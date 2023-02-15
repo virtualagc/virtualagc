@@ -59,9 +59,11 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
           in HAL/S</i></a> and/or the more formal <a
         moz-do-not-send="true"
         href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf"><i>HAL/S
+
 
 
 
@@ -244,9 +246,11 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
               world!</font><br>
           </font></tt></font></blockquote>
     Now, if before trying this you have skimmed a bit of the book <i>Programming
+
 
 
 
@@ -496,6 +500,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
             2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1/2</font><br>
           &nbsp; ... &gt; <font color="#000000">M X1 = (-B + (B - 4 A
             C)&nbsp;&nbsp; ) / (2 A);</font><br>
@@ -503,10 +508,12 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
             2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1/2</font><br>
           &nbsp; ... &gt; <font color="#000000">M X2 = (-B - (B - 4 A
             C)&nbsp;&nbsp; ) / (2 A);</font><br>
         </font></tt><tt><font color="#993399">HAL/S &gt;</font>&nbsp;&nbsp;
+
 
 
 
@@ -539,8 +546,10 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
         DECLARE SCALAR, A, B, C;</tt><tt><br>
       </tt><tt><font color="#993399">&nbsp; ... &gt;</font>&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -549,13 +558,16 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
         V$1 = (-B + (B**2 - 4 A C)**(1/2)) / (2 A);</tt><tt><br>
       </tt><tt><font color="#993399">&nbsp; ... &gt;</font>&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
         V$2 = (-B - (B**2 - 4 A C)**(1/2)) / (2 A);</tt><tt><br>
       </tt><tt><font color="#993399">&nbsp; ... &gt;</font>&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
 
@@ -573,6 +585,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     books like <i>Programming in HAL/S</i> are for, and they do it
     better than I would.&nbsp; And probably using less words than I
     would!&nbsp; But as for interpreter commands ... <tt>`spool</tt>?&nbsp;
+
     <tt>`unspool</tt>?&nbsp; What are they?&nbsp; Why are they there?<br>
     <br>
     Well, the interpreter tries to compile each HAL/S statement as soon
@@ -624,6 +637,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
 
 
 
+
           1&nbsp; 2&nbsp; 0&nbsp;&nbsp; 0.0&nbsp; -2.00000000000000E+00
           <br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2&nbsp;
@@ -670,148 +684,185 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;
 
 
+
         ROOTS: PROGRAM;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         DECLARE SCALAR, A, B, C, D, ROOT1, ROOT2;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         DO WHILE TRUE;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         WRITE(6) ;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         WRITE(6) 'Enter A, B, C (0,0,0 to quit):';</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         READ(5) A, B, C;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         IF A = 0 AND B = 0 AND C = 0 THEN</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         DO;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         WRITE(6) 'Quitting ...';</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         EXIT;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         END;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         D = B**2 - 4 A C;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         IF D &gt;= 0 THEN </tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         DO;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         D = D**0.5;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         ROOT1 = (-B + D) / (2 A);</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         ROOT2 = (-B - D) / (2 A);</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         WRITE(6) 'Real roots of', A, 'X**2 +', B, 'X +', C, 'are:',</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         ROOT1, ROOT2;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         WRITE(6) 'Check:', </tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         A ROOT1**2 + B ROOT1 + C,</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         A ROOT2**2 + B ROOT2 + C;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         END;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         ELSE</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         DO;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         TEMPORARY RE, IM, RE2, IM2;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         D = (-D)**0.5;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         RE = -B / (2 A);</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         IM = D / (2 A);</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         WRITE(6) 'Complex roots of', A, 'X**2 +', B, 'X +', C, 'are:',</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         RE, '+/-', IM, 'i';</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         RE2 = RE**2 - IM**2; /* Compute root squared RE2 +/- IM2 i. */</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         IM2 = 2 RE IM;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         WRITE(6) 'Check:', A RE2 + B RE + C, '+/-', A IM2 + B IM, 'i';</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         END;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         END;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;
+
 
 
         CLOSE ROOTS;</tt><tt><br>
@@ -896,12 +947,15 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     interpreter's installation file, where they have names like "<i>NNN-XXXX</i>.hal":&nbsp;
 
 
+
     <i>NNN</i> represents the page number in the book, and <i>XXXX</i>
     is name (if any) that the book gives to the sample.&nbsp; The <tt>ROOTS
 
 
+
       PROGRAM</tt> is actually just the contents of the sample file
     037-ROOTS.hal.&nbsp; But each of these source-code files from <i>Programming
+
       in HAL/S</i>, in principle, will eventually be available for
     cut-and-pasting into the interpreter.&nbsp; (Just at the moment,
     since the compiler/interpreter is still under development, many of
@@ -925,6 +979,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;
 
 
+
         SIMPLE: PROGRAM;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt> C
         CODE IN THIS TYPEFACE IS</tt><tt><br>
@@ -933,12 +988,15 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         DECLARE PI CONSTANT (3.14159266);</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         DECLARE R SCALAR;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         WRITE(6) 'Input values of R to compute PI R**2, or else -1 to
@@ -946,24 +1004,30 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         DO WHILE TRUE;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         READ(5) R;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         IF R &lt; 0 THEN EXIT;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
         WRITE(6) 'R =', R, 'and PI R**2 =', PI R**2;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
         END;</tt><tt><br>
       </tt><tt><tt><font color="#993399">&nbsp; ... &gt;</font></tt>&nbsp;&nbsp;
+
 
 
         CLOSE SIMPLE;</tt><tt><br>
@@ -982,10 +1046,12 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
           R =&nbsp; 0.0 and PI R**2 =&nbsp; 0.0 </tt></font><tt><br>
       </tt><tt><tt><font color="#993399">READ&nbsp; &gt;</font></tt> 1 2
         3 4</tt><tt><br>
       </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
           R =&nbsp; 1.00000000000000E+00 and PI R**2 =&nbsp;
@@ -1002,6 +1068,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
         </tt></font><tt><tt><font color="#993399">READ&nbsp; &gt;</font></tt>
         5, 6 ,7 , 8,9</tt><tt><br>
       </tt><font color="#993399"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
           R =&nbsp; 5.00000000000000E+00 and PI R**2 =&nbsp;
@@ -1034,6 +1101,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     interrogation commands (<tt>`data</tt> and <tt>`palmat</tt>) I've
     already showed you to see what the code sample we just used (<tt>PROGRAM
 
+
       SIMPLE</tt>) did to the definitions in our workspace:<br>
     <blockquote><tt><font color="#993399">HAL/S &gt;</font> `data</tt><tt><br>
       </tt><font color="#993399"><tt>Scope 0, ROOT:</tt><tt><br>
@@ -1061,6 +1129,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     happens to be the mangling used for symbolic names associated with
     some types of positions in the instruction stream, including names
     of <tt>PROGRAM</tt>s, <tt>PROCEDURE</tt>s, and some <tt>FUNCTION</tt>s.&nbsp;
+
 
 
     Similarly, "<tt>b_</tt>" is the mangling prefix for <tt>BIT/BOOLEAN</tt>
@@ -1181,6 +1250,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     and a final scope (3) for the <tt>IF THEN ...</tt> within the <tt>DO
 
 
+
       WHILE ... END</tt> loop.&nbsp; As for the question of where <tt>PI</tt>
     and <tt>R</tt> are, they're in scope 1 (the <tt>SIMPLE PROGRAM</tt>)
     where they belong.<br>
@@ -1250,6 +1320,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     grandchildren, ...), cousins, aunts and uncles, etc.&nbsp; Thus
     scope 3 (<tt>IF THEN ...</tt>") and scope 2 (<tt>DO WHILE ... END</tt>)
     can access <tt>PI</tt> and <tt>R</tt> in scope 1 (<tt>PROGRAM</tt>),
+
 
 
     but scope 0 (global or "root") cannot.<br>
@@ -1323,6 +1394,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     <h2><a name="Colorize"></a>`COLORIZE and `NOCOLORIZE</h2>
     <p>The <tt>`colorize <i>C</i></tt> command changes the
       colorization from the default magenta to the color specified by <tt><i>C</i></tt>.&nbsp;
+
 
 
       There are only 16 available choices for <tt><i>C</i></tt>,
@@ -1411,6 +1483,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     in a way that makes it inconvenient to remove; well, too bad!)&nbsp;
     Garbage collection does <i>not</i> remove scopes containing
     definitions of <tt>PROGRAM</tt>s, <tt>FUNCTION</tt>s, <tt>PROCEDURE</tt>s,
+
     <tt>COMPOOL</tt>s, or any of their descendant scopes.<br>
     <br>
     What the <tt>`garbage</tt> command does is to perform this cleanup
@@ -1425,6 +1498,16 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       available interpreter commands, in a more-abbreviated form than
       the descriptions I'm giving you right now.<br>
     </p>
+    <h2>`LABELS and `NOLABELS</h2>
+    <p>When using the <tt>`data</tt> command, it generally happens that
+      the symbol table contains many more program labels than variables
+      and constants.&nbsp; If you're interested only in the declared
+      variables and constants, these program labels in the symbol table
+      may be a nuisance.&nbsp; The program labels can be disabled my
+      means of the <tt>`nolabels</tt> command, and can be reenabled by
+      means of the <tt>`label</tt> command.<br>
+    </p>
+    <p> </p>
     <h2>`LBNF</h2>
     <p>(See also <tt>`bnf</tt> and <tt>`noast</tt>, of which the
       latter is the default.)&nbsp; The <tt>`lbnf</tt> command enables
@@ -1440,6 +1523,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     <p>(See also <tt>`bnf</tt> and <tt>`lbnf</tt>.&nbsp; The default,
       <i>vs</i> <tt>`bnf</tt> and <tt>`lbnf</tt>, is <tt>`noast</tt>.)&nbsp;
 
+
       The <tt>`noast</tt> command disables display of the abstract
       syntax tree (AST) generated by the compiler when it parses
       preprocessed HAL/S source code.<br>
@@ -1447,6 +1531,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
     <h2>`PALMAT</h2>
     <p>As already explained, the <tt>`palmat</tt> command displays the
       PALMAT instruction stream of scope 0 (the global context), while <tt>`palmat
+
 
         *</tt> displays the PALMAT instruction streams from all scopes.<br>
     </p>
@@ -1588,6 +1673,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
       determine which expressions are computable at compile-time, and to
       compute their values.&nbsp; For example, in the HAL/S statement <tt>DECLARE
 
+
         X INITIAL(12 (34+32/7))</tt>, the <tt>INITIAL</tt> value is
       computed at compile-time rather than at run-time.&nbsp; (In fact,
       <i>all</i> <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses are
@@ -1626,7 +1712,7 @@ document.write(headerTemplate.replace("@TITLE@","HAL/S Interpreter").replace("@S
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-02-09<br>
+          2023-02-14<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
