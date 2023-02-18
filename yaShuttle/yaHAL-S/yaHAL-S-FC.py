@@ -62,6 +62,7 @@ import sys
 from processSource import processSource
 from palmatAux import constructPALMAT
 from pass1 import parms
+from optimizePALMAT import optimizePALMAT
 
 #Parse the command-line arguments.
 tabSize = 8
@@ -82,16 +83,10 @@ ansiWrapper = True
 for param in ["--library="+libraryFilename] + sys.argv[1:]:
     if param == "--help":
         print("""
-        This is a preprocessor+compiler for HAL/S code. The principal 
-        functionality is preprocessing, and the compiler is simply invoked as
-        an external program. The preprocessing is necessary because the external
-        compiler is valid only for a context-free grammar, and the official
-        HAL/S grammar is not context-free.  The preprocessor produces valid 
-        HAL/S code but mangled in such a way that it can be parsed by a 
-        context-free grammar.
+        This is a preprocessor+compiler+interpreter for HAL/S code. 
         
         Usage:
-            yaHAL-S-FC.py [OPTIONS] [SOURCE1.hal [SOURCE2.hal [...]]] >SOURCE.hal
+            yaHAL-S-FC.py [OPTIONS] INPUT1.hal [INPUT2.hal [...]]
         
         The OPTIONS are: 
         
@@ -189,12 +184,9 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         halsFile.close()
         if len(halsSource) == start:
             continue
-        first = True
         for i in range(len(metadata), len(halsSource)):
-            m = {}
-            if first:
-                m["file"] = param
-                first = False
+            m = { "lineNumber" : i + 1 } # Lines numbered from 1.
+            m["file"] = param
             if halsSource[i][:1] == "C":
                 m["comment"] = True
             elif halsSource[i][:1] == "D":
@@ -220,6 +212,7 @@ if not interactive:
     processSource(PALMAT, halsSource, metadata, libraryFilename, 
                     structureTemplates,
                     noCompile, lbnf, bnf, trace)
+    optimizePALMAT(PALMAT)
 else:
     from interpreterLoop import interpreterLoop
     interpreterLoop(libraryFilename, structureTemplates, colorize, \

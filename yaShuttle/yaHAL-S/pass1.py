@@ -52,8 +52,8 @@ elif platform.system() == "Darwin":
     parms["compiler"] += "-macosx"
 
 """
- Make the "abstract syntax" obtained as a big string from the compiler 
- front-end into an actual abstract syntax tree (AST) structure.  This is 
+ Make the "abstract syntax", obtained as a big string from the compiler 
+ front-end, into an actual abstract syntax tree (AST) structure.  This is 
  actually a recursive function.  It assumes that the abstract-syntax
  string passed to it always starts with "(", and it processes until the 
  matching closing parenthesis is reached, which is not necessarily the end
@@ -68,7 +68,11 @@ elif platform.system() == "Darwin":
     {
         "lbnfLabel" : string,
         "components" : [ ... strings or nodes ... ]
+        "lineNumber" : integer,
+        "columnNumber" : integer
     }
+ The lineNumber and columnNumber fields are present if the parser provides
+ them but are absent otherwise.
  Since by convention the LBNF labels in my HAL/S grammar always begin with
  two arbitrary capital letters present solely to make the labels unique, and 
  I may or may not remove those two prefixed capitals.  The number of prefixed
@@ -106,6 +110,18 @@ def makeTree(abstractSyntax, index=0):
     label = abstractSyntax[startIndex+1+removePrefixedCapitals:index]
     ast = { "lbnfLabel" : label, "components" : [] }
     index += 1
+    # Look here for the lineNumber and columnNumber fields.
+    if abstractSyntax[index].isdigit():
+        start = index;
+        while abstractSyntax[index].isdigit():
+            index += 1
+        ast["lineNumber"] = int(abstractSyntax[start:index])
+        index += 1
+        start = index
+        while abstractSyntax[index].isdigit():
+            index += 1
+        ast["columnNumber"] = int(abstractSyntax[start:index])
+        index += 1
     if abstractSyntax[index] == ")":
         return True, ast, index
     # Loop on the components of this node.
@@ -133,7 +149,10 @@ def makeTree(abstractSyntax, index=0):
             start = index
             while abstractSyntax[index+1] not in [" ", ")"]:
                 index += 1
-            ast["components"].append(abstractSyntax[start:index+1])
+            componentName = abstractSyntax[start:index+1]
+            # Avid lineNumber and columnNumber field, if any.
+            if not componentName.isdigit():
+                ast["components"].append(componentName)
         # At this point, index is pointing to the last character processed,
         # and the next character should be either " " or ")".
         index += 1  
@@ -151,7 +170,7 @@ def makeTree(abstractSyntax, index=0):
 # a pair
 #       boolean, list
 # where the boolean if True/False on failure/success and the list is the 
-# dictionary is an actionable form of the abstract syntax tree.  Yes this is
+# dictionary in an actionable form of the abstract syntax tree.  Yes this is
 # cumbersome, but I see no way to use the BNF Converter framework otherwise, 
 # at least not in C.
 captured = { "stderr" : [] }
@@ -170,7 +189,6 @@ def tokenizeAndParse(sourceList=[], trace=False, wine=False):
             f.close()
         except:
             print("Could not read HAL_S.y; _SYMB_n may not be translated.")
-        #print("*", tokens)
     captured["stderr"] = []
     try:
         if len(sourceList) > 0:
@@ -251,8 +269,6 @@ def readGrammar(filename):
     return True
 
 # A function that prints an abstract syntax tree.
-#indenter = "    |    |    |    |    |    |    |    |    |    |    |    |    |"
-#indenter = "   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |"
 indenter = "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ "
 indenter += indenter
 indenter += indenter
@@ -268,6 +284,10 @@ def astPrint(ast, lbnf=True, bnf=False, indent=0):
             print("Cannot display BNF.")
             return
     
+    if "lineNumber" in ast:
+        print("%5d%4d   " % (ast["lineNumber"], ast["columnNumber"]), end="")
+    else:
+        print("%12s" % "", end="")
     print("%s" % (indenter[:indent]), end="")
     label = ast["lbnfLabel"]
     if bnf and label in lbnf2bnf:
@@ -281,6 +301,11 @@ def astPrint(ast, lbnf=True, bnf=False, indent=0):
                 component = lbnf2bnf[component]
             spacer = " "
             if interrupted:
+                if "lineNumber" in component:
+                    print("%5d%4d   " % (component["lineNumber"], \
+                                         component["columnNumber"]), end="")
+                else:
+                    print("%12s" % "", end="")
                 print("%s" % (indenter[:indent]), end="")
                 interrupted = False
                 spacer = indenter[indent]

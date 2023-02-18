@@ -421,34 +421,35 @@ COMPILATION psCOMPILATION(const char *str)
 %token _SYMB_169    /*   TRIM   */
 %token _SYMB_170    /*   TRUE   */
 %token _SYMB_171    /*   TRUNCATE   */
-%token _SYMB_172    /*   TYPEOF   */
-%token _SYMB_173    /*   TYPEOFV   */
-%token _SYMB_174    /*   UNIT   */
-%token _SYMB_175    /*   UNTIL   */
-%token _SYMB_176    /*   UPDATE   */
-%token _SYMB_177    /*   VECTOR   */
-%token _SYMB_178    /*   WAIT   */
-%token _SYMB_179    /*   WHILE   */
-%token _SYMB_180    /*   WRITE   */
-%token _SYMB_181    /*   XOR   */
-%token<string_> _SYMB_182    /*   NeqToken   */
-%token<string_> _SYMB_183    /*   LeToken   */
-%token<string_> _SYMB_184    /*   GeToken   */
-%token<string_> _SYMB_185    /*   BitIdentifierToken   */
-%token<string_> _SYMB_186    /*   BitFunctionIdentifierToken   */
-%token<string_> _SYMB_187    /*   CharFunctionIdentifierToken   */
-%token<string_> _SYMB_188    /*   CharIdentifierToken   */
-%token<string_> _SYMB_189    /*   StructIdentifierToken   */
-%token<string_> _SYMB_190    /*   StructFunctionIdentifierToken   */
-%token<string_> _SYMB_191    /*   LabelToken   */
-%token<string_> _SYMB_192    /*   EventToken   */
-%token<string_> _SYMB_193    /*   ArithFieldToken   */
-%token<string_> _SYMB_194    /*   IdentifierToken   */
-%token<string_> _SYMB_195    /*   StringToken   */
-%token<string_> _SYMB_196    /*   TextToken   */
-%token<string_> _SYMB_197    /*   LevelToken   */
-%token<string_> _SYMB_198    /*   NumberToken   */
-%token<string_> _SYMB_199    /*   CompoundToken   */
+%token _SYMB_172    /*   UNIT   */
+%token _SYMB_173    /*   UNTIL   */
+%token _SYMB_174    /*   UPDATE   */
+%token _SYMB_175    /*   VECTOR   */
+%token _SYMB_176    /*   WAIT   */
+%token _SYMB_177    /*   WHILE   */
+%token _SYMB_178    /*   WRITE   */
+%token _SYMB_179    /*   XOR   */
+%token _SYMB_180    /*   initialized   */
+%token _SYMB_181    /*   typeof   */
+%token _SYMB_182    /*   typeofv   */
+%token<string_> _SYMB_183    /*   NeqToken   */
+%token<string_> _SYMB_184    /*   LeToken   */
+%token<string_> _SYMB_185    /*   GeToken   */
+%token<string_> _SYMB_186    /*   BitIdentifierToken   */
+%token<string_> _SYMB_187    /*   BitFunctionIdentifierToken   */
+%token<string_> _SYMB_188    /*   CharFunctionIdentifierToken   */
+%token<string_> _SYMB_189    /*   CharIdentifierToken   */
+%token<string_> _SYMB_190    /*   StructIdentifierToken   */
+%token<string_> _SYMB_191    /*   StructFunctionIdentifierToken   */
+%token<string_> _SYMB_192    /*   LabelToken   */
+%token<string_> _SYMB_193    /*   EventToken   */
+%token<string_> _SYMB_194    /*   ArithFieldToken   */
+%token<string_> _SYMB_195    /*   IdentifierToken   */
+%token<string_> _SYMB_196    /*   StringToken   */
+%token<string_> _SYMB_197    /*   TextToken   */
+%token<string_> _SYMB_198    /*   LevelToken   */
+%token<string_> _SYMB_199    /*   NumberToken   */
+%token<string_> _SYMB_200    /*   CompoundToken   */
 
 %type <declare_body_> DECLARE_BODY
 %type <attributes_> ATTRIBUTES
@@ -653,16 +654,16 @@ ATTRIBUTES : ARRAY_SPEC TYPE_AND_MINOR_ATTR { $$ = make_AAattributes_arraySpec_t
 ;
 DECLARATION : NAME_ID { $$ = make_AAdeclaration_nameId($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | NAME_ID ATTRIBUTES { $$ = make_ABdeclaration_nameId_attributes($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_191 { $$ = make_ACdeclaration_labelToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_191 TYPE_AND_MINOR_ATTR { $$ = make_ACdeclaration_labelToken_type_minorAttrList($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_191 _SYMB_121 MINOR_ATTR_LIST { $$ = make_ACdeclaration_labelToken_procedure_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_191 _SYMB_121 { $$ = make_ADdeclaration_labelToken_procedure($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_191 _SYMB_87 TYPE_AND_MINOR_ATTR { $$ = make_ACdeclaration_labelToken_function_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_191 _SYMB_87 { $$ = make_ADdeclaration_labelToken_function($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_192 _SYMB_77 { $$ = make_AEdeclaration_eventToken_event($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_192 _SYMB_77 MINOR_ATTR_LIST { $$ = make_AFdeclaration_eventToken_event_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_192 { $$ = make_AGdeclaration_eventToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_192 MINOR_ATTR_LIST { $$ = make_AHdeclaration_eventToken_minorAttrList($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_192 { $$ = make_ACdeclaration_labelToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_192 TYPE_AND_MINOR_ATTR { $$ = make_ACdeclaration_labelToken_type_minorAttrList($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_192 _SYMB_121 MINOR_ATTR_LIST { $$ = make_ACdeclaration_labelToken_procedure_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_192 _SYMB_121 { $$ = make_ADdeclaration_labelToken_procedure($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_192 _SYMB_87 TYPE_AND_MINOR_ATTR { $$ = make_ACdeclaration_labelToken_function_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_192 _SYMB_87 { $$ = make_ADdeclaration_labelToken_function($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_193 _SYMB_77 { $$ = make_AEdeclaration_eventToken_event($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_193 _SYMB_77 MINOR_ATTR_LIST { $$ = make_AFdeclaration_eventToken_event_minorAttrList($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_193 { $$ = make_AGdeclaration_eventToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_193 MINOR_ATTR_LIST { $$ = make_AHdeclaration_eventToken_minorAttrList($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 ARRAY_SPEC : ARRAY_HEAD LITERAL_EXP_OR_STAR _SYMB_1 { $$ = make_AAarraySpec_arrayHead_literalExpOrStar($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_87 { $$ = make_ABarraySpec_function(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -674,17 +675,17 @@ TYPE_AND_MINOR_ATTR : TYPE_SPEC { $$ = make_AAtypeAndMinorAttr_typeSpec($1); $$-
   | TYPE_SPEC MINOR_ATTR_LIST { $$ = make_ABtypeAndMinorAttr_typeSpec_minorAttrList($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | MINOR_ATTR_LIST { $$ = make_ACtypeAndMinorAttr_minorAttrList($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-IDENTIFIER : _SYMB_194 { $$ = make_AAidentifier($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+IDENTIFIER : _SYMB_195 { $$ = make_AAidentifier($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 SQ_DQ_NAME : DOUBLY_QUAL_NAME_HEAD LITERAL_EXP_OR_STAR _SYMB_1 { $$ = make_AAsQdQName_doublyQualNameHead_literalExpOrStar($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | ARITH_CONV { $$ = make_ABsQdQName_arithConv($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-DOUBLY_QUAL_NAME_HEAD : _SYMB_177 _SYMB_2 { $$ = make_AAdoublyQualNameHead_vector(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+DOUBLY_QUAL_NAME_HEAD : _SYMB_175 _SYMB_2 { $$ = make_AAdoublyQualNameHead_vector(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_103 _SYMB_2 LITERAL_EXP_OR_STAR _SYMB_0 { $$ = make_ABdoublyQualNameHead_matrix_literalExpOrStar($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 ARITH_CONV : _SYMB_95 { $$ = make_AAarithConv_integer(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_139 { $$ = make_ABarithConv_scalar(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_177 { $$ = make_ACarithConv_vector(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_175 { $$ = make_ACarithConv_vector(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_103 { $$ = make_ADarithConv_matrix(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 DECLARATION_LIST : DECLARATION { $$ = make_AAdeclaration_list($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -694,10 +695,10 @@ NAME_ID : IDENTIFIER { $$ = make_AAnameId_identifier($1); $$->line_number = @$.f
   | IDENTIFIER _SYMB_108 { $$ = make_ABnameId_identifier_name($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | BIT_ID { $$ = make_ACnameId_bitId($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | CHAR_ID { $$ = make_ADnameId_charId($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_186 { $$ = make_AEnameId_bitFunctionIdentifierToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_187 { $$ = make_AFnameId_charFunctionIdentifierToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_189 { $$ = make_AGnameId_structIdentifierToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_190 { $$ = make_AHnameId_structFunctionIdentifierToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_187 { $$ = make_AEnameId_bitFunctionIdentifierToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_188 { $$ = make_AFnameId_charFunctionIdentifierToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_190 { $$ = make_AGnameId_structIdentifierToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_191 { $$ = make_AHnameId_structFunctionIdentifierToken($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 ARITH_EXP : TERM { $$ = make_AAarithExpTerm($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | PLUS TERM { $$ = make_ABarithExpPlusTerm($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -741,20 +742,20 @@ PRE_PRIMARY : _SYMB_2 ARITH_EXP _SYMB_1 { $$ = make_AApre_primary($2); $$->line_
   | NUMBER { $$ = make_ABpre_primary($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | COMPOUND_NUMBER { $$ = make_ACpre_primary($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | ARITH_FUNC _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_ADprePrimaryRtlFunction($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_172 _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_ADprePrimaryTypeof($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_173 _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_ADprePrimaryTypeofv($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_181 _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_ADprePrimaryTypeof($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_182 _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_ADprePrimaryTypeofv($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | SHAPING_HEAD _SYMB_1 { $$ = make_ADprePrimaryRtlShaping($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | SHAPING_HEAD _SYMB_0 _SYMB_6 _SYMB_1 { $$ = make_ADprePrimaryRtlShapingStar($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_191 _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_AEprePrimaryFunction($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_192 _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_AEprePrimaryFunction($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 NUMBER : SIMPLE_NUMBER { $$ = make_AAnumber($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | LEVEL { $$ = make_ABnumber($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-LEVEL : _SYMB_197 { $$ = make_ZZlevel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+LEVEL : _SYMB_198 { $$ = make_ZZlevel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-COMPOUND_NUMBER : _SYMB_199 { $$ = make_CLcompound_number($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+COMPOUND_NUMBER : _SYMB_200 { $$ = make_CLcompound_number($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-SIMPLE_NUMBER : _SYMB_198 { $$ = make_CKsimple_number($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+SIMPLE_NUMBER : _SYMB_199 { $$ = make_CKsimple_number($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 MODIFIED_ARITH_FUNC : NO_ARG_ARITH_FUNC { $$ = make_AAmodified_arith_func($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | NO_ARG_ARITH_FUNC SUBSCRIPT { $$ = make_ACmodified_arith_func($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -763,11 +764,11 @@ MODIFIED_ARITH_FUNC : NO_ARG_ARITH_FUNC { $$ = make_AAmodified_arith_func($1); $
 ;
 SHAPING_HEAD : _SYMB_95 _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadInteger($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_139 _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadScalar($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_177 _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadVector($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_175 _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadVector($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_103 _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadMatrix($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_95 SUBSCRIPT _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadIntegerSubscript($2, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_139 SUBSCRIPT _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadScalarSubscript($2, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_177 SUBSCRIPT _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadVectorSubscript($2, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_175 SUBSCRIPT _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadVectorSubscript($2, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_103 SUBSCRIPT _SYMB_2 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadMatrixSubscript($2, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | SHAPING_HEAD _SYMB_0 REPEATED_CONSTANT { $$ = make_ADprePrimaryRtlShapingHeadRepeated($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
@@ -785,7 +786,7 @@ EXPRESSION : ARITH_EXP { $$ = make_AAexpression($1); $$->line_number = @$.first_
   | STRUCTURE_EXP { $$ = make_ADexpression($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 ARITH_ID : IDENTIFIER { $$ = make_FGarith_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_193 { $$ = make_FHarith_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_194 { $$ = make_FHarith_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 NO_ARG_ARITH_FUNC : _SYMB_55 { $$ = make_ZZclocktime(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_62 { $$ = make_ZZdate(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -830,7 +831,7 @@ ARITH_FUNC : _SYMB_109 { $$ = make_ZZnextime(); $$->line_number = @$.first_line;
   | _SYMB_28 { $$ = make_ZZabval(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_67 { $$ = make_ZZdet(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_167 { $$ = make_ZZtrace(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_174 { $$ = make_ZZunit(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_172 { $$ = make_ZZunit(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_93 { $$ = make_ZZindex(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_98 { $$ = make_ZZlength(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_96 { $$ = make_ZZinverse(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -906,6 +907,7 @@ BIT_PRIM : BIT_VAR { $$ = make_AAbitPrimBitVar($1); $$->line_number = @$.first_l
   | _SYMB_2 BIT_EXP _SYMB_1 { $$ = make_AEbitPrimBitExp($2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | SUBBIT_HEAD EXPRESSION _SYMB_1 { $$ = make_AHbitPrimSubbit($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | BIT_FUNC_HEAD _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_AIbitPrimFunc($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_180 _SYMB_2 CALL_LIST _SYMB_1 { $$ = make_AIbitPrimInitialized($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_11 BIT_VAR _SYMB_12 { $$ = make_AAbitPrimBitVarBracketed($2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_11 BIT_VAR _SYMB_12 SUBSCRIPT { $$ = make_ABbitPrimBitVarBracketed($2, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_13 BIT_VAR _SYMB_14 { $$ = make_AAbitPrimBitVarBraced($2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -946,7 +948,7 @@ RADIX : _SYMB_89 { $$ = make_AAradixHEX(); $$->line_number = @$.first_line; $$->
   | _SYMB_44 { $$ = make_ACradixBIN(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_63 { $$ = make_ADradixDEC(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-CHAR_STRING : _SYMB_195 { $$ = make_FPchar_string($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+CHAR_STRING : _SYMB_196 { $$ = make_FPchar_string($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 SUBBIT_HEAD : SUBBIT_KEY _SYMB_2 { $$ = make_AAsubbit_head($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | SUBBIT_KEY SUBSCRIPT _SYMB_2 { $$ = make_ABsubbit_head($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -957,17 +959,17 @@ BIT_FUNC_HEAD : BIT_FUNC { $$ = make_AAbit_func_head($1); $$->line_number = @$.f
   | _SYMB_45 { $$ = make_ABbit_func_head(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_45 SUB_OR_QUALIFIER { $$ = make_ACbit_func_head($2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-BIT_ID : _SYMB_185 { $$ = make_FHbit_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+BIT_ID : _SYMB_186 { $$ = make_FHbit_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-LABEL : _SYMB_191 { $$ = make_FKlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_186 { $$ = make_FLlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_187 { $$ = make_FMlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_190 { $$ = make_FNlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+LABEL : _SYMB_192 { $$ = make_FKlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_187 { $$ = make_FLlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_188 { $$ = make_FMlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_191 { $$ = make_FNlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-BIT_FUNC : _SYMB_181 { $$ = make_ZZxor(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_186 { $$ = make_ZZuserBitFunction($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+BIT_FUNC : _SYMB_179 { $$ = make_ZZxor(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_187 { $$ = make_ZZuserBitFunction($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-EVENT : _SYMB_192 { $$ = make_FLevent($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+EVENT : _SYMB_193 { $$ = make_FLevent($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 SUB_OR_QUALIFIER : SUBSCRIPT { $$ = make_AAsub_or_qualifier($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | BIT_QUALIFIER { $$ = make_ABsub_or_qualifier($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -999,10 +1001,10 @@ CHAR_CONST : CHAR_STRING { $$ = make_AAchar_const($1); $$->line_number = @$.firs
 CHAR_FUNC : _SYMB_100 { $$ = make_ZZljust(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_136 { $$ = make_ZZrjust(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_169 { $$ = make_ZZtrim(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_187 { $$ = make_ZZuserCharFunction($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_188 { $$ = make_ZZuserCharFunction($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_54 { $$ = make_AAcharFuncCharacter(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-CHAR_ID : _SYMB_188 { $$ = make_FIchar_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+CHAR_ID : _SYMB_189 { $$ = make_FIchar_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 NAME_EXP : NAME_KEY _SYMB_2 NAME_VAR _SYMB_1 { $$ = make_AAnameExpKeyVar($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_112 { $$ = make_ABnameExpNull(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1031,12 +1033,12 @@ STRUCT_FUNC_HEAD : STRUCT_FUNC { $$ = make_AAstruct_func_head($1); $$->line_numb
 ;
 STRUCTURE_VAR : QUAL_STRUCT SUBSCRIPT { $$ = make_AAstructure_var($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-STRUCT_FUNC : _SYMB_190 { $$ = make_ZZuserStructFunc($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+STRUCT_FUNC : _SYMB_191 { $$ = make_ZZuserStructFunc($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 QUAL_STRUCT : STRUCTURE_ID { $$ = make_AAqual_struct($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | QUAL_STRUCT _SYMB_7 STRUCTURE_ID { $$ = make_ABqual_struct($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-STRUCTURE_ID : _SYMB_189 { $$ = make_FJstructure_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+STRUCTURE_ID : _SYMB_190 { $$ = make_FJstructure_id($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 ASSIGNMENT : VARIABLE EQUALS EXPRESSION { $$ = make_AAassignment($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | VARIABLE _SYMB_0 ASSIGNMENT { $$ = make_ABassignment($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1073,12 +1075,12 @@ BASIC_STATEMENT : ASSIGNMENT _SYMB_17 { $$ = make_ABbasicStatementAssignment($1)
   | FILE_EXP EQUALS QUAL_STRUCT _SYMB_17 { $$ = make_AVbasicStatementFileExp($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | WAIT_KEY _SYMB_86 _SYMB_66 _SYMB_17 { $$ = make_AVbasicStatementWait($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | WAIT_KEY ARITH_EXP _SYMB_17 { $$ = make_AWbasicStatementWait($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | WAIT_KEY _SYMB_175 ARITH_EXP _SYMB_17 { $$ = make_AXbasicStatementWait($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | WAIT_KEY _SYMB_173 ARITH_EXP _SYMB_17 { $$ = make_AXbasicStatementWait($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | WAIT_KEY _SYMB_86 BIT_EXP _SYMB_17 { $$ = make_AYbasicStatementWait($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | TERMINATOR _SYMB_17 { $$ = make_AZbasicStatementTerminator($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | TERMINATOR TERMINATE_LIST _SYMB_17 { $$ = make_BAbasicStatementTerminator($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_176 _SYMB_120 _SYMB_166 ARITH_EXP _SYMB_17 { $$ = make_BBbasicStatementUpdate($4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_176 _SYMB_120 LABEL_VAR _SYMB_166 ARITH_EXP _SYMB_17 { $$ = make_BCbasicStatementUpdate($3, $5); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_174 _SYMB_120 _SYMB_166 ARITH_EXP _SYMB_17 { $$ = make_BBbasicStatementUpdate($4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_174 _SYMB_120 LABEL_VAR _SYMB_166 ARITH_EXP _SYMB_17 { $$ = make_BCbasicStatementUpdate($3, $5); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | SCHEDULE_PHRASE _SYMB_17 { $$ = make_BDbasicStatementSchedule($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | SCHEDULE_PHRASE SCHEDULE_CONTROL _SYMB_17 { $$ = make_BEbasicStatementSchedule($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | SIGNAL_CLAUSE _SYMB_17 { $$ = make_BFbasicStatementSignal($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1122,11 +1124,11 @@ COMPARISON : ARITH_EXP EQUALS ARITH_EXP { $$ = make_AAcomparisonEQ($1, $2, $3); 
   | BIT_CAT EQUALS BIT_CAT { $$ = make_ACcomparisonEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | STRUCTURE_EXP EQUALS STRUCTURE_EXP { $$ = make_ADcomparisonEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | NAME_EXP EQUALS NAME_EXP { $$ = make_AEcomparisonEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | ARITH_EXP _SYMB_182 ARITH_EXP { $$ = make_AAcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | CHAR_EXP _SYMB_182 CHAR_EXP { $$ = make_ABcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | BIT_CAT _SYMB_182 BIT_CAT { $$ = make_ACcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | STRUCTURE_EXP _SYMB_182 STRUCTURE_EXP { $$ = make_ADcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | NAME_EXP _SYMB_182 NAME_EXP { $$ = make_AEcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_183 ARITH_EXP { $$ = make_AAcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP _SYMB_183 CHAR_EXP { $$ = make_ABcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT _SYMB_183 BIT_CAT { $$ = make_ACcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP _SYMB_183 STRUCTURE_EXP { $$ = make_ADcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP _SYMB_183 NAME_EXP { $$ = make_AEcomparisonNEQ($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | ARITH_EXP _SYMB_23 ARITH_EXP { $$ = make_AAcomparisonLT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | CHAR_EXP _SYMB_23 CHAR_EXP { $$ = make_ABcomparisonLT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | BIT_CAT _SYMB_23 BIT_CAT { $$ = make_ACcomparisonLT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1137,16 +1139,16 @@ COMPARISON : ARITH_EXP EQUALS ARITH_EXP { $$ = make_AAcomparisonEQ($1, $2, $3); 
   | BIT_CAT _SYMB_25 BIT_CAT { $$ = make_ACcomparisonGT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | STRUCTURE_EXP _SYMB_25 STRUCTURE_EXP { $$ = make_ADcomparisonGT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | NAME_EXP _SYMB_25 NAME_EXP { $$ = make_AEcomparisonGT($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | ARITH_EXP _SYMB_183 ARITH_EXP { $$ = make_AAcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | CHAR_EXP _SYMB_183 CHAR_EXP { $$ = make_ABcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | BIT_CAT _SYMB_183 BIT_CAT { $$ = make_ACcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | STRUCTURE_EXP _SYMB_183 STRUCTURE_EXP { $$ = make_ADcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | NAME_EXP _SYMB_183 NAME_EXP { $$ = make_AEcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | ARITH_EXP _SYMB_184 ARITH_EXP { $$ = make_AAcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | CHAR_EXP _SYMB_184 CHAR_EXP { $$ = make_ABcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | BIT_CAT _SYMB_184 BIT_CAT { $$ = make_ACcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | STRUCTURE_EXP _SYMB_184 STRUCTURE_EXP { $$ = make_ADcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | NAME_EXP _SYMB_184 NAME_EXP { $$ = make_AEcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_184 ARITH_EXP { $$ = make_AAcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP _SYMB_184 CHAR_EXP { $$ = make_ABcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT _SYMB_184 BIT_CAT { $$ = make_ACcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP _SYMB_184 STRUCTURE_EXP { $$ = make_ADcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP _SYMB_184 NAME_EXP { $$ = make_AEcomparisonLE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | ARITH_EXP _SYMB_185 ARITH_EXP { $$ = make_AAcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | CHAR_EXP _SYMB_185 CHAR_EXP { $$ = make_ABcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | BIT_CAT _SYMB_185 BIT_CAT { $$ = make_ACcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | STRUCTURE_EXP _SYMB_185 STRUCTURE_EXP { $$ = make_ADcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | NAME_EXP _SYMB_185 NAME_EXP { $$ = make_AEcomparisonGE($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 ANY_STATEMENT : STATEMENT { $$ = make_AAany_statement($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | BLOCK_DEFINITION { $$ = make_ABany_statement($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1186,7 +1188,7 @@ ENDING : _SYMB_72 { $$ = make_AAending(); $$->line_number = @$.first_line; $$->c
 READ_KEY : _SYMB_126 _SYMB_2 NUMBER _SYMB_1 { $$ = make_AAread_key($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_127 _SYMB_2 NUMBER _SYMB_1 { $$ = make_ABread_key($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-WRITE_KEY : _SYMB_180 _SYMB_2 NUMBER _SYMB_1 { $$ = make_AAwrite_key($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+WRITE_KEY : _SYMB_178 _SYMB_2 NUMBER _SYMB_1 { $$ = make_AAwrite_key($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 READ_PHRASE : READ_KEY READ_ARG { $$ = make_AAread_phrase($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | READ_PHRASE _SYMB_0 READ_ARG { $$ = make_ABread_phrase($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1199,7 +1201,7 @@ READ_ARG : VARIABLE { $$ = make_AAread_arg($1); $$->line_number = @$.first_line;
 ;
 WRITE_ARG : EXPRESSION { $$ = make_AAwrite_arg($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | IO_CONTROL { $$ = make_ABwrite_arg($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_189 { $$ = make_ACwrite_arg($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_190 { $$ = make_ACwrite_arg($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 FILE_EXP : FILE_HEAD _SYMB_0 ARITH_EXP _SYMB_1 { $$ = make_AAfile_exp($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
@@ -1211,7 +1213,7 @@ IO_CONTROL : _SYMB_152 _SYMB_2 ARITH_EXP _SYMB_1 { $$ = make_AAioControlSkip($3)
   | _SYMB_99 _SYMB_2 ARITH_EXP _SYMB_1 { $$ = make_ADioControlLine($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_118 _SYMB_2 ARITH_EXP _SYMB_1 { $$ = make_AEioControlPage($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-WAIT_KEY : _SYMB_178 { $$ = make_AAwait_key(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+WAIT_KEY : _SYMB_176 { $$ = make_AAwait_key(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 TERMINATOR : _SYMB_164 { $$ = make_AAterminatorTerminate(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_49 { $$ = make_ABterminatorCancel(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1255,8 +1257,8 @@ PERCENT_MACRO_ARG : NAME_VAR { $$ = make_AApercent_macro_arg($1); $$->line_numbe
 ;
 CASE_ELSE : _SYMB_69 _SYMB_50 ARITH_EXP _SYMB_17 _SYMB_71 { $$ = make_AAcase_else($3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-WHILE_KEY : _SYMB_179 { $$ = make_AAwhileKeyWhile(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_175 { $$ = make_ABwhileKeyUntil(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+WHILE_KEY : _SYMB_177 { $$ = make_AAwhileKeyWhile(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_173 { $$ = make_ABwhileKeyUntil(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 WHILE_CLAUSE : WHILE_KEY BIT_EXP { $$ = make_AAwhile_clause($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | WHILE_KEY RELATIONAL_EXP { $$ = make_ABwhile_clause($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1367,8 +1369,8 @@ BLOCK_STMT_TOP : BLOCK_STMT_TOP _SYMB_29 { $$ = make_AAblockTopAccess($1); $$->l
 BLOCK_STMT_HEAD : LABEL_EXTERNAL _SYMB_123 { $$ = make_AAblockHeadProgram($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | LABEL_EXTERNAL _SYMB_58 { $$ = make_ABblockHeadCompool($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | LABEL_DEFINITION _SYMB_162 { $$ = make_ACblockHeadTask($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | LABEL_DEFINITION _SYMB_176 { $$ = make_ADblockHeadUpdate($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_176 { $$ = make_AEblockHeadUpdate(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | LABEL_DEFINITION _SYMB_174 { $$ = make_ADblockHeadUpdate($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_174 { $$ = make_AEblockHeadUpdate(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | FUNCTION_NAME { $$ = make_AFblockHeadFunction($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | FUNCTION_NAME FUNC_STMT_BODY { $$ = make_AGblockHeadFunction($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | PROCEDURE_NAME { $$ = make_AHblockHeadProcedure($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -1405,12 +1407,12 @@ DECLARE_ELEMENT : DECLARE_STATEMENT { $$ = make_AAdeclareElementDeclare($1); $$-
   | STRUCTURE_STMT { $$ = make_ACdeclareElementStructure($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_73 _SYMB_82 IDENTIFIER _SYMB_166 VARIABLE _SYMB_17 { $$ = make_ADdeclareElementEquate($3, $5); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-PARAMETER : _SYMB_194 { $$ = make_AAparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_185 { $$ = make_ABparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_188 { $$ = make_ACparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_189 { $$ = make_ADparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_192 { $$ = make_AEparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_191 { $$ = make_AFparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+PARAMETER : _SYMB_195 { $$ = make_AAparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_186 { $$ = make_ABparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_189 { $$ = make_ACparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_190 { $$ = make_ADparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_193 { $$ = make_AEparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_192 { $$ = make_AFparameter($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 PARAMETER_LIST : PARAMETER_HEAD PARAMETER _SYMB_1 { $$ = make_AAparameter_list($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
@@ -1421,7 +1423,7 @@ DECLARE_STATEMENT : _SYMB_64 DECLARE_BODY _SYMB_17 { $$ = make_AAdeclare_stateme
 ;
 ASSIGN_LIST : ASSIGN PARAMETER_LIST { $$ = make_AAassign_list($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
-TEXT : _SYMB_196 { $$ = make_FQtext($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+TEXT : _SYMB_197 { $$ = make_FQtext($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 REPLACE_STMT : _SYMB_132 REPLACE_HEAD _SYMB_47 TEXT { $$ = make_AAreplace_stmt($2, $4); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;

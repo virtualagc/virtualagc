@@ -13,7 +13,8 @@ History:        2023-01-08 RSB  Created, hopefully for eventually replacing
 """
 
 from executePALMAT import executePALMAT, isBitArray
-from palmatAux import debug, findIdentifier, hTRUE, hFALSE, isArrayQuick
+from palmatAux import debug, findIdentifier, hTRUE, hFALSE, isArrayQuick, \
+    astToLbnf, appendInstruction
 from p_Functions import substate
 
 # Return True on success, False on failure.  The stage argument is 0 when
@@ -28,9 +29,10 @@ from p_Functions import substate
 # PALMAT.py module, must have some provision for saving either the stateMachine
 # or at least the "compiledExpression" field of the stateMachine before that
 # final call to expressionSM is made.
-def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
+def expressionSM(stage, ast, PALMAT, state, trace, depth, \
                  traceCompileTime=False):
     
+    lbnfLabel, source = astToLbnf(ast)
     stateMachine = state["stateMachine"]
     if "radix" not in stateMachine:
         stateMachine["radix"] = 0
@@ -57,45 +59,41 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
             si, attributes = \
                     findIdentifier(lbnfLabel, PALMAT, state["scopeIndex"])
             if "readStatement" in stateMachine:
-                expression.append({ "fetchp": (si, sp)})
+                appendInstruction(expression, { "fetchp": (si, sp)}, source)
             else:
-                expression.append({ "fetch": (si, sp) })
+                appendInstruction(expression, { "fetch": (si, sp) }, source)
             internalState = "normal"
         elif internalState == "waitNumber":
-            expression.append({ "number": sp })
+            appendInstruction(expression, \
+                              { "number": sp }, source)
             internalState = "normal"
         elif internalState == "waitCharString":
             if stateMachine["radix"] != 0:
-                expression.append({ 
-                    "bitarray": "%d" % int(sp[1:-1], stateMachine["radix"])})
+                appendInstruction(expression, \
+                    {"bitarray": "%d" % int(sp[1:-1], stateMachine["radix"])}, \
+                    source)
                 stateMachine["radix"] = 0
             else:
-                expression.append({ "string": sp[1:-1] })
+                appendInstruction(expression, { "string": sp[1:-1] }, source)
             internalState = "normal"
         elif internalState == "waitFunctionName":
             si, attributes = \
                     findIdentifier(lbnfLabel, PALMAT, state["scopeIndex"])
-            expression.append({ "call": (si, sp) })
+            appendInstruction(expression, { "call": (si, sp) }, source)
             internalState = "normal"
     if stage == 2:
         if lbnfLabel == "subscript":
-            expression.append({ 'sentinel': 'subscripts' })
+            appendInstruction(expression, { 'sentinel': 'subscripts' }, source)
         elif lbnfLabel == "basicStatementReadPhrase":
             if "readStatement" in stateMachine:
                 stateMachine.pop("readStatement")
         elif lbnfLabel == "repeated_constantMark":
-            expression.append({ "sentinel": "repeat"})
+            appendInstruction(expression, { "sentinel": "repeat"}, source)
         elif lbnfLabel in ["prePrimaryRtlShaping"]:
-            expression.append({ "sentinel": "shaping"})
+            appendInstruction(expression, { "sentinel": "shaping"}, source)
         elif lbnfLabel in ["prePrimaryRtlShapingStar"]:
-            expression.append({ "fill": True })
-            expression.append({ "sentinel": "shaping"})
-        #elif lbnfLabel == "arithConv_integer":
-        #    expression.append({ "shaping": "integer" })
-        #elif lbnfLabel == "arithConv_scalar":
-        #    expression.append({ "shaping": "scalar" })
-    #if stage == 2 and lbnfLabel == "repeated_constant":
-    #    expression.append({ "condense": "end" })
+            appendInstruction(expression, { "fill": True }, source)
+            appendInstruction(expression, { "sentinel": "shaping"}, source)
     if stage == 2 and depth == owningDepth:
         # Transfer the expression stack to the PALMAT instruction queue.
         # But if it's computable at compile-time, then we compute it down
@@ -108,7 +106,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
             # is known!  It has to run to completion to set up 
             # temporaryInstructions properly.
             instruction = expression.pop()
-            temporaryInstructions.append(instruction)
+            appendInstruction(temporaryInstructions, instruction, source)
             if compileTimeComputable:
                 if "fetchp" in instruction:
                     compileTimeComputable = False
@@ -133,7 +131,6 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
                     compileTimeComputable = False
                 elif "call" in instruction:
                     compileTimeComputable = False
-        #state[expressions].append(temporaryInstructions)
         if compileTimeComputable:
             # Is computable at compile-time, so let's compute it and just
             # add the single computed element to the existing instructions.
@@ -158,7 +155,7 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
             for instruction in temporaryInstructions:
                 if "fetch" in instruction:
                     instruction["fetch"] = (0, instruction["fetch"][1])
-                doctoredInstructions.append(instruction)
+                appendInstruction(doctoredInstructions, instruction, source)
             #if True or stateMachine["foundPound"]:
             #    print("foundPound:", doctoredInstructions)
             temporaryScope = {
@@ -181,28 +178,34 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
             temporaryInstructions.clear()
             for value in reversed(computationStack):
                 if value == None:
-                    temporaryInstructions.append({"empty": True})
+                    appendInstruction(temporaryInstructions, \
+                                      {"empty": True}, source)
                 elif value == { "fill" }:
-                    temporaryInstructions.append({"fill": True})
+                    appendInstruction(temporaryInstructions, \
+                                       {"fill": True}, source)
                 elif isBitArray(value):
-                    temporaryInstructions.append({"boolean": value})
+                    appendInstruction(temporaryInstructions, \
+                                      {"boolean": value}, source)
                 elif isinstance(value, (int, float)):
-                    temporaryInstructions.append({"number": str(value)})
+                    appendInstruction(temporaryInstructions, \
+                                      {"number": str(value)}, source)
                 elif isinstance(value, str):
-                    temporaryInstructions.append({"string": value })
+                    appendInstruction(temporaryInstructions, \
+                                      {"string": value }, source)
                 elif isinstance(value, list) and len(value) > 0:
                     if isinstance(value[0], list):
-                        temporaryInstructions.append({"matrix": value })
+                        appendInstruction(temporaryInstructions, \
+                                          {"matrix": value }, source)
                     else:
-                        temporaryInstructions.append({"vector": value }) 
+                        appendInstruction(temporaryInstructions, \
+                                          {"vector": value }, source) 
                 elif isArrayQuick(value):
-                    temporaryInstructions.append({"array": value })               
+                    appendInstruction(temporaryInstructions, \
+                                      {"array": value }, source)               
         if "compiledExpression" in stateMachine:
             instructions = stateMachine["compiledExpression"]
         else:
             instructions = PALMAT["scopes"][state["scopeIndex"]]["instructions"]
-        #if "relationalOperator" in stateMachine:
-        #    temporaryInstructions.append(stateMachine["relationalOperator"])
         if "expressionFlush" in stateMachine:
             stateMachine["expressionFlush"].extend(temporaryInstructions)
             stateMachine["whereTo"] = "expressionFlush"
@@ -224,25 +227,27 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
                          "clocktime", "date", "errgrp", "errnum", "nextime", 
                          "prio", "random", "randomg", "runtime", "shl", 
                          "shr", "size"]:
-            expression.append({ "function": lbnfLabel.upper()})
+            appendInstruction(expression, { "function": lbnfLabel.upper()}, \
+                              source)
         elif lbnfLabel == "prePrimaryTypeof":
-            expression.append({ "modern": "TYPEOF"})
+            appendInstruction(expression, { "modern": "TYPEOF"}, source)
         elif lbnfLabel == "prePrimaryTypeofv":
-            expression.append({ "modern": "TYPEOFV"})
-        #elif lbnfLabel == "repeated_constant":
-        #    expression.append({ "condense": "start"})
+            appendInstruction(expression, { "modern": "TYPEOFV"}, source)
+        elif lbnfLabel == "bitPrimInitialized":
+            appendInstruction(expression, { "modern": "INITIALIZED"}, source)
         elif lbnfLabel == "prePrimaryRtlShapingHeadInteger":
-            expression.append({ "shaping": "integer"})
+            appendInstruction(expression, { "shaping": "integer"}, source)
         elif lbnfLabel == "prePrimaryRtlShapingHeadScalar":
-            expression.append({ "shaping": "scalar"})
+            appendInstruction(expression, { "shaping": "scalar"}, source)
         elif lbnfLabel == "prePrimaryRtlShapingHeadVector":
-            expression.append({ "shaping": "vector"})
+            appendInstruction(expression, { "shaping": "vector"}, source)
         elif lbnfLabel == "prePrimaryRtlShapingHeadMatrix":
-            expression.append({ "shaping": "matrix"})
+            appendInstruction(expression, { "shaping": "matrix"}, source)
         elif lbnfLabel == "read_arg":
             stateMachine["readStatement"] = True
         elif lbnfLabel[:9] == "ioControl":
-            expression.append({ "iocontrol": lbnfLabel[9:].upper()})
+            appendInstruction(expression, { "iocontrol": lbnfLabel[9:].upper()},\
+                               source)
         elif lbnfLabel in ["identifier", "char_id", "bit_id"]:
             internalState = "waitIdentifier"
         elif lbnfLabel in ["level", "number", "compound_number", 
@@ -259,40 +264,40 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
         elif lbnfLabel == "char_string":
             internalState = "waitCharString"
         elif lbnfLabel == "arithExpArithExpPlusTerm":
-            expression.append({ "operator": "+" })
+            appendInstruction(expression, { "operator": "+" }, source)
         elif lbnfLabel == "arithExpArithExpMinusTerm":
-            expression.append({ "operator": "-" })
+            appendInstruction(expression, { "operator": "-" }, source)
         elif lbnfLabel == "arithMinusTerm":
-            expression.append({ "operator": "U-" })
+            appendInstruction(expression, { "operator": "U-" }, source)
         elif lbnfLabel == "termDivide":
-            expression.append({ "operator": "/" })
+            appendInstruction(expression, { "operator": "/" }, source)
         elif lbnfLabel == "productMultiplication":
-            expression.append({ "operator": "" })
+            appendInstruction(expression, { "operator": "" }, source)
         elif lbnfLabel == "factorExponentiation":
-            expression.append({ "operator": "**" })
+            appendInstruction(expression, { "operator": "**" }, source)
         elif lbnfLabel == "productDot":
-            expression.append({ "operator": "." })
+            appendInstruction(expression, { "operator": "." }, source)
         elif lbnfLabel == "productCross":
-            expression.append({ "operator": "*" })
+            appendInstruction(expression, { "operator": "*" }, source)
         elif lbnfLabel == "charExpCat":
-            expression.append({ "operator": "C||" })
+            appendInstruction(expression, { "operator": "C||" }, source)
         elif lbnfLabel == "bitConstTrue":
-            expression.append({ "boolean": hTRUE })
+            appendInstruction(expression, { "boolean": hTRUE }, source)
         elif lbnfLabel == "bitConstFalse":
-            expression.append({ "boolean": hFALSE })
+            appendInstruction(expression, { "boolean": hFALSE }, source)
         elif lbnfLabel == "NOT":
-            expression.append({ "operator": "NOT" })
+            appendInstruction(expression, { "operator": "NOT" }, source)
         elif lbnfLabel == "bitFactorAnd":
-            expression.append({ "operator": "AND" })
+            appendInstruction(expression, { "operator": "AND" }, source)
         elif lbnfLabel == "bitExpOR":
-            expression.append({ "operator": "OR" })
+            appendInstruction(expression, { "operator": "OR" }, source)
         elif lbnfLabel == "repeat_head":
-            expression.append({ "operator": "#"})
+            appendInstruction(expression, { "operator": "#"}, source)
             stateMachine["foundPound"] = True
         elif lbnfLabel == "minorAttributeStar":
-            expression.append({ "fill": True })
+            appendInstruction(expression, { "fill": True }, source)
         elif lbnfLabel == "subscript":
-            expression.append({ "operator": "subscripts"})
+            appendInstruction(expression, { "operator": "subscripts"}, source)
         #elif lbnfLabel == "relationalOpEQ":
         #    stateMachine["relationalOperator"] = { "operator": "==" }
         #elif lbnfLabel == "relationalOpNEQ":
@@ -306,26 +311,26 @@ def expressionSM(stage, lbnfLabel, PALMAT, state, trace, depth, \
         #elif lbnfLabel == "relationalOpGE":
         #    stateMachine["relationalOperator"] = { "operator": ">=" }
         elif lbnfLabel == "comparisonEQ":
-            expression.append({ "operator": "==" })
+            appendInstruction(expression, { "operator": "==" }, source)
         elif lbnfLabel == "comparisonNEQ":
-            expression.append({ "operator": "!=" })
+            appendInstruction(expression, { "operator": "!=" }, source)
         elif lbnfLabel == "comparisonLT":
-            expression.append({ "operator": "<" })
+            appendInstruction(expression, { "operator": "<" }, source)
         elif lbnfLabel == "comparisonGT":
-            expression.append({ "operator": ">" })
+            appendInstruction(expression, { "operator": ">" }, source)
         elif lbnfLabel == "comparisonLE":
-            expression.append({ "operator": "<=" })
+            appendInstruction(expression, { "operator": "<=" }, source)
         elif lbnfLabel == "comparisonGE":
-            expression.append({ "operator": ">=" })
+            appendInstruction(expression, { "operator": ">=" }, source)
         elif lbnfLabel == "relational_factorAND":
-            expression.append({ "operator": "AND" })
+            appendInstruction(expression, { "operator": "AND" }, source)
         elif lbnfLabel == "relational_expOR":
-            expression.append({ "operator": "OR" })
+            appendInstruction(expression, { "operator": "OR" }, source)
         elif lbnfLabel in ["prePrimaryFunction", "userBitFunction", 
                            "userCharFunction", "userStructFunc"]:
             internalState = "waitFunctionName"
         elif lbnfLabel == "factorTranspose":
-            expression.append({"function": "TRANSPOSE"})
+            appendInstruction(expression, {"function": "TRANSPOSE"}, source)
             
     stateMachine["internalState"] = internalState
     return True

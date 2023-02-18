@@ -8,6 +8,7 @@ Purpose:        This is a top-level intepreter loop for HAL/S code.
 Requirements:   READLINE module
 History:        2022-12-16 RSB  Split off the nascent form from 
                                 yaHAL-S-FC.py.
+                2023-02-18 RSB  Added the optimizePALMAT() pass.
 """
 
 #-------------------------------------------------------------------------
@@ -56,10 +57,11 @@ import re
 import atexit
 from processSource import processSource
 from palmatAux import constructPALMAT, writePALMAT, readPALMAT, \
-        collectGarbage, findIdentifier
+        collectGarbage, findIdentifier, astSourceFile
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
 from executePALMAT import executePALMAT, setupExecutePALMAT
 from replaceBy import bareIdentifierPattern
+from optimizePALMAT import optimizePALMAT
 
 # The following makes the buffer for user input persistent, or at least tries
 # to.  It works for me anyway.
@@ -111,6 +113,8 @@ helpMenu = \
 \t             available.
 \t`STRICT      Enables the special the special treatment of
 \t             column 1 specified by HAL/S documentation.
+\t`OPTIMIZE    (Default.)  Enable optimization of PALMAT code.
+\t`NOOPTIMIZE  Disable optimization of PALMAT code.
 \t`RUN P [*]   Run PROGRAM P. By default, runs as the 
 \t             "primary", which affects the DATA (see
 \t             below).  If the optional 3rd field is
@@ -138,6 +142,8 @@ helpMenu = \
 \t`DATA        Inspect identifiers in root scope.
 \t`DATA N      Inspect identifiers in scope N (integer).
 \t`DATA *      Inspect identifiers in all scopes.
+\t`LABELS      Enables display of program labels in `DATA.
+\t`NOLABELS    Disables display of labels in `DATA.
 \t`PALMAT      Inspect PALMAT code in root scope.
 \t`PALMAT N    Inspect PALMAT code in scope N (integer).
 \t`PALMAT *    Inspect PALMAT code in all scopes.
@@ -172,6 +178,7 @@ helpMenu = \
 
 def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     xeq=True, lbnf=False, bnf=False, ansiWrapper=True):
+
     spooling = False
     strict = False
     colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan",
@@ -186,7 +193,9 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
     halsSource = []
     metadata = []
     noCompile = False
+    showLabels = True
     wine = False
+    optimize = True
     if shouldColorize:
         # Regarding the wrappers of \001 ... \002 around all of the ANSI 
         # control sequences, these are apparently helpful for preventing
@@ -209,6 +218,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         colorName = ""
         debugColor = ""
     PALMAT = constructPALMAT()
+    astSourceFile(PALMAT, "interpreter")
     print(colorize)
     print("Input HAL/S or else interpreter commands. Use `HELP for more info.")
     while not quitting:
@@ -221,26 +231,24 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 halsSource = []
                 metadata = []
             print(colorize, end="")
-            if len(halsSource) == 0:
-                prompt = "HAL/S > "
+            if strict:
+                promptChar = "!"
             else:
-                prompt = "  ... > "
+                promptChar = ">"
+            if len(halsSource) == 0:
+                prompt = "HAL/S " + promptChar + " "
+            else:
+                prompt = "  ... " + promptChar + " "
             if colorize != "":
                 prompt = prompt + ansiPrefix + "\033[0m" + ansiSuffix
             line = input(prompt)
-            '''
-            if line[:2] in ["C ", "C\t"] or line[:3] in ["C/ ", "C/\t"]:
-                print("\tFull-line comment detected and discarded.")
-                continue
-            '''
             print(colorize, end="")
             fields = line.strip().split()
             numWords = len(fields)
             if numWords == 0:
-                #if readlinePresent:
-                #    print()
                 halsSource.append(" ")
-                metadata.append([])
+                metadata.append({"file": "interpreter", 
+                                  "lineNumber": len(halsSource)})
                 continue
             if fields[0][:1] == "`":
                 fields[0] = fields[0][1:]
@@ -338,8 +346,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                             print("\t(No identifiers declared)")
                         else:
                             for identifier in sorted(identifiers):
-                                print("\t%s:" % identifier[1:-1], \
-                                        identifiers[identifier])
+                                if showLabels or \
+                                        "label" not in identifiers[identifier]:
+                                    print("\t%s:" % identifier[1:-1], \
+                                            identifiers[identifier])
                     continue
                 elif firstWord == "PALMAT":
                     if len(fields) == 1:
@@ -369,6 +379,22 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 elif firstWord == "QUIT":
                     print("\tQuitting ...")
                     quitting = True
+                    break
+                elif firstWord == "OPTIMIZE":
+                    print("\tOptimization enabled.")
+                    optimize = True
+                    break
+                elif firstWord == "NOOPTIMIZE":
+                    print("\tOptimization disabled.")
+                    optimize = False
+                    break
+                elif firstWord == "LABELS":
+                    print("\tDisplaying program labels in `DATA.")
+                    showLabels = True
+                    break
+                elif firstWord == "NOLABELS":
+                    print("\tNot displaying program labels in `DATA.")
+                    showLabels = False
                     break
                 elif firstWord == "STRICT":
                     print("\tSTRICT on.")
@@ -447,8 +473,12 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print("\tSTRICT                   (vs NOSTRICT)")
                     else:
                         print("\tNOSTRICT                 (vs STRICT)")
+                    if showLabels:
+                        print("\tLABELS                   (vs. NOLABELS)")
+                    else:
+                        print("\tNOLABELS                 (vs. LABELS)")
                     if trace1:
-                        print("\tTRACE1                   (vs (NOTRACE1)")
+                        print("\tTRACE1                   (vs NOTRACE1)")
                     else:
                         print("\tNOTRACE1                 (vs TRACE1)")
                     if trace2:
@@ -467,6 +497,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print("\tEXEC                     (vs NOEXEC)")
                     else:
                         print("\tNOEXEC                   (vs EXEC)")
+                    if optimize:
+                        print("\tOPTIMIZE                 (vs NOOPTIMIZE)")
+                    else:
+                        print("\tNOOPTIMIZE               (vs OPTIMIZE)")
                     if bnf:
                         print("\tBNF                      (vs LBNF or NOAST)")
                     elif lbnf:
@@ -519,23 +553,13 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 elif firstWord == "HELP":
                     print(helpMenu)
                     continue
-            '''
-            if len(fields) > 3 and fields[0] == "D" and fields[1] == "INCLUDE" \
-                    and fields[2] == "TEMPLATE":
-                if fields[3] in structureTemplates:
-                    halsSource.append(" " + structureTemplates[fields[3]])
-                else:
-                    print("Template", fields[3], "not found.")
-                    continue
-                metadata.append({ "directive": True })
-            else:
-            '''
             halCode = True
             if strict:
                 halsSource.append(line)
             else:
                 halsSource.append(" " + line)
-            metadata.append({})
+            metadata.append({"file": "interpreter", 
+                              "lineNumber": len(halsSource)})
         if quitting:
             break 
         
@@ -576,7 +600,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         
         success, ast = processSource(PALMAT, halsSource, metadata, \
                          libraryFilename, structureTemplates, noCompile, \
-                         lbnf, bnf, trace1, wine, trace2, 8, macros, trace4)
+                         lbnf, bnf, trace1, wine, trace2, 8, macros, trace4, \
+                         strict)
+        if optimize:
+            optimizePALMAT(PALMAT)
         if len(substate["warnings"]):
             for warning in substate["warnings"]:
                 print("\tWarning:", warning)

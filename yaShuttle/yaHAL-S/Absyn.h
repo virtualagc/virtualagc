@@ -1245,7 +1245,7 @@ AND make_ABAND(void);
 struct BIT_PRIM_
 {
   int line_number, char_number;
-  enum { is_AAbitPrimBitVar, is_ABbitPrimLabelVar, is_ACbitPrimEventVar, is_ADbitBitConst, is_AEbitPrimBitExp, is_AHbitPrimSubbit, is_AIbitPrimFunc, is_AAbitPrimBitVarBracketed, is_ABbitPrimBitVarBracketed, is_AAbitPrimBitVarBraced, is_ABbitPrimBitVarBraced } kind;
+  enum { is_AAbitPrimBitVar, is_ABbitPrimLabelVar, is_ACbitPrimEventVar, is_ADbitBitConst, is_AEbitPrimBitExp, is_AHbitPrimSubbit, is_AIbitPrimFunc, is_AIbitPrimInitialized, is_AAbitPrimBitVarBracketed, is_ABbitPrimBitVarBracketed, is_AAbitPrimBitVarBraced, is_ABbitPrimBitVarBraced } kind;
   union
   {
     struct { BIT_VAR bit_var_; } aabitprimbitvar_;
@@ -1255,6 +1255,7 @@ struct BIT_PRIM_
     struct { BIT_EXP bit_exp_; } aebitprimbitexp_;
     struct { EXPRESSION expression_; SUBBIT_HEAD subbit_head_; } ahbitprimsubbit_;
     struct { BIT_FUNC_HEAD bit_func_head_; CALL_LIST call_list_; } aibitprimfunc_;
+    struct { CALL_LIST call_list_; } aibitpriminitialized_;
     struct { BIT_VAR bit_var_; } aabitprimbitvarbracketed_;
     struct { BIT_VAR bit_var_; SUBSCRIPT subscript_; } abbitprimbitvarbracketed_;
     struct { BIT_VAR bit_var_; } aabitprimbitvarbraced_;
@@ -1269,6 +1270,7 @@ BIT_PRIM make_ADbitBitConst(BIT_CONST p0);
 BIT_PRIM make_AEbitPrimBitExp(BIT_EXP p0);
 BIT_PRIM make_AHbitPrimSubbit(SUBBIT_HEAD p0, EXPRESSION p1);
 BIT_PRIM make_AIbitPrimFunc(BIT_FUNC_HEAD p0, CALL_LIST p1);
+BIT_PRIM make_AIbitPrimInitialized(CALL_LIST p0);
 BIT_PRIM make_AAbitPrimBitVarBracketed(BIT_VAR p0);
 BIT_PRIM make_ABbitPrimBitVarBracketed(BIT_VAR p0, SUBSCRIPT p1);
 BIT_PRIM make_AAbitPrimBitVarBraced(BIT_VAR p0);

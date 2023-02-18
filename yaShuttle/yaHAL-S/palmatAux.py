@@ -28,6 +28,53 @@ def debug(PALMAT, state, message):
             'debug': message
         })
 
+# Append a PALMAT instruction, with line/column reference if possible.
+def appendInstruction(instructions, instruction, source):
+    if source[1:] != [-1, -1]:
+        instruction = copy.deepcopy(instruction)
+        instruction["source"] = copy.deepcopy(source)
+    instructions.append(instruction)
+
+# Configures HAL/S source-file name for astToLbnf() (see below).
+astSourceIndex = -1
+def astSourceFile(PALMAT, filename):
+    global astSourceIndex
+    if filename not in PALMAT["sourceFiles"]:
+        PALMAT["sourceFiles"].append(filename)
+    astSourceIndex = PALMAT["sourceFiles"].index(filename)
+
+# Using some state machines (expressionSM, doForSM) which are passed an ast
+# object, it's necessary to construct an lbnfLabel and a source list (which
+# gives the reference to the original HAL/S source code).  This function does
+# that.
+def astToLbnf(ast):
+    source = [astSourceIndex, -1, -1]
+    if isinstance(ast, dict):
+        lbnfLabel = ast["lbnfLabel"]
+        if "lineNumber" in ast:
+            source[1] = ast["lineNumber"]
+            if "columnNumber" in ast:
+                source[2] = ast["columnNumber"]
+        if lbnfLabel[:2].isupper():
+            lbnfLabel = lbnfLabel[2:]
+    else:
+        lbnfLabel = ast
+    return lbnfLabel, source
+
+# Test if data is completely initialized.
+def isCompletelyInitialized(object):
+    if object == None:
+        return False
+    elif isinstance(object, dict):
+        for key in object:
+            if not isCompletelyInitialized(object[key]):
+                return False
+    elif isinstance(object, (list, tuple)):
+        for element in object:
+            if not isCompletelyInitialized(element):
+                return False
+    return True
+
 # Quick check if value is array.  Fuller test is isArrayGeometry() in
 # executePALMAT.
 def isArrayQuick(value):
@@ -216,7 +263,8 @@ def constructScope(selfIndex=0, parentIndex=None, scopeType="root"):
 def constructPALMAT(instantiation=0):
     return  {
                 "scopes" : [ constructScope() ],
-                "instantiation": 0
+                "instantiation": 0,
+                "sourceFiles": []
             }
 
 # Search upward through the scope hierarchy, trying to find the first enclosing
@@ -344,7 +392,7 @@ def constructLabel(scopeIndex, xx):
 
 # This function creates a label for an internal jump within a DO...END,
 # and inserts a noop instruction with that label. Returns the new label. 
-def createTarget(PALMAT, fromIndex, toIndex, xx, nameFromFrom=False):
+def createTarget(PALMAT, source, fromIndex, toIndex, xx, nameFromFrom=False):
     scopes = PALMAT["scopes"]
     namespaceIndex = min(fromIndex, toIndex)
     fromScope = scopes[fromIndex]
@@ -356,7 +404,7 @@ def createTarget(PALMAT, fromIndex, toIndex, xx, nameFromFrom=False):
         identifier = "^" + constructLabel(toIndex, xx) + "^"
     instructions = toScope["instructions"]
     toOffset = len(instructions)
-    instructions.append({'noop': True, 'label': identifier})
+    appendInstruction(instructions, {'noop': True, 'label': identifier}, source)
     identifiers = namespaceScope['identifiers']
     identifiers[identifier] = {'label': [toIndex, toOffset] }
     return identifier
@@ -367,7 +415,7 @@ def createTarget(PALMAT, fromIndex, toIndex, xx, nameFromFrom=False):
 # can be used multiple times for the same label, and can either precede
 # or follow createTarget(). 
 jumpInstructions = ['goto', 'iffalse', 'iftrue']
-def jumpToTarget(PALMAT, fromIndex, toIndex, xx, palmatOpcode, \
+def jumpToTarget(PALMAT, source, fromIndex, toIndex, xx, palmatOpcode, \
                  nameFromFrom=False, parentIndex=None):
 
     instructions = PALMAT["scopes"][fromIndex]["instructions"]
@@ -382,7 +430,8 @@ def jumpToTarget(PALMAT, fromIndex, toIndex, xx, palmatOpcode, \
     else:
         li = toIndex
     label = constructLabel(si, xx)
-    instructions.append({palmatOpcode: (li, "^" + label + "^")})
+    appendInstruction(instructions, \
+                      {palmatOpcode: (li, "^" + label + "^")}, source)
 
 uniqueVariableCounter = 0
 def createVariable(scope, xx, attributes):
@@ -398,19 +447,18 @@ def createVariable(scope, xx, attributes):
 # so those do not need to be created separately by createTargetLabel().
 # The parameter dummyTargets is an optional array of additional 
 # targets to add after the initial ue_ target. 
-def makeDoEnd(PALMAT, parentScope, scopeType="unknown"):
+def makeDoEnd(PALMAT, source, parentScope, scopeType="unknown"):
     parentIndex = parentScope["self"]
     childIndex = addScope(PALMAT, parentIndex, scopeType)
-    createTarget(PALMAT, parentIndex, childIndex, "ue")
-    jumpToTarget(PALMAT, parentIndex, childIndex, "ue", "goto")
-    createTarget(PALMAT, childIndex, parentIndex, "ur", True)
+    createTarget(PALMAT, source, parentIndex, childIndex, "ue")
+    jumpToTarget(PALMAT, source, parentIndex, childIndex, "ue", "goto")
+    createTarget(PALMAT, source, childIndex, parentIndex, "ur", True)
     return childIndex, PALMAT["scopes"][childIndex]
 
 # This function is used to exit from a DO loop back to the parent context,
 # assuming it was all set up by makeDoEnd().
-def exitDo(PALMAT, fromIndex, toIndex):
-    #createTarget(PALMAT, fromIndex, fromIndex, "ux")
-    jumpToTarget(PALMAT, fromIndex, toIndex, "ur", "goto", True)
+def exitDo(PALMAT, source, fromIndex, toIndex):
+    jumpToTarget(PALMAT, source, fromIndex, toIndex, "ur", "goto", True)
 
 #-----------------------------------------------------------------------------
 # The code generator (ast -> PALMAT).

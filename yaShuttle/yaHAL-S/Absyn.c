@@ -2716,6 +2716,19 @@ BIT_PRIM make_AIbitPrimFunc(BIT_FUNC_HEAD p1, CALL_LIST p2)
     tmp->u.aibitprimfunc_.call_list_ = p2;
     return tmp;
 }
+/********************   AIbitPrimInitialized    ********************/
+BIT_PRIM make_AIbitPrimInitialized(CALL_LIST p1)
+{
+    BIT_PRIM tmp = (BIT_PRIM) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating AIbitPrimInitialized!\n");
+        exit(1);
+    }
+    tmp->kind = is_AIbitPrimInitialized;
+    tmp->u.aibitpriminitialized_.call_list_ = p1;
+    return tmp;
+}
 /********************   AAbitPrimBitVarBracketed    ********************/
 BIT_PRIM make_AAbitPrimBitVarBracketed(BIT_VAR p1)
 {

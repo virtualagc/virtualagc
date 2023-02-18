@@ -33,7 +33,8 @@ import time
 import copy
 from decimal import Decimal, ROUND_HALF_UP
 from palmatAux import flatten, isBitArray, formBitArray, parseBitArray, \
-        findIdentifier, flexFindIdentifier, hTRUE, hFALSE, isArrayQuick
+        findIdentifier, flexFindIdentifier, hTRUE, hFALSE, isArrayQuick, \
+        isCompletelyInitialized
 
 timeOrigin = 0
 
@@ -99,6 +100,10 @@ builtIns = [
     ["MIDVAL"]
 ]
 
+def printError(source, instruction, msg):
+    print("\t%d,%d,%d (%s): %s" % \
+          (source[0], source[1], source[2], str(instruction), msg))
+
 '''
 The following is the guts of a "jump" instruction.  The parameters are:
     PALMAT          The entire PALMAT structure of which the current instruction
@@ -133,12 +138,13 @@ This function does two things:
         if the compiler or linker did this stuff for us, then the emulator 
         would not have to do it at all.
 '''
-def jump(PALMAT, scopeNumber, instructionDict, instructionName):
+def jump(PALMAT, source, scopeNumber, instructionDict, instructionName):
     si, s = instructionDict[instructionName]
     if isinstance(s, str):
         attributes = PALMAT["scopes"][si]["identifiers"][s]
         if attributes == None or "label" not in attributes:
-            print("\tCannot find target label", s)
+            printError(source, str(instructionDict), \
+                       "Cannot find target label " + s)
             return None
         instructionDict["symbolicLabel"] = instructionDict[instructionName]
         instructionDict[instructionName] = attributes["label"]
@@ -216,7 +222,7 @@ def clonePALMAT(rawPALMAT):
 
 # Get a subscripted value from an object.  At present, this works only if the 
 # subscripts are all numbers; i.e., not "slices".  Returns None on error.
-def subscripted(object, subscripts):
+def subscripted(source, object, subscripts):
     for i in range(len(subscripts)):
         subscript = hround(subscripts[i])
         try:
@@ -224,7 +230,7 @@ def subscripted(object, subscripts):
             # starts from 0.
             object = object[subscript-1]
         except:
-            print("\tSubscript does not exist in object.")
+            printError(source, "", "Subscript does not exist in object.")
             return None
     return copy.deepcopy(object)
 
@@ -250,7 +256,7 @@ def printVectorOrMatrix(vOrM):
 # For WRITE statements.
 def printArray(array):
     if isinstance(array, list) and len(array) > 1 and array[-1] == "a":
-        for a in array:
+        for a in array[:-1]:
             printArray(a)
         return
     elif array == None:
@@ -283,14 +289,15 @@ possibly prematurely.  However, this is the purview of the calling code, and
 all readItemLUN5() does is to insure that the semicolon is returned.
 '''
 readLineFields = [] # Buffered data for READ statements
-def readItemLUN5():
+def readItemLUN5(source):
     global readLineFields
     while len(readLineFields) == 0:
         line = input("READ  > ").replace(";", " ; ").strip()
         if line == "":
             continue
         if "`" in line:
-            print("The back-tick (`) is not a legal character for input data in a READ statement.")
+            printError(source, "{'read': True, 'lun': 5}", \
+                "The back-tick (`) is not a legal character for input data in a READ statement.")
             continue
         readLineFields = re.split(r"\s*,\s*|\s+", line.strip())
     return readLineFields.pop(0)
@@ -591,20 +598,42 @@ def presentify(object, digits=5):
             result += str(e)
     return result
 
-# This assigns a value, presumably taken from the computation stack, to a
-# variable, possibly with subscripts, as represented by its attributes from
-# the identifier dictionary and an array of subscripts.  At the moment, the
-# subscripts (if present) pick out a specific entry in an ARRAY, VECTOR, or 
-# MATRIX, thus the subscripts list is either empty (indicating the entire
-# object) or else has a length the same as the number of dimensions of the
-# variable.  The exception is the case of an ARRAY of VECTOR or ARRAY of MATRIX,
-# in which case the subscripts list could represent either the dimensions of
-# the ARRAY or else the dimenstions of the ARRAY+VECTOR or ARRAY+MATRIX.
+'''
+This assigns a value, presumably taken from the computation stack, to a
+variable, possibly with subscripts, as represented by its attributes from
+the identifier dictionary and an array of subscripts.  At the moment, the
+subscripts (if present) pick out a specific entry in an ARRAY, VECTOR, or 
+MATRIX, thus the subscripts list is either empty (indicating the entire
+object) or else has a length the same as the number of dimensions of the
+variable.  The exception is the case of an ARRAY of VECTOR or ARRAY of MATRIX,
+in which case the subscripts list could represent either the dimensions of
+the ARRAY or else the dimensions of the ARRAY+VECTOR or ARRAY+MATRIX.
 
-# For "simple" values only ... i.e., any but VECTOR, MATRIX, ARRAY, STRUCTURE.
-# Returns the converted value, but doesn't actually make any assignment.  
-# Returns NaN on failure.  None is a legal return value, interpreted as "do 
-# not change".
+For "simple" values only ... i.e., any but VECTOR, MATRIX, ARRAY, STRUCTURE.
+Returns the converted value, but doesn't actually make any assignment.  
+Returns NaN on failure.  A Python None is a legal return value, interpreted as 
+"do not change".
+
+As far as the arguments are concerned:
+    value       The value to convert.
+    attributes  The attributes of the identifier (sans subscripts) to which
+                the assignment is supposed to occur.
+    datatype    The datatype of the value ("integer", "scalar", "bit",
+                "character").
+    datalength  If the datatype is "bit" or "character", then the max or actual
+                length of the bit-string or character-string variable.  
+                Otherwise ignored.
+    datatype2   The datatype of the variable to which the assignment occurs.
+                For example, in V$I=X, where V is a VECTOR, the datatype of
+                V$I is "scalar".
+    datalength2 If datatype2 is "bit" or "character", then the declared maximum
+                bit-string or character-string length of the variable.
+Yes, datatype, datalength, datatype2, and datalength2 *could* be gotten by
+analyzing value and attributes, without passing additional parameters, but 
+that would mean redoing the analysis for each element of a VECTOR, MATRIX, or
+ARRAY element being assigned.  Better to do that analysis just once, 
+before calling convertSimple a bunch of times.
+'''
 def convertSimple(value, attributes, datatype, datalength, \
                    datatype2, datalength2):
     if value == None:
@@ -683,7 +712,7 @@ def convertSimple(value, attributes, datatype, datalength, \
     return NaN
 
 # Returns True on success, False on failure.
-def assignCompositeTo(value, attributes, subscripts=[]):
+def assignCompositeTo(source, value, attributes, subscripts=[]):
     #-------------------------------------------------------------------------
     # First determine the relevant characteristics of the target variable.
     # These are the variables 
@@ -719,7 +748,8 @@ def assignCompositeTo(value, attributes, subscripts=[]):
     elif "matrix" in attributes:
         datatype = "scalar"
     else:
-        print("\tAssignments to this datatype not yet implemented.")
+        printError(source, "" \
+                   "Assignments to this datatype not yet implemented.")
         return False
     #--------------------------------------------------------------------------
     # Now determine the relevant macro characteristics of the value to store.
@@ -741,7 +771,8 @@ def assignCompositeTo(value, attributes, subscripts=[]):
             dimensions.append(len(dummy)-1)
             dummy = dummy[0]
         if not isArrayGeometry(value, dimensions):
-            print("\tImplementation error, unassignable datatype on stack.")
+            printError(source, "", \
+                       "Implementation error, unassignable datatype on stack.")
             return False
         isArray2 = True
         dimensions = secondaryDimensions2
@@ -765,7 +796,7 @@ def assignCompositeTo(value, attributes, subscripts=[]):
     elif isinstance(value, float):
         datatype2 = "scalar"
     else:
-        print("\tNot presently an assignable datatype.")
+        printError(source, "", "Not presently an assignable datatype.")
         return False
     #--------------------------------------------------------------------------
     # Determine compatibility of composite-type geometries and subscripts.
@@ -776,7 +807,7 @@ def assignCompositeTo(value, attributes, subscripts=[]):
     fullDimensions2 = primaryDimensions2 + secondaryDimensions2
     for i in range(len(subscripts)):
         if subscripts[i] < 1 or subscripts[i] > fullDimensions[i]:
-            print("\tSubscript out of range in LHS variable.")
+            printError(source, "", "Subscript out of range in LHS variable.")
             return False
     fullAssignment = False # Assigns full object to full object
     halfAssignment = False # Assigns value to an array element.
@@ -793,7 +824,7 @@ def assignCompositeTo(value, attributes, subscripts=[]):
             len(fullDimensions2) == 0:
         leafAssignment = True
     else:
-        print("\tGeometry mismatch in assignment.")
+        printError(source, "", "Geometry mismatch in assignment.")
         return False
     #--------------------------------------------------------------------------
     # At this point the geometries of the assignments and assignees are 
@@ -841,16 +872,19 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
     scope = scopes[scopeNumber]
     scope0 = scopes[0]
     computationStack = []
+    source = [0, -1, -1]
     while instructionIndex < len(scope["instructions"]):
         identifiers = scope["identifiers"]
         instructions = scope["instructions"]
         instruction = instructions[instructionIndex]
+        if "source" in instruction:
+            source = instruction["source"]
         if "subscripts" in scope0 and "fetch" not in instruction and \
                 "fetchp" not in instruction and "shaping" not in instruction \
                 and "unravel" not in instruction:
-            print("\tImplementation error, subscript(s) without variable in instruction:", \
-                  instruction)
-            print(scope0)
+            printError(source, instruction, 
+                "Implementation error, subscript (%s) without variable in instruction" \
+                % scope0["subscripts"])
             return None
         if "subscripts" in scope0:
             subscripts = scope0.pop("subscripts")
@@ -889,21 +923,25 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             si, identifier = instruction["+><"]
             identifier = "^" + identifier + "^"
             if stackSize < 2:
-                print("\tImplementation error, not enough operands for '+><'.")
+                printError(source, instruction, \
+                        "Implementation error, not enough operands for '+><'.")
                 return None
             operand1 = computationStack.pop()
             negativeIncrement = (operand1 < 0)
             operand2 = computationStack[-1]
             attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
-                print("\tImplementation error, variable %s not found." \
+                printError(source, instruction, \
+                    "Implementation error, variable (%s) not found." \
                       % identifier[1:-1])
                 return None
             if "integer" not in attributes and "scalar" not in attributes:
-                print("\tImplementation error in '+><': Not a number.")
+                printError(source, instruction, \
+                           "Implementation error in '+><': Not a number.")
                 return None
             if "value" not in attributes:
-                print("\tImplementation error in '+><': Uninitialized variable.")
+                printError(source, instruction, \
+                    "Implementation error in '+><': Uninitialized variable.")
                 return None
             operand1 += attributes["value"]
             if "integer" in attributes:
@@ -922,8 +960,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 pass
             elif operator == "#":
                 if stackSize < 2:
-                    print(("\tImplementation error, not enough operands " + \
-                          "for operator \"%s\"") % operator)
+                    printError(source, instruction, \
+                        ("\tImplementation error, not enough operands " + \
+                        "for operator \"%s\"") % operator)
                     return None
                 operand1 = hround(computationStack.pop())
                 # Recall that if a single item is being repeated, it is present
@@ -961,13 +1000,15 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         break
                     subscripts.append(value)
                 if len(subscripts) < 1:
-                    print("\tSubscript operator without subscripts.")
+                    printError(source, instruction, \
+                               "Subscript operator without subscripts.")
                     return None
                 scope0["subscripts"] = subscripts
             elif operator in ["U-", "NOT"]: # Unary operators.
                 if stackSize < 1:
-                    print(("\tImplementation error, not enough operands " + \
-                          "for operator \"%s\"") % operator)
+                    printError(source, instruction, \
+                        ("\tImplementation error, not enough operands " + \
+                        "for operator \"%s\"") % operator)
                     return None
                 operand = computationStack[-1]
                 if operator == "U-":
@@ -989,16 +1030,19 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     elif isis:
                         result = -operand
                     else:
-                        print("\tIncompatible operand for negation.")
+                        printError(source, instruction, \
+                                   "Incompatible operand for negation.")
                         return None
                 elif operator == "NOT":
                     if not isBitArray(operand):
-                        print("\tNot bit array:", operand)
+                        printError(source, instruction, \
+                                   "Not bit array: " + operand)
                         return None
                     value, length = parseBitArray(operand)
                     result = formBitArray(~value, length)
                 else:
-                    print(("Implementation error, unary operator \"%s\" " + \
+                    printError(source, instruction, \
+                            ("Implementation error, unary operator (%s) " + \
                            "not yet implemented") % operator)
                     return None
                 computationStack[-1] = result
@@ -1007,8 +1051,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                               "ORNOT"]: 
                 # binary operators.
                 if stackSize < 2:
-                    print(("Implementation error, not enough operands " + \
-                          "for operator \"%s\"") % operator)
+                    printError(source, instruction, \
+                        ("Implementation error, not enough operands " + \
+                        "for operator \"%s\"") % operator)
                     return None
                 result = None
                 operand1 = computationStack[-1]
@@ -1048,7 +1093,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         elif isis1 and isis2:
                             result = float(operand1) + float(operand2)
                         else:
-                            print("\tIncompatible operands for addition.")
+                            printError(source, instruction, \
+                                       "Incompatible operands for addition.")
                             return None
                     elif operator == "-":
                         if ism1 and ism2 and \
@@ -1073,7 +1119,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         elif isis1 and isis2:
                             result = float(operand1) - float(operand2)
                         else:
-                            print("\tIncompatible operands for addition.")
+                            printError(source, instruction, \
+                                       "Incompatible operands for addition.")
                             return None
                     elif operator == "":
                         if isi1 and isi2:
@@ -1137,13 +1184,15 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                     s += operand1[i][k] * operand2[k]
                                 result.append(s)
                         else:
-                            print("\tIncompatible operands for multiplication.")
+                            printError(source, instruction, \
+                                    "Incompatible operands for multiplication.")
                             return None
                     elif operator == "/":
                         # I've so far not found any explanation of what happens
                         # with division by zero.
                         if not isis2:
-                            print("\tIncompatible datatype for divisor.")
+                            printError(source, instruction, \
+                                       "Incompatible datatype for divisor.")
                             return None
                         operand2 = float(operand2)
                         if ism1:
@@ -1163,7 +1212,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         elif isis1:
                             result = float(operand1) / operand2
                         else:
-                            print("\tIncompatible datatype for dividend.")
+                            printError(source, instruction, \
+                                       "Incompatible datatype for dividend.")
                             return None
                     elif operator == "**":
                         if ism1 and isis2 and len(operand1) == len(operand1[0]):
@@ -1176,7 +1226,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                 result = copy.deepcopy(operand1)
                                 operand2 = -operand2
                                 if operand1 == None:
-                                    print("\tMatrix is singular.")
+                                    printError(source, instruction, \
+                                               "Matrix is singular.")
                                     return None
                             else:
                                 result = copy.deepcopy(operand1)
@@ -1186,16 +1237,19 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         elif isis1 and isis2:
                             result = operand1 ** operand2
                         else:
-                            print("\tUnsupported operand type(s) for **.")
+                            printError(source, instruction, \
+                                       "Unsupported operand type(s) for **.")
                             return None
                     elif operator == "C||": # string concatenation.
                         result = operand1 + operand2
                     elif operator in ["AND", "OR", "ORNOT", "B|N" ]:
                         if not isBitArray(operand1):
-                            print("\tNot bit array:", operand1)
+                            printError(source, instruction, \
+                                       "Not bit array: " + operand1)
                             return None
                         if not isBitArray(operand2):
-                            print("\tNot bit array:", operand2)
+                            printError(source, instruction, \
+                                       "Not bit array :" + operand2)
                             return None
                         value1, length1 = parseBitArray(operand1)
                         value2, length2 = parseBitArray(operand2)
@@ -1239,20 +1293,27 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                 operand1[0]*operand2[1]-operand1[1]*operand2[0]                                
                                 ]
                         else:
-                            print("\tOperands of * must be initialized 3-vectors.")
+                            printError(source, instruction, \
+                                "Operands of * must be initialized 3-vectors.")
                             return None
                     else:
-                        print(("\tImplementation error, binary operator \"%s\" " + \
-                               "not yet implemented") % operator)
+                        printError(source, instruction, \
+                            ("Implementation error, binary operator \"%s\" " + \
+                            "not yet implemented") % operator)
                         return None
                     if result == None:
-                        print("\tUninitialized values in expression.")
+                        printErrpr(source, instruction, \
+                                   "Uninitialized values in expression.")
                         return None
                     computationStack[-1] = result
                 else:
-                    print("\tImplementation error, unknown binary operator \"%s\"" \
-                                                                    % operator)
+                    printError(source, instruction, \
+                        "Uninitialized operand(s) for binary operator \"%s\":" \
+                        % operator, operand1, operand2)
                     return None
+            else:
+                printError(source, instruction, \
+                           "Unknown operator \"%s\"" % operator)
         elif "fetch" in instruction or "unravel" in instruction \
                 or "fetchp" in instruction or \
                 "store" in instruction or "storepop" in instruction or \
@@ -1296,7 +1357,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 dummyScope = scope
                 while "assignments" not in dummyScope:
                     if dummyScope["parent"] == None:
-                        print("\tCannot find identifier", identifier)
+                        printError(source, instruction, \
+                                   "Cannot find identifier " + identifier)
                         return None
                     dummyScope = PALMAT["scopes"][dummyScope["parent"]]
                 si, identifier = dummyScope["assignments"][identifier]
@@ -1305,23 +1367,26 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 attributes = PALMAT["scopes"][si]["identifiers"][\
                                                         identifier]
             except:
-                print("\tProblem with PALMAT instruction:", instruction)
-                print("\tnum scopes =", len(PALMAT["scopes"]))
-                print("\ttype of si =", type(si))
-                print("\tscope number =", si, " identifier =", identifier)
-                print("\tidentifiers =", PALMAT["scopes"][si]["identifiers"])
+                printError(source, instruction, \
+                           "Undiagnosed problem with PALMAT instruction")
+                print("\t\tnum scopes =", len(PALMAT["scopes"]))
+                print("\t\ttype of si =", type(si))
+                print("\t\tscope number =", si, " identifier =", identifier)
+                print("\t\tidentifiers =", PALMAT["scopes"][si]["identifiers"])
                 return None
             erroredUp = True
             if fetch:
                 if "value" in attributes:
-                    value = subscripted(attributes["value"], subscripts)
+                    value = subscripted(source, attributes["value"], subscripts)
                 elif "constant" in attributes:
-                    value = subscripted(attributes["constant"], subscripts)
+                    value = subscripted(subscripted, attributes["constant"], \
+                                        subscripts)
                 else:
-                    print("\tIdentifier %s uninitialized" % identifier)
+                    printError(source, instruction, \
+                               "Identifier %s uninitialized" % identifier)
                     return None
                 if False and value == None:
-                    print("\tCannot compute value.")
+                    printError(source, instruction, "Cannot compute value.")
                     return None
                 if unravel:
                     onto = []
@@ -1333,15 +1398,17 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 computationStack.append( [si, identifier, 'p'] )
             else: # store
                 if len(computationStack) < stackPos:
-                    print("\tImplementation error, stack too short for " +
-                          "STOREXXX instruction")
+                    printError(source, instruction, \
+                               "Implementation error, stack too short for " +
+                               "STOREXXX instruction")
                     return None
                 value = copy.deepcopy(computationStack[-stackPos])
                 if pop:
                     computationStack.pop(-stackPos)
                 if "constant" in attributes:
-                    print("\tCannot change value of constant %s." \
-                          % identifier[1:-1])
+                    printError(source, instruction, \
+                               "Cannot change value of constant %s." \
+                               % identifier[1:-1])
                     return None
                 # Apply conversions to the data as necessary, if the datatype
                 # found on the computation stack was not precisely what the
@@ -1351,8 +1418,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     pass
                 elif isinstance(value, str):
                     if "character" not in attributes:
-                        print("\tCannot store string in non-CHARACTER " +
-                              "variable %s." % identifier[1:-1])
+                        printError(source, instruction, \
+                                   "Cannot store string in non-CHARACTER " +
+                                   "variable %s." % identifier[1:-1])
                         return None
                     maxlen = attributes["character"]
                     value = value[:maxlen]
@@ -1365,7 +1433,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         value = hround(value) & ((1 << attributes["bit"])-1)
                     elif "character" in attributes:
                         # TBD
-                        print("\tStoring number in CHARACTER not yet implemented.")
+                        printError(source, instruction, \
+                            "Storing number in CHARACTER not yet implemented.")
                         value = "?"
                 elif isBitArray(value) and "bit" in attributes:
                     value = formBitArray(parseBitArray(value)[0], \
@@ -1375,26 +1444,30 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     numRows = len(value)
                     dimensions = [numRows]
                     if numRows != attributes["vector"]:
-                        print("\tVector length mismatch in store operation:", \
-                              identifier[1:-1])
+                        printError(source, instruction, \
+                                "Vector length mismatch in store operation: " \
+                                + identifier[1:-1])
                         return None
                 elif isMatrix(value, False) and "matrix" in attributes \
                         and not lhsSubscripts:
                     dimensions = [len(value), len(value[0])]
                     if dimensions != attributes["matrix"]:
-                        print("\tMatrix geometry mismatch in store operation:",\
-                              identifier[1:-1])
+                        printError(source, instruction, \
+                            "Matrix geometry mismatch in store operation: " + \
+                            identifier[1:-1])
                         return None
                 elif "array" in attributes:
                     dimensions = attributes["array"]
                     if not lhsSubscripts and \
                             not isArrayGeometry(value, dimensions):
-                        print("\tArray geometry wrong in store operation:", \
-                              identifier[1:-1])
+                        printError(source, instruction, \
+                                "Array geometry wrong in store operation: " \
+                                + identifier[1:-1])
                         return None
                 else:
-                    print("\tMismatched datatypes in instruction:", \
-                          instruction, value)
+                    printError(source, instructions, \
+                               "Mismatched datatypes in instruction: %s vs %s" \
+                               % (str(instruction), str(value)))
                     return None
                 if lhsSubscriptList == []:
                     if "bit" in attributes and not isBitArray(value):
@@ -1415,16 +1488,18 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     else:
                         sdimensions = []
                     if dimensions != sdimensions[len(lhsSubscriptList):]:
-                        print("\tDimensionality mismatch in assignment.")
+                        printError(source, instruction, \
+                                   "Dimensionality mismatch in assignment.")
                         return None
                     if len(lhsSubscriptList) != len(sdimensions):
-                        print("\tDimensionality of value and variable differ.")
-                        #print(lhsSubscriptList, "vs", dimensions)
+                        printError(source, instruction, \
+                                "Dimensionality of value and variable differ.")
                         return None
                     for i in range(len(dimensions)):
                         if lhsSubscriptList[i] < 1 or \
                                 lhsSubscriptList[i] > dimensions[i]:
-                            print("\tSubscript out of range in assignment")
+                            printError(source, instruction, \
+                                       "Subscript out of range in assignment")
                             return None
                     # Recall that in python, the following manipulations of 
                     # "row" operate on pointers.  So the final "row" we end up 
@@ -1440,8 +1515,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         row = row[lhsSubscriptList[i]-1]
                     row[lhsSubscriptList[-1]-1] = value
             if not erroredUp:
-                print("\tIdentifier %s not in any accessible scope" \
-                      % identifier[1:-1])
+                printError(source, instruction, \
+                    "Identifier (%s) not in any accessible scope" \
+                    % identifier[1:-1])
                 return None
         elif "pop" in instruction:
             value = instruction["pop"]
@@ -1450,8 +1526,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     computationStack.pop()
                     value -= 1
             else:
-                print("\tImplementation error, too many POPs: %d vs %d" \
-                      % (value, stackSize))
+                printError(source, instruction, \
+                    "Implementation error, too many POPs: %d vs %d" \
+                    % (value, stackSize))
                 return None
         elif "read" in instruction:
             lun = instruction["read"]
@@ -1489,7 +1566,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         if "vector" in attributes:
                             rowLength = attributes["vector"]
                             for i in range(rowLength):
-                                value = readItemLUN5()
+                                value = readItemLUN5(source)
                                 if value == ";":
                                     semicolon = True
                                     break
@@ -1502,7 +1579,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                 if semicolon:
                                     break
                                 for j in range(numCols):
-                                    value = readItemLUN5()
+                                    value = readItemLUN5(source)
                                     if value == ";":
                                         semicolon = True
                                         break
@@ -1510,7 +1587,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                         continue
                                     attributes["value"][i][j] = float(value)
                         elif "integer" in attributes:
-                            value = readItemLUN5()
+                            value = readItemLUN5(source)
                             if value == ";":
                                 semicolon = True
                             elif value == "":
@@ -1518,7 +1595,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             else:
                                 attributes["value"] = int(value)
                         elif "scalar" in attributes:
-                            value = readItemLUN5()
+                            value = readItemLUN5(source)
                             if value == ";":
                                 semicolon = True
                             elif value == "":
@@ -1526,7 +1603,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             else:
                                 attributes["value"] = float(value)
                         elif "bit" in attributes:
-                            value = readItemLUN5()
+                            value = readItemLUN5(source)
                             bitLength = attributes["bit"]
                             if value == ";":
                                 semicolon = True
@@ -1537,7 +1614,6 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                 attributes["value"] = [(value, bitLength)]
                 while len(computationStack) > start:
                     computationStack.pop()
-                #print()
         elif "write" in instruction:
             lun = instruction["write"]
             if lun == '6':
@@ -1545,12 +1621,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 for value in computationStack:
                     if value == None:
                         print(" None ", end="")
+                    elif isArrayQuick(value):
+                        printArray(value)
                     elif isBitArray(value):
                         print(" " + bin(parseBitArray(value)[0])[2:], end="")
                     elif isinstance(value, (int, float, list)):
                         printVectorOrMatrix(value)
-                    elif isArrayQuick(value):
-                        printArray(value)
                     else:
                         print(value, end="")
                 computationStack.clear()
@@ -1629,24 +1705,40 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                         object[i] = float(object[i])
                             computationStack.append(object + ["a"])
                         continue
-                print("\tHaven't yet implemented shaping functions with subscripts.")
+                printError(source, instruction, \
+                   "Haven't yet implemented shaping functions with subscripts.")
                 return None
             else:
-                print("\tImplementation error, unknown shaping function:", \
-                      shapingFunction)
+                printError(source, instruction, \
+                    "Implementation error, unknown shaping function: " + \
+                    shapingFunction)
                 return None
         elif "modern" in instruction:
             # These are like RTL built-in functions, but are invented by me for
             # the "modern" compiler/interpreter.  They do things to make 
-            # debugging the compiler easier.
+            # debugging the compiler or performing validation testing on it
+            # easier.  Note that in distinction to real RTL built-in functions,
+            # in HAL/S their names are always lower-case, so they hopefully 
+            # won't collide with any actual HAL/S code.
             modern = instruction["modern"]
-            if modern == "TYPEOF":
+            if modern == "INITIALIZED":
                 if stackSize < 1:
-                    print("\tNot enough arguments on stack for TYPEOF")
+                    printError(source, instruction, \
+                            "Not enough arguments on stack for INITIALIZED")
+                    return None
+                if isCompletelyInitialized(computationStack[-1]):
+                    computationStack[-1] = hTRUE
+                else:
+                    computationStack[-1] = hFALSE
+            elif modern == "TYPEOF":
+                if stackSize < 1:
+                    printError(source, instruction, \
+                               "Not enough arguments on stack for TYPEOF")
                     return None
                 operand = computationStack[-1]
                 if not isinstance(operand, str):
-                    print("\tArgument of TYPEOF must be a string.")
+                    printError(source, instruction, \
+                               "Argument of TYPEOF must be a string.")
                     return None
                 result = [""]*20
                 i, mangled = flexFindIdentifier(operand, PALMAT, scopeNumber)
@@ -1713,7 +1805,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 # Same as TYPEOF, except analyzes the value atop the 
                 # computation stack, rather than an identifier.
                 if stackSize < 1:
-                    print("\tNot enough arguments on stack for TYPEOFV")
+                    printError(source, instruction, \
+                               "Not enough arguments on stack for TYPEOFV")
                     return None
                 operand = computationStack[-1]
                 result = [""]*20
@@ -1780,14 +1873,16 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     computationStack.append(1.0e-9 * \
                                             (time.time_ns() - timeOrigin))
                 else:
-                    print("\tHAL/S built-in function", function, \
-                          "not yet implemented")
+                    printError(source, instruction, \
+                            "HAL/S built-in function " + function + \
+                            "not yet implemented")
                     return None
             # Now all of the one-argument functions.
             elif function in builtIns[1]:
                 if stackSize < 1:
-                    print("\tNot enough arguments on stack for function", \
-                          function)
+                    printError(source, instruction, \
+                        "Not enough arguments on stack for function " + \
+                        function)
                     return None
                 operand = computationStack[-1]
                 if False:
@@ -1796,28 +1891,32 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     accumulation = [True]
                     accumulate(operand, fnMAX, accumulation)
                     if accumulation[0] in [None, True]:
-                        print("\tCannot compute array function", function)
+                        printError(source, instruction, \
+                                   "Cannot compute array function " + function)
                         return None
                     computationStack[-1] = accumulation[0]
                 elif function == "MIN":
                     accumulation = [True]
                     accumulate(operand, fnMIN, accumulation)
                     if accumulation[0] in [None, True]:
-                        print("\tCannot compute array function", function)
+                        printError(source, instruction, \
+                                   "Cannot compute array function " + function)
                         return None
                     computationStack[-1] = accumulation[0]
                 elif function == "PROD":
                     accumulation = [True]
                     accumulate(operand, fnPROD, accumulation)
                     if accumulation[0] in [None, True]:
-                        print("\tCannot compute array function", function)
+                        printError(source, instruction, \
+                                   "Cannot compute array function " + function)
                         return None
                     computationStack[-1] = accumulation[0]
                 elif function == "SUM":
                     accumulation = [True]
                     accumulate(operand, fnSUM, accumulation)
                     if accumulation[0] in [None, True]:
-                        print("\tCannot compute array function", function)
+                        printError(source, instruction, \
+                                   "Cannot compute array function " + function)
                         return None
                     computationStack[-1] = accumulation[0]
                 elif function == "ABS":
@@ -1892,7 +1991,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif function == "ABVAL":
                     vector = computationStack[-1]
                     if not isVector(vector):
-                        print("\tABVAL requires a vector argument.")
+                        printError(source, instruction, \
+                                   "ABVAL requires a vector argument.")
                         return None
                     sum = 0.0
                     for v in vector:
@@ -1901,7 +2001,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif function == "UNIT":
                     vector = computationStack[-1]
                     if not isVector(vector):
-                        print("\tUNIT requires a vector argument.")
+                        printError(source, instruction, \
+                                   "UNIT requires a vector argument.")
                         return None
                     sum = 0.0
                     for v in vector:
@@ -1911,14 +2012,16 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         for i in range(len(vector)):
                             vector[i] /= length
                     except:
-                        print("\tDivide by zero in UNIT function; using [1,0,...].")
+                        printError(source, instruction, \
+                            "Divide by zero in UNIT function; using [1,0,...].")
                         vector = [0.0]*len(vector)
                         vector[0] = 1.0
                     computationStack[-1] = vector
                 elif function == "TRACE":
                     matrix = computationStack[-1]
                     if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
-                        print("\tTRACE requires a square matrix argument.")
+                        printError(source, instruction, \
+                                   "TRACE requires a square matrix argument.")
                         return None
                     sum = 0.0
                     for i in range(len(matrix)):
@@ -1927,7 +2030,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif function == "TRANSPOSE":
                     matrix = computationStack[-1]
                     if not isMatrix(matrix, False):
-                        print("\tTRANSPOSE requires a matrix argument.")
+                        printError(source, instruction, \
+                                   "TRANSPOSE requires a matrix argument.")
                         return None
                     numRows = len(matrix)
                     numCols = len(matrix[0])
@@ -1941,28 +2045,33 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif function == "DET":
                     matrix = computationStack[-1]
                     if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
-                        print("\tDET requires a square-matrix argument.")
+                        printError(source, instruction, \
+                                   "DET requires a square-matrix argument.")
                         return None
                     computationStack[-1] = determinant(matrix)
                 elif function == "INVERSE":
                     matrix = computationStack[-1]
                     if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
-                        print("\tINVERSE requires a square-matrix argument.")
+                        printError(source, instruction, \
+                                   "INVERSE requires a square-matrix argument.")
                         return None
                     inverse = matrixInverse(matrix)
                     if inverse == None:
-                        print("\tMatrix is singular, and cannot be inverted.")
+                        printError(source, instruction, \
+                                "Matrix is singular, and cannot be inverted.")
                         return None
                     computationStack[-1] = inverse
                 else:
-                    print("\tHAL/S built-in function", function, \
-                          "not yet implemented")
+                    printError(source, instruction, \
+                               "HAL/S built-in function " + function + \
+                               "not yet implemented")
                     return None
             # Now all of the two-argument functions.
             elif function in builtIns[2]:
                 if stackSize < 2:
-                    print("\tNot enough arguments on stack for function", \
-                          function)
+                    printError(source, instruction, \
+                               "Not enough arguments on stack for function " + \
+                               function)
                     return None
                 operand1 = computationStack.pop()
                 operand2 = computationStack[-1]
@@ -1983,10 +2092,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     computationStack[-1] = math.atan2(operand2, operand1)
                 elif function == "XOR":
                     if not isBitArray(operand1):
-                        print("\tNot bit array:", operand1)
+                        printError(source, instruction, \
+                                   "Not bit array: " + str(operand1))
                         return None
                     if not isBitArray(operand2):
-                        print("\tNot bit array:", operand2)
+                        printError(source, instruction, \
+                                   "Not bit array: " + str(operand2))
                         return None
                     value1, length1 = parseBitArray(operand1)
                     value2, length2 = parseBitArray(operand2)
@@ -2030,14 +2141,16 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     else:
                         computationStack[-1] = "%*s" % (operand2, operand1)
                 else:
-                    print("\tHAL/S built-in function", function, \
-                          "not yet implemented")
+                    printError(source, instruction, \
+                               "HAL/S built-in function " + function + \
+                               " not yet implemented")
                     return None
             # Now all of the two-argument functions.
             elif function in builtIns[3]:
                 if stackSize < 3:
-                    print("\tNot enough arguments on stack for function", \
-                          function)
+                    printError(source, instruction, \
+                               "Not enough arguments on stack for function " \
+                               + function)
                     return None
                 operand1 = computationStack.pop()
                 operand2 = computationStack.pop()
@@ -2053,27 +2166,29 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     else:
                         computationStack[-1] = operand3
                 else:
-                    print("\tHAL/S built-in function", function, \
-                          "not yet implemented")
+                    printError(source, instruction, \
+                               "HAL/S built-in function " + function \
+                               + "not yet implemented")
                     return None
             else:
-                print("\tImplementation error, function", function)
+                printError(source, instruction, \
+                           "Implementation error, function " + function)
                 return None
         elif "goto" in instruction:
             scopeNumber, instructionIndex = \
-                    jump(PALMAT, scopeNumber, instruction, "goto")
+                    jump(PALMAT, source, scopeNumber, instruction, "goto")
             scope = scopes[scopeNumber]
         elif "iffalse" in instruction:
             value, dummy = parseBitArray(computationStack.pop())
             if (value & 1) == 0:
                 scopeNumber, instructionIndex = \
-                    jump(PALMAT, scopeNumber, instruction, "iffalse")
+                    jump(PALMAT, source, scopeNumber, instruction, "iffalse")
                 scope = scopes[scopeNumber]
         elif "iftrue" in instruction:
             value, dummy = parseBitArray(computationStack.pop())
             if (value & 1) != 0:
                 scopeNumber, instructionIndex = \
-                    jump(PALMAT, scopeNumber, instruction, "iftrue")
+                    jump(PALMAT, source, scopeNumber, instruction, "iftrue")
                 scope = scopes[scopeNumber]
         elif "noop" in instruction:
             pass # Nothing to do!
@@ -2082,10 +2197,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             identifier = "^" + identifier + "^"
             attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
-                print("\tTarget of RUN not found:", identifier)
+                printError(source, instruction, \
+                           "Target of RUN not found: " + identifier)
                 return None
             if "program" not in attributes:
-                print("\tRUN target is not a PROGRAM:", identifier)
+                printError(source, instruction, \
+                           "RUN target is not a PROGRAM: " + identifier)
                 return None
             scopeNumber = attributes["scope"]
             instructionIndex = 0;
@@ -2095,16 +2212,20 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             identifier = "^" + identifier + "^"
             attributes = PALMAT["scopes"][si]["identifiers"][identifier]
             if attributes == None:
-                print("\tTarget of CALL not found:", identifier)
+                printError(source, instruction, \
+                           "Target of CALL not found: " + identifier)
                 return None
             if "function" not in attributes and "procedure" not in attributes:
-                print("\tCALL to neither a FUNCTION nor PROCEDURE:", identifier)
+                printError(source, instruction, \
+                           "CALL to neither a FUNCTION nor PROCEDURE: " \
+                           + identifier)
                 return None
             si = attributes["scope"]
             s = scopes[si]
             if "return" in s:
-                print("\tRecursion in subroutine %s not allowed." \
-                      % identifier[1:-1])
+                printError(source, indentifier, \
+                           "Recursion in subroutine %s not allowed." \
+                           % identifier[1:-1])
                 return None
             # The return address.
             returnAddress = (scopeNumber, instructionIndex)
@@ -2127,12 +2248,14 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     break
                 enclosure = PALMAT["scopes"][enclosure["parent"]]
             if enclosure == None:
-                print("\tImplementation error, no return address.")
+                printError(source, instruction, \
+                           "Implementation error, no return address")
                 return None
             #scopeNumber, instructionIndex = computationStack.pop(-stackPos)
             scope = scopes[scopeNumber]
         else:
-            print("\tImplementation error, unknown PALMAT:", instruction)
+            printError(source, instruction, \
+                       "Implementation error, unknown PALMAT: " + instruction)
             return None
     if trace:
         print("\tTRACE:  ", computationStack, \

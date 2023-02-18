@@ -51,6 +51,8 @@ def addError(errorType, msg, metadata, lineNumber):
 # is processed, the topmost of the lines becomes a combination of the 
 # other(s), and then the others are turned into blank lines.  I do that to
 # preserve the original line numbering for error messages in the output.
+# Later ... Actually, this is bogus.  You can have situations like
+# E / ... / E / M / S / ... / S and so on.  I am ignoring those for now.
 overmarks = { 
     "-", # Vector
     "*", # Matrix
@@ -117,7 +119,8 @@ def unEMS(halsSource, metadata):
                 continue
             if exponent[j] in overmarks:
                 continue
-            addError(WARNING, "Illegal overmark or undermark at %d" % j, metadata, i)            
+            addError(WARNING, "Illegal overmark or undermark at %d" % j, \
+                     metadata, i)
         replacement = " "
         j = 1
         while j < n:
@@ -148,3 +151,8 @@ def unEMS(halsSource, metadata):
         
         i += combine
 
+    # Get rid of all empty lines.
+    for i in range(len(halsSource)-1, -1, -1):
+        if halsSource[i].strip() == "":
+            halsSource.pop(i)
+            metadata.pop(i)

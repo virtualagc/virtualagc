@@ -11,7 +11,7 @@ History:        2023-01-10 RSB  Adapted from expressionSM.py
 """
 
 from palmatAux import createTarget, jumpToTarget, createVariable, \
-    debug, findIdentifier
+    debug, findIdentifier, astToLbnf, appendInstruction
 import p_Functions
 
 '''
@@ -24,9 +24,9 @@ a string literal. The output is a compilation of DO FOR ... END to PALMAT
 instructions.  Those instructions are appended for the PALMAT
 instruction list for the current scope.
 '''
-def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth, trace4=False):
+def doForSM(stage, ast, PALMAT, state, trace, depth, trace4=False):
     
-    #debug(PALMAT, state, "SM doFor      %d %s" % (stage, lbnfLabel))
+    lbnfLabel, source = astToLbnf(ast)
     
     def closeout():
         '''
@@ -44,26 +44,29 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth, trace4=False):
         if 'label' in instructions[1]:
             label = instructions[1]['label']
             offset = len(instructions)
-            instructions.append({
+            appendInstruction(instructions, {
                 'noop': True, 
                 'label': label
-            })
+            }, source)
             instructions[1].pop('label')
             currentScope["identifiers"][label]["label"][1] = offset
         else:
-            createTarget(PALMAT, scopeNumber, scopeNumber, "up")
+            createTarget(PALMAT, source, scopeNumber, scopeNumber, "up")
         # Update the loop variable.
         si, attributes = \
             findIdentifier("^"+stateMachine['forEnd']+"^", PALMAT, scopeNumber)
-        instructions.append({'fetch': (si, stateMachine['forEnd'])})
+        appendInstruction(instructions, \
+                          {'fetch': (si, stateMachine['forEnd'])}, source)
         si, attributes = \
             findIdentifier("^"+stateMachine['forBY']+"^", PALMAT, scopeNumber)
-        instructions.append({'fetch': (si, stateMachine['forBY'])})
+        appendInstruction(instructions, \
+                          {'fetch': (si, stateMachine['forBY'])}, source)
         si, attributes = findIdentifier("^"+stateMachine['forKey']+"^", \
                                         PALMAT, scopeNumber, True)
-        instructions.append({'+><': (si, stateMachine['forKey'])})
+        appendInstruction(instructions, \
+                          {'+><': (si, stateMachine['forKey'])}, source)
 
-        jumpToTarget(PALMAT, scopeNumber, scopeNumber, "ux", 'iftrue')
+        jumpToTarget(PALMAT, source, scopeNumber, scopeNumber, "ux", 'iftrue')
         #debug(PALMAT, state, "Pauses: %s" % str(stateMachine['pauses']))
         state.pop("stateMachine")
     
@@ -142,34 +145,38 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth, trace4=False):
                         "scalar": True,
                         "double": True 
                         })
-                    instructions.append({"storepop": (scopeNumber, id1)})
+                    appendInstruction(instructions, \
+                                      {"storepop": (scopeNumber, id1)}, source)
                     instructions.extend(finalExpression)
                     id2 = createVariable(currentScope, "ud", {
                         "scalar": True,
                         "double": True 
                         })
-                    instructions.append({"store": (scopeNumber, id2)})
+                    appendInstruction(instructions, \
+                                      {"store": (scopeNumber, id2)}, source)
                 else: 
                     # This is the FOR TO (no BY) case.
                     id1 = createVariable(currentScope, "ud", {
                         "scalar": True,
                         "double": True 
                         })
-                    instructions.append({
-                        "storepop": (scopeNumber, id1)})
+                    appendInstruction(instructions, \
+                                      {"storepop": (scopeNumber, id1)}, source)
                     id2 = createVariable(currentScope, "ud", {
                         "integer": True, "constant": 1
                         })
-                    instructions.append(
-                        {"fetch": (scopeNumber, id2) })
+                    appendInstruction(instructions, \
+                        {"fetch": (scopeNumber, id2) }, source)
                 siForKey, attributesForKey = \
                     findIdentifier("^" + stateMachine["forKey"] + "^", 
                                    PALMAT, scopeNumber, True)
-                instructions.append({
-                    "fetch": (siForKey, stateMachine["forKey"])})
-                instructions.append({"operator": "-" })
-                instructions.append({
-                    "storepop": (siForKey, stateMachine["forKey"])})
+                appendInstruction(instructions, \
+                                {"fetch": (siForKey, stateMachine["forKey"])},\
+                                source)
+                appendInstruction(instructions, {"operator": "-" }, source)
+                appendInstruction(instructions, \
+                            {"storepop": (siForKey, stateMachine["forKey"])}, \
+                            source)
                 stateMachine["forEnd"] = id1
                 #debug(PALMAT, state, "Ending key stored at " + id1)
                 stateMachine["forBY"] = id2
@@ -194,7 +201,8 @@ def doForSM(stage, lbnfLabel, PALMAT, state, trace, depth, trace4=False):
                 '''
                 si, attributes = \
                     findIdentifier("^" + forKey + "^", PALMAT, scopeNumber)
-                instructions.append({"storepop": (si, forKey)})
+                appendInstruction(instructions, {"storepop": (si, forKey)}, \
+                                  source)
                 internalState = "waitForEndExpression"
                 stateMachine["pauses"] = []
     stateMachine["internalState"] = internalState
