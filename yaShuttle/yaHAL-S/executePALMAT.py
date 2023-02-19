@@ -31,22 +31,13 @@ import math
 import random
 import time
 import copy
-from decimal import Decimal, ROUND_HALF_UP
 from palmatAux import flatten, isBitArray, formBitArray, parseBitArray, \
         findIdentifier, flexFindIdentifier, hTRUE, hFALSE, isArrayQuick, \
-        isCompletelyInitialized
+        isCompletelyInitialized, hround, formatNumberAsString, fpFormat, \
+        stringifiedToFloat
+from saveValueToVariable import *
 
 timeOrigin = 0
-
-'''
-The following code is intended to determine the precision (number of 
-significant digits allowable to the right of the decimal point)
-of floating-point values.  The precision may actually be slightly
-higher than what I compute, because I subtract 1 decimal place, but 
-subtracting the 1 gets rid of a lot of nasty-looking printouts.
-'''
-precision = len(str(math.pi).split(".")[1]) - 1
-fpFormat = "%+2." + ("%d" % precision) + "e"
 
 '''
 This function is called once at startup, in order to set the 
@@ -59,25 +50,6 @@ some point in the very recent past.
 def setupExecutePALMAT():
     global timeOrigin;
     timeOrigin = time.time_ns()
-
-'''
-This is a replacement for Python's round() function, which I'd like to use
-for a direct implementation of the HAL/S ROUND() function, but can't due to 
-incompatibility.  Python's round() function uses a method apparently called 
-"banker's rounding", in which everything rounds just as you'd expect except 
-that numbers which are *exactly* integer+1/2 round (from my and HAL'S's 
-perspective) very oddly: they round to the nearest *even* integer.  For 
-example, 1.5 and 2.5 both round to 2, 3.5 and 4.5 both round to 4, and so on. 
-As far as HAL/S is concerned, the documentation isn't 100% explicit in this
-regard since they apparently don't know there are daft alternatives, but the 
-explanations on p. 3-4 (PDF p. 42) of [PIH] make it pretty 
-clear that banker's rounding is *not* what was envisaged; 0.5 is supposed to 
-round to 1, 3.5 is supposed to round to 4.  (What's left undiscussed are cases 
-like -1.5 or -2.5.  Oh well!)  Therefore, the following function is provided to 
-account for rounding that's closer to what's needed.  I think!
-'''
-def hround(x):
-    return int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
 
 '''
 Categorization of the HAL/S built-in functions by the number of arguments
@@ -152,37 +124,6 @@ def jump(PALMAT, source, scopeNumber, instructionDict, instructionName):
     return tuple(s)
 
 '''
-Convert a stringified HAL/S number (i.e., an INTEGER or SCALAR presented
-as a string, possibly with B, H, or E type exponents) into a Python
-float.
-
-Recall that HAL/S literal numbers can include modifiers like "B-12" or "H7" in 
-addition to the usual "E23".  Python of course has no knowledge of these 
-additional funky modifiers, so we have to handle them explicitly.  
-Unfortunately this can make the numerical version inexact compared to the 
-stringified version, and not inexact in the same way as the original IBM 360 or 
-AP-101S representations were. At some point I'll probably make the compiler do 
-this work for the sake of efficiency, but as for now I keep the accuracy for
-as long as possible, so the compiler provides us with "stringified" numbers
-and thus the emulator has to do this unpacking at runtime.
-'''
-def stringifiedToFloat(stringifiedNumber):
-    multiplier = 1.0
-    while True:
-        match = re.search("[EBH][-]?[0-9]+$", stringifiedNumber)
-        if match == None:
-            break
-        modifier = match.group()
-        stringifiedNumber = stringifiedNumber[:match.span()[0]]
-        if modifier[0] == "E":
-            multiplier *= 10 ** (int(modifier[1:]))
-        elif modifier[0] == "B":
-            multiplier *= 2 ** (int(modifier[1:]))
-        else: # modifier[0] == "H":
-            multiplier *= 16 ** (int(modifier[1:]))
-    return float(stringifiedNumber) * multiplier
-
-'''
 Create a PALMAT for a new process/thread.  This is related to the 
 executePALMAT() function's newInstantiation parameter (see below).  The
 clonePALMAT() function doesn't actually start such a new thread or process,
@@ -242,15 +183,8 @@ def printVectorOrMatrix(vOrM):
         return
     elif vOrM == None:
         value = "X.X"
-    elif isinstance(vOrM, int):
-        value = "%d" % vOrM
-    elif vOrM == 0.0:
-        value = " 0.0"
-    else: # isinstance(vOrM, float)
-        value = fpFormat % vOrM
-        if value[:1] == "+":
-            value = " " + value[1:]
-        value = value.replace("e", "E")
+    elif isinstance(vOrM, (int, float)):
+        value = formatNumberAsString(vOrM)
     print(" " + value + " ", end="")
 
 # For WRITE statements.
@@ -598,239 +532,6 @@ def presentify(object, digits=5):
             result += str(e)
     return result
 
-'''
-This assigns a value, presumably taken from the computation stack, to a
-variable, possibly with subscripts, as represented by its attributes from
-the identifier dictionary and an array of subscripts.  At the moment, the
-subscripts (if present) pick out a specific entry in an ARRAY, VECTOR, or 
-MATRIX, thus the subscripts list is either empty (indicating the entire
-object) or else has a length the same as the number of dimensions of the
-variable.  The exception is the case of an ARRAY of VECTOR or ARRAY of MATRIX,
-in which case the subscripts list could represent either the dimensions of
-the ARRAY or else the dimensions of the ARRAY+VECTOR or ARRAY+MATRIX.
-
-For "simple" values only ... i.e., any but VECTOR, MATRIX, ARRAY, STRUCTURE.
-Returns the converted value, but doesn't actually make any assignment.  
-Returns NaN on failure.  A Python None is a legal return value, interpreted as 
-"do not change".
-
-As far as the arguments are concerned:
-    value       The value to convert.
-    attributes  The attributes of the identifier (sans subscripts) to which
-                the assignment is supposed to occur.
-    datatype    The datatype of the value ("integer", "scalar", "bit",
-                "character").
-    datalength  If the datatype is "bit" or "character", then the max or actual
-                length of the bit-string or character-string variable.  
-                Otherwise ignored.
-    datatype2   The datatype of the variable to which the assignment occurs.
-                For example, in V$I=X, where V is a VECTOR, the datatype of
-                V$I is "scalar".
-    datalength2 If datatype2 is "bit" or "character", then the declared maximum
-                bit-string or character-string length of the variable.
-Yes, datatype, datalength, datatype2, and datalength2 *could* be gotten by
-analyzing value and attributes, without passing additional parameters, but 
-that would mean redoing the analysis for each element of a VECTOR, MATRIX, or
-ARRAY element being assigned.  Better to do that analysis just once, 
-before calling convertSimple a bunch of times.
-'''
-def convertSimple(value, attributes, datatype, datalength, \
-                   datatype2, datalength2):
-    if value == None:
-        return None
-    elif datatype == "integer":
-        if datatype2 == "integer":
-            return value
-        if datatype2 == "scalar":
-            return (hround(value))
-        if datatype2 == "bit":
-            return parseBitArray(value)[0]
-        if datatype2 == "character":
-            # According to [HPG] Appendix A, the string must represent an 
-            # integer, and not a float.
-            try:
-                return int(value)
-            except:
-                pass
-    elif datatype == "scalar":
-        if datatype2 == "integer" or datatype2 == "scalar":
-            return float(value)
-        if datatype2 == "bit":
-            return float(parseBitArray(value)[0])
-        if datatype2 == "character":
-            try:
-                return float(value)
-            except:
-                pass
-    elif datatype == "bit":
-        if datatype2 == "scalar":
-            value = hround(value)
-            datatype2 = "integer"
-        elif datatype2 == "bit":
-            value = parseBitArray(value)[0]
-            datatype2 = "integer"
-        elif datatype2 == "character":
-            # From [HPG] Appendix A, the string must consist of 1's, 0's, and
-            # blanks, but not all blanks.
-            value = value.replace(" ", "")
-            if value != "":
-                try:
-                    value = int(value, 2)
-                    datatype2 = "integer"
-                except:
-                    pass
-        if datatype2 == "integer":
-            return [( value & ((1 << datalength)-1), datalength )]
-    elif datatype == "character":
-        # When compiling the Shuttle flight software, there's no guarantee 
-        # here that the maximum string length of the variable will be obeyed.
-        # I *could* just truncate these strings to the maximum length,
-        # but I'd think this is very likely to screw up
-        # SCALAR values, because I'm likely using a lot higher precision here
-        # than the original HAL/S did ... but alas I have no clue whatever as
-        # to what that original precision was.  The docs just say it's 
-        # "implementation dependent".  But I bet those original developer
-        # sure knew what that length was, and hardcoded it into their 
-        # CHARACTER declarations when they needed to used it, setting me up to
-        # fail.
-        if datatype2 == "character":
-            return value[:datalength]
-        if datatype2 == "integer":
-            return "%d" % value
-        if datatype2 == "scalar":
-            if value == 0.0:
-                return " 0.0"
-            fmt = fpFormat
-            #fmt = "%+2." + ("%d" % 6) + "e"
-            value = fmt % value
-            if value[:1] == "+":
-                value = " " + value[1:]
-            value = value.replace("e", "E")
-            return value
-        if datatype2 == "bit":
-            return bin(parseBitArray(value)[0])[2:]
-    return NaN
-
-# Returns True on success, False on failure.
-def assignCompositeTo(source, value, attributes, subscripts=[]):
-    #-------------------------------------------------------------------------
-    # First determine the relevant characteristics of the target variable.
-    # These are the variables 
-    #        isArray
-    #        primaryDimensions 
-    #        secondaryDimensions
-    #        datatype
-    #        datalength
-    isArray = "array" in attributes;
-    primaryDimensions = []
-    secondaryDimensions = []
-    datatype = ""
-    datalength = -1
-    if "vector" in attributes:
-        primaryDimensions = [attributes["vector"]]
-    elif "matrix" in attributes:
-        primaryDimensions = attributes["matrix"]
-    if isARRAY:
-        secondaryDimensions = primaryDimensions
-        primaryDimensions = attributes["array"]
-    if "bit" in attributes:
-        datatype = "bit"
-        datalength = attributes["bit"]
-    elif "character" in attributes:
-        datatype = "character"
-        datalength = attributes["character"]
-    elif "integer" in attributes:
-        datatype = "integer"
-    elif "scalar" in attributes:
-        datatype = "scalar"
-    elif "vector" in attributes:
-        datatype = "scalar"
-    elif "matrix" in attributes:
-        datatype = "scalar"
-    else:
-        printError(source, "" \
-                   "Assignments to this datatype not yet implemented.")
-        return False
-    #--------------------------------------------------------------------------
-    # Now determine the relevant macro characteristics of the value to store.
-    # These are the variables
-    #        isArray2
-    #        primaryDimensions2
-    #        secondaryDimensions2
-    #        datatype2
-    #        datalength2
-    isArray2 = False
-    primaryDimensions2 = []
-    secondaryDimensions2 = []
-    dimensions = primaryDimensions2
-    datatype2 = ""
-    datalength2 = -1
-    if isArrayQuick(value):
-        dummy = value
-        while isArrayQuick(dummy):
-            dimensions.append(len(dummy)-1)
-            dummy = dummy[0]
-        if not isArrayGeometry(value, dimensions):
-            printError(source, "", \
-                       "Implementation error, unassignable datatype on stack.")
-            return False
-        isArray2 = True
-        dimensions = secondaryDimensions2
-    if value == None:
-        datatype2 = "unassigned"
-    elif isVector(value):
-        datatype2 = "scalar"
-        dimensions.append(len(value))
-    elif isMatrix(value):
-        datatype2 = "scalar"
-        dimensions.append(len(value))
-        dimensions.append(len(value[0]))
-    elif isBitArray(value):
-        datatype2 = "bit"
-        dummy, datalength2 = parseBitArray(value)
-    elif isinstance(value, str):
-        datatype2 = "character"
-        datalength2 = len(value)
-    elif isinstance(value, int):
-        datatype2 = "integer"
-    elif isinstance(value, float):
-        datatype2 = "scalar"
-    else:
-        printError(source, "", "Not presently an assignable datatype.")
-        return False
-    #--------------------------------------------------------------------------
-    # Determine compatibility of composite-type geometries and subscripts.
-    # I.e., we want to make sure that every element of the (subscripted) LHS
-    # corresponds to a an object of the corresponding geometry (including 
-    # ARRAY vs VECTOR/MATRIX) on the RHS.
-    fullDimensions = primaryDimensions + secondaryDimensions
-    fullDimensions2 = primaryDimensions2 + secondaryDimensions2
-    for i in range(len(subscripts)):
-        if subscripts[i] < 1 or subscripts[i] > fullDimensions[i]:
-            printError(source, "", "Subscript out of range in LHS variable.")
-            return False
-    fullAssignment = False # Assigns full object to full object
-    halfAssignment = False # Assigns value to an array element.
-    leafAssignment = False # Assigns value to an element of an array element.
-    if len(subscripts) == 0 and isArray == isArray2 and \
-            primaryDimensions == primaryDimensions2 and \
-            secondaryDimensions == secondaryDimensions2:
-        fullAssignment = True
-    elif len(subscripts) != 0 and len(subscripts) == len(primaryDimensions) \
-            and not isArray2 and secondaryDimensions == primaryDimensions2 \
-            and len(secondaryDimensions2) == 0:
-        halfAssignment = True
-    elif len(subscripts) != 0 and len(subscripts) == len(fullDimensions) and \
-            len(fullDimensions2) == 0:
-        leafAssignment = True
-    else:
-        printError(source, "", "Geometry mismatch in assignment.")
-        return False
-    #--------------------------------------------------------------------------
-    # At this point the geometries of the assignments and assignees are 
-    # known to be compatible. 
-    
-    return True
 '''
 This is the main emulator loop.  Basically, you feed it an entire PALMAT
 structure of scopes (namely rawPALMAT) including the model of all variables
@@ -1410,110 +1111,121 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                "Cannot change value of constant %s." \
                                % identifier[1:-1])
                     return None
-                # Apply conversions to the data as necessary, if the datatype
-                # found on the computation stack was not precisely what the
-                # variable being assigned expects.
-                dimensions = []
-                if value == None:
-                    pass
-                elif isinstance(value, str):
-                    if "character" not in attributes:
-                        printError(source, instruction, \
-                                   "Cannot store string in non-CHARACTER " +
-                                   "variable %s." % identifier[1:-1])
-                        return None
-                    maxlen = attributes["character"]
-                    value = value[:maxlen]
-                elif isinstance(value, (float, int)):
-                    if "integer" in attributes:
-                        value = hround(value)
-                    elif "scalar" in attributes:
-                        value = float(value)
-                    elif "bit" in attributes:
-                        value = hround(value) & ((1 << attributes["bit"])-1)
-                    elif "character" in attributes:
-                        # TBD
-                        printError(source, instruction, \
-                            "Storing number in CHARACTER not yet implemented.")
-                        value = "?"
-                elif isBitArray(value) and "bit" in attributes:
-                    value = formBitArray(parseBitArray(value)[0], \
-                                         attributes["bit"])
-                elif isVector(value, False) and "vector" in attributes \
-                        and not lhsSubscripts:
-                    numRows = len(value)
-                    dimensions = [numRows]
-                    if numRows != attributes["vector"]:
-                        printError(source, instruction, \
-                                "Vector length mismatch in store operation: " \
-                                + identifier[1:-1])
-                        return None
-                elif isMatrix(value, False) and "matrix" in attributes \
-                        and not lhsSubscripts:
-                    dimensions = [len(value), len(value[0])]
-                    if dimensions != attributes["matrix"]:
-                        printError(source, instruction, \
-                            "Matrix geometry mismatch in store operation: " + \
-                            identifier[1:-1])
-                        return None
-                elif "array" in attributes:
-                    dimensions = attributes["array"]
-                    if not lhsSubscripts and \
-                            not isArrayGeometry(value, dimensions):
-                        printError(source, instruction, \
-                                "Array geometry wrong in store operation: " \
-                                + identifier[1:-1])
+                if False:
+                    # This is my new, possibly-improved method.
+                    if not saveValueToVariable(source, value, \
+                                               identifier[1:-1], \
+                                               attributes, \
+                                               lhsSubscriptList):
                         return None
                 else:
-                    printError(source, instructions, \
-                               "Mismatched datatypes in instruction: %s vs %s" \
-                               % (str(instruction), str(value)))
-                    return None
-                if lhsSubscriptList == []:
-                    if "bit" in attributes and not isBitArray(value):
-                        value = formBitArray(value, attributes["bit"])
-                    elif "character" in attributes and \
-                            "array" not in attributes and \
-                            "vector" not in attributes and \
-                            "matrix" not in attributes:
-                        value = str(value)[:attributes["character"]]
-                    attributes["value"] = value
-                else:
-                    if "array" in attributes:
-                        sdimensions = attributes["array"]
-                    elif "vector" in attributes:
-                        sdimensions = [attributes["vector"]]
-                    elif "matrix" in attributes:
-                        sdimensions = attributes["matrix"]
-                    else:
-                        sdimensions = []
-                    if dimensions != sdimensions[len(lhsSubscriptList):]:
-                        printError(source, instruction, \
-                                   "Dimensionality mismatch in assignment.")
-                        return None
-                    if len(lhsSubscriptList) != len(sdimensions):
-                        printError(source, instruction, \
-                                "Dimensionality of value and variable differ.")
-                        return None
-                    for i in range(len(dimensions)):
-                        if lhsSubscriptList[i] < 1 or \
-                                lhsSubscriptList[i] > dimensions[i]:
+                    # This my original, incomplete, imperfect method.
+                    # Apply conversions to the data as necessary, if the datatype
+                    # found on the computation stack was not precisely what the
+                    # variable being assigned expects.
+                    dimensions = []
+                    if value == None:
+                        pass
+                    elif isinstance(value, str):
+                        if "character" not in attributes:
                             printError(source, instruction, \
-                                       "Subscript out of range in assignment")
+                                       "Cannot store string in non-CHARACTER " +
+                                       "variable %s." % identifier[1:-1])
                             return None
-                    # Recall that in python, the following manipulations of 
-                    # "row" operate on pointers.  So the final "row" we end up 
-                    # with is actually a pointer to a stored row existing 
-                    # already in the VECTOR, MATRIX, or ARRAY variable.
-                    # Recall also that HAL/S indexes from 1 while Python indexes
-                    # from 0.  Recall finally that even uninitialized composite
-                    # data in our HAL/S scopes have the proper dimensionality,
-                    # but with unused elements set to None, so the sought row
-                    # does actually exist.
-                    row = attributes["value"]
-                    for i in range(len(dimensions)-1):
-                        row = row[lhsSubscriptList[i]-1]
-                    row[lhsSubscriptList[-1]-1] = value
+                        maxlen = attributes["character"]
+                        value = value[:maxlen]
+                    elif isinstance(value, (float, int)):
+                        if "integer" in attributes:
+                            value = hround(value)
+                        elif "scalar" in attributes or \
+                                ("vector" in attributes and len(lhsSubscriptList) == 1) or \
+                                ("matrix" in attributes and len(lhsSubscriptList) == 2):
+                            value = float(value)
+                        elif "bit" in attributes:
+                            value = hround(value) & ((1 << attributes["bit"])-1)
+                        elif "character" in attributes:
+                            # TBD
+                            printError(source, instruction, \
+                                "Storing number in CHARACTER not yet implemented.")
+                            value = "?"
+                    elif isBitArray(value) and "bit" in attributes:
+                        value = formBitArray(parseBitArray(value)[0], \
+                                             attributes["bit"])
+                    elif isVector(value, False) and "vector" in attributes \
+                            and not lhsSubscripts:
+                        numRows = len(value)
+                        dimensions = [numRows]
+                        if numRows != attributes["vector"]:
+                            printError(source, instruction, \
+                                    "Vector length mismatch in store operation: " \
+                                    + identifier[1:-1])
+                            return None
+                    elif isMatrix(value, False) and "matrix" in attributes \
+                            and not lhsSubscripts:
+                        dimensions = [len(value), len(value[0])]
+                        if dimensions != attributes["matrix"]:
+                            printError(source, instruction, \
+                                "Matrix geometry mismatch in store operation: " + \
+                                identifier[1:-1])
+                            return None
+                    elif "array" in attributes:
+                        dimensions = attributes["array"]
+                        if not lhsSubscripts and \
+                                not isArrayGeometry(value, dimensions):
+                            printError(source, instruction, \
+                                    "Array geometry wrong in store operation: " \
+                                    + identifier[1:-1])
+                            return None
+                    else:
+                        printError(source, instructions, \
+                                   "Mismatched datatypes in instruction: %s vs %s" \
+                                   % (str(instruction), str(value)))
+                        return None
+                    if lhsSubscriptList == []:
+                        if "bit" in attributes and not isBitArray(value):
+                            value = formBitArray(value, attributes["bit"])
+                        elif "character" in attributes and \
+                                "array" not in attributes and \
+                                "vector" not in attributes and \
+                                "matrix" not in attributes:
+                            value = str(value)[:attributes["character"]]
+                        attributes["value"] = value
+                    else:
+                        if "array" in attributes:
+                            sdimensions = attributes["array"]
+                        elif "vector" in attributes:
+                            sdimensions = [attributes["vector"]]
+                        elif "matrix" in attributes:
+                            sdimensions = attributes["matrix"]
+                        else:
+                            sdimensions = []
+                        if dimensions != sdimensions[len(lhsSubscriptList):]:
+                            printError(source, instruction, \
+                                       "Dimensionality mismatch in assignment.")
+                            return None
+                        if len(lhsSubscriptList) != len(sdimensions):
+                            printError(source, instruction, \
+                                    "Dimensionality of value and variable differ.")
+                            return None
+                        for i in range(len(dimensions)):
+                            if lhsSubscriptList[i] < 1 or \
+                                    lhsSubscriptList[i] > dimensions[i]:
+                                printError(source, instruction, \
+                                           "Subscript out of range in assignment")
+                                return None
+                        # Recall that in python, the following manipulations of 
+                        # "row" operate on pointers.  So the final "row" we end up 
+                        # with is actually a pointer to a stored row existing 
+                        # already in the VECTOR, MATRIX, or ARRAY variable.
+                        # Recall also that HAL/S indexes from 1 while Python indexes
+                        # from 0.  Recall finally that even uninitialized composite
+                        # data in our HAL/S scopes have the proper dimensionality,
+                        # but with unused elements set to None, so the sought row
+                        # does actually exist.
+                        row = attributes["value"]
+                        for i in range(len(dimensions)-1):
+                            row = row[lhsSubscriptList[i]-1]
+                        row[lhsSubscriptList[-1]-1] = value
             if not erroredUp:
                 printError(source, instruction, \
                     "Identifier (%s) not in any accessible scope" \

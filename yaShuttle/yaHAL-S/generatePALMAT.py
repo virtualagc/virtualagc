@@ -15,7 +15,7 @@ import json
 import p_Functions
 substate = p_Functions.substate
 from palmatAux import *
-from executePALMAT import hround, isBitArray
+from executePALMAT import isBitArray
 from expressionSM import expressionSM
 from doForSM import doForSM
 from p_Functions import expressionComponents, doForComponents

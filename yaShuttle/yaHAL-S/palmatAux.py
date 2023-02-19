@@ -20,6 +20,8 @@ History:        2023-01-10 RSB  Split off from PALMAT.py.
 import json
 import re
 import copy
+import math
+from decimal import Decimal, ROUND_HALF_UP
 
 # Add a `debug` PALMAT instruction.
 def debug(PALMAT, state, message):
@@ -60,6 +62,81 @@ def astToLbnf(ast):
     else:
         lbnfLabel = ast
     return lbnfLabel, source
+
+'''
+This is a replacement for Python's round() function, which I'd like to use
+for a direct implementation of the HAL/S ROUND() function, but can't due to 
+incompatibility.  Python's round() function uses a method apparently called 
+"banker's rounding", in which everything rounds just as you'd expect except 
+that numbers which are *exactly* integer+1/2 round (from my and HAL'S's 
+perspective) very oddly: they round to the nearest *even* integer.  For 
+example, 1.5 and 2.5 both round to 2, 3.5 and 4.5 both round to 4, and so on. 
+As far as HAL/S is concerned, the documentation isn't 100% explicit in this
+regard since they apparently don't know there are daft alternatives, but the 
+explanations on p. 3-4 (PDF p. 42) of [PIH] make it pretty 
+clear that banker's rounding is *not* what was envisaged; 0.5 is supposed to 
+round to 1, 3.5 is supposed to round to 4.  (What's left undiscussed are cases 
+like -1.5 or -2.5.  Oh well!)  Therefore, the following function is provided to 
+account for rounding that's closer to what's needed.  I think!
+'''
+def hround(x):
+    return int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
+
+'''
+The following code is intended to determine the precision (number of 
+significant digits allowable to the right of the decimal point)
+of floating-point values.  The precision may actually be slightly
+higher than what I compute, because I subtract 1 decimal place, but 
+subtracting the 1 gets rid of a lot of nasty-looking printouts.
+'''
+precision = len(str(math.pi).split(".")[1]) - 1
+fpFormat = "%+2." + ("%d" % precision) + "e"
+
+# Format a number (INTEGER, SCALAR) as a string, as in WRITE statements, and
+# return it.  Or else None on failure.
+def formatNumberAsString(value):
+    if isinstance(value, int):
+        return "%d" % value
+    elif value == 0.0:
+        return " 0.0"
+    elif isinstance(value, float):
+        value = fpFormat % value
+        if value[:1] == "+":
+            value = " " + value[1:]
+        value = value.replace("e", "E")
+        return value
+    return None
+
+'''
+Convert a stringified HAL/S number (i.e., an INTEGER or SCALAR presented
+as a string, possibly with B, H, or E type exponents) into a Python
+float.
+
+Recall that HAL/S literal numbers can include modifiers like "B-12" or "H7" in 
+addition to the usual "E23".  Python of course has no knowledge of these 
+additional funky modifiers, so we have to handle them explicitly.  
+Unfortunately this can make the numerical version inexact compared to the 
+stringified version, and not inexact in the same way as the original IBM 360 or 
+AP-101S representations were. At some point I'll probably make the compiler do 
+this work for the sake of efficiency, but as for now I keep the accuracy for
+as long as possible, so the compiler provides us with "stringified" numbers
+and thus the emulator has to do this unpacking at runtime.
+'''
+def stringifiedToFloat(stringifiedNumber):
+    multiplier = 1.0
+    while True:
+        match = re.search("[EBH][-]?[0-9]+$", stringifiedNumber)
+        if match == None:
+            break
+        modifier = match.group()
+        stringifiedNumber = stringifiedNumber[:match.span()[0]]
+        if modifier[0] == "E":
+            multiplier *= 10 ** (int(modifier[1:]))
+        elif modifier[0] == "B":
+            multiplier *= 2 ** (int(modifier[1:]))
+        else: # modifier[0] == "H":
+            multiplier *= 16 ** (int(modifier[1:]))
+    return float(stringifiedNumber) * multiplier
 
 # Test if data is completely initialized.
 def isCompletelyInitialized(object):
