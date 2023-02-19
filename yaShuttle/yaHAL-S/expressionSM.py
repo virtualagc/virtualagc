@@ -243,6 +243,12 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
             appendInstruction(expression, { "shaping": "vector"}, source)
         elif lbnfLabel == "prePrimaryRtlShapingHeadMatrix":
             appendInstruction(expression, { "shaping": "matrix"}, source)
+        elif lbnfLabel == "subAt":
+            appendInstruction(expression, { "shaping": "sliceAT"}, source)
+        elif lbnfLabel == "subRunHeadTo":
+            appendInstruction(expression, { "shaping": "sliceTO"}, source)
+        elif lbnfLabel == "subStar":
+            appendInstruction(expression, { "fill": True}, source)
         elif lbnfLabel == "read_arg":
             stateMachine["readStatement"] = True
         elif lbnfLabel[:9] == "ioControl":

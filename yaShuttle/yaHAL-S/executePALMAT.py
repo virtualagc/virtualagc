@@ -533,6 +533,51 @@ def presentify(object, digits=5):
     return result
 
 '''
+This recursive function takes a data object and a subscript array, possibly 
+with slices, and returns the sliced object.  The subscripts array must have the 
+same or fewer dimensions as the object, and the same or smaller widths.  If 
+there are less subscripts than dimensions, the remainder is filled up as if *
+were used.  No conversions are performed.  Returns False on failure.
+'''
+def sliceIt(object, subscripts):
+    if not isinstance(object, list) or isBitArray(object):
+        if len(subscripts) == 0:
+            return copy.deepcopy(object)
+        else: # Too many subscripts for the object.
+            return False
+    isArray = (object[-1] == "a")
+    if isArray:
+        width = len(object) - 1
+    else:
+        width = len(object)
+    if len(subscripts) == 0: # Not enough subscripts, so use entire level.
+        thisLevelSubscripts = list(range(width))
+    else:
+        s = subscripts[0]
+        if s == {'fill'}:
+            thisLevelSubscripts = list(range(width))
+        elif isinstance(s, list): # This is an AT-slice.
+            thisLevelSubscripts = list(range(s[1] - 1, s[1] - 1 + s[0]))
+        elif isinstance(s, tuple): # This is a TO-slice.
+            thisLevelSubscripts = list(range(s[0] - 1, s[1]))
+        else: # This is a single index.
+            thisLevelSubscripts = [s-1]
+    print("**", object, subscripts, thisLevelSubscripts)
+    newObject = []
+    if len(subscripts) > 0:
+        newSubscripts = subscripts[1:]
+    else:
+        newSubscripts = []
+    for s in thisLevelSubscripts:
+        newLevel = sliceIt(object[s], newSubscripts)
+        if newLevel == False:
+            return False
+        newObject.append(newLevel)
+    if isArray:
+        newObject.append("a")
+    return newObject
+    
+'''
 This is the main emulator loop.  Basically, you feed it an entire PALMAT
 structure of scopes (namely rawPALMAT) including the model of all variables
 and constants for each scope, and the list of PALMAT instructions for each
@@ -1077,6 +1122,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 return None
             erroredUp = True
             if fetch:
+                '''
                 if "value" in attributes:
                     value = subscripted(source, attributes["value"], subscripts)
                 elif "constant" in attributes:
@@ -1086,8 +1132,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     printError(source, instruction, \
                                "Identifier %s uninitialized" % identifier)
                     return None
-                if False and value == None:
-                    printError(source, instruction, "Cannot compute value.")
+                '''
+                value = sliceIt(attributes["value"], subscripts)
+                if value == False:
+                    printError(source, instruction, \
+                        "Slicing error %s%s." % (identifier, str(subscripts)))
                     return None
                 if unravel:
                     onto = []

@@ -105,22 +105,70 @@ import sys
 sys.exit(1)
 '''
 
+# In a composite datatype (VECTOR, MATRIX, ARRAY, ARRAY VECTOR, ARRAY MATRIX),
+# perform a conversion on a leaf.  Basically these are all of the HAL/S 
+# datatypes, other than bit-strings, implemented as Python lists in the
+# HAL/S->PALMAT compiler.  The conversion is in-place.  Returns True
+# on success, False on failure.  Note that there's no checking that the input
+# (composite) is actually a list type.
+def convertComposite(composite, datatype, datalength):
+    for i in range(len(composite)):
+        value = composite[i]
+        if isinstance(value, list) and not isBitArray(value):
+            if convertComposite(value, datatype, datalength) == False:
+                return False
+        else:
+            composite[i] = convertSimple(value, datatype, datalength)
+            if composite[i] == False:
+                return False
+    return True
+
+# The function assigns a simple value to a subscripted composite variable.  
+# It has already been checked that the geometries are compatible.  The only
+# unusual paramter is indices, which is a list (over dimensions) of lists
+# (of the indices to be used in the variable at that dimension).  
+# The assignment is done directly in the attributes, leaving untouched any
+# indices not in the indices list.  Returns True on success, False on failure.
+def assignSimpleSubscripted(value, valueInAttributes, indices, \
+                            datatype, datalength):
+    if value == None: # Don't change anything!
+        return True
+    # Note that since value is not composite and the geometries have already
+    # been checked, then we must have len(indices[i])== 1 for each i.
+    index = indices[0][0] - 1;  # Recall HAL/S indexes from 1, Python from 0.
+    if len(indices) == 1:
+        converted = convertSimple(value, datatype, datalength)
+        if converted == False:
+            return False
+        valueInAttributes[index] = converted
+        return True
+    return assignSimpleSubscripted(value, valueInAttributes[index], \
+                                        indices[1:], datatype, datalength)
+
+# Same as assignSimpleSubscripted(), but when the value is not composite.  
+def assignCompositeSubscripted(value, valueInAttributes, indices, \
+                               datatype, datalength):
+    # TBD
+    return False
+
 '''
 ------------------------------------------------------------------------------
+Assignment of a value to a variable, possibly subscripted.
 Returns True on success, False on failure.  The inputs are:
-    source        The list [filenumber, linenumber, columnnumber] cross 
-                  referencing this instruction to the source code.
-    value         The value that's supposed to be assigned to the variable.
-                  This value must have geometric and datatype characteristics
-                  consistent with the portion of the target variable picked out
-                  by the subscripts (if any).
-    identifier    The identifier (mangled if appropriate, but not 
-                  carat-quoted) associated with the variable to
-                  which we want to assign the value.
-    attributes    The attributes of the identifier of the variable, already 
-                  looked up for us.  (We don't actually need the actual 
-                  identifier any longer, except for creating error messages.)
-    subscripts    The subscripts to be applied to the target variable.
+    source      The list [filenumber, linenumber, columnnumber] cross 
+                referencing this instruction to the source code.
+    value       The value that's supposed to be assigned to the variable.
+                This value must have geometric and datatype characteristics
+                consistent with the portion of the target variable picked out
+                by the subscripts (if any).
+    identifier  The identifier (mangled if appropriate, but not 
+                carat-quoted) associated with the variable to
+                which we want to assign the value.
+    attributes  The attributes of the variable, already 
+                looked up for us.  (We don't actually need the actual 
+                identifier any longer, except for creating error messages.)
+    subscripts  The subscripts to be applied to the target variable.  Note
+                that some of the subscripts may represent slicing.
 '''
 def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
     '''
@@ -228,35 +276,110 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
                    % identifier)
         return False
     #--------------------------------------------------------------------------
-    # Determine compatibility of composite-type geometries and subscripts.
-    # I.e., we want to make sure that every element of the (subscripted) LHS
-    # corresponds to a an object of the corresponding geometry (including 
-    # ARRAY vs VECTOR/MATRIX) on the RHS.
-    fullDimensions = primaryDimensions + secondaryDimensions
-    fullDimensions2 = primaryDimensions2 + secondaryDimensions2
-    for i in range(len(subscripts)):
-        if subscripts[i] < 1 or subscripts[i] > fullDimensions[i]:
-            printError(source, "", "Subscript out of range in LHS variable.")
+    # I'm not sure how to cleanly fit the case of no subscripts into an 
+    # implementation of the most-general case, so handle it explicitly now.
+    if len(subscripts) == 0:
+        # Are the geometries of the variable and value the same?
+        if isArray != isArray2 or \
+                primaryDimensions != primaryDimensions2 or \
+                secondaryDimensions != secondaryDimensions2:
+            printError(source, "", \
+                "Incompatible geometries in assignment of variable %s" \
+                % identifier)
             return False
-    fullAssignment = False # Assigns full object to full object
-    halfAssignment = False # Assigns value to an array element.
-    leafAssignment = False # Assigns value to an element of an array element.
-    if len(subscripts) == 0 and isArray == isArray2 and \
-            primaryDimensions == primaryDimensions2 and \
-            secondaryDimensions == secondaryDimensions2:
-        fullAssignment = True
-    elif len(subscripts) != 0 and len(subscripts) == len(primaryDimensions) \
-            and not isArray2 and secondaryDimensions == primaryDimensions2 \
-            and len(secondaryDimensions2) == 0:
-        halfAssignment = True
-    elif len(subscripts) != 0 and len(subscripts) == len(fullDimensions) and \
-            len(fullDimensions2) == 0:
-        leafAssignment = True
-    else:
-        printError(source, "", "Geometry mismatch in assignment.")
+        '''
+        First we have the absolutely simplest case:  a simple value being
+        assigned to a non-subscripted variable of a simple datatype.
+        '''
+        if len(primaryDimensions) == 0:
+            converted = convertSimple(value, datatype, datalength)
+            if converted == False:
+                printError(source, "", \
+                    "Incompatible datatypes in assignment of variable %s: %s" \
+                    % (identifier, str(value)))
+                return False
+            attributes["value"] = converted
+            return True
+        '''
+        Here's the next-to-simplest case: A composite value being assigned to
+        an unsubscripted composite variable of the same geometry (both array 
+        geometry, if any, and vector/matrix geometry, if any).  It's more 
+        complex than the simple-to-simple assignment we just did, because the 
+        leaf elements being assigned may require conversions of different types.
+        We use a recursive function to descend to all of the leaves.
+        '''
+        composite = copy.deepcopy(value)
+        if convertComposite(composite, datatype, datalength) == False:
+            printError(source, "", \
+                "Incompatible datatypes in assignment of composite variable %s"\
+                % (identifier))
+            return False
+        attributes["value"] = composite
+        return True
+    '''
+    ---------------------------------------------------------------------------
+    So now we have the case of a subscripted variable having a value assigned
+    to it ... with the possibility of some of the subscripts representing slices
+    instead of individual values.  Thus there may be some very-complex 
+    geometries indeed.  Fortunately, the full geometry of the value is known,
+    and we only need to determine the geometry of the variable as subscripted.
+    Let's first form a structure that for every dimension of the subscripted 
+    variable tells us all of the indices are involved.
+    '''
+    indicesAllowed = []
+    for subscript in subscripts:
+        if isinstance(subscript, int):
+            indicesAllowed.append([subscript])
+        elif isinstance(subscript, float):
+            indicesAllowed.append([hround(subscript)])
+        elif isinstance(subscript, list):
+            indicesAllowed.append(list(range(subscript[1], \
+                                             subscript[1]+subscript[0])))
+        elif isinstance(subscript, tuple):
+            indicesAllowed.append(list(range(subscript[0], subscript[1]+1)))
+        else:
+            printError(source, "", \
+                       "Implementation error, unknown subscript type.")
+            return False
+    dimensionsOfVariable = primaryDimensions + secondaryDimensions
+    dimensionsOfValue = primaryDimensions2 + secondaryDimensions2
+    for i in range(len(indicesAllowed)): # Double-check
+        indices = indicesAllowed[i]
+        if indices[0] < 1 or indices[-1] > variableDimensions[i]:
+            printError(source, "", "Subscript(s) out of range.")
+            return False
+    for i in range(len(subscripts), len(dimensionsOfVariable)):
+        indicesAllowed.append(list(range(1, dimensionsOfVariable[i] + 1)))
+    # Finally, the geometry of the subscripted variable:
+    dimensionsOfSubscriptedVariable = []
+    for i in allowedIndices:
+        if isinstance(i, list):
+            dimensionsOfSubscriptedVariable.append(len(i))
+    if dimensionsOfSubscriptedVariable != dimensionsOfValue:
+        printError(source, "", \
+            "Geometry mismatch in assignment of %s%s: %s != %s" % \
+            (identifier, str(subscripts), dimensionsOfSubscriptedVariable,
+             dimensionsOfValue))
         return False
-    #--------------------------------------------------------------------------
-    # At this point the geometries of the assignments and assignees are 
-    # known to be compatible. 
+    '''
+    As for the actual assignment itself, there are two cases.  If value is 
+    not itself a composite, vs if both the LHS and RHS are composites.
+    We have to handle those separately, simply because the loops don't work
+    otherwise.
+    '''
+    if len(dimensionsOfValue) == 0:
+        if False == assignSimpleSubscripted(value, attributes["value"], \
+                                            indicesAllowed, 
+                                            datatype, datalength):
+            printError(source, "", \
+                "Conversion error in assignement of %s%s" % (identifier, subscripts))
+            return False
+    else:
+        if False == assignCompositeSubscripted(value, attributes["value"], \
+                                               indicesAllowed, 
+                                               datatype, datalength):
+            printError(source, "", \
+                "Conversion error in assignement of %s%s" % (identifier, subscripts))
+            return False
     
     return True
