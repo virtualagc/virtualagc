@@ -25,6 +25,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <li><a moz-do-not-send="true" href="#Preprocessor">Preprocessor</a></li>
         <li><a moz-do-not-send="true" href="#Parser">Parser and Tokenizer</a></li>
         <li><a moz-do-not-send="true" href="#Generator">PALMAT Code Generator</a></li>
+        <li><a moz-do-not-send="true" href="#Optimizer">PALMAT Optimizer</a><br></li>
         <li><a moz-do-not-send="true" href="#Interpreter">PALMAT Interpreter</a></li>
         <li><a moz-do-not-send="true" href="#Linker">PALMAT Linker</a><br></li>
       </ul>
@@ -152,6 +153,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     <p>TBD<br></p>
     <h2><a name="Generator"></a>PALMAT Code Generator</h2>
     <p>TBD<br></p>
+    <h2><a name="Optimizer"></a>PALMAT Optimizer</h2>
+    <p>The Python module called "optimizePALMAT" provides a few extremely-crude optimizations of the PALMAT code created by the code generator.  It's trying to pick off just the lowest-hanging fruit.  The comments in the module itself describe it fairly well, so I'd just suggest just reading those if you're interested.<br></p>
     <h2><a name="Interpreter"></a>PALMAT Interpreter</h2>
     <p>TBD<br></p>
     <h2><a name="Linker"></a>PALMAT Linker</h2>
@@ -249,9 +252,15 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     At any rate, at the topmost level, a PALMAT structure is little more
     than a list of "scopes":<br>
     <blockquote>
-      <p><tt>PALMAT = { <br>&nbsp;&nbsp;&nbsp; "scopes" : [ SCOPE0, SCOPE1, SCOPE2, ... ], <br>&nbsp;&nbsp;&nbsp; "instantiation" : <i>N</i> <br>}</tt><br></p>
+      <p><tt>PALMAT = { <br>&nbsp;&nbsp;&nbsp; "scopes" : [ SCOPE0, SCOPE1, SCOPE2, ... ], <br>&nbsp;&nbsp;&nbsp; "instantiation" : <i>N</i> , <br>    "sourceFiles" : []<br>}</tt><br></p>
     </blockquote>
-    <p>There <i>can</i> be other elements in the PALMAT structure, such as the "instantiation" key/value pair you see above.&nbsp; The <tt>"instantiation"</tt> is a serialization, starting at 0, and is a unique value for each PALMAT dataset created.&nbsp; If multiple PALMAT datasets were being emulated simultaneously, you could think of it as a process-identification number.&nbsp; But it's the <i>scopes</i> that concern us here.<br></p>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b> There <i>can</i> be fields other than <tt>"scopes"</tt> in the PALMAT structure.  While this section focuses just on scopes, let me at least give you a brief rundown on the extra fields you do see in the sample above.<br></font></p>
+      <ul>
+        <li><font size="-1">The <tt>"instantiation"</tt> is a unique integer value for each PALMAT structure created, starting at 0.  Multiple PALMAT structures are created in case there are multiple PALMAT emulation threads or processes running simultaneously.  You could think of the <tt>instantiation</tt> much like a process-identification number.</font></li>
+        <li><font size="-1">The <tt>"sourceFiles"</tt> entry is a list of the HAL/S source-code files used during compilation.  When PALMAT instructions are generated, as is described later on, individual instructions can be tagged with the source-code file they're derived from, the line number within the source file, and a column number within the line.  Instead of attaching the full filename string to each instruction, an integer is instead used to represent the filename, and that integer is the index of the filename in the <tt>sourceFiles</tt> list.</font><br></li>
+      </ul>
+    </blockquote>
     <p>What these scopes signify, and the reason they are called "scopes", is that they let us determine which identifiers (variables, constants, program labels) are accessible from any given point in the code.&nbsp; As you'll see in a moment, the scopes are actually in a hierarchical arrangement that's more complex than the simple list structure shown above, and a given scope (with some exceptions) can generally access identifiers defined in itself or in its ancestors in the hierarchy, but not in its descendants or "cousins", "uncles", "nephews", etc.<br></p>
     <p>Scope 0 is the top-level scope, of which all other scopes are descendants, and essentially represents what you might call "global" elements.&nbsp; Each scope comprises the dictionary of the identifiers (variables, program labels) defined in it, along with their properties, and the list of PALMAT instructions defined in the scope, plus (potentially) other items.&nbsp; <i>Pure</i> HAL/S actually has no global variables or statements that can be compiled to instructions, but it does have other top-level compilation objects, each of which has an associated identifier, such as <br></p>
     <ul>
@@ -491,6 +500,20 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
     </ul>
     <h2><a name="Instructions"></a>Instructions</h2>
     <p>This section covers all available PALMAT instructions which can appear in an instruction stream, i.e., in <tt>PALMAT["scopes"][index]["instructions"]</tt>.&nbsp; I've grouped them below according to my categorization of their functionality.<br></p>
+    <p>PALMAT instructions in the preliminary compiler implementation are always Python dictionaries.  Aside from the explicit specifications for those dictionaries described below, any instruction may have the following additional fields:<br></p>
+    <ul>
+      <li>"<tt>label</tt>":  This is a unique symbolic label for the instruction to which it is attached.  It is used for making that instruction the target for instructions that change the instruction flow ... i.e., it allows some other instruction to "jump" to the labeled instruction without necessarily knowing the numerical address at compile-time.  This is described in more detail in the "<tt>goto</tt>" instruction below.</li>
+      <li>"<tt>source</tt>":  This associates the instruction with a specific position within the HAL/S source-code file(s).  In the preliminary implementation, the value is a Python list with three integer entries:</li>
+      <ol start="0" type="1">
+        <li>The index (starting at 0) of the source-code filename in the <tt>PALMAT["sourceFiles"]</tt> list.  Or else -1 if unknown.</li>
+        <li>The line number (starting at 1) within the source-code file, or -1 if unknown.</li>
+        <li>The column number (starting at 1) within the source line, or else -1 if unknown.</li>
+      </ol>
+    </ul>
+    <blockquote>
+      <p><font size="-1"><b>Aside:</b>  In general, any given HAL/S source-code line will result in generation of multiple PALMAT instructions.  It's therefore a waste to attach "</font><font size="-1"><tt>source</tt></font><font size="-1">" fields to every instruction.  The rule-of-thumb is that if any PALMAT instruction lacks a </font><font size="-1"><tt>source</tt></font><font size="-1"> field, then its </font><font size="-1"><tt>source</tt></font><font size="-1"> is identical to the preceding PALMAT instruction. <br></font></p>
+      <p><font size="-1">There is one exception to this rule, namely instructions with "</font><font size="-1"><tt>label</tt></font><font size="-1">" fields.  In that case, the instruction may be jumped to directly, and it's more difficult for the emulator to know what the associated source line is without the extra work of analyzing backward through the instruction <i>addresses</i> rather than the instruction flow actually executed (which the emulator already knows and thus requires no additional work).  To assist the emulator, </font><font size="-1"><tt>source</tt></font><font size="-1"> fields may therefore be attached to instructions with </font><font size="-1"><tt>label</tt></font><font size="-1"> fields, even if the actual value of the </font><font size="-1"><tt>source</tt></font><font size="-1"> may be the same as that of the preceding instruction address.<br></font></p>
+    </blockquote>
     <h3><a name="Calculations"></a>Operations on the Computation Stack<br>
     </h3>
     <p>Recall the discussion of the so-called <a moz-do-not-send="true" href="#ComputationStack">Computation Stack</a> from earlier.&nbsp; Below, if there is a single operand on the computation stack, I'll simply refer to it as "operand".&nbsp; If there are two operands on the stack, I'll refer to the one at the top of the stack (i.e., the first to be popped) as "operand1" and the next-to-top as "operand2".<br></p>
@@ -730,8 +753,7 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
           <td valign="top">Pushes a "fill" object (Python <tt>{'fill'}</tt>
             in the preliminary implementation) onto the computation
             stack.&nbsp; This corresponds to the presence of a "*" at
-            the end of a HAL/S repetition list.<br>
-          </td>
+            the end of a HAL/S repetition list, or a "*" subscript. </td>
         </tr>
       </tbody>
     </table>
@@ -1389,19 +1411,26 @@ p, li { white-space: pre-wrap; }
               <li>If an ARRAY 5D or higher, then the 5th ARRAY dimension. (There's no provision for displaying higher dimensions.)</li>
             </ol>
             <p>For example, the HAL/S code<br></p>
-            <blockquote><tt>DECLARE I INTEGER CONSTANT(5), M
-                MATRIX(3,5);</tt><tt><br>
+            <blockquote><tt>DECLARE I INTEGER CONSTANT(5), M MATRIX(3,5)
+                A ARRAY(2, 4) MATRIX(3, 5);</tt><tt><br>
               </tt><tt>WRITE(6) typeof('I');<br>
                 WRITE(6) typeof('M');<br>
+                WRITE(6) typeof('A');<br>
               </tt></blockquote>
             prints<br>
             <blockquote><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
-                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1<br>
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 "MATRIX"&nbsp; "3"&nbsp; "5"&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
-                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1 <br>
-              </tt></blockquote>
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
+                  ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
+                </tt></tt><tt>"MATRIX"&nbsp; "3"&nbsp; "5"&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>"2"&nbsp;
+                  "4"&nbsp; ""&nbsp; ""&nbsp; ""</tt> </tt><br>
+              <tt> </tt></blockquote>
           </td>
         </tr>
         <tr>
@@ -1437,14 +1466,16 @@ p, li { white-space: pre-wrap; }
             prints<br>
             <blockquote><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
-                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1<br>
-                "INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
+                  ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
+                </tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
-                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1 </tt><br>
+                ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
+                </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </tt><br>
               <tt><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                   ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
-                  ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; -1 </tt></tt>
-            </blockquote>
+                  ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt></tt><tt>""&nbsp;
+              </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </blockquote>
             Moreover, <tt>typeofv</tt> can analyze any datatype found
             on the computation stack, and that's not quite the same as
             the datatypes accessible to <tt>typeof</tt>.&nbsp; Some
@@ -1521,35 +1552,26 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>sliceAT<br>
               sliceTO<br>
+              <br>
             </tt></td>
           <td valign="top"><tt>{'shaping': 'sliceAT'}<br>
               {'shaping': 'sliceTO'}<br>
+              <br>
             </tt></td>
-          <td valign="top">These are similar to the aforementioned
-            instructions <tt>{'shaping': 'vector'}</tt> and <tt>{'shaping':
-
-
-
-              integer}</tt>, respectively.&nbsp; They're used in
-            implementing the HAL/S subscripting conventions "<tt><i>length</i>
-              AT <i>start</i></tt>" and "<tt><i>start</i> TO <i>end</i></tt>".&nbsp;
-
-
-
-            They're intended to execute more efficiently than the full
-            shaping instructions, by eliminating all flexibility and
-            checking.&nbsp; At runtime, either instruction pops operand1
-            and operand2, which are supposed to be <tt>INTEGER</tt>, or
-            at worst <tt>SCALAR</tt>.&nbsp; The <tt>sliceAT</tt>
-            instruction then pushes the Python list <tt>[round(operand1),
-
-
-
-              round(operand2)]</tt> in their place, while the <tt>sliceTO</tt>
-            instruction instead pushes the Python tuple <tt>(round(operand1),
-
-
-
+          <td valign="top">The first two are similar to the
+            aforementioned instructions <tt>{'shaping': 'vector'}</tt>
+            and <tt>{'shaping': integer}</tt>, respectively.&nbsp;
+            They're used in implementing the HAL/S subscripting
+            conventions "<tt><i>length</i> AT <i>start</i></tt>" and "<tt><i>start</i>
+              TO <i>end</i></tt>".&nbsp; They're intended to execute
+            more efficiently than the full shaping instructions, by
+            eliminating all flexibility and checking.&nbsp; At runtime,
+            either instruction pops operand1 and operand2, which are
+            supposed to be <tt>INTEGER</tt>, or at worst <tt>SCALAR</tt>.&nbsp;
+            The <tt>sliceAT</tt> instruction then pushes the Python
+            list <tt>[round(operand1), round(operand2)]</tt> in their
+            place, while the <tt>sliceTO</tt> instruction instead
+            pushes the Python tuple <tt>(round(operand1),
               round(operand2))</tt>.&nbsp; Subscript-list processing
             recognizes these forms as describing "slices" and
             consequently will not confuse them with the <tt>VECTOR(2)</tt>
@@ -1723,17 +1745,17 @@ p, li { white-space: pre-wrap; }
             not interpreted the same way as <tt>indexD</tt>.<br>
             <br>
             The variant in which the instruction contains both a "<tt>goto</tt>"
-            key and a "<tt>symbolicLabel</tt>" key is a combination of
-            the two above.&nbsp; The compiler's code-generator will have
+            key and a "<tt>symbolicLabel</tt>" key is a hybrid of the
+            two above.&nbsp; The compiler's code-generator will have
             generated the <tt>(indexD, identifier)</tt> variant of the
             instruction, but after executing the instruction once, the
             emulator will have chosen to transparently replace it by the
             <tt>(indexT, offset)</tt> form in order to avoid having to
-            perform the same identifier lookup again if the same address
-            is revisited.&nbsp; The emulator saves the original form in
-            a newly-created "<tt>symbolicLabel</tt>" field for debugging
-            purposes, but does not itself use that preserved
-            information.<br>
+            perform the same identifier-lookup again if the same
+            instruction is revisited later.&nbsp; The emulator saves the
+            original form in a newly-created "<tt>symbolicLabel</tt>"
+            field for debugging purposes, but does not itself use the
+            contents of <tt>symbolicLabel</tt>.<br>
           </td>
         </tr>
         <tr>
@@ -2058,13 +2080,14 @@ p, li { white-space: pre-wrap; }
             <meta name="qrichtext" content="1">
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--StartFragment-->Indicates that the elements at the top of the computation stack, ended by a <tt>{'sentinel'}</tt>, form subscripts for the <i>next</i> PALMAT instruction encountered, which should be a <tt>fetch</tt>, <tt>fetchp</tt>, or <tt>shaping</tt>.  The top element of the computation stack is the first subscript, the next-to-top is the 2nd subscript, and so on.  Upon execution, the <tt>subscripts</tt> instruction pops all of these from the instruction stack and stores them in some implementation-dependent way to be applied to the succeeding PALMAT instruction.<br></p>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br>This instruction may also appear in standalone computation of subscripts, as may occur when processing the variable-names appearing in the left-hand side of a HAL/S assignment statement, and thus appear as the final step in such an evaluation, without there being any succeeding PALMAT instruction at all.<br></p>
-            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br>The subscripts appearing on the computation stack are of three possible forms:<br></p>
+            <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br>The subscripts appearing on the computation stack are of four possible forms:<br></p>
             <ol>
               <li>A simple <tt>INTEGER</tt> or <tt>SCALAR</tt> (which will be automatically rounded to an INTEGER during execution) picks out a single element along the affected dimension.</li>
               <li>A Python list, <tt>[</tt><tt><i><tt><i>length</i></tt></i></tt><i><i>, </i></i><tt><i>start</i>]</tt>, of two <tt>INTEGER</tt>s indicates a range of <tt><i>length</i></tt> elements along the affected dimension.  This corresponds to the HAL/S "<tt><i>length</i> AT <i>start</i></tt>" subscripting convention.  HAL/S requires <tt><i>length</i></tt> (2 up to the dimensionality of the corresponding index) to be known at compile time, with <i><tt>start</tt></i> being computable, but PALMAT doesn't enforce compile-time computability.  See also <a moz-do-not-send="true" href="#Computations">the <tt>sliceAT</tt> instruction</a>.</li>
-              <li>A Python tuple, <tt>(<i>start</i>, <i>end</i>)</tt>, of two <tt>INTEGER</tt>s indicates a range of <tt><i>end</i>-<i>start</i>+1</tt> elements along the affected dimension, beginning at <tt><i>start</i></tt> and ending at <i><tt>end</tt></i>.  This corresponds to the HAL/S subscripting convention "<tt><i>start</i></tt><tt> TO <i>end</i></tt>".  HAL/S requires both start and end to be known (or computable) at compile-time, but this limitation is not enforced by PALMAT. See also <a moz-do-not-send="true" href="#Computations">the <tt>sliceTO</tt> instruction</a>.</li>
+              <li>A Python tuple, <tt>(<i>start</i>, <i>end</i>)</tt>, of two <tt>INTEGER</tt>s indicates a range of <tt><i>end</i>-<i>start</i>+1</tt> elements along the affected dimension, beginning at <tt><i>start</i></tt> and ending at <i><tt>end</tt></i>.  This corresponds to the HAL/S subscripting convention "<tt><i>start</i></tt><tt> TO <i>end</i></tt>".  HAL/S requires both start and end to be known (or computable) at compile-time. See also <a moz-do-not-send="true" href="#Computations">the <tt>sliceTO</tt> instruction</a>.</li>
+              <li>A Python set <tt>{'fill'}</tt> is used for a subscript specified using the HAL/S, and it is placed on the computation stack by a <tt>fill</tt> instruction.<br></li>
             </ol>
-            <p>Other subscripting conventions of HAL/S, namely "<tt>#</tt>" and "<tt>#</tt><tt>±<i>N</i></tt>" to mean the last element in the affected direction and elements relative to it, and "<tt>*</tt>" to mean every element along the affected direction, are handled by the compiler's code generator, and thus reduced to subscripts of the forms listed above.<br></p>
+            <p>For the other subscripting conventions of HAL/S, namely "<tt>#</tt>" and "<tt>#</tt><tt>±<i>N</i></tt>" to mean the last element in the affected direction and elements relative to it, the implementation remains TBD, but again, I expect it means that one of the forms listed above is pushed onto the computation stack.<br></p>
             <p>Note that although in an <tt>ARRAY</tt> of <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>BIT</tt> or <tt>CHARACTER</tt> HAL/S visually distinguishes between the <tt>ARRAY</tt> indices and the <tt>VECTOR</tt>/<tt>MATRIX</tt>/<tt>BIT</tt>/<tt>CHARACTER</tt> indices by having a colon (:) between the two groups indices rather than a comma (,), PALMAT makes no such distinction.  Rather, if subscripts are present, it expects the number of subscripts to correspond <i>either</i> to the dimensionality of the <tt>ARRAY</tt> or else to the dimensionality of the <tt>ARRAY</tt> <i>plus</i> the dimensionality of the <tt>VECTOR</tt>/<tt>MATRIX</tt>/<tt>BIT</tt>/<tt>CHARACTER</tt> objects comprising the <tt>ARRAY</tt>.</p>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
             <meta http-equiv="Content-Type" content="text/html;
@@ -2094,7 +2117,7 @@ p, li { white-space: pre-wrap; }
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-02-13<br>
+          2023-02-16<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
