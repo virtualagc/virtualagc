@@ -10,14 +10,15 @@ Purpose:    Module for inclusion in the executePALMAT module of the preliminary
             automatic datatype conversions needed as a part of that.
 References: [HPG] HAL/S Programmer's Guide.
             [PIH] Programming in HAL/S.
-History:    2023-02-18 RSB  Began.
+History:    2023-02-18 RSB  Began.  This is essentially a complete, improved
+                            replacement for the assignment code previously in
+                            executePALMAT.py, but extended to handle lots of
+                            cases that were impossible or very problematic in
+                            the older code, such as partition slices and more
+                            automatic type conversion.  Still does not handle
+                            STRUCTUREs, but hopefully they can be added.
 """
 
-'''
-from palmatAux import formBitArray, parseBitArray, hround, fpFormat, \
-                      formatNumberAsString, isBitArray, stringifiedToFloat, \
-                      unpound, isArrayQuick
-'''
 from palmatAux import *
 
 '''
@@ -149,7 +150,12 @@ def assignSimpleSubscripted(value, valueInAttributes, indices, \
     return assignSimpleSubscripted(value, valueInAttributes[index], \
                                         indices[1:], datatype, datalength)
 
-# Same as assignSimpleSubscripted(), but when the value is not composite.  
+# Same as assignSimpleSubscripted(), but when the value (and hence the 
+# variable after subscripting) is composite.  The principal difficulty, as 
+# noted in the comments below, is working around cases where one side of the
+# assignment has a dimensionality of (say) [1, 2, 1, 1, 3], while the other 
+# side has a dimensionality of (say) with [2, 1, 3, 1].  Both are ultimately
+# 2x3 objects, but looping through them is very different.
 def assignCompositeSubscripted(value, valueInAttributes, indices, \
                                datatype, datalength):
     # TBD
@@ -250,7 +256,8 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
         # all have the same (or compatible) datatypes.
         if not isArrayGeometry(value, dimensions):
             printError(source, "", \
-                "Implementation error, value of unsupported datatype cannot be assigned to variable %s"\
+                "Implementation error, value of unsupported datatype " + \
+                "cannot be assigned to variable %s"\
                 % identifier)
             return False
         isArray2 = True
@@ -397,14 +404,16 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
                                             indicesAllowed, 
                                             datatype, datalength):
             printError(source, "", \
-                "Conversion error in assignement of %s%s" % (identifier, subscripts))
+                "Conversion error in assignement of %s%s" % \
+                (identifier, subscripts))
             return False
     else:
         if False == assignCompositeSubscripted(value, attributes["value"], \
                                                indicesAllowed, 
                                                datatype, datalength):
             printError(source, "", \
-                "Conversion error in assignement of %s%s" % (identifier, subscripts))
+                "Conversion error in assignement of %s%s" % \
+                (identifier, subscripts))
             return False
     
     return True
