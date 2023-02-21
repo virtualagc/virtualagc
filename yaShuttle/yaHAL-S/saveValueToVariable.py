@@ -13,8 +13,12 @@ References: [HPG] HAL/S Programmer's Guide.
 History:    2023-02-18 RSB  Began.
 """
 
+'''
 from palmatAux import formBitArray, parseBitArray, hround, fpFormat, \
-                      formatNumberAsString, isBitArray, stringifiedToFloat
+                      formatNumberAsString, isBitArray, stringifiedToFloat, \
+                      unpound, isArrayQuick
+'''
+from palmatAux import *
 
 '''
 -------------------------------------------------------------------------------
@@ -197,7 +201,7 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
         primaryDimensions = [attributes["vector"]]
     elif "matrix" in attributes:
         primaryDimensions = attributes["matrix"]
-    if isARRAY:
+    if isArray:
         secondaryDimensions = primaryDimensions
         primaryDimensions = attributes["array"]
     if "bit" in attributes:
@@ -326,36 +330,57 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
     Let's first form a structure that for every dimension of the subscripted 
     variable tells us all of the indices are involved.
     '''
+    dimensionsOfVariable = primaryDimensions + secondaryDimensions
+    dimensionsOfValue = primaryDimensions2 + secondaryDimensions2
     indicesAllowed = []
-    for subscript in subscripts:
-        if isinstance(subscript, int):
-            indicesAllowed.append([subscript])
+    for i in range(len(subscripts)):
+        subscript = subscripts[i]
+        width = dimensionsOfVariable[i]
+        if subscript == {"fill"}:
+            indicesAllowed.append(list(range(1, width+1)))
+        elif isinstance(subscript, int):
+            indicesAllowed.append([unpound(subscript, width)])
         elif isinstance(subscript, float):
-            indicesAllowed.append([hround(subscript)])
-        elif isinstance(subscript, list):
-            indicesAllowed.append(list(range(subscript[1], \
-                                             subscript[1]+subscript[0])))
-        elif isinstance(subscript, tuple):
-            indicesAllowed.append(list(range(subscript[0], subscript[1]+1)))
+            indicesAllowed.append([unpound(hround(subscript), width)])
+        elif isinstance(subscript, list): # AT
+            s1 = unpound(subscript[1], width)
+            indicesAllowed.append(list(range(s1, s1 + subscript[0])))
+        elif isinstance(subscript, tuple): # TO
+            indicesAllowed.append(list(range(unpound(subscript[0], width), \
+                                             unpound(subscript[1], width)+1)))
         else:
             printError(source, "", \
                        "Implementation error, unknown subscript type.")
             return False
-    dimensionsOfVariable = primaryDimensions + secondaryDimensions
-    dimensionsOfValue = primaryDimensions2 + secondaryDimensions2
     for i in range(len(indicesAllowed)): # Double-check
         indices = indicesAllowed[i]
-        if indices[0] < 1 or indices[-1] > variableDimensions[i]:
+        if indices[0] < 1 or indices[-1] > dimensionsOfVariable[i]:
             printError(source, "", "Subscript(s) out of range.")
             return False
     for i in range(len(subscripts), len(dimensionsOfVariable)):
         indicesAllowed.append(list(range(1, dimensionsOfVariable[i] + 1)))
     # Finally, the geometry of the subscripted variable:
     dimensionsOfSubscriptedVariable = []
-    for i in allowedIndices:
+    for i in indicesAllowed:
         if isinstance(i, list):
             dimensionsOfSubscriptedVariable.append(len(i))
-    if dimensionsOfSubscriptedVariable != dimensionsOfValue:
+    '''
+    The following is a test for compatibility of geometries on the RHS and 
+    LHS of the assignment.  It's not as straightforward as it may initially
+    seem, because we can have cases like an LHS with a geometry of 
+    [1, 2, 1, 1, 3] and RHS with [2, 1, 3, 1] ... which are really both just
+    2x3 arrays or matrices, but not obviously so.  So we have to weed out the 
+    1's in the dimensional arrays before comparing the RHS and LHS geometries.
+    '''
+    dSV = []
+    for d in dimensionsOfSubscriptedVariable:
+        if d != 1:
+            dSV.append(d)
+    dV = []
+    for d in dimensionsOfValue:
+        if d != 1:
+            dV.append(d)
+    if dSV != dV:
         printError(source, "", \
             "Geometry mismatch in assignment of %s%s: %s != %s" % \
             (identifier, str(subscripts), dimensionsOfSubscriptedVariable,
@@ -364,8 +389,8 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
     '''
     As for the actual assignment itself, there are two cases.  If value is 
     not itself a composite, vs if both the LHS and RHS are composites.
-    We have to handle those separately, simply because the loops don't work
-    otherwise.
+    We have to handle those separately, simply because I didn't see how to 
+    write just a single elegant implementation of both.
     '''
     if len(dimensionsOfValue) == 0:
         if False == assignSimpleSubscripted(value, attributes["value"], \

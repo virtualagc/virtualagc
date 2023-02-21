@@ -1148,17 +1148,17 @@ SUB_EXP make_ABsub_exp(POUND_EXPRESSION p0);
 struct POUND_EXPRESSION_
 {
   int line_number, char_number;
-  enum { is_AApound_expression, is_ABpound_expression, is_ACpound_expression } kind;
+  enum { is_AApound_expression, is_ABpound_expressionPlusTerm, is_ACpound_expressionMinusTerm } kind;
   union
   {
-    struct { PLUS plus_; POUND_EXPRESSION pound_expression_; TERM term_; } abpound_expression_;
-    struct { MINUS minus_; POUND_EXPRESSION pound_expression_; TERM term_; } acpound_expression_;
+    struct { PLUS plus_; POUND_EXPRESSION pound_expression_; TERM term_; } abpound_expressionplusterm_;
+    struct { MINUS minus_; POUND_EXPRESSION pound_expression_; TERM term_; } acpound_expressionminusterm_;
   } u;
 };
 
 POUND_EXPRESSION make_AApound_expression(void);
-POUND_EXPRESSION make_ABpound_expression(POUND_EXPRESSION p0, PLUS p1, TERM p2);
-POUND_EXPRESSION make_ACpound_expression(POUND_EXPRESSION p0, MINUS p1, TERM p2);
+POUND_EXPRESSION make_ABpound_expressionPlusTerm(POUND_EXPRESSION p0, PLUS p1, TERM p2);
+POUND_EXPRESSION make_ACpound_expressionMinusTerm(POUND_EXPRESSION p0, MINUS p1, TERM p2);
 
 struct BIT_EXP_
 {

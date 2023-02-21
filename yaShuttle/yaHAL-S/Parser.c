@@ -5499,13 +5499,13 @@ yyreduce:
 
   case 193: /* POUND_EXPRESSION: POUND_EXPRESSION PLUS TERM  */
 #line 881 "HAL_S.y"
-                               { (yyval.pound_expression_) = make_ABpound_expression((yyvsp[-2].pound_expression_), (yyvsp[-1].plus_), (yyvsp[0].term_)); (yyval.pound_expression_)->line_number = (yyloc).first_line; (yyval.pound_expression_)->char_number = (yyloc).first_column;  }
+                               { (yyval.pound_expression_) = make_ABpound_expressionPlusTerm((yyvsp[-2].pound_expression_), (yyvsp[-1].plus_), (yyvsp[0].term_)); (yyval.pound_expression_)->line_number = (yyloc).first_line; (yyval.pound_expression_)->char_number = (yyloc).first_column;  }
 #line 5504 "Parser.c"
     break;
 
   case 194: /* POUND_EXPRESSION: POUND_EXPRESSION MINUS TERM  */
 #line 882 "HAL_S.y"
-                                { (yyval.pound_expression_) = make_ACpound_expression((yyvsp[-2].pound_expression_), (yyvsp[-1].minus_), (yyvsp[0].term_)); (yyval.pound_expression_)->line_number = (yyloc).first_line; (yyval.pound_expression_)->char_number = (yyloc).first_column;  }
+                                { (yyval.pound_expression_) = make_ACpound_expressionMinusTerm((yyvsp[-2].pound_expression_), (yyvsp[-1].minus_), (yyvsp[0].term_)); (yyval.pound_expression_)->line_number = (yyloc).first_line; (yyval.pound_expression_)->char_number = (yyloc).first_column;  }
 #line 5510 "Parser.c"
     break;
 

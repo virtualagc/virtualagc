@@ -92,6 +92,23 @@ subtracting the 1 gets rid of a lot of nasty-looking printouts.
 precision = len(str(math.pi).split(".")[1]) - 1
 fpFormat = "%+2." + ("%d" % precision) + "e"
 
+'''
+The POUND constant replaces the # symbol in subscripts during code 
+generation.  During emulation, any subscript greater than MAXDIMWIDTH
+is adjusted downward by MAXDIMWIDTH and incremented by the width of the
+corresponding dimension.  This trick allows # to be used in expressions
+in subscripts without introducing any tricky machinery to allow it.
+Of course, it means no VECTOR of length greater than MAXDIMWIDTH, and so on,
+but that doesn't seem like much of a drawback.  (I'm not aware of any other
+use of MAXDIMWIDTH; I don't do any tests vs it in declarations.
+'''
+MAXDIMWIDTH = 1000000000
+POUND = 2 * MAXDIMWIDTH
+def unpound(subscript, width):
+    if subscript > MAXDIMWIDTH:
+        return subscript - POUND + width
+    return subscript
+
 # Format a number (INTEGER, SCALAR) as a string, as in WRITE statements, and
 # return it.  Or else None on failure.
 def formatNumberAsString(value):
@@ -676,3 +693,91 @@ def setUninitialized(identifiers):
             else:
                 value = uninitializeLevel(arrayDimensions, dimensions)
             attributes["value"] = value
+
+# Test if an object is a vector, and (optionally) if all its elements are 
+# initialized.
+def isVector(object, initialization=True):
+    if not isinstance(object, list):
+        return False
+    if len(object) < 1:
+        return False
+    if isinstance(object[-1], str):
+        return False # Is bitstring, pointer, array, etc.
+    for e in object:
+        if isinstance(e, (int, float)):
+            continue
+        if e == None and not initialization:
+            continue
+        return False
+    return True
+
+# Test if an object is a matrix, and (optionally if all its elements are 
+# initialized.
+def isMatrix(object, initialization=True):
+    if not isinstance(object, list):
+        return False
+    numRows = len(object)
+    if numRows < 1 or not isinstance(object[0], list):
+        return False
+    if isinstance(object[-1], str):
+        return False # Is bitstring, pointer, array, etc.
+    numCols = len(object[0])
+    for row in object:
+        if not isinstance(row, list) or len(row) != numCols:
+            return False
+        for e in row:
+            if isinstance(e, (int, float)):
+                continue
+            if e == None and not initialization:
+                continue
+            return False
+    return True
+
+def isArrayGeometry(object, dimensions):
+    if len(dimensions) == 0:
+        # Object is an atomic element.  If we want to check that all of the 
+        # types of the array elements are the same and/or initialized, this
+        # is where we do it.
+        return True
+    if object == None:
+        return False
+    if not isinstance(object, list):
+        return False
+    if object[-1] != 'a':
+        return False
+    if len(object)-1 != dimensions[0]:
+        return False
+    # This level of the array is okay.  Now go on to the sub-levels.
+    subDimensions = dimensions[1:]
+    for subObject in object[:-1]:
+        if isArrayGeometry(subObject, subDimensions):
+            continue
+        return False
+    return True
+
+# Converts True or False to a bit-array representation for the computation 
+# stack.
+def convertToBitArray(b):
+    if b:
+        return hTRUE
+    else:
+        return hFALSE
+
+# Check operand type for INTEGER vs SCALAR vs VECTOR vs MATRIX.
+def checkArithmeticalDatatype(operand):
+    if isinstance(operand, int):
+        return True, True, False, False
+    if isinstance(operand, float):
+        return False, True, False, False
+    if isVector(operand):
+        return False, False, True, False
+    if isMatrix(operand):
+        return False, False, False, True
+    return False, False, False, False
+
+def printError(source, instruction, msg):
+    if msg == "":
+        msg = "n/a"
+    print("\t%d,%d,%d (%s): %s" % \
+          (source[0], source[1], source[2], str(instruction), msg))
+

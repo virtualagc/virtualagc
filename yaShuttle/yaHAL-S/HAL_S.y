@@ -878,8 +878,8 @@ SUB_EXP : ARITH_EXP { $$ = make_AAsub_exp($1); $$->line_number = @$.first_line; 
   | POUND_EXPRESSION { $$ = make_ABsub_exp($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 POUND_EXPRESSION : _SYMB_10 { $$ = make_AApound_expression(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | POUND_EXPRESSION PLUS TERM { $$ = make_ABpound_expression($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | POUND_EXPRESSION MINUS TERM { $$ = make_ACpound_expression($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | POUND_EXPRESSION PLUS TERM { $$ = make_ABpound_expressionPlusTerm($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | POUND_EXPRESSION MINUS TERM { $$ = make_ACpound_expressionMinusTerm($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 BIT_EXP : BIT_FACTOR { $$ = make_AAbitExpFactor($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | BIT_EXP OR BIT_FACTOR { $$ = make_ABbitExpOR($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }

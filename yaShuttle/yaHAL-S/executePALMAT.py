@@ -31,10 +31,13 @@ import math
 import random
 import time
 import copy
+from palmatAux import *
+'''
 from palmatAux import flatten, isBitArray, formBitArray, parseBitArray, \
         findIdentifier, flexFindIdentifier, hTRUE, hFALSE, isArrayQuick, \
         isCompletelyInitialized, hround, formatNumberAsString, fpFormat, \
-        stringifiedToFloat
+        stringifiedToFloat, unpound
+'''
 from saveValueToVariable import *
 
 timeOrigin = 0
@@ -71,10 +74,6 @@ builtIns = [
     # Three arguments
     ["MIDVAL"]
 ]
-
-def printError(source, instruction, msg):
-    print("\t%d,%d,%d (%s): %s" % \
-          (source[0], source[1], source[2], str(instruction), msg))
 
 '''
 The following is the guts of a "jump" instruction.  The parameters are:
@@ -161,6 +160,8 @@ def clonePALMAT(rawPALMAT):
     deepcopyDescendents(scopeIndex)
     return PALMAT
 
+'''
+(Superseded)
 # Get a subscripted value from an object.  At present, this works only if the 
 # subscripts are all numbers; i.e., not "slices".  Returns None on error.
 def subscripted(source, object, subscripts):
@@ -174,6 +175,7 @@ def subscripted(source, object, subscripts):
             printError(source, "", "Subscript does not exist in object.")
             return None
     return copy.deepcopy(object)
+'''
 
 # For WRITE statements.
 def printVectorOrMatrix(vOrM):
@@ -235,87 +237,6 @@ def readItemLUN5(source):
             continue
         readLineFields = re.split(r"\s*,\s*|\s+", line.strip())
     return readLineFields.pop(0)
-
-# Test if an object is a vector, and (optionally) if all its elements are 
-# initialized.
-def isVector(object, initialization=True):
-    if not isinstance(object, list):
-        return False
-    if len(object) < 1:
-        return False
-    if isinstance(object[-1], str):
-        return False # Is bitstring, pointer, array, etc.
-    for e in object:
-        if isinstance(e, (int, float)):
-            continue
-        if e == None and not initialization:
-            continue
-        return False
-    return True
-
-# Test if an object is a matrix, and (optionally if all its elements are 
-# initialized.
-def isMatrix(object, initialization=True):
-    if not isinstance(object, list):
-        return False
-    numRows = len(object)
-    if numRows < 1 or not isinstance(object[0], list):
-        return False
-    if isinstance(object[-1], str):
-        return False # Is bitstring, pointer, array, etc.
-    numCols = len(object[0])
-    for row in object:
-        if not isinstance(row, list) or len(row) != numCols:
-            return False
-        for e in row:
-            if isinstance(e, (int, float)):
-                continue
-            if e == None and not initialization:
-                continue
-            return False
-    return True
-
-def isArrayGeometry(object, dimensions):
-    if len(dimensions) == 0:
-        # Object is an atomic element.  If we want to check that all of the 
-        # types of the array elements are the same and/or initialized, this
-        # is where we do it.
-        return True
-    if object == None:
-        return False
-    if not isinstance(object, list):
-        return False
-    if object[-1] != 'a':
-        return False
-    if len(object)-1 != dimensions[0]:
-        return False
-    # This level of the array is okay.  Now go on to the sub-levels.
-    subDimensions = dimensions[1:]
-    for subObject in object[:-1]:
-        if isArrayGeometry(subObject, subDimensions):
-            continue
-        return False
-    return True
-
-# Converts True or False to a bit-array representation for the computation 
-# stack.
-def convertToBitArray(b):
-    if b:
-        return hTRUE
-    else:
-        return hFALSE
-
-# Check operand type for INTEGER vs SCALAR vs VECTOR vs MATRIX.
-def checkArithmeticalDatatype(operand):
-    if isinstance(operand, int):
-        return True, True, False, False
-    if isinstance(operand, float):
-        return False, True, False, False
-    if isVector(operand):
-        return False, False, True, False
-    if isMatrix(operand):
-        return False, False, False, True
-    return False, False, False, False
 
 '''
 Compute determinant of a square matrix.  I have *not* researched optimal
@@ -557,11 +478,13 @@ def sliceIt(object, subscripts):
         if s == {'fill'}:
             thisLevelSubscripts = list(range(width))
         elif isinstance(s, list): # This is an AT-slice.
-            thisLevelSubscripts = list(range(s[1] - 1, s[1] - 1 + s[0]))
+            s1 = unpound(s[0], width)
+            thisLevelSubscripts = list(range(s1 - 1, s1 - 1 + s[0]))
         elif isinstance(s, tuple): # This is a TO-slice.
-            thisLevelSubscripts = list(range(s[0] - 1, s[1]))
+            thisLevelSubscripts = list(range(unpound(s[0], width) - 1, \
+                                             unpound(s[1], width)))
         else: # This is a single index.
-            thisLevelSubscripts = [s-1]
+            thisLevelSubscripts = [unpound(s, width) - 1]
     print("**", object, subscripts, thisLevelSubscripts)
     newObject = []
     if len(subscripts) > 0:
@@ -576,7 +499,7 @@ def sliceIt(object, subscripts):
     if isArray:
         newObject.append("a")
     return newObject
-    
+
 '''
 This is the main emulator loop.  Basically, you feed it an entire PALMAT
 structure of scopes (namely rawPALMAT) including the model of all variables
@@ -1123,6 +1046,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             erroredUp = True
             if fetch:
                 '''
+                (Superseded by sliceIt.)
                 if "value" in attributes:
                     value = subscripted(source, attributes["value"], subscripts)
                 elif "constant" in attributes:
@@ -1160,7 +1084,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                "Cannot change value of constant %s." \
                                % identifier[1:-1])
                     return None
-                if False:
+                if True:
                     # This is my new, possibly-improved method.
                     if not saveValueToVariable(source, value, \
                                                identifier[1:-1], \

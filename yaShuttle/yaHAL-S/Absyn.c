@@ -2425,34 +2425,34 @@ POUND_EXPRESSION make_AApound_expression()
     tmp->kind = is_AApound_expression;
     return tmp;
 }
-/********************   ABpound_expression    ********************/
-POUND_EXPRESSION make_ABpound_expression(POUND_EXPRESSION p1, PLUS p2, TERM p3)
+/********************   ABpound_expressionPlusTerm    ********************/
+POUND_EXPRESSION make_ABpound_expressionPlusTerm(POUND_EXPRESSION p1, PLUS p2, TERM p3)
 {
     POUND_EXPRESSION tmp = (POUND_EXPRESSION) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABpound_expression!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABpound_expressionPlusTerm!\n");
         exit(1);
     }
-    tmp->kind = is_ABpound_expression;
-    tmp->u.abpound_expression_.pound_expression_ = p1;
-    tmp->u.abpound_expression_.plus_ = p2;
-    tmp->u.abpound_expression_.term_ = p3;
+    tmp->kind = is_ABpound_expressionPlusTerm;
+    tmp->u.abpound_expressionplusterm_.pound_expression_ = p1;
+    tmp->u.abpound_expressionplusterm_.plus_ = p2;
+    tmp->u.abpound_expressionplusterm_.term_ = p3;
     return tmp;
 }
-/********************   ACpound_expression    ********************/
-POUND_EXPRESSION make_ACpound_expression(POUND_EXPRESSION p1, MINUS p2, TERM p3)
+/********************   ACpound_expressionMinusTerm    ********************/
+POUND_EXPRESSION make_ACpound_expressionMinusTerm(POUND_EXPRESSION p1, MINUS p2, TERM p3)
 {
     POUND_EXPRESSION tmp = (POUND_EXPRESSION) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ACpound_expression!\n");
+        fprintf(stderr, "Error: out of memory when allocating ACpound_expressionMinusTerm!\n");
         exit(1);
     }
-    tmp->kind = is_ACpound_expression;
-    tmp->u.acpound_expression_.pound_expression_ = p1;
-    tmp->u.acpound_expression_.minus_ = p2;
-    tmp->u.acpound_expression_.term_ = p3;
+    tmp->kind = is_ACpound_expressionMinusTerm;
+    tmp->u.acpound_expressionminusterm_.pound_expression_ = p1;
+    tmp->u.acpound_expressionminusterm_.minus_ = p2;
+    tmp->u.acpound_expressionminusterm_.term_ = p3;
     return tmp;
 }/********************   AAbitExpFactor    ********************/
 BIT_EXP make_AAbitExpFactor(BIT_FACTOR p1)

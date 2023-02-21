@@ -14,7 +14,7 @@ History:        2023-01-08 RSB  Created, hopefully for eventually replacing
 
 from executePALMAT import executePALMAT, isBitArray
 from palmatAux import debug, findIdentifier, hTRUE, hFALSE, isArrayQuick, \
-    astToLbnf, appendInstruction
+    astToLbnf, appendInstruction, POUND
 from p_Functions import substate
 
 # Return True on success, False on failure.  The stage argument is 0 when
@@ -304,6 +304,12 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
             appendInstruction(expression, { "fill": True }, source)
         elif lbnfLabel == "subscript":
             appendInstruction(expression, { "operator": "subscripts"}, source)
+        elif lbnfLabel == "pound_expression":
+            appendInstruction(expression, { "number": POUND}, source)
+        elif lbnfLabel == "pound_expressionPlusTerm":
+            appendInstruction(expression, { "operator": "+"}, source)
+        elif lbnfLabel == "pound_expressionMinusTerm":
+            appendInstruction(expression, { "operator": "-"}, source)
         #elif lbnfLabel == "relationalOpEQ":
         #    stateMachine["relationalOperator"] = { "operator": "==" }
         #elif lbnfLabel == "relationalOpNEQ":

@@ -2084,20 +2084,20 @@ void ppPOUND_EXPRESSION(POUND_EXPRESSION p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABpound_expression:
+  case is_ABpound_expressionPlusTerm:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppPOUND_EXPRESSION(p->u.abpound_expression_.pound_expression_, 0);
-    ppPLUS(p->u.abpound_expression_.plus_, 0);
-    ppTERM(p->u.abpound_expression_.term_, 0);
+    ppPOUND_EXPRESSION(p->u.abpound_expressionplusterm_.pound_expression_, 0);
+    ppPLUS(p->u.abpound_expressionplusterm_.plus_, 0);
+    ppTERM(p->u.abpound_expressionplusterm_.term_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ACpound_expression:
+  case is_ACpound_expressionMinusTerm:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppPOUND_EXPRESSION(p->u.acpound_expression_.pound_expression_, 0);
-    ppMINUS(p->u.acpound_expression_.minus_, 0);
-    ppTERM(p->u.acpound_expression_.term_, 0);
+    ppPOUND_EXPRESSION(p->u.acpound_expressionminusterm_.pound_expression_, 0);
+    ppMINUS(p->u.acpound_expressionminusterm_.minus_, 0);
+    ppTERM(p->u.acpound_expressionminusterm_.term_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -10025,34 +10025,34 @@ void shPOUND_EXPRESSION(POUND_EXPRESSION p)
 
 
     break;
-  case is_ABpound_expression:
+  case is_ABpound_expressionPlusTerm:
     bufAppendC('(');
 
-    bufAppendSp(p, "ABpound_expression");
+    bufAppendSp(p, "ABpound_expressionPlusTerm");
 
     bufAppendC(' ');
 
-    shPOUND_EXPRESSION(p->u.abpound_expression_.pound_expression_);
+    shPOUND_EXPRESSION(p->u.abpound_expressionplusterm_.pound_expression_);
   bufAppendC(' ');
-    shPLUS(p->u.abpound_expression_.plus_);
+    shPLUS(p->u.abpound_expressionplusterm_.plus_);
   bufAppendC(' ');
-    shTERM(p->u.abpound_expression_.term_);
+    shTERM(p->u.abpound_expressionplusterm_.term_);
 
     bufAppendC(')');
 
     break;
-  case is_ACpound_expression:
+  case is_ACpound_expressionMinusTerm:
     bufAppendC('(');
 
-    bufAppendSp(p, "ACpound_expression");
+    bufAppendSp(p, "ACpound_expressionMinusTerm");
 
     bufAppendC(' ');
 
-    shPOUND_EXPRESSION(p->u.acpound_expression_.pound_expression_);
+    shPOUND_EXPRESSION(p->u.acpound_expressionminusterm_.pound_expression_);
   bufAppendC(' ');
-    shMINUS(p->u.acpound_expression_.minus_);
+    shMINUS(p->u.acpound_expressionminusterm_.minus_);
   bufAppendC(' ');
-    shTERM(p->u.acpound_expression_.term_);
+    shTERM(p->u.acpound_expressionminusterm_.term_);
 
     bufAppendC(')');
 
