@@ -1,26 +1,13 @@
 ### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	MAIN.agc
-# Purpose:	Part of the source code for Solarium build 55. This
-#		is for the Command Module's (CM) Apollo Guidance
-#		Computer (AGC), for Apollo 6.
+# Purpose:	Part of the AGC source code for Sunrise 45.  Sunrise 45 is the 
+#		Block I guidance-system acceptance-and-test program.
 # Assembler:	yaYUL --block1
 # Contact:	Ron Burkey <info@sandroid.org>
 # Website:	www.ibiblio.org/apollo/index.html
-# Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
-# Mod history:	2009-07-25 RSB	Adapted from corresponding Colossus 249 file.
-# 		2009-09-14 JL	Fixed page number.
-#		2016-08-17 RSB	Corrected names of AGC_SELF-CHECK.agc,  
-#				DUMMY_501_INITIALIZATION.agc, and
-#				REENTRY_CONTROL.agc.
-#
-# This file is a little different from the other Solarium055 files being provided, 
-# in that it doesn't represent anything that appears directly in the original source.  
-# What I (RSB) have done for organizational purposes is to split the huge monolithic
-# source code into smaller, more manageable chunks--i.e., into individual source 
-# files.  Those files are rejoined within this file as "includes".  It just makes
-# it a little easier to work with.  The code chunks correspond to natural divisions
-# into sub-programs as indicated by the page headings in the assembly listing. 
+# Mod history:	2023-02-22 RSB	Adapted from the Solarium 55 file of the same
+#				name.
 
 # Module Filename
 # ---------------
