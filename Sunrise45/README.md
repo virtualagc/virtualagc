@@ -2,7 +2,7 @@
 
 Sunrise 45 is a Block I AGC program, of which we have very few in our library, and is (at this writing) the *earliest* non-trivial AGC software available to us.
 
-The file Sunrise45-dump.bin contains data dumped from physical fixed-memory modules offered to us by an anonymous collector, and then later cross-checked vs another dump from a module owned by Larry McGlynn.  The source code was later reconstructed by Mike Stewart with the assistance of Nik Beug; it assembles identically to the dumped octal data from the physical core-rope memory modeules, but program comments and names of variables, constants, program labels, and so on, are necessarily suspect.
+The file Sunrise45-dump.bin contains data dumped from physical fixed-memory modules offered to us by an anonymous collector, and then later cross-checked vs another dump from a module owned by Larry McGlynn.  The source code was later reconstructed by Mike Stewart with the assistance of Nik Beug; it assembles identically to the dumped octal data from the physical core-rope memory modules, but program comments and names of variables, constants, program labels, and so on, are necessarily suspect.
 
 The entire program is made up of dumps initially made from 3 separate memory modules, concatenated to form a complete rope.  The dumps of the individual modules are all available in the Rope-Module Dump Library folder of the Virtual AGC source tree, and specifically are the files
 
