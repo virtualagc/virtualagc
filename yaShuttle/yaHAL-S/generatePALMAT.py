@@ -648,7 +648,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     elif isinstance(value, (int, float)) and \
                             "bit" in identifierDict:
                         length = identifierDict["bit"]
-                        value = [(hround(value) & ((1 << length) - 1), length)]
+                        value = [hround(value) & ((1 << length) - 1), length, "b"]
                     elif isBitArray(value) and "bit" in identifierDict:
                         pass
                     elif isinstance(value, str) and "character" in identifierDict:

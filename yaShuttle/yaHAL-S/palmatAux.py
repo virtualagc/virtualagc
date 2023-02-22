@@ -290,14 +290,14 @@ def collectGarbage(PALMAT):
     # Get rid of all PALMAT instructions in scope 0.
     PALMAT["scopes"][0]["instructions"].clear()
     
-    # Finally, eliminate all identifiers that are compiler-generated 
+    # Eliminate all identifiers that are compiler-generated 
     # identifiers, since every single one of them refers to unreachable blocks,
     # or no-longer-existent PALMAT instructions.
     identifiers = PALMAT["scopes"][0]["identifiers"]
     for identifier in list(identifiers.keys()):
         if isAutocreatedLabel(identifier):
             identifiers.pop(identifier)
-
+    
 # Compute the length of the instructions array, sans 'debug' instructions.
 def lenInstructions(instructions):
     i = 0
@@ -579,6 +579,22 @@ def markUnmarkedScalars(identifiers):
         if isUnmarkedScalar(identifier):
             identifier["scalar"] = True
 
+# Returns an uninitialized VECTOR, MATRIX, ARRAY, ARRAY VECTOR, or ARRAY MATRIX.
+def uninitializedComposite(arrayDimensions, dimensions):
+    composite = []
+    if len(arrayDimensions) > 0:
+        for i in range(arrayDimensions[0]):
+            composite.append(uninitializedComposite(arrayDimensions[1:], \
+                                                    dimensions))
+        composite.append("a")
+        return composite
+    if len(dimensions) > 0:
+        for i in range(dimensions[0]):
+            composite.append(uninitializedComposite([], \
+                                                    dimensions[1:]))
+        return composite
+    return None
+
 # Complete the initialization of a VECTOR, MATRIX, or ARRAY by making sure that
 # INITIALs or CONSTANTs are filled out to the proper geometry with appropriate
 # values.  Returns [] on success, or a list of identifiers which failed.
@@ -586,8 +602,17 @@ def completeInitialConstants(identifiers):
     messages = []
     for identifier in identifiers:
         identifierDict = identifiers[identifier]
-        if "vector" not in identifierDict and "matrix" not in identifierDict:
+        if "vector" not in identifierDict and "matrix" not in identifierDict \
+                and "array" not in identifierDict:
             continue
+        if "array" in identifierDict:
+            arrayDimensions = identifierDict["array"]
+        else:
+            arrayDimensions = []
+        if "value" in identifierDict:
+            oldValue = identifierDict["value"]
+        else:
+            oldValue = None
         if "initial" in identifierDict:
             value = identifierDict["initial"]
             if not isinstance(value, list):
@@ -601,16 +626,22 @@ def completeInitialConstants(identifiers):
                 identifierDict["constant"] = value
             isInitial = False
         elif "vector" in identifierDict:
-            numCols = identifierDict["vector"]
-            value = [None]*numCols
-            identifierDict["value"] = value
+            if not isinstance(oldValue, list):
+                identifierDict["value"] = \
+                    uninitializedComposite(arrayDimensions, \
+                                           [identifierDict["vector"]])
             continue
         elif "matrix" in identifierDict:
-            numRows, numCols = identifierDict["matrix"]
-            value = []
-            for i in range(numRows):
-                value.append([None]*numCols)
-            identifierDict["value"] = value
+            if not isinstance(oldValue, list):
+                identifierDict["value"] = \
+                    uninitializedComposite(arrayDimensions, \
+                                           identifierDict["matrix"])
+            continue
+        elif "array" in identifierDict:
+            if not isinstance(oldValue, list):
+                identifierDict["value"] = \
+                    uninitializedComposite(arrayDimensions, \
+                                           [])
             continue
         fillValue = None
         if "vector" in identifierDict:
@@ -657,7 +688,7 @@ def completeInitialConstants(identifiers):
 # Make sure every variable in the scope has a "value", even if it's 
 # uninitialized.
 def setUninitialized(identifiers):
-    
+        
     def uninitializeLevel(arrayDimensions, dimensions):
         level = []
         if len(arrayDimensions) > 0:
@@ -671,7 +702,7 @@ def setUninitialized(identifiers):
         else:
             level = None
         return level
-    
+
     for identifier in identifiers:
         attributes = identifiers[identifier]
         if "value" not in attributes and "constant" not in attributes and \

@@ -458,14 +458,14 @@ This recursive function takes a data object and a subscript array, possibly
 with slices, and returns the sliced object.  The subscripts array must have the 
 same or fewer dimensions as the object, and the same or smaller widths.  If 
 there are less subscripts than dimensions, the remainder is filled up as if *
-were used.  No conversions are performed.  Returns False on failure.
+were used.  No conversions are performed.  Returns NaN on failure.
 '''
 def sliceIt(object, subscripts):
     if not isinstance(object, list) or isBitArray(object):
         if len(subscripts) == 0:
             return copy.deepcopy(object)
         else: # Too many subscripts for the object.
-            return False
+            return NaN
     isArray = (object[-1] == "a")
     if isArray:
         width = len(object) - 1
@@ -485,7 +485,6 @@ def sliceIt(object, subscripts):
                                              unpound(s[1], width)))
         else: # This is a single index.
             thisLevelSubscripts = [unpound(s, width) - 1]
-    print("**", object, subscripts, thisLevelSubscripts)
     newObject = []
     if len(subscripts) > 0:
         newSubscripts = subscripts[1:]
@@ -494,9 +493,11 @@ def sliceIt(object, subscripts):
     for s in thisLevelSubscripts:
         newLevel = sliceIt(object[s], newSubscripts)
         if newLevel == False:
-            return False
+            return NaN
         newObject.append(newLevel)
-    if isArray:
+    if len(newObject) == 1:
+        newObject = newObject[0]
+    elif isArray:
         newObject.append("a")
     return newObject
 
@@ -536,6 +537,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
     else:
         PALMAT = rawPALMAT
     scopes = PALMAT["scopes"]
+    for scope in scopes:
+        if "return" in scope:
+            scope.pop("return")
     scopeNumber = pcScope
     instructionIndex = pcOffset
     scope = scopes[scopeNumber]
@@ -936,6 +940,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             result = formBitArray((value1 << length2) | value2,\
                                                    numbits)
                     elif operator == "==":
+                        if isBitArray(operand1) and isBitArray(operand2):
+                            operand1, dummy = parseBitArray(operand1)
+                            operand2, dummy = parseBitArray(operand2)
                         result = convertToBitArray(operand1 == operand2)
                     elif operator == "!=":
                         result = convertToBitArray(operand1 != operand2)
@@ -977,8 +984,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     computationStack[-1] = result
                 else:
                     printError(source, instruction, \
-                        "Uninitialized operand(s) for binary operator \"%s\":" \
-                        % operator, operand1, operand2)
+                        "Uninitialized operand(s) for binary operator \"%s\": %s %s" \
+                        % (operator, str(operand1), str(operand2)))
                     return None
             else:
                 printError(source, instruction, \
@@ -1057,8 +1064,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                "Identifier %s uninitialized" % identifier)
                     return None
                 '''
-                value = sliceIt(attributes["value"], subscripts)
-                if value == False:
+                if "constant" in attributes:
+                    value = sliceIt(attributes["constant"], subscripts)
+                else:
+                    value = sliceIt(attributes["value"], subscripts)
+                if value == NaN:
                     printError(source, instruction, \
                         "Slicing error %s%s." % (identifier, str(subscripts)))
                     return None
@@ -1908,7 +1918,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             si = attributes["scope"]
             s = scopes[si]
             if "return" in s:
-                printError(source, indentifier, \
+                printError(source, identifier, \
                            "Recursion in subroutine %s not allowed." \
                            % identifier[1:-1])
                 return None

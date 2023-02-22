@@ -20,13 +20,15 @@ History:    2023-02-18 RSB  Began.  This is essentially a complete, improved
 """
 
 from palmatAux import *
+from math import nan as NaN
 
 '''
 -------------------------------------------------------------------------------
 This function converts "simple" values (None, INTEGER, SCALAR, BIT, CHARACTER) 
 between datatypes.  The converted value is just returned from the function.
 The value None is interpreted as "do not change", and is simply passed through
-as-is.  Returns False on failure.
+as-is.  Returns Nan on failure.  (Note that None is a possible valid conversion
+and False can be confused with 0, so that's why I've fallen back on NaN here.)
 
 As far as the arguments are concerned:
     value       The "simple" value to convert.
@@ -48,7 +50,7 @@ def convertSimple(value, datatype, datalength):
         elif datatype == "character":
             s = formatNumberAsString(value)
             if len(s) > datalength:
-                return False
+                return NaN
             return s
     elif isinstance(value, float):
         if datatype == "integer":
@@ -61,7 +63,7 @@ def convertSimple(value, datatype, datalength):
         elif datatype == "character":
             s = formatNumberAsString(value)
             if len(s) > datalength:
-                return False
+                return NaN
             return s
     elif isinstance(value, str):
         try:
@@ -78,7 +80,7 @@ def convertSimple(value, datatype, datalength):
                 value = int(value.replace(" ", ""), 2)
                 return formBitArray(value, datalength)
         except:
-            return False
+            return NaN
     elif isBitArray(value):
         value, dummy = parseBitArray(value)
         if datatype == "integer":
@@ -91,9 +93,9 @@ def convertSimple(value, datatype, datalength):
             # HAL/S does not allow this conversion.  I do.
             s = bin(value)[2:]
             if len(s) > datalength:
-                return False
+                return NaN
             return s
-    return False
+    return NaN
 
 '''
 # Some tests for convertSimple(). 
@@ -123,9 +125,10 @@ def convertComposite(composite, datatype, datalength):
             if convertComposite(value, datatype, datalength) == False:
                 return False
         else:
-            composite[i] = convertSimple(value, datatype, datalength)
-            if composite[i] == False:
+            converted = convertSimple(value, datatype, datalength)
+            if converted == NaN:
                 return False
+            composite[i] = converted
     return True
 
 # The function assigns a simple value to a subscripted composite variable.  
@@ -143,23 +146,67 @@ def assignSimpleSubscripted(value, valueInAttributes, indices, \
     index = indices[0][0] - 1;  # Recall HAL/S indexes from 1, Python from 0.
     if len(indices) == 1:
         converted = convertSimple(value, datatype, datalength)
-        if converted == False:
+        if converted == NaN:
             return False
         valueInAttributes[index] = converted
         return True
     return assignSimpleSubscripted(value, valueInAttributes[index], \
                                         indices[1:], datatype, datalength)
 
-# Same as assignSimpleSubscripted(), but when the value (and hence the 
-# variable after subscripting) is composite.  The principal difficulty, as 
-# noted in the comments below, is working around cases where one side of the
-# assignment has a dimensionality of (say) [1, 2, 1, 1, 3], while the other 
-# side has a dimensionality of (say) with [2, 1, 3, 1].  Both are ultimately
-# 2x3 objects, but looping through them is very different.
-def assignCompositeSubscripted(value, valueInAttributes, indices, \
-                               datatype, datalength):
-    # TBD
-    return False
+'''
+Same as assignSimpleSubscripted(), but when the value (and hence the 
+variable after subscripting) is composite.  A big difficulty, as 
+noted in the comments below, is working around cases where one side of the
+assignment has a dimensionality of (say) [1, 2, 1, 1, 3], while the other 
+side has a dimensionality of (say) with [2, 1, 3, 1].  Both are ultimately
+2x3 objects, but looping through them is very different.  Returns True on 
+success, False on failure.
+'''
+def assignCompositeSubscripted(RHS, preSubscriptedLHS, subscriptsLHS, \
+                               datatypeLHS, datalengthLHS):
+    # Let's first unravel the RHS of the assignment to get a nice, flat list
+    # of simple values.
+    if unraveledRHS == None:
+        unraveledRHS = []
+        flatten(RHS, unraveledRHS)
+        
+    # This recursive function descends through the subscripted LHS entrees
+    # in unraveling order.  As it reaches the leaves, it picks off elements of 
+    # unraveledRHS to assign to the leaves.
+    def unravelLHS(preSubscriptedLHS, subscriptsLHS):
+        global unraveledRHS
+        subscriptsAtLevel = subscriptsLHS[0]
+        if len(subscriptsLHS) == 1:
+            # At lowest level of subscripts.
+            for s in subscriptsAtLevel:
+                converted = convertSimple(unraveledRHS.pop(0), datatypeLHS, \
+                                          datalengthLHS)
+                if converted == NaN:
+                    return False
+                preSubscriptedLHS[s] = converted
+            return True
+        else:
+            # Not at lowest subscript level.
+            for s in subscriptsAtLevel:
+                if False == assignCompositeSubscripted(preSubscriptedLHS[s], \
+                                                   subscriptsLHS[1:], \
+                                                   datatypeLHS, datalengthLHS):
+                    return False
+            return True
+        return False
+    
+    return unravelLHS(preSubscriptedLHS, subscriptsLHS)
+
+# Find an initialized array entry, or None if none.
+def findInitializedArrayEntry(object):
+    if isArrayQuick(object):
+        # Recall that if object is an array, then object[-1] == "a".
+        for o in object[:-1]:
+            oo = isArrayQuick(o)
+            if oo != None:
+                return oo
+        return None
+    return object
 
 '''
 ------------------------------------------------------------------------------
@@ -243,9 +290,10 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
     dimensions = primaryDimensions2
     datatype2 = ""
     datalength2 = -1
+    typeCheckValue = value
     if isArrayQuick(value):
         # If the value is an ARRAY, this step quickly determines what the 
-        # ARRAY dimensions must be, but without checking that that it actually
+        # ARRAY dimensions must be, but without checking that it actually
         # is an ARRAY.
         dummy = value
         while isArrayQuick(dummy):
@@ -262,24 +310,34 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
             return False
         isArray2 = True
         dimensions = secondaryDimensions2
-    if value == None:
+        # We must now try to find an initialized array element, because if we
+        # can't do that, then we can't guestimate the array's datatype.  We've
+        # already found one element, namely dummy.
+        if dummy == None:
+            dummy = findInitializedArrayEntry(value)
+            if dummy == None:
+                # If completely uninitialized it's still okay, since that just
+                # means there's no assignment needing to be done.
+                return True
+        typeCheckValue = dummy
+    if typeCheckValue == None:
         datatype2 = "unassigned"
-    elif isVector(value):
+    elif isVector(typeCheckValue):
         datatype2 = "scalar"
-        dimensions.append(len(value))
-    elif isMatrix(value):
+        dimensions.append(len(typeCheckValue))
+    elif isMatrix(typeCheckValue):
         datatype2 = "scalar"
-        dimensions.append(len(value))
-        dimensions.append(len(value[0]))
-    elif isBitArray(value):
+        dimensions.append(len(typeCheckValue))
+        dimensions.append(len(typeCheckValue[0]))
+    elif isBitArray(typeCheckValue):
         datatype2 = "bit"
-        dummy, datalength2 = parseBitArray(value)
-    elif isinstance(value, str):
+        dummy, datalength2 = parseBitArray(typeCheckValue)
+    elif isinstance(typeCheckValue, str):
         datatype2 = "character"
-        datalength2 = len(value)
-    elif isinstance(value, int):
+        datalength2 = len(typeCheckValue)
+    elif isinstance(typeCheckValue, int):
         datatype2 = "integer"
-    elif isinstance(value, float):
+    elif isinstance(typeCheckValue, float):
         datatype2 = "scalar"
     else:
         printError(source, "", \
@@ -304,7 +362,7 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
         '''
         if len(primaryDimensions) == 0:
             converted = convertSimple(value, datatype, datalength)
-            if converted == False:
+            if converted == NaN:
                 printError(source, "", \
                     "Incompatible datatypes in assignment of variable %s: %s" \
                     % (identifier, str(value)))
@@ -401,7 +459,7 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
     '''
     if len(dimensionsOfValue) == 0:
         if False == assignSimpleSubscripted(value, attributes["value"], \
-                                            indicesAllowed, 
+                                            indicesAllowed, \
                                             datatype, datalength):
             printError(source, "", \
                 "Conversion error in assignement of %s%s" % \
@@ -409,8 +467,8 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
             return False
     else:
         if False == assignCompositeSubscripted(value, attributes["value"], \
-                                               indicesAllowed, 
-                                               datatype, datalength):
+                                           indicesAllowed, \
+                                           datatype, datalength):
             printError(source, "", \
                 "Conversion error in assignement of %s%s" % \
                 (identifier, subscripts))

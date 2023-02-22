@@ -8,7 +8,7 @@
  
  /* This constant either enables (TRUE) or disables (FALSE) the time-consuming
     4.xx tests. */
- DECLARE TEST4 BOOLEAN CONSTANT(TRUE);
+ DECLARE TEST4 BOOLEAN CONSTANT(FALSE);
  
  /* 
  	-------------------------------------------------------------
@@ -20,7 +20,7 @@
  	DECLARE CHARACTER(32), TYPE, IDENTIFIER;
  	DECLARE CHARACTER(2048), VALUE;
  	DECLARE INTEGER, FIELD;
- 	DECLARE TEST ARRAY(20) CHARACTER(32);
+ 	DECLARE TEST ARRAY(20) CHARACTER(256);
  	TEST = typeof(IDENTIFIER);
  	IF TEST$1 = TYPE AND TEST$FIELD = VALUE THEN RETURN TRUE;
  	RETURN FALSE;
@@ -29,7 +29,7 @@
  TESTINT: FUNCTION(IDENTIFIER, TYPE, FIELD, VALUE) BOOLEAN;
  	DECLARE CHARACTER(32), TYPE, IDENTIFIER;
  	DECLARE INTEGER, FIELD, VALUE;
- 	DECLARE TEST ARRAY(20) CHARACTER(32);
+ 	DECLARE TEST ARRAY(20) CHARACTER(256);
  	TEST = typeof(IDENTIFIER);
  	IF TEST$1 = TYPE AND INTEGER(TEST$FIELD) = VALUE THEN RETURN TRUE;
  	RETURN FALSE;
@@ -39,7 +39,7 @@
  	DECLARE CHARACTER(32), IDENTIFIER, TYPE;
  	DECLARE INTEGER, FIELD;
  	DECLARE SCALAR, VALUE;
- 	DECLARE TEST ARRAY(20) CHARACTER(32);
+ 	DECLARE TEST ARRAY(20) CHARACTER(256);
  	TEST = typeof(IDENTIFIER);
  	IF TEST$1 = TYPE AND SCALAR(TEST$FIELD) = VALUE THEN RETURN TRUE;
  	RETURN FALSE;
@@ -58,7 +58,7 @@
  
  DECLARE SCALAR, T, X INITIAL(2.0), Y CONSTANT(3.0), Z DOUBLE;
  WRITE(6) '1.00:', 
- 	TESTCHAR('T', 'SCALAR', 15, ''),
+ 	TESTCHAR('T', 'SCALAR', 16, ''),
  	TESTSCALAR('X', 'SCALAR', 5, 2.0),
  	TESTSCALAR('Y', 'SCALAR', 4, 3.0),
  	TESTCHAR('Z', 'SCALAR', 6, 'DOUBLE');
@@ -594,7 +594,7 @@
  WRITE(6) '7.02L:', BB;
  V301 = INTEGER(V300); 
  MYTYPE = typeofv(V301$1);
- IF MYTYPE$1 = 'INTEGER' THEN BB = TRUE; ELSE BB = FALSE;
+ IF MYTYPE$1 = 'SCALAR' THEN BB = TRUE; ELSE BB = FALSE;
  WRITE(6) '7.02M:', BB;
  IF V301$1 = 1 AND V301$2 = 2 AND V301$3 = 3 THEN BB = TRUE; ELSE BB = FALSE;
  WRITE(6) '7.02N:', BB;
@@ -698,7 +698,6 @@
  
  DO FOR TEMPORARY I = 1 TO 3; 
  	DO FOR TEMPORARY J = 1 TO 3; 
- 		/* *************   TBD First problem here! ****************/
  		M400$(I,J) = 10 I + J; 
  	END; 
  END; 
@@ -729,25 +728,56 @@
  	END;
  END;
  WRITE(6) '8.01C:', BB;
-
- 	
- /****************************************************************************
  
+ WRITE(6) ;
+ DECLARE I590 INTEGER, X590 SCALAR, 
+ 	B590 BIT(4), B591 BIT(5) INITIAL(23), 
+ 	B595 BIT(4) INITIAL(5), B596 BIT(4) INITIAL(6), B597 BIT(4) INITIAL(7),
+ 	C590 CHARACTER(25),
+ 	V590 VECTOR(5), 
+ 	M590 MATRIX(4,6), 
+ 	A590 ARRAY(5) INTEGER, A591 ARRAY(5) VECTOR(4),
+ 	TST CHARACTER(10);
+ I590 = 6;
+ TST = '9.00A:'; IF I590 = 6 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ I590 = 5.4;
+ TST = '9.00B:'; IF I590 = 5 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ I590 = '7.2';
+ TST = '9.00C:'; IF I590 = 7 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ I590 = B591;
+ TST = '9.00D:'; IF I590 = 23 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
  
- WRITE(6) ; 
- WRITE(6) '10.00: Some WRITE tests ...'; 
- WRITE(6) CV1, '     (should be 2.0)'; 
- WRITE(6) VN1, '     (should be X.X X.X X.X X.X X.X)'; 
- WRITE(6) VN1A, '     (should be X.X X.X X.X X.X X.X)'; 
- WRITE(6) VN2, '     (should be 2.47 ... 2.47 with 10 entries)'; 
- WRITE(6) VN2A, '     (same as previous)'; 
- WRITE(6) VN3, '     (should be 1.0 2.0 3.0 4.0 5.0 X.X ... X.X with 15 X.X)'; 
- WRITE(6) VN3A, '     (should be 1.0 2.0 3.0 4.0)'; 
- WRITE(6) VN4, '     (should be 12.0 12.0 ... with 15 entries)'; 
- WRITE(6) VN4A, '     (should be 12.0 13.0 14.0 X.X ... X.X with 12 X.X)';  
- WRITE(6) VN4A$2, '     (should be 13.0)'; 
+ X590 = 6;
+ TST = '9.01A:'; IF X590 = 6.0 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ X590 = 5.4;
+ TST = '9.01B:'; IF X590 = 5.4 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ X590 = '7.2';
+ TST = '9.01C:'; IF X590 = 7.2 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ X590 = B591;
+ TST = '9.01D:'; IF X590 = 23.0 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
  
-
+ C590 = 6;
+ TST = '9.02A:'; IF C590 = '6' THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ WRITE(6) 'Unfortunately, I had to hard-code the implementation-dependent';
+ WRITE(6) 'arithmetical precision into test 9.02B below.';
+ C590 = 5.4;
+ TST = '9.02B:'; 
+ IF C590 = ' 5.40000000000000E+00' THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ C590 = '7.2';
+ TST = '9.02C:'; IF C590 = '7.2' THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ C590 = B591;
+ TST = '9.02D:'; IF C590 = '10111' THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ 
+ B590 = 6;
+ TST = '9.03A:'; IF B590 = B596 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ B590 = 5.4;
+ TST = '9.03B:'; IF B590 = B595 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ B590 = '10111';
+ TST = '9.03C:'; IF B590 = B597 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ B590 = B591;
+ TST = '9.03D:'; IF B590 = B597 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ 
+ WRITE(6) ;
  WRITE(6) 'Execution-speed timing measurement:'; 
  DECLARE STIME, ETIME; 
  STIME = RUNTIME; 
@@ -757,25 +787,6 @@
  WRITE(6) M, 'iterations,', ETIME-STIME, 'seconds, ', 
  	  ROUND(M/(ETIME-STIME)), 'iterations/second.'; 
  WRITE(6) ; 
- 
- WRITE(6) 'J here'; 
- WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X'; 
- WRITE(6) VC100; 
- WRITE(6) 'The following should be 1.0 X.X 3.0 X.X X.X 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0'; 
- WRITE(6) VC101; 
- WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0'; 
- WRITE(6) VC102; 
- WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0'; 
- WRITE(6) VC103; 
- WRITE(6) 'The following should be 1.0 2.0 3.0 4.0 5.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 1.0 2.0 3.0 1.0 2.0 3.0 4.0 24.0'; 
- WRITE(6) VC104; 
- WRITE(6) 'The following should be 1.0 2.0 1.0 2.0 3.0 4.0 5.0 3.0 4.0 5.0'; 
- WRITE(6) VC105; 
- WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0 5.0'; 
- WRITE(6) A100; 
- WRITE(6) 'The following should be 1.0 None 3.0 None None 1.0 None 3.0 None None 1.0 None 3.0 None None 6.0 6.0 6.0 6.0 6.0'; 
- WRITE(6) B100 ; 
- WRITE(6) ; 
- */
+ 	
  WRITE(6); 
  WRITE(6) 'Done.'; 
