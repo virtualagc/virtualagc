@@ -8,7 +8,9 @@
  
  /* This constant either enables (TRUE) or disables (FALSE) the time-consuming
     4.xx tests. */
- DECLARE TEST4 BOOLEAN CONSTANT(FALSE);
+ DECLARE TEST4 BOOLEAN INITIAL(TRUE);
+ WRITE(6) 'Enter 0 to disable time-consuming tests, non-zero to enable.';
+ READ(5) TEST4;
  
  /* 
  	-------------------------------------------------------------
@@ -776,6 +778,164 @@
  TST = '9.03C:'; IF B590 = B597 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
  B590 = B591;
  TST = '9.03D:'; IF B590 = B597 THEN WRITE(6) TST, TRUE; ELSE WRITE(6) TST, FALSE;
+ 
+ DECLARE M591 MATRIX(2,3), M592 MATRIX(2,6), M593 MATRIX(4, 3), 
+ 	BBB BOOLEAN, 
+ 	A592 ARRAY(2, 3) MATRIX(4,6), A593 ARRAY(2, 3) MATRIX(4, 6),
+ 	V591 VECTOR(6), V592 VECTOR(4), 
+ 	A594 ARRAY(3) SCALAR, A595 ARRAY(2) SCALAR;
+ DO FOR TEMPORARY I = 1 TO 4;
+ 	DO FOR TEMPORARY J = 1 TO 6;
+ 		M590$(I,J) = 10 I + J;
+ 	END;
+ END;
+ M591 = M590$(2 TO 3, 3 TO 5);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 3;
+ 		IF M591$(I, J) ~= 10 (I + 1) + (J + 2) THEN BBB = FALSE;
+ 	END;
+ END;
+ TST = '9.04A:'; WRITE(6) TST, BBB;
+ M592 = M590$(2 TO 3, *);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 6;
+ 		IF M592$(I, J) ~= 10 (I + 1) + J THEN BBB = FALSE;
+ 	END;
+ END;
+ TST = '9.04B:'; WRITE(6) TST, BBB;
+ M593 = M590$(*, 3 TO 5);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 4;
+ 	DO FOR TEMPORARY J = 1 TO 3;
+ 		IF M593$(I, J) ~= 10 I + (J + 2) THEN BBB = FALSE;
+ 	END;
+ END;
+ TST = '9.04C:'; WRITE(6) TST, BBB;
+ M592 = M590$(2 TO 3, 1 TO #);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 6;
+ 		IF M592$(I, J) ~= 10 (I + 1) + J THEN BBB = FALSE;
+ 	END;
+ END;
+ TST = '9.04D:'; WRITE(6) TST, BBB;
+
+ M591 = M590$(2 AT 2, 3 AT 3);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 3;
+ 		IF M591$(I, J) ~= 10 (I + 1) + (J + 2) THEN BBB = FALSE;
+ 	END;
+ END;
+ TST = '9.04E:'; WRITE(6) TST, BBB;
+ M592 = M590$(2 AT 2, *);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 6;
+ 		IF M592$(I, J) ~= 10 (I + 1) + J THEN BBB = FALSE;
+ 	END;
+ END;
+ TST = '9.04F:'; WRITE(6) TST, BBB;
+ M593 = M590$(*, 3 AT 3);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 4;
+ 	DO FOR TEMPORARY J = 1 TO 3;
+ 		IF M593$(I, J) ~= 10 I + (J + 2) THEN BBB = FALSE;
+ 	END;
+ END;
+ TST = '9.04G:'; WRITE(6) TST, BBB;
+ M592 = M590$(2 AT 2, 6 AT 1);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 6;
+ 		IF M592$(I, J) ~= 10 (I + 1) + J THEN BBB = FALSE;
+ 	END;
+ END;
+ TST = '9.04H:'; WRITE(6) TST, BBB;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 3;
+ 		DO FOR TEMPORARY K = 1 TO 4;
+ 			DO FOR TEMPORARY L = 1 TO 6;
+ 				A592$(I,J;K,L) = 1000 I + 100 J + 10 K + L;
+ 			END;
+ 		END;
+ 	END;
+ END;
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 3;
+ 		DO FOR TEMPORARY K = 1 TO 4;
+ 			DO FOR TEMPORARY L = 1 TO 6;
+ 				IF A592$(I,J;K,L) ~= 1000 I + 100 J + 10 K + L
+ 				THEN BBB = FALSE;
+ 			END;
+ 		END;
+ 	END;
+ END;
+ TST = '9.04I:'; WRITE(6) TST, BBB;
+ V591 = A592$(1, 2; 3, *);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 6; 
+ 	IF V591$I ~= 1230 + I THEN BBB = FALSE;
+ END;
+ TST = '9.04J:'; WRITE(6) TST, BBB;
+ V592 = A592$(2, 1; *, 4);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 4; 
+ 	IF V592$I ~= 2104 + 10 I THEN BBB = FALSE;
+ END;
+ TST = '9.04J:'; WRITE(6) TST, BBB;
+ A594 = A592$(2, *; 2, 3);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 3; 
+ 	IF A594$I ~= 2023 + 100 I THEN BBB = FALSE;
+ END;
+ TST = '9.04K:'; WRITE(6) TST, BBB;
+ A595 = A592$(*, 2; 1, 2);
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2; 
+ 	IF A595$I ~= 0212 + 1000 I THEN BBB = FALSE;
+ END;
+ TST = '9.04L:'; WRITE(6) TST, BBB;
+ A593 = A592;
+ BBB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 3;
+ 		DO FOR TEMPORARY K = 1 TO 4;
+ 			DO FOR TEMPORARY L = 1 TO 6;
+ 				IF A593$(I,J;K,L) ~= 1000 I + 100 J + 10 K + L
+ 				THEN BBB = FALSE;
+ 			END;
+ 		END;
+ 	END;
+ END;
+ TST = '9.04M:'; WRITE(6) TST, BBB;
+ A593$(1, 1; 2 TO 3, 3 TO 5) = A592$(2, 2; 1 TO 2, 2 TO 4);
+ DO FOR TEMPORARY I = 1 TO 2;
+ 	DO FOR TEMPORARY J = 1 TO 3;
+ 		DO FOR TEMPORARY K = 1 TO 4;
+ 			DO FOR TEMPORARY L = 1 TO 6;
+ 				IF I = 1 AND J = 1 AND K >= 2 AND K <= 3
+ 					AND L >= 3 AND L <= 5 THEN 
+ 				DO;
+	 				IF A593$(I,J;K,L) ~= 1000 (I + 1) + 
+	 						     100 (J + 1) + 
+	 						     10 (K - 1) + 
+	 						     (L - 1)
+	 				THEN BBB = FALSE;
+ 				END;
+ 				ELSE DO;
+	 				IF A593$(I,J;K,L) ~= 
+	 					1000 I + 100 J + 10 K + L
+	 				THEN BBB = FALSE;
+ 				END;
+ 			END;
+ 		END;
+ 	END;
+ END;
+ TST = '9.04N:'; WRITE(6) TST, BBB;
  
  WRITE(6) ;
  WRITE(6) 'Execution-speed timing measurement:'; 

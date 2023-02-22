@@ -210,6 +210,9 @@ def printArray(array):
         value = bin(parseBitArray(array)[0])[2:]
     elif isinstance(array, str):
         value = '"' + array + '"'
+    elif isVector(array) or isMatrix(array):
+        printVectorOrMatrix(array)
+        return
     else:
         value = "(unimplemented)"
     print(" " + value + " ", end="")
@@ -478,7 +481,7 @@ def sliceIt(object, subscripts):
         if s == {'fill'}:
             thisLevelSubscripts = list(range(width))
         elif isinstance(s, list): # This is an AT-slice.
-            s1 = unpound(s[0], width)
+            s1 = unpound(s[1], width)
             thisLevelSubscripts = list(range(s1 - 1, s1 - 1 + s[0]))
         elif isinstance(s, tuple): # This is a TO-slice.
             thisLevelSubscripts = list(range(unpound(s[0], width) - 1, \

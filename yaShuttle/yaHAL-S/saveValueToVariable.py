@@ -27,7 +27,7 @@ from math import nan as NaN
 This function converts "simple" values (None, INTEGER, SCALAR, BIT, CHARACTER) 
 between datatypes.  The converted value is just returned from the function.
 The value None is interpreted as "do not change", and is simply passed through
-as-is.  Returns Nan on failure.  (Note that None is a possible valid conversion
+as-is.  Returns NaN on failure.  (Note that None is a possible valid conversion
 and False can be confused with 0, so that's why I've fallen back on NaN here.)
 
 As far as the arguments are concerned:
@@ -119,7 +119,10 @@ sys.exit(1)
 # on success, False on failure.  Note that there's no checking that the input
 # (composite) is actually a list type.
 def convertComposite(composite, datatype, datalength):
-    for i in range(len(composite)):
+    end = len(composite)
+    if isArrayQuick(composite):
+        end -= 1
+    for i in range(end):
         value = composite[i]
         if isinstance(value, list) and not isBitArray(value):
             if convertComposite(value, datatype, datalength) == False:
@@ -163,18 +166,35 @@ side has a dimensionality of (say) with [2, 1, 3, 1].  Both are ultimately
 success, False on failure.
 '''
 def assignCompositeSubscripted(RHS, preSubscriptedLHS, subscriptsLHS, \
-                               datatypeLHS, datalengthLHS):
+                               datatypeLHS, datalengthLHS, \
+                               unraveledRHS=[]):
+    '''
+    print("*")
+    print("* RHS", RHS)
+    print("* preSubscriptedLHS", preSubscriptedLHS)
+    print("* subscriptsLHS", subscriptsLHS)
+    print("* datatypeLHS", datatypeLHS)
+    print("* datalengthLHS", datalengthLHS)
+    '''
     # Let's first unravel the RHS of the assignment to get a nice, flat list
-    # of simple values.
-    if unraveledRHS == None:
-        unraveledRHS = []
+    # of simple values.  Note that unraveledRHS will be altered in-place as
+    # the recursion proceeds.
+    if unraveledRHS == []:
+        if len(RHS) == 0:
+            return False
         flatten(RHS, unraveledRHS)
-        
+    #print("* unraveledRHS", unraveledRHS)
+    
     # This recursive function descends through the subscripted LHS entrees
     # in unraveling order.  As it reaches the leaves, it picks off elements of 
     # unraveledRHS to assign to the leaves.
-    def unravelLHS(preSubscriptedLHS, subscriptsLHS):
-        global unraveledRHS
+    def unravelLHS(preSubscriptedLHS, subscriptsLHS, unraveledRHS):
+        '''
+        print("`")
+        print("` preSubscriptedLHS", preSubscriptedLHS)
+        print("` subscriptsLHS", subscriptsLHS)
+        print("` unraveledRHS", unraveledRHS)
+        '''
         subscriptsAtLevel = subscriptsLHS[0]
         if len(subscriptsLHS) == 1:
             # At lowest level of subscripts.
@@ -183,19 +203,21 @@ def assignCompositeSubscripted(RHS, preSubscriptedLHS, subscriptsLHS, \
                                           datalengthLHS)
                 if converted == NaN:
                     return False
-                preSubscriptedLHS[s] = converted
+                preSubscriptedLHS[s-1] = converted
             return True
         else:
             # Not at lowest subscript level.
             for s in subscriptsAtLevel:
-                if False == assignCompositeSubscripted(preSubscriptedLHS[s], \
-                                                   subscriptsLHS[1:], \
-                                                   datatypeLHS, datalengthLHS):
+                if not assignCompositeSubscripted([], \
+                                                preSubscriptedLHS[s-1], \
+                                                subscriptsLHS[1:], \
+                                                datatypeLHS, datalengthLHS, \
+                                                unraveledRHS):
                     return False
             return True
         return False
     
-    return unravelLHS(preSubscriptedLHS, subscriptsLHS)
+    return unravelLHS(preSubscriptedLHS, subscriptsLHS, unraveledRHS)
 
 # Find an initialized array entry, or None if none.
 def findInitializedArrayEntry(object):
