@@ -13,6 +13,8 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2022-12-09 MAS	Initial reconstructed source.
 
+## Names in this section are largely taken from AGC Information Series Issue 16,
+## Progress Control and Fresh Start and Restart.
 
 		BANK	4
 #	FRESH START - A KEYBOARD REQUEST TO INITIALIZE THE SYSTEM.

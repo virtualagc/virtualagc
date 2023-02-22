@@ -13,6 +13,8 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2022-12-09 MAS	Initial reconstructed source.
 
+## Names in this section are largely taken from AGC Information Series Issue 22,
+## Prelaunch Alignment.
 
 # THE PRELAUNCH ALIGNMENT PROGRAM CONSISTS OF TWO PARTS- VERTICAL ERECTION AND GYROCOMPASSING. IN THE FIRST CASE
 # THE Z PIPA INPUTS ARE USED TO CONTROL THE Y GYRO IN SUCH A WAY THAT THESE INPUTS ARE NULLED. A SIMILAR SIT-

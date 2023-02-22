@@ -13,6 +13,12 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2022-12-09 MAS	Initial reconstructed source.
 
+## This log section contains a significant amount of code not present in
+## Solarium 55 or any other surviving program listing. Furthermore, we have
+## essentially no surviving documentation (and it appears an AGC Information
+## Series issue was never written for this section). As such, label names
+## herein are mostly modern guesses, wherever they were unable to be taken
+## from Solarium.
 
 		BANK	22
 
@@ -27,21 +33,19 @@ XKEP		=	14D
 RSCALE		=	14D
 VSCALE		=	6
 TSCALE		=	24D
-2VSCALE		=	12D
 4RSCALE		=	56D
-R+VSCALE	=	22D
 
 
-FFINIT		CS	TWO		## Calculate (Manual phase number) - 2
+FFINIT		CS	TWO
 		AD	MPAC
 		CCS	A
-		TC	+2		## +  Manual phase number > 2
-		TC	+1		## +0 Impossible
-		CS	ONE		## -  Manual phase == 1 -> FDSPWAIT = -1
-		TS	FDSPWAIT	## -0 Manual phase == 2 -> FDSPWAIT = +0
+		TC	+2
+		TC	+1
+		CS	ONE
+		TS	FDSPWAIT
 
 		CAF	DEC200
-FFZLOOP		TS	MPAC		## This zeros the 201 erasables from 1211 to 1521
+FFZLOOP		TS	MPAC
 		CAF	ZERO
 		INDEX	MPAC
 		TS	STEPEXIT
@@ -51,19 +55,19 @@ FFZLOOP		TS	MPAC		## This zeros the 201 erasables from 1211 to 1521
 		TC	INTPRET
 		AXT,1	1
 		SXA,1	VMOVE
-			UNK7705
-			UNK1220		## UNK1220 = 7705 (holding address of UNK7705)
+			TESTVEC1
+			TESTVADR
 			RINIT
-		STORE	RRECT		## RRECT = RINIT (V)
+		STORE	RRECT
 
 		NOLOD	0
-		STORE	RCV		## RCV = RINIT (V)
+		STORE	RCV
 
 		VMOVE	0
 			VINIT
-		STORE	VRECT		## VRECT = VINIT (V)
+		STORE	VRECT
 
-		NOLOD	4		## So MPAC retains VINIT throughout the AXT/SXA pairs
+		NOLOD	4
 		AXT,1	SXA,1
 		AXT,1	SXA,1
 		AXT,1	SXA,1
@@ -75,8 +79,8 @@ FFZLOOP		TS	MPAC		## This zeros the 201 erasables from 1211 to 1521
 			18D
 			SCALEDT		# AND TIME STEP.
 			FDISPLAY
-			STEPEXIT	## STEPEXIT = 6146 (holding address of FDISPLAY)
-		STORE	VCV		## VCV = UNK6213 (V)
+			STEPEXIT
+		STORE	VCV
 
 		VMOVE	0
 			FFZERO
@@ -87,18 +91,18 @@ FFZLOOP		TS	MPAC		## This zeros the 201 erasables from 1211 to 1521
 
 		DMOVE	0
 			TETINIT
-		STORE	TET		## TET = TETINIT (DP)
+		STORE	TET
 		
 		DMOVE	0
 			TETLIMIT
-		STORE	ENDTET		## ENDTET = TETLIMIT (DP)
+		STORE	ENDTET
 
 		DMOVE	0
-			TCINIT		## TC = TCINIT (DP)
+			TCINIT
 		STORE	TC
 
-		AXT,1	1		## The following chunk, down to the PHASCHANG,
-		RTB	AST,1		## is all about copying the initial W-matrix in
+		AXT,1	1
+		RTB	AST,1
 			72D
 			ZEROVAC
 			6D
@@ -112,13 +116,13 @@ INITWMAT	VMOVE*	0
 
 		EXIT	0
 
-		TC	PHASCHNG	## First real PHASCHNG: internal phase is now 14
+		TC	PHASCHNG
 		OCT	01401
 		TC	FFEXIT
 
 		TC	INTPRET
 		ITC	0
-			FDISPLAY	## Call FDISPLAY in interpretive
+			FDISPLAY
 
 STARTFF2	TC	PHASCHNG
 		OCT	01101
@@ -135,12 +139,12 @@ FFENDCHK	TC	INTPRET
 			ENDTET
 			TETDISP
 			STEPMIN
-			FFEXIT -1	## If ENDTET - TETDISP - STEPMIN < 0, exit FF
-			STEPMIN		## Add STEPMIN back in
-			STEPMAX		## Subtract STEPMAX
-			USEMAXDT	## If positive, use max DT
-			STEPMAX		## Add STEPMAX back in.
-			EARTHTAB	## Divide (ENDTET - TETDISP) by EARTHTAB (?)
+			FFEXIT -1
+			STEPMIN	
+			STEPMAX	
+			USEMAXDT
+			STEPMAX	
+			EARTHTAB
 			9D
 		STORE	DT/2
 
@@ -164,40 +168,40 @@ FDISPLAY	VSRT 1
 			TDELTAV
 			RSCALE -4
 			RCV
-		STORE	RDISP		## RDISP = TDELTAV>>N + RCV
+		STORE	RDISP
 
 		VSRT	1
 		VAD
 			TNUV
 			VSCALE -14D
 			VCV
-		STORE	VDISP		## VDISP = TNUV>>N + VCV
+		STORE	VDISP
 		
 		EXIT	0
 
 		TC	GRABDSP
-		TC	FGBSY		## System is already grabbed, go to FGBSY to see what to do
+		TC	FGBSY
 
 FDSPLAY2	CAF	LTETDISP
 		TS	MPAC +2
 
 FPASTE		CAF	V07N01
 		TC	NVSUB
-		TC	FNVBSY		## System is busy; go to FNVBSY to see what to do
+		TC	FNVBSY
 
 FDSPFREE	TC	FREEDSP
 		TC	STARTFF2
 
 FGBSY		CCS	FDSPWAIT
-		TC	STARTFF2	## Unreachable?
-		TC	STARTFF2	## Phase = 2 -> Skip display, go to STARTFF2
-		TC	PREGBSY		## Phase = 1 -> GRABUSY, wake up and jump to FDSPLAY2
+		TC	STARTFF2
+		TC	STARTFF2
+		TC	PREGBSY	
 		TC	FDSPLAY2
 
 FNVBSY		CCS	FDSPWAIT
-		TC	FPASTE		## Comes here after PRENVBSY
-		TC	FDSPFREE	## Phase = 2 -> Skip display, go to FDSPFREE
-		TC	PRENVBSY	## Phase = 1 -> NVSUBSY, wake up and jump to FPASTE
+		TC	FPASTE	
+		TC	FDSPFREE
+		TC	PRENVBSY
 
 RINIT		2DEC	6437.06189 B-14	# KILOMETERS.
 		2DEC	0.0
@@ -228,12 +232,12 @@ STARTFF		CAF	FFPRIO
 
 FFPRIO		OCT	05000
 
-FLSTCHK		CS	EIGHT		## Check to see if this is a manual (< 8) or
-		AD	MPAC		## automatic (>= 8) phase
+FLSTCHK		CS	EIGHT
+		AD	MPAC
 		CCS	A
-		TC	Q		## Automatic phase: return to caller
+		TC	Q
 		LOC	+1
-		TC	FFINIT		## Any manual phase: got to FFINIT
+		TC	FFINIT
 		TC	FFINIT
 
 FFGO		CAF	FFPRIO
@@ -254,7 +258,7 @@ FRESTART	TC	GETPHASE
 		TC	FFEXIT2
 MAXPHAS		DEC	12
 		TC	+2
-		TC	UNK7531
+		TC	ENDSTEP
 
 		INDEX	A
 		TC	+1
@@ -278,7 +282,7 @@ FBR3		TSRT	1
 
 		LXC,1	1
 		LXC,2	DMOVE*
-			UNK1220
+			TESTVADR
 			SCALEDT
 			8D,1
 		STORE	S1
@@ -414,8 +418,8 @@ KEPLER3		NOLOD	1		# COMPARE COMPUTED TIME WITH GIVEN TIME.
 			KEPSILON
 			GETRANDV
 		
-		BMN	1		## Difference negative -> DIFFNEG
-		ITC			## Otherwise -> DIFFPOS
+		BMN	1
+		ITC
 			16D
 			DIFFNEG
 			DIFFPOS
@@ -593,14 +597,12 @@ GETRANDV	LXA,1	2
 		ITCI	0
 			HBRANCH
 
-UNK6711		DMOVE	0
-			TETDISP
-		STORE	TET
-
 
 #	THE POSTRUE ROUTINES SET UP THE BETA VECTOR AND OTHER INITIAL CONDITIONS FOR THE NEXT ACCOMP.
 
-
+POSTRUE2	DMOVE	0
+			TETDISP
+		STORE	TET
 
 POSTRUE		LXA,1	3
 		SXA,1	XSU,1
@@ -621,7 +623,7 @@ POSTRUE		LXA,1	3
 			SCALER
 			SCALEB
 			2
-			UNK1224		## UNK1224 = 2
+			ACCIDX
 		STORE	BETAV
 
 
@@ -742,12 +744,12 @@ ACCOMP2		VSRT	3		#         2
 
 		EXIT	0
 
-		CCS	UNK1224
-		XCH	UNK1224
+		CCS	ACCIDX
+		XCH	ACCIDX
 		INDEX	A
 		TC	+1
-		TC	UNK7171
-		TC	UNK7147
+		TC	ACCOMP4
+		TC	ACCOMP3
 		
 		TC	INTPRET
 		NOLOD	1		# -SCALE(GAMMA)-1 IS LEFT IN X1.
@@ -760,12 +762,12 @@ ACCOMP2		VSRT	3		#         2
 		STORE	ALPHAV		# BETA VECTOR INTO ALPHA FOR NEXT ACCOMP.
 
 		ITC	0
-			UNK7674
+			LOADVEC1
 
 		NOLOD	1
 		LXA,1
 			DIFEQCNT
-		STORE	UNK1235,1
+		STORE	BETAVTAB,1
 
 		NOLOD	1
 		AXT,2	SXA,2
@@ -788,19 +790,19 @@ ACCOMP2		VSRT	3		#         2
 			FBRANCH
 			ACCOMP2
 
-UNK7147		TC	INTPRET
+ACCOMP3		TC	INTPRET
 		LXC,2	1
 		ITC
-			UNK1220
-			UNK7322
+			TESTVADR
+			CALCFV
 
 		ITC	0
-			UNK7677
+			LOADVEC2
 
 		LXA,1	1
 		VXSC*	VAD
 			DIFEQCNT
-			UNK1235,1
+			BETAVTAB,1
 			13D
 		STORE	BETAV
 
@@ -810,12 +812,12 @@ UNK7147		TC	INTPRET
 			SCALEB
 			ACCOMP2
 
-UNK7171		TC	INTPRET
+ACCOMP4		TC	INTPRET
 		LXC,2	1
 		INCR,2	ITC
-			UNK1220
+			TESTVADR
 			-3
-			UNK7322
+			CALCFV
 
 
 #	THE  OBLATE  ROUTINE COMPUTES THE ACCELERATION DUE THE THE EARTHS OBLATENESS. IT USES THE UNIT OF THE
@@ -916,7 +918,7 @@ NBRANCH		LXA,1	1
 			DIFEQCNT
 			DIFEQ,1
 
-UNK7322		DMOVE*	0
+CALCFV		DMOVE*	0
 			0,2
 		STORE	S1
 		
@@ -950,7 +952,7 @@ INTGRATE	AXT,1	3		# INITIALIZE INDEXES AND SWITCHES.
 		SXA,1	AXT,1
 		SXA,1	TEST
 		SWITCH
-			UNK6711
+			POSTRUE2
 			FBRANCH		# EXIT FROM DIFEQCOM
 			POSTRUE
 			HBRANCH		# EXIT FROM KEPLER.
@@ -1091,7 +1093,7 @@ DIFEQ+24	VXSC	3		# DO FINAL CALCULATION FOR Y AND Z.
 
 		TC	FLSTCHK
 
-UNK7531		TC	INTPRET
+ENDSTEP		TC	INTPRET
 		ITCI	0
 			STEPEXIT
 
@@ -1225,22 +1227,28 @@ DOW..		VSRT	0
 		ITC*	0		# CALL NYSTROM ROUTINES ACCORDING TO X1.
 			DIFEQ,1
 
-UNK7674		VMOVE	1
+LOADVEC1	VMOVE	1
 		ITCQ
-			UNK7705
+			TESTVEC1
 
-UNK7677		LXA,1	1
+LOADVEC2	LXA,1	1
 		SXA,1	VMOVE
 			FIXLOC
 			PUSHLOC
-			UNK7710
+			TESTVEC2
 
 		ITCQ	0
 
-UNK7705		OCT	00006
+## The following set of constants are loaded as vectors, which are stored directly
+## into BETAV or used for other calculations. It's unclear what exactly they are,
+## and they are specified in a form that suggests the original listing also used
+## octal constants instead of 2DEC formulations (i.e., the two overlap by 3 words,
+## splitting a DP boundary, and the last element of TESTVEC2 has mixed signs, which
+## Yul is incapable of directly generating).
+TESTVEC1	OCT	00006
 		OCT	00000
 		OCT	00000
-UNK7710		OCT	00012
+TESTVEC2	OCT	00012
 		OCT	00000
 		OCT	00000
 		OCT	00000
