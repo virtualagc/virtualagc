@@ -6,21 +6,15 @@
 # Mod history:	2022-10-29 RSB	So far we have no source code, so 
 #				this is the octal dump of the physical
 #				rope-memory modules right now.
+# 		2023-02-21 MAS	Added building of reconstructed source.
 
 BASENAME=Sunrise45
 EXTRA_YAYUL_ARGS+=--block1 --no-checksums --parity --honeywell
-OCT2BIN_ARGS+=--block1 --no-checksums
 NO_BINSOURCE=yes
-#EXTRA_TARGETS=diffSunrise45
+EXTRA_TARGETS=diffSunrise45
 
-#include ../Makefile.inc
-
-# This isn't the real "default" target.  It's just here in case
-# Makefile.inc is commented out above.
-.PHONY: default
-default:
-	@echo Nothing to do yet.
+include ../Makefile.inc
 
 .PHONY: diffSunrise45
 diffSunrise45:
-	diff -s Sunrise45vb.bin Sunrise45.bin
+	diff -s Sunrise45.bin Sunrise45-dump.bin
