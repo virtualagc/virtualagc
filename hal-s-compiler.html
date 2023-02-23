@@ -30,6 +30,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <li><a moz-do-not-send="true" href="#Linker">PALMAT Linker</a><br></li>
       </ul>
       <li><a moz-do-not-send="true" href="#Advanced">Advanced Version of the Compiler</a></li>
+      <li><a moz-do-not-send="true" href="#Validation">Validation and Regression Testing</a><br></li>
       <li><a moz-do-not-send="true" href="#PALMAT">Appendix: PALMAT Specification</a></li>
       <ul>
         <li><a moz-do-not-send="true" href="#Background">Background</a></li>
@@ -161,6 +162,13 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     <p>TBD<br></p>
     <h1><a name="Advanced"></a>Advanced Version of the Compiler</h1>
     <p>TBD<br></p>
+    <h1><a name="Validation"></a>Validation and Regression Testing<br>
+    </h1>
+    <p>There is a HAL/S file in the source-code tree called "val.hal" which can be used for validation and regression testing of the HAL/S compiler and emulator.  Unfortunately, it is a program I wrote myself, rather than being one from the Shuttle development team, so how correct you think it is depends on how much confidence you have in me.  I'd venture tentatively to grade it perhaps 7 out of 10.  I expect it to grow continually over the course of time.<br></p>
+    <p>Running the test is quite simple, since all it asks of you is to enter either 0 or 1, and then it runs without further assistance from you:  It computes various results, and then tests those results to see if they're what I expected them to be on the basis of my understanding of the HAL/S language requirements and other contemporary documentation.   Entering a 0 at the initial prompt disables certain "time-consuming" tests (requiring a total of about 57 seconds), whereas 1 enables them.  The possibility of disabling them is really more of a convenience for my own workflow — since I tend to run these tests a <i>lot</i> — than for any more generally satisfying reason, and you'll probably always want these tests enabled.<br></p>
+    <p>Each individual test has a designation (such as "1.23A") and prints one or more values of 1 (if successful) or 0 (if failed).  So all that's necessary in evaluating the complete set of tests is to check that all 1's were printed, and no 0's.  If a 0 is printed, of course, then there's a problem needing fixing.<br></p>
+    <p>In general, the individual tests are implementation-agnostic, and therefore should produce the same results in any implementation logically consistent with mine.  There are some exceptions, at the moment involving only tests in which the arithmetical precision (which is implementation-dependent) could differ, and messages are printed along with those results to point out this possibility.<br></p>
+    <p>Also, at the very end of the test run, some tests are performed for informational purposes, such as for timing the execution speed, and such tests have no "correct" success/fail result.  They can be ignored or not, as desired.<br></p>
     <h1><a name="PALMAT"></a>Appendix: PALMAT Specification</h1>
     <h2><a name="Background"></a>Background</h2>
     <p>The "preliminary" version of the HAL/S compiler produces object files in the form of an intermediate language named "PALMAT".&nbsp; This name derives from the fact that the original Shuttle era compiler, HAL/S-FC, produced an intermediate language known as "HALMAT"; but I'm not sure why HALMAT was given that name.&nbsp; HALMAT was machine-independent.&nbsp; The original compiler then optimized the HALMAT intermediate code, and translated it to whatever machine-dependent form was needed for the target computer.&nbsp; In the case of IBM System/360 (mainframe) or IBM AP-101S (Shuttle GPC) target systems, the target language was some variant of IBM's Basic Assembly Language (BAL).<br></p>
@@ -2117,7 +2125,7 @@ p, li { white-space: pre-wrap; }
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-02-16<br>
+          2023-02-22<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
