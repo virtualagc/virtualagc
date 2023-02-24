@@ -94,6 +94,8 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
         elif lbnfLabel in ["prePrimaryRtlShapingStar"]:
             appendInstruction(expression, { "fill": True }, source)
             appendInstruction(expression, { "sentinel": "shaping"}, source)
+        elif lbnfLabel == "subStartSemicolon":
+            appendInstruction(expression, { "partition": True }, source)
     if stage == 2 and depth == owningDepth:
         # Transfer the expression stack to the PALMAT instruction queue.
         # But if it's computable at compile-time, then we compute it down
@@ -235,13 +237,17 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
             appendInstruction(expression, { "modern": "TYPEOFV"}, source)
         elif lbnfLabel == "bitPrimInitialized":
             appendInstruction(expression, { "modern": "INITIALIZED"}, source)
-        elif lbnfLabel == "prePrimaryRtlShapingHeadInteger":
+        elif lbnfLabel in ["prePrimaryRtlShapingHeadInteger", 
+                           "prePrimaryRtlShapingHeadIntegerSubscript"]:
             appendInstruction(expression, { "shaping": "integer"}, source)
-        elif lbnfLabel == "prePrimaryRtlShapingHeadScalar":
+        elif lbnfLabel in ["prePrimaryRtlShapingHeadScalar",
+                           "prePrimaryRtlShapingHeadScalarSubscript"]:
             appendInstruction(expression, { "shaping": "scalar"}, source)
-        elif lbnfLabel == "prePrimaryRtlShapingHeadVector":
+        elif lbnfLabel in ["prePrimaryRtlShapingHeadVector",
+                           "prePrimaryRtlShapingHeadVectorSubscript"]:
             appendInstruction(expression, { "shaping": "vector"}, source)
-        elif lbnfLabel == "prePrimaryRtlShapingHeadMatrix":
+        elif lbnfLabel in ["prePrimaryRtlShapingHeadMatrix",
+                           "prePrimaryRtlShapingHeadMatrixSubscript"]:
             appendInstruction(expression, { "shaping": "matrix"}, source)
         elif lbnfLabel == "subAt":
             appendInstruction(expression, { "shaping": "sliceAT"}, source)

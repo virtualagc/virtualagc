@@ -230,6 +230,33 @@ def findInitializedArrayEntry(object):
         return None
     return object
 
+# Zero out every entry in a composite arithmetical object.  Actually, the 
+# constant stored can be anything, but 0 and 0.0 are what are needed for HAL/S.
+def zeroOutComposite(object, fillValue=0):
+    if not isinstance(object, list):
+        return
+    width = len(object)
+    if object[-1] == "a":
+        width -= 1
+    for i in range(width):
+        child = object[i]
+        if isinstance(child, list):
+            zeroOutComposite(child, fillValue)
+        else:
+            object[i] = fillValue
+
+# Zero out just the entries of a composite that are selected by subscripts.
+def zeroOutCompositeWithSubscripts(object, subscripts, fillValue=0):
+    if len(subscripts) < 1:
+        return
+    thisLevel = subscripts[0]
+    if len(subscripts) > 1:
+        for s in thisLevel:
+            zeroOutCompositeWithSubscripts(object(s-1), subscripts[1:], fillvalue)
+    else:
+        for s in thisLevel:
+            object[s-1] = fillValue
+    
 '''
 ------------------------------------------------------------------------------
 Assignment of a value to a variable, possibly subscripted.
@@ -370,6 +397,13 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
     # I'm not sure how to cleanly fit the case of no subscripts into an 
     # implementation of the most-general case, so handle it explicitly now.
     if len(subscripts) == 0:
+        # The case of value==0 is special, because 0 can be assigned to 
+        # anything, even composite objects.
+        if value == 0 and datatype in ["integer", "scalar"] and \
+                (len(primaryDimensions) > 0 or len(secondaryDimensions) > 0):
+            zeroOutComposite(attributes["value"])
+            return True
+        
         # Are the geometries of the variable and value the same?
         if isArray != isArray2 or \
                 primaryDimensions != primaryDimensions2 or \
@@ -451,6 +485,14 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
     for i in indicesAllowed:
         if isinstance(i, list):
             dimensionsOfSubscriptedVariable.append(len(i))
+    
+    # The case of value == 0 is special, because it can be assigned to 
+    # arithmetical, whatever the geometry.
+    if value == 0 and datatype in ["integer", "scalar"]:
+        zeroOutCompositeWithSubscripts(attributes["value"], \
+                                       indicesAllowed)
+        return True
+    
     '''
     The following is a test for compatibility of geometries on the RHS and 
     LHS of the assignment.  It's not as straightforward as it may initially

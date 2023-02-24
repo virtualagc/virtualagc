@@ -339,6 +339,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         r = [int(fields[1])]
                         if r[0] < 0 or r[0] >= len(PALMAT["scopes"]):
                             continue
+                    else:
+                        continue
                     for i in r:
                         scope = printScopeHeading(PALMAT, i)
                         identifiers = scope["identifiers"]
@@ -360,6 +362,8 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         r = [int(fields[1])]
                         if r[0] < 0 or r[0] >= len(PALMAT["scopes"]):
                             continue
+                    else:
+                        continue
                     for i in r:
                         scope = printScopeHeading(PALMAT, i)
                         instructions = scope["instructions"]

@@ -32,6 +32,8 @@ import random
 import time
 import copy
 from palmatAux import *
+from saveValueToVariable import assignCompositeSubscripted
+
 '''
 from palmatAux import flatten, isBitArray, formBitArray, parseBitArray, \
         findIdentifier, flexFindIdentifier, hTRUE, hFALSE, isArrayQuick, \
@@ -495,7 +497,7 @@ def sliceIt(object, subscripts):
         newSubscripts = []
     for s in thisLevelSubscripts:
         newLevel = sliceIt(object[s], newSubscripts)
-        if newLevel == False:
+        if newLevel == NaN:
             return NaN
         newObject.append(newLevel)
     if len(newObject) == 1:
@@ -555,7 +557,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         instruction = instructions[instructionIndex]
         if "source" in instruction:
             source = instruction["source"]
-        if "subscripts" in scope0 and "fetch" not in instruction and \
+        fullSubscripts = []
+        if "subscripts" in scope0:
+            fullSubscripts.extend(scope0["subscripts"])
+        if "subscripts2" in scope0:
+            fullSubscripts.extend(scope0["subscripts2"])
+        if len(fullSubscripts) > 0 and "fetch" not in instruction and \
                 "fetchp" not in instruction and "shaping" not in instruction \
                 and "unravel" not in instruction:
             printError(source, instruction, 
@@ -566,10 +573,14 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             subscripts = scope0.pop("subscripts")
         else:
             subscripts = []
-        instructionIndex += 1
+        if "subscripts2" in scope0:
+            subscripts2 = scope0.pop("subscripts2")
+        else:
+            subscripts2 = []
         if trace:
             print("\tTRACE:  ", computationStack, \
                   " (%d,%d):" % (scopeNumber, instructionIndex), instruction)
+        instructionIndex += 1
         stackSize = len(computationStack)
         if "debug" in instruction:
             pass
@@ -670,16 +681,23 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     operand1 -= 1
             elif operator == "subscripts":
                 subscripts = []
+                subscripts2 = []
+                s = subscripts
                 while True:
                     value = computationStack.pop()
                     if value == {"sentinel"}:
                         break
-                    subscripts.append(value)
-                if len(subscripts) < 1:
+                    if value == {"semicolon"}:
+                        s = subscripts2
+                        continue
+                    s.append(value)
+                if len(subscripts + subscripts2) < 1:
                     printError(source, instruction, \
                                "Subscript operator without subscripts.")
                     return None
                 scope0["subscripts"] = subscripts
+                scope0["subscripts2"] = subscripts2
+                #print("**", subscripts, subscripts2)
             elif operator in ["U-", "NOT"]: # Unary operators.
                 if stackSize < 1:
                     printError(source, instruction, \
@@ -1030,7 +1048,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             if lhsSubscripts:
                 subscript = computationStack.pop()
                 while subscript != {"sentinel"}:
-                    lhsSubscriptList.append(subscript)
+                    if subscript != {"semicolon"}:
+                        lhsSubscriptList.append(subscript)
                     subscript = computationStack.pop()
             if si == -1:
                 dummyScope = scope
@@ -1068,12 +1087,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     return None
                 '''
                 if "constant" in attributes:
-                    value = sliceIt(attributes["constant"], subscripts)
+                    value = sliceIt(attributes["constant"], fullSubscripts)
                 else:
-                    value = sliceIt(attributes["value"], subscripts)
+                    value = sliceIt(attributes["value"], fullSubscripts)
                 if value == NaN:
                     printError(source, instruction, \
-                        "Slicing error %s%s." % (identifier, str(subscripts)))
+                        "Slicing error %s%s." % (identifier, str(fullSubscripts)))
                     return None
                 if unravel:
                     onto = []
@@ -1346,14 +1365,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             elif shapingFunction in ["integer", "scalar", "vector", "matrix",
                                    "doubleinteger", "doublescalar",
                                    "doublevector", "doublematrix"]:
-                dimensions = []
-                if computationStack[-1] == {"subscripts"}:
-                    computationStack.pop()
-                    while True:
-                        operand = computationStack.pop()
-                        if operand == {"sentinel"}:
-                            break
-                        dimensions.append(operand)
+                dimensions = subscripts + subscripts2
                 if len(dimensions) == 0:
                     if shapingFunction in ["vector", "doublevector"]:
                         dimensions.append(3)
@@ -1403,9 +1415,47 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                         object[i] = float(object[i])
                             computationStack.append(object + ["a"])
                         continue
-                printError(source, instruction, \
-                   "Haven't yet implemented shaping functions with subscripts.")
-                return None
+                '''
+                So if we've gotten to here, then the object we're trying to
+                construct has dimensionality; i.e., it's one of VECTOR, 
+                MATRIX, ARRAY INTEGER|SCALAR, ARRAY VECTOR, or ARRAY MATRIX.  
+                The function assignCompositeSubscripted()
+                in the module saveValueToVariable is ideal for initializing
+                such an object starting from an unraveled set of data, except
+                for the fact that it requires an object of the correct 
+                dimensionality but with uninitialized elements as input.
+                Fortunately, the function uninitializedComposite() in the 
+                palmatAux module can be used to construct the uninitialized
+                object.
+                '''
+                if shapingFunction in ["vector", "doublevector",
+                                       "matrix", "doublematrix"]:
+                    datatype = "scalar"
+                elif shapingFunction in ["integer", "doubleinteger"]:
+                    datatype = "integer"
+                elif shapingFunction in ["scalar", "doublescalar"]:
+                    datatype = "scalar"
+                else:
+                    printError(source, instruction, \
+                               "Unimplemented shaping function.")
+                    return None
+                composite = uninitializedComposite(subscripts, subscripts2)
+                unraveled = []
+                while True:
+                    value = computationStack.pop()
+                    if value == {'sentinel'}:
+                        break
+                    unraveled.append(value)
+                subscriptedLHS = []
+                for i in subscripts + subscripts2:
+                    subscriptedLHS.append(list(range(1, i + 1)))
+                if not assignCompositeSubscripted(None, composite, \
+                                                  subscriptedLHS, \
+                               datatype, -1, unraveled):
+                    printError(source, instruction, "Cannot convert values")
+                    return None
+                computationStack.append(composite)
+                continue
             else:
                 printError(source, instruction, \
                     "Implementation error, unknown shaping function: " + \
@@ -1951,6 +2001,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 return None
             #scopeNumber, instructionIndex = computationStack.pop(-stackPos)
             scope = scopes[scopeNumber]
+        elif "partition" in instruction:
+            computationStack.append({"semicolon"})
         else:
             printError(source, instruction, \
                        "Implementation error, unknown PALMAT: " + instruction)
