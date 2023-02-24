@@ -183,7 +183,6 @@ def assignCompositeSubscripted(RHS, preSubscriptedLHS, subscriptsLHS, \
         if len(RHS) == 0:
             return False
         flatten(RHS, unraveledRHS)
-    #print("* unraveledRHS", unraveledRHS)
     
     # This recursive function descends through the subscripted LHS entrees
     # in unraveling order.  As it reaches the leaves, it picks off elements of 

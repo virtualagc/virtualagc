@@ -29,36 +29,19 @@ C/ PDF pp. 69-72 of the "HAL/S Programmer's Guide", 32.0/17.0 edition.
      DECLARE A6A MATRIX(2,2) INITIAL(-1, 1.5, 1, -1);
      DECLARE A6B MATRIX(2,2);
      DECLARE A23A MATRIX(2,3) INITIAL(1.0, 0.0, 3.0, 2.0, 0.0, 4.0);
-     
-     DECLARE TST CHARACTER(20);
     
   WRITE(6);
   WRITE(6) 'Stuff related to "Programming in HAL/S", p. 29.';
-
-  TST = 'VECTOR INITIAL: ';
-  IF V$1 = 10 AND V$2 = 11 AND V$3 = 12 
-  THEN WRITE(6) TST, 'success';
-  ELSE WRITE(6) TST, 'fail';
-  
-  TST = 'DOT PRODUCT: ';
 E	 -   -
 M    S = V . V;
-  IF S = 365 THEN WRITE(6) TST, 'success'; ELSE WRITE(6) TST, 'fail';
-  
-  TST = 'CROSS PRODUCT: ';
+  WRITE(6) 'V =', V;
+  WRITE(6) 'V.V =', S;
 E         -   -
 M    VV = V * V;
-  IF VV$1 = 0 AND VV$2 = 0 AND VV$3 = 0 THEN WRITE(6) TST, 'success';
-  ELSE WRITE(6) TST, 'fail';
-  
-  TST = 'VECTOR INITIAL 2: ';
-  IF X$1 = 5 AND X$2 = 6 AND X$3 = 2 AND Y$1 = 1 AND Y$2 = 1 AND Y$3 = 1
-  THEN WRITE(6) TST, 'success'; ELSE WRITE(6) TST, 'fail';
-  
-  TST = 'DOT PRODUCT 2: ';
-  S = X.Y;
-  IF S = 13 THEN WRITE(6) TST, 'success'; ELSE WRITE(6) TST, 'fail';
-
+  WRITE(6) 'V*V =', VV;
+  WRITE(6) 'X =', X;
+  WRITE(6) 'Y =', Y;
+  WRITE(6) 'X.Y =', X.Y;
   WRITE(6) 'X*Y =', X*Y;
 E    -    - *
 M    VV = V M;

@@ -399,7 +399,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
               (currentIdentifier[1:-1], assignments, attributes["assignments"]))
             endLabels.pop()
             return False, PALMAT
-        assignments = substate["commonAttributes"]["callAssignments"]
+        #assignments = substate["commonAttributes"]["callAssignments"]
         assDict = {}
         for i in range(len(assignments)):
             assDict[attributes["assignments"][i]] = assignments[i]

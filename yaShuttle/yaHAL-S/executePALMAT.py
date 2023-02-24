@@ -348,7 +348,7 @@ fnMAX = 0
 fnMIN = 1
 fnPROD = 2
 fnSUM = 3
-def accumulate(array, function, accumulation):
+def accumulate(array, functionType, accumulation):
     
     def prod(x, y):
         return x * y
@@ -697,7 +697,6 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     return None
                 scope0["subscripts"] = subscripts
                 scope0["subscripts2"] = subscripts2
-                #print("**", subscripts, subscripts2)
             elif operator in ["U-", "NOT"]: # Unary operators.
                 if stackSize < 1:
                     printError(source, instruction, \
@@ -939,11 +938,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     elif operator in ["AND", "OR", "ORNOT", "B|N" ]:
                         if not isBitArray(operand1):
                             printError(source, instruction, \
-                                       "Not bit array: " + operand1)
+                                       "Not bit array: " + str(operand1))
                             return None
                         if not isBitArray(operand2):
                             printError(source, instruction, \
-                                       "Not bit array :" + operand2)
+                                       "Not bit array: " + str(operand2))
                             return None
                         value1, length1 = parseBitArray(operand1)
                         value2, length2 = parseBitArray(operand2)
@@ -1051,8 +1050,20 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     if subscript != {"semicolon"}:
                         lhsSubscriptList.append(subscript)
                     subscript = computationStack.pop()
-            if si == -1:
-                dummyScope = scope
+            dummyScope = scope
+            while si == -1:
+                '''
+                If si == -1, then the variable being assigned is itself a
+                local alias in a procedure call.  So we have to seek upstream
+                to find the variable to which it's actually referring.
+                
+                The reason we're in a "while si" rather than an "if si" is that
+                we may have *nested* procedure calls, so once we find the 
+                upstream variable to which our alias refers, it may itself be
+                and alias for another variable upstream of the calling code
+                (which may be a scope that's not necessarily an ancestor of 
+                the procedure's scope), and so on. 
+                '''
                 while "assignments" not in dummyScope:
                     if dummyScope["parent"] == None:
                         printError(source, instruction, \
@@ -1060,6 +1071,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         return None
                     dummyScope = PALMAT["scopes"][dummyScope["parent"]]
                 si, identifier = dummyScope["assignments"][identifier]
+                if si == -1:
+                    if "return" not in dummyScope:
+                        printError(source, instruction, \
+                            "Cannot trace nested assignments (%s in %s)" % \
+                            (identifier, dummyScope["name"]))
+                        return None
+                    dummyScope = PALMAT["scopes"][dummyScope["return"][0]]
             identifier = "^" + identifier + "^"
             try:
                 attributes = PALMAT["scopes"][si]["identifiers"][\
