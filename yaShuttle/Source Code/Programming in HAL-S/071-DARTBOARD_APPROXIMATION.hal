@@ -8,8 +8,10 @@ C/ within the enclosing square.
      DECLARE SCALAR,
      		X, Y;
      DECLARE INTEGER,
-     		I, HIT, MISS;
-     DO FOR I = 1 TO 1000;
+     		I, HIT, MISS, N CONSTANT(10000);
+     HIT = 0;
+     MISS = 0;
+     DO FOR I = 1 TO N;
      	X = RANDOM;
      	Y = RANDOM;
 E           2    2
@@ -18,5 +20,5 @@ M    	IF X  + Y  <= 1 THEN
      	ELSE
      	   MISS = MISS + 1;
      END;
-     WRITE(6) 4 HIT / 1000;
+     WRITE(6) 4 HIT / N;
   CLOSE DARTBOARD_APPROXIMATION;

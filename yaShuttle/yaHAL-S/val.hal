@@ -12,25 +12,23 @@
  WRITE(6) 'Enter 0 to disable time-consuming tests, non-zero to enable.';
  READ(5) TEST4;
  
- /* 
- 	-------------------------------------------------------------
- 	Some functions for helping to automate tests of declarations.
- 	-------------------------------------------------------------
+ /*---------------------------------------------------------------------------- 
+   Some functions for helping to automate tests of declarations.
  	
- 	The TESTXXXX functions are used for testing whether a DECLARE
- 	produced the correct result.  To used them, feed them the name
- 	of an identifier, in string form, along with its basic type
- 	('INTEGER', 'SCALAR', 'VECTOR', 'MATRIX', 'BIT', 'CHARACTER'),
- 	along with the number of a field in the ARRAY(20) returned by
- 	the typeof() function, and the expected value for that 
- 	field in either character-string form (TESTCHAR), integer form
- 	(TESTINT), or scalar form (TESTSCALAR).  The TESTXXXX function
- 	checks the basic type and the extra field value, and returns
- 	either TRUE (on match) or FALSE (on failure).  Note that while
- 	the TESTINT function is pretty foolproof, the TESTSCALAR 
- 	function may fail because of roundoff error the TESTCHAR
- 	function may fail if your notion of how typeof() has stringified
- 	the fields being tested isn't quite right.
+   The TESTXXXX functions are used for testing whether a DECLARE
+   produced the correct result.  To used them, feed them the name
+   of an identifier, in string form, along with its basic type
+   ('INTEGER', 'SCALAR', 'VECTOR', 'MATRIX', 'BIT', 'CHARACTER'),
+   along with the number of a field in the ARRAY(20) returned by
+   the typeof() function, and the expected value for that 
+   field in either character-string form (TESTCHAR), integer form
+   (TESTINT), or scalar form (TESTSCALAR).  The TESTXXXX function
+   checks the basic type and the extra field value, and returns
+   either TRUE (on match) or FALSE (on failure).  Note that while
+   the TESTINT function is pretty foolproof, the TESTSCALAR 
+   function may fail because of roundoff error the TESTCHAR
+   function may fail if your notion of how typeof() has stringified
+   the fields being tested isn't quite right.
  */
  
  TESTCHAR: FUNCTION(IDENTIFIER, TYPE, FIELD, VALUE) BOOLEAN;
@@ -77,11 +75,7 @@
  	END;
  CLOSE PRINT_RESULT;
  
- /* 
- 	-------------------------------------------------------------
- 	The tests themselves.
- 	-------------------------------------------------------------
- */
+ /*--------------------------------------------------------------------------*/ 
  
  WRITE(6) ;
  WRITE(6) 'Each test has a designation, such as "4.56B" or "DOT PRODUCT", for';
@@ -163,7 +157,8 @@
  	'12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0')) ASSIGN(ERRORS);
  CALL PRINT_RESULT('1.08I', TESTCHAR('VN4A', 'VECTOR', 4,
  	'12.0, 13.0, 14.0, None, None, None, None, None, None, None, None, None, None, None, None')) ASSIGN(ERRORS);
- 		
+ 
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  I = 1.4;
  A = 2;
@@ -228,6 +223,7 @@
  IF 'ABC' = 'AB' THEN BB = FALSE; ELSE BB = TRUE;
  CALL PRINT_RESULT('2.02C', BB) ASSIGN(ERRORS); 
  
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  DO FOR TEMPORARY I = 1 TO 10; VN2$I = 1; END;
  IF ROUND(VN2$1) = 1 THEN BB = TRUE; ELSE BB = FALSE;
@@ -298,6 +294,7 @@
  IF K = 10 THEN BB = TRUE; ELSE BB = FALSE;
  CALL PRINT_RESULT('3.06', BB) ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  /* Make TEST4 TRUE to run the various loop tests. As written, they're 
     too time-consuming to do every time, so making TEST4 FALSE skips them. */
@@ -459,6 +456,7 @@
  
  END; ELSE WRITE(6) 'Skipping 4.xx tests.';
  
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  /* Function that averages 3 floats. */ 
  AVG3: 
@@ -526,6 +524,7 @@
  IF X1 = 123.0 AND Y2 = 245.0 AND Z1 = 789.0 THEN B1 = TRUE; ELSE B1 = FALSE;
  CALL PRINT_RESULT('5.03', B1) ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  DECLARE VC100 VECTOR(5) CONSTANT(1, 1#, 3, *); 
  CALL PRINT_RESULT('6.00', TESTCHAR('VC100', 'VECTOR', 4, '1.0, None, 3.0, None, None')) ASSIGN(ERRORS);
@@ -585,6 +584,7 @@
  IF 1 = ROUND(I / 27) AND 1 = ROUND(K / 52) THEN B1 = TRUE; ELSE B1 = FALSE;
  CALL PRINT_RESULT('6.09D', B1) ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  DECLARE B300 BIT(6);
  CALL PRINT_RESULT('7.00A', TESTINT('B300', 'BIT', 2, 6)) ASSIGN(ERRORS);
@@ -717,6 +717,7 @@
  BB = TRUE; DO FOR TEMPORARY K = 1 TO 9; IF A301$K ~= K THEN BB = FALSE; END;
  CALL PRINT_RESULT('7.03M', BB) ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  DECLARE V400 VECTOR(10), V401 VECTOR(10), V402 VECTOR(10); 
  DECLARE MATRIX, M400, M400U, M401, M402; 
@@ -787,6 +788,7 @@
  END;
  CALL PRINT_RESULT('8.01C', BB) ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  DECLARE I590 INTEGER, X590 SCALAR, 
  	B590 BIT(4), B591 BIT(5) INITIAL(23), 
@@ -1027,11 +1029,53 @@
  END; END; END;
  CALL PRINT_RESULT('9.04P', BBB) ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/	
+  /* Test equality with a tolerance. */
   REALLY_CLOSE_TO: FUNCTION(X, Y) BOOLEAN;
      DECLARE X SCALAR, Y SCALAR;
      DECLARE EPSILON SCALAR CONSTANT(1E-9);
      IF ABS(X - Y) < EPSILON THEN RETURN TRUE; ELSE RETURN FALSE;
   CLOSE REALLY_CLOSE_TO;
+ 
+ /* Convert degrees to radians and vice-versa. */
+ DECLARE PI CONSTANT(3.141592653589793);
+ DECLARE DEGREES_PER_RADIAN CONSTANT(180 / PI);
+ DEGREES_TO_RADIANS: FUNCTION(DEGREES) SCALAR;
+    DECLARE SCALAR, DEGREES;
+    RETURN DEGREES / DEGREES_PER_RADIAN;
+ CLOSE DEGREES_TO_RADIANS;
+ RADIANS_TO_DEGREES: FUNCTION(RADIANS) SCALAR;
+    DECLARE SCALAR, RADIANS;
+    RETURN RADIANS DEGREES_PER_RADIAN;
+ CLOSE RADIANS_TO_DEGREES;
+ 
+ WRITE(6) ;
+ WRITE(6) 'Some RTL tests ...';
+ DECLARE COSINE_ANGLES VECTOR(17) CONSTANT(0, 30, 45, 60, 90, 120, 135, 150, 
+ 				180, 210, 225, 240, 270, 300, 315, 330, 360),
+         COSINE_VALUES VECTOR(17) CONSTANT(1, SQRT(3)/2, SQRT(2)/2, 1/2, 0, 
+         			-1/2, -SQRT(2)/2, -SQRT(3)/2, -1, 
+         			-SQRT(3)/2, -SQRT(2)/2, -1/2, 0,
+         			1/2, SQRT(2)/2, SQRT(3)/2, 1);
+ BB = TRUE;
+ DO FOR TEMPORARY I = 1 TO 17;
+    IF NOT REALLY_CLOSE_TO(COS(DEGREES_TO_RADIANS(COSINE_ANGLES$I)), 
+                           COSINE_VALUES$I)
+    THEN DO; BB = FALSE; EXIT; END;
+ END; 
+ CALL PRINT_RESULT('COSINE', BB) ASSIGN(ERRORS);
+ BB = TRUE;
+ DO FOR TEMPORARY THETA = 0 TO 360;
+     IF NOT REALLY_CLOSE_TO(SIN(DEGREES_TO_RADIANS(THETA)),
+     			    COS(DEGREES_TO_RADIANS(THETA-90))) 
+     THEN DO;
+        BB = FALSE;
+        EXIT;
+     END;
+ END;
+ CALL PRINT_RESULT('SINE', BB) ASSIGN(ERRORS);
+
+ /*--------------------------------------------------------------------------*/
  
   /* Several functions for checking if a matrix is the identity. */
   IS_IDENTITY2X2: FUNCTION(M) BOOLEAN;
@@ -1332,10 +1376,126 @@ M    VV = V S;
   CALL PRINT_RESULT('2X3 MATRIX **T', BB) ASSIGN(ERRORS);
   
   CLOSE DATATYPES_029;
-  
   CALL DATATYPES_029 ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/	
+  INITIAL_AND_CONSTANT_032:
+  PROCEDURE ASSIGN(ERRORS);
+     DECLARE X SCALAR INITIAL(0);
+     DECLARE MAX_SPEED SCALAR INITIAL(14000);
+     DECLARE FEET_TO_MILES SCALAR CONSTANT(1 / 5280);
+     DECLARE SEC_TO_HR CONSTANT(60 (60));
+     DECLARE MAX_MPH INITIAL(14000 FEET_TO_MILES / SEC_TO_HR);
+     DECLARE BB BOOLEAN;
+     
+     WRITE(6) ;
+     WRITE(6) 'See "Programming in HAL/S" p. 2-12.';
+     IF X = 0 THEN BB = TRUE; ELSE BB = FALSE;
+     CALL PRINT_RESULT('SCALAR INITIAL', BB) ASSIGN(ERRORS);
+     IF MAX_SPEED = 14000 THEN BB = TRUE; ELSE BB = FALSE;
+     CALL PRINT_RESULT('SCALAR INITIAL 2', BB) ASSIGN(ERRORS);
+     IF REALLY_CLOSE_TO(FEET_TO_MILES, 189.393939394E-6) 
+     THEN BB = TRUE; ELSE BB = FALSE;
+     CALL PRINT_RESULT('SCALAR INITIAL 3', BB) ASSIGN(ERRORS);
+     IF SEC_TO_HR = 3600 THEN BB = TRUE; ELSE BB = FALSE;
+     CALL PRINT_RESULT('SCALAR INITIAL 4', BB) ASSIGN(ERRORS);
+     IF REALLY_CLOSE_TO(MAX_MPH, 736.531986532E-6)
+     THEN BB = TRUE; ELSE BB = FALSE;
+     CALL PRINT_RESULT('SCALAR INITIAL 5', BB) ASSIGN(ERRORS);
+     
+  CLOSE INITIAL_AND_CONSTANT_032;
+  CALL INITIAL_AND_CONSTANT_032 ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/	
+  WRITE(6) ;
+  WRITE(6) 'See "Programming in HAL/S" pp. 3-9 and 3-10."'; 
+  ROWS_047:
+  PROCEDURE ASSIGN(ERRORS);
+     DECLARE MM MATRIX INITIAL(11, 12, 13, 21, 22, 23, 31, 32, 33), 
+     	     M MATRIX,
+     	     TEMP VECTOR,
+     	     C SCALAR INITIAL(2),
+     	     I INTEGER INITIAL(1),
+     	     J INTEGER INITIAL(2),
+     	     BB BOOLEAN;
+     		
+C  MULTIPLY A ROW BY A (NONZERO) CONSTANT:
+
+  M = MM;
+E    -        -
+M    M    = C MM   ;
+S     I,*       I,*
+  BB = TRUE;
+  DO FOR TEMPORARY J = 1 TO 3;
+     IF M$(1,J) ~= 2 (10 + J) THEN BB = FALSE;
+  END;
+  DO FOR TEMPORARY I = 2 TO 3; DO FOR TEMPORARY J = 1 TO 3;
+     IF M$(I,J) ~= 10 I + J THEN BB = FALSE;
+  END; END;
+  CALL PRINT_RESULT('SCALAR TIMES MATRIX ROW', BB) ASSIGN(ERRORS);
+     
+C  ADD A CONSTANT MULTIPLE OF ROW J TO ROW I:
+
+  M = MM;
+E    -      -         -
+M    M    = MM    + C MM   ;
+S     I,*     I,*       J,*
+  BB = TRUE;
+  DO FOR TEMPORARY J = 1 TO 3;
+     IF M$(1,J) ~= (10 + J) + 2 (20 + J) THEN BB = FALSE;
+  END;
+  DO FOR TEMPORARY I = 2 TO 3; DO FOR TEMPORARY J = 1 TO 3;
+     IF M$(I,J) ~= 10 I + J THEN BB = FALSE;
+  END; END;
+  CALL PRINT_RESULT('LINEAR COMBO OF MATRIX ROWS', BB) ASSIGN(ERRORS);
+    
+C  EXCHANGE ROWS I AND J:
+ 
+  M = MM;
+E     -     -
+M    TEMP = M   ;
+S            I,*
+
+E    -      -
+M    M    = M   ;
+S     I,*    J,*
+
+E    -       -
+M    M    = TEMP;
+S     J,*
+  BB = TRUE;
+  DO FOR TEMPORARY I = 1 TO 3; DO FOR TEMPORARY J = 1 TO 3;
+     TEMPORARY K INTEGER;
+     IF I = 1 THEN K = 20;
+     IF I = 2 THEN K = 10;
+     IF I = 3 THEN K = 30;
+     IF M$(I,J) ~= K + J THEN BB = FALSE;
+  END; END;
+  CALL PRINT_RESULT('SWAP MATRIX ROWS', BB) ASSIGN(ERRORS);
+     
+  CLOSE ROWS_047;
+ CALL ROWS_047 ASSIGN(ERRORS);
+ 
+ /*--------------------------------------------------------------------------*/
+ WRITE(6) ;
+ WRITE(6) 'See p. 3-14 of "Programming in HAL/S".';
+ 
+ TABLE_052:
+ PROCEDURE ASSIGN(ERRORS);
+     REPLACE LOG2(X) BY "LOG(X)/LOG(2)";
+     REPLACE CHECK(X, VALUE) BY "REALLY_CLOSE_TO(LOG2(X), VALUE)";
+     
+     CALL PRINT_RESULT('REPLACE 0.25', CHECK(0.25, -2)) ASSIGN(ERRORS);
+     CALL PRINT_RESULT('REPLACE 0.5', CHECK(0.5, -1)) ASSIGN(ERRORS);
+     CALL PRINT_RESULT('REPLACE 1', CHECK(1, 0)) ASSIGN(ERRORS);
+     CALL PRINT_RESULT('REPLACE 2', CHECK(2, 1)) ASSIGN(ERRORS);
+     CALL PRINT_RESULT('REPLACE 4', CHECK(4, 2)) ASSIGN(ERRORS);
+     CALL PRINT_RESULT('REPLACE 8', CHECK(8, 3)) ASSIGN(ERRORS);
+     CALL PRINT_RESULT('REPLACE 16', CHECK(16, 4)) ASSIGN(ERRORS);
+ CLOSE TABLE_052;
+ CALL TABLE_052 ASSIGN(ERRORS);
+ 
+ /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  WRITE(6) 'Execution-speed timing measurement, for information only:'; 
  DECLARE STIME, ETIME; 
@@ -1346,6 +1506,7 @@ M    VV = V S;
  WRITE(6) M, 'iterations,', ETIME-STIME, 'seconds, ', 
  	  ROUND(M/(ETIME-STIME)), 'iterations/second.'; 
  	
+ /*--------------------------------------------------------------------------*/	
  WRITE(6); 
  WRITE(6) 'Total errors:', ERRORS;
  

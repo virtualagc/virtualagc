@@ -1,27 +1,57 @@
-C/ This sample is from PDF p. 44 of "Programming in HAL/S". 
+C/ This sample is adapted from PDF p. 44 of "Programming in HAL/S". 
 
   ORTHONORMAL: 
   PROGRAM;
   
-C  THIS PROGRAM CONSTRUCTS AN ORTHONORMAL 
-C  SET FROM X,Y AND Z AND THEN EXPRESSES
-C  V IN IT
+C    THIS PROGRAM CONSTRUCTS AN ORTHONORMAL 
+C    SET FROM X,Y AND Z AND THEN EXPRESSES
+C    V IN IT.  THERE'S AN OUTER LOOP IN WHICH
+C    THE BASIS VECTORS CAN BE SELECTED, AND
+C    AN INNER LOOP IN WHICH VECTORS TO EXPRESS
+C    IN THE NEW BASIS CAN BE SELECTED.  THE
+C    BASIS VECTORS NEED NOT BE ORTHOGONAL OR
+C    NORMAL.
 
-     DECLARE VECTOR, 
-    		X, Y, Z, V, A1, A2, A3;
-E                        -  -  -
-M    WRITE(6) DET(MATRIX(X, Y, Z));
+     DECLARE VECTOR, X, Y, Z, V, A1, A2, A3;
+     DECLARE SCALAR, DETERMINANT;
+     
+     DO WHILE TRUE;
+        WRITE(6) '(Enter 0,0,0 to exit.)';
+        WRITE(6) 'Input first 3-vector:';
+        READ(5) X;
+        IF X$1=0 AND X$2=0 AND X$3=0 THEN EXIT;
+        WRITE(6) 'Input second 3-vector:';
+        READ(5) Y;
+        IF Y$1=0 AND Y$2=0 AND Y$3=0 THEN EXIT;
+        WRITE(6) 'Input third 3-vector:';
+        READ(5) Z;
+        IF Z$1=0 AND Z$2=0 AND Z$3=0 THEN EXIT;
+
+E                                -  -  -
+M       DETERMINANT = DET(MATRIX(X, Y, Z));
+        WRITE(6) 'DETERMINANT =', DETERMINANT;
+        IF ABS(DETERMINANT) < 1E-9 THEN
+            WRITE(6) 'This is small, so the vectors may not form a basis.';
     
-C  IF RESULT IS ZERO, X, Y AND Z DO NOT FORM
-C  BASIS ... EXPECT ERROR BELOW.
-
-E    -         -
-M    A1 = UNIT(X);
-E    -         -    -   -   -
-M    A2 = UNIT(Y - (Y . A1) A1);
-E    -    -    -
-M    A3 = A1 * A2;
-E    -          -   -   -   -
-M    V = MATRIX(A1, A2, A3) V;    
+E       -         -
+M       A1 = UNIT(X);
+        WRITE(6) 'First basis vector:', A1;
+E       -         -    -   -   -
+M       A2 = UNIT(Y - (Y . A1) A1);
+        WRITE(6) 'Second basis vector:', A2;
+E       -    -    -
+M       A3 = A1 * A2;
+        WRITE(6) 'Third basis vector:', A3;
+        
+        WRITE(6) '(Enter 0,0,0 return to select new basis.)';
+        DO WHILE TRUE;
+           WRITE(6) 'Enter a vector to express in the basis:';
+           READ(5) V;
+           IF V$1=0 AND V$2=0 AND V$3=0 THEN EXIT;
+E          -          -   -   -   -
+M          V = MATRIX(A1, A2, A3) V;    
+	   WRITE(6) 'In the selected basis:', V;
+        END;
+     END;
   CLOSE;
       

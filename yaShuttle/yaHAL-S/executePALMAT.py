@@ -895,15 +895,30 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             for i in range(numRows):
                                 row = []
                                 for j in range(numCols):
-                                    row.append(operand1[i][j] / operand2)
+                                    try:
+                                        row.append(operand1[i][j] / operand2)
+                                    except:
+                                        printError(source, instruction, \
+                                                   "Division by zero.")
+                                        return None
                                 result.append(row)
                         elif isv1:
                             numCols = len(operand1)
                             result = []
                             for j in range(numCols):
-                                result.append(operand1[j] / operand2)
+                                try:
+                                    result.append(operand1[j] / operand2)
+                                except:
+                                    printError(source, instruction, \
+                                               "Division by zero.")
+                                    return None
                         elif isis1:
-                            result = float(operand1) / operand2
+                            try:
+                                result = float(operand1) / operand2
+                            except:
+                                printError(source, instruction, \
+                                           "Division by zero.")
+                                return None
                         else:
                             printError(source, instruction, \
                                        "Incompatible datatype for dividend.")
@@ -1449,6 +1464,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 if shapingFunction in ["vector", "doublevector",
                                        "matrix", "doublematrix"]:
                     datatype = "scalar"
+                    subscripts2 = dimensions
+                    subscripts = []
                 elif shapingFunction in ["integer", "doubleinteger"]:
                     datatype = "integer"
                 elif shapingFunction in ["scalar", "doublescalar"]:
@@ -1463,7 +1480,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     value = computationStack.pop()
                     if value == {'sentinel'}:
                         break
-                    unraveled.append(value)
+                    flatten(value, unraveled)
                 subscriptedLHS = []
                 for i in subscripts + subscripts2:
                     subscriptedLHS.append(list(range(1, i + 1)))

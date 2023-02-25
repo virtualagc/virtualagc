@@ -597,7 +597,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             identifier = identifier[1:-1]
             if None != re.fullmatch("[lbcse]f?_" + bareIdentifierPattern, \
                                     identifier):
-                fields = identifier.split("_")
+                fields = identifier.split("_", 1)
                 macro0[fields[1]] = { "arguments": [], 
                             "replacement": identifier, 
                             "pattern": "\\b" + fields[1] + "\\b" }

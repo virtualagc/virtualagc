@@ -168,14 +168,15 @@ success, False on failure.
 def assignCompositeSubscripted(RHS, preSubscriptedLHS, subscriptsLHS, \
                                datatypeLHS, datalengthLHS, \
                                unraveledRHS=[]):
-    '''
-    print("*")
-    print("* RHS", RHS)
-    print("* preSubscriptedLHS", preSubscriptedLHS)
-    print("* subscriptsLHS", subscriptsLHS)
-    print("* datatypeLHS", datatypeLHS)
-    print("* datalengthLHS", datalengthLHS)
-    '''
+    if False:
+        print("*")
+        print("* RHS", RHS)
+        print("* preSubscriptedLHS", preSubscriptedLHS)
+        print("* subscriptsLHS", subscriptsLHS)
+        print("* datatypeLHS", datatypeLHS)
+        print("* datalengthLHS", datalengthLHS)
+        print("* unraveledRHS", unraveledRHS)
+    
     # Let's first unravel the RHS of the assignment to get a nice, flat list
     # of simple values.  Note that unraveledRHS will be altered in-place as
     # the recursion proceeds.

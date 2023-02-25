@@ -99,7 +99,7 @@ def unEMS(halsSource, metadata):
             continue
         else:
             if main[:1] == "M":
-                halsSource[i][0] = " "
+                halsSource[i] = " " + halsSource[i][1:]
             i += 1
             continue
 
