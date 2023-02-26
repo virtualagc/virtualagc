@@ -787,7 +787,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 return False, PALMAT
             elif lbnfLabel == "basicStatementExit":
                 xx = "ux"
-            elif loopScope['type'] == "do for":
+            elif loopScope['type'] in ["do for", "do for discrete"]:
                 xx = "up"
             else:
                 xx = "ue"
@@ -811,6 +811,9 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         if currentScope["type"] == "do for":
             jumpToTarget(PALMAT, source, currentIndex, currentIndex, \
                          "up", "goto")
+        elif currentScope["type"] == "do for discrete":
+            appendInstruction(currentScope["instructions"], \
+                              {'returnoffset': True}, source)
         else:
             # We've got a little problem here, in that the label we want to
             # recycle to at the end of a DO WHILE or DO UNTIL is the same

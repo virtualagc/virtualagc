@@ -6298,18 +6298,18 @@ FOR_LIST make_AAfor_list(FOR_KEY p1, ARITH_EXP p2, ITERATION_CONTROL p3)
     tmp->u.aafor_list_.iteration_control_ = p3;
     return tmp;
 }
-/********************   ABfor_list    ********************/
-FOR_LIST make_ABfor_list(FOR_KEY p1, ITERATION_BODY p2)
+/********************   ABfor_listDiscrete    ********************/
+FOR_LIST make_ABfor_listDiscrete(FOR_KEY p1, ITERATION_BODY p2)
 {
     FOR_LIST tmp = (FOR_LIST) malloc(sizeof(*tmp));
     if (!tmp)
     {
-        fprintf(stderr, "Error: out of memory when allocating ABfor_list!\n");
+        fprintf(stderr, "Error: out of memory when allocating ABfor_listDiscrete!\n");
         exit(1);
     }
-    tmp->kind = is_ABfor_list;
-    tmp->u.abfor_list_.for_key_ = p1;
-    tmp->u.abfor_list_.iteration_body_ = p2;
+    tmp->kind = is_ABfor_listDiscrete;
+    tmp->u.abfor_listdiscrete_.for_key_ = p1;
+    tmp->u.abfor_listdiscrete_.iteration_body_ = p2;
     return tmp;
 }/********************   AAiteration_body    ********************/
 ITERATION_BODY make_AAiteration_body(ARITH_EXP p1)

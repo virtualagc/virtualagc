@@ -2601,16 +2601,16 @@ WHILE_CLAUSE make_ABwhile_clause(WHILE_KEY p0, RELATIONAL_EXP p1);
 struct FOR_LIST_
 {
   int line_number, char_number;
-  enum { is_AAfor_list, is_ABfor_list } kind;
+  enum { is_AAfor_list, is_ABfor_listDiscrete } kind;
   union
   {
     struct { ARITH_EXP arith_exp_; FOR_KEY for_key_; ITERATION_CONTROL iteration_control_; } aafor_list_;
-    struct { FOR_KEY for_key_; ITERATION_BODY iteration_body_; } abfor_list_;
+    struct { FOR_KEY for_key_; ITERATION_BODY iteration_body_; } abfor_listdiscrete_;
   } u;
 };
 
 FOR_LIST make_AAfor_list(FOR_KEY p0, ARITH_EXP p1, ITERATION_CONTROL p2);
-FOR_LIST make_ABfor_list(FOR_KEY p0, ITERATION_BODY p1);
+FOR_LIST make_ABfor_listDiscrete(FOR_KEY p0, ITERATION_BODY p1);
 
 struct ITERATION_BODY_
 {

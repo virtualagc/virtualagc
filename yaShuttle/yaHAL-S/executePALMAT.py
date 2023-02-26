@@ -545,6 +545,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
     for scope in scopes:
         if "return" in scope:
             scope.pop("return")
+        if "returnoffset" in scope:
+            scope.pop("returnoffset")
     scopeNumber = pcScope
     instructionIndex = pcOffset
     scope = scopes[scopeNumber]
@@ -1961,6 +1963,17 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             scopeNumber, instructionIndex = \
                     jump(PALMAT, source, scopeNumber, instruction, "goto")
             scope = scopes[scopeNumber]
+        elif "calloffset" in instruction:
+            identifier = instruction["calloffset"]
+            if identifier not in identifiers:
+                printError(source, instruction, \
+                           "Implementation error, identifier %s not found" \
+                           % identifier)
+                return None
+            scope["returnoffset"] = instructionIndex;
+            instructionIndex = identifiers[identifier]["label"][1]
+        elif "returnoffset" in instruction:
+            instructionIndex = scope.pop("returnoffset")
         elif "iffalse" in instruction:
             value, dummy = parseBitArray(computationStack.pop())
             if (value & 1) == 0:

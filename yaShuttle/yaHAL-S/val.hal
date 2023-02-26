@@ -83,6 +83,7 @@
  WRITE(6) 'for the test procedures.';
  WRITE(6) ;
  
+ WRITE(6) 'Various tests of DECLARE.';
  DECLARE SCALAR, T, X INITIAL(2.0), Y CONSTANT(3.0), Z DOUBLE;
  CALL PRINT_RESULT('1.00A', TESTCHAR('T', 'SCALAR', 16, '')) ASSIGN(ERRORS);
  CALL PRINT_RESULT('1.00B', TESTSCALAR('X', 'SCALAR', 5, 2.0)) ASSIGN(ERRORS);
@@ -160,6 +161,7 @@
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
+ WRITE(6) 'Some tests of expressions and arithmetic.';
  I = 1.4;
  A = 2;
  B = 12.6E2B-1 A + 6 ( I A**3 - 21 ) / 4.2;
@@ -225,6 +227,7 @@
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
+ WRITE(6) 'Some tests of simple subscripting.';
  DO FOR TEMPORARY I = 1 TO 10; VN2$I = 1; END;
  IF ROUND(VN2$1) = 1 THEN BB = TRUE; ELSE BB = FALSE;
  CALL PRINT_RESULT('3.00A', BB) ASSIGN(ERRORS);
@@ -296,6 +299,7 @@
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
+ WRITE(6) 'Various tests of DO WHILE, DO UNTIL, DO FOR.';
  /* Make TEST4 TRUE to run the various loop tests. As written, they're 
     too time-consuming to do every time, so making TEST4 FALSE skips them. */
  IF TEST4 THEN DO;
@@ -458,6 +462,7 @@
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
+ WRITE(6) 'Various simple tests of FUNCTION and PROCEDURE.';
  /* Function that averages 3 floats. */ 
  AVG3: 
  FUNCTION(X, Y, Z) SCALAR; 
@@ -526,6 +531,7 @@
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
+ WRITE(6) 'Some tests of "shaping" functions.';
  DECLARE VC100 VECTOR(5) CONSTANT(1, 1#, 3, *); 
  CALL PRINT_RESULT('6.00', TESTCHAR('VC100', 'VECTOR', 4, '1.0, None, 3.0, None, None')) ASSIGN(ERRORS);
  DECLARE VC101 VECTOR(20) CONSTANT(VC100, 2#(2#(1,2,3), 4), 24); 
@@ -586,6 +592,7 @@
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
+ WRITE(6) 'Some tests of repitition factors (#).';
  DECLARE B300 BIT(6);
  CALL PRINT_RESULT('7.00A', TESTINT('B300', 'BIT', 2, 6)) ASSIGN(ERRORS);
  MYTYPE = typeofv(34);
@@ -719,6 +726,7 @@
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
+ WRITE(6) 'Some tests of initialized vs uninitialized values and "shaping" functions.';
  DECLARE V400 VECTOR(10), V401 VECTOR(10), V402 VECTOR(10); 
  DECLARE MATRIX, M400, M400U, M401, M402; 
  CALL PRINT_RESULT('8.00A', NOT initialized(V400)) ASSIGN(ERRORS);
@@ -790,6 +798,7 @@
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
+ WRITE(6) 'Some tests of automatic datatype conversions.';
  DECLARE I590 INTEGER, X590 SCALAR, 
  	B590 BIT(4), B591 BIT(5) INITIAL(23), 
  	B595 BIT(4) INITIAL(5), B596 BIT(4) INITIAL(6), B597 BIT(4) INITIAL(7),
@@ -1050,7 +1059,7 @@
  CLOSE RADIANS_TO_DEGREES;
  
  WRITE(6) ;
- WRITE(6) 'Some RTL tests ...';
+ WRITE(6) 'Some RTL tests.';
  DECLARE COSINE_ANGLES VECTOR(17) CONSTANT(0, 30, 45, 60, 90, 120, 135, 150, 
  				180, 210, 225, 240, 270, 300, 315, 330, 360),
          COSINE_VALUES VECTOR(17) CONSTANT(1, SQRT(3)/2, SQRT(2)/2, 1/2, 0, 
@@ -1180,7 +1189,7 @@
     
   WRITE(6);
   WRITE(6) 'See "Programming in HAL/S", p. 2-9.';
-  WRITE(6) 'Some vector and matrix tests ...';
+  WRITE(6) 'Some vector and matrix arithmetic tests.';
 
   IF V$1 = 10 AND V$2 = 11 AND V$3 = 12 THEN BB = TRUE; ELSE BB = FALSE;
   CALL PRINT_RESULT('VECTOR INITIALIZATION', BB) ASSIGN(ERRORS);
@@ -1478,6 +1487,7 @@ S     J,*
  
  /*--------------------------------------------------------------------------*/
  WRITE(6) ;
+ WRITE(6) 'Some REPLACE-macro tests.';
  WRITE(6) 'See p. 3-14 of "Programming in HAL/S".';
  
  TABLE_052:
@@ -1495,9 +1505,66 @@ S     J,*
  CLOSE TABLE_052;
  CALL TABLE_052 ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/
+ WRITE(6) ;
+ WRITE(6) 'Tests of discrete FOR-loop, with and without WHILE/UNTIL clause.';
+ WRITE(6) 'See p. 5-6 of "Programming in HAL/S".';
+ /*
+ DECLARE SMALL_PRIMES ARRAY(26) INTEGER CONSTANT(2, 3, 5, 7, 11, 13, 17, 19, 23, 
+ 					         29, 31, 37, 41, 43, 47, 53, 59, 
+ 					         61, 67, 71, 73, 79, 83, 89, 97, 
+ 					         101);
+ */
+ DECLARE SMALL_PRIMES ARRAY(26) INTEGER;
+ SMALL_PRIMES = INTEGER(2, 3, 5, 7, 11, 13, 17, 19, 23, 
+ 					         29, 31, 37, 41, 43, 47, 53, 59, 
+ 					         61, 67, 71, 73, 79, 83, 89, 97, 
+ 					         101);
+ BB = TRUE;
+ DO FOR TEMPORARY I = 2 TO 101;
+    TEMPORARY IS_PRIME BOOLEAN, IS_IN_ARRAY BOOLEAN;
+    IS_PRIME = TRUE;
+    DO FOR TEMPORARY J = 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47;
+       IF I NOT = J AND REMAINDER(I, J) = 0 THEN DO;
+          IS_PRIME = FALSE;
+          EXIT;
+       END;
+    END;
+    IS_IN_ARRAY = FALSE;
+    DO FOR TEMPORARY J = 1 TO 26;
+       IF I = SMALL_PRIMES$J THEN DO;
+          IS_IN_ARRAY = TRUE;
+          EXIT;
+       END;
+    END;
+    IF IS_PRIME ~= IS_IN_ARRAY THEN DO;
+       BB = FALSE;
+       EXIT;
+    END;
+ END;
+ CALL PRINT_RESULT('DISCRETE FOR', BB) ASSIGN(ERRORS);
+ 
+ DECLARE II INTEGER, III INTEGER;
+ III = 0;
+ DO FOR II = 2, 6, 69, -5, 21, 62 WHILE II > 0; III = III + 1; END;
+ IF II = -5 AND III = 3 THEN BB = TRUE; ELSE BB = FALSE;
+ CALL PRINT_RESULT('DISCRETE FOR 2', BB) ASSIGN(ERRORS);
+ III = 0;
+ DO FOR II = 2, 6, 69, -5, 21, 62 UNTIL II < 0; III = III + 1; END;
+ IF II = -5 AND III = 4 THEN BB = TRUE; ELSE BB = FALSE;
+ CALL PRINT_RESULT('DISCRETE FOR 3', BB) ASSIGN(ERRORS);
+ III = 0;
+ BB = TRUE;
+ DO FOR II = 2, 3, 5, 7, 11, 13, 17; 
+    III = III + 1; 
+    IF II ~= SMALL_PRIMES$III THEN BB = FALSE;
+ END;
+ IF II ~= 17 THEN BB = FALSE;
+ CALL PRINT_RESULT('DISCRETE FOR 4', BB) ASSIGN(ERRORS);
+ 
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
- WRITE(6) 'Execution-speed timing measurement, for information only:'; 
+ WRITE(6) 'Not a pass/fail test. Informational execution-speed timing measurement.'; 
  DECLARE STIME, ETIME; 
  STIME = RUNTIME; 
  M = 100000; 

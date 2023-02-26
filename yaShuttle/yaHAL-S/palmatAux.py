@@ -256,7 +256,7 @@ def collectGarbage(PALMAT):
             # descendents may not be.
             pass
         elif level == 1 and scope["type"] not in \
-                ["do", "do for", "do until", "do while", "if"]:
+                ["do", "do for", "do for discrete", "do until", "do while", "if"]:
             # This scope and all of its descendents are keepers.
             return
         else:
@@ -365,9 +365,12 @@ def constructPALMAT(instantiation=0):
 # loop. Returns the scope dictionary for the loop, or else None.
 def findEnclosingLoop(PALMAT, scope):
     while scope != None:
-        if scope["type"] in ["do while", "do until", "do for"]:
+        if scope["type"] in ["do while", "do until", "do for", "do for discrete"]:
             return scope
-        scope = PALMAT["scopes"][scope["parent"]]
+        parent = scope["parent"]
+        if parent == None:
+            break
+        scope = PALMAT["scopes"][parent]
     return None
 
 # Add a memory scope to existing PALMAT.  Returns the index of the new scope.

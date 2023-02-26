@@ -353,6 +353,7 @@ augmentationCandidates = [
     "forKey",
     "forKeyTemporary",
     "for_list",
+    "for_listDiscrete",
     "func_stmt_body",
     "function_name",
     "ifClauseBitExp",

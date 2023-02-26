@@ -5547,10 +5547,10 @@ void ppFOR_LIST(FOR_LIST p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ABfor_list:
+  case is_ABfor_listDiscrete:
     if (_i_ > 0) renderC(_L_PAREN);
-    ppFOR_KEY(p->u.abfor_list_.for_key_, 0);
-    ppITERATION_BODY(p->u.abfor_list_.iteration_body_, 0);
+    ppFOR_KEY(p->u.abfor_listdiscrete_.for_key_, 0);
+    ppITERATION_BODY(p->u.abfor_listdiscrete_.iteration_body_, 0);
 
     if (_i_ > 0) renderC(_R_PAREN);
     break;
@@ -14732,16 +14732,16 @@ void shFOR_LIST(FOR_LIST p)
     bufAppendC(')');
 
     break;
-  case is_ABfor_list:
+  case is_ABfor_listDiscrete:
     bufAppendC('(');
 
-    bufAppendSp(p, "ABfor_list");
+    bufAppendSp(p, "ABfor_listDiscrete");
 
     bufAppendC(' ');
 
-    shFOR_KEY(p->u.abfor_list_.for_key_);
+    shFOR_KEY(p->u.abfor_listdiscrete_.for_key_);
   bufAppendC(' ');
-    shITERATION_BODY(p->u.abfor_list_.iteration_body_);
+    shITERATION_BODY(p->u.abfor_listdiscrete_.iteration_body_);
 
     bufAppendC(')');
 

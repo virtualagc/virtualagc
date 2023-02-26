@@ -7269,7 +7269,7 @@ yyreduce:
 
   case 488: /* FOR_LIST: FOR_KEY ITERATION_BODY  */
 #line 1267 "HAL_S.y"
-                           { (yyval.for_list_) = make_ABfor_list((yyvsp[-1].for_key_), (yyvsp[0].iteration_body_)); (yyval.for_list_)->line_number = (yyloc).first_line; (yyval.for_list_)->char_number = (yyloc).first_column;  }
+                           { (yyval.for_list_) = make_ABfor_listDiscrete((yyvsp[-1].for_key_), (yyvsp[0].iteration_body_)); (yyval.for_list_)->line_number = (yyloc).first_line; (yyval.for_list_)->char_number = (yyloc).first_column;  }
 #line 7274 "Parser.c"
     break;
 

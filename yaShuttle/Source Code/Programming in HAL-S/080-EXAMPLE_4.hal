@@ -8,23 +8,23 @@ C/ From PDF p. 80 in "Programming in HAL/S".
      DECLARE SCALAR,
      		VALUE, OLD_VALUE;
      		
-C     . . .
+     WRITE(6) 'HELLO';
 
      DO CASE NUM_GOOD;
         ELSE
            DO;
               VALUE = OLD_VALUE;
-              RETURN;
+              EXIT DONE;
            END;
         VALUE = A;
         VALUE = (A + B) / 2;
         VALUE = MIDVAL(A, B, C);
         DO;
         
-C        . . .
+   	   WRITE(6) 'I AM HERE';
 
         END;
      END;
      OLD_VALUE = VALUE;
-  CLOSE EXAMPLE_4;
+  DONE: CLOSE EXAMPLE_4;
   

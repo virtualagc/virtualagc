@@ -109,9 +109,26 @@ def doForSM(stage, ast, PALMAT, state, trace, depth, trace4=False):
             internalState = "waitForStartExpression"
             
     elif stage == 2:
+        if lbnfLabel == "for_listDiscrete":
+            currentScope["type"] = "do for discrete"
+            appendInstruction(instructions, \
+                              {'goto': (currentScope["parent"], 
+                                        "^ur_%d^" % scopeNumber)}, source)
+            currentScope["identifiers"]["^df_b^"] = \
+                {'label': [scopeNumber, len(instructions)] }
+            appendInstruction(instructions, \
+                              {'noop': True, 'label': "^df_b^"}, source)
+        elif lbnfLabel == "iteration_body":
+            # Come here after each iteration of a discrete FOR-LOOP completes.
+            si, attributes = \
+                findIdentifier("^" + forKey + "^", PALMAT, scopeNumber)
+            appendInstruction(instructions, {"storepop": (si, forKey)}, \
+                              source)
+            appendInstruction(instructions, {"calloffset": "^df_b^"}, source)
         if "completed" in stateMachine:
             stateMachine.pop("completed")
-            if internalState == "waitForEndExpression":
+            if internalState == "waitForEndExpression" and \
+                    currentScope["type"] == "do for":
                 '''
                 There are two cases here.  It may be that the expression 
                 state machine has been used either once or twice since our 
@@ -186,7 +203,7 @@ def doForSM(stage, ast, PALMAT, state, trace, depth, trace4=False):
     elif stage == 0:
         if internalState == "start":
             # Waiting for the action to begin!
-            if lbnfLabel == "for_list":
+            if lbnfLabel in  ["for_list", "for_listDiscrete"]:
                 internalState = "waitForKey"
         elif internalState == "waitForStartExpression":
             if "completed" in stateMachine:
@@ -199,10 +216,11 @@ def doForSM(stage, ast, PALMAT, state, trace, depth, trace4=False):
                 the initial assignment of the value to the key, and jump to 
                 the guts of the DO FOR block.
                 '''
-                si, attributes = \
-                    findIdentifier("^" + forKey + "^", PALMAT, scopeNumber)
-                appendInstruction(instructions, {"storepop": (si, forKey)}, \
-                                  source)
+                if currentScope["type"] == "do for":
+                    si, attributes = \
+                        findIdentifier("^" + forKey + "^", PALMAT, scopeNumber)
+                    appendInstruction(instructions, {"storepop": (si, forKey)}, \
+                                      source)
                 internalState = "waitForEndExpression"
                 stateMachine["pauses"] = []
     stateMachine["internalState"] = internalState

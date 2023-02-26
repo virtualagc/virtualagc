@@ -1264,7 +1264,7 @@ WHILE_CLAUSE : WHILE_KEY BIT_EXP { $$ = make_AAwhile_clause($1, $2); $$->line_nu
   | WHILE_KEY RELATIONAL_EXP { $$ = make_ABwhile_clause($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 FOR_LIST : FOR_KEY ARITH_EXP ITERATION_CONTROL { $$ = make_AAfor_list($1, $2, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | FOR_KEY ITERATION_BODY { $$ = make_ABfor_list($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | FOR_KEY ITERATION_BODY { $$ = make_ABfor_listDiscrete($1, $2); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 ITERATION_BODY : ARITH_EXP { $$ = make_AAiteration_body($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | ITERATION_BODY _SYMB_0 ARITH_EXP { $$ = make_ABiteration_body($1, $3); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
