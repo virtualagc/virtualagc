@@ -252,6 +252,13 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         if not success:
             endLabels.pop()
             return False, PALMAT
+    if lbnfLabel == "any_statement" and currentScope["type"] == "do case":
+        identifier = "^dc_%d^" % currentScope["caseCounter"];
+        currentScope["caseCounter"] += 1;
+        currentScope["identifiers"][identifier] = {
+            "label": [currentScope["self"], len(currentScope["instructions"])]}
+        appendInstruction(currentScope["instructions"], \
+                          {'noop': True, 'label': identifier}, source)
     for component in ast["components"]:
         if isinstance(component, str):
             if component[:1] == "^":
@@ -365,6 +372,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # Below are various other patterns not covered by lbnfLabelPatterns above.
     # The lbnfLabel of the relevant component must not be the same as any key 
     # in lbnfLabelPatterns.
+    elif lbnfLabel in ["any_statement", "doGroupHeadCaseElse"] and \
+            currentScope["type"] == "do case":
+        appendInstruction(currentScope["instructions"], \
+                          {'goto': (currentIndex, "^dc_exit^")}, source)
     elif lbnfLabel == "declare_group" and \
             currentScope["type"] in ["function", "procedure"]:
         isProcedure = False
@@ -426,6 +437,16 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             return False, PALMAT
         appendInstruction(currentScope["instructions"], \
                           {'return': stackPos}, source)
+    elif lbnfLabel in ["case_else", "doGroupHeadCase"]:
+        currentScope["type"] = "do case"
+        currentScope["caseCounter"] = 1
+        instructions = currentScope["instructions"]
+        appendInstruction(instructions, {'case': "dc_"}, source)
+        if lbnfLabel == "case_else":
+            currentScope["identifiers"]["^dc_else^"] = { 
+                "label": [currentIndex, len(instructions)]}
+            appendInstruction(instructions, \
+                              {"noop": True, "label": "^dc_else^"}, source)
     elif lbnfLabel == "closing":
         instructions = currentScope["instructions"]
         if currentScope["type"] == "procedure" and \
@@ -781,18 +802,24 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                               {'goto': substate['labelExitRepeat']}, source)
             substate.pop('labelExitRepeat')
         else:
+            xx = None
             if loopScope == None:
                 print("\tNo enclosing loop found for EXIT.")
                 endLabels.pop()
                 return False, PALMAT
             elif lbnfLabel == "basicStatementExit":
                 xx = "ux"
-            elif loopScope['type'] in ["do for", "do for discrete"]:
+            # Below here is REPEAT
+            elif loopScope['type'] == "do for discrete":
+                appendInstruction(currentScope["instructions"], \
+                                  {"returnoffset": True}, source)
+            elif loopScope['type'] == "do for":
                 xx = "up"
             else:
                 xx = "ue"
-            jumpToTarget(PALMAT, source, currentScope["self"], \
-                loopScope["self"], xx, "goto")
+            if xx != None:
+                jumpToTarget(PALMAT, source, currentScope["self"], \
+                    loopScope["self"], xx, "goto")
 
     #----------------------------------------------------------------------
     # Decide if we need to stick an automatically-generated label at the
@@ -839,6 +866,11 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     # goto instruction at the end of the block back to the original 
     # position in the parent scope.
     if isDo:
+        if currentScope["type"] == "do case":
+            currentScope["identifiers"]["^dc_exit^"] = {
+                "label": [currentScope["self"], len(currentScope["instructions"])]}
+            appendInstruction(currentScope["instructions"], \
+                              {'noop': True, 'label': '^dc_exit^'}, source)
         exitDo(PALMAT, source, currentScope["self"], preservedScopeIndex)
         state["scopeIndex"] = preservedScopeIndex
         

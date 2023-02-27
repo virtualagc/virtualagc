@@ -1548,11 +1548,11 @@ S     J,*
  III = 0;
  DO FOR II = 2, 6, 69, -5, 21, 62 WHILE II > 0; III = III + 1; END;
  IF II = -5 AND III = 3 THEN BB = TRUE; ELSE BB = FALSE;
- CALL PRINT_RESULT('DISCRETE FOR 2', BB) ASSIGN(ERRORS);
+ CALL PRINT_RESULT('DISCRETE FOR WHILE', BB) ASSIGN(ERRORS);
  III = 0;
  DO FOR II = 2, 6, 69, -5, 21, 62 UNTIL II < 0; III = III + 1; END;
  IF II = -5 AND III = 4 THEN BB = TRUE; ELSE BB = FALSE;
- CALL PRINT_RESULT('DISCRETE FOR 3', BB) ASSIGN(ERRORS);
+ CALL PRINT_RESULT('DISCRETE FOR UNTIL', BB) ASSIGN(ERRORS);
  III = 0;
  BB = TRUE;
  DO FOR II = 2, 3, 5, 7, 11, 13, 17; 
@@ -1560,7 +1560,99 @@ S     J,*
     IF II ~= SMALL_PRIMES$III THEN BB = FALSE;
  END;
  IF II ~= 17 THEN BB = FALSE;
- CALL PRINT_RESULT('DISCRETE FOR 4', BB) ASSIGN(ERRORS);
+ CALL PRINT_RESULT('DISCRETE FOR PRIMES', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ III = 1;
+ DO FOR II = 1, 2 II, 2 II, 2 II, 2 II, 2 II, 2 II;
+    IF II ~= III THEN BB = FALSE;
+    III = 2 III;
+ END;
+ IF II NOT = 64 THEN BB = FALSE;
+ CALL PRINT_RESULT('DISCRETE FOR EXPRESSIONS', BB) ASSIGN(ERRORS);
+ 
+ DO FOR II = 1, 2 II, 2 II, 2 II, 2 II, 2 II, 2 II;
+    IF II > 4 THEN EXIT;
+ END;
+ IF II = 8 THEN BB = TRUE; ELSE BB = FALSE;
+ CALL PRINT_RESULT('DISCRETE FOR EXIT', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ III = 1;
+ DO FOR II = 1, 2 II, 2 II, 2 II, 2 II, 2 II, 2 II;
+    IF II < 32 THEN DO;
+       IF II ~= III THEN BB = FALSE;
+       III = 2 III;
+       REPEAT;
+    END; 
+    EXIT;
+ END;
+ IF II NOT = 32 THEN BB = FALSE;
+ CALL PRINT_RESULT('DISCRETE FOR REPEAT', BB) ASSIGN(ERRORS);
+ 
+ /*--------------------------------------------------------------------------*/
+ WRITE(6) ;
+ WRITE(6) 'Some test cases for DO CASE statements.';
+ DO FOR TEMPORARY I = 1 TO 10;
+    TEMPORARY II INTEGER;
+    II = 100;
+    DO CASE I;
+       II = 1;
+       II = 2;
+       II = 3;
+       II = 4;
+       II = 5;
+    END;
+    BB = TRUE;
+    IF I <= 5 AND II ~= I THEN BB = FALSE;
+    IF I > 5 AND II ~= 100 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('DO CASE NO ELSE', BB) ASSIGN(ERRORS);
+ 
+ DO FOR TEMPORARY I = 1 TO 10;
+    TEMPORARY II INTEGER;
+    II = 100;
+    DO CASE I;
+       ELSE II = 99;
+       II = 1;
+       II = 2;
+       II = 3;
+       II = 4;
+       II = 5;
+    END;
+    BB = TRUE;
+    IF I <= 5 AND II ~= I THEN BB = FALSE;
+    IF I > 5 AND II ~= 99 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('DO CASE ELSE', BB) ASSIGN(ERRORS);
+ 
+ DO FOR TEMPORARY I = 1 TO 10;
+    TEMPORARY II INTEGER;
+    II = 100;
+    DO CASE I;
+       ELSE DO;
+       	  TEMPORARY K INTEGER;
+       	  K = 0;
+          DO FOR TEMPORARY J = 1 TO 98; K = K + 1; END;
+          II = K;
+       END;
+       II = 1;
+       II = 2;
+       II = 3;
+       DO;
+       	  TEMPORARY K INTEGER;
+       	  K = 0;
+          DO FOR TEMPORARY J = 1 TO 4; K = K + 1; END;
+          II = K;
+       END;
+       II = 5;
+    END;
+    BB = TRUE;
+    IF I <= 5 AND II ~= I THEN BB = FALSE;
+    IF I > 5 AND II ~= 98 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('DO CASE BLOCKS', BB) ASSIGN(ERRORS);
+ 
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
