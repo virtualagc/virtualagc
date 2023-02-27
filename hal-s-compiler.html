@@ -2035,17 +2035,27 @@ p, li { white-space: pre-wrap; }
         <tr>
           <td valign="top"><tt>returnoffset</tt><tt><br>
             </tt></td>
-          <td valign="top"><tt>{'returnoffset': True}</tt><tt><br>
+          <td valign="top"><tt>{'returnoffset': -1}</tt><tt><br>
+              {'returnoffset': index}<br>
             </tt></td>
-          <td valign="top">Transfers control, within the current scope,
-            to the offset held in the scope's dedicated offset register,
-            which is written only by the <tt>call</tt><tt>offset</tt>
-            instruction (see above).&nbsp; If the dedicated offset
-            register doesn't exist in the current scope, find the
-            nearest ancestor scope with an offset register, and use it
-            instead.&nbsp; (This allows using the <tt>returnoffset</tt>
-            instruction for implementing a HAL/S <tt>REPEAT</tt> within
-            a discrete <tt>FOR</tt>-loop.)<br>
+          <td valign="top">The first form of the instruction transfers
+            control, within the current scope, to the offset held in the
+            scope's dedicated offset register, which is written only by
+            the <tt>call</tt><tt>offset</tt> instruction (see
+            above).&nbsp; If the dedicated offset register doesn't exist
+            in the current scope, find the nearest ancestor scope with
+            an offset register, and use it instead.&nbsp; (This allows
+            using the <tt>returnoffset</tt> instruction for
+            implementing a HAL/S <tt>REPEAT</tt> without a symbolic
+            label inside a discrete <tt>FOR</tt>-loop.)<br>
+            <br>
+            The second form of the instruction is similar, except that
+            the scope to which the transfer occurs is specified by the
+            index embedded in the instruction, which must contain a
+            dedicated offset register.&nbsp; There is no hunting for an
+            appropriate scope.&nbsp; (This allows the <tt>returnoffset</tt>
+            instruction to be used for implementing a HAL/S <tt>REPEAT</tt>
+            <i>with</i> a symbolic label.)<br>
           </td>
         </tr>
         <tr>
@@ -2208,6 +2218,18 @@ p, li { white-space: pre-wrap; }
             <style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>halt</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'halt': True}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Halts execution/emulation of the the current
+            instantiation.&nbsp; Every PALMAT scope of type "program"
+            ends with this instruction.&nbsp; Moreover, this instruction
+            is generated for every HAL/S <tt>RETURN</tt> statement
+            that's outside the context of a <tt>FUNCTION</tt> or <tt>PROCEDURE</tt>.<br>
+          </td>
         </tr>
       </tbody>
     </table>
