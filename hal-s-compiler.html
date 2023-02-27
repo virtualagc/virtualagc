@@ -164,10 +164,11 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     <p>TBD<br></p>
     <h1><a name="Validation"></a>Validation and Regression Testing<br>
     </h1>
-    <p>There is a HAL/S file in the source-code tree called "val.hal" which can be used for validation and regression testing of the HAL/S compiler and emulator.  Unfortunately, it is a program I wrote myself, rather than being one from the Shuttle development team, so how correct you think it is depends on how much confidence you have in me.  I'd venture tentatively to grade it perhaps 7 out of 10.  I expect it to grow continually over the course of time.<br></p>
+    <p>There is a HAL/S file in the source-code tree called "val.hal" which can be used for validation and regression testing of the HAL/S compiler and emulator.  <br></p>
+    <p>Unfortunately, it is a program I wrote myself, rather than being one from the Shuttle development team, so how correct you think it is depends on how much confidence you have in me.  (Don't feel guilty if you haven't any.  Just help me out by writing your own HAL/S validation program or helping to fix mine!)  I'd venture tentatively to grade val.hal perhaps 7 out of 10, though I expect it to grow continually more complete and more accurate over the course of time, even if never 100% so.  I am told by one of the original Shuttle software developers that it is unlikely any contemporary test suite for the HAL/S compiler has survived, and that mini test suites kept by individual developers have likely disappeared as well; but fortunately, in my experience, opinions that such-and-such code <i>hasn't</i> survived haven't proven to be entirely reliable.  A lot more has probably survived, completely forgotten or else selfishly guarded from prying eyes, in the hidden recesses of government or private collections than you or I will ever know.<br></p>
     <p>Running the test is quite simple, since all it asks of you is to enter either 0 or 1, and then it runs without further assistance from you:  It computes various results, and then tests those results to see if they're what I expected them to be on the basis of my understanding of the HAL/S language requirements and other contemporary documentation.   Entering a 0 at the initial prompt disables certain "time-consuming" tests (requiring a total of about 57 seconds), whereas 1 enables them.  The possibility of disabling them is really more of a convenience for my own workflow — since I tend to run these tests a <i>lot</i> — than for any more generally satisfying reason, and you'll probably always want these tests enabled.<br></p>
-    <p>Each individual test has a designation (such as "1.23A") and prints one or more values of 1 (if successful) or 0 (if failed).  So all that's necessary in evaluating the complete set of tests is to check that all 1's were printed, and no 0's.  If a 0 is printed, of course, then there's a problem needing fixing.<br></p>
-    <p>In general, the individual tests are implementation-agnostic, and therefore should produce the same results in any implementation logically consistent with mine.  There are some exceptions, at the moment involving only tests in which the arithmetical precision (which is implementation-dependent) could differ, and messages are printed along with those results to point out this possibility.<br></p>
+    <p>Each individual test prints a designation for the test (such as "8.01A" or "MATRIX MULTIPLY") and then prints either "success" or "failure".  In the case of "failure", you can use the test designation to look at val.hal and see in more detail what was happening when the test failed; it could be that val.hal itself had a bug.  The total number of failures is printed at the end, so you usually don't even need to look at the individual results.<br></p>
+    <p>In general, the individual tests are implementation-agnostic, and therefore should produce the same results in any implementation.  (If you've written your own HAL/S compiler and emulator, feel free to run val.hal on it.)  There are some exceptions, at the moment involving only tests in which the arithmetical precision (which is implementation-dependent) could differ, and messages are printed along with those results to point out this possibility.<br></p>
     <p>Also, at the very end of the test run, some tests are performed for informational purposes, such as for timing the execution speed, and such tests have no "correct" success/fail result.  They can be ignored or not, as desired.<br></p>
     <h1><a name="PALMAT"></a>Appendix: PALMAT Specification</h1>
     <h2><a name="Background"></a>Background</h2>
@@ -392,7 +393,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       <li>"procedure"</li>
       <li>"compool"</li>
       <li>"do"</li>
+      <li>"do case"<br></li>
       <li>"do for"</li>
+      <li>"do for discrete"<br></li>
       <li>"do while"</li>
       <li>"do until"</li>
       <li>"if"<br></li>
@@ -402,14 +405,14 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     <blockquote>
       <p><tt>DECLARE I INTEGER INITIAL(0);</tt><tt><br></tt><tt>DO WHILE TRUE;</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; WRITE(6) I;</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; I = I + 1;</tt><tt><br></tt><tt>&nbsp;&nbsp;&nbsp; IF I &gt;= 10 THEN EXIT;</tt><tt><br></tt><tt>END;</tt><br></p>
     </blockquote>
-    <p>This produces a PALMAT structure like the one below.&nbsp; Since my purpose here in this section is just to illustrate how scopes interact, I won't dissect it in detail for you (exercise for the reader!), except to say that the various identifiers you see whose names are of the form <tt>xx_X</tt>, where <tt>xx</tt> is a pair of lower-case letters and <tt>X</tt> is a number, are program labels automatically created by the compiler's code generator.&nbsp; They are used both by PALMAT instructions like "<tt>goto</tt>" (discussed later) that cause some kind of jump to a different address, and by the PALMAT instructions that are the targets of such jumps.&nbsp; Thus, for example, you'll see an instruction <tt>{"goto": [0, "^ue_1^"]}</tt> in scope 0 and a matching instruction <tt>{"noop": true, "label": "^ue_1^"}</tt> in scope 1.&nbsp; The former is a jump to the latter.&nbsp; When this code is executed, beginning at instruction 0 in scope 0, the first thing that happens is a jump to instruction 0 in scope 1, which represents the <tt>DO WHILE</tt> block.&nbsp; Several instructions in the <tt>DO WHILE</tt> block are executed, until near the end of the block we see the instruction <tt>{"goto": [1, "^ue_2^"]}</tt>, which is a jump to scope 2, the <tt>IF</tt> block.&nbsp; Eventually, after scope 2 does its works it returns to scope 1 (via the instruction <tt>{"goto": [1, "^ur_2^"]}</tt>), and scope 1 eventually returns to scope 0 (via <tt>{"goto": [0, "^ur_1^"]}</tt>), at which point scope 0 runs out of instructions to execute, and emulation halts.<br></p>
+    <p>This produces a PALMAT structure like the one below.&nbsp; Since my purpose here in this section is just to illustrate how scopes interact, I won't dissect it in detail for you (exercise for the reader!), except to say that the various identifiers you see whose names are of the form <tt>xx_X</tt>, where <tt>xx</tt> is a pair of lower-case letters and <tt>X</tt> is a number, are program labels automatically created by the compiler's code generator.&nbsp; They are used both by PALMAT instructions like "<tt>goto</tt>" (discussed later) that cause some kind of jump to a different address, and by the PALMAT instructions that are the targets of such jumps.&nbsp; Thus, for example, you'll see an instruction <tt>{"goto": [0, "^ue_1^"]}</tt> in scope 0 and a matching instruction <tt>{"noop": true, "label": "^ue_1^"}</tt> in scope 1.&nbsp; The former is a jump to the latter.&nbsp; When this code is executed, beginning at instruction 0 in scope 0, the first thing that happens is a jump to instruction 0 in scope 1, which represents the <tt>DO WHILE</tt> block.&nbsp; Several instructions in the <tt>DO WHILE</tt> block are executed, until near the end of the block we see the instruction <tt>{"goto": [1, "^ue_2^"]}</tt>, which is a jump to scope 2, the <tt>IF</tt> block.&nbsp; Eventually, after scope 2 does its work it returns to scope 1 (via the instruction <tt>{"goto": [1, "^ur_2^"]}</tt>), and scope 1 eventually returns to scope 0 (via <tt>{"goto": [0, "^ur_1^"]}</tt>), at which point scope 0 runs out of instructions to execute, and emulation halts.<br></p>
     <blockquote>
       <p><tt>{<br>&nbsp;&nbsp;&nbsp; "scopes": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": null, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [1], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^I^": {"integer": true, "initial": 0, "value": 0}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ue_1^": {"label": [1, 0]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ur_1^": {"label": [0, 1]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ue_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ur_1^"}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "root"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 1, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [2], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ue_2^": {"label": [2, 0]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ur_2^": {"label": [1, 10]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ux_1^": {"label": [1, 12]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ue_1^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"boolean": [[1, 1]]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"iffalse": [1, "^ux_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"write": "6"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"number": "1"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"operator": "+"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"storepop": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ue_2^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ur_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ue_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ux_1^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ur_1^"]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "do while"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": 1, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 2, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {"^ux_2^": {"label": [2, 6]}}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ue_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"number": "10"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"operator": "&gt;="}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"iffalse": [2, "^ux_2^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ux_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ux_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ur_2^"]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "if"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; "instantiation": 0<br>}</tt><br></p>
     </blockquote>
     <p>This particular example happens to illustrate an interesting point about some program-label identifiers, namely that they may be <i>defined</i> in one scope but actually represent a location in a descendant scope.&nbsp; This is the case with the program labels <tt>ue_1</tt> and <tt>ue_2</tt>.&nbsp; Recall that I mentioned earlier that scopes have access to identifiers declared in their ancestor scopes, but ancestors have no access to identifiers defined in their descendant scopes.&nbsp; That's what's happening here.&nbsp; Both scopes 0 and 1 need the definition of <tt>ue_1</tt> to be accessible to them, and scope 1 has access to scope 0's definitions, but not vice-versa.&nbsp; This forces the code generator to define <tt>ue_1</tt> in scope 0, even though the label itself really refers to an address in scope 1.<br></p>
-    <p>As you can probably imagine by now, any practical example of HAL/S code will compile to quite a large hierarchy of scopes, descending to many levels deep and quite wide in terms of the numbers of sibling scopes.&nbsp; Part of the job of a linker program would be arrange all of these scopes linearly in memory in a reasonably efficient way to eliminate useless jumps; whereas when emulating PALMAT directly, each scope exists in its own memory space that is essentially independent of all the others, rather than being in any particular memory order with respect to them.<br></p>
+    <p>As you can probably imagine by now, any practical example of HAL/S code will compile to quite a large hierarchy of scopes, descending to many levels deep and quite wide in terms of the numbers of sibling scopes.&nbsp; Part of the job of a linker program would be arrange all of these scopes linearly in memory in a reasonably efficient way to eliminate useless jumps; whereas when emulating PALMAT directly, each scope can continue to exist in its own memory space that is essentially independent of all the others, rather than being in any particular linear memory order with respect to them.<br></p>
     <h2><a name="Data"></a>Data Model</h2>
-    <p>By the "data model" for a scope, I mean the "identifiers" dictionary in the scope, which was illustrated a little bit in the preceding section.&nbsp; The <tt>identifiers</tt> dictionary has an entry — i.e., a key/value pair — for each identifier accessible to the scope and its descendant scopes, but not to other scopes.&nbsp; Very often these identifiers will be the names of variables or constants for which actual space within the scope is allocated.&nbsp; Sometimes, however, the identifiers will be program labels, either for named entities (like a <tt>PROGRAM</tt>, <tt>FUNCTION</tt>, or <tt>PROCEDURE</tt>) or positions in the PALMAT instruction stream not explicitly named by the HAL/S source code but for which a label has been transparently created by the compiler's code generator.&nbsp; Often, as mentioned above, these locations will not be in the scope where their symbolic labels are defined in the identifiers dictionary, but rather in some descendant scope.&nbsp;&nbsp;&nbsp; For example, in HAL/S code such as the following,<br></p>
+    <p>By the "data model" for a scope, I mean the "identifiers" dictionary in the scope, which was illustrated a little bit in the preceding section.&nbsp; The <tt>identifiers</tt> dictionary has an entry — i.e., a key/value pair — for each identifier accessible to the scope and its descendant scopes, but not to other scopes.&nbsp; Very often these identifiers will be the names of variables or constants for which actual space within the scope is allocated.&nbsp; Sometimes, however, the identifiers will be symbolic program labels, either for named entities (like a <tt>PROGRAM</tt>, <tt>FUNCTION</tt>, or <tt>PROCEDURE</tt>) or for positions in the PALMAT instruction stream not explicitly named by the HAL/S source code but for which a label has been transparently created by the compiler's code generator.&nbsp; Often, as mentioned above, these locations will not be in the scope where their symbolic labels are defined in the identifiers dictionary, but rather in some descendant scope.&nbsp;&nbsp;&nbsp; For example, in HAL/S code such as the following,<br></p>
     <blockquote><tt>F: FUNCTION(X);<br>
         &nbsp;&nbsp;&nbsp; .<br>
         &nbsp;&nbsp;&nbsp; .<br>
@@ -438,7 +441,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <li><font size="-1">In the identifier dictionary, you'll always find identifiers decorated by what I refer to as "carat quotes".&nbsp; For example, for a declaration like <tt>DECLARE I INTEGER</tt>, you'd find that <tt>^I^</tt> appeared as a key in the identifier dictionary rather than merely <tt>I</tt>. <br></font></li>
         <li><font size="-1"><i>Some</i> types of identifiers appear in "mangled" forms related to their datatypes.&nbsp; This mangling, discussed later in the <a moz-do-not-send="true" href="#Preprocessor">Preprocessor Section</a>, takes the form of a suffix of either 1 or 2 lower-case letters and an underline.&nbsp; Thus in the examples you saw earlier, the <tt>PROGRAM EXAMPLE</tt> turned into the identifier "<tt>^l_EXAMPLE^</tt>".</font></li>
       </ul>
-      <p><font size="-1">Or to be blunt, </font><font size="-1"><tt>^l_EXAMPLE^</tt></font><font size="-1"> is nothing more nor less than </font><font size="-1"><tt>EXAMPLE</tt></font><font size="-1">, and you can basically ignore the decorations.  Both of these modifications to the identifier names are inherited from details of the inner workings of the preprocessor and parser; I won't go into detail with that here, except to say that there is no good reason for either of these modifications to persist once PALMAT has been generated and is going to be emulated.&nbsp; Both types of modifications can simply be stripped away in "advanced" stage development.&nbsp; (Though I've seen no actual Shuttle HAL/S source code as of yet, my belief is that it is all upper case, while the carat (^) is not a legal character in HAL/S.&nbsp; So there should be no identifiers in the Shuttle flight software that can mimic these modifications.)</font><br></p>
+      <p><font size="-1">Or to be blunt, </font><font size="-1"><tt>^l_EXAMPLE^</tt></font><font size="-1"> is nothing more nor less than </font><font size="-1"><tt>EXAMPLE</tt></font><font size="-1">, and you can basically ignore the decorations.  Both of these modifications to the identifier names are inherited from details of the inner workings of the preprocessor and parser; I won't go into detail with that here, except to say that there is no good reason for either of these modifications to persist once PALMAT has been generated and is going to be emulated.&nbsp; Both types of modifications can simply be stripped away in "advanced" stage development.&nbsp; (Though I've seen no actual Shuttle HAL/S source code as of yet, my belief is that it is all upper case, while the carat (^) is not a legal character in HAL/S.&nbsp; So there should be no identifiers in the Shuttle flight software that mimic these modifications.  If it turns out that there are, I guess I'll have to modify the name-mangling scheme somewhat.)</font><br></p>
     </blockquote>
     The value associated with an identifier key, i.e. <tt>PALMAT["scopes"][index]["identifiers"][identifier]</tt>,
     is itself a dictionary of key/value pairs describing the
@@ -460,13 +463,13 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <li>Optional "value".&nbsp; This is the value assigned to the variable.&nbsp; I've noted here that it's "optional", because it may be omitted from the variable's attributes prior to any assignment occurring.&nbsp; But regarding uninitialized values, see also the comments about <tt>None</tt> in the <a moz-do-not-send="true" href="#Datatypes">Datatypes Section</a>.</li>
         <li>Optional "static".&nbsp; Always <tt>True</tt> if present.&nbsp; It means that the initialization of a variable specified by the "initial" attribute (see above) is performed just once, at startup, and is not performed again if the defining block (<tt>FUNCTION</tt>, <tt>PROCEDURE</tt>, etc.) is executed again later.&nbsp; This is the default.<br></li>
         <li>Optional "automatic".&nbsp; Always <tt>True</tt> if present.&nbsp; It means that the initialization of a variable specified by the "initial" attribute (see above) is performed anew every time the declaring block is executed.</li>
-        <li>Optional "aligned".&nbsp; Always <tt>True</tt> if present. It means that data is aligned on "appropriate" storage boundaries.&nbsp; Appropriateness is undefined, but apparently means appropriate for fastest execution.&nbsp; This is not applicable to the PALMAT implementation in Python, and is thus ignored in the "preliminary" PALMAT-based implementation.<br></li>
+        <li>Optional "aligned".&nbsp; Always <tt>True</tt> if present. It means that data is aligned on "appropriate" storage boundaries.&nbsp; The concept of "appropriateness" isn't defined in the documentation, but apparently means appropriate for fastest execution.&nbsp; This is not applicable to the PALMAT implementation in Python, and is thus ignored in the "preliminary" PALMAT-based implementation.<br></li>
         <li>Optional "dense".&nbsp; Always <tt>True</tt> if present. It means that data is aligned to require the least amount of memory, potentially at the cost of reduced execution speed.&nbsp; Essentially, it is the opposite of "aligned".&nbsp; And like "aligned", it is ignored in the Python PALMAT-based "preliminary" implementation.</li>
         <li>Optional "access".&nbsp; Always <tt>True</tt> if present.&nbsp; This refers to a managerial control apparently used in the original Shuttle development, namely that blocks of code can be granted specific access rights to variables that define what code has permissions to do what to that variable.&nbsp; In other words, some programmers were trusted to use certain variables in certain ways, and others were not.&nbsp; However ... this managerial concept may have been useful <i>prior</i> to code creation, but has no relevance at all after the code has been written and released, because any source code surviving to that point is guaranteed to obey the imposed access controls even if the access mechanism is no longer actively in place.&nbsp; Hence, the modern implementation (at least in the "preliminary" version) simply ignores this attribute.<br></li>
         <li>Optional "lock".&nbsp; If present, it has an integer value that refers to the "lock group" to which it pertains.&nbsp; This refers to temporary locks placed on variables shared in <tt>COMPOOL</tt>s by multiple simultaneous HAL/S processes.<br></li>
         <li>Optional "remote".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; This attribute means that the variable may be seldom-used, and hence may reside in some form of auxiliary memory that's slow to access, rather than in quickly-accessed local memory.&nbsp; This concept of memory maintenance has no relevance to the modern implementation in which essentially unlimited amounts of fast memory are available, and hence is ignored.</li>
         <li>Optional "rigid".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; It implies that the compiler is not allowed to reorder <tt>STRUCTURE</tt> fields, but instead requires them to remain in the same order in memory as implied by their HAL/S declarations.&nbsp; I'm not certain yet whether this concept is irrelevant to the modern implementation or not; but for the present it is being ignored.&nbsp; But see the "ordering" key immediately below.</li>
-        <li>Optional "ordering".&nbsp; This field is present only for certain <tt>STRUCTURE</tt>s.&nbsp; <a moz-do-not-send="true" href="#Datatypes">Recall</a> that HAL/S <tt>STRUCTURE</tt>s are implemented in PALMAT as Python dictionaries, and that Python dictionaries do not have any concept of the ordering of the keys therein.&nbsp; On the other hand, recall also <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses in HAL/S <tt>DEFINE</tt> statements rely on a known ordering of the elements of composite datatypes (like <tt>STRUCTURE</tt>s).&nbsp; That being the case, if <tt>INITIAL</tt> or <tt>CONSTANT</tt> is present, or <tt>RIGID</tt> (see immediately above), knowledge of the expected ordering of <tt>STRUCTURE</tt> fields must be preserved.&nbsp; The "ordering" field provides that knowledge.&nbsp; The value associated with the "ordering" key is TBD.<br></li>
+        <li>Optional "ordering".&nbsp; This field is present only for certain <tt>STRUCTURE</tt>s.  It has a bookkeeping purpose for the modern compiler, and is not related to anything in the original HAL/S language or compiler.  (But see "rigid" above.)&nbsp; <a moz-do-not-send="true" href="#Datatypes">Recall</a> that HAL/S <tt>STRUCTURE</tt>s are implemented in PALMAT as Python dictionaries, and that Python dictionaries do not have any concept of the ordering of the keys therein.&nbsp; On the other hand, recall also <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses in HAL/S <tt>DEFINE</tt> statements rely on a known ordering of the elements of composite datatypes (like <tt>STRUCTURE</tt>s).&nbsp; That being the case, if <tt>INITIAL</tt> or <tt>CONSTANT</tt> is present, or <tt>RIGID</tt> (see immediately above), knowledge of the expected ordering of <tt>STRUCTURE</tt> fields must be preserved.&nbsp; The "ordering" field provides that knowledge.&nbsp; The value associated with the "ordering" key is TBD.<br></li>
       </ul>
       <li>For constants, the attributes are generally similar to variables as just described.&nbsp; But here are a few differences:</li>
       <ul>
@@ -488,11 +491,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       <li>For <tt>PROCEDURE</tt> names:</li>
       <ul>
         <li>"procedure" is always <tt>True</tt>.</li>
-        <li>"parameters" is a Python list, possibly empty, of the formal names 
-of the procedure's parameters.&nbsp; These are mangled names (i.e., sometimes 
-with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called carat-quotes.</li>
-        <li>"assignments" is a Python list, possibly empty, of the formal names of parameters in the <tt>ASSIGN</tt> clause. These are mangled names (i.e., sometimes 
-with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called carat-quotes.</li>
+        <li>"parameters" is a Python list, possibly empty, of the formal names of the procedure's parameters.&nbsp; These are mangled names (i.e., sometimes with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called carat-quotes.</li>
+        <li>"assignments" is a Python list, possibly empty, of the formal names of parameters in the <tt>ASSIGN</tt> clause. These are mangled names (i.e., sometimes with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called carat-quotes.</li>
         <li>"scope" is the index within <tt>PALMAT["scopes"]</tt> of the scope dedicated to the procedure.&nbsp; (The entry address of the scope's code is always 0, and is therefore not specified.)</li>
       </ul>
       <li>For <tt>COMPOOL</tt> names:</li>
@@ -519,14 +519,14 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
       </ol>
     </ul>
     <blockquote>
-      <p><font size="-1"><b>Aside:</b>  In general, any given HAL/S source-code line will result in generation of multiple PALMAT instructions.  It's therefore a waste to attach "</font><font size="-1"><tt>source</tt></font><font size="-1">" fields to every instruction.  The rule-of-thumb is that if any PALMAT instruction lacks a </font><font size="-1"><tt>source</tt></font><font size="-1"> field, then its </font><font size="-1"><tt>source</tt></font><font size="-1"> is identical to the preceding PALMAT instruction. <br></font></p>
+      <p><font size="-1"><b>Aside:</b>  In general, any given HAL/S source-code line will result in generation of multiple PALMAT instructions.  It's therefore a waste to attach "</font><font size="-1"><tt>source</tt></font><font size="-1">" fields to every instruction.  The rule-of-thumb is that if any PALMAT instruction lacks a </font><font size="-1"><tt>source</tt></font><font size="-1"> field, then its </font><font size="-1"><tt>source</tt></font><font size="-1"> is presumed to be identical to that of the preceding PALMAT instruction. <br></font></p>
       <p><font size="-1">There is one exception to this rule, namely instructions with "</font><font size="-1"><tt>label</tt></font><font size="-1">" fields.  In that case, the instruction may be jumped to directly, and it's more difficult for the emulator to know what the associated source line is without the extra work of analyzing backward through the instruction <i>addresses</i> rather than the instruction flow actually executed (which the emulator already knows and thus requires no additional work).  To assist the emulator, </font><font size="-1"><tt>source</tt></font><font size="-1"> fields may therefore be attached to instructions with </font><font size="-1"><tt>label</tt></font><font size="-1"> fields, even if the actual value of the </font><font size="-1"><tt>source</tt></font><font size="-1"> may be the same as that of the preceding instruction address.<br></font></p>
     </blockquote>
     <h3><a name="Calculations"></a>Operations on the Computation Stack<br>
     </h3>
-    <p>Recall the discussion of the so-called <a moz-do-not-send="true" href="#ComputationStack">Computation Stack</a> from earlier.&nbsp; Below, if there is a single operand on the computation stack, I'll simply refer to it as "operand".&nbsp; If there are two operands on the stack, I'll refer to the one at the top of the stack (i.e., the first to be popped) as "operand1" and the next-to-top as "operand2".<br></p>
-    <p>In general, if the operands in one of the operations described below are Python integers, and if the result can continue to be represented exactly as an integer, then the result will continue to be a Python integer.&nbsp; More usually, however, operations results will be Python floating-point values.<br></p>
-    <p>Note also that several <a moz-do-not-send="true" href="#ControlTransfer">control-transfer instructions</a> and <a moz-do-not-send="true" href="#Miscellaneous">miscellaneous instructions</a> also affect the computation stack in a generally-trivial way without that being their principal function, but are not included in the table below.<br></p>
+    <p>Recall the discussion of the so-called <a moz-do-not-send="true" href="#ComputationStack">Computation Stack</a> from earlier.&nbsp; The instructions described in this section are primarily for the purpose of performing computations on the stack.  Below, if there is a single operand on the computation stack, I'll simply refer to it as "operand".&nbsp; If there are two operands on the stack, I'll refer to the one at the top of the stack (i.e., the first to be popped) as "operand1" and the next-to-top as "operand2".<br></p>
+    <p>In general, if the operands in one of the operations described below are Python integers, and if the result can continue to be represented exactly as an integer, then the result will continue to be a Python integer.&nbsp; More usually, however, numerical-operation results will be Python floating-point values.<br></p>
+    <p>Note also that several <a moz-do-not-send="true" href="#ControlTransfer">control-transfer instructions</a> and <a moz-do-not-send="true" href="#Miscellaneous">miscellaneous instructions</a> also affect the computation stack in a generally-trivial way without that being their principal function, but are included in later sections rather than in the  table below.<br></p>
     <h4><a name="Pushing"></a>Pushing onto the Computation Stack<br>
     </h4>
     <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -547,26 +547,24 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
             </tt></td>
           <td valign="top">Pushes a literal number (HAL/S <tt>INTEGER</tt>
             or <tt>SCALAR</tt> onto the computation stack.&nbsp; In
-            this "preliminary" Python implementation, the number within
-            the instruction is given in string form, and hence must be
-            converted by the emulator at runtime into a Python integer
-            or float before pushing it onto the stack.&nbsp; (In an
-            instruction corresponding to this in an "advanced"
-            implementation, the literal constant would presumably
-            already be in the required native arithmetical format, and
-            would need no conversion.)&nbsp; That's because the
-            compiler's code generator retains exponential modifiers like
-            <tt>B5</tt> (power of 2) and <tt>H-2</tt> (power of 16)
-            as-is, accepting the loss of runtime efficiency.&nbsp; Of
-            course, Python understands only exponential modifiers like "<tt>E12</tt>",
-
-
-
-
-
-            and does not understand these alternate exponential
-            modifiers, nor the potential use of multiple exponential
-            identifiers within the same literal.<br>
+            this "preliminary" Python implementation, the number
+            embedded within the instruction is given in string form, and
+            hence must be converted by the emulator at runtime into a
+            Python integer or float before pushing it onto the
+            stack.&nbsp; (In an instruction corresponding to this in an
+            "advanced" implementation, the literal constant could
+            presumably already be in the required native arithmetical
+            format, thus needing no additional conversion.)&nbsp; That's
+            because the compiler's code generator retains exponential
+            modifiers like <tt>B5</tt> (power of 2) and <tt>H-2</tt>
+            (power of 16) as-is, accepting the loss of runtime
+            efficiency.&nbsp; That was an explicit design choice in the
+            design of PALMAT, if perhaps its wisdom is somewhat
+            questionable.&nbsp; Of course, Python understands only
+            exponential modifiers like "<tt>E12</tt>", and does not
+            understand these alternate exponential modifiers, nor the
+            potential use of multiple exponential identifiers within the
+            same literal.<br>
           </td>
         </tr>
         <tr>
@@ -581,7 +579,9 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
           <td valign="top"><tt>{'vector': [...]}<br>
             </tt></td>
           <td valign="top">Pushes a literal <tt>VECTOR</tt> onto the
-            computation stack as a single entry.<br>
+            computation stack as a single entry.&nbsp; Unlike the <tt>number</tt>
+            instruction, the compiler's code generator provides <tt>VECTOR</tt>
+            entries as actual Python numbers rather than strings.<br>
           </td>
         </tr>
         <tr>
@@ -590,8 +590,9 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
           <td valign="top"><tt>{'matrix': [[...],...,[...]]}<br>
             </tt></td>
           <td valign="top">Pushes a literal <tt>MATRIX</tt> into the
-            computation stack as a single entry.<br>
-          </td>
+            computation stack as a single entry.&nbsp; Unlike the <tt>number</tt>
+            instruction, the compiler's code generator provides <tt>MATRIX</tt>
+            entries as actual Python numbers rather than strings. </td>
         </tr>
         <tr>
           <td valign="top"><tt>array<br>
@@ -624,10 +625,9 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
           </td>
           <td valign="top"><tt>{'bitarray': [value, length, 'p']}</tt><tt><br>
             </tt></td>
-          <td valign="top">TBD ... I'm confused about this one; may be
-            some legacy thing no longer doing what it was originally
-            intended for.<br>
-          </td>
+          <td valign="top">TBD ... I may be confused.&nbsp; It may be
+            that <tt>{'boolean': [value, length, 'p']}</tt> is used for
+            all booleans and bit-strings. </td>
         </tr>
         <tr>
           <td valign="top"><tt>fetch</tt></td>
@@ -637,6 +637,8 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
             or constant in the indicated scope, and pushes the current
             or constant value of it onto the computation stack.&nbsp; If
             it's an uninitialized variable, then a Python <tt>None</tt>
+            (or a hierarchy of lists of <tt>None</tt>, as appropriate
+            for <tt>VECTOR</tt>, <tt>MATRIX</tt>, or <tt>ARRAY</tt>)
             is pushed onto the stack.&nbsp; Note that the value being
             pushed onto the stack can be of any supported datatype,
             including <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>ARRAY</tt>,
@@ -677,6 +679,14 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
             must be replaced (by <tt>Z</tt>) and that -1 must be
             replaced (by <tt>Z</tt>'s scope index).<br>
             <br>
+            Since <tt>PROCEDURE</tt> calls can be nested, it may be
+            that when an <tt>ASSIGN</tt> alias like this is resolved,
+            it may turn out to be yet another <tt>ASSIGN</tt> alias
+            (with a scope index of -1), thus resulting in another search
+            to resolve that alias.&nbsp; And this process could (but
+            wouldn't necessarily) continue for however many levels the <tt>PROCEDURE</tt>
+            calls are nested.<br>
+            <br>
             If some manner is found in the future of having the
             compiler's code-generator perform this lookup at compile
             time rather than forcing the emulator to do it at runtime,
@@ -705,7 +715,10 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
             </blockquote>
             At this writing, the only envisaged use for the <tt>fetchp</tt>
             instruction is in setup of the computation stack for a <tt>read</tt>
-            instruction.<br>
+            instruction.&nbsp; Like <tt>fetch</tt> instructions, when a
+            <tt>fetchp</tt> instruction is executed, it can be
+            conditioned by an immediately-preceding <tt>subscripts</tt>
+            collection on the computation stack.<br>
           </td>
         </tr>
         <tr>
@@ -762,6 +775,22 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
             in the preliminary implementation) onto the computation
             stack.&nbsp; This corresponds to the presence of a "*" at
             the end of a HAL/S repetition list, or a "*" subscript. </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>partition</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'partition': True}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Pushes a "semicolon" object (Python <tt>{'semicolon'}</tt>
+            in the preliminary implementation) onto the computation
+            stack.&nbsp; This should happen only within a list of
+            subscripts, and marks the separation point (if applicable)
+            between <tt>ARRAY</tt> subscripts and <tt>VECTOR/MATRIX</tt>
+            subscripts.&nbsp; (Or potentially for the latter, <tt>VECTOR/MATRIX/BIT/CHARACTER</tt>
+            subscripts.&nbsp; But at this writing I've not yet
+            implemented <tt>BIT</tt> or <tt>CHARACTER</tt>
+            subscripts.)<br>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -862,6 +891,13 @@ with prefixes like <tt>xx_</tt> indicating the datatype) but without so-called c
             pushes operand1**operand2 back onto the stack.&nbsp; I.e.,
             operand1 is raised to the operand2 power.&nbsp; The result
             of operations like 0**0 or (-1)**0.5 are presently TBD.<br>
+            <br>
+            Note that operand1 can be a square, non-singular <tt>MATRIX</tt>
+            in addition to <tt>INTEGER</tt> or <tt>SCALAR</tt>
+            types.&nbsp; Note that the HAL/S operation <tt>M**T</tt>
+            (where <tt>M</tt> is a <tt>MATRIX</tt>) is implemented
+            alternate means in PALMAT, and is <i>not</i> handled by the
+            <tt>**</tt> instruction.<br>
           </td>
         </tr>
         <tr>
@@ -1967,6 +2003,75 @@ p, li { white-space: pre-wrap; }
             whose compilation is capable of generating this instruction.<br>
           </td>
         </tr>
+        <tr>
+          <td valign="top"><tt>calloffset</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'calloffset': identifier}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Stores the offset within the instruction
+            stream of the <i>succeeding</i> instruction into a
+            dedicated and otherwise-inaccessible register (called
+            "returnoffset") in the scope, and then transfers control to
+            the specified <tt>identifier</tt>, which must be defined in
+            the <i>current</i> scope.&nbsp; This instruction is used in
+            conjunction with the <tt>returnoffset</tt> instruction (see
+            below), and designed for the implementation of HAL/S <i>discrete</i>
+            <tt>DO FOR</tt> loops.&nbsp; I.e., it is used for HAL/S
+            constructs like<br>
+            <blockquote><tt>DO FOR I = <i>EXPRESSION1</i>, <i>EXPRESSION2</i>,
+                ..., <i>EXPRESSIONn</i>; ... (body) ...; END;<br>
+              </tt></blockquote>
+            In practice, since this instruction is used for a single
+            purpose, the <tt>identifer</tt> is always called "<tt>df_b</tt>",
+            which stands for "do for body", and is the symbolic label at
+            the beginning of the loop's body.&nbsp; But in principle it
+            could be something else.&nbsp; Recall, by the way, that
+            while such loops can be nested, each nested loop resides in
+            a distinct PALMAT scope, so the use of the dedicated
+            "returnoffset" register and dedicated identifier "<tt>df_b</tt>"
+            do not conflict with such nestings.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>returnoffset</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'returnoffset': True}</tt><tt><br>
+            </tt></td>
+          <td valign="top">Transfers control, within the current scope,
+            to the offset held in the scope's dedicated offset register,
+            which is written only by the <tt>call</tt><tt>offset</tt>
+            instruction (see above).&nbsp; If the dedicated offset
+            register doesn't exist in the current scope, find the
+            nearest ancestor scope with an offset register, and use it
+            instead.&nbsp; (This allows using the <tt>returnoffset</tt>
+            instruction for implementing a HAL/S <tt>REPEAT</tt> within
+            a discrete <tt>FOR</tt>-loop.)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top"><tt>case</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'case': prefix}</tt><tt><br>
+            </tt></td>
+          <td valign="top">As the name of this instruction hints, it is
+            designed to implement HAL/S <tt>DO CASE</tt>
+            statements.&nbsp; Its action is as follows:<br>
+            <ol>
+              <li>It pops its operand from the top of the computation stack.  This operand must be an <tt>INTEGER</tt> or <tt>SCALAR</tt>; if a <tt>SCALAR</tt>, it is rounded to an <tt>INTEGER</tt>.</li>
+              <li>The <tt>prefix</tt> specified in the instruction is a string.  For PALMAT generated by the compiler from a <tt>DO CASE</tt> statement, prefix is always "<tt>dc_</tt>", but in principle it could be something else.</li>
+              <li>The <tt>prefix</tt> and the operand are used to construct an identifier by concatenating a suffix to the <tt>prefix</tt>:</li>
+              <ul>
+                <li>If the operand is &lt; 1, then the suffix is "else".</li>
+                <li>If the operand is ≥ 1, then suffix is the operand formatted as a string.  But if this identifier is not defined in the current scope, then the suffix is changed to "else". <br></li>
+              </ul>
+              <li>But if this identifier is not defined in the current scope, the suffix is changed to "exit".</li>
+              <li>Control is transferred to the instruction in the current scope having the identifier as a symbolic label.<br></li>
+            </ol>
+            <p>For example, if prefix is "<tt>dc_</tt>" and the number 5 is at the top of the computation stack, then the case instruction attempts to transfer control to the symbolic label <tt>dc_5</tt>, but if the symbolic label <tt>dc_5</tt> is not defined in the current scope it instead tries to transfer control to <tt>dc_else</tt>, and if <tt>dc_else</tt> isn't defined then it at last transfers control to <tt>dc_exit</tt>.<br></p>
+            <p>Explanation:  In a <tt>DO CASE</tt> statement, the compiler's code-generator assigns the symbolic label <tt>dc_else</tt> to the <tt>DO CASE</tt> statement's <tt>ELSE</tt> clause (if there is one).  It similarly assigns the symbolic labels <tt>dc_1</tt>, <tt>dc_2</tt>, <tt>dc_3</tt>, ... to the various statements comprising the different cases in the statement, and finally places the symbolic label <tt>dc_exit</tt> at the very end. <br></p>
+            <p>Finally, while it is true that <tt>DO CASE</tt> statements can be nested, since each <tt>DO CASE</tt> statement will reside in its own PALMAT scope, there is no conflict between the <tt>dc_X</tt> labels of the nested statements.<br></p>
+          </td>
+        </tr>
       </tbody>
     </table>
     <br>
@@ -2109,23 +2214,19 @@ p, li { white-space: pre-wrap; }
     <br>
     <hr style="width: 100%; height: 2px;"><br>
     <br>
-    <br>
-    <br>
-    <br>
-    <center><br>
-      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
-        font-size: 11.05px; font-style: normal; font-variant: normal;
-        font-weight: normal; letter-spacing: normal; line-height:
-        16.575px; orphans: auto; text-align: center; text-indent: 0px;
-        text-transform: none; white-space: normal; widows: 1;
-        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
-        inline !important; float: none; background-color: rgb(255, 255,
-        255);"> This page is available under the <a
+    <center> <span style="color: rgb(84, 89, 93); font-family:
+        sans-serif; font-size: 11.05px; font-style: normal;
+        font-variant: normal; font-weight: normal; letter-spacing:
+        normal; line-height: 16.575px; orphans: auto; text-align:
+        center; text-indent: 0px; text-transform: none; white-space:
+        normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width:
+        0px; display: inline !important; float: none; background-color:
+        rgb(255, 255, 255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-02-22<br>
+          2023-02-27<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
