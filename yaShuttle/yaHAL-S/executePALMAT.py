@@ -158,23 +158,6 @@ def clonePALMAT(rawPALMAT):
     deepcopyDescendents(scopeIndex)
     return PALMAT
 
-'''
-(Superseded)
-# Get a subscripted value from an object.  At present, this works only if the 
-# subscripts are all numbers; i.e., not "slices".  Returns None on error.
-def subscripted(source, object, subscripts):
-    for i in range(len(subscripts)):
-        subscript = hround(subscripts[i])
-        try:
-            # Recall that HAL/S subscripts start from 1, while Python 
-            # starts from 0.
-            object = object[subscript-1]
-        except:
-            printError(source, "", "Subscript does not exist in object.")
-            return None
-    return copy.deepcopy(object)
-'''
-
 # For WRITE statements.
 def printVectorOrMatrix(vOrM):
     if isinstance(vOrM, list):
@@ -1972,16 +1955,25 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             scope["returnoffset"] = instructionIndex;
             instructionIndex = identifiers[identifier]["label"][1]
         elif "returnoffset" in instruction:
-            i = scopeNumber
-            while i != None and "returnoffset" not in scopes[i]:
-                i = scopes[i]["parent"]
-            if i == None:
-                printError(source, instruction, \
-                           "Implementation error, cannot find returnoffset.")
-                return None
+            i = instruction["returnoffset"]
+            if i == -1:
+                i = scopeNumber
+                while i != None and "returnoffset" not in scopes[i]:
+                    i = scopes[i]["parent"]
+                if i == None:
+                    printError(source, instruction, \
+                               "Implementation error, cannot find returnoffset.")
+                    return None
             scope = scopes[i]
-            instructionIndex = scope.pop("returnoffset")
-            scopeNumber = i
+            if "returnoffset" in scope:
+                instructionIndex = scope.pop("returnoffset")
+                scopeNumber = i
+            else:
+                printError(source, instruction, \
+                           "Implementation error, returnoffset not in scope.")
+                for key in sorted(scope):
+                    print("\t%s:" % key, scope[key])
+                return None
         elif "case" in instruction:
             if len(computationStack) < 1:
                 printError(source, instruction, \
@@ -2082,6 +2074,10 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 return None
             #scopeNumber, instructionIndex = computationStack.pop(-stackPos)
             scope = scopes[scopeNumber]
+        elif "halt" in instruction:
+            # Ends emulation.
+            printError(source, None, "Normal program termination")
+            return None
         elif "partition" in instruction:
             computationStack.append({"semicolon"})
         else:

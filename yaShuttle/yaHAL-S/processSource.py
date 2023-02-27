@@ -195,6 +195,12 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
 
     success = generatePALMAT(ast, PALMAT, \
                 { "history" : [], "scopeIndex" : 0 }, trace2, [], -1, trace4)
+    if success:
+        for dummy in PALMAT["scopes"]:
+            if dummy["type"] in ["program", "root"]:
+                if len(dummy["instructions"]) == 0 or \
+                       "halt" not in dummy["instructions"][-1]:
+                    dummy["instructions"].append({'halt': True})
 
     return success, ast
     

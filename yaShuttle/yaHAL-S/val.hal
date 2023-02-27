@@ -1653,6 +1653,154 @@ S     J,*
  END;
  CALL PRINT_RESULT('DO CASE BLOCKS', BB) ASSIGN(ERRORS);
  
+ /*--------------------------------------------------------------------------*/
+ WRITE(6) ;
+ WRITE(6) 'Some tests of REPEAT inside of loops.';
+ DECLARE REPEAT_EXPECTED VECTOR(55) 
+ 	   		CONSTANT(1, 1, 2, 1, 2, 3, 1, 2, 3, 4, 1, 2, 3, 4, 5,
+ 				 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 7,
+ 				 1, 2, 3, 4, 5, 6, 7, 8,
+ 				 1, 2, 3, 4, 5, 6, 7, 8, 9,
+ 				 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+ BB = TRUE;
+ DO;
+    TEMPORARY K INTEGER;
+    K = 0;
+    REPEAT_LABEL1: 
+    DO FOR TEMPORARY I = 1 TO 10;
+       DO FOR TEMPORARY J = 1 TO 10;
+          IF J > I THEN REPEAT REPEAT_LABEL1;
+          K = K + 1;
+          IF J ~= REPEAT_EXPECTED$K THEN BB = FALSE;
+          /*WRITE(6) I, J;*/
+       END;
+    END;
+    IF K ~= 55 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('NESTED DO FOR REPEAT', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ DO;
+    TEMPORARY K INTEGER;
+    K = 0;
+    REPEAT_LABEL1: 
+    DO FOR TEMPORARY I = 1 TO 10 WHILE I < 100;
+       DO FOR TEMPORARY J = 1 TO 10;
+          IF J > I THEN REPEAT REPEAT_LABEL1;
+          K = K + 1;
+          IF J ~= REPEAT_EXPECTED$K THEN BB = FALSE;
+          /*WRITE(6) I, J;*/
+       END;
+    END;
+    IF K ~= 55 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('NESTED DO FOR WHILE REPEAT', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ DO;
+    TEMPORARY K INTEGER;
+    K = 0;
+    REPEAT_LABEL1: 
+    DO FOR TEMPORARY I = 1 TO 10 UNTIL I > 100;
+       DO FOR TEMPORARY J = 1 TO 10;
+          IF J > I THEN REPEAT REPEAT_LABEL1;
+          K = K + 1;
+          IF J ~= REPEAT_EXPECTED$K THEN BB = FALSE;
+          /*WRITE(6) I, J;*/
+       END;
+    END;
+    IF K ~= 55 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('NESTED DO FOR UNTIL REPEAT', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ DO;
+    TEMPORARY K INTEGER;
+    K = 0;
+    REPEAT_LABEL1: 
+    DO FOR TEMPORARY I = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10;
+       DO FOR TEMPORARY J = 1 TO 10;
+          IF J > I THEN REPEAT REPEAT_LABEL1;
+          K = K + 1;
+          IF J ~= REPEAT_EXPECTED$K THEN BB = FALSE;
+          /*WRITE(6) I, J;*/
+       END;
+    END;
+    IF K ~= 55 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('NESTED DO FOR DISCRETE REPEAT', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ DO;
+    TEMPORARY K INTEGER;
+    K = 0;
+    REPEAT_LABEL1: 
+    DO FOR TEMPORARY I = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 WHILE I < 100;
+       DO FOR TEMPORARY J = 1 TO 10;
+          IF J > I THEN REPEAT REPEAT_LABEL1;
+          K = K + 1;
+          IF J ~= REPEAT_EXPECTED$K THEN BB = FALSE;
+          /*WRITE(6) I, J;*/
+       END;
+    END;
+    IF K ~= 55 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('NESTED DO FOR DISCRETE WHILE REPEAT', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ DO;
+    TEMPORARY K INTEGER;
+    K = 0;
+    REPEAT_LABEL1: 
+    DO FOR TEMPORARY I = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 UNTIL I > 100;
+       DO FOR TEMPORARY J = 1 TO 10;
+          IF J > I THEN REPEAT REPEAT_LABEL1;
+          K = K + 1;
+          IF J ~= REPEAT_EXPECTED$K THEN BB = FALSE;
+          /*WRITE(6) I, J;*/
+       END;
+    END;
+    IF K ~= 55 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('NESTED DO FOR DISCRETE UNTIL REPEAT', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ DO;
+    TEMPORARY K INTEGER, I INTEGER;
+    K = 0;
+    I = 0;
+    REPEAT_LABEL1: 
+    DO WHILE I < 10;
+       I = I + 1;
+       DO FOR TEMPORARY J = 1 TO 10;
+          IF J > I THEN REPEAT REPEAT_LABEL1;
+          K = K + 1;
+          IF J ~= REPEAT_EXPECTED$K THEN BB = FALSE;
+          /*WRITE(6) I, J;*/
+       END;
+    END;
+    IF K ~= 55 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('NESTED DO WHILE REPEAT', BB) ASSIGN(ERRORS);
+ 
+ BB = TRUE;
+ DO;
+    TEMPORARY K INTEGER, I INTEGER;
+    K = 0;
+    I = 0;
+    REPEAT_LABEL1: 
+    DO UNTIL I = 10;
+       I = I + 1;
+       DO FOR TEMPORARY J = 1 TO 10;
+          IF J > I THEN REPEAT REPEAT_LABEL1;
+          K = K + 1;
+          IF J ~= REPEAT_EXPECTED$K THEN BB = FALSE;
+          /*WRITE(6) I, J;*/
+       END;
+    END;
+    IF K ~= 55 THEN BB = FALSE;
+ END;
+ CALL PRINT_RESULT('NESTED DO UNTIL REPEAT', BB) ASSIGN(ERRORS);
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;

@@ -418,8 +418,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                           {'call': (si, currentIdentifier[1:-1]),
                             'assignments': assDict}, source)
     elif lbnfLabel == "basicStatementReturn":
-        # We need to find the most-narrow context that's a FUNCTION or 
-        # PROCEDURE.
+        # We need to find the most-narrow context that's a FUNCTION, 
+        # PROCEDURE or PROGRAM.
         i = currentIndex
         stackPos = 0
         while i != None:
@@ -430,13 +430,22 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             elif dummy["type"] == 'procedure':
                 stackPos = 1
                 break
+            elif dummy["type"] == 'program':
+                stackPos = -1
+                break
             i = dummy["parent"]
         if stackPos == 0:
             print("\tRETURN without parent FUNCTION or PROCEDURE")
             endLabels.pop()
             return False, PALMAT
-        appendInstruction(currentScope["instructions"], \
-                          {'return': stackPos}, source)
+        elif stackPos == -1:
+            # Return from a PROGRAM. 
+            appendInstruction(currentScope["instructions"], \
+                {'halt': True}, source)
+        else:
+            # Return from a FUNCTION or PROCEDURE.
+            appendInstruction(currentScope["instructions"], \
+                              {'return': stackPos}, source)
     elif lbnfLabel in ["case_else", "doGroupHeadCase"]:
         currentScope["type"] = "do case"
         currentScope["caseCounter"] = 1
@@ -797,22 +806,71 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             return False, PALMAT
     elif lbnfLabel in ["basicStatementExit", "basicStatementRepeat"]:
         loopScope = findEnclosingLoop(PALMAT, currentScope)
-        if 'labelExitRepeat' in substate:
+        if lbnfLabel == "basicStatementExit" and 'labelExitRepeat' in substate:
             appendInstruction(currentScope["instructions"], \
                               {'goto': substate['labelExitRepeat']}, source)
             substate.pop('labelExitRepeat')
+        elif lbnfLabel == "basicStatementRepeat" and \
+                'labelExitRepeat' in substate:
+            label = substate.pop('labelExitRepeat')
+            # We have to find the ancestor scope in which this label is
+            # defined.
+            i = currentScope["self"]
+            while i != None and label not in PALMAT["scopes"][i]["identifiers"]:
+                if PALMAT["scopes"][i]["type"] in \
+                        ["program", "function", "procedure"]:
+                    i = None
+                    break
+                i = PALMAT["scopes"][i]["parent"]
+            if i == None:
+                print("\tLabel %s not found.")
+                endLabels.pop()
+                return False, PALMAT
+            labelScope = PALMAT["scopes"][i]
+            # Now we've found the scope containing the label, but that's not
+            # the scope we need.  We need the DO-loop to which the label refers,
+            # which is a child of  labelScope.  In fact, to find it, we need
+            # to find the instruction in labelScope at which the label is 
+            # defined, and the goto to the DO-loop should follow essentially
+            # thereafter.
+            labelAttributes = labelScope["identifiers"][label]["label"]
+            jumpDoInstruction = PALMAT["scopes"][labelAttributes[0]]\
+                                            ["instructions"][labelAttributes[1]]
+            # This is the instruction that jumps to the scope containing the
+            # DO-loop associated with the label.  It should be of the form
+            # {'goto': (index, entryLabel), ...}, and we can use that to find
+            # the scope actually containing the DO-loop.
+            dummy = jumpDoInstruction["goto"]
+            doScopeIndex = \
+                PALMAT["scopes"][dummy[0]]["identifiers"][dummy[1]]["label"][0]
+            doScope = PALMAT["scopes"][doScopeIndex]
+            # At last we have the scope in which the enclosing DO-loop resides.
+            # What we have to do now depends on what type of loop it is.
+            if doScope["type"] == "do for discrete":
+                appendInstruction(currentScope["instructions"], \
+                                  {'returnoffset': doScopeIndex}, source)
+            elif doScope["type"] == "do for":
+                jumpToTarget(PALMAT, source, currentScope["self"], \
+                             doScopeIndex, "up", "goto")
+            elif doScope["type"] in ["do while", "do until"]:
+                jumpToTarget(PALMAT, source, currentScope["self"], \
+                             doScopeIndex, "ue", "goto", False, dummy[0])
+            else:
+                print("\tLabel for REPEAT not attched to a loop.")
+                endLabels.pop()
+                return False, PALMAT
         else:
             xx = None
             if loopScope == None:
                 print("\tNo enclosing loop found for EXIT.")
                 endLabels.pop()
                 return False, PALMAT
-            elif lbnfLabel == "basicStatementExit":
+            if lbnfLabel == "basicStatementExit":
                 xx = "ux"
             # Below here is REPEAT
             elif loopScope['type'] == "do for discrete":
                 appendInstruction(currentScope["instructions"], \
-                                  {"returnoffset": True}, source)
+                                  {"returnoffset": -1}, source)
             elif loopScope['type'] == "do for":
                 xx = "up"
             else:
@@ -840,7 +898,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                          "up", "goto")
         elif currentScope["type"] == "do for discrete":
             appendInstruction(currentScope["instructions"], \
-                              {'returnoffset': True}, source)
+                              {'returnoffset': -1}, source)
         else:
             # We've got a little problem here, in that the label we want to
             # recycle to at the end of a DO WHILE or DO UNTIL is the same

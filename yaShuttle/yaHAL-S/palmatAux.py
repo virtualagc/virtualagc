@@ -812,6 +812,10 @@ def checkArithmeticalDatatype(operand):
 def printError(source, instruction, msg):
     if msg == "":
         msg = "n/a"
-    print("\t%d,%d,%d (%s): %s" % \
-          (source[0], source[1], source[2], str(instruction), msg))
+    if instruction == None:
+        print("\t%d,%d,%d: %s" % \
+            (source[0], source[1], source[2], msg))
+    else:
+        print("\t%d,%d,%d (%s): %s" % \
+            (source[0], source[1], source[2], str(instruction), msg))
 

@@ -415,9 +415,13 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                             macros[-2][identifier] = { "arguments": [], 
                                 "replacement": hasType + identifier, 
                                 "pattern": "\\b" + identifier + "\\b" }
-                # A new macro via DECLARE?
+                # A new macro via DECLARE or TEMPORARY?
+                declarations = None
                 if fullLine[:8] == "DECLARE ":
                     declarations = fullLine[8:-1].strip()
+                elif fullLine[:10] == "TEMPORARY ":
+                    declarations = fullLine[10:-1].strip()
+                if declarations != None:
                     '''
                     At this point, the declarations string contains the entire 
                     DECLARE statement, in which the leading "DECLARE" and 
