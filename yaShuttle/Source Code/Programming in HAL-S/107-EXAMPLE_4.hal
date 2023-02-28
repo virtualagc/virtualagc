@@ -1,8 +1,8 @@
-C/ From PDF p. 107 of "Programming in HAL/S".
+C/ Adapted from PDF p. 107 of "Programming in HAL/S".
 
   EXAMPLE_4:
   PROGRAM;
-     DECLARE A ARRAY(5) SCALAR DOUBLE;
+     DECLARE A ARRAY(5) SCALAR DOUBLE INITIAL(1, 2, 3, 4, 5);
      DECLARE TEMP SCALAR DOUBLE;
 M    TEMP = A  ;
 S            1
@@ -14,6 +14,8 @@ S	 T    T+1
      END;
 M    A  = TEMP;
 S     5
+
+     WRITE(6) A;
 
   CLOSE EXAMPLE_4;
   

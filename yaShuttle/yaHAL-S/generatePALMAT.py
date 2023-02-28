@@ -19,6 +19,7 @@ from executePALMAT import isBitArray
 from expressionSM import expressionSM
 from doForSM import doForSM
 from p_Functions import expressionComponents, doForComponents
+from saveValueToVariable import convertSimpleAttributes
 
 def traceIt(state, endLabels, lbnfLabel, beforeAfter="before", trace=True, depth=0):
     if not trace:
@@ -82,6 +83,54 @@ def allDeclaredAssigns(currentScope):
         if "assignment" not in identifiers[identifier]:
             identifiers[identifier]["assignment"] = True
     #return declared
+
+# This function takes a flattened list of values for a declaration with 
+# ARRAY(...) ... INITIAL(...) or ARRAY(...) ... CONSTANT(...) and lengthens
+# it consistently with the dimensions of the array.  The arrayList is 
+# manipulated in-place.  Returns True on success, False on failure (input
+# arrayList already longer than compatible with the dimensions).
+def embiggenArrayList(arrayList, attributes):
+    numElements = 1
+    dimensions = attributes["array"]
+    if "vector" in attributes:
+        dimensions.append(attributes["vector"])
+    elif "matrix" in attributes:
+        dimensions.extend(attributes["matrix"])
+    for d in dimensions:
+        numElements *= d
+    if len(arrayList) == 1:
+        e = arrayList[0]
+        while len(arrayList) < numElements:
+            arrayList.append(e)
+    else:
+        while len(arrayList) < numElements:
+            arrayList.append(None)
+    if len(arrayList) == numElements:
+        return True
+    return False;
+
+# "Inflates" an unraveled list of data values into a properly-dimensioned
+# array, in-place. It is known prior to entry that the number of values and 
+# their datatypes are correct, so no error checking or conversion is done.  This 
+# function is *not* recursive.  It works from the bottom up rather than the 
+# topp down.
+def inflateArray(arrayList, attributes):
+    dimensions = []
+    if "vector" in attributes:
+        dimensions.append(attributes["vector"])
+    elif "matrix" in attributes:
+        dimensions.extend(attributes["matrix"])
+    for width in reversed(dimensions):
+        numElements = len(arrayList)
+        for i in range(numElements // width):
+            vector = arrayList[i:i+width]
+            arrayList[i:i+width] = [vector]
+    for width in reversed(attributes["array"][1:]):
+        numElements = len(arrayList)
+        for i in range(numElements // width):
+            vector = arrayList[i:i+width] + ["a"]
+            arrayList[i:i+width] = [vector]
+    arrayList.append("a")
 
 '''
 Here's the idea:  generatePALMAT() is a recursive function that works its
@@ -541,7 +590,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         p_Functions.expressionToInstructions( \
             substate["expression"], instructions)
         appendInstruction(instructions, { "read": substate["LUN"] }, source)
-    elif lbnfLabel == "declare_statement":
+    elif lbnfLabel in ["declare_statement", "temporary_stmt"]:
         markUnmarkedScalars(currentScope["identifiers"])
         messages = completeInitialConstants(currentScope["identifiers"])
         setUninitialized(currentScope["identifiers"])
@@ -556,8 +605,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         parenthesis, but without having performed that computation
         yet, leaving a bogus "initial" or "constant" attribute.
         We now have to perform the actual computation, if possible,
-        and correct the bogus constant.  Since DECLARE statements
-        always come at the beginnings of blocks, prior to any 
+        and correct the bogus constant.  Since DECLARE or TEMPORARY
+        statements always come at the beginnings of blocks, prior to any 
         executable code, we don't have to worry about preserving
         any existing PALMAT for the scope.
         Later ... sez you!  In the interpreter, we do indeed allow DECLARE
@@ -633,11 +682,14 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                         value = None
                     elif "number" in value:
                         try:
-                            value = float(value["number"]);
+                            value = int(value["number"])
                         except:
-                            print("\tINITIAL or CONSTANT not SCALAR or INTEGER:", \
-                                  value)
-                            return False, PALMAT
+                            try:
+                                value = float(value["number"]);
+                            except:
+                                print("\tINITIAL or CONSTANT not SCALAR or INTEGER:", \
+                                      value)
+                                return False, PALMAT
                     elif "boolean" in value:
                         value = value["boolean"]
                     elif "string" in value:
@@ -667,7 +719,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     if False:
                         pass
                     elif "array" in identifierDict:
-                        appendValue(value, arrayList, identifierDict)
+                        #appendValue(value, arrayList, identifierDict)
+                        arrayList.append(convertSimpleAttributes(value, identifierDict))
                         continue
                     elif isinstance(value, (int, float)) and \
                             "integer" in identifierDict:
@@ -737,7 +790,15 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     if key == "initial":
                         identifierDict["value"] = copy.deepcopy(value)
             if "array" in identifierDict:
-                makeTuple(identifierDict, arrayList)
+                #makeTuple(identifierDict, arrayList)
+                embiggened = embiggenArrayList(arrayList, identifierDict)
+                if not embiggened:
+                    print("\tINITIAL or CONSTANT clause for ARRAY %s too long." \
+                          % currentIdentifier[1:-1])
+                    identifiers.pop(currentIdentifier)
+                    endLabels.pop()
+                    return False, PALMAT
+                inflateArray(arrayList, identifierDict)
                 identifierDict[key] = arrayList
                 if key == "initial":
                     identifierDict["value"] = copy.deepcopy(arrayList)

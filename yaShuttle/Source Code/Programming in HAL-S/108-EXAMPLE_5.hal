@@ -1,15 +1,21 @@
-C/ From PDF p. 108 of "Programming in HAL/S".
+C/ Adapted from PDF p. 108 of "Programming in HAL/S".
 
   EXAMPLE_5:
   PROGRAM;
-     DECLARE A ARRAY(100);
+     DECLARE COUNT INTEGER CONSTANT(100);
+     DECLARE A ARRAY(COUNT);
      DECLARE RMS SCALAR;
      DECLARE TOTAL SCALAR DOUBLE INITIAL(0);
-     DO FOR TEMPORARY N = 1 TO 100;
+     DO FOR TEMPORARY N = 1 TO COUNT; A$N = N; END;
+     DO FOR TEMPORARY N = 1 TO COUNT;
 E			 2
 M	TOTAL = TOTAL + A ;
 S			 N
 
      END;
-     RMS = SQRT(TOTAL/100);
+     RMS = SQRT(TOTAL/COUNT);
+     WRITE(6) RMS;
+     /* Compare vs formula for sum of squares. */
+     WRITE(6) SQRT(COUNT (COUNT+1) (2 COUNT + 1) / 6 / COUNT);
   CLOSE EXAMPLE_5;
+  

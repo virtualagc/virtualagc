@@ -97,6 +97,21 @@ def convertSimple(value, datatype, datalength):
             return s
     return NaN
 
+# Same as convertSimple, but take datatype and datalength from identifier
+# attributes.
+def convertSimpleAttributes(value, attributes):
+    if value == None:
+        return None
+    if "integer" in attributes:
+        return convertSimple(value, "integer", -1)
+    if "scalar" in attributes:
+        return convertSimple(value, "scalar", -1)
+    if "character" in attributes:
+        return convertSimple(value, "character", attributes["character"])
+    if "bit" in attributes:
+        return convertSimple(value, "bit", attributes["bit"])
+    return NaN
+
 '''
 # Some tests for convertSimple(). 
 testValues = [None, 1, 2.0, [3, 5, "b"], "4", "5.0B2E-7", "1110010"]
