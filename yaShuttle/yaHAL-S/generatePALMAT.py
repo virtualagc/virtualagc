@@ -88,16 +88,25 @@ def allDeclaredAssigns(currentScope):
 # ARRAY(...) ... INITIAL(...) or ARRAY(...) ... CONSTANT(...) and lengthens
 # it consistently with the dimensions of the array.  The arrayList is 
 # manipulated in-place.  Returns True on success, False on failure (input
-# arrayList already longer than compatible with the dimensions).
+# arrayList already longer than compatible with the dimensions, or shorter
+# but without a *).
 def embiggenArrayList(arrayList, attributes):
     numElements = 1
-    dimensions = attributes["array"]
+    dimensions = copy.deepcopy(attributes["array"])
     if "vector" in attributes:
         dimensions.append(attributes["vector"])
     elif "matrix" in attributes:
         dimensions.extend(attributes["matrix"])
     for d in dimensions:
         numElements *= d
+    filling = False
+    if arrayList[-1:] == [{'fill'}]:
+        filling = True
+        arrayList.pop()
+    if len(arrayList) > numElements:
+        return False
+    if len(arrayList) != 1 and len(arrayList) < numElements and not filling:
+        return False
     if len(arrayList) == 1:
         e = arrayList[0]
         while len(arrayList) < numElements:
@@ -105,9 +114,7 @@ def embiggenArrayList(arrayList, attributes):
     else:
         while len(arrayList) < numElements:
             arrayList.append(None)
-    if len(arrayList) == numElements:
-        return True
-    return False;
+    return True
 
 # "Inflates" an unraveled list of data values into a properly-dimensioned
 # array, in-place. It is known prior to entry that the number of values and 
@@ -719,8 +726,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     if False:
                         pass
                     elif "array" in identifierDict:
-                        #appendValue(value, arrayList, identifierDict)
-                        arrayList.append(convertSimpleAttributes(value, identifierDict))
+                        if isinstance(value, dict) and "fill" in value:
+                            arrayList.append({'fill'})
+                        else: 
+                            arrayList.append(convertSimpleAttributes(value, identifierDict))
                         continue
                     elif isinstance(value, (int, float)) and \
                             "integer" in identifierDict:
@@ -790,10 +799,9 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     if key == "initial":
                         identifierDict["value"] = copy.deepcopy(value)
             if "array" in identifierDict:
-                #makeTuple(identifierDict, arrayList)
                 embiggened = embiggenArrayList(arrayList, identifierDict)
                 if not embiggened:
-                    print("\tINITIAL or CONSTANT clause for ARRAY %s too long." \
+                    print("\tINITIAL or CONSTANT clause for ARRAY %s wrong length." \
                           % currentIdentifier[1:-1])
                     identifiers.pop(currentIdentifier)
                     endLabels.pop()

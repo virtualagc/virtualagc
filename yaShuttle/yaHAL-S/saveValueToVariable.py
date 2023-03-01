@@ -104,7 +104,7 @@ def convertSimpleAttributes(value, attributes):
         return None
     if "integer" in attributes:
         return convertSimple(value, "integer", -1)
-    if "scalar" in attributes:
+    if "scalar" in attributes or "vector" in attributes or "matrix" in attributes:
         return convertSimple(value, "scalar", -1)
     if "character" in attributes:
         return convertSimple(value, "character", attributes["character"])
@@ -202,7 +202,8 @@ def assignCompositeSubscripted(RHS, preSubscriptedLHS, subscriptsLHS, \
     
     # This recursive function descends through the subscripted LHS entrees
     # in unraveling order.  As it reaches the leaves, it picks off elements of 
-    # unraveledRHS to assign to the leaves.
+    # unraveledRHS to assign to the leaves.  Returns True on success, False
+    # on failure.
     def unravelLHS(preSubscriptedLHS, subscriptsLHS, unraveledRHS):
         '''
         print("`")
@@ -210,14 +211,32 @@ def assignCompositeSubscripted(RHS, preSubscriptedLHS, subscriptsLHS, \
         print("` subscriptsLHS", subscriptsLHS)
         print("` unraveledRHS", unraveledRHS)
         '''
+        if len(unraveledRHS) == 1:
+            fillWith = unraveledRHS[0]
+        else:
+            fillWith = None
+        filling = False
         subscriptsAtLevel = subscriptsLHS[0]
         if len(subscriptsLHS) == 1:
             # At lowest level of subscripts.
             for s in subscriptsAtLevel:
-                converted = convertSimple(unraveledRHS.pop(0), datatypeLHS, \
-                                          datalengthLHS)
-                if converted == NaN:
+                if fillWith != None:
+                    converted = fillWith
+                elif filling:
+                    converted = None
+                elif len(unraveledRHS) == 0:
+                    # Out of unraveled data.
                     return False
+                else:
+                    value = unraveledRHS.pop(0)
+                    if value == {'fill'}:
+                        filling = True
+                        converted = None
+                    else:
+                        converted = convertSimple(value, datatypeLHS, \
+                                                  datalengthLHS)
+                        if converted == NaN:
+                            return False
                 preSubscriptedLHS[s-1] = converted
             return True
         else:

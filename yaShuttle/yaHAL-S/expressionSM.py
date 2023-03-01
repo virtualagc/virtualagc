@@ -96,6 +96,8 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
             appendInstruction(expression, { "sentinel": "shaping"}, source)
         elif lbnfLabel == "subStartSemicolon":
             appendInstruction(expression, { "partition": True }, source)
+        elif lbnfLabel == "minorAttributeStar":
+            appendInstruction(expression, { "fill": True }, source)
     if stage == 2 and depth == owningDepth:
         # Transfer the expression stack to the PALMAT instruction queue.
         # But if it's computable at compile-time, then we compute it down
@@ -194,6 +196,9 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
                 elif isinstance(value, str):
                     appendInstruction(temporaryInstructions, \
                                       {"string": value }, source)
+                elif isArrayQuick(value):
+                    appendInstruction(temporaryInstructions, \
+                                      {"array": value }, source)               
                 elif isinstance(value, list) and len(value) > 0:
                     if isinstance(value[0], list):
                         appendInstruction(temporaryInstructions, \
@@ -201,9 +206,6 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
                     else:
                         appendInstruction(temporaryInstructions, \
                                           {"vector": value }, source) 
-                elif isArrayQuick(value):
-                    appendInstruction(temporaryInstructions, \
-                                      {"array": value }, source)               
         if "compiledExpression" in stateMachine:
             instructions = stateMachine["compiledExpression"]
         else:
@@ -306,8 +308,8 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
         elif lbnfLabel == "repeat_head":
             appendInstruction(expression, { "operator": "#"}, source)
             stateMachine["foundPound"] = True
-        elif lbnfLabel == "minorAttributeStar":
-            appendInstruction(expression, { "fill": True }, source)
+        #elif lbnfLabel == "minorAttributeStar":
+        #    appendInstruction(expression, { "fill": True }, source)
         elif lbnfLabel == "subscript":
             appendInstruction(expression, { "operator": "subscripts"}, source)
         elif lbnfLabel == "pound_expression":

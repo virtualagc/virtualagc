@@ -117,9 +117,7 @@ def fixupState(state, fsType, name=None):
 def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
     global substate
     history = state["history"]
-    #print("*A", attribute, value, substate["currentIdentifier"], history)
     if substate["currentIdentifier"] == "":
-        #print("*B")
         if ('declareBody_attributes_declarationList' in history and \
             ('attributes_typeAndMinorAttr' in history or \
              'attributes_arraySpec_typeAndMinorAttr' in history)) or \

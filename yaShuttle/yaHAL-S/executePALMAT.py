@@ -487,6 +487,107 @@ def sliceIt(object, subscripts):
     return newObject
 
 '''
+Computes the HAL/S "=" relational operator (PALMAT "==").
+Returns True or False or None.  None is returned of the operands are 
+incomparable (e.g., of unallowed datatypes or dimensions that don't match).
+
+Note that operand1 and operand2 should be guaranteed to be fully initialized
+before calling this function, so while we don't check for initialization here,
+we don't have to worry about what happens when comparing uninitialized values.
+
+Note:  According to [HPG] p. 9-8, it is legal to compare *either* of 
+arithmetical or CHARACTER vs *either* arithmetical or CHARACTER.  For example, 
+SCALAR vs CHARACTER is allowed. However, the BNF description of the HAL/S 
+grammar allows for arithmetical vs arithmetical and CHARACTER vs CHARACTER,
+but not arithmetical vs CHARACTER.  I'm assuming at the moment that this is
+a typo in [HPG].
+'''
+def isEqualTo(operand1, operand2):
+    
+    '''
+    Compare two ARRAY elements.  I.e., two values which are not themselves
+    arrays.  For equality or non-equality tests, there are no conversions and
+    only like vs like datatypes are compared (exception:  INTEGER vs SCALAR).
+    Returns True, False, or None (for incomparable operands).
+    '''
+    def areLeavesEqual(leaf1, leaf2):
+        isArith1 = isinstance(leaf1, (int, float))
+        isArith2 = isinstance(leaf2, (int, float))
+        if isArith1 != isArith2:
+            return None
+        if isArith1:
+            return leaf1 == leaf2
+        isChar1 = isinstance(leaf1, str)
+        isChar2 = isinstance(leaf2, str)
+        if isChar1 != isChar2:
+            return None
+        if isChar1:
+            return leaf1 == leaf2
+        isBit1 = isBitArray(leaf1)
+        isBit2 = isBitArray(leaf2)
+        if isBit1 != isBit2:
+            return None
+        if isBit1:
+            value1, length1 = parseBitArray(leaf1)
+            value2, length2 = parseBitArray(leaf2)
+            return value1 == value2
+        isVect1 = isVector(leaf1)
+        isVect2 = isVector(leaf2)
+        if isVect1 != isVect2:
+            return None
+        if isVect1:
+            return leaf1 == leaf2
+        isMat1 = isMatrix(leaf1)
+        isMat2 = isMatrix(leaf2)
+        if isMat1 != isMat2:
+            return None
+        if isMat1:
+            return leaf1 == leaf2
+        # Should do something with STRUCTURE, NAME here:  Depends if ARRAY
+        # of STRUCTURE or name is possible.  TBD
+        return leaf1 == leaf2
+    
+    def doesArrayEqualLeaf(array, leaf):
+        retVal = True
+        if isArrayQuick(array):
+            for a in array[:-1]:
+                r = doesArrayEqualLeaf(a, leaf)
+                if r == None:
+                    return None
+                retVal &= r
+            return retVal
+        else:
+            # "array" at this point is a leaf, and in spite of the designation
+            # "array", is not itself an ARRAY.
+            return areLeavesEqual(array, leaf)
+    
+    # We already know that the arrays match in dimensionality, so we can 
+    # recurse through them at the same time.  Returns the usual True, False,
+    # or None (for incomparability).
+    def areTwoArraysEqual(array1, array2):
+        retVal = True
+        if isArrayQuick(array1):
+            for i in range(len(array1)-1):
+                r = areTwoArraysEqual(array1[i], array2[i])
+                if r == None:
+                    return None
+                retVal &= r
+            return retVal
+        else:
+            # Both arrays have recursed down to the leaves.
+            return areLeavesEqual(array1, array2);
+    
+    isArray1 = isArrayQuick(operand1)
+    isArray2 = isArrayQuick(operand2)
+    if isArray1 and not isArray2:
+        return doesArrayEqualLeaf(operand1, operand2)
+    elif isArray2 and not isArray1:
+        return doesArrayEqualLeaf(operand2, operand1)
+    elif not isArray1 and not isArray2:
+        return areLeavesEqual(operand1, operand2)
+    return areTwoArraysEqual(operand1, operand2)
+
+'''
 This is the main emulator loop.  Basically, you feed it an entire PALMAT
 structure of scopes (namely rawPALMAT) including the model of all variables
 and constants for each scope, and the list of PALMAT instructions for each
@@ -736,6 +837,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 operand2 = computationStack[-2]
                 computationStack.pop()
                 computationStack[-1] = None
+                if operator in ["==", "!=", "<", ">", "<=", ">="] and \
+                        (not isCompletelyInitialized(operand1) or \
+                         not isCompletelyInitialized(operand2)):
+                    printError(source, instruction, \
+                        "Cannot compare uninitialized values")
+                    return None
                 # For some overloaded operators, check out types of operands.
                 if operator in ["+", "-", "", "/", "**", ".", "*"]:
                     isi1,isis1,isv1,ism1 = checkArithmeticalDatatype(operand1)
@@ -958,12 +1065,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             result = formBitArray((value1 << length2) | value2,\
                                                    numbits)
                     elif operator == "==":
-                        if isBitArray(operand1) and isBitArray(operand2):
-                            operand1, dummy = parseBitArray(operand1)
-                            operand2, dummy = parseBitArray(operand2)
-                        result = convertToBitArray(operand1 == operand2)
+                        result = \
+                            convertToBitArray(isEqualTo(operand1, operand2))
                     elif operator == "!=":
-                        result = convertToBitArray(operand1 != operand2)
+                        result = \
+                            convertToBitArray(not isEqualTo(operand1, operand2))
                     elif operator == "<":
                         result = convertToBitArray(operand1 < operand2)
                     elif operator == ">":
@@ -1418,6 +1524,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             while operand != {"sentinel"}:
                                 if operand == {"fill"}:
                                     fill = True
+                                    operand = computationStack.pop()
                                     continue
                                 flatten(operand, object)
                                 operand = computationStack.pop()
@@ -1470,7 +1577,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 if not assignCompositeSubscripted(None, composite, \
                                                   subscriptedLHS, \
                                datatype, -1, unraveled):
-                    printError(source, instruction, "Cannot convert values")
+                    printError(source, instruction, "Cannot convert or too few values")
                     return None
                 computationStack.append(composite)
                 continue

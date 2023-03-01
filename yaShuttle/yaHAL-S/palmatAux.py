@@ -176,6 +176,18 @@ def isArrayQuick(value):
         return False
     return True
 
+# Get dimensions of an Array.  Doesn't check that it *is* and ARRAY, but just
+# gets the dimensions assuming that it is.  The return value is the list of
+# dimensions and value[0]...[0] (the value of the very first leaf).  If this
+# is not an uninitialized value, we can use it very quickly to determine some
+# gross aspects of the datatype.  If it is uninitialized ... well, too bad.
+def getArrayDimensions(value):
+    dimensions = []
+    while isArrayQuick(value):
+        dimensions.append(len(value) - 1)
+        value = value[0]
+    return dimensions, value
+
 # Test if a value on the computation stack is a boolean.
 def isBitArray(value):
     return isinstance(value, list) and len(value) == 3 and value[2] == "b" \
@@ -612,6 +624,12 @@ def completeInitialConstants(identifiers):
             arrayDimensions = identifierDict["array"]
         else:
             arrayDimensions = []
+        if "vector" in identifierDict:
+            secondaryDimensions = [identifierDict["vector"]]
+        elif "matrix" in identifierDict:
+            secondaryDimensions = identifierDict["matrix"]
+        else:
+            secondaryDimensions = []
         if "value" in identifierDict:
             oldValue = identifierDict["value"]
         else:
@@ -628,26 +646,15 @@ def completeInitialConstants(identifiers):
                 value = []
                 identifierDict["constant"] = value
             isInitial = False
-        elif "vector" in identifierDict:
+        elif "array" in identifierDict or "vector" in identifierDict \
+                or "matrix" in identifierDict:
             if not isinstance(oldValue, list):
                 identifierDict["value"] = \
                     uninitializedComposite(arrayDimensions, \
-                                           [identifierDict["vector"]])
-            continue
-        elif "matrix" in identifierDict:
-            if not isinstance(oldValue, list):
-                identifierDict["value"] = \
-                    uninitializedComposite(arrayDimensions, \
-                                           identifierDict["matrix"])
-            continue
-        elif "array" in identifierDict:
-            if not isinstance(oldValue, list):
-                identifierDict["value"] = \
-                    uninitializedComposite(arrayDimensions, \
-                                           [])
+                                           secondaryDimensions)
             continue
         fillValue = None
-        if "vector" in identifierDict:
+        if "vector" in identifierDict and arrayDimensions == []:
             numCols = identifierDict["vector"]
             if "fill" not in identifierDict:
                 if len(value) == 1:
@@ -662,7 +669,7 @@ def completeInitialConstants(identifiers):
                 value.append(fillValue)
             if "fill" in identifierDict:
                 identifierDict.pop("fill")
-        elif "matrix" in identifierDict:
+        elif "matrix" in identifierDict and arrayDimensions == []:
             numRows, numCols = identifierDict["matrix"]
             if "fill" not in identifierDict:
                 if len(value) == 1 and len(value[0]) == 1:
