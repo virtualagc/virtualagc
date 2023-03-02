@@ -21,6 +21,7 @@ import json
 import re
 import copy
 import math
+from math import nan as NaN
 from decimal import Decimal, ROUND_HALF_UP
 
 # Add a `debug` PALMAT instruction.
@@ -168,6 +169,149 @@ def isCompletelyInitialized(object):
             if not isCompletelyInitialized(element):
                 return False
     return True
+
+'''
+Apply a unary function to each element of an array, returning an array of the
+same geometry, or NaN on failure.  (The unary function must also return NaN
+on error.  None is a proper return, because it signifies an uninitialized
+value rather than an illegal operation.)  The operand toLeafElement determines 
+whether the application of the function stops when it reaches the leaves 
+(False) or whether (True) it applies the function to the elements of the 
+leaves themselves (which are presumably VECTOR or MATRIX types).
+'''
+def unaryOperation(function, array, toLeafElements=False):
+    if isArrayQuick(array):
+        dimensions, dummy = getArrayDimensions(array)
+    else:
+        dimensions = []
+    if len(dimensions) > 0:
+        result = []
+        for a in array[:-1]:
+            r = unaryOperation(function, a, toLeafElements)
+            if r == NaN:
+                return NaN
+            result.append(r)
+        result.append("a")
+    elif not toLeafElements:
+        # We're at a leaf element, apply the function to it.
+        return function(array)
+    else:
+        # We're at a leaf, but need to apply the function to individual elements
+        # of VECTOR/MATRIX leaves.
+        if isBitArray(array):
+            return function(array)
+        elif isMatrix(array):
+            result = []
+            for row in array:
+                resultRow = []
+                for col in row:
+                    r = function(col)
+                    if r == NaN:
+                        return NaN
+                    resultRow.append(r)
+                result.append(resultRow)
+        elif isVector(array):
+            result = []
+            for element in array:
+                r = function(element)
+                if r == NaN:
+                    return NaN
+                result.append(r)
+        else:
+            result = function(array)
+    return result
+
+'''
+Apply a binary function to corresponding elements of two arrays of the same
+geometry, or an array and a non-array (of the same datatype as the leaves of
+the array).  Returns an array of the same geometry as the first operand,
+or NaN on failure.  (The binary function must also return NaN
+on error.  None is a proper return, because it signifies an uninitialized
+value rather than an illegal operation.)  The operand toLeafElement determines 
+whether the application of the function stops when it reaches the leaves 
+(False) or whether (True) it applies the function to the elements of the 
+leaves themselves (which are presumably VECTOR or MATRIX types).
+'''
+def binaryOperation(function, array, array2, toLeafElements=False):
+    if isArrayQuick(array):
+        dimensions, dummy = getArrayDimensions(array)
+    else:
+        dimensions = []
+    if isArrayQuick(array2):
+        dimensions2, dummy = getArrayDimensions(array2)
+    else:
+        dimensions2 = []
+    if dimensions != dimensions2 and dimensions2 != []:
+        return NaN
+    if len(dimensions) > 0:
+        result = []
+        for i in range(len(dimensions[0]-1)):
+            if len(dimensions2) == 0:
+                r = binaryOperation(function, array[i], array2, toLeafElements)
+            else:
+                r = binaryOperation(function, array[i], array2[i], toLeafElements)
+            if r == NaN:
+                return NaN
+            result.append(r)
+        result.append("a")
+    elif not toLeafElements:
+        # We're at a leaf element, apply the function to it.
+        return function(array, array2)
+    else:
+        # We're at a leaf, but need to apply the function to individual elements
+        # of VECTOR/MATRIX leaves.
+        if isBitArray(array):
+            return function(array, array2)
+        elif isMatrix(array):
+            result = []
+            if isBitArray(array2):
+                return NaN
+            height2 = 0
+            if isinstance(array2, list):
+                height2 = len(array2)
+                if height2 != width(array):
+                    return NaN
+            for i in range(len(array)):
+                row = array[i]
+                if height2 == 0:
+                    row2 = [array2]*len(row)
+                else:
+                    row2 = array2[i]
+                    if len(row) != len(row2):
+                        return NaN
+                resultRow = []
+                for j in range(len(row)):
+                    col = row[j]
+                    col2 = row2[j]
+                    r = function(col, col2)
+                    if r == NaN:
+                        return NaN
+                    resultRow.append(r)
+                result.append(resultRow)
+        elif isVector(array):
+            width2 = 0
+            if isBitArray(array2):
+                return NaN
+            elif isVector(array2):
+                width2 = len(array2)
+                if len(array) != width2:
+                    return NaN
+            elif isinstance(array2, (list, tuple)):
+                return NaN
+            result = []
+            for i in range(len(array)):
+                element = array[i]
+                if width2 == 0:
+                    element2 = array2
+                else:
+                    element2 = array2[i]
+                r = function(element, element2)
+                if r == NaN:
+                    return NaN
+                result.append(r)
+        else:
+            result = function(array, array2)
+    return result
 
 # Quick check if value is array.  Fuller test is isArrayGeometry() in
 # executePALMAT.

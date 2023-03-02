@@ -587,6 +587,40 @@ def isEqualTo(operand1, operand2):
         return areLeavesEqual(operand1, operand2)
     return areTwoArraysEqual(operand1, operand2)
 
+# A unary-minus operator for any simple datatype.  Returns NaN on error.
+def unaryMinus(operand):
+    if operand == None:
+        return None # Uninitialized value.
+    if isinstance(operand, (int, float)):
+        return -operand
+    return Nan
+
+# A binary-minus operator for any simple datatype.  Returns NaN on error.
+def simpleSubtraction(operand, operand2):
+    if operand == None or operand2 == None:
+        return None # Uninitialized value.
+    if isinstance(operand, (int, float)) and isinstance(operand2, (int, float)):
+        return operand - operand2
+    return NaN
+
+# A binary-addition operator for any simple datatype.  Returns NaN on error.
+def simpleAddition(operand, operand2):
+    if operand == None or operand2 == None:
+        return None # Uninitialized value.
+    if isinstance(operand, (int, float)) and isinstance(operand2, (int, float)):
+        return operand + operand2
+    return NaN
+
+# A binary-division operator for any simple datatype.  Returns NaN on error.
+def simpleDivision(operand, operand2):
+    if operand == None or operand2 == None:
+        return None # Uninitialized value.
+    if operand2 == 0:
+        return NaN
+    if isinstance(operand, (int, float)) and isinstance(operand2, (int, float)):
+        return operand / operand2
+    return NaN
+
 '''
 This is the main emulator loop.  Basically, you feed it an entire PALMAT
 structure of scopes (namely rawPALMAT) including the model of all variables
@@ -789,24 +823,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     return None
                 operand = computationStack[-1]
                 if operator == "U-":
-                    isi,isis,isv,ism = checkArithmeticalDatatype(operand)
-                    if ism:
-                        numRows = len(operand)
-                        numCols = len(operand[0])
-                        result = []
-                        for i in range(numRows):
-                            row = []
-                            for j in range(numCols):
-                                row.append(-operand[i][j])
-                            result.append(row)
-                    elif isv:
-                        numCols = len(operand)
-                        result = []
-                        for j in range(numCols):
-                            result.append(-operand[j])
-                    elif isis:
-                        result = -operand
-                    else:
+                    result = unaryOperation(unaryMinus, operand, True)
+                    if result == NaN:
                         printError(source, instruction, \
                                    "Incompatible operand for negation.")
                         return None
@@ -847,6 +865,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 if operator in ["+", "-", "", "/", "**", ".", "*"]:
                     isi1,isis1,isv1,ism1 = checkArithmeticalDatatype(operand1)
                     isi2,isis2,isv2,ism2 = checkArithmeticalDatatype(operand2)
+                    isa1 = isArrayQuick(operand1)
+                    if isa1:
+                        arrayDim1, v1 = getArrayDimensions(operand1)
+                    isa2 = isArrayQuick(operand2)
+                    if isa2:
+                        arrayDim2, v2 = getArrayDimensions(operand2)
                 # When VECTOR and MATRIX datatypes are involved in operations
                 # like addition, multiplication, etc., refer to the "HAL/S 
                 # Programmer's Guide", Chapter 7, for lists of compatible 
@@ -854,54 +878,16 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 # the results that are supposed to be produced.
                 if operand1 != None and operand2 != None:
                     if operator == "+":
-                        if ism1 and ism2 and \
-                                len(operand1) == len(operand2) and \
-                                len(operand1[0]) == len(operand2[0]):
-                            numRows = len(operand1)
-                            numCols = len(operand1[0])
-                            result = []
-                            for i in range(numRows):
-                                row = []
-                                for j in range(numCols):
-                                    row.append(operand1[i][j] + operand2[i][j])
-                                result.append(row)
-                        elif isv1 and isv2 and \
-                                len(operand1) == len(operand2):
-                            numCols = len(operand1)
-                            result = []
-                            for j in range(numCols):
-                                result.append(operand1[j] + operand2[j])
-                        elif isi1 and isi2:
-                            result = operand1 + operand2
-                        elif isis1 and isis2:
-                            result = float(operand1) + float(operand2)
-                        else:
+                        result = binaryOperation(simpleAddition, operand1, \
+                                                 operand2, True)
+                        if result == NaN:
                             printError(source, instruction, \
                                        "Incompatible operands for addition.")
                             return None
                     elif operator == "-":
-                        if ism1 and ism2 and \
-                                len(operand1) == len(operand2) and \
-                                len(operand1[0]) == len(operand2[0]):
-                            numRows = len(operand1)
-                            numCols = len(operand1[0])
-                            result = []
-                            for i in range(numRows):
-                                row = []
-                                for j in range(numCols):
-                                    row.append(operand1[i][j] - operand2[i][j])
-                                result.append(row)
-                        elif isv1 and isv2 and \
-                                len(operand1) == len(operand2):
-                            numCols = len(operand1)
-                            result = []
-                            for j in range(numCols):
-                                result.append(operand1[j] - operand2[j])
-                        elif isi1 and isi2:
-                            result = operand1 - operand2
-                        elif isis1 and isis2:
-                            result = float(operand1) - float(operand2)
-                        else:
+                        result = binaryOperation(simpleSubtraction, operand1, \
+                                                 operand2, True)
+                        if result == NaN:
                             printError(source, instruction, \
                                        "Incompatible operands for addition.")
                             return None
@@ -973,46 +959,54 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     elif operator == "/":
                         # I've so far not found any explanation of what happens
                         # with division by zero.
-                        if not isis2:
-                            printError(source, instruction, \
-                                       "Incompatible datatype for divisor.")
-                            return None
-                        operand2 = float(operand2)
-                        if ism1:
-                            numRows = len(operand1)
-                            numCols = len(operand1[0])
-                            result = []
-                            for i in range(numRows):
-                                row = []
+                        if isa1 and isa2:
+                            result = binaryOperation(simpleDivision, operand1, \
+                                                     operand2, True)
+                            if result == NaN:
+                                printError(source, instruction, \
+                                    "Incompatible operands for division")
+                                return None
+                        else:
+                            if not isis2:
+                                printError(source, instruction, \
+                                           "Incompatible datatype for divisor.")
+                                return None
+                            operand2 = float(operand2)
+                            if ism1:
+                                numRows = len(operand1)
+                                numCols = len(operand1[0])
+                                result = []
+                                for i in range(numRows):
+                                    row = []
+                                    for j in range(numCols):
+                                        try:
+                                            row.append(operand1[i][j] / operand2)
+                                        except:
+                                            printError(source, instruction, \
+                                                       "Division by zero.")
+                                            return None
+                                    result.append(row)
+                            elif isv1:
+                                numCols = len(operand1)
+                                result = []
                                 for j in range(numCols):
                                     try:
-                                        row.append(operand1[i][j] / operand2)
+                                        result.append(operand1[j] / operand2)
                                     except:
                                         printError(source, instruction, \
                                                    "Division by zero.")
                                         return None
-                                result.append(row)
-                        elif isv1:
-                            numCols = len(operand1)
-                            result = []
-                            for j in range(numCols):
+                            elif isis1:
                                 try:
-                                    result.append(operand1[j] / operand2)
+                                    result = float(operand1) / operand2
                                 except:
                                     printError(source, instruction, \
                                                "Division by zero.")
                                     return None
-                        elif isis1:
-                            try:
-                                result = float(operand1) / operand2
-                            except:
+                            else:
                                 printError(source, instruction, \
-                                           "Division by zero.")
+                                           "Incompatible datatype for dividend.")
                                 return None
-                        else:
-                            printError(source, instruction, \
-                                       "Incompatible datatype for dividend.")
-                            return None
                     elif operator == "**":
                         if ism1 and isis2 and len(operand1) == len(operand1[0]):
                             n = len(operand1)
