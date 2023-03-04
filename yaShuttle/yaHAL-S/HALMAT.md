@@ -59,7 +59,7 @@ As an aside, the "DOC. #" listed in the JSC Document Index just mentioned appear
 
 That being the case, it's entirely possible that these documents are *still* at JSC and can be freed up via an FOIA request.  In point of fact, on 2022-12-17 I submitted a NASA FOIA request for those items, under that very assumption.  
 
-We'll see what happens.  However, anything positive that *may* happen with them will take months and months, and I'm not going to wait for it to do so.
+Update:  I have indeed (2023-03-03) received these documents.  Unfortunately, the "HAL/S-360 Compiler System Specification" turns out to just be the identical incomplete document we already had; indeed, the new scan is obviously taken from the same physical copy as the one we already had (from NTRS).  On the other hand, ["HALMAT - An Intermediate Language of the first HAL Compiler"](http://www.ibiblio.org/apollo/Shuttle/HALMAT%20-%20An%20Intermediate%20Language.pdf) is indeed a complete description of HALMAT as far as I can tell.  Nevertheless, it conforms to a "preliminary" version of the compiler and clear differs in various details from the eventual specification of HALMAT.  In other words, the good news is that we did get the documents I requested, but they turn out to be of limited use.
 
 # References
 

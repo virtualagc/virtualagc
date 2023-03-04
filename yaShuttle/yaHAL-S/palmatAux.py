@@ -170,6 +170,30 @@ def isCompletelyInitialized(object):
                 return False
     return True
 
+# Quick check if value is array.  Fuller test is isArrayGeometry() in
+# executePALMAT.
+def isArrayQuick(value):
+    if not isinstance(value, list) or len(value) < 2 or value[-1] != "a":
+        return False
+    return True
+
+# Get dimensions of an Array.  Doesn't check that it *is* and ARRAY, but just
+# gets the dimensions assuming that it is.  The return value is the list of
+# dimensions and value[0]...[0] (the value of the very first leaf).  If this
+# is not an uninitialized value, we can use it very quickly to determine some
+# gross aspects of the datatype.  If it is uninitialized ... well, too bad.
+def getArrayDimensions(value):
+    dimensions = []
+    while isArrayQuick(value):
+        dimensions.append(len(value) - 1)
+        value = value[0]
+    return dimensions, value
+
+# Test if a value on the computation stack is a boolean.
+def isBitArray(value):
+    return isinstance(value, list) and len(value) == 3 and value[2] == "b" \
+            and isinstance(value[0], int) and isinstance(value[1], int)
+
 '''
 Apply a unary function to each element of an array, returning an array of the
 same geometry, or NaN on failure.  (The unary function must also return NaN
@@ -312,30 +336,6 @@ def binaryOperation(function, array, array2, toLeafElements=False):
         else:
             result = function(array, array2)
     return result
-
-# Quick check if value is array.  Fuller test is isArrayGeometry() in
-# executePALMAT.
-def isArrayQuick(value):
-    if not isinstance(value, list) or len(value) < 2 or value[-1] != "a":
-        return False
-    return True
-
-# Get dimensions of an Array.  Doesn't check that it *is* and ARRAY, but just
-# gets the dimensions assuming that it is.  The return value is the list of
-# dimensions and value[0]...[0] (the value of the very first leaf).  If this
-# is not an uninitialized value, we can use it very quickly to determine some
-# gross aspects of the datatype.  If it is uninitialized ... well, too bad.
-def getArrayDimensions(value):
-    dimensions = []
-    while isArrayQuick(value):
-        dimensions.append(len(value) - 1)
-        value = value[0]
-    return dimensions, value
-
-# Test if a value on the computation stack is a boolean.
-def isBitArray(value):
-    return isinstance(value, list) and len(value) == 3 and value[2] == "b" \
-            and isinstance(value[0], int) and isinstance(value[1], int)
 
 def formBitArray(value, length):
     if isinstance(value, int):
@@ -757,10 +757,22 @@ def uninitializedComposite(arrayDimensions, dimensions):
 # Complete the initialization of a VECTOR, MATRIX, or ARRAY by making sure that
 # INITIALs or CONSTANTs are filled out to the proper geometry with appropriate
 # values.  Returns [] on success, or a list of identifiers which failed.
-def completeInitialConstants(identifiers):
+def completeInitialConstants(currentScope):
+    identifiers = currentScope["identifiers"]
+    parameters = []
+    if "attributes" in currentScope and \
+            "parameters" in currentScope["attributes"]:
+        parameters = currentScope["attributes"]["parameters"]
     messages = []
     for identifier in identifiers:
         identifierDict = identifiers[identifier]
+        if identifier[1:-1] in parameters:
+            # A parameter for a FUNCTION or PROCEDURE.  There's no 
+            # INITAL or CONSTANT clause (or if there is, it shouldn't be there),
+            # and nothing is needed for a value, since it's just going to be
+            # popped from the computation stack upon entry to the subroutine
+            # anyway.
+            continue
         if "vector" not in identifierDict and "matrix" not in identifierDict \
                 and "array" not in identifierDict:
             continue
@@ -841,8 +853,14 @@ def completeInitialConstants(identifiers):
     
 # Make sure every variable in the scope has a "value", even if it's 
 # uninitialized.
-def setUninitialized(identifiers):
-        
+def setUninitialized(currentScope):
+    
+    identifiers = currentScope["identifiers"]
+    parameters = []
+    if "attributes" in currentScope and \
+            "parameters" in currentScope["attributes"]:
+        parameters = currentScope["attributes"]["parameters"]
+    
     def uninitializeLevel(arrayDimensions, dimensions):
         level = []
         if len(arrayDimensions) > 0:
@@ -858,6 +876,9 @@ def setUninitialized(identifiers):
         return level
 
     for identifier in identifiers:
+        if identifier[1:-1] in parameters:
+            # Don't need to "uninitialize" a formal parameter.
+            continue
         attributes = identifiers[identifier]
         if "value" not in attributes and "constant" not in attributes and \
                 ("integer" in attributes or "scalar" in attributes or \

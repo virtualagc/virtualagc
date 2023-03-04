@@ -1233,8 +1233,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                % identifier[1:-1])
                     return None
                 if True:
+                    if "array" in attributes and "parameter" in attributes:
+                        attributes["value"] = value
+                        attributes["array"], dummy = getArrayDimensions(value)
                     # This is my new, possibly-improved method.
-                    if not saveValueToVariable(source, value, \
+                    elif not saveValueToVariable(source, value, \
                                                identifier[1:-1], \
                                                attributes, \
                                                lhsSubscriptList):
@@ -1755,6 +1758,19 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 operand = computationStack[-1]
                 if False:
                     pass
+                elif function == "SIZE":
+                    if isArrayQuick(operand):
+                        dimensions, value = getArrayDimensions(operand)
+                        if len(dimensions) == 1:
+                            computationStack[-1] = dimensions[0]
+                        else:
+                            printError(source, instruction, \
+                                "Array for SIZE must be one-dimensional.")
+                            return None
+                    else:
+                        printError(source, instruction, \
+                                   "SIZE function requires an array")
+                        return None
                 elif function == "MAX":
                     accumulation = [True]
                     accumulate(operand, fnMAX, accumulation)

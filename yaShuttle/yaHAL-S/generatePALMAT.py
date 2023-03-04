@@ -599,8 +599,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
         appendInstruction(instructions, { "read": substate["LUN"] }, source)
     elif lbnfLabel in ["declare_statement", "temporary_stmt"]:
         markUnmarkedScalars(currentScope["identifiers"])
-        messages = completeInitialConstants(currentScope["identifiers"])
-        setUninitialized(currentScope["identifiers"])
+        messages = completeInitialConstants(currentScope)
+        setUninitialized(currentScope)
         if messages != []:
             print("\tGeometry mismatch for INITIAL or CONSTANT data,", messages)
             return False, PALMAT
@@ -845,16 +845,16 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 identifierDict = substate["commonAttributes"]
             if lbnfLabel == "char_spec":
                 datatype = "character"
-                if len(maxLens) != 1:
+                if len(maxLens) not in [0, 1]:
                     raise Exception("CHARACTER(...) wrong dimension")
             elif lbnfLabel == "sQdQName_doublyQualNameHead_literalExpOrStar":
                 if "vector" in identifierDict:
-                    if len(maxLens) != 1:
+                    if len(maxLens) not in [0, 1]:
                         raise Exception("VECTOR(...) wrong dimension")
                     datatype = "vector"
                 elif "matrix" in identifierDict:
                     datatype = "matrix"
-                    if len(maxLens) != 2:
+                    if len(maxLens) not in [1, 2]:
                         raise Exception("MATRIX(...) wrong dimension")
             elif lbnfLabel == "arraySpec_arrayHead_literalExpOrStar":
                 datatype = "array"
@@ -867,8 +867,9 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             else:
                 identifierDict[datatype] = maxLens[0]
             #instructions.clear()
-        except:
-            print("\tComputation of datatype length failed:", lbnfLabel)
+        except Exception as error:
+            print("\tComputation of datatype length failed:", \
+                  lbnfLabel, currentIdentifier, error)
             #instructions.clear()
             identifiers.pop(currentIdentifier)
             endLabels.pop()

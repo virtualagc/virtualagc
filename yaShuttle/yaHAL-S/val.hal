@@ -73,6 +73,25 @@
  	END;
  CLOSE PRINT_RESULT;
  
+ /* Automates comparison of an object to expected values that are in linear
+    progression.  Given the starting value and increment for the linear
+    progression and the unraveling of the object as a VECTOR,
+    compares them and prints the result of the comparison. */
+ CHECK_LINEAR: PROCEDURE(MSG, START, STEP, UNRAVELED) ASSIGN(ERRORS);
+    DECLARE MSG CHARACTER(64), START SCALAR, STEP SCALAR, 
+    	    UNRAVELED ARRAY(*) SCALAR, ERRORS INTEGER;
+    DECLARE TOLERANCE SCALAR CONSTANT(1E-6), EXPECTED SCALAR, BB BOOLEAN;
+    DECLARE WIDTH INTEGER;
+    WIDTH = SIZE(UNRAVELED);
+    BB = TRUE;
+    EXPECTED = START;
+    DO FOR TEMPORARY I = 1 TO WIDTH;
+       IF ABS(EXPECTED - UNRAVELED$I) > TOLERANCE THEN BB = FALSE;
+       EXPECTED = EXPECTED + STEP;
+    END;
+    CALL PRINT_RESULT(MSG, BB) ASSIGN(ERRORS);
+ CLOSE CHECK_LINEAR;
+ 
  /*--------------------------------------------------------------------------*/ 
  
  WRITE(6) ;
@@ -2014,53 +2033,19 @@ S     J,*
     IF SS = -6 THEN BB = TRUE; ELSE BB = FALSE;
     CALL PRINT_RESULT('Unary minus SCALAR', BB) ASSIGN(ERRORS);
     VV = -V;
-    BB = TRUE;
-    DO FOR TEMPORARY I = 1 TO 3; IF VV$I ~= -6-I THEN BB = FALSE; END;
-    CALL PRINT_RESULT('Unary minus VECTOR', BB) ASSIGN(ERRORS);
+    CALL CHECK_LINEAR('Unary minus VECTOR', -7, -1, SCALAR(1#VV)) ASSIGN(ERRORS);
     MM = -M;
-    BB = TRUE;
-    DO FOR TEMPORARY I = 1 TO 3; 
-       DO FOR TEMPORARY J = 1 TO 3;
-          IF MM$(I,J) ~= -6-(3 I+J) THEN BB = FALSE; 
-       END;
-    END;
-    CALL PRINT_RESULT('Unary minus MATRIX', BB) ASSIGN(ERRORS);
+    CALL CHECK_LINEAR('Unary minus MATRIX', -10, -1, SCALAR(1#MM)) ASSIGN(ERRORS);
     AII = -AI;
-    BB = TRUE;
-    DO FOR TEMPORARY I = 1 TO 3; IF AII$I ~= -19-I THEN BB = FALSE; END;
-    CALL PRINT_RESULT('Unary minus 1D ARRAY INTEGER', BB) ASSIGN(ERRORS);
+    CALL CHECK_LINEAR('Unary minus 1D ARRAY INTEGER', -20, -1, SCALAR(1#AII)) ASSIGN(ERRORS);
     ASS = -AS;
-    BB = TRUE;
-    DO FOR TEMPORARY I = 1 TO 3; IF ASS$I ~= -22-I THEN BB = FALSE; END;
-    CALL PRINT_RESULT('Unary minus 1D ARRAY SCALAR', BB) ASSIGN(ERRORS);
+    CALL CHECK_LINEAR('Unary minus 1D ARRAY SCALAR', -23, -1, SCALAR(1#ASS)) ASSIGN(ERRORS);
     AVV = -AV;
-    BB = TRUE;
-    DO FOR TEMPORARY I = 1 TO 2;
-       DO FOR TEMPORARY J = 1 TO 3;
-          IF AVV$(I;J) ~= -27-(3 I + J) THEN BB = FALSE;
-       END;
-    END;
-    CALL PRINT_RESULT('Unary minus 1D ARRAY VECTOR', BB) ASSIGN(ERRORS);
+    CALL CHECK_LINEAR('Unary minus 1D ARRAY VECTOR', -31, -1, SCALAR(1#AVV)) ASSIGN(ERRORS);
     AMM = -AM;
-    BB = TRUE;
-    DO FOR TEMPORARY I = 1 TO 2;
-       DO FOR TEMPORARY J = 1 TO 2;
-          DO FOR TEMPORARY K = 1 TO 2;
-             IF AMM$(I;J,K) ~= -34-(4 I + 2 J + K) THEN BB = FALSE;
-          END;
-       END;
-    END;
-    CALL PRINT_RESULT('Unary minus 1D ARRAY MATRIX', BB) ASSIGN(ERRORS);
+    CALL CHECK_LINEAR('Unary minus 1D ARRAY MATRIX', -41, -1, SCALAR(1#AMM)) ASSIGN(ERRORS);
     A2VV = -A2V;
-    BB = TRUE;
-    DO FOR TEMPORARY I = 1 TO 2;
-       DO FOR TEMPORARY J = 1 TO 2;
-          DO FOR TEMPORARY K = 1 TO 2;
-             IF A2VV$(I,J;K) ~= -44-(4 I + 2 J + K) THEN BB = FALSE;
-          END;
-       END;
-    END;
-    CALL PRINT_RESULT('Unary minus 2D ARRAY VECTOR', BB) ASSIGN(ERRORS);
+    CALL CHECK_LINEAR('Unary minus 2D ARRAY VECTOR', -51, -1, SCALAR(1#A2VV)) ASSIGN(ERRORS);
  CLOSE TEST_UNARY_MINUS;
  CALL TEST_UNARY_MINUS ASSIGN(ERRORS);
     
