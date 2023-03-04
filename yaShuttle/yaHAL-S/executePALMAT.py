@@ -1233,9 +1233,15 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                % identifier[1:-1])
                     return None
                 if True:
-                    if "array" in attributes and "parameter" in attributes:
+                    if "array" in attributes and "parameter" in attributes \
+                            and len(attributes["array"]) == 1 and \
+                            isArrayQuick(value) and \
+                            len(getArrayDimensions(value)[0]) == 1 and \
+                            (attributes["array"][0] == "*" \
+                             or "flex" in attributes):
                         attributes["value"] = value
                         attributes["array"], dummy = getArrayDimensions(value)
+                        attributes["flex"] = True
                     # This is my new, possibly-improved method.
                     elif not saveValueToVariable(source, value, \
                                                identifier[1:-1], \
