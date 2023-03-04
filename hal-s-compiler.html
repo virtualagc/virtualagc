@@ -364,6 +364,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
       "program"</tt>, which is presumably self explanatory, as well as
     fields <tt>"name"</tt> and <tt>"attributes"</tt> that simply
     duplicate the declaration in scope 0.&nbsp; <br>
@@ -382,6 +383,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     compiler's code generator.&nbsp; Any HAL/S <tt>DO</tt> block or <tt>IF</tt>
     statement will trigger creation of a new child scope dedicated to it
     as well, and mark the new scope with the associated <tt>type</tt>.&nbsp;
+
 
 
 
@@ -471,7 +473,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <li>Optional "lock".&nbsp; If present, it has an integer value that refers to the "lock group" to which it pertains.&nbsp; This refers to temporary locks placed on variables shared in <tt>COMPOOL</tt>s by multiple simultaneous HAL/S processes.<br></li>
         <li>Optional "remote".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; This attribute means that the variable may be seldom-used, and hence may reside in some form of auxiliary memory that's slow to access, rather than in quickly-accessed local memory.&nbsp; This concept of memory maintenance has no relevance to the modern implementation in which essentially unlimited amounts of fast memory are available, and hence is ignored.</li>
         <li>Optional "rigid".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; It implies that the compiler is not allowed to reorder <tt>STRUCTURE</tt> fields, but instead requires them to remain in the same order in memory as implied by their HAL/S declarations.&nbsp; I'm not certain yet whether this concept is irrelevant to the modern implementation or not; but for the present it is being ignored.&nbsp; But see the "ordering" key immediately below.</li>
-        <li>Optional "ordering".&nbsp; This field is present only for certain <tt>STRUCTURE</tt>s.  It has a bookkeeping purpose for the modern compiler, and is not related to anything in the original HAL/S language or compiler.  (But see "rigid" above.)&nbsp; <a moz-do-not-send="true" href="#Datatypes">Recall</a> that HAL/S <tt>STRUCTURE</tt>s are implemented in PALMAT as Python dictionaries, and that Python dictionaries do not have any concept of the ordering of the keys therein.&nbsp; On the other hand, recall also <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses in HAL/S <tt>DEFINE</tt> statements rely on a known ordering of the elements of composite datatypes (like <tt>STRUCTURE</tt>s).&nbsp; That being the case, if <tt>INITIAL</tt> or <tt>CONSTANT</tt> is present, or <tt>RIGID</tt> (see immediately above), knowledge of the expected ordering of <tt>STRUCTURE</tt> fields must be preserved.&nbsp; The "ordering" field provides that knowledge.&nbsp; The value associated with the "ordering" key is TBD.<br></li>
+        <li>Optional "ordering".&nbsp; This field is present only for certain <tt>STRUCTURE</tt>s.  It has a bookkeeping purpose for the modern compiler, and is not related to anything in the original HAL/S language or compiler.  (But see "rigid" above.)&nbsp; <a moz-do-not-send="true" href="#Datatypes">Recall</a> that HAL/S <tt>STRUCTURE</tt>s are implemented in PALMAT as Python dictionaries, and that Python dictionaries do not have any concept of the ordering of the keys therein.&nbsp; On the other hand, recall also <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses in HAL/S <tt>DEFINE</tt> statements rely on a known ordering of the elements of composite datatypes (like <tt>STRUCTURE</tt>s).&nbsp; That being the case, if <tt>INITIAL</tt> or <tt>CONSTANT</tt> is present, or <tt>RIGID</tt> (see immediately above), knowledge of the expected ordering of <tt>STRUCTURE</tt> fields must be preserved.&nbsp; The "ordering" field provides that knowledge.&nbsp; The value associated with the "ordering" key is TBD.</li>
+        <li>Optional "parameter".  This field is present (with the value <tt>True</tt>) for any identifier which is a formal <tt>FUNCTION</tt> or <tt>PROCEDURE</tt> parameter in its scope.<br></li>
       </ul>
       <li>For constants, the attributes are generally similar to variables as just described.&nbsp; But here are a few differences:</li>
       <ul>
@@ -613,6 +616,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
               'p']}<br>
             </tt></td>
           <td valign="top">Pushes a <tt>BOOLEAN</tt> or <tt>BIT</tt>-stream
+
 
 
 
@@ -936,6 +940,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.<br>
           </td>
@@ -961,6 +966,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -980,6 +986,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
             TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
             values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
 
 
 
@@ -1012,6 +1019,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1039,6 +1047,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But it's unclear what the result of the operation should be
             if operand2 has no known maximum length.<br>
           </td>
@@ -1050,6 +1059,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If they are equal, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1082,6 +1092,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1103,6 +1114,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 &lt; operand2, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1138,6 +1150,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1167,6 +1180,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1191,6 +1205,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 ≥ operand2, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1271,6 +1286,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
               V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
             <blockquote> </blockquote>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
@@ -1345,10 +1361,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             The HAL/S run-time library functions are documented in the
             HAL/S documentation, particularly the <a
               moz-do-not-send="true"
               href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+
 
 
 
@@ -1487,10 +1505,12 @@ p, li { white-space: pre-wrap; }
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
 
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt></tt><tt>"MATRIX"&nbsp; "3"&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>"2"&nbsp;
+
 
                   "4"&nbsp; ""&nbsp; ""&nbsp; ""</tt> </tt><br>
               <tt> </tt></blockquote>
@@ -1531,15 +1551,18 @@ p, li { white-space: pre-wrap; }
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
 
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
 
+
                 </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </tt><br>
               <tt><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                   ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                   ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt></tt><tt>""&nbsp;
+
 
               </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </blockquote>
             Moreover, <tt>typeofv</tt> can analyze any datatype found
@@ -1551,6 +1574,7 @@ p, li { white-space: pre-wrap; }
             identifiers, from the PALMAT <tt>fetchp</tt> instruction),
             and "NONE" for uninitialized data.&nbsp; Most of these extra
             types actually cannot appear to <tt>typeofv</tt> for <i>correctly</i>-generated
+
 
 
 
@@ -1636,6 +1660,7 @@ p, li { white-space: pre-wrap; }
             either instruction pops operand1 and operand2, which are
             supposed to be <tt>INTEGER</tt>, or at worst <tt>SCALAR</tt>.&nbsp;
 
+
             The <tt>sliceAT</tt> instruction then pushes the Python
             list <tt>[round(operand1), round(operand2)]</tt> in their
             place, while the <tt>sliceTO</tt> instruction instead
@@ -1714,12 +1739,23 @@ p, li { white-space: pre-wrap; }
           <td valign="top"><tt>storepop<br>
             </tt></td>
           <td valign="top" nowrap="nowrap"><tt>{'storepop': (index,
-              indentifier)}<br>
+              identifier)}<br>
             </tt></td>
-          <td valign="top">Equivalent to the two-instruction sequence<br>
+          <td valign="top">Mostly equivalent to the two-instruction
+            sequence<br>
             <blockquote><tt>{'store': (index, identifier)}</tt><tt><br>
               </tt><tt>{'pop': 1}</tt><br>
             </blockquote>
+            The equivalence is not exact in one particular case, namely
+            if <i>all</i> of the following conditions are present:<br>
+            <ul>
+              <li><tt>identifier</tt> is a formal subroutine parameter in the current scope, as evidenced by the attribute "parameter" being present; furthermore,<br></li>
+              <li>it was initially declared as <tt>ARRAY(*)</tt> (of any type); moreover,</li>
+              <li>the value on the computation stack is also a one-dimensional array (though obviously having some specific length rather than *).</li>
+            </ul>
+            <p>If all of these conditions are true, the value on the stack is popped into the <tt>identifier</tt>'s "value" attribute <i>and</i> the dimensions of the <tt>identifier</tt> in its attribute list are rewritten to match those of the popped array.  This gimmick is used to implement the HAL/S feature of declaring one-dimensional <tt>ARRAY</tt> subroutine parameters as <tt>ARRAY(*)</tt> and allowing the subroutine itself to determine the array-length dynamically using the <tt>SIZE()</tt> RTL function. <br></p>
+            <p>I say that the identifier was "initially" declared as <tt>ARRAY(*)</tt> to make it clear that any implementation must have the ability to still determine the original declaration on subsequent calls to the subroutine <i>after</i> <tt>storepop</tt> has overwritten the originally-declared length of * with some explicit number, because on the next call to the subroutine the length of the array passed to it may differ.  In this preliminary PALMAT implementation, the identifier is assigned a new attribute, "flex" (value <tt>True</tt>), to indicate that the original length was * but has since been changed.<br></p>
+            <blockquote> </blockquote>
           </td>
         </tr>
         <tr>
@@ -1796,8 +1832,10 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             To attach a symbolic label (say "<tt>MYLABEL</tt>") to the
             write instruction, the instruction would be modified to <tt>{'write':
+
 
 
 
@@ -1974,6 +2012,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             and (in effect, but not literally) replaces the entire third
             instruction by <tt>{'storepop': (0, 'Z')}</tt>.<br>
           </td>
@@ -1990,10 +2029,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             subroutine.&nbsp; (See the preceding entry.)<br>
             <br>
             The first variant of the instruction is for return from a <tt>PROCEDURE</tt>,
             while the second variant is for return from a <tt>FUNCTION</tt>.&nbsp;
+
 
 
 
@@ -2029,6 +2070,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             Also in principle, I don't believe there's any HAL/S code
             whose compilation is capable of generating this instruction.<br>
           </td>
@@ -2053,6 +2095,7 @@ p, li { white-space: pre-wrap; }
               </tt></blockquote>
             In practice, since this instruction is used for a single
             purpose, the <tt>identifer</tt> is always called "<tt>df_b</tt>",
+
 
             which stands for "do for body", and is the symbolic label at
             the beginning of the loop's body.&nbsp; But in principle it
@@ -2089,6 +2132,7 @@ p, li { white-space: pre-wrap; }
             appropriate scope.&nbsp; (This allows the <tt>returnoffset</tt>
             instruction to be used for implementing a HAL/S <tt>REPEAT</tt>
             <i>with</i> a symbolic label to an enclosing discrete <tt>FOR</tt>-loop,
+
 
             given that the compiler's code generator can figure out
             which scope that is.)<br>
@@ -2181,6 +2225,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             Note that the preliminary implementation supports only <tt>lun=6</tt>,
             namely <i>stdout</i> (i.e., the console).&nbsp; The values
             to be printed are removed from the stack in first-in
@@ -2205,6 +2250,7 @@ p, li { white-space: pre-wrap; }
           <td valign="top" nowrap="nowrap"><tt>{'read': lun}<br>
             </tt> </td>
           <td valign="top">Reads values from the "logical unit number (<tt>lun</tt>).&nbsp;
+
 
 
 
@@ -2286,7 +2332,7 @@ p, li { white-space: pre-wrap; }
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-02-27<br>
+          2023-03-03<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
