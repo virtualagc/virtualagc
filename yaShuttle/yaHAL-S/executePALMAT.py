@@ -863,8 +863,10 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     return None
                 # For some overloaded operators, check out types of operands.
                 if operator in ["+", "-", "", "/", "**", ".", "*"]:
-                    isi1,isis1,isv1,ism1 = checkArithmeticalDatatype(operand1)
-                    isi2,isis2,isv2,ism2 = checkArithmeticalDatatype(operand2)
+                    isi1,iss1,isv1,ism1 = checkArithmeticalDatatype(operand1)
+                    isi2,iss2,isv2,ism2 = checkArithmeticalDatatype(operand2)
+                    isn1 = isi1 or iss1
+                    isn2 = isi2 or iss2
                     isa1 = isArrayQuick(operand1)
                     if isa1:
                         arrayDim1, v1 = getArrayDimensions(operand1)
@@ -878,26 +880,31 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 # the results that are supposed to be produced.
                 if operand1 != None and operand2 != None:
                     if operator == "+":
-                        result = binaryOperation(simpleAddition, operand1, \
-                                                 operand2, True)
+                        result = NaN
+                        if (ism1 and ism2) or (isv1 and isv2) or (isn1 and isn2):
+                            result = binaryOperation(simpleAddition, operand1, \
+                                                     operand2, True)
                         if result == NaN:
                             printError(source, instruction, \
                                        "Incompatible operands for addition.")
                             return None
                     elif operator == "-":
-                        result = binaryOperation(simpleSubtraction, operand1, \
-                                                 operand2, True)
+                        result = NaN
+                        if (ism1 and ism2) or (isv1 and isv2) or (isn1 and isn2):
+                            result = binaryOperation(simpleSubtraction, \
+                                                     operand1, \
+                                                     operand2, True)
                         if result == NaN:
                             printError(source, instruction, \
-                                       "Incompatible operands for addition.")
+                                       "Incompatible operands for subtraction.")
                             return None
                     elif operator == "":
                         if isi1 and isi2:
                             result = operand1 * operand2
-                        elif isis1 and isis2:
-                            result = float(operand1) * float(operand2)
-                        elif (isis1 and isv2) or (isv1 and isis2):
-                            if isis1:
+                        elif iss1 and iss2:
+                            result = float(operand1 * operand2)
+                        elif (iss1 and isv2) or (isv1 and iss2):
+                            if iss1:
                                 s = operand1
                                 v = operand2
                             else:
@@ -907,8 +914,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             result = []
                             for i in range(numCols):
                                 result.append(s * v[i])
-                        elif (isis1 and ism2) or (ism1 and isis2):
-                            if isis1:
+                        elif (iss1 and ism2) or (ism1 and iss2):
+                            if iss1:
                                 s = operand1
                                 m = operand2
                             else:
@@ -959,7 +966,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     elif operator == "/":
                         # I've so far not found any explanation of what happens
                         # with division by zero.
-                        if isa1 and isa2:
+                        if isa1 and isn2:
                             result = binaryOperation(simpleDivision, operand1, \
                                                      operand2, True)
                             if result == NaN:
@@ -967,7 +974,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                     "Incompatible operands for division")
                                 return None
                         else:
-                            if not isis2:
+                            if not iss2:
                                 printError(source, instruction, \
                                            "Incompatible datatype for divisor.")
                                 return None
@@ -996,7 +1003,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                         printError(source, instruction, \
                                                    "Division by zero.")
                                         return None
-                            elif isis1:
+                            elif iss1:
                                 try:
                                     result = float(operand1) / operand2
                                 except:
@@ -1008,7 +1015,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                            "Incompatible datatype for dividend.")
                                 return None
                     elif operator == "**":
-                        if ism1 and isis2 and len(operand1) == len(operand1[0]):
+                        if ism1 and iss2 and len(operand1) == len(operand1[0]):
                             n = len(operand1)
                             operand2 = hround(operand2)
                             if operand2 == 0:
@@ -1026,7 +1033,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             while operand2 > 1:
                                 result = matrixMultiply(operand1, result)
                                 operand2 -= 1
-                        elif isis1 and isis2:
+                        elif iss1 and iss2:
                             result = operand1 ** operand2
                         else:
                             printError(source, instruction, \
