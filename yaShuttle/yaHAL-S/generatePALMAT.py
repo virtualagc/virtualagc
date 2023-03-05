@@ -786,7 +786,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                                     value = float(value)
                                 matrix[row].append(value)
                             value = matrix
-                    elif "fill" in value:
+                    elif isinstance(value, dict) and "fill" in value:
                         identifierDict["fill"] = key
                         continue
                     else:

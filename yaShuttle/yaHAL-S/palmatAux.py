@@ -179,7 +179,7 @@ def isArrayQuick(value):
 
 # Get dimensions of an Array.  Doesn't check that it *is* and ARRAY, but just
 # gets the dimensions assuming that it is.  The return value is the list of
-# dimensions and value[0]...[0] (the value of the very first leaf).  If this
+# dimensions and a representative value of the array's entries.  If this
 # is not an uninitialized value, we can use it very quickly to determine some
 # gross aspects of the datatype.  If it is uninitialized ... well, too bad.
 def getArrayDimensions(value):
@@ -187,6 +187,12 @@ def getArrayDimensions(value):
     while isArrayQuick(value):
         dimensions.append(len(value) - 1)
         value = value[0]
+    if value == None: # This particular value uninitialized?
+        unraveled = []
+        flatten(value, unraveled)
+        for value in unraveled:
+            if value != None:
+                break
     return dimensions, value
 
 # Test if a value on the computation stack is a boolean.
@@ -198,12 +204,9 @@ def isBitArray(value):
 Apply a unary function to each element of an array, returning an array of the
 same geometry, or NaN on failure.  (The unary function must also return NaN
 on error.  Python None is a proper return, because it signifies an uninitialized
-value rather than an illegal operation.)  The operand toLeafElement determines 
-whether the application of the function stops when it reaches the leaves 
-(False) or whether (True) it applies the function to the elements of the 
-leaves themselves (which are presumably VECTOR or MATRIX types).
+value rather than an illegal operation.)
 '''
-def unaryOperation(function, array, toLeafElements=False):
+def unaryOperation(function, array):
     if isArrayQuick(array):
         dimensions, dummy = getArrayDimensions(array)
     else:
@@ -211,26 +214,14 @@ def unaryOperation(function, array, toLeafElements=False):
     if len(dimensions) > 0:
         result = []
         for a in array[:-1]:
-            r = unaryOperation(function, a, toLeafElements)
+            r = unaryOperation(function, a)
             if r == NaN:
                 return NaN
             result.append(r)
         result.append("a")
-    elif not toLeafElements:
+    else:
         # We're at a leaf element, apply the function to it.
         return function(array)
-    else:
-        # We're at a leaf, but need to apply the function to individual elements
-        # of VECTOR/MATRIX leaves.
-        if isVector(array) or isMatrix(array):
-            result = []
-            for element in array:
-                r = unaryOperation(function, element, True)
-                if r == NaN:
-                    return NaN
-                result.append(r)
-        else:
-            result = function(array)
     return result
 
 '''
@@ -241,16 +232,9 @@ as an array (if one or both operands were arrays) or a non-array (if neither
 operand was an array). Or else returns NaN on failure.
 (The binary function must also return NaN on error.
 Python None is a proper return, because it signifies an uninitialized
-value rather than an illegal operation.)  The operand toLeafElement determines 
-whether the application of the function stops when it reaches the array's leaves 
-(False) or whether (True) it applies the function to the elements of the 
-leaves themselves (which are presumably VECTOR or MATRIX types).  For example, 
-if the operands were ARRAY VECTOR and if the supplied 
-function took VECTOR as its arguments, then you'd want 
-toLeafElements=False; whereas if the supplied function took SCALAR arguments, 
-you'd want toLeafElements=True.
+value rather than an illegal operation.) 
 '''
-def binaryOperation(function, array1, array2, toLeafElements=False):
+def binaryOperation(function, array1, array2):
     if isArrayQuick(array1):
         dimensions1, dummy = getArrayDimensions(array1)
     else:
@@ -269,10 +253,10 @@ def binaryOperation(function, array1, array2, toLeafElements=False):
     elif dimensions1 != dimensions2:
         return NaN
     else:
-        dimensions = []
+        dimensions = dimensions1
     if len(dimensions) > 0:
         result = []
-        for i in range(len(dimensions[0]-1)):
+        for i in range(dimensions[0]):
             if dimensions1 == []:
                 child1 = array1
             else:
@@ -281,57 +265,15 @@ def binaryOperation(function, array1, array2, toLeafElements=False):
                 child2 = array2
             else:
                 child2 = array2[i]
-            r = binaryOperation(function, child1, child2, toLeafElements)
+            r = binaryOperation(function, child1, child2)
             if r == NaN:
                 return NaN
             result.append(r)
         result.append("a")
-    elif not toLeafElements:
-        # We're at a leaf element and have a function that expects whatever the
-        # leaf datatype is as operands, so apply the function right now and 
+    else:
+        # We're at a leaf element, so apply the function right now and 
         # stop recursing.
         result = function(array1, array2)
-    else:
-        # We're at a leaf, but need to apply the function to individual elements
-        # of VECTOR/MATRIX leaves.
-        isvm1 = isVector(array1) or isMatrix(array1)
-        isvm2 = isVector(array2) or isMatrix(array2)
-        if isvm1 or isvm2:
-            result = []
-            width1 = 0
-            width2 = 0
-            if isvm1:
-                width1 = len(array1)
-            if isvm2:
-                width2 = len(array2)
-            if width1 == 0:
-                width = width2
-            elif width2 == 0:
-                width = width1
-            elif width1 != width2:
-                return NaN
-            else:
-                width = width1
-            
-            if width == 0:
-                result = function(array1, array2)
-            else:
-                result = []
-                for i in range(width):
-                    if width1 > 0:
-                        element1 = array1[i]
-                    else:
-                        element1 = array1
-                    if width2 > 0:
-                        element2 = array2[i]
-                    else:
-                        element2 = array2
-                    r = binaryOperation(function, element1, element2, True)
-                    if r == NaN:
-                        return NaN
-                    result.append(r)
-        else:
-            result = function(array1, array2)
     return result
 
 def formBitArray(value, length):

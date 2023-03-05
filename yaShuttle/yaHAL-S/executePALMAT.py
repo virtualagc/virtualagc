@@ -250,9 +250,11 @@ Of course, I haven't the slightest idea what the properties of the matrices
 that are going to be inverted are, nor however stupid it may be, any means
 whatever of bypassing inversion. That being the case, here is simple Gaussian 
 elimination with no frills whatever.  Returns either the inverse, or else
-None if m is singular.
+None if m isn't completely initialized, or NaN if singular.
 '''
 def matrixInverse(m):
+    if not isCompletelyInitialized(m):
+        return None
     # Augment m by attaching an identity matrix to the right.
     n = len(m)
     n2 = n + n
@@ -275,7 +277,7 @@ def matrixInverse(m):
                 maxElement = e
                 maxRow = row
         if maxElement == 0: # The matrix must be singular.
-            return None
+            return NaN
         if maxRow != col:
             a[col],a[maxRow] = a[maxRow],a[col]
         # Now we can subtract multiples of a[col) from all the rows below it
@@ -370,22 +372,6 @@ def identityMatrix(n):
     for i in range(n):
         row = [0.0]*n
         row[i] = 1.0
-        result.append(row)
-    return result
-
-# Assumes the inner dimensions match and all entries are initialized (!= None)
-def matrixMultiply(a, b):
-    numRows = len(a)
-    numCols = len(b[0])
-    numInner = len(b) # == len(a[0])
-    result = []
-    for i in range(numRows):
-        row = []
-        for j in range(numCols):
-            s = 0
-            for k in range(numInner):
-                s += a[i][k] * b[k][j]
-            row.append(s)
         result.append(row)
     return result
 
@@ -587,39 +573,331 @@ def isEqualTo(operand1, operand2):
         return areLeavesEqual(operand1, operand2)
     return areTwoArraysEqual(operand1, operand2)
 
-# A unary-minus operator for any simple datatype.  Returns NaN on error.
+# A unary-minus operator for use with unaryOperation().  Returns NaN on error.
+# Its operand can be anything legal to be negated,namely MATRIX, VECTOR, 
+# INTEGER, or SCALAR (see p. 7-2 of [HPG]).
 def unaryMinus(operand):
+    result = NaN
     if operand == None:
-        return None # Uninitialized value.
-    if isinstance(operand, (int, float)):
-        return -operand
-    return Nan
+        result = None
+    elif isinstance(operand, (int, float)):
+        result = -operand
+    elif isVector(operand):
+        result = []
+        for v in operand:
+            if v == None:
+                result.append(None)
+            else:
+                result.append(-v)
+    elif isMatrix(operand):
+        result = []
+        for r in operand:
+            row = []
+            for v in r:
+                if v == None:
+                    row.append(None)
+                else:
+                    row.append(-v)
+            result.append(row)
+    return result
 
-# A binary-minus operator for any simple datatype.  Returns NaN on error.
-def simpleSubtraction(operand, operand2):
-    if operand == None or operand2 == None:
-        return None # Uninitialized value.
-    if isinstance(operand, (int, float)) and isinstance(operand2, (int, float)):
-        return operand - operand2
-    return NaN
-
-# A binary-addition operator for any simple datatype.  Returns NaN on error.
-def simpleAddition(operand, operand2):
-    if operand == None or operand2 == None:
-        return None # Uninitialized value.
-    if isinstance(operand, (int, float)) and isinstance(operand2, (int, float)):
-        return operand + operand2
-    return NaN
-
-# A binary-division operator for any simple datatype.  Returns NaN on error.
-def simpleDivision(operand, operand2):
-    if operand == None or operand2 == None:
-        return None # Uninitialized value.
-    if operand2 == 0:
+# A building block for functions used with used with binaryOperation().  
+# The idea is that you give it the following information:
+#    Two operands (not ARRAY and not STRUCTURE) for the operation.
+#    The operator type, in the form "+", "-", "/", etc.
+#    A dictionary of allowed operand datatype pairs.
+# For the dictionary, the keys are the operand1 datatype: one of the following:
+# "numeric" (meaning either an integer or a scalar), "vector", or "matrix".
+# The keys are lists of the allowed operand2 datatype vs operand1.  The possible
+# entries in the lists are:
+#    "integer"
+#    "numeric" (integer or scalar)
+#    "vector"  (No restriction on width)
+#    "vector!" (Dimensional compatibility with operand1 for linear algebra)
+#    "vector3" (Same as "vector!" but with a width of exactly 3)
+#    "matrix"  (Implies dimensions identical to operand1 if operand1 is "matrix")
+#    "matrix!" (Implies dimensional compatibility for linear algebra)
+def compatibleArithmetic(operand1, operand2, opType, compatibility):
+    
+    # Elementary arithmetic on operands which are simple numbers.
+    def elementary(operand1, operand2, op=opType):
+        if op == "+":
+            return operand1 + operand2
+        if op == "-":
+            return operand1 - operand2
+        if op == "/":
+            if operand2 == 0:
+                return NaN
+            return operand1 / operand2
+        if op == "":
+            return operand1 * operand2
+        if op == "**":
+            if operand1 == 0 and operand2 == 0:
+                return NaN
+            return operand1 ** operand2
         return NaN
-    if isinstance(operand, (int, float)) and isinstance(operand2, (int, float)):
-        return operand / operand2
-    return NaN
+    
+        # Assumes the inner dimensions match and all entries are initialized (!= None)
+    def matrixMultiply(a, b):
+        numRows = len(a)
+        numCols = len(b[0])
+        numInner = len(b) # == len(a[0])
+        result = []
+        for i in range(numRows):
+            row = []
+            for j in range(numCols):
+                s = 0
+                for k in range(numInner):
+                    r = elementary(a[i][k], b[k][j], "")
+                    if r == NaN:
+                        return NaN
+                    if r == None:
+                        s = None
+                        break
+                    s += r
+                row.append(s)
+            result.append(row)
+        return result
+    
+    if operand1 == None or operand2 == None:
+        return None # Uninitialized value.
+    
+    # Check compatibility of operands.  First, find out what the compability
+    # requirements for operand1 are:
+    if isinstance(operand1, (int, float)) and "numeric" in compatibility:
+        c1 = "numeric"
+        compatibleWith = compatibility["numeric"]
+        dimensions1 = []
+    elif isVector(operand1) and "vector" in compatibility:
+        c1 = "vector"
+        compatibleWith = compatibility["vector"]
+        dimensions1 = [len(operand1)]
+    elif isMatrix(operand1) and "matrix" in compatibility:
+        c1 = "matrix"
+        compatibleWith = compatibility["matrix"]
+        dimensions1 = [len(operand1), len(operand1[0])]
+    else:
+        return NaN
+    
+    # Find out if operand2 is compatible with operand1:
+    dimensions2 = None
+    for c2 in compatibleWith:
+        if c2 == "integer" and isinstance(operand2, int):
+            dimensions2 = []
+            break
+        elif c2 == "numeric" and isinstance(operand2, (int, float)):
+            dimensions2 = []
+            break
+        elif    (c2 == "vector" and isVector(operand2)) or \
+                (c2 == "vector!" and isVector(operand2) \
+                    and dimensions1[-1] == len(operand2)) or \
+                (c2 == "vector3" and isVector(operand2) \
+                    and dimensions1[-1] == len(operand2) and len(operand2) == 3):
+            dimensions2 = [len(operand2)]
+            break
+        elif    (c2 == "matrix" and isMatrix(operand2) and ( \
+                    dimensions1 == [] or \
+                    dimensions1 == [len(operand2), len(operand2[0])])) or \
+                (c2 == "matrix!" and isMatrix(operand2) and \
+                    dimensions1[-1] == len(operand2)):
+            dimensions2 = [len(operand2), len(operand2[0])]
+            break
+    if dimensions2 == None:
+        return NaN
+        
+    # We now have only compatible operands.  c1 and c2 tell us the operand
+    # types, while dimensions1 and dimensions2 tell us the geometries.  Let's
+    # perform the operation.
+    result = NaN
+    if c1 == "numeric" and c2 == "numeric":
+        result = elementary(operand1, operand2)
+    elif c1 == "numeric" and c2 == "vector":
+        result = []
+        for e in operand2:
+            r = elementary(operand1, e)
+            if r == NaN:
+                return NaN
+            result.append(r)
+    elif c1 == "vector" and c2 == "numeric":
+        result = []
+        for e in operand1:
+            r = elementary(e, operand2)
+            if r == NaN:
+                return NaN
+            result.append(r)
+    elif c1 == "numeric" and c2 == "matrix":
+        result = []
+        for oRow in operand2:
+            row = []
+            for e in oRow:
+                r = elementary(operand1, e)
+                if r == NaN:
+                    return NaN
+                row.append(r)
+            result.append(row)
+    elif c1 == "matrix" and c2 == "numeric":
+        result = []
+        for oRow in operand1:
+            row = []
+            for e in oRow:
+                r = elementary(e, operand2)
+                if r == NaN:
+                    return NaN
+                row.append(r)
+            result.append(row)
+    elif c1 == "vector" and c2 == "vector" and opType == "":
+        result = []
+        for i in range(dimensions1[0]):
+            row = []
+            for j in range(dimensions2[0]):
+                r = elementary(operand1[i], operand2[j])
+                if r == NaN:
+                    return NaN
+                row.append(r)
+            result.append(row)
+    elif c1 == "vector" and c2 == "vector!" and opType == ".":
+        result = 0
+        for i in range(dimensions1[0]):
+            r = elementary(operand1[i], operand2[i], "")
+            if r == NaN:
+                return NaN
+            if r == None:
+                result = None
+                break
+            result += r
+    elif c1 == "vector" and c2 == "vector3" and opType == "*":
+        result = []
+        index0 = 0
+        index1 = 1
+        index2 = 2
+        for i in range(3):
+            r = elementary(operand1[index1], operand2[index2], "")
+            if r == NaN:
+                return NaN
+            if r == None:
+                result.append(None)
+            else:
+                result.append(r - elementary(operand1[index2], operand2[index1], ""))
+            index0, index1, index2 = index1, index2, index0
+    elif c1 == "vector" and c2 == "vector!":
+        result = []
+        for i in range(dimensions1[0]):
+            r = elementary(operand1[i], operand2[i])
+            if r == NaN:
+                return NaN
+            result.append(r)
+    elif c1 == "matrix" and c2 == "matrix!" and opType == "":
+        result = matrixMultiply(operand1, operand2)
+    elif c1 == "vector" and c2 == "matrix!" and opType == "":
+        result = []
+        for i in range(dimensions2[1]):
+            sum = 0
+            for j in range(dimensions1[0]):
+                r = elementary(operand1[j], operand2[j][i])
+                if r == NaN:
+                    return NaN
+                if r == None:
+                    sum = None
+                    break
+                sum += r
+            result.append(sum)
+    elif c1 == "matrix" and c2 == "vector!" and opType == "":
+        result = []
+        for i in range(dimensions1[0]):
+            sum = 0
+            for j in range(dimensions1[1]):
+                r = elementary(operand1[i][j], operand2[j])
+                if r == NaN:
+                    return NaN
+                if r == None:
+                    sum = None
+                    break
+                sum += r
+            result.append(sum)
+    elif c1 == "matrix" and c2 == "integer" and opType == "**":
+        if dimensions1[0] != dimensions1[1]:
+            result = NaN
+        elif operand2 >= 1:
+            result = copy.deepcopy(operand1)
+            while operand2 > 1:
+                operand2 -= 1
+                result = matrixMultiply(result, operand1)
+                if result == NaN:
+                    break
+        elif not isCompletelyInitialized(operand1):
+            return uninitializedComposite([], dimensions1)
+        elif operand2 == 0:
+            result = identityMatrix(dimensions1[0])
+        elif operand2 <= -1:
+            result = matrixInverse(operand1)
+            if operand2 < -1:
+                inverse = copy.deepcopy(inverse)
+            while operand2 < -1:
+                operand2 += 1
+                result = matrixMultiply(result, inverse)
+                if result == NaN:
+                    return NaN
+    elif c1 == "matrix" and c2 == "matrix":
+        result = []
+        for i in range(dimensions1[0]):
+            row = []
+            for j in range(dimensions1[1]):
+                r = elementary(operand1[i][j], operand2[i][j])
+                if r == NaN:
+                    return NaN
+                row.append(r)
+            result.append(row)
+    else:
+        printError(source, instruction, 
+            "Implementation error, cannot handle this combination of operands.")
+        return None
+    
+    # All done!
+    return result
+
+def simpleAddition(operand1, operand2):
+    return compatibleArithmetic(operand1, operand2, "+", {
+        "numeric": ["numeric"], 
+        "vector": ["vector!"], 
+        "matrix": ["matrix"]})
+
+def simpleSubtraction(operand1, operand2):
+    return compatibleArithmetic(operand1, operand2, "-", {
+        "numeric": ["numeric"], "vector": ["vector!"], "matrix": ["matrix"]})
+
+# A binary-division operator for use with binaryOperation().  
+# Returns NaN on error.
+def simpleDivision(operand1, operand2):
+    return compatibleArithmetic(operand1, operand2, "/", {
+        "numeric": ["numeric"], 
+        "vector": ["numeric"], 
+        "matrix": ["numeric"]})
+
+# A binary-multiplication operator for use with binaryOperation().  
+# Returns NaN on error.
+def simpleMultiplication(operand1, operand2):
+    return compatibleArithmetic(operand1, operand2, "", {
+        "numeric": ["numeric", "vector", "matrix"], 
+        "vector": ["numeric", "vector", "matrix!"], 
+        "matrix": ["numeric", "vector!", "matrix!"]} )
+
+# A binary-multiplication operator for use with binaryOperation().  
+# Returns NaN on error.
+def simpleDot(operand1, operand2):
+    return compatibleArithmetic(operand1, operand2, ".", \
+                                {"vector": ["vector!"]} )
+
+# A binary-multiplication operator for use with binaryOperation().  
+# Returns NaN on error.
+def simpleCross(operand1, operand2):
+    return compatibleArithmetic(operand1, operand2, "*", \
+                                {"vector": ["vector3"]} )
+    
+# A binary-multiplication operator for use with binaryOperation().  
+# Returns NaN on error.
+def simpleExponentiation(operand1, operand2):
+    return compatibleArithmetic(operand1, operand2, "**",\
+                            {"numeric": ["numeric"], "matrix": ["integer"]})
 
 '''
 This is the main emulator loop.  Basically, you feed it an entire PALMAT
@@ -822,8 +1100,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         "for operator \"%s\"") % operator)
                     return None
                 operand = computationStack[-1]
+                arrayDim, v = getArrayDimensions(operand)
+                isi,iss,isv,ism = checkArithmeticalDatatype(v)
+                isn = isi or iss
                 if operator == "U-":
-                    result = unaryOperation(unaryMinus, operand, True)
+                    result = NaN
+                    if isn or isv or ism:
+                        result = unaryOperation(unaryMinus, operand)
                     if result == NaN:
                         printError(source, instruction, \
                                    "Incompatible operand for negation.")
@@ -861,185 +1144,36 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     printError(source, instruction, \
                         "Cannot compare uninitialized values")
                     return None
-                # For some overloaded operators, check out types of operands.
+                # Common arithmetical operators ... both arrayed and
+                # non-arrayed operations.
                 if operator in ["+", "-", "", "/", "**", ".", "*"]:
-                    isi1,iss1,isv1,ism1 = checkArithmeticalDatatype(operand1)
-                    isi2,iss2,isv2,ism2 = checkArithmeticalDatatype(operand2)
-                    isn1 = isi1 or iss1
-                    isn2 = isi2 or iss2
-                    isa1 = isArrayQuick(operand1)
-                    if isa1:
-                        arrayDim1, v1 = getArrayDimensions(operand1)
-                    isa2 = isArrayQuick(operand2)
-                    if isa2:
-                        arrayDim2, v2 = getArrayDimensions(operand2)
-                # When VECTOR and MATRIX datatypes are involved in operations
-                # like addition, multiplication, etc., refer to the "HAL/S 
-                # Programmer's Guide", Chapter 7, for lists of compatible 
-                # datatypes for operand1 and operand2, as well as details about
-                # the results that are supposed to be produced.
-                if operand1 != None and operand2 != None:
                     if operator == "+":
-                        result = NaN
-                        if (ism1 and ism2) or (isv1 and isv2) or (isn1 and isn2):
-                            result = binaryOperation(simpleAddition, operand1, \
-                                                     operand2, True)
-                        if result == NaN:
-                            printError(source, instruction, \
-                                       "Incompatible operands for addition.")
-                            return None
+                        result = binaryOperation(simpleAddition, \
+                                                operand1, operand2)
                     elif operator == "-":
-                        result = NaN
-                        if (ism1 and ism2) or (isv1 and isv2) or (isn1 and isn2):
-                            result = binaryOperation(simpleSubtraction, \
-                                                     operand1, \
-                                                     operand2, True)
-                        if result == NaN:
-                            printError(source, instruction, \
-                                       "Incompatible operands for subtraction.")
-                            return None
-                    elif operator == "":
-                        if isi1 and isi2:
-                            result = operand1 * operand2
-                        elif iss1 and iss2:
-                            result = float(operand1 * operand2)
-                        elif (iss1 and isv2) or (isv1 and iss2):
-                            if iss1:
-                                s = operand1
-                                v = operand2
-                            else:
-                                s = operand2
-                                v = operand1
-                            numCols = len(v)
-                            result = []
-                            for i in range(numCols):
-                                result.append(s * v[i])
-                        elif (iss1 and ism2) or (ism1 and iss2):
-                            if iss1:
-                                s = operand1
-                                m = operand2
-                            else:
-                                s = operand2
-                                m = operand1
-                            numRows = len(m)
-                            numCols = len(m[0])
-                            result = []
-                            for i in range(numRows):
-                                row = []
-                                for j in range(numCols):
-                                    row.append(s * m[i][j])
-                                result.append(row)
-                        elif isv1 and isv2:
-                            numRows = len(operand1)
-                            numCols = len(operand2)
-                            result = []
-                            for i in range(numRows):
-                                row = []
-                                for j in range(numCols):
-                                    row.append(operand1[i] * operand2[j])
-                                result.append(row)
-                        elif ism1 and ism2 and \
-                                len(operand1[0]) == len(operand2):
-                            result = matrixMultiply(operand1, operand2)
-                        elif isv1 and ism2 and len(operand1) == len(operand2):
-                            numInner = len(operand1)
-                            numCols = len(operand2[0])
-                            result = []
-                            for j in range(numCols):
-                                s = 0
-                                for k in range(numInner):
-                                    s += operand1[k] * operand2[k][j]
-                                result.append(s)
-                        elif ism1 and isv2 and len(operand1[0]) == len(operand2):
-                            numRows = len(operand1)
-                            numInner = len(operand2)
-                            result = []
-                            for i in range(numRows):
-                                s = 0
-                                for k in range(numInner):
-                                    s += operand1[i][k] * operand2[k]
-                                result.append(s)
-                        else:
-                            printError(source, instruction, \
-                                    "Incompatible operands for multiplication.")
-                            return None
+                        result = binaryOperation(simpleSubtraction, \
+                                                operand1, operand2)
                     elif operator == "/":
-                        # I've so far not found any explanation of what happens
-                        # with division by zero.
-                        if isa1 and isn2:
-                            result = binaryOperation(simpleDivision, operand1, \
-                                                     operand2, True)
-                            if result == NaN:
-                                printError(source, instruction, \
-                                    "Incompatible operands for division")
-                                return None
-                        else:
-                            if not iss2:
-                                printError(source, instruction, \
-                                           "Incompatible datatype for divisor.")
-                                return None
-                            operand2 = float(operand2)
-                            if ism1:
-                                numRows = len(operand1)
-                                numCols = len(operand1[0])
-                                result = []
-                                for i in range(numRows):
-                                    row = []
-                                    for j in range(numCols):
-                                        try:
-                                            row.append(operand1[i][j] / operand2)
-                                        except:
-                                            printError(source, instruction, \
-                                                       "Division by zero.")
-                                            return None
-                                    result.append(row)
-                            elif isv1:
-                                numCols = len(operand1)
-                                result = []
-                                for j in range(numCols):
-                                    try:
-                                        result.append(operand1[j] / operand2)
-                                    except:
-                                        printError(source, instruction, \
-                                                   "Division by zero.")
-                                        return None
-                            elif iss1:
-                                try:
-                                    result = float(operand1) / operand2
-                                except:
-                                    printError(source, instruction, \
-                                               "Division by zero.")
-                                    return None
-                            else:
-                                printError(source, instruction, \
-                                           "Incompatible datatype for dividend.")
-                                return None
+                        result = binaryOperation(simpleDivision, \
+                                                 operand1, operand2)
+                    elif operator == ".":
+                        result = binaryOperation(simpleDot, \
+                                                 operand1, operand2)
+                    elif operator == "*":
+                        result = binaryOperation(simpleCross, \
+                                                 operand1, operand2)
+                    elif operator == "":
+                        result = binaryOperation(simpleMultiplication, \
+                                                 operand1, operand2)
                     elif operator == "**":
-                        if ism1 and iss2 and len(operand1) == len(operand1[0]):
-                            n = len(operand1)
-                            operand2 = hround(operand2)
-                            if operand2 == 0:
-                                result = identityMatrix(n)
-                            elif operand2 < 0:
-                                operand1 = matrixInverse(operand1)
-                                result = copy.deepcopy(operand1)
-                                operand2 = -operand2
-                                if operand1 == None:
-                                    printError(source, instruction, \
-                                               "Matrix is singular.")
-                                    return None
-                            else:
-                                result = copy.deepcopy(operand1)
-                            while operand2 > 1:
-                                result = matrixMultiply(operand1, result)
-                                operand2 -= 1
-                        elif iss1 and iss2:
-                            result = operand1 ** operand2
-                        else:
-                            printError(source, instruction, \
-                                       "Unsupported operand type(s) for **.")
-                            return None
-                    elif operator == "C||": # string concatenation.
+                        result = binaryOperation(simpleExponentiation, \
+                                                 operand1, operand2)
+                    if result == NaN:
+                        printError(source, instruction, \
+                                   "Incompatible operands for operator.")
+                        return None
+                else:
+                    if operator == "C||": # string concatenation.
                         result = operand1 + operand2
                     elif operator in ["AND", "OR", "ORNOT", "B|N" ]:
                         if not isBitArray(operand1):
@@ -1080,13 +1214,13 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     elif operator == ">=":
                         result = convertToBitArray(operand1 >= operand2)
                     elif operator == ".":
-                        if isVector(operand1) and isVector(operand2) \
+                        if isv1 and isv2 \
                                 and len(operand1) == len(operand2):
                             result = 0
                             for i in range(len(operand1)):
                                 result += operand1[i] * operand2[i]
                     elif operator == "*":
-                        if isVector(operand1) and isVector(operand2) \
+                        if isv1 and isv2 \
                                 and len(operand1) == 3 and len(operand2) == 3:
                             result = [
                                 operand1[1]*operand2[2]-operand1[2]*operand2[1],
@@ -1103,15 +1237,10 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                             "not yet implemented") % operator)
                         return None
                     if result == None:
-                        printErrpr(source, instruction, \
+                        printError(source, instruction, \
                                    "Uninitialized values in expression.")
                         return None
-                    computationStack[-1] = result
-                else:
-                    printError(source, instruction, \
-                        "Uninitialized operand(s) for binary operator \"%s\": %s %s" \
-                        % (operator, str(operand1), str(operand2)))
-                    return None
+                computationStack[-1] = result
             else:
                 printError(source, instruction, \
                            "Unknown operator \"%s\"" % operator)
