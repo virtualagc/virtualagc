@@ -230,9 +230,9 @@ def stringLiteral(PALMAT, state, s):
         if attributes == None:
             substate["errors"]\
                 .append("Variable %s in ASSIGN not found." % s[1:-1])
-            scope["children"].remove(i)
-            identifiers.pop(s)
-            PALMAT["scopes"][i]["parent"] = None
+            #scope["children"].remove(i)
+            #identifiers.pop(s)
+            #PALMAT["scopes"][i]["parent"] = None
         else:
             substate["commonAttributes"]["callAssignments"].append((si, s[1:-1]))
     elif state1 == "call_key":
