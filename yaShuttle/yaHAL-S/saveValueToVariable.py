@@ -286,7 +286,7 @@ def zeroOutCompositeWithSubscripts(object, subscripts, fillValue=0):
     thisLevel = subscripts[0]
     if len(subscripts) > 1:
         for s in thisLevel:
-            zeroOutCompositeWithSubscripts(object(s-1), subscripts[1:], fillvalue)
+            zeroOutCompositeWithSubscripts(object[s-1], subscripts[1:], fillValue)
     else:
         for s in thisLevel:
             object[s-1] = fillValue

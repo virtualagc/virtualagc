@@ -1,8 +1,11 @@
-C/ From PDF p. 113 in "Programming in HAL/S".
+C/ Adapted from PDF p. 113 in "Programming in HAL/S".
 
   EXAMPLE_7:
   PROGRAM;
-     DECLARE ATTITUDE ARRAY(4, 3) SCALAR;
+     DECLARE ATTITUDE ARRAY(4, 3) SCALAR INITIAL(1, 2, 3,
+     						 1, 3, 2,
+     						 1, 2, 3,
+     						 1, 3, 2);
      DECLARE MISMATCH ARRAY(4, 4) INTEGER;
      DECLARE INTEGER,
      		I, J;
@@ -23,6 +26,13 @@ S		      J,I	   I,J
 
         END;
      END;
+     WRITE(6) 'Should be:';
+     WRITE(6) '    0 1 0 1';
+     WRITE(6) '    1 0 1 0';
+     WRITE(6) '    0 1 0 1';
+     WRITE(6) '    1 0 1 0';
+     WRITE(6) 'Actual:';
+     DO FOR I = 1 TO 4; WRITE(6) MISMATCH$(I,*); END;
   CLOSE EXAMPLE_7;
   
      
