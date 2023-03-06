@@ -2049,6 +2049,350 @@ S     J,*
  CLOSE TEST_UNARY_MINUS;
  CALL TEST_UNARY_MINUS ASSIGN(ERRORS);
     
+ /*--------------------------------------------------------------------------*/
+ 
+ ARRAYED_ARITHMETIC: PROCEDURE ASSIGN(ERRORS);
+    DECLARE BOOLEAN, BB;
+    DECLARE INTEGER, ERRORS, I, J;
+    DECLARE VECTOR, ZEROVECTOR CONSTANT(0,0,0);
+    DECLARE ARRAY(2,3) INTEGER, AI1, AI2, AI3;
+    DECLARE ARRAY(2,3) SCALAR, AS1, AS2, AS3;
+    DECLARE ARRAY(2,3) VECTOR, AV1, AV2, AV3;
+    DECLARE ARRAY(2,3) MATRIX, AM1, AM2, AM3;
+    
+    /* The stuff that follows is all for setting up various data objects
+       declared above with "random" data. */
+    
+    RANDOM_VECTOR: FUNCTION VECTOR;
+       DECLARE V VECTOR, I INTEGER;
+       DO FOR I = 1 TO 3; V$I = RANDOM; END;
+       RETURN V;
+    CLOSE RANDOM_VECTOR;
+    
+    RANDOM_MATRIX: FUNCTION MATRIX;
+       DECLARE M MATRIX, I INTEGER;
+       DO FOR I = 1 TO 3; 
+          M$(I,*) = RANDOM_VECTOR; 
+       END;
+       RETURN M;
+    CLOSE RANDOM_MATRIX;
+    
+    DO FOR I = 1 TO 2; 
+       DO FOR J = 1 TO 3; 
+          DO UNTIL AI1$(I,J) ~= 0; AI1$(I,J) = 100 RANDOM; END; 
+          DO UNTIL AI2$(I,J) ~= 0; AI2$(I,J) = 100 RANDOM; END;
+          DO UNTIL AS1$(I,J) ~= 0; AS1$(I,J) = 100 RANDOM; END;
+          DO UNTIL AS2$(I,J) ~= 0; AS2$(I,J) = 100 RANDOM; END;
+          DO UNTIL AV1$(I,J) ~= ZEROVECTOR; AV1$(I,J) = RANDOM_VECTOR; END;
+          DO UNTIL AV2$(I,J) ~= ZEROVECTOR; AV2$(I,J) = RANDOM_VECTOR; END;
+          DO UNTIL ABS(DET(AM1$(I,J))) > 0.1; AM1$(I,J) = RANDOM_MATRIX; END;
+          DO UNTIL ABS(DET(AM2$(I,J))) > 0.1; AM2$(I,J) = RANDOM_MATRIX; END;
+       END; 
+    END;
+    
+    WRITE(6) ;
+    WRITE(6) 'Some tests of arrayed arithmetic.';
+    
+    AI3 = AI1 + AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AI3$(I,J) ~= AI1$(I,J) + AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed addition of INTEGER', BB) ASSIGN(ERRORS);
+    AS3 = AI1 + AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AI1$(I,J) + AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed addition of INTEGER to SCALAR', BB) ASSIGN(ERRORS);
+    AS3 = AS1 + AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AS1$(I,J) + AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed addition of SCALAR to INTEGER', BB) ASSIGN(ERRORS);
+    AS3 = AS1 + AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AS1$(I,J) + AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed addition of SCALAR', BB) ASSIGN(ERRORS);
+    AV3 = AV1 + AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) + AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed addition of VECTOR', BB) ASSIGN(ERRORS);
+    AM3 = AM1 + AM2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AM1$(I,J) + AM2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed addition of MATRIX', BB) ASSIGN(ERRORS);
+
+    AI3 = AI1 - AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AI3$(I,J) ~= AI1$(I,J) - AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed subtraction of INTEGER', BB) ASSIGN(ERRORS);
+    AS3 = AI1 - AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AI1$(I,J) - AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed subtraction of SCALAR from INTEGER', BB) ASSIGN(ERRORS);
+    AS3 = AS1 - AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AS1$(I,J) - AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed subtraction of INTEGER from SCALAR', BB) ASSIGN(ERRORS);
+    AS3 = AS1 - AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AS1$(I,J) - AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed subtraction of SCALAR', BB) ASSIGN(ERRORS);
+    AV3 = AV1 - AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) - AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed subtraction of VECTOR', BB) ASSIGN(ERRORS);
+    AM3 = AM1 - AM2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AM1$(I,J) - AM2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed subtraction of MATRIX', BB) ASSIGN(ERRORS);
+
+    AI3 = AI1 / AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AI3$(I,J) ~= ROUND(AI1$(I,J) / AI2$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed division of INTEGER', BB) ASSIGN(ERRORS);
+    AS3 = AI1 / AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AI1$(I,J) / AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed division of SCALAR by INTEGER', BB) ASSIGN(ERRORS);
+    AS3 = AS1 / AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AS1$(I,J) / AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed division of INTEGER by SCALAR', BB) ASSIGN(ERRORS);
+    AS3 = AS1 / AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AS1$(I,J) / AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed division of SCALAR', BB) ASSIGN(ERRORS);
+    AV3 = AV1 / AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) / AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed division of VECTOR by INTEGER', BB) ASSIGN(ERRORS);
+    AV3 = AV1 / AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) / AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed division of VECTOR by SCALAR', BB) ASSIGN(ERRORS);
+    AM3 = AM1 / AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AM1$(I,J) / AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed division of MATRIX by INTEGER', BB) ASSIGN(ERRORS);
+    AM3 = AM1 / AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AM1$(I,J) / AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed division of MATRIX by SCALAR', BB) ASSIGN(ERRORS);
+
+    AS3 = AV1 . AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AV1$(I,J) . AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed dot product', BB) ASSIGN(ERRORS);
+
+    AV3 = AV1 * AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) * AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed cross product', BB) ASSIGN(ERRORS);
+    
+    AI3 = AI1 AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AI3$(I,J) ~= AI1$(I,J) AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of INTEGER', BB) ASSIGN(ERRORS);
+    AS3 = AI1 AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AI1$(I,J) AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of INTEGER by SCALAR', BB) ASSIGN(ERRORS);
+    AS3 = AS1 AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AS1$(I,J) AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of SCALAR by INTEGER', BB) ASSIGN(ERRORS);
+    AS3 = AS1 AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AS3$(I,J) ~= AS1$(I,J) AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of SCALAR', BB) ASSIGN(ERRORS);
+    AV3 = AI1 AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AI1$(I,J) AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of INTEGER by VECTOR', BB) ASSIGN(ERRORS);
+    AV3 = AS1 AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AS1$(I,J) AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of SCALAR by VECTOR', BB) ASSIGN(ERRORS);
+    AV3 = AV1 AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of VECTOR by INTEGER', BB) ASSIGN(ERRORS);
+    AV3 = AV1 AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of VECTOR by SCALAR', BB) ASSIGN(ERRORS);
+    AM3 = AI1 AM2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AI1$(I,J) AM2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of INTEGER by MATRIX', BB) ASSIGN(ERRORS);
+    AM3 = AS1 AM2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AS1$(I,J) AM2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of SCALAR by MATRIX', BB) ASSIGN(ERRORS);
+    AM3 = AM1 AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AM1$(I,J) AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of MATRIX by INTEGER', BB) ASSIGN(ERRORS);
+    AM3 = AM1 AS2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AM1$(I,J) AS2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of MATRIX by SCALAR', BB) ASSIGN(ERRORS);
+    AV3 = AI1 AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AI1$(I,J) AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of INTEGER by VECTOR', BB) ASSIGN(ERRORS);
+    AV3 = AS1 AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AS1$(I,J) AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of SCALAR by VECTOR', BB) ASSIGN(ERRORS);
+    AV3 = AV1 AI2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) AI2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed multiplication of VECTOR by INTEGER', BB) ASSIGN(ERRORS);
+    AM3 = AV1 AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AV1$(I,J) AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed outer product of VECTOR', BB) ASSIGN(ERRORS);
+    AM3 = AM1 AM2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AM3$(I,J) ~= AM1$(I,J) AM2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed MATRIX multiplication', BB) ASSIGN(ERRORS);
+    AV3 = AV1 AM2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AV1$(I,J) AM2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed VECTOR times MATRIX', BB) ASSIGN(ERRORS);
+    AV3 = AM1 AV2;
+    BB = TRUE;
+    DO FOR I = 1 TO 2; DO FOR J = 1 TO 3; 
+       IF AV3$(I,J) ~= AM1$(I,J) AV2$(I,J) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed MATRIX times VECTOR', BB) ASSIGN(ERRORS);
+    
+ CLOSE ARRAYED_ARITHMETIC;
+ CALL ARRAYED_ARITHMETIC ASSIGN(ERRORS);
+
+ /*--------------------------------------------------------------------------*/
+ NF_TEST: PROCEDURE ASSIGN(ERRORS);
+    DECLARE ERRORS INTEGER;
+    DECLARE 	E FUNCTION INTEGER, F FUNCTION SCALAR, 
+    		G FUNCTION VECTOR, H FUNCTION MATRIX, 
+    		C FUNCTION CHARACTER(10), B FUNCTION BIT(5),
+    		I INTEGER, S SCALAR, V VECTOR, M MATRIX,
+    		A CHARACTER(10), D BIT(5);
+    DECLARE 	MM MATRIX INITIAL(1, 2, 3, 4, 5, 6, 7, 8, 9),
+    		VV VECTOR INITIAL(4, 5, 6),
+    		SS SCALAR INITIAL(77),
+    		II INTEGER INITIAL(89),
+    		AA CHARACTER(10) INITIAL('HELLO'),
+    		DD BIT(5) INITIAL(26),
+    		BB BOOLEAN;
+ 
+    WRITE(6);
+    WRITE(6) 'No-argument FUNCTION tests.';
+    IF II = E THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('No-argument INTEGER function test', BB) ASSIGN(ERRORS);
+    IF SS = F THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('No-argument SCALAR function test', BB) ASSIGN(ERRORS);
+    IF VV = G THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('No-argument VECTOR function test', BB) ASSIGN(ERRORS);
+    IF MM = H THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('No-argument MATRIX function test', BB) ASSIGN(ERRORS);
+    /*
+    IF AA = C THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('No-argument CHARACTER function test', BB) ASSIGN(ERRORS);
+    IF DD = B THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('No-argument BIT function test', BB) ASSIGN(ERRORS);
+    */
+
+    E: FUNCTION INTEGER; RETURN ROUND(F+12); CLOSE E;
+    F: FUNCTION SCALAR; RETURN G . G; CLOSE F;
+    G: FUNCTION VECTOR; DECLARE MM MATRIX; MM = H; RETURN MM$(2,*); CLOSE G;
+    H: FUNCTION MATRIX; 
+       DECLARE MM MATRIX CONSTANT(1, 2, 3, 4, 5, 6, 7, 8, 9);
+       RETURN MM;
+    CLOSE H;
+    C: FUNCTION CHARACTER(10); RETURN 'HELLO'; CLOSE C;
+    B: FUNCTION BIT(5); RETURN 26; CLOSE B;
+ CLOSE NF_TEST;
+ CALL NF_TEST ASSIGN(ERRORS);
+
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  IF ALLTESTS THEN DO;

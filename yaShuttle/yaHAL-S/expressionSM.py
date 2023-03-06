@@ -347,7 +347,8 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
         elif lbnfLabel == "relational_expOR":
             appendInstruction(expression, { "operator": "OR" }, source)
         elif lbnfLabel in ["prePrimaryFunction", "userBitFunction", 
-                           "userCharFunction", "userStructFunc"]:
+                           "userCharFunction", "userStructFunc",
+                           "noArgumentUserFunction"]:
             internalState = "waitFunctionName"
         elif lbnfLabel == "factorTranspose":
             appendInstruction(expression, {"function": "TRANSPOSE"}, source)

@@ -12,6 +12,7 @@ typedef char* Ident;
 typedef char* NeqToken;
 typedef char* LeToken;
 typedef char* GeToken;
+typedef char* NoArgUserFuncIdentifierToken;
 typedef char* BitIdentifierToken;
 typedef char* BitFunctionIdentifierToken;
 typedef char* CharFunctionIdentifierToken;
@@ -448,7 +449,7 @@ ATTRIBUTES make_ACattributes_typeAndMinorAttr(TYPE_AND_MINOR_ATTR p0);
 struct DECLARATION_
 {
   int line_number, char_number;
-  enum { is_AAdeclaration_nameId, is_ABdeclaration_nameId_attributes, is_ACdeclaration_labelToken, is_ACdeclaration_labelToken_type_minorAttrList, is_ACdeclaration_labelToken_procedure_minorAttrList, is_ADdeclaration_labelToken_procedure, is_ACdeclaration_labelToken_function_minorAttrList, is_ADdeclaration_labelToken_function, is_AEdeclaration_eventToken_event, is_AFdeclaration_eventToken_event_minorAttrList, is_AGdeclaration_eventToken, is_AHdeclaration_eventToken_minorAttrList } kind;
+  enum { is_AAdeclaration_nameId, is_ABdeclaration_nameId_attributes, is_ACdeclaration_labelToken, is_ACdeclaration_labelToken_type_minorAttrList, is_ACdeclaration_labelToken_procedure_minorAttrList, is_ADdeclaration_labelToken_procedure, is_ACdeclaration_labelToken_function_minorAttrList, is_ADdeclaration_labelToken_function_minorAttrList, is_ADdeclaration_labelToken_function, is_AEdeclaration_labelToken_function, is_AEdeclaration_eventToken_event, is_AFdeclaration_eventToken_event_minorAttrList, is_AGdeclaration_eventToken, is_AHdeclaration_eventToken_minorAttrList } kind;
   union
   {
     struct { NAME_ID name_id_; } aadeclaration_nameid_;
@@ -458,7 +459,9 @@ struct DECLARATION_
     struct { LabelToken labeltoken_; MINOR_ATTR_LIST minor_attr_list_; } acdeclaration_labeltoken_procedure_minorattrlist_;
     struct { LabelToken labeltoken_; } addeclaration_labeltoken_procedure_;
     struct { LabelToken labeltoken_; TYPE_AND_MINOR_ATTR type_and_minor_attr_; } acdeclaration_labeltoken_function_minorattrlist_;
+    struct { NoArgUserFuncIdentifierToken noarguserfuncidentifiertoken_; TYPE_AND_MINOR_ATTR type_and_minor_attr_; } addeclaration_labeltoken_function_minorattrlist_;
     struct { LabelToken labeltoken_; } addeclaration_labeltoken_function_;
+    struct { NoArgUserFuncIdentifierToken noarguserfuncidentifiertoken_; } aedeclaration_labeltoken_function_;
     struct { EventToken eventtoken_; } aedeclaration_eventtoken_event_;
     struct { EventToken eventtoken_; MINOR_ATTR_LIST minor_attr_list_; } afdeclaration_eventtoken_event_minorattrlist_;
     struct { EventToken eventtoken_; } agdeclaration_eventtoken_;
@@ -473,7 +476,9 @@ DECLARATION make_ACdeclaration_labelToken_type_minorAttrList(LabelToken p0, TYPE
 DECLARATION make_ACdeclaration_labelToken_procedure_minorAttrList(LabelToken p0, MINOR_ATTR_LIST p1);
 DECLARATION make_ADdeclaration_labelToken_procedure(LabelToken p0);
 DECLARATION make_ACdeclaration_labelToken_function_minorAttrList(LabelToken p0, TYPE_AND_MINOR_ATTR p1);
+DECLARATION make_ADdeclaration_labelToken_function_minorAttrList(NoArgUserFuncIdentifierToken p0, TYPE_AND_MINOR_ATTR p1);
 DECLARATION make_ADdeclaration_labelToken_function(LabelToken p0);
+DECLARATION make_AEdeclaration_labelToken_function(NoArgUserFuncIdentifierToken p0);
 DECLARATION make_AEdeclaration_eventToken_event(EventToken p0);
 DECLARATION make_AFdeclaration_eventToken_event_minorAttrList(EventToken p0, MINOR_ATTR_LIST p1);
 DECLARATION make_AGdeclaration_eventToken(EventToken p0);
@@ -940,12 +945,14 @@ ARITH_ID make_FHarith_id(ArithFieldToken p0);
 struct NO_ARG_ARITH_FUNC_
 {
   int line_number, char_number;
-  enum { is_ZZclocktime, is_ZZdate, is_ZZerrgrp, is_ZZerrnum, is_ZZprio, is_ZZrandom, is_ZZrandomg, is_ZZruntime } kind;
+  enum { is_ZZnoArgumentUserFunction, is_ZZclocktime, is_ZZdate, is_ZZerrgrp, is_ZZerrnum, is_ZZprio, is_ZZrandom, is_ZZrandomg, is_ZZruntime } kind;
   union
   {
+    struct { NoArgUserFuncIdentifierToken noarguserfuncidentifiertoken_; } zznoargumentuserfunction_;
   } u;
 };
 
+NO_ARG_ARITH_FUNC make_ZZnoArgumentUserFunction(NoArgUserFuncIdentifierToken p0);
 NO_ARG_ARITH_FUNC make_ZZclocktime(void);
 NO_ARG_ARITH_FUNC make_ZZdate(void);
 NO_ARG_ARITH_FUNC make_ZZerrgrp(void);
@@ -3048,16 +3055,18 @@ LABEL_EXTERNAL make_ABlabel_external(LABEL_DEFINITION p0);
 struct CLOSING_
 {
   int line_number, char_number;
-  enum { is_AAclosing, is_ABclosing, is_ACclosing } kind;
+  enum { is_AAclosing, is_ABclosing, is_ADclosing, is_ACclosing } kind;
   union
   {
     struct { LABEL label_; } abclosing_;
+    struct { NoArgUserFuncIdentifierToken noarguserfuncidentifiertoken_; } adclosing_;
     struct { CLOSING closing_; LABEL_DEFINITION label_definition_; } acclosing_;
   } u;
 };
 
 CLOSING make_AAclosing(void);
 CLOSING make_ABclosing(LABEL p0);
+CLOSING make_ADclosing(NoArgUserFuncIdentifierToken p0);
 CLOSING make_ACclosing(LABEL_DEFINITION p0, CLOSING p1);
 
 struct BLOCK_BODY_
@@ -3079,14 +3088,18 @@ BLOCK_BODY make_ACblock_body(BLOCK_BODY p0, ANY_STATEMENT p1);
 struct FUNCTION_NAME_
 {
   int line_number, char_number;
-  enum { is_AAfunction_name } kind;
+  enum { is_AAfunction_name, is_ABfunction_name, is_ACfunction_name } kind;
   union
   {
     struct { LABEL_EXTERNAL label_external_; } aafunction_name_;
+    struct { NoArgUserFuncIdentifierToken noarguserfuncidentifiertoken_; } abfunction_name_;
+    struct { NoArgUserFuncIdentifierToken noarguserfuncidentifiertoken_; } acfunction_name_;
   } u;
 };
 
 FUNCTION_NAME make_AAfunction_name(LABEL_EXTERNAL p0);
+FUNCTION_NAME make_ABfunction_name(NoArgUserFuncIdentifierToken p0);
+FUNCTION_NAME make_ACfunction_name(NoArgUserFuncIdentifierToken p0);
 
 struct PROCEDURE_NAME_
 {

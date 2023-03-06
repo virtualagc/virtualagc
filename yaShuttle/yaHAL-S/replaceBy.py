@@ -16,19 +16,25 @@ History:        2022-11-18 RSB  Created.
                                 Began adding hashing for mangling of structure
                                 field names.
                 2022-12-09 RSB  Added structure-template library.
+                2023-03-06 RSB  nf_.
 
 I've implemented a very imperfect, heuristic method.  If it
 turns out to be inadequate, it can be replaced.  It probably should be almost
 completely redone.  It's crummy in many ways.  It may need a full parser.
 For example, it will perform macro replacements within quoted character strings,
-which it shouldn't do at all.
+which it shouldn't do at all.  (Later:  I think that I now obfuscate quoted
+character strings, so in fact macro replacement can no longer match any patterns
+in them.)
 
 I attempt to handle both parsing of the REPLACE ... BY "..." command
 and the macro expansions themselves using relatively-simple regex pattern
 matching.  That's nowhere as rigorous as what the original language spec
 requires, but I *hope* it will be good enough. For example, it assumes
 that there won't be multiple statements on a single line.  Still, even 
-if it works adequately, there are still drawbacks.
+if it works adequately, there are still drawbacks.  (Later:  The preprocessor
+will have rearranged the source code so that lines only contain individual
+statements ... defined as things ending in semicolons.  So this paragraph
+may not actually be a real concern any longer.)
 
 Specifically, note that only the *expanded* macros will be visible to 
 the compiler, so the output listings (which are supposed to have the 
@@ -42,7 +48,11 @@ Regarding the scope of macros, I believe they're good only until the ends
 of the blocks in which they're defined.  The end of a block can be detected 
 by the reserved word CLOSE.  However, it's possible that a block can have 
 inline block of the form FUNCTION ... CLOSE, so it's necessary to watch out 
-for those as well.  Plus PROCEDURE ... CLOSE.
+for those as well.  Plus PROCEDURE ... CLOSE.  (Later:  This ignores the fact
+that some macros can be established by TEMPORARY declarations within DO ... END
+blocks, rather than just by DECLARE declarations in PROGRAM/FUNCTION/PROCEDURE
+blocks.  Therefore, the proper scopes for macros must include DO ... END blocks
+as well.  Though it looks as though I coded it that way anyway.)
 
 Additionally, while the original BNF distinguished between identifiers 
 for different datatypes (<ARITH ID>, <BIT ID>, <CHAR ID>, ...), the same
@@ -58,15 +68,28 @@ appropriately according to type.  The naming scheme used in my current
 LBNF HAL/S language definition is that the following prefixes are added
 to identifiers of various types:
 
-    BOOLEAN             b_
-    BOOLEAN FUNCTION    bf_
-    CHARACTER           c_
-    CHARACTER FUNCTION  cf_
-    STRUCT              s_
-    STRUCTURE FUNCTION  sf_
-    LABEL               l_
-    EVENT               e_
-    others              (none)  (Including INTEGER, SCALAR, VECTOR, MATRIX.)
+    BOOLEAN variable                    b_
+    BOOLEAN FUNCTION                    bf_
+    CHARACTER variable                  c_
+    CHARACTER FUNCTION                  cf_
+    STRUCT variable                     s_
+    STRUCTURE FUNCTION                  sf_
+    No-argument arithmetical FUNCTION   nf_
+    LABEL                               l_  
+        Includes all of the following:
+         * Arithmetical FUNCTION with arguments
+         * PROCEDURE
+         * PROGRAM
+         * COMPOOL
+         * Explicit labels ("LABEL:")
+         * ... and possibly others ...
+    EVENT                               e_
+    others                              (none)  
+        Includes all variables of types:
+         * INTEGER
+         * SCALAR
+         * VECTOR
+         * MATRIX
 
 This name mangling is handled essentially the same way as REPLACE/BY
 macros, except that the macros are created from DECLARE statements
@@ -95,7 +118,8 @@ declarePattern = '\\bDECLARE\\s'
 
 # Note that the mangling prefix for FUNCTION is actually "l_" only for 
 # arithmetical functions; for boolean functions it's "bf_", for character
-# functions it's "cf_", and for structure functions "sf_".
+# functions it's "cf_", for structure functions "sf_", and for arithmetical
+# functions with *no* arguments it's "nf_".
 mangling = { "BOOLEAN" : "b_", "CHARACTER" : "c_", "INTEGER" : "", 
             "SCALAR" : "", "VECTOR" : "", "MATRIX" : "",
             "PROCEDURE" : "l_", "FUNCTION": "l_", "STRUCTURE": "s_",
@@ -136,6 +160,8 @@ def expandMacros(rawline, macros, maxScopes=1000000):
             if numScopes <= 0:
                 break
             for macroName in macros[depth]:
+                if macroName == "@":
+                    continue
                 macro = macros[depth][macroName]
                 if macroName in macroNamesChecked:
                     # If a macro name of an inner block is the same as
@@ -182,7 +208,7 @@ def expandMacros(rawline, macros, maxScopes=1000000):
     return line, changed
 
 def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
-              macros=[{}]):
+              macros=[{}], trace=False):
     debugIndentation = False
     blockDepth = 0
     
@@ -230,7 +256,14 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                     print(blockDepth, "->", blockDepth+1, \
                             fullLine, file=sys.stderr)
                 blockDepth += 1
-                macros.append({})
+                # Upon entry to a new block, we append its list of macros
+                # to the full list of blocks, and pop it from the end of the
+                # when we eventually leave the block.  At first, this block's
+                # list of macros is empty, except that we add one entry ("@")
+                # to tell us the source line the block starts at.
+                macros.append({"@": i})
+                if trace:
+                    print("\tMacro block %d start: %s" % (i+1, fullLine))
                 lastFunctionProcedure = -1
             # A new macro definition via REPLACE ... BY "..."?  
             match = re.search(replaceByPattern, fullLine)
@@ -293,12 +326,21 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                             hasType = "cf_"
                         elif datatype == "STRUCTURE":
                             hasType = "sf_"
-                if re.search("\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE|COMPOOL" \
-                             + "|TASK|UPDATE)\\b", tail) \
-                        != None:
+                pfMatch = re.search(\
+                    "\\b(FUNCTION|PROCEDURE|PROGRAM|CLOSE|COMPOOL|TASK|UPDATE)\\b",\
+                    tail)
+                if pfMatch != None:
                     isProcedureOrFunction = True
-                    if None != re.search("\\b(FUNCTION|PROCEDURE)\\b", tail):
+                    blockType = pfMatch.group(0)
+                    if blockType in ["FUNCTION", "PROCEDURE"]:
                         lastFunctionProcedure = i
+                        if blockType == "FUNCTION" and \
+                                None == re.search("\\bFUNCTION\\(", \
+                                                 tail.replace(" ", "")):
+                            if trace:
+                                print("\t%s is no-argument function" % identifier)
+                            if hasType == "l_":
+                                hasType = "nf_"    
                 # Note that these macros have to be defined in the parent
                 # context rather than in the block's context, since the names
                 # of the PROGRAM/FUNCTION/PROCEDURE/... will be referenced from
@@ -307,6 +349,28 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                     macros[-2][identifier] = { "arguments": [], 
                                 "replacement": hasType + identifier, 
                                 "pattern": "\\b" + identifier + "\\b" }
+                elif hasType == "nf_":
+                    # The identifier is already in the macro table, which can
+                    # only mean it was previously-defined by a forward
+                    # declaration, which can only mean that it was incorrectly
+                    # mangled as "l_".  We must both correct that in the macro
+                    # table, and must also backtrack to fix any incorrect
+                    # replacements already done.  Note that the present line
+                    # hasn't yet had any replacements made in it.
+                    macro = macros[-2][identifier]
+                    oldReplacement = macro["replacement"]
+                    newReplacement = hasType + identifier
+                    if oldReplacement != newReplacement:
+                        macro["replacement"] = newReplacement
+                        start = macros[-2]["@"]
+                        fixupPattern = "\\b" + oldReplacement + "\\b"
+                        for j in range(start, i):
+                            if None != re.search(fixupPattern, halsSource[j]):
+                                if trace:
+                                    print("\tFixup needed at %d" % (j+1))
+                                halsSource[j] = re.sub(fixupPattern, \
+                                                       newReplacement, \
+                                                       halsSource[j])
             else:
                 match = re.search("(GO\\s+TO|REPEAT|EXIT)\\s+" + \
                         bareIdentifierPattern + "\\s*;", fullLine);
@@ -567,7 +631,19 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                 if blockDepth < 0:
                     print("Negative block depth implementation error.", \
                             file=sys.stderr)
-                macros = macros[:-1]
+                macroLine = macros.pop()
+                if trace:
+                    macroStart = macroLine.pop("@") + 1
+                    for key in list(macroLine.keys()):
+                        if "ignore" in macroLine[key]:
+                            macroLine.pop(key)
+                    print("\tMacro block %d ends at %d:" % (macroStart, i+1), \
+                          fullLine)
+                    if macroLine == {}:
+                        print("\t\t(no macros defined in block)")
+                    else:
+                        for key in sorted(macroLine):
+                            print("\t\t%s: %s" % (key, macroLine[key]))
                 
         # If we've gotten here, then we have a line which is eligible for macro
         # expansions.  

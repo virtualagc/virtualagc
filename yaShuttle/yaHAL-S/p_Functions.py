@@ -216,10 +216,12 @@ def stringLiteral(PALMAT, state, s):
                 "declaration_labelToken_function_minorAttrList" in history:
             addAttribute(identifiers, s, "function", True)
             addAttribute(identifiers, s, "scope", len(scopes))
+            addAttribute(identifiers, s, "forward", True)
             addAttribute(identifiers, s, "parameters", [])
         elif "blockHeadProcedure" in history:
             addAttribute(identifiers, s, "procedure", True)
             addAttribute(identifiers, s, "scope", len(scopes))
+            addAttribute(identifiers, s, "forward", True)
             addAttribute(identifiers, s, "parameters", [])
             addAttribute(identifiers, s, "assignments", [])
         return True, state

@@ -140,6 +140,29 @@ def inflateArray(arrayList, attributes):
     arrayList.append("a")
 
 '''
+# This is a recursive function used for fixing CALL instructions targeting
+# forward-declared FUNCTIONs and PROCEDUREs.  Such CALLs will have the wrong
+# scope (but correct identifer) for the CALLs, because the scopes in which the
+# subroutines reside aren't known  when the forward declaration is encountered.
+# The topIndex is supposed to indicate the topmost scope in which the call can
+# occur (namely, the one in which the identifier appears in the identifier
+# list), while oldValue is the current value of the "call" key in the 
+# instruction, and newValue is the desired new value.  The function must
+# recurse through all descendents of the topIndex scope.
+def fixForwardCalls(PALMAT, topIndex, oldValue, newValue, trace=False):
+    scope = PALMAT["scopes"][topIndex]
+    instructions = scope["instructions"]
+    for i in range(len(instructions)):
+        instruction = instructions[i]
+        if "call" in instruction and instruction["call"] == oldValue:
+            instruction["call"] = newValue
+            if trace:
+                print("\tFixup for CALL at (%d, %d)" % (topIndex, i+1))
+    for index in scope["children"]:
+        fixForwardCalls(PALMAT, index, oldValue, newValue, trace)
+'''
+    
+'''
 Here's the idea:  generatePALMAT() is a recursive function that works its
 way through the given AST to generate PALMAT for it.
 
@@ -528,13 +551,20 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 "blockHeadProgram": "program",
                 "blockHeadCompool": "compool"
             }
-        identifierDict = \
-          currentScope["identifiers"][substate["currentIdentifier"]]
+        blockIdentifier = substate["currentIdentifier"]
+        identifierDict = currentScope["identifiers"][blockIdentifier]
         if lbnfLabel == "blockHeadFunction" and \
                 isUnmarkedScalar(identifierDict):
             identifierDict["scalar"] = True
-        childIndex = addScope(PALMAT, currentScope["self"], \
-                              blockTypes[lbnfLabel])
+        blockType = blockTypes[lbnfLabel]
+        childIndex = addScope(PALMAT, currentScope["self"], blockType)
+        if blockType in ["function", "procedure"] and \
+                "forward" in identifierDict:
+            #fixForwardCalls(PALMAT, currentIndex, \
+            #                (identifierDict["scope"], blockIdentifier[1:-1]),
+            #                (childIndex, blockIdentifier[1:-1]), trace)
+            identifierDict["scope"] = childIndex
+            identifierDict.pop("forward")
         state["scopeIndex"] = childIndex
         currentScope = PALMAT["scopes"][childIndex]
         currentScope["name"] = substate["currentIdentifier"]

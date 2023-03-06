@@ -162,6 +162,8 @@ helpMenu = \
 \t`STATUS      Show current settings and other info.
 \t`WINE        Enable Windows compiler (Linux only).
 \t`NOWINE      Disable Windows compiler (Linux only).
+\t`TRACE0      Enable preprocessor tracing.
+\t`NOTRACE0    Disable preprocessor tracing.
 \t`TRACE1      Enable parser tracing.
 \t`NOTRACE1    Disable parser tracing.
 \t`TRACE2      Enable code-generator tracing.
@@ -184,6 +186,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
     colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan",
               "white", "gray", "brightred", "brightgreen", "brightyellow",
               "brightblue", "brightmagenta", "brightcyan", "brightwhite"]
+    trace0 = False
     trace1 = False
     trace2 = False
     trace3 = False
@@ -408,6 +411,14 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     print("\tSTRICT off.")
                     strict = False
                     continue
+                elif firstWord == "TRACE0":
+                    print("\tTRACE0 on.")
+                    trace0 = True
+                    continue
+                elif firstWord == "NOTRACE0":
+                    print("\tTRACE0 off.")
+                    trace0 = False
+                    continue
                 elif firstWord == "TRACE1":
                     print("\tTRACE1 on.")
                     trace1 = True
@@ -481,6 +492,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print("\tLABELS                   (vs. NOLABELS)")
                     else:
                         print("\tNOLABELS                 (vs. LABELS)")
+                    if trace0:
+                        print("\tTRACE0                   (vs NOTRACE0)")
+                    else:
+                        print("\tNOTRACE0                 (vs TRACE0)")
                     if trace1:
                         print("\tTRACE1                   (vs NOTRACE1)")
                     else:
@@ -605,7 +620,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         success, ast = processSource(PALMAT, halsSource, metadata, \
                          libraryFilename, structureTemplates, noCompile, \
                          lbnf, bnf, trace1, wine, trace2, 8, macros, trace4, \
-                         strict)
+                         strict, trace0)
         if optimize:
             optimizePALMAT(PALMAT)
         if len(substate["warnings"]):
