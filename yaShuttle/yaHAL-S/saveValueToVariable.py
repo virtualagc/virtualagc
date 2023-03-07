@@ -20,7 +20,6 @@ History:    2023-02-18 RSB  Began.  This is essentially a complete, improved
 """
 
 from palmatAux import *
-from math import nan as NaN
 
 '''
 -------------------------------------------------------------------------------
@@ -144,7 +143,7 @@ def convertComposite(composite, datatype, datalength):
                 return False
         else:
             converted = convertSimple(value, datatype, datalength)
-            if converted == NaN:
+            if isNaN(converted):
                 return False
             composite[i] = converted
     return True
@@ -164,7 +163,7 @@ def assignSimpleSubscripted(value, valueInAttributes, indices, \
     index = indices[0][0] - 1;  # Recall HAL/S indexes from 1, Python from 0.
     if len(indices) == 1:
         converted = convertSimple(value, datatype, datalength)
-        if converted == NaN:
+        if isNaN(converted):
             return False
         valueInAttributes[index] = converted
         return True
@@ -235,7 +234,7 @@ def assignCompositeSubscripted(RHS, preSubscriptedLHS, subscriptsLHS, \
                     else:
                         converted = convertSimple(value, datatypeLHS, \
                                                   datalengthLHS)
-                        if converted == NaN:
+                        if isNaN(converted):
                             return False
                 preSubscriptedLHS[s-1] = converted
             return True
@@ -452,7 +451,7 @@ def saveValueToVariable(source, value, identifier, attributes, subscripts=[]):
         '''
         if len(primaryDimensions) == 0:
             converted = convertSimple(value, datatype, datalength)
-            if converted == NaN:
+            if isNaN(converted):
                 printError(source, "", \
                     "Incompatible datatypes in assignment of variable %s: %s" \
                     % (identifier, str(value)))

@@ -36,6 +36,7 @@ import random
 import time
 import copy
 from palmatAux import *
+from unaryFunctions import *
 from saveValueToVariable import *
 
 timeOrigin = 0
@@ -223,92 +224,6 @@ def readItemLUN5(source):
     return readLineFields.pop(0)
 
 '''
-Compute determinant of a square matrix.  I have *not* researched optimal
-methods.  This is simply the one that stuck in my mind from schooldays.
-'''
-def determinant(m):
-    n = len(m)
-    if n == 1:
-        return m[0][0]
-    d = 0.0
-    s = 1
-    for i in range(n):
-        bottom = copy.deepcopy(m[1:])
-        for row in bottom:
-            row.pop(i)
-        d += s * m[0][i] * determinant(bottom)
-        s = -s
-    return d
-
-'''
-Compute the inverse of a matrix.  There are innumerable methods for doing 
-this, all of them accompanied by disclaimers as to why that particular method
-is incredible for some specific kind of matrix, and all other methods are
-horrible; and in the usual unhelpful web style, still other statements of the
-form "are you sure you really want to invert that matrix anyway ... stupid!"
-Of course, I haven't the slightest idea what the properties of the matrices 
-that are going to be inverted are, nor however stupid it may be, any means
-whatever of bypassing inversion. That being the case, here is simple Gaussian 
-elimination with no frills whatever.  Returns either the inverse, or else
-None if m isn't completely initialized, or NaN if singular.
-'''
-def matrixInverse(m):
-    if not isCompletelyInitialized(m):
-        return None
-    # Augment m by attaching an identity matrix to the right.
-    n = len(m)
-    n2 = n + n
-    a = []
-    for i in range(n):
-        addition = [0]*n
-        addition[i] = 1
-        a.append(m[i] + addition)
-    # Reduce so that the left-hand side of the augmented matrix is in
-    # upper-triangular form.
-    for col in range(n):
-        # At this step. only row = col and downard are considered.
-        # First I find the row in this section with the largest element
-        # in the column, and move it upward to row = col.
-        maxElement = abs(a[col][col])
-        maxRow = col
-        for row in range(col + 1, n):
-            e = abs(a[col][row])
-            if e > maxElement:
-                maxElement = e
-                maxRow = row
-        if maxElement == 0: # The matrix must be singular.
-            return NaN
-        if maxRow != col:
-            a[col],a[maxRow] = a[maxRow],a[col]
-        # Now we can subtract multiples of a[col) from all the rows below it
-        # to make the elements in that column 0. 
-        for row in range(col + 1, n):
-            scale = a[row][col] / a[col][col]
-            if scale == 0:
-                continue
-            #a[row][col] = 0
-            for i in range(col, n2):
-                a[row][i] -= scale * a[col][i]
-    # Now reduce the upper triangle.
-    for col in range(1, n):
-        for row in range(col):
-            scale = a[row][col] / a[col][col]
-            if scale == 0:
-                continue
-            a[row][col] = 0
-            for i in range(col + 1, n2):
-                a[row][i] -= scale * a[col][i]
-    # Finally, scale each row so that the diagonals on the left-hand side are
-    # all 1, and pick off the left=hand side of the augmented matrix, since it's
-    # the inverse.
-    for row in range(n):
-        e = a[row][row]
-        a[row] = a[row][n:]
-        for i in range(n):
-            a[row][i] /= e
-    return a
-
-'''
 The following function is used to apply a HAL/S built-in "array function"
 like MAX, MIN, PROD to an array of integers and/or scalars.  The function
 doesn't check the legality of the array, but merely uses the fact that 
@@ -463,7 +378,7 @@ def sliceIt(object, subscripts):
         newSubscripts = []
     for s in thisLevelSubscripts:
         newLevel = sliceIt(object[s], newSubscripts)
-        if newLevel == NaN:
+        if isNaN(newLevel):
             return NaN
         newObject.append(newLevel)
     if len(newObject) == 1:
@@ -573,33 +488,8 @@ def isEqualTo(operand1, operand2):
         return areLeavesEqual(operand1, operand2)
     return areTwoArraysEqual(operand1, operand2)
 
-# A unary-minus operator for use with unaryOperation().  Returns NaN on error.
-# Its operand can be anything legal to be negated,namely MATRIX, VECTOR, 
-# INTEGER, or SCALAR (see p. 7-2 of [HPG]).
-def unaryMinus(operand):
-    result = NaN
-    if operand == None:
-        result = None
-    elif isinstance(operand, (int, float)):
-        result = -operand
-    elif isVector(operand):
-        result = []
-        for v in operand:
-            if v == None:
-                result.append(None)
-            else:
-                result.append(-v)
-    elif isMatrix(operand):
-        result = []
-        for r in operand:
-            row = []
-            for v in r:
-                if v == None:
-                    row.append(None)
-                else:
-                    row.append(-v)
-            result.append(row)
-    return result
+#-----------------------------------------------------------------------------
+# What follows is a bunch of functions used with the binaryOperation() function.
 
 # A building block for functions used with used with binaryOperation().  
 # The idea is that you give it the following information:
@@ -649,7 +539,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
                 s = 0
                 for k in range(numInner):
                     r = elementary(a[i][k], b[k][j], "")
-                    if r == NaN:
+                    if isNaN(r):
                         return NaN
                     if r == None:
                         s = None
@@ -715,14 +605,14 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
         result = []
         for e in operand2:
             r = elementary(operand1, e)
-            if r == NaN:
+            if isNaN(r):
                 return NaN
             result.append(r)
     elif c1 == "vector" and c2 == "numeric":
         result = []
         for e in operand1:
             r = elementary(e, operand2)
-            if r == NaN:
+            if isNaN(r):
                 return NaN
             result.append(r)
     elif c1 == "numeric" and c2 == "matrix":
@@ -731,7 +621,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             row = []
             for e in oRow:
                 r = elementary(operand1, e)
-                if r == NaN:
+                if isNaN(r):
                     return NaN
                 row.append(r)
             result.append(row)
@@ -741,7 +631,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             row = []
             for e in oRow:
                 r = elementary(e, operand2)
-                if r == NaN:
+                if isNaN(r):
                     return NaN
                 row.append(r)
             result.append(row)
@@ -751,7 +641,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             row = []
             for j in range(dimensions2[0]):
                 r = elementary(operand1[i], operand2[j])
-                if r == NaN:
+                if isNaN(r):
                     return NaN
                 row.append(r)
             result.append(row)
@@ -759,7 +649,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
         result = 0
         for i in range(dimensions1[0]):
             r = elementary(operand1[i], operand2[i], "")
-            if r == NaN:
+            if isNaN(r):
                 return NaN
             if r == None:
                 result = None
@@ -772,7 +662,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
         index2 = 2
         for i in range(3):
             r = elementary(operand1[index1], operand2[index2], "")
-            if r == NaN:
+            if isNaN(r):
                 return NaN
             if r == None:
                 result.append(None)
@@ -783,7 +673,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
         result = []
         for i in range(dimensions1[0]):
             r = elementary(operand1[i], operand2[i])
-            if r == NaN:
+            if isNaN(r):
                 return NaN
             result.append(r)
     elif c1 == "matrix" and c2 == "matrix!" and opType == "":
@@ -794,7 +684,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             sum = 0
             for j in range(dimensions1[0]):
                 r = elementary(operand1[j], operand2[j][i])
-                if r == NaN:
+                if isNaN(r):
                     return NaN
                 if r == None:
                     sum = None
@@ -807,7 +697,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             sum = 0
             for j in range(dimensions1[1]):
                 r = elementary(operand1[i][j], operand2[j])
-                if r == NaN:
+                if isNaN(r):
                     return NaN
                 if r == None:
                     sum = None
@@ -822,7 +712,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             while operand2 > 1:
                 operand2 -= 1
                 result = matrixMultiply(result, operand1)
-                if result == NaN:
+                if isNaN(result):
                     break
         elif not isCompletelyInitialized(operand1):
             return uninitializedComposite([], dimensions1)
@@ -835,7 +725,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             while operand2 < -1:
                 operand2 += 1
                 result = matrixMultiply(result, inverse)
-                if result == NaN:
+                if isNaN(result):
                     return NaN
     elif c1 == "matrix" and c2 == "matrix":
         result = []
@@ -843,7 +733,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             row = []
             for j in range(dimensions1[1]):
                 r = elementary(operand1[i][j], operand2[i][j])
-                if r == NaN:
+                if isNaN(r):
                     return NaN
                 row.append(r)
             result.append(row)
@@ -1107,7 +997,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     result = NaN
                     if isn or isv or ism:
                         result = unaryOperation(unaryMinus, operand)
-                    if result == NaN:
+                    if isNaN(result):
                         printError(source, instruction, \
                                    "Incompatible operand for negation.")
                         return None
@@ -1168,7 +1058,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     elif operator == "**":
                         result = binaryOperation(simpleExponentiation, \
                                                  operand1, operand2)
-                    if result == NaN:
+                    if isNaN(result):
                         printError(source, instruction, \
                                    "Incompatible operands for operator.")
                         return None
@@ -1342,7 +1232,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     value = sliceIt(attributes["constant"], fullSubscripts)
                 else:
                     value = sliceIt(attributes["value"], fullSubscripts)
-                if value == NaN:
+                if isNaN(value):
                     printError(source, instruction, \
                         "Slicing error %s%s." % (identifier, str(fullSubscripts)))
                     return None
@@ -1898,8 +1788,54 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         function)
                     return None
                 operand = computationStack[-1]
-                if False:
-                    pass
+                # Built-ins with a single argument can mostly (all?) be 
+                # treated the same way.  Each entry in unaryRTL is a 2-list
+                # consisting of the function to be used with unaryOperation()
+                # and the error message on failure.  Actually, the 2nd entry
+                # of the list is optional, since the default message is 
+                # usually good enough.
+                unaryRTL = {
+                    "ABS": [unaryABS],
+                    "CEILING": [unaryCEILING],
+                    "FLOOR": [unaryFLOOR],
+                    "ODD": [unaryODD],
+                    "ROUND": [unaryROUND],
+                    "SIGN": [unarySIGN],
+                    "SIGNUM": [unarySIGNUM],
+                    "ARCCOS": [unaryARCCOS],
+                    "ARCCOSH": [unaryARCCOSH],
+                    "ARCSIN": [unaryARCSIN],
+                    "ARCSINH": [unaryARCSINH],
+                    "ARCTAN": [unaryARCTAN],
+                    "ARCTANH": [unaryARCTANH],
+                    "COS": [unaryCOS],
+                    "COSH": [unaryCOSH],
+                    "EXP": [unaryEXP],
+                    "LOG": [unaryLOG],
+                    "SIN": [unarySIN],
+                    "SINH": [unarySINH],
+                    "SQRT": [unarySQRT],
+                    "TAN": [unaryTAN],
+                    "TANH": [unaryTANH],
+                    "TRUNCATE": [unaryTRUNCATE, "TRUNCATE requires a numeric argument"],
+                    "ABVAL": [unaryABVAL, "ABVAL requires a VECTOR argument"],
+                    "DET": [unaryDET, "DET requires a square MATRIX argument"],
+                    "INVERSE": [unaryINVERSE, "INVERSE requires a non-singular square MATRIX argument"],
+                    "TRACE": [unaryTRACE, "TRACE requires a square MATRIX argument"],
+                    "TRANSPOSE": [unaryTRANSPOSE, "TRANSPOSE requires a MATRIX argument"],
+                    "UNIT": [unaryUNIT, "UNIT requires a non-zero VECTOR argument"],
+                    }
+                if function in unaryRTL:
+                    entry = unaryRTL[function]
+                    result = unaryOperation(entry[0], operand)
+                    if isNaN(result):
+                        if len(entry) < 2:
+                            printError(source, instruction, \
+                                       function + "requires a numeric argument")
+                        else:
+                            printError(source, instruction, entry[1])
+                        return None
+                    computationStack[-1] = result
                 elif function == "SIZE":
                     if isArrayQuick(operand):
                         dimensions, value = getArrayDimensions(operand)
@@ -1945,148 +1881,12 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                    "Cannot compute array function " + function)
                         return None
                     computationStack[-1] = accumulation[0]
-                elif function == "ABS":
-                    computationStack[-1] = abs(operand)
-                elif function == "CEILING":
-                    computationStack[-1] = math.ceil(operand)
-                elif function == "FLOOR":
-                    computationStack[-1] = math.floor(operand)
-                elif function == "ROUND":
-                    operand = hround(operand)
-                    computationStack[-1] = hround(operand)
-                elif function == "SIGN":
-                    if operand >= 0:
-                        computationStack[-1] = 1
-                    else:
-                        computationStack[-1] = -1
-                elif function == "SIGNUM":
-                    if operand > 0:
-                        computationStack[-1] = 1
-                    elif operand < 0:
-                        computationStack[-1] = -1
-                    else:
-                        computationStack[-1] = 0
-                elif function == "TRUNCATE":
-                    if operand >= 0:
-                        computationStack[-1] = math.floor(operand)
-                    else:
-                        computationStack[-1] = math.ceil(operand)
-                elif function == "ARCCOS":
-                    computationStack[-1] = math.acos(operand)
-                elif function == "ARCCOSH":
-                    computationStack[-1] = math.acosh(operand)
-                elif function == "ARCSIN":
-                    computationStack[-1] = math.asin(operand)
-                elif function == "ARCSINH":
-                    computationStack[-1] = math.asinh(operand)
-                elif function == "ARCTAN":
-                    computationStack[-1] = math.atan(operand)
-                elif function == "ARCTANH":
-                    computationStack[-1] = math.atanh(operand)
-                elif function == "COS":
-                    computationStack[-1] = math.cos(operand)
-                elif function == "COSH":
-                    computationStack[-1] = math.cosh(operand)
-                elif function == "SIN":
-                    computationStack[-1] = math.sin(operand)
-                elif function == "SINH":
-                    computationStack[-1] = math.sinh(operand)
-                elif function == "TAN":
-                    computationStack[-1] = math.tan(operand)
-                elif function == "TANH":
-                    computationStack[-1] = math.tanh(operand)
-                elif function == "EXP":
-                    computationStack[-1] = math.exp(operand)
-                elif function == "LOG":
-                    computationStack[-1] = math.log(operand)
-                elif function == "SQRT":
-                    computationStack[-1] = math.sqrt(operand)
                 elif function == "LENGTH":
                     operand = str(operand)
                     computationStack[-1] = len(operand)
                 elif function == "TRIM":
                     operand = str(operand)
                     computationStack[-1] = operand.strip()
-                elif function == "ODD":
-                    # Note that this function returns a boolean.
-                    operand = hround(operand)
-                    if (operand & 1) == 0:
-                        computationStack[-1] = hFALSE
-                    else:
-                        computationStack[-1] = hTRUE
-                elif function == "ABVAL":
-                    vector = computationStack[-1]
-                    if not isVector(vector):
-                        printError(source, instruction, \
-                                   "ABVAL requires a vector argument.")
-                        return None
-                    sum = 0.0
-                    for v in vector:
-                        sum += v * v
-                    computationStack[-1] = math.sqrt(sum)
-                elif function == "UNIT":
-                    vector = computationStack[-1]
-                    if not isVector(vector):
-                        printError(source, instruction, \
-                                   "UNIT requires a vector argument.")
-                        return None
-                    sum = 0.0
-                    for v in vector:
-                        sum += v * v
-                    length = math.sqrt(sum)
-                    try:
-                        for i in range(len(vector)):
-                            vector[i] /= length
-                    except:
-                        printError(source, instruction, \
-                            "Divide by zero in UNIT function; using [1,0,...].")
-                        vector = [0.0]*len(vector)
-                        vector[0] = 1.0
-                    computationStack[-1] = vector
-                elif function == "TRACE":
-                    matrix = computationStack[-1]
-                    if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
-                        printError(source, instruction, \
-                                   "TRACE requires a square matrix argument.")
-                        return None
-                    sum = 0.0
-                    for i in range(len(matrix)):
-                        sum += matrix[i][i]
-                    computationStack[-1] = sum
-                elif function == "TRANSPOSE":
-                    matrix = computationStack[-1]
-                    if not isMatrix(matrix, False):
-                        printError(source, instruction, \
-                                   "TRANSPOSE requires a matrix argument.")
-                        return None
-                    numRows = len(matrix)
-                    numCols = len(matrix[0])
-                    transposed = []
-                    for i in range(numCols):
-                        transposed.append([0]*numRows)
-                    for i in range(numCols):
-                        for j in range(numRows):
-                            transposed[i][j] = matrix[j][i]
-                    computationStack[-1] = transposed
-                elif function == "DET":
-                    matrix = computationStack[-1]
-                    if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
-                        printError(source, instruction, \
-                                   "DET requires a square-matrix argument.")
-                        return None
-                    computationStack[-1] = determinant(matrix)
-                elif function == "INVERSE":
-                    matrix = computationStack[-1]
-                    if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
-                        printError(source, instruction, \
-                                   "INVERSE requires a square-matrix argument.")
-                        return None
-                    inverse = matrixInverse(matrix)
-                    if inverse == None:
-                        printError(source, instruction, \
-                                "Matrix is singular, and cannot be inverted.")
-                        return None
-                    computationStack[-1] = inverse
                 else:
                     printError(source, instruction, \
                                "HAL/S built-in function " + function + \

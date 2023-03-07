@@ -24,6 +24,14 @@ import math
 from math import nan as NaN
 from decimal import Decimal, ROUND_HALF_UP
 
+# math.isnan() doesn't work on lists, tuples, dictionaries, or sets, as I found
+# out the hard way since it's not documented in the Python docs, which implies
+# that it works on anything.  So it must be modified as follows.
+def isNaN(object):
+    if object == None or isinstance(object, (list, tuple, dict, set, str)):
+        return False
+    return math.isnan(object)
+
 # Add a `debug` PALMAT instruction.
 def debug(PALMAT, state, message):
     return
@@ -215,7 +223,7 @@ def unaryOperation(function, array):
         result = []
         for a in array[:-1]:
             r = unaryOperation(function, a)
-            if r == NaN:
+            if isNaN(r):
                 return NaN
             result.append(r)
         result.append("a")
@@ -266,7 +274,7 @@ def binaryOperation(function, array1, array2):
             else:
                 child2 = array2[i]
             r = binaryOperation(function, child1, child2)
-            if r == NaN:
+            if isNaN(r):
                 return NaN
             result.append(r)
         result.append("a")
