@@ -387,10 +387,10 @@ unaryRTL = {
     "ROUND": [unaryROUND],
     "SIGN": [unarySIGN],
     "SIGNUM": [unarySIGNUM],
-    "ARCCOS": [unaryARCCOS],
-    "ARCCOSH": [unaryARCCOSH],
-    "ARCSIN": [unaryARCSIN],
-    "ARCSINH": [unaryARCSINH],
+    "ARCCOS": [unaryARCCOS, "ARCCOS requires |argument\ <= 1"],
+    "ARCCOSH": [unaryARCCOSH, "ARCCOSH requires |argument| >= 1"],
+    "ARCSIN": [unaryARCSIN, "ARCSIN requires |argument| <= 1"],
+    "ARCSINH": [unaryARCSINH, "ARCSINH requires |argument| >= 1"],
     "ARCTAN": [unaryARCTAN],
     "ARCTANH": [unaryARCTANH],
     "COS": [unaryCOS],
@@ -409,6 +409,7 @@ unaryRTL = {
     "TRACE": [unaryTRACE, "TRACE requires a square MATRIX argument"],
     "TRANSPOSE": [unaryTRANSPOSE, "TRANSPOSE requires a MATRIX argument"],
     "UNIT": [unaryUNIT, "UNIT requires a non-zero VECTOR argument"],
+    "Negation": [unaryMinus], # Not actually RTL function; rather U- operator
     }
 
 # Returns either the operation result (could be None) or NaN on failure.

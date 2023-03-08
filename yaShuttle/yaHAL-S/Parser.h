@@ -42,6 +42,7 @@ typedef union
   ARITH_ID arith_id_;
   NO_ARG_ARITH_FUNC no_arg_arith_func_;
   ARITH_FUNC arith_func_;
+  BIT_FUNC bit_func_;
   SUBSCRIPT subscript_;
   QUALIFIER qualifier_;
   SCALE_HEAD scale_head_;
@@ -73,7 +74,6 @@ typedef union
   BIT_FUNC_HEAD bit_func_head_;
   BIT_ID bit_id_;
   LABEL label_;
-  BIT_FUNC bit_func_;
   EVENT event_;
   SUB_OR_QUALIFIER sub_or_qualifier_;
   BIT_QUALIFIER bit_qualifier_;

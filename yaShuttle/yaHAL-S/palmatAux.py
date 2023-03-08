@@ -229,6 +229,8 @@ def unaryOperation(function, array):
         result.append("a")
     else:
         # We're at a leaf element, apply the function to it.
+        if array == None:
+            return None
         return function(array)
     return result
 
@@ -281,7 +283,77 @@ def binaryOperation(function, array1, array2):
     else:
         # We're at a leaf element, so apply the function right now and 
         # stop recursing.
+        if array1 == None or array2 == None:
+            return None
         result = function(array1, array2)
+    return result
+
+'''
+Apply a trinary function to three objects, any of which can be arrays
+(of identical geometries), but otherwise of compatible datatypes
+when the arrayness is ignored.  Returns the result of the operation, either
+as an array (if some operands were arrays) or a non-array (if no
+operand was an array). Or else returns NaN on failure.
+(The trinary function must also return NaN on error.
+Python None is a proper return, because it signifies an uninitialized
+value rather than an illegal operation.) 
+As far as I know, the only use-case for trinaryOperation() is the RTL
+function MIDVAL().
+'''
+def trinaryOperation(function, array1, array2, array3):
+    if isArrayQuick(array1):
+        dimensions1, dummy = getArrayDimensions(array1)
+    else:
+        dimensions1 = []
+    if isArrayQuick(array2):
+        dimensions2, dummy = getArrayDimensions(array2)
+    else:
+        dimensions2 = []
+    if isArrayQuick(array3):
+        dimensions3, dummy = getArrayDimensions(array3)
+    else:
+        dimensions3 = []
+    # The list called "dimensions" will be the array dimensions if any 
+    # operand (and thus the output result) are to be arrays.  If dimensions==[],
+    # then neither the operands nor the output are arrays.
+    if dimensions1 != []:
+        dimensions = dimensions1
+        if (dimensions2 != [] and dimensions2 != dimensions1) or \
+                (dimensions3 != [] and dimensions3 != dimensions1):
+            return NaN
+    elif dimensions2 != []:
+        dimensions = dimensions2
+        if dimensions3 != [] and dimensions3 != dimensions2:
+            return NaN
+    else:
+        dimensions = dimensions3
+        
+    if len(dimensions) > 0:
+        result = []
+        for i in range(dimensions[0]):
+            if dimensions1 == []:
+                child1 = array1
+            else:
+                child1 = array1[i]
+            if dimensions2 == []:
+                child2 = array2
+            else:
+                child2 = array2[i]
+            if dimensions3 == []:
+                child3 = array3
+            else:
+                child3 = array3[i]
+            r = trinaryOperation(function, child1, child2, child3)
+            if isNaN(r):
+                return NaN
+            result.append(r)
+        result.append("a")
+    else:
+        # We're at a leaf element, so apply the function right now and 
+        # stop recursing.
+        if array1 == None or array2 == None or array3 == None:
+            return None
+        result = function(array1, array2, array3)
     return result
 
 def formBitArray(value, length):

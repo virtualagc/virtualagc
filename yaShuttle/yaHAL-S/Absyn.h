@@ -98,6 +98,8 @@ struct NO_ARG_ARITH_FUNC_;
 typedef struct NO_ARG_ARITH_FUNC_ *NO_ARG_ARITH_FUNC;
 struct ARITH_FUNC_;
 typedef struct ARITH_FUNC_ *ARITH_FUNC;
+struct BIT_FUNC_;
+typedef struct BIT_FUNC_ *BIT_FUNC;
 struct SUBSCRIPT_;
 typedef struct SUBSCRIPT_ *SUBSCRIPT;
 struct QUALIFIER_;
@@ -160,8 +162,6 @@ struct BIT_ID_;
 typedef struct BIT_ID_ *BIT_ID;
 struct LABEL_;
 typedef struct LABEL_ *LABEL;
-struct BIT_FUNC_;
-typedef struct BIT_FUNC_ *BIT_FUNC;
 struct EVENT_;
 typedef struct EVENT_ *EVENT;
 struct SUB_OR_QUALIFIER_;
@@ -965,7 +965,7 @@ NO_ARG_ARITH_FUNC make_ZZruntime(void);
 struct ARITH_FUNC_
 {
   int line_number, char_number;
-  enum { is_ZZnextime, is_ZZabs, is_ZZceiling, is_ZZdiv, is_ZZfloor, is_ZZmidval, is_ZZmod, is_ZZodd, is_ZZremainder, is_ZZround, is_ZZsign, is_ZZsignum, is_ZZtruncate, is_ZZarccos, is_ZZarccosh, is_ZZarcsin, is_ZZarcsinh, is_ZZarctan2, is_ZZarctan, is_ZZarctanh, is_ZZcos, is_ZZcosh, is_ZZexp, is_ZZlog, is_ZZsin, is_ZZsinh, is_ZZsqrt, is_ZZtan, is_ZZtanh, is_ZZshl, is_ZZshr, is_ZZabval, is_ZZdet, is_ZZtrace, is_ZZunit, is_ZZindex, is_ZZlength, is_ZZinverse, is_ZZtranspose, is_ZZprod, is_ZZsum, is_ZZsize, is_ZZmax, is_ZZmin } kind;
+  enum { is_ZZnextime, is_ZZabs, is_ZZceiling, is_ZZdiv, is_ZZfloor, is_ZZmidval, is_ZZmod, is_ZZremainder, is_ZZround, is_ZZsign, is_ZZsignum, is_ZZtruncate, is_ZZarccos, is_ZZarccosh, is_ZZarcsin, is_ZZarcsinh, is_ZZarctan2, is_ZZarctan, is_ZZarctanh, is_ZZcos, is_ZZcosh, is_ZZexp, is_ZZlog, is_ZZsin, is_ZZsinh, is_ZZsqrt, is_ZZtan, is_ZZtanh, is_ZZshl, is_ZZshr, is_ZZabval, is_ZZdet, is_ZZtrace, is_ZZunit, is_ZZindex, is_ZZlength, is_ZZinverse, is_ZZtranspose, is_ZZprod, is_ZZsum, is_ZZsize, is_ZZmax, is_ZZmin } kind;
   union
   {
   } u;
@@ -978,7 +978,6 @@ ARITH_FUNC make_ZZdiv(void);
 ARITH_FUNC make_ZZfloor(void);
 ARITH_FUNC make_ZZmidval(void);
 ARITH_FUNC make_ZZmod(void);
-ARITH_FUNC make_ZZodd(void);
 ARITH_FUNC make_ZZremainder(void);
 ARITH_FUNC make_ZZround(void);
 ARITH_FUNC make_ZZsign(void);
@@ -1015,6 +1014,20 @@ ARITH_FUNC make_ZZsum(void);
 ARITH_FUNC make_ZZsize(void);
 ARITH_FUNC make_ZZmax(void);
 ARITH_FUNC make_ZZmin(void);
+
+struct BIT_FUNC_
+{
+  int line_number, char_number;
+  enum { is_ZZodd, is_ZZxor, is_ZZuserBitFunction } kind;
+  union
+  {
+    struct { BitFunctionIdentifierToken bitfunctionidentifiertoken_; } zzuserbitfunction_;
+  } u;
+};
+
+BIT_FUNC make_ZZodd(void);
+BIT_FUNC make_ZZxor(void);
+BIT_FUNC make_ZZuserBitFunction(BitFunctionIdentifierToken p0);
 
 struct SUBSCRIPT_
 {
@@ -1486,19 +1499,6 @@ LABEL make_FKlabel(LabelToken p0);
 LABEL make_FLlabel(BitFunctionIdentifierToken p0);
 LABEL make_FMlabel(CharFunctionIdentifierToken p0);
 LABEL make_FNlabel(StructFunctionIdentifierToken p0);
-
-struct BIT_FUNC_
-{
-  int line_number, char_number;
-  enum { is_ZZxor, is_ZZuserBitFunction } kind;
-  union
-  {
-    struct { BitFunctionIdentifierToken bitfunctionidentifiertoken_; } zzuserbitfunction_;
-  } u;
-};
-
-BIT_FUNC make_ZZxor(void);
-BIT_FUNC make_ZZuserBitFunction(BitFunctionIdentifierToken p0);
 
 struct EVENT_
 {

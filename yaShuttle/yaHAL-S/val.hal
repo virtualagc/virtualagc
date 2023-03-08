@@ -62,7 +62,8 @@
     'fail') of a test with a given character-string designation.  It also
     updates the global count of ERRORS, and should be CALL'd with 
     ASSIGN(ERRORS). */
- DECLARE ERRORS INTEGER INITIAL(0);
+ DECLARE ERRORS INTEGER;
+ ERRORS = 0;
  PRINT_RESULT:
  PROCEDURE(DESIGNATION, IS_SUCCESS) ASSIGN(ERRORS);
  DECLARE DESIGNATION CHARACTER(64), IS_SUCCESS BOOLEAN, ERRORS INTEGER;
@@ -1074,13 +1075,22 @@
  CLOSE RADIANS_TO_DEGREES;
  
  WRITE(6) ;
- WRITE(6) 'Some RTL tests.';
+ WRITE(6) 'Some unarrayed RTL tests.';
  DECLARE COSINE_ANGLES VECTOR(17) CONSTANT(0, 30, 45, 60, 90, 120, 135, 150, 
  				180, 210, 225, 240, 270, 300, 315, 330, 360),
          COSINE_VALUES VECTOR(17) CONSTANT(1, SQRT(3)/2, SQRT(2)/2, 1/2, 0, 
          			-1/2, -SQRT(2)/2, -SQRT(3)/2, -1, 
          			-SQRT(3)/2, -SQRT(2)/2, -1/2, 0,
          			1/2, SQRT(2)/2, SQRT(3)/2, 1);
+ IF ABS(-5.2) = 5.2 AND ABS(0) = 0 AND ABS(153) = 153 THEN BB = TRUE;
+ ELSE BB = FALSE;
+ CALL PRINT_RESULT('ABS', BB) ASSIGN(ERRORS);
+ IF CEILING(-5.2) = -5 AND CEILING(-3.9) = -3 AND CEILING(0.0) = 0
+    AND CEILING(1.1) = 2 AND CEILING(5.9) = 6 THEN BB = TRUE;
+ ELSE BB = FALSE;
+ CALL PRINT_RESULT('CEILING', BB) ASSIGN(ERRORS);
+ WRITE(6) '... more such tests to be implemented later.';
+ 
  BB = TRUE;
  DO FOR TEMPORARY I = 1 TO 17;
     IF NOT REALLY_CLOSE_TO(COS(DEGREES_TO_RADIANS(COSINE_ANGLES$I)), 
@@ -2399,7 +2409,7 @@ S     J,*
     DECLARE A ARRAY(6) INITIAL(1, 2, 3, 4, 5, 6);
     DECLARE BB;
     WRITE(6) ;
-    WRITE(6) 'Array functions';
+    WRITE(6) 'Array functions.';
     IF MIN(A) = 1 THEN BB = TRUE; ELSE BB = FALSE;
     CALL PRINT_RESULT('Array function MIN', BB) ASSIGN(ERRORS);
     IF MAX(A) = 6 THEN BB = TRUE; ELSE BB = FALSE;
@@ -2410,6 +2420,113 @@ S     J,*
     CALL PRINT_RESULT('Array function PROD', BB) ASSIGN(ERRORS);
  CLOSE ARRAY_FUNCTIONS;
  CALL ARRAY_FUNCTIONS ASSIGN(ERRORS);
+ 
+ /*--------------------------------------------------------------------------*/
+ ARRAYED_RTL: PROCEDURE ASSIGN(ERRORS);
+    DECLARE ERRORS INTEGER;
+    DECLARE ARRAY(3,2), A, A1, A2, A3, B2, AB BOOLEAN;
+    DECLARE BB BOOLEAN, I INTEGER, J INTEGER;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+    	A1$(I,J) = 20 (RANDOM - 0.5);
+    	DO UNTIL ROUND(A2$(I,J)) ~= 0; A2$(I,J) = 20 (RANDOM - 0.5); END;
+    	B2$(I,J) = 100 (RANDOM + 1);
+    	A3$(I,J) = 20 (RANDOM - 0.5);
+    END; END;
+    WRITE(6) ;
+    WRITE(6) 'Arrayed RTL functions.';
+    A = ABS(A1);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= ABS(A1$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed ABS', BB) ASSIGN(ERRORS);
+    A = CEILING(A1);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= CEILING(A1$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed CEILING', BB) ASSIGN(ERRORS);
+    A = DIV(A1, A2);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= DIV(A1$(I,J), A2$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed DIV', BB) ASSIGN(ERRORS);
+    A = FLOOR(A1);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= FLOOR(A1$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed FLOOR', BB) ASSIGN(ERRORS);
+    A = MIDVAL(A1, A2, A3);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= MIDVAL(A1$(I,J), A2$(I,J), A3$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed MIDVAL', BB) ASSIGN(ERRORS);
+    A = MOD(A1, A2);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= MOD(A1$(I,J), A2$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed MOD', BB) ASSIGN(ERRORS);
+    AB = ODD(A1);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF AB$(I,J) ~= ODD(A1$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed ODD', BB) ASSIGN(ERRORS);
+    A = REMAINDER(A1, A2);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= REMAINDER(A1$(I,J), A2$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed REMAINDER', BB) ASSIGN(ERRORS);
+    A = ROUND(A1);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= ROUND(A1$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed ROUND', BB) ASSIGN(ERRORS);
+    A = SIGN(A1);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= SIGN(A1$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed SIGN', BB) ASSIGN(ERRORS);
+    A = SIGNUM(A1);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= SIGNUM(A1$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed SIGNUM', BB) ASSIGN(ERRORS);
+    A = TRUNCATE(A1);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= TRUNCATE(A1$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed TRUNCATE', BB) ASSIGN(ERRORS);
+    A = ARCCOS(A1/10);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= ARCCOS(A1$(I,J)/10) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed ARCCOS', BB) ASSIGN(ERRORS);
+    A = ARCCOSH(B2);
+    BB = TRUE;
+    DO FOR I = 1 TO 3; DO FOR J = 1 TO 2;
+       IF A$(I,J) ~= ARCCOSH(B2$(I,J)) THEN BB = FALSE;
+    END; END;
+    CALL PRINT_RESULT('Arrayed ARCCOSH', BB) ASSIGN(ERRORS);
+    WRITE(6) 'More RTL functions could be tested for arrayness, but since';
+    WRITE(6) 'they''re all implemented using the same framework, and since';
+    WRITE(6) 'we''ve already tested single-argument, double-argument, and';
+    WRITE(6) 'triple-argument functions, it seems kind of pointless to';
+    WRITE(6) 'continue doing so.  More of these tests can be implemented';
+    WRITE(6) 'later if the need arises.';
+    
+ CLOSE ARRAYED_RTL;
+ CALL ARRAYED_RTL ASSIGN(ERRORS);
  
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;

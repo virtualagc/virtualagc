@@ -1514,13 +1514,6 @@ void ppARITH_FUNC(ARITH_FUNC p, int _i_)
     if (_i_ > 0) renderC(_R_PAREN);
     break;
 
-  case is_ZZodd:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("ODD");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
   case is_ZZremainder:
     if (_i_ > 0) renderC(_L_PAREN);
     renderS("REMAINDER");
@@ -1776,6 +1769,38 @@ void ppARITH_FUNC(ARITH_FUNC p, int _i_)
 
   default:
     fprintf(stderr, "Error: bad kind field when printing ARITH_FUNC!\n");
+    exit(1);
+  }
+}
+
+void ppBIT_FUNC(BIT_FUNC p, int _i_)
+{
+  switch(p->kind)
+  {
+  case is_ZZodd:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("ODD");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ZZxor:
+    if (_i_ > 0) renderC(_L_PAREN);
+    renderS("XOR");
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+  case is_ZZuserBitFunction:
+    if (_i_ > 0) renderC(_L_PAREN);
+    ppIdent(p->u.zzuserbitfunction_.bitfunctionidentifiertoken_, 0);
+
+    if (_i_ > 0) renderC(_R_PAREN);
+    break;
+
+
+  default:
+    fprintf(stderr, "Error: bad kind field when printing BIT_FUNC!\n");
     exit(1);
   }
 }
@@ -2864,31 +2889,6 @@ void ppLABEL(LABEL p, int _i_)
 
   default:
     fprintf(stderr, "Error: bad kind field when printing LABEL!\n");
-    exit(1);
-  }
-}
-
-void ppBIT_FUNC(BIT_FUNC p, int _i_)
-{
-  switch(p->kind)
-  {
-  case is_ZZxor:
-    if (_i_ > 0) renderC(_L_PAREN);
-    renderS("XOR");
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-  case is_ZZuserBitFunction:
-    if (_i_ > 0) renderC(_L_PAREN);
-    ppIdent(p->u.zzuserbitfunction_.bitfunctionidentifiertoken_, 0);
-
-    if (_i_ > 0) renderC(_R_PAREN);
-    break;
-
-
-  default:
-    fprintf(stderr, "Error: bad kind field when printing BIT_FUNC!\n");
     exit(1);
   }
 }
@@ -9406,14 +9406,6 @@ void shARITH_FUNC(ARITH_FUNC p)
 
 
     break;
-  case is_ZZodd:
-
-    bufAppendSp(p, "ZZodd");
-
-
-
-
-    break;
   case is_ZZremainder:
 
     bufAppendSp(p, "ZZremainder");
@@ -9705,6 +9697,45 @@ void shARITH_FUNC(ARITH_FUNC p)
 
   default:
     fprintf(stderr, "Error: bad kind field when showing ARITH_FUNC!\n");
+    exit(1);
+  }
+}
+
+void shBIT_FUNC(BIT_FUNC p)
+{
+  switch(p->kind)
+  {
+  case is_ZZodd:
+
+    bufAppendSp(p, "ZZodd");
+
+
+
+
+    break;
+  case is_ZZxor:
+
+    bufAppendSp(p, "ZZxor");
+
+
+
+
+    break;
+  case is_ZZuserBitFunction:
+    bufAppendC('(');
+
+    bufAppendSp(p, "ZZuserBitFunction");
+
+    bufAppendC(' ');
+
+    shIdent(p->u.zzuserbitfunction_.bitfunctionidentifiertoken_);
+
+    bufAppendC(')');
+
+    break;
+
+  default:
+    fprintf(stderr, "Error: bad kind field when showing BIT_FUNC!\n");
     exit(1);
   }
 }
@@ -11140,37 +11171,6 @@ void shLABEL(LABEL p)
 
   default:
     fprintf(stderr, "Error: bad kind field when showing LABEL!\n");
-    exit(1);
-  }
-}
-
-void shBIT_FUNC(BIT_FUNC p)
-{
-  switch(p->kind)
-  {
-  case is_ZZxor:
-
-    bufAppendSp(p, "ZZxor");
-
-
-
-
-    break;
-  case is_ZZuserBitFunction:
-    bufAppendC('(');
-
-    bufAppendSp(p, "ZZuserBitFunction");
-
-    bufAppendC(' ');
-
-    shIdent(p->u.zzuserbitfunction_.bitfunctionidentifiertoken_);
-
-    bufAppendC(')');
-
-    break;
-
-  default:
-    fprintf(stderr, "Error: bad kind field when showing BIT_FUNC!\n");
     exit(1);
   }
 }

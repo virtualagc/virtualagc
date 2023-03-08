@@ -88,6 +88,7 @@ COMPILATION psCOMPILATION(const char *str)
   ARITH_ID arith_id_;
   NO_ARG_ARITH_FUNC no_arg_arith_func_;
   ARITH_FUNC arith_func_;
+  BIT_FUNC bit_func_;
   SUBSCRIPT subscript_;
   QUALIFIER qualifier_;
   SCALE_HEAD scale_head_;
@@ -119,7 +120,6 @@ COMPILATION psCOMPILATION(const char *str)
   BIT_FUNC_HEAD bit_func_head_;
   BIT_ID bit_id_;
   LABEL label_;
-  BIT_FUNC bit_func_;
   EVENT event_;
   SUB_OR_QUALIFIER sub_or_qualifier_;
   BIT_QUALIFIER bit_qualifier_;
@@ -485,6 +485,7 @@ COMPILATION psCOMPILATION(const char *str)
 %type <arith_id_> ARITH_ID
 %type <no_arg_arith_func_> NO_ARG_ARITH_FUNC
 %type <arith_func_> ARITH_FUNC
+%type <bit_func_> BIT_FUNC
 %type <subscript_> SUBSCRIPT
 %type <qualifier_> QUALIFIER
 %type <scale_head_> SCALE_HEAD
@@ -516,7 +517,6 @@ COMPILATION psCOMPILATION(const char *str)
 %type <bit_func_head_> BIT_FUNC_HEAD
 %type <bit_id_> BIT_ID
 %type <label_> LABEL
-%type <bit_func_> BIT_FUNC
 %type <event_> EVENT
 %type <sub_or_qualifier_> SUB_OR_QUALIFIER
 %type <bit_qualifier_> BIT_QUALIFIER
@@ -808,7 +808,6 @@ ARITH_FUNC : _SYMB_109 { $$ = make_ZZnextime(); $$->line_number = @$.first_line;
   | _SYMB_85 { $$ = make_ZZfloor(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_105 { $$ = make_ZZmidval(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_107 { $$ = make_ZZmod(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_114 { $$ = make_ZZodd(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_129 { $$ = make_ZZremainder(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_137 { $$ = make_ZZround(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_145 { $$ = make_ZZsign(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -845,6 +844,10 @@ ARITH_FUNC : _SYMB_109 { $$ = make_ZZnextime(); $$->line_number = @$.first_line;
   | _SYMB_151 { $$ = make_ZZsize(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_104 { $$ = make_ZZmax(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_106 { $$ = make_ZZmin(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+;
+BIT_FUNC : _SYMB_114 { $$ = make_ZZodd(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_179 { $$ = make_ZZxor(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
+  | _SYMB_188 { $$ = make_ZZuserBitFunction($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 SUBSCRIPT : SUB_HEAD _SYMB_1 { $$ = make_AAsubscript($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | QUALIFIER { $$ = make_ABsubscript($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
@@ -969,9 +972,6 @@ LABEL : _SYMB_193 { $$ = make_FKlabel($1); $$->line_number = @$.first_line; $$->
   | _SYMB_188 { $$ = make_FLlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_189 { $$ = make_FMlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
   | _SYMB_192 { $$ = make_FNlabel($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-;
-BIT_FUNC : _SYMB_179 { $$ = make_ZZxor(); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
-  | _SYMB_188 { $$ = make_ZZuserBitFunction($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;
 EVENT : _SYMB_194 { $$ = make_FLevent($1); $$->line_number = @$.first_line; $$->char_number = @$.first_column;  }
 ;

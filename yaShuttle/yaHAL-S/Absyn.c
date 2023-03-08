@@ -1681,18 +1681,6 @@ ARITH_FUNC make_ZZmod()
     tmp->kind = is_ZZmod;
     return tmp;
 }
-/********************   ZZodd    ********************/
-ARITH_FUNC make_ZZodd()
-{
-    ARITH_FUNC tmp = (ARITH_FUNC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ZZodd!\n");
-        exit(1);
-    }
-    tmp->kind = is_ZZodd;
-    return tmp;
-}
 /********************   ZZremainder    ********************/
 ARITH_FUNC make_ZZremainder()
 {
@@ -2123,6 +2111,42 @@ ARITH_FUNC make_ZZmin()
         exit(1);
     }
     tmp->kind = is_ZZmin;
+    return tmp;
+}/********************   ZZodd    ********************/
+BIT_FUNC make_ZZodd()
+{
+    BIT_FUNC tmp = (BIT_FUNC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ZZodd!\n");
+        exit(1);
+    }
+    tmp->kind = is_ZZodd;
+    return tmp;
+}
+/********************   ZZxor    ********************/
+BIT_FUNC make_ZZxor()
+{
+    BIT_FUNC tmp = (BIT_FUNC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ZZxor!\n");
+        exit(1);
+    }
+    tmp->kind = is_ZZxor;
+    return tmp;
+}
+/********************   ZZuserBitFunction    ********************/
+BIT_FUNC make_ZZuserBitFunction(BitFunctionIdentifierToken p1)
+{
+    BIT_FUNC tmp = (BIT_FUNC) malloc(sizeof(*tmp));
+    if (!tmp)
+    {
+        fprintf(stderr, "Error: out of memory when allocating ZZuserBitFunction!\n");
+        exit(1);
+    }
+    tmp->kind = is_ZZuserBitFunction;
+    tmp->u.zzuserbitfunction_.bitfunctionidentifiertoken_ = p1;
     return tmp;
 }/********************   AAsubscript    ********************/
 SUBSCRIPT make_AAsubscript(SUB_HEAD p1)
@@ -3315,30 +3339,6 @@ LABEL make_FNlabel(StructFunctionIdentifierToken p1)
     }
     tmp->kind = is_FNlabel;
     tmp->u.fnlabel_.structfunctionidentifiertoken_ = p1;
-    return tmp;
-}/********************   ZZxor    ********************/
-BIT_FUNC make_ZZxor()
-{
-    BIT_FUNC tmp = (BIT_FUNC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ZZxor!\n");
-        exit(1);
-    }
-    tmp->kind = is_ZZxor;
-    return tmp;
-}
-/********************   ZZuserBitFunction    ********************/
-BIT_FUNC make_ZZuserBitFunction(BitFunctionIdentifierToken p1)
-{
-    BIT_FUNC tmp = (BIT_FUNC) malloc(sizeof(*tmp));
-    if (!tmp)
-    {
-        fprintf(stderr, "Error: out of memory when allocating ZZuserBitFunction!\n");
-        exit(1);
-    }
-    tmp->kind = is_ZZuserBitFunction;
-    tmp->u.zzuserbitfunction_.bitfunctionidentifiertoken_ = p1;
     return tmp;
 }/********************   FLevent    ********************/
 EVENT make_FLevent(EventToken p1)
