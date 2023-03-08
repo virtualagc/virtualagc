@@ -312,7 +312,10 @@ def sliceIt(object, subscripts):
     else:
         newSubscripts = []
     for s in thisLevelSubscripts:
-        newLevel = sliceIt(object[s], newSubscripts)
+        try:
+            newLevel = sliceIt(object[s], newSubscripts)
+        except:
+            return NaN
         if isNaN(newLevel):
             return NaN
         newObject.append(newLevel)

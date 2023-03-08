@@ -76,7 +76,10 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             operand2 = hround(operand2)
             if operand2 == 0:
                 return NaN
-            return operand1 // operand2
+            value = abs(operand1) // abs(operand2)
+            if operand1 * operand2 < 0:
+                value = -value
+            return value
         if op == "MOD":
             if operand2 == 0:
                 return NaN
@@ -90,7 +93,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
             if operand2 == 0:
                 return NaN
             value = operand1 % operand2 
-            if operand1 * operand2 < 0:
+            if value != 0 and operand1 * operand2 < 0:
                 value -= operand2
             return value
         if op == "ARCTAN2":
