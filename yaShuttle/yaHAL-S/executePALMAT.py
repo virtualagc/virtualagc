@@ -37,6 +37,7 @@ import time
 import copy
 from palmatAux import *
 from unaryFunctions import *
+from accumulableFunctions import *
 from saveValueToVariable import *
 
 timeOrigin = 0
@@ -222,65 +223,6 @@ def readItemLUN5(source):
             continue
         readLineFields = re.split(r"\s*,\s*|\s+", line.strip())
     return readLineFields.pop(0)
-
-'''
-The following function is used to apply a HAL/S built-in "array function"
-like MAX, MIN, PROD to an array of integers and/or scalars.  The function
-doesn't check the legality of the array, but merely uses the fact that 
-the input object is some hierarchy of lists in which the atomic elements
-are integers and/or scalars.  The accumulation parameter is a list with a 
-single element, namely the "accumulated" value.  the accumulation function 
-(MAX, MIN, ...) adjusts that value in place; it acts like a global variable 
-throughout the recursion, but a separate invocation of accumulate() with a 
-different accumation parameter wouldn't conflict with it.
-The accumulation can either be initialized to an appriate value before 
-entry (such as 0.0 for SUM or 1.0 for PROD), or it can be set to True (i.e.,
-accumulation = [True]), in which case the very first atomic array element
-encountered is used.  Note that accumulation=[None] is used to indicate that
-uninitialized or incompatible array values were encountered, so this setting
-should not be used when invoking accumulate().
-'''
-fnMAX = 0
-fnMIN = 1
-fnPROD = 2
-fnSUM = 3
-def accumulate(array, functionType, accumulation):
-    
-    def prod(x, y):
-        return x * y
-    
-    def sum(x, y):
-        return x + y
-    
-    if accumulation[0] == None:
-        return
-    if array == None:
-        accumulation[0] = None
-        return
-    if functionType == fnMAX:
-        function = max
-    elif functionType == fnMIN:
-        function = min
-    elif functionType == fnPROD:
-        function = prod
-    elif functionType == fnSUM:
-        function = sum
-    else:
-        accumulation[0] = None
-        return
-    
-    if isArrayQuick(array):
-        for e in array[:-1]:
-            accumulate(e, functionType, accumulation)
-            if accumulation[0] == None:
-                return 
-    elif accumulation[0] == True:
-        accumulation[0] = array
-    else:
-        try:
-            accumulation[0] = function(accumulation[0], array)
-        except:
-            accumulation[0] = None
 
 def identityMatrix(n):
     result = []
@@ -1788,52 +1730,15 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         function)
                     return None
                 operand = computationStack[-1]
-                # Built-ins with a single argument can mostly (all?) be 
-                # treated the same way.  Each entry in unaryRTL is a 2-list
-                # consisting of the function to be used with unaryOperation()
-                # and the error message on failure.  Actually, the 2nd entry
-                # of the list is optional, since the default message is 
-                # usually good enough.
-                unaryRTL = {
-                    "ABS": [unaryABS],
-                    "CEILING": [unaryCEILING],
-                    "FLOOR": [unaryFLOOR],
-                    "ODD": [unaryODD],
-                    "ROUND": [unaryROUND],
-                    "SIGN": [unarySIGN],
-                    "SIGNUM": [unarySIGNUM],
-                    "ARCCOS": [unaryARCCOS],
-                    "ARCCOSH": [unaryARCCOSH],
-                    "ARCSIN": [unaryARCSIN],
-                    "ARCSINH": [unaryARCSINH],
-                    "ARCTAN": [unaryARCTAN],
-                    "ARCTANH": [unaryARCTANH],
-                    "COS": [unaryCOS],
-                    "COSH": [unaryCOSH],
-                    "EXP": [unaryEXP],
-                    "LOG": [unaryLOG],
-                    "SIN": [unarySIN],
-                    "SINH": [unarySINH],
-                    "SQRT": [unarySQRT],
-                    "TAN": [unaryTAN],
-                    "TANH": [unaryTANH],
-                    "TRUNCATE": [unaryTRUNCATE, "TRUNCATE requires a numeric argument"],
-                    "ABVAL": [unaryABVAL, "ABVAL requires a VECTOR argument"],
-                    "DET": [unaryDET, "DET requires a square MATRIX argument"],
-                    "INVERSE": [unaryINVERSE, "INVERSE requires a non-singular square MATRIX argument"],
-                    "TRACE": [unaryTRACE, "TRACE requires a square MATRIX argument"],
-                    "TRANSPOSE": [unaryTRANSPOSE, "TRANSPOSE requires a MATRIX argument"],
-                    "UNIT": [unaryUNIT, "UNIT requires a non-zero VECTOR argument"],
-                    }
-                if function in unaryRTL:
-                    entry = unaryRTL[function]
-                    result = unaryOperation(entry[0], operand)
+                if function in unaryRTL: # See unaryFunctions.py module.
+                    result = arrayableUnaryRTL(function, operand, \
+                                               source, instruction)
                     if isNaN(result):
-                        if len(entry) < 2:
-                            printError(source, instruction, \
-                                       function + "requires a numeric argument")
-                        else:
-                            printError(source, instruction, entry[1])
+                        return None
+                    computationStack[-1] = result
+                elif function in accumulableFunctions: # See accumulableFunctions.py
+                    result = accumulate(operand, function, source, instruction)
+                    if isNaN(result):
                         return None
                     computationStack[-1] = result
                 elif function == "SIZE":
@@ -1849,38 +1754,6 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         printError(source, instruction, \
                                    "SIZE function requires an array")
                         return None
-                elif function == "MAX":
-                    accumulation = [True]
-                    accumulate(operand, fnMAX, accumulation)
-                    if accumulation[0] in [None, True]:
-                        printError(source, instruction, \
-                                   "Cannot compute array function " + function)
-                        return None
-                    computationStack[-1] = accumulation[0]
-                elif function == "MIN":
-                    accumulation = [True]
-                    accumulate(operand, fnMIN, accumulation)
-                    if accumulation[0] in [None, True]:
-                        printError(source, instruction, \
-                                   "Cannot compute array function " + function)
-                        return None
-                    computationStack[-1] = accumulation[0]
-                elif function == "PROD":
-                    accumulation = [True]
-                    accumulate(operand, fnPROD, accumulation)
-                    if accumulation[0] in [None, True]:
-                        printError(source, instruction, \
-                                   "Cannot compute array function " + function)
-                        return None
-                    computationStack[-1] = accumulation[0]
-                elif function == "SUM":
-                    accumulation = [True]
-                    accumulate(operand, fnSUM, accumulation)
-                    if accumulation[0] in [None, True]:
-                        printError(source, instruction, \
-                                   "Cannot compute array function " + function)
-                        return None
-                    computationStack[-1] = accumulation[0]
                 elif function == "LENGTH":
                     operand = str(operand)
                     computationStack[-1] = len(operand)

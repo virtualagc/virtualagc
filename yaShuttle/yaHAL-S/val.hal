@@ -2392,7 +2392,25 @@ S     J,*
     B: FUNCTION BIT(5); RETURN 26; CLOSE B;
  CLOSE NF_TEST;
  CALL NF_TEST ASSIGN(ERRORS);
-
+ 
+ /*--------------------------------------------------------------------------*/
+ ARRAY_FUNCTIONS: PROCEDURE ASSIGN(ERRORS);
+    DECLARE ERRORS INTEGER;
+    DECLARE A ARRAY(6) INITIAL(1, 2, 3, 4, 5, 6);
+    DECLARE BB;
+    WRITE(6) ;
+    WRITE(6) 'Array functions';
+    IF MIN(A) = 1 THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('Array function MIN', BB) ASSIGN(ERRORS);
+    IF MAX(A) = 6 THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('Array function MAX', BB) ASSIGN(ERRORS);
+    IF SUM(A) = 21 THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('Array function SUM', BB) ASSIGN(ERRORS);
+    IF PROD(A) = 720 THEN BB = TRUE; ELSE BB = FALSE;
+    CALL PRINT_RESULT('Array function PROD', BB) ASSIGN(ERRORS);
+ CLOSE ARRAY_FUNCTIONS;
+ CALL ARRAY_FUNCTIONS ASSIGN(ERRORS);
+ 
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  IF ALLTESTS THEN DO;

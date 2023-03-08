@@ -367,3 +367,59 @@ def unaryUNIT(vector):
     except:
         return NaN
 
+#----------------------------------------------------------------------
+# Finally, one function that can be used to access any arrayable RTL
+# function with a single operand.  I.e., any of the functions above
+# except unaryMINUS() (which is for the "-" operator rather than an
+# RTL function.  
+
+# Built-ins with a single argument can mostly (all?) be 
+# treated the same way.  Each entry in unaryRTL is a 2-list
+# consisting of the function to be used with unaryOperation()
+# and the error message on failure.  Actually, the 2nd entry
+# of the list is optional, since the default message is 
+# usually good enough.
+unaryRTL = {
+    "ABS": [unaryABS],
+    "CEILING": [unaryCEILING],
+    "FLOOR": [unaryFLOOR],
+    "ODD": [unaryODD],
+    "ROUND": [unaryROUND],
+    "SIGN": [unarySIGN],
+    "SIGNUM": [unarySIGNUM],
+    "ARCCOS": [unaryARCCOS],
+    "ARCCOSH": [unaryARCCOSH],
+    "ARCSIN": [unaryARCSIN],
+    "ARCSINH": [unaryARCSINH],
+    "ARCTAN": [unaryARCTAN],
+    "ARCTANH": [unaryARCTANH],
+    "COS": [unaryCOS],
+    "COSH": [unaryCOSH],
+    "EXP": [unaryEXP],
+    "LOG": [unaryLOG],
+    "SIN": [unarySIN],
+    "SINH": [unarySINH],
+    "SQRT": [unarySQRT],
+    "TAN": [unaryTAN],
+    "TANH": [unaryTANH],
+    "TRUNCATE": [unaryTRUNCATE, "TRUNCATE requires a numeric argument"],
+    "ABVAL": [unaryABVAL, "ABVAL requires a VECTOR argument"],
+    "DET": [unaryDET, "DET requires a square MATRIX argument"],
+    "INVERSE": [unaryINVERSE, "INVERSE requires a non-singular square MATRIX argument"],
+    "TRACE": [unaryTRACE, "TRACE requires a square MATRIX argument"],
+    "TRANSPOSE": [unaryTRANSPOSE, "TRANSPOSE requires a MATRIX argument"],
+    "UNIT": [unaryUNIT, "UNIT requires a non-zero VECTOR argument"],
+    }
+
+# Returns either the operation result (could be None) or NaN on failure.
+def arrayableUnaryRTL(halsFunctionName, operand, source, instruction):
+    entry = unaryRTL[halsFunctionName]
+    result = unaryOperation(entry[0], operand)
+    if isNaN(result):
+        if len(entry) < 2:
+            printError(source, instruction, \
+                       halsFunctionName + "requires a numeric argument")
+        else:
+            printError(source, instruction, entry[1])
+        return NaN
+    return result
