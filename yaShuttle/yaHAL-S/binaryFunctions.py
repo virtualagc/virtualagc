@@ -97,7 +97,7 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
                 value -= operand2
             return value
         if op == "ARCTAN2":
-            return math.atan2(operand2, operand1)
+            return math.atan2(operand1, operand2)
         return NaN
     
         # Assumes the inner dimensions match and all entries are initialized (!= None)

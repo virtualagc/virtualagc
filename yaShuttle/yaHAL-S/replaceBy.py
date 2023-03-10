@@ -240,13 +240,6 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
         if line.strip() == "":
             continue
         fullLine = removeComments(line).strip()
-        '''
-        j = i + 1
-        while fullLine[-1:] != ";" and j < len(halsSource):
-            fullLine += " " + removeComments(halsSource[j]).strip()
-            metadata[j]["child"] = True
-            j += 1
-        '''
         #print("->", fullLine, file=sys.stderr)
         # At beginning of a block?
         if "child" not in metadata[i]:
@@ -345,6 +338,9 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                 # context rather than in the block's context, since the names
                 # of the PROGRAM/FUNCTION/PROCEDURE/... will be referenced from
                 # the parent and thus needs to be accessible to it.
+                if len(macros) < 2:
+                    print("\tBlock-nesting error in preprocessor, line", i+1)
+                    return
                 if identifier not in macros[-2]:
                     macros[-2][identifier] = { "arguments": [], 
                                 "replacement": hasType + identifier, 

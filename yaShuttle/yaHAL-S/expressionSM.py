@@ -69,8 +69,11 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
             internalState = "normal"
         elif internalState == "waitCharString":
             if stateMachine["radix"] != 0:
+                #appendInstruction(expression, \
+                #    {"bitarray": "%d" % int(sp[1:-1], stateMachine["radix"])}, \
+                #    source)
                 appendInstruction(expression, \
-                    {"bitarray": "%d" % int(sp[1:-1], stateMachine["radix"])}, \
+                    {"boolean": [int(sp[1:-1], stateMachine["radix"]), 32, 'b']}, \
                     source)
                 stateMachine["radix"] = 0
             else:

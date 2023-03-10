@@ -540,8 +540,8 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             computationStack.append(instruction["matrix"])
         elif "array" in instruction:
             computationStack.append(instruction["array"])
-        elif "bitarray" in instruction:
-            computationStack.append(parseBitArray(instruction["bitarray"])[0])
+        #elif "bitarray" in instruction:
+        #    computationStack.append(parseBitArray(instruction["bitarray"])[0])
         elif "+><" in instruction:
             si, identifier = instruction["+><"]
             identifier = "^" + identifier + "^"
@@ -1477,7 +1477,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                         return None
                     value1, length1 = parseBitArray(operand1)
                     value2, length2 = parseBitArray(operand2)
-                    numbits = min(length1, length2)
+                    numbits = max(length1, length2)
                     computationStack[-1] = formBitArray(value1^value2, numbits)
                 elif function == "SHL":
                     operand1 = hround(operand1)
