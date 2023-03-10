@@ -365,6 +365,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
       "program"</tt>, which is presumably self explanatory, as well as
     fields <tt>"name"</tt> and <tt>"attributes"</tt> that simply
     duplicate the declaration in scope 0.&nbsp; <br>
@@ -383,6 +384,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     compiler's code generator.&nbsp; Any HAL/S <tt>DO</tt> block or <tt>IF</tt>
     statement will trigger creation of a new child scope dedicated to it
     as well, and mark the new scope with the associated <tt>type</tt>.&nbsp;
+
 
 
 
@@ -612,10 +614,11 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         <tr>
           <td valign="top"><tt>boolean<br>
             </tt></td>
-          <td valign="top" nowrap="nowrap"><tt>{'boolean': [value, 1,
-              'p']}<br>
+          <td valign="top" nowrap="nowrap"><tt>{'boolean': [value,
+              length, 'b']}<br>
             </tt></td>
           <td valign="top">Pushes a <tt>BOOLEAN</tt> or <tt>BIT</tt>-stream
+
 
 
 
@@ -628,13 +631,15 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
           </td>
         </tr>
         <tr>
-          <td valign="top"><tt>bitarray</tt><br>
-          </td>
-          <td valign="top"><tt>{'bitarray': [value, length, 'p']}</tt><tt><br>
-            </tt></td>
-          <td valign="top">TBD ... I may be confused.&nbsp; It may be
-            that <tt>{'boolean': [value, length, 'p']}</tt> is used for
-            all booleans and bit-strings. </td>
+          <td valign="top"><strike><tt>bitarray</tt></strike><strike><br>
+            </strike> </td>
+          <td valign="top"><strike><tt>{'bitarray': [value, length,
+                'p']}</tt></strike><strike><tt><br>
+              </tt></strike></td>
+          <td valign="top"><strike>TBD ... I may be confused.&nbsp; It
+              may be that </strike><strike><tt>{'boolean': [value,
+                length, 'p']}</tt></strike><strike> is used for all
+              booleans and bit-strings. </strike></td>
         </tr>
         <tr>
           <td valign="top"><tt>fetch</tt></td>
@@ -941,6 +946,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.<br>
           </td>
@@ -967,6 +973,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -986,6 +993,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
             TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
             values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
 
 
 
@@ -1020,6 +1028,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1048,6 +1057,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But it's unclear what the result of the operation should be
             if operand2 has no known maximum length.<br>
           </td>
@@ -1059,6 +1069,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If they are equal, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1093,6 +1104,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1114,6 +1126,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 &lt; operand2, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1151,6 +1164,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1181,6 +1195,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1205,6 +1220,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 ≥ operand2, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1287,6 +1303,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
               V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
             <blockquote> </blockquote>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
@@ -1362,10 +1379,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             The HAL/S run-time library functions are documented in the
             HAL/S documentation, particularly the <a
               moz-do-not-send="true"
               href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+
 
 
 
@@ -1506,10 +1525,12 @@ p, li { white-space: pre-wrap; }
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
 
 
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt></tt><tt>"MATRIX"&nbsp; "3"&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>"2"&nbsp;
+
 
 
                   "4"&nbsp; ""&nbsp; ""&nbsp; ""</tt> </tt><br>
@@ -1552,16 +1573,19 @@ p, li { white-space: pre-wrap; }
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
 
 
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
 
 
+
                 </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </tt><br>
               <tt><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                   ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                   ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt></tt><tt>""&nbsp;
+
 
 
               </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </blockquote>
@@ -1574,6 +1598,7 @@ p, li { white-space: pre-wrap; }
             identifiers, from the PALMAT <tt>fetchp</tt> instruction),
             and "NONE" for uninitialized data.&nbsp; Most of these extra
             types actually cannot appear to <tt>typeofv</tt> for <i>correctly</i>-generated
+
 
 
 
@@ -1659,6 +1684,7 @@ p, li { white-space: pre-wrap; }
             eliminating all flexibility and checking.&nbsp; At runtime,
             either instruction pops operand1 and operand2, which are
             supposed to be <tt>INTEGER</tt>, or at worst <tt>SCALAR</tt>.&nbsp;
+
 
 
             The <tt>sliceAT</tt> instruction then pushes the Python
@@ -1833,8 +1859,10 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             To attach a symbolic label (say "<tt>MYLABEL</tt>") to the
             write instruction, the instruction would be modified to <tt>{'write':
+
 
 
 
@@ -2013,6 +2041,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             and (in effect, but not literally) replaces the entire third
             instruction by <tt>{'storepop': (0, 'Z')}</tt>.<br>
           </td>
@@ -2030,10 +2059,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             subroutine.&nbsp; (See the preceding entry.)<br>
             <br>
             The first variant of the instruction is for return from a <tt>PROCEDURE</tt>,
             while the second variant is for return from a <tt>FUNCTION</tt>.&nbsp;
+
 
 
 
@@ -2071,6 +2102,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             Also in principle, I don't believe there's any HAL/S code
             whose compilation is capable of generating this instruction.<br>
           </td>
@@ -2095,6 +2127,7 @@ p, li { white-space: pre-wrap; }
               </tt></blockquote>
             In practice, since this instruction is used for a single
             purpose, the <tt>identifer</tt> is always called "<tt>df_b</tt>",
+
 
 
             which stands for "do for body", and is the symbolic label at
@@ -2132,6 +2165,7 @@ p, li { white-space: pre-wrap; }
             appropriate scope.&nbsp; (This allows the <tt>returnoffset</tt>
             instruction to be used for implementing a HAL/S <tt>REPEAT</tt>
             <i>with</i> a symbolic label to an enclosing discrete <tt>FOR</tt>-loop,
+
 
 
             given that the compiler's code generator can figure out
@@ -2226,6 +2260,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             Note that the preliminary implementation supports only <tt>lun=6</tt>,
             namely <i>stdout</i> (i.e., the console).&nbsp; The values
             to be printed are removed from the stack in first-in
@@ -2250,6 +2285,7 @@ p, li { white-space: pre-wrap; }
           <td valign="top" nowrap="nowrap"><tt>{'read': lun}<br>
             </tt> </td>
           <td valign="top">Reads values from the "logical unit number (<tt>lun</tt>).&nbsp;
+
 
 
 
