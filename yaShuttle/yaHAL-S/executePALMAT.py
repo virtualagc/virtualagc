@@ -34,26 +34,13 @@ import re
 import math
 import random
 import time
+import datetime
 import copy
 from palmatAux import *
 from unaryFunctions import arrayableUnaryRTL, unaryRTL
 from binaryFunctions import arrayableBinaryRTL, binaryRTL
 from accumulableFunctions import accumulate, accumulableFunctions
 from saveValueToVariable import *
-
-timeOrigin = 0
-
-'''
-This function is called once at startup, in order to set the 
-time origin properaly.  If not, then the time functions will
-probably work, but they'll be of very low resolution since
-the time measurements (with nanosecond resolution) will likely be
-relative to 1970-01-01 00:00:00 UTC rather than relative to
-some point in the very recent past.
-'''
-def setupExecutePALMAT():
-    global timeOrigin;
-    timeOrigin = time.time_ns()
 
 '''
 Categorization of the HAL/S built-in functions by the number of arguments
@@ -470,6 +457,11 @@ uninitialized variable, then None is returned instead.
 '''
 def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                   trace=False, indent=0):
+    # Some values needed for RTL functions.
+    timeOrigin = time.time_ns() # For RUNTIME
+    errorGroup = 0              # For ERRGRP
+    errorNum = 0                # For ERRNUM
+    
     if newInstantiation:
         PALMAT = clonePALMAT(rawPALMAT)
     else:
@@ -820,6 +812,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                                    "Cannot find identifier " + identifier)
                         return None
                     dummyScope = PALMAT["scopes"][dummyScope["parent"]]
+                if identifier not in dummyScope["assignments"]:
+                    printError(source, instruction, \
+                        ("Identifier \"%s\" " + \
+                        "not found") % identifier[1:-1])
+                    return None
                 si, identifier = dummyScope["assignments"][identifier]
                 if si == -1:
                     if "return" not in dummyScope:
@@ -1403,10 +1400,25 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 elif function == "RUNTIME":
                     computationStack.append(1.0e-9 * \
                                             (time.time_ns() - timeOrigin))
+                elif function == "CLOCKTIME":
+                    rightNow = datetime.datetime.now(datetime.timezone.utc)
+                    timeOfDay = 3600 * rightNow.hour + \
+                                60 * rightNow.minute + rightNow.second + \
+                                rightNow.microsecond * 1E-6
+                    computationStack.append(timeOfDay)
+                elif function == "DATE":
+                    rightNow = datetime.datetime.now(datetime.timezone.utc)
+                    d = 10000 * rightNow.year + 100 * rightNow.month + \
+                        rightNow.day
+                    computationStack.append(d)
+                elif function == "ERRGRP":
+                    computationStack.append(errorGroup)
+                elif function == "ERRNUM":
+                    computationStack.append(errorNum)
                 else:
                     printError(source, instruction, \
                             "HAL/S built-in function " + function + \
-                            "not yet implemented")
+                            " not yet implemented")
                     return None
             # Now all of the one-argument functions.
             elif function in builtIns[1]:

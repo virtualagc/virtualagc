@@ -445,7 +445,7 @@ def collectGarbage(PALMAT):
         scope = PALMAT["scopes"][scopeIndex]
         scope["unreachable"] = True
         for i in scope["children"]:
-            findObsoleted(scopeIndex)
+            findObsoleted(i)
     
     # Scopes disconnected from the root of the tree are unreachable.
     for i in range(1, len(PALMAT["scopes"])):

@@ -1146,6 +1146,7 @@
          	0.9999092042625951);
     DECLARE V VECTOR(5), V2 VECTOR(5), SUMM SCALAR, M MATRIX(5,5), MT MATRIX(5,5);
     DECLARE B5 BIT(5), B7 BIT(7);
+    DECLARE A2 ARRAY(2), A7 ARRAY(7), A12 ARRAY(12), A10V5 ARRAY(10) VECTOR(5);
  
     WRITE(6) ;
     WRITE(6) 'Some unarrayed RTL tests.';
@@ -1405,7 +1406,70 @@
     IF TRIM('   RONALD     ') ~= 'RONALD' THEN BB = FALSE;
     CALL PRINT_RESULT('TRIM', BB) ASSIGN(ERRORS, TOTAL);
  
-    WRITE(6) '... more such tests to be implemented later.';
+    WRITE(6) 'Note that there is no apparent way to provide an automated';
+    WRITE(6) 'check for most time-related RTL functions.  For informational';
+    WRITE(6) 'purposes only, here are some current readings for them:';
+    WRITE(6) 'CLOCKTIME =', CLOCKTIME, ', DATE =', DATE, ', RUNTIME =', RUNTIME;
+    WRITE(6) 'Note that the HAL/S runtime-error system has not yet been';
+    WRITE(6) 'implemented, and therefore cannot be tested at present.  Here';
+    WRITE(6) 'are the outputs of the error-reporting functions:';
+    WRITE(6) 'ERRGRP =', ERRGRP, ', ERRNUM =', ERRNUM;
+    
+    MONTE_PI: FUNCTION(N) SCALAR;
+       DECLARE N INTEGER, HIT INTEGER;
+       HIT = 0;
+       DO FOR TEMPORARY I = 1 TO N;
+     	  IF RANDOM**2 + RANDOM**2 <= 1 THEN HIT = HIT + 1;
+       END;
+       RETURN ABS(PI - 4 HIT / N);
+    CLOSE MONTE_PI;
+    BB = FALSE;
+    DO FOR TEMPORARY I = 1 TO 20;
+       IF MONTE_PI(1000) < 0.1 THEN DO; BB = TRUE; EXIT; END;
+    END;
+    CALL PRINT_RESULT('RANDOM', BB) ASSIGN(ERRORS, TOTAL);
+    
+    /* Swiped this from Wikipedia's Python code in the article called
+       "Algorithms for calculating variance". */
+    SHIFTED_VARIANCE: PROCEDURE(N) ASSIGN(MEAN, VARIANCE);
+       DECLARE N INTEGER, MEAN SCALAR, VARIANCE SCALAR;
+       DECLARE K SCALAR, EX SCALAR, EX2 SCALAR;
+       K = RANDOMG;
+       EX, EX2 = 0.0;
+       DO FOR TEMPORARY I = 2 TO N;
+          TEMPORARY X;
+          X = RANDOMG;
+          EX = EX + X - K;
+          EX2 = EX2 + (X - K)**2;
+       END;
+       MEAN = EX / N + K;
+       VARIANCE = (EX2 - EX**2 / N) / (N-1);
+    CLOSE SHIFTED_VARIANCE;
+    BB = FALSE;
+    DO FOR TEMPORARY I = 1 TO 20;
+       TEMPORARY MEAN, VARIANCE;
+       CALL SHIFTED_VARIANCE(1000) ASSIGN(MEAN, VARIANCE);
+       IF ABS(MEAN) < 0.1 AND ABS(VARIANCE - 1) < 0.1 THEN DO;
+          BB = TRUE;
+          EXIT;
+       END;
+    END;
+    CALL PRINT_RESULT('RANDOMG', BB) ASSIGN(ERRORS, TOTAL);
+    
+    BB = TRUE;
+    IF SHL(-2, 2) ~= -8 THEN BB = FALSE;
+    IF SHL(1, 1) ~= 2 OR SHL(2, 1) ~= 4 OR SHL(1, 2) ~= 4 THEN BB = FALSE;
+    CALL PRINT_RESULT('SHL', BB) ASSIGN(ERRORS, TOTAL);
+    BB = TRUE;
+    IF SHR(-4,2) ~= -1 THEN BB = FALSE;
+    IF SHR(8, 1) ~= 4 OR SHR(4, 1) ~= 2 OR SHR(8, 2) ~= 2 THEN BB = FALSE;
+    CALL PRINT_RESULT('SHR', BB) ASSIGN(ERRORS, TOTAL);
+    
+    BB = TRUE;
+    IF SIZE(A2) ~= 2 OR SIZE(A7) ~= 7 OR SIZE(A12) ~= 12 OR SIZE(A10V5) ~= 10
+    THEN BB = FALSE;
+    CALL PRINT_RESULT('SIZE', BB) ASSIGN(ERRORS, TOTAL);
+ 
  CLOSE RTL_TESTS;
  CALL RTL_TESTS ASSIGN(ERRORS, TOTAL);
 

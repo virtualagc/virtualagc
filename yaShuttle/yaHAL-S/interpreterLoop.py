@@ -59,7 +59,7 @@ from processSource import processSource
 from palmatAux import constructPALMAT, writePALMAT, readPALMAT, \
         collectGarbage, findIdentifier, astSourceFile
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate
-from executePALMAT import executePALMAT, setupExecutePALMAT
+from executePALMAT import executePALMAT
 from replaceBy import bareIdentifierPattern
 from optimizePALMAT import optimizePALMAT
 
@@ -73,8 +73,6 @@ if rlModule != None:
         rlModule.set_history_length(1000)
     except FileNotFoundError:
         pass
-
-setupExecutePALMAT()
 
 def printScopeHeading(PALMAT, i):
     scope = PALMAT["scopes"][i]

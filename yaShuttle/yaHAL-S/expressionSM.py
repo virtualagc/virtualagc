@@ -17,6 +17,8 @@ from palmatAux import debug, findIdentifier, hTRUE, hFALSE, isArrayQuick, \
     astToLbnf, appendInstruction, POUND
 from p_Functions import substate
 
+MAXBITSTRING = 256
+
 # Return True on success, False on failure.  The stage argument is 0 when
 # called upon starting processing of an lbnfLabel, 2 after otherwise finishing
 # the processing of an lbnfLabel, or 1 when called with the lbnfLabel being 
@@ -73,7 +75,8 @@ def expressionSM(stage, ast, PALMAT, state, trace, depth, \
                 #    {"bitarray": "%d" % int(sp[1:-1], stateMachine["radix"])}, \
                 #    source)
                 appendInstruction(expression, \
-                    {"boolean": [int(sp[1:-1], stateMachine["radix"]), 32, 'b']}, \
+                    {"boolean": [int(sp[1:-1], stateMachine["radix"]), 
+                                 MAXBITSTRING, 'b']}, \
                     source)
                 stateMachine["radix"] = 0
             else:
