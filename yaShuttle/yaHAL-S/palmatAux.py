@@ -723,6 +723,8 @@ def makeDoEnd(PALMAT, source, parentScope, scopeType="unknown"):
     parentIndex = parentScope["self"]
     childIndex = addScope(PALMAT, parentIndex, scopeType)
     createTarget(PALMAT, source, parentIndex, childIndex, "ue")
+    PALMAT["scopes"][childIndex]["instructions"].append({"automatics": True})
+    createTarget(PALMAT, source, parentIndex, childIndex, "ug")
     jumpToTarget(PALMAT, source, parentIndex, childIndex, "ue", "goto")
     createTarget(PALMAT, source, childIndex, parentIndex, "ur", True)
     return childIndex, PALMAT["scopes"][childIndex]

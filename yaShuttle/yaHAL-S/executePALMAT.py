@@ -1697,6 +1697,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
             # Ends emulation.
             printError(source, None, "Normal program termination")
             return None
+        elif "automatics" in instruction:
+            for identifier in identifiers:
+                attributes = identifiers[identifier]
+                if "initial" in attributes and "automatic" in attributes:
+                    attributes["value"] = copy.deepcopy(attributes["initial"])
         elif "partition" in instruction:
             computationStack.append({"semicolon"})
         else:

@@ -274,7 +274,12 @@ def stringLiteral(PALMAT, state, s):
     elif state1 in ["basicStatementExit", "basicStatementRepeat"]:
         substate["labelExitRepeat"] = s
     elif state1 == "basicStatementGoTo":
-        instructions.append({'goto': s})
+        si, attributes = findIdentifier(s, PALMAT, scopeIndex)
+        if attributes == None:
+            substate["errors"].append("Can't find label %s.", sp)
+            return False
+        else:
+            instructions.append({'goto': (si, s)})
     elif state1 == "number" and \
             ("write_key" in history or "read_key" in history):
         substate["LUN"] = sp

@@ -558,6 +558,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             identifierDict["scalar"] = True
         blockType = blockTypes[lbnfLabel]
         childIndex = addScope(PALMAT, currentScope["self"], blockType)
+        PALMAT["scopes"][childIndex]["instructions"].append({"automatics": True})
         if blockType in ["function", "procedure"] and \
                 "forward" in identifierDict:
             #fixForwardCalls(PALMAT, currentIndex, \
@@ -906,12 +907,21 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             return False, PALMAT
     elif lbnfLabel in ["basicStatementExit", "basicStatementRepeat"]:
         loopScope = findEnclosingLoop(PALMAT, currentScope)
-        if lbnfLabel == "basicStatementExit" and 'labelExitRepeat' in substate:
-            appendInstruction(currentScope["instructions"], \
-                              {'goto': substate['labelExitRepeat']}, source)
-            substate.pop('labelExitRepeat')
-        elif lbnfLabel == "basicStatementRepeat" and \
-                'labelExitRepeat' in substate:
+        #if lbnfLabel == "basicStatementExit" and 'labelExitRepeat' in substate:
+        #    si, attributes = findIdentifier(substate['labelExitRepeat'], \
+        #                                    PALMAT, currentScope["self"])
+        #    if attributes == None:
+        #        print("\tCannot find identier:", substate['labelExitRepeat'])
+        #        endLabels.pop()
+        #        return False, PALMAT
+        #    else:
+        #        appendInstruction(currentScope["instructions"], \
+        #                          {'goto': (si, substate['labelExitRepeat'])}, \
+        #                          source)
+        #    substate.pop('labelExitRepeat')
+        #elif lbnfLabel == "basicStatementRepeat" and \
+        #        'labelExitRepeat' in substate:
+        if 'labelExitRepeat' in substate:
             label = substate.pop('labelExitRepeat')
             # We have to find the ancestor scope in which this label is
             # defined.
@@ -946,7 +956,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             doScope = PALMAT["scopes"][doScopeIndex]
             # At last we have the scope in which the enclosing DO-loop resides.
             # What we have to do now depends on what type of loop it is.
-            if doScope["type"] == "do for discrete":
+            if lbnfLabel == "basicStatementExit":
+                jumpToTarget(PALMAT, source, currentScope["self"], \
+                             doScopeIndex, "ux", "goto", False, doScopeIndex)
+            elif doScope["type"] == "do for discrete":
                 appendInstruction(currentScope["instructions"], \
                                   {'returnoffset': doScopeIndex}, source)
             elif doScope["type"] == "do for":
@@ -956,7 +969,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 jumpToTarget(PALMAT, source, currentScope["self"], \
                              doScopeIndex, "ue", "goto", False, dummy[0])
             else:
-                print("\tLabel for REPEAT not attched to a loop.")
+                print("\tLabel for REPEAT/EXIT not attched to a loop.")
                 endLabels.pop()
                 return False, PALMAT
         else:
@@ -988,7 +1001,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     identifiers = currentScope["identifiers"]
     if "recycle" in endLabels[-1]:
         if len(expressionFlush) > 0:
-            # This is a buffered set of PALMAT instructions for a an UNTIL
+            # This is a buffered set of PALMAT instructions for an UNTIL
             # conditional expression
             instructions.extend(expressionFlush)
             jumpToTarget(PALMAT, source, currentIndex, currentIndex, \
@@ -1005,10 +1018,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             # label at which the block is entered from elsewhere.  Hence
             # the label doesn't appear in the identifier list of the current
             # block.  We have to find it.
-            identifier = "^ue_%d^" % currentIndex
+            identifier = "^ug_%d^" % currentIndex
             si, attributes = findIdentifier(identifier, PALMAT, currentIndex)
             jumpToTarget(PALMAT, source, currentIndex, currentIndex, \
-                         "ue", "goto", False, si)
+                         "ug", "goto", False, si)
     if endLabels[-1]["used"]:
         if lbnfLabel == "true_part":
             if createTarget(PALMAT, source, currentIndex, currentIndex, "ub") \

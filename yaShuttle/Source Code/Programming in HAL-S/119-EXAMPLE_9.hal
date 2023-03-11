@@ -1,10 +1,23 @@
-C/ From PDF p. 119 of "Programming in HAL/S".
+C/ Adapted from PDF p. 119 of "Programming in HAL/S".  In case it isn't obvious,
+C/ here's what this program does:  As input, it has an array (V) of 3-vectors.
+C/ As output, it has a 3-array (BIGTHREE) of 3-vectors, which is supposed to
+C/ duplicate the 3 vectors from V that are greatest in absolute value.  So the 
+C/ loop just checks each vector in V vs those in BIGTHREE, and if it finds one 
+C/ that's greater in absolute value, kicks out the smallest vector from 
+C/ BIGTHREE.  BIGTHREE is maintained in the order biggest (absolute value) to 
+C/ smallest, and the replacement process maintains that order.
 
   EXAMPLE_9:
   PROGRAM;
      DECLARE V ARRAY(999) VECTOR(3);
-     DECLARE BIGTHREE ARRAY(3) VECTOR(3) INITIAL(0);
-     DECLARE N INTEGER;					/*NUMBER OF ACTUAL ENTRIES IN V*/
+     DECLARE BIGTHREE ARRAY(3) VECTOR(3) INITIAL(0) AUTOMATIC;
+     DECLARE N INTEGER;			      /*NUMBER OF ACTUAL ENTRIES IN V*/
+     
+     N = 25;
+     DO FOR TEMPORARY I = 1 TO N;
+        V$(I:) = VECTOR(RANDOM, RANDOM, RANDOM);
+     END;
+     
      DO FOR TEMPORARY I = 1 TO N;
   INNER:
         DO FOR TEMPORARY J = 1 TO 3;
@@ -13,7 +26,7 @@ M	   IF ABVAL(V  ) > ABVAL(BIGTHREE  ) THEN
 S		     I:                  J:
 
 	      DO;
-	         DO FOR TEMPORARY K = J + 1 TO 3;
+	         DO FOR TEMPORARY K = 3 TO J + 1 BY -1;
 E                      -            -
 M		    BIGTHREE   = BIGTHREE    ;
 S			    K:           K-1:
@@ -27,5 +40,14 @@ S			 J:    I:
 	      END;
 	END INNER;
      END;
+     
+     DO FOR TEMPORARY I = 1 TO 3;
+        WRITE(6) '(', ABVAL(BIGTHREE$I), ')', BIGTHREE$I;
+     END;
+     WRITE(6) '---------------------------------------------------------------';
+     DO FOR TEMPORARY I = 1 TO N;
+        WRITE(6) '(', ABVAL(V$I), ')', V$I;
+     END;
+     
   CLOSE EXAMPLE_9;
   
