@@ -34,6 +34,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       <li><a moz-do-not-send="true" href="#PALMAT">Appendix: PALMAT Specification</a></li>
       <ul>
         <li><a moz-do-not-send="true" href="#Background">Background</a></li>
+        <li><a moz-do-not-send="true" href="#ImplementationDependent">Implementation-Dependent Details</a><br></li>
         <li><a moz-do-not-send="true" href="#Datatypes">Representation of HAL/S Data Types</a><br></li>
         <li><a moz-do-not-send="true" href="#ComputationStack">The Computation Stack</a><br></li>
         <li><a moz-do-not-send="true" href="#Scopes">Scopes</a></li>
@@ -177,6 +178,21 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     <p>Thus ... PALMAT!<br></p>
     <p>The PALMAT language has a minimal instruction set intended to have behaviors that are very easy to implement in an emulator.&nbsp; Since the preliminary code compiler code generator and the preliminary emulator are written in Python, the format of a PALMAT dataset makes heavy usage of Python datatypes such as dictionaries, lists, tuples, and sets; moreover, PALMAT object files are basically just JSON representations of the Python internal dataset, and are thus both very human-friendly and very easily output from and input into Python programs.&nbsp; But use of Python-style datatypes and JSON storage formats is <i>not</i> conducive to rapid emulation.<br></p>
     <p>PALMAT is thus described in detail here in the hope of aiding translation from PALMAT to a more-efficient representation for both storage and emulation.<br></p>
+    <h2><a name="ImplementationDependent"></a>Implementation-Dependent
+      Details</h2>
+    <p>The general HAL/S documentation leaves a number of details of the language specification as "implementation dependent", and in a spectacular display of nonsensical behavior, the Shuttle-specific documentation for HAL/S written near the end of the Shuttle program continues to do so!  Obviously I want the PALMAT-based implementation to match the behavior of the actual compiler used for the Shuttle flight software, but alas I am forced to invent my own implementation-dependence which may not match that of the original Shuttle software.  Perhaps when the actual Shuttle flight-software source code can be examined, the original implementation details can be deduced and this section will be updated.  <br></p>
+    <p>Other than the unknown limits imposed by available memory (which are unlikely to be of any significance for Shuttle flight software), the following limits currently exist in the PALMAT implementation:<br></p>
+    <ul>
+      <li><tt>INTEGER</tt> and <tt>INTEGER DOUBLE</tt> precision:  Identical and unlimited.  (Recall that in Python, unlimited-precision integer arithmetic is used internally, albeit with increasingly-large use of resources for large integers.)</li>
+      <li><tt>SCALAR</tt> and <tt>SCALAR DOUBLE</tt> precision:  Identical, and match the precision of the <tt>float</tt> datatype for the Python version used to implement the PALMAT emulator.  For a 64-bit machine, I expect that's on the order of 16 decimal digits, plus sign and exponent.<br></li>
+      <li>Maximum bit-string width:  Bit-string literals like <tt>BIN'101001'</tt> (or <tt>HEX'...'</tt>, <tt>DEC'...'</tt>, or <tt>OCT'...'</tt>) are supposed to pad shorter bit-strings to the implementation maximum, and for that purpose only, a maximum of 256 (<tt>MAXBITSTRING</tt>) bits per bit-string is used.  But aside from this arbitrary choice, there are no limits applied to bit-string width.  <b>Note:</b>  A bit-string is implemented as a Python integer supplemented by an attribute specifying the maximum size of the integer (which may differ for different bit-string values).  Thus bit-string operations essentially inherit the unlimited precision of integer operations.</li>
+      <li>Maximum character-string width:  No limits.<br></li>
+      <li>Maximum number of <tt>ARRAY</tt> dimensions:  No limits.</li>
+      <li>Maximum width of an <tt>ARRAY</tt> dimension:  1,000,000,000 (<tt>MAXDIMWIDTH</tt>).</li>
+      <li>Format of (<tt>SCALAR</tt>) RTL <tt>CLOCKTIME</tt> function:  Number of seconds since midnight UTC.  The returned value superficially has a precision to the microsecond, but there is no guarantee that it is accurate.</li>
+      <li>Format of (<tt>INTEGER</tt>) RTL <tt>DATE</tt> function:  The UTC date at the preceding midnight, expressed in 8 decimal digits as YYYYMMDD, where YYYY is the 4-digit year, MM is 01 through 12, and DD is 01 through 31.</li>
+      <li>Format of (<tt>SCALAR</tt>) RTL <tt>RUNTIME</tt> function:  The time, in seconds, since the current instance of the PALMAT emulator began execution.  Superficially precise to the microsecond, but with no guarantee of accuracy.  If multiple HAL/S programs are running simultaneously, each emulator instance may have a different start time and therefore return a different <tt>RUNTIME</tt>, even if the programs are intercommunicating.<br></li>
+    </ul>
     <h2><a name="Datatypes"></a>Representation of HAL/S Data Types</h2>
     <p>In PALMAT, the various HAL/S data types are represented as follows:<br></p>
     <ul>
@@ -366,6 +382,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
       "program"</tt>, which is presumably self explanatory, as well as
     fields <tt>"name"</tt> and <tt>"attributes"</tt> that simply
     duplicate the declaration in scope 0.&nbsp; <br>
@@ -384,6 +403,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     compiler's code generator.&nbsp; Any HAL/S <tt>DO</tt> block or <tt>IF</tt>
     statement will trigger creation of a new child scope dedicated to it
     as well, and mark the new scope with the associated <tt>type</tt>.&nbsp;
+
+
+
 
 
 
@@ -618,6 +640,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
               length, 'b']}<br>
             </tt></td>
           <td valign="top">Pushes a <tt>BOOLEAN</tt> or <tt>BIT</tt>-stream
+
+
+
 
 
 
@@ -947,6 +972,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.<br>
           </td>
@@ -974,6 +1002,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -993,6 +1024,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
             TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
             values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+
+
 
 
 
@@ -1029,6 +1063,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1058,6 +1095,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
             But it's unclear what the result of the operation should be
             if operand2 has no known maximum length.<br>
           </td>
@@ -1069,6 +1109,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If they are equal, pushes the <tt>BIT</tt>-string
+
+
+
 
 
 
@@ -1105,6 +1148,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1126,6 +1172,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 &lt; operand2, pushes the <tt>BIT</tt>-string
+
+
+
 
 
 
@@ -1165,6 +1214,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1196,6 +1248,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1220,6 +1275,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 ≥ operand2, pushes the <tt>BIT</tt>-string
+
+
+
 
 
 
@@ -1304,6 +1362,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
+
               V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
             <blockquote> </blockquote>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
@@ -1380,10 +1441,16 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
             The HAL/S run-time library functions are documented in the
             HAL/S documentation, particularly the <a
               moz-do-not-send="true"
               href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+
+
+
 
 
 
@@ -1526,10 +1593,16 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt></tt><tt>"MATRIX"&nbsp; "3"&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>"2"&nbsp;
+
+
+
 
 
 
@@ -1574,6 +1647,9 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
@@ -1581,10 +1657,16 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
                 </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </tt><br>
               <tt><tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                   ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                   ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt></tt><tt>""&nbsp;
+
+
+
 
 
 
@@ -1598,6 +1680,9 @@ p, li { white-space: pre-wrap; }
             identifiers, from the PALMAT <tt>fetchp</tt> instruction),
             and "NONE" for uninitialized data.&nbsp; Most of these extra
             types actually cannot appear to <tt>typeofv</tt> for <i>correctly</i>-generated
+
+
+
 
 
 
@@ -1684,6 +1769,9 @@ p, li { white-space: pre-wrap; }
             eliminating all flexibility and checking.&nbsp; At runtime,
             either instruction pops operand1 and operand2, which are
             supposed to be <tt>INTEGER</tt>, or at worst <tt>SCALAR</tt>.&nbsp;
+
+
+
 
 
 
@@ -1860,8 +1948,14 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
             To attach a symbolic label (say "<tt>MYLABEL</tt>") to the
             write instruction, the instruction would be modified to <tt>{'write':
+
+
+
 
 
 
@@ -2042,6 +2136,9 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
             and (in effect, but not literally) replaces the entire third
             instruction by <tt>{'storepop': (0, 'Z')}</tt>.<br>
           </td>
@@ -2060,10 +2157,16 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
             subroutine.&nbsp; (See the preceding entry.)<br>
             <br>
             The first variant of the instruction is for return from a <tt>PROCEDURE</tt>,
             while the second variant is for return from a <tt>FUNCTION</tt>.&nbsp;
+
+
+
 
 
 
@@ -2103,6 +2206,9 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
             Also in principle, I don't believe there's any HAL/S code
             whose compilation is capable of generating this instruction.<br>
           </td>
@@ -2127,6 +2233,9 @@ p, li { white-space: pre-wrap; }
               </tt></blockquote>
             In practice, since this instruction is used for a single
             purpose, the <tt>identifer</tt> is always called "<tt>df_b</tt>",
+
+
+
 
 
 
@@ -2165,6 +2274,9 @@ p, li { white-space: pre-wrap; }
             appropriate scope.&nbsp; (This allows the <tt>returnoffset</tt>
             instruction to be used for implementing a HAL/S <tt>REPEAT</tt>
             <i>with</i> a symbolic label to an enclosing discrete <tt>FOR</tt>-loop,
+
+
+
 
 
 
@@ -2261,6 +2373,9 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
+
             Note that the preliminary implementation supports only <tt>lun=6</tt>,
             namely <i>stdout</i> (i.e., the console).&nbsp; The values
             to be printed are removed from the stack in first-in
@@ -2285,6 +2400,9 @@ p, li { white-space: pre-wrap; }
           <td valign="top" nowrap="nowrap"><tt>{'read': lun}<br>
             </tt> </td>
           <td valign="top">Reads values from the "logical unit number (<tt>lun</tt>).&nbsp;
+
+
+
 
 
 
@@ -2351,6 +2469,19 @@ p, li { white-space: pre-wrap; }
             that's outside the context of a <tt>FUNCTION</tt> or <tt>PROCEDURE</tt>.<br>
           </td>
         </tr>
+        <tr>
+          <td valign="top"><tt>automatics<br>
+            </tt></td>
+          <td valign="top"><tt>{'automatics': True}<br>
+            </tt></td>
+          <td valign="top">This instruction acts on all identifiers in
+            its immediate scope (i.e., not on the ancestor scopes) which
+            have both an "automatic" attribute and an "initial"
+            attribute in the identifier table.&nbsp; For those
+            identifiers, which are variables, their "initial" attributes
+            are copied into their "value" attributes.<br>
+          </td>
+        </tr>
       </tbody>
     </table>
     <br>
@@ -2368,7 +2499,7 @@ p, li { white-space: pre-wrap; }
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-03-03<br>
+          2023-03-11<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
