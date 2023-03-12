@@ -53,7 +53,7 @@ def identityMatrix(n):
 #    "vector3" (Same as "vector!" but with a width of exactly 3)
 #    "matrix"  (Implies dimensions identical to operand1 if operand1 is "matrix")
 #    "matrix!" (Implies dimensional compatibility for linear algebra)
-def compatibleArithmetic(operand1, operand2, opType, compatibility):
+def compatibleArithmetic(PALMAT, operand1, operand2, opType, compatibility):
     
     # Elementary arithmetic on operands which are simple numbers.
     def elementary(operand1, operand2, op=opType):
@@ -311,71 +311,71 @@ def compatibleArithmetic(operand1, operand2, opType, compatibility):
                 row.append(r)
             result.append(row)
     else:
-        printError(source, instruction, 
+        printError(PALMAT, source, instruction, 
             "Implementation error, cannot handle this combination of operands.")
         return None
     
     # All done!
     return result
 
-def simpleAddition(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "+", {
+def simpleAddition(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "+", {
         "numeric": ["numeric"], 
         "vector": ["vector!"], 
         "matrix": ["matrix"]})
 
-def simpleSubtraction(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "-", {
+def simpleSubtraction(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "-", {
         "numeric": ["numeric"], "vector": ["vector!"], "matrix": ["matrix"]})
 
 # A binary-division operator for use with binaryOperation().  
 # Returns NaN on error.
-def simpleDivision(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "/", {
+def simpleDivision(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "/", {
         "numeric": ["numeric"], 
         "vector": ["numeric"], 
         "matrix": ["numeric"]})
 
 # A binary-multiplication operator for use with binaryOperation().  
 # Returns NaN on error.
-def simpleMultiplication(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "", {
+def simpleMultiplication(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "", {
         "numeric": ["numeric", "vector", "matrix"], 
         "vector": ["numeric", "vector", "matrix!"], 
         "matrix": ["numeric", "vector!", "matrix!"]} )
 
 # A binary-multiplication operator for use with binaryOperation().  
 # Returns NaN on error.
-def simpleDot(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, ".", \
+def simpleDot(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, ".", \
                                 {"vector": ["vector!"]} )
 
 # A binary-multiplication operator for use with binaryOperation().  
 # Returns NaN on error.
-def simpleCross(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "*", \
+def simpleCross(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "*", \
                                 {"vector": ["vector3"]} )
     
 # A binary-multiplication operator for use with binaryOperation().  
 # Returns NaN on error.
-def simpleExponentiation(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "**", \
+def simpleExponentiation(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "**", \
                             {"numeric": ["numeric"], "matrix": ["integer"]})
 
-def simpleDIV(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "DIV", \
+def simpleDIV(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "DIV", \
                                 {"numeric": ["numeric"]})
 
-def simpleMOD(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "MOD", \
+def simpleMOD(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "MOD", \
                                 {"numeric": ["numeric"]})
 
-def simpleREMAINDER(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "REMAINDER", \
+def simpleREMAINDER(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "REMAINDER", \
                                 {"numeric": ["numeric"]})
 
-def simpleARCTAN2(operand1, operand2):
-    return compatibleArithmetic(operand1, operand2, "ARCTAN2", \
+def simpleARCTAN2(PALMAT, operand1, operand2):
+    return compatibleArithmetic(PALMAT, operand1, operand2, "ARCTAN2", \
                                 {"numeric": ["numeric"]})
 
 
@@ -395,15 +395,15 @@ binaryRTL = {
     }
 
 # Returns either the operation result (could be None) or NaN on failure.
-def arrayableBinaryRTL(halsFunctionName, operand1, operand2, \
+def arrayableBinaryRTL(PALMAT, halsFunctionName, operand1, operand2, \
                        source, instruction):
     entry = binaryRTL[halsFunctionName]
-    result = binaryOperation(entry[0], operand1, operand2)
+    result = binaryOperation(PALMAT, entry[0], operand1, operand2)
     if isNaN(result):
         if len(entry) < 2:
-            printError(source, instruction, \
+            printError(PALMAT, source, instruction, \
                        "Incompatible operands for " + halsFunctionName)
         else:
-            printError(source, instruction, entry[1])
+            printError(PALMAT, source, instruction, entry[1])
         return NaN
     return result

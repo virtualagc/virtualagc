@@ -219,7 +219,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         colorName = ""
         debugColor = ""
     PALMAT = constructPALMAT()
-    astSourceFile(PALMAT, "interpreter")
+    astSourceFile(PALMAT, "Interpreter")
     print(colorize)
     print("Input HAL/S or else interpreter commands. Use `HELP for more info.")
     while not quitting:
@@ -247,9 +247,9 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             fields = line.strip().split()
             numWords = len(fields)
             if numWords == 0:
+                fileIndex = astSourceFile(PALMAT, "Interpreter")
                 halsSource.append(" ")
-                metadata.append({"file": "interpreter", 
-                                  "lineNumber": len(halsSource)})
+                metadata.append({"file": fileIndex, "lineNumber": len(halsSource)})
                 continue
             if fields[0][:1] == "`":
                 fields[0] = fields[0][1:]
@@ -575,11 +575,23 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 halsSource.append(line)
             else:
                 halsSource.append(" " + line)
-            metadata.append({"file": "interpreter", 
-                              "lineNumber": len(halsSource)})
+            fileIndex = astSourceFile(PALMAT, "Interpreter")
+            metadata.append({"file": fileIndex, "lineNumber": len(halsSource)})
         if quitting:
             break 
         
+        # Sanity check.
+        illegals = set()
+        for line in halsSource:
+            if len(line) > 0 and line[0] not in ["M", "E", "S", "C", 
+                                                 "D", " ", "\t"] \
+                    and strict:
+                illegals.add(line[0])
+        if len(illegals) != 0:
+            print("\tThere are illegal characters in column one:", illegals)
+            print("\tPerhaps you should use the `NOSTRICT command.")
+            continue
+    
         # For whatever reason, just feeding nothing but blanks into the compiler
         # returns an error, which is not something I want, so detect that case
         # separately and avoid it.

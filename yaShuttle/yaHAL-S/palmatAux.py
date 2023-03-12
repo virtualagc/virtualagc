@@ -214,7 +214,7 @@ same geometry, or NaN on failure.  (The unary function must also return NaN
 on error.  Python None is a proper return, because it signifies an uninitialized
 value rather than an illegal operation.)
 '''
-def unaryOperation(function, array):
+def unaryOperation(PALMAT, function, array):
     if isArrayQuick(array):
         dimensions, dummy = getArrayDimensions(array)
     else:
@@ -222,7 +222,7 @@ def unaryOperation(function, array):
     if len(dimensions) > 0:
         result = []
         for a in array[:-1]:
-            r = unaryOperation(function, a)
+            r = unaryOperation(PALMAT, function, a)
             if isNaN(r):
                 return NaN
             result.append(r)
@@ -231,7 +231,7 @@ def unaryOperation(function, array):
         # We're at a leaf element, apply the function to it.
         if array == None:
             return None
-        return function(array)
+        return function(PALMAT, array)
     return result
 
 '''
@@ -244,7 +244,7 @@ operand was an array). Or else returns NaN on failure.
 Python None is a proper return, because it signifies an uninitialized
 value rather than an illegal operation.) 
 '''
-def binaryOperation(function, array1, array2):
+def binaryOperation(PALMAT, function, array1, array2):
     if isArrayQuick(array1):
         dimensions1, dummy = getArrayDimensions(array1)
     else:
@@ -275,7 +275,7 @@ def binaryOperation(function, array1, array2):
                 child2 = array2
             else:
                 child2 = array2[i]
-            r = binaryOperation(function, child1, child2)
+            r = binaryOperation(PALMAT, function, child1, child2)
             if isNaN(r):
                 return NaN
             result.append(r)
@@ -285,7 +285,7 @@ def binaryOperation(function, array1, array2):
         # stop recursing.
         if array1 == None or array2 == None:
             return None
-        result = function(array1, array2)
+        result = function(PALMAT, array1, array2)
     return result
 
 '''
@@ -300,7 +300,7 @@ value rather than an illegal operation.)
 As far as I know, the only use-case for trinaryOperation() is the RTL
 function MIDVAL().
 '''
-def trinaryOperation(function, array1, array2, array3):
+def trinaryOperation(PALMAT, function, array1, array2, array3):
     if isArrayQuick(array1):
         dimensions1, dummy = getArrayDimensions(array1)
     else:
@@ -343,7 +343,7 @@ def trinaryOperation(function, array1, array2, array3):
                 child3 = array3
             else:
                 child3 = array3[i]
-            r = trinaryOperation(function, child1, child2, child3)
+            r = trinaryOperation(PALMAT, function, child1, child2, child3)
             if isNaN(r):
                 return NaN
             result.append(r)
@@ -353,7 +353,7 @@ def trinaryOperation(function, array1, array2, array3):
         # stop recursing.
         if array1 == None or array2 == None or array3 == None:
             return None
-        result = function(array1, array2, array3)
+        result = function(PALMAT, array1, array2, array3)
     return result
 
 def formBitArray(value, length):
@@ -1002,13 +1002,14 @@ def checkArithmeticalDatatype(operand):
         return False, False, False, True
     return False, False, False, False
 
-def printError(source, instruction, msg):
+def printError(PALMAT, source, instruction, msg):
     if msg == "":
         msg = "n/a"
     if instruction == None:
-        print("\t%d,%d,%d: %s" % \
-            (source[0], source[1], source[2], msg))
+        print("\t%s, line %d, column %d: %s" % \
+            (PALMAT["sourceFiles"][source[0]], source[1], source[2], msg))
     else:
-        print("\t%d,%d,%d (%s): %s" % \
-            (source[0], source[1], source[2], str(instruction), msg))
+        print("\t%s, line %d, column %d (%s): %s" % \
+            (PALMAT["sourceFiles"][source[0]], source[1], source[2], \
+             str(instruction), msg))
 

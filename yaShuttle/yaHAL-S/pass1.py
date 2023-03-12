@@ -270,9 +270,6 @@ def readGrammar(filename):
 
 # A function that prints an abstract syntax tree.
 indenter = "░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ ░ "
-indenter += indenter
-indenter += indenter
-indenter += indenter
 def astPrint(ast, lbnf=True, bnf=False, indent=0):
     if not (lbnf or bnf):
         return
@@ -288,7 +285,10 @@ def astPrint(ast, lbnf=True, bnf=False, indent=0):
         print("%5d%4d   " % (ast["lineNumber"], ast["columnNumber"]), end="")
     else:
         print("%12s" % "", end="")
-    print("%s" % (indenter[:indent]), end="")
+    if indent <= len(indenter):
+        print("%s" % (indenter[:indent]), end="")
+    else:
+        print("%s(%d) " % (indenter, indent), end="")
     label = ast["lbnfLabel"]
     if bnf and label in lbnf2bnf:
         label = lbnf2bnf[label]
@@ -308,7 +308,10 @@ def astPrint(ast, lbnf=True, bnf=False, indent=0):
                     print("%12s" % "", end="")
                 print("%s" % (indenter[:indent]), end="")
                 interrupted = False
-                spacer = indenter[indent]
+                if indent < len(indenter):
+                    spacer = indenter[indent]
+                else:
+                    spacer = " "
             print("%s%s" % (spacer, component), end="")
             needNewline = True
         else:

@@ -121,7 +121,7 @@ def matrixInverse(m):
 # The unary functions themselves follow:
 
 # A unary-minus operator. See p. 7-2 of [HPG].
-def unaryMinus(operand):
+def unaryMinus(PALMAT, operand):
     result = NaN
     if operand == None:
         result = None
@@ -146,25 +146,25 @@ def unaryMinus(operand):
             result.append(row)
     return result
 
-def unaryABS(operand):
+def unaryABS(PALMAT, operand):
     try:
         return abs(operand)
     except:
         return NaN
 
-def unaryCEILING(operand):
+def unaryCEILING(PALMAT, operand):
     try:
         return math.ceil(operand)
     except:
         return NaN
 
-def unaryFLOOR(operand):
+def unaryFLOOR(PALMAT, operand):
     try:
         return math.floor(operand)
     except:
         return NaN
 
-def unaryODD(operand):
+def unaryODD(PALMAT, operand):
     try:
         operand = hround(operand)
         if (operand & 1) == 0:
@@ -174,13 +174,13 @@ def unaryODD(operand):
     except:
         return NaN
 
-def unaryROUND(operand):
+def unaryROUND(PALMAT, operand):
     try:
         return hround(operand)
     except:
         return NaN
 
-def unarySIGN(operand):
+def unarySIGN(PALMAT, operand):
     try:
         if operand >= 0:
             return 1
@@ -189,7 +189,7 @@ def unarySIGN(operand):
     except:
         return NaN
 
-def unarySIGNUM(operand):
+def unarySIGNUM(PALMAT, operand):
     try:
         if operand > 0:
             return 1
@@ -200,7 +200,7 @@ def unarySIGNUM(operand):
     except:
         return NaN
 
-def unaryTRUNCATE(operand):
+def unaryTRUNCATE(PALMAT, operand):
     try:
         if operand >= 0:
             return math.floor(operand)
@@ -209,97 +209,97 @@ def unaryTRUNCATE(operand):
     except:
         return NaN
 
-def unaryARCCOS(operand):
+def unaryARCCOS(PALMAT, operand):
     try:
         return math.acos(operand)
     except:
         return NaN
 
-def unaryARCCOSH(operand):
+def unaryARCCOSH(PALMAT, operand):
     try:
         return math.acosh(operand)
     except:
         return NaN
 
-def unaryARCSIN(operand):
+def unaryARCSIN(PALMAT, operand):
     try:
         return math.asin(operand)
     except:
         return NaN
 
-def unaryARCSINH(operand):
+def unaryARCSINH(PALMAT, operand):
     try:
         return math.asinh(operand)
     except:
         return NaN
 
-def unaryARCTAN(operand):
+def unaryARCTAN(PALMAT, operand):
     try:
         return math.atan(operand)
     except:
         return NaN
 
-def unaryARCTANH(operand):
+def unaryARCTANH(PALMAT, operand):
     try:
         return math.atanh(operand)
     except:
         return NaN
 
-def unaryCOS(operand):
+def unaryCOS(PALMAT, operand):
     try:
         return math.cos(operand)
     except:
         return NaN
 
-def unaryCOSH(operand):
+def unaryCOSH(PALMAT, operand):
     try:
         return math.cosh(operand)
     except:
         return NaN
 
-def unaryEXP(operand):
+def unaryEXP(PALMAT, operand):
     try:
         return math.exp(operand)
     except:
         return NaN
 
-def unaryLOG(operand):
+def unaryLOG(PALMAT, operand):
     try:
         return math.log(operand)
     except:
         return NaN
 
-def unarySIN(operand):
+def unarySIN(PALMAT, operand):
     try:
         return math.sin(operand)
     except:
         return NaN
 
-def unarySINH(operand):
+def unarySINH(PALMAT, operand):
     try:
         return math.sinh(operand)
     except:
         return NaN
 
-def unarySQRT(operand):
+def unarySQRT(PALMAT, operand):
     try:
         return math.sqrt(operand)
     except:
         return NaN
 
-def unaryTAN(operand):
+def unaryTAN(PALMAT, operand):
     try:
         return math.tan(operand)
     except:
         return NaN
 
-def unaryTANH(operand):
+def unaryTANH(PALMAT, operand):
     try:
         return math.tanh(operand)
     except:
         return NaN
 
-def unaryABVAL(vector):
+def unaryABVAL(PALMAT, vector):
     try:
         sum = 0.0
         for v in vector:
@@ -308,7 +308,7 @@ def unaryABVAL(vector):
     except:
         return NaN
 
-def unaryDET(matrix):
+def unaryDET(PALMAT, matrix):
     try:
         if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
             return NaN
@@ -316,7 +316,7 @@ def unaryDET(matrix):
     except:
         return NaN
 
-def unaryINVERSE(matrix):
+def unaryINVERSE(PALMAT, matrix):
     try:
         if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
             return NaN
@@ -327,7 +327,7 @@ def unaryINVERSE(matrix):
     except:
         return NaN
 
-def unaryTRACE(matrix):
+def unaryTRACE(PALMAT, matrix):
     try:
         if not isMatrix(matrix) or len(matrix) != len(matrix[0]):
             return NaN
@@ -338,7 +338,7 @@ def unaryTRACE(matrix):
     except:
         return NaN
 
-def unaryTRANSPOSE(matrix):
+def unaryTRANSPOSE(PALMAT, matrix):
     try:
         if not isMatrix(matrix, False):
             return NaN
@@ -354,7 +354,7 @@ def unaryTRANSPOSE(matrix):
     except:
         return NaN
 
-def unaryUNIT(vector):
+def unaryUNIT(PALMAT, vector):
     try:
         sum = 0.0
         for v in vector:
@@ -413,14 +413,14 @@ unaryRTL = {
     }
 
 # Returns either the operation result (could be None) or NaN on failure.
-def arrayableUnaryRTL(halsFunctionName, operand, source, instruction):
+def arrayableUnaryRTL(PALMAT, halsFunctionName, operand, source, instruction):
     entry = unaryRTL[halsFunctionName]
-    result = unaryOperation(entry[0], operand)
+    result = unaryOperation(PALMAT, entry[0], operand)
     if isNaN(result):
         if len(entry) < 2:
-            printError(source, instruction, \
+            printError(PALMAT, source, instruction, \
                        halsFunctionName + "requires a numeric argument")
         else:
-            printError(source, instruction, entry[1])
+            printError(PALMAT, source, instruction, entry[1])
         return NaN
     return result

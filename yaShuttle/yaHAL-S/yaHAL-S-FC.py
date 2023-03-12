@@ -60,7 +60,7 @@ import sys
 #import reorganizer
 #from pass1 import tokenizeAndParse, tmpFile, compiler, astPrint, captured
 from processSource import processSource
-from palmatAux import constructPALMAT
+from palmatAux import constructPALMAT, astSourceFile
 from pass1 import parms
 from optimizePALMAT import optimizePALMAT
 
@@ -177,7 +177,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         print("Unknown parameter:", param)
         sys.exit(1)
     else:
-        files.append(param)
+        fileIndex = astSourceFile(PALMAT, param)
         start = len(halsSource)
         halsFile = open(param, "r")
         halsSource += halsFile.readlines()
@@ -185,8 +185,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
         if len(halsSource) == start:
             continue
         for i in range(len(metadata), len(halsSource)):
-            m = { "lineNumber" : i + 1 } # Lines numbered from 1.
-            m["file"] = param
+            m = { "file": fileIndex, "lineNumber" : i + 1 } # Lines numbered from 1.
             if halsSource[i][:1] == "C":
                 m["comment"] = True
             elif halsSource[i][:1] == "D":
@@ -209,6 +208,7 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
 # Interpret or compile.
 if not interactive:
     PALMAT = constructPALMAT()
+    PALMAT["sourceFiles"] = files
     processSource(PALMAT, halsSource, metadata, libraryFilename, 
                     structureTemplates,
                     noCompile, lbnf, bnf, trace)

@@ -40,7 +40,7 @@ encountered is used.
 
 The function also returns accumulation[0], or else NaN upon failure.
 '''
-def accumulate(array, halsFunctionName, source, instruction, \
+def accumulate(PALMAT, array, halsFunctionName, source, instruction, \
                initial=True, accumulation=[None]):
     
     def prod(x, y):
@@ -64,8 +64,8 @@ def accumulate(array, halsFunctionName, source, instruction, \
             
         if isArrayQuick(array):
             for e in array[:-1]:
-                if isNaN(accumulate(e, halsFunctionName, source, instruction, \
-                                    False, accumulation)):
+                if isNaN(accumulate(PALMAT, e, halsFunctionName, source, \
+                                    instruction, False, accumulation)):
                     raise Exception("")
         
         elif accumulation[0] == None:
@@ -77,7 +77,7 @@ def accumulate(array, halsFunctionName, source, instruction, \
             accumulation[0] = function(accumulation[0], array)
             
     except:
-        printError(source, instruction, \
+        printError(PALMAT, source, instruction, \
                    "Cannot compute array function " + halsFunctionName)
         return NaN
     
