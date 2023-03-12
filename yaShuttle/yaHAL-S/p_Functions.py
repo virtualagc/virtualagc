@@ -225,7 +225,7 @@ def stringLiteral(PALMAT, state, s):
             addAttribute(identifiers, s, "parameters", [])
             addAttribute(identifiers, s, "assignments", [])
         return True, state
-    elif state1 == "variable" and "call_assign_list" in history:
+    elif state1 in ["variable", "bit_id"] and "call_assign_list" in history:
         if "callAssignments" not in substate["commonAttributes"]:
             substate["commonAttributes"]["callAssignments"] = []
         si, attributes = findIdentifier(s, PALMAT, scopeIndex)
