@@ -69,9 +69,9 @@ tabSize = 8
 halsSource = []
 metadata = []
 files = []
-noLibrary = False
+noLibrary = True
 libraryFilename = "yaHAL-default.templates"
-structureTemplates = {}
+structureTemplates = [{}]
 noCompile = False
 lbnf = False
 bnf = False
@@ -97,7 +97,8 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                         supplied on
                         punchcards, but it's certainly possible to accidentally
                         end up with tabs if source is edited in modern editors.
-        --no-library    Do not try to load or update a template library.
+        --no-compile    Merely output preprocessed source, and do not attempt
+                        to invoke the compiler.
         --library=F     Specifies the filename of the library of structure
                         templates.  By default, "yaHAL-default.templates".
                         This option can be used multiple times, but any new
@@ -125,6 +126,18 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                         although it processes it normally in all other
                         ways.
         """ % parms["compiler"])
+        '''
+        Here are some former OPTIONS I've at least temporarily discontinued
+        because they weren't thought out well.  --no-library is now the 
+        default, and --library isn't functional.
+        --no-library    Do not try to load or update a template library.
+        --library=F     Specifies the filename of the library of structure
+                        templates.  By default, "yaHAL-default.templates".
+                        This option can be used multiple times, but any new
+                        structure templates encountered during preprocessing
+                        will only be added to the final library file specified.
+                        This option must precede the HAL/S source filenames.
+       '''
         sys.exit(0)
     elif param == "--interactive":
         interactive = True
@@ -149,11 +162,15 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
     elif param == "--trace":
         trace = True
     elif param == "--no-library":
+        '''
         noLibrary = True
         structureTemplates = {}
         libraryFilename = None
         print("Note: Disabling template-library file, if any.")
+        '''
+        print("Note that --no-library is now the default.")
     elif param[:10] == "--library=":
+        '''
         libraryFilename = param[10:].strip()
         #print("Here", libraryFilename)
         # Read the structure-template library file.  This is just a text file
@@ -165,14 +182,16 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
                 identifier = fields[1]
                 if identifier[-1:] == ":":
                     identifier = identifier[:-1]
-                if identifier in structureTemplates:
+                if identifier in structureTemplates[0]:
                     print("Overwriting structure-template", identifier, \
                             file=sys.stderr)
-                structureTemplates[identifier] = line.strip()
+                structureTemplates[0][identifier] = line.strip()
             f.close()
             #print(structureTemplates)
         except:
             print("Note: Structure-template library not found.", file=sys.stderr)
+        '''
+        print("Note that the --library option is presently unavailable.")
     elif param[:1] == "-":
         print("Unknown parameter:", param)
         sys.exit(1)

@@ -231,6 +231,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             if not halCode:
                 halsSource = []
                 metadata = []
+            print("**", structureTemplates)
             print(colorize, end="")
             if strict:
                 promptChar = "!"
@@ -552,6 +553,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()
+                    structureTemplates = [{}]
                     continue
                 elif firstWord == "WINE":
                     print("\tEnabled Windows version of compiler in Linux.")
@@ -620,7 +622,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         macro0 = macros[0]
         for identifier in identifiers:
             identifier = identifier[1:-1]
-            if None != re.fullmatch("[lbcse]f?_" + bareIdentifierPattern, \
+            if None != re.fullmatch("[lbcsen]f?_" + bareIdentifierPattern, \
                                     identifier):
                 fields = identifier.split("_", 1)
                 macro0[fields[1]] = { "arguments": [], 

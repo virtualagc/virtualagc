@@ -207,7 +207,7 @@ def expandMacros(rawline, macros, maxScopes=1000000):
                                     + line[match.span()[1]:]
     return line, changed
 
-def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
+def replaceBy(halsSource, metadata, libraryFilename, structureTemplates, \
               macros=[{}], trace=False):
     debugIndentation = False
     blockDepth = 0
@@ -220,11 +220,7 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
             string = string[:match.span()[0]] + string[match.span()[1]+1:]
 
     lastFunctionProcedure = -1
-    # The structureTemplates dictionary is used to track fields of structure
-    # templates, for mangling purposes.  The keys are the names of the
-    # templates.  The values are also dictionaries that express the fields
-    # and their types as a tree structure.
-    structureTemplates = {}
+    templateLibrary = structureTemplates[-1]
     
     for i in range(len(halsSource)):
         # Ignore lines which shouldn't have macro expansions.
@@ -255,6 +251,8 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                 # list of macros is empty, except that we add one entry ("@")
                 # to tell us the source line the block starts at.
                 macros.append({"@": i})
+                structureTemplates.append({})
+                templateLibrary = structureTemplates[-1]
                 if trace:
                     print("\tMacro block %d start: %s" % (i+1, fullLine))
                 lastFunctionProcedure = -1
@@ -406,11 +404,9 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                                 f.close()
                         elif normalized != templateLibrary[identifier]:
                             unEMS.addError(unEMS.WARNING, \
-                                "Template mismatch between source (" + \
-                                normalized + ") and library (" + \
-                                templateLibrary[identifier] + ")", \
-                                metadata, i)
-                                
+                                "Rejected redefinition of structure template " \
+                                + identifier + ")", metadata, i)
+                            continue
                         hasType = "s_"
                         identifier = re.search(
                             "\\b" + bareIdentifierPattern + "\\b", 
@@ -628,6 +624,8 @@ def replaceBy(halsSource, metadata, libraryFilename, templateLibrary, \
                     print("Negative block depth implementation error.", \
                             file=sys.stderr)
                 macroLine = macros.pop()
+                structureTemplates.pop()
+                templateLibrary = structureTemplates[-1]
                 if trace:
                     macroStart = macroLine.pop("@") + 1
                     for key in list(macroLine.keys()):

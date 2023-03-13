@@ -63,8 +63,18 @@ of the parameters:
                         and the  line-number in that file.
     libraryFilename     The name of the file of structure templates, for 
                         updating if new STRUCTURE statements are found.
-    structureTemplates  A dictionary of the structure templates imported or
-                        declared so far.
+    structureTemplates  A list of dictionaries of structure templates imported 
+                        or declared so far during preprocessing.  A new 
+                        dictionary is appended to the list for each PROGRAM,
+                        FUNCTIONS, PROCEDURE, or COMPOOL entered, and then 
+                        popped when the preprocessor leaves that object.
+                        (See macros, below.)  The generated codes has similar
+                        but independent treatement of structure-template 
+                        dictionaries (or macro dictionaries), but those are 
+                        independently-generated on a scope-by-scope basis by 
+                        the compiler's code generator, since the preprocessor 
+                        is only imperfectly aware of the code generator's 
+                        concept of "scope".
     noCompile           If True, then only preprocessing is performed, without
                         tokenization, parsing, code generation, etc.
     lbnf                Corresponds to the interpreter's `LBNF command.
@@ -80,7 +90,10 @@ of the parameters:
                         common (but not univesal, unfortunately) setting.
     macros              On input, a list of the macros already defined by
                         identifier mangling.  This list is *not* updated by 
-                        processSource().
+                        processSource().  A new macro dictionary is appended
+                        to the list for each PROGRAM, FUNCTION, PROCEDURE, or 
+                        COMPOOL entered, and then popped when the preprocessor
+                        leaves that object.
     trace4              Corresponds to the interpreter's `TRACE4 command.
     strict              Corresponds to the interpreter's `STRICT command.
                         Although not immediately obvious, the reason this is 
