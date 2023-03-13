@@ -203,12 +203,40 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       <li>A HAL/S bit-string (<tt>BIT</tt> or <tt>BOOLEAN</tt> datatype) is represented as a Python list of three elements, thusly: <tt>[<i>value</i>, <i>length</i>, "b"]</tt>. Here, <i><tt>value</tt></i> is an integer representation of the bit string, with each bit position representing one of the bits of the bit-string, and the <i><tt>length</tt></i> is the maximum number of bits in the bit-string.&nbsp; The "first" bit in the string is the most-significant bit of the value, and the "last" bit of the string is the least-significant bit of the value.&nbsp; The case of <i><tt>length</tt></i>=1 corresponds to the HAL/S <tt>BOOLEAN</tt> datatype.<br></li>
       <li><tt>VECTOR</tt> is represented as a Python list of floats, though integers are tolerated as well.</li>
       <li><tt>MATRIX</tt> is represented as a Python list of lists of floats, with integers tolerated.&nbsp; The outer list represents the rows, and the inner lists represents the column-positions within the rows.&nbsp; All of the inner lists have the same length.</li>
-      <li>A <tt>STRUCTURE</tt> is represented as a Python dictionary, in the obvious way.&nbsp; Note that this way of representing a structure loses certain information significant in HAL/S, specifically the defined ordering of the various fields of the structure.&nbsp; The ordering is important in HAL/S because <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses in <tt>DECLARE</tt> statements rely on knowledge of it.&nbsp; Therefore, information is maintained about this ordering, but it is separate in the identifier attributes of the identifier dictionary (see <a moz-do-not-send="true" href="#Identifiers">Identifiers</a>) rather than a part of the Python dictionary associated with the structure.</li>
+      <li>A <tt>STRUCTURE</tt> is represented as a Python list. The entries in the list are the items in the topmost hierarchy level of the structure, with the final item in the list being a string that is the name of the structure-template associated with the structure, including the suffix "<tt>-STRUCTURE</tt>" found in HAL/S DECLARE statements, thus making this pattern distinguishable from pointers and <tt>BOOLEAN</tt> and <tt>ARRAY</tt> types, which are also lists having a final string entry.  (If there STRUCTURE statement lists lower hierarchical levels explicitly, rather than in terms of structure templates, then the final string of the list is simply "<tt>-STRUCTURE</tt>" without any template name.)  These entries are thus each one of the datatypes given in this bullet list, potentially including entries which are themselves <tt>STRUCTURE</tt>s.  Naïvely, it would seem reasonable to represent HAL/S structures directly as Python dictionaries, however such an approach would not maintain any ordering which could be used in <tt>INITIAL</tt> or <tt>CONSTANT</tt> clauses of HAL/S <tt>DECLARE</tt> statements, thus requiring some extra means of tracking that ordering; the list-based approach bypasses that difficulty, and allows coopting some code used for <tt>VECTOR</tt>, <tt>MATRIX</tt>, and <tt>ARRAY</tt> types for purposes such as unraveling or recursing through hierarchical data objects.</li>
       <li><tt>ARRAY</tt> is represented similarly to <tt>MATRIX</tt> as a hierarchy of lists, <i>except</i> that the dimensionality can be anything (rather than always 2D) <i>and</i> that every list at each level of the hierarchy has final entry of <tt>'a'</tt>.&nbsp; Each level of lists in this hierarchy has lists all of the same length.&nbsp; Elements of the final level of lists can be any of the datatypes described above, but all are of the <i>same</i> datatype.&nbsp; Explicit examples appear at the end of this section.</li>
       <li>A "pointer" to a variable is represented by the Python list <tt>[<i>index</i>, <i>identifier</i>, 'p']</tt>, where <i><tt>identifier</tt></i> is the name (a string) of the variable and <i><tt>index</tt></i> is for the scope in which the identifier's declaration appears.&nbsp; Note that pointers to variables do not appear (so far) except for the specific use of specifying target variables for a HAL/S <tt>READ</tt> statement.<br></li>
       <li>An uninitialized individual data value of any simple type (i.e., not <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>ARRAY</tt>, or <tt>STRUCTURE</tt>) is represented by a Python <tt>None</tt>.&nbsp; Uninitialized elements of a composite type like <tt>VECTOR</tt> are represented by <tt>None</tt>, but the composite as a whole retains its structure (as a list, list of lists, structure, etc.).</li>
       <li>Additionally, though not representing any specific HAL/S data types, the Python set datatype is used in place of data under some circumstances (see <a moz-do-not-send="true" href="#ComputationStack">Computation Stack</a> below).&nbsp; The Python set <tt>{ "sentinel" }</tt> is the principal example of this, and it is used to terminate variable-length sequences of data values, without itself being confusable with any existing HAL/S datatype.<br></li>
     </ul>
+    <p>Here are a few examples of <tt>STRUCTURE</tt>s.  The HAL/S statements<br></p>
+    <blockquote><tt>STRUCTURE FIRST: </tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 X SCALAR,</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 I INTEGER;</tt><tt><br>
+      </tt><tt>DECLARE DUMMY1 FIRST-STRUCTURE INITIAL(100, 200);</tt><br>
+    </blockquote>
+    results in <tt>DUMMY1</tt> being represented as <tt>[100.0, 200,
+      "FIRST-STRUCTURE"]</tt>.&nbsp; Whereas<br>
+    <blockquote><tt>STRUCTURE SECOND:<br>
+        &nbsp;&nbsp;&nbsp; 1 A FIRST-STRUCTURE,<br>
+        &nbsp;&nbsp;&nbsp; 1 B FIRST-STRUCTURE,<br>
+        &nbsp;&nbsp;&nbsp; 1 Y SCALAR;<br>
+        DECLARE DUMMY2 SECOND-STRUCTURE INITIAL(100, 200, 300, 400,
+        500);<br>
+      </tt></blockquote>
+    <p>would result in <tt>DUMMY2</tt> being represented as <tt>[[100.0, 200, "FIRST-STRUCTURE"], [300.0, 400, "FIRST-STRUCTURE], 500.0, "SECOND-STRUCTURE"]</tt>.  Whereas<br></p>
+    <blockquote><tt>STRUCTURE THIRD:<br>
+        &nbsp;&nbsp;&nbsp; 1 A,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 X SCALAR,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 I INTEGER,<br>
+        &nbsp;&nbsp;&nbsp; 1 B,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 X SCALAR,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 I INTEGER,<br>
+        &nbsp;&nbsp;&nbsp; 1 Y SCALAR;<br>
+        DECLARE DUMMY3 THIRD-STRUCTURE INITIAL(100, 200, 300, 400, 500);<br>
+      </tt></blockquote>
+    results in <tt>DUMMY3</tt> being <tt>[[100.0, 200, "-STRUCTURE"],
+      [300.0, 400, "-STRUCTURE], 500.0, "THIRD-STRUCTURE"].</tt>
     <p>Here are a few examples of the representation of the <tt>ARRAY</tt> vs <tt>VECTOR</tt> and <tt>MATRIX</tt> types of comparable geometries.<br></p>
     <p>Example 1:  <tt>VECTOR(5)</tt> would be represented (in Python lists) as:<br></p>
     <blockquote><tt>[<i><br>
@@ -385,6 +413,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
       "program"</tt>, which is presumably self explanatory, as well as
     fields <tt>"name"</tt> and <tt>"attributes"</tt> that simply
     duplicate the declaration in scope 0.&nbsp; <br>
@@ -403,6 +432,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     compiler's code generator.&nbsp; Any HAL/S <tt>DO</tt> block or <tt>IF</tt>
     statement will trigger creation of a new child scope dedicated to it
     as well, and mark the new scope with the associated <tt>type</tt>.&nbsp;
+
 
 
 
@@ -610,7 +640,17 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
           <td valign="top">Pushes a literal <tt>VECTOR</tt> onto the
             computation stack as a single entry.&nbsp; Unlike the <tt>number</tt>
             instruction, the compiler's code generator provides <tt>VECTOR</tt>
-            entries as actual Python numbers rather than strings.<br>
+            entries as actual Python numbers rather than strings.&nbsp;
+            <b>Note:</b>&nbsp; There are no means in HAL/S for&nbsp;
+            forming a literal <tt>VECTOR</tt> (or <tt>MATRIX</tt> or <tt>ARRAY</tt>,
+            or within certain constraints a <tt>BIT</tt>-string), but
+            evaluation of expressions which are computable at
+            compile-time sometimes results in the generated code
+            pretending that literals for these datatypes have been
+            provided.&nbsp; Since there are no compile-time-computable
+            expressions which can product <tt>STRUCTURE</tt> results, I
+            believe, there is no need for a corresponding instruction
+            that pushes <tt>STRUCTURE</tt> literals.<br>
           </td>
         </tr>
         <tr>
@@ -621,7 +661,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
           <td valign="top">Pushes a literal <tt>MATRIX</tt> into the
             computation stack as a single entry.&nbsp; Unlike the <tt>number</tt>
             instruction, the compiler's code generator provides <tt>MATRIX</tt>
-            entries as actual Python numbers rather than strings. </td>
+            entries as actual Python numbers rather than strings.&nbsp;
+            See the comment for <tt>VECTOR</tt> above.<br>
+          </td>
         </tr>
         <tr>
           <td valign="top"><tt>array<br>
@@ -630,8 +672,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
               ..., [..., 'a'], 'a']}<br>
             </tt></td>
           <td valign="top">Pushes a literal <tt>ARRAY</tt> onto the
-            computation stack as a single entry.<br>
-          </td>
+            computation stack as a single entry.&nbsp; See the comment
+            for <tt>VECTOR</tt> above. </td>
         </tr>
         <tr>
           <td valign="top"><tt>boolean<br>
@@ -650,10 +692,11 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             literal onto the computation stack.&nbsp; The <tt>BOOLEAN</tt>
             type is distinguished from <tt>BIT</tt> types only in that
-            length=1.<br>
-          </td>
+            <tt>length</tt>=1.&nbsp; See the comment for <tt>VECTOR</tt>
+            above. </td>
         </tr>
         <tr>
           <td valign="top"><strike><tt>bitarray</tt></strike><strike><br>
@@ -975,6 +1018,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.<br>
           </td>
@@ -1005,6 +1049,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1024,6 +1069,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
             TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
             values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
 
 
 
@@ -1066,6 +1112,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1098,6 +1145,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But it's unclear what the result of the operation should be
             if operand2 has no known maximum length.<br>
           </td>
@@ -1109,6 +1157,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If they are equal, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1151,6 +1200,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1172,6 +1222,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 &lt; operand2, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1217,6 +1268,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1251,6 +1303,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1275,6 +1328,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 ≥ operand2, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1365,6 +1419,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
               V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
             <blockquote> </blockquote>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
@@ -1444,10 +1499,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             The HAL/S run-time library functions are documented in the
             HAL/S documentation, particularly the <a
               moz-do-not-send="true"
               href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+
 
 
 
@@ -1596,10 +1653,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt></tt><tt>"MATRIX"&nbsp; "3"&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>"2"&nbsp;
+
 
 
 
@@ -1650,10 +1709,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
+
 
 
 
@@ -1670,6 +1731,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
               </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </blockquote>
             Moreover, <tt>typeofv</tt> can analyze any datatype found
             on the computation stack, and that's not quite the same as
@@ -1680,6 +1742,7 @@ p, li { white-space: pre-wrap; }
             identifiers, from the PALMAT <tt>fetchp</tt> instruction),
             and "NONE" for uninitialized data.&nbsp; Most of these extra
             types actually cannot appear to <tt>typeofv</tt> for <i>correctly</i>-generated
+
 
 
 
@@ -1769,6 +1832,7 @@ p, li { white-space: pre-wrap; }
             eliminating all flexibility and checking.&nbsp; At runtime,
             either instruction pops operand1 and operand2, which are
             supposed to be <tt>INTEGER</tt>, or at worst <tt>SCALAR</tt>.&nbsp;
+
 
 
 
@@ -1951,8 +2015,10 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             To attach a symbolic label (say "<tt>MYLABEL</tt>") to the
             write instruction, the instruction would be modified to <tt>{'write':
+
 
 
 
@@ -2139,6 +2205,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             and (in effect, but not literally) replaces the entire third
             instruction by <tt>{'storepop': (0, 'Z')}</tt>.<br>
           </td>
@@ -2160,10 +2227,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             subroutine.&nbsp; (See the preceding entry.)<br>
             <br>
             The first variant of the instruction is for return from a <tt>PROCEDURE</tt>,
             while the second variant is for return from a <tt>FUNCTION</tt>.&nbsp;
+
 
 
 
@@ -2209,6 +2278,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             Also in principle, I don't believe there's any HAL/S code
             whose compilation is capable of generating this instruction.<br>
           </td>
@@ -2233,6 +2303,7 @@ p, li { white-space: pre-wrap; }
               </tt></blockquote>
             In practice, since this instruction is used for a single
             purpose, the <tt>identifer</tt> is always called "<tt>df_b</tt>",
+
 
 
 
@@ -2274,6 +2345,7 @@ p, li { white-space: pre-wrap; }
             appropriate scope.&nbsp; (This allows the <tt>returnoffset</tt>
             instruction to be used for implementing a HAL/S <tt>REPEAT</tt>
             <i>with</i> a symbolic label to an enclosing discrete <tt>FOR</tt>-loop,
+
 
 
 
@@ -2376,6 +2448,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             Note that the preliminary implementation supports only <tt>lun=6</tt>,
             namely <i>stdout</i> (i.e., the console).&nbsp; The values
             to be printed are removed from the stack in first-in
@@ -2400,6 +2473,7 @@ p, li { white-space: pre-wrap; }
           <td valign="top" nowrap="nowrap"><tt>{'read': lun}<br>
             </tt> </td>
           <td valign="top">Reads values from the "logical unit number (<tt>lun</tt>).&nbsp;
+
 
 
 
@@ -2499,7 +2573,7 @@ p, li { white-space: pre-wrap; }
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-03-11<br>
+          2023-03-13<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
