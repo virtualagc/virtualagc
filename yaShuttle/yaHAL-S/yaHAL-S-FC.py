@@ -69,9 +69,6 @@ tabSize = 8
 halsSource = []
 metadata = []
 files = []
-noLibrary = True
-libraryFilename = "yaHAL-default.templates"
-structureTemplates = [{}]
 noCompile = False
 lbnf = False
 bnf = False
@@ -80,7 +77,7 @@ interactive = False
 colorize = False
 noexec = False
 ansiWrapper = True
-for param in ["--library="+libraryFilename] + sys.argv[1:]:
+for param in sys.argv[1:]:
     if param == "--help":
         print("""
         This is a preprocessor+compiler+interpreter for HAL/S code. 
@@ -162,36 +159,9 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
     elif param == "--trace":
         trace = True
     elif param == "--no-library":
-        '''
-        noLibrary = True
-        structureTemplates = {}
-        libraryFilename = None
-        print("Note: Disabling template-library file, if any.")
-        '''
-        print("Note that --no-library is now the default.")
+        print("Note: The --no-library option is no longer of use.")
     elif param[:10] == "--library=":
-        '''
-        libraryFilename = param[10:].strip()
-        #print("Here", libraryFilename)
-        # Read the structure-template library file.  This is just a text file
-        # in which each line is a HAL/S STRUCTURE statement.
-        try:
-            f = open(libraryFilename, "r")
-            for line in f:
-                fields = line.split()
-                identifier = fields[1]
-                if identifier[-1:] == ":":
-                    identifier = identifier[:-1]
-                if identifier in structureTemplates[0]:
-                    print("Overwriting structure-template", identifier, \
-                            file=sys.stderr)
-                structureTemplates[0][identifier] = line.strip()
-            f.close()
-            #print(structureTemplates)
-        except:
-            print("Note: Structure-template library not found.", file=sys.stderr)
-        '''
-        print("Note that the --library option is presently unavailable.")
+        print("Note: The --library option is no longer of use.")
     elif param[:1] == "-":
         print("Unknown parameter:", param)
         sys.exit(1)
@@ -207,33 +177,15 @@ for param in ["--library="+libraryFilename] + sys.argv[1:]:
             m = { "file": fileIndex, "lineNumber" : i + 1 } # Lines numbered from 1.
             if halsSource[i][:1] == "C":
                 m["comment"] = True
-            elif halsSource[i][:1] == "D":
-                m["directive"] = True
-                # If this is an INCLUDE TEMPLATE directive, then replace the
-                # input line by the requested library template and append
-                # the original line to the end of it as an inline comment.
-                fields = halsSource[i].split()
-                if len(fields) >= 4 and fields[1] == "INCLUDE" and \
-                        fields[2] == "TEMPLATE":
-                    templateName = fields[3]
-                    if templateName in structureTemplates:
-                        halsSource[i] = " " + structureTemplates[templateName] \
-                            + "\t/*" + halsSource[i].strip()+ " */"
-                    else:
-                        m["errors"] = ["Structure template " + templateName + \
-                            " requested by compiler directive not in libary."]
             metadata.append(m)
 
 # Interpret or compile.
 if not interactive:
     PALMAT = constructPALMAT()
     PALMAT["sourceFiles"] = files
-    processSource(PALMAT, halsSource, metadata, libraryFilename, 
-                    structureTemplates,
-                    noCompile, lbnf, bnf, trace)
+    processSource(PALMAT, halsSource, metadata, noCompile, lbnf, bnf, trace)
     optimizePALMAT(PALMAT)
 else:
     from interpreterLoop import interpreterLoop
-    interpreterLoop(libraryFilename, structureTemplates, colorize, \
-                    not noexec, lbnf, bnf, ansiWrapper)
+    interpreterLoop(colorize, not noexec, lbnf, bnf, ansiWrapper)
 

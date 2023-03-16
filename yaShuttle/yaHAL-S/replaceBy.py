@@ -101,6 +101,7 @@ import sys
 import re
 import copy
 import unEMS
+from palmatAux import splitOutsideParentheses
 
 bareIdentifierPattern = '[A-Za-z]([A-Za-z0-9_]*[A-Za-z0-9])?'
 identifierPattern = "\\b" + bareIdentifierPattern
@@ -115,6 +116,8 @@ argListPattern = '(\\s*\\([^)]+\\))?'
 byPattern = '\\s+BY\\s+"[^"]*"\\s*;'
 replaceByPattern = replacePattern + argListPattern + byPattern
 declarePattern = '\\bDECLARE\\s'
+
+fqPattern = bareIdentifierPattern + "(\\s*[.]\\s*" + bareIdentifierPattern + ")*"
 
 # Note that the mangling prefix for FUNCTION is actually "l_" only for 
 # arithmetical functions; for boolean functions it's "bf_", for character
@@ -144,7 +147,12 @@ def allReplacement(string, target, replacement):
 # many levels of scope we're taking the macros from (from innermost scope to
 # outermost).  In particular, if maxScopes==1, then only the ones from the 
 # innermost scope are used.
+ORIGINAL_STRUCTURE = False
 def expandMacros(rawline, macros, maxScopes=1000000):
+    # Perahaps should not expand macros in a STRUCTURE statement.
+    if not ORIGINAL_STRUCTURE and \
+            re.search("^\\s*STRUCTURE\\s", rawline) != None:
+        return rawline, False
     line = copy.deepcopy(rawline)
     changed = False
     changedLastLoop = True
@@ -207,8 +215,155 @@ def expandMacros(rawline, macros, maxScopes=1000000):
                                     + line[match.span()[1]:]
     return line, changed
 
-def replaceBy(halsSource, metadata, libraryFilename, structureTemplates, \
-              macros=[{}], trace=False):
+# This performs the complete processing for a STRUCTURE statement.  I.e., it
+# parses the statement, in so far as it is able, and updates whatever global
+# data objects are used to store info about structure templates.
+
+# This is the code I was *originally* using in a very-preliminary fashion.
+# It seems totally deficient now that I've gotten around to actually trying
+# to implement the remainder of the support needed, specifically because
+# in setting up the macros object to handle mangling, it cannot distinguish
+# between idenditical structure fieldnames, nor (for that matter) fieldnames
+# that coincide with fieldnames in other structures, or just with
+# non-structure variables.
+def processStructureStatementOriginal(fullLine, macros):
+    match = re.search("^\\s*STRUCTURE\\s+" + \
+                        bareIdentifierPattern + "[^:]*:", \
+                        fullLine)
+    # Update structure library.  Note that we normalize
+    # the STRUCTURE statement to facilitate comparisons
+    # once the template is in the library.  Just for
+    # now, the method is to replace all whitespace by
+    # single spaces, to eliminate inline comments, etc.
+    # However, since this is done by simple-minded
+    # pattern-matching, it can goof up for some things,
+    # particularly CHARACTER() INITIAL('...').
+    # So in the long run, a better method may be needed.
+    normalized = re.sub("\s*/[*].*[*]/\s*", \
+                        "", fullLine)
+    normalized = normalized.strip()
+    normalized = re.sub("\s+:", ":", normalized)
+    normalized = re.sub("\s+;", ";", normalized)
+    fields = normalized.split()
+    if fields[1][-1:] == ":":
+        identifier = fields[1][:-1]
+    else:
+        identifier = fields[1]
+    hasType = "s_"
+    identifier = re.search(
+        "\\b" + bareIdentifierPattern + "\\b", 
+        match.group().replace("STRUCTURE","")).group()
+    macros[-1][identifier] = { "arguments": [], 
+                "replacement": "s_" + identifier, 
+                "pattern": "\\b" + identifier + "\\b" }
+    # That takes care of the name of this structure
+    # template, but not of the structure fieldnames;
+    # they may need mangling as well.
+    endLine = fullLine[match.span()[1]+1:].strip()
+    for field in endLine.replace(";", "").split(","):
+        subfields = field.split()
+        
+        if len(subfields) < 3:
+            continue
+        if not subfields[0].isdigit():
+            continue
+        identifier = subfields[1]
+        if None == re.search("^" + \
+                            bareIdentifierPattern + \
+                            "$", identifier):
+            continue
+        thisType = ""
+        if "STRUCTURE" == subfields[2][-9:]:
+            thisType = "s_"
+        elif "CHARACTER" == subfields[2][:9]:
+            thisType = "c_"
+        elif "BIT" == subfields[2][:3]:
+            thisType = "b_"
+        else:
+            if subfields[2] not in mangling:
+                continue
+            thisType = mangling[subfields[2]]
+            if thisType == "":
+                continue
+        if thisType in identifier:
+            continue
+        macros[-1][identifier] = { "arguments": [], 
+                        "replacement": thisType + \
+                                        identifier, 
+                        "pattern": "\\b" + identifier \
+                                    + "\\b" }
+
+def processStructureStatement(fullLine, macros):
+    remainder = re.sub("^\\s*STRUCTURE\\s+", "", fullLine.replace(";", ""), 1)
+    topFields = remainder.split(":", 1)
+    subfields = topFields[0].split()
+    # Note that if len(subfields)>1, then the remaining subfields (after 
+    # the identifier) are the so-called minor attributes such as RIGID
+    # and DENSE, all of which I think we can simply ignore in the PALMAT 
+    # implementation.  An exception might be LOCK, though I don't 
+    # immediately see why it would be appropriate in a structure template
+    # as opposed to a specific structure.  At any rate, if I'm wrong, this
+    # is the place to grab such attributes in future maintenance.
+    identifier = subfields[0]
+    subfields[0] = "s_" + identifier
+    minorAttributes = subfields[1:]
+    macros[-1][identifier] = { "arguments": [], 
+                "replacement": "s_" + identifier, 
+                "pattern": "\\b" + identifier + "\\b" }
+    # fields[1] now remains to be parsed.  It consists of comma-separated
+    # subfields, each of which is of the form
+    #    LEVEL FIELDNAME ...ATRIBUTES...
+    # Unfortunately, the ATTRIBUTES may have commas in them too (within
+    # matching parentheses), so we can't just use regular expressions to 
+    # make these splits.  Remember ... replaceBy() is part of the preprocessor
+    # and not the compiler's code generator, so we have no way to use any of 
+    # the stuff we're parsing to create a PALMAT identifier or its attributes;
+    # the code generator will have to work all that out for itself later.
+    # However, we need to create macros for proper manggline of fieldnames.
+    # Unfortunately, the full mangling isn't known until the structure using
+    # this structure template is declared.  For example, if we are working with
+    # STRUCTURE S: ... and later have a DECLARE T S-STRUCTURE, the mangling
+    # occurs for identifiers like T.something and not identifiers like 
+    # S.something (of which there presumably aren't any).  However, what we 
+    # can do is to create macros for the names (say) S-STRUCTURE.something, 
+    # and use them when the DECLARE T S-STRUCTURE is encounted by the 
+    # preprocessor; they won't match any identifier, so this is perfectly safe.
+    structureFieldsSpecs = splitOutsideParentheses(topFields[1], ",")
+    level = 0
+    unmangled = []
+    mangled = []
+    for j in range(len(structureFieldsSpecs)):
+        structureFieldsSpec = structureFieldsSpecs[j]
+        fields = splitOutsideParentheses(structureFieldsSpec)
+        level = int(fields[0])
+        while len(unmangled) >= level:
+            unmangled.pop()
+            mangled.pop()
+        fieldname = fields[1]
+        unmangled.append(fieldname)
+        attributes = fields[2:]
+        for attribute in attributes:
+            if "CHARACTER" in attribute:
+                fieldname = "c_" + fieldname
+            elif "BIT" in attribute or "BOOLEAN" in attribute:
+                fieldname = "b_" + fieldname
+            elif "STRUCTURE" in attribute:
+                fieldname = "s_" + fieldname
+        mangled.append(fieldname)
+        fields[1] = fieldname
+        uName = identifier + "-STRUCTURE." + ".".join(unmangled)
+        mName = "." + ".".join(mangled)
+        macros[-1][uName] = { "arguments": [], 
+                    "replacement": mName, 
+                    "pattern": mName + "\\b" }
+        structureFieldsSpecs[j] = " ".join(fields)
+    topFields[0] = " ".join(subfields)
+    topFields[1] = ", ".join(structureFieldsSpecs)
+    remainder = ": ".join(topFields)
+    fullLine = " STRUCTURE " + remainder + ";"
+    return fullLine
+
+def replaceBy(halsSource, metadata, macros=[{}], trace=False):
     debugIndentation = False
     blockDepth = 0
     
@@ -220,7 +375,6 @@ def replaceBy(halsSource, metadata, libraryFilename, structureTemplates, \
             string = string[:match.span()[0]] + string[match.span()[1]+1:]
 
     lastFunctionProcedure = -1
-    templateLibrary = structureTemplates[-1]
     
     for i in range(len(halsSource)):
         # Ignore lines which shouldn't have macro expansions.
@@ -251,8 +405,6 @@ def replaceBy(halsSource, metadata, libraryFilename, structureTemplates, \
                 # list of macros is empty, except that we add one entry ("@")
                 # to tell us the source line the block starts at.
                 macros.append({"@": i})
-                structureTemplates.append({})
-                templateLibrary = structureTemplates[-1]
                 if trace:
                     print("\tMacro block %d start: %s" % (i+1, fullLine))
                 lastFunctionProcedure = -1
@@ -372,84 +524,21 @@ def replaceBy(halsSource, metadata, libraryFilename, structureTemplates, \
                     identifier = re.search("\\b" + bareIdentifierPattern + \
                         "\\s*;", match.group()).group()[:-1].strip()
                 else:
-                    # Structure template?
+                    # Structure template?  If you wonder why "[^:]*" appears
+                    # between the bareIdentifierPattern and the ":" (rather
+                    # than simply "\\s*"), it's because a "minor attribute list"
+                    # can appear between the identifier and the colon.  See rule
+                    # ABstruct_stmt_head in HAL_S.cf.
                     match = re.search("^\\s*STRUCTURE\\s+" + \
                                         bareIdentifierPattern + "[^:]*:", \
                                         fullLine)
                     if match != None:
-                        # Update structure library.  Note that we normalize
-                        # the STRUCTURE statement to facilitate comparisons
-                        # once the template is in the library.  Just for
-                        # now, the method is to replace all whitespace by
-                        # single spaces, to eliminate inline comments, etc.
-                        # However, since this is done by simple-minded
-                        # pattern-matching, it can goof up for some things,
-                        # particularly CHARACTER() INITIAL('...').
-                        # So in the long run, a better method may be needed.
-                        normalized = re.sub("\s*/[*].*[*]/\s*", \
-                                            "", fullLine)
-                        normalized = normalized.strip()
-                        normalized = re.sub("\s+:", ":", normalized)
-                        normalized = re.sub("\s+;", ";", normalized)
-                        fields = normalized.split()
-                        if fields[1][-1:] == ":":
-                            identifier = fields[1][:-1]
+                        if not ORIGINAL_STRUCTURE:
+                            line = processStructureStatement(fullLine, macros)
+                            halsSource[i] = line
                         else:
-                            identifier = fields[1]
-                        if identifier not in templateLibrary:
-                            templateLibrary[identifier] = normalized
-                            if libraryFilename != None:
-                                f = open(libraryFilename, "a")
-                                print(normalized, file=f)
-                                f.close()
-                        elif normalized != templateLibrary[identifier]:
-                            unEMS.addError(unEMS.WARNING, \
-                                "Rejected redefinition of structure template " \
-                                + identifier + ")", metadata, i)
-                            continue
-                        hasType = "s_"
-                        identifier = re.search(
-                            "\\b" + bareIdentifierPattern + "\\b", 
-                            match.group().replace("STRUCTURE","")).group()
-                        macros[-1][identifier] = { "arguments": [], 
-                                    "replacement": "s_" + identifier, 
-                                    "pattern": "\\b" + identifier + "\\b" }
-                        # That takes care of the name of this structure
-                        # template, but not of the structure fieldnames;
-                        # they may need mangling as well.
-                        endLine = fullLine[match.span()[1]+1:].strip()
-                        for field in endLine.replace(";", "").split(","):
-                            subfields = field.split()
-                            
-                            if len(subfields) < 3:
-                                continue
-                            if not subfields[0].isdigit():
-                                continue
-                            identifier = subfields[1]
-                            if None == re.search("^" + \
-                                                bareIdentifierPattern + \
-                                                "$", identifier):
-                                continue
-                            thisType = ""
-                            if "STRUCTURE" == subfields[2][-9:]:
-                                thisType = "s_"
-                            elif "CHARACTER" == subfields[2][:9]:
-                                thisType = "c_"
-                            elif "BIT" == subfields[2][:3]:
-                                thisType = "b_"
-                            else:
-                                if subfields[2] not in mangling:
-                                    continue
-                                thisType = mangling[subfields[2]]
-                                if thisType == "":
-                                    continue
-                            if thisType in identifier:
-                                continue
-                            macros[-1][identifier] = { "arguments": [], 
-                                            "replacement": thisType + \
-                                                            identifier, 
-                                            "pattern": "\\b" + identifier \
-                                                        + "\\b" }
+                            processStructureStatementOriginal(fullLine, \
+                                                              macros)
                         identifier = ""
                     else:
                         # SCHEDULE statement?
@@ -624,8 +713,6 @@ def replaceBy(halsSource, metadata, libraryFilename, structureTemplates, \
                     print("Negative block depth implementation error.", \
                             file=sys.stderr)
                 macroLine = macros.pop()
-                structureTemplates.pop()
-                templateLibrary = structureTemplates[-1]
                 if trace:
                     macroStart = macroLine.pop("@") + 1
                     for key in list(macroLine.keys()):

@@ -39,6 +39,45 @@ def debug(PALMAT, state, message):
             'debug': message
         })
 
+# Workaround for the fact that separators I'd like to use with Python's .split() 
+# method may sometimes occur within parethesized argument lists where I don't
+# actually want a split to occur.  Tailored for HAL/S.  In other words, 
+# splitOutsideParentheses(string) or splitOutside Parentheses(string, separator)
+# works just like string.split() or string.split(separater), except that the 
+# splits won't occur anywhere between parentheses.  For the default case
+# (splitting on whitspace), a split also won't occur immediately preceding a
+# leading parenthesis (for cases like an attribute "VECTOR (5)".  Note that
+# maxsplit isn't supported.
+def splitOutsideParentheses(string, separator=None):
+    fullTrim = False
+    if separator == None:
+        # Collapse multiple whitespace characters to a single actual space.
+        string = " ".join(string.strip().split())
+        # And eliminate whitespace preceding a leading parenthesis.
+        string = string.replace(" (", "(")
+        separator = " "
+        fullTrim = True # Gets rid of whitespace within parentheses.
+    start = 0
+    parenCount = 0
+    fields = []
+    for i in range(len(string)):
+        c = string[i]
+        if c == "(":
+            parenCount += 1
+        elif c == ")":
+            parenCount -= 1
+        elif parenCount == 0 and c == separator:
+            if fullTrim:
+                fields.append(string[start:i].replace(" ", ""))
+            else:
+                fields.append(string[start:i])
+            start = i + 1
+    if fullTrim:
+        fields.append(string[start:].replace(" ", ""))
+    else:
+        fields.append(string[start:])
+    return fields
+
 # Append a PALMAT instruction, with line/column reference if possible.
 def appendInstruction(instructions, instruction, source):
     if source[1:] != [-1, -1]:
@@ -519,12 +558,13 @@ def readPALMAT(filename):
 # Create a new, empty scope.
 def constructScope(selfIndex=0, parentIndex=None, scopeType="root"):
     scope = {
-                "parent"        : parentIndex,
-                "self"          : selfIndex,
-                "children"      : [ ],
-                "identifiers"   : { },
-                "instructions"  : [ ],
-                "type"          : scopeType
+                "parent"            : parentIndex,
+                "self"              : selfIndex,
+                "children"          : [ ],
+                "identifiers"       : { },
+                "instructions"      : [ ],
+                "type"              : scopeType,
+                "structureTemplates": {}
             }
     return scope
 

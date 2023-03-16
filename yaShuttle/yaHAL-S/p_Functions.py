@@ -134,16 +134,45 @@ def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
     if attribute != None:
         identifiers[substate["currentIdentifier"]][attribute] = value
 
-# Remove identifiers.  This is not something you can
+# Remove identifier.  This is not something you can
 # do in HAL/S, but there are interpreter commands for it.
-def removeIdentifier(PALMAT, scopeIndex, identifier):
+# The identifier name is unmangled and not carat-quoted.
+def removeIdentifier(PALMAT, macros, scopeIndex, identifier):
     scope = PALMAT["scopes"][scopeIndex]
+    macros0 = macros[scopeIndex]
+    mangled = identifier
+    if identifier in macros0:
+        attributes = macros0[identifier]
+        if attributes["arguments"] == []:
+            mangled = attributes["replacement"]
+    carated = "^" + mangled + "^"
     identifiers = scope["identifiers"]
-    if identifier in identifiers:
-        identifiers.pop(identifier)
+    if carated in identifiers:
+        identifiers.pop(carated)
+        if identifier in macros0:
+            macros0.pop(identifier)
+        print("Removed identifier: %s (%s)" % (identifier, mangled))
+    else:
+        print("Identifier not found: %s (%s)" % (identifier, mangled))
 
-def removeAllIdentifiers(PALMAT, scopeIndex):
-    PALMAT["scopes"][scopeIndex]["identifiers"] = {}
+def removeAllIdentifiers(PALMAT, macros, scopeIndex):
+    scope = PALMAT["scopes"][scopeIndex]
+    macros0 = macros[scopeIndex]
+    identifiers = scope["identifiers"]
+    forRemoval = []
+    for identifier in identifiers:
+        attributes = identifiers[identifier]
+        if "program" not in attributes and "function" not in attributes and \
+                "procedure" not in attributes and "compool" not in attributes:
+            forRemoval.append(identifier)
+    for identifier in forRemoval:
+        identifiers.pop(identifier)
+    macroRemovals = []
+    for macro in macros0:
+        if "^" + macros[macro]["replacement"] + "^" in forRemoval:
+            macroRemovals.append(macro)
+    for macro in macroRemovals:
+        macros0.pop(macro)
    
 # This function is called from generatePALMAT() for a string literal.
 # Returns only True/False for Success/Failure.
@@ -191,6 +220,63 @@ def stringLiteral(PALMAT, state, s):
     # variations (sp, isp, fsp). 
     if False:
         pass
+    elif state1 == "structure_id":
+        # Start of a STRUCTURE statement.
+        if "structure_stmt" in history:
+            if "attributes_typeAndMinorAttr" in history:
+                # This is a declaration that a field in a structure is itself
+                # a substructure.
+                pass
+            else:
+                # This is the name of in an actual definition of a structure 
+                # template.
+                if s in identifiers:
+                    substate["errors"]\
+                        .append("Structure-template name (%s) already declared." \
+                                % sp)
+                    return False
+                else:
+                    identifiers[s] = { "template": ([], []) }
+                    substate["currentStructureTemplateIdentifier"] = s
+                    substate["currentStructureTemplateDescent"] = []
+                    #print("*A", substate["currentStructureTemplateIdentifier"])
+                    #print("*B", substate["currentStructureTemplateDescent"])
+        else:
+            updateCurrentIdentifierAttribute(PALMAT, state, "structure", sp)
+    elif state1 in ["struct_stmt_head", "struct_stmt_tail"]:
+        # The variable called "descent" is a hierarchical list of fieldnames
+        # identifying the exact field we're currently processing.  When we
+        # descend to the next level, we append a fieldname to the list.  When we
+        # remain within a level, we replace the last fieldname in the list.
+        # When we retreat, we remove the final fieldnames until we get back
+        # the earlier level we want.
+        if sp.isdigit():
+            # Level in a structure statement.
+            substate["currentStructureTemplateLevel"] = int(sp)
+        else:
+            # Fieldname for the structure statement.
+            descent = substate["currentStructureTemplateDescent"]
+            level = substate["currentStructureTemplateLevel"]
+            while len(descent) > level:
+                descent.pop()
+            if len(descent) == level:
+                # We're on an existing level, and can thus add the new field
+                # to that level.
+                descent[-1] = sp
+                pass
+            elif level == len(descent) + 1:
+                # The last field added was a substructure, or else the template
+                # is completely empty so far, so we now have to
+                # add the level for that substructure and add our new field
+                # to it.
+                descent.append(sp)
+                pass
+            else:
+                substate["errors"]\
+                    .append("Illegal level in structure-template " + sp)
+                return False
+            #print("*C", level)
+            #print("*D", descent)
     elif state1 == "number" and "minorAttributeRepeatedConstant" in history:
         pass
     elif state2 == ["typeSpecChar", "number"]:
@@ -314,6 +400,12 @@ def resetStatement():
     substate["commonAttributes"] = {}
     substate["lhs"] = []
     substate["expression"] = []
+    forRemoval = []
+    for key in substate:
+        if "currentStructureTemplate" in key:
+            forRemoval.append(key)
+    for key in forRemoval:
+        substate.pop(key)
 
 # Transfer the expression stack to end of the PALMAT instruction list, 
 # in reverse order, and clear the expression stack.
@@ -373,6 +465,7 @@ augmentationCandidates = [
     "literalExp",
     "nameId_bitFunctionIdentifierToken",
     "nameId_charFunctionIdentifierToken",
+    "nameId_structIdentifierToken",
     "parameter",
     "parameter_list",
     "prePrimaryFunction",
@@ -392,6 +485,9 @@ augmentationCandidates = [
     "prePrimaryRtlShapingHeadMatrixSubscript",
     "repeated_constantMark",
     "sQdQName_doublyQualNameHead_literalExpOrStar",
+    "structure_id",
+    "struct_stmt_head",
+    "struct_stmt_tail",
     "sub_exp",
     "subscript",
     "then",

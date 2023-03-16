@@ -58,7 +58,8 @@ import atexit
 from processSource import processSource
 from palmatAux import constructPALMAT, writePALMAT, readPALMAT, \
         collectGarbage, findIdentifier, astSourceFile
-from p_Functions import removeIdentifier, removeAllIdentifiers, substate
+from p_Functions import removeIdentifier, removeAllIdentifiers, substate, \
+        resetStatement
 from executePALMAT import executePALMAT
 from replaceBy import bareIdentifierPattern
 from optimizePALMAT import optimizePALMAT
@@ -174,11 +175,13 @@ helpMenu = \
 \t`BNF         Show abstract syntax trees in BNF.
 \t`NOAST       Don't show abstract syntax trees.
 \t`EXEC        Execute the HAL/S code.
-\t`NOEXEC      Don't execute the HAL/S code.'''
+\t`NOEXEC      Don't execute the HAL/S code.
+\t`MANGLING    Display current top-level macros.'''
 
-def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
+def interpreterLoop(shouldColorize=False, \
                     xeq=True, lbnf=False, bnf=False, ansiWrapper=True):
 
+    macros = [{}]
     spooling = False
     strict = False
     colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan",
@@ -231,7 +234,6 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
             if not halCode:
                 halsSource = []
                 metadata = []
-            print("**", structureTemplates)
             print(colorize, end="")
             if strict:
                 promptChar = "!"
@@ -314,9 +316,10 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                 elif firstWord == "REMOVE" and len(fields) > 1:
                     identifier = fields[1]
                     if identifier == "*":
-                        removeAllIdentifiers(PALMAT, 0)
+                        removeAllIdentifiers(PALMAT, macros, 0)
+                        print("Removed all identifiers from topmost scope.")
                     else: 
-                        removeIdentifier(PALMAT, 0, "^" + identifier + "^")
+                        removeIdentifier(PALMAT, macros, 0, identifier)
                     continue
                 elif firstWord == "WRITE" and len(fields) > 1:
                     if writePALMAT(PALMAT, fields[1]):
@@ -553,7 +556,6 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                     continue
                 elif firstWord == "RESET":
                     PALMAT = constructPALMAT()
-                    structureTemplates = [{}]
                     continue
                 elif firstWord == "WINE":
                     print("\tEnabled Windows version of compiler in Linux.")
@@ -568,6 +570,16 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                         print(ansiPrefix + "\033[0m" + ansiSuffix, end="")
                     print("\tDisabled colorized output.")
                     colorize = ""
+                    continue
+                elif firstWord == "MANGLING":
+                    if len(macros[0]) == 0:
+                        print("\t(None)")
+                    else:
+                        for macro in macros[0]:
+                            if "replacement" in macros[0][macro] and \
+                                    "ignore" not in macros[0][macro]:
+                                print("\t%s: %s" % \
+                                      (macro, macros[0][macro]["replacement"]))
                     continue
                 elif firstWord == "HELP":
                     print(helpMenu)
@@ -614,6 +626,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
         # after the next tranche of HAL/S code is processed, leaving only those
         # which might still be useful.
         collectGarbage(PALMAT)
+        resetStatement()
         # All existing macros are discarded before processing the next HAL/S.
         # However, some of those (like prefixing "c_" to character variable
         # names) remain useful, and indeed necessary.  We regenerate those
@@ -629,8 +642,7 @@ def interpreterLoop(libraryFilename, structureTemplates, shouldColorize=False, \
                             "replacement": identifier, 
                             "pattern": "\\b" + fields[1] + "\\b" }
         
-        success, ast = processSource(PALMAT, halsSource, metadata, \
-                         libraryFilename, structureTemplates, noCompile, \
+        success, ast = processSource(PALMAT, halsSource, metadata, noCompile, \
                          lbnf, bnf, trace1, wine, trace2, 8, macros, trace4, \
                          strict, trace0)
         if optimize:

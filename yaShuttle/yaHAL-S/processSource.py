@@ -61,20 +61,6 @@ of the parameters:
                         source code.  My conception of it has fallen away over 
                         time, but it does relate each line to a source-code file
                         and the  line-number in that file.
-    libraryFilename     The name of the file of structure templates, for 
-                        updating if new STRUCTURE statements are found.
-    structureTemplates  A list of dictionaries of structure templates imported 
-                        or declared so far during preprocessing.  A new 
-                        dictionary is appended to the list for each PROGRAM,
-                        FUNCTIONS, PROCEDURE, or COMPOOL entered, and then 
-                        popped when the preprocessor leaves that object.
-                        (See macros, below.)  The generated codes has similar
-                        but independent treatement of structure-template 
-                        dictionaries (or macro dictionaries), but those are 
-                        independently-generated on a scope-by-scope basis by 
-                        the compiler's code generator, since the preprocessor 
-                        is only imperfectly aware of the code generator's 
-                        concept of "scope".
     noCompile           If True, then only preprocessing is performed, without
                         tokenization, parsing, code generation, etc.
     lbnf                Corresponds to the interpreter's `LBNF command.
@@ -108,9 +94,8 @@ of the parameters:
                         compiler applications (no interpreter), strict will
                         always be True.
 '''
-def processSource(PALMAT, halsSource, metadata, libraryFilename, 
-                    structureTemplates, \
-                    noCompile=False, lbnf=False, bnf=False, \
+def processSource(PALMAT, halsSource, metadata, noCompile=False, lbnf=False, 
+                    bnf=False, \
                     trace1=False, wine=False, trace2=False, tabSize=8, \
                     macros=[{}], trace4=False, strict=True, trace0=False):
 
@@ -141,8 +126,7 @@ def processSource(PALMAT, halsSource, metadata, libraryFilename,
         reorganizer.reorganizer(halsSource, metadata)
 
     # Take care of REPLACE ... BY "..." macros.
-    replaceBy.replaceBy(halsSource, metadata, \
-                        libraryFilename, structureTemplates, macros, trace0)
+    replaceBy.replaceBy(halsSource, metadata, macros, trace0)
 
     # Output the modified source.  If --no-compile, then simply output to
     # stdout. If not --no-compile, then output to a file called yaHAL_S.tmp.
