@@ -575,10 +575,11 @@ def interpreterLoop(shouldColorize=False, \
                     if len(macros[0]) == 0:
                         print("\t(None)")
                     else:
-                        for macro in macros[0]:
-                            if "replacement" in macros[0][macro] and \
+                        for macro in sorted(macros[0]):
+                            if "-STRUCTURE" not in macro and \
+                                    "replacement" in macros[0][macro] and \
                                     "ignore" not in macros[0][macro]:
-                                print("\t%s: %s" % \
+                                print("\t%s  ->  %s" % \
                                       (macro, macros[0][macro]["replacement"]))
                     continue
                 elif firstWord == "HELP":
@@ -627,20 +628,33 @@ def interpreterLoop(shouldColorize=False, \
         # which might still be useful.
         collectGarbage(PALMAT)
         resetStatement()
-        # All existing macros are discarded before processing the next HAL/S.
-        # However, some of those (like prefixing "c_" to character variable
-        # names) remain useful, and indeed necessary.  We regenerate those
-        # from the identifier list.
-        macros = [{}]
-        macro0 = macros[0]
-        for identifier in identifiers:
-            identifier = identifier[1:-1]
-            if None != re.fullmatch("[lbcsen]f?_" + bareIdentifierPattern, \
-                                    identifier):
-                fields = identifier.split("_", 1)
-                macro0[fields[1]] = { "arguments": [], 
-                            "replacement": identifier, 
-                            "pattern": "\\b" + fields[1] + "\\b" }
+        
+        # We want to get rid of all macros, except those for scope 0 which
+        # directly relate to the identifiers now present in scope 0.  There
+        # are two cases I know of in which the macro needs to be retained:
+        #    1.  The replacement (or the first field of the replacement if
+        #        split at periods) is an existing identifier.
+        #    2.  The key is of the form XXX-STRUCTURE[.something], where XXX is 
+        #        a structure template that exists among the identifiers.
+        while len(macros) > 1:
+            macros.pop()
+        macros0 = macros[0]
+        macrosToDrop = []
+        for macro in macros0:
+            if "ignore" in macros0[macro]:
+                macrosToDrop.append(macro)
+                continue
+            replacement = macros0[macro]["replacement"]
+            fields = replacement.split(".")
+            if "^" + fields[0] + "^" in identifiers:
+                continue
+            if "-STRUCTURE" in macro:
+                fields = macro.split("-STRUCTURE")
+                if "^s_" + fields[0] + "^" in identifiers:
+                    continue
+            macrosToDrop.append(macro)
+        for macro in macrosToDrop:
+            macros0.pop(macro)
         
         success, ast = processSource(PALMAT, halsSource, metadata, noCompile, \
                          lbnf, bnf, trace1, wine, trace2, 8, macros, trace4, \

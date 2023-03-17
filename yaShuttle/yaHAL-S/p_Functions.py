@@ -243,15 +243,20 @@ def stringLiteral(PALMAT, state, s):
                     #print("*B", substate["currentStructureTemplateDescent"])
         else:
             updateCurrentIdentifierAttribute(PALMAT, state, "structure", sp)
-    elif state1 in ["struct_stmt_head", "struct_stmt_tail"]:
-        # The variable called "descent" is a hierarchical list of fieldnames
-        # identifying the exact field we're currently processing.  When we
-        # descend to the next level, we append a fieldname to the list.  When we
-        # remain within a level, we replace the last fieldname in the list.
-        # When we retreat, we remove the final fieldnames until we get back
-        # the earlier level we want.
+    elif "structure_stmt" in history and \
+            state1 in ["struct_stmt_head", "struct_stmt_tail",
+                       "nameId_structIdentifierToken"]:
+        '''
+        The variable called "descent" is a hierarchical list of unmangled 
+        fieldnames identifying the exact field we're currently processing.  When 
+        we descend to the next level, we append a fieldname to the list.  When 
+        we remain within a level, we replace the last fieldname in the list.
+        When we retreat, we remove the final fieldnames until we get back
+        the earlier level we want.
+        '''
         if sp.isdigit():
             # Level in a structure statement.
+            substate["commonAttributes"] = {}
             substate["currentStructureTemplateLevel"] = int(sp)
         else:
             # Fieldname for the structure statement.
@@ -273,7 +278,8 @@ def stringLiteral(PALMAT, state, s):
                 pass
             else:
                 substate["errors"]\
-                    .append("Illegal level in structure-template " + sp)
+                    .append("Illegal level in structure-template %s: %d %s" % \
+                            (sp, level, str(descent)))
                 return False
             #print("*C", level)
             #print("*D", descent)

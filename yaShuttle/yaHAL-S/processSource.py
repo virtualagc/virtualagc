@@ -187,9 +187,6 @@ def processSource(PALMAT, halsSource, metadata, noCompile=False, lbnf=False,
         print("Compiler pass 1 failure.")
         return False, ast
         
-    # Additional passes ...
-    # TBD
-
     success = generatePALMAT(ast, PALMAT, \
                 { "history" : [], "scopeIndex" : 0 }, trace2, [], -1, trace4)
     if success:

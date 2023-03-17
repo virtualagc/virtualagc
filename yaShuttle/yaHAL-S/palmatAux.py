@@ -24,6 +24,23 @@ import math
 from math import nan as NaN
 from decimal import Decimal, ROUND_HALF_UP
 
+# The following patterns are used the same way as "\\b" would be used in a 
+# regex at the start and end of a pattern to indicate a word boundary.  The 
+# difference is that (effectively) they add "." to the list of "word
+# characters", so that a match cannot be immediately preceded or followed by a
+# "." (perhaps surrounded by spaces.  This extension is necessary for mangling 
+# of structure fields, in which the field separator is ".".  For example, if 
+# we have a fully-qualified field expression like a.b.c.d, we want our mangling
+# to match the full "a.b.c.d" and not match (for example) "a" or "a.b", or 
+# "a.b.c".  The techniques used are, respectively, "negative lookbehind" and 
+# "negative lookahead", if you want to look them up in the Python regex docs.
+# The technique isn't perfect, unfortunately, because look-behind requires a 
+# fixed-length pattern, so all I can really check for is that there's no leading
+# "."; I can't check for a leading dot and some unknown number of spaces.
+# Fortunately, lookahed isn't restricted like that.
+fqStart = "(?<!\\.)\\b"
+fqEnd = "\\b(?!\\s*\\.)"
+
 # math.isnan() doesn't work on lists, tuples, dictionaries, or sets, as I found
 # out the hard way since it's not documented in the Python docs, which implies
 # that it works on anything.  So it must be modified as follows.

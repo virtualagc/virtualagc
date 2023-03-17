@@ -880,7 +880,12 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
             elif lbnfLabel == "sQdQName_doublyQualNameHead_literalExpOrStar":
                 if "vector" in identifierDict:
                     if len(maxLens) not in [0, 1]:
-                        raise Exception("VECTOR(...) wrong dimension")
+                        raise Exception(\
+                            "VECTOR(...) wrong dimension: '%s' %s %s %s" \
+                            % (currentIdentifier, 
+                               str(identifierDict), 
+                               str(maxLens),
+                               str(substate["commonAttributes"])) )
                     datatype = "vector"
                 elif "matrix" in identifierDict:
                     datatype = "matrix"

@@ -101,7 +101,7 @@ import sys
 import re
 import copy
 import unEMS
-from palmatAux import splitOutsideParentheses
+from palmatAux import splitOutsideParentheses, fqStart, fqEnd
 
 bareIdentifierPattern = '[A-Za-z]([A-Za-z0-9_]*[A-Za-z0-9])?'
 identifierPattern = "\\b" + bareIdentifierPattern
@@ -169,6 +169,8 @@ def expandMacros(rawline, macros, maxScopes=1000000):
                 break
             for macroName in macros[depth]:
                 if macroName == "@":
+                    continue
+                if "-STRUCTURE" in macroName:
                     continue
                 macro = macros[depth][macroName]
                 if macroName in macroNamesChecked:
@@ -255,7 +257,7 @@ def processStructureStatementOriginal(fullLine, macros):
         match.group().replace("STRUCTURE","")).group()
     macros[-1][identifier] = { "arguments": [], 
                 "replacement": "s_" + identifier, 
-                "pattern": "\\b" + identifier + "\\b" }
+                "pattern": fqStart + identifier + fqEnd }
     # That takes care of the name of this structure
     # template, but not of the structure fieldnames;
     # they may need mangling as well.
@@ -290,8 +292,7 @@ def processStructureStatementOriginal(fullLine, macros):
         macros[-1][identifier] = { "arguments": [], 
                         "replacement": thisType + \
                                         identifier, 
-                        "pattern": "\\b" + identifier \
-                                    + "\\b" }
+                        "pattern": fqStart + identifier + fqEnd }
 
 def processStructureStatement(fullLine, macros):
     remainder = re.sub("^\\s*STRUCTURE\\s+", "", fullLine.replace(";", ""), 1)
@@ -309,7 +310,7 @@ def processStructureStatement(fullLine, macros):
     minorAttributes = subfields[1:]
     macros[-1][identifier] = { "arguments": [], 
                 "replacement": "s_" + identifier, 
-                "pattern": "\\b" + identifier + "\\b" }
+                "pattern": fqStart + identifier + fqEnd }
     # fields[1] now remains to be parsed.  It consists of comma-separated
     # subfields, each of which is of the form
     #    LEVEL FIELDNAME ...ATRIBUTES...
@@ -342,13 +343,31 @@ def processStructureStatement(fullLine, macros):
         fieldname = fields[1]
         unmangled.append(fieldname)
         attributes = fields[2:]
+        mangledAlready = False
         for attribute in attributes:
             if "CHARACTER" in attribute:
                 fieldname = "c_" + fieldname
+                mangledAlready = True
             elif "BIT" in attribute or "BOOLEAN" in attribute:
                 fieldname = "b_" + fieldname
+                mangledAlready = True
             elif "STRUCTURE" in attribute:
                 fieldname = "s_" + fieldname
+                mangledAlready = True
+        if not mangledAlready and j+1 < len(structureFieldsSpecs):
+            '''
+            There's another way that a fieldname may need to be mangled (with 
+            "s_") that we haven't accounted for yet:  If there's another level
+            below it in the template.  To find out, we unfortunately have to do 
+            this lookahead, because (trust me!) it's too hard to fix up 
+            afterward if we get it wrong now
+            '''
+            next = structureFieldsSpecs[j+1]
+            nfields = next.split(None, 1)
+            nlevel = int(nfields[0])
+            if nlevel > level:
+                fieldname = "s_" + fieldname
+                mangledAlready = True
         mangled.append(fieldname)
         fields[1] = fieldname
         uName = identifier + "-STRUCTURE." + ".".join(unmangled)
@@ -362,6 +381,33 @@ def processStructureStatement(fullLine, macros):
     remainder = ": ".join(topFields)
     fullLine = " STRUCTURE " + remainder + ";"
     return fullLine
+
+def fixStructureMacros(macros, structureTemplateName, identifier):
+    '''
+    print("%%A", identifier)
+    print("%%B", structureTemplateName)
+    for i in range(len(macros)-1, -1, -1):
+        print("%%C", i)
+        for macro in sorted(macros[i]):
+            print("%%C\t", macro, "->", macros[i][macro])
+    '''
+    found = False
+    macrosAnnex = {}
+    for scopeMacros in reversed(macros):
+        if found:
+            break
+        for key in scopeMacros:
+            if structureTemplateName in key:
+                found = True
+                keySplit = key.split(".", 1)
+                qualified = identifier + "." + keySplit[1]
+                mangled = "s_" + identifier + scopeMacros[key]["replacement"]
+                macrosAnnex[qualified] = {
+                    "arguments": [],
+                    "replacement": mangled,
+                    "pattern": fqStart + qualified.replace(".", "\\s*[.]\\s*") \
+                                + fqEnd}
+    macros[-1].update(macrosAnnex)
 
 def replaceBy(halsSource, metadata, macros=[{}], trace=False):
     debugIndentation = False
@@ -494,7 +540,7 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                 if identifier not in macros[-2]:
                     macros[-2][identifier] = { "arguments": [], 
                                 "replacement": hasType + identifier, 
-                                "pattern": "\\b" + identifier + "\\b" }
+                                "pattern": fqStart + identifier + fqEnd }
                 elif hasType == "nf_":
                     # The identifier is already in the macro table, which can
                     # only mean it was previously-defined by a forward
@@ -550,16 +596,16 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                             identifier = fields[1]
                             macros[-1][identifier] = { "arguments": [], 
                                         "replacement": "l_" + identifier, 
-                                        "pattern": "\\b" + identifier + "\\b" }
+                                        "pattern": fqStart + identifier + fqEnd }
                 if identifier != "":
                     if identifier[:2] != hasType:
                         macros[-1][identifier] = { "arguments": [], 
                                         "replacement": hasType + identifier, 
-                                        "pattern": "\\b" + identifier + "\\b" }
+                                        "pattern": fqStart + identifier + fqEnd }
                         if isProcedureOrFunction:
                             macros[-2][identifier] = { "arguments": [], 
                                 "replacement": hasType + identifier, 
-                                "pattern": "\\b" + identifier + "\\b" }
+                                "pattern": fqStart + identifier + fqEnd }
                 # A new macro via DECLARE or TEMPORARY?
                 declarations = None
                 if fullLine[:8] == "DECLARE ":
@@ -574,8 +620,9 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                     delimited by commas.  But we can't just split the statement
                     at commas, because there could be MATRIX, ARRAY, or INITIAL
                     qualifiers that also have comms in their parameter lists.
-                    So we have to engage in some heavy-fancy parsing.  :-(
-                    Either N identifiers are declared by the statement (for a 
+                    So we simply remove all parenthesized material (with 
+                    matching parentheses).  Having done that,
+                    either N identifiers are declared by the statement (for a 
                     "simple declare" or "compound declare") or N-1 identifiers
                     (for a "factored declare").  A macro is created for each
                     declared identifier of BOOLEAN or CHARACTER type.
@@ -620,6 +667,7 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                         declarations[n] = declarations[n].split()
                     overallType = ""
                     overallFunction = False
+                    overallStructureTemplate = ""
                     start = 0
                     if len(declarations[0]) > 0:
                         if declarations[0][0] in mangling:
@@ -638,6 +686,7 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                             start += 1
                         elif "-STRUCTURE" == declarations[0][0][-10:]:
                             overallType = "s_"
+                            overallStructureTemplate = declarations[0][0]
                             start += 1
                     for n in range(start, len(declarations)):
                         declaration = declarations[n]
@@ -646,7 +695,11 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                             if identifier[:2] != overallType:
                                 macros[-1][identifier] = { "arguments": [], 
                                         "replacement": overallType + identifier, 
-                                        "pattern": "\\b" + identifier + "\\b" }
+                                        "pattern": fqStart + identifier + fqEnd }
+                                if overallStructureTemplate:
+                                    fixStructureMacros(macros,
+                                                       overallStructureTemplate, \
+                                                       identifier)
                         elif len(declaration) >= 2 and \
                                 declaration[1] in mangling:
                             thisType = mangling[declaration[1]]
@@ -672,7 +725,7 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                             if identifier[:2] != thisType:
                                 macros[-1][identifier] = { "arguments": [], 
                                         "replacement": thisType + identifier, 
-                                        "pattern": "\\b" + identifier + "\\b" }
+                                        "pattern": fqStart + identifier + fqEnd }
                         elif len(declaration) >= 2 and \
                                 "-STRUCTURE" == declaration[1][-10:]:
                             thisType = "s_"
@@ -680,7 +733,8 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                             if identifier[:2] != thisType:
                                 macros[-1][identifier] = { "arguments": [], 
                                         "replacement": thisType + identifier, 
-                                        "pattern": "\\b" + identifier + "\\b" }
+                                        "pattern": fqStart + identifier + fqEnd }
+                            fixStructureMacros(macros, declaration[1], identifier)
                         elif len(declaration) > 0:
                             # If we've gotten here, the identifier isn't 
                             # supposed to be mangled.  However, we still have
