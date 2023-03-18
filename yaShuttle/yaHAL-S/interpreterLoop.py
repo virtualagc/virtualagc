@@ -98,85 +98,92 @@ helpMenu = \
 \tHAL/S source code is case-sensitive.  Any input line
 \tbeginning with a back-tick (`) is an interpreter command.
 \tThe available interpreter commands are listed below:
-\t`HELP        Show this menu.
-\t`QUIT        Quit this interpreter program.
-\t`CANCEL *    Cancel any uncompleted multi-line source-
-\t             code input.
-\t`CANCEL      Cancel just the preceding line of a 
-\t             multi-line source-code input.
-\t`NOSTRICT    This is the default, for convenience in
-\t             using the interpreter.  In this mode, column
-\t             1 is not special, and thus full-line comments
-\t             (C in column 1), compiler directives (D), and
-\t             multiline math input (E/M/S) are not 
-\t             available.
-\t`STRICT      Enables the special the special treatment of
-\t             column 1 specified by HAL/S documentation.
-\t`OPTIMIZE    (Default.)  Enable optimization of PALMAT code.
-\t`NOOPTIMIZE  Disable optimization of PALMAT code.
-\t`RUN P [*]   Run PROGRAM P. By default, runs as the 
-\t             "primary", which affects the DATA (see
-\t             below).  If the optional 3rd field is
-\t             present, runs as a "secondary" with 
-\t             cloned DATA structures that persist only
-\t             while PROGRAM P runs, and vanish afterward.
-\t`SPOOL       Begin spooling all HAL/S source lines for
-\t             later processing.  (The default is to
-\t             process lines one-by-one upon input, and
-\t             to spool only lines not ending in ';'.)
-\t             Note that all interpreter commands are
-\t             acted upon immediately rather than being
-\t             added to the spool.
-\t`UNSPOOL     Immediately process all spooled lines.
-\t`REVIEW      Redisplay spooled HAL/S source lines.
-\t`COLORIZE C  Enable colorizing (ANSI terminals only).
-\t             C is one of the following words: black,
-\t             red, green, yellow, blue, magenta, cyan,
-\t             white, gray, brightred, brightgreen,
-\t             brightyellow, brightblue, brightmagenta,
-\t             brightcyan, or brightwhite.
-\t`NOCOLORIZE  Disable colorized output.
-\t`WRITE F     Write current PALMAT to a file named F.
-\t`READ F      Read PALMAT from a file named F.
-\t`DATA        Inspect identifiers in root scope.
-\t`DATA N      Inspect identifiers in scope N (integer).
-\t`DATA *      Inspect identifiers in all scopes.
-\t`LABELS      Enables display of program labels in `DATA.
-\t`NOLABELS    Disables display of labels in `DATA.
-\t`PALMAT      Inspect PALMAT code in root scope.
-\t`PALMAT N    Inspect PALMAT code in scope N (integer).
-\t`PALMAT *    Inspect PALMAT code in all scopes.
-\t`EXECUTE     (Re)execute already-compiled PALMAT.
-\t`CLONE       Same as EXECUTE, but clone instantiation.
-\t`SCOPES      Inspect scope hierarchy.
-\t`GARBAGE     Perform "garbage collection".  This is
-\t             done automatically prior to processing
-\t             any newly-input HAL/S, but it may be
-\t             useful sometimes to do it explictly if
-\t             you want to inspect the environment 
-\t             under which the next HAL/S will run.
-\t`REMOVE D    Remove identifier D.
-\t`REMOVE *    Remove all identifiers.
-\t`RESET       Reset all PALMAT.
-\t`STATUS      Show current settings and other info.
-\t`WINE        Enable Windows compiler (Linux only).
-\t`NOWINE      Disable Windows compiler (Linux only).
-\t`TRACE0      Enable preprocessor tracing.
-\t`NOTRACE0    Disable preprocessor tracing.
-\t`TRACE1      Enable parser tracing.
-\t`NOTRACE1    Disable parser tracing.
-\t`TRACE2      Enable code-generator tracing.
-\t`NOTRACE2    Disable code-generator tracing.
-\t`TRACE3      Enable execution tracing.
-\t`NOTRACE3    Disable execution tracing.
-\t`TRACE4      Enable tracing of compile-time calculations.
-\t`NOTRACE4    Disable compile-time calculation tracing.
-\t`LBNF        Show abstract syntax trees in LBNF.
-\t`BNF         Show abstract syntax trees in BNF.
-\t`NOAST       Don't show abstract syntax trees.
-\t`EXEC        Execute the HAL/S code.
-\t`NOEXEC      Don't execute the HAL/S code.
-\t`MANGLING    Display current top-level macros.'''
+\t`HELP            Show this menu.
+\t`QUIT            Quit this interpreter program.
+\t`CANCEL *        Cancel any uncompleted multi-line source-
+\t                 code input.
+\t`CANCEL          Cancel just the preceding line of a 
+\t                 multi-line source-code input.
+\t`NOSTRICT        This is the default, for convenience in
+\t                 using the interpreter.  In this mode, column
+\t                 1 is not special, and thus full-line comments
+\t                 (C in column 1), compiler directives (D), and
+\t                 multiline math input (E/M/S) are not 
+\t                 available.
+\t`STRICT          Enables the special the special treatment of
+\t                 column 1 specified by HAL/S documentation.
+\t`OPTIMIZE        (Default.)  Enable optimization of PALMAT code.
+\t`NOOPTIMIZE      Disable optimization of PALMAT code.
+\t`RUN P [*]       Run PROGRAM P. By default, runs as the 
+\t                 "primary", which affects the DATA (see
+\t                 below).  If the optional 3rd field is
+\t                 present, runs as a "secondary" with 
+\t                 cloned DATA structures that persist only
+\t                 while PROGRAM P runs, and vanish afterward.
+\t`SPOOL           Begin spooling all HAL/S source lines for
+\t                 later processing.  (The default is to
+\t                 process lines one-by-one upon input, and
+\t                 to spool only lines not ending in ';'.)
+\t                 Note that all interpreter commands are
+\t                 acted upon immediately rather than being
+\t                 added to the spool.
+\t`UNSPOOL          process all spooled lines.
+\t`REVIEW          Redisplay spooled HAL/S source lines.
+\t`COLORIZE C      Enable colorizing (ANSI terminals only).
+\t                 C is one of the following words: black,
+\t                 red, green, yellow, blue, magenta, cyan,
+\t                 white, gray, brightred, brightgreen,
+\t                 brightyellow, brightblue, brightmagenta,
+\t                 brightcyan, or brightwhite.
+\t`NOCOLORIZE      Disable colorized output.
+\t`WRITE F         Write current PALMAT to a file named F.
+\t`READ F          Read PALMAT from a file named F.
+\t`DATA            Inspect identifiers in root scope.
+\t`DATA N          Inspect identifiers in scope N (integer).
+\t`DATA *          Inspect identifiers in all scopes.
+\t`LABELS          Enables display of program labels in `DATA.
+\t`NOLABELS        Disables display of labels in `DATA.
+\t`PALMAT          Inspect PALMAT code in root scope.
+\t`PALMAT N        Inspect PALMAT code in scope N (integer).
+\t`PALMAT *        Inspect PALMAT code in all scopes.
+\t`EXECUTE         (Re)execute already-compiled PALMAT.
+\t`CLONE           Same as EXECUTE, but clone instantiation.
+\t`SCOPES          Inspect scope hierarchy.
+\t`GARBAGE         Perform "garbage collection".  This is
+\t                 done automatically prior to processing
+\t                 any newly-input HAL/S, but it may be
+\t                 useful sometimes to do it explictly if
+\t                 you want to inspect the environment 
+\t                 under which the next HAL/S will run.
+\t`REMOVE D        Remove identifier D.
+\t`REMOVE *        Remove all identifiers.
+\t`RESET           Reset all PALMAT.
+\t`STATUS          Show current settings and other info.
+\t`WINE            Enable Windows compiler (Linux only).
+\t`NOWINE          Disable Windows compiler (Linux only).
+\t`TRACE0          Enable preprocessor tracing.
+\t`NOTRACE0        Disable preprocessor tracing.
+\t`TRACE1          Enable parser tracing.
+\t`NOTRACE1        Disable parser tracing.
+\t`TRACE2          Enable code-generator tracing.
+\t`NOTRACE2        Disable code-generator tracing.
+\t`TRACE3          Enable execution tracing.
+\t`NOTRACE3        Disable execution tracing.
+\t`TRACE4          Enable tracing of compile-time calculations.
+\t`NOTRACE4        Disable compile-time calculation tracing.
+\t`LBNF            Show abstract syntax trees in LBNF.
+\t`BNF             Show abstract syntax trees in BNF.
+\t`NOAST           Don't show abstract syntax trees.
+\t`EXEC            Execute the HAL/S code.
+\t`NOEXEC          Don't execute the HAL/S code.
+\t`MANGLING [*]    Display mangling macros in the global scope, 
+\t                 as understood by the preprocessor.  (These are
+\t                 the only macros affecting new interpreter
+\t                 input.)  If the optional * is added, additional
+\t                 macros having to do with structure-template 
+\t                 mangling are displayed, which are normally hidden
+\t                 because the cannot be directly accessed from
+\t                 the interpreter's input prompt.'''
 
 def interpreterLoop(shouldColorize=False, \
                     xeq=True, lbnf=False, bnf=False, ansiWrapper=True):
@@ -576,8 +583,8 @@ def interpreterLoop(shouldColorize=False, \
                         print("\t(None)")
                     else:
                         for macro in sorted(macros[0]):
-                            if "-STRUCTURE" not in macro and \
-                                    "replacement" in macros[0][macro] and \
+                            if (len(fields) > 1 or "-STRUCTURE" not in macro) \
+                                     and "replacement" in macros[0][macro] and \
                                     "ignore" not in macros[0][macro]:
                                 print("\t%s  ->  %s" % \
                                       (macro, macros[0][macro]["replacement"]))

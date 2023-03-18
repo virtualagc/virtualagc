@@ -342,18 +342,48 @@ def processStructureStatement(fullLine, macros):
             mangled.pop()
         fieldname = fields[1]
         unmangled.append(fieldname)
-        attributes = fields[2:]
         mangledAlready = False
-        for attribute in attributes:
+        for k in range(2, len(fields)):
+            attribute = fields[k]
             if "CHARACTER" in attribute:
                 fieldname = "c_" + fieldname
                 mangledAlready = True
             elif "BIT" in attribute or "BOOLEAN" in attribute:
                 fieldname = "b_" + fieldname
                 mangledAlready = True
-            elif "STRUCTURE" in attribute:
+            elif "-STRUCTURE" in attribute:
                 fieldname = "s_" + fieldname
+                otherStructureTemplate = copy.deepcopy(fields[k])
+                fields[k] = "s_" + otherStructureTemplate
                 mangledAlready = True
+                # Since this field of our current structure template is itself 
+                # defined in terms of another structure template, we have to
+                # pull in all of the manglings of the other structure template
+                # and append them one by one to our current field.  but first,
+                # we have to go upward through the scopes (or what the 
+                # preprocessor things of as scopes) until finding the one in 
+                # which this other structure template appears.
+                found = False
+                macrosAnnex = {}
+                for scopeMacro in reversed(macros):
+                    if found:
+                        break
+                    for key in scopeMacro:
+                        if otherStructureTemplate in key:
+                            found = True
+                            uName = key.replace(otherStructureTemplate, \
+                                        identifier + "-STRUCTURE." + \
+                                            ".".join(unmangled))
+                            mName = ".".join(mangled) + "." + \
+                                fieldname + scopeMacro[key]["replacement"]
+                            if mName[0] != ".":
+                                mName = "." + mName
+                            macrosAnnex[uName] = {
+                                "arguments": [],
+                                "replacement": mName,
+                                "pattern": mName + "\\b"
+                                }
+                macros[-1].update(macrosAnnex)
         if not mangledAlready and j+1 < len(structureFieldsSpecs):
             '''
             There's another way that a fieldname may need to be mangled (with 
