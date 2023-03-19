@@ -207,7 +207,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       <li><tt>ARRAY</tt> is represented similarly to <tt>MATRIX</tt> as a hierarchy of lists, <i>except</i> that the dimensionality can be anything (rather than always 2D) <i>and</i> that every list at each level of the hierarchy has final entry of <tt>'a'</tt>.&nbsp; Each level of lists in this hierarchy has lists all of the same length.&nbsp; Elements of the final level of lists can be any of the datatypes described above, but all are of the <i>same</i> datatype.&nbsp; Explicit examples appear at the end of this section.</li>
       <li>A "pointer" to a variable is represented by the Python list <tt>[<i>index</i>, <i>identifier</i>, 'p']</tt>, where <i><tt>identifier</tt></i> is the name (a string) of the variable and <i><tt>index</tt></i> is for the scope in which the identifier's declaration appears.&nbsp; Note that pointers to variables do not appear (so far) except for the specific use of specifying target variables for a HAL/S <tt>READ</tt> statement.<br></li>
       <li>An uninitialized individual data value of any simple type (i.e., not <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>ARRAY</tt>, or <tt>STRUCTURE</tt>) is represented by a Python <tt>None</tt>.&nbsp; Uninitialized elements of a composite type like <tt>VECTOR</tt> are represented by <tt>None</tt>, but the composite as a whole retains its structure (as a list, list of lists, structure, etc.).</li>
-      <li>Additionally, though not representing any specific HAL/S data types, the Python set datatype is used in place of data under some circumstances (see <a moz-do-not-send="true" href="#ComputationStack">Computation Stack</a> below).&nbsp; The Python set <tt>{ "sentinel" }</tt> is the principal example of this, and it is used to terminate variable-length sequences of data values, without itself being confusable with any existing HAL/S datatype.<br></li>
+      <li>Additionally, though not representing any specific HAL/S data types, the Python set datatype is used in place of data under some circumstances (see <a moz-do-not-send="true" href="#ComputationStack">Computation Stack</a> below).&nbsp; The Python set <tt>{ "sentinel" }</tt> is the principal example of this, and it is used to terminate variable-length sequences of data values, without itself being confusable with any existing HAL/S datatype.</li>
     </ul>
     <p>Here are a few examples of <tt>STRUCTURE</tt>s.  The HAL/S statements<br></p>
     <blockquote><tt>STRUCTURE FIRST: </tt><tt><br>
@@ -338,7 +338,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       <li><tt>parent, self, children</tt>:&nbsp; The scopes are in a strict hierarchical arrangement, in which each scope has a parent (unless it is the global scope, 0), itself, and a list of 0 or more children.&nbsp; Each of these is identified by a corresponding numerical index within the <tt>P</tt><tt>ALMAT["scopes"]</tt> array.&nbsp; Since we have only scope 0 in our example, it has no parent, and thus its <tt>parent</tt> is listed as <tt>None</tt>, which is an object used in Python that we use here to mean that there is no assigned value.&nbsp; Moreover, it has no children.&nbsp; But it will always have itself, which it identifies as <tt>SELF 0</tt>.<br></li>
       <li><tt>identifiers</tt>:&nbsp; This is a Python dictionary of all of the identifiers (variables, constants, program labels) defined in the scope.&nbsp; In this case, there's only one variable, <tt>I</tt>.&nbsp; It has various attributes, in this case "integer", "initial", and "value", which I'll discuss later.</li>
       <li><tt>instructions</tt>:&nbsp; This a Python list of all of the PALMAT instructions for the scope, in the order in which they're executed.&nbsp; The available PALMAT instructions and their behaviors will be discussed in a later section.&nbsp; In this particular example, the first instruction <tt>{"fetch": [0, "I"]}</tt> gets the value of the variable I from scope 0, and the second instruction, <tt>{"write": "6"}</tt>, prints it out.<br></li>
-      <li><tt>type</tt>:&nbsp; This is an indication of what type of compilation unit the scope is associated with.&nbsp; I'll get to those in a moment.&nbsp; The <tt>type</tt> is useful because there are cases in which a given scope has access to identifiers defined in their ancestor scopes, but only to a certain point; the <tt>type</tt> allows those demarcation points to be known in searches for identifiers within the scope hierarchy.&nbsp; (Such searches are very rare in emulation of PALMAT object code, since most can be resolved at compile-time; however, emulation-time searches associated with <tt>ASSIGN</tt> clauses in <tt>PROCEDURE</tt> calls may still be needed, until/unless I see how to eliminate them.)<br></li>
+      <li><tt>type</tt>:&nbsp; This is an indication of what type of compilation unit the scope is associated with.&nbsp; I'll get to those in a moment.&nbsp; The <tt>type</tt> is useful because there are cases in which a given scope has access to identifiers defined in their ancestor scopes, but only to a certain point; the <tt>type</tt> allows those demarcation points to be known in searches for identifiers within the scope hierarchy.&nbsp; (Such searches are very rare in emulation of PALMAT object code, since most can be resolved at compile-time; however, emulation-time searches associated with <tt>ASSIGN</tt> clauses in <tt>PROCEDURE</tt> calls may still be needed, until/unless I see how to eliminate them.)</li>
     </ul>
     <p>As I began by saying, this example is "impure" HAL/S.&nbsp; But we can convert it to a "pure" HAL/S example if we provide a <tt>PROGRAM</tt> wrapper:</p>
     <blockquote><tt>EXAMPLE: PROGRAM;</tt><tt><br>
@@ -365,7 +365,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         "instructions": [], <br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type":
-        "root"<br>
+        "root",<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "templates": {}<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -388,7 +390,9 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         &nbsp;&nbsp;&nbsp; {"write": "6"}<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type":
-        "program", <br>
+        "program",<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        "templates": {},<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "name":
         "^l_EXAMPLE^", <br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -403,6 +407,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     newly-defined <tt>PROGRAM</tt>.&nbsp; Similarly, scope 1 now
     contains everything that our earlier scope 0 used to, with a few
     relatively-minor changes.&nbsp; One such change is that it now has <tt>type
+
 
 
 
@@ -443,6 +448,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
     Here are the values of <tt>type</tt> that have been used up to now:<br>
     <ul>
       <li>"root"<br></li>
@@ -465,7 +471,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     </blockquote>
     <p>This produces a PALMAT structure like the one below.&nbsp; Since my purpose here in this section is just to illustrate how scopes interact, I won't dissect it in detail for you (exercise for the reader!), except to say that the various identifiers you see whose names are of the form <tt>xx_X</tt>, where <tt>xx</tt> is a pair of lower-case letters and <tt>X</tt> is a number, are program labels automatically created by the compiler's code generator.&nbsp; They are used both by PALMAT instructions like "<tt>goto</tt>" (discussed later) that cause some kind of jump to a different address, and by the PALMAT instructions that are the targets of such jumps.&nbsp; Thus, for example, you'll see an instruction <tt>{"goto": [0, "^ue_1^"]}</tt> in scope 0 and a matching instruction <tt>{"noop": true, "label": "^ue_1^"}</tt> in scope 1.&nbsp; The former is a jump to the latter.&nbsp; When this code is executed, beginning at instruction 0 in scope 0, the first thing that happens is a jump to instruction 0 in scope 1, which represents the <tt>DO WHILE</tt> block.&nbsp; Several instructions in the <tt>DO WHILE</tt> block are executed, until near the end of the block we see the instruction <tt>{"goto": [1, "^ue_2^"]}</tt>, which is a jump to scope 2, the <tt>IF</tt> block.&nbsp; Eventually, after scope 2 does its work it returns to scope 1 (via the instruction <tt>{"goto": [1, "^ur_2^"]}</tt>), and scope 1 eventually returns to scope 0 (via <tt>{"goto": [0, "^ur_1^"]}</tt>), at which point scope 0 runs out of instructions to execute, and emulation halts.<br></p>
     <blockquote>
-      <p><tt>{<br>&nbsp;&nbsp;&nbsp; "scopes": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": null, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [1], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^I^": {"integer": true, "initial": 0, "value": 0}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ue_1^": {"label": [1, 0]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ur_1^": {"label": [0, 1]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ue_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ur_1^"}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "root"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 1, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [2], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ue_2^": {"label": [2, 0]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ur_2^": {"label": [1, 10]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ux_1^": {"label": [1, 12]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ue_1^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"boolean": [[1, 1]]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"iffalse": [1, "^ux_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"write": "6"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"number": "1"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"operator": "+"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"storepop": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ue_2^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ur_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ue_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ux_1^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ur_1^"]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "do while"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": 1, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 2, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {"^ux_2^": {"label": [2, 6]}}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ue_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"number": "10"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"operator": "&gt;="}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"iffalse": [2, "^ux_2^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ux_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ux_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ur_2^"]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "if"<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; "instantiation": 0<br>}</tt><br></p>
+      <p><tt>{<br>&nbsp;&nbsp;&nbsp; "scopes": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": null, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [1], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^I^": {"integer": true, "initial": 0, "value": 0}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ue_1^": {"label": [1, 0]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ur_1^": {"label": [0, 1]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ue_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ur_1^"}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "root",<br>	    "templates": {}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": 0, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 1, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [2], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ue_2^": {"label": [2, 0]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ur_2^": {"label": [1, 10]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "^ux_1^": {"label": [1, 12]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ue_1^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"boolean": [[1, 1]]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"iffalse": [1, "^ux_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"write": "6"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"number": "1"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"operator": "+"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"storepop": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ue_2^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ur_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ue_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ux_1^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [0, "^ur_1^"]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "do while",<br>	    "templates": {}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "parent": 1, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "self": 2, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "children": [], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "identifiers": {"^ux_2^": {"label": [2, 6]}}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "instructions": [<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ue_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"number": "10"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"fetch": [0, "I"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"operator": "&gt;="}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"iffalse": [2, "^ux_2^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ux_1^"]}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"noop": true, "label": "^ux_2^"}, <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"goto": [1, "^ur_2^"]}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; "type": "if",<br>	    "templates": {}<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; ], <br>&nbsp;&nbsp;&nbsp; "instantiation": 0<br>}</tt><br></p>
     </blockquote>
     <p>This particular example happens to illustrate an interesting point about some program-label identifiers, namely that they may be <i>defined</i> in one scope but actually represent a location in a descendant scope.&nbsp; This is the case with the program labels <tt>ue_1</tt> and <tt>ue_2</tt>.&nbsp; Recall that I mentioned earlier that scopes have access to identifiers declared in their ancestor scopes, but ancestors have no access to identifiers defined in their descendant scopes.&nbsp; That's what's happening here.&nbsp; Both scopes 0 and 1 need the definition of <tt>ue_1</tt> to be accessible to them, and scope 1 has access to scope 0's definitions, but not vice-versa.&nbsp; This forces the code generator to define <tt>ue_1</tt> in scope 0, even though the label itself really refers to an address in scope 1.<br></p>
     <p>As you can probably imagine by now, any practical example of HAL/S code will compile to quite a large hierarchy of scopes, descending to many levels deep and quite wide in terms of the numbers of sibling scopes.&nbsp; Part of the job of a linker program would be arrange all of these scopes linearly in memory in a reasonably efficient way to eliminate useless jumps; whereas when emulating PALMAT directly, each scope can continue to exist in its own memory space that is essentially independent of all the others, rather than being in any particular linear memory order with respect to them.<br></p>
@@ -509,25 +515,24 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     <ul>
       <li>For variables:</li>
       <ul>
-        <li>One (and only one) of the following keys:&nbsp; "scalar", "integer", "bit", "character", "vector", "matrix", or "structure".&nbsp; As for the values associated with these keys:<br></li>
+        <li>One (and only one) of the following keys:&nbsp; "scalar", "integer", "bit", "character", "vector", "matrix", "structure", or "template".&nbsp; As for the values associated with these keys:<br></li>
         <ul>
           <li>"scalar" or "integer":&nbsp; The value is always the boolean <tt>True</tt>.  (I mean the value associated with the key/value pair in the dictionary; not the value of the variable; that's covered in a moment.)</li>
           <li>"bit", "character", or "vector":&nbsp; The value is an integer, giving the width of the bit-string, character-string, or vector stored in the variable.</li>
           <li>"matrix": The value is a list of two integers defining the geometry, thusly:&nbsp; [number of rows, number of columns].</li>
-          <li>"structure": TBD</li>
+          <li>"structure": The value is the name (which is an identifier, not carat-quoted) of the associated structure template (see below).</li>
         </ul>
         <li>Optional "array".&nbsp; The associated value is a list of the array's dimensions:&nbsp; [N<sub>1</sub>, N<sub>2</sub>, ..., N<sub>M</sub>] for an M-dimensional array.</li>
         <li>Optional "initial".&nbsp; This is the initial value assigned to the variable, prior to execution of any code in the scope.&nbsp; See the <a moz-do-not-send="true" href="#Datatypes">Datatypes Section</a> for an explanation of the nature of this data.<br></li>
         <li>Optional "value".&nbsp; This is the value assigned to the variable.&nbsp; I've noted here that it's "optional", because it may be omitted from the variable's attributes prior to any assignment occurring.&nbsp; But regarding uninitialized values, see also the comments about <tt>None</tt> in the <a moz-do-not-send="true" href="#Datatypes">Datatypes Section</a>.</li>
         <li>Optional "static".&nbsp; Always <tt>True</tt> if present.&nbsp; It means that the initialization of a variable specified by the "initial" attribute (see above) is performed just once, at startup, and is not performed again if the defining block (<tt>FUNCTION</tt>, <tt>PROCEDURE</tt>, etc.) is executed again later.&nbsp; This is the default.<br></li>
-        <li>Optional "automatic".&nbsp; Always <tt>True</tt> if present.&nbsp; It means that the initialization of a variable specified by the "initial" attribute (see above) is performed anew every time the declaring block is executed.</li>
+        <li>Optional "automatic".&nbsp; Always <tt>True</tt> if present.  It is the opposite of "static" (see above).&nbsp; It means that the initialization of a variable specified by the "initial" attribute (see above) is performed anew every time the declaring block is executed.</li>
         <li>Optional "aligned".&nbsp; Always <tt>True</tt> if present. It means that data is aligned on "appropriate" storage boundaries.&nbsp; The concept of "appropriateness" isn't defined in the documentation, but apparently means appropriate for fastest execution.&nbsp; This is not applicable to the PALMAT implementation in Python, and is thus ignored in the "preliminary" PALMAT-based implementation.<br></li>
         <li>Optional "dense".&nbsp; Always <tt>True</tt> if present. It means that data is aligned to require the least amount of memory, potentially at the cost of reduced execution speed.&nbsp; Essentially, it is the opposite of "aligned".&nbsp; And like "aligned", it is ignored in the Python PALMAT-based "preliminary" implementation.</li>
         <li>Optional "access".&nbsp; Always <tt>True</tt> if present.&nbsp; This refers to a managerial control apparently used in the original Shuttle development, namely that blocks of code can be granted specific access rights to variables that define what code has permissions to do what to that variable.&nbsp; In other words, some programmers were trusted to use certain variables in certain ways, and others were not.&nbsp; However ... this managerial concept may have been useful <i>prior</i> to code creation, but has no relevance at all after the code has been written and released, because any source code surviving to that point is guaranteed to obey the imposed access controls even if the access mechanism is no longer actively in place.&nbsp; Hence, the modern implementation (at least in the "preliminary" version) simply ignores this attribute.<br></li>
         <li>Optional "lock".&nbsp; If present, it has an integer value that refers to the "lock group" to which it pertains.&nbsp; This refers to temporary locks placed on variables shared in <tt>COMPOOL</tt>s by multiple simultaneous HAL/S processes.<br></li>
         <li>Optional "remote".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; This attribute means that the variable may be seldom-used, and hence may reside in some form of auxiliary memory that's slow to access, rather than in quickly-accessed local memory.&nbsp; This concept of memory maintenance has no relevance to the modern implementation in which essentially unlimited amounts of fast memory are available, and hence is ignored.</li>
-        <li>Optional "rigid".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; It implies that the compiler is not allowed to reorder <tt>STRUCTURE</tt> fields, but instead requires them to remain in the same order in memory as implied by their HAL/S declarations.&nbsp; I'm not certain yet whether this concept is irrelevant to the modern implementation or not; but for the present it is being ignored.&nbsp; But see the "ordering" key immediately below.</li>
-        <li>Optional "ordering".&nbsp; This field is present only for certain <tt>STRUCTURE</tt>s.  It has a bookkeeping purpose for the modern compiler, and is not related to anything in the original HAL/S language or compiler.  (But see "rigid" above.)&nbsp; <a moz-do-not-send="true" href="#Datatypes">Recall</a> that HAL/S <tt>STRUCTURE</tt>s are implemented in PALMAT as Python dictionaries, and that Python dictionaries do not have any concept of the ordering of the keys therein.&nbsp; On the other hand, recall also <tt>INITIAL</tt> and <tt>CONSTANT</tt> clauses in HAL/S <tt>DEFINE</tt> statements rely on a known ordering of the elements of composite datatypes (like <tt>STRUCTURE</tt>s).&nbsp; That being the case, if <tt>INITIAL</tt> or <tt>CONSTANT</tt> is present, or <tt>RIGID</tt> (see immediately above), knowledge of the expected ordering of <tt>STRUCTURE</tt> fields must be preserved.&nbsp; The "ordering" field provides that knowledge.&nbsp; The value associated with the "ordering" key is TBD.</li>
+        <li>Optional "rigid".&nbsp; If present, it has the value <tt>True</tt>.&nbsp; It implies that the compiler is not allowed to reorder <tt>STRUCTURE</tt> fields, but instead requires them to remain in the same order in memory as implied by their HAL/S declarations.&nbsp; In the PALMAT implementation, <tt>STRUCTURE</tt>s are always <tt>RIGID</tt>, so this attribute is ignored.</li>
         <li>Optional "parameter".  This field is present (with the value <tt>True</tt>) for any identifier which is a formal <tt>FUNCTION</tt> or <tt>PROCEDURE</tt> parameter in its scope.<br></li>
       </ul>
       <li>For constants, the attributes are generally similar to variables as just described.&nbsp; But here are a few differences:</li>
@@ -563,7 +568,124 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       <ul>
         <li>"label" has a Python list value of the form [scope index, offset within the instructions of the scope].</li>
       </ul>
-      <li>Other ... TBD<br></li>
+      <li>For structure templates:</li>
+      <ul>
+        <li>The sole attribute, "template", provides a hierarchical specification of the template. Specifically, it is a Python ordered pair, of which the first entry is a Python list of the field names in the level (in the order encountered in the <tt>STRUCTURE</tt> statement) and the second entry is a Python list of the attribute dictionaries of those fields (<i>as if</i> they were freestanding entries for variables in the identifiers dictionary).  Both lists are in the same order and have the same number of entries.  Of course, not all attributes for variables are necessarily appropriate for structure templates.  For example, an <tt>INITIAL</tt> attribute (if any) should appear in the <tt>DECLARE</tt> statement for a structure, and not in the <tt>STRUCTURE</tt> statement for its template.</li>
+      </ul>
+    </ul>
+    <p>Here are some examples of attributes dictionaries for structure templates.  Consider first the HAL/S statement<br></p>
+    <blockquote><tt>STRUCTURE T1: </tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 A SCALAR,</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 B SCALAR,</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 I INTEGER;</tt><br>
+    </blockquote>
+    Due to name-mangling, this would appear in the scope's identifiers
+    dictionary as <br>
+    <blockquote><tt>"^s_T1-STRUCTURE^": { "template": ( ["A", "B", "I"],
+        [ { "scalar": True }, { "scalar": True }, { "integer": True } ]
+        ) }</tt><br>
+    </blockquote>
+    Or consider the slightly-more-complex case of<br>
+    <blockquote><tt>STRUCTURE T2:<br>
+        &nbsp;&nbsp;&nbsp; 1 C,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 A SCALAR,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 B SCALAR,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 I INTEGER,<br>
+        &nbsp;&nbsp;&nbsp; 1 D,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 A SCALAR,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 B SCALAR,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 I INTEGER,<br>
+        &nbsp;&nbsp;&nbsp; 1 E VECTOR;<br>
+      </tt></blockquote>
+    This would appear in the identifiers dictionary as<br>
+    <blockquote><tt>"^s_T2-STRUCTURE^": { "template": ( <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp; ["C", "D", "E" ], <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; [ </tt><tt><tt>{
+          "template": ( ["A", "B", "I"], [ { "scalar": True }, {
+          "scalar": True }, { "integer": True } ] ) }</tt>, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt><tt><tt>{
+          "template": ( ["A", "B", "I"], [ { "scalar": True }, {
+          "scalar": True }, { "integer": True } ] ) }</tt>, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; { "vector": 3 } <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ] ) }<br>
+      </tt></blockquote>
+    Finally, consider<br>
+    <blockquote><tt>
+        STRUCTURE T3:</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 C T1-STRUCTURE,</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 D T1-STRUCTURE,</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 E VECTOR;</tt><br>
+    </blockquote>
+    Perhaps this could appear in the identifiers dictionary as<br>
+    <blockquote><tt>"^s_T3-STRUCTURE^": { "template": ( ["C", "D", "E"
+        ], [ { "structure": "^s_T1-STRUCTURE^" }, { "structure":
+        "^s_T1-STRUCTURE^" }, { "vector": 3 } ] ) }</tt><br>
+    </blockquote>
+    I say "perhaps", because it makes some sense to expand the
+    "structure" entries to "template" entries, giving us instead<br>
+    <blockquote><tt>"^s_T3-STRUCTURE^": { "template": ( <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp; ["C", "D", "E" ], <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; [ </tt><tt><tt>{
+          "template": ( ["A", "B", "I"], [ { "scalar": True }, {
+          "scalar": True }, { "integer": True } ] ) }</tt>, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt><tt><tt>{
+          "template": ( ["A", "B", "I"], [ { "scalar": True }, {
+          "scalar": True }, { "integer": True } ] ) }</tt>, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; { "vector": 3 } <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ] ) }<br>
+      </tt></blockquote>
+    In this form it is immediately apparent that <tt>T2-STRUCTURE</tt>
+    and <tt>T3-STRUCTURE</tt> are identical.&nbsp; Note, however, that
+    this expansion or non-expansion of "structure" entries in the
+    internal representation of structure templates is irrelevant to the
+    structures declared with these structure templates, since the
+    internal data in the structures always corresponds to the expanded
+    form of the templates anyway.&nbsp; <br>
+    <br>
+    It appears to me that the internal representation of the structure
+    templates should <i>not</i> use the expanded form.&nbsp; Recall
+    that one use pattern for structure templates is to store them in
+    "libraries" for later reuse.&nbsp; In the unexpanded form, it is
+    possible to redefine <tt>T1-STRUCTURE</tt> in the library in such a
+    way that <tt>T3-STRUCTURE</tt> is transparently redefined at the
+    same time, thus reducing the cost to change the code; whereas it is
+    not possible for a redefinition of <tt>T1-STRUCTURE</tt> to
+    transparently carry over into <tt>T2-STRUCTURE</tt> since <tt>T2-STRUCTURE</tt>
+    has no dependence on <tt>T1-STRUCTURE</tt>, thus improving
+    reliability by reducing the possibility of unintended
+    consequences.&nbsp; Admittedly, I have no evidence at all the
+    original library system would have desired this kind of transparent
+    redefinition or not.&nbsp; I could provide arguments either
+    way.&nbsp; However, my expectation (in spite of statements in HAL/S
+    documentation about the importance of reliability) would be that
+    convenience would have been prioritized over reliability in this
+    instance; transparent redefinition probably would have been desired,
+    and hence that automatic expansion (in the representation of the
+    templates) of "structure" into "template" would not have been
+    desired.<br>
+    <blockquote>
+    </blockquote>
+    <ul>
     </ul>
     <h2><a name="Instructions"></a>Instructions</h2>
     <p>This section covers all available PALMAT instructions which can appear in an instruction stream, i.e., in <tt>PALMAT["scopes"][index]["instructions"]</tt>.&nbsp; I've grouped them below according to my categorization of their functionality.<br></p>
@@ -682,6 +804,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
               length, 'b']}<br>
             </tt></td>
           <td valign="top">Pushes a <tt>BOOLEAN</tt> or <tt>BIT</tt>-stream
+
 
 
 
@@ -1019,6 +1142,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.<br>
           </td>
@@ -1050,6 +1174,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1069,6 +1194,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
             TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
             values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
 
 
 
@@ -1113,6 +1239,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1146,6 +1273,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             But it's unclear what the result of the operation should be
             if operand2 has no known maximum length.<br>
           </td>
@@ -1157,6 +1285,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If they are equal, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1201,6 +1330,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1222,6 +1352,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 &lt; operand2, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1269,6 +1400,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1304,6 +1436,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1328,6 +1461,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 ≥ operand2, pushes the <tt>BIT</tt>-string
+
 
 
 
@@ -1420,6 +1554,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
               V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
             <blockquote> </blockquote>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
@@ -1500,10 +1635,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             The HAL/S run-time library functions are documented in the
             HAL/S documentation, particularly the <a
               moz-do-not-send="true"
               href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+
 
 
 
@@ -1654,10 +1791,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt></tt><tt>"MATRIX"&nbsp; "3"&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>"2"&nbsp;
+
 
 
 
@@ -1710,10 +1849,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
+
 
 
 
@@ -1732,6 +1873,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
               </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </blockquote>
             Moreover, <tt>typeofv</tt> can analyze any datatype found
             on the computation stack, and that's not quite the same as
@@ -1742,6 +1884,7 @@ p, li { white-space: pre-wrap; }
             identifiers, from the PALMAT <tt>fetchp</tt> instruction),
             and "NONE" for uninitialized data.&nbsp; Most of these extra
             types actually cannot appear to <tt>typeofv</tt> for <i>correctly</i>-generated
+
 
 
 
@@ -1832,6 +1975,7 @@ p, li { white-space: pre-wrap; }
             eliminating all flexibility and checking.&nbsp; At runtime,
             either instruction pops operand1 and operand2, which are
             supposed to be <tt>INTEGER</tt>, or at worst <tt>SCALAR</tt>.&nbsp;
+
 
 
 
@@ -2016,8 +2160,10 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             To attach a symbolic label (say "<tt>MYLABEL</tt>") to the
             write instruction, the instruction would be modified to <tt>{'write':
+
 
 
 
@@ -2206,6 +2352,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             and (in effect, but not literally) replaces the entire third
             instruction by <tt>{'storepop': (0, 'Z')}</tt>.<br>
           </td>
@@ -2228,10 +2375,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             subroutine.&nbsp; (See the preceding entry.)<br>
             <br>
             The first variant of the instruction is for return from a <tt>PROCEDURE</tt>,
             while the second variant is for return from a <tt>FUNCTION</tt>.&nbsp;
+
 
 
 
@@ -2279,6 +2428,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             Also in principle, I don't believe there's any HAL/S code
             whose compilation is capable of generating this instruction.<br>
           </td>
@@ -2303,6 +2453,7 @@ p, li { white-space: pre-wrap; }
               </tt></blockquote>
             In practice, since this instruction is used for a single
             purpose, the <tt>identifer</tt> is always called "<tt>df_b</tt>",
+
 
 
 
@@ -2345,6 +2496,7 @@ p, li { white-space: pre-wrap; }
             appropriate scope.&nbsp; (This allows the <tt>returnoffset</tt>
             instruction to be used for implementing a HAL/S <tt>REPEAT</tt>
             <i>with</i> a symbolic label to an enclosing discrete <tt>FOR</tt>-loop,
+
 
 
 
@@ -2449,6 +2601,7 @@ p, li { white-space: pre-wrap; }
 
 
 
+
             Note that the preliminary implementation supports only <tt>lun=6</tt>,
             namely <i>stdout</i> (i.e., the console).&nbsp; The values
             to be printed are removed from the stack in first-in
@@ -2473,6 +2626,7 @@ p, li { white-space: pre-wrap; }
           <td valign="top" nowrap="nowrap"><tt>{'read': lun}<br>
             </tt> </td>
           <td valign="top">Reads values from the "logical unit number (<tt>lun</tt>).&nbsp;
+
 
 
 
@@ -2573,7 +2727,7 @@ p, li { white-space: pre-wrap; }
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-03-13<br>
+          2023-03-14<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
