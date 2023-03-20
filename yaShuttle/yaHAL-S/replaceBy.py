@@ -294,6 +294,8 @@ def processStructureStatementOriginal(fullLine, macros):
                                         identifier, 
                         "pattern": fqStart + identifier + fqEnd }
 
+# Returns the modified line (or the same line if unmodified, and a boolean
+# success indicator.
 def processStructureStatement(fullLine, macros):
     remainder = re.sub("^\\s*STRUCTURE\\s+", "", fullLine.replace(";", ""), 1)
     topFields = remainder.split(":", 1)
@@ -336,7 +338,10 @@ def processStructureStatement(fullLine, macros):
     for j in range(len(structureFieldsSpecs)):
         structureFieldsSpec = structureFieldsSpecs[j]
         fields = splitOutsideParentheses(structureFieldsSpec)
-        level = int(fields[0])
+        try:
+            level = int(fields[0])
+        except:
+            return fullLine, False
         while len(unmangled) >= level:
             unmangled.pop()
             mangled.pop()
@@ -410,7 +415,7 @@ def processStructureStatement(fullLine, macros):
     topFields[1] = ", ".join(structureFieldsSpecs)
     remainder = ": ".join(topFields)
     fullLine = " STRUCTURE " + remainder + ";"
-    return fullLine
+    return fullLine, True
 
 def fixStructureMacros(macros, structureTemplateName, identifier):
     '''
@@ -610,7 +615,11 @@ def replaceBy(halsSource, metadata, macros=[{}], trace=False):
                                         fullLine)
                     if match != None:
                         if not ORIGINAL_STRUCTURE:
-                            line = processStructureStatement(fullLine, macros)
+                            line, success = \
+                                processStructureStatement(fullLine, macros)
+                            if not success:
+                                print("Ill-formed STRUCTURE statement.", \
+                                      file=sys.stderr)
                             halsSource[i] = line
                         else:
                             processStructureStatementOriginal(fullLine, \

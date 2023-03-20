@@ -116,6 +116,13 @@ def fixupState(state, fsType, name=None):
 # Update attribute for identifier.
 def updateCurrentIdentifierAttribute(PALMAT, state, attribute=None, value=True):
     global substate
+    if "currentStructureTemplateAttributes" in substate and \
+            0 != len(substate["currentStructureTemplateAttributes"]):
+        # We come here if we're processing a STRUCTURE statement.
+        if attribute != None:
+            substate["currentStructureTemplateAttributes"][-1][attribute] = value
+        return
+    # We come here if we're processing a DECLARE statement.
     history = state["history"]
     if substate["currentIdentifier"] == "":
         if ('declareBody_attributes_declarationList' in history and \
@@ -239,8 +246,7 @@ def stringLiteral(PALMAT, state, s):
                     identifiers[s] = { "template": ([], []) }
                     substate["currentStructureTemplateIdentifier"] = s
                     substate["currentStructureTemplateDescent"] = []
-                    #print("*A", substate["currentStructureTemplateIdentifier"])
-                    #print("*B", substate["currentStructureTemplateDescent"])
+                    substate["currentStructureTemplateAttributes"] = []
         else:
             updateCurrentIdentifierAttribute(PALMAT, state, "structure", sp)
     elif "structure_stmt" in history and \
@@ -261,13 +267,16 @@ def stringLiteral(PALMAT, state, s):
         else:
             # Fieldname for the structure statement.
             descent = substate["currentStructureTemplateDescent"]
+            dattributes = substate["currentStructureTemplateAttributes"]
             level = substate["currentStructureTemplateLevel"]
             while len(descent) > level:
                 descent.pop()
+                dattributes.pop()
             if len(descent) == level:
                 # We're on an existing level, and can thus add the new field
                 # to that level.
                 descent[-1] = sp
+                dattributes[-1] = {}
                 pass
             elif level == len(descent) + 1:
                 # The last field added was a substructure, or else the template
@@ -275,6 +284,7 @@ def stringLiteral(PALMAT, state, s):
                 # add the level for that substructure and add our new field
                 # to it.
                 descent.append(sp)
+                dattributes.append({})
                 pass
             else:
                 substate["errors"]\
