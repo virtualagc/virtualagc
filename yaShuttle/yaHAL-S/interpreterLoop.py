@@ -188,7 +188,7 @@ helpMenu = \
 def interpreterLoop(shouldColorize=False, \
                     xeq=True, lbnf=False, bnf=False, ansiWrapper=True):
 
-    macros = [{}]
+    macros = [{"@": 0}]
     spooling = False
     strict = False
     colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan",
@@ -583,11 +583,20 @@ def interpreterLoop(shouldColorize=False, \
                         print("\t(None)")
                     else:
                         for macro in sorted(macros[0]):
+                            if macro == "@":
+                                continue
                             if (len(fields) > 1 or "-STRUCTURE" not in macro) \
                                      and "replacement" in macros[0][macro] and \
                                     "ignore" not in macros[0][macro]:
-                                print("\t%s  ->  %s" % \
-                                      (macro, macros[0][macro]["replacement"]))
+                                if "pattern" in macros[0][macro]:
+                                    print("\t%s  ->  %s  (%s)" % \
+                                          (macro, 
+                                           macros[0][macro]["replacement"],
+                                           macros[0][macro]["pattern"]))
+                                else:
+                                    print("\t%s  ->  %s" % \
+                                          (macro, 
+                                           macros[0][macro]["replacement"]))
                     continue
                 elif firstWord == "HELP":
                     print(helpMenu)
@@ -648,6 +657,8 @@ def interpreterLoop(shouldColorize=False, \
         macros0 = macros[0]
         macrosToDrop = []
         for macro in macros0:
+            if macro == "@":
+                continue
             if "ignore" in macros0[macro]:
                 macrosToDrop.append(macro)
                 continue

@@ -38,6 +38,7 @@ from decimal import Decimal, ROUND_HALF_UP
 # fixed-length pattern, so all I can really check for is that there's no leading
 # "."; I can't check for a leading dot and some unknown number of spaces.
 # Fortunately, lookahed isn't restricted like that.
+fqShort = "\\b"
 fqStart = "(?<!\\.)\\b"
 fqEnd = "\\b(?!\\s*\\.)"
 

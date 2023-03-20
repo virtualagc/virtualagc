@@ -97,7 +97,7 @@ of the parameters:
 def processSource(PALMAT, halsSource, metadata, noCompile=False, lbnf=False, 
                     bnf=False, \
                     trace1=False, wine=False, trace2=False, tabSize=8, \
-                    macros=[{}], trace4=False, strict=True, trace0=False):
+                    macros=[{"@": 0}], trace4=False, strict=True, trace0=False):
 
     # Because whitespace is important in E/M/S constructs and (potentially) in 
     # the positioning our compiler output is going to use for error markers, 
