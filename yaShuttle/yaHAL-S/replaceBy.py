@@ -101,7 +101,7 @@ import sys
 import re
 import copy
 import unEMS
-from palmatAux import splitOutsideParentheses, fqStart, fqEnd, fqShort
+from palmatAux import splitOutsideParentheses, fqStart, fqEnd
 
 bareIdentifierPattern = '[A-Za-z]([A-Za-z0-9_]*[A-Za-z0-9])?'
 identifierPattern = "\\b" + bareIdentifierPattern
@@ -118,6 +118,8 @@ replaceByPattern = replacePattern + argListPattern + byPattern
 declarePattern = '\\bDECLARE\\s'
 
 fqPattern = bareIdentifierPattern + "(\\s*[.]\\s*" + bareIdentifierPattern + ")*"
+lastWordPattern = fqStart + bareIdentifierPattern + "\\s*$"
+firstWordPattern = "^\\s*" + bareIdentifierPattern + fqEnd
 
 # Note that the mangling prefix for FUNCTION is actually "l_" only for 
 # arithmetical functions; for boolean functions it's "bf_", for character
@@ -213,6 +215,55 @@ def expandMacros(rawline, macros, maxScopes=1000000):
                                     macro["arguments"][j], newArgs[j])
                     line = line[:match.span()[0]] + replacement \
                                     + line[match.span()[1]:]
+    '''
+    There's one thing the loop above wasn't able to do, and that's to
+    deal with the dreaded dot product of two vectors, say A.B, in which
+    one or both of A or B is a call to a no-argument VECTOR function.
+    Such replacements do appear in the macros[] table, but only in a 
+    form in which they cannot be found by the check above if they are
+    preceded or followed by a ".".  And the patterns in the macros[] 
+    table can't be changed to allow the ".", because the name of the 
+    function *could* coincide with a structure-field name.  But this
+    pathological dot-product case can be detected by more-complex 
+    processing (which we'll do right now), since if A.B were a qualified
+    structure-field identifier A would have to be mangled to s_A (which
+    it can't for a dot product).
+    '''
+    changedNow = False
+    partitions = line.split(".")
+    for i in range(len(partitions) - 1):
+        # Now, we check the last word in partitions[i] and the first word
+        # in partitions[i+1] to see if they may represent a dot-product.
+        match1 = re.search(lastWordPattern, partitions[i])
+        if match1 == None:
+            continue
+        leftWord = match1.group().strip()
+        if leftWord[:2] == "s_":
+            continue
+        leftStart = match1.span()[0]
+        match2 = re.search(firstWordPattern, partitions[i+1])
+        if match2 == None:
+            continue
+        rightWord = match2.group().strip()
+        rightEnd = match2.span()[1]
+        for depth in range(blockDepth, -1, -1):
+            if match1 == None and match2 == None:
+                break
+            if match1 != None and leftWord in macros[depth] and \
+                    "replacement" in macros[depth][leftWord]:
+                partitions[i] = partitions[i][:leftStart] + \
+                                macros[depth][leftWord]["replacement"]
+                changedNow = True
+                match1 = None
+            if match2 != None and rightWord in macros[depth] and \
+                    "replacement" in macros[depth][rightWord]:
+                partitions[i+1] = macros[depth][rightWord]["replacement"] + \
+                                  partitions[i+1][rightEnd:]
+                changedNow = True
+                match2 = None
+    if changedNow:
+        line = ".".join(partitions)
+        changed = True
     return line, changed
 
 # This performs the complete processing for a STRUCTURE statement.  I.e., it
@@ -343,14 +394,6 @@ def processStructureStatement(fullLine, macros):
     return fullLine, True
 
 def fixStructureMacros(macros, structureTemplateName, identifier):
-    '''
-    print("%%A", identifier)
-    print("%%B", structureTemplateName)
-    for i in range(len(macros)-1, -1, -1):
-        print("%%C", i)
-        for macro in sorted(macros[i]):
-            print("%%C\t", macro, "->", macros[i][macro])
-    '''
     found = False
     macrosAnnex = {}
     for scopeMacros in reversed(macros):
@@ -498,15 +541,9 @@ def replaceBy(halsSource, metadata, macros=[{"@": 0}], trace=False):
                     print("\tBlock-nesting error in preprocessor, line", i+1)
                     return
                 if identifier not in macros[-2]:
-                    fs = fqStart
-                    fe = fqEnd
-                    if identifier[:2] == "l_" or \
-                            identifier[:3] in ["sf_", "bf_", "cf_", "nf_"]:
-                        fs = fqShort
-                        fe = fqShort
                     macros[-2][identifier] = { "arguments": [], 
                                 "replacement": hasType + identifier, 
-                                "pattern": fs + identifier + fe }
+                                "pattern": fqStart + identifier + fqEnd }
                 elif hasType == "nf_":
                     # The identifier is already in the macro table, which can
                     # only mean it was previously-defined by a forward
@@ -516,7 +553,7 @@ def replaceBy(halsSource, metadata, macros=[{"@": 0}], trace=False):
                     # replacements already done.  Note that the present line
                     # hasn't yet had any replacements made in it.
                     macro = macros[-2][identifier]
-                    macro["pattern"] = fqShort + identifier + fqShort
+                    macro["pattern"] = "\\b" + identifier + "\\b"
                     oldReplacement = macro["replacement"]
                     newReplacement = hasType + identifier
                     if oldReplacement != newReplacement:
@@ -659,14 +696,9 @@ def replaceBy(halsSource, metadata, macros=[{"@": 0}], trace=False):
                         if len(declaration) == 1 and overallType != "":
                             identifier = declaration[0]
                             if identifier[:2] != overallType:
-                                fs = fqStart
-                                fe = fqEnd
-                                if overallType in ["l_", "sf_", "bf_", "cf_", "nf_"]:
-                                    fs = fqShort
-                                    fe = fqEnd
                                 macros[-1][identifier] = { "arguments": [], 
                                         "replacement": overallType + identifier, 
-                                        "pattern": fs + identifier + fe }
+                                        "pattern": fqStart + identifier + fqEnd }
                                 if overallStructureTemplate:
                                     fixStructureMacros(macros,
                                                        overallStructureTemplate, \
@@ -693,15 +725,10 @@ def replaceBy(halsSource, metadata, macros=[{"@": 0}], trace=False):
                                 else:
                                     thisType = "l_"
                             identifier = declaration[0]
-                            fs = fqStart
-                            fe = fqEnd
-                            if thisType in ["l_", "sf_", "bf_", "cf_", "nf_"]:
-                                fs = fqShort
-                                fe = fqShort
                             if identifier[:2] != thisType:
                                 macros[-1][identifier] = { "arguments": [], 
                                         "replacement": thisType + identifier, 
-                                        "pattern": fs + identifier + fe }
+                                        "pattern": fqStart + identifier + fqEnd }
                         elif len(declaration) >= 2 and \
                                 "-STRUCTURE" == declaration[1][-10:]:
                             thisType = "s_"
