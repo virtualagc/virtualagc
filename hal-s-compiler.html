@@ -520,7 +520,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
           <li>"scalar" or "integer":&nbsp; The value is always the boolean <tt>True</tt>.  (I mean the value associated with the key/value pair in the dictionary; not the value of the variable; that's covered in a moment.)</li>
           <li>"bit", "character", or "vector":&nbsp; The value is an integer, giving the width of the bit-string, character-string, or vector stored in the variable.</li>
           <li>"matrix": The value is a list of two integers defining the geometry, thusly:&nbsp; [number of rows, number of columns].</li>
-          <li>"structure": The value is the name (which is an identifier, not carat-quoted) of the associated structure template (see below).</li>
+          <li>"structure": The value is the name (which is also an identifier, as described below) of the associated structure template.</li>
         </ul>
         <li>Optional "array".&nbsp; The associated value is a list of the array's dimensions:&nbsp; [N<sub>1</sub>, N<sub>2</sub>, ..., N<sub>M</sub>] for an M-dimensional array.</li>
         <li>Optional "initial".&nbsp; This is the initial value assigned to the variable, prior to execution of any code in the scope.&nbsp; See the <a moz-do-not-send="true" href="#Datatypes">Datatypes Section</a> for an explanation of the nature of this data.<br></li>
@@ -619,21 +619,51 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ] ) }<br>
       </tt></blockquote>
+    Or consider<br>
+    <blockquote><tt>STRUCTURE T3:<br>
+        &nbsp;&nbsp;&nbsp; 1 A,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 2 B,<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 3 C
+        INTEGER;<br>
+      </tt></blockquote>
+    This would appear as:<br>
+    <blockquote><tt>"^s_T3-STRUCTURE^": { "template": (<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; ["A"],<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; [ { "template": (<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ["B"],<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; [ {
+        "template": ( ["C"], [ { "integer": True } ] ) } ] <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ) } ]<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; )<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>
+      </tt></blockquote>
     Finally, consider<br>
     <blockquote><tt>
-        STRUCTURE T3:</tt><tt><br>
+        STRUCTURE T4:</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp; 1 C T1-STRUCTURE,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp; 1 D T1-STRUCTURE,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp; 1 E VECTOR;</tt><br>
     </blockquote>
     Perhaps this could appear in the identifiers dictionary as<br>
-    <blockquote><tt>"^s_T3-STRUCTURE^": { "template": ( ["C", "D", "E"
+    <blockquote><tt>"^s_T4-STRUCTURE^": { "template": ( ["C", "D", "E"
         ], [ { "structure": "^s_T1-STRUCTURE^" }, { "structure":
         "^s_T1-STRUCTURE^" }, { "vector": 3 } ] ) }</tt><br>
     </blockquote>
     I say "perhaps", because it makes some sense to expand the
     "structure" entries to "template" entries, giving us instead<br>
-    <blockquote><tt>"^s_T3-STRUCTURE^": { "template": ( <br>
+    <blockquote><tt>"^s_T4-STRUCTURE^": { "template": ( <br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp; ["C", "D", "E" ], <br>
@@ -655,19 +685,19 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ] ) }<br>
       </tt></blockquote>
     In this form it is immediately apparent that <tt>T2-STRUCTURE</tt>
-    and <tt>T3-STRUCTURE</tt> are identical.&nbsp; Note, however, that
-    this expansion or non-expansion of "structure" entries in the
-    internal representation of structure templates is irrelevant to the
-    structures declared with these structure templates, since the
-    internal data in the structures always corresponds to the expanded
-    form of the templates anyway.&nbsp; <br>
+    and <tt>T3-STRUCTURE</tt> are identical.&nbsp; Note that this
+    expansion or non-expansion of "structure" subfields in the internal
+    representation of structure templates is irrelevant to the
+    structures <i>declared</i> with these structure templates, since
+    the internal data in the structures always corresponds to the
+    expanded form of the templates anyway.&nbsp; <br>
     <br>
     It appears to me that the internal representation of the structure
     templates should <i>not</i> use the expanded form.&nbsp; Recall
     that one use pattern for structure templates is to store them in
     "libraries" for later reuse.&nbsp; In the unexpanded form, it is
     possible to redefine <tt>T1-STRUCTURE</tt> in the library in such a
-    way that <tt>T3-STRUCTURE</tt> is transparently redefined at the
+    way that <tt>T4-STRUCTURE</tt> is transparently redefined at the
     same time, thus reducing the cost to change the code; whereas it is
     not possible for a redefinition of <tt>T1-STRUCTURE</tt> to
     transparently carry over into <tt>T2-STRUCTURE</tt> since <tt>T2-STRUCTURE</tt>
