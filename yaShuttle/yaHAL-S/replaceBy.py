@@ -361,8 +361,7 @@ def processStructureStatement(fullLine, macros):
                                 mName = "." + mName
                             macrosAnnex[uName] = {
                                 "arguments": [],
-                                "replacement": mName,
-                                "pattern": mName + "\\b"
+                                "replacement": mName
                                 }
                 macros[-1].update(macrosAnnex)
         if not mangledAlready and j+1 < len(structureFieldsSpecs):
@@ -384,8 +383,7 @@ def processStructureStatement(fullLine, macros):
         uName = identifier + "-STRUCTURE." + ".".join(unmangled)
         mName = "." + ".".join(mangled)
         macros[-1][uName] = { "arguments": [], 
-                    "replacement": mName, 
-                    "pattern": mName + "\\b" }
+                    "replacement": mName }
         structureFieldsSpecs[j] = " ".join(fields)
     topFields[0] = " ".join(subfields)
     topFields[1] = ", ".join(structureFieldsSpecs)

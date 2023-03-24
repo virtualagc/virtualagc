@@ -59,7 +59,7 @@ from processSource import processSource
 from palmatAux import constructPALMAT, writePALMAT, readPALMAT, \
         collectGarbage, findIdentifier, astSourceFile
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate, \
-        resetStatement
+        resetStatement, printTemplate
 from executePALMAT import executePALMAT
 from replaceBy import bareIdentifierPattern
 from optimizePALMAT import optimizePALMAT
@@ -362,8 +362,13 @@ def interpreterLoop(shouldColorize=False, \
                             for identifier in sorted(identifiers):
                                 if showLabels or \
                                         "label" not in identifiers[identifier]:
-                                    print("\t%s:" % identifier[1:-1], \
-                                            identifiers[identifier])
+                                    if "template" in identifiers[identifier]:
+                                        printTemplate(identifier, \
+                                                      identifiers[identifier], \
+                                                      8)
+                                    else:
+                                        print("\t%s:" % identifier[1:-1], \
+                                                identifiers[identifier])
                     continue
                 elif firstWord == "PALMAT":
                     if len(fields) == 1:

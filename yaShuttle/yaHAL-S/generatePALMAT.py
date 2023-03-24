@@ -842,7 +842,8 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     identifierDict["value"] = copy.deepcopy(arrayList)
     elif lbnfLabel in ["char_spec", "bitSpecBoolean",  
                        "sQdQName_doublyQualNameHead_literalExpOrStar",
-                       "arraySpec_arrayHead_literalExpOrStar"]:
+                       "arraySpec_arrayHead_literalExpOrStar"] and \
+            "currentStructureTemplateIdentifier" not in substate:
         # I wish I had commented this when I first wrote it!  What I think
         # is going on here is that in a DECLARE for a BIT, CHARACTER, VECTOR,
         # MATRIX, or ARRAY, list of dimensions will have been computed by the
@@ -891,6 +892,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                     datatype = "matrix"
                     if len(maxLens) not in [1, 2]:
                         raise Exception("MATRIX(...) wrong dimension")
+                else:
+                    raise Exception(\
+                        "Unimplemented datatype attributes: %s %s" \
+                          % (str(identifierDict), str(maxLens)) )
             elif lbnfLabel == "arraySpec_arrayHead_literalExpOrStar":
                 datatype = "array"
             elif lbnfLabel == "bitSpecBoolean":
@@ -903,28 +908,15 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                 identifierDict[datatype] = maxLens[0]
             #instructions.clear()
         except Exception as error:
-            print("\tComputation of datatype length failed:", \
-                  lbnfLabel, currentIdentifier, error)
+            print("\tComputation of datatype length failed: '%s' '%s': %s" % \
+                  (lbnfLabel, currentIdentifier, error) )
             #instructions.clear()
-            identifiers.pop(currentIdentifier)
+            if currentIdentifier in identifiers:
+                identifiers.pop(currentIdentifier)
             endLabels.pop()
             return False, PALMAT
     elif lbnfLabel in ["basicStatementExit", "basicStatementRepeat"]:
         loopScope = findEnclosingLoop(PALMAT, currentScope)
-        #if lbnfLabel == "basicStatementExit" and 'labelExitRepeat' in substate:
-        #    si, attributes = findIdentifier(substate['labelExitRepeat'], \
-        #                                    PALMAT, currentScope["self"])
-        #    if attributes == None:
-        #        print("\tCannot find identier:", substate['labelExitRepeat'])
-        #        endLabels.pop()
-        #        return False, PALMAT
-        #    else:
-        #        appendInstruction(currentScope["instructions"], \
-        #                          {'goto': (si, substate['labelExitRepeat'])}, \
-        #                          source)
-        #    substate.pop('labelExitRepeat')
-        #elif lbnfLabel == "basicStatementRepeat" and \
-        #        'labelExitRepeat' in substate:
         if 'labelExitRepeat' in substate:
             label = substate.pop('labelExitRepeat')
             # We have to find the ancestor scope in which this label is
