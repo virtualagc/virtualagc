@@ -366,7 +366,7 @@ def stringLiteral(PALMAT, state, s):
                 # This is a declaration that a field in a structure is itself
                 # a substructure.
                 updateCurrentIdentifierAttribute(PALMAT, state, \
-                                                 "template", ([], []))
+                                            "structure", sp[2:] + "-STRUCTURE")
             else:
                 # This is the name of in an actual definition of a structure 
                 # template.
