@@ -832,6 +832,58 @@ def uninitializedComposite(arrayDimensions, dimensions):
         return composite
     return None
 
+# Returns an uninitialized STRUCTURE, given the attributes of the associated
+# structure template, or NaN on error.
+def uninitializedStructure(PALMAT, currentScope, templateName, templateAttributes):
+    currentIndex = currentScope["self"]
+    if "template" in templateAttributes:
+        fieldNames = templateAttributes["template"][0]
+        fieldAttributes = templateAttributes["template"][1]
+    elif "structure" in templateAttributes:
+        subTemplateName = templateAttributes["structure"][:-10]
+        subTemplateScope, subTemplateAttribute = \
+            findIdentifier("^s_" + subTemplateName + "^", \
+                           PALMAT, currentIndex)
+        fieldNames = subTemplateAttribute["template"][0]
+        fieldAttributes = subTemplateAttribute["template"][1]
+    else:
+        return NaN
+    structure = []
+    for i in range(len(fieldNames)):
+        fieldName = fieldNames[i]
+        fieldAttribute = fieldAttributes[i]
+        if "structure" in fieldAttribute:
+            sub = uninitializedStructure(PALMAT, currentScope, \
+                                         fieldAttribute["structure"][:-10], \
+                                         fieldAttribute)
+            if sub == NaN:
+                return NaN
+            structure.append(sub)
+        elif "template" in fieldAttribute:
+            sub = uninitializedStructure(PALMAT, currentScope, "", \
+                                         fieldAttribute)
+            if sub == NaN:
+                return NaN
+            structure.append(sub)
+        elif "array" in fieldAttribute or "vector" in fieldAttribute \
+                or "matrix" in fieldAttribute:
+            arrayDimensions = []
+            if "array" in fieldAttribute:
+                arrayDimensions = fieldAttribute["array"]
+            dimensions = []
+            if "vector" in fieldAttribute:
+                dimensions = [fieldAttribute["vector"]]
+            elif "matrix" in fieldAttribute:
+                dimensions = fieldAttribute["matrix"]
+            structure.append(uninitializedComposite(arrayDimensions, dimensions))
+        else:
+            structure.append(None)
+    if templateName[:2] == "s_":
+        structure.append(templateName[2:] + "-STRUCTURE")
+    else:
+        structure.append(templateName + "-STRUCTURE")
+    return structure
+
 # Complete the initialization of a VECTOR, MATRIX, or ARRAY by making sure that
 # INITIALs or CONSTANTs are filled out to the proper geometry with appropriate
 # values.  Returns [] on success, or a list of identifiers which failed.
@@ -931,7 +983,7 @@ def completeInitialConstants(currentScope):
     
 # Make sure every variable in the scope has a "value", even if it's 
 # uninitialized.
-def setUninitialized(currentScope):
+def setUninitialized(PALMAT, currentScope):
     
     identifiers = currentScope["identifiers"]
     parameters = []
@@ -961,7 +1013,18 @@ def setUninitialized(currentScope):
         if "value" not in attributes and "constant" not in attributes and \
                 ("integer" in attributes or "scalar" in attributes or \
                  "vector" in attributes or "matrix" in attributes or \
-                 "bit" in attributes or "character" in attributes):
+                 "bit" in attributes or "character" in attributes or \
+                 "structure" in attributes):
+            if "structure" in attributes:
+                templateName = attributes["structure"]
+                dummy, templateAttributes = \
+                    findIdentifier("^" + templateName + "^", \
+                                   PALMAT, currentScope["self"])
+                attributes["value"] = uninitializedStructure(PALMAT, \
+                                                             currentScope, \
+                                                             templateName, \
+                                                             templateAttributes)
+                continue
             dimensions = []
             arrayDimensions = []
             if "array" in attributes:

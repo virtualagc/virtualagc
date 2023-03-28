@@ -630,7 +630,7 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
     elif lbnfLabel in ["declare_statement", "temporary_stmt"]:
         markUnmarkedScalars(currentScope["identifiers"])
         messages = completeInitialConstants(currentScope)
-        setUninitialized(currentScope)
+        setUninitialized(PALMAT, currentScope)
         if messages != []:
             print("\tGeometry mismatch for INITIAL or CONSTANT data,", messages)
             return False, PALMAT

@@ -2907,6 +2907,22 @@ S     J,*
  CLOSE ARRAYED_RTL;
  CALL ARRAYED_RTL ASSIGN(ERRORS, TOTAL);
  
+ /*--------------------------------------------------------------------------*/
+ WRITE(6);
+ WRITE(6) 'Dot-products A.B vs structure references A.B.';
+  /* Explanation:  In the final WRITE statement, we should see 14, which is the
+    dot product of vector (1,2,3) with itself.  But if the preprocessor doesn't
+    correctly mangle the leading G (in G . G), we'll instead see an emulation
+    error. */
+ DOTPRODUCT_VS_STRUCTURE: FUNCTION; 
+ DECLARE G FUNCTION VECTOR;
+ F: FUNCTION SCALAR; RETURN G.G; CLOSE F;
+ G: FUNCTION VECTOR; DECLARE V VECTOR INITIAL(1,2,3); RETURN V; CLOSE G;
+ RETURN F;
+ CLOSE DOTPRODUCT_VS_STRUCTURE; 
+ IF DOTPRODUCT_VS_STRUCTURE = 14 THEN BB = TRUE; ELSE BB = FALSE;
+ CALL PRINT_RESULT('Dot-product vs structure-reference', BB) ASSIGN (ERRORS, TOTAL);
+ 
  /*--------------------------------------------------------------------------*/	
  WRITE(6) ;
  IF ALLTESTS THEN DO;
