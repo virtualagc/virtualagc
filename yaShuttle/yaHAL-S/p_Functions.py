@@ -345,6 +345,13 @@ def stringLiteral(PALMAT, state, s):
     if False:
         pass
     elif state1 == "number" and \
+            "arraySpec_arrayHead_literalExpOrStar" in history and \
+            "structure_stmt" in history:
+        attributes = findTemplateAttributes(\
+                identifiers[substate["currentStructureTemplateIdentifier"]], \
+                substate["currentStructureTemplateDescent"])
+        attributes["array"].append(int(sp))
+    elif state1 == "number" and \
             "sQdQName_doublyQualNameHead_literalExpOrStar" in history and \
             "currentStructureTemplateDescent" in substate and \
             substate["currentStructureTemplateIdentifier"] in identifiers:
