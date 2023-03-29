@@ -419,6 +419,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
       "program"</tt>, which is presumably self explanatory, as well as
     fields <tt>"name"</tt> and <tt>"attributes"</tt> that simply
     duplicate the declaration in scope 0.&nbsp; <br>
@@ -437,6 +439,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     compiler's code generator.&nbsp; Any HAL/S <tt>DO</tt> block or <tt>IF</tt>
     statement will trigger creation of a new child scope dedicated to it
     as well, and mark the new scope with the associated <tt>type</tt>.&nbsp;
+
+
 
 
 
@@ -570,7 +574,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
       </ul>
       <li>For structure templates:</li>
       <ul>
-        <li>The sole attribute, "template", provides a hierarchical specification of the template. Specifically, it is a Python ordered pair, of which the first entry is a Python list of the field names in the level (in the order encountered in the <tt>STRUCTURE</tt> statement) and the second entry is a Python list of the attribute dictionaries of those fields (<i>as if</i> they were freestanding entries for variables in the identifiers dictionary).  Both lists are in the same order and have the same number of entries.  Of course, not all attributes for variables are necessarily appropriate for structure templates.  For example, an <tt>INITIAL</tt> attribute (if any) should appear in the <tt>DECLARE</tt> statement for a structure, and not in the <tt>STRUCTURE</tt> statement for its template.</li>
+        <li>The sole attribute, "template", provides a hierarchical specification of the template. Specifically, it is a Python ordered pair, of which the first entry is a Python list of the field names in the level (in the order encountered in the <tt>STRUCTURE</tt> statement) and the second entry is a Python list of the attribute dictionaries of those fields (<i>as if</i> they were freestanding entries for variables in the identifiers dictionary).  The two lists are in the same order and have the same number of entries.  Of course, not all attributes for variables are necessarily appropriate for structure templates.  For example, an <tt>INITIAL</tt> attribute (if any) should appear in the <tt>DECLARE</tt> statement for a structure, and not in the <tt>STRUCTURE</tt> statement for its template.</li>
       </ul>
     </ul>
     <p>Here are some examples of attributes dictionaries for structure templates.  Consider first the HAL/S statement<br></p>
@@ -581,9 +585,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     </blockquote>
     Due to name-mangling, this would appear in the scope's identifiers
     dictionary as <br>
-    <blockquote><tt>"^s_T1-STRUCTURE^": { "template": ( ["A", "B", "I"],
-        [ { "scalar": True }, { "scalar": True }, { "integer": True } ]
-        ) }</tt><br>
+    <blockquote><tt>"^s_T1^": { "template": ( ["A", "B", "I"], [ {
+        "scalar": True }, { "scalar": True }, { "integer": True } ] ) }</tt><br>
     </blockquote>
     Or consider the slightly-more-complex case of<br>
     <blockquote><tt>STRUCTURE T2:<br>
@@ -598,7 +601,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         &nbsp;&nbsp;&nbsp; 1 E VECTOR;<br>
       </tt></blockquote>
     This would appear in the identifiers dictionary as<br>
-    <blockquote><tt>"^s_T2-STRUCTURE^": { "template": ( <br>
+    <blockquote><tt>"^s_T2^": { "template": ( <br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp; ["C", "D", "E" ], <br>
@@ -627,7 +630,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         INTEGER;<br>
       </tt></blockquote>
     This would appear as:<br>
-    <blockquote><tt>"^s_T3-STRUCTURE^": { "template": (<br>
+    <blockquote><tt>"^s_T3^": { "template": (<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; ["A"],<br>
@@ -650,20 +653,44 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>
       </tt></blockquote>
     Finally, consider<br>
-    <blockquote><tt>
-        STRUCTURE T4:</tt><tt><br>
+    <blockquote><tt> STRUCTURE T4:</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp; 1 C T1-STRUCTURE,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp; 1 D T1-STRUCTURE,</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp; 1 E VECTOR;</tt><br>
     </blockquote>
-    Perhaps this could appear in the identifiers dictionary as<br>
-    <blockquote><tt>"^s_T4-STRUCTURE^": { "template": ( ["C", "D", "E"
-        ], [ { "structure": "^s_T1-STRUCTURE^" }, { "structure":
-        "^s_T1-STRUCTURE^" }, { "vector": 3 } ] ) }</tt><br>
+    This would appear in the identifiers dictionary as<br>
+    <blockquote><tt>"^s_T4^": { "template": ( <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp; ["C", "D", "E" ], <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp; [ <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; { "structure":
+        "T1-STRUCTURE" }, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; { "structure":
+        "T1-STRUCTURE" }, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; { "vector": 3 } <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ) }</tt><br>
     </blockquote>
-    I say "perhaps", because it makes some sense to expand the
-    "structure" entries to "template" entries, giving us instead<br>
-    <blockquote><tt>"^s_T4-STRUCTURE^": { "template": ( <br>
+    Note the use of "<tt>structure</tt>" vs "<tt>template</tt>" here for
+    the <tt>C</tt> and <tt>D</tt> fields; they serve the same purpose,
+    except that the former identifies an applicable template by name,
+    whereas the latter expands the template explicitly.&nbsp; The
+    explicit form ("<tt>template</tt>") is used if and only if the
+    substructure being described has no explicitly-named template.<br>
+    <br>
+    One might <i>imagine</i> (incorrectly) that template <tt>T4</tt>
+    would instead appear in the identifiers dictionary as<br>
+    <blockquote><tt>"^s_T4^": { "template": ( <br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp; ["C", "D", "E" ], <br>
@@ -684,37 +711,66 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ] ) }<br>
       </tt></blockquote>
-    In this form it is immediately apparent that <tt>T2-STRUCTURE</tt>
-    and <tt>T3-STRUCTURE</tt> are identical.&nbsp; Note that this
-    expansion or non-expansion of "structure" subfields in the internal
-    representation of structure templates is irrelevant to the
-    structures <i>declared</i> with these structure templates, since
-    the internal data in the structures always corresponds to the
-    expanded form of the templates anyway.&nbsp; <br>
-    <br>
-    It appears to me that the internal representation of the structure
-    templates should <i>not</i> use the expanded form.&nbsp; Recall
-    that one use pattern for structure templates is to store them in
-    "libraries" for later reuse.&nbsp; In the unexpanded form, it is
-    possible to redefine <tt>T1-STRUCTURE</tt> in the library in such a
-    way that <tt>T4-STRUCTURE</tt> is transparently redefined at the
-    same time, thus reducing the cost to change the code; whereas it is
-    not possible for a redefinition of <tt>T1-STRUCTURE</tt> to
-    transparently carry over into <tt>T2-STRUCTURE</tt> since <tt>T2-STRUCTURE</tt>
+    This form (which again, is <i>not</i> used) would have some
+    advantages.&nbsp; For example, in this form it is immediately
+    apparent that <tt>T2-STRUCTURE</tt> and <tt>T4-STRUCTURE</tt> are
+    identical.&nbsp; The reason this fully-exanded form isn't used to
+    represent <tt>T4</tt> has to do with structure-template
+    libraries.&nbsp; Recall that one usage pattern for structure
+    templates is to store them in "libraries" for later reuse.&nbsp; In
+    the unexpanded form, it is possible to redefine <tt>T1-STRUCTURE</tt>
+    in the library in such a way that <tt>T4-STRUCTURE</tt> is
+    transparently redefined at the same time, thus reducing the cost to
+    change the code; whereas it is not possible for a redefinition of <tt>T1-STRUCTURE</tt>
+    to transparently carry over into <tt>T2-STRUCTURE</tt> since <tt>T2-STRUCTURE</tt>
     has no dependence on <tt>T1-STRUCTURE</tt>, thus improving
     reliability by reducing the possibility of unintended
-    consequences.&nbsp; Admittedly, I have no evidence at all the
-    original library system would have desired this kind of transparent
-    redefinition or not.&nbsp; I could provide arguments either
-    way.&nbsp; However, my expectation (in spite of statements in HAL/S
-    documentation about the importance of reliability) would be that
-    convenience would have been prioritized over reliability in this
-    instance; transparent redefinition probably would have been desired,
-    and hence that automatic expansion (in the representation of the
-    templates) of "structure" into "template" would not have been
-    desired.<br>
-    <blockquote>
+    consequences.&nbsp; <br>
+    <br>
+    Any given structure template may have some substructures described
+    by "<tt>structure</tt>" fields and others described by "<tt>template</tt>"
+    fields.&nbsp; For example, consider<br>
+    <blockquote><tt> STRUCTURE T5:</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 C T1-STRUCTURE,</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 D,</tt><tt><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 A SCALAR,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 B SCALAR,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 I INTEGER,<br>
+      </tt><tt>&nbsp;&nbsp;&nbsp; 1 E VECTOR;</tt><br>
     </blockquote>
+    which is identical in layout to <tt>T2-STRUCTURE</tt> and <tt>T4-STRUCTURE</tt>.&nbsp;
+    It is represented in the identifier dictionary as<br>
+    <blockquote><tt>"^s_T5^": {"template": [<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; ["s_C", "s_D", "E"], <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; [<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"structure":
+        "T1-STRUCTURE"}, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"template": [ ["A", "B",
+        "I"], [ {"scalar": true}, {"scalar": true}, {"integer": true} ]
+        ] }, <br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {"vector": 3}<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; ]<br>
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ]}</tt><br>
+    </blockquote>
+    But note that this expansion or non-expansion of "structure"
+    subfields in the internal representation of structure templates is
+    irrelevant to the structures <tt>DECLARE</tt>'d with those
+    structure templates.&nbsp; <tt>DECLARE</tt>'d structures are always
+    represented in a fully-expanded form.<br>
+    <blockquote> </blockquote>
     <ul>
     </ul>
     <h2><a name="Instructions"></a>Instructions</h2>
@@ -834,6 +890,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
               length, 'b']}<br>
             </tt></td>
           <td valign="top">Pushes a <tt>BOOLEAN</tt> or <tt>BIT</tt>-stream
+
+
 
 
 
@@ -1173,6 +1231,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.<br>
           </td>
@@ -1205,6 +1265,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1224,6 +1286,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             so both operands must be <tt>BIT</tt>-strings.&nbsp; It is
             TBD whether or not <tt>INTEGER</tt> or <tt>SCALAR</tt>
             values should be automatically converted to <tt>BIT</tt>-strings.&nbsp;
+
+
 
 
 
@@ -1270,6 +1334,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             But note that even if they were converted, their lengths
             (number of significant bits) would still be unknown.</td>
         </tr>
@@ -1304,6 +1370,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             But it's unclear what the result of the operation should be
             if operand2 has no known maximum length.<br>
           </td>
@@ -1315,6 +1383,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If they are equal, pushes the <tt>BIT</tt>-string
+
+
 
 
 
@@ -1361,6 +1431,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1382,6 +1454,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 &lt; operand2, pushes the <tt>BIT</tt>-string
+
+
 
 
 
@@ -1431,6 +1505,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1467,6 +1543,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
             corresponding to HAL/S <tt>TRUE</tt>, namely <tt>[1,1,'b']</tt>,
             onto the stack; otherwise, pushes <tt>FALSE</tt>, <tt>[0,1,'b']</tt>,
             onto the stack.<br>
@@ -1491,6 +1569,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
             </tt></td>
           <td valign="top">Pops operand1 and operand2 from the
             stack.&nbsp; If operand1 ≥ operand2, pushes the <tt>BIT</tt>-string
+
+
 
 
 
@@ -1585,6 +1665,8 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
 
 
 
+
+
               V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
             <blockquote> </blockquote>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
@@ -1666,10 +1748,14 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             The HAL/S run-time library functions are documented in the
             HAL/S documentation, particularly the <a
               moz-do-not-send="true"
               href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+
+
 
 
 
@@ -1822,10 +1908,14 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt></tt><tt>"MATRIX"&nbsp; "3"&nbsp; "5"&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>"2"&nbsp;
+
+
 
 
 
@@ -1880,10 +1970,14 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
                   ""&nbsp; ""&nbsp; ""&nbsp; ""<br>
                 </tt>"INTEGER"&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp;
                 ""&nbsp; ""&nbsp; ""&nbsp; ""&nbsp; </tt><tt><tt>""&nbsp;
+
+
 
 
 
@@ -1904,6 +1998,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
               </tt><tt><tt>""&nbsp; ""&nbsp; ""&nbsp; ""</tt></tt> </blockquote>
             Moreover, <tt>typeofv</tt> can analyze any datatype found
             on the computation stack, and that's not quite the same as
@@ -1914,6 +2010,8 @@ p, li { white-space: pre-wrap; }
             identifiers, from the PALMAT <tt>fetchp</tt> instruction),
             and "NONE" for uninitialized data.&nbsp; Most of these extra
             types actually cannot appear to <tt>typeofv</tt> for <i>correctly</i>-generated
+
+
 
 
 
@@ -2005,6 +2103,8 @@ p, li { white-space: pre-wrap; }
             eliminating all flexibility and checking.&nbsp; At runtime,
             either instruction pops operand1 and operand2, which are
             supposed to be <tt>INTEGER</tt>, or at worst <tt>SCALAR</tt>.&nbsp;
+
+
 
 
 
@@ -2191,8 +2291,12 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             To attach a symbolic label (say "<tt>MYLABEL</tt>") to the
             write instruction, the instruction would be modified to <tt>{'write':
+
+
 
 
 
@@ -2383,6 +2487,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             and (in effect, but not literally) replaces the entire third
             instruction by <tt>{'storepop': (0, 'Z')}</tt>.<br>
           </td>
@@ -2406,10 +2512,14 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             subroutine.&nbsp; (See the preceding entry.)<br>
             <br>
             The first variant of the instruction is for return from a <tt>PROCEDURE</tt>,
             while the second variant is for return from a <tt>FUNCTION</tt>.&nbsp;
+
+
 
 
 
@@ -2459,6 +2569,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             Also in principle, I don't believe there's any HAL/S code
             whose compilation is capable of generating this instruction.<br>
           </td>
@@ -2483,6 +2595,8 @@ p, li { white-space: pre-wrap; }
               </tt></blockquote>
             In practice, since this instruction is used for a single
             purpose, the <tt>identifer</tt> is always called "<tt>df_b</tt>",
+
+
 
 
 
@@ -2526,6 +2640,8 @@ p, li { white-space: pre-wrap; }
             appropriate scope.&nbsp; (This allows the <tt>returnoffset</tt>
             instruction to be used for implementing a HAL/S <tt>REPEAT</tt>
             <i>with</i> a symbolic label to an enclosing discrete <tt>FOR</tt>-loop,
+
+
 
 
 
@@ -2632,6 +2748,8 @@ p, li { white-space: pre-wrap; }
 
 
 
+
+
             Note that the preliminary implementation supports only <tt>lun=6</tt>,
             namely <i>stdout</i> (i.e., the console).&nbsp; The values
             to be printed are removed from the stack in first-in
@@ -2656,6 +2774,8 @@ p, li { white-space: pre-wrap; }
           <td valign="top" nowrap="nowrap"><tt>{'read': lun}<br>
             </tt> </td>
           <td valign="top">Reads values from the "logical unit number (<tt>lun</tt>).&nbsp;
+
+
 
 
 
@@ -2716,6 +2836,76 @@ p, li { white-space: pre-wrap; }
 </style></td>
         </tr>
         <tr>
+          <td valign="top"><tt>dotted</tt><tt><br>
+            </tt></td>
+          <td valign="top"><tt>{'operator': 'dotted'}</tt><tt><br>
+            </tt></td>
+          <td valign="top">The <tt>dotted</tt> instruction provides
+            functionality similar to the <tt>subscripts</tt>
+            instruction described in the preceding entry, except that
+            instead of implementing subscripts for a variable it
+            implements the dotted notation used to specify the
+            hierarchical fields of <tt>STRUCTURE</tt>s.&nbsp; It
+            indicates that the strings at the top of the computation
+            stack, ended by a <tt>{'sentinel'}</tt>, form a sequence of
+            <tt>STRUCTURE</tt> field-names.&nbsp; Upon execution, the <tt>dotted</tt>
+            instruction pops all of these from the instruction stack and
+            stores them in some implementation-dependent way to be
+            applied to the succeeding PALMAT instruction, which should
+            be a <tt>fetch</tt> or <tt>fetchp</tt>.<br>
+            <br>
+            (Note that there are two ways in HAL/S in which <tt>STRUCTURE</tt>s
+            can be combined with subscripts.&nbsp; One way is if the
+            topmost level of the <tt>STRUCTURE</tt> has "copyness" and
+            the one-dimensional subscript refers to the particular copy
+            of the <tt>STRUCTURE</tt>.&nbsp; The other way is if the
+            leaf is an <tt>ARRAY</tt>, <tt>VECTOR</tt>, <tt>MATRIX</tt>,
+            <tt>BIT</tt>-string, or <tt>CHARACTER</tt> type and the
+            subscript or subscripts refer to the leaf.&nbsp; I haven't <i>yet</i>
+            thought too much about handling these cases, so the
+            discussion here will for now pretend that those cases don't
+            occur.&nbsp; Hopefully, some details about those cases will
+            be added in the future.)<br>
+            <br>
+            As an example, suppose we have HAL/S code such as "<tt>X =
+              A.B.C.D;</tt>".&nbsp; PALMAT code similar to the following
+            would be generated:<br>
+            <blockquote><tt>{'sentinel': 'dotted'}</tt><tt><br>
+              </tt><tt>{'string': 'A'}</tt><tt><br>
+              </tt><tt>{'string': 'B'}</tt><tt><br>
+              </tt><tt>{'string': 'C'}</tt><tt><br>
+              </tt><tt>{'operator': 'dotted'}</tt><tt><br>
+              </tt><tt>{'fetch': (index1, 'D')}</tt><tt><br>
+              </tt><tt>{'storepop': (index2, 'Y'}</tt><br>
+            </blockquote>
+            where <tt>index1</tt> and <tt>index2</tt> are the scopes
+            in which the variables <tt>A</tt> (<i>not</i> <tt>D</tt>,
+            since there is no variable <tt>D</tt>) and <tt>Y</tt> are
+            <tt>DECLARE</tt>'d.&nbsp; What would appear on the
+            computation stack (growing rightward) at the time the <tt>dotted</tt>
+            instruction executes would be:<br>
+            <blockquote><tt>..., {'sentinel'}, 'A', 'B', 'C'<br>
+              </tt></blockquote>
+            In theory, the PALMAT emulator would allow any of the
+            strings on the computation stack to themselves be the
+            results of string expressions.&nbsp; However, syntactically,
+            HAL/S does not provide any means of generating PALMAT code
+            for such a case, so in practice all of the fieldnames are
+            deposited onto the computation stack by PALMAT <tt>string</tt>
+            instructions.<br>
+            <br>
+            This method of accessing <tt>STRUCTURE</tt> fields by the
+            preliminary PALMAT-based implementation of HAL/S is rather
+            inefficient, in that each fieldname involves some kind of
+            string lookup at execution time.&nbsp; In an advanced
+            implementation, one would expect the lookups to occur at
+            compile-time, and the fieldname strings in the PALMAT
+            instructions and on the computation stack to instead be
+            pointers directly to the items being referenced, thus
+            requiring no more execution time than any other variable.<br>
+          </td>
+        </tr>
+        <tr>
           <td valign="top"><tt>halt</tt><tt><br>
             </tt></td>
           <td valign="top"><tt>{'halt': True}</tt><tt><br>
@@ -2757,7 +2947,7 @@ p, li { white-space: pre-wrap; }
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-03-14<br>
+          2023-03-28<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

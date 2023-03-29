@@ -25,10 +25,11 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
       <ul>
         <li><a href="#Overall_Structure">Overall Structure</a></li>
         <li><a href="#Preflight_Program">Preflight Program</a></li>
-        <li><a href="#Executive_Control_Program">Executive Control
-            Program</a></li>
-        <li><a href="#Flight_Program_in_General">Flight Program in
-            General</a><br>
+        <li><a href="#Flight_Program_in_General">Flight Program</a></li>
+        <li><a moz-do-not-send="true" href="#AvailableVersions">Available
+
+
+            Software Versions</a><br>
         </li>
         <li><a href="#Evolution_of_the_Flight_Software">AS-206RAM Flight
             Program Specifically</a></li>
@@ -69,7 +70,7 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         <li><a href="#Assembly_Pass">Assembly Pass</a></li>
         <li><a href="#Pseudo-ops">Pseudo-ops</a><br>
         </li>
-        <li><a href="#ANATOMY">Program Structure</a><br>
+        <li><a href="#ANATOMY">AS-206RAM Program Structure</a><br>
         </li>
       </ul>
       <li><a href="#MIT_Instrumentation_Laboratory_vs_IBM">MIT
@@ -95,6 +96,9 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         src="lvdc_upper-small.jpg" style="border: 2px solid ; width:
         288px; height: 165px;" width="288" height="165" align="right"></a>The
 Launch
+
+
+
 
 
 
@@ -266,11 +270,12 @@ Launch
     The LVDC has a less-visible role in people's eyes than the AGC, not
     only because it was used for only a very small portion of the
     individual missions, but also because it had no user interface as
-    such.&nbsp; In other words, it was a black box that responded to
-    inputs from sensors in the Saturn and to ground telemetry, but there
-    was no panel into which astronauts could enter commands or get
-    feedback from it.&nbsp; One might well call the LVDC "The Forgotten
-    Computer", even more so that the computer of the <a
+    such.&nbsp; And frankly, because it plays no role at all in the
+    movie <i>Apollo 13</i>.&nbsp; In essence, it was a black box that
+    responded to inputs from sensors in the Saturn and to ground
+    telemetry, but there was no panel into which astronauts could enter
+    commands or get feedback from it.&nbsp; One might well call the LVDC
+    "The Forgotten Computer", even more so that the computer of the <a
       href="yaAGS.html">LM's Abort Guidance System</a>.&nbsp;
     Nevertheless, the LVDC's importance is great, because you need to
     actually get the Command Module and Lunar Module into space and
@@ -343,6 +348,9 @@ Launch
     </div>
     <br>
     <h2><a name="Peripheral_Devices" id="Peripheral_Devices"></a>Peripheral
+
+
+
 
 
 
@@ -632,18 +640,21 @@ Launch
       Documentation</h2>
     Sadly, documentation we've been able to collect for the LVDC lags
     far behind that of the AGC or even that of the Abort Guidance
-    System, though it's getting better over time.&nbsp; What little
-    survives that we have been able to access can be found in our <a
-      href="links2.html#LVDC">Document Library</a>.<br>
+    System, though it has slowly gotten a little better over time.&nbsp;
+    That little surviving material that we've been able to access can be
+    found in our <a href="links2.html#LVDC">Document Library</a>.<br>
     <br>
     I'm also told that there are a number of published (but not
     necessarily free-of-charge) research papers about the LVDC.&nbsp;
     These may be of assistance if you're an enthusiast, but I cannot
-    provide any of them for you, for legal reasons.&nbsp; Specifically,
-    you can go to <a href="http://arc.aiaa.org/">the AIAA's website</a>,
-    and search for "LVDC".&nbsp; Or as another example, via the IEEE's
-    website, you can get an article about the "<a
+    provide any of them for you, for copyright reasons.&nbsp;
+    Specifically, you can go to <a href="http://arc.aiaa.org/">the
+      AIAA's website</a>, and search for "LVDC".&nbsp; Or as another
+    example, via the IEEE's website, you can get an article about the "<a
       href="https://ieeexplore.ieee.org/abstract/document/5388320">Interactive
+
+
+
 
 
 
@@ -796,7 +807,9 @@ Launch
       concerning the gross structure of&nbsp; the software are based on
       my own inferences and on the recollections of developers not
       entirely familiar with the details.&nbsp; So my comments about the
-      program structure with a large grain of salt.<br>
+      program structure with a large grain of salt.&nbsp; Of course, as
+      more LVDC code has dribbled in over the years, more of it has
+      become susceptible to reverse engineering as well.<br>
     </p>
     <p>With that said, let's contrast the overall structure of the LVDC
       code vs the software source code for the Apollo Guidance Computer
@@ -822,7 +835,7 @@ Launch
       loaded into the computer and run.&nbsp; Conversely, every word in
       core-memory either came directly from the associate program
       listing or from some action taken by the code in that program
-      listing.&nbsp; When you look at a program listing for (say)
+      listing.&nbsp; When you look at an ABC program listing for (say)
       LUMINARY, you see the <i>entire</i> contents of the Lunar
       Module's AGC's core memory.<br>
     </p>
@@ -841,7 +854,6 @@ Launch
     </p>
     <ul>
       <li>The Preflight Program</li>
-      <li>The Executive Control Program</li>
       <li>The Flight Program<br>
       </li>
     </ul>
@@ -855,7 +867,10 @@ Launch
       desired function from the operating system.&nbsp; Similarly, the
       operation system stands ready to provide the desired
       functionality, but has no knowledge of the internal workings of
-      the application program requesting service.<br>
+      the application program requesting service.&nbsp; The model of a
+      "BIOS" and software running atop the BIOS is even more <i>á
+        propos</i>, though that may be a concept no longer too
+      meaningful to most computer programmers to be very illustrative.<br>
     </p>
     <p>In the LVDC, the method by which interaction between independent
       but simultaneously-loaded programs worked was for there to be an
@@ -872,15 +887,18 @@ Launch
       cognizance at all of the Preflight Program, the developers of
       which might have no cognizance of the Executive Control Program,
       and so on.&nbsp; And unfortunately, that means that <i>we</i>
-      don't, either.<br>
+      don't have a lot of understanding of it either.<br>
     </p>
     <h3><a name="Preflight_Program"></a>Preflight Program</h3>
-    <p>I don't know anything at all about the Preflight Program at
+    <p>I don't know barely anything about the Preflight Program at
       present.&nbsp; I.e., there is no surviving documentation or source
       code for it as far as I know.&nbsp; I will provide information
       about it if/when it becomes available.<br>
     </p>
     <p>As it relates to the <a href="#Evolution_of_the_Flight_Software">AS-206RAM
+
+
+
 
 
 
@@ -964,211 +982,362 @@ Launch
         Woods!) tells me that he believes that the Flight Program shared
         memory with a Preflight Program that ran before liftoff.</li>
     </ol>
-    <h3><a name="Executive_Control_Program"></a>Executive Control
-      Program</h3>
-    <p>Original LVDC software developer Pat Woods tells me that there
-      was no Executive Control Program (ECP) in use until the Apollo 12
-      mission.&nbsp; This anecdotal information is backed up by the fact
-      that the Saturn Launch Vehicle Astrionics Systems Handbook has 14
-      pages of descriptive material about the ECP in its <a
-href="http://www.ibiblio.org/apollo/Documents/AstrionicsSystemsHandbook_Nov69.pdf">November
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        15 1969 release</a> (see section 11.2.1 in particular), but does
-      not even mention the ECP at all in its <a
-href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">November
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        1 1968 release</a>.<br>
+    <p>Similarly, the AS-512 Flight Program has a couple of modules —
+      namely, PREFLIGHT DCS LINKAGE and PREFLIGHT G &amp; C STEERING —
+      whose sole purpose is linking the Flight Program to the Preflight
+      Program.<br>
     </p>
-    <p>I won't describe the ECP further here, since we have no source
-      code for it, but if you are interested you should consult the
-      later release of the Astrionics Systems Handbook mentioned above.<br>
-    </p>
-    <p>It is unfortunately not clear from the description whether the
-      ECP constituted a program <i>separate</i> from the Flight Program
-      with which it was used — i.e., whether it had a separate set of
-      source code that was assembled separately from the Flight Program
-      — or whether the two had an integrated code base that was
-      assembled as a single operation.<br>
-    </p>
-    <h3><a name="Flight_Program_in_General"></a>Flight Program in
-      General</h3>
+    <ol>
+    </ol>
+    <h3><a name="Flight_Program_in_General"></a>Flight Program</h3>
     <p>The software was apparently known simply as the Flight Program,
       and didn't have a catchy name such as "Luminary".<br>
     </p>
     <p>You may also see references to the Generalized Flight Program
       (GFP) or generalized Flight Program System, in use from Apollo 12
-      onward.&nbsp; You may recall from <a
-        href="#Executive_Control_Program">the preceding section</a> that
-      the Executive Control Program also came into use from Apollo 12
-      onward.&nbsp; My supposition would be that this simply means that<br>
-    </p>
-    <blockquote>GFP = ECP + FP<br>
-    </blockquote>
-    Was the software classified?&nbsp; No.&nbsp; Or at least it was not
-    classified at the time period from which we begin to have any
-    information.&nbsp; Several people associated with the development
-    have stated to me that it was classified.&nbsp; But classified
-    material must be stamped with one of the designations <tt>CONFIDENTIAL</tt>,
+      onward. At that point the flight program was restructured for
+      easier maintenance on a mission-by-mission basic, and that's where
+      the "generalized" comes from.</p>
+    Was the Flight Program classified?&nbsp; No.&nbsp; Or at least it
+    was not classified at the time period from which we begin to have
+    any information.&nbsp; Several people associated with the
+    development have stated to me that it was classified.&nbsp; But
+    classified material must be stamped with one of the designations <tt>CONFIDENTIAL</tt>,
     <tt>SECRET</tt>, or <tt>TOP SECRET</tt>.&nbsp; The available
-    software listing is not so stamped, and therefore should not be
+    software listings are not so stamped, and therefore should not be
     considered classified.&nbsp; Undoubtedly IBM Federal Systems
-    Division considered it confidential at the time, under the common
-    usage of the word, but that doesn't make it classified.
+    Division considered it confidential at the time, in the sense that
+    they wanted to hide it for their own corporate reasons, but that
+    doesn't make it classified in the sense of national security.<br>
+    <h3><a name="AvailableVersions"></a>Available Software Versions</h3>
+    <table width="95%" cellspacing="2" cellpadding="2" border="1"
+      align="center">
+      <tbody>
+        <tr>
+          <th valign="top" nowrap="nowrap">Mission<br>
+          </th>
+          <th valign="top" nowrap="nowrap">Program<br>
+          </th>
+          <th valign="top" nowrap="nowrap">Source Code<br>
+          </th>
+          <th valign="top">Other Mission-Specific Documentation<br>
+          </th>
+          <th valign="top">Notes<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="middle" nowrap="nowrap" align="center">N/A<br>
+          </td>
+          <td valign="middle" nowrap="nowrap" align="center">(Ground
+            Test)<br>
+          </td>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              moz-do-not-send="true"
+href="http://www.ibiblio.org/apollo/Documents/19730064346_1973064346.pdf#page=434">Page
+
+
+              Images</a><br>
+            or<br>
+            <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/blob/master/PTC-ADAPT-Self-Test-Program/PTC-ADAPT-Self-Test-Program.lvdc">Transcribed
+
+
+              Source-Code File</a><br>
+          </td>
+          <td valign="middle" align="center">"<a moz-do-not-send="true"
+href="http://www.ibiblio.org/apollo/Documents/19730064346_1973064346.pdf">Saturn
+
+
+              V Laboratory Maintenance Instruction for LTE</a>"<br>
+          </td>
+          <td valign="middle">This is not flight software as such, but
+            rather the software used for ground-test equipment known as
+            the <i>Programmable Test Controller</i> (PTC).&nbsp; The
+            PTC included a modified LVDC and a complex test panel with
+            many facilities for stepping through code, setting
+            breakpoints on code or data, etc.&nbsp; There's an extensive
+            write-up in the section titled "<a moz-do-not-send="true"
+              href="#PTC_ADAPT_Self-Test_Program">PTC ADAPT Self-Test
+              (PAST) Program</a>" below.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" nowrap="nowrap" align="center">AS-206RAM<br>
+            (unflown)<br>
+          </td>
+          <td valign="middle" nowrap="nowrap" align="center">Flight
+            Program<br>
+          </td>
+          <td valign="middle" align="left">We're currently treating LVDC
+            code as if it is restricted for export from the U.S. by the
+            International Traffic in Arms Regulations (ITAR).&nbsp; If
+            you legally qualify as a "U.S. person" and can provide
+            evidence of that status, contact us directly to arrange to
+            receive a copy of the code.<br>
+          </td>
+          <td valign="middle" align="center">"<a moz-do-not-send="true"
+              href="Documents/19680007324.pdf">AS-206 S-IVB Restart
+              Alternate Mission Launch Vehicle Operational Flight
+              Trajectory</a>"<br>
+          </td>
+          <td valign="middle">AS-206RAM was an alternate mission profile
+            which was never flown, and this is the LVDC flight software
+            for it as provided by an anonymous donor.&nbsp; Or rather,
+            it's an uncompleted and not-fully-debugged development
+            version of that software.&nbsp; The mission itself was
+            principally to get a Saturn S-IVB stage into orbit, and then
+            to test that the S-IVB's engine could be restarted after it
+            had been turned off for a while.&nbsp; Which obviously would
+            have been a good thing to know if you were depending on it!<br>
+            <br>
+            <div align="center"><img moz-do-not-send="true"
+                src="AS-206RAM-marking.jpg" alt="" width="572"
+                height="82"><br>
+              <div align="left"><br>
+              </div>
+            </div>
+            <div align="left">Although LVDC assembly-listing printouts
+              such as the one that provided this code were not printed
+              with dates or other identifying information (unless
+              programmers chose to explicitly include such information
+              in the source code itself), the mainframe that performed
+              the compilation sometimes provided additional information
+              about the printout.&nbsp; I've unfortunately been forced
+              to omit from the scans that extra bit of information (it's
+              not much!) due to anonymity concerns; however, I can say
+              that the assembly-listing printout was made on September
+              7, 1967.&nbsp; That's consistent with AS-206RAM, as the
+              documentation (see the link to the left) for that mission
+              is dated September 15, 1967.<br>
+              <br>
+              There's a more-extensive write-up in the section titled "<a
+                moz-do-not-send="true"
+href="file:///home/rburkey/git/virtualagc-web/LVDC.html#Evolution_of_the_Flight_Software">AS-206RAM
+
+                Flight Program</a>" below.&nbsp; <br>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" nowrap="nowrap" align="center">AS-512<br>
+            (Apollo 17)<br>
+          </td>
+          <td valign="middle" nowrap="nowrap" align="center">Flight
+            Program<br>
+          </td>
+          <td valign="middle" align="left">We're currently treating LVDC
+            code as if it is restricted for export from the U.S. by the
+            International Traffic in Arms Regulations (ITAR).&nbsp; If
+            you legally qualify as a "U.S. person" and can provide
+            evidence of that status, contact us directly to arrange to
+            receive a copy of the code.</td>
+          <td valign="middle" align="center"><br>
+          </td>
+          <td valign="middle"><img moz-do-not-send="true"
+              src="AS-512-marking.jpg" alt="" width="224" height="252"
+              align="right">Apollo 17 (AS-512) was, of course, the final
+            flown lunar-landing mission of Apollo.<br>
+            <br>
+            As far as we can tell, this is the complete Flight Program
+            used in the actual mission.&nbsp; Lacking the associated
+            Preflight Program, though, it still leaves us a bit short of
+            having the full set of LVDC software for the mission.&nbsp;
+            <br>
+            <br>
+            Unfortunately, the creators of the original LVDC compiler
+            didn't see fit to include such niceties on their printouts
+            as the date or code version, or at least not in any way we
+            can unambiguously decipher it now, nor did the writers of
+            the code see fit include such information (or even the
+            Apollo mission number) within the code.&nbsp; In other
+            words, the printout itself doesn't actually provide much
+            direct support for the claim that this code was flown on
+            Apollo 17, or indeed anywhere at all.&nbsp; And alas, the
+            surviving owners of the printout appear to have had no
+            knowledge at all of the nature of the material in their
+            possession, with the original owner unfortunately being
+            deceased by the time we became aware of the printout.&nbsp;
+            <i>We</i> believe this code was flown on Apollo 17 partially
+            because of the handwritten markings on the printout, which
+            you can see in the photo to the right ... made at some
+            unknown time by some unknown person.&nbsp;&nbsp; <br>
+            <br>
+            As it happens, there is a somewhat-cryptic notation in the
+            assembler's messages which could be relevant, if we assume
+            that "FT-512-1" stands for "Flight Program AS-512":<br>
+            <br>
+            <div align="center"><img moz-do-not-send="true"
+                src="AS512-id.png" alt="" width="386" height="174"><br>
+              <div align="left"><br>
+                Besides which, I'm told that the assembly listing does
+                include various presettings which are consistent with
+                Apollo 17.&nbsp; For example, on p. 31 of the listing we
+                find that something called <tt>P.DATE</tt> was set tp
+                341.&nbsp; Apollo 17 launched on December 7, 1972, and
+                December 6 was the 341st day of 1972.<br>
+                <br>
+              </div>
+              <img moz-do-not-send="true" src="AS512-PDATE.png" alt=""
+                width="387" height="47"><br>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" nowrap="nowrap" align="center">AS-513<br>
+            (Skylab 1)<br>
+          </td>
+          <td valign="middle" nowrap="nowrap" align="center">Flight
+            Program<br>
+          </td>
+          <td valign="middle" align="left">We're currently treating LVDC
+            code as if it is restricted for export from the U.S. by the
+            International Traffic in Arms Regulations (ITAR).&nbsp; If
+            you legally qualify as a "U.S. person" and can provide
+            evidence of that status, contact us directly to arrange to
+            receive a copy of the code.</td>
+          <td valign="middle" align="center"><br>
+          </td>
+          <td valign="middle">Skylab 1 (AS-513) was the mission that
+            launched Skylab into orbit.&nbsp; It was an unmanned
+            mission, succeeded almost immediately by the manned Skylab 2
+            mission, and then later by the manned Skylab 3 and 4
+            missions.&nbsp; As you may recall, Skylab itself was
+            essentially a modified Saturn S-IVB stage, without the usual
+            propulsion provided by that stage, but <i>with</i> the
+            S-IVB's Instrumentation Unit (IU) containing the LVDC and
+            controlling the other stages of the rocket.&nbsp; Thus the
+            launch was essentially a normal Saturn V launch, but with a
+            modified third stage.<br>
+            <br>
+            As far as we can tell, this is the complete Flight Program,
+            though whether it was actually flown on the mission or is
+            instead some earlier revision of the code we can't say <i>for
+              sure</i> ... but we think it was.&nbsp; Of course, lacking
+            the matching Preflight Program, it does not by itself
+            provide the full LVDC software for the mission in either
+            case.&nbsp; <br>
+            <br>
+            As far as our claim that this code was associated with the
+            Skylab 1 mission is concerned, the evidence consists
+            partially of the handwritten notation seen in the photo
+            below of the physical printout.&nbsp; Next to it, you see
+            also a similar notation on the AS-512 printout, which was
+            received from the same owners at the same time, so we're
+            entitled to have roughly the same level of trust in the
+            handwritten notation for AS-513 as we do for AS-512.<br>
+            <br>
+            <div align="center"><img moz-do-not-send="true"
+                src="spines-AS512-513.jpg" alt="" width="500"
+                height="184"><br>
+              <div align="left"><br>
+                Moreover, the assembler's messages do include the
+                following<br>
+                <br>
+                <div align="center"><img moz-do-not-send="true"
+                    src="AS513-id.jpg" alt="" width="708" height="137"><br>
+                  <div align="left"><br>
+                    and we presume that "FT-513-1" is interpreted as
+                    "AS-513 Flight Program".&nbsp; The presettings
+                    embedded in the code are reasonably clear too.&nbsp;
+                    Consider this excerpt from p. 34 of the assembly
+                    listing:<br>
+                    <br>
+                    <div align="center"><img moz-do-not-send="true"
+                        src="AS513-PTDAY.jpg" alt="" width="815"
+                        height="71"><br>
+                      <div align="left"><br>
+                        Skylab 1 was launched on May 14, 1973, while day
+                        119 of 1973 was April 29.&nbsp; Those dates are
+                        pretty close.&nbsp; But <a
+                          moz-do-not-send="true"
+href="https://www.nasa.gov/feature/50-years-ago-preparations-continue-for-skylab-americas-first-space-station">according
+                          to NASA</a>, <br>
+                        <blockquote><font size="-1">... a few minor
+                            issues led NASA managers on Jan. 15, 1973,
+                            to announce a delay of two weeks for the
+                            dual launches. The Skylab 1 launch slipped
+                            from April 30 to May 14, ...</font><br>
+                        </blockquote>
+                      </div>
+                      <div align="left">so day 119 (April 29) was indeed
+                        very, <i>very</i> close to the intended launch
+                        date for Skylab 1.<br>
+                      </div>
+                    </div>
+                  </div>
+                  <br>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle" nowrap="nowrap" align="center">AS-207<br>
+            (Skylab 3)<br>
+          </td>
+          <td valign="middle" nowrap="nowrap" align="center">Flight
+            Program<br>
+          </td>
+          <td valign="middle" nowrap="nowrap" align="center">N/A<br>
+          </td>
+          <td valign="middle" align="center">Digital Simulation<br>
+            (available shortly)<br>
+          </td>
+          <td valign="middle">Skylab 3 was the 2nd crewed mission to
+            Skylab.&nbsp; We don't actually have a program listing for
+            its LVDC at present, but we do have a contemporary digital
+            simulation for it, so I thought it was worth an entry in
+            this table.&nbsp; <br>
+            <br>
+            <b>Note</b>:&nbsp; Do not assume too much similarity between
+            the Skylab 1 mission (for which we have the software) and
+            the Skylab 3 mission (for which we don't).&nbsp; Skylab 1
+            used a Saturn V launch vehicle, whereas Skylab 3 used a
+            Saturn IB launch vehicle, so you'd have to suppose the LVDC
+            software was configured pretty differently for the two
+            missions.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><br>
+    </p>
     <p> </p>
     <h2> </h2>
     <h3><a name="Evolution_of_the_Flight_Software"
         id="Evolution_of_the_Flight_Software"></a>AS-206RAM Flight
       Program<br>
     </h3>
+    <b>Note:</b>&nbsp; You may wonder why there's an extensive write-up
+    here of the unflown AS-206RAM Flight Program, whereas there is
+    little to-do made of seemingly more-importation flight programs like
+    the one for AS-512 (Apollo 17).&nbsp; (And similarly for the PTC
+    software write-up in the next section.)&nbsp; But it's not a
+    commentary on the relative significance of AS-206RAM vs
+    AS-512.&nbsp; It's that when this write-up was done, AS-206RAM was
+    the <i>only</i> LVDC code known to exist.&nbsp; And naturally,
+    finding it was therefore a very big deal and I made a big fuss over
+    it!&nbsp; A lot of the description below would be relevant to other
+    versions of the Flight Program as well.<br>
+    <br>
     To a computer programmer, the most important thing about any
-    computer program is its source code, and at present a single
-    revision of the flight program is available to us.&nbsp; (For
-    non-flight software, though, see the PAST program described in <a
+    computer program is its source code, and at present not many
+    versions of the LVDC Flight Program are available to us.&nbsp; (For
+    some non-flight LVDC software, see the PAST program described in <a
       href="#PTC_ADAPT_Self-Test_Program">the next section</a>.)&nbsp;
-    The flight program at issue is an engineering revision of the
+    The Flight Program at issue is an engineering revision of the
     software, from September 1967, designated "AS-206RAM LVDC FLIGHT
     PROGRAM".&nbsp; If you were to Google this (<b>don't do it!</b>),
-    you may unnecessarily excite yourself by noting that Saturn IB
-    launch vehicle AS-206 was used for the Skylab 2 mission
-    (Conrad/Weitz/Kerwin).&nbsp; You may then be chagrined to realize
-    that the Skylab 2 mission was in 1973, far past the 1967 time frame
-    in which this revision of the program is developed.&nbsp; What
-    gives?&nbsp; The answer, is that AS-206 was <i>originally</i>
-    intended for an unmanned mission that was canceled after the Apollo
-    1 fire.&nbsp; The software we have is not even for that canceled
-    early AS-206 mission, but rather for a proposed backup to the
-    canceled mission.&nbsp; So whatever software the LVDC had when
-    AS-206 eventually launched as Skylab 2, is not <i>this</i>
+    you may confuse yourself by noting that Saturn IB launch vehicle
+    AS-206 was used for the Skylab 2 mission
+    (Conrad/Weitz/Kerwin).&nbsp; But the Skylab 2 mission was in 1973,
+    far past the 1967 time frame in which this revision of the program
+    is developed.&nbsp; What gives?&nbsp; The answer, is that AS-206 was
+    <i>originally</i> intended for an unmanned mission that was canceled
+    after the Apollo 1 fire.&nbsp; The software we have is not even for
+    that canceled early AS-206 mission, but rather for a proposed backup
+    to the canceled mission.&nbsp; So whatever software the LVDC had
+    when AS-206 eventually launched as Skylab 2, is not <i>this</i>
     software.&nbsp; That doesn't alter the fact that this software is
     ancestral to the versions that followed it ... or at least a very
     close cousin to the ancestor of the versions following it.&nbsp;
@@ -1182,11 +1351,9 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
     program we have had likely been branched off from the LVDC software
     being developed for the never-flown Apollo 2 mission.<br>
     <br>
-    From the preceding sections and from the date of the software,
-    you'll note that there is likely no Executive Control Program (ECP)
-    associated with this software, but that there should be a separate
-    Preflight Program (which we know essentially nothing about)
-    interacting with it through shared memory.&nbsp; Thus the AS-206RAM
+    We believe that there would have been a separate Preflight Program
+    (which we know essentially nothing about) interacting with the
+    Flight Program through shared memory.&nbsp; Thus the AS-206RAM
     Flight Program we have does <i>not</i> completely describe the
     contents of LVDC core memory, and thus is not a complete LVDC
     program as it stands.&nbsp; More on this below.<br>
@@ -1321,6 +1488,9 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
 
 
 
+
+
+
     Thus the program wouldn't actually work as-is anyway, even assuming
     we had an LVDC or a simulation of an LVDC in which to run it.&nbsp;
     That doesn't reduce its instructional value any, though, and it
@@ -1337,18 +1507,25 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
     there is something called the International Traffic in Arms
     Regulations (ITAR), which prevents export of certain technologies
     from the U.S. except under strict controls.&nbsp; Under my
-    non-expert, non-lawyer reading of the ITAR, the LVDC would be such a
+    non-expert, non-lawyer reading of the ITAR, the LVDC might be such a
     device whose export is prohibited.&nbsp; However, I cannot
     personally figure out whether the LVDC's <i>software</i> would also
     therefore be restricted.&nbsp; If it were restricted, then freely
     providing the software online would be regarded as "exporting" it,
-    and would therefore also be prohibited!<br>
+    and would therefore also be prohibited!&nbsp; Legal assistance is
+    working through the slow process of getting an official ruling on
+    this matter, so perhaps one day will have a more-definitive answer
+    as to what we can and cannot do with this software from a legal
+    standpoint.<br>
     <p>As it happens, the source code from the assembly-listing printout
       has been entirely transcribed into machine readable form.&nbsp;
       That's a lot more convenient to deal with that scanned page
       images, since you can do things like text searches on it, or even
       assemble it using the nifty new LVDC assembler I've written (<a
         href="LVDC.html#yaLVDCASM_the_LVDC_Cross-Assembler">see below</a>).&nbsp;
+
+
+
 
 
 
@@ -1443,14 +1620,16 @@ href="http://www.ibiblio.org/apollo/Documents/MSFC-IV-4-401-1-AstrionicsSystemHa
       States person</a>".&nbsp; Therefore, if you want the program
     listing, you must obtain it from me personally and provide <a
 href="https://www.uscis.gov/us-citizenship/proof-us-citizenship-and-identification-when-applying-a-job">proof</a>
-    that you are a United States person as just described. I will retain
-    a record of everyone to whom I the program listing.&nbsp; <br>
+    that you are a United States person as just described. <br>
     <br>
     With all that unpleasantness out of the way, it doesn't seem to me
     that suitably-abridged subsets of the assembly listing would be
     restricted by ITAR, if they do not pertain to guidance, control, or
     other technical aspects of the launch vehicle.&nbsp; <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">Such
+
+
+
 
 
 
@@ -1607,18 +1786,18 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
     </p>
     Additionally, each of the flown Saturns is associated with a report
     known as its "launch vehicle flight evaluation report", and <a
-      href="links2.html#FlightEvaluation">these reports are available for <i>most</i>
-      of the missions</a>, though there are a few gaps.&nbsp; Chapter 2
-    of each of the reports divides the mission into a set of "time
-    bases", called T<sub>0</sub>, T<sub>1</sub>, ..., T<sub>5</sub>, T<sub>5A</sub>,
-    T<sub>6</sub>, ..., T<sub>9</sub>, and each time base itself
-    consists of a series of events that are supposed to occur at
-    different times.&nbsp; For example, time base T<sub>0</sub> is
-    always the "Guidance Reference Release", and comprises events such
-    as "S-IC Engine Start Sequence Command", "S-IC Engine No. 1 Start",
-    and so on.&nbsp; But in general, not all missions use all of the
-    time bases, and the time bases aren't necessarily used for the same
-    thing on different missions.<sub><br>
+      href="links2.html#FlightEvaluation">these reports are available
+      for <i>most</i> of the missions</a>, though there are a few
+    gaps.&nbsp; Chapter 2 of each of the reports divides the mission
+    into a set of "time bases", called T<sub>0</sub>, T<sub>1</sub>,
+    ..., T<sub>5</sub>, T<sub>5A</sub>, T<sub>6</sub>, ..., T<sub>9</sub>,
+    and each time base itself consists of a series of events that are
+    supposed to occur at different times.&nbsp; For example, time base T<sub>0</sub>
+    is always the "Guidance Reference Release", and comprises events
+    such as "S-IC Engine Start Sequence Command", "S-IC Engine No. 1
+    Start", and so on.&nbsp; But in general, not all missions use all of
+    the time bases, and the time bases aren't necessarily used for the
+    same thing on different missions.<sub><br>
       <br>
     </sub> As noted above, we're pretty sure that for Apollo 12 and
     beyond, a single Generalized Flight Program (GFP) was used, but we
@@ -1651,12 +1830,11 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
       operational flight trajectory", and these documents (among other
       things) listed the LVDC preload settings.&nbsp; Unfortunately,
       most of these reports are presently unavailable, though <a
-        href="links2.html">we do have a
-        few of them</a>.&nbsp; For example, the AS-202 report says that
-      "LVDC symbol" T<sub>1i</sub>, the time-to-go for first IGM stage,
-      is preloaded with 299.25 sec, while Vex<sub>1</sub>, the J2
-      exhaust velocity for first IGM stage, is loaded with 4165.45
-      m/sec, and so on.<br>
+        href="links2.html">we do have a few of them</a>.&nbsp; For
+      example, the AS-202 report says that "LVDC symbol" T<sub>1i</sub>,
+      the time-to-go for first IGM stage, is preloaded with 299.25 sec,
+      while Vex<sub>1</sub>, the J2 exhaust velocity for first IGM
+      stage, is loaded with 4165.45 m/sec, and so on.<br>
     </p>
     <p>Finally, I claimed earlier that the AS-206RAM Flight Program is
       not, of itself, a complete program.&nbsp; In that assessment, I'm
@@ -1773,6 +1951,9 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
 
 
 
+
+
+
           HCCMDC</tt> instruction it contains now.&nbsp; Another
         workaround would be to simply disable the command-upload
         interrupt.&nbsp; But alas, that's just one example of the
@@ -1780,6 +1961,18 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         cause.&nbsp; Until a complete survey of all jumps into no-man's
         land is made, it's impossible to know yet whether all of them
         can be worked around so easily.<br>
+        <br>
+        It's interesting to note that the AS-512 also has references to
+        module 4 sector 17, but in the AS-512's case that sector <i>does</i>
+        exist in the assembled form of the Flight Program.&nbsp; As you
+        can see above (<tt>HCCMDC</tt>), AS-206RAM references 4,17,1,267
+        with the comment "<tt>TO COMMAND RECEIVER</tt>".&nbsp; Whereas
+        AS-512 (p. 70) references (<tt>M.HD00</tt>) 4,17,0,274 with the
+        comment "<tt>INIT. ENTRY , CMND. RECEIVER</tt>", which is in
+        fact populated in the assembly of the AS-512 Flight
+        Program.&nbsp; But the interpretation of this awaits a
+        more-extensive analysis of the AS-512 Flight Program than is
+        presently available.<br>
         <h3><a name="PTC_ADAPT_Self-Test_Program"></a>PTC ADAPT
           Self-Test (PAST) Program</h3>
         <p><i><a href="PTC.jpg"><img src="PTC-small.jpg" title="Click to
@@ -1836,6 +2029,9 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
         </p>
         <ol>
           <li>The PTC contains a CPU ... <i>which is a modified LVDC</i>.&nbsp;
+
+
+
 
 
 
@@ -2014,12 +2210,6 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
             still have to do for the AS206-RAM Flight Program).&nbsp;
             Just follow the links given below.<br>
           </li>
-          <li>An additional bonus is that while the AS206-RAM assembly
-            listing we've obtained is simply a snapshot of work of
-            ancient work in progress, which cannot even be assembled
-            error-free without a bit of massaging, the PAST program is
-            unambiguously a mature, debugged, working program.<br>
-          </li>
         </ul>
         <p>As far as the versioning of the software, there is nothing
           embedded within the assembly listing itself which dates
@@ -2080,10 +2270,16 @@ href="https://www.ibiblio.org/apollo/Documents/satinstunitibm_5.pdf">the
 
 
 
+
+
+
           You can get that source code from our software repository:<br>
         </p>
         <p align="center"><a
 href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-Program">Folder
+
+
+
 
 
 
@@ -2231,6 +2427,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
 
 
 
+
+
+
                 of scanned page images for the PAST program</a></p>
           </blockquote>
         </div>
@@ -2253,6 +2452,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/PTC-ADAPT-Self-Test-P
     </div>
     <h2><a name="Architecture_of_the_LVDC" id="Architecture_of_the_LVDC"></a>Architecture
 of
+
+
+
 
 
 
@@ -2537,6 +2739,9 @@ This
 
 
 
+
+
+
         is IBM's documentation for the LVDC "breadboard model II"
         system.&nbsp; (I'm not presently aware of any existing
         documentation of the production "TMR" LVDC.)&nbsp; <br>
@@ -2673,9 +2878,15 @@ Astrionics
 
 
 
+
+
+
           System of Saturn Launch Vehicles</a>" by Rudolf Decher.</li>
       <li>1 November 1968:&nbsp; <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
+
 
 
 
@@ -3119,6 +3330,9 @@ of
 
 
 
+
+
+
       Memory Words</h3>
     <br>
     <div style="text-align: center;"> <img style="width: 896px; height:
@@ -3263,6 +3477,9 @@ of
     about their functionality came from the "Logic Symbols" Appendix of
     <a
 href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescriptionAndTheory.pdf">this
+
+
+
 
 
 
@@ -3467,6 +3684,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
             discussion, imagine assembly-language code something like
             the following:<br>
             <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt>HOP&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -3747,6 +3967,9 @@ However,
 
 
 
+
+
+
             the result will remain in the P-Q register until the next <span
               style="font-family: Courier New,Courier,monospace;">MPH</span>,
             <span style="font-family: Courier New,Courier,monospace;">MPY</span>,
@@ -3837,6 +4060,9 @@ However,
             would seem to imply that it covers only Binary Coded
             Decimals, whereas in fact it covers the complete repertoire
             of printable characters.&nbsp; Besides those, see also <tt>CIO
+
+
+
 
 
 
@@ -3971,6 +4197,9 @@ However,
                 straightforward, but in octal mode the interpretation of
                 "final" will depend on what has previously been done
                 with the <tt>CIO 250</tt> instruction.&nbsp; If <tt>CIO
+
+
+
 
 
 
@@ -4201,6 +4430,9 @@ However,
 
 
 
+
+
+
                   OINIT</tt>" instruction.</li>
               <li>Use the newly-allocated memory location as the target
                 of the <tt>TNZ</tt> instruction.</li>
@@ -4241,6 +4473,9 @@ However,
             Register at the next instruction following <span
               style="font-family: Courier New,Courier,monospace;">MPY</span>.&nbsp;
 However,
+
+
+
 
 
 
@@ -4817,6 +5052,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
               documentation of the STO instruction (see p. 2-17)</a>:<br>
             <ul>
               <li>Residual sector, location 0375<sub>8</sub> (often
@@ -4913,6 +5151,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
                 777</tt>, what ends up getting stored in location 776 or
               777 is the HOP constant for the memory address that
               follows the previously executed transfer instruction
@@ -4930,6 +5171,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 HOP&nbsp;&nbsp;&nbsp;&nbsp;
                 SUB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -5013,6 +5257,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
                 # Save the return address.</tt><br>
               <tt> </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -5054,8 +5301,14 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
                 # ... do stuff ...</tt><br>
               <tt> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </tt><tt>HOP&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -5153,11 +5406,17 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
                   # Call a subroutine.<br>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
                 </tt></p>
               <p><tt>SUBRET&nbsp; BSS&nbsp;&nbsp;&nbsp;
                   1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -5239,10 +5498,16 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
                   # Save the return address.<br>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   CLA&nbsp;&nbsp;&nbsp;&nbsp;
                   776&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -5446,6 +5711,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
                 or <tt>DEQS</tt> pseudo-ops (see below), whereas the
                 module number and sector number are simply supplied with
                 octal numeric literals in <tt>CDSD</tt> or <tt>CDSS</tt>.&nbsp;
+
+
+
 
 
 
@@ -6144,6 +6412,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
                     Sector<br>
                   </th>
                 </tr>
@@ -6319,6 +6590,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
 
 
 
+
+
+
         203</tt>.&nbsp; Unfortunately, with programming and
       documentation practices like these, getting a complete list of
       ports used — other than by just running the code under all
@@ -6343,6 +6617,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
           <th colspan="1" rowspan="2">Data Destination<br>
           </th>
           <th colspan="1" rowspan="2" style="vertical-align: middle;">Specific
+
+
+
 
 
 
@@ -6479,6 +6756,9 @@ href="Documents/LaboratoryMaintenanceInstructionsForLVDC-Volume1-GeneralDescript
               of that topic</a>.&nbsp; Page-number references are to the
             AS-206RAM LVDC source code or to its <a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.lvdc">abridged
+
+
+
 
 
 
@@ -7802,6 +8082,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
                               672</tt> is used in memory module 2, and
                             address 672 translates to 2-17-272, which is
                             the variable <tt>IHBT</tt>.&nbsp; I infer
@@ -8053,6 +8336,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
                             document, section 7.4, summarizes the
                             discrete inputs in the table below.&nbsp;
                             (The DIS1-DIS8 inputs in the table for <tt>PIO
+
+
+
 
 
 
@@ -8747,6 +9033,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
         original PTC documentation</a> gives a list of i/o ports
       employed by the PTC's <tt>CIO</tt> instruction.&nbsp;
       Unfortunately, by my count, 137 different <tt>CIO</tt> ports are
@@ -9108,6 +9397,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
             and then output via <tt>CIO 066</tt>.&nbsp; A similar
             sequence of code occurs at label <tt>L10P33</tt>.&nbsp; On
             the other hand, this interpretation is inconsistent with the
@@ -9176,6 +9468,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
                   102</tt>) or 240 TSYNC pulses per second (if followed
                 by <tt>CIO 102</tt>).</li>
             </ul>
@@ -9203,6 +9498,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
               <li>000000002, solid GSYNC reset, diode check.</li>
               <li>257777777, reset solid GSYNC</li>
               <li>357777777, single GSYNC pulse (if not followed by <tt>CIO
+
+
+
 
 
 
@@ -9921,6 +10219,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
             data.<br>
           </td>
         </tr>
@@ -10315,12 +10616,18 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
               250</tt> comprises the following cryptic comments from the
             PAST program source code:<br>
             <ul>
               <li>SIGN bit is set to 1:&nbsp; <tt>INHIBIT CHECK BIT AT
                   10,11,12 TIME</tt></li>
               <li>Bit 1 is set to 1:&nbsp; <tt>RESET CHECK BIT INHIBIT</tt>.&nbsp;
+
+
+
 
 
 
@@ -10610,6 +10917,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/sample-1967.
 
 
 
+
+
+
       Linkage</h3>
     While the LVDC is executing an instruction, it is also forming the
     HOP constant of the next instruction in sequence—i.e., on the
@@ -10754,6 +11064,9 @@ Only
 
 
 
+
+
+
     those special addresses work.&nbsp; So a typical subroutine linkage
     would look like this:<br>
     <br>
@@ -10763,6 +11076,9 @@ Only
       </span> </div>
     <div style="margin-left: 40px;"> <span style="font-family: courier
         new,courier,monospace;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; ... <i>return
+
+
+
 
 
 
@@ -10979,6 +11295,9 @@ Only
             digital uplink and is ready to be processed.&nbsp; See
             section 6.2.3 of <a style="font-style: italic;"
 href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf">Astrionic
+
+
+
 
 
 
@@ -11504,6 +11823,9 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
 
 
 
+
+
+
     bits.)&nbsp; The LVDA combines this pair of bits (in some manner
     unknown to me), and thus the LVDC receives a single OM/D bit.&nbsp;
     The LVDC recognizes two types of commands, <i>mode commands words</i>
@@ -11578,6 +11900,9 @@ href="Documents/MSFC-IV-4-401-1-AstrionicsSystemHandbookSaturnLaunchVehicles.pdf
     <h3> </h3>
     <h2><a name="LVDC_Assembly_Language" id="LVDC_Assembly_Language"></a>LVDC
 Assembly
+
+
+
 
 
 
@@ -11793,6 +12118,9 @@ Assembly
 
 
 
+
+
+
     which does produce an assembled core-rope image identical to that of
     the original assembler, handles the code.&nbsp; However, my
     description shouldn't be taken as authoritative in any larger
@@ -11825,6 +12153,9 @@ Assembly
     machines did not include lower-case characters anyway.&nbsp; Douglas
     Jones has written a fun <a
       href="http://homepage.divms.uiowa.edu/%7Ejones/cards/index.html">exploration
+
+
+
 
 
 
@@ -12062,12 +12393,18 @@ Assembly
 
 
 
+
+
+
         In other words, a decimal integer encoded as <i>N</i> bits
         would be sign-extended on the left by 26-<i>N</i> bits.</li>
       <li>Decimal non-integer constants are treated as being in the
         range -1.0 &lt; <i>constant</i> &lt; 1.0.&nbsp;</li>
     </ul>
     <p><i><a name="AngleUnits"></a>Units of angular measurement</i>:&nbsp;
+
+
+
 
 
 
@@ -12502,6 +12839,9 @@ Assembly
 
 
 
+
+
+
         Note that such expressions, depending on what they contain, may
         resolve <i>either</i> to an address in memory, or else to a
         constant value.&nbsp; In the latter case, the numerical constant
@@ -12645,6 +12985,9 @@ Assembly
 
 
 
+
+
+
         in the existing LVDC source code, so I really have no way of
         knowing whether the original assembler accepted decimal
         constants or octal ones.)<br>
@@ -12685,6 +13028,9 @@ Assembly
         specifications, and so the operand for <tt>CDS</tt> can be such
         a symbolic macro name as well.</li>
       <li>The <tt>EXM</tt> instruction has operands of the form "<tt><i>target</i>,<i>syllable</i>,<i>modifier</i></tt>",
+
+
+
 
 
 
@@ -12925,11 +13271,17 @@ href="https://en.wikipedia.org/wiki/IBM_1400_series#Field_and_character_coding">
 
 
 
+
+
+
               1400 series printers</a>, and EBCDIC encoding, used for
             later IBM printers like the ones that printed the original
             LVDC and PTC assembly listings.&nbsp; The BA8421 encoding
             scheme can be found at <a
 href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_code">this
+
+
+
 
 
 
@@ -13636,6 +13988,9 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
 
 
 
+
+
+
             In that case, the first previously-unused location in the
             select data module/sector is used.&nbsp; Actually, even
             specifying <tt><i>DLOC</i></tt> explicitly does not
@@ -13672,6 +14027,9 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             <br>
             Any of the fields may be left empty.&nbsp; As far as I can
             tell, any field left empty defaults to 0, except for <tt><tt><i>DLOC</i></tt></tt>.&nbsp;
+
+
+
 
 
 
@@ -13771,6 +14129,9 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
 
 
 
+
+
+
             because <tt>ORG</tt> merely increments the preceding
             address (rather than searching for the first unallocated
             address as in the LVDC's <tt>ORGDD</tt>).&nbsp; In fact, it
@@ -13809,6 +14170,9 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           <td valign="middle">This pseudo-op requires a left-hand symbol
             to precede the <tt>SYN</tt> on the line.&nbsp; It tells the
             assembler to treat the left-hand symbol as a synonym for <tt><i>symbol</i></tt>.&nbsp;
+
+
+
 
 
 
@@ -14007,6 +14371,9 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
 
 
 
+
+
+
               Normally, instructions are assembled at successive offset
               locations while the "syllable" (0 or 1) is kept
               fixed.&nbsp; I.e., normally, all of the locations with
@@ -14020,6 +14387,9 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
               <br>
               Data is similarly assembled at successive locations (with
               pseudo-ops like <tt>DEC</tt>, <tt>OCT</tt>, or <tt>BSS</tt>),
+
+
+
 
 
 
@@ -14150,9 +14520,10 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
         </tr>
       </tbody>
     </table>
-    <h3><a name="ANATOMY"></a>Program Structure </h3>
+    <h3><a name="ANATOMY"></a>AS-206RAM Program Structure </h3>
     <p>Here are some of my own observations and inferences, based on
-      inspection of the AS-206RAM assembly listing.<br>
+      inspection of the AS-206RAM assembly listing.&nbsp; It is quite
+      different from the much-later AS-512 Flight Program.<br>
     </p>
     <p>Overall structure of the program: <br>
     </p>
@@ -14528,6 +14899,9 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
 
 
 
+
+
+
         I know it's probably tough to do those conversions in your head,
         so a handy python script (<a
 href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unHOP.py">unHOP.py</a>)
@@ -14672,13 +15046,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
     their own critiques, shredding IBM's report to the extent
     possible.&nbsp; And in <a
       href="Documents/CritiqueOfIBMApolloStudyReport.pdf"> one of those
-      critiques</a>, we have a few precious gems of LVDC assembly
-    language, as written by the Instrumentation Labs personnel rather
-    than by IBM. Perhaps I'm making too much of this sample code, but
-    for years and years it was the only purported LVDC code we had any
-    access to, and as the only LVDC code then thought still to exist,
-    perhaps over the span of a decade or so it used up more of my mind
-    share than it ought.<br>
+      critiques</a>, we have a few snippets of LVDC assembly language,
+    as written by the Instrumentation Labs personnel rather than by IBM.
+    Perhaps I'm making too much of this sample code, but for years and
+    years it was the only purported LVDC code we had any access to, and
+    as the only LVDC code then thought still to exist, perhaps over the
+    span of a decade or so it used up more of my mind share than it
+    deserved in retrospect.<br>
     <br>
     Whether it's good LVDC code or bad LVDC code, who knows?&nbsp; I can
     tell you that it would certainly bomb out when run through our
@@ -14707,6 +15081,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/yaASM.py/unOP.py">unO
                 style="font-family: Courier New,Courier,monospace;">
               <span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CLA&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
 
 
 
@@ -15257,6 +15634,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
       code</a>.&nbsp; Building it requires the GNU C compiler ("gcc")
     and the GNU "make" program.&nbsp; Simply download the source code,
     "cd" into the folder containing it (which is the "yaLVDC" folder in
@@ -15352,9 +15732,15 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
             Or if you had renamed them (say) MyProgram.tsv,
             MyProgram.sym, and MyProgram.src, and were in the folder
             .../test/, then it would be <tt>--assembly=../test/MyProgram</tt>.&nbsp;
+
+
+
 
 
 
@@ -15667,7 +16053,13 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
         The program then must immediately use a <tt>STO 777</tt> or <tt>STO
+
+
+
 
 
 
@@ -15715,6 +16107,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
         LVDC/PTC instructions.&nbsp; For example, in the PTC, the
         "instruction" <tt>SHL 25</tt> is really the sequence of
         instructions <tt>SHL 6 / SHL 6 / SHL 6 / SHL 6 / SHL 1</tt>.&nbsp;
+
+
+
 
 
 
@@ -16052,6 +16447,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
       modern LVDC assembler is called yaASM.py and is available in the
       Virtual AGC software repository</a>.&nbsp; Both the files yaASM.py
     and expression.py found there are necessary for running the
@@ -16076,6 +16474,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
     <br>
     Usage of the LVDC assembler is quite simple:<br>
     <blockquote><tt>yaASM.py [<i>OPTIONS</i>] [<i>OCTALS</i>.tsv] &lt;<i>INPUT</i>.lvdc
+
+
+
 
 
 
@@ -16348,6 +16749,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
 
 
 
+
+
+
               Library</a>.</li>
           <li>Developers' notes.</li>
         </ul>
@@ -16375,6 +16779,9 @@ CLA&nbsp;&nbsp;&nbsp;&nbsp;
             as long as the rules for interfacing between the different
             software programs were rigidly obeyed.</li>
           <li>At the beginning, the LVDC software for each mission was <i>ad
+
+
+
 
 
 
@@ -17004,10 +17411,13 @@ Commons
 
 
 
+
+
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2021-09-21.<br>
+          2023-03-29.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
