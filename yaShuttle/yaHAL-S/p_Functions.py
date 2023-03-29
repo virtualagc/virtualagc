@@ -344,6 +344,12 @@ def stringLiteral(PALMAT, state, s):
     # variations (sp, isp, fsp). 
     if False:
         pass
+    elif state1 == "structure_id" and "qual_struct" in history:
+        if len(substate["qual"]) == 0:
+            iScope, iAttributes = findIdentifier(s, PALMAT, scopeIndex)
+            substate["qualScope"] = iScope
+            substate["qualInsert"] = -1
+        substate["qual"].append(sp[2:])
     elif state1 == "number" and \
             "arraySpec_arrayHead_literalExpOrStar" in history and \
             "structure_stmt" in history:
@@ -571,6 +577,8 @@ def resetStatement():
     substate["commonAttributes"] = {}
     substate["lhs"] = []
     substate["expression"] = []
+    substate["qual"] = []
+    substate["qualInsert"] = -1
     forRemoval = []
     for key in substate:
         if "currentStructureTemplate" in key:
@@ -641,6 +649,7 @@ augmentationCandidates = [
     "parameter_list",
     "prePrimaryFunction",
     "procedure_name",
+    "qual_struct",
     "read_arg",
     "read_key",
     "relational_exp",

@@ -96,11 +96,14 @@ def splitOutsideParentheses(string, separator=None):
     return fields
 
 # Append a PALMAT instruction, with line/column reference if possible.
-def appendInstruction(instructions, instruction, source):
+def appendInstruction(instructions, instruction, source, insert=-1):
     if source[1:] != [-1, -1]:
         instruction = copy.deepcopy(instruction)
         instruction["source"] = copy.deepcopy(source)
-    instructions.append(instruction)
+    if insert >= 0:
+        instructions[insert:insert] = [instruction]
+    else:
+        instructions.append(instruction)
 
 # Configures HAL/S source-file name for astToLbnf() (see below).
 astSourceIndex = -1
