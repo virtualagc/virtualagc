@@ -887,6 +887,22 @@ def uninitializedStructure(PALMAT, currentScope, templateName, templateAttribute
         structure.append(templateName + "-STRUCTURE")
     return structure
 
+# Find the next uninitialized value in a STRUCTURE, and initialize it with 
+# a value.  Returns True upon completion.
+def insertNextElement(struct, value):
+    # We should be performing data conversions here.  Initially, though, I'm
+    # just assuming the datatypes are right.  We *should* be fed the structure
+    # template attributes as a paramter, and should be using it.
+    # **FIXME**
+    for i in range(len(struct)):
+        if isinstance(struct[i], list):
+            if insertNextElement(struct[i], value):
+                return True
+        elif struct[i] == None:
+            struct[i] = value
+            return True
+    return False
+
 # Complete the initialization of a VECTOR, MATRIX, or ARRAY by making sure that
 # INITIALs or CONSTANTs are filled out to the proper geometry with appropriate
 # values.  Returns [] on success, or a list of identifiers which failed.

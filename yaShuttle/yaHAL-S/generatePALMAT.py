@@ -712,6 +712,10 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                             valueList[i] = 0
                 else:
                     valueList = [value]
+                    
+                # Now insert the values in the data object, one-by-one.  In
+                # retrospect, this is pretty inefficient for objects like
+                # STRUCTUREs, and I'm not quite sure I did it this way.
                 for value in valueList:
                     if False:
                         pass
@@ -816,6 +820,26 @@ def generatePALMAT(ast, PALMAT, state={ "history":[], "scopeIndex":0 },
                                     value = float(value)
                                 matrix[row].append(value)
                             value = matrix
+                    elif "structure" in identifierDict:
+                        if identifierDict[key] == "^?^":
+                            # We have to create an uninitialized structure,
+                            # so that we can fill it with data.
+                            templateName = identifierDict["structure"]
+                            templateScopeIndex, templateAttributes = \
+                                findIdentifier("^" + templateName + "^", \
+                                               PALMAT, currentIndex)
+                            struct = uninitializedStructure(PALMAT, currentScope, \
+                                                            templateName, \
+                                                            templateAttributes)
+                            identifierDict[key] = struct
+                        else:
+                            struct = identifierDict[key]
+                        # We now have to find the next uninitialized location
+                        # in the structure and fill it with value.
+                        if not insertNextElement(struct, value):
+                            print("\tCannot insert INITIAL or CONSTANT data:", \
+                                  currentIdentifier, value)
+                        value = struct
                     elif isinstance(value, dict) and "fill" in value:
                         identifierDict["fill"] = key
                         continue
