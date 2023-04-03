@@ -57,7 +57,7 @@ import re
 import atexit
 from processSource import processSource
 from palmatAux import constructPALMAT, writePALMAT, readPALMAT, \
-        collectGarbage, findIdentifier, astSourceFile
+        collectGarbage, findIdentifier, astSourceFile, expandStructureTemplate
 from p_Functions import removeIdentifier, removeAllIdentifiers, substate, \
         resetStatement, printTemplate
 from executePALMAT import executePALMAT
@@ -174,6 +174,8 @@ helpMenu = \
 \t`LBNF            Show abstract syntax trees in LBNF.
 \t`BNF             Show abstract syntax trees in BNF.
 \t`NOAST           Don't show abstract syntax trees.
+\t`EXPAND          Expand structure-template references in `DATA.
+\t`NOEXPAND        Don't expand structure-template references.
 \t`EXEC            Execute the HAL/S code.
 \t`NOEXEC          Don't execute the HAL/S code.
 \t`MANGLING [*]    Display mangling macros in the global scope, 
@@ -199,6 +201,7 @@ def interpreterLoop(shouldColorize=False, \
     trace2 = False
     trace3 = False
     trace4 = False
+    expand = False
     halCode = False
     quitting = False
     halsSource = []
@@ -363,8 +366,15 @@ def interpreterLoop(shouldColorize=False, \
                                 if showLabels or \
                                         "label" not in identifiers[identifier]:
                                     if "template" in identifiers[identifier]:
+                                        attributes = identifiers[identifier]
+                                        if expand:
+                                            attributes = \
+                                                expandStructureTemplate( \
+                                                                PALMAT,
+                                                                i,
+                                                                attributes)
                                         printTemplate(identifier, \
-                                                      identifiers[identifier], \
+                                                      attributes, \
                                                       8)
                                     else:
                                         print("\t%s:" % identifier[1:-1], \
@@ -465,6 +475,14 @@ def interpreterLoop(shouldColorize=False, \
                     print("\tTRACE4 off.")
                     trace4 = False
                     continue
+                elif firstWord == "EXPAND":
+                    print("\tEXPAND on.")
+                    expand = True
+                    continue
+                elif firstWord == "NOEXPAND":
+                    print("\tEXPAND off.")
+                    expand = False
+                    continue
                 elif firstWord == "LBNF":
                     print("\tDisplaying abstract syntax trees (AST) in LBNF.")
                     lbnf = True
@@ -526,6 +544,10 @@ def interpreterLoop(shouldColorize=False, \
                         print("\tTRACE4                   (vs NOTRACE4)")
                     else:
                         print("\tNOTRACE4                 (vs TRACE4)")
+                    if expand:
+                        print("\tEXPAND                   (vs NOEXPAND)")
+                    else:
+                        print("\tNOEXPAND                 (vs EXPAND)")
                     if xeq:
                         print("\tEXEC                     (vs NOEXEC)")
                     else:

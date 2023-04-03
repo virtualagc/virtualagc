@@ -696,6 +696,24 @@ def findIdentifier(identifier, PALMAT, scopeIndex=None, write=False):
             return i, PALMAT["scopes"][i]["identifiers"][identifier]
     return -1, None
 
+# "Expands" all of the structure-TEMPLATE references within a structure TEMPLATE,
+# returning a new template.  Or returns None on error.
+def expandStructureTemplate(PALMAT, scopeIndex, template):
+    if "structure" in template:
+        s = template["structure"]
+        identifier = "^s_" + s[:-10] + "^"
+        si, attributes = findIdentifier(identifier, PALMAT, scopeIndex)
+        if attributes == None or "template" not in attributes:
+            return None
+        template = attributes
+    newTemplate = copy.deepcopy(template)
+    if "template" in newTemplate:
+        fieldAttributes = newTemplate["template"][1]
+        for i in range(len(fieldAttributes)):
+            fieldAttributes[i] = expandStructureTemplate(PALMAT, scopeIndex, \
+                                                         fieldAttributes[i])
+    return newTemplate
+
 # This is for searching for identifiers when the proper name-mangling prefix
 # isn't known.  All it does is to return a tuple consisting of the scope index
 # and the mangled identifier, or else -1 if not found.

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # Copyright 2019 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC. 
@@ -37,6 +37,7 @@
 #				detecting locations which have been changed by
 #				self-modifying code, and hence whose original
 #				source lines are no longer applicable.
+#		2023-04-01 RSB	Now formfeeds in listing file at "Copyright" lines.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -244,12 +245,12 @@ for arg in sys.argv[1:]:
 			print("Unknown command-line option " + arg, file=sys.stderr)
 			sys.exit(1)
 	else:
+		module = -1
+		sector = -1
+		offset = -1
 		try:
 			checkFilename = arg
 			f = open(checkFilename, "r")
-			module = -1
-			sector = -1
-			offset = -1
 			for line in f:
 				line = line.strip()
 				if line[:1] == "#" or len(line) == 0:
@@ -1533,7 +1534,7 @@ for entry in inputFile:
 	constantString = ""
 	clearLineFields()
 	star = False
-	if originalLine[:7] == "# PAGE ":
+	if originalLine[:7] == "# PAGE " or originalLine[:11] == "# Copyright":
 		print("\f")
 	if "udDM" in inputLine:
 		udDM = inputLine["udDM"]

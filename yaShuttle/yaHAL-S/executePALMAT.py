@@ -426,6 +426,46 @@ def simpleMIDVAL(PALMAT, operand1, operand2, operand3):
     else:
         return operand3
 
+# Find attributes of an identifier from an identifiers list, possibly with 
+# structure qualifications.
+def getAttributes(PALMAT, scopeIndex, qualifications, identifier):
+    identifiers = PALMAT["scopes"][scopeIndex]["identifiers"]
+    if len(qualifications) == 0:
+        return identifiers[identifier]
+    identifier = identifier[1:-1]
+    try:
+        # qualifications[0] is actually the top-level identifier we need to find
+        # since it identifies the DECLARE'd STRUCTURE.  From that, we have to
+        # find the structure template associated with the STRUCTURE and descend
+        # down into it.
+        si, attributes = findIdentifier("^s_" + qualifications[0] + "^", \
+                                        PALMAT, scopeIndex)
+        if attributes == None or "structure" not in attributes:
+            return None
+        si, template = findIdentifier("^" + attributes["structure"] + "^", \
+                                        PALMAT, si)
+        if template == None or "template" not in template:
+            return None
+        template = expandStructureTemplate(PALMAT, si, template)
+        print("*1", qualifications[0], template)
+        if template == None:
+            return None
+        for j in range(1, len(qualifications)):
+            q = qualifications[j]
+            if "template" in template:
+                fieldNames = template["template"][0]
+                fieldAttributes = template["template"][1]
+                i = fieldNames.index("s_" + q)
+                template = fieldAttributes[i]
+            else:
+                return None
+        fieldNames = template["template"][0]
+        fieldAttributes = template["template"][1]
+        i = fieldNames.index(identifier)
+        return fieldAttributes[i]
+    except:
+        return None
+
 '''
 This is the main emulator loop.  Basically, you feed it an entire PALMAT
 structure of scopes (namely rawPALMAT) including the model of all variables
@@ -485,6 +525,16 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
         instruction = instructions[instructionIndex]
         if "source" in instruction:
             source = instruction["source"]
+        # As originally designed, both structure qualifications and and 
+        # subscripts are intended to persist only until the very next 
+        # instruction (usually, 'fetch').  But what if there are both?
+        # We need to do something here to account for the possibility that 
+        # both subscripts and structure qualifications are present; but for 
+        # now, I'm just pretending that at most one of those two is present.
+        qualifications = []
+        if "qualifications" in scope0:
+            qualifications = scope0["qualifications"]
+            scope0.pop("qualifications")
         fullSubscripts = []
         if "subscripts" in scope0:
             fullSubscripts.extend(scope0["subscripts"])
@@ -607,6 +657,16 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     #computationStack[0:0] = operands2
                     computationStack.extend(reversed(operands2))
                     operand1 -= 1
+            elif operator == "dotted":
+                # Structure qualifications.  These are the strings "A", "B", "C"
+                # in structure refrences like A.B.C.X.
+                q = []
+                while True:
+                    value = computationStack.pop()
+                    if value == {"sentinel"}:
+                        break
+                    q[0:0] = [value] # Insert the qualification at position 0.
+                scope0["qualifications"] = q
             elif operator == "subscripts":
                 subscripts = []
                 subscripts2 = []
@@ -803,7 +863,7 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 The reason we're in a "while si" rather than an "if si" is that
                 we may have *nested* procedure calls, so once we find the 
                 upstream variable to which our alias refers, it may itself be
-                and alias for another variable upstream of the calling code
+                an alias for another variable upstream of the calling code
                 (which may be a scope that's not necessarily an ancestor of 
                 the procedure's scope), and so on. 
                 '''
@@ -828,8 +888,9 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                     dummyScope = PALMAT["scopes"][dummyScope["return"][0]]
             identifier = "^" + identifier + "^"
             try:
-                attributes = PALMAT["scopes"][si]["identifiers"][\
-                                                        identifier]
+                attributes = getAttributes(PALMAT, si, qualifications, identifier)
+                if attributes == None:
+                    raise Exception("Problem fetching attributes")
             except:
                 printError(PALMAT, source, instruction, \
                            "Undiagnosed problem with PALMAT instruction")
@@ -837,21 +898,11 @@ def executePALMAT(rawPALMAT, pcScope=0, pcOffset=0, newInstantiation=False, \
                 print("\t\ttype of si =", type(si))
                 print("\t\tscope number =", si, " identifier =", identifier)
                 print("\t\tidentifiers =", PALMAT["scopes"][si]["identifiers"])
+                print("\t\tqualifications =", qualifications)
                 return None
             erroredUp = True
             if fetch:
-                '''
-                (Superseded by sliceIt.)
-                if "value" in attributes:
-                    value = subscripted(source, attributes["value"], subscripts)
-                elif "constant" in attributes:
-                    value = subscripted(subscripted, attributes["constant"], \
-                                        subscripts)
-                else:
-                    printError(PALMAT, source, instruction, \
-                               "Identifier %s uninitialized" % identifier)
-                    return None
-                '''
+                print("!!", attributes)
                 if "constant" in attributes:
                     value = sliceIt(attributes["constant"], fullSubscripts)
                 else:
