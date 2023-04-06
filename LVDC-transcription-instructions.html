@@ -1,0 +1,359 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  </head>
+  <body>
+    <h1>LVDC Source-Code Transcription Guidelines</h1>
+    <h2>Introduction</h2>
+    <p>If you're reading this, I assume you know what the <a
+        moz-do-not-send="true" href="LVDC.html">LVDC</a> was, what the
+      flight software for it is, and what the feared ITAR restrictions
+      of that software are, so I won't rehash that territory.&nbsp;
+      Rather, this page is solely about the topic of how digitized LVDC
+      source-code listings are transcribed into machine-readable
+      source-code files (for use with the yaASM.py assembler), and what
+      the basic standards and conventions for those transcribed files
+      are.<br>
+    </p>
+    <p>At this writing, three LVDC flight programs are known to have
+      survived:<br>
+    </p>
+    <ul>
+      <li>AS-206RAM, already transcribed (~400 pages)<br>
+      </li>
+      <li>AS-512, next to be transcribed (~1400 pages)<br>
+      </li>
+      <li>AS-513, to be transcribed at some future time (~1000 pages)<br>
+      </li>
+    </ul>
+    <p>The LVDC flight software was essentially completely rewritten
+      between AS-206RAM and AS-512, so in transcribing AS-512 and
+      AS-513, there is little possibly of reducing our effort by
+      cut-and-pasting from AS-206RAM.&nbsp; Whereas AS-512 and AS-513,
+      in contrast, will likely turn out to have very long stretches of
+      code that are identical to each other.&nbsp; However, the
+      standards applied to the AS-206RAM transcription will be applied
+      also to the AS-512 and AS-513 transcriptions, so I'll use
+      AS-206RAM as my example in some of the descriptions that follow.<br>
+    </p>
+    <p>Digitized assembly listings are supplied to you as encrypted PDF
+      files (which I would strongly recommend) and/or encrypted (7z)
+      archives of JPG files (if you insist).&nbsp; The PDF files do have
+      searchable text layers, which may useful in navigating the files,
+      but which I expect will have extremely-limited utility in terms of
+      cut-and-pasting.&nbsp; The principal reasons for preferring the
+      PDF over the JPG is that they are much smaller without any obvious
+      loss in legibility and that they never appear on your computer in
+      an unencrypted form, so there's less opportunity for them to be
+      accidentally "exported" from the U.S. in any accessible form.<br>
+    </p>
+    <p>An LVDC flight program consists of an introductory section (which
+      <i>we</i> will refer to as "MAIN"), followed by a sequence of
+      "modules".&nbsp; There is an index of the modules, by name, within
+      the first few pages of an LVDC assembly listing.&nbsp; For
+      example, in AS-512, there are 77 such sections.&nbsp; We
+      transcribe each of these sections as a separate source-code
+      file.&nbsp; For AS-512, we thus have the 77 source-code files<br>
+    </p>
+    <blockquote>
+      <p>MAIN.lvdc<br>
+        GFP_DATA_PACK.lvdc<br>
+        GFP_EXECUTIVE_MACRO_DEFINITIONS.lvdc<br>
+        ...<br>
+        SIMULTANEOUS_MEMORY_ERROR.lvdc<br>
+      </p>
+    </blockquote>
+    The filenames are massaged forms of those in the assembly listings'
+    module indices, but the exact manner in which they are massaged
+    shouldn't concern you, since we handle that aspect of the process
+    for you.<br>
+    <h2>Procedure</h2>
+    <p>If you want to involve yourself in the transcription process,
+      notify us by email at info@sandroid.org.&nbsp; Note that the reply
+      will likely come from a different email address, so if you don't
+      receive a response within (say) a day, perhaps you should check
+      your spam filter.&nbsp; <br>
+    </p>
+    You will be asked to provide some evidence that you are "U.S.
+    person" as required by ITAR.&nbsp; The most-common way to be
+    considered a U.S. person is to be a citizen, though there are other
+    ways as well.&nbsp; Once we consider you to be a U.S. person, you'll
+    be provided access to digitized LVDC program listings, as well as a
+    snapshot of a git repository of existing transcribed source-code
+    files.<br>
+    <p>Note, however, that this transcription effort is not being
+      managed via a git repository (or more-specifically, by a github
+      repository), because we perceive no way to do that while still
+      complying with ITAR.&nbsp; Thus you can ignore the provided git
+      repository or not, as suits you, but you will <i>not</i> be
+      submitting your transcriptions using it!<br>
+    </p>
+    <p>Rather, source-code files are transferred by the following steps:<br>
+    </p>
+    <ol>
+      <li>Compress and <i>encrypt</i> the source-code file with 7z or
+        zip.&nbsp; You are free to use the same password which you are
+        supplied for accessing the digitized assembly-listing files, or
+        to invent your own.&nbsp; Of course, if you do the latter,
+        you'll have to inform us what the password is.<br>
+      </li>
+      <li>Email the compressed, encrypted file to us (<i>separately</i>
+        from the password).&nbsp; We will then add it to the git
+        repository if it is acceptable, or (potentially) reject it for
+        rework if not.<br>
+      </li>
+    </ol>
+    <p>The <i>first</i> section transcribed by any volunteer will be
+      assigned to you from among the shortest remaining untranscribed
+      modules.&nbsp; However, subsequent files may be chosen from the
+      remaining untranscribed modules according to your personal
+      interests.&nbsp; In all cases, you are <i>supplied</i> with a
+      correctly-named source-code file that includes a header in our
+      required form, and your responsibility is merely to add the
+      transcribed source code to it.<br>
+    </p>
+    <h2>Configuring Your Text Editor</h2>
+    <p>Note that source-code files are maintained here with UNIX-style
+      line endings (i.e., line-feed characters) rather than
+      Windows-style line ending (i.e., a pair of characters,
+      carriage-return followed by line-feed).&nbsp; If you are using
+      Windows and are going to be using a text-editor that can handle
+      UNIX-style endings, please configure it to do so.&nbsp; If you
+      can't, then let us know, so that we can translate source-code
+      files to have the proper line-endings.&nbsp; But translating each
+      file is obviously something that's prone to confusion and error,
+      so we'd certainly prefer it if the editor itself can handle it
+      instead forcing us to do it for you.<br>
+    </p>
+    <p>The LVDC assembler defines tab stops at 8-column intervals; i.e.,
+      at columns 1, 9, 17, 25, ....&nbsp; To insure correct alignment,
+      therefore, either configure your text editor to automatically
+      expand all tabs to spaces, or else to retain tab characters but
+      with a tab-width of 8.&nbsp; FYI:&nbsp; The AS-206RAM
+      transcription uses the latter approach.&nbsp; Retaining tab
+      characters in the source-code file but using a tab-width other
+      than 8 will definitely produce an unusable file that will be
+      rejected (if we notice it) upon submission.<br>
+    </p>
+    <h2>Anatomy of an LVDC Assembly Listing</h2>
+    <p>Here is a sample page of the assembly listing of AS-206RAM which
+      I've marked up in color to illustrate those parts of an assembly
+      listing that are relevant to our transcription effort.&nbsp; Since
+      this code just describes a mathematical method for a well-known
+      standard operation (the vector dot product), I can't imagine ITAR
+      has any relevance to it, and so I simply present it as-is:<br>
+    </p>
+    <p align="center"><img moz-do-not-send="true"
+        src="LVDC-AS206RAM-282.jpg" alt="" width="1081" height="849"><br>
+    </p>
+    Here's what the colors mean:<br>
+    <ul>
+      <li>The portion in <font color="#666666">gray</font> is
+        irrelevant to the transcription effort and can simply be
+        ignored.&nbsp; <br>
+      </li>
+      <li>The portion in <font color="#009900">green</font> is
+        source-code, and is supposed to be fully transcribed.&nbsp; It's
+        divided horizontally into three portions:&nbsp; An optional
+        "label" (<tt>UVDOT</tt> and <tt>UVDOT1</tt> in this example),
+        an LVDC "opcode" or "pseudo-op" (<tt>STO</tt>, <tt>EXM</tt>, <tt>CLA</tt>,
+        ...), and an optional operand (<tt>777</tt>, <tt>UTEXM</tt>,
+        ...).&nbsp; The transcription does not attempt to duplicate the
+        columnar alignment in this portion:&nbsp; Rather, the "label" is
+        aligned at the left-hand margin (column 1) in the transcription,
+        the opcode is at the first tab stop (column 9), and the operand
+        is at the second tab stop (column 17).&nbsp; (In the assembly
+        listing, in contrast, the opcode is at column 8 and the operand
+        is at column 16.)<br>
+      </li>
+      <li>The portion in <font color="#ff0000">red</font> consists of
+        full-line comments and is supposed to be fully
+        transcribed.&nbsp; It's distinguished by the fact that the '*'
+        character appears in column 1.&nbsp; In the transcription, we
+        attempt to exactly duplicate the columnar alignment in this
+        portion.&nbsp; This is admittedly tricky in the absence of
+        visual references that numerically mark the column numbers for
+        us, so one can only do one's best.<br>
+      </li>
+      <li>The portion in <font color="#993399">purple</font> consists
+        of inline comments and is supposed to be fully
+        transcribed.&nbsp; It's any text on a line that follows legal
+        LVDC opcodes and operands.&nbsp;&nbsp; In the transcription, we
+        attempt to exactly duplicate the columnar alignment in this
+        portion, including the starting column.<br>
+      </li>
+      <li>The portion in <font color="#cc9933">yellow</font> isn't
+        transcribed, but certain summary data is extracted from it and
+        added to comments in the transcribed code to help
+        cross-reference the source-code files to the original assembly
+        listing.&nbsp; The information specifically needed is the page
+        number (282 in this example), the starting sequence number
+        (119390), and the ending sequence number (119790),<br>
+      </li>
+    </ul>
+    Here's what it looks like after being transcribed:<br>
+    <blockquote>
+      <pre># PAGE 282, SEQUENCE 119390-119790
+
+************************************************************************
+*                                                                      *
+*                       VECTOR DOT PRODUCT ROUTINE                     *
+*                                                                      *
+************************************************************************
+
+************************************************************************
+*                                                                      *
+*  INPUT       IN THE ACCUMULATOR, A WORD DEFINED BY THE DFW MACRO     *
+*              OPERATION.  SYLLABLE 1 OF THIS WORD MUST CONTAIN THE    *
+*	       INSTRUCTION- CLA P, WHERE P IS THE FIRST OF THREE       *
+*              CONSECUTIVE LOCATIONS CONTAINING MULTIPLICANDS.         *
+*	       SYLLABLE 2 CONTAINS THE INSTRUCTION- MPY Q, WHERE Q IS  *
+*	       THE FIRST OF THREE CONSECUTIVELY LOCATED MULTIPLIERS.   *
+*                                                                      *
+*  OUTPUT      THE SUM OF PRODUCTS- P(1)*Q(1) + P(2)*Q(2) + P(3)*Q(3)  *
+*                                                                      *
+************************************************************************
+
+
+UVDOT	STO	777			LINKAGE
+UVDOT1	STO	UTEXM			     EXM LOCATION USED BY UTILITY ROUTINE
+	EXM	0,1,0			CLA A(1)
+	EXM	0,0,0			MPY B(1)
+	EXM	0,1,1		        CLA A(2)
+	STO	UTEMP1
+	CLA	775			FIRST PRODUCT
+	STO	UTEMP2
+	CLA	UTEMP1
+	EXM	0,0,1			MPY B(2)
+	EXM	0,1,2			CLA A(3)
+	STO	UTEMP1
+	CLA	775			SECOND PRODUCT
+	STO	UTEMP3
+	CLA	UTEMP1
+	EXM	0,0,2			MPY B(3)
+	CLA	UTEMP7
+	STO	UTEXM			     SET UP DFW USED BY MATMPY TO STORE
+	CLA	UTEMP2
+	ADD	UTEMP3
+	ADD	775			THIRD PRODUCT
+	HOP	777
+</pre>
+    </blockquote>
+    You'll notice that the <font color="#993399">inline-comment portion</font>
+    does not align as I claim it ought to.&nbsp; According to what I
+    said earlier, the L in <tt>LINKAGE</tt> should be immediately under
+    the D of <tt>PRODUCTS</tt> of the bottom-most full-line comment,
+    but it's not.&nbsp; That's not because I'm lying about the standard
+    we're trying to maintain, but simply because I was apparently lazy
+    when I transcribed this code.&nbsp; When the leading character of an
+    inline comment doesn't align with a tab stop, and there are lots of
+    lines in a block of code that all align the same way (i.e., <i>not</i>
+    at a tab stop), it frankly becomes very tedious to transcribe those
+    comments.&nbsp; So apparently I decided to optimize by just aligning
+    most of those comments at a convenient tab stop.<br>
+    <br>
+    Oh, well ... I guess that means that if you do the same, I can't
+    really criticize or reject the files on that basis.&nbsp; But I can
+    also say on the basis of experience that <i>someday</i>, somebody
+    is probably going to come back and "correct" all of these alignments
+    while cursing our names for having taken the easy way out.&nbsp;
+    Such is life.<br>
+    <h2>Modern Comments, Required and Optional<br>
+    </h2>
+    <p>As mentioned above, the original LVDC code had two comment
+      mechanisms:&nbsp; full-line comments occupy an entire line, and
+      are distinguished by having the character '*' in column 1; inline
+      comments simply follow legal LVDC code on any given line, and do
+      not have any distinguishing mark to prefix them.<br>
+    </p>
+    <p>However, these mechanisms do not suffice to handle all of the
+      program comments we'd like to have in the transcriptions.&nbsp;
+      We'd like to add our own comments, distinguishable from the
+      originals, for all manner of reasons.&nbsp; In the example above,
+      you see the comment "<tt># PAGE 282, SEQUENCE 119390-119790</tt>".&nbsp;
+      Every transcribed page is required to have of these "modern
+      comments", comprising metadata for the page that we've added but
+      weren't originally present.&nbsp; These are all full-line
+      comments, but are distinguished from the original comments in that
+      they begin with '#' rather than '*'.<br>
+    </p>
+    <p>Similarly, each source-code file is required to begin with a
+      file-header, consisting of "modern comments", giving the filename,
+      modification history, and so on.&nbsp; These headers are present
+      when the source-code file is given to you, but you should modify
+      the modification-history portion of the header (with new modern
+      comments) to describe the work you've done on the file.&nbsp;
+      Here's the header from the transcribed file that I took the
+      example code above from:<br>
+    </p>
+    <pre># Copyright:    Public domain.
+# Restrictions: Presently, treat as if export from U.S. is restricted by ITAR.
+# Filename:     UTILITY_ROUTINES.lvdc
+# Purpose:      This is LVDC flight program AS-206RAM (1967), as 
+#               transcribed directly from the assembly listing. 
+#               The transcription does not include individual line 
+#               numbers, but does indicate the range of card sequence 
+#               numbers for each page of the listing.
+# Assembler:    yaASM.py
+# Contact:      Ron Burkey <info@sandroid.org>.
+# Website:      www.ibiblio.org/apollo/LVDC.html
+# Page images:  Inquire
+# Mod history:  2023-04-01 RSB  Split from monolithic file LVDC-AS206RAM.lvdc.
+</info@sandroid.org></pre>
+    <p>To add a new line to the modification history, beginning with '#'
+      in column 1, you'd align the date field, initials field, and
+      comment-text fields with the existing line that's already
+      there.&nbsp; The date format, YYYY-MM-DD is some ISO standard, the
+      name of which I've forgotten.<br>
+    </p>
+    <p>As far as optional modern comments are concerned, I can't really
+      offer criteria at this time for adding them.&nbsp; But if, for
+      example, you're transcribing a page with a handwritten notation,
+      adding a modern comment to describe that handwritten notation
+      would seem to be a good use of the modern-comment facility.<br>
+    </p>
+    <h2>Other Portions of the Assembly Listings, and an Exception<br>
+    </h2>
+    <p>Beyond just source code, assembly listings include other
+      assembler-generated material as well.&nbsp; Example are:&nbsp;
+      lists of cards which have been added or removed, symbol tables,
+      octal listings of the assembled executable, and so forth.&nbsp;
+      This extra material differs on a listing-by-listing basis, and I
+      won't attempt to categorize all of the possibilities for
+      you.&nbsp; Suffice it to say that any page of an assembly listing
+      which doesn't have the obvious characteristics of those described
+      in the preceding sections doesn't need to be transcribed.&nbsp;
+      You can inquire if there's uncertainty.<br>
+    </p>
+    <p>But there is an exception, if you happen to be transcribing the
+      introductory "MAIN" section of code.&nbsp; That exception is the
+      module index.<br>
+    </p>
+    <p>In the AS-206RAM assembly listing, the module index is actually a
+      set of full-line comments in the source code, so there's no
+      question that it should have been transcribed.&nbsp; But in AS-512
+      and AS-513, while the module index is of a confusingly-similar
+      appearance, it nevertheless seems to have been auto-generated by
+      the assembler rather than having been derived from full-line
+      comments in the source code; there are no page headings, no page
+      number, no card sequence number, and the columnar alignment is
+      wrong.&nbsp; Strictly following the rules already mentioned, we'd
+      just ignore these module indices and not transcribe them.<br>
+    </p>
+    <p>Nevertheless, these module indices are extremely-convenient to
+      have.&nbsp; It's hard to reconcile their usefulness with simply
+      omitting them.&nbsp; My executive ruling is that they <i>should</i>
+      be transcribed, but as "modern comments".&nbsp; (See the preceding
+      section.)&nbsp; The good news is that I've already done some of
+      the work of transcribing them:&nbsp; In each of the folders
+      AS-512/ and AS-513/ in the provided git repository, you find a
+      file called stubTitles.txt.&nbsp; These files contain the names of
+      the modules, and can be used to facilitate addition of the modern
+      comments to the transcription.<br>
+    </p>
+    <p><br>
+    </p>
+  </body>
+</html>
