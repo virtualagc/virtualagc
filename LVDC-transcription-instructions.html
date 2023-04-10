@@ -11,7 +11,7 @@
     <h2>Introduction</h2>
     <p>If you're reading this, I assume you know what the <a
         moz-do-not-send="true" href="LVDC.html">LVDC</a> was, what the
-      flight software for it is, and what the potential ITAR
+      flight software for it is, and that there are potential ITAR
       restrictions on export of that software from the U.S. are, so I
       won't rehash that territory here.&nbsp; <br>
     </p>
@@ -45,8 +45,9 @@
       some of the descriptions that follow.<br>
     </p>
     <p>Digitized assembly listings are supplied to you as encrypted PDF
-      files and/or as encrypted (7z) archives of JPG files.&nbsp; Each
-      as some advantage over the other, but I won't bore you with my
+      files and/or as encrypted (7z) archives of JPG files.&nbsp; It
+      will be your own choice as to which is best for you.&nbsp; Each as
+      some advantage over the other, but I won't bore you with my
       assessments of those.<br>
     </p>
     <p>An LVDC flight program consists of an introductory section (which
@@ -69,15 +70,61 @@
     module indices, but the exact manner in which they are massaged
     shouldn't concern you, since we handle that aspect of the process
     for you.<br>
+    <h2>Procedure</h2>
+    <p>If you want to involve yourself in the transcription process,
+      notify us by email at info AT sandroid.org.&nbsp; Note that the
+      reply will likely come from a different email address, so if you
+      don't receive a response within (say) a day, perhaps you should
+      check your spam filter.&nbsp; <br>
+    </p>
+    If you haven't already done so in the past, you will be asked to
+    provide some evidence that you are "U.S. person" as required by
+    ITAR.&nbsp; The most-common way to be considered a U.S. person is to
+    be a citizen, though there are other ways as well.&nbsp; Once we
+    consider you to be a U.S. person, you'll be provided access to
+    digitized LVDC program listings, as well as a snapshot of an
+    encrypted git repository containing existing transcribed source-code
+    files.<br>
+    <p>Note, however, that this transcription effort is not being
+      managed via a git repository (or more-specifically, by a github
+      repository), because we perceive no way to do that while still
+      complying with ITAR.&nbsp; Thus you can ignore the provided git
+      repository or not, as suits you, but you will <i>not</i> be
+      submitting your transcriptions using it!<br>
+    </p>
+    <p>Rather, you will transfer source-code files to us via the
+      following 2-step process:<br>
+    </p>
+    <ol>
+      <li><b>Compress and </b><b><i>encrypt</i></b><b> the source-code
+          file with 7z or zip</b>.&nbsp; You are free to use the same
+        password which you are supplied for accessing the digitized
+        assembly-listing files, or to invent your own.&nbsp; Of course,
+        if you do the latter, you'll have to inform us what the password
+        is.<br>
+      </li>
+      <li>Email the <b>compressed, encrypted file</b> to us (<i>separately</i>
+        from the password).&nbsp; We will then add it to the git
+        repository if it is acceptable, or (potentially) reject it for
+        rework if not.<br>
+      </li>
+    </ol>
+    The first section transcribed by any volunteer will be assigned to
+    you from among the shortest remaining untranscribed modules.&nbsp;
+    However, subsequent files may be chosen from the remaining
+    untranscribed modules according to your personal interests.&nbsp; In
+    all cases, you are supplied with a correctly-named source-code file
+    that includes a header in our required form, and your responsibility
+    is merely to add the transcribed source code to it.<br>
     <h2>A Choice of Formats:&nbsp; .lvdc vs .lvdc8<br>
     </h2>
-    As I just mentioned, an LVDC source-code file will have a filename
-    such as GFP_DATA_PACK.lvdc.<br>
+    I mentioned earlier that an LVDC source-code file will have a
+    filename such as GFP_DATA_PACK.lvdc.<br>
     <br>
     Unfortunately, that statement is an oversimplification.&nbsp; The
     source-code files you transcribe <i>may</i> have an extension of
-    ".lvdc", but they may <i>instead</i> be given a filename extension
-    of ".lvdc8".&nbsp; Thus you could have a source-code file named
+    ".lvdc", but they may instead be given a filename extension of
+    ".lvdc8".&nbsp; Thus you could have a source-code file named
     GFP_DATA_PACK.lvdc8 instead of GFP_DATA_PACK.lvdc.&nbsp; That's
     because we accept two slightly-different formats for these
     transcribed files, and the two filename extensions indicate which of
@@ -100,12 +147,47 @@
       conversions.&nbsp; Make <i>your</i> decision on the basis of your
       own preferences alone.<br>
     </p>
-    <p>In brief, though, the situation is this:&nbsp; LVDC assembly code
-      as it was used back in the original Apollo project days, was
-      strictly aligned to specific columns within the punch-cards on
-      which the source code was supplied.&nbsp; Whereas today, we no
-      longer use punch-cards, but instead use text-editor software in
-      which maintaining specific columnar alignment isn't something we
+    <p>By the way, as I already mentioned, once you choose (or we choose
+      for you) a module to be transcribed, we'll send you a mostly-empty
+      source-code file into which you will add the transcribed source
+      code.&nbsp; We'll make every effort to send you whichever file
+      format (.lvdc vs .lvdc8) that we think you're going to
+      attempt.&nbsp; But we could be wrong, or you could change your
+      mind, so you need to know how to change the type of one of these
+      mostly-empty files.&nbsp; Once you've added transcribed source
+      code to it, changing your mind is much harder, and I won't bother
+      trying to describe that.&nbsp; With these nearly-empty files,
+      though, there are two simple steps.&nbsp; First, rename the file
+      from <i>whatever</i>.lvdc to <i>whatever</i>.lvdc8, or
+      vice-versa.&nbsp; Second, the file itself begins with a header
+      that may read something like this:<br>
+    </p>
+    <blockquote>
+      <p><font face="Courier New, Courier, monospace">#
+          Copyright:&nbsp;&nbsp;&nbsp; Public domain.<br>
+          # Restrictions: Presently, treat as if export from U.S. is
+          restricted by ITAR.<br>
+          # Filename:&nbsp;&nbsp;&nbsp;&nbsp;
+          ABSOLUTE-COMMAND_FREEZE_UTILITY.lvdc<br>
+          # Purpose:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; This is a portion of
+          LVDC flight program AS-512, as <br>
+          &nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; &nbsp; .<br>
+          &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; &nbsp; .<br>
+          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp; .</font><br>
+      </p>
+    </blockquote>
+    Just change where it says ".lvdc" in the third line to ".lvdc8" (or
+    vice-versa).<br>
+    <p>But what is the difference between the two file formats?&nbsp; In
+      brief, the situation is this:&nbsp; LVDC assembly code as it was
+      used back in the original Apollo project days, was strictly
+      aligned to specific columns within the punch-cards on which the
+      source code was supplied.&nbsp; Whereas today, we no longer use
+      punch-cards, but instead use text-editor software in which
+      maintaining specific columnar alignment isn't something we
       normally worry about.&nbsp; When we do have to worry about exact
       columnar alignment in source code, we usually hope to rely on tab
       stops at regular (often 8-column) intervals.&nbsp; But a constant
@@ -117,13 +199,13 @@
     <p>So another way of looking at ".lvdc" vs ".lvdc8" is this:<br>
     </p>
     <ul>
-      <li>The ".lvdc" format means that you have exactly reproduced the
+      <li>The ".lvdc" format means that you are exactly reproducing the
         columnar alignment of all of the source code, including the
         comments.</li>
-      <li>The ".lvdc8" format means that you have instead relied on your
-        text editor's tab stops (with a tab-width of 8), and have made
-        somewhat of an effort to align the comments but have probably
-        failed to do so perfectly.</li>
+      <li>The ".lvdc8" format means that you are instead relying on your
+        text editor's tab stops (with a tab-width of 8), and are making
+        somewhat of an effort to align the comments but are probably
+        failing to do so perfectly.</li>
     </ul>
     <p>With all that said, there are tricks that can be used to make
       ".lvdc" actually <i>easier</i> to produce than ".lvdc8" ...
@@ -134,57 +216,13 @@
       be unwilling to change to an alternate editor.&nbsp; Thus your
       decision to use .lvdc vs .lvdc8 may come down to whatever's
       convenient with the text editor you insist upon using.&nbsp; But
-      we'll get to that later.<br>
-    </p>
-    <h2>Procedure</h2>
-    <p>If you want to involve yourself in the transcription process,
-      notify us by email at info@sandroid.org.&nbsp; Note that the reply
-      will likely come from a different email address, so if you don't
-      receive a response within (say) a day, perhaps you should check
-      your spam filter.&nbsp; <br>
-    </p>
-    If you haven't already done so in the past, you will be asked to
-    provide some evidence that you are "U.S. person" as required by
-    ITAR.&nbsp; The most-common way to be considered a U.S. person is to
-    be a citizen, though there are other ways as well.&nbsp; Once we
-    consider you to be a U.S. person, you'll be provided access to
-    digitized LVDC program listings, as well as a snapshot of a git
-    repository of existing transcribed source-code files.<br>
-    <p>Note, however, that this transcription effort is not being
-      managed via a git repository (or more-specifically, by a github
-      repository), because we perceive no way to do that while still
-      complying with ITAR.&nbsp; Thus you can ignore the provided git
-      repository or not, as suits you, but you will <i>not</i> be
-      submitting your transcriptions using it!<br>
-    </p>
-    <p>Rather, source-code files are transferred by the following steps:<br>
-    </p>
-    <ol>
-      <li>Compress and <i>encrypt</i> the source-code file with 7z or
-        zip.&nbsp; You are free to use the same password which you are
-        supplied for accessing the digitized assembly-listing files, or
-        to invent your own.&nbsp; Of course, if you do the latter,
-        you'll have to inform us what the password is.<br>
-      </li>
-      <li>Email the compressed, encrypted file to us (<i>separately</i>
-        from the password).&nbsp; We will then add it to the git
-        repository if it is acceptable, or (potentially) reject it for
-        rework if not.<br>
-      </li>
-    </ol>
-    <p>The <i>first</i> section transcribed by any volunteer will be
-      assigned to you from among the shortest remaining untranscribed
-      modules.&nbsp; However, subsequent files may be chosen from the
-      remaining untranscribed modules according to your personal
-      interests.&nbsp; In all cases, you are <i>supplied</i> with a
-      correctly-named source-code file that includes a header in our
-      required form, and your responsibility is merely to add the
-      transcribed source code to it.<br>
+      we're coming to that choice in the next section.<br>
     </p>
     <h2>Selecting and Configuring Your Text Editor:&nbsp; .lvdc vs
       .lvdc8<br>
     </h2>
-    <h3>Selection</h3>
+    <h3>Selecting the Text Editor<br>
+    </h3>
     <p>Recall that I said earlier that we'd accept transcriptions in
       either a (preferred) format called .lvdc or else in a (possibly
       simpler) format called .lvdc8, and that the particular format you
@@ -192,25 +230,25 @@
       text-editing software you are willing to use.&nbsp; If at any
       point while reading this section you feel that it's just not worth
       the hassle, then you've made the definite choice to just produce
-      .lvdc8 files and should immediately <a moz-do-not-send="true"
-        href="#lvdc8">advance to the section on configuring your text
-        editor for .lvdc8.</a><br>
+      .lvdc8 files and should just use the text editor of your choice
+      and immediately <a moz-do-not-send="true" href="#lvdc8">advance
+        to the section on configuring your text editor for .lvdc8.</a><br>
     </p>
     <p>The most-significant characteristic your text-editor — or rather,
       your text-editor plus your operating system — can have to simplify
-      your transcription effort, and in particular the ability to easily
-      produce the .lvdc format, is what I call "transparency".&nbsp; By
-      transparency, I mean the ability to see through the editing area
-      of your text-editor program to the desktop underlying it.&nbsp;
-      The following screenshot from my own desktop should make this idea
-      clear:<br>
+      your transcription effort, and in particular your ability to
+      easily produce the .lvdc format, is what I call
+      "transparency".&nbsp; By transparency, I mean the ability to see
+      through the editing area of your text-editor program to the
+      desktop underlying it.&nbsp; The following screenshot from my own
+      desktop should make this idea clear:<br>
     </p>
     <div align="center"><img moz-do-not-send="true"
         src="LVDC-guidelines-transparency.jpg" alt="" width="1288"
         height="724"><br>
       <div align="left"><br>
         In this picture, what has happened is that on my desktop I have
-        use a JPG viewer to open up a digitized page I wish to
+        used a JPG viewer to open up a digitized page I wish to
         transcribe.&nbsp; Then, I opened up a text-editor program, which
         happens to be called <b>nano</b>, and maneuvered <b>nano</b>'s
         window in front of the image of the digitized page and
@@ -227,7 +265,11 @@
         be.&nbsp; Other than configuring the transparency you have to be
         able to adjust the font type and font size used by your text
         editor so that the character width corresponds well to the
-        horizontal spacing of the scan.<br>
+        horizontal spacing of the scan.&nbsp; Getting everything scaled
+        and positioned usefully can be a pain, particularly once you
+        realize that not all of the digitized images of the assembly
+        listing are necessarily scaled identically, so that some page-by
+        page scaling adjustments may be needed.<br>
         <br>
         Which text-editors have transparency on which operating
         systems?&nbsp; Yes, that's certainly a question, isn't it?<br>
@@ -239,46 +281,51 @@
         platforms.&nbsp; Unfortunately, like everything in EMACS, an
         innocent bystander such as myself can't understand a single
         thing the aficionados say about it, not even the instructions on
-        how to achieve it, so I can neither confirm nor deny, and am
-        certainly in no position to recommend.)<br>
+        how to achieve it, so I can neither confirm nor deny that it can
+        do it, and am certainly in no position to recommend it.)<br>
         <br>
         The good news is that if you can make the terminal window (i.e.,
         the "command line") partially transparent on your operating
-        system, then any text editor which operates with a terminal
-        window will be transparent as well.&nbsp; Alas, by using one of
-        these purely text-based editors, you lose the ability to
-        position the cursor using a mouse, and thus must rely on
-        keyboard arrow keys to move the cursor around instead.<br>
+        system, then <i>any</i> text editor which operates with that
+        terminal window will be transparent as well.&nbsp; Alas, by
+        using one of these purely text-based editors, you lose the
+        ability to position the cursor using a mouse, and thus must rely
+        on keyboard arrow keys to move the cursor around instead.<br>
         <br>
-        In my experience, command-line transparency can be configured in
-        Linux and Mac OS.&nbsp; Admittedly I'm stuck back at Mac OS
-        10.7.5 and have no information about modern versions.&nbsp;
-        Similarly, I've read that you can have command-line transparency
-        in Windows 10, but I'm personally stuck back on Windows 7 where
-        you cannot.&nbsp; On the other hand, even in Windows 7 <a
-          moz-do-not-send="true"
+        In my experience, command-line transparency of a terminal window
+        can be easily configured in Linux and Mac OS.&nbsp; Admittedly
+        I'm stuck back at Mac OS 10.7.5 and have no information about
+        modern versions.&nbsp; Similarly, I've read that you can have
+        command-line transparency in Windows 10, but I'm personally
+        stuck back on Windows 7 where you cannot.&nbsp; On the other
+        hand, even in Windows 7 <a moz-do-not-send="true"
           href="https://sourceforge.net/projects/console/">you can
           install an open-source replacement for the command-line window</a>
         which does allow you to set its transparency.&nbsp; Regardless
         of platform, I'd suggest initially setting the opacity somewhere
         in the neighborhood of 15-20% for transcription purposes.<br>
         <br>
-        I presume, perhaps foolishly, that most operating systems still
-        have native command-line-window text editors.&nbsp; Even if not,
+        I don't know whether any current operating systems still have
+        native command-line-window text editors.&nbsp; For example,
+        Windows use to have such an editor, called <b>edit</b>, but
+        apparently no longer does.&nbsp; But even if not, there are
         editors which operate within the command-line window and are
-        available on all three of Linux, Mac, and Windows include:<br>
+        available on all three of Linux, Mac, and Windows.&nbsp; Those
+        include:<br>
         <ul>
           <li><b>vim</b> <br>
           </li>
           <li><b>nano</b></li>
         </ul>
-        <p>I'm sure there are others, but I just don't know what they
-          are.&nbsp; Of the two mentioned, <b>nano</b> is much simpler
-          to use for casual users, while <b>vim</b> (which has a
-          steeper learning curve) is typically used by those of us who
-          consider ourselves power users and look down on the rest of
-          you peons.&nbsp; (Joke!&nbsp; Personally, I prefer <b>nano</b>,
-          thus look down even on myself with disdain.)&nbsp; <br>
+        <p>I'm sure there are other suitable editors that are
+          cross-platform or single-platform-only, but I'm presently
+          mostly ignorant of them.&nbsp; Of the two mentioned, <b>nano</b>
+          is much simpler to use for casual users, while <b>vim</b>
+          (which has a steeper learning curve) is typically used by
+          those of us who consider ourselves power users and look down
+          on the rest of you peons.&nbsp; (Joke!&nbsp; Personally, I
+          prefer <b>nano</b>, thus look down even on myself with
+          disdain.)&nbsp; <br>
         </p>
         <p>On the other hand, <b>vim</b> has the nice advantage that we
           actually have LVDC syntax-highlighting for it.&nbsp; Perhaps
@@ -288,8 +335,9 @@
           color.&nbsp; You can see an example of highlighting
           below.&nbsp; The example is from the AS-206RAM vector
           dot-product utility, which I've chosen since as a pure
-          mathematical method seems to have no ITAR restrictions; we'll
-          see more of it later on.<a name="SyntaxHighlighted"></a><br>
+          mathematical method it would seem to have no ITAR
+          restrictions; we'll see more of it later on.<a
+            name="SyntaxHighlighted"></a><br>
         </p>
         <p align="center"><img moz-do-not-send="true"
             src="LVDC-vim-highlighting.png" alt="" width="672"
@@ -303,15 +351,16 @@
           folders, ftdetect/ and syntax/.&nbsp; There's some folder on
           your system that holds <b>vim</b> syntax-highlighting
           options, though unfortunately I don't know what it is and
-          you'll have to google it to find out.&nbsp; On my Linux
-          system, that folder is ~/.vim/, though it didn't exist at
-          first and I had to create it.&nbsp; At any rate, once you
-          figure out the folder you're supposed to use, and/or create
-          it, then you should copy ftdetect/ and syntax/ into it.&nbsp;
-          From now on, whenever you open a .lvdc or .lvdc8 file with <b>vim</b>,
-          it will be syntax-highlighted.<br>
+          you'll have to google it to find out.&nbsp; On my own Linux
+          system, that folder happens to be ~/.vim/, though it didn't
+          exist at first and I had to create it myself.&nbsp; At any
+          rate, once you figure out the folder you're supposed to use,
+          and/or you create it, then you should copy ftdetect/ and
+          syntax/ into it.&nbsp; From now on, whenever you open a .lvdc
+          or .lvdc8 file with <b>vim</b>, it will be
+          syntax-highlighted.<br>
         </div>
-        <h3>Configuring for .lvdc</h3>
+        <h3>Configuring the Text Editor for .lvdc</h3>
         <p>If you're here, you've chosen to at least try to maintain
           exact columnar alignment of both source code and program
           comments in your transcription.&nbsp; <br>
@@ -349,7 +398,7 @@
           use the tab key all, and resign yourself to using the space
           bar almost all of the time.<br>
         </p>
-        <h3><a name="lvdc8"></a>Configuring for .lvdc8</h3>
+        <h3><a name="lvdc8"></a>Configuring the Text Editor for .lvdc8</h3>
         If you're here, you've chosen to minimize your transcription
         effort, at the cost of losing exact columnar alignment of source
         code and (probably) of program comments.<br>
@@ -434,16 +483,17 @@
       </li>
       <li>The portion in <font color="#993399">purple</font> consists
         of inline comments and is supposed to be fully
-        transcribed.&nbsp; It's any text on a line that follows legal
-        LVDC opcodes and operands after some intervening white space,
-        but preceding the sequence number at the end of the
+        transcribed.&nbsp; It's any text that follows the legal LVDC
+        opcodes and operands on a line after some intervening white
+        space, but preceding the sequence number at the end of the
         line.&nbsp;&nbsp; The rules for columnar alignment are the same
-        as for full-line comments.&nbsp; Incidentally, don't conclude
-        (as you might if not warned) that the comment area begins at
-        some specific column; as I said, anything following the
-        source-code operand is the comment.&nbsp; Some source-code
-        operands are so long that they intrude into the purple area
-        shown as an example above, but that doesn't make them comments!<br>
+        as for full-line comments.&nbsp; Incidentally, don't infer from
+        the picture above (as you might if not warned) that the comment
+        area begins at some specific column; as I said, anything
+        following the source-code operand is the comment.&nbsp; Some
+        source-code operands are so long that they intrude into the
+        purple area shown as an example above, but that doesn't make
+        them comments!<br>
       </li>
       <li>The portion in <font color="#cc9933">yellow</font> isn't
         transcribed, but certain summary data is extracted from it and
@@ -463,6 +513,18 @@
         as summary data.<br>
       </li>
     </ul>
+    Even more generally, it may be helpful to remember (or learn) that
+    the physical punch-cards on which the source code was supplied
+    allowed for 80 columns of information.&nbsp; In terms of the picture
+    above, the first column in the <font color="#009900">green</font>
+    and <font color="#cc0000">red</font> areas is column 1 of the
+    punch-care, the final column in the <font color="#cc0000">red</font>
+    and <font color="#993399">purple</font> areas is column 72, and the
+    <font color="#cc9933">yellow</font> card-sequence-number area
+    occupies columns 73-80 (though only 6-digit card-sequence numbers
+    are used in the image above, so a couple of those columns are blank
+    spaces).<br>
+    <br>
     As for what the source code looks like after transcription, <a
       moz-do-not-send="true" href="#SyntaxHighlighted">we already saw it
       earlier as an example of syntax highlighting</a>.&nbsp; The line
@@ -483,21 +545,22 @@
     when I transcribed this code.&nbsp; Which is to say that I
     transcribed it as an .lvdc8 file rather than an .lvdc file, and just
     aligned the comments at some convenient tab stop rather than
-    striving to make the columnar alignment exact.&nbsp; Well ... and it
+    striving to make the columnar alignment exact.&nbsp; (Actually, it
     was transcribed years before we really started discussing the issue
-    of columnar alignment.<br>
+    of columnar alignment that we're obsessing about here.)<br>
     <br>
     As I mentioned above, there are some assembly-listing quirks you
     need to worry about that weren't included in the generalized
     description earlier.&nbsp; Several of these quirks involve things
     that appear in what I've called the source-code area but which need
-    not or <i>must not</i> be transcribed.&nbsp; Consider the following
-    few lines from the AS-512 matrix-multiply code:<br>
+    not or must not be transcribed.&nbsp; Consider the following few
+    lines from the AS-512 matrix-multiply code:<br>
     <br>
     <div align="center"><img moz-do-not-send="true"
         src="LVDC-hopstar.jpg" alt="" width="1324" height="117"><br>
       <br>
       <div align="left">There's actually no such LVDC instruction as <tt>HOP*</tt>.&nbsp;
+
         The instruction is just <tt>HOP</tt>, but the assembler added
         the "*" next to it for its own reasons.&nbsp; Thus the "*"
         needn't be transcribed, and should instead be replaced with a
@@ -513,7 +576,7 @@
         </div>
         <br>
         The lines in highlighted in red <i>must</i> be discarded in
-        their entirety and not transcribed.&nbsp; The are distinguished
+        their entirety and not transcribed.&nbsp; They are distinguished
         by the fact that they have a '#' character in the column
         immediately preceding the source code area; besides which, they
         have no punch-card sequence number at the far right.&nbsp; (If
@@ -522,25 +585,36 @@
         by the assembler itself at assembly time.&nbsp; For
         informational purposes, the assembler repeats the line, but with
         the calculated value shown explicitly.&nbsp; But if this
-        informational line were transcribed, it would basically mean
-        that it was simply a duplication of the line above it, and thus
-        would be assembled twice.&nbsp; Not good.)<br>
+        informational line appeared in the transcription, it would
+        basically be a duplication of the line above it, and thus would
+        be assembled twice.&nbsp; Not good.)<br>
         <br>
         The example below shows another type of line which <i>must not</i>
         be transcribed ... and which will save you a lot of work by not
-        transcribing them.&nbsp; The LVDC assembler is a so-called
-        "macro assembler", meaning that one can define macros consisting
-        of sequences of assembly-language instructions; wherever the
-        name of the macro appears in the source code, the assembler
-        automatically expands the macro into the defined sequence of
-        instructions.&nbsp; As a courtesy, the assembler also shows you
-        the instructions it expanded the macro into.&nbsp; Which is
-        fine, except that when you transcribe it you want to just
-        transcribe the invocation of the macro, and not the expanded
-        form of the macro.&nbsp; The expanded form of the macro is
-        indicated by the "+" character in the column immediately
+        transcribing them.&nbsp; (Don't let the blurring of the source
+        code confused you.&nbsp; I grabbed this example from a random
+        page of the AS-512 program listing and although it was obviously
+        harmless to national security — as indeed the <i>entire</i>
+        LVDC flight program is to anybody thinking rationally! — I
+        couldn't immediately come up with a bureaucratic&nbsp; argument
+        as to why it is.&nbsp; It was easier to simply to blur it
+        out.)&nbsp; The LVDC assembler is a so-called "macro assembler",
+        meaning that one can define macros consisting of sequences of
+        assembly-language instructions; wherever the name of the macro
+        appears in the source code, the assembler automatically expands
+        the macro into the predefined sequence of instructions.&nbsp;
+        That's what has happened in this example.&nbsp; As a courtesy,
+        the assembler also shows you the instructions it expanded the
+        macro into.&nbsp; Which is fine, except that when you transcribe
+        it you want to just transcribe the invocation of the macro, and
+        not the expanded form of the macro.&nbsp; Because again, if both
+        the macro invocation and the expanded macro appeared in the
+        transcribed source code, it would essentially result in it being
+        assembled twice.&nbsp; The expanded form of the macro is
+        distinguished by the "+" character in the column immediately
         preceding the source-code area, and in the fact that there are
-        no punch-card sequence numbers at the far right.<br>
+        no punch-card sequence numbers at the far right, as you can see
+        even in spite of the blurring:<br>
         <br>
         <div align="center"><img moz-do-not-send="true"
             src="LVDC-macro-expansion.jpg" alt="" width="1322"
@@ -556,31 +630,41 @@
         src="LVDC-AS512-282.png" alt="" width="1287" height="709"><br>
     </div>
     <br>
-    Well, for one thing, you'll notice that the sequence numbers do have
-    2-letter prefixes (in this case, "VD") as I already mentioned.&nbsp;
-    But just preceding those on the line, notice the characters
-    highlighted in <font color="#cc0000">red</font>.&nbsp; You might be
-    pardoned for assuming that these seemingly-nonsensical symbols were
-    generated by the assembler, but in fact these are indeed part of the
-    full-line comment and inline comment areas, and are transcribed as
-    part of the comments.&nbsp; <br>
+    You'll notice that the sequence numbers do have 2-letter prefixes
+    (in this case, "VD") as I already mentioned, and thus are fully 8
+    characters in length.&nbsp; But just preceding those sequence
+    numbers, notice the characters highlighted in <font color="#cc0000">red</font>.&nbsp;
+    You might be pardoned for assuming that these seemingly-nonsensical
+    symbols were generated by the assembler, but in fact these are
+    indeed part of the full-line comment and inline comment areas, and
+    are transcribed as part of the comments.&nbsp; They appear very
+    often throughout the listing.&nbsp; As far as columnar alignment is
+    concerned, recall that I said earlier that the comment area of a
+    punch-card ends at column 72, while the card-sequence numbers occupy
+    some or all of columns 73-80.&nbsp; In the image above, you can see
+    that the these funky red character are separated from the
+    card-sequence numbers by a single space, so at least for this sample
+    page, they are in column 71.&nbsp; For AS-512 and AS-513, you should
+    always be able count backward from the card-sequence numbers in this
+    manner to determine the proper column alignment of the funky
+    characters.<br>
     <br>
     Notice also the area highlighted in <font color="#009900">green</font>.&nbsp;
+
     At the end of each module in AS-512 and AS-513 is an block of
     material generated by the assembler.&nbsp; These areas include
-    summary information about errors (as seen above), symbol
-    cross-reference tables (not shown), and so on.&nbsp; <i>These areas
-      are not to be transcribed</i>.&nbsp; You should be able to
-    distinguish these areas easily, since they simply don't look like
-    the source-code areas do; in particular, they don't have punch-card
-    sequence numbers at the ends of the lines.&nbsp; But unfortunately,
-    beyond that hint I can't give you some specific rule for recognizing
-    them, and I'm afraid you'll simply have to learn to do so by
-    experience.<br>
+    summary information about errors, symbol cross-reference tables (not
+    shown in the image), and so on.&nbsp; <i>These areas are not to be
+      transcribed</i>.&nbsp; You should be able to distinguish these
+    areas easily, since they simply don't look like the source-code
+    areas do; in particular, they don't have punch-card sequence numbers
+    at the ends of the lines.&nbsp; But unfortunately, beyond that hint
+    I can't give you some specific rule for recognizing them, and I'm
+    afraid you'll simply have to learn to do so by experience.<br>
     <br>
     As far as the <font color="#663366">purple</font> area is
     concerned, it's yet another kind of sequence number, generated by
-    the assembler rather than being punched on the cards, and and isn't
+    the assembler rather than being punched on the cards, and isn't
     transcribed.&nbsp; There's nothing really that you have to know
     about it other than the fact that the assembler-generated
     information appearing between modules won't have these sequence
@@ -588,28 +672,34 @@
     <h2>Modern Comments, Required and Optional<br>
     </h2>
     <p>As mentioned above, the original LVDC code had two comment
-      mechanisms:&nbsp; full-line comments occupy an entire line, and
-      are distinguished by having the character '*' in column 1; inline
-      comments simply follow legal LVDC code on any given line, and do
-      not have any distinguishing mark to prefix them.<br>
+      mechanisms:&nbsp; <i>full-line</i> comments occupy an entire
+      line, and are distinguished by having the character '*' in column
+      1; whereas <i>inline</i> comments simply follow legal LVDC code
+      on any given line, and do not have any distinguishing mark to
+      prefix them.<br>
     </p>
     <p>However, these mechanisms do not suffice to handle all of the
-      program comments we'd like to have in the transcriptions.&nbsp;
-      We'd like to add our own comments, distinguishable from the
-      originals, for all manner of reasons.&nbsp; In the example above,
-      you saw the comment "<tt># PAGE 282, SEQUENCE 119390-119790</tt>".&nbsp;
-
-      Every transcribed page is required to have of these "modern
-      comments", comprising metadata for the page that we've added but
-      weren't originally present.&nbsp; These are all full-line
-      comments, but are distinguished from the original comments in that
-      they begin with '#' rather than '*'.<br>
+      program comments we'd like to have in our transcriptions.&nbsp;
+      We'd like to add our own comments that didn't appear in the
+      original code, but that remain distinguishable from the original
+      comments so that they cannot be confused with them.&nbsp; For this
+      reason we introduce a third kind of comment that we'll call a
+      "modern comment".&nbsp; In the example above, you saw the line "<tt>#
+        PAGE 282, SEQUENCE 119390-119790</tt>", which begins with "#"
+      rather than "*" in column 1.&nbsp; This is a modern comment.&nbsp;
+      The leading "#" is characteristic of modern comments, whereas for
+      the original LVDC assembler it would simply have been a syntax
+      error.&nbsp; Every transcribed page is required to have one of
+      these modern comments providing the page number and the page's
+      summarized sequence numbers.&nbsp; All modern comments have the
+      characteristics of the original full-line comments, except for the
+      difference in the leading character.<br>
     </p>
     <p>Similarly, each source-code file is required to begin with a
       file-header, consisting of "modern comments", giving the filename,
       modification history, and so on.&nbsp; These headers are present
       when the source-code file is given to you, but you should modify
-      the modification-history portion of the header (with new modern
+      the modification-history portion of the header (using new modern
       comments) to describe the work you've done on the file.&nbsp;
       Here's the header from the transcribed file that I took the
       example code above from:<br>
@@ -627,8 +717,8 @@
 # Website:      www.ibiblio.org/apollo/LVDC.html
 # Page images:  Inquire
 # Mod history:  2023-04-01 RSB  Split from monolithic file LVDC-AS206RAM.lvdc.<br>#               2023-04-09 RSB	An example of an added change notice. <br></info@sandroid.org></pre>
-    <p>To add a new line to the modification history, beginning with '#'
-      in column 1, you'd align the date field, initials field, and
+    <p>To add a new entry to the modification history, beginning with
+      '#' in column 1, you'd align the date field, initials field, and
       comment-text fields with the existing line that's already
       there.&nbsp; The date format, YYYY-MM-DD is some ISO standard, the
       name of which I've forgotten.<br>
@@ -637,20 +727,25 @@
       offer criteria at this time for adding them.&nbsp; But if, for
       example, you're transcribing a page with a handwritten notation,
       adding a modern comment to describe that handwritten notation
-      would seem to be a good use of the modern-comment facility.<br>
+      would seem to be a good use of the modern-comment facility. <br>
     </p>
     <h2>Other Portions of the Assembly Listings, and an Exception<br>
     </h2>
     <p>Beyond just source code, assembly listings include other
-      assembler-generated material as well.&nbsp; Example are:&nbsp;
-      lists of cards which have been added or removed, symbol tables,
-      octal listings of the assembled executable, and so forth.&nbsp;
-      This extra material differs on a listing-by-listing basis, and I
-      won't attempt to categorize all of the possibilities for
-      you.&nbsp; Suffice it to say that any page of an assembly listing
-      which doesn't have the obvious characteristics of those described
-      in the preceding sections doesn't need to be transcribed.&nbsp;
-      You can inquire if there's uncertainty.<br>
+      assembler-generated material as well.&nbsp; We've already seen
+      that diagnostic summaries and symbol cross-reference tables may be
+      generated by the assembler between source-code modules.&nbsp; But
+      there are other assembler-provided sections that may appear prior
+      to any source-code module or after the final source-code
+      module.&nbsp; Example are:&nbsp; lists of cards which have been
+      added or removed, symbol tables, octal listings of the assembled
+      executable, and so forth.&nbsp; This extra material differs on a
+      listing-by-listing basis, and I won't attempt to categorize all of
+      the possibilities for you.&nbsp; Suffice it to say that any page
+      of an assembly listing which doesn't have the obvious
+      characteristics of those described in the preceding sections
+      doesn't need to be transcribed.&nbsp; You can inquire if there's
+      uncertainty.<br>
     </p>
     <p>But there is an exception, if you happen to be transcribing the
       introductory "MAIN" section of code.&nbsp; That exception is the
