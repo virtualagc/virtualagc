@@ -7,7 +7,7 @@
   </head>
   <body>
     <h1>LVDC Source-Code Transcription Guidelines</h1>
-    <p>(Last updated 2023-04-10.)<br>
+    <p>(Last updated 2023-04-11.)<br>
     </p>
     <h2>Introduction</h2>
     <p>If you're reading this, I assume you know what the <a
@@ -235,10 +235,10 @@
       and immediately <a moz-do-not-send="true" href="#lvdc8">advance
         to the section on configuring your text editor for .lvdc8.</a><br>
     </p>
-    <p>The most-significant characteristic your text-editor � or rather,
-      your text-editor plus your operating system � can have to simplify
-      your transcription effort, and in particular your ability to
-      easily produce the .lvdc format, is what I call
+    <p>The most-significant characteristic your text-editor � or
+      rather, your text-editor plus your operating system � can have
+      to simplify your transcription effort, and in particular your
+      ability to easily produce the .lvdc format, is what I call
       "transparency".&nbsp; By transparency, I mean the ability to see
       through the editing area of your text-editor program to the
       desktop underlying it.&nbsp; The following screenshot from my own
@@ -341,8 +341,8 @@
             name="SyntaxHighlighted"></a><br>
         </p>
         <p align="center"><img moz-do-not-send="true"
-            src="LVDC-vim-highlighting.png" alt="" width="672"
-            height="754"><br>
+            src="LVDC-vim-highlighting.png" alt="" width="680"
+            height="838"><br>
         </p>
         <div align="left"><br>
           If you do intend to use <b>vim</b>, and you do want to set it
@@ -501,8 +501,9 @@
         added to comments in the transcribed code to help
         cross-reference the source-code files to the original assembly
         listing.&nbsp; The information specifically needed is the page
-        number (282 in this example), the starting sequence number
-        (119390), and the ending sequence number (119790).&nbsp;
+        number (282 in this example), the title in the heading at the
+        top of the page ("22 UTILITY ROUTINES"), the starting sequence
+        number (119390), and the ending sequence number (119790).&nbsp;
         Incidentally, in the AS-512 and AS-513 assembly listings, you'll
         find that the sequence numbers aren't just 6-digit numbers as
         shown above, but have 2-letter alphabetic prefixes as well, such
@@ -529,12 +530,33 @@
     As for what the source code looks like after transcription, <a
       moz-do-not-send="true" href="#SyntaxHighlighted">we already saw it
       earlier as an example of syntax highlighting</a>.&nbsp; The line
-    preceding the lines shown in screenshot, which I should have
-    included in it but forgot to, reads<br>
+    at the very top of that transcription of the transcribed page reads<br>
     <blockquote><tt># PAGE 282, SEQUENCE 119390-119790</tt><br>
     </blockquote>
-    That's where you put the summary data extracted from the yellow
-    areas.<br>
+    You'll notice that this doesn't seem to be a line that's actually in
+    the original assembly listing.&nbsp; It's an example of what I call
+    a "modern comment" (<a moz-do-not-send="true" href="#Modern">to
+      which an entire section is devoted below</a>), and in this case it
+    happens to be where you present the summary data extracted from the
+    <font color="#cc9933">yellow</font> areas.&nbsp; There's one of
+    these modern comments with the page-number for each transcribed
+    page.&nbsp; As it happens, I transcribed AS-206RAM years ago, and
+    the thinking on what goes into one of the page-specific modern
+    comments has changed somewhat since then.&nbsp; The more-recent
+    thinking, which I'd like to follow in the AS-512 and AS-513
+    transcriptions, is that the comment should instead read something
+    like:<br>
+    <blockquote><tt># PAGE 282, SEQUENCE 119390-119790, TITLE "22
+        UTILITY ROUTINES"</tt><br>
+    </blockquote>
+    However, it usually happens that the title in the page header
+    doesn't change very often from page-to-page, so for labor-saving
+    reasons there's no need to add the <tt>TITLE</tt> field to these
+    comments unless the title has actually changed from title of the
+    preceding page.&nbsp; As for the question of whether you need to
+    preserve the exact spacing within the title, I don't personally see
+    any reason to clutter up these title with lots of extra spaces, but
+    I'd leave it up to you.<br>
     <br>
     If you're really attentive to detail, you may notice in the
     transcription that the <font color="#993399">inline-comment portion</font>
@@ -546,9 +568,7 @@
     when I transcribed this code.&nbsp; Which is to say that I
     transcribed it as an .lvdc8 file rather than an .lvdc file, and just
     aligned the comments at some convenient tab stop rather than
-    striving to make the columnar alignment exact.&nbsp; (Actually, it
-    was transcribed years before we really started discussing the issue
-    of columnar alignment that we're obsessing about here.)<br>
+    striving to make the columnar alignment exact.&nbsp; <br>
     <br>
     As I mentioned above, there are some assembly-listing quirks you
     need to worry about that weren't included in the generalized
@@ -561,6 +581,7 @@
         src="LVDC-hopstar.jpg" alt="" width="1324" height="117"><br>
       <br>
       <div align="left">There's actually no such LVDC instruction as <tt>HOP*</tt>.&nbsp;
+
 
 
 
@@ -637,6 +658,7 @@
     numbers, notice the characters highlighted in <font color="#cc0000">red</font>.&nbsp;
 
 
+
     You might be pardoned for assuming that these seemingly-nonsensical
     symbols were generated by the assembler, but in fact these are
     indeed part of the full-line comment and inline comment areas, and
@@ -653,6 +675,7 @@
     characters.<br>
     <br>
     Notice also the area highlighted in <font color="#009900">green</font>.&nbsp;
+
 
 
 
@@ -674,7 +697,7 @@
     about it other than the fact that the assembler-generated
     information appearing between modules won't have these sequence
     numbers.<br>
-    <h2>Modern Comments, Required and Optional<br>
+    <h2><a name="Modern"></a>Modern Comments, Required and Optional<br>
     </h2>
     <p>As mentioned above, the original LVDC code had two comment
       mechanisms:&nbsp; <i>full-line</i> comments occupy an entire
