@@ -7,6 +7,8 @@
 # syllable 1 (left hand) while those starting with a space
 # followed by a digit are syllable 0 (right hand).
 
+# Updated 2023-04-12 to show the A8-1 A9 OP fields explicitly for most instructions.
+
 import sys
 
 instructions = [ "HOP", "MPY", "SUB", "DIV", "TNZ", "MPH", "AND", "ADD", "TRA", "XOR", "PIO", "STO", "TMI", "RSU", "", "CLA" ]
@@ -19,7 +21,8 @@ for line in sys.stdin:
 			syllable = int(line, 8) >> 1
 	except:
 		continue
-	op = (syllable >> 1) & 0x0F
+	syllable_1 = syllable >> 1
+	op = syllable_1 & 0x0F
 	if op == 0o16:
 		if (syllable & 32) == 0:
 			instruction = "CDS"
@@ -48,6 +51,9 @@ for line in sys.stdin:
 			right = (syllable >> 6) & 15
 			print("%s %o,%o,%02o" % (instruction, left, middle, right))
 	else:
+		a9 = (syllable_1 >> 4) & 0x01
+		a8_1 = (syllable_1 >> 5) & 0xFF 
+		print("%03o %o %02o   " % (a8_1, a9, op), end="")
 		instruction = instructions[op]
 		address = ((syllable >> 6) & 0xFF) | ((syllable << 3) & 0x100)
 		print("%s %03o" % (instruction, address))
