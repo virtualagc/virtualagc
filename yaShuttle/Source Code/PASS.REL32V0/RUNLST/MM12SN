@@ -1,0 +1,295 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+MM12SN    SD 0001 000000 00008A
+¤
+         MM12SN--DETERMINANT OF AN N X N MATRIX, SP                                                            PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 DETSAV   DS    1F                                                       00000400
+                                 10          MEND                                                           00000500
+                                 11 MM12SN   AMAIN                                                          00000600
+                                 12+***********************************************************************
+                                 13+*
+                                 14+*        PRIMARY ENTRY POINT
+                                 15+*
+                                 16+***********************************************************************
+00000                            17+MM12SN   CSECT                                                          01-AMAIN
+00000                            18+STACK    DSECT                                                          01-AMAIN
+                                 19+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            20+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            21+         DS    2F             R0,R1                                     01-AMAIN
+00006                            22+ARG2     DS    F              R2                                        01-AMAIN
+00008                            23+         DS    F              R3                                        01-AMAIN
+0000A                            24+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            25+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            26+ARG6     DS    F              R6                                        01-AMAIN
+00010                            27+ARG7     DS    F              R7                                        01-AMAIN
+                                 28+*        END OF STANDARD STACK AREA
+00012                            29+DETSAV   DS    1F                                                       02-00009
+00014                            30+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            31+MM12SN   CSECT                                                          01-AMAIN
+0000000                          32+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   33+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 35 *                                                                       00000700
+                                 36 * TAKES THE DETERMINANT OF AN N X N DOUBLE PRECISION MATRIX WHERE N     00000800
+                                 37 *   IS NOT EQUAL TO 3.                                                  00000900
+                                 38 *                                                                       00001000
+                                 39          INPUT R2,            MATRIX(N,N) SP                           X00001100
+                                                   R4,            MATRIX(N,N) SP TEMPORARY WORKAREA        X00001200
+                                                   R5             INTEGER(N) SP                             00001300
+0000002                          40+R2       EQU   2                                                        01-INPUT
+0000004                          41+R4       EQU   4                                                        01-INPUT
+0000005                          42+R5       EQU   5                                                        01-INPUT
+                                 44          OUTPUT F0            SCALAR SP                                 00001400
+0000000                          45+F0       EQU   0                                                        01-OUTPU
+                                 47          WORK  R1,R3,R6,R7,F1,F2,F3,F4,F5                               00001500
+0000001                          48+R1       EQU   1                                                        01-WORK
+0000003                          49+R3       EQU   3                                                        01-WORK
+0000006                          50+R6       EQU   6                                                        01-WORK
+0000007                          51+R7       EQU   7                                                        01-WORK
+0000001                          52+F1       EQU   1                                                        01-WORK
+0000002                          53+F2       EQU   2                                                        01-WORK
+0000003                          54+F3       EQU   3                                                        01-WORK
+0000004                          55+F4       EQU   4                                                        01-WORK
+0000005                          56+F5       EQU   5                                                        01-WORK
+                                 58 *                                                                       00001600
+                                 59 * ALGORITHM:                                                            00001700
+                                 60 * IF N = 2 THEN                                                         00001800
+                                 61 *    RETURN (A(1,1) * A(2,2) - (A(2,1) * A(1,2)))                       00001900
+                                 62 * ELSE                                                                  00002000
+                                 63 * DET=1.0                                                               00002100
+                                 64 *FOR K=1 TO N-1 DO                                                      00002200
+                                 65 *    BEGIN                                                              00002300
+                                 66 *    BIG=0.0                                                            00002400
+                                 67 *    I1=J1=K                                                            00002500
+                                 68 *    FOR I=K TO N DO                                                    00002600
+                                 69 *    FOR J=K TO N DO                                                    00002700
+                                 70 *       IF ABS(A(I,J))>BIG THEN                                         00002800
+                                 71 *       BEGIN                                                           00002900
+                                 72 *       BIG=ABS(A(I,J)                                                  00003000
+                                 73 *       I1=I                                                            00003100
+                                 74 *       J1=J                                                            00003200
+                                 75 *       END                                                             00003300
+                                 76 *    IF I1^=K THEN                                                      00003400
+                                 77 *       BEGIN                                                           00003500
+                                 78 *       DET=-DET                                                        00003600
+i                                 79 *       FOR J=K TO N DO SWITCH(A(I1,J),A(K,J));                         00003700
+         MM12SN--DETERMINANT OF AN N X N MATRIX, SP                                                            PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                 80 *       END;                                                            00003800
+                                 81 *    IF J1^=K THEN                                                      00003900
+                                 82 *       BEGIN                                                           00004000
+                                 83 *       DET=-DET                                                        00004100
+                                 84 *       FOR I=K TO N DO SWITCH(A(I,J1),A(I,K))                          00004200
+                                 85 *       END                                                             00004300
+                                 86 *    DET=DET*A(K,K)                                                     00004400
+                                 87 *    FOR I=K+1 TO N DO                                                  00004500
+                                 88 *       BEGIN                                                           00004600
+                                 89 *       TEMP1=-A(I,K)/A(K,K)                                            00004700
+                                 90 *       FOR J=K+1 TO N DO                                               00004800
+                                 91 *          A(I,J)=A(I,J)+A(K,J)*TEMP1                                   00004900
+                                 92 *       END                                                             00005000
+                                 93 *    END                                                                00005100
+                                 94 * DET=DET*A(N,N)                                                        00005200
+                                 95 *                                                                       00005300
+00002 B5E5 0002           0002   96          CHI   R5,2                                                     00005400
+00004 DB1C           000C 0007   97          BNE   NLEN                                                     00005500
+00005 7806           0002        98          LE    F0,2(R2)                                                 00005600
+00006 6012           0008        99          ME    F0,8(R2)                                                 00005700
+00007 7A0A           0004       100          LE    F2,4(R2)                                                 00005800
+00008 620E           0006       101          ME    F2,6(R2)                                                 00005900
+00009 58EA                      102          SEDR  F0,F2                                                    00006000
+0000A C7F7 007D      0089 007D  103          B     OUT                                                      00006100
+0000C 1FE5                      104 NLEN     LR    R7,R5                                                    00006200
+0000D 47E5                      105          MR    R7,R5                                                    00006300
+0000E F73C                000F  106          SLL   R7,15                                                    00006400
+0000F 19E4                      107          LR    R1,R4                                                    00006500
+00010 1CE5                      108          LR    R4,R5                                                    00006600
+00011 F404                0001  109          SLL   R4,1                                                     00006700
+00012 78F6 E000      0000       110 MVLOOP   LE    F0,0(R7,R2)                                              00006800
+00014 38F5 E000      0000       111          STE   F0,0(R7,R1)                                              00006900
+00016 DF17           0012 0005  112          BCTB  R7,MVLOOP                                                00007000
+00017 8CE1                0001  113          LFLI  F4,1                                                     00007100
+00018 BDE3                0003  114          LFXI  R5,1                                                     00007200
+00019 58E0                      115 ALOOP    SER   F0,F0                                                    00007300
+0001A 1FE5                      116          LR    R7,R5                                                    00007400
+0001B 9928           000A       117          LH    R1,ARG4                                                  00007500
+0001C 09E4                      118          SR    R1,R4                                                    00007600
+0001D 01E4                      119 SLOOP    AR    R1,R4                                                    00007700
+0001E DF0B           001D 0002  120          BCTB  R7,SLOOP                                                 00007800
+0001F 1EE5                      121          LR    R6,R5          I1=K                                      00007900
+00020 1FE5                      122          LR    R7,R5          J1=K                                      00008000
+00021 1BE5                      123          LR    R3,R5          I=K TO N                                  00008100
+00022 1AE5                      124 DLOOP    LR    R2,R5          J = K TO N                                00008200
+00023 7AF5 4000      0000       125 ELOOP    LE    F2,0(R2,R1)                                              00008300
+00025 DD04           0027 0001  126          BNL   COMP                                                     00008400
+00026 7AEA                      127 C1       LECR  F2,F2                                                    00008500
+00027 48EA                      128 COMP     CER  F0,F2                                                     00008600
+00028 DD0C           002C 0003  129          BNL   GLOOP                                                    00008700
+00029 78E2                      130          LER   F0,F2                                                    00008800
+0002A 1EE3                      131          LR    R6,R3                                                    00008900
+0002B 1FE2                      132          LR    R7,R2                                                    00009000
+0002C EA06           0001       133 GLOOP    LA    R2,1(R2)       J COUNTER                                 00009100
+0002D 9230           000C       134          CH    R2,ARG5                                                  00009200
+0002E DE32           0023 000C  135          BLE   ELOOP                                                    00009300
+0002F EB07           0001       136          LA    R3,1(R3)                                                 00009400
+00030 01E4                      137          AR    R1,R4          ROW I = I + 1                             00009500
+00031 9330           000C       138          CH    R3,ARG5                                                  00009600
+00032 DE46           0022 0011  139          BLE   DLOOP                                                    00009700
+00033 9928           000A       140          LH    R1,ARG4                                                  00009800
+00034 1BE5                      141          LR    R3,R5                                                    00009900
+00035 09E4                      142          SR    R1,R4                                                    00010000
+00036 1AE1                      143          LR    R2,R1                                                    00010100
+00037 01E4                      144 K2       AR    R1,R4                                                    00010200
+00038 DB0B           0037 0002  145          BCTB  R3,K2                                                    00010300
+00039 16E5                      146          CR    R6,R5                                                    00010400
+0003A DC40           004B 0010  147          BE    L                                                        00010500
+0003B 7CEC                      148 J        LECR  F4,F4                                                    00010600
+0003C 1BE6                      149          LR    R3,R6                                                    00010700
+0003D 02E4                      150 K1       AR    R2,R4                                                    00010800
+0003E DB0B           003D 0002  151          BCTB  R3,K1                                                    00010900
+0003F 1BE5                      152          LR    R3,R5                                                    00011000
+00040 78F5 6000      0000       153 KLOOP    LE    F0,0(R3,R1)    A(K,J)                                    00011100
+00042 7AF6 6000      0000       154          LE    F2,0(R3,R2)    A(I1,J)                                   00011200
+00044 3AF5 6000      0000       155          STE   F2,0(R3,R1)    A(K,J)                                    00011300
+00046 38F6 6000      0000       156          STE   F0,0(R3,R2)    A(I1,J)                                   00011400
+00048 EB07           0001       157          LA    R3,1(R3)                                                 00011500
+00049 9330           000C       158          CH    R3,ARG5                                                  00011600
+i0004A DE2E           0040 000B  159          BNH   KLOOP                                                    00011700
+         MM12SN--DETERMINANT OF AN N X N MATRIX, SP                                                            PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+0004B 1AE1                      160 L        LR    R2,R1                                                    00011800
+0004C 17E5                      161          CR    R7,R5                                                    00011900
+0004D DC38           005C 000E  162          BE    Q                                                        00012000
+0004E 7CEC                      163 N        LECR  F4,F4                                                    00012100
+0004F 1BE5                      164          LR    R3,R5          I = K TO N                                00012200
+00050 78F5 E000      0000       165 OLOOP    LE    F0,0(R7,R1)    A(I,J1)                                   00012300
+00052 7AF5 A000      0000       166          LE    F2,0(R5,R1)    A(I,K)                                    00012400
+00054 3AF5 E000      0000       167          STE   F2,0(R7,R1)    A(I,J1)                                   00012500
+00056 38F5 A000      0000       168          STE   F0,0(R5,R1)    A(I,K)                                    00012600
+00058 01E4                      169          AR    R1,R4                                                    00012700
+00059 EB07           0001       170          LA    R3,1(R3)                                                 00012800
+0005A 9330           000C       171          CH    R3,ARG5                                                  00012900
+0005B DE32           0050 000C  172          BNH   OLOOP                                                    00013000
+0005C 78F6 A000      0000       173 Q        LE    F0,0(R5,R2)    A(K,K)                                    00013100
+0005E 64E0                      174          MER   F4,F0          DET * A(K,K)                              00013200
+0005F 9928           000A       175          LH    R1,ARG4                                                  00013300
+00060 3C24           0012       176          STE   F4,DETSAV                                                00013400
+00061 7CE0                      177          LER   F4,F0                                                    00013500
+00062 19E2                      178 R        LR    R1,R2                                                    00013600
+00063 02E4                      179          AR    R2,R4                                                    00013700
+00064 1BE5                      180          LR    R3,R5                                                    00013800
+00065 EB07           0001       181          LA    R3,1(R3)                                                 00013900
+00066 88E1                0001  182          LFLI  F0,1                                                     00014000
+00067 68E4                      183          DER   F0,F4                                                    00014100
+00068 1FE5                      184 RLOOP    LR    R7,R5                                                    00014200
+00069 B0E7 0001           0001  185          AHI   R7,1           K + 1                                     00014300
+0006B 7AF6 A000      0000       186          LE    F2,0(R5,R2)    A(I,K)                                    00014400
+0006D 7AEA                      187          LECR  F2,F2          -A(I,K)                                   00014500
+0006E 62E0                      188 T        MER   F2,F0          TEMP1                                     00014600
+0006F 7CF5 E000      0000       189 ULOOP    LE    F4,0(R7,R1)    A(K,J)                                    00014700
+00071 64E2                      190          MER   F4,F2          A(K,J) * TEMP1                            00014800
+00072 54F6 E000      0000       191 V        AE    F4,0(R7,R2)    A(I,J)                                    00014900
+00074 3CF6 E000      0000       192          STE   F4,0(R7,R2)                                              00015000
+00076 B0E7 0001           0001  193          AHI   R7,1           J = J + 1                                 00015100
+00078 9730           000C       194          CH    R7,ARG5                                                  00015200
+00079 DE2E           006F 000B  195          BNH   ULOOP                                                    00015300
+0007A 02E4                      196          AR    R2,R4                                                    00015400
+0007B EB07           0001       197          LA    R3,1(R3)                                                 00015500
+0007C 9330           000C       198          CH    R3,ARG5                                                  00015600
+0007D DE5A           0068 0016  199          BNH   RLOOP                                                    00015700
+0007E B0E5 0001           0001  200          AHI   R5,1                                                     00015800
+00080 7C24           0012       201          LE    F4,DETSAV                                                00015900
+00081 9530           000C       202          CH    R5,ARG5                                                  00016000
+00082 C2F7 086B      0019 006B  203          BL    ALOOP                                                    00016100
+00084 0AE4                      204          SR    R2,R4                                                    00016200
+00085 9D30           000C       205          LH    R5,ARG5                                                  00016300
+00086 64F6 A000      0000       206          ME    F4,0(R5,R2)                                              00016400
+00088 78E4                      207          LER   F0,F4                                                    00016500
+                                208 OUT      AEXIT                                                          00016600
+                                209+*********RETURN TO CALLER**********************************************
+00089                           210+OUT      DS    0H                                                       01-AEXIT
+00089 97E8                      211+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                212+***********************************************************************
+                                214          ACLOSE                                                         00016700
+0008A                           215+         LTORG                                                          02-ERRPA
+                                216+****************ERROR PARAMETER AREA***********************************
+                                217+***  NO ERRORS SENT IN MM12SN                                           02-ERRPA
+                                218+****************END OF ERROR PARAMETER AREA****************************
+                                219+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ALOOP        1   000019   115    203
+ARG2         2   000006    22
+ARG4         2   00000A    24    117   140   175
+ARG5         2   00000C    25    134   138   158   171   194   198   202   205
+ARG6         2   00000E    26
+ARG7         2   000010    27
+C1           1   000026   127
+COMP         1   000027   128    126
+DETSAV       2   000012    29    176   201
+DLOOP        1   000022   124    139
+ELOOP        2   000023   125    135
+F0           1 00000000    45     98    99   102   110   111   115   115   128   130   153   156   165   168   173   174
+                                 177   182   183   188   207
+F1           1 00000001    52
+F2           1 00000002    53    100   101   102   125   127   127   128   130   154   155   166   167   186   187   187
+                                 188   190
+F3           1 00000003    54
+F4           1 00000004    55    113   148   148   163   163   174   176   177   183   189   190   191   192   201   206
+                                 207
+F5           1 00000005    56
+GLOOP        2   00002C   133    129
+J            1   00003B   148
+K1           1   00003D   150    151
+K2           1   000037   144    145
+KLOOP        2   000040   153    159
+L            1   00004B   160    147
+MM12SN       1 00000000    17     31
+MVLOOP       2   000012   110    112
+N            1   00004E   163
+NLEN         1   00000C   104     97
+OLOOP        2   000050   165    172
+OUT          1   000089   210    103
+Q            2   00005C   173    162
+R            1   000062   178
+R1           1 00000001    48    107   111   117   118   119   125   137   140   142   143   144   153   155   160   165
+                                 166   167   168   169   175   178   189
+R2           1 00000002    40     98    98    99    99   100   100   101   101   110   124   125   125   132   133   133
+                                 133   134   143   150   154   156   160   173   178   179   186   191   192   196   204
+                                 206
+R3           1 00000003    49    123   131   136   136   136   138   141   145   149   151   152   153   153   154   154
+                                 155   155   156   156   157   157   157   158   164   170   170   170   171   180   181
+                                 181   181   197   197   197   198
+R4           1 00000004    41    107   108   109   118   119   137   142   144   150   169   179   196   204
+R5           1 00000005    42     96   104   105   108   114   116   121   122   123   124   141   146   152   161   164
+                                 166   166   168   168   173   173   180   184   186   186   200   202   205   206   206
+R6           1 00000006    50    121   131   146   149
+R7           1 00000007    51    104   105   106   110   110   111   111   112   116   120   122   132   161   165   165
+                                 167   167   184   185   189   189   191   191   192   192   193   194
+RLOOP        1   000068   184    199
+SLOOP        1   00001D   119    120
+STACK        1 00000000    18     32
+STACKEND     2   000014    30
+T            1   00006E   188
+ULOOP        2   00006F   189    195
+V            2   000072   191
+$RET1        1   000089   211
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     172 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+     295 LINES OUTPUT          14 CARDS OUTPUT

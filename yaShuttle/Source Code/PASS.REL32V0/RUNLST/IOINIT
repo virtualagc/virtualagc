@@ -1,0 +1,325 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+IOINIT    SD 0001 000000 000056
+IOBUF     LD      000058        0002
+IOCODE    LD      000056        0002
+INTRAP    LD      000034        0001
+HOUT      LD      000009        0001
+OUTER1    LD      000013        0001
+IOUT      LD      000016        0001
+EOUT      LD      00001D        0001
+DOUT      LD      000024        0001
+BOUT      LD      00002B        0001
+SKIP      LD      000035        0001
+LINE      LD      000041        0001
+COLUMN    LD      000046        0001
+TAB       LD      00004B        0001
+PAGE      LD      000050        0001
+#LIOINIT  SD 0002 000056 000083
+¤
+         IOINIT AND OUTPUT PACKAGE                                                                             PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 IOINIT   AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+IOINIT   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+IOINIT   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *        INITIALIZES I/O SYSTEM FOR READ,READALL,OR WRITE STATEMENT     00000300
+                                 32          INPUT R5,            MODE (0-READ,1-READALL,2-WRITE,3-PRINT)  X00000400
+                                                   R6             CHANNEL (0 - 9)                           00000500
+0000005                          33+R5       EQU   5                                                        01-INPUT
+0000006                          34+R6       EQU   6                                                        01-INPUT
+                                 36          OUTPUT NONE                                                    00000600
+                                 38          WORK  R4             FOR VARIOUS BAL'S                         00000700
+0000004                          39+R4       EQU   4                                                        01-WORK
+                                 41          ENTRY  IOBUF,IOCODE,INTRAP                                     00000800
+00002 BEF3 0058      0058        42          STH   R6,IOBUF                                                 00000900
+00004 BDF3 0056      0056        43          STH   R5,IOCODE                                                00001000
+00006 E4F7 0038      0040 0038   44          BAL   R4,CNTRAP                                                00001100
+                                 45          AEXIT                                                          00001200
+                                 46+*********RETURN TO CALLER**********************************************
+00008                            47+         DS    0H                                                       01-AEXIT
+00008 97E8                       48+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 49+***********************************************************************
+                                 51 HOUT     AENTRY                                                         00001300
+                                 52+***********************************************************************
+                                 53+*
+                                 54+*        SECONDARY ENTRY POINT
+                                 55+*
+                                 56+***********************************************************************
+00009                            57+HOUT     DS    0H                                                       01-AENTR
+                                 58+         ENTRY HOUT                                                     01-AENTR
+00009 B624 0000      0009 0000   59+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 61 *        SINGLE PRECISION (HALFWORD) INTEGER OUTPUT                     00001400
+                                 62          INPUT R5             INTEGER SP                                00001500
+                                 64          OUTPUT NONE                                                    00001600
+0000B BDF3 0058      0058        66          STH   R5,IOBUF                                                 00001700
+0000D EEF3 000A      000A        67          LHI   R6,10                                                    00001800
+0000F BEF3 0056      0056        68 OUTCOM   STH   R6,IOCODE                                                00001900
+00011 C0E0                       69 OUTRAP   BCR   0,0                                                      00002000
+                                 70          AEXIT                                                          00002100
+                                 71+*********RETURN TO CALLER**********************************************
+00012                            72+         DS    0H                                                       01-AEXIT
+00012 97E8                       73+$RET2    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 74+***********************************************************************
+                                 76 OUTER1   AENTRY                                                         00002200
+                                 77+***********************************************************************
+                                 78+*
+                                 79+*        SECONDARY ENTRY POINT
+i                                 80+*
+         IOINIT AND OUTPUT PACKAGE                                                                             PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                 81+***********************************************************************
+00013                            82+OUTER1   DS    0H                                                       01-AENTR
+                                 83+         ENTRY OUTER1                                                   01-AENTR
+00013 B624 0000      0009 0000   84+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 86 *        OUTPUT ENTRY USED BY COUT                                      00002300
+                                 87          INPUT NONE                                                     00002400
+                                 89          OUTPUT NONE                                                    00002500
+00015 DF16           0011 0005   91          B     OUTRAP                                                   00002600
+                                 92 IOUT     AENTRY                                                         00002700
+                                 93+***********************************************************************
+                                 94+*
+                                 95+*        SECONDARY ENTRY POINT
+                                 96+*
+                                 97+***********************************************************************
+00016                            98+IOUT     DS    0H                                                       01-AENTR
+                                 99+         ENTRY IOUT                                                     01-AENTR
+00016 B624 0000      0009 0000  100+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                102 *        DOUBLE PRECISION (FULLWORD) INTEGER OUTPUT                     00002800
+                                103          INPUT R5             INTEGER DP                                00002900
+                                105          OUTPUT NONE                                                    00003000
+00018 35F3 0058      0058       107          ST    R5,IOBUF                                                 00003100
+0001A EEF3 0009      0009       108          LHI   R6,9                                                     00003200
+0001C DF3A           000F 000E  109          B     OUTCOM                                                   00003300
+                                110 EOUT     AENTRY                                                         00003400
+                                111+***********************************************************************
+                                112+*
+                                113+*        SECONDARY ENTRY POINT
+                                114+*
+                                115+***********************************************************************
+0001D                           116+EOUT     DS    0H                                                       01-AENTR
+                                117+         ENTRY EOUT                                                     01-AENTR
+0001D B624 0000      0009 0000  118+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                120 *        SINGLE PRECISION (FULLWORD) SCALAR OUTPUT                      00003500
+                                121          INPUT F0             SCALAR SP                                 00003600
+0000000                         122+F0       EQU   0                                                        01-INPUT
+                                124          OUTPUT NONE                                                    00003700
+0001F 38F3 0058      0058       126          STE   F0,IOBUF                                                 00003800
+00021 EEF3 000B      000B       127          LHI   R6,11                                                    00003900
+00023 DF56           000F 0015  128          B     OUTCOM                                                   00004000
+                                129 DOUT     AENTRY                                                         00004100
+                                130+***********************************************************************
+                                131+*
+                                132+*        SECONDARY ENTRY POINT
+                                133+*
+                                134+***********************************************************************
+00024                           135+DOUT     DS    0H                                                       01-AENTR
+                                136+         ENTRY DOUT                                                     01-AENTR
+00024 B624 0000      0009 0000  137+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                139 *        DOUBLE PRECISION (DOUBLEWORD) SCALAR OUTPUT                    00004200
+                                140          INPUT F0             SCALAR DP                                 00004300
+                                142          OUTPUT NONE                                                    00004400
+00026 38FB 0058      0058       144          STED  F0,IOBUF                                                 00004500
+00028 EEF3 000C      000C       145          LHI   R6,12                                                    00004600
+0002A DF72           000F 001C  146          B     OUTCOM                                                   00004700
+                                147 BOUT     AENTRY                                                         00004800
+                                148+***********************************************************************
+                                149+*
+                                150+*        SECONDARY ENTRY POINT
+                                151+*
+                                152+***********************************************************************
+0002B                           153+BOUT     DS    0H                                                       01-AENTR
+                                154+         ENTRY BOUT                                                     01-AENTR
+0002B B624 0000      0009 0000  155+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                157 *        BIT STRING OUTPUT                                              00004900
+                                158          INPUT R5,            BIT STRING                               X00005000
+i                                                   R6             BIT LENGTH                                00005100
+         IOINIT AND OUTPUT PACKAGE                                                                             PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                160          OUTPUT NONE                                                    00005200
+0002D 35F3 005A      005A       162          ST    R5,IOBUF+2                                               00005300
+0002F BEF3 0058      0058       163          STH   R6,IOBUF                                                 00005400
+00031 EEF3 0008      0008       164          LHI   R6,8                                                     00005500
+00033 DF96           000F 0025  165          B     OUTCOM                                                   00005600
+00034 C7E4                      166 INTRAP   BR    R4                                                       00005700
+                                167 SKIP     AENTRY                                                         00005800
+                                168+***********************************************************************
+                                169+*
+                                170+*        SECONDARY ENTRY POINT
+                                171+*
+                                172+***********************************************************************
+00035                           173+SKIP     DS    0H                                                       01-AENTR
+                                174+         ENTRY SKIP                                                     01-AENTR
+00035 B624 0000      0009 0000  175+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                177 *        PERFORMS SKIP CONTROL FUNCTION                                 00005900
+                                178          INPUT R5             INTEGER SP SKIP COUNT                     00006000
+                                180          OUTPUT NONE                                                    00006100
+00037 EEF3 0008      0008       182          LHI   R6,8                                                     00006200
+00039 BDF3 0058      0058       183 CTCOM    STH   R5,IOBUF                                                 00006300
+0003B BEF3 0056      0056       184          STH   R6,IOCODE                                                00006400
+0003D E4F7 0001      0040 0001  185          BAL   R4,CNTRAP                                                00006500
+                                186          AEXIT                                                          00006600
+                                187+*********RETURN TO CALLER**********************************************
+0003F                           188+         DS    0H                                                       01-AEXIT
+0003F 97E8                      189+$RET3    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                190+***********************************************************************
+00040 C7E4                      192 CNTRAP   BR    R4                                                       00006700
+                                193 LINE     AENTRY                                                         00006800
+                                194+***********************************************************************
+                                195+*
+                                196+*        SECONDARY ENTRY POINT
+                                197+*
+                                198+***********************************************************************
+00041                           199+LINE     DS    0H                                                       01-AENTR
+                                200+         ENTRY LINE                                                     01-AENTR
+00041 B624 0000      0009 0000  201+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                203 *        PERFORMS LINE CONTROL FUNCTION                                 00006900
+                                204          INPUT R5             INTEGER SP LINE NUMBER                    00007000
+                                206          OUTPUT NONE                                                    00007100
+00043 EEF3 0004      0004       208          LHI   R6,4                                                     00007200
+00045 DF36           0039 000D  209          B     CTCOM                                                    00007300
+                                210 COLUMN   AENTRY                                                         00007400
+                                211+***********************************************************************
+                                212+*
+                                213+*        SECONDARY ENTRY POINT
+                                214+*
+                                215+***********************************************************************
+00046                           216+COLUMN   DS    0H                                                       01-AENTR
+                                217+         ENTRY COLUMN                                                   01-AENTR
+00046 B624 0000      0009 0000  218+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                220 *        PERFORMS COLUMN CONTROL FUNCTION                               00007500
+                                221          INPUT R5             INTEGER SP COLUMN NUMBER                  00007600
+                                223          OUTPUT NONE                                                    00007700
+00048 EEF3 0005      0005       225          LHI   R6,5                                                     00007800
+0004A DF4A           0039 0012  226          B     CTCOM                                                    00007900
+                                227 TAB      AENTRY                                                         00008000
+                                228+***********************************************************************
+                                229+*
+                                230+*        SECONDARY ENTRY POINT
+                                231+*
+                                232+***********************************************************************
+0004B                           233+TAB      DS    0H                                                       01-AENTR
+                                234+         ENTRY TAB                                                      01-AENTR
+0004B B624 0000      0009 0000  235+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                237 *        PERFORMS TAB CONTROL FUNCTION                                  00008100
+i                                238          INPUT R5             INTEGER SP TAB COUNT                      00008200
+         IOINIT AND OUTPUT PACKAGE                                                                             PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                240          OUTPUT NONE                                                    00008300
+0004D EEF3 0006      0006       242          LHI   R6,6                                                     00008400
+0004F DF5E           0039 0017  243          B     CTCOM                                                    00008500
+                                244 PAGE     AENTRY                                                         00008600
+                                245+***********************************************************************
+                                246+*
+                                247+*        SECONDARY ENTRY POINT
+                                248+*
+                                249+***********************************************************************
+00050                           250+PAGE     DS    0H                                                       01-AENTR
+                                251+         ENTRY PAGE                                                     01-AENTR
+00050 B624 0000      0009 0000  252+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                254 *        PERFORMS PAGE CONTROL FUNCTION                                 00008700
+                                255          INPUT R5             INTEGER SP PAGE COUNT                     00008800
+                                257          OUTPUT NONE                                                    00008900
+00052 EEF3 0007      0007       259          LHI   R6,7                                                     00009000
+00054 DF72           0039 001C  260          B     CTCOM                                                    00009100
+                                261          ADATA                                                          00009200
+                                262+*********DATA CSECT****************************************************
+00055 C9FB
+00056                           263+         LTORG                                                          02-ERRPA
+                                264+****************ERROR PARAMETER AREA***********************************
+                                265+***  NO ERRORS SENT IN IOINIT                                           02-ERRPA
+                                266+****************END OF ERROR PARAMETER AREA****************************
+00056                           267+#LIOINIT CSECT                                                          01-ADATA
+                                268          SPOFF                                                          00009300
+00056                           269 IOCODE   DS    H                                                        00009400
+00057 C9FB
+00058                           270          DS    0D                                                       00009500
+00058                           271 IOBUF    DS    129H                                                     00009600
+                                272          ACLOSE                                                         00009700
+                                273+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    6
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.38 07/22/05
+  0001     0002     00     000003
+  0001     0002     00     000005
+  0001     0002     00     00000C
+  0001     0002     00     000010
+  0001     0002     00     000019
+  0001     0002     00     000020
+  0001     0002     00     000027
+  0001     0002     00     00002E
+  0001     0002     00     000030
+  0001     0002     00     00003A
+  0001     0002     00     00003C
+¤
+                                             CROSS REFERENCE                                                   PAGE    7
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+BOUT         1   00002B   153    154
+CNTRAP       1   000040   192     44   185
+COLUMN       1   000046   216    217
+CTCOM        2   000039   183    209   226   243   260
+DOUT         1   000024   135    136
+EOUT         1   00001D   116    117
+F0           1 00000000   122    126   144
+HOUT         1   000009    57     58
+INTRAP       1   000034   166     41
+IOBUF        1   000058   271     41    42    66   107   126   144   162   163   183
+IOCODE       1   000056   269     41    43    68   184
+IOINIT       1 00000000    13     27
+IOUT         1   000016    98     99
+LINE         1   000041   199    200
+OUTCOM       2   00000F    68    109   128   146   165
+OUTER1       1   000013    82     83
+OUTRAP       1   000011    69     91
+PAGE         1   000050   250    251
+R4           1 00000004    39     44   166   185   192
+R5           1 00000005    33     43    66   107   162   183
+R6           1 00000006    34     42    67    68   108   127   145   163   164   182   184   208   225   242   259
+SKIP         1   000035   173    174
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+TAB          1   00004B   233    234
+$RET1        1   000008    48
+$RET2        1   000012    73
+$RET3        1   00003F   189
+#LIOINIT     1 00000056   267
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    8
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     102 CARDS FROM SYSIN     418 CARDS FROM SYSLIB
+     325 LINES OUTPUT          25 CARDS OUTPUT

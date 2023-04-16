@@ -1,0 +1,71 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VV1SN     SD 0001 000000 000008
+¤
+         VV1SN -- VECTOR MOVE, LENGTH N, SP                                                                    PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV1SN    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV1SN    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * MOVES V1 TO V2 WHERE V1 AND V2 ARE SINGLE PRECISION N VECTORS         00000400
+                                 17 *   WHERE N IS NOT EQUAL TO 3.                                          00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            VECTOR(N) SP                             X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT R1            VECTOR(N) SP                              00000900
+0000001                          24+R1       EQU   1                                                        01-OUTPU
+                                 26          WORK  F0                                                       00001000
+0000000                          27+F0       EQU   0                                                        01-WORK
+                                 29 *                                                                       00001100
+                                 30 * ALGORITHM:                                                            00001200
+                                 31 *   SEE ALGORITHM DESCRIPTION IN VV1DN                                  00001300
+                                 32 *                                                                       00001400
+00000 78F6 A000      0000        33 SLOOP    LE    F0,0(R5,R2)                                              00001500
+00002 38F5 A000      0000        34          STE   F0,0(R5,R1)                                              00001600
+00004 DD17           0000 0005   35          BCTB  R5,SLOOP                                                 00001700
+                                 36          AEXIT                                                          00001800
+                                 37+*********RETURN TO CALLER**********************************************
+00005                            38+         DS    0H                                                       01-AEXIT
+00005 9914           0005        39+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00006 C7EC                       40+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 41+***********************************************************************
+                                 43          ACLOSE                                                         00001900
+00007 C9FB
+00008                            44+         LTORG                                                          02-ERRPA
+                                 45+****************ERROR PARAMETER AREA***********************************
+                                 46+***  NO ERRORS SENT IN VV1SN                                            02-ERRPA
+                                 47+****************END OF ERROR PARAMETER AREA****************************
+                                 48+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    27     33    34
+R1           1 00000001    24     34
+R2           1 00000002    20     33
+R5           1 00000005    21     33    33    34    34    35
+SLOOP        2   000000    33     35
+VV1SN        1 00000000    13
+$RET1        1   000006    40
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      24 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      71 LINES OUTPUT           4 CARDS OUTPUT

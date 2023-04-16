@@ -1,0 +1,211 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CLJSTV    SD 0001 000000 000028
+#QGTBYTE  ER 0002
+#QSTBYTE  ER 0003
+#LCLJSTV  SD 0004 000028 000002
+¤
+         CLJSTV--LEFT JUSTIFY CHARACTER STRING                                                                 PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 CLJSTV   AMAIN ACALL=YES                                                00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+CLJSTV   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+CLJSTV   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * LEFT JUSTIFY CHARACTER STRING C1 TO A LENGTH OF I.                    00000400
+                                 33 *                                                                       00000500
+                                 34          INPUT R4,            CHARACTER(C1)                            X00000600
+                                                   R5             INTEGER(I) SP                             00000700
+0000004                          35+R4       EQU   4                                                        01-INPUT
+0000005                          36+R5       EQU   5                                                        01-INPUT
+                                 38          OUTPUT R2            CHARACTER(VAC)                            00000800
+0000002                          39+R2       EQU   2                                                        01-OUTPU
+                                 41          WORK  R1,R3,R6,F0                                              00000900
+0000001                          42+R1       EQU   1                                                        01-WORK
+0000003                          43+R3       EQU   3                                                        01-WORK
+0000006                          44+R6       EQU   6                                                        01-WORK
+0000000                          45+F0       EQU   0                                                        01-WORK
+                                 47 *                                                                       00001000
+                                 48 * ALGORITHM:                                                            00001100
+                                 49 *   IF 255 < I THEN                                                     00001200
+                                 50 *     I = 255;                                                          00001300
+                                 51 *   IF I < 0 THEN                                                       00001400
+                                 52 *     DO;                                                               00001500
+                                 53 *       DESCRIPTOR(VAC) = 0 || 0;                                       00001600
+                                 54 *       SEND ERROR$(4:18);                                              00001700
+                                 55 *       RETURN;                                                         00001800
+                                 56 *     END;                                                              00001900
+                                 57 *   DESCRIPTOR(VAC) = I; /* NO NEED TO SET MAXLENGTH SINCE VAC */       00002000
+                                 58 *   TEMP1 = CURRENT_LENGTH(C1);                                         00002100
+                                 59 *   TEMP2 = I - CURRENT_LENGTH(C1);                                     00002200
+                                 60 *   IF TEMP1 ^= 0 THEN                                                  00002300
+                                 61 *     DO FOR L = 1 TO TEMP1;                                            00002400
+                                 62 *       VAC$(L) = C1$(L);                                               00002500
+                                 63 *     END;                                                              00002600
+                                 64 *   IF TEMP2 <= 0 THEN                                                  00002700
+                                 65 *     RETURN;                                                           00002800
+                                 66 *   BLANK = HEX'20'; /* HEX CODE FOR DEU BLANK */                       00002900
+                                 67 *   DO FOR K = 1 TO TEMP2;                                              00003000
+                                 68 *     VAC$(K + L) = BLANK;                                              00003100
+                                 69 *   END;                                                                00003200
+                                 70 *                                                                       00003300
+00002 19E2                       71          LR    R1,R2          PUT OUTPUT PTR INTO R1                    00003400
+00003 1AE4                       72          LR    R2,R4          PUT INPUT PTR INTO R2 FOR ADDRESSABILITY  00003500
+00004 EEF3 00FF      00FF        73          LA    R6,255         255=MAX RESULT LENGTH                     00003600
+00006 16E5                       74          CR    R6,R5          COMPARE 255 WITH I                        00003700
+00007 DE08           000A 0002   75          BNH   SETLEN         BRANCH IF 255 <= I                        00003800
+00008 1EE5                       76          LR    R6,R5          SET R6=SUPPLIED LENGTH AND TEST FOR <0    00003900
+00009 DA50           001E 0014   77          BM    NEGLEN         BRANCH IF I < 0                           00004000
+                                 78 *                                                                       00004100
+                                 79 *   R6 HAS # CHARS OF RESULT STRING. 0<=(R6)<=255                       00004200
+i                                 80 *                                                                       00004300
+         CLJSTV--LEFT JUSTIFY CHARACTER STRING                                                                 PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0000A BE01           0000        81 SETLEN   STH   R6,0(R1)       SET ACTUAL LENGTH OF RESULT               00004400
+                                 82 *                                                                       00004500
+                                 83 * NOTE:  THIS SETS MAX LENGTH TO ZERO - OK SINCE ITS A TEMPORARY        00004600
+                                 84 *                                                                       00004700
+0000B 9B02           0000        85          LH    R3,0(R2)       GET DESCRIPTOR OF C1                      00004800
+0000C B6E3 00FF           00FF   86          NHI   R3,X'00FF'     MASK OUT MAXIMUM LENGTH                   00004900
+0000E DC1C           0016 0007   87          BZ    BLANKTST       BRANCH IF NULL INPUT                      00005000
+0000F 0EE3                       88          SR    R6,R3          COMPUTE PAD CHAR COUNT                    00005100
+00010 DA44           0022 0011   89          BM    TRUNCATE       BR IF SUPPLIED LEN < INPUT STR LEN        00005200
+                                 90 *                                                                       00005300
+                                 91 * THE FOLLOWING LOOP MOVES C1 TO THE VAC.                               00005400
+                                 92 *                                                                       00005500
+                                 93 MOVEIT   ABAL  GTBYTE         GET ONE CHAR                              00005600
+                                 94+         EXTRN #QGTBYTE                                                 01-ABAL
+00011 E4F7                       95+MOVEIT   DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00012 3800                       96+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+                                 97          ABAL  STBYTE         STORE ONE CHAR                            00005700
+                                 98+         EXTRN #QSTBYTE                                                 01-ABAL
+00013 E4F7                       99+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00014 3800                      100+         DC  Y(#QSTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+                                101 *                                                                       00005800
+                                102 * NOTE:  GTBYTE AND STBYTE INCREMENT THE BYTE PTRS                      00005900
+                                103 *                                                                       00006000
+00015 DB17           0011 0005  104          BCTB  R3,MOVEIT      LOOP (R3) TIMES                           00006100
+                                105 *                                                                       00006200
+                                106 *        PAD RESULT STRING WITH (R6) BLANKS                             00006300
+                                107 *                                                                       00006400
+00016 1EE6                      108 BLANKTST LR    R6,R6          TEST FOR ANY PAD CHARS?                   00006500
+00017 DE14           001D 0005  109          BNP   EXIT           BR IF NOT                                 00006600
+00018 EDF3 0020      0020       110 BLANKIT  LHI   R5,X'0020'     R5=DEU BLANK                              00006700
+                                111          ABAL  STBYTE         STORE INTO RESULT STR                     00006800
+0001A E4F7                      112+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0001B 3800                      113+         DC  Y(#QSTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0001C DE17           0018 0005  114          BCTB  R6,BLANKIT     LOOP (R6) TIMES                           00006900
+                                115 EXIT     AEXIT                                                          00007000
+                                116+*********RETURN TO CALLER**********************************************
+0001D                           117+EXIT     DS    0H                                                       01-AEXIT
+0001D 97E8                      118+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                119+***********************************************************************
+                                121 *                                                                       00007100
+                                122 *        SUPPLIED LENGTH WAS NEGATIVE                                   00007200
+0001E A101           0000       123 NEGLEN   ZH    0(R1)          SET RESULT TO NULL STRING                 00007300
+                                124 *                                                                       00007400
+                                125 * CAN ZERO ALL OF DESCRIPTOR SINCE ALWAYS ASSIGNS TO A VAC.             00007500
+                                126 *                                                                       00007600
+                                127          AERROR 18            ERROR: NEGATIVE LENGTH TO LJUST           00007700
+                                128+*********ISSUE SEND ERROR SVC******************************************
+0001F C9FB 0028      0028       129+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                130+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00021 DF16           001D 0005  131          B     EXIT                                                     00007800
+                                132 *                                                                       00007900
+                                133 * SUPPLIED LENGTH < INPUT LENGTH. PERFORM TRUNCATION                    00008000
+                                134 *                                                                       00008100
+                                135 TRUNCATE AERROR 18            ERROR: LJUST TRUNCATION                   00008200
+                                136+*********ISSUE SEND ERROR SVC******************************************
+00022 C9FB 0028      0028       137+TRUNCATE SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                138+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00024 03E6                      139          AR    R3,R6          REGENERATE RESULT LENGTH                  00008300
+00025 D956           0011 0015  140          BP    MOVEIT         FIXUP VIA TRUNCATION IF NON-NULL          00008400
+00026 DF2A           001D 000A  141          B     EXIT           BR IF NULL RESULT (SUPPLIED LEN=0)        00008500
+                                142 *                                                                       00008600
+                                143          ACLOSE                                                         00008700
+00027 C9FB
+00028                           144+         LTORG                                                          02-ERRPA
+                                145+****************ERROR PARAMETER AREA***********************************
+00028                           146+#LCLJSTV CSECT                                                          02-ERRPA
+                                147+***  CLJSTV SENDS THE FOLLOWING ERROR                                   02-ERRPA
+                                149+***  ERROR NUMBER 18 IN GROUP 4                                         02-ERRPA
+00028 0014                      151+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00029 0412                      152+         DC    Y(4*256+18)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                153+****************END OF ERROR PARAMETER AREA****************************
+                                154+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000012
+  0001     0003     00     000014
+  0001     0003     00     00001B
+  0001     0004     00     000020
+  0001     0004     00     000023
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000028   151    129   137
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+BLANKIT      2   000018   110    114
+BLANKTST     1   000016   108     87
+CLJSTV       1 00000000    13     27
+EXIT         1   00001D   117    109   131   141
+F0           1 00000000    45
+MOVEIT       1   000011    95    104   140
+NEGLEN       2   00001E   123     77
+R1           1 00000001    42     71    81    81   123   123
+R2           1 00000002    39     71    72    85    85
+R3           1 00000003    43     85    86    88   104   139
+R4           1 00000004    35     72
+R5           1 00000005    36     74    76   110
+R6           1 00000006    44     73    74    76    81    88   108   108   114   139
+SETLEN       2   00000A    81     75
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+TRUNCATE     2   000022   137     89
+$RET1        1   00001D   118
+#LCLJSTV     1 00000028   146
+#QGTBYTE     1 00000000    94     96
+#QSTBYTE     1 00000000    98    100   113
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      92 CARDS FROM SYSIN     424 CARDS FROM SYSLIB
+     211 LINES OUTPUT          13 CARDS OUTPUT

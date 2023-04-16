@@ -1,0 +1,121 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CINP      SD 0001 000000 000012
+IOCODE    ER 0002
+IOBUF     ER 0003
+#QINTRAP  ER 0004
+#QCPAS    ER 0005
+¤
+         CINP - PARTITIONED CHARACTER INPUT                                                                    PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 CINP     AMAIN  ACALL=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+CINP     CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+CINP     CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *        PARTITIONED CHARACTER INPUT                                    00000300
+                                 32          INPUT R5,            FIRST CHARACTER                          X00000400
+                                                   R6             LAST CHARACTER                            00000500
+0000005                          33+R5       EQU   5                                                        01-INPUT
+0000006                          34+R6       EQU   6                                                        01-INPUT
+                                 36          OUTPUT R2            POINTER TO RECEIVING CHARACTER STRING     00000600
+0000002                          37+R2       EQU   2                                                        01-OUTPU
+                                 39          WORK  R1,R7                                                    00000700
+0000001                          40+R1       EQU   1                                                        01-WORK
+0000007                          41+R7       EQU   7                                                        01-WORK
+                                 43          WORK  F0,F1          FROM ACALL CPAS                           00000800
+0000000                          44+F0       EQU   0                                                        01-WORK
+0000001                          45+F1       EQU   1                                                        01-WORK
+                                 47          EXTRN IOCODE,IOBUF                                             00000900
+00002 EFF3 FF00      FF00        48          LHI   R7,X'FF00'                                               00001000
+00004 BFF3 0000      0000        49          STH   R7,IOBUF       SET MAX LENGTH=255                        00001100
+00006 EFF3 000D      000D        50          LHI   R7,13                                                    00001200
+00008 BFF3 0000      0000        51          STH   R7,IOCODE    SAVE I/O CODE                               00001300
+                                 52          ABAL  INTRAP         GET STRING INTO IOBUF                     00001400
+                                 53+         EXTRN #QINTRAP                                                 01-ABAL
+0000A E4F7                       54+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0000B 3800                       55+         DC  Y(#QINTRAP+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0000C 19E2                       56          LR    R1,R2          DESTINATION POINTER FOR CPAS              00001500
+0000D EAF3 0000      0000        57          LA    R2,IOBUF       SOURCE PTR                                00001600
+                                 58          ACALL CPAS                                                     00001700
+                                 59+         EXTRN #QCPAS                                                   01-ACALL
+0000F D0FF                       60+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00010 3800                       61+         DC  Y(#QCPAS+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+                                 62          AEXIT                                                          00001800
+                                 63+*********RETURN TO CALLER**********************************************
+00011                            64+         DS    0H                                                       01-AEXIT
+00011 97E8                       65+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 66+***********************************************************************
+                                 68          ACLOSE                                                         00001900
+00012                            69+         LTORG                                                          02-ERRPA
+                                 70+****************ERROR PARAMETER AREA***********************************
+                                 71+***  NO ERRORS SENT IN CINP                                             02-ERRPA
+                                 72+****************END OF ERROR PARAMETER AREA****************************
+                                 73+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    3
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000009
+  0001     0003     00     000005
+  0001     0003     00     00000E
+  0001     0004     00     00000B
+  0001     0005     00     000010
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+CINP         1 00000000    13     27
+F0           1 00000000    44
+F1           1 00000001    45
+IOBUF        1 00000000    47     49    57
+IOCODE       1 00000000    47     51
+R1           1 00000001    40     56
+R2           1 00000002    37     56    57
+R5           1 00000005    33
+R6           1 00000006    34
+R7           1 00000007    41     48    49    50    51
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   000011    65
+#QCPAS       1 00000000    59     61
+#QINTRAP     1 00000000    53     55
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      24 CARDS FROM SYSIN     454 CARDS FROM SYSLIB
+     121 LINES OUTPUT           9 CARDS OUTPUT

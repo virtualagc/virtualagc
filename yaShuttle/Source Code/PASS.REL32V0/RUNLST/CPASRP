@@ -1,0 +1,131 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CPASRP    SD 0001 000000 000010
+#QCASRPV  ER 0002
+#QCPASR   ER 0003
+¤
+         CPASRP--CHARACTER ASSIGN,PARTITION TO PARTITION,REMOTE                                                PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 VAC      DS    128H                                                     00000400
+                                 10          MEND                                                           00000500
+                                 11 CPASRP   AMAIN ACALL=YES                                                00000600
+                                 12+***********************************************************************
+                                 13+*
+                                 14+*        PRIMARY ENTRY POINT
+                                 15+*
+                                 16+***********************************************************************
+00000                            17+CPASRP   CSECT                                                          01-AMAIN
+00000                            18+STACK    DSECT                                                          01-AMAIN
+                                 19+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            20+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            21+         DS    2F             R0,R1                                     01-AMAIN
+00006                            22+ARG2     DS    F              R2                                        01-AMAIN
+00008                            23+         DS    F              R3                                        01-AMAIN
+0000A                            24+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            25+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            26+ARG6     DS    F              R6                                        01-AMAIN
+00010                            27+ARG7     DS    F              R7                                        01-AMAIN
+                                 28+*        END OF STANDARD STACK AREA
+00012                            29+VAC      DS    128H                                                     02-00009
+00092                            30+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            31+CPASRP   CSECT                                                          01-AMAIN
+0000000                          32+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 E0FB 0092      0092        33+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN
+00002 B624 0000      0009 0000   34+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 36 *                                                                       00000700
+                                 37 * ASSIGN C1$(I TO J) TO C2$(K TO L) WHERE C1 AND C2 ARE CHARACTER       00000800
+                                 38 *   STRINGS AT LEAST ONE OF WHICH IS REMOTE.                            00000900
+                                 39 *                                                                       00001000
+                                 40          INPUT R4,            CHARACTER(C1)                            X00001100
+                                                   R5,            INTEGER(I) SP                            X00001200
+                                                   R6,            INTEGER(J) SP                            X00001300
+                                                   R7             INTEGER(K || L) SP                        00001400
+0000004                          41+R4       EQU   4                                                        01-INPUT
+0000005                          42+R5       EQU   5                                                        01-INPUT
+0000006                          43+R6       EQU   6                                                        01-INPUT
+0000007                          44+R7       EQU   7                                                        01-INPUT
+                                 46          OUTPUT R2            CHARACTER(C2)                             00001500
+0000002                          47+R2       EQU   2                                                        01-OUTPU
+                                 49          WORK  F0,F1                                                    00001600
+0000000                          50+F0       EQU   0                                                        01-WORK
+0000001                          51+F1       EQU   1                                                        01-WORK
+                                 53 *                                                                       00001700
+                                 54 * ALGORITHM:                                                            00001800
+                                 55 *   VAC = CASRPV(C1$(I TO J));                                          00001900
+                                 56 *   C2$(K TO L) = CPASR(VAC);                                           00002000
+                                 57 *                                                                       00002100
+00004 EA48           0012        58          LA    R2,VAC                                                   00002200
+                                 59          ACALL CASRPV         PUT INPUT PARTITION INTO A VAC            00002300
+                                 60+         EXTRN #QCASRPV                                                 01-ACALL
+00005 D0FF                       61+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00006 3800                       62+         DC  Y(#QCASRPV+X'3800')                                       X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+00007 9D40           0010        63          LH    R5,ARG7        LOAD K IN R5                              00002400
+00008 9E44           0011        64          LH    R6,ARG7+1      LOAD L IN R6                              00002500
+00009 DB04           000B 0001   65          BNZ   *+2            CHECK FOR ZERO                            00002600
+0000A 1EE5                       66          LR    R6,R5          SPECIAL CASE, ASSUME L=K                  00002700
+0000B 1A0C           0006        67          L     R2,ARG2                                                  00002800
+0000C EC48           0012        68          LA    R4,VAC         READ FROM VAC INTO                        00002900
+                                 69          ACALL CPASR          PARTITION                                 00003000
+                                 70+         EXTRN #QCPASR                                                  01-ACALL
+0000D D0FF                       71+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+0000E 3800                       72+         DC  Y(#QCPASR+X'3800')                                        X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+                                 73          AEXIT                                                          00003100
+                                 74+*********RETURN TO CALLER**********************************************
+0000F                            75+         DS    0H                                                       01-AEXIT
+i0000F 97E8                       76+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+         CPASRP--CHARACTER ASSIGN,PARTITION TO PARTITION,REMOTE                                                PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 77+***********************************************************************
+                                 79          ACLOSE                                                         00003200
+00010                            80+         LTORG                                                          02-ERRPA
+                                 81+****************ERROR PARAMETER AREA***********************************
+                                 82+***  NO ERRORS SENT IN CPASRP                                           02-ERRPA
+                                 83+****************END OF ERROR PARAMETER AREA****************************
+                                 84+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000006
+  0001     0003     00     00000E
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    22     67
+ARG4         2   00000A    24
+ARG5         2   00000C    25
+ARG6         2   00000E    26
+ARG7         2   000010    27     63    64
+CPASRP       1 00000000    17     31
+F0           1 00000000    50
+F1           1 00000001    51
+R2           1 00000002    47     58    67
+R4           1 00000004    41     68
+R5           1 00000005    42     63    66
+R6           1 00000006    43     64    66
+R7           1 00000007    44
+STACK        1 00000000    18     32    33
+STACKEND     2   000092    30     33
+VAC          1   000012    29     58    68
+$RET1        1   00000F    76
+#QCASRPV     1 00000000    60     62
+#QCPASR      1 00000000    70     72
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      37 CARDS FROM SYSIN     390 CARDS FROM SYSLIB
+     131 LINES OUTPUT           8 CARDS OUTPUT

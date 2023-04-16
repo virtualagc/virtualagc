@@ -1,0 +1,184 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+EMOD      SD 0001 000000 000034
+#LEMOD    SD 0002 000034 000004
+¤
+         EMOD - MOD FUNCTION,SINGLE PREC.SCALAR                                                                PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 EMOD     AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+EMOD     CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *  COMPUTES THE MOD INSTRUCTION :                                       00000400
+                                 17 *                                                                       00000500
+                                 18 *    MOD (A,B)                                                          00000600
+                                 19 *                                                                       00000700
+                                 20 *   WHERE A & B ARE SP SCALARS                                          00000800
+                                 21 *                                                                       00000900
+                                 22 * CHANGE HISTORY:                                                       00001000
+                                 23 *                                                                       00001100
+                                 24 *  DATE       AUTHOR           CHANGE DESCRIPTION                       00001200
+                                 25 *                                                                       00001300
+                                 26 *  7/14/89    DAVID E. WATSON  DR103563 - USE DOUBLE PRECISION          00001400
+                                 27 *                              INSTRUCTION WHEN ADDING/SUBTRACTING      00001500
+                                 28 *                              BIGNUM TO/FROM F4 IN TWO PLACES - THIS   00001607
+                                 29 *                              AVOIDS USING THE GUARD BITS, WHICH ARE   00001707
+                                 30 *                              IMPLEMENTED DIFFERENTLY ON THE AP101/B   00001807
+                                 31 *                              AP101/S                                  00001907
+                                 32 *                                                                       00002000
+                                 33 * 03/16/93    TONY VARESIC     DR103901 - 'EMOD RTL INCORRECT'. REMOVED
+                                 34 *                              FLNUM FROM ALGORITHM. REMOVED DR103563
+                                 35 *                              MODIFICATIONS BECAUSE ALGORITHM CHANGE
+                                 36 *                              CANNOT CAUSE A GUARD BIT PROBLEM ON
+                                 37 *                              NEGATIVE NUMBERS. CHANGED FIXUP VALUE
+                                 38 *                              FROM |B| TO ZERO FOR GPC ERROR 4:19.
+                                 39 *                              ADDED LOGIC TO EMIT GPC ERROR 4:33 WHEN
+                                 40 *                              VALIDATION CANNOT BRING ANSWER INTO
+                                 41 *                              VALID RANGE.
+                                 42 *
+                                 43          INPUT F0,            SCALAR  SP                               X00002100
+                                                   F2             SCALAR  SP                                00002200
+0000000                          44+F0       EQU   0                                                        01-INPUT
+0000002                          45+F2       EQU   2                                                        01-INPUT
+                                 47          OUTPUT F0            SCALAR  SP                                00002300
+                                 49          WORK  F4
+0000004                          50+F4       EQU   4                                                        01-WORK
+                                 52 *                                                                       00002500
+                                 53 *                                                                       00002600
+                                 54 *                                                                       00002600
+00000 7AE2                       55          LER    F2,F2      CHECK B                                      00003000
+00001 D914           0007 0005   56          BP     MOD        IF B POSITIVE, CONTINUE
+00002 DA0C           0006 0003   57          BM     COMPB      IF B NEGATIVE, COMPLEMENT B
+00003 78E0                       58          LER    F0,F0      SPECIAL CASE: B=0, CHECK A                   00003300
+00004 DDAC           0030 002B   59          BNM    EXIT       IF A POSITIVE, RETURN A                      00003400
+00005 DF9C           002D 0027   60          B      LOGERR     ELSE LOG ERROR, RETURN ZERO
+                                 61 *
+00006 7AEA                       62 COMPB    LECR   F2,F2      MAKE |B|                                     00003700
+00007 7CE0                       63 MOD      LER    F4,F0      STORE A IN F4                                00003800
+00008 DA4C           001C 0013   64          BN     NEGA       A IS NEGATIVE
+                                 65 *
+                                 66 * A IS POSITIVE
+                                 67 *
+00009 4CEA                       68          CER    F4,F2      PREDIVIDE CHECK: A < |B|
+0000A DA94           0030 0025   69          BL     EXIT       IF TRUE, A IS ANSWER, RETURN A
+0000B 6CE2                       70          DER    F4,F2      ELSE, CALCULATE A/|B|
+0000C 54F7 0024      0032 0024   71          AE     F4,BIGNUM  FLOOR(A/|B|)
+0000E 5CF7 0022      0032 0022   72          SE     F4,BIGNUM
+00010 64E2                       73          MER    F4,F2      |B|*FLOOR(A/|B|)
+00011 58E4                       74          SER    F0,F4      A - |B|*FLOOR(A/|B|) (A>0)
+                                 75 *
+                                 76 * PERFORM EXIT VALIDITY CHECKS
+                                 77 *
+00012 DA18           0019 0006   78 VALID8   BM     VLOW       IS ANSWER < 0
+00013 48EA                       79 VHI      CER    F0,F2      IS ANSWER >= |B|
+i00014 DA6C           0030 001B   80          BL     EXIT       IF ANSWER < |B|, VALID ANSWER, RETURN
+         EMOD - MOD FUNCTION,SINGLE PREC.SCALAR                                                                PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+00015 58E2                       81          SER    F0,F2      ELSE ADJUST FOR 1 LOST |B|
+00016 48EA                       82          CER    F0,F2
+00017 DA60           0030 0018   83          BL     EXIT       NOW IF ANSWER < |B|, VALID ANSWER, RETURN
+00018 DF40           0029 0010   84          B      FIXUP      ELSE MAJOR FAULT, TAKE FIXUP RETURN
+                                 85 *
+00019 50E2                       86 VLOW     AER    F0,F2      ANSWER < 0, MAY MEAN 1 LOST |B|
+0001A DD54           0030 0015   87          BNM    EXIT       NOW IF ANSWER >= 0, VALID ANSWER, RETURN
+0001B DF34           0029 000D   88          B      FIXUP      ELSE, MAJOR FAULT, TAKE FIXUP RETURN
+                                 89 *
+                                 90 * A IS NEGATIVE
+                                 91 *
+0001C 7CEC                       92 NEGA     LECR   F4,F4      MAKE |A|
+0001D 4CEA                       93          CER    F4,F2      PREDIVIDE CHECK: |A| < |B|?
+0001E DD08           0021 0002   94          BHE    AGEB       IF NOT TRUE, CONTINUE WITH ROUTINE
+0001F 50E2                       95          AER    F0,F2      ELSE, A + |B| IS ANSWER
+00020 DF3E           0012 000F   96          B      VALID8     VALIDATE FOR = |B| CASE
+00021 6CE2                       97 AGEB     DER    F4,F2      CALCULATE |A|/|B|
+00022 54F7 000E      0032 000E   98          AE     F4,BIGNUM  FLOOR(|A|/|B|)
+00024 5CF7 000C      0032 000C   99          SE     F4,BIGNUM
+00026 64E2                      100          MER    F4,F2      |B|*FLOOR(|A|/|B|)
+00027 50E4                      101          AER    F0,F4      RESULT = A + |B|*FLOOR(|A|/|B|) (A<0)
+00028 DF5E           0012 0017  102          B      VALID8     GO TO VALIDATE ANSWER
+                                103 *
+                                104 * ZERO RESULT IF ALGORITHM FAILED (LOST BITS IN INTERMEDIATE STEPS)
+                                105 *
+00029 58E0                      106 FIXUP    SER    F0,F0      RETURN 0
+                                107          AERROR 33         LOG ERROR (MOD FAILURE)
+                                108+*********ISSUE SEND ERROR SVC******************************************
+0002A C9FB 0034      0034       109+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                110+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0002C DF0C           0030 0003  111          B      EXIT
+                                112 *
+0002D 58E0                      113 LOGERR   SER    F0,F0      RETURN 0
+                                114          AERROR 19         LOG ERROR (MOD DOMAIN FAILURE)
+                                115+*********ISSUE SEND ERROR SVC******************************************
+0002E C9FB 0036      0036       116+         SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                117+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+                                118 *
+                                119 * COMMON EXIT
+                                120 *
+                                121 EXIT     AEXIT                                                          00005900
+                                122+*********RETURN TO CALLER**********************************************
+00030                           123+EXIT     DS    0H                                                       01-AEXIT
+00030 C7EC                      124+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                125+***********************************************************************
+00031 C9FB
+00032                           127          DS     0F                                                      00006000
+00032 46800000                  128 BIGNUM   DC     X'46800000'
+                                129          ACLOSE                                                         00007000
+00034                           130+         LTORG                                                          02-ERRPA
+                                131+****************ERROR PARAMETER AREA***********************************
+00034                           132+#LEMOD   CSECT                                                          02-ERRPA
+                                133+***  EMOD SENDS THE FOLLOWING ERRORS                                    02-ERRPA
+                                135+***  ERROR NUMBER 33 IN GROUP 4                                         02-ERRPA
+00034 0014                      137+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00035 0421                      138+         DC    Y(4*256+33)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                140+***  ERROR NUMBER 19 IN GROUP 4                                         02-ERRPA
+00036 0014                      142+AERROR2  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00037 0413                      143+         DC    Y(4*256+19)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                144+****************END OF ERROR PARAMETER AREA****************************
+                                145+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.38 07/22/05
+  0001     0002     00     00002B
+  0001     0002     00     00002F
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+AERROR1      1   000034   137    109
+AERROR2      1   000036   142    116
+AGEB         1   000021    97     94
+BIGNUM       2   000032   128     71    72    98    99
+COMPB        1   000006    62     57
+EMOD         1 00000000    13
+EXIT         1   000030   123     59    69    80    83    87   111
+F0           1 00000000    44     58    58    63    74    79    81    82    86    95   101   106   106   113   113
+F2           1 00000002    45     55    55    62    62    68    70    73    79    81    82    86    93    95    97   100
+F4           1 00000004    50     63    68    70    71    72    73    74    92    92    93    97    98    99   100   101
+FIXUP        1   000029   106     84    88
+LOGERR       1   00002D   113     60
+MOD          1   000007    63     56
+NEGA         1   00001C    92     64
+VALID8       2   000012    78     96   102
+VHI          1   000013    79
+VLOW         1   000019    86     78
+$RET1        1   000030   124
+#LEMOD       1 00000034   132
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     106 CARDS FROM SYSIN     360 CARDS FROM SYSLIB
+     184 LINES OUTPUT          10 CARDS OUTPUT

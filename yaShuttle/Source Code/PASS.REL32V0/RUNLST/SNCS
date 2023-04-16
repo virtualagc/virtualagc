@@ -1,0 +1,325 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+SNCS      SD 0001 000000 00007A
+SIN       LD      00000B        0001
+COS       LD      000013        0001
+#LSNCS    SD 0002 00007A 00001C
+¤
+         SNCS -- SINGLE PRECISION SINE-COSINE FUNCTION                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * SNCS: SINE, COSINE, AND SINE/COSINE(SINGLE)                           00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUT AND OUTPUT VIA F0                                     00000400
+                                 10 *        2. LET |X|*4/PI = Q+R, WHERE Q IS AN INTEGER, 0<=R<1           00000500
+                                 11 *        3. CRANK Q BY 2 IF COSINE ENTRY AND 4 IF SINE AND X<0. SINCE   00000600
+                                 12 *           COS(X)=SIN(PI/2+X), AND SIN(-X)=SIN(PI+X), THIS REDUCES     00000700
+                                 13 *           THE PROBLEM TO THAT OF FINDING SIN(X) FOR 0<=X<PI/4.        00000800
+                                 14 *        4. IF Q IS EVEN, LET R'=R. OTHERWISE, LET R'=1-R.              00000900
+                                 15 *        5. THE OCTANT IS GIVEN BY Q MOD 8. THEN:                       00001000
+                                 16 *           IN OCTANTS 0,3,4,7, CALCULATE SIN(R'*PI/4);                 00001100
+                                 17 *           IN OCTANTS 1,2,5,6, CALCULATE COS(R'*PI/4).                 00001200
+                                 18 *        6. FINALLY, COMPLEMENT ANSWER IF IN BOTTOM HALF-PLANE (Q>3).   00001300
+                                 19 *        7. ERROR GIVEN IF |X|>PI*2**18.                                00001400
+                                 20 *        8. FLOATING REGISTERS USED: F0-F4.                             00001500
+                                 21 *                                                                       00001600
+                                 22 SNCS     AMAIN INTSIC=YES                                               00001700
+                                 23+***********************************************************************
+                                 24+*
+                                 25+*        PRIMARY ENTRY POINT
+                                 26+*
+                                 27+***********************************************************************
+00000                            28+SNCS     CSECT                                                          01-AMAIN
+                                 30 *                                                                       00001800
+                                 31 * COMPUTES THE SIN AND COS IN SINGLE PRECISION                          00001900
+                                 32 *   OF THE INPUT ARGUMENT                                               00002000
+                                 33 *                                                                       00002100
+                                 34          INPUT F0             SCALAR SP RADIANS                         00002200
+0000000                          35+F0       EQU   0                                                        01-INPUT
+                                 37          OUTPUT F0            SCALAR SP (SIN)                           00002300
+                                 39          OUTPUT F2            SCALAR SP (COS)                           00002400
+0000002                          40+F2       EQU   2                                                        01-OUTPU
+                                 42          WORK  R2,R3,F0,F1,F2,F3,F4                                     00002500
+0000002                          43+R2       EQU   2                                                        01-WORK
+0000003                          44+R3       EQU   3                                                        01-WORK
+0000001                          45+F1       EQU   1                                                        01-WORK
+0000003                          46+F3       EQU   3                                                        01-WORK
+0000004                          47+F4       EQU   4                                                        01-WORK
+00000 EBF3 0400      0400        49          LHI   R3,SCSENTRY    FLAG TO INDICATE SNCS ENTRY               00002600
+00002 7AF7 0070      0074 0070   50          LE    F2,=X'46800000'  CRANK=0                                 00002700
+00004 78E0                       51          LER   F0,F0                                                    00002800
+00005 DD4C           0019 0013   52          BNM   MERGE          IF ARGUMENT<0, THEN SET                   00002900
+00006 EBF3 0600      0600        53          LHI   R3,SCSENTRY+NEG  SNCS ENTRY AND ARG<0 FLAGS.             00003000
+00008 7AF7 006C      0076 006C   54          LE    F2,=X'46800004'  CRANK=4 FOR NEGATIVE ARG                00003100
+0000A DF34           0018 000D   55          B     INVERT                                                   00003200
+                                 56 *                                                                       00003300
+                                 57 SIN      AENTRY                                                         00003400
+                                 58+***********************************************************************
+                                 59+*
+                                 60+*        SECONDARY ENTRY POINT
+                                 61+*
+                                 62+***********************************************************************
+0000B                            63+SIN      DS    0H                                                       01-AENTR
+                                 64+         ENTRY SIN                                                      01-AENTR
+                                 66 *                                                                       00003500
+                                 67 * COMPUTES THE SIN IN SINGLE PRECISION OF THE INPUT ARGUMENT            00003600
+                                 68 *                                                                       00003700
+                                 69          INPUT F0             SCALAR SP RADIANS                         00003800
+                                 71          OUTPUT F0            SCALAR SP                                 00003900
+                                 73          WORK  R2,R3,F0,F1,F2,F3,F4                                     00004000
+0000B 73E3                       75          XR    R3,R3          ZERO SNCS ENTRY AND NEGATIVE ARG FLAGS    00004100
+0000C 7AF7 0066      0074 0066   76          LE    F2,=X'46800000'  CRANK=0                                 00004200
+0000E 78E0                       77          LER   F0,F0                                                    00004300
+0000F DD24           0019 0009   78          BNM   MERGE                                                    00004400
+00010 7AF7 0064      0076 0064   79          LE    F2,=X'46800004'  CRANK=4 FOR SINE OF NEGATIVE ARG.       00004500
+00012 DF14           0018 0005   80          B     INVERT                                                   00004600
+i                                 81 *                                                                       00004700
+         SNCS -- SINGLE PRECISION SINE-COSINE FUNCTION                                                         PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 82 COS      AENTRY                                                         00004800
+                                 83+***********************************************************************
+                                 84+*
+                                 85+*        SECONDARY ENTRY POINT
+                                 86+*
+                                 87+***********************************************************************
+00013                            88+COS      DS    0H                                                       01-AENTR
+                                 89+         ENTRY COS                                                      01-AENTR
+                                 91 *                                                                       00004900
+                                 92 * COMPUTES THE COS IN SINGLE PRECISION OF THE INPUT ARGUMENT            00005000
+                                 93 *                                                                       00005100
+                                 94          INPUT F0             SCALAR SP RADIANS                         00005200
+                                 96          OUTPUT F0            SCALAR SP                                 00005300
+                                 98          WORK  R2,R3,F0,F1,F2,F3,F4                                     00005400
+00013 73E3                      100          XR    R3,R3          ZERO SNCS ENTRY AND NEGATIVE ARG FLAGS    00005500
+00014 7AF7 0062      0078 0062  101          LE    F2,=X'46800002'  CRANK=2 FOR COSINE ENTRY                00005600
+00016 78E0                      102          LER   F0,F0                                                    00005700
+00017 DD04           0019 0001  103          BNM   MERGE                                                    00005800
+00018 78E8                      104 INVERT   LECR  F0,F0          GET |X|                                   00005900
+                                105 *                                                                       00006000
+00019 48FB 0080      0080       106 MERGE    CE    F0,MAX                                                   00006100
+0001B DE1C           0023 0007  107          BNH   SMALL                                                    00006200
+                                108          AERROR 8             |ARG|>PI*2**18                            00006300
+                                109+*********ISSUE SEND ERROR SVC******************************************
+0001C C9FB 007A      007A       110+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                111+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0001E 78F3 0094      0094       112          LE    F0,RT2         FIXUP: SIN(X),COS(X)=SQRT(2)/2            00006400
+00020 7AE0                      113          LER   F2,F0                                                    00006500
+00021 C7F7 004F      0072 004F  114          B     EXIT                                                     00006600
+                                115 *                                                                       00006700
+00023 7BF3 0092      0092       116 SMALL    LE    F3,ZERO        ZERO LOW HALVES F0 AND F2                 00006800
+00025 79E3                      117          LER   F1,F3                                                    00006900
+00026 30FB 007C      007C       118          MED   F0,FOVPI       REDUCE TO MULTIPLES OF PI/4               00007000
+00028 50EA                      119          AEDR  F0,F2          ADD CRANK, SEPARATE INTEGER AND FRACTION  00007100
+00029 22E8                      120          LFXR  R2,F0          INTEGER PART TO R2, TEMPORARILY           00007200
+0002A F20F                0003  121          SRR   R2,3           OCTANT TO TOP 3 BITS OF R2                00007300
+0002B 2BE2                      122          OR    R3,R2          COMBINE OCTANT AND FLAG BITS IN R3        00007400
+                                123 *                                                                       00007500
+                                124 *  COMPUTE R',LEAVE IN F0                                               00007600
+                                125 *                                                                       00007700
+0002C 7AE0                      126          LER   F2,F0          INTEGER PART IN F2                        00007800
+0002D 58EA                      127          SEDR  F0,F2          R IN F0                                   00007900
+0002E B3E3 2000           2000  128          TRB   R3,X'2000'     TEST OCTANT PARITY                        00008000
+00030 DC0C           0034 0003  129          BZ    EVEN           R'=R IN EVEN OCTANT                       00008100
+00031 78E8                      130          LECR  F0,F0                                                    00008200
+00032 50FB 0090      0090       131          AED   F0,ONE         R'=1-R IN ODD OCTANT                      00008300
+                                132 *                                                                       00008400
+00034 7CE0                      133 EVEN     LER   F4,F0          R' IN F4 FOR SINE POLYNOMIAL              00008500
+00035 22E8                      134          LFXR  R2,F0          TEST FOR UNDERFLOW IN FIXED               00008600
+00036 8AF3 0081      0081       135          SH    R2,UNFLO       POINT FOR SPEED                           00008700
+00038 DD04           003A 0001  136          BNM   OK                                                       00008800
+00039 78E3                      137          LER   F0,F3          ZERO F0 TO AVOID UNDERFLOW                00008900
+                                138 *                                                                       00009000
+                                139 *  IF COSINE POLYNOMIAL ALONE TO BE COMPUTED,                           00009100
+                                140 *  SKIP DOWN TO SECOND POLYNOMIAL                                       00009200
+                                141 *                                                                       00009300
+0003A 60E0                      142 OK       MER   F0,F0          (R')**2 IN F0                             00009400
+0003B 7AE0                      143          LER   F2,F0          AND IN F2.                                00009500
+0003C EAF3 0082      0082       144          LA    R2,A3                                                    00009600
+0000082                         145          USING A3,R2                                                    00009700
+0003E B3E3 0400           0400  146          TRB   R3,SCSENTRY    IF BOTH SIN AND COS TO BE COMPUTED,       00009800
+00040 D90C           0044 0003  147          BO    SINPOLY        THEN DO BOTH POLYNOMIALS.                 00009900
+00041 B3E3 6000           6000  148          TRB   R3,X'6000'     ELSE IF COSINE ONLY (OCTANTS 1,2,5,6),    00010000
+00043 DA28           004E 000A  149          BM    COSPOLY        JUMP TO COSINE POLYNOMIAL.                00010100
+                                150 *                                                                       00010200
+00044 6002           0082       151 SINPOLY  ME    F0,A3                                                    00010300
+00045 500A           0086       152          AE    F0,A2                                                    00010400
+00046 60E2                      153          MER   F0,F2                                                    00010500
+00047 5012           008A       154          AE    F0,A1                                                    00010600
+00048 60E2                      155          MER   F0,F2                                                    00010700
+00049 501A           008E       156          AE    F0,A0                                                    00010800
+0004A 60E4                      157          MER   F0,F4                                                    00010900
+                                158 *                                                                       00011000
+                                159 *  SIN(R') IN F0, CORRECT UP TO                                         00011100
+                                160 *  A POSSIBLE SIGN CHANGE                                               00011200
+i                                161 *                                                                       00011300
+         SNCS -- SINGLE PRECISION SINE-COSINE FUNCTION                                                         PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+0004B B3E3 0400           0400  162          TRB   R3,SCSENTRY    TEST FOR SNCS ENTRY,                      00011400
+0004D DC7C           006D 001F  163          BZ    SINONLY        EXIT IF NOT.                              00011500
+                                164 *                                                                       00011600
+                                165 *  COMPUTE COSINE POLYNOMIAL HERE.  NOTE THAT                           00011700
+                                166 *  F2 CONTAINS (R')**2 AND F4 CONTAINS R', WHICH                        00011800
+                                167 *  IS NO LONGER NEEDED.                                                 00011900
+                                168 *                                                                       00012000
+0004E 7CE2                      169 COSPOLY  LER   F4,F2          PUT (R')**2 IN F4 TEMPORARILY             00012100
+0004F EA0A           0002       170          LA    R2,2(R2)       INDEX COSINE COEFFICIENTS                 00012200
+00050 6202           0082       171          ME    F2,A3                                                    00012300
+00051 520A           0086       172          AE    F2,A2                                                    00012400
+00052 62E4                      173          MER   F2,F4                                                    00012500
+00053 5212           008A       174          AE    F2,A1                                                    00012600
+00054 62E4                      175          MER   F2,F4                                                    00012700
+00055 521A           008E       176          AE    F2,A0                                                    00012800
+                                177 *                                                                       00012900
+                                178 *  COS(R') IN F2, CORRECT UP TO                                         00013000
+                                179 *  A POSSIBLE SIGN CHANGE                                               00013100
+                                180 *                                                                       00013200
+00056 B3E3 0400           0400  181          TRB   R3,SCSENTRY  TEST FOR SNCS ENTRY                         00013300
+00058 DC4C           006C 0013  182          BZ    COSONLY        AND EXIT IF NOT.                          00013400
+                                183 *                                                                       00013500
+                                184 *  SNCS PROCESSING HERE: CONTENTS OF F0 AND F2                          00013600
+                                185 *  MUST BE SWITCHED IN OCTANTS 1,2,5,6                                  00013700
+                                186 *                                                                       00013800
+00059 B3E3 6000           6000  187          TRB   R3,X'6000'                                               00013900
+0005B DD0C           005F 0003  188          BNM   FIXCOS         OK IN OCTANTS 0,3,4,7                     00014000
+0005C 22E8                      189          LFXR  R2,F0          USE FIXED-POINT REGISTER                  00014100
+0005D 78E2                      190          LER   F0,F2          AS TEMPORARY FOR SWITCH                   00014200
+0005E 2AEA                      191          LFLR  F2,R2          FOR FASTER EXECUTION.                     00014300
+                                192 *                                                                       00014400
+                                193 *  FIX SIGN OF COSINE OF ARGUMENT                                       00014500
+                                194 *                                                                       00014600
+0005F B3E3 C000           C000  195 FIXCOS   TRB   R3,X'C000'     COMPLEMENT IF                             00014700
+00061 DD0C           0065 0003  196          BNM   TSTNEG         OCTANT IS 2,3,4,5.                        00014800
+00062 7AE2                      197          LER   F2,F2          WORKAROUND FOR BUG                        00014900
+00063 DC04           0065 0001  198          BZ    TSTNEG         IN LECR INSTRUCTION.                      00015000
+00064 7AEA                      199          LECR  F2,F2                                                    00015100
+00065 B3E3 0200           0200  200 TSTNEG   TRB   R3,NEG         (RE)COMPLEMENT IF                         00015200
+00067 DC14           006D 0005  201          BZ    SINONLY        INPUT ARGUMENT WAS NEGATIVE.              00015300
+00068 7AE2                      202          LER   F2,F2          WORKAROUND FOR BUG                        00015400
+00069 DC0C           006D 0003  203          BZ    SINONLY        IN LECR INSTRUCTION.                      00015500
+0006A 7AEA                      204          LECR  F2,F2                                                    00015600
+0006B DF04           006D 0001  205          B     SINONLY        FIX SIGN OF SIN(X).                       00015700
+                                206 *                                                                       00015800
+0006C 78E2                      207 COSONLY  LER   F0,F2          GET COS(X) IN F0.                         00015900
+0006D 1BE3                      208 SINONLY  LR    R3,R3          FIX SIGN, IF NECESSARY,                   00016000
+0006E DD0C           0072 0003  209          BNM   EXIT           OF SINGLE-ENTRY OUTPUT                    00016100
+0006F 78E0                      210          LER   F0,F0          WORKAROUND FOR BUG                        00016200
+00070 DC04           0072 0001  211          BZ    EXIT           IN LECR INSTRUCTION.                      00016300
+00071 78E8                      212          LECR  F0,F0          OR SINE OUTPUT OF SNCS.                   00016400
+                                213 EXIT     AEXIT                                                          00016500
+                                214+*********RETURN TO CALLER**********************************************
+00072                           215+EXIT     DS    0H                                                       01-AEXIT
+00072 9B24           0009       216+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+00073 C7EC                      217+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                218+***********************************************************************
+                                220 *                                                                       00016600
+                                221 *  DATA DEFINITIONS                                                     00016700
+                                222 *                                                                       00016800
+0000400                         223 SCSENTRY EQU   X'0400'                                                  00016900
+0000200                         224 NEG      EQU   X'0200'                                                  00017000
+                                225          ADATA                                                          00017100
+                                226+*********DATA CSECT****************************************************
+00074                           227+         LTORG                                                          02-ERRPA
+00074 46800000                  228                =X'46800000'
+00076 46800004                  229                =X'46800004'
+00078 46800002                  230                =X'46800002'
+                                231+****************ERROR PARAMETER AREA***********************************
+0007A                           232+#LSNCS   CSECT                                                          02-ERRPA
+                                233+***  SNCS SENDS THE FOLLOWING ERROR                                     02-ERRPA
+                                235+***  ERROR NUMBER 8 IN GROUP 4                                          02-ERRPA
+0007A 0014                      237+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0007B 0408                      238+         DC    Y(4*256+8)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                239+****************END OF ERROR PARAMETER AREA****************************
+i0007C                           240+#LSNCS   CSECT                                                          01-ADATA
+         SNCS -- SINGLE PRECISION SINE-COSINE FUNCTION                                                         PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+0007C 41145F306DC9C883          241 FOVPI    DC    X'41145F306DC9C883'                                      00017200
+00080 45C9                      242 MAX      DC    X'45C9'    PI*2**18                                      00017300
+00081 3E10                      243 UNFLO    DC    X'3E10'                                                  00017400
+00082 BD25B368                  244 A3       DC    X'BD25B368'    SIN A3=-.000035943                        00017500
+00084 BE14F17D                  245          DC    X'BE14F17D'    COS A3=-.000319570                        00017600
+00086 3EA32F62                  246 A2       DC    X'3EA32F62'    SIN A2=.0024900069                        00017700
+00088 3F40ED0F                  247          DC    X'3F40ED0F'    COS A2=.0158510767                        00017800
+0008A C014ABBC                  248 A1       DC    X'C014ABBC'    SIN A1=-.080745459                        00017900
+0008C C04EF4EE                  249          DC    X'C04EF4EE'    COS A1=-.308424830                        00018000
+0008E 40C90FDB                  250 A0       DC    X'40C90FDB'    SIN A0=.7853981853                        00018100
+00090 41100000                  251 ONE      DC    X'41100000'    COS A0=1.0                                00018200
+00092 00000000                  252 ZERO     DC    X'00000000'    0 AND LOW HALF OF ONE                     00018300
+00094 40B504F3                  253 RT2      DC    X'40B504F3'    SQRT(2)/2                                 00018400
+                                254          ACLOSE                                                         00018500
+                                255+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    6
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.39 07/22/05
+  0001     0002     00     00001A
+  0001     0002     00     00001D
+  0001     0002     00     00001F
+  0001     0002     00     000024
+  0001     0002     00     000027
+  0001     0002     00     000033
+  0001     0002     00     000037
+  0001     0002     00     00003D
+¤
+                                             CROSS REFERENCE                                                   PAGE    7
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+A0           2   00008E   250    156   176
+A1           2   00008A   248    154   174
+A2           2   000086   246    152   172
+A3           2   000082   244    144   145   151   171
+AERROR1      1   00007A   237    110
+COS          1   000013    88     89
+COSONLY      1   00006C   207    182
+COSPOLY      1   00004E   169    149
+EVEN         1   000034   133    129
+EXIT         1   000072   215    114   209   211
+F0           1 00000000    35     51    51    77    77   102   102   104   104   106   112   113   118   119   120   126
+                                 127   130   130   131   133   134   137   142   142   143   151   152   153   154   155
+                                 156   157   189   190   207   210   210   212   212
+F1           1 00000001    45    117
+F2           1 00000002    40     50    54    76    79   101   113   119   126   127   143   153   155   169   171   172
+                                 173   174   175   176   190   191   197   197   199   199   202   202   204   204   207
+F3           1 00000003    46    116   117   137
+F4           1 00000004    47    133   157   169   173   175
+FIXCOS       2   00005F   195    188
+FOVPI        4   00007C   241    118
+INVERT       1   000018   104     55    80
+MAX          1   000080   242    106
+MERGE        2   000019   106     52    78   103
+NEG          1 00000200   224     53   200
+OK           1   00003A   142    136
+ONE          2   000090   251    131
+R2           1 00000002    43    120   121   122   134   135   144   145   170   170   170   189   191
+R3           1 00000003    44     49    53    75    75   100   100   122   128   146   148   162   181   187   195   200
+                                 208   208
+RT2          2   000094   253    112
+SCSENTRY     1 00000400   223     49    53   146   162   181
+SIN          1   00000B    63     64
+SINONLY      1   00006D   208    163   201   203   205
+SINPOLY      2   000044   151    147
+SMALL        2   000023   116    107
+SNCS         1 00000000    28
+TSTNEG       2   000065   200    196   198
+UNFLO        1   000081   243    135
+ZERO         2   000092   252    116
+$RET1        1   000073   217
+#LSNCS       1 0000007A   232    240
+=X'46800000'
+             2   000074   228     50    76
+=X'46800002'
+             2   000078   230    101
+=X'46800004'
+             2   000076   229     54    79
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    8
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     190 CARDS FROM SYSIN     434 CARDS FROM SYSLIB
+     325 LINES OUTPUT          17 CARDS OUTPUT

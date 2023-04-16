@@ -1,0 +1,115 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+MR0DNP    SD 0001 000000 000010
+¤
+         MR0DNP--SCALAR TO REMOTE PARTITIONED MATRIX MOVE, DP                                                  PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 TARG2    DS    F                                                        00000400
+                                 10          MEND                                                           00000500
+                                 11 MR0DNP   AMAIN                                                          00000600
+                                 12+***********************************************************************
+                                 13+*
+                                 14+*        PRIMARY ENTRY POINT
+                                 15+*
+                                 16+***********************************************************************
+00000                            17+MR0DNP   CSECT                                                          01-AMAIN
+00000                            18+STACK    DSECT                                                          01-AMAIN
+                                 19+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            20+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            21+         DS    2F             R0,R1                                     01-AMAIN
+00006                            22+ARG2     DS    F              R2                                        01-AMAIN
+00008                            23+         DS    F              R3                                        01-AMAIN
+0000A                            24+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            25+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            26+ARG6     DS    F              R6                                        01-AMAIN
+00010                            27+ARG7     DS    F              R7                                        01-AMAIN
+                                 28+*        END OF STANDARD STACK AREA
+00012                            29+TARG2    DS    F                                                        02-00009
+00014                            30+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            31+MR0DNP   CSECT                                                          01-AMAIN
+0000000                          32+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   33+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 35 *                                                                       00000700
+                                 36 * FILL AN N X M PARTITION OF A REMOTE DOUBLE PRECISION MATRIX WITH      00000800
+                                 37 *   A DOUBLE PRECISION SCALAR                                           00000900
+                                 38 *                                                                       00001000
+                                 39          INPUT R5,            INTEGER(N) SP                            X00001100
+                                                   R6,            INTEGER(M) SP                            X00001200
+                                                   R7,            INTEGER(OUTDEL) SP                       X00001300
+                                                   F0             SCALAR DP                                 00001400
+0000005                          40+R5       EQU   5                                                        01-INPUT
+0000006                          41+R6       EQU   6                                                        01-INPUT
+0000007                          42+R7       EQU   7                                                        01-INPUT
+0000000                          43+F0       EQU   0                                                        01-INPUT
+                                 45          OUTPUT R2            ZCON(MATRIX(N,M)) DP                      00001500
+0000002                          46+R2       EQU   2                                                        01-OUTPU
+                                 48 *                                                                       00001600
+                                 49 * ALGORITHM:                                                            00001700
+                                 50 *   DO FOR I = 1 TO N;                                                  00001800
+                                 51 *     DO FOR J = 1 TO M;                                                00001900
+                                 52 *       M$(I,J) = F0;                                                   00002000
+                                 53 *     END;                                                              00002100
+                                 54 *   END;                                                                00002200
+                                 55 *                                                                       00002300
+00002 3224           0012        56          ST    R2,TARG2       SAVE ZCON IN TARG2                        00002400
+00003 1AE6                       57          LR    R2,R6          PUT M IN R2                               00002500
+00004 F208                0002   58          SLL   R2,2           GET # OF HALFWORDS / ROW OF               00002600
+                                 59 *                             PARTITION OF MATRIX                       00002700
+00005 07E2                       60          AR    R7,R2          GET # OF HALFWORDS / ROW OF MATRIX        00002800
+00006 1AE6                       61          LR    R2,R6          SAVE M IN R2                              00002900
+00007 38FC D812      0012        62 MR0DNPX  STED@# F0,TARG2(R6)                                            00003000
+00009 DE0F           0007 0003   63          BCTB  R6,MR0DNPX                                               00003100
+0000A 1EE2                       64          LR    R6,R2          RESET R6 TO M                             00003200
+0000B 07F8 0012      0012        65          AST   R7,TARG2        BUMP OUTPUT PTR TO NEXT ROW              00003300
+0000D DD1F           0007 0007   66          BCTB  R5,MR0DNPX                                               00003400
+                                 67          AEXIT                                                          00003500
+                                 68+*********RETURN TO CALLER**********************************************
+0000E                            69+         DS    0H                                                       01-AEXIT
+0000E 97E8                       70+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 71+***********************************************************************
+                                 73          ACLOSE                                                         00003600
+0000F C9FB
+00010                            74+         LTORG                                                          02-ERRPA
+                                 75+****************ERROR PARAMETER AREA***********************************
+                                 76+***  NO ERRORS SENT IN MR0DNP                                           02-ERRPA
+i                                 77+****************END OF ERROR PARAMETER AREA****************************
+         MR0DNP--SCALAR TO REMOTE PARTITIONED MATRIX MOVE, DP                                                  PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 78+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    22
+ARG4         2   00000A    24
+ARG5         2   00000C    25
+ARG6         2   00000E    26
+ARG7         2   000010    27
+F0           1 00000000    43     62
+MR0DNP       1 00000000    17     31
+MR0DNPX      2   000007    62     63    66
+R2           1 00000002    46     56    57    58    60    61    64
+R5           1 00000005    40     66
+R6           1 00000006    41     57    61    62    63    64
+R7           1 00000007    42     60    65
+STACK        1 00000000    18     32
+STACKEND     2   000014    30
+TARG2        2   000012    29     56    62    65
+$RET1        1   00000E    70
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      41 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+     115 LINES OUTPUT           7 CARDS OUTPUT

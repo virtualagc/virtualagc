@@ -1,0 +1,262 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DSINH     SD 0001 000000 000092
+DCOSH     LD      000006        0001
+#QDEXP    ER 0002
+#LDSINH   SD 0003 000092 000002
+¤
+         DSINH -- DOUBLE PRECISION HYPERBOLIC SINE-COSINE                                                      PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * DSINH: HYPERBOLIC SINE-COSINE(SINGLE)                                 00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUT AND OUTPUT VIA F0-F1.                                 00000400
+                                 10 *        2.                                                             00000500
+                                 11 *                                                                       00000600
+                                 12          MACRO                                                          00000700
+                                 13          WORKAREA                                                       00000800
+                                 14 FOUR     DS    D                                                        00000900
+                                 15          MEND                                                           00001000
+                                 16 *                                                                       00001100
+                                 17 DSINH    AMAIN ACALL=YES,QDED=YES                                       00001200
+                                 18+***********************************************************************
+                                 19+*
+                                 20+*        PRIMARY ENTRY POINT
+                                 21+*
+                                 22+***********************************************************************
+00000                            23+DSINH    CSECT                                                          01-AMAIN
+00000                            24+STACK    DSECT                                                          01-AMAIN
+                                 25+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            26+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            27+         DS    2F             R0,R1                                     01-AMAIN
+00006                            28+ARG2     DS    F              R2                                        01-AMAIN
+00008                            29+         DS    F              R3                                        01-AMAIN
+0000A                            30+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            31+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            32+ARG6     DS    F              R6                                        01-AMAIN
+00010                            33+ARG7     DS    F              R7                                        01-AMAIN
+                                 34+*        END OF STANDARD STACK AREA
+00012                            35+FOUR     DS    D                                                        02-00014
+00016                            36+QARGA    DS    D                                                        01-AMAIN
+0001A                            37+QARGB    DS    D                                                        01-AMAIN
+0001E                            38+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            39+DSINH    CSECT                                                          01-AMAIN
+0000000                          40+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 E0FB 001E      001E        41+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN
+00002 B624 0000      0009 0000   42+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 44 * COMPUTES HYPERBOLIC SIN IN DOUBLE PRECISION                           00001300
+                                 45          INPUT F0             SCALAR DP                                 00001400
+0000000                          46+F0       EQU   0                                                        01-INPUT
+                                 48          OUTPUT F0            SCALAR DP                                 00001500
+                                 50          WORK  R5,F1,F2,F3,F4,F5                                        00001600
+0000005                          51+R5       EQU   5                                                        01-WORK
+0000001                          52+F1       EQU   1                                                        01-WORK
+0000002                          53+F2       EQU   2                                                        01-WORK
+0000003                          54+F3       EQU   3                                                        01-WORK
+0000004                          55+F4       EQU   4                                                        01-WORK
+0000005                          56+F5       EQU   5                                                        01-WORK
+00004 75E5                       58          XR    R5,R5          R5=0 FOR SINH                             00001700
+00005 DF18           000C 0006   59          B     BEGIN                                                    00001800
+                                 60 *                                                                       00001900
+                                 61 DCOSH    AENTRY                                                         00002000
+                                 62+***********************************************************************
+                                 63+*
+                                 64+*        SECONDARY ENTRY POINT
+                                 65+*
+                                 66+***********************************************************************
+00006                            67+DCOSH    DS    0H                                                       01-AENTR
+                                 68+         ENTRY DCOSH                                                    01-AENTR
+00006 E0FB 001E      001E        69+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AENTR
+00008 B624 0000      0009 0000   70+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 72 * COMPUTES HYPERBOLIC COSINE IN DOUBLE PRECISION                        00002100
+                                 73          INPUT F0             SCALAR DP                                 00002200
+                                 75          OUTPUT F0            SCALAR DP                                 00002300
+                                 77          WORK  R5,F1,F2,F3,F4                                           00002400
+0000A EDF3 FFFF      FFFF        79          LHI   R5,X'FFFF'     R5<0 FOR COSH                             00002500
+                                 80 *                                                                       00002600
+i0000C 7DE1                       81 BEGIN    LER   F5,F1                                                    00002700
+         DSINH -- DOUBLE PRECISION HYPERBOLIC SINE-COSINE                                                      PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0000D 7CE0                       82          LER   F4,F0                                                    00002800
+0000E DD14           0014 0005   83          BNM   PRETEST        ALL SET IF >0                             00002900
+                                 84 *                                                                       00003000
+0000F 78E8                       85          LECR  F0,F0          GET |X|                                   00003100
+00010 1DE5                       86          LR    R5,R5                                                    00003200
+00011 DD10           0016 0004   87          BNM   TEST                                                     00003300
+00012 7CEC                       88          LECR  F4,F4                                                    00003400
+00013 DF80           0034 0020   89          B     EXPON                                                    00003500
+                                 90 *                                                                       00003600
+00014 1DE5                       91 PRETEST  LR    R5,R5                                                    00003700
+00015 DA78           0034 001E   92          BM    EXPON                                                    00003800
+00016 48FF 0078      0090 0078   93 TEST     CE    F0,LIMIT                                                 00003900
+00018 DD6C           0034 001B   94          BNM   EXPON                                                    00004000
+                                 95 *                                                                       00004100
+                                 96 * COMPUTE POLYNOMIAL HERE                                               00004200
+                                 97 *                                                                       00004300
+00019 48FF 004F      006A 004F   98          CE    F0,UNFLO                                                 00004400
+0001B C2F7 003E      005B 003E   99          BL    SIGN                                                     00004500
+0001D 30E8                      100          MEDR  F0,F0                                                    00004600
+0001E 7AE0                      101          LER   F2,F0                                                    00004700
+0001F 7BE1                      102          LER   F3,F1                                                    00004800
+00020 30FF 0048      006A 0048  103          MED   F0,C6                                                    00004900
+00022 50FF 004A      006E 004A  104          AED   F0,C5                                                    00005000
+00024 30EA                      105          MEDR  F0,F2                                                    00005100
+00025 50FF 004B      0072 004B  106          AED   F0,C4                                                    00005200
+00027 30EA                      107          MEDR  F0,F2                                                    00005300
+00028 50FF 004C      0076 004C  108          AED   F0,C3                                                    00005400
+0002A 30EA                      109          MEDR  F0,F2                                                    00005500
+0002B 50FF 004D      007A 004D  110          AED   F0,C2                                                    00005600
+0002D 30EA                      111          MEDR  F0,F2                                                    00005700
+0002E 50FF 004E      007E 004E  112          AED   F0,C1                                                    00005800
+00030 30EA                      113          MEDR  F0,F2                                                    00005900
+00031 30EC                      114          MEDR  F0,F4                                                    00006000
+00032 50EC                      115          AEDR  F0,F4                                                    00006100
+00033 DFB0           0060 002C  116          B     EXIT                                                     00006200
+                                117 *                                                                       00006300
+00034 48FF 0058      008E 0058  118 EXPON    CE    F0,MAX                                                   00006400
+00036 D9A8           0061 002A  119          BH    ERROR                                                    00006500
+00037 50FF 004D      0086 004D  120          AED   F0,LNV                                                   00006600
+00039 3CF8 0012      0012       121          STED  F4,FOUR                                                  00006700
+                                122          ACALL DEXP                                                     00006800
+                                123+         EXTRN #QDEXP                                                   01-ACALL
+0003B D0FF                      124+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+0003C 3800                      125+         DC  Y(#QDEXP+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+0003D 7CF8 0012      0012       126          LED   F4,FOUR                                                  00006900
+0003F 7AFF 0041      0082 0041  127          LED   F2,VSQ                                                   00007000
+                                128         QDEDR  F2,F0                                                    00007100
+00041 3AF8 0016      0016       129+         STED  F2,QARGA                                                 01-QDEDR
+00043 38F8 001A      001A       130+         STED  F0,QARGB                                                 01-QDEDR
+00045 6AE0                      131+         DER   F2,F0                                                    01-QDEDR
+00046 78E2                      132+         LER   F0,F2                                                    01-QDEDR
+00047 79E3                      133+         LER   F0+1,F2+1                                                01-QDEDR
+00048 30F8 001A      001A       134+         MED   F0,QARGB                                                 01-QDEDR
+0004A 58F8 0016      0016       135+         SED   F0,QARGA                                                 01-QDEDR
+0004C 6834           001A       136+         DE    F0,QARGB                                                 01-QDEDR
+0004D 5AE8                      137+         SEDR  F2,F0                                                    01-QDEDR
+0004E 78F8 001A      001A       138+         LED   F0,QARGB                                                 01-QDEDR
+00050 38F8 0012      0012       139          STED  F0,FOUR                                                  00007200
+00052 1DE5                      140          LR    R5,R5                                                    00007300
+00053 DB04           0055 0001  141          BNZ   ECOSH                                                    00007400
+00054 7AEA                      142          LECR  F2,F2                                                    00007500
+                                143 *                                                                       00007600
+00055 50EA                      144 ECOSH    AEDR  F0,F2                                                    00007700
+00056 30FF 0032      008A 0032  145          MED   F0,DELTA                                                 00007800
+00058 50EA                      146          AEDR  F0,F2                                                    00007900
+00059 50F8 0012      0012       147          AED   F0,FOUR                                                  00008000
+                                148 *                                                                       00008100
+0005B 7CE4                      149 SIGN     LER   F4,F4                                                    00008200
+0005C DD0C           0060 0003  150          BNM   EXIT                                                     00008300
+0005D 78E0                      151          LER   F0,F0          WORKAROUND FOR BUG                        00008400
+0005E DC04           0060 0001  152          BZ    EXIT           IN LECR INSTRUCTION.                      00008500
+0005F 78E8                      153          LECR  F0,F0                                                    00008600
+                                154 *                                                                       00008700
+                                155 EXIT     AEXIT                                                          00008800
+                                156+*********RETURN TO CALLER**********************************************
+00060                           157+EXIT     DS    0H                                                       01-AEXIT
+00060 97E8                      158+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+i                                159+***********************************************************************
+         DSINH -- DOUBLE PRECISION HYPERBOLIC SINE-COSINE                                                      PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                161 *                                                                       00008900
+                                162 ERROR    AERROR 9             |X|<=175.366                              00009000
+                                163+*********ISSUE SEND ERROR SVC******************************************
+00061 C9FB 0092      0092       164+ERROR    SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                165+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00063 78FF 0001      0066 0001  166          LED   F0,INFINITY                                              00009100
+00065 DF1A           0060 0006  167          B     EXIT                                                     00009200
+                                168 *                                                                       00009300
+00066                           169          DS    0D                                                       00009400
+00066 7FFFFFFFFFFFFFFF          170 INFINITY DC    X'7FFFFFFFFFFFFFFF' STANDARD FIXUP= INFINITY             00009500
+000006A                         171 UNFLO    EQU   *                                                        00009600
+0006A 38B2D4C184418A97          172 C6       DC    X'38B2D4C184418A97'       0.1626459177981471(-9)         00009700
+0006E 3A6B96B8975A1636          173 C5       DC    X'3A6B96B8975A1636'       0.2504995887597646(-7)         00009800
+00072 3C2E3BC881345D91          174 C4       DC    X'3C2E3BC881345D91'       0.2755733025610683(-5)         00009900
+00076 3DD00D00CB06A6F5          175 C3       DC    X'3DD00D00CB06A6F5'       0.1984126981270711(-3)         00010000
+0007A 3F2222222222BACE          176 C2       DC    X'3F2222222222BACE'       0.8333333333367232(-2)         00010100
+0007E 402AAAAAAAAAAA4D          177 C1       DC    X'402AAAAAAAAAAA4D'       0.1666666666666653 +2F         00010200
+00082 403FDF9434F03D26          178 VSQ      DC    X'403FDF9434F03D26'       0.2495052937740537 = V**2      00010300
+00086 C0B1B30000000000          179 LNV      DC    X'C0B1B30000000000'      -0.6941375732421875 = LOG(V)    00010400
+0008A 3E40F0434B741C6D          180 DELTA    DC    X'3E40F0434B741C6D'       0.0009908832830238=1/2V-1 +F   00010500
+0008E 42AF5DC0                  181 MAX      DC    X'42AF5DC0'               175.366                        00010600
+00090 40E1A1B8                  182 LIMIT    DC    X'40E1A1B8'               0.881374                       00010700
+                                183          ACLOSE                                                         00010800
+00092                           184+         LTORG                                                          02-ERRPA
+                                185+****************ERROR PARAMETER AREA***********************************
+00092                           186+#LDSINH  CSECT                                                          02-ERRPA
+                                187+***  DSINH SENDS THE FOLLOWING ERROR                                    02-ERRPA
+                                189+***  ERROR NUMBER 9 IN GROUP 4                                          02-ERRPA
+00092 0014                      191+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00093 0409                      192+         DC    Y(4*256+9)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                193+****************END OF ERROR PARAMETER AREA****************************
+                                194+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     00003C
+  0001     0003     00     000062
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000092   191    164
+ARG2         2   000006    28
+ARG4         2   00000A    30
+ARG5         2   00000C    31
+ARG6         2   00000E    32
+ARG7         2   000010    33
+BEGIN        1   00000C    81     59
+C1           4   00007E   177    112
+C2           4   00007A   176    110
+C3           4   000076   175    108
+C4           4   000072   174    106
+C5           4   00006E   173    104
+C6           4   00006A   172    103
+DCOSH        1   000006    67     68
+DELTA        4   00008A   180    145
+DSINH        1 00000000    23     39
+ECOSH        1   000055   144    141
+ERROR        2   000061   164    119
+EXIT         1   000060   157    116   150   152   167
+EXPON        2   000034   118     89    92    94
+F0           1 00000000    46     82    85    85    93    98   100   100   101   103   104   105   106   107   108   109
+                                 110   111   112   113   114   115   118   120   130   131   132   133   134   135   136
+                                 137   138   139   144   145   146   147   151   151   153   153   166
+F1           1 00000001    52     81   102
+F2           1 00000002    53    101   105   107   109   111   113   127   129   131   132   133   137   142   142   144
+                                 146
+F3           1 00000003    54    102
+F4           1 00000004    55     82    88    88   114   115   121   126   149   149
+F5           1 00000005    56     81
+FOUR         4   000012    35    121   126   139   147
+INFINITY     4   000066   170    166
+LIMIT        2   000090   182     93
+LNV          4   000086   179    120
+MAX          2   00008E   181    118
+PRETEST      1   000014    91     83
+QARGA        4   000016    36    129   135
+QARGB        4   00001A    37    130   134   136   138
+R5           1 00000005    51     58    58    79    86    86    91    91   140   140
+SIGN         1   00005B   149     99
+STACK        1 00000000    24     40    41    69
+STACKEND     2   00001E    38     41    69
+TEST         2   000016    93     87
+UNFLO        1 0000006A   171     98
+VSQ          4   000082   178    127
+$RET1        1   000060   158
+#LDSINH      1 00000092   186
+#QDEXP       1 00000000   123    125
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     113 CARDS FROM SYSIN     498 CARDS FROM SYSLIB
+     262 LINES OUTPUT          20 CARDS OUTPUT

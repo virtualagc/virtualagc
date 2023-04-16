@@ -1,0 +1,292 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DEXP      SD 0001 000000 00009E
+#LDEXP    SD 0002 00009E 000042
+¤
+         DEXP -- DOUBLE PRECISION EXPONENTIAL FUNCTION                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * DEXP: EXPONENTIAL(DOUBLE)                                             00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUT AND OUTPUT VIA F0-F1.                                 00000400
+                                 10 *        2. WRITE X=(4A-B-C/16)*LOGE(2)+R, WHERE A,B,AND C              00000500
+                                 11 *           ARE INTEGERS, 0<=B<=3, 0<=C<=15, AND R IS A                 00000600
+                                 12 *           FRACTION, -1/16<=R<0.                                       00000700
+                                 13 *        2. THEN E**X=(16**A)(2**(-B))(2**(-C/16))(E**R).               00000800
+                                 14 *        3. 2**(-C/16) IS COMPUTED BY TABLE LOOKUP.                     00000900
+                                 15 *        4. E**R IS COMPUTED BY POLYNOMIAL.                             00001000
+                                 16 *        5. ERRORS GIVEN IF X<-180.2187 OR X>174.6731.                  00001100
+                                 17 *        6. FLOATING REGISTERS F4-F5 NOT USED.                          00001200
+                                 18 *                                                                       00001300
+                                 19 *                                                                       00001400
+                                 20 *  REVISION HISTORY:                                                    00001500
+                                 21 *                                                                       00001600
+                                 22 *     DATE       NAME  DR/SSCR#   DESCRIPTION                           00001700
+                                 23 *     --------   ----  --------   -----------------------------------   00001800
+                                 24 *     12/16/89   JAC   DR103762   REPLACED QCED/QCEDR MACRO WITH        00001900
+                                 25 *                                 CED/CEDR INSTRUCTION                  00002000
+                                 26 *                                                                       00002100
+                                 27 *     03/15/91   RAH   CR11055    RUNTIME LIBRARY CODE COMMENT CHANGES  00002200
+                                 28 *                                 (RELEASE 23V2)                        00002300
+                                 29 *                                                                       00002400
+                                 30 DEXP     AMAIN                                                          00002500
+                                 31+***********************************************************************
+                                 32+*
+                                 33+*        PRIMARY ENTRY POINT
+                                 34+*
+                                 35+***********************************************************************
+00000                            36+DEXP     CSECT                                                          01-AMAIN
+00000                            37+STACK    DSECT                                                          01-AMAIN
+                                 38+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            39+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            40+         DS    2F             R0,R1                                     01-AMAIN
+00006                            41+ARG2     DS    F              R2                                        01-AMAIN
+00008                            42+         DS    F              R3                                        01-AMAIN
+0000A                            43+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            44+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            45+ARG6     DS    F              R6                                        01-AMAIN
+00010                            46+ARG7     DS    F              R7                                        01-AMAIN
+                                 47+*        END OF STANDARD STACK AREA
+                                 48+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            49+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            50+DEXP     CSECT                                                          01-AMAIN
+0000000                          51+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   52+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 54 * COMPUTE E**X IN DOUBLE PRECISION                                      00002600
+                                 55          INPUT F0             SCALAR DP                                 00002700
+0000000                          56+F0       EQU   0                                                        01-INPUT
+                                 58          OUTPUT F0 SCALAR DP                                            00002800
+                                 60          WORK  R2,R5,R6,R7,F1,F2,F3                                     00002900
+0000002                          61+R2       EQU   2                                                        01-WORK
+0000005                          62+R5       EQU   5                                                        01-WORK
+0000006                          63+R6       EQU   6                                                        01-WORK
+0000007                          64+R7       EQU   7                                                        01-WORK
+0000001                          65+F1       EQU   1                                                        01-WORK
+0000002                          66+F2       EQU   2                                                        01-WORK
+0000003                          67+F3       EQU   3                                                        01-WORK
+00002 48FF 006C      0070 006C   69          CE    F0,MAX                                                   00003000
+00004 C1F7 0062      0068 0062   70          BH    ERROR                                                    00003100
+00006 48FF 006A      0072 006A   71          CE    F0,MIN                                                   00003200
+00008 C6F7 005A      0064 005A   72          BNH   UNFLO                                                    00003300
+                                 73 *                                                                       00003400
+0000A 7BE1                       74          LER   F3,F1                                                    00003500
+0000B 7AE0                       75          LER   F2,F0          DECOMPOSE X AS P*LOG(2)+R,                00003600
+0000C 6AF7 0060      006E 0060   76          DE    F2,LOG2H       WHERE R IS AN INTEGRAL                    00003700
+0000E DD18           0015 0006   77          BNM   POS                                                      00003800
+0000F 5AF7 008B      009C 008B   78          SE    F2,SCALER                                                00003900
+00011 26EA                       79          LFXR  R6,F2                                                    00004000
+00012 52F7 0088      009C 0088   80          AE    F2,SCALER                                                00004100
+i00014 DF14           001A 0005   81          B     PM                                                       00004200
+         DEXP -- DOUBLE PRECISION EXPONENTIAL FUNCTION                                                         PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 82 *                                                                       00004300
+00015 52F7 0085      009C 0085   83 POS      AE    F2,SCALER                                                00004400
+00017 26EA                       84          LFXR  R6,F2                                                    00004500
+00018 5AF7 0082      009C 0082   85          SE    F2,SCALER                                                00004600
+                                 86 *                                                                       00004700
+0001A 25EA                       87 PM       LFXR  R5,F2                                                    00004800
+0001B 62F7 0051      006E 0051   88          ME    F2,LOG2H                                                 00004900
+0001D 58EA                       89          SEDR  F0,F2          LOG(2) = LOG2H+LOG2L,                     00005000
+0001E 2AED                       90          LFLR  F2,R5          WHERE LOG2H IS ROUNDED UP.                00005100
+0001F 5BE3                       91          SER   F3,F3                                                    00005200
+00020 32FF 006E      0090 006E   92          MED   F2,LOG2L       TOTAL PRECISION 80 BITS                   00005300
+00022 77E7                       93          XR    R7,R7          * -- REL20V12 AND REL21V2 FIX --          00005400
+00023 FE41                0010   94          SRDA  R6,16          * |P| IN UPPER HALF R7, SIGN OF R6 SAVED  00005500
+00024 1EE6                       95          LR    R6,R6          * SET CONDITION CODE                      00005600
+00025 DA04           0027 0001   96          BCF   2,NEGP         * IF R6 > 0 THEN                          00005700
+00026 EFEF                       97          LACR  R7,R7          * COMPLIMENT R7 (P)                       00005800
+00027 1EE7                       98 NEGP     LR    R6,R7          * LOAD -P INTO R6                         00005900
+00028 58EA                       99          SEDR  F0,F2          X = P'*LOG(2)+R', WHERE |R'|              00006000
+00029 DE14           002F 0005  100          BNP   ZMINUS         MAY BE SLIGHTLY OVER LOG(2)/16            00006100
+                                101 *                                                                       00006200
+0002A DE03           002B 0000  102 PLUS     BCTB  R6,*+1         SUBTRACT LOG(2)/16 FROM R UNTIL           00006300
+0002B 50FF 0067      0094 0067  103          AED   F0,ML216       IT GOES NEGATIVE, SUBTRACTING 1           00006400
+0002D D912           002A 0004  104          BP    PLUS           FROM -P EACH TIME AROUND.                 00006500
+0002E DF1C           0036 0007  105          B     READY                                                    00006600
+                                106 *                                                                       00006700
+0002F 18FF 0063      0094 0063  107 ZMINUS   CED   F0,ML216       /* DR103762 - CHANGED QCED TO CED */      00006800
+00031 D910           0036 0004  108          BH    READY          IF R'<-LOG(2)/16,                         00006900
+00032 58FF 0060      0094 0060  109          SED   F0,ML216       ADD LOG(2)/16 AND INCREMENT               00007000
+00034 B0E6 0001           0001  110          AHI   R6,1           R6, WHOSE HIGH PART IS -P.                00007100
+                                111 *                                                                       00007200
+00036 0FE7                      112 READY    SR    R7,R7          R7 = -P = -4A+B+C/16                      00007300
+00037 FE52                0014  113          SRDL  R6,20          C IN HIGH R7                              00007400
+00038 F732                000C  114          SRL   R7,12                                                    00007500
+00039 FE0A                0002  115          SRDL  R6,2           B IN HIGH R7,C IN LOW R7.                 00007600
+0003A F660                0018  116          SLL   R6,24                                                    00007700
+0003B EDEE                      117          LACR  R5,R6          A (AT BIT 7) IN R5, CHAR. MODIFIER        00007800
+0003C 0EE6                      118          SR    R6,R6                                                    00007900
+0003D FE08                0002  119          SLDL  R6,2           B IN R6, C IN R7 HIGH                     00008000
+0003E EAF3 00A0      00A0       120          LA    R2,MCONST                                                00008100
+                                121 *                                                                       00008200
+00040 48FF 0036      0078 0036  122          CE    F0,NEAR0       IF |R|<2**(-60), AVOID                    00008300
+00042 D954           0058 0015  123          BH    SKIP1          UNDERFLOW BY SETTING E**R=1,              00008400
+00043 7AE0                      124          LER   F2,F0                                                    00008500
+00044 7BE1                      125          LER   F3,F1                                                    00008600
+00045 60F7 0033      007A 0033  126          ME    F0,C6                                                    00008700
+00047 50FF 0033      007C 0033  127          AED   F0,C5                                                    00008800
+00049 30EA                      128          MEDR  F0,F2                                                    00008900
+0004A 50FF 0034      0080 0034  129          AED   F0,C4                                                    00009000
+0004C 30EA                      130          MEDR  F0,F2                                                    00009100
+0004D 50FF 0035      0084 0035  131          AED   F0,C3                                                    00009200
+0004F 30EA                      132          MEDR  F0,F2                                                    00009300
+00050 50FF 0036      0088 0036  133          AED   F0,C2                                                    00009400
+00052 30EA                      134          MEDR  F0,F2                                                    00009500
+00053 50FF 0037      008C 0037  135          AED   F0,C1                                                    00009600
+00055 30EA                      136          MEDR  F0,F2          E**(-R) READY IN F0                       00009700
+00056 30FE E000      0000       137          MED   F0,0(R7,R2)                                              00009800
+                                138 *                                                                       00009900
+00058 50FE E000      0000       139 SKIP1    AED   F0,0(R7,R2)    (E**R)*(2**(-C/16)) READY                 00010000
+                                140 *                                                                       00010100
+0005A 1EE6                      141          LR    R6,R6          MULTIPLY BY 2**(-B)                       00010200
+0005B DC10           0060 0004  142          BZ    SKIP2          BY HALVING B TIMES                        00010300
+0005C F640                0010  143          SLL   R6,16                                                    00010400
+0005D 30FF 0039      0098 0039  144 MULT     MED   F0,HALF                                                  00010500
+0005F DE0F           005D 0003  145          BCT   R6,MULT                                                  00010600
+                                146 *                                                                       00010700
+00060 26E8                      147 SKIP2    LFXR  R6,F0                                                    00010800
+00061 06E5                      148          AR    R6,R5                                                    00010900
+00062 28EE                      149          LFLR  F0,R6                                                    00011000
+                                150 *                                                                       00011100
+                                151 EXIT     AEXIT                                                          00011200
+                                152+*********RETURN TO CALLER**********************************************
+00063                           153+EXIT     DS    0H                                                       01-AEXIT
+00063 97E8                      154+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                155+***********************************************************************
+                                157 *                                                                       00011300
+                                158 * ARG TOO SMALL - GIVE UNDERFLOW                                        00011400
+                                159 *                                                                       00011500
+00064 78F7 0018      007E 0018  160 UNFLO    LE    F0,C5+2                                                  00011600
+i00066 30E8                      161          MEDR  F0,F0                                                    00011700
+         DEXP -- DOUBLE PRECISION EXPONENTIAL FUNCTION                                                         PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00067 DF16           0063 0005  162          B     EXIT                                                     00011800
+                                163 *                                                                       00011900
+                                164 * ARG TOO LARGE - GIVE ERROR                                            00012000
+                                165 *                                                                       00012100
+                                166 ERROR    AERROR 6             ARG>174.6731                              00012200
+                                167+*********ISSUE SEND ERROR SVC******************************************
+00068 C9FB 009E      009E       168+ERROR    SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                169+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0006A 78FF 0008      0074 0008  170          LED   F0,INFINITY    STANDARD FIXUP IS MAXIMUM FLOATING NO.    00012300
+0006C DF2A           0063 000A  171          B     EXIT                                                     00012400
+                                172 *                                                                       00012500
+0006D C9FB
+0006E                           173          DS    0F                                                       00012600
+0006E 40B17218                  174 LOG2H    DC    X'40B17218'    LOG(2) ROUNDED UP                         00012700
+00070 42AEAC4E                  175 MAX      DC    X'42AEAC4E'    174.67306                                 00012800
+00072 C2B437DF                  176 MIN      DC    X'C2B437DF'    -180.21824                                00012900
+00074 7FFFFFFFFFFFFFFF          177 INFINITY DC    X'7FFFFFFFFFFFFFFF'  STANDARD FIXUP                      00013000
+00078 B2100000                  178 NEAR0    DC    X'B2100000'    -2**60                                    00013100
+0007A 3E591893                  179 C6       DC    X'3E591893'    0.1359497E-2                              00013200
+0007C 3F2220559A15E158          180 C5       DC    X'3F2220559A15E158'   0.8331617720039062E-2              00013300
+00080 3FAAAA9D6AC1D734          181 C4       DC    X'3FAAAA9D6AC1D734'   0.416666173078875E-1               00013400
+00084 402AAAAAA794AA99          182 C3       DC    X'402AAAAAA794AA99'   0.1666666659481656                 00013500
+00088 407FFFFFFFFAB64A          183 C2       DC    X'407FFFFFFFFAB64A'   0.4999999999951906                 00013600
+0008C 40FFFFFFFFFFFCFC          184 C1       DC    X'40FFFFFFFFFFFCFC'   0.9999999999999892                 00013700
+00090 B982E308654361C4          185 LOG2L    DC    X'B982E308654361C4'   LOG(2)-LOG2H TO 80 BITS            00013800
+00094 BFB17217F7D1CF7A          186 ML216    DC    X'BFB17217F7D1CF7A'   -LOG(2)/16 ROUNDED UP              00013900
+00098 4080000000000000          187 HALF     DC    X'4080000000000000'   0.5                                00014000
+0009C 45100000                  188 SCALER   DC    X'45100000'                                              00014100
+                                189          ADATA                                                          00014200
+                                190+*********DATA CSECT****************************************************
+0009E                           191+         LTORG                                                          02-ERRPA
+                                192+****************ERROR PARAMETER AREA***********************************
+0009E                           193+#LDEXP   CSECT                                                          02-ERRPA
+                                194+***  DEXP SENDS THE FOLLOWING ERROR                                     02-ERRPA
+                                196+***  ERROR NUMBER 6 IN GROUP 4                                          02-ERRPA
+0009E 0014                      198+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0009F 0406                      199+         DC    Y(4*256+6)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                200+****************END OF ERROR PARAMETER AREA****************************
+000A0                           201+#LDEXP   CSECT                                                          01-ADATA
+000A0 4110000000000000          202 MCONST   DC    X'4110000000000000'   2**(-0/16)                         00014300
+000A4 40F5257D152486CD          203          DC    X'40F5257D152486CD'   2**(-1/16)                         00014400
+000A8 40EAC0C6E7DD243A          204          DC    X'40EAC0C6E7DD243A'   2**(-2/16)                         00014500
+000AC 40E0CCDEEC2A94E1          205          DC    X'40E0CCDEEC2A94E1'   2**(-3/16)                         00014600
+000B0 40D744FCCAD69D6B          206          DC    X'40D744FCCAD69D6B'   2**(-4/16)                         00014700
+000B4 40CE248C151F8481          207          DC    X'40CE248C151F8481'   2**(-5/16)                         00014800
+000B8 40C5672A115506DB          208          DC    X'40C5672A115506DB'   2**(-6/16)                         00014900
+000BC 40BD08A39F580C37          209          DC    X'40BD08A39F580C37'   2**(-7/16)                         00015000
+000C0 40B504F333F9DE65          210          DC    X'40B504F333F9DE65'   2**(-8/16)                         00015100
+000C4 40AD583EEA42A14B          211          DC    X'40AD583EEA42A14B'   2**(-9/16)                         00015200
+000C8 40A5FED6A9B15139          212          DC    X'40A5FED6A9B15139'   2**(-10/16)                        00015300
+000CC 409EF5326091A112          213          DC    X'409EF5326091A112'   2**(-11/16)                        00015400
+000D0 409837F0518DB8AA          214          DC    X'409837F0518DB8AA'   2**(-12/16)                        00015500
+000D4 4091C3D373AB11C4          215          DC    X'4091C3D373AB11C4'   2**(-13/16)                        00015600
+000D8 408B95C1E3EA8BD7          216          DC    X'408B95C1E3EA8BD7'   2**(-14/16)                        00015700
+000DC 4085AAC367CC487C          217          DC    X'4085AAC367CC487C'   2**(-15/16)                        00015800
+                                218          ACLOSE                                                         00015900
+                                219+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     00003F
+  0001     0002     00     000069
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   00009E   198    168
+ARG2         2   000006    41
+ARG4         2   00000A    43
+ARG5         2   00000C    44
+ARG6         2   00000E    45
+ARG7         2   000010    46
+C1           4   00008C   184    135
+C2           4   000088   183    133
+C3           4   000084   182    131
+C4           4   000080   181    129
+C5           4   00007C   180    127   160
+C6           2   00007A   179    126
+DEXP         1 00000000    36     50
+ERROR        2   000068   168     70
+EXIT         1   000063   153    162   171
+F0           1 00000000    56     69    71    75    89    99   103   107   109   122   124   126   127   128   129   130
+                                 131   132   133   134   135   136   137   139   144   147   149   160   161   161   170
+F1           1 00000001    65     74   125
+F2           1 00000002    66     75    76    78    79    80    83    84    85    87    88    89    90    92    99   124
+                                 128   130   132   134   136
+F3           1 00000003    67     74    91    91   125
+HALF         4   000098   187    144
+INFINITY     4   000074   177    170
+LOG2H        2   00006E   174     76    88
+LOG2L        4   000090   185     92
+MAX          2   000070   175     69
+MCONST       4   0000A0   202    120
+MIN          2   000072   176     71
+ML216        4   000094   186    103   107   109
+MULT         2   00005D   144    145
+NEAR0        2   000078   178    122
+NEGP         1   000027    98     96
+PLUS         1   00002A   102    104
+PM           1   00001A    87     81
+POS          2   000015    83     77
+R2           1 00000002    61    120   137   139
+R5           1 00000005    62     87    90   117   148
+R6           1 00000006    63     79    84    94    95    95    98   102   110   113   115   116   117   118   118   119
+                                 141   141   143   145   147   148   149
+R7           1 00000007    64     93    93    97    97    98   112   112   114   137   137   139   139
+READY        1   000036   112    105   108
+SCALER       2   00009C   188     78    80    83    85
+SKIP1        2   000058   139    123
+SKIP2        1   000060   147    142
+STACK        1 00000000    37     51
+STACKEND     2   000012    49
+UNFLO        2   000064   160     72
+ZMINUS       2   00002F   107    100
+$RET1        1   000063   154
+#LDEXP       1 0000009E   193    201
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     164 CARDS FROM SYSIN     374 CARDS FROM SYSLIB
+     292 LINES OUTPUT          24 CARDS OUTPUT

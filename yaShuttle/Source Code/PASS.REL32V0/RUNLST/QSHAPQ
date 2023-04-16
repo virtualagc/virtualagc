@@ -1,0 +1,220 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+QSHAPQ    SD 0001 000000 00004A
+DTOH      ER 0002
+DTOI      ER 0003
+ITOE      ER 0004
+ITOD      ER 0005
+¤
+         QSHAPQ - GENERALIZED SHAPING FUNCTION                                                                 PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 QSHAPQ   AMAIN ACALL=YES                                                00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+QSHAPQ   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+QSHAPQ   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 *                                                                       00000400
+                                 33 * SHAPES DATA OF A GIVEN TYPE AND PRECISION                             00000500
+                                 34 * TO DATA OF AN EXPLICIT TYPE AND PRECISION                             00000600
+                                 35 *                                                                       00000700
+                                 36 *                                                                       00000800
+                                 37          INPUT R4,            INT. SCA.  SP/DP                         X00000900
+                                                   R6,            INTEGER                                  X00001000
+                                                   R5             INTEGER(COUNT)                            00001100
+0000004                          38+R4       EQU   4                                                        01-INPUT
+0000006                          39+R6       EQU   6                                                        01-INPUT
+0000005                          40+R5       EQU   5                                                        01-INPUT
+                                 42          OUTPUT R2            INT. SCA.  SP/DP                          00001200
+0000002                          43+R2       EQU   2                                                        01-OUTPU
+                                 45          WORK  R1,R3,R7,F0,F1                                           00001300
+0000001                          46+R1       EQU   1                                                        01-WORK
+0000003                          47+R3       EQU   3                                                        01-WORK
+0000007                          48+R7       EQU   7                                                        01-WORK
+0000000                          49+F0       EQU   0                                                        01-WORK
+0000001                          50+F1       EQU   1                                                        01-WORK
+                                 52 *                                                                       00001400
+                                 53 *                                                                       00001500
+                                 54 *                                                                       00001600
+                                 55 *                                                                       00001700
+                                 56 *ARGUMENTS:                                                             00001800
+                                 57 *        R1 - DESTINATION POINTER                                       00001900
+                                 58 *        R2 - SOURCE POINTER                                            00002000
+                                 59 *        R6 - FLAG TO INDICATE TYPE OF TRANSFER                         00002100
+                                 60 *              0 - HALFWORD INTEGER                                     00002200
+                                 61 *              1 - FULLWORD INTEGER                                     00002300
+                                 62 *              2 - FULLWORD SCALAR                                      00002400
+                                 63 *              3 - DOUBLEWORD SCALAR                                    00002500
+                                 64 *              (UPPER 8 BITS OF R6 IS INPUT DATATYPE,LOWER IS OUTPUT)   00002600
+                                 65 *        R5 - NUMBER OF ITEMS TO BE TRANSFERRED                         00002700
+                                 66 *                                                                       00002800
+                                 67 *                                                                       00002900
+00002 19E2                       68          LR    R1,R2                                                    00003000
+00003 1AE4                       69          LR    R2,R4                                                    00003100
+00004 1FE5                       70          LR    R7,R5          SAVE ITEM COUNT                           00003200
+00005 1DE6                       71          LR    R5,R6                                                    00003300
+00006 F522                0008   72          SRL   R5,8           INPUT TYPE                                00003400
+00007 B6E6 00FF           00FF   73          NHI   R6,X'00FF'     OUTPUT TYPE                               00003500
+00009 EBF7 000C      0017 000C   74          LA    R3,INTAB                                                 00003600
+0000B 03E5                       75          AR    R3,R5          INPUT BRANCH POINTER                      00003700
+0000C B6E5 0002           0002   76          NHI   R5,X'0002'     INPUT IS SCALAR FLAG                      00003800
+0000E F504                0001   77          SLL   R5,1                                                     00003900
+0000F 05E6                       78          AR    R5,R6          COMBINE INPUT CLASS AND OUTPUT TYPE       00004000
+i00010 EEF7 0009      001B 0009   79          LA    R6,OUTTAB                                                00004100
+         QSHAPQ - GENERALIZED SHAPING FUNCTION                                                                 PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+00012 06E5                       80          AR    R6,R5          OUTPUT BRANCH POINTER                     00004200
+00013 B0E7 0001           0001   81          AHI   R7,1           ALLOW AT LEAST ONE PASS THROUGH           00004300
+00015 D7E3                       82 SHAPLOOP BCTR  R7,R3          GO IF DATA TO CONVERT                     00004400
+                                 83          AEXIT                                                          00004500
+                                 84+*********RETURN TO CALLER**********************************************
+00016                            85+         DS    0H                                                       01-AEXIT
+00016 97E8                       86+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 87+***********************************************************************
+
+00017 DF2C           0023 000B   90 INTAB    B     LOADH                                                    00004700
+00018 DF38           0027 000E   91          B     LOADI                                                    00004800
+00019 DF40           002A 0010   92          B     LOADE                                                    00004900
+0001A DF4C           002E 0013   93          B     LOADD                                                    00005000
+0001B DF64           0035 0019   94 OUTTAB   B     STOREH                                                   00005100
+0001C DF78           003B 001E   95          B     STOREI                                                   00005200
+0001D DF80           003E 0020   96          B     CVITOE                                                   00005300
+0001E DF90           0043 0024   97          B     CVITOD                                                   00005400
+0001F DF48           0032 0012   98          B     CVSTOH                                                   00005500
+00020 DF60           0039 0018   99          B     CVSTOI                                                   00005600
+00021 DF78           0040 001E  100          B     STOREE                                                   00005700
+00022 DF88           0045 0022  101          B     STORED                                                   00005800
+
+00023 9D02           0000       103 LOADH    LH    R5,0(R2)                                                 00006000
+00024 F541                0010  104          SRA   R5,16                                                    00006100
+00025 EA06           0001       105          LA    R2,1(R2)                                                 00006200
+00026 C7E6                      106          BR    R6                                                       00006300
+00027 1D02           0000       108 LOADI    L     R5,0(R2)                                                 00006500
+00028 EA0A           0002       109          LA    R2,2(R2)                                                 00006600
+00029 C7E6                      110          BR    R6                                                       00006700
+0002A 7802           0000       112 LOADE    LE    F0,0(R2)                                                 00006900
+0002B 59E1                      113          SER   F1,F1                                                    00007000
+0002C EA0A           0002       114          LA    R2,2(R2)                                                 00007100
+0002D C7E6                      115          BR    R6                                                       00007200
+0002E 78FA 0000      0000       117 LOADD    LED   F0,0(R2)                                                 00007400
+00030 EA12           0004       118          LA    R2,4(R2)                                                 00007500
+00031 C7E6                      119          BR    R6                                                       00007600
+                                121 CVSTOH   ABAL DTOH,BANK=0                                               00007800
+                                122+         EXTRN DTOH                                                     01-ABAL
+00032 E4F3 0000      0000       123+CVSTOH   BAL   4,DTOH         CALL BANK0 INTRINSIC                      01-ABAL
+00034 DF04           0036 0001  124          B     CVSTH                                                    00007900
+00035 F540                0010  125 STOREH   SLL   R5,16                                                    00008000
+00036 BD01           0000       126 CVSTH    STH   R5,0(R1)                                                 00008100
+00037 E905           0001       127          LA    R1,1(R1)                                                 00008200
+00038 DF92           0015 0024  128          B     SHAPLOOP                                                 00008300
+                                130 CVSTOI   ABAL DTOI,BANK=0                                               00008500
+                                131+         EXTRN DTOI                                                     01-ABAL
+00039 E4F3 0000      0000       132+CVSTOI   BAL   4,DTOI         CALL BANK0 INTRINSIC                      01-ABAL
+0003B 3501           0000       133 STOREI   ST    R5,0(R1)                                                 00008600
+0003C E909           0002       134          LA    R1,2(R1)                                                 00008700
+0003D DFA6           0015 0029  135          B     SHAPLOOP                                                 00008800
+                                137 CVITOE   ABAL ITOE,BANK=0                                               00009000
+                                138+         EXTRN ITOE                                                     01-ABAL
+0003E E4F3 0000      0000       139+CVITOE   BAL   4,ITOE         CALL BANK0 INTRINSIC                      01-ABAL
+00040 3801           0000       140 STOREE   STE   F0,0(R1)                                                 00009100
+00041 E909           0002       141          LA    R1,2(R1)                                                 00009200
+00042 DFBA           0015 002E  142          B     SHAPLOOP                                                 00009300
+                                144 CVITOD   ABAL ITOD,BANK=0                                               00009500
+                                145+         EXTRN ITOD                                                     01-ABAL
+00043 E4F3 0000      0000       146+CVITOD   BAL   4,ITOD         CALL BANK0 INTRINSIC                      01-ABAL
+00045 38F9 0000      0000       147 STORED   STED  F0,0(R1)                                                 00009600
+00047 E911           0004       148          LA    R1,4(R1)                                                 00009700
+00048 DFD2           0015 0034  149          B     SHAPLOOP                                                 00009800
+                                151          ACLOSE                                                         00010000
+00049 C9FB
+i0004A                           152+         LTORG                                                          02-ERRPA
+         QSHAPQ - GENERALIZED SHAPING FUNCTION                                                                 PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                153+****************ERROR PARAMETER AREA***********************************
+                                154+***  NO ERRORS SENT IN QSHAPQ                                           02-ERRPA
+                                155+****************END OF ERROR PARAMETER AREA****************************
+                                156+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.39 07/22/05
+  0001     0002     00     000033
+  0001     0003     00     00003A
+  0001     0004     00     00003F
+  0001     0005     00     000044
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+CVITOD       2   000043   146     97
+CVITOE       2   00003E   139     96
+CVSTH        2   000036   126    124
+CVSTOH       2   000032   123     98
+CVSTOI       2   000039   132     99
+DTOH         1 00000000   122    123
+DTOI         1 00000000   131    132
+F0           1 00000000    49    112   117   140   147
+F1           1 00000001    50    113   113
+INTAB        2   000017    90     74
+ITOD         1 00000000   145    146
+ITOE         1 00000000   138    139
+LOADD        2   00002E   117     93
+LOADE        2   00002A   112     92
+LOADH        2   000023   103     90
+LOADI        2   000027   108     91
+OUTTAB       2   00001B    94     79
+QSHAPQ       1 00000000    13     27
+R1           1 00000001    46     68   126   126   127   127   127   133   133   134   134   134   140   140   141   141
+                                 141   147   147   148   148   148
+R2           1 00000002    43     68    69   103   103   105   105   105   108   108   109   109   109   112   112   114
+                                 114   114   117   117   118   118   118
+R3           1 00000003    47     74    75    82
+R4           1 00000004    38     69
+R5           1 00000005    40     70    71    72    75    76    77    78    80   103   104   108   125   126   133
+R6           1 00000006    39     71    73    78    79    80   106   110   115   119
+R7           1 00000007    48     70    81    82
+SHAPLOOP     1   000015    82    128   135   142   149
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+STORED       2   000045   147    101
+STOREE       2   000040   140    100
+STOREH       1   000035   125     94
+STOREI       2   00003B   133     95
+$RET1        1   000016    86
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     105 CARDS FROM SYSIN     402 CARDS FROM SYSLIB
+     220 LINES OUTPUT          14 CARDS OUTPUT

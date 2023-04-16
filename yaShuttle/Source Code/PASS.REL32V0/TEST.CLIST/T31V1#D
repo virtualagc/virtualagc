@@ -1,0 +1,109 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040008/*   NAME :     T31V0#D                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION : A DRIVER CLIST TO TESTSUIT FOR RUNNING FUNCTIONAL   */
+00090000/*              TEST ON A TEST CATEGORY (WITH DATA_REMOTE).         */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*  REVISION HISTORY :                                              */
+00140000/*                                                                  */
+00150000/*    DATE      PCR#     NAME   DESCRIPTION                         */
+00160000/*    --------  -----    ----   -------------------------------     */
+00170008/*    09/10/02  730      LWW    BASELINED COMPILER TEST CLISTS      */
+00180000/*------------------------------------------------------------------*/
+00190000/********************************************************************/
+00200000
+00210000PROC     1  GROUP                                               +
+00220000            ID(NCAMTST)                                         +
+00230000            SRCID(NCAMCM)                                       +
+00240008            DSN(R31V0#D1)                                       +
+00250000            LIB(&ID..&DSN..&GROUP.)                             +
+00260000            SRCDSN(NCAMCM.TESTLIB.&GROUP..HAL)                  +
+00270010            COMPVER(REL31V1)                                    +
+00280000            RUNLVER(&COMPVER.)                                  +
+00290000            COMPILER(&SRCID..PASS.&COMPVER..COMPILER)           +
+00300000            RUNLIB(&SRCID..PASS.&RUNLVER..RUNLIB)               +
+00310000            SIMLIB(NCAMCM.TOOLS.PASS.SIMLIB)                    +
+00320000            ERRORLIB(&SRCID..PASS.&COMPVER..ERRORLIB)           +
+00330000            MONITOR(&SRCID..PASS.&COMPVER..MONITOR.LOAD(MONITOR)) +
+00331000            ZCONLIB(&SRCID..PASS.&COMPVER..ZCONOBJ)             +
+00340000            TRUNLIB()                                           +
+00350009            TERRORLIB(NCAMCM.TESTLIB.REL31V0.TERRLIB)           +
+00360000            HALSDF2(&ID..&DSN..COMPOOL.SDF)                     +
+00370000            HALLOAD2(&ID..&DSN..COMPOOL.LOAD)                   +
+00371000            LNKIN(NCAMCM.TESTLIB.&GROUP..CON#D)                 +
+00380000            CT(WMZMTCBCPDUMVM)                                  +
+00390000            LITS(5000)                                          +
+00391000            EXECSTEP(3000000)                                   +
+00392007            ACCESS()                                            +
+00400000            TPLT                                                +
+00410000            TABLST                                              +
+00420000            SRN                                                 +
+00420100            HO                                                  +
+00430000            OPT()                                               +
+00440000            COMPOOL(1)                                          +
+00450000            LIST()                                              +
+00460000            SEQ                                                 +
+00460100            NOPLINK                                             +
+00460200            TRACE                                               +
+00470000            UTRACE                                              +
+00480000            REFRESH                                             +
+00490000            FIRSTRUN
+00500000
+00510000GLOBAL  RETCODE
+00520000IF  &TRACE. NE THEN  CONTROL CONLIST LIST
+00540000
+00550000    IF &TERRORLIB. NE THEN SET &TERRORLIB = TERRORLIB(&TERRORLIB.)
+00560000        ELSE SET  &TERRORLIB =
+00561007    IF &ACCESS. NE THEN SET &ACCESS = ACCESS(&ACCESS.)
+00562007        ELSE SET  &ACCESS =
+00570000    IF &TRUNLIB. NE THEN SET &TRUNLIB = TRUNLIB(&TRUNLIB.)
+00580000        ELSE SET  &TRUNLIB =
+00590000    IF &HALSDF2. NE THEN SET &HALSDF2 = HALSDF2(&HALSDF2.)
+00600000        ELSE SET  &HALSDF2 =
+00610000    IF &HALLOAD2. NE THEN SET &HALLOAD2 = HALLOAD2(&HALLOAD2.)
+00620000        ELSE SET  &HALLOAD2 =
+00650000    IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+00660000        ELSE SET  &OPT =
+00670000    IF &LIST. NE THEN SET &LIST = LIST(&LIST.)
+00680000        ELSE SET  &LIST =
+00690000
+00700000TESTSUIT    &GROUP.                  +
+00710000            ID(&ID.)                 +
+00720000            LIB(&LIB.)               +
+00730000            SRCDSN(&SRCDSN.)         +
+00740000            COMPVER(&COMPVER.)       +
+00750000            RUNLVER(&RUNLVER.)       +
+00760000            COMPILER(&COMPILER.)     +
+00770000            RUNLIB(&RUNLIB.)         +
+00780000            SIMLIB(&SIMLIB.)         +
+00790000            ERRORLIB(&ERRORLIB.)     +
+00800000            MONITOR(&MONITOR.)       +
+00801000            ZCONLIB(&ZCONLIB.)       +
+00810000            &TRUNLIB.                +
+00820000            &TERRORLIB.              +
+00821007            &ACCESS.                 +
+00830000            &HALSDF2.                +
+00840000            &HALLOAD2.               +
+00841000            LNKIN(&LNKIN.)           +
+00850000            CT(&CT.)                 +
+00860000            LITS(&LITS.)             +
+00861000            EXECSTEP(&EXECSTEP.)     +
+00870000            &TPLT.                   +
+00880000            &TABLST.                 +
+00890000            &SRN.                    +
+00900000            &HO.                     +
+00900100            &OPT.                    +
+00910000            COMPOOL(&COMPOOL.)       +
+00920000            &LIST.                   +
+00930000            &SEQ.                    +
+00930100            &NOPLINK.                +
+00930200            &TRACE.                  +
+00940000            &UTRACE.                 +
+00950000            &REFRESH.                +
+00960000            &FIRSTRUN.

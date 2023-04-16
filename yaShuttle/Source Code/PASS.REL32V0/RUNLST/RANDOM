@@ -1,0 +1,166 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+RANDOM    SD 0001 000000 00002E
+RANDG     LD      000014        0001
+#LRANDOM  SD 0002 00002E 000002
+¤
+         RANDOM-RANDOM NUM. GENERATOR                                                                          PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 RANDOM   AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+RANDOM   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+RANDOM   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 *  GENERATES RANDOM NUMBER WITH UNIFORM                                 00000400
+                                 33 *  DISTRIBUTION IN RANGE (0.0,1.0)                                      00000500
+                                 34 *                                                                       00000600
+                                 35          INPUT NONE                                                     00000700
+                                 37          OUTPUT F0            SCALAR  DP                                00000800
+0000000                          38+F0       EQU   0                                                        01-OUTPU
+                                 40          WORK  R5,R6,R7,F1,F2,F3,R2                                     00000900
+0000005                          41+R5       EQU   5                                                        01-WORK
+0000006                          42+R6       EQU   6                                                        01-WORK
+0000007                          43+R7       EQU   7                                                        01-WORK
+0000001                          44+F1       EQU   1                                                        01-WORK
+0000002                          45+F2       EQU   2                                                        01-WORK
+0000003                          46+F3       EQU   3                                                        01-WORK
+0000002                          47+R2       EQU   2                                                        01-WORK
+                                 49 *                                                                       00001000
+                                 50 *                                                                       00001100
+00002 E5F7 0001      0005 0001   51          BAL    R5,RANU   GENERATE RANDOM NUMBER                        00001200
+                                 52 EXIT     AEXIT            THEN RETURN                                   00001300
+                                 53+*********RETURN TO CALLER**********************************************
+00004                            54+EXIT     DS    0H                                                       01-AEXIT
+00004 97E8                       55+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 56+***********************************************************************
+00005 1EF7 0025      002C 0025   58 RANU     L   R6,=F'65539'                                               00001400
+00007 46F3 002E      002E        59          M    R6,SEED   USE ONLY LEAST SIGNIF. BITS                     00001500
+00009 FE05                0001   60          SRDA  R6,1           FRACTIONAL TO INTEGER                     00001600
+0000A 1EE7                       61          LR   R6,R7     SET CONDITION CODE                              00001700
+0000B DD08           000E 0002   62          BNM  NOFIX                                                     00001800
+0000C 0EF7 0014      0022 0014   63          S    R6,NEGMAX     IF (SEED)<0 THEN FIX UP                     00001900
+0000E 36F3 002E      002E        64 NOFIX    ST   R6,SEED    SAVE UPDATED SEED                              00002000
+00010 38EE                       65          CVFL   F0,R6   CONVERT,THEN MULT. BY 16**4                     00002100
+00011 30FF 0011      0024 0011   66          MED  F0,=X'3D20000000000000'   AND BY 2**-31                   00002200
+                                 67 *      RANU=SEED*2**-31                                                 00002300
+00013 C7E5                       68          BR   R5                                                        00002400
+                                 69 *                                                                       00002500
+                                 70 RANDG    AENTRY                                                         00002600
+                                 71+***********************************************************************
+                                 72+*
+                                 73+*        SECONDARY ENTRY POINT
+                                 74+*
+                                 75+***********************************************************************
+00014                            76+RANDG    DS    0H                                                       01-AENTR
+                                 77+         ENTRY RANDG                                                    01-AENTR
+00014 B624 0000      0009 0000   78+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 80 *                                                                       00002700
+i                                 81 *  GENERATES RANDOM NUMBER FROM GAUSSIAN                                00002800
+         RANDOM-RANDOM NUM. GENERATOR                                                                          PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 82 *  DISTRIBUTION MEAN ZERO,VARIANCE ONE                                  00002900
+                                 83 *                                                                       00003000
+                                 84          INPUT NONE                                                     00003100
+                                 86          OUTPUT F0            SCALAR  DP                                00003200
+                                 88          WORK  R5,R6,R7                                                 00003300
+                                 90 *                                                                       00003400
+                                 91 *                                                                       00003500
+00016 5AEA                       92          SEDR  F2,F2                                                    00003600
+00017 EAF3 000C      000C        93          LA   R2,12         LOOP TWELVE TIMES                           00003700
+00019 E5F7 0816      0005 0016   94 LOOP     BAL  R5,RANU                                                   00003800
+0001B 52E8                       95          AEDR F2,F0     A=A+RANU                                        00003900
+0001C DA13           0019 0004   96          BCT  R2,LOOP                                                   00004000
+0001D 5AFF 0009      0028 0009   97          SED  F2,=D'6.0' GRANDOM=A-6.0                                  00004100
+0001F 78E2                       98          LER  F0,F2      ANSWER IN F0                                   00004200
+00020 79E3                       99          LER  F1,F3      FAKE D.P. LOAD                                 00004300
+00021 DF7A           0004 001E  100          B    EXIT                                                      00004400
+00022                           101          DS    0D                                                       00004500
+00022 80000000                  102 NEGMAX   DC   X'80000000'                                               00004600
+                                103          ADATA                                                          00004700
+                                104+*********DATA CSECT****************************************************
+00024                           105+         LTORG                                                          02-ERRPA
+00024 3D20000000000000          106                =X'3D20000000000000'
+00028 4160000000000000          107                =D'6.0'
+0002C 00010003                  108                =F'65539'
+                                109+****************ERROR PARAMETER AREA***********************************
+                                110+***  NO ERRORS SENT IN RANDOM                                           02-ERRPA
+                                111+****************END OF ERROR PARAMETER AREA****************************
+0002E                           112+#LRANDOM CSECT                                                          01-ADATA
+                                113          SPOFF                                                          00004800
+0002E 0000059B                  114 SEED     DC   F'1435'                                                   00004900
+                                115          SPON                                                           00005000
+                                116          ACLOSE                                                         00005100
+                                117+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.39 07/22/05
+  0001     0002     00     000008
+  0001     0002     00     00000F
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+EXIT         1   000004    54    100
+F0           1 00000000    38     65    66    95    98
+F1           1 00000001    44     99
+F2           1 00000002    45     92    92    95    97    98
+F3           1 00000003    46     99
+LOOP         2   000019    94     96
+NEGMAX       2   000022   102     63
+NOFIX        2   00000E    64     62
+R2           1 00000002    47     93    96
+R5           1 00000005    41     51    68    94
+R6           1 00000006    42     58    59    60    61    63    64    65
+R7           1 00000007    43     61
+RANDG        1   000014    76     77
+RANDOM       1 00000000    13     27
+RANU         2   000005    58     51    94
+SEED         2   00002E   114     59    64
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   000004    55
+#LRANDOM     1 0000002E   112
+=D'6.0'      4   000028   107     97
+=F'65539'
+             2   00002C   108     58
+=X'3D20000000000000'
+             4   000024   106     66
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      56 CARDS FROM SYSIN     418 CARDS FROM SYSLIB
+     166 LINES OUTPUT          12 CARDS OUTPUT

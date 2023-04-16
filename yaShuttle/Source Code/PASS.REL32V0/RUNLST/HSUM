@@ -1,0 +1,69 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+HSUM      SD 0001 000000 000006
+¤
+         HSUM--INTEGER SUM FUNCTION, SP                                                                        PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 HSUM     AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+HSUM     CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * RETURNS THE SUM OF ALL THE ELEMENTS OF A LENGTH N ARRAY OF SINGLE     00000400
+                                 17 *   PRECISION INTEGERS.                                                 00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            ARRAY(N) INTEGER SP                      X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT R5            INTEGER SP                                00000900
+                                 25          WORK  R6                                                       00001000
+0000006                          26+R6       EQU   6                                                        01-WORK
+                                 28 *                                                                       00001100
+                                 29 * ALGORITHM:                                                            00001200
+                                 30 *   SEE ALGORITHM DESCRIPTION IN DSUM                                   00001300
+                                 31 *                                                                       00001400
+00000 0EE6                       32          SR    R6,R6          CLEAR ACCUMULATOR                         00001500
+00001 8606           0001        33 LOOPH    AH    R6,1(R2)       ADD IN NEXT ELEMENT                       00001600
+00002 EA06           0001        34          LA    R2,1(R2)       BUMP INPUT PTR TO NEXT ELEMENT            00001700
+00003 DD0F           0001 0003   35          BCT   R5,LOOPH                                                 00001800
+00004 1DE6                       36          LR    R5,R6          ANSWER EXPECTED IN R5                     00001900
+                                 37          AEXIT                                                          00002000
+                                 38+*********RETURN TO CALLER**********************************************
+00005                            39+         DS    0H                                                       01-AEXIT
+00005 C7EC                       40+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 41+***********************************************************************
+                                 43          ACLOSE                                                         00002100
+00006                            44+         LTORG                                                          02-ERRPA
+                                 45+****************ERROR PARAMETER AREA***********************************
+                                 46+***  NO ERRORS SENT IN HSUM                                             02-ERRPA
+                                 47+****************END OF ERROR PARAMETER AREA****************************
+                                 48+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+HSUM         1 00000000    13
+LOOPH        2   000001    33     35
+R2           1 00000002    20     33    33    34    34    34
+R5           1 00000005    21     35    36
+R6           1 00000006    26     32    32    33    36
+$RET1        1   000005    40
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      26 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      69 LINES OUTPUT           4 CARDS OUTPUT

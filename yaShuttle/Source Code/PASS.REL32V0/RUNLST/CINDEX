@@ -1,0 +1,196 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CINDEX    SD 0001 000000 000034
+#QGTBYTE  ER 0002
+¤
+         CINDEX--CHARACTER INDEX FUNCTION                                                                      PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 CINDEX   AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+CINDEX   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+CINDEX   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * RETURNS THE INDEX, IF ANY, OF C2 IN C1 WHERE C1 AND C2 ARE            00000400
+                                 33 *   CHARACTER STRINGS.                                                  00000500
+                                 34 *                                                                       00000600
+                                 35          INPUT R2,            CHARACTER(C1)                            X00000700
+                                                   R4             CHARACTER(C2)                             00000800
+0000002                          36+R2       EQU   2                                                        01-INPUT
+0000004                          37+R4       EQU   4                                                        01-INPUT
+                                 39          OUTPUT R5            INTEGER SP                                00000900
+0000005                          40+R5       EQU   5                                                        01-OUTPU
+                                 42          WORK  R1,R3,R6,R7,F0,F1,F2,F3,F4,F5                            00001000
+0000001                          43+R1       EQU   1                                                        01-WORK
+0000003                          44+R3       EQU   3                                                        01-WORK
+0000006                          45+R6       EQU   6                                                        01-WORK
+0000007                          46+R7       EQU   7                                                        01-WORK
+0000000                          47+F0       EQU   0                                                        01-WORK
+0000001                          48+F1       EQU   1                                                        01-WORK
+0000002                          49+F2       EQU   2                                                        01-WORK
+0000003                          50+F3       EQU   3                                                        01-WORK
+0000004                          51+F4       EQU   4                                                        01-WORK
+0000005                          52+F5       EQU   5                                                        01-WORK
+                                 54 *                                                                       00001100
+                                 55 * ALGORITHM:                                                            00001200
+                                 56 *   I = 1;                                                              00001300
+                                 57 *   IF CURRENT_LENGTH(C1) = 0 THEN                                      00001400
+                                 58 *     RETURN 0;                                                         00001500
+                                 59 *   IF CURRENT_LENGTH(C2) = 0 THEN                                      00001600
+                                 60 *     RETURN 0;                                                         00001700
+                                 61 *   END_OF_COMPARE = NAME(C1) + CURRENT_LENGTH(C1);                     00001800
+                                 62 *   IF CURRENT_LENGTH(C1) < CURRENT_LENGTH(C2) THEN                     00001900
+                                 63 *     RETURN 0;                                                         00002000
+                                 64 *   DO WHILE NAME(C1$(I)) + CURRENT_LENGTH(C2) <= END_OF_COMPARE;       00002100
+                                 65 *     DO FOR J = 1 TO CURRENT_LENGTH(C2);                               00002200
+                                 66 *       IF C1$(I - 1 + J) = C2$(J) THEN                                 00002300
+                                 67 *         REPEAT;                                                       00002400
+                                 68 *       ELSE                                                            00002500
+                                 69 *         GO TO NEWK;                                                   00002600
+                                 70 *     END;                                                              00002700
+                                 71 *     RETURN I;                                                         00002800
+                                 72 *   NEWK:                                                               00002900
+                                 73 *     I = I + 1;                                                        00003000
+                                 74 *   END;                                                                00003100
+                                 75 *                                                                       00003200
+00002 1BE4                       76          LR    R3,R4          PUT C2 PTR INTO R3 FOR ADDRESSABILITY     00003300
+00003 BFE3                0003   77          LFXI  R7,1           PUT A 1 IN R7                             00003400
+00004 2CEB                       78          LFLR  F4,R3          SAVE PTR  TO STRING                       00003500
+00005 2AEA                       79          LFLR  F2,R2          SAVE PTR TO C1 FOR PLACEMARK              00003600
+i00006 2BEA                       80          LFLR  F3,R2          SAVE PTR TO C1                            00003700
+         CINDEX--CHARACTER INDEX FUNCTION                                                                      PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00007 9E02           0000        81          LH    R6,0(R2)       GET DESCRIPTOR OF C1                      00003800
+00008 B6E6 00FF           00FF   82          NHI   R6,X'00FF'     MASK OFF MAXIMUM_LENGTH                   00003900
+0000A DC94           0030 0025   83          BZ    NO             IF CURRENT_LENGTH(C1) = 0 THEN RETURN     00004000
+0000B 9903           0000        84          LH    R1,0(R3)       GET DESCRIPTOR OF C2                      00004100
+0000C B6E1 00FF           00FF   85          NHI   R1,X'00FF'     MASK OFF MAXIMUM_LENGTH                   00004200
+0000E DC84           0030 0021   86          BZ    NO             IF CURRENT_LENGTH(C2) = 0 THEN RETURN     00004300
+0000F 29E9                       87          LFLR  F1,R1          SAVE CURRENT_LENGTH(C2)                   00004400
+00010 02E6                       88          AR    R2,R6          R2 <- NAME(C1) + CURRENT_LENGTH(C1)       00004500
+00011 2DEA                       89          LFLR  F5,R2          F5 <- END_OF_COMPARE                      00004600
+00012 16E1                       90          CR    R6,R1          COMPARE CURRENT_LENGTH(C1) &              00004700
+                                 91 *                             CURRENT_LENGTH(C2)                        00004800
+00013 DA70           0030 001C   92          BL    NO             IF < THEN RETURN                          00004900
+00014 22EB                       93 NEXTC    LFXR  R2,F3          GET C1 PTR BACK                           00005000
+                                 94          ABAL  GTBYTE         GET A CHARACTER OF C1                     00005100
+                                 95+         EXTRN #QGTBYTE                                                 01-ABAL
+00015 E4F7                       96+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00016 3800                       97+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00017 2BEA                       98          LFLR  F3,R2          SAVE INCREMENTED C1 PTR                   00005200
+00018 1EE5                       99          LR    R6,R5          SAVE CHARACTER OF C1                      00005300
+00019 22EC                      100 NEXTK    LFXR  R2,F4          GET C2 PTR BACK                           00005400
+                                101          ABAL  GTBYTE         GET A CHARACTER OF C2                     00005500
+0001A E4F7                      102+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0001B 3800                      103+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0001C 2CEA                      104          LFLR  F4,R2          SAVE INCREMENTED C2 PTR                   00005600
+0001D 16E5                      105          CR    R6,R5          COMPARE C1 CHAR WITH C2 CHAR              00005700
+0001E DB08           0021 0002  106          BNE   NEWK           IF ^= GO TO NEW COMPARE LOOP              00005800
+0001F D933           0014 000C  107          BCTB  R1,NEXTC       ELSE CONTINUE COMPARING CHARS             00005900
+                                108 *                             UP TO CURRENT_LENGTH(C2)                  00006000
+00020 DF40           0031 0010  109          B     OUT            IF GET HERE THEN C1 FOUND IN C2           00006100
+00021 22EA                      110 NEWK     LFXR  R2,F2          GET PLACEMARK                             00006200
+00022 B0E7 0001           0001  111          AHI   R7,1           BUMP I                                    00006300
+                                112          ABAL  GTBYTE         CALL GTBYTE TO UPDATE PLACEMARK           00006400
+00024 E4F7                      113+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00025 3800                      114+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00026 21E9                      115          LFXR  R1,F1          RESET INNER LOOP COUNTER                  00006500
+00027 25ED                      116          LFXR  R5,F5          GET BACK END_OF_COMPARE                   00006600
+00028 02E1                      117          AR    R2,R1          GET PLACEMARK + CURRENT_LENGTH(C2)        00006700
+00029 12E5                      118          CR    R2,R5          COMPARE THIS WITH END_OF_COMPARE          00006800
+0002A D914           0030 0005  119          BH    NO             IF > THEN C2 NO LONGER FITS               00006900
+                                120 *                             IN REMAINDER OF C1                        00007000
+0002B 0AE1                      121          SR    R2,R1          GET BACK PLACEMARK                        00007100
+0002C 2BEA                      122          LFLR  F3,R2          SAVE PLACEMARK                            00007200
+0002D 2AEA                      123          LFLR  F2,R2          SAVE PLACEMARK                            00007300
+0002E 2CEB                      124          LFLR  F4,R3          SAVE PTR TO S2                            00007400
+0002F DF72           0014 001C  125          B     NEXTC                                                    00007500
+00030 0FE7                      126 NO       SR    R7,R7          RETURN ZERO IF NOT FOUND                  00007600
+00031 3718           000C       127 OUT      ST    R7,ARG5                                                  00007700
+                                128          AEXIT                                                          00007800
+                                129+*********RETURN TO CALLER**********************************************
+00032                           130+         DS    0H                                                       01-AEXIT
+00032 97E8                      131+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                132+***********************************************************************
+                                134          ACLOSE                                                         00007900
+00033 C9FB
+00034                           135+         LTORG                                                          02-ERRPA
+                                136+****************ERROR PARAMETER AREA***********************************
+                                137+***  NO ERRORS SENT IN CINDEX                                           02-ERRPA
+                                138+****************END OF ERROR PARAMETER AREA****************************
+                                139+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000016
+  0001     0002     00     00001B
+  0001     0002     00     000025
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21    127
+ARG6         2   00000E    22
+ARG7         2   000010    23
+CINDEX       1 00000000    13     27
+F0           1 00000000    47
+F1           1 00000001    48     87   115
+F2           1 00000002    49     79   110   123
+F3           1 00000003    50     80    93    98   122
+F4           1 00000004    51     78   100   104   124
+F5           1 00000005    52     89   116
+NEWK         1   000021   110    106
+NEXTC        1   000014    93    107   125
+NEXTK        1   000019   100
+NO           1   000030   126     83    86    92   119
+OUT          2   000031   127    109
+R1           1 00000001    43     84    85    87    90   107   115   117   121
+R2           1 00000002    36     79    80    81    81    88    89    93    98   100   104   110   117   118   121   122
+                                 123
+R3           1 00000003    44     76    78    84    84   124
+R4           1 00000004    37     76
+R5           1 00000005    40     99   105   116   118
+R6           1 00000006    45     81    82    88    90    99   105
+R7           1 00000007    46     77   111   126   126   127
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   000032   131
+#QGTBYTE     1 00000000    95     97   103   114
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      84 CARDS FROM SYSIN     402 CARDS FROM SYSLIB
+     196 LINES OUTPUT          10 CARDS OUTPUT

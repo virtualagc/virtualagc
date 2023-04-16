@@ -1,0 +1,116 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VR1DNP    SD 0001 000000 000014
+¤
+         VR1DNP--REMOTE COLUMN VECTOR MOVE,DP                                                                  PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VR1DNP   AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VR1DNP   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+VR1DNP   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * MOVES V1 TO V2 WHERE V1 AND V2 ARE DOUBLE PRECISION VECTORS,          00000400
+                                 33 *   AT LEAST ONE OF WHICH IS REMOTE AND AT LEAST ONE OF WHICH IS        00000500
+                                 34 *   A COLUMN VECTOR WITHIN A MATRIX, BOTH OF WHICH ARE LENGTH N.        00000600
+                                 35 *                                                                       00000700
+                                 36          INPUT R4,            ZCON(VECTOR(N)) DP                       X00000800
+                                                   R5,            INTEGER(N) SP                            X00000900
+                                                   R6,            INTEGER(INDEL) SP                        X00001000
+                                                   R7             INTEGER(OUTDEL) SP                        00001100
+0000004                          37+R4       EQU   4                                                        01-INPUT
+0000005                          38+R5       EQU   5                                                        01-INPUT
+0000006                          39+R6       EQU   6                                                        01-INPUT
+0000007                          40+R7       EQU   7                                                        01-INPUT
+                                 42          OUTPUT R2            ZCON(VECTOR(N)) DP                        00001200
+0000002                          43+R2       EQU   2                                                        01-OUTPU
+                                 45          WORK  F0                                                       00001300
+0000000                          46+F0       EQU   0                                                        01-WORK
+                                 48 *                                                                       00001400
+                                 49 * ALGORITHM:                                                            00001500
+                                 50 *   DO FOR I = 1 TO N;                                                  00001600
+                                 51 *     V1$(I) = V2$(I);                                                  00001700
+                                 52 *   END;                                                                00001800
+                                 53 *                                                                       00001900
+00002 BCE3                0003   54          LFXI  R4,1           SET INDEX REG TO 1                        00002000
+00003 1AE4                       55          LR    R2,R4          SET OTHER INDEX TO 1                      00002100
+00004 F70A                0002   56          SRL   R7,2           CONVERT HALFWORDS TO INDEX                00002200
+00005 1FE7                       57          LR    R7,R7          TEST FOR NO OUTDEL                        00002300
+00006 DB04           0008 0001   58          BNZ   VR1            IF OUTDEL>0 THEN BRANCH                   00002400
+00007 1FE2                       59          LR    R7,R2          ELEMENTS ARE IN A ROW, BUMP INDEX BY 1    00002500
+00008 F60A                0002   60 VR1      SRL   R6,2           CONVERT HALFWORDS TO INDEX                00002600
+00009 1EE6                       61          LR    R6,R6          SET CONDITION CODE                        00002700
+0000A DB04           000C 0001   62          BNZ   VR2            BRANCH IF INDEL>0                         00002800
+0000B 1EE4                       63          LR    R6,R4          ELEMENTS ARE IN A ROW, BUMP INDEX BY 1    00002900
+0000C 78FC 980A      000A        64 VR2      LED@# F0,ARG4(R4)    LOAD NEXT ELEMENT                         00003000
+0000E 38FC 5806      0006        65          STED@# F0,ARG2(R2)   STORE NEXT ELEMENT                        00003100
+00010 02E7                       66          AR    R2,R7          ADVANCE TO NEXT STORAGE ELEMENT           00003200
+00011 04E6                       67          AR    R4,R6          ADVANCE TO NEXT ELEMENT TO BE MOVED       00003300
+00012 DD1F           000C 0007   68          BCTB  R5,VR2                                                   00003400
+                                 69          AEXIT                                                          00003500
+                                 70+*********RETURN TO CALLER**********************************************
+00013                            71+         DS    0H                                                       01-AEXIT
+00013 97E8                       72+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 73+***********************************************************************
+                                 75          ACLOSE                                                         00003600
+00014                            76+         LTORG                                                          02-ERRPA
+                                 77+****************ERROR PARAMETER AREA***********************************
+i                                 78+***  NO ERRORS SENT IN VR1DNP                                           02-ERRPA
+         VR1DNP--REMOTE COLUMN VECTOR MOVE,DP                                                                  PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 79+****************END OF ERROR PARAMETER AREA****************************
+                                 80+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    18     65
+ARG4         2   00000A    20     64
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+F0           1 00000000    46     64    65
+R2           1 00000002    43     55    59    65    66
+R4           1 00000004    37     54    55    63    64    67
+R5           1 00000005    38     68
+R6           1 00000006    39     60    61    61    63    67
+R7           1 00000007    40     56    57    57    59    66
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+VR1          1   000008    60     58
+VR1DNP       1 00000000    13     27
+VR2          2   00000C    64     62    68
+$RET1        1   000013    72
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      41 CARDS FROM SYSIN     344 CARDS FROM SYSLIB
+     116 LINES OUTPUT           7 CARDS OUTPUT

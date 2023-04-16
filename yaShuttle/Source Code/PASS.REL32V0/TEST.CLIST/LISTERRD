@@ -1,0 +1,73 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     LISTERRD                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: DRIVER CLIST TO LISTXPDS TO EXTRACT ERROR MESSAGES   */
+00090000/*             FROM A PDS. (INCLUDING XS3 ERRORS)                   */
+00100000/*------------------------------------------------------------------*/
+00157000/*                                                                  */
+00158000/*   PARAMETERS:                                                    */
+00159000/*                                                                  */
+00160000/*     CAT      REQUIRED                                            */
+00170000/*              NAME OF THE TEST CATEGORY                           */
+00180000/*                                                                  */
+00181000/*     SUITE    DEFAUIT: &REL..&CAT.                                */
+00182000/*              NAME OF THE PDS CONTAINS THE TEST CASES             */
+00183000/*                                                                  */
+00190000/*     INID     DEFAULT: NCAMTST                                    */
+00200000/*              HLQ OF INLIB                                        */
+00210000/*                                                                  */
+00211000/*     ID       DEFAULT: NCAMTST                                    */
+00212000/*              HLQ OF DEVELOPERS ACCOUNT                           */
+00213000/*                                                                  */
+00220000/*     INLIB    DEFAULT: &INID..&SUITE..LST                         */
+00230000/*              NAME OF PDS CONTAINING TESTCASES (W/ HLQ)           */
+00240000/*                                                                  */
+00250000/*     OUT      DEFAULT: &ID..&SUITE..LISTXPDS                      */
+00260000/*              OUTPUT OF PROGRAM (W/ HLQ)                          */
+00270000/*                                                                  */
+00280001/*     REL      DEFAULT: R30V0                                      */
+00290000/*              DSN LEVEL                                           */
+00300000/*                                                                  */
+00310000/*     LIST     DEFAULT: NULL                                       */
+00320000/*              SPECIFIES MEMBERLIST                                */
+00330000/*                                                                  */
+00340000/*     TRACE    OPTIONAL                                            */
+00350000/*              TURN TRACE ON OR OFF                                */
+00360000/*                                                                  */
+00370000/*------------------------------------------------------------------*/
+00670000/*                                                                  */
+00680000/*   REVISION HISTORY:                                              */
+00690000/*                                                                  */
+00700000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00710000/*  --------  ---  ---   -----------------------------------------  */
+00720005/*  09/10/02  730  LWW   BASELINED COMPILER TEST CLIST              */
+00750000/*------------------------------------------------------------------*/
+00760000/********************************************************************/
+00760100
+00770000PROC 1 CAT                        +
+00780000       INID(NCAMTST)              +
+00790005       REL(R32V0)                 +
+00791000       SUITE(&REL..&CAT.)         +
+00792000       ID(NCAMTST)                +
+00793000       INLIB(&INID..&SUITE..LST)  +
+00794000       OUT(&ID..&SUITE..LISTXPDS) +
+00796000       LIST()                     +
+00797000       TRACE
+00798000
+00799000GLOBAL RETCODE
+00800000IF  &TRACE.  NE THEN       +
+00810000    CONTROL  LIST CONLIST
+00820000IF  &LIST. NE THEN SET &LIST = LIST(&LIST.)
+00821000    ELSE SET  &LIST =
+00824000
+00830000LISTXPDS &CAT.                     +
+00860000         ID(&ID.)                  +
+00870000         SUITE(&SUITE.)            +
+00880000         INLIB(&INLIB.)            +
+00890000         OUT(&OUT.)                +
+00900000         &LIST.                    +
+00910000         &TRACE.

@@ -1,0 +1,68 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     TESTOP#D                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: DRIVER CLIST TO EXECUTE A COMMAND TO RUN FUNCTIONAL  */
+00081000/*             TESTS WITH SPECIAL COMPILATION OPTIONS (ESPECIALLY   */
+00082000/*             USING CARD TYPE TO EXCLUDED DATA_REMOTE RESTRICTED   */
+00082100/*             FEATURES OR SOURCE STATEMENTS). IT MAY ALSO USE      */
+00082200/*             SPECIFIC TEMPORARY ERRORLIB WITH ERROR MESSAGES      */
+00083000/*             DOWNGRADED TO SEVERITY 0 OR 1.                       */
+00084000/*             THIS CLIST IS DERIVED FROM TESTOPT AND USED FOR      */
+00084100/*             DATA_REMOTE TESTING ONLY.                            */
+00084300/*                                                                  */
+00085002/*             EX: TESTOP#D T31V0#D                                 */
+00086000/*                                                                  */
+00087000/*     REQUIRED - 'COMMAND'                                         */
+00088000/*------------------------------------------------------------------*/
+00089000/*                                                                  */
+00090000/*   REVISION HISTORY:                                              */
+00091000/*                                                                  */
+00092000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00093000/*  --------  ---  ---   -------------------------------------------*/
+00094005/*  09/10/02  730  LWW   BASELINED COMPILER TEST CLIST              */
+00095000/*------------------------------------------------------------------*/
+00096000/********************************************************************/
+00097000
+00098000PROC 1 COMMAND             +
+00100000       HO                  +
+00110000       TERRORLIB(NCAMCM.TESTLIB.DOWNGRAD.TERRLIB)
+00120000
+00130000GLOBAL RETCODE
+00140000/*
+00150000/* TEST CASES NEED SPECIAL COMPILATION OPTIONS
+00160000/* OR A TERRORLIB TO DOWNGRADE CERTAIN ERRORS
+00170000/*
+00550000
+00570000 &COMMAND UNIT29VA &HO CT(WMZCTCBCPDUMVM)            +
+00580000          LIST(NCAMCM.TESTLIB.UNIT29VA.MLIST3)
+00582000
+00583000 &COMMAND UNIT29VA &HO CT(WMZMTCBCPDUCVM)            +
+00584000          LIST(NCAMCM.TESTLIB.UNIT29VA.MLIST4)
+00870003
+00880003 &COMMAND UNIT30V0 +
+00890004          LIST(NCAMCM.TESTLIB.UNIT30V0.MLIST)       +
+00900003          TERRORLIB(NCAMCM.TESTLIB.FN105.TERRLIB)    +
+00910003          CT(PDWMBCZC)
+00920003
+00930003 &COMMAND EXP30V0 +
+00940004          LIST(NCAMCM.TESTLIB.EXP30V0.MLIST1)       +
+00950003          TERRORLIB(NCAMCM.TESTLIB.FN105.TERRLIB)    +
+00960003          CT(PDWMBCZC)
+00970003
+00980003 &COMMAND UNIT30VA +
+00990004          LIST(NCAMCM.TESTLIB.UNIT30VA.MLIST2)      +
+01000004          TERRORLIB(NCAMCM.TESTLIB.TERRLIB2)        +
+01010003          CT(PDWMBCZCTM)
+01020003
+01030003 &COMMAND EXP30VA +
+01040004          LIST(NCAMCM.TESTLIB.EXP30VA.MLIST2)       +
+01050004          TERRORLIB(NCAMCM.TESTLIB.TERRLIB2)        +
+01060003          CT(WMZCTMBCPDUMVM)
+01070003
+01080003 &COMMAND EXP30VA +
+01090004          LIST(NCAMCM.TESTLIB.EXP30VA.MLIST5)       +
+01100004          TERRORLIB(NCAMCM.TESTLIB.TERRLIB2)

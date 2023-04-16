@@ -1,0 +1,54 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     COMP4                                                */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: DRIVER CLIST TO COMPALLD TO COMPARE THE GROUP 4      */
+00090000/*             FUNCTIONAL TEST RESULTS FOR PASS OR BFS COMPILERS    */
+00091000/*                                                                  */
+00091100/*------------------------------------------------------------------*/
+00091200/*                                                                  */
+00091300/*   REVISION HISTORY:                                              */
+00091400/*                                                                  */
+00091500/*  DATE      PCR  NAME  DESCRIPTION                                */
+00091600/*  --------  ---  ---   -----------------------------------------  */
+00091711/*  09/10/02  730  LWW   BASELINED FOR COMPILER TEST CLIST          */
+00091800/*------------------------------------------------------------------*/
+00091900/********************************************************************/
+00092000
+00093011PROC 0 REL(R32V0)          +
+00094011       OLDREL(R31V01)      +
+00094100       SYSTEM(PASS)        +
+00095000       REFRESH
+00097000
+00098000GLOBAL RETCODE
+00110000
+00120000IF &SYSTEM = BFS THEN DO
+00130000   COMPALLD ERROR.BFS   REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00140000   COMPALLD UNITB8V0    REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00150000END
+00151002
+00152003COMPALLD MV     REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00153003COMPALLD NAME   REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00160000
+00172004COMPALLD RTL.CHAR    REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00173004COMPALLD RTL.REMOTE  REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00180004
+00440400COMPALLD RTL.ERROR.ALG    REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00440500COMPALLD RTL.ERROR.ARITH  REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00440600COMPALLD RTL.ERROR.ARRAY  REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00440700COMPALLD RTL.ERROR.CHAR   REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00440800COMPALLD RTL.ERROR.VECMAT REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00440900
+00441000COMPALLD ERROR.BIT    REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00442000COMPALLD ERROR.BLTIN  REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00443000COMPALLD ERROR.CHAR   REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00444000COMPALLD ERROR.DECL   REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00445000COMPALLD ERROR.FLOW   REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00446000COMPALLD ERROR.IS     REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00447000COMPALLD ERROR.MACRO  REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00448000COMPALLD ERROR.MV     REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00449000COMPALLD ERROR.NAME   REL(&REL.) OLDREL(&OLDREL.) &REFRESH.
+00450000COMPALLD ERROR.PROC   REL(&REL.) OLDREL(&OLDREL.) &REFRESH.

@@ -1,0 +1,225 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VV10S3    SD 0001 000000 00002E
+VV10SN    LD      000005        0001
+VV9SN     LD      000017        0001
+#QSQRT    ER 0002
+#QVV0SN   ER 0003
+#LVV10S3  SD 0004 00002E 000002
+¤
+         VV10S3--UNIT VECTOR, LENGTH 3 OR N, SP                                                                PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 TARG5    DS    F                                                        00000400
+                                 10 R6SAVE   DS    F                                                        00000500
+                                 11 R1SAVE   DS    F                                                        00000600
+                                 12          MEND                                                           00000700
+                                 13 VV10S3   AMAIN                                                          00000800
+                                 14+***********************************************************************
+                                 15+*
+                                 16+*        PRIMARY ENTRY POINT
+                                 17+*
+                                 18+***********************************************************************
+00000                            19+VV10S3   CSECT                                                          01-AMAIN
+00000                            20+STACK    DSECT                                                          01-AMAIN
+                                 21+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            22+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            23+         DS    2F             R0,R1                                     01-AMAIN
+00006                            24+ARG2     DS    F              R2                                        01-AMAIN
+00008                            25+         DS    F              R3                                        01-AMAIN
+0000A                            26+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            27+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            28+ARG6     DS    F              R6                                        01-AMAIN
+00010                            29+ARG7     DS    F              R7                                        01-AMAIN
+                                 30+*        END OF STANDARD STACK AREA
+00012                            31+TARG5    DS    F                                                        02-00009
+00014                            32+R6SAVE   DS    F                                                        02-00010
+00016                            33+R1SAVE   DS    F                                                        02-00011
+00018                            34+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            35+VV10S3   CSECT                                                          01-AMAIN
+0000000                          36+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   37+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 39 *                                                                       00000900
+                                 40 * FINDS THE UNIT VECTOR OF V1 WHERE V1 IS A DOUBLE PRECISION            00001000
+                                 41 *   3 VECTOR.                                                           00001100
+                                 42 *                                                                       00001200
+                                 43          INPUT R4             VECTOR(3) SP                              00001300
+0000004                          44+R4       EQU   4                                                        01-INPUT
+                                 46          OUTPUT R2            VECTOR(3) SP                              00001400
+0000002                          47+R2       EQU   2                                                        01-OUTPU
+                                 49          WORK  R1,R5,R6,F0,F2,F4                                        00001500
+0000001                          50+R1       EQU   1                                                        01-WORK
+0000005                          51+R5       EQU   5                                                        01-WORK
+0000006                          52+R6       EQU   6                                                        01-WORK
+0000000                          53+F0       EQU   0                                                        01-WORK
+0000002                          54+F2       EQU   2                                                        01-WORK
+0000004                          55+F4       EQU   4                                                        01-WORK
+                                 57 *                                                                       00001600
+                                 58 * ALGORITHM:                                                            00001700
+                                 59 *   SEE ALGORITHM DESCRIPTION IN VV10D3                                 00001800
+                                 60 *                                                                       00001900
+00002 EDF3 0003      0003        61          LA    R5,3                                                     00002000
+00004 DF08           0007 0002   62          B     UNIT                                                     00002100
+                                 63 VV10SN   AENTRY                                                         00002200
+                                 64+***********************************************************************
+                                 65+*
+                                 66+*        SECONDARY ENTRY POINT
+                                 67+*
+                                 68+***********************************************************************
+00005                            69+VV10SN   DS    0H                                                       01-AENTR
+                                 70+         ENTRY VV10SN                                                   01-AENTR
+00005 B624 0000      0009 0000   71+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 73 *                                                                       00002300
+                                 74 * FINDS THE UNIT VECTOR OF V1 WHERE V1 IS A DOUBLE PRECISION            00002400
+                                 75 *   VECTOR OF LENGTH N WHERE N IS NOT EQUAL TO 3.                       00002500
+                                 76 *                                                                       00002600
+                                 77          INPUT R4,            VECTOR(N) SP                             X00002700
+                                                   R5             INTEGER(N) SP                             00002800
+i                                 79          OUTPUT R2            VECTOR(N) SP                              00002900
+         VV10S3--UNIT VECTOR, LENGTH 3 OR N, SP                                                                PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                 81          WORK  R1,R6,F0,F2,F4                                           00003000
+                                 83 *                                                                       00003100
+                                 84 * ALGORITHM:                                                            00003200
+                                 85 *   SEE ALGORITHM DESCRIPTION IN VV10DN                                 00003300
+                                 86 *                                                                       00003400
+00007 19E2                       87 UNIT     LR    R1,R2          MOVE OUTPUT BASE TO R4 FOR                00003500
+                                 88 *                             ADDRESSABILITY PURPOSES                   00003600
+00008 1AE4                       89          LR    R2,R4                 "          "                       00003700
+00009 3524           0012        90          ST    R5,TARG5       SAVE FOR AFTER SQRT                       00003800
+0000A E6F7 000F      001B 000F   91          BAL   R6,MAG         FIND MAGNITUDE OF V1                      00003900
+0000C 1D24           0012        92          L     R5,TARG5       RESET COUNT                               00004000
+0000D 78E0                       93          LER   F0,F0          SET CONDITION CODE                        00004100
+0000E DC64           0028 0019   94          BZ    AOUT           IF MAGNITUDE = 0 THEN SEND ERROR AND      00004200
+                                 95 *                             PERFORM FIXUP                             00004300
+0000F 9A28           000A        96          LH    R2,ARG4        RESET INPUT BASE                          00004400
+00010 7AF6 A000      0000        97 ULOOP    LE    F2,0(R5,R2)    GET ELEMENT FROM INPUT                    00004500
+00012 6AE0                       98          DER   F2,F0          DIVIDE ELEMENT BY MAGNITUDE               00004600
+00013 3AF5 A000      0000        99          STE   F2,0(R5,R1)    STORE INTO RESULTS                        00004700
+00015 DD1B           0010 0006  100          BCTB  R5,ULOOP                                                 00004800
+00016 DF58           002D 0016  101          B     OUT                                                      00004900
+                                102 VV9SN    AENTRY                                                         00005000
+                                103+***********************************************************************
+                                104+*
+                                105+*        SECONDARY ENTRY POINT
+                                106+*
+                                107+***********************************************************************
+00017                           108+VV9SN    DS    0H                                                       01-AENTR
+                                109+         ENTRY VV9SN                                                    01-AENTR
+00017 B624 0000      0009 0000  110+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                112 *                                                                       00005100
+                                113 * RETURNS THE MAGNITUDE OF V1 WHERE V1 IS A SINGLE PRECISION            00005200
+                                114 *   VECTOR OF LENGTH N WHERE N IS NOT EQUAL TO 3.                       00005300
+                                115 *                                                                       00005400
+                                116          INPUT R2,            VECTOR(N) SP                             X00005500
+                                                   R5             INTEGER(N) SP                             00005600
+                                118          OUTPUT F0            SCALAR SP                                 00005700
+                                120          WORK  R6,F0,F2,F4                                              00005800
+                                122 *                                                                       00005900
+                                123 * ALGORITHM:                                                            00006000
+                                124 *   SEE ALGORITHM DESCRIPTION IN VV9DN                                  00006100
+                                125 *                                                                       00006200
+00019 EEF7 0012      002D 0012  126 RMAG     LA    R6,OUT         IF ABVAL CALLED FROM HIGHER LEVEL         00006300
+                                127 *                             THEN LOAD ADDRESS OF RETURN SEQUENCE      00006400
+0001B 58E8                      128 MAG      SEDR  F0,F0          CLEAR F0                                  00006500
+0001C 7AF6 A000      0000       129 LOOP     LE    F2,0(R5,R2)    GET ELEMENT FROM VECTOR                   00006600
+0001E 62E2                      130          MER   F2,F2          SQUARE IT                                 00006700
+0001F 50EA                      131          AEDR  F0,F2          ADD INTO ACCUMULATOR                      00006800
+00020 DD17           001C 0005  132          BCTB  R5,LOOP                                                  00006900
+00021 3628           0014       133          ST    R6,R6SAVE      SAVE R6 FOR AFTER SQRT                    00007000
+00022 312C           0016       134          ST    R1,R1SAVE      SAVE R1 FOR AFTER SQRT                    00007100
+                                135          ABAL  SQRT           GET SQRT OF ACCUMULATOR                   00007200
+                                136+         EXTRN #QSQRT                                                   01-ABAL
+00023 E4F7                      137+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00024 3800                      138+         DC  Y(#QSQRT+X'3800')                                         X01-ABAL
+                                   +                              THROUGH QCON
+00025 1E28           0014       139          L     R6,R6SAVE      GET RETURN ADDRESS BACK                   00007300
+00026 192C           0016       140          L     R1,R1SAVE      GET POSSIBLE R1 VECTOR BACK               00007400
+00027 C7E6                      141          BR    R6             BRANCH TO EITHER RETURN SEQUENCE          00007500
+                                142 *                             OR BACK TO UNIT                           00007600
+                                143 AOUT     AERROR    28         VECTOR/MATRIX DIVIDE BY 0                 00007700
+                                144+*********ISSUE SEND ERROR SVC******************************************
+00028 C9FB 002E      002E       145+AOUT     SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                146+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0002A 58E0                      147          SER   F0,F0          CLEAR F0                                  00007800
+                                148          ABAL  VV0SN          SET RESULT TO 0 VECTOR                    00007900
+                                149+         EXTRN #QVV0SN                                                  01-ABAL
+0002B E4F7                      150+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0002C 3800                      151+         DC  Y(#QVV0SN+X'3800')                                        X01-ABAL
+                                   +                              THROUGH QCON
+                                152 OUT      AEXIT                                                          00008000
+                                153+*********RETURN TO CALLER**********************************************
+0002D                           154+OUT      DS    0H                                                       01-AEXIT
+0002D 97E8                      155+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+i                                156+***********************************************************************
+         VV10S3--UNIT VECTOR, LENGTH 3 OR N, SP                                                                PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                158          ACLOSE                                                         00008100
+0002E                           159+         LTORG                                                          02-ERRPA
+                                160+****************ERROR PARAMETER AREA***********************************
+0002E                           161+#LVV10S3 CSECT                                                          02-ERRPA
+                                162+***  VV10S3 SENDS THE FOLLOWING ERROR                                   02-ERRPA
+                                164+***  ERROR NUMBER 28 IN GROUP 4                                         02-ERRPA
+0002E 0014                      166+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0002F 041C                      167+         DC    Y(4*256+28)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                168+****************END OF ERROR PARAMETER AREA****************************
+                                169+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.40 07/22/05
+  0001     0002     00     000024
+  0001     0003     00     00002C
+  0001     0004     00     000029
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+AERROR1      1   00002E   166    145
+AOUT         2   000028   145     94
+ARG2         2   000006    24
+ARG4         2   00000A    26     96
+ARG5         2   00000C    27
+ARG6         2   00000E    28
+ARG7         2   000010    29
+F0           1 00000000    53     93    93    98   128   128   131   147   147
+F2           1 00000002    54     97    98    99   129   130   130   131
+F4           1 00000004    55
+LOOP         2   00001C   129    132
+MAG          1   00001B   128     91
+OUT          1   00002D   154    101   126
+R1           1 00000001    50     87    99   134   140
+R1SAVE       2   000016    33    134   140
+R2           1 00000002    47     87    89    96    97   129
+R4           1 00000004    44     89
+R5           1 00000005    51     61    90    92    97    97    99    99   100   129   129   132
+R6           1 00000006    52     91   126   133   139   141
+R6SAVE       2   000014    32    133   139
+RMAG         2   000019   126
+STACK        1 00000000    20     36
+STACKEND     2   000018    34
+TARG5        2   000012    31     90    92
+ULOOP        2   000010    97    100
+UNIT         1   000007    87     62
+VV10S3       1 00000000    19     35
+VV10SN       1   000005    69     70
+VV9SN        1   000017   108    109
+$RET1        1   00002D   155
+#LVV10S3     1 0000002E   161
+#QSQRT       1 00000000   136    138
+#QVV0SN      1 00000000   149    151
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      86 CARDS FROM SYSIN     484 CARDS FROM SYSLIB
+     225 LINES OUTPUT          14 CARDS OUTPUT

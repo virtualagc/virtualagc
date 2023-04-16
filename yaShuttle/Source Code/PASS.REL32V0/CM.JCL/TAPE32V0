@@ -1,0 +1,66 @@
+//NCAMCMAK JOB  (DEVIFC3T,INTERMET,REL32V0),'COMPILER',NOTIFY=NCAMCMA,  00001004
+//  USER=NCAMCMA,PASSWORD=????????,MSGCLASS=X,TIME=2,REGION=256K        00002000
+//*MAIN CLASS=TAPE                                                      00003000
+//*                                                                     00004000
+//*  THIS JOB USES DFDSS TO DUMP A DASD VOLUME TO TAPE                  00005000
+//*  MORE INFORMATION CAN BE FOUND FOR THIS                             00006000
+//*  JOB IN THE DFDSS USER'S GUIDE AND                                  00007000
+//*  REFERENCE #SC26-3949.                                              00008000
+//*                                                                     00009000
+//*    CHANGE:  'TDTDTD' TO THE OUTPUT TAPE DSN YOU PLAN TO USE         00009100
+//*                   EG. NCAMCMA.DUMP.VOLSER                           00009200
+//*                                                                     00009300
+//*             'COPYDATASET' TO THE DATASETS TO BE COPIED              00009400
+//*                                                                     00009500
+//DUMP1    EXEC PGM=ADRDSSU,REGION=4096K                                00009600
+//DMPTAPE  DD   DSN=NCAMCM.PASS.REL32V0.COMPILER,                       00009704
+//         DISP=(,KEEP),                                                00009800
+//         UNIT=3480,                                                   00009902
+//         LABEL=(,SL,RETPD=30)                                         00010000
+//SYSPRINT DD   SYSOUT=*                                                00020000
+      DUMP OUTDDNAME(DMPTAPE) -                                         00030000
+    DATASET(INCLUDE( -                                                  00040000
+                       NCAMCM.PASS.REL32V0.COMPILER,  -                 00050004
+                       NCAMCM.PASS.REL32V0.ERRORLIB,  -                 00050104
+                       NCAMCM.PASS.REL32V0.MONITOR.LOAD, -              00051004
+                       NCAMCM.PASS.REL32V0.RUNOBJ, -                    00052004
+                       NCAMCM.PASS.REL32V0.RUNLIB, -                    00053004
+                       NCAMCM.PASS.REL32V0.RUNLST, -                    00054004
+                       NCAMCM.PASS.REL32V0.PASS4.OBJ, -                 00055004
+                       NCAMCM.PASS.REL32V0.SDFPKGC.OBJ, -               00055104
+                       NCAMCM.PASS.REL32V0.ZCONOBJ, -                   00056004
+                       NCAMCM.PASS.REL32V0.AUX.PROCS, -                 00057004
+                       NCAMCM.PASS.REL32V0.FLO.PROCS, -                 00058004
+                       NCAMCM.PASS.REL32V0.OPT.PROCS, -                 00059004
+                       NCAMCM.PASS.REL32V0.PASS1.PROCS, -               00059104
+                       NCAMCM.PASS.REL32V0.PASS2.PROCS, -               00059204
+                       NCAMCM.PASS.REL32V0.PASS3.PROCS, -               00059304
+                       NCAMCM.PASS.REL32V0.PASS4.PROCS, -               00059404
+                       NCAMCM.PASS.REL32V0.HALINCL, -                   00059504
+                       NCAMCM.PASS.REL32V0.MONITOR.ASM, -               00059604
+                       NCAMCM.PASS.REL32V0.RUNASM, -                    00059704
+                       NCAMCM.PASS.REL32V0.RUNMAC, -                    00059904
+                       NCAMCM.PASS.REL32V0.SDFPKG.ASM, -                00060104
+                       NCAMCM.PASS.REL32V0.SDFPKGC, -                   00060204
+                       NCAMCM.PASS.REL32V0.SDFPKGC.H, -                 00060304
+                       NCAMCM.PASS.REL32V0.ZCONASM, -                   00060404
+                       NCAMCM.PASS.REL32V0.DIAGNSTC.MACLIB, -           00060504
+                       NCAMCM.PASS.REL32V0.BUILD.CLIST, -               00060604
+                       NCAMCM.PASS.REL32V0.CM.CLIST, -                  00060804
+                       NCAMCM.PASS.REL32V0.CM.JCL, -                    00060904
+                       NCAMCM.PASS.REL32V0.TEST.CLIST, -                00061004
+                       NCAMCM.TOOLS.PASS.SIMASM, -                      00061100
+                       NCAMCM.TOOLS.PASS.SIMLIB, -                      00061200
+                       NCAMCM.HAL.HALS.RUNMAC, -                        00061300
+                       NCAMCM.XPL.REL90V2.XCOMLINK, -                   00061400
+                       NCAMCM.APES.REL3V2.PLILOAD, -                    00061500
+                       NCAMCM.TOOLS.SYSTEM.CLIST, -                     00061600
+                       NCAMCM.TOOLS.COMPILER.CLIST, -                   00061700
+                       NCAMCM.TOOLS.MISCLOAD, -                         00061800
+                       NCAMCM.TOOLS.XPLOBJ, -                           00061900
+                       NCAMCM.XPL.MACROS.ASM, -                         00062100
+                       NCAMCM.XPL.TOOLS.HALS.MONITOR, -                 00062200
+                       NCAMCM.XPL.TOOLS.MONITOR -                       00062300
+                     )) -                                               00062400
+          ALLEXCP OPT(1) CANCELERROR TOLERATE(ENQFAILURE)               00062500
+//*                                                                     00062600

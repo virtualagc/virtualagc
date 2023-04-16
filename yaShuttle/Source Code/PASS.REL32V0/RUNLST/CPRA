@@ -1,0 +1,144 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CPRA      SD 0001 000000 000016
+#QCPR     ER 0002
+¤
+         CPRA--COMPARE ARRAYS OF CHARACTER STRINGS                                                             PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 TARG2    DS    F                                                        00000400
+                                 10 TARG4    DS    F                                                        00000500
+                                 11          MEND                                                           00000600
+                                 12 CPRA     AMAIN                                                          00000700
+                                 13+***********************************************************************
+                                 14+*
+                                 15+*        PRIMARY ENTRY POINT
+                                 16+*
+                                 17+***********************************************************************
+00000                            18+CPRA     CSECT                                                          01-AMAIN
+00000                            19+STACK    DSECT                                                          01-AMAIN
+                                 20+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            21+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            22+         DS    2F             R0,R1                                     01-AMAIN
+00006                            23+ARG2     DS    F              R2                                        01-AMAIN
+00008                            24+         DS    F              R3                                        01-AMAIN
+0000A                            25+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            26+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            27+ARG6     DS    F              R6                                        01-AMAIN
+00010                            28+ARG7     DS    F              R7                                        01-AMAIN
+                                 29+*        END OF STANDARD STACK AREA
+00012                            30+TARG2    DS    F                                                        02-00009
+00014                            31+TARG4    DS    F                                                        02-00010
+00016                            32+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            33+CPRA     CSECT                                                          01-AMAIN
+0000000                          34+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   35+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 37 *                                                                       00000800
+                                 38 * COMPARE C1 AND C2 WHERE C1 AND C2 ARE LENGTH N ARRAYS OF              00000900
+                                 39 *   MAXIMUM LENGTH M CHARACTER STRINGS.                                 00001000
+                                 40 *                                                                       00001100
+                                 41          INPUT R2,            ARRAY(N) CHARACTER(M) C1                 X00001200
+                                                   R4,            ARRAY(N) CHARACTER(M) C2                 X00001300
+                                                   R6,            INTEGER(FLOOR((M+1)/2)+1) SP             X00001400
+                                                   R7             INTEGER(N)                                00001500
+0000002                          42+R2       EQU   2                                                        01-INPUT
+0000004                          43+R4       EQU   4                                                        01-INPUT
+0000006                          44+R6       EQU   6                                                        01-INPUT
+0000007                          45+R7       EQU   7                                                        01-INPUT
+                                 47          OUTPUT CC                                                      00001600
+                                 49          WORK  R3,R5                                                    00001700
+0000003                          50+R3       EQU   3                                                        01-WORK
+0000005                          51+R5       EQU   5                                                        01-WORK
+                                 53 *                                                                       00001800
+                                 54 * ALGORITHM:                                                            00001900
+                                 55 *   DO FOR I = 1 TO N;                                                  00002000
+                                 56 *     IF C1$(I:) = C2$(I:) THEN                                         00002100
+                                 57 *       ;                                                               00002200
+                                 58 *     ELSE                                                              00002300
+                                 59 *       RETURN CC;                                                      00002400
+                                 60 *   END;                                                                00002500
+                                 61 *   RETURN CC;                                                          00002600
+                                 62 *                                                                       00002700
+00002 3224           0012        63          ST    R2,TARG2       SAVE R2 IN TARG2                          00002800
+00003 3428           0014        64          ST    R4,TARG4       SAVE R4 IN TARG4                          00002900
+00004 1BE4                       65          LR    R3,R4                                                    00003000
+                                 66 CPRL     ABAL  CPR            CHARACTER COMPARE CALL FOR EACH ITEM      00003100
+                                 67+         EXTRN #QCPR                                                    01-ABAL
+00005 E4F7                       68+CPRL     DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00006 3800                       69+         DC  Y(#QCPR+X'3800') THROUGH QCON                              01-ABAL
+00007 DB28           0012 000A   70          BNE   CPRANEQ        NOT EQUAL, EXIT                           00003200
+00008 9A48           0012        71          LH    R2,TARG2       1ST ARGUMENT                              00003300
+00009 8238           000E        72          AH    R2,ARG6        ADVANCE TO NEXT CHARACTER STRING IN ARRAY 00003400
+0000A BA48           0012        73          STH   R2,TARG2       AND BE READY FOR NEXT                     00003500
+0000B 9B50           0014        74          LH    R3,TARG4       2ND ARGUMENT                              00003600
+0000C 8338           000E        75          AH    R3,ARG6        GETS THE SAME TREATMENT                   00003700
+0000D BB50           0014        76          STH   R3,TARG4                                                 00003800
+                                 77 *                             ***                                       00003900
+i0000E DF2B           0005 000A   78          BCT   R7,CPRL        *** WARNING.  ASSUMES R7 SAFE OVER CPR    00004000
+         CPRA--COMPARE ARRAYS OF CHARACTER STRINGS                                                             PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 79 *                             ***                                       00004100
+                                 80          AEXIT CC=EQ                                                    00004200
+                                 81+*********RETURN TO CALLER**********************************************
+0000F                            82+         DS    0H                                                       01-AEXIT
+0000F B104 C000      0001 C000   83+         ZB    1(0),X'C000'   SET PSW CC TO 00 (EQ)                     01-AEXIT
+00011 97E8                       84+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 85+***********************************************************************
+                                 87 CPRANEQ  AEXIT CC=NE                                                    00004300
+                                 88+*********RETURN TO CALLER**********************************************
+00012                            89+CPRANEQ  DS    0H                                                       01-AEXIT
+00012 B204 C000      0001 C000   90+         SB    1(0),X'C000'   SET PSW CC TO 11 (LT (NE))                01-AEXIT
+00014 97E8                       91+$RET2    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 92+***********************************************************************
+                                 94          ACLOSE                                                         00004400
+00015 C9FB
+00016                            95+         LTORG                                                          02-ERRPA
+                                 96+****************ERROR PARAMETER AREA***********************************
+                                 97+***  NO ERRORS SENT IN CPRA                                             02-ERRPA
+                                 98+****************END OF ERROR PARAMETER AREA****************************
+                                 99+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000006
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    23
+ARG4         2   00000A    25
+ARG5         2   00000C    26
+ARG6         2   00000E    27     72    75
+ARG7         2   000010    28
+CPRA         1 00000000    18     33
+CPRANEQ      1   000012    89     70
+CPRL         1   000005    68     78
+R2           1 00000002    42     63    71    72    73
+R3           1 00000003    50     65    74    75    76
+R4           1 00000004    43     64    65
+R5           1 00000005    51
+R6           1 00000006    44
+R7           1 00000007    45     78
+STACK        1 00000000    19     34
+STACKEND     2   000016    32
+TARG2        2   000012    30     63    71    73
+TARG4        2   000014    31     64    74    76
+$RET1        1   000011    84
+$RET2        1   000014    91
+#QCPR        1 00000000    67     69
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      49 CARDS FROM SYSIN     396 CARDS FROM SYSLIB
+     144 LINES OUTPUT           9 CARDS OUTPUT

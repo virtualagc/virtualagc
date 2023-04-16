@@ -1,0 +1,286 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CTOX      SD 0001 000000 00003C
+GTBYTE    ER 0002
+#QGTBYTE  ER 0003
+CTOO      LD      00001F        0001
+#LCTOX    SD 0004 00003C 000004
+¤
+         CTOX--CHARACTER TO OCTAL AND HEX CONVERSION                                                           PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 CTOX     AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+CTOX     CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+CTOX     CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * CONVERT A CHARACTER STRING, C1, TO A BIT STRING WHERE C1 CONTAINS     00000400
+                                 33 *   HEXADECIMAL CHARACTERS.                                             00000500
+                                 34 *                                                                       00000600
+                                 35          INPUT R2             CHARACTER(C1)                             00000700
+0000002                          36+R2       EQU   2                                                        01-INPUT
+                                 38          OUTPUT R5            BIT(32)                                   00000800
+0000005                          39+R5       EQU   5                                                        01-OUTPU
+                                 41          WORK  R1,R3,R4,R6,R7,F0                                        00000900
+0000001                          42+R1       EQU   1                                                        01-WORK
+0000003                          43+R3       EQU   3                                                        01-WORK
+0000004                          44+R4       EQU   4                                                        01-WORK
+0000006                          45+R6       EQU   6                                                        01-WORK
+0000007                          46+R7       EQU   7                                                        01-WORK
+0000000                          47+F0       EQU   0                                                        01-WORK
+                                 49 *                                                                       00001000
+                                 50 * ALGORITHM:                                                            00001100
+                                 51 *   RADIX = 4;                                                          00001200
+                                 52 *   IF LENGTH(C1) = 0 THEN                                              00001300
+                                 53 *     DO;                                                               00001400
+                                 54 *       SEND ERROR$(4:32);                                              00001500
+                                 55 *       RETURN HEX(8)'0';                                               00001600
+                                 56 *     END;                                                              00001700
+                                 57 *   TEMP = 0;                                                           00001800
+                                 58 *   DO FOR I = 1 TO LENGTH(C1);                                         00001900
+                                 59 *     CURR_CHAR = GTBYTE;                                               00002000
+                                 60 *     IF CURR_CHAR > 'F' THEN                                           00002100
+                                 61 *       DO;                                                             00002200
+                                 62 *         SEND ERROR$(4:32);                                            00002300
+                                 63 *         RETURN HEX(8)'0';                                             00002400
+                                 64 *       END;                                                            00002500
+                                 65 *     IF CURR_CHAR < 'A' THEN                                           00002600
+                                 66 *       DO;                                                             00002700
+                                 67 *         IF CURR_CHAR > '9' THEN                                       00002800
+                                 68 *           DO;                                                         00002900
+                                 69 *             SEND ERROR$(4:32);                                        00003000
+                                 70 *             RETURN HEX(8)'0';                                         00003100
+                                 71 *           END;                                                        00003200
+                                 72 *         IF CURR_CHAR < '0' THEN                                       00003300
+                                 73 *           DO;                                                         00003400
+                                 74 *             SEND ERROR$(4:32);                                        00003500
+                                 75 *             RETURN HEX(8)'0';                                         00003600
+                                 76 *           END;                                                        00003700
+                                 77 *         INTEGER(SUBBIT(CURR_CHAR)) = INTEGER(SUBBIT(CURR_CHAR)) +     00003800
+                                 78 *           INTEGER(SUBBIT(HEX'FFD0'));                                 00003900
+                                 79 *         TEMP = SLL(TEMP,RADIX) + SRL(CURR_CHAR,16);                   00004000
+                                 80 *       END;                                                            00004100
+i                                 81 *     ELSE                                                              00004200
+         CTOX--CHARACTER TO OCTAL AND HEX CONVERSION                                                           PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 82 *       DO;                                                             00004300
+                                 83 *         INTEGER(SUBBIT(CURR_CHAR)) = INTEGER(SUBBIT(CURR_CHAR)) +     00004400
+                                 84 *           INTEGER(SUBBIT(HEX'FFC9');                                  00004500
+                                 85 *         TEMP = SLL(TEMP,RADIX) + SRL(CURR_CHAR,16);                   00004600
+                                 86 *       END;                                                            00004700
+                                 87 *   END;                                                                00004800
+                                 88 *   RETURN TEMP;                                                        00004900
+                                 89 *                                                                       00005000
+                                 90          EXTRN GTBYTE                                                   00005100
+00002 EEF3 0004      0004        91          LHI   R6,4           SHIFT COUNT FOR HEX                       00005200
+00004 E1F7 0022      0028 0022   92          BAL   R1,COMMON      DO SOME COMMON STUFF                      00005300
+                                 93 *                                                                       00005400
+                                 94 *  TESTS SPECIFIC TO HEXADECIMAL                                        00005500
+                                 95 *                                                                       00005600
+00006 B5E5 0046           0046   96          CHI   R5,X'46'       ERROR IF CHARACTER FOLLOWS                00005700
+00008 D9A0           0031 0028   97          BH    ERROR          'F' IN COLLATING SEQUENCE.                00005800
+00009 B5E5 0041           0041   98          CHI   R5,X'41'       CHECK FOR DIGIT IF CHARACTER              00005900
+0000B DA0C           000F 0003   99          BL    NUM            PRECEDES 'A' IN COLLATING SEQUENCE.       00006000
+0000C B0E5 FFC9           FFC9  100          AHI   R5,X'FFC9'     CONVERT LETTER TO NUMBER                  00006100
+0000E DF20           0017 0008  101          B     SHIFT                                                    00006200
+                                102 *                                                                       00006300
+0000F B5E5 0039           0039  103 NUM      CHI   R5,X'39'       IF <C'A' AND >C'9',                       00006400
+00011 D97C           0031 001F  104          BH    ERROR          INVALID CHARACTER IN HEXADECIMAL          00006500
+                                105 *                                                                       00006600
+                                106 *  TEST AND CONVERSION COMMON TO BOTH HEX AND OCTAL DIGITS              00006700
+                                107 *                                                                       00006800
+00012 B5E5 0030           0030  108 COMMON1  CHI   R5,X'30'       IF < C'0',                                00006900
+00014 DA70           0031 001C  109          BL    ERROR          INVALID CHARACTER IN EITHER ENTRY         00007000
+00015 B0E5 FFD0           FFD0  110          AHI   R5,X'FFD0'     CONVERT DIGIT TO NUMBER                   00007100
+                                111 *                                                                       00007200
+                                112 *  THIS SECTION IS USED FOR ALL VALID INPUTS, HEX AND OCTAL             00007300
+                                113 *                                                                       00007400
+00017 F7F8                003E  114 SHIFT    SLL   R7,0(R6)       SHIFT 3 FOR OCT, 4 FOR HEX                00007500
+00018 F542                0010  115          SRL   R5,16          NEXT DIGIT IN R5 LOW                      00007600
+00019 07E5                      116          AR    R7,R5          ACCUMULATE BIT STRING                     00007700
+                                117          ABAL  GTBYTE                                                   00007800
+                                118+         EXTRN #QGTBYTE                                                 01-ABAL
+0001A E4F7                      119+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0001B 3800                      120+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0001C D3E1                      121          BCTR  R3,R1                                                    00007900
+                                122 *                                                                       00008000
+0001D 3718           000C       123 EXIT     ST    7,ARG5                                                   00008100
+                                124          AEXIT                                                          00008200
+                                125+*********RETURN TO CALLER**********************************************
+0001E                           126+         DS    0H                                                       01-AEXIT
+0001E 97E8                      127+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                128+***********************************************************************
+                                130 *                                                                       00008300
+                                131 *  OCTAL CONVERSION ENTRY                                               00008400
+                                132 *                                                                       00008500
+                                133 CTOO     AENTRY                                                         00008600
+                                134+***********************************************************************
+                                135+*
+                                136+*        SECONDARY ENTRY POINT
+                                137+*
+                                138+***********************************************************************
+0001F                           139+CTOO     DS    0H                                                       01-AENTR
+                                140+         ENTRY CTOO                                                     01-AENTR
+0001F B624 0000      0009 0000  141+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                143 *                                                                       00008700
+                                144 * CONVERT A CHARACTER STRING, C1, TO A BIT STRING WHERE C1 CONTAINS     00008800
+                                145 *   OCTAL CHARACTERS.                                                   00008900
+                                146 *                                                                       00009000
+                                147          INPUT R2             CHARACTER(C1)                             00009100
+                                149          OUTPUT R5            BIT(32)                                   00009200
+                                151          WORK  R3,R4,R6,R7,F0                                           00009300
+                                153 *                                                                       00009400
+                                154 * ALGORITHM:                                                            00009500
+                                155 *   RADIX = 3;                                                          00009600
+                                156 *   IF LENGTH(C1) = 0 THEN                                              00009700
+                                157 *     DO;                                                               00009800
+                                158 *       SEND ERROR$(4:31);                                              00009900
+                                159 *       RETURN HEX(8)'0';                                               00010000
+i                                160 *     END;                                                              00010100
+         CTOX--CHARACTER TO OCTAL AND HEX CONVERSION                                                           PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                161 *   TEMP = 0;                                                           00010200
+                                162 *   DO FOR I = 1 TO LENGTH(C1);                                         00010300
+                                163 *     CURR_CHAR = GTBYTE;                                               00010400
+                                164 *     IF CURR_CHAR > '7' THEN                                           00010500
+                                165 *       DO;                                                             00010600
+                                166 *         SEND ERROR$(4:31);                                            00010700
+                                167 *         RETURN HEX(8)'0';                                             00010800
+                                168 *       END;                                                            00010900
+                                169 *     IF CURR_CHAR < '0' THEN                                           00011000
+                                170 *       DO;                                                             00011100
+                                171 *         SEND ERROR$(4:31);                                            00011200
+                                172 *         RETURN 0;                                                     00011300
+                                173 *       END;                                                            00011400
+                                174 *     INTEGER(SUBBIT(CURR_CHAR)) = INTEGER(SUBBIT(CURR_CHAR)) +         00011500
+                                175 *       INTEGER(SUBBIT(HEX'FFD0'));                                     00011600
+                                176 *     TEMP = SLL(TEMP,RADIX) + SRL(CURR_CHAR,16);                       00011700
+                                177 *   END;                                                                00011800
+                                178 *   RETURN TEMP;                                                        00011900
+                                179 *                                                                       00012000
+00021 BEE5                0005  180          LFXI  R6,3           SHIFT COUNT FOR OCTAL                     00012100
+00022 E1F7 0004      0028 0004  181          BAL   R1,COMMON      DO COMMON STUFF AND RETURN HERE           00012200
+                                182 *                                                                       00012300
+                                183 *  TEST SPECIFIC TO OCTAL                                               00012400
+                                184 *                                                                       00012500
+00024 B5E5 0037           0037  185          CHI   R5,X'37'       IF > C'7',                                00012600
+00026 D928           0031 000A  186          BH    ERROR          INVALID CHARACTER IN OCTAL                00012700
+00027 DF5A           0012 0016  187          B     COMMON1                                                  00012800
+                                188 *                                                                       00012900
+                                189 *  COMMON SECTION: DOES SETUP AND GETS THE FIRST CHARACTER              00013000
+                                190 *                                                                       00013100
+00028 9B02           0000       191 COMMON   LH    R3,0(R2)                                                 00013200
+00029 B6E3 00FF           00FF  192          NHI   R3,X'00FF'     GET LENGTH IN R3,                         00013300
+0002B DC14           0031 0005  193          BZ    ERROR          AND GIVE ERROR IF LENGTH=0.               00013400
+0002C EA02           0000       194          LA    R2,0(R2)       ZERO OUT FLAG IN BYTE POINTER             00013500
+0002D 77E7                      195          XR    R7,R7          CLEAR R7 TO RECEIVE STRING                00013600
+                                196          ABAL  GTBYTE                                                   00013700
+0002E E4F7                      197+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0002F 3800                      198+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00030 C7E1                      199          BCR   7,R1                                                     00013800
+                                200 *                                                                       00013900
+00031 B3E6 0004           0004  201 ERROR    TRB   R6,4                                                     00014000
+00033 DB10           0038 0004  202          BNZ   HEXERR                                                   00014100
+                                203          AERROR 31            BIT@OCT CONVERSION-INVALID CHARACTER      00014200
+                                204+*********ISSUE SEND ERROR SVC******************************************
+00034 C9FB 003C      003C       205+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                206+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00036 77E7                      207          XR    R7,R7          FIXUP RETURNS 0                           00014300
+00037 DF6E           001D 001B  208          B     EXIT                                                     00014400
+                                209 *                                                                       00014500
+                                210 HEXERR   AERROR 32            BIT@HEX CONVERSION-INVALID CHARACTER      00014600
+                                211+*********ISSUE SEND ERROR SVC******************************************
+00038 C9FB 003E      003E       212+HEXERR   SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                213+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0003A 77E7                      214          XR    R7,R7          STANDARD FIXUP RETURNS 0                  00014700
+0003B DF7E           001D 001F  215          B     EXIT                                                     00014800
+                                216 *                                                                       00014900
+                                217          ACLOSE                                                         00015000
+0003C                           218+         LTORG                                                          02-ERRPA
+                                219+****************ERROR PARAMETER AREA***********************************
+0003C                           220+#LCTOX   CSECT                                                          02-ERRPA
+                                221+***  CTOX SENDS THE FOLLOWING ERRORS                                    02-ERRPA
+                                223+***  ERROR NUMBER 31 IN GROUP 4                                         02-ERRPA
+0003C 0014                      225+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0003D 041F                      226+         DC    Y(4*256+31)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                228+***  ERROR NUMBER 32 IN GROUP 4                                         02-ERRPA
+0003E 0014                      230+AERROR2  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0003F 0420                      231+         DC    Y(4*256+32)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                232+****************END OF ERROR PARAMETER AREA****************************
+                                233+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0003     00     00001B
+  0001     0003     00     00002F
+  0001     0004     00     000035
+  0001     0004     00     000039
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   00003C   225    205
+AERROR2      1   00003E   230    212
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21    123
+ARG6         2   00000E    22
+ARG7         2   000010    23
+COMMON       2   000028   191     92   181
+COMMON1      2   000012   108    187
+CTOO         1   00001F   139    140
+CTOX         1 00000000    13     27
+ERROR        2   000031   201     97   104   109   186   193
+EXIT         2   00001D   123    208   215
+F0           1 00000000    47
+GTBYTE       1 00000000    90
+HEXERR       2   000038   212    202
+NUM          2   00000F   103     99
+R1           1 00000001    42     92   121   181   199
+R2           1 00000002    36    191   191   194   194   194
+R3           1 00000003    43    121   191   192
+R4           1 00000004    44
+R5           1 00000005    39     96    98   100   103   108   110   115   116   185
+R6           1 00000006    45     91   114   180   201
+R7           1 00000007    46    114   116   195   195   207   207   214   214
+SHIFT        1   000017   114    101
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   00001E   127
+#LCTOX       1 0000003C   220
+#QGTBYTE     1 00000000   118    120   198
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     155 CARDS FROM SYSIN     490 CARDS FROM SYSLIB
+     286 LINES OUTPUT          15 CARDS OUTPUT

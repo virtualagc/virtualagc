@@ -1,0 +1,588 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CSLD      SD 0001 000000 0000F6
+CSLDP     LD      000007        0001
+CPSLD     LD      00002C        0001
+CPSLDP    LD      00003D        0001
+CSST      LD      000048        0001
+CSSTP     LD      000050        0001
+CPSST     LD      000064        0001
+CPSSTP    LD      000094        0001
+#LCSLD    SD 0002 0000F6 000004
+¤
+         CSLD--CHARACTER SUBBIT LOAD AND STORE ROUTINES                                                        PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 MASK1    DS    F              TEMPORARY STORAGE                         00000400
+                                 10 MASK2    DS    F              FOR BIT STRING MASK                       00000500
+                                 11          MEND                                                           00000600
+                                 12 CSLD     AMAIN                                                          00000700
+                                 13+***********************************************************************
+                                 14+*
+                                 15+*        PRIMARY ENTRY POINT
+                                 16+*
+                                 17+***********************************************************************
+00000                            18+CSLD     CSECT                                                          01-AMAIN
+00000                            19+STACK    DSECT                                                          01-AMAIN
+                                 20+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            21+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            22+         DS    2F             R0,R1                                     01-AMAIN
+00006                            23+ARG2     DS    F              R2                                        01-AMAIN
+00008                            24+         DS    F              R3                                        01-AMAIN
+0000A                            25+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            26+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            27+ARG6     DS    F              R6                                        01-AMAIN
+00010                            28+ARG7     DS    F              R7                                        01-AMAIN
+                                 29+*        END OF STANDARD STACK AREA
+00012                            30+MASK1    DS    F              TEMPORARY STORAGE                         02-00009
+00014                            31+MASK2    DS    F              FOR BIT STRING MASK                       02-00010
+00016                            32+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            33+CSLD     CSECT                                                          01-AMAIN
+0000000                          34+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   35+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 37 *                                                                       00000800
+                                 38 * OBTAIN THE BIT PATTERN OF A CHARACTER STRING, C1.                     00000900
+                                 39 *                                                                       00001000
+                                 40          INPUT R2             CHARACTER(C1)                             00001100
+0000002                          41+R2       EQU   2                                                        01-INPUT
+                                 43          OUTPUT R5            BIT(32)                                   00001200
+0000005                          44+R5       EQU   5                                                        01-OUTPU
+                                 46          WORK  R4,R5,R6,R7                                              00001300
+0000004                          47+R4       EQU   4                                                        01-WORK
+0000006                          48+R6       EQU   6                                                        01-WORK
+0000007                          49+R7       EQU   7                                                        01-WORK
+                                 51 *                                                                       00001400
+                                 52 *                                                                       00001500
+                                 53 *                                                                       00001600
+00002 75E5                       54          XR    R5,R5          FIRST CHARACTER-1=0                       00001700
+00003 9E02           0000        55          LH    R6,0(R2)       LOAD DESCRIPTOR OF C1                     00001800
+00004 B6E6 00FF           00FF   56          NHI   R6,X'00FF'     CHARACTER WIDTH=LENGTH(STRING)            00001900
+00006 DF14           000C 0005   57          B     CSLDPX                                                   00002000
+                                 58 CSLDP    AENTRY                                                         00002100
+                                 59+***********************************************************************
+                                 60+*
+                                 61+*        SECONDARY ENTRY POINT
+                                 62+*
+                                 63+***********************************************************************
+00007                            64+CSLDP    DS    0H                                                       01-AENTR
+                                 65+         ENTRY CSLDP                                                    01-AENTR
+00007 B624 0000      0009 0000   66+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 68 *                                                                       00002200
+                                 69 * OBTAIN THE BIT PATTERN OF THE K TO L PARTITION OF A CHARACTER STRING, 00002300
+                                 70 *   C1.                                                                 00002400
+                                 71 *                                                                       00002500
+                                 72          INPUT R2,            CHARACTER(C1)                            X00002600
+                                                   R5,            INTEGER(K) SP                            X00002700
+                                                   R6             INTEGER(L) SP                             00002800
+                                 74          OUTPUT R5            BIT(32)                                   00002900
+                                 76          WORK  R1,R4,R7                                                 00003000
+0000001                          77+R1       EQU   1                                                        01-WORK
+i                                 79 *                                                                       00003100
+         CSLD--CHARACTER SUBBIT LOAD AND STORE ROUTINES                                                        PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 80 *                                                                       00003200
+                                 81 *                                                                       00003300
+00009 E4F7 0097      00A2 0097   82          BAL   R4,CPTEST      CHECK OF K AND L                          00003400
+0000B 1EE6                       83          LR    R6,R6          TEST CHARACTER WIDTH                      00003500
+0000C DB08           000F 0002   84 CSLDPX   BNZ   CSLDPX2                                                  00003600
+0000D 3618           000C        85 RET0     ST    R6,ARG5        IF WIDTH=0,                               00003700
+0000E DF70           002B 001C   86          B     EXIT           RETURN 0 STRING                           00003800
+                                 87 *                                                                       00003900
+0000F EFF3 0004      0004        88 CSLDPX2  LHI   R7,4                                                     00004000
+00011 16E7                       89          CR    R6,R7          COMPARE CHARACTER WIDTH TO 4              00004100
+00012 DE04           0014 0001   90          BNH   WIDTHOK                                                  00004200
+00013 1EE7                       91          LR    R6,R7          IF >4, SET WIDTH TO 4                     00004300
+                                 92 *                                                                       00004400
+00014 0FE6                       93 WIDTHOK  SR    R7,R6                                                    00004500
+00015 1EF7 00D7      00EE 00D7   94          L     R6,=X'0000FFFF'   MASK FOR TWO CHARACTERS                00004600
+00017 B0E7 0002           0002   95          AHI   R7,2                                                     00004700
+00019 F70C                0003   96          SLL   R7,3           SHIFT COUNT=48-8*WIDTH                    00004800
+0001A B3E5 0001           0001   97          TRB   R5,X'0001'                                               00004900
+0001C DC10           0021 0004   98          BZ    ODDCH                                                    00005000
+0001D 1EF7 00D1      00F0 00D1   99          L     R6,=X'000000FF'   MASK FOR ONE CHARACTER                 00005100
+0001F B0E7 FFF8          FFFF8  100          AHI   R7,-8          SHIFT COUNT                               00005200
+                                101 *                                                                       00005300
+                                102 *  GET HALFWORD ADDRESS                                                 00005400
+                                103 *                                                                       00005500
+00021 F506                0001  104 ODDCH    SRL   R5,1                                                     00005600
+00022 02E5                      105          AR    R2,R5          GET ADDRESS - 1 OF HALFWORD CONTAINING    00005700
+                                106 *                             FIRST CHARACTER                           00005800
+                                107 *                                                                       00005900
+                                108 *  LOAD PARTITION OF AT LEAST 6 CHARACTERS                              00006000
+                                109 *                                                                       00006100
+00023 84FA 0001      0001       110          IHL   R4,1(R2)                                                 00006200
+00025 9D0A           0002       111          LH    R5,2(R2)                                                 00006300
+00026 85FA 0003      0003       112          IHL   R5,3(R2)                                                 00006400
+00028 24E6                      113          NR    R4,R6          ZERO OUT UNWANTED BITS                    00006500
+00029 FCFE                003F  114          SRDL  R4,0(R7)       RJUST INTO R5                             00006600
+                                115 *                                                                       00006700
+0002A 3518           000C       116 STORE    ST    R5,ARG5                                                  00006800
+                                117 EXIT     AEXIT                AND EXIT                                  00006900
+                                118+*********RETURN TO CALLER**********************************************
+0002B                           119+EXIT     DS    0H                                                       01-AEXIT
+0002B 97E8                      120+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                121+***********************************************************************
+                                123 CPSLD    AENTRY                                                         00007000
+                                124+***********************************************************************
+                                125+*
+                                126+*        SECONDARY ENTRY POINT
+                                127+*
+                                128+***********************************************************************
+0002C                           129+CPSLD    DS    0H                                                       01-AENTR
+                                130+         ENTRY CPSLD                                                    01-AENTR
+0002C B624 0000      0009 0000  131+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                133 *                                                                       00007100
+                                134 * OBTAIN THE BIT PATTERN OF AN I TO J SUBBIT PARTITION OF A CHARACTER   00007200
+                                135 *   STRING, C1.                                                         00007300
+                                136 *                                                                       00007400
+                                137          INPUT R2,            CHARACTER(C1)                            X00007500
+                                                   R5,            INTEGER(I) SP                            X00007600
+                                                   R6             INTEGER(J) SP                             00007700
+                                139          OUTPUT R5            BIT(32)                                   00007800
+                                141          WORK  R1,R3,R4,R7                                              00007900
+0000003                         142+R3       EQU   3                                                        01-WORK
+                                144 *                                                                       00008000
+                                145 *                                                                       00008100
+                                146 *                                                                       00008200
+                                147 *                                                                       00008300
+                                148 *  SET UP FOR CALL TO SPTEST                                            00008400
+                                149 *                                                                       00008500
+0002E 1BE5                      150          LR    R3,R5          PLACE I IN R3                             00008600
+0002F 1FE6                      151          LR    R7,R6          PLACE J IN R7                             00008700
+00030 9E02           0000       152          LH    R6,0(R2)       GET DESCRIPTOR OF C1                      00008800
+00031 B6E6 00FF           00FF  153          NHI   R6,X'00FF'     WIDTH OF CHAR PARTITION IN R6             00008900
+                                154 *                                                                       00009000
+00033 E1F7 0092      00C7 0092  155 CPSLDX   BAL   R1,SPTEST      CHECK SUBBIT PARTITION                    00009100
+00035 1EE6                      156 CSLDLR   LR    R6,R6          TEST FOR 0 PARTITION                      00009200
+i00036 DCAA           000D 002A  157          BZ    RET0           RETURN 0 STRING IF CHAR PART=0            00009300
+         CSLD--CHARACTER SUBBIT LOAD AND STORE ROUTINES                                                        PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                158 *                                                                       00009400
+                                159 *  SHIFT OFF UNWANTED BITS                                              00009500
+                                160 *                                                                       00009600
+00037 FCEC                003B  161          SLDL  R4,0(R3)       SHIFT OFF EXCESS HIGH-ORDER BITS          00009700
+00038 EEF3 0040      0040       162          LHI   R6,64                                                    00009800
+0003A 0EE7                      163          SR    R6,R7          (64-WIDTH)=NO. OF EXCESS LOW-ORDER BITS   00009900
+                                164 *                                                                       00010000
+0003B FCFA                003E  165          SRDL  R4,0(R6)                                                 00010100
+0003C DF4E           002A 0013  166          B     STORE                                                    00010200
+                                167 CPSLDP   AENTRY                                                         00010300
+                                168+***********************************************************************
+                                169+*
+                                170+*        SECONDARY ENTRY POINT
+                                171+*
+                                172+***********************************************************************
+0003D                           173+CPSLDP   DS    0H                                                       01-AENTR
+                                174+         ENTRY CPSLDP                                                   01-AENTR
+0003D B624 0000      0009 0000  175+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                177 *                                                                       00010400
+                                178 * OBTAIN THE BIT PATTERN OF AN I TO J SUBBIT PARTITION OF A K TO L      00010500
+                                179 *   PARTITION OF A CHARACTER STRING, C1.                                00010600
+                                180 *                                                                       00010700
+                                181          INPUT R2,            CHARACTER(C1)                            X00010800
+                                                   R5,            INTEGER(K) SP                            X00010900
+                                                   R6,            INTEGER(L) SP                            X00011000
+                                                   R7             INTEGER(I || J) SP                        00011100
+                                183          OUTPUT R5            BIT(32)                                   00011200
+                                185          WORK  R1,R3,R4                                                 00011300
+                                187 *                                                                       00011400
+                                188 *                                                                       00011500
+                                189 *                                                                       00011600
+0003F 1BE7                      190          LR    R3,R7          PLACE I || J IN R3                        00011700
+00040 77E7                      191          XR    R7,R7          CLEAR OUT R7                              00011800
+00041 07EB                      192          XUL   R7,R3          PUTS J IN R7, I IN R3                     00011900
+00042 E4F7 005E      00A2 005E  193          BAL   R4,CPTEST                                                00012000
+00044 E9F7 0811      0035 0011  194          LA    R1,CSLDLR                                                00012100
+00046 C7F7 006E      00B6 006E  195          B     SPTEST0        TEST SUBBIT PARTITION                     00012200
+                                196 CSST     AENTRY                                                         00012300
+                                197+***********************************************************************
+                                198+*
+                                199+*        SECONDARY ENTRY POINT
+                                200+*
+                                201+***********************************************************************
+00048                           202+CSST     DS    0H                                                       01-AENTR
+                                203+         ENTRY CSST                                                     01-AENTR
+00048 B624 0000      0009 0000  204+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                206 *                                                                       00012400
+                                207 * STORE A BIT STRING, B1, INTO A CHARACTER STRING, C1.                  00012500
+                                208 *                                                                       00012600
+                                209          INPUT R2             CHARACTER(C1)                             00012700
+                                211          OUTPUT R4            BIT(B1)                                   00012800
+                                213          WORK  R1,R3,R5,R6,R7,F0                                        00012900
+0000000                         214+F0       EQU   0                                                        01-WORK
+                                216 *                                                                       00013000
+                                217 *                                                                       00013100
+                                218 *                                                                       00013200
+0004A 28EC                      219          LFLR  F0,R4          SAVE BIT STRING                           00013300
+0004B 75E5                      220          XR    R5,R5          FIRST CHAR-1=0                            00013400
+0004C 9E02           0000       221          LH    R6,0(R2)       GET C1 DESCRIPTOR                         00013500
+0004D B6E6 00FF           00FF  222          NHI   R6,X'00FF'     CHARACTER WIDTH = LENGTH(STRING)          00013600
+0004F DF18           0056 0006  223          B     CSSTPX                                                   00013700
+                                224 CSSTP    AENTRY                                                         00013800
+                                225+***********************************************************************
+                                226+*
+                                227+*        SECONDARY ENTRY POINT
+                                228+*
+                                229+***********************************************************************
+00050                           230+CSSTP    DS    0H                                                       01-AENTR
+                                231+         ENTRY CSSTP                                                    01-AENTR
+00050 B624 0000      0009 0000  232+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+i                                234 *                                                                       00013900
+         CSLD--CHARACTER SUBBIT LOAD AND STORE ROUTINES                                                        PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                235 * STORE A BIT STRING, B1, INTO A K TO L PARTITION OF A CHARACTER        00014000
+                                236 *   STRING, C1.                                                         00014100
+                                237 *                                                                       00014200
+                                238          INPUT R2,            CHARACTER(C1)                            X00014300
+                                                   R5,            INTEGER(K) SP                            X00014400
+                                                   R6             INTEGER(L) SP                             00014500
+                                240          OUTPUT R4            BIT(B1)                                   00014600
+                                242          WORK  R1,R3,R7,F0                                              00014700
+                                244 *                                                                       00014800
+                                245 *                                                                       00014900
+                                246 *                                                                       00015000
+00052 28EC                      247          LFLR  F0,R4          SAVE BIT STRING                           00015100
+00053 E4F7 004D      00A2 004D  248          BAL   R4,CPTEST      CHECK CHAR PARTITION                      00015200
+00055 1EE6                      249          LR    R6,R6          IF WIDTH=0,                               00015300
+00056 DCB2           002B 002C  250 CSSTPX   BZ    EXIT           EXIT IMMEDIATELY                          00015400
+00057 1FE6                      251          LR    R7,R6          CHAR WIDTH IN R7                          00015500
+00058 B5E7 0004           0004  252          CHI   R7,4                                                     00015600
+0005A DE08           005D 0002  253          BNH   SETBIT                                                   00015700
+0005B EFF3 0004      0004       254          LHI   R7,4           SET WIDTH TO 4 IF GREATER                 00015800
+0005D EBF3 0001      0001       255 SETBIT   LHI   R3,1           RELATIVE FIRST BIT=1                      00015900
+0005F F70C                0003  256          SLL   R7,3           8*WIDTH = LAST BIT                        00016000
+00060 E9F7 000C      006E 000C  257          LA    R1,CPSTLR                                                00016100
+00062 C7F7 0052      00B6 0052  258          B     SPTEST0                                                  00016200
+                                259 CPSST    AENTRY                                                         00016300
+                                260+***********************************************************************
+                                261+*
+                                262+*        SECONDARY ENTRY POINT
+                                263+*
+                                264+***********************************************************************
+00064                           265+CPSST    DS    0H                                                       01-AENTR
+                                266+         ENTRY CPSST                                                    01-AENTR
+00064 B624 0000      0009 0000  267+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                269 *                                                                       00016400
+                                270 * STORE A BIT STRING, B1, INTO AN I TO J SUBBIT PARTITION OF A          00016500
+                                271 *   CHARACTER STRING, C1.                                               00016600
+                                272 *                                                                       00016700
+                                273          INPUT R2,            CHARACTER(C1)                            X00016800
+                                                   R5,            INTEGER(I) SP                            X00016900
+                                                   R6             INTEGER(J) SP                             00017000
+                                275          OUTPUT R4            BIT(B1)                                   00017100
+                                277          WORK  R1,R3,R7,F0                                              00017200
+                                279 *                                                                       00017300
+                                280 *                                                                       00017400
+                                281 *                                                                       00017500
+00066 28EC                      282          LFLR  F0,R4          SAVE BIT STRING                           00017600
+00067 1BE5                      283          LR    R3,R5          FIRST BIT IN R3                           00017700
+00068 1FE6                      284          LR    R7,R6          LAST BIT IN R7                            00017800
+00069 9E02           0000       285          LH    R6,0(R2)                                                 00017900
+0006A B6E6 00FF           00FF  286          NHI   R6,X'00FF'     CHARACTER WIDTH = LENGTH(STRING)          00018000
+0006C E1F7 0059      00C7 0059  287 CPSSTX   BAL   R1,SPTEST      CHECK SUBBIT PARTITION AND SETUP          00018100
+0006E 1EE6                      288 CPSTLR   LR    R6,R6          TEST CHAR PARTITION WIDTH                 00018200
+0006F C4F7 0846      002B 0046  289          BZ    EXIT           AND EXIT IMMEDIATELY IF 0                 00018300
+00071 19E7                      290          LR    R1,R7          SAVE BIT WIDTH                            00018400
+                                291 *                                                                       00018500
+                                292 *  GET MASK OF PROPER WIDTH AND PLACEMENT                               00018600
+                                293 *                                                                       00018700
+00072 1FF7 007E      00F2 007E  294          L     R7,=F'1'                                                 00018800
+00074 F7E4                0039  295          SLL   R7,0(R1)                                                 00018900
+00075 0FF7 007B      00F2 007B  296          S     R7,=F'1'       MASK OF PROPER WIDTH IN R7                00019000
+00077 01E3                      297          AR    R1,R3          RELATIVE LAST BIT                         00019100
+00078 EBF3 0040      0040       298          LHI   R3,64                                                    00019200
+0007A 0BE1                      299          SR    R3,R1          LEFT SHIFT COUNT=64-LAST BIT              00019300
+0007B 76E6                      300          XR    R6,R6          CLEAR R6                                  00019400
+0007C FEEC                003B  301          SLDL  R6,0(R3)                                                 00019500
+0007D 3624           0012       302          ST    R6,MASK1       STORE MASK IN TEMPORARY                   00019600
+0007E 3728           0014       303          ST    R7,MASK2       FOR BIT STRING MASK.                      00019700
+0007F 76F7 0073      00F4 0073  304          X     R6,=X'FFFFFFFF'                                          00019800
+00081 77F7 0071      00F4 0071  305          X     R7,=X'FFFFFFFF'  MASK READY IN R6-R7                     00019900
+                                306 *                                                                       00020000
+                                307 *  MASK OLD BITS                                                        00020100
+                                308 *                                                                       00020200
+00083 24E6                      309          NR    R4,R6                                                    00020300
+i00084 25E7                      310          NR    R5,R7                                                    00020400
+         CSLD--CHARACTER SUBBIT LOAD AND STORE ROUTINES                                                        PAGE    6
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                311 *                                                                       00020500
+                                312 *  INSERT INPUT BIT STRING                                              00020600
+                                313 *                                                                       00020700
+00085 27E8                      314          LFXR  R7,F0          RECOVER STRING                            00020800
+00086 76E6                      315          XR    R6,R6                                                    00020900
+00087 FEEC                003B  316          SLDL  R6,0(R3)       SHIFT INTO POSITION                       00021000
+00088 2624           0012       317          N     R6,MASK1       MASK OUT UNWANTED BITS                    00021100
+00089 2728           0014       318          N     R7,MASK2       IN INPUT STRING.                          00021200
+0008A 2CE6                      319          OR    R4,R6                                                    00021300
+0008B 2DE7                      320          OR    R5,R7          STRING IN                                 00021400
+                                321 *                                                                       00021500
+                                322 *  STORE BACK IN CHARACTER STRING                                       00021600
+                                323 *                                                                       00021700
+0008C BC06           0001       324          STH   R4,1(R2)                                                 00021800
+0008D F440                0010  325          SLL   R4,16                                                    00021900
+0008E BC0A           0002       326          STH   R4,2(R2)                                                 00022000
+0008F BD0E           0003       327          STH   R5,3(R2)                                                 00022100
+00090 F540                0010  328          SLL   R5,16                                                    00022200
+00091 BD12           0004       329          STH   R5,4(R2)                                                 00022300
+                                330 *                                                                       00022400
+00092 C7F7 0869      002B 0069  331          B     EXIT                                                     00022500
+                                332 CPSSTP   AENTRY                                                         00022600
+                                333+***********************************************************************
+                                334+*
+                                335+*        SECONDARY ENTRY POINT
+                                336+*
+                                337+***********************************************************************
+00094                           338+CPSSTP   DS    0H                                                       01-AENTR
+                                339+         ENTRY CPSSTP                                                   01-AENTR
+00094 B624 0000      0009 0000  340+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                342 *                                                                       00022700
+                                343 * STORE A BIT STRING, B1, INTO AN I TO J SUBBIT PARTITION OF A K TO L   00022800
+                                344 *   PARTITION OF A CHARACTER STRING, C1.                                00022900
+                                345 *                                                                       00023000
+                                346          INPUT R2,            CHARACTER(C1)                            X00023100
+                                                   R5,            INTEGER(K) SP                            X00023200
+                                                   R6,            INTEGER(L) SP                            X00023300
+                                                   R7             INTEGER(I || J)                           00023400
+                                348          OUTPUT R4            BIT(B1)                                   00023500
+                                350          WORK  R1,R3,F0                                                 00023600
+                                352 *                                                                       00023700
+                                353 *                                                                       00023800
+                                354 *                                                                       00023900
+00096 28EC                      355          LFLR  F0,R4          SAVE BIT STRING IN F0                     00024000
+00097 1BE7                      356          LR    R3,R7          GET I || J IN R3                          00024100
+00098 77E7                      357          XR    R7,R7          CLEAR OUT R7                              00024200
+00099 07EB                      358          XUL   R7,R3          PLACE J IN REGISTER 7                     00024300
+0009A E4F7 0006      00A2 0006  359          BAL   R4,CPTEST      CHECK CHAR PARTITION                      00024400
+0009C 1EE6                      360          LR    R6,R6          IF WIDTH=0,                               00024500
+0009D C4F7 0874      002B 0074  361          BZ    EXIT           EXIT IMMEDIATELY                          00024600
+0009F E9F7 0833      006E 0033  362          LA    R1,CPSTLR                                                00024700
+000A1 DF50           00B6 0014  363          B     SPTEST0                                                  00024800
+                                364 **************************************************************          00024900
+                                365 *  SECTION CPTEST: CHECKS CHARACTER PARTITION FOR VALIDITY.  *          00025000
+                                366 *     INPUTS: R2->CHARACTER STRING,                          *          00025100
+                                367 *       R5=FIRST CHARACTER, R6=LAST CHARACTER.               *          00025200
+                                368 *     OUTPUTS: R5=FIRST CHARACTER-1,R6=WIDTH OF CHARACTER    *          00025300
+                                369 *       PARTITION. R2,R3, AND R7 UNCHANGED.                  *          00025400
+                                370 **************************************************************          00025500
+000A2 B0E5 FFFF          FFFFF  371 CPTEST   AHI   R5,-1                                                    00025600
+000A4 DD0C           00A8 0003  372          BNM   FIRSTOK                                                  00025700
+                                373          AERROR 17            ERROR: FIRST CHAR<1                       00025800
+                                374+*********ISSUE SEND ERROR SVC******************************************
+000A5 C9FB 00F6      00F6       375+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                376+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+000A7 75E5                      377          XR    R5,R5          FIXUP: FIRST CHAR=1                       00025900
+                                378 *                                                                       00026000
+000A8 9902           0000       379 FIRSTOK  LH    R1,0(R2)                                                 00026100
+000A9 B6E1 00FF           00FF  380          NHI   R1,X'00FF'     LENGTH OF CHAR STRING                     00026200
+000AB 16E1                      381          CR    R6,R1                                                    00026300
+000AC DE0C           00B0 0003  382          BNH   LASTOK                                                   00026400
+                                383          AERROR 17            ERROR:LAST CHAR>CURRLEN                   00026500
+                                384+*********ISSUE SEND ERROR SVC******************************************
+000AD C9FB 00F6      00F6       385+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                386+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+i000AF 1EE1                      387          LR    R6,R1          FIXUP: LAST CHAR=CURRLEN                  00026600
+         CSLD--CHARACTER SUBBIT LOAD AND STORE ROUTINES                                                        PAGE    7
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                388 *                                                                       00026700
+000B0 0EE5                      389 LASTOK   SR    R6,R5          WIDTH OF CHAR PARTITION                   00026800
+000B1 D90C           00B5 0003  390          BP    WPOS                                                     00026900
+                                391          AERROR 17            ERROR:WIDTH<=0                            00027000
+                                392+*********ISSUE SEND ERROR SVC******************************************
+000B2 C9FB 00F6      00F6       393+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                394+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+000B4 76E6                      395          XR    R6,R6          FIXUP: ZERO WIDTH                         00027100
+                                396 *                                                                       00027200
+000B5 C7E4                      397 WPOS     BR    R4             RETURN TO CALLING SECTION                 00027300
+                                398 ******************************************************************      00027400
+                                399 *  SECTION SPTEST: CHECKS SUBBIT PARTITION FOR VALIDITY.         *      00027500
+                                400 *     INPUTS: R6=WIDTH OF CHARACTER PARTITION,                   *      00027600
+                                401 *       R3=FIRST BIT,R7=LAST BIT                                 *      00027700
+                                402 *     OUTPUTS: 1(R2)->4 HALFWORDS CONTAINING REQUIRED PARTITION, *      00027800
+                                403 *           R3=RELATIVE FIRST BIT-1,R7=BIT WIDTH,R4-R5 CONTAIN   *      00027900
+                                404 *            THE 4 HALFWORDS AT 1(R2).                           *      00028000
+                                405 ******************************************************************      00028100
+000B6 B3E5 0001           0001  406 SPTEST0  TRB   R5,X'0001'                                               00028200
+000B8 DC30           00C5 000C  407          BZ    UPR2                                                     00028300
+000B9 1BE3                      408          LR    R3,R3                                                    00028400
+000BA D910           00BF 0004  409          BP    INC                                                      00028500
+                                410          AERROR 30            ERROR: FIRST BIT<1                        00028600
+                                411+*********ISSUE SEND ERROR SVC******************************************
+000BB C9FB 00F8      00F8       412+         SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                413+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+000BD EBF3 0001      0001       414          LHI   R3,1           FIXUP: FIRST BIT=1                        00028700
+                                415 *                                                                       00028800
+000BF B0E3 0008           0008  416 INC      AHI   R3,8           SECOND CHAR OF HALFWORD                   00028900
+000C1 B0E7 0008           0008  417          AHI   R7,8           INCREASE WIDTH TO COMPENSATE              00029000
+000C3 B0E6 0001           0001  418          AHI   R6,1                                                     00029100
+                                419 *                                                                       00029200
+000C5 F506                0001  420 UPR2     SRL   R5,1           HALFWORD COUNT                            00029300
+000C6 02E5                      421          AR    R2,R5          POINT TO PARTITION                        00029400
+                                422 *                                                                       00029500
+000C7 F60C                0003  423 SPTEST   SLL   R6,3           C1 LENGTH * 3                             00029600
+000C8 1BE3                      424          LR    R3,R3          SET CONDITION CODE                        00029700
+000C9 D920           00D2 0008  425          BP    B1BIG          ELSE ERROR: I <= 0                        00029800
+                                426          AERROR 30            ERROR:FIRST BIT<1                         00029900
+                                427+*********ISSUE SEND ERROR SVC******************************************
+000CA C9FB 00F8      00F8       428+         SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                429+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+000CC 0FE3                      430          SR    R7,R3          ADJUST J FOR SAME WIDTH                   00030000
+000CD B0E7 0001           0001  431          AHI   R7,1           NOTE: R3 <= 0 IMPLIES NEW R7 > OLD R7     00030100
+000CF EBF3 0001      0001       432          LHI   R3,1           FIXUP: FIRST BIT=1                        00030200
+000D1 DF18           00D8 0006  433          B     B1SML                                                    00030300
+                                434 *                                                                       00030400
+000D2 13E6                      435 B1BIG    CR    R3,R6                                                    00030500
+000D3 DE10           00D8 0004  436          BNH   B1SML                                                    00030600
+                                437          AERROR 30            ERROR: FIRST BIT>PARTITION WIDTH          00030700
+                                438+*********ISSUE SEND ERROR SVC******************************************
+000D4 C9FB 00F8      00F8       439+         SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                440+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+000D6 1BE6                      441          LR    R3,R6          FIXUP: FIRST BIT=PARTITION WIDTH          00030800
+000D7 DC50           00EC 0014  442          BZ    SPRETN         LEAVE IF PARTITION WIDTH=0                00030900
+                                443 *                                                                       00031000
+000D8 17E6                      444 B1SML    CR    R7,R6          COMPARE J WITH CURRENT LENGTH * 8         00031100
+000D9 DE0C           00DD 0003  445          BNH   LBSML                                                    00031200
+                                446          AERROR 30            ERROR: LAST BIT>PARTITION WIDTH           00031300
+                                447+*********ISSUE SEND ERROR SVC******************************************
+000DA C9FB 00F8      00F8       448+         SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                449+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+000DC 1FE6                      450          LR    R7,R6          FIXUP: LAST BIT=PARTITION WIDTH           00031400
+                                451 *                                                                       00031500
+000DD DB03           00DE 0000  452 LBSML    BCTB  R3,*+1         I = I - 1                                 00031600
+000DE 0FE3                      453          SR    R7,R3          LENGTH OF PARTITION = J - I + 1           00031700
+000DF 1CE3                      454          LR    R4,R3          FIRST BIT-1 IN R4                         00031800
+000E0 F412                0004  455          SRL   R4,4           (FIRST BIT-1)/16=FIRST HALFWORD-1         00031900
+000E1 ECF7 8000      0000       456          LA    R4,0(R4,3)     CLEAR BOTTOM HALF OF R4                   00032000
+000E3 02E4                      457          AR    R2,R4          FIRST HALFWORD ADDRESS IN C1              00032100
+000E4 F410                0004  458          SLL   R4,4           GET BACK R4 WIHTOUT 4 SIGNIFICANT BITS    00032200
+000E5 0BE4                      459          SR    R3,R4          RELATIVE FIRST BIT-1                      00032300
+                                460 *                                                                       00032400
+                                461 *  GET 4 HALFWORDS WHICH CONTAIN THE REQUIRED                           00032500
+                                462 *  PARTITION IN REGISTER PAIR R4-R5                                     00032600
+                                463 *                                                                       00032700
+000E6 9C06           0001       464          LH    R4,1(R2)                                                 00032800
+000E7 84FA 0002      0002       465          IHL   R4,2(R2)                                                 00032900
+000E9 9D0E           0003       466          LH    R5,3(R2)                                                 00033000
+i000EA 85FA 0004      0004       467          IHL   R5,4(R2)                                                 00033100
+         CSLD--CHARACTER SUBBIT LOAD AND STORE ROUTINES                                                        PAGE    8
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                468 *                                                                       00033200
+000EC C7E1                      469 SPRETN   BR    R1             RETURN TO CALLING SECTION                 00033300
+                                470          ACLOSE                                                         00033400
+000ED C9FB
+000EE                           471+         LTORG                                                          02-ERRPA
+000EE 0000FFFF                  472                =X'0000FFFF'
+000F0 000000FF                  473                =X'000000FF'
+000F2 00000001                  474                =F'1'
+000F4 FFFFFFFF                  475                =X'FFFFFFFF'
+                                476+****************ERROR PARAMETER AREA***********************************
+000F6                           477+#LCSLD   CSECT                                                          02-ERRPA
+                                478+***  CSLD SENDS THE FOLLOWING ERRORS                                    02-ERRPA
+                                480+***  ERROR NUMBER 17 IN GROUP 4                                         02-ERRPA
+000F6 0014                      482+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+000F7 0411                      483+         DC    Y(4*256+17)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                485+***  ERROR NUMBER 30 IN GROUP 4                                         02-ERRPA
+000F8 0014                      487+AERROR2  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+000F9 041E                      488+         DC    Y(4*256+30)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                489+****************END OF ERROR PARAMETER AREA****************************
+                                490+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    9
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     0000A6
+  0001     0002     00     0000AE
+  0001     0002     00     0000B3
+  0001     0002     00     0000BC
+  0001     0002     00     0000CB
+  0001     0002     00     0000D5
+  0001     0002     00     0000DB
+¤
+                                             CROSS REFERENCE                                                   PAGE   10
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   0000F6   482    375   385   393
+AERROR2      1   0000F8   487    412   428   439   448
+ARG2         2   000006    23
+ARG4         2   00000A    25
+ARG5         2   00000C    26     85   116
+ARG6         2   00000E    27
+ARG7         2   000010    28
+B1BIG        1   0000D2   435    425
+B1SML        1   0000D8   444    433   436
+CPSLD        1   00002C   129    130
+CPSLDP       1   00003D   173    174
+CPSLDX       2   000033   155
+CPSST        1   000064   265    266
+CPSSTP       1   000094   338    339
+CPSSTX       2   00006C   287
+CPSTLR       1   00006E   288    257   362
+CPTEST       2   0000A2   371     82   193   248   359
+CSLD         1 00000000    18     33
+CSLDLR       1   000035   156    194
+CSLDP        1   000007    64     65
+CSLDPX       2   00000C    84     57
+CSLDPX2      2   00000F    88     84
+CSST         1   000048   202    203
+CSSTP        1   000050   230    231
+CSSTPX       2   000056   250    223
+EXIT         1   00002B   119     86   250   289   331   361
+F0           1 00000000   214    219   247   282   314   355
+FIRSTOK      2   0000A8   379    372
+INC          2   0000BF   416    409
+LASTOK       1   0000B0   389    382
+LBSML        1   0000DD   452    445
+MASK1        2   000012    30    302   317
+MASK2        2   000014    31    303   318
+ODDCH        1   000021   104     98
+R1           1 00000001    77    155   194   257   287   290   295   297   299   362   379   380   381   387   469
+R2           1 00000002    41     55    55   105   110   110   111   111   112   112   152   152   221   221   285   285
+                                 324   324   326   326   327   327   329   329   379   379   421   457   464   464   465
+                                 465   466   466   467   467
+R3           1 00000003   142    150   161   190   192   255   283   297   298   299   301   316   356   358   408   408
+                                 414   416   424   424   430   432   435   441   452   453   454   459
+R4           1 00000004    47     82   110   113   114   161   165   193   219   247   248   282   309   319   324   325
+                                 326   355   359   397   454   455   456   456   456   457   458   459   464   465
+R5           1 00000005    44     54    54    97   104   105   111   112   116   150   220   220   283   310   320   327
+                                 328   329   371   377   377   389   406   420   421   466   467
+R6           1 00000006    48     55    56    83    83    85    89    91    93    94    99   113   151   152   153   156
+                                 156   162   163   165   221   222   249   249   251   284   285   286   288   288   300
+                                 300   301   302   304   309   315   315   316   317   319   360   360   381   387   389
+                                 395   395   418   423   435   441   444   450
+R7           1 00000007    49     88    89    91    93    95    96   100   114   151   163   190   191   191   192   251
+                                 252   254   256   284   290   294   295   296   303   305   310   314   318   320   356
+                                 357   357   358   417   430   431   444   450   453
+RET0         2   00000D    85    157
+SETBIT       2   00005D   255    253
+SPRETN       1   0000EC   469    442
+SPTEST       1   0000C7   423    155   287
+SPTEST0      2   0000B6   406    195   258   363
+STACK        1 00000000    19     34
+STACKEND     2   000016    32
+STORE        2   00002A   116    166
+UPR2         1   0000C5   420    407
+WIDTHOK      1   000014    93     90
+WPOS         1   0000B5   397    390
+$RET1        1   00002B   120
+#LCSLD       1 000000F6   477
+=F'1'        2   0000F2   474    294   296
+=X'000000FF'
+             2   0000F0   473     99
+=X'0000FFFF'
+             2   0000EE   472     94
+=X'FFFFFFFF'
+             2   0000F4   475    304   305
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE   11
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     339 CARDS FROM SYSIN     426 CARDS FROM SYSLIB
+     588 LINES OUTPUT          28 CARDS OUTPUT

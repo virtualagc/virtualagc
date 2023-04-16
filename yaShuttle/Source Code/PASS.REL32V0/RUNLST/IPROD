@@ -1,0 +1,90 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+IPROD     SD 0001 000000 000016
+¤
+         IPROD--INTEGER PROD FUNCTION, DP                                                                      PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 IPROD    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+IPROD    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * RETURNS THE PRODUCT OF ALL THE ELEMENTS OF A LENGTH N ARRAY OF        00000400
+                                 17 *   DOUBLE PRECISION INTEGERS.                                          00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            ARRAY(N) INTEGER DP                      X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT R5            INTEGER DP                                00000900
+                                 25          WORK  R6,R7                                                    00001000
+0000006                          26+R6       EQU   6                                                        01-WORK
+0000007                          27+R7       EQU   7                                                        01-WORK
+                                 29 *                                                                       00001100
+                                 30 * ALGORITHM:                                                            00001200
+                                 31 *   SEE ALGORITHM DESCRIPTION IN DPROD                                  00001300
+                                 32 *                                                                       00001400
+00000 1EF7 0012      0014 0012   33          L     R6,=F'1'       INITIALIZE ACCUMULATOR                    00001500
+00002 4606           0002        34 LOOPI    M     R6,2(R2)       MULTIPLY BY NEXT ELEMENT                  00001600
+00003 FE06                0001   35          SRDL  R6,1           FIX ANSWER                                00001700
+00004 1EE6                       36          LR    R6,R6          CHECK FOR OVERFLOW TO R6                  00001800
+00005 DC14           000B 0005   37          BZ    OK             IF ZERO THEN STILL OK                     00001900
+00006 16F7 000A      0012 000A   38          C     R6,BIG         CHECK AGAIN                               00002000
+00008 DC08           000B 0002   39          BE    OK             IF ALL ONES THEN STILL OK                 00002100
+                                 40 *                                                                       00002200
+                                 41 *  IF PRODUCT TOO BIG FOR 32 BITS, THEN FORCE                           00002300
+                                 42 *  OVERFLOW TO SIGNAL POSSIBLE ERROR                                    00002400
+                                 43 *                                                                       00002500
+00009 06F7 0007      0012 0007   44          A     R6,BIG         ADD LARGE NUMBER TO FORCE OVERFLOW        00002600
+0000B 1EE7                       45 OK       LR    R6,R7          PUT PROD IN R6 FOR NEXT MULTIPLY          00002700
+0000C DC08           000F 0002   46          BZ    SHIFT          IF PROD = 0 THEN RETURN IMMEDIATELY       00002800
+0000D EA0A           0002        47          LA    R2,2(R2)       BUMP INPUT PTR TO NEXT ELEMENT            00002900
+0000E DD37           0002 000D   48          BCT   R5,LOOPI                                                 00003000
+0000F 1DE6                       49 SHIFT    LR    R5,R6          ANSWER EXPECTED IN R5                     00003100
+                                 50          AEXIT                                                          00003200
+                                 51+*********RETURN TO CALLER**********************************************
+00010                            52+         DS    0H                                                       01-AEXIT
+00010 C7EC                       53+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 54+***********************************************************************
+00011 C9FB
+00012 7FFFFFFF                   56 BIG      DC    F'2147483647'  X'7FFFFFFF'                               00003300
+                                 57          ACLOSE                                                         00003400
+00014                            58+         LTORG                                                          02-ERRPA
+00014 00000001                   59                =F'1'
+                                 60+****************ERROR PARAMETER AREA***********************************
+                                 61+***  NO ERRORS SENT IN IPROD                                            02-ERRPA
+                                 62+****************END OF ERROR PARAMETER AREA****************************
+                                 63+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+BIG          2   000012    56     38    44
+IPROD        1 00000000    13
+LOOPI        2   000002    34     48
+OK           1   00000B    45     37    39
+R2           1 00000002    20     34    34    47    47    47
+R5           1 00000005    21     48    49
+R6           1 00000006    26     33    34    35    36    36    38    44    45    49
+R7           1 00000007    27     45
+SHIFT        1   00000F    49     46
+$RET1        1   000010    53
+=F'1'        2   000014    59     33
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      39 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      90 LINES OUTPUT           5 CARDS OUTPUT

@@ -1,0 +1,104 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VX6D3     SD 0001 000000 000024
+¤
+         VX6D3--VECTOR CROSS PRODUCT, LENGTH 3 DP                                                              PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VX6D3    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VX6D3    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * TAKES THE CROSS PRODUCT OF V1 AND V2 WHERE V1 AND V2 ARE TWO          00000400
+                                 17 *   DOUBLE PRECISION 3 VECTORS.                                         00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            VECTOR(3) DP                             X00000700
+                                                   R3             VECTOR(3) DP                              00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000003                          21+R3       EQU   3                                                        01-INPUT
+                                 23          OUTPUT R1            VECTOR(3) DP                              00000900
+0000001                          24+R1       EQU   1                                                        01-OUTPU
+                                 26          WORK  F0,F1,F2,F3,F4,F5                                        00001000
+0000000                          27+F0       EQU   0                                                        01-WORK
+0000001                          28+F1       EQU   1                                                        01-WORK
+0000002                          29+F2       EQU   2                                                        01-WORK
+0000003                          30+F3       EQU   3                                                        01-WORK
+0000004                          31+F4       EQU   4                                                        01-WORK
+0000005                          32+F5       EQU   5                                                        01-WORK
+                                 34 *                                                                       00001100
+                                 35 * ALGORITHM:                                                            00001200
+                                 36 *   V1$(1) = V2$(2) V3$(3) - V3$(2) V2$(3)                              00001300
+                                 37 *   V1$(2) = V2$(3) V3$(1) - V3$(3) V2$(1)                              00001400
+                                 38 *   V1$(3) = V2$(1) V3$(2) - V3$(1) V2$(2)                              00001500
+                                 39 *                                                                       00001600
+00000 781B           000C        40          LE    F0,12(R3)                                                00001700
+00001 791F           000E        41          LE    F1,14(R3)      V3$(3)                                    00001800
+00002 30FA 0008      0008        42          MED   F0,8(R2)       V3$(3) V2$(2)                             00001900
+00004 7A13           0008        43          LE    F2,8(R3)                                                 00002000
+00005 7B17           000A        44          LE    F3,10(R3)      V3$(2)                                    00002100
+00006 32FA 000C      000C        45          MED   F2,12(R2)      V3$(2) V2$(3)                             00002200
+00008 7C1B           000C        46          LE    F4,12(R3)                                                00002300
+00009 7D1F           000E        47          LE    F5,14(R3)      V3$(3)                                    00002400
+0000A 34FA 0004      0004        48          MED   F4,4(R2)       V2$(1) V3$(3)                             00002500
+0000C 58EA                       49          SEDR  F0,F2          V2$(2) V3$(3) - V3$(2) V2$(3)             00002600
+0000D 7A0B           0004        50          LE    F2,4(R3)                                                 00002700
+0000E 7B0F           0006        51          LE    F3,6(R3)       V3$(1)                                    00002800
+0000F 32FA 000C      000C        52          MED   F2,12(R2)      V2$(3) V3$(1)                             00002900
+00011 5AEC                       53          SEDR  F2,F4          V2$(3) V3$(1) - V2$(1) V3$(3)             00003000
+00012 38F9 0004      0004        54          STED  F0,4(R1)       STORE V1$(1)                              00003100
+00014 3AF9 0008      0008        55          STED  F2,8(R1)       STORE V1$(2)                              00003200
+00016 7813           0008        56          LE    F0,8(R3)                                                 00003300
+00017 7917           000A        57          LE    F1,10(R3)      V3$(2)                                    00003400
+00018 30FA 0004      0004        58          MED   F0,4(R2)       V2$(1) V3$(2)                             00003500
+0001A 7A0B           0004        59          LE    F2,4(R3)                                                 00003600
+0001B 7B0F           0006        60          LE    F3,6(R3)       V3$(1)                                    00003700
+0001C 32FA 0008      0008        61          MED   F2,8(R2)       V2$(2) V3$(1)                             00003800
+0001E 58EA                       62          SEDR  F0,F2          V2$(1) V3$(2) - V2$(2) V3$(1)             00003900
+0001F 38F9 000C      000C        63          STED  F0,12(R1)                                                00004000
+                                 64          AEXIT                                                          00004100
+                                 65+*********RETURN TO CALLER**********************************************
+00021                            66+         DS    0H                                                       01-AEXIT
+00021 9B24           0009        67+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+00022 9914           0005        68+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00023 C7EC                       69+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 70+***********************************************************************
+                                 72          ACLOSE                                                         00004200
+00024                            73+         LTORG                                                          02-ERRPA
+                                 74+****************ERROR PARAMETER AREA***********************************
+                                 75+***  NO ERRORS SENT IN VX6D3                                            02-ERRPA
+                                 76+****************END OF ERROR PARAMETER AREA****************************
+                                 77+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+F0           1 00000000    27     40    42    49    54    56    58    62    63
+F1           1 00000001    28     41    57
+F2           1 00000002    29     43    45    49    50    52    53    55    59    61    62
+F3           1 00000003    30     44    51    60
+F4           1 00000004    31     46    48    53
+F5           1 00000005    32     47
+R1           1 00000001    24     54    54    55    55    63    63
+R2           1 00000002    20     42    42    45    45    48    48    52    52    58    58    61    61
+R3           1 00000003    21     40    40    41    41    43    43    44    44    46    46    47    47    50    50    51
+                                  51    56    56    57    57    59    59    60    60
+VX6D3        1 00000000    13
+$RET1        1   000023    69
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      47 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+     104 LINES OUTPUT           5 CARDS OUTPUT

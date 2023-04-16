@@ -1,0 +1,116 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VV8D3     SD 0001 000000 00000C
+VV8DN     LD      000001        0001
+¤
+         VV8D3--VECTOR COMPARISON, LENGTH 3 AND N, SP                                                          PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV8D3    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV8D3    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * COMPARES V1 AND V2 WHERE V1 AND V2 ARE DOUBLE PRECISION 3 VECTORS     00000400
+                                 17 *                                                                       00000500
+                                 18          INPUT R2,            VECTOR(3) DP                             X00000600
+                                                   R3             VECTOR(3)                                 00000700
+0000002                          19+R2       EQU   2                                                        01-INPUT
+0000003                          20+R3       EQU   3                                                        01-INPUT
+                                 22          OUTPUT CC                                                      00000800
+                                 24          WORK  R1,R5,F0                                                 00000900
+0000001                          25+R1       EQU   1                                                        01-WORK
+0000005                          26+R5       EQU   5                                                        01-WORK
+0000000                          27+F0       EQU   0                                                        01-WORK
+                                 29 *                                                                       00001000
+                                 30 * ALGORITHM:                                                            00001100
+                                 31 *   DO FOR I = N TO 1 BY -1;                                            00001200
+                                 32 *     IF V1$(I) ^= V2$(I) THEN                                          00001300
+                                 33 *       EXIT;                                                           00001400
+                                 34 *   END;                                                                00001500
+                                 35 *   IF I = 0 THEN                                                       00001600
+                                 36 *     RETURN TRUE;                                                      00001700
+                                 37 *   ELSE                                                                00001800
+                                 38 *     RETURN FALSE;                                                     00001900
+                                 39 *                                                                       00002000
+00000 BDE5                0005   40          LFXI  R5,3                                                     00002100
+                                 41 VV8DN    AENTRY                                                         00002200
+                                 42+***********************************************************************
+                                 43+*
+                                 44+*        SECONDARY ENTRY POINT
+                                 45+*
+                                 46+***********************************************************************
+00001                            47+VV8DN    DS    0H                                                       01-AENTR
+                                 48+         ENTRY VV8DN                                                    01-AENTR
+                                 50 *                                                                       00002300
+                                 51 * COMPARES V1 AND V2 WHERE V1 AND V2 ARE DOUBLE PRECISION VECTORS OF    00002400
+                                 52 *   LENGTH N WHERE N IS NOT EQUAL TO 3.                                 00002500
+                                 53 *                                                                       00002600
+                                 54          INPUT R2,            VECTOR(N) DP                             X00002700
+                                                   R3,            VECTOR(N) DP                             X00002800
+                                                   R5             INTEGER(N) SP                             00002900
+                                 56          OUTPUT CC                                                      00003000
+                                 58          WORK  R1,F0                                                    00003100
+                                 60 *                                                                       00003200
+                                 61 * ALGORITHM:                                                            00003300
+                                 62 *   DO FOR I = N TO 1 BY -1;                                            00003400
+                                 63 *     IF V1$(I) ^= V2$(I) THEN                                          00003500
+                                 64 *       EXIT;                                                           00003600
+                                 65 *   END;                                                                00003700
+                                 66 *   IF I = 0 THEN                                                       00003800
+                                 67 *     RETURN TRUE;                                                      00003900
+                                 68 *   ELSE                                                                00004000
+                                 69 *     RETURN FALSE;                                                     00004100
+                                 70 *                                                                       00004200
+00001 19E3                       71          LR    R1,R3          MORE CONVENIENT FOR ADDRESING             00004300
+00002 78FE A000      0000        72 VV8DNL   LED   F0,0(R5,R2)    GET ELEMENT FROM INPUT                    00004400
+00004 58FD A000      0000        73          SED   F0,0(R5,R1)    COMPARE WITH CORREPONDING ELEMENT         00004500
+00006 DB04           0008 0001   74          BNE   VV8DNEQ        EXIT IF NOT EQUAL                         00004600
+00007 DD1B           0002 0006   75          BCTB  R5,VV8DNL                                                00004700
+                                 76 VV8DNEQ  AEXIT CC=(R5)                                                  00004800
+                                 77+*********RETURN TO CALLER**********************************************
+i00008                            78+VV8DNEQ  DS    0H                                                       01-AEXIT
+         VV8D3--VECTOR COMPARISON, LENGTH 3 AND N, SP                                                          PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+00008 9B24           0009        79+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+00009 9914           0005        80+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0000A 1DE5                       81+         LR    R5,R5          SET CONDITION CODE                        01-AEXIT
+0000B C7EC                       82+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 83+***********************************************************************
+                                 85          ACLOSE                                                         00004900
+0000C                            86+         LTORG                                                          02-ERRPA
+                                 87+****************ERROR PARAMETER AREA***********************************
+                                 88+***  NO ERRORS SENT IN VV8D3                                            02-ERRPA
+                                 89+****************END OF ERROR PARAMETER AREA****************************
+                                 90+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+F0           1 00000000    27     72    73
+R1           1 00000001    25     71    73
+R2           1 00000002    19     72
+R3           1 00000003    20     71
+R5           1 00000005    26     40    72    72    73    73    75    81    81
+VV8D3        1 00000000    13
+VV8DN        1   000001    47     48
+VV8DNEQ      1   000008    78     74
+VV8DNL       2   000002    72     75
+$RET1        1   00000B    82
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      54 CARDS FROM SYSIN     404 CARDS FROM SYSLIB
+     116 LINES OUTPUT           5 CARDS OUTPUT

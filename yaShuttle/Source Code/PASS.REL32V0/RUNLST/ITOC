@@ -1,0 +1,232 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+ITOC      SD 0001 000000 000068
+HTOC      LD      000003        0001
+¤
+         ITOC -- INTERNAL INTEGER TO CHARACTER CONVERSION                                                      PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 ARG      DS    F                                                        00000400
+                                 10 CHARSTR  DS    8H                                                       00000500
+                                 11          MEND                                                           00000600
+                                 12 *                                                                       00000700
+                                 13 ITOC     AMAIN                                                          00000800
+                                 14+***********************************************************************
+                                 15+*
+                                 16+*        PRIMARY ENTRY POINT
+                                 17+*
+                                 18+***********************************************************************
+00000                            19+ITOC     CSECT                                                          01-AMAIN
+00000                            20+STACK    DSECT                                                          01-AMAIN
+                                 21+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            22+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            23+         DS    2F             R0,R1                                     01-AMAIN
+00006                            24+ARG2     DS    F              R2                                        01-AMAIN
+00008                            25+         DS    F              R3                                        01-AMAIN
+0000A                            26+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            27+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            28+ARG6     DS    F              R6                                        01-AMAIN
+00010                            29+ARG7     DS    F              R7                                        01-AMAIN
+                                 30+*        END OF STANDARD STACK AREA
+00012                            31+ARG      DS    F                                                        02-00009
+00014                            32+CHARSTR  DS    8H                                                       02-00010
+0001C                            33+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            34+ITOC     CSECT                                                          01-AMAIN
+0000000                          35+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   36+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 38 *                                                                       00000900
+                                 39 *  CONVERTS INTEGER DP TO CHARACTER                                     00001000
+                                 40 *                                                                       00001100
+                                 41          INPUT R5             INTEGER  DP                               00001200
+0000005                          42+R5       EQU   5                                                        01-INPUT
+                                 44          OUTPUT R2            CHARACTER                                 00001300
+0000002                          45+R2       EQU   2                                                        01-OUTPU
+                                 47          WORK  R1,R3,R4,R6                                              00001400
+0000001                          48+R1       EQU   1                                                        01-WORK
+0000003                          49+R3       EQU   3                                                        01-WORK
+0000004                          50+R4       EQU   4                                                        01-WORK
+0000006                          51+R6       EQU   6                                                        01-WORK
+                                 53 *                                                                       00001500
+                                 54 *                                                                       00001600
+                                 55 *                                                                       00001700
+00002 DF0C           0006 0003   56          B     MERGE                                                    00001800
+                                 57 *                                                                       00001900
+                                 58 HTOC     AENTRY                                                         00002000
+                                 59+***********************************************************************
+                                 60+*
+                                 61+*        SECONDARY ENTRY POINT
+                                 62+*
+                                 63+***********************************************************************
+00003                            64+HTOC     DS    0H                                                       01-AENTR
+                                 65+         ENTRY HTOC                                                     01-AENTR
+00003 B624 0000      0009 0000   66+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 68 *                                                                       00002100
+                                 69 *  CONVERT INTEGER SP TO CHARACTER                                      00002200
+                                 70 *                                                                       00002300
+                                 71          INPUT R5             INTEGER  SP                               00002400
+                                 73          OUTPUT R2            CHARACTER                                 00002500
+                                 75          WORK  R1,R3,R4,R6                                              00002600
+                                 77 *                                                                       00002700
+                                 78 *                                                                       00002800
+                                 79 *                                                                       00002900
+00005 F541                0010   80          SRA   R5,16                                                    00003000
+i                                 81 *                                                                       00003100
+         ITOC -- INTERNAL INTEGER TO CHARACTER CONVERSION                                                      PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+00006 3524           0012        82 MERGE    ST    R5,ARG                                                   00003200
+00007 1EE5                       83          LR    R6,R5                                                    00003300
+00008 DD04           000A 0001   84          BNM   GETADR                                                   00003400
+00009 EEEE                       85          LACR  R6,R6                                                    00003500
+0000A ED6C           001B        86 GETADR   LA    R5,CHARSTR+7                                             00003600
+0000B 19E6                       87          LR    R1,R6                                                    00003700
+0000C FE12                0004   88 POSINT   SRDL  R6,4                                                     00003800
+0000D 4EF7 0057      0066 0057   89          D     R6,TEN                                                   00003900
+0000F 1BE6                       90          LR    R3,R6          X/10 IN R3                                00004000
+00010 46F7 0054      0066 0054   91          M     R6,TEN                                                   00004100
+00012 FE10                0004   92          SLDL  R6,4                                                     00004200
+00013 09E6                       93          SR    R1,R6          GET DIGIT                                 00004300
+00014 F140                0010   94          SLL   R1,16                                                    00004400
+00015 1CE1                       95          LR    R4,R1          LOW DIGIT IN R4                           00004500
+                                 96 *  END OF FIRST CYCLE                                                   00004600
+00016 1EE3                       97          LR    R6,R3                                                    00004700
+00017 DC4C           002B 0013   98          BZ    ENDTRAN1                                                 00004800
+00018 19E3                       99          LR    R1,R3                                                    00004900
+00019 FE12                0004  100          SRDL  R6,4                                                     00005000
+0001A 4EF7 004A      0066 004A  101          D     R6,TEN                                                   00005100
+0001C 1BE6                      102          LR    R3,R6                                                    00005200
+0001D 46F7 0047      0066 0047  103          M     R6,TEN                                                   00005300
+0001F FE10                0004  104          SLDL  R6,4                                                     00005400
+00020 09E6                      105          SR    R1,R6                                                    00005500
+00021 F160                0018  106          SLL   R1,24                                                    00005600
+00022 B0E1 3030           3030  107          AHI   R1,X'3030'                                               00005700
+00024 04E1                      108          AR    R4,R1                                                    00005800
+00025 1EE3                      109          LR    R6,R3                                                    00005900
+00026 DC88           0049 0022  110          BZ    ENDTRAN2                                                 00006000
+00027 BCF7 A000      0000       111          STH   R4,0(R5,3)                                               00006100
+00029 19E3                      112          LR    R1,R3                                                    00006200
+0002A DD7F           000C 001F  113          BCT   R5,POSINT                                                00006300
+                                114 *                                                                       00006400
+                                115 *  GET SIGN AND ALIGN CHARACTER STRING                                  00006500
+                                116 *                                                                       00006600
+0002B B348 8000      0012 8000  117 ENDTRAN1 TB    ARG,X'8000'                                              00006700
+0002D D914           0033 0005  118          BO    MINUS1         CORRECTLY ALIGNED IF NEGATIVE             00006800
+0002E B0E4 0030           0030  119          AHI   R4,X'0030'                                               00006900
+00030 B0E5 0001           0001  120          AHI   R5,1                                                     00007000
+00032 DF74           0050 001D  121          B     PLUS2                                                    00007100
+                                122 *                                                                       00007200
+00033 B0E4 2D30           2D30  123 MINUS1   AHI   R4,X'2D30'                                               00007300
+00035 BC06           0001       124 STORE1   STH   R4,1(R2)                                                 00007400
+                                125 * PUT IN LENGTH                                                         00007500
+00036 EB70           001C       126          LA    R3,CHARSTR+8                                             00007600
+00037 0BE5                      127          SR    R3,R5                                                    00007700
+00038 F304                0001  128          SLL   R3,1           BYTE LENGTH                               00007800
+00039 9E02           0000       129          LH    R6,0(R2)                                                 00007900
+0003A B6E6 FF00           FF00  130          NHI   R6,X'FF00'                                               00008000
+0003C 06E3                      131          AR    R6,R3                                                    00008100
+0003D BE02           0000       132          STH   R6,0(R2)                                                 00008200
+0003E F306                0001  133          SRL   R3,1           HALFWORD COUNT                            00008300
+0003F D3F7 0001      0042 0001  134 PLOOP1   BCT   R3,CONT                                                  00008400
+00041 DF88           0064 0022  135          B     EXIT                                                     00008500
+00042 EA06           0001       136 CONT     LA    R2,1(R2)                                                 00008600
+00043 EDF7 A001      0001       137          LA    R5,1(R5,3)                                               00008700
+00045 9CF7 A000      0000       138          LH    R4,0(R5,3)                                               00008800
+00047 BC06           0001       139          STH   R4,1(R2)                                                 00008900
+00048 DF2A           003F 000A  140          B     PLOOP1                                                   00009000
+                                141 *                                                                       00009100
+                                142 * OFFSET BY ONE BYTE                                                    00009200
+                                143 *                                                                       00009300
+00049 B348 8000      0012 8000  144 ENDTRAN2 TB    ARG,X'8000'                                              00009400
+0004B DC5E           0035 0017  145          BZ    STORE1         CORRECTLY ALIGNED IF NOT NEGATIVE         00009500
+0004C BCF7 A000      0000       146          STH   R4,0(R5,3)                                               00009600
+0004E ECF3 002D      002D       147          LHI   R4,X'002D'                                               00009700
+                                148 * PUT IN LENGTH                                                         00009800
+00050 EB70           001C       149 PLUS2    LA    R3,CHARSTR+8                                             00009900
+00051 0BE5                      150          SR    R3,R5                                                    00010000
+00052 F304                0001  151          SLL   R3,1                                                     00010100
+00053 EB07           0001       152          LA    R3,1(R3)       LENGTH IN BYTES                           00010200
+00054 9E02           0000       153          LH    R6,0(R2)                                                 00010300
+00055 B6E6 FF00           FF00  154          NHI   R6,X'FF00'                                               00010400
+00057 06E3                      155          AR    R6,R3                                                    00010500
+00058 BE02           0000       156          STH   R6,0(R2)                                                 00010600
+00059 EB07           0001       157          LA    R3,1(R3)                                                 00010700
+0005A F306                0001  158          SRL   R3,1           REMAINING HALFWORD COUNT                  00010800
+                                159 *                                                                       00010900
+0005B 84FF A000      0000       160 PLOOP2   IHL   R4,0(R5,3)                                               00011000
+i0005D F420                0008  161          SLL   R4,8                                                     00011100
+         ITOC -- INTERNAL INTEGER TO CHARACTER CONVERSION                                                      PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+0005E BC06           0001       162          STH   R4,1(R2)                                                 00011200
+0005F F420                0008  163          SLL   R4,8                                                     00011300
+00060 EA06           0001       164          LA    R2,1(R2)                                                 00011400
+00061 EDF7 A001      0001       165          LA    R5,1(R5,3)                                               00011500
+00063 DB27           005B 0009  166          BCT   R3,PLOOP2                                                00011600
+                                167 *                                                                       00011700
+                                168 EXIT     AEXIT                                                          00011800
+                                169+*********RETURN TO CALLER**********************************************
+00064                           170+EXIT     DS    0H                                                       01-AEXIT
+00064 97E8                      171+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                172+***********************************************************************
+                                174 *                                                                       00011900
+00065 C9FB
+00066 50000000                  175 TEN      DC    F'0.625'                                                 00012000
+                                176          ACLOSE                                                         00012100
+00068                           177+         LTORG                                                          02-ERRPA
+                                178+****************ERROR PARAMETER AREA***********************************
+                                179+***  NO ERRORS SENT IN ITOC                                             02-ERRPA
+                                180+****************END OF ERROR PARAMETER AREA****************************
+                                181+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ARG          2   000012    31     82   117   144
+ARG2         2   000006    24
+ARG4         2   00000A    26
+ARG5         2   00000C    27
+ARG6         2   00000E    28
+ARG7         2   000010    29
+CHARSTR      1   000014    32     86   126   149
+CONT         2   000042   136    134
+ENDTRAN1     2   00002B   117     98
+ENDTRAN2     2   000049   144    110
+EXIT         1   000064   170    135
+GETADR       2   00000A    86     84
+HTOC         1   000003    64     65
+ITOC         1 00000000    19     34
+MERGE        2   000006    82     56
+MINUS1       2   000033   123    118
+PLOOP1       2   00003F   134    140
+PLOOP2       2   00005B   160    166
+PLUS2        2   000050   149    121
+POSINT       1   00000C    88    113
+R1           1 00000001    48     87    93    94    95    99   105   106   107   108   112
+R2           1 00000002    45    124   124   129   129   132   132   136   136   136   139   139   153   153   156   156
+                                 162   162   164   164   164
+R3           1 00000003    49     90    97    99   102   109   112   126   127   128   131   133   134   149   150   151
+                                 152   152   152   155   157   157   157   158   166
+R4           1 00000004    50     95   108   111   119   123   124   138   139   146   147   160   161   162   163
+R5           1 00000005    42     80    82    83    86   111   111   113   120   127   137   137   137   138   138   146
+                                 146   150   160   160   165   165   165
+R6           1 00000006    51     83    85    85    87    88    89    90    91    92    93    97   100   101   102   103
+                                 104   105   109   129   130   131   132   153   154   155   156
+STACK        1 00000000    20     35
+STACKEND     2   00001C    33
+STORE1       2   000035   124    145
+TEN          2   000066   175     89    91   101   103
+$RET1        1   000064   171
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     126 CARDS FROM SYSIN     404 CARDS FROM SYSLIB
+     232 LINES OUTPUT          13 CARDS OUTPUT

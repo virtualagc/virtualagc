@@ -1,0 +1,73 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+GTBYTE    SD 0001 000000 00000E
+¤
+         GTBYTE--INTRINSIC USED FOR CHARACTER MANIPULATION                                                     PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 GTBYTE   AMAIN INTSIC=INTERNAL                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+GTBYTE   CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *  FETCHES ONE CHARACTER FROM A CHARACTER STRING. USED FOR CHARACTER    00000400
+                                 17 * MANIPULATION BY OTHER LIBRARY ROUTINES                                00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2             POINTER                                   00000700
+0000002                          20+R2       EQU   2                                                        01-INPUT
+                                 22          OUTPUT R5            SINGLE CHARACTER                          00000800
+0000005                          23+R5       EQU   5                                                        01-OUTPU
+                                 25          WORK R4,F0                                                     00000900
+0000004                          26+R4       EQU   4                                                        01-WORK
+0000000                          27+F0       EQU   0                                                        01-WORK
+00000 28EC                       29          LFLR  F0,R4                                                    00001000
+00001 9D06           0001        30          LH    R5,1(R2)                                                 00001100
+00002 1CF7 0008      000C 0008   31          L     R4,BYTEDISP                                              00001200
+00004 02E4                       32          AR    R2,R4                                                    00001300
+00005 24E2                       33          NR    R4,R2                                                    00001400
+00006 24E8                       34          LFXR  R4,F0                                                    00001500
+00007 DC04           0009 0001   35          BZ    LOWER                                                    00001600
+00008 F522                0008   36          SRL   R5,8                                                     00001700
+00009 B6E5 00FF           00FF   37 LOWER    NHI   R5,X'00FF'                                               00001800
+                                 38          AEXIT                                                          00001900
+                                 39+*********RETURN TO CALLER**********************************************
+0000B                            40+         DS    0H                                                       01-AEXIT
+0000B C7E4                       41+$RET1    BCR   7,4            RETURN TO CALLER                          01-AEXIT
+                                 42+***********************************************************************
+0000C                            44          DS    0F                                                       00002000
+0000C 00008000                   45 BYTEDISP DC    X'00008000'                                              00002100
+                                 46          ACLOSE                                                         00002200
+0000E                            47+         LTORG                                                          02-ERRPA
+                                 48+****************ERROR PARAMETER AREA***********************************
+                                 49+***  NO ERRORS SENT IN GTBYTE                                           02-ERRPA
+                                 50+****************END OF ERROR PARAMETER AREA****************************
+                                 51+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+BYTEDISP     2   00000C    45     31
+F0           1 00000000    27     29    34
+GTBYTE       1 00000000    13
+LOWER        2   000009    37     35
+R2           1 00000002    20     30    30    32    33
+R4           1 00000004    26     29    31    32    33    34
+R5           1 00000005    23     30    36    37
+$RET1        1   00000B    41
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      27 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      73 LINES OUTPUT           5 CARDS OUTPUT

@@ -1,0 +1,316 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DMOD      SD 0001 000000 000098
+#LDMOD    SD 0002 000098 000004
+¤
+                                                                                                               PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+i                                  1 *                                                                       00000401
+         DMOD - MOD FUNCTION, DOUBLE PREC. SCALAR                                                              PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  3 *
+                                  4 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  5 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  6 * A BASE REGISTER. (CR12620)
+                                  7 *
+                                  8 DMOD     AMAIN INTSIC=YES                                               00000600
+                                  9+***********************************************************************
+                                 10+*
+                                 11+*        PRIMARY ENTRY POINT
+                                 12+*
+                                 13+***********************************************************************
+00000                            14+DMOD     CSECT                                                          01-AMAIN
+                                 16 *                                                                       00000700
+                                 17 *   COMPUTES THE MOD INSTRUCTION :                                      00000803
+                                 18 *                                                                       00000900
+                                 19 *    MOD(A,B)                                                           00001000
+                                 20 *                                                                       00001100
+                                 21 *   WHERE  A OR B OR BOTH ARE DP                                        00001200
+                                 22 *                                                                       00001300
+                                 23 * REVISION HISTORY :                                                    00001405
+                                 24 *                                                                       00001505
+                                 25 * 16 JAN 89 - ROBERT HANDLEY - DR63480                                  00001605
+                                 26 *   REPLACED IDEDR MACRO WITH DEDR INSTRUCTION. ALSO HAD TO ADD A CED   00001711
+                                 27 *   INSTRUCTION FOLLOWING THE DEDR BECAUSE THE IDEDR MACRO SET THE      00002011
+                                 28 *   CONDITION CODE WHICH IS TESTED FOR LATER FOR A RESULT OF ZERO.      00002211
+                                 29 *   SINCE THE DEDR INSTRUCTION DOES NOT SET THE CONDITION CODE A CHECK  00002311
+                                 30 *   FOR A ZERO RESULT WAS ADDED TO SET THE CONDITION CODE.              00002511
+                                 31 *   BECAUSE OF THE REMOVAL THE IDEDR MACRO THIS ROUTINE WILL NO LONGER  00002712
+                                 32 *   WORK ON THE AP101/B.                                                00002812
+                                 33 *                                                                       00002912
+                                 34 * 16 DEC 89 - JOYCE CRAWLEY - DR103762                                  00003016
+                                 35 *   REPLACED QCED MACRO WITH CED INSTRUCTION                            00003116
+                                 36 *                                                                       00003216
+                                 37 * 26 JAN 93 - ROBERT HANDLEY - DR103781,CR11163,CR11164
+                                 38 *   DR103781 - REVISED ALGORITHM TO REMOVE FLAWED FLOOR FUNCTION
+                                 39 *   CR11163  - REPLACED BROKEN CEDR INTRUCTIONS WITH IBMCEDR MACRO
+                                 40 *   CR11164  - REPLACED BROKEN DEDR INTRUCTIONS WITH I2DEDR MACRO
+                                 41 *
+                                 42          INPUT F0,            SCALAR  DP                               X00003313
+                                                   F2             SCALAR  DP                                00003400
+0000000                          43+F0       EQU   0                                                        01-INPUT
+0000002                          44+F2       EQU   2                                                        01-INPUT
+                                 46          OUTPUT F0            SCALAR  DP                                00003500
+                                 48          WORK  F1,F3,F4,F5,F6,F7                                        00003600
+0000001                          49+F1       EQU   1                                                        01-WORK
+0000003                          50+F3       EQU   3                                                        01-WORK
+0000004                          51+F4       EQU   4                                                        01-WORK
+0000005                          52+F5       EQU   5                                                        01-WORK
+                                 53+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+0000006                          54+F6       EQU   6                                                        01-WORK
+0000007                          55+F7       EQU   7                                                        01-WORK
+                                 57 *                                                                       00003700
+00000 7AE2                       58          LER   F2,F2      CHECK B
+00001 D91C           0009 0007   59          BP    MOD         IF B POSITIVE, CONTINUE
+00002 DA14           0008 0005   60          BM    COMPB       IF B NEGATIVE, COMPLEMENT B
+00003 78E0                       61          LER   F0,F0      SPECIAL CASE: B=0, CHECK A
+00004 C5F7 0089      008F 0089   62          BNM   EXIT        IF A>=0, RETURN A
+00006 C7F7 0084      008C 0084   63          B     LOGERR      ELSE LOG ERROR, RETURN ZERO
+                                 64 *
+00008 7AEA                       65 COMPB    LECR  F2,F2      USE |B|
+00009 7DE1                       66 MOD      LER   F5,F1      COPY A INTO F4,F5
+0000A 7CE0                       67          LER   F4,F0
+0000B C2F7 004C      0059 004C   68          BN    NEGA
+                                 69 *
+                                 70 * A IS POSITIVE
+                                 71 *
+                                 72          IBMCEDR F4,F2    PREDIVIDE CHECK: A < |B|?
+0000D 4CEA                       73+         CER   F4,F2                                                    01-IBMCE
+0000E DB2C           001A 000B   74+         BNE   SKIP1                                                    01-IBMCE
+0000F 1CEA                       75+         CEDR  F4,F2                                                    01-IBMCE
+00010 DB24           001A 0009   76+         BNE   SKIP1                                                    01-IBMCE
+00011 4DEB                       77+         CER   F4+1,F2+1                                                01-IBMCE
+00012 DC1C           001A 0007   78+         BE    SKIP1                                                    01-IBMCE
+00013 7CE4                       79+         LER   F4,F4           IF NOT EQUAL THEN SET CC                 01-IBMCE
+00014 DA0C           0018 0003   80+         BN    NEGA1                                                    01-IBMCE
+i00015 10F7 007D      0094 007D   81+         C     0,=X'7FFFFFFF'  COMPARE TO STACK ADDRESS TO SET CC=11    01-IBMCE
+         DMOD - MOD FUNCTION, DOUBLE PREC. SCALAR                                                              PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00017 DF08           001A 0002   82+         B     SKIP1                                                    01-IBMCE
+00018 10F7 007C      0096 007C   83+NEGA1    C     0,=X'80000000'  COMPARE TO STACK ADDRESS TO SET CC=01    01-IBMCE
+0001A                            84+SKIP1    DS    0H                                                       01-IBMCE
+0001A C2F7 0073      008F 0073   85          BL    EXIT        IF TRUE, RETURN A
+                                 86          I2DEDR F4,F2,F0,F6  A/|B|
+0001C 78E4                       87+         LER   F0,F4                                                    01-I2DED
+0001D 79E5                       88+         LER   F0+1,F4+1                                                01-I2DED
+                                 89+*  ROUGH APPROXIMATION IS X/Y
+0001E 6CE2                       90+         DER   F4,F2                                                    01-I2DED
+                                 91+*  FIRST ITERATION
+0001F 8DE0                0000   92+         LFLI  F4+1,0             RAH 1/5/93                            01-I2DED
+00020 7EE4                       93+         LER   F6,F4                                                    01-I2DED
+00021 7FE5                       94+         LER   F6+1,F4+1                                                01-I2DED
+00022 36EA                       95+         MEDR  F6,F2                                                    01-I2DED
+00023 5EE8                       96+         SEDR  F6,F0                                                    01-I2DED
+00024 6EE2                       97+         DER   F6,F2                                                    01-I2DED
+00025 8FE0                0000   98+         LFLI  F6+1,0             RAH 1/5/93                            01-I2DED
+00026 5CEE                       99+         SEDR  F4,F6                                                    01-I2DED
+                                100+*  SECOND ITERATION
+00027 7EE4                      101+         LER   F6,F4              RAH 1/5/93                            01-I2DED
+00028 7FE5                      102+         LER   F6+1,F4+1          RAH 1/5/93                            01-I2DED
+00029 36EA                      103+         MEDR  F6,F2              RAH 1/5/93                            01-I2DED
+0002A 5EE8                      104+         SEDR  F6,F0              RAH 1/5/93                            01-I2DED
+0002B 6EE2                      105+         DER   F6,F2              RAH 1/5/93                            01-I2DED
+0002C 8FE0                0000  106+         LFLI  F6+1,0             RAH 1/5/93                            01-I2DED
+0002D 5CEE                      107+         SEDR  F4,F6              RAH 1/5/93                            01-I2DED
+0002E 54FF 0060      0090 0060  108          AED   F4,BIGNUM  FLOOR(A/|B|)
+00030 5CFF 005E      0090 005E  109          SED   F4,BIGNUM
+00032 34EA                      110          MEDR  F4,F2      |B| * FLOOR(A/|B|)
+00033 58EC                      111          SEDR  F0,F4      A - |B| * FLOOR(A/|B|)
+                                112 *
+                                113 * PERFORM EXIT VALIDATION CHECKS
+                                114 *
+00034 DA80           0055 0020  115 VALID8   BM    VLOW
+                                116 VHI      IBMCEDR F0,F2    ANS >= 0
+00035 48EA                      117+VHI      CER   F0,F2                                                    01-IBMCE
+00036 DB2C           0042 000B  118+         BNE   SKIP2                                                    01-IBMCE
+00037 18EA                      119+         CEDR  F0,F2                                                    01-IBMCE
+00038 DB24           0042 0009  120+         BNE   SKIP2                                                    01-IBMCE
+00039 49EB                      121+         CER   F0+1,F2+1                                                01-IBMCE
+0003A DC1C           0042 0007  122+         BE    SKIP2                                                    01-IBMCE
+0003B 78E0                      123+         LER   F0,F0           IF NOT EQUAL THEN SET CC                 01-IBMCE
+0003C DA0C           0040 0003  124+         BN    NEGA2                                                    01-IBMCE
+0003D 10F7 0055      0094 0055  125+         C     0,=X'7FFFFFFF'  COMPARE TO STACK ADDRESS TO SET CC=11    01-IBMCE
+0003F DF08           0042 0002  126+         B     SKIP2                                                    01-IBMCE
+00040 10F7 0054      0096 0054  127+NEGA2    C     0,=X'80000000'  COMPARE TO STACK ADDRESS TO SET CC=01    01-IBMCE
+00042                           128+SKIP2    DS    0H                                                       01-IBMCE
+00042 C2F7 004B      008F 004B  129          BL    EXIT        IF ANS < |B|, VALID ANS, RETURN
+00044 58EA                      130          SEDR  F0,F2       ELSE ADJUST FOR 1 LOST |B|
+                                131          IBMCEDR F0,F2
+00045 48EA                      132+         CER   F0,F2                                                    01-IBMCE
+00046 DB2C           0052 000B  133+         BNE   SKIP3                                                    01-IBMCE
+00047 18EA                      134+         CEDR  F0,F2                                                    01-IBMCE
+00048 DB24           0052 0009  135+         BNE   SKIP3                                                    01-IBMCE
+00049 49EB                      136+         CER   F0+1,F2+1                                                01-IBMCE
+0004A DC1C           0052 0007  137+         BE    SKIP3                                                    01-IBMCE
+0004B 78E0                      138+         LER   F0,F0           IF NOT EQUAL THEN SET CC                 01-IBMCE
+0004C DA0C           0050 0003  139+         BN    NEGA3                                                    01-IBMCE
+0004D 10F7 0045      0094 0045  140+         C     0,=X'7FFFFFFF'  COMPARE TO STACK ADDRESS TO SET CC=11    01-IBMCE
+0004F DF08           0052 0002  141+         B     SKIP3                                                    01-IBMCE
+00050 10F7 0044      0096 0044  142+NEGA3    C     0,=X'80000000'  COMPARE TO STACK ADDRESS TO SET CC=01    01-IBMCE
+00052                           143+SKIP3    DS    0H                                                       01-IBMCE
+00052 C2F7 003B      008F 003B  144          BL    EXIT       NOW IF ANS < |B|, VALID ANS, RETURN
+00054 DFCC           0088 0033  145          B     FIXUP       ELSE MAJOR FAULT, TAKE FIXUP RETURN
+                                146 *
+00055 50EA                      147 VLOW     AEDR  F0,F2      ANS < 0, MAY MEAN 1 LOST |B|
+00056 C5F7 0037      008F 0037  148          BNM   EXIT       NOW IF ANS >= 0, VALID ANS, RETURN
+00058 DFBC           0088 002F  149          B     FIXUP       ELSE MAJOR FAULT, TAKE FIXUP RETURN
+                                150 *
+                                151 * A IS NEGATIVE
+                                152 *
+00059 7CEC                      153 NEGA     LECR  F4,F4      USE |A|
+                                154          IBMCEDR F4,F2    PREDIVIDE CHECK: A < |B|?
+0005A 4CEA                      155+         CER   F4,F2                                                    01-IBMCE
+0005B DB2C           0067 000B  156+         BNE   SKIP4                                                    01-IBMCE
+0005C 1CEA                      157+         CEDR  F4,F2                                                    01-IBMCE
+0005D DB24           0067 0009  158+         BNE   SKIP4                                                    01-IBMCE
+0005E 4DEB                      159+         CER   F4+1,F2+1                                                01-IBMCE
+0005F DC1C           0067 0007  160+         BE    SKIP4                                                    01-IBMCE
+i00060 7CE4                      161+         LER   F4,F4           IF NOT EQUAL THEN SET CC                 01-IBMCE
+         DMOD - MOD FUNCTION, DOUBLE PREC. SCALAR                                                              PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00061 DA0C           0065 0003  162+         BN    NEGA4                                                    01-IBMCE
+00062 10F7 0030      0094 0030  163+         C     0,=X'7FFFFFFF'  COMPARE TO STACK ADDRESS TO SET CC=11    01-IBMCE
+00064 DF08           0067 0002  164+         B     SKIP4                                                    01-IBMCE
+00065 10F7 002F      0096 002F  165+NEGA4    C     0,=X'80000000'  COMPARE TO STACK ADDRESS TO SET CC=01    01-IBMCE
+00067                           166+SKIP4    DS    0H                                                       01-IBMCE
+00067 DD08           006A 0002  167          BHE   AGEB        IF |A| >= |B|, CONTINUE WITH ROUTINE
+00068 50EA                      168          AEDR  F0,F2       ELSE A + |B| IS THE ANS
+00069 DFDA           0034 0036  169          B     VALID8     VALIDATE FOR =|B| CASE
+                                170 AGEB     I2DEDR F4,F2,F0,F6  CALCULATE |A|/|B|
+0006A 78E4                      171+AGEB     LER   F0,F4                                                    01-I2DED
+0006B 79E5                      172+         LER   F0+1,F4+1                                                01-I2DED
+                                173+*  ROUGH APPROXIMATION IS X/Y
+0006C 6CE2                      174+         DER   F4,F2                                                    01-I2DED
+                                175+*  FIRST ITERATION
+0006D 8DE0                0000  176+         LFLI  F4+1,0             RAH 1/5/93                            01-I2DED
+0006E 7EE4                      177+         LER   F6,F4                                                    01-I2DED
+0006F 7FE5                      178+         LER   F6+1,F4+1                                                01-I2DED
+00070 36EA                      179+         MEDR  F6,F2                                                    01-I2DED
+00071 5EE8                      180+         SEDR  F6,F0                                                    01-I2DED
+00072 6EE2                      181+         DER   F6,F2                                                    01-I2DED
+00073 8FE0                0000  182+         LFLI  F6+1,0             RAH 1/5/93                            01-I2DED
+00074 5CEE                      183+         SEDR  F4,F6                                                    01-I2DED
+                                184+*  SECOND ITERATION
+00075 7EE4                      185+         LER   F6,F4              RAH 1/5/93                            01-I2DED
+00076 7FE5                      186+         LER   F6+1,F4+1          RAH 1/5/93                            01-I2DED
+00077 36EA                      187+         MEDR  F6,F2              RAH 1/5/93                            01-I2DED
+00078 5EE8                      188+         SEDR  F6,F0              RAH 1/5/93                            01-I2DED
+00079 6EE2                      189+         DER   F6,F2              RAH 1/5/93                            01-I2DED
+0007A 8FE0                0000  190+         LFLI  F6+1,0             RAH 1/5/93                            01-I2DED
+0007B 5CEE                      191+         SEDR  F4,F6              RAH 1/5/93                            01-I2DED
+0007C 78E8                      192          LECR  F0,F0      REFORM A FROM |A| (F4 -> F0 DURING IDEDR)
+0007D 54FF 0011      0090 0011  193          AED   F4,BIGNUM  FLOOR(|A|/|B|)
+0007F 5CFF 000F      0090 000F  194          SED   F4,BIGNUM
+00081 34EA                      195          MEDR  F4,F2      |B| * FLOOR(|A|/|B|)
+00082 50EC                      196          AEDR  F0,F4      A + |B| * FLOOR(|A|/|B|)
+                                197 *
+                                198 * AT THIS POINT THE ANSWER SHOULD BE -|B|<= ANS <= 0.
+                                199 *
+00083 C5F7 0851      0034 0051  200          BNM   VALID8     SHOULD TAKE BRANCH FOR ZERO RESULT ONLY
+00085 50EA                      201          AEDR  F0,F2      IF ANS IS < 0 ADD 1 MORE |B|
+00086 C7F7 0854      0034 0054  202          B     VALID8     VALIDATE ANSWER
+                                203 *
+                                204 * MAJOR ALGORITHMIC ERROR ENCOUNTERED
+                                205 *
+00088 58E8                      206 FIXUP    SEDR  F0,F0      RETURN 0
+                                207          AERROR 33        LOG GPC ERROR
+                                208+*********ISSUE SEND ERROR SVC******************************************
+00089 C9FB 0098      0098       209+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                210+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0008B DF0C           008F 0003  211          B     EXIT
+                                212 *
+0008C 58E8                      213 LOGERR   SEDR  F0,F0      RETURN ZERO
+                                214          AERROR 19        LOG GPC ERROR
+                                215+*********ISSUE SEND ERROR SVC******************************************
+0008D C9FB 009A      009A       216+         SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                217+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+                                218 *
+                                219 * COMMON EXIT
+                                220 *
+                                221 EXIT     AEXIT                                                          00007100
+                                222+*********RETURN TO CALLER**********************************************
+0008F                           223+EXIT     DS    0H                                                       01-AEXIT
+0008F C7EC                      224+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                225+***********************************************************************
+                                227 *
+00090 4E80000000000000          228 BIGNUM   DC    X'4E80000000000000'                                      00007312
+                                229          ACLOSE                                                         00008000
+00094                           230+         LTORG                                                          02-ERRPA
+00094 7FFFFFFF                  231                =X'7FFFFFFF'
+00096 80000000                  232                =X'80000000'
+                                233+****************ERROR PARAMETER AREA***********************************
+00098                           234+#LDMOD   CSECT                                                          02-ERRPA
+                                235+***  DMOD SENDS THE FOLLOWING ERRORS                                    02-ERRPA
+                                237+***  ERROR NUMBER 33 IN GROUP 4                                         02-ERRPA
+00098 0014                      239+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+i00099 0421                      240+         DC    Y(4*256+33)                      8 BIT GROUP AND NUMBER  02-ERRPA
+         DMOD - MOD FUNCTION, DOUBLE PREC. SCALAR                                                              PAGE    6
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+
+                                242+***  ERROR NUMBER 19 IN GROUP 4                                         02-ERRPA
+0009A 0014                      244+AERROR2  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0009B 0413                      245+         DC    Y(4*256+19)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                246+****************END OF ERROR PARAMETER AREA****************************
+                                247+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    7
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     00008A
+  0001     0002     00     00008E
+¤
+                                             CROSS REFERENCE                                                   PAGE    8
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000098   239    209
+AERROR2      1   00009A   244    216
+AGEB         1   00006A   171    167
+BIGNUM       4   000090   228    108   109   193   194
+COMPB        1   000008    65     60
+DMOD         1 00000000    14
+EXIT         1   00008F   223     62    85   129   144   148   211
+F0           1 00000000    43     61    61    67    87    88    96   104   111   117   119   121   123   123   130   132
+                                 134   136   138   138   147   168   171   172   180   188   192   192   196   201   206
+                                 206   213   213
+F1           1 00000001    49     66
+F2           1 00000002    44     58    58    65    65    73    75    77    90    95    97   103   105   110   117   119
+                                 121   130   132   134   136   147   155   157   159   168   174   179   181   187   189
+                                 195   201
+F3           1 00000003    50
+F4           1 00000004    51     67    73    75    77    79    79    87    88    90    92    93    94    99   101   102
+                                 107   108   109   110   111   153   153   155   157   159   161   161   171   172   174
+                                 176   177   178   183   185   186   191   193   194   195   196
+F5           1 00000005    52     66
+F6           1 00000006    54     93    94    95    96    97    98    99   101   102   103   104   105   106   107   177
+                                 178   179   180   181   182   183   185   186   187   188   189   190   191
+F7           1 00000007    55
+FIXUP        1   000088   206    145   149
+LOGERR       1   00008C   213     63
+MOD          1   000009    66     59
+NEGA         1   000059   153     68
+NEGA1        2   000018    83     80
+NEGA2        2   000040   127    124
+NEGA3        2   000050   142    139
+NEGA4        2   000065   165    162
+SKIP1        1   00001A    84     74    76    78    82
+SKIP2        1   000042   128    118   120   122   126
+SKIP3        1   000052   143    133   135   137   141
+SKIP4        1   000067   166    156   158   160   164
+VALID8       2   000034   115    169   200   202
+VHI          1   000035   117
+VLOW         1   000055   147    115
+$RET1        1   00008F   224
+#LDMOD       1 00000098   234
+=X'7FFFFFFF'
+             2   000094   231     81   125   140   163
+=X'80000000'
+             2   000096   232     83   127   142   165
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    9
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     110 CARDS FROM SYSIN     401 CARDS FROM SYSLIB
+     316 LINES OUTPUT          17 CARDS OUTPUT

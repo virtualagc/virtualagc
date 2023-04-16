@@ -1,0 +1,103 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VM6D3     SD 0001 000000 000018
+¤
+         VM6D3--VECTOR X MATRIX,LENGTH 3,DOUBLE PREC                                                           PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VM6D3    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VM6D3    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *   COMPUTES THE VECTOR MATRIX PRODUCT:                                 00000400
+                                 17 *                                                                       00000500
+                                 18 *       V(3)=V1(3) X M(3,3)                                             00000600
+                                 19 *                                                                       00000700
+                                 20 *       WHERE V,V1,M ARE DP                                             00000800
+                                 21 *                                                                       00000900
+                                 22          INPUT R3,            MATRIX(3,3)  DP                          X00001000
+                                                   R2             VECTOR(3)    DP                           00001100
+0000003                          23+R3       EQU   3                                                        01-INPUT
+0000002                          24+R2       EQU   2                                                        01-INPUT
+                                 26          OUTPUT R1            VECTOR(3)   DP                            00001200
+0000001                          27+R1       EQU   1                                                        01-OUTPU
+                                 29          WORK  R5,F0,F2,F4,F1,F3,F5                                     00001300
+0000005                          30+R5       EQU   5                                                        01-WORK
+0000000                          31+F0       EQU   0                                                        01-WORK
+0000002                          32+F2       EQU   2                                                        01-WORK
+0000004                          33+F4       EQU   4                                                        01-WORK
+0000001                          34+F1       EQU   1                                                        01-WORK
+0000003                          35+F3       EQU   3                                                        01-WORK
+0000005                          36+F5       EQU   5                                                        01-WORK
+                                 38 *                                                                       00001400
+                                 39 *     ALGORITHM:                                                        00001500
+                                 40 *                                                                       00001600
+                                 41 *     DO I=1 TO 3;                                                      00001700
+                                 42 *       V(I)=V1(1)*M(1,I)+V1(2)*M(2,I)+V1(3)*M(3,I);                    00001800
+                                 43 *     END;                                                              00001900
+                                 44 *                                                                       00002000
+00000 BDE5                0005   45          LFXI  R5,3           R5=3                                      00002100
+00001 780B           0004        46 LOOP     LE    F0,4(R3)       GET 1 ST. V1 ELE.                         00002200
+00002 790F           0006        47          LE    F1,6(R3)                                                 00002300
+00003 7A23           0010        48          LE    F2,16(R3)       GET 2 ND. V1 ELE                         00002400
+00004 7B27           0012        49          LE    F3,18(R3)                                                00002500
+00005 7C3B           001C        50          LE    F4,28(R3)      GET 3 RD. V1 ELE.                         00002600
+00006 7D3F           001E        51          LE    F5,30(R3)                                                00002700
+00007 30FA 0004      0004        52          MED   F0,4(R2)       MUL V1(1)*M(1,I)                          00002800
+00009 32FA 0008      0008        53          MED   F2,8(R2)      MUL V1(2)*M(2,I)                           00002900
+0000B 52E8                       54          AEDR  F2,F0           TEMP SUM                                 00003000
+0000C 34FA 000C      000C        55          MED   F4,12(R2)      MUL V1(3)*M(3,I)                          00003100
+0000E 52EC                       56          AEDR  F2,F4          GET V ELE.                                00003200
+0000F 3AF9 0004      0004        57          STED  F2,4(R1)       PLACE V ELE.                              00003300
+00011 E911           0004        58          LA    R1,4(R1)      BUMP V PTR BY 4                            00003400
+00012 EB13           0004        59          LA    R3,4(R3)       BUMP M PTR TO NEXT COL                    00003500
+00013 DD4F           0001 0013   60          BCTB  R5,LOOP        I=1 TO 3 COUNTER                          00003600
+                                 61          AEXIT                                                          00003700
+                                 62+*********RETURN TO CALLER**********************************************
+00014                            63+         DS    0H                                                       01-AEXIT
+00014 9B24           0009        64+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+00015 9914           0005        65+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00016 C7EC                       66+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 67+***********************************************************************
+                                 69          ACLOSE                                                         00003800
+00017 C9FB
+00018                            70+         LTORG                                                          02-ERRPA
+                                 71+****************ERROR PARAMETER AREA***********************************
+                                 72+***  NO ERRORS SENT IN VM6D3                                            02-ERRPA
+                                 73+****************END OF ERROR PARAMETER AREA****************************
+                                 74+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    31     46    52    54
+F1           1 00000001    34     47
+F2           1 00000002    32     48    53    54    56    57
+F3           1 00000003    35     49
+F4           1 00000004    33     50    55    56
+F5           1 00000005    36     51
+LOOP         2   000001    46     60
+R1           1 00000001    27     57    57    58    58    58
+R2           1 00000002    24     52    52    53    53    55    55
+R3           1 00000003    23     46    46    47    47    48    48    49    49    50    50    51    51    59    59    59
+R5           1 00000005    30     45    60
+VM6D3        1 00000000    13
+$RET1        1   000016    66
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      43 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+     103 LINES OUTPUT           4 CARDS OUTPUT

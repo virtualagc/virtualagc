@@ -1,0 +1,50 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     SDFALLD                                              */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: A DRIVER CLIST TO SDFALL FOR GENERATING SDFLIST ON   */
+00090000/*             A FSW PDS.                                           */
+00286400/*------------------------------------------------------------------*/
+00286500/*                                                                  */
+00286600/*   REVISION HISTORY :                                             */
+00286700/*                                                                  */
+00286800/*     DATE      PCR     NAME   DESCRIPTION                         */
+00286900/*    ---------  ----    ----   ------------------------------      */
+00287020/*    09/10/02   730     LWW    BASELINED COMPILER TEST CLIST       */
+00287200/*------------------------------------------------------------------*/
+00288000/********************************************************************/
+01050000
+01070000PROC 0   ID(NCAMTST)                      +
+01080000         DSN(APPL)                        +
+01080121         REL(R31V01)                    +
+01080200         LIB(&ID..&REL..&DSN.)            +
+01080300         SDFLIB(&LIB..SDF)                +
+01080405         SRCID(NCAMCM)                    +
+01091000         SYSTEM(PASS)                     +
+01092020         COMPVER(REL31V0)                 +
+01100000         PROGRAM(&SRCID..&SYSTEM..&COMPVER..PASS4.OBJ)   +
+01101000         ERRORLIB(&SRCID..&SYSTEM..&COMPVER..ERRORLIB)   +
+01101100         MONITOR(&SRCID..&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+01120000         SCREEN                           +
+01140021         LIST() +
+01140100         TRACE
+01141000
+01150000GLOBAL RETCODE
+01630000IF       &TRACE.  NE THEN +
+01640000         CONTROL  LIST CONLIST
+01650000
+01660000IF &LIST. NE THEN SET &LIST = LIST(&LIST.)
+01670000         ELSE SET  &LIST =
+01680000
+01690000SDFALL   ID(&ID.)                  +
+01700000         LIB(&LIB.)                +
+01710000         SDFLIB(&SDFLIB.)          +
+01720000         SRCID(&SRCID.)            +
+01730000         PROGRAM(&PROGRAM.)        +
+01740000         ERRORLIB(&ERRORLIB.)      +
+01750000         MONITOR(&MONITOR.)        +
+01760000         &SCREEN.                  +
+01770000         &LIST.                    +
+01780000         &TRACE.

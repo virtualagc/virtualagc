@@ -1,0 +1,74 @@
+00010000/********************************************************************/
+00011000/*------------------------------------------------------------------*/
+00012000/*                                                                  */
+00013000/*   NAME:      CMPFC#D                                             */
+00014000/*                                                                  */
+00015000/*------------------------------------------------------------------*/
+00016000/*                                                                  */
+00017000/*   FUNCTION:  THIS IS A DRIVER CLIST TO CMPFCRPT FOR RUNNING      */
+00019100/*              COMPFC ON TWO VERSION OF THE FSW WITH DATA_REMOTE.  */
+00019200/*                                                                  */
+00019300/*------------------------------------------------------------------*/
+00034400/*                                                                  */
+00034500/*   REVISION HISTORY:                                              */
+00034600/*                                                                  */
+00034700/*  DATE      PCR#     NAME   DESCRIPTION                           */
+00034800/*  --------  -----    ----   ---------------------------------     */
+00035007/*  09/10/02  730      LWW    BASELINED FOR COMPILER TEST CLIST     */
+00035200/*------------------------------------------------------------------*/
+00035300/********************************************************************/
+00035400
+00035500PROC 0   ID       (NCAMTST)                              +
+00035607         REL      (R32V0)                                +
+00035707         OLDREL   (R31V01)                               +
+00035800         DSN      (APPL#D)                               +
+00035900         LIB      (&ID..&REL..&DSN.)                     +
+00036000         OLDLIB   (&ID..&OLDREL..O.&DSN.)                +
+00036100         SYSTEM   (PASS)                                 +
+00036200         COMPVER  (CURRENT)                              +
+00036300         SRCID    (NCAMCM)                               +
+00036400         OLDCMPLR (&SRCID..&SYSTEM..&COMPVER..COMPILER)  +
+00036500         OLDERROR (&SRCID..&SYSTEM..&COMPVER..ERRORLIB)  +
+00036600         OLDMONTR (&SRCID..&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00037007         OLDTERROR(NCAMCM.TESTLIB.REL31V0.TERRLIB)       +
+00037100         OLDSDF2  (&ID..&OLDREL..&DSN..SDF)              +
+00038008         OI       (OI302100)                             +
+00039000         SRCDSN   (NCAMTST.TESTLIB.&OI..&DSN..SRC)       +
+00039100         INV      (NCAMTST.TESTLIB.&OI..INVENTRY)        +
+00040000         LIST     (&LIB..COMPFC.MLIST)                   +
+00060000         OPT      ()                                     +
+00060100         COMPFC                                          +
+00060200         NOCOMPFC                                        +
+00060300         FIRSTRUN                                        +
+00070000         REFRESH                                         +
+00080000         TRACE
+00090000
+00100000CONTROL END(DONE)
+00110000GLOBAL RETCODE
+00120000IF &TRACE NE THEN CONTROL CONLIST LIST
+00130000
+00740000IF &OLDTERROR. NE THEN SET &OLDTERROR = OLDTERROR(&OLDTERROR.)
+00750000        ELSE SET  &OLDTERROR =
+00754000IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+00754100        ELSE SET  &OPT =
+00754200
+00760000CMPFCRPT ID(&ID.)             +
+00770000         REL(&REL.)           +
+00771000         DSN(&DSN.)           +
+00780000         LIB(&LIB.)           +
+00790000         OLDLIB(&OLDLIB.)     +
+00810000         OLDCMPLR(&OLDCMPLR.) +
+00820000         OLDERROR(&OLDERROR.) +
+00821000         OLDMONTR(&OLDMONTR.) +
+00822000         OLDSDF2 (&OLDSDF2.)  +
+00830000         &OLDTERROR.          +
+00840000         OI(&OI.)             +
+00841000         INV(&INV.)           +
+00850000         SRCDSN(&SRCDSN.)     +
+00860000         LIST(&LIST.)         +
+00870000         &OPT.                +
+00880000         &FIRSTRUN.           +
+00890000         &REFRESH.            +
+00890100         &COMPFC.             +
+00890200         &NOCOMPFC.           +
+00900000         &TRACE.

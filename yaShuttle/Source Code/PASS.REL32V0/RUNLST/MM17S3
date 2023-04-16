@@ -1,0 +1,236 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+MM17S3    SD 0001 000000 00004E
+MM17SN    LD      000004        0001
+¤
+         MM17S3--MATRIX TO A POWER, SP                                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 EXPSAVE  DS    H                                                        00000400
+                                 10 NSAVE    DS    H                                                        00000500
+                                 11          MEND                                                           00000600
+                                 12 MM17S3   AMAIN                                                          00000700
+                                 13+***********************************************************************
+                                 14+*
+                                 15+*        PRIMARY ENTRY POINT
+                                 16+*
+                                 17+***********************************************************************
+00000                            18+MM17S3   CSECT                                                          01-AMAIN
+00000                            19+STACK    DSECT                                                          01-AMAIN
+                                 20+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            21+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            22+         DS    2F             R0,R1                                     01-AMAIN
+00006                            23+ARG2     DS    F              R2                                        01-AMAIN
+00008                            24+         DS    F              R3                                        01-AMAIN
+0000A                            25+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            26+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            27+ARG6     DS    F              R6                                        01-AMAIN
+00010                            28+ARG7     DS    F              R7                                        01-AMAIN
+                                 29+*        END OF STANDARD STACK AREA
+00012                            30+EXPSAVE  DS    H                                                        02-00009
+00013                            31+NSAVE    DS    H                                                        02-00010
+00014                            32+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            33+MM17S3   CSECT                                                          01-AMAIN
+0000000                          34+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   35+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 37 *                                                                       00000800
+                                 38 * RAISES M TO AN INTEGER POWER WHERE M IS A SINGLE PRECISION            00000900
+                                 39 *   3 X 3 MATRIX                                                        00001000
+                                 40 *                                                                       00001100
+                                 41          INPUT R4,            MATRIX(3,3) SP                           X00001200
+                                                   R6,            INTEGER(POWER) SP                        X00001300
+                                                   R7             MATRIX(3,3) DP TEMPORARY WORKAREA         00001400
+0000004                          42+R4       EQU   4                                                        01-INPUT
+0000006                          43+R6       EQU   6                                                        01-INPUT
+0000007                          44+R7       EQU   7                                                        01-INPUT
+                                 46          OUTPUT R2            MATRIX(3,3) SP                            00001500
+0000002                          47+R2       EQU   2                                                        01-OUTPU
+                                 49          WORK  R1,R3,R5,F0,F2,F4,F5                                     00001600
+0000001                          50+R1       EQU   1                                                        01-WORK
+0000003                          51+R3       EQU   3                                                        01-WORK
+0000005                          52+R5       EQU   5                                                        01-WORK
+0000000                          53+F0       EQU   0                                                        01-WORK
+0000002                          54+F2       EQU   2                                                        01-WORK
+0000004                          55+F4       EQU   4                                                        01-WORK
+0000005                          56+F5       EQU   5                                                        01-WORK
+                                 58 *                                                                       00001700
+                                 59 * ALGORITHM:                                                            00001800
+                                 60 *   SEE ALGORITHM DESCRIPTION IN MM17D3                                 00001900
+                                 61 *                                                                       00002000
+00002 BDE5                0005   62          LFXI  R5,3           SET N TO 3                                00002100
+00003 DF08           0006 0002   63          B     MERGE                                                    00002200
+                                 64 MM17SN   AENTRY                                                         00002300
+                                 65+***********************************************************************
+                                 66+*
+                                 67+*        SECONDARY ENTRY POINT
+                                 68+*
+                                 69+***********************************************************************
+00004                            70+MM17SN   DS    0H                                                       01-AENTR
+                                 71+         ENTRY MM17SN                                                   01-AENTR
+00004 B624 0000      0009 0000   72+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 74 *                                                                       00002400
+                                 75 * RAISES M TO AN INTEGER POWER WHERE M IS A SINGLE PRECISION            00002500
+                                 76 *   N X N MATRIX WHERE N IS NOT EQUAL TO 3.                             00002600
+                                 77 *                                                                       00002700
+                                 78          INPUT R4,            MATRIX(N,N) SP                           X00002800
+i                                                   R5,            INTEGER(N) SP                            X00002900
+         MM17S3--MATRIX TO A POWER, SP                                                                         PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                                   R6,            INTEGER(POWER) SP                        X00003000
+                                                   R7             MATRIX(N,N) SP TEMPORARY WORKAREA         00003100
+                                 80          OUTPUT R2            MATRIX(N,N) SP                            00003200
+                                 82          WORK  R1,R3,F0,F2,F4,F5                                        00003300
+                                 84 *                                                                       00003400
+                                 85 * ALGORITHM:                                                            00003500
+                                 86 *   SEE ALGORITHM DESCRIPTION IN MM17D3                                 00003600
+                                 87 *                                                                       00003700
+00006 19E2                       88 MERGE    LR    R1,R2          PUTS RESULT PTR IN R1 FOR                 00003800
+                                 89 *                             ADDRESSABILITY PURPOSES                   00003900
+00007 1AE4                       90          LR    R2,R4                 "           "                      00004000
+00008 1BE7                       91          LR    R3,R7                 "           "                      00004100
+00009 BD4C           0013        92          STH   R5,NSAVE       SAVE N IN NSAVE                           00004200
+0000A 1CE5                       93          LR    R4,R5          SET R4 TO N                               00004300
+0000B F404                0001   94          SLL   R4,1           SET R4 TO N * 2                           00004400
+0000C 1BE2                       95          LR    R3,R2          LOAD INPUT ADDRESS INTO R3                00004500
+0000D E7F7 0023      0032 0023   96          BAL   R7,MULT        BRANCH TO THE MULTIPLY ROUTINE            00004600
+                                 97 *                             THIS GETS RESULT = M ** 2;                00004700
+0000F 96F7 003B      004C 003B   98          CH    R6,=X'0002'                                              00004800
+00011 DC54           0027 0015   99          BE    OUT            IF POWER = 2 THEN RETURN                  00004900
+00012 F604                0001  100          SLL   R6,1                                                     00005000
+00013 B0E6 0001           0001  101          AHI   R6,1           SET R6 = SHL(POWER,1) + 1;                00005100
+00015 B3E6 8000           8000  102 SHIFTED  TRB   R6,X'8000'     TEST BIT TO BE SHIFTED OFF                00005200
+00017 F604                0001  103          SLL   R6,1           POWER = SHL(POWER,1)                      00005300
+00018 DC12           0015 0004  104          BC    4,SHIFTED      IF BIT SHIFTED OFF WAS 0,                 00005400
+                                105 *                             THEN CONTINUE SEARCH FOR SIGNIFICANT BIT  00005500
+00019 DF0C           001D 0003  106          B     TEST           TAKEN WHEN HIGHER ORDER BIT WAS 1         00005600
+0001A 9B40           0010       107 COMPLOOP LH    R3,ARG7        PASS TEMP AS RIGHT MULTIPLIER             00005700
+0001B E7F7 000B      0028 000B  108          BAL   R7,MOVE                                                  00005800
+0001D B3E6 8000           8000  109 TEST     TRB   R6,X'8000'     TEST BIT TO BE SHIFTED OFF                00005900
+0001F F604                0001  110          SLL   R6,1                                                     00006000
+00020 DC0C           0024 0003  111          BC    4,NOBIT        IF NO 1 WAS SHIFTED OFF DON'T MULTIPLY    00006100
+00021 9B28           000A       112          LH    R3,ARG4        PASS M AS RIGHT MULTIPLIER                00006200
+00022 E7F7 0004      0028 0004  113          BAL   R7,MOVE                                                  00006300
+00024 96F7 0027      004D 0027  114 NOBIT    CH    R6,=X'8000'    TEST DONE BIT                             00006400
+00026 DB36           001A 000D  115          BNE   COMPLOOP       IF NOT EQUAL THEN CONTINUE PROCESSING     00006500
+                                116 OUT      AEXIT                                                          00006600
+                                117+*********RETURN TO CALLER**********************************************
+00027                           118+OUT      DS    0H                                                       01-AEXIT
+00027 97E8                      119+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                120+***********************************************************************
+                                122 *                                                                       00006700
+                                123 * THE NEXT 7 INSTRCUTIONS MOVES RESULT TO TEMPORARY                     00006800
+                                124 *                                                                       00006900
+00028 9918           0006       125 MOVE     LH    R1,ARG2        PUT ADDRESS OF RESULT IN R1               00007000
+00029 9D4C           0013       126          LH    R5,NSAVE       PUT N INTO R5                             00007100
+0002A 9DF8 0013      0013       127          MIH   R5,NSAVE       PUT N ** 2 IN R5                          00007200
+0002C 9A40           0010       128          LH    R2,ARG7        PUT ADDRESS OF TEMPORARY IN R2            00007300
+0002D 78F5 A000      0000       129 MLOOP    LE    F0,0(R5,R1)    GET ELEMENT OF RESULT                     00007400
+0002F 38F6 A000      0000       130          STE   F0,0(R5,R2)    STORE ELEMENT INTO TEMPORARY              00007500
+00031 DD17           002D 0005  131          BCTB  R5,MLOOP                                                 00007600
+                                132 *                                                                       00007700
+                                133 * THE FOLLOWING CODE PERFORMS THE MATRIX MULTIPLY OF EITHER             00007800
+                                134 *   RESULT = TEMPORARY TEMPORARY;                                       00007900
+                                135 *         OR                                                            00008000
+                                136 *   RESULT = TEMPORARY M;                                               00008100
+                                137 * THE POINTER IN R3 DETERMINES WHICH CASE IS TO BE DONE.                00008200
+                                138 *                                                                       00008300
+                                139 *   R1 POINTS TO RESULT                                                 00008400
+                                140 *   R2 POINTS TO TEMPORARY                                              00008500
+                                141 *   R3 POINTS TO EITHER TEMPORARY OR M                                  00008600
+                                142 *                                                                       00008700
+00032 BE48           0012       143 MULT     STH   R6,EXPSAVE     SAVE EXPONENT                             00008800
+00033 2CEF                      144          LFLR  F4,R7          SAVE RETURN IN F4                         00008900
+00034 9D4C           0013       145          LH    R5,NSAVE       SET R5 TO N                               00009000
+00035 9F4C           0013       146 LOOP3    LH    R7,NSAVE       SET R7 TO N                               00009100
+00036 9E4C           0013       147 LOOP2    LH    R6,NSAVE       SET R6 TO N                               00009200
+00037 2DEB                      148          LFLR  F5,R3          SAVE PTR TO COLUMN OF RIGHT MATRIX        00009300
+00038 58E0                      149          SER   F0,F0          CLEAR F0                                  00009400
+00039 7A06           0002       150 LOOP1    LE    F2,2(R2)       GET ELEMENT OF LEFT MATRIX                00009500
+0003A 6207           0002       151          ME    F2,2(R3)       MULTIPLY BY ELEMENT OF RIGHT MATRIX       00009600
+0003B 50E2                      152          AER   F0,F2          USING F0 AS ACCUMULATOR,                  00009700
+                                153 *                             STORE PRODUCT                             00009800
+0003C 03E4                      154          AR    R3,R4          BUMP RIGHT MATRIX POINTER TO NEXT         00009900
+                                155 *                             ELEMENT IN COLUMN                         00010000
+i0003D EA0A           0002       156          LA    R2,2(R2)       BUMP LEFT MATRIX POINTER ALONG ROW        00010100
+         MM17S3--MATRIX TO A POWER, SP                                                                         PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+0003E DE1B           0039 0006  157          BCTB  R6,LOOP1                                                 00010200
+0003F 3805           0002       158          STE   F0,2(R1)       STORE ACCUMULATOR IN RESULT               00010300
+00040 E909           0002       159          LA    R1,2(R1)       BUMP RESULT PTR TO NEXT ELEMENT           00010400
+00041 0AE4                      160          SR    R2,R4          RESET LEFT MATRIX PTR TO BEGINNING OR ROW 00010500
+00042 23ED                      161          LFXR  R3,F5          RESTORE RIGHT MATRIX PTR TO BEGINNING     00010600
+                                162 *                             OF COLUMN                                 00010700
+00043 EB0B           0002       163          LA    R3,2(R3)       BUMP RIGHT MATRIX PTR TO NEXT COLUMN      00010800
+00044 DF3F           0036 000F  164          BCTB  R7,LOOP2                                                 00010900
+00045 02E4                      165          AR    R2,R4          BUMP LEFT MATRIX PTR TO NEXT ROW          00011000
+00046 0BE4                      166          SR    R3,R4          RESET RIGHT MATRIX PTR TO FIRST COLUMN    00011100
+00047 DD4F           0035 0013  167          BCTB  R5,LOOP3                                                 00011200
+00048 27EC                      168          LFXR  R7,F4          RESTORE RETURN ADDRESS                    00011300
+00049 9E48           0012       169          LH    R6,EXPSAVE     RESTORE EXPONENT                          00011400
+0004A C7E7                      170          BR    R7             RETURN                                    00011500
+                                171          ACLOSE                                                         00011600
+0004B C9FB
+0004C                           172+         LTORG                                                          02-ERRPA
+0004C 0002                      173                =X'0002'
+0004D 8000                      174                =X'8000'
+                                175+****************ERROR PARAMETER AREA***********************************
+                                176+***  NO ERRORS SENT IN MM17S3                                           02-ERRPA
+                                177+****************END OF ERROR PARAMETER AREA****************************
+                                178+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    23    125
+ARG4         2   00000A    25    112
+ARG5         2   00000C    26
+ARG6         2   00000E    27
+ARG7         2   000010    28    107   128
+COMPLOOP     2   00001A   107    115
+EXPSAVE      1   000012    30    143   169
+F0           1 00000000    53    129   130   149   149   152   158
+F2           1 00000002    54    150   151   152
+F4           1 00000004    55    144   168
+F5           1 00000005    56    148   161
+LOOP1        2   000039   150    157
+LOOP2        2   000036   147    164
+LOOP3        2   000035   146    167
+MERGE        1   000006    88     63
+MLOOP        2   00002D   129    131
+MM17S3       1 00000000    18     33
+MM17SN       1   000004    70     71
+MOVE         2   000028   125    108   113
+MULT         2   000032   143     96
+NOBIT        2   000024   114    111
+NSAVE        1   000013    31     92   126   127   145   146   147
+OUT          1   000027   118     99
+R1           1 00000001    50     88   125   129   158   158   159   159   159
+R2           1 00000002    47     88    90    95   128   130   150   150   156   156   156   160   165
+R3           1 00000003    51     91    95   107   112   148   151   151   154   161   163   163   163   166
+R4           1 00000004    42     90    93    94   154   160   165   166
+R5           1 00000005    52     62    92    93   126   127   129   129   130   130   131   145   167
+R6           1 00000006    43     98   100   101   102   103   109   110   114   143   147   157   169
+R7           1 00000007    44     91    96   108   113   144   146   164   168   170
+SHIFTED      2   000015   102    104
+STACK        1 00000000    19     34
+STACKEND     2   000014    32
+TEST         2   00001D   109    106
+$RET1        1   000027   119
+=X'0002'     1   00004C   173     98
+=X'8000'     1   00004D   174    114
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     121 CARDS FROM SYSIN     404 CARDS FROM SYSLIB
+     236 LINES OUTPUT          12 CARDS OUTPUT

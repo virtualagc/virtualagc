@@ -1,0 +1,70 @@
+00001000/*******************************************************************/
+00002000/*-----------------------------------------------------------------*/
+00003000/*                                                                 */
+00004000/*   NAME:      FSWCMPD                                            */
+00005000/*                                                                 */
+00006000/*-----------------------------------------------------------------*/
+00007000/*                                                                 */
+00008000/*   FUNCTION:  A DRIVER CLIST TO FSWCMP FOR FSW ACCEPTANCE TEST   */
+00030000/*                                                                 */
+00045000/*-----------------------------------------------------------------*/
+00046000/*                                                                 */
+00047000/*   REVISION HISTORY:                                             */
+00048000/*                                                                 */
+00049000/*  DATE      PCR#     NAME   DESCRIPTION                          */
+00050000/*  --------  -----    ----   -------------------------------      */
+00060010/*  09/10/02   730     LWW    BASELINED COMPILER TEST CLIST        */
+00070000/*-----------------------------------------------------------------*/
+00120000/*******************************************************************/
+00130000
+00140000PROC 0   ID       (NCAMTST)                              +
+00150000         DSN      (APPL)                                 +
+00150110         REL      (R32V0)                                +
+00151010         OLDREL   (R31V01)                               +
+00160000         LIB      (&ID..&REL..&DSN.)                     +
+00170000         OLDLIB   (&ID..&OLDREL..&DSN.)                  +
+00190000         SYSTEM   (PASS)                                 +
+00200010         COMPVER  (REL32V0)                              +
+00201000         SRCID    (NCAMTST)                              +
+00210000         NEWCMPLR (&SRCID..&SYSTEM..&COMPVER..COMPILER)  +
+00220000         NEWERROR (&SRCID..&SYSTEM..&COMPVER..ERRORLIB)  +
+00221000         NEWMONTR (&SRCID..&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00230010         NEWTERROR(&SRCID..TESTLIB.REL32V0.FSW.TERRLIB)  +
+00240011         OI       (OI302100)                             +
+00250000         SRCDSN   (&OI..&DSN..SRC)                       +
+00251000         LIST     (&SRCID..TESTLIB.&OI..&DSN..MEMLIST)   +
+00252000         INV      (&SRCID..TESTLIB.&OI..INVENTRY)        +
+00280000         OPT      ()                                     +
+00280100         INSTCNT                                         +
+00281000         FIRSTRUN                                        +
+00290000         REFRESH                                         +
+00300000         TRACE
+00310000
+00330000GLOBAL RETCODE
+00340000IF &TRACE NE THEN CONTROL CONLIST LIST
+00350000
+00360000IF &NEWTERROR. NE THEN SET &NEWTERROR = NEWTERROR(&NEWTERROR.)
+00370000         ELSE SET &NEWTERROR =
+00380000IF &LIST. NE THEN SET &LIST = LIST(&LIST.)
+00390000         ELSE SET &LIST =
+00390100IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+00390200         ELSE SET  &OPT =
+00400000
+00410000FSWCMP   ID(&ID.)              +
+00420000         DSN(&DSN.)            +
+00430000         LIB(&LIB.)            +
+00440000         OLDLIB(&OLDLIB.)      +
+00450000         &LIST.                +
+00451000         COMPVER(&COMPVER.)    +
+00460000         NEWCMPLR(&NEWCMPLR.)  +
+00470000         NEWERROR(&NEWERROR.)  +
+00471000         NEWMONTR(&NEWMONTR.)  +
+00480000         &NEWTERROR.           +
+00490000         OI(&OI.)              +
+00500000         SRCDSN(&SRCDSN.)      +
+00510000         INV(&INV.)            +
+00530000         &FIRSTRUN.            +
+00530100         &OPT.                 +
+00531000         &INSTCNT.             +
+00540000         &REFRESH.             +
+00550000         &TRACE.

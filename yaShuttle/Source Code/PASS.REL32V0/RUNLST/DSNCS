@@ -1,0 +1,391 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DSNCS     SD 0001 000000 00008C
+DSIN      LD      000005        0001
+DCOS      LD      00000D        0001
+#LDSNCS   SD 0002 00008C 000040
+¤
+         DSNCS - DOUBLE PRECISION SINE-COSINE FUNCTION                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * ASSUMPTIONS:                                                          00000200
+                                  8 *       1) 31 BIT ACCURACY IS SUFFICIENT                                00000300
+                                  9 *       2) HEAVY USE OF COMBINED SINE-COSINE EVALUATIONS                00000400
+                                 10 *       3) INPUT IS NORMALIZED IN FLT. PT. REGS 0 & 1                   00000500
+                                 11 *  ALGORITHM                                                            00000600
+                                 12 *          SINE-COSINE OF ARGUMENT ...                                  00000700
+                                 13 *            .TABLE LOOK UP - A                                         00000800
+                                 14 *            .EVALUATION OF FUNCTION IN RANGE---PI/32 GE DEL LE PI/32   00000900
+                                 15 *            .COMPUTATION OF ARGUMENT A+DEL, WHERE A IS ARGUMENT OF     00001000
+                                 16 *                   CORRESPONDING POINT IN TABLE                        00001100
+                                 17 *                                                                       00001201
+                                 18 * REVISION HISTORY                                                      00001301
+                                 19 * ----------------                                                      00001401
+                                 20 * DATE     NAME  REL   DR NUMBER AND TITLE                              00001501
+                                 21 *                                                                       00001601
+                                 22 * 03/15/91  RAH  23V2  CR11055 RUNTIME LIBRARY CODE COMMENT CHANGES     00001701
+                                 23 *
+                                 24 * 02/11/93  PMA  24V1  DR103782 INCORRECT CONSTANTS USED IN DSNCS
+                                 25 *                                                                       00001801
+                                 27 *                                                                       00002000
+                                 28          MACRO                                                          00002100
+                                 29          WORKAREA                                                       00002200
+                                 30 F6F7     DS    D              TEMP FOR FLP.REGS.  F6,F7                 00002300
+                                 31 SINTEMP  DS    D              TEMPORARY STORAGE FOR SINE                00002400
+                                 32 BUFF     DS    F                                                        00002500
+                                 33          MEND                                                           00002600
+                                 34 *                                                                       00002700
+                                 35 DSNCS    AMAIN                COMBINED EVALUATION                       00002800
+                                 36+***********************************************************************
+                                 37+*
+                                 38+*        PRIMARY ENTRY POINT
+                                 39+*
+                                 40+***********************************************************************
+00000                            41+DSNCS    CSECT                                                          01-AMAIN
+00000                            42+STACK    DSECT                                                          01-AMAIN
+                                 43+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            44+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            45+         DS    2F             R0,R1                                     01-AMAIN
+00006                            46+ARG2     DS    F              R2                                        01-AMAIN
+00008                            47+         DS    F              R3                                        01-AMAIN
+0000A                            48+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            49+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            50+ARG6     DS    F              R6                                        01-AMAIN
+00010                            51+ARG7     DS    F              R7                                        01-AMAIN
+                                 52+*        END OF STANDARD STACK AREA
+00012                            53+F6F7     DS    D              TEMP FOR FLP.REGS.  F6,F7                 02-00030
+00016                            54+SINTEMP  DS    D              TEMPORARY STORAGE FOR SINE                02-00031
+0001A                            55+BUFF     DS    F                                                        02-00032
+0001C                            56+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            57+DSNCS    CSECT                                                          01-AMAIN
+0000000                          58+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   59+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 61 *                                                                       00002900
+                                 62 * COMPUTES BOTH THE SIN AND COS IN DOUBLE PRECISION                     00003000
+                                 63 *   OF THE INPUT ARGUMENT                                               00003100
+                                 64 *                                                                       00003200
+                                 65          INPUT F0             SCALAR DP                                 00003300
+0000000                          66+F0       EQU   0                                                        01-INPUT
+                                 68          OUTPUT F0            SCALAR DP                                 00003400
+                                 70          OUTPUT F2            SCALAR DP                                 00003500
+0000002                          71+F2       EQU   2                                                        01-OUTPU
+                                 73          WORK  R2,R5,R6,R7,F1,F2,F3,F4,F5,F6                            00003600
+0000002                          74+R2       EQU   2                                                        01-WORK
+0000005                          75+R5       EQU   5                                                        01-WORK
+0000006                          76+R6       EQU   6                                                        01-WORK
+0000007                          77+R7       EQU   7                                                        01-WORK
+0000001                          78+F1       EQU   1                                                        01-WORK
+0000003                          79+F3       EQU   3                                                        01-WORK
+i0000004                          80+F4       EQU   4                                                        01-WORK
+         DSNCS - DOUBLE PRECISION SINE-COSINE FUNCTION                                                         PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0000005                          81+F5       EQU   5                                                        01-WORK
+                                 82+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+0000006                          83+F6       EQU   6                                                        01-WORK
+00002 1DF3 00A0      00A0        85          L     R5,ONE         SET R5 TO DC F'1' - LOWER REG5 =1 FOR     00003700
+00004 DF0C           0008 0003   86          B     DSIN1                                     BOTH ENTRY     00003800
+                                 87 DSIN     AENTRY               SINE ENTRY                                00003900
+                                 88+***********************************************************************
+                                 89+*
+                                 90+*        SECONDARY ENTRY POINT
+                                 91+*
+                                 92+***********************************************************************
+00005                            93+DSIN     DS    0H                                                       01-AENTR
+                                 94+         ENTRY DSIN                                                     01-AENTR
+00005 B624 0000      0009 0000   95+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 97 *                                                                       00004000
+                                 98 * COMPUTES THE SIN IN DOUBLE PRECISION OF THE INPUT ARGUMENT            00004100
+                                 99 *                                                                       00004200
+                                100          INPUT F0             SCALAR DP                                 00004300
+                                102          OUTPUT F0            SCALAR                                    00004400
+                                104          WORK  R2,R5,R6,R7,F1,F2,F3,F4,F5,F6                            00004500
+                                105+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+00007 75E5                      107          XR    R5,R5          ZERO REG 5                                00004600
+00008 78E0                      108 DSIN1    LER   F0,F0          LOAD TEST REG                             00004700
+00009 DD1C           0011 0007  109          BNM   MERGE                                                    00004800
+0000A B0E5 0004           0004  110          AHI   R5,4           NEG SINE ARGUMENT                         00004900
+0000C DF10           0011 0004  111          B     MERGE                                                    00005000
+                                113 DCOS     AENTRY               COSINE ENTRY                              00005200
+                                114+***********************************************************************
+                                115+*
+                                116+*        SECONDARY ENTRY POINT
+                                117+*
+                                118+***********************************************************************
+0000D                           119+DCOS     DS    0H                                                       01-AENTR
+                                120+         ENTRY DCOS                                                     01-AENTR
+0000D B624 0000      0009 0000  121+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                123 *                                                                       00005300
+                                124 * COMPUTES THE COS IN DOUBLE PRECISION OF THE INPUT ARGUMENT            00005400
+                                125 *                                                                       00005500
+                                126          INPUT F0             SCALAR DP                                 00005600
+                                128          OUTPUT F0            SCALAR                                    00005700
+                                130          WORK  R2,R5,R6,R7,F1,F2,F3,F4,F5,F6                            00005800
+                                131+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+0000F EDF3 0002      0002       133          LA    R5,2           X'00020000'                               00005900
+                                134 * POSSIBLE VALUES IN REG 5 -  SO FAR,WILL MERGE WITH REG 6              00006000
+                                135 *               00000001  - DSNCS ENTRY,POS ARG                         00006100
+                                136 *               00040001  - DSNCS ENTRY,NEG ARG                         00006200
+                                137 *               00000000  - DSIN  ENTRY,POS ARG                         00006300
+                                138 *               00040000  - DSIN  ENTRY,NEG ARG                         00006400
+                                139 *               00020000  - DCOS  ENTRY                                 00006500
+00011 3EF8 0012      0012       140 MERGE    STED  F6,F6F7        NEED TO SAVE/RESTORE THESE REGS           00006600
+00013 EAF3 008E      008E       141          LA    R2,DSCNCONT    ADDRESS FOR DATA CSECT                    00006700
+000008E                         142          USING DSCNCONT,R2                                              00006800
+00015 5006           0090       143          AE    F0,ZERO                                                  00006900
+00016 DD04           0018 0001  144          BNM   POS                                                      00007000
+00017 78E8                      145          LECR  F0,F0          COMPLEMENT INPUT                          00007100
+00018 27E8                      146 POS      LFXR  R7,F0          LOAD FIXED FOR SIZE TEST                  00007200
+00019 8F2E           0099       147          SH    R7,MAX         USE SUB HALF FOR SIZE COMPARE             00007300
+0001A C1F7 0061      007D 0061  148          BP    ERROR                                                    00007400
+0001C 871E           0095       149          AH    R7,UNFLO       ADD SUB HALF FOR TEST                     00007500
+0001D D904           001F 0001  150          BP    NOUNDR                                                   00007600
+0001E 58E8                      151          SEDR  F0,F0          UNDER-FLOW PREVENTION                     00007700
+0001F 30FA 0008      0096       153 NOUNDR   MED   F0,RPIO32      NEED ARG* 32/PI                           00007900
+00021 7AE0                      154          LER   F2,F0                                                    00008000
+00022 5222           009E       155          AE    F2,SCALER      SCALE                                     00008100
+00023 26EA                      156          LFXR  R6,F2          SET UP TO ATTAIN BITS TO CONTROL          00008200
+                                157 *                               COMPUTATION IN COMPLP LOGIG             00008300
+i00024 F640                0010  158          SLL   R6,16          NEED: NUMBER OF 2 PI IN ARC               00008400
+         DSNCS - DOUBLE PRECISION SINE-COSINE FUNCTION                                                         PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00025 B3E6 0008           0008  159          TRB   R6,X'0008'           OCTANT OF ARG                       00008500
+00027 DC0C           002B 0003  160          BZ    SKPSET1                                                  00008600
+                                161 *                             R6 _BITS  0- 9 = # 2PI                    00008700
+00028 5202           008E       162          AE    F2,DONE                 10-12 = OCTANT                   00008800
+                                163 *                                      13-15 = PTR TO TBL ENTRY         00008900
+00029 B4E6 0007           0007  164          XHI   R6,X'0007'     R6 SET BASED  ON SERIES OF                00009000
+0002B 5A22           009E       165 SKPSET1  SE    F2,SCALER        TESTS ON INPUT VALUE                    00009100
+0002C 7B06           0090       166          LE    F3,ZERO                                                  00009200
+0002D 58EA                      167          SEDR  F0,F2          INPUT ARG WILL BE COMPLEMENTED            00009300
+0002E DD04           0030 0001  168          BNM   COMPLIN          WHEN NECESSARY FOR                      00009400
+0002F 78E8                      169          LECR  F0,F0            OCTANT OR FOR DIRECTION                 00009500
+00030 1FE6                      170 COMPLIN  LR    R7,R6          USE R7 FOR TABLE INDICES                  00009600
+00031 F706                0001  171          SRL   R7,1                                                     00009700
+00032 B6E7 0003           0003  172          NHI   R7,X'0003'     ADJUST POINTER TO TABLE                   00009800
+00034 B3E6 0001           0001  173          TRB   R6,X'0001'     IF AGR POS SKIP TEST                      00009900
+00036 D918           003D 0006  174          BP    COMPLIN1                                                 00010000
+00037 1FE7                      175          LR    R7,R7          IF TABLE ENTRY ZERO                       00010100
+00038 DB08           003B 0002  176          BNZ   COMPLIN2                                                 00010200
+00039 1F32           00A6       177          L     R7,BS          FLAG AS NEG FOT LATER TEST                00010300
+0003A DF08           003D 0002  178          B     COMPLIN1                                                 00010400
+0003B 58FA 0000      008E       179 COMPLIN2 SED   F0,DONE        REDUCE BY CONST., NEG ARG. NOT FIRST      00010500
+0003D B6E6 0038           0038  180 COMPLIN1 NHI   R6,X'0038'     REMOVE EXTRANEOUS BITS                    00010600
+0003F F60E                0003  181          SRL   R6,3           BE ADDED TO REG 5 FOR CONTROL IN          00010700
+00040 05E6                      182          AR    R5,R6          COMPLP LOGIC                              00010800
+00041 3534           001A       183          ST    R5,BUFF        SAVE FOR DUAL ENTRY LOGIC IN COMPLP       00010900
+                                184 *  EVALUATION OF SINE/COSINE POLYNOMIAL                                 00011000
+                                185 *   DEL = CONT(F0) = INPUT* RECIPROCAL PI/32                            00011100
+                                186 *   IF DEL LE  UNFLO THEN,                                              00011200
+                                187 *      DSIN(DEL) = F'0.0'                                               00011300
+                                188 *      DCOS(DEL) = F'1.0'                                               00011400
+                                189 *   ELSE                                                                00011500
+                                190 *      DSIN(DEL) = DEL * (PI/32 + (B*DEL**2 + A*DEL**4))                00011600
+                                191 *      DCOS(DEL) = 1.0 + 2*(B*DEL**2 + A*DEL**4)                        00011700
+00042 7CE0                      192 COMPOLY  LER   F4,F0                                                    00011800
+00043 64E4                      193          MER   F4,F4          DEL**2 = D2                               00011900
+00044 7EE4                      194          LER   F6,F4          SAVE D2 FOR COS COMP                      00012000
+00045 7AE4                      195          LER   F2,F4                                                    00012100
+00046 622E           00A4       196          ME    F2,AS          A(D2)                                     00012200
+00047 5232           00A6       197          AE    F2,BS          A(D2)+B                                   00012300
+00048 62E4                      198          MER   F2,F4          (A(D2)+B)*D2                              00012400
+00049 52FA 0004      0092       199          AED   F2,PIO32       (PI/32)+(A(D2)+B)D2                       00012500
+0004B 32E8                      200          MEDR  F2,F0          DEL*((PI/32)+(ACD2)+B)D2) = DSIN(DEL)     00012600
+0004C 6436           00A8       201          ME    F4,AC          A(D2)                                     00012700
+0004D 543A           00AA       202          AE    F4,BC          A(D2)+B                                   00012800
+0004E 64E6                      203          MER   F4,F6          (A(D2)+B)*D2                              00012900
+0004F 54EC                      204          AEDR  F4,F4          2((A(D2)+B)*D2)                           00013000
+00050 54FA 0000      008E       205          AED   F4,DONE        1+2((A(D2)+B)*D2)  = DCOS(DEL)            00013100
+                                207 * NEED  SIN(TBL_ENTRY+DEL) = SIN(TBL_ENTRY)COS(DEL)+SIN(DEL)COS(TBL-EN) 00013300
+                                208 *       COS(TBL_ENTRY+DEL) = COS(TBL_ENTRY)COS(DEL)-SIN(DEL)SIN(TBL-EN) 00013400
+00052 854E           00A1       210 COMPLP   AH    R5,HONE        USE TO DETERMINE TYPE OF ENTRY            00013600
+00053 B6E5 0002           0002  211          NHI   R5,X'0002'     ENTRY - SINE,COS OR BOTH                  00013700
+00055 DB28           0060 000A  212          BNZ   COMPCOS        BRANCH FOR COS, ELSE DO SIN               00013800
+00056 1FE7                      213 COMPSIN  LR    R7,R7          IF FLAG IS NEG NO COMP                    00013900
+00057 DD0C           005B 0003  214          BNM   COMPSIN1                                                 00014000
+00058 78E2                      215          LER   F0,F2          USE POLY COMPUTED ABOVE                   00014100
+00059 79E3                      216          LER   F1,F3                                                    00014200
+0005A DF48           006D 0012  217          B     COMPCMN1                                                 00014300
+0005B 78FE E01E      00AC       218 COMPSIN1 LED   F0,TSIN(R7)    COMPUTATION                               00014400
+0005D 7EFE E02E      00BC       219          LED   F6,TCOS(R7)                                              00014500
+0005F DF28           006A 000A  220          B     COMPCMN        COMMON COMPUTATION                        00014600
+00060 1FE7                      221 COMPCOS  LR    R7,R7          IF FLAG SET NO COMPUTATION USE POLY       00014700
+00061 DD0C           0065 0003  222          BNM   COMPCOS1                                                 00014800
+00062 78E4                      223          LER   F0,F4          USE POLY COMPUTED ABOVE                   00014900
+00063 79E5                      224          LER   F1,F5                                                    00015000
+00064 DF20           006D 0008  225          B     COMPCMN1                                                 00015100
+00065 78FE E02E      00BC       226 COMPCOS1 LED   F0,TCOS(R7)    COMPUTATION                               00015200
+00067 7EFE E01E      00AC       227          LED   F6,TSIN(R7)    2ND TOKEN NEGATIVE                        00015300
+00069 7EEE                      228          LECR  F6,F6          -SIN(TBL_ENTRY)                           00015400
+0006A 30EC                      229 COMPCMN  MEDR  F0,F4          F4 = COS(DEL)                             00015500
+0006B 36EA                      230          MEDR  F6,F2          F2 = SIN(DEL)                             00015600
+0006C 50EE                      231          AEDR  F0,F6          EITHER SINE OR COSINE IN FO               00015700
+0006D B368 0004      001A 0004  232 COMPCMN1 TB    BUFF,X'0004'   MAY NEED TO COMPLEMENT                    00015800
+0006F DC0C           0073 0003  233          BZ    CKLUP                                                    00015900
+00070 78E0                      234          LER   F0,F0          WORKAROUND FOR BUG                        00016000
+00071 DC04           0073 0001  235          BZ    CKLUP          IN LECR INSTRUCTION.                      00016100
+00072 78E8                      236          LECR  F0,F0          NEED NEG IF BIT OFF                       00016200
+i00073 B56C 0001      001B 0001  237 CKLUP    CIST  BUFF+1,X'0001' DETERMINES ENTRY TYPE                     00016300
+         DSNCS - DOUBLE PRECISION SINE-COSINE FUNCTION                                                         PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00075 DA38           0084 000E  238          BC    2,STORECOS     IMMEDT LS -  COSINE PASS                  00016400
+00076 D944           0088 0011  239          BC    1,EXIT         IMMEDT GR  - JUST SINE OR COSINE          00016500
+00077 38F8 0016      0016       240 STORESIN STED  F0,SINTEMP                                               00016600
+00079 1DE6                      241          LR    R5,R6                                                    00016700
+0007A 052A           00A2       242          A     R5,H2H3        X'00020003'                               00016800
+0007B 3534           001A       243          ST    R5,BUFF                                                  00016900
+0007C DFAE           0052 002B  244          B     COMPLP                                                   00017000
+                                245 *                                                                       00017100
+                                246 ERROR    AERROR 8             ARGUMENT > 8E+5                           00017200
+                                247+*********ISSUE SEND ERROR SVC******************************************
+0007D C9FB 008C      008C       248+ERROR    SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                249+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0007F 78FA 000C      009A       250          LED   F0,RT2                                                   00017300
+00081 7AFA 000C      009A       251          LED   F2,RT2                                                   00017400
+00083 DF10           0088 0004  252          B     EXIT           BIT OFF                                   00017500
+00084 7AE0                      253 STORECOS LER   F2,F0                                                    00017600
+00085 7BE1                      254          LER   F3,F1                                                    00017700
+00086 78F8 0016      0016       255          LED   F0,SINTEMP                                               00017800
+00088 7EF8 0012      0012       256 EXIT     LED   F6,F6F7        NEED TO SAVE/RESTORE                      00017900
+                                257          AEXIT                                                          00018000
+                                258+*********RETURN TO CALLER**********************************************
+0008A                           259+         DS    0H                                                       01-AEXIT
+0008A 97E8                      260+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                261+***********************************************************************
+                                263 *                                                                       00018100
+                                265          ADATA                                                          00018300
+                                266+*********DATA CSECT****************************************************
+0008B C9FB
+0008C                           267+         LTORG                                                          02-ERRPA
+                                268+****************ERROR PARAMETER AREA***********************************
+0008C                           269+#LDSNCS  CSECT                                                          02-ERRPA
+                                270+***  DSNCS SENDS THE FOLLOWING ERROR                                    02-ERRPA
+                                272+***  ERROR NUMBER 8 IN GROUP 4                                          02-ERRPA
+0008C 0014                      274+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0008D 0408                      275+         DC    Y(4*256+8)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                276+****************END OF ERROR PARAMETER AREA****************************
+0008E                           277+#LDSNCS  CSECT                                                          01-ADATA
+0008E                           278 DSCNCONT DS    0D                                                       00018400
+                                279 * CONSTANTS USED IN FUNCTION                                            00018500
+0008E 4110000000000000          280 DONE     DC    X'4110000000000000'                                      00018600
+0000090                         281 ZERO     EQU   *-2                                                      00018700
+00092 401921FB544420B9          282 PIO32    DC    X'401921FB544420B9'      PI / 32 AND TEST VALUE          00018800
+0000095                         283 UNFLO    EQU   *-1                                                      00018900
+00096 41A2F9836E4E45C9          284 RPIO32   DC    X'41A2F9836E4E45C9'      32 / PI AND TEST VALUE          00019000
+0000099                         285 MAX      EQU   *-1                                                      00019100
+0009A 40B504F333F9DE70          286 RT2      DC    X'40B504F333F9DE70'                                      00019200
+0009E 46800000                  287 SCALER   DC    X'46800000'                                              00019300
+000A0 00000001                  288 ONE      DC    X'00000001'                                              00019400
+00000A1                         289 HONE     EQU   *-1                                                      00019500
+000A2 00020003                  290 H2H3     DC    X'00020003'                                              00019600
+                                291 *                                                                       00019700
+                                292 * CONSTANTS FOR POLYNOMIAL                                              00019800
+000A4 3B14634A                  293 AS       DC    X'3B14634A'       COEFFICIENT A FOR SINE                 00019900
+000A6 BDA55DE5                  294 BS       DC    X'BDA55DE5'       COEFFICIENT B FOR SINE                 00020000
+000A8 3C2075A1                  295 AC       DC    X'3C2075A1'       COEFFICIENT A FOR COSINE               00020100
+000AA BE9DE9E7                  296 BC       DC    X'BE9DE9E7'       COEFFICIENT B FOR COSINE               00020200
+                                297 *  TABLE_ENTRY FOR SINE/COSINE                                          00020300
+                                298 *   INDEXED TO BASED UPON INPUT ARG                                     00020400
+000AC 401917A6BC28D002          299 TSIN     DC    D'.09801714032875'                                       00020500
+000B0 404A5018BB55F9F2          300          DC    D'.290284677254'                                         00020600
+000B4 4078AD74E01BBD70          301          DC    D'.4713967368259'                                        00020700
+000B8 40A2679928488D71          302          DC    D'.6343932841633'                                        00020800
+000BC 40FEC46D1E8AD044          303 TCOS     DC    D'.9951847266737'                                        00020900
+000C0 40F4FA0AB6342C04          304          DC    D'.9569403357347'                                        00021000
+000C4 40E1C5978C08656E          305          DC    D'.8819212643506'                                        00021100
+000C8 40C5E40358AA1D89          306          DC    D'.773010453364'                                         00021200
+                                307 *                                                                       00021300
+                                308          ACLOSE                                                         00022000
+                                309+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    6
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000003
+  0001     0002     00     000014
+  0001     0002     00     00007E
+¤
+                                             CROSS REFERENCE                                                   PAGE    7
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AC           2   0000A8   295    201
+AERROR1      1   00008C   274    248
+ARG2         2   000006    46
+ARG4         2   00000A    48
+ARG5         2   00000C    49
+ARG6         2   00000E    50
+ARG7         2   000010    51
+AS           2   0000A4   293    196
+BC           2   0000AA   296    202
+BS           2   0000A6   294    177   197
+BUFF         2   00001A    55    183   232   237   243
+CKLUP        2   000073   237    233   235
+COMPCMN      1   00006A   229    220
+COMPCMN1     2   00006D   232    217   225
+COMPCOS      1   000060   221    212
+COMPCOS1     2   000065   226    222
+COMPLIN      1   000030   170    168
+COMPLIN1     2   00003D   180    174   178
+COMPLIN2     2   00003B   179    176
+COMPLP       2   000052   210    244
+COMPOLY      1   000042   192
+COMPSIN      1   000056   213
+COMPSIN1     2   00005B   218    214
+DCOS         1   00000D   119    120
+DONE         4   00008E   280    162   179   205
+DSCNCONT     4   00008E   278    141   142
+DSIN         1   000005    93     94
+DSIN1        1   000008   108     86
+DSNCS        1 00000000    41     57
+ERROR        2   00007D   248    148
+EXIT         2   000088   256    239   252
+F0           1 00000000    66    108   108   143   145   145   146   151   151   153   154   167   169   169   179   192
+                                 200   215   218   223   226   229   231   234   234   236   236   240   250   253   255
+F1           1 00000001    78    216   224   254
+F2           1 00000002    71    154   155   156   162   165   167   195   196   197   198   199   200   215   230   251
+                                 253
+F3           1 00000003    79    166   216   254
+F4           1 00000004    80    192   193   193   194   195   198   201   202   203   204   204   205   223   229
+F5           1 00000005    81    224
+F6           1 00000006    83    140   194   203   219   227   228   228   230   231   256
+F6F7         4   000012    53    140   256
+H2H3         2   0000A2   290    242
+HONE         1 000000A1   289    210
+MAX          1 00000099   285    147
+MERGE        2   000011   140    109   111
+NOUNDR       2   00001F   153    150
+ONE          2   0000A0   288     85
+PIO32        4   000092   282    199
+POS          1   000018   146    144
+R2           1 00000002    74    141   142
+R5           1 00000005    75     85   107   107   110   133   182   183   210   211   241   242   243
+R6           1 00000006    76    156   158   159   164   170   173   180   181   182   241
+R7           1 00000007    77    146   147   149   170   171   172   175   175   177   213   213   218   219   221   221
+                                 226   227
+RPIO32       4   000096   284    153
+RT2          4   00009A   286    250   251
+SCALER       2   00009E   287    155   165
+SINTEMP      4   000016    54    240   255
+SKPSET1      2   00002B   165    160
+STACK        1 00000000    42     58
+STACKEND     2   00001C    56
+STORECOS     1   000084   253    238
+STORESIN     2   000077   240
+TCOS         4   0000BC   303    219   226
+TSIN         4   0000AC   299    218   227
+UNFLO        1 00000095   283    149
+ZERO         1 00000090   281    143   166
+$RET1        1   00008A   260
+#LDSNCS      1 0000008C   269    277
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    8
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     221 CARDS FROM SYSIN     434 CARDS FROM SYSLIB
+     391 LINES OUTPUT          26 CARDS OUTPUT

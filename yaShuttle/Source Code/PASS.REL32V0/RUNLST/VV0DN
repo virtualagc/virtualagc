@@ -1,0 +1,69 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VV0DN     SD 0001 000000 000006
+¤
+         VV0DN -- SCALAR TO VECTOR MOVE,LENGTH N,DOUBLE PREC                                                   PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV0DN    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV0DN    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *     GENERATES A VECTOR(N)  DP                                         00000400
+                                 17 *   ALL OF WHOSE ELE. ARE THE SAME                                      00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT F0,            SCALAR      DP                           X00000700
+                                                   R5             INTEGER(N)  SP                            00000800
+0000000                          20+F0       EQU   0                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT R1            VECTOR(N)   DP                            00000900
+0000001                          24+R1       EQU   1                                                        01-OUTPU
+                                 26 *                                                                       00001000
+                                 27 *   ALGORITHM :                                                         00001100
+                                 28 *   DO FOR I=N TO 1                                                     00001200
+                                 29 *     V(I)=S;                                                           00001300
+                                 30 *   END;                                                                00001400
+                                 31 *                                                                       00001500
+00000 38FD A000      0000        32 LOOP     STED  F0,0(R5,R1)    PLACE V ELE.                              00001600
+00002 DD0F           0000 0003   33          BCTB  R5,LOOP        I=N TO 1 COUNTER                          00001700
+                                 34          AEXIT                                                          00001800
+                                 35+*********RETURN TO CALLER**********************************************
+00003                            36+         DS    0H                                                       01-AEXIT
+00003 9914           0005        37+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00004 C7EC                       38+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 39+***********************************************************************
+                                 41          ACLOSE                                                         00001900
+00005 C9FB
+00006                            42+         LTORG                                                          02-ERRPA
+                                 43+****************ERROR PARAMETER AREA***********************************
+                                 44+***  NO ERRORS SENT IN VV0DN                                            02-ERRPA
+                                 45+****************END OF ERROR PARAMETER AREA****************************
+                                 46+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    20     32
+LOOP         2   000000    32     33
+R1           1 00000001    24     32
+R5           1 00000005    21     32    32    33
+VV0DN        1 00000000    13
+$RET1        1   000004    38
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      24 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+      69 LINES OUTPUT           4 CARDS OUTPUT

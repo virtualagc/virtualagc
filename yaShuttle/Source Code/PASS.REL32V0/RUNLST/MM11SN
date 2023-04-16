@@ -1,0 +1,92 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+MM11SN    SD 0001 000000 000010
+¤
+         MM11SN--MATRIX TRANSPOSE, LENGTH N, SP                                                                PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 MM11SN   AMAIN  INTSIC=YES                                              00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+MM11SN   CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * TO CREATE THE SINGLE PRECISION TRANSPOSE OF AN N X M MATRIX WHERE     00000400
+                                 17 *   EITHER N AND/OR M ARE NOT EQUAL TO 3                                00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R5,           INTEGER(M) SP                             X00000700
+                                                   R2,           MATRIX(N,M) SP                            X00000800
+                                                   R6            INTEGER(N) SP                              00000900
+0000005                          20+R5       EQU   5                                                        01-INPUT
+0000002                          21+R2       EQU   2                                                        01-INPUT
+0000006                          22+R6       EQU   6                                                        01-INPUT
+                                 24          OUTPUT R1           MATRIX(M,N) SP                             00001000
+0000001                          25+R1       EQU   1                                                        01-OUTPU
+                                 27          WORK   R3,R7,F0,F1                                             00001100
+0000003                          28+R3       EQU   3                                                        01-WORK
+0000007                          29+R7       EQU   7                                                        01-WORK
+0000000                          30+F0       EQU   0                                                        01-WORK
+0000001                          31+F1       EQU   1                                                        01-WORK
+                                 33 *                                                                       00001200
+                                 34 * ALGORITHM:                                                            00001300
+                                 35 *   SEE ALGORITHM DESCRIPTION IN MM11DN                                 00001400
+                                 36 *                                                                       00001500
+00000 1FE5                       37          LR     R7,R5        SAVE # OF ROWS OF RESULT                   00001600
+00001 29EE                       38          LFLR   F1,R6        SAVE # OF COLUMNS OF RESULT                00001700
+00002 EA0A           0002        39 ILOOP    LA     R2,2(R2)     BUMP INPUT PTR TO FIRST ENTRY OF COLUMN    00001800
+                                 40 *                            BEING PROCESSED                            00001900
+00003 0BE3                       41          SR     R3,R3        SET INDEX REG TO 0                         00002000
+00004 78F6 6000      0000        42 JLOOP    LE     F0,0(R3,R2)                                             00002100
+00006 E909           0002        43          LA     R1,2(R1)     BUMP OUTPUT PTR TO NEXT ELEMENT            00002200
+00007 3801           0000        44          STE    F0,0(R1)                                                00002300
+00008 03E7                       45          AR     R3,R7        BUMP INDEX REG TO POINT TO NEXT COLUMN     00002400
+                                 46 *                            ELEMENT OF INPUT MATRIX                    00002500
+00009 DE1B           0004 0006   47          BCTB   R6,JLOOP                                                00002600
+0000A 26E9                       48          LFXR   R6,F1        RESTORE # OF COLUMNS COUNT                 00002700
+0000B DD2B           0002 000A   49          BCTB   R5,ILOOP                                                00002800
+                                 50          AEXIT                                                          00002900
+                                 51+*********RETURN TO CALLER**********************************************
+0000C                            52+         DS    0H                                                       01-AEXIT
+0000C 9B24           0009        53+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+0000D 9914           0005        54+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0000E C7EC                       55+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 56+***********************************************************************
+                                 58          ACLOSE                                                         00003000
+0000F C9FB
+00010                            59+         LTORG                                                          02-ERRPA
+                                 60+****************ERROR PARAMETER AREA***********************************
+                                 61+***  NO ERRORS SENT IN MM11SN                                           02-ERRPA
+                                 62+****************END OF ERROR PARAMETER AREA****************************
+                                 63+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+F0           1 00000000    30     42    44
+F1           1 00000001    31     38    48
+ILOOP        2   000002    39     49
+JLOOP        2   000004    42     47
+MM11SN       1 00000000    13
+R1           1 00000001    25     43    43    43    44    44
+R2           1 00000002    21     39    39    39    42
+R3           1 00000003    28     41    41    42    42    45
+R5           1 00000005    20     37    49
+R6           1 00000006    22     38    47    48
+R7           1 00000007    29     37    45
+$RET1        1   00000E    55
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      35 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      92 LINES OUTPUT           5 CARDS OUTPUT

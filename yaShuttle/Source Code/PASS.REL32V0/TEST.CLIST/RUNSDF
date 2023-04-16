@@ -1,0 +1,71 @@
+00010014PROC     1  GROUP                                                 +
+00020013            ID(NCAMTST)                                           +
+00030013            REL(R32V0)                                            +
+00031013            SYSTEM(PASS)                                          +
+00032016            COMPVER(REL32V0)                                      +
+00040013            LIB(&ID..&REL..&GROUP.)                               +
+00041010            SRCDSN(&ID..&GROUP..HAL)                              +
+00041116            PROGRAM(&ID..&SYSTEM..&COMPVER..PASS4.OBJ)            +
+00041216            ERRORLIB(&ID..&SYSTEM..&COMPVER..ERRORLIB)            +
+00041316            MONITOR(&ID..&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00042005            LIST()                                                +
+00070000            TRACE                                                 +
+00080000            SCREEN
+00090000
+00100000GLOBAL  RETCODE
+00110000IF  &TRACE. NE THEN  CONTROL CONLIST LIST
+00120000CONTROL END(DONE)
+00130000
+00140000/********************************************************/
+00150000/*                                                      */
+00160000/*  RUN PDSALL TO CREATE THE MEMBER LIST FILE           */
+00170000/*                                                      */
+00180000/********************************************************/
+00190000IF &LIST. EQ THEN  DO
+00191006   WRITE *** EXECUTING TESTLIB.&GROUP. ***
+00200000   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00220000   SET &LIST =  &LIB..MEMLIST
+00230000DONE
+00240000         /***************************************/
+00250000         /*                                     */
+00260000         /*    ON ATTN, DO THE FOLLOWING:       */
+00270000         /*                                     */
+00280000         /***************************************/
+00290000
+00300000ATTN     DO
+00310000         ERROR    OFF
+00320000         CLOSFILE MEMBERS
+00330000         FREE     F(MEMBERS)
+00340000         EXIT
+00350000DONE
+00360000
+00370000CONTROL  NOMSG
+00380000         FREE     F(MEMBERS)
+00390000CONTROL  MSG NOFLUSH
+00400000
+00410000
+00420000         /***************************************/
+00430000         /*                                     */
+00440000         /* SET UP TO READ THE FILE &LIST.      */
+00450000         /*                                     */
+00460000         /***************************************/
+00470000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00480000OPENFILE MEMBERS  INPUT
+00490000
+00500000DO  WHILE  &SYSUID NE
+00510000    GETFILE MEMBERS
+00520000     SET &MEMLEN = 1
+00530000     DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+00540000        SET &MEMLEN =  &MEMLEN + 1
+00550000     DONE
+00560000     SET &MEMLEN = &MEMLEN - 1
+00570000     SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+00580000
+00590000        TIME
+00600016         SDFLIST &NAME. LIB(&LIB.) SYSTEM(&SYSTEM.) ID(&ID)     +
+00600116                 PROGRAM(&PROGRAM)                              +
+00600216                 ERRORLIB(&ERRORLIB)                            +
+00600316                 MONITOR(&MONITOR)
+00601008
+00610000DONE
+00620000EXIT

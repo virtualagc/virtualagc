@@ -1,0 +1,71 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+EMAX      SD 0001 000000 000008
+¤
+         EMAX--SCALAR MAX FUNCTION, SP                                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 EMAX     AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+EMAX     CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * RETURNS THE MAXIMAL ELEMENT OF A LENGTH N ARRAY OF SINGLE PRECISION   00000400
+                                 17 *   SCALARS.                                                            00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            ARRAY(N) SCALAR SP                       X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT F0            SCALAR SP                                 00000900
+0000000                          24+F0       EQU   0                                                        01-OUTPU
+                                 26 *                                                                       00001000
+                                 27 * ALGORITHM:                                                            00001100
+                                 28 *   SEE ALGORITHM DESCRIPTION IN DMAX                                   00001200
+                                 29 *                                                                       00001300
+00000 DF0C           0004 0003   30          B     START          GO TO SET CURRMAX                         00001400
+00001 48FA 0002      0002        31 ELOOP    CE    F0,2(R2)       COMPARE CURRMAX TO NEXT ELEMENT           00001500
+00003 DD04           0005 0001   32          BNL   HIGH           IF ^< THEN BRANCH PAST ASSIGNMENT         00001600
+00004 7806           0002        33 START    LE    F0,2(R2)       RESET CURRMAX                             00001700
+00005 EA0A           0002        34 HIGH     LA    R2,2(R2)       BUMP INPUT PTR TO NEXT ELEMENT            00001800
+00006 DD1B           0001 0006   35          BCT   R5,ELOOP                                                 00001900
+                                 36          AEXIT                                                          00002000
+                                 37+*********RETURN TO CALLER**********************************************
+00007                            38+         DS    0H                                                       01-AEXIT
+00007 C7EC                       39+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 40+***********************************************************************
+                                 42          ACLOSE                                                         00002100
+00008                            43+         LTORG                                                          02-ERRPA
+                                 44+****************ERROR PARAMETER AREA***********************************
+                                 45+***  NO ERRORS SENT IN EMAX                                             02-ERRPA
+                                 46+****************END OF ERROR PARAMETER AREA****************************
+                                 47+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ELOOP        2   000001    31     35
+EMAX         1 00000000    13
+F0           1 00000000    24     31    33
+HIGH         2   000005    34     32
+R2           1 00000002    20     31    31    33    33    34    34    34
+R5           1 00000005    21     35
+START        2   000004    33     30
+$RET1        1   000007    39
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      26 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+      71 LINES OUTPUT           5 CARDS OUTPUT

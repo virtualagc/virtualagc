@@ -1,0 +1,70 @@
+00001000/********************************************************************/
+00002000/*------------------------------------------------------------------*/
+00003000/*                                                                  */
+00004000/*   NAME:      FSWCMP#D                                            */
+00005000/*                                                                  */
+00006000/*------------------------------------------------------------------*/
+00007000/*                                                                  */
+00008000/*   FUNCTION:  A DRIVER CLIST TO FSWCMP FOR FSW ACCEPTANCE TEST    */
+00009000/*              WITH DATA_REMOTE                                    */
+00010000/*                                                                  */
+00045000/*------------------------------------------------------------------*/
+00046000/*                                                                  */
+00047000/*   REVISION HISTORY:                                              */
+00048000/*                                                                  */
+00049000/*  DATE      PCR#     NAME   DESCRIPTION                           */
+00050000/*  --------  -----    ----   -------------------------------       */
+00060008/*  09/10/02   730     LWW    BASELINED COMPILER TEST CLIST         */
+00071000/*------------------------------------------------------------------*/
+00080000/********************************************************************/
+00090000
+00100000PROC 0   ID       (NCAMTST)                              +
+00110000         DSN      (APPL#D)                               +
+00111008         REL      (R32V0)                                +
+00112008         OLDREL   (R31V01)                               +
+00120000         LIB      (&ID..&REL..&DSN.)                     +
+00130000         OLDLIB   (&ID..&OLDREL..&DSN.)                  +
+00140000         SYSTEM   (PASS)                                 +
+00150008         COMPVER  (REL32V0)                              +
+00151000         SRCID    (NCAMTST)                              +
+00160000         NEWCMPLR (&SRCID..&SYSTEM..&COMPVER..COMPILER)  +
+00170000         NEWERROR (&SRCID..&SYSTEM..&COMPVER..ERRORLIB)  +
+00171000         NEWMONTR (&SRCID..&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00180009         NEWTERROR(&SRCID..TESTLIB.REL32V0.FSW.TERRLIB)  +
+00190010         OI       (OI302100)                             +
+00200000         SRCDSN   (&SRCID..TESTLIB.&OI..&DSN..SRC)       +
+00210000         LIST     (&SRCID..TESTLIB.&OI..&DSN..MEMLIST)   +
+00220000         INV      (&SRCID..TESTLIB.&OI..INVENTRY)        +
+00230000         OPT      ()                                     +
+00230100         FIRSTRUN                                        +
+00240000         REFRESH                                         +
+00241000         INSTCNT                                         +
+00250000         TRACE
+00260000
+00280000GLOBAL RETCODE
+00290000IF &TRACE NE THEN CONTROL CONLIST LIST
+00300000
+00310000IF &NEWTERROR. NE THEN SET &NEWTERROR = NEWTERROR(&NEWTERROR.)
+00320000        ELSE SET &NEWTERROR =
+00330000IF &LIST. NE THEN SET &LIST = LIST(&LIST.)
+00340000        ELSE SET &LIST =
+00340100IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+00340200        ELSE SET  &OPT =
+00350000
+00360000FSWCMP   ID(&ID.)              +
+00370000         DSN(&DSN.)            +
+00380000         LIB(&LIB.)            +
+00390000         OLDLIB(&OLDLIB.)      +
+00400000         &LIST.                +
+00410000         NEWCMPLR(&NEWCMPLR.)  +
+00420000         NEWERROR(&NEWERROR.)  +
+00421000         NEWMONTR(&NEWMONTR.)  +
+00430000         &NEWTERROR.           +
+00440000         OI(&OI.)              +
+00450000         SRCDSN(&SRCDSN.)      +
+00460000         INV(&INV.)            +
+00470000         &OPT.                 +
+00470100         &FIRSTRUN.            +
+00471000         &INSTCNT.             +
+00480000         &REFRESH.             +
+00490000         &TRACE.

@@ -1,0 +1,67 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+#0ITOE    SD 0001 000000 000006
+ITOE      LD      000000        0001
+¤
+         ITOE - DOUBLE PREC INTEGER TO SINGLE PREC SCALAR CONVERSION                                           PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 *                                                                       00000200
+                                  8 ITOE     AMAIN INTSIC=YES,SECTOR=0                                      00000300
+                                  9+***********************************************************************
+                                 10+*
+                                 11+*        PRIMARY ENTRY POINT
+                                 12+*
+                                 13+***********************************************************************
+00000                            14+#0ITOE   CSECT                                                          01-AMAIN
+00000                            15+ITOE     DS    0H             PRIMARY ENTRY POINT                       01-AMAIN
+                                 16+         ENTRY ITOE                                                     01-AMAIN
+                                 18 *                                                                       00000400
+                                 19 *  CONVERT INTEGER DP TO SCALAR SP                                      00000500
+                                 20 *                                                                       00000600
+                                 21          INPUT R5             INTEGER  DP                               00000700
+0000005                          22+R5       EQU   5                                                        01-INPUT
+                                 24          OUTPUT F0            SCALAR  SP                                00000800
+0000000                          25+F0       EQU   0                                                        01-OUTPU
+                                 27 *                                                                       00000900
+                                 28 *                                                                       00001000
+                                 29 *                                                                       00001100
+00000 38ED                       30          CVFL  F0,R5                                                    00001200
+00001 60F7 0001      0004 0001   31          ME    F0,=X'45100000'                                          00001300
+                                 32          AEXIT                                                          00001400
+                                 33+*********RETURN TO CALLER**********************************************
+00003                            34+         DS    0H                                                       01-AEXIT
+00003 C7E4                       35+$RET1    BCR   7,4            RETURN TO CALLER                          01-AEXIT
+                                 36+***********************************************************************
+                                 38          ACLOSE                                                         00001500
+00004                            39+         LTORG                                                          02-ERRPA
+00004 45100000                   40                =X'45100000'
+                                 41+****************ERROR PARAMETER AREA***********************************
+                                 42+***  NO ERRORS SENT IN ITOE                                             02-ERRPA
+                                 43+****************END OF ERROR PARAMETER AREA****************************
+                                 44+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+F0           1 00000000    25     30    31
+ITOE         1   000000    15     16
+R5           1 00000005    22     30
+$RET1        1   000003    35
+#0ITOE       1 00000000    14
+=X'45100000'
+             2   000004    40     31
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      20 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+      67 LINES OUTPUT           5 CARDS OUTPUT

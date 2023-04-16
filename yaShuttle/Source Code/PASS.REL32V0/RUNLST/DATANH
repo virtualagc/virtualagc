@@ -1,0 +1,233 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DATANH    SD 0001 000000 000084
+#QDLOG    ER 0002
+#LDATANH  SD 0003 000084 000002
+¤
+         ARCTANCH,DOUBLE PRECISION                                                                             PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 *        ARCTANH(X)=1/2*LN(1+X)/(1-X)                                   00000200
+                                  8 *                                                                       00000300
+                                  9 * THE FUNCTION IS MADE ODD BY COMPUTING IT FOR A POSITIVE ARGUMENT,     00000400
+                                 10 * THEN CHANGING THE SIGN OF THE RESULT IF THE ARGUMENT WAS              00000500
+                                 11 * NEGATIVE. IF ABS(X) IS SO SMALL THAT THE NEXT TERM IN THE TAYLOR      00000600
+                                 12 * SERIES FOR ARCTANH(X) WOULDN'T CHANGE THE RESULT, THEN X IS RETURNED. 00000700
+                                 13 * FOR LARGER ABS(X), THE TAYLOR SERIES IS CALCULATED. IF ABS(X) HAS AN  00000800
+                                 14 * EXPONENT LARGE ENOUGH TO PREVENT LARGE ACCURACY LOSSES, THEN THE LOG  00000900
+                                 15 * FUNCTION IS USED TO EVALUATE THE FUNCTION STRAIGHTFORWARDLY. IF       00001000
+                                 16 * ABS(X) IS GREATER THAN ONE, AN ERROR IS SIGNALED.                     00001100
+                                 17 *                                                                       00001200
+                                 18 * REVISION HISTORY                                                      00002502
+                                 19 *                                                                       00002602
+                                 20 *DR101156  1/24/89  R. HANDLEY                                          00003002
+                                 21 *     CHECK FOR AN EPSILON VALUE. IF 1<=|ARGUMENT|<=1+EPSILON THEN      00003102
+                                 22 *     DON'T PRODUCE ERROR, BUT RETURN FIXUP VALUE.                      00003202
+                                 23 *     IF |ARGUMENT|>1+EPSILON THEN PRODUCE ERROR AND RETURN FIXUP       00003302
+                                 24 *     VALUE. EPSILON IS A DOUBLEWORD WITH THE LAST HALFWORD CONTAINING  00003402
+                                 25 *     ALL ONES.                                                         00003502
+                                 26 *                                                                       00003602
+                                 27 *DR103795 2/22/93  P. ANSLEY  -  INTERMETRICS                           00016102
+                                 28 *     INCREASED EPLUS1 VALUE TO HANDLE ARGUMENTS BETWEEN
+                                 29 *     -1 AND 1 ACCURATE TO DOUBLE PRECISION REQUIREMENTS.
+                                 30 *
+                                 31 DATANH   AMAIN   ACALL=YES,QDED=YES                                     00016200
+                                 32+***********************************************************************
+                                 33+*
+                                 34+*        PRIMARY ENTRY POINT
+                                 35+*
+                                 36+***********************************************************************
+00000                            37+DATANH   CSECT                                                          01-AMAIN
+00000                            38+STACK    DSECT                                                          01-AMAIN
+                                 39+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            40+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            41+         DS    2F             R0,R1                                     01-AMAIN
+00006                            42+ARG2     DS    F              R2                                        01-AMAIN
+00008                            43+         DS    F              R3                                        01-AMAIN
+0000A                            44+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            45+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            46+ARG6     DS    F              R6                                        01-AMAIN
+00010                            47+ARG7     DS    F              R7                                        01-AMAIN
+                                 48+*        END OF STANDARD STACK AREA
+                                 49+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            50+QARGA    DS    D                                                        01-AMAIN
+00016                            51+QARGB    DS    D                                                        01-AMAIN
+0001A                            52+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            53+DATANH   CSECT                                                          01-AMAIN
+0000000                          54+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 E0FB 001A      001A        55+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN
+00002 B624 0000      0009 0000   56+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 58 * COMPUTES HYPERBOLIC ARC-TANGENT IN DOUBLE PRECISION                   00016300
+                                 59          INPUT F0             SCALAR DP                                 00016400
+0000000                          60+F0       EQU   0                                                        01-INPUT
+                                 62          OUTPUT F0            SCALAR DP                                 00016500
+                                 64          WORK  R7,F1,F2,F3,F4,F5                                        00016600
+0000007                          65+R7       EQU   7                                                        01-WORK
+0000001                          66+F1       EQU   1                                                        01-WORK
+0000002                          67+F2       EQU   2                                                        01-WORK
+0000003                          68+F3       EQU   3                                                        01-WORK
+0000004                          69+F4       EQU   4                                                        01-WORK
+0000005                          70+F5       EQU   5                                                        01-WORK
+00004 27E8                       72          LFXR  R7,F0                                                    00016700
+00005 78E0                       73           LER F0,F0                                                     00016800
+00006 DD04           0008 0001   74          BNM   POS                                                      00016900
+00007 78E8                       75          LECR     F0,F0                                                 00017000
+00008 18FF 0056      0060 0056   76 POS      CED   F0,ONE                                                   00017101
+0000A C5F7 004C      0058 004C   77          BNL   TESTE          TEST FOR EPSILON               DR101156   00017201
+0000C 48FF 006E      007C 006E   78          CE    F0,TINY                                                  00017300
+0000E C2F7 0042      0052 0042   79          BL    SIGN                                                     00017400
+00010 48FF 006C      007E 006C   80          CE    F0,SMALL                                                 00017500
+i00012 DD5C           002A 0017   81          BNL   NORMAL         IF TINY< X <SMALL                         00017600
+         ARCTANCH,DOUBLE PRECISION                                                                             PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00013 7AE0                       82          LER   F2,F0          THEN COMPUTE TAYLOR SERIES =              00017700
+00014 7BE1                       83          LER   F3,F1          X+X**3/3+X**5/5+X**7/7                    00017800
+00015 32EA                       84          MEDR  F2,F2          +X**9/9+X**11/11                          00017900
+00016 7CE2                       85          LER  F4,F2                                                     00018000
+00017 7DE3                       86          LER   F5,F3                                                    00018100
+00018 34FF 005E      0078 005E   87          MED   F4,A11                                                   00018200
+0001A 54FF 0058      0074 0058   88          AED   F4,A9                                                    00018300
+0001C 34EA                       89          MEDR  F4,F2                                                    00018400
+0001D 54FF 0051      0070 0051   90          AED   F4,A7                                                    00018500
+0001F 34EA                       91          MEDR  F4,F2                                                    00018600
+00020 54FF 004A      006C 004A   92          AED   F4,A5                                                    00018700
+00022 34EA                       93          MEDR  F4,F2                                                    00018800
+00023 54FF 0043      0068 0043   94          AED   F4,A3                                                    00018900
+00025 34EA                       95          MEDR  F4,F2                                                    00019000
+00026 54FF 0038      0060 0038   96          AED   F4,ONE                                                   00019100
+00028 30EC                       97          MEDR  F0,F4                                                    00019200
+00029 DFA0           0052 0028   98          B     SIGN                                                     00019300
+0002A 7AE8                       99 NORMAL   LECR  F2,F0                                                    00019400
+0002B 7BE1                      100          LER   F3,F1                                                    00019500
+0002C 52FF 0032      0060 0032  101          AED   F2,ONE                                                   00019600
+0002E 50FF 0030      0060 0030  102          AED   F0,ONE                                                   00019700
+                                103         QDEDR  F0,F2                                                    00019800
+00030 38F8 0012      0012       104+         STED  F0,QARGA                                                 01-QDEDR
+00032 3AF8 0016      0016       105+         STED  F2,QARGB                                                 01-QDEDR
+00034 68E2                      106+         DER   F0,F2                                                    01-QDEDR
+00035 7AE0                      107+         LER   F2,F0                                                    01-QDEDR
+00036 7BE1                      108+         LER   F2+1,F0+1                                                01-QDEDR
+00037 32F8 0016      0016       109+         MED   F2,QARGB                                                 01-QDEDR
+00039 5AF8 0012      0012       110+         SED   F2,QARGA                                                 01-QDEDR
+0003B 6A2C           0016       111+         DE    F2,QARGB                                                 01-QDEDR
+0003C 58EA                      112+         SEDR  F0,F2                                                    01-QDEDR
+0003D 7AF8 0016      0016       113+         LED   F2,QARGB                                                 01-QDEDR
+                                114          ACALL DLOG                                                     00019900
+                                115+         EXTRN #QDLOG                                                   01-ACALL
+0003F D0FF                      116+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00040 3800                      117+         DC  Y(#QDLOG+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+                                118         QDED   F0,TWO                                                   00020000
+00041 38F8 0012      0012       119+         STED  F0,QARGA                                                 01-QDED
+00043 3EF8 0016      0016       120+         STED  6,QARGB                                                  01-QDED
+00045 68F7 001D      0064 001D  121+         DE    F0,TWO                                                   01-QDED
+00047 7EE0                      122+         LER   6,F0                                                     01-QDED
+00048 7FE1                      123+         LER   7,F0+1                                                   01-QDED
+00049 36FF 0019      0064 0019  124+         MED   6,TWO                                                    01-QDED
+0004B 5EF8 0012      0012       125+         SED   6,QARGA                                                  01-QDED
+0004D 6EF7 0015      0064 0015  126+         DE    6,TWO                                                    01-QDED
+0004F 58EE                      127+         SEDR  F0,6                                                     01-QDED
+00050 7EF8 0016      0016       128+         LED   6,QARGB                                                  01-QDED
+00052 1FE7                      129 SIGN     LR    R7,R7                                                    00020100
+00053 DD0C           0057 0003  130          BNM   EXIT                                                     00020200
+00054 78E0                      131          LER   F0,F0          WORKAROUND FOR BUG                        00020300
+00055 DC04           0057 0001  132          BZ    EXIT           IN LECR INSTRUCTION                       00020400
+00056 78E8                      133          LECR  F0,F0                                                    00020500
+                                134 EXIT     AEXIT                                                          00020600
+                                135+*********RETURN TO CALLER**********************************************
+00057                           136+EXIT     DS    0H                                                       01-AEXIT
+00057 97E8                      137+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                138+***********************************************************************
+00058 18FF 0026      0080 0026  140 TESTE    CED   F0,EPLUS1                                     DR101156   00020701
+0005A DE08           005D 0002  141          BNH   NOTERR                                        DR101156   00020801
+                                142          AERROR 60            -1-EPSILON<ARG<1+EPSILON       DR101156   00020901
+                                143+*********ISSUE SEND ERROR SVC******************************************
+0005B C9FB 0084      0084       144+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                145+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0005D 58E8                      146 NOTERR   SEDR  F0,F0                                         DR101156   00021001
+0005E DF22           0057 0008  147          B     EXIT                                                     00021100
+0005F C9FB
+00060 4110000000000000          148 ONE      DC    D'1'                                                     00021200
+00064 4120000000000000          149 TWO      DC    D'2'                                                     00021300
+00068 4055555555555555          150 A3       DC    X'4055555555555555'                                      00021400
+0006C 4033333333333333          151 A5       DC    X'4033333333333333'                                      00021500
+00070 4024924924924925          152 A7       DC    X'4024924924924925'                                      00021600
+00074 401C71C71C71C71C          153 A9       DC    X'401C71C71C71C71C'                                      00021700
+00078 401745D1745D1746          154 A11      DC    X'401745D1745D1746'                                      00021800
+0007C 3A2E26E8                  155 TINY     DC    X'3A2E26E8'         /* 1.074559E-8 */                    00021903
+0007E 40100000                  156 SMALL    DC    X'40100000'         /* 6.25E-2 */                        00022003
+00080 411000000FFFFFFF          157 EPLUS1   DC    X'411000000FFFFFFF' /* 1.0000000596046445 */  DR103795   00023003
+                                158          ACLOSE                                                         00030000
+i00084                           159+         LTORG                                                          02-ERRPA
+         ARCTANCH,DOUBLE PRECISION                                                                             PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                160+****************ERROR PARAMETER AREA***********************************
+00084                           161+#LDATANH CSECT                                                          02-ERRPA
+                                162+***  DATANH SENDS THE FOLLOWING ERROR                                   02-ERRPA
+                                164+***  ERROR NUMBER 60 IN GROUP 4                                         02-ERRPA
+00084 0014                      166+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00085 043C                      167+         DC    Y(4*256+60)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                168+****************END OF ERROR PARAMETER AREA****************************
+                                169+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000040
+  0001     0003     00     00005C
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+A11          4   000078   154     87
+A3           4   000068   150     94
+A5           4   00006C   151     92
+A7           4   000070   152     90
+A9           4   000074   153     88
+AERROR1      1   000084   166    144
+ARG2         2   000006    42
+ARG4         2   00000A    44
+ARG5         2   00000C    45
+ARG6         2   00000E    46
+ARG7         2   000010    47
+DATANH       1 00000000    37     53
+EPLUS1       4   000080   157    140
+EXIT         1   000057   136    130   132   147
+F0           1 00000000    60     72    73    73    75    75    76    78    80    82    97    99   102   104   106   107
+                                 108   112   119   121   122   123   127   131   131   133   133   140   146   146
+F1           1 00000001    66     83   100
+F2           1 00000002    67     82    84    84    85    89    91    93    95    99   101   105   106   107   108   109
+                                 110   111   112   113
+F3           1 00000003    68     83    86   100
+F4           1 00000004    69     85    87    88    89    90    91    92    93    94    95    96    97
+F5           1 00000005    70     86
+NORMAL       1   00002A    99     81
+NOTERR       1   00005D   146    141
+ONE          4   000060   148     76    96   101   102
+POS          2   000008    76     74
+QARGA        4   000012    50    104   110   119   125
+QARGB        4   000016    51    105   109   111   113   120   128
+R7           1 00000007    65     72   129   129
+SIGN         1   000052   129     79    98
+SMALL        2   00007E   156     80
+STACK        1 00000000    38     54    55
+STACKEND     2   00001A    52     55
+TESTE        2   000058   140     77
+TINY         2   00007C   155     78
+TWO          4   000064   149    121   124   126
+$RET1        1   000057   137
+#LDATANH     1 00000084   161
+#QDLOG       1 00000000   115    117
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      91 CARDS FROM SYSIN     458 CARDS FROM SYSLIB
+     233 LINES OUTPUT          16 CARDS OUTPUT

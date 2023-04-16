@@ -1,0 +1,118 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CSTR      SD 0001 000000 000012
+¤
+         CSTR--STRUCTURE COMPARE, REMOTE                                                                       PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 CSTR     AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+CSTR     CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+CSTR     CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * COMPARE S1 WITH S2 WHERE S1 AND S2 ARE STRUCTURES OF LENGTH N         00000400
+                                 33 *   HALFWORDS, AT LEAST ONE OF WHICH IS REMOTE.                         00000500
+                                 34 *                                                                       00000600
+                                 35          INPUT R2,            ZCON(STRUCTURE(S1))                      X00000700
+                                                   R4,            ZCON(STRUCTURE(S2))                      X00000800
+                                                   R5             INTEGER(N) SP                             00000900
+0000002                          36+R2       EQU   2                                                        01-INPUT
+0000004                          37+R4       EQU   4                                                        01-INPUT
+0000005                          38+R5       EQU   5                                                        01-INPUT
+                                 40          OUTPUT CC                                                      00001000
+                                 42          WORK  R3,R6,R7                                                 00001100
+0000003                          43+R3       EQU   3                                                        01-WORK
+0000006                          44+R6       EQU   6                                                        01-WORK
+0000007                          45+R7       EQU   7                                                        01-WORK
+                                 47 *                                                                       00001200
+                                 48 * ALGORITHM:                                                            00001300
+                                 49 *   DO FOR I = 1 TO N;                                                  00001400
+                                 50 *     IF S1 ^= S2 THEN                                                  00001500
+                                 51 *       RETURN CC;                                                      00001600
+                                 52 *     NAME(S1) = NAME(S1) + 1;                                          00001700
+                                 53 *     NAME(X2) = NAME(S2) + 1;                                          00001800
+                                 54 *   END;                                                                00001900
+                                 55 *                                                                       00002000
+00002 BFE3                0003   56          LFXI  R7,1           SET R7 TO A 1 (FOR INDEXING PURPOSES)     00002100
+00003 73E3                       57          XR    R3,R3          CLEAR R3 (FOR INDEXING PURPOSES)          00002200
+00004 9EF4 7806      0006        58 L1       LH@#  R6,ARG2(R3)    JUST LOAD AND COMPARE 1/2WORDS TIL DONE   00002300
+00006 96F4 780A      000A        59          CH@#  R6,ARG4(R3)    CONDITION CODE SET HERE                   00002400
+00008 DB14           000E 0005   60          BNE   CPRNEQ         IF NOT EQUAL TO RETURN NE                 00002500
+00009 03E7                       61          AR    R3,R7                                                    00002600
+0000A DD1F           0004 0007   62          BCTB  R5,L1                                                    00002700
+                                 63          AEXIT CC=EQ          IF GET HERE THEN EQUAL                    00002800
+                                 64+*********RETURN TO CALLER**********************************************
+0000B                            65+         DS    0H                                                       01-AEXIT
+0000B B104 C000      0001 C000   66+         ZB    1(0),X'C000'   SET PSW CC TO 00 (EQ)                     01-AEXIT
+0000D 97E8                       67+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 68+***********************************************************************
+                                 70 CPRNEQ   AEXIT CC=NE                                                    00002900
+                                 71+*********RETURN TO CALLER**********************************************
+0000E                            72+CPRNEQ   DS    0H                                                       01-AEXIT
+0000E B204 C000      0001 C000   73+         SB    1(0),X'C000'   SET PSW CC TO 11 (LT (NE))                01-AEXIT
+00010 97E8                       74+$RET2    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 75+***********************************************************************
+                                 77          ACLOSE                                                         00003000
+00011 C9FB
+i00012                            78+         LTORG                                                          02-ERRPA
+         CSTR--STRUCTURE COMPARE, REMOTE                                                                       PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 79+****************ERROR PARAMETER AREA***********************************
+                                 80+***  NO ERRORS SENT IN CSTR                                             02-ERRPA
+                                 81+****************END OF ERROR PARAMETER AREA****************************
+                                 82+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    18     58
+ARG4         2   00000A    20     59
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+CPRNEQ       1   00000E    72     60
+CSTR         1 00000000    13     27
+L1           2   000004    58     62
+R2           1 00000002    36
+R3           1 00000003    43     57    57    58    59    61
+R4           1 00000004    37
+R5           1 00000005    38     62
+R6           1 00000006    44     58    59
+R7           1 00000007    45     56    61
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   00000D    67
+$RET2        1   000010    74
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      35 CARDS FROM SYSIN     344 CARDS FROM SYSLIB
+     118 LINES OUTPUT           7 CARDS OUTPUT

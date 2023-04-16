@@ -1,0 +1,73 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+IMAX      SD 0001 000000 000008
+¤
+         IMAX--INTEGER MAX FUNCTION ,DP                                                                        PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 IMAX     AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+IMAX     CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * RETURNS THE MAXIMAL ELEMENT OF A LENGTH N ARRAY OF DOUBLE PRECISION   00000400
+                                 17 *   INTEGERS.                                                           00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            ARRAY(N) INTEGER DP                      X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT R5            INTEGER DP                                00000900
+                                 25          WORK  R6                                                       00001000
+0000006                          26+R6       EQU   6                                                        01-WORK
+                                 28 *                                                                       00001100
+                                 29 * ALGORITHM:                                                            00001200
+                                 30 *   SEE ALGORITHM DESCRIPTION IN DMAX                                   00001300
+                                 31 *                                                                       00001400
+00000 DF08           0003 0002   32          B     START          GO TO SET CURRMAX                         00001500
+00001 1606           0002        33 ILOOP    C     R6,2(R2)       COMPARE CURRMAX TO NEXT ELEMENT           00001600
+00002 DD04           0004 0001   34          BNL   HIGH           IF ^< THEN SKIP ASSIGNMENT                00001700
+00003 1E06           0002        35 START    L     R6,2(R2)       RESET CURRMAX                             00001800
+00004 EA0A           0002        36 HIGH     LA    R2,2(R2)       BUMP INPUT PTR TO NEXT ELEMENT            00001900
+00005 DD17           0001 0005   37          BCT   R5,ILOOP                                                 00002000
+00006 1DE6                       38          LR    R5,R6          ANSWER EXPECTED IN R5                     00002100
+                                 39          AEXIT                                                          00002200
+                                 40+*********RETURN TO CALLER**********************************************
+00007                            41+         DS    0H                                                       01-AEXIT
+00007 C7EC                       42+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 43+***********************************************************************
+                                 45          ACLOSE                                                         00002300
+00008                            46+         LTORG                                                          02-ERRPA
+                                 47+****************ERROR PARAMETER AREA***********************************
+                                 48+***  NO ERRORS SENT IN IMAX                                             02-ERRPA
+                                 49+****************END OF ERROR PARAMETER AREA****************************
+                                 50+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+HIGH         2   000004    36     34
+ILOOP        2   000001    33     37
+IMAX         1 00000000    13
+R2           1 00000002    20     33    33    35    35    36    36    36
+R5           1 00000005    21     37    38
+R6           1 00000006    26     33    35    38
+START        2   000003    35     32
+$RET1        1   000007    42
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      28 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      73 LINES OUTPUT           5 CARDS OUTPUT

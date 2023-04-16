@@ -1,0 +1,259 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DTANH     SD 0001 000000 00009A
+#QDEXP    ER 0002
+¤
+         DTANH -- DOUBLE PRECISION HYPERBOLIC TANGENT                                                          PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * DTANH: HYPERBOLIC TANGENT(DOUBLE)                                     00000200
+                                  8 *                                                                       00000300
+                                  9 *        1.INPUT AND OUTPUT VIA F0-F1.                                  00000400
+                                 10 *        2. IF |X|<0.54931, USE A FRACTIONAL APPROXIMATION.             00000500
+                                 11 *        3. IF |X|>20.101, ANSWER IS +1 OR -1.                          00000600
+                                 12 *        4. FOR OTHER VALUES OF X, USE EXTERNAL DEXP FUNCTION:          00000700
+                                 13 *           TANH(|X|) = 1-2/(EXP(2|X|)+1).                              00000800
+                                 14 *        5. TANH(-X) = -TANH(X)                                         00000900
+                                 15 *                                                                       00001000
+                                 16          MACRO                                                          00001100
+                                 17          WORKAREA                                                       00001200
+                                 18 SAVE6    DS    D                                                        00001300
+                                 19          MEND                                                           00001400
+                                 20 *                                                                       00001500
+                                 21 DTANH    AMAIN ACALL=YES,QDED=YES                                       00001600
+                                 22+***********************************************************************
+                                 23+*
+                                 24+*        PRIMARY ENTRY POINT
+                                 25+*
+                                 26+***********************************************************************
+00000                            27+DTANH    CSECT                                                          01-AMAIN
+00000                            28+STACK    DSECT                                                          01-AMAIN
+                                 29+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            30+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            31+         DS    2F             R0,R1                                     01-AMAIN
+00006                            32+ARG2     DS    F              R2                                        01-AMAIN
+00008                            33+         DS    F              R3                                        01-AMAIN
+0000A                            34+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            35+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            36+ARG6     DS    F              R6                                        01-AMAIN
+00010                            37+ARG7     DS    F              R7                                        01-AMAIN
+                                 38+*        END OF STANDARD STACK AREA
+00012                            39+SAVE6    DS    D                                                        02-00018
+00016                            40+QARGA    DS    D                                                        01-AMAIN
+0001A                            41+QARGB    DS    D                                                        01-AMAIN
+0001E                            42+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            43+DTANH    CSECT                                                          01-AMAIN
+0000000                          44+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 E0FB 001E      001E        45+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN
+00002 B624 0000      0009 0000   46+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 48 * COMPUTES HYPERBOLIC TANGENT IN DOUBLE PRECISION                       00001700
+                                 49          INPUT F0             SCALAR DP                                 00001800
+0000000                          50+F0       EQU   0                                                        01-INPUT
+                                 52          OUTPUT F0            SCALAR DP                                 00001900
+                                 54          WORK  F1,F2,F3,F4,F5,F6,F7                                     00002000
+0000001                          55+F1       EQU   1                                                        01-WORK
+0000002                          56+F2       EQU   2                                                        01-WORK
+0000003                          57+F3       EQU   3                                                        01-WORK
+0000004                          58+F4       EQU   4                                                        01-WORK
+0000005                          59+F5       EQU   5                                                        01-WORK
+                                 60+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+0000006                          61+F6       EQU   6                                                        01-WORK
+0000007                          62+F7       EQU   7                                                        01-WORK
+00004 3EF8 0012      0012        64          STED  F6,SAVE6                                                 00002100
+00006 7FE1                       65          LER   F7,F1                                                    00002200
+00007 7EE0                       66          LER   F6,F0          GET X IN F6                               00002300
+00008 DD04           000A 0001   67          BNM   POS            AND TEST SIGN                             00002400
+00009 78E8                       68          LECR  F0,F0          |X| IN F0                                 00002500
+                                 69 *                                                                       00002600
+0000A 48FF 008C      0098 008C   70 POS      CE    F0,MLIM        IF |X|<=0.54931, COMPUTE TANH(X)          00002700
+0000C DEA4           0036 0029   71          BNH   SMALL          USING A FRACTIONAL APPROXIMATION.         00002800
+0000D 48FF 0085      0094 0085   72          CE    F0,HLIM        IF |X|>=20.101,                           00002900
+0000F DD8C           0033 0023   73          BNL   BIG            RETURN +1 OR -1.                          00003000
+                                 74 *                                                                       00003100
+                                 75 *  INTERMEDIATE VALUE OF X: USE EXTERNAL DEXP FUNCTION                  00003200
+                                 76 *                                                                       00003300
+00010 50E8                       77          AEDR  F0,F0          2|X| IN F0                                00003400
+                                 78          ACALL DEXP      EXP(2|X|) IN F0. DEXP DOES NOT ALTER F4-F5.    00003500
+                                 79+         EXTRN #QDEXP                                                   01-ACALL
+00011 D0FF                       80+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+i00012 3800                       81+         DC  Y(#QDEXP+X'3800')                                         X01-ACALL
+         DTANH -- DOUBLE PRECISION HYPERBOLIC TANGENT                                                          PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                   +                              INDIRECTLY THRU QCON
+00013 8CE1                0001   82          LFLI  F4,1                                                     00003600
+00014 5DE5                       83          SER   F5,F5                                                    00003700
+00015 50EC                       84          AEDR  F0,F4          EXP(2|X|)+1.                              00003800
+00016 7AE4                       85          LER   F2,F4                                                    00003900
+00017 5BE3                       86          SER   F3,F3                                                    00004000
+00018 52EA                       87          AEDR  F2,F2                                                    00004100
+                                 88         QDEDR  F2,F0                                                    00004200
+00019 3AF8 0016      0016        89+         STED  F2,QARGA                                                 01-QDEDR
+0001B 38F8 001A      001A        90+         STED  F0,QARGB                                                 01-QDEDR
+0001D 6AE0                       91+         DER   F2,F0                                                    01-QDEDR
+0001E 78E2                       92+         LER   F0,F2                                                    01-QDEDR
+0001F 79E3                       93+         LER   F0+1,F2+1                                                01-QDEDR
+00020 30F8 001A      001A        94+         MED   F0,QARGB                                                 01-QDEDR
+00022 58F8 0016      0016        95+         SED   F0,QARGA                                                 01-QDEDR
+00024 6834           001A        96+         DE    F0,QARGB                                                 01-QDEDR
+00025 5AE8                       97+         SEDR  F2,F0                                                    01-QDEDR
+00026 78F8 001A      001A        98+         LED   F0,QARGB                                                 01-QDEDR
+00028 78E4                       99          LER   F0,F4                                                    00004300
+00029 59E1                      100          SER   F1,F1                                                    00004400
+0002A 58EA                      101          SEDR  F0,F2          TANH(|X|) READY                           00004500
+                                102 *                                                                       00004600
+0002B 7EE6                      103 SIGN     LER   F6,F6          TEST SIGN OF ARGUMENT, AND                00004700
+0002C DD0C           0030 0003  104          BNM   EXIT           EXIT IF NOT NEGATIVE.                     00004800
+0002D 78E0                      105          LER   F0,F0          WORKAROUND FOR BUG                        00004900
+0002E DC04           0030 0001  106          BZ    EXIT           IN LECR INSTRUCTION.                      00005000
+0002F 78E8                      107          LECR  F0,F0          COMPLEMENT IF ARGUMENT WAS NEGATIVE       00005100
+                                108 *                                                                       00005200
+00030 7EF8 0012      0012       109 EXIT     LED   F6,SAVE6       RESTORE F6                                00005300
+                                110          AEXIT                AND EXIT                                  00005400
+                                111+*********RETURN TO CALLER**********************************************
+00032                           112+         DS    0H                                                       01-AEXIT
+00032 97E8                      113+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                114+***********************************************************************
+                                116 *                                                                       00005500
+                                117 *  LARGE ARGUMENT RETURNS +1 OR -1                                      00005600
+                                118 *                                                                       00005700
+00033 88E1                0001  119 BIG      LFLI  F0,1           F0=1 FOR LARGE ARGUMENT                   00005800
+00034 59E1                      120          SER   F1,F1                                                    00005900
+00035 DF2E           002B 000B  121          B     SIGN                                                     00006000
+                                122 *                                                                       00006100
+00036 48FF 005E      0096 005E  123 SMALL    CE    F0,LLIM        IF |X|<16**(-7),                          00006200
+00038 DE3A           002B 000E  124          BNH   SIGN           LET TANH(X)=X.                            00006300
+00039 30E8                      125          MEDR  F0,F0          OTHERWISE, COMPUTE TANH(X) BY POLYNOMIAL. 00006400
+0003A 7CFF 0054      0090 0054  126          LED   F4,C5                                                    00006500
+0003C 54E8                      127          AEDR  F4,F0                                                    00006600
+0003D 7AFF 004D      008C 004D  128          LED   F2,C4                                                    00006700
+                                129         QDEDR  F2,F4                                                    00006800
+0003F 3AF8 0016      0016       130+         STED  F2,QARGA                                                 01-QDEDR
+00041 3CF8 001A      001A       131+         STED  F4,QARGB                                                 01-QDEDR
+00043 6AE4                      132+         DER   F2,F4                                                    01-QDEDR
+00044 7CE2                      133+         LER   F4,F2                                                    01-QDEDR
+00045 7DE3                      134+         LER   F4+1,F2+1                                                01-QDEDR
+00046 34F8 001A      001A       135+         MED   F4,QARGB                                                 01-QDEDR
+00048 5CF8 0016      0016       136+         SED   F4,QARGA                                                 01-QDEDR
+0004A 6C34           001A       137+         DE    F4,QARGB                                                 01-QDEDR
+0004B 5AEC                      138+         SEDR  F2,F4                                                    01-QDEDR
+0004C 7CF8 001A      001A       139+         LED   F4,QARGB                                                 01-QDEDR
+0004E 52FF 0038      0088 0038  140          AED   F2,C3                                                    00006900
+00050 52E8                      141          AEDR  F2,F0                                                    00007000
+00051 7CFF 0031      0084 0031  142          LED   F4,C2                                                    00007100
+                                143         QDEDR  F4,F2                                                    00007200
+00053 3CF8 0016      0016       144+         STED  F4,QARGA                                                 01-QDEDR
+00055 3AF8 001A      001A       145+         STED  F2,QARGB                                                 01-QDEDR
+00057 6CE2                      146+         DER   F4,F2                                                    01-QDEDR
+00058 7AE4                      147+         LER   F2,F4                                                    01-QDEDR
+00059 7BE5                      148+         LER   F2+1,F4+1                                                01-QDEDR
+0005A 32F8 001A      001A       149+         MED   F2,QARGB                                                 01-QDEDR
+0005C 5AF8 0016      0016       150+         SED   F2,QARGA                                                 01-QDEDR
+0005E 6A34           001A       151+         DE    F2,QARGB                                                 01-QDEDR
+0005F 5CEA                      152+         SEDR  F4,F2                                                    01-QDEDR
+00060 7AF8 001A      001A       153+         LED   F2,QARGB                                                 01-QDEDR
+00062 54FF 001C      0080 001C  154          AED   F4,C1                                                    00007300
+00064 54E8                      155          AEDR  F4,F0                                                    00007400
+00065 30FF 0015      007C 0015  156          MED   F0,C0                                                    00007500
+                                157         QDEDR  F0,F4                                                    00007600
+00067 38F8 0016      0016       158+         STED  F0,QARGA                                                 01-QDEDR
+00069 3CF8 001A      001A       159+         STED  F4,QARGB                                                 01-QDEDR
+i0006B 68E4                      160+         DER   F0,F4                                                    01-QDEDR
+         DTANH -- DOUBLE PRECISION HYPERBOLIC TANGENT                                                          PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0006C 7CE0                      161+         LER   F4,F0                                                    01-QDEDR
+0006D 7DE1                      162+         LER   F4+1,F0+1                                                01-QDEDR
+0006E 34F8 001A      001A       163+         MED   F4,QARGB                                                 01-QDEDR
+00070 5CF8 0016      0016       164+         SED   F4,QARGA                                                 01-QDEDR
+00072 6C34           001A       165+         DE    F4,QARGB                                                 01-QDEDR
+00073 58EC                      166+         SEDR  F0,F4                                                    01-QDEDR
+00074 7CF8 001A      001A       167+         LED   F4,QARGB                                                 01-QDEDR
+00076 30EE                      168          MEDR  F0,F6                                                    00007700
+00077 50EE                      169          AEDR  F0,F6                                                    00007800
+00078 7EF8 0012      0012       170          LED   F6,SAVE6       RESTORE F6                                00007900
+                                171          AEXIT                                                          00008000
+                                172+*********RETURN TO CALLER**********************************************
+0007A                           173+         DS    0H                                                       01-AEXIT
+0007A 97E8                      174+$RET2    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                175+***********************************************************************
+                                177 *                                                                       00008100
+0007B C9FB
+0007C                           178          DS    0D                                                       00008200
+0007C C0F6E12F40F5590A          179 C0       DC    X'C0F6E12F40F5590A'   -.9643735440816707                 00008300
+00080 419DA5D6FD3DBC84          180 C1       DC    X'419DA5D6FD3DBC84'   9.8529882328255392                 00008400
+00084 C31C504FEF537AF6          181 C2       DC    X'C31C504FEF537AF6'   453.01951534852503                 00008500
+00088 424D2FA31CAD8D00          182 C3       DC    X'424D2FA31CAD8D00'   77.186082641955181                 00008600
+0008C C3136E2A5891D8E9          183 C4       DC    X'C3136E2A5891D8E9'   -310.8853383729134                 00008700
+00090 4219B3ACA4C6E790          184 C5       DC    X'4219B3ACA4C6E790'   25.701853083191565                 00008800
+00094 421419DB                  185 HLIM     DC    X'421419DB'  20.101                                      00008900
+00096 3A100000                  186 LLIM     DC    X'3A100000'  16**(-7)                                    00009000
+00098 408C9F95                  187 MLIM     DC    X'408C9F95'  0.54931                                     00009100
+                                188          ACLOSE                                                         00009200
+0009A                           189+         LTORG                                                          02-ERRPA
+                                190+****************ERROR PARAMETER AREA***********************************
+                                191+***  NO ERRORS SENT IN DTANH                                            02-ERRPA
+                                192+****************END OF ERROR PARAMETER AREA****************************
+                                193+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000012
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    32
+ARG4         2   00000A    34
+ARG5         2   00000C    35
+ARG6         2   00000E    36
+ARG7         2   000010    37
+BIG          1   000033   119     73
+C0           4   00007C   179    156
+C1           4   000080   180    154
+C2           4   000084   181    142
+C3           4   000088   182    140
+C4           4   00008C   183    128
+C5           4   000090   184    126
+DTANH        1 00000000    27     43
+EXIT         2   000030   109    104   106
+F0           1 00000000    50     66    68    68    70    72    77    77    84    90    91    92    93    94    95    96
+                                  97    98    99   101   105   105   107   107   119   123   125   125   127   141   155
+                                 156   158   160   161   162   166   168   169
+F1           1 00000001    55     65   100   100   120   120
+F2           1 00000002    56     85    87    87    89    91    92    93    97   101   128   130   132   133   134   138
+                                 140   141   145   146   147   148   149   150   151   152   153
+F3           1 00000003    57     86    86
+F4           1 00000004    58     82    84    85    99   126   127   131   132   133   134   135   136   137   138   139
+                                 142   144   146   147   148   152   154   155   159   160   161   162   163   164   165
+                                 166   167
+F5           1 00000005    59     83    83
+F6           1 00000006    61     64    66   103   103   109   168   169   170
+F7           1 00000007    62     65
+HLIM         2   000094   185     72
+LLIM         2   000096   186    123
+MLIM         2   000098   187     70
+POS          2   00000A    70     67
+QARGA        4   000016    40     89    95   130   136   144   150   158   164
+QARGB        4   00001A    41     90    94    96    98   131   135   137   139   145   149   151   153   159   163   165
+                                 167
+SAVE6        4   000012    39     64   109   170
+SIGN         1   00002B   103    121   124
+SMALL        2   000036   123     71
+STACK        1 00000000    28     44    45
+STACKEND     2   00001E    42     45
+$RET1        1   000032   113
+$RET2        1   00007A   174
+#QDEXP       1 00000000    79     81
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      97 CARDS FROM SYSIN     410 CARDS FROM SYSLIB
+     259 LINES OUTPUT          17 CARDS OUTPUT

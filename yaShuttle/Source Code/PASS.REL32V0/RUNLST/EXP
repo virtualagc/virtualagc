@@ -1,0 +1,225 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+EXP       SD 0001 000000 00006C
+#LEXP     SD 0002 00006C 000002
+¤
+         EXP -- SINGLE PRECISION EXPONENTIAL FUNCTION                                                          PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * EXP: EXPONENTIAL(SINGLE)                                              00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUT AND OUTPUT VIA F0.                                    00000400
+                                 10 *        2. LET X*(LOG E BASE 2) = 4R-S-T, WHERE R AND S ARE INTEGERS,  00000500
+                                 11 *           0<=S<=3, AND 0<=T<1.                                        00000600
+                                 12 *        3. CALCULATE 2**(-T) USING A RATIONAL FUNCTION APPROXIMATION.  00000700
+                                 13 *        4. THEN EXP(X)=(16**R)(2**(-S))(2**(-T)).                      00000800
+                                 14 *        5. ERRORS ARE GIVEN IF X>174.673 OR X<-180.218.                00000900
+                                 15 *        6. FLOATING REGISTERS USED: F0-F3.                             00001000
+                                 16 *                                                                       00001100
+                                 17 EXP      AMAIN                                                          00001200
+                                 18+***********************************************************************
+                                 19+*
+                                 20+*        PRIMARY ENTRY POINT
+                                 21+*
+                                 22+***********************************************************************
+00000                            23+EXP      CSECT                                                          01-AMAIN
+00000                            24+STACK    DSECT                                                          01-AMAIN
+                                 25+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            26+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            27+         DS    2F             R0,R1                                     01-AMAIN
+00006                            28+ARG2     DS    F              R2                                        01-AMAIN
+00008                            29+         DS    F              R3                                        01-AMAIN
+0000A                            30+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            31+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            32+ARG6     DS    F              R6                                        01-AMAIN
+00010                            33+ARG7     DS    F              R7                                        01-AMAIN
+                                 34+*        END OF STANDARD STACK AREA
+                                 35+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            36+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            37+EXP      CSECT                                                          01-AMAIN
+0000000                          38+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   39+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 41 * COMPUTES E**X IN SINGLE PRECISION                                     00001300
+                                 42          INPUT F0             SCALAR SP                                 00001400
+0000000                          43+F0       EQU   0                                                        01-INPUT
+                                 45          OUTPUT F0            SCALAR SP                                 00001500
+                                 47          WORK  R1,R2,R3,R4,R5,R6,F1,F2                                  00001600
+0000001                          48+R1       EQU   1                                                        01-WORK
+0000002                          49+R2       EQU   2                                                        01-WORK
+0000003                          50+R3       EQU   3                                                        01-WORK
+0000004                          51+R4       EQU   4                                                        01-WORK
+0000005                          52+R5       EQU   5                                                        01-WORK
+0000006                          53+R6       EQU   6                                                        01-WORK
+0000001                          54+F1       EQU   1                                                        01-WORK
+0000002                          55+F2       EQU   2                                                        01-WORK
+00002 48FF 004E      0052 004E   57          CE    F0,MAX         GIVE ERROR IF ARG                         00001700
+00004 DE1C           000C 0007   58          BNH   LOW            GREATER THAN 174.673                      00001800
+                                 59          AERROR 6             ARG > 174.673                             00001900
+                                 60+*********ISSUE SEND ERROR SVC******************************************
+00005 C9FB 006C      006C        61+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                 62+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00007 78F7 0055      005E 0055   63          LE    F0,ALLF                                                  00002000
+00009 78E8                       64          LECR  F0,F0                                                    00002100
+0000A C7F7 0044      0050 0044   65          B     EXIT                                                     00002200
+0000C 48FF 0046      0054 0046   66 LOW      CE    F0,MIN                                                   00002300
+0000E DD14           0014 0005   67          BNL   OK             IF ARG LESS THAN -180.218,                00002400
+0000F 78F7 0059      006A 0059   68          LE    F0,ONE         LOAD F0 WITH TINY NUMBER                  00002500
+00011 60E0                       69          MER   F0,F0          AND GIVE EXPONENT UNDERFLOW.              00002600
+00012 C7F7 003C      0050 003C   70          B     EXIT                                                     00002700
+                                 71 *                                                                       00002800
+00014 59E1                       72 OK       SER   F1,F1                                                    00002900
+00015 7AE0                       73          LER   F2,F0                                                    00003000
+00016 30FF 003E      0056 003E   74          MED   F0,LOG2E       LOG2E=4*LOG(BASE 2)E                      00003100
+00018 DA0C           001C 0003   75          BM    MINUS                                                    00003200
+00019 50FF 003F      005A 003F   76          AED   F0,CH47        SEPARATE INTEGER AND FRACTION             00003300
+0001B DF08           001E 0002   77          B     TOG                                                      00003400
+0001C 58FF 003C      005A 003C   78 MINUS    SED   F0,CH47                                                  00003500
+                                 79 *                                                                       00003600
+0001E 21E8                       80 TOG      LFXR  R1,F0          INTEGER IN R1                             00003700
+i0001F 23E9                       81          LFXR  R3,F1          FRACTION IN R2                            00003800
+         EXP -- SINGLE PRECISION EXPONENTIAL FUNCTION                                                          PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                 82 *                                                                       00003900
+                                 83 *  NOW, IF X<0, THEN R1 CONTAINS -R IN THE LOW 8 BITS, AND R3           00004000
+                                 84 *  CONTAINS S IN THE TOP 2 BITS AND T IN THE LOW 30 BITS.               00004100
+                                 85 *   IF X>=0, THEN R1 CONTAINS R-1 IN THE LOW 8 BITS, AND R3 HAS         00004200
+                                 86 *  -S-1 IN THE TOP 2 BITS AND -T (WITHOUT THE SIGN BIT) IN LOW 30 BITS  00004300
+                                 87 *                                                                       00004400
+00020 7AE2                       88          LER   F2,F2                                                    00004500
+00021 DE10           0026 0004   89          BNP   NEG                                                      00004600
+00022 71F7 003A      005E 003A   90          X     R1,ALLF        -R IN R1                                  00004700
+00024 73F7 0038      005E 0038   91          X     R3,ALLF        S+T IN R3 HIGH (IGNORE ERROR IN LAST BIT) 00004800
+                                 92 *                                                                       00004900
+                                 93 *  BELOW THIS POINT, R1 LOW 8 BITS CONTAIN -R,                          00005000
+                                 94 *  AND R3 CONTAINS S+T                                                  00005100
+                                 95 *                                                                       00005200
+00026 F160                0018   96 NEG      SLL   R1,24          SHIFT -R TO CHARACTERISTIC POSITION       00005300
+00027 B0E1 C000           C000   97          AHI   R1,X'C000'     CHAR. OFFSET = -64                        00005400
+00029 0AE2                       98          SR    R2,R2          CLEAR R2 TO RECEIVE S                     00005500
+0002A FA08                0002   99          SLDL  R2,2           S IN R2, T IN R3 UNSIGNED                 00005600
+0002B F240                0010  100          SLL   R2,16          SHIFT TO TOP HALFWORD                     00005700
+0002C F312                0004  101          SRL   R3,4           GIVE T POSITIVE SIGN (B3)                 00005800
+0002D 1EE3                      102          LR    R6,R3          T IN R6                                   00005900
+0002E 46E6                      103          MR    R6,R6                                                    00006000
+0002F FE06                0001  104          SRDL  R6,1           T*T IN R6 (B7)                            00006100
+00030 1CE6                      105          LR    R4,R6          AND IN R4 (B7)                            00006200
+00031 44F7 0031      0064 0031  106          M     R4,C           C*T*T (B3)                                00006300
+00033 F405                0001  107          SRA   R4,1           C*T*T (B4)                                00006400
+00034 06F7 002A      0060 002A  108          A     R6,A           A+T*T (B7)                                00006500
+00036 1DE6                      109          LR    R5,R6                                                    00006600
+00037 1EF7 0029      0062 0029  110          L     R6,B           B (B11)                                   00006700
+00039 4EE5                      111          DR    R6,R5          B/(A+T*T) (B4)                            00006800
+0003A F306                0001  112          SRL   R3,1           T (B4)                                    00006900
+0003B 0EE3                      113          SR    R6,R3          -T+B/(A+T*T) (B4)                         00007000
+0003C 06F7 0028      0066 0028  114          A     R6,D           D-T+B/(A+T*T) (B4)                        00007100
+0003E 06E4                      115          AR    R6,R4          CT*T-T+D+B/(A+T*T) (B4)                   00007200
+0003F 1CE3                      116          LR    R4,R3                                                    00007300
+00040 F406                0001  117          SRL   R4,1           2T (B6)                                   00007400
+00041 4CE6                      118          DR    R4,R6          2T/(CT*T-T+D+B/(A+T*T)) (B2)              00007500
+00042 F411                0004  119          SRA   R4,4           AND AT B6                                 00007600
+                                120 *                                                                       00007700
+00043 04F7 0023      0068 0023  121          A     R4,FONE        2**(-T) READY AT BIT 6 OF R4              00007800
+                                122 *                                                                       00007900
+00045 F4EA                003A  123          SRL   R4,58          2**(-S)*2**(-T) AT BIT 6 OF R4            00008000
+00046 0CF7 0016      005E 0016  124          S     R4,ALLF        ADD 1 AT BIT 31 TO ROUND                  00008100
+                                125 *                                                                       00008200
+00048 14F7 001E      0068 001E  126          C     R4,FONE        FIXUP NEEDED IF CARRY INTO CHAR. POSITION 00008300
+0004A F406                0001  127          SRL   R4,1           SHIFT TO MANTISSA POSITION BIT 7          00008400
+0004B DA08           004E 0002  128          BL    READY                                                    00008500
+                                129 *                                                                       00008600
+0004C 1CF7 001C      006A 001C  130          L     R4,ONE         FIXUP OCCURS HERE                         00008700
+                                131 *                                                                       00008800
+0004E 0CE1                      132 READY    SR    R4,R1          MULTIPLY BY 16**R                         00008900
+0004F 28EC                      133          LFLR  F0,R4          AND FLOAT                                 00009000
+                                134 EXIT     AEXIT                                                          00009100
+                                135+*********RETURN TO CALLER**********************************************
+00050                           136+EXIT     DS    0H                                                       01-AEXIT
+00050 97E8                      137+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                138+***********************************************************************
+                                140 *                                                                       00009200
+00051 C9FB
+00052                           141          DS    0F                                                       00009300
+00052 42AEAC4F                  142 MAX      DC    X'42AEAC4F'    174.673                                   00009400
+00054 C2B437E0                  143 MIN      DC    X'C2B437E0'    -180.218                                  00009500
+00056 415C551D94AE0BF8          144 LOG2E    DC    X'415C551D94AE0BF8'   4*LOG E BASE 2                     00009600
+0005A 4710000000000000          145 CH47     DC    X'4710000000000000'                                      00009700
+0005E FFFFFFFF                  146 ALLF     DC    X'FFFFFFFF'           ALSO = F'-1'                       00009800
+00060 576AE119                  147 A        DC    X'576AE119'    87.417497 (B7)                            00009900
+00062 269F8E6B                  148 B        DC    X'269F8E6B'    617.97227 (B11)                           00010000
+00064 B9059003                  149 C        DC    X'B9059003'    -0.03465736 (B-4)                         00010100
+00066 B05CFCE3                  150 D        DC    X'B05CFCE3'    -9.95459578 (B4)                          00010200
+00068 02000000                  151 FONE     DC    X'02000000'                                              00010300
+0006A 01100000                  152 ONE      DC    X'01100000'                                              00010400
+                                153          ACLOSE                                                         00010500
+0006C                           154+         LTORG                                                          02-ERRPA
+                                155+****************ERROR PARAMETER AREA***********************************
+0006C                           156+#LEXP    CSECT                                                          02-ERRPA
+                                157+***  EXP SENDS THE FOLLOWING ERROR                                      02-ERRPA
+i                                159+***  ERROR NUMBER 6 IN GROUP 4                                          02-ERRPA
+         EXP -- SINGLE PRECISION EXPONENTIAL FUNCTION                                                          PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+0006C 0014                      161+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0006D 0406                      162+         DC    Y(4*256+6)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                163+****************END OF ERROR PARAMETER AREA****************************
+                                164+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.38 07/22/05
+  0001     0002     00     000006
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+A            2   000060   147    108
+AERROR1      1   00006C   161     61
+ALLF         2   00005E   146     63    90    91   124
+ARG2         2   000006    28
+ARG4         2   00000A    30
+ARG5         2   00000C    31
+ARG6         2   00000E    32
+ARG7         2   000010    33
+B            2   000062   148    110
+C            2   000064   149    106
+CH47         4   00005A   145     76    78
+D            2   000066   150    114
+EXIT         1   000050   136     65    70
+EXP          1 00000000    23     37
+F0           1 00000000    43     57    63    64    64    66    68    69    69    73    74    76    78    80   133
+F1           1 00000001    54     72    72    81
+F2           1 00000002    55     73    88    88
+FONE         2   000068   151    121   126
+LOG2E        4   000056   144     74
+LOW          2   00000C    66     58
+MAX          2   000052   142     57
+MIN          2   000054   143     66
+MINUS        2   00001C    78     75
+NEG          1   000026    96     89
+OK           1   000014    72     67
+ONE          2   00006A   152     68   130
+R1           1 00000001    48     80    90    96    97   132
+R2           1 00000002    49     98    98    99   100
+R3           1 00000003    50     81    91   101   102   112   113   116
+R4           1 00000004    51    105   106   107   115   116   117   118   119   121   123   124   126   127   130   132
+                                 133
+R5           1 00000005    52    109   111
+R6           1 00000006    53    102   103   103   104   105   108   109   110   111   113   114   115   118
+READY        1   00004E   132    128
+STACK        1 00000000    24     38
+STACKEND     2   000012    36
+TOG          1   00001E    80     77
+$RET1        1   000050   137
+#LEXP        1 0000006C   156
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     110 CARDS FROM SYSIN     366 CARDS FROM SYSLIB
+     225 LINES OUTPUT          15 CARDS OUTPUT

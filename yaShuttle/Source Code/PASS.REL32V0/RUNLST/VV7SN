@@ -1,0 +1,79 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VV7SN     SD 0001 000000 00000A
+¤
+         VV7SN -- VECTOR NEGATE,LENGTH N,SINGLE PREC                                                           PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV7SN    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV7SN    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *   GENERATES THE NEGATIVE VECTOR :                                     00000400
+                                 17 *                                                                       00000500
+                                 18 *    V(N)= -V1(N)                                                       00000600
+                                 19 *                                                                       00000700
+                                 20 *   WHERE N NOT=3 & V,V1 ARE SP                                         00000800
+                                 21 *                                                                       00000900
+                                 22          INPUT R2,            VECTOR(N)   SP                           X00001000
+                                                   R5             INTEGER(N)  SP                            00001100
+0000002                          23+R2       EQU   2                                                        01-INPUT
+0000005                          24+R5       EQU   5                                                        01-INPUT
+                                 26          OUTPUT R1            VECTOR(N)   SP                            00001200
+0000001                          27+R1       EQU   1                                                        01-OUTPU
+                                 29          WORK  F0                                                       00001300
+0000000                          30+F0       EQU   0                                                        01-WORK
+                                 32 *                                                                       00001400
+                                 33 *  ALGORITHM :                                                          00001500
+                                 34 *   DO FOR I=N TO 1;                                                    00001600
+                                 35 *    V(I)=-V1(I);                                                       00001700
+                                 36 *   END;                                                                00001800
+                                 37 *                                                                       00001900
+00000 78F6 A000      0000        38 VV7SNX   LE    F0,0(R5,R2)   GET V1 ELE.                                00002000
+00002 DC04           0004 0001   39          BZ    FX1            WORKAROUND FOR LECR BUG.                  00002100
+00003 78E8                       40          LECR  F0,F0         V(I)=-V1(I)                                00002200
+00004 38F5 A000      0000        41 FX1      STE   F0,0(R5,R1)   PLACE V ELE.                               00002300
+00006 DD1F           0000 0007   42          BCTB   R5,VV7SNX    I=N TO 1 COUNTER                           00002400
+                                 43          AEXIT                                                          00002500
+                                 44+*********RETURN TO CALLER**********************************************
+00007                            45+         DS    0H                                                       01-AEXIT
+00007 9914           0005        46+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00008 C7EC                       47+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 48+***********************************************************************
+                                 50          ACLOSE                                                         00002600
+00009 C9FB
+0000A                            51+         LTORG                                                          02-ERRPA
+                                 52+****************ERROR PARAMETER AREA***********************************
+                                 53+***  NO ERRORS SENT IN VV7SN                                            02-ERRPA
+                                 54+****************END OF ERROR PARAMETER AREA****************************
+                                 55+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+F0           1 00000000    30     38    40    40    41
+FX1          2   000004    41     39
+R1           1 00000001    27     41
+R2           1 00000002    23     38
+R5           1 00000005    24     38    38    41    41    42
+VV7SN        1 00000000    13
+VV7SNX       2   000000    38     42
+$RET1        1   000008    47
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      31 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      79 LINES OUTPUT           5 CARDS OUTPUT

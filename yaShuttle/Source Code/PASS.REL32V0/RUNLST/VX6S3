@@ -1,0 +1,89 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VX6S3     SD 0001 000000 000016
+¤
+         VX6S3--VECTOR CROSS PRODUCT, LENGTH 3, SP                                                             PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VX6S3    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VX6S3    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * TAKES THE CROSS PRODUCT OF V1 AND V2 WHERE V1 AND V2 ARE SINGLE       00000400
+                                 17 *   PRECISION VECTORS.                                                  00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            VECTOR(3) SP                             X00000700
+                                                   R3             VECTOR(3) SP                              00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000003                          21+R3       EQU   3                                                        01-INPUT
+                                 23          OUTPUT R1            VECTOR(3) SP                              00000900
+0000001                          24+R1       EQU   1                                                        01-OUTPU
+                                 26          WORK  F0,F2                                                    00001000
+0000000                          27+F0       EQU   0                                                        01-WORK
+0000002                          28+F2       EQU   2                                                        01-WORK
+                                 30 *                                                                       00001100
+                                 31 * ALGORITHM:                                                            00001200
+                                 32 *   SEE ALGORITHM DESCRIPTION IN VX6D3                                  00001300
+                                 33 *                                                                       00001400
+00000 780A           0004        34 VX6S3X   LE    F0,4(R2)       V2$(2)                                    00001500
+00001 600F           0006        35          ME    F0,6(R3)       V2$(2) V3$(3)                             00001600
+00002 7A0E           0006        36          LE    F2,6(R2)       V2$(3)                                    00001700
+00003 620B           0004        37          ME    F2,4(R3)       V2$(3) V3$(2)                             00001800
+00004 58EA                       38          SEDR  F0,F2          V2$(2) V3$(3) - V2$(3) V3$(2)             00001900
+00005 3805           0002        39          STE   F0,2(R1)       FIRST ELEMENT OF RESULT                   00002000
+00006 7A06           0002        40          LE    F2,2(R2)       V2$(1)                                    00002100
+00007 620F           0006        41          ME    F2,6(R3)       V2$(1) V3$(3)                             00002200
+00008 780E           0006        42          LE    F0,6(R2)       V2$(3)                                    00002300
+00009 6007           0002        43          ME    F0,2(R3)       V2$(3) V3$(1)                             00002400
+0000A 58EA                       44          SEDR  F0,F2          V2$(3) V3$(1) - V2$(1) V3$(3)             00002500
+0000B 3809           0004        45          STE   F0,4(R1)       2ND ELEMENT OF RESULT                     00002600
+0000C 7806           0002        46          LE    F0,2(R2)       V2$(1)                                    00002700
+0000D 600B           0004        47          ME    F0,4(R3)       V2$(1) V3$(2)                             00002800
+0000E 7A0A           0004        48          LE    F2,4(R2)       V2$(2)                                    00002900
+0000F 6207           0002        49          ME    F2,2(R3)       V2$(2) V3$(1)                             00003000
+00010 58EA                       50          SEDR  F0,F2          V2$(1) V3$(2) - V2$(2) V3$(1)             00003100
+00011 380D           0006        51          STE   F0,6(R1)       3RD ELEMENT OF RESULT                     00003200
+                                 52          AEXIT                                                          00003300
+                                 53+*********RETURN TO CALLER**********************************************
+00012                            54+         DS    0H                                                       01-AEXIT
+00012 9B24           0009        55+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+00013 9914           0005        56+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00014 C7EC                       57+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 58+***********************************************************************
+                                 60          ACLOSE                                                         00003400
+00015 C9FB
+00016                            61+         LTORG                                                          02-ERRPA
+                                 62+****************ERROR PARAMETER AREA***********************************
+                                 63+***  NO ERRORS SENT IN VX6S3                                            02-ERRPA
+                                 64+****************END OF ERROR PARAMETER AREA****************************
+                                 65+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+F0           1 00000000    27     34    35    38    39    42    43    44    45    46    47    50    51
+F2           1 00000002    28     36    37    38    40    41    44    48    49    50
+R1           1 00000001    24     39    39    45    45    51    51
+R2           1 00000002    20     34    34    36    36    40    40    42    42    46    46    48    48
+R3           1 00000003    21     35    35    37    37    41    41    43    43    47    47    49    49
+VX6S3        1 00000000    13
+VX6S3X       2   000000    34
+$RET1        1   000014    57
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      39 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      89 LINES OUTPUT           4 CARDS OUTPUT

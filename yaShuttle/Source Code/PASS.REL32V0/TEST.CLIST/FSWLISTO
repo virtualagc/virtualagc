@@ -1,0 +1,68 @@
+00010000/********************************************************************/
+00011000/*------------------------------------------------------------------*/
+00012000/*                                                                  */
+00013000/*   NAME:      FSWLISTO                                            */
+00014000/*                                                                  */
+00015000/*------------------------------------------------------------------*/
+00016000/*                                                                  */
+00017000/*   FUNCTION:  THIS IS A DRIVER CLIST TO FSWOBJ FOR COMPILING FSW. */
+00019100/*                                                                  */
+00019300/*------------------------------------------------------------------*/
+00034400/*                                                                  */
+00034500/*   REVISION HISTORY:                                              */
+00034600/*                                                                  */
+00034700/*  DATE      PCR#     NAME   DESCRIPTION                           */
+00034800/*  --------  -----    ----   -------------------------------       */
+00035024/*  09/10/02  730      LWW    BASELINED COMPILER TEST CLIST         */
+00035200/*------------------------------------------------------------------*/
+00035300/********************************************************************/
+00035400
+00035500PROC 0   ID       (NCAMTST)                              +
+00035625         REL      (R31V01LS)                            +
+00035700         DSN      (APPL)                                 +
+00035800         LIB      (&ID..&REL..&DSN.)                     +
+00035900         SYSTEM   (PASS)                                 +
+00036000         SRCID    (NCAMCM)                               +
+00036125         COMPVER  (REL31V0)                              +
+00036200         OLDCMPLR (&SRCID..&SYSTEM..&COMPVER..COMPILER)     +
+00036300         OLDERROR (&SRCID..&SYSTEM..&COMPVER..ERRORLIB)     +
+00036400         OLDMONTR (&SRCID..&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00037011         OLDTERROR(&SRCID..TESTLIB.REL30V0.TERRLIB)         +
+00038026         OI       (OI302100)                             +
+00038100         INV      (NCAMTST.TESTLIB.&OI..INVENTRY)        +
+00039000         SRCDSN   (&OI..&DSN..SRC)                       +
+00040025         LIST     (NCAMTST.R32V0LS.&DSN..MEMLIST1)      +
+00060000         OPT      ()                                     +
+00060100         FIRSTRUN                                        +
+00070000         NODELETES                                       +
+00070100         REFRESH                                         +
+00080000         TRACE
+00090000
+00100000CONTROL END(DONE)
+00110000GLOBAL RETCODE
+00120000IF &TRACE NE THEN CONTROL CONLIST LIST
+00130000
+00740000IF &OLDTERROR. NE THEN SET &OLDTERROR = OLDTERROR(&OLDTERROR.)
+00750000        ELSE SET  &OLDTERROR =
+00752000IF &LIST. NE THEN SET &LIST = LIST(&LIST.)
+00753000        ELSE SET  &LIST =
+00754000IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+00754100         ELSE SET  &OPT =
+00754200
+00760000FSWOBJ   ID(&ID.)             +
+00770000         DSN(&DSN.)           +
+00780000         LIB(&LIB.)           +
+00810000         COMPVER(&COMPVER.)   +
+00811000         OLDCMPLR(&OLDCMPLR.) +
+00820000         OLDERROR(&OLDERROR.) +
+00821000         OLDMONTR(&OLDMONTR.) +
+00830000         &OLDTERROR.          +
+00840000         OI(&OI.)             +
+00850000         INV(&INV.)           +
+00851000         SRCDSN(&SRCDSN.)     +
+00860000         &LIST.               +
+00870000         &OPT.                +
+00880000         &FIRSTRUN.           +
+00890000         &NODELETES.          +
+00891000         &REFRESH.            +
+00900000         &TRACE.

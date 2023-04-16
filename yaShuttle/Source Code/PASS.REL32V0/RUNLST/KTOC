@@ -1,0 +1,167 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+KTOC      SD 0001 000000 000046
+¤
+         KTOC -- BIT STRING TO CHARACTER CONVERSION(DECIMAL RADIX)                                             PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 KTOC     AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+KTOC     CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *  PERFORM BIT STRING TO CHARACTER                                      00000400
+                                 17 *   CONVERSION WITH DECIMAL RADIX                                       00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R5,            BIT STRING                               X00000700
+                                                   R6             INTEGER(LENG.)                            00000800
+0000005                          20+R5       EQU   5                                                        01-INPUT
+0000006                          21+R6       EQU   6                                                        01-INPUT
+                                 23          OUTPUT R2            CHARACTER                                 00000900
+0000002                          24+R2       EQU   2                                                        01-OUTPU
+                                 26          WORK  R1,R3,R4,F0,F1                                           00001000
+0000001                          27+R1       EQU   1                                                        01-WORK
+0000003                          28+R3       EQU   3                                                        01-WORK
+0000004                          29+R4       EQU   4                                                        01-WORK
+0000000                          30+F0       EQU   0                                                        01-WORK
+0000001                          31+F1       EQU   1                                                        01-WORK
+                                 33          WORK  R7             BECAUSE OF SRDL R6,4                      00001100
+0000007                          34+R7       EQU   7                                                        01-WORK
+                                 36 *                                                                       00001200
+                                 37 *                                                                       00001300
+                                 38 *                                                                       00001400
+00000 29EC                       39          LFLR  F1,R4          SAVE RETURN ADDRESS                       00001500
+                                 40 *                                                                       00001600
+                                 41 *  SET UP CHARACTER AND HALFWORD COUNTS                                 00001700
+                                 42 *                                                                       00001800
+00001 AEF7 0041      0044 0041   43          MH    R6,LOG2                                                  00001900
+00003 F606                0001   44          SRL   R6,1                                                     00002000
+00004 B0E6 0001           0001   45          AHI   R6,1                                                     00002100
+00006 28EE                       46          LFLR  F0,R6          STORE CHARACTER COUNT                     00002200
+00007 B0E6 0001           0001   47          AHI   R6,1                                                     00002300
+00009 F606                0001   48          SRL   R6,1           HALFWORD COUNT                            00002400
+0000A 19E6                       49          LR    R1,R6                                                    00002500
+                                 50 *                                                                       00002600
+                                 51 *  FURTHER SETUP FOR CALCULATION                                        00002700
+                                 52 *                                                                       00002800
+0000B 1EE5                       53          LR    R6,R5          GET STRING IN EVEN REGISTER               00002900
+                                 54 *                                                                       00003000
+                                 55 *  CONVERT TO DECIMAL HERE. GET THE LOW-ORDER DIGIT OF X                00003100
+                                 56 *   AS X-10*(X/10) (INTEGER DIVISION). SAVE X/10 FOR                    00003200
+                                 57 *   USE AS THE NEW X.  GENERATE TWO DIGITS AT A TIME,                   00003300
+                                 58 *   AND STORE BY HALFWORDS FROM RIGHT TO LEFT.  NOTICE                  00003400
+                                 59 *   THAT THIS YIELDS A STRING WITH VARIABLE LENGTH AND                  00003500
+                                 60 *   ALIGNMENT, WHICH MUST BE CORRECTED WHEN THE STRING                  00003600
+                                 61 *   IS LEFT-JUSTIFIED IN THE OUTPUT AREA.                               00003700
+                                 62 *                                                                       00003800
+0000C FE12                0004   63 POSINT   SRDL  R6,4                                                     00003900
+0000D 4EF7 0033      0042 0033   64          D     R6,TEN                                                   00004000
+0000F 1BE6                       65          LR    R3,R6          X/10 IN R3                                00004100
+00010 46F7 0030      0042 0030   66          M     R6,TEN                                                   00004200
+00012 FE10                0004   67          SLDL  R6,4           10*(X/10)                                 00004300
+00013 0DE6                       68          SR    R5,R6          GET DIGIT AS X-10*(X/10)                  00004400
+00014 F540                0010   69          SLL   R5,16          SHIFT TO TOP HALFWORD, LOW BYTE           00004500
+00015 1CE5                       70          LR    R4,R5          LOW DIGIT IN R4                           00004600
+                                 71 *  END OF FIRST CYCLE                                                   00004700
+00016 1EE3                       72          LR    R6,R3          NEW X = OLD X/10                          00004800
+00017 1DE3                       73          LR    R5,R3          SAVE IN R5 AS WELL                        00004900
+00018 FE12                0004   74          SRDL  R6,4                                                     00005000
+00019 4EF7 0027      0042 0027   75          D     R6,TEN                                                   00005100
+0001B 1BE6                       76          LR    R3,R6          X/10 IN R3                                00005200
+0001C 46F7 0024      0042 0024   77          M     R6,TEN                                                   00005300
+0001E FE10                0004   78          SLDL  R6,4           10*(X/10)                                 00005400
+0001F 0DE6                       79          SR    R5,R6          GET DIGIT AS X-10*(X/10)                  00005500
+i00020 F560                0018   80          SLL   R5,24          SHIFT TO TOP BYTE                         00005600
+         KTOC -- BIT STRING TO CHARACTER CONVERSION(DECIMAL RADIX)                                             PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+00021 04E5                       81          AR    R4,R5          TWO DIGITS IN R4                          00005700
+00022 B0E4 3030           3030   82          AHI   R4,X'3030'     CONVERT TO CHARACTERS                     00005800
+00024 1EE3                       83          LR    R6,R3          NEW X = OLD X/10                          00005900
+00025 BCF6 2000      0000        84          STH   R4,0(R1,R2)                                              00006000
+00027 1DE3                       85          LR    R5,R3                                                    00006100
+00028 D977           000C 001D   86          BCT   R1,POSINT                                                00006200
+                                 87 *                                                                       00006300
+                                 88 *  PUT IN LENGTH AND ALIGN CHARACTER STRING                             00006400
+                                 89 *                                                                       00006500
+00029 9C02           0000        90          LH    R4,0(R2)                                                 00006600
+0002A B6E4 FF00           FF00   91          NHI   R4,X'FF00'                                               00006700
+0002C 23E8                       92          LFXR  R3,F0          RECOVER COUNT                             00006800
+0002D 04E3                       93          AR    R4,R3                                                    00006900
+0002E BC02           0000        94          STH   R4,0(R2)                                                 00007000
+                                 95 *                                                                       00007100
+0002F B3E3 0001           0001   96          TRB   R3,X'0001'     IF COUNT IS EVEN, THE STRING              00007200
+00031 DC2C           003D 000B   97          BZ    EXIT           IS ALREADY CORRECTLY ALIGNED              00007300
+                                 98 *                                                                       00007400
+                                 99 * IF THE COUNT IS ODD, THEN THE STRING IS OFFSET BY ONE BYTE,           00007500
+                                100 * SO IT MUST BE SHIFTED ONE BYTE TO THE LEFT. THE MOVE IS               00007600
+                                101 * ACCOMPLISHED HERE.                                                    00007700
+                                102 *                                                                       00007800
+                                103 *                                                                       00007900
+00032 EB07           0001       104          LA    R3,1(R3)                                                 00008000
+00033 F306                0001  105          SRL   R3,1           REMAINING HALFWORD COUNT                  00008100
+00034 9C06           0001       106          LH    R4,1(R2)       FIRST BYTE IN BITS 8-15                   00008200
+00035 E906           0001       107          LA    R1,1(R2)       ADDRESS OF FIRST CHARACTER                00008300
+00036 84F9 0001      0001       108 PLOOP2   IHL   R4,1(R1)                                                 00008400
+00038 F420                0008  109          SLL   R4,8           TWO CORRECT BYTES TOGETHER                00008500
+00039 BC01           0000       110          STH   R4,0(R1)                                                 00008600
+0003A F420                0008  111          SLL   R4,8                                                     00008700
+0003B E905           0001       112          LA    R1,1(R1)                                                 00008800
+0003C DB1F           0036 0007  113          BCT   R3,PLOOP2                                                00008900
+                                114 *                                                                       00009000
+0003D 24E9                      115 EXIT     LFXR  R4,F1          RESTORE RETURN ADDRESS                    00009100
+                                116          AEXIT                AND EXIT                                  00009200
+                                117+*********RETURN TO CALLER**********************************************
+0003E                           118+         DS    0H                                                       01-AEXIT
+0003E 9B24           0009       119+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+0003F 9914           0005       120+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00040 C7EC                      121+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                122+***********************************************************************
+                                124 *                                                                       00009300
+00041 C9FB
+00042 50000000                  125 TEN      DC    F'0.625'                                                 00009400
+00044 4D10                      126 LOG2     DC    H'19728'                                                 00009500
+                                127          ACLOSE                                                         00009600
+00045 C9FB
+00046                           128+         LTORG                                                          02-ERRPA
+                                129+****************ERROR PARAMETER AREA***********************************
+                                130+***  NO ERRORS SENT IN KTOC                                             02-ERRPA
+                                131+****************END OF ERROR PARAMETER AREA****************************
+                                132+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+EXIT         1   00003D   115     97
+F0           1 00000000    30     46    92
+F1           1 00000001    31     39   115
+KTOC         1 00000000    13
+LOG2         1   000044   126     43
+PLOOP2       2   000036   108    113
+POSINT       1   00000C    63     86
+R1           1 00000001    27     49    84    84    86   107   108   108   110   110   112   112   112
+R2           1 00000002    24     84    90    90    94    94   106   106   107   107
+R3           1 00000003    28     65    72    73    76    83    85    92    93    96   104   104   104   105   113
+R4           1 00000004    29     39    70    81    82    84    90    91    93    94   106   108   109   110   111   115
+R5           1 00000005    20     53    68    69    70    73    79    80    81    85
+R6           1 00000006    21     43    44    45    46    47    48    49    53    63    64    65    66    67    68    72
+                                  74    75    76    77    78    79    83
+R7           1 00000007    34
+TEN          2   000042   125     64    66    75    77
+$RET1        1   000040   121
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     101 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+     167 LINES OUTPUT           7 CARDS OUTPUT

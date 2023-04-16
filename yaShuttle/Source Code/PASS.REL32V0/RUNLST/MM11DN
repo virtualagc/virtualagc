@@ -1,0 +1,99 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+MM11DN    SD 0001 000000 000010
+¤
+         MM11DN--MATRIX TRANSPOSE, LENGTN N, DP                                                                PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 MM11DN   AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+MM11DN   CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * TO CREATE THE DOUBLE PRECISION TRANSPOSE OF AN N X M MATRIX WHERE     00000400
+                                 17 *   EITHER N AND/OR M ARE NOT EQUAL TO 3                                00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            MATRIX(N,M) DP                           X00000700
+                                                   R5,            INTEGER(M) SP                            X00000800
+                                                   R6             INTEGER(N) SP                             00000900
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+0000006                          22+R6       EQU   6                                                        01-INPUT
+                                 24          OUTPUT R1            MATRIX(M,N) DP                            00001000
+0000001                          25+R1       EQU   1                                                        01-OUTPU
+                                 27          WORK  R3,R7,F0,F2                                              00001100
+0000003                          28+R3       EQU   3                                                        01-WORK
+0000007                          29+R7       EQU   7                                                        01-WORK
+0000000                          30+F0       EQU   0                                                        01-WORK
+0000002                          31+F2       EQU   2                                                        01-WORK
+                                 33 *                                                                       00001200
+                                 34 * ALGORITHM:                                                            00001300
+                                 35 *   USES TWO LOOPS, ONE NESTED WITHIN THE OTHER.                        00001400
+                                 36 *   OUTER LOOP:                                                         00001500
+                                 37 *     THIS LOOP SETS THE COLUMN OF THE INPUT MATRIX BEING               00001600
+                                 38 *       PROCESSED.                                                      00001700
+                                 39 *   INNER LOOP:                                                         00001800
+                                 40 *     THIS LOOP TAKES AN ELEMENT FROM A COLUMN OF THE INPUT MATRIX      00001900
+                                 41 *       AND PUTS IT IN THE APPROPRIATE ROW OF THE OUTPUT MATRIX.        00002000
+                                 42 *       THE INPUT MATRIX IS WALKED THRU BY COLUMN ELEMENTS AND THE      00002100
+                                 43 *       OUTPUT MATRIX IS WALKED THRU BY ROW ELEMENTS.                   00002200
+                                 44 *                                                                       00002300
+00000 1FE5                       45          LR    R7,R5          SAVE # OF ROWS OF RESULT                  00002400
+00001 2AEE                       46          LFLR  F2,R6          SAVE # OF COLUMNS OF RESULT               00002500
+00002 0BE3                       47 ILOOP    SR    R3,R3          SET INDEX REG TO 0                        00002600
+00003 E911           0004        48 JLOOP    LA    R1,4(R1)       BUMP OUTPUT PTR TO NEXT ELEMENT           00002700
+00004 78FE 6004      0004        49          LED   F0,4(R3,R2)                                              00002800
+00006 38F9 0000      0000        50          STED  F0,0(R1)                                                 00002900
+00008 03E7                       51          AR    R3,R7          BUMP INDEX REG TO POINT TO NEXT COLUMN    00003000
+                                 52 *                             ELEMENT OF INPUT MATRIX                   00003100
+00009 DE1F           0003 0007   53          BCTB  R6,JLOOP                                                 00003200
+0000A 26EA                       54          LFXR  R6,F2          RESTORE # OF COLUMNS COUNT                00003300
+0000B EA12           0004        55          LA    R2,4(R2)       BUMP INPUT PTR TO FIRST ENTRY OF COLUMN   00003400
+                                 56 *                             BEING PROCESSED                           00003500
+0000C DD2F           0002 000B   57          BCTB  R5,ILOOP                                                 00003600
+                                 58          AEXIT                                                          00003700
+                                 59+*********RETURN TO CALLER**********************************************
+0000D                            60+         DS    0H                                                       01-AEXIT
+0000D 9B24           0009        61+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+0000E 9914           0005        62+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0000F C7EC                       63+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 64+***********************************************************************
+                                 66          ACLOSE                                                         00003800
+00010                            67+         LTORG                                                          02-ERRPA
+                                 68+****************ERROR PARAMETER AREA***********************************
+                                 69+***  NO ERRORS SENT IN MM11DN                                           02-ERRPA
+                                 70+****************END OF ERROR PARAMETER AREA****************************
+                                 71+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+F0           1 00000000    30     49    50
+F2           1 00000002    31     46    54
+ILOOP        1   000002    47     57
+JLOOP        2   000003    48     53
+MM11DN       1 00000000    13
+R1           1 00000001    25     48    48    48    50    50
+R2           1 00000002    20     49    55    55    55
+R3           1 00000003    28     47    47    49    49    51
+R5           1 00000005    21     45    57
+R6           1 00000006    22     46    53    54
+R7           1 00000007    29     45    51
+$RET1        1   00000F    63
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      43 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      99 LINES OUTPUT           4 CARDS OUTPUT

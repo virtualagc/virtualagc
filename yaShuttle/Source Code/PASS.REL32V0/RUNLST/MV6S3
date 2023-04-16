@@ -1,0 +1,106 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+MV6S3     SD 0001 000000 00001E
+¤
+         MV6S3 -- MATRIX VECTOR MULTIPLY.LENGTH 3,SINGLE PREC                                                  PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 MV6S3    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+MV6S3    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *   COMPUTES THE MATRIX VECTOR PRODUCT:                                 00000400
+                                 17 *                                                                       00000500
+                                 18 *        V(3)=M(3,3) X V1(3)                                            00000600
+                                 19 *                                                                       00000700
+                                 20 *        WHERE  V,M,V1 : SP                                             00000800
+                                 21 *                                                                       00000900
+                                 22          INPUT R2,            MATRIX(3,3)  SP                          X00001000
+                                                   R3             VECTOR(3)    SP                           00001100
+0000002                          23+R2       EQU   2                                                        01-INPUT
+0000003                          24+R3       EQU   3                                                        01-INPUT
+                                 26          OUTPUT R1            VECTO(3)    SP                            00001200
+0000001                          27+R1       EQU   1                                                        01-OUTPU
+                                 29          WORK  F0,F2                                                    00001300
+0000000                          30+F0       EQU   0                                                        01-WORK
+0000002                          31+F2       EQU   2                                                        01-WORK
+                                 33 *                                                                       00001400
+                                 34 *    ALGORITHM:                                                         00001500
+                                 35 *       DO FOR I=3 TO 1 ;                                               00001600
+                                 36 *         V(I)=M(I,1)V1(1)+M(I,2)V1(2)+M(I,3)V1(3);                     00001700
+                                 37 *       END;                                                            00001800
+                                 38 *    DO LOOP IS UNWOUND TO SAVE REGS AND TIME                           00001900
+                                 39 *                                                                       00002000
+00000 7806           0002        40 MV6S3X   LE    F0,2(R2)      GET M(1,1)                                 00002100
+00001 6007           0002        41          ME    F0,2(R3)      MULT BY V(1)                               00002200
+00002 7A0A           0004        42          LE    F2,4(R2)      GET M(1,2)                                 00002300
+00003 620B           0004        43          ME    F2,4(R3)      MULT BYV(2)                                00002400
+00004 50E2                       44          AER   F0,F2         TEMP SUM                                   00002500
+00005 7A0E           0006        45          LE    F2,6(R2)      GET M(1,3)                                 00002600
+00006 620F           0006        46          ME    F2,6(R3)      MULT BY V(3)                               00002700
+00007 50E2                       47          AER   F0,F2         TEMT SUM                                   00002800
+00008 3805           0002        48          STE   F0,2(R1)      STORE                                      00002900
+00009 7812           0008        49          LE    F0,8(R2)      REPEAT FOR  M(2,1)  ETC.                   00003000
+0000A 6007           0002        50          ME    F0,2(R3)                                                 00003100
+0000B 7A16           000A        51          LE    F2,10(R2)                                                00003200
+0000C 620B           0004        52          ME    F2,4(R3)                                                 00003300
+0000D 50E2                       53          AER   F0,F2                                                    00003400
+0000E 7A1A           000C        54          LE    F2,12(R2)                                                00003500
+0000F 620F           0006        55          ME    F2,6(R3)                                                 00003600
+00010 50E2                       56          AER   F0,F2                                                    00003700
+00011 3809           0004        57          STE   F0,4(R1)                                                 00003800
+00012 781E           000E        58          LE    F0,14(R2)     REPEAT FOR  M(3,1)  ETC.                   00003900
+00013 6007           0002        59          ME    F0,2(R3)                                                 00004000
+00014 7A22           0010        60          LE    F2,16(R2)                                                00004100
+00015 620B           0004        61          ME    F2,4(R3)                                                 00004200
+00016 50E2                       62          AER   F0,F2                                                    00004300
+00017 7A26           0012        63          LE    F2,18(R2)                                                00004400
+00018 620F           0006        64          ME    F2,6(R3)                                                 00004500
+00019 50E2                       65          AER   F0,F2                                                    00004600
+0001A 380D           0006        66          STE   F0,6(R1)                                                 00004700
+                                 67          AEXIT                                                          00004800
+                                 68+*********RETURN TO CALLER**********************************************
+0001B                            69+         DS    0H                                                       01-AEXIT
+0001B 9B24           0009        70+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+0001C 9914           0005        71+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0001D C7EC                       72+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 73+***********************************************************************
+                                 75          ACLOSE                                                         00004900
+0001E                            76+         LTORG                                                          02-ERRPA
+                                 77+****************ERROR PARAMETER AREA***********************************
+                                 78+***  NO ERRORS SENT IN MV6S3                                            02-ERRPA
+                                 79+****************END OF ERROR PARAMETER AREA****************************
+                                 80+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    30     40    41    44    47    48    49    50    53    56    57    58    59    62    65    66
+F2           1 00000002    31     42    43    44    45    46    47    51    52    53    54    55    56    60    61    62
+                                  63    64    65
+MV6S3        1 00000000    13
+MV6S3X       2   000000    40
+R1           1 00000001    27     48    48    57    57    66    66
+R2           1 00000002    23     40    40    42    42    45    45    49    49    51    51    54    54    58    58    60
+                                  60    63    63
+R3           1 00000003    24     41    41    43    43    46    46    50    50    52    52    55    55    59    59    61
+                                  61    64    64
+$RET1        1   00001D    72
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      54 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+     106 LINES OUTPUT           5 CARDS OUTPUT

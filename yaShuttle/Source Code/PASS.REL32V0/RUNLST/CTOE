@@ -1,0 +1,668 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CTOE      SD 0001 000000 00013F
+CTOD      LD      000003        0001
+#QGTBYTE  ER 0002
+#LCTOE    SD 0003 000140 000002
+¤
+         CTOE--CHARACTER TO SCALAR CONVERSION                                                                  PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 COUNTE   DS    H              POWER OF 10                               00000400
+                                 10 COUNTH   DS    H              POWER OF 16                               00000500
+                                 11 COUNTB   DS    H              POWER OF 2                                00000600
+                                 12 SWITCH   DS    H              FLAGS                                     00000700
+                                 13 X41ETC   DS    D              TO FLOAT A DECIMAL DIGIT                  00000800
+                                 14 F6SAVE   DS    D                                                        00000900
+                                 15          MEND                                                           00001000
+                                 16 CTOE     AMAIN QDED=YES                                                 00001100
+                                 17+***********************************************************************
+                                 18+*
+                                 19+*        PRIMARY ENTRY POINT
+                                 20+*
+                                 21+***********************************************************************
+00000                            22+CTOE     CSECT                                                          01-AMAIN
+00000                            23+STACK    DSECT                                                          01-AMAIN
+                                 24+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            25+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            26+         DS    2F             R0,R1                                     01-AMAIN
+00006                            27+ARG2     DS    F              R2                                        01-AMAIN
+00008                            28+         DS    F              R3                                        01-AMAIN
+0000A                            29+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            30+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            31+ARG6     DS    F              R6                                        01-AMAIN
+00010                            32+ARG7     DS    F              R7                                        01-AMAIN
+                                 33+*        END OF STANDARD STACK AREA
+00012                            34+COUNTE   DS    H              POWER OF 10                               02-00009
+00013                            35+COUNTH   DS    H              POWER OF 16                               02-00010
+00014                            36+COUNTB   DS    H              POWER OF 2                                02-00011
+00015                            37+SWITCH   DS    H              FLAGS                                     02-00012
+00016                            38+X41ETC   DS    D              TO FLOAT A DECIMAL DIGIT                  02-00013
+0001A                            39+F6SAVE   DS    D                                                        02-00014
+0001E                            40+QARGA    DS    D                                                        01-AMAIN
+00022                            41+QARGB    DS    D                                                        01-AMAIN
+00026                            42+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            43+CTOE     CSECT                                                          01-AMAIN
+0000000                          44+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   45+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 47 *                                                                       00001200
+                                 48 * CONVERT A CHARACTER STRING, C1, TO A SINGLE PRECISION SCALAR.         00001300
+                                 49 *                                                                       00001400
+                                 50          INPUT R2             CHARACTER(C1)                             00001500
+0000002                          51+R2       EQU   2                                                        01-INPUT
+                                 53          OUTPUT F0            SCALAR SP                                 00001600
+0000000                          54+F0       EQU   0                                                        01-OUTPU
+                                 56          WORK  R1,R3,R4,R5,R6,R7,F1,F2,F3,F4,F6                         00001700
+0000001                          57+R1       EQU   1                                                        01-WORK
+0000003                          58+R3       EQU   3                                                        01-WORK
+0000004                          59+R4       EQU   4                                                        01-WORK
+0000005                          60+R5       EQU   5                                                        01-WORK
+0000006                          61+R6       EQU   6                                                        01-WORK
+0000007                          62+R7       EQU   7                                                        01-WORK
+0000001                          63+F1       EQU   1                                                        01-WORK
+0000002                          64+F2       EQU   2                                                        01-WORK
+0000003                          65+F3       EQU   3                                                        01-WORK
+0000004                          66+F4       EQU   4                                                        01-WORK
+                                 67+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+0000006                          68+F6       EQU   6                                                        01-WORK
+                                 70 *                                                                       00001800
+                                 71 * ALGORITHM:                                                            00001900
+                                 72 *   GO TO CTOD;                                                         00002000
+                                 73 *                                                                       00002100
+00002 DF08           0005 0002   74          B     START                                                    00002200
+                                 75 CTOD     AENTRY                                                         00002300
+                                 76+***********************************************************************
+                                 77+*
+                                 78+*        SECONDARY ENTRY POINT
+                                 79+*
+                                 80+***********************************************************************
+i00003                            81+CTOD     DS    0H                                                       01-AENTR
+         CTOE--CHARACTER TO SCALAR CONVERSION                                                                  PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 82+         ENTRY CTOD                                                     01-AENTR
+00003 B624 0000      0009 0000   83+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 85 *                                                                       00002400
+                                 86 * CONVERT A CHARACTER STRING, C1,  TO A DOUBLE PRECISION SCALAR.        00002500
+                                 87 *                                                                       00002600
+                                 88          INPUT R2             CHARACTER(C1)                             00002700
+                                 90          OUTPUT F0            SCALAR DP                                 00002800
+                                 92          WORK  R1,R3,R4,R5,R6,R7,F1,F2,F3,F4,F6                         00002900
+                                 93+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+                                 95 *                                                                       00003000
+                                 96 * ALGORITHM:                                                            00003100
+                                 97 *   CURR_LEN = CURRENT_LENGTH(C1);                                      00003200
+                                 98 *   IF CURR_LEN = 0 THEN                                                00003300
+                                 99 *     DO;                                                               00003400
+                                100 *       SEND ERROR$(4:20);                                              00003500
+                                101 *       RETURN 0;                                                       00003600
+                                102 *     END;                                                              00003700
+                                103 * LSTRP:                                                                00003800
+                                104 *   DO WHILE TRUE;                                                      00003900
+                                105 *     IF C1$(2 AT 1) = '  ' THEN                                        00004000
+                                106 *       DO;                                                             00004100
+                                107 *         NAME(C1) = NAME(C1) + 1;                                      00004200
+                                108 *         CURR_LEN = CURR_LEN - 2;                                      00004300
+                                109 *         IF CURR_LEN > 0 THEN                                          00004400
+                                110 *           REPEAT LSTRP;                                               00004500
+                                111 *         ELSE                                                          00004600
+                                112 *           DO;                                                         00004700
+                                113 *             SEND ERROR$(4:20);                                        00004800
+                                114 *             RETURN 0;                                                 00004900
+                                115 *           END;                                                        00005000
+                                116 *       END;                                                            00005100
+                                117 *     ELSE                                                              00005200
+                                118 *       EXIT;                                                           00005300
+                                119 *   END LSTRP;                                                          00005400
+                                120 *   IF C1$(1) = ' ' THEN                                                00005500
+                                121 *     DO;                                                               00005600
+                                122 *       RIGHT_BYTE_SWITCH = ON; /* FOR GTBYTE */                        00005700
+                                123 *       CURR_LEN = CURR_LEN - 1;                                        00005800
+                                124 *       IF CURR_LEN = 0 THEN                                            00005900
+                                125 *         DO;                                                           00006000
+                                126 *           SEND ERROR$(4:20);                                          00006100
+                                127 *           RETURN 0;                                                   00006200
+                                128 *         END;                                                          00006300
+                                129 *     END;                                                              00006400
+                                130 * RSTRP:                                                                00006500
+                                131 *   I = CURR_LEN;                                                       00006600
+                                132 *   CURR_CHAR = C1$(I);                                                 00006700
+                                133 *   DO WHILE CURR_CHAR = ' ';                                           00006800
+                                134 *     I = I - 1;                                                        00006900
+                                135 *     CURR_LEN = CURR_LEN - 1;                                          00007000
+                                136 *     CURR_CHAR = C1$(I);                                               00007100
+                                137 *   END;                                                                00007200
+                                138 *   DEC_PT_REACHED,F0,F1,X41ETC,COUNTB,COUNTE = 0;                      00007300
+                                139 *   X41ETC = HEX'4100';                                                 00007400
+                                140 *   CURR_CHAR = GTBYTE;                                                 00007500
+                                141 *   IF CURR_CHAR ^= '+' THEN                                            00007600
+                                142 *     DO;                                                               00007700
+                                143 *       IF CURR_CHAR ^= '-' THEN                                        00007800
+                                144 *         EXIT;                                                         00007900
+                                145 *       ELSE                                                            00008000
+                                146 *         VALID_SIGN = ON;                                              00008100
+                                147 *       CURR_CHAR = GTBYTE;                                             00008200
+                                148 *       CURR_LEN = CURR_LEN - 1;                                        00008300
+                                149 *       IF CURR_LEN = 0 THEN                                            00008400
+                                150 *         DO;                                                           00008500
+                                151 *           SEND ERROR$(4:20);                                          00008600
+                                152 *           RETURN;                                                     00008700
+                                153 *         END;                                                          00008800
+                                154 *     END;                                                              00008900
+                                155 * NOSIGNS:                                                              00009000
+                                156 *   DO WHILE CURR_LEN > 0;                                              00009100
+                                157 *     IF CURR_CHAR < '0' OR CURR_CHAR > '9' THEN                        00009200
+                                158 *       DO;                                                             00009300
+                                159 *         IF CURR_CHAR ^= '.' THEN                                      00009400
+                                160 *           GO TO EXPON;                                                00009500
+i                                161 *         IF DEC_PT_REACHED = ON THEN                                   00009600
+         CTOE--CHARACTER TO SCALAR CONVERSION                                                                  PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                162 *           DO;                                                         00009700
+                                163 *             SEND ERROR$(4:20);  /* TWO DECIMAL POINTS IN C1 */        00009800
+                                164 *             RETURN 0;                                                 00009900
+                                165 *           END;                                                        00010000
+                                166 *         ELSE                                                          00010100
+                                167 *           DEC_PT_REACHED = ON;                                        00010200
+                                168 *       END;                                                            00010300
+                                169 *     ELSE                                                              00010400
+                                170 *       IF IGNORE = OFF THEN                                            00010500
+                                171 *         DO;                                                           00010600
+                                172 *           TEMP = SLL(INTEGER(SUBBIT$(5 TO 8)(CURR_CHAR),4);           00010700
+                                173 *           X41ETC = X41ETC + TEMP;                                     00010800
+                                174 *           F0 = F0 10;                                                 00010900
+                                175 *           F0 = F0 + X41ETC.                                           00011000
+                                176 *           IF F0 >= SCALAR(HEX'4E19999A') THEN                         00011100
+                                177 *             DO;                                                       00011200
+                                178 *               IF DEC_PT_REACHED = ON THEN                             00011300
+                                179 *                 IGNORE = ON;                                          00011400
+                                180 *             END;                                                      00011500
+                                181 *           VALID_DIGIT = ON;                                           00011600
+                                182 *           X41ETC = HEX'4100';                                         00011700
+                                183 *           COUNTE = COUNTE - INTEGER(DEC_PT_REACHED);                  00011800
+                                184 *         END;                                                          00011900
+                                185 *     CURR_LEN = CURR_LEN - 1;                                          00012000
+                                186 *     CURR_CHAR = GTBYTE;                                               00012100
+                                187 *   END;                                                                00012200
+                                188 *   IF VALID_DIGIT = OFF THEN                                           00012300
+                                189 *     DO;                                                               00012400
+                                190 *       SEND ERROR$(4:20);                                              00012500
+                                191 *       RETURN 0;                                                       00012600
+                                192 *     END;                                                              00012700
+                                193 *   GO TO TIMES10;                                                      00012800
+                                194 * EXPON:                                                                00012900
+                                195 * TIMES10:                                                              00013000
+                                196 *   TEMP = SRA(COUNTE,16);                                              00013100
+                                197 *   TEMP_SCAL1 = 10;                                                    00013200
+                                198 *   TEMP_SCAL2 = 1;                                                     00013300
+                                199 *   IF TEMP ^= 0 THEN                                                   00013400
+                                200 *     DO;                                                               00013500
+                                201 *       TEMP1 = ABS(TEMP);                                              00013600
+                                202 *       DO WHILE TRUE;                                                  00013700
+                                203 *         IF TEMP1 > 23 THEN                                            00013800
+                                204 *           DO;                                                         00013900
+                                205 *             IF TEMP >= 0 THEN                                         00014000
+                                206 *               F0 = F0 1.E+23;                                         00014100
+                                207 *             ELSE                                                      00014200
+                                208 *               F0 = F0 / 1.E+23;                                       00014300
+                                209 *             TEMP1 = TEMP1 - 23;                                       00014400
+                                210 *           END;                                                        00014500
+                                211 *         ELSE                                                          00014600
+                                212 *           EXIT;                                                       00014700
+                                213 *       END;                                                            00014800
+                                214 *       DO WHILE TRUE;                                                  00014900
+                                215 *         TEMP1 = SRDL(TEMP1,1);                                        00015000
+                                216 *         IF SUBBIT$(33)(TEMP1) = OFF THEN                              00015100
+                                217 *           TEMP_SCAL2 = TEMP_SCAL2 TEMP_SCAL1;                         00015200
+                                218 *         IF TEMP1 = 0 THEN                                             00015300
+                                219 *           EXIT;                                                       00015400
+                                220 *         TEMP_SCAL1 = TEMP_SCAL1 TEMP_SCAL1;                           00015500
+                                221 *       END;                                                            00015600
+                                222 *     END;                                                              00015700
+                                223 *   IF TEMP >= 0 THEN                                                   00015800
+                                224 *     F0 = F0 TEMP_SCAL2;                                               00015900
+                                225 *   ELSE                                                                00016000
+                                226 *     F0 = F0 / TEMP_SCAL2;                                             00016100
+                                227 *   IF VALID_SIGN = ON THEN                                             00016200
+                                228 *     F0 = -F0;                                                         00016300
+                                229 *   RETURN F0;                                                          00016400
+                                230 *                                                                       00016500
+00005 3EF8 001A      001A       231 START    STED  F6,F6SAVE      SAVE F6                                   00016600
+00007 9E02           0000       232          LH    R6,0(R2)       GET C1 DESCRIPTOR                         00016700
+00008 B6E6 00FF           00FF  233          NHI   R6,X'00FF'     BYTE LENGTH IN R6                         00016800
+0000A C4F7 011B      0127 011B  234          BZ    ERROR          ERROR IF ZERO LENGTH                      00016900
+                                235 *                                                                       00017000
+                                236 *  STRIP LEADING BLANKS                                                 00017100
+                                237 *                                                                       00017200
+0000C 9D06           0001       238 LSTRP    LH    R5,1(R2)       GET FIRST 2 CHARS                         00017300
+0000D B5E5 2020           2020  239          CHI   R5,X'2020'     COMPARE WITH '  '                         00017400
+0000F DB18           0016 0006  240          BNE   CK1            IF ^= THEN BRANCH                         00017500
+i00010 EA06           0001       241          LA    R2,1(R2)       OTHERWISE BUMP C1 PTR                     00017600
+         CTOE--CHARACTER TO SCALAR CONVERSION                                                                  PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00011 B0E6 FFFE          FFFFE  242          AHI   R6,-2          DECREMENT LENGTH                          00017700
+00013 D922           000C 0008  243          BP    LSTRP          GO BACK FOR MORE                          00017800
+00014 C7F7 0111      0127 0111  244          B     ERROR                                                    00017900
+                                245 *                                                                       00018000
+00016 F522                0008  246 CK1      SRL   R5,8           PLACE FIRST CHAR IN LOWER BYTE            00018100
+00017 EDF7 A000      0000       247          LA    R5,0(R5,3)     CLEAR BOTTOM HALF OF REGISTER             00018200
+00019 B5E5 0020           0020  248          CHI   R5,X'20'       COMPARE WITH ' '                          00018300
+0001B DB18           0022 0006  249          BNE   RSTRP          IF FIRST CHAR NOT EQUAL THEN BRANCH       00018400
+0001C E2FB 8000      8000       250          IAL   R2,X'8000'     ELSE SET RIGHT BYTE PTR                   00018500
+0001E D6F7 0002      0022 0002  251          BCT   R6,RSTRP       GO TO RSTRP AND DECREMENT CURRLEN         00018600
+00020 C7F7 0105      0127 0105  252          B     ERROR          IF CURRLEN WAS 1 THEN ERROR               00018700
+                                253 *                             I.E., ALL BLANK INPUT                     00018800
+                                254 *                                                                       00018900
+                                255 *  STRIP TRAILING BLANKS                                                00019000
+                                256 *                                                                       00019100
+00022 1BE2                      257 RSTRP    LR    R3,R2          SAVE R2                                   00019200
+00023 F606                0001  258          SRL   R6,1           DIVIDE CURRLEN BY 2                       00019300
+00024 02E6                      259          AR    R2,R6          R2 POINTS TO LAST BYTE+1                  00019400
+00025 02F7 0111      0138 0111  260          A     R2,=X'FFFF8000'  R2 POINTS TO LAST BYTE                  00019500
+00027 F604                0001  261          SLL   R6,1           RESTORE COUNT                             00019600
+                                262 RLOOP    ABAL  GTBYTE         NEXT CHARACTER IN TOP HALF R5             00019700
+                                263+         EXTRN #QGTBYTE                                                 01-ABAL
+00028 E4F7                      264+RLOOP    DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00029 3800                      265+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0002A B5E5 0020           0020  266          CHI   R5,X'20'       COMPARE WITH ' '                          00019800
+0002C DB08           002F 0002  267          BNE   CTOE1          IF ^= THEN BRANCH                         00019900
+0002D DA03           002E 0000  268          BCTB  R2,*+1         DECREMENT BYTE POINTER                    00020000
+0002E DE1F           0028 0007  269          BCT   R6,RLOOP       DECREMENT LENGTH                          00020100
+                                270 *                                                                       00020200
+                                271 *  NOTE THAT LENGTH CANNOT REACH 0 HERE                                 00020300
+                                272 *                                                                       00020400
+0002F 1AE3                      273 CTOE1    LR    R2,R3          RESTORE R3                                00020500
+                                274 *                                                                       00020600
+                                275 *  THIS SECTION DOES THE ACTUAL TRANSLATION                             00020700
+                                276 *  AT ENTRY, R2 IS BYTE POINTER, R6 IS LENGTH.                          00020800
+                                277 *                                                                       00020900
+00030 77E7                      278          XR    R7,R7          CLEAR R7                                  00021000
+00031 2AEF                      279          LFLR  F2,R7          CLEAR F2                                  00021100
+00032 2BEF                      280          LFLR  F3,R7          CLEAR F3                                  00021200
+00033 372C           0016       281          ST    R7,X41ETC      CLEAR HALF OF X41ETC                      00021300
+00034 3730           0018       282          ST    R7,X41ETC+2    CLEAR OTHER HALF X41ETC                   00021400
+00035 3724           0012       283          ST    R7,COUNTE      CLEAR COUNTE AND COUNTH                   00021500
+00036 3728           0014       284          ST    R7,COUNTB      CLEAR COUNTB AND SWITCH                   00021600
+00037 B058 4100      0016 4100  285          MSTH  X41ETC,X'4100'  SET FIRST BYTE OF X41ETC TO X'41'        00021700
+                                286 *                                                                       00021800
+                                287 * END OF SETUP FOR TRANSLATION                                          00021900
+                                288 *                                                                       00022000
+                                289          ABAL  GTBYTE         NEXT CHARACTER IN TOP HALF R5             00022100
+00039 E4F7                      290+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0003A 3800                      291+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0003B B5E5 002B           002B  292          CHI   R5,X'2B'       IF PLUS SIGN, IGNORE                      00022200
+0003D DC14           0043 0005  293          BE    UPPTR          BY UPDATING POINTER                       00022300
+0003E B5E5 002D           002D  294          CHI   R5,X'2D'       C'-'                                      00022400
+00040 DB20           0049 0008  295          BNE   NOSIGNS        IF MINUS SIGN, SET                        00022500
+00041 B254 8000      0015 8000  296          SB    SWITCH,VSIGN   'VSIGN' FLAG                              00022600
+                                297 *                                                                       00022700
+                                298 UPPTR    ABAL  GTBYTE         NEXT CHARACTER IN TOP HALF R5             00022800
+00043 E4F7                      299+UPPTR    DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00044 3800                      300+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00045 D6F7 0002      0049 0002  301          BCT   R6,NOSIGNS     IF LENGTH GOES TO 0 HERE,                 00022900
+00047 C7F7 00DE      0127 00DE  302          B     ERROR          THERE ARE NO DIGITS                       00023000
+                                303 *                                                                       00023100
+                                304 *  HERE WE GET DIGITS AND ASSEMBLE THEM                                 00023200
+                                305 *  INTO AN UNSCALED FLOATING POINT NUMBER                               00023300
+                                306 *                                                                       00023400
+00049 B5E5 0030           0030  307 NOSIGNS  CHI   R5,X'30'       COMPARE WITH '0'                          00023500
+0004B DA94           0071 0025  308          BL    NOTNUM         IF < THEN NOT NUM                         00023600
+0004C B5E5 0039           0039  309          CHI   R5,X'39'       COMPARE WITH '9'                          00023700
+0004E D988           0071 0022  310          BH    NOTNUM         IF > THEN NOT NUM AS WELL                 00023800
+0004F B354 0800      0015 0800  311          TB    SWITCH,IGNORE  IF DIGIT NOT SIGNIFICANT,                 00023900
+00051 D958           0068 0016  312          BO    BCT1           CONTINUE SCANNING                         00024000
+                                313 *                                                                       00024100
+00052 B6E5 000F           000F  314          NHI   R5,X'000F'     GET DIGIT IN BITS                         00024200
+00054 F510                0004  315          SLL   R5,4           8 TO 11 OF R5, AND                        00024300
+00055 05F8 0016      0016       316          AST   R5,X41ETC      FLOAT IN X41ETC.                          00024400
+                                317 *                                                                       00024500
+i00057 32FF 00D3      012C 00D3  318          MED   F2,=D'10'                                                00024600
+         CTOE--CHARACTER TO SCALAR CONVERSION                                                                  PAGE    6
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00059 52F8 0016      0016       319          AED   F2,X41ETC      F2 = 10*F2 + (DIGIT)                      00024700
+0005B 4AFF 00DD      013A 00DD  320          CE    F2,=X'4E19999A'   IF F2 IS THIS LARGE,                   00024800
+0005D DA10           0062 0004  321          BL    DIGIT                                                    00024900
+0005E 1FE7                      322          LR    R7,R7          SET "IGNORE" FLAG UNLESS                  00025000
+0005F DC08           0062 0002  323          BZ    DIGIT          DECIMAL POINT NOT REACHED.                00025100
+00060 B254 0800      0015 0800  324          SB    SWITCH,IGNORE                                            00025200
+                                325 *                                                                       00025300
+00062 B254 4000      0015 4000  326 DIGIT    SB    SWITCH,VDIGIT                                            00025400
+00064 B158 00FF      0016 00FF  327          ZB    X41ETC,X'00FF'  RESET X41ETC TO X'4100'                  00025500
+00066 0FF8 0012      0012       328          SST   R7,COUNTE      R7 IS '1' IF DECIMAL PT. HAS BEEN         00025600
+                                329 *                             ENCOUNTERED, AND 0 OTHERWISE              00025700
+                                330 *                                                                       00025800
+                                331 BCT1     ABAL  GTBYTE         NEXT CHARACTER IN TOP HALF R5             00025900
+00068 E4F7                      332+BCT1     DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00069 3800                      333+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0006A DE8B           0049 0022  334          BCT   R6,NOSIGNS                                               00026000
+                                335 *                                                                       00026100
+0006B B354 4000      0015 4000  336          TB    SWITCH,VDIGIT  GIVE ERROR IF                             00026200
+0006D C4F7 00B8      0127 00B8  337          BZ    ERROR          NO DIGITS IN NUMBER                       00026300
+0006F C7F7 0069      00DA 0069  338          B     TIMES10                                                  00026400
+                                339 *                                                                       00026500
+                                340 *  NOTNUM: NOT A DECIMAL DIGIT. VALID ARE '.','E','H','B'.              00026600
+                                341 *                                                                       00026700
+00071 B5E5 002E           002E  342 NOTNUM   CHI   R5,X'2E'       C'.'                                      00026800
+00073 DB18           007A 0006  343          BNE   EXPON                                                    00026900
+00074 1FE7                      344          LR    R7,R7          IF R7 CONTAINS '1', A DECIMAL             00027000
+00075 C1F7 00B0      0127 00B0  345          BP    ERROR          POINT HAS ALREADY BEEN FOUND.             00027100
+00077 EFF3 0001      0001       346          LA    R7,1           IF NOT, SET R7 TO '1'                     00027200
+00079 DF4A           0068 0012  347          B     BCT1           AND CONTINUE SCANNING                     00027300
+                                348 *                                                                       00027400
+                                349 *  CHECK HERE TO SEE IF AN EXPONENT IS INDICATED                        00027500
+                                350 *                                                                       00027600
+0007A B354 4000      0015 4000  351 EXPON    TB    SWITCH,VDIGIT  GIVE ERROR IF                             00027700
+0007C C4F7 00A9      0127 00A9  352          BZ    ERROR          NO DIGITS IN NUMBER                       00027800
+                                353 *                                                                       00027900
+0007E B5E5 0045           0045  354 EXPONE   CHI   R5,X'45'       C'E'                                      00028000
+00080 DB08           0083 0002  355          BNE   EXPONH                                                   00028100
+00081 0FE7                      356          SR    R7,R7          R7=0 TO INDEX COUNTE                      00028200
+00082 DF30           008F 000C  357          B     EXPONENT                                                 00028300
+                                358 *                                                                       00028400
+00083 B5E5 0048           0048  359 EXPONH   CHI   R5,X'48'       C'H'                                      00028500
+00085 DB0C           0089 0003  360          BNE   EXPONB                                                   00028600
+00086 EFF3 0001      0001       361          LA    R7,1           R7=1 TO INDEX COUNTH                      00028700
+00088 DF18           008F 0006  362          B     EXPONENT                                                 00028800
+                                363 *                                                                       00028900
+00089 B5E5 0042           0042  364 EXPONB   CHI   R5,X'42'       C'B'                                      00029000
+0008B C3F7 009A      0127 009A  365          BNE   ERROR          INVALID CHARACTER                         00029100
+0008D EFF3 0002      0002       366          LA    R7,2           R7=2 TO INDEX COUNTB                      00029200
+                                367 *                                                                       00029300
+                                368 *  CONSTRUCT EXPONENT HERE                                              00029400
+                                369 *                                                                       00029500
+0008F D6F7 0002      0093 0002  370 EXPONENT BCT   R6,FINDX       GIVE ERROR IF                             00029600
+00091 C7F7 0094      0127 0094  371          B     ERROR          NO DIGITS IN EXPONENT                     00029700
+                                372 *                                                                       00029800
+00093 09E1                      373 FINDX    SR    R1,R1                                                    00029900
+                                374          ABAL  GTBYTE         NEXT CHARACTER IN TOP HALF R5             00030000
+00094 E4F7                      375+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00095 3800                      376+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00096 B5E5 002B           002B  377          CHI   R5,X'2B'       IF PLUS SIGN, IGNORE                      00030100
+00098 DC14           009E 0005  378          BE    UPPTRE         BY UPDATING POINTER                       00030200
+00099 B5E5 002D           002D  379          CHI   R5,X'2D'       C'-'                                      00030300
+0009B DB20           00A4 0008  380          BNE   NOSIGNE        IF MINUS SIGN,                            00030400
+0009C B254 2000      0015 2000  381          SB    SWITCH,ESIGN   SET 'ESIGN' FLAG                          00030500
+                                382 *                                                                       00030600
+                                383 UPPTRE   ABAL  GTBYTE         NEXT CHARACTER IN TOP HALF R5             00030700
+0009E E4F7                      384+UPPTRE   DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0009F 3800                      385+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+000A0 D6F7 0002      00A4 0002  386          BCT   R6,NOSIGNE     GIVE ERROR IF                             00030800
+000A2 C7F7 0083      0127 0083  387          B     ERROR          NO DIGITS IN EXPONENT                     00030900
+                                388 *                                                                       00031000
+000A4 B5E5 0030           0030  389 NOSIGNE  CHI   R5,X'30'       C'0'                                      00031100
+000A6 C2F7 007F      0127 007F  390          BL    ERROR          INVALID CHARACTER                         00031200
+000A8 B5E5 0039           0039  391          CHI   R5,X'39'       C'9'                                      00031300
+000AA D96C           00C6 001B  392          BH    NOTNUME        ERROR OR MORE EXPONENT                    00031400
+000AB B254 1000      0015 1000  393          SB    SWITCH,EDIGIT                                            00031500
+000AD 99FF 008F      013E 008F  394          MIH   R1,=H'10'                                                00031600
+i000AF B6E5 000F           000F  395          NHI   R5,X'000F'     GET NEXT DECIMAL DIGIT                    00031700
+         CTOE--CHARACTER TO SCALAR CONVERSION                                                                  PAGE    7
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+000B1 01E5                      396          AR    R1,R5          ACCUMULATE EXPONENT IN R5                 00031800
+                                397          ABAL  GTBYTE         NEXT CHARACTER IN TOP HALF R5             00031900
+000B2 E4F7                      398+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+000B3 3800                      399+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+000B4 DE47           00A4 0011  400          BCT   R6,NOSIGNE                                               00032000
+000B5 B254 0400      0015 0400  401          SB    SWITCH,FINISHED                                          00032100
+                                402 *                                                                       00032200
+000B7 B354 2000      0015 2000  403 ETEST    TB    SWITCH,ESIGN                                             00032300
+000B9 DC04           00BB 0001  404          BZ    EOK            COMPLEMENT EXPONENT IF                    00032400
+000BA E9E9                      405          LACR  R1,R1          'ESIGN' FLAG SET                          00032500
+                                406 *                                                                       00032600
+000BB 81F4 E012      0012       407 EOK      AH    R1,COUNTE(R7)  UPDATE APPROPRIATE                        00032700
+000BD B9F4 E012      0012       408          STH   R1,COUNTE(R7)  EXPONENT COUNTER                          00032800
+000BF B354 0400      0015 0400  409          TB    SWITCH,FINISHED                                          00032900
+000C1 D924           00CB 0009  410          BO    PWR2                                                     00033000
+000C2 B154 3000      0015 3000  411          ZB    SWITCH,ESIGN+EDIGIT                                      00033100
+000C4 C7F7 0848      007E 0048  412          B     EXPONE                                                   00033200
+                                413 *                                                                       00033300
+000C6 B354 1000      0015 1000  414 NOTNUME  TB    SWITCH,EDIGIT  CURRENTLY ACCUMULATING EXPONENT?          00033400
+000C8 DB4A           00B7 0012  415          BNZ   ETEST          IF SO,EVALUATE EXPONENT AND KEEP LOOKING  00033500
+000C9 C7F7 005C      0127 005C  416          B     ERROR          IF NOT, SHOULDN'T BE HERE                 00033600
+                                417 *                                                                       00033700
+                                418 *  POWERS OF 2 AND 16                                                   00033800
+                                419 *                                                                       00033900
+000CB 27EA                      420 PWR2     LFXR  R7,F2          GET NUMBER IN R7 TO FIX CHARACTERISTIC    00034000
+000CC 9C4C           0013       421          LH    R4,COUNTH      GET EXPONENT IN                           00034100
+000CD F408                0002  422          SLL   R4,2           BINARY AS                                 00034200
+000CE 8450           0014       423          AH    R4,COUNTB      4*COUNTH+COUNTB                           00034300
+000CF DC28           00DA 000A  424          BZ    TIMES10                                                  00034400
+000D0 FC4A                0012  425          SRDL  R4,18          GET HEX PART IN                           00034500
+000D1 F460                0018  426          SLL   R4,24          CHARACTERISTIC POSITION IN R4             00034600
+000D2 F53A                000E  427          SRL   R5,14          BINARY PART IN TOP HALFWORD OF R5         00034700
+000D3 B0E5 0001           0001  428          AHI   R5,1           INCREMENT FOR BCT                         00034800
+000D5 07E4                      429          AR    R7,R4          ADD HEX EXPONENT                          00034900
+000D6 2AEF                      430          LFLR  F2,R7                                                    00035000
+000D7 DF04           00D9 0001  431          B     COUNT                                                    00035100
+000D8 52EA                      432          AEDR  F2,F2                                                    00035200
+000D9 DD0B           00D8 0002  433 COUNT    BCT   R5,*-1                                                   00035300
+                                434 *                                                                       00035400
+                                435 *  TIME10: POWERS OF 10                                                 00035500
+                                436 *                                                                       00035600
+000DA 9F48           0012       437 TIMES10  LH    R7,COUNTE                                                00035700
+000DB F741                0010  438          SRA   R7,16          CONVERT TO FULLWORD INTEGER               00035800
+000DC 7CFF 004E      012C 004E  439          LED   F4,=D'10'                                                00035900
+000DE 7EFF 0050      0130 0050  440          LED   F6,=D'1'                                                 00036000
+000E0 1CE7                      441          LR    R4,R7                                                    00036100
+000E1 C4F7 0039      011C 0039  442          BZ    ENDALL                                                   00036200
+000E3 D904           00E5 0001  443          BP    POS10                                                    00036300
+000E4 ECEC                      444          LACR  R4,R4                                                    00036400
+000E5 14F7 0055      013C 0055  445 POS10    C     R4,=F'23'                                                00036500
+000E7 DA64           0101 0019  446          BL    TIMES10B                                                 00036600
+000E8 1FE7                      447          LR    R7,R7                                                    00036700
+000E9 DA0C           00ED 0003  448          BM    DIV1                                                     00036800
+000EA 32FF 0048      0134 0048  449          MED   F2,=D'1E23'                                              00036900
+000EC DF44           00FE 0011  450          B     SUB23                                                    00037000
+                                451 DIV1     QDED   F2,=D'1E23'                                             00037100
+000ED 3AF8 001E      001E       452+DIV1     STED  F2,QARGA                                                 01-QDED
+000EF 3EF8 0022      0022       453+         STED  6,QARGB                                                  01-QDED
+000F1 6AF7 0041      0134 0041  454+         DE    F2,=D'1E23'                                              01-QDED
+000F3 7EE2                      455+         LER   6,F2                                                     01-QDED
+000F4 7FE3                      456+         LER   7,F2+1                                                   01-QDED
+000F5 36FF 003D      0134 003D  457+         MED   6,=D'1E23'                                               01-QDED
+000F7 5EF8 001E      001E       458+         SED   6,QARGA                                                  01-QDED
+000F9 6EF7 0039      0134 0039  459+         DE    6,=D'1E23'                                               01-QDED
+000FB 5AEE                      460+         SEDR  F2,6                                                     01-QDED
+000FC 7EF8 0022      0022       461+         LED   6,QARGB                                                  01-QDED
+000FE 0CF7 003C      013C 003C  462 SUB23    S     R4,=F'23'                                                00037200
+00100 DF72           00E5 001C  463          B     POS10                                                    00037300
+                                464 *                                                                       00037400
+00101 FC06                0001  465 TIMES10B SRDL  R4,1                                                     00037500
+00102 1DE5                      466          LR    R5,R5                                                    00037600
+00103 DD04           0105 0001  467          BNM   TEST10                                                   00037700
+00104 36EC                      468          MEDR  F6,F4                                                    00037800
+00105 1CE4                      469 TEST10   LR    R4,R4                                                    00037900
+00106 DC08           0109 0002  470          BZ    TIMES10C                                                 00038000
+00107 34EC                      471          MEDR  F4,F4                                                    00038100
+00108 DF22           0101 0008  472          B     TIMES10B                                                 00038200
+                                473 *                                                                       00038300
+i00109 1FE7                      474 TIMES10C LR    R7,R7                                                    00038400
+         CTOE--CHARACTER TO SCALAR CONVERSION                                                                  PAGE    8
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0010A DA08           010D 0002  475          BM    DIV2                                                     00038500
+0010B 32EE                      476          MEDR  F2,F6                                                    00038600
+0010C DF3C           011C 000F  477          B     ENDALL                                                   00038700
+                                478 DIV2     QDEDR  F2,F6                                                   00038800
+0010D 3AF8 001E      001E       479+DIV2     STED  F2,QARGA                                                 01-QDEDR
+0010F 3EF8 0022      0022       480+         STED  F6,QARGB                                                 01-QDEDR
+00111 6AE6                      481+         DER   F2,F6                                                    01-QDEDR
+00112 7EE2                      482+         LER   F6,F2                                                    01-QDEDR
+00113 7FE3                      483+         LER   F6+1,F2+1                                                01-QDEDR
+00114 36F8 0022      0022       484+         MED   F6,QARGB                                                 01-QDEDR
+00116 5EF8 001E      001E       485+         SED   F6,QARGA                                                 01-QDEDR
+00118 6E44           0022       486+         DE    F6,QARGB                                                 01-QDEDR
+00119 5AEE                      487+         SEDR  F2,F6                                                    01-QDEDR
+0011A 7EF8 0022      0022       488+         LED   F6,QARGB                                                 01-QDEDR
+                                489 *                                                                       00038900
+0011C B354 8000      0015 8000  490 ENDALL   TB    SWITCH,VSIGN                                             00039000
+0011E DC0C           0122 0003  491          BZ    EXIT                                                     00039100
+0011F 7AE2                      492          LER   F2,F2          WORKAROUND FOR BUG                        00039200
+00120 DC04           0122 0001  493          BZ    EXIT           IN LECR INSTRUCTION.                      00039300
+00121 7AEA                      494          LECR  F2,F2                                                    00039400
+                                495 *                                                                       00039500
+00122 7EF8 001A      001A       496 EXIT     LED   F6,F6SAVE      RESTORE F6 CONTENTS                       00039600
+00124 78E2                      497          LER   F0,F2          PUT RESULT IN DESIRED REGISTER            00039700
+00125 79E3                      498          LER   F1,F3                  "        "                        00039800
+                                499          AEXIT                AND RETURN                                00039900
+                                500+*********RETURN TO CALLER**********************************************
+00126                           501+         DS    0H                                                       01-AEXIT
+00126 97E8                      502+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                503+***********************************************************************
+                                505 *                                                                       00040000
+                                506 ERROR    AERROR 20            INTERNAL CONVERSION ERROR                 00040100
+                                507+*********ISSUE SEND ERROR SVC******************************************
+00127 C9FB 0140      0140       508+ERROR    SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                509+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00129 5AEA                      510          SEDR  F2,F2          STANDARD FIXUP RETURNS 0                  00040200
+0012A DF26           0122 0009  511          B     EXIT                                                     00040300
+                                512 *                                                                       00040400
+0008000                         513 VSIGN    EQU   X'8000'                                                  00040500
+0004000                         514 VDIGIT   EQU   X'4000'                                                  00040600
+0002000                         515 ESIGN    EQU   X'2000'                                                  00040700
+0001000                         516 EDIGIT   EQU   X'1000'                                                  00040800
+0000800                         517 IGNORE   EQU   X'0800'                                                  00040900
+0000400                         518 FINISHED EQU   X'0400'                                                  00041000
+                                519          ACLOSE                                                         00041100
+0012B C9FB
+0012C                           520+         LTORG                                                          02-ERRPA
+0012C 41A0000000000000          521                =D'10'
+00130 4110000000000000          522                =D'1'
+00134 54152D02C7E14AF7          523                =D'1E23'
+00138 FFFF8000                  524                =X'FFFF8000'
+0013A 4E19999A                  525                =X'4E19999A'
+0013C 00000017                  526                =F'23'
+0013E 000A                      527                =H'10'
+                                528+****************ERROR PARAMETER AREA***********************************
+00140                           529+#LCTOE   CSECT                                                          02-ERRPA
+                                530+***  CTOE SENDS THE FOLLOWING ERROR                                     02-ERRPA
+                                532+***  ERROR NUMBER 20 IN GROUP 4                                         02-ERRPA
+00140 0014                      534+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00141 0414                      535+         DC    Y(4*256+20)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                536+****************END OF ERROR PARAMETER AREA****************************
+                                537+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    9
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000029
+  0001     0002     00     00003A
+  0001     0002     00     000044
+  0001     0002     00     000069
+  0001     0002     00     000095
+  0001     0002     00     00009F
+  0001     0002     00     0000B3
+  0001     0003     00     000128
+¤
+                                             CROSS REFERENCE                                                   PAGE   10
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000140   534    508
+ARG2         2   000006    27
+ARG4         2   00000A    29
+ARG5         2   00000C    30
+ARG6         2   00000E    31
+ARG7         2   000010    32
+BCT1         1   000068   332    312   347
+CK1          1   000016   246    240
+COUNT        2   0000D9   433    431
+COUNTB       1   000014    36    284   423
+COUNTE       1   000012    34    283   328   407   408   437
+COUNTH       1   000013    35    421
+CTOD         1   000003    81     82
+CTOE         1 00000000    22     43
+CTOE1        1   00002F   273    267
+DIGIT        2   000062   326    321   323
+DIV1         2   0000ED   452    448
+DIV2         2   00010D   479    475
+EDIGIT       1 00001000   516    393   411   414
+ENDALL       2   00011C   490    442   477
+EOK          2   0000BB   407    404
+ERROR        2   000127   508    234   244   252   302   337   345   352   365   371   387   390   416
+ESIGN        1 00002000   515    381   403   411
+ETEST        2   0000B7   403    415
+EXIT         2   000122   496    491   493   511
+EXPON        2   00007A   351    343
+EXPONB       2   000089   364    360
+EXPONE       2   00007E   354    412
+EXPONENT     2   00008F   370    357   362
+EXPONH       2   000083   359    355
+F0           1 00000000    54    497
+F1           1 00000001    63    498
+F2           1 00000002    64    279   318   319   320   420   430   432   432   449   452   454   455   456   460   476
+                                 479   481   482   483   487   492   492   494   494   497   510   510
+F3           1 00000003    65    280   498
+F4           1 00000004    66    439   468   471   471
+F6           1 00000006    68    231   440   468   476   480   481   482   483   484   485   486   487   488   496
+F6SAVE       4   00001A    39    231   496
+FINDX        1   000093   373    370
+FINISHED     1 00000400   518    401   409
+IGNORE       1 00000800   517    311   324
+LSTRP        2   00000C   238    243
+NOSIGNE      2   0000A4   389    380   386   400
+NOSIGNS      2   000049   307    295   301   334
+NOTNUM       2   000071   342    308   310
+NOTNUME      2   0000C6   414    392
+POS10        2   0000E5   445    443   463
+PWR2         1   0000CB   420    410
+QARGA        4   00001E    40    452   458   479   485
+QARGB        4   000022    41    453   461   480   484   486   488
+R1           1 00000001    57    373   373   394   396   405   405   407   408
+R2           1 00000002    51    232   232   238   238   241   241   241   250   257   259   260   268   273
+R3           1 00000003    58    257   273
+R4           1 00000004    59    421   422   423   425   426   429   441   444   444   445   462   465   469   469
+R5           1 00000005    60    238   239   246   247   247   247   248   266   292   294   307   309   314   315   316
+                                 342   354   359   364   377   379   389   391   395   396   427   428   433   466   466
+R6           1 00000006    61    232   233   242   251   258   259   261   269   301   334   370   386   400
+R7           1 00000007    62    278   278   279   280   281   282   283   284   322   322   328   344   344   346   356
+                                 356   361   366   407   408   420   429   430   437   438   441   447   447   474   474
+RLOOP        1   000028   264    269
+RSTRP        1   000022   257    249   251
+STACK        1 00000000    23     44
+STACKEND     2   000026    42
+START        2   000005   231     74
+SUB23        2   0000FE   462    450
+SWITCH       1   000015    37    296   311   324   326   336   351   381   393   401   403   409   411   414   490
+TEST10       1   000105   469    467
+TIMES10      2   0000DA   437    338   424
+TIMES10B     1   000101   465    446   472
+TIMES10C     1   000109   474    470
+UPPTR        1   000043   299    293
+UPPTRE       1   00009E   384    378
+VDIGIT       1 00004000   514    326   336   351
+VSIGN        1 00008000   513    296   490
+X41ETC       4   000016    38    281   282   285   316   319   327
+$RET1        1   000126   502
+#LCTOE       1 00000140   529
+#QGTBYTE     1 00000000   263    265   291   300   333   376   385   399
+=D'10'       4   00012C   521    318   439
+i=D'1E23'     4   000134   523    449   454   457   459
+                                             CROSS REFERENCE                                                   PAGE   11
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+=D'1'        4   000130   522    440
+=F'23'       2   00013C   526    445   462
+=H'10'       1   00013E   527    394
+=X'4E19999A'
+             2   00013A   525    320
+=X'FFFF8000'
+             2   000138   524    260
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE   12
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     416 CARDS FROM SYSIN     524 CARDS FROM SYSLIB
+     668 LINES OUTPUT          32 CARDS OUTPUT

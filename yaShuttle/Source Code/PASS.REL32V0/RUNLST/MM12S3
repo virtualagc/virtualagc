@@ -1,0 +1,114 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+MM12S3    SD 0001 000000 00001A
+¤
+         MM12S3--DETERMINANT OF A 3 X 3 MATRIX, SP                                                             PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 MM12S3   AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+MM12S3   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+MM12S3   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * TAKES THE DETERMINANT OF A 3 X 3 SINGLE PRECISION MATRIX              00000400
+                                 33 *                                                                       00000500
+                                 34          INPUT R2             MATRIX(3,3) SP                            00000600
+0000002                          35+R2       EQU   2                                                        01-INPUT
+                                 37          OUTPUT F0            SCALAR SP                                 00000700
+0000000                          38+F0       EQU   0                                                        01-OUTPU
+                                 40          WORK  F2,F4                                                    00000800
+0000002                          41+F2       EQU   2                                                        01-WORK
+0000004                          42+F4       EQU   4                                                        01-WORK
+                                 44 *                                                                       00000900
+                                 45 * ALGORITHM:                                                            00001000
+                                 46 *   USES THE SUM OF THE TOP TO BOTTOM DIAGONALS MINUS THE SUM OF THE    00001100
+                                 47 *     BOTTOM TO TOP DIAGONALS FORMULA.                                  00001200
+                                 48 *                                                                       00001300
+00002 7806           0002        49          LE    F0,2(R2)                                                 00001400
+00003 6016           000A        50          ME    F0,10(R2)                                                00001500
+00004 6026           0012        51          ME    F0,18(R2)      M$(1,1) * M$(2,2) * M$(3,3)               00001600
+00005 7A0A           0004        52          LE    F2,4(R2)                                                 00001700
+00006 621A           000C        53          ME    F2,12(R2)                                                00001800
+00007 621E           000E        54          ME    F2,14(R2)      M$(1,2) * M$(2,3) * M$(3,1)               00001900
+00008 7C0E           0006        55          LE    F4,6(R2)                                                 00002000
+00009 6412           0008        56          ME    F4,8(R2)                                                 00002100
+0000A 6422           0010        57          ME    F4,16(R2)      M$(1,3) * M$(2,1) * M$(3,2)               00002200
+0000B 50E2                       58          AER   F0,F2                                                    00002300
+0000C 50E4                       59          AER   F0,F4                                                    00002400
+0000D 7A1E           000E        60          LE    F2,14(R2)                                                00002500
+0000E 6216           000A        61          ME    F2,10(R2)                                                00002600
+0000F 620E           0006        62          ME    F2,6(R2)       M$(3,1) * M$(2,3) * M$(1,1)               00002700
+00010 7C22           0010        63          LE    F4,16(R2)                                                00002800
+00011 641A           000C        64          ME    F4,12(R2)                                                00002900
+00012 6406           0002        65          ME    F4,2(R2)       M$(3,2) * M$(2,3) * M$(1,1)               00003000
+00013 58E2                       66          SER   F0,F2                                                    00003100
+00014 58E4                       67          SER   F0,F4                                                    00003200
+00015 7A26           0012        68          LE    F2,18(R2)                                                00003300
+00016 6212           0008        69          ME    F2,8(R2)                                                 00003400
+00017 620A           0004        70          ME    F2,4(R2)       M$(3,3) * M$(2,1) * M$(1,2)               00003500
+00018 58E2                       71          SER   F0,F2                                                    00003600
+                                 72          AEXIT                                                          00003700
+                                 73+*********RETURN TO CALLER**********************************************
+00019                            74+         DS    0H                                                       01-AEXIT
+00019 97E8                       75+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 76+***********************************************************************
+                                 78          ACLOSE                                                         00003800
+0001A                            79+         LTORG                                                          02-ERRPA
+                                 80+****************ERROR PARAMETER AREA***********************************
+i                                 81+***  NO ERRORS SENT IN MM12S3                                           02-ERRPA
+         MM12S3--DETERMINANT OF A 3 X 3 MATRIX, SP                                                             PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                 82+****************END OF ERROR PARAMETER AREA****************************
+                                 83+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+F0           1 00000000    38     49    50    51    58    59    66    67    71
+F2           1 00000002    41     52    53    54    58    60    61    62    66    68    69    70    71
+F4           1 00000004    42     55    56    57    59    63    64    65    67
+MM12S3       1 00000000    13     27
+R2           1 00000002    35     49    49    50    50    51    51    52    52    53    53    54    54    55    55    56
+                                  56    57    57    60    60    61    61    62    62    63    63    64    64    65    65
+                                  68    68    69    69    70    70
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   000019    75
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      43 CARDS FROM SYSIN     344 CARDS FROM SYSLIB
+     114 LINES OUTPUT           6 CARDS OUTPUT

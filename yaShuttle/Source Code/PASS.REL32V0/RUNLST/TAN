@@ -1,0 +1,254 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+TAN       SD 0001 000000 000074
+#LTAN     SD 0002 000074 000004
+¤
+         TAN -- SINGLE PRECISION TANGENT FUNCTION                                                              PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * TAN: TANGENT(SINGLE)                                                  00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUT AND OUTPUT VIA F0                                     00000400
+                                 10 *        2. LET |X|*4/PI = Q+R, WHERE Q IS AN INTEGER AND R A FRACTION. 00000500
+                                 11 *        3. IF Q IS EVEN, THEN W=R. OTHERWISE, W=1-R.                   00000600
+                                 12 *        4. LET Q'=Q MOD 4. THEN                                        00000700
+                                 13 *           IF Q'=0, TAN(|X|)=TAN(W*PI/4);                              00000800
+                                 14 *           IF Q'=1, TAN(|X|)=COT(W*PI/4);                              00000900
+                                 15 *           IF Q'=2, TAN(|X|)=-COT(W*PI/4);                             00001000
+                                 16 *           IF Q'=3, TAN(|X|)=-TAN(W*PI/4).                             00001100
+                                 17 *        5. FINALLY, GET TAN(X) AS TAN(|X|) IF X>=0,                    00001200
+                                 18 *           OR -TAN(|X|) IF X<0.                                        00001300
+                                 19 *        6. ERRORS ARE GIVEN IF X>PI*2**18,OR IF X IS SUFFICIENTLY      00001400
+                                 20 *           CLOSE TO A SINGULARITY OF THE TANGENT FUNCTION THAT THE     00001500
+                                 21 *           COMBINATION OF COMPUTATIONAL ERROR AND MINIMAL INPUT ERROR  00001600
+                                 22 *           WILL CAUSE RELATIVE ERROR > 1/5 IN THE ANSWER.              00001700
+                                 23 *        7. FLOATING REGISTERS USED: F0-F4.                             00001800
+                                 24 *                                                                       00001900
+                                 25          MACRO                                                          00002000
+                                 26          WORKAREA                                                       00002100
+                                 27 COMPR    DS    F                                                        00002200
+                                 28          MEND                                                           00002300
+                                 29 *                                                                       00002400
+                                 30 TAN      AMAIN                                                          00002500
+                                 31+***********************************************************************
+                                 32+*
+                                 33+*        PRIMARY ENTRY POINT
+                                 34+*
+                                 35+***********************************************************************
+00000                            36+TAN      CSECT                                                          01-AMAIN
+00000                            37+STACK    DSECT                                                          01-AMAIN
+                                 38+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            39+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            40+         DS    2F             R0,R1                                     01-AMAIN
+00006                            41+ARG2     DS    F              R2                                        01-AMAIN
+00008                            42+         DS    F              R3                                        01-AMAIN
+0000A                            43+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            44+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            45+ARG6     DS    F              R6                                        01-AMAIN
+00010                            46+ARG7     DS    F              R7                                        01-AMAIN
+                                 47+*        END OF STANDARD STACK AREA
+00012                            48+COMPR    DS    F                                                        02-00027
+00014                            49+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            50+TAN      CSECT                                                          01-AMAIN
+0000000                          51+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   52+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 54 * COMPUTES TANGENT(X) IN SINGLE PRECISION                               00002600
+                                 55          INPUT F0             SCALAR SP RADIANS                         00002700
+0000000                          56+F0       EQU   0                                                        01-INPUT
+                                 58          OUTPUT F0            SCALAR SP                                 00002800
+                                 60          WORK  R5,R6,R7,F0,F1,F2,F3,F4                                  00002900
+0000005                          61+R5       EQU   5                                                        01-WORK
+0000006                          62+R6       EQU   6                                                        01-WORK
+0000007                          63+R7       EQU   7                                                        01-WORK
+0000001                          64+F1       EQU   1                                                        01-WORK
+0000002                          65+F2       EQU   2                                                        01-WORK
+0000003                          66+F3       EQU   3                                                        01-WORK
+0000004                          67+F4       EQU   4                                                        01-WORK
+00002 26E8                       69          LFXR  R6,F0          SAVE ARG TO TEST SIGN                     00003000
+00003 78E0                       70          LER   F0,F0                                                    00003100
+00004 DD04           0006 0001   71          BNM   POS                                                      00003200
+00005 78E8                       72          LECR  F0,F0          GET |X| IN F0                             00003300
+                                 73 *                                                                       00003400
+00006 48FF 004A      0052 004A   74 POS      CE    F0,MAX         GIVE ERROR IF                             00003500
+00008 C5F7 003F      0049 003F   75          BNL   ERROR1         ARGUMENT TOO LARGE                        00003600
+                                 76 *                                                                       00003700
+0000A 59E1                       77          SER   F1,F1                                                    00003800
+0000B 5BE3                       78          SER   F3,F3                                                    00003900
+0000C 30FF 0056      0064 0056   79          MED   F0,FOVPI                                                 00004000
+                                 80 *                                                                       00004100
+i0000E 25E8                       81          LFXR  R5,F0          PUT CHARACTERISTIC OF                     00004200
+         TAN -- SINGLE PRECISION TANGENT FUNCTION                                                              PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+0000F 25F7 0043      0054 0043   82          N     R5,MASK        (ARG*4/PI) IN COMPARAND                   00004300
+00011 05F7 0043      0056 0043   83          A     R5,QTAN        FOR LATER USE,                            00004400
+00013 3524           0012        84          ST    R5,COMPR       AND SAVE IN COMPR                         00004500
+                                 85 *                                                                       00004600
+00014 50FF 004A      0060 004A   86          AED   F0,CHAR46      SEPARATE INTEGER AND FRACTION             00004700
+00016 7AE0                       87          LER   F2,F0          INTEGER PART + 16**5 IN F2                00004800
+00017 58EA                       88          SEDR  F0,F2          FRACTION IN F0                            00004900
+                                 89 *                                                                       00005000
+00018 27EA                       90 JOIN     LFXR  R7,F2          SAVE INTEGER PART TO FIND OCTANT          00005100
+00019 F740                0010   91          SLL   R7,16          MOVE INTEGER TO TOP HALFWORD              00005200
+0001A 5AE2                       92          SER   F2,F2                                                    00005300
+0001B 7CE0                       93          LER   F4,F0                                                    00005400
+0001C B3E7 0001           0001   94          TRB   R7,X'0001'                                               00005500
+0001E DC0C           0022 0003   95          BZ    EVEN           W READY IN F4 IF EVEN OCTANT              00005600
+0001F 58FF 0037      0058 0037   96          SED   F0,ONE         W=1-FRACTION IF ODD OCTANT                00005700
+00021 7CE8                       97          LECR  F4,F0                                                    00005800
+                                 98 *                                                                       00005900
+00022 4CFF 0044      0068 0044   99 EVEN     CE    F4,UNFLO       AVOID EXTRANEOUS UNDERFLOW                00006000
+00024 DA24           002E 0009  100          BL    SKIP           IF W<16**(-3)                             00006100
+                                101 *                                                                       00006200
+                                102 *  COMPUTE TWO POLYNOMIALS IN W                                         00006300
+                                103 *                                                                       00006400
+00025 60E0                      104          MER   F0,F0          U=W**2/2                                  00006500
+00026 60F7 0034      005C 0034  105          ME    F0,HALF                                                  00006600
+00028 7AE0                      106          LER   F2,F0          Q(W)=B0+(B1*U)+(B2*U**2)                  00006700
+00029 62F7 003F      006A 003F  107          ME    F2,B2                                                    00006800
+0002B 52F7 003F      006C 003F  108          AE    F2,B1                                                    00006900
+0002D 62E0                      109          MER   F2,F0                                                    00007000
+0002E 52F7 003E      006E 003E  110 SKIP     AE    F2,B0                                                    00007100
+00030 50F7 003E      0070 003E  111          AE    F0,A0          P(W)=W*(A0+U)                             00007200
+00032 60E4                      112          MER   F0,F4                                                    00007300
+                                113 *                                                                       00007400
+                                114 *  CALCULATE THE TANGENT AS A RATIONAL FUNCTION IN W                    00007500
+                                115 *                                                                       00007600
+00033 B3E7 0003           0003  116          TRB   R7,X'0003'                                               00007700
+00035 DA08           0038 0002  117          BM    COTN                                                     00007800
+00036 68E2                      118          DER   F0,F2          USE TAN(W*PI/4)=P(W)/Q(W)                 00007900
+00037 DF14           003D 0005  119          B     SIGN           IN OCTANTS 0,3,4,7                        00008000
+                                120 *                                                                       00008100
+00038 4CF8 0012      0012       121 COTN     CE    F4,COMPR       USE COT(W*PI/4)=Q(W)/P(W)                 00008200
+0003A DE48           004D 0012  122          BNH   ERROR2         IN OCTANTS 1,2,5,6 UNLESS                 00008300
+0003B 6AE0                      123          DER   F2,F0          ARGUMENT IS TOO CLOSE TO                  00008400
+0003C 78E2                      124          LER   F0,F2          A SINGULARITY (W TOO SMALL)               00008500
+                                125 *                                                                       00008600
+                                126 *  FIX SIGN OF ANSWER                                                   00008700
+                                127 *                                                                       00008800
+0003D B3E7 0002           0002  128 SIGN     TRB   R7,X'0002'                                               00008900
+0003F DC0C           0043 0003  129          BZ    NXTST                                                    00009000
+00040 78E0                      130          LER   F0,F0          WORKAROUND FOR BUG                        00009100
+00041 DC04           0043 0001  131          BZ    NXTST          IN LECR INSTRUCTION.                      00009200
+00042 78E8                      132          LECR  F0,F0          COMPLEMENT IN OCTANTS 2,3,6,7             00009300
+00043 1EE6                      133 NXTST    LR    R6,R6          TEST SIGN OF ARGUMENT                     00009400
+00044 DD0C           0048 0003  134          BNM   EXIT           (SAVED IN R6), AND                        00009500
+00045 78E0                      135          LER   F0,F0          WORKAROUND FOR BUG                        00009600
+00046 DC04           0048 0001  136          BZ    EXIT           IN LECR INSTRUCTION.                      00009700
+00047 78E8                      137          LECR  F0,F0          COMPLEMENT ANSWER IF ARG<0                00009800
+                                138 *                                                                       00009900
+                                139 EXIT     AEXIT                                                          00010000
+                                140+*********RETURN TO CALLER**********************************************
+00048                           141+EXIT     DS    0H                                                       01-AEXIT
+00048 97E8                      142+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                143+***********************************************************************
+                                145 ERROR1   AERROR 11            |ARG| > PI*2**18                          00010100
+                                146+*********ISSUE SEND ERROR SVC******************************************
+00049 C9FB 0074      0074       147+ERROR1   SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                148+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0004B 88E1                0001  149          LFLI  F0,1           FIXUP RETURNS 1                           00010200
+0004C DF16           0048 0005  150          B     EXIT                                                     00010300
+                                151 ERROR2   AERROR 12            TOO CLOSE TO SINGULARITY                  00010400
+                                152+*********ISSUE SEND ERROR SVC******************************************
+0004D C9FB 0076      0076       153+ERROR2   SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                154+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0004F 78F7 0021      0072 0021  155          LE    F0,INFINITY                                              00010500
+00051 DF2A           0048 000A  156          B     EXIT                                                     00010600
+                                157 *                                                                       00010700
+00052                           158          DS    0F                                                       00010800
+00052 45C90FDA                  159 MAX      DC    X'45C90FDA'    PI*2**18                                  00010900
+00054 FF000000                  160 MASK     DC    X'FF000000'                                              00011000
+i00056 00000008                  161 QTAN     DC    X'00000008'                                              00011100
+         TAN -- SINGLE PRECISION TANGENT FUNCTION                                                              PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+00058 4110000000000000          162 ONE      DC    X'4110000000000000'   1.0                                00011200
+0005C 4080000000000000          163 HALF     DC    X'4080000000000000'   0.5                                00011300
+00060 4610000000000000          164 CHAR46   DC    X'4610000000000000'                                      00011400
+00064 41145F306DC9C883          165 FOVPI    DC    X'41145F306DC9C883'                                      00011500
+00068 3B100000                  166 UNFLO    DC    X'3B100000'       16**(-3)                               00011600
+0006A C028C93F                  167 B2       DC    X'C028C93F'    -.15932077                                00011700
+0006C 415B40FD                  168 B1       DC    X'415B40FD'    5.7033663                                 00011800
+0006E C1AC5D33                  169 B0       DC    X'C1AC5D33'    -10.7727537                               00011900
+00070 C1875FDC                  170 A0       DC    X'C1875FDC'    -8.4609032                                00012000
+00072 7FFFFFFF                  171 INFINITY DC    X'7FFFFFFF'                                              00012100
+                                172          ACLOSE                                                         00012200
+00074                           173+         LTORG                                                          02-ERRPA
+                                174+****************ERROR PARAMETER AREA***********************************
+00074                           175+#LTAN    CSECT                                                          02-ERRPA
+                                176+***  TAN SENDS THE FOLLOWING ERRORS                                     02-ERRPA
+                                178+***  ERROR NUMBER 11 IN GROUP 4                                         02-ERRPA
+00074 0014                      180+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00075 040B                      181+         DC    Y(4*256+11)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                183+***  ERROR NUMBER 12 IN GROUP 4                                         02-ERRPA
+00076 0014                      185+AERROR2  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00077 040C                      186+         DC    Y(4*256+12)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                187+****************END OF ERROR PARAMETER AREA****************************
+                                188+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.39 07/22/05
+  0001     0002     00     00004A
+  0001     0002     00     00004E
+¤
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+A0           2   000070   170    111
+AERROR1      1   000074   180    147
+AERROR2      1   000076   185    153
+ARG2         2   000006    41
+ARG4         2   00000A    43
+ARG5         2   00000C    44
+ARG6         2   00000E    45
+ARG7         2   000010    46
+B0           2   00006E   169    110
+B1           2   00006C   168    108
+B2           2   00006A   167    107
+CHAR46       4   000060   164     86
+COMPR        2   000012    48     84   121
+COTN         2   000038   121    117
+ERROR1       2   000049   147     75
+ERROR2       2   00004D   153    122
+EVEN         2   000022    99     95
+EXIT         1   000048   141    134   136   150   156
+F0           1 00000000    56     69    70    70    72    72    74    79    81    86    87    88    93    96    97   104
+                                 104   105   106   109   111   112   118   123   124   130   130   132   132   135   135
+                                 137   137   149   155
+F1           1 00000001    64     77    77
+F2           1 00000002    65     87    88    90    92    92   106   107   108   109   110   118   123   124
+F3           1 00000003    66     78    78
+F4           1 00000004    67     93    97    99   112   121
+FOVPI        4   000064   165     79
+HALF         4   00005C   163    105
+INFINITY     2   000072   171    155
+JOIN         1   000018    90
+MASK         2   000054   160     82
+MAX          2   000052   159     74
+NXTST        1   000043   133    129   131
+ONE          4   000058   162     96
+POS          2   000006    74     71
+QTAN         2   000056   161     83
+R5           1 00000005    61     81    82    83    84
+R6           1 00000006    62     69   133   133
+R7           1 00000007    63     90    91    94   116   128
+SIGN         2   00003D   128    119
+SKIP         2   00002E   110    100
+STACK        1 00000000    37     51
+STACKEND     2   000014    49
+TAN          1 00000000    36     50
+UNFLO        2   000068   166     99
+$RET1        1   000048   142
+#LTAN        1 00000074   175
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     127 CARDS FROM SYSIN     360 CARDS FROM SYSLIB
+     254 LINES OUTPUT          18 CARDS OUTPUT

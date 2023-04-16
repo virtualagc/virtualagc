@@ -1,0 +1,149 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CPR       SD 0001 000000 00002E
+CPRC      LD      000000        0001
+¤
+         CPR--CHARACTER COMPARE                                                                                PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 CPR      AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+CPR      CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * COMPARE CHARACTER STRINGS C1 AND C2 FOR EITHER = OR ^=.               00000400
+                                 17 *                                                                       00000500
+                                 18          INPUT R2,            CHARACTER(C1)                            X00000600
+                                                   R3             CHARACTER(C2)                             00000700
+0000002                          19+R2       EQU   2                                                        01-INPUT
+0000003                          20+R3       EQU   3                                                        01-INPUT
+                                 22          OUTPUT CC                                                      00000800
+                                 24          WORK  R5,R6                                                    00000900
+0000005                          25+R5       EQU   5                                                        01-WORK
+0000006                          26+R6       EQU   6                                                        01-WORK
+                                 28 *                                                                       00001000
+                                 29 * ALGORITHM:                                                            00001100
+                                 30 *   GO TO CPRC                                                          00001200
+                                 31 *                                                                       00001300
+                                 32 CPRC     AENTRY                                                         00001400
+                                 33+***********************************************************************
+                                 34+*
+                                 35+*        SECONDARY ENTRY POINT
+                                 36+*
+                                 37+***********************************************************************
+00000                            38+CPRC     DS    0H                                                       01-AENTR
+                                 39+         ENTRY CPRC                                                     01-AENTR
+                                 41 *                                                                       00001500
+                                 42 * COMPARE CHARACTER STRINGS C1 AND C2 FOR COLLATING SEQUENCE.           00001600
+                                 43 *                                                                       00001700
+                                 44          INPUT R2,            CHARACTER(C1)                            X00001800
+                                                   R3             CHARACTER(C2)                             00001900
+                                 46          OUTPUT CC                                                      00002000
+                                 48          WORK  R5,R6                                                    00002100
+                                 50 *                                                                       00002200
+                                 51 * ALGORITHM:                                                            00002300
+                                 52 *   TEMP = MIN(CURRENT_LENGTH(C1), CURRENT_LENGTH(C2));                 00002400
+                                 53 *   TEMP1 = SHR(TEMP + 2, 1);                                           00002500
+                                 54 *   DO FOR I = 1 TO TEMP1 - 1;                                          00002600
+                                 55 *     IF C1$(2 AT 2 * I - 1) = C2$(2 AT 2 * I - 1) THEN                 00002700
+                                 56 *       REPEAT;                                                         00002800
+                                 57 *     ELSE                                                              00002900
+                                 58 *       RETURN CC;                                                      00003000
+                                 59 *   END;                                                                00003100
+                                 60 *   IF ODD(TEMP) THEN                                                   00003200
+                                 61 *     DO;                                                               00003300
+                                 62 *       IF C1$(TEMP) ^= C2$(TEMP) THEN                                  00003400
+                                 63 *         RETURN CC;                                                    00003500
+                                 64 *     END;                                                              00003600
+                                 65 *   RETURN CC(COMPARE(LENGTH(C1), LENGTH(C2)));                         00003700
+                                 66 *                                                                       00003800
+00000 E202           0000        67          IAL   R2,0(R2)       SAVE POINTER TO C1 IN BOTTOM OF R2        00003900
+00001 E303           0000        68          IAL   R3,0(R3)       SAVE POINTER TO C2 IN BOTTOM OF R2        00004000
+00002 9E02           0000        69          LH    R6,0(R2)       GET DESCRIPTOR OF C1                      00004100
+00003 B6E6 00FF           00FF   70          NHI   R6,X'00FF'     MASK OFF MAXIMUM LENGTH                   00004200
+00005 9D03           0000        71          LH    R5,0(R3)       GET DESCRIPTOR OF C2                      00004300
+00006 B6E5 00FF           00FF   72          NHI   R5,X'00FF'     MASK OFF MAXIMUM LENGTH                   00004400
+00008 15E6                       73          CR    R5,R6          COMPARE LENGTH(C2) WITH LENGTH(C1)        00004500
+00009 DD04           000B 0001   74          BNL   UPR6           IF >= THEN BRANCH                         00004600
+0000A 1EE5                       75          LR    R6,R5          ELSE PUT LENGTH(C2) IN R6                 00004700
+0000B B0E6 0002           0002   76 UPR6     AHI   R6,X'0002'     GET TEMP + 2                              00004800
+0000D F606                0001   77          SRL   R6,1           TEMP1 = HALFWORD COUNT + 1 IF TEMP EVEN,  00004900
+                                 78 *                             HALFWORD COUNT IF TEMP IS ODD             00005000
+i0000E DF1C           0016 0007   79          B     L2                                                       00005100
+         CPR--CHARACTER COMPARE                                                                                PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0000F 9D06           0001        80 L1       LH    R5,1(R2)       GET HALFWORD OF C1                        00005200
+00010 9507           0001        81          CH    R5,1(R3)       COMPARE WITH HALFWORD OF C2               00005300
+00011 DB5C           0029 0017   82          BNE   EXIT           IF NOT EQUAL THEN EXIT WITH CC            00005400
+00012 B0E2 0001           0001   83          AHI   R2,1           BUMP C1 PTR TO NEXT HALFWORD              00005500
+00014 B0E3 0001           0001   84          AHI   R3,1           BUMP C2 PTR TO NEXT HALFWORD              00005600
+00016 DE23           000F 0008   85 L2       BCTB  R6,L1                                                    00005700
+00017 1EE6                       86          LR    R6,R6          SET CONDITION CODE                        00005800
+00018 DC20           0021 0008   87          BZ    LAST           IF ZERO THEN CHECK THE LENGTHS            00005900
+                                 88 *                                                                       00006000
+                                 89 * NOTE THAT THE LR WILL NOT RETURN A 0 RESULT IN THE EVENT THAT         00006100
+                                 90 *   THE MINIMAL COMPARE COUNT WAS ODD DUE TO THE USE OF THE             00006200
+                                 91 *   SRL R6,1 INSTRUCTION WHICH WOULD SHIFT A 1 INTO THE HIGHER          00006300
+                                 92 *   ORDER BIT OF THE LOWER HALF OF R6 WHICH REMAINS UNCHANGED           00006400
+                                 93 *   IN THE INTERVENING CODE.                                            00006500
+                                 94 *                                                                       00006600
+00019 9E06           0001        95          LH    R6,1(R2)       GET HALFWORD WITH LAST CHARACTER OF C1    00006700
+0001A B6E6 FF00           FF00   96          NHI   R6,X'FF00'     MASK OFF UNWANTED CHARACTER               00006800
+0001C 9D07           0001        97          LH    R5,1(R3)       GET HALFWORD WITH LAST CHARACTER OF C2    00006900
+0001D B6E5 FF00           FF00   98          NHI   R5,X'FF00'     MASK OFF UNWANTED CHARACTER               00007000
+0001F 16E5                       99          CR    R6,R5          COMPARE C1 CHAR WITH C2 CHAR              00007100
+00020 DB20           0029 0008  100          BNE   EXIT           IF ^= THEN RETURN WITH CC                 00007200
+00021 FA40                0010  101 LAST     SLDL  R2,16          RECOVER POINTERS                          00007300
+00022 9E02           0000       102          LH    R6,0(R2)       GET DESCRIPTOR OF C1                      00007400
+00023 B6E6 00FF           00FF  103          NHI   R6,X'00FF'     MASK OFF MAXIMUM LENGTH                   00007500
+00025 9D03           0000       104          LH    R5,0(R3)       GET DESCRIPTOR OF C2                      00007600
+00026 B6E5 00FF           00FF  105          NHI   R5,X'00FF'     MASK OFF MAXIMUM LENGTH                   00007700
+00028 16E5                      106          CR    R6,R5          COMPARE LENGTH(C1) WITH LENGTH(C2)        00007800
+                                107 *                             TO SET CC                                 00007900
+                                108 EXIT     AEXIT CC=KEEP                                                  00008000
+                                109+*********RETURN TO CALLER**********************************************
+00029                           110+EXIT     DS    0H                                                       01-AEXIT
+00029 83F8 0009      0009       111+         IHL   R3,9(0)        LOAD R3, PRESERVING CC                    01-AEXIT
+0002B F340                0010  112+         SLL   R3,16          POSITION IN UPPER HALFWORD                01-AEXIT
+0002C C7EC                      113+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                114+***********************************************************************
+                                116          ACLOSE                                                         00008100
+0002D C9FB
+0002E                           117+         LTORG                                                          02-ERRPA
+                                118+****************ERROR PARAMETER AREA***********************************
+                                119+***  NO ERRORS SENT IN CPR                                              02-ERRPA
+                                120+****************END OF ERROR PARAMETER AREA****************************
+                                121+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+CPR          1 00000000    13
+CPRC         1   000000    38     39
+EXIT         1   000029   110     82   100
+L1           2   00000F    80     85
+L2           1   000016    85     79
+LAST         1   000021   101     87
+R2           1 00000002    19     67    67    67    69    69    80    80    83    95    95   101   102   102
+R3           1 00000003    20     68    68    68    71    71    81    81    84    97    97   104   104   111   112
+R5           1 00000005    25     71    72    73    75    80    81    97    98    99   104   105   106
+R6           1 00000006    26     69    70    73    75    76    77    85    86    86    95    96    99   102   103   106
+UPR6         2   00000B    76     74
+$RET1        1   00002C   113
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      86 CARDS FROM SYSIN     404 CARDS FROM SYSLIB
+     149 LINES OUTPUT           6 CARDS OUTPUT

@@ -1,0 +1,480 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DATAN2    SD 0001 000000 000156
+DATAN     LD      000005        0001
+#LDATAN2  SD 0002 000156 00001A
+¤
+         ARCTANGENT(DOUBLE,2 ENTRIES)                                                                          PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 DATAN2   AMAIN QDED=YES                                                 00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+DATAN2   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+QARGA    DS    D                                                        01-AMAIN
+00016                            27+QARGB    DS    D                                                        01-AMAIN
+0001A                            28+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            29+DATAN2   CSECT                                                          01-AMAIN
+0000000                          30+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   31+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 33 * COMPUTES ARCTAN2(ARG1,ARG2) BY FRACTIONAL APPROXIMATION IN            00000300
+                                 34 * THE RANGE (-PI,PI) IN DOUBLE PRECISION                                00000400
+                                 35 *
+                                 36 *  REVISION HISTORY:
+                                 37 *
+                                 38 *   DATE       NAME  DR/SSCR#   DESCRIPTION
+                                 39 *   --------   ----  --------   --------------------------------------
+                                 40 *   12/16/89   JAC   DR103762   REPLACED QCED/QCEDR MACRO WITH
+                                 41 *                               CED/CEDR INSTRUCTION
+                                 42 *
+                                 43          INPUT F0,            SCALAR DP                                X00000500
+                                                   F2             SCALAR DP                                 00000600
+0000000                          44+F0       EQU   0                                                        01-INPUT
+0000002                          45+F2       EQU   2                                                        01-INPUT
+                                 47          OUTPUT F0            SCALAR DP RADIANS                         00000700
+                                 49          WORK  R1,R2,R3,R4,R5,R6,R7,F1,F3,F4,F6,F7                      00000800
+0000001                          50+R1       EQU   1                                                        01-WORK
+0000002                          51+R2       EQU   2                                                        01-WORK
+0000003                          52+R3       EQU   3                                                        01-WORK
+0000004                          53+R4       EQU   4                                                        01-WORK
+0000005                          54+R5       EQU   5                                                        01-WORK
+0000006                          55+R6       EQU   6                                                        01-WORK
+0000007                          56+R7       EQU   7                                                        01-WORK
+0000001                          57+F1       EQU   1                                                        01-WORK
+0000003                          58+F3       EQU   3                                                        01-WORK
+0000004                          59+F4       EQU   4                                                        01-WORK
+                                 60+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+0000006                          61+F6       EQU   6                                                        01-WORK
+0000007                          62+F7       EQU   7                                                        01-WORK
+00002 B2E1 FFFF           FFFF   64          OHI   R1,X'FFFF'     USING R1 TO FLAG THE ENTRY POINT          00000900
+00004 DF0C           0008 0003   65          B     MERGE                                                    00001000
+                                 66 DATAN    AENTRY                                                         00001100
+                                 67+***********************************************************************
+                                 68+*
+                                 69+*        SECONDARY ENTRY POINT
+                                 70+*
+                                 71+***********************************************************************
+00005                            72+DATAN    DS    0H                                                       01-AENTR
+                                 73+         ENTRY DATAN                                                    01-AENTR
+00005 B624 0000      0009 0000   74+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 76 * COMPUTES ARCTAN(X) BY FRACTIONAL APPROXIMATION IN                     00001200
+                                 77 * THE RANGE (-PI/2,PI/2) IN DOUBLE PRECISION                            00001300
+                                 78          INPUT F0             SCALAR DP                                 00001400
+i                                 80          OUTPUT F0            SCALAR DP RADIANS                         00001500
+         ARCTANGENT(DOUBLE,2 ENTRIES)                                                                          PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 82          WORK  R1,R2,R3,R4,R5,R6,R7,F1,F2,F3,F4,F6                      00001600
+                                 83+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+00007 09E1                       85          SR    R1,R1          SET R1 TO SIGNAL DATAN ENTRY              00001700
+00008 26E8                       86 MERGE    LFXR  R6,F0          SAVE THE SIGN OF F0 IN R6                 00002100
+00009 78E0                       87          LER   F0,F0                                                    00002200
+0000A DD04           000C 0001   88          BNM   TEST1    IF SINARG < 0,                                  00002300
+0000B 78E8                       89 MINUS    LECR  F0,F0         USE POSITIVE ARG                           00002400
+0000C 19E1                       90 TEST1    LR    R1,R1    CHECK CONDITION CODE                            00002500
+0000D C4F7 005A      0069 005A   91          BZ    DATAN1   IF DATAN ENTRY, SKIP TO MAIN CIRCUIT            00002600
+                                 92 *  IF ARCT2 ENTRY THEN DO THIS                                          00002700
+0000F 27EA                       93          LFXR  R7,F2          SAVE SIGN OF COSARG                       00002800
+00010 7AE2                       94          LER   F2,F2                                                    00002900
+00011 DB1C           0019 0007   95          BNZ   CHECK                                                    00003000
+00012 78E0                       96          LER   F0,F0        IF COSARG=SINARG=0,                         00003010
+00013 C4F7 00F0      0105 00F0   97          BZ    ERROR            THEN ERROR                              00003020
+00015 78FF 00FF      0116 00FF   98 VALUE    LED   F0,PIOV2   IF COSARG=0,SINARG NOT=0,RETURN +/- PI/2      00003030
+00017 C7F7 00E6      00FF 00E6   99          B     STEST                                                    00003040
+                                100 *    PROTECTION ADDED TO AVOID EXPONENT OVERFLOW AND UNDERFLOW IN ALL   00003041
+                                101 *    STEPS OF THE TANGENT APPROXIMATION ALGORITHM.  THE PROTECTION      00003042
+                                102 *    SCHEME DEFAULTS TO +/- PI/2 WHEN DELTA = EXPONENT(SINARG) -        00003043
+                                103 *    EXPONENT(COSARG) >=15 AND DEFAULTS TO ARCTAN(0), I.E. 0 OR         00003044
+                                104 *    +/- PI, WHEN DELTA < -51.                                          00003045
+00019 78E0                      105 CHECK    LER   F0,F0      IF SINARG=0, CONTINUE WITH TANGENT            00003046
+0001A DCC4           004C 0031  106          BZ    TANDIV      DIVIDE                                       00003047
+0001B 24E8                      107          LFXR  R4,F0      SAVE EXP(SINARG) * 16**2(I.E. EXP IS IN       00003050
+0001C B6E4 7F00           7F00  108          NHI   R4,X'7F00'  LOW ORDER BITS, 0'S IN HIGH ORDER BITS).     00003060
+0001E 25EA                      109          LFXR  R5,F2      SAVE EXP(COSARG) * 16**2                      00003070
+0001F B6E5 7F00           7F00  110          NHI   R5,X'7F00'                                               00003080
+00021 0CE5                      111          SR    R4,R5      DELTA =(EXP(SINARG) - EXP(COSARG)) * 16**2    00003090
+00022 B5E4 0F00           0F00  112          CHI   R4,X'0F00' IF DELTA >= 15 * 16**2, RETURN +/- PI/2       00003092
+00024 DD42           0015 0010  113          BNL   VALUE                                                    00003093
+00025 B5E4 CD00           CD00  114          CHI   R4,X'CD00' IF DELTA < -51 * 16**2, RETURN ARCTAN(0):     00003097
+00027 DD10           002C 0004  115          BNL   CHKHI                                                    00003098
+00028 58E0                      116          SER   F0,F0          CLEAR F0 AND F1 AND                       00003099
+00029 59E1                      117          SER   F1,F1                                                    00003100
+0002A C7F7 00C8      00F4 00C8  118          B     POSOK          RETURN 0 OR +/- PI                        00003101
+                                119 *    WHEN EXP(SINARG) >= 61, OVERFLOW CAN OCCUR REGARDLESS OF THE       00003102
+                                120 *    MAGNITUDE OF EXP(COSARG) AND SO THE ABOVE DEFAULTING SCHEME IS     00003103
+                                121 *    NOT ADEQUATE. TO AVOID OVERFLOW, SUBTRACT3 FROM BOTH EXP(SINARG)   00003104
+                                122 *    AND EXP(COSARG) BEFORE ENTERING TANGENT ALGORITHM.                 00003105
+0002C 24E8                      123 CHKHI    LFXR  R4,F0      GET EXP(SINARG)* 16**2                        00003106
+0002D B6E4 7F00           7F00  124          NHI   R4,X'7F00'                                               00003107
+0002F B5E4 7D00           7D00  125          CHI   R4,X'7D00'    7D00=61 * 16**2 IN EXCESS 64 NOTATION      00003108
+00031 DA0C           0035 0003  126          BL    CHKLO      IF EXP(SINARG) * 16**2 >= 61 * 16**2,         00003109
+00032 1AF7 00EE      0122 00EE  127          L     R2,NEG3        SCALE BOTH EXP(SINARG) AND EXP(COSARG)    00003110
+00034 DF14           003A 0005  128          B     SCALE          BY -3 * 16**2.                            00003111
+                                129 *    WHEN EXP(SINARG) < -51, UNDERFLOW CAN OCCUR REGARDLESS OF THE      00003112
+                                130 *    MAGNITUDE OF EXP(COSARG) AND SO THE ABOVE DEFAULTING SCHEME IS     00003113
+                                131 *    NOT ENOUGH.  TO AVOID UNDERFLOW, ADD 13 TO BOTH EXP(SINARG) AND    00003114
+                                132 *    EXP(COSARG) BEFORE ENTERING TANGENT ALGORITHM.                     00003115
+00035 B5E4 0D00           0D00  133 CHKLO    CHI   R4,X'0D00'  0D00=-51 * 16**2 IN EXCESS 64 NOTATION       00003116
+00037 DD50           004C 0014  134          BNL   TANDIV     IF EXP(SINARG) * 16**2 < -51 * 16**2,         00003117
+00038 1AF7 00EC      0126 00EC  135          L     R2,THIRTN      SCALE BOTH EXPONENTS BY 13.               00003118
+                                136 *    SCALE EXPONENTS BEFORE ENTERING TANGENT ALGORITHM IF EXP(SINARG)   00003119
+                                137 *    >= 61 OR < -51.  EXPONENTS ARE SCALED BY EITHER-3 OR 13 (STORED    00003120
+                                138 *    IN R2), DEPENDING ON WHETHER WE ARE AVOIDING UNDERFLOW OR OVER-    00003121
+                                139 *    FLOW.                                                              00003122
+0003A 25EA                      140 SCALE    LFXR  R5,F2      GET HIGH ORDER HALFWORD OF COSARG,            00003123
+0003B B6E5 7FFF           7FFF  141          NHI   R5,X'7FFF'   WITHOUT SIGN BIT                            00003124
+0003D 05E2                      142          AR    R5,R2      SCALE EXPONENT  BY EITHER -3 OR 13.           00003125
+0003E 24E8                      143          LFXR  R4,F0      GET HIGH ORDER HALFWORD OF SINARG,            00003126
+0003F B6E4 7FFF           7FFF  144          NHI   R4,X'7FFF'   WITHOUT SIGN BIT                            00003127
+00041 04E2                      145          AR    R4,R2      SCALE EXPONENT BY EITHER -3 OR 13.            00003128
+                                146 *    RESET ARGUMENTS                                                    00003129
+00042 22E8                      147          LFXR  R2,F0           RESET SINARG.                            00003130
+00043 B1E2 FFFF           FFFF  148          ZRB   R2,X'FFFF'      GET LOW ORDER HALFWORD OF SINARG         00003131
+00045 2CE2                      149          OR    R4,R2           COMBINE WITH NEW HIGH ORDER HALF-        00003132
+00046 28EC                      150          LFLR  F0,R4             WORD IN R4                             00003133
+00047 22EA                      151          LFXR  R2,F2           RESET COSARG IN SAME MANNER.             00003134
+00048 B1E2 7FFF           7FFF  152          ZRB   R2,X'7FFF'                                               00003135
+0004A 2DE2                      153          OR    R5,R2                                                    00003136
+0004B 2AED                      154          LFLR  F2,R5                                                    00003137
+                                155 *    BEGINNING OF TANGENT APPROXIMATION ALGORITHM                       00003138
+                                156 TANDIV  QDEDR  F0,F2    X=|SINARG|/COSARG                               00003140
+0004C 38F8 0012      0012       157+TANDIV   STED  F0,QARGA                                                 01-QDEDR
+0004E 3AF8 0016      0016       158+         STED  F2,QARGB                                                 01-QDEDR
+00050 68E2                      159+         DER   F0,F2                                                    01-QDEDR
+i00051 7AE0                      160+         LER   F2,F0                                                    01-QDEDR
+         ARCTANGENT(DOUBLE,2 ENTRIES)                                                                          PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00052 7BE1                      161+         LER   F2+1,F0+1                                                01-QDEDR
+00053 32F8 0016      0016       162+         MED   F2,QARGB                                                 01-QDEDR
+00055 5AF8 0012      0012       163+         SED   F2,QARGA                                                 01-QDEDR
+00057 6A2C           0016       164+         DE    F2,QARGB                                                 01-QDEDR
+00058 58EA                      165+         SEDR  F0,F2                                                    01-QDEDR
+00059 7AF8 0016      0016       166+         LED   F2,QARGB                                                 01-QDEDR
+0005B 7AE2                      167          LER   F2,F2                                                    00003200
+0005C D920           0065 0008  168          BP    NORM    COSARG>0,X=|SINARG|/|COSARG|, SO CONTINUE        00003300
+0005D 78E8                      169          LECR  F0,F0    COSARG<0, LOAD POSITIVE X                       00003400
+                                170 *
+                                171 *   DR103762 CHANGED QCED TO CED ON THE FOLLOWING LINE
+                                172 *
+0005E 18FF 00BA      011A 00BA  173          CED   F0,LOWLIM IF COSARG<0 AND X<=16**-14 THEN RETURN +/- PI  00003500
+00060 D910           0065 0004  174          BH    NORM                                                     00003600
+00061 78FF 00AF      0112 00AF  175          LED   F0,PI                                                    00003700
+00063 C7F7 009A      00FF 009A  176          B     STEST     STEST FIXES SIGN  OF RESULT                    00003800
+                                177 *
+                                178 *   DR103762 CHANGED QCED TO CED ON THE FOLLOWING LINE
+                                179 *
+00065 18FF 00B7      011E 00B7  180 NORM     CED   F0,HIGHLIM   IF COSARG NOT=0 AND X>16**14                00004300
+00067 C1F7 0854      0015 0054  181          BH    VALUE      THEN RETURN +/- PI/2                          00004400
+                                182 *   MAIN CIRCUIT- ARCTAN FN WITH SINARG=TAN% OR X=|SINARG|/|COSARG|     00004500
+                                183 *   FIND %(ANGLE) AND FIX QUADRANTS AND SIGN OF RESULT                  00004600
+00069 EBF3 0168      0168       184 DATAN1   LA    R3,ZERO    R3-->0 IF X<=1                                00004700
+0006B EAF3 0158      0158       185          LA    R2,DATA     SET POINTER TO ADDRESS OF DOUBLEWORD '0'     00004710
+                                186 *
+                                187 *   DR103762 CHANGED QCED TO CED ON THE FOLLOWING LINE
+                                188 *
+0006D 18FF 009B      010A 009B  189          CED   F0,FLONE                                                 00004800
+0006F DE54           0085 0015  190          BNH   REDUC   IF X>1, THEN TAKE INVERSE                        00004900
+00070 7AE0                      191          LER   F2,F0   PUT X IN F2                                      00005000
+00071 7BE1                      192          LER   F3,F1                                                    00005100
+00072 78FF 0096      010A 0096  193          LED   F0,FLONE                                                 00005200
+                                194         QDEDR  F0,F2   F0=1/X                                           00005300
+00074 38F8 0012      0012       195+         STED  F0,QARGA                                                 01-QDEDR
+00076 3AF8 0016      0016       196+         STED  F2,QARGB                                                 01-QDEDR
+00078 68E2                      197+         DER   F0,F2                                                    01-QDEDR
+00079 7AE0                      198+         LER   F2,F0                                                    01-QDEDR
+0007A 7BE1                      199+         LER   F2+1,F0+1                                                01-QDEDR
+0007B 32F8 0016      0016       200+         MED   F2,QARGB                                                 01-QDEDR
+0007D 5AF8 0012      0012       201+         SED   F2,QARGA                                                 01-QDEDR
+0007F 6A2C           0016       202+         DE    F2,QARGB                                                 01-QDEDR
+00080 58EA                      203+         SEDR  F0,F2                                                    01-QDEDR
+00081 7AF8 0016      0016       204+         LED   F2,QARGB                                                 01-QDEDR
+00083 EA22           0008       205          LA    R2,8(R2)   MEANS REDUCTION FOR X>1 TAKEN                 00005400
+00084 EB13           0004       206          LA    R3,4(R3)    R3-->-1 IF X>1                               00005500
+                                207 *   CHECK FOR X<16**-7.  ALSO, CHECK IF X<=TAN(PI/12)                   00005600
+                                208 *   IF NOT, THEN REDUCE X                                               00005700
+                                209 *
+                                210 *   DR103762 CHANGED QCED TO CED ON THE FOLLOWING LINE
+                                211 *
+00085 18FF 00C7      014E 00C7  212 REDUC    CED   F0,SMALL    IF X<16**-7 THEN ANSWER=X                    00005800
+00087 C2F7 0064      00ED 0064  213          BL    READY       THIS AVOIDS UNDERFLOW EXCEPTION              00005900
+00089 24EE                      214          LFXR  R4,F6       SAVE F6,F7                                   00005910
+0008A 25EF                      215          LFXR  R5,F7                                                    00005920
+                                216 *
+                                217 *   DR103762 CHANGED QCED TO CED ON THE FOLLOWING LINE
+                                218 *
+0008B 18FF 00C5      0152 00C5  219          CED   F0,TAN15    IF X>TAN(PI/12), THEN REDUCE USING           00006000
+0008D DE64           00A7 0019  220          BNH   OK          ATAN(X)=PI/6+TAN(Y), WHERE                   00006100
+0008E 7AE0                      221          LER   F2,F0       Y=(X*SQRT3-1)/(X+SQRT3)                      00006200
+0008F 7BE1                      222          LER   F3,F1                                                    00006300
+00090 30FF 00B4      0146 00B4  223          MED   F0,RT3M1                                                 00006400
+00092 58FF 0076      010A 0076  224          SED   F0,FLONE    TO PROTECT SIGNIFICANT BITS, COMPUTE         00006500
+00094 50EA                      225          AEDR  F0,F2       X*SQRT3-1 AS X(SQRT3-1)-1+X                  00006600
+00095 52FF 00B3      014A 00B3  226          AED   F2,RT3                                                   00006700
+                                227         QDEDR  F0,F2                                                    00006800
+00097 38F8 0012      0012       228+         STED  F0,QARGA                                                 01-QDEDR
+00099 3AF8 0016      0016       229+         STED  F2,QARGB                                                 01-QDEDR
+0009B 68E2                      230+         DER   F0,F2                                                    01-QDEDR
+0009C 7AE0                      231+         LER   F2,F0                                                    01-QDEDR
+0009D 7BE1                      232+         LER   F2+1,F0+1                                                01-QDEDR
+0009E 32F8 0016      0016       233+         MED   F2,QARGB                                                 01-QDEDR
+000A0 5AF8 0012      0012       234+         SED   F2,QARGA                                                 01-QDEDR
+000A2 6A2C           0016       235+         DE    F2,QARGB                                                 01-QDEDR
+000A3 58EA                      236+         SEDR  F0,F2                                                    01-QDEDR
+000A4 7AF8 0016      0016       237+         LED   F2,QARGB                                                 01-QDEDR
+000A6 EA12           0004       238          LA    R2,4(R2)    MEANS REDUCTION FOR X OR 1/X>TAN(PI/12)      00006900
+                                239 *   NOW X IS LESS THAN TAN(PI/12), SO COMPUTE ARCTAN                    00007000
+i000A7 7EE0                      240 OK       LER   F6,F0   ATAN(X)=X+X*X**2*F,WHERE                         00007100
+         ARCTANGENT(DOUBLE,2 ENTRIES)                                                                          PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+000A8 7FE1                      241          LER   F7,F1   F=C1+C2/(XSQ+C3+C4/(XSQ+C5+C6/(XSQ+C7))).        00007200
+000A9 30E8                      242          MEDR  F0,F0                                                    00007300
+000AA 7CFF 0096      0142 0096  243          LED   F4,C7                                                    00007400
+000AC 54E8                      244          AEDR  F4,F0                                                    00007500
+000AD 7AFF 008F      013E 008F  245          LED   F2,C6                                                    00007600
+                                246         QDEDR  F2,F4                                                    00007700
+000AF 3AF8 0012      0012       247+         STED  F2,QARGA                                                 01-QDEDR
+000B1 3CF8 0016      0016       248+         STED  F4,QARGB                                                 01-QDEDR
+000B3 6AE4                      249+         DER   F2,F4                                                    01-QDEDR
+000B4 7CE2                      250+         LER   F4,F2                                                    01-QDEDR
+000B5 7DE3                      251+         LER   F4+1,F2+1                                                01-QDEDR
+000B6 34F8 0016      0016       252+         MED   F4,QARGB                                                 01-QDEDR
+000B8 5CF8 0012      0012       253+         SED   F4,QARGA                                                 01-QDEDR
+000BA 6C2C           0016       254+         DE    F4,QARGB                                                 01-QDEDR
+000BB 5AEC                      255+         SEDR  F2,F4                                                    01-QDEDR
+000BC 7CF8 0016      0016       256+         LED   F4,QARGB                                                 01-QDEDR
+000BE 52FF 007A      013A 007A  257          AED   F2,C5                                                    00007800
+000C0 52E8                      258          AEDR  F2,F0                                                    00007900
+000C1 7CFF 0073      0136 0073  259          LED   F4,C4                                                    00008000
+                                260         QDEDR  F4,F2                                                    00008100
+000C3 3CF8 0012      0012       261+         STED  F4,QARGA                                                 01-QDEDR
+000C5 3AF8 0016      0016       262+         STED  F2,QARGB                                                 01-QDEDR
+000C7 6CE2                      263+         DER   F4,F2                                                    01-QDEDR
+000C8 7AE4                      264+         LER   F2,F4                                                    01-QDEDR
+000C9 7BE5                      265+         LER   F2+1,F4+1                                                01-QDEDR
+000CA 32F8 0016      0016       266+         MED   F2,QARGB                                                 01-QDEDR
+000CC 5AF8 0012      0012       267+         SED   F2,QARGA                                                 01-QDEDR
+000CE 6A2C           0016       268+         DE    F2,QARGB                                                 01-QDEDR
+000CF 5CEA                      269+         SEDR  F4,F2                                                    01-QDEDR
+000D0 7AF8 0016      0016       270+         LED   F2,QARGB                                                 01-QDEDR
+000D2 54FF 005E      0132 005E  271          AED   F4,C3                                                    00008200
+000D4 54E8                      272          AEDR  F4,F0                                                    00008300
+000D5 7AFF 0057      012E 0057  273          LED   F2,C2                                                    00008400
+                                274         QDEDR  F2,F4                                                    00008500
+000D7 3AF8 0012      0012       275+         STED  F2,QARGA                                                 01-QDEDR
+000D9 3CF8 0016      0016       276+         STED  F4,QARGB                                                 01-QDEDR
+000DB 6AE4                      277+         DER   F2,F4                                                    01-QDEDR
+000DC 7CE2                      278+         LER   F4,F2                                                    01-QDEDR
+000DD 7DE3                      279+         LER   F4+1,F2+1                                                01-QDEDR
+000DE 34F8 0016      0016       280+         MED   F4,QARGB                                                 01-QDEDR
+000E0 5CF8 0012      0012       281+         SED   F4,QARGA                                                 01-QDEDR
+000E2 6C2C           0016       282+         DE    F4,QARGB                                                 01-QDEDR
+000E3 5AEC                      283+         SEDR  F2,F4                                                    01-QDEDR
+000E4 7CF8 0016      0016       284+         LED   F4,QARGB                                                 01-QDEDR
+000E6 52FF 0042      012A 0042  285          AED   F2,C1                                                    00008600
+000E8 30EA                      286          MEDR  F0,F2                                                    00008700
+000E9 30EE                      287          MEDR  F0,F6                                                    00008800
+000EA 50EE                      288          AEDR  F0,F6                                                    00008900
+000EB 2EEC                      289          LFLR  F6,R4                                                    00008910
+000EC 2FED                      290          LFLR  F7,R5                                                    00008920
+                                291 *   NOW ADJUST ANGLE TO PROPER SECTION                                  00009000
+                                292 *   R2=0 MEANS X<=TAN(PI/12)   ACTION TAKEN- ADD 0                      00009100
+                                293 *   R2=4(0) MEANS TAN(PI/12)<X<=1   ACTION TAKEN- ADD PI/6              00009200
+                                294 *   R2=8 MEANS 1/X<=TAN(PI/12)   ACTION TAKEN- SUBTRACT PI/2            00009300
+                                295 *   R2=4(8) MEANS 1/X>TAN(PI/12)   ACTION TAKEN- SUBTRACT PI/3          00009400
+                                296 *   R3-->0 IF X<=1 USED                                                 00009500
+                                297 *   R3-->-1 IF 1/X USED                                                 00009600
+000ED 50FA 0000      0000       298 READY    AED   F0,0(R2)                                                 00009700
+000EF 1AE3                      299          LR    R2,R3                                                    00009800
+000F0 58FA 0000      0000       300          SED F0,0(R2)   SUBTRACT EITHER 0 OR -1                         00009900
+000F2 DD04           00F4 0001  301          BNM   POSOK     WANT POSITIVE ANSWER                           00010000
+000F3 78E8                      302          LECR  F0,F0                                                    00010100
+                                303 *   ANSWER POSITIVE.  CHECK IF DATAN2 ENTRY AND COSARG<0                00010200
+                                304 *   IF SO, THEN F0=PI-F0                                                00010300
+                                305 *   IF TWO ARGS(DATAN2 ENTRY), THEN ANSWER IN RANGE (-PI,PI)            00010400
+000F4 19E1                      306 POSOK    LR    R1,R1          SET CONDITION CODE                        00010500
+000F5 DC24           00FF 0009  307          BZ    STEST                                                    00010600
+000F6 1FE7                      308          LR    R7,R7          DATAN2 ENTRY-CHECK SIGN OF COSARG         00010700
+000F7 DD1C           00FF 0007  309          BNM   STEST      GO TO STEST IF COSARG>=0                      00010800
+000F8 7AFF 0018      0112 0018  310          LED   F2,PI                                                    00010900
+000FA 5AE8                      311          SEDR  F2,F0      COSARG<0                                      00011000
+000FB 79E3                      312          LER   F1,F3    ANSWER IN F0                                    00011100
+000FC 78E2                      313          LER   F0,F2                                                    00011200
+000FD DD04           00FF 0001  314          BNM   STEST    WANT POSITIVE ANSWER                            00011300
+000FE 78E8                      315          LECR  F0,F0                                                    00011400
+                                316 *   STEST MAKES SIGN OF ANSWER AGREE WITH SIGN OF SINARG                00011500
+                                317 *   IF ONLY ONE ARG(DATAN ENTRY), THEN ANSWER IN RANGE (-PI/2,PI/2)     00011600
+000FF 1EE6                      318 STEST    LR    R6,R6          SET CONDITION CODE                        00011700
+00100 DD0C           0104 0003  319          BNM   EXIT                                                     00011800
+i00101 78E0                      320          LER   F0,F0          WORKAROUND FOR BUG                        00011900
+         ARCTANGENT(DOUBLE,2 ENTRIES)                                                                          PAGE    6
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00102 DC04           0104 0001  321          BZ    EXIT           IN LECR INSTRUCTION.                      00012000
+00103 78E8                      322          LECR  F0,F0                                                    00012100
+                                323 EXIT     AEXIT                                                          00012400
+                                324+*********RETURN TO CALLER**********************************************
+00104                           325+EXIT     DS    0H                                                       01-AEXIT
+00104 97E8                      326+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                327+***********************************************************************
+                                329 *     ERROR HANDLER FOR SINARG=COSARG=0                                 00012500
+00105 78FF 0007      010E 0007  330 ERROR    LED   F0,FLZERO   STANDARD FIX-UP=0.0                          00012600
+                                331          AERROR 62            ARG1=ARG2=0                               00012700
+                                332+*********ISSUE SEND ERROR SVC******************************************
+00107 C9FB 0156      0156       333+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                334+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00109 DF1A           0104 0006  335          B     EXIT                                                     00012800
+0010A                           336          DS   0D   ALIGN ON DOUBLEWORD BOUNDARY                         00012900
+0010A 4110000000000000          337 FLONE    DC   X'4110000000000000'                                       00013000
+0010E 0000000000000000          338 FLZERO   DC   X'0000000000000000'                                       00013100
+00112 413243F6A8885A2F          339 PI       DC   X'413243F6A8885A2F'                                       00013200
+00116 411921FB54442D18          340 PIOV2    DC   X'411921FB54442D18'                                       00013300
+0011A 3310000000000000          341 LOWLIM   DC   X'3310000000000000'   16**-14                             00013400
+0011E 4F10000000000000          342 HIGHLIM  DC   X'4F10000000000000'   16**14                              00013500
+00122 FD00000000000000          343 NEG3     DC   X'FD00000000000000'   -3                                  00013520
+00126 0D00000000000000          344 THIRTN   DC   X'0D00000000000000'   13                                  00013540
+0012A BF1E31FF1784B965          345 C1       DC   X'BF1E31FF1784B965'   -0.7371899082768562E-2              00013600
+0012E C0ACDB34C0D1B35D          346 C2       DC   X'C0ACDB34C0D1B35D'   -0.6752198191404210                 00013700
+00132 412B7CE45AF5C165          347 C3       DC   X'412B7CE45AF5C165'    0.2717991214096480E+1              00013800
+00136 C11A8F923B178C78          348 C4       DC   X'C11A8F923B178C78'   -0.1660051565960002E+1              00013900
+0013A 412AB4FD5D433FF6          349 C5       DC   X'412AB4FD5D433FF6'    0.2669186939532663E+1              00014000
+0013E C02298BB68CFD869          350 C6       DC   X'C02298BB68CFD869'   -0.1351430064094942                 00014100
+00142 41154CEE8B70CA99          351 C7       DC   X'41154CEE8B70CA99'    0.1331282181443987E+1              00014200
+00146 40BB67AE8584CAA8          352 RT3M1    DC   X'40BB67AE8584CAA8'   SQRT3-1                             00014300
+0014A 411BB67AE8584CAB          353 RT3      DC   X'411BB67AE8584CAB'   SQRT3                               00014400
+0014E 3A10000000000000          354 SMALL    DC   X'3A10000000000000'   16**-7                              00014500
+00152 40449851C5F064AC          355 TAN15    DC   X'40449851C5F064AC'   TAN(PI/12)                          00014600
+                                356          ADATA                                                          00014700
+                                357+*********DATA CSECT****************************************************
+00156                           358+         LTORG                                                          02-ERRPA
+                                359+****************ERROR PARAMETER AREA***********************************
+00156                           360+#LDATAN2 CSECT                                                          02-ERRPA
+                                361+***  DATAN2 SENDS THE FOLLOWING ERROR                                   02-ERRPA
+                                363+***  ERROR NUMBER 62 IN GROUP 4                                         02-ERRPA
+00156 0014                      365+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00157 043E                      366+         DC    Y(4*256+62)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                367+****************END OF ERROR PARAMETER AREA****************************
+00158                           368+#LDATAN2 CSECT                                                          01-ADATA
+00158 0000000000000000          369 DATA     DC   D'0'                  THESE FOUR                          00014800
+0015C 40860A91C16B9B2C          370          DC   X'40860A91C16B9B2C'   PI/6      CONSTANTS                 00014900
+00160 C0921FB54442D184          371          DC   X'C0921FB54442D184' -PI/2+1      MUST BE                  00015000
+00164 BFC152382D736574          372          DC   X'BFC152382D736574'            CONSECUTIVE                00015100
+00168 0000000000000000          373 ZERO     DC   D'0'                                                      00015200
+0016C 4110000000000000          374          DC   D'1'                                                      00015300
+                                375          ACLOSE                                                         00015400
+                                376+         END                                                            01-ACLOS
+¤
+                                                 RELOCATION DICTIONARY                                         PAGE    7
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     00006A
+  0001     0002     00     00006C
+  0001     0002     00     000108
+¤
+                                             CROSS REFERENCE                                                   PAGE    8
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000156   365    333
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+C1           4   00012A   345    285
+C2           4   00012E   346    273
+C3           4   000132   347    271
+C4           4   000136   348    259
+C5           4   00013A   349    257
+C6           4   00013E   350    245
+C7           4   000142   351    243
+CHECK        1   000019   105     95
+CHKHI        1   00002C   123    115
+CHKLO        2   000035   133    126
+DATA         4   000158   369    185
+DATAN        1   000005    72     73
+DATAN1       2   000069   184     91
+DATAN2       1 00000000    13     29
+ERROR        2   000105   330     97
+EXIT         1   000104   325    319   321   335
+F0           1 00000000    44     86    87    87    89    89    96    96    98   105   105   107   116   116   123   143
+                                 147   150   157   159   160   161   165   169   169   173   175   180   189   191   193
+                                 195   197   198   199   203   212   219   221   223   224   225   228   230   231   232
+                                 236   240   242   242   244   258   272   286   287   288   298   300   302   302   311
+                                 313   315   315   320   320   322   322   330
+F1           1 00000001    57    117   117   192   222   241   312
+F2           1 00000002    45     93    94    94   109   140   151   154   158   159   160   161   162   163   164   165
+                                 166   167   167   191   196   197   198   199   200   201   202   203   204   221   225
+                                 226   229   230   231   232   233   234   235   236   237   245   247   249   250   251
+                                 255   257   258   262   263   264   265   266   267   268   269   270   273   275   277
+                                 278   279   283   285   286   310   311   313
+F3           1 00000003    58    192   222   312
+F4           1 00000004    59    243   244   248   249   250   251   252   253   254   255   256   259   261   263   264
+                                 265   269   271   272   276   277   278   279   280   281   282   283   284
+F6           1 00000006    61    214   240   287   288   289
+F7           1 00000007    62    215   241   290
+FLONE        4   00010A   337    189   193   224
+FLZERO       4   00010E   338    330
+HIGHLIM      4   00011E   342    180
+LOWLIM       4   00011A   341    173
+MERGE        1   000008    86     65
+MINUS        1   00000B    89
+NEG3         4   000122   343    127
+NORM         2   000065   180    168   174
+OK           1   0000A7   240    220
+PI           4   000112   339    175   310
+PIOV2        4   000116   340     98
+POSOK        1   0000F4   306    118   301
+QARGA        4   000012    26    157   163   195   201   228   234   247   253   261   267   275   281
+QARGB        4   000016    27    158   162   164   166   196   200   202   204   229   233   235   237   248   252   254
+                                 256   262   266   268   270   276   280   282   284
+R1           1 00000001    50     64    85    85    90    90   306   306
+R2           1 00000002    51    127   135   142   145   147   148   149   151   152   153   185   205   205   205   238
+                                 238   238   298   298   299   300   300
+R3           1 00000003    52    184   206   206   206   299
+R4           1 00000004    53    107   108   111   112   114   123   124   125   133   143   144   145   149   150   214
+                                 289
+R5           1 00000005    54    109   110   111   140   141   142   153   154   215   290
+R6           1 00000006    55     86   318   318
+R7           1 00000007    56     93   308   308
+READY        2   0000ED   298    213
+REDUC        2   000085   212    190
+RT3          4   00014A   353    226
+RT3M1        4   000146   352    223
+SCALE        1   00003A   140    128
+SMALL        4   00014E   354    212
+STACK        1 00000000    14     30
+STACKEND     2   00001A    28
+STEST        1   0000FF   318     99   176   307   309   314
+TAN15        4   000152   355    219
+TANDIV       2   00004C   157    106   134
+TEST1        1   00000C    90     88
+THIRTN       4   000126   344    135
+VALUE        2   000015    98    113   181
+ZERO         4   000168   373    184
+$RET1        1   000104   326
+#LDATAN2     1 00000156   360    368
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    9
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     240 CARDS FROM SYSIN     460 CARDS FROM SYSLIB
+     480 LINES OUTPUT          30 CARDS OUTPUT

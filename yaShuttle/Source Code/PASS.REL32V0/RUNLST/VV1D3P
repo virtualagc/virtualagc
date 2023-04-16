@@ -1,0 +1,122 @@
+¤
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VV1D3P    SD 0001 000000 000012
+VV1DNP    LD      000002        0001
+¤
+         VV1D3P--COLUMN VECTOR MOVE, LENGTH 3 OR N, DP                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV1D3P   AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV1D3P   CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * MOVE V1 TO V2 WHERE V1 AND V2 ARE DOUBLE PRECISION 3 VECTORS,         00000400
+                                 17 *   AT LEAST ONE OF WHICH IS A COLUMN VECTOR WITHIN A MATRIX.           00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            VECTOR(3) DP                             X00000700
+                                                   R6,            INTEGER(INDEL) SP                        X00000800
+                                                   R7             INTEGER(OUTDEL) SP                        00000900
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000006                          21+R6       EQU   6                                                        01-INPUT
+0000007                          22+R7       EQU   7                                                        01-INPUT
+                                 24          OUTPUT R1            VECTOR(3) DP                              00001000
+0000001                          25+R1       EQU   1                                                        01-OUTPU
+                                 27          WORK  R5,F0                                                    00001100
+0000005                          28+R5       EQU   5                                                        01-WORK
+0000000                          29+F0       EQU   0                                                        01-WORK
+                                 31 *                                                                       00001200
+                                 32 * ALGORITHM:                                                            00001300
+                                 33 *   SEE ALGORITHM DESCRIPTION BELOW FOR ENTRY                           00001400
+                                 34 *                                                                       00001500
+00000 EDF3 0003      0003        35          LA   R5,3                                                      00001600
+                                 36 VV1DNP   AENTRY                                                         00001700
+                                 37+***********************************************************************
+                                 38+*
+                                 39+*        SECONDARY ENTRY POINT
+                                 40+*
+                                 41+***********************************************************************
+00002                            42+VV1DNP   DS    0H                                                       01-AENTR
+                                 43+         ENTRY VV1DNP                                                   01-AENTR
+                                 45 *                                                                       00001800
+                                 46 * MOVE V1 TO V2 WHERE V1 AND V2 ARE DOUBLE PRECISION VECTORS OF LENGTH  00001900
+                                 47 *   N WHERE N IS NOT EQUAL TO 3 AND WHERE AT LEAST ONE OF WHICH IS      00002000
+                                 48 *   A COLUMN VECTOR WITHIN A MATRIX.                                    00002100
+                                 49 *  WHERE N IS NOT EQUAL TO 3.                                           00002200
+                                 50 *                                                                       00002300
+                                 51          INPUT R2,            VECTOR(N) DP                             X00002400
+                                                   R5,            INTEGER(N) SP                            X00002500
+                                                   R6,            INTEGER(INDEL) SP                        X00002600
+                                                   R7             INTEGER(OUTDEL) SP                        00002700
+                                 53          OUTPUT R1            VECTOR(N) DP                              00002800
+                                 55          WORK  F0                                                       00002900
+                                 57 *                                                                       00003000
+                                 58 * ALGORITHM:                                                            00003100
+                                 59 *   IF OUTDEL = 0 THEN                                                  00003200
+                                 60 *     R7 = 4;   /* TO ADDRESS CONSECUTIVE ELEMENTS */                   00003300
+                                 61 *   IF INDEL = 0 THEN                                                   00003400
+                                 62 *     R6 = 4;   /* TO ADDRESS CONSECUTIVE ELEMENTS */                   00003500
+                                 63 *   DO FOR I = N TO 1 BY -1;                                            00003600
+                                 64 *     V2$(I) = V1$(I);                                                  00003700
+                                 65 *   END;                                                                00003800
+                                 66 *                                                                       00003900
+00002 1FE7                       67          LR    R7,R7          SET CONDITION CODE                        00004000
+00003 DB04           0005 0001   68          BNZ   VV1DNP1        IF OUTDEL^=0 BRANCH TO CHECK ON INDEL     00004100
+00004 BFE6                0006   69          LFXI  R7,4           ELSE SET R7 TO ADDRESS CONSECUTIVE        00004200
+                                 70 *                             ELEMENT                                   00004300
+00005 1EE6                       71 VV1DNP1  LR    R6,R6          SET CONDITION CODE                        00004400
+00006 DB04           0008 0001   72          BNZ   VV1DNP2        IF INDEL ^= 0 BRANCH TO MOVE LOOP         00004500
+00007 BEE6                0006   73          LFXI  R6,4           ELSE SET R6 TO ADDRESS CONSECUTIVE        00004600
+                                 74 *                             ELEMENT                                   00004700
+00008 78FA 0004      0004        75 VV1DNP2  LED   F0,4(R2)                                                 00004800
+i0000A 38F9 0004      0004        76          STED  F0,4(R1)                                                 00004900
+         VV1D3P--COLUMN VECTOR MOVE, LENGTH 3 OR N, DP                                                         PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+0000C 01E7                       77          AR    R1,R7          BUMP OUTPUT PTR TO NEXT ELEMENT           00005000
+0000D 02E6                       78          AR    R2,R6          BUMP INPUT PTR TO NEXT ELEMENT            00005100
+0000E DD1F           0008 0007   79          BCTB  R5,VV1DNP2                                               00005200
+                                 80          AEXIT                                                          00005300
+                                 81+*********RETURN TO CALLER**********************************************
+0000F                            82+         DS    0H                                                       01-AEXIT
+0000F 9914           0005        83+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00010 C7EC                       84+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 85+***********************************************************************
+                                 87          ACLOSE                                                         00005400
+00011 C9FB
+00012                            88+         LTORG                                                          02-ERRPA
+                                 89+****************ERROR PARAMETER AREA***********************************
+                                 90+***  NO ERRORS SENT IN VV1D3P                                           02-ERRPA
+                                 91+****************END OF ERROR PARAMETER AREA****************************
+                                 92+         END                                                            01-ACLOS
+¤
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    29     75    76
+R1           1 00000001    25     76    76    77
+R2           1 00000002    20     75    75    78
+R5           1 00000005    28     35    79
+R6           1 00000006    21     71    71    73    78
+R7           1 00000007    22     67    67    69    77
+VV1D3P       1 00000000    13
+VV1DNP       1   000002    42     43
+VV1DNP1      1   000005    71     68
+VV1DNP2      2   000008    75     72    79
+$RET1        1   000010    84
+¤
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      59 CARDS FROM SYSIN     404 CARDS FROM SYSLIB
+     122 LINES OUTPUT           5 CARDS OUTPUT
