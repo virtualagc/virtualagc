@@ -9,7 +9,7 @@ Additional documentation may be found on [the Virtual AGC Project main website's
 # Files
 
 - PTC-ADAPT-Self-Test-Program.tsv &mdash; this is a transcription of the program's _octal listing_, which begins at p. 221 of the scanned pages and proceeds to the end of the scans.  The octal listing is the assembled form of the PTC ADAPT Self-Test Program.  The modern LVDC assembler also creates its own octal listing, of course, but this transcribed octal listing can be read by the assembler and used as a cross-check to validate that the modern assembler's results compares with the original assembler's results.
-- PTC-ADAPT-Self-Test-Program.lvdc &mdash; this is a transcription of the program's assembly-language source code.  It can be used as an input to the modern LVDC assembler.
+- PTC-ADAPT-Self-Test-Program.lvdc8 &mdash; this is a transcription of the program's assembly-language source code.  It can be used as an input to the modern LVDC assembler.
 
 The transcribed source-code file assembles correctly and its assembled executable octals correspond 100% to those in the transcribed octal listing.  While the source code and the assembler undoubtedly still contain errors, they are nevertheless likely correct enough for practical purposes.
 
@@ -20,12 +20,12 @@ The original assembler program used during the Apollo Project is not available t
 The recommended syntax for assembling the PTC ADAPT Self-Test Program is one of the following:
 
     cd /to/the/folder/containing/this/file
-    yaASM.py --ptc PTC-ADAPT-Self-Test-Program.tsv <PTC-ADAPT-Self-Test-Program.lvdc >listing.txt
+    yaASM.py --ptc PTC-ADAPT-Self-Test-Program.tsv <PTC-ADAPT-Self-Test-Program.lvdc8 >listing.txt
    
 or
 
     cd /to/the/folder/containing/this/file
-    yaASM.py --ptc --past-bugs PTC-ADAPT-Self-Test-Program.tsv <PTC-ADAPT-Self-Test-Program.lvdc >listing.txt
+    yaASM.py --ptc --past-bugs PTC-ADAPT-Self-Test-Program.tsv <PTC-ADAPT-Self-Test-Program.lvdc8 >listing.txt
 
 The difference between these two forms is that the original Apollo-era assembler displayed buggy messages (but created correct executable octals) for a pseudo-op named "BCI".  By default (upper command), the modern assembler instead produces correct messages in the output assembly listing, but if --past-bugs is added to the command line (lower command), the modern assembler instead mimics the original operation and prints out the buggy messages.
 
