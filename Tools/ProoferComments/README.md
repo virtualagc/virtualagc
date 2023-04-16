@@ -141,6 +141,10 @@ tendency of some Linux distributions (if you're using Linux) to install Graphics
 in place of ImageMagick, whilst pretending that ImageMagick is what has been installed.
 I don't know of any of this works with GraphicsMagick, and don't care.
 
+**Note:** You may notice a folder called fontAGC/.  While this folder does indeed contain a TrueType font created from the characters 
+as printed in AGC assembly listings, that font is not used in any way by this software, and needn't be installed
+on your system.
+
 # Usage of ProoferComments.py
 
 ProoferComments.py requires the files match0.png-match127.png and nomatch0.png-nomatch127.png font-image files described earlier.  Not all the files need be present, since not all 7-bit ASCII characters appear in AGC printouts.  The files match127.png and nomatch127.png (typically, solid rectangular blocks) are used in case a character for a missing file is encountered.
