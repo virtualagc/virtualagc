@@ -38,6 +38,8 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 
 
 
+
+
           Interface</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Emulation">Compilation and
@@ -136,6 +138,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
       but there are numerous other documents in <a
@@ -171,6 +175,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         software, known as the <i>Primary Flight Software (PFS)</i>
         atop the <i>Flight Control Operating System (FCOS)</i>.&nbsp;
         PFS and FCOS together are collectively referred to as the <i>Primary
+
+
 
 
 
@@ -238,12 +244,16 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
               Display Units (MDUs)</i>.&nbsp; <br>
           </li>
           <li>Keyboards.&nbsp; The pilots had 2 of these, and the
             mission specialist station had a 3rd.</li>
         </ul>
         <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
+
 
 
 
@@ -279,7 +289,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
             height="739">
             <tbody>
               <tr>
-                <td valign="top" align="center">
+                <td align="center" valign="top">
                   <div><img moz-do-not-send="true"
                       src="ShuttleCRThorizSitPhoto.jpg" alt=""
                       width="429" height="364"><img
@@ -292,7 +302,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
                       (Multifunction CRT Display System, or MCDS)<br>
                     </i> </div>
                 </td>
-                <td valign="top" align="center"><img
+                <td align="center" valign="top"><img
                     moz-do-not-send="true"
                     src="ShuttleLCDhorizSitPhoto.jpg" alt="" width="377"
                     height="363"><br>
@@ -327,8 +337,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         <br>
         <div align="center"><a href="shuttle_avionics_sm.jpg"><img
               moz-do-not-send="true" src="shuttle_avionics_sm-small.jpg"
-              alt="" title="Click to enlarge" width="1200" height="333"
-              border="2"></a><br>
+              alt="" title="Click to enlarge" border="2" width="1200"
+              height="333"></a><br>
         </div>
         <br>
         <br>
@@ -340,7 +350,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         <br>
         <div align="center"><a href="MEDS.png"><img
               moz-do-not-send="true" src="MEDS.png" alt="" title="Click
-              to enlarge" width="486" height="320" border="2"></a><br>
+              to enlarge" border="2" width="486" height="320"></a><br>
         </div>
         <br>
         Like the AGC, AGS, and LVDC, which are programmed essentially in
@@ -405,6 +415,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
       That should be your first stop in a documentation
       pilgrimage!&nbsp; However, here are some websites that have
       additional documents that you may find interesting, and which may
@@ -413,6 +425,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     <ul>
       <li><a moz-do-not-send="true"
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
+
+
 
 
 
@@ -456,7 +470,11 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
+
 
 
 
@@ -485,6 +503,8 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
+
 
 
 
@@ -536,14 +556,17 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
     </p>
     <ul>
       <li>HAL/S-FC — the original HAL/S compiler.&nbsp; Our software
-        repository currently has <a moz-do-not-send="true"
-href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/HAL-S-FC-REL32V0">only
+        repository actually has <a moz-do-not-send="true"
+href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">the
 
-
-
-
-          <i>partial</i> source code for release 32V0"</a>.&nbsp; Here
-        are some admittedly-poor hints for dissecting that source code:</li>
+          source code for the HAL/S-FC of release 32V0"</a>, written
+        mostly in the XPL high-level language with some assistance in
+        BAL (IBM Basic Assembly Language).&nbsp; Note that these files
+        have undergone some conversions (EBCDIC→ASCII, a couple of
+        character conversions to UTF-8, file renaming) that were
+        necessary and I believe are harmless ... but time will tell.
+        &nbsp; Here are some admittedly-poor hints for dissecting that
+        source code:</li>
       <ul>
         <li>The top-level program for any given phase of the compiler is
           generally the one called "##DRIVER.xpl".<br>
@@ -561,8 +584,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
               Compiler System Specification"</a>.</li>
           <li><a moz-do-not-send="true" href="Shuttle/19760020796.pdf">"HAL/S-FC
+
+
 
 
 
@@ -582,6 +609,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </ul>
       <li>Translator Writing System (TWS) —<a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/XPL-TWS-1969-03">The
+
+
 
 
 
@@ -721,7 +750,9 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <br>
     Conversely, if we ever get the original HAL/S-FC compiler to run on
     our modern computer systems, we have to convert the Shuttle source
-    code back to EBCDIC to get it to compile!&nbsp; I don't really know.<br>
+    code back to EBCDIC to get it to compile, as well as undoing the few
+    other conversions that were necessary to cater to the changes in the
+    computing scene these past 50 years.<br>
     <p>Interestingly, the original Shuttle software development teams
       may have had problems with the funky "¬" character themselves,
       because when you view the Shuttle source code, you may not
@@ -732,6 +763,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       AGC ever saw the code.&nbsp; The documentation for the HAL/S
       language is clear and unambiguous that "¬" is the "logical not"
       operator, and that it is used in expressions like <tt>A</tt><tt>¬=
+
+
 
         B</tt> ("<tt>A</tt> is not equal to <tt>B</tt>").&nbsp; But the
       EBCDIC character set is not entirely consistent.&nbsp; In some
@@ -769,6 +802,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       C. Clarke, maintained that that was simply a coincidence.&nbsp;
       Where the "HAL" in HAL/S comes from has likewise been explained in
       several ways, none of them relating to <i>2001: A Space Odyssey</i>.&nbsp;
+
+
 
 
 
@@ -827,12 +862,16 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
           in HAL/S</a>", which was intended as an introduction to
         programming in HAL/S and is organized as a tutorial.</li>
       <li>The tutorial itself points out that it is not a definitive
         exposition of the language, and recommends proceeding afterward
         to the <a moz-do-not-send="true"
           href="Shuttle/HAL_S%20Language%20Specification%20Nov%202005.pdf">"HAL/S
+
+
 
 
 
@@ -874,9 +913,13 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
+
 
 
 
@@ -935,6 +978,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       compute its mathematical factorial, then output the result.&nbsp;
       While I won't dissect this short program in detail, I can make a
       couple of observations.&nbsp; For one, the language is <i>strongly
+
+
 
 
 
@@ -1003,6 +1048,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -1015,6 +1062,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1039,6 +1088,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         2</tt><tt><br>
       </tt><tt><br>
       </tt><tt>E&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;
@@ -1046,6 +1097,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
         <br>
       </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1101,6 +1154,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
             DEX$J<br>
           </tt></div>
         <tt> </tt>
@@ -1113,7 +1168,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
             I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1138,10 +1197,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
             L<br>
           </tt></div>
         <tt> </tt>
         <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1166,6 +1229,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     a '-' above it, that means that <tt>AB</tt> is really a
     vector.&nbsp; Actually, a 2-vector, in the example code above.&nbsp;
     That's reflected in the declaration "<tt>DECLARE VECTOR(2), AB, ...</tt>".
+
+
 
 
 
@@ -1204,6 +1269,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -1221,6 +1288,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     by the '<tt>$</tt>' character. <br>
     <br>
     One thing you may take away from this is that the '<tt>-</tt>' (or '<tt>*</tt>',
+
+
 
 
 
@@ -1275,6 +1344,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
     Multiplication is indicated simply by placing variable names,
     constant names, or literal numbers adjacent to each other (separated
     by whitespace).&nbsp; For example, <br>
@@ -1286,6 +1357,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
       floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
       or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+
+
 
 
 
@@ -1346,6 +1419,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
       (Some data past the end of Volume 2 can be gotten from NASA Press
       Kits for STS-132 through 135.)&nbsp; In the following tabulation,
       sorted by software version, notice that a higher STS mission
@@ -1353,222 +1428,222 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       partially because the mission numbering doesn't perfectly agree
       with the chronological order in which the missions were flown.<br>
     </p>
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
+    <table border="1" align="center" cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
-          <th valign="middle" align="center">Mission<br>
+          <th align="center" valign="middle">Mission<br>
           </th>
-          <th valign="middle" align="center">Software Version<br>
+          <th align="center" valign="middle">Software Version<br>
           </th>
         </tr>
         <tr>
-          <td valign="top" align="center">STS-1 <br>
+          <td align="center" valign="top">STS-1 <br>
           </td>
-          <td valign="top" align="center">R16/T9<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top" align="center">STS-2, 3, 4<br>
-          </td>
-          <td valign="top" align="center">R18/T11<br>
+          <td align="center" valign="top">R16/T9<br>
           </td>
         </tr>
         <tr>
-          <td valign="top" align="center">STS-5, 6, 7, 8<br>
+          <td align="center" valign="top">STS-2, 3, 4<br>
           </td>
-          <td valign="top" align="center">R19/T12<br>
+          <td align="center" valign="top">R18/T11<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-9 (41A), 11 (41B), 13
+          <td align="center" valign="top">STS-5, 6, 7, 8<br>
+          </td>
+          <td align="center" valign="top">R19/T12<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">STS-9 (41A), 11 (41B), 13
             (41C)<br>
           </td>
-          <td valign="middle" align="center">OI-2<br>
+          <td align="center" valign="middle">OI-2<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-14 (41DR), 17 (41G), 19
+          <td align="center" valign="middle">STS-14 (41DR), 17 (41G), 19
             (51A), 20 (51C), 24 (51B)<br>
           </td>
-          <td valign="middle" align="center">OI-4<br>
+          <td align="center" valign="middle">OI-4<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-22 (51E), 23 (51D)<br>
+          <td align="center" valign="middle">STS-22 (51E), 23 (51D)<br>
           </td>
-          <td valign="middle" align="center">OI-5<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">STS-26 (51F)<br>
-          </td>
-          <td valign="middle" align="center">OI5-24<br>
+          <td align="center" valign="middle">OI-5<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-25 (51G)<br>
+          <td align="center" valign="middle">STS-26 (51F)<br>
           </td>
-          <td valign="middle" align="center">OI-6<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">STS-27 (51I)<br>
-          </td>
-          <td valign="middle" align="center">OI6-27<br>
+          <td align="center" valign="middle">OI5-24<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-28 (51J)<br>
+          <td align="center" valign="middle">STS-25 (51G)<br>
           </td>
-          <td valign="middle" align="center">OI6-28<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">STS-30 (61A)<br>
-          </td>
-          <td valign="middle" align="center">OI6-29<br>
+          <td align="center" valign="middle">OI-6<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-31 (61B)<br>
+          <td align="center" valign="middle">STS-27 (51I)<br>
           </td>
-          <td valign="middle" align="center">OI6-30<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">STS-33 (51L)<br>
-          </td>
-          <td valign="middle" align="center">OI17-26<br>
+          <td align="center" valign="middle">OI6-27<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-32 (61C)<br>
+          <td align="center" valign="middle">STS-28 (51J)<br>
           </td>
-          <td valign="middle" align="center">OI17-32<br>
+          <td align="center" valign="middle">OI6-28<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-26 (26R), 27 (27R), 28
+          <td align="center" valign="middle">STS-30 (61A)<br>
+          </td>
+          <td align="center" valign="middle">OI6-29<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">STS-31 (61B)<br>
+          </td>
+          <td align="center" valign="middle">OI6-30<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">STS-33 (51L)<br>
+          </td>
+          <td align="center" valign="middle">OI17-26<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">STS-32 (61C)<br>
+          </td>
+          <td align="center" valign="middle">OI17-32<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">STS-26 (26R), 27 (27R), 28
             (28R), 29 (29R), 30 (30R), 33 (33R)<br>
           </td>
-          <td valign="middle" align="center">OI-8B<br>
+          <td align="center" valign="middle">OI-8B<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-31 (31R), 32 (32R), 34
+          <td align="center" valign="middle">STS-31 (31R), 32 (32R), 34
             (34R), 36 (36R)<br>
           </td>
-          <td valign="middle" align="center">OI-8C<br>
+          <td align="center" valign="middle">OI-8C<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-35 (61E), 38, 40, 41<br>
+          <td align="center" valign="middle">STS-35 (61E), 38, 40, 41<br>
           </td>
-          <td valign="middle" align="center">OI-8D<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">STS-37, 39<br>
-          </td>
-          <td valign="middle" align="center">OI-8F<br>
+          <td align="center" valign="middle">OI-8D<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-42, 43, 44, 45, 48<br>
+          <td align="center" valign="middle">STS-37, 39<br>
           </td>
-          <td valign="middle" align="center">OI-20<br>
+          <td align="center" valign="middle">OI-8F<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-46, 47, 49, 50, 52, 53,
+          <td align="center" valign="middle">STS-42, 43, 44, 45, 48<br>
+          </td>
+          <td align="center" valign="middle">OI-20<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">STS-46, 47, 49, 50, 52, 53,
             54, 55, 56<br>
           </td>
-          <td valign="middle" align="center">OI-21<br>
+          <td align="center" valign="middle">OI-21<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-51, 57, 58, 59, 60, 61,
+          <td align="center" valign="middle">STS-51, 57, 58, 59, 60, 61,
             62, 68<br>
           </td>
-          <td valign="middle" align="center">OI-22<br>
+          <td align="center" valign="middle">OI-22<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-63, 64, 65, 66, 67<br>
+          <td align="center" valign="middle">STS-63, 64, 65, 66, 67<br>
           </td>
-          <td valign="middle" align="center">OI-23<br>
+          <td align="center" valign="middle">OI-23<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-69, 70, 71, 72, 73, 74,
+          <td align="center" valign="middle">STS-69, 70, 71, 72, 73, 74,
             75, 76, 77, 78<br>
           </td>
-          <td valign="middle" align="center">OI-24<br>
+          <td align="center" valign="middle">OI-24<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-79, 80, 81, 82, 83, 84,
+          <td align="center" valign="middle">STS-79, 80, 81, 82, 83, 84,
             94<br>
           </td>
-          <td valign="middle" align="center">OI-25<br>
+          <td align="center" valign="middle">OI-25<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-85, 86, 87, 89<br>
+          <td align="center" valign="middle">STS-85, 86, 87, 89<br>
           </td>
-          <td valign="middle" align="center">OI-26A<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">STS-88, 90, 91, 93, 95, 103<br>
-          </td>
-          <td valign="middle" align="center">OI-26B<br>
+          <td align="center" valign="middle">OI-26A<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-92, 96, 97, 99, 101,
+          <td align="center" valign="middle">STS-88, 90, 91, 93, 95, 103<br>
+          </td>
+          <td align="center" valign="middle">OI-26B<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">STS-92, 96, 97, 99, 101,
             106<br>
           </td>
-          <td valign="middle" align="center">OI-27<br>
+          <td align="center" valign="middle">OI-27<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-98, 100, 102, 104, 105,
+          <td align="center" valign="middle">STS-98, 100, 102, 104, 105,
             108, 109<br>
           </td>
-          <td valign="middle" align="center">OI-28<br>
+          <td align="center" valign="middle">OI-28<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-107, 110, 111, 112, 113<br>
+          <td align="center" valign="middle">STS-107, 110, 111, 112, 113<br>
           </td>
-          <td valign="middle" align="center">OI-29<br>
+          <td align="center" valign="middle">OI-29<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-114, 115, 116, 117,
+          <td align="center" valign="middle">STS-114, 115, 116, 117,
             118, 121<br>
           </td>
-          <td valign="middle" align="center">OI-30<br>
+          <td align="center" valign="middle">OI-30<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-120, 122, 123, 124, 125<br>
+          <td align="center" valign="middle">STS-120, 122, 123, 124, 125<br>
           </td>
-          <td valign="middle" align="center">OI-32<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="middle" align="center">STS-119, 126, 127<br>
-          </td>
-          <td valign="middle" align="center">OI-33<br>
+          <td align="center" valign="middle">OI-32<br>
           </td>
         </tr>
         <tr>
-          <td valign="middle" align="center">STS-128, 129, 130, 131,
+          <td align="center" valign="middle">STS-119, 126, 127<br>
+          </td>
+          <td align="center" valign="middle">OI-33<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">STS-128, 129, 130, 131,
             132, 133, 134, 135<br>
           </td>
-          <td valign="middle" align="center">OI-34<br>
+          <td align="center" valign="middle">OI-34<br>
           </td>
         </tr>
       </tbody>
@@ -1598,8 +1673,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       GPCs, so whatever keystrokes were seen by the PFS / BFS software
       had already been pre-digested by these extra processors.)<br>
     </p>
-    <p><img moz-do-not-send="true" src="MCDS.png" alt="" width="455"
-        height="278" align="right">In the case of the older, pre-2000
+    <p><img moz-do-not-send="true" src="MCDS.png" alt="" align="right"
+        width="455" height="278">In the case of the older, pre-2000
       cockpit configuration (MCDS, 4 CRTs), this extra processor was
       known as the <i>Display Electronics Unit (DEU)</i>, and it
       consisted of an IBM SP-0 CPU with 8K×16 bits of RAM.&nbsp; In the
@@ -1611,6 +1686,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       (MEDS) configuration is conceptually quite similar.&nbsp; In the
       case of the MEDS configuration, the software for the IDP that was
       specifically tasked with formatting the display was called the <i>Display
+
+
 
 
 
@@ -1643,7 +1720,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     two varieties, one for the primary flight software, and one for the
     backup flight software: <br>
     <br>
-    <table cellspacing="2" cellpadding="2" border="0" align="center">
+    <table border="0" align="center" cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
           <td valign="top"><img moz-do-not-send="true"
@@ -1703,11 +1780,15 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
+
 
 
 
@@ -1749,7 +1830,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       something to do with the differences.<br>
       <br>
     </p>
-    <table cellspacing="2" cellpadding="2" border="0" align="center">
+    <table border="0" align="center" cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
           <td valign="top"><img moz-do-not-send="true"
@@ -1787,6 +1868,8 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
 
 
 
+
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -1805,6 +1888,8 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     none so far, I have in fact received quite <a
       moz-do-not-send="true" href="#PASS">a lot of the source code (but
       not all) for the original HAL/S compiler, <tt>HAL/S-FC</tt></a>.&nbsp;
+
+
     <br>
     <blockquote><font size="-1"><b>Aside:</b> </font><font size="-1"><tt>HAL/S-FC</tt></font><font
         size="-1"> was written in a language called <a
@@ -1919,6 +2004,8 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     the assigned execution-priorities.&nbsp; But with the interpreter,
     we can just bypass all of that infrastructure and compute any values
     we like, directly and immediately, without wrapping our code in a <tt>PROGRAM</tt>.&nbsp;
+
+
     For example, by inputting a couple of hopefully-self-explanatory
     lines of HAL/S code into the interpreter, I get the following<br>
     <blockquote><tt>HAL/S &gt; DECLARE PI CONSTANT (3.141592653589793);</tt><tt><br>
@@ -2010,6 +2097,8 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     be processed together.&nbsp; Meanwhile, just defining the <tt>SIMPLE</tt>
     program doesn't cause the <tt>SIMPLE</tt> program to <i>execute</i>,
     and it's the actual execution that's triggered by <tt>`run SIMPLE</tt>.&nbsp;
+
+
     And of course, <tt>SIMPLE</tt> doesn't vanish after we've finished
     running it; the interpreter still recalls its definition, and we
     could run it again if we liked:<br>
@@ -2062,7 +2151,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-02-02<br>
+          2023-04-16<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
