@@ -44,7 +44,8 @@ href="https://docs.google.com/spreadsheets/d/1OEv6guJYSzxf3cBMo_YLQGnzjp15qLCtRN
       <li>2023-04-28.&nbsp; The use of the <tt>TITLE</tt> field in "<tt>#
           PAGE ...</tt>" lines accompanying "<tt>$SEGMENT ...</tt>"
         lines <a moz-do-not-send="true" href="#OtherPortions">was
-          clarified</a>.<br>
+          clarified</a>.&nbsp; Clarified <a moz-do-not-send="true"
+          href="#OptionalModern">optional modern comments</a>.<br>
       </li>
     </ul>
     <p><b>Note:</b>&nbsp; If you have submitted a transcribed file and
@@ -52,8 +53,9 @@ href="https://docs.google.com/spreadsheets/d/1OEv6guJYSzxf3cBMo_YLQGnzjp15qLCtRN
       does <b>not</b> mean that I expect you to rework your
       submission.&nbsp; It's my fault for not having thought it through
       in advance, not yours for following my directions.&nbsp; I'll fix
-      it up myself if necessary.&nbsp; All changes to the guidelines are
-      on a go-forward basis rather than being retroactive.<br>
+      it up myself if necessary, if it's possible to do so.&nbsp; All
+      changes to the guidelines are on a go-forward basis rather than
+      being retroactive.<br>
     </p>
     <ul>
     </ul>
@@ -106,8 +108,14 @@ href="https://docs.google.com/spreadsheets/d/1OEv6guJYSzxf3cBMo_YLQGnzjp15qLCtRN
       <li><a moz-do-not-send="true" href="#ObviousTypos">If I Find
           Obvious Typos, Should I Fix Them?</a><br>
       </li>
-      <li><a moz-do-not-send="true" href="#Modern">Modern Comments,
-          Required and Optional</a></li>
+      <li><a moz-do-not-send="true" href="#Modern">Modern Comments</a></li>
+      <ul>
+        <li><a moz-do-not-send="true" href="#RequiredModern">Required
+            Modern Comments</a></li>
+        <li><a moz-do-not-send="true" href="#OptionalModern">Optional
+            Modern Comments</a><br>
+        </li>
+      </ul>
       <li><a moz-do-not-send="true" href="#PoorPages">Poorly-Scanned
           Pages</a><br>
       </li>
@@ -1824,7 +1832,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/Tools/ProoferComments
     please resist the temptation to do so!&nbsp; And please make the <i>effort</i>
     to see it -- which is all too easy not to -- because if you don't
     see it, you'll almost certainly correct it without even knowing it.<br>
-    <h2><a name="Modern"></a>Modern Comments, Required and Optional<br>
+    <h2><a name="Modern"></a>Modern Comments<br>
     </h2>
     <p>As mentioned above, the original LVDC code had two comment
       mechanisms:&nbsp; <i>full-line</i> comments occupy an entire
@@ -1833,26 +1841,28 @@ href="https://github.com/virtualagc/virtualagc/tree/master/Tools/ProoferComments
       on any given line, and do not have any distinguishing mark to
       prefix them.<br>
     </p>
-    <p>However, these mechanisms do not suffice to handle all of the
-      program comments we'd like to have in our transcriptions.&nbsp;
-      We'd like to add our own comments that didn't appear in the
-      original code, but that remain distinguishable from the original
-      comments so that they cannot be confused with them.&nbsp; For this
-      reason we introduce a third kind of comment that we'll call a
-      "modern comment".&nbsp; In the example earlier, you saw the line <br>
+    <p>However, those original assembly-language mechanisms do not
+      suffice to handle all of the program comments we'd like to have in
+      our transcriptions.&nbsp; We'd like to add our own comments that
+      didn't appear in the original code, but that remain
+      distinguishable from the original comments so that they cannot be
+      confused with them.&nbsp; For this reason we introduce a third
+      kind of comment that we'll call a "modern comment".&nbsp; This is
+      a new kind of full-line comment in which the character "#" appears
+      in column 1 rather than "*", recognized by the modern LVDC
+      assembler but not by the original Apollo-era LVDC assembler.<br>
+    </p>
+    <h3><a name="RequiredModern"></a>Required Modern Comments<br>
+    </h3>
+    <p>In the example earlier, you saw the line <br>
     </p>
     <blockquote>
       <p><tt># PAGE 282, SEQUENCE 119390-119790, TITLE "22 UTILITY
           ROUTINES"</tt> <br>
       </p>
     </blockquote>
-    which begins with "#" rather than "*" in column 1.&nbsp; This is a
-    modern comment.&nbsp; The leading "#" is characteristic of modern
-    comments, whereas for the original LVDC assembler it would simply
-    have been a syntax error.&nbsp; Modern comments are identical in
-    every respect to the original full-line comments, except for the
-    difference in the leading character, and in the fact that we choose
-    to syntax-highlight them using a different coloring.<br>
+    which begins with "#" rather than "*" in column 1.&nbsp; This is an
+    example of a "modern comment".&nbsp; <br>
     <br>
     Each transcribed page is required to have a modern comment like the
     sample above.&nbsp; Such page-comments have the following
@@ -1900,12 +1910,53 @@ href="https://github.com/virtualagc/virtualagc/tree/master/Tools/ProoferComments
       there.&nbsp; The date format, YYYY-MM-DD is some ISO standard, the
       name of which I've forgotten.<br>
     </p>
-    <p>As far as optional modern comments are concerned, I can't really
-      offer criteria at this time for adding them.&nbsp; But if, for
-      example, you're transcribing a page with a handwritten notation,
-      adding a modern comment to describe that handwritten notation
-      would seem to be a good use of the modern-comment facility. <br>
+    <h3><a name="OptionalModern"></a>Optional Modern Comments<br>
+    </h3>
+    <p>As far as <i>optional</i> modern comments are concerned, I can't
+      really offer terribly-useful criteria at this time for adding
+      them, since the "need" for them is subjective.&nbsp; I would say
+      that <i>if</i> you choose to add such a comment on your own
+      judgement, you should embed the current year and your initials
+      within the comment so that we have some idea later how it got
+      there!<br>
     </p>
+    <p>Here are some examples of situations in AS-512 where I've chosen
+      to add such modern comments myself.&nbsp; If similar situations
+      arise for you, you may of course use the same wording as in these
+      examples, but that isn't my intent in providing the samples.&nbsp;
+      There's nothing sacred about my wording; the idea is simply to get
+      the idea across to the reader as clearly as you can!<br>
+    </p>
+    <ul>
+      <li>Where I've seen handwritten notations on a page, I've added
+        modern comments such as the following at those points:</li>
+    </ul>
+    <blockquote>
+      <blockquote><tt># 2023 RSB: Note that 121 is manually circled on
+          the printout in the next line.</tt><br>
+      </blockquote>
+    </blockquote>
+    <ul>
+      <li> Where characters have been unrecoverably illegible in the
+        digitized pages, I've used "~" in place of illegible characters
+        and added modern comments such as:</li>
+    </ul>
+    <blockquote>
+      <blockquote><tt># 2023 RSB: The character depicted as ~ below is
+          illegible in the hardcopy.</tt><br>
+      </blockquote>
+    </blockquote>
+    <blockquote>
+      <blockquote>
+        <meta http-equiv="content-type" content="text/html;
+          charset=windows-1252">
+        <title></title>
+        <meta name="generator" content="LibreOffice 7.3.7.2 (Linux)">
+        <style type="text/css">
+		@page { size: 8.5in 11in; margin: 0.79in }
+		p { line-height: 115%; margin-bottom: 0.1in; background: transparent }
+	</style> </blockquote>
+    </blockquote>
     <h2><a name="PoorPages"></a>Poorly-Scanned Pages</h2>
     <p>There are no poorly-scanned pages ... by definition, since (at
       least in the case of AS-512 and AS-513) the assembly listings are
