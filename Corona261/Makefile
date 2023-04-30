@@ -6,17 +6,15 @@
 # Mod history:	2023-05-02 RSB	So far we have no source code, so 
 #				this is the octal dump of the physical
 #				rope-memory modules right now.
+#		2023-05-27 MAS	Added source build.
 
 BASENAME=Corona261
-EXTRA_YAYUL_ARGS+=--block1 --parity --honeywell
-OCT2BIN_ARGS+=--block1
+EXTRA_YAYUL_ARGS+=--block1 --honeywell --parity
 NO_BINSOURCE=yes
+EXTRA_TARGETS=diffCorona261
 
-#include ../Makefile.inc
+include ../Makefile.inc
 
-# This isn't the real "default" target.  It's just here in case
-# Makefile.inc is commented out above.
-.PHONY: default
-default:
-	@echo Nothing to do yet.
-
+.PHONY: diffCorona261
+diffCorona261:
+	diff -s Corona261.bin Corona261-dump.bin
