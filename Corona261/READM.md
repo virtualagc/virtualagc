@@ -1,0 +1,1 @@
+Note that the dump of Corona 261 is tentative.  While it has correct checksums, it's accuracy remains unclear and it is subject to change if corrections are discovered.

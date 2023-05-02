@@ -318,6 +318,62 @@ Flaws:
 
 *Postscript*:  Some time after the module was dumped and repaired, a *second* 1003733-071 module (also belonging to an anonymous collector) was located and dumped, this time flawlessly.  The latter dump was found to be identical, bit-by-bit, to the repaired dump.  This is as we would expect, but it's welcome corroboration of the validity of the method.  Since it's identical to the repaired file, however, I've elected not to provide it as a separate file.
 
+## 1003733-171-BlockI-Corona261-B21.bin
+
+Source:  Jimmie Looke.
+
+Software:  Corona 261
+
+Flaws:  None known.
+
+## 1003733-191-BlockI-Corona261-B23-SomeDefects.bin, 1003733-191-BlockI-Corona261-B23-Repaired.bin
+
+Source:  Jimmie Looke.
+
+Software:  Corona 261
+
+Flaws:  
+
+  * To be documented later ... but minor and easily correctable.
+
+## 1003733-211-BlockI-Corona261-B24-SomeDefects.bin, 1003733-211-BlockI-Corona261-B24-TentativelyRepaired.bin
+
+Source:  Jimmie Looke.
+
+Software:  Corona 261
+
+Flaws:  
+
+  * To be documented later ... but the defects were multiple and serious, and required significant repair effort.  Therefore it is uncertain whether the "Repaired" form of this module is final.
+
+## 1003733-221-BlockI-Corona261-B28-SomeDefects.bin, 1003733-221-BlockI-Corona261-B28-Repaired.bin
+
+Source:  Jimmie Looke.
+
+Software:  Corona 261
+
+Flaws:  
+
+  * To be documented later ... but minor and easily correctable.
+
+## 1003733-231-BlockI-Corona261-B29-SomeDefects.bin, 1003733-231-BlockI-Corona261-B29-Repaired.bin
+
+Source:  Jimmie Looke.
+
+Software:  Corona 261
+
+Flaws:  
+
+  * To be documented later ... but minor and easily correctable.
+
+## 1003733-241-BlockI-Corona261-B24.bin
+
+Source:  Jimmie Looke.
+
+Software:  Corona 261
+
+Flaws:  None known.
+
 ## 2003053-031-BLK2-Retread50-B1-BadBits.bin, 2003053-031-BLK2-Retread50-B1-Repaired.bin
 
 Source:  Computer History Museum, Mountain View, California.
