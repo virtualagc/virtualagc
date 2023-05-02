@@ -320,7 +320,7 @@ Flaws:
 
 ## 1003733-171-BlockI-Corona261-B21.bin
 
-Source:  Jimmie Looke.
+Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
@@ -328,7 +328,7 @@ Flaws:  None known.
 
 ## 1003733-191-BlockI-Corona261-B23-SomeDefects.bin, 1003733-191-BlockI-Corona261-B23-Repaired.bin
 
-Source:  Jimmie Looke.
+Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
@@ -338,7 +338,7 @@ Flaws:
 
 ## 1003733-211-BlockI-Corona261-B24-SomeDefects.bin, 1003733-211-BlockI-Corona261-B24-TentativelyRepaired.bin
 
-Source:  Jimmie Looke.
+Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
@@ -348,7 +348,7 @@ Flaws:
 
 ## 1003733-221-BlockI-Corona261-B28-SomeDefects.bin, 1003733-221-BlockI-Corona261-B28-Repaired.bin
 
-Source:  Jimmie Looke.
+Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
@@ -358,7 +358,7 @@ Flaws:
 
 ## 1003733-231-BlockI-Corona261-B29-SomeDefects.bin, 1003733-231-BlockI-Corona261-B29-Repaired.bin
 
-Source:  Jimmie Looke.
+Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
@@ -368,7 +368,7 @@ Flaws:
 
 ## 1003733-241-BlockI-Corona261-B24.bin
 
-Source:  Jimmie Looke.
+Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
