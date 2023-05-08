@@ -294,7 +294,7 @@ But admittedly, this brief test probably does not exercise all of the repaired m
 
 See also:  1003133-20-BlockI-Sunrise45+-B28-BadStrand7_BrokenCore167.bin, 1003133-20-BlockI-Sunrise45+-B28-Repaired.bin.
 
-Source:  Larry McClynn.
+Source:  Larry McGlynn.
 
 Software:  Sunrise 45, 69
 
@@ -332,9 +332,13 @@ Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
-Flaws:  
+Flaws:  This module had three bad diodes:
 
-  * To be documented later ... but minor and easily correctable.
+  * Strand 16 (11,6000 - 11,6377 and 14,6000 - 14,6377) had a bad diode on bit 9.
+  * Strand 41 (31,6400 - 31,6777 and 34,6400 - 34,6777) had a bad diode on bit 15 (the parity bit).
+  * Strand 42 (31,7000 - 31,7377 and 34,7000 - 34,7377) had a bad diode on bit 4.
+
+Each of these was correctable by the [stuck-bit parity fix](#Stuck) described earlier, and the fixes could be double-checked via memory-bank checksums.
 
 ## 1003733-211-BlockI-Corona261-B24-SomeDefects.bin, 1003733-211-BlockI-Corona261-B24-TentativelyRepaired.bin
 
@@ -342,9 +346,21 @@ Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
-Flaws:  
+Flaws:  This module had so many problems that it was at the limit of what's fixable without physically opening the memory module and repairing it ... something which collectors of such objects are typically not very keen about doing.  However, we have pretty good confidence that it was repaired and is correct.  Four strands were problematic.  Let's look at the two "easy" ones first:
 
-  * To be documented later ... but the defects were multiple and serious, and required significant repair effort.  Therefore it is uncertain whether the "Repaired" form of this module is final.
+  * Strand 46 (32,7000 - 32,7377 and 33,7000 - 33,7377) had one bad diode on bit 3.
+  * Strand 47 (32,7400 - 32,7777 and 33,7400 - 33,7777) had one bad diode on bit 7.
+
+These strands were both correctable via the [stuck-bit parity fix](#Stuck).
+
+However, each of the two remaining "difficult" strands, on the other hand, had *two* bad diodes, which made the stuck-bit parity fix inapplicable.  Fortunately, some workarounds were available:
+
+  * Strand 21 (12,6400 - 12,6777 and 13,6400 - 13,6777) had two bad diodes. One on bit 14 was an open circuit, which made bit 14 completely unrecoverable without parity correction techniques. One diode on bit 12 had a dramatically lower forward voltage than it should. As a result, the diodes on bit 12 were so unbalanced that upward-going `1`s just barely made it out, while downward-going `1`s were blocked. It was possible to work around this, however, with alterations to the hardware of the custom rope-reader device used to perform the dumps.  (Technically, the workaround was that the cycle timing on the rope reader was changed so that the sense amplifiers were enabled both during set and during reset for each core in the strand. Upward-going `1`s thus made it out during the `set` cycle, and downward-going ones got "flipped over" and made it out during the `reset` cycle.)  Bit 12 in this strand was then manually corrected to a `1` when either the set or the reset of an oscilloscope trace displayed a voltage pulse, and to a `0` when neither did.  (Reports of all oscilloscope traces were generated for archival purposes, but given that the report is 90MB, zipped, they're not being provided online.  Bit 7 in this strand also appeared a bit marginal on the oscilloscope traces so a report was generated for it as well, but resulted in no manual corrections.) After these manual corrections were performed to bit 12, word parity was recalculated. Then bit 14 was repaired using the resulting new parity in each word.
+  * Strand 23 (12,7400 - 12,7777 and 13,7400 - 13,7777) had two bad diodes. Bit 13 was similarly bad to bit 12 of strand 21, and the same set/reset sampling was performed. Bit 7 also had a diode that was just barely bad, although it only resulted in a wrong reading on a single word. Parity was used to correct bit 7 for that one word, and bit 13 elsewhere.
+
+As with all Corona 261 modules, the fixes were cross-checked via the validity of the memory-bank checksums.  This is not a 100% guarantee of accuracy, however, as there have been known cases of correct memory-bank checksums in spite of existing memory errors.  Additionally, Corona 261 has been "flown" successfully in a simulated AS-202 mission in the Orbiter/NASSP spaceflight-simulator system.  But neither is this any guarantee of accuracy.
+
+Regeneration of Corona 261 source code is in progress.  This is a process of using existing Solarium 55 source code, other AGC source code, [the documentation of differences between AS-202 and AS-501 software](http://www.ibiblio.org/apollo/Documents/Programming%20Changes%20from%20AS-202%20to%20AS-501.pdf), and of course the dump of Corona 261.  Successful regeneration of the Corona 261 source code would be yet another confidence builder ... but as of this writing, the conclusion of that process is still in the future.
 
 ## 1003733-221-BlockI-Corona261-B28-SomeDefects.bin, 1003733-221-BlockI-Corona261-B28-Repaired.bin
 
@@ -352,9 +368,116 @@ Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
-Flaws:  
+Flaws:  This module had one bad diode and one broken core.
 
-  * To be documented later ... but minor and easily correctable.
+First, consider the bad diode
+
+  * Strand 27 (21,7400 - 21,7777 and 24,7400 - 24,7777) had a bad diode on bit 11.
+
+This was correctable via the [stuck-bit parity fix](#Stuck).
+
+Second, core 62 was broken. This resulted in the total loss of data from 8 words, 4 of them in each of two memory banks. In each of 8 cases, the missing word appeared in a section of code otherwise identical to corresponding code in the Solarium 55 program.  Note that Solarium 55 was the successor program to Corona 261, used on the very next mission (Apollo 4 vs AS-202), and that in spite of the different program name is understood to be very similar.  Indeed, a number of reports from the time refer to the software from Apollo 4 (and Apollo 6) as being "Corona" rather than as being "Solarium".  Besides which, we have a document titled ["Programming Changes from AS-202 to AS-501"](http://www.ibiblio.org/apollo/Documents/Programming%20Changes%20from%20AS-202%20to%20AS-501.pdf) which purports (and actually seems) to outline all of the differences between the two.  What you see below is a list of each of the 8 chunks of code, with the missing data due to the broken core shown as `OCT 00000` and accompanied by a comment as to octal value the location *should* have if corresponding to Solarium:
+
+  * 2062: in `JOBWAKE` in section `EXECUTIVE`.
+       <pre>
+       2060  50573 0 JOBWAKE  TS     EXECTEM2
+       2061  10001 1          CCS    Q
+       2062  00000 0          OCT    00000      ; Should be 50600 1 for TS WTEXIT
+       2063  02071 0          TC     EXECSW
+       2064  06110 1          TC     JOBWAKE2
+       2065  50600 1 EXECCOM  TS     WTEXIT
+       </pre>
+  * 2462: in `DNPHASE5` in section `DOWN-TELEMETRY PROGRAM`.
+       <pre>
+       2455  10674 0 DNPHASE5 CCS    TMINDEX
+       2456  02450 1          TC     PHASE5A
+       2457  32555 0          CAF    LPHASE6
+       2460  50673 0          TS     DNTMGOTO
+       2461  32562 1          CAF    LTHLSTB
+       2462  00000 0          OCT    00000      ; Should be 50674 1 for TS TMINDEX
+       2463  34473 0          CAF    NOMRKRS
+       2464  50676 0          TS     MARKERCT
+       2465  32566 0          CAF    LISTBANK
+       2466  30015 0          XCH    BANKREG
+       </pre>
+  * 3062: in `NEWABORT` in section `ALARM AND DISPLAY PROCEDURES`.
+       <pre>
+       3056  11763 0          CCS    FAILREG
+       3057  03062 0          TC     SETMULTF
+       3060  03064 0          TC     NEWABORT
+       3061  03061 0 WHIMPER  TC     WHIMPER
+       3062  00000 0 SETMULTF OCT    00000      ; Should be 64664 1 for AD CSQ
+       3063  03066 1          TC     +3
+       3064  03044 1 NEWABORT TC     PROGLARM
+       3065  30577 1          XCH    ITEMP1
+       </pre>
+  * 3462: in `FLAG2DWN` in section `202 MISSION CONTROL PROGRAM`.
+       <pre>
+       3460  20001 1 FLAG2DWN INDEX  Q
+       3461  40000 0          CS     0
+       3462  00000 0          OCT    00000      ; Should be 20017 0 for INHINT
+       3463  70647 0          MASK   FLAGWRD2
+       3464  50647 1          TS     FLAGWRD2
+       3465  20016 1          RELINT
+       3466  20001 1          INDEX  Q
+       3467  00001 0          TC     1
+       </pre>
+  * 21,6062: in `TOP33` in section `PRELAUNCH ALIGNMENT PROGRAM`. This word is not *bit-for-bit* identical to Solarium because the fixed memory constant `SCNBMAT` moved in bank 26. However, none of the surrounding code changed, so it is quite unlikely that this line did.
+       <pre>
+       21,6054  47575 0          NOLOD  1
+       21,6055  47065 1          COMP   AST,1
+       21,6056  00007 0                 6
+       21,6057  32013 1          STORE  10D
+       21,6060  74175 1 TOP33    VMOVE* 1
+       21,6061  51622 0          VXM    VSLT
+       21,6062  00000 0          OCT    00000      ; Should be 33461 1 for SCNBMAT +18D,1
+       21,6063  00001 0                 0
+       21,6064  00002 0                 1
+       21,6065  37241 1          STORE  XNB +18D,1
+       </pre>
+  * 21,6462: in `SPITGYRO` in section `PRELAUNCH ALIGNMENT PROGRAM`.
+       <pre>
+       21,6454  37042 0 SPITGYRO CAF    LGYROANG
+       21,6455  05654 0          TC     BANKCALL
+       21,6456  31421 1          CADR   GYRODPNT
+       21,6457  05654 0          TC     BANKCALL
+       21,6460  30331 0          CADR   IMUSTALL
+       21,6461  02124 1          TC     ENDOFJOB
+       21,6462  00000 0          OCT    00000      ; Should be 02124 1 for TC ENDOFJOB
+       21,6463  11320 0 NOGYROCM CCS    GYROCSW
+       21,6464  06470 1          TC     MORE
+       21,6465  02362 1          TC     NEWMODE
+       </pre>
+  * 21,7062: in `PRELTER1` in section `PRELAUNCH ALIGNMENT PROGRAM`.
+       <pre>
+       21,7054  35501 0          CAF    ZERO
+       21,7055  51340 1          TS     GYROANG
+       21,7056  51342 0          TS     GYROANG +2
+       21,7057  51344 0          TS     GYROANG +4
+       21,7060  31452 0          XCH    THETAX
+       21,7061  51341 0          TS     GYROANG +1
+       21,7062  00000 0          OCT    00000      ; Should be 31446 0 for XCH THETAY
+       21,7063  51343 1          TS     GYROANG +3
+       21,7064  31450 1          XCH    THETAZ
+       21,7065  51345 1          TS     GYROANG +5
+       21,7066  20017 0          INHINT
+       </pre>
+  * 21,7462: in `MAKEXSM` in section `PRELAUNCH ALIGNMENT PROGRAM`.
+       <pre>
+       21,7455  02362 1          TC     NEWMODE
+       21,7456  00002 0          OCT    02
+       21,7457  02124 1          TC     ENDOFJOB
+       21,7460  77576 0 MAKEXSM  EXIT   0
+       21,7461  37554 1          CAF    XVII
+       21,7462  00000 0          OCT    00000      ; Should be 50077 1 for TS BUF
+       21,7463  35501 0          CAF    ZERO
+       21,7464  20077 0          INDEX  BUF
+       21,7465  51424 1          TS     XSM
+       </pre>
+
+As I mentioned above, there is a document describing the differences between Corona 261 and Solarium 55, so one should ask whether any of the 8 chunks of code listed above *should* differ from Solarium.  As it happens, the differences document isn't organized on a subroutine-by-subroutine basis; we can't actually look up (say) `MAKEXSM` and say, "Nope, no differences!"  So while it is difficult to be certain under these circumstances, I've looked at the 8 chunks of code above in relation to the difference document, and find no differences relevant to them.  My own conclusion is that we should expect these chunks in Corona 261 to match their counterparts in Solarium 55.
+
+All of the changes above were cross-checked using memory-bank checksums.
 
 ## 1003733-231-BlockI-Corona261-B29-SomeDefects.bin, 1003733-231-BlockI-Corona261-B29-Repaired.bin
 
@@ -362,9 +485,11 @@ Source:  Jimmie Loocke.
 
 Software:  Corona 261
 
-Flaws:  
+Flaws: This module had a single bad diode:
 
-  * To be documented later ... but minor and easily correctable.
+  * Strand 04 (4000 - 4377 and 03,6000 - 03,6377) has a bad diode on bit 4.
+
+This was correctable by the [stuck-bit parity fix](#Stuck) described earlier, and the fix could be double-checked via memory-bank checksums.
 
 ## 1003733-241-BlockI-Corona261-B24.bin
 
