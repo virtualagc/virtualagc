@@ -1206,6 +1206,7 @@ static InterpreterMatch_t InterpreterOpcodesBlock1[] =
     { "VSRT*", 0025 },
     { "VSU", 0163 },
     { "VXM", 0047 },
+    { "VXM*", 0045 },
     { "VXSC", 0167 },
     { "VXSC*", 0165 },
     { "VXV", 0007 },
