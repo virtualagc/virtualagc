@@ -1419,7 +1419,7 @@ else:
         { "anchor" : "ISSMemos", "title" : "Inertial Sub-System (I.S.S.) Memos", "sortKey" : myDocSortKeyReverse, "documentNumbers" : ["ISS Memo"] },
         { "anchor" : "XDENotes", "title" : "XDE Notes", "sortKey" : myXdeSortKey, "documentNumbers" : ["XDE-"], "blurb" : blurbXDE },
         { "anchor" : "DigitalGroupMemos", "title" : "Digital Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["DG Memo"] },
-        { "anchor" : "MissionTechniquesMemos", "title" : "Mission Techniques Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Mission Techniques Memo"] },
+        { "anchor" : "MissionTechniquesMemos", "title" : "Mission Techniques and Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["Mission Techniques Memo"], "keywords" : ["Mission Techniques"] },
         { "anchor" : "SystemTestGroupMemos", "title" : "System Test Group Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["System Test Group Memo"] },
         { "anchor" : "Requirements", "title" : "AGC/AGS Software Requirements", "keywords" : ["Software requirements"]},
         { "anchor" : "LuminaryMemos", "title" : "LUMINARY Memos", "sortKey" : myDocSortKey, "documentNumbers" : ["LUMINARY Memo"], "blurb" : blurbLuminaryMemos },
@@ -1481,6 +1481,7 @@ else:
         { "anchor" : "ASTP", "title" : "Mission-Specific Documentation: ASTP", "targets" : ["ASTP"], "keywords" : ["skylark", "skylark 48", "skylark 47", "skylark 46", "skylark 45"] },
         
         { "anchor" : "StatusReports", "title" : "Status Reports", "keywords" : ["Status report"]},
+        { "anchor" : "Tindallgrams", "title" : "Tindallgrams", "keywords" : ["Tindallgrams"]},
         { "anchor" : "Press", "title" : "The Press", "keywords" : ["Press"]},
         { "anchor" : "OBC", "title" : "Gemini On-Board Computer (OBC)", "keywords" : ["OBC"]},
         { "anchor" : "IMCC", "title" : "Integrated Mission Control Center (IMCC)", "keywords" : ["IMCC"], "blurb" : blurbIMCC},
