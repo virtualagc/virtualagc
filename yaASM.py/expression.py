@@ -18,10 +18,13 @@
 #
 # Filename:    	expression.py
 # Purpose:     	A lightweight evaluator for the kinds of arithmetical
-#		expressions evaluated by the LVDC assembler's macro
-#		processor.
+#               expressions evaluated by the LVDC assembler's macro
+#               processor.
 # Reference:   	http://www.ibibio.org/apollo
 # Mods:        	2019-07-10 RSB  Began playing around with the concept.
+#               2023-05-18 RSB  Changes related to the peculiarities
+#                               of AS-512/513 vs AS-206RAM.  See the notes 
+#                               marked "2023 change" below.
 
 # My attempt at a minimal arithmetical expression parser for use
 # in assembling LVDC code with yaASM.py.  I don't know that it's bug-free,
@@ -46,6 +49,18 @@
 #	{ "number":12, "scale":5 } / { "number":3, "scale":2 } = { "number":4, "scale":3 }
 # For addition and subtraction, the scales of the terms and the result
 # must all match.
+
+# 2023 change:  The AS-512 and AS-513 source code use constructions not used
+# in AS-206RAM, for which I originally wrote this, and are quite inconsistent
+# with my original structure for this code.  Specifically, I fixed the 
+# following gaps:
+#		nBn								Was already accepted
+#		(expression)Bn					Was already accepted
+#		nB(expression)					Wasn't already accepted
+#       (expression1)B(expression2)		Wasn't already accepted
+# Additionally, I've made it possible to run this file as a stand-alone 
+# program, outside the context of yaASM.py.  Make sure the command-line switch
+# "--test-expressions" is used.
 
 # Of all the functions provided here, it is generally only yaEvaluate() that
 # is called directly.
@@ -145,10 +160,12 @@ def pullNumber(string):
 #	"B-"					Binary minus
 #	"U-"					Unary minus
 #	"("					Opening parenthesis
+#   ")"					Closing parenthesis
 #	{ "token":")", "scale":scale }		Closing parenthesis.  Includes binary scale.
 #	{ "number":number, "scale":scale }	A number (integer or float as appropriate).
 #	SYMBOL					An alphanumeric (with optional periods) name.
 def yaTokenize(string):
+	rawString = string + ""
 	tokens = [""]
 	error = ""
 	while string != "":
@@ -190,7 +207,7 @@ def yaTokenize(string):
 				# Must be a unary operator.
 				tokens.append("U" + string[0])
 				string = string[1:]
-		elif string[0] == "B" and tokens[-1] == ")":
+		elif string[0] == "B" and string[:2] != "B(" and tokens[-1] == ")":
 			bexp = "B"
 			string = string[1:]
 			if string[:1] in ["-", "+"]:
@@ -199,7 +216,11 @@ def yaTokenize(string):
 			while string[:1].isdigit():
 				bexp += string[:1]
 				string = string[1:]
-			tokens[-1] = { "token":")", "scale":int(bexp[1:]) }
+			try:
+				tokens[-1] = { "token":")", "scale":int(bexp[1:]) }
+			except:
+				error = "No digits for binary scaler: " + rawscale
+				break
 		elif string[0].isalpha():
 			token = string[0]
 			string = string[1:]
@@ -271,6 +292,27 @@ def yaShuntingYard(tokens):
 # a number/scale dictionary, and error is a hopefully-empty error message.
 def yaEvaluate(string, constants):
 	value = { "number":0 }
+	
+	# 2023 change: Everything related to overallScaler is for taking
+	# care of ...B(expression).  What we do is to split this into two parts, 
+	# namely what's prior to the B and what's after it, and evaluate them
+	# separately, as two different expressions.  The 2nd of the expressions
+	# turns into overallScaler, which we save until the end of the evaluation
+	# of the 1st of the expressions, and then just increment the scale of
+	# the evaluated expression by overallScaler.
+	fields = string.split("B(")
+	overallScaler = 0
+	if len(fields) > 1:
+		variableScaler = "(" + fields[1]
+		string = "B(".join(fields[:-1])
+		overallScaler,error = yaEvaluate(variableScaler, constants)
+		if error != "":
+			return value,error
+		if ("scale" in overallScaler and overallScaler["scale"] != 0) \
+				or "number" not in overallScaler:
+			return value,("Improper scaler expression: "+variableScaler)
+		overallScaler = overallScaler["number"]	
+	
 	# Let's tokenize the string.
 	tokens,error = yaTokenize(string)
 	if error != "":
@@ -329,16 +371,24 @@ def yaEvaluate(string, constants):
 		error = "Could not evaluate expression"
 	else:
 		value = rpn[0]
+	# 2023 change:
+	if overallScaler != 0:
+		if "scale" in value:
+			value["scale"] += overallScaler
+		else:
+			value["scale"] = overallScaler
 	return value,error
 
 # Some test code, which accepts the following types of lines on stdin:
 #	(empty)			Just prints all defined constants.
 #	NAME=EXPRESSION		Creates/modifies a named constant
 #	EXPRESSION		Displays the value of an expression
-if False:
+if "--test-expressions" in sys.argv:
 	constants = {}
-	for line in sys.stdin:
-		line = line.strip()
+	while True:
+		print("> ", end="")
+		sys.stdout.flush()
+		line = sys.stdin.readline().strip()
 		fields = line.split("=")
 		if len(fields) == 2:
 			value,errors = yaEvaluate(fields[1], constants)
@@ -350,10 +400,12 @@ if False:
 			for n in constants:
 				print(n + " = " + str(constants[n]["number"]) + "B" + str(constants[n]["scale"]))
 		else:
+			tokens,error = yaTokenize(line)
+			print("Tokens:", tokens)
 			value,errors = yaEvaluate(line, constants)
 			if errors != "":
-				print(errors)
+				print("Errors:", errors)
 				continue
-			print(value)
+			print("Value:", value)
 	
 	

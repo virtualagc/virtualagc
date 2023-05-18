@@ -21,23 +21,31 @@
 #              	(but not for OBC) assemblies. 
 # Reference:   	http://www.ibibio.org/apollo
 # Mods:        	2019-07-10 RSB  Began playing around with the concept.
-#		2019-08-14 RSB	Began working on this more seriously since
-#				the LVDC-206RAM transcription is now available.
-#				Specifically, began adding preprocessor pass.
-#		2019-08-22 RSB	I think the preprocessor and discovery passes
-#				are essentially working, except for 
-#				auto-allocation of =... constants.
-#		2019-09-18 RSB	Now outputs .sym and .sch files in addition to
-#				the .tsv file that was already being output.
-#		2020-04-21 RSB	Began adding the --ptc command-line options
-#				along with --past-bugs and --help.
-#		2020-05-01 RSB	Added line number field to .src output file.
-#		2020-05-09 RSB	Added the assembled octals for the source lines
-#				to the .src file.  Needed by the debugger for
-#				detecting locations which have been changed by
-#				self-modifying code, and hence whose original
-#				source lines are no longer applicable.
-#		2023-04-01 RSB	Now formfeeds in listing file at "Copyright" lines.
+#               2019-08-14 RSB	Began working on this more seriously since
+#                               the LVDC-206RAM transcription is now available.
+#                               Specifically, began adding preprocessor pass.
+#               2019-08-22 RSB	I think the preprocessor and discovery passes
+#                               are essentially working, except for 
+#                               auto-allocation of =... constants.
+#               2019-09-18 RSB	Now outputs .sym and .sch files in addition to
+#                               the .tsv file that was already being output.
+#               2020-04-21 RSB	Began adding the --ptc command-line options
+#                               along with --past-bugs and --help.
+#               2020-05-01 RSB	Added line number field to .src output file.
+#               2020-05-09 RSB	Added the assembled octals for the source lines
+#                               to the .src file.  Needed by the debugger for
+#                               detecting locations which have been changed by
+#                               self-modifying code, and hence whose original
+#                               source lines are no longer applicable.
+#               2023-04-01 RSB	Now formfeeds in listing file at "Copyright" lines.
+#               2023-05-17 RSB	Began looking at fixes for unexpected conditions
+#                               in AS-512 source code (vs AS-206RAM).  The 
+#                               difference I see far that's a big "gotcha" is
+#                               the use of constants in macro argument lists
+#                               that are resolvable only after the macro has
+#                               been expanded, and not at the time the macro
+#                               is defined.  What to do about that, I'm not yet
+#                               clear.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -338,7 +346,8 @@ for arg in sys.argv[1:]:
 			checkTheOctals = True
 		except:
 			countWarnings += 1
-			print("Warning (%o %02o %03o): Cannot open octal-comparison file %s or file is corrupted" % (module, sector, offset, checkFilename))
+			print("Warning (%o %02o %03o): Cannot open octal-comparison file %s or file is corrupted" \
+					% (module, sector, offset, checkFilename))
 			checkFilename = ""
 #print(octalsForChecking)
 if ptc:
@@ -400,6 +409,12 @@ def addError(n, msg, trigger=-1):
 	global errors, countInfos, countWarnings, countErrors, countMismatches, countOthers
 	if trigger != -1 and trigger != n:
 		return
+	if n >= len(errors):
+		print("Implementation error: %d >= %d = len(errors), %d = len(lines)" \
+			  % (n, len(errors), len(lines)),\
+			  file=sys.stderr)
+		print("Message =", msg, file=sys.stderr)
+		sys.exit(1)
 	if msg not in errors[n]:
 		if msg[:5] == "Info:":
 			countInfos += 1
@@ -878,7 +893,7 @@ for n in range(0, len(lines)):
 		value,error = yaEvaluate(fields2, constants)
 		if error != "":
 			addError(n, error)
-			break
+			continue
 		if fields[1] == "TABLE":
 			fields2 = str(value["number"]).upper()
 		else:
@@ -969,9 +984,16 @@ for n in range(0, len(lines)):
 			expandedLines[n] = []
 			for m in range(0,len(macroLines)):
 				macroLine = macroLines[m]
+				if len(macroLine) < 1:
+					continue
 				lhs = ""
 				operator = macroLine[1]
-				operand = macroLine[2]
+				if len(macroLine) < 3:
+					# The only case I know of in which this can happen is for
+					# an ENDIF.
+					operand = ""
+				else:
+					operand = macroLine[2]
 				argNum = 0
 				if operand[:3] == "ARG" and operand[3:].isdigit():
 					argNum = int(operand[3:])
@@ -1119,6 +1141,7 @@ for lineNumber in range(0, len(expandedLines)):
 				try:
 					checkDLOC(int(fields[2]))
 				except:
+					print("Implementation error in TABLE", file=sys.stderr)
 					print(lineNumber)
 					print(line)
 					print(fields)
@@ -1208,13 +1231,16 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["udDM"] = int(constants[fields[0]][1], 8)
 				inputLine["udDS"] = int(constants[fields[0]][2], 8)
 			elif fields[1] == "BSS":
-				checkDLOC(int(fields[2]))
-				if fields[0] != "":
-					inputLine["lhs"] = fields[0]
-				inputLine["operator"] = fields[1]
-				inputLine["operand"] = fields[2]
-				inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-				incDLOC(int(fields[2]))
+				try:
+					checkDLOC(int(fields[2]))
+					if fields[0] != "":
+						inputLine["lhs"] = fields[0]
+					inputLine["operator"] = fields[1]
+					inputLine["operand"] = fields[2]
+					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					incDLOC(int(fields[2]))
+				except:
+					addError(lineNumber, "Error: Improper BSS")
 			elif ptc and fields[1] == "BCI":
 				text = bciPad(fields[2][1:-1])
 				textLength = len(text) / 4
