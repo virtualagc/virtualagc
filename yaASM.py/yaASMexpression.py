@@ -16,7 +16,7 @@
 # along with yaAGC; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# Filename:    	expression.py
+# Filename:    	yaASMexpression.py
 # Purpose:     	A lightweight evaluator for the kinds of arithmetical
 #               expressions evaluated by the LVDC assembler's macro
 #               processor.
@@ -25,6 +25,7 @@
 #               2023-05-18 RSB  Changes related to the peculiarities
 #                               of AS-512/513 vs AS-206RAM.  See the notes 
 #                               marked "2023 change" below.
+#               2023-05-19 RSB  Changed name from expression.py.
 
 # My attempt at a minimal arithmetical expression parser for use
 # in assembling LVDC code with yaASM.py.  I don't know that it's bug-free,
