@@ -51,6 +51,8 @@
 #                                  several Python modules.
 #                               2. Lots of problems that previously would cause
 #                                  abort now insert messages in the listing.
+#                               3. "$SEGMENT" lines (actually, any line with $
+#                                  in column 1) are ignored.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -179,8 +181,8 @@ operators = {
     "SHL": { "opcode":0b1110, "a9":1, "a8":0 }
 }
 pseudos = []
-preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM"]
-ignore = ["TELD"]
+preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM", "TELD"]
+ignore = []
 
 # Bit patterns used by DFW pseudo-ops. The key value is the DS.
 dfwBits = {
@@ -890,7 +892,7 @@ for lineNumber in range(0, len(expandedLines)):
 			fields[0] = ""
 		    
 		# Remove comments.
-		if inputLine["raw"][:1] in ["*", "#"]:
+		if inputLine["raw"][:1] in ["*", "#", "$"]:
 			fields = []
 		
 		if len(fields) >= 2 and fields[1] == "VEC":

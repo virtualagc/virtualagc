@@ -20,9 +20,14 @@
 # Purpose:     	Preprocessor for yaASM.py. 
 # Reference:   	http://www.ibibio.org/apollo
 # Mods:        	2023-05-19 RSB	Split off (as a Python module) from yaASM.py.
+#               2023-05-22 RSB	Implemented TELD & TELM.
 
 from yaASMerrors import *
 from yaASMexpression import *
+
+# The following are TELemetry Definitions.  The keys are the names, and the
+# values are ordered pairs consisting of the delay-mode and the pio-number.
+telds = {}
 
 #----------------------------------------------------------------------------
 #	Preprocessor pass
@@ -46,7 +51,7 @@ from yaASMexpression import *
 # an array (hopefully usually empty) of error/warning messages for lines[n].
 def preprocessor(lines, expandedLines, constants, macros, \
 				ptc=False, inMacro="", inFalseIf = False):
-	global errors
+	global errors, telds
 	if ptc:
 		maxSHF = 6
 	else:
@@ -56,7 +61,7 @@ def preprocessor(lines, expandedLines, constants, macros, \
 		errors.append([])
 		expandedLines.append([line])
 		
-		if line[:1] in ["*", "#"]:
+		if line[:1] in ["*", "#", "$"] or len(line) < 8:
 			continue
 		
 		# Split the line into fields.
@@ -66,6 +71,27 @@ def preprocessor(lines, expandedLines, constants, macros, \
 		if len(fields) > 0 and fields[0] == "@":
 			fields[0] = ""
 			line = line[1:]
+	
+		if "\t" in line or " " == line[7]: # .lvdc8 
+			fmt = "%-8s%-8s%s"
+		else: # .lvdc
+			fmt = "%-7s%-8s%s"
+			
+		# TELD and TELM
+		if len(fields) >= 3 and fields[0] == "" and fields[1] == "TELD":
+			subfields = fields[2].split(",")
+			if len(subfields) == 3:
+				telds[subfields[0]] = ("D.HTR"+subfields[1], subfields[2])
+				continue
+		if len(fields) >= 3 and fields[1] == "TELM" and fields[2] in telds:
+			teld = telds[fields[2]]
+			expandedLines[n] = [
+				fmt % ("", "BLOCK", "3"),
+				fmt % (fields[0], "HOP", teld[0]),
+				fmt % ("", "CLA", fields[2]),
+				fmt % ("", "PIO", teld[1])
+				]
+			continue
 	
 		# Most expansions of (EXPRESSION) are handled later, and I don't want to
 		# override that here, but there is one case that the later code can't
@@ -128,7 +154,7 @@ def preprocessor(lines, expandedLines, constants, macros, \
 			constants[fields[0]] = [fields[1]] + fields[2].split(",")
 		elif ptc and len(fields) >= 3 and fields[1] == "CDS" and 2 == len(fields[2].split(",")):
 			subfields = fields[2].split(",")
-			line = "%-8s%-8s%s" % (fields[0], fields[1], "%s,%s" % (subfields[0], subfields[1]))
+			line = fmt % (fields[0], fields[1], "%s,%s" % (subfields[0], subfields[1]))
 			expandedLines[n] = [line]
 		elif (not ptc) and len(fields) >= 3 and fields[1] == "CDS" and fields[2] in constants and type(constants[fields[2]]) == type([]) and len(constants[fields[2]]) >= 3:
 			constant = constants[fields[2]]
@@ -137,7 +163,7 @@ def preprocessor(lines, expandedLines, constants, macros, \
 				op = "CDSS"
 			elif constant[0] == "DEQD":
 				op = "CDSD"
-			line = "%-8s%-8s%s" % (fields[0], op, "%s,%s" % (constant[1], constant[2]))
+			line = fmt % (fields[0], op, "%s,%s" % (constant[1], constant[2]))
 			expandedLines[n] = [line]
 		elif len(fields) >= 3 and fields[0] != "" and fields[1] == "EQU":
 			value,error = yaEvaluate(fields[2], constants)
@@ -148,14 +174,14 @@ def preprocessor(lines, expandedLines, constants, macros, \
 		elif len(fields) >= 3 and fields[1] == "CALL":
 			ofields = fields[2].split(",")
 			if len(ofields) == 2:
-				line1 = "%-8s%-8s%s" % (fields[0], "CLA", ofields[1])
-				line2 = "%-8s%-8s%s" % ("", "HOP", ofields[0])
+				line1 = fmt % (fields[0], "CLA", ofields[1])
+				line2 = fmt % ("", "HOP", ofields[0])
 				expandedLines[n] = [line1, line2]
 			elif len(ofields) == 3:
-				line1 = "%-8s%-8s%s" % (fields[0], "CLA", ofields[2])
-				line2 = "%-8s%-8s%s" % ("", "STO", "775")
-				line3 = "%-8s%-8s%s" % ("", "CLA", ofields[1])
-				line4 = "%-8s%-8s%s" % ("", "HOP", ofields[0])
+				line1 = fmt % (fields[0], "CLA", ofields[2])
+				line2 = fmt % ("", "STO", "775")
+				line3 = fmt % ("", "CLA", ofields[1])
+				line4 = fmt % ("", "HOP", ofields[0])
 				expandedLines[n] = [line1, line2, line3, line4]
 		elif len(fields) >= 3 and fields[1] in ["SHL", "SHR"] and fields[2].isdigit():
 			count = int(fields[2])
@@ -218,7 +244,7 @@ def preprocessor(lines, expandedLines, constants, macros, \
 							operand +=  "B" + str(value["scale"])
 					if m == 0:
 						lhs = fields[0]
-					expandedLines[n].append("%-8s%-8s%s" % (lhs, operator, operand))
+					expandedLines[n].append(fmt % (lhs, operator, operand))
 		elif len(fields) >= 3 and fields[2][:2] == "=(":
 			value,error = yaEvaluate(fields[2][1:], constants)
 			if error != "":
