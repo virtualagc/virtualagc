@@ -46,6 +46,11 @@
 #                               been expanded, and not at the time the macro
 #                               is defined.  What to do about that, I'm not yet
 #                               clear.
+#               2023-05-22 RSB  Some incomplete notes on notable changes:
+#                               1. Formerly-monolithic program split into
+#                                  several Python modules.
+#                               2. Lots of problems that previously would cause
+#                                  abort now insert messages in the listing.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -175,6 +180,7 @@ operators = {
 }
 pseudos = []
 preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM"]
+ignore = ["TELD"]
 
 # Bit patterns used by DFW pseudo-ops. The key value is the DS.
 dfwBits = {
@@ -907,7 +913,9 @@ for lineNumber in range(0, len(expandedLines)):
 			pass
 		elif len(fields) >= 3:
 			ofields = fields[2].split(",")
-			if fields[1] == "USE":
+			if fields[1] in ignore:
+				pass
+			elif fields[1] == "USE":
 				if fields[2] == "INST":
 					useDat = False
 				elif fields[2] == "DAT":
@@ -1130,7 +1138,7 @@ for lineNumber in range(0, len(expandedLines)):
 			elif fields[1] in pseudos:
 				pass
 			else:
-				addError(lineNumber, "Error: Unrecognized operator")
+				addError(lineNumber, "Error: Unrecognized operator %s" % fields[1])
 		elif len(fields) != 0:
 			addError(lineNumber, "Wrong number of fields")
 		inputLine["inDataMemory"] = inDataMemory
