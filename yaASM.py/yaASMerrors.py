@@ -29,6 +29,7 @@ counts = {
     "warnings" : 0,
     "errors" : 0,
     "mismatches" : 0,
+    "implementation": 0,
     "others" : 0
 }
 
@@ -43,14 +44,16 @@ def addError(n, msg, trigger=-1):
         print("Message =", msg, file=sys.stderr)
         sys.exit(1)
     if msg not in errors[n]:
-        if msg[:5] == "Info:":
+        if msg.startswith("Info:"):
             counts["infos"] += 1
-        elif msg[:8] == "Warning:":
+        elif msg.startswith("Warning:"):
             counts["warnings"] += 1
-        elif msg[:6] == "Error:":
+        elif msg.startswith("Error:"):
             counts["errors"] += 1
-        elif msg[:9] == "Mismatch:":
+        elif msg.startswith("Mismatch:"):
             counts["mismatches"] += 1
+        elif msg.startswith("Implementation:"):
+            counts["implementation"] += 1
         else:
             counts["others"] += 1
         #msg = str(n) + ": " + msg

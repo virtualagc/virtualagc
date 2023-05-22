@@ -557,30 +557,40 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 			return nameless[valueR],1
 	start = 0
 	for loc in range(start, 256):
-		if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
-			if False:
-				addError(lineNumber, "Info: Allocation of nameless " + value)
-			used[DM][DS][0][loc] = True
-			used[DM][DS][1][loc] = True
-			octals[DM][DS][2][loc] = 0
-			nameless[value] = loc
-			allocationRecords.append({ "symbol": value, "lineNumber":lineNumber, 
-				"inputLine": inputFile[lineNumber]["expandedLine"], 
-				"DM": DM, "DS": DS, "LOC": loc })
-			return loc,0
-	if useResidual and DS != 0o17:
-		for loc in range(start, 256):
-			if not used[DM][0o17][0][loc] and not used[DM][0o17][1][loc]:
+		try:
+			if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
 				if False:
-					addError(lineNumber, "Info: Allocation of nameless " + valueR)
-				used[DM][0o17][0][loc] = True
-				used[DM][0o17][1][loc] = True
-				octals[DM][0o17][2][loc] = 0
-				nameless[valueR] = loc
-				allocationRecords.append({ "symbol": valueR, "lineNumber":lineNumber, 
+					addError(lineNumber, "Info: Allocation of nameless " + value)
+				used[DM][DS][0][loc] = True
+				used[DM][DS][1][loc] = True
+				octals[DM][DS][2][loc] = 0
+				nameless[value] = loc
+				allocationRecords.append({ "symbol": value, "lineNumber":lineNumber, 
 					"inputLine": inputFile[lineNumber]["expandedLine"], 
 					"DM": DM, "DS": DS, "LOC": loc })
-				return loc,1
+				return loc,0
+		except:
+			addError(lineNumber, 
+					"Error: Nameless allocation to %o-%02o-%03o" % (DM, DS, loc))
+			return 0,0
+	if useResidual and DS != 0o17:
+		for loc in range(start, 256):
+			try:
+				if not used[DM][0o17][0][loc] and not used[DM][0o17][1][loc]:
+					if False:
+						addError(lineNumber, "Info: Allocation of nameless " + valueR)
+					used[DM][0o17][0][loc] = True
+					used[DM][0o17][1][loc] = True
+					octals[DM][0o17][2][loc] = 0
+					nameless[valueR] = loc
+					allocationRecords.append({ "symbol": valueR, "lineNumber":lineNumber, 
+						"inputLine": inputFile[lineNumber]["expandedLine"], 
+						"DM": DM, "DS": DS, "LOC": loc })
+					return loc,1
+			except:
+				addError(lineNumber, 
+						"Error: Nameless allocation to %o-17-%03o" % (DM, loc))
+				return 0,0
 	addError(lineNumber, "Error: No remaining memory to store nameless constant (" + value + ")")
 	return 0,0
 
@@ -738,20 +748,41 @@ def storeAssembled(lineNumber, value, hop, data = True):
 				value = value << 14
 			else:
 				value = value << 1
-			if octals[module][sector][2][location] == None:
-				octals[module][sector][2][location] = value
-			else:
-				checkSyl = 2
-				octals[module][sector][2][location] = octals[module][sector][2][location] | value
+			try:
+				if octals[module][sector][2][location] == None:
+					octals[module][sector][2][location] = value
+				else:
+					checkSyl = 2
+					octals[module][sector][2][location] = \
+									octals[module][sector][2][location] | value
+			except:
+				addError(lineNumber, \
+						"Error: Storing non-existent data %o-%02o-%03o" \
+						% (module, sector, location))
+				return
 		else:
 			checkSyl = syllable
-			if syllable == 1:
-				octals[module][sector][syllable][location] = (value << 2) & 0o77774
-			else:
-				octals[module][sector][syllable][location] = (value << 1) & 0o37776
+			try:
+				if syllable == 1:
+					octals[module][sector][syllable][location] = \
+														(value << 2) & 0o77774
+				else:
+					octals[module][sector][syllable][location] = \
+														(value << 1) & 0o37776
+			except:
+				addError(lineNumber, \
+					"Error: Storing non-existent instruction %o-%02o-%o-%03o" \
+								% (module, sector, checkSyl, location))
+				return
 	if checkTheOctals and checkSyl >= 0:
-		assembledOctal = octals[module][sector][checkSyl][location]
-		checkOctal = octalsForChecking[module][sector][checkSyl][location]
+		try:
+			assembledOctal = octals[module][sector][checkSyl][location]
+			checkOctal = octalsForChecking[module][sector][checkSyl][location]
+		except:
+			addError(lineNumber, \
+					"Error: Checking non-existent instruction %o-%02o-%o-%03o" \
+								% (module, sector, checkSyl, location))
+			return
 		if assembledOctal != checkOctal:
 			msg = "Mismatch: Octal mismatch, "
 			xor = 0
@@ -767,10 +798,13 @@ def storeAssembled(lineNumber, value, hop, data = True):
 				else:
 					fmt = "%o,%02o,%o,%03o, %05o != %05o, xor = %05o"
 				xor = assembledOctal ^ checkOctal
-				msg += fmt % (module, sector, checkSyl, location, assembledOctal, checkOctal, xor)
+				msg += fmt % (module, sector, checkSyl, location, 
+								assembledOctal, checkOctal, xor)
 				#msg += ", disassembly   " + unassemble(assembledOctal)
 				#msg += "   !=   " + unassemble(checkOctal)
-			if not (ptc and ignoreResiduals and ((checkSyl == 0 and xor == 0o100) or (checkSyl == 1 and xor == 0o100))):
+			if not (ptc and ignoreResiduals and \
+					((checkSyl == 0 and xor == 0o100) 
+					or (checkSyl == 1 and xor == 0o100))):
 				addError(lineNumber, msg)
 
 # Form a HOP constant from a hop dictionary.
@@ -885,12 +919,7 @@ for lineNumber in range(0, len(expandedLines)):
 				try:
 					checkDLOC(int(fields[2]))
 				except:
-					print("Implementation error in TABLE", file=sys.stderr)
-					print(lineNumber)
-					print(line)
-					print(fields)
-					print(ofields)
-					sys.exit(1)
+					addError(lineNumber, "Implementation: Parsing error in TABLE")
 			elif fields[0] != "" and fields[1] == "SYN":
 				synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
@@ -2040,19 +2069,21 @@ if checkTheOctals:
 						# test to check for that.
 						if ptc and syllable == 2:
 							continue
-						countMismatches += 1
-						print("Mismatch: Octal mismatch B at %o,%02o,%o,%03o" %(module,sector,syllable,location))
+						counts["mismatches"] += 1
+						print("Mismatch: Octal mismatch B at %o,%02o,%o,%03o" \
+							%(module,sector,syllable,location) )
 print("")
 print("Assembly-message summary:")
-print("\tErrors:     %d" % counts["errors"])
-print("\tWarnings:   %d" % counts["warnings"])
+print("\tImplementation errors:  %d" % counts["implementation"])
+print("\tErrors:                 %d" % counts["errors"])
+print("\tWarnings:               %d" % counts["warnings"])
 if checkTheOctals:
-	print("\tMismatches: %d (vs %s)" % (counts["mismatches"],checkFilename))
+	print("\tMismatches:             %d (vs %s)" % (counts["mismatches"],checkFilename))
 else:
 	print("\tMismatches: (not checked)")
-print("\tRollovers:  %d" % countRollovers)
-print("\tInfos:      %d" % counts["infos"])
-print("\tOther:      %d" % counts["others"])
+print("\tRollovers:              %d" % countRollovers)
+print("\tInfos:                  %d" % counts["infos"])
+print("\tOther:                  %d" % counts["others"])
 
 
 #----------------------------------------------------------------------------
