@@ -53,6 +53,10 @@
 #                                  abort now insert messages in the listing.
 #                               3. "$SEGMENT" lines (actually, any line with $
 #                                  in column 1) are ignored.
+#               2023-05-23 RSB  4. Extraneous "*" and "$" characters in label
+#                                  field.
+#                               5. Wrong display in symbol table of DEQD and 
+#                                  DEQS constants (inherited from AS-206RAM).
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -392,7 +396,17 @@ for n in range(8):
 
 lines = sys.stdin.readlines()
 for n in range(0,len(lines)):
-	lines[n] = lines[n].expandtabs().rstrip()
+	line = lines[n].expandtabs().rstrip()
+	
+	# In AS-512, columns 2-5 sometimes have a "random" (meaning we can't figure
+	# out what they mean) sprinkling of "*" and "$" characters that seem to 
+	# have nothing to do with how the lines are actually assembled.  I probably
+	# should retain them somehow for printing in the output assembly listing,
+	# but for now I just get rid of them.
+	if len(line) >= 6 and line[0] == " " and not line[1:6].isspace():
+		line = "      " + line[6:]
+	
+	lines[n] = line
 	if ptc and 'BCI' in lines[n] and '^' in lines[n] and '$' in lines[n]:
 		# Convert all spaces within a BCI pseudo-op's operand to
 		# '_', so that the line can be parsed properly into
@@ -1010,7 +1024,7 @@ for lineNumber in range(0, len(expandedLines)):
 				symbols[fields[0]] = {	"IM":IM, "IS":IS, "S":S, 
 								"LOC":LOC, "DM":int(constants[fields[0]][1], 8), 
 								"DS":int(constants[fields[0]][2], 8), 
-								"DLOC":DLOC, "inDataMemory":True }
+								"DLOC":int(constants[fields[0]][3], 8), "inDataMemory":True }
 				inputLine["udDM"] = int(constants[fields[0]][1], 8)
 				inputLine["udDS"] = int(constants[fields[0]][2], 8)
 			elif fields[1] == "BSS":
@@ -1124,7 +1138,7 @@ for lineNumber in range(0, len(expandedLines)):
 										found = True
 										break
 							if not found:
-								addError(lineNumber, "Error: Symbol not found")
+								addError(lineNumber, "Error: Symbol not found, " + fields[2])
 					elif len(ofields) != 2:
 						addError(lineNumber, "Error: Wrong number of CDS/CDSD arguments")
 					elif not useDat:
@@ -1891,7 +1905,7 @@ for entry in inputFile:
 			#lineFields[adrField] = "%03o" % loc
 		elif (not ptc) and operator == "CDS":
 			if operand not in symbols:
-				addError(lineNumber, "Error: Symbol not found")
+				addError(lineNumber, "Error: Symbol not found, " + operand)
 				loc = 0
 			else:
 				#print("%o %2o" % (symbols[operand]["DM"], symbols[operand]["DS"]))
@@ -2090,7 +2104,7 @@ print("\tWarnings:               %d" % counts["warnings"])
 if checkTheOctals:
 	print("\tMismatches:             %d (vs %s)" % (counts["mismatches"],checkFilename))
 else:
-	print("\tMismatches: (not checked)")
+	print("\tMismatches:             (not checked)")
 print("\tRollovers:              %d" % countRollovers)
 print("\tInfos:                  %d" % counts["infos"])
 print("\tOther:                  %d" % counts["others"])
@@ -2105,14 +2119,15 @@ print("")
 for key in sorted(symbols):
 	hop = symbols[key]
 	if "inDataMemory" in symbols[key] and symbols[key]["inDataMemory"]:
-		print("%o %02o   %03o" % (hop["IM"], hop["IS"], 
-							hop["LOC"]) + "  " + key)
+		print("%o %02o   %03o" % (hop["DM"], hop["DS"], 
+							hop["DLOC"]) + "  " + key)
 		syl = 2
+		print("%s\t%o\t%02o\t%o\t%03o" % (key, hop["DM"], hop["DS"], syl, hop["DLOC"]), file=f)
 	else:
 		print("%o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
 							hop["LOC"]) + "  " + key)
 		syl = hop["S"]
-	print("%s\t%o\t%02o\t%o\t%03o" % (key, hop["IM"], hop["IS"], syl, hop["LOC"]), file=f)
+		print("%s\t%o\t%02o\t%o\t%03o" % (key, hop["IM"], hop["IS"], syl, hop["LOC"]), file=f)
 lastKey = ""
 for key in sorted(nameless):
 	loc = nameless[key]

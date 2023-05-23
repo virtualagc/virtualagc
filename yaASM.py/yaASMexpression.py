@@ -16,12 +16,12 @@
 # along with yaAGC; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# Filename:    	yaASMexpression.py
-# Purpose:     	A lightweight evaluator for the kinds of arithmetical
+# Filename:     yaASMexpression.py
+# Purpose:      A lightweight evaluator for the kinds of arithmetical
 #               expressions evaluated by the LVDC assembler's macro
 #               processor.
-# Reference:   	http://www.ibibio.org/apollo
-# Mods:        	2019-07-10 RSB  Began playing around with the concept.
+# Reference:    http://www.ibibio.org/apollo
+# Mods:         2019-07-10 RSB  Began playing around with the concept.
 #               2023-05-18 RSB  Changes related to the peculiarities
 #                               of AS-512/513 vs AS-206RAM.  See the notes 
 #                               marked "2023 change" below.
@@ -257,7 +257,7 @@ def yaShuntingYard(tokens):
 			stack.append(token)
 			continue
 		try:
-			if token == ")" or token["token"] == ")":
+			if token == ")" or (type(token) == type({}) and "token" in token and token["token"] == ")"):
 				while len(stack) > 0 and stack[-1] != "(":
 					queue.append(stack[-1])
 					stack = stack[:-1]
@@ -266,19 +266,20 @@ def yaShuntingYard(tokens):
 					return queue,error
 				stack = stack[:-1]
 				try:
-					if "scale" in token:
+					if type(token) == type({}) and "scale" in token:
 						queue.append({"scale":token["scale"]})
 				except:
 					pass
 				continue
 		except:
 			pass
-		error = "Implementation error"
+		error = "Expression token = " + str(token) + \
+				", tokens = " + str(tokens)
 		return queue,error
 	while len(stack) > 0:
 		token = stack[-1]
 		stack = stack[:-1]
-		if token == "(" or (type(token) == type({}) and "token" in token and token["token"] == ")"):
+		if token == "(": # or (type(token) == type({}) and "token" in token and token["token"] == ")"):
 			error = "Parentheses do not match"
 			break
 		queue.append(token)

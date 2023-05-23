@@ -16,11 +16,12 @@
 # along with yaAGC; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# Filename:    	yaASMpreprocessor.py
-# Purpose:     	Preprocessor for yaASM.py. 
-# Reference:   	http://www.ibibio.org/apollo
-# Mods:        	2023-05-19 RSB	Split off (as a Python module) from yaASM.py.
+# Filename:     yaASMpreprocessor.py
+# Purpose:      Preprocessor for yaASM.py. 
+# Reference:    http://www.ibibio.org/apollo
+# Mods:         2023-05-19 RSB	Split off (as a Python module) from yaASM.py.
 #               2023-05-22 RSB	Implemented TELD & TELM.
+#               2023-05-23 RSB	CALL with a single parameter.
 
 from yaASMerrors import *
 from yaASMexpression import *
@@ -83,7 +84,10 @@ def preprocessor(lines, expandedLines, constants, macros, \
 			if len(subfields) == 3:
 				telds[subfields[0]] = ("D.HTR"+subfields[1], subfields[2])
 				continue
-		if len(fields) >= 3 and fields[1] == "TELM" and fields[2] in telds:
+		if len(fields) >= 3 and fields[1] == "TELM":
+			if fields[2] not in telds:
+				addError(n, "Error: TELD not found for TELM %s" % fields[2])
+				continue
 			teld = telds[fields[2]]
 			expandedLines[n] = [
 				fmt % ("", "BLOCK", "3"),
@@ -173,7 +177,10 @@ def preprocessor(lines, expandedLines, constants, macros, \
 				constants[fields[0]] = value 
 		elif len(fields) >= 3 and fields[1] == "CALL":
 			ofields = fields[2].split(",")
-			if len(ofields) == 2:
+			if len(ofields) == 1:
+				line1 = fmt % ("", "HOP", ofields[0])
+				expandedLines[n] = [line1]
+			elif len(ofields) == 2:
 				line1 = fmt % (fields[0], "CLA", ofields[1])
 				line2 = fmt % ("", "HOP", ofields[0])
 				expandedLines[n] = [line1, line2]
