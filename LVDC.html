@@ -14345,7 +14345,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap"><tt>DEQD</tt><tt> </tt><tt><i>M</i></tt><tt>,</tt><tt><i>S</i></tt><tt>,</tt><tt><i>LOC<br>
-              </i></tt><i>&nbsp; or</i><tt><i><br>
+              </i></tt><i>&nbsp; </i><tt><i><br>
               </i></tt><tt>DEQS</tt><tt> </tt><tt><i>M</i></tt><tt>,</tt><tt><i>S</i></tt><tt>,</tt><tt><i>LOC</i></tt></td>
           <td valign="middle">This preprocessor pseudo-op is a variant
             of <tt>EQU</tt> (see below).&nbsp; It defines a
@@ -14395,31 +14395,49 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap"><tt>DOG <i>DM,DS,DLOC</i><br>
-            </tt><i>&nbsp;&nbsp; or</i><tt><br>
+            </tt><i>&nbsp;&nbsp; </i><tt><br>
               DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,</tt><tt><i>DLOC</i></tt><tt><br>
-            </tt><i>&nbsp;&nbsp; or</i><br>
-            <tt>DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,</tt></td>
-          <td valign="middle">Of the LVDC source code available to us,
-            the <tt>DOG</tt> form appears only in the PTC ADAPT
-            Self-Test Program, while the <tt>DOGD</tt> form appears
-            only in the AS206-RAM Flight Program.&nbsp; <br>
-            <br>
-            Abbreviated form of <tt>ORGDD</tt> (see below) that only
-            modifies the assembler's current data-memory pointer,
-            leaving the instruction-memory pointer untouched.&nbsp; It
-            does not allocate any memory.&nbsp; The location parameter <tt><i>DLOC</i></tt>
+            </tt><i>&nbsp;&nbsp; </i><br>
+            <tt>DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,<br>
+            </tt><i>&nbsp; </i><tt><br>
+              DOG SYMBOL<br>
+            </tt><i>&nbsp;&nbsp; </i><tt><tt><br>
+              </tt>DOG *,*[±<i>n</i>],*[</tt><tt>±<i>m</i>]</tt></td>
+          <td valign="middle">While the modern LVDC assembler supports
+            all of the forms shown to the left, I have no idea of how
+            broadly these various pseudo-op forms were supported by the
+            original assembler, because of the LVDC or PTC source code
+            available to us:<br>
+            <ul>
+              <li>The first of the <tt>DOG</tt> forms appear everywhere
+                <i>except</i> in AS206-RAM.<br>
+              </li>
+              <li>The <tt>DOGD</tt> forms appear only in AS206-RAM
+                .&nbsp; </li>
+              <li>The final two <tt>DOG</tt> forms only appear in
+                AS-512 and AS-513.&nbsp; Brackets indicate the optional
+                appearance of a plus or minus sign and an integer, but
+                the brackets themselves don't literally appear in the
+                source code.</li>
+            </ul>
+            This pseudo-op is similar in its effect to the <tt>ORGDD</tt>
+            pseudo-ip (see below), except that it only modifies the
+            assembler's current data-memory pointer, leaving the
+            instruction-memory pointer untouched.&nbsp; It does not
+            allocate any memory.&nbsp; The location parameter <tt><i>DLOC</i></tt>
             is treated as a suggestion rather than as a hard
             specification of the offset into the data-memory sector,
             since if the assembler finds that the requested <tt><i>DLOC</i></tt>
             has already been used, it will search upward through the
             data sector until it finds a location that hasn't already
-            been used.&nbsp; If any field is left empty, it defaults to
-            000.<br>
+            been used.&nbsp; If any of the fields <i><tt>DM</tt></i>, <i><tt>DS</tt></i>,
+            or <i><tt>DLOC</tt></i> is empty, they default to zero.<br>
             <br>
-            Presumably there is a <tt>DOGS</tt> pseudo-op as well
-            (differing in that it pertains to a simplex memory
+            Possibly there was a <tt>DOGS</tt> pseudo-op as well
+            (differing in that it pertained to a simplex memory
             configuration rather than a duplex one), but I have not
-            encountered it in actual code.<br>
+            encountered it in actual code and for that reason I don't
+            support it in the modern assembler.<br>
           </td>
         </tr>
         <tr>
@@ -14509,7 +14527,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
         <tr>
           <td valign="middle" nowrap="nowrap"><tt>HPC</tt><tt> <i>SYMBOLNAME</i><br>
             </tt>
-            <div align="left"><i>&nbsp;&nbsp; or</i><br>
+            <div align="left"><i>&nbsp;&nbsp; </i><br>
             </div>
             <tt>HPC <i>SYMBOLNAME1</i>,<i>SYMBOLNAME</i><i>2</i><br>
             </tt></td>
@@ -14529,7 +14547,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
         <tr>
           <td valign="middle" nowrap="nowrap"><tt>HPCDD</tt><tt> <i>arg1,arg2</i><br>
             </tt>
-            <div align="left"><i>&nbsp;&nbsp; or</i><br>
+            <div align="left"><i>&nbsp;&nbsp; </i><br>
             </div>
             <tt>HPCDD <i>IM,IS,S,LOC,DM,DS</i><i></i><br>
             </tt></td>
@@ -14940,7 +14958,8 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
         </tr>
         <tr>
           <td valign="middle"><tt>TELD <i>X,Y,Z<br>
-              </i>TELM<i> X<br>
+              </i><br>
+              TELM<i> X<br>
               </i></tt></td>
           <td valign="top">It appears that by the time of AS-512/AS-513
             flight-program development, the user-defined <tt>MACRO</tt>
@@ -14969,7 +14988,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             subroutine has somehow been placed.&nbsp; And <tt><i>ARG2</i></tt>
             and <tt><i>ARG3</i></tt>, of course, are respectively a
             variable to be output after the delay has transpired and the
-            output channel itself.<br>
+            number of the output channel itself.<br>
             <br>
             The equivalent operation using <tt>TELD</tt> and <tt>TELM</tt>
             would look like this:<br>
@@ -14983,12 +15002,12 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             </blockquote>
             The reason <tt><i>ARG1</i></tt> has disappeared here is
             that <tt>TELD</tt> internally generates what <tt>TELEM</tt>
-            called "<i><tt>ARG1</tt></i>" by concatenating the string "<tt>D.HTR</tt>"
-            with <tt><i>MODE</i></tt>, which is a single octal
-            digit.&nbsp; Thus what happens as far as the assembler is
-            concerned is that <tt>TELD</tt> "defines" the telemetry as
-            having the name "<i><tt>ARG2</tt></i>", and internally
-            associates the parameters <tt><i>"</i>D.HTR<i>"+MODE</i></tt>
+            had earlier called "<i><tt>ARG1</tt></i>" by concatenating
+            the literal string "<tt>D.HTR</tt>" with <tt><i>MODE</i></tt>,
+            which is a single octal digit.&nbsp; Thus what happens as
+            far as the assembler is concerned is that <tt>TELD</tt>
+            "defines" the telemetry as having the name "<i><tt>ARG2</tt></i>",
+            and internally associates the parameters <tt><i>"</i>D.HTR<i>"+MODE</i></tt>
             and <tt><i>ARG3</i></tt> with that name.&nbsp; At some
             later point when <tt>TELM</tt> is invoked, the built-in
             macro is expanded and those associated parameters are
@@ -15008,7 +15027,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap"><tt>USE</tt><tt> INST<i><br>
-              </i></tt><i>&nbsp; or</i><tt><i><br>
+              </i></tt><i>&nbsp; </i><tt><i><br>
               </i>USE DAT<i><br>
               </i> </tt></td>
           <td valign="middle">These pseudo-ops alter the way the
@@ -18291,7 +18310,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-05-11.<br>
+          2023-05-23.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
