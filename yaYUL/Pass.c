@@ -124,6 +124,8 @@
  *            	2021-01-24 RSB  Added a "Reconstruction" marker in .lst files.
  *            	2022-11-27 MAS  Added the "LOC" pseudo-op to Block I, and removed an old
  *            	                workaround for the symbol "DECON" in Solarium 55.
+ *            	2023-05-15 MAS  Added support for the "VXM*" interpretive instruction for Block I.
+ *            	2023-05-23 MAS  Added support for the "DOT*" interpretive instruction for Block I.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1149,6 +1151,7 @@ static InterpreterMatch_t InterpreterOpcodesBlock1[] =
     { "DMP*", 0121 },
     { "DMPR", 0067 },
     { "DOT", 0013 },
+    { "DOT*", 0011 },
     { "DSQ", 0044 },
     { "DSU", 0133 },
     { "DSU*", 0131 },
