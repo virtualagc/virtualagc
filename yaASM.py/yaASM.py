@@ -57,6 +57,13 @@
 #                                  field.
 #                               5. Wrong display in symbol table of DEQD and 
 #                                  DEQS constants (inherited from AS-206RAM).
+#                               6. Allowed symbolic labels or asterisk 
+#                                  expressions in DOG parameters.
+#                               7. Removed restrictions on some pseudo-ops
+#                                  formerly tagged as PTC-only.
+#                               8. Allowed symbolic labels for TABLE pseudo-op.
+#                               9. Allowed asterisk expressions in ORG 
+#                                  parameters.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -462,16 +469,19 @@ def incLOC():
 	global DLOC
 	global dS
 	global used
-	if useDat:
-		if DLOC < 256:
-			used[DM][DS][dS][DLOC] = True
-		dS = 1 - dS
-		if dS == 1:
-			DLOC += 1
-	else:
-		if LOC < 256:
-			used[IM][IS][S][LOC] = True
-		LOC += 1
+	try:
+		if useDat:
+			if DLOC < 256:
+				used[DM][DS][dS][DLOC] = True
+			dS = 1 - dS
+			if dS == 1:
+				DLOC += 1
+		else:
+			if LOC < 256:
+				used[IM][IS][S][LOC] = True
+			LOC += 1
+	except:
+		return
 
 # Find out the last usable instruction location in a sector,
 # because _some_ TMI or TMZ instructions need an extra word
@@ -492,7 +502,10 @@ def getRoof(imod, isec, syl, extra):
 		# 2 words are needed by TMI or TNZ, we can add them 
 		# below 0o375.
 		roof = 0o374
-		needed = len(set(roofAdders[imod][isec]) - set(roofRemovers[imod][isec]))
+		try:
+			needed = len(set(roofAdders[imod][isec]) - set(roofRemovers[imod][isec]))
+		except:
+			return roof
 		if needed > 2:
 			roof -= (needed - 2)
 	if extra > 0:
@@ -648,13 +661,33 @@ def checkLOC(extra = 0):
 	else:
 		# This is the "USE INST" case.
 		autoSwitch = False
-		if not lastORG and (LOC >= 256 or used[IM][IS][S][LOC]):
+		try:
+			if not lastORG and LOC < 256:
+				nextUsed = used[IM][IS][S][LOC]
+			else:
+				nextUsed = False
+		except:
+			addError(lineNumber, \
+					"Error: Space-check failed %o-%02o-%o-%03o" \
+						% (IM, IS, S, LOC))
+			return []
+		if not lastORG and (LOC >= 256 or nextUsed):
 			# If the current location is already used up, we're out
 			# of luck since there's no room to even insert a TRA or HOP.
 			addError(lineNumber, "Error: No memory available at current location")
 			return []
 		roof = getRoof(IM, IS, S, extra)
-		if LOC >= roof or used[IM][IS][S][LOC + 1]:
+		try:
+			if LOC < roof:
+				nextUsed = used[IM][IS][S][LOC + 1]
+			else:
+				nextUsed = False
+		except:
+			addError(lineNumber, \
+					"Error: Space-check failed %o-%02o-%o-%03o" \
+						% (IM, IS, S, LOC+1))
+			return []
+		if LOC >= roof or nextUsed:
 			# Only one word available here, just insert TRA or HOP.  However, we need
 			# to find address for the TRA or HOP to take us to, always searching
 			# upward.
@@ -873,6 +906,35 @@ preprocessor(lines, expandedLines, constants, macros, ptc)
 # having an outer loop on all of the elements of expandedLines[], and an inner 
 # loop on all of the elements of expandedLines[n][].
 
+# Here, "d" is an integer.  "field" is supposed to be one of the following:
+#	*
+#	*+n
+#	*-n
+# where n is a non-negative decimal integer.  The return value is the adjusted 
+# value of d by n.  Or else d is simply returned on error.  These represent
+# adjustments to fields of the DOG pseudo-op, and don't actually appear in the
+# source code in this form.  Rather, they appear as *, *+(n), *-(n), *+(C), or
+# *-(C), where C is the symbolic name of a constant.  However, the processing
+# which has already occurred prior to calling adjustDogField() have  
+# computed the parenthesized expressions and replaced the original source.
+def adjustDogField(lineNumber, d, field):
+	if field == "*":
+		return d
+	elif field[:2] == "*+":
+		sign = 1
+		n = field[2:]
+	elif field[:2] == "*-":
+		sign = -1
+		n = field[2:]
+	else:
+		addError(lineNumber, "Error: Illegal DOG field " + field)
+		return d
+	if n.isdigit():
+		return d + sign * int(n)
+	else:
+		addError(lineNumber, "Error: Non-integer increment in DOG field")
+		return d
+
 page = 0
 ptcDLOC = [[1 for sector in range(16)] for module in range(8)]
 IM = 0
@@ -886,7 +948,6 @@ DLOC = 0
 useDat = False
 udDM = 0
 udDS = 0
-tempSymbols = []
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
 		if ptc:
@@ -940,6 +1001,9 @@ for lineNumber in range(0, len(expandedLines)):
 				else:
 					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
+				if fields[0] != "":
+					inputLine["lhs"] = fields[0]
+					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				try:
 					checkDLOC(int(fields[2]))
 				except:
@@ -967,53 +1031,103 @@ for lineNumber in range(0, len(expandedLines)):
 						DLOC = 0
 					inputLine["udDM"] = DM
 					inputLine["udDS"] = DS
-			elif ptc and fields[1] == "ORG":
+			elif fields[1] == "ORG":
 				lastORG = True
 				if len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORG arguments")
 				else:
-					if ofields[0].strip() != "":
-						IM = int(ofields[0], 8)
+					fIM = ofields[0].strip()
+					fIS = ofields[1].strip()
+					fS = ofields[2].strip()
+					fLOC = ofields[3].strip()
+					fDM = ofields[4].strip()
+					fDS = ofields[5].strip()
+					fDLOC = ofields[6].strip()
+					if fIM[:1] == "*":
+						IM = adjustDogField(lineNumber, IM, fIM)
+					elif fIM != "":
+						IM = int(fIM, 8)
 					else:
 						IM = 0
-					if ofields[1].strip() != "":
-						IS = int(ofields[1], 8)
+					if fIS[:1] == "*":
+						IS = adjustDogField(lineNumber, IS, fIS)
+					elif fIS != "":
+						IS = int(fIS, 8)
 					else:
 						IS = 0
-					if ofields[2].strip() != "":
-						S = int(ofields[2], 8)
+					if fS[:1] == "*":
+						S = adjustDogField(lineNumber, S, fS)
+					elif fS != "":
+						S = int(fS, 8)
 					else:
 						S = 0
-					if ofields[3].strip() != "":
-						LOC = int(ofields[3], 8)
+					if fLOC[:1] == "*":
+						LOC = adjustDogField(lineNumber, LOC, fLOC)
+					elif fLOC != "":
+						LOC = int(fLOC, 8)
 					else:
 						LOC = 0
-					if ofields[4].strip() != "":
-						DM = int(ofields[4], 8)
+					if fDM[:1] == "*":
+						DM = adjustDogField(lineNumber, DM, fDM)
+					elif fDM != "":
+						DM = int(fDM, 8)
 					else:
 						DM = 0
-					if ofields[5].strip() != "":
-						DS = int(ofields[5], 8)
+					if fDS[:1] == "*":
+						DS = adjustDogField(lineNumber, DS, fDS)
+					elif fDS != "":
+						DS = int(fDS, 8)
 					else:
 						DS = 0
-					if ofields[6].strip() != "":
-						DLOC = int(ofields[6], 8)
+					if fDLOC[:1] == "*":
+						DLOC = adjustDogField(lineNumber, DLOC, fDLOC)
+					elif fDLOC != "":
+						DLOC = int(fDLOC, 8)
+					elif not ptc:
+						DLOC = 0
 					else:
 						DLOC = ptcDLOC[DM][DS]
-			elif (fields[1] == "DOGD" and not ptc) or (fields[1] == "DOG" and ptc):
-				if len(ofields) != 3:
+			elif fields[1] in ["DOGD", "DOG"]:
+				if len(ofields) == 1:
+					# In this case we expect the operand to be the name of an
+					# existing symbol representing a variable.
+					symbol = ofields[0]
+					if symbol in constants and "DEQD" == constants[symbol][0]:
+						DM = int(constants[symbol][1], 8)
+						DS = int(constants[symbol][2], 8)
+						DLOC = int(constants[symbol][3], 8)
+					elif symbol not in symbols:
+						#print("Here", symbol, symbol in constants, file=sys.stderr)
+						addError(lineNumber, "Error: Undefined symbol "+symbol)
+					elif "inDataMemory" not in symbols[symbol] \
+							or not symbols[symbol]["inDataMemory"]:
+						addError(lineNumber, "Error: Symbol " + symbol + " not data")
+					else:
+						DM = symbols[symbol]["DM"]
+						DS = symbols[symbol]["DS"]
+						DLOC = symbols[symbol]["DLOC"]
+				elif len(ofields) != 3:
 					addError(lineNumber, "Error: Wrong number of DOGD/DOG arguments")
 				else:
-					if ofields[0].strip() != "":
-						DM = int(ofields[0], 8)
+					fDM = ofields[0].strip()
+					fDS = ofields[1].strip()
+					fDLOC = ofields[2].strip()
+					if fDM[:1] == "*":
+						DM = adjustDogField(lineNumber, DM, fDM)
+					elif fDM != "":
+						DM = int(fDM, 8)
 					else:
 						DM = 0
-					if ofields[1].strip() != "":
-						DS = int(ofields[1], 8)
+					if fDS[:1] == "*":
+						DS = adjustDogField(lineNumber, DS, fDS)
+					elif fDS != "":
+						DS = int(fDS, 8)
 					else:
 						DS = 0
-					if ofields[2].strip() != "":
-						DLOC = int(ofields[2], 8)
+					if fDLOC[:1] == "*":
+						DLOC = adjustDogField(lineNumber, DLOC, fDLOC)
+					elif fDLOC != "":
+						DLOC = int(fDLOC, 8)
 					elif ptc:
 						DLOC = ptcDLOC[DM][DS]
 					else:
@@ -1082,13 +1196,16 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["operand"] = fields[2]
 				
 				# Try to track the number of locations we need for remapping TMI and TNZ targets.
-				if len(fields) >= 2 and fields[0] != "":
-					if fields[0] not in roofRemovers[IM][IS]:
-						roofRemovers[IM][IS].append(fields[0])
-				if len(fields) >= 3 and fields[1] in ["TMI", "TNZ"] and fields[2][:1].isalpha():
-					symbol = fields[2].split("+")[0].split("-")[0]
-					if symbol not in roofAdders[IM][IS]:
-						roofAdders[IM][IS].append(symbol)
+				try:
+					if len(fields) >= 2 and fields[0] != "":
+						if fields[0] not in roofRemovers[IM][IS]:
+							roofRemovers[IM][IS].append(fields[0])
+					if len(fields) >= 3 and fields[1] in ["TMI", "TNZ"] and fields[2][:1].isalpha():
+						symbol = fields[2].split("+")[0].split("-")[0]
+						if symbol not in roofAdders[IM][IS]:
+							roofAdders[IM][IS].append(symbol)
+				except:
+					addError(lineNumber, "Error: Tracking TMI/TNZ failed")
 				
 				if useDat:
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
@@ -1160,8 +1277,6 @@ for lineNumber in range(0, len(expandedLines)):
 		inputLine["inDataMemory"] = inDataMemory
 		inputLine["useDat"] = useDat
 		inputLine["isCDS"] = isCDS
-		if ptc and "lhs" in inputLine:
-			tempSymbols.append(inputLine["lhs"])
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
 
 # Create a table to quickly look up addresses of symbols.
@@ -1801,45 +1916,52 @@ for entry in inputFile:
 				residual = 1
 				hopConstant2 = formConstantHOP(symbols[operand])
 				constantString = "%09o" % hopConstant2
-				if operand in roofed[IM][IS]:
-					# An appropriate HOP instruction has already been put at the 
-					# end of the sector, so we can just take advantage of it.
-					index = roofed[IM][IS].index(operand)
-					loc = 0o377 - index
-					if loc <= 0o375:
-						loc -= 1
-				else:
-					# No HOP to this target has been added to the end of the sector,
-					# so we must do so now.
-					index = len(roofed[IM][IS])
-					loc = 0o377 - index
-					if loc <= 0o375:
-						loc -= 1
-					roofed[IM][IS].append(operand)
-					loc2,residual2 = allocateNameless(lineNumber, constantString, False)
-					ds = DS
-					if residual2 != 0:
-						ds = 0o17
-					storeAssembled(lineNumber, hopConstant2, {
-						"IM": IM,
-						"IS": IS,
-						"S": residual2,
-						"LOC": loc2,
-						"DM": DM,
-						"DS": ds,
-						"DLOC": loc2
-					})
-					assembled2 = operators["HOP"]["opcode"]
-					assembled2 = (assembled2 | (loc2 << 5) | (residual2 << 4))
-					storeAssembled(lineNumber, assembled2, {
-						"IM": IM,
-						"IS": IS,
-						"S": 1,
-						"LOC": loc,
-						"DM": DM,
-						"DS": DS
-					}, False)
-					used[IM][IS][1][loc] = True
+				try:
+					hoppedAlready = (operand in roofed[IM][IS])
+					failed = False
+				except:
+					addError(lineNumber, "Error: Check for prior HOP failed")
+					failed = True
+				if not failed:
+					if hoppedAlready:
+						# An appropriate HOP instruction has already been put at the 
+						# end of the sector, so we can just take advantage of it.
+						index = roofed[IM][IS].index(operand)
+						loc = 0o377 - index
+						if loc <= 0o375:
+							loc -= 1
+					else:
+						# No HOP to this target has been added to the end of the sector,
+						# so we must do so now.
+						index = len(roofed[IM][IS])
+						loc = 0o377 - index
+						if loc <= 0o375:
+							loc -= 1
+						roofed[IM][IS].append(operand)
+						loc2,residual2 = allocateNameless(lineNumber, constantString, False)
+						ds = DS
+						if residual2 != 0:
+							ds = 0o17
+						storeAssembled(lineNumber, hopConstant2, {
+							"IM": IM,
+							"IS": IS,
+							"S": residual2,
+							"LOC": loc2,
+							"DM": DM,
+							"DS": ds,
+							"DLOC": loc2
+						})
+						assembled2 = operators["HOP"]["opcode"]
+						assembled2 = (assembled2 | (loc2 << 5) | (residual2 << 4))
+						storeAssembled(lineNumber, assembled2, {
+							"IM": IM,
+							"IS": IS,
+							"S": 1,
+							"LOC": loc,
+							"DM": DM,
+							"DS": DS
+						}, False)
+						used[IM][IS][1][loc] = True
 		elif operator == "HOP":
 			if operand.isdigit():
 				#addError(lineNumber, "Info: Converting HOP to TRA")
