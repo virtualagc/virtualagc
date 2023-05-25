@@ -47,23 +47,32 @@
 #                               is defined.  What to do about that, I'm not yet
 #                               clear.
 #               2023-05-22 RSB  Some incomplete notes on notable changes:
-#                               1. Formerly-monolithic program split into
-#                                  several Python modules.
-#                               2. Lots of problems that previously would cause
-#                                  abort now insert messages in the listing.
-#                               3. "$SEGMENT" lines (actually, any line with $
-#                                  in column 1) are ignored.
-#               2023-05-23 RSB  4. Extraneous "*" and "$" characters in label
-#                                  field.
-#                               5. Wrong display in symbol table of DEQD and 
-#                                  DEQS constants (inherited from AS-206RAM).
-#                               6. Allowed symbolic labels or asterisk 
-#                                  expressions in DOG parameters.
-#                               7. Removed restrictions on some pseudo-ops
-#                                  formerly tagged as PTC-only.
-#                               8. Allowed symbolic labels for TABLE pseudo-op.
-#                               9. Allowed asterisk expressions in ORG 
-#                                  parameters.
+#                               1.  Formerly-monolithic program split into
+#                                   several Python modules.
+#                               2.  Lots of problems that previously would cause
+#                                   abort now insert messages in the listing.
+#                               3.  "$SEGMENT" lines (actually, any line with $
+#                                   in column 1) are ignored.
+#               2023-05-23 RSB  4.  Extraneous "*" and "$" characters in label
+#                                   field.
+#                               5.  Wrong display in symbol table of DEQD and 
+#                                   DEQS constants (inherited from AS-206RAM).
+#                               6.  Allowed symbolic labels or asterisk 
+#                                   expressions in DOG parameters.
+#               2023-05-24 RSB  7.  Removed restrictions on some pseudo-ops
+#                                   formerly tagged as PTC-only.
+#                               8.  Allowed symbolic labels for TABLE pseudo-op.
+#                               9.  Allowed asterisk expressions in ORG 
+#                                   parameters.
+#               2023-05-25 RSB  10. In symbol-discovery loop, labels for TABLE 
+#                                   pseudo-ops now added immediately to symbol 
+#                                   table for use by DOG pseudo-ops, rather than
+#                                   being handled later in symbol-table loop.
+#                                   (All of the fixes above either decreased the
+#                                   assembly-time errors by tiny amounts or 
+#                                   resulted in big increases.  This change was
+#                                   the first resulting in a big decrease: from
+#                                   >24K before to <10K after.  Yay!)
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -1001,13 +1010,27 @@ for lineNumber in range(0, len(expandedLines)):
 				else:
 					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
-				if fields[0] != "":
-					inputLine["lhs"] = fields[0]
-					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 				try:
 					checkDLOC(int(fields[2]))
 				except:
 					addError(lineNumber, "Implementation: Parsing error in TABLE")
+				if fields[0] != "":
+					lhs = fields[0]
+					inputLine["lhs"] = lhs
+					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, 
+										"DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["isTABLE"] = True
+					# Ordinarily, addition to the symbol table would be handled
+					# later on, outside of this loop.  However, I find that 
+					# DOG instructions processed by this loop need the labels
+					# for TABLE instructions, so we add them to the symbol table
+					# right now.
+					if lhs in symbols:
+						addError(lineNumber, "Error: Symbol already defined")
+					symbols[lhs] = inputLine["hop"]
+					symbols[lhs]["inDataMemory"] = inDataMemory
+					symbols[lhs]["isCDS"] = False
+					symbols[lhs]["isTABLE"] = True
 			elif fields[0] != "" and fields[1] == "SYN":
 				synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
@@ -1282,6 +1305,8 @@ for lineNumber in range(0, len(expandedLines)):
 # Create a table to quickly look up addresses of symbols.
 for entry in inputFile:
 	inputLine = entry["expandedLine"]
+	if "isTABLE" in inputLine: # Already added.
+		continue
 	lineNumber = entry["lineNumber"]
 	if "lhs" in inputLine:
 		lhs = inputLine["lhs"]
