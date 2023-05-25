@@ -312,13 +312,13 @@ def yaEvaluate(string, constants):
 			return value,error
 		if ("scale" in overallScaler and overallScaler["scale"] != 0) \
 				or "number" not in overallScaler:
-			return value,("Improper scaler expression: "+variableScaler)
+			return value,("Error: Improper scaler expression: "+variableScaler)
 		overallScaler = overallScaler["number"]	
 	
 	# Let's tokenize the string.
 	tokens,error = yaTokenize(string)
 	if error != "":
-		return value,error
+		return value,"Error: " + error
 	# Let's replace all constant symbols by their numerical values.
 	for n in range(0, len(tokens)):
 		if type(tokens[n]) != type({}) and tokens[n] in constants:
@@ -331,7 +331,7 @@ def yaEvaluate(string, constants):
 	# form of it.
 	queue,error = yaShuntingYard(tokens)
 	if error != "":
-		return value,error
+		return value,"Error: " + error
 	rpn = []
 	for token in queue:
 		if type(token) == type({}) and "number" in token:
@@ -345,12 +345,12 @@ def yaEvaluate(string, constants):
 			rpn[-1]["number"] = -rpn[-1]["number"]
 		elif token == "B+":
 			if ("scale" in rpn[-2] and "scale" in rpn[-1]) and rpn[-2]["scale"] != rpn[-1]["scale"]:
-				error = "Scale of terms doesn't match"	
+				error = "Error: Scale of terms doesn't match"	
 			rpn[-2]["number"] += rpn[-1]["number"]
 			rpn.pop()
 		elif token == "B-":
 			if ("scale" in rpn[-2] and "scale" in rpn[-1]) and rpn[-2]["scale"] != rpn[-1]["scale"]:
-				error = "Scale of terms doesn't match"
+				error = "Error: Scale of terms doesn't match"
 			rpn[-2]["number"] -= rpn[-1]["number"]
 			rpn.pop()
 		elif token == "*":
@@ -370,7 +370,7 @@ def yaEvaluate(string, constants):
 				else:
 					rpn[-1]["scale"] = token["scale"]
 	if len(rpn) != 1:
-		error = "Could not evaluate expression"
+		error = "Error: Could not evaluate expression"
 	else:
 		value = rpn[0]
 	# 2023 change:

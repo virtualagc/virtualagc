@@ -73,6 +73,7 @@
 #                                   resulted in big increases.  This change was
 #                                   the first resulting in a big decrease: from
 #                                   >24K before to <10K after.  Yay!)
+#                               11. Handles SYN *INS and SYN *DAT.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -529,7 +530,7 @@ def getRoof(imod, isec, syl, extra):
 #	if isOctal == True:
 #		octal digits
 # Returns a string of 9 octal digits, or else "" if error.
-def convertNumericLiteral(n, isOctal = False):
+def convertNumericLiteral(lineNumber, n, isOctal = False):
 	if isOctal or n[:1] == "O":
 		if isOctal:
 			constantString = n[0:]
@@ -577,7 +578,7 @@ def convertNumericLiteral(n, isOctal = False):
 		constantString = "%09o" % value
 		return constantString
 	except:
-		print(n)
+		addError(lineNumber, "Error: Cannot convert numeric literal " + str(n))
 		return ""	
 
 # Allocate/store a nameless variable for "=..." constant, returning its offset
@@ -1032,7 +1033,14 @@ for lineNumber in range(0, len(expandedLines)):
 					symbols[lhs]["isCDS"] = False
 					symbols[lhs]["isTABLE"] = True
 			elif fields[0] != "" and fields[1] == "SYN":
-				synonyms[fields[0]] = fields[2]
+				if fields[2] == "*INS":
+					inputLine["lhs"] = fields[0]
+					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				elif fields[2] == "*DAT":
+					inputLine["lhs"] = fields[0]
+					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+				else:
+					synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
 				if fields[0] in forms:
 					addError(n, "Error: Form already defined")
@@ -1721,9 +1729,9 @@ for entry in inputFile:
 				except:
 					addError(lineNumber, "Error: Illegal operand or form definition")
 		elif operator == "DEC":
-			constantString = convertNumericLiteral(operand)
+			constantString = convertNumericLiteral(lineNumber, operand)
 		elif operator == "OCT":
-			constantString = convertNumericLiteral(operand, True)
+			constantString = convertNumericLiteral(lineNumber, operand, True)
 		elif operator == "HPC":
 			ofields = operand.split(",")
 			if len(ofields) == 1:
@@ -2071,7 +2079,7 @@ for entry in inputFile:
 		else:
 			# Instruction is a "regular" one ... not one of the ones dealt with above.
 			if operand [:1] == "=":
-				constantString = convertNumericLiteral(operand[1:])
+				constantString = convertNumericLiteral(lineNumber, operand[1:])
 				if constantString == "":
 					addError(lineNumber, "Error: Illegal numeric literal")
 					loc = 0
