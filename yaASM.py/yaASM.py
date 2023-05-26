@@ -74,6 +74,7 @@
 #                                   the first resulting in a big decrease: from
 #                                   >24K before to <10K after.  Yay!)
 #                               11. Handles SYN *INS and SYN *DAT.
+#               2024-05-26 RSB  12. Handles ORG SYMBOL and ORG SYMBOL1,SYMBOL2.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -202,7 +203,7 @@ operators = {
     "SHL": { "opcode":0b1110, "a9":1, "a8":0 }
 }
 pseudos = []
-preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM", "TELD"]
+preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM", "TELD", "REQ"]
 ignore = []
 
 # Bit patterns used by DFW pseudo-ops. The key value is the DS.
@@ -1044,6 +1045,21 @@ for lineNumber in range(0, len(expandedLines)):
 			elif fields[0] != "" and fields[1] == "FORM":
 				if fields[0] in forms:
 					addError(n, "Error: Form already defined")
+				for i in range(len(ofields)):
+					ofield = ofields[i]
+					if ofield[:1] == "(":
+						value,error = yaEvaluate(ofield, constants)
+						if error != "":
+							addError(n, error)
+						ofields[i] = "%d" % round(value) # Need hround().
+					elif ofield in constants:
+						print(fields[0], ofield, constants[ofield], file=sys.stderr)
+						sys.exit(1)
+					elif ofield[:-1].isdigit() and \
+							ofield[-1:] in ["B", "O", "D", "P"]:
+						ofields[i] = ofield[:-1]
+					else:
+						print(fields, ofield, file=sys.stderr)
 				forms[fields[0]] = ofields
 			elif (not ptc) and fields[1] == "ORGDD":
 				lastORG = True
@@ -1064,7 +1080,39 @@ for lineNumber in range(0, len(expandedLines)):
 					inputLine["udDS"] = DS
 			elif fields[1] == "ORG":
 				lastORG = True
-				if len(ofields) != 7:
+				if len(ofields) == 1:
+					# In this case we expect the operand to be the name of an
+					# existing symbol associated with a memory location.
+					symbol = ofields[0]
+					if symbol not in symbols:
+						addError(lineNumber, "Error: Undefined symbol "+symbol)
+					else:
+						hop = symbols[symbol]
+						IM = hop["IM"]
+						IS = hop["IS"]
+						S = hop["S"]
+						LOC = hop["LOC"]
+						DM = hop["DM"]
+						DS = hop["DS"]
+						DLOC = hop["DLOC"]
+				elif len(ofields) == 2:
+					symbol = ofields[0]
+					symbol2 = ofields[1]
+					if symbol not in symbols:
+						addError(lineNumber, "Error: Undefined symbol "+symbol)
+					elif symbol2 not in symbols:
+						addError(lineNumber, "Error: Undefined symbol "+symbol2)
+					else:
+						hop = symbols[symbol]
+						hop2 = symbols[symbol2]
+						IM = hop["IM"]
+						IS = hop["IS"]
+						S = hop["S"]
+						LOC = hop["LOC"]
+						DM = hop2["DM"]
+						DS = hop2["DS"]
+						DLOC = hop2["DLOC"]
+				elif len(ofields) != 7:
 					addError(lineNumber, "Error: Wrong number of ORG arguments")
 				else:
 					fIM = ofields[0].strip()

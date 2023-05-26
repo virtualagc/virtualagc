@@ -22,6 +22,7 @@
 # Mods:         2023-05-19 RSB	Split off (as a Python module) from yaASM.py.
 #               2023-05-22 RSB	Implemented TELD & TELM.
 #               2023-05-23 RSB	CALL with a single parameter.
+#               2023-05-26 RSB	Implemented REQ.
 
 from yaASMerrors import *
 from yaASMexpression import *
@@ -169,11 +170,16 @@ def preprocessor(lines, expandedLines, constants, macros, \
 				op = "CDSD"
 			line = fmt % (fields[0], op, "%s,%s" % (constant[1], constant[2]))
 			expandedLines[n] = [line]
-		elif len(fields) >= 3 and fields[0] != "" and fields[1] == "EQU":
+		elif len(fields) >= 3 and fields[0] != "" \
+				and fields[1] in ["EQU", "REQ"]:
 			value,error = yaEvaluate(fields[2], constants)
 			if error != "":
 				addError(n, "Error: " + error)
 			else:
+				if fields[1] == "EQU" and fields[0] in constants:
+					addError(n, "Error: Constant already exists, " + fields[0])
+				elif fields[1] == "REQ" and fields[0] not in constants:
+					addError(n, "Error: Constant does not exist, " + fields[0])
 				constants[fields[0]] = value 
 		elif len(fields) >= 3 and fields[1] == "CALL":
 			ofields = fields[2].split(",")
