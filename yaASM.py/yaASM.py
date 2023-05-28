@@ -72,9 +72,13 @@
 #                                   assembly-time errors by tiny amounts or 
 #                                   resulted in big increases.  This change was
 #                                   the first resulting in a big decrease: from
-#                                   >24K before to <10K after.  Yay!)
+#                                   >24K before to <10K after.  Yay!)  Note that
+#                                   this doesn't yet implement the exclusion
+#                                   properties TABLE is supposed to have.
 #                               11. Handles SYN *INS and SYN *DAT.
-#               2024-05-26 RSB  12. Handles ORG SYMBOL and ORG SYMBOL1,SYMBOL2.
+#               2023-05-26 RSB  12. Handles ORG SYMBOL and ORG SYMBOL1,SYMBOL2.
+#               2023-05-27 RSB  13. Created partial implementation for BLOCK
+#                                   similar to the one for TABLE (#10 above).
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -1033,6 +1037,28 @@ for lineNumber in range(0, len(expandedLines)):
 					symbols[lhs]["inDataMemory"] = inDataMemory
 					symbols[lhs]["isCDS"] = False
 					symbols[lhs]["isTABLE"] = True
+			elif fields[1] == "BLOCK":
+				try:
+					checkDLOC(int(fields[2]))
+				except:
+					addError(lineNumber, "Implementation: Parsing error in BLOCK")
+				if fields[0] != "":
+					lhs = fields[0]
+					inputLine["lhs"] = lhs
+					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, 
+										"DM":DM, "DS":DS, "DLOC":DLOC}
+					inputLine["isBLOCK"] = True
+					# Ordinarily, addition to the symbol table would be handled
+					# later on, outside of this loop.  However, I find that 
+					# DOG instructions processed by this loop need the labels
+					# for TABLE instructions, so we add them to the symbol table
+					# right now.
+					if lhs in symbols:
+						addError(lineNumber, "Error: Symbol already defined")
+					symbols[lhs] = inputLine["hop"]
+					symbols[lhs]["inDataMemory"] = inDataMemory
+					symbols[lhs]["isCDS"] = False
+					symbols[lhs]["isBLOCK"] = True
 			elif fields[0] != "" and fields[1] == "SYN":
 				if fields[2] == "*INS":
 					inputLine["lhs"] = fields[0]
@@ -1053,13 +1079,15 @@ for lineNumber in range(0, len(expandedLines)):
 							addError(n, error)
 						ofields[i] = "%d" % round(value) # Need hround().
 					elif ofield in constants:
-						print(fields[0], ofield, constants[ofield], file=sys.stderr)
-						sys.exit(1)
+						#print(fields[0], ofield, constants[ofield], file=sys.stderr)
+						#sys.exit(1)
+						pass
 					elif ofield[:-1].isdigit() and \
 							ofield[-1:] in ["B", "O", "D", "P"]:
 						ofields[i] = ofield[:-1]
 					else:
-						print(fields, ofield, file=sys.stderr)
+						#print(fields, ofield, file=sys.stderr)
+						pass
 				forms[fields[0]] = ofields
 			elif (not ptc) and fields[1] == "ORGDD":
 				lastORG = True
