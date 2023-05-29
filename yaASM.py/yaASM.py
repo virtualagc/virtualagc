@@ -127,6 +127,45 @@ from yaASMerrors import *
 from yaASMexpression import *
 from yaASMpreprocessor import preprocessor
 
+'''
+Here's an explanation of the overall structure of the assembler.
+
+Pass 0:		Read in all of the source code and store it in the lines[] array.
+			There are additional arrays of the same length that will correlate
+			processed data to the original source lines throughout the assembly
+			process's subsequent passes:
+				errors[]		Lists all error, warning, info messages.
+				expandedLines[]	As the processing proceeds, macros may be 
+								expanded, causing an original source line to
+								turn into multiple lines of code.  The entries
+								are themselves arrays of lines.  Initially,
+								each of these lists contains a single line,
+								but that changes as processing proceeds later.
+Pass 1:		Find all MACRO/ENDMAC definitions in the lines[] array, and store
+			them in a dictionary called macros{}.
+Pass 2:		Preprocessor.  Handles all of the following, by modifying the
+			expandedLines[] array: EQU, REQ, TELD, expansion of TELM,
+			expansion of CALL, expansion of SHL and SHR, expansion of macros,
+			conditional blocks, evaluation of all parenthesized expressions.
+			Constants (defined by EQU and possibly modified by REQ) are stored
+			in the constants{} dictionary.  Note, however, that *all* uses of
+			constants (and macros) are handled by the preprocessor, and thus
+			constants{} and macros{} are irrelevant to subsequent passes.
+			Note also that preprocessing is an iterative process, in that 
+			macro expansions may contain other macro expansions and/or 
+			conditional blocks.  Moreover, the values of constants may change
+			throughout the preprocessing, as REQs are encountered.
+			All all constants or macros are required to have been defined prior
+			to any use of them.
+Pass 3:		Symbol-table generation.  This pass determines locations for all
+			symbols (other than those representing constants and macros).
+			It must handle pseudo-ops such as ORG, as well as modifications 
+			related to HOP*, TRA*, TMI*, TNZ*, BLOCK, TABLE, and insertion of
+			automatic jumps at the ends of sectors.
+Pass 4:		Assembly and output.  
+
+'''
+
 #----------------------------------------------------------------------------
 #	Definitions of global variables.
 #----------------------------------------------------------------------------

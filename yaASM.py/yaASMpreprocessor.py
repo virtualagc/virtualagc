@@ -35,13 +35,15 @@ telds = {}
 #	Preprocessor pass
 #----------------------------------------------------------------------------
 # The idea for this pass is to process:
-#	EQU
+#	EQU and REQ
+#	TELD
+#	Expansion of TELM
 #	Expansion of CALL
-#	Expansion of SHL, SHR
-#	Macro definitions
-#	Usage of EQU-defined constants in assembly-language operands
-#	Expansion of macros
-#	Conditionally-assembled code.
+#	Expansion of SHL and SHR
+#	MACRO
+#	Macro expansions
+#	Conditional blocks
+#	Evaluation of all parenthesized expressions.
 # The array expandedLines[] will end up being exactly the same length as lines[],
 # and the entries will correspond 1-to-1 to it, but the entries will be arrays of
 # replacement lines.  In other words, suppose line=lines[n].  If the preprocessor
