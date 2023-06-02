@@ -33,10 +33,10 @@ counts = {
     "others" : 0
 }
 
-def addError(n, msg, trigger=-1):
+# n is the line number, a la lines[n] array.
+# nn is index, a la expandedLines[n][nn]
+def addError(n, msg, nn=0):
     global errors, counts
-    if trigger != -1 and trigger != n:
-        return
     if n >= len(errors):
         print("Implementation error: %d >= %d = len(errors), %d = len(lines)" \
               % (n, len(errors), len(lines)),\
@@ -57,5 +57,5 @@ def addError(n, msg, trigger=-1):
         else:
             counts["others"] += 1
         #msg = str(n) + ": " + msg
-        errors[n].append(msg) 
+        errors[n].append((nn,msg)) 
 

@@ -125,7 +125,8 @@ import sys
 # The next line imports expression.py.
 from yaASMerrors import *
 from yaASMexpression import *
-from yaASMpreprocessor import preprocessor
+from yaASMdefineMacros import *
+from yaASMpreprocessor import preprocessor, hround
 
 '''
 Here's an explanation of the overall structure of the assembler.
@@ -134,7 +135,11 @@ Pass 0:		Read in all of the source code and store it in the lines[] array.
 			There are additional arrays of the same length that will correlate
 			processed data to the original source lines throughout the assembly
 			process's subsequent passes:
-				errors[]		Lists all error, warning, info messages.
+				errors[]		Lists all error, warning, info messages.  Each
+								entry is an ordered pair (nn, msg), where
+								msg is the error message (a string) and for 
+								errors[n], nn is an index into 
+								expandedLines[n][].
 				expandedLines[]	As the processing proceeds, macros may be 
 								expanded, causing an original source line to
 								turn into multiple lines of code.  The entries
@@ -246,7 +251,8 @@ operators = {
     "SHL": { "opcode":0b1110, "a9":1, "a8":0 }
 }
 pseudos = []
-preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM", "TELD", "REQ"]
+preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM", "TELD", "REQ",
+			"SPACE", "UNLIST", "LIST"]
 ignore = []
 
 # Bit patterns used by DFW pseudo-ops. The key value is the DS.
@@ -414,7 +420,7 @@ for arg in sys.argv[1:]:
 			f.close()
 			checkTheOctals = True
 		except:
-			countWarnings += 1
+			counts["warnings"] += 1
 			print("Warning (%o %02o %03o): Cannot open octal-comparison file %s or file is corrupted" \
 					% (module, sector, offset, checkFilename))
 			checkFilename = ""
@@ -482,6 +488,7 @@ for n in range(0,len(lines)):
 #----------------------------------------------------------------------------
 #	Definitions of utility functions
 #----------------------------------------------------------------------------
+
 def incDLOC(increment = 1, mark = True):
 	global DLOC
 	while increment > 0:
@@ -932,11 +939,19 @@ def formConstantHOP(hop):
 	hopConstant |= (hop["IM"] & 6) >> 1
 	return hopConstant << 1
 
+for n in range(0, len(lines)):
+	line = lines[n]
+	errors.append([])
+	expandedLines.append([line])
+
 #----------------------------------------------------------------------------
 #	Preprocessor pass
 #----------------------------------------------------------------------------
+
+defineMacros(lines, macros)
+
 # The idea for this pass is to process:
-#	EQU, expansion of CALL, expansion of SHL, SHR, macro definitions,
+#	EQU, expansion of CALL, expansion of SHL, SHR,
 #	usage of EQU-defined constants in assembly-language operands,
 #	expansion of macros, conditionally-assembled code.
 # The array expandedLines[] will end up being exactly the same length as 
@@ -964,7 +979,7 @@ preprocessor(lines, expandedLines, constants, macros, ptc)
 #	*
 #	*+n
 #	*-n
-# where n is a non-negative decimal integer.  The return value is the adjusted 
+# where n is a non-negative octal integer.  The return value is the adjusted 
 # value of d by n.  Or else d is simply returned on error.  These represent
 # adjustments to fields of the DOG pseudo-op, and don't actually appear in the
 # source code in this form.  Rather, they appear as *, *+(n), *-(n), *+(C), or
@@ -983,10 +998,19 @@ def adjustDogField(lineNumber, d, field):
 	else:
 		addError(lineNumber, "Error: Illegal DOG field " + field)
 		return d
-	if n.isdigit():
-		return d + sign * int(n)
-	else:
-		addError(lineNumber, "Error: Non-integer increment in DOG field")
+	if n[0] == "(" and n[-1] == ")":
+		value,error = yaEvaluate(n[1:-1], constants)
+		if error != "":
+			addError(lineNumber, "Error: %s" % error)
+		else:
+			v = value["number"]
+			if "scale" in value:
+				v *= 2**value["scale"]
+			return d + sign * hround(v)
+	try:
+		return d + sign * hround(float(n))
+	except:
+		addError(lineNumber, "Error: Cannot evaluate increment in DOG field (%s)" % n)
 		return d
 
 page = 0
@@ -1002,6 +1026,7 @@ DLOC = 0
 useDat = False
 udDM = 0
 udDS = 0
+inMacro = ""
 for lineNumber in range(0, len(expandedLines)):
 	for line in expandedLines[lineNumber]:
 		if ptc:
@@ -1019,9 +1044,26 @@ for lineNumber in range(0, len(expandedLines)):
 		fields = line.split()
 		if len(fields) > 0 and fields[0] == "@":
 			fields[0] = ""
+		lhs = ""
+		if len(fields) > 0:
+			lhs = fields[0]
 		    
-		# Remove comments.
+		# Ignore full-line comments.
 		if inputLine["raw"][:1] in ["*", "#", "$"]:
+			#continue
+			fields = []
+
+		# Detect MACRO / ENDMAC definitions.
+		if len(fields) >= 2:
+			if inMacro != "":
+				inputLine["inMacroDef"] = True
+				if fields[1] == "ENDMAC":
+					inMacro = ""
+					fields = []
+			elif fields[1] == "MACRO":
+				inMacro = fields[0]
+		if inMacro != "":
+			inputLine["inMacroDef"] = True
 			fields = []
 		
 		if len(fields) >= 2 and fields[1] == "VEC":
@@ -1036,8 +1078,6 @@ for lineNumber in range(0, len(expandedLines)):
 				checkDLOC()
 				if (DLOC & 15) == 0:
 					break
-		elif len(fields) >= 2 and fields[1] == "MACRO" and fields[0] in macros and macros[fields[0]]["numArgs"] == 0:
-			pass
 		elif len(fields) >= 2 and fields[1] in macros and macros[fields[1]]["numArgs"] == 0:
 			pass
 		elif len(fields) >= 2 and fields[1] in ["ENDIF", "END"]:
@@ -1116,18 +1156,19 @@ for lineNumber in range(0, len(expandedLines)):
 						value,error = yaEvaluate(ofield, constants)
 						if error != "":
 							addError(n, error)
-						ofields[i] = "%d" % round(value) # Need hround().
+						ofields[i] = "%d" % hround(value)
 					elif ofield in constants:
 						#print(fields[0], ofield, constants[ofield], file=sys.stderr)
 						#sys.exit(1)
 						pass
 					elif ofield[:-1].isdigit() and \
 							ofield[-1:] in ["B", "O", "D", "P"]:
-						ofields[i] = ofield[:-1]
+						ofields[i] = ofield
 					else:
 						#print(fields, ofield, file=sys.stderr)
 						pass
 				forms[fields[0]] = ofields
+				#print("Added FORM", fields[0], ofields, file=sys.stderr)
 			elif (not ptc) and fields[1] == "ORGDD":
 				lastORG = True
 				if len(ofields) != 7:
@@ -1165,11 +1206,14 @@ for lineNumber in range(0, len(expandedLines)):
 				elif len(ofields) == 2:
 					symbol = ofields[0]
 					symbol2 = ofields[1]
+					bad = False
 					if symbol not in symbols:
 						addError(lineNumber, "Error: Undefined symbol "+symbol)
-					elif symbol2 not in symbols:
+						bad = True
+					if symbol2 not in symbols:
 						addError(lineNumber, "Error: Undefined symbol "+symbol2)
-					else:
+						bad = True
+					if not bad:
 						hop = symbols[symbol]
 						hop2 = symbols[symbol2]
 						IM = hop["IM"]
@@ -1238,10 +1282,15 @@ for lineNumber in range(0, len(expandedLines)):
 					# In this case we expect the operand to be the name of an
 					# existing symbol representing a variable.
 					symbol = ofields[0]
-					if symbol in constants and "DEQD" == constants[symbol][0]:
-						DM = int(constants[symbol][1], 8)
-						DS = int(constants[symbol][2], 8)
-						DLOC = int(constants[symbol][3], 8)
+					if symbol in constants and len(constants[symbol]) > 0:
+						try:
+							if "DEQD" == constants[symbol][0]:
+								DM = int(constants[symbol][1], 8)
+								DS = int(constants[symbol][2], 8)
+								DLOC = int(constants[symbol][3], 8)
+						except:
+							addError(lineNumber, "Implementation: %s %s" \
+									% (symbol, str(constants[symbol])))
 					elif symbol not in symbols:
 						#print("Here", symbol, symbol in constants, file=sys.stderr)
 						addError(lineNumber, "Error: Undefined symbol "+symbol)
@@ -1424,8 +1473,15 @@ for lineNumber in range(0, len(expandedLines)):
 		inputLine["useDat"] = useDat
 		inputLine["isCDS"] = isCDS
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
+		if lhs != "" and "hop" in inputLine:
+			symbols[lhs] = inputLine["hop"]
+			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
+			symbols[lhs]["isCDS"] = inputLine["isCDS"]
+			symbols[lhs]["1stPass"] = True
 
-# Create a table to quickly look up addresses of symbols.
+# Create a table to quickly look up addresses of symbols. I think that all or
+# most of these will already have been done by the preprocessor or the loop 
+# above, though.
 for entry in inputFile:
 	inputLine = entry["expandedLine"]
 	if "isTABLE" in inputLine: # Already added.
@@ -1435,10 +1491,14 @@ for entry in inputFile:
 		lhs = inputLine["lhs"]
 		if "hop" in inputLine:
 			if lhs in symbols:
-				addError(lineNumber, "Error: Symbol already defined")
-			symbols[lhs] = inputLine["hop"]
-			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
-			symbols[lhs]["isCDS"] = inputLine["isCDS"]
+				if "1stPass" not in symbols[lhs]:
+					addError(lineNumber, "Error: Symbol (%s) already defined" % lhs)
+				else:
+					symbols[lhs].pop("1stPass")
+			else:
+				symbols[lhs] = inputLine["hop"]
+				symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
+				symbols[lhs]["isCDS"] = inputLine["isCDS"]
 			if inputLine["inDataMemory"]:
 				allocationRecords.append({ "symbol": lhs, "lineNumber": lineNumber, 
 					"inputLine": inputLine, "DM": inputLine["hop"]["DM"], 
@@ -1459,20 +1519,32 @@ for entry in inputFile:
 			addError(lineNumber, "Error: Symbol location unknown (%s)" % autoVariable)
 
 # A mini-pass to set up SYN symbols.
-for n in range(0, len(lines)):
-	line = lines[n]
-	# Split the line into fields.
-	if line[:1] in [" ", "\t"] and not line.isspace():
-		line = "@" + line
-	fields = line.split()
-	if len(fields) > 0 and fields[0] == "@":
-		fields[0] = ""
-		line = line[1:]
-	if len(fields) >= 3 and fields[0] != "" and fields[1] == "SYN":
-		if fields[2] not in symbols:
-			addError(n, "Error: Synonym not found")
-		else:
-			symbols[fields[0]] = symbols[fields[2]]
+if True:
+	inMacro = ""
+	for n in range(0, len(lines)):
+		line = lines[n]
+		# Split the line into fields.
+		if line[:1] in [" ", "\t"] and not line.isspace():
+			line = "@" + line
+		fields = line.split()
+		if len(fields) > 0 and fields[0] == "@":
+			fields[0] = ""
+			line = line[1:]
+			
+		# Detect MACRO / ENDMAC definitions.
+		if len(fields) >= 2:
+			if inMacro != "":
+				if fields[1] == "ENDMAC":
+					inMacro = ""
+					fields = []
+			elif fields[1] == "MACRO":
+				inMacro = fields[0]
+					
+		if inMacro == "" and len(fields) >= 3 and fields[0] != "" and fields[1] == "SYN":
+			if fields[2] not in symbols:
+				addError(n, "Error: Synonym not found")
+			else:
+				symbols[fields[0]] = symbols[fields[2]]
 
 if False:
 	for key in sorted(symbols):
@@ -1826,11 +1898,51 @@ for entry in inputFile:
 					numBits = 0
 					cumulative = 0
 					for n in range(len(formDef)):
-						patternValue = int(formDef[n])
+						form = formDef[n]
+						last = form[-1:]
+						first = form[:-1]
+						ofield = ofields[n]
+						patternValue = 0
+						usageValue = 8
+						if last in ["B", "O", "D", "P", "0", "1", "2", 
+										"3", "4", "5", "6", "7", "8", "9"] \
+								and (first == "" or first.isdigit()):
+							if last.isdigit():
+								patternValue = int(form)
+							else:
+								patternValue = int(first)
+							if ofield in constants:
+								usageValue = constants[ofield]["number"]
+							elif last == "B":
+								usageValue = int(ofield, 2)
+							elif last == "O":
+								usageValue = int(ofield, 8)
+							elif last == "D":
+								usageValue = int(ofield, 10)
+							elif last == "P":
+								usageValue = hround(ofield)
+							else: # Pure integer
+								# This was all that was needed for AS-206RAM.
+								usageValue = int(ofield, 8)
+						elif form == "DM" and ofield in symbols:
+							patternValue = 3
+							usageValue = symbols[ofield]["DM"]
+						elif form == "DS" and ofield in symbols:
+							patternValue = 4
+							usageValue = symbols[ofield]["DS"]
+						elif form == "DA" and ofield in symbols:
+							patternValue = 8
+							usageValue = symbols[ofield]["DLOC"]
+						elif form in ["DM", "DS", "DA"]:
+							addError(lineNumber, \
+									"Error: Symbol (%s) not found" % ofield)
+						else:
+							addError(lineNumber, \
+									"Error: Unknown form parameter (%s)" % form)
 						ceiling = pow(2, patternValue)
-						usageValue = int(ofields[n], 8)
 						if usageValue >= ceiling:
-							addError(lineNumber, "Error: Field value too large for defined form")
+							addError(lineNumber, \
+								"Error: Field value too large for defined form")
 							usageValue = usageValue & (ceiling - 1)
 						cumulative = cumulative << patternValue
 						cumulative = cumulative | usageValue
@@ -1906,8 +2018,10 @@ for entry in inputFile:
 				addError(lineNumber, "Error: Improperly-formed operand for DFW")
 			elif ofields[0] not in operators or ofields[2] not in operators:
 				addError(lineNumber, "Error: Unknown operator")
-			elif ofields[1] not in symbols or ofields[3] not in symbols:
-				addError(lineNumber, "Error: Symbol not found")
+			elif ofields[1] not in symbols:
+				addError(lineNumber, "Error: Symbol (%s) not found" % ofields[1])
+			elif ofields[3] not in symbols:
+				addError(lineNumber, "Error: Symbol (%s) not found" % ofields[3])
 			else:
 				assembled1 = operators[ofields[0]]["opcode"]
 				assembled0 = operators[ofields[2]]["opcode"]
@@ -2194,9 +2308,28 @@ for entry in inputFile:
 		else:
 			# Instruction is a "regular" one ... not one of the ones dealt with above.
 			if operand [:1] == "=":
-				constantString = convertNumericLiteral(lineNumber, operand[1:])
+				if operand[:3] == "=H'":
+					symbol = operand[3:]
+					if symbol not in symbols:
+						addError(lineNumber, "Error: Symbol (%s) not found" % symbol)
+					else:
+						# The symbol was found, and we want to convert it to a
+						# hop constant, in the form of a string that's an octal
+						# representation of the constant.
+						symbol1 = symbols[symbol]
+						hopConstant = formConstantHOP({
+							"IM": symbol1["IM"],
+							"IS": symbol1["IS"],
+							"S": symbol1["S"],
+							"LOC": symbol1["LOC"],
+							"DM": symbol2["DM"],
+							"DS": symbol2["DS"]
+						})
+						constantString = "%09o" % hopConstant
+				else:
+					constantString = convertNumericLiteral(lineNumber, operand[1:])
 				if constantString == "":
-					addError(lineNumber, "Error: Illegal numeric literal")
+					addError(lineNumber, "Error: Illegal \"=...\" string")
 					loc = 0
 				else:
 					#print("B1: allocateNameless " + constantString + " " + operand)
@@ -2262,7 +2395,6 @@ for entry in inputFile:
 		if loc > 0o377:
 			loc = loc & 0o377
 			residual = 1
-		#addError(lineNumber, "here C %d" % residual, trigger = 1469)
 		if "a8" in operators[operator]:
 			loc = (loc & 0o177) | (operators[operator]["a8"] << 7)
 		a81 = "%03o" % loc
@@ -2277,9 +2409,9 @@ for entry in inputFile:
 		errorsPrinted = []
 		lastLineNumber = lineNumber
 	for error in errorList:
-		if error not in errorsPrinted:
-			errorsPrinted.append(error)
-			print(error)
+		if error[1] not in errorsPrinted:
+			errorsPrinted.append(error[1])
+			print("%d: %s" % error)
 	# If jump instructions have been remapped mark them with an asterisk.
 	raw = inputLine["raw"]
 	if star and operator in ["HOP", "TRA", "TNZ", "TMI"]:
@@ -2328,10 +2460,11 @@ for entry in inputFile:
 				lineFields[adrField] = "%03o" % (hop["DLOC"] + n)
 				lineFields[constantField] = "%-9s" % bciLine
 				printLineFields()
-		if len(fields) > 1 and fields[1] == "MACRO" and fields[0] in macros:
+		if False and len(fields) > 1 and fields[1] == "MACRO" and fields[0] in macros:
 			macroLines = macros[fields[0]]["lines"]
 			clearLineFields()
-			for macroLine in macroLines:
+			for ml in macroLines:
+				macroLine = lineSplit(ml)
 				lineText = ""
 				for n in macroLine:
 					lineText += "%-8s" % n
