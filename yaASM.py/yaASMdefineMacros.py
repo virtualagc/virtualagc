@@ -32,15 +32,34 @@ from yaASMerrors import addError
 # However, special steps are taken to account for full-line comments, for the
 # differences between .lvdc and .lvdc8 formats, and for the fact that columns
 # 2-6 may have a sprinkling of "random" * and $ characters.
-def lineSplit(line):
-	if line.strip() == "":
-		return []
-	if line[:1] in ["*", "#", "$"]:
-		return ["", "", "", line.rstrip()]
-	field0 = line[:7].rstrip()
-	field1 = line[7:].strip().split(None, 2)
-	fields = [field0] + field1
-	return fields
+if False:
+	def lineSplit(line):
+		if line.strip() == "":
+			return []
+		if line[:1] in ["*", "#", "$"]:
+			return ["", "", "", line.rstrip()]
+		field0 = line[:7].rstrip()
+		field1 = line[7:].strip().split(None, 2)
+		fields = [field0] + field1
+		return fields
+else:
+	def lineSplit(line):
+		if line.strip() == "":
+			return []
+		if line[:1] in ["*", "#", "$"]:
+			return ["", "", "", line.rstrip()]
+		field0 = line[:7].rstrip()
+		# The next few lines attempt to account for lines having no operand
+		# but having a comment.  It tries to account for both .lvdc and .lvdc8
+		# formats, and assumes that the comment cannot encroach on an 
+		# 8-character-wide field representing the operand.
+		if len(line) >= 16 and line[15:23].strip() == "":
+			line = line[:15] + "@_@" + line[15:]
+		field1 = line[7:].strip().split(None, 2)
+		if len(field1) >= 2 and field1[1] == "@_@":
+			field1[1] = ""
+		fields = [field0] + field1
+		return fields
 
 # Examine the lines[] array and form the macros{} dictionary from it.
 # NOTE:  It's tempting to try and handle UNLIST and LIST here, but don't do it!
@@ -84,7 +103,7 @@ def defineMacros(lines, macros):
 				addError(n, "Error: Macro (%s) already exists" % inMacro)
 				inError = True
 			if not inError:
-				if len(fields) == 2:
+				if len(fields) == 2 or fields[2] == '':
 					numArgs = 0
 					formalArgs = []
 				else:

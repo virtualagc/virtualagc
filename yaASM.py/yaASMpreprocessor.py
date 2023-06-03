@@ -73,6 +73,9 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 	# The following LVDC instructions may accept operands of the form "=...".
 	acceptsEquals = ["AND", "CLA", "DIV", "MPH", "MPY", "RSU", "SUB", "XOR"]
 
+	ampC1 = 0
+	ampString = "000"
+	ampUsed = False
 	inMacro = ""
 	unlist = False
 	ifs = []
@@ -139,11 +142,13 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 				if constant not in constants:
 					addError(n, "Error: Constant (%s) not found" % constant, nn)
 					continue
+
 				expression = ofields[1][:-1]
 				value,error = yaEvaluate(expression, constants)
 				if error != "":
 					addError(n, "Error: Cannot evaluate expression", nn)
 					continue
+					
 				v1 = constants[constant]["number"]
 				v2 = value["number"]
 				if "scale" in value or "scale" in constants[constant]:
@@ -219,9 +224,14 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 			# actually find any instances in the source code of nesting.  Inside
 			# of macros you do have form invocations, TELMs, and so forth, 
 			# which are kinds of macro.  It doesn't matter; this code should be
-			# fine anyway.] 
+			# fine anyway.  The code for ampC1 will fail if there are nested
+			# expansions.] 
 			if len(fields) >= 2 and fields[1] in macros:
 				unlist = False
+				if ampUsed:
+					ampC1 += 1
+					ampString = "%03d" % ampC1
+					ampUsed = False
 				#print("M:", line, file=sys.stderr)
 				macro = macros[fields[1]]
 				if len(fields) >= 3:
@@ -230,7 +240,9 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 					ofields = []
 				numArgs = len(ofields)
 				if macro["numArgs"] != 0 and numArgs != macro["numArgs"]:
-					addError(n, "Error: " + "Wrong number of macro arguments")
+					addError(n, "Error: " + \
+							"Wrong number (%d != %d) of macro arguments: %s" \
+							% (numArgs, macro["numArgs"], macro["formalArgs"]))
 				else:
 					macroLines = macro["lines"]
 					formalArgs = macro["formalArgs"]
@@ -241,6 +253,9 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 						# parameter.these formal arguments can appear anywhere
 						# in the line, not just in operand fields.
 						mline = macroLines[m]	
+						if "&C1" in mline:
+							mline = re.sub("&C1", ampString, mline)
+							ampUsed = True
 						for ii in range(numArgs):
 							try:
 								pattern = "\\b%s\\b" % formalArgs[ii]
@@ -384,12 +399,10 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 				if error != "":
 					addError(n, "Error: " + error)
 				else:
-					if False:
-						if fields[1] == "EQU" and fields[0] in constants \
-								and value != constants[fields[0]]:
-							addError(n, "Error: Constant already defined differently, " + fields[0])
-						elif fields[1] == "REQ" and fields[0] not in constants:
-							addError(n, "Error: Constant does not exist, " + fields[0])
+					if fields[1] == "EQU" and fields[0] in constants:
+						value = constants[fields[0]]
+					elif False and fields[1] == "REQ" and fields[0] not in constants:
+						addError(n, "Error: Constant does not exist, " + fields[0])
 					constants[fields[0]] = value 
 			elif len(fields) >= 3 and fields[1] == "CALL":
 				ofields = fields[2].split(",")
