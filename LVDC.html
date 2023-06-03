@@ -13352,9 +13352,15 @@ Assembly
     associated macro.<br>
     <br>
     Note that in the <i>definition</i> of the macro, the strings <tt>ARG1</tt>,
-    <tt>ARG2</tt>, and so on are literal.&nbsp; You can't <i>define</i>
-    a macro with arbitrary arguments names like (say) <tt>x</tt>, <tt>y</tt>,
-    and <tt>z</tt>.&nbsp;&nbsp; <br>
+    <tt>ARG2</tt>, and so on are the list of formal arguments to the
+    macro.&nbsp; Most existing LVDC code literally uses the formal
+    arguments <tt>ARG1</tt>,<tt>ARG2</tt>,..., but not always.&nbsp; At
+    least in the modern assembler, you can use anything as a formal
+    argument that doesn't have a space or a comment in it.&nbsp; When
+    you invoke the macro, the invocation will itself have a list of
+    parameters (again, the parameters can be anything not having a space
+    or comma in it), and the macro-expansion process will substitute
+    those parameters for the formal arguments.<br>
     <br>
     As an example, consider the 2-argument the <tt> CALL</tt> macro
     described earlier.&nbsp; It is hard-coded into the assembler, and
@@ -13369,17 +13375,30 @@ Assembly
         HOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ARG1<br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ENDMAC<br>
       </tt></blockquote>
-    One feature that can be used in macro definitions is the counter
-    string, <tt>&amp;C1</tt>.&nbsp; This is a 3-decimal-digit counter
-    that begins with a value of 000, and increments at the end of any
-    macro using <tt>&amp;C1</tt>.&nbsp; In other words, within the
-    first macro using <tt>&amp;C1</tt> which is expanded, it has the
-    value 000, within the next macro expanded it has the value 001, and
-    so on.&nbsp; It can be used to have labels which are good within any
-    given macro expansion, but don't overlap with any other macro
-    expansion.&nbsp; The example macro above doesn't use <tt>&amp;C1</tt>,
-    so invoking it won't increment the counter.&nbsp; But suppose
-    instead that it were written as:<br>
+    This might be invoked, for example, as<br>
+    <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CALL&nbsp;&nbsp;&nbsp; MYFUNC,X</tt><br>
+    </blockquote>
+    and would be expanded as<br>
+    <blockquote><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        CLA&nbsp;&nbsp;&nbsp; &nbsp; X</tt><br>
+      <tt> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+        HOP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MYFUNC</tt><br>
+    </blockquote>
+    <tt> </tt>Various features commonly used with macros (and described
+    below in the section on pseudo-ops) are <tt>IF/ENDIF</tt>, <tt>UNLIST/LIST</tt>,
+    <tt>EQU</tt>/<tt>REQ</tt>, and <tt>SPACE</tt>.&nbsp; One feature
+    not discussed later that can be used in macro definitions is the
+    counter string, <tt>&amp;C1</tt>.&nbsp; This is a 3-decimal-digit
+    counter that begins with a value of 000, and increments at the end
+    of any macro using <tt>&amp;C1</tt>.&nbsp; In other words, within
+    the first macro expansion using <tt>&amp;C1</tt>, it has the value
+    000, within the next macro expanded it has the value 001, and so
+    on.&nbsp; It can be used to create and reference labels which are
+    good within any given macro expansion, but which don't overlap with
+    any other macro expansion.&nbsp; The example macro above doesn't use
+    <tt>&amp;C1</tt>, so invoking it won't increment the counter.&nbsp;
+    But suppose instead that it were written as:<br>
     <blockquote><tt>CALL&nbsp;&nbsp;&nbsp; MACRO&nbsp;&nbsp;&nbsp;
         ARG1,ARG2<br>
         CAL&amp;C1&nbsp; CLA&nbsp;&nbsp;&nbsp; &nbsp; ARG2<br>
@@ -13399,6 +13418,13 @@ Assembly
     code and can't imagine any use for them, so the modern assembler
     supports only <tt>&amp;C1</tt>.<br>
     <i><br>
+    </i>It is unclear whether macros can be nested.&nbsp; There are no
+    cases of nested macros in any currently-available LVDC code.&nbsp; I
+    believe that the modern assembler <i>does</i> support nested
+    macros, although the present support for <tt>&amp;C1</tt> in the
+    modern assembler would not work correctly if both a parent macro and
+    its nested child used the counter.<i><br>
+      <br>
       Pseudo variables</i>:&nbsp; "Pseudo variables" are named numeric
     constants known only by the preprocessor.&nbsp; Any usages of such
     pseudo variables are replaced by numeric literals by the
@@ -14836,7 +14862,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           </td>
         </tr>
         <tr>
-          <td valign="top"><tt>LIST</tt><br>
+          <td valign="middle"><tt>LIST</tt><br>
           </td>
           <td valign="top">See <tt>UNLIST</tt>.<br>
           </td>
@@ -15164,7 +15190,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           </td>
         </tr>
         <tr>
-          <td valign="top"><tt>SPACE <i>n</i></tt><br>
+          <td valign="middle"><tt>SPACE <i>n</i></tt><br>
           </td>
           <td valign="top">As far as I can tell, <tt>SPACE</tt> appears
             only within macro definitions — i.e., between <tt>MACRO</tt>
@@ -15388,12 +15414,12 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           </td>
         </tr>
         <tr>
-          <td valign="top"><tt>UNLIST</tt><br>
+          <td valign="middle"><tt>UNLIST</tt><br>
           </td>
           <td valign="top">In the available LVDC source code, it appears
             to me that <tt>UNLIST</tt> (and its partner, <tt>LIST</tt>)
             appear only within macro definitions — i.e., between a <tt>MACRO</tt>
-            and an <tt>ENDMAC</tt>.&nbsp; The effect on an <tt>UNLIST</tt>
+            and an <tt>ENDMAC</tt>.&nbsp; The effect of an <tt>UNLIST</tt>
             is to omit all subsequent lines in the macro definition from
             the assembly listing until a <tt>LIST</tt> is
             encountered.&nbsp; The <tt>UNLIST</tt>'d lines are still
