@@ -23,6 +23,9 @@
 #               2023-05-22 RSB	Implemented TELD & TELM.
 #               2023-05-23 RSB	CALL with a single parameter.
 #               2023-05-26 RSB	Implemented REQ.
+#               2023-06-04 RSB  UNLIST/LIST is processed in the assembly pass,
+#                               but I had forgotten to remove my early 
+#                               misconception of it from the preprocessor.
 
 import re
 from decimal import Decimal, ROUND_HALF_UP
@@ -77,7 +80,6 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 	ampString = "000"
 	ampUsed = False
 	inMacro = ""
-	unlist = False
 	ifs = []
 	if ptc:
 		maxSHF = 6
@@ -108,11 +110,9 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 				if inMacro != "":
 					if fields[1] == "ENDMAC":
 						inMacro = ""
-						unlist = False
 						continue
 				elif fields[1] == "MACRO":
 					inMacro = fields[0]
-					unlist = False
 			if inMacro != "":
 				continue
 			
@@ -188,23 +188,6 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 			# If we've gotten to this point, we have a line that supposed to be
 			# processed.
 			
-			# Ignore anything in an UNLIST/LIST block.
-			if len(fields) >= 2 and fields[1] == "UNLIST":
-				if unlist:
-					addError(n, "Info: UNLIST was already in effect")
-				unlist = True
-				expandedLines[n][nn-1] += unlistSuffix
-				continue
-			elif len(fields) >= 2 and fields[1] == "LIST":
-				if not unlist:
-					addError(n, "Info: LIST without preceding UNLIST")
-				unlist = False
-				expandedLines[n][nn-1] += unlistSuffix
-				continue
-			elif unlist:
-				expandedLines[n][nn-1] += unlistSuffix
-				continue
-	
 			# Determine the format of the line (.lvdc8 vs .lvdc), in case we need
 			# to print something.
 			if "\t" in line or " " == line[7]: # .lvdc8 
@@ -227,7 +210,6 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 			# fine anyway.  The code for ampC1 will fail if there are nested
 			# expansions.] 
 			if len(fields) >= 2 and fields[1] in macros:
-				unlist = False
 				if ampUsed:
 					ampC1 += 1
 					ampString = "%03d" % ampC1
@@ -293,8 +275,9 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 							lhs = fields[0]
 						expandedMacro.append(fmt % (lhs, operator, operand))
 						#print("E:", expandedMacro[-1], file=sys.stderr)
-					# Replace the macro invocation line with the lines of the
-					# expanded macro, and proceed to process from that point.
+					# Replace the macro invocation line itself with the lines 
+					# of the expanded macro, and proceed to process from that 
+					# point. 
 					nn -= 1
 					expandedLines[n][nn:nn+1] = expandedMacro
 					continue
@@ -363,8 +346,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 				if fields2 != fields[2]:
 					nn -= 1
 					expandedLines[n][nn] = line.replace(fields[2], fields2)
-					#fields[2] = fields2
-					continue
+					fields[2] = fields2
 				
 			if len(fields) >= 3 and fields[1] in ["TABLE", "DEC"] and fields[2][:1] == "(":
 				value,error = yaEvaluate(fields2, constants)
@@ -405,8 +387,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 				nn -= 1
 				expandedLines[n][nn] = line
 				continue
-			elif len(fields) >= 3 and fields[0] != "" \
-					and fields[1] in ["EQU", "REQ"]:
+			elif len(fields) >= 3 and fields[0] != "" and fields[1] in ["EQU", "REQ"]:
 				value,error = yaEvaluate(fields[2], constants)
 				if error != "":
 					addError(n, "Error: " + error)

@@ -79,6 +79,11 @@
 #               2023-05-26 RSB  12. Handles ORG SYMBOL and ORG SYMBOL1,SYMBOL2.
 #               2023-05-27 RSB  13. Created partial implementation for BLOCK
 #                                   similar to the one for TABLE (#10 above).
+#               2023-06-04 RSB  Fixed incorrect alignment check for VEC and 
+#                               MAT.  Corrected DEQD, DEQS. PTC ADAPT Self-Test 
+#                               and AS-206RAM continue
+#                               to build correctly, though there are 2 less 
+#                               warnings for the latter.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -1075,13 +1080,13 @@ for lineNumber in range(0, len(expandedLines)):
 		if len(fields) >= 2 and fields[1] == "VEC":
 			while DLOC < 256:
 				DLOC = (DLOC + 3) & ~3
-				checkDLOC()
+				checkDLOC(3)
 				if (DLOC & 3) == 0:
 					break
 		elif len(fields) >= 2 and fields[1] == "MAT":
 			while DLOC < 256:
 				DLOC = (DLOC + 15) & ~15
-				checkDLOC()
+				checkDLOC(9)
 				if (DLOC & 15) == 0:
 					break
 		elif len(fields) >= 2 and fields[1] in macros and macros[fields[1]]["numArgs"] == 0:
@@ -1336,10 +1341,13 @@ for lineNumber in range(0, len(expandedLines)):
 				inputLine["udDM"] = DM
 				inputLine["udDS"] = DS
 			elif fields[1] in ["DEQS", "DEQD"] and fields[0] in constants:
-				symbols[fields[0]] = {	"IM":IM, "IS":IS, "S":S, 
-								"LOC":LOC, "DM":int(constants[fields[0]][1], 8), 
-								"DS":int(constants[fields[0]][2], 8), 
-								"DLOC":int(constants[fields[0]][3], 8), "inDataMemory":True }
+				newDM = int(constants[fields[0]][1], 8)
+				newDS = int(constants[fields[0]][2], 8)
+				newDLOC = int(constants[fields[0]][3], 8)
+				symbols[fields[0]] = {	"IM": newDM, "IS": newDS, "S": 0, 
+								"LOC": newDLOC, "DM": newDM, 
+								"DS": newDS, 
+								"DLOC": newDLOC, "inDataMemory":True }
 				inputLine["udDM"] = int(constants[fields[0]][1], 8)
 				inputLine["udDS"] = int(constants[fields[0]][2], 8)
 			elif fields[1] == "BSS":
@@ -1525,32 +1533,19 @@ for entry in inputFile:
 			addError(lineNumber, "Error: Symbol location unknown (%s)" % autoVariable)
 
 # A mini-pass to set up SYN symbols.
-if True:
-	inMacro = ""
-	for n in range(0, len(lines)):
-		line = lines[n]
-		# Split the line into fields.
-		if line[:1] in [" ", "\t"] and not line.isspace():
-			line = "@" + line
-		fields = line.split()
-		if len(fields) > 0 and fields[0] == "@":
-			fields[0] = ""
-			line = line[1:]
-			
-		# Detect MACRO / ENDMAC definitions.
-		if len(fields) >= 2:
-			if inMacro != "":
-				if fields[1] == "ENDMAC":
-					inMacro = ""
-					fields = []
-			elif fields[1] == "MACRO":
-				inMacro = fields[0]
-					
-		if inMacro == "" and len(fields) >= 3 and fields[0] != "" and fields[1] == "SYN":
-			if fields[2] not in symbols:
-				addError(n, "Error: Synonym not found")
-			else:
-				symbols[fields[0]] = symbols[fields[2]]
+for s in synonyms:
+	upper = [s]
+	while synonyms[s] in synonyms:
+		s = synonyms[s]
+		upper.append(s)
+	original = synonyms[s]
+	if original not in symbols:
+		addError(n, "Error: Referent (%s) not found for synonyms %s" \
+				% (original, str(upper)))
+	else:
+		for u in upper:
+			if u not in symbols:
+				symbols[u] = symbols[original]
 
 if False:
 	for key in sorted(symbols):
@@ -1920,6 +1915,15 @@ for entry in inputFile:
 								patternValue = int(first)
 							if ofield in constants:
 								usageValue = constants[ofield]["number"]
+							elif "(" in ofield or "B" in ofield:
+								value,error = yaEvaluate(ofield, constants)
+								if error == "":
+									if "scale" in value:
+										usageValue = hround(value["number"] * 2**value["scale"])
+									else:
+										usageValue = hround(value["number"])
+								else:
+									addError(lineNumber, "Cannot evaluate constant expression (%s)" % ofield)
 							elif last == "B":
 								usageValue = int(ofield, 2)
 							elif last == "O":
@@ -1927,7 +1931,7 @@ for entry in inputFile:
 							elif last == "D":
 								usageValue = int(ofield, 10)
 							elif last == "P":
-								usageValue = hround(ofield)
+								usageValue = hround(float(ofield))
 							else: # Pure integer
 								# This was all that was needed for AS-206RAM.
 								usageValue = int(ofield, 8)
