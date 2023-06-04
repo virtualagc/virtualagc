@@ -264,6 +264,18 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 								sys.exit(1)
 							replacement = ofields[ii]	
 							mline = re.sub(pattern, replacement, mline)
+							# There's a weird thing in AS-512 ITERATIVE GUIDANCE
+							# MODE (and maybe other places for all I know) in
+							# which there's line in a macro of the form
+							#		MPY     =ARG
+							# and a macro invocation in which ARG is 
+							#		=1
+							# with the net result being that the line expands as
+							#		MPY     ==1
+							# Which the original assembler apparently allowed.
+							# I'm going a crude fix and just convert == to = :
+							if replacement[:1] == "=" and "==" in mline:
+								mline = mline.replace("==", "=")
 							
 						macroLine = lineSplit(mline)
 						if len(macroLine) < 1 or \
@@ -407,7 +419,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 			elif len(fields) >= 3 and fields[1] == "CALL":
 				ofields = fields[2].split(",")
 				if len(ofields) == 1:
-					line1 = fmt % ("", "HOP", ofields[0])
+					line1 = fmt % (fields[0], "HOP", ofields[0])
 					nn -= 1
 					expandedLines[n][nn] = line1
 					continue
@@ -445,8 +457,15 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 				expandedLines[n][nn:nn+1] = expandedSH
 				nn += len(expandedSH)
 				continue
-			elif len(fields) >= 3 and fields[2][:2] == "=(":
-				value,error = yaEvaluate(fields[2][1:], constants)
+			elif len(fields) >= 3 and fields[2][:1] == "=" \
+					and fields[2][:3] != "=H'" and fields[2][:2] != "=O":
+				operand = fields[2]
+				if operand[:2] != "=(" and "B(" in operand:
+					# This is supposed to detect "=nB(expression)" and turn
+					# it into "=(n)B(expression)".
+					operand = operand.replace("=", "=(").replace("B(", ")B(")
+					#print(fields[2], operand, file=sys.stderr)
+				value,error = yaEvaluate(operand[1:], constants)
 				if error != "":
 					addError(n, "Error: " + error)
 				else:

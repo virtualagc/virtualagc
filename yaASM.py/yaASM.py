@@ -126,7 +126,7 @@ import sys
 from yaASMerrors import *
 from yaASMexpression import *
 from yaASMdefineMacros import *
-from yaASMpreprocessor import preprocessor, hround
+from yaASMpreprocessor import preprocessor, hround, unlistSuffix
 
 '''
 Here's an explanation of the overall structure of the assembler.
@@ -462,7 +462,11 @@ for n in range(8):
 		roofed[n].append([])
 
 lines = sys.stdin.readlines()
-for n in range(0,len(lines)):
+n = 0
+while n < len(lines):
+	if lines[n].strip() == "":
+		del lines[n]
+		continue
 	line = lines[n].expandtabs().rstrip()
 	
 	# In AS-512, columns 2-5 sometimes have a "random" (meaning we can't figure
@@ -484,6 +488,8 @@ for n in range(0,len(lines)):
 		b = lines[n].index('$')
 		if p < a and a < b:
 			lines[n] = lines[n][:a] + lines[n][a:b].replace(' ', '_') + lines[n][b:]
+	
+	n += 1
 
 #----------------------------------------------------------------------------
 #	Definitions of utility functions
@@ -629,7 +635,7 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 		constantString = "%09o" % value
 		return constantString
 	except:
-		addError(lineNumber, "Error: Cannot convert numeric literal " + str(n))
+		addError(lineNumber, "Error: Cannot compute constant expression " + str(n))
 		return ""	
 
 # Allocate/store a nameless variable for "=..." constant, returning its offset
@@ -1646,7 +1652,8 @@ def printLineFields():
 	for n in range(len(lineFieldFormats)):
 		#print('"' + lineFieldFormats[n] + '" "' + lineFields[n] + '"')
 		line += lineFieldFormats[n] % lineFields[n]
-	print(line)
+	if line[-2:] !=  unlistSuffix:
+		print(line)
 
 # Determine if module dm, sector ds is reachable from the global 
 # module DM, sector DS.  Return True if so, False if not.
