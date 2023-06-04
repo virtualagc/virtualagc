@@ -77,7 +77,7 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         <li><a href="#Basic_Factoids">Basic Factoids</a></li>
         <li><a href="#Preprocessor_Pass">Preprocessor Pass</a></li>
         <li><a href="#Assembly_Pass">Assembly Pass</a></li>
-        <li><a href="#Pseudo-ops">Pseudo-ops</a><br>
+        <li><a href="#Pseudo-ops">Pseudo-ops and Assembler Directives</a><br>
         </li>
         <li><a href="#ANATOMY">AS-206RAM Program Structure</a><br>
         </li>
@@ -13391,14 +13391,15 @@ Assembly
     not discussed later that can be used in macro definitions is the
     counter string, <tt>&amp;C1</tt>.&nbsp; This is a 3-decimal-digit
     counter that begins with a value of 000, and increments at the end
-    of any macro using <tt>&amp;C1</tt>.&nbsp; In other words, within
-    the first macro expansion using <tt>&amp;C1</tt>, it has the value
-    000, within the next macro expanded it has the value 001, and so
-    on.&nbsp; It can be used to create and reference labels which are
-    good within any given macro expansion, but which don't overlap with
-    any other macro expansion.&nbsp; The example macro above doesn't use
-    <tt>&amp;C1</tt>, so invoking it won't increment the counter.&nbsp;
-    But suppose instead that it were written as:<br>
+    of any macro which happens to use <tt>&amp;C1</tt>.&nbsp; In other
+    words, within the first macro expansion using <tt>&amp;C1</tt>, it
+    has the value 000, within the next such expanded macro it has the
+    value 001, and so on.&nbsp; It can be used to create and reference
+    labels which are good within any given macro expansion, but which
+    don't overlap with any other macro expansion.&nbsp; The sample macro
+    above doesn't use <tt>&amp;C1</tt>, so expanding that macro
+    wouldn't increment the counter.&nbsp; But suppose instead that the
+    macro definition were written as:<br>
     <blockquote><tt>CALL&nbsp;&nbsp;&nbsp; MACRO&nbsp;&nbsp;&nbsp;
         ARG1,ARG2<br>
         CAL&amp;C1&nbsp; CLA&nbsp;&nbsp;&nbsp; &nbsp; ARG2<br>
@@ -13410,22 +13411,63 @@ Assembly
     12th macro expansions actually using <tt>&amp;C1</tt>, then the
     label for the <tt>CLA</tt> instruction would be <tt>CAL006</tt>, <tt>CAL008</tt>,
     and <tt>CAL011</tt> for the respective expansions.&nbsp; If <tt>&amp;C1</tt>
-    is used multiple times within the same expansion, it will have the
-    same value every time; it only changes for different
+    were used multiple times within the same expansion, it would have
+    the same value every time; it only differs within different
     expansions.&nbsp; The naming of <tt>&amp;C1</tt> would seem to
     imply that there may be multiple counters of this type (such as <tt>&amp;C2</tt>,
     <tt>&amp;C3</tt>, and so on), but I've not seen them in actual LVDC
     code and can't imagine any use for them, so the modern assembler
-    supports only <tt>&amp;C1</tt>.<br>
-    <i><br>
-    </i>It is unclear whether macros can be nested.&nbsp; There are no
-    cases of nested macros in any currently-available LVDC code.&nbsp; I
-    believe that the modern assembler <i>does</i> support nested
-    macros, although the present support for <tt>&amp;C1</tt> in the
-    modern assembler would not work correctly if both a parent macro and
-    its nested child used the counter.<i><br>
-      <br>
-      Pseudo variables</i>:&nbsp; "Pseudo variables" are named numeric
+    supports only <tt>&amp;C1</tt>.&nbsp; In AS-512 and AS-513 LVDC
+    code, the root name for program labels local to the macros is often
+    <tt>D.L</tt>, rather than the root <tt>CAL</tt> I used above in the
+    sample macro, so that many macro definitions appear to have program
+    label named <tt>D.L&amp;C1</tt>, which thus expand to <tt>D.L000</tt>,
+    <tt>D.L001</tt>, <tt>D.L002</tt>, and so on.<br>
+    <blockquote><font size="-1"><b>Aside:</b> In <a
+          moz-do-not-send="true"
+href="http://www.bitsavers.org/pdf/ibm/360/asm/C28-6514-5_IBM_System_360_Assembler_Language_Level_E_F_Dec67.pdf">1960's-era
+          IBM 360 Basic Assembly Language (BAL)</a>, there was a "system
+        variable" called <tt>&amp;SYSNDX</tt>, the "macro instruction
+        index", that corresponds pretty closely to our <tt>&amp;C1</tt>.&nbsp;
+        Admittedly, IBM-FSD LVDC assembly language is not IBM 360 BAL,
+        but I imagine that the original LVDC assembler was likely
+        written by people who had helped write the BAL assembler.&nbsp;
+        Even if not, they would have been very familiar with BAL, and it
+        seems to me that they would have mimicked BAL's features when it
+        was appropriate to do so, rather than rethinking them
+        unnecessarily.<br>
+        <br>
+        Some differences were that <tt>&amp;SYSNDX</tt> incremented for
+        <i>each</i> expanded macro rather than just for the ones using </font><font
+        size="-1"><tt>&amp;SYSNDX</tt></font><font size="-1">, and that
+        it provided 4 digits rather than just 3. As it happens, there
+        are more than 1000 total macro expansions in AS-512 source code,
+        so if </font><font size="-1"><tt>&amp;C1</tt></font><font
+        size="-1"> <i>were</i> to increment with each macro expansion
+        like </font><font size="-1"><tt>&amp;SYSNDX</tt></font><font
+        size="-1">, it would in fact need 4 digits.&nbsp; But
+        considering the fact that symbols in LVDC assembly language are
+        only 6 characters long (vs the 8+ characters in IBM 360 BAL),
+        devoting 4 characters to </font><font size="-1"><tt>&amp;C1</tt></font><font
+        size="-1"> could be an inconvenient naming limitation.&nbsp;
+        Whereas because </font><font size="-1"><tt>&amp;C1</tt></font><font
+        size="-1"> only increments when needed, it only reaches 128 in
+        AS-512, comfortably within 3 digits.&nbsp; This is perhaps the
+        reason that LVDC assembly language has </font><font size="-1"><tt>&amp;C1</tt></font><font
+        size="-1"> (with its attendant properties) rather than sticking
+        with the pre-existing </font><font size="-1"><tt>&amp;SYSNDX</tt></font><font
+        size="-1"> (with its).<br>
+      </font></blockquote>
+    It is unclear whether macros can be nested.&nbsp; There are no cases
+    of nested macros in any currently-available LVDC code.<i><br>
+    </i>
+    <blockquote><font size="-1"><b>Aside:</b> In the afore-mentioned IBM
+        BAL, macros could indeed be nested, which hints that the LVDC
+        assembler may have been able to nest them as well.&nbsp; The
+        modern LVDC assembler supports nested macros too, though at this
+        writing macro-nesting is an untested feature.</font><i><br>
+      </i></blockquote>
+    <i>Pseudo variables</i>:&nbsp; "Pseudo variables" are named numeric
     constants known only by the preprocessor.&nbsp; Any usages of such
     pseudo variables are replaced by numeric literals by the
     preprocessor, and thus none of them remain in the code by the time
@@ -13649,12 +13691,20 @@ Assembly
         </li>
         <li>Octal literal numbers like <tt>=O0000004</tt> (note the
           alphabetic letter "O", which stands for Octal).</li>
-        <li>HOP constants:&nbsp; In operands like <tt>=H'<i>symbol</i></tt>,
-          the <tt><i>symbol</i></tt> (representing the location of a
-          variable or a location in the instruction stream) is converted
-          into a HOP constant.&nbsp; Note that the <tt><i>symbol</i></tt>
-          can be a forward reference.<br>
+        <li>HOP constants:&nbsp; <br>
         </li>
+        <ul>
+          <li>In operands like <tt>=H'<i>symbol</i></tt>, the <tt><i>symbol</i></tt>
+            (representing the location of a variable or a location in
+            the instruction stream) is converted into a HOP
+            constant.&nbsp; Note that the <tt><i>symbol</i></tt> can be
+            a forward reference.</li>
+          <li>Another variant is <tt>=H'<i>symbol1</i>,<i>symbol2</i></tt>.&nbsp;
+            This variant also produces a HOP constant, but only the
+            fields relating to instruction space are taken from <i><tt>symbol1</tt></i>,
+            whereas the fields relating to data space are taken from <tt><i>symbol2</i></tt>.<br>
+          </li>
+        </ul>
         <li>Expressions, like <tt>=(<i>expression</i>)</tt>, where the
           algebraic <tt><i>expression</i></tt> consists of
           assembly-time constants (defined using <tt>EQU</tt> or <tt>REQ</tt>),
@@ -13908,7 +13958,9 @@ Assembly
         not enforce that restriction.<br>
       </li>
     </ul>
-    <h3> <i><a name="Pseudo-ops"></a></i>Pseudo-ops</h3>
+    <h3> <i><a name="Pseudo-ops"></a></i>Pseudo-ops and Assembler
+      Directives<br>
+    </h3>
     The following table shows every type of pseudo-op I've encountered
     in existing LVDC program listings, and what I've been able to infer
     about them:<br>
@@ -14488,6 +14540,18 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           </td>
         </tr>
         <tr>
+          <td valign="middle"><tt>CEJECT <i>n</i></tt><br>
+          </td>
+          <td valign="top">This is a conditional <tt>EJECT</tt>, which
+            moves to the next page of the output assembly listing if
+            less than <i><tt>n</tt></i> available lines remain on the
+            current page.&nbsp; It is ignored by the modern LVDC
+            assembler.<br>
+            <br>
+            See also:&nbsp; <tt>EJECT</tt>.<br>
+          </td>
+        </tr>
+        <tr>
           <td valign="middle" nowrap="nowrap"><tt>DEC</tt><tt> <i>number</i><br>
             </tt></td>
           <td valign="middle">This pseudo-op allocates one word of
@@ -14594,6 +14658,33 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             configuration rather than a duplex one), but I have not
             encountered it in actual code and for that reason I don't
             support it in the modern assembler.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>EJECT</tt><br>
+          </td>
+          <td valign="top">The existence of this assembler directive is
+            somewhat speculative, because by its very nature it does not
+            appear in assembly listings (which are presently our only
+            sources of LVDC source code).&nbsp; However, there is
+            circumstantial evidence that <i>some</i> assembler
+            directive of this nature was used, and my personal suspicion
+            is that it was <tt>EJECT</tt>.&nbsp; My description here
+            relies on contemporary manuals for IBM 360 Basic Assembly
+            Language (BAL).<br>
+            <br>
+            For the original LVDC assembler, the <tt>EJECT</tt>
+            directive performed a page feed to move to the top of the
+            next printed page.&nbsp; Note that the <tt>EJECT</tt> line
+            itself was not printed in the assembly listing.<br>
+            <div align="left">
+              <div align="left"><br>
+                The modern LVDC assembler effectively ignores <tt>EJECT</tt>
+                directives.<br>
+                <br>
+                See also:&nbsp; <tt>TITLE</tt>, <tt>CEJECT</tt>.<br>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
@@ -15192,15 +15283,13 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
         <tr>
           <td valign="middle"><tt>SPACE <i>n</i></tt><br>
           </td>
-          <td valign="top">As far as I can tell, <tt>SPACE</tt> appears
-            only within macro definitions — i.e., between <tt>MACRO</tt>
-            and <tt>ENDMAC</tt> — and appears to mean that <i><tt>n</tt></i>
-            blank lines should be inserted in the macro.&nbsp; I admit
-            that I'm at a loss as to why anybody would want to do that
-            ... but they apparently really did!&nbsp; I would also infer
-            that the original assembler must otherwise have ignored
-            blank lines in a macro definition, and thus a <tt>SPACE</tt>
-            was the only way to insert them.<br>
+          <td valign="top">This means that <i><tt>n</tt></i> blank
+            lines should be inserted in the macro.&nbsp; <br>
+            <br>
+            Apparently, blank punch cards (for the original assembler)
+            were <i>not</i> a way to insert blank lines, and were
+            simply ignored.&nbsp; The modern assembler mimics that
+            behavior as well.<br>
           </td>
         </tr>
         <tr>
@@ -15411,6 +15500,64 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
               </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 PIO&nbsp;&nbsp;&nbsp;&nbsp; <i>ARG3</i></tt><tt><br>
               </tt></blockquote>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>TITLE '<i>string</i>'</tt><br>
+          </td>
+          <td valign="top">The existence of this assembler directive is
+            somewhat speculative, because by its very nature it does not
+            appear in assembly listings (which are presently our only
+            source material for LVDC source code).&nbsp; However, there
+            is circumstantial evidence that <i>some</i> assembler
+            directive of this nature was used, and my personal suspicion
+            is that it was <tt>TITLE</tt>.&nbsp; My description here
+            relies on contemporary manuals for IBM 360 Basic Assembly
+            Language (BAL).<br>
+            <br>
+            For the original LVDC assembler, the <tt>TITLE</tt>
+            directive simultaneously performed two separate functions:<br>
+            <ol>
+              <li>It set the title printed in the headings at the tops
+                of the printed pages of the assembly listing.&nbsp; The
+                new title took effect only on the <i>next</i> printed
+                page (and subsequent).<br>
+              </li>
+              <li>It performed a page feed to move to the top of the
+                next printed page.</li>
+            </ol>
+            <p>Note that the <tt>TITLE</tt> line itself was not printed
+              in the assembly listing.<br>
+            </p>
+            <p>Single-quotes and ampersands appearing within the title <tt><i>string</i></tt>
+              must be treated specially.&nbsp; A single-quote character
+              must appear as two single-quotes in succession, and
+              similarly an ampersand must appear as two ampersands in
+              succession.&nbsp; For example, if the new title was
+              supposed to be<br>
+            </p>
+            <blockquote>
+              <div align="left">THIS IS MY TITLE &amp; IT'S A VERY GOOD
+                ONE<br>
+              </div>
+            </blockquote>
+            <div align="left">
+              <div align="left">then the appropriate directive would be<br>
+                <blockquote><tt>TITLE 'THIS IS MY TITLE &amp;&amp; IT''S
+                    A VERY GOOD ONE'</tt><br>
+                </blockquote>
+                Note that assembly listings as output by the modern LVDC
+                assembler do not really have "pages" as such, other than
+                for the purpose of documenting the correspondence to the
+                original program listing, because the days when
+                programmers pored over 1000+ page printouts on paper is
+                now long past.&nbsp; Therefore, the modern LVDC
+                assembler effectively ignores <tt>TITLE</tt>
+                directives.<br>
+                <br>
+                See also:&nbsp; <tt>EJECT</tt>, <tt>CEJECT</tt>.<br>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
@@ -18758,7 +18905,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-06-02.<br>
+          2023-06-03.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
