@@ -22,6 +22,7 @@
 # Reference:    http://www.ibibio.org/apollo
 # Mods:         2023-05-29 RSB	Split off from yaASMpreprocessor.py.
 
+import sys
 from yaASMerrors import addError
 
 # Split a line into fields: [LHS, operator, operand, comment].  Since this
@@ -115,3 +116,11 @@ def defineMacros(lines, macros):
 	
 	if inMacro != "":
 		addError(n, "Error: MACRO (%s) without ENDMAC" % inMacro)
+		
+	if False:
+		for name in macros:
+			macro = macros[name]
+			print("!", name, macro["formalArgs"], file=sys.stderr)
+			for e in macro["lines"]:
+				print("!\t%s" % e, file=sys.stderr)
+			

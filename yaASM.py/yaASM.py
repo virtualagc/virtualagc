@@ -180,7 +180,8 @@ Pass 4:		Assembly and output.
 #	Definitions of global variables.
 #----------------------------------------------------------------------------
 # Array for keeping track of which memory locations have been used already.
-used = [[[[False for offset in range(256)] for syllable in range(2)] for sector in range(16)] for module in range(8)]
+used = [[[[False for offset in range(256)] for syllable in range(2)] \
+		for sector in range(16)] for module in range(8)]
 
 # BA8421 character set in its native encoding.  All of the unprintable
 # characters are replaced by '?', which isn't a legal character anyway.
@@ -481,8 +482,9 @@ while n < len(lines):
 	# but for now I just get rid of them.
 	if len(line) >= 6 and line[0] == " " and not line[1:6].isspace():
 		line = "      " + line[6:]
-	
+		#print("!", lines[n].rstrip(), "->", line.rstrip(), file=sys.stderr)
 	lines[n] = line
+		
 	if ptc and 'BCI' in lines[n] and '^' in lines[n] and '$' in lines[n]:
 		# Convert all spaces within a BCI pseudo-op's operand to
 		# '_', so that the line can be parsed properly into
@@ -501,7 +503,7 @@ while n < len(lines):
 #----------------------------------------------------------------------------
 
 def incDLOC(increment = 1, mark = True):
-	global DLOC
+	global DLOC, used
 	while increment > 0:
 		increment -= 1
 		if DLOC < 256 and mark:
@@ -529,7 +531,8 @@ def findDLOC(start = 0, increment = 1):
 	if reuse:
 		addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, n))
 	if length < increment:
-		addError(lineNumber, "Error: No space of size %d found in memory bank (%o %02o)" % (increment, DM, DS))
+		addError(lineNumber, \
+				"Error: No space of size %d found in memory bank (%o %02o)" % (increment, DM, DS))
 	return start
 	
 def checkDLOC(increment = 1):
@@ -654,7 +657,7 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 # there's no code here that needs to be backed out.
 allocationRecords = []	# For debugging ordering of named and nameless allocationis.
 def allocateNameless(lineNumber, constantString, useResidual = True):
-	global nameless, allocationRecords
+	global nameless, allocationRecords, used
 	value = "%o_%02o_%s" % (DM, DS, constantString)
 	if value in nameless:
 		return nameless[value],0
@@ -801,6 +804,38 @@ def checkLOC(extra = 0):
 		# current location, so we can just keep the current address.
 		return []
 
+# This is used to find a block of n unallocated locations in instruction space,
+# starting at the current LOC.  It returns either the found location, in the
+# form of an array [IM, IS, S, LOC] (with the global values of those variables
+# remaining unchanged), or else an empty array upon error.
+def checkBLOCKafterORG(n, extra = 0):
+	index = []
+	sector = IS
+	syllable = S
+	offset = LOC
+	for i in range(IM, 0o10):
+		for j in range(sector, 0o20):
+			sector = 0
+			for k in range(syllable, 2):
+				syllable = 0
+				roof = getRoof(i, j, k, extra)
+				inUsed = True
+				for l in range(offset, 0o400):
+					offset = 0
+					if used[i][j][k][l]:
+						inUsed = True
+						index = []
+						lenUnused = 0
+					elif inUsed:
+						inUsed = False
+						index = [i, j, k, l]
+						lenUnused = 1
+					else:
+						lenUnused += 1
+					if lenUnused >= n:
+						return index
+	return []
+
 # Disassembles the two syllables of a word into instructions.  Useful only for debugging
 # DFW pseudo-ops, and now that DFW is working properly, I've actually commented its use out.  
 # However, I like the function definition, so I'll leave it here for a while in case I think
@@ -853,7 +888,7 @@ def unassemble(word):
 
 # Put the assembled value wherever it's supposed to go in the executable image.
 def storeAssembled(lineNumber, value, hop, data = True):
-	global octals, octalsUsed
+	global octals
 	checkSyl = -1
 	if data:
 		module = hop["DM"]
@@ -978,7 +1013,7 @@ preprocessor(lines, expandedLines, constants, macros, ptc)
 # The object of this pass is to discover all addresses for left-hand symbols,
 # or in other words, to assign an address (HOP constant) to each line of code.
   
-# The result of the pass is a hopefully easy-to-understand dictionary called 
+# The result of the pass is a hopefully easy-to-understand list of dictionaries, 
 # inputFile. It also buffers the lhs, operator, and operand fields, so they 
 # don't have to be parsed out again on the next pass.
 
@@ -1128,14 +1163,28 @@ for lineNumber in range(0, len(expandedLines)):
 					symbols[lhs]["isCDS"] = False
 					symbols[lhs]["isTABLE"] = True
 			elif fields[1] == "BLOCK":
-				try:
-					checkDLOC(int(fields[2]))
-				except:
-					addError(lineNumber, "Implementation: Parsing error in BLOCK")
+				value, error = yaEvaluate(fields[2], constants)
+				if error != "":
+					addError(lineNumber, "Error: " + error)
+					index = [IM, IS, S, LOC]
+				else:
+					v = value["number"]
+					if "scale" in value:
+						v *= 2**value["scale"]
+					index = checkBLOCKafterORG(hround(v))
+				if len(index) == -1:
+					addError(lineNumber, "Error: No space for BLOCK")
+				elif index == [IM, IS, S, LOC]:
+					pass # Okay as-is!
+				elif lastORG:
+					IM, IS, S, LOC = tuple(index)
+					addError(lineNumber, "Warning: Skipping already-used locations")
+				else:
+					addError(lineNumber, "Implementation: BLOCK needs HOP")
 				if fields[0] != "":
 					lhs = fields[0]
 					inputLine["lhs"] = lhs
-					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, 
+					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, 
 										"DM":DM, "DS":DS, "DLOC":DLOC}
 					inputLine["isBLOCK"] = True
 					# Ordinarily, addition to the symbol table would be handled
@@ -1258,12 +1307,23 @@ for lineNumber in range(0, len(expandedLines)):
 						IS = 0
 					if fS[:1] == "*":
 						S = adjustDogField(lineNumber, S, fS)
+						if S == 2:
+							S = 0
 					elif fS != "":
 						S = int(fS, 8)
 					else:
 						S = 0
 					if fLOC[:1] == "*":
 						LOC = adjustDogField(lineNumber, LOC, fLOC)
+						if LOC >= 0o400:
+							S += LOC // 0o400
+							LOC = LOC % 0o400
+							if S >= 2:
+								IS += S // 2
+								S = S % 2
+								if IS >= 0o20:
+									IM += IS // 0o20
+									IS = IS % 0o20
 					elif fLOC != "":
 						LOC = int(fLOC, 8)
 					else:
@@ -1419,8 +1479,10 @@ for lineNumber in range(0, len(expandedLines)):
 				if useDat:
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 					inputLine["useDat"] = True
+					used[DM][DS][dS][DLOC] = True
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					used[IM][IS][S][LOC] = True
 				incLOC()
 				if ptc and "incDLOC" in inputLine:
 					incDLOC(mark = False)
@@ -1753,7 +1815,8 @@ for entry in inputFile:
 				"DS": ds,
 				"DLOC": loc
 			}, True)
-		storeAssembled(lineNumber, assembled, {"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
+		storeAssembled(lineNumber, assembled, \
+					{"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
 		lineFields[traField] = "*"
 		lineFields[imField] = "%2o" % im0
 		lineFields[isField] = "%02o" % is0
@@ -2132,8 +2195,10 @@ for entry in inputFile:
 				pass
 			elif operand not in symbols:
 				addError(lineNumber, "Error: Target location of TRA not found")
-			elif symbols[operand]["IM"] == IM and symbols[operand]["IS"] == IS and ((symbols[operand]["DM"] == DM \
-					and symbols[operand]["DS"] in [DS, 0o17]) or symbols[operand]["isCDS"]):
+			elif symbols[operand]["IM"] == IM and symbols[operand]["IS"] == IS \
+					and ((symbols[operand]["DM"] == DM \
+					and symbols[operand]["DS"] in [DS, 0o17]) \
+						or symbols[operand]["isCDS"]):
 				# Regarding DM/DS, which appears in this conditional, a TRA/TMI/TNZ 
 				# instruction doesn't require the target location to be in the same
 				# DM/DS, but the original assembler seemed to disallow it.  I assume
@@ -2284,7 +2349,7 @@ for entry in inputFile:
 						storeAssembled(lineNumber, hopConstant, {
 							"IM": IM,
 							"IS": IS,
-							"S": residual,
+							"S": S,
 							"LOC": loc,
 							"DM": DM,
 							"DS": ds,

@@ -214,7 +214,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 					ampC1 += 1
 					ampString = "%03d" % ampC1
 					ampUsed = False
-				#print("M:", line, file=sys.stderr)
+				#print("! M:", line, file=sys.stderr)
 				macro = macros[fields[1]]
 				if len(fields) >= 3:
 					ofields = fields[2].split(",")
@@ -274,7 +274,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 						if m == 0 and fields[0] != "":
 							lhs = fields[0]
 						expandedMacro.append(fmt % (lhs, operator, operand))
-						#print("E:", expandedMacro[-1], file=sys.stderr)
+						#print("! E:", expandedMacro[-1], file=sys.stderr)
 					# Replace the macro invocation line itself with the lines 
 					# of the expanded macro, and proceed to process from that 
 					# point. 
@@ -420,23 +420,24 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 					continue
 			elif len(fields) >= 3 and fields[1] in ["SHL", "SHR"] and fields[2].isdigit():
 				count = int(fields[2])
-				expandedLines[n] = []
-				thisLabel = fields[0]
-				operator = fields[1]
-				expandedSH = []
-				if count == 0:
-					expandedSH.append("%-8s%-8s0" % (thisLabel, operator))
-				else:
-					while count > 0:
-						thisCount = maxSHF
-						if thisCount > count:
-							thisCount = count
-						expandedSH.append("%-8s%-8s%d" % (thisLabel, operator, thisCount))
-						thisLabel = ""
-						count -= thisCount
-				nn -= 1
-				expandedLines[n][nn:nn+1] = expandedSH
-				nn += len(expandedSH)
+				if count > 2:
+					expandedLines[n] = []
+					thisLabel = fields[0]
+					operator = fields[1]
+					expandedSH = []
+					if count == 0:
+						expandedSH.append("%-8s%-8s0" % (thisLabel, operator))
+					else:
+						while count > 0:
+							thisCount = maxSHF
+							if thisCount > count:
+								thisCount = count
+							expandedSH.append("%-8s%-8s%d" % (thisLabel, operator, thisCount))
+							thisLabel = ""
+							count -= thisCount
+					nn -= 1
+					expandedLines[n][nn:nn+1] = expandedSH
+					nn += len(expandedSH)
 				continue
 			elif len(fields) >= 3 and fields[2][:1] == "=" \
 					and fields[2][:3] != "=H'" and fields[2][:2] != "=O":
