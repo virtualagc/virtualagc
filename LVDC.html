@@ -14857,17 +14857,35 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                 an extra alphabetic character.&nbsp; The literal
                 decimals still indicate the number of bits in the
                 associated field, just as above.&nbsp; The allowed
-                suffixes seem to be "B", "O", "D", and "P".&nbsp; I
-                think that these indicate the base of literal numbers in
-                the invocations of the form, namely respectively,
-                Binary, Octal, Decimal, and fixed-Point decimal (which
-                would round to the nearest integer).&nbsp; For example,
-                if we defined a form with the statement "<tt>MYFORM FORM
-                  5B,6O,7D,3P,...</tt>", then we might invoke it with
-                binary, octal, decimal, and floating-point parameters as
-                "<tt>MYFORM 10110,46,89,4.3,...</tt>", which would
-                assemble to <tt>10110 101110 1011001 100 ...</tt>.<br>
-              </li>
+                suffixes seem to indicate the format of the fields in
+                the invocations of the form:</li>
+              <ul>
+                <li>"B":&nbsp; Numerical base for literal numbers is
+                  binary.</li>
+                <li>"O":&nbsp; Numerical base for literal numbers is
+                  octal.</li>
+                <li>"D":&nbsp; Numerical base for literal numbers is
+                  decimal.&nbsp; Fixed-point or floating-point numbers
+                  are also accepted, and are rounded to the nearest
+                  integer.<br>
+                </li>
+                <li>"P":&nbsp; Literal numbers are decimal fixed-point
+                  or floating point.&nbsp; If the parameter evaluates to
+                  a fixed-point or floating-point number (rather than to
+                  an integer), then an implicit scale factor of B-29 is
+                  applied.&nbsp; (Proviso:&nbsp; I'm not actually sure
+                  what rules the original assembler used to apply this
+                  B-29 scaling, but this is what works for me!)&nbsp;
+                  The scaled numbers are rounded to the nearest integer.<br>
+                </li>
+              </ul>
+            </ul>
+            For example, if we defined a form with the statement "<tt>MYFORM
+              FORM 5B,6O,7D,3P,...</tt>", then we might invoke it with
+            binary, octal, decimal, and floating-point parameters as "<tt>MYFORM
+              10110,46,89,4.3B29, ...</tt>", which would assemble to <tt>10110
+              101110 1011001 100 ...</tt>.<br>
+            <ul>
             </ul>
             <p>As an example of <tt>DM</tt>, <tt>DS</tt>, and <tt>DA</tt>
               parameters from existing code, AS-512 has the following
@@ -18925,7 +18943,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-06-05.<br>
+          2023-06-06.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
