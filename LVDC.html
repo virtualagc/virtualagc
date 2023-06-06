@@ -14496,34 +14496,54 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           </td>
           <td valign="top">The <tt>BLOCK</tt> pseudo-op tells the
             assembler not to break up the succeeding <i><tt>n</tt></i>
-            instructions in memory by (among other things) transparently
-            inserting <tt>HOP</tt> instructions to avoid memory-sector
-            overflow:&nbsp; The assembler must instead insert any such
-            stuff <i>prior</i> to the <tt>BLOCK</tt>.&nbsp; For
-            example, you might use <tt>BLOCK</tt> for particularly
-            time-sensitive code or to avoid unwanted extra stuff being
-            inserted into an interrupt service routine.<br>
+            instructions in memory.&nbsp; For example, you might use <tt>BLOCK</tt>
+            for particularly time-sensitive code, to insure that it
+            really takes the amount of time you've designed it to
+            take.&nbsp; Another common use for very short blocks is to
+            protect instructions like "<tt>TMI *+<i>m</i></tt>", for
+            which it would be disastrous if the assembler were to insert
+            any extra instructions or perform a memory-sector change
+            between the instruction and its targeted destination.&nbsp;
+            Recall that the assembler transparently inserts instructions
+            like <tt>TRA</tt> or <tt>HOP</tt> in order to detour
+            around already-allocated memory or prevent memory-sector
+            overflows, and what the <tt>BLOCK</tt> pseudo-op does is to
+            prevent any such insertions <i>within</i> the block.<br>
             <br>
-            It's a little trickier to understand for the case of <tt><i>n</i></tt>=1,
-
-            but there are indeed situations where "<tt>BLOCK 1</tt>"
-            usefully appears in the source code; the key to
-            understanding why it may be useful is perhaps to realize
-            that it prevents an insertion between the <tt>BLOCK</tt>
-            statement itself and the first instruction following it in
-            memory.&nbsp; Note too that although <tt>BLOCK</tt> does
-            not allocate any memory itself, it can still be associated
-            with a left-hand symbol to define that symbol address of the
-            <tt>BLOCK</tt> statement.<br>
-            <br>
-            While there are many instances of <tt>BLOCK</tt> in AS-512
-            and AS-513 source code, for the most part they can be
-            ignored since there are very few cases in which <tt>BLOCK</tt>
-            needs to take any action to avoid a sector overflow.&nbsp;
-            But there are a few of them.&nbsp; If you have access to the
-            AS-512 source code, one such example is the expansion of the
-            pre-defined <tt>TELM</tt> macro at the top of p. 465 in the
-            <tt>BOOST NAVIGATION</tt> section.<br>
+            I'm not certain I understand the <i>full</i> scope of the
+            actions <tt>BLOCK</tt> might take under various
+            circumstances.&nbsp; (Realize that we have no documentation
+            of any kind concerning the characteristics of the pseudo-ops
+            and assembler directives I'm describing for you, and thus I
+            am simply giving you my inferences based on examination of
+            LVDC source code and my successes vs failures in
+            implementation of the modern LVDC assembler.)&nbsp; But
+            here's what I believe is going on:<br>
+            <ol>
+              <li>If the <tt>BLOCK</tt> appears immediately after an <tt>ORG</tt>
+                or <tt>ORGDD</tt> (see below), then its action is
+                merely to seek the block of <i><tt>n</tt></i> unused
+                words at the lowest offset within the same memory
+                sector/syllable.&nbsp; In other words, it adjusts the
+                assembler's program counter before proceeding with the
+                block, but does not of itself insert any extra
+                code.&nbsp; If there's not enough room in the current
+                sector, it moves to the next sector, and so on.<br>
+              </li>
+              <li>If the <tt>BLOCK</tt> instead appears within an
+                instruction stream, preceded by an instruction (rather
+                than an <tt>ORG</tt>/<tt>ORGDD</tt>), then the
+                assembler will insert an appropriate <tt>TRA</tt> or <tt>HOP</tt>
+                between the preceding instruction and the block.&nbsp;
+                The block itself will therefore move to a later position
+                within the memory sector/syllable, or to an altogether
+                different memory module/sector/syllable.<br>
+              </li>
+            </ol>
+            <tt>BLOCK</tt> is a little trickier to understand for the
+            case of <tt><i>n</i></tt>=1, but there are indeed
+            situations where "<tt>BLOCK 1</tt>" usefully appears in the
+            source code.<br>
             <br>
             <tt>BLOCK</tt> is used only for blocks of <i>instructions</i>
             (which are one syllable wide), and is not used for blocks of
@@ -18905,7 +18925,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-06-03.<br>
+          2023-06-05.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
