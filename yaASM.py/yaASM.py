@@ -84,6 +84,7 @@
 #                               and AS-206RAM continue
 #                               to build correctly, though there are 2 less 
 #                               warnings for the latter.
+#               2023-06-06 RSB  Various fixes.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -127,6 +128,7 @@
 # an LVDC simulator.
 
 import sys
+import copy
 # The next line imports expression.py.
 from yaASMerrors import *
 from yaASMexpression import *
@@ -482,7 +484,6 @@ while n < len(lines):
 	# but for now I just get rid of them.
 	if len(line) >= 6 and line[0] == " " and not line[1:6].isspace():
 		line = "      " + line[6:]
-		#print("!", lines[n].rstrip(), "->", line.rstrip(), file=sys.stderr)
 	lines[n] = line
 		
 	if ptc and 'BCI' in lines[n] and '^' in lines[n] and '$' in lines[n]:
@@ -1135,9 +1136,11 @@ for lineNumber in range(0, len(expandedLines)):
 			elif fields[1] == "USE":
 				if fields[2] == "INST":
 					useDat = False
+					#print("!C USE INST", file=sys.stderr)
 				elif fields[2] == "DAT":
 					dS = 1
 					useDat = True
+					#print("!C USE DAT", file=sys.stderr)
 				else:
 					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
@@ -1163,6 +1166,7 @@ for lineNumber in range(0, len(expandedLines)):
 					symbols[lhs]["isCDS"] = False
 					symbols[lhs]["isTABLE"] = True
 			elif fields[1] == "BLOCK":
+				inDataMemory = False
 				value, error = yaEvaluate(fields[2], constants)
 				if error != "":
 					addError(lineNumber, "Error: " + error)
@@ -1172,7 +1176,9 @@ for lineNumber in range(0, len(expandedLines)):
 					if "scale" in value:
 						v *= 2**value["scale"]
 					index = checkBLOCKafterORG(hround(v))
-				if len(index) == -1:
+				if False and fields[0] == "D.LNMT":
+					print("!", IM, IS, S, LOC, fields[2], value, error, index, file=sys.stderr)
+				if len(index) == 0:
 					addError(lineNumber, "Error: No space for BLOCK")
 				elif index == [IM, IS, S, LOC]:
 					pass # Okay as-is!
@@ -1184,7 +1190,8 @@ for lineNumber in range(0, len(expandedLines)):
 				if fields[0] != "":
 					lhs = fields[0]
 					inputLine["lhs"] = lhs
-					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, 
+					inputLine["hop"] = {"IM":index[0], "IS":index[1], 
+										"S":index[2], "LOC":index[3], 
 										"DM":DM, "DS":DS, "DLOC":DLOC}
 					inputLine["isBLOCK"] = True
 					# Ordinarily, addition to the symbol table would be handled
@@ -1194,10 +1201,12 @@ for lineNumber in range(0, len(expandedLines)):
 					# right now.
 					if lhs in symbols:
 						addError(lineNumber, "Error: Symbol already defined")
-					symbols[lhs] = inputLine["hop"]
+					symbols[lhs] = copy.deepcopy(inputLine["hop"])
 					symbols[lhs]["inDataMemory"] = inDataMemory
 					symbols[lhs]["isCDS"] = False
 					symbols[lhs]["isBLOCK"] = True
+					if False and lhs == "D.LNMT":
+						print("!B", symbols[lhs], file=sys.stderr)
 			elif fields[0] != "" and fields[1] == "SYN":
 				if fields[2] == "*INS":
 					inputLine["lhs"] = fields[0]
@@ -1353,7 +1362,8 @@ for lineNumber in range(0, len(expandedLines)):
 					# In this case we expect the operand to be the name of an
 					# existing symbol representing a variable.
 					symbol = ofields[0]
-					if symbol in constants and len(constants[symbol]) > 0:
+					if symbol in constants and len(constants[symbol]) > 0 and \
+							symbol not in symbols:
 						try:
 							if "DEQD" == constants[symbol][0]:
 								DM = int(constants[symbol][1], 8)
@@ -1747,10 +1757,20 @@ useDat = False
 errorsPrinted = []
 lastLineNumber = -1
 expansionMarker = " "
+pageNumber = 0
 for entry in inputFile:
 	#print(entry)
 	lineNumber = entry["lineNumber"]
 	inputLine = entry["expandedLine"]
+	if inputLine["raw"].startswith("# PAGE "):
+		fields = inputLine["raw"].split()
+		try:
+			if fields[2][-1] == ",":
+				pageNumber = int(fields[2][:-1])
+			else:
+				pageNumber = int(fields[2])
+		except:
+			addError(lineNumber, "Warning: Corrupted page marker")
 	errorList = errors[lineNumber]
 	originalLine = lines[lineNumber]
 	constantString = ""
@@ -1981,10 +2001,14 @@ for entry in inputFile:
 							elif "(" in ofield or "B" in ofield:
 								value,error = yaEvaluate(ofield, constants)
 								if error == "":
+									v = value["number"]
+									s = 0
 									if "scale" in value:
-										usageValue = hround(value["number"] * 2**value["scale"])
-									else:
-										usageValue = hround(value["number"])
+										s = value["scale"]
+									if last == "P" and not isinstance(v, int):
+										s -= 29
+									v *= 2**s
+									usageValue = hround(v)
 								else:
 									addError(lineNumber, "Cannot evaluate constant expression (%s)" % ofield)
 							elif last == "B":
@@ -1992,7 +2016,7 @@ for entry in inputFile:
 							elif last == "O":
 								usageValue = int(ofield, 8)
 							elif last == "D":
-								usageValue = int(ofield, 10)
+								usageValue = hround(float(ofield))
 							elif last == "P":
 								usageValue = hround(float(ofield))
 							else: # Pure integer
@@ -2019,7 +2043,8 @@ for entry in inputFile:
 								"Error: Field value too large for defined form")
 							usageValue = usageValue & (ceiling - 1)
 						cumulative = cumulative << patternValue
-						cumulative = cumulative | usageValue
+						cumulative = cumulative | \
+									 (usageValue & ((1 << patternValue)-1))
 						numBits += patternValue
 					if numBits > 26:
 						addError(lineNumber, "Error: Form definition was too big")
@@ -2385,21 +2410,40 @@ for entry in inputFile:
 			# Instruction is a "regular" one ... not one of the ones dealt with above.
 			if operand [:1] == "=":
 				if operand[:3] == "=H'":
-					symbol = operand[3:]
+					bad = False
+					ofields = operand[3:].split(",")
+					if len(ofields) == 1:
+						symbol = ofields[0]
+						symbold = ""
+					elif len(ofields) == 2:
+						symbol = ofields[0]
+						symbold = ofields[1]
+					else:
+						addError(lineNumber, "Error: Corrupt =H'...")
+						bad = True
 					if symbol not in symbols:
 						addError(lineNumber, "Error: Symbol (%s) not found" % symbol)
-					else:
+						bad = True
+					if symbold != "" and symbold not in symbols:
+						addError(lineNumber, "Error: Symbol (%s) not found" % symbold)
+						bad = True
+					if not bad:
 						# The symbol was found, and we want to convert it to a
 						# hop constant, in the form of a string that's an octal
 						# representation of the constant.
 						symbol1 = symbols[symbol]
+						if symbold == "":
+							symbol2 = symbol1
+						else:
+							symbol2 = symbols[symbold]
 						hopConstant = formConstantHOP({
 							"IM": symbol1["IM"],
 							"IS": symbol1["IS"],
 							"S": symbol1["S"],
 							"LOC": symbol1["LOC"],
 							"DM": symbol2["DM"],
-							"DS": symbol2["DS"]
+							"DS": symbol2["DS"],
+							"DLOC": symbol2["DLOC"]
 						})
 						constantString = "%09o" % hopConstant
 				else:
@@ -2459,7 +2503,7 @@ for entry in inputFile:
 						loc -= operandModifier
 					residual = residualBit(hop2["DM"], hop2["DS"])
 				else:
-					if hop2["IM"] != DM or hop2["IS"] != DS:
+					if hop2["IM"] != DM or (hop2["IS"] != 0o17 and hop2["IS"] != DS):
 						if not useDat or S == 1:
 							addError(lineNumber, "Error: Operand not in current data-memory sector (%o %02o)" % (hop2["IM"], hop2["IS"]))
 					loc = hop2["LOC"]
