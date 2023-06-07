@@ -26,6 +26,7 @@
 #               2023-06-04 RSB  UNLIST/LIST is processed in the assembly pass,
 #                               but I had forgotten to remove my early 
 #                               misconception of it from the preprocessor.
+#               2023-06-06 RSB  Now handles "SHL expression" and "SHR expression".
 
 import re
 from decimal import Decimal, ROUND_HALF_UP
@@ -132,27 +133,27 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 						comparison = c
 						break
 				if comparison == "":
-					addError(n, "Error: Illegal comparison", nn)
+					addError(n, "Error: Illegal comparison", nn-1)
 					continue
 				ofields = operand.split(comparison)
 				if len(ofields) != 2 or ofields[1][-1] != ")":
-					addError(n, "Error: Illegal comparison", nn)
+					addError(n, "Error: Illegal comparison", nn-1)
 					continue
 				constant = ofields[0]
 				if constant not in constants:
-					addError(n, "Error: Constant (%s) not found" % constant, nn)
+					addError(n, "Error: Constant (%s) not found" % constant, nn-1)
 					continue
 
 				expression = ofields[1][:-1]
 				value,error = yaEvaluate(expression, constants)
 				if error != "":
-					addError(n, "Error: Cannot evaluate expression", nn)
+					addError(n, "Error: Cannot evaluate expression", nn-1)
 					continue
 					
 				v1 = constants[constant]["number"]
 				v2 = value["number"]
 				if "scale" in value or "scale" in constants[constant]:
-					addError(n, "Implementation: Scale in IF condition", nn)
+					addError(n, "Implementation: Scale in IF condition", nn-1)
 					continue
 				isTrue = False
 				if comparison == "=(" and v1 == v2:
@@ -169,7 +170,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 				if len(ifs) > 0:
 					del ifs[-1]
 				else:
-					addError(n, "Info: ENDIF without IF", nn)
+					addError(n, "Info: ENDIF without IF", nn-1)
 				nn -= 1
 				del expandedLines[n][nn]
 				continue
@@ -418,8 +419,16 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 					nn -= 1
 					expandedLines[n][nn:nn+1] = [line1, line2, line3, line4]
 					continue
-			elif len(fields) >= 3 and fields[1] in ["SHL", "SHR"] and fields[2].isdigit():
-				count = int(fields[2])
+			elif len(fields) >= 3 and fields[1] in ["SHL", "SHR"]:
+				value, error = yaEvaluate(fields[2], constants)
+				if error != "":
+					addError(n, "Error: " + error, nn-1)
+					count = 0
+				else:
+					count = value["number"]
+					if "scale" in value:
+						count *= 2**value["scale"]
+					count = hround(count)
 				if count > 2:
 					expandedLines[n] = []
 					thisLabel = fields[0]

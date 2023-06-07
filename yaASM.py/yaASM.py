@@ -821,7 +821,7 @@ def checkBLOCKafterORG(n, extra = 0):
 				syllable = 0
 				roof = getRoof(i, j, k, extra)
 				inUsed = True
-				for l in range(offset, 0o400):
+				for l in range(offset, roof):
 					offset = 0
 					if used[i][j][k][l]:
 						inUsed = True
@@ -972,6 +972,8 @@ def storeAssembled(lineNumber, value, hop, data = True):
 
 # Form a HOP constant from a hop dictionary.
 def formConstantHOP(hop):
+	if hop == {}:
+		return 0
 	hopConstant = 0
 	hopConstant |= (hop["IM"] & 1) << 25
 	if not ptc:
@@ -1176,8 +1178,9 @@ for lineNumber in range(0, len(expandedLines)):
 					if "scale" in value:
 						v *= 2**value["scale"]
 					index = checkBLOCKafterORG(hround(v))
-				if False and fields[0] == "D.LNMT":
-					print("!", IM, IS, S, LOC, fields[2], value, error, index, file=sys.stderr)
+					if False and IM==0 and IS==0o13 and S==1 and LOC >=0o370:
+						print("!", IM, IS, S, LOC, fields[2], value, error, \
+							index, getRoof(IM, IS, S, 0), file=sys.stderr)
 				if len(index) == 0:
 					addError(lineNumber, "Error: No space for BLOCK")
 				elif index == [IM, IS, S, LOC]:
@@ -1186,7 +1189,18 @@ for lineNumber in range(0, len(expandedLines)):
 					IM, IS, S, LOC = tuple(index)
 					addError(lineNumber, "Warning: Skipping already-used locations")
 				else:
+					'''
 					addError(lineNumber, "Implementation: BLOCK needs HOP")
+					hop2 = { "IM": index[0], "IS": index[1], "S": index[2],
+							"LOC": index[3], "DM": DM, "DS": DS, "DLOC": DLOC}
+					hopStar(hop2)
+					'''
+					inputLine["switchSectorAt"] = [IM, IS, S, LOC] + index
+					used[IM][IS][S][LOC] = True
+					IM, IS, S, LOC = tuple(index)
+					inputLine["hop"] = {"IM":index[0], "IS":index[1], 
+										"S":index[2], "LOC":index[3], 
+										"DM":DM, "DS":DS, "DLOC":DLOC}
 				if fields[0] != "":
 					lhs = fields[0]
 					inputLine["lhs"] = lhs
@@ -1752,6 +1766,76 @@ def residualBit(dm, ds):
 		if dm == DM and ds == 0o17: # and DS != 0o17:
 			return 1 
 	return 0
+
+# This function is used only in the big assembly loop below.  The idea is that
+# you feed it a HOP constant tricked up like a symbol-table entry:
+#	1.	Assembles octal form of the HOP constant.
+#	2.	Allocates a variable to hold the HOP constant.
+#	3.	Assembles a HOP instruction with the variable as operand.
+#	4.	Stores the assembled instruction and HOP constant in memory.
+def hopStar(hop2):
+	global star, residual, loc
+	star = True
+	# We need to allocate a nameless variable to hold the HOP constant.
+	hopConstant = formConstantHOP(hop2)
+	constantString = "%09o" % hopConstant
+	#print("A1: allocateNameless " + constantString + " " + operand)
+	loc,residual = allocateNameless(lineNumber, constantString)
+	#print("A2: %o,%02o,%03o %o" % (DM, DS, loc, residual))
+	ds = DS
+	if loc > 0o377 or DS == 0o17 or residual != 0:
+		loc = loc & 0o377
+		residual = 1
+		ds = 0o17
+	#addError(lineNumber, "Info: Allocating variable for HOP at %o,%02o,%03o" % (DM, ds, loc))
+	storeAssembled(lineNumber, hopConstant, {
+		"IM": IM,
+		"IS": IS,
+		"S": S,
+		"LOC": loc,
+		"DM": DM,
+		"DS": ds,
+		"DLOC": loc
+	})
+
+# The following function is used only in the big assembly loop below.  It
+# accepts an operand of the form "=H'symbol" or "=H'symbol1,symbol2" and returns
+# a dictionary describing the associated HOP constant suitable for being fed
+# into formConstantHOP().  Or else it returns {} on error.
+def equalsH(operand):
+	ofields = operand[3:].split(",")
+	if len(ofields) == 1:
+		symbol = ofields[0]
+		symbold = ""
+	elif len(ofields) == 2:
+		symbol = ofields[0]
+		symbold = ofields[1]
+	else:
+		addError(lineNumber, "Error: Corrupt =H'...")
+		return {}
+	if symbol not in symbols:
+		addError(lineNumber, "Error: Symbol (%s) not found" % symbol)
+		return {}
+	if symbold != "" and symbold not in symbols:
+		addError(lineNumber, "Error: Symbol (%s) not found" % symbold)
+		return {}
+	# The symbol was found, and we want to convert it to a
+	# hop constant, in the form of a string that's an octal
+	# representation of the constant.
+	symbol1 = symbols[symbol]
+	if symbold == "":
+		symbol2 = symbol1
+	else:
+		symbol2 = symbols[symbold]
+	return {
+		"IM": symbol1["IM"],
+		"IS": symbol1["IS"],
+		"S": symbol1["S"],
+		"LOC": symbol1["LOC"],
+		"DM": symbol2["DM"],
+		"DS": symbol2["DS"],
+		"DLOC": symbol2["DLOC"]
+	}
 
 useDat = False
 errorsPrinted = []
@@ -2326,17 +2410,30 @@ for entry in inputFile:
 						}, False)
 						used[IM][IS][1][loc] = True
 		elif operator == "HOP":
+			# Note that the only arithmetical evaluation is for 
+			#	symbol+n
+			#	symbol-n
 			if operand.isdigit():
 				#addError(lineNumber, "Info: Converting HOP to TRA")
 				pass
+			elif operand.startswith("=H'"):
+				hopSing = equalsH(operand)
+				hopStar(hopSing)
 			elif operand not in symbols:
 				addError(lineNumber, "Error: Target location of HOP not found")
-			else:
-				hop2 = symbols[operand]
-				if operandModifierOperation != "":
+			else: # The case of "HOP symbol", or "HOP symbol+n", or 
+				  # "HOP symbol-n".
+				hop2 = copy.deepcopy(symbols[operand])
+				# I have no idea what the following is supposed to do if there's
+				# overflow or underflow.
+				if False and operandModifierOperation != "":
 					addError(lineNumber, "Error: Cannot apply + or - in HOP operand")
 				elif "inDataMemory" in hop2 and hop2["inDataMemory"]:
 					# The operand is a variable, as it ought to be.
+					if operandModifierOperation == "+":
+						hop2["DLOC"] += operandModifier
+					elif operandModifierOperation == "-":
+						hop2["DLOC"] -= operandModifier
 					#if (not ptc and hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17)):
 					#	if not useDat: # or S == 1:
 					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
@@ -2344,6 +2441,10 @@ for entry in inputFile:
 					loc = hop2["DLOC"]
 					residual = residualBit(hop2["DM"], hop2["DS"])
 				else:
+					if operandModifierOperation == "+":
+						hop2["LOC"] += operandModifier
+					elif operandModifierOperation == "-":
+						hop2["LOC"] -= operandModifier
 					# The operand is an LHS in instruction space.  If that's within the 
 					# current instruction sector, we should be able to convert the HOP 
 					# to a TRA and be done with it, and I could have sworn I saw
@@ -2358,28 +2459,7 @@ for entry in inputFile:
 						op = "%02o" % assembled
 						#addError(lineNumber, "Info: Converting HOP to TRA")
 					else:
-						star = True
-						# We need to allocate a nameless variable to hold the HOP constant.
-						hopConstant = formConstantHOP(hop2)
-						constantString = "%09o" % hopConstant
-						#print("A1: allocateNameless " + constantString + " " + operand)
-						loc,residual = allocateNameless(lineNumber, constantString)
-						#print("A2: %o,%02o,%03o %o" % (DM, DS, loc, residual))
-						ds = DS
-						if loc > 0o377 or DS == 0o17 or residual != 0:
-							loc = loc & 0o377
-							residual = 1
-							ds = 0o17
-						#addError(lineNumber, "Info: Allocating variable for HOP at %o,%02o,%03o" % (DM, ds, loc))
-						storeAssembled(lineNumber, hopConstant, {
-							"IM": IM,
-							"IS": IS,
-							"S": S,
-							"LOC": loc,
-							"DM": DM,
-							"DS": ds,
-							"DLOC": loc
-						})
+						hopStar(hop2)
 		elif ptc and operator == "CDS":
 			ofields = operand.split(",")
 			if len(ofields) != 2 or not ofields[0].isdigit() or not ofields[1].isdigit() or int(ofields[0],8) > 1 or int(ofields[1],8) > 15:
@@ -2410,42 +2490,9 @@ for entry in inputFile:
 			# Instruction is a "regular" one ... not one of the ones dealt with above.
 			if operand [:1] == "=":
 				if operand[:3] == "=H'":
-					bad = False
-					ofields = operand[3:].split(",")
-					if len(ofields) == 1:
-						symbol = ofields[0]
-						symbold = ""
-					elif len(ofields) == 2:
-						symbol = ofields[0]
-						symbold = ofields[1]
-					else:
-						addError(lineNumber, "Error: Corrupt =H'...")
-						bad = True
-					if symbol not in symbols:
-						addError(lineNumber, "Error: Symbol (%s) not found" % symbol)
-						bad = True
-					if symbold != "" and symbold not in symbols:
-						addError(lineNumber, "Error: Symbol (%s) not found" % symbold)
-						bad = True
-					if not bad:
-						# The symbol was found, and we want to convert it to a
-						# hop constant, in the form of a string that's an octal
-						# representation of the constant.
-						symbol1 = symbols[symbol]
-						if symbold == "":
-							symbol2 = symbol1
-						else:
-							symbol2 = symbols[symbold]
-						hopConstant = formConstantHOP({
-							"IM": symbol1["IM"],
-							"IS": symbol1["IS"],
-							"S": symbol1["S"],
-							"LOC": symbol1["LOC"],
-							"DM": symbol2["DM"],
-							"DS": symbol2["DS"],
-							"DLOC": symbol2["DLOC"]
-						})
-						constantString = "%09o" % hopConstant
+					hopSing = equalsH(operand)
+					hopConstant = formConstantHOP(hopSing)
+					constantString = "%09o" % hopConstant
 				else:
 					constantString = convertNumericLiteral(lineNumber, operand[1:])
 				if constantString == "":
