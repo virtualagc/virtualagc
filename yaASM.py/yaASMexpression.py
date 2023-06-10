@@ -67,6 +67,16 @@
 # is called directly.
 
 import sys
+from decimal import Decimal, ROUND_HALF_UP
+
+# Python's native round() function uses a silly method (in the sense that it is
+# unlike the expectation of every programmer who ever lived) called "banker's
+# rounding", wherein half-integers sometimes round up and sometimes
+# round down.  Good for bankers, I suppose, because rounding errors tend to
+# sum to zero, but no help whatever for us.  I've stolen the hround() function
+# from my Shuttle HAL/S compiler.  It rounds half-integers upward.
+def hround(x):
+	return int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
 
 # Function to pull a numeric literal constant from a string.
 # The leading portion of the input string is known to be a number
@@ -400,7 +410,8 @@ if "--test-expressions" in sys.argv:
 				constants[fields[0]] = value
 		elif line == "":
 			for n in constants:
-				print(n + " = " + str(constants[n]["number"]) + "B" + str(constants[n]["scale"]))
+				print(n + " = " + str(constants[n]["number"]) \
+					+ "B" + str(constants[n]["scale"]))
 		else:
 			tokens,error = yaTokenize(line)
 			print("Tokens:", tokens)
@@ -408,6 +419,6 @@ if "--test-expressions" in sys.argv:
 			if errors != "":
 				print("Errors:", errors)
 				continue
-			print("Value:", value)
+			print("Value:", value, "%09o" % (0o777777776 & hround(value["number"])))
 	
 	

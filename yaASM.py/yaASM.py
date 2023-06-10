@@ -85,6 +85,7 @@
 #                               to build correctly, though there are 2 less 
 #                               warnings for the latter.
 #               2023-06-06 RSB  Various fixes.
+#               2023-06-09 RSB  Corrected module increment in checkLOC() to 2.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -133,7 +134,7 @@ import copy
 from yaASMerrors import *
 from yaASMexpression import *
 from yaASMdefineMacros import *
-from yaASMpreprocessor import preprocessor, hround, unlistSuffix
+from yaASMpreprocessor import preprocessor, unlistSuffix
 
 '''
 Here's an explanation of the overall structure of the assembler.
@@ -311,6 +312,7 @@ checkFilename = ""
 ptc = False
 pastBugs = False
 ignoreResiduals = False
+debugRoof = 0
 for arg in sys.argv[1:]:
 	if arg[:2] == "--":
 		if arg == "--ptc":
@@ -319,11 +321,14 @@ for arg in sys.argv[1:]:
 			pastBugs = True
 		elif arg == "--ignore-residuals":
 			ignoreResiduals = True
+		elif arg.startswith("--debug-roof="):
+			debugRoof = int(arg.removeprefix("--debug-roof="))
 		elif arg == "--help":
 			print("Usage:", file=sys.stderr)
 			print("\tyaASM.py [OPTIONS] [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
 			print("The OPTIONS are", file=sys.stderr)
 			print("\t--help -- to print this message.", file=sys.stderr)
+			print("\t--debug-roof=n -- debug automatic sector changes to level n>0.", file=sys.stderr)
 			print("\t--ptc -- to use PTC source/octal input rather than the default LVDC.", file=sys.stderr)
 			print("\t--past-bugs -- only with --ptc, reproduces some original assembler bugs.", file=sys.stderr)
 			print("\t--ignore-residuals -- (debug) for --ptc octal checks, ignore residual flag.", file=sys.stderr)
@@ -469,6 +474,20 @@ for n in range(8):
 		roofRemovers[n].append([])
 		roofed[n].append([])
 
+# The following function handles adding a symbol to the roofAdders[] structure.
+# Used only during the symbol-discovery pass.
+def addAdder(symbol, IM, IS, S, LOC, lineNumber, expandedNumber):
+	global roofAdders
+	if symbol not in roofAdders[IM][IS]:
+		roofAdders[IM][IS].append(symbol)
+
+# The following function handles adding a symbol to the roofRemovers[] 
+# structure.  Used only during the symbol-discovery pass.
+def addRemover(symbol, IM, IS):
+	global roofRemovers
+	if symbol not in roofRemovers[IM][IS]:
+		roofRemovers[IM][IS].append(symbol)
+
 lines = sys.stdin.readlines()
 n = 0
 while n < len(lines):
@@ -564,14 +583,19 @@ def incLOC():
 # at the top of syllable 1.  The assembler is going to automatically
 # shove a HOP into this location if an automatic syllable switch
 # occurs.
-def getRoof(imod, isec, syl, extra):
+getRoofReported = [[[[[] for offset in range(256)] for syllable in range(2)] \
+		for sector in range(16)] for module in range(8)]
+def getRoof(imod, isec, syl, loc, extra):
+	global getRoofReported
 	if syl == 0:
 		# No space needs to be reserved in syllable 0.
 		roof = 0o377
+		needed = set()
+		numNeeded = 0
 	else:
 		# In syllable 1, the default amount of reserved
 		# space is 3 words:  0o377 and 0o376 can be used by
-		# TNZ and TMI, but 0o375 are never used for anything
+		# TNZ and TMI, but 0o375 is never used for anything
 		# as far as I can see.  Because of that, if less 
 		# than 2 words is needed by TMI/TNZ, the amount of
 		# reserved space can't be reduced.  But if more than
@@ -579,14 +603,23 @@ def getRoof(imod, isec, syl, extra):
 		# below 0o375.
 		roof = 0o374
 		try:
-			needed = len(set(roofAdders[imod][isec]) - set(roofRemovers[imod][isec]))
+			needed = set(roofAdders[imod][isec]) - set(roofRemovers[imod][isec])
+			numNeeded = len(needed)
 		except:
 			return roof
-		if needed > 2:
-			roof -= (needed - 2)
+		if numNeeded > 2:
+			roof -= (numNeeded - 2)
 	if extra > 0:
 		extra -= 1
-	return roof - extra
+	roof -= extra
+	if debugRoof == 1:
+		getRoofReported[imod][isec][syl][loc] = [roof, numNeeded]
+	elif debugRoof == 2:
+		getRoofReported[imod][isec][syl][loc] = [roof, numNeeded,
+										str(sorted(roofAdders[imod][isec])),
+										str(sorted(roofRemovers[imod][isec])),
+										str(sorted(needed))]
+	return roof
 
 # Convert a numeric literal to LVDC binary format.  I accept literals of the forms:
 #	if isOctal == False:
@@ -634,11 +667,11 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 		if not isInt:
 			decimal = float(decimal)
 			scale = int(scale[1:])
-			value = round(decimal * pow(2, 27 - scale - 1 - 1)) << 1
+			value = hround(decimal * pow(2, 27 - scale - 1 - 1)) << 1
 		else:
 			decimal = int(decimal)
 			scale = int(scale[1:])
-			value = round(decimal * pow(2, 27 - scale))
+			value = hround(decimal * pow(2, 27 - scale))
 		if value < 0:
 			value += 0o1000000000
 		constantString = "%09o" % value
@@ -752,7 +785,7 @@ def checkLOC(extra = 0):
 			# of luck since there's no room to even insert a TRA or HOP.
 			addError(lineNumber, "Error: No memory available at current location")
 			return []
-		roof = getRoof(IM, IS, S, extra)
+		roof = getRoof(IM, IS, S, LOC, extra)
 		try:
 			if LOC < roof:
 				nextUsed = used[IM][IS][S][LOC + 1]
@@ -777,7 +810,7 @@ def checkLOC(extra = 0):
 			tSec = IS
 			tMod = IM
 			while True:
-				roof = getRoof(tMod, tSec, tSyl, extra)
+				roof = getRoof(tMod, tSec, tSyl, tLoc, extra)
 				if tLoc < roof and not used[tMod][tSec][tSyl][tLoc] and not used[tMod][tSec][tSyl][tLoc + 1]:
 					if autoSwitch:
 						retVal = [IM, IS, S, LOC, tMod, tSec, tSyl, tLoc]
@@ -797,7 +830,7 @@ def checkLOC(extra = 0):
 						tSec += 1
 						if tSec >= 16:
 							tSec = 0
-							tMod += 1
+							tMod += 2
 							if tMod >= 8:
 								addError(lineNumber, "Error: Memory totally exhausted")
 								return []
@@ -816,13 +849,10 @@ def checkBLOCKafterORG(n, extra = 0):
 	offset = LOC
 	for i in range(IM, 0o10):
 		for j in range(sector, 0o20):
-			sector = 0
 			for k in range(syllable, 2):
-				syllable = 0
-				roof = getRoof(i, j, k, extra)
+				roof = getRoof(i, j, k, offset, extra)
 				inUsed = True
 				for l in range(offset, roof):
-					offset = 0
 					if used[i][j][k][l]:
 						inUsed = True
 						index = []
@@ -835,6 +865,9 @@ def checkBLOCKafterORG(n, extra = 0):
 						lenUnused += 1
 					if lenUnused >= n:
 						return index
+				offset = 0
+			syllable = 0
+		sector = 0
 	return []
 
 # Disassembles the two syllables of a word into instructions.  Useful only for debugging
@@ -1076,8 +1109,9 @@ useDat = False
 udDM = 0
 udDS = 0
 inMacro = ""
-for lineNumber in range(0, len(expandedLines)):
-	for line in expandedLines[lineNumber]:
+for lineNumber in range(len(expandedLines)):
+	for expandedNumber in range(len(expandedLines[lineNumber])):
+		line = expandedLines[lineNumber][expandedNumber]
 		if ptc:
 			ptcDLOC[DM][DS] = DLOC
 		lFields = line.split()
@@ -1138,11 +1172,9 @@ for lineNumber in range(0, len(expandedLines)):
 			elif fields[1] == "USE":
 				if fields[2] == "INST":
 					useDat = False
-					#print("!C USE INST", file=sys.stderr)
 				elif fields[2] == "DAT":
 					dS = 1
 					useDat = True
-					#print("!C USE DAT", file=sys.stderr)
 				else:
 					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
@@ -1178,9 +1210,6 @@ for lineNumber in range(0, len(expandedLines)):
 					if "scale" in value:
 						v *= 2**value["scale"]
 					index = checkBLOCKafterORG(hround(v))
-					if False and IM==0 and IS==0o13 and S==1 and LOC >=0o370:
-						print("!", IM, IS, S, LOC, fields[2], value, error, \
-							index, getRoof(IM, IS, S, 0), file=sys.stderr)
 				if len(index) == 0:
 					addError(lineNumber, "Error: No space for BLOCK")
 				elif index == [IM, IS, S, LOC]:
@@ -1189,12 +1218,6 @@ for lineNumber in range(0, len(expandedLines)):
 					IM, IS, S, LOC = tuple(index)
 					addError(lineNumber, "Warning: Skipping already-used locations")
 				else:
-					'''
-					addError(lineNumber, "Implementation: BLOCK needs HOP")
-					hop2 = { "IM": index[0], "IS": index[1], "S": index[2],
-							"LOC": index[3], "DM": DM, "DS": DS, "DLOC": DLOC}
-					hopStar(hop2)
-					'''
 					inputLine["switchSectorAt"] = [IM, IS, S, LOC] + index
 					used[IM][IS][S][LOC] = True
 					IM, IS, S, LOC = tuple(index)
@@ -1219,15 +1242,16 @@ for lineNumber in range(0, len(expandedLines)):
 					symbols[lhs]["inDataMemory"] = inDataMemory
 					symbols[lhs]["isCDS"] = False
 					symbols[lhs]["isBLOCK"] = True
-					if False and lhs == "D.LNMT":
-						print("!B", symbols[lhs], file=sys.stderr)
 			elif fields[0] != "" and fields[1] == "SYN":
 				if fields[2] == "*INS":
+					inDataMemory = False
 					inputLine["lhs"] = fields[0]
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					addRemover(fields[0], IM, IS)
 				elif fields[2] == "*DAT":
 					inputLine["lhs"] = fields[0]
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
+					addRemover(fields[0], DM, DS)
 				else:
 					synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
@@ -1491,12 +1515,12 @@ for lineNumber in range(0, len(expandedLines)):
 				# Try to track the number of locations we need for remapping TMI and TNZ targets.
 				try:
 					if len(fields) >= 2 and fields[0] != "":
-						if fields[0] not in roofRemovers[IM][IS]:
-							roofRemovers[IM][IS].append(fields[0])
-					if len(fields) >= 3 and fields[1] in ["TMI", "TNZ"] and fields[2][:1].isalpha():
+						addRemover(fields[0], IM, IS)
+					if len(fields) >= 3 and fields[1] in ["TMI", "TNZ"] and \
+							fields[2][:1].isalpha():
 						symbol = fields[2].split("+")[0].split("-")[0]
-						if symbol not in roofAdders[IM][IS]:
-							roofAdders[IM][IS].append(symbol)
+						addAdder(symbol, IM, IS, S, LOC, \
+								lineNumber, expandedNumber)
 				except:
 					addError(lineNumber, "Error: Tracking TMI/TNZ failed")
 				
@@ -1892,6 +1916,15 @@ for entry in inputFile:
 		is1 = switch[5]
 		s1 = switch[6]
 		loc1 = switch[7]
+		if debugRoof > 0:
+			here = getRoofReported[im0][is0][s0][loc0]
+			print("Sector change at %o-%02o-%o-%03o:" % (im0, is0, s0, loc0), \
+				"roof=%03o goo=%s" % (here[0], str(here[1])), \
+				file=sys.stderr)
+			if debugRoof > 1:
+				print("\tRoof adders:  ", here[2], file=sys.stderr)
+				print("\tRoof removers:", here[3], file=sys.stderr)
+				print("\tDifference:   ", here[4], file=sys.stderr)
 		if IM == im1 and IS == is1:
 			# Can use a TRA.
 			assembled = (operators["TRA"]["opcode"] | (loc1 << 5) | (s1 << 4))
@@ -2153,12 +2186,12 @@ for entry in inputFile:
 				symbol1 = symbols[ofields[0]]
 				symbol2 = symbols[ofields[1]]
 				hopConstant = formConstantHOP({
-					"IM": symbol1["IM"],
-					"IS": symbol1["IS"],
-					"S": symbol1["S"],
+					"IM":  symbol1["IM"],
+					"IS":  symbol1["IS"],
+					"S":   symbol1["S"],
 					"LOC": symbol1["LOC"],
-					"DM": symbol2["DM"],
-					"DS": symbol2["DS"]
+					"DM":  symbol2["DM"],
+					"DS":  symbol2["DS"]
 				})
 				constantString = "%09o" % hopConstant
 		elif operator == "HPCDD":
@@ -2349,8 +2382,8 @@ for entry in inputFile:
 				star = True
 			else: 
 				# For the moment, I'm ignoring the possibility of 
-				#	TMI	SYMBOL+offset
-				# and similar cases.  I'm just assuming that the operand is a symbol.
+				#	(TMI|TNZ)	SYMBOL(+|-)offset
+				# I'm just assuming that the operand is a symbol.
 				if operandModifierOperation != "":
 					addError(lineNumber, "Error: Not implemented yet")
 				

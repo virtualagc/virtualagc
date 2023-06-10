@@ -29,19 +29,9 @@
 #               2023-06-06 RSB  Now handles "SHL expression" and "SHR expression".
 
 import re
-from decimal import Decimal, ROUND_HALF_UP
 from yaASMerrors import *
 from yaASMexpression import *
 from yaASMdefineMacros import lineSplit
-
-# Python's native round() function uses a silly method (in the sense that it is
-# unlike the expectation of every programmer who ever lived) called "banker's
-# rounding", wherein half-integers sometimes round up and sometimes
-# round down.  Good for bankers, I suppose, because rounding errors tend to
-# sum to zero, but no help whatever for us.  I've stolen the hround() function
-# from my Shuttle HAL/S compiler.  It rounds half-integers upward.
-def hround(x):
-	return int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
 
 # The following are TELemetry Definitions.  The keys are the names, and the
 # values are ordered pairs consisting of the delay-mode and the pio-number.
