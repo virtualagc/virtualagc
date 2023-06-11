@@ -86,6 +86,8 @@
 #                               warnings for the latter.
 #               2023-06-06 RSB  Various fixes.
 #               2023-06-09 RSB  Corrected module increment in checkLOC() to 2.
+#               2023-06-10 RSB  Several seeming changes in the original compiler
+#                               are condition on the --newer CLI switch.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -313,6 +315,8 @@ ptc = False
 pastBugs = False
 ignoreResiduals = False
 debugRoof = 0
+ceiling = 0o1000
+newer = False
 for arg in sys.argv[1:]:
 	if arg[:2] == "--":
 		if arg == "--ptc":
@@ -323,11 +327,17 @@ for arg in sys.argv[1:]:
 			ignoreResiduals = True
 		elif arg.startswith("--debug-roof="):
 			debugRoof = int(arg.removeprefix("--debug-roof="))
+		elif arg.startswith("--ceiling="):
+			ceiling = int(arg.removeprefix("--ceiling="), 8)
+		elif arg == "--newer":
+			newer = True
 		elif arg == "--help":
 			print("Usage:", file=sys.stderr)
 			print("\tyaASM.py [OPTIONS] [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
 			print("The OPTIONS are", file=sys.stderr)
 			print("\t--help -- to print this message.", file=sys.stderr)
+			print("\t--newer -- assemble for AS-512/513 rather than AS-206RAM.", file=sys.stderr)
+			print("\t--ceiling=n -- (leave at default 1000) octal limit forward TNZ/TMI distance.", file=sys.stderr)
 			print("\t--debug-roof=n -- debug automatic sector changes to level n>0.", file=sys.stderr)
 			print("\t--ptc -- to use PTC source/octal input rather than the default LVDC.", file=sys.stderr)
 			print("\t--past-bugs -- only with --ptc, reproduces some original assembler bugs.", file=sys.stderr)
@@ -470,23 +480,31 @@ for n in range(8):
 	roofRemovers.append([])
 	roofed.append([])
 	for m in range(16):
-		roofAdders[n].append([])
-		roofRemovers[n].append([])
+		roofAdders[n].append({})
+		roofRemovers[n].append(set())
 		roofed[n].append([])
 
 # The following function handles adding a symbol to the roofAdders[] structure.
 # Used only during the symbol-discovery pass.
-def addAdder(symbol, IM, IS, S, LOC, lineNumber, expandedNumber):
+def addAdder(symbol, IM, IS, S, LOC, DM, DS):
 	global roofAdders
 	if symbol not in roofAdders[IM][IS]:
-		roofAdders[IM][IS].append(symbol)
+		roofAdders[IM][IS][symbol] = [S, LOC, DM, DS]
 
 # The following function handles adding a symbol to the roofRemovers[] 
 # structure.  Used only during the symbol-discovery pass.
-def addRemover(symbol, IM, IS):
+def addRemover(symbol, IM, IS, S, LOC, DM, DS):
 	global roofRemovers
 	if symbol not in roofRemovers[IM][IS]:
-		roofRemovers[IM][IS].append(symbol)
+		if symbol in roofAdders[IM][IS]:
+			addedAt = roofAdders[IM][IS][symbol]
+			if newer and (DM != addedAt[2] or DS != addedAt[3]):
+				return
+			if ceiling < 0o1000: # I don't think this should ever occur.
+				distance = (0o400 * S + LOC) - (0o400 * addedAt[0] + addedAt[1])
+				if distance >= ceiling:
+					return
+		roofRemovers[IM][IS].add(symbol)
 
 lines = sys.stdin.readlines()
 n = 0
@@ -526,10 +544,17 @@ def incDLOC(increment = 1, mark = True):
 	global DLOC, used
 	while increment > 0:
 		increment -= 1
-		if DLOC < 256 and mark:
+		DLOC1 = DLOC + 1
+		if DLOC < 0o400 and mark:
 			used[DM][DS][0][DLOC] = True
 			used[DM][DS][1][DLOC] = True
-		DLOC += 1
+			if increment == 0 and \
+					(DLOC == 0o377 or sectorTopData[DM][DS] == DLOC1):
+				top = DLOC
+				while top > 0 and used[DM][DS][1][top-1]:
+					top -= 1
+				sectorTopData[DM][DS] = top
+		DLOC = DLOC1
 
 # This function checks to see if a block of the desired size is 
 # available at the currently selected DM/DS/DLOC, and if not,
@@ -585,30 +610,53 @@ def incLOC():
 # occurs.
 getRoofReported = [[[[[] for offset in range(256)] for syllable in range(2)] \
 		for sector in range(16)] for module in range(8)]
+sectorTopData = []
+for i in range(8):
+	sectorTopData.append([0o400]*16)
 def getRoof(imod, isec, syl, loc, extra):
 	global getRoofReported
+	roof = sectorTopData[imod][isec] - 1
 	if syl == 0:
 		# No space needs to be reserved in syllable 0.
-		roof = 0o377
 		needed = set()
 		numNeeded = 0
+		# Okay ... This is purely ad-hoc.  At 4-17-0-374 and at 6-17-0-374,
+		# the original assembler inserted a sector change for no reason I can 
+		# see. There's no data being avoided.  I figure (well, hope) that
+		# it means that the assembler reserved a few words at the ends
+		# of residual sectors into which it wouldn't put instructions.  In
+		# point of fact, the final three words (both syllables) are unused
+		# in every residual sector in evern available LVDC program 
+		# (PTC-ADAPT-SELF-TEST-PROGRAM, AS-206RAM, AS-512, and AS-153)
+		# processed by the original assembler, although the two addresses I
+		# just mentioned are the only ones that caused me a problem.
+		if isec == 0o17 and roof >= 0o375:
+			roof = 0o374
 	else:
 		# In syllable 1, the default amount of reserved
 		# space is 3 words:  0o377 and 0o376 can be used by
-		# TNZ and TMI, but 0o375 is never used for anything
+		# TNZ and TMI, but 0o375 is never used for any instructions,
 		# as far as I can see.  Because of that, if less 
 		# than 2 words is needed by TMI/TNZ, the amount of
 		# reserved space can't be reduced.  But if more than
 		# 2 words are needed by TMI or TNZ, we can add them 
-		# below 0o375.
-		roof = 0o374
-		try:
-			needed = set(roofAdders[imod][isec]) - set(roofRemovers[imod][isec])
-			numNeeded = len(needed)
-		except:
-			return roof
-		if numNeeded > 2:
-			roof -= (numNeeded - 2)
+		# below 0o375.  However, there are some cases in which a
+		# data word has been written to 0o375, and we have to 
+		# detect that case.
+		needed = set(roofAdders[imod][isec]) - roofRemovers[imod][isec]
+		numNeeded = len(needed)
+		if roof == 0o377:
+			roof = 0o374
+			if numNeeded > 2:
+				roof -= (numNeeded - 2)
+		elif roof == 0o376:
+			roof = 0o374
+			if numNeeded > 1:
+				roof -= (numNeeded - 1)
+		elif roof == 0o375:
+			roof == 0o374 - numNeeded
+		else:
+			roof -= numNeeded
 	if extra > 0:
 		extra -= 1
 	roof -= extra
@@ -663,6 +711,9 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 			whereE = scale.index("E")
 			decimal += scale[whereE:]
 			scale = scale[:whereE]
+	elif newer:
+		decimal = "%d" % hround(decimal)
+		isInt = True
 	try:
 		if not isInt:
 			decimal = float(decimal)
@@ -680,9 +731,10 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 		addError(lineNumber, "Error: Cannot compute constant expression " + str(n))
 		return ""	
 
-# Allocate/store a nameless variable for "=..." constant, returning its offset
+# Allocate/store a nameless memory location, returning its offset
 # into the sector, and a residual (0 if in sector specified or 1 if in residual
-# sector).
+# sector).  There are various reasons why this might be done:  for "=..." 
+# operands, for HOP*, for TRA*, for TMI*, for TNZ*, and for sector changes.
 # Later: Use has been extended, for --ptc, to automatic allocation of 
 # named variables from their implicit usage as operands in some instructions.
 # Still later:  No, automatic allocation of named variables for --ptc has to be done
@@ -847,7 +899,7 @@ def checkBLOCKafterORG(n, extra = 0):
 	sector = IS
 	syllable = S
 	offset = LOC
-	for i in range(IM, 0o10):
+	for i in range(IM, 0o10, 2):
 		for j in range(sector, 0o20):
 			for k in range(syllable, 2):
 				roof = getRoof(i, j, k, offset, extra)
@@ -1247,11 +1299,11 @@ for lineNumber in range(len(expandedLines)):
 					inDataMemory = False
 					inputLine["lhs"] = fields[0]
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					addRemover(fields[0], IM, IS)
+					addRemover(fields[0], IM, IS, S, LOC, DM, DS)
 				elif fields[2] == "*DAT":
 					inputLine["lhs"] = fields[0]
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					addRemover(fields[0], DM, DS)
+					addRemover(fields[0], DM, DS, 0, DLOC, DM, DS)
 				else:
 					synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
@@ -1491,15 +1543,10 @@ for lineNumber in range(len(expandedLines)):
 				inDataMemory = False
 				if True:
 					# This code is intended for inserting extra jumps around memory
-					# already allocated for something else.  I don't see how it could
-					# be effective here in the discovery pass, because some of the 
-					# memory it's trying to jump around won't have been allocated yet. 
-					# Nevertheless, it seems to work for LVDC AS206-RAM, and fails
-					# sometimes for PTC PAST program.  Perhaps the AS206-RAM program
-					# just by chance avoids the problematic situations.
+					# already allocated for something else. 
 					extra = 0
 					if fields[2][:2] == "*+" and fields[2][2:].isdigit():
-						extra = int(fields[2][2:])
+						extra += int(fields[2][2:])
 					if ptc and fields[1] in ["TRA", "HOP"] and not used[IM][IS][S][LOC]:
 						pass
 					else:
@@ -1515,12 +1562,11 @@ for lineNumber in range(len(expandedLines)):
 				# Try to track the number of locations we need for remapping TMI and TNZ targets.
 				try:
 					if len(fields) >= 2 and fields[0] != "":
-						addRemover(fields[0], IM, IS)
+						addRemover(fields[0], IM, IS, S, LOC, DM, DS)
 					if len(fields) >= 3 and fields[1] in ["TMI", "TNZ"] and \
 							fields[2][:1].isalpha():
 						symbol = fields[2].split("+")[0].split("-")[0]
-						addAdder(symbol, IM, IS, S, LOC, \
-								lineNumber, expandedNumber)
+						addAdder(symbol, IM, IS, S, LOC, DM, DS)
 				except:
 					addError(lineNumber, "Error: Tracking TMI/TNZ failed")
 				
@@ -1663,15 +1709,6 @@ if False:
 		print("%-8s  %o %02o %o %03o  %o %02o %03o" % (key, symbol["IM"], 
                 symbol["IS"], symbol["S"], symbol["LOC"], symbol["DM"], 
                 symbol["DS"], symbol["DLOC"]))
-
-if False:
-	for dm in range(8):
-		for ds in range(16):
-			r = set(roofAdders[dm][ds]) - set(roofRemovers[dm][ds])
-			print(("%o %02o " % (dm, ds)) + str(r))
-			#print(sorted(roofAdders[dm][ds]))
-			#print(sorted(roofRemovers[dm][ds]))
-			#print("")
 
 #----------------------------------------------------------------------------
 #   	Assembly pass, printout of assembly listing, saving .src file
@@ -2271,6 +2308,9 @@ for entry in inputFile:
 			assembled = int(constantString, 8)
 		# Put the assembled value wherever it's supposed to 
 		storeAssembled(lineNumber, assembled, inputLine["hop"])
+		if newer and len(constantString) == 9:
+			key = "%o_%02o_%s" % (DM, DS, constantString)
+			nameless[key] = DLOC
 	elif operator in operators:
 		#print("%o\t%02o\t%o\t%03o\t%d\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], lineNumber, inputLine["raw"]), file=f)
 		inDataMemory = False
@@ -2346,7 +2386,7 @@ for entry in inputFile:
 				# DM/DS, but the original assembler seemed to disallow it.  I assume
 				# that's for safety purposes.  On the other hand, even if there's a 
 				# DM/DS mismatch, the TRA seems to be allowed if there's a CDS instruction
-				# at the target location or if the target is on the residial sector.  
+				# at the target location or if the target is on the residual sector.  
 				# Which seems pretty convoluted, though pragmatically reasonable, so I may be
 				# misinterpreting what's going on.
 				loc = symbols[operand]["LOC"]
@@ -2807,6 +2847,10 @@ for module in range(8):
 			print(formatLine % tuple(rowList))
 			print(formatFileLine % tuple(rowList), file=f)
 f.close()
+
+if False:
+	for key in sorted(nameless):
+		print("\"%s\" \"%03o\"" % (key, nameless[key]), file=sys.stderr)
 
 # Prints out some debugging stuff about the order in which symbols are allocated.
 # It may be useful for figuring out where the assembly process stuff starts 
