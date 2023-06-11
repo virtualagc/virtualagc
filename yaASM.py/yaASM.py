@@ -1972,7 +1972,7 @@ for entry in inputFile:
 			# Must use a HOP.
 			hopConstant = formConstantHOP(inputLine["hop"])
 			constantString = "%09o" % hopConstant
-			loc,residual = allocateNameless(lineNumber, constantString, False)
+			loc,residual = allocateNameless(lineNumber, constantString, newer)
 			assembled = (operators["HOP"]["opcode"] | (loc << 5) | (residual << 4))
 			a81 = "%03o" % loc
 			a9 = "%o" % residual
@@ -2159,7 +2159,8 @@ for entry in inputFile:
 									s = 0
 									if "scale" in value:
 										s = value["scale"]
-									if last == "P" and not isinstance(v, int):
+									if last == "P" and not isinstance(v, int) \
+											and "scale" in value:
 										s -= 29
 									v *= 2**s
 									usageValue = hround(v)
@@ -2402,7 +2403,7 @@ for entry in inputFile:
 				hopConstant = formConstantHOP(symbols[operand])
 				constantString = "%09o" % hopConstant
 				#print("C1: allocateNameless " + constantString + " " + operand)
-				loc,residual = allocateNameless(lineNumber, constantString, False)
+				loc,residual = allocateNameless(lineNumber, constantString, newer)
 				#print("C2: %o,%20o,%03o %o" % (DM, DS, loc, residual))
 				assembled = operators["HOP"]["opcode"]
 				op = "%02o" % assembled
@@ -2458,7 +2459,7 @@ for entry in inputFile:
 						if loc <= 0o375:
 							loc -= 1
 						roofed[IM][IS].append(operand)
-						loc2,residual2 = allocateNameless(lineNumber, constantString, False)
+						loc2,residual2 = allocateNameless(lineNumber, constantString, newer)
 						ds = DS
 						if residual2 != 0:
 							ds = 0o17
@@ -2624,8 +2625,12 @@ for entry in inputFile:
 					residual = residualBit(hop2["DM"], hop2["DS"])
 				else:
 					if hop2["IM"] != DM or (hop2["IS"] != 0o17 and hop2["IS"] != DS):
+						if useDat:
+							etype = "Warning"
+						else:
+							etype = "Error"
 						if not useDat or S == 1:
-							addError(lineNumber, "Error: Operand not in current data-memory sector (%o %02o)" % (hop2["IM"], hop2["IS"]))
+							addError(lineNumber, "%s: Operand not in current data-memory sector (%o %02o)" % (etype, hop2["IM"], hop2["IS"]))
 					loc = hop2["LOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier

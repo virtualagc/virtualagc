@@ -72,6 +72,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 	ampUsed = False
 	inMacro = ""
 	ifs = []
+	suffix = ""
 	if ptc:
 		maxSHF = 6
 	else:
@@ -257,6 +258,8 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 							continue
 						lhs = macroLine[0]
 						operator = macroLine[1]
+						if operator == "UNLIST":
+							suffix = unlistSuffix
 						if len(macroLine) < 3:
 							operand = ""
 						else:
@@ -264,7 +267,9 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 						
 						if m == 0 and fields[0] != "":
 							lhs = fields[0]
-						expandedMacro.append(fmt % (lhs, operator, operand))
+						expandedMacro.append(fmt % (lhs, operator, operand) + suffix)
+						if operator == "LIST":
+							suffix = ""
 						#print("! E:", expandedMacro[-1], file=sys.stderr)
 					# Replace the macro invocation line itself with the lines 
 					# of the expanded macro, and proceed to process from that 
