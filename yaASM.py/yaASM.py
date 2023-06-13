@@ -731,7 +731,10 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 		addError(lineNumber, "Error: Cannot compute constant expression " + str(n))
 		return ""	
 
-# Allocate/store a nameless memory location, returning its offset
+# Note: By a "nameless memory location", I mean the same thing as what I believe
+# was known as "literal memory" in LVDC lingo.  I'm just guessing, of course,
+# since there's no surviving documentation about LVDC assembly language.  This
+# function allocates/stores a nameless memory location, returning its offset
 # into the sector, and a residual (0 if in sector specified or 1 if in residual
 # sector).  There are various reasons why this might be done:  for "=..." 
 # operands, for HOP*, for TRA*, for TMI*, for TNZ*, and for sector changes.
@@ -1467,6 +1470,7 @@ for lineNumber in range(len(expandedLines)):
 						addError(lineNumber, "Error: Undefined symbol "+symbol)
 					elif "inDataMemory" not in symbols[symbol] \
 							or not symbols[symbol]["inDataMemory"]:
+						#print("!", symbol, symbols[symbol], file=sys.stderr)
 						addError(lineNumber, "Error: Symbol " + symbol + " not data")
 					else:
 						DM = symbols[symbol]["DM"]
@@ -2309,9 +2313,16 @@ for entry in inputFile:
 			assembled = int(constantString, 8)
 		# Put the assembled value wherever it's supposed to 
 		storeAssembled(lineNumber, assembled, inputLine["hop"])
+		'''
+		The following would have the instantaneous effect of removing 100 errors
+		and 3000 mismatches ... but it's false.  Referring to the literal table
+		on the assembly listing's pp. 1220-1243, it's clear that every 
+		literal is allocated by an actual instruction (like CLA etc.) and not
+		by a pseudo-op like DEC or OCT.  Which makes sense.
 		if newer and len(constantString) == 9:
 			key = "%o_%02o_%s" % (DM, DS, constantString)
 			nameless[key] = DLOC
+		'''
 	elif operator in operators:
 		#print("%o\t%02o\t%o\t%03o\t%d\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], lineNumber, inputLine["raw"]), file=f)
 		inDataMemory = False
@@ -2432,7 +2443,9 @@ for entry in inputFile:
 				# The technique in this case is to use a word at the top of syllable
 				# 1 of the sector to store a HOP instruction that gets us to the 
 				# target.  The words are used in the order 0o377, 0o376, 0o374 (0o375
-				# is alway skipped), 0o373, etc.
+				# is alway skipped), 0o373, etc.  Unless there are already
+				# data words allocated up there, in which case we start below
+				# those data words.
 				star = True
 				residual = 1
 				hopConstant2 = formConstantHOP(symbols[operand])
@@ -2454,12 +2467,25 @@ for entry in inputFile:
 					else:
 						# No HOP to this target has been added to the end of the sector,
 						# so we must do so now.
-						index = len(roofed[IM][IS])
-						loc = 0o377 - index
-						if loc <= 0o375:
-							loc -= 1
+						if False:
+							# This was the original algorithm I was using.
+							index = len(roofed[IM][IS])
+							loc = 0o377 - index
+							# TBD -- I'm not sure the following is right when there
+							# are data words allocated at the top of the sector.
+							if loc <= 0o375:
+								loc -= 1
+						else:
+							# This is the replacement.  It works equally well
+							# for AS-206RAM and PTC-ADAPT, and is very 
+							# marginally better for AS-512 (in that it fixes
+							# slightly more things than it breaks).
+							for loc in range(0o377, -1, -1):
+								if used[IM][IS][1][loc] or loc == 0o375:
+									continue
+								break
 						roofed[IM][IS].append(operand)
-						loc2,residual2 = allocateNameless(lineNumber, constantString, newer)
+						loc2,residual2 = allocateNameless(lineNumber, constantString, True)
 						ds = DS
 						if residual2 != 0:
 							ds = 0o17
