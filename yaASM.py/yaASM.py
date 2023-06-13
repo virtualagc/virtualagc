@@ -88,6 +88,7 @@
 #               2023-06-09 RSB  Corrected module increment in checkLOC() to 2.
 #               2023-06-10 RSB  Several seeming changes in the original compiler
 #                               are condition on the --newer CLI switch.
+#               2023-06-13 RSB  Replaced used[] structure by ms[] structure.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -184,9 +185,14 @@ Pass 4:		Assembly and output.
 #----------------------------------------------------------------------------
 #	Definitions of global variables.
 #----------------------------------------------------------------------------
-# Array for keeping track of which memory locations have been used already.
-used = [[[[False for offset in range(256)] for syllable in range(2)] \
+# Array for keeping track of which memory locations have been used already, 
+# and other memory characteristics.
+ms = [[[[0 for offset in range(256)] for syllable in range(2)] \
 		for sector in range(16)] for module in range(8)]
+msUSED = 1
+msLITERAL = 2
+msBLOCK = 4
+msTABLE = 8
 
 # BA8421 character set in its native encoding.  All of the unprintable
 # characters are replaced by '?', which isn't a legal character anyway.
@@ -546,12 +552,12 @@ def incDLOC(increment = 1, mark = True):
 		increment -= 1
 		DLOC1 = DLOC + 1
 		if DLOC < 0o400 and mark:
-			used[DM][DS][0][DLOC] = True
-			used[DM][DS][1][DLOC] = True
+			ms[DM][DS][0][DLOC] |= msUSED
+			ms[DM][DS][1][DLOC] |= msUSED
 			if increment == 0 and \
 					(DLOC == 0o377 or sectorTopData[DM][DS] == DLOC1):
 				top = DLOC
-				while top > 0 and used[DM][DS][1][top-1]:
+				while top > 0 and (ms[DM][DS][1][top-1] & msUSED):
 					top -= 1
 				sectorTopData[DM][DS] = top
 		DLOC = DLOC1
@@ -564,7 +570,7 @@ def findDLOC(start = 0, increment = 1):
 	length = 0
 	reuse = False
 	while n < 256 and length < increment:
-		if used[DM][DS][0][n] or used[DM][DS][1][n]:
+		if (ms[DM][DS][0][n] & msUSED) or (ms[DM][DS][1][n] & msUSED):
 			n += 1
 			length = 0
 			reuse = True
@@ -592,13 +598,13 @@ def incLOC():
 	try:
 		if useDat:
 			if DLOC < 256:
-				used[DM][DS][dS][DLOC] = True
+				ms[DM][DS][dS][DLOC] |= msUSED
 			dS = 1 - dS
 			if dS == 1:
 				DLOC += 1
 		else:
 			if LOC < 256:
-				used[IM][IS][S][LOC] = True
+				ms[IM][IS][S][LOC] |= msUSED
 			LOC += 1
 	except:
 		return
@@ -757,11 +763,12 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 	start = 0
 	for loc in range(start, 256):
 		try:
-			if not used[DM][DS][0][loc] and not used[DM][DS][1][loc]:
+			if not (ms[DM][DS][0][loc] & (msUSED | msTABLE | msBLOCK)) \
+					and not (ms[DM][DS][1][loc] & (msUSED | msTABLE | msBLOCK)):
 				if False:
 					addError(lineNumber, "Info: Allocation of nameless " + value)
-				used[DM][DS][0][loc] = True
-				used[DM][DS][1][loc] = True
+				ms[DM][DS][0][loc] |= msUSED | msLITERAL
+				ms[DM][DS][1][loc] |= msUSED | msLITERAL
 				octals[DM][DS][2][loc] = 0
 				nameless[value] = loc
 				allocationRecords.append({ "symbol": value, "lineNumber":lineNumber, 
@@ -775,11 +782,12 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 	if useResidual and DS != 0o17:
 		for loc in range(start, 256):
 			try:
-				if not used[DM][0o17][0][loc] and not used[DM][0o17][1][loc]:
+				if not (ms[DM][0o17][0][loc] & (msUSED | msTABLE | msBLOCK)) \
+						and not (ms[DM][0o17][1][loc] & (msUSED | msTABLE | msBLOCK)):
 					if False:
 						addError(lineNumber, "Info: Allocation of nameless " + valueR)
-					used[DM][0o17][0][loc] = True
-					used[DM][0o17][1][loc] = True
+					ms[DM][0o17][0][loc] |= msUSED | msLITERAL
+					ms[DM][0o17][1][loc] |= msUSED | msLITERAL
 					octals[DM][0o17][2][loc] = 0
 					nameless[valueR] = loc
 					allocationRecords.append({ "symbol": valueR, "lineNumber":lineNumber, 
@@ -811,10 +819,13 @@ def checkLOC(extra = 0):
 		# This is the "USE DAT" case. 
 		if DLOC >= 256:
 		 	addError(lineNumber, "Error: No room left in memory sector")
-		elif dS == 1 and (used[DM][DS][0][DLOC] or used[DM][DS][1][DLOC]):
+		elif dS == 1 and ((ms[DM][DS][0][DLOC] & msUSED) 
+						or (ms[DM][DS][1][DLOC] & msUSED)):
 			tLoc = DLOC
 			addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, DLOC))
-			while tLoc < 256 and dS == 1 and (used[DM][DS][0][tLoc] or used[DM][DS][1][tLoc]):
+			while tLoc < 256 and dS == 1 \
+					and ((ms[DM][DS][0][tLoc] & msUSED) \
+						or (ms[DM][DS][1][tLoc] & msUSED)):
 				tLoc += 1
 			if tLoc >= 256:
 				addError(lineNumber, "Error: No room left in memory sector (%o %02o)" % (DM, DS))
@@ -827,7 +838,7 @@ def checkLOC(extra = 0):
 		autoSwitch = False
 		try:
 			if not lastORG and LOC < 256:
-				nextUsed = used[IM][IS][S][LOC]
+				nextUsed = ms[IM][IS][S][LOC] & msUSED
 			else:
 				nextUsed = False
 		except:
@@ -843,7 +854,7 @@ def checkLOC(extra = 0):
 		roof = getRoof(IM, IS, S, LOC, extra)
 		try:
 			if LOC < roof:
-				nextUsed = used[IM][IS][S][LOC + 1]
+				nextUsed = ms[IM][IS][S][LOC + 1] & msUSED
 			else:
 				nextUsed = False
 		except:
@@ -858,7 +869,7 @@ def checkLOC(extra = 0):
 			if lastORG:
 				addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %o %03o)" % (IM, IS, S, LOC + 1))
 			else:
-				used[IM][IS][S][LOC] = True
+				ms[IM][IS][S][LOC] |= msUSED
 				autoSwitch = True
 			tLoc = LOC
 			tSyl = S
@@ -866,7 +877,8 @@ def checkLOC(extra = 0):
 			tMod = IM
 			while True:
 				roof = getRoof(tMod, tSec, tSyl, tLoc, extra)
-				if tLoc < roof and not used[tMod][tSec][tSyl][tLoc] and not used[tMod][tSec][tSyl][tLoc + 1]:
+				if tLoc < roof and not (ms[tMod][tSec][tSyl][tLoc] & msUSED) \
+						and not (ms[tMod][tSec][tSyl][tLoc + 1] & msUSED):
 					if autoSwitch:
 						retVal = [IM, IS, S, LOC, tMod, tSec, tSyl, tLoc]
 					else:
@@ -908,7 +920,7 @@ def checkBLOCKafterORG(n, extra = 0):
 				roof = getRoof(i, j, k, offset, extra)
 				inUsed = True
 				for l in range(offset, roof):
-					if used[i][j][k][l]:
+					if ms[i][j][k][l] & msUSED:
 						inUsed = True
 						index = []
 						lenUnused = 0
@@ -1164,6 +1176,7 @@ useDat = False
 udDM = 0
 udDS = 0
 inMacro = ""
+inLiteralMemory = False
 for lineNumber in range(len(expandedLines)):
 	for expandedNumber in range(len(expandedLines[lineNumber])):
 		line = expandedLines[lineNumber][expandedNumber]
@@ -1204,7 +1217,11 @@ for lineNumber in range(len(expandedLines)):
 			inputLine["inMacroDef"] = True
 			fields = []
 		
-		if len(fields) >= 2 and fields[1] == "VEC":
+		if len(fields) >= 2 and  fields[1] == "LIT":
+			inLiteralMemory = True
+		elif len(fields) >= 2 and  fields[1] == "ENDLIT":
+			inLiteralMemory = False
+		elif len(fields) >= 2 and fields[1] == "VEC":
 			while DLOC < 256:
 				DLOC = (DLOC + 3) & ~3
 				checkDLOC(3)
@@ -1274,7 +1291,7 @@ for lineNumber in range(len(expandedLines)):
 					addError(lineNumber, "Warning: Skipping already-used locations")
 				else:
 					inputLine["switchSectorAt"] = [IM, IS, S, LOC] + index
-					used[IM][IS][S][LOC] = True
+					ms[IM][IS][S][LOC] |= msUSED
 					IM, IS, S, LOC = tuple(index)
 					inputLine["hop"] = {"IM":index[0], "IS":index[1], 
 										"S":index[2], "LOC":index[3], 
@@ -1551,7 +1568,8 @@ for lineNumber in range(len(expandedLines)):
 					extra = 0
 					if fields[2][:2] == "*+" and fields[2][2:].isdigit():
 						extra += int(fields[2][2:])
-					if ptc and fields[1] in ["TRA", "HOP"] and not used[IM][IS][S][LOC]:
+					if ptc and fields[1] in ["TRA", "HOP"] \
+							and not (ms[IM][IS][S][LOC] & msUSED):
 						pass
 					else:
 						oldLocation = checkLOC(extra)
@@ -1577,10 +1595,10 @@ for lineNumber in range(len(expandedLines)):
 				if useDat:
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 					inputLine["useDat"] = True
-					used[DM][DS][dS][DLOC] = True
+					ms[DM][DS][dS][DLOC] |= msUSED
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					used[IM][IS][S][LOC] = True
+					ms[IM][IS][S][LOC] |= msUSED
 				incLOC()
 				if ptc and "incDLOC" in inputLine:
 					incDLOC(mark = False)
@@ -1652,6 +1670,7 @@ for lineNumber in range(len(expandedLines)):
 			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
 			symbols[lhs]["isCDS"] = inputLine["isCDS"]
 			symbols[lhs]["1stPass"] = True
+			symbols[lhs]["inLiteralMemory"] = inLiteralMemory
 
 # Create a table to quickly look up addresses of symbols. I think that all or
 # most of these will already have been done by the preprocessor or the loop 
@@ -2481,7 +2500,7 @@ for entry in inputFile:
 							# marginally better for AS-512 (in that it fixes
 							# slightly more things than it breaks).
 							for loc in range(0o377, -1, -1):
-								if used[IM][IS][1][loc] or loc == 0o375:
+								if (ms[IM][IS][1][loc] & msUSED) or loc == 0o375:
 									continue
 								break
 						roofed[IM][IS].append(operand)
@@ -2508,7 +2527,7 @@ for entry in inputFile:
 							"DM": DM,
 							"DS": DS
 						}, False)
-						used[IM][IS][1][loc] = True
+						ms[IM][IS][1][loc] |= msUSED
 		elif operator == "HOP":
 			# Note that the only arithmetical evaluation is for 
 			#	symbol+n
@@ -2834,7 +2853,7 @@ for module in range(8):
 			if sectorUsed:
 				break
 			for loc in range(256):
-				if used[module][sector][syllable][loc]:
+				if ms[module][sector][syllable][loc] & msUSED:
 					sectorUsed = True
 					break
 		if not sectorUsed:
@@ -2850,7 +2869,8 @@ for module in range(8):
 		for row in range(0, 256, 8):
 			rowList = [row]
 			for loc in range(row, row + 8):
-				if not (used[module][sector][0][loc] or used[module][sector][1][loc]):
+				if not ((ms[module][sector][0][loc] & msUSED) \
+						or (ms[module][sector][1][loc] & msUSED)):
 					rowList.append("           ")
 					rowList.append(" ")
 				elif octals[module][sector][2][loc] != None:
@@ -2862,7 +2882,7 @@ for module in range(8):
 					for syl in [1, 0]:
 						if syl == 0:
 							col += " "
-						if not used[module][sector][syl][loc]:
+						if not (ms[module][sector][syl][loc] & msUSED):
 							col += "     "
 						elif octals[module][sector][syl][loc] == None:
 							col += "-----"
