@@ -187,12 +187,15 @@ Pass 4:		Assembly and output.
 #----------------------------------------------------------------------------
 # Array for keeping track of which memory locations have been used already, 
 # and other memory characteristics.
+# Note:  ms[] was originally a structure (of the same geometry) called used[]
+# that had boolean rather than integer entries.  I reworked it into this form
+# because I thought there were several conditions I needed to track on a 
+# location-by-location basis, and wanted to use bit-flags (msUSED and others)
+# to do so.  That turned out to be bogus, and the original structure of booleans
+# should have been left as-is.  Perhaps I'll restore it some day.
 ms = [[[[0 for offset in range(256)] for syllable in range(2)] \
 		for sector in range(16)] for module in range(8)]
 msUSED = 1
-msLITERAL = 2
-msBLOCK = 4
-msTABLE = 8
 
 # BA8421 character set in its native encoding.  All of the unprintable
 # characters are replaced by '?', which isn't a legal character anyway.
@@ -569,8 +572,12 @@ def findDLOC(start = 0, increment = 1):
 	n = start
 	length = 0
 	reuse = False
+	#print("!v %o-%02o-%03o %d" % (DM, DS, start, increment), file=sys.stderr)
 	while n < 256 and length < increment:
-		if (ms[DM][DS][0][n] & msUSED) or (ms[DM][DS][1][n] & msUSED):
+		syl0 = ms[DM][DS][0][n]
+		syl1 = ms[DM][DS][1][n]
+		used = (syl0 & msUSED) or (syl1 & msUSED)
+		if used:
 			n += 1
 			length = 0
 			reuse = True
@@ -581,7 +588,8 @@ def findDLOC(start = 0, increment = 1):
 		length += 1
 	if reuse:
 		addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, n))
-	if length < increment:
+	if length < increment or start + length > 0o400:
+		#print("!vi Bad", file=sys.stderr)
 		addError(lineNumber, \
 				"Error: No space of size %d found in memory bank (%o %02o)" % (increment, DM, DS))
 	return start
@@ -754,21 +762,25 @@ allocationRecords = []	# For debugging ordering of named and nameless allocation
 def allocateNameless(lineNumber, constantString, useResidual = True):
 	global nameless, allocationRecords, used
 	value = "%o_%02o_%s" % (DM, DS, constantString)
+	valueR = "%o_17_%s" % (DM, constantString)
 	if value in nameless:
 		return nameless[value],0
 	if useResidual and DS != 0o17:
-		valueR = "%o_17_%s" % (DM, constantString)
 		if valueR in nameless:
 			return nameless[valueR],1
 	start = 0
 	for loc in range(start, 256):
 		try:
-			if not (ms[DM][DS][0][loc] & (msUSED | msTABLE | msBLOCK)) \
-					and not (ms[DM][DS][1][loc] & (msUSED | msTABLE | msBLOCK)):
+			syl0 = ms[DM][DS][0][loc]
+			syl1 = ms[DM][DS][1][loc]
+			#if DM == 2 and DS == 0o13 and loc == 0o176:
+			#	print("!! %o %o" % (syl0, syl1), file=sys.stderr)
+			used = (syl0 & msUSED) or (syl1 & msUSED)
+			if not used:
 				if False:
 					addError(lineNumber, "Info: Allocation of nameless " + value)
-				ms[DM][DS][0][loc] |= msUSED | msLITERAL
-				ms[DM][DS][1][loc] |= msUSED | msLITERAL
+				ms[DM][DS][0][loc] |= msUSED
+				ms[DM][DS][1][loc] |= msUSED
 				octals[DM][DS][2][loc] = 0
 				nameless[value] = loc
 				allocationRecords.append({ "symbol": value, "lineNumber":lineNumber, 
@@ -782,12 +794,14 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 	if useResidual and DS != 0o17:
 		for loc in range(start, 256):
 			try:
-				if not (ms[DM][0o17][0][loc] & (msUSED | msTABLE | msBLOCK)) \
-						and not (ms[DM][0o17][1][loc] & (msUSED | msTABLE | msBLOCK)):
+				syl0 = ms[DM][0o17][0][loc]
+				syl1 = ms[DM][0o17][1][loc]
+				used = (syl0 & msUSED) or (syl1 & msUSED)
+				if used:
 					if False:
 						addError(lineNumber, "Info: Allocation of nameless " + valueR)
-					ms[DM][0o17][0][loc] |= msUSED | msLITERAL
-					ms[DM][0o17][1][loc] |= msUSED | msLITERAL
+					ms[DM][0o17][0][loc] |= msUSED
+					ms[DM][0o17][1][loc] |= msUSED
 					octals[DM][0o17][2][loc] = 0
 					nameless[valueR] = loc
 					allocationRecords.append({ "symbol": valueR, "lineNumber":lineNumber, 
@@ -1176,7 +1190,6 @@ useDat = False
 udDM = 0
 udDS = 0
 inMacro = ""
-inLiteralMemory = False
 for lineNumber in range(len(expandedLines)):
 	for expandedNumber in range(len(expandedLines[lineNumber])):
 		line = expandedLines[lineNumber][expandedNumber]
@@ -1217,11 +1230,7 @@ for lineNumber in range(len(expandedLines)):
 			inputLine["inMacroDef"] = True
 			fields = []
 		
-		if len(fields) >= 2 and  fields[1] == "LIT":
-			inLiteralMemory = True
-		elif len(fields) >= 2 and  fields[1] == "ENDLIT":
-			inLiteralMemory = False
-		elif len(fields) >= 2 and fields[1] == "VEC":
+		if len(fields) >= 2 and fields[1] == "VEC":
 			while DLOC < 256:
 				DLOC = (DLOC + 3) & ~3
 				checkDLOC(3)
@@ -1251,9 +1260,10 @@ for lineNumber in range(len(expandedLines)):
 					addError(lineNumber, "Error: Wrong operand for USE")
 			elif fields[1] == "TABLE":
 				try:
-					checkDLOC(int(fields[2]))
+					length = int(fields[2])
+					checkDLOC(length)
 				except:
-					addError(lineNumber, "Implementation: Parsing error in TABLE")
+					addError(lineNumber, "Implementation: Error in TABLE")
 				if fields[0] != "":
 					lhs = fields[0]
 					inputLine["lhs"] = lhs
@@ -1277,11 +1287,13 @@ for lineNumber in range(len(expandedLines)):
 				if error != "":
 					addError(lineNumber, "Error: " + error)
 					index = [IM, IS, S, LOC]
+					length = 0
 				else:
 					v = value["number"]
 					if "scale" in value:
 						v *= 2**value["scale"]
-					index = checkBLOCKafterORG(hround(v))
+					length = hround(v)
+					index = checkBLOCKafterORG(length)
 				if len(index) == 0:
 					addError(lineNumber, "Error: No space for BLOCK")
 				elif index == [IM, IS, S, LOC]:
@@ -1487,7 +1499,6 @@ for lineNumber in range(len(expandedLines)):
 						addError(lineNumber, "Error: Undefined symbol "+symbol)
 					elif "inDataMemory" not in symbols[symbol] \
 							or not symbols[symbol]["inDataMemory"]:
-						#print("!", symbol, symbols[symbol], file=sys.stderr)
 						addError(lineNumber, "Error: Symbol " + symbol + " not data")
 					else:
 						DM = symbols[symbol]["DM"]
@@ -1595,6 +1606,7 @@ for lineNumber in range(len(expandedLines)):
 				if useDat:
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 					inputLine["useDat"] = True
+					inputLine["inDataMemory"] = True
 					ms[DM][DS][dS][DLOC] |= msUSED
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
@@ -1659,18 +1671,19 @@ for lineNumber in range(len(expandedLines)):
 				pass
 			else:
 				addError(lineNumber, "Error: Unrecognized operator %s" % fields[1])
+		elif len(fields) > 1 and fields[1] in ["LIT", "ENDLIT"]:
+			inputLine["operator"] = fields[1]
 		elif len(fields) != 0:
-			addError(lineNumber, "Wrong number of fields")
+			addError(lineNumber, "Error: Wrong number of fields")
 		inputLine["inDataMemory"] = inDataMemory
 		inputLine["useDat"] = useDat
 		inputLine["isCDS"] = isCDS
 		inputFile.append({"lineNumber":lineNumber, "expandedLine":inputLine })
 		if lhs != "" and "hop" in inputLine:
 			symbols[lhs] = inputLine["hop"]
-			symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
+			symbols[lhs]["inDataMemory"] = inDataMemory or useDat
 			symbols[lhs]["isCDS"] = inputLine["isCDS"]
 			symbols[lhs]["1stPass"] = True
-			symbols[lhs]["inLiteralMemory"] = inLiteralMemory
 
 # Create a table to quickly look up addresses of symbols. I think that all or
 # most of these will already have been done by the preprocessor or the loop 
@@ -1689,9 +1702,11 @@ for entry in inputFile:
 				else:
 					symbols[lhs].pop("1stPass")
 			else:
+				usingDat = inputLine["useDat"]
 				symbols[lhs] = inputLine["hop"]
 				symbols[lhs]["inDataMemory"] = inputLine["inDataMemory"]
 				symbols[lhs]["isCDS"] = inputLine["isCDS"]
+				symbols[lhs]["useDat"] = usingDat
 			if inputLine["inDataMemory"]:
 				allocationRecords.append({ "symbol": lhs, "lineNumber": lineNumber, 
 					"inputLine": inputLine, "DM": inputLine["hop"]["DM"], 
@@ -1926,6 +1941,7 @@ errorsPrinted = []
 lastLineNumber = -1
 expansionMarker = " "
 pageNumber = 0
+inLiteralMemory = False
 for entry in inputFile:
 	#print(entry)
 	lineNumber = entry["lineNumber"]
@@ -2148,6 +2164,10 @@ for entry in inputFile:
 		inputFile[lineNumber]["bciLines"] = printArray	
 		entry["bciLines"] = printArray
 		#addError(lineNumber, "Info: " + str(printArray))
+	elif operator == "LIT":
+		inLiteralMemory = True
+	elif operator == "ENDLIT":
+		inLiteralMemory = False
 	elif operator in [ "DEC", "OCT", "HPC", "HPCDD", "DFW" ] or operator in forms:
 		assembled = 0
 		if operator in forms:
@@ -2332,16 +2352,9 @@ for entry in inputFile:
 			assembled = int(constantString, 8)
 		# Put the assembled value wherever it's supposed to 
 		storeAssembled(lineNumber, assembled, inputLine["hop"])
-		'''
-		The following would have the instantaneous effect of removing 100 errors
-		and 3000 mismatches ... but it's false.  Referring to the literal table
-		on the assembly listing's pp. 1220-1243, it's clear that every 
-		literal is allocated by an actual instruction (like CLA etc.) and not
-		by a pseudo-op like DEC or OCT.  Which makes sense.
-		if newer and len(constantString) == 9:
+		if newer and inLiteralMemory and len(constantString) == 9:
 			key = "%o_%02o_%s" % (DM, DS, constantString)
 			nameless[key] = DLOC
-		'''
 	elif operator in operators:
 		#print("%o\t%02o\t%o\t%03o\t%d\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], lineNumber, inputLine["raw"]), file=f)
 		inDataMemory = False
