@@ -88,7 +88,12 @@
 #               2023-06-09 RSB  Corrected module increment in checkLOC() to 2.
 #               2023-06-10 RSB  Several seeming changes in the original compiler
 #                               are condition on the --newer CLI switch.
-#               2023-06-13 RSB  Replaced used[] structure by ms[] structure.
+#               2023-06-13 RSB  Replaced used[] boolean structure by ms[] 
+#                               integer structure and bit flags msUSED, msTABLE,
+#                               msBLOCK, msLITERAL.
+#               2023-06-15 RSB  Restored used[] structure (in place of ms[]),
+#                               eliminating associated bit flags, but now named 
+#                               memUsed[] instead of just used[].
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -187,15 +192,8 @@ Pass 4:		Assembly and output.
 #----------------------------------------------------------------------------
 # Array for keeping track of which memory locations have been used already, 
 # and other memory characteristics.
-# Note:  ms[] was originally a structure (of the same geometry) called used[]
-# that had boolean rather than integer entries.  I reworked it into this form
-# because I thought there were several conditions I needed to track on a 
-# location-by-location basis, and wanted to use bit-flags (msUSED and others)
-# to do so.  That turned out to be bogus, and the original structure of booleans
-# should have been left as-is.  Perhaps I'll restore it some day.
-ms = [[[[0 for offset in range(256)] for syllable in range(2)] \
-		for sector in range(16)] for module in range(8)]
-msUSED = 1
+memUsed = [[[[False for offset in range(256)] for syllable in range(2)] \
+			for sector in range(16)] for module in range(8)]
 
 # BA8421 character set in its native encoding.  All of the unprintable
 # characters are replaced by '?', which isn't a legal character anyway.
@@ -555,12 +553,12 @@ def incDLOC(increment = 1, mark = True):
 		increment -= 1
 		DLOC1 = DLOC + 1
 		if DLOC < 0o400 and mark:
-			ms[DM][DS][0][DLOC] |= msUSED
-			ms[DM][DS][1][DLOC] |= msUSED
+			memUsed[DM][DS][0][DLOC] = True
+			memUsed[DM][DS][1][DLOC] = True
 			if increment == 0 and \
 					(DLOC == 0o377 or sectorTopData[DM][DS] == DLOC1):
 				top = DLOC
-				while top > 0 and (ms[DM][DS][1][top-1] & msUSED):
+				while top > 0 and memUsed[DM][DS][1][top-1]:
 					top -= 1
 				sectorTopData[DM][DS] = top
 		DLOC = DLOC1
@@ -574,9 +572,9 @@ def findDLOC(start = 0, increment = 1):
 	reuse = False
 	#print("!v %o-%02o-%03o %d" % (DM, DS, start, increment), file=sys.stderr)
 	while n < 256 and length < increment:
-		syl0 = ms[DM][DS][0][n]
-		syl1 = ms[DM][DS][1][n]
-		used = (syl0 & msUSED) or (syl1 & msUSED)
+		syl0 = memUsed[DM][DS][0][n]
+		syl1 = memUsed[DM][DS][1][n]
+		used = syl0 or syl1
 		if used:
 			n += 1
 			length = 0
@@ -606,13 +604,13 @@ def incLOC():
 	try:
 		if useDat:
 			if DLOC < 256:
-				ms[DM][DS][dS][DLOC] |= msUSED
+				memUsed[DM][DS][dS][DLOC] = True
 			dS = 1 - dS
 			if dS == 1:
 				DLOC += 1
 		else:
 			if LOC < 256:
-				ms[IM][IS][S][LOC] |= msUSED
+				memUsed[IM][IS][S][LOC] = True
 			LOC += 1
 	except:
 		return
@@ -627,6 +625,8 @@ getRoofReported = [[[[[] for offset in range(256)] for syllable in range(2)] \
 sectorTopData = []
 for i in range(8):
 	sectorTopData.append([0o400]*16)
+roofWorkarounds = []
+blockWorkarounds = []
 def getRoof(imod, isec, syl, loc, extra):
 	global getRoofReported
 	roof = sectorTopData[imod][isec] - 1
@@ -640,7 +640,7 @@ def getRoof(imod, isec, syl, loc, extra):
 		# it means that the assembler reserved a few words at the ends
 		# of residual sectors into which it wouldn't put instructions.  In
 		# point of fact, the final three words (both syllables) are unused
-		# in every residual sector in evern available LVDC program 
+		# in every residual sector in every available LVDC program 
 		# (PTC-ADAPT-SELF-TEST-PROGRAM, AS-206RAM, AS-512, and AS-153)
 		# processed by the original assembler, although the two addresses I
 		# just mentioned are the only ones that caused me a problem.
@@ -681,6 +681,9 @@ def getRoof(imod, isec, syl, loc, extra):
 										str(sorted(roofAdders[imod][isec])),
 										str(sorted(roofRemovers[imod][isec])),
 										str(sorted(needed))]
+	parameters = (imod, isec, syl, loc)
+	if parameters in roofWorkarounds:
+		roof -= 1
 	return roof
 
 # Convert a numeric literal to LVDC binary format.  I accept literals of the forms:
@@ -771,16 +774,16 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 	start = 0
 	for loc in range(start, 256):
 		try:
-			syl0 = ms[DM][DS][0][loc]
-			syl1 = ms[DM][DS][1][loc]
+			syl0 = memUsed[DM][DS][0][loc]
+			syl1 = memUsed[DM][DS][1][loc]
 			#if DM == 2 and DS == 0o13 and loc == 0o176:
 			#	print("!! %o %o" % (syl0, syl1), file=sys.stderr)
-			used = (syl0 & msUSED) or (syl1 & msUSED)
+			used = syl0 or syl1
 			if not used:
 				if False:
 					addError(lineNumber, "Info: Allocation of nameless " + value)
-				ms[DM][DS][0][loc] |= msUSED
-				ms[DM][DS][1][loc] |= msUSED
+				memUsed[DM][DS][0][loc] = True
+				memUsed[DM][DS][1][loc] = True
 				octals[DM][DS][2][loc] = 0
 				nameless[value] = loc
 				allocationRecords.append({ "symbol": value, "lineNumber":lineNumber, 
@@ -794,14 +797,14 @@ def allocateNameless(lineNumber, constantString, useResidual = True):
 	if useResidual and DS != 0o17:
 		for loc in range(start, 256):
 			try:
-				syl0 = ms[DM][0o17][0][loc]
-				syl1 = ms[DM][0o17][1][loc]
-				used = (syl0 & msUSED) or (syl1 & msUSED)
+				syl0 = memUsed[DM][0o17][0][loc]
+				syl1 = memUsed[DM][0o17][1][loc]
+				used = syl0 or syl1
 				if used:
 					if False:
 						addError(lineNumber, "Info: Allocation of nameless " + valueR)
-					ms[DM][0o17][0][loc] |= msUSED
-					ms[DM][0o17][1][loc] |= msUSED
+					memUsed[DM][0o17][0][loc] = True
+					memUsed[DM][0o17][1][loc] = True
 					octals[DM][0o17][2][loc] = 0
 					nameless[valueR] = loc
 					allocationRecords.append({ "symbol": valueR, "lineNumber":lineNumber, 
@@ -833,13 +836,11 @@ def checkLOC(extra = 0):
 		# This is the "USE DAT" case. 
 		if DLOC >= 256:
 		 	addError(lineNumber, "Error: No room left in memory sector")
-		elif dS == 1 and ((ms[DM][DS][0][DLOC] & msUSED) 
-						or (ms[DM][DS][1][DLOC] & msUSED)):
+		elif dS == 1 and (memUsed[DM][DS][0][DLOC] or memUsed[DM][DS][1][DLOC]):
 			tLoc = DLOC
 			addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, DLOC))
 			while tLoc < 256 and dS == 1 \
-					and ((ms[DM][DS][0][tLoc] & msUSED) \
-						or (ms[DM][DS][1][tLoc] & msUSED)):
+					and (memUsed[DM][DS][0][tLoc] or memUsed[DM][DS][1][tLoc]):
 				tLoc += 1
 			if tLoc >= 256:
 				addError(lineNumber, "Error: No room left in memory sector (%o %02o)" % (DM, DS))
@@ -852,7 +853,7 @@ def checkLOC(extra = 0):
 		autoSwitch = False
 		try:
 			if not lastORG and LOC < 256:
-				nextUsed = ms[IM][IS][S][LOC] & msUSED
+				nextUsed = memUsed[IM][IS][S][LOC]
 			else:
 				nextUsed = False
 		except:
@@ -868,7 +869,7 @@ def checkLOC(extra = 0):
 		roof = getRoof(IM, IS, S, LOC, extra)
 		try:
 			if LOC < roof:
-				nextUsed = ms[IM][IS][S][LOC + 1] & msUSED
+				nextUsed = memUsed[IM][IS][S][LOC + 1]
 			else:
 				nextUsed = False
 		except:
@@ -883,7 +884,7 @@ def checkLOC(extra = 0):
 			if lastORG:
 				addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %o %03o)" % (IM, IS, S, LOC + 1))
 			else:
-				ms[IM][IS][S][LOC] |= msUSED
+				memUsed[IM][IS][S][LOC] = True
 				autoSwitch = True
 			tLoc = LOC
 			tSyl = S
@@ -891,8 +892,8 @@ def checkLOC(extra = 0):
 			tMod = IM
 			while True:
 				roof = getRoof(tMod, tSec, tSyl, tLoc, extra)
-				if tLoc < roof and not (ms[tMod][tSec][tSyl][tLoc] & msUSED) \
-						and not (ms[tMod][tSec][tSyl][tLoc + 1] & msUSED):
+				if tLoc < roof and not memUsed[tMod][tSec][tSyl][tLoc] \
+						and not memUsed[tMod][tSec][tSyl][tLoc + 1]:
 					if autoSwitch:
 						retVal = [IM, IS, S, LOC, tMod, tSec, tSyl, tLoc]
 					else:
@@ -934,7 +935,7 @@ def checkBLOCKafterORG(n, extra = 0):
 				roof = getRoof(i, j, k, offset, extra)
 				inUsed = True
 				for l in range(offset, roof):
-					if ms[i][j][k][l] & msUSED:
+					if memUsed[i][j][k][l]:
 						inUsed = True
 						index = []
 						lenUnused = 0
@@ -1129,6 +1130,8 @@ preprocessor(lines, expandedLines, constants, macros, ptc)
 #----------------------------------------------------------------------------
 # The object of this pass is to discover all addresses for left-hand symbols,
 # or in other words, to assign an address (HOP constant) to each line of code.
+# It also collects any workarounds (WORK directives) into a structure for later
+# reference during the assembly pass.
   
 # The result of the pass is a hopefully easy-to-understand list of dictionaries, 
 # inputFile. It also buffers the lhs, operator, and operand fields, so they 
@@ -1217,6 +1220,28 @@ for lineNumber in range(len(expandedLines)):
 			#continue
 			fields = []
 
+		# Collect workarounds.
+		if len(fields) >= 3 and fields[1] == "WORK":
+			parameters = fields[2].split(",")
+			if len(parameters) == 5 and parameters[0] in ["ROOF", "BLOCK"]:
+				try:
+					name = parameters[0]
+					parameters = (int(parameters[1], 8), int(parameters[2], 8),
+								  int(parameters[3], 8), int(parameters[4], 8))
+					if name == "ROOF":
+						if parameters not in roofWorkarounds:
+							roofWorkarounds.append(parameters)
+					elif name == "BLOCK":
+						if parameters not in blockWorkarounds:
+							blockWorkarounds.append(parameters)
+				except:
+					addError(lineNumber, "Info: Illegal workaround parameters: " + fields[2], expandedNumber)
+			elif len(parameters) == 5 and parameters[0] == "INCREMENT":
+				addError(lineNumber, "Implementation: WORK INCREMENT not yet available", expandedNumber)
+			else:
+				addError(lineNumber, "Info: Unknown workaround: "+fields[2], expandedNumber)
+			continue
+
 		# Detect MACRO / ENDMAC definitions.
 		if len(fields) >= 2:
 			if inMacro != "":
@@ -1298,12 +1323,12 @@ for lineNumber in range(len(expandedLines)):
 					addError(lineNumber, "Error: No space for BLOCK")
 				elif index == [IM, IS, S, LOC]:
 					pass # Okay as-is!
-				elif lastORG:
+				elif lastORG or (IM,IS,S,LOC) in blockWorkarounds:
 					IM, IS, S, LOC = tuple(index)
 					addError(lineNumber, "Warning: Skipping already-used locations")
 				else:
 					inputLine["switchSectorAt"] = [IM, IS, S, LOC] + index
-					ms[IM][IS][S][LOC] |= msUSED
+					memUsed[IM][IS][S][LOC] = True
 					IM, IS, S, LOC = tuple(index)
 					inputLine["hop"] = {"IM":index[0], "IS":index[1], 
 										"S":index[2], "LOC":index[3], 
@@ -1580,7 +1605,7 @@ for lineNumber in range(len(expandedLines)):
 					if fields[2][:2] == "*+" and fields[2][2:].isdigit():
 						extra += int(fields[2][2:])
 					if ptc and fields[1] in ["TRA", "HOP"] \
-							and not (ms[IM][IS][S][LOC] & msUSED):
+							and not memUsed[IM][IS][S][LOC]:
 						pass
 					else:
 						oldLocation = checkLOC(extra)
@@ -1607,10 +1632,10 @@ for lineNumber in range(len(expandedLines)):
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":dS, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
 					inputLine["useDat"] = True
 					inputLine["inDataMemory"] = True
-					ms[DM][DS][dS][DLOC] |= msUSED
+					memUsed[DM][DS][dS][DLOC] = True
 				else:
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					ms[IM][IS][S][LOC] |= msUSED
+					memUsed[IM][IS][S][LOC] = True
 				incLOC()
 				if ptc and "incDLOC" in inputLine:
 					incDLOC(mark = False)
@@ -2354,9 +2379,10 @@ for entry in inputFile:
 		storeAssembled(lineNumber, assembled, inputLine["hop"])
 		if newer and inLiteralMemory and len(constantString) == 9:
 			key = "%o_%02o_%s" % (DM, DS, constantString)
-			nameless[key] = DLOC
+			if key not in nameless:
+				nameless[key] = DLOC
+			#print("! %04d: LIT added to literal memory %s %03o" % (pageNumber, key, nameless[key]), file=sys.stderr)
 	elif operator in operators:
-		#print("%o\t%02o\t%o\t%03o\t%d\t%s" % (hop["IM"], hop["IS"], hop["S"], hop["LOC"], lineNumber, inputLine["raw"]), file=f)
 		inDataMemory = False
 		loc = 0
 		residual = 0
@@ -2513,7 +2539,7 @@ for entry in inputFile:
 							# marginally better for AS-512 (in that it fixes
 							# slightly more things than it breaks).
 							for loc in range(0o377, -1, -1):
-								if (ms[IM][IS][1][loc] & msUSED) or loc == 0o375:
+								if memUsed[IM][IS][1][loc] or loc == 0o375:
 									continue
 								break
 						roofed[IM][IS].append(operand)
@@ -2540,7 +2566,7 @@ for entry in inputFile:
 							"DM": DM,
 							"DS": DS
 						}, False)
-						ms[IM][IS][1][loc] |= msUSED
+						memUsed[IM][IS][1][loc] = True
 		elif operator == "HOP":
 			# Note that the only arithmetical evaluation is for 
 			#	symbol+n
@@ -2866,7 +2892,7 @@ for module in range(8):
 			if sectorUsed:
 				break
 			for loc in range(256):
-				if ms[module][sector][syllable][loc] & msUSED:
+				if memUsed[module][sector][syllable][loc]:
 					sectorUsed = True
 					break
 		if not sectorUsed:
@@ -2882,8 +2908,8 @@ for module in range(8):
 		for row in range(0, 256, 8):
 			rowList = [row]
 			for loc in range(row, row + 8):
-				if not ((ms[module][sector][0][loc] & msUSED) \
-						or (ms[module][sector][1][loc] & msUSED)):
+				if not (memUsed[module][sector][0][loc] \
+						or memUsed[module][sector][1][loc]):
 					rowList.append("           ")
 					rowList.append(" ")
 				elif octals[module][sector][2][loc] != None:
@@ -2895,7 +2921,7 @@ for module in range(8):
 					for syl in [1, 0]:
 						if syl == 0:
 							col += " "
-						if not (ms[module][sector][syl][loc] & msUSED):
+						if not memUsed[module][sector][syl][loc]:
 							col += "     "
 						elif octals[module][sector][syl][loc] == None:
 							col += "-----"
