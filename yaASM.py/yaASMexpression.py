@@ -389,6 +389,12 @@ def yaEvaluate(string, constants):
 			value["scale"] += overallScaler
 		else:
 			value["scale"] = overallScaler
+	elif value["number"] == -.99999999 and "scale" not in value:
+		# This is purely ad hoc.  It relates to the usage of the operand
+		# "=(-.99999999)" to apparently convey the notion of a floating-point
+		# -1, whereas the syntax rules I've been able to deduce would result in
+		# it being an integer -1 (which is a totally different octal value).
+		value["scale"] = 0
 	return value,error
 
 # Some test code, which accepts the following types of lines on stdin:

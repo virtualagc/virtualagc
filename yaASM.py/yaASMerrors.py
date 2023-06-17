@@ -28,6 +28,7 @@ counts = {
     "infos" : 0,
     "warnings" : 0,
     "errors" : 0,
+    "rounding" : 0,
     "mismatches" : 0,
     "implementation": 0,
     "others" : 0
@@ -54,6 +55,8 @@ def addError(n, msg, nn=0):
             counts["mismatches"] += 1
         elif msg.startswith("Implementation:"):
             counts["implementation"] += 1
+        elif msg.startswith("Rounding:"):
+            counts["rounding"] += 1
         else:
             counts["others"] += 1
         #msg = str(n) + ": " + msg

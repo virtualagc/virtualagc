@@ -94,6 +94,9 @@
 #               2023-06-15 RSB  Restored used[] structure (in place of ms[]),
 #                               eliminating associated bit flags, but now named 
 #                               memUsed[] instead of just used[].
+#               2023-06-17 RSB  Various fixes, such as correct sector for using
+#                               an instruction location as the operand of a 
+#                               data instruction like CLA or STO.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -329,6 +332,7 @@ debugRoof = 0
 ceiling = 0o1000
 newer = False
 allowUnlist = True
+fuzzy = False
 for arg in sys.argv[1:]:
 	if arg[:2] == "--":
 		if arg == "--ptc":
@@ -345,6 +349,8 @@ for arg in sys.argv[1:]:
 			newer = True
 		elif arg == "--no-unlist":
 			allowUnlist = False
+		elif arg == "--fuzzy":
+			fuzzy = True
 		elif arg == "--help":
 			print("Usage:", file=sys.stderr)
 			print("\tyaASM.py [OPTIONS] [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
@@ -353,6 +359,7 @@ for arg in sys.argv[1:]:
 			print("\t--newer -- assemble for AS-512/513 rather than AS-206RAM.", file=sys.stderr)
 			print("\t--ceiling=n -- (leave at default 1000) octal limit forward TNZ/TMI distance.", file=sys.stderr)
 			print("\t--no-unlist -- debugging option to ignore UNLIST directives.", file=sys.stderr)
+			print("\t--fuzzy -- in octal-mismatch check, ignore rounding error.", file=sys.stderr)
 			print("\t--debug-roof=n -- debug automatic sector changes to level n>0.", file=sys.stderr)
 			print("\t--ptc -- to use PTC source/octal input rather than the default LVDC.", file=sys.stderr)
 			print("\t--past-bugs -- only with --ptc, reproduces some original assembler bugs.", file=sys.stderr)
@@ -578,8 +585,7 @@ def findDLOC(start = 0, increment = 1):
 	n = start
 	length = 0
 	reuse = False
-	#print("!v %o-%02o-%03o %d" % (DM, DS, start, increment), file=sys.stderr)
-	while n < 256 and length < increment:
+	while n < 0o400 and length < increment:
 		syl0 = memUsed[DM][DS][0][n]
 		syl1 = memUsed[DM][DS][1][n]
 		used = syl0 or syl1
@@ -784,6 +790,7 @@ def allocateNameless(lineNumber, constantString, \
 			return nameless[valueR],1
 	start = 0
 	for loc in range(start, 256):
+		location = (DM, DS, loc)
 		try:
 			syl0 = memUsed[DM][DS][0][loc]
 			syl1 = memUsed[DM][DS][1][loc]
@@ -807,6 +814,7 @@ def allocateNameless(lineNumber, constantString, \
 			return 0,0
 	if useResidual and DS != 0o17:
 		for loc in range(start, 256):
+			location = (DM, 0o17, loc)
 			try:
 				syl0 = memUsed[DM][0o17][0][loc]
 				syl1 = memUsed[DM][0o17][1][loc]
@@ -930,6 +938,44 @@ def checkLOC(extra = 0):
 		# At this point, we know there are two consecutive words available at the 
 		# current location, so we can just keep the current address.
 		return []
+
+# Similar to checkLOC() above, but simply changes the assembler's internal 
+# pointers to the next unused location.  The situation it envisages is that 
+# there has just been an ORG, and that the next instruction has a label by
+# which it is reached, so that it can be moved upward at will.  It also assumes
+# USE INST.  Returns True on success, False on failure.
+def moveLOC():
+	global LOC
+	global IM
+	global IS
+	global S
+	tLoc = LOC
+	tSyl = S
+	tSec = IS
+	tMod = IM
+	while True:
+		roof = getRoof(tMod, tSec, tSyl, tLoc, extra)
+		if tLoc < roof and not memUsed[tMod][tSec][tSyl][tLoc] \
+				and not memUsed[tMod][tSec][tSyl][tLoc + 1]:
+			IM = tMod
+			IS = tSec
+			S = tSyl
+			LOC = tLoc
+			return True
+		tLoc += 1
+		if tLoc >= roof:
+			tLoc = 0
+			tSyl += 1
+			if tSyl >= 2:
+				tSyl = 0
+				tSec += 1
+				if tSec >= 16:
+					tSec = 0
+					tMod += 2
+					if tMod >= 8:
+						addError(lineNumber, "Error: Memory totally exhausted")
+						return False
+	return False
 
 # This is used to find a block of n unallocated locations in instruction space,
 # starting at the current LOC.  It returns either the found location, in the
@@ -1072,7 +1118,15 @@ def storeAssembled(lineNumber, value, hop, data = True):
 					"Error: Checking non-existent instruction %o-%02o-%o-%03o" \
 								% (module, sector, checkSyl, location))
 			return
-		if assembledOctal != checkOctal:
+		if fuzzy and assembledOctal != None and checkOctal != None \
+				and abs(assembledOctal - checkOctal) == 2:
+			if assembledOctal > checkOctal:
+				direction = "large"
+			else:
+				direction = "small"
+			msg = "Rounding: %09o too %s by 1" % (assembledOctal, direction)
+			addError(lineNumber, msg)
+		elif assembledOctal != checkOctal:
 			msg = "Mismatch: Octal mismatch, "
 			xor = 0
 			if checkOctal == None:
@@ -1316,6 +1370,8 @@ for lineNumber in range(len(expandedLines)):
 				try:
 					length = int(fields[2])
 					checkDLOC(length)
+					for i in range(length):
+						location = (DM, DS, DLOC+i)
 				except:
 					addError(lineNumber, "Implementation: Error in TABLE")
 				if fields[0] != "":
@@ -1636,6 +1692,9 @@ for lineNumber in range(len(expandedLines)):
 					if ptc and fields[1] in ["TRA", "HOP"] \
 							and not memUsed[IM][IS][S][LOC]:
 						pass
+					elif newer and lastORG:
+						if not moveLOC():
+							addError(lineNumber, "Error: No free memory in sector")
 					else:
 						oldLocation = checkLOC(extra)
 						if oldLocation != []:
@@ -2663,9 +2722,12 @@ for entry in inputFile:
 			if operand not in symbols:
 				addError(lineNumber, "Error: Symbol not found, " + operand)
 				loc = 0
-			else:
+			elif "inDataMemory" in symbols[operand] and \
+					symbols[operand]["inDataMemory"]:
 				#print("%o %2o" % (symbols[operand]["DM"], symbols[operand]["DS"]))
 				loc = 1 | (symbols[operand]["DM"] << 1) | (symbols[operand]["DS"] << 4)
+			else:
+				loc = 1 | (symbols[operand]["IM"] << 1) | (symbols[operand]["IS"] << 4)
 			residual = 0
 		elif operator in ["CDSD", "CDSS"]:
 			ofields = operand.split(",")
@@ -2754,7 +2816,7 @@ for entry in inputFile:
 						loc += operandModifier
 					elif operandModifierOperation == "-":
 						loc -= operandModifier
-					residual = residualBit(hop2["DM"], hop2["DS"])
+					residual = residualBit(hop2["IM"], hop2["IS"])
 		if loc > 0o377:
 			loc = loc & 0o377
 			residual = 1
@@ -2867,6 +2929,8 @@ print("Assembly-message summary:")
 print("\tImplementation errors:  %d" % counts["implementation"])
 print("\tErrors:                 %d" % counts["errors"])
 print("\tWarnings:               %d" % counts["warnings"])
+if checkTheOctals and fuzzy:
+	print("\tRounding-mismatches:    %d" % counts["rounding"])
 if checkTheOctals:
 	print("\tMismatches:             %d (vs %s)" % (counts["mismatches"],checkFilename))
 else:

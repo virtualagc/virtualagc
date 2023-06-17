@@ -27,6 +27,8 @@
 #                               but I had forgotten to remove my early 
 #                               misconception of it from the preprocessor.
 #               2023-06-06 RSB  Now handles "SHL expression" and "SHR expression".
+#               2023-06-17 RSB  Corrected expansion (and formatting) of certain
+#                               shift operations.
 
 import re
 from yaASMerrors import *
@@ -425,24 +427,22 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 					if "scale" in value:
 						count *= 2**value["scale"]
 					count = hround(count)
+				expandedSH = []
+				thisLabel = fields[0]
+				operator = fields[1]
 				if count > 2:
-					expandedLines[n] = []
-					thisLabel = fields[0]
-					operator = fields[1]
-					expandedSH = []
-					if count == 0:
-						expandedSH.append("%-8s%-8s0" % (thisLabel, operator))
-					else:
-						while count > 0:
-							thisCount = maxSHF
-							if thisCount > count:
-								thisCount = count
-							expandedSH.append("%-8s%-8s%d" % (thisLabel, operator, thisCount))
-							thisLabel = ""
-							count -= thisCount
-					nn -= 1
-					expandedLines[n][nn:nn+1] = expandedSH
-					nn += len(expandedSH)
+					while count > 0:
+						thisCount = maxSHF
+						if thisCount > count:
+							thisCount = count
+						expandedSH.append(fmt % (thisLabel, operator, thisCount))
+						thisLabel = ""
+						count -= thisCount
+				else:
+					expandedSH.append(fmt % (thisLabel, operator, count))
+				nn -= 1
+				expandedLines[n][nn:nn+1] = expandedSH
+				nn += len(expandedSH)
 				continue
 			elif len(fields) >= 3 and fields[2][:1] == "=" \
 					and fields[2][:3] != "=H'" and fields[2][:2] != "=O":
