@@ -62,7 +62,8 @@ telds = {}
 # Note that lines inside of an UNLIST/LIST block are marked (in expandedLines)
 # by being suffixed with unlistSuffix.
 unlistSuffix = " " + chr(127)
-def preprocessor(lines, expandedLines, constants, macros, ptc=False):
+def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
+				 allowUnlist=True):
 	global errors, telds
 	# The following LVDC instructions may accept operands of the form "=...".
 	acceptsEquals = ["AND", "CLA", "DIV", "MPH", "MPY", "RSU", "SUB", "XOR"]
@@ -258,7 +259,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False):
 							continue
 						lhs = macroLine[0]
 						operator = macroLine[1]
-						if operator == "UNLIST":
+						if operator == "UNLIST" and allowUnlist:
 							suffix = unlistSuffix
 						if len(macroLine) < 3:
 							operand = ""

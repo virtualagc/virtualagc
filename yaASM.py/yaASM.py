@@ -309,6 +309,10 @@ lastORG = False
 inDataMemory = True
 symbols = {}
 lastLineNumber = -1
+roofWorkarounds = []
+blockWorkarounds = []
+incWorkarounds = []
+decWorkarounds = []
 
 # Array for keeping track of assembled octals
 octals = [[[[None for offset in range(256)] for syllable in range(3)] for sector in range(16)] for module in range(8)]
@@ -324,6 +328,7 @@ ignoreResiduals = False
 debugRoof = 0
 ceiling = 0o1000
 newer = False
+allowUnlist = True
 for arg in sys.argv[1:]:
 	if arg[:2] == "--":
 		if arg == "--ptc":
@@ -338,6 +343,8 @@ for arg in sys.argv[1:]:
 			ceiling = int(arg.removeprefix("--ceiling="), 8)
 		elif arg == "--newer":
 			newer = True
+		elif arg == "--no-unlist":
+			allowUnlist = False
 		elif arg == "--help":
 			print("Usage:", file=sys.stderr)
 			print("\tyaASM.py [OPTIONS] [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
@@ -345,6 +352,7 @@ for arg in sys.argv[1:]:
 			print("\t--help -- to print this message.", file=sys.stderr)
 			print("\t--newer -- assemble for AS-512/513 rather than AS-206RAM.", file=sys.stderr)
 			print("\t--ceiling=n -- (leave at default 1000) octal limit forward TNZ/TMI distance.", file=sys.stderr)
+			print("\t--no-unlist -- debugging option to ignore UNLIST directives.", file=sys.stderr)
 			print("\t--debug-roof=n -- debug automatic sector changes to level n>0.", file=sys.stderr)
 			print("\t--ptc -- to use PTC source/octal input rather than the default LVDC.", file=sys.stderr)
 			print("\t--past-bugs -- only with --ptc, reproduces some original assembler bugs.", file=sys.stderr)
@@ -625,8 +633,6 @@ getRoofReported = [[[[[] for offset in range(256)] for syllable in range(2)] \
 sectorTopData = []
 for i in range(8):
 	sectorTopData.append([0o400]*16)
-roofWorkarounds = []
-blockWorkarounds = []
 def getRoof(imod, isec, syl, loc, extra):
 	global getRoofReported
 	roof = sectorTopData[imod][isec] - 1
@@ -707,46 +713,50 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 				return ""
 		while len(constantString) < 9:
 			constantString += "0"
-		return constantString
-	# The decimal-number case.
-	# The following manipulations try to produce two strings called
-	# "decimal" (which includes the decimal portion of the number, 
-	# including sign, decimal point, and En exponent) and "scale"
-	# (which is just the Bn portion).  The trick is that the En may
-	# follow the Bn in the original operand.
-	decimal = n[0:]
-	scale = "B26"
-	isInt = True
-	if "." in decimal or "E" in decimal:
-		isInt = False
-	if "B" in decimal:
-		isInt = False
-		whereB = decimal.index("B")
-		scale = decimal[whereB:]
-		decimal = decimal[:whereB]
-		if "E" in scale:
-			whereE = scale.index("E")
-			decimal += scale[whereE:]
-			scale = scale[:whereE]
-	elif newer:
-		decimal = "%d" % hround(decimal)
+	else:
+		# The decimal-number case.
+		# The following manipulations try to produce two strings called
+		# "decimal" (which includes the decimal portion of the number, 
+		# including sign, decimal point, and En exponent) and "scale"
+		# (which is just the Bn portion).  The trick is that the En may
+		# follow the Bn in the original operand.
+		decimal = n[0:]
+		scale = "B26"
 		isInt = True
-	try:
-		if not isInt:
-			decimal = float(decimal)
-			scale = int(scale[1:])
-			value = hround(decimal * pow(2, 27 - scale - 1 - 1)) << 1
-		else:
-			decimal = int(decimal)
-			scale = int(scale[1:])
-			value = hround(decimal * pow(2, 27 - scale))
-		if value < 0:
-			value += 0o1000000000
-		constantString = "%09o" % value
-		return constantString
-	except:
-		addError(lineNumber, "Error: Cannot compute constant expression " + str(n))
-		return ""	
+		if "." in decimal or "E" in decimal:
+			isInt = False
+		if "B" in decimal:
+			isInt = False
+			whereB = decimal.index("B")
+			scale = decimal[whereB:]
+			decimal = decimal[:whereB]
+			if "E" in scale:
+				whereE = scale.index("E")
+				decimal += scale[whereE:]
+				scale = scale[:whereE]
+		elif newer:
+			decimal = "%d" % hround(decimal)
+			isInt = True
+		try:
+			if not isInt:
+				decimal = float(decimal)
+				scale = int(scale[1:])
+				value = hround(decimal * pow(2, 27 - scale - 1 - 1)) << 1
+			else:
+				decimal = int(decimal)
+				scale = int(scale[1:])
+				value = hround(decimal * pow(2, 27 - scale))
+			if value < 0:
+				value += 0o1000000000
+			constantString = "%09o" % value
+		except:
+			addError(lineNumber, "Error: Cannot compute constant expression " + str(n))
+			return ""	
+	if (DM,DS,DLOC) in incWorkarounds:
+		constantString = "%09o" % (2 + int(constantString, 8))
+	elif (DM,DS,DLOC) in decWorkarounds:
+		constantString = "%09o" % (-2 + int(constantString, 8))
+	return constantString
 
 # Note: By a "nameless memory location", I mean the same thing as what I believe
 # was known as "literal memory" in LVDC lingo.  I'm just guessing, of course,
@@ -762,13 +772,14 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 # variables are supposed to go into have already been allocated.  Fortunately,
 # there's no code here that needs to be backed out.
 allocationRecords = []	# For debugging ordering of named and nameless allocationis.
-def allocateNameless(lineNumber, constantString, useResidual = True):
+def allocateNameless(lineNumber, constantString, \
+					useResidual = True, searchResidual = True):
 	global nameless, allocationRecords, used
 	value = "%o_%02o_%s" % (DM, DS, constantString)
 	valueR = "%o_17_%s" % (DM, constantString)
 	if value in nameless:
 		return nameless[value],0
-	if useResidual and DS != 0o17:
+	if searchResidual and DS != 0o17:
 		if valueR in nameless:
 			return nameless[valueR],1
 	start = 0
@@ -1123,7 +1134,7 @@ defineMacros(lines, macros)
 # be arrays of replacement lines.  The errors[] array is also in a similar 
 # 1-to-1 relationship, and errors[n] contains an array (hopefully usually 
 # empty) of error/warning messages for lines[n].
-preprocessor(lines, expandedLines, constants, macros, ptc)
+preprocessor(lines, expandedLines, constants, macros, ptc, allowUnlist)
 
 #----------------------------------------------------------------------------
 #     	Discovery pass (creation of symbol table)
@@ -1220,7 +1231,14 @@ for lineNumber in range(len(expandedLines)):
 			#continue
 			fields = []
 
-		# Collect workarounds.
+		# Immediately deal with INFO directives.
+		infoRequest = []
+		if len(fields) >= 3 and fields[1] == "INFO":
+			parameters = fields[2].split(",")
+			if parameters[0] == "CONSTANT" and parameters[1] in constants:
+				infoRequest = parameters
+
+		# Collect WORK directives for later use.
 		if len(fields) >= 3 and fields[1] == "WORK":
 			parameters = fields[2].split(",")
 			if len(parameters) == 5 and parameters[0] in ["ROOF", "BLOCK"]:
@@ -1236,8 +1254,19 @@ for lineNumber in range(len(expandedLines)):
 							blockWorkarounds.append(parameters)
 				except:
 					addError(lineNumber, "Info: Illegal workaround parameters: " + fields[2], expandedNumber)
-			elif len(parameters) == 5 and parameters[0] == "INCREMENT":
-				addError(lineNumber, "Implementation: WORK INCREMENT not yet available", expandedNumber)
+			elif len(parameters) == 4 and parameters[0] in ["INC","DEC"]:
+				try:
+					name = parameters[0]
+					parameters = (int(parameters[1], 8), int(parameters[2], 8),
+								  int(parameters[3], 8))
+					if name == "INC":
+						if parameters not in incWorkarounds:
+							incWorkarounds.append(parameters)
+					elif name == "DEC":
+						if parameters not in decWorkarounds:
+							decWorkarounds.append(parameters)
+				except:
+					addError(lineNumber, "Info: Illegal workaround parameters: " + fields[2], expandedNumber)
 			else:
 				addError(lineNumber, "Info: Unknown workaround: "+fields[2], expandedNumber)
 			continue
@@ -1696,10 +1725,10 @@ for lineNumber in range(len(expandedLines)):
 				pass
 			else:
 				addError(lineNumber, "Error: Unrecognized operator %s" % fields[1])
-		elif len(fields) > 1 and fields[1] in ["LIT", "ENDLIT"]:
+		elif len(fields) > 1 and fields[1] in ["LIT", "ENDLIT", "LIST", "UNLIST"]:
 			inputLine["operator"] = fields[1]
 		elif len(fields) != 0:
-			addError(lineNumber, "Error: Wrong number of fields")
+			addError(lineNumber, "Error: Wrong number of fields: %s" % str(fields))
 		inputLine["inDataMemory"] = inDataMemory
 		inputLine["useDat"] = useDat
 		inputLine["isCDS"] = isCDS
@@ -2109,7 +2138,7 @@ for entry in inputFile:
 			lineFields[locField] = "%03o" % DLOC
 			lineFields[dmField] = "%2o" % DM
 			lineFields[dsField] = "%02o" % DS
-			lineFields[adrField] = "%03o" % DLOC
+			#lineFields[adrField] = "%03o" % DLOC
 		elif operator in ["DEC", "OCT", "DFW", "BSS", "HPC", "HPCDD"] or operator in forms:
 			if ptc:
 				lineFields[adrField] = "%03o" % DLOC
@@ -2274,6 +2303,10 @@ for entry in inputFile:
 						cumulative = cumulative >> (numBits - 26)
 						numbits = 26
 					hopConstant = cumulative << (27 - numBits)
+					if (DM,DS,DLOC) in incWorkarounds:
+						hopConstant += 2
+					elif (DM,DS,DLOC) in decWorkarounds:
+						hopConstant -= 2
 					constantString = "%09o" % hopConstant
 				except:
 					addError(lineNumber, "Error: Illegal operand or form definition")
@@ -2646,11 +2679,13 @@ for entry in inputFile:
 			residual = 0
 		else:
 			# Instruction is a "regular" one ... not one of the ones dealt with above.
+			searchResidual = True
 			if operand [:1] == "=":
 				if operand[:3] == "=H'":
 					hopSing = equalsH(operand)
 					hopConstant = formConstantHOP(hopSing)
 					constantString = "%09o" % hopConstant
+					searchResidual = False
 				else:
 					constantString = convertNumericLiteral(lineNumber, operand[1:])
 				if constantString == "":
@@ -2658,7 +2693,8 @@ for entry in inputFile:
 					loc = 0
 				else:
 					#print("B1: allocateNameless " + constantString + " " + operand)
-					loc,residual = allocateNameless(lineNumber, constantString)
+					loc,residual = allocateNameless(lineNumber, constantString,\
+												    True, searchResidual)
 					#print("B2: %o,%20o,%03o %o" % (DM, DS, loc, residual))
 					ds = DS
 					if loc > 0o377 or DS == 0o17 or residual != 0:
@@ -2697,8 +2733,6 @@ for entry in inputFile:
 			else: 
 				hop2 = symbols[operand]
 				if hop2["inDataMemory"]:
-					#if (not ptc and hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17)):
-					#	if not useDat: # or S == 1:
 					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
 						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (hop2["DM"], hop2["DS"]))
 					loc = hop2["DLOC"]
@@ -2808,7 +2842,7 @@ if checkTheOctals:
 	# octal cross-check file, it's still possible that the cross-check
 	# file contains octals which didn't come from the assembled source
 	# code.  We need to check for those.
-	for module in range(8):
+	for module in range(0, 8, 2):
 		for sector in range(16):
 			for syllable in range(3):
 				for location in range(0o400):
@@ -2826,7 +2860,7 @@ if checkTheOctals:
 						if ptc and syllable == 2:
 							continue
 						counts["mismatches"] += 1
-						print("Mismatch: Octal mismatch B at %o,%02o,%o,%03o" \
+						print("Mismatch: Missing octal at %o,%02o,%o,%03o" \
 							%(module,sector,syllable,location) )
 print("")
 print("Assembly-message summary:")
