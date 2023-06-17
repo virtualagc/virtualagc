@@ -15656,42 +15656,107 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
           <td valign="middle"><tt>TABLE <i>number</i></tt><br>
           </td>
           <td valign="middle">This informs the assembler that the
-            succeeding <tt><i>number</i></tt> words of memory form a
-            table.&nbsp; Recall that a "word" comprises a <i>pair</i>
-            of syllables at a given offset into a memory sector: i.e., a
-            single data location or a pair of instruction words in
-            opposing syllables.&nbsp; The operand is a decimal
-            number.&nbsp; <br>
+            succeeding <tt><i>number</i></tt> words of memory need to
+            be treated together as a group, for certain purposes.&nbsp;
+            Recall that a "word" comprises a <i>pair</i> of syllables
+            at a given offset into a memory sector: i.e., a single data
+            location or a pair of instruction words in opposing
+            syllables.&nbsp; The operand is a decimal number.&nbsp; <br>
             <br>
             As far as I can see, <tt>TABLE</tt> does not allocate any
             memory, and does not advance the assembler's internal
-            location pointers.&nbsp; I believe that the only use of this
-            pseudo-op is to inform the assembler that it should not
-            split the table across a memory-sector boundary.&nbsp;
-            (Recall that the assembler would otherwise insert <tt>HOP</tt>
-            instructions as a coding convenience when a section of code
-            would otherwise cause a memory sector to overflow.)&nbsp;
-            When the table consists of a sequence of data pseudo-ops
-            like <tt>BSS</tt>, <tt>HPC</tt>, <tt>DEC</tt>, or <tt>OCT</tt>,
-            each of which itself allocates one or more words, <tt>TABLE</tt>
-            is easy to comprehend. <br>
-            <br>
-            However, a table could instead comprise a sequence of
-            instructions, with each instruction occupying a syllable
-            rather than a wide word of memory.&nbsp; So one must
-            question how 2*<tt><i>number</i></tt> instructions are
+            location pointers.&nbsp; I believe that using <tt>TABLE</tt>
+            simultaneously provides two features:<br>
+            <ol>
+              <li>It informs the assembler that it should not split the
+                table across a memory-sector boundary.&nbsp; (Recall
+                that the assembler would otherwise insert <tt>HOP</tt>
+                instructions as a coding convenience when a section of
+                code would otherwise cause a memory sector to
+                overflow.)&nbsp; </li>
+              <li>It further informs the assembler not to automatically
+                allocate "literal memory" within that chunk of
+                memory.&nbsp; (See <tt>LIT</tt> for an explanation of
+                what that means.)&nbsp; <br>
+              </li>
+            </ol>
+            A typical use of <tt>TABLE</tt> for protecting a block of
+            data would be something like the following,<br>
+            <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                TABLE&nbsp;&nbsp; 8</tt><br>
+              <tt>L.DPIS BSS&nbsp;&nbsp;&nbsp;&nbsp; 6 </tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                HPC&nbsp;&nbsp;&nbsp;&nbsp; M.DP25</tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                HPC&nbsp;&nbsp;&nbsp;&nbsp; M.DP25</tt><br>
+            </blockquote>
+            which would assure that the <tt>BSS</tt> and the two <tt>HPC</tt>'s
+            were in contiguous memory.&nbsp; When the table consists of
+            a sequence of data pseudo-ops like <tt>BSS</tt>, <tt>HPC</tt>,
+            <tt>DEC</tt>, or <tt>OCT</tt> like this, each of which
+            itself allocates one or more words, <tt>TABLE</tt> is easy
+            to comprehend. However, a table could instead comprise a
+            sequence of instructions, with each instruction occupying a
+            syllable rather than a wide word of memory.&nbsp; So one
+            must question how 2*<tt><i>number</i></tt> instructions are
             packed within the <i><tt>number</tt></i> words of the
             table.&nbsp; This is determined by the <tt>USE</tt>
             pseudo-op (see below) and <tt>ORG</tt> pseudo-op (see
-            above).&nbsp; <tt>TABLE</tt> itself does not enforce any
-            specific ordering/packing behavior, and it's the
-            programmer's responsibility to handle it.<br>
+            above).&nbsp; There are instances in AS-512 of <tt>TABLE</tt>
+            usage both with <tt>USE DAT</tt> and with <tt>USE INST</tt>,
+            though it is unclear in the latter case why <tt>TABLE</tt>
+            was used in preference to <tt>BLOCK</tt>.&nbsp; At any
+            rate, <tt>TABLE</tt> itself does not enforce any specific
+            ordering/packing behavior, and it's the programmer's
+            responsibility to handle it.<br>
             <br>
-            I have found a number of instances in the AS-206RAM and
-            AS-512 assembly listings in which uses of <tt>TABLE</tt>
-            (and the similar <tt>VEC</tt> and <tt>MAT</tt> pseudo-ops)
-            are tagged as assembler warnings, but have so far been
-            unable to ascertain why they are so-flagged.<br>
+            However, the protections afforded by <tt>TABLE</tt> affect
+            only the lines of code immediately encountered by the
+            assembler after encountering the <tt>TABLE</tt> itself. But
+            if that's true, how are we then to interpret usages such as
+            the following, in which there <i>are</i> no lines of code
+            that could be affected following any <tt>TABLE</tt>?<br>
+            <blockquote><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...</tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                DOG&nbsp;&nbsp;&nbsp;&nbsp; D.KDAF</tt><br>
+              <tt>C.NI&nbsp;&nbsp; TABLE&nbsp;&nbsp; 1&nbsp; </tt><br>
+              <tt>C.TCV&nbsp; TABLE&nbsp;&nbsp; 1 </tt><br>
+              <tt>C.LA&nbsp;&nbsp; TABLE&nbsp;&nbsp; 1&nbsp; </tt><br>
+              <tt>C.OA&nbsp;&nbsp; TABLE&nbsp;&nbsp; 1&nbsp; </tt><br>
+              <tt>C.GL&nbsp;&nbsp; TABLE&nbsp;&nbsp; 1&nbsp; </tt><br>
+              <tt>C.NZ&nbsp;&nbsp; TABLE&nbsp;&nbsp; 1&nbsp;&nbsp; </tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                DOG&nbsp;&nbsp;&nbsp;&nbsp; D.KDAD</tt><br>
+              <tt>C.PC&nbsp;&nbsp; TABLE&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;
+              </tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                DOGD&nbsp;&nbsp;&nbsp; 6,11,0</tt><br>
+              <tt>C.SS1&nbsp; TABLE&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp; </tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                DOGD&nbsp;&nbsp;&nbsp; 6,12,0</tt><br>
+              <tt>C.SS2&nbsp; TABLE&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp; </tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                DOG&nbsp;&nbsp;&nbsp;&nbsp; D.KDAC</tt><br>
+              <tt>C.EP1&nbsp; TABLE&nbsp;&nbsp;
+                1&nbsp;&nbsp;&nbsp;&nbsp; </tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...</tt><br>
+            </blockquote>
+            There are many such cases — generally (or always) involving
+            <tt>TABLE 1</tt> — in AS-512 source code.&nbsp; I think that
+            the <tt>TABLE</tt> directives are being used here only as a
+            convenient way to define symbolic labels (<tt>C.NI</tt>, <tt>C.TCV</tt>,
+            and so on) without allocating any memory for them and
+            without necessarily understanding what was eventually going
+            to occupy those locations; those symbolic labels are then
+            used throughout the source code with pseudo-ops like <tt>DOG</tt>
+            or instructions like <tt>CDS</tt> to select a data-memory
+            sector, but not with instructions (like <tt>CLA</tt> or <tt>STO</tt>)
+            what would expect them to specify a unique memory
+            location.&nbsp; And as I said, <tt>TABLE</tt> does not
+            advance the assembler's internal memory pointers, so in this
+            example, labels <tt>C.NI</tt> through <tt>C.NZ</tt> all
+            refer to the same memory location (and hence the same memory
+            sector).<br>
             <br>
             See also:&nbsp; <tt>BLOCK</tt>.<br>
           </td>
@@ -16124,6 +16189,70 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             forming a vector.&nbsp; It does not allocate any
             memory.&nbsp; I.e., any memory it skips past to reach the
             proper alignment remains unallocated.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle"><tt>WORK ... <i>varies</i> ...</tt><br>
+          </td>
+          <td valign="top"><tt>WORK</tt> is an assembler directive I've
+            added, not present in the original LVDC assembly
+            language.&nbsp; I hope it's a temporary addition, and that
+            any <tt>WORK</tt> directives added to the source code can
+            eventually be backed out, and hopefully <i>sooner</i>
+            rather than later.&nbsp; Basically, they're there to help me
+            diagnose internal changes in the original assembler (between
+            the AS-206RAM time-frame and the AS-512 time-frame), and to
+            <i>temporarily</i> implement workarounds for those whose
+            correct implementation in the modern LVDC assembler isn't
+            yet clear to me.<br>
+            <br>
+            Here are the presently-defined workarounds, and descriptions
+            of the assembly problems they relate to:<br>
+            <ul>
+              <li><tt>WORK </tt><tt>ROOF</tt><tt><i><tt>,</tt>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i></tt>
+                — (Note that the word <tt>ROOF</tt> is literal.&nbsp;
+                All of the other fields are octal.)&nbsp; This tells the
+                assembler that when at the precise address <i><tt>IM-IS-S-LOC</tt></i>,
+                in evaluating the amount of free memory remaining in the
+                sector, it should reduce that amount by 1.&nbsp; The net
+                result of the workaround is that if the assembler would
+                otherwise have inserted a sector change after the
+                instruction at that address, it instead inserts it
+                before that address. <br>
+              </li>
+              <li><tt>WORK </tt><tt>BLOCK</tt><tt><i><tt>,</tt>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i></tt>
+                — (Note that the word <tt>BLOCK</tt> is literal.&nbsp;
+                All of the other fields are octal.)&nbsp; Suppresses
+                insertion of an automatic sector change prior to a <tt>BLOCK</tt>
+                at the selected address.<br>
+              </li>
+              <li><tt>WORK </tt><tt><tt>INC</tt></tt><tt><tt>,</tt><i>DM</i>,<i>DS</i>,<i>D</i><i>LOC</i></tt>
+                — (Note that the word <tt>INC</tt> is literal.&nbsp;
+                All of the other fields are octal.) This tells the
+                assembler to increment by 1 the constant at address <i><tt>DM-DS-DLOC</tt></i>.&nbsp;
+                Technically, it's actually incremented by 2, since the
+                least-significant bit in any memory word is reserved for
+                the parity bit.&nbsp; Note that only certain pseudo-ops
+                like <tt>DEC</tt> and <tt>OCT</tt> are affected, along
+                with <tt>FORM</tt>'s, because the problem being address
+                is incorrect rounding of fractional numbers to integers.
+                <br>
+              </li>
+              <li><tt>WORK </tt><tt><tt>DEC</tt></tt><tt><tt>,</tt><i>DM</i>,<i>DS</i>,<i>D</i><i>LOC</i></tt>
+                — (Note that the word <tt><tt>DEC</tt></tt> is
+                literal.&nbsp; All of the other fields are octal.) Same
+                as <tt>WORK INC</tt>, but decrements by 1 (2) instead
+                of incrementing.</li>
+            </ul>
+            <p>As a debugging measure (vs a semi-permanent fix), using
+              the LVDC assembler's <tt>--fuzzy</tt> command-line switch
+              may be more useful than adding <tt>WORK INC</tt> and <tt>WORK
+                DEC</tt> directives to the LVDC source code, because it
+              has the effect of categorizing ±1 mismatches separately
+              from other mismatches, produces more-useful messages, and
+              is easier to do.&nbsp; On the other hand, it may also hide
+              some non-rounding errors.<br>
+            </p>
           </td>
         </tr>
       </tbody>
@@ -19197,7 +19326,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-06-13.<br>
+          2023-06-17.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
