@@ -15569,13 +15569,13 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             <br>
             <tt>SYN *DAT</tt><br>
           </td>
-          <td valign="middle">This pseudo-op requires a left-hand symbol
+          <td valign="middle">I assume that <tt>SYN</tt> stands for
+            "synonym".&nbsp; This pseudo-op requires a left-hand symbol
             to precede the <tt>SYN</tt> on the line, and <tt>SYN</tt>
-            defines that left-hand symbol in the symbol table.&nbsp; For
-            example, the left-hand symbol <tt>MY_LHS</tt> in the line "<tt>MY_LHS
-
-
-              SYN *INST</tt>".<br>
+            defines that left-hand symbol in the symbol table without
+            allocating any actual memory for it.&nbsp; For example, it
+            might define a left-hand symbol called <tt>MY_LHS</tt> by
+            using a the line like "<tt>MY_LHS SYN *INS</tt>".<br>
             <blockquote><font size="-1"><b>Aside:</b>&nbsp; Note that if
                 <tt>SYN</tt> is the <i>first</i> line in a macro, it
                 won't explicitly appear to have a left-hand symbol in
@@ -15627,25 +15627,90 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             reference symbols like assembler constants; whereas the
             reverse is true for <tt>EQU</tt>.<br>
             <br>
-            The "<tt>SYN *INS</tt>" form instead tells the assembler
-            that the left-hand symbol refers to the memory address
-            corresponding to the assembler's current instruction
-            pointer.&nbsp; This is essentially the same thing as simply
-            moving the left-hand symbol accompanying the <tt>SYN</tt>
-            to the <i>next</i> source line and eliminating the <tt>SYN</tt>
-            line of source code entirely.&nbsp; However, that's not
-            always possible.&nbsp; For example, the next line of source
-            code might be something which cannot accept a left-hand
-            symbol, such as an <tt>ORG</tt> or an <tt>ENDMAC</tt>. <br>
-            <br>
-            Finally, the "<tt>SYN *DAT</tt>" form tells the assembler
-            that the left-hand system refers to the memory address
-            corresponding to the assembler's current data-memory
-            pointer.<br>
-            <br>
-            In no case does <tt>SYM</tt> actually allocate
-            memory.&nbsp; It merely creates symbols that refer to
-            specific memory addresses, whether or not those memory
+            Alas, we have no documentation of the original assembler, so
+            the explanation that follows of the "<tt>SYN *INS</tt>" and
+            form "<tt>SYN *DAT</tt>" forms is based on my own
+            observations.&nbsp; What they do is to tell the assembler
+            that the left-hand symbol refers to the <i>next</i>
+            instruction or data location, respectively, that the
+            assembler encounters.&nbsp; In most usages in actual source
+            code, this turns out to be the same thing as the assembler's
+            current internal instruction pointer or data pointer.&nbsp;
+            But you can't rely on it, because there are cases in which
+            that assumption fails rather badly.&nbsp; The worst case,
+            from my perspective, is the <tt>SS1</tt> macro used in
+            AS-512 source code.&nbsp; For illustrative purposes, here's
+            a simple macro I've modeled after just the problematic
+            portion of <tt>SS1</tt>:<br>
+            <blockquote><tt>MYSS1&nbsp; MACRO</tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                SYN&nbsp;&nbsp;&nbsp;&nbsp; *DAT</tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DOGD &nbsp;&nbsp;
+                6,11,</tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                OCT&nbsp;&nbsp;&nbsp;&nbsp; 0</tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ENDMAC</tt><br>
+            </blockquote>
+            Now, macro <tt>SS1</tt> is used many, many times throughout
+            the AS-512 source code, but with our simple model macro,
+            here's what just the very first expansion looks like:<br>
+            <blockquote><tt>S.TTB1 MYSS1</tt><br>
+            </blockquote>
+            which expands to<br>
+            <blockquote><tt>S.TTB1 SYN&nbsp;&nbsp;&nbsp;&nbsp; *DAT</tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                DOGD&nbsp;&nbsp;&nbsp; 6,11,</tt><br>
+              <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                OCT&nbsp;&nbsp;&nbsp;&nbsp; 0</tt><br>
+            </blockquote>
+            The code preceding this expansion happens to have left the
+            data-memory pointer set to a location in memory module 2,
+            sector 17.&nbsp; However, the <tt>SYN</tt> will assign
+            symbol <tt>S.TTB1</tt> to module 6, sector 11 instead,
+            because the <i>next</i> data-word encountered comes from
+            the <tt>OCT 0</tt>, and intervening <tt>DOGD</tt> does not
+            itself allocate any data memory words even though it does
+            affect the memory pointers.&nbsp; Thus if you had relied
+            upon <tt>S.TTB1</tt> to represent an address in module 2,
+            sector 17, you would have been badly mistaken.&nbsp; Perhaps
+            I make too big a deal of this, but <i>I</i> had assumed
+            that the current data pointers were what were relevant and I
+            was mistaken.&nbsp; It took quite a bit of effort eventually
+            to come to an understanding of the actual behavior of <tt>SYN
+              *DAT</tt> vs a more-simplistic view of it.<br>
+            <blockquote><font size="-1"><b>Aside:</b> It's not clear to
+                me why they may have thought this was reasonable
+                behavior for <tt>SYN *DAT</tt> back in the day, vs
+                simply using the current data pointer.&nbsp; The only
+                use case, as far as I know, is this ability to assign a
+                label the way it's done in <tt>SS1</tt>.&nbsp; But an
+                equivalent symbol assignment could have been
+                accomplished just as easily — and perhaps more so! — by
+                rewriting the macro as<br>
+              </font>
+              <blockquote><font size="-1"><tt>MYSS1&nbsp;
+                    MACRO&nbsp;&nbsp; ARG1</tt><br>
+                  <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DOGD
+                    &nbsp;&nbsp; 6,11,</tt><br>
+                </font> <font size="-1"><tt>ARG1&nbsp;&nbsp;
+                    OCT&nbsp;&nbsp;&nbsp;&nbsp; 0</tt><br>
+                  <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ENDMAC<br>
+                  </tt></font></blockquote>
+              <font size="-1">and invoking it instead as:<br>
+              </font>
+              <blockquote><font size="-1"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    MYSS1&nbsp;&nbsp; S.TTB1</tt><br>
+                </font></blockquote>
+              <font size="-1">Oh, well!&nbsp; Perhaps someone can point
+                out some wonderful use for the feature that I've not
+                thought of.&nbsp; If not, perhaps it will instead just
+                remain one of the eternal mysteries.</font><br>
+              <blockquote>
+              </blockquote>
+            </blockquote>
+            As I mentioned, in no case does <tt>SYM</tt> actually
+            allocate memory.&nbsp; It merely creates symbols that refer
+            to specific memory addresses, whether or not those memory
             addresses are actually allocated (by some other
             means).&nbsp; For example, upon reaching an address
             referenced by a <tt>SYN</tt>, the assembler will make no
