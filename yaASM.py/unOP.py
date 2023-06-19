@@ -13,13 +13,20 @@ import sys
 
 instructions = [ "HOP", "MPY", "SUB", "DIV", "TNZ", "MPH", "AND", "ADD", "TRA", "XOR", "PIO", "STO", "TMI", "RSU", "", "CLA" ]
 
+print("For syllable 1 (left-hand column in assembly listings), enter a 5-digit")
+print("octal number.  For syllable 0 (right-hand column), enter a space")
+print("character followed by a 5-digit octal number.  Only one value can be")
+print("input per line!  Hit control-C to exit.")
 for line in sys.stdin:
 	try:
 		if line[:1] == " ":
 			syllable = int(line[1:], 8)
+			print("Syllable 0 (right) detected.")
 		else:
 			syllable = int(line, 8) >> 1
+			print("Syllable 1 (left) detected.")
 	except:
+		print("Unrecognized input, try again.")
 		continue
 	syllable_1 = syllable >> 1
 	op = syllable_1 & 0x0F

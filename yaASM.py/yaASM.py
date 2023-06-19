@@ -99,7 +99,10 @@
 #                               data instruction like CLA or STO.
 #               2023-06-19 RSB  Fixed SYN *DAT, I think.  There's also similar
 #                               scaffolding in place for SYN *INS, but I'm
-#                               unsure it's needed, so it's disabled.
+#                               unsure it's needed, so it's disabled.  Fixed
+#                               my previous fix for allocateNameless, which had
+#                               its conditional reversed for the residual
+#                               sector.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -519,7 +522,6 @@ def addAdder(symbol, IM, IS, S, LOC, DM, DS):
 	global roofAdders
 	if symbol not in roofAdders[IM][IS]:
 		roofAdders[IM][IS][symbol] = [S, LOC, DM, DS]
-		#print("!! Add\t%s\t%o-%02o\t%o\t%03o\t%o-%02o" % (symbol, IM, IS, S, LOC, DM, DS), file=sys.stderr)
 
 # The following function handles adding a symbol to the roofRemovers[] 
 # structure.  Used only during the symbol-discovery pass.
@@ -535,7 +537,6 @@ def addRemover(symbol, IM, IS, S, LOC, DM, DS):
 				if distance >= ceiling:
 					return
 		roofRemovers[IM][IS].add(symbol)
-		#print("!! Rem\t%s\t%o-%02o" % (symbol, IM, IS), file=sys.stderr)
 
 lines = sys.stdin.readlines()
 n = 0
@@ -610,7 +611,6 @@ def findDLOC(start = 0, increment = 1):
 	if reuse:
 		addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, n))
 	if length < increment or start + length > 0o400:
-		#print("!vi Bad", file=sys.stderr)
 		addError(lineNumber, \
 				"Error: No space of size %d found in memory bank (%o %02o)" % (increment, DM, DS))
 	return start
@@ -794,14 +794,11 @@ def allocateNameless(lineNumber, constantString, \
 	if searchResidual and DS != 0o17:
 		if valueR in nameless:
 			return nameless[valueR],1
-	start = 0
-	for loc in range(start, 256):
+	for loc in range(0o400):
 		location = (DM, DS, loc)
 		try:
 			syl0 = memUsed[DM][DS][0][loc]
 			syl1 = memUsed[DM][DS][1][loc]
-			#if DM == 2 and DS == 0o13 and loc == 0o176:
-			#	print("!! %o %o" % (syl0, syl1), file=sys.stderr)
 			used = syl0 or syl1
 			if not used:
 				if False:
@@ -819,13 +816,13 @@ def allocateNameless(lineNumber, constantString, \
 					"Error: Nameless allocation to %o-%02o-%03o" % (DM, DS, loc))
 			return 0,0
 	if useResidual and DS != 0o17:
-		for loc in range(start, 256):
+		for loc in range(0o400):
 			location = (DM, 0o17, loc)
 			try:
 				syl0 = memUsed[DM][0o17][0][loc]
 				syl1 = memUsed[DM][0o17][1][loc]
 				used = syl0 or syl1
-				if used:
+				if not used:
 					if False:
 						addError(lineNumber, "Info: Allocation of nameless " + valueR)
 					memUsed[DM][0o17][0][loc] = True
@@ -1835,9 +1832,6 @@ for lineNumber in range(len(expandedLines)):
 		if pendingSyn >= 0:
 			pendingSyn += 2
 
-#print("! S.TTB1 =", symbols["S.TTB1"], file=sys.stderr)
-#print("! roofRemovers", roofRemovers[6][9], file=sys.stderr)
-
 # Create a table to quickly look up addresses of symbols. I think that all or
 # most of these will already have been done by the preprocessor or the loop 
 # above, though.
@@ -2514,7 +2508,6 @@ for entry in inputFile:
 			key = "%o_%02o_%s" % (DM, DS, constantString)
 			if key not in nameless:
 				nameless[key] = DLOC
-			#print("! %04d: LIT added to literal memory %s %03o" % (pageNumber, key, nameless[key]), file=sys.stderr)
 	elif operator in operators:
 		inDataMemory = False
 		loc = 0
@@ -2658,23 +2651,10 @@ for entry in inputFile:
 					else:
 						# No HOP to this target has been added to the end of the sector,
 						# so we must do so now.
-						if False:
-							# This was the original algorithm I was using.
-							index = len(roofed[IM][IS])
-							loc = 0o377 - index
-							# TBD -- I'm not sure the following is right when there
-							# are data words allocated at the top of the sector.
-							if loc <= 0o375:
-								loc -= 1
-						else:
-							# This is the replacement.  It works equally well
-							# for AS-206RAM and PTC-ADAPT, and is very 
-							# marginally better for AS-512 (in that it fixes
-							# slightly more things than it breaks).
-							for loc in range(0o377, -1, -1):
-								if memUsed[IM][IS][1][loc] or loc == 0o375:
-									continue
-								break
+						for loc in range(0o377, -1, -1):
+							if memUsed[IM][IS][1][loc] or loc == 0o375:
+								continue
+							break
 						roofed[IM][IS].append(operand)
 						loc2,residual2 = allocateNameless(lineNumber, constantString, True)
 						ds = DS
