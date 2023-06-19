@@ -97,6 +97,9 @@
 #               2023-06-17 RSB  Various fixes, such as correct sector for using
 #                               an instruction location as the operand of a 
 #                               data instruction like CLA or STO.
+#               2023-06-19 RSB  Fixed SYN *DAT, I think.  There's also similar
+#                               scaffolding in place for SYN *INS, but I'm
+#                               unsure it's needed, so it's disabled.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -333,6 +336,7 @@ ceiling = 0o1000
 newer = False
 allowUnlist = True
 fuzzy = False
+synFix = True
 for arg in sys.argv[1:]:
 	if arg[:2] == "--":
 		if arg == "--ptc":
@@ -351,6 +355,8 @@ for arg in sys.argv[1:]:
 			allowUnlist = False
 		elif arg == "--fuzzy":
 			fuzzy = True
+		elif arg == "--no-syn-fix":
+			synFix = False
 		elif arg == "--help":
 			print("Usage:", file=sys.stderr)
 			print("\tyaASM.py [OPTIONS] [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
@@ -358,8 +364,9 @@ for arg in sys.argv[1:]:
 			print("\t--help -- to print this message.", file=sys.stderr)
 			print("\t--newer -- assemble for AS-512/513 rather than AS-206RAM.", file=sys.stderr)
 			print("\t--ceiling=n -- (leave at default 1000) octal limit forward TNZ/TMI distance.", file=sys.stderr)
-			print("\t--no-unlist -- debugging option to ignore UNLIST directives.", file=sys.stderr)
-			print("\t--fuzzy -- in octal-mismatch check, ignore rounding error.", file=sys.stderr)
+			print("\t--no-unlist -- (debugging) option to ignore UNLIST directives.", file=sys.stderr)
+			print("\t--fuzzy -- (debugging) in octal-mismatch check, ignore rounding error.", file=sys.stderr)
+			print("\t--no-syn-fix -- (debugging) do not fix SYN *DAT and SYN *INS.", file=sys.stderr)
 			print("\t--debug-roof=n -- debug automatic sector changes to level n>0.", file=sys.stderr)
 			print("\t--ptc -- to use PTC source/octal input rather than the default LVDC.", file=sys.stderr)
 			print("\t--past-bugs -- only with --ptc, reproduces some original assembler bugs.", file=sys.stderr)
@@ -512,6 +519,7 @@ def addAdder(symbol, IM, IS, S, LOC, DM, DS):
 	global roofAdders
 	if symbol not in roofAdders[IM][IS]:
 		roofAdders[IM][IS][symbol] = [S, LOC, DM, DS]
+		#print("!! Add\t%s\t%o-%02o\t%o\t%03o\t%o-%02o" % (symbol, IM, IS, S, LOC, DM, DS), file=sys.stderr)
 
 # The following function handles adding a symbol to the roofRemovers[] 
 # structure.  Used only during the symbol-discovery pass.
@@ -527,6 +535,7 @@ def addRemover(symbol, IM, IS, S, LOC, DM, DS):
 				if distance >= ceiling:
 					return
 		roofRemovers[IM][IS].add(symbol)
+		#print("!! Rem\t%s\t%o-%02o" % (symbol, IM, IS), file=sys.stderr)
 
 lines = sys.stdin.readlines()
 n = 0
@@ -611,10 +620,7 @@ def checkDLOC(increment = 1):
 	DLOC = findDLOC(start=DLOC, increment=increment)
 
 def incLOC():
-	global LOC
-	global DLOC
-	global dS
-	global used
+	global LOC, DLOC, dS, used
 	try:
 		if useDat:
 			if DLOC < 256:
@@ -1258,6 +1264,7 @@ useDat = False
 udDM = 0
 udDS = 0
 inMacro = ""
+pendingSyn = -1
 for lineNumber in range(len(expandedLines)):
 	for expandedNumber in range(len(expandedLines[lineNumber])):
 		line = expandedLines[lineNumber][expandedNumber]
@@ -1438,15 +1445,27 @@ for lineNumber in range(len(expandedLines)):
 					symbols[lhs]["isBLOCK"] = True
 			elif fields[0] != "" and fields[1] == "SYN":
 				if fields[2] == "*INS":
+					inputLine["syn"] = "ins"
 					inDataMemory = False
 					inputLine["lhs"] = fields[0]
 					inputLine["hop"] = {"IM":IM, "IS":IS, "S":S, "LOC":LOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					addRemover(fields[0], IM, IS, S, LOC, DM, DS)
+					if False and synFix:
+						# This case may (or may not) be the more-correct 
+						# behavior, but I've disallowed it because of 
+						# implementation difficulty.
+						pendingSyn = 1
+					else:
+						addRemover(fields[0], IM, IS, S, LOC, DM, DS)
 				elif fields[2] == "*DAT":
+					inputLine["syn"] = "dat"
 					inputLine["lhs"] = fields[0]
 					inputLine["hop"] = {"IM":DM, "IS":DS, "S":0, "LOC":DLOC, "DM":DM, "DS":DS, "DLOC":DLOC}
-					addRemover(fields[0], DM, DS, 0, DLOC, DM, DS)
+					if synFix:
+						pendingSyn = 0
+					else:
+						addRemover(fields[0], DM, DS, 0, DLOC, DM, DS)
 				else:
+					inputLine["syn"] = "symbol"
 					synonyms[fields[0]] = fields[2]
 			elif fields[0] != "" and fields[1] == "FORM":
 				if fields[0] in forms:
@@ -1797,6 +1816,27 @@ for lineNumber in range(len(expandedLines)):
 			symbols[lhs]["inDataMemory"] = inDataMemory or useDat
 			symbols[lhs]["isCDS"] = inputLine["isCDS"]
 			symbols[lhs]["1stPass"] = True
+		if pendingSyn > 1 and "hop" in inputLine:
+			for pendingLine in reversed(inputFile):
+				pendingInputLine = pendingLine["expandedLine"]
+				if "syn" in pendingInputLine and \
+						pendingInputLine["syn"] in ["ins", "dat"]:
+					lhs = pendingInputLine["lhs"]
+					newHop = inputLine["hop"]
+					pendingInputLine["hop"].update(newHop)
+					symbols[lhs].update(newHop)
+					odd = pendingSyn & 1
+					if odd: # *INS
+						addRemover(lhs, IM, IS, S, LOC, DM, DS)
+					else: # *DAT
+						addRemover(lhs, DM, DS, 0, DLOC, DM, DS)
+					break
+			pendingSyn = -1
+		if pendingSyn >= 0:
+			pendingSyn += 2
+
+#print("! S.TTB1 =", symbols["S.TTB1"], file=sys.stderr)
+#print("! roofRemovers", roofRemovers[6][9], file=sys.stderr)
 
 # Create a table to quickly look up addresses of symbols. I think that all or
 # most of these will already have been done by the preprocessor or the loop 
@@ -2183,7 +2223,8 @@ for entry in inputFile:
 					operandModifier = int(operandModifier)
 	
 	# Print the address portion of the line.
-	if "hop" in inputLine:
+	if "hop" in inputLine and "syn" not in inputLine \
+			and "isTABLE" not in inputLine and "isBLOCK" not in inputLine:
 		hop = inputLine["hop"]
 		DM = hop["DM"]
 		DS = hop["DS"]
