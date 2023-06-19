@@ -13,6 +13,8 @@
 #		2016-08-17 RSB	Corrected names of AGC_SELF-CHECK.agc,  
 #				DUMMY_501_INITIALIZATION.agc, and
 #				REENTRY_CONTROL.agc.
+#		2023-06-19 MAS	Restored original names of DUMMY 501
+#				INITIALISATION and RE-ENTRY CONTROL.
 #
 # This file is a little different from the other Solarium055 files being provided, 
 # in that it doesn't represent anything that appears directly in the original source.  
@@ -57,8 +59,8 @@ $PINBALL_GAME__BUTTONS_AND_LIGHTS.agc		# 481
 $501_MISSION_CONTROL_PROGRAM.agc		# 553
 $POWERED_FLIGHT_SUBROUTINES.agc			# 628
 $TIME_OF_FREE-FALL_CALCULATIONS.agc		# 682
-$DUMMY_501_INITIALIZATION.agc			# 697
-$REENTRY_CONTROL.agc				# 698
+$DUMMY_501_INITIALISATION.agc			# 697
+$RE-ENTRY_CONTROL.agc				# 698
 $AVERAGE_G_INTEGRATOR.agc			# 746
 $VERIFICATION_ASSISTANCE_PROGRAMS.agc		# 754
 $SUM-CHECK_END_OF_RECORD_MARKS.agc		# 759
