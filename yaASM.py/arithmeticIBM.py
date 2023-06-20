@@ -180,6 +180,8 @@ def ibmToOctal(value, scale=26):
             v = v >> (-shift)
         if v & 1:
             v += 1
+        if value["negative"]:
+            v = v ^ 0o777777776
         return "%09o" % v
 
 # *** Note: --check is only partially implemented and not fully working. ***
@@ -271,6 +273,8 @@ if test:
             value2 = toIBM(fields[2])
             if operator == "+":
                 value = addIBM(value1, value2)
+            elif operator == "-":
+                value = addIBM(value1, value2, True)
             elif operator == "*":
                 value = multiplyIBM(value1, value2)
             else:
