@@ -235,7 +235,7 @@ if test:
     print("Accepts line inputs in any of the following formats:")
     print("\tnumber [Bn]")
     print("\tnumber + number [Bn]")
-    print("\tnumber 1 number [Bn]")
+    print("\tnumber - number [Bn]")
     print("\tnumber * number [Bn]")
     print("The default B-scale, affecting only outputs, is B26.")
     print("Notice the whitespaces delimiting operators and B-scales.")
