@@ -216,7 +216,7 @@ def ibmToOctal(value, scale=26):
 if test:
     
     print("Numbers can include E-exponents but not B-scales.")
-    print("B-scales can be optionally appear at the end of a line.")
+    print("B-scales can optionally appear at the end of a line.")
     print("Accepts line inputs in any of the following formats:")
     print("\tnumber [Bn]")
     print("\tnumber + number [Bn]")
