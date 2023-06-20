@@ -15630,18 +15630,20 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             Alas, we have no documentation of the original assembler, so
             the explanation that follows of the "<tt>SYN *INS</tt>" and
             form "<tt>SYN *DAT</tt>" forms is based on my own
-            observations.&nbsp; What they do is to tell the assembler
-            that the left-hand symbol refers to the <i>next</i>
-            instruction or data location, respectively, that the
-            assembler encounters.&nbsp; In most usages in actual source
-            code, this turns out to be the same thing as the assembler's
-            current internal instruction pointer or data pointer.&nbsp;
-            But you can't rely on it, because there are cases in which
-            that assumption fails rather badly.&nbsp; The worst case,
-            from my perspective, is the <tt>SS1</tt> macro used in
-            AS-512 source code.&nbsp; For illustrative purposes, here's
-            a simple macro I've modeled after just the problematic
-            portion of <tt>SS1</tt>:<br>
+            observations.&nbsp; <br>
+            <br>
+            What <tt>SYN *DAT</tt> does is to tell the assembler that
+            the left-hand symbol associates with the data-memory pointer
+            of the <i>next</i> instruction or data-allocation pseudo-op
+            the assembler encounters.&nbsp; In most usages in actual
+            source code, this turns out to be the same thing as the
+            assembler's current internal data pointer.&nbsp; But you
+            can't rely on it, because there are cases in which that
+            assumption fails rather badly.&nbsp; The worst case, from my
+            perspective, is the <tt>SS1</tt> macro used in AS-512
+            source code.&nbsp; For illustrative purposes, here's a
+            simple macro I've modeled after just the problematic portion
+            of <tt>SS1</tt>:<br>
             <blockquote><tt>MYSS1&nbsp; MACRO</tt><br>
               <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 SYN&nbsp;&nbsp;&nbsp;&nbsp; *DAT</tt><br>
@@ -15708,6 +15710,17 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
               <blockquote>
               </blockquote>
             </blockquote>
+            For <tt>SYN *INS</tt>, the left-hand symbol is simply
+            associated with the current instruction pointer of the
+            assembler.&nbsp; I suspect that the intended behavior may be
+            a bit more complex, similar to the
+            next-instruction-encountered behavior just described for <tt>SYN
+              *DAT</tt>, but there's no usage in actual LVDC source code
+            where these actually differ.&nbsp; (Plus, I've had trouble
+            trying to implement it in the more-complex way, so I'd
+            prefer to pretend that the simply behavior is the intended
+            behavior.)<br>
+            <br>
             As I mentioned, in no case does <tt>SYM</tt> actually
             allocate memory.&nbsp; It merely creates symbols that refer
             to specific memory addresses, whether or not those memory
@@ -16283,7 +16296,15 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                 result of the workaround is that if the assembler would
                 otherwise have inserted a sector change after the
                 instruction at that address, it instead inserts it
-                before that address. <br>
+                before that address.&nbsp; <tt>WORK ROOF</tt> has the
+                side-effect of filling the succeeding location where the
+                sector change would otherwise have been, namely <i><tt>IM</tt></i>-<tt><i>IS</i></tt>-<i><tt>S</tt></i>-<tt>(<i>LOC</i>+1)</tt>,
+                with 00000 if it's otherwise unallocated.&nbsp; This
+                mimics what I think was a bug in the original LVDC
+                assembler.&nbsp; I'm forced to admit, on the other hand,
+                that assuming this bug in the original assembler is a
+                pretty big inference 50 years afterward from a single
+                observed anomaly in the assembler's behavior!<br>
               </li>
               <li><tt>WORK </tt><tt>BLOCK</tt><tt><i><tt>,</tt>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i></tt>
                 — (Note that the word <tt>BLOCK</tt> is literal.&nbsp;
@@ -16297,11 +16318,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                 assembler to increment by 1 the constant at address <i><tt>DM-DS-DLOC</tt></i>.&nbsp;
                 Technically, it's actually incremented by 2, since the
                 least-significant bit in any memory word is reserved for
-                the parity bit.&nbsp; Note that only certain pseudo-ops
-                like <tt>DEC</tt> and <tt>OCT</tt> are affected, along
-                with <tt>FORM</tt>'s, because the problem being address
-                is incorrect rounding of fractional numbers to integers.
-                <br>
+                the parity bit.&nbsp; <br>
               </li>
               <li><tt>WORK </tt><tt><tt>DEC</tt></tt><tt><tt>,</tt><i>DM</i>,<i>DS</i>,<i>D</i><i>LOC</i></tt>
                 — (Note that the word <tt><tt>DEC</tt></tt> is
@@ -19391,7 +19408,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-06-17.<br>
+          2023-06-19.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
