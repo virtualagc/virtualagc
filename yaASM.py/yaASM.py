@@ -609,10 +609,13 @@ def findDLOC(start = 0, increment = 1):
 		n += 1
 		length += 1
 	if reuse:
-		addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, n))
+		addError(lineNumber, \
+				"Warning: Skipping memory locations already used (%o-%02o-%03o)" \
+				% (DM, DS, n))
 	if length < increment or start + length > 0o400:
 		addError(lineNumber, \
-				"Error: No space of size %d found in memory bank (%o %02o)" % (increment, DM, DS))
+				"Error: No space of size %d found in memory bank (%o-%02o)" \
+				% (increment, DM, DS))
 	return start
 	
 def checkDLOC(increment = 1):
@@ -860,12 +863,16 @@ def checkLOC(extra = 0):
 		 	addError(lineNumber, "Error: No room left in memory sector")
 		elif dS == 1 and (memUsed[DM][DS][0][DLOC] or memUsed[DM][DS][1][DLOC]):
 			tLoc = DLOC
-			addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %03o)" % (DM, DS, DLOC))
+			addError(lineNumber, \
+					"Warning: Skipping memory locations already used (%o-%02o-%03o)" \
+					% (DM, DS, DLOC))
 			while tLoc < 256 and dS == 1 \
 					and (memUsed[DM][DS][0][tLoc] or memUsed[DM][DS][1][tLoc]):
 				tLoc += 1
 			if tLoc >= 256:
-				addError(lineNumber, "Error: No room left in memory sector (%o %02o)" % (DM, DS))
+				addError(lineNumber, \
+						"Error: No room left in memory sector (%o-%02o)" \
+						% (DM, DS))
 			else:
 				DLOC = tLoc
 				return []
@@ -904,7 +911,9 @@ def checkLOC(extra = 0):
 			# to find address for the TRA or HOP to take us to, always searching
 			# upward.
 			if lastORG:
-				addError(lineNumber, "Warning: Skipping memory locations already used (%o %02o %o %03o)" % (IM, IS, S, LOC + 1))
+				addError(lineNumber, \
+						"Warning: Skipping memory locations already used (%o-%02o-%o-%03o)" \
+						% (IM, IS, S, LOC + 1))
 			else:
 				memUsed[IM][IS][S][LOC] = True
 				autoSwitch = True
@@ -1414,7 +1423,9 @@ for lineNumber in range(len(expandedLines)):
 					pass # Okay as-is!
 				elif lastORG or (IM,IS,S,LOC) in blockWorkarounds:
 					IM, IS, S, LOC = tuple(index)
-					addError(lineNumber, "Warning: Skipping already-used locations")
+					addError(lineNumber, \
+							"Warning: Skipping already-used locations (%o-%02o-%o-%03o)" \
+							% tuple(index))
 				else:
 					inputLine["switchSectorAt"] = [IM, IS, S, LOC] + index
 					memUsed[IM][IS][S][LOC] = True
@@ -2708,7 +2719,9 @@ for entry in inputFile:
 					#if (not ptc and hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17)):
 					#	if not useDat: # or S == 1:
 					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
-						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (hop2["DM"], hop2["DS"]))
+						addError(lineNumber, \
+								"Error: Operand not in current data-memory sector or residual sector (%o-%02o-%03o)" \
+								% (hop2["DM"], hop2["DS"], hop2["DLOC"]))
 					loc = hop2["DLOC"]
 					residual = residualBit(hop2["DM"], hop2["DS"])
 				else:
@@ -2802,7 +2815,9 @@ for entry in inputFile:
 				dloc = int(constants[operand][3], 8)
 				#if (not ptc and (dm != DM or (ds != DS and ds != 0o17)) or (ptc and ds != 0o17 and not (dm == DM and ds == DS))):
 				if not inSectorOrResidual(dm, ds, DM, DS, useDat, udDM, udDS):
-					addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (dm, ds))
+					addError(lineNumber, \
+							"Error: Operand not in current data-memory sector or residual sector (%o-%02o-%03o)" \
+							% (dm, ds, dloc))
 				else:
 					loc = dloc
 					if ds == 0o17:
@@ -2816,9 +2831,11 @@ for entry in inputFile:
 			else: 
 				hop2 = symbols[operand]
 				if hop2["inDataMemory"]:
-					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
-						addError(lineNumber, "Error: Operand not in current data-memory sector or residual sector (%o %02o)" % (hop2["DM"], hop2["DS"]))
 					loc = hop2["DLOC"]
+					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
+						addError(lineNumber, \
+								"Error: Operand not in current data-memory sector or residual sector (%o-%02o-%03o)" \
+								% (hop2["DM"], hop2["DS"], loc))
 					if operandModifierOperation == "+":
 						loc += operandModifier
 					elif operandModifierOperation == "-":
@@ -2831,7 +2848,9 @@ for entry in inputFile:
 						else:
 							etype = "Error"
 						if not useDat or S == 1:
-							addError(lineNumber, "%s: Operand not in current data-memory sector (%o %02o)" % (etype, hop2["IM"], hop2["IS"]))
+							addError(lineNumber, \
+									"%s: Operand not in current data-memory sector (%o-%02o-%o-%03o)" \
+									% (etype, hop2["IM"], hop2["IS"], hop2["S"], hop2["LOC"]))
 					loc = hop2["LOC"]
 					if operandModifierOperation == "+":
 						loc += operandModifier
