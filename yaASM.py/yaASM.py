@@ -2920,6 +2920,31 @@ for entry in inputFile:
 			printLineFields()
 f.close()
 
+# Highly speculative:  The AS-512 code, at the current state of the assembler
+# (2023-06-19) requires a single WORK ROOF workaround, at 6-03-1-370.  Perhaps
+# not so coincidentally, a single mismatch of the modern assembly vs the 
+# original exists, at 6-03-1-371.  The original assembler fills this location
+# with 00000, whereas I see no reason (and nor does the modern assembler) for
+# anything to be at this location.  So the modern assembler leaves it 
+# uninitialized.  *Perhaps* the original assembler filled this location
+# with 00000 as some side-effect of whatever computation it was doing that 
+# corresponded to WORK ROOF.  In fact, now that I think of it, filling that
+# location with 00000 (or indeed with anything whatsoever) would indeed 
+# accomplish what WORK ROOF is doing, namely to force an automatic sector change
+# on location earlier than it otherwise would.  The inference is that we should 
+# go to all of the roofWorkaround[] locations and insert 00000 immediately after
+# them if those locations are otherwise unused.  If true, it's probably a bug
+# in the original assembler that it kept those locations filled with 00000, 
+# which really was only a bookkeeping move rather than anything necessary to
+# operation.
+for w in roofWorkarounds:
+	if memUsed[w[0]][w[1]][w[2]][w[3]+1]:
+		print("Warning: Location following WORK ROOF %o,%02o,%o,%03o already filled" % w)
+		counts["warnings"] += 1
+	else:
+		storeAssembled(lineNumber, 0o00000, \
+					{ "IM": w[0], "IS": w[1], "S": w[2], "LOC": w[3]+1}, False)
+
 if checkTheOctals:
 	# While we have now checked all of the assembed values against the 
 	# octal cross-check file, it's still possible that the cross-check
