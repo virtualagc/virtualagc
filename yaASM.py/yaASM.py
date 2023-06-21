@@ -280,7 +280,7 @@ operators = {
 pseudos = []
 preprocessed = ["EQU", "IF", "ENDIF", "MACRO", "ENDMAC", "FORM", "TELD", "REQ",
 			"SPACE", "UNLIST", "LIST"]
-ignore = []
+ignore = ["TITLE"]
 
 # Bit patterns used by DFW pseudo-ops. The key value is the DS.
 dfwBits = {
@@ -1810,7 +1810,7 @@ for lineNumber in range(len(expandedLines)):
 			elif fields[1] in pseudos:
 				pass
 			else:
-				addError(lineNumber, "Error: Unrecognized operator %s" % fields[1])
+				addError(lineNumber, "Error: Unrecognized operator: %s" % fields[1])
 		elif len(fields) > 1 and fields[1] in ["LIT", "ENDLIT", "LIST", "UNLIST"]:
 			inputLine["operator"] = fields[1]
 		elif len(fields) != 0:
@@ -2099,6 +2099,7 @@ errorsPrinted = []
 lastLineNumber = -1
 expansionMarker = " "
 pageNumber = 0
+pageTitle = ""
 inLiteralMemory = False
 for entry in inputFile:
 	#print(entry)
@@ -2277,7 +2278,14 @@ for entry in inputFile:
 	op = "  "
 	constantString = ""
 	inDataMemory = True
-	if operator == "BSS":
+	rawLine = inputLine["raw"]
+	if rawLine.lstrip().startswith("TITLE"):
+		lfields = rawLine.split("TITLE", 1)
+		if len(lfields) != 2:
+			continue
+		pageTitle = lfields[1].strip().strip("'").replace("''", "'").replace("&&", "&")
+		continue
+	elif operator == "BSS":
 		bssHop = hop.copy()
 		for n in range(int(operand)):
 			storeAssembled(lineNumber, 0, bssHop)
@@ -2895,7 +2903,17 @@ for entry in inputFile:
 	if originalLine[:1] == "#":
 		print("    " + originalLine)
 		if len(fields) > 1 and fields[1] == "PAGE":
+			firstPart = 87
+			lenTitle = len(pageTitle)
+			leadIn = 35
+			leadOut = firstPart - leadIn - lenTitle
+			header0 = "%*s%s%*s%25sPAGE %03d" % (leadIn, "", pageTitle, leadOut, 
+											"", "", pageNumber)
+			print()
+			print(header0)
+			print()
 			print(header)
+			print()
 		
 	else:
 		if "bciLines" in entry:
