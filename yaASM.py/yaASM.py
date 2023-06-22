@@ -103,6 +103,10 @@
 #                               my previous fix for allocateNameless, which had
 #                               its conditional reversed for the residual
 #                               sector.
+#               2023-06-21 RSB  Now extracts page titles from TITLE directives,
+#                               and prints those titles (along with page 
+#                               numbers) in the page headers of assembly 
+#                               listings.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
