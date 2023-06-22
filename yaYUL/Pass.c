@@ -126,6 +126,7 @@
  *            	                workaround for the symbol "DECON" in Solarium 55.
  *            	2023-05-15 MAS  Added support for the "VXM*" interpretive instruction for Block I.
  *            	2023-05-23 MAS  Added support for the "DOT*" interpretive instruction for Block I.
+ *            	2023-06-21 MAS  Added support for the "TSU*" interpretive instruction for Block I.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1194,6 +1195,7 @@ static InterpreterMatch_t InterpreterOpcodesBlock1[] =
     { "TSRT", 0073 },
     { "TSRT*", 0071 },
     { "TSU", 0063 },
+    { "TSU*", 0061 },
     { "UNIT", 0154 },
     { "UNIT*", 0150 },
     { "VAD", 0043 },
