@@ -521,7 +521,7 @@ else:
     summary of what we presently have and don't have:<br><br>
     <table cellspacing="2" cellpadding="2" border="1" align="center" style="font-family:sans-serif"><tbody>
     <tr style="font-weight:bold" align="center"><td>Mission</td><td>CM AGC</td><td>LM AGC</td><td>AGS</td><td>LVDC</td></tr>
-    <tr align="center"><td>AS-202</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
+    <tr align="center"><td>AS-202</td><td>yes</td><td>n/a</td><td>n/a</td><td>no</td></tr>
     <tr align="center"><td>Apollo 1</td><td>no</td><td>n/a</td><td>n/a</td><td>no</td></tr>
     <tr align="center"><td>Apollo 4</td><td>yes</td><td>n/a</td><td>n/a</td><td>no</td></tr>
     <tr align="center"><td>Apollo 5</td><td>n/a</td><td>yes</td><td>no</td><td>no</td></tr>
