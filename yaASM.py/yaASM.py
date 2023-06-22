@@ -1714,22 +1714,21 @@ for lineNumber in range(len(expandedLines)):
 				incDLOC()	
 			elif fields[1] in operators:
 				inDataMemory = False
-				if True:
-					# This code is intended for inserting extra jumps around memory
-					# already allocated for something else. 
-					extra = 0
-					if fields[2][:2] == "*+" and fields[2][2:].isdigit():
-						extra += int(fields[2][2:])
-					if ptc and fields[1] in ["TRA", "HOP"] \
-							and not memUsed[IM][IS][S][LOC]:
-						pass
-					elif newer and lastORG:
-						if not moveLOC():
-							addError(lineNumber, "Error: No free memory in sector")
-					else:
-						oldLocation = checkLOC(extra)
-						if oldLocation != []:
-							inputLine["switchSectorAt"] = oldLocation
+				# This code is intended for inserting automatic sector changes
+				# or jumps around memory already allocated for something else. 
+				extra = 0
+				if fields[2][:2] == "*+" and fields[2][2:].isdigit():
+					extra += int(fields[2][2:])
+				if ptc and fields[1] in ["TRA", "HOP"] \
+						and not memUsed[IM][IS][S][LOC]:
+					pass
+				elif newer and lastORG:
+					if not moveLOC():
+						addError(lineNumber, "Error: No free memory in sector")
+				else:
+					oldLocation = checkLOC(extra)
+					if oldLocation != []:
+						inputLine["switchSectorAt"] = oldLocation
 				lastORG = False
 				if fields[0] != "":
 					inputLine["lhs"] = fields[0]
@@ -2973,7 +2972,7 @@ f.close()
 # location with 00000 (or indeed with anything whatsoever) would indeed 
 # accomplish what WORK ROOF is doing, namely to force an automatic sector change
 # on location earlier than it otherwise would.  The inference is that we should 
-# go to all of the roofWorkaround[] locations and insert 00000 immediately after
+# go to all of the roofWorkarounds[] locations and insert 00000 immediately after
 # them if those locations are otherwise unused.  If true, it's probably a bug
 # in the original assembler that it kept those locations filled with 00000, 
 # which really was only a bookkeeping move rather than anything necessary to

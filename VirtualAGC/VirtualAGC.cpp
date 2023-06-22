@@ -161,6 +161,7 @@
  *              2022-10-28 RSB  Added LM131R1, SUNRISE45, and SUNRISE69.
  *              2022-11-17 RSB  Added Aurora 88.
  *              2023-05-02 RSB  Tentatively enabled Corona 261.
+ *              2023-06-22 RSB  Added Corona161's HTML.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -204,7 +205,7 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "Apollo 1 Command Module", "",
                 "Click this to select the unflown Apollo 1 mission.", DISABLED,
                 CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
-            { "AS-202 (\"Apollo 3\") CM", "",
+            { "AS-202 (\"Apollo 3\") CM", "Corona261/MAIN.agc.html",
                 "Click this to select the AS-202 (\"Apollo 3\") unmanned CM mission. "
                 "Note that this software is presently tentative.",
                 ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Corona261", "CM0.ini" },
