@@ -60,6 +60,7 @@ document.write(headerTemplate.replace("@TITLE@","Colossus &mdash; Comanche &mdas
 
 
 
+
     In the context of the Virtual AGC project, of course, the process is
     somewhat different:&nbsp; <span style="font-weight: bold;">Colossus</span>
     source code is assembled by the <span style="font-weight: bold;">yaYUL</span>
@@ -81,6 +82,7 @@ document.write(headerTemplate.replace("@TITLE@","Colossus &mdash; Comanche &mdas
       style="font-weight: bold;">Colossus</span> as such, but provided
     some code for <span style="font-weight: bold;">Colossus</span>.&nbsp;
 If
+
 
 
 
@@ -108,6 +110,7 @@ If
 
 
 
+
       <b>Luminary</b> page</a>.<br>
     <br>
     <a href="DocumentLibraryDatabase/AGCSoftwareTree.svg"><img
@@ -118,6 +121,7 @@ If
     software source code and the manufactured core ropes than presented
     on this page, you might want to look in the section of our <a
 href="file:///home/rburkey/git/virtualagc-web/links2.html#AssemblyListings">Document
+
 
 
 
@@ -286,6 +290,7 @@ Brains
 
 
 
+
                 for the Right Stuff</a>.)&nbsp; <br>
               <br>
               Amusingly, though, in reviewing the program after all
@@ -298,6 +303,7 @@ Brains
               program, I leave that as an exercise for the reader!<br>
             </span><br>
             <button onclick="toggleMore('TRIVIUM')" id="buttonTRIVIUM">Read
+
 
 
 
@@ -318,6 +324,7 @@ Brains
 
 
 
+
               hyperlinked HTML</a><br>
           </td>
           <td rowspan="2" colspan="1" align="center" valign="middle"><a
@@ -326,6 +333,7 @@ Brains
               204 Reference Cards</a><br>
             <br>
             <a moz-do-not-send="true" href="Documents/E-1574.pdf">Keyboard
+
 
 
 
@@ -361,6 +369,7 @@ href="https://archive.org/details/apertureCardBox474Part1NARASW_images/page/n436
 
 
 
+
               69 and Erasable Memory Test Program</a><br>
           </td>
           <td valign="middle"><a name="SUNRISE"></a> SUNRISE is a
@@ -370,7 +379,7 @@ href="https://archive.org/details/apertureCardBox474Part1NARASW_images/page/n436
             acquired SUNRISE 45 by dumping the contents of three
             physical rope-memory modules to which an anonymous collector
             gave us access.<br>
-            <span id="moreSUNRISE45" style="display:none"><br>
+            <br>
               Now, it often happens that physical rope-memory modules
               are physically defective in one way or another, either as
               a result of sitting around for 50-60 years unused, or
@@ -388,7 +397,7 @@ href="https://archive.org/details/apertureCardBox474Part1NARASW_images/page/n436
               they were unusually difficult to make, and we'd have even
               more confidence in the dumped data if those corrections
               hadn't needed to be made in the first place.<br>
-              <br>
+              <span id="moreSUNRISE45" style="display:none"><br>
               Fortunately, we were later able to obtain a dump from a
               different physical memory module containing those very
               same memory banks of SUNRISE 45.&nbsp; While this module <i>also</i>
@@ -403,6 +412,7 @@ href="https://archive.org/details/apertureCardBox474Part1NARASW_images/page/n436
               If you're interested in the sordid details, there's a full
               description in <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20Library/README.md#Inventory">the
+
 
 
 
@@ -440,15 +450,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                   memory checks, etc. It essentially only has the
                   control pulse tests. To kick it off:</p>
                 <ul dir="auto">
-                  <li>VERB 21 NOUN 27 ENTER XXXXX ENTER</li>
+                  <li><tt>VERB 21 NOUN 27 ENTER XXXXX ENTER</tt></li>
                 </ul>
                 <p dir="auto">where XXXXX is the number of times you
                   want it to execute. If XXXXX is negative, it will
-                  instead loop forever until a new N27 is entered or an
+                  instead loop forever until a new <tt>N27</tt> is entered or an
                   error is encountered. The high-level results can be
                   monitored with:</p>
                 <ul dir="auto">
-                  <li>VERB 15 NOUN 01 ENTER 1570 ENTER</li>
+                  <li><tt>VERB 15 NOUN 01 ENTER 1570 ENTER</tt></li>
                 </ul>
                 <p dir="auto">The first register will contain the
                   address (within bank 5) of the first failure
@@ -461,11 +471,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                   low-altitude Earth orbit for just a bit more than one
                   orbit. It can be started with verb 37 as follows:</p>
                 <ul dir="auto">
-                  <li>VERB 37 ENTER 11 ENTER</li>
-                  <li>KEY RLSE</li>
+                  <li><tt>VERB 37 ENTER 11 ENTER</tt></li>
+                  <li><tt>KEY RLSE</tt></li>
                 </ul>
                 <p dir="auto">The program will change to 02, and it will
-                  put up a V07N01 display of address 1315. In this
+                  put up a <tt>V07N01</tt> display of address 1315. In this
                   display, registers 1 and 2 are a double-precision
                   fractional simulation time in weeks. It will slowly
                   count up until it reaches 0.009 weeks, i.e. 90
@@ -475,7 +485,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                   address 1431) and <tt>VDISP</tt> (velocity in meters
                   per second, scaled 2<sup>6</sup> 10<sup>-3</sup>
                   √μ&nbsp; address 1437) can be examined one element at
-                  a time with a manual V07N01. I don't think there's a
+                  a time with a manual <tt>V07N01</tt>. I don't think there's a
                   good way to display the whole vector.</p>
                 <h3 dir="auto">Other Tests</h3>
                 <p dir="auto">The other tests available in Sunrise are
@@ -492,7 +502,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                       href="Documents/agcis_22_prelaunch_alignment.pdf"
                       rel="nofollow" moz-do-not-send="true">AGCIS Issue
                       22, Prelaunch Alignment</a></li>
-                  <li>Started with VERB 37 ENTER 01 ENTER</li>
+                  <li>Started with <tt>VERB 37 ENTER 01 ENTER</tt></li>
                 </ul>
                 <p dir="auto"><strong>Gyro Drift Test</strong></p>
                 <ul dir="auto">
@@ -500,7 +510,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                       href="Documents/agcis_21_system_test.pdf"
                       rel="nofollow" moz-do-not-send="true">AGCIS Issue
                       21, System Test</a></li>
-                  <li>Started with VERB 70 ENTER</li>
+                  <li>Started with <tt>VERB 70 ENTER</tt></li>
                 </ul>
                 <p dir="auto"><strong>PIPA Scale Factor Test</strong></p>
                 <ul dir="auto">
@@ -508,7 +518,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                       href="Documents/agcis_21_system_test.pdf"
                       rel="nofollow" moz-do-not-send="true">AGCIS Issue
                       21, System Test</a></li>
-                  <li>Started with VERB 71 ENTER</li>
+                  <li>Started with <tt>VERB 71 ENTER</tt></li>
                 </ul>
               </div>
             </span> <br>
@@ -518,16 +528,21 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
         <tr>
           <td align="center" valign="middle">69<br>
           </td>
-          <td align="center" valign="middle">On our wish list<br>
-          </td>
-          <td valign="middle">The same comments I made for SUNRISE 45
-            above basically hold equally well for SUNRISE 69, with the
-            differences that the AGC source code for it has not (yet?)
-            been 100% reconstructed, and that SUNRISE 69 spans four
-            rope-memory modules rather than just three.&nbsp; What's
-            really interesting, however, is that the four memory modules
-            are the <i>same</i> three from SUNRISE 45, plus one extra.
-            <br>
+          <td align="center" valign="middle"><a moz-do-not-send="true"
+              href="listings/Sunrise69/MAIN.agc.html">Syntax-highlighted,
+
+
+
+
+
+              hyperlinked HTML</a> </td>
+          <td valign="middle"><a name="Sunrise69"></a>The same comments
+            I made for SUNRISE 45 above basically hold equally well for
+            SUNRISE 69, with the difference that the that SUNRISE 69
+            spans four rope-memory modules rather than just three.&nbsp;
+            What's really interesting, however, is that the four memory
+            modules are the <i>same</i> three from SUNRISE 45, plus one
+            extra. <br>
             <br>
             If you think about it, that's pretty remarkable.&nbsp; After
             all, if the three SUNRISE 45 modules never access a 4th rope
@@ -540,11 +555,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
             modules are B28, B29, and B21.)&nbsp; For example, the
             SUNRISE 69 DSKY electroluminescent test is kind of fun, and
             it's started by the rather cumbersome command sequence,<br>
-            <br>
-            <div align="center">VERB 21 NOUN 25 ENTER 30000 ENTER<br>
-              VERB 20 NOUN 01 ENTER 15233 ENTER<br>
-            </div>
-            <br>
+            <blockquote>
+              <div align="left"><tt>VERB 21 NOUN 25 ENTER 30000 ENTER</tt><tt><br>
+                </tt><tt> VERB 20 NOUN 01 ENTER 15233 ENTER</tt><br>
+              </div>
+            </blockquote>
             Whereas if you were to attempt the same thing in SUNRISE 45,
             it doesn't initiate the test.&nbsp; Rather, control is lost
             and all further key entries on the DSKY seem to be
@@ -553,14 +568,61 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
             would cause a system reset; since that doesn't happen
             virtually, I must not support parity checking in the CPU
             emulator.&nbsp; It sounds like the kind of thing I'd do.<br>
-            <br>
-            It seems to be the latter command, V20N01E XXXXXE which is
-            used to enter the address of the code to be executed in the
-            4th memory module ... or I suppose, <i>any</i> other memory
-            module.&nbsp; It's apparently the <tt>CADR</tt> of the
-            address (if you're up on your AGC assembly-language
+            <span id="moreSUNRISE69" style="display:none"><br>
+            It seems to be the latter command, <tt>V20N01E XXXXXE</tt>
+            which is used to enter the address of the code to be
+            executed in the 4th memory module ... or I suppose, <i>any</i>
+            other memory module.&nbsp; It's apparently the <tt>CADR</tt>
+            of the address (if you're up on your AGC assembly-language
             pseudo-ops).<br>
-          </td>
+            <br>
+            Speaking of the electroluminescent test, Mike tells me that
+            the only additions to Sunrise 69 (vs Sunrise 45) were tests
+            of various kinds, and that he was indeed able to run all of
+            those tests (with the guidance provided by <a
+              moz-do-not-send="true"
+              href="Documents/HSI-25099.pdf#page=13">this memo</a>).&nbsp;
+            Actually, here are the instructions for how to activate all
+            of those tests:<br>
+            <br>
+            <strong>Self-check number two:</strong><br>
+            <blockquote><tt>V36E</tt><tt><br>
+              </tt><tt>V21N01E 1762E 77777E</tt><tt><br>
+              </tt><tt>V21N26E 02000E</tt><tt><br>
+              </tt><tt>V15N01E 1764E</tt><tt><br>
+              </tt><tt>V20N01E 14042E</tt><br>
+            </blockquote>
+            <strong>C-relay test:</strong><br>
+            <blockquote><tt>V21N26E 04000E</tt><tt><br>
+              </tt><tt>V20N01E 15120E</tt><br>
+            </blockquote>
+            <strong>DSKY test:</strong><br>
+            <blockquote><tt>V21N26E 04000E</tt><tt><br>
+              </tt><tt>V20N01E 15233E</tt><br>
+            </blockquote>
+            <strong>Gyro drift test:</strong><br>
+            <blockquote><tt>V21N26E 04000E</tt><tt><br>
+              </tt><tt>V20N01E 55675E</tt><br>
+            </blockquote>
+            <strong>PIPA scale factor determination test:</strong><br>
+            <blockquote><tt>V21N26E 04000E</tt><tt><br>
+              </tt><tt>V20N01E 55703E</tt><br>
+            </blockquote>
+            <strong>IMU check:</strong><br>
+            <blockquote><tt>V21N26E 04000E</tt><tt><br>
+              </tt><tt>V20N01E 55711E</tt><br>
+            </blockquote>
+            <strong>IMU alignment test:</strong><br>
+            <blockquote><tt>V21N26E 04000E</tt><tt><br>
+              </tt><tt>V20N01E 55717E</tt><br>
+            </blockquote>
+            <strong>Gyro torquing test:</strong><br>
+            <blockquote><tt>V21N26E 04000E</tt><tt><br>
+              </tt><tt>V20N01E 55725E</tt><br>
+            </blockquote>
+            </span> <br>
+            <button onclick="toggleMore('SUNRISE69')"
+              id="buttonSUNRISE69">Read more</button></td>
         </tr>
         <tr>
           <td align="center" valign="middle">Apollo 3<br>
@@ -574,9 +636,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
           </td>
           <td align="center" valign="middle">261<br>
           </td>
-          <td align="center" valign="middle">On our wish list<br>
-          </td>
+          <td align="center" valign="middle"><a moz-do-not-send="true"
+              href="listings/Corona261/MAIN.agc.html">Syntax-highlighted,
+
+
+
+
+
+              hyperlinked HTML</a> </td>
           <td align="center" valign="middle"><a href="links2.html#AS202">Document
+
 
 
 
@@ -586,11 +655,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
           <td valign="middle"> <a href="Corona261Modules.jpg"><img
                 moz-do-not-send="true" src="Corona261Modules-small.jpg"
                 title="Click to enlarge" alt="" border="2" align="right"
-                width="216" height="193"></a><a name="Corona261"></a>A
-            program for which we do have the executable code but do not
-            (yet) have the source code is Corona 261, the Block I AGC
-            software for mission AS-202.&nbsp; Quoting from the
-            wikipedia article:<br>
+                width="216" height="193"></a><a name="Corona261"></a>Corona
+            261 is the Block I AGC software for mission AS-202.&nbsp;
+            Quoting from the wikipedia article:<br>
             <blockquote> <small><b>"AS-202</b> (also referred to as <b>SA-202</b>)
                 was the second unmanned, suborbital test flight of a
                 production Block I <a
@@ -632,7 +699,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
               than "AS-202".<br>
               <br>
               <div align="center">
-                <div align="left">While we don't have a software listing
+                <div align="left">While we don't have a contemporary software listing
                   for Corona 261, it turns out that collector Jimmie
                   Loocke had the physical core-rope memory modules, and
                   our Mike Stewart has managed to dump the contents of
@@ -647,9 +714,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                   it weren't for his intervention. Thanks, Francois! <br>
                   <br>
                   While I won't clutter up this description with the
-                  details of that module-dump effor (refer to <a
+                  details of that module-dump effort (refer to <a
                     moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20Library/README.md">the
+
 
 
 
@@ -664,14 +732,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                   decades.&nbsp; Mike tells me that two of the six
                   memory modules were perfect, dumps of three others
                   required some minor reconstruction, but that the sixth
-                  required many, many retries and fixups.&nbsp; Thus
-                  while in the end the checksums of this sixth module
-                  (and of the other five modules) were correct, there's
-                  still not 100% certainty of correctness, and some
-                  updates to the dumps may continue into the future if
-                  errors are discovered.<br>
+                  required many, many retries and fixups.&nbsp; Rest assured,
+                  though, that we're convinced the dump is 100% correct.
+                  And even if you're not the trusting sort (or perhaps think that 
+                  <i>we</i> aren't trustworthy sorts!), you can at least
+                  verify for yourself that the memory-bank checksums are
+                  100% correct.<br>
                   <br>
-                  Nevertheless, the dumped-and-repaired program can be
+                  Besides which, the dumped-and-repaired program can be
                   run in the Orbiter/NASSP spaceflight simulator, and
                   thanks to Nik Beug, here's a video the 35 juiciest
                   minutes of an entire 90-minute simulated AS-202
@@ -696,14 +764,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                       height="450" frameborder="0"></iframe><br>
                     <br>
                   </div>
-                  And hopefully at some point the source code can be
-                  reconstructed by disassembly of the core-rope dump, in
-                  conjunction with comparison to other related software
-                  versions.<br>
+                  As you'll find often throughout these notes, Mike was 
+                  eventually able to use the dumped core to mostly reconstruct
+                  the corresponding source code, via a combination of 
+                  disassembly of the core-rope dump and
+                  comparison to other related software
+                  versions.  Like all such reconstructions, it's almost
+                  necessarily imperfect.  But it does assemble identically to
+                  the core dump, and you can view our souped-up colorized
+                  version of it, as hyperlinked to the left.<br>
                   <br>
                   If you're interested in the evolution of the software,
                   note the document "<a
                     href="Documents/Programming%20Changes%20from%20AS-202%20to%20AS-501.pdf">Programming
+
 
 
 
@@ -833,6 +907,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
 
 
 
+
               more</button> </td>
         </tr>
         <tr>
@@ -866,6 +941,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
 
 
 
+
               page images</a> <a href="ScansForConversion/Solarium055/">
             </a></td>
           <td style="text-align: center;" align="center" valign="middle">
@@ -873,6 +949,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
                 4)</a><br>
               <br>
               <a href="links2.html#Apollo6" moz-do-not-send="true">Document
+
 
 
 
@@ -931,6 +1008,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
 
 
 
+
                 Virtual AGC's Block 1 AGC emulator into a branch of
                 NASSP</a>, as well as creating an emulator for the
               "Mission Programer" mentioned above, and Mike Stewart
@@ -938,6 +1016,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
               left in the AGC emulator.&nbsp; (Naturally those fixes are
               in our <a
                 href="https://github.com/virtualagc/virtualagc/tree/master/yaAGCb1">own
+
 
 
 
@@ -1017,6 +1096,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/Rope-Module%20Dump%20
 
 
 
+
                               honors</span></span><br>
                         </div>
                       </div>
@@ -1033,9 +1113,11 @@ Computer
 
 
 
+
                                   Museum</span><br style="font-family:
                                   sans-serif;">
                                 <span style="font-family: sans-serif;">Bozeman,
+
 
 
 
@@ -1116,6 +1198,7 @@ Computer
 
 
 
+
               rope dump</a><br>
             <br>
             Source code is on our wish list<br>
@@ -1129,8 +1212,10 @@ Computer
 
 
 
+
             a nice online writeup of <a
               href="http://www.angelfire.com/ma3/spacepatch/2TV1.html">the
+
 
 
 
@@ -1235,6 +1320,7 @@ Computer
 
 
 
+
               page images</a><br>
             <a href="ScansForConversion/Colossus249"> </a></td>
           <td style="text-align: center;" align="center" valign="middle">
@@ -1290,10 +1376,12 @@ href="https://archive.org/details/Colossus237DigitalSimulationAnomaly45Images">a
 
 
 
+
               hyperlinked,&nbsp; HTML</a><br>
             <br>
             <a
               href="https://archive.org/details/Colossus249MartinPp15651719">The
+
 
 
 
@@ -1445,6 +1533,7 @@ href="https://archive.org/details/Colossus237DigitalSimulationAnomaly45Images">a
 
 
 
+
             10<br>
           </td>
           <td rowspan="3" colspan="1" align="center" valign="middle">CSM-106<br>
@@ -1456,6 +1545,7 @@ href="https://archive.org/details/Colossus237DigitalSimulationAnomaly45Images">a
 
 
 
+
               2<br>
               (Comanche)</b><br>
           </td>
@@ -1463,6 +1553,7 @@ href="https://archive.org/details/Colossus237DigitalSimulationAnomaly45Images">a
           </td>
           <td align="center" valign="middle"><a
               href="listings/Comanche044/MAIN.agc.html">Syntax-highlighted,
+
 
 
 
@@ -1507,6 +1598,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
                 drawing 2021153</a>, that lists the correct memory-bank
               checksums for Colossus 44.&nbsp; Since the reconstructed
               program's memory-bank checksums match the listed ones, we
@@ -1529,6 +1621,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
               learn how it was done, Mike's running commentary on how he
               did it can be found in <a
                 href="https://github.com/virtualagc/virtualagc/issues/1134">problem
+
 
 
 
@@ -1569,11 +1662,13 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
                 here</a>) written in 1969 by AGC developer Fred
               Martin.&nbsp; In other words, you have to use the correct
               Apollo 10 procedures <i>plus</i> the workaround.&nbsp;
               The workaround reads as follows:<br>
               <blockquote><font face="Courier New, Courier, monospace">Avoidance
+
 
 
 
@@ -1609,6 +1704,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
           </td>
           <td align="center" valign="middle"><a
               href="listings/Comanche045/MAIN.agc.html">Syntax-highlighted,
+
 
 
 
@@ -1669,6 +1765,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
               hyperlinked,&nbsp; HTML</a> </td>
           <td style="text-align: left; vertical-align: middle;"
             valign="middle"><a name="Manche45R2"></a>This is the third
@@ -1692,7 +1789,9 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
                 source code has instead been accurately reconstructed</a>.&nbsp;
+
 
 
 
@@ -1700,6 +1799,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
               As usual, all memory-bank checksums of the assembled code
               match the known-good checksums listed in <a
 href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/mode/1up">engineering
+
 
 
 
@@ -1748,6 +1848,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
             11<br>
           </td>
           <td rowspan="2" colspan="1" align="center" valign="middle">CSM-107<br>
@@ -1759,6 +1860,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
               2A</b><b><br>
             </b><b>(Comanche)</b><br>
           </td>
@@ -1766,6 +1868,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
           </td>
           <td align="center" valign="middle"><a
               href="listings/Comanche051/MAIN.agc.html">Syntax-highlighted,
+
 
 
 
@@ -1787,6 +1890,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
               reconstruct its source code with confidence.&nbsp; Mike
               Stewart (thanks, Mike!) has done so, and written up <a
                 href="https://github.com/virtualagc/virtualagc/pull/1080">an
+
 
 
 
@@ -1820,6 +1924,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
                 drawing 2021153</a>.&nbsp; Drawing 2021153 is a list of
               the manufactured Comanche rope-memory modules, including
               Comanche 51.&nbsp; In addition to listing the software
@@ -1848,9 +1953,11 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
               hyperlinked,&nbsp; HTML</a><br>
             <br>
             <a href="https://archive.org/details/Comanche55J2k60">Scanned
+
 
 
 
@@ -1885,6 +1992,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n88/m
 
 
 
+
                               honors</span></span><br>
                         </div>
                       </div>
@@ -1900,6 +2008,7 @@ Institute
 
 
 
+
                                   of Technology / MIT Museum</span><br
                                   style="font-family: sans-serif;">
                                 <span style="font-family: sans-serif;">Building
@@ -1908,10 +2017,12 @@ N51,
 
 
 
+
                                   265 Massachusetts Avenue</span><br
                                   style="font-family: sans-serif;">
                                 <span style="font-family: sans-serif;">Cambridge,
 MA&nbsp;
+
 
 
 
@@ -1996,6 +2107,7 @@ MA&nbsp;
 
 
 
+
               endlessly-detailed description of how I've been going
               about it</a> ... but I wouldn't recommend it.&nbsp; The
             good news is that we do have some prospects that are much
@@ -2007,6 +2119,7 @@ MA&nbsp;
                 href="Documents/HSI-208615.pdf">Guidance, Navigation,
                 and Control Command Module Functional Description and
                 Operation Using Flight Program COLOSSUS 2C (COMANCHE 67)</a>",
+
 
 
 
@@ -2155,6 +2268,7 @@ are
 
 
 
+
                   available here</a>,
                 as&nbsp;Artemis072NBY71.bin&nbsp;and&nbsp;Luminary210NBY71.bin,
                 [i.e.] Artemis072 and Luminary210 modified to work for
@@ -2193,6 +2307,7 @@ are
 
 
 
+
             15<br>
           </td>
           <td rowspan="2" colspan="1" align="center" valign="middle">CSM-112<br>
@@ -2204,12 +2319,14 @@ are
 
 
 
+
               3<br>
               (Artemis)</b> </td>
           <td align="center" valign="middle">71<br>
           </td>
           <td align="center" valign="middle"><a
               href="listings/Artemis071/MAIN.agc.html">Syntax-highlighted,
+
 
 
 
@@ -2230,6 +2347,7 @@ are
             code for Artemis 72.&nbsp; Mike Stewart (thanks, Mike!) has
             done so, and has provided <a
               href="https://github.com/virtualagc/virtualagc/issues/1087">an
+
 
 
 
@@ -2271,6 +2389,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/m
 
 
 
+
                 drawing 2021154</a>.&nbsp; Drawing 2021154 is a list of
               the manufactured Artemis rope-memory modules.&nbsp; While
               we don't have the final revision of drawing 2021154, the
@@ -2300,9 +2419,11 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/m
 
 
 
+
               hyperlinked,&nbsp; HTML</a><br>
             <br>
             <a href="https://archive.org/details/Artemis072J2k60">Scanned
+
 
 
 
@@ -2340,14 +2461,17 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/m
 
 
 
+
                 1</a>, <a
                 href="Documents/programmed-guidance-equations-colossus-3-002_text.pdf">part
 
 
 
 
+
                 2</a>, <a
                 href="Documents/programmed-guidance-equations-colossus-3-003_text.pdf">part
+
 
 
 
@@ -2391,6 +2515,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/m
 
 
 
+
             2<br>
           </td>
           <td style="text-align: center;" align="center" valign="middle">CSM-116<br>
@@ -2417,6 +2542,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/m
 
 
 
+
               Library</a><br>
           </td>
           <td rowspan="4" colspan="1" valign="middle">This is the AGC
@@ -2428,14 +2554,17 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/m
 
 
 
+
               1</a>, <a
               href="Documents/programmed-guidance-equations-skylark-002.pdf">part
 
 
 
 
+
               2</a>, <a
               href="Documents/programmed-guidance-equations-skylark-003.pdf">part
+
 
 
 
@@ -2576,6 +2705,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/m
 
 
 
+
                   &lt;Colossus249.binsource</span><br
                   style="font-family: monospace;">
                 <span style="font-family: monospace;">mv Oct2Bin.bin
@@ -2644,6 +2774,7 @@ href="https://archive.org/stream/apertureCardBox467Part2NARASW_images#page/n93/m
       what I have to say will apply to <span style="font-weight: bold;">Luminary</span>
       as well as to <span style="font-weight: bold;">Colossus</span>.)&nbsp;
 With
+
 
 
 
@@ -2739,6 +2870,7 @@ With
         style="font-style: italic;">even parity</span>, while the digits
       1, 2, 4, and 7 have <span style="font-style: italic;">odd parity</span>.&nbsp;
 Therefore,
+
 
 
 
@@ -2875,6 +3007,7 @@ Therefore,
 
 
 
+
         847)</a> to see the pages of the source-code listing that are
       relevant to the problems in bank 36, namely:<br>
       <ol>
@@ -2941,9 +3074,11 @@ Guide
 
 
 
+
           to the Block II AGC/LGC Interpreter</span></a>, by Charles A.
       Muntz) was last updated in early 1965, and contains an incorrect
       numerical opcode for <span style="font-family: monospace;">STODL</span>.&nbsp;
+
 
 
 
@@ -3185,10 +3320,11 @@ Commons
 
 
 
+
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-05-11.<br>
+          2023-05-22.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
