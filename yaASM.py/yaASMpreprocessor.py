@@ -29,6 +29,8 @@
 #               2023-06-06 RSB  Now handles "SHL expression" and "SHR expression".
 #               2023-06-17 RSB  Corrected expansion (and formatting) of certain
 #                               shift operations.
+#               2023-07-03 RSB  Accounted for the syntax 
+#                                    IF (EXPRESSION)op(EXPRESSION)
 
 import re
 from yaASMerrors import *
@@ -134,9 +136,16 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 					addError(n, "Error: Illegal comparison", nn-1)
 					continue
 				constant = ofields[0]
-				if constant not in constants:
+				if constant[:1] == "(" and constant[-1:] == ")":
+					constantValue,error = yaEvaluate(constant[1:-1], constants)
+					if error != "":
+						addError(n, "Error: Cannot evaluate expression", nn-1)
+						continue
+				elif constant not in constants:
 					addError(n, "Error: Constant (%s) not found" % constant, nn-1)
 					continue
+				else:
+					constantValue = constants[constant]
 
 				expression = ofields[1][:-1]
 				value,error = yaEvaluate(expression, constants)
@@ -144,9 +153,9 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 					addError(n, "Error: Cannot evaluate expression", nn-1)
 					continue
 					
-				v1 = constants[constant]["number"]
+				v1 = constantValue["number"]
 				v2 = value["number"]
-				if "scale" in value or "scale" in constants[constant]:
+				if "scale" in value or "scale" in constantValue:
 					addError(n, "Implementation: Scale in IF condition", nn-1)
 					continue
 				isTrue = False
@@ -452,7 +461,12 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 					# it into "=(n)B(expression)".
 					operand = operand.replace("=", "=(").replace("B(", ")B(")
 					#print(fields[2], operand, file=sys.stderr)
-				value,error = yaEvaluate(operand[1:], constants)
+				try:
+					value,error = yaEvaluate(operand[1:], constants)
+				except:
+					print("Implementation error:", expandedLines[n][nn-1], \
+						operand, file=sys.stderr)
+					sys.exit(1)
 				if error != "":
 					addError(n, "Error: " + error)
 				else:

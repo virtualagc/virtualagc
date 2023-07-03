@@ -26,11 +26,14 @@
 #                               of AS-512/513 vs AS-206RAM.  See the notes 
 #                               marked "2023 change" below.
 #               2023-05-19 RSB  Changed name from expression.py.
+#               2023-07-03 RSB  Added exponential ("**") token, which is new
+#                               (and only used once!) in AS-513.
 
 # My attempt at a minimal arithmetical expression parser for use
 # in assembling LVDC code with yaASM.py.  I don't know that it's bug-free,
 # but it's probably good enough.  It has to handle:
 #	The 4 standard binary operations -, +, *, /.
+#	Exponential operation **.
 #	Unary operation -.
 #	Numerical literals for decimal numbers, including E, B exponentials.
 #	Symbolic constants previously assigned numerical values.
@@ -76,7 +79,12 @@ from decimal import Decimal, ROUND_HALF_UP
 # sum to zero, but no help whatever for us.  I've stolen the hround() function
 # from my Shuttle HAL/S compiler.  It rounds half-integers upward.
 def hround(x):
-	return int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
+	try:
+		i = int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
+	except:
+		print("Implementation error, non-decimal:", x, file=sys.stderr)
+		sys.exit(1)
+	return i
 
 # Function to pull a numeric literal constant from a string.
 # The leading portion of the input string is known to be a number
@@ -166,10 +174,11 @@ def pullNumber(string):
 # (which is hopefully normally empty).  The tokens potentially present are:
 #	"*"					Multiplication
 #	"/"					Division
-#	"B+"					Binary plus
-#	"U+"					Unary plus
-#	"B-"					Binary minus
-#	"U-"					Unary minus
+#	"B+"				Binary plus
+#	"U+"				Unary plus
+#	"B-"				Binary minus
+#	"U-"				Unary minus
+#   "**"				Exponential
 #	"("					Opening parenthesis
 #   ")"					Closing parenthesis
 #	{ "token":")", "scale":scale }		Closing parenthesis.  Includes binary scale.
@@ -184,6 +193,9 @@ def yaTokenize(string):
 		# that can be validly tokenized, or else with whitespace.
 		if string[0] in [" ", "\t", "\n", "\r"]:
 			string = string[1:]
+		elif string[:2] == "**":
+			tokens.append("**")
+			string = string[2:]
 		elif string[0] in ["*", "/", "(", ")"]:
 			tokens.append(string[0])
 			string = string[1:]
@@ -245,7 +257,7 @@ def yaTokenize(string):
 	return tokens[1:],error
 
 # Followed algorithm here:  https://infogalactic.com/info/Shunting-yard_algorithm
-precedence = ["U-", "U+", "/", "*", "B+", "B-"]
+precedence = ["**", "U-", "U+", "/", "*", "B+", "B-"]
 def yaShuntingYard(tokens):
 	queue = []
 	stack = []
@@ -373,6 +385,9 @@ def yaEvaluate(string, constants):
 			if "scale" in rpn[-2] and "scale" in rpn[-1]:
 				rpn[-2]["scale"] -= rpn[-1]["scale"]
 			rpn.pop()
+		elif token == "**":
+			rpn[-2]["number"] = rpn[-2]["number"] ** rpn[-1]["number"]
+			rpn.pop()
 		elif type(token) == type({}):
 			if "scale" in token:
 				if "scale" in rpn[-1]:
@@ -426,5 +441,11 @@ if "--test-expressions" in sys.argv:
 				print("Errors:", errors)
 				continue
 			print("Value:", value, "%09o" % (0o777777776 & hround(value["number"])))
-	
+			'''
+			queue,error = yaShuntingYard(tokens)
+			if errors != "":
+				print("Errors:", errors)
+				continue
+			print("Queue:", queue)
+			'''
 	

@@ -107,6 +107,8 @@
 #                               and prints those titles (along with page 
 #                               numbers) in the page headers of assembly 
 #                               listings.
+#               2023-07-02 RSB  Accounted for the occasional trailing ' found
+#                               in "=H'..." constructs in AS-513.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -2059,11 +2061,12 @@ def hopStar(hop2):
 	})
 
 # The following function is used only in the big assembly loop below.  It
-# accepts an operand of the form "=H'symbol" or "=H'symbol1,symbol2" and returns
+# accepts an operand of the form "=H'symbol" or "=H'symbol1,symbol2", with or
+# without an optional trailing single quote (as in "=H'symbol'), and returns
 # a dictionary describing the associated HOP constant suitable for being fed
 # into formConstantHOP().  Or else it returns {} on error.
 def equalsH(operand):
-	ofields = operand[3:].split(",")
+	ofields = operand[3:].rstrip("'").split(",")
 	if len(ofields) == 1:
 		symbol = ofields[0]
 		symbold = ""
