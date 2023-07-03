@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2023-06-22 MAS  Created from Aurora 12.
 ##              2023-06-30 MAS  Updated for Sundial E.
+##              2023-07-03 MAS  Moved in patches from FRESH START AND RESTART.
 
 
                 SETLOC  ENDPHMNF
@@ -965,5 +966,22 @@ OPONLY1         CAF     BIT4
 
                 CAF     IMUSEFLG        # OTHERWISE, ZERO THE COUNTERS
                 TCF     OPONLY +1
+
+GOPROG1         INCR    REDOCTR         # ADVANCE RESTART COUNTER.
+
+                CA      ERESTORE
+                EXTEND
+                BZF     GOPROG +1
+
+                EXTEND                  # RESTORE B(X) AND B(X+1) IF RESTART
+                DCA     SKEEP5          # HAPPENED WHILE SELF-CHECK HAD REPLACED
+                NDX     SKEEP7          # THEM WITH CHECKING WORDS.
+                DXCH    0000
+
+                TC      GOPROG +1
+
+STARTSB1        TS      ERESTORE
+                CAF     PRIO34          # ENABLE INTERRUPTS.
+                TC      STARTSB2
 
 ENDT4S          EQUALS

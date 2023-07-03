@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2023-06-22 MAS  Created from Aurora 12.
 ##              2023-06-30 MAS  Updated for Sundial E.
+##              2023-07-03 MAS  Added note for patches introduced in Sundial D.
 
 
                 BANK    10
@@ -1218,7 +1219,9 @@ DV5--           EXTEND
                 INCR    SCOUNT +2
                 TC      SELFCHK         # START SELF-CHECK AGAIN
 
-
+## MAS 2023: The following two chunks of code were added as patches
+## in Sundial D. They were placed here at the end of the bank so
+## as to not change addresses of existing symbols.
 
 ERASLP1         EXTEND
                 INDEX   SKEEP7

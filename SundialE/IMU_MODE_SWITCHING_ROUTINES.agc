@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2023-06-22 MAS  Created from Aurora 12.
 ##              2023-06-30 MAS  Updated for Sundial E.
+##              2023-07-03 MAS  Relocated Sundial D patch to SXTMARK.
 
 
                 SETLOC  ENDT4FF
@@ -699,28 +700,3 @@ IMUSEFLG        EQUALS  BIT8            # INTERPRETER SWITCH 7.
 90SEC           DEC     9000
 
 ENDIMODS        EQUALS
-
-
-## MAS 2023: The following chunk of code was added as a patch
-## in Sundial D. It was placed here at the end of the bank
-## so as to not change addresses of existing symbols.
-                SETLOC  ENDAMODS
-
-IMUZERO1        CAF     BIT4            # DONT ZERO CDUS IF IMU IN GIMBAL LOCK AND
-                EXTEND                  # COARSE ALIGN.
-                RAND    12
-                DOUBLE
-                DOUBLE
-                MASK    DSPTAB +11D
-                CCS     A
-                TCF     +3
-
-                CS      IMUSEFLG
-                TCF     IMUZERO +2
-
-                TC      ALARM           # IF SO.
-                OCT     206
-
-                TCF     CAGETSTJ +4
-
-ENDIMPS         EQUALS

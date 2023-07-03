@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2023-06-22 MAS  Created from Aurora 12.
 ##              2023-06-30 MAS  Updated for Sundial E.
+##              2023-07-03 MAS  Corrected a corrupted comment and some whitespace.
 
 
 
@@ -2159,7 +2160,7 @@ MMCHANG         TC      REQMM
                 TC      POSTJUMP
                 CADR    MODROUTB        # GO THRU STANDARD LOC.
 
-MODROUTB        =       DSPALARM                # **FI*
+MODROUTB        =       DSPALARM        # **FIX LATER**
 REQMM           CS      Q
                 TS      REQRET
                 CAF     ND1
@@ -2960,7 +2961,7 @@ SETNCADR        TS      NOUNCADR        # STORE ECADR
 #               E ADRES AND PUTS IT INTO NOUNADD.
 
 SETNADD         CA      NOUNCADR
-                TCF     SETNCADR        +1
+                TCF     SETNCADR +1
 
 
 

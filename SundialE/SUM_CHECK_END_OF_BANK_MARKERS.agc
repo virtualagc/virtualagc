@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2023-06-22 MAS  Created from Aurora 12.
 ##              2023-06-30 MAS  Updated for Sundial E.
+##              2023-07-03 MAS  Updated tags for new patch placement.
 
 
                 SETLOC  ENDIMUF
@@ -54,11 +55,11 @@
                 TC
                 TC
 
-                SETLOC  ENDFRPS
+                SETLOC  ENDT4S
                 TC
                 TC
 
-                SETLOC  ENDIMPS
+                SETLOC  ENDSMODS
                 TC
                 TC
 
