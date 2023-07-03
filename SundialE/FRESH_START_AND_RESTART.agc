@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2023-06-22 MAS  Created from Aurora 12.
 ##              2023-06-30 MAS  Updated for Sundial E.
+##              2023-07-03 MAS  Relocated Sundial D patches to T4RUPT PROGRAM.
 
                 BANK    12
                 EBANK=  LST1
@@ -365,27 +366,3 @@ SWINIT          OCT     0
                 OCT     0
 
 ENDFRESS        EQUALS
-
-## MAS 2023: The following chunks of code were added as patches
-## in Sundial D. They were placed here at the end of the bank
-## so as to not change addresses of existing symbols.
-                SETLOC  ENDT4S
-
-GOPROG1         INCR    REDOCTR         # ADVANCE RESTART COUNTER.
-
-                CA      ERESTORE
-                EXTEND
-                BZF     GOPROG +1
-
-                EXTEND                  # RESTORE B(X) AND B(X+1) IF RESTART
-                DCA     SKEEP5          # HAPPENED WHILE SELF-CHECK HAD REPLACED
-                NDX     SKEEP7          # THEM WITH CHECKING WORDS.
-                DXCH    0000
-
-                TC      GOPROG +1
-
-STARTSB1        TS      ERESTORE
-                CAF     PRIO34          # ENABLE INTERRUPTS.
-                TC      STARTSB2
-
-ENDFRPS         EQUALS

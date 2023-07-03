@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2023-06-22 MAS  Created from Aurora 12.
 ##              2023-06-30 MAS  Updated for Sundial E.
+##              2023-07-03 MAS  Corrected a corrupted comment and some whitespace.
 
 
 # SECTION 1  DISPATCHER
@@ -1312,7 +1313,7 @@ DV/SC           EXTEND
 
 SIGN            INDEX   ADDRWD          # CALL COMP INSTRUCTION IF WORD AT X IS
                 CCS     0               # NEGATIVE NON-ZERO.
-                TCF     NOIBNKSW		# NO FTCH REQUIRED.
+                TCF     NOIBNKSW        # NO FBANK SWITCH REQUIRED.
                 TCF     +2
                 TCF     COMP            # DO THE COMPLEMENT.
 
@@ -2645,11 +2646,11 @@ ACOS3           DXCH    MPAC            # SET UP FOR POLYNOMIAL EVALUATION.
 
                 2DEC*   +.00695311612 B+4*
 
-                2DEC*   -.00384617957   B+5*
+                2DEC*   -.00384617957 B+5*
 
-                2DEC*   +.001501297736  B+6*
+                2DEC*   +.001501297736 B+6*
 
-                2DEC*   -.000284160334  B+7*
+                2DEC*   -.000284160334 B+7*
 
                 CAF     LBUF2           # DO FINAL MULTIPLY AND GO TO ANY
                 TC      DMPSUB -1       # EPILOGUE SEQUENCES.
