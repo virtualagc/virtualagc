@@ -15233,7 +15233,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             </tt><i>&nbsp;&nbsp; </i><br>
             <tt>DOGD </tt><tt><i>DM</i></tt><tt>,</tt><tt><i>DS</i></tt><tt>,<br>
             </tt><i>&nbsp; </i><tt><br>
-              DOG SYMBOL<br>
+              DOG <i>SYMBOL</i><br>
             </tt><i>&nbsp;&nbsp; </i><tt><tt><br>
               </tt>DOG *,*[±<i>n</i>],*[</tt><tt>±<i>m</i>]</tt></td>
           <td valign="middle">While the modern LVDC assembler supports
@@ -15254,7 +15254,7 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                 source code.</li>
             </ul>
             This pseudo-op is similar in its effect to the <tt>ORGDD</tt>
-            pseudo-ip (see below), except that it only modifies the
+            pseudo-op (see below), except that it only modifies the
             assembler's current data-memory pointer, leaving the
             instruction-memory pointer untouched.&nbsp; It does not
             allocate any memory.&nbsp; The location parameter <tt><i>DLOC</i></tt>
@@ -15266,6 +15266,26 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             been used.&nbsp; If any of the fields <i><tt>DM</tt></i>, <i><tt>DS</tt></i>,
             or <i><tt>DLOC</tt></i> is empty, they default to zero.<br>
             <br>
+            Regarding the <tt>DOG <i>SYMBOL</i></tt> form, one might
+            suppose (as I did), that the <tt><i>SYMBOL</i></tt> must be
+            a location in data memory, such as a variable or a literal
+            constant.&nbsp; That's the usual case, and in that case the
+            behavior is exactly as one would guess.&nbsp; But there are
+            exceptions:&nbsp; There are very rare cases in which <tt><i>SYMBOL</i></tt>
+            is associated with a location in code.&nbsp; In this case, <tt>DOG</tt>
+            assigns the assembler's internal <tt><i>DM</i></tt>, <i><tt>DS</tt></i>,
+            and <tt><i>DLOC</i></tt> from the <i><tt>IM</tt></i>, <tt><i>IS</i></tt>,
+            and <tt><i>LOC</i></tt> associated with the <tt><i>SYMBOL</i></tt>.<br>
+            <blockquote><font size="-1"><b>Aside:</b>&nbsp; The behavior
+                when <i><tt>SYMBOL</tt></i> is in instruction space is
+                inferred from just two examples, <br>
+              </font>
+              <pre><font size="-1">       DOG     V.SST1<br>       DOG     V.T4A2<br></font></pre>
+              <font size="-1">found respectively at lines 026032PK and
+                026041PK on pp. 134-135 of AS-513.&nbsp; This small
+                block of code is associated with unique behavior of the
+                ORG pseudo-op (see below) as well.</font><br>
+            </blockquote>
             Possibly there was a <tt>DOGS</tt> pseudo-op as well
             (differing in that it pertained to a simplex memory
             configuration rather than a duplex one), but I have not
@@ -16096,8 +16116,21 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
             As far as the "<tt><tt>ORG <i>symbol</i></tt></tt>" form is
             concerned, principles are the same as described, but <i><tt>IM</tt></i>,
             <i><tt>IS</tt></i>, etc., are taken as being the same as for
-            the already-defined <tt><i>symbol</i></tt>.&nbsp; <br>
-            <br>
+            the already-defined <tt><i>symbol</i></tt>.&nbsp; This form
+            of the pseudo-op does not alter the assembler's internal
+            data-memory pointers <i><tt>DM</tt></i>, <i><tt>DS</tt></i>,
+            and <i><tt>DLOC</tt></i>.<br>
+            <blockquote><font size="-1"><b>Aside:</b>&nbsp; The
+                described behavior with respect to</font><font size="-1">
+                <i><tt>DM</tt></i>, <i><tt>DS</tt></i>, and <i><tt>DLOC</tt></i>
+                is known only from the behavior of <tt>ORG V.SST2</tt>
+                at line 026027PK on p. 134 of AS-513.&nbsp; This small
+                block of code also contains rare abnormalities with
+                respect to the behavior of the </font><font size="-1"><tt>DOG</tt></font><font
+                size="-1"> pseudo-op (see above), so it's possible that
+                my interpretation of what's happening more questionable
+                than usual.<br>
+              </font></blockquote>
             As far as the "<tt><tt>ORG <i>symbol</i>,<i>symbol2</i></tt></tt>"
             form is concerned, it appears to me that <i><tt>IM</tt></i>,
             <tt><i>IS</i></tt>, <i><tt>S</tt></i>, and <i><tt>LOC</tt></i>
@@ -16931,7 +16964,23 @@ href="https://en.wikipedia.org/wiki/BCD_%28character_encoding%29#IBM_1401_BCD_co
                 assembler.&nbsp; I'm forced to admit, on the other hand,
                 that assuming this bug in the original assembler is a
                 pretty big inference 50 years afterward from a single
-                observed anomaly in the assembler's behavior!<br>
+                observed anomaly in the assembler's behavior!</li>
+              <li><tt>WORK </tt><tt>FLOOR</tt><tt><i><tt>,</tt>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i></tt>
+                — (Note that the word <tt>FLOOR</tt> is literal.&nbsp;
+                All of the other fields are octal.)&nbsp; This basically
+                is the reverse of <tt>WORK ROOF</tt>, and tells the
+                assembler that at the precise address <i><tt>IM-IS-S-LOC</tt></i>,
+                it should pretend that the amount of free memory is 1
+                greater than what it actually measures.&nbsp; This
+                subterfuge is a workaround for the case of a <tt>TNZ <i>SYMBOL</i></tt>
+                or <tt>TMI <i>SYMBOL</i></tt> appearing in syllable 0,
+                but with <tt><i>SYMBOL</i></tt> itself appearing in
+                syllable 1 of the same sector.&nbsp; Without the <tt>WORK</tt>
+                directive, the modern assembler may insert an automatic
+                sector change 1 instruction earlier than the original
+                assembler would have.&nbsp; This <tt>WORK</tt>
+                directive may be used multiple times at the same address
+                to increase the effect.<br>
               </li>
               <li><tt>WORK </tt><tt>BLOCK</tt><tt><i><tt>,</tt>IM</i>,<i>IS</i>,<i>S</i>,<i>LOC</i></tt>
                 — (Note that the word <tt>BLOCK</tt> is literal.&nbsp;
@@ -20106,7 +20155,7 @@ Commons
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-07-03.<br>
+          2023-07-04.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
