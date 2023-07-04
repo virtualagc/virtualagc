@@ -109,6 +109,9 @@
 #                               listings.
 #               2023-07-02 RSB  Accounted for the occasional trailing ' found
 #                               in "=H'..." constructs in AS-513.
+#               2023-07-04 RSB  Added WORK FLOOR.  Corrected data-sector 
+#                               assumptions for reuse of HOPs with TMI*/TNZ*.
+#                               Various other fixes needed for AS-513.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -325,7 +328,9 @@ inDataMemory = True
 symbols = {}
 lastLineNumber = -1
 roofWorkarounds = []
+floorWorkarounds = []
 blockWorkarounds = []
+cdsWorkarounds = set()
 incWorkarounds = []
 decWorkarounds = []
 
@@ -657,22 +662,22 @@ for i in range(8):
 def getRoof(imod, isec, syl, loc, extra):
 	global getRoofReported
 	roof = sectorTopData[imod][isec] - 1
+	# This is purely ad-hoc.  For AS-512, at 4-17-0-374 and at 6-17-0-374,
+	# the original assembler inserted a sector change for no reason I can 
+	# see. There's no data being avoided.  I figure (well, hope) that
+	# it means that the assembler reserved a few words at the ends
+	# of residual sectors into which it wouldn't put instructions.  In
+	# point of fact, the final three words (both syllables) are unused
+	# in every residual sector in every available LVDC program 
+	# (PTC-ADAPT-SELF-TEST-PROGRAM, AS-206RAM, AS-512, and AS-153)
+	# processed by the original assembler, although the two addresses I
+	# just mentioned are the only ones that caused me a problem.
+	if isec == 0o17 and roof >= 0o375:
+		roof = 0o374
 	if syl == 0:
 		# No space needs to be reserved in syllable 0.
 		needed = set()
 		numNeeded = 0
-		# Okay ... This is purely ad-hoc.  At 4-17-0-374 and at 6-17-0-374,
-		# the original assembler inserted a sector change for no reason I can 
-		# see. There's no data being avoided.  I figure (well, hope) that
-		# it means that the assembler reserved a few words at the ends
-		# of residual sectors into which it wouldn't put instructions.  In
-		# point of fact, the final three words (both syllables) are unused
-		# in every residual sector in every available LVDC program 
-		# (PTC-ADAPT-SELF-TEST-PROGRAM, AS-206RAM, AS-512, and AS-153)
-		# processed by the original assembler, although the two addresses I
-		# just mentioned are the only ones that caused me a problem.
-		if isec == 0o17 and roof >= 0o375:
-			roof = 0o374
 	else:
 		# In syllable 1, the default amount of reserved
 		# space is 3 words:  0o377 and 0o376 can be used by
@@ -711,6 +716,8 @@ def getRoof(imod, isec, syl, loc, extra):
 	parameters = (imod, isec, syl, loc)
 	if parameters in roofWorkarounds:
 		roof -= 1
+	if parameters in floorWorkarounds:
+		roof += floorWorkarounds.count(parameters)
 	return roof
 
 # Convert a numeric literal to LVDC binary format.  I accept literals of the forms:
@@ -1314,7 +1321,10 @@ for lineNumber in range(len(expandedLines)):
 		# Collect WORK directives for later use.
 		if len(fields) >= 3 and fields[1] == "WORK":
 			parameters = fields[2].split(",")
-			if len(parameters) == 5 and parameters[0] in ["ROOF", "BLOCK"]:
+			if len(parameters) == 2 and parameters[0] == "CDS":
+				cdsWorkarounds.add(parameters[1])
+			elif len(parameters) == 5 and parameters[0] \
+					in ["ROOF", "BLOCK", "FLOOR"]:
 				try:
 					name = parameters[0]
 					parameters = (int(parameters[1], 8), int(parameters[2], 8),
@@ -1322,6 +1332,8 @@ for lineNumber in range(len(expandedLines)):
 					if name == "ROOF":
 						if parameters not in roofWorkarounds:
 							roofWorkarounds.append(parameters)
+					elif name == "FLOOR":
+						floorWorkarounds.append(parameters)
 					elif name == "BLOCK":
 						if parameters not in blockWorkarounds:
 							blockWorkarounds.append(parameters)
@@ -1534,9 +1546,10 @@ for lineNumber in range(len(expandedLines)):
 						IS = hop["IS"]
 						S = hop["S"]
 						LOC = hop["LOC"]
-						DM = hop["DM"]
-						DS = hop["DS"]
-						DLOC = hop["DLOC"]
+						if False:
+							DM = hop["DM"]
+							DS = hop["DS"]
+							DLOC = hop["DLOC"]
 				elif len(ofields) == 2:
 					symbol = ofields[0]
 					symbol2 = ofields[1]
@@ -1642,7 +1655,10 @@ for lineNumber in range(len(expandedLines)):
 						addError(lineNumber, "Error: Undefined symbol "+symbol)
 					elif "inDataMemory" not in symbols[symbol] \
 							or not symbols[symbol]["inDataMemory"]:
-						addError(lineNumber, "Error: Symbol " + symbol + " not data")
+						#addError(lineNumber, "Error: Symbol " + symbol + " not data")
+						DM = symbols[symbol]["IM"]
+						DS = symbols[symbol]["IS"]
+						DLOC = symbols[symbol]["LOC"]
 					else:
 						DM = symbols[symbol]["DM"]
 						DS = symbols[symbol]["DS"]
@@ -1829,6 +1845,8 @@ for lineNumber in range(len(expandedLines)):
 			symbols[lhs]["inDataMemory"] = inDataMemory or useDat
 			symbols[lhs]["isCDS"] = inputLine["isCDS"]
 			symbols[lhs]["1stPass"] = True
+			if "syn" in inputLine:
+				symbols[lhs]["syn"] = inputLine["syn"]
 		if pendingSyn > 1 and "hop" in inputLine:
 			for pendingLine in reversed(inputFile):
 				pendingInputLine = pendingLine["expandedLine"]
@@ -1847,6 +1865,7 @@ for lineNumber in range(len(expandedLines)):
 			pendingSyn = -1
 		if pendingSyn >= 0:
 			pendingSyn += 2
+
 
 # Create a table to quickly look up addresses of symbols. I think that all or
 # most of these will already have been done by the preprocessor or the loop 
@@ -2346,6 +2365,7 @@ for entry in inputFile:
 		if operator in forms:
 			formDef = forms[operator]
 			ofields = operand.split(",")
+			#print("!", operator, formDef, ofields, file=sys.stderr)
 			if len(formDef) != len(ofields):
 				addError(lineNumber, "Error: Wrong number of operand fields")
 			else:
@@ -2393,6 +2413,7 @@ for entry in inputFile:
 							else: # Pure integer
 								# This was all that was needed for AS-206RAM.
 								usageValue = int(ofield, 8)
+							#print("!\t", last, first, usageValue, file=sys.stderr)
 						elif form == "DM" and ofield in symbols:
 							patternValue = 3
 							usageValue = symbols[ofield]["DM"]
@@ -2601,7 +2622,7 @@ for entry in inputFile:
 			elif symbols[operand]["IM"] == IM and symbols[operand]["IS"] == IS \
 					and ((symbols[operand]["DM"] == DM \
 					and symbols[operand]["DS"] in [DS, 0o17]) \
-						or symbols[operand]["isCDS"]):
+						or symbols[operand]["isCDS"] or operand in cdsWorkarounds):
 				# Regarding DM/DS, which appears in this conditional, a TRA/TMI/TNZ 
 				# instruction doesn't require the target location to be in the same
 				# DM/DS, but the original assembler seemed to disallow it.  I assume
@@ -2660,7 +2681,12 @@ for entry in inputFile:
 				hopConstant2 = formConstantHOP(symbols[operand])
 				constantString = "%09o" % hopConstant2
 				try:
-					hoppedAlready = (operand in roofed[IM][IS])
+					# In looking to see if any suitable HOPs have already been
+					# placed at the top of the sector, note such HOPs would 
+					# need not only the correct destination address, but would
+					# also need to share the same assumptions for data pointers.
+					key = "%s_%o_%03o" % (operand, DM, DS)
+					hoppedAlready = (key in roofed[IM][IS])
 					failed = False
 				except:
 					addError(lineNumber, "Error: Check for prior HOP failed")
@@ -2669,18 +2695,21 @@ for entry in inputFile:
 					if hoppedAlready:
 						# An appropriate HOP instruction has already been put at the 
 						# end of the sector, so we can just take advantage of it.
-						index = roofed[IM][IS].index(operand)
+						index = roofed[IM][IS].index(key)
 						loc = 0o377 - index
 						if loc <= 0o375:
 							loc -= 1
 					else:
 						# No HOP to this target has been added to the end of the sector,
 						# so we must do so now.
-						for loc in range(0o377, -1, -1):
+						start = 0o377
+						if IS == 0o17:
+							start = 0o374
+						for loc in range(start, -1, -1):
 							if memUsed[IM][IS][1][loc] or loc == 0o375:
 								continue
 							break
-						roofed[IM][IS].append(operand)
+						roofed[IM][IS].append(key)
 						loc2,residual2 = allocateNameless(lineNumber, constantString, True)
 						ds = DS
 						if residual2 != 0:
