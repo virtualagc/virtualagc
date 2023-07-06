@@ -3101,8 +3101,26 @@ for key in sorted(nameless):
 f.close()
 
 #----------------------------------------------------------------------------
+#   	Print a table of constants.
+#----------------------------------------------------------------------------
+
+print("\n\nConstant Table:")
+print("")
+for constant in sorted(constants):
+	c = constants[constant]
+	if isinstance(c, dict):
+		number = str(c["number"])
+		if "scale" in c:
+			number = number + "B%d" % c["scale"]
+	else:
+		number = str(c)
+	print("%-16s%s" % (constant, number))	
+
+#----------------------------------------------------------------------------
 #   	Print octal listing and save as a .tsv file too
 #----------------------------------------------------------------------------
+
+print("\n\nOctal Listing:")
 f = open("yaASM.tsv", "w")
 formatLine = "%03o"
 for n in range(8):

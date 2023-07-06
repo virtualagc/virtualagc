@@ -258,21 +258,22 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 				# input line, and the values of those keys are the names
 				# of the constant matched.  We simply have to build a
 				# replacement input line in which all of the matches have
-				# been replaced by mangled constants.
+				# been replaced by mangled constants.  Note that 
+				# mangledSymbols[constant][] is a list that tracks all of the
+				# values assigned to constant, and a value at position n
+				# corresponds to mangled constant#n.
 				newLine = ""
 				lastEnd = 0
 				for start in sorted(starts):
 					constant = starts[start]
 					c = constants[constant]
-					mangled = constant + "#0"
-					if mangled not in constants \
-							or c != constants[mangled]:
-						if constant in mangledSymbols:
-							numMangled = mangledSymbols[constant] + 1
-						else:
-							numMangled = 0
-						mangledSymbols[constant] = numMangled
-						mangled = "%s#%d" % (constant, numMangled)
+					if constant not in mangledSymbols:
+						mangledSymbols[constant] = []
+					if c not in mangledSymbols[constant]:
+						mangledSymbols[constant].append(c)
+					index = mangledSymbols[constant].index(c)
+					mangled = "%s#%03d" % (constant, index)
+					if mangled not in constants:
 						constants[mangled] = copy.deepcopy(c)
 					newLine = newLine + line[lastEnd:start] + mangled
 					lastEnd = start + len(constant)
