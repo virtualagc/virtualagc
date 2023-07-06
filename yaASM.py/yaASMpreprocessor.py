@@ -31,8 +31,10 @@
 #                               shift operations.
 #               2023-07-03 RSB  Accounted for the syntax 
 #                                    IF (EXPRESSION)op(EXPRESSION)
+#               2023-07-06 RSB  Implemented mangled names for constants (re: REQ).
 
 import re
+import copy
 from yaASMerrors import *
 from yaASMexpression import *
 from yaASMdefineMacros import lineSplit
@@ -66,6 +68,7 @@ telds = {}
 # Note that lines inside of an UNLIST/LIST block are marked (in expandedLines)
 # by being suffixed with unlistSuffix.
 unlistSuffix = " " + chr(127)
+mangledSymbols = {} # Track the mangling index for mangled constants.
 def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 				 allowUnlist=True):
 	global errors, telds
@@ -199,6 +202,85 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 			else: # .lvdc
 				fmt = "%-7s%-8s%s"
 				
+			# We have a bit of a problem now, in that we have to replace any
+			# symbolic constants (other than in comments) with their current 
+			# values, recognizing that the constants may be redefined later 
+			# via REQ.  If we don't do this now, the assembly pass will have to 
+			# do it, but it will have only the final values, not the values
+			# at this specific point in the code.  Finding the replacement 
+			# points is a big inefficiency. Too bad!  But it's worse than that,
+			# since the syntax is going to require that the replacements be
+			# decimals in some cases, and octals in others, and we really don't
+			# have the parsing smarts to know that at this point.  To get around
+			# that, we don't replace the constants with their *values*, but 
+			# instead clone the constants with new, mangled names, and replace
+			# the constants by their mangled forms.  Yuck!  But the mangled
+			# forms won't be REQ'd later, so the assembly pass will at least 
+			# evaluate them correctly.  Symbolic names in LVDC assembly language
+			# are limited to 6 characters, and obey other rules, but 
+			# fortunately, because the mangled names won't appear in the label
+			# fields of punchcards, I think we can relax those naming rules.
+			# At least as a first cut at it, the mangling will be:
+			#		SYMBOL -> SYMBOL#n
+			# where n starts at 0 for the first mangling of SYMBOL, 1 for
+			# the second mangling, and so on.  That means that at the output
+			# stage, if desired, some magic could be done to unmangle SYMBOL#0
+			# to just SYMBOL, while retaining SYMBOL##1, SYMBOL##2, and so on.
+			# The places where we need to make these replacements are, I 
+			# believe, always delimited by (...), though every line may contain
+			# several such aread.  We have to find all of them and process them
+			# each.  Alas, the simple method I use disallows embedded 
+			# parentheses.
+			pAreas = []
+			for p in re.finditer("\\([^)]*\\)", line): # Find (...) areas.
+				pAreas.append(p.span())
+			starts = {}
+			for constant in constants:
+				if "#" in constant:
+					continue
+				c = constants[constant]
+				if not isinstance(c, dict):
+					continue
+				if "pat1" not in c:
+					noDot = constant.replace(".", "[.]")
+					c["pat1"] = re.compile("\\b" + noDot + "[^.A-Z0-9#]")
+					c["pat2"] = re.compile("\\b" + noDot + "$")
+				for pArea in pAreas:
+					matches = c["pat1"].finditer(line[pArea[0]:pArea[1]])
+					for match in matches:
+						starts[match.span()[0] + pArea[0]] = constant
+					match = c["pat2"].search(line[pArea[0]:pArea[1]])
+					if match != None:
+						starts[match.span()[0]+pArea[0]] = constant
+			if len(starts) > 0:
+				# At this point, the keys in the dictionary starts{} are the
+				# starting positions of all of the matches found in the
+				# input line, and the values of those keys are the names
+				# of the constant matched.  We simply have to build a
+				# replacement input line in which all of the matches have
+				# been replaced by mangled constants.
+				newLine = ""
+				lastEnd = 0
+				for start in sorted(starts):
+					constant = starts[start]
+					c = constants[constant]
+					mangled = constant + "#0"
+					if mangled not in constants \
+							or c != constants[mangled]:
+						if constant in mangledSymbols:
+							numMangled = mangledSymbols[constant] + 1
+						else:
+							numMangled = 0
+						mangledSymbols[constant] = numMangled
+						mangled = "%s#%d" % (constant, numMangled)
+						constants[mangled] = copy.deepcopy(c)
+					newLine = newLine + line[lastEnd:start] + mangled
+					lastEnd = start + len(constant)
+				newLine = newLine + line[lastEnd:]
+				line = newLine
+				expandedLines[n][nn-1] = line
+				fields = lineSplit(line)
+				
 			# Expand macro invocations.  Regarding what happens with nested
 			# macros, the following expands only one level of macros.  The
 			# logic of the containing loop then processes each of the expanded
@@ -236,7 +318,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 					expandedMacro = []
 					for m in range(0,len(macroLines)):
 						# Replace each formal argument with corresponding macro 
-						# parameter.these formal arguments can appear anywhere
+						# parameter. These formal arguments can appear anywhere
 						# in the line, not just in operand fields.
 						mline = macroLines[m]	
 						if "&C1" in mline:
@@ -405,6 +487,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 					elif False and fields[1] == "REQ" and fields[0] not in constants:
 						addError(n, "Error: Constant does not exist, " + fields[0])
 					constants[fields[0]] = value 
+					# print("!", fields[0], fields[1], value["number"])
 			elif len(fields) >= 3 and fields[1] == "CALL":
 				ofields = fields[2].split(",")
 				if len(ofields) == 1:
@@ -462,6 +545,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 					operand = operand.replace("=", "=(").replace("B(", ")B(")
 					#print(fields[2], operand, file=sys.stderr)
 				try:
+					#print("!##", operand[1:], file=sys.stderr)
 					value,error = yaEvaluate(operand[1:], constants)
 				except:
 					print("Implementation error:", expandedLines[n][nn-1], \

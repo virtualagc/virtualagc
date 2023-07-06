@@ -109,9 +109,11 @@
 #                               listings.
 #               2023-07-02 RSB  Accounted for the occasional trailing ' found
 #                               in "=H'..." constructs in AS-513.
-#               2023-07-04 RSB  Added WORK FLOOR.  Corrected data-sector 
-#                               assumptions for reuse of HOPs with TMI*/TNZ*.
-#                               Various other fixes needed for AS-513.
+#               2023-07-04 RSB  Added WORK FLOOR and WORK CDS.  Corrected 
+#                               data-sector assumptions for reuse of HOPs with 
+#                               TMI*/TNZ*.  Various other fixes needed for 
+#                               AS-513.
+#               2023-07-06 RSB  More of the same.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -227,7 +229,7 @@ BA8421 = [
 	'H', 'I', '?', '.', ')', '?', '?', '?'
 ]
 # EBCDIC-like character table.  The table has been massaged, and in particular 
-# shifted to a different numerical range, in such a way to as timake
+# shifted to a different numerical range, in such a way to as to make
 # it convenient for the purposes of this program, so it's not really EBCDIC
 # any longer.  Only the 0x40-0x7F and 0xC0-0xFF ranges have been reproduced.
 # They have been merged (with printable characters overriding unprintable ones) 
@@ -763,7 +765,12 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 				decimal += scale[whereE:]
 				scale = scale[:whereE]
 		elif newer:
-			decimal = "%d" % hround(decimal)
+			try:
+				decimal = "%d" % hround(decimal)
+			except:
+				addError(lineNumber, \
+						"Implementation: Non-decimal expression: " + decimal)
+				decimal = "0"
 			isInt = True
 		try:
 			if not isInt:
@@ -2825,6 +2832,11 @@ for entry in inputFile:
 					hopConstant = formConstantHOP(hopSing)
 					constantString = "%09o" % hopConstant
 					searchResidual = False
+				elif "(" in operand:
+					addError(lineNumber, \
+							"Implementation: Expression %s unevaluated" %\
+								operand[1:])
+					constantString = "000000000"
 				else:
 					constantString = convertNumericLiteral(lineNumber, operand[1:])
 				if constantString == "":

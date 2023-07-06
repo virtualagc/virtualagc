@@ -28,6 +28,7 @@
 #               2023-05-19 RSB  Changed name from expression.py.
 #               2023-07-03 RSB  Added exponential ("**") token, which is new
 #                               (and only used once!) in AS-513.
+#               2023-07-06 RSB  Added some handling for mangled names of constants.
 
 # My attempt at a minimal arithmetical expression parser for use
 # in assembling LVDC code with yaASM.py.  I don't know that it's bug-free,
@@ -78,12 +79,14 @@ from decimal import Decimal, ROUND_HALF_UP
 # round down.  Good for bankers, I suppose, because rounding errors tend to
 # sum to zero, but no help whatever for us.  I've stolen the hround() function
 # from my Shuttle HAL/S compiler.  It rounds half-integers upward.
+# Returns None on error
 def hround(x):
 	try:
 		i = int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
 	except:
-		print("Implementation error, non-decimal:", x, file=sys.stderr)
-		sys.exit(1)
+		#print("Implementation error, non-decimal:", x, file=sys.stderr)
+		#sys.exit(1)
+		return None
 	return i
 
 # Function to pull a numeric literal constant from a string.
@@ -247,7 +250,7 @@ def yaTokenize(string):
 		elif string[0].isalpha():
 			token = string[0]
 			string = string[1:]
-			while string[:1] == "." or string[:1].isalnum():
+			while string[:1] in [".", "#"] or string[:1].isalnum():
 				token += string[0]
 				string = string[1:]
 			tokens.append(token)
