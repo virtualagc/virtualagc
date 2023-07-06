@@ -113,7 +113,8 @@
 #                               data-sector assumptions for reuse of HOPs with 
 #                               TMI*/TNZ*.  Various other fixes needed for 
 #                               AS-513.
-#               2023-07-06 RSB  More of the same.
+#               2023-07-06 RSB  More of the same.  *Almost* working fully now.
+#                               Also added constant table to assembly listing.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -3108,10 +3109,14 @@ print("\n\nConstant Table:")
 print("")
 for constant in sorted(constants):
 	c = constants[constant]
+	if "#" not in constant and isinstance(c, dict):
+		continue
 	if isinstance(c, dict):
 		number = str(c["number"])
 		if "scale" in c:
 			number = number + "B%d" % c["scale"]
+	elif isinstance(c, list) and c[0] == "DEQD":
+		number = "%o-%02o-%03o" % (int(c[1],8), int(c[2],8), int(c[3],8))
 	else:
 		number = str(c)
 	print("%-16s%s" % (constant, number))	
