@@ -2700,19 +2700,19 @@ for entry in inputFile:
 					addError(lineNumber, "Error: Check for prior HOP failed")
 					failed = True
 				if not failed:
+					start = 0o377
+					if IS == 0o17:
+						start = 0o374
 					if hoppedAlready:
 						# An appropriate HOP instruction has already been put at the 
 						# end of the sector, so we can just take advantage of it.
 						index = roofed[IM][IS].index(key)
-						loc = 0o377 - index
-						if loc <= 0o375:
+						loc = start - index
+						if loc <= 0o375 and IS != 0o17:
 							loc -= 1
 					else:
 						# No HOP to this target has been added to the end of the sector,
 						# so we must do so now.
-						start = 0o377
-						if IS == 0o17:
-							start = 0o374
 						for loc in range(start, -1, -1):
 							if memUsed[IM][IS][1][loc] or loc == 0o375:
 								continue
