@@ -115,6 +115,10 @@
 #                               AS-513.
 #               2023-07-06 RSB  More of the same.  *Almost* working fully now.
 #                               Also added constant table to assembly listing.
+#               2023-07-07 RSB  Partially handled rounding problem, reducing
+#                               total number of rounding mismatches in 
+#                               AS-512 + AS-513 from 19 + 11 to 5 + 1; i.e.,
+#                               an 80% reduction.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -723,6 +727,23 @@ def getRoof(imod, isec, syl, loc, extra):
 		roof += floorWorkarounds.count(parameters)
 	return roof
 
+# This function is an attempt to mutilate (oops, I meant "round") fixed-point
+# and floating-point decimal numbers in a manner similar to that used by the
+# original assembler.
+def normalizeDecimal(decimal):
+	# The theory here is that the original assembler normalized numbers before 
+	# converting them to octal form in the following manner:
+	#	1.	Put them into the form 0.nnnn...Emm.
+	#	2.	Round so that the number of fraction digits (the n's) is exactly 8.
+	#		(In spite of the fact that both the computer running the assembler
+	#       and the LVDC itself had a slightly-higher precision than that.)
+	# This notion comes from the fact that the assembler always prints the
+	# numbers in this format in the assembly listings, and that it works in the
+	# few cases I've tried it with.
+	# We don't actually need to duplicate this completely, since the form
+	# n.nnnnnnnEmm works equally well for us, as long as the leading n is not 0.
+	return float("%.7e" % decimal)
+
 # Convert a numeric literal to LVDC binary format.  I accept literals of the forms:
 #	if isOctal == False:
 #		O + octal digits
@@ -777,6 +798,8 @@ def convertNumericLiteral(lineNumber, n, isOctal = False):
 			if not isInt:
 				decimal = float(decimal)
 				scale = int(scale[1:])
+				if newer:
+					decimal = normalizeDecimal(decimal)
 				value = hround(decimal * pow(2, 27 - scale - 1 - 1)) << 1
 			else:
 				decimal = int(decimal)
