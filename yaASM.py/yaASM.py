@@ -168,6 +168,7 @@ from yaASMerrors import *
 from yaASMexpression import *
 from yaASMdefineMacros import *
 from yaASMpreprocessor import preprocessor, unlistSuffix
+#import arithmeticIBM
 
 '''
 Here's an explanation of the overall structure of the assembler.
@@ -742,6 +743,7 @@ def normalizeDecimal(decimal):
 	# few cases I've tried it with.
 	# We don't actually need to duplicate this completely, since the form
 	# n.nnnnnnnEmm works equally well for us, as long as the leading n is not 0.
+	#decimal = arithmeticIBM.fromIBM(arithmeticIBM.toIBM(decimal))
 	return float("%.7e" % decimal)
 
 # Convert a numeric literal to LVDC binary format.  I accept literals of the forms:
@@ -1682,7 +1684,6 @@ for lineNumber in range(len(expandedLines)):
 							addError(lineNumber, "Implementation: %s %s" \
 									% (symbol, str(constants[symbol])))
 					elif symbol not in symbols:
-						#print("Here", symbol, symbol in constants, file=sys.stderr)
 						addError(lineNumber, "Error: Undefined symbol "+symbol)
 					elif "inDataMemory" not in symbols[symbol] \
 							or not symbols[symbol]["inDataMemory"]:
@@ -2646,7 +2647,6 @@ for entry in inputFile:
 					loc = 0 
 					residual = 0
 			elif operand.isdigit():
-				#print("Here: " + str(inputLine))
 				pass
 			elif operand not in symbols:
 				addError(lineNumber, "Error: Target location of TRA not found")

@@ -1,0 +1,655 @@
+%! SDL shapes for Graphviz/dot in PostScript output mode
+
+% FILE
+%   sdl.ps  -  SDL shapes for Graphviz/dot in PostScript output mode
+%
+% USE
+%   All procedures expect to be passed a rectangular bounding box in the
+%   order [upper right, lower right, lower left, upper left, upper right].
+%   All procedures expect to be used with "peripheries = 0".
+%
+% BUGS
+%   The following shapes are currently not implemented:
+%   - frame/system/block/process/procedure/service/procedure, and types thereof
+%   - macro inlet/outlet/call
+%   - exception handler/handle/raise
+%   - decision (suggest use diamond)
+%   - alternative (suggest use triangle)
+%   - internal input/output (suggest stop using historical relics!)
+%
+% COPYRIGHT AND PERMISSION NOTICE
+%   Copyright (C) 2005 Cambridge Silicon Radio Ltd.; all rights reserved.
+%
+%   Permission is hereby granted, free of charge, to any person obtaining
+%   a copy of this software and associated documentation files (the
+%   "Software"), to deal in the Software without restriction, including
+%   without limitation the rights to use, copy, modify, merge, publish,
+%   distribute, sublicense, and/or sell copies of the Software, and to
+%   permit persons to whom the Software is furnished to do so, subject to
+%   the following conditions:
+%
+%   The above copyright notice and this permission notice shall be
+%   included in all copies or substantial portions of the Software.
+%
+%   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+%   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+%   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+%   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+%   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+%   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+%
+%   Except as contained in this notice, the name of a copyright holder
+%   shall not be used in advertising or otherwise to promote the sale, use
+%   or other dealings in the Software without prior written authorization
+%   of the copyright holder.
+%
+% REVISION
+%   #4
+
+/xdef {exch def} bind def
+
+% SDL task
+
+/sdl_task {
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        newpath
+        moveto
+        lineto
+        lineto
+        lineto
+        pop pop
+        closepath
+        { fill } { stroke } ifelse
+} bind def
+
+% SDL input from right
+% The indent has lines at 45 degrees
+% There should be a few spaces at the end of this shape's label
+
+/sdl_input_from_right {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h2 ury lry sub 2 div def
+        newpath
+        moveto
+        urx h2 sub ury h2 sub lineto
+        lrx lry lineto
+        llx lly lineto
+        ulx uly lineto
+        closepath
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL input from left
+% Similar to SDL input from right
+% There should be a few spaces at the start of this shape's label
+
+/sdl_input_from_left {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h2 uly lly sub 2 div def
+        newpath
+        moveto
+        lrx lry lineto
+        llx lly lineto
+        ulx h2 add ury h2 sub lineto
+        ulx uly lineto
+        closepath
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL priority input from right
+% Similar to SDL input from right
+% The chevrons are displaced by an eighth of the shape height
+% The filled version is indistinguishable from a non-priority SDL input
+
+/sdl_priority_input_from_right {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h2 ury lry sub 2 div def
+        newpath
+        moveto
+        urx h2 sub ury h2 sub lineto
+        lrx lry lineto
+        llx lly lineto
+        ulx uly lineto
+        closepath
+        { fill } { stroke
+        urx h2 4 div sub ury moveto
+        urx h2 sub h2 4 div sub ury h2 sub lineto
+        lrx h2 4 div sub lry lineto
+        stroke } ifelse
+    end
+} bind def
+
+% SDL priority input from left
+% Similar to SDL priority input from right
+
+/sdl_priority_input_from_left {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h2 uly lly sub 2 div def
+        newpath
+        moveto
+        lrx lry lineto
+        llx lly lineto
+        ulx h2 add uly h2 sub lineto
+        ulx uly lineto
+        closepath
+        { fill } { stroke
+        llx h2 4 div add lly moveto
+        ulx h2 add h2 4 div add uly h2 sub lineto
+        ulx h2 4 div add uly lineto
+        stroke } ifelse
+    end
+} bind def
+
+% SDL start
+% The left and right sides are semicircles
+% This should be used with "label = "                ""
+
+/sdl_start {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        pop pop
+        /r ury lry sub 2 div def
+        newpath
+        urx r sub ury r sub r 90 -90 arcn
+        ulx r add uly r sub r -90 90 arcn
+        closepath
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL procedure start
+% Similar to SDL start
+% The filled version is indistinguishable from an SDL start
+% This should be used with "label = "                ""
+
+/sdl_procedure_start {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        pop pop
+        /r ury lry sub 2 div def
+        newpath
+        urx r sub ury r sub r 90 -90 arcn
+        ulx r add uly r sub r -90 90 arcn
+        closepath
+        { fill } { stroke
+        lrx r sub lry moveto
+        0 r 2 mul rlineto
+        llx r add lly moveto
+        0 r 2 mul rlineto
+        stroke } ifelse
+    end
+} bind def
+
+% SDL state/nextstate
+% The left and right sides are arcs
+
+/sdl_state {
+    12 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        pop pop
+        /h2 ury lry sub 2 div def
+        /w2 h2 1.5 mul def % was urx ulx sub 2 div def but this made curvature width-dependent
+        /r w2 def
+        /th h2 r dup mul h2 dup mul sub sqrt atan def
+        newpath
+        urx w2 sub ury h2 sub r th th neg arcn
+        ulx w2 add uly h2 sub r -180 th add -180 th sub arcn
+        closepath
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL output to right
+% The outdent has lines at 45 degrees
+% There should be a few spaces at the end of this shape's label
+
+/sdl_output_to_right {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h2 ury lry sub 2 div def
+        newpath
+        exch h2 sub exch moveto
+        urx ury h2 sub lineto
+        lrx h2 sub lry lineto
+        llx lly lineto
+        ulx uly lineto
+        closepath
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL output to left
+% Similar to SDL output to right
+% There should be a few spaces at the start of this shape's label
+
+/sdl_output_to_left {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h2 ury lry sub 2 div def
+        newpath
+        moveto
+        lrx lry lineto
+        llx h2 add lly lineto
+        ulx ury h2 sub lineto
+        ulx h2 add uly lineto
+        closepath
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL continuous signal/enabling condition
+% The chevrons have lines at 45 degrees
+% There should be a few spaces at the start and end of this shape's label
+
+/sdl_condition {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h2 ury lry sub 2 div def
+        newpath
+        exch h2 sub exch moveto
+        urx ury h2 sub lineto
+        lrx h2 sub lry lineto
+        dup llx h2 add lly 3 -1 roll { lineto } { moveto } ifelse
+        ulx uly h2 sub lineto
+        ulx h2 add uly lineto
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL save
+% The left and right edges are at about 60 degrees
+% There should be a few spaces at the start and end of this shape's label
+
+/sdl_save {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h3 ury lry sub 3 div def
+        newpath
+        moveto
+        lrx h3 sub lry lineto
+        llx lly lineto
+        ulx h3 add uly lineto
+        closepath
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL stop
+% The width of the bounding box is ignored; the lines are set at 45 degrees
+% This shape cannot be filled
+% This should be used with "label = """ and "arrowhead = none, headclip = false"
+
+/sdl_stop {
+    7 dict begin
+        { stop } if % make sure not asked to fill this
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        pop pop
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef pop
+        /h2 uly lly sub 2 div def
+        /mx llx lrx add 2 div def
+        newpath
+        mx h2 add exch moveto pop
+        mx h2 sub lly lineto
+        mx h2 sub uly moveto
+        mx h2 add lry lineto
+        closepath
+        stroke
+    end
+} bind def
+
+% SDL return
+% The width of the bounding box is ignored; the lines are set at 45 degrees
+% The filled version is indistinguishable from an SDL connection
+
+/sdl_return {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef pop
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef pop
+        pop pop
+        /h2 uly lly sub 2 div 2 sqrt div def
+        /mx llx lrx add 2 div def
+        /my lry ury add 2 div def
+        newpath
+        mx my uly lly sub 2 div 0 360 arc
+        { fill } { stroke
+        mx h2 add my h2 add moveto
+        mx h2 sub my h2 sub lineto
+        mx h2 sub my h2 add moveto
+        mx h2 add my h2 sub lineto
+        stroke } ifelse
+    end
+} bind def
+
+% SDL create
+% The extra lines are displaced by an eighth of the shape height
+% The filled version is indistinguishable from an SDL task
+
+/sdl_create {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h8 ury lry sub 8 div def
+        newpath
+        moveto
+        lrx lry lineto
+        llx lly lineto
+        ulx uly lineto
+        closepath
+        { fill } { stroke
+        ulx uly h8 sub moveto
+        urx ury h8 sub lineto
+        llx lly h8 add moveto
+        lrx lry h8 add lineto
+        stroke } ifelse
+    end
+} bind def
+
+% SDL call
+% The extra lines are displaced by an eighth of the shape height
+% The filled version is indistinguishable from an SDL task
+% There should be a few spaces at the start and end of this shape's label
+
+/sdl_call {
+    9 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h8 ury lry sub 8 div def
+        newpath
+        moveto
+        lrx lry lineto
+        llx lly lineto
+        ulx uly lineto
+        closepath
+        { fill } { stroke
+        urx h8 sub ury moveto
+        lrx h8 sub lry lineto
+        llx h8 add lly moveto
+        ulx h8 add uly lineto
+        stroke } ifelse
+    end
+} bind def
+
+% SDL text symbol
+% The corner has a size of twice the H height
+
+/sdl_text {
+    10 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /h8 ury lry sub 8 div def
+        newpath
+        moveto
+        /d (H) true charpath flattenpath pathbbox exch pop exch sub exch pop 2 mul def
+        newpath
+        urx ury d sub moveto
+        lrx lry lineto
+        llx lly lineto
+        ulx uly lineto
+        urx d sub ury lineto
+        closepath
+        { fill } { stroke } ifelse
+        urx ury d sub moveto
+        d neg 0 rlineto
+        0 d rlineto
+        stroke
+    end
+} bind def
+
+% SDL text extension from left
+% This should be used with "rank = same"
+
+/sdl_text_extension_from_left {
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        pop pop
+        moveto
+        lineto
+        lineto
+        lineto
+        { fill } { stroke } ifelse
+} bind def
+
+% SDL text extension from right
+% This should be used with "rank = same"
+
+/sdl_text_extension_from_right {
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        pop pop
+        8 4 roll
+        moveto
+        lineto
+        lineto
+        lineto
+        { fill } { stroke } ifelse
+} bind def
+
+% SDL comment from left
+% This should be used with "style = dashed" and "rank = same"
+
+/sdl_comment_from_left { sdl_text_extension_from_left } bind def
+
+% SDL comment from right
+% This should be used with "style = dashed" and "rank = same"
+
+/sdl_comment_from_right { sdl_text_extension_from_right } bind def
+
+% SDL connector
+% The width of the bounding box is ignored
+
+/sdl_connector {
+    7 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        pop pop
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef pop
+        pop pop
+        /h2 uly lly sub 2 div def
+        /mx llx lrx add 2 div def
+        newpath
+        mx uly h2 sub h2 0 360 arc
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL set (extension)
+% The hourglass has a size of twice the H height
+% There should be a few spaces at the start of this shape's label
+
+/sdl_set {
+    10 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /my uly lly add 2 div def
+        newpath
+        moveto
+        /d (H) true charpath flattenpath pathbbox exch pop exch sub exch pop def
+        newpath
+        llx d add my d add moveto
+        ulx d add uly lineto
+        urx ury lineto
+        lrx lry lineto
+        llx d add lly lineto
+        llx d add my d sub lineto
+        dup { closepath fill } { stroke } ifelse
+        llx my d sub moveto
+        d 2 mul dup rlineto
+        d 2 mul neg 0 rlineto
+        d 2 mul dup neg rlineto
+        closepath
+        { fill } { stroke } ifelse
+    end
+} bind def
+
+% SDL reset (extension)
+% The cross has a size of twice the H height
+% There should be a few spaces at the start of this shape's label
+
+/sdl_reset {
+    10 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /my uly lly add 2 div def
+        newpath
+        moveto
+        /d (H) true charpath flattenpath pathbbox exch pop exch sub exch pop def
+        newpath
+        urx ury moveto
+        lrx lry lineto
+        llx d add lly lineto
+        ulx d add uly lineto
+        closepath
+        { fill } { stroke } ifelse
+        llx my d sub moveto
+        d 2 mul dup rlineto
+        llx d 2 mul add my d sub moveto
+        d 2 mul dup neg exch rlineto
+        stroke
+    end
+} bind def
+
+% SDL export (extension)
+% The store has a width of twice the H height
+% There should be a few spaces at the start of this shape's label
+
+/sdl_export {
+    10 dict begin
+        3 1 roll % put filled flag at end
+        4 ne { stop } if % sanity-check number of sides
+        aload pop
+        /ury xdef /urx xdef
+        /lry xdef /lrx xdef
+        /lly xdef /llx xdef
+        /uly xdef /ulx xdef
+        /my uly lly add 2 div def
+        newpath
+        moveto
+        /d (H) true charpath flattenpath pathbbox exch pop exch sub exch pop def
+        newpath
+        llx d add my d 2 div add moveto
+        ulx d add uly lineto
+        urx ury lineto
+        lrx lry lineto
+        llx d add lly lineto
+        llx d add my d 2 div sub lineto
+        { closepath fill } { stroke } ifelse
+        llx my d 2 div sub moveto
+        d 2 mul 0 rlineto
+        llx my d 2 div add moveto
+        d 2 mul 0 rlineto
+        stroke
+    end
+} bind def
