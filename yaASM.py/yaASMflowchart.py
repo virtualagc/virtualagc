@@ -16,7 +16,7 @@
 # along with yaAGC; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# Filename:     yaASMflowchar.py
+# Filename:     yaASMflowchart.py
 # Purpose:      The idea behind this program is the observation that certain
 #               aspects of the program comments of LVDC flight programs AS-512
 #               and AS-513, particularly the markings in column 71, *may* be 
@@ -36,6 +36,34 @@ given DOT-language file.  Therefore, rather than output a DOT file on stdout,
 one or more DOT files are generated with names like yaASMflowchart-00.dot,
 yaASMflowchart-01.dot, and so on.
 
+Anyway, my recommendation is to use with the command-line switch --sdl, as in
+
+    yaASMflowchart.py --sdl <SOURCE.lvdc
+
+and to convert the resulting DOT file (supposing there's only one of them) to
+postscript format with
+
+    dot -Tps -l sdl.ps <yaASMflowchart-01.dot >test.ps
+
+The output .ps file is the rendering of the flowchart, and it can be viewed with
+a postcript viewer or else somehow converted to some more-common format like
+pdf, svg, or png.
+
+These particular instructions use a non-default configuration of graphviz, in
+that several of the natively-included node shapes just don't look good in the
+flowcharts, and are instead replaced by custom node shapes (downloaded from the
+web, not designed by me!) that look much better.  The drawback is that these
+custom shapes are postscript only, and that's why we output a postscript file.
+
+If one were willing to live with the native graphviz shapes, then formats like
+pdf, png, jpg, svg, etc., could all be output directly.  For example, the 
+commands for directly producing svg (using native graphviz shapes) would be:
+
+    yaASMflowchart.py <SOURCE.lvdc
+    dot -Tsvg <yaASMflowchart-01.dot >test.svg
+
+and the other formats could be produced using obvious variants of the latter.
+
 Here's my interpretation of what's in column 71:
 
     J Start of a flowchart.
@@ -50,8 +78,6 @@ Here's my interpretation of what's in column 71:
     G Unconditional goto.
     
     P Process (subroutine all or macro expansion)
-    
-    
     
 See also:  https://sketchviz.com/flowcharts-in-graphviz
 '''
@@ -79,7 +105,7 @@ else:
     startShape = "style=rounded"
     callShape = ""
     decisionShape = "shape=diamond height=1.5"
-    ioShape = "shape=parallelogram"
+    ioShape = "shape=parallelogram height=1"
     connectorShape = "shape=circle"
 leftJustify = ("--left-justify" in sys.argv[1:])
 if leftJustify:
