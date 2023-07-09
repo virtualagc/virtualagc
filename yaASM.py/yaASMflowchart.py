@@ -119,30 +119,43 @@ lineNumber = 0
 for line in sys.stdin.readlines():
     lineNumber += 1
     line = line.rstrip()
-    if len(line) < 71 or line[70] == " " or line[0] in ["$", "#"] \
-            or line.startswith("       TITLE"):
-        continue
     
     match = re.search("^[A-Z][.A-Z0-9]*\\b", line)
     label = ""
+    labelFrom = "Nowhere"
     if match != None:
         label = match.group()
+        labelFrom = "Label"
+        
+    if len(line) < 71 or line[70] == " " or line[0] in ["$", "#"] \
+            or line.startswith("       TITLE"):
+        if label != "":
+            flowchart.append({
+                "col71" : "-", 
+                "comment": "", 
+                "label": label, 
+                "labelFrom": labelFrom,
+                "opcode": "",
+                "operand": "", 
+                "lineNumber": lineNumber,
+                "line": line,
+                "heading": ""})
+        continue
+    
     opcode = ""
     operand = ""
     col71 = line[70]
     line = line[:70].rstrip()
+    heading = ""
     if line[0] == "*":
         # Full-line comment.
         dummy = line[1:]
         if len(dummy) == 0:
             continue
         while len(dummy) > 0 and dummy[0] != " ":
-            label += dummy[0]
+            heading += dummy[0]
             dummy = dummy[1:]
         comment = dummy[1:].lstrip()
-        # I'm frankly very confused about these.  So for now ...
-        if label != "":
-            continue
     else:
         # We have to find the comment field.  To do that, we first have to 
         # find the end of the operand field, if any.
@@ -154,7 +167,6 @@ for line in sys.stdin.readlines():
         operand = line[15:col].strip()
         if col < len(line):
             comment = line[col:].lstrip()
-    heading = ""
     if comment.startswith("(") and ")" in comment:
         end = comment.index(")")
         heading = comment[:end+1]
@@ -169,6 +181,7 @@ for line in sys.stdin.readlines():
         "col71" : col71, 
         "comment": comment, 
         "label": label, 
+        "labelFrom": labelFrom,
         "opcode": opcode,
         "operand": operand, 
         "lineNumber": lineNumber,
@@ -177,20 +190,23 @@ for line in sys.stdin.readlines():
     
 if False:
     for entry in flowchart:
-        print(entry)
+        print("")
+        for key in entry:
+            print(key, ":", entry[key])
 else:
     fileCount = 1
     inJ = False
     title = ""
     nodes = {}
     arrows = []
+    destinations = {}
     precedingNode = ""
     
     tbdMessages = []
     def TBD():
         if col71 not in tbdMessages:
             tbdMessages.append(col71)
-            print("Directive %s not yet implemented" % col71)
+            print("Directive %s not yet fully implemented" % col71)
     
     # Format text for inclusion in a box.
     def formatText(text, heading, lineLength=24):
@@ -213,6 +229,7 @@ else:
         print("\tlabelloc = t", file=file)
         print("\tfontsize = 20", file=file)
         print("\tfontcolor = blue", file=file)
+        #print("\tsplines=false", file=file)
         if leftJustify:
             print("\tnode [shape=rect fontname=\"%s\" fontsize=12]" \
                   % fixedFont, file=file)
@@ -246,6 +263,11 @@ else:
             elif nodeType == "I":
                 text = formatText(node["text"], node["heading"])
                 attributes = "%s label=\"%s\"" % (ioShape, text)
+            elif nodeType in ["-", "+"]:
+                if nodeType == "-" and nodeName not in destinations:
+                    continue
+                text = node["label"]
+                attributes = "%s label=\"%s\"" % (startShape, text)
             print("\t%s [%s]" % (nodeIdentifier, attributes), file=file)
             if False:
                 # The following is just a temporary measure to keep the nodes
@@ -257,25 +279,73 @@ else:
         
         print("", file=file)
         for arrow in arrows:
-            nodeIdentifier1 = "n%08d" % nodes[arrow[0]]["lineNumber"]
-            nodeIdentifier2 = "n%08d" % nodes[arrow[1]]["lineNumber"]
-            print("\t%s:s -> %s:n" % (nodeIdentifier1, nodeIdentifier2), file=file)
+            node0 = nodes[arrow[0]]
+            node1 = nodes[arrow[1]]
+            caption = arrow[2]
+            nodeIdentifier0 = "n%08d" % node0["lineNumber"]
+            if node0["col71"] not in ["S", "X", "D", "G", "-", "Q"]:
+                nodeIdentifier0 = nodeIdentifier0 + ":s"
+            nodeIdentifier1 = "n%08d" % node1["lineNumber"]
+            if node1["col71"] not in ["S", "X", "D", "G", "-"]:
+                nodeIdentifier1 = nodeIdentifier1 + ":n"
+            if arrow[2] != "":
+                print("\t%s -> %s [label=\"%s\"]" % \
+                      (nodeIdentifier0, nodeIdentifier1, caption), file=file)
+            else:
+                print("\t%s -> %s" % (nodeIdentifier0, nodeIdentifier1), \
+                      file=file)
         
         print("}", file=file)
         file.close()
     
+    # In general, boxes are added to the flowchart principally because of
+    # markings in column 71.  However, there are cases when the boxes are added
+    # even though they have no markings, but have a symbolic label in the 
+    # label field.  These are needed because not all potential entry points and
+    # targets of control transfers are indicated in column 71.  With the 
+    # processing so far, however, all such labels have added nodes and edges,
+    # and most of them aren't needed.  So this is an optimization step which
+    # removes those nodes that aren't needed, and consolidates their edges.
+    def removeSuperfluous():
+        return
+    
+    # Up to this point, nodes may have multiple arrows targeting them.  In
+    # flowchart theory, however, this should only be possible for "connector"
+    # nodes (none of which have been added so far), so the following function
+    # tries to insert connector nodes whenever a non-connector node has multiple
+    # incoming arrows.
+    def addConnectors():
+        return
+    
     # This subroutine is entered whenever a flowchart (started by J and ending
     # with H, or another J, or the end of file) is being closed out and printed.
+    # Additionally, several types of beautifications may be performed before
+    # printing.
     def cleanup():
-        global inJ
+        global inJ, arrows
         if inJ:
+            removeSuperfluous()
+            addConnectors()
             printFlowchart()
             inJ = False
     
     # Add an arrow from node #1 to node #2.
+    queryStatus = {}
     def addArrow(node1, node2, caption="", yn=""):
-        global arrows, nodes, precedingNode
+        global arrows, nodes, precedingNode, queryStatus
+        if caption == ""  and queryStatus != {} \
+                and (queryStatus["yes"] ^ queryStatus["no"]):
+            if queryStatus["yes"]:
+                caption = "NO"
+                queryStatus = {}
+            else:
+                caption = "YES"
+                queryStatus = {}
         if node1 != "":
+            if node2 not in destinations:
+                destinations[node2] = 1
+            else:
+                destinations[node2] += 1
             arrows.append((node1, node2, caption))
             if nodes[node1] == "Q":
                 if yn == "Y":
@@ -293,6 +363,7 @@ else:
         operand = entry["operand"]
         label = entry["label"]
         lineNumber = entry["lineNumber"]
+        heading = entry["heading"]
         if label == "":
             label = "node%d" % len(nodes)
         if col71 == "J":
@@ -312,9 +383,10 @@ else:
             elif col71 == "S":
                 startLabel = heading
                 if startLabel == "":
-                    error("Unnamed entry point")
+                    print("Unnamed entry point:", entry, file=sys.stderr)
                 elif startLabel in flowchart:
-                    error("Start point already defined")
+                    print("Start point (%s) already defined" % startLabel, \
+                          file=sys.stderr)
                 else:
                     nodes[startLabel] = entry
                     entry["text"] = ""
@@ -344,14 +416,64 @@ else:
                 entry["noUsed"] = False
                 entry["yesUsed"] = False
                 precedingNode = label
-            elif col71 in ["Y", "N"]:
+                queryStatus = { "yes": False, "no": False }
+            elif col71 == "G":
                 TBD()
+            elif col71 in ["Y", "N"]:
+                if precedingNode in nodes and queryStatus != {}:
+                    query = nodes[precedingNode]
+                    if not queryStatus["yes"] and not queryStatus["no"]:
+                        if opcode.startswith("TMI") or \
+                                opcode.startswith("TNZ"):
+                            if col71 == "Y":
+                                queryStatus["yes"] = True
+                                addArrow(precedingNode, operand, "YES")
+                            else:
+                                queryStatus["no"] = True
+                                addArrow(precedingNode, operand, "NO")
+                        else:
+                            print("Yes/No at line %d is not TMI/TNZ: %s" \
+                                  % (lineNumber, opcode))
+                    elif queryStatus["yes"] and not queryStatus["no"]:
+                        if col71 == "N":
+                            addArrow(precedingNode, operand, "NO")
+                            precedingNode = ""
+                            queryStatus = {}
+                        else:
+                            print("Duplicated N at line %d for Query" \
+                                  % lineNumber)
+                    elif queryStatus["no"] and not queryStatus["yes"]:
+                        if col71 == "Y":
+                            addArrow(precedingNode, operand, "YES")
+                            precedingNode = ""
+                            queryStatus = {}
+                        else:
+                            print("Duplicated Y at line %d for Query" \
+                                  % lineNumber)
+                    else:
+                        # This can't happen, I think.
+                        precedingNode = ""
+                        queryStatus = {}
+                else:
+                    print("No Query for Y/N at line %d" % entry["lineNumber"])
             elif col71 == "L":
                 TBD()
             elif col71 == "E":
                 TBD()
             elif col71 == "*":
                 TBD()
+            elif col71 == "-":
+                # Note that col71 of "-" or "+" is something I use for internal
+                # processing of lines with a symbolic label in the label field
+                # and " " in column 71.  They're not markings that actually 
+                # appear in assembly listings.
+                nodes[label] = entry
+                if precedingNode == "":
+                    entry["col71"] = "+"
+                    entry["text"] = label
+                else:
+                    addArrow(precedingNode, label)
+                precedingNode = label
             else:
                 print("Unknown directive %s in line \"%s\"" % \
                       (col71, entry["line"]))
