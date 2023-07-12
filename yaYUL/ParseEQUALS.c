@@ -35,6 +35,8 @@
  *                              found some places in SUNBURST.  However, I
  *               01/29/17 MAS   Added an address calculation tweak for
  *                              the --raytheon option.
+ *               07/12/23 MAS   Made empty string symbols evaluate to the
+ *                              current program counter.
  */
 
 #include "yaYUL.h"
@@ -65,6 +67,12 @@ FetchSymbolPlusOffset(Address_t *pc, char *Operand, char *Mod1,
   Symbol_t *Symbol;
   Address_t dummyAddress;
   int i, Offset;
+
+  if (Operand[0] == '\0')
+    {
+      *Value = *pc;
+      return (0);
+    }
 
   i = GetOctOrDec(Operand, &Offset);
   if (!i)
