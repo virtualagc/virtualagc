@@ -11,6 +11,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2023-06-30 MAS  Created.
+##              2023-07-12 MAS  Changed an unused constant to a TC GRABWAIT,
+##                              and a WANGI reference to XSM1 +16D, based on
+##                              disassembly of equivalent code in Aurora 88.
 
                 BANK    15
                 EBANK=  XSM
@@ -53,8 +56,8 @@ LODLATAZ        EXTEND
                 TC      LODLATAZ +2
 
 V06N61E         OCT     00661
-UNUSED1         OCT     05550
 
+                TC      GRABWAIT
 STARTPL         TC      NEWMODEX
                 OCT     01
                 EXTEND
@@ -173,7 +176,7 @@ ZEROS1          TS      MPAC
                         OPTUSE
                 STODL   XSM1 +6
                         GEOCONS5
-                STORE   WANGI
+                STORE   XSM1 +16D
                 EXIT
 
                 INHINT
