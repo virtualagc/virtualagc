@@ -82,222 +82,222 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-011877,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-011878,000003:                                                                                                  <span class="co">## Filename:    DOWN-TELEMETRY_PROGRAM.agc</span>
-011879,000004:                                                                                                  <span class="co">## Purpose:     A section of Sundial E.</span>
-011880,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the final</span>
-011881,000006:                                                                                                  <span class="co">##              release of the Block II Command Module system test software. No</span>
-011882,000007:                                                                                                  <span class="co">##              original listings of this program are available; instead, this</span>
-011883,000008:                                                                                                  <span class="co">##              file was created via disassembly of dumps of Sundial core rope</span>
-011884,000009:                                                                                                  <span class="co">##              modules and comparison with other AGC programs.</span>
-011885,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-011886,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-011887,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-011888,000013:                                                                                                  <span class="co">## Mod history: 2023-06-22 MAS  Created from Aurora 12.</span>
-011889,000014:                                                                                                  <span class="co">##              2023-06-30 MAS  Updated for Sundial E.</span>
-011890,000015: 
-011891,000016: 05,3517                                           <span class="ps">SETLOC  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4450494E5332">ENDPINS2</a>                              
-011892,000017: 05,3517  E7,1430                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-011893,000018: 
-011894,000019:                                                                                                  <span class="co">#        THIS ROUTINE IS INITITATED EVERY 20MS BY AN INTERRUPT TRIGGERED</span>
-011895,000020:                                                                                                  <span class="co">#  BY THE RECEIPT OF AN ENDPULSE FROM THE SPACECRAFT TELEMETRY PROGRAMMER.</span>
-011896,000021: 
-<a name="444F444F574E544D"></a>011897,000022: 05,3517           54016        <span class="sm">DODOWNTM</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  DO APPROPRIATE TM PHASE.</span>
-011898,000023: 05,3520           51426                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
-011899,000024: 05,3521           10000                           <span class="op">TCF     </span> 0                                     
-011900,000025: 
-<a name="444E504841534531"></a>011901,000026: 05,3522           30413        <span class="sm">DNPHASE1</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354414452">DNLSTADR</a>                              <span class="co">#  ONCE PER CYCLE (1 SECOND), AN ID IS SENT</span>
-011902,000027: 05,3523           55425                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              <span class="co">#  AND THE DATA LIST SWITCHED TO THAT</span>
-011903,000028: 05,3524           76426                           <span class="op">MASK    </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  SELECTED BY A MISSION OR TEST PROGRAM.</span>
-011904,000029: 05,3525           00006                           <span class="op">EXTEND  </span>                                       
-011905,000030: 05,3526           01034                           <span class="op">WRITE   </span> <a href="INPUT_OUTPUT_CHANNELS.agc.html#444E544D31">DNTM1</a>                                 
-011906,000031: 05,3527           47644                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  WORD ORDER BIT IS 0 FOR ID OWRD ONLY.</span>
-011907,000032: 05,3530           00006                           <span class="op">EXTEND  </span>                                       
-011908,000033: 05,3531           03013                           <span class="op">WAND    </span> 13                                    
-011909,000034: 
-011910,000035: 05,3532           33662                           <span class="op">CAF     </span> <a href="#4C444E5048415332">LDNPHAS2</a>                              <span class="co">#  SWITCH TO PHASE 2.</span>
-011911,000036: 05,3533           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
-011912,000037: 05,3534           33671                           <span class="op">CAF     </span> <a href="#4C4F574944434F44">LOWIDCOD</a>                              <span class="co">#  SPECIAL ID CODE IN L.</span>
-011913,000038: 05,3535           13621                           <span class="op">TCF     </span> <a href="#544D455849544C">TMEXITL</a>                               
-011914,000039: 
-<a name="444E504841534532"></a>011915,000040: 05,3536           37644        <span class="sm">DNPHASE2</span>           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  SET WORD ORDER BACK TO 1 FOR REMAINDER</span>
-011916,000041: 05,3537           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  OF CYCLE AND SET UP TO PICK UP 12 PAIRS</span>
-011917,000042: 05,3540           05013                           <span class="op">WOR     </span> 13                                    <span class="co">#  FROM ANYWHERE IN COMMON ERASABLE OR E7.</span>
-011918,000043: 
-011919,000044: 05,3541           37657                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-011920,000045: 05,3542           54065                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  TAKE SNAPSHOT OF 12 DP WORDS.</span>
-011921,000046: 05,3543           37654                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#54454E">TEN</a>                                   
-011922,000047: 
-<a name="4C4F4F50"></a>011923,000048: 05,3544           54066        <span class="sm">LOOP    </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  THESE 12 DP WORDS ARE READ INTO AN</span>
-011924,000049: 05,3545           61425                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              <span class="co">#  INTERMEDIATE BUFFER SO THEY REFER TO THE</span>
-011925,000050: 05,3546           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SAME POINT IN THE EXECUTION OF A MISSION</span>
-011926,000051: 05,3547           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  PROGRAM. THE WORDS MAY BE IN NON-</span>
-011927,000052: 05,3550           50032                           <span class="op">INDEX   </span> 26D                                   
-011928,000053: 05,3551           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  12 OF THE DATA LIST ARE USED AS</span>
-011929,000054: 05,3552           50065                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  ADDRESSES OF THE DESIRED DATA.</span>
-011930,000055: 05,3553           53431                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-011931,000056: 
-011932,000057: 05,3554           37651                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#54574F">TWO</a>                                   
-011933,000058: 05,3555           26065                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-011934,000059: 05,3556           10066                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
-011935,000060: 05,3557           13544                           <span class="op">TCF     </span> <a href="#4C4F4F50">LOOP</a>                                  
-011936,000061: 
-011937,000062: 05,3560           33670                           <span class="op">CAF     </span> <a href="#4445433131">DEC11</a>                                 <span class="co">#  SET UP TO SEND 11 REMAINING WORDS</span>
-011938,000063: 05,3561           55427                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-011939,000064: 05,3562           33663                           <span class="op">CAF     </span> <a href="#4C444E5048415358">LDNPHASX</a>                              
-011940,000065: 05,3563           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
-011941,000066: 
-011942,000067: 05,3564           00006                           <span class="op">EXTEND  </span>                                       
-011943,000068: 05,3565           51425                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              
-011944,000069: 05,3566           50045                           <span class="op">INDEX   </span> 37D                                   
-011945,000070: 05,3567           30001                           <span class="op">DCA     </span> 0                                     
-011946,000071: 05,3570           13616                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              
-011947,000072: 
-<a name="444E504841535841"></a>011948,000073: 05,3571           55427        <span class="sm">DNPHASXA</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-011949,000074: 05,3572           00006                           <span class="op">EXTEND  </span>                                       
-011950,000075: 05,3573           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  SENDS SNAPSHOT BUFFER.</span>
-011951,000076: 05,3574           53701                           <span class="op">INDEX   </span> <a href="#4649584C49535442">FIXLISTB</a>                              
-011952,000077: 05,3575           30001                           <span class="op">DCA     </span> 0                                     
-011953,000078: 05,3576           13616                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              
-011954,000079: 
-<a name="444E504841534558"></a>011955,000080: 05,3577           11427        <span class="sm">DNPHASEX</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               <span class="co">#  AT END OF SNAPSHOT TRANSMISSION, SET UP</span>
-011956,000081: 05,3600           13571                           <span class="op">TCF     </span> <a href="#444E504841535841">DNPHASXA</a>                              <span class="co">#  TO SEND 26 PRS FROM ANY ERASABLE LOC AS</span>
-011957,000082: 
-011958,000083: 05,3601           33664                           <span class="op">CAF     </span> <a href="#4C444E5048415333">LDNPHAS3</a>                              <span class="co">#  SPECIFIED BY WORDS 1 - 26 OF THE DATA</span>
-011959,000084: 05,3602           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  LIST.</span>
-011960,000085: 05,3603           33667                           <span class="op">CAF     </span> <a href="#4E4F47454E574453">NOGENWDS</a>                              
-011961,000086: 
-<a name="50484153453341"></a>011962,000087: 05,3604           55427        <span class="sm">PHASE3A </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               <span class="co">#  GET DP WORD FROM ANY EBANK.</span>
-011963,000088: 05,3605           61425                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              
-011964,000089: 05,3606           00006                           <span class="op">EXTEND  </span>                                       
-011965,000090: 05,3607           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-011966,000091: 05,3610           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  THIS GETS THE ADDRESS - MUST USE DCA</span>
-011967,000092: 05,3611           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-011968,000093: 05,3612           75466                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  
-011969,000094: 05,3613           00006                           <span class="op">EXTEND  </span>                                       
-011970,000095: 05,3614           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-011971,000096: 05,3615           31401                           <span class="op">DCA     </span> 3400                                  <span class="co">#  (NOTE ASSEMBLY AS DCA 1400)</span>
-<a name="444E544D45584954"></a>011972,000097: 05,3616           00006        <span class="sm">DNTMEXIT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  GENERAL DNTM EXIT LOCATION.</span>
-011973,000098: 05,3617           01034                           <span class="op">WRITE   </span> <a href="INPUT_OUTPUT_CHANNELS.agc.html#444E544D31">DNTM1</a>                                 
-011974,000099: 05,3620           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-<a name="544D455849544C"></a>011975,000100: 05,3621           00006        <span class="sm">TMEXITL </span>           <span class="op">EXTEND  </span>                                       
-011976,000101: 05,3622           01035                           <span class="op">WRITE   </span> <a href="INPUT_OUTPUT_CHANNELS.agc.html#444E544D32">DNTM2</a>                                 
-011977,000102: 05,3623           14513                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#4E4F5152534D">NOQRSM</a>                                
-011978,000103: 
-<a name="444E504841534533"></a>011979,000104: 05,3624           11427        <span class="sm">DNPHASE3</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-011980,000105: 05,3625           13604                           <span class="op">TCF     </span> <a href="#50484153453341">PHASE3A</a>                               
-011981,000106: 
-011982,000107: 05,3626           33665                           <span class="op">CAF     </span> <a href="#4C444E5048415334">LDNPHAS4</a>                              <span class="co">#  SEND FIXED FORMAT LIST OF DSPTAB AND</span>
-011983,000108: 05,3627           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  T2, T1.</span>
-011984,000109: 05,3630           36162                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#534958">SIX</a>                                   
-011985,000110: 
-<a name="50484153453441"></a>011986,000111: 05,3631           55427        <span class="sm">PHASE4A </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-011987,000112: 05,3632           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FIXED DATA LIST FOR DSPTAB AND TIME.</span>
-011988,000113: 05,3633           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-011989,000114: 05,3634           53672                           <span class="op">INDEX   </span> <a href="#4649584C495354">FIXLIST</a>                               
-011990,000115: 05,3635           30001                           <span class="op">DCA     </span> 0                                     
-011991,000116: 05,3636           13616                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              
-<a name="444E504841534534"></a>011992,000117: 05,3637           11427        <span class="sm">DNPHASE4</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-011993,000118: 05,3640           13631                           <span class="op">TCF     </span> <a href="#50484153453441">PHASE4A</a>                               
-011994,000119: 
-011995,000120: 05,3641           33666                           <span class="op">CAF     </span> <a href="#4C504841534535">LPHASE5</a>                               <span class="co">#  SET UP FOR CHANNEL TRANSMISSION.</span>
-011996,000121: 05,3642           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
-011997,000122: 05,3643           36165                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  FOUR PAIRS OF CHANNELS.</span>
-011998,000123: 
-<a name="50484153453541"></a>011999,000124: 05,3644           55427        <span class="sm">PHASE5A </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-012000,000125: 05,3645           00006                           <span class="op">EXTEND  </span>                                       
-012001,000126: 05,3646           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-012002,000127: 05,3647           53720                           <span class="op">INDEX   </span> <a href="#4649584C5354434C">FIXLSTCL</a>                              
-012003,000128: 05,3650           00000                           <span class="op">READ    </span> 0                                     
-012004,000129: 05,3651           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-012005,000130: 05,3652           00006                           <span class="op">EXTEND  </span>                                       
-012006,000131: 05,3653           51427                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-012007,000132: 05,3654           53714                           <span class="op">INDEX   </span> <a href="#4649584C53544341">FIXLSTCA</a>                              
-012008,000133: 05,3655           00000                           <span class="op">READ    </span> 0                                     
-012009,000134: 05,3656           13616                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              
-<a name="444E504841534535"></a>012010,000135: 05,3657           11427        <span class="sm">DNPHASE5</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
-012011,000136: 05,3660           13644                           <span class="op">TCF     </span> <a href="#50484153453541">PHASE5A</a>                               
-012012,000137: 05,3661           13522                           <span class="op">TCF     </span> <a href="#444E504841534531">DNPHASE1</a>                              <span class="co">#  START NEXT CYCLE.</span>
-012013,000138:                                                                                                  <span class="co">#        CONSTNATS AND FIXED FORMAT DATA LIST.</span>
-<a name="4C444E5048415332"></a>012014,000139: 05,3662           03536        <span class="sm">LDNPHAS2</span>           <span class="ps">ADRES   </span> <a href="#444E504841534532">DNPHASE2</a>                              
-<a name="4C444E5048415358"></a>012015,000140: 05,3663           03577        <span class="sm">LDNPHASX</span>           <span class="ps">ADRES   </span> <a href="#444E504841534558">DNPHASEX</a>                              
-<a name="4C444E5048415333"></a>012016,000141: 05,3664           03624        <span class="sm">LDNPHAS3</span>           <span class="ps">ADRES   </span> <a href="#444E504841534533">DNPHASE3</a>                              
-<a name="4C444E5048415334"></a>012017,000142: 05,3665           03637        <span class="sm">LDNPHAS4</span>           <span class="ps">ADRES   </span> <a href="#444E504841534534">DNPHASE4</a>                              
-<a name="4C504841534535"></a>012018,000143: 05,3666           03657        <span class="sm">LPHASE5 </span>           <span class="ps">ADRES   </span> <a href="#444E504841534535">DNPHASE5</a>                              
-012019,000144: 
-<a name="4E4F47454E574453"></a>012020,000145: 05,3667           00031        <span class="sm">NOGENWDS</span>           <span class="ps">DEC     </span> 25         B-14                       <span class="co">#  26 WORDS SENT DURING PHASE 3.</span>
-<a name="4445433131"></a>012021,000146: 05,3670           00013        <span class="sm">DEC11   </span>           <span class="ps">DEC     </span> 11         B-14                       
-<a name="4C4F574944434F44"></a>012022,000147: 05,3671           00437        <span class="sm">LOWIDCOD</span>           <span class="ps">OCT     </span> 00437                                 <span class="co">#  FOD'S CHOICE.</span>
-012023,000148: 
-<a name="4649584C495354"></a>012024,000149: 05,3672           00024        <span class="sm">FIXLIST </span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  FIXED-FORMAT PORTION INCLUDES BUFFER,</span>
-012025,000150: 05,3673           00321                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +10D                       <span class="co">#  DSPTAB, AND TIME.</span>
-012026,000151: 05,3674           00317                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +8D                        
-012027,000152: 05,3675           00315                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +6                         
-012028,000153: 05,3676           00313                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +4                         
-012029,000154: 05,3677           00311                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +2                         
-012030,000155: 05,3700           00307                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                
-012031,000156: 
-<a name="4649584C49535442"></a>012032,000157: 05,3701           01454        <span class="sm">FIXLISTB</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +20D                       
-012033,000158: 05,3702           01452                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +18D                       
-012034,000159: 05,3703           01450                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +16D                       
-012035,000160: 05,3704           01446                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +14D                       
-012036,000161: 05,3705           01444                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +12D                       
-012037,000162: 05,3706           01442                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +10D                       
-012038,000163: 05,3707           01440                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +8D                        
-012039,000164: 05,3710           01436                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +6D                        
-012040,000165: 05,3711           01434                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +4D                        
-012041,000166: 05,3712           01432                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +2D                        
-012042,000167: 05,3713           01430                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
-012043,000168: 
-<a name="4649584C53544341"></a>012044,000169: 05,3714           00032        <span class="sm">FIXLSTCA</span>           <span class="ps">OCT     </span> 32                                    <span class="co">#  CHANNEL ADDRESSES.</span>
-012045,000170: 05,3715           00030                           <span class="ps">OCT     </span> 30                                    
-012046,000171: 05,3716           00013                           <span class="ps">OCT     </span> 13                                    
-012047,000172: 05,3717           00011                           <span class="ps">OCT     </span> 11                                    
-012048,000173: 
-<a name="4649584C5354434C"></a>012049,000174: 05,3720           00033        <span class="sm">FIXLSTCL</span>           <span class="ps">OCT     </span> 33                                    
-012050,000175: 05,3721           00031                           <span class="ps">OCT     </span> 31                                    
-012051,000176: 05,3722           00014                           <span class="ps">OCT     </span> 14                                    
-012052,000177: 05,3723           00012                           <span class="ps">OCT     </span> 12                                    
-012053,000178:                                                                                                  <span class="co">#        NOMINAL SUNDIAL DOWNLIST.</span>
-<a name="4E4F4D444E4C5354"></a>012054,000179: 05,3724           00342        <span class="sm">NOMDNLST</span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504C4F434B">UPLOCK</a>                                
-012055,000180: 05,3725           02635                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504145">PIPAE</a>                                 
-012056,000181: 05,3726           02633                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950414E">PIPAN</a>                                 
-012057,000182: 05,3727           02741                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57504C415454">WPLATT</a>                                
-012058,000183: 05,3730           02737                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57504C415449">WPLATI</a>                                
-012059,000184: 05,3731           02735                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57504C41544F">WPLATO</a>                                
-012060,000185: 05,3732           02641                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564C41554E">VLAUN</a>                                 
-012061,000186: 05,3733           02631                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E4758">ANGX</a>                                  
-012062,000187: 05,3734           02627                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E4759">ANGY</a>                                  
-012063,000188: 05,3735           02623                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E475A">ANGZ</a>                                  
-012064,000189: 05,3736           02705                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47415A494D555448">GAZIMUTH</a>                              
-012065,000190: 05,3737           02637                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445249465454">DRIFTT</a>                                
-012066,000191: 05,3740           02635                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445249465449">DRIFTI</a>                                
-012067,000192: 05,3741           02633                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44524946544F">DRIFTO</a>                                
-012068,000193: 05,3742           00365                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B53544154">MARKSTAT</a>                              
-012069,000194: 05,3743           00402                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544845544144">THETAD</a>     +2                         
-012070,000195: 05,3744           00400                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544845544144">THETAD</a>                                
-012071,000196: 05,3745           00363                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D5543414452">IMUCADR</a>                               
-012072,000197: 05,3746           00356                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4445534F504D4F44">DESOPMOD</a>                              
-012073,000198: 05,3747           00354                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              
-012074,000199: 05,3750           01362                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245444F435452">REDOCTR</a>                               <span class="co">#  INCLUDES FAILREG.</span>
-012075,000200: 05,3751           00063                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>      +2                         
-012076,000201: 05,3752           00061                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 
-012077,000202: 05,3753           00035                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F505459">OPTY</a>                                  
-012078,000203: 05,3754           00034                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-012079,000204: 05,3755           00032                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-012080,000205: 05,3756           00403                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4445534F505454">DESOPTT</a>                               
-012081,000206: 05,3757           00361                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              
-012082,000207: 05,3760           01364                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 
-012083,000208: 05,3761           01360                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               
-012084,000209: 05,3762           00411                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>      +4                         
-012085,000210: 05,3763           00407                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>      +2                         
-012086,000211: 05,3764           00405                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 
-012087,000212: 05,3765           00150                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-012088,000213: 05,3766           00152                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
-012089,000214: 05,3767           00043                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#424D414759">BMAGY</a>                                 
-012090,000215: 05,3770           00041                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 
-012091,000216: 05,3771           00037                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 
-<a name="454E44444E544D53"></a>012092,000217: 05,3772                        <span class="sm">ENDDNTMS</span>           <span class="ps">EQUALS  </span>                                       
+011873,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+011874,000003:                                                                                                  <span class="co">## Filename:    DOWN-TELEMETRY_PROGRAM.agc</span>
+011875,000004:                                                                                                  <span class="co">## Purpose:     A section of Sundial E.</span>
+011876,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the final</span>
+011877,000006:                                                                                                  <span class="co">##              release of the Block II Command Module system test software. No</span>
+011878,000007:                                                                                                  <span class="co">##              original listings of this program are available; instead, this</span>
+011879,000008:                                                                                                  <span class="co">##              file was created via disassembly of dumps of Sundial core rope</span>
+011880,000009:                                                                                                  <span class="co">##              modules and comparison with other AGC programs.</span>
+011881,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+011882,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+011883,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+011884,000013:                                                                                                  <span class="co">## Mod history: 2023-06-22 MAS  Created from Aurora 12.</span>
+011885,000014:                                                                                                  <span class="co">##              2023-06-30 MAS  Updated for Sundial E.</span>
+011886,000015: 
+011887,000016: 05,3517                                           <span class="ps">SETLOC  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4450494E5332">ENDPINS2</a>                              
+011888,000017: 05,3517  E7,1430                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+011889,000018: 
+011890,000019:                                                                                                  <span class="co">#        THIS ROUTINE IS INITITATED EVERY 20MS BY AN INTERRUPT TRIGGERED</span>
+011891,000020:                                                                                                  <span class="co">#  BY THE RECEIPT OF AN ENDPULSE FROM THE SPACECRAFT TELEMETRY PROGRAMMER.</span>
+011892,000021: 
+<a name="444F444F574E544D"></a>011893,000022: 05,3517           54016        <span class="sm">DODOWNTM</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  DO APPROPRIATE TM PHASE.</span>
+011894,000023: 05,3520           51426                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
+011895,000024: 05,3521           10000                           <span class="op">TCF     </span> 0                                     
+011896,000025: 
+<a name="444E504841534531"></a>011897,000026: 05,3522           30413        <span class="sm">DNPHASE1</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354414452">DNLSTADR</a>                              <span class="co">#  ONCE PER CYCLE (1 SECOND), AN ID IS SENT</span>
+011898,000027: 05,3523           55425                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              <span class="co">#  AND THE DATA LIST SWITCHED TO THAT</span>
+011899,000028: 05,3524           76426                           <span class="op">MASK    </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4C4F573130">LOW10</a>                                 <span class="co">#  SELECTED BY A MISSION OR TEST PROGRAM.</span>
+011900,000029: 05,3525           00006                           <span class="op">EXTEND  </span>                                       
+011901,000030: 05,3526           01034                           <span class="op">WRITE   </span> <a href="INPUT_OUTPUT_CHANNELS.agc.html#444E544D31">DNTM1</a>                                 
+011902,000031: 05,3527           47644                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  WORD ORDER BIT IS 0 FOR ID OWRD ONLY.</span>
+011903,000032: 05,3530           00006                           <span class="op">EXTEND  </span>                                       
+011904,000033: 05,3531           03013                           <span class="op">WAND    </span> 13                                    
+011905,000034: 
+011906,000035: 05,3532           33662                           <span class="op">CAF     </span> <a href="#4C444E5048415332">LDNPHAS2</a>                              <span class="co">#  SWITCH TO PHASE 2.</span>
+011907,000036: 05,3533           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
+011908,000037: 05,3534           33671                           <span class="op">CAF     </span> <a href="#4C4F574944434F44">LOWIDCOD</a>                              <span class="co">#  SPECIAL ID CODE IN L.</span>
+011909,000038: 05,3535           13621                           <span class="op">TCF     </span> <a href="#544D455849544C">TMEXITL</a>                               
+011910,000039: 
+<a name="444E504841534532"></a>011911,000040: 05,3536           37644        <span class="sm">DNPHASE2</span>           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  SET WORD ORDER BACK TO 1 FOR REMAINDER</span>
+011912,000041: 05,3537           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  OF CYCLE AND SET UP TO PICK UP 12 PAIRS</span>
+011913,000042: 05,3540           05013                           <span class="op">WOR     </span> 13                                    <span class="co">#  FROM ANYWHERE IN COMMON ERASABLE OR E7.</span>
+011914,000043: 
+011915,000044: 05,3541           37657                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+011916,000045: 05,3542           54065                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  TAKE SNAPSHOT OF 12 DP WORDS.</span>
+011917,000046: 05,3543           37654                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#54454E">TEN</a>                                   
+011918,000047: 
+<a name="4C4F4F50"></a>011919,000048: 05,3544           54066        <span class="sm">LOOP    </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                <span class="co">#  THESE 12 DP WORDS ARE READ INTO AN</span>
+011920,000049: 05,3545           61425                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              <span class="co">#  INTERMEDIATE BUFFER SO THEY REFER TO THE</span>
+011921,000050: 05,3546           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SAME POINT IN THE EXECUTION OF A MISSION</span>
+011922,000051: 05,3547           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  PROGRAM. THE WORDS MAY BE IN NON-</span>
+011923,000052: 05,3550           50032                           <span class="op">INDEX   </span> 26D                                   
+011924,000053: 05,3551           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  12 OF THE DATA LIST ARE USED AS</span>
+011925,000054: 05,3552           50065                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                <span class="co">#  ADDRESSES OF THE DESIRED DATA.</span>
+011926,000055: 05,3553           53431                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+011927,000056: 
+011928,000057: 05,3554           37651                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#54574F">TWO</a>                                   
+011929,000058: 05,3555           26065                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+011930,000059: 05,3556           10066                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5032">ITEMP2</a>                                
+011931,000060: 05,3557           13544                           <span class="op">TCF     </span> <a href="#4C4F4F50">LOOP</a>                                  
+011932,000061: 
+011933,000062: 05,3560           33670                           <span class="op">CAF     </span> <a href="#4445433131">DEC11</a>                                 <span class="co">#  SET UP TO SEND 11 REMAINING WORDS</span>
+011934,000063: 05,3561           55427                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+011935,000064: 05,3562           33663                           <span class="op">CAF     </span> <a href="#4C444E5048415358">LDNPHASX</a>                              
+011936,000065: 05,3563           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
+011937,000066: 
+011938,000067: 05,3564           00006                           <span class="op">EXTEND  </span>                                       
+011939,000068: 05,3565           51425                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              
+011940,000069: 05,3566           50045                           <span class="op">INDEX   </span> 37D                                   
+011941,000070: 05,3567           30001                           <span class="op">DCA     </span> 0                                     
+011942,000071: 05,3570           13616                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              
+011943,000072: 
+<a name="444E504841535841"></a>011944,000073: 05,3571           55427        <span class="sm">DNPHASXA</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+011945,000074: 05,3572           00006                           <span class="op">EXTEND  </span>                                       
+011946,000075: 05,3573           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  SENDS SNAPSHOT BUFFER.</span>
+011947,000076: 05,3574           53701                           <span class="op">INDEX   </span> <a href="#4649584C49535442">FIXLISTB</a>                              
+011948,000077: 05,3575           30001                           <span class="op">DCA     </span> 0                                     
+011949,000078: 05,3576           13616                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              
+011950,000079: 
+<a name="444E504841534558"></a>011951,000080: 05,3577           11427        <span class="sm">DNPHASEX</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               <span class="co">#  AT END OF SNAPSHOT TRANSMISSION, SET UP</span>
+011952,000081: 05,3600           13571                           <span class="op">TCF     </span> <a href="#444E504841535841">DNPHASXA</a>                              <span class="co">#  TO SEND 26 PRS FROM ANY ERASABLE LOC AS</span>
+011953,000082: 
+011954,000083: 05,3601           33664                           <span class="op">CAF     </span> <a href="#4C444E5048415333">LDNPHAS3</a>                              <span class="co">#  SPECIFIED BY WORDS 1 - 26 OF THE DATA</span>
+011955,000084: 05,3602           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  LIST.</span>
+011956,000085: 05,3603           33667                           <span class="op">CAF     </span> <a href="#4E4F47454E574453">NOGENWDS</a>                              
+011957,000086: 
+<a name="50484153453341"></a>011958,000087: 05,3604           55427        <span class="sm">PHASE3A </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               <span class="co">#  GET DP WORD FROM ANY EBANK.</span>
+011959,000088: 05,3605           61425                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C444154414C5354">LDATALST</a>                              
+011960,000089: 05,3606           00006                           <span class="op">EXTEND  </span>                                       
+011961,000090: 05,3607           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+011962,000091: 05,3610           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  THIS GETS THE ADDRESS - MUST USE DCA</span>
+011963,000092: 05,3611           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+011964,000093: 05,3612           75466                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5738">LOW8</a>                                  
+011965,000094: 05,3613           00006                           <span class="op">EXTEND  </span>                                       
+011966,000095: 05,3614           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+011967,000096: 05,3615           31401                           <span class="op">DCA     </span> 3400                                  <span class="co">#  (NOTE ASSEMBLY AS DCA 1400)</span>
+<a name="444E544D45584954"></a>011968,000097: 05,3616           00006        <span class="sm">DNTMEXIT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  GENERAL DNTM EXIT LOCATION.</span>
+011969,000098: 05,3617           01034                           <span class="op">WRITE   </span> <a href="INPUT_OUTPUT_CHANNELS.agc.html#444E544D31">DNTM1</a>                                 
+011970,000099: 05,3620           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+<a name="544D455849544C"></a>011971,000100: 05,3621           00006        <span class="sm">TMEXITL </span>           <span class="op">EXTEND  </span>                                       
+011972,000101: 05,3622           01035                           <span class="op">WRITE   </span> <a href="INPUT_OUTPUT_CHANNELS.agc.html#444E544D32">DNTM2</a>                                 
+011973,000102: 05,3623           14513                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#4E4F5152534D">NOQRSM</a>                                
+011974,000103: 
+<a name="444E504841534533"></a>011975,000104: 05,3624           11427        <span class="sm">DNPHASE3</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+011976,000105: 05,3625           13604                           <span class="op">TCF     </span> <a href="#50484153453341">PHASE3A</a>                               
+011977,000106: 
+011978,000107: 05,3626           33665                           <span class="op">CAF     </span> <a href="#4C444E5048415334">LDNPHAS4</a>                              <span class="co">#  SEND FIXED FORMAT LIST OF DSPTAB AND</span>
+011979,000108: 05,3627           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              <span class="co">#  T2, T1.</span>
+011980,000109: 05,3630           36162                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#534958">SIX</a>                                   
+011981,000110: 
+<a name="50484153453441"></a>011982,000111: 05,3631           55427        <span class="sm">PHASE4A </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+011983,000112: 05,3632           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FIXED DATA LIST FOR DSPTAB AND TIME.</span>
+011984,000113: 05,3633           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+011985,000114: 05,3634           53672                           <span class="op">INDEX   </span> <a href="#4649584C495354">FIXLIST</a>                               
+011986,000115: 05,3635           30001                           <span class="op">DCA     </span> 0                                     
+011987,000116: 05,3636           13616                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              
+<a name="444E504841534534"></a>011988,000117: 05,3637           11427        <span class="sm">DNPHASE4</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+011989,000118: 05,3640           13631                           <span class="op">TCF     </span> <a href="#50484153453441">PHASE4A</a>                               
+011990,000119: 
+011991,000120: 05,3641           33666                           <span class="op">CAF     </span> <a href="#4C504841534535">LPHASE5</a>                               <span class="co">#  SET UP FOR CHANNEL TRANSMISSION.</span>
+011992,000121: 05,3642           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
+011993,000122: 05,3643           36165                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  FOUR PAIRS OF CHANNELS.</span>
+011994,000123: 
+<a name="50484153453541"></a>011995,000124: 05,3644           55427        <span class="sm">PHASE5A </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+011996,000125: 05,3645           00006                           <span class="op">EXTEND  </span>                                       
+011997,000126: 05,3646           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+011998,000127: 05,3647           53720                           <span class="op">INDEX   </span> <a href="#4649584C5354434C">FIXLSTCL</a>                              
+011999,000128: 05,3650           00000                           <span class="op">READ    </span> 0                                     
+012000,000129: 05,3651           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+012001,000130: 05,3652           00006                           <span class="op">EXTEND  </span>                                       
+012002,000131: 05,3653           51427                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+012003,000132: 05,3654           53714                           <span class="op">INDEX   </span> <a href="#4649584C53544341">FIXLSTCA</a>                              
+012004,000133: 05,3655           00000                           <span class="op">READ    </span> 0                                     
+012005,000134: 05,3656           13616                           <span class="op">TCF     </span> <a href="#444E544D45584954">DNTMEXIT</a>                              
+<a name="444E504841534535"></a>012006,000135: 05,3657           11427        <span class="sm">DNPHASE5</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D494E444558">TMINDEX</a>                               
+012007,000136: 05,3660           13644                           <span class="op">TCF     </span> <a href="#50484153453541">PHASE5A</a>                               
+012008,000137: 05,3661           13522                           <span class="op">TCF     </span> <a href="#444E504841534531">DNPHASE1</a>                              <span class="co">#  START NEXT CYCLE.</span>
+012009,000138:                                                                                                  <span class="co">#        CONSTNATS AND FIXED FORMAT DATA LIST.</span>
+<a name="4C444E5048415332"></a>012010,000139: 05,3662           03536        <span class="sm">LDNPHAS2</span>           <span class="ps">ADRES   </span> <a href="#444E504841534532">DNPHASE2</a>                              
+<a name="4C444E5048415358"></a>012011,000140: 05,3663           03577        <span class="sm">LDNPHASX</span>           <span class="ps">ADRES   </span> <a href="#444E504841534558">DNPHASEX</a>                              
+<a name="4C444E5048415333"></a>012012,000141: 05,3664           03624        <span class="sm">LDNPHAS3</span>           <span class="ps">ADRES   </span> <a href="#444E504841534533">DNPHASE3</a>                              
+<a name="4C444E5048415334"></a>012013,000142: 05,3665           03637        <span class="sm">LDNPHAS4</span>           <span class="ps">ADRES   </span> <a href="#444E504841534534">DNPHASE4</a>                              
+<a name="4C504841534535"></a>012014,000143: 05,3666           03657        <span class="sm">LPHASE5 </span>           <span class="ps">ADRES   </span> <a href="#444E504841534535">DNPHASE5</a>                              
+012015,000144: 
+<a name="4E4F47454E574453"></a>012016,000145: 05,3667           00031        <span class="sm">NOGENWDS</span>           <span class="ps">DEC     </span> 25         B-14                       <span class="co">#  26 WORDS SENT DURING PHASE 3.</span>
+<a name="4445433131"></a>012017,000146: 05,3670           00013        <span class="sm">DEC11   </span>           <span class="ps">DEC     </span> 11         B-14                       
+<a name="4C4F574944434F44"></a>012018,000147: 05,3671           00437        <span class="sm">LOWIDCOD</span>           <span class="ps">OCT     </span> 00437                                 <span class="co">#  FOD'S CHOICE.</span>
+012019,000148: 
+<a name="4649584C495354"></a>012020,000149: 05,3672           00024        <span class="sm">FIXLIST </span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 <span class="co">#  FIXED-FORMAT PORTION INCLUDES BUFFER,</span>
+012021,000150: 05,3673           00321                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +10D                       <span class="co">#  DSPTAB, AND TIME.</span>
+012022,000151: 05,3674           00317                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +8D                        
+012023,000152: 05,3675           00315                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +6                         
+012024,000153: 05,3676           00313                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +4                         
+012025,000154: 05,3677           00311                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +2                         
+012026,000155: 05,3700           00307                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                
+012027,000156: 
+<a name="4649584C49535442"></a>012028,000157: 05,3701           01454        <span class="sm">FIXLISTB</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +20D                       
+012029,000158: 05,3702           01452                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +18D                       
+012030,000159: 05,3703           01450                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +16D                       
+012031,000160: 05,3704           01446                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +14D                       
+012032,000161: 05,3705           01444                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +12D                       
+012033,000162: 05,3706           01442                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +10D                       
+012034,000163: 05,3707           01440                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +8D                        
+012035,000164: 05,3710           01436                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +6D                        
+012036,000165: 05,3711           01434                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +4D                        
+012037,000166: 05,3712           01432                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>   +2D                        
+012038,000167: 05,3713           01430                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D42554646">DNTMBUFF</a>                              
+012039,000168: 
+<a name="4649584C53544341"></a>012040,000169: 05,3714           00032        <span class="sm">FIXLSTCA</span>           <span class="ps">OCT     </span> 32                                    <span class="co">#  CHANNEL ADDRESSES.</span>
+012041,000170: 05,3715           00030                           <span class="ps">OCT     </span> 30                                    
+012042,000171: 05,3716           00013                           <span class="ps">OCT     </span> 13                                    
+012043,000172: 05,3717           00011                           <span class="ps">OCT     </span> 11                                    
+012044,000173: 
+<a name="4649584C5354434C"></a>012045,000174: 05,3720           00033        <span class="sm">FIXLSTCL</span>           <span class="ps">OCT     </span> 33                                    
+012046,000175: 05,3721           00031                           <span class="ps">OCT     </span> 31                                    
+012047,000176: 05,3722           00014                           <span class="ps">OCT     </span> 14                                    
+012048,000177: 05,3723           00012                           <span class="ps">OCT     </span> 12                                    
+012049,000178:                                                                                                  <span class="co">#        NOMINAL SUNDIAL DOWNLIST.</span>
+<a name="4E4F4D444E4C5354"></a>012050,000179: 05,3724           00342        <span class="sm">NOMDNLST</span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504C4F434B">UPLOCK</a>                                
+012051,000180: 05,3725           02635                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504145">PIPAE</a>                                 
+012052,000181: 05,3726           02633                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950414E">PIPAN</a>                                 
+012053,000182: 05,3727           02741                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57504C415454">WPLATT</a>                                
+012054,000183: 05,3730           02737                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57504C415449">WPLATI</a>                                
+012055,000184: 05,3731           02735                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57504C41544F">WPLATO</a>                                
+012056,000185: 05,3732           02641                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564C41554E">VLAUN</a>                                 
+012057,000186: 05,3733           02631                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E4758">ANGX</a>                                  
+012058,000187: 05,3734           02627                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E4759">ANGY</a>                                  
+012059,000188: 05,3735           02623                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414E475A">ANGZ</a>                                  
+012060,000189: 05,3736           02705                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#47415A494D555448">GAZIMUTH</a>                              
+012061,000190: 05,3737           02637                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445249465454">DRIFTT</a>                                
+012062,000191: 05,3740           02635                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445249465449">DRIFTI</a>                                
+012063,000192: 05,3741           02633                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44524946544F">DRIFTO</a>                                
+012064,000193: 05,3742           00365                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B53544154">MARKSTAT</a>                              
+012065,000194: 05,3743           00402                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544845544144">THETAD</a>     +2                         
+012066,000195: 05,3744           00400                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544845544144">THETAD</a>                                
+012067,000196: 05,3745           00363                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D5543414452">IMUCADR</a>                               
+012068,000197: 05,3746           00356                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4445534F504D4F44">DESOPMOD</a>                              
+012069,000198: 05,3747           00354                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              
+012070,000199: 05,3750           01362                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245444F435452">REDOCTR</a>                               <span class="co">#  INCLUDES FAILREG.</span>
+012071,000200: 05,3751           00063                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>      +2                         
+012072,000201: 05,3752           00061                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 
+012073,000202: 05,3753           00035                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F505459">OPTY</a>                                  
+012074,000203: 05,3754           00034                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+012075,000204: 05,3755           00032                           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+012076,000205: 05,3756           00403                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4445534F505454">DESOPTT</a>                               
+012077,000206: 05,3757           00361                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              
+012078,000207: 05,3760           01364                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 
+012079,000208: 05,3761           01360                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               
+012080,000209: 05,3762           00411                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>      +4                         
+012081,000210: 05,3763           00407                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>      +2                         
+012082,000211: 05,3764           00405                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 
+012083,000212: 05,3765           00150                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+012084,000213: 05,3766           00152                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
+012085,000214: 05,3767           00043                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#424D414759">BMAGY</a>                                 
+012086,000215: 05,3770           00041                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 
+012087,000216: 05,3771           00037                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 
+<a name="454E44444E544D53"></a>012088,000217: 05,3772                        <span class="sm">ENDDNTMS</span>           <span class="ps">EQUALS  </span>                                       
 
 End of include-file DOWN-TELEMETRY_PROGRAM.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

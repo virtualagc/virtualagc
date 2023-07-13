@@ -82,410 +82,373 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-005197,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-005198,000003:                                                                                                  <span class="co">## Filename:    FRESH_START_AND_RESTART.agc</span>
-005199,000004:                                                                                                  <span class="co">## Purpose:     A section of Sundial E.</span>
-005200,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the final</span>
-005201,000006:                                                                                                  <span class="co">##              release of the Block II Command Module system test software. No</span>
-005202,000007:                                                                                                  <span class="co">##              original listings of this program are available; instead, this</span>
-005203,000008:                                                                                                  <span class="co">##              file was created via disassembly of dumps of Sundial core rope</span>
-005204,000009:                                                                                                  <span class="co">##              modules and comparison with other AGC programs.</span>
-005205,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-005206,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-005207,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-005208,000013:                                                                                                  <span class="co">## Mod history: 2023-06-22 MAS  Created from Aurora 12.</span>
-005209,000014:                                                                                                  <span class="co">##              2023-06-30 MAS  Updated for Sundial E.</span>
-005210,000015: 
-005211,000016: 12,2000                                           <span class="ps">BANK    </span> 12                                    
-005212,000017: 12,2000  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-005213,000018: 
-<a name="534C415031"></a>005214,000019: 12,2000           00004        <span class="sm">SLAP1   </span>           <span class="op">INHINT  </span>                                       <span class="co">#  FRESH START. COMES HERE FROM PINBALL.</span>
-005215,000020: 12,2001           02210                           <span class="op">TC      </span> <a href="#5354415254535542">STARTSUB</a>                              <span class="co">#  SUBROUTINE DOES MOST OF THE WORK.</span>
-005216,000021: 
-005217,000022: 12,2002           37634                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  TURN OFF ALL DSPTAB +11D LAMPS ONLY ON</span>
-005218,000023: 12,2003           54322                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       <span class="co">#  REQUESTED FRESH START.</span>
-005219,000024: 
-005220,000025: 12,2004           37657                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SAME STORY ON ZEROING FAILREG.</span>
-005221,000026: 12,2005           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
-005222,000027: 12,2006           55361                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534D4F4445">SMODE</a>                                 
-005223,000028: 
-<a name="444F465354415254"></a>005224,000029: 12,2007           37657        <span class="sm">DOFSTART</span>           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  DO A FRESH START,</span>
-005225,000030: 12,2010           54276                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
-005226,000031: 12,2011           54342                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504C4F434B">UPLOCK</a>                                <span class="co">#  FREE UPLINK INTERLOCK</span>
-005227,000032: 
-005228,000033: 12,2012           55073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534530">PHASE0</a>                                <span class="co">#  INITIALIZE PHASE TABLE - NO MISSION</span>
-005229,000034: 12,2013           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534531">PHASE1</a>                                <span class="co">#  PROGRAMS RUNNING.</span>
-005230,000035: 12,2014           55077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534532">PHASE2</a>                                
-005231,000036: 12,2015           55101                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534533">PHASE3</a>                                
-005232,000037: 12,2016           55103                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534534">PHASE4</a>                                
-005233,000038: 12,2017           55105                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534535">PHASE5</a>                                
-005234,000039: 
-005235,000040: 12,2020           40000                           <span class="op">COM     </span>                                       
-005236,000041: 12,2021           55072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534530">-PHASE0</a>                               
-005237,000042: 12,2022           55074                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>                               
-005238,000043: 12,2023           55076                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534532">-PHASE2</a>                               
-005239,000044: 12,2024           55100                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534533">-PHASE3</a>                               
-005240,000045: 12,2025           55102                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534534">-PHASE4</a>                               
-005241,000046: 12,2026           55104                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534535">-PHASE5</a>                               
-005242,000047: 
-005243,000048: 12,2027           32421                           <span class="op">CAF     </span> <a href="#494D3330494E4946">IM30INIF</a>                              <span class="co">#  FRESH START IMU INITIALIZATION.</span>
-005244,000049: 12,2030           54361                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              
-005245,000050: 
-005246,000051: 12,2031           37641                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543130">BIT10</a>                                 <span class="co">#  REMOVE IMU FAIL INHIBIT IN 5 SECS.</span>
-005247,000052: 12,2032           04451                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-005248,000053: 12,2033           02247 26003                     <span class="ps">2CADR   </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494641494C4F4B">IFAILOK</a>                               
-005249,000054: 
-005250,000055: 12,2035           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  LET T5 IDLE.</span>
-005251,000056: 12,2036           32373                           <span class="op">DCA     </span> <a href="#543549444C4552">T5IDLER</a>                               
-005252,000057: 12,2037           52346                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54354C4F43">T5LOC</a>                                 
-005253,000058: 
-005254,000059: 12,2040           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  INITIALIZE SWITCHES ONLY ON FRESH START.</span>
-005255,000060: 12,2041           32427                           <span class="op">DCA     </span> <a href="#5357494E4954">SWINIT</a>                                
-005256,000061: 12,2042           52062                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 
-005257,000062: 12,2043           00006                           <span class="op">EXTEND  </span>                                       
-005258,000063: 12,2044           32431                           <span class="op">DCA     </span> <a href="#5357494E4954">SWINIT</a>     +2                         
-005259,000064: 12,2045           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>      +2                         
-005260,000065: 
-<a name="454E445253545254"></a>005261,000066: 12,2046           37645        <span class="sm">ENDRSTRT</span>           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495436">BIT6</a>                                  <span class="co">#  IF GIMBAL LOCK LAMP IS STILL ON,</span>
-005262,000067: 12,2047           70322                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       <span class="co">#  IMU WAS FOUND IN GIMBAL LOCK IN RESTART</span>
-005263,000068: 12,2050           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  AND LEFT IN COARSE ALIGN. IN THIS CASE</span>
-005264,000069: 12,2051           47642                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495439">BIT9</a>                                  <span class="co">#  SET ISS OPERATE BIT IN IMODES30 TO</span>
-005265,000070: 12,2052           26361                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  OPERATE SO T4 INBIT MONITOR WONT ZERO</span>
-005266,000071: 
-005267,000072: 12,2053           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  THE CDUS AS IT DOES IN FRESH START.</span>
-005268,000073: 12,2054           04064                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DISPLAY MAJOR MODE.</span>
-005269,000074: 12,2055           12001                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4453504D4D">DSPMM</a>                                 
-005270,000075: 
-<a name="53544152545357"></a>005271,000076: 12,2056           14365        <span class="sm">STARTSW </span>           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#44554D4D594A4F42">DUMMYJOB</a>   +2                         <span class="co">#  PATCH FOR SIMULATION.</span>
-005272,000077: 
-<a name="535441525453494D"></a>005273,000078: 12,2057           37635        <span class="sm">STARTSIM</span>           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543134">BIT14</a>                                 
-005274,000079: 12,2060           04307                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-005275,000080: 12,2061           77777                           <span class="ps">OCT     </span> 77777                                 <span class="co">#  FATAL IF NOT PATCHED AS ABOVE.</span>
-005276,000081: 12,2062           77777                           <span class="ps">OCT     </span> 77777                                 
-005277,000082: 
-005278,000083: 12,2063           14365                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#44554D4D594A4F42">DUMMYJOB</a>   +2                         <span class="co">#  DONT ZERO NEWJOB</span>
-005279,000084: 
-005280,000085:                                                                                                  <span class="co">#           COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.</span>
-005281,000086: 
-<a name="474F50524F47"></a>005282,000087: 12,2064           03746        <span class="sm">GOPROG  </span>           <span class="op">TC      </span> <a href="#474F50524F4731">GOPROG1</a>                               
-005283,000088: 
-005284,000089: 12,2065           02210                           <span class="op">TC      </span> <a href="#5354415254535542">STARTSUB</a>                              <span class="co">#  COMMON INITIALIZATION ROUTINE.</span>
-005285,000090: 
-005286,000091: 12,2066           32424                           <span class="op">CAF     </span> <a href="#392C36">9,6</a>                                   <span class="co">#  LEAVE PROGRAM ALARM AND GIMBAL LOCK</span>
-005287,000092: 12,2067           70322                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       <span class="co">#  LAMPS INTACT ON RESTART.</span>
-005288,000093: 12,2070           67634                           <span class="op">AD      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543135">BIT15</a>                                 
-005289,000094: 12,2071           56322                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
-005290,000095: 12,2072           77645                           <span class="op">MASK    </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495436">BIT6</a>                                  
-005291,000096: 12,2073           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF GIMBAL LOCK LAMP WAS ON, LEAVE ISS IN</span>
-005292,000097: 12,2074           37647                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495434">BIT4</a>                                  <span class="co">#  COARSE ALIGN.</span>
-005293,000098: 12,2075           00006                           <span class="op">EXTEND  </span>                                       
-005294,000099: 12,2076           05012                           <span class="op">WOR     </span> 12                                    
-005295,000100: 
-005296,000101: 12,2077           34450                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                <span class="co">#  DISPLAY FAILREG AS INDICATION OF RESTART</span>
-005297,000102: 12,2100           04276                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  OR TO DISPLAY ABORT CODE AS ABOVE.</span>
-005298,000103: 12,2101           03113 02003                     <span class="ps">2CADR   </span> <a href="ALARM_AND_ABORT.agc.html#444F414C41524D">DOALARM</a>                               
-005299,000104: 
-005300,000105: 12,2103           37644                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  DOFSTART IF MARK REJECT AND EITHER</span>
-005301,000106: 12,2104           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ERROR LIGHT RESET BUTTONS ARE DEPRESSED</span>
-005302,000107: 12,2105           02016                           <span class="op">RAND    </span> 16                                    
-005303,000108: 12,2106           00006                           <span class="op">EXTEND  </span>                                       
-005304,000109: 12,2107           12124                           <span class="op">BZF     </span> <a href="#50434C4F4F50">PCLOOP</a>     -1                         <span class="co">#  VERIFY PHASE TABLE.</span>
-005305,000110: 
-005306,000111: 12,2110           42420                           <span class="op">CS      </span> <a href="#2D454C52">-ELR</a>                                  
-005307,000112: 12,2111           00006                           <span class="op">EXTEND  </span>                                       
-005308,000113: 12,2112           02016                           <span class="op">RAND    </span> 16                                    <span class="co">#  NAV DSKY KEYCODES,MARK,MARK REJECT</span>
-005309,000114: 12,2113           62420                           <span class="op">AD      </span> <a href="#2D454C52">-ELR</a>                                  
-005310,000115: 12,2114           00006                           <span class="op">EXTEND  </span>                                       
-005311,000116: 12,2115           12007                           <span class="op">BZF     </span> <a href="#444F465354415254">DOFSTART</a>                              
-005312,000117: 
-005313,000118: 12,2116           42420                           <span class="op">CS      </span> <a href="#2D454C52">-ELR</a>                                  
-005314,000119: 12,2117           00006                           <span class="op">EXTEND  </span>                                       
-005315,000120: 12,2120           02015                           <span class="op">RAND    </span> 15                                    <span class="co">#  MAIN DSKY KEYCODES</span>
-005316,000121: 12,2121           62420                           <span class="op">AD      </span> <a href="#2D454C52">-ELR</a>                                  
-005317,000122: 12,2122           00006                           <span class="op">EXTEND  </span>                                       
-005318,000123: 12,2123           12007                           <span class="op">BZF     </span> <a href="#444F465354415254">DOFSTART</a>                              
-005319,000124: 
-005320,000125: 12,2124           37227                 -1        <span class="op">CAF     </span> <a href="#4E554D47525053">NUMGRPS</a>                               <span class="co">#  VERIFY PHASE TABLE AGREEMENT.</span>
-<a name="50434C4F4F50"></a>005321,000126: 12,2125           54145        <span class="sm">PCLOOP  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-005322,000127: 12,2126           60000                           <span class="op">DOUBLE  </span>                                       
-005323,000128: 12,2127           00006                           <span class="op">EXTEND  </span>                                       
-005324,000129: 12,2130           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-005325,000130: 12,2131           31073                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534530">-PHASE0</a>                               <span class="co">#  COMPLEMENT INTO A - DIRECT INTO L.</span>
-005326,000131: 12,2132           00006                           <span class="op">EXTEND  </span>                                       
-005327,000132: 12,2133           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESULT MUST BE -0 FOR AGREEMENT.</span>
-005328,000133: 12,2134           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-005329,000134: 12,2135           12177                           <span class="op">TCF     </span> <a href="#5054424144">PTBAD</a>                                 <span class="co">#  RESTART FAILURE.</span>
-005330,000135: 12,2136           12177                           <span class="op">TCF     </span> <a href="#5054424144">PTBAD</a>                                 
-005331,000136: 12,2137           12177                           <span class="op">TCF     </span> <a href="#5054424144">PTBAD</a>                                 
-005332,000137: 12,2140           10145                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  PROCESS ALL RESTART GROUPS.</span>
-005333,000138: 12,2141           12125                           <span class="op">TCF     </span> <a href="#50434C4F4F50">PCLOOP</a>                                
-005334,000139: 
-005335,000140: 12,2142           54146                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         <span class="co">#  SET TO +0.</span>
-005336,000141: 12,2143           37227                           <span class="op">CAF     </span> <a href="#4E554D47525053">NUMGRPS</a>                               <span class="co">#  SEE IF ANY GROUPS RUNNING.</span>
-<a name="4E5854525354"></a>005337,000142: 12,2144           54145        <span class="sm">NXTRST  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
-005338,000143: 12,2145           60000                           <span class="op">DOUBLE  </span>                                       
-005339,000144: 12,2146           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-005340,000145: 12,2147           11073                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534530">PHASE0</a>                                
-005341,000146: 12,2150           12173                           <span class="op">TCF     </span> <a href="#50414354495645">PACTIVE</a>                               <span class="co">#  PNZ - GROUP ACTIVE.</span>
-005342,000147: 12,2151           12166                           <span class="op">TCF     </span> <a href="#50494E414354">PINACT</a>                                <span class="co">#  +0 - GROUP NOT RUNNING.</span>
-005343,000148: 
-<a name="505445524D"></a>005344,000149: 12,2152           54140        <span class="sm">PTERM   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  NNZ - TERMINATE REQUEST.</span>
-005345,000150: 12,2153           50145                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  PICK UP RESTART TERMINATE CADR.</span>
-005346,000151: 12,2154           32412                           <span class="op">CAF     </span> <a href="#525445524D434144">RTERMCAD</a>                              
-005347,000152: 
-<a name="5041435432"></a>005348,000153: 12,2155           54001        <span class="sm">PACT2   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-005349,000154: 12,2156           24140                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ABS OF PHASE.</span>
-005350,000155: 12,2157           46027                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4C4F5737">LOW7</a>                                  <span class="co">#  SEE THAT MAG IS LESS THAN 128.</span>
-005351,000156: 12,2160           70140                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-005352,000157: 12,2161           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-005353,000158: 12,2162           12177                           <span class="op">TCF     </span> <a href="#5054424144">PTBAD</a>                                 <span class="co">#  BAD DATA.</span>
-005354,000159: 
-005355,000160: 12,2163           24146                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         <span class="co">#  INDICATE GROUP DEMANDS PRESENT.</span>
-005356,000161: 12,2164           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-005357,000162: 12,2165           04070                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  MUST RETURN TO SWRETURN.</span>
-005358,000163: 
-<a name="50494E414354"></a>005359,000164: 12,2166           10145        <span class="sm">PINACT  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  PROCESS ALL RESTART GROUPS.</span>
-005360,000165: 12,2167           12144                           <span class="op">TCF     </span> <a href="#4E5854525354">NXTRST</a>                                
-005361,000166: 
-<a name="5453544D50414336"></a>005362,000167: 12,2170           10146        <span class="sm">TSTMPAC6</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         <span class="co">#  IF NO GROUPS ACTIVE THIS REQUEST, DO A</span>
-005363,000168: 12,2171           12203                           <span class="op">TCF     </span> <a href="#444F525354415254">DORSTART</a>                              
-005364,000169: 12,2172           12007                           <span class="op">TCF     </span> <a href="#444F465354415254">DOFSTART</a>                              <span class="co">#  FRESH START</span>
-005365,000170: 
-<a name="50414354495645"></a>005366,000171: 12,2173           54140        <span class="sm">PACTIVE </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-005367,000172: 12,2174           50145                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  SELECT RESTART ACTIVE CADR.</span>
-005368,000173: 12,2175           32404                           <span class="op">CAF     </span> <a href="#5241435443414452">RACTCADR</a>                              
-005369,000174: 12,2176           12155                           <span class="op">TCF     </span> <a href="#5041435432">PACT2</a>                                 
-005370,000175: 
-<a name="5054424144"></a>005371,000176: 12,2177           32202        <span class="sm">PTBAD   </span>           <span class="op">CAF     </span> <a href="#4F435431313037">OCT1107</a>                               <span class="co">#  SET ADDITIONAL FAILURE TO SHOW PHASE</span>
-005372,000177: 12,2200           55364                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 <span class="co">#  TABLE DISAGREEMENT (WILL BE DISPLAYED</span>
-005373,000178: 12,2201           12007                           <span class="op">TCF     </span> <a href="#444F465354415254">DOFSTART</a>                              <span class="co">#  IN R2).</span>
-005374,000179: 
-<a name="4F435431313037"></a>005375,000180: 12,2202           01107        <span class="sm">OCT1107 </span>           <span class="ps">OCT     </span> 1107                                  <span class="co">#  ADDITIONAL ALARM CODE.</span>
-005376,000181: 
-<a name="444F525354415254"></a>005377,000182: 12,2203           32374        <span class="sm">DORSTART</span>           <span class="op">CAF     </span> <a href="#494641494C494E48">IFAILINH</a>                              <span class="co">#  LEAVE IMUFAILURE INHIBITS INTACT ON</span>
-005378,000183: 12,2204           70361                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  RESTART, RESETTING ALL FAILURE CODES.</span>
-005379,000184: 12,2205           62422                           <span class="op">AD      </span> <a href="#494D3330494E4952">IM30INIR</a>                              
-005380,000185: 12,2206           54361                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              
-005381,000186: 12,2207           12046                           <span class="op">TCF     </span> <a href="#454E445253545254">ENDRSTRT</a>                              
-005382,000187:                                                                                                  <span class="co">#  INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.</span>
-005383,000188: 
-<a name="5354415254535542"></a>005384,000189: 12,2210           56002        <span class="sm">STARTSUB</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-005385,000190: 12,2211           54114                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  EXEC TEMPS ARE AVAILABLE TO US.</span>
-005386,000191: 
-005387,000192: 12,2212           37657                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO OUTBITS WITHIN 3MS OF RESTART.</span>
-005388,000193: 12,2213           00006                           <span class="op">EXTEND  </span>                                       
-005389,000194: 12,2214           01012                           <span class="op">WRITE   </span> 12                                    
-005390,000195: 12,2215           00006                           <span class="op">EXTEND  </span>                                       
-005391,000196: 12,2216           01014                           <span class="op">WRITE   </span> 14                                    
-005392,000197: 12,2217           00006                           <span class="op">EXTEND  </span>                                       
-005393,000198: 12,2220           01011                           <span class="op">WRITE   </span> 11                                    
-005394,000199: 12,2221           03757                           <span class="op">TC      </span> <a href="#5354415254534231">STARTSB1</a>                              
-<a name="5354415254534232"></a>005395,000200: 12,2222           00006        <span class="sm">STARTSB2</span>           <span class="op">EXTEND  </span>                                       
-005396,000201: 12,2223           01013                           <span class="op">WRITE   </span> 13                                    
-005397,000202: 
-005398,000203: 12,2224           37632                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  T3 AND T4 OVERFLOW AS SOON AS POSSIBLE.</span>
-005399,000204: 12,2225           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 <span class="co">#  SO DOES T5.</span>
-005400,000205: 12,2226           54026                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 <span class="co">#    (POSMAX IS PSEUDO INTERRUPT SIGNAL IN</span>
-005401,000206: 12,2227           54027                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4534">TIME4</a>                                 <span class="co">#    CASE RUPT SIGNALLED BEFORE TS TIME3).</span>
-005402,000207: 
-005403,000208: 12,2230           32403                           <span class="op">CAF     </span> <a href="#53544152544542">STARTEB</a>                               
-005404,000209: 12,2231           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET FOR E3</span>
-005405,000210: 
-005406,000211: 12,2232           37633                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#  INITIALIZE WAITLIST DELTA-TS.</span>
-005407,000212: 12,2233           55407                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +7                         
-005408,000213: 12,2234           55406                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +6                         
-005409,000214: 12,2235           55405                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +5                         
-005410,000215: 12,2236           55404                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +4                         
-005411,000216: 12,2237           55403                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +3                         
-005412,000217: 12,2240           55402                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +2                         
-005413,000218: 12,2241           55401                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +1                         
-005414,000219: 12,2242           55400                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-005415,000220: 
-005416,000221: 12,2243           44502                           <span class="op">CS      </span> <a href="WAITLIST.agc.html#454E445441534B">ENDTASK</a>                               
-005417,000222: 12,2244           55410                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>                                  
-005418,000223: 12,2245           55412                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +2                         
-005419,000224: 12,2246           55414                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +4                         
-005420,000225: 12,2247           55416                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +6                         
-005421,000226: 12,2250           55420                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +8D                        
-005422,000227: 12,2251           55422                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +10D                       
-005423,000228: 12,2252           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +12D                       
-005424,000229: 12,2253           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +14D                       
-005425,000230: 12,2254           55430                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +16D                       
-005426,000231: 12,2255           44503                           <span class="op">CS      </span> <a href="WAITLIST.agc.html#454E445441534B">ENDTASK</a>    +1                         
-005427,000232: 12,2256           55411                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +1                         
-005428,000233: 12,2257           55413                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +3                         
-005429,000234: 12,2260           55415                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +5                         
-005430,000235: 12,2261           55417                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +7                         
-005431,000236: 12,2262           55421                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +9D                        
-005432,000237: 12,2263           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +11D                       
-005433,000238: 12,2264           55425                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +13D                       
-005434,000239: 12,2265           55427                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +15D                       
-005435,000240: 12,2266           55431                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +17D                       
-005436,000241: 
-005437,000242: 12,2267           47657                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  MAKE ALL EXECUTIVE REGISTER SETS</span>
-005438,000243: 12,2270           54153                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  AVAILABLE.</span>
-005439,000244: 12,2271           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +12D                       
-005440,000245: 12,2272           54203                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +24D                       
-005441,000246: 12,2273           54217                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +36D                       
-005442,000247: 12,2274           54233                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +48D                       
-005443,000248: 12,2275           54247                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +60D                       
-005444,000249: 12,2276           54263                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +72D                       
-005445,000250: 
-005446,000251: 12,2277           54347                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453525550545357">DSRUPTSW</a>                              
-005447,000252: 12,2300           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  SHOWS NO ACTIVE JOBS.</span>
-005448,000253: 
-005449,000254: 12,2301           32401                           <span class="op">CAF     </span> <a href="#5641433141445243">VAC1ADRC</a>                              <span class="co">#  MAKE ALL VAC AREAS AVAILABLE.</span>
-005450,000255: 12,2302           54414                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414331555345">VAC1USE</a>                               
-005451,000256: 12,2303           62402                           <span class="op">AD      </span> <a href="#4C544856414341">LTHVACA</a>                               
-005452,000257: 12,2304           54470                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414332555345">VAC2USE</a>                               
-005453,000258: 12,2305           62402                           <span class="op">AD      </span> <a href="#4C544856414341">LTHVACA</a>                               
-005454,000259: 12,2306           54544                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414333555345">VAC3USE</a>                               
-005455,000260: 12,2307           62402                           <span class="op">AD      </span> <a href="#4C544856414341">LTHVACA</a>                               
-005456,000261: 12,2310           54620                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414334555345">VAC4USE</a>                               
-005457,000262: 12,2311           62402                           <span class="op">AD      </span> <a href="#4C544856414341">LTHVACA</a>                               
-005458,000263: 12,2312           54674                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414335555345">VAC5USE</a>                               
-005459,000264: 
-005460,000265: 12,2313           37654                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#54454E">TEN</a>                                   <span class="co">#  TURN OFF ALL DISPLAY SYSTEM RELAYS.</span>
-<a name="4453504F4646"></a>005461,000266: 12,2314           54140        <span class="sm">DSPOFF  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-005462,000267: 12,2315           47637                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543132">BIT12</a>                                 
-005463,000268: 12,2316           50140                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-005464,000269: 12,2317           54307                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                
-005465,000270: 12,2320           10140                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-005466,000271: 12,2321           02314                           <span class="op">TC      </span> <a href="#4453504F4646">DSPOFF</a>                                
-005467,000272: 
-005468,000273: 12,2322           54045                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E4C494E4B">INLINK</a>                                
-005469,000274: 12,2323           54341                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350434E54">DSPCNT</a>                                
-005470,000275: 12,2324           54323                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341445253544F52">CADRSTOR</a>                              
-005471,000276: 12,2325           54300                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524551524554">REQRET</a>                                
-005472,000277: 12,2326           54302                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434C50415353">CLPASS</a>                                
-005473,000278: 12,2327           54277                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453504C4F434B">DSPLOCK</a>                               
-005474,000279: 12,2330           54305                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4E53415645">MONSAVE</a>                               <span class="co">#  KILL MONITOR</span>
-005475,000280: 12,2331           54306                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4E5341564531">MONSAVE1</a>                              
-005476,000281: 12,2332           54324                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#475241424C4F434B">GRABLOCK</a>                              
-005477,000282: 12,2333           54266                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56455242524547">VERBREG</a>                               
-005478,000283: 12,2334           54267                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F554E524547">NOUNREG</a>                               
-005479,000284: 12,2335           54327                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453504C495354">DSPLIST</a>                               
-005480,000285: 12,2336           54330                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453504C495354">DSPLIST</a>    +1                         
-005481,000286: 12,2337           54331                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453504C495354">DSPLIST</a>    +2                         
-005482,000287: 
-005483,000288: 12,2340           54365                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B53544154">MARKSTAT</a>                              
-005484,000289: 12,2341           54332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              <span class="co">#  MAKE EXTENDED VERBS AVAILABLE</span>
-005485,000290: 12,2342           54363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D5543414452">IMUCADR</a>                               
-005486,000291: 12,2343           54364                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F505443414452">OPTCADR</a>                               
-005487,000292: 12,2344           54351                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 
-005488,000293: 12,2345           37653                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4E4F5554434F4E">NOUTCON</a>                               
-005489,000294: 12,2346           54303                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F5554">NOUT</a>                                  
-005490,000295: 
-005491,000296: 12,2347           32425                           <span class="op">CAF     </span> <a href="#4F5054494E4954">OPTINIT</a>                               
-005492,000297: 12,2350           54354                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              
-005493,000298: 
-005494,000299: 12,2351           37661                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4E45474F4E45">NEGONE</a>                                
-005495,000300: 12,2352           54350                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494E44">OPTIND</a>                                <span class="co">#  KILL COARSE OPTICS</span>
-005496,000301: 
-005497,000302: 12,2353           32423                           <span class="op">CAF     </span> <a href="#494D3333494E4954">IM33INIT</a>                              <span class="co">#  NO PIP OR TM FAILS.</span>
-005498,000303: 12,2354           54362                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
-005499,000304: 
-005500,000305: 12,2355           32400                           <span class="op">CAF     </span> <a href="#4C455343484B">LESCHK</a>                                <span class="co">#  SELF CHECK GO-TO REGISTER.</span>
-005501,000306: 12,2356           55360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               
-005502,000307: 12,2357           45470                           <span class="op">CS      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#564431">VD1</a>                                   
-005503,000308: 12,2360           54264                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350434F554E54">DSPCOUNT</a>                              
-005504,000309: 12,2361  E7,1426                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
-005505,000310: 
-005506,000311: 12,2361           32376                           <span class="op">CAF     </span> <a href="#4C444E544D474F">LDNTMGO</a>                               <span class="co">#  SET UP TM PROGRAM.</span>
-005507,000312: 12,2362           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-005508,000313: 
-005509,000314: 12,2363           32375                           <span class="op">CAF     </span> <a href="#4C444E5048415331">LDNPHAS1</a>                              
-005510,000315: 12,2364           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
-005511,000316: 
-005512,000317: 12,2365           32377                           <span class="op">CAF     </span> <a href="#4E4F4D544D4C5354">NOMTMLST</a>                              <span class="co">#  SET UP NOMINAL DOWNLINK LIST.</span>
-005513,000318: 12,2366           54413                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354414452">DNLSTADR</a>                              
-005514,000319: 
-005515,000320: 12,2367           00114                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-005516,000321: 
-<a name="543549444C4F43"></a>005517,000322: 12,2370           30001        <span class="sm">T5IDLOC </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  T5RUPT COMES HERE EVERY 163.84 SECS</span>
-005518,000323: 12,2371           14514                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#4E4F5152534D">NOQRSM</a>     +1                         <span class="co">#  WHEN NOBODY IS USING IT.</span>
-005519,000324: 
-<a name="543549444C4552"></a>005520,000325: 12,2372           02370 24007  <span class="sm">T5IDLER </span>           <span class="ps">2CADR   </span> <a href="#543549444C4F43">T5IDLOC</a>                               
-005521,000326: 
-<a name="494641494C494E48"></a>005522,000327: 12,2374           00035        <span class="sm">IFAILINH</span>           <span class="ps">OCT     </span> 35                                    <span class="co">#  ISS FAILURE INHIBIT BITS.</span>
-<a name="4C444E5048415331"></a>005523,000328: 12,2375           03522        <span class="sm">LDNPHAS1</span>           <span class="ps">GENADR  </span> <a href="DOWN-TELEMETRY_PROGRAM.agc.html#444E504841534531">DNPHASE1</a>                              
-<a name="4C444E544D474F"></a>005524,000329: 12,2376           03426        <span class="sm">LDNTMGO </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
-<a name="4E4F4D544D4C5354"></a>005525,000330: 12,2377           03724        <span class="sm">NOMTMLST</span>           <span class="ps">GENADR  </span> <a href="DOWN-TELEMETRY_PROGRAM.agc.html#4E4F4D444E4C5354">NOMDNLST</a>                              
-<a name="4C455343484B"></a>005526,000331: 12,2400           02101        <span class="sm">LESCHK  </span>           <span class="ps">GENADR  </span> <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html#53454C4643484B">SELFCHK</a>                               
-<a name="5641433141445243"></a>005527,000332: 12,2401           00414        <span class="sm">VAC1ADRC</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414331555345">VAC1USE</a>                               
-<a name="4C544856414341"></a>005528,000333: 12,2402           00054        <span class="sm">LTHVACA </span>           <span class="ps">DEC     </span> 44         B-14                       
-005529,000334: 
-<a name="53544152544542"></a>005530,000335: 12,2403           01400        <span class="sm">STARTEB </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-<a name="4E554D47525053"></a>005531,000336: 12,2404     7227               <span class="sm">NUMGRPS </span>           <span class="ps">EQUALS  </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#46495645">FIVE</a>                                  <span class="co">#  SIX GROUPS CURRENTLY.</span>
-005532,000337: 
-005533,000338:                                                                                                  <span class="co">#  WHERE TO GO ON RESTART IF GROUP ACTIVE:</span>
-005534,000339: 
-<a name="5241435443414452"></a>005535,000340: 12,2404           32555        <span class="sm">RACTCADR</span>           <span class="ps">CADR    </span> <a href="PRELAUNCH_ALIGNMENT_PROGRAM.agc.html#5052454C474F">PRELGO</a>                                <span class="co">#   RESTARTS DURING PRELAUNCH ALIGNMENT</span>
-005536,000341: 12,2405           35474                           <span class="ps">CADR    </span> <a href="OPTIMUM_PRELAUNCH_ALIGNMENT_CALIBRATION.agc.html#4F50544D53545254">OPTMSTRT</a>                              <span class="co">#   RESTARTS DURING OPTM ALIGN CALIBRATION</span>
-005537,000342: 12,2406           00000                           <span class="ps">CADR    </span> 10000                                 
-005538,000343: 12,2407           00000                           <span class="ps">CADR    </span> 10000                                 
-005539,000344: 12,2410           00000                           <span class="ps">CADR    </span> 10000                                 
-005540,000345: 12,2411           00000                           <span class="ps">CADR    </span> 10000                                 
-005541,000346: 
-005542,000347:                                                                                                  <span class="co">#  WHERE TO GO ON RESTART IF TERMINATE REQUESTED.</span>
-005543,000348: 
-<a name="525445524D434144"></a>005544,000349: 12,2412           00000        <span class="sm">RTERMCAD</span>           <span class="ps">CADR    </span> 10000                                 
-005545,000350: 12,2413           00000                           <span class="ps">CADR    </span> 10000                                 
-005546,000351: 12,2414           00000                           <span class="ps">CADR    </span> 10000                                 
-005547,000352: 12,2415           00000                           <span class="ps">CADR    </span> 10000                                 
-005548,000353: 12,2416           00000                           <span class="ps">CADR    </span> 10000                                 
-005549,000354: 12,2417           00000                           <span class="ps">CADR    </span> 10000                                 
-005550,000355: 
-<a name="2D454C52"></a>005551,000356: 12,2420           77755        <span class="sm">-ELR    </span>           <span class="ps">OCT     </span> -22                                   <span class="co">#  -ERROR LIGHT RESET KEY CODE.</span>
-<a name="494D3330494E4946"></a>005552,000357: 12,2421           37411        <span class="sm">IM30INIF</span>           <span class="ps">OCT     </span> 37411                                 <span class="co">#  INHIBITS IMU FAIL FOR 5 SEC AND PIP ISSW</span>
-<a name="494D3330494E4952"></a>005553,000358: 12,2422           37400        <span class="sm">IM30INIR</span>           <span class="ps">OCT     </span> 37400                                 <span class="co">#  LEAVE FAIL INHIBITS ALONE.</span>
-<a name="494D3333494E4954"></a>005554,000359: 12,2423           16000        <span class="sm">IM33INIT</span>           <span class="ps">OCT     </span> 16000                                 <span class="co">#  NO PIP OR TM FAIL SIGNALS.</span>
-<a name="392C36"></a>005555,000360: 12,2424           00440        <span class="sm">9,6     </span>           <span class="ps">OCT     </span> 440                                   <span class="co">#  MASK FOR PROG ALARM AND GIMBAL LOCK.</span>
-<a name="4F5054494E4954"></a>005556,000361: 12,2425           00130        <span class="sm">OPTINIT </span>           <span class="ps">OCT     </span> 130                                   
-<a name="5357494E4954"></a>005557,000362: 12,2426           00000        <span class="sm">SWINIT  </span>           <span class="ps">OCT     </span> 0                                     
-005558,000363: 12,2427           00000                           <span class="ps">OCT     </span> 0                                     
-005559,000364: 12,2430           00000                           <span class="ps">OCT     </span> 0                                     
-005560,000365: 12,2431           00000                           <span class="ps">OCT     </span> 0                                     
-005561,000366: 
-<a name="454E444652455353"></a>005562,000367: 12,2432                        <span class="sm">ENDFRESS</span>           <span class="ps">EQUALS  </span>                                       
-005563,000368: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-MAS 2023: The following chunks of code were added as patches
-in Sundial D. They were placed here at the end of the bank
-so as to not change addresses of existing symbols.
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-005567,000372: 12,3746                                           <span class="ps">SETLOC  </span> <a href="T4RUPT_PROGRAM.agc.html#454E44543453">ENDT4S</a>                                
-005568,000373: 
-<a name="474F50524F4731"></a>005569,000374: 12,3746           25362        <span class="sm">GOPROG1 </span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5245444F435452">REDOCTR</a>                               <span class="co">#  ADVANCE RESTART COUNTER.</span>
-005570,000375: 
-005571,000376: 12,3747           31357                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              
-005572,000377: 12,3750           00006                           <span class="op">EXTEND  </span>                                       
-005573,000378: 12,3751           12065                           <span class="op">BZF     </span> <a href="#474F50524F47">GOPROG</a>     +1                         
-005574,000379: 
-005575,000380: 12,3752           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  RESTORE B(X) AND B(X+1) IF RESTART</span>
-005576,000381: 12,3753           31376                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455035">SKEEP5</a>                                <span class="co">#  HAPPENED WHILE SELF-CHECK HAD REPLACED</span>
-005577,000382: 12,3754           51377                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534B45455037">SKEEP7</a>                                <span class="co">#  THEM WITH CHECKING WORDS.</span>
-005578,000383: 12,3755           52001                           <span class="op">DXCH    </span> 0000                                  
-005579,000384: 
-005580,000385: 12,3756           02065                           <span class="op">TC      </span> <a href="#474F50524F47">GOPROG</a>     +1                         
-005581,000386: 
-<a name="5354415254534231"></a>005582,000387: 12,3757           55357        <span class="sm">STARTSB1</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45524553544F5245">ERESTORE</a>                              
-005583,000388: 12,3760           34445                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3334">PRIO34</a>                                <span class="co">#  ENABLE INTERRUPTS.</span>
-005584,000389: 12,3761           02222                           <span class="op">TC      </span> <a href="#5354415254534232">STARTSB2</a>                              
-005585,000390: 
-<a name="454E4446525053"></a>005586,000391: 12,3762                        <span class="sm">ENDFRPS </span>           <span class="ps">EQUALS  </span>                                       
+005198,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+005199,000003:                                                                                                  <span class="co">## Filename:    FRESH_START_AND_RESTART.agc</span>
+005200,000004:                                                                                                  <span class="co">## Purpose:     A section of Sundial E.</span>
+005201,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the final</span>
+005202,000006:                                                                                                  <span class="co">##              release of the Block II Command Module system test software. No</span>
+005203,000007:                                                                                                  <span class="co">##              original listings of this program are available; instead, this</span>
+005204,000008:                                                                                                  <span class="co">##              file was created via disassembly of dumps of Sundial core rope</span>
+005205,000009:                                                                                                  <span class="co">##              modules and comparison with other AGC programs.</span>
+005206,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+005207,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+005208,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+005209,000013:                                                                                                  <span class="co">## Mod history: 2023-06-22 MAS  Created from Aurora 12.</span>
+005210,000014:                                                                                                  <span class="co">##              2023-06-30 MAS  Updated for Sundial E.</span>
+005211,000015:                                                                                                  <span class="co">##              2023-07-03 MAS  Relocated Sundial D patches to T4RUPT PROGRAM.</span>
+005212,000016: 
+005213,000017: 12,2000                                           <span class="ps">BANK    </span> 12                                    
+005214,000018: 12,2000  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+005215,000019: 
+<a name="534C415031"></a>005216,000020: 12,2000           00004        <span class="sm">SLAP1   </span>           <span class="op">INHINT  </span>                                       <span class="co">#  FRESH START. COMES HERE FROM PINBALL.</span>
+005217,000021: 12,2001           02210                           <span class="op">TC      </span> <a href="#5354415254535542">STARTSUB</a>                              <span class="co">#  SUBROUTINE DOES MOST OF THE WORK.</span>
+005218,000022: 
+005219,000023: 12,2002           37634                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  TURN OFF ALL DSPTAB +11D LAMPS ONLY ON</span>
+005220,000024: 12,2003           54322                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       <span class="co">#  REQUESTED FRESH START.</span>
+005221,000025: 
+005222,000026: 12,2004           37657                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SAME STORY ON ZEROING FAILREG.</span>
+005223,000027: 12,2005           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
+005224,000028: 12,2006           55361                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534D4F4445">SMODE</a>                                 
+005225,000029: 
+<a name="444F465354415254"></a>005226,000030: 12,2007           37657        <span class="sm">DOFSTART</span>           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  DO A FRESH START,</span>
+005227,000031: 12,2010           54276                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
+005228,000032: 12,2011           54342                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#55504C4F434B">UPLOCK</a>                                <span class="co">#  FREE UPLINK INTERLOCK</span>
+005229,000033: 
+005230,000034: 12,2012           55073                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534530">PHASE0</a>                                <span class="co">#  INITIALIZE PHASE TABLE - NO MISSION</span>
+005231,000035: 12,2013           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534531">PHASE1</a>                                <span class="co">#  PROGRAMS RUNNING.</span>
+005232,000036: 12,2014           55077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534532">PHASE2</a>                                
+005233,000037: 12,2015           55101                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534533">PHASE3</a>                                
+005234,000038: 12,2016           55103                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534534">PHASE4</a>                                
+005235,000039: 12,2017           55105                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534535">PHASE5</a>                                
+005236,000040: 
+005237,000041: 12,2020           40000                           <span class="op">COM     </span>                                       
+005238,000042: 12,2021           55072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534530">-PHASE0</a>                               
+005239,000043: 12,2022           55074                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>                               
+005240,000044: 12,2023           55076                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534532">-PHASE2</a>                               
+005241,000045: 12,2024           55100                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534533">-PHASE3</a>                               
+005242,000046: 12,2025           55102                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534534">-PHASE4</a>                               
+005243,000047: 12,2026           55104                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534535">-PHASE5</a>                               
+005244,000048: 
+005245,000049: 12,2027           32421                           <span class="op">CAF     </span> <a href="#494D3330494E4946">IM30INIF</a>                              <span class="co">#  FRESH START IMU INITIALIZATION.</span>
+005246,000050: 12,2030           54361                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              
+005247,000051: 
+005248,000052: 12,2031           37641                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543130">BIT10</a>                                 <span class="co">#  REMOVE IMU FAIL INHIBIT IN 5 SECS.</span>
+005249,000053: 12,2032           04451                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+005250,000054: 12,2033           02247 26003                     <span class="ps">2CADR   </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#494641494C4F4B">IFAILOK</a>                               
+005251,000055: 
+005252,000056: 12,2035           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  LET T5 IDLE.</span>
+005253,000057: 12,2036           32373                           <span class="op">DCA     </span> <a href="#543549444C4552">T5IDLER</a>                               
+005254,000058: 12,2037           52346                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54354C4F43">T5LOC</a>                                 
+005255,000059: 
+005256,000060: 12,2040           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  INITIALIZE SWITCHES ONLY ON FRESH START.</span>
+005257,000061: 12,2041           32427                           <span class="op">DCA     </span> <a href="#5357494E4954">SWINIT</a>                                
+005258,000062: 12,2042           52062                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>                                 
+005259,000063: 12,2043           00006                           <span class="op">EXTEND  </span>                                       
+005260,000064: 12,2044           32431                           <span class="op">DCA     </span> <a href="#5357494E4954">SWINIT</a>     +2                         
+005261,000065: 12,2045           52064                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5354415445">STATE</a>      +2                         
+005262,000066: 
+<a name="454E445253545254"></a>005263,000067: 12,2046           37645        <span class="sm">ENDRSTRT</span>           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495436">BIT6</a>                                  <span class="co">#  IF GIMBAL LOCK LAMP IS STILL ON,</span>
+005264,000068: 12,2047           70322                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       <span class="co">#  IMU WAS FOUND IN GIMBAL LOCK IN RESTART</span>
+005265,000069: 12,2050           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  AND LEFT IN COARSE ALIGN. IN THIS CASE</span>
+005266,000070: 12,2051           47642                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495439">BIT9</a>                                  <span class="co">#  SET ISS OPERATE BIT IN IMODES30 TO</span>
+005267,000071: 12,2052           26361                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  OPERATE SO T4 INBIT MONITOR WONT ZERO</span>
+005268,000072: 
+005269,000073: 12,2053           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  THE CDUS AS IT DOES IN FRESH START.</span>
+005270,000074: 12,2054           04064                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              <span class="co">#  DISPLAY MAJOR MODE.</span>
+005271,000075: 12,2055           12001                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4453504D4D">DSPMM</a>                                 
+005272,000076: 
+<a name="53544152545357"></a>005273,000077: 12,2056           14365        <span class="sm">STARTSW </span>           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#44554D4D594A4F42">DUMMYJOB</a>   +2                         <span class="co">#  PATCH FOR SIMULATION.</span>
+005274,000078: 
+<a name="535441525453494D"></a>005275,000079: 12,2057           37635        <span class="sm">STARTSIM</span>           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+005276,000080: 12,2060           04307                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+005277,000081: 12,2061           77777                           <span class="ps">OCT     </span> 77777                                 <span class="co">#  FATAL IF NOT PATCHED AS ABOVE.</span>
+005278,000082: 12,2062           77777                           <span class="ps">OCT     </span> 77777                                 
+005279,000083: 
+005280,000084: 12,2063           14365                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#44554D4D594A4F42">DUMMYJOB</a>   +2                         <span class="co">#  DONT ZERO NEWJOB</span>
+005281,000085: 
+005282,000086:                                                                                                  <span class="co">#           COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.</span>
+005283,000087: 
+<a name="474F50524F47"></a>005284,000088: 12,2064           03746        <span class="sm">GOPROG  </span>           <span class="op">TC      </span> <a href="T4RUPT_PROGRAM.agc.html#474F50524F4731">GOPROG1</a>                               
+005285,000089: 
+005286,000090: 12,2065           02210                           <span class="op">TC      </span> <a href="#5354415254535542">STARTSUB</a>                              <span class="co">#  COMMON INITIALIZATION ROUTINE.</span>
+005287,000091: 
+005288,000092: 12,2066           32424                           <span class="op">CAF     </span> <a href="#392C36">9,6</a>                                   <span class="co">#  LEAVE PROGRAM ALARM AND GIMBAL LOCK</span>
+005289,000093: 12,2067           70322                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       <span class="co">#  LAMPS INTACT ON RESTART.</span>
+005290,000094: 12,2070           67634                           <span class="op">AD      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543135">BIT15</a>                                 
+005291,000095: 12,2071           56322                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
+005292,000096: 12,2072           77645                           <span class="op">MASK    </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495436">BIT6</a>                                  
+005293,000097: 12,2073           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  IF GIMBAL LOCK LAMP WAS ON, LEAVE ISS IN</span>
+005294,000098: 12,2074           37647                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495434">BIT4</a>                                  <span class="co">#  COARSE ALIGN.</span>
+005295,000099: 12,2075           00006                           <span class="op">EXTEND  </span>                                       
+005296,000100: 12,2076           05012                           <span class="op">WOR     </span> 12                                    
+005297,000101: 
+005298,000102: 12,2077           34450                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                <span class="co">#  DISPLAY FAILREG AS INDICATION OF RESTART</span>
+005299,000103: 12,2100           04276                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  OR TO DISPLAY ABORT CODE AS ABOVE.</span>
+005300,000104: 12,2101           03113 02003                     <span class="ps">2CADR   </span> <a href="ALARM_AND_ABORT.agc.html#444F414C41524D">DOALARM</a>                               
+005301,000105: 
+005302,000106: 12,2103           37644                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495437">BIT7</a>                                  <span class="co">#  DOFSTART IF MARK REJECT AND EITHER</span>
+005303,000107: 12,2104           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  ERROR LIGHT RESET BUTTONS ARE DEPRESSED</span>
+005304,000108: 12,2105           02016                           <span class="op">RAND    </span> 16                                    
+005305,000109: 12,2106           00006                           <span class="op">EXTEND  </span>                                       
+005306,000110: 12,2107           12124                           <span class="op">BZF     </span> <a href="#50434C4F4F50">PCLOOP</a>     -1                         <span class="co">#  VERIFY PHASE TABLE.</span>
+005307,000111: 
+005308,000112: 12,2110           42420                           <span class="op">CS      </span> <a href="#2D454C52">-ELR</a>                                  
+005309,000113: 12,2111           00006                           <span class="op">EXTEND  </span>                                       
+005310,000114: 12,2112           02016                           <span class="op">RAND    </span> 16                                    <span class="co">#  NAV DSKY KEYCODES,MARK,MARK REJECT</span>
+005311,000115: 12,2113           62420                           <span class="op">AD      </span> <a href="#2D454C52">-ELR</a>                                  
+005312,000116: 12,2114           00006                           <span class="op">EXTEND  </span>                                       
+005313,000117: 12,2115           12007                           <span class="op">BZF     </span> <a href="#444F465354415254">DOFSTART</a>                              
+005314,000118: 
+005315,000119: 12,2116           42420                           <span class="op">CS      </span> <a href="#2D454C52">-ELR</a>                                  
+005316,000120: 12,2117           00006                           <span class="op">EXTEND  </span>                                       
+005317,000121: 12,2120           02015                           <span class="op">RAND    </span> 15                                    <span class="co">#  MAIN DSKY KEYCODES</span>
+005318,000122: 12,2121           62420                           <span class="op">AD      </span> <a href="#2D454C52">-ELR</a>                                  
+005319,000123: 12,2122           00006                           <span class="op">EXTEND  </span>                                       
+005320,000124: 12,2123           12007                           <span class="op">BZF     </span> <a href="#444F465354415254">DOFSTART</a>                              
+005321,000125: 
+005322,000126: 12,2124           37227                 -1        <span class="op">CAF     </span> <a href="#4E554D47525053">NUMGRPS</a>                               <span class="co">#  VERIFY PHASE TABLE AGREEMENT.</span>
+<a name="50434C4F4F50"></a>005323,000127: 12,2125           54145        <span class="sm">PCLOOP  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+005324,000128: 12,2126           60000                           <span class="op">DOUBLE  </span>                                       
+005325,000129: 12,2127           00006                           <span class="op">EXTEND  </span>                                       
+005326,000130: 12,2130           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+005327,000131: 12,2131           31073                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534530">-PHASE0</a>                               <span class="co">#  COMPLEMENT INTO A - DIRECT INTO L.</span>
+005328,000132: 12,2132           00006                           <span class="op">EXTEND  </span>                                       
+005329,000133: 12,2133           06001                           <span class="op">RXOR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  RESULT MUST BE -0 FOR AGREEMENT.</span>
+005330,000134: 12,2134           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+005331,000135: 12,2135           12177                           <span class="op">TCF     </span> <a href="#5054424144">PTBAD</a>                                 <span class="co">#  RESTART FAILURE.</span>
+005332,000136: 12,2136           12177                           <span class="op">TCF     </span> <a href="#5054424144">PTBAD</a>                                 
+005333,000137: 12,2137           12177                           <span class="op">TCF     </span> <a href="#5054424144">PTBAD</a>                                 
+005334,000138: 12,2140           10145                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  PROCESS ALL RESTART GROUPS.</span>
+005335,000139: 12,2141           12125                           <span class="op">TCF     </span> <a href="#50434C4F4F50">PCLOOP</a>                                
+005336,000140: 
+005337,000141: 12,2142           54146                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         <span class="co">#  SET TO +0.</span>
+005338,000142: 12,2143           37227                           <span class="op">CAF     </span> <a href="#4E554D47525053">NUMGRPS</a>                               <span class="co">#  SEE IF ANY GROUPS RUNNING.</span>
+<a name="4E5854525354"></a>005339,000143: 12,2144           54145        <span class="sm">NXTRST  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         
+005340,000144: 12,2145           60000                           <span class="op">DOUBLE  </span>                                       
+005341,000145: 12,2146           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+005342,000146: 12,2147           11073                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534530">PHASE0</a>                                
+005343,000147: 12,2150           12173                           <span class="op">TCF     </span> <a href="#50414354495645">PACTIVE</a>                               <span class="co">#  PNZ - GROUP ACTIVE.</span>
+005344,000148: 12,2151           12166                           <span class="op">TCF     </span> <a href="#50494E414354">PINACT</a>                                <span class="co">#  +0 - GROUP NOT RUNNING.</span>
+005345,000149: 
+<a name="505445524D"></a>005346,000150: 12,2152           54140        <span class="sm">PTERM   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  NNZ - TERMINATE REQUEST.</span>
+005347,000151: 12,2153           50145                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  PICK UP RESTART TERMINATE CADR.</span>
+005348,000152: 12,2154           32412                           <span class="op">CAF     </span> <a href="#525445524D434144">RTERMCAD</a>                              
+005349,000153: 
+<a name="5041435432"></a>005350,000154: 12,2155           54001        <span class="sm">PACT2   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+005351,000155: 12,2156           24140                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ABS OF PHASE.</span>
+005352,000156: 12,2157           46027                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4C4F5737">LOW7</a>                                  <span class="co">#  SEE THAT MAG IS LESS THAN 128.</span>
+005353,000157: 12,2160           70140                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+005354,000158: 12,2161           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+005355,000159: 12,2162           12177                           <span class="op">TCF     </span> <a href="#5054424144">PTBAD</a>                                 <span class="co">#  BAD DATA.</span>
+005356,000160: 
+005357,000161: 12,2163           24146                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         <span class="co">#  INDICATE GROUP DEMANDS PRESENT.</span>
+005358,000162: 12,2164           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+005359,000163: 12,2165           04070                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  MUST RETURN TO SWRETURN.</span>
+005360,000164: 
+<a name="50494E414354"></a>005361,000165: 12,2166           10145        <span class="sm">PINACT  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  PROCESS ALL RESTART GROUPS.</span>
+005362,000166: 12,2167           12144                           <span class="op">TCF     </span> <a href="#4E5854525354">NXTRST</a>                                
+005363,000167: 
+<a name="5453544D50414336"></a>005364,000168: 12,2170           10146        <span class="sm">TSTMPAC6</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         <span class="co">#  IF NO GROUPS ACTIVE THIS REQUEST, DO A</span>
+005365,000169: 12,2171           12203                           <span class="op">TCF     </span> <a href="#444F525354415254">DORSTART</a>                              
+005366,000170: 12,2172           12007                           <span class="op">TCF     </span> <a href="#444F465354415254">DOFSTART</a>                              <span class="co">#  FRESH START</span>
+005367,000171: 
+<a name="50414354495645"></a>005368,000172: 12,2173           54140        <span class="sm">PACTIVE </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+005369,000173: 12,2174           50145                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +5                         <span class="co">#  SELECT RESTART ACTIVE CADR.</span>
+005370,000174: 12,2175           32404                           <span class="op">CAF     </span> <a href="#5241435443414452">RACTCADR</a>                              
+005371,000175: 12,2176           12155                           <span class="op">TCF     </span> <a href="#5041435432">PACT2</a>                                 
+005372,000176: 
+<a name="5054424144"></a>005373,000177: 12,2177           32202        <span class="sm">PTBAD   </span>           <span class="op">CAF     </span> <a href="#4F435431313037">OCT1107</a>                               <span class="co">#  SET ADDITIONAL FAILURE TO SHOW PHASE</span>
+005374,000178: 12,2200           55364                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 <span class="co">#  TABLE DISAGREEMENT (WILL BE DISPLAYED</span>
+005375,000179: 12,2201           12007                           <span class="op">TCF     </span> <a href="#444F465354415254">DOFSTART</a>                              <span class="co">#  IN R2).</span>
+005376,000180: 
+<a name="4F435431313037"></a>005377,000181: 12,2202           01107        <span class="sm">OCT1107 </span>           <span class="ps">OCT     </span> 1107                                  <span class="co">#  ADDITIONAL ALARM CODE.</span>
+005378,000182: 
+<a name="444F525354415254"></a>005379,000183: 12,2203           32374        <span class="sm">DORSTART</span>           <span class="op">CAF     </span> <a href="#494641494C494E48">IFAILINH</a>                              <span class="co">#  LEAVE IMUFAILURE INHIBITS INTACT ON</span>
+005380,000184: 12,2204           70361                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              <span class="co">#  RESTART, RESETTING ALL FAILURE CODES.</span>
+005381,000185: 12,2205           62422                           <span class="op">AD      </span> <a href="#494D3330494E4952">IM30INIR</a>                              
+005382,000186: 12,2206           54361                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533330">IMODES30</a>                              
+005383,000187: 12,2207           12046                           <span class="op">TCF     </span> <a href="#454E445253545254">ENDRSTRT</a>                              
+005384,000188:                                                                                                  <span class="co">#  INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.</span>
+005385,000189: 
+<a name="5354415254535542"></a>005386,000190: 12,2210           56002        <span class="sm">STARTSUB</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+005387,000191: 12,2211           54114                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  EXEC TEMPS ARE AVAILABLE TO US.</span>
+005388,000192: 
+005389,000193: 12,2212           37657                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO OUTBITS WITHIN 3MS OF RESTART.</span>
+005390,000194: 12,2213           00006                           <span class="op">EXTEND  </span>                                       
+005391,000195: 12,2214           01012                           <span class="op">WRITE   </span> 12                                    
+005392,000196: 12,2215           00006                           <span class="op">EXTEND  </span>                                       
+005393,000197: 12,2216           01014                           <span class="op">WRITE   </span> 14                                    
+005394,000198: 12,2217           00006                           <span class="op">EXTEND  </span>                                       
+005395,000199: 12,2220           01011                           <span class="op">WRITE   </span> 11                                    
+005396,000200: 12,2221           03757                           <span class="op">TC      </span> <a href="T4RUPT_PROGRAM.agc.html#5354415254534231">STARTSB1</a>                              
+<a name="5354415254534232"></a>005397,000201: 12,2222           00006        <span class="sm">STARTSB2</span>           <span class="op">EXTEND  </span>                                       
+005398,000202: 12,2223           01013                           <span class="op">WRITE   </span> 13                                    
+005399,000203: 
+005400,000204: 12,2224           37632                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  T3 AND T4 OVERFLOW AS SOON AS POSSIBLE.</span>
+005401,000205: 12,2225           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 <span class="co">#  SO DOES T5.</span>
+005402,000206: 12,2226           54026                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4533">TIME3</a>                                 <span class="co">#    (POSMAX IS PSEUDO INTERRUPT SIGNAL IN</span>
+005403,000207: 12,2227           54027                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4534">TIME4</a>                                 <span class="co">#    CASE RUPT SIGNALLED BEFORE TS TIME3).</span>
+005404,000208: 
+005405,000209: 12,2230           32403                           <span class="op">CAF     </span> <a href="#53544152544542">STARTEB</a>                               
+005406,000210: 12,2231           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 <span class="co">#  SET FOR E3</span>
+005407,000211: 
+005408,000212: 12,2232           37633                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#  INITIALIZE WAITLIST DELTA-TS.</span>
+005409,000213: 12,2233           55407                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +7                         
+005410,000214: 12,2234           55406                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +6                         
+005411,000215: 12,2235           55405                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +5                         
+005412,000216: 12,2236           55404                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +4                         
+005413,000217: 12,2237           55403                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +3                         
+005414,000218: 12,2240           55402                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +2                         
+005415,000219: 12,2241           55401                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>       +1                         
+005416,000220: 12,2242           55400                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+005417,000221: 
+005418,000222: 12,2243           44502                           <span class="op">CS      </span> <a href="WAITLIST.agc.html#454E445441534B">ENDTASK</a>                               
+005419,000223: 12,2244           55410                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>                                  
+005420,000224: 12,2245           55412                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +2                         
+005421,000225: 12,2246           55414                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +4                         
+005422,000226: 12,2247           55416                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +6                         
+005423,000227: 12,2250           55420                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +8D                        
+005424,000228: 12,2251           55422                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +10D                       
+005425,000229: 12,2252           55424                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +12D                       
+005426,000230: 12,2253           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +14D                       
+005427,000231: 12,2254           55430                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +16D                       
+005428,000232: 12,2255           44503                           <span class="op">CS      </span> <a href="WAITLIST.agc.html#454E445441534B">ENDTASK</a>    +1                         
+005429,000233: 12,2256           55411                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +1                         
+005430,000234: 12,2257           55413                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +3                         
+005431,000235: 12,2260           55415                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +5                         
+005432,000236: 12,2261           55417                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +7                         
+005433,000237: 12,2262           55421                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +9D                        
+005434,000238: 12,2263           55423                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +11D                       
+005435,000239: 12,2264           55425                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +13D                       
+005436,000240: 12,2265           55427                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +15D                       
+005437,000241: 12,2266           55431                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535432">LST2</a>       +17D                       
+005438,000242: 
+005439,000243: 12,2267           47657                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  MAKE ALL EXECUTIVE REGISTER SETS</span>
+005440,000244: 12,2270           54153                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  AVAILABLE.</span>
+005441,000245: 12,2271           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +12D                       
+005442,000246: 12,2272           54203                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +24D                       
+005443,000247: 12,2273           54217                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +36D                       
+005444,000248: 12,2274           54233                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +48D                       
+005445,000249: 12,2275           54247                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +60D                       
+005446,000250: 12,2276           54263                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +72D                       
+005447,000251: 
+005448,000252: 12,2277           54347                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453525550545357">DSRUPTSW</a>                              
+005449,000253: 12,2300           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  SHOWS NO ACTIVE JOBS.</span>
+005450,000254: 
+005451,000255: 12,2301           32401                           <span class="op">CAF     </span> <a href="#5641433141445243">VAC1ADRC</a>                              <span class="co">#  MAKE ALL VAC AREAS AVAILABLE.</span>
+005452,000256: 12,2302           54414                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414331555345">VAC1USE</a>                               
+005453,000257: 12,2303           62402                           <span class="op">AD      </span> <a href="#4C544856414341">LTHVACA</a>                               
+005454,000258: 12,2304           54470                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414332555345">VAC2USE</a>                               
+005455,000259: 12,2305           62402                           <span class="op">AD      </span> <a href="#4C544856414341">LTHVACA</a>                               
+005456,000260: 12,2306           54544                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414333555345">VAC3USE</a>                               
+005457,000261: 12,2307           62402                           <span class="op">AD      </span> <a href="#4C544856414341">LTHVACA</a>                               
+005458,000262: 12,2310           54620                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414334555345">VAC4USE</a>                               
+005459,000263: 12,2311           62402                           <span class="op">AD      </span> <a href="#4C544856414341">LTHVACA</a>                               
+005460,000264: 12,2312           54674                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414335555345">VAC5USE</a>                               
+005461,000265: 
+005462,000266: 12,2313           37654                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#54454E">TEN</a>                                   <span class="co">#  TURN OFF ALL DISPLAY SYSTEM RELAYS.</span>
+<a name="4453504F4646"></a>005463,000267: 12,2314           54140        <span class="sm">DSPOFF  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+005464,000268: 12,2315           47637                           <span class="op">CS      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4249543132">BIT12</a>                                 
+005465,000269: 12,2316           50140                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+005466,000270: 12,2317           54307                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>                                
+005467,000271: 12,2320           10140                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+005468,000272: 12,2321           02314                           <span class="op">TC      </span> <a href="#4453504F4646">DSPOFF</a>                                
+005469,000273: 
+005470,000274: 12,2322           54045                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E4C494E4B">INLINK</a>                                
+005471,000275: 12,2323           54341                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350434E54">DSPCNT</a>                                
+005472,000276: 12,2324           54323                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341445253544F52">CADRSTOR</a>                              
+005473,000277: 12,2325           54300                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524551524554">REQRET</a>                                
+005474,000278: 12,2326           54302                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434C50415353">CLPASS</a>                                
+005475,000279: 12,2327           54277                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453504C4F434B">DSPLOCK</a>                               
+005476,000280: 12,2330           54305                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4E53415645">MONSAVE</a>                               <span class="co">#  KILL MONITOR</span>
+005477,000281: 12,2331           54306                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4E5341564531">MONSAVE1</a>                              
+005478,000282: 12,2332           54324                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#475241424C4F434B">GRABLOCK</a>                              
+005479,000283: 12,2333           54266                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56455242524547">VERBREG</a>                               
+005480,000284: 12,2334           54267                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F554E524547">NOUNREG</a>                               
+005481,000285: 12,2335           54327                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453504C495354">DSPLIST</a>                               
+005482,000286: 12,2336           54330                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453504C495354">DSPLIST</a>    +1                         
+005483,000287: 12,2337           54331                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453504C495354">DSPLIST</a>    +2                         
+005484,000288: 
+005485,000289: 12,2340           54365                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D41524B53544154">MARKSTAT</a>                              
+005486,000290: 12,2341           54332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558545642414354">EXTVBACT</a>                              <span class="co">#  MAKE EXTENDED VERBS AVAILABLE</span>
+005487,000291: 12,2342           54363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D5543414452">IMUCADR</a>                               
+005488,000292: 12,2343           54364                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F505443414452">OPTCADR</a>                               
+005489,000293: 12,2344           54351                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 
+005490,000294: 12,2345           37653                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4E4F5554434F4E">NOUTCON</a>                               
+005491,000295: 12,2346           54303                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F5554">NOUT</a>                                  
+005492,000296: 
+005493,000297: 12,2347           32425                           <span class="op">CAF     </span> <a href="#4F5054494E4954">OPTINIT</a>                               
+005494,000298: 12,2350           54354                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F50544D4F444553">OPTMODES</a>                              
+005495,000299: 
+005496,000300: 12,2351           37661                           <span class="op">CAF     </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4E45474F4E45">NEGONE</a>                                
+005497,000301: 12,2352           54350                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5054494E44">OPTIND</a>                                <span class="co">#  KILL COARSE OPTICS</span>
+005498,000302: 
+005499,000303: 12,2353           32423                           <span class="op">CAF     </span> <a href="#494D3333494E4954">IM33INIT</a>                              <span class="co">#  NO PIP OR TM FAILS.</span>
+005500,000304: 12,2354           54362                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494D4F4445533333">IMODES33</a>                              
+005501,000305: 
+005502,000306: 12,2355           32400                           <span class="op">CAF     </span> <a href="#4C455343484B">LESCHK</a>                                <span class="co">#  SELF CHECK GO-TO REGISTER.</span>
+005503,000307: 12,2356           55360                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               
+005504,000308: 12,2357           45470                           <span class="op">CS      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#564431">VD1</a>                                   
+005505,000309: 12,2360           54264                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350434F554E54">DSPCOUNT</a>                              
+005506,000310: 12,2361  E7,1426                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
+005507,000311: 
+005508,000312: 12,2361           32376                           <span class="op">CAF     </span> <a href="#4C444E544D474F">LDNTMGO</a>                               <span class="co">#  SET UP TM PROGRAM.</span>
+005509,000313: 12,2362           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+005510,000314: 
+005511,000315: 12,2363           32375                           <span class="op">CAF     </span> <a href="#4C444E5048415331">LDNPHAS1</a>                              
+005512,000316: 12,2364           55426                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
+005513,000317: 
+005514,000318: 12,2365           32377                           <span class="op">CAF     </span> <a href="#4E4F4D544D4C5354">NOMTMLST</a>                              <span class="co">#  SET UP NOMINAL DOWNLINK LIST.</span>
+005515,000319: 12,2366           54413                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E4C5354414452">DNLSTADR</a>                              
+005516,000320: 
+005517,000321: 12,2367           00114                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+005518,000322: 
+<a name="543549444C4F43"></a>005519,000323: 12,2370           30001        <span class="sm">T5IDLOC </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  T5RUPT COMES HERE EVERY 163.84 SECS</span>
+005520,000324: 12,2371           14514                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#4E4F5152534D">NOQRSM</a>     +1                         <span class="co">#  WHEN NOBODY IS USING IT.</span>
+005521,000325: 
+<a name="543549444C4552"></a>005522,000326: 12,2372           02370 24007  <span class="sm">T5IDLER </span>           <span class="ps">2CADR   </span> <a href="#543549444C4F43">T5IDLOC</a>                               
+005523,000327: 
+<a name="494641494C494E48"></a>005524,000328: 12,2374           00035        <span class="sm">IFAILINH</span>           <span class="ps">OCT     </span> 35                                    <span class="co">#  ISS FAILURE INHIBIT BITS.</span>
+<a name="4C444E5048415331"></a>005525,000329: 12,2375           03522        <span class="sm">LDNPHAS1</span>           <span class="ps">GENADR  </span> <a href="DOWN-TELEMETRY_PROGRAM.agc.html#444E504841534531">DNPHASE1</a>                              
+<a name="4C444E544D474F"></a>005526,000330: 12,2376           03426        <span class="sm">LDNTMGO </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444E544D474F544F">DNTMGOTO</a>                              
+<a name="4E4F4D544D4C5354"></a>005527,000331: 12,2377           03724        <span class="sm">NOMTMLST</span>           <span class="ps">GENADR  </span> <a href="DOWN-TELEMETRY_PROGRAM.agc.html#4E4F4D444E4C5354">NOMDNLST</a>                              
+<a name="4C455343484B"></a>005528,000332: 12,2400           02101        <span class="sm">LESCHK  </span>           <span class="ps">GENADR  </span> <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html#53454C4643484B">SELFCHK</a>                               
+<a name="5641433141445243"></a>005529,000333: 12,2401           00414        <span class="sm">VAC1ADRC</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414331555345">VAC1USE</a>                               
+<a name="4C544856414341"></a>005530,000334: 12,2402           00054        <span class="sm">LTHVACA </span>           <span class="ps">DEC     </span> 44         B-14                       
+005531,000335: 
+<a name="53544152544542"></a>005532,000336: 12,2403           01400        <span class="sm">STARTEB </span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+<a name="4E554D47525053"></a>005533,000337: 12,2404     7227               <span class="sm">NUMGRPS </span>           <span class="ps">EQUALS  </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#46495645">FIVE</a>                                  <span class="co">#  SIX GROUPS CURRENTLY.</span>
+005534,000338: 
+005535,000339:                                                                                                  <span class="co">#  WHERE TO GO ON RESTART IF GROUP ACTIVE:</span>
+005536,000340: 
+<a name="5241435443414452"></a>005537,000341: 12,2404           32555        <span class="sm">RACTCADR</span>           <span class="ps">CADR    </span> <a href="PRELAUNCH_ALIGNMENT_PROGRAM.agc.html#5052454C474F">PRELGO</a>                                <span class="co">#   RESTARTS DURING PRELAUNCH ALIGNMENT</span>
+005538,000342: 12,2405           35474                           <span class="ps">CADR    </span> <a href="OPTIMUM_PRELAUNCH_ALIGNMENT_CALIBRATION.agc.html#4F50544D53545254">OPTMSTRT</a>                              <span class="co">#   RESTARTS DURING OPTM ALIGN CALIBRATION</span>
+005539,000343: 12,2406           00000                           <span class="ps">CADR    </span> 10000                                 
+005540,000344: 12,2407           00000                           <span class="ps">CADR    </span> 10000                                 
+005541,000345: 12,2410           00000                           <span class="ps">CADR    </span> 10000                                 
+005542,000346: 12,2411           00000                           <span class="ps">CADR    </span> 10000                                 
+005543,000347: 
+005544,000348:                                                                                                  <span class="co">#  WHERE TO GO ON RESTART IF TERMINATE REQUESTED.</span>
+005545,000349: 
+<a name="525445524D434144"></a>005546,000350: 12,2412           00000        <span class="sm">RTERMCAD</span>           <span class="ps">CADR    </span> 10000                                 
+005547,000351: 12,2413           00000                           <span class="ps">CADR    </span> 10000                                 
+005548,000352: 12,2414           00000                           <span class="ps">CADR    </span> 10000                                 
+005549,000353: 12,2415           00000                           <span class="ps">CADR    </span> 10000                                 
+005550,000354: 12,2416           00000                           <span class="ps">CADR    </span> 10000                                 
+005551,000355: 12,2417           00000                           <span class="ps">CADR    </span> 10000                                 
+005552,000356: 
+<a name="2D454C52"></a>005553,000357: 12,2420           77755        <span class="sm">-ELR    </span>           <span class="ps">OCT     </span> -22                                   <span class="co">#  -ERROR LIGHT RESET KEY CODE.</span>
+<a name="494D3330494E4946"></a>005554,000358: 12,2421           37411        <span class="sm">IM30INIF</span>           <span class="ps">OCT     </span> 37411                                 <span class="co">#  INHIBITS IMU FAIL FOR 5 SEC AND PIP ISSW</span>
+<a name="494D3330494E4952"></a>005555,000359: 12,2422           37400        <span class="sm">IM30INIR</span>           <span class="ps">OCT     </span> 37400                                 <span class="co">#  LEAVE FAIL INHIBITS ALONE.</span>
+<a name="494D3333494E4954"></a>005556,000360: 12,2423           16000        <span class="sm">IM33INIT</span>           <span class="ps">OCT     </span> 16000                                 <span class="co">#  NO PIP OR TM FAIL SIGNALS.</span>
+<a name="392C36"></a>005557,000361: 12,2424           00440        <span class="sm">9,6     </span>           <span class="ps">OCT     </span> 440                                   <span class="co">#  MASK FOR PROG ALARM AND GIMBAL LOCK.</span>
+<a name="4F5054494E4954"></a>005558,000362: 12,2425           00130        <span class="sm">OPTINIT </span>           <span class="ps">OCT     </span> 130                                   
+<a name="5357494E4954"></a>005559,000363: 12,2426           00000        <span class="sm">SWINIT  </span>           <span class="ps">OCT     </span> 0                                     
+005560,000364: 12,2427           00000                           <span class="ps">OCT     </span> 0                                     
+005561,000365: 12,2430           00000                           <span class="ps">OCT     </span> 0                                     
+005562,000366: 12,2431           00000                           <span class="ps">OCT     </span> 0                                     
+005563,000367: 
+<a name="454E444652455353"></a>005564,000368: 12,2432                        <span class="sm">ENDFRESS</span>           <span class="ps">EQUALS  </span>                                       
 
 End of include-file FRESH_START_AND_RESTART.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

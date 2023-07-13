@@ -82,112 +82,112 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-011769,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-011770,000003:                                                                                                  <span class="co">## Filename:    ALARM_AND_ABORT.agc</span>
-011771,000004:                                                                                                  <span class="co">## Purpose:     A section of Sundial E.</span>
-011772,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the final</span>
-011773,000006:                                                                                                  <span class="co">##              release of the Block II Command Module system test software. No</span>
-011774,000007:                                                                                                  <span class="co">##              original listings of this program are available; instead, this</span>
-011775,000008:                                                                                                  <span class="co">##              file was created via disassembly of dumps of Sundial core rope</span>
-011776,000009:                                                                                                  <span class="co">##              modules and comparison with other AGC programs.</span>
-011777,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-011778,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-011779,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-011780,000013:                                                                                                  <span class="co">## Mod history: 2023-06-22 MAS  Created from Aurora 12.</span>
-011781,000014:                                                                                                  <span class="co">##              2023-06-30 MAS  Updated for Sundial E.</span>
-011782,000015: 
-011783,000016: 
-011784,000017:                                                                                                  <span class="co">#           THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED</span>
-011785,000018:                                                                                                  <span class="co">#  EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.</span>
-011786,000019: 
-011787,000020:                                                                                                  <span class="co">#           CALLING SEQUENCE IS AS FOLLOWS:</span>
-011788,000021: 
-011789,000022:                                                                                                  <span class="co">#           TC     ALARM</span>
-011790,000023:                                                                                                  <span class="co">#           OCT    AAANN           ALARM NO. NN IN GENERAL AREA AAA.</span>
-011791,000024:                                                                                                  <span class="co">#                                  (RETURNS HERE)</span>
-011792,000025: 
-011793,000026:    5644                                           <span class="ps">SETLOC  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4450494E4246">ENDPINBF</a>                              
-011794,000027:    5644     1363                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
-011795,000028: 
-<a name="414C41524D"></a>011796,000029:    5644           00004        <span class="sm">ALARM   </span>           <span class="op">INHINT  </span>                                       
-011797,000030:    5645           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-011798,000031:    5646           54077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-011799,000032: 
-011800,000033:    5647           11363                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               <span class="co">#  SEE IF ONE FAILURE HAS OCCURRED SINCE</span>
-011801,000034:                                                                                                  <span class="co">#   THE LAST ERROR RESET.</span>
-011802,000035:    5650           05656                           <span class="op">TC      </span> <a href="#4D554C544641494C">MULTFAIL</a>                              <span class="co">#  YES - INDICATE MULTIPLE FAILURES.</span>
-011803,000036:    5651           05661                           <span class="op">TC      </span> <a href="#4E4557414C41524D">NEWALARM</a>                              <span class="co">#  FIRST SINCE RESET.</span>
-011804,000037: 
-<a name="4D554C5445584954"></a>011805,000038:    5652           30077        <span class="sm">MULTEXIT</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              <span class="co">#  FREE RUPTREG4 BEFORE RELINT.</span>
-011806,000039:    5653           00003                           <span class="op">RELINT  </span>                                       
-011807,000040:    5654           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-011808,000041:    5655           00001                           <span class="op">TC      </span> 1                                     <span class="co">#  RETURN TO CALLER.</span>
-011809,000042: 
-<a name="4D554C544641494C"></a>011810,000043:    5656           66042        <span class="sm">MULTFAIL</span>           <span class="op">AD      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4F43543430303031">OCT40001</a>                              <span class="co">#  BIT 15 = 1 INDICATES MULTIPLE FAILURES.</span>
-011811,000044:    5657           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
-011812,000045:    5660           05652                           <span class="op">TC      </span> <a href="#4D554C5445584954">MULTEXIT</a>                              
-011813,000046: 
-<a name="4E4557414C41524D"></a>011814,000047:    5661           05671        <span class="sm">NEWALARM</span>           <span class="op">TC      </span> <a href="#50524F474C41524D">PROGLARM</a>                              <span class="co">#  TURN ON THE PROGRAM ALARM LIGHT.</span>
-011815,000048: 
-011816,000049:    5662           34450                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                
-011817,000050:    5663           04276                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
-011818,000051:    5664           03113 02002                     <span class="ps">2CADR   </span> <a href="#444F414C41524D">DOALARM</a>                               <span class="co">#  CALL (SEPARATE) JOB FOR DISPLAY.</span>
-011819,000052: 
-011820,000053:    5666           50077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-011821,000054:    5667           30000                           <span class="op">CAF     </span> 0                                     
-011822,000055:    5670           05657                           <span class="op">TC      </span> <a href="#4D554C544641494C">MULTFAIL</a>   +1                         
-011823,000056: 
-<a name="50524F474C41524D"></a>011824,000057:    5671           45676        <span class="sm">PROGLARM</span>           <span class="op">CS      </span> <a href="#4F43543430343030">OCT40400</a>                              <span class="co">#  TURN ON PROGRAM ALARM LIGHT VIA OUT0.</span>
-011825,000058:    5672           70322                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
-011826,000059:    5673           65676                           <span class="op">AD      </span> <a href="#4F43543430343030">OCT40400</a>                              
-011827,000060:    5674           54322                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
-011828,000061:    5675           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-011829,000062: 
-<a name="4F43543430343030"></a>011830,000063:    5676           40400        <span class="sm">OCT40400</span>           <span class="ps">OCT     </span> 40400                                 
-011831,000064: 
-011832,000065:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE IS CALLED TO INITIATE AN ABORT. FAILREG IS SET (ACCORDING TO THE MULTIPLE</span>
-011833,000066:                                                                                                  <span class="co">#  FAILURES CONVENTION) AND A RE-START IS INITIATED BY TC-SELF. THIS IS CALLED ONLY UNDER RARE CIRCUMSTANCES.</span>
-011834,000067: 
-<a name="41424F5254"></a>011835,000068:    5677           00004        <span class="sm">ABORT   </span>           <span class="op">INHINT  </span>                                       <span class="co">#  MAY BE CALLED IN INTERRUPT OR UNDER EXEC</span>
-011836,000069:    5700           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  PICK UP FAILURE CODE.</span>
-011837,000070:    5701           30000                           <span class="op">CAF     </span> 0                                     
-011838,000071:    5702           54065                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-011839,000072: 
-011840,000073:    5703           11363                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               <span class="co">#  SEE IF THIS IS A MULTIPLE FAILURE.</span>
-011841,000074:    5704           05707                           <span class="op">TC      </span> <a href="#5345544D554C5446">SETMULTF</a>                              <span class="co">#  SET BIT 15 TO INDICATE YES.</span>
-011842,000075:    5705           05711                           <span class="op">TC      </span> <a href="#4E455741424F5254">NEWABORT</a>                              <span class="co">#  FIRST FAILURE.</span>
-011843,000076: 
-<a name="5748494D504552"></a>011844,000077:    5706           05706        <span class="sm">WHIMPER </span>           <span class="op">TC      </span> <a href="#5748494D504552">WHIMPER</a>                               <span class="co">#  NOT WITH A BANG...</span>
-011845,000078: 
-<a name="5345544D554C5446"></a>011846,000079:    5707           66042        <span class="sm">SETMULTF</span>           <span class="op">AD      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4F43543430303031">OCT40001</a>                              <span class="co">#  RESTORE AND SET BIT 15.</span>
-011847,000080:    5710           05713                           <span class="op">TC      </span> +3                                    
-011848,000081: 
-<a name="4E455741424F5254"></a>011849,000082:    5711           05671        <span class="sm">NEWABORT</span>           <span class="op">TC      </span> <a href="#50524F474C41524D">PROGLARM</a>                              <span class="co">#  FIRST FAILURE - TURN ON ALARM LIGHT.</span>
-011850,000083:    5712           56065                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
-011851,000084:    5713           55363                 +3        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
-011852,000085:    5714           05706                           <span class="op">TC      </span> <a href="#5748494D504552">WHIMPER</a>                               <span class="co">#  UNIVERSAL ABORT LOCATION.</span>
-011853,000086: 
-<a name="434353484F4C45"></a>011854,000087:    5715           56002        <span class="sm">CCSHOLE </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-011855,000088:    5716           55364                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 
-011856,000089: 
-011857,000090:    5717           05677                           <span class="op">TC      </span> <a href="#41424F5254">ABORT</a>                                 
-011858,000091:    5720           01103                           <span class="ps">OCT     </span> 1103                                  
-011859,000092: 
-<a name="454E444641494C46"></a>011860,000093:    5721                        <span class="sm">ENDFAILF</span>           <span class="ps">EQUALS  </span>                                       
-011861,000094: 
-011862,000095:                                                                                                  <span class="co">#           JOB WHICH CALLS NVSUB FOR ALARM DISPLAY.</span>
-011863,000096: 
-011864,000097: 01,3113                                           <span class="ps">SETLOC  </span> <a href="KEYRUPT,_UPRUPT.agc.html#454E444B52555253">ENDKRURS</a>                              
-011865,000098: 
-<a name="444F414C41524D"></a>011866,000099: 01,3113           05550        <span class="sm">DOALARM </span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4752414257414954">GRABWAIT</a>                              <span class="co">#  DISPLAY FAILREG.</span>
-011867,000100: 01,3114           33117                           <span class="op">CAF     </span> <a href="#4641494C44495350">FAILDISP</a>                              
-011868,000101: 01,3115           05563                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
-011869,000102: 
-011870,000103: 01,3116           04352                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                <span class="co">#  FREE DISPLAY AND END JOB.</span>
-011871,000104: 
-<a name="4641494C44495350"></a>011872,000105: 01,3117           00531        <span class="sm">FAILDISP</span>           <span class="ps">OCT     </span> 00531                                 
-011873,000106: 
-<a name="454E444641494C53"></a>011874,000107: 01,3120                        <span class="sm">ENDFAILS</span>           <span class="ps">EQUALS  </span>                                       
+011765,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+011766,000003:                                                                                                  <span class="co">## Filename:    ALARM_AND_ABORT.agc</span>
+011767,000004:                                                                                                  <span class="co">## Purpose:     A section of Sundial E.</span>
+011768,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the final</span>
+011769,000006:                                                                                                  <span class="co">##              release of the Block II Command Module system test software. No</span>
+011770,000007:                                                                                                  <span class="co">##              original listings of this program are available; instead, this</span>
+011771,000008:                                                                                                  <span class="co">##              file was created via disassembly of dumps of Sundial core rope</span>
+011772,000009:                                                                                                  <span class="co">##              modules and comparison with other AGC programs.</span>
+011773,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+011774,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+011775,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+011776,000013:                                                                                                  <span class="co">## Mod history: 2023-06-22 MAS  Created from Aurora 12.</span>
+011777,000014:                                                                                                  <span class="co">##              2023-06-30 MAS  Updated for Sundial E.</span>
+011778,000015: 
+011779,000016: 
+011780,000017:                                                                                                  <span class="co">#           THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED</span>
+011781,000018:                                                                                                  <span class="co">#  EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.</span>
+011782,000019: 
+011783,000020:                                                                                                  <span class="co">#           CALLING SEQUENCE IS AS FOLLOWS:</span>
+011784,000021: 
+011785,000022:                                                                                                  <span class="co">#           TC     ALARM</span>
+011786,000023:                                                                                                  <span class="co">#           OCT    AAANN           ALARM NO. NN IN GENERAL AREA AAA.</span>
+011787,000024:                                                                                                  <span class="co">#                                  (RETURNS HERE)</span>
+011788,000025: 
+011789,000026:    5644                                           <span class="ps">SETLOC  </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4450494E4246">ENDPINBF</a>                              
+011790,000027:    5644     1363                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
+011791,000028: 
+<a name="414C41524D"></a>011792,000029:    5644           00004        <span class="sm">ALARM   </span>           <span class="op">INHINT  </span>                                       
+011793,000030:    5645           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+011794,000031:    5646           54077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+011795,000032: 
+011796,000033:    5647           11363                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               <span class="co">#  SEE IF ONE FAILURE HAS OCCURRED SINCE</span>
+011797,000034:                                                                                                  <span class="co">#   THE LAST ERROR RESET.</span>
+011798,000035:    5650           05656                           <span class="op">TC      </span> <a href="#4D554C544641494C">MULTFAIL</a>                              <span class="co">#  YES - INDICATE MULTIPLE FAILURES.</span>
+011799,000036:    5651           05661                           <span class="op">TC      </span> <a href="#4E4557414C41524D">NEWALARM</a>                              <span class="co">#  FIRST SINCE RESET.</span>
+011800,000037: 
+<a name="4D554C5445584954"></a>011801,000038:    5652           30077        <span class="sm">MULTEXIT</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              <span class="co">#  FREE RUPTREG4 BEFORE RELINT.</span>
+011802,000039:    5653           00003                           <span class="op">RELINT  </span>                                       
+011803,000040:    5654           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+011804,000041:    5655           00001                           <span class="op">TC      </span> 1                                     <span class="co">#  RETURN TO CALLER.</span>
+011805,000042: 
+<a name="4D554C544641494C"></a>011806,000043:    5656           66042        <span class="sm">MULTFAIL</span>           <span class="op">AD      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4F43543430303031">OCT40001</a>                              <span class="co">#  BIT 15 = 1 INDICATES MULTIPLE FAILURES.</span>
+011807,000044:    5657           55363                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
+011808,000045:    5660           05652                           <span class="op">TC      </span> <a href="#4D554C5445584954">MULTEXIT</a>                              
+011809,000046: 
+<a name="4E4557414C41524D"></a>011810,000047:    5661           05671        <span class="sm">NEWALARM</span>           <span class="op">TC      </span> <a href="#50524F474C41524D">PROGLARM</a>                              <span class="co">#  TURN ON THE PROGRAM ALARM LIGHT.</span>
+011811,000048: 
+011812,000049:    5662           34450                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3337">PRIO37</a>                                
+011813,000050:    5663           04276                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 
+011814,000051:    5664           03113 02002                     <span class="ps">2CADR   </span> <a href="#444F414C41524D">DOALARM</a>                               <span class="co">#  CALL (SEPARATE) JOB FOR DISPLAY.</span>
+011815,000052: 
+011816,000053:    5666           50077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+011817,000054:    5667           30000                           <span class="op">CAF     </span> 0                                     
+011818,000055:    5670           05657                           <span class="op">TC      </span> <a href="#4D554C544641494C">MULTFAIL</a>   +1                         
+011819,000056: 
+<a name="50524F474C41524D"></a>011820,000057:    5671           45676        <span class="sm">PROGLARM</span>           <span class="op">CS      </span> <a href="#4F43543430343030">OCT40400</a>                              <span class="co">#  TURN ON PROGRAM ALARM LIGHT VIA OUT0.</span>
+011821,000058:    5672           70322                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
+011822,000059:    5673           65676                           <span class="op">AD      </span> <a href="#4F43543430343030">OCT40400</a>                              
+011823,000060:    5674           54322                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#445350544142">DSPTAB</a>     +11D                       
+011824,000061:    5675           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+011825,000062: 
+<a name="4F43543430343030"></a>011826,000063:    5676           40400        <span class="sm">OCT40400</span>           <span class="ps">OCT     </span> 40400                                 
+011827,000064: 
+011828,000065:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE IS CALLED TO INITIATE AN ABORT. FAILREG IS SET (ACCORDING TO THE MULTIPLE</span>
+011829,000066:                                                                                                  <span class="co">#  FAILURES CONVENTION) AND A RE-START IS INITIATED BY TC-SELF. THIS IS CALLED ONLY UNDER RARE CIRCUMSTANCES.</span>
+011830,000067: 
+<a name="41424F5254"></a>011831,000068:    5677           00004        <span class="sm">ABORT   </span>           <span class="op">INHINT  </span>                                       <span class="co">#  MAY BE CALLED IN INTERRUPT OR UNDER EXEC</span>
+011832,000069:    5700           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  PICK UP FAILURE CODE.</span>
+011833,000070:    5701           30000                           <span class="op">CAF     </span> 0                                     
+011834,000071:    5702           54065                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+011835,000072: 
+011836,000073:    5703           11363                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               <span class="co">#  SEE IF THIS IS A MULTIPLE FAILURE.</span>
+011837,000074:    5704           05707                           <span class="op">TC      </span> <a href="#5345544D554C5446">SETMULTF</a>                              <span class="co">#  SET BIT 15 TO INDICATE YES.</span>
+011838,000075:    5705           05711                           <span class="op">TC      </span> <a href="#4E455741424F5254">NEWABORT</a>                              <span class="co">#  FIRST FAILURE.</span>
+011839,000076: 
+<a name="5748494D504552"></a>011840,000077:    5706           05706        <span class="sm">WHIMPER </span>           <span class="op">TC      </span> <a href="#5748494D504552">WHIMPER</a>                               <span class="co">#  NOT WITH A BANG...</span>
+011841,000078: 
+<a name="5345544D554C5446"></a>011842,000079:    5707           66042        <span class="sm">SETMULTF</span>           <span class="op">AD      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#4F43543430303031">OCT40001</a>                              <span class="co">#  RESTORE AND SET BIT 15.</span>
+011843,000080:    5710           05713                           <span class="op">TC      </span> +3                                    
+011844,000081: 
+<a name="4E455741424F5254"></a>011845,000082:    5711           05671        <span class="sm">NEWABORT</span>           <span class="op">TC      </span> <a href="#50524F474C41524D">PROGLARM</a>                              <span class="co">#  FIRST FAILURE - TURN ON ALARM LIGHT.</span>
+011846,000083:    5712           56065                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4954454D5031">ITEMP1</a>                                
+011847,000084:    5713           55363                 +3        <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4641494C524547">FAILREG</a>                               
+011848,000085:    5714           05706                           <span class="op">TC      </span> <a href="#5748494D504552">WHIMPER</a>                               <span class="co">#  UNIVERSAL ABORT LOCATION.</span>
+011849,000086: 
+<a name="434353484F4C45"></a>011850,000087:    5715           56002        <span class="sm">CCSHOLE </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+011851,000088:    5716           55364                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#534641494C">SFAIL</a>                                 
+011852,000089: 
+011853,000090:    5717           05677                           <span class="op">TC      </span> <a href="#41424F5254">ABORT</a>                                 
+011854,000091:    5720           01103                           <span class="ps">OCT     </span> 1103                                  
+011855,000092: 
+<a name="454E444641494C46"></a>011856,000093:    5721                        <span class="sm">ENDFAILF</span>           <span class="ps">EQUALS  </span>                                       
+011857,000094: 
+011858,000095:                                                                                                  <span class="co">#           JOB WHICH CALLS NVSUB FOR ALARM DISPLAY.</span>
+011859,000096: 
+011860,000097: 01,3113                                           <span class="ps">SETLOC  </span> <a href="KEYRUPT,_UPRUPT.agc.html#454E444B52555253">ENDKRURS</a>                              
+011861,000098: 
+<a name="444F414C41524D"></a>011862,000099: 01,3113           05550        <span class="sm">DOALARM </span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4752414257414954">GRABWAIT</a>                              <span class="co">#  DISPLAY FAILREG.</span>
+011863,000100: 01,3114           33117                           <span class="op">CAF     </span> <a href="#4641494C44495350">FAILDISP</a>                              
+011864,000101: 01,3115           05563                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
+011865,000102: 
+011866,000103: 01,3116           04352                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                <span class="co">#  FREE DISPLAY AND END JOB.</span>
+011867,000104: 
+<a name="4641494C44495350"></a>011868,000105: 01,3117           00531        <span class="sm">FAILDISP</span>           <span class="ps">OCT     </span> 00531                                 
+011869,000106: 
+<a name="454E444641494C53"></a>011870,000107: 01,3120                        <span class="sm">ENDFAILS</span>           <span class="ps">EQUALS  </span>                                       
 
 End of include-file ALARM_AND_ABORT.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

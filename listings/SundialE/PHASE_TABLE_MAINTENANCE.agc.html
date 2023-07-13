@@ -82,116 +82,116 @@ from scratch to match what we believe would have been in the original listing.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-005085,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-005086,000003:                                                                                                  <span class="co">## Filename:    PHASE_TABLE_MAINTENANCE.agc</span>
-005087,000004:                                                                                                  <span class="co">## Purpose:     A section of Sundial E.</span>
-005088,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the final</span>
-005089,000006:                                                                                                  <span class="co">##              release of the Block II Command Module system test software. No</span>
-005090,000007:                                                                                                  <span class="co">##              original listings of this program are available; instead, this</span>
-005091,000008:                                                                                                  <span class="co">##              file was created via disassembly of dumps of Sundial core rope</span>
-005092,000009:                                                                                                  <span class="co">##              modules and comparison with other AGC programs.</span>
-005093,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-005094,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-005095,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-005096,000013:                                                                                                  <span class="co">## Mod history: 2023-06-22 MAS  Created from Aurora 12.</span>
-005097,000014:                                                                                                  <span class="co">##              2023-06-30 MAS  Updated for Sundial E.</span>
-005098,000015: 
-005099,000016:                                                                                                  <span class="co">#        THE FOLLOWING ROUTINES ARE PROVIDED TO MAINTAIN THE PHASE TABLE. TWO ROUTINES ARE AVAILABLE:</span>
-005100,000017: 
-005101,000018:                                                                                                  <span class="co">#                TC      PHASCHNG        SLOWER BUT LESS STORAGE.</span>
-005102,000019:                                                                                                  <span class="co">#                OCT     PPPGG           CHANGE RESTART GROUP GG TO PHASE PPP</span>
-005103,000020:                                                                                                  <span class="co">#                                        (PPP IS A SIGNED 8 BIT NUMBER).</span>
-005104,000021: 
-005105,000022:                                                                                                  <span class="co">#                CA      PPPPP           NEW PHASE ARRIVES IN A.</span>
-005106,000023:                                                                                                  <span class="co">#                TC      NEWPHASE</span>
-005107,000024:                                                                                                  <span class="co">#                OCT     000GG           UPDATES GG.</span>
-005108,000025: 
-005109,000026:                                                                                                  <span class="co">#        IN ALL CASES THE OLD PHASE RETURNS IN A. IF THE OLD PHASE WAS NEGATIVE, CALL A ROUTINE USING THE</span>
-005110,000027:                                                                                                  <span class="co">#  CORRESPONDING TERMCADR.</span>
-005111,000028: 
-005112,000029:    4517                                           <span class="ps">SETLOC  </span> <a href="WAITLIST.agc.html#454E445741495446">ENDWAITF</a>                              
-005113,000030: 
-<a name="5048415343484E47"></a>005114,000031:    4517           00004        <span class="sm">PHASCHNG</span>           <span class="op">INHINT  </span>                                       
-005115,000032:    4520           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-005116,000033:    4521           30000                           <span class="op">CAF     </span> 0                                     <span class="co">#  GET PARAMETER WORD.</span>
-005117,000034:    4522           54077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-005118,000035:    4523           75455                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  <span class="co">#  GROUP NUMBER 0 - 37.</span>
-005119,000036:    4524           60000                           <span class="op">DOUBLE  </span>                                       
-005120,000037:    4525           56077                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-005121,000038:    4526           00006                           <span class="op">EXTEND  </span>                                       
-005122,000039:    4527           77642                           <span class="op">MP      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495439">BIT9</a>                                  <span class="co">#  SIGNED NEW PHASE.</span>
-005123,000040:    4530           14537                           <span class="op">TCF     </span> <a href="#50484153434832">PHASCH2</a>                               
-005124,000041: 
-<a name="4E45575048415345"></a>005125,000042:    4531           00004        <span class="sm">NEWPHASE</span>           <span class="op">INHINT  </span>                                       <span class="co">#  NEW PHASE ARRIVES IN A.</span>
-005126,000043:    4532           54077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-005127,000044:    4533           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-005128,000045:    4534           30000                           <span class="op">CAF     </span> 0                                     <span class="co">#  GROUP NUMBER.</span>
-005129,000046:    4535           60000                           <span class="op">DOUBLE  </span>                                       
-005130,000047:    4536           56077                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
-005131,000048: 
-<a name="50484153434832"></a>005132,000049:    4537           54001        <span class="sm">PHASCH2 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  DIRECT VERSION.</span>
-005133,000050:    4540           40000                           <span class="op">COM     </span>                                       <span class="co">#  COMPLEMENTED VERSION IMMEDIATELY PRE-</span>
-005134,000051:    4541           50077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              <span class="co">#  CEDES THE DIRECT ONE.</span>
-005135,000052:    4542           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534530">-PHASE0</a>                               <span class="co">#  COPIES DISAGREE FOR MINIMUM TIME.</span>
-005136,000053:    4543           00006                           <span class="op">EXTEND  </span>                                       
-005137,000054:    4544           64560                           <span class="op">BZMF    </span> <a href="#5048415345584954">PHASEXIT</a>                              <span class="co">#  IF NO DERAIL.</span>
-005138,000055: 
-005139,000056:    4545           54074                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  IF NEGATIVE, SAVE ABSOLUTE VALUE OF</span>
-005140,000057:    4546           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  OLD PHASE AND RETURN Q.</span>
-005141,000058:    4547           22075                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
-005142,000059:    4550           30077                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              <span class="co">#  GET BACK GROUP NUMBER.</span>
-005143,000060:    4551           00006                           <span class="op">EXTEND  </span>                                       
-005144,000061:    4552           77635                           <span class="op">MP      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#48414C46">HALF</a>                                  
-005145,000062:    4553           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  SELECT TERMCADR.</span>
-005146,000063:    4554           34564                           <span class="op">CAF     </span> <a href="#5445524D43414452">TERMCADR</a>                              
-005147,000064:    4555           04136                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49535743414C4C">ISWCALL</a>                               
-005148,000065: 
-005149,000066:    4556           52075                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  -OLD PHASE BITS TO A - RETURN -1 TO L.</span>
-005150,000067:    4557           22002                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-005151,000068: 
-<a name="5048415345584954"></a>005152,000069:    4560           40000        <span class="sm">PHASEXIT</span>           <span class="op">COM     </span>                                       <span class="co">#  RETURN OLD PHASE IN A.</span>
-005153,000070:    4561           00003                           <span class="op">RELINT  </span>                                       
-005154,000071:    4562           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-005155,000072:    4563           00001                           <span class="op">TC      </span> 1                                     
-005156,000073: 
-<a name="5445524D43414452"></a>005157,000074:    4564           00000        <span class="sm">TERMCADR</span>           <span class="ps">CADR    </span> 10000                                 <span class="co">#  FILLED IN AS NEEDED.</span>
-005158,000075:    4565           00000                           <span class="ps">CADR    </span> 10000                                 
-005159,000076:    4566           00000                           <span class="ps">CADR    </span> 10000                                 
-005160,000077:    4567           00000                           <span class="ps">CADR    </span> 10000                                 
-005161,000078:    4570           00000                           <span class="ps">CADR    </span> 10000                                 
-005162,000079:    4571           00000                           <span class="ps">CADR    </span> 10000                                 
-005163,000080: 
-005164,000081:                                                                                                  <span class="co">#        SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.</span>
-005165,000082: 
-<a name="4E45574D4F444558"></a>005166,000083:    4572           50002        <span class="sm">NEWMODEX</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  UPDATE MODREG.</span>
-005167,000084:    4573           30000                           <span class="op">CAF     </span> 0                                     
-005168,000085:    4574           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-005169,000086:    4575           56276                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
-005170,000087:    4576           40000                           <span class="op">COM     </span>                                       <span class="co">#  IF NO CHANGE IN MODE, RETURN IMMEDIATELY</span>
-005171,000088:    4577           60276                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
-005172,000089:    4600           00006                           <span class="op">EXTEND  </span>                                       
-005173,000090:    4601           14615                           <span class="op">BZF     </span> <a href="#544351">TCQ</a>                                   
-005174,000091: 
-005175,000092:    4602           34604                           <span class="op">CAF     </span> +2                                    <span class="co">#  CALL PINBALL SUBROUTINE.</span>
-005176,000093:    4603           14070                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  WITH Q SET TO CALLERS RETURN.</span>
-005177,000094: 
-005178,000095:    4604           12001                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4453504D4D">DSPMM</a>                                 
-005179,000096: 
-005180,000097:                                                                                                  <span class="co">#        RETURN TO CALLER +3 IF MODE = THAT AT CALLER +1. OTHERWISE RETURN TO CALLER +2.</span>
-005181,000098: 
-<a name="434845434B4D4D"></a>005182,000099:    4605           50002        <span class="sm">CHECKMM </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-005183,000100:    4606           40000                           <span class="op">CS      </span> 0                                     
-005184,000101:    4607           60276                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
-005185,000102:    4610           00006                           <span class="op">EXTEND  </span>                                       
-005186,000103:    4611           14614                           <span class="op">BZF     </span> +3                                    
-005187,000104: 
-005188,000105:    4612           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-005189,000106:    4613           00001                           <span class="op">TC      </span> 1                                     <span class="co">#  NO MATCH.</span>
-005190,000107: 
-005191,000108:    4614           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="544351"></a>005192,000109:    4615           00002        <span class="sm">TCQ     </span>           <span class="op">TC      </span> 2                                     <span class="co">#  (ALWAYS AVAILABLE TO BZF &amp; BZMF)</span>
-005193,000110: 
-<a name="454E4450484D4E46"></a>005194,000111:    4616                        <span class="sm">ENDPHMNF</span>           <span class="ps">EQUALS  </span>                                       
+005086,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+005087,000003:                                                                                                  <span class="co">## Filename:    PHASE_TABLE_MAINTENANCE.agc</span>
+005088,000004:                                                                                                  <span class="co">## Purpose:     A section of Sundial E.</span>
+005089,000005:                                                                                                  <span class="co">##              It is part of the reconstructed source code for the final</span>
+005090,000006:                                                                                                  <span class="co">##              release of the Block II Command Module system test software. No</span>
+005091,000007:                                                                                                  <span class="co">##              original listings of this program are available; instead, this</span>
+005092,000008:                                                                                                  <span class="co">##              file was created via disassembly of dumps of Sundial core rope</span>
+005093,000009:                                                                                                  <span class="co">##              modules and comparison with other AGC programs.</span>
+005094,000010:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+005095,000011:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+005096,000012:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+005097,000013:                                                                                                  <span class="co">## Mod history: 2023-06-22 MAS  Created from Aurora 12.</span>
+005098,000014:                                                                                                  <span class="co">##              2023-06-30 MAS  Updated for Sundial E.</span>
+005099,000015: 
+005100,000016:                                                                                                  <span class="co">#        THE FOLLOWING ROUTINES ARE PROVIDED TO MAINTAIN THE PHASE TABLE. TWO ROUTINES ARE AVAILABLE:</span>
+005101,000017: 
+005102,000018:                                                                                                  <span class="co">#                TC      PHASCHNG        SLOWER BUT LESS STORAGE.</span>
+005103,000019:                                                                                                  <span class="co">#                OCT     PPPGG           CHANGE RESTART GROUP GG TO PHASE PPP</span>
+005104,000020:                                                                                                  <span class="co">#                                        (PPP IS A SIGNED 8 BIT NUMBER).</span>
+005105,000021: 
+005106,000022:                                                                                                  <span class="co">#                CA      PPPPP           NEW PHASE ARRIVES IN A.</span>
+005107,000023:                                                                                                  <span class="co">#                TC      NEWPHASE</span>
+005108,000024:                                                                                                  <span class="co">#                OCT     000GG           UPDATES GG.</span>
+005109,000025: 
+005110,000026:                                                                                                  <span class="co">#        IN ALL CASES THE OLD PHASE RETURNS IN A. IF THE OLD PHASE WAS NEGATIVE, CALL A ROUTINE USING THE</span>
+005111,000027:                                                                                                  <span class="co">#  CORRESPONDING TERMCADR.</span>
+005112,000028: 
+005113,000029:    4517                                           <span class="ps">SETLOC  </span> <a href="WAITLIST.agc.html#454E445741495446">ENDWAITF</a>                              
+005114,000030: 
+<a name="5048415343484E47"></a>005115,000031:    4517           00004        <span class="sm">PHASCHNG</span>           <span class="op">INHINT  </span>                                       
+005116,000032:    4520           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+005117,000033:    4521           30000                           <span class="op">CAF     </span> 0                                     <span class="co">#  GET PARAMETER WORD.</span>
+005118,000034:    4522           54077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+005119,000035:    4523           75455                           <span class="op">MASK    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4C4F5735">LOW5</a>                                  <span class="co">#  GROUP NUMBER 0 - 37.</span>
+005120,000036:    4524           60000                           <span class="op">DOUBLE  </span>                                       
+005121,000037:    4525           56077                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+005122,000038:    4526           00006                           <span class="op">EXTEND  </span>                                       
+005123,000039:    4527           77642                           <span class="op">MP      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#42495439">BIT9</a>                                  <span class="co">#  SIGNED NEW PHASE.</span>
+005124,000040:    4530           14537                           <span class="op">TCF     </span> <a href="#50484153434832">PHASCH2</a>                               
+005125,000041: 
+<a name="4E45575048415345"></a>005126,000042:    4531           00004        <span class="sm">NEWPHASE</span>           <span class="op">INHINT  </span>                                       <span class="co">#  NEW PHASE ARRIVES IN A.</span>
+005127,000043:    4532           54077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+005128,000044:    4533           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+005129,000045:    4534           30000                           <span class="op">CAF     </span> 0                                     <span class="co">#  GROUP NUMBER.</span>
+005130,000046:    4535           60000                           <span class="op">DOUBLE  </span>                                       
+005131,000047:    4536           56077                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              
+005132,000048: 
+<a name="50484153434832"></a>005133,000049:    4537           54001        <span class="sm">PHASCH2 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  DIRECT VERSION.</span>
+005134,000050:    4540           40000                           <span class="op">COM     </span>                                       <span class="co">#  COMPLEMENTED VERSION IMMEDIATELY PRE-</span>
+005135,000051:    4541           50077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              <span class="co">#  CEDES THE DIRECT ONE.</span>
+005136,000052:    4542           53073                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534530">-PHASE0</a>                               <span class="co">#  COPIES DISAGREE FOR MINIMUM TIME.</span>
+005137,000053:    4543           00006                           <span class="op">EXTEND  </span>                                       
+005138,000054:    4544           64560                           <span class="op">BZMF    </span> <a href="#5048415345584954">PHASEXIT</a>                              <span class="co">#  IF NO DERAIL.</span>
+005139,000055: 
+005140,000056:    4545           54074                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  IF NEGATIVE, SAVE ABSOLUTE VALUE OF</span>
+005141,000057:    4546           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  OLD PHASE AND RETURN Q.</span>
+005142,000058:    4547           22075                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              
+005143,000059:    4550           30077                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454734">RUPTREG4</a>                              <span class="co">#  GET BACK GROUP NUMBER.</span>
+005144,000060:    4551           00006                           <span class="op">EXTEND  </span>                                       
+005145,000061:    4552           77635                           <span class="op">MP      </span> <a href="LIST_PROCESSING_INTERPRETER.agc.html#48414C46">HALF</a>                                  
+005146,000062:    4553           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  SELECT TERMCADR.</span>
+005147,000063:    4554           34564                           <span class="op">CAF     </span> <a href="#5445524D43414452">TERMCADR</a>                              
+005148,000064:    4555           04136                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49535743414C4C">ISWCALL</a>                               
+005149,000065: 
+005150,000066:    4556           52075                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              <span class="co">#  -OLD PHASE BITS TO A - RETURN -1 TO L.</span>
+005151,000067:    4557           22002                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+005152,000068: 
+<a name="5048415345584954"></a>005153,000069:    4560           40000        <span class="sm">PHASEXIT</span>           <span class="op">COM     </span>                                       <span class="co">#  RETURN OLD PHASE IN A.</span>
+005154,000070:    4561           00003                           <span class="op">RELINT  </span>                                       
+005155,000071:    4562           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+005156,000072:    4563           00001                           <span class="op">TC      </span> 1                                     
+005157,000073: 
+<a name="5445524D43414452"></a>005158,000074:    4564           00000        <span class="sm">TERMCADR</span>           <span class="ps">CADR    </span> 10000                                 <span class="co">#  FILLED IN AS NEEDED.</span>
+005159,000075:    4565           00000                           <span class="ps">CADR    </span> 10000                                 
+005160,000076:    4566           00000                           <span class="ps">CADR    </span> 10000                                 
+005161,000077:    4567           00000                           <span class="ps">CADR    </span> 10000                                 
+005162,000078:    4570           00000                           <span class="ps">CADR    </span> 10000                                 
+005163,000079:    4571           00000                           <span class="ps">CADR    </span> 10000                                 
+005164,000080: 
+005165,000081:                                                                                                  <span class="co">#        SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.</span>
+005166,000082: 
+<a name="4E45574D4F444558"></a>005167,000083:    4572           50002        <span class="sm">NEWMODEX</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  UPDATE MODREG.</span>
+005168,000084:    4573           30000                           <span class="op">CAF     </span> 0                                     
+005169,000085:    4574           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+005170,000086:    4575           56276                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
+005171,000087:    4576           40000                           <span class="op">COM     </span>                                       <span class="co">#  IF NO CHANGE IN MODE, RETURN IMMEDIATELY</span>
+005172,000088:    4577           60276                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
+005173,000089:    4600           00006                           <span class="op">EXTEND  </span>                                       
+005174,000090:    4601           14615                           <span class="op">BZF     </span> <a href="#544351">TCQ</a>                                   
+005175,000091: 
+005176,000092:    4602           34604                           <span class="op">CAF     </span> +2                                    <span class="co">#  CALL PINBALL SUBROUTINE.</span>
+005177,000093:    4603           14070                           <span class="op">TCF     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#535743414C4C">SWCALL</a>                                <span class="co">#  WITH Q SET TO CALLERS RETURN.</span>
+005178,000094: 
+005179,000095:    4604           12001                           <span class="ps">CADR    </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4453504D4D">DSPMM</a>                                 
+005180,000096: 
+005181,000097:                                                                                                  <span class="co">#        RETURN TO CALLER +3 IF MODE = THAT AT CALLER +1. OTHERWISE RETURN TO CALLER +2.</span>
+005182,000098: 
+<a name="434845434B4D4D"></a>005183,000099:    4605           50002        <span class="sm">CHECKMM </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+005184,000100:    4606           40000                           <span class="op">CS      </span> 0                                     
+005185,000101:    4607           60276                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F44524547">MODREG</a>                                
+005186,000102:    4610           00006                           <span class="op">EXTEND  </span>                                       
+005187,000103:    4611           14614                           <span class="op">BZF     </span> +3                                    
+005188,000104: 
+005189,000105:    4612           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+005190,000106:    4613           00001                           <span class="op">TC      </span> 1                                     <span class="co">#  NO MATCH.</span>
+005191,000107: 
+005192,000108:    4614           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="544351"></a>005193,000109:    4615           00002        <span class="sm">TCQ     </span>           <span class="op">TC      </span> 2                                     <span class="co">#  (ALWAYS AVAILABLE TO BZF &amp; BZMF)</span>
+005194,000110: 
+<a name="454E4450484D4E46"></a>005195,000111:    4616                        <span class="sm">ENDPHMNF</span>           <span class="ps">EQUALS  </span>                                       
 
 End of include-file PHASE_TABLE_MAINTENANCE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
