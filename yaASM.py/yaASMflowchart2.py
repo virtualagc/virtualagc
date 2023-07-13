@@ -196,7 +196,9 @@ defaultEntry = {
         "commentMiddle": "",
         "commentTail": "",
         # For splitting nodes.
-        "next": None
+        "next": None,
+        # If destination for any arrows other then default fallthrough:
+        "targeted": False
     }
 lines = []
 lhsPattern = re.compile("^[A-Z][.A-Z0-9]*\\b")
@@ -344,7 +346,7 @@ def printFlowchart(nodes, arrows):
             heading = ""
             is_TRA_HOP = opcode.startswith("TRA") or opcode.startswith("HOP")
             boxWidth = 20
-            if col71 in ["J", "H", "E"]:
+            if col71 in ["J", "H", "E", "Y", "N"]:
                 continue
             elif col71 in ["S"]:
                 if lhs != "":
@@ -477,6 +479,7 @@ def processFlowchart(startLine, afterLine):
     # on the line.
     nodes = []
     arrows = []
+    lhsDict = {}
     # Let's accumulate some nodes, and add some status variables (key, ...)
     # to them.
     for i in range(start, after):
@@ -484,13 +487,24 @@ def processFlowchart(startLine, afterLine):
         col71 = entry["col71"]
         opcode = entry["opcode"]
         operand = entry["operand"]
+        fullCommentFront = entry["fullCommentFront"]
+        commentPrefix = entry["commentPrefix"]
+        lhs = entry["lhs"]
+        if opcode in ["HOP", "TRA", "TMI", "TNZ"] and operand.startswith("*") \
+                and commentPrefix != "":
+            operand = commentPrefix.lstrip("(").rstrip(")")
+            entry["operand"] = operand
         commentMiddle = entry["commentMiddle"]
         if col71 == "C" and opcode == "HOP" and \
                 (operand.startswith("77") or commentMiddle == "RETURN"):
             # Pure ad-hoc'ery here!  I hope it doesn't come back to bite me.
             col71 = "X"
             entry["col71"] = col71
-        if col71 in [" ", "$", "*", "H", "Y", "N", "C", "E"]:
+        if col71 == " " and opcode.startswith("TRA") and \
+                not operand.startswith("*"):
+            col71 = "G"
+            entry["col71"] = col71
+        if col71 in [" ", "$", "*", "H", "C", "E"]:
             continue
         if entry["fullComment"] and entry["comment"] == "*":
             continue
@@ -502,13 +516,77 @@ def processFlowchart(startLine, afterLine):
         entry["yes"] = False
         entry["no"] = False
         entry["index"] = len(nodes)
+        # If this flowchart box is labeled in some way that might enable us
+        # to target an arrow at it, add its labeling to the lhsDict{}
+        # dictionary.  There are several possible types of labeling, so we
+        # need to prioritize them.  It's not entirely clear just how that
+        # should work, but from highest to lowest priority I'm using:
+        # lhs, commentPrefix, fullCommentFront.
+        if lhs != "":
+            lhsDict[lhs] = (len(nodes), "lhs")
+        elif commentPrefix != "":
+            lhs = commentPrefix.lstrip("(").rstrip(")")
+            if lhs not in lhsDict or lhsDict[lhs][1] == "fullCommentFront":
+                if " " not in lhs:
+                    lhsDict[lhs] = (len(nodes), "commentPrefix")
+        elif fullCommentFront != "":
+            lhs = fullCommentFront.lstrip("*(").rstrip(")")
+            if lhs not in lhsDict:
+                if " " not in lhs:
+                    lhsDict[lhs] = (len(nodes), "fullCommentFront")
         nodes.append(entry)
     
-    # And some arrows.  If the --simplified CLI switch is used, only the 
-    # boxes and their default fallthrough arrows are depicted.  That helps in
-    # certain aspects of debugging, but isn't for "production" flowcharts.
+
     if not simplified:
-        pass 
+        # Insert all arrows for decision boxes resulting directly from Y or N. 
+        noPrior = { "col71": "?", "index": -1, "yes": False, "no": False}
+        prior = copy.deepcopy(noPrior)
+        for i in range(len(nodes)):
+            node = nodes[i]
+            col71 = node["col71"]
+            opcode = node["opcode"]
+            operand = node["operand"]
+            index = node["index"]
+            fullCommentFront = node["fullCommentFront"]
+            commentPrefix = node["commentPrefix"]
+            prior71 = prior["col71"]
+            priorIndex = prior["index"]
+            if col71 == "N":
+                if prior71 != "Q" or prior["no"]:
+                    node["col71"] = "Q"
+                    prior = node
+                    priorIndex = prior["index"]
+                prior["no"] = True
+                node["targeted"] = True
+                if operand in lhsDict:
+                    arrows.append((priorIndex, \
+                                   nodes[lhsDict[operand][0]]["index"], "NO"))
+            elif col71 == "Y":
+                if prior71 != "Q" or prior["yes"]:
+                    node["col71"] = "Q"
+                    prior = node
+                    priorIndex = prior["index"]
+                prior["yes"] = True
+                node["targeted"] = True
+                if operand in lhsDict:
+                    arrows.append((priorIndex, \
+                                   nodes[lhsDict[operand][0]]["index"], "YES"))
+            elif col71 == "G":
+                if opcode.startswith("TRA") or opcode.startswith("HOP"):
+                    target = operand
+                elif commentPrefix != "":
+                    target = commentPrefix.lstrip("(").rstrip(")")
+                elif fullCommentFront != "":
+                    target = fullCommentFront.lstrip("(*").rstrip(")")
+                else:
+                    target = "" 
+                if target in lhsDict:
+                    arrows.append((index, \
+                                   nodes[lhsDict[target][0]]["index"], ""))
+            if prior["yes"] and prior["no"]:
+                prior = copy.deepcopy(noPrior)
+            elif col71 not in ["N", "Y", "E", "-"]:
+                prior = node 
     
     # Here are the default fallthrough arrows.
     prior = nodes[1]
@@ -516,29 +594,41 @@ def processFlowchart(startLine, afterLine):
         caption = ""
         fallthrough = ("hang" not in prior)
         col71 = node["col71"]
+        if col71 in ["Y", "N"]:
+            continue
         prior71 = prior["col71"]
         priorOpcode = prior["opcode"]
+        priorNext = prior["next"]
+        if priorNext != None:
+            priorNext71 = priorNext["col71"]
+        else:
+            priorNext71 = " "
         if prior71 == "X":
             fallthrough = False
         elif prior71 == "G" and \
                 (priorOpcode.startswith("TRA") or \
                  priorOpcode.startswith("HOP")):
             fallthrough = False
-        elif prior71 == "Q":
-            if prior["yes"] and not prior["no"]:
+        elif prior71 == "Q" or priorNext71 == "Q":
+            if prior71 == "Q":
+                p = prior
+            else:
+                p = priorNext
+            if p["yes"] and not p["no"]:
                 caption = "NO"
-                prior["no"] = True
-            elif prior["no"] and not prior["yes"]:
+                p["no"] = True
+            elif p["no"] and not p["yes"]:
                 caption = "YES"
-                prior["yes"] = True
-            elif prior["yes"] and prior["no"]:
+                p["yes"] = True
+            elif p["yes"] and p["no"]:
                 fallthrough = False
         if fallthrough:
             arrows.append((prior["index"], node["index"], caption))
-        elif col71 not in ["S", "-"]:
+        elif col71 not in ["S", "-"] and not node["targeted"]:
             # Here we have a node that's marked with flowchart notations, but
             # no way to get to it, and not already having an entry-point shape.
-            # We're going to split it so that an entry-point box feeds it.
+            # We're going to split it into an entry box plus (essentially) the
+            # original version of the box.
             next = copy.deepcopy(node)
             next["key"] = next["key"] + "A"
             node["next"] = next

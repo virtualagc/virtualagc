@@ -192,6 +192,8 @@ for line in sys.stdin.readlines():
         while len(dummy) > 0 and dummy[0] != " ":
             heading += dummy[0]
             dummy = dummy[1:]
+        if col71 == "S" and heading == "":
+            heading = dummy.strip()
         comment = dummy[1:].lstrip()
     else:
         # We have to find the comment field.  To do that, we first have to 
