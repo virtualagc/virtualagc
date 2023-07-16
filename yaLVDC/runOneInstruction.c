@@ -43,6 +43,13 @@
  *                                  ACC.
  *                              3)  Assigned "spare" CIO 175 as an input port
  *                                  rather than an output port.
+ *              2023-07-16 MAS  Fixes for various bugs affecting only the LVDC:
+ *                              1)  CDS should not require A8 to be 0.
+ *                              2)  MPH was not loading the accumulator with PQ.
+ *                              3)  MPH/MPY were producing incorrect results;
+ *                                  they have been replaced with a simple
+ *                                  implementation of the algorithm used by the
+ *                                  LVDC.
  */
 
 #include <stdlib.h>
@@ -309,6 +316,50 @@ convertNativeToDataWord(int integer)
   return (integer & dataWordMask);
 }
 
+// Calculate the delta 1 term for multiplication
+int64_t
+mpyDelta1(int multiplier, int multiplicand)
+{
+  uint8_t bits = multiplier & 07;
+  switch (bits)
+    {
+  case 01:
+  case 02:
+    return 2 * multiplicand;
+  case 03:
+    return 4 * multiplicand;
+  case 04:
+    return -4 * multiplicand;
+  case 05:
+  case 06:
+    return -2 * multiplicand;
+  default:
+    return 0;
+    }
+}
+
+// Calculate the delta 2 term for multiplication
+int64_t
+mpyDelta2(int multiplier, int multiplicand)
+{
+  uint8_t bits = (multiplier >> 2) & 07;
+  switch (bits)
+    {
+  case 01:
+  case 02:
+    return 8 * multiplicand;
+  case 03:
+    return 16 * multiplicand;
+  case 04:
+    return -16 * multiplicand;
+  case 05:
+  case 06:
+    return -8 * multiplicand;
+  default:
+    return 0;
+    }
+}
+
 void
 checkForInterrupts(void)
 {
@@ -530,13 +581,31 @@ runOneInstruction(int *cyclesUsed)
       if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
           &fetchedFromMemory, &dataFromInstructionMemory))
         goto done;
-      // The LVDC uses only 24 bits of the multiplicand and multitplier, so the
-      // 2 least significant bits are discarded.  (Assumes native 2's-complement.)
-      dummy = (convertDataWordToNative(fetchedFromMemory) & ~3)
-          * (convertDataWordToNative(state.acc) & ~3);
-      state.pq = convertNativeToDataWord(dummy / (1 << 25));
+
+      // The following is a simple implementation of the algorithm used by
+      // the LVDC for multiplication. This is done instead of using native
+      // multiplication because the latter sometimes produces off-by-one
+      // results from this approach, presumably due to differences in
+      // precision.
+      int multiplier = (state.acc >> 1) & ~1;
+      int multiplicand = fetchedFromMemory & ~3;
+      dummy = 0;
+      for (uint8_t i = 0; i < 6; i++)
+        {
+          dummy += mpyDelta2(multiplier, multiplicand) +
+                   mpyDelta1(multiplier, multiplicand);
+          dummy >>= 4;
+          multiplier >>= 4;
+        }
+      state.pq = dummy & dataWordMask;
+
+      // MPH stops execution for five cycles, and automatically loads PQ
+      // into the accumulator at the end.
       if (op == 005)
-        cycleCount = 5;
+        {
+          cycleCount = 5;
+          state.acc = state.pq;
+        }
     }
   else if (ptc && op == 001)
     {
@@ -794,7 +863,7 @@ runOneInstruction(int *cyclesUsed)
       printf("CDS %o,%02o\n", rawHopStructure.dm, rawHopStructure.ds);
 #endif
     }
-  else if (!ptc && op == 016 && a8 == 0 && a9 == 0)
+  else if (!ptc && op == 016 && a9 == 0)
     {
       // CDS
       rawHopStructure.dm = (operand >> 1) & 07;

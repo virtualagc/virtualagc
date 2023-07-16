@@ -36,6 +36,7 @@
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2020-04-30 RSB  Began.
  *              2020-05-21 RSB  Fixed arguments for DISASSEMBLE.
+ *              2023-07-16 MAS  Fixed handling of SI and NI.
  */
 
 #include <stdlib.h>
@@ -176,9 +177,9 @@ typedef struct
 commandAssociation_t commandAssociations[] =
       {
         { ctSTEP, "STEPI", "STEPI [n]", "Step n instructions, default n=1." },
-        { ctSTEP, "STEPI", "SI [n]", "Same as STEPI." },
+        { ctSTEP, "SI", "SI [n]", "Same as STEPI." },
         { ctNEXT, "NEXTI", "NEXTI [n]", "Next n instructions, w/o entry." },
-        { ctNEXT, "NEXTI", "NI [n]", "Same as NEXTI." },
+        { ctNEXT, "NI", "NI [n]", "Same as NEXTI." },
         { ctDELETE, "DELETE", "DELETE", "Delete all breakpoints." },
         { ctDELETE, "DELETE", "DELETE n", "Delete breakpoint n." },
         { ctCONTINUE, "CONTINUE", "CONTINUE", "Continue running emulation." },
