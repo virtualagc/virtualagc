@@ -120,16 +120,19 @@ import copy
 if "--no-sdl" not in sys.argv[1:]:
     startShape = "shape=sdl_start peripheries=0"
     callShape = "shape=sdl_call peripheries=0"
-    decisionShape = "shape=diamond height=1.33"
+    decisionShape = "shape=diamond height=1 margin=0"
+    decisionShape2 = "shape=diamond height=1.33 margin=0.1"
     ioShape = "shape=sdl_save peripheries=0"
     connectorShape = "shape=sdl_connector peripheries=0"
 else:
     startShape = "style=rounded"
     callShape = ""
-    decisionShape = "shape=diamond height=1.33"
+    decisionShape = "shape=diamond height=1 margin=0"
+    decisionShape2 = "shape=diamond height=1.33 margin=0.1"
     ioShape = "shape=parallelogram height=1"
     connectorShape = "shape=circle"
 simplified = ("--simplified" in sys.argv[1:])
+printNodes = ("--print-nodes" in sys.argv[1:])
 
 lineNumber = -1
 def error(msg):
@@ -137,25 +140,23 @@ def error(msg):
 def error71():
     error("Cannot interpret %s notation" % col71)
 
-# Dissects a comment having the form "(...)...", "...(...)", or "(...)...(...)",
-# possibly embedded in a full-line comment.  Returns 4-tuple of fields (let's 
-# call them F1, F2, F3, and F4), from either the pattern
-#    *F1 (F2)F3(F4)
+# Dissects a comment having the form "(...)...",
+# possibly embedded in a full-line comment.  Returns 3-tuple of fields (let's 
+# call them F1, F2, F3), from either the pattern
+#    *F1 (F2)F3
 # or the pattern
-#    (F2)F3(F4)
+#    (F2)F3
 # Multiple spaces are condensed to single spaces, and space between F2 and F3
-# or F3 and F4 is optional.  Any field not present is returned as an empty
+# is optional.  Any field not present is returned as an empty
 # string.
 fullFrontPattern = re.compile("^\*[^ ]*")
 commentPrefixPattern = re.compile("^\([^ )]+\)")
-commentTailPattern = re.compile("\([^ )]+\)$")
 multispacePattern = re.compile("\s\s+")
 def dissectComment(comment):
     comment = multispacePattern.sub(" ", comment)
     fullCommentFront = ""
     commentPrefix = ""
     commentMiddle = ""
-    commentTail = ""
     match = fullFrontPattern.search(comment)
     if match != None:
         fullCommentFront = match.group()
@@ -168,12 +169,8 @@ def dissectComment(comment):
     if match != None:
         commentPrefix = match.group()
         comment = comment[match.span()[1]:].lstrip()
-    match = commentTailPattern.search(comment)
-    if match != None:
-        commentTail = match.group()
-        comment = comment[:match.span()[0]].rstrip()
     commentMiddle = comment
-    return fullCommentFront, commentPrefix, commentMiddle, commentTail
+    return fullCommentFront, commentPrefix, commentMiddle
 
 # Loop that makes list (lines) containing all the source-code lines.  Each entry
 # is a dictionary describing the relevant properties of the line.  In this loop
@@ -194,38 +191,89 @@ defaultEntry = {
         "fullCommentFront": "",
         "commentPrefix": "",
         "commentMiddle": "",
-        "commentTail": "",
         # For splitting nodes.
         "next": None,
         # If destination for any arrows other then default fallthrough:
         "targeted": False
     }
+# Default FLOW directive.
+defaultFlow = {
+        "col71": None,
+        "lhs": None,
+        "opcode": None,
+        "operand": None,
+        "fullCommentFront": None,
+        "commentPrefix": None,
+        "commentMiddle": None
+    }
 lines = []
 lhsPattern = re.compile("^[A-Z][.A-Z0-9]*\\b")
 operandPattern = re.compile("^[^ ]+")
+flow = copy.deepcopy(defaultFlow)
+lastWasFlow = False
 for line in sys.stdin:
     entry = copy.deepcopy(defaultEntry)
+    if lastWasFlow:
+        for key in flow:
+            if flow[key] != None:
+                entry[key] = flow[key]
+        lastWasFlow = False
+    else:
+        flow = copy.deepcopy(defaultFlow)
     lines.append(entry)
     entry["lineNumber"] = len(lines)
     raw = "%-071s" % line.rstrip()
     entry["raw"] = raw
     if raw[0] in ["$", "#"] or raw.startswith("       TITLE"):
         continue
-    col71 = raw[70]
+    # Collect FLOW directive, if any.
+    fields = raw.strip().split(None, 1)
+    if len(fields) == 2 and fields[0] == "FLOW":
+        fields = fields[1].split(",", 6)
+        if len(fields) == 7:
+            for i in range(7):
+                if fields[i] == "":
+                    fields[i] = None
+                else:
+                    fields[i] = fields[i].strip('"')
+                    if i == 4 and fields[i] != "":
+                        fields[i] = "*" + fields[i]
+                    if i == 5 and fields[i] != "":
+                        fields[i] = "(" + fields[i] + ")"
+            flow["col71"] = fields[0]
+            flow["lhs"] = fields[1]
+            flow["opcode"] = fields[2]
+            flow["operand"] = fields[3]
+            flow["fullCommentFront"] = fields[4]
+            flow["commentPrefix"] = fields[5]
+            flow["commentMiddle"] = fields[6]
+            lastWasFlow = True
+        continue
+    if flow["col71"] != None:
+        col71 = flow["col71"]
+    else:
+        col71 = raw[70]
     entry["col71"] = col71
     if raw[0] == "*":
         entry["fullComment"] = True
         comment = raw[:70].strip()
         entry["comment"] = comment
-        fullCommentFront,commentPrefix,commentMiddle,commentTail = \
+        fullCommentFront,commentPrefix,commentMiddle = \
             dissectComment(comment)
+        if flow["fullCommentFront"] != None:
+            fullCommentFront = flow["fullCommentFront"]
         entry["fullCommentFront"] = fullCommentFront
+        if flow["commentPrefix"] != None:
+            commentPrefix = flow["commentPrefix"]
         entry["commentPrefix"] = commentPrefix
+        if flow["commentMiddle"] != None:
+            commentMiddle = flow["commentMiddle"]
         entry["commentMiddle"] = commentMiddle
-        entry["commentTail"] = commentTail
         continue
     match = lhsPattern.search(raw)
-    if match != None:
+    if flow["lhs"] != None:
+        lhs = flow["lhs"]
+    elif match != None:
         lhs = match.group()
         if col71 == " ":
             col71 = "-"
@@ -236,7 +284,10 @@ for line in sys.stdin:
     s = line[:70].rstrip()
     if len(s) < 8:
         continue
-    opcode = s[7:15].strip()
+    if flow["opcode"] != None:
+        opcode = flow["opcode"]
+    else:
+        opcode = s[7:15].strip()
     entry["opcode"] = opcode
     s = s[15:]
     if len(s) < 1:
@@ -250,14 +301,21 @@ for line in sys.stdin:
             continue
         operand = match.group()
         comment = s[match.span()[1]:].strip()
+    if flow["operand"] != None:
+        operand = flow["operand"]
     entry["operand"] = operand
     entry["comment"] = comment
-    fullCommentFront,commentPrefix,commentMiddle,commentTail = \
+    fullCommentFront,commentPrefix,commentMiddle = \
         dissectComment(comment)
+    if flow["fullCommentFront"] != None:
+        fullCommentFront = flow["fullCommentFront"]
     entry["fullCommentFront"] = fullCommentFront
+    if flow["commentPrefix"] != None:
+        commentPrefix = flow["commentPrefix"]
     entry["commentPrefix"] = commentPrefix
+    if flow["commentMiddle"] != None:
+        commentMiddle = flow["commentMiddle"]
     entry["commentMiddle"] = commentMiddle
-    entry["commentTail"] = commentTail
 
 # For debugging purposes ...
 if False:
@@ -271,7 +329,7 @@ if False:
 # The following function assumes that all the info for a flowchart has been
 # turned into two structures, one representing the boxes (nodes[]) and one the 
 # edges (arrows[]), and outputs a dot-file representing it.
-def printFlowchart(nodes, arrows):
+def printFlowchart(nodes, arrows, lhsDict):
     global col71, lineNumber
 
     # Format text for inclusion in a box.
@@ -305,8 +363,6 @@ def printFlowchart(nodes, arrows):
         return "\n".join(lines)
     
     title = nodes[0]["commentMiddle"]
-    if nodes[0]["commentTail"] != "":
-        title = title + " " + nodes[0]["commentTail"]
     filename = title.replace("/", "-").replace(" ", "_") + ".dot"
     file = open(filename, "w")
     print("digraph {", file=file)
@@ -315,7 +371,7 @@ def printFlowchart(nodes, arrows):
     print("\tfontsize = 20", file=file)
     print("\tfontcolor = blue", file=file)
     #print("\tsplines=false", file=file)
-    print("\tnode [shape=rect fontsize=12]", file=file)
+    print("\tnode [shape=rect fontsize=12 margin=0.2]", file=file)
     
     print("", file=file)
     lastNode = ""
@@ -340,7 +396,6 @@ def printFlowchart(nodes, arrows):
             fullCommentFront = node["fullCommentFront"]
             commentPrefix = node["commentPrefix"]
             commentMiddle = node["commentMiddle"]
-            commentTail = node["commentTail"]
             opcode = node["opcode"]
             operand = node["operand"]
             heading = ""
@@ -404,20 +459,45 @@ def printFlowchart(nodes, arrows):
                 body = commentMiddle
                 attributes = ioShape
             elif col71 == "G":
-                heading = operand
-                body = ""
-                attributes = startShape
+                if operand in lhsDict:
+                    node["invisible"] = True
+                    attributes = "style=invis height=0 width=0 margin=0"
+                    heading = ""
+                    body = ""
+                    if "xlabel" in node:
+                        node.pop("xlabel")
+                else:
+                    heading = operand
+                    body = ""
+                    attributes = startShape
             elif col71 == "Q":
                 heading = commentPrefix
                 body = commentMiddle
-                attributes = decisionShape
-                boxWidth = 12
+                attributes = decisionShape2
+                length = len(commentMiddle)
+                if heading != "":
+                    length += 1 + len(heading)
+                if "xlabel" in node:
+                    length += 1 + len(node["xlabel"])
+                if length < 30:
+                    boxWidth = 12
+                    attributes = decisionShape
             else:
                 error("Node type %s not yet implemented" % col71)
                 continue
             if body == heading:
                 body = ""
             text = formatText(body, heading, boxWidth)
+            if "xlabel" in node:
+                text = text + "\n[" + formatText(node["xlabel"], "", boxWidth) + "]"
+            # This bit of ad hoc'ery relates to the fact that the sdl_save
+            # box shape apparently does not use any of the DOT attributes
+            # (height, width, margin), and therefore must be fooled into 
+            # providing some extra margin around the label text.  But the 
+            # decision boxes need a little assistance too (though I'm not too
+            # sure that this provides it!).
+            if attributes in [ioShape, decisionShape]:
+                text = "  " + text.replace("\n", "  \n  ") + "  "
             print("\t%s [%s label=\"%s\"]" \
                   % (nodeIdentifier, attributes, text), file=file)
             if len(arrows) == 0:
@@ -438,6 +518,10 @@ def printFlowchart(nodes, arrows):
     for arrow in arrows:
         node0 = nodes[arrow[0]]
         node1 = nodes[arrow[1]]
+        if "invisible" in node1:
+            arrowhead = "arrowhead=none"
+        else:
+            arrowhead = "" 
         if arrow[0] == arrow[1]:
             if node1["next"] != None:
                 node1 = node1["next"]
@@ -446,16 +530,18 @@ def printFlowchart(nodes, arrows):
                 node0 = node0["next"]
         caption = arrow[2]
         nodeIdentifier0 = node0["key"]
-        if node0["col71"] not in ["S", "X", "D", "G", "-", "Q"]:
+        if False and node0["col71"] not in ["S", "X", "D", "G", "-", "Q"]:
             nodeIdentifier0 = nodeIdentifier0 + ":s"
         nodeIdentifier1 = node1["key"]
-        if node1["col71"] not in ["S", "X", "D", "G", "-"]:
+        if False and node1["col71"] not in ["S", "X", "D", "G", "-"]:
             nodeIdentifier1 = nodeIdentifier1 + ":n"
         if arrow[2] != "":
-            print("\t%s -> %s [label=\"%s\"]" % \
-                  (nodeIdentifier0, nodeIdentifier1, caption), file=file)
+            print("\t%s -> %s [%s label=\"%s\"]" % \
+                  (nodeIdentifier0, nodeIdentifier1, arrowhead, caption), \
+                  file=file)
         else:
-            print("\t%s -> %s" % (nodeIdentifier0, nodeIdentifier1), \
+            print("\t%s -> %s [%s]" % \
+                  (nodeIdentifier0, nodeIdentifier1, arrowhead), \
                   file=file)
     
     print("}", file=file)
@@ -482,6 +568,7 @@ def processFlowchart(startLine, afterLine):
     lhsDict = {}
     # Let's accumulate some nodes, and add some status variables (key, ...)
     # to them.
+    lastSignificantLine = None
     for i in range(start, after):
         entry = lines[i]
         col71 = entry["col71"]
@@ -504,10 +591,15 @@ def processFlowchart(startLine, afterLine):
                 not operand.startswith("*"):
             col71 = "G"
             entry["col71"] = col71
+        if col71 == "*" and entry["fullComment"] and fullCommentFront == "" \
+                and commentPrefix == "" and commentMiddle != "":
+            if lastSignificantLine != None:
+                lastSignificantLine["xlabel"] = commentMiddle
         if col71 in [" ", "$", "*", "H", "C", "E"]:
             continue
         if entry["fullComment"] and entry["comment"] == "*":
             continue
+        lastSignificantLine = lines[i]
         if col71 == "G" and \
                 not (opcode.startswith("TRA") or opcode.startswith("HOP")):
             continue
@@ -559,6 +651,7 @@ def processFlowchart(startLine, afterLine):
                 prior["no"] = True
                 node["targeted"] = True
                 if operand in lhsDict:
+                    nodes[lhsDict[operand][0]]["targeted"] = True
                     arrows.append((priorIndex, \
                                    nodes[lhsDict[operand][0]]["index"], "NO"))
             elif col71 == "Y":
@@ -569,6 +662,7 @@ def processFlowchart(startLine, afterLine):
                 prior["yes"] = True
                 node["targeted"] = True
                 if operand in lhsDict:
+                    nodes[lhsDict[operand][0]]["targeted"] = True
                     arrows.append((priorIndex, \
                                    nodes[lhsDict[operand][0]]["index"], "YES"))
             elif col71 == "G":
@@ -581,9 +675,10 @@ def processFlowchart(startLine, afterLine):
                 else:
                     target = "" 
                 if target in lhsDict:
+                    nodes[lhsDict[target][0]]["targeted"] = True
                     arrows.append((index, \
                                    nodes[lhsDict[target][0]]["index"], ""))
-            if prior["yes"] and prior["no"]:
+            if col71 == "G" or (prior["yes"] and prior["no"]):
                 prior = copy.deepcopy(noPrior)
             elif col71 not in ["N", "Y", "E", "-"]:
                 prior = node 
@@ -642,13 +737,13 @@ def processFlowchart(startLine, afterLine):
         prior = node
     
     # For debugging purposes ...
-    if False:
+    if printNodes:
         for node in nodes:
             print("")
             for key in sorted(node):
                 print(key, ":", node[key])
     
-    printFlowchart(nodes, arrows)
+    printFlowchart(nodes, arrows, lhsDict)
 
 
 # This loop determines where flowcharts begin and end, processing them as it

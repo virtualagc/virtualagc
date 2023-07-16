@@ -119,6 +119,7 @@
 #                               total number of rounding mismatches in 
 #                               AS-512 + AS-513 from 19 + 11 to 5 + 1; i.e.,
 #                               an 80% reduction.
+#               2023-07-14 RSB  Eliminated FLOW directives.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -564,6 +565,10 @@ while n < len(lines):
 		del lines[n]
 		continue
 	line = lines[n].expandtabs().rstrip()
+	# Eliminate any line with the FLOW directive in it.
+	if line[0] == " " and line.lstrip().startswith("FLOW"):
+		del lines[n]
+		continue
 	
 	# In AS-512, columns 2-5 sometimes have a "random" (meaning we can't figure
 	# out what they mean) sprinkling of "*" and "$" characters that seem to 
