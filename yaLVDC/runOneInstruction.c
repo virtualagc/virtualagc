@@ -588,7 +588,7 @@ runOneInstruction(int *cyclesUsed)
       // results from this approach, presumably due to differences in
       // precision.
       int multiplier = (state.acc >> 1) & ~1;
-      int multiplicand = fetchedFromMemory & ~3;
+      int multiplicand = convertDataWordToNative(fetchedFromMemory) & ~3;
       dummy = 0;
       for (uint8_t i = 0; i < 6; i++)
         {
