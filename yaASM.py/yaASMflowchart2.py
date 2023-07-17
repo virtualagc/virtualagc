@@ -240,6 +240,8 @@ for line in sys.stdin:
                         fields[i] = "*" + fields[i]
                     if i == 5 and fields[i] != "":
                         fields[i] = "(" + fields[i] + ")"
+            if fields[0] == "":
+                fields[0] = " "
             flow["col71"] = fields[0]
             flow["lhs"] = fields[1]
             flow["opcode"] = fields[2]
@@ -401,8 +403,14 @@ def printFlowchart(nodes, arrows, lhsDict):
             heading = ""
             is_TRA_HOP = opcode.startswith("TRA") or opcode.startswith("HOP")
             boxWidth = 20
-            if col71 in ["J", "H", "E", "Y", "N"]:
+            if col71 in ["J", "H", "E"]:
                 continue
+            if col71 in ["Y", "N"]:
+                if lhs == "":
+                    continue
+                heading = lhs
+                body = ""
+                attributes = startShape
             elif col71 in ["S"]:
                 if lhs != "":
                     heading = lhs
@@ -477,6 +485,9 @@ def printFlowchart(nodes, arrows, lhsDict):
                 length = len(commentMiddle)
                 if heading != "":
                     length += 1 + len(heading)
+                elif body == "":
+                    heading = nodeIdentifier # Implementation error, maybe
+                    heading = "Line %d" % lineNumber
                 if "xlabel" in node:
                     length += 1 + len(node["xlabel"])
                 if length < 30:
@@ -582,7 +593,7 @@ def processFlowchart(startLine, afterLine):
             operand = commentPrefix.lstrip("(").rstrip(")")
             entry["operand"] = operand
         commentMiddle = entry["commentMiddle"]
-        if col71 == "C" and opcode == "HOP" and \
+        if col71 in [" ", "C"] and opcode == "HOP" and \
                 (operand.startswith("77") or commentMiddle == "RETURN"):
             # Pure ad-hoc'ery here!  I hope it doesn't come back to bite me.
             col71 = "X"
@@ -607,6 +618,7 @@ def processFlowchart(startLine, afterLine):
         entry["key"] = key
         entry["yes"] = False
         entry["no"] = False
+        entry["3way"] = False
         entry["index"] = len(nodes)
         # If this flowchart box is labeled in some way that might enable us
         # to target an arrow at it, add its labeling to the lhsDict{}
@@ -631,12 +643,14 @@ def processFlowchart(startLine, afterLine):
 
     if not simplified:
         # Insert all arrows for decision boxes resulting directly from Y or N. 
-        noPrior = { "col71": "?", "index": -1, "yes": False, "no": False}
+        noPrior = { "col71": "?", "index": -1, 
+                   "yes": False, "no": False, "3way": False}
         prior = copy.deepcopy(noPrior)
         for i in range(len(nodes)):
             node = nodes[i]
             col71 = node["col71"]
             opcode = node["opcode"]
+            is_TMI_TNZ = (opcode.startswith("TMI") or opcode.startswith("TNZ"))
             operand = node["operand"]
             index = node["index"]
             fullCommentFront = node["fullCommentFront"]
@@ -649,6 +663,8 @@ def processFlowchart(startLine, afterLine):
                     prior = node
                     priorIndex = prior["index"]
                 prior["no"] = True
+                if prior["yes"] and is_TMI_TNZ:
+                    prior["3way"] = True
                 node["targeted"] = True
                 if operand in lhsDict:
                     nodes[lhsDict[operand][0]]["targeted"] = True
@@ -660,6 +676,8 @@ def processFlowchart(startLine, afterLine):
                     prior = node
                     priorIndex = prior["index"]
                 prior["yes"] = True
+                if prior["no"] and is_TMI_TNZ:
+                    prior["3way"] = True
                 node["targeted"] = True
                 if operand in lhsDict:
                     nodes[lhsDict[operand][0]]["targeted"] = True
@@ -678,7 +696,8 @@ def processFlowchart(startLine, afterLine):
                     nodes[lhsDict[target][0]]["targeted"] = True
                     arrows.append((index, \
                                    nodes[lhsDict[target][0]]["index"], ""))
-            if col71 == "G" or (prior["yes"] and prior["no"]):
+            if col71 == "G" or (prior["yes"] and prior["no"] \
+                                and not prior["3way"]):
                 prior = copy.deepcopy(noPrior)
             elif col71 not in ["N", "Y", "E", "-"]:
                 prior = node 
@@ -715,7 +734,7 @@ def processFlowchart(startLine, afterLine):
             elif p["no"] and not p["yes"]:
                 caption = "YES"
                 p["yes"] = True
-            elif p["yes"] and p["no"]:
+            elif p["yes"] and p["no"] and not p["3way"]:
                 fallthrough = False
         if fallthrough:
             arrows.append((prior["index"], node["index"], caption))
