@@ -36,6 +36,10 @@
 #               but manually tweaking the DOT files can achieve that.
 # Reference:    http://www.ibibio.org/apollo
 # Mods:         2023-07-11 RSB  Began.
+#               2023-07-18 RSB  "Working" now.  The biggest problem I perceive
+#                               is handling of jump-tables ... namely, none.
+#                               There are still markup issues in the LVDC code,
+#                               but that's out of scope for this program.
 
 '''
 Input is on stdin.  Any given source-code input file may actually represent
@@ -120,6 +124,7 @@ import copy
 if "--no-sdl" not in sys.argv[1:]:
     startShape = "shape=sdl_start peripheries=0"
     callShape = "shape=sdl_call peripheries=0"
+    decisionShape0 = "shape=diamond height=.67 margin=0"
     decisionShape = "shape=diamond height=1 margin=0"
     decisionShape2 = "shape=diamond height=1.33 margin=0.1"
     ioShape = "shape=sdl_save peripheries=0"
@@ -127,6 +132,7 @@ if "--no-sdl" not in sys.argv[1:]:
 else:
     startShape = "style=rounded"
     callShape = ""
+    decisionShape0 = "shape=diamond height=.67 margin=0"
     decisionShape = "shape=diamond height=1 margin=0"
     decisionShape2 = "shape=diamond height=1.33 margin=0.1"
     ioShape = "shape=parallelogram height=1"
@@ -139,6 +145,15 @@ def error(msg):
     print("Line %d: %s" % (lineNumber, msg), file=sys.stderr)
 def error71():
     error("Cannot interpret %s notation" % col71)
+
+# Items in the opcode field that occupy memory. Used for interpreting *+n and 
+# *-n.
+starOccupiers = {
+    "HOP", "HOP*", "MPY", "PRS", "SUB", "DIV", "TNZ", "TNZ*", "MPH", "CIO", 
+    "AND", "ADD", "TRA", "TRA*", "XOR", "PIO", "STO", "TMI", "TMI*", "RSU", 
+    "CDS", "CDSD", "CDSS", "SHF", "EXM", "CLA", "SHR", "SHL",
+    "DEC", "OCT", "HPC", "HPCDD", "DFW"
+}
 
 # Dissects a comment having the form "(...)...",
 # possibly embedded in a full-line comment.  Returns 3-tuple of fields (let's 
@@ -257,6 +272,8 @@ for line in sys.stdin:
         col71 = raw[70]
     entry["col71"] = col71
     if raw[0] == "*":
+        if col71 not in ["J", "H"]:
+            entry["col71"] = " " # Just ignore all of these.
         entry["fullComment"] = True
         comment = raw[:70].strip()
         entry["comment"] = comment
@@ -478,7 +495,7 @@ def printFlowchart(nodes, arrows, lhsDict):
                     heading = operand
                     body = ""
                     attributes = startShape
-            elif col71 == "Q":
+            elif col71 in ["Q", "?"]:
                 heading = commentPrefix
                 body = commentMiddle
                 attributes = decisionShape2
@@ -490,7 +507,10 @@ def printFlowchart(nodes, arrows, lhsDict):
                     heading = "Line %d" % lineNumber
                 if "xlabel" in node:
                     length += 1 + len(node["xlabel"])
-                if length < 30:
+                if length < 10:
+                    boxWidth = 12
+                    attributes = decisionShape0
+                elif length < 30:
                     boxWidth = 12
                     attributes = decisionShape
             else:
@@ -498,6 +518,8 @@ def printFlowchart(nodes, arrows, lhsDict):
                 continue
             if body == heading:
                 body = ""
+            if body != "" and heading.startswith("Line "):
+                heading = ""
             text = formatText(body, heading, boxWidth)
             if "xlabel" in node:
                 text = text + "\n[" + formatText(node["xlabel"], "", boxWidth) + "]"
@@ -567,6 +589,55 @@ def printFlowchart(nodes, arrows, lhsDict):
 def processFlowchart(startLine, afterLine):
     start = startLine - 1
     after = afterLine - 1
+    # Let's find all of the operands *+n or *-n for TRA/TNZ/TMI and convert
+    # them to something meaningful in terms of lhs labels, even if we have to
+    # invent those labels ourselves.
+    for i in range(start, after):
+        entry = lines[i]
+        opcode = entry["opcode"]
+        operand = entry["operand"]
+        if opcode in {"TRA", "TRA*", "TMI", "TMI*", "TNZ", "TNZ*"} \
+                and operand[:2] in {"*+", "*-"}:
+            if operand[1] == "+":
+                direction = 1
+            else:
+                direction = -1
+            j = i
+            destination = lines[j]
+            k = 0
+            try:
+                n = int(operand[2:])
+                while k < n:
+                    j += direction
+                    destination = lines[j]
+                    if destination["opcode"] not in starOccupiers:
+                        continue
+                    k += 1
+                # "destination" should now be the line corresponding to *+n 
+                # or *-n (whichever is appropriate).
+            except:
+                continue
+            lhsDestination = destination["lhs"]
+            if lhsDestination == "":
+                lhsDestination = "Line %d" % destination["lineNumber"]
+                destination["lhs"] = lhsDestination
+                if destination["col71"] == " ":
+                    destination["col71"] = "-"
+            entry["operand"] = lhsDestination
+    # Now let's find all TNZ/TMI that are unmarked with Q/Y/N and mark them
+    # ourselves.  We'll use a new column-71 symbol, "?", which is supposed to
+    # have a result like "Y" or "N" without preceding "Q", but without putting
+    # captions on the decision box's exit labels.
+    for i in range(start, after):
+        entry = lines[i]
+        if entry["col71"] != " ":
+            continue
+        opcode = entry["opcode"]
+        operand = entry["operand"]
+        if opcode in {"TMI", "TMI*", "TNZ", "TNZ*"}:
+            entry["col71"] = "?"
+            if entry["commentMiddle"] in ["YES", "NO"]:
+                entry["commentMiddle"] = ""
     # There's one entry in nodes[] for each box.  In the dot file, the nodes
     # will be identified as "n%06d" % lineNumber.  Or if we have need to split
     # a node into a sequence of two or more nodes, the subsequent nodes will
@@ -593,11 +664,14 @@ def processFlowchart(startLine, afterLine):
             operand = commentPrefix.lstrip("(").rstrip(")")
             entry["operand"] = operand
         commentMiddle = entry["commentMiddle"]
-        if col71 in [" ", "C"] and opcode == "HOP" and \
+        if col71 in [" ", "C", "-"] and opcode == "HOP" and \
                 (operand.startswith("77") or commentMiddle == "RETURN"):
             # Pure ad-hoc'ery here!  I hope it doesn't come back to bite me.
             col71 = "X"
             entry["col71"] = col71
+            if commentMiddle == "" and operand == "777":
+                commentMiddle = "RETURN"
+                entry["commentMiddle"] = commentMiddle
         if col71 == " " and opcode.startswith("TRA") and \
                 not operand.startswith("*"):
             col71 = "G"
@@ -660,6 +734,8 @@ def processFlowchart(startLine, afterLine):
             if col71 == "N":
                 if prior71 != "Q" or prior["no"]:
                     node["col71"] = "Q"
+                    if node["commentMiddle"] in ["YES", "NO"]:
+                        node["commentMiddle"] = ""
                     prior = node
                     priorIndex = prior["index"]
                 prior["no"] = True
@@ -673,6 +749,8 @@ def processFlowchart(startLine, afterLine):
             elif col71 == "Y":
                 if prior71 != "Q" or prior["yes"]:
                     node["col71"] = "Q"
+                    if node["commentMiddle"] in ["YES", "NO"]:
+                        node["commentMiddle"] = ""
                     prior = node
                     priorIndex = prior["index"]
                 prior["yes"] = True
@@ -683,6 +761,13 @@ def processFlowchart(startLine, afterLine):
                     nodes[lhsDict[operand][0]]["targeted"] = True
                     arrows.append((priorIndex, \
                                    nodes[lhsDict[operand][0]]["index"], "YES"))
+            elif col71 == "?":
+                prior = node
+                priorIndex = prior["index"]
+                if operand in lhsDict:
+                    nodes[lhsDict[operand][0]]["targeted"] = True
+                    arrows.append((priorIndex, \
+                                   nodes[lhsDict[operand][0]]["index"], ""))
             elif col71 == "G":
                 if opcode.startswith("TRA") or opcode.startswith("HOP"):
                     target = operand
@@ -702,8 +787,14 @@ def processFlowchart(startLine, afterLine):
             elif col71 not in ["N", "Y", "E", "-"]:
                 prior = node 
     
-    # Here are the default fallthrough arrows.
+    # Here are the default fallthrough arrows.  Note that the J line is node[0].
     prior = nodes[1]
+    if prior["col71"] not in ["S", "-"] and not prior["targeted"]:
+        next = copy.deepcopy(prior)
+        prior["key"] = next["key"] + "A"
+        prior["next"] = next
+        prior["col71"] = "S"
+        arrows.append((prior["index"], prior["index"], ""))
     for node in nodes[2:]:
         caption = ""
         fallthrough = ("hang" not in prior)
