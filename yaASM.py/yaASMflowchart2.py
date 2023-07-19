@@ -115,7 +115,8 @@ Here's my interpretation of what's in column 71:
 
 import sys
 import re
-import textwrap
+if False:
+    import textwrap
 import copy
 
 # Read CLI switches.  Define the shapes used for various flowchart boxes.
