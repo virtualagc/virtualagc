@@ -1,0 +1,581 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=windows-1252">
+    <title>LVDC Flowchart Editor Tutorial</title>
+  </head>
+  <body>
+    <h1>LVDC Flowchart Editor Tutorial<br>
+    </h1>
+    <h2>History<br>
+    </h2>
+    <ul>
+      <li>2023-07-19.&nbsp; First draft.</li>
+    </ul>
+    <ul>
+    </ul>
+    <h2>Contents</h2>
+    <ul>
+      <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+      <li><a moz-do-not-send="true" href="#Preparation">Preparation</a><br>
+      </li>
+      <li><a moz-do-not-send="true" href="#Building">How to Build an
+          LVDC Flowchart from Source Code</a></li>
+      <li><a moz-do-not-send="true" href="Annotations">Flowchart
+          Annotations in LVDC Source Code</a></li>
+      <li><a moz-do-not-send="true" href="#FLOW">FLOW Directives</a></li>
+      <li><a moz-do-not-send="true" href="#Example">Working
+          Example:&nbsp; the SQUARE ROOT UTILITY Module of AS-512</a><br>
+      </li>
+    </ul>
+    <ul>
+    </ul>
+    <h2><a name="Introduction"></a>Introduction</h2>
+    <p>If you're reading this, I assume you know what the <a
+        moz-do-not-send="true" href="LVDC.html">LVDC</a> was, know what
+      the flight software for it is, and that you have access to the
+      available LVDC flight-program source code in compliance with
+      whatever ITAR restrictions on export of that software from the
+      U.S. may or may not be, so I won't rehash that territory here.<br>
+    </p>
+    <p>Rather, this page is solely about the creation and maintenance of
+      software flowcharts based LVDC flight-program software.&nbsp; By
+      that, I <i>do not</i> mean creation of flowcharts that allow
+      complete and accurate recreation of the flight-program
+      software.&nbsp; Instead, I refer to a set of undocumented
+      annotations that appear in AS-512 and AS-513 flight-program
+      software (and presumably other versions of the flight software not
+      available to us) that I theorize <i>may</i> have been hints for
+      draftsmen creating mid-level flowcharts that could provide
+      convenient guidance to someone trying to understand the general
+      flow of the software.<br>
+    </p>
+    <p>In fact, this is entirely my own idea:&nbsp; There is no
+      available evidence at all about who created the annotations I
+      refer to, when they were created, why they were created, whether
+      they actually relate to flowcharting, how to interpret the
+      annotations, nor whether flowcharts created from them provide a
+      reasonably-accurate view of the software flow that could be useful
+      to someone or not.&nbsp; I merely observe that flowcharts <i>can</i>
+      be created based on these annotations, that those flowcharts are
+      pleasing to <i>me</i>, and that perhaps that they are not
+      entirely without merit more generally.<br>
+    </p>
+    <p>But they are not perfect.&nbsp; The two main problems about the
+      flowcharts that bother me are:<br>
+    </p>
+    <ol>
+      <li>The LVDC software's flowchart-related annotations — if that's
+        what they are! — are neither fully complete nor fully
+        correct.&nbsp; Therefore, manual corrections to the annotations
+        are sometimes useful in producing more-informative flowcharts.<br>
+      </li>
+      <li>We don't know if the flowcharts we produce are actually good
+        reflections of the software source code or not.&nbsp; Perhaps
+        they're misleading!&nbsp; They need to be checked and corrected
+        if they do turn out to mislead.<br>
+      </li>
+    </ol>
+    <p>Potentially, the latter of these problems may ultimately require
+      updates to the flowchart-generation software (more about that in a
+      moment)&nbsp; But regardless, the first step for either of the
+      problems is human inspection of the flowcharts and of their
+      relationship to the LVDC source code, along with manual editing of
+      the flowcharting annotations as necessary.&nbsp; Both are
+      difficult tasks, but are the kinds of tasks that can be rewarding
+      in terms of the understanding gained of the LVDC software in the
+      process.&nbsp; This tutorial is addressed to someone who would
+      want to involve themself in process of checking and improving the
+      LVDC flowcharts.<br>
+    </p>
+    <h2><a name="Preparation"></a>Preparation</h2>
+    You will need to have access to the transcribed LVDC source code for
+    whatever software version(s) you're working with.&nbsp; I hope that
+    eventually this source code can be made generally available, but as
+    of this writing it is being treated as if it is restricted from U.S.
+    export by ITAR.&nbsp; If you are qualified to do so, for example by
+    being a U.S. citizen, follow whatever instructions are given on <a
+      moz-do-not-send="true" href="LVDC.html">the LVDC web page</a> for
+    obtaining access.&nbsp; If it is restricted by ITAR, and continues
+    to be so-restricted, realize that if you do "export" it by giving it
+    to a non-qualified individual or by posting it online, it is you
+    have violated ITAR and you who will be legally responsible for those
+    actions.<br>
+    <p>As far as the flowcharts themselves are concerned, you don't
+      actually need copies of them since you'll have the capability of
+      building them yourself.&nbsp; With that said ....&nbsp; Unlike the
+      LVDC source code, I do not believe that the flowcharts are
+      restricted by ITAR, and so it's possible you may find them on the
+      LVDC web page.&nbsp; However, at least at first, I am continuing
+      to treat them as ITAR-restricted, so it may be that the only place
+      you'll find them is same place you got the LVDC source code.<br>
+    </p>
+    <p>Having downloaded the LVDC source code and (optionally) the
+      flowcharts onto your computer, you'll have encrypted archives in
+      the 7z format, respectively LVDC-software.git.7z and (optionally)
+      dots.7z.&nbsp; You'll need 7z-enabled archiving software to unpack
+      these archives.&nbsp; Google it to find out what the right
+      archiving software is for you platform.<br>
+    </p>
+    <p>The unpacked LVDC software is in the form of a git repository, so
+      to access it you'll need to have git installed on your
+      computer.&nbsp; The online folder from which you downloaded
+      LVDC-software.git.7z will have a README that among other things,
+      gives you instructions on accessing the files in the repository.<br>
+    </p>
+    <p>You will need to have Python 3 installed on your computer in
+      order to run the flowchart-generation software.&nbsp; I don't
+      believe that any nonstandard Python modules need to be separately
+      installed.&nbsp; Python 2 will <i>not</i> suffice.<br>
+    </p>
+    <p><a moz-do-not-send="true"
+        href="https://github.com/virtualagc/virtualagc/tree/master/yaASM.py">My
+
+        flowchart-generation software needs to be downloaded</a>.&nbsp;
+      The only files actually needed are yaASMflowchart2.py and
+      sdl.ps.&nbsp; No installation is needed.<br>
+    </p>
+    <p>The graph-visualization software <a moz-do-not-send="true"
+        href="https://graphviz.org/download/">graphviz</a> is
+      needed.&nbsp; This is a free download (Linux/Windows/Mac).<br>
+    </p>
+    <p>The flowcharts are produced in PostScript format.&nbsp; To view
+      them, you either need document-viewer software that supports
+      PostScript, or else graphics software that can conveniently
+      convert PostScript to some other image format, preferably
+      PNG.&nbsp; There are so many possibilities on so many different
+      platforms (Linux vs Windows vs Mac) that it is hard to make solid
+      recommendations. <br>
+    </p>
+    <h2><a name="Building"></a>How to Build an LVDC Flowchart from
+      Source Code</h2>
+    <p>Creation of software flowcharts from LVDC source-code files is a
+      multistep process, which in general looks like this:<br>
+    </p>
+    <ol>
+      <li>Conversion of LVDC source-code files (*.lvdc) to flowcharts in
+        <a moz-do-not-send="true"
+          href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)">the
+
+          DOT graph-description language</a> is carried out by the
+        program yaASMflowchart2.py.</li>
+      <li>Conversion of DOT files to flowcharts in <a
+          moz-do-not-send="true"
+          href="https://en.wikipedia.org/wiki/PostScript">the PostScript
+          page-description language</a> is performed by the program
+        called "dot" that is provided by your installation of graphviz.</li>
+      <li>(Optionally) PostScript files are converted to other viewing
+        formats (PNG, JPG, PDF, etc.) by graphics software such as
+        ImageMagic, GIMP, maybe Adobe Acrobat, maybe Photoshop, etc.,
+        though in general it's just easier to view the PostScript files
+        directly in appropriate viewing software.<br>
+      </li>
+    </ol>
+    <p>Let's consider these steps in order.<br>
+    </p>
+    <p><i>Creation of DOT files from LVDC files</i>.&nbsp; Recall that
+      any given LVDC flight program consists of a set of dozens of LVDC
+      source-code files.&nbsp; We don't create a single, immense
+      flowchart for an LVDC flight program as a whole.&nbsp; Rather, the
+      flowcharting annotations in the LVDC software define many, many
+      smaller flowcharts.&nbsp; Usually there's a single flowchart in an
+      individual LVDC source file.&nbsp; But sometimes there are
+      multiple flowcharts in a single source file, and sometimes (though
+      rarely) there are none at all.&nbsp; The naming of the flowchart
+      files is provided by the flowcharting annotations and <i>not</i>
+      by the filenames of the source-code files.&nbsp; You can either
+      process each source-code file individually, or else you can
+      concatenate some or all of them and process them all at
+      once.&nbsp; If yaASMflowchart2.py is in your PATH, from a command
+      line you could process a single LVDC source-code file (say,
+      SQUARE_ROOT_UTILITY.lvdc) like so:<br>
+    </p>
+    <blockquote>
+      <p><tt>yaASMflowchart2.py &lt;SQUARE_ROOT_UTILITY.lvdc</tt><br>
+      </p>
+    </blockquote>
+    <p>Or in Linux, you could process all of the LVDC files in the
+      current folder at once like this:<br>
+    </p>
+    <blockquote>
+      <p><tt>cat *.lvdc | yaASMflowchart2.py</tt><br>
+      </p>
+    </blockquote>
+    <p>In Windows, the corresponding command would be:<br>
+    </p>
+    <blockquote><tt>type *.lvdc | yaASMflowchart2.py</tt><br>
+    </blockquote>
+    The result of this operation is a bunch of DOT files, 93 in all if
+    you're working with the entire set of AS-512 source-code files:<br>
+    <blockquote><tt>ABSOLUTE-COMMAND_FREEZE_UTILITY_(FR).dot</tt><tt><br>
+      </tt><tt>ACCELEROMETER_PROCESSING_(AP).dot</tt><tt><br>
+      </tt><tt>ACCELEROMETER_READ_(AR).dot</tt><tt><br>
+      </tt><tt>ACQUISITION_GAIN-LOSS_(GL).dot</tt><tt><br>
+      </tt><tt>APS_ATTITUDE_CONTROL_TEST_(AC).dot</tt><tt><br>
+      </tt><tt>ARCTANGENT_UTILITY_(AT).dot</tt><tt><br>
+      </tt><tt>BOOST_NAVIGATION_(NE).dot</tt><tt><br>
+      </tt><tt>CHI_COMPUTATIONS_(CC).dot</tt><tt><br>
+      </tt><tt>CMC_CUTOFF_(CI).dot</tt><tt><br>
+      </tt><tt>COMPRESSED_DATA_TELEMETRY_(CT).dot</tt><tt><br>
+      </tt><tt>.</tt><tt>..</tt><tt><br>
+      </tt></blockquote>
+    By the way, these DOT files can themselves be manually edited to
+    change the appearance of the flowcharts, if you're expert enough in
+    graphviz and the DOT language to do so.&nbsp; I wouldn't recommend
+    doing that in general, since any changes you make to the DOT files
+    directly are so easily overwritten later by yaASMflowchart2.py and
+    thus lost.&nbsp; But the potential does exist.<br>
+    <br>
+    <i>Conversion of DOT files to PostScript</i>.&nbsp; Converting a
+    single DOT file to PostScript format (again, say
+    SQUARE_ROOT_UTILITY_(SR).dot), looks like this:<br>
+    <blockquote><tt>dot -l sdl.ps "</tt><tt>SQUARE_ROOT_UTILITY_(SR).dot"
+
+      </tt><tt>&gt;"SQUARE_ROOT_UTILITY_(SR).ps"</tt></blockquote>
+    On some platforms, the surrounding quotes (single-quotes could be
+    used instead) aren't needed, but on others the parentheses in the
+    filename causes problems without the quotes, so you may as well just
+    always include them.<br>
+    <br>
+    Note that the file sdl.ps just be either in the current folder, or
+    else you'll have to provide a full path to where it is actually
+    located.&nbsp; To make it simple above, I just assumed that it was
+    in the current folder.<br>
+    <br>
+    Depending on your platform and what document-viewing software is
+    installed on it, these *.ps (PostScript) file may now be directly
+    viewable as flowcharts just by clicking on them with a mouse.&nbsp;
+    Alas, on other platforms doing that may simply show you the files as
+    text, which is pretty uninformative.&nbsp; It may be painful, but if
+    it doesn't work at first, my advice to you would be to research the
+    available solutions for directly viewing PostScript files on your
+    system.&nbsp; There will be some free solution, but I simply don't
+    know that it is for you.&nbsp; <br>
+    <br>
+    Even on Linux it hasn't always been easy.&nbsp; For example, on my
+    system, the default document viewer (xreader) displays the
+    PostScript flowcharts just fine, but cannot zoom very large images
+    appropriately; an alternate viewer (okular) works terrifically for <i>me</i>,
+    but when I install okular on Windows it just shows the PostScript
+    files as text.<br>
+    <br>
+    <i>Conversion of PostScript to other image formats</i>.&nbsp;
+    Optionally, you may want to convert the PostScript files to image
+    files like PNG, JPG, SVG, or PDF.&nbsp; My own advice, if you choose
+    to do this, is to convert to PNG.&nbsp; The PNG files will be much
+    smaller than JPG files; and while not as scalable as SVG will be
+    more easily viewable in more contexts without additional software
+    installation; and conversion to PDF will likely involve you in
+    unpleasant discoveries about "paper size" (hint: you need very large
+    paper sizes sometimes) that you won't have to worry about with PNG.<br>
+    <br>
+    The two cross-platform methods I've used with success for conversion
+    are <a moz-do-not-send="true"
+      href="https://www.gimp.org/downloads/">GIMP</a> and <a
+      moz-do-not-send="true"
+      href="https://imagemagick.org/script/download.php">ImageMagick</a>.&nbsp;
+
+    Neither program directly supports PostScript; rather, each is a
+    convenience layer using <a moz-do-not-send="true"
+      href="https://www.ghostscript.com/releases/index.html">ghostscript</a>
+    to perform the actual conversion.&nbsp; <br>
+    <br>
+    GIMP is purely interactive, and is relatively convenient for
+    converting a single file.&nbsp; If you ask it to load one of your
+    PostScript files, there will be a pop-up asking you various
+    questions about the conversion: I'd suggest using a "resolution" of
+    96, "Color", "Strong" text antialiasing, and "Strong" graphic
+    antialiasing.&nbsp; Once loaded, you can then use File/Export-as to
+    output it as a PNG file.<br>
+    <br>
+    ImageMagick is purely command-line driven, and therefore is more
+    useful than GIMP for batch conversions.&nbsp; The basic command in
+    ImageMagick 6 for converting a single file, such as our
+    SQUARE_ROOT_UTILITY_(SR).ps file, is<br>
+    <blockquote><tt>convert -density 96 "</tt><tt>SQUARE_ROOT_UTILITY_(SR).ps</tt><tt>"
+        -background white -flatten "</tt><tt>SQUARE_ROOT_UTILITY_(SR).png"</tt></blockquote>
+    For ImageMagick 7, the "convert" command absurdly turns instead into
+    the "magick" command but is otherwise the same:<br>
+    <blockquote><tt>magick -density 96 "</tt><tt>SQUARE_ROOT_UTILITY_(SR).ps</tt><tt>"
+        -background white -flatten "</tt><tt>SQUARE_ROOT_UTILITY_(SR).png"</tt></blockquote>
+    <table border="1" align="center" width="95%" cellspacing="2"
+      cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><font size="-1"><b>Aside:</b>&nbsp; At least
+              on my computer (Linux Mint 21), ImageMagick 6 is
+              constrained by various "policy" settings, and (for me) the
+              default policy settings were heavily weighted against my
+              being able to actually perform this conversion.&nbsp; So
+              before doing anything at all, I needed to change the
+              policy settings.&nbsp; I don't know if ImageMagick 7 has
+              equivalent policy problems. Perhaps not.&nbsp; I didn't
+              change any.</font><br>
+            <br>
+            <font size="-1">ImageMagick 6 policy settings are found in a
+              file called policy.xml stored <i>somewhere</i> on your
+              computer.&nbsp; (On my system, they're at
+              /etc/ImageMagick-6/policy.xml.)&nbsp; The file may require
+              administrative rights to edit.&nbsp; Fortunately, these
+              policy changes are a one-time-only thing, and once set
+              they can be forgotten.&nbsp; On my system, the default
+              policy settings disallowed all operations using
+              ghostscript, thus disallowing operations on PostScript
+              files, so I had to comment out the policy reading</font><br>
+            <blockquote><font size="-1"><tt>&lt;policy domain="coder"
+                  rights="none" pattern="PS" /&gt;</tt></font><br>
+            </blockquote>
+            <font size="-1">Then too, there are various policies
+              representing limits on the amount of computer resources
+              ImageMagick is allowed to use.&nbsp; Any operation that
+              exceeds those limits will fail, probably with unhelpful
+              messages that do not allow you to isolate the
+              problem.&nbsp; Unfortunately, on my own system, I've had
+              to pep up these limits quite a lot, long ago, for
+              applications unrelated to flowcharting, so I have little
+              idea how much <i>you'll</i> have to change the limits;
+              probably less drastically than me.&nbsp; The
+              resource-related policies that <i>may</i> require pepping
+              up currently read as follows on my system:</font><br>
+            <blockquote><font size="-1"><tt>&lt;policy domain="resource"
+                  name="memory" value="24GiB"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="map"
+                  value="1GiB"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="width"
+                  value="32KP"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="height"
+                  value="32KP"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="area"
+                  value="256MP"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="disk"
+                  value="2GiB"/&gt;</tt></font><br>
+            </blockquote>
+            <font size="-1">The only resource policies I've set
+              specifically for flowchart-conversion reasons are the
+              "width" and "height" settings.</font><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h2><a name="Annotations"></a>Flowchart Annotations in LVDC Source
+      Code</h2>
+    <h2><a name="FLOW"></a>FLOW Directives</h2>
+    <h2><a name="Example"></a>Working Example:&nbsp; the SQUARE ROOT
+      UTILITY Module of AS-512</h2>
+    <p><img moz-do-not-send="true" src="SQUARE_ROOT_UTILITY.png" alt=""
+        align="left" width="427" hspace="20" height="802"><img
+        moz-do-not-send="true" src="SQUARE_ROOT_UTILITY_(SR).dot.ps.png"
+        alt="" align="right" width="325" height="1222">What I'd like to
+      do in this section is work through a real-life example, namely
+      that of the SQUARE ROOT UTILITY module from the AS-512 flight
+      program that has already been used several times above as an
+      example.&nbsp; It's a very short file that has a relatively-large
+      number of potential improvements.&nbsp; Fixing it up the flowchart
+      will thus be a lot of work, but at the same time we'll gain a lot
+      of understanding about the code along the way. <br>
+    </p>
+    <p>To the left is the relevant portion of the source-code file,
+      which I've chosen to look at using the vim editor, because LVDC
+      syntax-highlighting is available in vim.&nbsp; Whereas to the
+      right we see the flowchart generated from that source code.<br>
+    </p>
+    <p>As mentioned earlier, one issue with the flowchart is that we <i>may</i>
+      have succeeded in accurately reproducing the program flow — that
+      remains to be seen! — but inadequate flowcharting annotations in
+      the original source code may not have allowed decent labeling of
+      some of the boxes or arrows in the flowchart.&nbsp; You can see
+      this particularly in the decision boxes labeled "Line 68", "Line
+      77", and "Line 85", and in the associated entry points labeled
+      "Line 70", "Line 76", and "Line 88".&nbsp; Why these goofy
+      labels?&nbsp; It's because there's nothing in the source code that
+      tells the flowchart-generator software anything meaningful about
+      the test being performed or the significance of the test
+      results.&nbsp; <br>
+    </p>
+    <p>So if we want to fix up the flowchart at those points with <i>meaningful</i>
+      captions, we have to use our soft human brains to figure out the <i>intent</i>
+      of the original source code.&nbsp; This will require actual
+      thinking and rummaging around in the LVDC source code, and cannot
+      be done in some formulaic rote fashion.<br>
+    </p>
+    <p>Let's first see if we can figure out what's happening at line 68
+      of the source code and its environs.&nbsp; According to the
+      comments at the top of the source code, subroutine <tt>U.SR00</tt>
+      accepts a number (let's call it <i>x</i>) in the accumulator
+      register and is supposed to compute its square root.&nbsp; <tt>D.VUTB</tt>
+      (a variable) it tells us, contains the "previous square root of
+      argument".&nbsp; So presumably one would load an initial guess for
+      the square root (perhaps <i>x</i>/2) into <tt>D.VUTB</tt> before
+      calling <tt>U.SR00</tt> the first time, and could then keep
+      calling <tt>U.SR00</tt> iteratively in order to keep refining the
+      square-root value.<br>
+    </p>
+    <p>It's too bad that the comments in the source code don't actually
+      <i>say</i> that, and instead force us to <i>presume</i> it.&nbsp;
+      As it happens, there is external documentation that can help us
+      out somewhat, sometimes, in figuring out stuff like this.&nbsp;
+      The external documentation I speak of is something called the
+      Equation Defining Document (EDD).&nbsp; Unfortunately, there are
+      several separate EDDs, and we only have the one called "LVDC
+      Equation Defining Document (EDD) for the Saturn IB Flight
+      Program".&nbsp; Which is <i>not</i> what the AS-512 flight
+      program is, given that AS-512 used a Saturn V launch
+      vehicle.&nbsp; But still, it's close enough in some ways to be
+      helpful.&nbsp; Rather than making you look in <a
+        moz-do-not-send="true" href="links2.html">the document library</a>
+      for the document, here are direct links to the various parts of
+      that EDD:<br>
+    </p>
+    <blockquote>
+      <blockquote>
+        <ul>
+          <li><a moz-do-not-send="true"
+              href="Documents/satinstunitibm_1.pdf">Part I, Sections 1-3</a></li>
+          <li><a moz-do-not-send="true"
+              href="Documents/satinstunitibm_2.pdf">Part I, Sections 4-5</a></li>
+          <li><a moz-do-not-send="true"
+              href="Documents/satinstunitibm_3.pdf">Part I, Sections 7-9</a></li>
+          <li><a moz-do-not-send="true"
+              href="Documents/satinstunitibm_4.pdf">Part I, Sections
+              10-11</a></li>
+          <li><a moz-do-not-send="true"
+              href="Documents/satinstunitibm_5.pdf">Part I, Sections
+              12-14</a></li>
+          <li><a moz-do-not-send="true"
+              href="Documents/satinstunitibm_6.pdf">Part I, Section 15</a></li>
+          <li><a moz-do-not-send="true"
+              href="Documents/satinstunitibm_7.pdf">Part II</a></li>
+        </ul>
+      </blockquote>
+    </blockquote>
+    <p>Now, if you look at line 79 in the source code, you'll notice a
+      reference to EQ. 13.6.1.&nbsp; That's an equation in the EDD,
+      though since we have a different version of the EDD, it's not
+      necessarily the same equation number.&nbsp; As it happens, in the
+      Saturn IB EDD it's section 13.5 (rather than 13.6) that describes
+      SQUARE ROOT ALGORITHM, so the relevant equation is 13.5.1.&nbsp;
+      Let me quote the EDD in full:<br>
+    </p>
+    <div align="center"><img moz-do-not-send="true" src="EDD-13.5.jpg"
+        alt="" width="482" height="368"></div>
+    <br>
+    With that explanation, it now becomes clear that the test being
+    performed at line 68 is whether or not <i>x</i>/2 is less than the
+    estimated root, <tt>D.VUTB</tt>.&nbsp; Which not coincidentally, is
+    what the comment for <i>next</i> line, line 69, says.&nbsp; Thus if
+    lines 67-69 of the source code had been annotated <i>properly</i>
+    for flowcharting, they should instead read:<br>
+    <pre>       SUB     D.VUTB       IS 1/2 ARGUMENT LESS THAN FIRST GUESS     Q
+       TMI     *+2                                                    Y<br>       TRA     SR10                                                   N<br></pre>
+    <img moz-do-not-send="true" src="flow-1.png" alt="" align="left"
+      width="282" height="353">But what are we going to do about
+    it?&nbsp; Our own rules for transcribing the LVDC source code are to
+    do so <i>as-is</i>, including all errors, so we can't just go in
+    and "fix" the program comments according to how we imagine they
+    should have been done way back when.&nbsp; What we do instead is to
+    add <tt>FLOW</tt> directives, which don't exist in the original
+    LVDC assembly language, and thus are unambiguously "modern", without
+    changing any of the original lines.&nbsp; Here's what that looks
+    like:<br>
+    <pre>       FLOW    Q,,,,,,IS 1/2 ARGUMENT LESS THAN FIRST GUESS<br>       SUB     D.VUTB<br>       FLOW    Y,,,,,,<br>       TMI     *+2<br>       TRA     SR10         IS 1/2 ARGUMENT LESS THAN FIRST GUESS     N<br></pre>
+    I could have added a <tt>FLOW</tt> directive here to remove the
+    comment from line 69, but there's no need to do so, since that
+    comment never shows up the flowchart.&nbsp; But regardless, the
+    section of the flowchart related to Line 68 and its environs has now
+    changed to the more-pleasant form seen at left.<br>
+    <br>
+    Although the decision box for line 68 has been fixed, the entry
+    point formerly labeled "Line 70" (but now "Line 72" because of the
+    addition of the two <tt>FLOW</tt> directives) has not.&nbsp; The
+    problem is that the <tt>TMI *+2</tt> (formerly at line 68 but now
+    at line 70) jumps to <tt>*+2</tt>, but there's no symbolic label at
+    <tt>*+2</tt>.&nbsp; The flowchart generator makes up its own label
+    for <tt>*+2</tt> ... namely, "Line 72".&nbsp; But if you look at
+    what happens after reaching "Line 72", the code simply progresses
+    straight to <tt>SR05</tt> with no intervening annotations or even
+    program comments:&nbsp; i.e., with nothing relevant to the flowchart
+    in between.&nbsp; So as far as the flowchart is concerned, instead
+    of <tt>TMI *+2</tt> it may as well have been <tt>TMI SR05</tt>.&nbsp;
+
+    Let's add a FLOW directive to that effect:<br>
+    <pre>       FLOW    Y,,,SR05,,,<br>       TMI     *+2<br></pre>
+    <img moz-do-not-send="true" src="flow-2.png" alt="" align="right"
+      width="281" height="182">Remember, <tt>FLOW</tt> directives do
+    not affect the assembly of the source code in any way, so <tt>TMI
+      *+2</tt> still assembles as <tt>TMI *+2</tt> regardless of any <tt>FLOW</tt>
+    directives we may choose to stick in front.&nbsp; The result of this
+    change, seen to the right, is exactly what we desired.<br>
+    <br>
+    The next problems to be addressed are at the original lines 76 and
+    77, but now lines 78 and 79 due to the addition of <tt>FLOW</tt>
+    directives in the meantime.&nbsp; It's tiring talking about all of
+    these changing line numbers, so from now on whenever I mention a
+    line number, it will always be from the <i>original</i> source code
+    and flowchart, <i>sans</i> <tt>FLOW</tt> directives.<br>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; Here's a pro tip for
+        you.&nbsp; Fix the flowcharting problems from the <i>bottom</i>
+        of the source-code file <i>upward</i>.&nbsp; That way, addition
+        of FLOW directives doesn't keep messing up the line numbers!</font><br>
+    </blockquote>
+    Original lines 76 and 77 apparently constitute some kind of delay
+    loop, starting with a count of <tt>D.KB24</tt>, and then
+    decrementing that count by <tt>D.KB25</tt> until it becomes
+    negative.&nbsp; Not that it really matters what the specific values
+    of <tt>D.KB24</tt> and <tt>D.KB25</tt> are, but looking at where
+    they're allocated in the GFP DATA PACK module, we find that they're
+    4 and 2, respectively ... so it's actually a very short delay
+    indeed.&nbsp; At any rate, the code originally looks like this,<br>
+    <pre>       SUB     D.KB25<br>       TNZ     *-1<br>       CLA     D.VUTB<br></pre>
+    <pre><img moz-do-not-send="true" src="flow-3.png" alt="" align="left" width="220" height="218"></pre>
+    but it seems as though we should update it to:<br>
+    <pre>       FLOW    Q,,,,,,DIVISION DELAY COMPLETE?<br>       SUB     D.KB25<br>       FLOW    N,,,,,,<br>       TNZ     *-1<br>       CLA     D.VUTB<br></pre>
+    which indeed repairs it as shown to the left.<br>
+    <br>
+    Now let's look at the problems related to (original) lines 85 and
+    88.&nbsp; Back at (original) line 71, a value of 2 was stored in the
+    variable <tt>D.VUTB+2</tt>.&nbsp; What's happening near line 85 is
+    that <tt>D.VUTB+2</tt> is decremented by 1, and we go back to <tt>SR05</tt>
+    as long as <tt>D.VUTB+2</tt> doesn't become negative.&nbsp; In
+    other words, <tt>SR05</tt> is the start of a loop, <tt>D.VUTB+2</tt>
+    is the loop counter, and the loop is executed 3 times, for <tt>D.VUTB+2</tt>
+    equal to 2, 1, and then 0.&nbsp; So it seems as though we need the
+    following <tt>FLOW</tt> directives at (original) lines 84 and 85:<br>
+    <pre>       FLOW    Q,,,,,,3 ITERATIONS COMPLETED?<br>       SUB     =1<br>       FLOW    Y,,,,,,<br>       TMI     *+3<br>       STO     D.VUTB+2<br>       TRA     SR05<br>       FLOW    -,DONE,,,,,<br>       CLA     D.VUTB<br></pre>
+    The mysterious "<tt>FLOW -,DONE,,,,,</tt>" near the bottom is there
+    to provide a label (<tt>"DONE"</tt>) to which the decision box can
+    exit, since otherwise it would exit to the (unlabeled) "Line <i>something</i>".<br>
+    <br>
+    Putting this all together, we end up with the following pepped-up
+    source code and flowchart for it:<br>
+    <br>
+    <div align="center"><img moz-do-not-send="true"
+        src="SQUARE_ROOT_UTILITY-2.png" alt="" width="532" height="1101">&nbsp;&nbsp;&nbsp;&nbsp;
+
+      <img moz-do-not-send="true" src="flow-4.png" alt="" width="328"
+        height="922"><br>
+    </div>
+    <br>
+    Once these things are in hand, the next step is to compare them to
+    see whether or not the flowchart accurately and usefully reflects
+    what the source code is doing?&nbsp; Since we're only looking about
+    about a page of relatively-simple code here, it's pretty easy to do
+    that without a lot of yakety yak from me.&nbsp; The "DONE" entry
+    point is a bit weird, since there's no actual label "DONE" in the
+    source code, but I don't know what can be done about that, if
+    anything.&nbsp; About the only other obvious thing is to wonder
+    where the division referenced by the "DIVISION DELAY COMPLETE?"
+    decision box is?&nbsp; Thus one might want to add a <tt>FLOW</tt>
+    directive such as<br>
+    <pre>       FLOW    B,,,,,,DIVIDE BY CURRENT ESTIMATE<br></pre>
+    at (current) line 75 so that the <tt>DIV</tt> operation shows up in
+    the flowchart.&nbsp; The final, <i>final</i> version of the
+    flowchart, unless I or somebody else keeps thinking about it, thus
+    becomes:<br>
+    <div align="center"><img moz-do-not-send="true" src="flow-5.png"
+        alt="" width="328" height="994"><br>
+      <br>
+      <br>
+    </div>
+  </body>
+</html>
