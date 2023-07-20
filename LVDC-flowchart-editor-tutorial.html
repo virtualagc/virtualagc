@@ -11,7 +11,7 @@
     <h2>History<br>
     </h2>
     <ul>
-      <li>2023-07-19.&nbsp; First draft.</li>
+      <li>2023-07-20.&nbsp; First draft.</li>
     </ul>
     <ul>
     </ul>
@@ -24,7 +24,8 @@
           LVDC Flowchart from Source Code</a></li>
       <li><a moz-do-not-send="true" href="Annotations">Flowchart
           Annotations in LVDC Source Code</a></li>
-      <li><a moz-do-not-send="true" href="#FLOW">FLOW Directives</a></li>
+      <li><a moz-do-not-send="true" href="#FLOW"><tt>FLOW</tt>
+          Directives</a></li>
       <li><a moz-do-not-send="true" href="#Example">Working
           Example:&nbsp; the SQUARE ROOT UTILITY Module of AS-512</a><br>
       </li>
@@ -66,8 +67,8 @@
       flowcharts that bother me are:<br>
     </p>
     <ol>
-      <li>The LVDC software's flowchart-related annotations — if that's
-        what they are! — are neither fully complete nor fully
+      <li>The LVDC software's flowchart-related annotations &mdash; if that's
+        what they are! &mdash; are neither fully complete nor fully
         correct.&nbsp; Therefore, manual corrections to the annotations
         are sometimes useful in producing more-informative flowcharts.<br>
       </li>
@@ -97,11 +98,13 @@
     export by ITAR.&nbsp; If you are qualified to do so, for example by
     being a U.S. citizen, follow whatever instructions are given on <a
       moz-do-not-send="true" href="LVDC.html">the LVDC web page</a> for
-    obtaining access.&nbsp; If it is restricted by ITAR, and continues
-    to be so-restricted, realize that if you do "export" it by giving it
-    to a non-qualified individual or by posting it online, it is you
-    have violated ITAR and you who will be legally responsible for those
-    actions.<br>
+    obtaining access.&nbsp; <i>If</i> the source code is truly
+    restricted by ITAR, legally rather than by some whim of a
+    functionary who doesn't care to look into the matter, and if it
+    continues to be so-restricted, realize that if you do "export" it by
+    giving it to a non-qualified individual or by posting it online, it
+    is you have violated ITAR and you who will be legally responsible
+    for those actions.<br>
     <p>As far as the flowcharts themselves are concerned, you don't
       actually need copies of them since you'll have the capability of
       building them yourself.&nbsp; With that said ....&nbsp; Unlike the
@@ -109,7 +112,7 @@
       restricted by ITAR, and so it's possible you may find them on the
       LVDC web page.&nbsp; However, at least at first, I am continuing
       to treat them as ITAR-restricted, so it may be that the only place
-      you'll find them is same place you got the LVDC source code.<br>
+      you'll find them is the same place you got the LVDC source code.<br>
     </p>
     <p>Having downloaded the LVDC source code and (optionally) the
       flowcharts onto your computer, you'll have encrypted archives in
@@ -120,9 +123,16 @@
     </p>
     <p>The unpacked LVDC software is in the form of a git repository, so
       to access it you'll need to have git installed on your
-      computer.&nbsp; The online folder from which you downloaded
-      LVDC-software.git.7z will have a README that among other things,
-      gives you instructions on accessing the files in the repository.<br>
+      computer.&nbsp; The unpacked git repository will be called
+      LVDC-software.git, and won't appear to have any usable files in
+      it.&nbsp; You'll need to run the command<br>
+    </p>
+    <blockquote>
+      <p>git clone LVDC-software.git<br>
+      </p>
+    </blockquote>
+    <p>thus creating a new folder (called just LVDC-software) in which
+      you'll be able to find all of the LVDC source-code files.<br>
     </p>
     <p>You will need to have Python 3 installed on your computer in
       order to run the flowchart-generation software.&nbsp; I don't
@@ -132,22 +142,130 @@
     <p><a moz-do-not-send="true"
         href="https://github.com/virtualagc/virtualagc/tree/master/yaASM.py">My
 
+
         flowchart-generation software needs to be downloaded</a>.&nbsp;
       The only files actually needed are yaASMflowchart2.py and
-      sdl.ps.&nbsp; No installation is needed.<br>
+      sdl.ps.&nbsp; No installation is needed, though you may find it
+      helpful to give yaASMflowchart2.py "executable" permissions (if
+      that's something that exists in your operating system) and to put
+      it in your PATH.&nbsp; The easiest thing to do with sdl.ps is to
+      put it directly in whatever folders hold LVDC source-code files
+      (*.lvdc).<br>
     </p>
     <p>The graph-visualization software <a moz-do-not-send="true"
         href="https://graphviz.org/download/">graphviz</a> is
       needed.&nbsp; This is a free download (Linux/Windows/Mac).<br>
     </p>
-    <p>The flowcharts are produced in PostScript format.&nbsp; To view
-      them, you either need document-viewer software that supports
-      PostScript, or else graphics software that can conveniently
-      convert PostScript to some other image format, preferably
-      PNG.&nbsp; There are so many possibilities on so many different
-      platforms (Linux vs Windows vs Mac) that it is hard to make solid
-      recommendations. <br>
+    <p>(Optional.)&nbsp; In viewing or editing LVDC source code, it is
+      helpful though not required for the viewing/editing software to be
+      able to provide syntax highlighting for LVDC assembly
+      language.&nbsp; You'll see examples of that below.&nbsp; The only
+      editor presently having LVDC syntax-highlighting capability is <a
+        moz-do-not-send="true" href="https://www.vim.org/">vim</a>,
+      which is admittedly not to everyone's taste.<br>
     </p>
+    <table border="1" align="center" width="95%" cellspacing="2"
+      cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><font size="-1"><b>Aside:</b>&nbsp; If you do
+              choose to install vim, LVDC syntax highlighting is not a
+              standard feature and must be installed separately as a
+              one-time setup.&nbsp; To do so, <a moz-do-not-send="true"
+                href="lvdc_vim.zip">download this zipfile</a> and
+              uncompress it.&nbsp; In the uncompressed folder you'll
+              find two other folders, named "ftdetect" and
+              "syntax".&nbsp; There's some folder on your system that
+              holds vim syntax-highlighting options, though
+              unfortunately I don't know what it is and you'll have to
+              google it to find out.&nbsp; On my own Linux system, that
+              folder happens to be ~/.vim/, though it didn't exist at
+              first and I had to create it myself.&nbsp; At any rate,
+              once you figure out the folder you're supposed to use,
+              and/or you create it, then you should copy ftdetect and
+              syntax into it.&nbsp; From now on, whenever you open an
+              LVDC source-code file with vim, it will be
+              syntax-highlighted.</font> </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
+    <p>(Optional.)&nbsp; The flowcharts are produced in PostScript
+      format.&nbsp; To view them, you either need document-viewer
+      software that supports PostScript, or else graphics software that
+      can conveniently convert PostScript to some other image format,
+      preferably PNG.&nbsp; There are so many possibilities on so many
+      different platforms (Linux vs Windows vs Mac) that it is hard to
+      make solid recommendations.&nbsp; With that said, I most-often use
+      <a moz-do-not-send="true" href="https://imagemagick.org/">ImageMagick
+        graphics software</a> when converting to PNG, and instructions I
+      give will be geared towards it.&nbsp; Personally, I seldom have
+      reason to perform such conversions.<br>
+    </p>
+    <table border="1" align="center" width="95%" cellspacing="2"
+      cellpadding="2">
+      <tbody>
+        <tr>
+          <td valign="top"><font size="-1"><b>Aside:</b>&nbsp; At this
+              writing, ImageMagick 6 and ImageMagick 7 are both
+              generally available, with ImageMagick 6 being the
+              most-readily available on my computer system.&nbsp; At
+              least on my computer (Linux Mint 21), ImageMagick 6 is
+              constrained by various "policy" settings, and (for me) the
+              default policy settings were heavily weighted against my
+              being able to actually perform flowchart
+              conversions.&nbsp; So before doing anything at all, I
+              needed to change the policy settings.&nbsp; I don't know
+              if ImageMagick 7 has equivalent policy problems. Perhaps
+              not.&nbsp; I didn't
+              need to change any myself.</font><br>
+            <br>
+            <font size="-1">ImageMagick 6 policy settings are found in a
+              file called policy.xml stored <i>somewhere</i> on your
+              computer.&nbsp; (On my system, they're at
+              /etc/ImageMagick-6/policy.xml.)&nbsp; The file may require
+              administrative rights to edit.&nbsp; Fortunately, these
+              policy changes are a one-time-only thing, and once set
+              they can be forgotten.&nbsp; On my system, the default
+              policy settings disallowed all operations using
+              ghostscript, thus disallowing operations on PostScript
+              files, so I had to comment out the policy reading</font><br>
+            <blockquote><font size="-1"><tt>&lt;policy domain="coder"
+                  rights="none" pattern="PS" /&gt;</tt></font><br>
+            </blockquote>
+            <font size="-1">Then too, there are various policies
+              representing limits on the amount of computer resources
+              ImageMagick is allowed to use.&nbsp; Any operation that
+              exceeds those limits will fail, probably with unhelpful
+              messages that do not allow you to isolate the
+              problem.&nbsp; Unfortunately, on my own system, I've had
+              to pep up these limits quite a lot, long ago, for
+              applications unrelated to flowcharting, so I have little
+              idea how much <i>you'll</i> have to change the limits;
+              probably less drastically than me.&nbsp; The
+              resource-related policies that <i>may</i> require pepping
+              up on your system currently read as follows on my system:</font><br>
+            <blockquote><font size="-1"><tt>&lt;policy domain="resource"
+                  name="memory" value="24GiB"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="map"
+                  value="1GiB"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="width"
+                  value="32KP"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="height"
+                  value="32KP"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="area"
+                  value="256MP"/&gt;</tt><tt><br>
+                </tt><tt>&lt;policy domain="resource" name="disk"
+                  value="2GiB"/&gt;</tt></font><br>
+            </blockquote>
+            <font size="-1">But the only resource policies I've set
+              specifically for flowchart-conversion reasons are the
+              "width" and "height" settings.</font><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p> </p>
     <h2><a name="Building"></a>How to Build an LVDC Flowchart from
       Source Code</h2>
     <p>Creation of software flowcharts from LVDC source-code files is a
@@ -157,6 +275,7 @@
       <li>Conversion of LVDC source-code files (*.lvdc) to flowcharts in
         <a moz-do-not-send="true"
           href="https://en.wikipedia.org/wiki/DOT_(graph_description_language)">the
+
 
           DOT graph-description language</a> is carried out by the
         program yaASMflowchart2.py.</li>
@@ -232,6 +351,7 @@
     SQUARE_ROOT_UTILITY_(SR).dot), looks like this:<br>
     <blockquote><tt>dot -l sdl.ps "</tt><tt>SQUARE_ROOT_UTILITY_(SR).dot"
 
+
       </tt><tt>&gt;"SQUARE_ROOT_UTILITY_(SR).ps"</tt></blockquote>
     On some platforms, the surrounding quotes (single-quotes could be
     used instead) aren't needed, but on others the parentheses in the
@@ -276,6 +396,7 @@
       moz-do-not-send="true"
       href="https://imagemagick.org/script/download.php">ImageMagick</a>.&nbsp;
 
+
     Neither program directly supports PostScript; rather, each is a
     convenience layer using <a moz-do-not-send="true"
       href="https://www.ghostscript.com/releases/index.html">ghostscript</a>
@@ -299,68 +420,656 @@
     the "magick" command but is otherwise the same:<br>
     <blockquote><tt>magick -density 96 "</tt><tt>SQUARE_ROOT_UTILITY_(SR).ps</tt><tt>"
         -background white -flatten "</tt><tt>SQUARE_ROOT_UTILITY_(SR).png"</tt></blockquote>
-    <table border="1" align="center" width="95%" cellspacing="2"
-      cellpadding="2">
+    <h2><a name="Annotations"></a>Flowchart Annotations in LVDC Source
+      Code</h2>
+    <p>As I've mentioned, AS-512 and AS-513 flight-program source code
+      contains various unexplained annotations among the program
+      comments that usually have no immediately-obvious interpretation
+      in terms of describing what the source code is doing.&nbsp; After
+      contemplating the meaning of these for a couple of months, I
+      formed an impression that these annotations may have something to
+      do with flowcharts, and specifically may be hints for creating a
+      flowchart of the associated code.&nbsp; Or possibly at one time
+      had even been exact instructions for automating generation of
+      flowcharts, but had deteriorated over time due to neglect and lack
+      of programmer training.&nbsp; Whatever the explanation, in AS-512
+      and AS-513, by my reckoning, the annotations can no longer be
+      interpreted with 100% reliability.&nbsp; Thus the explanations I'm
+      going to give you of these annotations and how to interpret (or
+      edit) them are based on my own inferences, and have lots of
+      exceptions where they don't agree with my explanations.<br>
+    </p>
+    <p>Throughout this section, I'll illustrate my explanations using
+      AS-512's MATRIX MULTIPLY UTILITY module.&nbsp; Here's the entire
+      original source code for that module, sans and modern comments we
+      added when transcribing it.&nbsp; Everything that I think is part
+      of a flowcharting annotation in one way or another has been
+      highlighted either in <font color="#ff0000">red</font>, <font
+        color="#33cc00">green</font>, or <font color="#3333ff">blue</font>:<br>
+    </p>
+    <blockquote><tt>$SEGMENT&nbsp; MM&nbsp;&nbsp;
+        REF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        MATRIX MULTIPLY UTILITY (MM)</tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TITLE&nbsp;&nbsp;
+        'MATRIX MULTIPLY UTILITY
+        (MM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        A0840'</tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>**********************************************************************</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        *</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        *</tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          MATRIX MULTIPLY UTILITY
+          (MM)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          *</font><font color="#ff0000">J</font></tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        *</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        *</tt><tt><br>
+      </tt><tt>**********************************************************************</tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>*
+        DATE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        5 - 18 - 68</tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>*
+        REVISIONS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NONE</tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>*
+        FUNCTION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        THE FUNCTION OF THE MATRIX MULTIPLY UTILITY MODULE</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        IS TO PERFORM A MATRIX MULTIPLICATION ON THE TWO</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SPECIFIED MATRICES</tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>*
+        ENTRIES&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        U.MM00 - TWO ARGUMENTS SUPPLIED UPON ENTRY. IN AC,</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        A DFW ON THE FORM CLA,A,MPY,B WHERE A AND</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        B ARE THE INITIAL LOCATIONS OF THE </tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        MATRICES TO BE MULTIPLIED.&nbsp; IN PQ, A WORD</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CONTAINING A DFW OF THE FORM STO,C IN</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SYLLABLE 1 AND A COUNTER (SCALED B25) IN</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SYLLABLE 0.&nbsp; C IS THE INITIAL LOCATION OF</tt><tt><br>
+      </tt><tt>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        THE PRODUCT MATRIX.</tt><tt><br>
+      </tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          LIST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </font><font color="#ff0000">$</font></tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp; ARROWLEFT DRAW
+          &lt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </font><font color="#ff0000">$</font></tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp; ARROWRIGHTDRAW
+          &gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </font><font color="#ff0000">$</font></tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp; ARROWDOWN DRAW
+V&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">$</font></tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp;
+          SYMBOL&nbsp;&nbsp;&nbsp; DRAW
+          .&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </font><font color="#ff0000">$</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ORG&nbsp;&nbsp;&nbsp;&nbsp; P.MOD,C.UT</tt><tt><br>
+      </tt><tt><font color="#3333ff">*Q&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">*</font></tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          U.MM00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </font><font color="#ff0000">S</font></tt><tt><br>
+      </tt><tt>U.MM00 STO&nbsp;&nbsp;&nbsp;&nbsp;
+        777&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#3333ff">SAVE RETURN LINKAGES AND INPUT ARGUMENTS&nbsp;
+        </font><font color="#ff0000">B</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SUB&nbsp;&nbsp;&nbsp;&nbsp;
+        =O01&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; AKJUST DFW
+        FOR USE</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STO&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+4</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLA&nbsp;&nbsp;&nbsp;&nbsp; 775</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STO&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        AND&nbsp;&nbsp;&nbsp;&nbsp; =3</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STO&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+5&nbsp;&nbsp;&nbsp;&nbsp;
+        SAVE COUNTER</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLA&nbsp;&nbsp;&nbsp;&nbsp; 777</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STO&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+6</tt><tt><br>
+      </tt><tt>MM100&nbsp; HOP&nbsp;&nbsp;&nbsp;&nbsp;
+        MM500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#33cc00">(U.VD01)</font><font color="#3333ff">FORM
+          VECTOR DOT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">P</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        EXM&nbsp;&nbsp;&nbsp;&nbsp;
+        0,1,0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#3333ff">STORE 1ST ELEMENT&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">B</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        HOP&nbsp;&nbsp;&nbsp;&nbsp;
+        MM500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#33cc00">(U.VD01)</font><font color="#3333ff">FORM
+          VECTOR DOT&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">P</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        EXM&nbsp;&nbsp;&nbsp;&nbsp;
+        0,1,1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#3333ff">STORE 2ND ELEMENT&nbsp;&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">B</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        HOP&nbsp;&nbsp;&nbsp;&nbsp;
+        MM500&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#33cc00">(U.VD01)</font><font color="#3333ff">FORM
+          VECTOR DOT&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">P</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        EXM&nbsp;&nbsp;&nbsp;&nbsp;
+        0,1,2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#3333ff">STORE 3RD ELEMENT&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">B</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLA&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+5</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SUB&nbsp;&nbsp;&nbsp;&nbsp; =1</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        TNZ&nbsp;&nbsp;&nbsp;&nbsp;
+        MM200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#3333ff">MATRIX MULTIPLICAT- ION COMPLETE&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">N</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        HOP&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+6&nbsp;&nbsp;&nbsp;&nbsp; <font
+          color="#3333ff">RETURN</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">X</font></tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          NONE
+8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>&nbsp;
+        <font color="#ff0000">$</font></tt><tt><br>
+      </tt><tt>MM200&nbsp; STO&nbsp;&nbsp;&nbsp;&nbsp;
+        D.VUTB+5&nbsp;&nbsp;&nbsp;&nbsp; <font color="#3333ff">SET TO
+          FORM ELEMENTS FOR NEXT ROW&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">B</font></tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLA&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+4&nbsp;&nbsp;&nbsp;&nbsp; *</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ADD&nbsp;&nbsp;&nbsp;&nbsp; =O7500004&nbsp;&nbsp;&nbsp; * RESET
+        A ADDRESS, INCREMENT B ADDRESS</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STO&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+4&nbsp;&nbsp;&nbsp;&nbsp; *</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLA&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ADD&nbsp;&nbsp;&nbsp;&nbsp;
+        =O01&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        *&nbsp; INCREMENT C ADDRESS</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STO&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        TRA&nbsp;&nbsp;&nbsp;&nbsp;
+        MM100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">G</font></tt><tt><br>
+      </tt><tt><br>
+      </tt><tt>MM500&nbsp; STO&nbsp;&nbsp;&nbsp;&nbsp;
+        777&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SET TO
+        PEFORM VECTOR DOT</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLA&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+4</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ADD&nbsp;&nbsp;&nbsp;&nbsp; =O01</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STO&nbsp;&nbsp;&nbsp;&nbsp; D.VUTB+4</tt><tt><br>
+      </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        TRA&nbsp;&nbsp;&nbsp;&nbsp; U.VD01</tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">E</font></tt><tt><br>
+      </tt><tt><font color="#3333ff">*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <font color="#ff0000">H</font></tt><br>
+    </blockquote>
+    The <font color="#ff0000">red</font> annotations are clearly the
+    most mysterious as they seem to have no purpose whatever in
+    explicating the code.&nbsp; If present, they are invariably in
+    column 71.&nbsp; (Recall that LVDC source-code was originally on
+    80-column punch-cards and has a specific columnar alignment.)&nbsp;
+    Some of these <font color="#ff0000">red</font> markings, in my
+    view, give you high-level information about a flowchart:<br>
+    <ul>
+      <li><font color="#ff0000">J</font> indicates the start of a
+        flowchart.&nbsp; It invariably appears only in full-line
+        comments, and the remainder of the comment (shown above in <font
+          color="#3333ff">blue</font>), minus any * or spaces at the
+        beginning or end, is the title of the flowchart.</li>
+      <li><font color="#ff0000">H</font> indicates the end of a
+        flowchart.&nbsp; Any source-code lines not between <font
+          color="#ff0000">J</font> and <font color="#ff0000">H</font>
+        are not included in any flowchart.<br>
+      </li>
+    </ul>
+    <blockquote><font size="-1"><b>Aside:</b>&nbsp; Other than <font
+          color="#ff0000">J</font> and <font color="#ff0000">H</font>
+        lines, I currently just ignore all full-line comments, because I
+        haven't figured out any reliable interpretation for them.&nbsp;
+        It's possible they may be best interpreted as captions for
+        blocks of flowchart elements, and that they should be printed on
+        the flowchart separately from any individual boxes or
+        arrows.&nbsp; I just don't know.&nbsp; However, omitting them
+        doesn't seem to do much harm.</font><br>
+    </blockquote>
+    More often, <font color="#ff0000">red</font> annotations indicate
+    that there's a flowchart box associated with the vicinity of that
+    line of code, and tells you the shape of the box.&nbsp; Only a few
+    of the many relatively-standardized flowchart shapes are used.&nbsp;
+    How the captions of the boxes should be derived isn't entirely
+    clear, and the flowchart-generator program tends to use a
+    prioritized heuristic approach to figuring it out, as described in
+    the following table.<br>
+    <br>
+    <table border="1" align="center" cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
-          <td valign="top"><font size="-1"><b>Aside:</b>&nbsp; At least
-              on my computer (Linux Mint 21), ImageMagick 6 is
-              constrained by various "policy" settings, and (for me) the
-              default policy settings were heavily weighted against my
-              being able to actually perform this conversion.&nbsp; So
-              before doing anything at all, I needed to change the
-              policy settings.&nbsp; I don't know if ImageMagick 7 has
-              equivalent policy problems. Perhaps not.&nbsp; I didn't
-              change any.</font><br>
-            <br>
-            <font size="-1">ImageMagick 6 policy settings are found in a
-              file called policy.xml stored <i>somewhere</i> on your
-              computer.&nbsp; (On my system, they're at
-              /etc/ImageMagick-6/policy.xml.)&nbsp; The file may require
-              administrative rights to edit.&nbsp; Fortunately, these
-              policy changes are a one-time-only thing, and once set
-              they can be forgotten.&nbsp; On my system, the default
-              policy settings disallowed all operations using
-              ghostscript, thus disallowing operations on PostScript
-              files, so I had to comment out the policy reading</font><br>
-            <blockquote><font size="-1"><tt>&lt;policy domain="coder"
-                  rights="none" pattern="PS" /&gt;</tt></font><br>
-            </blockquote>
-            <font size="-1">Then too, there are various policies
-              representing limits on the amount of computer resources
-              ImageMagick is allowed to use.&nbsp; Any operation that
-              exceeds those limits will fail, probably with unhelpful
-              messages that do not allow you to isolate the
-              problem.&nbsp; Unfortunately, on my own system, I've had
-              to pep up these limits quite a lot, long ago, for
-              applications unrelated to flowcharting, so I have little
-              idea how much <i>you'll</i> have to change the limits;
-              probably less drastically than me.&nbsp; The
-              resource-related policies that <i>may</i> require pepping
-              up currently read as follows on my system:</font><br>
-            <blockquote><font size="-1"><tt>&lt;policy domain="resource"
-                  name="memory" value="24GiB"/&gt;</tt><tt><br>
-                </tt><tt>&lt;policy domain="resource" name="map"
-                  value="1GiB"/&gt;</tt><tt><br>
-                </tt><tt>&lt;policy domain="resource" name="width"
-                  value="32KP"/&gt;</tt><tt><br>
-                </tt><tt>&lt;policy domain="resource" name="height"
-                  value="32KP"/&gt;</tt><tt><br>
-                </tt><tt>&lt;policy domain="resource" name="area"
-                  value="256MP"/&gt;</tt><tt><br>
-                </tt><tt>&lt;policy domain="resource" name="disk"
-                  value="2GiB"/&gt;</tt></font><br>
-            </blockquote>
-            <font size="-1">The only resource policies I've set
-              specifically for flowchart-conversion reasons are the
-              "width" and "height" settings.</font><br>
+          <th align="center" valign="middle"><font color="#ff0000">Red</font>
+            Annotation<br>
+          </th>
+          <th align="center" valign="middle">Interpretation<br>
+          </th>
+          <th align="center" valign="middle">Flowchart Shape<br>
+          </th>
+        </tr>
+        <tr>
+          <td align="center" valign="middle"><font color="#ff0000">S</font>,
+            <font color="#ff0000">X</font>, <font color="#ff0000">G</font><br>
+          </td>
+          <td align="left" valign="middle">Entry or exit point.&nbsp; Or
+            more specifically:<br>
+            <ul>
+              <li>S:&nbsp; Start point.&nbsp; Caption:&nbsp; If the line
+                of code has a symbolic label, it uses that symbolic
+                label; otherwise, if the program comment is of the form
+                "<font color="#33cc00">(<i>label</i>)</font><font
+                  color="#3333ff">remainder of comment</font>", it uses
+                <font color="#33cc00"><i>label</i></font>; otherwise, if
+                the program comment isn't empty and has no spaces in it,
+                it just uses the comment in its entirety; if all of the
+                that fails, then there's an error message.<br>
+              </li>
+              <li>X:&nbsp; Exit point. Caption: If the program comment,
+                <i>sans</i> any leading or trailing "<font
+                  color="#33cc00">(something)</font>", isn't empty and
+                contains no spaces, that's used as the caption;
+                otherwise, if the assembly-language instruction is
+                either <tt>TRA</tt> or <tt>HOP</tt>, then the operand
+                of the instruction is used if it can be interpreted as a
+                symbolic label; otherwise, "Line <i>N</i>" is used,
+                where <i>N</i> is the source-code line number.<br>
+              </li>
+              <li>G:&nbsp; Go to.&nbsp; Caption: The assembly-language
+                instruction is expected to be a <tt>TRA</tt> or <tt>HOP</tt>
+                to a symbolic label, and that operand is used as the
+                caption.<br>
+              </li>
+            </ul>
+          </td>
+          <td align="center" valign="middle"><img moz-do-not-send="true"
+              src="boxTerminal.png" alt="" width="175" height="78"><br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle"><font color="#ff0000">P</font><br>
+          </td>
+          <td align="center" valign="middle">
+            <div align="left">Call to a subroutine or expansion of a
+              macro; i.e., a named sequence of instructions.&nbsp;
+              Caption:&nbsp; The program comment is generally of the
+              form "<font color="#33cc00">(<i>label</i>)</font><font
+                color="#3333ff">remainder of comment</font>", and is
+              used (word-wrapped) as the caption.&nbsp; If "<font
+                color="#33cc00">(<i>label</i>)</font>" is present, a
+              linefeed is also inserted following it.<br>
+            </div>
+          </td>
+          <td align="center" valign="middle"><img moz-do-not-send="true"
+              src="boxSubroutine.png" alt="" width="322" height="78"><br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle"><font color="#ff0000">M</font>,
+            <font color="#ff0000">L<font color="#000000">, </font>B<font
+                color="#000000">, </font>D</font><br>
+          </td>
+          <td align="left" valign="middle">Unnamed sequence of
+            instructions.&nbsp; The caption is generated the same way as
+            for <font color="#ff0000">P</font> (see above).&nbsp; The
+            distinction between M, L, B, and D isn't clear.&nbsp;
+            Perhaps the following interpretations, in order of
+            increasing uncertainty, are meaningful.&nbsp; Perhaps not:<br>
+            <ul>
+              <li>M: Mask</li>
+              <li>L: switch seLector</li>
+              <li>B: Begin, Bias, Backup, Bits, Burn, feedBack, oBtain,
+                time Base</li>
+              <li>D: &mdash;\_(&#12484;)_/&mdash; (For future readers, if any, that's a
+                shrug emoji.)</li>
+            </ul>
+            <p>Perhaps the real truth here is that there's no consistent
+              way for us to distinguish these annotations from each
+              other.&nbsp; The flowchart-generator software doesn't even
+              try, and treats them as interchangeable.<br>
+            </p>
+          </td>
+          <td align="center" valign="middle"><img moz-do-not-send="true"
+              src="boxProcess.png" alt="" width="158" height="77"><br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle"><font color="#ff0000">Q</font><br>
+          </td>
+          <td align="left" valign="middle">Decision.&nbsp; The caption
+            is generated the same way as for <font color="#ff0000">P</font>
+            (see above).</td>
+          <td align="center" valign="middle"><img moz-do-not-send="true"
+              src="boxDecision.png" alt="" width="171" height="134"><br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle"><font color="#ff0000">I</font><br>
+          </td>
+          <td align="left" valign="middle">Input or output, generally
+            via <tt>PIO</tt> instructions.&nbsp; The caption is
+            generated the same way as for <font color="#ff0000">P</font>
+            (see above).</td>
+          <td align="center" valign="middle"><img moz-do-not-send="true"
+              src="boxIO.png" alt="" width="221" height="80"><br>
           </td>
         </tr>
       </tbody>
     </table>
-    <h2><a name="Annotations"></a>Flowchart Annotations in LVDC Source
-      Code</h2>
-    <h2><a name="FLOW"></a>FLOW Directives</h2>
+    <br>
+    A couple of <font color="#ff0000">red</font> annotations relate to
+    the captions on arrows exiting a decision box rather then themselves
+    representing boxes:<br>
+    <br>
+    <table border="1" align="center" cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <th align="center" valign="middle"><font color="#ff0000">Red</font>
+            Annotation<br>
+          </th>
+          <th align="center" valign="middle">Interpretation<br>
+          </th>
+          <th align="center" valign="middle">Flowchart Shape<br>
+          </th>
+        </tr>
+        <tr>
+          <td align="center" valign="middle"><font color="#ff0000">Y</font><font
+              color="#ff0000"></font><br>
+          </td>
+          <td align="center" valign="middle">Yes<br>
+          </td>
+          <td align="center" valign="middle"><img moz-do-not-send="true"
+              src="arrowYES.png" alt="" width="85" height="83"><br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle"><font color="#ff0000">N</font><br>
+          </td>
+          <td align="center" valign="middle">No<br>
+          </td>
+          <td align="center" valign="middle"><img moz-do-not-send="true"
+              src="arrowNO.png" alt="" width="80" height="87"><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <br>
+    And finally, there are various <font color="#ff0000">red</font>
+    annotations in the original code that I haven't been able to discern
+    any purpose for, and are simply ignored by the flowchart-generator
+    software:&nbsp; <font color="#ff0000">E</font> (perhaps "End of
+    routine"), <font color="#ff0000">$</font> (perhaps a comment), <font
+      color="#ff0000">*</font>, <font color="#ff0000">C</font> (perhaps
+    "Completed").<br>
+    <br>
+    There are also a few exceptional cases in which the flowchart
+    generator acts on the basis of the assembly-language code, even if
+    unmarked by <font color="#ff0000">red</font> annotations:<br>
+    <ul>
+      <li>Any line with a symbolic label may potentially appear in the
+        flowchart as a TERMINAL box, captioned by the symbolic label
+        itself.<br>
+      </li>
+      <li>Even without a symbolic label, any line may potentially appear
+        in the flowchart as a TERMINAL box if it's the target of a <tt>HOP</tt>,
+        <tt>TRA</tt>, <tt>TMI</tt>, or <tt>TNZ</tt> instruction.&nbsp;
+        Without a symbolic label, the TERMINAL box will be captioned as
+        "Line <i>N</i>", where <i>N</i> is the source-code line
+        number.</li>
+      <li>Unannotated <tt>TRA</tt> instructions are treated as if they
+        were annotated by <font color="#ff0000">G</font>.</li>
+      <li>Unannotated <tt>TMI</tt> and <tt>TNZ</tt> instructions are
+        treated as if they were decision boxes (<font color="#ff0000">Q</font>)
+        combined with <i>uncaptioned</i> exit arrows.</li>
+      <li><b>Note</b>:&nbsp; Unannotated <tt>HOP</tt> instructions are
+        not treated in any special way, since either <tt>P</tt> vs <tt>G</tt>
+        could be the appropriate annotation, and the flowchart generator
+        has no way to know which is which. <br>
+      </li>
+    </ul>
+    <p>In most cases, the flowchart depicts control flow by following
+      the simple rule that each flowchart box has an arrow to the next
+      box, in the order that the annotations associated with the boxes
+      are encountered in the source code.&nbsp; But there are exceptions
+      that interrupt this simple default ordering:<br>
+    </p>
+    <ul>
+      <li><font color="#ff0000">S</font> boxes do not receive a default
+        arrow from the preceding box.</li>
+      <li>Boxes do not receive a default arrow if the preceding box is
+        an <font color="#ff0000">X</font> box, a <font color="#ff0000">G</font>
+        box, or if the preceding LVDC instruction was <tt>TRA</tt>.</li>
+      <li>And there are certain rare cases involving <tt>Q</tt>, <tt>Y</tt>,
+        and <tt>N</tt> in which there is no default arrow from the <tt>Q</tt>
+        box to the next box.</li>
+    </ul>
+    <p>Decision boxes are the trickiest aspect of program flow in the
+      flowcharts.&nbsp; The stereotypical case is a two-way decision, in
+      which the pattern of LVDC instructions and flowchart annotations
+      looks like this:<br>
+    </p>
+    <blockquote>
+      <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ... <i>instructions
+            to set up a test</i> ... <br>
+          <i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; final instruction of
+            the setup</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Q<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TMI|TNZ <i>label1</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Y or N<br>
+          <i>&nbsp; &nbsp; &nbsp;&nbsp; next instruction</i><br>
+          <i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ... additional
+            instructions ...<br>
+          </i></tt></p>
+    </blockquote>
+    <p>The flowchart associated with this has a decision box (labeled
+      with the comment for the "final instruction of the setup"), an
+      arrow captioned YES or NO to <i>label1</i>, and an arrow
+      captioned NO or YES to the next box following the decision
+      box.&nbsp; The complexity comes in because there are many ways to
+      do this differently or even wrong, and the flowchart generator
+      tries to handle as many of those exceptions as it can.<br>
+    </p>
+    <p>For one thing, suppose we instead had this:<br>
+    </p>
+    <blockquote>
+      <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ... <i>instructions
+            to set up a test</i> ... <br>
+          <i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; final instruction of
+            the setup</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Q<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TMI|TNZ <i>label1</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Y or N<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TMI|TNZ <i>label2</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          N or Y<br>
+          <i>&nbsp; &nbsp; &nbsp;&nbsp; next instruction</i><br>
+          <i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ... additional
+            instructions ...<br>
+          </i></tt></p>
+    </blockquote>
+    <p>This is treated as a 3-way decision instead of a 2-way decision,
+      so that we have an arrow captioned YES or NO to <i>label1</i>,
+      and an arrow captioned NO or YES to <i>label2</i>, and an
+      uncaptioned arrow to the next box following the decision
+      box.&nbsp; Perhaps a bit misleading, but inescapable given that <font
+        color="#ff0000">Y</font> and <font color="#ff0000">N</font> are
+      the only <font color="#ff0000">red</font> annotations available
+      for the arrow captioning.&nbsp; (Fortunately, there seem to be no
+      4-way or higher decisions in LVDC code.)<br>
+    </p>
+    <p>A common situation, which may or may not be an error on the part
+      of the original programmer, is when the <font color="#ff0000">Q</font>
+      annotation is missing:<br>
+    </p>
+    <blockquote>
+      <p><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ... <i>instructions
+            to set up a test</i> ... <br>
+          <i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; final instruction of
+            the setup</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TMI|TNZ <i>label1</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          Y or N<br>
+          <i>&nbsp; &nbsp; &nbsp;&nbsp; next instruction</i><br>
+          <i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ... additional
+            instructions ...<br>
+          </i></tt></p>
+    </blockquote>
+    <p>In this case, the flowchart generator compensates by inserting a
+      decision box captioned by the comment associated with the <tt>TMI|TNZ</tt>
+      (<i>not</i> from the "final instruction of the setup"), but
+      otherwise proceeds as if the decision box had been present all
+      along; i.e., there is still an arrow from the decision box to <i>label1</i>,
+      and so on.<br>
+    </p>
+    <p>I probably haven't captured all of the possible aberrations
+      associated with decision-box annotations here, but the lesson is
+      clear: poorly-annotated decision-boxes are fairly common.<br>
+      <tt><i></i></tt></p>
+    <h2><a name="FLOW"></a><tt>FLOW</tt> Directives</h2>
+    <p>The <tt>FLOW</tt> directive is the mechanism provided to
+      compensate for poor flowchart annotations in the original source
+      code.&nbsp; A detailed worked-out example appears in the following
+      section.<br>
+    </p>
+    <p>When you want to correct poor flowchart annotations, the first
+      step is to determine what the correct annotations <i>should</i>
+      have been.&nbsp; However, having determined the correct
+      annotations, you can't simply modify the LVDC source code's
+      annotations, because our unalterable rule is that the LVDC source
+      code must match the original program listing <i>exactly</i>, even
+      if the original code was in error.&nbsp; Because otherwise, we
+      have no means of verifying that the transcription process was
+      correct.&nbsp; But we do allow additions to the source code of
+      directives defined only by the modern LVDC assembler and not
+      accepted by the original LVDC assembler, because there's no way of
+      confusing such a directive with incorrectly-transcribed source
+      code.<br>
+    </p>
+    <p>The <tt>FLOW</tt> directive is one such modern-only addition to
+      LVDC assembly language.&nbsp; The <tt>FLOW</tt> directive is
+      placed on the line immediately preceding a line with poor
+      flowchart annotations, and provides corrections to those
+      annotations.&nbsp; However, the <tt>FLOW</tt> directive is used
+      only by the flowchart generator program, and is entirely discarded
+      by the modern LVDC assembler, so that the presence of <tt>FLOW</tt>
+      directives does not in any way alter assembled LVDC code.<br>
+    </p>
+    <p>From the description in the preceding section, you'll have noted
+      that the following characteristics of a line of LVDC code
+      sometimes affect flowchart generation:<br>
+    </p>
+    <ol>
+      <li>The <font color="#ff0000">red</font> annotation.</li>
+      <li>The symbolic label of the line.</li>
+      <li>The LVDC instruction.</li>
+      <li>The operand of the LVDC instruction.</li>
+      <li>(Intentionally blank; relates to a property of full-line
+        comments that's no longer used).</li>
+      <li>The "<font color="#33cc00"><i>label</i></font>" in a comment
+        of the form "<font color="#33cc00">(<i>label</i>)</font><font
+          color="#3333ff">remainder of comment</font>".</li>
+      <li>The "<font color="#3333ff">remainder of comment</font>" in a
+        comment of either the form "<font color="#33cc00">(<i>label</i>)</font><font
+          color="#3333ff">remainder of comment</font>" or "<font
+          color="#3333ff">remainder of comment</font>".<br>
+      </li>
+    </ol>
+    <p>The <tt>FLOW</tt> directive has 7 fields corresponding to these
+      parameters (including the always-blank #5), and allows you to
+      correct any or all of them for any given line of LVDC code.&nbsp;
+      The format of a <tt>FLOW</tt>-directive line is:<br>
+    </p>
+    <pre>       FLOW    F1,F2,F3,F4,F5,F6,F7<br></pre>
+    <p>where the fields F1 and so on correspond to the 7 characteristics
+      mentioned above.&nbsp; Note that there are no spaces shown.&nbsp;
+      In fact, no spaces are allowed until F7 is reached, since F7 is
+      the only one of the seven fields that can actually contain any
+      spaces.&nbsp; Any field you <i>don't</i> want to provide a
+      correction for is left empty.&nbsp; For example, the directive<br>
+    </p>
+    <pre>       FLOW    ,,,,,,<br></pre>
+    <p>would correct nothing at all.&nbsp; If the correction you want to
+      apply is to blank out something that isn't empty already, you can
+      use the field ""; i.e., two double-quotes side-by-side.&nbsp; Thus
+      the following command would blank out all seven flowchart
+      characteristics:<br>
+    </p>
+    <pre>       FLOW    "","","","","","",""<br></pre>
+    The most-common use of <tt>FLOW</tt> is probably to change the <font
+      color="#ff0000">red</font> annotation.&nbsp; For example, here is
+    a directive to turn a line into a decision box and provide a caption
+    for it that differs from what's on the source-code line:<br>
+    <pre>       FLOW    Q,,,,,,MY DECISION?<br></pre>
+    There are also a couple of new <font color="#ff0000">red</font>
+    annotations you can use, invented solely for the modern assembler
+    and not present in original LVDC code.&nbsp; They're intended mostly
+    for internal use by the flowchart generator, but can sometimes be
+    used to good effect in <tt>FLOW</tt> directives:<br>
+    <ul>
+      <li><font color="#ff0000">?</font> indicates a decision box, and
+        at the same time an uncaptioned exit arrow from the box.&nbsp;
+        It's like a <font color="#ff0000">Y</font> or <font
+          color="#ff0000">N</font> unaccompanied by a preceding <font
+          color="#ff0000">Q</font> (as described above) but without any
+        caption on the arrow.<br>
+      </li>
+      <li> <font color="#ff0000">-</font> is used for marking lines
+        that have a symbolic label but are otherwise without flowchart
+        annotations.</li>
+    </ul>
+    <p>For example, suppose you had code like so,<br>
+    </p>
+    <pre>       TMI     *+1<br>       TRA     <i>label</i><br>       ... <i>some instruction</i> ...<br></pre>
+    <p>The TMI instruction will turn into a decision box and will want
+      to have an arrow to "some instruction", but "some instruction" has
+      no symbolic label, and thus the flowchart generator will want to
+      insert a terminal box with a caption like "Line <i>N</i>".&nbsp;
+      But if you instead inserted a <tt>FLOW</tt> directive, <br>
+    </p>
+    <pre>       TMI     *+1<br>       TRA     <i>label<br></i>       FLOW    -,MYLABL,,,,,<br>       ... <i>some instruction</i> ...<br></pre>
+    it would instead insert a terminal box captioned "MYLABL" ... which
+    may or may not be more meaningful than "Line <i>N</i>".&nbsp; (It's
+    just an example!)<br>
     <h2><a name="Example"></a>Working Example:&nbsp; the SQUARE ROOT
       UTILITY Module of AS-512</h2>
     <p><img moz-do-not-send="true" src="SQUARE_ROOT_UTILITY.png" alt=""
@@ -378,11 +1087,11 @@
     <p>To the left is the relevant portion of the source-code file,
       which I've chosen to look at using the vim editor, because LVDC
       syntax-highlighting is available in vim.&nbsp; Whereas to the
-      right we see the flowchart generated from that source code.<br>
+      right we see the flowchart generated from that source code as-is.<br>
     </p>
     <p>As mentioned earlier, one issue with the flowchart is that we <i>may</i>
-      have succeeded in accurately reproducing the program flow — that
-      remains to be seen! — but inadequate flowcharting annotations in
+      have succeeded in accurately reproducing the program flow &mdash; that
+      remains to be seen! &mdash; but inadequate flowcharting annotations in
       the original source code may not have allowed decent labeling of
       some of the boxes or arrows in the flowchart.&nbsp; You can see
       this particularly in the decision boxes labeled "Line 68", "Line
@@ -404,7 +1113,7 @@
       comments at the top of the source code, subroutine <tt>U.SR00</tt>
       accepts a number (let's call it <i>x</i>) in the accumulator
       register and is supposed to compute its square root.&nbsp; <tt>D.VUTB</tt>
-      (a variable) it tells us, contains the "previous square root of
+      (a variable), it tells us, contains the "previous square root of
       argument".&nbsp; So presumably one would load an initial guess for
       the square root (perhaps <i>x</i>/2) into <tt>D.VUTB</tt> before
       calling <tt>U.SR00</tt> the first time, and could then keep
@@ -498,6 +1207,7 @@
     in between.&nbsp; So as far as the flowchart is concerned, instead
     of <tt>TMI *+2</tt> it may as well have been <tt>TMI SR05</tt>.&nbsp;
 
+
     Let's add a FLOW directive to that effect:<br>
     <pre>       FLOW    Y,,,SR05,,,<br>       TMI     *+2<br></pre>
     <img moz-do-not-send="true" src="flow-2.png" alt="" align="right"
@@ -508,7 +1218,7 @@
     change, seen to the right, is exactly what we desired.<br>
     <br>
     The next problems to be addressed are at the original lines 76 and
-    77, but now lines 78 and 79 due to the addition of <tt>FLOW</tt>
+    77, but which are now lines 78 and 79 due to the addition of <tt>FLOW</tt>
     directives in the meantime.&nbsp; It's tiring talking about all of
     these changing line numbers, so from now on whenever I mention a
     line number, it will always be from the <i>original</i> source code
@@ -535,7 +1245,7 @@
     Now let's look at the problems related to (original) lines 85 and
     88.&nbsp; Back at (original) line 71, a value of 2 was stored in the
     variable <tt>D.VUTB+2</tt>.&nbsp; What's happening near line 85 is
-    that <tt>D.VUTB+2</tt> is decremented by 1, and we go back to <tt>SR05</tt>
+    that <tt>D.VUTB+2</tt> is decremented by 1, and jumps back to <tt>SR05</tt>
     as long as <tt>D.VUTB+2</tt> doesn't become negative.&nbsp; In
     other words, <tt>SR05</tt> is the start of a loop, <tt>D.VUTB+2</tt>
     is the loop counter, and the loop is executed 3 times, for <tt>D.VUTB+2</tt>
@@ -552,6 +1262,7 @@
     <div align="center"><img moz-do-not-send="true"
         src="SQUARE_ROOT_UTILITY-2.png" alt="" width="532" height="1101">&nbsp;&nbsp;&nbsp;&nbsp;
 
+
       <img moz-do-not-send="true" src="flow-4.png" alt="" width="328"
         height="922"><br>
     </div>
@@ -561,11 +1272,11 @@
     what the source code is doing?&nbsp; Since we're only looking about
     about a page of relatively-simple code here, it's pretty easy to do
     that without a lot of yakety yak from me.&nbsp; The "DONE" entry
-    point is a bit weird, since there's no actual label "DONE" in the
-    source code, but I don't know what can be done about that, if
-    anything.&nbsp; About the only other obvious thing is to wonder
-    where the division referenced by the "DIVISION DELAY COMPLETE?"
-    decision box is?&nbsp; Thus one might want to add a <tt>FLOW</tt>
+    point in the flowchart looks a bit weird, since there's no actual
+    label "DONE" in the source code, but I don't know what can be done
+    about that, if anything.&nbsp; About the only other obvious thing is
+    to wonder where the division referenced by the "DIVISION DELAY
+    COMPLETE?" decision box is?&nbsp; Thus one might want to add a <tt>FLOW</tt>
     directive such as<br>
     <pre>       FLOW    B,,,,,,DIVIDE BY CURRENT ESTIMATE<br></pre>
     at (current) line 75 so that the <tt>DIV</tt> operation shows up in
