@@ -533,9 +533,10 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 						count -= thisCount
 				else:
 					expandedSH.append(fmt % (thisLabel, operator, count))
-				nn -= 1
-				expandedLines[n][nn:nn+1] = expandedSH
-				nn += len(expandedSH)
+				if fields[2] not in ["0", "1", "2"]:
+					nn -= 1
+					expandedLines[n][nn:nn+1] = expandedSH
+					nn += len(expandedSH)
 				continue
 			elif len(fields) >= 3 and fields[2][:1] == "=" \
 					and fields[2][:3] != "=H'" and fields[2][:2] != "=O":
