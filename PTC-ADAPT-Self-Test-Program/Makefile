@@ -25,4 +25,9 @@ temp.tmp: ${SOURCES}
 yaASM.tsv: temp.tmp
 	yaASM.py --ptc ${BASENAME}.tsv <temp.tmp >${BASENAME}.lst
 	@grep --after-context=6 "Assembly[-]message summary" ${BASENAME}.lst
-	
+
+.PHONY: lean
+lean: 	clean temp.tmp
+	yaASM.py --html --ptc ${BASENAME}.tsv <temp.tmp >${BASENAME}.lst
+	@grep --after-context=6 "Assembly[-]message summary" ${BASENAME}.lst
+		

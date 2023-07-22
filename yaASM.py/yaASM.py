@@ -122,6 +122,13 @@
 #               2023-07-14 RSB  Eliminated FLOW directives.
 #               2023-07-21 RSB  Printing of + expansions enabled (except within
 #                               macro expansions).  Began implementing --html.
+#               2023-07-22 RSB  In the assembly listing, eliminated certain 
+#                               Warning messages and replaced others by W in
+#                               in column 1, to match original assembler.
+#                               Fixed printed address fields following automatic
+#                               sector change.  Tables at the end of the listing
+#                               are now printed in columns to save space.  Fixed
+#                               links to constants in expressions.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -1508,9 +1515,10 @@ for lineNumber in range(len(expandedLines)):
 					pass # Okay as-is!
 				elif lastORG or (IM,IS,S,LOC) in blockWorkarounds:
 					IM, IS, S, LOC = tuple(index)
-					addError(lineNumber, \
-							"Warning: Skipping already-used locations (%o-%02o-%o-%03o)" \
-							% tuple(index))
+					if False:
+						addError(lineNumber, \
+								"Warning: Skipping already-used locations (%o-%02o-%o-%03o)" \
+								% tuple(index))
 				else:
 					inputLine["switchSectorAt"] = [IM, IS, S, LOC] + index
 					memUsed[IM][IS][S][LOC] = True
@@ -2084,11 +2092,15 @@ else:
 	rawField = 12
 lineFields = []
 
+wPending = False
 def clearLineFields():
-	global lineFields
+	global lineFields, wPending
 	lineFields = []
 	for n in range(len(lineFieldFormats)):
 		lineFields.append("")
+	if wPending:
+		lineFields[traField] = "W"
+		wPending = False
 
 # The colorize function applies colorization to a raw LVDC source line.  There
 # has to be a better way to do this by taking advantage of the parsed line, but
@@ -2124,7 +2136,7 @@ def colorizeSymbol(op, lhs=False):
 	return op
 # This colorized just an operand.
 constantNamePattern = re.compile("\\b[A-Z][.#A-Z0-9]*\\b")
-paranExpPattern = re.compile("([^)]+)")
+paranExpPattern = re.compile("\\([^)]+\\)")
 poundPattern = re.compile("#[0-9]+")
 def colorizeOperand(operand):
 	# Take care of any #nnn suffixes added to constant names by the assembler.
@@ -2171,9 +2183,10 @@ def colorizeOperand(operand):
 		for m in reversed(matches):
 			name = m.group()
 			span = m.span()
-			if name in constants:
-				expression = expression[:span[0]] + applyClass("cn", name) \
-								+ expression[span[1]:]
+			if name in constantAnchors:
+				expression = expression[:span[0]] + \
+							applyClass("cn", name, constantAnchors[name]) \
+							+ expression[span[1]:]
 		operand = operand[:paranSpan[0]] + expression + operand[paranSpan[1]:]
 	return operand
 def colorize(raw):
@@ -2252,7 +2265,10 @@ def printLineFields():
 			line = ""
 			lineFields[rawField] = colorize(lineFields[rawField])
 			for n in range(len(lineFieldFormats)):
-				line += lineFieldFormats[n] % lineFields[n]
+				field = lineFieldFormats[n] % lineFields[n]
+				if n == 0 and field[0] == "W":
+					field = applyClass("wn", field)
+				line += field
 			print(line, file=htmlFile)
 
 # Determine if module dm, sector ds is reachable from the global 
@@ -2452,7 +2468,6 @@ for entry in inputFile:
 			}, True)
 		storeAssembled(lineNumber, assembled, \
 					{"IM":im0, "IS":is0, "S":s0, "LOC":loc0}, False)
-		lineFields[traField] = "*"
 		lineFields[imField] = "%2o" % im0
 		lineFields[isField] = "%02o" % is0
 		lineFields[sylField] = "%1o" % s0
@@ -2462,8 +2477,14 @@ for entry in inputFile:
 		lineFields[opField] = op
 		lineFields[a9Field] = a9
 		lineFields[adrField] = a81
-		lineFields[constantField] = "%9s" % constantString
+		if newer:
+			lineFields[traField] = " "
+			lineFields[constantField] = "        *"
+		else:
+			lineFields[traField] = "*"
+			lineFields[constantField] = "%9s" % constantString
 		printLineFields()
+		clearLineFields()
 		constantString = ""
 	operator = ""
 	if "operator" in inputLine:
@@ -2994,7 +3015,8 @@ for entry in inputFile:
 						hop2["DLOC"] -= operandModifier
 					#if (not ptc and hop2["DM"] != DM or (hop2["DS"] != DS and hop2["DS"] != 0o17)):
 					#	if not useDat: # or S == 1:
-					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
+					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, \
+												DS, useDat, udDM, udDS):
 						addError(lineNumber, \
 								"Error: Operand not in current data-memory sector or residual sector (%o-%02o-%03o)" \
 								% (hop2["DM"], hop2["DS"], hop2["DLOC"]))
@@ -3092,7 +3114,8 @@ for entry in inputFile:
 				ds = int(constants[operand][2], 8)
 				dloc = int(constants[operand][3], 8)
 				#if (not ptc and (dm != DM or (ds != DS and ds != 0o17)) or (ptc and ds != 0o17 and not (dm == DM and ds == DS))):
-				if not inSectorOrResidual(dm, ds, DM, DS, useDat, udDM, udDS):
+				if not inSectorOrResidual(dm, ds, DM, DS, \
+												useDat, udDM, udDS):
 					addError(lineNumber, \
 							"Error: Operand not in current data-memory sector or residual sector (%o-%02o-%03o)" \
 							% (dm, ds, dloc))
@@ -3110,7 +3133,8 @@ for entry in inputFile:
 				hop2 = symbols[operand]
 				if hop2["inDataMemory"]:
 					loc = hop2["DLOC"]
-					if not inSectorOrResidual(hop2["DM"], hop2["DS"], DM, DS, useDat, udDM, udDS):
+					if not inSectorOrResidual(hop2["DM"], hop2["DS"], \
+													DM, DS, useDat, udDM, udDS):
 						addError(lineNumber, \
 								"Error: Operand not in current data-memory sector or residual sector (%o-%02o-%03o)" \
 								% (hop2["DM"], hop2["DS"], loc))
@@ -3125,7 +3149,7 @@ for entry in inputFile:
 							etype = "Warning"
 						else:
 							etype = "Error"
-						if not useDat or S == 1:
+						if etype == "Error" and (not useDat or S == 1):
 							addError(lineNumber, \
 									"%s: Operand not in current data-memory sector (%o-%02o-%o-%03o)" \
 									% (etype, hop2["IM"], hop2["IS"], hop2["S"], hop2["LOC"]))
@@ -3155,13 +3179,20 @@ for entry in inputFile:
 	for error in errorList:
 		if error[1] not in errorsPrinted:
 			errorsPrinted.append(error[1])
+			if error[1].startswith("Warning"):
+				# It turns out that the original assembler doesn't print few
+				# (or perhaps any) explicit warnings as I understand them, 
+				# except putting a W in column 1 sometimes.
+				if "Skipping memory locations" in error[1]:
+					wPending = True
+					continue
 			msg = "%d: %s" % error
 			print(msg)
 			if htmlFile != None:
 				if error[1].startswith("Error") or \
 						error[1].startswith("Implementation") or \
 						error[1].startswith("Mismatch"):
-					msg.applyClass("fe", msg)
+					msg = applyClass("fe", msg)
 				elif error[1].startswith("Warning") or \
 						error[1].startswith("Rounding"):
 					msg = applyClass("wn", msg)
@@ -3185,7 +3216,7 @@ for entry in inputFile:
 		msg = "    " + originalLine
 		print(msg)
 		if htmlFile != None:
-			print(applyClass("mo", msg), file=htmlFile)
+			print(applyClass("mo", msg.replace("<", "&lt;")), file=htmlFile)
 		if len(fields) > 1 and fields[1] == "PAGE":
 			firstPart = 87
 			lenTitle = len(pageTitle)
@@ -3262,7 +3293,7 @@ for w in roofWorkarounds:
 		msg = "Warning: Location following WORK ROOF %o,%02o,%o,%03o already filled" % w
 		print(msg)
 		if htmlFile != None:
-			print(msg, file=htmlFile)
+			print(applyClass("wn", msg), file=htmlFile)
 		counts["warnings"] += 1
 	else:
 		storeAssembled(lineNumber, 0o00000, \
@@ -3324,6 +3355,43 @@ for f in [sys.stdout, htmlFile]:
 #----------------------------------------------------------------------------
 #   	Print a symbol table and save as a .sym file too
 #----------------------------------------------------------------------------
+
+# First, here are 4 utilities to print out a sequence entries in the form of
+# a table with 4 columns.  It's used for all of the tables that follow, not
+# just the symbol table.
+plainLine = ""
+htmlLine = ""
+def initializeTable():
+	global plainLine, htmlLine
+	plainLine = ""
+	htmlLine = ""
+def flushTable():
+	global plainLine, htmlLine
+	if len(plainLine) > 0:
+		print(plainLine)
+		plainLine = ""
+	if htmlFile and len(htmlLine) > 0:
+		print(htmlLine, file=htmlFile)
+		htmlLine = ""
+def printToTable(rawEntry, htmlEntry):
+	global plainLine, htmlLine
+	columnWidth = 38
+	nextColumn = (len(plainLine) + columnWidth - 1) // columnWidth
+	padLength = nextColumn * columnWidth - len(plainLine)
+	if padLength <= 0:
+		pad = " "
+	else:
+		pad = "%*s" % (padLength, "")
+	plainLine = plainLine + pad + rawEntry
+	htmlLine = htmlLine + pad + htmlEntry
+	if nextColumn >= 3:
+		flushTable()
+def advanceTable():
+	flushTable()
+	print("")
+	if htmlFile != None:
+		print("", file=htmlFile)
+
 f = open("yaASM.sym", "w")
 print("\n\nSymbol Table:")
 print("")
@@ -3331,48 +3399,59 @@ if htmlFile != None:
 	print("\n<hr>", file=htmlFile)
 	print('<a id="symbols"></a><h1>Symbol Table</h1>', file=htmlFile)
 	print("Program labels and variables.\n", file=htmlFile)
+initializeTable()
+lastInitial = ""
 for key in sorted(symbols):
+	if key[:1] != lastInitial:
+		advanceTable()
+		lastInitial = key[:1]
 	hop = symbols[key]
 	if "inDataMemory" in symbols[key] and symbols[key]["inDataMemory"]:
-		print("%o %02o   %03o" % (hop["DM"], hop["DS"], 
-							hop["DLOC"]) + "  " + key)
-		if htmlFile != None:
-			print("%o %02o   %03o" % (hop["DM"], hop["DS"], 
+		msg = "%o %02o   %03o" % (hop["DM"], hop["DS"], 
+							hop["DLOC"]) + "  " + key
+		if htmlFile == None:
+			hmsg = ""
+		else:
+			hmsg = "%o %02o   %03o" % (hop["DM"], hop["DS"], 
 					hop["DLOC"]) + "  " + \
-					applyClass("va", key, symbols[key]["anchor"]), \
-					file=htmlFile)
+					applyClass("va", key, symbols[key]["anchor"])
+		printToTable(msg, hmsg)
 			
 		syl = 2
 		print("%s\t%o\t%02o\t%o\t%03o" % (key, hop["DM"], hop["DS"], syl, hop["DLOC"]), file=f)
 	else:
-		print("%o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
-				hop["LOC"]) + "  " + key)
-		if htmlFile != None:
-			print("%o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
+		msg = "%o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
+				hop["LOC"]) + "  " + key
+		if htmlFile == None:
+			hmsg = ""
+		else:
+			hmsg = "%o %02o %o %03o" % (hop["IM"], hop["IS"], hop["S"], 
 					hop["LOC"]) + "  " + \
-					applyClass("sm", key, symbols[key]["anchor"]), \
-					file=htmlFile)
+					applyClass("sm", key, symbols[key]["anchor"])
+		printToTable(msg, hmsg)
 		syl = hop["S"]
 		print("%s\t%o\t%02o\t%o\t%03o" % (key, hop["IM"], hop["IS"], syl, hop["LOC"]), file=f)
+flushTable()
+
+print("\n\nLiteral Table:")
+print("")
 if htmlFile != None:
 	print("\n<hr>", file=htmlFile)
 	print('<a id="literals"></a><h1>Literal Table</h1>', file=htmlFile)
 	print("Values allocated silently by the assembler.", file=htmlFile)
 lastKey = ""
+initializeTable()
 for key in sorted(nameless):
 	loc = nameless[key]
 	fields = key.split("_")
 	print("%s\t%s\t%s\t2\t%03o" % (fields[2], fields[0], fields[1], loc), file=f)
 	newKey = fields[0] + "_" + fields[1]
 	if newKey != lastKey:
-		print("")
-		if htmlFile != None:
-			print("", file=htmlFile)
+		advanceTable()
 		lastKey = newKey
 	msg = fields[0] + " " + fields[1] + "   " + ("%03o" % loc) + "  " + fields[2]
-	print(msg)
-	if htmlFile != None:
-		print(msg, file=htmlFile)
+	printToTable(msg, msg)
+flushTable()
 f.close()
 
 #----------------------------------------------------------------------------
@@ -3385,7 +3464,12 @@ if htmlFile != None:
 	print('<a id="constants"></a><h1>Constant Table</h1>', file=htmlFile)
 	print("Defined via EQU, REQ, DEQD, and DEQS. Suffixes such as #nnn indicate reassigments by REQ.", file=htmlFile)
 	print("", file=htmlFile)
+initializeTable()
+lastInitial = ""
 for constant in sorted(constants):
+	if constant[:1] != lastInitial:
+		advanceTable()
+		lastInitial = constant[:1]
 	c = constants[constant]
 	if "#" not in constant and isinstance(c, dict):
 		continue
@@ -3397,15 +3481,17 @@ for constant in sorted(constants):
 		number = "%o-%02o-%03o" % (int(c[1],8), int(c[2],8), int(c[3],8))
 	else:
 		number = str(c)
-	constant = "%-16s" % constant
-	print("%s%s" % (constant, number))	
-	if htmlFile != None:
+	constant = "%-11s" % constant.replace("#000", "")
+	msg = "%s%s" % (constant, number)
+	if htmlFile == None:
+		hmsg = ""
+	else:
 		fields = constant.split("#")
-		constant = "%-16s" % constant.replace("#000", "")
-		print("%s%s" % \
-			(applyClass("cn", constant, constantAnchors[fields[0].strip()]), 
-				number), \
-			file=htmlFile)
+		hmsg = "%s%s" % \
+				(applyClass("cn", constant, \
+						constantAnchors[fields[0].strip()]), number)
+	printToTable(msg, hmsg)
+flushTable()
 
 #----------------------------------------------------------------------------
 #   	Print octal listing and save as a .tsv file too
@@ -3416,13 +3502,13 @@ if htmlFile != None:
 	print("\n<hr>", file=htmlFile)
 	print('<a id="octals"></a><h1>Octal Listing</h1>', file=htmlFile)
 f = open("yaASM.tsv", "w")
-formatLine = "%03o"
+formatLine = " %03o"
 for n in range(8):
 	formatLine += "   %s %1s"
 formatFileLine = "%03o"
 for n in range(8):
 	formatFileLine += "\t%s\t%s"
-heading = "     "
+heading = "      "
 firstPage = True
 for n in range(8):
 	heading += "      %o         " % n
@@ -3439,14 +3525,14 @@ for module in range(8):
 		if not sectorUsed:
 			continue
 		print("SECTOR\t%o\t%02o" % (module, sector), file=f)
-		print("\n\n%56sMODULE %o      SECTOR %02o\n\n" % ("", module, sector))
+		print("\n\n%57sMODULE %o      SECTOR %02o\n\n" % ("", module, sector))
 		print(heading)
 		print("")
 		if htmlFile != None:
 			if not firstPage:
 				print("\n<hr>", file=htmlFile)
 			firstPage = False
-			print("\n\n%56sMODULE %o      SECTOR %02o\n\n" \
+			print("\n\n%57sMODULE %o      SECTOR %02o\n\n" \
 				% ("", module, sector), file=htmlFile)
 			print(heading, file=htmlFile)
 			print("", file=htmlFile)
