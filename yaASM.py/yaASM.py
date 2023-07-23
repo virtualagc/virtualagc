@@ -129,6 +129,7 @@
 #                               sector change.  Tables at the end of the listing
 #                               are now printed in columns to save space.  Fixed
 #                               links to constants in expressions.
+#               2023-07-23 RSB  Clip printout lines.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -2263,7 +2264,7 @@ def printLineFields():
 		print(line)
 		if htmlFile != None:
 			line = ""
-			lineFields[rawField] = colorize(lineFields[rawField])
+			lineFields[rawField] = colorize(lineFields[rawField][:71])
 			for n in range(len(lineFieldFormats)):
 				field = lineFieldFormats[n] % lineFields[n]
 				if n == 0 and field[0] == "W":
@@ -2413,7 +2414,7 @@ for entry in inputFile:
 			expansionMarker = " "
 		else:
 			expansionMarker = "+"
-			lineFields[rawField] = originalLine
+			lineFields[rawField] = originalLine[:71]
 			printLineFields()
 			clearLineFields()
 			
@@ -3241,7 +3242,7 @@ for entry in inputFile:
 			iDollar = raw.index("$")
 			if iBCI < iCarat and iCarat < iDollar:
 				raw = raw[:iCarat] + raw[iCarat:iDollar].replace("_", " ") + raw[iDollar:]
-		lineFields[rawField] = raw
+		lineFields[rawField] = raw[:71]
 		if a9 == "1" or not ptc:
 			lineFields[a9Field] = a9
 		if lineFields[adrField] == "":
@@ -3265,7 +3266,7 @@ for entry in inputFile:
 				lineText = ""
 				for n in macroLine:
 					lineText += "%-8s" % n
-				lineFields[rawField] = lineText
+				lineFields[rawField] = lineText[:71]
 				printLineFields()
 			lineFields[rawField] = "        ENDMAC"
 			printLineFields()

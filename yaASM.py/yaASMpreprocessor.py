@@ -32,6 +32,8 @@
 #               2023-07-03 RSB  Accounted for the syntax 
 #                                    IF (EXPRESSION)op(EXPRESSION)
 #               2023-07-06 RSB  Implemented mangled names for constants (re: REQ).
+#               2023-07-23 RSB  Prevented constant-name mangling in comment
+#                               fields.
 
 import re
 import copy
@@ -116,13 +118,7 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 			if inMacro != "":
 				continue
 			
-			# Take care of IF/ENDIF.  Every IF line I've seen so far has one of 
-			# the following forms:
-			#		IF	constant=(expression)
-			#		IF	constant<(expression)
-			#		IF	constant>(expression)
-			# where expression is usually a literal integer, but is sometimes
-			# an actual expression instead. Note that IF/ENDIF blocks are
+			# Take care of IF/ENDIF.  Note that IF/ENDIF blocks are
 			# sometimes nested.
 			if len(fields) >= 3 and fields[1] == "IF":
 				operand = fields[2]
@@ -231,8 +227,14 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 			# several such aread.  We have to find all of them and process them
 			# each.  Alas, the simple method I use disallows embedded 
 			# parentheses.
+			c = 23 # Do a crude check to determine where the comment starts.
+			for c in range(16, len(line)):
+				if line[c].isspace():
+					break
+			if c < 23:
+				c = 23
 			pAreas = []
-			for p in re.finditer("\\([^)]*\\)", line): # Find (...) areas.
+			for p in re.finditer("\\([^)]*\\)", line[:c]): # Find (...) areas.
 				pAreas.append(p.span())
 			starts = {}
 			for constant in constants:
@@ -467,7 +469,10 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 				continue
 				'''
 				pass
-			elif (not ptc) and len(fields) >= 3 and fields[1] == "CDS" and fields[2] in constants and type(constants[fields[2]]) == type([]) and len(constants[fields[2]]) >= 3:
+			elif (not ptc) and len(fields) >= 3 and fields[1] == "CDS" and \
+					fields[2] in constants and \
+					type(constants[fields[2]]) == type([]) and \
+					len(constants[fields[2]]) >= 3:
 				constant = constants[fields[2]]
 				op = fields[1]
 				if constant[0] == "DEQS":
@@ -478,15 +483,18 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 				nn -= 1
 				expandedLines[n][nn] = line
 				continue
-			elif len(fields) >= 3 and fields[0] != "" and fields[1] in ["EQU", "REQ"]:
+			elif len(fields) >= 3 and fields[0] != "" and \
+					fields[1] in ["EQU", "REQ"]:
 				value,error = yaEvaluate(fields[2], constants)
 				if error != "":
 					addError(n, "Error: " + error)
 				else:
 					if fields[1] == "EQU" and fields[0] in constants:
 						value = constants[fields[0]]
-					elif False and fields[1] == "REQ" and fields[0] not in constants:
-						addError(n, "Error: Constant does not exist, " + fields[0])
+					elif False and fields[1] == "REQ" and \
+							fields[0] not in constants:
+						addError(n, \
+								"Error: Constant does not exist, " + fields[0])
 					constants[fields[0]] = value 
 					# print("!", fields[0], fields[1], value["number"])
 			elif len(fields) >= 3 and fields[1] == "CALL":
@@ -561,14 +569,16 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 						replacement += "B" + str(value["scale"])
 					if replacement != fields[2]:
 						nn -= 1
-						expandedLines[n][nn] = line.replace(fields[2], replacement)
+						expandedLines[n][nn] = line.replace(fields[2], \
+														replacement)
 						continue
 	
 if False:
 	# Just print out some results from the preprocessor and then exit.
 	print("Constants:")		
 	for n in sorted(constants):
-		print("\t" + n + "\t= " + str(constants[n]["number"]) + "B" + str(constants[n]["scale"]))
+		print("\t" + n + "\t= " + str(constants[n]["number"]) + "B" + \
+			str(constants[n]["scale"]))
 	print("Macros:")
 	for n in sorted(macros):
 		print("\t" + n + "\t= " + str(macros[n]))
