@@ -227,10 +227,11 @@ def preprocessor(lines, expandedLines, constants, macros, ptc=False, \
 			# several such aread.  We have to find all of them and process them
 			# each.  Alas, the simple method I use disallows embedded 
 			# parentheses.
-			c = 23 # Do a crude check to determine where the comment starts.
+			c = 22 # Do a crude check to determine where the comment starts.
 			for c in range(16, len(line)):
 				if line[c].isspace():
 					break
+			c += 1
 			if c < 23:
 				c = 23
 			pAreas = []

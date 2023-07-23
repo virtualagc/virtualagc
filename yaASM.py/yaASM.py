@@ -129,7 +129,8 @@
 #                               sector change.  Tables at the end of the listing
 #                               are now printed in columns to save space.  Fixed
 #                               links to constants in expressions.
-#               2023-07-23 RSB  Clip printout lines.
+#               2023-07-23 RSB  Clip printout lines.  Added flowchart links
+#                               to HTML listings.
 #
 # Regardless of whether or not the assembly is successful, the following
 # additional files are produced at the end of the assembly process:
@@ -372,6 +373,7 @@ allowUnlist = True
 fuzzy = False
 synFix = True
 htmlFile = None
+flowchartFolder = ""
 for arg in sys.argv[1:]:
 	if arg[:2] == "--":
 		if arg == "--ptc":
@@ -394,12 +396,15 @@ for arg in sys.argv[1:]:
 			synFix = False
 		elif arg == "--html":
 			htmlFile = open("yaASM.html", "w")
+		elif arg.startswith("--flowcharts="):
+			flowchartFolder = arg[13:]
 		elif arg == "--help":
 			print("Usage:", file=sys.stderr)
 			print("\tyaASM.py [OPTIONS] [OCTALS.tsv] <INPUT.lvdc >OUTPUT.listing", file=sys.stderr)
 			print("The OPTIONS are", file=sys.stderr)
 			print("\t--help -- to print this message.", file=sys.stderr)
 			print("\t--html -- create syntax-highlighted listing.", file=sys.stderr)
+			print("\t--flowcharts=D -- flowchart folder for html.", file=sys.stderr)
 			print("\t--newer -- assemble for AS-512/513 rather than AS-206RAM.", file=sys.stderr)
 			print("\t--ceiling=n -- (leave at default 1000) octal limit forward TNZ/TMI distance.", file=sys.stderr)
 			print("\t--no-unlist -- (debugging) option to ignore UNLIST directives.", file=sys.stderr)
@@ -2060,7 +2065,9 @@ if False:
 	for key in sorted(nameless):
 		print(key + " " + ("%03o" % nameless[key]))
 if ptc:
-	lineFieldFormats = [ "%1s", "   %2s ", "%2s ", "%1s ", "%03s    ", "%02s ", "%2s ", "%02s ", "%1s ", "%03s    ", "%9s  ", "%1s ", "%s" ]
+	lineFieldFormats = [ "%1s", "   %2s ", "%2s ", "%1s ", "%03s    ", "%02s ", 
+						"%2s ", "%02s ", "%1s ", "%03s    ", "%9s  ", "%1s ", 
+						"%s" ]
 	header = "    IM IS S LOC    OP DM DS 9 ADR     OCT VAL     LHS     OPC     VARIABLE                COMMENT"
 	traField = 0
 	imField = 1
@@ -2076,7 +2083,9 @@ if ptc:
 	expansionField = 11
 	rawField = 12
 else:
-	lineFieldFormats = [ "%1s", "   %2s ", "%02s ", "%1s ", "%03s ", "%2s ", "%02s   "," %03s  ", "%1s  ", "%02s    ", "%09s ", "%1s ", "%s"]
+	lineFieldFormats = [ "%1s", "   %2s ", "%02s ", "%1s ", "%03s ", "%2s ", 
+						"%02s   "," %03s  ", "%1s  ", "%02s    ", "%09s ", 
+						"%1s ", "%s"]
 	header = "    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT"
 	traField = 0
 	imField = 1
@@ -2264,13 +2273,30 @@ def printLineFields():
 		print(line)
 		if htmlFile != None:
 			line = ""
+			flowchartName = ""
+			flowchartLink = ""
+			if flowchartFolder != "":
+				raw = lineFields[rawField]
+				if raw[:1] == "*" and raw[70:] == "J":
+					# Pick off the title of the flowchart and normalize it to
+					# a filename the same way as yaASMflowchart2.py does.
+					# I.e. strip off leading and trailing spaces and asterisks.
+					# Collapse all whitespace to a single underline.  Make sure
+					# there are no forward slashes.
+					flowchartName = "_".join(raw[:70].strip(" *").split()).replace("/", "-")
 			lineFields[rawField] = colorize(lineFields[rawField][:71])
 			for n in range(len(lineFieldFormats)):
 				field = lineFieldFormats[n] % lineFields[n]
-				if n == 0 and field[0] == "W":
+				if n == traField and field[0] == "W":
 					field = applyClass("wn", field)
-				line += field
-			print(line, file=htmlFile)
+				if n == constantField and flowchartName != "":
+					#field = '<a href="%s/%s.dot.ps.png"><u>Flowchart</u></a> ' \
+					#	% (flowchartFolder, flowchartName)
+					flowchartLink = \
+						'<a href="%s/%s.dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>' \
+						% (flowchartFolder, flowchartName)
+				line = line + field
+			print(line + flowchartLink, file=htmlFile)
 
 # Determine if module dm, sector ds is reachable from the global 
 # module DM, sector DS.  Return True if so, False if not.
