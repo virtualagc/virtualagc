@@ -40,6 +40,9 @@
 #                               is handling of jump-tables ... namely, none.
 #                               There are still markup issues in the LVDC code,
 #                               but that's out of scope for this program.
+#               2023-07-24 RSB  FLOW -,(...),,,,, (where the parentheses are
+#                               literal) now results in an invisible node; the
+#                               contents of the parentheses are ignored.
 
 '''
 Input is on stdin.  Any given source-code input file may actually represent
@@ -210,7 +213,8 @@ defaultEntry = {
         # For splitting nodes.
         "next": None,
         # If destination for any arrows other then default fallthrough:
-        "targeted": False
+        "targeted": 0,
+        "fallthrough": 0
     }
 # Default FLOW directive.
 defaultFlow = {
@@ -444,9 +448,18 @@ def printFlowchart(nodes, arrows, lhsDict):
                 body = ""
                 attributes = startShape
             elif col71 == "-":
-                heading = lhs
-                body = ""
-                attributes = startShape
+                if "(" in lhs:
+                    if entry["targeted"] + entry["fallthrough"] > 1:
+                        attributes = connectorShape
+                    else:
+                        node["invisible"] = True
+                        attributes = "style=invis height=0 width=0 margin=0"
+                    heading = ""
+                    body = ""
+                else:
+                    heading = lhs
+                    body = ""
+                    attributes = startShape
             elif col71 in ["X"]:
                 if commentMiddle != "":
                     heading = commentMiddle
@@ -587,7 +600,9 @@ def printFlowchart(nodes, arrows, lhsDict):
 # being the next line number after the end of the flowchart.  These parameters
 # start from 1, thus the corresponding source lines are lines[startLine-1] and
 # lines[afterLine-1].
+#lhsFakeCount = 0
 def processFlowchart(startLine, afterLine):
+    #global lhsFakeCount
     start = startLine - 1
     after = afterLine - 1
     # Let's find all of the operands *+n or *-n for TRA/TNZ/TMI and convert
@@ -702,6 +717,12 @@ def processFlowchart(startLine, afterLine):
         # should work, but from highest to lowest priority I'm using:
         # lhs, commentPrefix, fullCommentFront.
         if lhs != "":
+            if False and "(" in lhs:
+                # labels resulting from FLOW -,(...),... are all adjusted to
+                # to be unique.
+                lhs = "(%d)" % lhsFakeCount
+                entry["lhs"] = lhs
+                lhsFakeCount += 1
             lhsDict[lhs] = (len(nodes), "lhs")
         elif commentPrefix != "":
             lhs = commentPrefix.lstrip("(").rstrip(")")
@@ -742,9 +763,9 @@ def processFlowchart(startLine, afterLine):
                 prior["no"] = True
                 if prior["yes"] and is_TMI_TNZ:
                     prior["3way"] = True
-                node["targeted"] = True
+                node["targeted"] += 1
                 if operand in lhsDict:
-                    nodes[lhsDict[operand][0]]["targeted"] = True
+                    nodes[lhsDict[operand][0]]["targeted"] += 1
                     arrows.append((priorIndex, \
                                    nodes[lhsDict[operand][0]]["index"], "NO"))
             elif col71 == "Y":
@@ -757,16 +778,16 @@ def processFlowchart(startLine, afterLine):
                 prior["yes"] = True
                 if prior["no"] and is_TMI_TNZ:
                     prior["3way"] = True
-                node["targeted"] = True
+                node["targeted"] += 1
                 if operand in lhsDict:
-                    nodes[lhsDict[operand][0]]["targeted"] = True
+                    nodes[lhsDict[operand][0]]["targeted"] += 1
                     arrows.append((priorIndex, \
                                    nodes[lhsDict[operand][0]]["index"], "YES"))
             elif col71 == "?":
                 prior = node
                 priorIndex = prior["index"]
                 if operand in lhsDict:
-                    nodes[lhsDict[operand][0]]["targeted"] = True
+                    nodes[lhsDict[operand][0]]["targeted"] += 1
                     arrows.append((priorIndex, \
                                    nodes[lhsDict[operand][0]]["index"], ""))
             elif col71 == "G":
@@ -779,7 +800,7 @@ def processFlowchart(startLine, afterLine):
                 else:
                     target = "" 
                 if target in lhsDict:
-                    nodes[lhsDict[target][0]]["targeted"] = True
+                    nodes[lhsDict[target][0]]["targeted"] += 1
                     arrows.append((index, \
                                    nodes[lhsDict[target][0]]["index"], ""))
             if col71 == "G" or (prior["yes"] and prior["no"] \
@@ -790,7 +811,7 @@ def processFlowchart(startLine, afterLine):
     
     # Here are the default fallthrough arrows.  Note that the J line is node[0].
     prior = nodes[1]
-    if prior["col71"] not in ["S", "-"] and not prior["targeted"]:
+    if prior["col71"] not in ["S", "-"] and prior["targeted"] == 0:
         next = copy.deepcopy(prior)
         prior["key"] = next["key"] + "A"
         prior["next"] = next
@@ -829,8 +850,9 @@ def processFlowchart(startLine, afterLine):
             elif p["yes"] and p["no"] and not p["3way"]:
                 fallthrough = False
         if fallthrough:
+            node["fallthrough"] = 1
             arrows.append((prior["index"], node["index"], caption))
-        elif col71 not in ["S", "-"] and not node["targeted"]:
+        elif col71 not in ["S", "-"] and node["targeted"] == 0:
             # Here we have a node that's marked with flowchart notations, but
             # no way to get to it, and not already having an entry-point shape.
             # We're going to split it into an entry box plus (essentially) the
