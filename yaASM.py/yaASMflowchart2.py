@@ -156,7 +156,7 @@ starOccupiers = {
     "HOP", "HOP*", "MPY", "PRS", "SUB", "DIV", "TNZ", "TNZ*", "MPH", "CIO", 
     "AND", "ADD", "TRA", "TRA*", "XOR", "PIO", "STO", "TMI", "TMI*", "RSU", 
     "CDS", "CDSD", "CDSS", "SHF", "EXM", "CLA", "SHR", "SHL",
-    "DEC", "OCT", "HPC", "HPCDD", "DFW"
+    "DEC", "OCT", "HPC", "HPCDD", "DFW", "SYN", "CALL", "NOOP", "TELM"
 }
 
 # Dissects a comment having the form "(...)...",
@@ -226,11 +226,15 @@ defaultFlow = {
         "commentPrefix": None,
         "commentMiddle": None
     }
+flow = copy.deepcopy(defaultFlow)
+# This is for accepting col71 and comment from a full-line comment, and
+# feeding them one line forward.
+forwardComment = copy.deepcopy(defaultFlow)
 lines = []
 lhsPattern = re.compile("^[A-Z][.A-Z0-9]*\\b")
 operandPattern = re.compile("^[^ ]+")
-flow = copy.deepcopy(defaultFlow)
 lastWasFlow = False
+debugs = {}
 for line in sys.stdin:
     entry = copy.deepcopy(defaultEntry)
     if lastWasFlow:
@@ -250,26 +254,29 @@ for line in sys.stdin:
     fields = raw.strip().split(None, 1)
     if len(fields) == 2 and fields[0] == "FLOW":
         fields = fields[1].split(",", 6)
-        if len(fields) == 7:
-            for i in range(7):
-                if fields[i] == "":
-                    fields[i] = None
-                else:
-                    fields[i] = fields[i].strip('"')
-                    if i == 4 and fields[i] != "":
-                        fields[i] = "*" + fields[i]
-                    if i == 5 and fields[i] != "":
-                        fields[i] = "(" + fields[i] + ")"
-            if fields[0] == "":
-                fields[0] = " "
-            flow["col71"] = fields[0]
-            flow["lhs"] = fields[1]
-            flow["opcode"] = fields[2]
-            flow["operand"] = fields[3]
-            flow["fullCommentFront"] = fields[4]
-            flow["commentPrefix"] = fields[5]
-            flow["commentMiddle"] = fields[6]
-            lastWasFlow = True
+        while len(fields) < 7:
+            fields.append("")
+        for i in range(7):
+            if fields[i] == "":
+                fields[i] = None
+            else:
+                fields[i] = fields[i].strip('"')
+                if i == 4 and fields[i] != "":
+                    fields[i] = "*" + fields[i]
+                if i == 5 and fields[i] != "":
+                    fields[i] = "(" + fields[i] + ")"
+        if fields[0] == "":
+            fields[0] = " "
+        flow["col71"] = fields[0]
+        flow["lhs"] = fields[1]
+        flow["opcode"] = fields[2]
+        flow["operand"] = fields[3]
+        flow["fullCommentFront"] = fields[4]
+        flow["commentPrefix"] = fields[5]
+        flow["commentMiddle"] = fields[6]
+        if fields[4] not in ["", None]:
+            debugs[len(lines)+1] = fields[4][1:]
+        lastWasFlow = True
         continue
     if flow["col71"] != None:
         col71 = flow["col71"]
@@ -293,6 +300,9 @@ for line in sys.stdin:
         if flow["commentMiddle"] != None:
             commentMiddle = flow["commentMiddle"]
         entry["commentMiddle"] = commentMiddle
+        if col71 in ["Q", "P", "B", "D", "L", "M"]:
+            forwardComment = copy.deepcopy(entry)
+            forwardComment["col71"] = col71
         continue
     match = lhsPattern.search(raw)
     if flow["lhs"] != None:
@@ -312,6 +322,8 @@ for line in sys.stdin:
         opcode = flow["opcode"]
     else:
         opcode = s[7:15].strip()
+    if opcode in ["BLOCK"]:
+        opcode = ""
     entry["opcode"] = opcode
     s = s[15:]
     if len(s) < 1:
@@ -331,6 +343,21 @@ for line in sys.stdin:
     entry["comment"] = comment
     fullCommentFront,commentPrefix,commentMiddle = \
         dissectComment(comment)
+    if opcode != "" and forwardComment["col71"] != None:
+        if col71 in [" ", "-"] \
+                 and (lhs == "" or \
+                      forwardComment["fullCommentFront"][1:] in ["", lhs]):
+            if "." in opcode and forwardComment["col71"] != "Q":
+                col71 = "P"
+            else:
+                col71 = forwardComment["col71"]
+            entry["col71"] = col71
+            if commentMiddle == "":
+                commentMiddle = forwardComment["commentMiddle"]
+            if commentPrefix == "":
+                commentPrefix = forwardComment["commentPrefix"]
+            pass
+        forwardComment = copy.deepcopy(defaultFlow)
     if flow["fullCommentFront"] != None:
         fullCommentFront = flow["fullCommentFront"]
     entry["fullCommentFront"] = fullCommentFront
@@ -340,6 +367,8 @@ for line in sys.stdin:
     if flow["commentMiddle"] != None:
         commentMiddle = flow["commentMiddle"]
     entry["commentMiddle"] = commentMiddle
+    if len(lines) in debugs and debugs[len(lines)] == "READ":
+        print("DEBUG (%s): entry =" % debugs[len(lines)], entry, file = sys.stderr)
 
 # For debugging purposes ...
 if False:
@@ -448,8 +477,10 @@ def printFlowchart(nodes, arrows, lhsDict):
                 body = ""
                 attributes = startShape
             elif col71 == "-":
+                if lineNumber in debugs and debugs[lineNumber] == "NODE":
+                    print("DEBUG (%s):" % debugs[lineNumber], node, file=sys.stderr)
                 if "(" in lhs:
-                    if entry["targeted"] + entry["fallthrough"] > 1:
+                    if node["targeted"] + node["fallthrough"] > 1:
                         attributes = connectorShape
                     else:
                         node["invisible"] = True
@@ -600,9 +631,9 @@ def printFlowchart(nodes, arrows, lhsDict):
 # being the next line number after the end of the flowchart.  These parameters
 # start from 1, thus the corresponding source lines are lines[startLine-1] and
 # lines[afterLine-1].
-#lhsFakeCount = 0
+lhsFakeCount = 0
 def processFlowchart(startLine, afterLine):
-    #global lhsFakeCount
+    global lhsFakeCount
     start = startLine - 1
     after = afterLine - 1
     # Let's find all of the operands *+n or *-n for TRA/TNZ/TMI and convert
@@ -613,26 +644,32 @@ def processFlowchart(startLine, afterLine):
         opcode = entry["opcode"]
         operand = entry["operand"]
         if opcode in {"TRA", "TRA*", "TMI", "TMI*", "TNZ", "TNZ*"} \
-                and operand[:2] in {"*+", "*-"}:
-            if operand[1] == "+":
+                and operand[:2] in {"*+", "*-", "*"}:
+            if operand == "*":
+                direction = 0
+            elif operand[1] == "+":
                 direction = 1
             else:
                 direction = -1
             j = i
             destination = lines[j]
-            k = 0
-            try:
-                n = int(operand[2:])
-                while k < n:
-                    j += direction
-                    destination = lines[j]
-                    if destination["opcode"] not in starOccupiers:
-                        continue
-                    k += 1
-                # "destination" should now be the line corresponding to *+n 
-                # or *-n (whichever is appropriate).
-            except:
-                continue
+            if direction != 0:
+                k = 0
+                try:
+                    n = int(operand[2:])
+                    while k < n:
+                        j += direction
+                        destination = lines[j]
+                        if destination["opcode"] not in starOccupiers \
+                                and "." not in destination["opcode"]:
+                            continue
+                        k += 1
+                    # "destination" should now be the line corresponding to *+n 
+                    # or *-n (whichever is appropriate).
+                    if opcode.startswith("TRA"):
+                        destination["targeted"] += 1
+                except:
+                    continue
             lhsDestination = destination["lhs"]
             if lhsDestination == "":
                 lhsDestination = "Line %d" % destination["lineNumber"]
@@ -640,6 +677,8 @@ def processFlowchart(startLine, afterLine):
                 if destination["col71"] == " ":
                     destination["col71"] = "-"
             entry["operand"] = lhsDestination
+        if i+1 in debugs and debugs[i+1] == "STAR":
+            print("DEBUG (%s):" % debugs[i+1], destination, file=sys.stderr)
     # Now let's find all TNZ/TMI that are unmarked with Q/Y/N and mark them
     # ourselves.  We'll use a new column-71 symbol, "?", which is supposed to
     # have a result like "Y" or "N" without preceding "Q", but without putting
@@ -650,7 +689,9 @@ def processFlowchart(startLine, afterLine):
             continue
         opcode = entry["opcode"]
         operand = entry["operand"]
-        if opcode in {"TMI", "TMI*", "TNZ", "TNZ*"}:
+        # Note that U.TPL is a macro that conditionally performs a transfer.
+        # That I've hardcoded it here is a purely ad hoc measure.
+        if opcode in {"TMI", "TMI*", "TNZ", "TNZ*", "U.TPL"}:
             entry["col71"] = "?"
             if entry["commentMiddle"] in ["YES", "NO"]:
                 entry["commentMiddle"] = ""
@@ -735,7 +776,8 @@ def processFlowchart(startLine, afterLine):
                 if " " not in lhs:
                     lhsDict[lhs] = (len(nodes), "fullCommentFront")
         nodes.append(entry)
-    
+    #for lhs in sorted(lhsDict):
+    #    print("!", lhs, lhsDict[lhs], file=sys.stderr)
 
     if not simplified:
         # Insert all arrows for decision boxes resulting directly from Y or N. 
