@@ -1,0 +1,1739 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta content="text/html; charset=windows-1252"
+      http-equiv="Content-Type">
+    <title>Abridged LVDC assembly listing</title>
+    <style type="text/css">
+p.nobreak {
+white-space: nowrap;
+}
+pre { 
+font-family: monospace; 
+}
+a { 
+text-decoration:none; 
+}
+.dim {
+/* filter: brightness(25%); */
+background-color: lightgrey;
+}
+.op{ /* opcodes */
+font-weight: bold;
+color: #993300;
+}
+.ma{ /* macro name */
+color: #009900;
+}
+.fe{ /* assembler fatal error */
+color: #FF0000;
+}
+.fl{ /* column 71 flowchart annotation */
+font-style: italic;
+color: #dd0000;
+}
+.fo{ /* form name */
+color: #FF6600;
+}
+.ps{ /* pseudo-ops */
+color: #336600;
+}
+.sm{ /* program labels */
+color: #0000FF;
+}
+.va{ /* variables */
+color: #0099FF;
+}
+.cn{ /* constants */
+color: #6600FF;
+}
+.wn{ /* assembler warning */
+color: #FF9900;
+}
+.co{ /* original comment */
+font-style: italic;
+color: #993399;
+}
+.mo{ /* modern comment */
+font-style: italic;
+color: #6699FF;
+}
+</style>
+  </head>
+  <body>
+    <p class="nobreak"> </p>
+    <pre><h1>Contents</h1><ul><li><a href="#introduction">Introduction</a></li><li><a href="#source">Assembly Listing</a></li></ul>
+<hr>
+<a id="introduction"></a><h1>Introduction</h1>This is an <i>abridged</i> version of the AS-512 LVDC Flight Program, with all code<br><i>removed</i> except purely mathematical utilities such as the square root subroutine,<br>the exponential subroutine, trigonometric subroutines, and so on.  The intent<br>is to illustrate LVDC code that cannot conceivably be restricted under U.S.<br>International Traffic in Arms Regulations (ITAR).<br><br>The LVDC assembly-language source code herein was transcribed from an original 
+Apollo-era assembly listing into a set of source-code files. Those source-code 
+files were then assembled using a post-Apollo-era LVDC assembler, and the 
+resulting assembly listing was manually edited to remove most of it. The  
+present listing resulted. It was designed to superficially resemble the 
+original assembly listing in its full state, though there are some differences 
+in presentation.
+
+An important difference is the presence of "modern" comments that were not 
+present in the original listings.  Modern comments can be recognized because 
+they are preceded by the character "<span class="mo">#</span>".
+
+Moreover, this assembly listing uses colorized syntax highlighting, according 
+to the following color key:
+<ul><li>Numbers and assembler-generated text.</li><li><span class="fe">Fatal assembly errors</span></li><li><span class="wn">Assembly warnings</span></li><li><span class="mo">"Modern" comments</span></li><li><span class="co">Original Apollo-era comments</span></li><li><span class="fl">Punchcard column 71.</span></li><li><span class="op">LVDC instruction opcodes.</span></li><li><span class="ps">Pseudo-ops and assembler directives.</span></li></ul>
+Besides which, the following colors are used for symbols defined within the LVDC 
+source code, and they double as hyperlinks that jump to the source-code lines at 
+which the symbols are defined:
+<img src="flowchart.png" style="float:right"><ul><li><span class="sm">Program labels.</span></li><li><span class="va">Names of variables</span></li><li><span class="cn">Names of preprocessor constants.</span></li><li><span class="ma">Names of macros.</span></li><li><span class="fo">Names of forms.</span></li></ul>
+Finally, if you encounter icons like the one to the right, those are clickable
+hyperlinks to experimental flowcharts of the associated sections of the LVDC
+program.
+
+<hr>
+<a id="source"></a><h1>Assembly Listing</h1>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: Presently, treat as if export of the full version</span>
+<span class="mo">    #               of the file from U.S. is restricted by ITAR.</span>
+<span class="mo">    # Filename:     GFP_DATA_PACK.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-04-18 RSB  Pp. 1-9 transcribed.  (In LibreOffice Writer</span>
+<span class="mo">    #                               with scanned page as background, and then</span>
+<span class="mo">    #                               cut-and-pasted here.)</span>
+<span class="mo">    #               2023-04-19 RSB  Transcribed through p. 24. (LibreOffice.)</span>
+<span class="mo">    #               2023-04-20 RSB  Transcribed through p. 46.</span>
+<span class="mo">    #               2023-04-21 RSB  Transcribed through p. 84.</span>
+<span class="mo">    #               2023-04-22 RSB  Transcribed through p. 112.</span>
+<span class="mo">    #               2023-04-23 RSB  Transcribed through p. 163.</span>
+<span class="mo">    #               2023-04-24 RSB  Transcription completed.  (No proof-reading.)</span>
+<span class="mo">    #               2023-04-27 RSB  Replaced instances of HOP* and TRA* by HOP and</span>
+<span class="mo">    #                               TRA respectively, to conform to guidelines.</span>
+<span class="mo">    #               2023-04-28 RSB  Corrected initial page.  Simplified some of the</span>
+<span class="mo">    #                               comments I had added.</span>
+<span class="mo">    #               2023-05-05 RSB  Corrected P.N403 to P.N4O3.</span>
+<span class="mo">    #               2023-05-17 RSB  Proofed through p. 13, making 8 corrections,</span>
+<span class="mo">    #                               using the transparent nano over PDF method.</span>
+<span class="mo">    #                               Also some corrections found during assembly.</span>
+<span class="mo">    #               2023-05-18 RSB  Fixes identified during assembly.</span>
+<span class="mo">    #               2023-05-22 RSB  More of the same.</span>
+<span class="mo">    #               2023-05-23 RSB  Fixed some problems discovered by assembling.</span>
+<span class="mo">    #               2023-05-24 RSB  More assembly-related fixes.</span>
+<span class="mo">    #               2023-05-25 RSB  More of the same.</span>
+<span class="mo">    #               2023-05-26 RSB  More of the same.</span>
+<span class="mo">    #               2023-05-29 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-02 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-03 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-04 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-06 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-07 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-11 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-14 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-16 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-17 RSB  Ditto.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+<span class="mo">    #               2023-06-22 RSB  Fixed a few typos found during AS-513</span>
+<span class="mo">    #                               transcription.</span>
+<span class="mo">    #               2023-06-23 RSB  More of the same.</span>
+<span class="mo">    #               2023-06-24 RSB  Ditto.</span>
+<span class="mo">    #               2023-07-21 RSB  Typo correction.</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a3"></a><span class="cn">P.MOD  </span><span class="ps">DEQD    </span>4,0,000<span class="co">      DATA MODULE STARTING LOCATION</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a19"></a><span class="va">D.KDAN </span><span class="ps">TABLE   </span>1<span class="co">            DATA AREA N</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a21"></a><span class="va">D.KDAP </span><span class="ps">TABLE   </span>1<span class="co">            DATA AREA P</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a49"></a><span class="va">C.UT   </span><span class="ps">TABLE   </span>1<span class="co">            UTILITY ROUTINES</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a77"></a><span class="va">C.SD   </span><span class="ps">TABLE   </span>1<span class="co">            SCALED DIVIDE MODULE</span>
+                                                          .
+                                                          .
+                                                          .
+            276  2 17                  000000002   <a id="a186"></a><span class="va">D.KB25 </span><span class="ps">OCT     </span>000000002
+                                                          .
+                                                          .
+                                                          .
+            200  2 17                              <a id="a192"></a><span class="va">D.VUEM </span><span class="ps">BSS     </span>1<span class="co">            EXM LOCATION FOR USE BY UTILITIES</span>
+                                                          .
+                                                          .
+                                                          .
+<span class="wn">W</span>           027  2 17                              <a id="a332"></a><span class="va">D.VUTB </span><span class="ps">BSS     </span>8
+                                                          .
+                                                          .
+                                                          .
+            070  2 17                  000000000   <a id="a348"></a><span class="va">D.KZRO </span><span class="ps">DEC     </span>0<span class="co">            ZERO</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a3663"></a><span class="cn">P.P135 </span><span class="ps">EQU     </span>(135/180)<span class="co">    135 DEGREES IN PIRADS</span>
+                                                   <a id="a3664"></a><span class="cn">P.P90  </span><span class="ps">EQU     </span>(90/180)<span class="co">     90 DEGREES</span>
+                                                   <a id="a3666"></a><span class="cn">P.P45  </span><span class="ps">EQU     </span>(45/180)<span class="co">     45 DEGREES</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a3767"></a><span class="cn">P.AT1  </span><span class="ps">EQU     </span>(.31830264)<span class="co">  *</span>
+                                                   <a id="a3768"></a><span class="cn">P.AT3  </span><span class="ps">EQU     </span>(-.10587734)<span class="co">     *  COEFFICIENTS TO ARCTANGENT</span>
+                                                   <a id="a3769"></a><span class="cn">P.AT5  </span><span class="ps">EQU     </span>(.0616068)<span class="co">   *  POLYNOMIAL APPROXIMATION</span>
+                                                   <a id="a3770"></a><span class="cn">P.AT7  </span><span class="ps">EQU     </span>(-.37061734E-1)<span class="co">  *</span>
+                                                   <a id="a3771"></a><span class="cn">P.AT9  </span><span class="ps">EQU     </span>(.16760072E-1)<span class="co">   *</span>
+                                                   <a id="a3772"></a><span class="cn">P.AT11 </span><span class="ps">EQU     </span>(-.37309738E-2)<span class="co">  *</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a4050"></a><span class="cn">P.LNC1 </span><span class="ps">EQU     </span>(.99990167)<span class="co">  *</span>
+                                                   <a id="a4051"></a><span class="cn">P.LNC2 </span><span class="ps">EQU     </span>(-.49787544)<span class="co"> *</span>
+                                                   <a id="a4052"></a><span class="cn">P.LNC3 </span><span class="ps">EQU     </span>(.31765005)<span class="co">  *  COEFFICIENTS TO NATURAL LOGARITHM</span>
+                                                   <a id="a4053"></a><span class="cn">P.LNC4 </span><span class="ps">EQU     </span>(-.19376149)<span class="co"> *  POLYNOMINAL APPROXIMATION</span>
+                                                   <a id="a4054"></a><span class="cn">P.LNC5 </span><span class="ps">EQU     </span>(.08556927)<span class="co">  *</span>
+                                                   <a id="a4055"></a><span class="cn">P.LNC6 </span><span class="ps">EQU     </span>(-.01833831)<span class="co"> *</span>
+                                                   <a id="a4056"></a><span class="cn">P.LN2  </span><span class="ps">EQU     </span>(.693147181)<span class="co"> NATURAL LOGARITHM OF 2, LN(2)</span>
+                                                          .
+                                                          .
+                                                          .
+                                                   <a id="a4189"></a><span class="cn">P.SCC1 </span><span class="ps">EQU     </span>(3.1415897)<span class="co">    *</span>
+                                                   <a id="a4190"></a><span class="cn">P.SCC3 </span><span class="ps">EQU     </span>(-5.16736782)<span class="co">  *  COEFFICIENTS TO SINE-COSINE</span>
+                                                   <a id="a4191"></a><span class="cn">P.SCC5 </span><span class="ps">EQU     </span>(2.5436052)<span class="co">    *  POLYNOMINAL APPROXIMATION</span>
+                                                   <a id="a4192"></a><span class="cn">P.SCC7 </span><span class="ps">EQU     </span>(-.558396947)<span class="co">  *</span>
+                                                          .
+                                                          .
+                                                          .
+                                                          
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     POLYNOMIAL_EVALUATION_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created</span>
+<span class="mo">    #               2023-04-19 JAP  Transcribed from scans</span>
+<span class="mo">    #               2023-04-28 RSB  Corrected title of p. 1049.</span>
+<span class="mo">    #               2023-06-16 RSB  Corrected typo discovered via assembly.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+
+<hr>
+<span class="mo">    # PAGE 1049, SEQUENCE PN000000-PN000000</span>
+
+                                   VARIABLE LAUNCH AZIMUTH (LA)                A0800                            PAGE 1049
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  PN   REF           POLYNOMIAL EVALUATION UTILITY (PN)
+
+<hr>
+<span class="mo">    # PAGE 1050, SEQUENCE PN000020-PN000240</span>
+
+                                   POLYNOMIAL EVALUATION UTILITY (PN)          A0810                            PAGE 1050
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      POLYNOMIAL EVALUATION UTILITY (PN)                            *</span><span class="fl">J</span><a href="AS-512-flowcharts/POLYNOMIAL_EVALUATION_UTILITY_(PN).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*  DATE</span>
+                                                   <span class="co">*  REVISIONS      NONE</span>
+                                                   <span class="co">*  FUNCTION       EVALUATION OF A 4TH OR 6TH ORDER POLYNOMIAL</span>
+                                                   <span class="co">*                 (NOTE: OTHER ORDER POLYNOMIALS MAY BE EVALUATED</span>
+                                                          <span class="ps">        </span><span class="co">          IF THE APPROPRIATE ENTRIES ARE INCORPORATED)</span>
+                                                   <span class="co">*  ENTRIES        U.PN06  EVALUATION OF 6TH ORDER POLYNOMIAL</span>
+                                                   <span class="co">*                 U.PN04  EVALUATION OF 4TH ORDER POLYNOMIAL</span>
+                                                   <span class="co">*  RESTRICTIONS   NONE</span>
+                                                   <span class="co">*  NOTES          INPUT    INDEPENDENT VARIABLE IN ACCUMULATOR</span>
+                                                   <span class="co">*                 OUTPUT  RESULT IN ACCUMULATOR</span>
+
+<hr>
+<span class="mo">    # PAGE 1051, SEQUENCE PN000260-PN000720</span>
+
+                                   POLYNOMIAL EVALUATION UTILITY (PN)          A0810                            PAGE 1051
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">DOGD    </span>0,16,000
+                                                          <span class="ps">BLOCK   </span>33
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+     6 16 0 011  0 16    377  1  13                <a id="a3317"></a><span class="sm">U.PN04 </span><span class="op">STO     </span>777<span class="co">          U.PN04                                    </span><span class="fl">S</span>
+                                                   <span class="co">*                           ENTRY FOR 4TH ORDER POLYNOMIAL            </span><span class="fl">*</span>
+     6 16 0 012  0 16    200  1  13                       <span class="op">STO     </span>600<span class="co">          SAVE DFW IN EXM LOCATION                  </span><span class="fl">B</span>
+     6 16 0 013  0 16    204  1  16                       <span class="op">EXM     </span>0,0,4<span class="co">        LOAD A4 COF</span>
+     6 16 0 014  0 16    030  0  10                       <span class="op">TRA     </span><a href="#a3319"><span class="sm">GOON4</span></a><span class="co">                                                  </span><span class="fl">G</span>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+     6 16 0 015  0 16    377  1  13                <a id="a3318"></a><span class="sm">U.PN06 </span><span class="op">STO     </span>777<span class="co">          U.PN06                                    </span><span class="fl">S</span>
+                                                   <span class="co">*                           ENTRY FOR 6TH ORDER POLYNOMIAL            </span><span class="fl">*</span>
+     6 16 0 016  0 16    200  1  13                       <span class="op">STO     </span>600<span class="co">          SAVE DFW IN EXM LOCATION                  </span><span class="fl">B</span>
+     6 16 0 017  0 16    206  1  16                       <span class="op">EXM     </span>0,0,6<span class="co">        LOAD A6 COF</span>
+     6 16 0 020  0 16    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        MULTIPLY BY INDEPENDENT VARIABLE</span>
+     6 16 0 021          000  1  16                       <span class="op">SHL     </span>0<span class="co">            DELAY</span>
+     6 16 0 022  0 16    205  1  16                       <span class="op">EXM     </span>0,0,5<span class="co">        A5</span>
+     6 16 0 023  0 16    375  1  07                       <span class="op">ADD     </span>775<span class="co">          ADD PRODUCT OF MULTIPLY</span>
+     6 16 0 024  0 16    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        MULTIPLY BY INDEPENDENT VARIABLE</span>
+     6 16 0 025          000  1  16                       <span class="op">SHL     </span>0<span class="co">            DELAY</span>
+     6 16 0 026  0 16    204  1  16                       <span class="op">EXM     </span>0,0,4<span class="co">        A4</span>
+     6 16 0 027  0 16    375  1  07                       <span class="op">ADD     </span>775<span class="co">          ADD PRODUCT OF MULTIPLY</span>
+     6 16 0 030  0 16    220  1  16                <a id="a3319"></a><span class="sm">GOON4  </span><span class="op">EXM     </span>0,1,0<span class="co">        COMPUTE APPROPRIATE POLYNOMIAL            </span><span class="fl">B</span>
+     6 16 0 031          000  1  16                       <span class="op">SHL     </span>0<span class="co">            DELAY</span>
+     6 16 0 032  0 16    203  1  16                       <span class="op">EXM     </span>0,0,3<span class="co">        A3</span>
+     6 16 0 033  0 16    375  1  07                       <span class="op">ADD     </span>775<span class="co">          ADD PRODUCT OF MULTIPLY</span>
+     6 16 0 034  0 16    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        MULTIPLY BY INDEPENDENT VARIABLE</span>
+     6 16 0 035          000  1  16                       <span class="op">SHL     </span>0<span class="co">            DELAY</span>
+     6 16 0 036  0 16    202  1  16                       <span class="op">EXM     </span>0,0,2<span class="co">        A2</span>
+     6 16 0 037  0 16    375  1  07                       <span class="op">ADD     </span>775<span class="co">          ADD PRODUCT OF MULTIPLY</span>
+     6 16 0 040  0 16    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        MULTIPLY BY INDEPENDENT VARIABLE</span>
+     6 16 0 041          000  1  16                       <span class="op">SHL     </span>0<span class="co">            DELAY</span>
+     6 16 0 042  0 16    201  1  16                       <span class="op">EXM     </span>0,0,1<span class="co">        A1</span>
+     6 16 0 043  0 16    375  1  07                       <span class="op">ADD     </span>775<span class="co">          ADD PRODUCT OF MULTIPLY</span>
+     6 16 0 044  0 16    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        MULTIPLY BY INDEPENDENT VARIABLE</span>
+     6 16 0 045          000  1  16                       <span class="op">SHL     </span>0<span class="co">            DELAY</span>
+     6 16 0 046  0 16    200  1  16                       <span class="op">EXM     </span>0,0,0<span class="co">        A0</span>
+     6 16 0 047  0 16    375  1  07                       <span class="op">ADD     </span>775<span class="co">          ADD PRODUCT OF MULTIPLY</span>
+     6 16 0 050  0 16    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # PAGE 1052, NO SOURCE CODE</span>
+
+                                   POLYNOMIAL EVALUATION UTILITY (PN)          A0810                            PAGE 1052
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr><br><i>... Pages removed ...</i><br>&nbsp;<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     SINE-COSINE_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-06 RSB  Fixed typo identified during assembly.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+<span class="mo">    #               2023-07-23 RSB  Added FLOW.</span>
+
+<hr>
+<span class="mo">    # PAGE 1059, SEQUENCE SC000000</span>
+
+                                   SECTOR DUMP TELEMETRY (DT)                  A0820                            PAGE 1059
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  SC   REF           SINE-COSINE UTILITY (SC)
+
+<hr>
+<span class="mo">    # PAGE 1060, SEQUENCE SC000020-SC000460</span>
+
+                                   SINE/COSINE UTILITY (SC)                    A0830                            PAGE 1060
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      SINE-COSINE UTILITY (SC)                                      *</span><span class="fl">J</span><a href="AS-512-flowcharts/SINE-COSINE_UTILITY_(SC).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              4 - 23 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE SINE-COSINE UTILITY MODULE IS</span>
+                                                   <span class="co">*                   TO COMPUTE THE SINE AND COSINE OF INPUT ANGLE.</span>
+                                                   <span class="co">* ENTRIES           U.SC00 - ANGLE ARGUMENT TO BE IN AC IN PIRADS ON</span>
+                                                   <span class="co">*                            ENTRY.  ON EXIT SINE(ANGLE) IN AC,</span>
+                                                   <span class="co">*                            COSINE(ANGLE) IN PQ.</span>
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+                                                   <span class="co">*                           U.SC00                                    </span><span class="fl">S</span>
+     6 16 0 152  2 10    377  1  13                <a id="a3332"></a><span class="sm">U.SC00 </span><span class="op">STO     </span>777<span class="co">          SAVE RETURN LINKAGES                      </span><span class="fl">B</span>
+     6 16 0 153  2 10    027  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a><span class="co">       DETERMINE WHICH QUADRANT ANGLE IS IN      </span><span class="fl">B</span>
+     6 16 0 154  2 10    163  0  14                       <span class="op">TMI     </span><a href="#a3333"><span class="sm">SC100</span></a>
+                                                          <span class="op">RSU     </span>=(<a href="#a3664"><span class="cn">P.P90</span></a>)B0<span class="co">   90 DEGREES</span>
+     6 16 0 155  2 10    217  1  15    200000000 +        <span class="op">RSU     </span>=0.5B0<span class="co">   90 DEGREES</span>
+     6 16 0 156  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 0 157  2 10    161  0  14                       <span class="op">TMI     </span>*+2<span class="co">          QUADRANT  II</span>
+     6 16 0 160  2 10    171  0  10                       <span class="op">TRA     </span><a href="#a3335"><span class="sm">SC300</span></a><span class="co">        QUADRANT  I</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a3664"><span class="cn">P.P90</span></a>)B0<span class="co">   90 DEGREES</span>
+     6 16 0 161  2 10    217  1  07    200000000 +        <span class="op">ADD     </span>=0.5B0<span class="co">   90 DEGREES</span>
+     6 16 0 162  2 10    170  0  10                       <span class="op">TRA     </span><a href="#a3334"><span class="sm">SC200</span></a>
+                                                   <a id="a3333"></a><span class="sm">SC100  </span><span class="op">ADD     </span>=(<a href="#a3664"><span class="cn">P.P90</span></a>)B0<span class="co">   90 DEG.</span>
+     6 16 0 163  2 10    217  1  07    200000000 + <a id="a3333"></a><span class="sm">SC100  </span><span class="op">ADD     </span>=0.5B0<span class="co">   90 DEG.</span>
+     6 16 0 164  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 0 165  2 10    167  0  14                       <span class="op">TMI     </span>*+2<span class="co">          QUADRANT III</span>
+     6 16 0 166  2 10    171  0  10                       <span class="op">TRA     </span><a href="#a3335"><span class="sm">SC300</span></a><span class="co">        QUADRANT IV</span>
+                                                          <span class="op">RSU     </span>=(-<a href="#a3664"><span class="cn">P.P90</span></a>)B0<span class="co">  -90 DEG.</span>
+     6 16 0 167  2 10    125  0  15    600000000 +        <span class="op">RSU     </span>=-0.5B0<span class="co">  -90 DEG.</span>
+     6 16 0 170  2 10    027  1  13                <a id="a3334"></a><span class="sm">SC200  </span><span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 0 171  2 10    377  1  17                <a id="a3335"></a><span class="sm">SC300  </span><span class="op">CLA     </span>777<span class="co">          SAVE RETURN</span>
+     6 16 0 172  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+                                                          <span class="ma">CALL    </span><a href="#a3336"><span class="sm">SC1000</span></a>,<a href="#a332"><span class="va">D.VUTB</span></a><span class="co"> (SC1000)COMPUTE SINE OF ANGLE            </span><span class="fl">L</span>
+     6 16 0 173  2 10    027  1  17              +        <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 0 174  2 10    126  0  00              +        <span class="op">HOP*    </span><a href="#a3336"><span class="sm">SC1000</span></a>
+
+<hr>
+<span class="mo">    # PAGE 1061, SEQUENCE SC000470-SC000710</span>
+
+                                   SINE/COSINE UTILITY (SC)                    A0830                            PAGE 1061
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+     6 16 0 175  2 10    027  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+                                                          <span class="ma">CALL    </span><a href="#a3336"><span class="sm">SC1000</span></a>,<a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">  (SC1000)COMPUTE COSINE OF ANGLE       </span><span class="fl">L</span>
+     6 16 0 176  2 10    030  1  17              +        <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 0 177  2 10    126  0  00              +        <span class="op">HOP*    </span><a href="#a3336"><span class="sm">SC1000</span></a>
+     6 16 0 200  2 10    375  1  13                       <span class="op">STO     </span>775
+     6 16 0 201  2 10    027  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 0 202  2 10    031  1  00                       <span class="op">HOP     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">     RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+     6 16 0 203  2 10    377  1  13                <a id="a3336"></a><span class="sm">SC1000 </span><span class="op">STO     </span>777<span class="co">          SC1000                                    </span><span class="fl">S</span>
+     6 16 0 204  2 10    032  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3<span class="co">     USE POLY. APPROX. FOR SIN-COS EQ.13.2.1   </span><span class="fl">B</span>
+     6 16 0 205  2 10    032  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 16 0 206          020  1  16                       <span class="op">SHL     </span>1
+     6 16 0 207  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+                                                          <span class="op">MPH     </span>=(<a href="#a4192"><span class="cn">P.SCC7</span></a>)B3
+     6 16 0 210  2 10    127  0  05    756103162 +        <span class="op">MPH     </span>=-0.558396947B3
+                                                          <span class="op">ADD     </span>=(<a href="#a4191"><span class="cn">P.SCC5</span></a>)B2
+     6 16 0 211  2 10    130  0  07    242624666 +        <span class="op">ADD     </span>=2.5436052B2
+     6 16 0 212  2 10    033  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 213          002  1  16                       <span class="op">SHR     </span>2
+                                                          <span class="op">ADD     </span>=(<a href="#a4190"><span class="cn">P.SCC3</span></a>)B3
+     6 16 0 214  2 10    131  0  07    532511662 +        <span class="op">ADD     </span>=-5.16736782B3
+     6 16 0 215  2 10    033  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+                                                          <span class="op">ADD     </span>=(<a href="#a4189"><span class="cn">P.SCC1</span></a>)B2
+     6 16 0 216  2 10    132  0  07    311037470 +        <span class="op">ADD     </span>=3.1415897B2
+     6 16 0 217  2 10    032  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 16 0 220          040  1  16                       <span class="op">SHL     </span>2<span class="co">            RESCALE</span>
+     6 16 0 221  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # PAGE 1062, NO SOURCE CODE</span>
+
+                                   SINE/COSINE UTILITY (SC)                    A0830                            PAGE 1062
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr>
+<span class="mo">    # PAGE 1063, NO SOURCE CODE</span>
+
+                                   SINE/COSINE UTILITY (SC)                    A0830                            PAGE 1063
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     MATRIX_MULTIPLY_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-19 RSB  Fixed typos discovered in assembly.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+<span class="mo">    #               2023-07-23 RSB  Added FLOW.</span>
+
+<hr>
+<span class="mo">    # PAGE 1064, SEQUENCE MM000000</span>
+
+                                   SINE/COSINE UTILITY (SC)                    A0830                            PAGE 1064
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  MM   REF           MATRIX MULTIPLY UTILITY (MM)
+
+<hr>
+<span class="mo">    # PAGE 1065, SEQUENCE MM000020-MM000250</span>
+
+                                   MATRIX MULTIPLY UTILITY (MM)                A0840                            PAGE 1065
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      MATRIX MULTIPLY UTILITY (MM)                                  *</span><span class="fl">J</span><a href="AS-512-flowcharts/MATRIX_MULTIPLY_UTILITY_(MM).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              5 - 18 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE MATRIX MULTIPLY UTILITY MODULE</span>
+                                                   <span class="co">*                   IS TO PERFORM A MATRIX MULTIPLICATION ON THE TWO</span>
+                                                   <span class="co">*                   SPECIFIED MATRICES</span>
+                                                   <span class="co">* ENTRIES           U.MM00 - TWO ARGUMENTS SUPPLIED UPON ENTRY. IN AC,</span>
+                                                   <span class="co">*                            A DFW ON THE FORM CLA,A,MPY,B WHERE A AND</span>
+                                                   <span class="co">*                            B ARE THE INITIAL LOCATIONS OF THE</span>
+                                                   <span class="co">*                            MATRICES TO BE MULTIPLIED.  IN PQ, A WORD</span>
+                                                   <span class="co">*                            CONTAINING A DFW OF THE FORM STO,C IN</span>
+                                                   <span class="co">*                            SYLLABLE 1 AND A COUNTER (SCALED B25) IN</span>
+                                                   <span class="co">*                            SYLLABLE 0.  C IS THE INITIAL LOCATION OF</span>
+                                                   <span class="co">*                            THE PRODUCT MATRIX.</span>
+
+<hr>
+<span class="mo">    # PAGE 1066, SEQUENCE MM000270-MM000700</span>
+
+                                   MATRIX MULTIPLY UTILITY (MM)                A0840                            PAGE 1066
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+                                                   <span class="co">*                           U.MM00                                    </span><span class="fl">S</span>
+     6 16 0 222  2 10    377  1  13                <a id="a3337"></a><span class="sm">U.MM00 </span><span class="op">STO     </span>777<span class="co">          SAVE RETURN LINKAGES AND INPUT ARGUMENTS  </span><span class="fl">B</span>
+     6 16 0 223  2 10    223  1  02    010000000          <span class="op">SUB     </span>=O01<span class="co">         AKJUST DFW FOR USE</span>
+     6 16 0 224  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 225  2 10    375  1  17                       <span class="op">CLA     </span>775
+     6 16 0 226  2 10    027  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 0 227  2 10    133  0  06    000000006          <span class="op">AND     </span>=3
+     6 16 0 230  2 10    034  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     SAVE COUNTER</span>
+     6 16 0 231  2 10    377  1  17                       <span class="op">CLA     </span>777
+     6 16 0 232  2 10    035  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6
+     6 16 0 233  2 10    134  0  00                <a id="a3338"></a><span class="sm">MM100  </span><span class="op">HOP*    </span><a href="#a3340"><span class="sm">MM500</span></a><span class="co">        (U.VD01)FORM VECTOR DOT                   </span><span class="fl">P</span>
+     6 16 0 234  2 10    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        STORE 1ST ELEMENT                         </span><span class="fl">B</span>
+     6 16 0 235  2 10    134  0  00                       <span class="op">HOP*    </span><a href="#a3340"><span class="sm">MM500</span></a><span class="co">        (U.VD01)FORM VECTOR DOT                   </span><span class="fl">P</span>
+     6 16 0 236  2 10    221  1  16                       <span class="op">EXM     </span>0,1,1<span class="co">        STORE 2ND ELEMENT                         </span><span class="fl">B</span>
+     6 16 0 237  2 10    134  0  00                       <span class="op">HOP*    </span><a href="#a3340"><span class="sm">MM500</span></a><span class="co">        (U.VD01)FORM VECTOR DOT                   </span><span class="fl">P</span>
+     6 16 0 240  2 10    222  1  16                       <span class="op">EXM     </span>0,1,2<span class="co">        STORE 3RD ELEMENT                         </span><span class="fl">B</span>
+     6 16 0 241  2 10    034  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+     6 16 0 242  2 10    276  1  02    000000002          <span class="op">SUB     </span>=1
+     6 16 0 243  2 10    245  0  04                       <span class="op">TNZ     </span><a href="#a3339"><span class="sm">MM200</span></a><span class="co">        MATRIX MULTIPLICAT- ION COMPLETE          </span><span class="fl">N</span>
+     6 16 0 244  2 10    035  1  00                       <span class="op">HOP     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*              NONE 8                                                 </span><span class="fl">$</span>
+     6 16 0 245  2 10    034  1  13                <a id="a3339"></a><span class="sm">MM200  </span><span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     SET TO FORM ELEMENTS FOR NEXT ROW         </span><span class="fl">B</span>
+     6 16 0 246  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     *</span>
+     6 16 0 247  2 10    135  0  07    750000400          <span class="op">ADD     </span>=O7500004<span class="co">    * RESET A ADDRESS, INCREMENT B ADDRESS</span>
+     6 16 0 250  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     *</span>
+     6 16 0 251  2 10    027  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 0 252  2 10    223  1  07    010000000          <span class="op">ADD     </span>=O01<span class="co">          *  INCREMENT C ADDRESS</span>
+     6 16 0 253  2 10    027  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 0 254  2 10    233  0  10                       <span class="op">TRA     </span><a href="#a3338"><span class="sm">MM100</span></a><span class="co">                                                  </span><span class="fl">G</span>
+     6 16 0 255  2 10    377  1  13                <a id="a3340"></a><span class="sm">MM500  </span><span class="op">STO     </span>777<span class="co">          SET TO PEFORM VECTOR DOT</span>
+     6 16 0 256  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 257  2 10    223  1  07    010000000          <span class="op">ADD     </span>=O01
+     6 16 0 260  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 261  2 10    170  1  10                       <span class="op">TRA     </span><a href="#a3359"><span class="sm">U.VD01</span></a>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # PAGE 1067, NO SOURCE CODE</span>
+
+                                   MATRIX MULTIPLY UTILITY (MM)                A0840                            PAGE 1067
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     EXPONENTIAL_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+<span class="mo">    #               2023-07-23 RSB  Added FLOW.</span>
+
+<hr>
+<span class="mo">    # PAGE 1068, SEQUENCE EU000000</span>
+
+                                   MATRIX MULTIPLY UTILITY (MM)                A0840                            PAGE 1068
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  EU   REF           EXPONENTIAL UTILITY (EX)
+
+<hr>
+<span class="mo">    # PAGE 1069, SEQUENCE EU000020-EU000230</span>
+
+                                   EXPONENTIAL UTILITY (EX)                    A0845                            PAGE 1069
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*              EXPONENTIAL  UTILITY  (EX)                            *</span><span class="fl">J</span><a href="AS-512-flowcharts/EXPONENTIAL_UTILITY_(EX).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*  DATE           3-20-69</span>
+                                                   <span class="co">*  REVISIONS      NONE</span>
+                                                   <span class="co">*  FUNCTION       THE FUNCTION OF THE EXPONENTIAL UTILITY MODULE IS</span>
+                                                   <span class="co">*                 TO COMPUTE Y WHEN Y = E(X)</span>
+                                                   <span class="co">*  ENTRY          U.EX00 - ARGUMENT X TO BE IN ACCUMULATOR UPON</span>
+                                                   <span class="co">*                          ENTRY AND SCALED B1. ON EXIT OUTPUT Y</span>
+                                                   <span class="co">*                          WILL BE IN ACCUMULATOR SCALED B1.</span>
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+
+<hr>
+<span class="mo">    # PAGE 1070, SEQUENCE EU000250-EU000580</span>
+
+                                   EXPONENTIAL UTILITY (EX)                    A0845                            PAGE 1070
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+     6 16 0 262  2 10    377  1  13                <a id="a3341"></a><span class="sm">U.EX00 </span><span class="op">STO     </span>777<span class="co">          U.EX00                                    </span><span class="fl">S</span>
+     6 16 0 263  2 10    035  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     SAVE RETURN LINKAGES AND INPUT ARGUMENTS  </span><span class="fl">B</span>
+     6 16 0 264  2 10    217  1  17    200000000          <span class="op">CLA     </span>=1B1<span class="co">         SET OUTPUT FACTOR TO 1.0                  </span><span class="fl">B</span>
+     6 16 0 265  2 10    036  1  13                <a id="a3342"></a><span class="sm">EX10   </span><span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+7<span class="co">     IS INPUT ARGUMENT &lt; -.5                   </span><span class="fl">Q</span>
+     6 16 0 266  2 10    035  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6
+                                                          <span class="op">ADD     </span>=.5B1
+     6 16 0 267  2 10    220  1  07    100000000 +        <span class="op">ADD     </span>=0.5B1
+     6 16 0 270  2 10    307  0  14                       <span class="op">TMI     </span><a href="#a3343"><span class="sm">EX20</span></a><span class="co">         IS ARGUMENT &lt; -.5                         </span><span class="fl">Y</span>
+                                                   <span class="co">*                           CALCULATE THE VALUE OF E**X EQ.13.5.1     </span><span class="fl">B</span>
+                                                          <span class="op">CLA     </span>=.00841598B-3
+     6 16 0 271  2 10    136  0  17    021170626 +        <span class="op">CLA     </span>=0.00841598B-3
+     6 16 0 272  2 10    035  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     B1</span>
+                                                          <span class="op">ADD     </span>=.04216020B-2
+     6 16 0 273  2 10    137  0  07    053130054 +        <span class="op">ADD     </span>=0.0421602B-2
+     6 16 0 274  2 10    035  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     B1</span>
+                                                          <span class="op">ADD     </span>=.16665739B-1
+     6 16 0 275  2 10    140  0  07    125250170 +        <span class="op">ADD     </span>=0.16665739B-1
+     6 16 0 276  2 10    035  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     B1</span>
+                                                          <span class="op">ADD     </span>=.49995983B0
+     6 16 0 277  2 10    141  0  07    177772570 +        <span class="op">ADD     </span>=0.49995983B0
+     6 16 0 300  2 10    035  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     B1</span>
+     6 16 0 301  2 10    142  0  07    200000006          <span class="op">ADD     </span>=1.0000002B1
+     6 16 0 302  2 10    035  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     B1</span>
+     6 16 0 303  2 10    143  0  07    100000004          <span class="op">ADD     </span>=1.0000002B2
+     6 16 0 304  2 10    036  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+7
+     6 16 0 305          040  1  16                       <span class="op">SHL     </span>2<span class="co">            SET OUTPUT TO E**X*OUTPUT FACTOR          </span><span class="fl">B</span>
+     6 16 0 306  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+     6 16 0 307  2 10    036  1  17                <a id="a3343"></a><span class="sm">EX20   </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+7<span class="co">     INCREMENT INPUT ARG X BY 1.0              </span><span class="fl">B</span>
+                                                          <span class="op">MPY     </span>=.36787944B0
+     6 16 0 310  2 10    144  0  01    136132544 +        <span class="op">MPY     </span>=0.36787944B0
+     6 16 0 311  2 10    035  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     B1</span>
+     6 16 0 312  2 10    217  1  07    200000000          <span class="op">ADD     </span>=1B1
+     6 16 0 313  2 10    035  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     B1</span>
+     6 16 0 314  2 10    375  1  17                       <span class="op">CLA     </span>775<span class="co">          SET OUTPUT FACTOR TO E**-1                </span><span class="fl">B</span>
+     6 16 0 315  2 10    265  0  10                       <span class="op">TRA     </span><a href="#a3342"><span class="sm">EX10</span></a><span class="co">                                                   </span><span class="fl">G</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # PAGE 1071, NO SOURCE CODE</span>
+
+                                   EXPONENTIAL UTILITY (EX)                    A0845                            PAGE 1071
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     MATRIX_TRANSPOSE_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-19 RSB  Fixed typos discovered in assembly.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+
+<hr>
+<span class="mo">    # PAGE 1072, SEQUENCE MT000000</span>
+
+                                   EXPONENTIAL UTILITY (EX)                    A0845                            PAGE 1072
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  MT   REF           MATRIX TRANSPOSE UTILITY (MT)
+
+<hr>
+<span class="mo">    # PAGE 1073, SEQUENCE MT000020-MT000220</span>
+
+                                   MATRIX TRANSPOSE UTILITY (MT)               A0850                            PAGE 1073
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      MATRIX TRANSPOSE UTILITY (MT)                                 *</span><span class="fl">J</span><a href="AS-512-flowcharts/MATRIX_TRANSPOSE_UTILITY_(MT).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              5 - 18 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE MATRIX TRANSPOSE UTILITY</span>
+                                                   <span class="co">*                   MODULE IS TO FORM TRANSPOSE MATRIX OF SPECIFIED</span>
+                                                   <span class="co">*                   MATRIX.</span>
+                                                   <span class="co">* ENTRIES           U.MT00 - UPON ENTRY A DFW OF THE FORM STO,B,CLA,A</span>
+                                                   <span class="co">*                            IS TO BE IN AC.  WHERE A AND B ARE THE</span>
+                                                   <span class="co">*                            INITIAL LOCATIONS OF THE MATRIX TO BE</span>
+                                                   <span class="co">*                            TRANSPOXED AND THE MATRIX IN WHICH</span>
+                                                   <span class="co">*                            TRANSPOSE IS TO BE STORED.</span>
+
+<hr>
+<span class="mo">    # PAGE 1074, SEQUENCE MT000240-MT000600</span>
+
+                                   MATRIX TRANSPOSE UTILITY (MT)               A0850                            PAGE 1074
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+     6 16 0 316  2 10    377  1  13                <a id="a3344"></a><span class="sm">U.MT00 </span><span class="op">STO     </span>777<span class="co">          U.MT00                                    </span><span class="fl">S</span>
+                                                   <span class="co">*                           SAVE RETURN LINKAGE AND INPUT ARGUMENTS   </span><span class="fl">B</span>
+     6 16 0 317  2 10    200  1  13                       <span class="op">STO     </span><a href="#a192"><span class="va">D.VUEM</span></a><span class="co">       FORM TRANSPOSE MATRIX                     </span><span class="fl">B</span>
+     6 16 0 320  2 10    200  1  16                       <span class="op">EXM     </span>0,0,0<span class="co">        TRANSPOSE AND STORE DIAGONAL ELEMENTS</span>
+     6 16 0 321  2 10    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        *</span>
+     6 16 0 322  2 10    205  1  16                       <span class="op">EXM     </span>0,0,5<span class="co">        *</span>
+     6 16 0 323  2 10    225  1  16                       <span class="op">EXM     </span>0,1,5<span class="co">        *</span>
+     6 16 0 324  2 10    212  1  16                       <span class="op">EXM     </span>0,0,12<span class="co">       *</span>
+     6 16 0 325  2 10    232  1  16                       <span class="op">EXM     </span>0,1,12<span class="co">       *</span>
+     6 16 0 326  2 10    201  1  16                       <span class="op">EXM     </span>0,0,1<span class="co">        SAVE LEFT OFF DIAGONAL ELEMENTS</span>
+     6 16 0 327  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     *</span>
+     6 16 0 330  2 10    202  1  16                       <span class="op">EXM     </span>0,0,2<span class="co">        *</span>
+     6 16 0 331  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">     *</span>
+     6 16 0 332  2 10    206  1  16                       <span class="op">EXM     </span>0,0,6<span class="co">        *</span>
+     6 16 0 333  2 10    032  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3<span class="co">     *</span>
+     6 16 0 334  2 10    204  1  16                       <span class="op">EXM     </span>0,0,4<span class="co">        TRANSPOSE AND MOVE RIGHT OFF DIGONAL EL.</span>
+     6 16 0 335  2 10    221  1  16                       <span class="op">EXM     </span>0,1,1<span class="co">        *</span>
+     6 16 0 336  2 10    210  1  16                       <span class="op">EXM     </span>0,0,10<span class="co">       10</span>
+     6 16 0 337  2 10    222  1  16                       <span class="op">EXM     </span>0,1,2<span class="co">        *</span>
+     6 16 0 340  2 10    211  1  16                       <span class="op">EXM     </span>0,0,11<span class="co">       *</span>
+     6 16 0 341  2 10    226  1  16                       <span class="op">EXM     </span>0,1,6<span class="co">        *</span>
+     6 16 0 342  2 10    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     TRANSPOSE AND MOVE LEFT OFF DIAGONAL EL.</span>
+     6 16 0 343  2 10    224  1  16                       <span class="op">EXM     </span>0,1,4<span class="co">        *</span>
+     6 16 0 344  2 10    031  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">     *</span>
+     6 16 0 345  2 10    230  1  16                       <span class="op">EXM     </span>0,1,10<span class="co">       *</span>
+     6 16 0 346  2 10    032  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3<span class="co">     *</span>
+     6 16 0 347  2 10    231  1  16                       <span class="op">EXM     </span>0,1,11<span class="co">       *</span>
+     6 16 0 350  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     VECTOR_CROSS_PRODUCT_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive</span>
+
+<hr>
+<span class="mo">    # PAGE 1075, SEQUENCE VC000000</span>
+
+                                   MATRIX TRANSPOSE UTILITY (MT)               A0850                            PAGE 1075
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  VC   REF           VECTOR CROSS PRODUCT UTILITY (VC)
+
+<hr>
+<span class="mo">    # PAGE 1076, SEQUENCE VC000020-VC000240</span>
+
+                                   VECTOR CROSS PRODUCT (VC)                   A0860                            PAGE 1076
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      VECTOR CROSS PRODUCT UTILITY (VC)                             *</span><span class="fl">J</span><a href="AS-512-flowcharts/VECTOR_CROSS_PRODUCT_UTILITY_(VC).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              5 - 18 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE VECTOR CROSS PRODUCT UTILITY</span>
+                                                   <span class="co">*                   MODULE IS TO PEFORM A VECTOR CROSS OF SPECIFIED</span>
+                                                   <span class="co">*                   VECTORS.</span>
+                                                   <span class="co">* ENTRIES           U.VC00 - UPON ENTRY, AC TO CONTAIN A DFW OF THE</span>
+                                                   <span class="co">*                            FORM CLA,A,MPY,B.  WHERE A AND B ARE</span>
+                                                   <span class="co">*                            THE INITIAL LOCATIONS OF THE VECTORS.</span>
+                                                   <span class="co">*                            UPON EXIT,</span>
+                                                   <span class="co">*                            D.VUTB+1 =  A(2)*B(3) - A(3)*B(2)</span>
+                                                   <span class="co">*                            D.VUTB+2 =  A(3)*B(1) - A(1)*B(3)</span>
+                                                   <span class="co">*                            D.VUTB+3 =  A(1)*B(2) - A(2)*B(1)</span>
+
+<hr>
+<span class="mo">    # PAGE 1077, SEQUENCE VC000260-VC000740</span>
+
+                                   VECTOR CROSS PRODUCT (VC)                   A0860                            PAGE 1077
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+                                                   <span class="co">*                           U.VC00                                    </span><span class="fl">S</span>
+     6 16 0 351  2 10    377  1  13                <a id="a3345"></a><span class="sm">U.VC00 </span><span class="op">STO     </span>777<span class="co">          SAVE RETURN LINKAGE AND INPUT ARGUMENTS   </span><span class="fl">B</span>
+     6 16 0 352  2 10    200  1  13                       <span class="op">STO     </span><a href="#a192"><span class="va">D.VUEM</span></a>
+     6 16 0 353  2 10    221  1  16                       <span class="op">EXM     </span>0,1,1<span class="co">        CLA A2</span>
+     6 16 0 354  2 10    202  1  16                       <span class="op">EXM     </span>0,0,2<span class="co">        MPY A3</span>
+     6 16 0 355  2 10    222  1  16                       <span class="op">EXM     </span>0,1,2<span class="co">        CLA A3</span>
+     6 16 0 356  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 357  2 10    375  1  17                       <span class="op">CLA     </span>775
+     6 16 0 360  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     A2*B3</span>
+     6 16 0 361  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 362  2 10    201  1  16                       <span class="op">EXM     </span>0,0,1<span class="co">        MPY B2</span>
+     6 16 0 363  2 10    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        CLA A1</span>
+     6 16 0 364  2 10    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 0 365  2 10    375  1  02                       <span class="op">SUB     </span>775<span class="co">          COMPUTE I ELEMENT OF VECTOR EQ.13.9.1     </span><span class="fl">B</span>
+     6 16 0 366  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     A2*B3-A3*B2</span>
+     6 16 0 367  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 370  2 10    200  1  16                       <span class="op">EXM     </span>0,0,0<span class="co">        MPY B1</span>
+     6 16 0 371  2 10    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        CLA A1</span>
+     6 16 0 372  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 373  2 10    375  1  17                       <span class="op">CLA     </span>775
+     6 16 0 374  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">     A3*B1</span>
+     6 16 0 375  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 0 376  2 10    202  1  16                       <span class="op">EXM     </span>0,0,2<span class="co">        MPY B3</span>
+     6 16 0 377  2 10    011  1  10            *   
+     6 16 1 011  2 10    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        CLA A1</span>
+     6 16 1 012  2 10    031  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 16 1 013  2 10    375  1  02                       <span class="op">SUB     </span>775<span class="co">          COMPUTE J ELEMENT OF VECTOR EQ.13.9.1     </span><span class="fl">B</span>
+     6 16 1 014  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">     A3*B1-A1*B3</span>
+     6 16 1 015  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 016  2 10    201  1  16                       <span class="op">EXM     </span>0,0,1<span class="co">        MPY B2</span>
+     6 16 1 017  2 10    221  1  16                       <span class="op">EXM     </span>0,1,1<span class="co">        CLA A2</span>
+     6 16 1 020  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 021  2 10    375  1  17                       <span class="op">CLA     </span>775
+     6 16 1 022  2 10    032  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3<span class="co">     A1*B2</span>
+     6 16 1 023  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 024  2 10    200  1  16                       <span class="op">EXM     </span>0,0,0<span class="co">        MPY B1</span>
+     6 16 1 025  2 10    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        CLA A1</span>
+     6 16 1 026  2 10    032  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 16 1 027  2 10    375  1  02                       <span class="op">SUB     </span>775<span class="co">          COMPUTE K ELEMENT OF VECTOR EQ.13.9.1     </span><span class="fl">B</span>
+     6 16 1 030  2 10    032  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3<span class="co">     A1*B2-A2*B1</span>
+     6 16 1 031  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     NATURAL_LOG_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+<span class="mo">    #               2023-07-17 RSB  Added a couple of FLOW directives.</span>
+
+<hr>
+<span class="mo">    # PAGE 1078, SEQUENCE LN000000</span>
+
+                                   VECTOR CROSS PRODUCT (VC)                   A0860                            PAGE 1078
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  LN   REF           NATURAL LOG UTILITY (LN)
+
+<hr>
+<span class="mo">    # PAGE 1079, SEQUENCE LN000020-LN000490</span>
+
+                                   NATURAL LOG UTILITY (LN)                    A0870                            PAGE 1079
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      NATURAL LOG UTILITY (LN)                                      *</span><span class="fl">J</span><a href="AS-512-flowcharts/NATURAL_LOG_UTILITY_(LN).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              5 - 17 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE NATURAL LOG UTILITY MODULE IS</span>
+                                                   <span class="co">*                   TO COMPUTE THE NATURAL LOGARITHM OF THE INPUT</span>
+                                                   <span class="co">*                   ARGUMENT.</span>
+                                                   <span class="co">* ENTRIES           U.LN00 - TWO ARGUMENTS SUPPLIED UPON ENTRY. ARG1</span>
+                                                   <span class="co">*                            IN AC AND ARG2 IN PQ.  THESE TWO</span>
+                                                   <span class="co">*                            ARGUMENTS MUST HAVE SAME SCALING. ON</span>
+                                                   <span class="co">*                            EXIT LN(ARG1/ARG2) IN AC SCALED B1.</span>
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+                                                   <span class="co">*                           U.LN00                                    </span><span class="fl">S</span>
+     6 16 1 032  2 10    377  1  13                <a id="a3346"></a><span class="sm">U.LN00 </span><span class="op">STO     </span>777<span class="co">          SAVE RETURN LINKAGE AND INPUT ARGUMENTS   </span><span class="fl">B</span>
+     6 16 1 033  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 034  2 10    375  1  17                       <span class="op">CLA     </span>775
+     6 16 1 035  2 10    032  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 16 1 036  2 10    030  1  15                       <span class="op">RSU     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     (LN100)ARE ARGUMENTS EQUAL                </span><span class="fl">N</span>
+     6 16 1 037  2 10    046  1  14                       <span class="op">TMI     </span><a href="#a3348"><span class="sm">LN200</span></a><span class="co">        ARG1 &lt; ARG2</span>
+     6 16 1 040  2 10    042  1  04                       <span class="op">TNZ     </span><a href="#a3347"><span class="sm">LN100</span></a><span class="co">        ARG1 &gt; ARG2</span>
+                                                   <span class="co">*                           SET NATURAL LOG OF NUMBER TO=ZERO         </span><span class="fl">B</span>
+     6 16 1 041  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+     6 16 1 042  2 10    032  1  17                <a id="a3347"></a><span class="sm">LN100  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3<span class="co">     PERFORM ARGUMENT DIVIDE                   </span><span class="fl">B</span>
+     6 16 1 043  2 10    030  1  03                       <span class="op">DIV     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     USE ARG2/ARG1 AS ARGUMENT</span>
+                                                          <span class="op">CLA     </span>=(-<a href="#a4056"><span class="cn">P.LN2</span></a>)B2
+     6 16 1 044  2 10    145  0  17    723506750 +        <span class="op">CLA     </span>=-0.693147181B2
+     6 16 1 045  2 10    052  1  10                       <span class="op">TRA     </span><a href="#a3349"><span class="sm">LN300</span></a>
+     6 16 1 046  2 10    030  1  17                <a id="a3348"></a><span class="sm">LN200  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 047  2 10    032  1  03                       <span class="op">DIV     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3<span class="co">     USE ARG1/ARG2 AS ARGUMENT</span>
+     6 16 1 050  2 10    070  1  17                       <span class="op">CLA     </span><a href="#a348"><span class="va">D.KZRO</span></a>
+     6 16 1 051  2 10    052  1  10                       <span class="op">TRA     </span><a href="#a3349"><span class="sm">LN300</span></a><span class="co">        DUMMY INSTURCTION (NECESSARY FOR DIVIDE)</span>
+     6 16 1 052  2 10    033  1  13                <a id="a3349"></a><span class="sm">LN300  </span><span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 053  2 10    260  1  16                       <span class="op">EXM     </span>1,1,0<span class="co">        DELAY 2 INSTRUCTIONS</span>
+
+<hr>
+<span class="mo">    # PAGE 1080, SEQUENCE LN000500-LN000930</span>
+
+                                   NATURAL LOG UTILITY (LN)                    A0870                            PAGE 1080
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                          <span class="op">CLA     </span>=(-2*<a href="#a4056"><span class="cn">P.LN2</span></a>)B2
+     6 16 1 054  2 10    146  0  17    647215720 +        <span class="op">CLA     </span>=-1.386294362B2
+     6 16 1 055  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 16 1 056  2 10    375  1  17                       <span class="op">CLA     </span>775
+     6 16 1 057          001  1  16                       <span class="op">SHR     </span>1<span class="co">            RESCALE</span>
+     6 16 1 060  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+                                                          <span class="op">SUB     </span>=(1/4)B1
+     6 16 1 061  2 10    221  1  02    040000000 +        <span class="op">SUB     </span>=0.25B1
+     6 16 1 062  2 10    073  1  14                       <span class="op">TMI     </span><a href="#a3350"><span class="sm">LN400</span></a>
+                                                          <span class="op">SUB     </span>=(1/4)B1
+     6 16 1 063  2 10    221  1  02    040000000 +        <span class="op">SUB     </span>=0.25B1
+     6 16 1 064  2 10    101  1  14                       <span class="op">TMI     </span><a href="#a3351"><span class="sm">LN500</span></a>
+     6 16 1 065  2 10    031  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+                                                          <span class="op">SUB     </span>=(-<a href="#a4056"><span class="cn">P.LN2</span></a>)B2
+     6 16 1 066  2 10    145  0  02    723506750 +        <span class="op">SUB     </span>=-0.693147181B2
+     6 16 1 067  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 16 1 070  2 10    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 071          020  1  16                       <span class="op">SHL     </span>1<span class="co">            RESCALE</span>
+     6 16 1 072  2 10    103  1  10                       <span class="op">TRA     </span><a href="#a3353"><span class="sm">LN700</span></a>
+     6 16 1 073  2 10    031  1  17                <a id="a3350"></a><span class="sm">LN400  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+                                                          <span class="op">ADD     </span>=(-<a href="#a4056"><span class="cn">P.LN2</span></a>)B2
+     6 16 1 074  2 10    145  0  07    723506750 +        <span class="op">ADD     </span>=-0.693147181B2
+     6 16 1 075  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 16 1 076  2 10    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 077          020  1  16                       <span class="op">SHL     </span>1
+     6 16 1 100  2 10    102  1  10                       <span class="op">TRA     </span><a href="#a3352"><span class="sm">LN600</span></a>
+     6 16 1 101  2 10    030  1  17                <a id="a3351"></a><span class="sm">LN500  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 102          040  1  16                <a id="a3352"></a><span class="sm">LN600  </span><span class="op">SHL     </span>2
+     6 16 1 103  2 10    217  1  02    200000000   <a id="a3353"></a><span class="sm">LN700  </span><span class="op">SUB     </span>=1B1
+     6 16 1 104          020  1  16                       <span class="op">SHL     </span>1
+     6 16 1 105  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+                                                          <span class="op">MPH     </span>=(<a href="#a4055"><span class="cn">P.LNC6</span></a>)B2<span class="co">  USE NATURAL LOG APPROX. POLY. EQ.13.4.1   </span><span class="fl">B</span>
+     6 16 1 106  2 10    147  0  05    776647056 +        <span class="op">MPH     </span>=-0.01833831B2<span class="co">  USE NATURAL LOG APPROX. POLY. EQ.13.4.1 </span>
+                                                          <span class="op">ADD     </span>=(<a href="#a4054"><span class="cn">P.LNC5</span></a>)B2<span class="co">        *                              *</span>
+     6 16 1 107  2 10    150  0  07    005363736 +        <span class="op">ADD     </span>=0.08556927B2<span class="co">        *                              *</span>
+     6 16 1 110  2 10    030  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">         *                                *</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a4053"><span class="cn">P.LNC4</span></a>)B2<span class="co">      *                                  *</span>
+     6 16 1 111  2 10    151  0  07    763462646 +        <span class="op">ADD     </span>=-0.19376149B2<span class="co">      *                                  </span><span class="fl">*</span>
+     6 16 1 112  2 10    030  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">       *                                    *</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a4052"><span class="cn">P.LNC3</span></a>)B2<span class="co">    *    LN(X) = (X-1)*(C1 + (X-1)*(C2 +   *</span>
+     6 16 1 113  2 10    152  0  07    024250604 +        <span class="op">ADD     </span>=0.31765005B2<span class="co">    *    LN(X) = (X-1)*(C1 + (X-1)*(C2 +   </span>
+     6 16 1 114  2 10    030  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     *             (X-1)*(C3 + (X-1)*(C4 +    *</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a4051"><span class="cn">P.LNC2</span></a>)B2<span class="co">   *             (X-1)*(C5 + (X-1)*(C6)))))</span>
+     6 16 1 115  2 10    153  0  07    740105474 +        <span class="op">ADD     </span>=-0.49787544B2<span class="co">   *             (X-1)*(C5 + (X-1)*(C6)))</span><span class="fl">)</span>
+     6 16 1 116  2 10    030  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">      *                                      *</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a4050"><span class="cn">P.LNC1</span></a>)B2<span class="co">     *                                    *</span>
+     6 16 1 117  2 10    154  0  07    077774616 +        <span class="op">ADD     </span>=0.99990167B2<span class="co">     *                                    </span><span class="fl">*</span>
+     6 16 1 120  2 10    030  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">        *                                  *</span>
+     6 16 1 121  2 10    031  1  07                       <span class="op">ADD     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">         *                                *</span>
+     6 16 1 122          020  1  16                       <span class="op">SHL     </span>1
+     6 16 1 123  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">          *                              *</span>
+     6 16 1 124  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 125  2 10    130  1  04                       <span class="op">TNZ     </span><a href="#a3354"><span class="sm">LN800</span></a>
+     6 16 1 126  2 10    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     NATURAL LOG FOR NUMBER BETWEEN  .5 AND 16</span>
+     6 16 1 127  2 10    377  1  00                       <span class="op">HOP     </span>777
+
+<hr>
+<span class="mo">    # PAGE 1081, SEQUENCE LN000940-LN000980</span>
+
+                                   NATURAL LOG UTILITY (LN)                    A0870                            PAGE 1081
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+     6 16 1 130  2 10    070  1  17                <a id="a3354"></a><span class="sm">LN800  </span><span class="op">CLA     </span><a href="#a348"><span class="va">D.KZRO</span></a><span class="co">       LN(X * 2**() =  N * LN(2) + LN(X)</span>
+     6 16 1 131  2 10    030  1  02                       <span class="op">SUB     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 132  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # PAGE 1082, NO SOURCE CODE</span>
+
+                                   NATURAL LOG UTILITY (LN)                    A0870                            PAGE 1082
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     SQUARE_ROOT_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-05-23 RSB  Fixed some problems discovered by assembling.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+<span class="mo">    #               2023-07-19 RSB  Added various FLOW directives in the course of</span>
+<span class="mo">    #                               creating a tutorial page about the topic.</span>
+
+<hr>
+<span class="mo">    # PAGE 1083, SEQUENCE SR000000</span>
+
+                                   NATURAL LOG UTILITY (LN)                    A0870                            PAGE 1083
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  SR   REF           SQUARE ROOT UTILITY (SR)
+
+<hr>
+<span class="mo">    # PAGE 1084, SEQUENCE SR000020-SR000220</span>
+
+                                   SQUARE ROOT UTILITY ROUTINE (SR)            A0880                            PAGE 1084
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      SQUARE ROOT UTILITY (SR)                                      *</span><span class="fl">J</span><a href="AS-512-flowcharts/SQUARE_ROOT_UTILITY_(SR).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              4 - 23 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE SQUARE ROOT ROUTINE</span>
+                                                   <span class="co">*                   IS TO COMPUTE THE SQUARE ROOT OF AN INPUT</span>
+                                                   <span class="co">*                   ARGUMENT.</span>
+                                                   <span class="co">* ENTRIES           U.SR00   ARGUMENT IS TO BE IN AC AND PREVIOUS</span>
+                                                   <span class="co">*                            SQUARE ROOT OF ARGUMENT IS TO BE IN</span>
+                                                   <span class="co">*                            D.VUTB. SQUARE ROOT OF ARGUMENT IN AC</span>
+                                                   <span class="co">*                            ON EXIT AND RESULT OF ALGORITHM DIVIDE</span>
+                                                   <span class="co">*                            IS IN PQ.</span>
+
+<hr>
+<span class="mo">    # PAGE 1085, SEQUENCE SR000240-SR000620</span>
+
+                                   SQUARE ROOT UTILITY ROUTINE (SR)            A0880                            PAGE 1085
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+                                                   <span class="co">*                           U.SR00                                    </span><span class="fl">S</span>
+     6 16 1 133  2 10    377  1  13                <a id="a3355"></a><span class="sm">U.SR00 </span><span class="op">STO     </span>777<span class="co">          SAVE RETURN LINKAGE                       </span><span class="fl">B</span>
+     6 16 1 134  2 10    165  1  14                       <span class="op">TMI     </span><a href="#a3357"><span class="sm">SR10</span></a><span class="co">         NEGATIVE ARGUMENT                         </span><span class="fl">Y</span>
+     6 16 1 135          001  1  16                       <span class="op">SHR     </span>1<span class="co">            DIVIDE BY 2</span>
+     6 16 1 136  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 137  2 10    027  1  02                       <span class="op">SUB     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 1 140  2 10    142  1  14                       <span class="op">TMI     </span>*+2
+     6 16 1 141  2 10    165  1  10                       <span class="op">TRA     </span><a href="#a3357"><span class="sm">SR10</span></a><span class="co">         IS 1/2 ARGUMENT LESS THAN FIRST GUESS     </span><span class="fl">N</span>
+     6 16 1 142  2 10    250  1  17    000000004          <span class="op">CLA     </span>=2
+     6 16 1 143  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 16 1 144  2 10    030  1  17                <a id="a3356"></a><span class="sm">SR05   </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 145  2 10    027  1  03                       <span class="op">DIV     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 1 146  2 10    250  1  17                       <span class="op">CLA     </span><a href="#a464"><span class="va">D.KB24</span></a><span class="co">       DELAY FOR DIVIDE</span>
+                                                          <span class="ps">BLOCK   </span>2
+     6 16 1 147  2 10    276  1  02                       <span class="op">SUB     </span><a href="#a186"><span class="va">D.KB25</span></a>
+     6 16 1 150  2 10    147  1  04                       <span class="op">TNZ     </span>*-1
+     6 16 1 151  2 10    027  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 1 152          001  1  16                       <span class="op">SHR     </span>1<span class="co">            PERFORM SQUARE ROOT ALGORITHM EQ.13.6.1   </span><span class="fl">B</span>
+     6 16 1 153  2 10    375  1  07                       <span class="op">ADD     </span>775<span class="co">          ARG(L-1)/2 + ARG(L)/2* ARG(-1)</span>
+     6 16 1 154  2 10    165  1  14                       <span class="op">TMI     </span><a href="#a3357"><span class="sm">SR10</span></a><span class="co">         ALGORITHM RESULT NEGATIVE                 </span><span class="fl">Y</span>
+     6 16 1 155  2 10    027  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 1 156  2 10    031  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 16 1 157  2 10    276  1  02    000000002          <span class="op">SUB     </span>=1
+     6 16 1 160  2 10    163  1  14                       <span class="op">TMI     </span>*+3
+     6 16 1 161  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 16 1 162  2 10    144  1  10                       <span class="op">TRA     </span><a href="#a3356"><span class="sm">SR05</span></a>
+     6 16 1 163  2 10    027  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 1 164  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+     6 16 1 165  2 10    255  1  17    377777770   <a id="a3357"></a><span class="sm">SR10   </span><span class="op">CLA     </span>=O377777770<span class="co">  OVERFLOW PROTECTION, SET TO LARGE NUMBER  </span><span class="fl">B</span>
+     6 16 1 166  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # PAGE 1086, NO SOURCE CODE</span>
+
+                                   SQUARE ROOT UTILITY ROUTINE (SR)            A0880                            PAGE 1086
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     VECTOR_DOT_PRODUCT.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-04-18 RSB  Transcribed.  1st page with nano, 2nd page</span>
+<span class="mo">    #                               with LibreOffice.  LibreOffice Writer was a lot</span>
+<span class="mo">    #                               easier.</span>
+<span class="mo">    #               2023-04-27 RSB  P. 1087 added due to guideline changes.</span>
+<span class="mo">    #                               Number of p. 1088 corrected.</span>
+<span class="mo">    #               2023-04-28 RSB  Corrected title of p. 1087.</span>
+<span class="mo">    #               2023-06-19 RSB  Fixed typo discovered in assembly.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+
+<hr>
+<span class="mo">    # PAGE 1087, SEQUENCE VD000000</span>
+
+                                   SQUARE ROOT UTILITY ROUTINE (SR)            A0880                            PAGE 1087
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  VD   REF           VECTOR DOT PRODUCT (VD)
+
+<hr>
+<span class="mo">    # PAGE 1088, SEQUENCE VD000020-VD000210</span>
+
+                                   VECTOR DOT PRODUCT (VD)                     A0890                            PAGE 1088
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      VECTOR DOT PRODUCT UTILITY (VD)                               *</span><span class="fl">J</span><a href="AS-512-flowcharts/VECTOR_DOT_PRODUCT_UTILITY_(VD).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              4 - 23 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE VECTOR DOT PRODUCT MODULE IS</span>
+                                                   <span class="co">*                   TO COMPUTE THE DOT PRODUCT OF THE TWO SPECIFIED</span>
+                                                   <span class="co">*                   VECTORS.</span>
+                                                   <span class="co">* ENTRIES           U.VD00 - UPON ENTRY DATA WORD GENERATED BY DFW IS</span>
+                                                   <span class="co">*                            TO BE IN AC.  CONTAINS CLA P, MPY Q.</span>
+                                                   <span class="co">*                            P AND Q ARE LOCATIONS OF FIRST COMPONENT</span>
+                                                   <span class="co">*                            OF RESPECTIVE VECTORS.</span>
+
+<hr>
+<span class="mo">    # PAGE 1089, SEQUENCE VD000230-VD000570</span>
+
+                                   VECTOR DOT PRODUCT (VD)                     A0890                            PAGE 1089
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+                                                   <span class="co">*U.VD00                     U.VD00                                    </span><span class="fl">S</span>
+     6 16 1 167  2 10    377  1  13                <a id="a3358"></a><span class="sm">U.VD00 </span><span class="op">STO     </span>777<span class="co">          SAVE RETURN LINKAGE                       </span><span class="fl">B</span>
+                                                   <span class="co">*                           (VD10)                                    </span><span class="fl">G</span>
+                                                   <span class="co">*U.VD01                     U.VD01                                    </span><span class="fl">S</span>
+                                                   <span class="co">*VD10                       SAVE INPUT ARGUMENTS                      </span><span class="fl">B</span>
+     6 16 1 170  2 10    200  1  13                <a id="a3359"></a><span class="sm">U.VD01 </span><span class="op">STO     </span><a href="#a192"><span class="va">D.VUEM</span></a>
+     6 16 1 171  2 10    220  1  16                       <span class="op">EXM     </span>0,1,0<span class="co">        CLA P(1)</span>
+     6 16 1 172  2 10    200  1  16                       <span class="op">EXM     </span>0,0,0<span class="co">        MPY Q(1)</span>
+     6 16 1 173  2 10    221  1  16                       <span class="op">EXM     </span>0,1,1<span class="co">        CLA P(2)</span>
+     6 16 1 174  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 175  2 10    375  1  17                       <span class="op">CLA     </span>775<span class="co">          FIRST PRODUCT</span>
+     6 16 1 176  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 16 1 177  2 10    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 200  2 10    201  1  16                       <span class="op">EXM     </span>0,0,1<span class="co">        MPY Q(2)</span>
+     6 16 1 201  2 10    222  1  16                       <span class="op">EXM     </span>0,1,2<span class="co">        CLA P(3)</span>
+     6 16 1 202  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 203  2 10    375  1  17                       <span class="op">CLA     </span>775<span class="co">          SECOND PRODUCT</span>
+     6 16 1 204  2 10    032  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 16 1 205  2 10    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 16 1 206  2 10    202  1  16                       <span class="op">EXM     </span>0,0,2<span class="co">        MPY Q(3)</span>
+     6 16 1 207  2 10    027  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>
+     6 16 1 210  2 10    200  1  13                       <span class="op">STO     </span><a href="#a192"><span class="va">D.VUEM</span></a><span class="co">       SET EXM LOCATION FOR MM</span>
+     6 16 1 211  2 10    031  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">     FORM DOT PRODUCT EQ.13.8.1                </span><span class="fl">B</span>
+     6 16 1 212  2 10    032  1  07                       <span class="op">ADD     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 16 1 213  2 10    375  1  07                       <span class="op">ADD     </span>775<span class="co">          THIRD PRODUCT</span>
+     6 16 1 214  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     ARCTANGENT_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+
+<hr>
+<span class="mo">    # PAGE 1090, SEQUENCE AT000000</span>
+
+                                   VECTOR DOT PRODUCT (VD)                     A0890                            PAGE 1090
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  AT   REF           ARCTANGENT UTILITY (AT)
+
+<hr>
+<span class="mo">    # PAGE 1091, SEQUENCE AT000020-AT000270</span>
+
+                                   ARCTANGENT UTILITY (AT)                     A0900                            PAGE 1091
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      ARCTANGENT UTILITY (AT)                                       *</span><span class="fl">J</span><a href="AS-512-flowcharts/ARCTANGENT_UTILITY_(AT).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              5 - 17 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE ARCTANGENT UTILITY MODULE IS</span>
+                                                   <span class="co">*                   TO COMPUTE THE ARCTANGENT OF THE QUOTIENT OF TWO</span>
+                                                   <span class="co">*                   SPECIFIED NUMBERS BY MEANS OF AN ALGORITHM WHICH</span>
+                                                   <span class="co">*                   UTILIZES A POLYNOMIAL APPROXIMATION TO THE</span>
+                                                   <span class="co">*                   ARCTANGENT FUNCTION.</span>
+                                                   <span class="co">* ENTRIES           U.AT00 - ENTERED FROM ANY MODULE.</span>
+                                                   <span class="co">*                            ON ENTRY THE ACCUMULATOR MUST CONTAIN</span>
+                                                   <span class="co">*                           THE SINE OF THE DESIRED ANGLE (ARG1) AND</span>
+                                                   <span class="co">*                           THE PQ REGISTER MUST CONTAIN THE COSINE</span>
+                                                   <span class="co">*                           OF THE DESIRED ANGLE (ARG2).</span>
+                                                   <span class="co">*                           UPON EXIT THE DESIRED ANGLE, ARCTAN</span>
+                                                   <span class="co">*                           (ARG1/ARG2), WILL BE IN THE ACCUMULATOR</span>
+                                                   <span class="co">*                           IN PIRADS SCALED B0.</span>
+
+<hr>
+<span class="mo">    # PAGE 1092, SEQUENCE AT000290-AT000790</span>
+
+                                   ARCTANGENT UTILITY (AT)                     A0900                            PAGE 1092
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+                                                   <span class="co">*                           U.AT00                                    </span><span class="fl">S</span>
+     6 16 1 215  2 10    377  1  13                <a id="a3360"></a><span class="sm">U.AT00 </span><span class="op">STO     </span>777<span class="co">          SAVE RETURN LINKAGE AND INPUT ARGUMENTS   </span><span class="fl">B</span>
+     6 16 1 216          001  1  16                       <span class="op">SHR     </span>1
+     6 16 1 217  2 10    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     SIN (ARG1)</span>
+                                                          <span class="ps">BLOCK   </span>4
+     6 16 1 220  2 10    222  1  14                       <span class="op">TMI     </span>*+2
+     6 16 1 221  2 10    223  1  10                       <span class="op">TRA     </span>*+2
+     6 16 1 222  2 10    070  1  15                       <span class="op">RSU     </span><a href="#a348"><span class="va">D.KZRO</span></a>
+     6 16 1 223  2 10    032  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3<span class="co">     ABS SIN (ARG1)</span>
+     6 16 1 224  2 10    375  1  17                       <span class="op">CLA     </span>775
+     6 16 1 225          001  1  16                       <span class="op">SHR     </span>1
+     6 16 1 226  2 10    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">     COS (ARG2)</span>
+                                                          <span class="ps">BLOCK   </span>4
+     6 16 1 227  2 10    231  1  14                       <span class="op">TMI     </span>*+2
+     6 16 1 230  2 10    232  1  10                       <span class="op">TRA     </span>*+2
+     6 16 1 231  2 10    070  1  15                       <span class="op">RSU     </span><a href="#a348"><span class="va">D.KZRO</span></a>
+     6 16 1 232  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     ABS COS (ARG2)</span>
+     6 16 1 233  2 10    032  1  07                       <span class="op">ADD     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 16 1 234  2 10    034  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+     6 16 1 235  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 236  2 10    032  1  02                       <span class="op">SUB     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 16 1 237          001  1  16                       <span class="op">SHR     </span>1
+     6 16 1 240  2 10    034  1  03                       <span class="op">DIV     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+     6 16 1 241  2 10    250  1  17                       <span class="op">CLA     </span><a href="#a464"><span class="va">D.KB24</span></a>
+                                                          <span class="ps">BLOCK   </span>3
+     6 16 1 242  2 10    276  1  02                       <span class="op">SUB     </span><a href="#a186"><span class="va">D.KB25</span></a>
+     6 16 1 243  2 10    244  1  10                       <span class="op">TRA     </span>*+1
+     6 16 1 244  2 10    242  1  04                       <span class="op">TNZ     </span>*-2
+     6 16 1 245  2 10    375  1  17                       <span class="op">CLA     </span>775
+                                                   <span class="co">*</span>
+                                                   <span class="co">*  V =  (ABS (ARG2) - ABS (ARG1)) / (ABS (ARG2) + ABS (ARG1))</span>
+                                                   <span class="co">*</span>
+     6 16 1 246  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     SAVE V</span>
+     6 16 1 247  2 10    033  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 250          020  1  16                       <span class="op">SHL     </span>1<span class="co">            RESCALE</span>
+     6 16 1 251  2 10    034  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+                                                   <span class="co">*                           PERFORM ARCTANGENT ALGORITHM EQ.13.3.1    </span><span class="fl">B</span>
+                                                          <span class="op">MPH     </span>=(<a href="#a3772"><span class="cn">P.AT11</span></a>)B-6<span class="co"> T= V**2 * C11</span>
+     6 16 1 252  2 10    155  0  05    702676246 +        <span class="op">MPH     </span>=-0.0037309738B-6<span class="co"> T= V**2 * C11</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a3771"><span class="cn">P.AT9</span></a>)B-5<span class="co">  T=T+C9</span>
+     6 16 1 253  2 10    156  0  07    211230654 +        <span class="op">ADD     </span>=0.016760072B-5<span class="co">  T=T+C9</span>
+     6 16 1 254  2 10    034  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     T = T * V**2</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a3770"><span class="cn">P.AT7</span></a>)B-4<span class="co">  T=T+C7</span>
+     6 16 1 255  2 10    157  0  07    550143722 +        <span class="op">ADD     </span>=-0.037061734B-4<span class="co">  T=T+C7</span>
+     6 16 1 256  2 10    034  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     T = T * V**2</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a3769"><span class="cn">P.AT5</span></a>)B-3<span class="co">  T=T+C5</span>
+     6 16 1 257  2 10    160  0  07    176127322 +        <span class="op">ADD     </span>=0.0616068B-3<span class="co">  T=T+C5</span>
+     6 16 1 260  2 10    034  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     T = T * V**2</span>
+
+<hr>
+<span class="mo">    # PAGE 1093, SEQUENCE AT000800-AT001040</span>
+
+                                   ARCTANGENT UTILITY (AT)                     A0900                            PAGE 1093
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                          <span class="op">ADD     </span>=(<a href="#a3768"><span class="cn">P.AT3</span></a>)B-2<span class="co">  T=T+C3</span>
+     6 16 1 261  2 10    161  0  07    623451620 +        <span class="op">ADD     </span>=-0.10587734B-2<span class="co">  T=T+C3</span>
+     6 16 1 262  2 10    034  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     T = T * V**2</span>
+                                                          <span class="op">ADD     </span>=(<a href="#a3767"><span class="cn">P.AT1</span></a>)B-1<span class="co">  T=T+C1</span>
+     6 16 1 263  2 10    162  0  07    242761102 +        <span class="op">ADD     </span>=0.31830264B-1<span class="co">  T=T+C1</span>
+     6 16 1 264  2 10    033  1  05                       <span class="op">MPH     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     T = T * V</span>
+     6 16 1 265  2 10    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+                                                   <span class="co">*</span>
+                                                   <span class="co">* T =  V*(C1 + V**2*(C3 + V**2*(C5 + V**2*(C7 + V**2*(C9+V**2*C11)))))</span>
+                                                   <span class="co">*</span>
+     6 16 1 266  2 10    031  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2<span class="co">     COS (ARG2)</span>
+     6 16 1 267  2 10    273  1  14                       <span class="op">TMI     </span><a href="#a3361"><span class="sm">AT100</span></a><span class="co">        NEG = II , III QUADRANT</span>
+                                                          <span class="op">CLA     </span>=(<a href="#a3666"><span class="cn">P.P45</span></a>)B0
+     6 16 1 270  2 10    220  1  17    100000000 +        <span class="op">CLA     </span>=0.25B0
+     6 16 1 271  2 10    033  1  02                       <span class="op">SUB     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     45 DEG - ARCTAN (ARG1/ARG2)</span>
+     6 16 1 272  2 10    275  1  10                       <span class="op">TRA     </span><a href="#a3362"><span class="sm">AT200</span></a>
+                                                   <a id="a3361"></a><span class="sm">AT100  </span><span class="op">CLA     </span>=(<a href="#a3663"><span class="cn">P.P135</span></a>)B0<span class="co">   135 DEG - ARCTAN (ARG1/ARG2)</span>
+     6 16 1 273  2 10    163  0  17    300000000 + <a id="a3361"></a><span class="sm">AT100  </span><span class="op">CLA     </span>=0.75B0<span class="co">   135 DEG - ARCTAN (ARG1/ARG2)</span>
+     6 16 1 274  2 10    033  1  07                       <span class="op">ADD     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 275  2 10    033  1  13                <a id="a3362"></a><span class="sm">AT200  </span><span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 276  2 10    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     SIN (ARG1)</span>
+     6 16 1 277  2 10    302  1  14                       <span class="op">TMI     </span><a href="#a3363"><span class="sm">AT300</span></a><span class="co">        NEG = III , IV QUADRANT</span>
+     6 16 1 300  2 10    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 301  2 10    377  1  00                       <span class="op">HOP     </span>777
+     6 16 1 302  2 10    070  1  17                <a id="a3363"></a><span class="sm">AT300  </span><span class="op">CLA     </span><a href="#a348"><span class="va">D.KZRO</span></a><span class="co">       0 DEG - ARCTAN (ARG1/ARG2)</span>
+     6 16 1 303  2 10    033  1  02                       <span class="op">SUB     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 16 1 304  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # PAGE 1094, NO SOURCE CODE</span>
+
+                                   ARCTANGENT UTILITY (AT)                     A0900                            PAGE 1094
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     FIXED_POINT_DIVIDE_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+
+<hr>
+<span class="mo">    # PAGE 1095, SEQUENCE FD000000</span>
+
+                                   ARCTANGENT UTILITY (AT)                     A0900                            PAGE 1095
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  FD   REF           FIXED POINT DIVIDE UTILITY (FD)
+
+<hr>
+<span class="mo">    # PAGE 1096, SEQUENCE FD000020-FD000390</span>
+
+                                   FIXED-POINT DIVIDE UTILITY (FD)             A0910                            PAGE 1096
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      FIXED POINT DIVIDE UTILITY (FD)                               *</span><span class="fl">J</span><a href="AS-512-flowcharts/FIXED_POINT_DIVIDE_UTILITY_(FD).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE              4 - 23 - 68</span>
+                                                   <span class="co">* REVISIONS         NONE</span>
+                                                   <span class="co">* FUNCTION          THE FUNCTION OF THE FIXED POINT DIVIDE ROUTINE IS</span>
+                                                   <span class="co">*                   TO PERFORM A DIVIDE OPERATION WITH THE SPECIFIED</span>
+                                                   <span class="co">*                   INPUTS.</span>
+                                                   <span class="co">* ENTRIES           U.FD00 - NUMERATOR TO BE IN AC. AND DENOMINATOR</span>
+                                                   <span class="co">*                            IN D.VUTB.  QUOTIENT WILL BE IN PQ</span>
+                                                   <span class="co">*                            AND AC ON EXIT.</span>
+                                                   <span class="co">*              LIST                                                   </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V                                                 </span><span class="fl">$</span>
+                                                   <span class="co">*    SYMBOL    DRAW .                                                 </span><span class="fl">$</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a49"><span class="va">C.UT</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+                                                   <span class="co">*                           U.FD00                                    </span><span class="fl">S</span>
+     6 16 1 305  2 10    377  1  13                <a id="a3364"></a><span class="sm">U.FD00 </span><span class="op">STO     </span>777<span class="co">          SAVE RETURN LINKAGE                       </span><span class="fl">B</span>
+     6 16 1 306  2 10    027  1  03                       <span class="op">DIV     </span><a href="#a332"><span class="va">D.VUTB</span></a><span class="co">       PERFORM DIVIDE                            </span><span class="fl">B</span>
+     6 16 1 307  2 10    250  1  17                       <span class="op">CLA     </span><a href="#a464"><span class="va">D.KB24</span></a><span class="co">       DELAY FOR DIVIDE EXECUTION TIME           </span><span class="fl">B</span>
+                                                          <span class="ps">BLOCK   </span>3
+     6 16 1 310  2 10    276  1  02                       <span class="op">SUB     </span><a href="#a186"><span class="va">D.KB25</span></a>
+     6 16 1 311  2 10    312  1  10                       <span class="op">TRA     </span>*+1
+     6 16 1 312  2 10    310  1  04                       <span class="op">TNZ     </span>*-2
+     6 16 1 313  2 10    375  1  17                       <span class="op">CLA     </span>775<span class="co">          PLACE DIVIDE RESULT IN ACCUMULATOR        </span><span class="fl">B</span>
+     6 16 1 314  2 10    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<i>... Pages removed ...</i>
+
+<hr>
+<span class="mo">    # Copyright:    Public domain.</span>
+<span class="mo">    # Restrictions: This file is being treated as unrestricted by ITAR, since it</span>
+<span class="mo">    #               relates only to commonly-known mathematical methods non-specific</span>
+<span class="mo">    #               to the launch vehicle.</span>
+<span class="mo">    # Filename:     SCALE_DIVIDE_UTILITY.lvdc</span>
+<span class="mo">    # Purpose:      This is a portion of LVDC flight program AS-512, as</span>
+<span class="mo">    #               transcribed directly from the assembly listing.</span>
+<span class="mo">    #               The transcription does not include individual line</span>
+<span class="mo">    #               numbers, but does indicate the range of card sequence</span>
+<span class="mo">    #               numbers for each page of the listing.</span>
+<span class="mo">    # Assembler:    yaASM.py</span>
+<span class="mo">    # Contact:      Ron Burkey &lt;info@sandroid.org&gt;.</span>
+<span class="mo">    # Website:      www.ibiblio.org/apollo/LVDC.html</span>
+<span class="mo">    # Page images:  Inquire</span>
+<span class="mo">    # Mod history:  2023-04-01 RSB  Created.</span>
+<span class="mo">    #               2023-05-12 RSB  Transcribed but not proofed.</span>
+<span class="mo">    #               2023-06-21 RSB  Added TITLE directive.</span>
+<span class="mo">    #               2023-07-02 RSB  Typo correction.</span>
+<span class="mo">    #               2023-07-23 RSB  Added FLOW.</span>
+
+<hr>
+<span class="mo">    # PAGE 1117, SEQUENCE SD000000</span>
+
+                                   GRAVITATION ACCELERATION (GR)               A0940                            PAGE 1117
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   $SEGMENT  SD   REF           SCALE DIVIDE UTILITY (SD)
+
+<hr>
+<span class="mo">    # PAGE 1118, SEQUENCE SD000020-SD000520</span>
+
+                                   SCALED DIVIDE UTILITY (SD)                  A0950                            PAGE 1118
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*      SCALE DIVIDE UTILITY (SD)                                     *</span><span class="fl">J</span><a href="AS-512-flowcharts/SCALE_DIVIDE_UTILITY_(SD).dot.ps.png" target="_blank" rel="noopener noreferrer" style="float:right"><img src="flowchart.png"></a>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">*                                                                    *</span>
+                                                   <span class="co">**********************************************************************</span>
+                                                   <span class="co">* DATE         JUNE 1, 1968</span>
+                                                   <span class="co">* REVISIONS    NONE</span>
+                                                   <span class="co">* FUNCTION     THE FUNCTION OF THE SCALE DIVIDE UTILITY ROUTINE IS TO</span>
+                                                   <span class="co">*              COMPUTE AS ACCURATELY AS POSSIBLE A SCALED QUOTIENT OF</span>
+                                                   <span class="co">*              TWO SPECIFIED NUMBERS WHICH ARE NOT IDENTICALLY SCALED.</span>
+                                                   <span class="co">* ENTRY        U.SD00 - ENTER TO COMPUTE THE SCALED QUOTIENT OF TWO</span>
+                                                   <span class="co">*                       SPECIFIED NUMBERS. THE FOLLOWING MUST HAVE</span>
+                                                   <span class="co">*                       BEEN SETUP BEFORE ENTRY</span>
+                                                   <span class="co">*</span>
+                                                   <span class="co">*                       1. ACC      - NUMERATOR</span>
+                                                   <span class="co">*                       2. PQ       - DENOMINATOR</span>
+                                                   <span class="co">*                      3. D.VUTB+1 - SCALING OF NUMERATOR. THIS SCALE</span>
+                                                   <span class="co">*                                     FACTOR MUST BE SCALED B25</span>
+                                                   <span class="co">*                      4. D.VUTB+2 - SCALING OF DENOMINATOR. THIS</span>
+                                                   <span class="co">*                                     SCALE FACTOR MUST BE SCALED B25</span>
+                                                   <span class="co">*                      5. D.VUTB+3 - DESIRED SCALING OF QUOTIENT TO</span>
+                                                   <span class="co">*                                     BE RETURNED IN THE ACCUMULATOR.</span>
+                                                   <span class="co">*                                     THIS VALUE, ITSELF, MUST BE</span>
+                                                   <span class="co">*                                     SCALED B25.</span>
+                                                   <span class="co">*</span>
+                                                   <span class="co">*                     THE SCALED DIVIDE ROUTINE NOT ONLY EXECUTES THE</span>
+                                                   <span class="co">*                     DIVIDE AND THE APPROPRIATE DELAY, BUT HANDLES</span>
+                                                   <span class="co">*                     ALL SCALING PROBLEMS. THE ROUTINE FIRST SHIFTS</span>
+                                                   <span class="co">*                     BOTH THE DIVIDEND AND DIVISOR AS FAR LEFT AS</span>
+                                                   <span class="co">*                     POSSIBLE WITHOUT OVERFLOWING INTO THE SIGN BIT</span>
+                                                   <span class="co">*                     AND UPDATES THE SCALING ACCORDINGLY. THIS ALLOWS</span>
+                                                   <span class="co">*                     MAXIMUM ACCURACY IN THE DIVISION PROCESS. IF THE</span>
+                                                   <span class="co">*                     NUMERATOR IS LARGER THAN THE DENOMINATOR, THE</span>
+                                                   <span class="co">*                     NUMERATOR IS SHIFTED BACK TO THE RIGHT SO THAT</span>
+                                                   <span class="co">*                     THE REGISTER CAN CONTAIN THE COMPLETE QUOTIENT.</span>
+                                                   <span class="co">*                     SCALING IS AGAIN UPDATED.  IN ORDER TO PLACE THE</span>
+                                                   <span class="co">*                     QUOTIENT IN THE DESIRED SCALING, THE ROUTINE</span>
+                                                   <span class="co">*                     DETERMINES THE DIFFERENCE BETWEEN THE PRESENT</span>
+                                                   <span class="co">*                     QUOTIENT SCALING AND THE DESIRED SCALING AND</span>
+                                                   <span class="co">*                     SHIFTS RIGHT OR LEFT ACCORDINGLY.  IF THE</span>
+                                                   <span class="co">*                     DENOMINATOR IS ZERO, THE ROUTINE RETURNS THE</span>
+                                                   <span class="co">*                     LARGEST POSSIBLE VALUE AS QUOTIENT. A ZERO</span>
+                                                   <span class="co">*                     NUMERATOR WILL ALSO BE DETECTED.  BY COMPARING</span>
+                                                   <span class="co">*                     THE SIGN BITS OF THE DIVISOR AND DIVIDEND, THE</span>
+                                                   <span class="co">*                     SIGN OF THE ANSWER WILL BE DETERMINED.</span>
+
+<hr>
+<span class="mo">    # PAGE 1119, SEQUENCE SD000530-SD001030</span>
+
+                                   SCALED DIVIDE UTILITY (SD)                  A0950                            PAGE 1119
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+                                                   <span class="co">*              LIST</span>
+                                                   <span class="co">*    ARROWDOWN DRAW V</span>
+                                                   <span class="co">*    ARROWRIGHTDRAW &gt;</span>
+                                                   <span class="co">*    ARROWLEFT DRAW &lt;</span>
+                                                   <span class="co">*    SYMBOL    DRAW .</span>
+                                                          <span class="ps">ORG     </span><a href="#a3"><span class="cn">P.MOD</span></a>,<a href="#a77"><span class="va">C.SD</span></a>
+                                                   <span class="co">*Q                                                                    </span><span class="fl">*</span>
+     6 17 0 355  2 15    377  1  13                <a id="a3387"></a><span class="sm">U.SD00 </span><span class="op">STO     </span>777<span class="co">          U.SD00                                    </span><span class="fl">S</span>
+     6 17 0 356  2 15    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     SAVE RETURN LINKAGE AND INPUT ARGUMENTS   </span><span class="fl">B</span>
+     6 17 0 357  2 15    375  1  17                <a id="a3388"></a><span class="sm">SD000  </span><span class="op">CLA     </span>775
+     6 17 0 360  2 15    034  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+     6 17 0 361  2 15    033  1  11                       <span class="op">XOR     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 17 0 362  2 15    035  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     DETERMINE SIGN OF ANSWER                  </span><span class="fl">B</span>
+                                                   <span class="co">*                           FORCE NUM. AND DEN. TO POSITIVE VALUES    </span><span class="fl">B</span>
+     6 17 0 363  2 15    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 17 0 364  2 15    070  1  15                       <span class="op">RSU     </span><a href="#a348"><span class="va">D.KZRO</span></a>
+     6 17 0 365  2 15    367  0  14                       <span class="op">TMI     </span><a href="#a3389"><span class="sm">SD01</span></a><span class="co">       IS NUMERATOR POSITIVE</span>
+     6 17 0 366  2 15    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 17 0 367  2 15    034  1  17                <a id="a3389"></a><span class="sm">SD01   </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     IS DENOMINATOR POSITIVE</span>
+     6 17 0 370  2 15    070  1  15                       <span class="op">RSU     </span><a href="#a348"><span class="va">D.KZRO</span></a>
+     6 17 0 371  2 15    373  0  14                       <span class="op">TMI     </span><a href="#a3390"><span class="sm">SD011</span></a>
+     6 17 0 372  2 15    034  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     COMPLEMENT DENOMINATOR</span>
+     6 17 0 373  2 15    034  1  17                <a id="a3390"></a><span class="sm">SD011  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5<span class="co">     IS DENOMINATOR ZERO                       </span><span class="fl">Q</span>
+     6 17 0 374  2 15    001  1  10            *   
+     6 17 1 001  2 15    003  1  04                       <span class="op">TNZ     </span><a href="#a3391"><span class="sm">SD012</span></a>
+     6 17 1 002  2 15    075  1  10                       <span class="op">TRA     </span><a href="#a3400"><span class="sm">SD024</span></a><span class="co">                                                  </span><span class="fl">Y</span>
+                                                   <span class="co">*                   DELETE</span>
+     6 17 1 003          020  1  16                <a id="a3391"></a><span class="sm">SD012  </span><span class="op">SHL     </span>1<span class="co">            RESCALE DENOMINATOR FOR MAXIMUM ACCURACY  </span><span class="fl">B</span>
+     6 17 1 004  2 15    012  1  14                       <span class="op">TMI     </span><a href="#a3392"><span class="sm">SD013</span></a>
+     6 17 1 005  2 15    034  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+     6 17 1 006  2 15    031  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 17 1 007  2 15    276  1  02                       <span class="op">SUB     </span><a href="#a186"><span class="va">D.KB25</span></a>
+     6 17 1 010  2 15    031  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 17 1 011  2 15    373  0  10                       <span class="op">TRA     </span><a href="#a3390"><span class="sm">SD011</span></a>
+     6 17 1 012          001  1  16                <a id="a3392"></a><span class="sm">SD013  </span><span class="op">SHR     </span>1<span class="co">            REPAIR DENOM, SHR 1 AND RESTORE SIGN</span>
+     6 17 1 013  2 15    254  1  06    377777776          <span class="op">AND     </span>=O377777776
+     6 17 1 014  2 15    034  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+     6 17 1 015  2 15    033  1  17                <a id="a3393"></a><span class="sm">SD014  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     IS NUMERATOR ZERO                         </span><span class="fl">Q</span>
+     6 17 1 016  2 15    020  1  04                       <span class="op">TNZ     </span><a href="#a3394"><span class="sm">SD015</span></a><span class="co">                                                  </span><span class="fl">N</span>
+     6 17 1 017  2 15    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+     6 17 1 020          020  1  16                <a id="a3394"></a><span class="sm">SD015  </span><span class="op">SHL     </span>1<span class="co">            RESCALE NUMERATOR FOR MAXIMUM ACCURACY    </span><span class="fl">B</span>
+     6 17 1 021  2 15    027  1  14                       <span class="op">TMI     </span><a href="#a3395"><span class="sm">SD016</span></a>
+     6 17 1 022  2 15    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 17 1 023  2 15    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 17 1 024  2 15    276  1  02                       <span class="op">SUB     </span><a href="#a186"><span class="va">D.KB25</span></a><span class="co">       UPDATE SCALING ACCORDINGLY</span>
+     6 17 1 025  2 15    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 17 1 026  2 15    015  1  10                       <span class="op">TRA     </span><a href="#a3393"><span class="sm">SD014</span></a>
+     6 17 1 027          001  1  16                <a id="a3395"></a><span class="sm">SD016  </span><span class="op">SHR     </span>1<span class="co">            REPAIR NUM, SHR 1 AND RESTORE SIGN</span>
+     6 17 1 030  2 15    254  1  06    377777776          <span class="op">AND     </span>=O377777776
+     6 17 1 031  2 15    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+
+<hr>
+<span class="mo">    # PAGE 1120, SEQUENCE SD001040-SD001540</span>
+
+                                   SCALED DIVIDE UTILITY (SD)                  A0950                            PAGE 1120
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+     6 17 1 032  2 15    034  1  02                       <span class="op">SUB     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+     6 17 1 033  2 15    042  1  14                       <span class="op">TMI     </span><a href="#a3396"><span class="sm">SD02</span></a><span class="co">       WILL QUOTIENT BE A FRACTION                 </span><span class="fl">Y</span>
+     6 17 1 034  2 15    033  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     FORCE NUMERATOR LT DENOMINATOR AND RESCALE</span><span class="fl">B</span>
+     6 17 1 035          001  1  16                       <span class="op">SHR     </span>1
+     6 17 1 036  2 15    033  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4
+     6 17 1 037  2 15    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+     6 17 1 040  2 15    276  1  07                       <span class="op">ADD     </span><a href="#a186"><span class="va">D.KB25</span></a>
+     6 17 1 041  2 15    030  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1
+                                                   <span class="co">*</span>
+     6 17 1 042  2 15    033  1  17                <a id="a3396"></a><span class="sm">SD02   </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+4<span class="co">     EXECUTE DIVIDE                            </span><span class="fl">B</span>
+     6 17 1 043  2 15    034  1  03                       <span class="op">DIV     </span><a href="#a332"><span class="va">D.VUTB</span></a>+5
+                                                   <span class="co">*                           RESCALE QUOTIENT AS SPECIFIED             </span><span class="fl">B</span>
+     6 17 1 044  2 15    030  1  17                       <span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+1<span class="co">     DETERMINE DEVIATION FROM DESIRED SCALING</span>
+     6 17 1 045  2 15    031  1  02                       <span class="op">SUB     </span><a href="#a332"><span class="va">D.VUTB</span></a>+2
+     6 17 1 046  2 15    032  1  02                       <span class="op">SUB     </span><a href="#a332"><span class="va">D.VUTB</span></a>+3
+     6 17 1 047  2 15    036  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+7
+     6 17 1 050  2 15    053  1  14                       <span class="op">TMI     </span><a href="#a3397"><span class="sm">SD021</span></a><span class="co">       IS SCALING TOO SMALL</span>
+     6 17 1 051  2 15    064  1  04                       <span class="op">TNZ     </span><a href="#a3399"><span class="sm">SD023</span></a><span class="co">       IS SCALING TOO LARGE</span>
+     6 17 1 052  2 15    077  1  10                       <span class="op">TRA     </span><a href="#a3401"><span class="sm">SD025</span></a><span class="co">                                                  </span><span class="fl">G</span>
+     6 17 1 053  2 15    036  1  17                <a id="a3397"></a><span class="sm">SD021  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+7<span class="co">     SHIFT RIGHT UNTIL SCALING IS CORREDT</span>
+     6 17 1 054  2 15    276  1  07                       <span class="op">ADD     </span><a href="#a186"><span class="va">D.KB25</span></a>
+     6 17 1 055  2 15    036  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+7
+     6 17 1 056  2 15    060  1  14                       <span class="op">TMI     </span><a href="#a3398"><span class="sm">SD022</span></a>
+     6 17 1 057  2 15    077  1  04                       <span class="op">TNZ     </span><a href="#a3401"><span class="sm">SD025</span></a>
+     6 17 1 060  2 15    375  1  17                <a id="a3398"></a><span class="sm">SD022  </span><span class="op">CLA     </span>775
+     6 17 1 061          001  1  16                       <span class="op">SHR     </span>1
+     6 17 1 062  2 15    375  1  13                       <span class="op">STO     </span>775
+     6 17 1 063  2 15    053  1  10                       <span class="op">TRA     </span><a href="#a3397"><span class="sm">SD021</span></a>
+     6 17 1 064  2 15    036  1  17                <a id="a3399"></a><span class="sm">SD023  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+7<span class="co">     IS SCALING CORRECT YET</span>
+     6 17 1 065  2 15    276  1  02                       <span class="op">SUB     </span><a href="#a186"><span class="va">D.KB25</span></a>
+     6 17 1 066  2 15    036  1  13                       <span class="op">STO     </span><a href="#a332"><span class="va">D.VUTB</span></a>+7
+     6 17 1 067  2 15    077  1  14                       <span class="op">TMI     </span><a href="#a3401"><span class="sm">SD025</span></a><span class="co">       XFER IF SCALING IS NOT CORRECT</span>
+     6 17 1 070  2 15    375  1  17                       <span class="op">CLA     </span>775
+     6 17 1 071          020  1  16                       <span class="op">SHL     </span>1<span class="co">            SHIFT QUOTIENT LEFT 1</span>
+     6 17 1 072  2 15    075  1  14                       <span class="op">TMI     </span><a href="#a3400"><span class="sm">SD024</span></a><span class="co">       XFER IF OVERFLOW OCCURS</span>
+     6 17 1 073  2 15    375  1  13                       <span class="op">STO     </span>775
+     6 17 1 074  2 15    064  1  10                       <span class="op">TRA     </span><a href="#a3399"><span class="sm">SD023</span></a>
+                                                   <span class="co">*</span>
+     6 17 1 075  2 15    254  1  17    377777776   <a id="a3400"></a><span class="sm">SD024  </span><span class="op">CLA     </span>=O377777776<span class="co">  SET QUOTIENT TO LARGE POSITIVE VALUE      </span><span class="fl">B</span>
+     6 17 1 076  2 15    375  1  13                       <span class="op">STO     </span>775
+                                                   <span class="co">*</span>
+     6 17 1 077  2 15    035  1  17                <a id="a3401"></a><span class="sm">SD025  </span><span class="op">CLA     </span><a href="#a332"><span class="va">D.VUTB</span></a>+6<span class="co">     PLACE SIGN ON QUOTIENT                    </span><span class="fl">B</span>
+                                                          <span class="ps">BLOCK   </span>5
+     6 17 1 100  2 15    103  1  14                       <span class="op">TMI     </span><a href="#a3403"><span class="sm">SD027</span></a>
+     6 17 1 101  2 15    375  1  17                <a id="a3402"></a><span class="sm">SD026  </span><span class="op">CLA     </span>775<span class="co">          STORE QUOTIENT IN THE ACCUMULATOR         </span><span class="fl">B</span>
+     6 17 1 102  2 15    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN</span>
+     6 17 1 103  2 15    375  1  17                <a id="a3403"></a><span class="sm">SD027  </span><span class="op">CLA     </span>775
+     6 17 1 104  2 15    070  1  15                       <span class="op">RSU     </span><a href="#a348"><span class="va">D.KZRO</span></a><span class="co">       COMPLEMENT ANSWER</span>
+     6 17 1 105  2 15    377  1  00                       <span class="op">HOP     </span>777<span class="co">          RETURN                                    </span><span class="fl">X</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">E</span>
+                                                   <span class="co">*                                                                     </span><span class="fl">H</span>
+
+<hr>
+<span class="mo">    # PAGE 1121, NO SOURCE CODE</span>
+
+                                   SCALED DIVIDE UTILITY (SD)                  A0950                            PAGE 1121
+
+    IM IS S LOC DM DS   A8-A1 A9 OP    CONSTANT    SOURCE STATEMENT
+
+
+<hr>
+<i>... Pages removed ...</i><br><br></pre>
+    <p></p>
+  </body>
+</html>
