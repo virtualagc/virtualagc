@@ -43,6 +43,11 @@
 #               2023-07-24 RSB  FLOW -,(...),,,,, (where the parentheses are
 #                               literal) now results in an invisible node; the
 #                               contents of the parentheses are ignored.
+#               2023-07-25 RSB  Trailing commas in FLOW no longer needed.
+#               2023-07-26 RSB  In unmarked TNZ/TMI, comments of "YES" or "NO
+#                               are now converted automatically to col 71 Y/N.
+#                               Reenabled automatically unique labels for
+#                               FLOW -,(...)
 
 '''
 Input is on stdin.  Any given source-code input file may actually represent
@@ -692,9 +697,12 @@ def processFlowchart(startLine, afterLine):
         # Note that U.TPL is a macro that conditionally performs a transfer.
         # That I've hardcoded it here is a purely ad hoc measure.
         if opcode in {"TMI", "TMI*", "TNZ", "TNZ*", "U.TPL"}:
-            entry["col71"] = "?"
-            if entry["commentMiddle"] in ["YES", "NO"]:
-                entry["commentMiddle"] = ""
+            if entry["commentMiddle"] == "YES":
+                entry["col71"] = "Y"
+            elif entry["commentMiddle"] == "NO":
+                entry["col71"] = "N"
+            else:
+                entry["col71"] = "?"
     # There's one entry in nodes[] for each box.  In the dot file, the nodes
     # will be identified as "n%06d" % lineNumber.  Or if we have need to split
     # a node into a sequence of two or more nodes, the subsequent nodes will
@@ -758,9 +766,9 @@ def processFlowchart(startLine, afterLine):
         # should work, but from highest to lowest priority I'm using:
         # lhs, commentPrefix, fullCommentFront.
         if lhs != "":
-            if False and "(" in lhs:
-                # labels resulting from FLOW -,(...),... are all adjusted to
-                # to be unique.
+            if lhs[:0] == "(" and lhs[-1:] == ")":
+                # labels resulting from FLOW -,(...),... are all automatically
+                # adjusted to be unique.
                 lhs = "(%d)" % lhsFakeCount
                 entry["lhs"] = lhs
                 lhsFakeCount += 1
