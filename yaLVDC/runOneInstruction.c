@@ -50,6 +50,16 @@
  *                                  they have been replaced with a simple
  *                                  implementation of the algorithm used by the
  *                                  LVDC.
+ *              2023-07-28 MAS  More LVDC fixes:
+ *                              1)  MPY and DIV now continuously update PQR util
+ *                                  they are complete.
+ *                              2)  The partial product of the multiplicand with
+ *                                  the lower 12 bits of the accumulator available
+ *                                  the second instruction after MPY is scaled
+ *                                  differently from the final product. This
+ *                                  difference is now accounted for.
+ *                              3)  Scaling in DIV has been corrected to produce
+ *                                  correct results.
  */
 
 #include <stdlib.h>
@@ -574,10 +584,10 @@ runOneInstruction(int *cyclesUsed)
       // MPY or MPH
       // The actual LVDC had a pretty complex behavior with this instruction,
       // in that the full 26-bit result would become available 4 cycles later,
-      // but after 2 cycles you could fetch the less-significant word of the
-      // result from PQ.  At least at first, I'm not going to implement it that
-      // way, and I'll just provide the full result in PQ immediately.  I don't
-      // see a problem with doing that.
+      // but after 2 cycles you could fetch the partial product of the
+      // multiplicand with the lower 12 bits of the accumulator. This product
+      // is formed as if these 12 bits were shifted up to be the most significant
+      // bits of the accumulator rather than their real position.
       if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
           &fetchedFromMemory, &dataFromInstructionMemory))
         goto done;
@@ -596,15 +606,22 @@ runOneInstruction(int *cyclesUsed)
                    mpyDelta1(multiplier, multiplicand);
           dummy >>= 4;
           multiplier >>= 4;
+          if (i == 2)
+            state.pqPend1 = dummy & dataWordMask;
         }
-      state.pq = dummy & dataWordMask;
+      state.pqPend2 = dummy & dataWordMask;
 
       // MPH stops execution for five cycles, and automatically loads PQ
       // into the accumulator at the end.
       if (op == 005)
         {
           cycleCount = 5;
-          state.acc = state.pq;
+          state.mpyDivCount = 1;
+          state.acc = state.pqPend2;
+        }
+      else
+        {
+          state.mpyDivCount = 4;
         }
     }
   else if (ptc && op == 001)
@@ -729,20 +746,19 @@ runOneInstruction(int *cyclesUsed)
   else if (!ptc && op == 003)
     {
       // DIV
-      // We start by shifting the dividend as far left as possible, to insure
-      // that the quotient will have as many significant bits as possible.
-      // We'll shift the quotient down afterward to account for this.  The
-      // LVDC words are 26 bits, and we're using 64 bits for the intermediate
+      // We start by shifting the dividend left to position it for integer division.
+      // The LVDC words are 26 bits, and we're using 64 bits for the intermediate
       // values.
-      dummy = convertDataWordToNative(state.acc) * (1 << 28); // Scale ACC to 64 bits.
+      dummy = (int64_t)convertDataWordToNative(state.acc) * (1 << 25); // Scale ACC to 64 bits.
       if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
           &fetchedFromMemory, &dataFromInstructionMemory))
         goto done;
       dummy /= convertDataWordToNative(fetchedFromMemory);
-      // The quotient will now be 2**28 too big, so must rescale it.  Also, the
-      // LVDC only has a 24-bit quotient, so the two least-significant bits
+      // The LVDC only has a 24-bit quotient, so the two least-significant bits
       // are discarded.  (Assumes native 2's-complement arithmetic.)
-      state.pq = convertNativeToDataWord((dummy / (1 << 28)) & ~3); // Undo scaling.
+      state.pqPend1 = 0;
+      state.pqPend2 = convertNativeToDataWord((dummy) & ~3);
+      state.mpyDivCount = 8;
     }
   else if (op == 004)
     {
@@ -1031,6 +1047,15 @@ runOneInstruction(int *cyclesUsed)
       goto done;
     }
 
+  if (state.mpyDivCount > 0)
+    {
+      // Copy ongoing MPY/DIV results into PQ
+      state.mpyDivCount--;
+      if (state.mpyDivCount > 0)
+        state.pq = state.pqPend1;
+      else
+        state.pq = state.pqPend2;
+    }
   rawHopStructure.loc = nextLOC;
   rawHopStructure.s = nextS;
   if (!isHOP)

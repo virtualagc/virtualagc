@@ -32,6 +32,9 @@
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-18 RSB  Began.
  *              2020-04-29 RSB  Added the --ptc switch.
+ *              2023-07-28 MAS  Added a multiply/divide counter and
+ *                              registers to hold intermediate PQR
+ *                              multiplication/division results.
  */
 
 #ifndef yaLVDC_h
@@ -156,6 +159,9 @@ typedef struct
   int32_t hop;
   int32_t acc;
   int32_t pq;
+  int32_t pqPend1;
+  int32_t pqPend2;
+  int32_t mpyDivCount;
   int32_t hopSaver; // otherwise known as the "HOP saver" register.
   int32_t core[8][16][3][256];
   int32_t pio[01000];
