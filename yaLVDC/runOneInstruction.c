@@ -60,6 +60,11 @@
  *                                  difference is now accounted for.
  *                              3)  Scaling in DIV has been corrected to produce
  *                                  correct results.
+ *              2023-07-29 MAS  Replaced the implementation of DIV with a simulation
+ *                              of the non-restoring division algorithm implemented
+ *                              by the hardware. This was necessary to achieve
+ *                              consistent agreement with hardware simulation
+ *                              division results.
  */
 
 #include <stdlib.h>
@@ -746,18 +751,41 @@ runOneInstruction(int *cyclesUsed)
   else if (!ptc && op == 003)
     {
       // DIV
-      // We start by shifting the dividend left to position it for integer division.
-      // The LVDC words are 26 bits, and we're using 64 bits for the intermediate
-      // values.
-      dummy = (int64_t)convertDataWordToNative(state.acc) * (1 << 25); // Scale ACC to 64 bits.
       if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
           &fetchedFromMemory, &dataFromInstructionMemory))
         goto done;
-      dummy /= convertDataWordToNative(fetchedFromMemory);
-      // The LVDC only has a 24-bit quotient, so the two least-significant bits
-      // are discarded.  (Assumes native 2's-complement arithmetic.)
+
+      // The LVDC implements a form of non-restoring division, with a "sign
+      // shortcut". The hardware actually does this two bits at a time by
+      // predicting the sign of the next remainder, but it is simplest
+      // to simulate it by calculating one bit a time. Once the quotient
+      // is fully formed, its sign bit is complemented to obtain the
+      // final result. The nature of this algorithm leads to some slightly-
+      // off results (e.g. 000000000 / 377777777 = 377777774), so it must
+      // be directly simulated rather than using native host processor
+      // division.
+      int remainder = convertDataWordToNative(state.acc);
+      int divisor = convertDataWordToNative(fetchedFromMemory);
+      int quotient = 0;
+
+      for (uint8_t i = 0; i < 24; i++)
+        {
+          if ((remainder >= 0 && divisor >= 0) || (remainder < 0 && divisor < 0))
+            {
+              quotient = (quotient | 1) << 1;
+              remainder = (remainder << 1) - divisor;
+            }
+          else
+            {
+              quotient = quotient << 1;
+              remainder = (remainder << 1) + divisor;
+            }
+        }
+
+      quotient = (quotient << 1) ^ 0200000000;
+
       state.pqPend1 = 0;
-      state.pqPend2 = convertNativeToDataWord((dummy) & ~3);
+      state.pqPend2 = convertNativeToDataWord(quotient);
       state.mpyDivCount = 8;
     }
   else if (op == 004)
