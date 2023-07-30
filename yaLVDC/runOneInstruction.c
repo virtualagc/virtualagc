@@ -65,6 +65,7 @@
  *                              by the hardware. This was necessary to achieve
  *                              consistent agreement with hardware simulation
  *                              division results.
+ *              2023-07-30 MAS  Corrected various bugs in the implementation of EXM.
  */
 
 #include <stdlib.h>
@@ -430,7 +431,6 @@ runOneInstruction(int *cyclesUsed)
   uint16_t instruction, operand9;
   uint8_t op, operand, residual, a8, a9;
   int32_t fetchedFromMemory;
-  //int modOperand = 0;
 
   // If we changes any of state.pio[], state.cio[], or state.prs, then
   // the following state.xxxChange variables will be set accordingly to
@@ -559,10 +559,6 @@ runOneInstruction(int *cyclesUsed)
   a8 = (operand >> 7) & 1;
   residual = a9;
   operand9 = operand | (a9 << 8);
-  // The following has something to do with EXM, but doesn't work as-is,
-  // since it messes up almost all operands.  Fix later.
-  //operand = (operand & ~3) | modOperand;
-  //modOperand = 0;
 
   // Execute the instruction.
   if (op == 000)
@@ -986,7 +982,9 @@ runOneInstruction(int *cyclesUsed)
     {
       // SHF
       int sign = state.acc & signMask;
+#ifdef DEBUG_A_LOT
       printf("Shift %03o\n", operand);
+#endif
       switch (operand)
         {
       case 000:
@@ -1021,14 +1019,22 @@ runOneInstruction(int *cyclesUsed)
       int syllable, modBits, dsIndex;
       uint8_t loc;
       hopStructure_t pendingHop;
+      // Isolate the modifier bits (A1-A4), syllable (A5), and location
+      // index (A6-A7) from the EXM instruction.
       modBits = operand & 017;
       syllable = (operand >> 4) & 1;
       loc = locs[(operand >> 5) & 3];
-      if (fetchInstruction(hopStructure.dm, 017, syllable, locs[loc],
+      // Fetch the instruction being targeted by the EXM.
+      if (fetchInstruction(hopStructure.dm, 017, syllable, loc,
           &instruction, &instructionFromDataMemory))
         goto done;
+      // Determine the data sector for the modified instruction from
+      // its address bits A2, A1, and A9.
       dsIndex = (instruction >> 4) & 7;
-      instruction = (instruction & ~023) | modBits;
+      // OR in the modifier bits, after first masking out bits A9,
+      // A1, and A2 (the former is always 0 in the modified instruction,
+      // and the latter two are directly replaced by the EXM).
+      instruction = (instruction & ~0160) | (modBits << 5);
       state.pendingEXM.pendingInstruction = instruction;
       rawHopStructure.loc = nextLOC;
       rawHopStructure.s = nextS;
@@ -1037,7 +1043,7 @@ runOneInstruction(int *cyclesUsed)
       pendingHop.im = hopStructure.dm;
       pendingHop.is = 017;
       pendingHop.s = syllable;
-      pendingHop.loc = locs[loc];
+      pendingHop.loc = loc;
       pendingHop.dm = hopStructure.dm;
       pendingHop.ds = secs[dsIndex];
       pendingHop.dupdn = hopStructure.dupdn;
