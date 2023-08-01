@@ -66,6 +66,30 @@
  *                              consistent agreement with hardware simulation
  *                              division results.
  *              2023-07-30 MAS  Corrected various bugs in the implementation of EXM.
+ *              2023-08-01 MAS  Lots of changes related to PIO and interrupts.
+ *                              1)  The automatic HOP save now stores a HOP constant
+ *                                  with a LOC of 0 unless a branch was taken, in
+ *                                  which case the pre-branch nextLOC is used.
+ *                              2)  TRA, TMI, and TNZ no longer inhibit interrupts
+ *                                  for one cycle.
+ *                              3)  EXM no longer uses the interrupt inhibit feature
+ *                                  because although it *does* inhibit interrupts
+ *                                  for one instruction, the current EXM implementation
+ *                                  forces both cycles to occur in the same call to
+ *                                  runOneInstruction().
+ *                              4)  The one-cycle interrupt inhibit has been changed
+ *                                  to a counter, which is now used by HOP, MPY,
+ *                                  MPH, and DIV.
+ *                              5)  Interrupts are now delayed by one cycle from
+ *                                  when they were first detected.
+ *                              6)  Interrupts now force a real HOP instruction to
+ *                                  happen. The same mechanism that was being used
+ *                                  for EXM is now also used for this forced HOP
+ *                                  instruction.
+ *                              7)  Bits 8 and 9 of LVDA PIO instructions are no
+ *                                  longer used in channel selection (they only
+ *                                  determine if the accumulator or memory are the
+ *                                  source of the data being sent to the LVDA).
  */
 
 #include <stdlib.h>
@@ -380,8 +404,17 @@ void
 checkForInterrupts(void)
 {
   // Check if an interrupt has been triggered.
-  if (!state.masterInterruptLatch && !state.inhibitInterruptsOneCycle)
+  if (state.masterInterruptLatch == 0)
     {
+      // Interrupt detection happens in a few stages in the LVDA (and
+      // presumably also the PTC). Once an interrupt bit has been set,
+      // it must first make it past an inhibit mask. If this happens,
+      // an "interrupt has occurred" bit is sent into a delay line.
+      // This bit emerges 1 LVDC/PTC instruction cycle later, at which
+      // point the interrupt latch INTC is set. The output of this latch
+      // is applied to the processor, which will handle it as soon as
+      // temporary global interrupt inhibits (via HOP, EXM, MPY, MPH, or
+      // DIV instructions) are lifted.
       if (ptc)
         {
           int i, intLatch, intInhibit;
@@ -393,20 +426,34 @@ checkForInterrupts(void)
               break;
           if (i < 16)
             {
+              // Send an interrupt bit into the delay line.
               state.masterInterruptLatch = 1;
-              state.hop = state.core[0][017][2][i];
+              state.pendingInterruptIndex = i;
               //printf("Interrupt %d.\n", i + 1);
             }
         }
       else // LVDC
         {
-          if (state.pio[0137] != 0)
+          if (state.pio[0137] & ~(state.pio[072] << 1))
             {
-              hopStructure_t hs;
+              // Send an interrupt bit into the delay line.
               state.masterInterruptLatch = 1;
-              parseHopConstant(state.hop, &hs);
-              state.hop = state.core[hs.im][017][2][0];
+              state.pendingInterruptIndex = 0;
             }
+        }
+    }
+  else if (state.masterInterruptLatch == 1)
+    {
+      // Interrupt bit has emerged from the delay line, and INTC has
+      // been set. Trigger an interrupt as soon as possible.
+      if (state.inhibitInterruptCycles == 0)
+        {
+          state.masterInterruptLatch = 2;
+          state.pendingInstruction.nextHop = state.hop;
+          state.pendingInstruction.pending = 1;
+          state.pendingInstruction.pendingHop = state.pendingInstruction.nextHop;
+          state.pendingInstruction.instruction = 000020 |
+              (state.pendingInterruptIndex << 5);
         }
     }
 
@@ -425,7 +472,7 @@ int
 runOneInstruction(int *cyclesUsed)
 {
   int retVal = 1;
-  int cycleCount = 1, nextLOC, nextS, isHOP = 0;
+  int cycleCount = 1, saveLOC, nextLOC, nextS, isHOP = 0;
   int64_t dummy;  // For multiplication intermediate result.
   hopStructure_t hopStructure, rawHopStructure, rawestHopStructure;
   uint16_t instruction, operand9;
@@ -496,15 +543,16 @@ runOneInstruction(int *cyclesUsed)
     state.prsParityDelayCount++;
 
   // Set global variables providing background info on the emulation.
-  state.inhibitInterruptsOneCycle = 0;
+  if (state.inhibitInterruptCycles > 0)
+    state.inhibitInterruptCycles--;
   dataFromInstructionMemory = 0;
   instructionFromDataMemory = 0;
 
   reenterForEXM: ;
-  if (state.pendingEXM.pending)
+  if (state.pendingInstruction.pending)
     {
-      state.pendingEXM.pending = 0;
-      state.hop = state.pendingEXM.pendingHop;
+      state.pendingInstruction.pending = 0;
+      state.hop = state.pendingInstruction.pendingHop;
       if (parseHopConstant(state.hop, &hopStructure))
         {
           printf("Cannot interpret current instruction address (HOP=%09o)\n",
@@ -512,16 +560,16 @@ runOneInstruction(int *cyclesUsed)
           runStepN = 0;
           goto done;
         }
-      if (parseHopConstant(state.pendingEXM.nextHop, &rawHopStructure))
+      if (parseHopConstant(state.pendingInstruction.nextHop, &rawHopStructure))
         {
           printf("Cannot interpret next instruction address (HOP=%09o)\n",
-              state.pendingEXM.nextHop);
+              state.pendingInstruction.nextHop);
           runStepN = 0;
           goto done;
         }
       nextLOC = rawHopStructure.loc;
       nextS = rawHopStructure.s;
-      instruction = state.pendingEXM.pendingInstruction;
+      instruction = state.pendingInstruction.instruction;
     }
   else
     {
@@ -565,7 +613,7 @@ runOneInstruction(int *cyclesUsed)
     {
       // HOP
       isHOP = 1;
-      state.inhibitInterruptsOneCycle = 1;
+      state.inhibitInterruptCycles = 1;
       if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
           &fetchedFromMemory, &dataFromInstructionMemory))
         {
@@ -579,6 +627,7 @@ runOneInstruction(int *cyclesUsed)
 #endif
       state.lastHop = state.hop;
       state.hop = fetchedFromMemory;
+      saveLOC = nextLOC;
     }
   else if (!ptc && (op == 001 || op == 005))
     {
@@ -619,10 +668,16 @@ runOneInstruction(int *cyclesUsed)
           cycleCount = 5;
           state.mpyDivCount = 1;
           state.acc = state.pqPend2;
+          // A slight quirk of MPY is that even though it completed in
+          // five cycles, interrupts are inhibited for one more cycle after
+          // it completes. In other words, an interrupt can never come in
+          // immediately following an MPH instruction.
+          state.inhibitInterruptCycles = 1;
         }
       else
         {
           state.mpyDivCount = 4;
+          state.inhibitInterruptCycles = 5;
         }
     }
   else if (ptc && op == 001)
@@ -783,13 +838,14 @@ runOneInstruction(int *cyclesUsed)
       state.pqPend1 = 0;
       state.pqPend2 = convertNativeToDataWord(quotient);
       state.mpyDivCount = 8;
+      state.inhibitInterruptCycles = 8;
     }
   else if (op == 004)
     {
       // TNZ
       if (state.acc != 0)
         {
-          state.inhibitInterruptsOneCycle = 1;
+          saveLOC = nextLOC;
           nextLOC = operand;
           nextS = residual;
           state.lastHop = state.hop;
@@ -819,7 +875,7 @@ runOneInstruction(int *cyclesUsed)
   else if (op == 010)
     {
       // TRA
-      state.inhibitInterruptsOneCycle = 1;
+      saveLOC = nextLOC;
       nextLOC = operand;
       nextS = residual;
       state.lastHop = state.hop;
@@ -849,15 +905,20 @@ runOneInstruction(int *cyclesUsed)
         state.acc = state.pio[operand9];
       else
         {
-          state.pioChange = operand9;
-          if (a8) // Source is the accumulator
-            state.pio[operand9] = state.acc;
+          // Bits 8-9 only determine the source of data being sent to
+          // the LVDA.
+          if (ptc)
+            state.pioChange = operand9;
+          else
+            state.pioChange = operand & 0177;
+          if (!a8) // Source is the accumulator
+            state.pio[state.pioChange] = state.acc;
           else // Source is memory.
             {
               if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
                   &fetchedFromMemory, &dataFromInstructionMemory))
                 fetchedFromMemory = 0;
-              state.pio[operand9] = fetchedFromMemory;
+              state.pio[state.pioChange] = fetchedFromMemory;
             }
         }
     }
@@ -878,7 +939,7 @@ runOneInstruction(int *cyclesUsed)
       // most-significant (26th) bit.
       if ((state.acc & signMask) != 0)
         {
-          state.inhibitInterruptsOneCycle = 1;
+          saveLOC = nextLOC;
           nextLOC = operand;
           nextS = residual;
           state.lastHop = state.hop;
@@ -1035,10 +1096,10 @@ runOneInstruction(int *cyclesUsed)
       // A1, and A2 (the former is always 0 in the modified instruction,
       // and the latter two are directly replaced by the EXM).
       instruction = (instruction & ~0160) | (modBits << 5);
-      state.pendingEXM.pendingInstruction = instruction;
+      state.pendingInstruction.instruction = instruction;
       rawHopStructure.loc = nextLOC;
       rawHopStructure.s = nextS;
-      if (formHopConstant(&rawHopStructure, &state.pendingEXM.nextHop))
+      if (formHopConstant(&rawHopStructure, &state.pendingInstruction.nextHop))
         goto done;
       pendingHop.im = hopStructure.dm;
       pendingHop.is = 017;
@@ -1048,12 +1109,12 @@ runOneInstruction(int *cyclesUsed)
       pendingHop.ds = secs[dsIndex];
       pendingHop.dupdn = hopStructure.dupdn;
       pendingHop.dupin = hopStructure.dupin;
-      if (formHopConstant(&pendingHop, &state.pendingEXM.pendingHop))
+      if (formHopConstant(&pendingHop, &state.pendingInstruction.pendingHop))
         goto done;
-      state.pendingEXM.pending = 1;
+      state.pendingInstruction.pending = 1;
       // We're just going to jump back up to the start of this function
       // to executed the modified instruction.  Because all the info
-      // for doing this is in the state.pendingEXM structure, we could
+      // for doing this is in the state.pendingInstruction structure, we could
       // instead exit the function normally and count on the parent code
       // to just call runOneInstruction() again later.  The problem is
       // that I'm not sure how all that affects stuff the parent code is
@@ -1061,8 +1122,10 @@ runOneInstruction(int *cyclesUsed)
       // taking the simpler route of not returning until after the modified
       // instruction is executed.  But if all the details were worked out,
       // I think exiting the function normally would be better.
+      // Note also that while EXM inhibits interrupts for 1 cycle, we do
+      // not need to set inhibitInterruptCycles since we're forcing the
+      // next cycle to immediately happen without exiting.
       cycleCount++;
-      state.inhibitInterruptsOneCycle = 1;
       goto reenterForEXM;
     }
   else if (op == 017)
@@ -1097,11 +1160,18 @@ runOneInstruction(int *cyclesUsed)
       if (formHopConstant(&rawHopStructure, &state.hop))
         goto done;
     }
-  rawestHopStructure.loc++;
+  // The automatic HOP save circuit constructs an *almost* complete
+  // HOP constant every cycle. Every part except the LOC is guaranteed
+  // to be present. The LOC is only included if HOP, TRA, TMI, or TNZ
+  // caused a branch above (each of which set saveLOC to nextLOC before
+  // applying the effects of the branch). Otherwise, the LOC field is
+  // simply 0.
+  rawestHopStructure.loc = saveLOC;
   if (formHopConstant(&rawestHopStructure, &state.hopSaver))
     state.hopSaver = -1;
 
   *cyclesUsed = cycleCount;
+  state.rtcDivider += cycleCount;
   retVal = 0;
   done: ;
   return (retVal);
