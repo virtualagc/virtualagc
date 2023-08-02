@@ -51,6 +51,9 @@
  *                              also that there were errors in the yaPTC.py
  *                              implementation of this that I fixed here.
  *              2020-06-05 RSB  Corrected CIO 065, 071.
+ *              2023-08-01 MAS  Split processInterruptsAndIO() into PTC and
+ *                              LVDA implementations. Added RTC, timer, and
+ *                              interrupt support for the LVDA.
  */
 
 #include <stdlib.h>
@@ -155,12 +158,11 @@ int typewriterMargin = 80;
 int typewriterTabStop = 5;
 int typewriterCharsInLine = 0;
 int
-processInterruptsAndIO(void)
+processPTCInterruptsAndIO(void)
 {
   int retVal = 1, channel, payload, lastInterruptLatch = 0;
 
-  if (ptc)
-    lastInterruptLatch = state.cio[0154];
+  lastInterruptLatch = state.cio[0154];
 
   // Some of these operations we want to performed entirely locally here,
   // in the yaLVDC program; some we want to be done entirely in the client,
@@ -175,10 +177,7 @@ processInterruptsAndIO(void)
 
       channel = state.pioChange;
       payload = state.pio[channel];
-      if (ptc)
-        interruptLatch = &state.cio[0154];
-      else
-        interruptLatch = &state.pio[0137];
+      interruptLatch = &state.cio[0154];
 
       //printf("here PIO channel %03o\n", channel);
 
@@ -480,7 +479,7 @@ processInterruptsAndIO(void)
       moreCIO: ;
     }
 
-  if (ptc && lastInterruptLatch != state.cio[0154])
+  if (lastInterruptLatch != state.cio[0154])
     state.prsParityDelayCount = 100;
 
   pendingVirtualWireActivity();
@@ -489,4 +488,84 @@ processInterruptsAndIO(void)
   //done: ;
 
   return (retVal);
+}
+
+int
+processLVDAInterruptsAndIO(void)
+{
+  int retVal = 0, channel, payload, lastInterruptLatch = 0;
+  int *interruptLatch = &state.pio[0137];
+
+  // Begin by servicing the real-time clock (RTC) and timers.
+  while (state.rtcDivider >= 3)
+    {
+      // The RTC is configured to increment *precisely* once every
+      // three LVDC instructions. It only consists of 13 bits; the
+      // upper 13 bits of the word are filled with garbage.
+      state.rtcDivider -= 3;
+      state.pio[0103] = 0377760000 | ((state.pio[0103] + 1) & 017777);
+
+      // The minor loop and switch selector timers count down at half
+      // the frequency of RTC (i.e. once every 6 instructions).
+      state.timerDivider = !state.timerDivider;
+      if (state.timerDivider)
+        {
+          // The minor loop timer (timer 1) always counts down, wrapping
+          // around through 0, and generates an interrupt when it hits 0.
+          state.pio[076] = (state.pio[076] - 1) & 017777;
+          if (state.pio[076] == 0)
+            {
+              *interruptLatch |= 0200000000;
+            }
+
+          // The switch selector timer (timer 2) counts down to 0, and
+          // does *not* wrap. An interrupt is generated when it hits 0.
+          if (state.pio[062] > 0)
+            {
+              state.pio[062]--;
+              if (state.pio[062] == 0)
+                {
+                  *interruptLatch |= 0100000000;
+                }
+            }
+        }
+    }
+
+  // Service PIO channel writes.
+  if (state.pioChange != -1)
+    {
+      channel = state.pioChange;
+      payload = state.pio[channel];
+
+      if (channel == 032)
+        {
+          // Any bits that were set to 1 in the PIO write are cleared from the
+          // interrupt register.
+          *interruptLatch &= ~(payload << 1);
+
+          // Regardless of the value written (even if it was 0), the interrupt
+          // latch is cleared.
+          state.masterInterruptLatch = 0;
+
+          // Writing to PIO 032 also kicks off the "interrupt limiting" feature
+          // of the interrupt processor. If the source of an interrupt is still
+          // present  when its bit is reset, a "limiting" bit is constantly
+          // recirculated until the interrupt source goes away. This limiting
+          // bit prevents the same interrupt source from triggering multiple
+          // interrupts. This feature is currently unsimulated.
+        }
+
+      state.pioChange = -1;
+    }
+
+  return retVal;
+}
+
+int
+processInterruptsAndIO(void)
+{
+  if (ptc)
+    return processPTCInterruptsAndIO();
+  else
+    return processLVDAInterruptsAndIO();
 }
