@@ -40,6 +40,8 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 
 
 
+
+
           Interface</a><br>
       </li>
       <li><a moz-do-not-send="true" href="#Emulation">Compilation and
@@ -84,7 +86,7 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
       rather than being freely available.&nbsp; And by "the" source
       code, do I mean <i>all</i> revisions?&nbsp; Do I mean for <i>all</i>
       components of the system?&nbsp; And by "the" development tools, do
-      I mean the original ones, or do I mean partial work-alikes?&nbsp;
+      I mean the original ones, or do I mean partial workalikes?&nbsp;
       And by emulation, do I mean emulation of the entire stack of code,
       or just for some restricted portion of it?&nbsp; And besides
       which, how do I really know which documents may be relevant to
@@ -140,6 +142,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
         4, "Computers in the Space Shuttle Avionics System", of James
         Tomayko's <i>Computers in Spaceflight: The NASA Experience</i></a>,
       but there are numerous other documents in <a
@@ -155,7 +159,7 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
       includes the <i>General Purpose Computers (GPC)</i>, the crew
       interface (display and keyboards), the mass-memory units, and the
       data-bus network interconnecting all of them.&nbsp; Here's a
-      diagram, swiped from the afore-mentioned <i>Computers in
+      diagram, swiped from the aforementioned <i>Computers in
         Spaceflight</i>, that gives a very high-level view of the system
       architecture:<br>
     </p>
@@ -192,20 +196,31 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
-          Avionics Software Subsystem (PASS)</i>.&nbsp; The behaviors of
-        these four copies of FCOS were synchronized ... not on a
-        CPU-cycle by CPU-cycle basis, but to the extent that inputs to
-        the GPCs from the spacecraft, as well as commands output from
-        the GPCs to the spacecraft, occurred at the same time.&nbsp; In
-        particular, the fact that outputs from the GPCs were
-        synchronized allowed detection if one of the GPCs was behaving
-        abnormally.&nbsp; I say they did this "nominally", because this
-        extreme level of redundancy was warranted only during critical
-        flight phases ... in particular, during ascent and
-        reentry.&nbsp; During the more-leisurely phases of the mission,
-        if additional computing power was needed, the four principal
-        GPCs did not necessarily need to run identical, redundant
-        software.<br>
+
+
+          Avionics Software Subsystem (PASS)</i>.&nbsp; <br>
+        <blockquote><font size="-1"><b>Aside:</b> In spite of this
+            technical distinction between the acronyms PFS and PASS, I
+            find in practice (and have been chided by veterans of the
+            Shuttle project) that the terminology PASS is always used in
+            preference to PFS.&nbsp; Since that is the common usage, I'm
+            going to adopt it throughout the remainder of this article,
+            and will not pedantically use the acronym PFS even where the
+            distinction vs PASS is significant.</font><br>
+        </blockquote>
+        The behaviors of these four copies of FCOS were synchronized ...
+        not on a CPU-cycle by CPU-cycle basis, but to the extent that
+        inputs to the GPCs from the spacecraft, as well as commands
+        output from the GPCs to the spacecraft, occurred at the same
+        time.&nbsp; In particular, the fact that outputs from the GPCs
+        were synchronized allowed detection if one of the GPCs was
+        behaving abnormally.&nbsp; I say they did this "nominally",
+        because this extreme level of redundancy was warranted only
+        during critical flight phases ... in particular, during ascent
+        and reentry.&nbsp; During the more-leisurely phases of the
+        mission, if additional computing power was needed, the four
+        principal GPCs did not necessarily need to run identical,
+        redundant software.<br>
         <br>
         The fifth GPC instead ran the <i>Backup Flight Software (BFS)</i>,
         created entirely separately from PASS in a clean-room
@@ -218,9 +233,11 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         <br>
         Besides these, there was a <i>Run Time Library (RTL)</i> that
         provided various common functions needed by PASS / BFS, such as
-        square roots, trigonometric functions, and so forth, though the
-        compiler embedded RTL code directly in the executable, so it
-        doesn't seem to have existed as a separate entity.<br>
+        square roots, trigonometric functions, and so forth.&nbsp; On
+        the other hand, it appears to me that the HAL/S compiler may
+        have embedded RTL code directly into the executables it
+        produced, as needed, so I'm not sure if it's fair to say that
+        the RTL actually existed as a separate entity.<br>
         <br>
         The data buses interconnecting the GPCs and peripheral devices
         were MIL-STD-1553 buses.<br>
@@ -246,12 +263,16 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
               Display Units (MDUs)</i>.&nbsp; <br>
           </li>
           <li>Keyboards.&nbsp; The pilots had 2 of these, and the
             mission specialist station had a 3rd.</li>
         </ul>
         <p>The pre-2000 configuration was known collectively as the <i>Multifunction
+
+
 
 
 
@@ -358,12 +379,12 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
         Control Operating System (FCOS) and the Run Time Library (RTL)
         are written in BAL, the assembly language of the AP-101S
         CPU.&nbsp; But once you get past those infrastructural software
-        components, you have the Primary Flight Software (PFS), and the
-        PFS is written in a higher-level language called HAL/S, as is
-        the BFS.&nbsp; <a moz-do-not-send="true"
+        components, the remainder of PASS is written in a higher-level
+        language called HAL/S, as is the BFS.&nbsp; <a
+          moz-do-not-send="true"
           href="Shuttle/DPS%20Overview%20Workbook.pdf#page=22">The DPS
-          Overview Workbook</a> explains the overall structure of the
-        PFS better than I can:&nbsp; <br>
+          Overview Workbook</a> explains the overall structure of PASS
+        better than I can:&nbsp; <br>
         <blockquote>"PASS software consists of two types of software:
           system software and application software. System software runs
           the GPC. It is responsible for tasks such as GPC–to–GPC
@@ -417,6 +438,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
 
 
 
+
+
       That should be your first stop in a documentation
       pilgrimage!&nbsp; However, here are some websites that have
       additional documents that you may find interesting, and which may
@@ -425,6 +448,8 @@ href="https://www.ibiblio.org/apollo/Shuttle/Computers%20in%20Spaceflight%20-%20
     <ul>
       <li><a moz-do-not-send="true"
 href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.html">Johnson
+
+
 
 
 
@@ -472,7 +497,11 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
 
 
 
+
+
           Space Shuttle Ultra site, particularly its reference section</a>.&nbsp;
+
+
 
 
 
@@ -503,6 +532,8 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         FlightGear is a flight simulation system.</li>
       <li><a moz-do-not-send="true"
           href="https://gandalfddi.z19.web.core.windows.net/shuttle.html">Ken
+
+
 
 
 
@@ -559,6 +590,8 @@ href="https://www.nasa.gov/centers/johnson/news/flightdatafiles/foia_archive.htm
         repository actually has <a moz-do-not-send="true"
 href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">the
 
+
+
           source code for the HAL/S-FC of release 32V0"</a>, written
         mostly in the XPL high-level language with some assistance in
         BAL (IBM Basic Assembly Language).&nbsp; Note that these files
@@ -586,8 +619,12 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
               Compiler System Specification"</a>.</li>
           <li><a moz-do-not-send="true" href="Shuttle/19760020796.pdf">"HAL/S-FC
+
+
 
 
 
@@ -615,13 +652,15 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
           source code from the Appendices of the book <i>A Compiler
             Generator</i></a> mentioned above, including XCOM and other
         XPL software.&nbsp; This is reference code, and is guaranteed
         (because the available documentation says so) not to be the same
         version of TWS on which HAL/S-FC is based.<br>
       </li>
-      <li>PFS — wish list.</li>
+      <li>PASS — wish list.</li>
       <li>BFS — wish list.</li>
       <li>FCOS — wish list.</li>
       <li>TBD<br>
@@ -766,6 +805,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         B</tt> ("<tt>A</tt> is not equal to <tt>B</tt>").&nbsp; But the
       EBCDIC character set is not entirely consistent.&nbsp; In some
       EBCDIC tables you find that&nbsp; "¬" is encoded numerically in
@@ -777,7 +818,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <h1><a name="HALS"></a>HAL/S<br>
     </h1>
     <p>HAL/S?&nbsp; HAL/S was a high-level programming language in which
-      the PFS and BFS application software was written.&nbsp; Whereas
+      the PASS and BFS application software was written.&nbsp; Whereas
       infrastructural software (like operating systems and run-time
       libraries) was written in whatever assembly-languages were native
       to the particular CPUs running that code.&nbsp; <br>
@@ -812,6 +853,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
       The HAL/S language was invented (and the flight software was
       written) by a company called Intermetrics, many of whose employees
       were refugees from the same Draper Laboratories (MIT
@@ -831,7 +874,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       have been somewhere in the back of somebody's mind.<br>
     </p>
     <p>But I digress.&nbsp; As I was saying, the HAL/S software for the
-      Shuttle's PFS and BFS still survives in private stashes, which is
+      Shuttle's PASS and BFS still survives in private stashes, which is
       much better than the alternative.&nbsp; But the Virtual AGC
       Project doesn't have any as of yet, and whether or not we can get
       any of it depends very much on the kindness of strangers.<br>
@@ -844,6 +887,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <ol>
       <li>The recommended starting point is "<a moz-do-not-send="true"
           href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf">Programming
+
+
 
 
 
@@ -890,6 +935,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
           Language Specification"</a>, which contains a much-more-formal
         specification of the language syntax, both in the form of graphs
         of the syntax and in Backus-Naur form (BNF).</li>
@@ -915,9 +962,13 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
           Programmer's Guide"</a>.</li>
       <li>And then there's the <a moz-do-not-send="true"
           href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">"HAL/S-FC
+
+
 
 
 
@@ -978,6 +1029,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       compute its mathematical factorial, then output the result.&nbsp;
       While I won't dissect this short program in detail, I can make a
       couple of observations.&nbsp; For one, the language is <i>strongly
+
+
 
 
 
@@ -1050,6 +1103,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -1062,6 +1117,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </tt><tt>E&nbsp;&nbsp;&nbsp; -</tt><tt><br>
       </tt><tt>M&nbsp;&nbsp;&nbsp; BC = VECTOR (LONG, 0);</tt><tt><br>
       </tt><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1090,6 +1147,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         2</tt><tt><br>
       </tt><tt><br>
       </tt><tt>E&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;
@@ -1097,6 +1156,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       </tt><tt>M&nbsp;&nbsp;&nbsp; CD = BC + DA;</tt><tt><br>
         <br>
       </tt><tt>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1156,6 +1217,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
             DEX$J<br>
           </tt></div>
         <tt> </tt>
@@ -1170,7 +1233,11 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
             I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1199,10 +1266,14 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
             L<br>
           </tt></div>
         <tt> </tt>
         <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1229,6 +1300,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     a '-' above it, that means that <tt>AB</tt> is really a
     vector.&nbsp; Actually, a 2-vector, in the example code above.&nbsp;
     That's reflected in the declaration "<tt>DECLARE VECTOR(2), AB, ...</tt>".
+
+
 
 
 
@@ -1271,6 +1344,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         LONG, SHORT, ALPHA;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; DECLARE VECTOR(2),</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
@@ -1288,6 +1363,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     by the '<tt>$</tt>' character. <br>
     <br>
     One thing you may take away from this is that the '<tt>-</tt>' (or '<tt>*</tt>',
+
+
 
 
 
@@ -1346,6 +1423,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
     Multiplication is indicated simply by placing variable names,
     constant names, or literal numbers adjacent to each other (separated
     by whitespace).&nbsp; For example, <br>
@@ -1357,6 +1436,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <p>By the way, <tt>SCALAR</tt> is what HAL/S calls its
       floating-point type; thus <tt>SCALAR</tt> contrasts with <tt>INTEGER</tt>
       or <tt>BOOLEAN</tt> datatypes, but not with <tt>VECTOR</tt> or <tt>MATRIX</tt>.&nbsp;
+
+
 
 
 
@@ -1381,8 +1462,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <h1><a name="Versioning"></a>Software Versioning</h1>
     <p>As I've described above, any given shuttle had a number of
       computers, running a lot of different software components — more
-      than just the GPCs running PFS / BFS / FCOS / RTL we're discussing
-      here.&nbsp; Each of these software components had their own unique
+      than just the GPCs running PASS/BFS we're discussing here.&nbsp;
+      Each of these software components had their own unique
       versioning.&nbsp; I couldn't begin to tell you what those all are;
       I don't even have a list of all the different computers or their
       software components, let alone details about their versions. <br>
@@ -1399,34 +1480,16 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     </p>
     <p>At this point, I have no authoritative references which link
       software versions to specific Shuttle missions.&nbsp; For what
-      information I do have, I'd refer you to the mission summaries, <a
-        moz-do-not-send="true"
-        href="Shuttle/SpaceShuttleMissionsSummaryVol1.pdf">Volume 1</a>
-      and <a moz-do-not-send="true"
-        href="Shuttle/SpaceShuttleMissionsSummaryVol2.pdf">Volume 2</a>.&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      (Some data past the end of Volume 2 can be gotten from NASA Press
-      Kits for STS-132 through 135.)&nbsp; In the following tabulation,
+      information I do have, I'd refer you to the <a
+        moz-do-not-send="true" href="Shuttle/20110001406.pdf">Space
+        Shuttle Missions Summary</a>.&nbsp; In the following tabulation,
       sorted by software version, notice that a higher STS mission
       number sometimes has a lower software version number, presumably
       partially because the mission numbering doesn't perfectly agree
-      with the chronological order in which the missions were flown.<br>
+      with the chronological order in which the missions were
+      flown.&nbsp; For that matter, notice confusing duplicate numbers,
+      like the entire range STS-26 through STS-33 (skipping STS-29); not
+      my fault, blame NASA!<br>
     </p>
     <table border="1" align="center" cellspacing="2" cellpadding="2">
       <tbody>
@@ -1443,205 +1506,230 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">STS-2, 3, 4<br>
+          <td align="center" valign="top">STS-2, STS-3, STS-4<br>
           </td>
           <td align="center" valign="top">R18/T11<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="top">STS-5, 6, 7, 8<br>
+          <td align="center" valign="top">STS-5, STS-6, STS-7, STS-8<br>
           </td>
           <td align="center" valign="top">R19/T12<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-9 (41A), 11 (41B), 13
-            (41C)<br>
+          <td align="center" valign="middle">STS-9 (STS 41-A), STS-11 (STS
+            41-B), STS 41-C (STS-13)<br>
           </td>
           <td align="center" valign="middle">OI-2<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-14 (41DR), 17 (41G), 19
-            (51A), 20 (51C), 24 (51B)<br>
-          </td>
+          <td align="center" valign="middle">STS 41-DR (STS-14), STS
+            41-G (STS-17), STS 51-A (STS-19), <br>
+            STS 51-C (STS-20), STS 51-E (STS-22), STS 51-B (STS-24) </td>
           <td align="center" valign="middle">OI-4<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-22 (51E), 23 (51D)<br>
+          <td align="center" valign="middle">STS 51-D (STS-23), STS-51-E
+            (STS-22)<br>
           </td>
           <td align="center" valign="middle">OI-5<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-26 (51F)<br>
+          <td align="center" valign="middle">STS 51-F (STS-26)<br>
           </td>
           <td align="center" valign="middle">OI5-24<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-25 (51G)<br>
+          <td align="center" valign="middle">STS 51-G (STS-25)<br>
           </td>
           <td align="center" valign="middle">OI-6<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-27 (51I)<br>
+          <td align="center" valign="middle">STS 51-I (STS-27)<br>
           </td>
           <td align="center" valign="middle">OI6-27<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-28 (51J)<br>
+          <td align="center" valign="middle">STS 51-J (STS-28)<br>
           </td>
           <td align="center" valign="middle">OI6-28<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-30 (61A)<br>
+          <td align="center" valign="middle">STS 61-A (STS-30)<br>
           </td>
           <td align="center" valign="middle">OI6-29<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-31 (61B)<br>
+          <td align="center" valign="middle">STS 61-B (STS-31)<br>
           </td>
           <td align="center" valign="middle">OI6-30<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-33 (51L)<br>
+          <td align="center" valign="middle">STS 51-L (STS-33)<br>
           </td>
           <td align="center" valign="middle">OI17-26<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-32 (61C)<br>
+          <td align="center" valign="middle">STS 61-C (STS-32)<br>
           </td>
           <td align="center" valign="middle">OI17-32<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-26 (26R), 27 (27R), 28
-            (28R), 29 (29R), 30 (30R), 33 (33R)<br>
+          <td align="center" valign="middle">STS-26 (STS-26R), STS-27 (STS-27R),
+            STS-28 (STS-28R), <br>
+            STS-29 (STS-29R), STS-30 (STS-30R), STS-33 (STS-33R)<br>
           </td>
           <td align="center" valign="middle">OI-8B<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-31 (31R), 32 (32R), 34
-            (34R), 36 (36R)<br>
+          <td align="center" valign="middle">STS-31 (STS-31R), STS-32 (STS-32R),
+            STS-34 (STS-34R), <br>
+            STS-36 (STS-36R)<br>
           </td>
           <td align="center" valign="middle">OI-8C<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-35 (61E), 38, 40, 41<br>
+          <td align="center" valign="middle">STS-35 (STS 61-E), STS-38,
+            STS-40, STS-41<br>
           </td>
           <td align="center" valign="middle">OI-8D<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-37, 39<br>
+          <td align="center" valign="middle">STS-37, STS-39<br>
           </td>
           <td align="center" valign="middle">OI-8F<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-42, 43, 44, 45, 48<br>
+          <td align="center" valign="middle">STS-42, STS-43, STS-44,
+            STS-45, STS-48<br>
           </td>
           <td align="center" valign="middle">OI-20<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-46, 47, 49, 50, 52, 53,
-            54, 55, 56<br>
+          <td align="center" valign="middle">STS-46, STS-47, STS-49,
+            STS-50, STS-52, STS-53,
+            STS-54, <br>
+            STS-55, STS-56<br>
           </td>
           <td align="center" valign="middle">OI-21<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-51, 57, 58, 59, 60, 61,
-            62, 68<br>
+          <td align="center" valign="middle">STS-51, STS-57, STS-58,
+            STS-59, STS-60, STS-61, STS-62, <br>
+            STS-68<br>
           </td>
           <td align="center" valign="middle">OI-22<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-63, 64, 65, 66, 67<br>
+          <td align="center" valign="middle">STS-63, STS-64, STS-65,
+            STS-66, STS-67<br>
           </td>
           <td align="center" valign="middle">OI-23<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-69, 70, 71, 72, 73, 74,
-            75, 76, 77, 78<br>
+          <td align="center" valign="middle">STS-69, STS-70, STS-71,
+            STS-72, STS-73, STS-74, STS-75, <br>
+            STS-76, STS-77, STS-78<br>
           </td>
           <td align="center" valign="middle">OI-24<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-79, 80, 81, 82, 83, 84,
-            94<br>
+          <td align="center" valign="middle">STS-79, STS-80, STS-81,
+            STS-82, STS-83, STS-84, <br>
+            STS-94 (STS-83R)<br>
           </td>
           <td align="center" valign="middle">OI-25<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-85, 86, 87, 89<br>
+          <td align="center" valign="middle">STS-85, STS-86, STS-87,
+            STS-89<br>
           </td>
-          <td align="center" valign="middle">OI-26A<br>
+          <td align="center" valign="middle">OI-26<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-88, 90, 91, 93, 95, 103<br>
+          <td align="center" valign="middle">STS-88 (ISS-2A), STS-90,
+            STS-91, STS-93, STS-95, STS-103<br>
           </td>
           <td align="center" valign="middle">OI-26B<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-92, 96, 97, 99, 101,
-            106<br>
+          <td align="center" valign="middle">STS-92 (ISS 3A), STS-96
+            (ISS-2A.1), STS-97 (ISS 4A), STS-99, <br>
+            STS-101 (ISS 2A.2a),
+            STS-106 (ISS 2A.2b)<br>
           </td>
           <td align="center" valign="middle">OI-27<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-98, 100, 102, 104, 105,
-            108, 109<br>
+          <td align="center" valign="middle">STS-98 (ISS 5A), STS-100
+            (ISS 6A), STS-102 (ISS 5A.1), <br>
+            STS-104 (ISS 7A), STS-105 (ISS 7A.1), STS-108 (ISS UF-1), <br>
+            STS-109<br>
           </td>
           <td align="center" valign="middle">OI-28<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-107, 110, 111, 112, 113<br>
+          <td align="center" valign="middle">STS-107, STS-110 (ISS 8A),
+            STS-111 (ISS UF-2), STS-112 (ISS 9A), <br>
+            STS-113 (ISS 11A)<br>
           </td>
           <td align="center" valign="middle">OI-29<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-114, 115, 116, 117,
-            118, 121<br>
+          <td align="center" valign="middle">STS-114 (LF-1), STS-115
+            (ISS 12A), STS-116 (ISS 12A.1), <br>
+            STS-117 (ISS 13A), STS-118 (ISS 13A.1), STS-121 (ULF1.1)<br>
           </td>
           <td align="center" valign="middle">OI-30<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-120, 122, 123, 124, 125<br>
+          <td align="center" valign="middle">STS-120 (ISS 10A), STS-122
+            (ISS 1E), STS-123 (ISS 1JA), <br>
+            STS-124 (ISS 1J), STS-125<br>
           </td>
           <td align="center" valign="middle">OI-32<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-119, 126, 127<br>
+          <td align="center" valign="middle">STS-119 (ISS-15A), STS-126
+            (ISS-ULF2), STS-127 (ISS-2JA)<br>
           </td>
           <td align="center" valign="middle">OI-33<br>
           </td>
         </tr>
         <tr>
-          <td align="center" valign="middle">STS-128, 129, 130, 131,
-            132, 133, 134, 135<br>
+          <td align="center" valign="middle">STS-128 (ISS 17A), STS-129
+            (ULF3), STS-130 (ISS 20A), <br>
+            STS-131 (ISS 19A), STS-132 (ULF4), STS-133 (ULF5), <br>
+            STS-134 (ULF6), STS-135 (ULF7)<br>
           </td>
           <td align="center" valign="middle">OI-34<br>
           </td>
@@ -1661,16 +1749,16 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
     <p>As was mentioned earlier in the <a moz-do-not-send="true"
         href="#Introduction">Introduction</a>, the principal method by
       which the General Purpose Computers (GPC) running the primary
-      flight software (PFS) and backup flight software (BFS) interact
+      flight software (PASS) and backup flight software (BFS) interact
       with the crew includes keyboards and display screens.&nbsp; What's
       unusual about the display screens is that what appears on them is
-      only <i>partially</i> controlled by the PFS or BFS
+      only <i>partially</i> controlled by the PASS or BFS
       software.&nbsp; Instead, there was another processor sitting
       between each of the displays and the GPCs, and it was this extra
       processor that directly controlled what was displayed and how the
       display was formatted.&nbsp; (For that matter, the keyboards also
       were attached to one of these extra processors rather than to the
-      GPCs, so whatever keystrokes were seen by the PFS / BFS software
+      GPCs, so whatever keystrokes were seen by the PASS / BFS software
       had already been pre-digested by these extra processors.)<br>
     </p>
     <p><img moz-do-not-send="true" src="MCDS.png" alt="" align="right"
@@ -1700,6 +1788,8 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         Application Software (DAS)</i>.&nbsp; But these kinds of details
       are of little interest to us in the absence of the DAS or other
       software that actually ran on the DEU/IDPs.&nbsp; So the only use
@@ -1712,7 +1802,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       DEU/IDP's RAM was used to store a set of templates that controlled
       the formatting of the display screen.&nbsp; These templates were
       loaded from mass memory into RAM at power-up.&nbsp; In other
-      words, the screen templates are <i>independent</i> of the PFS /
+      words, the screen templates are <i>independent</i> of the PASS /
       BFS source code.<br>
     </p>
     For illustrative purposes, there's an example below of the template
@@ -1726,7 +1816,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           <td valign="top"><img moz-do-not-send="true"
               src="GNC-SYS-SUMM-1-PASS-STS96.png" alt="" width="534"
               height="385"><br>
-            <div align="center"><i>PFS GNC SYS SUMM 1 screen, STS-96</i><br>
+            <div align="center"><i>PASS GNC SYS SUMM 1 screen, STS-96</i><br>
             </div>
           </td>
           <td valign="top"><img moz-do-not-send="true"
@@ -1744,7 +1834,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
       corner or the X's and S's that are all over the place.&nbsp; Other
       markings, like the "SURF", "POS", "MOM", and "DPS" are simply
       features of the template, and don't change at the whim of the GPC
-      or more specifically, of PFS or BFS.<br>
+      or more specifically, of PASS or BFS.<br>
     </p>
     <p>The screen templates don't <i>quite</i> fall under the
       Operational Increment (OI) top-level software-versioning scheme
@@ -1782,11 +1872,15 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
 
 
 
+
+
         GNC SYS SUMM 1 sample templates above came from one such DPS
         Dictionary</a>.&nbsp; There are also reference-card-like
       summaries that are very helpful, such as <a
         moz-do-not-send="true"
         href="Shuttle/Orbiter%20Displays%20Reference%20Guide%20OI-34.pdf">this
+
+
 
 
 
@@ -1836,7 +1930,7 @@ href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Co
           <td valign="top"><img moz-do-not-send="true"
               src="GNC-SYS-SUMM-1-PASS-OP34.png" alt="" width="541"
               height="371"><br>
-            <div align="center"><i>PFS GNC SYS SUMM 1 screen, STS-128</i><br>
+            <div align="center"><i>PASS GNC SYS SUMM 1 screen, STS-128</i><br>
             </div>
           </td>
           <td valign="top"><img moz-do-not-send="true"
@@ -1870,6 +1964,8 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
 
 
 
+
+
         Processing System Brief</a>.&nbsp; I won't bother to summarize
       that information here, since the document's presentation is at
       least as readable as anything I might write up to supplement
@@ -1884,13 +1980,10 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     <h1><a name="Emulation"></a>Compilation and Emulation</h1>
     Recall that the Shuttle flight software was largely written in the
     high-level language HAL/S.&nbsp; In contrast to the HAL/S source
-    code for the flight software, PFS (PASS) and BFS, of which I have
-    none so far, I have in fact received quite <a
-      moz-do-not-send="true" href="#PASS">a lot of the source code (but
-      not all) for the original HAL/S compiler, <tt>HAL/S-FC</tt></a>.&nbsp;
-
-
-    <br>
+    code for the flight software, PASS and BFS, of which I have none so
+    far, I have in fact received quite <a moz-do-not-send="true"
+      href="#PASS">a lot of the source code (but not all) for the
+      original HAL/S compiler, <tt>HAL/S-FC</tt></a>.&nbsp; <br>
     <blockquote><font size="-1"><b>Aside:</b> </font><font size="-1"><tt>HAL/S-FC</tt></font><font
         size="-1"> was written in a language called <a
           moz-do-not-send="true" href="https://www.cs.toronto.edu/XPL/">XPL</a>,
@@ -2006,6 +2099,8 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     we like, directly and immediately, without wrapping our code in a <tt>PROGRAM</tt>.&nbsp;
 
 
+
+
     For example, by inputting a couple of hopefully-self-explanatory
     lines of HAL/S code into the interpreter, I get the following<br>
     <blockquote><tt>HAL/S &gt; DECLARE PI CONSTANT (3.141592653589793);</tt><tt><br>
@@ -2099,6 +2194,8 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
     and it's the actual execution that's triggered by <tt>`run SIMPLE</tt>.&nbsp;
 
 
+
+
     And of course, <tt>SIMPLE</tt> doesn't vanish after we've finished
     running it; the interpreter still recalls its definition, and we
     could run it again if we liked:<br>
@@ -2151,7 +2248,7 @@ href="Shuttle/JSC-18820%20-%20Rev%20B%20-%20Data%20Processing%20System%20Brief%2
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-04-16<br>
+          2023-08-01<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

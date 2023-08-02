@@ -36,6 +36,8 @@
 #                               Shuttle library.
 #               2022-11-28 RSB  Added OI-specific sections to the Shuttle
 #                               library.
+#               2023-07-31 RSB  Added shorthand STS-nnn-mmm to Targets field.
+#               2023-08-01 RSB  Added the "Flight STS-xxx" sections for --shuttle.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -282,6 +284,51 @@ shuttle = False
 for param in sys.argv[1:]:
     if param == "--shuttle":
         shuttle = True
+
+if shuttle:
+    oi2sts = {
+        "r16/t9": [1],
+        "r18/t11": [2, 3, 4],
+        "r19/t12": [5, 6, 7, 8],
+        "oi-2": [9, 11, 13],
+        "oi-4": [14, 17, 19, 20, 24],
+        "oi-5": [22, 23],
+        #"oi5-24": [26],
+        "oi-6": [25],
+        #"oi6-27": [27],
+        #"oi6-28": [28],
+        #"oi6-29": [30],
+        #"oi6-30": [31],
+        #"oi17-26": [33],
+        #"oi17-32": [32],
+        "oi-8b": [26, 27, 28, 29, 30, 33],
+        "oi-8c": [31, 32, 34, 36],
+        "oi-8d": [35, 38, 40, 41],
+        "oi-8f": [37, 39],
+        "oi-20": [42, 43, 44, 45, 48],
+        "oi-21": [46, 47, 49, 50, 52, 53, 54, 55, 56],
+        "oi-22": [51, 57, 58, 59, 60, 61, 62, 68],
+        "oi-23": [63, 64, 65, 66, 67],
+        "oi-24": [69, 70, 71, 72, 73, 74, 75, 76, 77, 78],
+        "oi-25": [79, 80, 81, 82, 83, 84, 94],
+        "oi-26a": [85, 86, 87, 89],
+        "oi-26b": [88, 90, 91, 93, 95, 103],
+        "oi-27": [92, 96, 97, 99, 101, 106],
+        "oi-28": [98, 100, 102, 104, 105, 108, 109],
+        "oi-29": [107, 110, 111, 112, 113],
+        "oi-30": [114, 115, 116, 117, 118, 121],
+        "oi-32": [120, 122, 123, 124, 125],
+        "oi-33": [119, 126, 127],
+        "oi-34": [128, 129, 130, 131, 132, 133, 134, 135]
+        }
+    for oi in oi2sts:
+        stsList = oi2sts[oi]
+        for i in range(len(stsList)):
+            sts = stsList[i]
+            if isinstance(sts, int):
+                stsList[i] = "sts-%d" % sts
+            else:
+                stsList[i] = "sts-%s" % sts.lower()
 
 oldRemote = "http://www.ibiblio.org/apollo/"
 remote = "https://www.ibiblio.org/apollo/"
@@ -1382,7 +1429,144 @@ if shuttle:
         { "anchor" : "OI30", "title" : "Software Version OI-30", "keywords" : [ "OI-30" ] },
         { "anchor" : "OI32", "title" : "Software Version OI-32", "keywords" : [ "OI-32" ] },
         { "anchor" : "OI33", "title" : "Software Version OI-33", "keywords" : [ "OI-33" ] },
-        { "anchor" : "OI34", "title" : "Software Version OI-34", "keywords" : [ "OI-34" ] },
+        { "anchor" : "OI34", "title" : "Software Version OI-34", "keywords" : [ "OI-34" ] }, 
+        { "anchor" : 1 },
+        { "anchor" : 2 },
+        { "anchor" : 3 },
+        { "anchor" : 4 },
+        { "anchor" : 5 },
+        { "anchor" : 6 },
+        { "anchor" : 7 },
+        { "anchor" : 8 },
+        { "anchor" : 9, "title": "STS 41-A (STS-9" },
+        { "anchor" : 11, "title": "STS 41-B (STS-11)" },
+        { "anchor" : 13, "title": "STS 41-C (STS-13)" },
+        { "anchor" : 14, "title": "STS 41-DR (STS-14" },
+        { "anchor" : 17, "title": "STS 41-G (STS-17)" },
+        { "anchor" : 19, "title": "STS 51-A (STS-19)" },
+        { "anchor" : 20, "title": "STS 51-C (STS-20)" },
+        { "anchor" : 22, "title": "STS 51-E (STS-22)" },
+        { "anchor" : 23, "title": "STS 51-D (STS-23)" },
+        { "anchor" : 24, "title": "STS 51-B (STS-24)" },
+        { "anchor" : 25, "title": "STS 51-G (STS-25)" },
+        { "anchor" : 26, "title": "STS 51-F (STS-26)" },
+        { "anchor" : 27, "title": "STS 51-I (STS-27)" },
+        { "anchor" : 28, "title": "STS 51-J (STS-28)" },
+        { "anchor" : 30, "title": "STS 61-A (STS-30)" },
+        { "anchor" : 31, "title": "STS 61-B (STS-31)" },
+        { "anchor" : 32, "title": "STS 61-C (STS-32)" },
+        { "anchor" : 33, "title": "STS 51-L (STS-33)" },
+        { "anchor" : 29, "title": "STS-29 (STS-29R)" },
+        { "anchor" : "STS29R", "title": "STS-26 (STS-26R)" },
+        { "anchor" : "STS27R", "title": "STS-27 (STS-27R)" },
+        { "anchor" : "STS29R", "title": "STS-29 (STS-29R)" },
+        { "anchor" : "STS30R", "title": "STS-30 (STS-30R)" },
+        { "anchor" : "STS28R", "title": "STS-28 (STS-28R)" },
+        { "anchor" : "STS34R", "title": "STS-34 (STS-34R)" },
+        { "anchor" : "STS33R", "title": "STS-33 (STS-33R)" },
+        { "anchor" : "STS32R", "title": "STS-32 (STS-32R)" },
+        { "anchor" : "STS36R", "title": "STS-36 (STS-36R)" },
+        { "anchor" : "STS31R", "title": "STS-31 (STS-31R)" },
+        { "anchor" : 41 },
+        { "anchor" : 38 },
+        { "anchor" : 35, "title": "STS-35 (STS 61-E)" },
+        { "anchor" : 37 },
+        { "anchor" : 39 },
+        { "anchor" : 40 },
+        { "anchor" : 43 },
+        { "anchor" : 48 },
+        { "anchor" : 44 },
+        { "anchor" : 42 },
+        { "anchor" : 45 },
+        { "anchor" : 49 },
+        { "anchor" : 50 },
+        { "anchor" : 46 },
+        { "anchor" : 47 },
+        { "anchor" : 52 },
+        { "anchor" : 53 },
+        { "anchor" : 54 },
+        { "anchor" : 56 },
+        { "anchor" : 55 },
+        { "anchor" : 57 },
+        { "anchor" : 51 },
+        { "anchor" : 58 },
+        { "anchor" : 61 },
+        { "anchor" : 60 },
+        { "anchor" : 62 },
+        { "anchor" : 59 },
+        { "anchor" : 65 },
+        { "anchor" : 64 },
+        { "anchor" : 68 },
+        { "anchor" : 66 },
+        { "anchor" : 63 },
+        { "anchor" : 67 },
+        { "anchor" : 71 },
+        { "anchor" : 70 },
+        { "anchor" : 69 },
+        { "anchor" : 73 },
+        { "anchor" : 74 },
+        { "anchor" : 72 },
+        { "anchor" : 75 },
+        { "anchor" : 76 },
+        { "anchor" : 77 },
+        { "anchor" : 78 },
+        { "anchor" : 79 },
+        { "anchor" : 80 },
+        { "anchor" : 81 },
+        { "anchor" : 82 },
+        { "anchor" : 83 },
+        { "anchor" : 84 },
+        { "anchor" : 94, "title": "STS-94 (STS-83R)" },
+        { "anchor" : 85 },
+        { "anchor" : 86 },
+        { "anchor" : 87 },
+        { "anchor" : 89 },
+        { "anchor" : 90 },
+        { "anchor" : 91 },
+        { "anchor" : 95 },
+        { "anchor" : 88, "title": "STS-88/ISS-2A" },
+        { "anchor" : 96, "title": "STS-96/ISS-2A.1" },
+        { "anchor" : 93 },
+        { "anchor" : 103 },
+        { "anchor" : 99 },
+        { "anchor" : 101, "title": "STS-101/ISS 2A.2a" },
+        { "anchor" : 106, "title": "STS-106/ISS 2A.2b" },
+        { "anchor" : 92, "title": "STS-92/ISS 3A" },
+        { "anchor" : 97, "title": "STS-97/ISS 4A" },
+        { "anchor" : 98, "title": "STS-98/ISS 5A" },
+        { "anchor" : 102, "title": "STS-102/ISS 5A.1" },
+        { "anchor" : 100, "title": "STS-100/ISS 6A" },
+        { "anchor" : 104, "title": "STS-104/ISS 7A" },
+        { "anchor" : 105, "title": "STS-105/ISS 7A.1" },
+        { "anchor" : 108, "title": "STS-108/ISS UF-1" },
+        { "anchor" : 109 },
+        { "anchor" : 110, "title": "STS-110/ISS 8A" },
+        { "anchor" : 111, "title": "STS-111/ISS UF-2" },
+        { "anchor" : 112, "title": "STS-112/ISS 9A" },
+        { "anchor" : 113, "title": "STS-113/ISS 11A" },
+        { "anchor" : 107 },
+        { "anchor" : 114, "title": "STS-114/LF-1" },
+        { "anchor" : 121, "title": "STS-121/ULF1.1" },
+        { "anchor" : 115, "title": "STS-115/ISS 12A" },
+        { "anchor" : 116, "title": "STS-116/ISS 12A.1" },
+        { "anchor" : 117, "title": "STS-117/ISS 13A" },
+        { "anchor" : 118, "title": "STS-118/ISS 13A.1" },
+        { "anchor" : 120, "title": "STS-120/ISS 10A" },
+        { "anchor" : 122, "title": "STS-122/ISS 1E" },
+        { "anchor" : 123, "title": "STS-123/ISS 1JA" },
+        { "anchor" : 124, "title": "STS-124/ISS 1J" },
+        { "anchor" : 126, "title": "STS-126/ISS-ULF2" },
+        { "anchor" : 119, "title": "STS-119/ISS-15A" },
+        { "anchor" : 125 },
+        { "anchor" : 127, "title": "STS-127/ISS-2JA" },
+        { "anchor" : 128, "title": "STS-128 (17A)" },
+        { "anchor" : 129, "title": "STS-129/ULF3" },
+        { "anchor" : 130, "title": "STS-130/20A" },
+        { "anchor" : 131, "title": "STS-131/19A" },
+        { "anchor" : 132, "title": "STS-132/ULF4" },
+        { "anchor" : 133, "title": "STS-133/ULF5" },
+        { "anchor" : 134, "title": "STS-134/ULF6" },
+        { "anchor" : 135, "title": "STS-135/ULF7" },
         { "anchor" : "GOAL", "title" : "Ground Operations Aerospace Language (GOAL)", "keywords" : [ "GOAL" ] },
         { "anchor" : "papers", "title" : "Papers, Articles, Presentations, Books", "keywords" : [ "papers", "paper" ] },
         { "anchor" : "studies", "title" : "Studies, Analyses", "keywords" : [ "studies" ] },
@@ -1399,6 +1583,17 @@ if shuttle:
         { "anchor" : "Administrative", "title" : "Administrative", "keywords" : ["administrative"] },
         { "anchor" : "Everything", "title" : "Everything", "blurb" : blurbEverything, "all" : True, "lineNumbers" : True, "hr" : True }
     ]
+    # Above I took some shortcuts for the STS-nnn entries, so flesh them out.
+    for entry in tableOfContentsSpec:
+        if "anchor" not in entry:
+            continue
+        if isinstance(entry["anchor"], int):
+            n = entry["anchor"]
+            entry["anchor"] = "STS%d" % n
+            entry["title"] = "STS-%d" % n
+        if entry["anchor"].startswith("STS"):
+            entry["targets"] = [entry["anchor"].replace("STS", "STS-")]
+            entry["title"] = "Flight " + entry["title"]
 else:
     tableOfContentsSpec = [
         { "title" : "Debug", "sortKey" : myOriginalSortKey, "blurb" : blurbDebug },
@@ -1594,8 +1789,32 @@ for line in lines[1:]:
             record["Authors"] = orgList(field5, "Name")            
     if len(fields) >= 7:    # Field 7
         record["Targets"] = simpleList(fields[6].lower())
+        # For STS-nnn missions, I've often found documents that have relevance
+        # for missions STS-nnn through STS-mmm, and it's quite a hassle to
+        # manually list a bunch of missions like that.  I want instead to use
+        # the shorthand STA-nnn-mmm.  So I catch that here:
+        targets = record["Targets"]
+        for i in range(len(targets)-1, -1, -1):
+            target = targets[i]
+            if target.startswith("sts-"):
+                stsFields = target.split("-")
+                if len(stsFields) == 3 and stsFields[1].isdigit() and \
+                        stsFields[2].isdigit():
+                    nnn = int(stsFields[1])
+                    mmm = int(stsFields[2])
+                    if nnn >= 1 and nnn < mmm and mmm <= 135:
+                        t = []
+                        for j in range(nnn, mmm+1):
+                            t.append("sts-%d" % j)
+                        targets[i:i] = t
     if len(fields) >= 8:    # Field 8
         record["Keywords"] = simpleList(fields[7].lower())
+        if shuttle:
+            for keyword in record["Keywords"]:
+                if keyword in oi2sts:
+                    for sts in oi2sts[keyword]:
+                        if sts not in record["Targets"]:
+                            record["Targets"].append(sts)
     if len(fields) >= 9:    # Field 9
         # The string replacement in the line below is a simple convenience for
         # me (RSB), so that I can cut-and-paste hyperlinks to local documents
