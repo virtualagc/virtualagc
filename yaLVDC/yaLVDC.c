@@ -34,6 +34,9 @@
  * 				capability the the yaOBC program, but I'm
  * 				just too lazy and would prefer to write it
  * 				from scratch.
+ *              2023-07-15 MAS  Changed LVDC startup to begin at address
+ *                              000, instead of loading a HOP constant
+ *                              from there.
  */
 
 #include <stdio.h>
@@ -244,10 +247,7 @@ main(int argc, char *argv[])
   cyclesPerTick = 1.0 / (SECONDS_PER_CYCLE * sysconf(_SC_CLK_TCK))
       / clockDivisor;
   startingTime = times(&TmsStruct);
-  if (ptc)
-    state.hop = 0;
-  else
-    state.hop = state.core[0][0][2][0];
+  state.hop = 0;
 
   // Emulation.
   while (1)
