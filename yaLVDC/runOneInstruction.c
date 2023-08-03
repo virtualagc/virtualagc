@@ -90,6 +90,10 @@
  *                                  longer used in channel selection (they only
  *                                  determine if the accumulator or memory are the
  *                                  source of the data being sent to the LVDA).
+ *              2023-08-02 MAS  Moved PQR countdown to the start of runOneInstruction
+ *                              and positioned the reenterForEXM label such that both
+ *                              this countdown and the interrupt inhibit one are
+ *                              re-executed for EXM's second cycle.
  */
 
 #include <stdlib.h>
@@ -543,12 +547,22 @@ runOneInstruction(int *cyclesUsed)
     state.prsParityDelayCount++;
 
   // Set global variables providing background info on the emulation.
+  reenterForEXM: ;
   if (state.inhibitInterruptCycles > 0)
     state.inhibitInterruptCycles--;
   dataFromInstructionMemory = 0;
   instructionFromDataMemory = 0;
 
-  reenterForEXM: ;
+  if (state.mpyDivCount > 0)
+    {
+      // Copy ongoing MPY/DIV results into PQ
+      state.mpyDivCount--;
+      if (state.mpyDivCount > 0)
+        state.pq = state.pqPend1;
+      else
+        state.pq = state.pqPend2;
+    }
+
   if (state.pendingInstruction.pending)
     {
       state.pendingInstruction.pending = 0;
@@ -1144,15 +1158,6 @@ runOneInstruction(int *cyclesUsed)
       goto done;
     }
 
-  if (state.mpyDivCount > 0)
-    {
-      // Copy ongoing MPY/DIV results into PQ
-      state.mpyDivCount--;
-      if (state.mpyDivCount > 0)
-        state.pq = state.pqPend1;
-      else
-        state.pq = state.pqPend2;
-    }
   rawHopStructure.loc = nextLOC;
   rawHopStructure.s = nextS;
   if (!isHOP)
