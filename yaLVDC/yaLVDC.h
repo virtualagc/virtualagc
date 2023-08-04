@@ -39,11 +39,13 @@
  *                              EXM pending instructions for use with
  *                              interrupts, and changed interrupt inhibit
  *                              to a cycle counter.
+ *              2023-08-04 RSB  Added pioLogFlags, pioLogFile;
  */
 
 #ifndef yaLVDC_h
 #define yaLVDC_h
 
+#include <stdio.h>
 #include <stdint.h>
 #include <limits.h>
 
@@ -147,6 +149,8 @@ extern int cpuCurrentAccumulator;
 extern char *coreFilename;
 extern int ptc;
 extern int coldStart;
+extern int pioLogFlags;
+extern FILE *pioLogFile;
 
 int
 parseCommandLineArguments(int argc, char *argv[]);

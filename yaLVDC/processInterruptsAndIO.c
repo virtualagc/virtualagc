@@ -54,11 +54,13 @@
  *              2023-08-01 MAS  Split processInterruptsAndIO() into PTC and
  *                              LVDA implementations. Added RTC, timer, and
  *                              interrupt support for the LVDA.
+ *              2023-08-04 RSB  Added pioLogFlags, pioLogFile;
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "yaLVDC.h"
 
 // Note the mapping of the individual bits in the interrupt
@@ -493,7 +495,8 @@ processPTCInterruptsAndIO(void)
 int
 processLVDAInterruptsAndIO(void)
 {
-  int retVal = 0, channel, payload, lastInterruptLatch = 0;
+  int retVal = 0, channel, payload;
+  //int lastInterruptLatch = 0;
   int *interruptLatch = &state.pio[0137];
 
   // Begin by servicing the real-time clock (RTC) and timers.
@@ -536,6 +539,17 @@ processLVDAInterruptsAndIO(void)
     {
       channel = state.pioChange;
       payload = state.pio[channel];
+
+      if (pioLogFile != NULL && (pioLogFlags & 1) != 0)
+        {
+          if (-1 == fprintf(pioLogFile, "%lu\t>\t%03o\t%09o\n", cycleCount,
+                        channel, payload))
+            {
+              fclose(pioLogFile);
+              pioLogFile = NULL;
+              pioLogFlags = 0;
+            }
+        }
 
       if (channel == 032)
         {

@@ -32,10 +32,13 @@
  * Reference:   http://www.ibibio.org/apollo
  * Mods:        2019-09-18 RSB  Began.
  *              2020-04-29 RSB  Resumed development (including --ptc).
+ *              2023-08-04 RSB  Added --log-pio.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 #include "yaLVDC.h"
 
 static char helpMessage[] = "Usage:\n"
@@ -59,6 +62,9 @@ static char helpMessage[] = "Usage:\n"
     "              file does not exist initially, then the initial state is\n"
     "              instead taken from the --assembly file, but the --core\n"
     "              file will still be created and periodically updated.\n"
+    "--log-pio=N   Logs PIO instructions to a file called yaLVDC.pio.\n"
+    "              N is a set of flags to determine what's logged:\n"
+    "                   1     Outputs\n"
     "--ptc         Emulate a PTC target rather than an LVDC target.\n"
     "--run         Start the LVDC/PTC program running freely.  By default,\n"
     "              (without --run), will simply pause without running.\n"
@@ -90,6 +96,8 @@ static char helpMessage[] = "Usage:\n"
 char *coreFilename = "yaLVDC.core";
 int ptc = 0;
 int coldStart = 0;
+int pioLogFlags = 0;
+FILE *pioLogFile = NULL;
 
 // Parse a set of command-line arguments and set global variables based
 // on them.
@@ -112,6 +120,16 @@ parseCommandLineArguments (int argc, char *argv[])
 	}
       else if (!strncmp (argv[i], "--core=", 7))
 	coreFilename = &argv[i][7];
+      else if (!strncmp (argv[i], "--log-pio=", 10))
+        {
+          pioLogFlags = atoi(&argv[i][10]);
+          if (pioLogFlags != 0)
+            {
+              pioLogFile = fopen("yaLVDC.pio", "w");
+              if (pioLogFile == NULL)
+                  pioLogFlags = 0;
+            }
+        }
       else if (!strcmp (argv[i], "--ptc"))
         ptc = 1;
       else if (1 == sscanf(argv[i], "--port=%d", &j))
