@@ -948,9 +948,11 @@ runOneInstruction(int *cyclesUsed)
               // Can change discard to non-zero here if there are pioLogFlags
               // asking to reject some channels or values.
               if (discard == 0 && -1 == fprintf(pioLogFile,
-                                                "%lu\t>\t%03o\t%09o\n",
+                                                "%lu\t>\t%03o\t%02o\t%09o\n",
                                                 cycleCount,
-                                                operand9, sourceValue))
+                                                operand9,
+                                                hopStructure.ds,
+                                                sourceValue))
                 {
                   fclose(pioLogFile);
                   pioLogFile = NULL;
