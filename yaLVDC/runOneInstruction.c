@@ -94,6 +94,12 @@
  *                              and positioned the reenterForEXM label such that both
  *                              this countdown and the interrupt inhibit one are
  *                              re-executed for EXM's second cycle.
+ *              2023-08-05 RSB  Moved PIO logging from processInterruptsAndIO.c
+ *                              to here.  I was obliged to change the internal
+ *                              variable cycleCount in the runOneInstruction()
+ *                              function to deltaCycleCount, because I needed
+ *                              to use the global variable cycleCount (same
+ *                              name!) for logging.
  */
 
 #include <stdlib.h>
@@ -476,7 +482,7 @@ int
 runOneInstruction(int *cyclesUsed)
 {
   int retVal = 1;
-  int cycleCount = 1, saveLOC, nextLOC, nextS, isHOP = 0;
+  int deltaCycleCount = 1, saveLOC, nextLOC, nextS, isHOP = 0;
   int64_t dummy;  // For multiplication intermediate result.
   hopStructure_t hopStructure, rawHopStructure, rawestHopStructure;
   uint16_t instruction, operand9;
@@ -679,7 +685,7 @@ runOneInstruction(int *cyclesUsed)
       // into the accumulator at the end.
       if (op == 005)
         {
-          cycleCount = 5;
+          deltaCycleCount = 5;
           state.mpyDivCount = 1;
           state.acc = state.pqPend2;
           // A slight quirk of MPY is that even though it completed in
@@ -919,6 +925,7 @@ runOneInstruction(int *cyclesUsed)
         state.acc = state.pio[operand9];
       else
         {
+          int sourceValue;
           // Bits 8-9 only determine the source of data being sent to
           // the LVDA.
           if (ptc)
@@ -926,14 +933,32 @@ runOneInstruction(int *cyclesUsed)
           else
             state.pioChange = operand & 0177;
           if (!a8) // Source is the accumulator
-            state.pio[state.pioChange] = state.acc;
+            sourceValue = state.acc;
           else // Source is memory.
             {
               if (fetchData(hopStructure.dm, residual, hopStructure.ds, operand,
                   &fetchedFromMemory, &dataFromInstructionMemory))
                 fetchedFromMemory = 0;
-              state.pio[state.pioChange] = fetchedFromMemory;
+              sourceValue = fetchedFromMemory;
             }
+          state.pio[state.pioChange] = sourceValue;
+          if (pioLogFile != NULL && (pioLogFlags & 1) != 0)
+            {
+              int discard = 0;
+              // Can change discard to non-zero here if there are pioLogFlags
+              // asking to reject some channels or values.
+              if (discard == 0 && -1 == fprintf(pioLogFile,
+                                                "%lu\t>\t%03o\t%09o\n",
+                                                cycleCount,
+                                                operand, sourceValue))
+                {
+                  fclose(pioLogFile);
+                  pioLogFile = NULL;
+                  pioLogFlags = 0;
+                }
+            }
+
+
         }
     }
   else if (op == 013)
@@ -1139,7 +1164,7 @@ runOneInstruction(int *cyclesUsed)
       // Note also that while EXM inhibits interrupts for 1 cycle, we do
       // not need to set inhibitInterruptCycles since we're forcing the
       // next cycle to immediately happen without exiting.
-      cycleCount++;
+      deltaCycleCount++;
       goto reenterForEXM;
     }
   else if (op == 017)
@@ -1175,8 +1200,8 @@ runOneInstruction(int *cyclesUsed)
   if (formHopConstant(&rawestHopStructure, &state.hopSaver))
     state.hopSaver = -1;
 
-  *cyclesUsed = cycleCount;
-  state.rtcDivider += cycleCount;
+  *cyclesUsed = deltaCycleCount;
+  state.rtcDivider += deltaCycleCount;
   retVal = 0;
   done: ;
   return (retVal);

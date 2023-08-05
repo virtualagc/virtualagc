@@ -54,7 +54,8 @@
  *              2023-08-01 MAS  Split processInterruptsAndIO() into PTC and
  *                              LVDA implementations. Added RTC, timer, and
  *                              interrupt support for the LVDA.
- *              2023-08-04 RSB  Added pioLogFlags, pioLogFile;
+ *              2023-08-04 RSB  Added pioLogFlags, pioLogFile.
+ *              2023-08-05 RSB  Moved the PIO logging to runOneInstruction.c.
  */
 
 #include <stdlib.h>
@@ -539,18 +540,6 @@ processLVDAInterruptsAndIO(void)
     {
       channel = state.pioChange;
       payload = state.pio[channel];
-
-      if (pioLogFile != NULL && (pioLogFlags & 1) != 0)
-        {
-          if (-1 == fprintf(pioLogFile, "%lu\t>\t%03o\t%09o\n", cycleCount,
-                        channel, payload))
-            {
-              fclose(pioLogFile);
-              pioLogFile = NULL;
-              pioLogFlags = 0;
-            }
-        }
-
       if (channel == 032)
         {
           // Any bits that were set to 1 in the PIO write are cleared from the
