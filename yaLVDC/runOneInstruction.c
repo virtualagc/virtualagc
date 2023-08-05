@@ -950,7 +950,7 @@ runOneInstruction(int *cyclesUsed)
               if (discard == 0 && -1 == fprintf(pioLogFile,
                                                 "%lu\t>\t%03o\t%09o\n",
                                                 cycleCount,
-                                                operand, sourceValue))
+                                                operand9, sourceValue))
                 {
                   fclose(pioLogFile);
                   pioLogFile = NULL;
