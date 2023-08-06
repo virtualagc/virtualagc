@@ -56,5 +56,5 @@ for line in lines:
         z = components["z"]
         r2 = x * x + y * y + z * z
         r = (math.sqrt(r2) - radius39A) / 1000.0
-        print("%e\t%e\t%e" % (t, r, v))
+        print("%8.4f\t%8.4f\t%8.3f" % (t, r, v))
         components = {}
