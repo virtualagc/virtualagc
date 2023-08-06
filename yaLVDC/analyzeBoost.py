@@ -21,13 +21,14 @@ def tScale(t):
     return t * 168.0 / 2048000
 
 def vScale(v):
-    return v / (2 * 1000.0)
+    return v / 2048
 
 def rScale(x):
     if x & 0o200000000:
         x = -(x ^ 0o377777777)
     return x / 4.0
 
+print("Time (sec)\tAltitude (km)\tVelocity (m/sec)")
 components = {}
 for line in lines:
     fields = line.strip().split("\t")
