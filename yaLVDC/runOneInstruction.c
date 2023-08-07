@@ -100,6 +100,9 @@
  *                              function to deltaCycleCount, because I needed
  *                              to use the global variable cycleCount (same
  *                              name!) for logging.
+ *              2023-08-07 RSB  Now automatically flushes the pioLogFile, if
+ *                              there's any output pending and it has been
+ *                              12K cycles since the last PIO.
  */
 
 #include <stdlib.h>
@@ -478,6 +481,7 @@ checkForInterrupts(void)
 int instructionFromDataMemory = 0;
 int dataFromInstructionMemory = 0;
 int dataOverwritesInstructionMemory = 0;
+int pioFlushCount = -1;
 int
 runOneInstruction(int *cyclesUsed)
 {
@@ -488,6 +492,14 @@ runOneInstruction(int *cyclesUsed)
   uint16_t instruction, operand9;
   uint8_t op, operand, residual, a8, a9;
   int32_t fetchedFromMemory;
+
+  if (pioFlushCount == 0)
+    {
+      fflush(pioLogFile);
+      pioFlushCount = -1;
+    }
+  else if (pioFlushCount > 0)
+    pioFlushCount -= 1;
 
   // If we changes any of state.pio[], state.cio[], or state.prs, then
   // the following state.xxxChange variables will be set accordingly to
@@ -947,16 +959,21 @@ runOneInstruction(int *cyclesUsed)
               int discard = 0;
               // Can change discard to non-zero here if there are pioLogFlags
               // asking to reject some channels or values.
-              if (discard == 0 && -1 == fprintf(pioLogFile,
-                                                "%lu\t>\t%03o\t%02o\t%09o\n",
-                                                cycleCount,
-                                                operand9,
-                                                hopStructure.ds,
-                                                sourceValue))
+              if (discard == 0)
                 {
-                  fclose(pioLogFile);
-                  pioLogFile = NULL;
-                  pioLogFlags = 0;
+                  if (-1 == fprintf(pioLogFile,
+                                                  "%lu\t>\t%03o\t%02o\t%09o\n",
+                                                  cycleCount,
+                                                  operand9,
+                                                  hopStructure.ds,
+                                                  sourceValue))
+                    {
+                      fclose(pioLogFile);
+                      pioLogFile = NULL;
+                      pioLogFlags = 0;
+                    }
+                  else
+                    pioFlushCount = 12000;
                 }
             }
 
