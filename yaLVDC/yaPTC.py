@@ -1722,7 +1722,7 @@ def mainLoopIteration():
 				value |= (inputBuffer[4] & 0x7F) << 7
 				value |= inputBuffer[5] & 0x7F
 				if args.terminal:
-					print(">\t%01o\t%01o\t%09o\t%09o" \
+					print(">\t%01o\t%01o\t%03o\t%09o" \
 							% (ioType, source, channel, value))
 				else:
 					outputFromCPU(ioType, channel, value)
