@@ -37,6 +37,7 @@
  * Mods:        2020-04-30 RSB  Began.
  *              2020-05-21 RSB  Fixed arguments for DISASSEMBLE.
  *              2023-07-16 MAS  Fixed handling of SI and NI.
+ *              2023-08-08 RSB  Fixed elapsed time.
  */
 
 #include <stdlib.h>
@@ -1064,8 +1065,7 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       printf(" RET = %s\n", hopBuffer);
       printf("Instructions: %lu", instructionCount);
       printf(", Cycles: %lu", cycleCount);
-      printf(", Elapsed time: %f seconds\n",
-          cycleCount * SECONDS_PER_CYCLE * clockDivisor);
+      printf(", Time: %f seconds\n", cycleCount * SECONDS_PER_CYCLE);
       if (found)
         {
           printf("Source line: ");

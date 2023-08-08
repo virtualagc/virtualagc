@@ -39,7 +39,8 @@
  *                              EXM pending instructions for use with
  *                              interrupts, and changed interrupt inhibit
  *                              to a cycle counter.
- *              2023-08-04 RSB  Added pioLogFlags, pioLogFile;
+ *              2023-08-04 RSB  Added pioLogFlags, pioLogFile.
+ *              2023-08-08 RSB  Added clockMultiplier.
  */
 
 #ifndef yaLVDC_h
@@ -87,6 +88,7 @@
 
 // See yaLVDC.c
 extern int clockDivisor;
+extern double clockMultiplier;
 extern int inhibitFetchMessages;
 extern unsigned long cycleCount;
 #define MAX_SYMBOL_LENGTH 10
