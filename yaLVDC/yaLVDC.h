@@ -40,7 +40,7 @@
  *                              interrupts, and changed interrupt inhibit
  *                              to a cycle counter.
  *              2023-08-04 RSB  Added pioLogFlags, pioLogFile.
- *              2023-08-08 RSB  Added clockMultiplier.
+ *              2023-08-08 RSB  Added clockMultiplier and state.pioChangeFull.
  */
 
 #ifndef yaLVDC_h
@@ -196,6 +196,7 @@ typedef struct
   int pioChange;
   int cioChange;
   int prsChange;
+  int pioChangeFull;
   // The following is normally -1, but is set by runOneInstruction()
   // to the address of a HOP, TRA, TMI, or TNZ if it causes a jump
   // to an instruction that's out of sequence.

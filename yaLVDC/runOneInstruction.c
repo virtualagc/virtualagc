@@ -944,6 +944,7 @@ runOneInstruction(int *cyclesUsed)
             state.pioChange = operand9;
           else
             state.pioChange = operand & 0177;
+          state.pioChangeFull = operand9;
           if (!a8) // Source is the accumulator
             sourceValue = state.acc;
           else // Source is memory.
@@ -964,7 +965,7 @@ runOneInstruction(int *cyclesUsed)
                   if (-1 == fprintf(pioLogFile,
                                                   "%lu\t>\t%03o\t%02o\t%09o\n",
                                                   cycleCount,
-                                                  operand9,
+                                                  state.pioChangeFull,
                                                   hopStructure.ds,
                                                   sourceValue))
                     {

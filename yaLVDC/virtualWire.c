@@ -40,6 +40,7 @@
                                 #ifdef unix (or similar) extended to
                                 apple.)  Thanks to Ludo Visser for the
                                 change.
+                2023-08-08 RSB  Added state.pioChangeFull.
  */
 
 #include <stdio.h>
@@ -66,6 +67,7 @@
 // for some other program.
 
 #include "yaLVDC.h"
+#define CHUNK_SIZE 6
 
 /*
  * Format for yaLVDC-compatible "virtual wire" packets.
@@ -82,8 +84,7 @@
  * the payload in the following data packet will be valid, and a 0 wherever
  * the data packet will be invalid.
  *
- * Each packet consists
- * of 6 data bytes, formatted as follows:
+ * Each packet consists of CHUNK_SIZE data bytes, formatted as follows:
  *
  *  1st byte:   D7      1
  *              D6      1 if the message is a mask, 0 if it's data.
@@ -249,12 +250,12 @@ connectCheck(void)
     }
 }
 
-// Add a 6-byte chunk to the output packet. First set outPacketSize=0; then
-// call formatPacket() up to MAX_CHUNKS_PER_PACKET times.  Then send()
+// Add a CHUNK_SIZE-byte chunk to the output packet. First set outPacketSize=0;
+// then call formatPacket() up to MAX_CHUNKS_PER_PACKET times.  Then send()
 // outPacket[].
 #define MAX_CHUNKS_PER_PACKET 32
 static int outPacketSize = 0;
-static uint8_t outPacket[6 * MAX_CHUNKS_PER_PACKET];
+static uint8_t outPacket[CHUNK_SIZE * MAX_CHUNKS_PER_PACKET];
 void
 formatPacket(int ioType, int channel, int payload, int isMask)
 {
@@ -403,7 +404,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   if (state.pioChange != -1)
     {
       ioType = 0;
-      channel = state.pioChange;
+      channel = state.pioChangeFull;
       payload = state.pio[channel];
       state.pioChange = -1;
     }
