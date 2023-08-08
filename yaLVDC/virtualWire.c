@@ -371,26 +371,29 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                 dataReadback = 0;
             }
         }
-      formatPacket(5, (panelPause == 0 || panelPause == 4) ? 001 : 000, 0, 0);
-      if (hop != -1)
-        formatPacket(5, 003, state.hop, 0);
-      if (hopd != -1)
-        formatPacket(5, 002, hopd, 0);
-      if (data != -1)
-        formatPacket(5, 004, data, 0);
-      if (displayModePayload != -1)
-        formatPacket(5, 005, displayModePayload, 0);
-      formatPacket(5, 0600, state.acc, 0);
-      if (progRegA != -1)
-        formatPacket(5, 0604, progRegA, 0);
-      if (progRegB != -1)
-        formatPacket(5, 0605, progRegB, 0);
-      if (inspat != -1)
-        formatPacket(5, 0603, inspat, 0);
-      if (datapat != -1)
-        formatPacket(5, 0602, datapat, 0);
-      if (dataReadback != -1)
-        formatPacket(5, 0601, dataReadback, 0);
+      if (ptc)
+        {
+          formatPacket(5, (panelPause == 0 || panelPause == 4) ? 001 : 000, 0, 0);
+          if (hop != -1)
+            formatPacket(5, 003, state.hop, 0);
+          if (hopd != -1)
+            formatPacket(5, 002, hopd, 0);
+          if (data != -1)
+            formatPacket(5, 004, data, 0);
+          if (displayModePayload != -1)
+            formatPacket(5, 005, displayModePayload, 0);
+          formatPacket(5, 0600, state.acc, 0);
+          if (progRegA != -1)
+            formatPacket(5, 0604, progRegA, 0);
+          if (progRegB != -1)
+            formatPacket(5, 0605, progRegB, 0);
+          if (inspat != -1)
+            formatPacket(5, 0603, inspat, 0);
+          if (datapat != -1)
+            formatPacket(5, 0602, datapat, 0);
+          if (dataReadback != -1)
+            formatPacket(5, 0601, dataReadback, 0);
+        }
       needStatus = 0;
       newConnect = 0;
     }
@@ -405,7 +408,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
     {
       ioType = 0;
       channel = state.pioChangeFull;
-      payload = state.pio[channel];
+      payload = state.pio[state.pioChange];
       state.pioChange = -1;
     }
   else if (state.cioChange != -1)
@@ -427,7 +430,8 @@ pendingVirtualWireActivity(void /* int id, int mask */)
         {
           state.bbPrinter = 1;
           state.busyCountPrinter = PERIPHERAL_BUSY_CYCLES;
-          state.cio[0154] = (payload & 0374000000) | (0002100000 >> 1) | oddParity6((payload >> 20) & 077);
+          state.cio[0154] = (payload & 0374000000) | (0002100000 >> 1)
+                              | oddParity6((payload >> 20) & 077);
           state.lastWasPrinter = 1;
         }
       else if (channel == 0164)
@@ -444,7 +448,8 @@ pendingVirtualWireActivity(void /* int id, int mask */)
           state.cio[0264] = 0;
           state.lastWasPrinter = 1;
         }
-      else if (channel == 0120 || channel == 0124 || channel == 0130 || channel == 0134)
+      else if (channel == 0120 || channel == 0124 || channel == 0130
+              || channel == 0134)
         {
           state.bbTypewriter = 4;
           state.lastWasPrinter = 0;

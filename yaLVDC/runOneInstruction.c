@@ -103,6 +103,8 @@
  *              2023-08-07 RSB  Now automatically flushes the pioLogFile, if
  *                              there's any output pending and it has been
  *                              12K cycles since the last PIO.
+ *              2023-08-08 RSB  Restored operation of PIO virtual wire, which
+ *                              had been broken.
  */
 
 #include <stdlib.h>
@@ -963,10 +965,10 @@ runOneInstruction(int *cyclesUsed)
               if (discard == 0)
                 {
                   if (-1 == fprintf(pioLogFile,
-                                                  "%lu\t>\t%03o\t%02o\t%09o\n",
+                                                  "%lu\t>\t%03o\t%09o\t%09o\n",
                                                   cycleCount,
                                                   state.pioChangeFull,
-                                                  hopStructure.ds,
+                                                  state.pio[006],
                                                   sourceValue))
                     {
                       fclose(pioLogFile);

@@ -1,51 +1,56 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # Copyright:	None, placed in the PUBLIC DOMAIN by its author (Ron Burkey)
 # Filename: 	yaPTC.py
-# Purpose:	This is a very primitive PTC peripheral emulator for
-#		use with the yaLVDC PTC CPU emulator, and is connected
-#		to yaLVDC with "virtual wires" ... i.e., via network sockets.
-#		It's not fully developed, and is just intended to help me
-#		it couldn't be developed fully, if there were reason to do so.  
+# Purpose:		This is a very primitive PTC peripheral emulator for
+#				use with the yaLVDC PTC CPU emulator, and is connected
+#				to yaLVDC with "virtual wires" ... i.e., via network sockets.
+#				It's not fully developed, and is just intended to help me
+#				it couldn't be developed fully, if there were reason to do so.  
 # Reference:	http://www.ibiblio.org/apollo/developer.html
 # Mod history:	2020-05-07 RSB	Began adapting from piPeripheral.py, which is
-#				a skeleton program for developing peripherals
-#				for the AGC or AGS CPU emulators.
-#		2020-05-08 RSB	I've added a GUI, based on the standard
-#				tkinter module in Python.  I've used the PAGE
-#				(http://page.sourceforge.net/html/index.html)
-#				tool to build it, and those are the files
-#				ProcessorDisplayPanel.py and 
-#				ProcessorDisplayPanel_support.py, which are
-#				simply imported as a module called
-#				"ProcessorDisplayPanel" at the top of this
-#				file.  The sources PAGE uses to generate 
-#				this code are in the guiDesign folder.
-#		2020-05-10 RSB	Unfortunately, there's no way this can keep up
-#				with yaLVDC in terms of speed.  It continues
-#				to receive data from yaLVDC *long* after the
-#				PTC program has been paused.  It may be 
-#				possible to use it if the clock-rate in 
-#				yaLVDC is cut way down, and I'll experiment
-#				with that, because this program is nice enough
-#				now that I'm not keen to reimplement it in 
-#				another language and gui toolkit.
-#		2020-05-11 RSB	Removed all of the "interrupt latch" 
-#				processing (most of the input CIO's) and 
-#				moved it all back locally to yaLVDC, because
-#				the PAST software expects to read back changes
-#				to the interrupt latch within one instruction
-#				cycle.  I expect this will help with the
-#				speed problem I complained about above as well.
-#		2020-06-14 RSB	Removed ad hoc stuff related to temporarily
-#				writing "command" settings into the "computer"
-#				indicators on the MLDD.  That's stuff I added
-#				before understanding fully that the program 
-#				loaded into the PTC for test procedures other than
-#				Figure 7-11 was *not* the PAST program.  This 
-#				allows the "computer" indicators to work how I 
-#				imagined they ought to.  Of course, it also means
-#				that some test procedures no longer "PASS" when
-#				the PAST program is loaded, which is as it should be!
+#								a skeleton program for developing peripherals
+#								for the AGC or AGS CPU emulators.
+#				2020-05-08 RSB	I've added a GUI, based on the standard
+#								tkinter module in Python.  I've used the PAGE
+#								(http://page.sourceforge.net/html/index.html)
+#								tool to build it, and those are the files
+#								ProcessorDisplayPanel.py and 
+#								ProcessorDisplayPanel_support.py, which are
+#								simply imported as a module called
+#								"ProcessorDisplayPanel" at the top of this
+#								file.  The sources PAGE uses to generate 
+#								this code are in the guiDesign folder.
+#				2020-05-10 RSB	Unfortunately, there's no way this can keep up
+#								with yaLVDC in terms of speed.  It continues
+#								to receive data from yaLVDC *long* after the
+#								PTC program has been paused.  It may be 
+#								possible to use it if the clock-rate in 
+#								yaLVDC is cut way down, and I'll experiment
+#								with that, because this program is nice enough
+#								now that I'm not keen to reimplement it in 
+#								another language and gui toolkit.
+#				2020-05-11 RSB	Removed all of the "interrupt latch" 
+#								processing (most of the input CIO's) and 
+#								moved it all back locally to yaLVDC, because
+#								the PAST software expects to read back changes
+#								to the interrupt latch within one instruction
+#								cycle.  I expect this will help with the
+#								speed problem I complained about above as well.
+#				2020-06-14 RSB	Removed ad hoc stuff related to temporarily
+#								writing "command" settings into the "computer"
+#								indicators on the MLDD.  That's stuff I added
+#								before understanding fully that the program 
+#								loaded into the PTC for test procedures other 
+#								than Figure 7-11 was *not* the PAST program.  
+#								This allows the "computer" indicators to work 
+#								how I imagined they ought to.  Of course, it 
+#								also means that some test procedures no longer 
+#								"PASS" when the PAST program is loaded, which 
+#								is as it should be!
+#				2023-08-08 RSB	Corrected references of "AGC" to "LVDC".
+#								Added --terminal operation to allow using 
+#								as a spy on virtual-wire outputs but yaLVDC
+#								(whether with --ptc switch or not).
 #
 # The parts which need to be modified from the skeleton form of the program 
 # to make it peripheral-specific are the outputFromCPU() and inputsForCPU() 
@@ -126,13 +131,28 @@ typewriterTabStop = 10
 # Parse command-line arguments.
 import argparse
 cli = argparse.ArgumentParser()
-cli.add_argument("--host", help="Host address of yaAGC/yaAGS, defaulting to localhost.")
-cli.add_argument("--port", help="Port for yaLVDC, defaulting to 19653.", type=int)
-cli.add_argument("--id", help="Unique ID of this peripheral (1-7), default=1.", type=int)
-cli.add_argument("--resize", help="If 1 (default 0), make the window resizable.", type=int)
-cli.add_argument("--scale", help="An integer (default 1) scale for the plotter peripheral.", type=int)
-cli.add_argument("--twidth", help="Width of the typewriter, in characters (default %d)." % typewriterMargin, type=int)
-cli.add_argument("--tstop", help="Typewriter tab width, in characters (default %d)." % typewriterTabStop, type=int)
+cli.add_argument("--host", \
+				 help="Host address of yaLVDC, defaulting to localhost.")
+cli.add_argument("--port", \
+				 help="Port for yaLVDC, defaulting to 19653.", type=int)
+cli.add_argument("--id", \
+				 help="Unique ID of this peripheral (1-7), default=1.", \
+				 type=int)
+cli.add_argument("--resize", \
+				 help="If 1 (default 0), make the window resizable.", \
+				 type=int)
+cli.add_argument("--scale", \
+			help="An integer (default 1) scale for the plotter peripheral.", \
+			type=int)
+cli.add_argument("--twidth", \
+				 help="Width of the typewriter, in characters (default %d)." \
+						% typewriterMargin, type=int)
+cli.add_argument("--tstop", \
+				 help="Typewriter tab width, in characters (default %d)." \
+				 		% typewriterTabStop, type=int)
+cli.add_argument("--terminal", \
+				 help="Just print all incoming virtual-wire data from CPU.", \
+				 type=int)
 args = cli.parse_args()
 
 # Characteristics of the host and port being used for yaLVDC communications.  
@@ -159,14 +179,15 @@ else:
 	resize = 0
 
 # The --scale switch is useful in that if you don't use it, some of the tiny 
-# details of the plotter test (see Figure 7-11 sheet 10 in the PTC documentation)
-# can't be seen well enough to confirm that they're correct in the test plot.
-# If so, --scale=2 or --scale=3 helps a lot in this regard.  However ... portions 
-# of the plot may not be immediately visible in the plot window.  You have to
-# use the mouse scroll-wheel to scroll the window up or down (which probably isn't
-# necessary if the height of the window is not changed from its default value of
-# >1024), and SHIFT scroll-wheel to scroll sideways (which definitely should be 
-# necessary.  Or expand the plotter window if you have enough screen space.
+# details of the plotter test (see Figure 7-11 sheet 10 in the PTC 
+# documentation) can't be seen well enough to confirm that they're correct in 
+# the test plot.  If so, --scale=2 or --scale=3 helps a lot in this regard.  
+# However ... portions of the plot may not be immediately visible in the plot 
+# window.  You have to use the mouse scroll-wheel to scroll the window up or 
+# down (which probably isn't necessary if the height of the window is not 
+# changed from its default value of >1024), and SHIFT scroll-wheel to scroll 
+# sideways (which definitely should be necessary.  Or expand the plotter window 
+# if you have enough screen space.
 if args.scale:
 	plotScale = args.scale
 else:
@@ -177,8 +198,8 @@ if args.twidth:
 
 if args.tstop:
 	typewriterTabStop = args.tstop
-	
-###################################################################################
+
+##############################################################################
 # The separate window implementing the printer peripheral.
 
 printerFont = "-family {Courier 10 Pitch} -size 9"
@@ -188,14 +209,15 @@ class printer:
 		self.root.title("PTC PRINTER")
 		self.root.geometry("1200x480")
 		self.text = ScrolledText(self.root)
-		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, bordermode='ignore')
+		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, \
+					    bordermode='ignore')
 		self.text.configure(background="white")
 		self.text.configure(font=printerFont)
 		self.text.configure(insertborderwidth="3")
 		self.text.configure(selectbackground="#c4c4c4")
 		self.text.configure(wrap="char")
 
-###################################################################################
+##############################################################################
 # The separate window implementing the typewriter peripheral.
 
 class typewriter:
@@ -204,14 +226,15 @@ class typewriter:
 		self.root.title("PTC TYPEWRITER")
 		self.root.geometry("1200x480")
 		self.text = ScrolledText(self.root)
-		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, bordermode='ignore')
+		self.text.place(relx=0.0, rely=0.0, relheight=1.0, relwidth=1.0, \
+					    bordermode='ignore')
 		self.text.configure(background="white")
 		self.text.configure(font=printerFont)
 		self.text.configure(insertborderwidth="3")
 		self.text.configure(selectbackground="#c4c4c4")
 		self.text.configure(wrap="char")
 
-###################################################################################
+#############################################################################
 # The separate window implementing the plotter peripheral.
 
 plotMargin = 10
@@ -219,7 +242,8 @@ class plotter:
 	def __init__(self, root):
 		self.root = root
 		self.root.title("PTC PLOTTER")
-		self.root.geometry("%dx%d" % (1024 + 2 * plotMargin, 1024 + 2 * plotMargin))
+		self.root.geometry("%dx%d" % (1024 + 2 * plotMargin, \
+									  1024 + 2 * plotMargin))
 		self.canvas = ScrolledWindow(self.root)
 		self.canvas.place(relx=0.0, rely=0.0, relheight=1.0,
 			relwidth=1.0, bordermode='ignore')
@@ -233,9 +257,10 @@ class plotter:
 		self.canvas.create_window(0, 0, anchor='nw',
 	                                           window=self.canvas_f)
 
-###################################################################################
-# Hardware abstraction / User-defined functions.  Also, any other platform-specific
-# initialization.  This is the section to customize for specific applications.
+##############################################################################
+# Hardware abstraction / User-defined functions.  Also, any other 
+# platform-specific initialization.  This is the section to customize for 
+# specific applications.
 
 # Callbacks for the GUI (tkinter) event loop.
 
@@ -379,16 +404,16 @@ def cPRB():
 	ProgRegB = n
 ProcessorDisplayPanel_support.cPRB = cPRB
 
-# This function is automatically called periodically by the event loop to check for 
-# conditions that will result in sending messages to yaLVDC that are interpreted
-# as changes to bits on its input channels.  The return
+# This function is automatically called periodically by the event loop to check 
+# for conditions that will result in sending messages to yaLVDC that are 
+# interpreted as changes to bits on its input channels.  The return
 # value is supposed to be a list of 4-tuples of the form
 #	[ (ioType0,channel0,value0,mask0), (ioType1,channel1,value1,mask1), ...]
-# and may be an empty list.  The "values" are written to the LVDC/PTC's input "channels",
-# while the "masks" tell which bits of the "values" are valid.  The ioTypeN's are
-# indices into ioTypes[] (see top of file) to tell which particular class of i/o
-# channels is affected.  Only the PIO, CIO, and INT classes are possible for inputs
-# to the CPU.
+# and may be an empty list.  The "values" are written to the LVDC/PTC's input 
+# "channels", while the "masks" tell which bits of the "values" are valid.  
+# The ioTypeN's are indices into ioTypes[] (see top of file) to tell which 
+# particular class of i/o channels is affected.  Only the PIO, CIO, and INT 
+# classes are possible for inputs to the CPU.
 changedIA = -1
 changedDA = -1
 changedD = -1
@@ -401,6 +426,8 @@ def inputsForCPU():
 	global changedIA, changedDA, changedD, displayModePayload, advance
 	global newConnect
 	returnValue = []
+	if args.terminal:
+		return []
 	
 	if newConnect:
 		returnValue.append((4, 0o606, typewriterMargin, nomask))
@@ -480,7 +507,8 @@ def indicatorReconfigure(event):
 PANEL_PDP = 1	# PANEL_XXX is just a constant we use to ID specific panels.
 PANEL_MLDD = 2
 PANEL_CE = 3
-CC_NONE = 0 # CC_XXX is a constant we use to tell if an indicator is "computer" or "command" or neither.
+CC_NONE = 0 # CC_XXX is a constant we use to tell if an indicator is \
+			# "computer" or "command" or neither.
 CC_COMPUTER = 1
 CC_COMMAND = 2
 indicators = { PANEL_PDP : {}, PANEL_MLDD : {}, PANEL_CE : {} }
@@ -494,7 +522,8 @@ def indicatorInitialize(canvas, text, panel, cc = CC_NONE):
 		commandIndicators.append(canvas)
 	canvas.delete("all")
 	canvas.create_rectangle(0, 0, 1, 1, fill="white", state = "hidden")
-	canvas.create_text(1, 1, fill="white", text=text, font=("Sans", 6), justify=tk.CENTER)
+	canvas.create_text(1, 1, fill="white", text=text, \
+						font=("Sans", 6), justify=tk.CENTER)
 	canvas.bind("<Configure>", indicatorReconfigure)
 # indicatorOn() and indicatorOff() are used to either light up an indicator
 # or to unlight it.  That involves changing the color of the rectangular
@@ -834,7 +863,8 @@ def getCommandedDataAddress():
 
 def autoAddressCmptr():
 	global changedD
-	if top.trmcML.itemcget(1, "state") == "normal" and top.mlREPEAT.itemcget(1, "state") == "normal":
+	if top.trmcML.itemcget(1, "state") == "normal" and \
+			top.mlREPEAT.itemcget(1, "state") == "normal":
 		changedD = getDataCommand()
 		root.after(500, autoAddressCmptr)
 
@@ -898,13 +928,13 @@ def oddParity13(value):
 	value = 3 & (value ^ (value >> 2)) # Now has 2 bits.
 	return 1 & (1 ^ value ^ (value >> 1)) # Just 1 bit left!
 
-# This function is called by the event loop only when yaLVDC has written
-# to an output channel.  The function should do whatever it is that needs to be done
+# This function is called by the event loop only when yaLVDC has written to an
+# output channel.  The function should do whatever it is that needs to be done
 # with this output data, which is not processed additionally in any way by the 
 # generic portion of the program.  The ioType argument is an index into the
 # ioTypes[] array (see the top of this file), giving the class of i/o ports
-# to which the channel belongs.  Only the PIO, CIO, and PRS channels are applicable
-# for output from the CPU to peripherals.
+# to which the channel belongs.  Only the PIO, CIO, and PRS channels are 
+# applicable for output from the CPU to peripherals.
 #
 # The function _could_ also be called directly, by panel events, though I'm not
 # aware of any reason at the moment why that would be needed.  But it does work.
@@ -921,7 +951,8 @@ typewriterCharsInLine = 0
 isRed = False
 def outputFromCPU(ioType, channel, value):
 	global displaySelect, modeControl, addressCompare, dcDisplayCount, crlfCount
-	global prsModeBCD, xPlot, yPlot, penDown, xDelta, yDelta, typewriterCharsInLine
+	global prsModeBCD, xPlot, yPlot, penDown, xDelta, yDelta, \
+			typewriterCharsInLine
 	global isRed
 	see = False
 	
@@ -937,7 +968,8 @@ def outputFromCPU(ioType, channel, value):
 			print("\nSingle step")
 		elif channel == 0o120:
 			string = BA8421b[(value >> 20) & 0o77]
-			#print("\nTypewriter alphanumeric = %09o (%s)" % (value, string), end="  ")
+			#print("\nTypewriter alphanumeric = %09o (%s)" % \
+			#		(value, string), end="  ")
 			typewriterCharsInLine += 1
 			if typewriterCharsInLine >= typewriterMargin:
 				typewriterCharsInLine = 0
@@ -962,10 +994,12 @@ def outputFromCPU(ioType, channel, value):
 					printerWindow.text.insert(tk.END, " ", "bg")
 					bottom4 -= 1
 				crlfCount = 0
-			#print("\nPrinter carriage control = %09o (%s)" % (value, string), end="  ")
+			#print("\nPrinter carriage control = %09o (%s)" % \
+			#		(value, string), end="  ")
 		elif channel == 0o124:
 			string = BA8421b[(value >> 22) & 0o17]
-			#print("\nTypewriter decimal = %09o (%s)" % (value, string), end="  ")
+			#print("\nTypewriter decimal = %09o (%s)" % \
+			#		(value, string), end="  ")
 			typewriterCharsInLine += 1
 			if typewriterCharsInLine >= typewriterMargin:
 				typewriterCharsInLine = 0
@@ -1056,11 +1090,15 @@ def outputFromCPU(ioType, channel, value):
 			xDelta = 0
 			yDelta = 0
 			if penDown:
-				print("\nPlotter:  draw from (%d,%d) to (%d,%d)" % (xPlot, yPlot, xPlotNew, yPlotNew))
-				plotterWindow.canvas.create_line(xPlot*plotScale + plotMargin, (1023-yPlot)*plotScale + plotMargin, 
-					xPlotNew*plotScale + plotMargin, (1023-yPlotNew)*plotScale + plotMargin, width=1)
+				print("\nPlotter:  draw from (%d,%d) to (%d,%d)" % \
+							(xPlot, yPlot, xPlotNew, yPlotNew))
+				plotterWindow.canvas.create_line(xPlot*plotScale + plotMargin, \
+					(1023-yPlot)*plotScale + plotMargin, \
+					xPlotNew*plotScale + plotMargin, \
+					(1023-yPlotNew)*plotScale + plotMargin, width=1)
 			else:
-				print("\nPlotter:  move from (%d,%d) to (%d,%d)" % (xPlot, yPlot, xPlotNew, yPlotNew))
+				print("\nPlotter:  move from (%d,%d) to (%d,%d)" % \
+							(xPlot, yPlot, xPlotNew, yPlotNew))
 			xPlot = xPlotNew
 			yPlot = yPlotNew
 		elif channel == 0o150:
@@ -1484,7 +1522,8 @@ def outputFromCPU(ioType, channel, value):
 		else:
 			print("\nCPU status %03o %09o" % (channel, value))
 	else:
-		print("\nUnimplemented type %d, channel %03o, value %09o" % (ioType, channel, value), end="  ")
+		print("\nUnimplemented type %d, channel %03o, value %09o" % \
+					(ioType, channel, value), end="  ")
 	
 	return
 
@@ -1492,23 +1531,28 @@ def pressedPROG_ERR(event):
 	indicatorOn(top.PROG_ERR)
 
 dcDisplayCount = 0
-def changeDisplayMode(newDisplaySelect, newModeControl, newAddressCompare, other=False):
-	global displaySelect, modeControl, addressCompare, displayModePayload, dcDisplayCount
+def changeDisplayMode(newDisplaySelect, newModeControl, \
+					  newAddressCompare, other=False):
+	global displaySelect, modeControl, addressCompare, displayModePayload,\
+		   dcDisplayCount
 	changed = False
 	if other:
 		changed = True
 	else:
 		if displaySelect != newDisplaySelect:
-			print("Display select changed from %d to %d" % (displaySelect, newDisplaySelect))
+			print("Display select changed from %d to %d" % \
+						(displaySelect, newDisplaySelect))
 			displaySelect = newDisplaySelect
 			changed = True
 		if modeControl != newModeControl:
-			print("Mode control changed from %d to %d" % (modeControl, newModeControl))
+			print("Mode control changed from %d to %d" % \
+						(modeControl, newModeControl))
 			modeControl = newModeControl
 			changed = True
 			dcDisplayCount = 0
 		if addressCompare != newAddressCompare:
-			print("Address compare changed from %d to %d" % (addressCompare, newAddressCompare))
+			print("Address compare changed from %d to %d" % \
+						(addressCompare, newAddressCompare))
 			addressCompare = newAddressCompare
 			indicatorSet(top.acINS, not addressCompare)
 			indicatorSet(top.acDATA, addressCompare)
@@ -1533,15 +1577,18 @@ def changeDisplayMode(newDisplaySelect, newModeControl, newAddressCompare, other
 			displayModePayload |= 1 << 11
 		
 def eventDisplaySelect():
-	changeDisplayMode(ProcessorDisplayPanel_support.displaySelect.get(), modeControl, addressCompare)
+	changeDisplayMode(ProcessorDisplayPanel_support.displaySelect.get(), \
+					  modeControl, addressCompare)
 def eventModeControl():
-	changeDisplayMode(displaySelect, ProcessorDisplayPanel_support.modeControl.get(), addressCompare)
+	changeDisplayMode(displaySelect, \
+					  ProcessorDisplayPanel_support.modeControl.get(), \
+					  addressCompare)
 def eventAddressCompareInsData(event):
 	changeDisplayMode(displaySelect, modeControl, not addressCompare)
 ProcessorDisplayPanel_support.eventDisplaySelect = eventDisplaySelect
 ProcessorDisplayPanel_support.eventModeControl = eventModeControl
 
-###################################################################################
+##############################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
 # shouldn't need to be modified unless there are bugs.
 
@@ -1552,11 +1599,12 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setblocking(0)
 
 newConnect = False
-def connectToAGC():
+def connectToLVDC():
 	global newConnect
 	import sys
 	count = 0
-	sys.stderr.write("Connecting to LVDC/PTC emulator at %s:%d\n" % (TCP_IP, TCP_PORT))
+	sys.stderr.write("Connecting to LVDC/PTC emulator at %s:%d\n" % \
+						(TCP_IP, TCP_PORT))
 	while True:
 		try:
 			s.connect((TCP_IP, TCP_PORT))
@@ -1572,16 +1620,17 @@ def connectToAGC():
 				sys.exit(1)
 			time.sleep(1)
 
-connectToAGC()
+connectToLVDC()
 
-###################################################################################
-# Event loop.  Just check periodically for output from yaLVDC (in which case the
-# user-defined callback function outputFromCPU is executed) or data in the 
-# user-defined function inputsForCPU (in which case a message is sent to yaLVDC).
-# But this section has no target-specific code, and shouldn't need to be modified
-# unless there are bugs.
+###############################################################################
+# Event loop.  Just check periodically for output from yaLVDC (in which case 
+# the user-defined callback function outputFromCPU is executed) or data in the 
+# user-defined function inputsForCPU (in which case a message is sent to 
+# yaLVDC). But this section has no target-specific code, and shouldn't need to 
+# be modified unless there are bugs.
 
-# Given a 4-tuple (ioType,channel,value,mask), creates packet data and sends it to yaLVDC.
+# Given a 4-tuple (ioType,channel,value,mask), creates packet data and sends it 
+# to yaLVDC.
 def packetize(tuple):
 	outputBuffer = bytearray(6)
 	source = ID
@@ -1616,10 +1665,10 @@ def mainLoopIteration():
 	global didSomething, inputBuffer, leftToRead, view
 
 	# Check for packet data received from yaLVDC and process it.
-	# While these packets are always exactly 5
-	# bytes long, since the socket is non-blocking, any individual read
-	# operation may yield less bytes than that, so the buffer may accumulate data
-	# over time until it fills.	
+	# While these packets are always the same length in bytes,
+	# since the socket is non-blocking any individual read
+	# operation may yield less bytes than that, and the buffer may accumulate
+	# data over time until it fills.	
 	try:
 		numNewBytes = s.recv_into(view, leftToRead)
 	except:
@@ -1654,7 +1703,8 @@ def mainLoopIteration():
 				# other corrupted packets we print a message.  In either 
 				# case, we try to realign past the corrupted/ping byte(s).
 				if inputBuffer[0] != 0xff:
-					print("Illegal packet: %03o %03o %03o %03o %03o %03o" % tuple(inputBuffer))
+					print("Illegal packet: %03o %03o %03o %03o %03o %03o" % \
+							tuple(inputBuffer))
 				for i in range(1,packetSize):
 					if (inputBuffer[i] & 0x80) == 0x80 and inputBuffer[i] != 0xFF:
 						j = 0
@@ -1671,7 +1721,11 @@ def mainLoopIteration():
 				value |= (inputBuffer[3] & 0x7F) << 14
 				value |= (inputBuffer[4] & 0x7F) << 7
 				value |= inputBuffer[5] & 0x7F
-				outputFromCPU(ioType, channel, value)
+				if args.terminal:
+					print(">\t%01o\t%01o\t%09o\t%09o" \
+							% (ioType, source, channel, value))
+				else:
+					outputFromCPU(ioType, channel, value)
 			didSomething = True
 	
 	# Check for locally-generated data for which we must generate messages
@@ -1978,8 +2032,10 @@ indicatorInitialize(top.mlREPEAT, "REPEAT", PANEL_MLDD)
 indicatorInitialize(top.mlREPEAT_INVERSE, "/REPEAT", PANEL_MLDD)
 indicatorOn(top.mlREPEAT_INVERSE)
 indicatorInitialize(top.mlADDRESS_CMPTR, "ADDRESS\nCOMPTR", PANEL_MLDD)
-indicatorInitialize(top.mlCOMPTR_DISPLAY_RESET, "COMPTR\nDISPLAY\nRESET", PANEL_MLDD)
-indicatorInitialize(top.mlCOMMAND_DISPLAY_RESET, "COMMAND\nDISPLAY\nRESET", PANEL_MLDD)
+indicatorInitialize(top.mlCOMPTR_DISPLAY_RESET, "COMPTR\nDISPLAY\nRESET", \
+				    PANEL_MLDD)
+indicatorInitialize(top.mlCOMMAND_DISPLAY_RESET, "COMMAND\nDISPLAY\nRESET", \
+				    PANEL_MLDD)
 # Indicators for CE ACCUMULATOR area:
 indicatorInitialize(top.A_S, "A/S", PANEL_CE)
 indicatorInitialize(top.DLA2, "DLA2", PANEL_CE)
@@ -2084,7 +2140,8 @@ top.mlddLAMP_TEST.bind("<ButtonRelease-1>", eventMlddLampTestRelease)
 top.ceLAMP_TEST.bind("<Button-1>", eventCeLampTest)
 top.ceLAMP_TEST.bind("<ButtonRelease-1>", eventCeLampTestRelease)
 top.trmcERROR_DEVICES_TEST.bind("<Button-1>", eventTrmcErrorDevicesTest)
-top.trmcERROR_DEVICES_TEST.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.trmcERROR_DEVICES_TEST.bind("<ButtonRelease-1>", \
+							    eventIndicatorButtonRelease)
 top.CST.bind("<Button-1>", eventToggleIndicatorChange)
 top.MAN_CST.bind("<Button-1>", eventToggleIndicatorChange)
 top.ADVANCE.bind("<Button-1>", eventAdvance)
@@ -2100,9 +2157,11 @@ top.mlREPEAT_INVERSE.bind("<Button-1>", eventRepeat)
 top.mlADDRESS_CMPTR.bind("<Button-1>", eventAddressCmptr)
 top.mlADDRESS_CMPTR.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
 top.mlCOMPTR_DISPLAY_RESET.bind("<Button-1>", eventComptrDisplayReset)
-top.mlCOMPTR_DISPLAY_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.mlCOMPTR_DISPLAY_RESET.bind("<ButtonRelease-1>", \
+							    eventIndicatorButtonRelease)
 top.mlCOMMAND_DISPLAY_RESET.bind("<Button-1>", eventCommandDisplayReset)
-top.mlCOMMAND_DISPLAY_RESET.bind("<ButtonRelease-1>", eventIndicatorButtonRelease)
+top.mlCOMMAND_DISPLAY_RESET.bind("<ButtonRelease-1>", \
+								 eventIndicatorButtonRelease)
 top.daCommandOP1.bind("<Button-1>", updateDaCommand)
 top.daCommandOP2.bind("<Button-1>", updateDaCommand)
 top.daCommandOP3.bind("<Button-1>", updateDaCommand)
@@ -2171,11 +2230,14 @@ top.pdpHOPSAVE_REG.bind("<Button-1>", eventMarHsr)
 
 # Create the extra windows for the printer, plotter, and typewriter
 # peripherals.
-printerWindow = printer(tk.Toplevel(root))
-printerWindow.text.tag_config("bg", background="#f8f8f8")
-typewriterWindow = typewriter(tk.Toplevel(root))
-typewriterWindow.text.tag_config("red", foreground="red")
-plotterWindow = plotter(tk.Toplevel(root))
+if args.terminal:
+	pass
+else:
+	printerWindow = printer(tk.Toplevel(root))
+	printerWindow.text.tag_config("bg", background="#f8f8f8")
+	typewriterWindow = typewriter(tk.Toplevel(root))
+	typewriterWindow.text.tag_config("red", foreground="red")
+	plotterWindow = plotter(tk.Toplevel(root))
 # Note that the "printer" and "typewriter" classes use widgets of type 
 # ScrolledText and ScrolledWindow, which are not native tkinter widgets, 
 # but rather are classes created by the PAGE tool I use to help design 

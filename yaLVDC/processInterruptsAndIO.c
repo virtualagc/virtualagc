@@ -56,6 +56,8 @@
  *                              interrupt support for the LVDA.
  *              2023-08-04 RSB  Added pioLogFlags, pioLogFile.
  *              2023-08-05 RSB  Moved the PIO logging to runOneInstruction.c.
+ *              2023-08-08 RSB  Virtual-wire servicing wasn't being done in
+ *                              processLVDAInterruptsAndIO().
  */
 
 #include <stdlib.h>
@@ -558,6 +560,7 @@ processLVDAInterruptsAndIO(void)
           // interrupts. This feature is currently unsimulated.
         }
 
+      pendingVirtualWireActivity();
       state.pioChange = -1;
     }
 
