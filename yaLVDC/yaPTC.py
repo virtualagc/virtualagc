@@ -128,6 +128,8 @@ resizable = 0
 typewriterMargin = 90
 typewriterTabStop = 10
 
+terminalHeaderPrinted = False
+
 # Parse command-line arguments.
 import argparse
 cli = argparse.ArgumentParser()
@@ -1662,7 +1664,7 @@ view = memoryview(inputBuffer)
 
 didSomething = False
 def mainLoopIteration():
-	global didSomething, inputBuffer, leftToRead, view
+	global didSomething, inputBuffer, leftToRead, view, terminalHeaderPrinted
 
 	# Check for packet data received from yaLVDC and process it.
 	# While these packets are always the same length in bytes,
@@ -1722,6 +1724,9 @@ def mainLoopIteration():
 				value |= (inputBuffer[4] & 0x7F) << 7
 				value |= inputBuffer[5] & 0x7F
 				if args.terminal:
+					if not terminalHeaderPrinted:
+						print("Dir\tIoType\tSource\tChannel\tData")
+						terminalHeaderPrinted = True
 					print(">\t%01o\t%01o\t%03o\t%09o" \
 							% (ioType, source, channel, value))
 				else:

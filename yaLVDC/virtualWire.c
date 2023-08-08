@@ -29,7 +29,7 @@
 
  Filename:	virtualWire.c
  Purpose:	Portable functions (*NIX and Win32) for working with sockets
- for connecting yaLVDC to peripherals by "virtual wires".
+                for connecting yaLVDC to peripherals by "virtual wires".
  Compiler:	GNU gcc.
  Contact:	Ron Burkey <info@sandroid.org>
  Reference:	http://www.ibiblio.org/apollo/LVDC.html
