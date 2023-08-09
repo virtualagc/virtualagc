@@ -72,6 +72,13 @@
 /*
  * Format for yaLVDC-compatible "virtual wire" packets.
  *
+ * IMPORTANT NOTE: For some purposes, a client device cannot interpret a
+ * PIO unless it knows the current "mode".  yaLVDC attempts to send the mode
+ * via a PIO 006 as soon as possible after a client connects to yaLVDC,
+ * but there is no guarantee that the PIO 006 is the very first packet received.
+ * Therefore, a client should treat the mode as "unknown" until it receives
+ * a PIO 006/206/406/606 from yaLVDC.
+ *
  * The format distinguishes between packets containing "data" and packets
  * containing a "mask".  If the packet carries all 26 bits of data (as
  * packets output by the server do), then there's no need for a mask; all
@@ -199,6 +206,26 @@
  *      Channel 605:    Last PROG REG B configuration received by CPU.
  */
 
+// Add a CHUNK_SIZE-byte chunk to the output packet. First set outPacketSize=0;
+// then call formatPacket() up to MAX_CHUNKS_PER_PACKET times.  Then send()
+// outPacket[].
+#define MAX_CHUNKS_PER_PACKET 32
+static int outPacketSize = 0;
+static uint8_t outPacket[CHUNK_SIZE * MAX_CHUNKS_PER_PACKET];
+void
+formatPacket(int ioType, int channel, int payload, int isMask)
+{
+  int id = 0;
+  outPacket[outPacketSize++] = (isMask ? 0300 : 0200) | ((ioType << 3) & 0070)
+      | (id & 0007);
+  outPacket[outPacketSize++] = channel & 0177;
+  outPacket[outPacketSize++] = ((channel & 0600) >> 2)
+      | ((payload >> 21) & 0037);
+  outPacket[outPacketSize++] = (payload >> 14) & 0177;
+  outPacket[outPacketSize++] = (payload >> 7) & 0177;
+  outPacket[outPacketSize++] = payload & 0177;
+}
+
 int ServerBaseSocket = -1;
 int PortNum = 19653;
 typedef struct
@@ -242,32 +269,13 @@ connectCheck(void)
           printf("\nConnected to peripheral #%d%s on handle %d.\n", j,
               reassigned, i);
           newConnect = 1;
+          formatPacket(0, 006, state.pio[006], 0);
         }
       else if (i == -1 && errno != EAGAIN)
         {
           printf("\nVirtual wire (accept) error: %s\n", strerror(errno));
         }
     }
-}
-
-// Add a CHUNK_SIZE-byte chunk to the output packet. First set outPacketSize=0;
-// then call formatPacket() up to MAX_CHUNKS_PER_PACKET times.  Then send()
-// outPacket[].
-#define MAX_CHUNKS_PER_PACKET 32
-static int outPacketSize = 0;
-static uint8_t outPacket[CHUNK_SIZE * MAX_CHUNKS_PER_PACKET];
-void
-formatPacket(int ioType, int channel, int payload, int isMask)
-{
-  int id = 0;
-  outPacket[outPacketSize++] = (isMask ? 0300 : 0200) | ((ioType << 3) & 0070)
-      | (id & 0007);
-  outPacket[outPacketSize++] = channel & 0177;
-  outPacket[outPacketSize++] = ((channel & 0600) >> 2)
-      | ((payload >> 21) & 0037);
-  outPacket[outPacketSize++] = (payload >> 14) & 0177;
-  outPacket[outPacketSize++] = (payload >> 7) & 0177;
-  outPacket[outPacketSize++] = payload & 0177;
 }
 
 // Compute parity of a 6-bit value.  The value returned is suitable for direct
