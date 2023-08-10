@@ -13,12 +13,13 @@ The PIO log file is read on stdin, and the output dataset is created on stdout.
 
 import sys
 import math
-from lvdcTelemetryDecoder import lvdcTelemetryDecoder
+from lvdcTelemetryDecoder import lvdcTelemetryDecoder, lvdcSetVersion
 
 version = None
 for param in sys.argv[1:]:
     if param.startswith("--telem="):
         version = int(param[8:])
+        lvdcSetVersion(version)
 
 lines = sys.stdin.readlines()
 
@@ -26,6 +27,13 @@ def tScale(t):
     return t * 168.0 / 2048000
 
 if version != None:
+    format0 = "\t%-8s\t%-12s\t%-12s\t%-12s\t%s"
+    hFormat = "%12s" + format0
+    lFormat = "%12.3f" + format0
+    print(hFormat % \
+          ("Time (sec)", "Variable", "Value", "Scale", "Units", "Description"))
+    print(hFormat % \
+          ("----------", "--------", "-----", "-----", "-----", "-----------"))
     for line in lines:
         fields = line.strip().split("\t")
         if len(fields) != 5:
@@ -34,19 +42,26 @@ if version != None:
         channelNumber = int(fields[2], 8)
         data = int(fields[4], 8)
         var,val,sc1,sc2,units,desc,msg = \
-                        lvdcTelemetryDecoder(version, 0, channelNumber, data)
+                        lvdcTelemetryDecoder(0, channelNumber, data)
         if isinstance(sc1, int):
             scale = "B%d" % sc1
-            if sc2 != -100:
+            if sc2 != -1000:
                 scale = scale + ("/B%d" % sc2)
         if val != None:
-            if units in ["SECONDS", "PIRADS"] \
-                    or "METER" in units or "M/SEC" in units:
-                val = "%f" % val
+            if  "RADIAN" in units or \
+                "PIRAD" in units or \
+                "/" in units or \
+                "**" in units or \
+                "SECOND" in units or \
+                "METER" in units or \
+                "KG" in units or \
+                "QMS" in units or \
+                "RTC" in units or \
+                "DECIMAL" in units:
+                val = "%d" % val
             else:
                 val = "O%09o" % val
-            print("%.3f\t%s\t%s\t%s\t%s\t%s" % (tScale(t), var, val, 
-                                                scale, units, desc))
+            print(lFormat % (tScale(t), var, val, scale, units, desc))
     sys.exit(0)
 
 radius39A = 6373382.0
