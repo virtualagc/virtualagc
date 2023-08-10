@@ -5,20 +5,51 @@ License:    The creater of this program, Ron Burkey, declares that it is in the
 Filename:   analyzeBoost.py
 Purpose:    Reads a PIO log file created by yaLVDC --log-pio=1, and creates
             a dataset of altitude and velocity vs time.
-History:    08-05-2023 RSB    Created.
+History:    2023-08-06 RSB    Created.
+            2023-08-09 RSB    Added --telem.
 
 The PIO log file is read on stdin, and the output dataset is created on stdout.
 '''
 
 import sys
 import math
+from lvdcTelemetryDecoder import lvdcTelemetryDecoder
+
+version = None
+for param in sys.argv[1:]:
+    if param.startswith("--telem="):
+        version = int(param[8:])
 
 lines = sys.stdin.readlines()
 
-radius39A = 6373382.0
-
 def tScale(t):
     return t * 168.0 / 2048000
+
+if version != None:
+    for line in lines:
+        fields = line.strip().split("\t")
+        if len(fields) != 5:
+            continue
+        t = int(fields[0])
+        channelNumber = int(fields[2], 8)
+        data = int(fields[4], 8)
+        var,val,sc1,sc2,units,desc,msg = \
+                        lvdcTelemetryDecoder(version, 0, channelNumber, data)
+        if isinstance(sc1, int):
+            scale = "B%d" % sc1
+            if sc2 != -100:
+                scale = scale + ("/B%d" % sc2)
+        if val != None:
+            if units in ["SECONDS", "PIRADS"] \
+                    or "METER" in units or "M/SEC" in units:
+                val = "%f" % val
+            else:
+                val = "O%09o" % val
+            print("%.3f\t%s\t%s\t%s\t%s\t%s" % (tScale(t), var, val, 
+                                                scale, units, desc))
+    sys.exit(0)
+
+radius39A = 6373382.0
 
 def vScale(v):
     return v / 2048
