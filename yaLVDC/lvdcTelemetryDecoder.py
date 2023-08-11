@@ -12,6 +12,20 @@ History:    2023-08-09 RSB  Began.
 
 import sys
 
+# Here are some substrings which *if* they appear in the the string defining
+# the units for a telemetry definition, I assume they mean that I should 
+# present the data in base 10.  If nont of these substrings appear, I assume
+# octal. 
+lvdcDecimalUnits = ["RADIAN", "PIRAD", "/", "**", "SECOND", "METER", "KG",
+                    "QMS", "RTC", "DECIMAL"]
+def lvdcFormatData(value, units):
+    octal = True
+    for n in lvdcDecimalUnits:
+        if n in units:
+            octal = False
+            return "%d" % value
+    return "O%09o" % value
+
 lvdcMode = None
 
 # Get lists of telemetry PIOs.  These are stored in a tab-delimited file so
