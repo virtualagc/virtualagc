@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <math.h>
 #include "lvdcTelemetryDecoder.h"
 
 static int lvdcMode = 256; // 256 means "unknown".
@@ -43,23 +44,33 @@ static int *numForMission = NULL;
  * Here are some substrings which *if* they appear in the the string defining
  * the units for a telemetry definition, I assume they mean that I should
  * present the data in base 10.  If none of these substrings appear, I assume
- * octal.
+ * octal.  Besides the returned value, a second value that's scaled according
+ * to the given binary scaler is set up as the global variable
+ * lvdcScaledValue[].
  */
 static char *lvdcDecimalUnits[] = { "RADIAN", "PIRAD", "/", "**", "SECOND",
                                     "METER", "KG", "QMS", "RTC", "DECIMAL"};
 static int numLvdcDecimalUnits = sizeof(lvdcDecimalUnits) / sizeof(char *);
+char lvdcScaledValue[64];
 char *
-lvdcFormatData(int value, char *units)
+lvdcFormatData(int value, float scale, char *units)
 {
   static char formattedData[64];
-  int octal = 1, i;
+  int i;
   for (i = 0; i < numLvdcDecimalUnits; i++)
     if (NULL != strstr(units, lvdcDecimalUnits[i]))
       {
+        if (value & 0200000000) // Supposed to be negative?
+          value = -(value ^ 0377777777); // Negate it.
         sprintf(formattedData, "%d", value);
+        if (scale != -1000 && scale != 0)
+          sprintf(lvdcScaledValue, "%g", value * pow(2, scale - 25));
+        else
+          strcpy(lvdcScaledValue, formattedData);
         return formattedData;
       }
   sprintf(formattedData, "O%09o", value);
+  strcpy(lvdcScaledValue, "");
   return formattedData;
 }
 
@@ -231,7 +242,7 @@ main(int argc, char **argv)
   telm_t *telemetry;
   int i, version = 2;
   char *path = "./lvdcTelemetryDefinitions.tsv";
-  char fmt[] = "%12.3f\t%-8s\t%-12s\t%-12s\t%-12s\t%s\n";
+  char fmt[] = "%12.3f\t%-8s\t%-12s\t%-12s\t%-12s\t%-12s\t%s\n";
   char line[1024], *fields[5], *next, scaleString[64], *dataString;
   int numFields;
   float t;
@@ -292,14 +303,19 @@ main(int argc, char **argv)
       if (telemetry->definition->modeAndPio != -1)
         {
           dataString = lvdcFormatData(telemetry->data,
+                                      telemetry->definition->scale1,
                                       telemetry->definition->units);
-          if (telemetry->definition->scale2 == -1000)
-            sprintf(scaleString, "B%d", telemetry->definition->scale1);
-          else
-            sprintf(scaleString, "B%d/B%d", telemetry->definition->scale1,
-                                     telemetry->definition->scale2);
+          strcpy(scaleString, "");
+          if (telemetry->definition->scale1 != -1000)
+            {
+              if (telemetry->definition->scale2 == -1000)
+                sprintf(scaleString, "B%d", telemetry->definition->scale1);
+              else
+                sprintf(scaleString, "B%d/B%d", telemetry->definition->scale1,
+                                         telemetry->definition->scale2);
+            }
           printf(fmt, t, telemetry->definition->variableName,
-                 dataString, scaleString,
+                 dataString, scaleString, lvdcScaledValue,
                  telemetry->definition->units,
                  telemetry->definition->description);
         }

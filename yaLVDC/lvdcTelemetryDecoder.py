@@ -8,6 +8,8 @@ Purpose:    Parses a "virtual wire" datastream from the yaLVDC CPU
 History:    2023-08-09 RSB  Began.
             2023-08-10 RSB  Telemetry definitions now read from a file
                             (lvdcTelemetryDefinitions.tsv).
+            2023-08-12 RSB  Added sign-correction for formatting decimal 
+                            numbers.
 '''
 
 import sys
@@ -18,13 +20,24 @@ import sys
 # octal. 
 lvdcDecimalUnits = ["RADIAN", "PIRAD", "/", "**", "SECOND", "METER", "KG",
                     "QMS", "RTC", "DECIMAL"]
-def lvdcFormatData(value, units):
-    octal = True
+powers = []
+for i in range(-100, 101):
+    powers.append(2.0 ** i)
+minusFlag = 0o200000000
+minusMask = 0o377777777
+def lvdcFormatData(value, scale, units):
     for n in lvdcDecimalUnits:
         if n in units:
-            octal = False
-            return "%d" % value
-    return "O%09o" % value
+            if value & minusFlag: # Is it negative?
+                value = -(value ^ minusMask)
+            scaled = value
+            if scale != -1000 and scale != 0:
+                scaled = value * powers[100 - 25 + scale]
+            unscaled = "%d" % value
+            scaled = "%g" % scaled
+            return unscaled,scaled
+    value = "O%09o" % value
+    return value,""
 
 lvdcMode = None
 

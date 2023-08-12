@@ -11,6 +11,9 @@ History:    2023-08-06 RSB  Created.
                             new --telemetry, --port, and --host CLI options to
                             support the new operating mode of connecting to
                             yaLVDC and displaying all its telemetry.
+            2023-08-12 RSB  Better handling of case in which no binary scaling
+                            is defined, some of which was accomplished by 
+                            updating lvdcTelemetryDefinitions.tsv.
 
 The PIO log file is read on stdin, and the output dataset is created on stdout.
 '''
@@ -65,7 +68,7 @@ for param in sys.argv[1:]:
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
 # shouldn't need to be modified unless there are bugs.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.setblocking(0)
+#s.setblocking(0)
 newConnect = False
 def connectToLVDC():
     global newConnect
@@ -81,7 +84,7 @@ def connectToLVDC():
         except socket.error as msg:
             sys.stderr.write(str(msg) + "\n")
             count += 1
-            if count >= 10:
+            if count >= 100:
                 sys.stderr.write("Too many retries ...\n")
                 time.sleep(3)
                 sys.exit(1)
@@ -94,13 +97,13 @@ if version != None and not telemetry:
     
     lines = sys.stdin.readlines()
 
-    format0 = "\t%-8s\t%-12s\t%-12s\t%-12s\t%s"
+    format0 = "\t%-8s\t%-12s\t%-12s\t%-16s\t%-12s\t%s"
     hFormat = "%12s" + format0
     lFormat = "%12.3f" + format0
     print(hFormat % \
-          ("Time (sec)", "Variable", "Value", "Scale", "Units", "Description"))
+          ("Time (sec)", "Variable", "Raw Value", "Scale", "Scaled Val", "Units", "Description"))
     print(hFormat % \
-          ("----------", "--------", "-----", "-----", "-----", "-----------"))
+          ("----------", "--------", "---------", "-----", "----------", "-----", "-----------"))
     for line in lines:
         fields = line.strip().split("\t")
         if len(fields) != 5:
@@ -110,13 +113,15 @@ if version != None and not telemetry:
         data = int(fields[4], 8)
         var,val,sc1,sc2,units,desc,msg = \
                         lvdcTelemetryDecoder(0, channelNumber, data)
+        scale = ""
         if isinstance(sc1, int):
-            scale = "B%d" % sc1
-            if sc2 != -1000:
-                scale = scale + ("/B%d" % sc2)
+            if sc1 != -1000:
+                scale = "B%d" % sc1
+                if sc2 != -1000:
+                    scale = scale + ("/B%d" % sc2)
         if val != None:
-            val = lvdcFormatData(val, units)
-            print(lFormat % (tScale(t), var, val, scale, units, desc))
+            val,scaled = lvdcFormatData(val, sc1, units)
+            print(lFormat % (tScale(t), var, val, scale, scaled, units, desc))
     sys.exit(0)
 
 if version != None and telemetry:
@@ -128,16 +133,16 @@ if version != None and telemetry:
     leftToRead = packetSize
     view = memoryview(inputBuffer)
     
-    format0 = "\t%-8s\t%-12s\t%-12s\t%-12s\t%s"
+    format0 = "\t%-8s\t%-12s\t%-12s\t%-12s\t%-12s\t%s"
     hFormat = "%12s" + format0
     lFormat = "%12.3f" + format0
     print()
     print("NOTE: Time origin is start of analyzeBoost, not of LVDC.")
     print()
     print(hFormat % \
-          ("Time (sec)", "Variable", "Value", "Scale", "Units", "Description"))
+          ("Time (sec)", "Variable", "Raw Value", "Scale", "Scaled Val", "Units", "Description"))
     print(hFormat % \
-          ("----------", "--------", "-----", "-----", "-----", "-----------"))
+          ("----------", "--------", "---------", "-----", "----------", "-----", "-----------"))
     t0 = time.time()
     while True:
         # Check for packet data received from yaLVDC and process it.
@@ -201,14 +206,16 @@ if version != None and telemetry:
                     value |= inputBuffer[5] & 0x7F
                     var,val,sc1,sc2,units,desc,msg = \
                                     lvdcTelemetryDecoder(0, channel, value)
+                    scale = ""
                     if isinstance(sc1, int):
-                        scale = "B%d" % sc1
-                        if sc2 != -1000:
-                            scale = scale + ("/B%d" % sc2)
+                        if sc1 != -1000:
+                            scale = "B%d" % sc1
+                            if sc2 != -1000:
+                                scale = scale + ("/B%d" % sc2)
                     if val != None:
-                        val = lvdcFormatData(val, units)
+                        val,scaled = lvdcFormatData(val, sc1, units)
                         t1 = time.time()
-                        print(lFormat % (t1-t0, var, val, scale, units, desc))
+                        print(lFormat % (t1-t0, var, val, scale, scaled, units, desc))
 
 radius39A = 6373382.0
 

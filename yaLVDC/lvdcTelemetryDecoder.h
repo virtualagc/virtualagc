@@ -141,8 +141,9 @@ lvdcTelemetryDecoder(int ioType, int channelNumber, int data);
  * string, so memory for it should not be freed, and its value is likely to
  * change upon the next call to the function.
  */
+extern char lvdcScaledValue[64];
 char *
-lvdcFormatData(int value, char *units);
+lvdcFormatData(int value, float scale, char *units);
 
 
 #endif // LVDC_TELEMETRY_DECODER_H

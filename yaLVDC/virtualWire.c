@@ -41,6 +41,9 @@
                                 apple.)  Thanks to Ludo Visser for the
                                 change.
                 2023-08-08 RSB  Added state.pioChangeFull.
+                2023-08-12 RSB  Eliminated the sleep of 5ms between packets
+                                when not --ptc, since it appears to be a
+                                performance bottleneck.
  */
 
 #include <stdio.h>
@@ -603,7 +606,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   // The following is just a little trick:  a delay to allow the UI
   // some time to take care of its business after receiving the data.
   // Undoubtedly there are better ways of handling this.
-  if (outPacketSize)
+  if (ptc && outPacketSize)
     {
       void
       sleepMilliseconds(unsigned Milliseconds);
