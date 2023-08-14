@@ -28736,35 +28736,51 @@ binary scaler.&nbsp; If two scalers were given, the first one is used.<br>
     <li>The units in which the data is measured, if any.</li>
     <li>A description of what the data is supposed to represent.</li>
   </ol>
-  <p>As I mentioned, the timestamps provided on each line aren't as 
-useful as they might be, because they relate to real time in 
-analyzeBoost.py rather than to any property of the emulated LVDC.&nbsp; 
+  <p>As I mentioned, the timestamps provided by analyzeBoost.py on each line aren't as 
+useful as they might be, because they relate to elapsed time in 
+analyzeBoost.py rather than to any timing property of the emulated LVDC.&nbsp; 
 As it happens, timestamps of a sort <i>are</i> among the telemetry data, but are only emitted periodically rather than being embedded on a <tt>PIO</tt>-by-<tt>PIO</tt> basis.&nbsp; You can actually see one such timestamp in the sample data above: It's <tt>D.VTAS</tt>,
  "MISSION TIME AT ACCELEROMETER READ", and its value is close to the 
 timestamp assigned by analyzeBoost.py, but not quite equal. Which should not be a surprise, since given that <tt>PIO 000</tt> is emitted only at about 1.5 second intervals, it's not very good for timestamping any individual <tt>PIO</tt> records appearing in the in the interim.<br>
 </p>
 <p>Besides the timestamps, another inconvenience of analyzeBoost.py is 
-that the telemetry rushes past so fast that you can't possible see it 
-without scrolling or without capturing it by piping it into another 
-files ... which is very easy to do.&nbsp; However, as I said, there is 
-an alternative method of viewing the telemetry, and that's via a program
- called yaMccLvdc.py, whose output looks something like this:<br>
+that the telemetry rushes past so fast that you can't possibly see it 
+without scrolling or without capturing it by piping it into file first 
+... which, on the other hand, is very easy to do.&nbsp; However, as I 
+said, there is 
+an alternative method of viewing the telemetry, and that's via a GUI 
+program
+ called yaMccLvdc.py, whose output looks something like the following:<br>
 </p>
-<div align="center"><img moz-do-not-send="true" src="yaMccLvdc.png" alt="" width="1355" height="760"><br>
+<div align="center"><img moz-do-not-send="true" src="yaMccLvdc.png" alt="" width="1383" height="761"><br>
   <div align="left"><br>
-Because each telemetered item stays at the same position on the screen, 
+Because each telemetered item stays at the same position on the screen 
+in yaMccLvdc.py, 
 rather than furiously scrolling past you, it's easier to read.&nbsp; 
+(Though you can no longer capture it to a file as you could have with 
+analyzeBoost.py.)&nbsp; 
 It's also slightly more analogous to the way mission controllers saw the
- telemetry.&nbsp; On the other hand, because of space limitations, you 
-can no longer have immediate access to the descriptions of each item, 
+ telemetry back in the day.&nbsp; On the other hand, because of space 
+limitations, you 
+can no longer have immediate on-screen access to the descriptions of 
+each item, 
 and simply have to know the names of the variables you're interested 
-in.&nbsp; For example, to watch the total inertial velocity vs time, you
- have to know to look at <tt>D.VVS</tt> (column 2, row 8) vs <tt>D.VTAS</tt> (column 1, row 1).&nbsp; But nothing's perfect!&nbsp; Hopefully improvements can be made at some point.<br>
-    <br>
-Running yaMccLvdc.py is much the same as running analyzeBoost.py:<br>
+in.&nbsp; But as some compensation for that, if you hover the mouse over
+ a variable name, a pop-up window will show its description and other 
+potentially-interesting information, as seen for the variable <tt>V.CSB</tt>
+ in the screenshot.&nbsp; The telemetry is alphabetized by variable 
+name, incidentally, so it is relatively easy to find any given variable.
+ Another handy feature is that if you left-click one of the data 
+readouts with your mouse, you can change its color to make it stand out 
+visually and thus easier for you to monitor on an ongoing basis; the 
+colors persist even as the readings update, and they cycle through red, 
+green, blue, and black as you repeatedly click.&nbsp; For example, only 
+the variables&nbsp; <tt>D.VTAS</tt> (mission time elapsed), <tt>D.VVS</tt> (total inertial velocity), and <tt>D.VXS</tt>/<tt>D.VYS</tt>/<tt>D.VZS</tt> (fixed-space coordinates) are relevant to <a moz-do-not-send="true" href="#DemoAS512">the altitude and velocity graphs we made above for the repeatable flight test mode</a>, so before taking the screenshot I had changed their colors to monitor them.<br>
+<br>
+Invoking yaMccLvdc.py is much the same as invoking analyzeBoost.py:<br>
     <ol>
 <li>Open up 2 separate command-line windows.</li><li>At one of the command lines, run the LVDC CPU emulator, using whatever command switches are appropriate:&nbsp; "<tt>yaLVDC ...</tt>".</li><li>At the other command line, run "<tt>yaMccLvdc.py --version=<i>N</i></tt>", where again, <i><tt>N</tt></i>=1
- for AS-206RAM, 2 for AS-512 (this is the default), or 3 for AS-513.</li>
+ for AS-206RAM, 2 for AS-512 (default), or 3 for AS-513.</li>
     </ol>
 
   </div>
@@ -28915,7 +28931,7 @@ concerned, I think the only choices are sequences 4A and 4B, but I don't
       <td width="10%" valign="middle" align="center">22<br>
       </td>
       <td width="45%" valign="middle" align="center">UPDATE MANEUVER<br>
-Change time to start coast phase maneuver.<br>
+Change the time for starting the coast phase maneuver.<br>
       </td>
       <td valign="middle" bgcolor="#cccccc" align="center"><br>
       </td>
@@ -28925,8 +28941,7 @@ Change time to start coast phase maneuver.<br>
       </td>
       <td width="45%" valign="middle" align="center">TIME BASE 6D<br>
 Initiates time base 6D.&nbsp; I have found no specific documentation for
- TB6D, but I believe that it is an S-IVB ignition restart for TLI, 
-subsequent to some kind of earlier failure.<br>
+ TB6D, but I believe that it is an S-IVB ignition restart for TLI.<br>
       </td>
       <td valign="middle" bgcolor="#cccccc" align="center"><br>
       </td>
@@ -30023,7 +30038,7 @@ Commons
 
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-08-13.<br>
+          2023-08-14.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
