@@ -33,7 +33,7 @@ default: ${TARGET}
 all-archs: ${TARGET}
 
 ${TARGET}: ${SOURCE} yaLVDC.h Makefile
-	${cc} ${CFLAGS} -o $@ *.c
+	${cc} ${CFLAGS} -o $@ *.c -lm
 
 .PHONY:	clean
 clean:
