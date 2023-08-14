@@ -28692,8 +28692,9 @@ ground depends on the specific LVDC Flight Program version and the flight phase.
 interpretation.&nbsp; Channel 124 is always inertial velocity in any 
 flight program I know of, but other <tt>PIO</tt>'s are not always the same.<br>
   </p>
-The telemetry interpreter available right now happens to be the same 
-program analyzeBoost.py that we used in the preceding section to 
+There are a couple of different ways to view the telemetry in real 
+time.&nbsp; One is to use the same program (analyzeBoost.py) that we 
+used in the preceding section to 
 interpret repeatable flight-test mode data.&nbsp; In its simplest form, 
 the usage for viewing telemetry is this:<br>
   <ol>
@@ -28741,7 +28742,36 @@ analyzeBoost.py rather than to any property of the emulated LVDC.&nbsp;
 As it happens, timestamps of a sort <i>are</i> among the telemetry data, but are only emitted periodically rather than being embedded on a <tt>PIO</tt>-by-<tt>PIO</tt> basis.&nbsp; You can actually see one such timestamp in the sample data above: It's <tt>D.VTAS</tt>,
  "MISSION TIME AT ACCELEROMETER READ", and its value is close to the 
 timestamp assigned by analyzeBoost.py, but not quite equal. Which should not be a surprise, since given that <tt>PIO 000</tt> is emitted only at about 1.5 second intervals, it's not very good for timestamping any individual <tt>PIO</tt> records appearing in the in the interim.<br>
-  </p>
+</p>
+<p>Besides the timestamps, another inconvenience of analyzeBoost.py is 
+that the telemetry rushes past so fast that you can't possible see it 
+without scrolling or without capturing it by piping it into another 
+files ... which is very easy to do.&nbsp; However, as I said, there is 
+an alternative method of viewing the telemetry, and that's via a program
+ called yaMccLvdc.py, whose output looks something like this:<br>
+</p>
+<div align="center"><img moz-do-not-send="true" src="yaMccLvdc.png" alt="" width="1355" height="760"><br>
+  <div align="left"><br>
+Because each telemetered item stays at the same position on the screen, 
+rather than furiously scrolling past you, it's easier to read.&nbsp; 
+It's also slightly more analogous to the way mission controllers saw the
+ telemetry.&nbsp; On the other hand, because of space limitations, you 
+can no longer have immediate access to the descriptions of each item, 
+and simply have to know the names of the variables you're interested 
+in.&nbsp; For example, to watch the total inertial velocity vs time, you
+ have to know to look at <tt>D.VVS</tt> (column 2, row 8) vs <tt>D.VTAS</tt> (column 1, row 1).&nbsp; But nothing's perfect!&nbsp; Hopefully improvements can be made at some point.<br>
+    <br>
+Running yaMccLvdc.py is much the same as running analyzeBoost.py:<br>
+    <ol>
+<li>Open up 2 separate command-line windows.</li><li>At one of the command lines, run the LVDC CPU emulator, using whatever command switches are appropriate:&nbsp; "<tt>yaLVDC ...</tt>".</li><li>At the other command line, run "<tt>yaMccLvdc.py --version=<i>N</i></tt>", where again, <i><tt>N</tt></i>=1
+ for AS-206RAM, 2 for AS-512 (this is the default), or 3 for AS-513.</li>
+    </ol>
+
+  </div>
+  <div align="left">We'll see more of yaMccLvdc.py in the next section as well.<br>
+  </div>
+</div>
+
   <h3><a name="UsingDCS"></a>Using the Digital Command System (DCS)<br>
   </h3>
   <p>Data isn't merely sent from the LVDC to mission control via 
@@ -28749,9 +28779,285 @@ telemetry, but can be sent from mission control to the LVDC as well ...
 though in the latter case the data is normally called a "command", and 
 is delivered by what's known as the Digital Command System (DCS).<br>
   </p>
-  <p><br>
-  </p>
-  <p>TBD</p>
+  <p>I haven't been able to find out anything so far regarding 
+application of DCS to the AS-206RAM mission, though the comments in the 
+Flight Program's source code do refer to it.&nbsp; I suspect that this 
+is due to DCS having been processed back in those early days by the 
+Preflight Program (which we don't have) rather than by the Flight 
+Program (which we do).&nbsp; However, in latter missions the DCS was 
+processed by the Flight Program, so the amount of information about DCS 
+in the AS-512 and AS-513 missions is a bit more substantial if not 100% 
+complete.&nbsp; Besides the flight-program source code itself, section 
+10 of the document "<a moz-do-not-send="true" href="Documents/satinstunitibm_4.pdf">Saturn Instrument Unit: LVDC Equation Defining Document (EDD) for the Saturn IB Flight Program</a>" covers <i>some</i>
+ DCS commands in reasonable detail.&nbsp; The so-called "Technical 
+Information Summary" documents for individual missions, though not 
+providing any technical details about DCS in depth, sometimes though not
+ always list the specific DCS commands available for the missions, as 
+well as the constraints on when those various commands could be 
+accepted.&nbsp; For example:<br>
+</p>
+<ul>
+  <li><a moz-do-not-send="true" href="Documents/saturnas501.pdf#page=21">AS-501</a> (Apollo 4)<br>
+  </li>
+  <li><a moz-do-not-send="true" href="Documents/UAH-19671215-TechnicalInformationSummaryApollo5%28AS204LM1%29ApolloSaturn1BFlightVehicle.pdf#page=27">AS-204</a> (Apollo 5)</li>
+  <li><a moz-do-not-send="true" href="Documents/tisapollo8.pdf#page=25">AS-503</a> (Apollo 8)<br>
+  </li>
+  <li><a moz-do-not-send="true" href="Documents/tecinfsumapollo9.pdf#page=27">AS-504</a> (Apollo 9)<br>
+  </li>
+  <li><a moz-do-not-send="true" href="Documents/19700015780_1970015780.pdf#page=27">AS-505</a> (Apollo 10)</li>
+</ul>
+<p>Admittedly, the value of a list of available DCS commands is minimal 
+without the ability to actually run the still-unavailable LVDC Flight 
+Programs or Preflight Programs capable of accepting those commands, so 
+only AS-512 (Apollo 17) and AS-513 (Skylab 1) are of much interest at 
+the moment.&nbsp; You'll notice that <i>those</i> missions are not among
+ any of the documented ones.&nbsp; With that said, the particular 
+commands available to the AS-512 or AS-513 missions are summarized in 
+the following table, to the extent I've been able to discover or guess 
+what they are:<br>
+</p>
+<table width="90%" cellspacing="2" cellpadding="2" border="1" align="center">
+  <tbody>
+    <tr>
+      <th width="10%" valign="middle" align="center">Command (Octal)<br>
+      </th>
+      <th width="45%" valign="middle" align="center">AS-512<br>
+      </th>
+      <th valign="middle" align="center">AS-513<br>
+      </th>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">05<br>
+      </td>
+      <td width="45%" valign="middle" align="center">INHIBIT MANEUVER<br>
+Inhibit coast phase attitude maneuver.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">10<br>
+      </td>
+      <td width="45%" valign="middle" align="center">TIME BASE UPDATE<br>
+The time-base time is advanced or retarded by a selected amount.<br>
+      </td>
+      <td valign="middle" align="center">FINE TIME BASE UPDATE<br>
+See also command 40 below.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">11<br>
+      </td>
+      <td rowspan="1" colspan="2" width="45%" valign="middle" align="center">NAVIGATION UPDATE<br>
+Re-initializes the navigation state vector (position and velocity) at a specified time with data provided by mission control.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">12<br>
+      </td>
+      <td rowspan="1" colspan="2" width="45%" valign="middle" align="center">GENERALIZED SWITCH SELECTOR<br>
+The specified switch-selector function is issued at the first opportunity.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">13<br>
+      </td>
+      <td width="45%" valign="middle" align="center">SECTOR DUMP<br>
+The contents of the specified memory sector are telemetered.<br>
+      </td>
+      <td valign="middle" align="center">MEMORY DUMP<br>
+The contents of the specified contiguous memory block are 
+telemetered.&nbsp; Presumably this is a combined replacement for the 
+separate SECTOR DUMP and TELEMETER SINGLE MEMORY LOCATION commands found
+ in AS-512 and earlier missions.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">14<br>
+      </td>
+      <td width="45%" valign="middle" align="center">TELEMETER SINGLE MEMORY LOCATION<br>
+The content of a single selected memory location is telemetered.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">17<br>
+      </td>
+      <td width="45%" valign="middle" align="center">TIME BASE 8 ENABLE<br>
+Initiates time base 8.&nbsp; I believe that TB8 is the 
+post-S-IVB-separation maneuver, including a propellant dump and safeing 
+sequence.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">20<br>
+      </td>
+      <td rowspan="1" colspan="2" width="45%" valign="middle" align="center">TERMINATE<br>
+Stop DCS processing and reset for a new command.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">21<br>
+      </td>
+      <td width="45%" valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+      <td valign="middle" align="center">EXECUTE ALTERNATE SEQUENCE<br>
+In general, initiates one of (potentially) 15 different preprogrammed 
+alternate sequences.&nbsp; Specifically, in so far as AS-513 is 
+concerned, I think the only choices are sequences 4A and 4B, but I don't
+ know what either of those sequences actually does.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">22<br>
+      </td>
+      <td width="45%" valign="middle" align="center">UPDATE MANEUVER<br>
+Change time to start coast phase maneuver.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">25<br>
+      </td>
+      <td width="45%" valign="middle" align="center">TIME BASE 6D<br>
+Initiates time base 6D.&nbsp; I have found no specific documentation for
+ TB6D, but I believe that it is an S-IVB ignition restart for TLI, 
+subsequent to some kind of earlier failure.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">31<br>
+      </td>
+      <td width="45%" valign="middle" align="center">TARGET UPDATE<br>
+Replace targeting quantities for second S-IVB burn.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">33<br>
+      </td>
+      <td width="45%" valign="middle" align="center">EXECUTE MANEUVER A<br>
+        <i>Possibly</i>, initiates a maneuver to local horizontal in a retrograde position.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">34<br>
+      </td>
+      <td width="45%" valign="middle" align="center">EXECUTE MANEUVER B<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">35<br>
+      </td>
+      <td width="45%" valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+      <td valign="middle" align="center">EXECUTE GENERALIZED MANEUVER<br>
+Initiates one of the following:&nbsp;&nbsp; Inertial-attitude hold 
+maneuver; track-local-reference orbital maneuver; return to nominal 
+timeline (see below); special maneuver A (see AS-512); special maneuver B
+ (see AS-512).<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">36<br>
+      </td>
+      <td width="45%" valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+      <td valign="middle" align="center">RETURN TO NOMINAL TIMELINE<br>
+Returns to the pre-programmed orbital attitude timeline in effect prior to DCS-initiated action having overridden it.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">40<br>
+      </td>
+      <td width="45%" valign="middle" align="center">INHIBIT MANEUVER<br>
+This <i>appears</i> to be the same as command 05 (see above).&nbsp; The same subroutine is executed for either one.<br>
+      </td>
+      <td valign="middle" align="center">COARSE TIME BASE UPDATE<br>
+See also command 10 above.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">41<br>
+      </td>
+      <td rowspan="1" colspan="2" width="45%" valign="middle" align="center">LADDER MAGNITUDE LIMIT<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">43<br>
+      </td>
+      <td width="45%" valign="middle" align="center">UPDATE MANEUVER<br>
+This <i>appears</i> to be the same as command 22 (see above).&nbsp; The same subroutine is executed for either one.</td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">45<br>
+      </td>
+      <td rowspan="1" colspan="2" width="45%" valign="middle" align="center">INHIBIT WATER CONTROL VALVE LOGIC<br>
+Inhibit water valve from changing position.<br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">52<br>
+      </td>
+      <td width="45%" valign="middle" align="center">S-IVB/IU LUNAR IMPACT<br>
+Presumably, initiates the maneuver that crashes the S-IVB onto the moon.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">53<br>
+      </td>
+      <td width="45%" valign="middle" align="center">SWITCH ANTENNA TO OMNI<br>
+Both the PCM and CCS antennas are switched.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">54<br>
+      </td>
+      <td width="45%" valign="middle" align="center">SWITCH ANTENNA TO LOW GAIN<br>
+Both the PCM and CCS antennas are switched.</td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">55<br>
+      </td>
+      <td width="45%" valign="middle" align="center">SWITCH ANTENNA TO HIGH GAIN<br>
+Both the PCM and CCS antennas are switched.</td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+    <tr>
+      <td width="10%" valign="middle" align="center">60<br>
+      </td>
+      <td width="45%" valign="middle" align="center">TD &amp; E ENABLE<br>
+Inhibits T6 (TLI?) so that TD &amp; E (LM Transposition, Docking, and Ejection) can be accomplished in Earth orbit.<br>
+      </td>
+      <td valign="middle" bgcolor="#cccccc" align="center"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p><br>
+</p>
+<p>TBD</p>
+
 </div>
 </div></div></div>
               </div>
@@ -29717,7 +30023,7 @@ Commons
 
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-08-11.<br>
+          2023-08-13.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
