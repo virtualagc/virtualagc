@@ -13,8 +13,10 @@ import time
 import socket
 try:
   import Tkinter as tk
+  import Tkinter.font as font
 except ImportError:
   import tkinter as tk
+  import tkinter.font as font
 try:
   import ttk
   py3 = False
@@ -82,8 +84,59 @@ elif version == 3:
 else:
 	print("Unrecognized LVDC version (%d)." % version)
 	sys.exit(1)
+variables = {}
+for pio in forMission:
+	variables[forMission[pio][0]] = pio
 
 lvdcSetVersion(version)
+
+class ToolTip(object):
+
+    def __init__(self, widget):
+        self.widget = widget
+        self.tipwindow = None
+        self.id = None
+        self.x = self.y = 0
+
+    def showtip(self, text):
+        self.text = text
+        if self.tipwindow or not self.text:
+            return
+        x, y, cx, cy = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 57
+        y = y + cy + self.widget.winfo_rooty() +27
+        self.tipwindow = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(1)
+        tw.wm_geometry("+%d+%d" % (x, y))
+        label = tk.Label(tw, text=self.text, justify=tk.LEFT,
+                      background="#ffffe0", relief=tk.SOLID, borderwidth=1,
+                      font="TkFixedFont")
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
+
+def CreateToolTip(widget, text):
+    toolTip = ToolTip(widget)
+    def enter(event):
+        toolTip.showtip(text)
+    def leave(event):
+        toolTip.hidetip()
+    widget.bind('<Enter>', enter)
+    widget.bind('<Leave>', leave)
+    
+# An event for clicking on a variable name.  It cycles through my chosen
+# set of colors.
+gray = "#3f3f3f"
+colors = ["#000000", "#ff0000", "#00ff00", "#0000ff"]
+def varClick(event):
+	var = event.widget["text"].split(":")[0]
+	color = event.widget["fg"]
+	color = colors[(colors.index(color) + 1) % len(colors)]
+	event.widget["fg"] = color
 
 class mccPanel:
     def __init__(self, top=None):
@@ -94,53 +147,65 @@ class mccPanel:
 	    _compcolor = '#d9d9d9' # X11 color: 'gray85'
 	    _ana1color = '#d9d9d9' # X11 color: 'gray85'
 	    _ana2color = '#ececec' # Closest X11 color: 'gray92'
-	    #font = "-family {DejaVu Sans Mono} -size 12"
-	    font = "TkFixedFont"
 	    self.style = ttk.Style()
 	    if sys.platform == "win32":
 	      self.style.theme_use('winnative')
 	    self.style.configure('.',background=_bgcolor)
 	    self.style.configure('.',foreground=_fgcolor)
-	    self.style.configure('.',font=font)
 	    self.style.map('.',background=
 	      [('selected', _compcolor), ('active',_ana2color)])
+	    
+	    
 	
-	    #top.geometry("1311x729+3241+107")
-	    #top.minsize(1, 1)
-	    #top.maxsize(5105, 1170)
-	    #top.resizable(1, 0)
-	    top.title("LVDC Telemetry and Digital Command System (DCS)")
+	    top.title("LVDC TELEMETRY AND DIGITAL COMMAND SYSTEM (DCS)")
 	    top.configure(highlightcolor="black")
 	    
 	    numPIOs = len(forMission)
 	    self.numCols = 5
 	    self.numRows = (numPIOs + self.numCols - 1) // self.numCols
-	    row = 0
-	    col = 0
 	    self.array = []
+	    for row in range(self.numRows):
+	    	self.array.append([])
 	    self.locations = {}
-	    for pio in sorted(forMission):
+	    row = 0
+	    for var in sorted(variables):
+	    	pio = variables[var]
 	    	teld = forMission[pio]
-	    	if col == 0:
-	    		rowArray = []
-	    		self.array.append(row)
-	    	rowArray.append(tk.Label(text=" "+teld[0]+": ", anchor="e")\
-								.grid(row=row, column=col, sticky=tk.W))
-	    	col += 1
-	    	rowArray.append(tk.Label(text="", width=12, anchor="w")\
-								.grid(row=row, column=col, sticky=tk.W))
-	    	self.locations[pio] = (row, col)
-	    	col += 1
-	    	rowArray.append(tk.Label(text=teld[3]+" ", anchor="w")\
-								.grid(row=row, column=col, sticky=tk.W))
-	    	col += 1
-	    	if col >= 4 * self.numCols - 1:
-	    		row += 1
-	    		col = 0
-	    	else:
+	    	scale = ""
+	    	if teld[1] != -1000:
+	    		if teld[2] == -1000:
+	    			scale = "B%d" % teld[1]
+	    		else:
+	    			scale = "B%d/B%d" % (teld[1], teld[2])
+	    	tooltip = "Variable:     %s\n" % teld[0] + \
+	    			  "Mode reg:     %o\n" % (pio >> 9) + \
+	    			  "PIO channel:  %03o\n" % (pio & 0o177) + \
+	    			  "Binary scale: %s\n" % scale + \
+	    			  "Units:        %s\n" % teld[3] + \
+	    			  "Description:  %s" % teld[4]
+	    	rowArray = self.array[row]
+	    	label = tk.Label(text=" "+teld[0]+": ", fg=gray, anchor="e")
+	    	rowArray.append(label.grid(row=row, column=len(rowArray), \
+									sticky=tk.W))
+	    	CreateToolTip(label, tooltip)
+	    	self.locations[pio] = (row, len(rowArray))
+	    	label = tk.Label(text="", width=12, fg=colors[0], anchor="w")
+	    	rowArray.append(label\
+								.grid(row=row, column=len(rowArray), \
+									sticky=tk.W))
+	    	label.bind('<Button-1>', varClick)
+	    	rowArray.append(tk.Label(text=teld[3]+" ", fg=gray, \
+									anchor="w")\
+								.grid(row=row, column=len(rowArray), \
+									sticky=tk.W))
+	    	if len(rowArray) < 4 * self.numCols - 1:
 	    		rowArray.append(tk.ttk.Separator(orient=tk.VERTICAL)\
-	    						.grid(row=row, column=col, rowspan=1, sticky=tk.NS))
-	    		col += 1
+	    						.grid(row=row, column=len(rowArray), \
+									rowspan=1, \
+									sticky=tk.NS))
+	    	row += 1
+	    	if row >= self.numRows:
+	    		row = 0
 	    	
 	    	
 ##############################################################################
@@ -305,6 +370,7 @@ def mainLoopIteration():
 	root.after(refreshRate, mainLoopIteration)
 
 root = tk.Tk()
+root.option_add("*Font", font.nametofont("TkFixedFont"))
 top = mccPanel(root)
 
 
