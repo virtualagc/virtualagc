@@ -37,7 +37,7 @@ def lvdcFormatData(value, scale, units):
             scaled = "%g" % scaled
             return unscaled,scaled
     value = "O%09o" % value
-    return value,""
+    return value, ""
 
 lvdcMode = None
 
@@ -101,10 +101,11 @@ def lvdcSetVersion(version):
 #    units           A string describing the units, possibly empty
 #    description     A string describing the quantity, possibly empty
 #    errorMessage    Self-explanatory.  None if none.
+#    augmentedPIO    mode+channel
 # If the packet doesn't hold any telemetered data, then variableName and value
 # are returned as None.  If there is no error, then errorMessage is returned
 # as None.
-defaultReturn = (None, None, None, None, None, None, None)
+defaultReturn = (None, None, None, None, None, None, None, None)
 def lvdcTelemetryDecoder(ioType, channelNumber, data):
     global lvdcMode
     if ioType != 0:
@@ -118,4 +119,4 @@ def lvdcTelemetryDecoder(ioType, channelNumber, data):
     if augmentedPIO not in forMission:
         return defaultReturn
     teld = forMission[augmentedPIO]
-    return teld[0],data,teld[1],teld[2],teld[3],teld[4],None
+    return teld[0],data,teld[1],teld[2],teld[3],teld[4],None,augmentedPIO

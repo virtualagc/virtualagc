@@ -111,7 +111,7 @@ if version != None and not telemetry:
         t = int(fields[0])
         channelNumber = int(fields[2], 8)
         data = int(fields[4], 8)
-        var,val,sc1,sc2,units,desc,msg = \
+        var,val,sc1,sc2,units,desc,msg,aug = \
                         lvdcTelemetryDecoder(0, channelNumber, data)
         scale = ""
         if isinstance(sc1, int):
@@ -204,7 +204,7 @@ if version != None and telemetry:
                     value |= (inputBuffer[3] & 0x7F) << 14
                     value |= (inputBuffer[4] & 0x7F) << 7
                     value |= inputBuffer[5] & 0x7F
-                    var,val,sc1,sc2,units,desc,msg = \
+                    var,val,sc1,sc2,units,desc,msg,aug = \
                                     lvdcTelemetryDecoder(0, channel, value)
                     scale = ""
                     if isinstance(sc1, int):

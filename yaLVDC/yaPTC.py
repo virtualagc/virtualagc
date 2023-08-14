@@ -4,8 +4,8 @@
 # Purpose:		This is a very primitive PTC peripheral emulator for
 #				use with the yaLVDC PTC CPU emulator, and is connected
 #				to yaLVDC with "virtual wires" ... i.e., via network sockets.
-#				It's not fully developed, and is just intended to help me
-#				it couldn't be developed fully, if there were reason to do so.  
+#				It's not fully developed, and is just intended to help me.
+#				It could be developed fully, if there were reason to do so.  
 # Reference:	http://www.ibiblio.org/apollo/developer.html
 # Mod history:	2020-05-07 RSB	Began adapting from piPeripheral.py, which is
 #								a skeleton program for developing peripherals
