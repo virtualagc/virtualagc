@@ -517,9 +517,9 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
               frame->imageCompOff : frame->imageCompOn);
       frame->indicatorKeyRlse->SetBitmap(
           (0 == (Value & 04)) ? frame->imageKeyRlseOff : frame->imageKeyRlseOn);
-      frame->indicatorScalerFail->SetBitmap(
+      frame->indicatorTmFail->SetBitmap(
           (0 == (Value & 010)) ?
-              frame->imageScalerFailOff : frame->imageScalerFailOn);
+              frame->imageTmFailOff : frame->imageTmFailOn);
       frame->indicatorCheckFail->SetBitmap(
           (0 == (Value & 020)) ?
               frame->imageCheckFailOff : frame->imageCheckFailOn);
