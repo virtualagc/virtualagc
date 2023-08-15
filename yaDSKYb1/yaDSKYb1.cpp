@@ -290,7 +290,7 @@ TimerClass::Notify()
   if (frame->flashing)
     {
       frame->flashCounter++;
-      if (frame->flashCounter >= 700 / PULSE_INTERVAL)
+      if (frame->flashCounter >= 78125 / 100 / PULSE_INTERVAL)
         {
           frame->flashCounter = 0;
           frame->flashStateLit = !frame->flashStateLit;
