@@ -42,6 +42,15 @@
  *                              used, and it's really flashing of the verb and noun
  *                              *digits* themselves, just as it is for Block 2.  So
  *                              I've fixed that.
+ *              2023-08-14 JAP  Fixed the COMP FAIL and SCALER FAIL lights
+ *                              illuminating instead of the COMP ACTY and TM FAIL
+ *                              lights, respectively. Also sped up the VERB/NOUN
+ *                              flashing to 0.78125 Hz or 1.28 seconds (640 ms on,
+ *                              640 ms off), per the ND-1021041 document and
+ *                              relevant schematics. Additionally removed a
+ *                              200 ms wait from the packet output code, and fixed
+ *                              a warning about an incorrect grid sizer
+ *                              alignment object on program startup.
  */
 
 #include <sys/types.h>
@@ -290,7 +299,7 @@ TimerClass::Notify()
   if (frame->flashing)
     {
       frame->flashCounter++;
-      if (frame->flashCounter >= 1000 / PULSE_INTERVAL)
+      if (frame->flashCounter >= 640 / PULSE_INTERVAL)
         {
           frame->flashCounter = 0;
           frame->flashStateLit = !frame->flashStateLit;
@@ -378,7 +387,6 @@ OutputKeycode(int Keycode)
         }
       else
         {
-          wxMilliSleep(200);
           FormIoPacket(04, 0, &Packet[4]); // Data.
           j = send(ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
           if (j == SOCKET_ERROR && SOCKET_BROKEN)
@@ -512,14 +520,14 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
       lastOUT1 = Value;
       frame->indicatorProgAlm->SetBitmap(
           (0 == (Value & 01)) ? frame->imageProgAlmOff : frame->imageProgAlmOn);
-      frame->indicatorCompFail->SetBitmap(
+      frame->indicatorComp->SetBitmap(
           (0 == (Value & 02)) ?
-              frame->imageCompFailOff : frame->imageCompFailOn);
+              frame->imageCompOff : frame->imageCompOn);
       frame->indicatorKeyRlse->SetBitmap(
           (0 == (Value & 04)) ? frame->imageKeyRlseOff : frame->imageKeyRlseOn);
-      frame->indicatorScalerFail->SetBitmap(
+      frame->indicatorTmFail->SetBitmap(
           (0 == (Value & 010)) ?
-              frame->imageScalerFailOff : frame->imageScalerFailOn);
+              frame->imageTmFailOff : frame->imageTmFailOn);
       frame->indicatorCheckFail->SetBitmap(
           (0 == (Value & 020)) ?
               frame->imageCheckFailOff : frame->imageCheckFailOn);

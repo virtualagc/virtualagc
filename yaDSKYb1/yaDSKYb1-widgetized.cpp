@@ -604,7 +604,7 @@ MyFrame::do_layout()
       sizer_12_copy_1->Add(digitNounRight, 0, 0, 0);
       sizer_12_copy_1->Add(12, 20, 0, 0, 0);
       grid_sizer_3->Add(sizer_12_copy_1, 0, 0, 0);
-      sizer_3->Add(grid_sizer_3, 0, wxALIGN_CENTER_VERTICAL, 0);
+      sizer_3->Add(grid_sizer_3, 0, wxALIGN_CENTER_HORIZONTAL, 0);
       sizer_3->Add(20, 22, 0, 0, 0); // Between Reg1 and Verb/Noun
       grid_sizer_2->Add(PlusMinusReg1, 0, 0, 0);
       grid_sizer_2->Add(Digit1Reg1, 0, 0, 0);
