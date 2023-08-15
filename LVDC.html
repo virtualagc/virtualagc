@@ -28750,9 +28750,9 @@ without scrolling or without capturing it by piping it into file first
 said, there is 
 an alternative method of viewing the telemetry, and that's via a GUI 
 program
- called yaMccLvdc.py, whose output looks something like the following:<br>
+ called yaMccLvdc.py, <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaLVDC">available in the same place in our source-code repository</a>, whose output looks something like the following:<br>
 </p>
-<div align="center"><img moz-do-not-send="true" src="yaMccLvdc.png" alt="" width="1383" height="761"><br>
+<div align="center"><img moz-do-not-send="true" src="yaMccLvdc.png" alt="" width="1604" height="758"><br>
   <div align="left"><br>
 Because each telemetered item stays at the same position on the screen 
 in yaMccLvdc.py, 
@@ -28775,7 +28775,7 @@ readouts with your mouse, you can change its color to make it stand out
 visually and thus easier for you to monitor on an ongoing basis; the 
 colors persist even as the readings update, and they cycle through red, 
 green, blue, and black as you repeatedly click.&nbsp; For example, only 
-the variables&nbsp; <tt>D.VTAS</tt> (mission time elapsed), <tt>D.VVS</tt> (total inertial velocity), and <tt>D.VXS</tt>/<tt>D.VYS</tt>/<tt>D.VZS</tt> (fixed-space coordinates) are relevant to <a moz-do-not-send="true" href="#DemoAS512">the altitude and velocity graphs we made above for the repeatable flight test mode</a>, so before taking the screenshot I had changed their colors to monitor them.<br>
+the variables&nbsp; <tt>D.VTAS</tt> (mission time elapsed), <tt>D.VVS</tt> (total inertial velocity), and <tt>D.VXS</tt>/<tt>D.VYS</tt>/<tt>D.VZS</tt> (fixed-space coordinates) are relevant to <a moz-do-not-send="true" href="#DemoAS512">the altitude and velocity graphs we made above for the repeatable flight test mode</a>, so before taking the screenshot you see above, I had already changed their colors to monitor them.<br>
 <br>
 Invoking yaMccLvdc.py is much the same as invoking analyzeBoost.py:<br>
     <ol>
@@ -28784,7 +28784,38 @@ Invoking yaMccLvdc.py is much the same as invoking analyzeBoost.py:<br>
     </ol>
 
   </div>
-  <div align="left">We'll see more of yaMccLvdc.py in the next section as well.<br>
+  <div align="left">The telemetry display can be quite large relative to
+ your screen real-estate if, for example, you're confined to a laptop 
+computer rather than to the kind of multi-monitor desktop setup I 
+use.&nbsp; So yaMccLvdc.py has several optional command-line switches 
+you can use to make telemetry display in a limited monitor setup more 
+palatable.&nbsp; One thing that may happen is that your window manager 
+may decide simply to size the telemetry window to fit your monitor size,
+ rather than to make it big enough to accommodate all of the 
+telemetry.&nbsp; By default, the yaMccLvdc.py's telemetry window isn't 
+resizable after it has been created, in which case there's no way to see
+ all of the telemetry.&nbsp; But if you add the <tt>--resize</tt> 
+command-line switch, it will let you enlarge the window after it has 
+been created.&nbsp; It's true that it won't fit entirely on the screen 
+at once after it has been enlarged, but at least you can slide it around
+ to see the entire contents.&nbsp; And then there's the <tt>--font=<i>N</i></tt>
+ switch, which can be used to reduce the font size from the default 
+(which is 10).&nbsp; This will generally make the telemetry window a lot
+ smaller.&nbsp; Another consideration is that by default, I spell out 
+all of the units (like METERS/SECOND) in full, causing them to occupy 
+quite a bit of screen width.&nbsp; But if you use the <tt>--abbreviate</tt>
+ switch, then some of the units can be abbreviated (for example, M/S), 
+reducing the width somewhat.&nbsp; Though it's less likely with every 
+passing year, I suppose it's also possible that some computer setups 
+still can't process the UTF-8 (unicode) characters that I use for units 
+such as METERS<sup>-1</sup> or METERS/SECOND<sup>2</sup>.&nbsp; If that's your situation, you can use the <tt>--ascii</tt>
+ switch to instead display ASCII-only representations like METERS**-1 
+and METERS/SECOND**2.&nbsp; It won't reduce the window size, obviously.<br>
+<br>
+If you want to see all the available command-line options, use the command<br>
+<blockquote><tt>yaMccLvdc.py --help</tt><br>
+</blockquote>
+We'll encounter yaMccLvdc.py again in the next section.<br>
   </div>
 </div>
 
