@@ -290,7 +290,7 @@ TimerClass::Notify()
   if (frame->flashing)
     {
       frame->flashCounter++;
-      if (frame->flashCounter >= 1000 / PULSE_INTERVAL)
+      if (frame->flashCounter >= 700 / PULSE_INTERVAL)
         {
           frame->flashCounter = 0;
           frame->flashStateLit = !frame->flashStateLit;
@@ -512,9 +512,9 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
       lastOUT1 = Value;
       frame->indicatorProgAlm->SetBitmap(
           (0 == (Value & 01)) ? frame->imageProgAlmOff : frame->imageProgAlmOn);
-      frame->indicatorCompFail->SetBitmap(
+      frame->indicatorComp->SetBitmap(
           (0 == (Value & 02)) ?
-              frame->imageCompFailOff : frame->imageCompFailOn);
+              frame->imageCompOff : frame->imageCompOn);
       frame->indicatorKeyRlse->SetBitmap(
           (0 == (Value & 04)) ? frame->imageKeyRlseOff : frame->imageKeyRlseOn);
       frame->indicatorScalerFail->SetBitmap(
