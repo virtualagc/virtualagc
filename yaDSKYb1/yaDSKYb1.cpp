@@ -45,11 +45,12 @@
  *              2023-08-14 JAP  Fixed the COMP FAIL and SCALER FAIL lights
  *                              illuminating instead of the COMP ACTY and TM FAIL
  *                              lights, respectively. Also sped up the VERB/NOUN
- *                              flashing from a period of 1000 ms to 781.25 ms, per
- *                              the ND-1021041 document and relevant schematics.
- *                              Additionally removed a 200 ms wait from the packet
- *                              output code, and fixed a warning about an incorrect
- *                              grid sizer alignment object on program startup.
+ *                              flashing to 0.78125 Hz or 1.28 seconds (640 ms on,
+ *                              640 ms off), per the ND-1021041 document and
+ *                              relevant schematics. Additionally removed a
+ *                              200 ms wait from the packet output code, and fixed
+ *                              a warning about an incorrect grid sizer
+ *                              alignment object on program startup.
  */
 
 #include <sys/types.h>
@@ -298,7 +299,7 @@ TimerClass::Notify()
   if (frame->flashing)
     {
       frame->flashCounter++;
-      if (frame->flashCounter >= 78125 / 100 / PULSE_INTERVAL)
+      if (frame->flashCounter >= 640 / PULSE_INTERVAL)
         {
           frame->flashCounter = 0;
           frame->flashStateLit = !frame->flashStateLit;
