@@ -20,7 +20,7 @@ endif
 all default:	yaDSKYb1
 
 yaDSKYb1: yaDSKYb1-widgetized.cpp yaDSKYb1-widgetized.h ${EXTRASOURCE} ${EXTRAHEADERS} Makefile
-	${CC} -g -O0 -DMAIN_DSKY_WIDGETIZED `wx-config --cxxflags` ${wxFLAGS} -I/usr/lib/wx/include/gtk3-unicode-3.2/ -I/usr/include/wx-3.2/ \
+	${CC} -g -O0 -DMAIN_DSKY_WIDGETIZED `wx-config --cxxflags` ${wxFLAGS} \
 		$< ${EXTRASOURCE} `wx-config --libs` -o $@ $(NLIBS)
 
 .PHONY: clean
