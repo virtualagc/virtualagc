@@ -42,6 +42,14 @@
  *                              used, and it's really flashing of the verb and noun
  *                              *digits* themselves, just as it is for Block 2.  So
  *                              I've fixed that.
+ *              2023-08-14 JAP  Fixed the COMP FAIL and SCALER FAIL lights
+ *                              illuminating instead of the COMP ACTY and TM FAIL
+ *                              lights, respectively. Also sped up the VERB/NOUN
+ *                              flashing from a period of 1000 ms to 781.25 ms, per
+ *                              the ND-1021041 document and relevant schematics.
+ *                              Additionally removed a 200 ms wait from the packet
+ *                              output code, and fixed a warning about an incorrect
+ *                              grid sizer alignment object on program startup.
  */
 
 #include <sys/types.h>
