@@ -43,7 +43,14 @@
                 2023-08-08 RSB  Added state.pioChangeFull.
                 2023-08-12 RSB  Eliminated the sleep of 5ms between packets
                                 when not --ptc, since it appears to be a
-                                performance bottleneck.
+                                performance bottleneck.  (Actually, it was
+                                useful in the sense of preventing the
+                                send/recv buffer from increasing endlessly
+                                if running with --multiplier, but I can't see
+                                any way to fine-tune it.)
+                2023-08-16 RSB  Eliminated some pointless PTC-related stuff
+                                from LVDC mode, since it was producing harmless
+                                but irritating warning messages.
  */
 
 #include <stdio.h>
@@ -106,11 +113,8 @@
  *                                      101     Command or status to panel
  *                                      110     (reserved)
  *                                      111     PING
- *              D2-D0   Unique Source ID.  (000 is the server; i.e., the CPU.)
- *                      The port numbers used are the base port number plus
- *                      the ID.  Thus if the server were port number 19653,
- *                      then ID=1 would be port 19694, ... , ID=7 would be
- *                      port 19660.
+ *              D2-D0   Unique Source ID.  In LVDC, this is not actually used
+ *                      for anything at all.
  *              Note that if all fields are 0xFF, it could be used as
  *              a harmless 1-byte PING message.  I don't know why I'd
  *              want to use that, necessarily, but at least I'm allowing
@@ -328,8 +332,13 @@ pendingVirtualWireActivity(void /* int id, int mask */)
   ioType = -1;
   mask = 0377777777;
   outPacketSize = 0;
-  // Format the output packet.
-  if (needStatus || newConnect || panelPause == 2 || panelPause == 4)
+  // Format the output packet(s).  For --ptc (particularly the PTC panel),
+  // there's a lot of stuff automatically sent upon connection or other
+  // circumstances, none of which is needed for LVDC.  It wouldn't be harmful
+  // per se to prepare it anyway, but it sometimes causes attempts to read
+  // from allocated memory, which outputs pointless error messages, so it's
+  // better to eliminate the preparation if not in --ptc.
+  if (ptc && (needStatus || newConnect || panelPause == 2 || panelPause == 4))
     {
       uint16_t instruction = 0;
       int data = -1, hop = -1, hopd = -1, dataReadback = -1, datapat = -1,
@@ -382,32 +391,29 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                 dataReadback = 0;
             }
         }
-      if (ptc)
-        {
-          formatPacket(5, (panelPause == 0 || panelPause == 4) ? 001 : 000, 0, 0);
-          if (hop != -1)
-            formatPacket(5, 003, state.hop, 0);
-          if (hopd != -1)
-            formatPacket(5, 002, hopd, 0);
-          if (data != -1)
-            formatPacket(5, 004, data, 0);
-          if (displayModePayload != -1)
-            formatPacket(5, 005, displayModePayload, 0);
-          formatPacket(5, 0600, state.acc, 0);
-          if (progRegA != -1)
-            formatPacket(5, 0604, progRegA, 0);
-          if (progRegB != -1)
-            formatPacket(5, 0605, progRegB, 0);
-          if (inspat != -1)
-            formatPacket(5, 0603, inspat, 0);
-          if (datapat != -1)
-            formatPacket(5, 0602, datapat, 0);
-          if (dataReadback != -1)
-            formatPacket(5, 0601, dataReadback, 0);
-        }
-      needStatus = 0;
-      newConnect = 0;
+      formatPacket(5, (panelPause == 0 || panelPause == 4) ? 001 : 000, 0, 0);
+      if (hop != -1)
+        formatPacket(5, 003, state.hop, 0);
+      if (hopd != -1)
+        formatPacket(5, 002, hopd, 0);
+      if (data != -1)
+        formatPacket(5, 004, data, 0);
+      if (displayModePayload != -1)
+        formatPacket(5, 005, displayModePayload, 0);
+      formatPacket(5, 0600, state.acc, 0);
+      if (progRegA != -1)
+        formatPacket(5, 0604, progRegA, 0);
+      if (progRegB != -1)
+        formatPacket(5, 0605, progRegB, 0);
+      if (inspat != -1)
+        formatPacket(5, 0603, inspat, 0);
+      if (datapat != -1)
+        formatPacket(5, 0602, datapat, 0);
+      if (dataReadback != -1)
+        formatPacket(5, 0601, dataReadback, 0);
     }
+  needStatus = 0;
+  newConnect = 0;
   // Take care of any virtual-wire outputs needed.  The changes (triggered by
   // the last LVDC/PTC instruction executed) have stuck the necessary info in
   // the global "state" structure.  Note that any given instruction can flag
@@ -701,7 +707,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                   }
                 else
                   {
-                    int mask = 0377777777;
+                    int mask = 0377777777, oldValue;
                     if (pendingMasks[i].valid)
                       {
                         if (pendingMasks[i].source != source)
@@ -719,11 +725,41 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                     case 0: // PIO
                       if (channel < 0 || channel > 0777)
                         printf("Input PIO channel out of range.\n");
+                      oldValue = state.pio[channel];
+                      state.pio[channel] = (oldValue & ~mask) | (value & mask);
                       printf(
-                          "PIO-%03o changed from %09o to %09o with mask %09o.\n",
-                          channel, state.pio[channel], value, mask);
-                      state.pio[channel] = (state.pio[channel] & ~mask)
-                          | (value & mask);
+                          "PIO-%03o changed from %09o to %09o (value %09o, mask %09o).\n",
+                          channel, oldValue, state.pio[channel], value, mask);
+                      if (channel == 043)
+                        {
+                          int channel2, mask2;
+                          channel2 = 057;
+                          mask2 = 000000010;
+                          oldValue = state.pio[channel2];
+                          state.pio[channel2] = (oldValue & ~mask2) | mask2;
+                          printf(
+                              "PIO-%03o changed from %09o to %09o (bit %09o).\n",
+                              channel2, oldValue, state.pio[channel2], mask2);
+                          channel2 = 0137;
+                          mask2 = 010000000;
+                          oldValue = state.pio[channel2];
+                          state.pio[channel2] = (oldValue & ~mask2) | mask2;
+                          printf(
+                              "PIO-%03o changed from %09o to %09o (bit %09o).\n",
+                              channel2, oldValue, state.pio[channel2], mask2);
+                          /*
+                          // The following is temporary.  It's an override that
+                          // undoes the inhibiting of DCS interrupts.
+                          // ... And it fails dramatically, in unexpected ways!
+                          channel2 = 072;
+                          mask2 = 004000000;
+                          oldValue = state.pio[channel2];
+                          state.pio[channel2] = (oldValue & ~mask2);
+                          printf(
+                              "PIO-%03o changed from %09o to %09o (bit %09o).\n",
+                              channel2, oldValue, state.pio[channel2], mask2);
+                          */
+                        }
                       break;
                     case 1: // CIO
                       if (channel < 0 || channel > 0777)
@@ -866,7 +902,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                 break;
                 }
             }
-          // Everything from the input buffer than cat be processed has
+          // Everything from the input buffer that can be processed has
           // been.  So removed that stuff from the buffer, leaving everything
           // not yet processed.
           if (offsetIntoBuffer > 0)

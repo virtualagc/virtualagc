@@ -7,6 +7,48 @@
 # Reference:    http://www.ibiblio.org/apollo/LVDC.html
 # Mod history:  2023-08-13 RSB  Began adapting from yaPTC.py.
 
+'''
+Regarding how the Digital Command System (DCS) delivers commands and data to 
+the LVDC, I interpret the documentation and the LVDC source code as follows.
+
+What's supposed to happen:  The transmission from the ground is in packets that
+contain either code or data, plus two bits (OM/D A and OM/D B) both having the 
+same value) that indicate whether the packet contains the mode or whether it 
+contains data, and two interrupt bits as well.  The LVDA is supposed to:
+    1.  AND the OM/D bits together and present them to the LVDC as discrete
+        input 2 (DI2), which is available to the LVDC software as "bit 22" of 
+        PIO 057 (where the S is the most-significant bit, 1 the next-most,
+        and so on).
+    2.  Make the command or data available to the LVDC software as PIO 043.
+    3.  Generate a DCS interrupt in the LVDC if the AND of the interrupt bits
+        is 1.
+
+Our CPU emulator receives data directly from mission control (i.e., from 
+yaMccLvdc.py), without any intervening LVDA.  The obvious possibility is to
+first send a PIO 057 (to set DI2), and then to send a PIO 043 (with the mode
+or data), and assume that the LVDC emulator is written in such a way that it
+will trigger a DCS interrupt after seeing the PIO 043.  The problem with this is
+that there's a short window between the DI2 for PIO 057 and the data/mode 
+for PIO 043, whereas in the real hardware these would have been simultanous.
+Probably it wouldn't cause a problem, but still ....  A secondary concern is  
+that this process would require transmission of a mask for PIO 057, followed by 
+PIO 057, followed by PIO 043, and that's pretty inefficient because only 14 bits
+of each PIO 043 are used anyway.
+
+So here's the alternate procedure I intend to use:
+    1.  Mode words will be transmitted just on PIO 043, but with all of the 
+        otherwise unused bits set to 1.
+    2.  Similarly, data words will be transmitted on PIO 043 also, but with all 
+        of the otherwise unused bits set to 0.
+    3.  The LVDC emulator will always generate a DCS interrupt upon detecting
+        an incoming PIO 043, and will use the filler bits (all 0 or all 1) to
+        set the DI2 bit appropriately at the same time.
+
+(Recall that sending a PIO to the CPU emulator merely stores the data in a 
+memory buffer, while subsequent PIO instructions by the LVDC software read from
+the persistent data in the memory buffer.)
+'''
+
 import sys
 import argparse
 import time
@@ -31,9 +73,13 @@ from dcsDefinitions import *
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
 
 refreshRate = 1 # Milliseconds
-resizable = 0
+resizable = False
+resize = 0
 version = 2
 showDcs = False
+asciiOnly = False
+abbreviateUnits = False
+fontSize = 10
 
 # Parse command-line arguments.
 cli = argparse.ArgumentParser()
@@ -42,13 +88,22 @@ cli.add_argument("--host", \
 cli.add_argument("--port", \
                  help="Port for yaLVDC, defaulting to 19653.", type=int)
 cli.add_argument("--id", \
-                 help="Unique ID of this peripheral (1-7), default=1.", \
+                 help="Unique ID of this LVDC peripheral (1-7), default=1.", \
                  type=int)
 cli.add_argument("--dcs", \
-                 help="1 to enable DCS, 0 (default) to disable.", \
-                 type=int)
+                 help="Enable the Digital Command System window", \
+                 action="store_true")
 cli.add_argument("--resize", \
-                 help="If 1 (default 0), make the window resizable.", \
+                 help="Make the window resizable.", \
+                 action="store_true")
+cli.add_argument("--ascii", \
+                 help="Replace UTF-8 characters like superscripts with ASCII representations.", 
+                 action="store_true")
+cli.add_argument("--abbreviate", \
+                 help="Abbreviate units (like METERS -> M).", \
+                 action="store_true")
+cli.add_argument("--fontsize", \
+                 help="Change font size (default %d)" % fontSize, \
                  type=int)
 cli.add_argument("--version", \
                  help="1=AS-206RAM, 2=AS-512 (default), 3=AS-513.", \
@@ -72,24 +127,33 @@ else:
     ID = 1
 
 if args.dcs:
-    showDcs = args.resize != 0
+    showDcs = args.dcs
     
 if args.resize:
     resize = args.resize
-    if resize != 0:
-        resize = 1
-else:
-    resize = 0
+    resize = 1
+    
+if args.ascii:
+    asciiOnly = args.ascii
+
+if args.abbreviate:
+    abbreviateUnits = args.abbreviate
+
+if args.fontsize:
+    fontSize = args.fontsize
 
 if args.version:
     version = args.version
 if version == 1:
+    missionDesignation = "AS-206RAM"
     forMission = forAS206RAM
     showDcs = False
 elif version == 2:
+    missionDesignation = "AS-512"
     forMission = forAS512
     dcsForMission = dcsForAS512
 elif version == 3:
+    missionDesignation = "AS-513"
     forMission = forAS513
     try:
         dcsForMission = dcsForAS513
@@ -101,8 +165,74 @@ else:
 variables = {}
 for pio in forMission:
     variables[forMission[pio][0]] = pio
+if showDcs:
+    modes = {}
+    for mode in dcsForMission:
+        modes[dcsForMission[mode]["name"]] = mode
 
 lvdcSetVersion(version)
+
+#-----------------------------------------------------------------------------
+# Output DCS.
+
+SIGN = 0o200000000
+BIT6 = SIGN >> 6
+BIT13 = SIGN >> 13
+BIT22 = SIGN >> 22
+BITS6and13 = BIT6 | BIT13
+BITS7through13 = 0o177 * BIT13
+BITSunused = BIT13 - 1
+dcsSequenceNumber = 0
+def dcsTransmit(isItCommand, sixBitValue, sequenceNumber):
+    global dcsSequenceNumber
+    outputBuffer = bytearray(6)
+    if isItCommand:
+        dcsSequenceNumber = 0
+    encoded7 = ((sixBitValue & 0o77) << 1) | dcsSequenceNumber
+    encoded26 = (encoded7 * BITS6and13) ^ BITS7through13
+    if isItCommand:
+        encoded26 |= BITSunused
+    dcsSequenceNumber ^= 1
+    # At this point, we now have a proper 26-bit word for the PIO's data, 
+    # in the form the LVDC will expect to encounter it, but
+    # we need to turn it into a 6-byte packet for transfer to the LVDC.
+    # This is described in the comments at the top of virtualWire.c.
+    channel = 0o043
+    outputBuffer[0] = 0x80 | (ID & 7)
+    outputBuffer[1] = channel
+    outputBuffer[2] = ((channel & 0x180) >> 2) | ((encoded26 >> 21) & 0x1F)
+    outputBuffer[3] = (encoded26 >> 14) & 0x7F
+    outputBuffer[4] = (encoded26 >> 7) & 0x7F
+    outputBuffer[5] = encoded26 & 0x7F
+    s.send(outputBuffer)
+
+def dcsButtonCallback(event):
+    name = event.widget["text"]
+    row = dcs.dict[name]
+    dcsEntry = dcsTypes[name]
+    # First take care of the simplest, generic cases, and then move on to 
+    # the more-complex custom cases.  The simplest case is one with no
+    # "dataValues" array, since that's one we haven't figured out how to 
+    # implement yet.
+    if "dataValues" not in dcsEntry:
+        print("%s command insufficiently documented or reverse engineered" % name)
+        sys.stdout.flush()
+        return
+    # The next-simplest case is that of commands that require no data words,
+    # since they can all be encoded in precisely the same manner.
+    if dcsEntry["numDataWords"] == 0:
+        mode = modes[name]
+        dcsTransmit(True, mode, 0)
+        return
+    # Next we have various commands that do have data words, and we have to
+    # encode their data into those data words in whatever manner is appropriate
+    # to the command itself.
+    
+    # Whatever's left over must not have been implemented yet.
+    print("%s command not yet implemented" % name)
+    sys.stdout.flush()
+
+#-----------------------------------------------------------------------------
 
 class ToolTip(object):
 
@@ -141,7 +271,20 @@ def CreateToolTip(widget, text):
         toolTip.hidetip()
     widget.bind('<Enter>', enter)
     widget.bind('<Leave>', leave)
-    
+
+def normalizeUnits(text):
+    if not asciiOnly:
+        text = text.replace("**2", "²").replace("**-1", "⁻¹")
+    if abbreviateUnits:
+        text = text.replace("METERS", "M")
+        text = text.replace("METER", "M")
+        text = text.replace("SECONDS", "S")
+        text = text.replace("SECOND", "S")
+        text = text.replace("KILOGRAM", "KG")
+        text = text.replace("RADIANS", "RAD")
+        text = text.replace("RADIAN", "RAD")
+    return text
+
 # An event for clicking on a variable name.  It cycles through my chosen
 # set of colors.
 gray = "#3f3f3f"
@@ -155,7 +298,7 @@ def varClick(event):
 class telPanel:
     def __init__(self, top=None):
     
-        top.title("LVDC TELEMETRY")
+        top.title(missionDesignation + " LVDC TELEMETRY")
         top.configure(highlightcolor="black")
         
         numPIOs = len(forMission)
@@ -191,7 +334,8 @@ class telPanel:
             label.grid(row=row, column=len(rowArray), sticky=tk.W)
             label.bind('<Button-1>', varClick)
             rowArray.append(label)
-            label = tk.Label(text=teld[3]+" ", fg=gray, anchor="w")
+            text = normalizeUnits(teld[3])
+            label = tk.Label(text=text+" ", fg=gray, anchor="w")
             label.grid(row=row, column=len(rowArray), sticky=tk.W)
             rowArray.append(label)
             if len(rowArray) < 4 * self.numCols - 1:
@@ -210,25 +354,47 @@ class dcsPanel:
             exit(0)
         
         self.root = root
-        self.root.title("LVDC DIGITAL COMMAND SYSTEM (DCS)")
+        self.root.title(missionDesignation + " LVDC DIGITAL COMMAND SYSTEM (DCS)")
         self.root.protocol("WM_DELETE_WINDOW", close)
         self.root.geometry("+0-50")
         self.array = []
+        self.dict = {}
         for dcs in sorted(dcsForMission):
             dcsEntry = dcsForMission[dcs]
             row = []
             button = tk.Button(master=self.root, text=dcsEntry["name"])
             button.grid(row=len(self.array), column=len(row), padx=8, sticky="ew")
+            tooltip = ("Command Name: %s\n" % dcsEntry["name"]) + \
+                      ("Octal Command: %02o\n" % dcs) + \
+                      ("Description:   %s\n" % dcsEntry["description"]) + \
+                      ("Data words:    %d" % dcsEntry["numDataWords"])
+            CreateToolTip(button, tooltip)
+            button.bind("<Button-1>", dcsButtonCallback)
             row.append(button)
             if "dataValues" in dcsEntry:
                 if len(dcsEntry["dataValues"]) == 0:
-                    label = tk.Label(master=self.root, text="(No inputs)", anchor=tk.W)
+                    label = tk.Label(master=self.root, text="(No data)", anchor=tk.W)
                     label.grid(row=len(self.array), column=len(row), sticky=tk.W)
                     row.append(label)
                 else:
-                    for dataValue in dcsEntry["dataValues"]:
+                    for d in range(len(dcsEntry["dataValues"])):
+                        dataValue = dcsEntry["dataValues"][d]
                         label = tk.Label(master=self.root, text=dataValue+":", anchor=tk.E)
                         label.grid(row=len(self.array), column=len(row), sticky=tk.E)
+                        tooltip = ("Data Name:   %s" % dataValue)
+                        if "dataDescriptions" in dcsEntry:
+                            tooltip = tooltip + ("\nDescription: %s" % \
+                                                dcsEntry["dataDescriptions"][d])
+                        if "dataScales" in dcsEntry:
+                            scale = dcsEntry["dataScales"][d]
+                            if scale != -1000:
+                                tooltip = tooltip + ("\nScale:       B%d" % \
+                                                     scale)
+                        if "dataUnits" in dcsEntry:
+                            units = normalizeUnits(dcsEntry["dataUnits"][d])
+                            if units != "":
+                                tooltip = tooltip + ("\nUnits:       %s" % units)
+                        CreateToolTip(label, tooltip)
                         row.append(label)
                         entry = tk.Entry(master=self.root, width=12)
                         entry.grid(row=len(self.array), column=len(row), padx=8, sticky=tk.W)
@@ -240,6 +406,7 @@ class dcsPanel:
                 button["state"] = "disabled"
 
             self.array.append(row)
+            self.dict[dcsEntry["name"]] = row
             
 ##############################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
@@ -403,7 +570,9 @@ def mainLoopIteration():
     root.after(refreshRate, mainLoopIteration)
 
 root = tk.Tk()
-root.option_add("*Font", font.nametofont("TkFixedFont"))
+defaultFont = font.nametofont("TkFixedFont")
+defaultFont.configure(size=fontSize)
+root.option_add("*Font", defaultFont)
 top = telPanel(root)
 if showDcs:
     dcs = dcsPanel(tk.Toplevel(root))

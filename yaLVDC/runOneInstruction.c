@@ -105,6 +105,8 @@
  *                              12K cycles since the last PIO.
  *              2023-08-08 RSB  Restored operation of PIO virtual wire, which
  *                              had been broken.
+ *              2023-08-16 RSB  Better error message for instruction from
+ *                              empty address.
  */
 
 #include <stdlib.h>
@@ -335,7 +337,8 @@ fetchInstruction(int module, int sector, int syllable, int loc,
       if (fetchedData == -1)
         {
           if (!inhibitFetchMessages)
-            printf("Cannot fetch instruction from empty data address\n");
+            printf("Cannot fetch instruction from empty address %o-%02o-%o-%03o.\n",
+                module, sector, syllable, loc);
           goto done;
         }
       *instructionFromDataMemory = 1;

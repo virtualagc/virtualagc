@@ -5,176 +5,32 @@
 # Reference:    http://www.ibiblio.org/apollo/LVDC.html
 # Mod history:  2023-08-14 RSB  Began.
 
-dcsForAS512 = {
-    0o05: {
-        "name": "INHIBIT MANEUVER",
-        "description": "Inhibit coast phase attitude maneuver",
-        "dataValues": [], 
-        "numDataWords": 0
-        },
-    0o10: {
-        "name": "TIME BASE UPDATE",
-        "description": "The time-base time is advanced or retarded by a selected amount",
-        "dataValues": ["DELTAT"],
-        "dataScales": [""],
-        "dataUnits": ["4 SECONDS"],
-        "numDataWords": 1,
-        },
-    0o11: {
-        "name": "NAVIGATION UPDATE",
-        "description": "Re-initialize the navigation state vector at a specified time",
-        "dataValues": ["ZDOT", "XDOT", "YDOT", "Z", "X", "Y", "T"],
-        "dataScales": [14, 14, 14, 23, 23, 23, 15],
-        "dataUnits":  ["M/SEC", "M/SEC", "M/SEC", "METERS", "METERS", "METERS", "SECONDS"],
-        "numDataWords": 35
-        },
-    0o12: {
-        "name": "GENERALIZED SWITCH SELECTOR",
-        "description": "Issue a switch-selector function at the first opportunity",
-        "dataValues": ["IU", "SIVB", "ADDRESS"],
-        "numDataWords": 2
-        },
-    0o13: {
-        "name": "SECTOR DUMP",
-        "description": "The contents of the specified memory sector are telemetered",
-        
-        "numDataWords": 2
-        },
-    0o14: {
-        "name": "TELEMETER SINGLE LOCATION",
-        "description": "The content of a single selected memory location is telemetered",
-        
-        "numDataWords": 3
-        },
-    0o17: {
-        "name": "TIME BASE 8 ENABLE",
-        "description": "Initiates time base 8, the post-S-IVB-separation maneuver",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o20: {
-        "name": "TERMINATE",
-        "description": "Stop DCS processing and reset for a new command",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o22: {
-        "name": "UPDATE MANEUVER",
-        "description": "Change the time for starting the coast phase maneuver.",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o25: {
-        "name": "TIME BASE 6D",
-        "description": "Initiates time base 6D, S-IVB ignition restart",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o31: {
-        "name": "TARGET UPDATE",
-        "description": "Replace targeting quantities for second S-IVB burn",
-        
-        "numDataWords": 35
-        },
-    0o33: {
-        "name": "EXECUTE MANEUVER A",
-        "description": "Initiates a maneuver to local horizontal in a retrograde position",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o34: {
-        "name": "EXECUTE MANEUVER B",
-        "description": "TBD",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    #0o40: {
-    #    "name": "INHIBIT MANEUVER",
-    #    "description": "Same as command 05"
-    #    },
-    0o41: {
-        "name": "LADDER MAGNITUDE LIMIT",
-        "description": "TBD",
-        
-        "numDataWords": 1
-        },
-    #0o43: {
-    #    "name": "UPDATE MANEUVER",
-    #    "description": "Same as command 22"
-    #    },
-    0o45: {
-        "name": "INHIBIT WATER LOGIC",
-        "description": "Inhibit water valve from changing position",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o52: {
-        "name": "S-IVB/IU LUNAR IMPACT",
-        "description": "Initiate maneuver to crash the S-IVB onto the moon",
-        
-        "numDataWords": 4
-        },
-    0o53: {
-        "name": "ANTENNA TO OMNI",
-        "description": "Both the PCM and CCS antennas are switched",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o54: {
-        "name": "ANTENNA TO LOW GAIN",
-        "description": "Both the PCM and CCS antennas are switched",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o55: {
+dcsTypes = {
+    "ANTENNA TO HIGH GAIN": {
         "name": "ANTENNA TO HIGH GAIN",
-        "description": "Both the PCM and CCS antennas are switched",
+        "description": "Switch to PCM and CCS high-gain antennas",
         "dataValues": [],
         "numDataWords": 0
         },
-    0o60: {
-        "name": "TD & E ENABLE",
-        "description": "Inhibits T6 so that Transposition, Docking, and Ejection can be accomplished in Earth orbit.",
+    "ANTENNA TO LOW GAIN": {
+        "name": "ANTENNA TO LOW GAIN",
+        "description": "Switch to PCM and CCS low-gain antennas",
         "dataValues": [],
         "numDataWords": 0
         },
-
-}
-
-dcsForAS513 = {
-    0o10: {
-        "name": "FINE TIME BASE UPDATE",
+    "ANTENNA TO OMNI": {
+        "name": "ANTENNA TO OMNI",
+        "description": "Switch to PCM and CCS omni antennas",
+        "dataValues": [],
+        "numDataWords": 0
+        },
+    "COARSE TIME BASE UPDATE": {
+        "name": "COARSE TIME BASE UPDATE",
         "description": "TBD",
         
         "numDataWords": 1
         },
-    0o11: {
-        "name": "NAVIGATION UPDATE",
-        "description": "Re-initialize the navigation state vector at a specified time",
-        "dataValues": ["ZDOT", "XDOT", "YDOT", "Z", "X", "Y", "T"],
-        "dataScales": [14, 14, 14, 23, 23, 23, 15],
-        "dataUnits":  ["M/SEC", "M/SEC", "M/SEC", "METERS", "METERS", "METERS", "SECONDS"],
-        "numDataWords": 35
-        },
-    0o12: {
-        "name": "GENERALIZED SWITCH SELECTOR",
-        "description": "Issue a switch-selector function at the first opportunity",
-        "dataValues": ["IU", "SIVB", "ADDRESS"],
-        "numDataWords": 2
-        },
-    0o13: {
-        "name": "MEMORY DUMP",
-        "description": "The contents of the specified contiguous memory block are telemetered.",
-        "dataValues": ["DM1", "DS1", "DLOC1", "DM2", "DS2", "DLOC2"],
-        "numDataWords": 6
-        },
-    0o20: {
-        "name": "TERMINATE",
-        "description": "Stop DCS processing and reset for a new command",
-        "dataValues": [],
-        "numDataWords": 0
-        },
-    0o21: {
+    "EXECUTE ALTERNATE SEQUENCE": {
         "name": "EXECUTE ALTERNATE SEQUENCE",
         "description": "Initiate alternate sequence 4A or 4B",
         "dataValues": ["TSEQ", "SEQNUM"],
@@ -182,7 +38,7 @@ dcsForAS513 = {
         "dataUnits": ["SECONDS", ""],
         "numDataWords": 5
         },
-    0o35: {
+    "EXECUTE GENERALIZED MANEUVER": {
         "name": "EXECUTE GENERALIZED MANEUVER",
         "description": "TBD",
         "dataValues": ["TSOM", "GOMTYP", "YREF", "ZREF", "XREF"],
@@ -190,7 +46,72 @@ dcsForAS513 = {
         "dataUnits": ["SECONDS", "", "PIRADS", "PIRADS", "PIRADS"],
         "numDataWords": 20
         },
-    0o36: {
+    "EXECUTE MANEUVER A": {
+        "name": "EXECUTE MANEUVER A",
+        "description": "Initiates a maneuver to local horizontal in a retrograde position",
+        "dataValues": [],
+        "numDataWords": 0
+        },
+    "EXECUTE MANEUVER B": {
+        "name": "EXECUTE MANEUVER B",
+        "description": "TBD",
+        "dataValues": [],
+        "numDataWords": 0
+        },
+    "FINE TIME BASE UPDATE": {
+        "name": "FINE TIME BASE UPDATE",
+        "description": "TBD",
+        
+        "numDataWords": 1
+        },
+    "GENERALIZED SWITCH SELECTOR": {
+        "name": "GENERALIZED SWITCH SELECTOR",
+        "description": "Issue a switch-selector function at the first opportunity",
+        "dataValues": ["IU", "SIVB", "ADDRESS"],
+        "numDataWords": 2
+        },
+    "INHIBIT MANEUVER": {
+        "name": "INHIBIT MANEUVER",
+        "description": "Inhibit coast phase attitude maneuver",
+        "dataValues": [], 
+        "numDataWords": 0
+        },
+    "INHIBIT WATER VALVE LOGIC": {
+        "name": "INHIBIT WATER VALVE LOGIC",
+        "description": "Inhibit water valve from changing position",
+        "dataValues": [],
+        "numDataWords": 0
+        },
+    "LADDER MAGNITUDE LIMIT": {
+        "name": "LADDER MAGNITUDE LIMIT",
+        "description": "TBD",
+        
+        "numDataWords": 1
+        },
+    "MEMORY DUMP": {
+        "name": "MEMORY DUMP",
+        "description": "The contents of the specified contiguous memory block are telemetered.",
+        "dataValues": ["DM1", "DS1", "DLOC1", "DM2", "DS2", "DLOC2"],
+        "numDataWords": 6
+        },
+    "NAVIGATION UPDATE": {
+        "name": "NAVIGATION UPDATE",
+        "description": "Re-initialize the navigation state vector at a specified time",
+        "dataValues": ["ZDOT", "XDOT", "YDOT", "Z", "X", "Y", "T"],
+        "dataScales": [14, 14, 14, 23, 23, 23, 15],
+        "dataUnits":  ["METERS/SECOND", "METERS/SECOND", "METERS/SECOND", "METERS", "METERS", "METERS", "SECONDS"],
+        "dataDescriptions": [
+            "Inertial velocity along Z axis in fixed-space coordinate system",
+            "Inertial velocity along X axis in fixed-space coordinate system",
+            "Inertial velocity along Y axis in fixed-space coordinate system",
+            "Position along Z axis in fixed-space coordinate system",
+            "Position along X axis in fixed-space coordinate system",
+            "Position along Y axis in fixed-space coordinate system",
+            "Time at which the adjustment takes effect"
+            ],
+        "numDataWords": 35
+        },
+    "RETURN TO NOMINAL TIMELINE": {
         "name": "RETURN TO NOMINAL TIMELINE",
         "description": "Returns to the pre-programmed orbital attitude timeline in effect prior to DCS-initiated action having overridden it.",
         "dataValues": ["TRNTL"],
@@ -198,22 +119,108 @@ dcsForAS513 = {
         "dataUnits": ["SECONDS"],
         "numDataWords": 5
         },
-    0o40: {
-        "name": "COARSE TIME BASE UPDATE",
-        "description": "TBD",
+    "S-IVB/IU LUNAR IMPACT": {
+        "name": "S-IVB/IU LUNAR IMPACT",
+        "description": "Initiate maneuver to crash the S-IVB onto the moon",
         
-        "numDataWords": 1
+        "numDataWords": 4
         },
-    0o41: {
-        "name": "LADDER MAGNITUDE LIMIT",
-        "description": "TBD",
+    "SECTOR DUMP": {
+        "name": "SECTOR DUMP",
+        "description": "The contents of the specified memory sector are telemetered",
         
-        "numDataWords": 1
+        "numDataWords": 2
         },
-    0o45: {
-        "name": "INHIBIT WATER VALVE LOGIC",
-        "description": "Inhibit water valve from changing position",
+    "TARGET UPDATE": {
+        "name": "TARGET UPDATE",
+        "description": "Replace targeting quantities for second S-IVB burn",
+        
+        "numDataWords": 35
+        },
+    "TD & E ENABLE": {
+        "name": "TD & E ENABLE",
+        "description": "Inhibits TLI so that Transposition, Docking, and Ejection can be accomplished in Earth orbit.",
         "dataValues": [],
         "numDataWords": 0
-        }
+        },
+    "TELEMETER SINGLE LOCATION": {
+        "name": "TELEMETER SINGLE LOCATION",
+        "description": "The content of a single selected memory location is telemetered",
+        
+        "numDataWords": 3
+        },
+    "TERMINATE": {
+        "name": "TERMINATE",
+        "description": "Stop DCS processing and reset for a new command",
+        "dataValues": [],
+        "numDataWords": 0
+        },
+    "TIME BASE 6D": {
+        "name": "TIME BASE 6D",
+        "description": "Initiates time base 6D, S-IVB ignition restart",
+        "dataValues": [],
+        "numDataWords": 0
+        },
+    "TIME BASE 8 ENABLE": {
+        "name": "TIME BASE 8 ENABLE",
+        "description": "Initiates time base 8, the post-S-IVB-separation maneuver",
+        "dataValues": [],
+        "numDataWords": 0
+        },
+    "TIME BASE UPDATE": {
+        "name": "TIME BASE UPDATE",
+        "description": "The time-base time is advanced or retarded by a selected amount",
+        "dataValues": ["DELTAT"],
+        "dataScales": [-1000],
+        "dataUnits": ["SECONDS"],
+        "dataDescriptions": [
+            "Delta-time in current time base, in range -124 to +124, rounded to nearest 4-second multiple"
+            ],
+        "numDataWords": 1,
+        },
+    "UPDATE MANEUVER": {
+        "name": "UPDATE MANEUVER",
+        "description": "Change the time for starting the coast phase maneuver.",
+        "dataValues": [],
+        "numDataWords": 0
+        },
+    }
+
+dcsForAS512 = {
+    0o05: dcsTypes["INHIBIT MANEUVER"],
+    0o10: dcsTypes["TIME BASE UPDATE"],
+    0o11: dcsTypes["NAVIGATION UPDATE"],
+    0o12: dcsTypes["GENERALIZED SWITCH SELECTOR"],
+    0o13: dcsTypes["SECTOR DUMP"],
+    0o14: dcsTypes["TELEMETER SINGLE LOCATION"],
+    0o17: dcsTypes["TIME BASE 8 ENABLE"],
+    0o20: dcsTypes["TERMINATE"],
+    0o22: dcsTypes["UPDATE MANEUVER"],
+    0o25: dcsTypes["TIME BASE 6D"],
+    0o31: dcsTypes["TARGET UPDATE"],
+    0o33: dcsTypes["EXECUTE MANEUVER A"],
+    0o34: dcsTypes["EXECUTE MANEUVER B"],
+    #0o40: dcsTypes["INHIBIT MANEUVER"],
+    0o41: dcsTypes["LADDER MAGNITUDE LIMIT"],
+    #0o43: dcsTypes["UPDATE MANEUVER"],
+    0o45: dcsTypes["INHIBIT WATER VALVE LOGIC"],
+    0o52: dcsTypes["S-IVB/IU LUNAR IMPACT"],
+    0o53: dcsTypes["ANTENNA TO OMNI"],
+    0o54: dcsTypes["ANTENNA TO LOW GAIN"],
+    0o55: dcsTypes["ANTENNA TO HIGH GAIN"],
+    0o60: dcsTypes["TD & E ENABLE"]
+}
+
+dcsForAS513 = {
+    0o10: dcsTypes["FINE TIME BASE UPDATE"],
+    0o11: dcsTypes["NAVIGATION UPDATE"],
+    0o12: dcsTypes["GENERALIZED SWITCH SELECTOR"],
+    0o13: dcsTypes["MEMORY DUMP"],
+    0o20: dcsTypes["TERMINATE"],
+    0o21: dcsTypes["EXECUTE ALTERNATE SEQUENCE"],
+    0o35: dcsTypes["EXECUTE GENERALIZED MANEUVER"],
+    0o36: dcsTypes["RETURN TO NOMINAL TIMELINE"],
+    0o40: dcsTypes["COARSE TIME BASE UPDATE"],
+    0o41: dcsTypes["LADDER MAGNITUDE LIMIT"],
+    0o45: dcsTypes["INHIBIT WATER VALVE LOGIC"]
 }

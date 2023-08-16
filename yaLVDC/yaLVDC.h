@@ -333,7 +333,7 @@ processInterruptsAndIO(void);
 
 // See virtualWire.c
 // Socket stuff.
-#define MAX_LISTENERS 7
+#define MAX_LISTENERS 10
 extern int ServerBaseSocket;
 extern int PortNum;
 extern int virtualWireErrorCodes;

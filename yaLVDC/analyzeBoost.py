@@ -60,9 +60,7 @@ for param in sys.argv[1:]:
         print("--host=H       H defaults to 'localhost', but could be an")
         print("               IP address, etc.  It specifies the host machine")
         print("               on which yaLVDC is running.")
-        print("--port=P       P defaults to 19653.  It is a decimal")
-        print("               TCP port number on which to connect to yaLVDC,")
-        print("               whose default range of ports is 19653-19659.")
+        print("--port=P       P defaults to 19653. ")
         sys.exit(0)
 
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 

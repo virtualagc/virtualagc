@@ -191,7 +191,7 @@ commandAssociation_t commandAssociations[] =
             { ctJUMP, "JUMP", "JUMP [asm:]name M-SS",
                 "Jump to symbol in code memory and assign DM/DS as M-SS." },
             { ctJUMP, "JUMP", "JUMP octal",
-                "Jump using literal octal HOP constant." },
+                "Jump using literal octal HOP constant. Note that JUMP 0 is a restart." },
             { ctGOTO, "GOTO", "GOTO ...",
                 "Same as JUMP, except pause rather than run." },
             { ctLIST, "LIST", "LIST", "List following block of source code." },

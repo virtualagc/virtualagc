@@ -58,6 +58,10 @@
  *              2023-08-05 RSB  Moved the PIO logging to runOneInstruction.c.
  *              2023-08-08 RSB  Virtual-wire servicing wasn't being done in
  *                              processLVDAInterruptsAndIO().
+ *              2023-08-16 RSB  The call to pendingVirtualWireActivity() had
+ *                              been inside of a conditional that prevented it
+ *                              from receiving input PIO's when, for example,
+ *                              in a one-instruction loop.
  */
 
 #include <stdlib.h>
@@ -559,10 +563,11 @@ processLVDAInterruptsAndIO(void)
           // bit prevents the same interrupt source from triggering multiple
           // interrupts. This feature is currently unsimulated.
         }
-
-      pendingVirtualWireActivity();
-      state.pioChange = -1;
     }
+  // This must be outside of the conditional above, or else it can't receive
+  // any incoming PIO's without there first being an outgoing PIO.
+  pendingVirtualWireActivity();
+  state.pioChange = -1;
 
   return retVal;
 }
