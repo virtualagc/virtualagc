@@ -8,12 +8,15 @@
 # Mod history:	2024-01-26	Dummy version to just use the dump of
 #				the core ropes, since source isn't 
 #				available yet.
+#		2024-03-05	Added building of reconstructed source.
 
 BASENAME=Skylark048
+EXTRA_YAYUL_ARGS+=--parity
+NO_BINSOURCE=yes
+EXTRA_TARGETS=diffSkylark048
 
-# When source code becomes available, uncomment the following line and 
-# remove the 'default' target after it.
-#include ../Makefile.inc
-default:
-	cp Skylark048-dump.bin Skylark048.bin
+include ../Makefile.inc
 
+.PHONY: diffSkylark048
+diffSkylark048:
+	diff -s Skylark048.bin Skylark048-dump.bin
