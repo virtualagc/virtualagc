@@ -6,11 +6,16 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	http://www.ibiblio.org/apollo
 # Mod history:	2024-05-13 RSB	Added
+# 		2024-05-13 MAS	Added source build.
 
 BASENAME=Comanche067
-NO_BINSOURCE=yes
 
-#include ../Makefile.inc
-.PHONY: clean default
-default:
-clean:
+EXTRA_YAYUL_ARGS+=--parity
+NO_BINSOURCE=yes
+EXTRA_TARGETS=diffComanche067
+
+include ../Makefile.inc
+
+.PHONY: diffComanche067
+diffComanche067:
+	diff -s Comanche067.bin Comanche067-dump.bin
