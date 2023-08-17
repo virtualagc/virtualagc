@@ -80,6 +80,7 @@ showDcs = False
 asciiOnly = False
 abbreviateUnits = False
 fontSize = 10
+t0 = time.time_ns()
 
 # Parse command-line arguments.
 cli = argparse.ArgumentParser()
@@ -290,10 +291,46 @@ def normalizeUnits(text):
 gray = "#3f3f3f"
 colors = ["#000000", "#ff0000", "#00ff00", "#0000ff"]
 def varClick(event):
-    var = event.widget["text"].split(":")[0]
     color = event.widget["fg"]
     color = colors[(colors.index(color) + 1) % len(colors)]
     event.widget["fg"] = color
+
+lightGray = "#cfcfcf"
+yellow = "#ffff00"
+doubleClicked = set()
+doubleClickTimeouts = {}
+doubleClickIds = {}
+
+def telControlClickCallback(event):
+    global doubleClicked
+    widget = event.widget
+    id = str(widget)
+    if id in doubleClicked:
+        doubleClicked.remove(id)
+    else:
+        doubleClicked.add(id)
+
+def telChanged(widget):
+    global doubleClickTimeouts, doubleClickIds
+    id = str(widget)
+    if id not in doubleClicked:
+        return
+    oldColor = widget["bg"]
+    widget["bg"] = yellow
+    timeout = (time.time_ns() - t0) // 1000000 + 1000
+    if id not in doubleClickIds:
+        doubleClickIds[id] = [timeout, widget, oldColor]
+    else:
+        oldTimeout = doubleClickIds[id][0]
+        doubleClickIds[id][0] = timeout
+        if oldTimeout in doubleClickTimeouts:
+            if id in doubleClickTimeouts[oldTimeout]:
+                doubleClickTimeouts[oldTimeout].remove(id)
+    if timeout in doubleClickTimeouts:
+        doubleClickTimeouts[timeout].append(id)
+    else:
+        doubleClickTimeouts[timeout] = [id]
+
 
 class telPanel:
     def __init__(self, top=None):
@@ -330,8 +367,10 @@ class telPanel:
             rowArray.append(label)
             CreateToolTip(label, tooltip)
             self.locations[pio] = (row, len(rowArray))
-            label = tk.Label(text="", width=12, fg=colors[0], anchor="w")
+            label = tk.Label(text="", width=12, fg=colors[0], \
+                             anchor="w", name=str(pio))
             label.grid(row=row, column=len(rowArray), sticky=tk.W)
+            label.bind("<Control-Button-1>", telControlClickCallback)
             label.bind('<Button-1>', varClick)
             rowArray.append(label)
             text = normalizeUnits(teld[3])
@@ -479,9 +518,12 @@ def outputFromCPU(ioType, channel, value):
         widget = root.grid_slaves(row=row, column=col)[0]
         raw, scaled = lvdcFormatData(val, sc1, units)
         if scaled == "":
-            widget["text"] = raw
+            valueToUse = raw
         else:
-            widget["text"] = scaled
+            valueToUse = scaled
+        if widget["text"] != valueToUse:
+            telChanged(widget)
+        widget["text"] = valueToUse
 
 def inputsForCPU():
     return []
@@ -495,6 +537,16 @@ view = memoryview(inputBuffer)
 didSomething = False
 def mainLoopIteration():
     global didSomething, inputBuffer, leftToRead, view
+    global doubleClickTimeouts, doubleClickIds
+
+    timeNow = (time.time_ns() - t0) // 1000000
+    for timeout in sorted(doubleClickTimeouts.keys()):
+        if timeout > timeNow:
+            break;
+        for id in doubleClickTimeouts[timeout]:
+            record = doubleClickIds.pop(id)
+            record[1]["bg"] = record[2]
+        del doubleClickTimeouts[timeout]
 
     # Check for packet data received from yaLVDC and process it.
     # While these packets are always the same length in bytes,
