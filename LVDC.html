@@ -16,7 +16,7 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
       <li><a href="#What_is_the_Launch_Vehicle_Digital_">What is the
           Launch Vehicle Digital Computer (LVDC)?</a></li>
       <li><a href="#Peripheral_Devices">Peripheral Devices</a></li>
-      <li><a href="#Interaction_with_the_AGC">Saturn Interaction with
+      <li><a href="#Interaction_with_the_AGC" moz-do-not-send="true">Saturn Interaction with
           the AGC</a><br>
       </li>
       <li><a href="#LVDC_Documentation">LVDC Documentation</a></li>
@@ -367,14 +367,10 @@ Launch
             </div>
             People generally think that the guidance computer (AGC) of
             the command module controlled the Saturn rocket, but it
-            isn't true.&nbsp; During burns of the S-II and S-IVB rocket
-            stages, it <span style="font-style: italic;">was</span>
+            isn't true.&nbsp; During certain burns, it <span style="font-style: italic;">was</span>
             possible for the CSM's AGC to control the steering, as a
             backup to the LVDC.&nbsp; That backup capability was never
-            used in a mission.&nbsp; This was not possible during burns
-            of the first stage (S-IB or&nbsp; S-IC).&nbsp; However, the
-            AGC's ability to directly control the Saturn IVB was used
-            for other purposes during the mission.&nbsp; <a href="#Interaction_with_the_AGC">Also, see below</a>.<br>
+            used in a mission.&nbsp; <a href="#Interaction_with_the_AGC">More on this below</a>.<br>
           </td>
         </tr>
       </tbody>
@@ -701,57 +697,155 @@ Launch
           <div align="left">
             <h2><a name="Interaction_with_the_AGC" id="Interaction_with_the_AGC"></a>Saturn Interaction
               with the AGC</h2>
-            <p>The LVDC and the AGC did not actually have any direct
-              interaction, so we may as well talk about how the AGC
-              interacted with the Saturn before immersing ourselves in
-              too much detail about the LVDC.<br>
-            </p>
+            <p>Let's talk about how the launch vehicle could interact 
+with the Command Module's AGC before immersing ourselves in
+              too much detail about the LVDC specifically.&nbsp; I may 
+perhaps go into this topic in more detail than suits your taste, so feel
+ free to ignore this section entirely!&nbsp; I can just give you the 
+executive summary:&nbsp; There was <i>very little</i> interaction between the AGC and the Saturn rocket under normal circumstances.&nbsp; <br>
+</p>
+<p>I talk about this a lot primarily because it has sometimes been at 
+the center of spirited arguments for which I have not necessarily always
+ had all the relevant facts immediately at my fingertips.&nbsp; (Thanks,
+ Fabrizio Bernardini.)&nbsp; Well, ... now I will have those facts lined
+ up when I need them, and so will you.<br>
+</p>
+<p>For the sake of clarity, I've taken the Saturn V block diagram from 
+the preceding section, chopped out everything except the Instrument Unit
+ (IU), and added a bit of coloring to the connections between the IU and
+ the CSM ("SPACECRAFT"):<br>
+</p>
+<div align="center"><img moz-do-not-send="true" src="IU-CSM.jpg" alt="" width="787" height="227"></div>
+
             <p><a href="IUFlightControlComputer.jpg"><img alt="Flight
                   Control Computer" src="small-IUFlightControlComputer.png" title="Click
-                  to enlarge" width="286" height="285" border="0" align="right"></a><img src="Saturn-I-Flight-Control-Computer.png" alt="" width="400" height="285" align="right">If you look at
-              either of the graphics at the end of the preceding
-              section, you'll see the four ways that the Instrumentation
-              Unit (IU) in the Saturn IVB and the Spacecraft (i.e, the
-              Command Module) — which are separated by a horizontal
-              dotted line near the tops of the two graphics —
-              interacted:<br>
-            </p>
-            <ol>
-              <li>The Abort Decision signal.</li>
-              <li>The Status signal.</li>
-              <li>The Mode Command signal.</li>
-              <li>The Alternate Steering Commands signals.</li>
-            </ol>
-            The Saturn was always steered by the so-called Flight
-            Control Computer (depicted in the picture at the right), an
-            analog computer whose salient characteristic for our
+                  to enlarge" width="286" height="285" border="0" align="right"></a><img src="Saturn-I-Flight-Control-Computer.png" alt="" width="400" height="285" align="right">The launch vehicle (i.e., the Saturn V or IB rocket) was always <i>directly</i> steered by the so-called Flight
+            Control Computer (or FCC, depicted in the picture at the right), an
+            analog computer whose salient property for our
             purposes is that it was <i>not</i> the LVDC.&nbsp; However,
-            the flight-control computer did not operate on its own, and
+            the FCC did not operate on its own, and
             thus itself needed to be supervised.&nbsp; Normally, that
             supervision was performed, by default, by the LVDC,
             indirectly through the LVDA, the Launch Vehicle Data
             Adapter. <br>
-            <p>However, it was also possible for the spacecraft to send
+
+            </p><p>However, it was also possible for the Command Module to send
               the flight control computer a signal, the Mode Command,
               which instructed it to accept Alternate Steering Commands
               from the AGC rather than the default steering commands
-              from the LVDC/LVDA.&nbsp; Thus, the AGC could steer the
-              Saturn IVB (but not some of the other Saturn stages) by
-              this mechanism.<br>
+              from the LVDC/LVDA.&nbsp; <br>
+</p>
+<blockquote>
+  <p><font size="-1"><b><img moz-do-not-send="true" src="file:///home/rburkey/git/virtualagc-web/LVGuidance.jpg" alt="" width="228" height="164" align="left"></b></font><font size="-1"><b>Aside:</b>&nbsp; As far as the detailed mechanisms in the AGC and the Command Module by which this was accomplished are concerned, <a moz-do-not-send="true" href="Colossus.html">the Colossus software</a>'s program <a moz-do-not-send="true" href="listings/Artemis072/P11.agc.html">P11</a> would have</font><font size="-1">
+ presided over the process.&nbsp; Normally P11 would just have been used
+ to monitor the launch vehicle's activity.&nbsp; But if a toggle switch 
+called "LV Guidance" on the CM's control panel (seen to the left) were 
+to be flipped into the position marked "CMC",&nbsp; P11 could detect 
+this via one of the AGC's i/o channels, namely bit 10 of channel 
+30.&nbsp; In turn, P11 could set bit 9 of i/o channel 12:&nbsp; That's 
+the "Mode Command" signal in the block diagram above, and it's what told
+ the IU that the change of control was taking place.&nbsp; At the same 
+time, P11 would begin sending the "Alternate Steering Commands" to the 
+IU, and those are what performed the actual steering.&nbsp; As it 
+happens, these Alternate Steering Commands were no different than the 
+ones used by the AGC's digital autopilot to steer the CM itself:&nbsp; 
+They were literally the same electrical wires up to the point where they
+ separated to go off to the IU, though controlled within the Colossus 
+software by different polynomial-based flight equations.&nbsp; It's 
+important to recognize that these signals were analog in nature, not 
+digital.&nbsp; Or to put it in other words, the AGC did <i>not</i> 
+control the LVDC.&nbsp; The LVDC was simply completely out of the 
+picture insofar as steering was concerned, once the Mode Command to 
+switch control to the CMC had arrived in the IU.&nbsp; It was also 
+possible during P11 to key in </font><font size="-1"><tt>VERB 46 ENTR</tt></font><font size="-1">
+ on the DSKY to disable steering of the launch vehicle by Colossus's 
+digital autopilot and instead allow the CM's Rotational Hand Controller 
+(RHC) to be used by an astronaut to manually send Alternate Steering 
+Commands to the IU.</font><br>
+  </p>
+</blockquote>
+<blockquote>
+  <p><font size="-1">How much control over the launch vehicle could actually be exercised by the AGC?&nbsp; <a moz-do-not-send="true" href="Documents/CSM-113_CSM-114_Apollo_Operations_Handbook_Vol_II.pdf#page=84">The Apollo Operations Handbook for the Apollo 16 CM</a> says this: </font><font size="-1">"[Toggling
+ the LV Guidance switch to CMC] allows CMC automatic steering 
+(polynomial guidance) for S-IC stage, and attitude hold commands only, 
+for SII and SIVB stages.&nbsp; Also provides capability of issuing RHC 
+commands via CMC, provided configuration digit in </font><font size="-1"><tt>N46</tt></font><font size="-1"> is 3 and </font><font size="-1"><tt>V46E</tt></font><font size="-1"> is keyed."&nbsp; So the amount of control the AGC could have over the launch vehicle was great, but was not complete.</font><br>
+  </p>
+</blockquote>
+<p>
             </p>
-            <p>Of course, it was also desirable for the spacecraft to be
+
+            <p>Could the AGC exercise this control over the launch vehicle in <i>all</i> Apollo missions?&nbsp; Regarding Apollo 7, there is presently no information whatever.&nbsp; But for the remaining missions, No!&nbsp; The ability for P11 to provide automatic steering <i>wasn't</i>
+ present in 8 or 9, though it was present in Apollo 10 and beyond.&nbsp;
+ On the other hand, manual steering via the Rotational Hand Controller 
+(RHC) was available in Apollo 8 and onward.&nbsp; Unfortunately, there 
+is not enough surviving documentation presently to have full certainty 
+about all of the details.<br>
+</p>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; I draw my conclusions 
+from examination of the Colossus source code.&nbsp; First consider 
+automatic steering.&nbsp; Insofar as Apollo 8 (Colossus 237) and 9 
+(Colossus 249) are concerned, they did not read bit 10 of i/o channel 
+30, and therefore could not have known to initiate automatic 
+control.&nbsp; On the other hand, that capability is present in Apollo 
+10 (a version of Colossus called MANCHE45R2) onward.&nbsp; Admittedly, I
+ have no basis for the assumption that the steering capability was 100% 
+implemented and operational at that juncture.&nbsp; Nor do I have any 
+information as to whether that steering ability was present for every <i>stage</i> of the rocket, or whether it merely applied to the S-IVB stage.<br>
+    <br>
+Regarding manual steering via the RHC, every version of Colossus from 
+Apollo 8 onward has the following verbatim comment in P11's source 
+code:&nbsp; "SATURN TAKEOVER FUNCTION ... DURING THE COASTING PHASE OF 
+SIVB ATTACHED, THE ASTRONAUT MAY REQUEST SATURN TAKEOVER THROUGH 
+EXTENDED VERB 46 (BITS 13,14 OF DAPDATR1 SET). THE CMC REGARDS RHC 
+COMMANDS AS BODY-AXES RATE COMMANDS AND IT TRANSMITS THESE TO SATURN AS 
+DC VOLTAGES. THE VALUE OF THE CONSTANT RATE COMMAND </font><font size="-1">IS
+ 0.5 DEG/SEC. AN ABSENCE OF RHC ACTIVITY RESULTS IN A ZERO RATE COMMAND.
+ THE FDAI ERROR NEEDLES WILL INDICATE THE VALUE OF THE RATE 
+COMMAND."&nbsp; This seems pretty conclusive, though it only applies to 
+the "coasting phase", at which point stages S-IC and S-II would have 
+been ejected, so at least on the face of it seems to apply only the 
+S-IVB stage.</font><br>
+</blockquote>
+<p>Of course, it was also desirable for the CM to be
               able to monitor the activity of the Saturn, even under
               normal conditions when the LVDC was controlling the
               rocket.&nbsp; Since the spacecraft had its own Inertial
               Measurement Unit (IMU), it knew its own orientation and
-              acceleration — and hence the Saturn's — at all times, and
-              the AGC could integrate these quantities to know the
+              acceleration — and hence the Saturn's orientation and acceleration — at all times, and
+              the AGC could mathematically integrate these quantities to know the
               velocity and position at all times.&nbsp; Thus it was not
               necessary for the IU to communicate that information to
               the spacecraft in order for the AGC to monitor the
               physical motion of the rocket and to display it for the
-              astronauts on the DSKY.<br>
+              astronauts on the DSKY.&nbsp; Which is why there are <i>no</i> signals in the block diagram showing such state-vector data flowing back from the IU to the AGC. <br>
+</p>
+<blockquote><font size="-1"><b><img moz-do-not-send="true" src="iuStatus.jpg" alt="" width="524" height="315" align="right">Aside:</b>&nbsp;
+ (Refer to the portion of the CSM block diagram at the right.)&nbsp; 
+What about the remaining signals in the Saturn block diagram the we 
+haven't discussed: i.e., the "Abort Decision" and "Status" 
+signals?&nbsp; The block diagram does show an </font><font size="-1"><font size="-1">"S-IVB
+ SEPARATE/ABORT" signal directed at the CMC, and it would have been read
+ by the CMC as bit 4 of i/o channel 30.&nbsp; On the other hand, the</font> signal is clearly marked as coming from the control panel switches, and <i>not</i>
+ from the IU, so perhaps there's some additional magic going on with 
+that signal within the control panel.&nbsp; Regarding the IU's Status 
+signals, those would appear to be "LIFTOFF" and "ULLAGE", which are 
+presumably bits 5 and 1 of the CMC's i/o channel 30.&nbsp; The only one 
+of these three signals actually used by Colossus, as far as I can see, 
+is LIFTOFF, though it is used elsewhere in Colossus and not directly by 
+P11.<br>
+    <br>
+What would <i>normally</i> happen in P11 with the LV Guidance 
+control-panel switch remaining in the "IU" position as it did in every 
+actual mission, is that <tt>VERB 06 NOUN 62</tt> would be used to 
+monitor the following items on the three 5-digit displays of the 
+DSKY:&nbsp; The total inertial velocity in feet per second, the rate of 
+change of altitude in feet per second, and the altitude in nautical 
+miles above the radius of the launch pad.</font><br>
+</blockquote>
+<p>
             </p>
+
             <p>I actually have an interesting graphic of the monitoring
               process to show you.&nbsp; This graphic is not from
               physical system.&nbsp; Rather, Riley Rainey has used the
@@ -30236,7 +30330,7 @@ Commons
 
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-08-16.<br>
+          2023-08-17.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
