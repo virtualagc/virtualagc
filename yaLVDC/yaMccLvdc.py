@@ -49,6 +49,14 @@ memory buffer, while subsequent PIO instructions by the LVDC software read from
 the persistent data in the memory buffer.)
 '''
 
+'''
+Let's talk for a moment about how the Flight Program processes incoming DCS
+data.  (Not commands; it uses them to vector to subroutines corresponding to
+the 6-bit mode codes, and that process doesn't really concerns us here.)
+The 6-bit data from each incoming data word is extracted from the word, 
+and stored in bits S,1,2,3,4,5 at V.DSBL, V.DSBL+1, V.DSBL+2, and so on.
+'''
+
 import sys
 import argparse
 import time
@@ -69,6 +77,24 @@ from lvdcTelemetryDecoder import lvdcFormatData, lvdcModeReset, \
                                  lvdcSetVersion, lvdcTelemetryDecoder, \
                                  forAS206RAM, forAS512, forAS513
 from dcsDefinitions import *
+from decimal import Decimal, ROUND_HALF_UP
+
+# Python's native round() function uses a silly method (in the sense that it is
+# unlike the expectation of every programmer who ever lived) called "banker's
+# rounding", wherein half-integers sometimes round up and sometimes
+# round down.  Good for bankers, I suppose, because rounding errors tend to
+# sum to zero, but no help whatever for us.  I've stolen the hround() function
+# from my Shuttle HAL/S compiler.  It rounds half-integers upward.
+# Returns None on error
+def hround(x):
+    try:
+        i = int(Decimal(x).to_integral_value(rounding=ROUND_HALF_UP))
+    except:
+        #print("Implementation error, non-decimal:", x, file=sys.stderr)
+        #sys.exit(1)
+        return None
+    return i
+
 
 ioTypes = ["PIO", "CIO", "PRS", "INT" ]
 
@@ -184,7 +210,7 @@ BITS6and13 = BIT6 | BIT13
 BITS7through13 = 0o177 * BIT13
 BITSunused = BIT13 - 1
 dcsSequenceNumber = 0
-def dcsTransmit(isItCommand, sixBitValue, sequenceNumber):
+def dcsTransmit(isItCommand, sixBitValue):
     global dcsSequenceNumber
     outputBuffer = bytearray(6)
     if isItCommand:
@@ -206,11 +232,34 @@ def dcsTransmit(isItCommand, sixBitValue, sequenceNumber):
     outputBuffer[4] = (encoded26 >> 7) & 0x7F
     outputBuffer[5] = encoded26 & 0x7F
     s.send(outputBuffer)
+    
+def dcsTransmit26(word):
+    dcsTransmit(False, (word >> 20) & 0o77)
+    dcsTransmit(False, (word >> 14) & 0o77)
+    dcsTransmit(False, (word >> 8) & 0o77)
+    dcsTransmit(False, (word >> 2) & 0o77)
+    dcsTransmit(False, (word << 4) & 0o60)
+
+def scaleData(value, dataScale):
+    if dataScale == -1000:
+        return value
+    else:
+        negate = False
+        if value < 0:
+            negate = True
+            value = -value
+        valueToUse = hround(value * 2**(25-dataScale))
+        if valueToUse > 0o377777777:
+            return None
+        if negate:
+            valueToUse ^= 0o377777777
+        return valueToUse
 
 def dcsButtonCallback(event):
     name = event.widget["text"]
     row = dcs.dict[name]
     dcsEntry = dcsTypes[name]
+    
     # First take care of the simplest, generic cases, and then move on to 
     # the more-complex custom cases.  The simplest case is one with no
     # "dataValues" array, since that's one we haven't figured out how to 
@@ -219,15 +268,112 @@ def dcsButtonCallback(event):
         print("%s command insufficiently documented or reverse engineered" % name)
         sys.stdout.flush()
         return
+    
     # The next-simplest case is that of commands that require no data words,
     # since they can all be encoded in precisely the same manner.
     if dcsEntry["numDataWords"] == 0:
         mode = modes[name]
-        dcsTransmit(True, mode, 0)
+        dcsTransmit(True, mode)
         return
-    # Next we have various commands that do have data words, and we have to
-    # encode their data into those data words in whatever manner is appropriate
-    # to the command itself.
+    
+    # The next-simplest case is that of commands that have data words, but with
+    # the data words corresponding on a straightforward one-to-one basis with 
+    # the items input from the UI.  In other words, where each input item can
+    # just be converted to a data word in the obvious way.  Those items are
+    # distinguished by the fact that their dcsEntry includes the key "simple".
+    if "simple" in dcsEntry:
+        # First let's convert each of the input data fields into an octal
+        # word and abort on failure.  As far as I know, all input
+        # values for these types of commands will be decimal, so I don't 
+        # need to use the units to deduce decimal vs octal.  I'm not 
+        # actually sure how the scaling is supposed to work, so I just undo
+        # what lvdcFormatData() does to format the telemetry words.
+        words = []
+        for i in range(len(dcsEntry["dataValues"])):
+            dataName = dcsEntry["dataValues"][i]
+            try:
+                value = float(row[2 + 2*i].get())
+            except:
+                print(dataName, "was not a decimal number")
+                return
+            dataScale = dcsEntry["dataScales"][i]
+            dataUnits = dcsEntry["dataUnits"][i]
+            valueToUse = scaleData(value, dataScale)
+            if valueToUse == None:
+                print("Overflow for", dataName)
+                return
+            if False: # Double check the scaling.
+                checkValue = lvdcFormatData(valueToUse, dataScale, \
+                                                dataUnits)
+                print(dataName, dataScale, dataUnits, value, \
+                        "%09o" % valueToUse, checkValue)
+            words.append(valueToUse)
+        # Data conversion was okay, so let's everything transmit!
+        mode = modes[name]
+        dcsTransmit(True, mode)
+        for word in words:
+            dcsTransmit26(word)
+        return
+    
+    # Finally, we have various commands that do have data words, but with the
+    # data packed into the upwords in some more-complex manner than the simpler
+    # cases above, and so we have to encode their data into those data words in
+    # whatever manner is appropriate to the individual command.  Usually this
+    # will have been something undocumented that needed to be gotten somehow
+    # via reverse engineering.
+    if name == "SECTOR DUMP":
+        '''
+        This is undocumented, so let's start with a series of guesses.
+        Looking at the 3 sector-dump commands (NAV update, PDU, ODU) on 
+        p. 55-24 of the NOD document, here's my guess for the 12 data bits 
+        sent (more-significant 6 in 1st data word, less-significant 6 in 
+        2nd data word):
+           MMM 0SS SSE EEE
+        where:
+           MMM is the module number.
+           SSSS is the starting sector number
+           EEEE is the ending sector number.
+        This matches the MM-SSSS for the NAV UPDATE sector in AS-512 and 
+        AS-513, namely the variables D.VUDZ, D.VUDX, D.VUDY, D.VUZS, D.VUXS,
+        D.VUYS, and D.VNUT starting at 4-15-371.  Unfortunately, I don't know
+        what PTU and OTU are, though the bit patterns are consistent with the
+        guesses above.
+        
+        To test these guesses, we need to examine the Flight Program source 
+        code D.S430.  I was going to detail my findings, but to make a long 
+        story slightly shorter, I shockingly find that every detail of my 
+        suppositions above is correct and easy to verify, except for the
+        fact that the least-significant bit of MMM ends up being dropped after
+        being read, so that only even-numbered modules can be dumped.  Which
+        makes sense since there's no way for the CPU to read odd modues in a 
+        duplex configuration.
+        '''
+        try:
+            dm = int(row[2].get(), 8)
+            ds0 = int(row[4].get(), 8)
+            ds1 = int(row[6].get(), 8)
+        except:
+            print("Module or sector number not octal.")
+            return
+        if dm not in [0, 2, 4, 6]:
+            print("DM not 0, 2, 4, or 6")
+            return
+        if ds0 < 0 or ds0 > 0o17:
+            print("DS0 out of range")
+            return
+        if ds1 < ds0:
+            print("DS1 less than DS0")
+            return
+        if ds1 > 0o17:
+            print("DS1 out of range")
+            return
+        value1 = (dm << 3) | ((ds0 >> 2) & 3)
+        value2 = ((ds0 & 3) << 4) | ds1
+        mode = modes[name]
+        dcsTransmit(True, mode)
+        dcsTransmit(False, value1)
+        dcsTransmit(False, value2)
+        return
     
     # Whatever's left over must not have been implemented yet.
     print("%s command not yet implemented" % name)

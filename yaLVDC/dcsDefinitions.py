@@ -96,6 +96,7 @@ dcsTypes = {
         },
     "NAVIGATION UPDATE": {
         "name": "NAVIGATION UPDATE",
+        "simple": True,
         "description": "Re-initialize the navigation state vector at a specified time",
         "dataValues": ["ZDOT", "XDOT", "YDOT", "Z", "X", "Y", "T"],
         "dataScales": [14, 14, 14, 23, 23, 23, 15],
@@ -113,6 +114,7 @@ dcsTypes = {
         },
     "RETURN TO NOMINAL TIMELINE": {
         "name": "RETURN TO NOMINAL TIMELINE",
+        "simple": True,
         "description": "Returns to the pre-programmed orbital attitude timeline in effect prior to DCS-initiated action having overridden it.",
         "dataValues": ["TRNTL"],
         "dataScales": [15],
@@ -127,8 +129,11 @@ dcsTypes = {
         },
     "SECTOR DUMP": {
         "name": "SECTOR DUMP",
-        "description": "The contents of the specified memory sector are telemetered",
-        
+        "description": "The contents of the specified memory sector(s) are telemetered",
+        "dataValues": ["DM", "DS0", "DS1"],
+        "dataDescriptions": ["Module number 0, 2, 4, or 6.", 
+                             "Starting sector number 00-17 in octal.",
+                             "Ending sector number 00-17 in octal."],
         "numDataWords": 2
         },
     "TARGET UPDATE": {
