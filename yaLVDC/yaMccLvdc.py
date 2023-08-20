@@ -255,8 +255,28 @@ def scaleData(value, dataScale):
             valueToUse ^= 0o377777777
         return valueToUse
 
+def getMemloc(dmStr, dsStr, locStr):
+    try:
+        dm = int(dmStr, 8)
+        ds = int(dsStr, 8)
+        loc = int(locStr, 8)
+    except:
+        print("Parameter not octal.")
+        return 0,0,0,True
+    if dm not in [0, 2, 4, 6]:
+        print("DM not 0, 2, 4, or 6")
+        return 0,0,0,True
+    if ds < 0 or ds > 0o17:
+        print("DS out of range")
+        return 0,0,0,True
+    if loc < 0 or loc > 0o377:
+        print("LOC out of range")
+        return 0,0,0,True
+    return dm,ds,loc,False
+
 def dcsButtonCallback(event):
     name = event.widget["text"]
+    mode = modes[name]
     row = dcs.dict[name]
     dcsEntry = dcsTypes[name]
     
@@ -272,7 +292,6 @@ def dcsButtonCallback(event):
     # The next-simplest case is that of commands that require no data words,
     # since they can all be encoded in precisely the same manner.
     if dcsEntry["numDataWords"] == 0:
-        mode = modes[name]
         dcsTransmit(True, mode)
         return
     
@@ -309,7 +328,6 @@ def dcsButtonCallback(event):
                         "%09o" % valueToUse, checkValue)
             words.append(valueToUse)
         # Data conversion was okay, so let's everything transmit!
-        mode = modes[name]
         dcsTransmit(True, mode)
         for word in words:
             dcsTransmit26(word)
@@ -319,7 +337,7 @@ def dcsButtonCallback(event):
     # data packed into the upwords in some more-complex manner than the simpler
     # cases above, and so we have to encode their data into those data words in
     # whatever manner is appropriate to the individual command.  Usually this
-    # will have been something undocumented that needed to be gotten somehow
+    # will have been something undocumented that needed to be deduced somehow
     # via reverse engineering.
     if name == "SECTOR DUMP":
         '''
@@ -353,7 +371,7 @@ def dcsButtonCallback(event):
             ds0 = int(row[4].get(), 8)
             ds1 = int(row[6].get(), 8)
         except:
-            print("Module or sector number not octal.")
+            print("Parameter not octal.")
             return
         if dm not in [0, 2, 4, 6]:
             print("DM not 0, 2, 4, or 6")
@@ -369,7 +387,124 @@ def dcsButtonCallback(event):
             return
         value1 = (dm << 3) | ((ds0 >> 2) & 3)
         value2 = ((ds0 & 3) << 4) | ds1
-        mode = modes[name]
+        dcsTransmit(True, mode)
+        dcsTransmit(False, value1)
+        dcsTransmit(False, value2)
+        return
+    if name == "TELEMETER SINGLE LOCATION":
+        '''
+        There are 9 of these commands shown on pp. 55-24 and 55-25 of the NOD
+        document.  Unfortunately, I wasn't able to guess what addresses they're
+        *supposed* to telemeter, so I couldn't infer anything from the commands'
+        bit patterns, and had to rely entirely on the FP source code (D.S470).
+        Denoting the 3 data words as AAAAAA, BBBBBB, and CCCCCC, what I found
+        was this:
+                AAAAAA BBBBBB CCCCCC
+                MMMLLL LLLLL  SSSS
+        where MMM is transparently masked to MM0 after extraction.  *Not* my
+        best guess from the NOD commands.  :-)  The addresses turned out to be 
+        2-06-200 through 2-06-210, which in AS-512 is an area denoted as
+        "EXECUTABLE MANEUVERS TO BE INITIALIZED", and commented "MANEUVER 2" 
+        through "MANEUVER 13" individually.  Which I'm forced to admit may 
+        indeed have been guessable; but there's nothing corresponding in
+        AS-513, so perhaps not all that guessable after all.
+        '''
+        dm,ds,loc,error = getMemLoc(row[2].get(), row[4].get(), row[6].get())
+        value1 = (dm << 3) | ((loc >> 5) & 7)
+        value2 = (loc & 0o37) << 1
+        value3 = ds << 2
+        dcsTransmit(True, mode)
+        dcsTransmit(False, value1)
+        dcsTransmit(False, value2)
+        dcsTransmit(False, value3)
+        return
+    if name == "MEMORY DUMP":
+        '''
+        The only info on this presently is in the AS-513 FP source code 
+        (D.S430).  There are 6 data words ... 3 for the starting address and
+        3 for the ending address.  Each of the two is formatted the same as
+        the other, so I'll just give you the formatting of one set of 3 words:
+            AAAAAA BBBBBB CCCCCC
+            LLLLLL LL MMM SSSS
+        where MMM is transparently converted to MM0.  Note that this is 
+        different than the 3-word format for TELEMETER SINGLE LOCATION.
+        '''
+        dm0,ds0,loc0,error = getMemLoc(row[2].get(), row[4].get(), row[6].get())
+        if error:
+            return
+        dm1,ds1,loc1,error = getMemLoc(row[2].get(), row[4].get(), row[6].get())
+        if error:
+            return
+        value1 = (loc0 >> 2) & 0o77
+        value2 = ((loc0 << 4) & 0o60) | dm0
+        value3 = (ds0 << 2) & 0o74
+        value4 = (loc1 >> 2) & 0o77
+        value5 = ((loc1 << 4) & 0o60) | dm1
+        value6 = (ds1 << 2) & 0o74
+        dcsTransmit(True, mode)
+        dcsTransmit(False, value1)
+        dcsTransmit(False, value2)
+        dcsTransmit(False, value3)
+        dcsTransmit(False, value4)
+        dcsTransmit(False, value5)
+        dcsTransmit(False, value6)
+        return
+    if name == "GENERALIZED SWITCH SELECTOR":
+        '''
+        There are a number of examples of this in NOD, with descriptions like
+        "LH2 Vent Open", "LH2 Vent Closed", "LOX Pressure Safe", "S-IVB Cutoff",
+        and so on, but without any explanation of what those are or what they
+        have in commen, other than the fact that eash has 2 data words.  So we
+        have to resort to examining the FP source code (D.S380).  My findings:
+            AAAAAA BBBBBB
+            TS  DD DDDDD
+        where S is the S-IVB flag, but T and DDDDDDD are more uncertain.  Within
+        the FP, this is converted to a "switch selector word" of the form
+            T0S 000 DDD DDD D
+        filled on the right with 0.  There's little explanation anywhere I've
+        found of how a "switch selector word" works, but they seem to be formed
+        by
+            SSF2   FORM    5P,8O,13D
+        with the 1st parameter being the "stage", the 2nd being an "address",
+        and the 3rd being 0.  The stages for which symbolic constants are 
+        provided by the FP are:
+            IU     EQU     (-80)
+            SIVB   EQU     (4)
+            SII    EQU     (2)
+            SIC    EQU     (1)
+            SIB    EQU     (1)
+        It's not 100% clear how -80 might be represented as a 5-bit pattern, 
+        but it seems possible that the stages would convert to 5-bit patterns 
+        10110, 00100, 00010, 00001, 00001.  So *perhaps* the possible 
+        combinations could be
+            TS = 11    IU
+            TS = 01    S-IVB
+            TS = 00    SII, SIC, or SIB.
+        or perhaps
+            TS = 10    IU
+            TS = 01    S-IVB
+        Examining the NOD requests already mentioned from p. 55-24, and others
+        on p. 55-26, the only combinations that seem to appear are TS=01 and 10,
+        so I'm thinking that those are the only choices.
+        '''
+        stage = row[2].get().upper()
+        if stage not in ["IU", "SIVB", "S-IVB", "S4B", "S-4B"]:
+            print("Stage must be IU or SIVB")
+            return
+        try:
+            loc = int(row[4].get(), 8)
+        except:
+            print("Address not octal.")
+            return
+        if loc < 0 or loc > 0o177:
+            print("Address out of range")
+            return
+        if stage == "IU":
+            value1 = 0o40
+        else:
+            value1 = 0o20
+        value1 |= (loc >> 5) & 3
+        value2 = (loc << 1) & 0o76
         dcsTransmit(True, mode)
         dcsTransmit(False, value1)
         dcsTransmit(False, value2)
@@ -556,7 +691,7 @@ class dcsPanel:
             CreateToolTip(button, tooltip)
             button.bind("<Button-1>", dcsButtonCallback)
             row.append(button)
-            if "dataValues" in dcsEntry:
+            if "dataValues" in dcsEntry and "unimplemented" not in dcsEntry:
                 if len(dcsEntry["dataValues"]) == 0:
                     label = tk.Label(master=self.root, text="(No data)", anchor=tk.W)
                     label.grid(row=len(self.array), column=len(row), sticky=tk.W)

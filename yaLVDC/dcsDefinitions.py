@@ -5,6 +5,8 @@
 # Reference:    http://www.ibiblio.org/apollo/LVDC.html
 # Mod history:  2023-08-14 RSB  Began.
 
+scaleTBD = -1000
+
 dcsTypes = {
     "ANTENNA TO HIGH GAIN": {
         "name": "ANTENNA TO HIGH GAIN",
@@ -26,12 +28,14 @@ dcsTypes = {
         },
     "COARSE TIME BASE UPDATE": {
         "name": "COARSE TIME BASE UPDATE",
+        "unimplemented": True,
         "description": "TBD",
         
         "numDataWords": 1
         },
     "EXECUTE ALTERNATE SEQUENCE": {
         "name": "EXECUTE ALTERNATE SEQUENCE",
+        "unimplemented": True,
         "description": "Initiate alternate sequence 4A or 4B",
         "dataValues": ["TSEQ", "SEQNUM"],
         "dataScales": [15, -1000],
@@ -40,6 +44,7 @@ dcsTypes = {
         },
     "EXECUTE GENERALIZED MANEUVER": {
         "name": "EXECUTE GENERALIZED MANEUVER",
+        "unimplemented": True,
         "description": "TBD",
         "dataValues": ["TSOM", "GOMTYP", "YREF", "ZREF", "XREF"],
         "dataScales": [15, -1000, 0, 0, 0],
@@ -60,6 +65,7 @@ dcsTypes = {
         },
     "FINE TIME BASE UPDATE": {
         "name": "FINE TIME BASE UPDATE",
+        "unimplemented": True,
         "description": "TBD",
         
         "numDataWords": 1
@@ -67,7 +73,11 @@ dcsTypes = {
     "GENERALIZED SWITCH SELECTOR": {
         "name": "GENERALIZED SWITCH SELECTOR",
         "description": "Issue a switch-selector function at the first opportunity",
-        "dataValues": ["IU", "SIVB", "ADDRESS"],
+        "dataValues": ["STAGE", "ADDRESS"],
+        "dataDescriptions": [
+            "Literally, the string 'IU' or 'SIVB' without quotation marks",
+            "Octal address 000-177"
+            ],
         "numDataWords": 2
         },
     "INHIBIT MANEUVER": {
@@ -84,6 +94,7 @@ dcsTypes = {
         },
     "LADDER MAGNITUDE LIMIT": {
         "name": "LADDER MAGNITUDE LIMIT",
+        "unimplemented": True,
         "description": "TBD",
         
         "numDataWords": 1
@@ -91,7 +102,15 @@ dcsTypes = {
     "MEMORY DUMP": {
         "name": "MEMORY DUMP",
         "description": "The contents of the specified contiguous memory block are telemetered.",
-        "dataValues": ["DM1", "DS1", "DLOC1", "DM2", "DS2", "DLOC2"],
+        "dataValues": ["DM0", "DS0", "LOC0", "DM1", "DS1", "LOC1"],
+        "dataDescriptions": [
+            "Starting module number, one of 0, 2, 4, or 6",
+            "Starting sector number, octal 00-17",
+            "Starting offset within sector, octal 000-377",
+            "Ending module number, one of 0, 2, 4, or 6",
+            "Ending sector number, octal 00-17",
+            "Ending offset within sector, octal 000-377"
+            ],
         "numDataWords": 6
         },
     "NAVIGATION UPDATE": {
@@ -123,6 +142,7 @@ dcsTypes = {
         },
     "S-IVB/IU LUNAR IMPACT": {
         "name": "S-IVB/IU LUNAR IMPACT",
+        "unimplemented": True,
         "description": "Initiate maneuver to crash the S-IVB onto the moon",
         
         "numDataWords": 4
@@ -138,8 +158,22 @@ dcsTypes = {
         },
     "TARGET UPDATE": {
         "name": "TARGET UPDATE",
+        "unimplemented": True,
         "description": "Replace targeting quantities for second S-IVB burn",
-        
+        "datavalues": ["Inclin.", "Dec. Node", "Eccentricity", 
+                       "Twice Orb. Vel.", 
+                       "Per. to Dec.", "True Anom.", "Time Left"],
+        "dataScales": [scaleTBD, scaleTBD, scaleTBD, scaleTBD, scaleTBD, scaleTBD, scaleTBD],
+        "dataUnits": ["PIRADS", "PIRADS", "TBD", "TBD", "PIRADS", "PIRADS", "SECONDS"],
+        "dataDescriptions": [
+            "Inclination angle in PIRADs",
+            "Descending node in PIRADs",
+            "Eccentricity",
+            "Twice orbital energy",
+            "Angle from perigee to descending node in PIRADs",
+            "True anomaly in PIRADs",
+            "Time from T5 to start T6 in seconds"
+            ],
         "numDataWords": 35
         },
     "TD & E ENABLE": {
@@ -151,7 +185,10 @@ dcsTypes = {
     "TELEMETER SINGLE LOCATION": {
         "name": "TELEMETER SINGLE LOCATION",
         "description": "The content of a single selected memory location is telemetered",
-        
+        "dataValues": ["DM", "DS", "LOC"],
+        "dataDescriptions": ["Module number 0, 2, 4, or 6.", 
+                             "Sector number 00-17 in octal.",
+                             "Address within sector, 000-377 in octal."],
         "numDataWords": 3
         },
     "TERMINATE": {
