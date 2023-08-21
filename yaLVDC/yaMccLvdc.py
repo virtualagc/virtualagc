@@ -6,6 +6,12 @@
 #               to yaLVDC with "virtual wires" ... i.e., via network sockets.
 # Reference:    http://www.ibiblio.org/apollo/LVDC.html
 # Mod history:  2023-08-13 RSB  Began adapting from yaPTC.py.
+#               2023-08-21 RSB  Continued implementation of DCS commands ...
+#                               however, had to incorporate the DCS status-
+#                               command protocol, which at first I hadn't
+#                               thought was useful for our model, but I now
+#                               realize could result in data being overwritten
+#                               before use if not implemented.
 
 '''
 Regarding how the Digital Command System (DCS) delivers commands and data to 
@@ -75,7 +81,7 @@ except ImportError:
   py3 = True
 from lvdcTelemetryDecoder import lvdcFormatData, lvdcModeReset, \
                                  lvdcSetVersion, lvdcTelemetryDecoder, \
-                                 forAS206RAM, forAS512, forAS513
+                                 forAS206RAM, forAS512, forAS513, getLvdcMode
 from dcsDefinitions import *
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -202,6 +208,76 @@ lvdcSetVersion(version)
 #-----------------------------------------------------------------------------
 # Output DCS.
 
+# Call this frequently in main loop to take care of actual transmissions to
+# the lvdc.
+pendingDcsTransmissions = []
+pendingDcsStatusCodes = []
+pdsEMPTY = 0
+pdsWAIT1 = 1
+pdsWAIT2 = 2
+pendingDcsState = pdsEMPTY
+pendingDcsDesiredStatus = 0
+pendingDcsTimeout = 0
+def servicePending():
+    global pendingDcsTransmissions, pendingDcsStatusCodes, pendingDcsState, \
+            pendingDcsDesiredStatus, pendingDcsTimeout
+    while True:
+        if pendingDcsState == pdsEMPTY:
+            if len(pendingDcsStatusCodes) > 0:
+                msg = "Popping code(s):"
+                while len(pendingDcsStatusCodes) > 0:
+                    msg = msg + " %03o,%09o" % pendingDcsStatusCodes.pop(0)
+                print(msg)
+                sys.stdout.flush()
+            if len(pendingDcsTransmissions) > 0:
+                pendingTransmission = pendingDcsTransmissions.pop(0)
+                pendingDcsDesiredStatus = pendingTransmission[0]
+                s.send(pendingTransmission[1])
+                pendingDcsStatusCodes.clear()
+                pendingDcsState = pdsWAIT1
+                pendingDcsTimeout = time.time_ns() + 1000000000 
+                print("Waiting for status (%09o)" % pendingDcsDesiredStatus)
+                sys.stdout.flush()
+            return
+        elif len(pendingDcsStatusCodes) == 0:
+            if time.time_ns() >= pendingDcsTimeout:
+                print("DCS timed out waiting for acknowledgement")
+                sys.stdout.flush()
+                pendingDcsTransmissions.clear()
+                pendingDcsStatusCodes.clear()
+                pendingDcsState = pdsEMPTY
+            return
+        else:
+            pendingStatusTuple = pendingDcsStatusCodes.pop()
+            channel = pendingStatusTuple[0]
+            pendingStatus = pendingStatusTuple[1]
+            sys.stdout.flush()
+            if channel == 0o055:
+                errorCode = (pendingStatus >> 20) & 0o77
+                count = (pendingStatus >> 14) & 0o7
+                command = (pendingStatus >> 8) & 0o77
+                print("Received error code %02o,%02o,%o" % (command,errorCode,count))
+                sys.stdout.flush()
+                pendingDcsTransmissions.clear()
+                pendingDcsStatusCodes.clear()
+                pendingDcsState = pdsEMPTY
+                return
+            if pendingStatus != pendingDcsDesiredStatus:
+                print("DCS protocol mismatch (%09o != %09o)" % \
+                      (pendingStatus, pendingDcsDesiredStatus))
+                pendingDcsTransmissions.clear()
+                pendingDcsStatusCodes.clear()
+                pendingDcsState = pdsEMPTY
+                return
+            elif pendingDcsState == pdsWAIT1:
+                print("Received first expected status")
+                sys.stdout.flush()
+                pendingDcsState = pdsWAIT2
+            else: # pendingDcsState == pdsWAIT2
+                print("Received second expected status")
+                sys.stdout.flush()
+                pendingDcsState = pdsEMPTY
+
 SIGN = 0o200000000
 BIT6 = SIGN >> 6
 BIT13 = SIGN >> 13
@@ -211,7 +287,7 @@ BITS7through13 = 0o177 * BIT13
 BITSunused = BIT13 - 1
 dcsSequenceNumber = 0
 def dcsTransmit(isItCommand, sixBitValue):
-    global dcsSequenceNumber
+    global dcsSequenceNumber, pendingDcsTransmissions
     outputBuffer = bytearray(6)
     if isItCommand:
         dcsSequenceNumber = 0
@@ -219,6 +295,9 @@ def dcsTransmit(isItCommand, sixBitValue):
     encoded26 = (encoded7 * BITS6and13) ^ BITS7through13
     if isItCommand:
         encoded26 |= BITSunused
+        desiredStatus =  encoded26 & 0o374000000
+    else:
+        desiredStatus =  encoded26 | 0o000007777
     dcsSequenceNumber ^= 1
     # At this point, we now have a proper 26-bit word for the PIO's data, 
     # in the form the LVDC will expect to encounter it, but
@@ -231,7 +310,7 @@ def dcsTransmit(isItCommand, sixBitValue):
     outputBuffer[3] = (encoded26 >> 14) & 0x7F
     outputBuffer[4] = (encoded26 >> 7) & 0x7F
     outputBuffer[5] = encoded26 & 0x7F
-    s.send(outputBuffer)
+    pendingDcsTransmissions.append((desiredStatus, outputBuffer))
     
 def dcsTransmit26(word):
     dcsTransmit(False, (word >> 20) & 0o77)
@@ -616,6 +695,50 @@ def dcsButtonCallback(event):
         dcsTransmit(True, mode)
         dcsTransmit(False, value)
         return
+    if name == "EXECUTE GENERALIZED MANEUVER":
+        '''
+        See AS-513 subroutine D.S540.  *Almost* a "simple" configuration, 
+        except that the first transmitted 5-word packet contains a packed time
+        and a maneuver type; the remainint 5-word packets are "simple".
+        '''
+        try:
+            seconds = int(row[2].get())
+        except:
+            print("TIME not integer")
+            return
+        if seconds < 0:
+            print("TIME is negative")
+            return
+        maneuverType = row[4].get().upper()
+        if maneuverType.startswith("HOLD"):
+            maneuverType = 1
+        elif maneuverType.startswith("TRACK"):
+            maneuverType = 2
+        else:
+            print("TYPE must be HOLD or TRACK")
+            return
+        try:
+            pitch = float(row[6].get())
+            yaw = float(row[8].get())
+            roll = float(row[10].get())
+        except:
+            print("PITCH, YAW, or ROLL not decimal")
+            return
+        dataScales = dcsEntry["dataScales"]
+        seconds = scaleData(seconds, dataScales[0])
+        pitch = scaleData(pitch, dataScales[2])
+        yaw = scaleData(yaw, dataScales[3])
+        roll = scaleData(roll, dataScales[4])
+        dcsTransmit(True, mode)
+        dcsTransmit(False, (seconds >> 20) & 0o77)
+        dcsTransmit(False, (seconds >> 14) & 0o77)
+        dcsTransmit(False, (seconds >> 8) & 0o77)
+        dcsTransmit(False, ((seconds >> 2) & 0o60) | (maneuverType << 2))
+        dcsTransmit26(pitch)
+        dcsTransmit26(yaw)
+        dcsTransmit26(roll)
+        return
+    
     
     # Whatever's left over must not have been implemented yet.
     print("%s command not yet implemented" % name)
@@ -931,6 +1054,7 @@ didSomething = False
 def mainLoopIteration():
     global didSomething, inputBuffer, leftToRead, view
     global doubleClickTimeouts, doubleClickIds
+    global pendingDcsStatusCodes
 
     timeNow = (time.time_ns() - t0) // 1000000
     for timeout in sorted(doubleClickTimeouts.keys()):
@@ -940,6 +1064,10 @@ def mainLoopIteration():
             record = doubleClickIds.pop(id)
             record[1]["bg"] = record[2]
         del doubleClickTimeouts[timeout]
+
+    # State machine for processing DCS protocol (i.e., sending to LVDC and
+    # receiving corresponding acknowledgements).
+    servicePending()
 
     # Check for packet data received from yaLVDC and process it.
     # While these packets are always the same length in bytes,
@@ -1000,6 +1128,8 @@ def mainLoopIteration():
                 value |= (inputBuffer[3] & 0x7F) << 14
                 value |= (inputBuffer[4] & 0x7F) << 7
                 value |= inputBuffer[5] & 0x7F
+                if source == 0 and getLvdcMode() == 4 and channel in [0o030, 0o055]:
+                    pendingDcsStatusCodes.append((channel,value))
                 outputFromCPU(ioType, channel, value)
             didSomething = True
     

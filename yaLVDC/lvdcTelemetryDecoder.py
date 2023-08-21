@@ -40,6 +40,8 @@ def lvdcFormatData(value, scale, units):
     return value, ""
 
 lvdcMode = None
+def getLvdcMode():
+    return lvdcMode
 
 # Get lists of telemetry PIOs.  These are stored in a tab-delimited file so
 # that they can be easily used by other software without being locked in a

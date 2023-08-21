@@ -47,11 +47,17 @@ dcsTypes = {
         },
     "EXECUTE GENERALIZED MANEUVER": {
         "name": "EXECUTE GENERALIZED MANEUVER",
-        "unimplemented": True,
-        "description": "TBD",
-        "dataValues": ["TSOM", "GOMTYP", "YREF", "ZREF", "XREF"],
+        "description": "Execute a maneuver that wasn't prepreprogrammed",
+        "dataValues": ["TIME", "TYPE", "PITCH", "YAW", "ROLL"],
         "dataScales": [15, -1000, 0, 0, 0],
         "dataUnits": ["SECONDS", "", "PIRADS", "PIRADS", "PIRADS"],
+        "dataDescriptions": [
+            "Time (seconds) at thich to perform the maneuver",
+            "Type of maneuver: literal HOLD (hold inertial attitude) or TRACK (track local reference)",
+            "Desired pitch in PIRADs",
+            "Desired yaw in PIRADs",
+            "Desired roll in PIRADs"
+            ],
         "numDataWords": 20
         },
     "EXECUTE MANEUVER A": {
