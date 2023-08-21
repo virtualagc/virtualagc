@@ -334,7 +334,7 @@ def scaleData(value, dataScale):
             valueToUse ^= 0o377777777
         return valueToUse
 
-def getMemloc(dmStr, dsStr, locStr):
+def getMemLoc(dmStr, dsStr, locStr):
     try:
         dm = int(dmStr, 8)
         ds = int(dsStr, 8)
