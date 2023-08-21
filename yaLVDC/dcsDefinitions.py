@@ -28,10 +28,13 @@ dcsTypes = {
         },
     "COARSE TIME BASE UPDATE": {
         "name": "COARSE TIME BASE UPDATE",
-        "unimplemented": True,
-        "description": "TBD",
-        
-        "numDataWords": 1
+        "description": "The time-base time is advanced or retarded by a selected amount",
+        "dataValues": ["DELTA T"],
+        "dataUnits": ["SECONDS"],
+        "dataDescriptions": [
+            "Delta-time in current time base, in range -3968 to +3968, rounded to nearest 128-second multiple"
+            ],
+        "numDataWords": 1,
         },
     "EXECUTE ALTERNATE SEQUENCE": {
         "name": "EXECUTE ALTERNATE SEQUENCE",
@@ -63,12 +66,15 @@ dcsTypes = {
         "dataValues": [],
         "numDataWords": 0
         },
-    "FINE TIME BASE UPDATE": {
+    "FINE TIME BASE UPDATE": { # Same as TIME BASE UPDATE
         "name": "FINE TIME BASE UPDATE",
-        "unimplemented": True,
-        "description": "TBD",
-        
-        "numDataWords": 1
+        "description": "The time-base time is advanced or retarded by a selected amount",
+        "dataValues": ["DELTA T"],
+        "dataUnits": ["SECONDS"],
+        "dataDescriptions": [
+            "Delta-time in current time base, in range -124 to +124, rounded to nearest 4-second multiple"
+            ],
+        "numDataWords": 1,
         },
     "GENERALIZED SWITCH SELECTOR": {
         "name": "GENERALIZED SWITCH SELECTOR",
@@ -94,9 +100,10 @@ dcsTypes = {
         },
     "LADDER MAGNITUDE LIMIT": {
         "name": "LADDER MAGNITUDE LIMIT",
-        "unimplemented": True,
-        "description": "TBD",
-        
+        "description": "Sets magnitude limit on pitch/roll/yaw D/A \"ladders\"",
+        "dataValues": ["ANGLE"],
+        "dataUnits": ["DEGREES"],
+        "dataDescriptions": ["Decimal degrees, 0 through 15.3"],
         "numDataWords": 1
         },
     "MEMORY DUMP": {
@@ -138,14 +145,22 @@ dcsTypes = {
         "dataValues": ["TRNTL"],
         "dataScales": [15],
         "dataUnits": ["SECONDS"],
+        "dataDescriptions": ["Replacement time, in seconds"],
         "numDataWords": 5
         },
     "S-IVB/IU LUNAR IMPACT": {
         "name": "S-IVB/IU LUNAR IMPACT",
-        "unimplemented": True,
-        "description": "Initiate maneuver to crash the S-IVB onto the moon",
-        
-        "numDataWords": 4
+        "description": "Initiate maneuver to crash the S-IVB stage onto the moon",
+        "dataValues": ["1ST & 2ND", "3RD & 4TH", "DELTA PITCH", "DELTA YAW", "DELTA ROLL"],
+        "dataUnits": ["MINUTES", "SECONDS", "DEGREES", "DEGREES", "DEGREES"],
+        "dataDescriptions": [
+            "Time (minutes, 0-511) to issue 1st and 2nd lunar-impact switch-selector sequence",
+            "Delay (seconds, 0-4095) before issuing 3rd and 4th lunar-impact switch-selector sequence",
+            "Change in pitch, -31 to 31 integer degrees",
+            "Change in yaw, -31 to 31 integer degrees",
+            "Change in roll, -31 to 31 integer degrees"
+            ],
+        "numDataWords": 7
         },
     "SECTOR DUMP": {
         "name": "SECTOR DUMP",
@@ -156,15 +171,16 @@ dcsTypes = {
                              "Ending sector number 00-17 in octal."],
         "numDataWords": 2
         },
-    "TARGET UPDATE": {
+    "TARGET UPDATE": { 
+        # AS-513 D.S670 (V.INCU, V.THNU, V.ECCU, V.NC3U, V.APDU, V.FU, D.VTRP)
         "name": "TARGET UPDATE",
-        "unimplemented": True,
+        "simple": True,
         "description": "Replace targeting quantities for second S-IVB burn",
-        "datavalues": ["Inclin.", "Dec. Node", "Eccentricity", 
-                       "Twice Orb. Vel.", 
-                       "Per. to Dec.", "True Anom.", "Time Left"],
-        "dataScales": [scaleTBD, scaleTBD, scaleTBD, scaleTBD, scaleTBD, scaleTBD, scaleTBD],
-        "dataUnits": ["PIRADS", "PIRADS", "TBD", "TBD", "PIRADS", "PIRADS", "SECONDS"],
+        "dataValues": ["INCLIN.", "DEC. NODE", "ECC.", 
+                       "TWICE ORB. VEL.", 
+                       "PER. TO DEC.", "TRUE ANOM.", "TIME LEFT"],
+        "dataScales": [0, 0, 0, 26, 0, 0, 15],
+        "dataUnits": ["PIRADS", "PIRADS", "", "METER**2/SECONDS**2", "PIRADS", "PIRADS", "SECONDS"],
         "dataDescriptions": [
             "Inclination angle in PIRADs",
             "Descending node in PIRADs",
@@ -172,7 +188,7 @@ dcsTypes = {
             "Twice orbital energy",
             "Angle from perigee to descending node in PIRADs",
             "True anomaly in PIRADs",
-            "Time from T5 to start T6 in seconds"
+            "Time remaining in time base prior to burn, in seconds"
             ],
         "numDataWords": 35
         },
@@ -212,8 +228,7 @@ dcsTypes = {
     "TIME BASE UPDATE": {
         "name": "TIME BASE UPDATE",
         "description": "The time-base time is advanced or retarded by a selected amount",
-        "dataValues": ["DELTAT"],
-        "dataScales": [-1000],
+        "dataValues": ["DELTA T"],
         "dataUnits": ["SECONDS"],
         "dataDescriptions": [
             "Delta-time in current time base, in range -124 to +124, rounded to nearest 4-second multiple"

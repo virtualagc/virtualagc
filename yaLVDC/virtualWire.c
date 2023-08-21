@@ -51,6 +51,7 @@
                 2023-08-16 RSB  Eliminated some pointless PTC-related stuff
                                 from LVDC mode, since it was producing harmless
                                 but irritating warning messages.
+                2023-08-20 RSB  Fixed OM/D bit in PIO 057.
  */
 
 #include <stdio.h>
@@ -707,7 +708,7 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                   }
                 else
                   {
-                    int mask = 0377777777, oldValue;
+                    int mask = 0377777777, oldValue, newValue;
                     if (pendingMasks[i].valid)
                       {
                         if (pendingMasks[i].source != source)
@@ -726,7 +727,8 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                       if (channel < 0 || channel > 0777)
                         printf("Input PIO channel out of range.\n");
                       oldValue = state.pio[channel];
-                      state.pio[channel] = (oldValue & ~mask) | (value & mask);
+                      newValue = (oldValue & ~mask) | (value & mask);
+                      state.pio[channel] = newValue;
                       printf(
                           "PIO-%03o changed from %09o to %09o (value %09o, mask %09o).\n",
                           channel, oldValue, state.pio[channel], value, mask);
@@ -736,7 +738,8 @@ pendingVirtualWireActivity(void /* int id, int mask */)
                           channel2 = 057;
                           mask2 = 000000010;
                           oldValue = state.pio[channel2];
-                          state.pio[channel2] = (oldValue & ~mask2) | mask2;
+                          state.pio[channel2] = (oldValue & ~mask2) |
+                                                (newValue & mask2);
                           printf(
                               "PIO-%03o changed from %09o to %09o (bit %09o).\n",
                               channel2, oldValue, state.pio[channel2], mask2);

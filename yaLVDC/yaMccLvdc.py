@@ -509,6 +509,113 @@ def dcsButtonCallback(event):
         dcsTransmit(False, value1)
         dcsTransmit(False, value2)
         return
+    if name == "LADDER MAGNITUDE LIMIT":
+        '''
+        Again, no explicit documentation about this one, or for that matter,
+        even aout "ladders".  I think "ladder" refers to D/A-converters used
+        (in this case) to control pitch, yaw, and roll of the launch vehicle.
+        The have a range of 0 to 255, representing angles of 0 to 15.3 degrees,
+        or 0.06 degrees per "ladder unit".  In AS-512 at least, there the 
+        variable D.VM06 is the maximum magnitude (in ladder units) for roll, 
+        while D.VM16 is the maximum magnitude for pitch and yaw.  (Not the max
+        *rate*, which is a different variable and not controlled by this DCS
+        command.)  This command overwrites both D.VM06 and D.VM16 with the same
+        value.  The relevant AS-512 source code is D.S980, and my finding is
+        that the entire AAAAAA provides the limit as an unsigned integer 0-63
+        decimal.
+        '''
+        try:
+            value = hround(float(row[2].get()))
+        except:
+            print("Not a decimal number")
+            return
+        if value < 0 or value > 63:
+            print("Out of range")
+            return
+        dcsTransmit(True, mode)
+        dcsTransmit(False, value)
+        return
+    if name == "S-IVB/IU LUNAR IMPACT":
+        '''
+        No documentation.  The relevant AS-512 subroutine is D.S900.
+            AAAAAA BBBBBB CCCCCC DDDDDD
+               MMM MMMMMM SSSSSS SSSSSS
+        where M...M is unsigned minutes and S...S is unsigned seconds.
+        EEEEEE, FFFFFF, and GGGGGG are respectively delta-pitch, delta-yaw,
+        and delta-roll.
+        '''
+        try:
+            minutes = int(row[2].get())
+            seconds = int(row[4].get())
+            deltaPitch = int(row[6].get())
+            deltaYaw = int(row[8].get())
+            deltaRoll = int(row[10].get())
+        except:
+            print("Not integer")
+            return
+        if minutes < 0 or minutes > 511:
+            print("Minutes out of range")
+            return
+        if seconds < 0 or seconds > 4095:
+            print("Seconds out of range")
+            return
+        if abs(deltaPitch) > 31:
+            print("Delta pitch out of range")
+            return
+        if abs(deltaYaw) > 31:
+            print("Delta yaw out of range")
+            return
+        if abs(deltaRoll) > 31:
+            print("Delta roll out of range")
+            return
+        value1 = minutes >> 6
+        value2 = minutes & 0o77
+        value3 = seconds >> 6
+        value4 = seconds & 0o77
+        value5 = deltaPitch & 0o77
+        value6 = deltaYaw & 0o77
+        value7 = deltaRoll & 0o77
+        dcsTransmit(True, mode)
+        dcsTransmit(False, value1)
+        dcsTransmit(False, value2)
+        dcsTransmit(False, value3)
+        dcsTransmit(False, value4)
+        dcsTransmit(False, value5)
+        dcsTransmit(False, value6)
+        dcsTransmit(False, value7)
+        return
+    if name in ["TIME BASE UPDATE", "FINE TIME BASE UPDATE"]:
+        '''
+        See AS-512/AS-513 subroutines D.S260.
+        '''
+        try:
+            adjustment = float(row[2].get())
+        except:
+            print("Not decimal number")
+            return
+        value = hround(adjustment / 4.0)
+        if value < -31 or value > 31:
+            print("Out of range")
+            return
+        dcsTransmit(True, mode)
+        dcsTransmit(False, value)
+        return
+    if name == "COARSE TIME BASE UPDATE":
+        '''
+        See AS-513 subroutines D.S270.
+        '''
+        try:
+            adjustment = float(row[2].get())
+        except:
+            print("Not decimal number")
+            return
+        value = hround(adjustment / 128.0)
+        if value < -31 or value > 31:
+            print("Out of range")
+            return
+        dcsTransmit(True, mode)
+        dcsTransmit(False, value)
+        return
     
     # Whatever's left over must not have been implemented yet.
     print("%s command not yet implemented" % name)
@@ -545,18 +652,10 @@ class ToolTip(object):
         if tw:
             tw.destroy()
 
-def CreateToolTip(widget, text):
-    toolTip = ToolTip(widget)
-    def enter(event):
-        toolTip.showtip(text)
-    def leave(event):
-        toolTip.hidetip()
-    widget.bind('<Enter>', enter)
-    widget.bind('<Leave>', leave)
-
-def normalizeUnits(text):
+def normalizeText(text):
     if not asciiOnly:
         text = text.replace("**2", "²").replace("**-1", "⁻¹")
+        text = text.replace("DELTA ", "Δ")
     if abbreviateUnits:
         text = text.replace("METERS", "M")
         text = text.replace("METER", "M")
@@ -566,6 +665,15 @@ def normalizeUnits(text):
         text = text.replace("RADIANS", "RAD")
         text = text.replace("RADIAN", "RAD")
     return text
+
+def CreateToolTip(widget, text):
+    toolTip = ToolTip(widget)
+    def enter(event):
+        toolTip.showtip(normalizeText(text))
+    def leave(event):
+        toolTip.hidetip()
+    widget.bind('<Enter>', enter)
+    widget.bind('<Leave>', leave)
 
 # An event for clicking on a variable name.  It cycles through my chosen
 # set of colors.
@@ -654,7 +762,7 @@ class telPanel:
             label.bind("<Control-Button-1>", telControlClickCallback)
             label.bind('<Button-1>', varClick)
             rowArray.append(label)
-            text = normalizeUnits(teld[3])
+            text = normalizeText(teld[3])
             label = tk.Label(text=text+" ", fg=gray, anchor="w")
             label.grid(row=row, column=len(rowArray), sticky=tk.W)
             rowArray.append(label)
@@ -693,13 +801,16 @@ class dcsPanel:
             row.append(button)
             if "dataValues" in dcsEntry and "unimplemented" not in dcsEntry:
                 if len(dcsEntry["dataValues"]) == 0:
-                    label = tk.Label(master=self.root, text="(No data)", anchor=tk.W)
-                    label.grid(row=len(self.array), column=len(row), sticky=tk.W)
-                    row.append(label)
+                    if False:
+                        label = tk.Label(master=self.root, text="(No data)", anchor=tk.W)
+                        label.grid(row=len(self.array), column=len(row), sticky=tk.W)
+                        row.append(label)
                 else:
                     for d in range(len(dcsEntry["dataValues"])):
                         dataValue = dcsEntry["dataValues"][d]
-                        label = tk.Label(master=self.root, text=dataValue+":", anchor=tk.E)
+                        label = tk.Label(master=self.root, \
+                                         text=normalizeText(dataValue)+":", \
+                                         anchor=tk.E)
                         label.grid(row=len(self.array), column=len(row), sticky=tk.E)
                         tooltip = ("Data Name:   %s" % dataValue)
                         if "dataDescriptions" in dcsEntry:
@@ -711,7 +822,7 @@ class dcsPanel:
                                 tooltip = tooltip + ("\nScale:       B%d" % \
                                                      scale)
                         if "dataUnits" in dcsEntry:
-                            units = normalizeUnits(dcsEntry["dataUnits"][d])
+                            units = normalizeText(dcsEntry["dataUnits"][d])
                             if units != "":
                                 tooltip = tooltip + ("\nUnits:       %s" % units)
                         CreateToolTip(label, tooltip)
@@ -720,9 +831,10 @@ class dcsPanel:
                         entry.grid(row=len(self.array), column=len(row), padx=8, sticky=tk.W)
                         row.append(entry)
             else:
-                label = tk.Label(master=self.root, text="(TBD)", anchor=tk.W)
-                label.grid(row=len(self.array), column=len(row), sticky=tk.W)
-                row.append(label)
+                if False:
+                    label = tk.Label(master=self.root, text="(TBD)", anchor=tk.W)
+                    label.grid(row=len(self.array), column=len(row), sticky=tk.W)
+                    row.append(label)
                 button["state"] = "disabled"
 
             self.array.append(row)
