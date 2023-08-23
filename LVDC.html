@@ -29156,9 +29156,9 @@ Stop DCS processing and reset for a new command.<br>
       <td width="45%" valign="middle" bgcolor="#cccccc" align="center"><br>
       </td>
       <td valign="middle" align="center">EXECUTE ALTERNATE SEQUENCE<br>
-In general, initiates one of (potentially) 15 different preprogrammed 
+In general, initiates one of (potentially) 16 different preprogrammed 
 alternate sequences.&nbsp; Specifically, in so far as AS-513 is 
-concerned, I think the only choices are sequences 4A and 4B, but I don't
+concerned, the only choices are sequences 4A and 4B, though I don't
  know what either of those sequences actually does.<br>
       </td>
     </tr>
@@ -29194,7 +29194,7 @@ Replace targeting quantities for second S-IVB burn.<br>
       <td width="10%" valign="middle" align="center">33<br>
       </td>
       <td width="45%" valign="middle" align="center">EXECUTE MANEUVER A<br>
-        <i>Possibly</i>, initiates a maneuver to local horizontal in a retrograde position.<br>
+        Track-local-reference orbital maneuver.
       </td>
       <td valign="middle" bgcolor="#cccccc" align="center"><br>
       </td>
@@ -29203,6 +29203,8 @@ Replace targeting quantities for second S-IVB burn.<br>
       <td width="10%" valign="middle" align="center">34<br>
       </td>
       <td width="45%" valign="middle" align="center">EXECUTE MANEUVER B<br>
+Inertial-attitude hold 
+maneuver.<br>
       </td>
       <td valign="middle" bgcolor="#cccccc" align="center"><br>
       </td>
@@ -29213,10 +29215,8 @@ Replace targeting quantities for second S-IVB burn.<br>
       <td width="45%" valign="middle" bgcolor="#cccccc" align="center"><br>
       </td>
       <td valign="middle" align="center">EXECUTE GENERALIZED MANEUVER<br>
-Initiates one of the following:&nbsp;&nbsp; Inertial-attitude hold 
-maneuver; track-local-reference orbital maneuver; return to nominal 
-timeline (see below); special maneuver A (see AS-512); special maneuver B
- (see AS-512).<br>
+Initiates either an inertial-attitude hold 
+maneuver or a track-local-reference orbital maneuver.<br>
       </td>
     </tr>
     <tr>
@@ -29321,7 +29321,7 @@ program we used in the preceding section for viewing telemetry.&nbsp;
 The program has an extra DCS window that I didn't show you before, 
 enabled by a command-line switch (<tt>--dcs</tt>).&nbsp; The DCS window when emulating AS-513 looks something like the following:<br>
 </p>
-<div align="center"><img moz-do-not-send="true" src="yaMccLvdc-dcs.png" alt="" width="1459" height="364"><br>
+<div align="center"><img moz-do-not-send="true" src="yaMccLvdc-dcs.png" alt="" width="1419" height="363"><br>
   <div align="left"><br>
 You'll notice in the screenshot that just as with the telemetry window, 
 hovering the mouse over many of the items in the window will give you 
@@ -29339,41 +29339,114 @@ rate, once you've entered whatever data is required, you simply click
 the button, and the command+data is sent to the LVDC, where it reacts to
  it in whatever way the LVDC software dictates.<br>
     <br>
-Some of the items, you'll notice, are <font color="#999999">grayed out</font>
- and/or marked as having data "(TBD)".&nbsp; That's because the 
-documentation for that particular DCS command is absent or so deficient 
-that details about how to process the required data and pack that data 
-into the transmission simply aren't known, and will have to be deduced 
-from the LVDC Flight Program itself ... <i>sometime</i>, but not <i>yet</i>.&nbsp; It's a work in progress.<br>
+But there are several annoyances in terms of trying to use DCS to actually see an emulated LVDC actually <i>do</i>
+ anything, and so it's necessary to engage in various forms of trickery 
+to actually exercise any DCS commands.&nbsp; All of these annoyances, 
+though, as far as I'm aware, stem from the simple fact that you can't 
+just use any arbitrarily-selected DCS command at any time of your 
+choosing, but rather can only do so during pre-selected phases of the 
+mission.&nbsp; And the acceptable time intervals are pretty 
+restrictive!&nbsp; Not only that, but the entirety of repeatable 
+flight-test mode — our favorite way of running the LVDC Flight Program 
+in emulation so far — is disallowed.<br>
+<br>
+As it happens, I don't have enough documentation for AS-512 or AS-513 to 
+give you an authoritative list of when their DCS commands are accepted and when 
+they are not, but I can illustrate my point with a table from <a moz-do-not-send="true" href="Documents/19700015780_1970015780.pdf#page=27">the AS-505 (Apollo 10) "Technical Information Summary" document</a>: <br>
     <br>
-Another annoyance from from the standpoint of someone just wanting to 
-emulate, is that most of the DCS commands are not accepted most of the 
-time.&nbsp; I don't have enough documentation for AS-512 or AS-513 to 
-give you an authoritative list of when commands are accepted and when 
-they are not, but consider the following excerpt from an Apollo 10 
-(AS-505) table listing the acceptance times:<br>
-    <br>
-    <div align="center"><img moz-do-not-send="true" src="dcsAcceptance.png" alt="" width="511" height="174"><br>
+    <div align="center"><img moz-do-not-send="true" src="dcsAcceptance.png" alt="" width="522" height="645"><br>
     </div>
-    <br>
-We see, for example, that the <tt>MANEUVER INHIBIT</tt> command is 
-accepted from the beginning of time base 5 until 9 seconds before the 
-end of time base 5, and then again from the beginning of time base 7 
-until the end of mission.&nbsp; Pretty specific!&nbsp; Perhaps still 
-worse from our perspective, is that the entirety of our repeatable 
-flight-test simulation is a period of non-acceptance!&nbsp; It's 
+    <br>Indeed, as you may imagine from the table above, it's 
 actually tough to find any time when we <i>can</i> sent a DCS command to the LVDC and expect it to be accepted.<br>
-    <br>
-As it happens, we do have means to cheat, and hence to fool the flight 
-program into accepting our DCS command even if it doesn't want to.&nbsp;
- At least to a certain extent.&nbsp; The Flight Program disqualifies DCS
- commands using several techniques, and we can relatively-painlessly 
-fool one of those techniques.<br>
+    <br>So if we want to play with DCS commands in the emulator, we have
+ to resort to a bit of trickery.&nbsp; There are several ways the Flight
+ Program can block our access to DCS commands, and we have to defeat all
+ of them.&nbsp; Our method is to exploit <a moz-do-not-send="true" href="#EmulatorDebugger">the gdb-style debugger built into our LVDC emulator</a>.&nbsp; To do so, it's helpful to have a <i>little</i>
+ information about how the DCS system actually functions in LVDC 
+hardware and in the Flight Program.&nbsp; Very briefly, a DCS command is
+ transmitted to the LVDC as a sequence of one or more 35-bit "words", 
+that (after massaging by the IU hardware) are presented to the flight 
+software as the same number for 26-bit words accessed via the CPU's <tt>PIO 043</tt>
+ instruction.&nbsp; Every time such a word appears, a specific type of 
+interrupt used only for DCS triggers an interrupt service routine in the
+ Flight Program (or Preflight Program, for early versions).<br>
+<br>
+So the <i>first</i> thing that can go wrong is that the Flight Program 
+may have instructed the LVDC hardware to completely mask out DCS 
+interrupts, so that the Flight Program has no knowledge of them at 
+all.&nbsp; The CPU instruction <tt>PIO 032</tt> is what controls this interrupt-mask register.&nbsp; We designate the bits in <tt>PIO</tt>
+ registers as S (most-significant), 1, 2, ..., 25, and using this naming
+ convention, the DCS interrupt is masked out if bit 5 of <tt>PIO 032</tt> is 1.&nbsp; Fortunately, you don't see this happen too often, so it's not normally what you have to worry about ... but it <i>can</i> happen.&nbsp; In the emulator's debugger, you can examine the interrupt mask with the <tt>X</tt> command, like so:<br>
+<blockquote>
+  <pre>&gt; X PIO-032<br><br>PIO-032: 000000000 (000000000)<br></pre>
+</blockquote>
+
   </div>
+  
+<div align="left">Of the two numbers shown, both of which are 27 bits vs the 26 bits of the actual <tt>PIO</tt>
+ registers, the first number is right-aligned (i.e., with the leftmost 
+bit being literally 0, and the others being the PIO bits S, 1, ..., 25) 
+and the second is left-aligned (with the leftmost bits being the PIO 
+bits S, 1, ..., 25, and the rightmost being a placeholder for a parity 
+bit).&nbsp; It's important to keep this distinction in mind, because 
+both conventions are used in the software, annoyingly, and you simply 
+have to know which is which.&nbsp; But regardless, you see all zeroes 
+like this, then obviously no interrupts are masked.&nbsp; On the other 
+hand, if <i>only</i> the DCS interrupt were masked, you would have seen <tt>PIO-032: 004000000 (010000000)</tt>.<br>
   <br>
+The next thing that can go wrong — and certainly <i>will</i> go wrong in repeatable flight-test mode — is that the Flight Program maintains a variable called <tt>D.VIHC</tt>
+ that it also uses to mask interrupts ... although in this case, the 
+bits are 1 if the interrupt is enabled and 0 if the interrupt is 
+masked.&nbsp; In repeatable flight-test mode, here's what you will see 
+if you examine its value in the debugger:<br>
+  <blockquote>
+    <pre>&gt; X &amp;D.VIHC<br><br>2-17-206: 320000000 (640000000)<br></pre>
+  </blockquote>
+(The notation 2-17-206 is the address of the variable, and will differ 
+between different versions of the Flight Program.)&nbsp; In the case of <tt>D.VIHC</tt>,
+ it's bit 4 (rather than bit 5 as above) that corresponds to the DCS 
+interrupt, so with a mask like the one shown above, that bit is 0, and 
+the DCS interrupt is still masked.&nbsp; You can enable it using the 
+debugger:<br>
+  <blockquote>
+    <pre>&gt; SET D.VIHC=0330000000<br><br>Overwriting value 320000000 with 330000000.<br></pre>
+  </blockquote>
+How effective this is in allowing the Flight Program to receive DCS 
+commands varies.&nbsp; In some of the Flight Program's time bases, this 
+setting persists until the end of the time base; in others, it's 
+essentially undone immediately.&nbsp; If you happen to be in one of the 
+time bases where it persists, though, once you allow the Flight Program 
+to continue its free run (with the debugger's <tt>CONTINUE</tt> command), you'll now be able to send the Flight Program DCS commands, and have them acknowledged!<br>
+  <br>
+Which is great, but those DCS commands usually won't do anything in most
+ time bases.&nbsp; Instead, you get back an error response from the 
+Flight Program that translates as "The mode command received is defined 
+for this mission but is not acceptable in the present time frame".<br>
+  <br>
+That's because the Flight Program has yet another variable you need to manipulate.&nbsp; In AS-512 and AS-513, it's called <tt>D.VLNK</tt>, and it determines which <i>particular</i> DCS commands are currently allowed.<br>
+  <blockquote>
+    <pre>&gt; X &amp;D.VLNK<br><br>2-17-073: 000000000 (000000000)<br></pre>
+  </blockquote>
+This, of course, means "none of them are allowed".&nbsp; I won't bore 
+you by giving you lists (separate for AS-512 vs AS-513) of which bits in
+ <tt>D.VLNK</tt> correspond to which DCS commands, since it's easier to simply enable everything:<br>
+  <blockquote>
+    <pre>&gt; SET D.VLNK=0377777777<br><br>Overwriting value 000000000 with 377777777.<br></pre>
+  </blockquote>
 </div>
 
+</div>
+
+<p>Now after resuming free-running in the debugger, we find that full 
+multi-word DCS commands are indeed apparently fully accepted by the 
+Flight Program, though not necessarily acted upon.&nbsp; Indeed, once 
+sending a DCS command, sending any additional commands likely to result 
+in a response that translates as "A DCS program is in progress at this 
+time; however, no more data is required; only a terminate mode command 
+can be processed at this time".<br>
+</p>
 <p>TBD</p>
+
 
 </div>
 </div></div></div>
@@ -30340,7 +30413,7 @@ Commons
 
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-08-17.<br>
+          2023-08-22.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
