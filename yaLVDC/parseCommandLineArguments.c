@@ -153,7 +153,10 @@ parseCommandLineArguments (int argc, char *argv[])
       else if (1 == sscanf(argv[i], "--divisor=%d", &j))
         clockDivisor = j;
       else if (1 == sscanf(argv[i], "--multiplier=%d", &j))
-        clockMultiplier = j;
+        {
+          clockMultiplier = j;
+          parmClockMultiplier = j;
+        }
       else if (!strcmp (argv[i], "--help"))
 	goto help;
       else

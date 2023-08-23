@@ -88,7 +88,11 @@
 
 // See yaLVDC.c
 extern int clockDivisor;
+extern double parmClockMultiplier;
 extern double clockMultiplier;
+extern double cyclesPerTick;
+void
+setCpuTiming(void);
 extern int inhibitFetchMessages;
 extern unsigned long cycleCount;
 #define MAX_SYMBOL_LENGTH 10

@@ -38,6 +38,7 @@
  *              2020-05-21 RSB  Fixed arguments for DISASSEMBLE.
  *              2023-07-16 MAS  Fixed handling of SI and NI.
  *              2023-08-08 RSB  Fixed elapsed time.
+ *              2023-08-22 RSB  Added MULTIPLIER.
  */
 
 #include <stdlib.h>
@@ -50,8 +51,8 @@
 // Utility functions.
 
 // Create a descriptive string for a HOP constant, specified either by giving
-// the constant itself, or else by module/sector/location if the constant is given
-// as -1.  A char buffer[32] to store the string is one of the arguments.
+// the constant itself, or else by module/sector/location if the constant is
+// given as -1.  A char buffer[32] to store the string is one of the arguments.
 // Returns 0 if successful, 1 otherwise.  The string is still created in
 // case of failure.
 static int
@@ -166,6 +167,7 @@ enum commandTokens
   ctSHOW,
   ctPANEL,
   ctHELP,
+  ctMULTIPLIER,
   ctNone
 };
 typedef struct
@@ -186,56 +188,58 @@ commandAssociation_t commandAssociations[] =
         { ctCONTINUE, "CONTINUE", "CONTINUE", "Continue running emulation." },
         { ctJUMP, "JUMP", "JUMP *address M-SS",
             "Jump to code-memory address and assign DM/DS as M-SS and run." },
-            { ctJUMP, "JUMP", "JUMP [asm:]name",
-                "Jump. Operand is symbolic name of a HOP constant in data memory." },
-            { ctJUMP, "JUMP", "JUMP [asm:]name M-SS",
-                "Jump to symbol in code memory and assign DM/DS as M-SS." },
-            { ctJUMP, "JUMP", "JUMP octal",
-                "Jump using literal octal HOP constant. Note that JUMP 0 is a restart." },
-            { ctGOTO, "GOTO", "GOTO ...",
-                "Same as JUMP, except pause rather than run." },
-            { ctLIST, "LIST", "LIST", "List following block of source code." },
-            { ctLIST, "LIST", "LIST -", "List preceding block source code." },
-            { ctLIST, "LIST", "LIST [asm:]n", "List source block at line #n." },
-            { ctLIST, "LIST", "LIST [asm:]name",
-                "List source block at function." },
-            { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE",
-                "Disassemble next LISTSIZE instructions in current HOP environment." },
-            { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE - D-TT",
-                "Disassemble preceding LISTSIZE instructions; D-TT is starting DM/DS." },
-            { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE M-SS-Y-LLL EEE D-TT",
-                "Disassemble from code address M-SS-Y-LLL to EEE using data sector D-TT." },
-            { ctX, "X", "X[/[n][b|d|o]] address", "Show n words at address." },
-            { ctX, "X", "X[/[n][b|d|o]] &[asm:]name", "Show n words at name." },
-            { ctCLEAR, "CLEAR", "CLEAR [asm:]name",
-                "Delete breakpoint at function." },
-            { ctCLEAR, "CLEAR", "CLEAR [asm:]number",
-                "Delete breakpoint at line #." },
-            { ctCLEAR, "CLEAR", "CLEAR *address",
-                "Delete breakpoint at address." },
-            { ctBREAK, "BREAK", "BREAK [asm:]name",
-                "Set breakpoint at function." },
-            { ctBREAK, "BREAK", "BREAK [asm:]number",
-                "Set breakpoint at line #." },
-            { ctBREAK, "BREAK", "BREAK *address", "Set breakpoint at address." },
-            { ctTBREAK, "TBREAK", "TBREAK ...", "Same as BREAK, but temporary." },
-            { ctBACKTRACE, "BACKTRACE", "BACKTRACE [n]",
-                "Show last n backtraces, default=20." },
-            { ctBACKTRACE, "BACKTRACE", "BT [n]", "Same as BACKTRACE." },
-            { ctINFO, "INFO", "INFO ASSEMBLIES", "List all loaded assemblies." },
-            { ctINFO, "INFO", "INFO BREAKPOINTS", "List all breakpoints." },
-            { ctINFO, "INFO", "INFO BREAK", "List all breakpoint numbers." },
-            { ctRUN, "RUN", "RUN", "Reboot the LVDC/PTC emulation." },
-            { ctQUIT, "QUIT", "QUIT", "Quit the LVDC/PTC emulator." },
-            { ctSET, "SET", "SET LISTSIZE n", "Sets default size used for LIST." },
-            { ctSET, "SET", "SET name = n", "Store value n in variable name." },
-            { ctSET, "SET", "SET *address = n",
-                "Store value n at memory address." },
-            { ctSHOW, "SHOW", "SHOW LISTSIZE", "Show current size for LIST." },
-            { ctPANEL, "PANEL", "PANEL",
-                "Resume full control by PTC front panel." },
-            { ctHELP, "HELP", "HELP", "Print this list of commands." },
-            { ctNone, "" } };
+        { ctJUMP, "JUMP", "JUMP [asm:]name",
+            "Jump. Operand is symbolic name of a HOP constant in data memory." },
+        { ctJUMP, "JUMP", "JUMP [asm:]name M-SS",
+            "Jump to symbol in code memory and assign DM/DS as M-SS." },
+        { ctJUMP, "JUMP", "JUMP octal",
+            "Jump using literal octal HOP constant. Note that JUMP 0 is a restart." },
+        { ctGOTO, "GOTO", "GOTO ...",
+            "Same as JUMP, except pause rather than run." },
+        { ctLIST, "LIST", "LIST", "List following block of source code." },
+        { ctLIST, "LIST", "LIST -", "List preceding block source code." },
+        { ctLIST, "LIST", "LIST [asm:]n", "List source block at line #n." },
+        { ctLIST, "LIST", "LIST [asm:]name",
+            "List source block at function." },
+        { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE",
+            "Disassemble next LISTSIZE instructions in current HOP environment." },
+        { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE - D-TT",
+            "Disassemble preceding LISTSIZE instructions; D-TT is starting DM/DS." },
+        { ctDISASSEMBLE, "DISASSEMBLE", "DISASSEMBLE M-SS-Y-LLL EEE D-TT",
+            "Disassemble from code address M-SS-Y-LLL to EEE using data sector D-TT." },
+        { ctX, "X", "X[/[n][b|d|o]] address", "Show n words at address." },
+        { ctX, "X", "X[/[n][b|d|o]] &[asm:]name", "Show n words at name." },
+        { ctCLEAR, "CLEAR", "CLEAR [asm:]name",
+            "Delete breakpoint at function." },
+        { ctCLEAR, "CLEAR", "CLEAR [asm:]number",
+            "Delete breakpoint at line #." },
+        { ctCLEAR, "CLEAR", "CLEAR *address",
+            "Delete breakpoint at address." },
+        { ctBREAK, "BREAK", "BREAK [asm:]name",
+            "Set breakpoint at function." },
+        { ctBREAK, "BREAK", "BREAK [asm:]number",
+            "Set breakpoint at line #." },
+        { ctBREAK, "BREAK", "BREAK *address", "Set breakpoint at address." },
+        { ctTBREAK, "TBREAK", "TBREAK ...", "Same as BREAK, but temporary." },
+        { ctBACKTRACE, "BACKTRACE", "BACKTRACE [n]",
+            "Show last n backtraces, default=20." },
+        { ctBACKTRACE, "BACKTRACE", "BT [n]", "Same as BACKTRACE." },
+        { ctINFO, "INFO", "INFO ASSEMBLIES", "List all loaded assemblies." },
+        { ctINFO, "INFO", "INFO BREAKPOINTS", "List all breakpoints." },
+        { ctINFO, "INFO", "INFO BREAK", "List all breakpoint numbers." },
+        { ctRUN, "RUN", "RUN", "Reboot the LVDC/PTC emulation." },
+        { ctQUIT, "QUIT", "QUIT", "Quit the LVDC/PTC emulator." },
+        { ctSET, "SET", "SET LISTSIZE n", "Sets default size used for LIST." },
+        { ctSET, "SET", "SET name = n", "Store value n in variable name." },
+        { ctSET, "SET", "SET *address = n",
+            "Store value n at memory address." },
+        { ctSHOW, "SHOW", "SHOW LISTSIZE", "Show current size for LIST." },
+        { ctPANEL, "PANEL", "PANEL",
+            "Resume full control by PTC front panel." },
+        { ctMULTIPLIER, "MULTIPLIER", "MULTIPLIER n",
+            "(Don't use.) Temporarily set clock multiplier to n; reverts at next breakpoint."},
+        { ctHELP, "HELP", "HELP", "Print this list of commands." },
+        { ctNone, "" } };
 enum commandTokens
 findCommandToken(void)
 {
@@ -968,6 +972,12 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
       // Print breakpoint information.
       if (breakpoint != NULL)
         {
+          if (clockMultiplier != parmClockMultiplier)
+            {
+              printf("Restoring clock multiplier to its normal value.\n");
+              clockMultiplier = parmClockMultiplier;
+              setCpuTiming();
+            }
           printf("Hit breakpoint #%ld at address %o-%02o-%o-%03o",
               breakpoint - breakpoints, breakpoint->module, breakpoint->sector,
               breakpoint->syllable, breakpoint->location);
@@ -2001,6 +2011,19 @@ gdbInterface(unsigned long instructionCount, unsigned long cycleCount,
                       (numBreakpoints - i - 1) * sizeof(breakpoint_t));
                 numBreakpoints--;
                 printf("Breakpoint #%d deleted.\n", i);
+              }
+          }
+        goto nextCommand;
+      case ctMULTIPLIER:
+        if (count > 1)
+          {
+            int n;
+            n = atoi(fields[1]);
+            if (n > 1)
+              {
+                printf("Temporarily changing clock multiplier to %d.\n", n);
+                clockMultiplier = n;
+                setCpuTiming();
               }
           }
         goto nextCommand;

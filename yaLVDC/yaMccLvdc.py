@@ -12,14 +12,17 @@
 #                               thought was useful for our model, but I now
 #                               realize could result in data being overwritten
 #                               before use if not implemented.
+#               2023-08-22 RSB  Implemented last command (EXECUTE ALTERNATE
+#                               SEQUENCE) and corrected yesterday's
+#                               (EXECUTE GENERALIZED MANEUVER).
 
 '''
 Regarding how the Digital Command System (DCS) delivers commands and data to 
 the LVDC, I interpret the documentation and the LVDC source code as follows.
 
 What's supposed to happen:  The transmission from the ground is in packets that
-contain either code or data, plus two bits (OM/D A and OM/D B) both having the 
-same value) that indicate whether the packet contains the mode or whether it 
+contain either command or data, plus two bits (OM/D A and OM/D B) both having 
+the same value) that indicate whether the packet is a command or whether it 
 contains data, and two interrupt bits as well.  The LVDA is supposed to:
     1.  AND the OM/D bits together and present them to the LVDC as discrete
         input 2 (DI2), which is available to the LVDC software as "bit 22" of 
@@ -28,6 +31,11 @@ contains data, and two interrupt bits as well.  The LVDA is supposed to:
     2.  Make the command or data available to the LVDC software as PIO 043.
     3.  Generate a DCS interrupt in the LVDC if the AND of the interrupt bits
         is 1.
+
+After each packet is received by the LVDC (either a command packet or a date
+packet, each of which can carry 6 bits of data), the LVDC (software) 
+handshakes by sending back either two identical status words or else two 
+identical error words.
 
 Our CPU emulator receives data directly from mission control (i.e., from 
 yaMccLvdc.py), without any intervening LVDA.  The obvious possibility is to
@@ -218,16 +226,53 @@ pdsWAIT2 = 2
 pendingDcsState = pdsEMPTY
 pendingDcsDesiredStatus = 0
 pendingDcsTimeout = 0
+knownErrorCodes = { # Cut-and-pasted rom Saturn IB EDD
+    0o04: "Orbital Mode/Data bit is invalid; data command was received when a mode command was expected",
+    0o10: "True complement test failed for mode command; information bits 7-1 are not the complement of bits 14-8",
+    0o14: "Mode command invalid; the mode command received is not defined for this mission ",
+    0o20: "Orbital Mode/Data bit is invalid; mode command was received when expecting a data command",
+    0o24: "Mode command sequence bit incorrect; the sequence bit received was 1 instead of 0",
+    0o34: "Unable to issue generalized switch selector function at this time, the last requested generalized switch selector function has not been issued",
+    0o44: "True complement test failed for data command; information bits 7-1 are not the complement of bits 14-8",
+    0o50: "The start module, sector, and address requested by the memory dump command is greater than the end module, sector, and address; or one or more locations requested by the memory dump command are in a non-existing module",
+    0o54: "The time of implementation of a navigation update, execute generalized maneuver, execute maneuver, or return to nominal timeline, is less than 10 sec in the future",
+    0o60: "Data command sequence bit incorrect; the sequence bit must begin with 1 and alternate from 1 to 0 in each sequential data command of a set",
+    0o64: "A DCS program is in progress at this time; however, no more data is required; only a terminate mode command can be processed at this time",
+    0o74: "The mode command received is defined for this mission but is not acceptable in the present time frame"
+    }
+
 def servicePending():
     global pendingDcsTransmissions, pendingDcsStatusCodes, pendingDcsState, \
             pendingDcsDesiredStatus, pendingDcsTimeout
+            
+    def formatReception(receivedTuple):
+        first, second = ("%03o,%09o" % receivedTuple, "")
+        pio = receivedTuple[0]
+        pendingStatus = receivedTuple[1]
+        if pio == 0o055:
+            errorCode = (pendingStatus >> 20) & 0o77
+            count = (pendingStatus >> 14) & 0o7
+            command = (pendingStatus >> 8) & 0o77
+            first = "Error code %02o,%02o,%o" % (command,errorCode,count)
+            if errorCode in knownErrorCodes:
+                second = knownErrorCodes[errorCode]
+        elif pio in [0o030, 0o574]:
+            if pendingStatus & 2:
+                first = "data status %02o" % ((pendingStatus >> 20) & 0o77)
+            else:
+                first = "mode status %02o" % ((pendingStatus >> 20) & 0o77)
+        return first, second
+            
     while True:
         if pendingDcsState == pdsEMPTY:
             if len(pendingDcsStatusCodes) > 0:
-                msg = "Popping code(s):"
+                msg = ""
                 while len(pendingDcsStatusCodes) > 0:
-                    msg = msg + " %03o,%09o" % pendingDcsStatusCodes.pop(0)
-                print(msg)
+                    if len(msg) > 0:
+                        msg = msg + ", "
+                    first, second = formatReception(pendingDcsStatusCodes.pop(0))
+                    msg = msg + first
+                print("Popping code(s):", msg)
                 sys.stdout.flush()
             if len(pendingDcsTransmissions) > 0:
                 pendingTransmission = pendingDcsTransmissions.pop(0)
@@ -236,7 +281,8 @@ def servicePending():
                 pendingDcsStatusCodes.clear()
                 pendingDcsState = pdsWAIT1
                 pendingDcsTimeout = time.time_ns() + 1000000000 
-                print("Waiting for status (%09o)" % pendingDcsDesiredStatus)
+                first, second = formatReception((0o030, pendingDcsDesiredStatus))
+                print("Waiting for %s" % first)
                 sys.stdout.flush()
             return
         elif len(pendingDcsStatusCodes) == 0:
@@ -252,16 +298,23 @@ def servicePending():
             channel = pendingStatusTuple[0]
             pendingStatus = pendingStatusTuple[1]
             sys.stdout.flush()
-            if channel == 0o055:
-                errorCode = (pendingStatus >> 20) & 0o77
-                count = (pendingStatus >> 14) & 0o7
-                command = (pendingStatus >> 8) & 0o77
-                print("Received error code %02o,%02o,%o" % (command,errorCode,count))
+            if channel == 0o55:
+                first, second = formatReception(pendingStatusTuple)
+                print("Received %s" % first)
+                if second != "":
+                    print(second)
                 sys.stdout.flush()
                 pendingDcsTransmissions.clear()
                 pendingDcsStatusCodes.clear()
                 pendingDcsState = pdsEMPTY
                 return
+            # Note that below I don't actually distinguish between the PIO's
+            # received for mode status (PIO 030) and those for data status
+            # (PIO 0574).  In other words, if somehow a data status word arrived
+            # on PIO 030 it would be accepted, while if a mode status word 
+            # arrived on PIO 0574 then it would be accepted too.  That can't
+            # happen, of course, but if I insisted on implementing it by the
+            # book, I'd handle those cases separately.
             if pendingStatus != pendingDcsDesiredStatus:
                 print("DCS protocol mismatch (%09o != %09o)" % \
                       (pendingStatus, pendingDcsDesiredStatus))
@@ -270,11 +323,13 @@ def servicePending():
                 pendingDcsState = pdsEMPTY
                 return
             elif pendingDcsState == pdsWAIT1:
-                print("Received first expected status")
+                first, second = formatReception(pendingStatusTuple)
+                print("Received first expected %s" % first)
                 sys.stdout.flush()
                 pendingDcsState = pdsWAIT2
             else: # pendingDcsState == pdsWAIT2
-                print("Received second expected status")
+                first, second = formatReception(pendingStatusTuple)
+                print("Received second expected %s" % first)
                 sys.stdout.flush()
                 pendingDcsState = pdsEMPTY
 
@@ -733,12 +788,43 @@ def dcsButtonCallback(event):
         dcsTransmit(False, (seconds >> 20) & 0o77)
         dcsTransmit(False, (seconds >> 14) & 0o77)
         dcsTransmit(False, (seconds >> 8) & 0o77)
-        dcsTransmit(False, ((seconds >> 2) & 0o60) | (maneuverType << 2))
+        dcsTransmit(False, (seconds >> 2) & 0o77)
+        dcsTransmit(False, ((seconds << 4) & 0o60) | (maneuverType << 2))
         dcsTransmit26(pitch)
         dcsTransmit26(yaw)
         dcsTransmit26(roll)
         return
-    
+    if name == "EXECUTE ALTERNATE SEQUENCE":
+        '''
+        See AS-513 subroutine D.S800.  *Almost* a "simple" configuration with a 
+        single data word, except that the normally-unused bits of the 
+        transmitted data instead provide a 4-bit alternate-sequence number.
+        '''
+        try:
+            seconds = int(row[2].get())
+        except:
+            print("TIME not integer")
+            return
+        if seconds < 0:
+            print("TIME is negative")
+            return
+        try:
+            sequenceType = int(row[4].get().upper())
+        except:
+            print("Requested sequence number not an integer")
+            return
+        if sequenceType < 0 or sequenceType > 15:
+            print("Requested sequence number is out of range")
+            return
+        dataScales = dcsEntry["dataScales"]
+        seconds = scaleData(seconds, dataScales[0])
+        dcsTransmit(True, mode)
+        dcsTransmit(False, (seconds >> 20) & 0o77)
+        dcsTransmit(False, (seconds >> 14) & 0o77)
+        dcsTransmit(False, (seconds >> 8) & 0o77)
+        dcsTransmit(False, (seconds >> 2) & 0o77)
+        dcsTransmit(False, ((seconds << 6) & 0o60) | sequenceType)
+        return
     
     # Whatever's left over must not have been implemented yet.
     print("%s command not yet implemented" % name)
@@ -1128,7 +1214,7 @@ def mainLoopIteration():
                 value |= (inputBuffer[3] & 0x7F) << 14
                 value |= (inputBuffer[4] & 0x7F) << 7
                 value |= inputBuffer[5] & 0x7F
-                if source == 0 and getLvdcMode() == 4 and channel in [0o030, 0o055]:
+                if source == 0 and getLvdcMode() == 4 and channel in [0o030, 0o055, 0o574]:
                     pendingDcsStatusCodes.append((channel,value))
                 outputFromCPU(ioType, channel, value)
             didSomething = True

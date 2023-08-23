@@ -37,12 +37,18 @@ dcsTypes = {
         "numDataWords": 1,
         },
     "EXECUTE ALTERNATE SEQUENCE": {
+        # AS-513 D.S800 
+        # MS 26 bits = requested time for alternate sequence
+        # LS 4 bits = indicator bits
         "name": "EXECUTE ALTERNATE SEQUENCE",
-        "unimplemented": True,
-        "description": "Initiate alternate sequence 4A or 4B",
-        "dataValues": ["TSEQ", "SEQNUM"],
+        "description": "Initiate alternate sequence",
+        "dataValues": ["TIME", "SEQUENCE"],
         "dataScales": [15, -1000],
         "dataUnits": ["SECONDS", ""],
+        "dataDescriptions": [
+            "Requested time (seconds) at which to activate the alternate sequence",
+            "Specifies the requested alternate sequence (0-15); for AS-513, 1 = sequence 4A and 2 = sequence 4B"
+            ],
         "numDataWords": 5
         },
     "EXECUTE GENERALIZED MANEUVER": {

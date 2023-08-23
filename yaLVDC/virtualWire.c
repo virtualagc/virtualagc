@@ -52,6 +52,7 @@
                                 from LVDC mode, since it was producing harmless
                                 but irritating warning messages.
                 2023-08-20 RSB  Fixed OM/D bit in PIO 057.
+                2023-08-22 RSB  Fixed PIO 574 least-significant bits.
  */
 
 #include <stdio.h>
@@ -427,6 +428,14 @@ pendingVirtualWireActivity(void /* int id, int mask */)
       ioType = 0;
       channel = state.pioChangeFull;
       payload = state.pio[state.pioChange];
+      if (channel == 0574)
+        {
+          // This is the channel used for outputting DCS data-status messages.
+          // I have deduced that the hardware must fill the least-significant
+          // bits with 1, because the documentation says the words have those
+          // bits filled but the LVDC FP software doesn't bother doing that.
+          payload |= 07777;
+        }
       state.pioChange = -1;
     }
   else if (state.cioChange != -1)
