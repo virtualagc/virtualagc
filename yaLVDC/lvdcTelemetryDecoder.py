@@ -118,6 +118,10 @@ def lvdcTelemetryDecoder(ioType, channelNumber, data):
     if lvdcMode == None:
         return defaultReturn
     augmentedPIO = (lvdcMode << 9) | channelNumber
+    if augmentedPIO == 0o4470: # Block header
+        return None, data, None, None, None, None, None, augmentedPIO
+    if augmentedPIO >= 0o4474 and augmentedPIO <= 0o4570 and (augmentedPIO & 3) == 0:
+        return None, data, None, None, None, None, None, augmentedPIO
     if augmentedPIO not in forMission:
         return defaultReturn
     teld = forMission[augmentedPIO]

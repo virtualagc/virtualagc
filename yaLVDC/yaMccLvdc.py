@@ -1115,6 +1115,17 @@ def packetize(tuple):
 def outputFromCPU(ioType, channel, value):
     var, val, sc1, sc2, units, desc, msg, aug = \
         lvdcTelemetryDecoder(ioType, channel, value)
+    if aug == None:
+        return
+    if aug == 0o4470: # Block header
+        mmm = (val >> 23) & 0o7
+        ssss = (val >> 19) & 0o17
+        loc = (val >> 11) & 0o377
+        print("Memory header %o-%02o-%03o" % (mmm, ssss, loc))
+        return
+    if aug >= 0o4474 and aug <= 0o4570 and (aug & 3) == 0:
+        print("Memory word +%02o: %09o (%09o)" % ((aug - 0o4474) // 4, val, val<<1))
+        return
     if aug in top.locations:
         row, col = top.locations[aug]
         widget = root.grid_slaves(row=row, column=col)[0]
