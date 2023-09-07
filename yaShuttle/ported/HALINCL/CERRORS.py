@@ -9,12 +9,11 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-29 RSB  Ported
 '''
 
-import sys
-from g import SUBSTR, BYTE, MONITOR, INPUT, DWN_STMT, DWN_ERR, DWN_CLS, \
-                DWN_VER, TRUE, FALSE, PAD, OUTPUT, LENGTH
+from xplBuiltins import *
+import g
+import HALINCL.COMMON as h
+import HALINCL.CERRDECL as d
 from CHARINDE import CHAR_INDEX
-from HALINCL.COMMON import DOWN_INFO, SEVERITY_ONE
-from HALINCL.CERRDECL import ERROR_CLASSES, CLASS_BX
 
 '''
 #*********************************************************
@@ -28,7 +27,6 @@ from HALINCL.CERRDECL import ERROR_CLASSES, CLASS_BX
 '''
 
 def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
-    global SEVERITY_ONE
     ERRORFILE = 5;
     AST = '***** ';
    
@@ -37,12 +35,12 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
     TEMP_STMT = STMTp;
     DOWN_COUNT = 1;
     while True:
-        C=SUBSTR(ERROR_CLASSES,(CLASS-1)<<1,2);
+        C=SUBSTR(d.ERROR_CLASSES,(CLASS-1)<<1,2);
         if BYTE(C,1)==BYTE(' '):
             C=SUBSTR(C,0,1);
         C=PAD(C+str(NUM),8);
         if MONITOR(2,5,C):
-           CLASS=CLASS_BX;
+           CLASS=d.CLASS_BX;
            NUM=113;
            TEXT = C;
         else:
@@ -51,7 +49,7 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
     S = INPUT(ERRORFILE);
     SEVERITY = BYTE(S) - BYTE('0');
     #  DETERMINE IF THERE IS A DOWNGRADE FOR THIS STMT  
-    while FOUND == 0  and DOWN_COUNT <= len(DOWN_INFO) - 1:
+    while FOUND == 0  and DOWN_COUNT <= len(h.DOWN_INFO) - 1:
         if NUMIT == DWN_ERR(DOWN_COUNT) and CLS_COMPARE == DWN_CLS(DOWN_COUNT):
             if TEMP_STMT == DWN_STMT(DOWN_COUNT):
                 if SEVERITY == 1:
@@ -74,7 +72,7 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
                 str(STMTp()) + '.' + AST);
     S = INPUT(ERRORFILE);
     if LENGTH(TEXT) > 0:
-        IMBED=TRUE;
+        IMBED=g.TRUE;
     while LENGTH(S)>0:
         if IMBED:
             K = CHAR_INDEX(S,'??');
@@ -83,13 +81,13 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
                     S = TEXT + SUBSTR(S,2);
                 else:
                     S = SUBSTR(S,0,K) + TEXT + SUBSTR(S,K+2);
-                IMBED = FALSE;
+                IMBED = g.FALSE;
         OUTPUT(0, AST + S);
         S = INPUT(ERRORFILE);
     TEXT = '';
     # CR12416: TREAT SEVERITY 1 ERRORS AS WARNINGS 
     if SEVERITY == 1: 
-        SEVERITY_ONE = TRUE;
+        h.SEVERITY_ONE = g.TRUE;
         SEVERITY = 0;
     return SEVERITY;
     

@@ -9,9 +9,9 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-31 RSB  Ported from XPL
 '''
 
-from g import SDL_OPTION, SRN_PRESENT
+import g
+import HALINCL.CERRDECL as c
 from ERROR import ERROR
-from HALINCL.CERRDECL import CLASS_B
 
 '''
  /***************************************************************************/
@@ -39,11 +39,11 @@ def SET_T_LIMIT(LRECL):
     T_LIMIT = 0
     
     if LRECL<0:
-        ERROR(CLASS_B, 3);
-    if SDL_OPTION:
+        ERROR(c.CLASS_B, 3);
+    if g.SDL_OPTION:
         T_LIMIT=71;
     else:
         T_LIMIT=LRECL;
-        if SRN_PRESENT:
+        if g.SRN_PRESENT:
             T_LIMIT=T_LIMIT-8;
     return T_LIMIT

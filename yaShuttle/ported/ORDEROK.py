@@ -9,9 +9,10 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-31 RSB  Ported from XPL
 '''
 
-from g import CARD_TYPE, BYTE, CURRENT_CARD, END_GROUP, FALSE, TRUE
+from xplBuiltins import *
+import g
+import HALINCL.CERRDECL as c
 from ERROR import ERROR
-from HALINCL.CERRDECL import CLASS_M
 
 '''
  /***************************************************************************/
@@ -41,39 +42,37 @@ from HALINCL.CERRDECL import CLASS_M
 '''
 
 def ORDER_OK(TYPE):
-    global CURRENT_CARD, END_GROUP
     
-    print("OO A", '"%s"' % CURRENT_CARD)
-    ctc = CARD_TYPE[BYTE(CURRENT_CARD)]
-    ctt = CARD_TYPE[TYPE]
+    ctc = g.CARD_TYPE[BYTE(g.CURRENT_CARD)]
+    ctt = g.CARD_TYPE[TYPE]
     if ctc == 0:
         #  CASE 0 -- ILLEGAL CARD TYPES  
-        ERROR(CLASS_M,1);
-        CURRENT_CARD = 'C' + CURRENT_CARD[1:]
+        ERROR(c.CLASS_M,1);
+        g.CURRENT_CARD = 'C' + g.CURRENT_CARD[1:]
         # Note fallthrough.
     elif ctc == 1 or ctc == 2:
         #  CASE 1 -- E CARD  
         #  CASE 2 -- M CARD  
         if ctt == 2 or ctt == 3:
-            END_GROUP = TRUE;
+            g.END_GROUP = g.TRUE;
         else:
-            END_GROUP = FALSE;
-        return TRUE;
+            g.END_GROUP = g.FALSE;
+        return g.TRUE;
     elif ctc == 3:
         #  CASE 3 -- S CARD  
-        END_GROUP = FALSE;
+        g.END_GROUP = g.FALSE;
         if ctt == 2 or ctt == 3:
-            return TRUE;
+            return g.TRUE;
         else:
-            return FALSE;
+            return g.FALSE;
     #  CASE 0 -- ILLEGAL CARD TYPES
     #  CASE 4 -- A COMMENT CARD 
     #  CASE 5 -- DIRECTIVE CARD 
     if ctt == 2 or ctt == 3:
-        END_GROUP = TRUE;
+        g.END_GROUP = g.TRUE;
     else:
-        END_GROUP = FALSE;
+        g.END_GROUP = g.FALSE;
     if ctt == 1:
-        return FALSE;
+        return g.FALSE;
     else:
-        return TRUE;
+        return g.TRUE;

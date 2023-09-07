@@ -9,8 +9,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-06 RSB  Ported from XPL
 '''
 
-from g import NEXT, I, TOO_MANY_LINES, FALSE, LISTING2_COUNT, LINE_LIM, \
-                DOUBLE, SAVE_GROUP, X1, CURRENT_SCOPE
+import g
 from PRINT2 import PRINT2
 
 '''
@@ -38,15 +37,14 @@ from PRINT2 import PRINT2
 '''
 
 def OUTPUT_GROUP():
-    global NEXT, LISTING2_COUNT, I, TOO_MANY_LINES
-    if NEXT < 0:
+    if g.NEXT < 0:
         return;
-    if LISTING2_COUNT + NEXT + 2 > LINE_LIM:
-        LISTING2_COUNT = LINE_LIM;
-    PRINT2(DOUBLE + SAVE_GROUP[0] + X1 + CURRENT_SCOPE, 2);
-    for I in range(1, NEXT+1):
-        PRINT2(X1 + SAVE_GROUP[I] + X1 + CURRENT_SCOPE, 1);
-    if TOO_MANY_LINES:
+    if g.LISTING2_COUNT + g.NEXT + 2 > g.LINE_LIM:
+        g.LISTING2_COUNT = g.LINE_LIM;
+    PRINT2(g.DOUBLE + g.SAVE_GROUP[0] + g.X1 + g.CURRENT_SCOPE, 2);
+    for g.I in range(1, g.NEXT+1):
+        PRINT2(g.X1 + g.SAVE_GROUP[g.I] + g.X1 + g.CURRENT_SCOPE, 1);
+    if g.TOO_MANY_LINES:
         PRINT2(' *** WARNING *** INPUT BUFFER FILLED; NOT ALL SOURCE LINES ARE PRINTED.', 1);
-    NEXT = -1;
-    TOO_MANY_LINES = FALSE;
+    g.NEXT = -1;
+    g.TOO_MANY_LINES = g.FALSE;

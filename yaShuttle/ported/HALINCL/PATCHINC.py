@@ -9,7 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-06 RSB  Ported
 '''
 
-from g import *
+from xplBuiltins import *
+import g
 
 '''
    /* ROUTINE CALLED TO HANDLE PROCESSING OF INCLUDE DIRECTIVE.     */
@@ -17,92 +18,88 @@ from g import *
 '''
 
 def INCLUDE_OK():
-    global C, COMPARE_SOURCE, CURRENT_CARD, INCLUDE_COMPRESSED, INCLUDE_LIST, \
-            INCLUDE_LIST2, INCLUDE_OFFSET, INCLUDE_OPENED, INCLUDE_STMT, \
-            INCLUDING, INITIAL_INCLUDE_RECORD, MEMBER, \
-            REV_CAT, TEMPLATE_FLAG, TPL_REMOTE
     # Locals:
     INCL_FLAGS = 0
     LIST_FLAG = 0
     SDF_FLAG = 0
     
     
-    if INCLUDING:
+    if g.INCLUDING:
         ERROR(CLASS_XI,1);
         return FALSE;
     INCL_FLAGS = 0;
-    C = D_TOKEN;
-    TEMPLATE_FLAG = FALSE
+    g.C[0] = D_TOKEN;
+    g.TEMPLATE_FLAG = FALSE
     SDF_FLAG = FALSE;
-    if C  == 'TEMPLATE':
+    if g.C[0]  == 'TEMPLATE':
         SDF_FLAG = TRUE
-        TEMPLATE_FLAG = TRUE;
+        g.TEMPLATE_FLAG = TRUE;
         INCL_FLAGS = INCL_FLAGS | INCL_TEMPLATE_FLAG;
-        MEMBER = D_TOKEN;
-    elif C == 'SDF':
+        g.MEMBER = D_TOKEN;
+    elif g.C[0] == 'SDF':
         SDF_FLAG = TRUE;
-        MEMBER = D_TOKEN;
+        g.MEMBER = D_TOKEN;
     else:
-        MEMBER = C;
-    if LENGTH(MEMBER) == 0:
+        g.MEMBER = g.C[0];
+    if LENGTH(g.MEMBER) == 0:
         ERROR(CLASS_XI,2);
         return FALSE;
-    C = D_TOKEN;
+    g.C[0] = D_TOKEN;
     LIST_FLAG = TRUE;
     while True:
-        if C == 'NOLIST':
+        if g.C[0] == 'NOLIST':
             LIST_FLAG = FALSE;
-        elif (C == 'NOSDF') and TEMPLATE_FLAG:
+        elif (g.C[0] == 'NOSDF') and g.TEMPLATE_FLAG:
             SDF_FLAG = FALSE;
-        elif C == 'REMOTE':
+        elif g.C[0] == 'REMOTE':
            INCL_FLAGS = INCL_FLAGS | INCL_REMOTE_FLAG;
-           if TEMPLATE_FLAG:
-               TPL_REMOTE = TRUE;
+           if g.TEMPLATE_FLAG:
+               g.TPL_REMOTE = TRUE;
            elif not SDF_FLAG:
                ERROR(CLASS_XI, 4);
         else:
             ESCAPE();
-        C = D_TOKEN;
-    if (TEMPLATE_FLAG or SDF_FLAG) and CREATING:
+        g.C[0] = D_TOKEN;
+    if (g.TEMPLATE_FLAG or SDF_FLAG) and CREATING:
         ERROR(CLASS_XI, 12);
         return FALSE;
     if SDF_FLAG:
-        if INCLUDE_SDF(MEMBER, INCL_FLAGS):
+        if INCLUDE_SDF(g.MEMBER, INCL_FLAGS):
             return FALSE;
-        if not TEMPLATE_FLAG:
+        if not g.TEMPLATE_FLAG:
             return FALSE;
-    if TEMPLATE_FLAG:
-        MEMBER = DESCORE(MEMBER);
-    elif LENGTH(MEMBER) < 8:
-        MEMBER = PAD(MEMBER, 8);
+    if g.TEMPLATE_FLAG:
+        g.MEMBER = DESCORE(g.MEMBER);
+    elif LENGTH(g.MEMBER) < 8:
+        g.MEMBER = PAD(g.MEMBER, 8);
     else:
-        MEMBER = SUBSTR(MEMBER, 0, 8);
-    if FINDER(4, MEMBER, 0): # FIND THE MEMBER
-        ERROR(CLASS_XI,3,MEMBER);
+        g.MEMBER = SUBSTR(g.MEMBER, 0, 8);
+    if FINDER(4, g.MEMBER, 0): # FIND THE MEMBER
+        ERROR(CLASS_XI,3,g.MEMBER);
         return FALSE;
-    if TEMPLATE_FLAG:
-        COMPARE_SOURCE=FALSE;
+    if g.TEMPLATE_FLAG:
+        g.COMPARE_SOURCE=FALSE;
         # SAVE CURRENT STMT NUMBER FOR 'INCLUDE TEMPLATE NOSDF'
-        INCLUDE_STMT = STMT_NUM;
+        g.INCLUDE_STMT = STMT_NUM;
     INCL_FLAGS = INCL_FLAGS | SHL(0x1,SHR(INCLUDE_FILEp,1));
-    REV_CAT = MONITOR(15);
+    g.REV_CAT = MONITOR(15);
     INCLUDE_MSG = ' OF INCLUDED MEMBER, RVL ' \
-                    + STRING(0x01000000 | ADDR(REV_CAT)) + \
-                    ', CATENATION NUMBER ' + (REV_CAT & 0xFFFF);
-    INCLUDE_LIST = LIST_FLAG
-    INCLUDE_LIST2 = LIST_FLAG;
-    INCLUDE_OFFSET = CARD_COUNT + 1;
+                    + STRING(0x01000000 | ADDR(g.REV_CAT)) + \
+                    ', CATENATION NUMBER ' + (g.REV_CAT & 0xFFFF);
+    g.INCLUDE_LIST = LIST_FLAG
+    g.INCLUDE_LIST2 = LIST_FLAG;
+    g.INCLUDE_OFFSET = CARD_COUNT + 1;
     if SIMULATING:
-        MAKE_INCL_CELL(MEMBER, INCL_FLAGS, REV_CAT);
-    INCLUDING = TRUE;
+        MAKE_INCL_CELL(g.MEMBER, INCL_FLAGS, g.REV_CAT);
+    g.INCLUDING = TRUE;
     INPUT_DEV = 4;
-    INCLUDE_OPENED = TRUE;
-    CURRENT_CARD = INPUT(INPUT_DEV);
-    LRECL(1, LENGTH(CURRENT_CARD) - 1);
-    if BYTE(CURRENT_CARD) == 0x00:
+    g.INCLUDE_OPENED = TRUE;
+    g.CURRENT_CARD = INPUT(INPUT_DEV);
+    LRECL(1, LENGTH(g.CURRENT_CARD) - 1);
+    if BYTE(g.CURRENT_CARD) == 0x00:
         # COMPRESSED SOURCE
-        INCLUDE_COMPRESSED = TRUE;
-        INPUT_REC(1, CURRENT_CARD);
+        g.INCLUDE_COMPRESSED = TRUE;
+        INPUT_REC(1, g.CURRENT_CARD);
     else:
-        INITIAL_INCLUDE_RECORD = TRUE;
+        g.INITIAL_INCLUDE_RECORD = TRUE;
     return TRUE;

@@ -9,7 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-06 RSB  Ported from XPL
 '''
 
-from g import LISTING2_COUNT, LINE_LIM, OUTPUT, BYTE
+from xplBuiltins import *
+import g
 
 '''
  /***************************************************************************/
@@ -31,16 +32,15 @@ from g import LISTING2_COUNT, LINE_LIM, OUTPUT, BYTE
 '''
 
 def PRINT2(LINE, SPACE):
-    global LISTING2_COUNT
     # Local
     PAGE_NUM = 0
     
-    LISTING2_COUNT = LISTING2_COUNT + SPACE;
-    if LISTING2_COUNT > LINE_LIM:
+    g.LISTING2_COUNT = g.LISTING2_COUNT + SPACE;
+    if g.LISTING2_COUNT > g.LINE_LIM:
         PAGE_NUM = PAGE_NUM + 1;
         OUTPUT(2, \
             '1  H A L   C O M P I L A T I O N   --   P H A S E   1   --   U N F O R M A T T E D   S O U R C E   L I S T I N G             PAGE ' \
             + str(PAGE_NUM));
         BYTE(LINE, 0, BYTE('-'));
-        LISTING2_COUNT = 4;
+        g.LISTING2_COUNT = 4;
     OUTPUT(2, LINE);

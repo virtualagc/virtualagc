@@ -9,7 +9,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-30 RSB  Ported
 '''
 
-from g import LENGTH, SUBSTR
+from xplBuiltins import *
 
 '''
  /***************************************************************************/

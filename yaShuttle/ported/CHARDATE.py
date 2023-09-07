@@ -9,7 +9,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-28 RSB  Ported from XPL
 '''
 
-from g import X1
+import g
 
 '''
  /***************************************************************************/
@@ -47,4 +47,4 @@ def CHARDATE(D):
     M = 1;
     while DAY > DAYS[M]:
        M = M + 1;
-    return str(MONTH[M - 1]) + X1 + str(DAY - DAYS[M - 1]) + ', ' + str(YEAR);
+    return str(MONTH[M - 1]) + g.X1 + str(DAY - DAYS[M - 1]) + ', ' + str(YEAR);

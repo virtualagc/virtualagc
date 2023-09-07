@@ -9,7 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-06 RSB  Ported
 '''
 
-from g import *
+from xplBuiltins import *
+import g
 
 '''
    /* ROUTINE TO PICK OUT TOKENS FROM A DIRECTIVE CARD.            */
@@ -21,7 +22,6 @@ from g import *
 '''
 
 def D_TOKEN():
-    global D_INDEX, LOOKED_RECORD_AHEAD, D_CONTINUATION_OK
     # Locals
     I = 0
     J = 0
@@ -29,31 +29,31 @@ def D_TOKEN():
     SPECIALS = ' ,:;';
     
     while True:
-        while (BYTE(CURRENT_CARD,D_INDEX) == BYTE(' ')) and \
-                (D_INDEX <= TEXT_LIMIT):
-            D_INDEX = D_INDEX + 1;
-        if D_INDEX <= TEXT_LIMIT:
+        while (BYTE(CURRENT_CARD,g.D_INDEX) == BYTE(' ')) and \
+                (g.D_INDEX <= TEXT_LIMIT):
+            g.D_INDEX = g.D_INDEX + 1;
+        if g.D_INDEX <= TEXT_LIMIT:
            break;
-        if D_CONTINUATION_OK: # GET NEXT RECORD 
+        if g.D_CONTINUATION_OK: # GET NEXT RECORD 
             NEXT_RECORD();
             if CARD_TYPE(BYTE(CURRENT_CARD)) != CARD_TYPE(BYTE('D')):
-                LOOKED_RECORD_AHEAD = TRUE;
-                D_CONTINUATION_OK = FALSE;
+                g.LOOKED_RECORD_AHEAD = TRUE;
+                g.D_CONTINUATION_OK = FALSE;
                 return '';
             BYTE(CURRENT_CARD, 0, BYTE('D'));
             PRINT_COMMENT(TRUE);
-            D_INDEX = 1;
+            g.D_INDEX = 1;
             continue;
         else:
             return '';
     for I in range(1, pSPECIALS+1):
-        if BYTE(CURRENT_CARD, D_INDEX)== BYTE(SPECIALS, I):
-            D_INDEX = D_INDEX + 1;
-            return SUBSTR(CURRENT_CARD, D_INDEX-1, 1);
-    I = D_INDEX;
-    while D_INDEX <= TEXT_LIMIT:
+        if BYTE(CURRENT_CARD, g.D_INDEX)== BYTE(SPECIALS, I):
+            g.D_INDEX = g.D_INDEX + 1;
+            return SUBSTR(CURRENT_CARD, g.D_INDEX-1, 1);
+    I = g.D_INDEX;
+    while g.D_INDEX <= TEXT_LIMIT:
         for J in range(0, pSPECIALS+1):
-            if BYTE(CURRENT_CARD, D_INDEX) == BYTE(SPECIALS, J):
+            if BYTE(CURRENT_CARD, g.D_INDEX) == BYTE(SPECIALS, J):
                 break;
-        D_INDEX = D_INDEX + 1;
-    return SUBSTR(CURRENT_CARD, I, D_INDEX - I);
+        g.D_INDEX = g.D_INDEX + 1;
+    return SUBSTR(CURRENT_CARD, I, g.D_INDEX - I);

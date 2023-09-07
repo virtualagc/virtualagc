@@ -23,75 +23,76 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
  /***************************************************************************/
 '''
 
-from sys import exit
-from g import monitorLabel, CLOCK, MONITOR, OUTPUT, SUBHEADING, MAX_SEVERITY, \
-                COMPILING, CONTROL, FALSE, TOGGLE, DOUBLE, X32
+import sys
+from xplBuiltins import *
+
+import g
+import HALINCL.COMMON as h
 from INITIALI import INITIALIZATION
 from COMPILAT import COMPILATION_LOOP
 from PRINTSUM import PRINT_SUMMARY
 from OUTPUTWR import OUTPUT_WRITER
 from ERRORSUM import ERROR_SUMMARY
-from HALINCL.COMMON import SEVERITY_ONE
 from HALINCL.DOWNSUM import DOWNGRADE_SUMMARY
 from HALINCL.SPACELIB import RECORD_LINK
 
-monitorLabel = "THE_BEGINNING"
+g.monitorLabel = "THE_BEGINNING"
 while True:
-    routing = monitorLabel
-    monitorLabel = None
+    routing = g.monitorLabel
+    g.monitorLabel = None
     if routing == "THE_BEGINNING":
-        CLOCK[0] = MONITOR(18)
+        g.CLOCK[0] = MONITOR(18)
         INITIALIZATION()
-        if monitorLabel != None:
+        if g.monitorLabel != None:
             continue
-        CLOCK[1] = MONITOR(18)
+        g.CLOCK[1] = MONITOR(18)
         COMPILATION_LOOP()
-        if monitorLabel != None:
+        if g.monitorLabel != None:
             continue
-        monitorLabel = "ALMOST_DISASTER" # Fall through
+        g.monitorLabel = "ALMOST_DISASTER" # Fall through
     elif routing == "ALMOST_DISASTER":
-        OUTPUT(1, SUBHEADING)
-        CLOCK[2] = MONITOR(18)
-        if MAX_SEVERITY == 0 and SEVERITY_ONE:
-            MAX_SEVERITY = 1
+        OUTPUT(1, g.SUBHEADING)
+        g.CLOCK[2] = MONITOR(18)
+        if g.MAX_SEVERITY == 0 and h.SEVERITY_ONE:
+            g.MAX_SEVERITY = 1
         PRINT_SUMMARY()
-        if monitorLabel != None:
+        if g.monitorLabel != None:
             continue
-        if (COMPILING & 0x80) != 0: # HALMAT COMPLETE FLAG
-            if MAX_SEVERITY < 2:
-                if CONTROL[1] == FALSE:
-                    TOGGLE =  (CONTROL[2] & 0x80) | \
-                                (CONTROL[5] & 0x40) | \
-                                (CONTROL[9] & 0x10) | \
-                                (CONTROL[6] & 0x20)
-                    if MAX_SEVERITY > 0:
-                        TOGGLE = TOGGLE | 0x08
+        if (g.COMPILING & 0x80) != 0: # HALMAT COMPLETE FLAG
+            if g.MAX_SEVERITY < 2:
+                if g.CONTROL[1] == g.FALSE:
+                    g.TOGGLE =  (g.CONTROL[2] & 0x80) | \
+                                (g.CONTROL[5] & 0x40) | \
+                                (g.CONTROL[9] & 0x10) | \
+                                (g.CONTROL[6] & 0x20)
+                    if g.MAX_SEVERITY > 0:
+                        g.TOGGLE = g.TOGGLE | 0x08
                     RECORD_LINK()
-                    if monitorLabel != None:
+                    if g.monitorLabel != None:
                         continue
-        MAX_SEVERITY = 4
-        monitorLabel = "ENDITNOW"
+        g.MAX_SEVERITY = 4
+        g.monitorLabel = "ENDITNOW"
     elif routing == "SCAN_DISASTER":
         OUTPUT_WRITER()
-        if monitorLabel != None:
+        if g.monitorLabel != None:
             continue
-        monitorLabel = "OUTPUT_WRITER_DISASTER"
+        g.monitorLabel = "OUTPUT_WRITER_DISASTER"
     elif routing == "OUTPUT_WRITER_DISASTER":
-        OUTPUT(1, SUBHEADING)
+        OUTPUT(1, g.SUBHEADING)
         ERROR_SUMMARY()
-        if monitorLabel != None:
+        if g.monitorLabel != None:
             continue
-        monitorLabel = "ENDITNOW"
+        g.monitorLabel = "ENDITNOW"
     elif routing == "ENDITNOW":
-        OUTPUT(1, DOUBLE)
-        if MAX_SEVERITY > 2:
+        OUTPUT(1, g.DOUBLE)
+        if g.MAX_SEVERITY > 2:
             DOWNGRADE_SUMMARY()
-            if monitorLabel != None:
+            if g.monitorLabel != None:
                 continue
-        OUTPUT(0, X32 + \
+        OUTPUT(0, g.X32 + \
                  '*****  C O M P I L A T I O N   A B A N D O N E D  *****')
         print()
-        exit(MAX_SEVERITY << 2)
+        exit(g.MAX_SEVERITY << 2)
     else:
         print("Implementation error: Unknown routing", file=sys.stderr)
         exit(1)

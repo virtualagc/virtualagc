@@ -25,7 +25,26 @@ Each XPL file *needed* for PASS 1 of the compiler is ported to Python, but files
 
 For example, the "main program", originally named "PASS1.PROCS/##DRIVER" or "PASS1.PROCS/##DRIVER.xpl", thus becomes "ported/##DRIVER.py" in Python.  Whereas the original file "HALINCL/COMMON.xpl" would become "ported/HALINCL/COMMON.py".
 
-Additionally, many variables, constants, and macros defined in PASS1.PROCS/##DRIVER.xpl are expected to be within scope for other XPL source-code files.  These definitions (and presumably some from files other than ##DRIVER.xpl) are collected in a Python module ported/g.py that must be imported by all other Python files partaking of that scope.  Those global objects, originally having names like `NAME` would thus be accessed in Python with names like `g.NAME`.
+Additionally, many variables, constants, functions, and macros defined in PASS1.PROCS/##DRIVER.xpl, as well as some which are always present and don't need to be defined in any XPL source file, are expected to be within scope for other XPL source-code files.  I've adopted the following convention:
+
+  * Definitions of global variables and constants, as well as some python functions having the same names as the original XPL variables and are intended to workaround some goofy behavior of the originals, are collected in the file g.py.
+  * Definitions of global functions and macros such as `MONITOR()`, `OUTPUT()`, `BYTE()`, and so on are collected in the file xplBuiltins.py
+
+Therefore, in any of our other files ported from XPL to Python, these can be accessed by including the line:
+<pre>
+    from xplBuiltins import *
+    import g
+</pre>
+Those functions and macros are then used just as-is, without any name changes, whereas the global variables and constant have "`g.`" prefixed to their names.  For example, if you had a global function (say, `MONITOR`, defined in xplBuiltins.py) and a global variable (say, `CURRENT_CARD`, defined in g.py), you could access them as:
+<pre>
+    from xplBuiltins import *
+    import g
+    ...
+    MONITOR(...)
+    ...
+    g.CURRENT_CARD = ...
+</pre>
+It's important *not* to import g.py with `from g import *`, because assignments to variables defined in g.py won't change the values of those variables in other files importing g.py if they're not in the `g.` namespace.  However, assignments in the `g.` namespace do affect all files that import g.py.
 
 In addition to the usual alphanumeric and underline characters, identifiers in XPL can include the characters '@', '#', and '$', which are not allowed in Python identifiers.  However, it so happens that all of the original HAL/S-FC source code contained only upper-case characters when alphabetic.  Therefore, I use the uniform system of replacing disallowed characters in identifiers as follows:
 

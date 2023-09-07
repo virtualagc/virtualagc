@@ -9,7 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-28 RSB  Ported from XPL
 '''
 
-from g import OUTPUT, PERIOD
+from xplBuiltins import *
+import g
 from CHARTIME import CHARTIME
 
 '''
@@ -33,4 +34,4 @@ from CHARTIME import CHARTIME
 
 def PRINT_TIME(MESSAGE, T):
     C = CHARTIME(T);
-    OUTPUT(0, MESSAGE + C + PERIOD);
+    OUTPUT(0, MESSAGE + C + g.PERIOD);

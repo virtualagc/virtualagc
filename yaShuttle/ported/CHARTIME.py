@@ -9,7 +9,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-28 RSB  Ported from XPL
 '''
 
-from g import PERIOD
+import g
 
 '''
  /***************************************************************************/
@@ -34,7 +34,7 @@ def CHARTIME(T):
     COLON = ':'
     C = str(T // 360000)
     C = C + COLON + str((T % 360000) // 6000) + \
-        COLON + str((T % 6000) // 100) + PERIOD;
+        COLON + str((T % 6000) // 100) + g.PERIOD;
     T = T % 100; # DECIMAL FRACTION
     if T < 10:
         C = C + '0';

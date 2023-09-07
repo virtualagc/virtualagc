@@ -9,12 +9,10 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-31 RSB  Ported from XPL
 '''
 
-from g import SDL_OPTION, SRN_PRESENT, LAST, SAVE_ERROR_LIM, TOO_MANY_ERRORS, \
-                TRUE, SUBSTR, SHL, BYTE, X1, SAVE_ERROR_MESSAGE, PAD, TOKEN, \
-                LEVEL, STMT_NUM, STMT_PTR, ERROR_PTR, MONITOR, INPUT, \
-                monitorLabel
-from HALINCL.CERRDECL import CLASS_BX, CLASS_ZS, ERROR_CLASSES
-from HALINCL.COMMON import advise, ADVISE
+from xplBuiltins import *
+import g
+import HALINCL.COMMON as h
+import HALINCL.CERRDECL as c
 
 '''
  /***************************************************************************/
@@ -34,12 +32,12 @@ from HALINCL.COMMON import advise, ADVISE
  /*          FALSE                                                          */
  /*          SAVE_ERROR_LIM                                                 */
  /*          STMT_NUM                                                       */
- /*          STMT_PTR                                                       */
+ /*          g.STMT_PTR                                                       */
  /*          TRUE                                                           */
  /* EXTERNAL VARIABLES CHANGED:                                             */
  /*          COMPILING                                                      */
  /*          C                                                              */
- /*          ERROR_PTR                                                      */
+ /*          g.ERROR_PTR                                                      */
  /*          LAST                                                           */
  /*          SAVE_ERROR_MESSAGE                                             */
  /*          TOO_MANY_ERRORS                                                */
@@ -107,30 +105,27 @@ from HALINCL.COMMON import advise, ADVISE
 '''
 
 def ERROR(CLASS, NUM, TEXT=""):
-    global LAST, SAVE_ERROR_MESSAGE, ERROR_PTR, CLASSNUM, S, C, \
-            SEVERITY, MAX_SEVERITY, COMPILING, monitorLabel, ADVISE, \
-            TOO_MANY_ERRORS
     ERRORFILE = 5;
 
-    if CLASS <= CLASS_ZS:
-        LAST = LAST + 1;
-        if LAST > SAVE_ERROR_LIM:
+    if CLASS <= c.CLASS_ZS:
+        g.LAST = g.LAST + 1;
+        if g.LAST > g.SAVE_ERROR_LIM:
             # BUFFER FULL
-            TOO_MANY_ERRORS = TRUE;
-            LAST = LAST - 1;
+            g.TOO_MANY_ERRORS = g.TRUE;
+            g.LAST = g.LAST - 1;
         else:
-            C = SUBSTR(ERROR_CLASSES, SHL(CLASS - 1, 1), 2);
-            if BYTE(C, 1) == BYTE(X1):
-                C = SUBSTR(C, 0, 1);
-            SAVE_ERROR_MESSAGE[LAST] = PAD(C + str(NUM), 8) + TEXT;
+            g.C[0] = SUBSTR(c.ERROR_CLASSES, SHL(CLASS - 1, 1), 2);
+            if BYTE(g.C[0], 1) == BYTE(g.X1):
+                g.C[0] = SUBSTR(g.C[0], 0, 1);
+            g.SAVE_ERROR_MESSAGE[g.LAST] = PAD(g.C[0] + str(NUM), 8) + TEXT;
             # IF THE ERROR IS GENERATED IN A STRUCTURE TEMPLATE
             # AND THE TOKEN IS EQUAL TO THE LEVEL NUMBER THEN
             # ATTACH THE ERROR TO THE PREVIOUS TOKEN SO THE
             # ERROR WILL BE PRINTED WITH THE CORRECT LINE.
-            if TOKEN == LEVEL:
-                ERROR_PTR[STMT_PTR-1] = LAST;
+            if g.TOKEN == g.LEVEL:
+                g.ERROR_PTR[g.STMT_PTR-1] = g.LAST;
             else:
-                ERROR_PTR[STMT_PTR] = LAST; # ATTACH ERROR TO TOKEN
+                g.ERROR_PTR[g.STMT_PTR] = g.LAST; # ATTACH ERROR TO TOKEN
             # REMOVE "SEVERE" PARAMETER (HANDLE SEVERITY 3&4 
             # ABORT IN OUTPUT_WRITER
             # GET ERROR SEVERITY FROM ERRORLIB FILE AND
@@ -138,32 +133,32 @@ def ERROR(CLASS, NUM, TEXT=""):
             goto_AGAIN = True
             while goto_AGAIN:
                 goto_AGAIN = False
-                C=PAD(C+str(NUM),8);
-                if MONITOR(2,5,C):
-                    CLASS=CLASS_BX;
+                g.C[0]=PAD(g.C[0]+str(NUM),8);
+                if MONITOR(2,5,g.C[0]):
+                    CLASS=c.CLASS_BX;
                     NUM=113;
-                    TEXT = C;
-                    C=SUBSTR(ERROR_CLASSES,SHL(CLASS-1,1),2);
-                    if BYTE(C,1)==BYTE(X1):
-                        C=SUBSTR(C,0,1);
+                    TEXT = g.C[0];
+                    g.C[0]=SUBSTR(c.ERROR_CLASSES,SHL(CLASS-1,1),2);
+                    if BYTE(g.C[0],1)==BYTE(g.X1):
+                        g.C[0]=SUBSTR(g.C[0],0,1);
                     goto_AGAIN = True
                     continue
-            S = INPUT(ERRORFILE);
-            SEVERITY = BYTE(S) - BYTE('0');
-            if SEVERITY > 2:
-                MAX_SEVERITY = SEVERITY;
-                COMPILING = FALSE;
-                monitorLabel = "SCAN_DISASTER";
+            g.S = INPUT(ERRORFILE);
+            g.SEVERITY = BYTE(g.S) - BYTE('0');
+            if g.SEVERITY > 2:
+                g.MAX_SEVERITY = g.SEVERITY;
+                g.COMPILING = FALSE;
+                g.monitorLabel = "SCAN_DISASTER";
                 return
         TEXT = '';
     else:
         '''
-        NEXT_ELEMENT(ADVISE);
-        ADV_STMTp(RECORD_USED(ADVISE)-1, STMT_NUM);
-        ADV_ERRORp(RECORD_USED(ADVISE)-1, \
-                       SUBSTR(ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM));
+        NEXT_ELEMENT(h.ADVISE);
+        ADV_STMTp(RECORD_USED(h.ADVISE)-1, g.STMT_NUM);
+        ADV_ERRORp(RECORD_USED(h.ADVISE)-1, \
+                       SUBSTR(c.ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM));
         '''
-        ADVISE.append(advise())
-        ADVISE[-1].ADV_STMTp = STMT_NUM
-        ADVISE[-1].ADV_ERRORp = SUBSTR(ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM)
+        h.ADVISE.append(h.advise())
+        h.ADVISE[-1].ADV_STMTp = g.STMT_NUM
+        h.ADVISE[-1].ADV_ERRORp = SUBSTR(c.ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM)
         

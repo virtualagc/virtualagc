@@ -9,9 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-29 RSB  Ported
 '''
 
-from g import monitorLabel, ERROR_COUNT, STMT_NUM, COMPILING, MAX_SEVERITY, \
-            SAVE_SEVERITY
-from HALINCL.CERRORS import COMMON_ERRORS
+import g
+import HALINCL.CERRORS as c
 
 '''
  /***************************************************************************/
@@ -44,19 +43,18 @@ from HALINCL.CERRORS import COMMON_ERRORS
 '''
 
 def ERRORS(CLASS, NUM, TEXT):  # HANDLES ONCE QUIET MESSAGES
-    global ERROR_COUNT, MAX_SEVERITY, COMPILING, SAVE_SEVERITY
     
-    ERROR_COUNT = ERROR_COUNT + 1;
+    g.ERROR_COUNT = g.ERROR_COUNT + 1;
     # BI106 IS THE ERROR FOR TOO MANY ERRORS AND THEREFORE
     # ERROR_COUNT NEEDS TO BE DECREMENTED THEN INCREMENTED
     if NUM == 106:
-       ERROR_COUNT = ERROR_COUNT - 1;
-    SEVERITY = COMMON_ERRORS(CLASS, NUM, TEXT, ERROR_COUNT, STMT_NUM);
+       g.ERROR_COUNT = g.ERROR_COUNT - 1;
+    SEVERITY = c.COMMON_ERRORS(CLASS, NUM, TEXT, g.ERROR_COUNT, g.STMT_NUM);
     if NUM == 106:
-       ERROR_COUNT = ERROR_COUNT + 1;
-    SAVE_SEVERITY[ERROR_COUNT] = SEVERITY;
-    if SEVERITY > MAX_SEVERITY:
-       MAX_SEVERITY = SEVERITY;
-    if MAX_SEVERITY > 2:
-       COMPILING = FALSE;
-       monitorLabel = "ALMOST_DISASTER"
+       g.ERROR_COUNT = g.ERROR_COUNT + 1;
+    g.SAVE_SEVERITY[g.ERROR_COUNT] = SEVERITY;
+    if SEVERITY > g.MAX_SEVERITY:
+       g.MAX_SEVERITY = SEVERITY;
+    if g.MAX_SEVERITY > 2:
+       g.COMPILING = FALSE;
+       g.monitorLabel = "ALMOST_DISASTER"

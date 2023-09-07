@@ -9,7 +9,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-25 RSB  Created place-holder file.
 '''
 
-from g import OUTPUT
+from xplBuiltins import *
 
 def COMPILATION_LOOP():
     OUTPUT(0, "COMPILATION_LOOP not yet implemented")

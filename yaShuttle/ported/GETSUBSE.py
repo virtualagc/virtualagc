@@ -9,8 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-30 RSB  Ported from XPL
 '''
 
-from g import X1, pPRODUCE_NAME, BIT_LENGTH_LIM, OUTPUT, SHL, BYTE, LENGTH, \
-                BI_NAME, BI_FLAGS, BI_LOC, BI_INDX, MONITOR
+from xplBuiltins import *
+import g
 
 '''
  /***************************************************************************/
@@ -48,7 +48,6 @@ from g import X1, pPRODUCE_NAME, BIT_LENGTH_LIM, OUTPUT, SHL, BYTE, LENGTH, \
 '''
 
 def GET_SUBSET(SUBSET,FLAGS):
-    global pPRODUCE_NAME, BIT_LENGTH_LIM, BI_FLAGS
     CP = 0
     L = 0
     LIMIT = 0
@@ -82,7 +81,7 @@ def GET_SUBSET(SUBSET,FLAGS):
                     if BYTE(S)!=BYTE('C'):
                         break;
                 CP=0;
-            if BYTE(S,CP)!=BYTE(X1):
+            if BYTE(S,CP)!=BYTE(g.X1):
                 for I in range(1, Tp+1):
                     if BYTE(S,CP)==TERM[I]:
                         return I;
@@ -114,7 +113,7 @@ def GET_SUBSET(SUBSET,FLAGS):
         return 1;
     LIMIT=LENGTH(S)-1;
     OUTPUT(1, SUBSET_MSG+S);
-    OUTPUT(0, X1);
+    OUTPUT(0, g.X1);
     CP=LIMIT;
     I=1;
     while I != 0:
@@ -133,9 +132,9 @@ def GET_SUBSET(SUBSET,FLAGS):
                     elif gt2 == 2 or gt2 == 3:
                         L=BIp;
                         while L>0:
-                            if SUBSTR(BI_NAME[BI_INDX[L]],BI_LOC[L],10) \
+                            if SUBSTR(g.BI_NAME[g.BI_INDX[L]],g.BI_LOC[L],10) \
                                     == PAD(A_TOKEN,10):
-                                BI_FLAGS[L]=BI_FLAGS[L]|FLAGS;
+                                g.BI_FLAGS[L]=g.BI_FLAGS[L]|FLAGS;
                                 L=-1;
                             else: 
                                 L=L-1;
@@ -151,7 +150,7 @@ def GET_SUBSET(SUBSET,FLAGS):
                     elif gt2 == 2 or gt2 == 3:
                         L=VALUE;
                         if (L>0)and(L<=Pp):
-                            pPRODUCE_NAME[L]= pPRODUCE_NAME[L]|SHL(FLAGS,12);
+                            g.pPRODUCE_NAME[L]= g.pPRODUCE_NAME[L]|SHL(FLAGS,12);
                         else:
                             SUBSET_ERROR(3);
             elif A_TOKEN == '$BITLENGTH':
@@ -163,10 +162,10 @@ def GET_SUBSET(SUBSET,FLAGS):
                        SUBSET_ERROR(1);
                     elif gt2 == 2:
                         L = VALUE;
-                        if L < 1 or L > BIT_LENGTH_LIM:
+                        if L < 1 or L > g.BIT_LENGTH_LIM:
                             SUBSET_ERROR(4);
                         else:
-                            BIT_LENGTH_LIM = L;
+                            g.BIT_LENGTH_LIM = L;
                     elif gt2 == 3:
                        SUBSET_ERROR(1);
             else:
@@ -175,5 +174,5 @@ def GET_SUBSET(SUBSET,FLAGS):
             SUBSET_ERROR(1);
         elif gt == 3:
             SUBSET_ERROR(1);
-    OUTPUT(0, X1);
+    OUTPUT(0, g.X1);
     return 0;
