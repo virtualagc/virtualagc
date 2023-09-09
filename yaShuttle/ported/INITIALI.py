@@ -410,9 +410,9 @@ def INITIALIZATION():
     g.CARD_COUNT = g.CARD_COUNT + 1;
     g.SAVE_CARD = g.CURRENT_CARD;
     SOURCE_COMPARE();
-    print("\nA")
+    print("\nIN A")
     STREAM();
-    print("\nB", g.NEXT_CHAR, g.OVER_PUNCH)
+    print("\nIN B", g.NEXT_CHAR, g.OVER_PUNCH)
     SCAN();
     print("\nC")
     if g.CONTROL[4]:

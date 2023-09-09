@@ -9,11 +9,12 @@ Purpose:    This is part of the port of the original XPL source code for
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
             2023-08-25 RSB  Finished initial port.
-            2023-09-07 RSB  Split off xplBuiltins.py to contain just the functions.
+            2023-09-07 RSB  Split off xplBuiltins.py to contain just the 
+                            functions.
 '''
 
 import sys
-from xplBuiltins import OUTPUT
+from xplBuiltins import OUTPUT, BYTE
 import HALINCL.COMMON as h
 
 #------------------------------------------------------------------------------
@@ -1985,7 +1986,7 @@ SAVE_ERROR_MESSAGE = ['']*SAVE_ERROR_LIM
 TOO_MANY_LINES = 0
 TOO_MANY_ERRORS = 0
 CURRENT_CARD = ''
-END_GROUP = 0
+END_GROUP = FALSE
 NONBLANK_FOUND = 0
 GROUP_NEEDED = TRUE
 LRECL = [0, 0]
@@ -2201,10 +2202,10 @@ if SANITY_CHECK and len(TRANS_OUT) != 255 + 1:
     sys.exit(1)
 
 if assumeASCII:
-    ESCP = ord('`') # Backtick replaces cent character (missing from ASCII).
-    CHAR_OP = (ord('_'), ord('='))
-    VALID_00_OP = ord('_')
-    VALID_00_CHAR = ord('0')
+    ESCP = BYTE('`') # Backtick replaces cent character (missing from ASCII).
+    CHAR_OP = (BYTE('_'), BYTE('='))
+    VALID_00_OP = BYTE('_')
+    VALID_00_CHAR = BYTE('0')
 else:
     ESCP = 0x4A  # THE ESCAPE CHARACTER
     CHAR_OP = (0x6D, 0x7E)  # OVER PUNCH ESCAPES

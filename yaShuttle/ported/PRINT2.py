@@ -41,6 +41,6 @@ def PRINT2(LINE, SPACE):
         OUTPUT(2, \
             '1  H A L   C O M P I L A T I O N   --   P H A S E   1   --   U N F O R M A T T E D   S O U R C E   L I S T I N G             PAGE ' \
             + str(PAGE_NUM));
-        BYTE(LINE, 0, BYTE('-'));
+        LINE = BYTE(LINE, 0, BYTE('-'));
         g.LISTING2_COUNT = 4;
     OUTPUT(2, LINE);

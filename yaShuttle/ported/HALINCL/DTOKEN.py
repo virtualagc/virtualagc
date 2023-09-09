@@ -40,7 +40,7 @@ def D_TOKEN():
                 g.LOOKED_RECORD_AHEAD = TRUE;
                 g.D_CONTINUATION_OK = FALSE;
                 return '';
-            BYTE(CURRENT_CARD, 0, BYTE('D'));
+            g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('D'));
             PRINT_COMMENT(TRUE);
             g.D_INDEX = 1;
             continue;

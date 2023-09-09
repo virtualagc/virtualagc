@@ -45,10 +45,11 @@ def ORDER_OK(TYPE):
     
     ctc = g.CARD_TYPE[BYTE(g.CURRENT_CARD)]
     ctt = g.CARD_TYPE[TYPE]
+    print("OO ctCURRENT_CARD=%d ctTYPE=%d" % (ctc, ctt))
     if ctc == 0:
         #  CASE 0 -- ILLEGAL CARD TYPES  
         ERROR(c.CLASS_M,1);
-        g.CURRENT_CARD = 'C' + g.CURRENT_CARD[1:]
+        g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'))
         # Note fallthrough.
     elif ctc == 1 or ctc == 2:
         #  CASE 1 -- E CARD  

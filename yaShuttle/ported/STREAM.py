@@ -16,6 +16,7 @@ technique.
 
 from xplBuiltins import *
 import g
+import HALINCL.CERRDECL as d
 from OUTPUTGR import OUTPUT_GROUP
 from NEXTRECO import NEXT_RECORD
 from ORDEROK import ORDER_OK
@@ -236,11 +237,122 @@ def STREAM():
     DEPENDENT UPON THE MEMORY LOCATIONS ASSIGNED TO CONTIGUOUSLY
     DECLARED CHARACTER STRING DESCRIPTORS WHICH IS CURRENTLY
     PRESUMED TO BE IN ASCENDING LOCATIONS '''
-    # The comment above sounds bad ... *really* bad.  We'll see.
+    # The comment above sounds bad ... *really* bad.  It appears to me to mean
+    # the following:  It expects several of these Exxx variables to be 
+    # immediately succeeded in memory by the corresponding Sxxx variables. 
+    # Specifically, it's referring to the pairs:
+    #        (E_LINE,S_LINE), 
+    #        (E_STACK,S_STACK)
+    #        (EP,SP)
+    #        (E_IND, S_IND)
+    #        (E_INDICATOR, S_INDICATOR)
+    # Consider EP,EP, for example.  Even though EP is defined as ascalar rather
+    # than as an array, the original coders seemed to have the expectation that
+    # they could address EP as EP(0) and SP as EP(1).  There is no provision in
+    # XPL for doing using this, as far as I can see.  The case of E_INDICATOR
+    # is even more tricky, because some (E_IND etc.) are defined a 128-element
+    # arrays, so the expectation is that S_IND[0] is the same thing as 
+    # E_IND[128], and so on.  For some of these pairs (E_IND,S_IND), the
+    # additional expectation is that negative indices can be used with Sxxx(i)
+    # to access Exxx(i+128).  I'll refrain from further editorial comments 
+    # on this matter, as tempted as I am to make some pithy remarks I may 
+    # regret later.
     E_LINE = ""
     S_LINE = ""
+    def e_line(p=0, value=None):
+        nonlocal E_LINE, S_LINE
+        if p not in [0, 1]:
+            print("Implementation error E_LINE/S_LINE")
+            sys.exit(1)
+        if value == None:
+            if p == 0:
+                return E_LINE
+            else:
+                return S_LINE
+        if p == 0:
+            E_LINE = value
+        else:
+            S_LINE = value
     E_STACK = ""
     S_STACK = ""
+    def e_stack(p=0, value=None):
+        nonlocal E_STACK, S_STACK
+        if p not in [0, 1]:
+            print("Implementation error E_STACK/S_STACK")
+            sys.exit(1)
+        if value == None:
+            if p == 0:
+                return E_STACK
+            else:
+                return S_STACK
+        if p == 0:
+            E_STACK = value
+        else:
+            S_STACK = value
+    EP = 0
+    SP = 0
+    def ep(p=0, value=None):
+        nonlocal EP, SP
+        if p not in [0, 1]:
+            print("Implementation error EP/SP")
+            sys.exit(1)
+        if value == None:
+            if p == 0:
+                return EP
+            else:
+                return SP
+        if p == 0:
+            EP = value
+        else:
+            SP = value
+    IND_LIM = 127
+    IND_SHIFT = 7
+    E_IND = [0]*(IND_LIM+1)
+    S_IND = [0]*(IND_LIM+1)
+    def e_ind(index=0, value=None):
+        nonlocal E_IND, S_IND
+        if index < 0 or index >= len(E_IND)+len(S_IND):
+            print("Implementation error E_IND/S_IND")
+            sys.exit(1)
+        if value == None:
+            if index < len(E_IND):
+                return E_IND[index]
+            else:
+                return S_IND[index-len(E_IND)]
+        if index < len(E_IND):
+            E_IND[index] = value
+        else:
+            S_IND[index-len(E_IND)] = value
+    def s_ind(index=0, value=None):
+        nonlocal E_IND, S_IND
+        if index < -len(E_IND) or index >= len(S_IND):
+            print("Implementation error E_IND/S_IND")
+            sys.exit(1)
+        if value == None:
+            if index < 0:
+                return E_IND[index + len(E_IND)]
+            else:
+                return S_IND[index]
+        if index < 0:
+            E_IND[index + len(E_IND)] = value
+        else:
+            S_IND[index] = value
+    E_INDICATOR = [0]*(IND_LIM+1)
+    S_INDICATOR = [0]*(IND_LIM+1)
+    def e_indicator(index=0, value=None):
+        nonlocal E_INDICATOR, S_INDICATOR
+        if index < 0 or index >= len(E_INDICATOR)+len(S_INDICATOR):
+            print("Implementation error E_INDICATOR/S_INDICATOR")
+            sys.exit(1)
+        if value == None:
+            if index < len(E_INDICATOR):
+                return E_INDICATOR[index]
+            else:
+                return S_INDICATOR[index-len(E_INDICATOR)]
+        if index < len(E_INDICATOR):
+            E_INDICATOR[index] = value
+        else:
+            S_INDICATOR[index-len(E_INDICATOR)] = value
     # Regarding the following comment, see the comments preceding INPUT()
     # in g.py.  We use g.asciiEOT (0x04) in place of 0xFE for EOF.  And 
     # ASCII backtick (`) in place of the EBCDIC cent sign.
@@ -254,16 +366,9 @@ def STREAM():
     LAST_S_IND = 0
     E_BLANKS = 0
     S_BLANKS = 0
-    EP = 0
-    SP = 0
+    # EP, SP see above.
     M_BLANKS = -1
-    IND_LIM = 127
-    IND_SHIFT = 7
-    E_IND = [0]*(IND_LIM+1)
-    S_IND = [0]*(IND_LIM+1)
-    E_INDICATOR = [0]*(IND_LIM+1)
-    S_INDICATOR = [0]*(IND_LIM+1)
-    
+    # IND_LIM, E_IND, S_IND, E_INDICATOR, S_INDICATOR, see above.
     E_COUNT = 0
     S_COUNT = 0
     LAST_E_COUNT = 0
@@ -457,7 +562,7 @@ def STREAM():
                     firstTry = False
                     if LENGTH(C[0]) == 0 or goto_NO_CHAN:
                         goto_NO_CHAN = False          
-                        ERROR(CLASS_XD,3);
+                        ERROR(d.CLASS_XD,3);
                         ERRPRINT()
                         return
                     I = CHAR_INDEX(C[0], 'CHANNEL=');
@@ -475,7 +580,7 @@ def STREAM():
                         goto_NO_CHAN = True;
                         continue
                 if g.J > 9:
-                    ERROR(CLASS_XD,4);
+                    ERROR(d.CLASS_XD,4);
                     ERRPRINT()
                     return
                 C[0] = D_TOKEN;
@@ -487,10 +592,10 @@ def STREAM():
                     PRINT_FLAG = g.TRUE;
                 elif C[0] != '':
                     L = L | 0x20;
-                    ERROR(CLASS_XD,1);
+                    ERROR(d.CLASS_XD,1);
                 goto_D_DONE = False
                 if (L & 0x40) != 0:
-                    ERROR(CLASS_XD,2);
+                    ERROR(d.CLASS_XD,2);
                     goto_D_DONE = True
                 if not goto_D_DONE:
                     if L == 0:
@@ -530,7 +635,7 @@ def STREAM():
                 g.CONTINUE = 0;
                 C[0] = D_TOKEN;
                 if LENGTH(C[0]) == 0: # NO ERROR NUMBER TO DOWNGRADE 
-                    ERRORS(CLASS_BI, 108);
+                    ERRORS(d.CLASS_BI, 108);
                 elif g.DOWN_COUNT > DOWNGRADE_LIMIT: # OBTAIN CLASS
                     '''
                     /* IN ORDER TO COMPLETELY REMOVE THE LIMIT ON THE NUMBER OF          */
@@ -539,7 +644,7 @@ def STREAM():
                     /* STATEMENTS MUST ALSO THEN BE REMOVED.                             */
                     /* CHECK TO SEE IF EXCEEDED DOWNGRADE_LIMIT */
                     '''
-                    ERRORS (CLASS_BI, 109);
+                    ERRORS (d.CLASS_BI, 109);
                 else:
                     NEXT_ELEMENT(g.DOWN_INFO);
                     g.DOWN_COUNT = g.DOWN_COUNT + 1;
@@ -549,7 +654,7 @@ def STREAM():
                        if g.ULT_TEMP_CLS >= '0' and g.ULT_TEMP_CLS <= '9':
                           g.CONTINUE = 1;
                        if g.CONTINUE == 0: # GET CLASS
-                          g.ULT_TEMP_CLS = PAD('CLASS_'+g.TEMP_CLS,8);
+                          g.ULT_TEMP_CLS = PAD('d.CLASS_'+g.TEMP_CLS,8);
                           g.FIN_TMP_CLS = SUBSTR(g.X1+g.ULT_TEMP_CLS, 1);
                        # END DETERMINE CLASS
                     # END OF ELSE FOR CLASS
@@ -591,15 +696,15 @@ def STREAM():
                         /* NOT EXIST).                                                       */
                         '''
                         DWN_UNKN(g.DOWN_COUNT, C[0]);
-                        ERRORS (CLASS_BI, 107);
+                        ERRORS (d.CLASS_BI, 107);
             # END OF DOWNGRADE
             elif C[0] == 'PROGRAM':
                 if g.BLOCK_MODE != 0:
-                    ERROR(CLASS_XA, 3);
+                    ERROR(d.CLASS_XA, 3);
                     ERRPRINT()
                     return
                 if LENGTH(g.PROGRAM_ID) > 0:
-                    ERROR(CLASS_XA, 1);
+                    ERROR(d.CLASS_XA, 1);
                     ERRPRINT()
                     return
                 C[0] = D_TOKEN;
@@ -609,7 +714,7 @@ def STREAM():
                     firstTry = False
                     if goto_NO_ID or LENGTH(C[0]) == 0:
                         goto_NO_ID = False
-                        ERROR(CLASS_XA, 2);
+                        ERROR(d.CLASS_XA, 2);
                         ERRPRINT()
                         return
                     I = CHAR_INDEX(C[0], 'ID=');
@@ -635,7 +740,7 @@ def STREAM():
                 
                 C[1] = D_TOKEN;
                 if LENGTH(C[1]) == 0:
-                    ERROR(CLASS_XD, 5);
+                    ERROR(d.CLASS_XD, 5);
                 elif LENGTH(C[1]) >= 8:
                     C[1] = SUBSTR(C[1],0,8);
                 else:
@@ -647,7 +752,7 @@ def STREAM():
                     LIST_FLAG = g.FALSE;
                 RECORD_NOT_WRITTEN = g.TRUE;
                 if g.INCLUDING:
-                    ERROR(CLASS_XD, 8);
+                    ERROR(d.CLASS_XD, 8);
                 else:
                     CREATING = g.TRUE;
                 while CREATING:
@@ -673,7 +778,7 @@ def STREAM():
                             D_INDEX = 1;
                             C[0] = D_TOKEN;
                             if C[0] == INCLUDE_DIR:
-                                BYTE(g.CURRENT_CARD, 0, BYTE('C'));
+                                g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'));
                                 COPY_TO_8();
                                 if INCLUDE_OK():
                                     OUTPUT(8, XC+STARS+START+g.INCLUDE_MSG+STARS);
@@ -685,12 +790,12 @@ def STREAM():
                                 else:
                                     C[0] = PAD(C[0], 8);
                                 if C[0] != C[1]:
-                                    ERROR(CLASS_XD, 6, C[0]);
+                                    ERROR(d.CLASS_XD, 6, C[0]);
                                 if RECORD_NOT_WRITTEN:
-                                    ERROR(CLASS_XD, 7);
+                                    ERROR(d.CLASS_XD, 7);
                                 elif LENGTH(C[1]) > 0:
                                     if MONITOR(1, 8, C[1]): # STOW THE MEMBER
-                                        ERROR(CLASS_XD, 9, C[1]);
+                                        ERROR(d.CLASS_XD, 9, C[1]);
                                 CREATING = g.FALSE;
                             else:
                                 COPY_TO_8();
@@ -703,16 +808,16 @@ def STREAM():
                 if pfs:
                     # CHECK FOR ILLEGAL LOCATION OF THE DIRECTIVE
                     if g.BLOCK_MODE != 0:
-                        ERRORS(CLASS_XR,1);
+                        ERRORS(d.CLASS_XR,1);
                     # PART2 -- CHECK FOR ILLEGAL LOCATION OF
                     # THE DIRECTIVE INSIDE AN EXTERNAL BLOCK.
                     if ((SYT_FLAGS(g.BLOCK_SYTREF(g.NEST))&EXTERNAL_FLAG)!=0):
-                        ERRORS(CLASS_XR,1);
+                        ERRORS(d.CLASS_XR,1);
             # END DATA_REMOTE
             
             #-----------------------------------------------------------------
             else:
-                ERROR(CLASS_XU,1);
+                ERROR(d.CLASS_XU,1);
                 
             if not pfs: # BFS
                 '''
@@ -721,7 +826,7 @@ def STREAM():
                 /* REMOVED IF AND WHEN BFS BEGINS USING 'DATA_REMOTE'.             */
                 '''
                 if g.DATA_REMOTE:
-                    ERROR(CLASS_B,102);
+                    ERROR(d.CLASS_B,102);
                     g.DATA_REMOTE=g.FALSE;
             #-----------------------------------------------------------------
             ERRPRINT()
@@ -783,13 +888,13 @@ def STREAM():
             if BYTE(g.CURRENT_CARD, CP) != BYTE(g.X1):
                 if BYTE(E_LINE[TYPE], CP) != BYTE(g.X1):
                     if TYPE == 0:
-                        ERROR(CLASS_ME,4);
+                        ERROR(d.CLASS_ME,4);
                     elif TYPE == 1:
-                        ERROR(CLASS_MS,4);
+                        ERROR(d.CLASS_MS,4);
                         continue
-                E_INDICATOR[CP + POINT] = E_COUNT[TYPE];
+                e_indicator(CP + POINT, E_COUNT[TYPE]);
                 FILL = BYTE(g.CURRENT_CARD, CP);
-                BYTE(E_LINE[TYPE], CP, FILL);
+                E_LINE[TYPE] = BYTE(E_LINE[TYPE], CP, FILL);
     
     def COMP(TYPE):
         nonlocal E_COUNT, E_INDICATOR, FILL
@@ -802,14 +907,14 @@ def STREAM():
             READ_CARD();
             if BYTE(g.CURRENT_CARD) != POINT: # NO MORE OF THIS TYPE OF CARD
                 if not ORDER_OK(POINT):
-                    ERROR(CLASS_M,2);
+                    ERROR(d.CLASS_M,2);
                 POINT = SHL(TYPE, IND_SHIFT);
                 for CP in range(1, g.TEXT_LIMIT[0]+1):
-                    if BYTE(E_LINE(TYPE), CP) == BYTE(g.X1):
-                        E_INDICATOR[CP + POINT] = 0;
+                    if BYTE(e_line(TYPE), CP) == BYTE(g.X1):
+                        e_indicator(CP + POINT, 0);
                     elif not TYPE:
-                        FILL = E_COUNT - E_INDICATOR[CP] + 1;
-                        E_INDICATOR[CP] = FILL;
+                        FILL = E_COUNT - e_indicator(CP) + 1;
+                        e_indicator(CP, FILL);
                 return;
             E_COUNT[TYPE] = E_COUNT[TYPE] + 1;
     
@@ -817,6 +922,7 @@ def STREAM():
         nonlocal E_COUNT, S_COUNT, LAST_E_COUNT, LAST_S_COUNT, M_LINE, CP, \
                 E_INDICATOR, S_INDICATOR, E_LINE, S_LINE
         # No locals.
+        print("GG @ END_GROUP=%d" % g.END_GROUP)
         E_LINE = BLANKS + BLANKS;
         S_LINE = BLANKS + BLANKS;
         LAST_E_COUNT = E_COUNT;
@@ -833,7 +939,7 @@ def STREAM():
             g.INCLUDE_LIST = g.TRUE;
             g.SRN_COUNT=0;
             if g.TPL_REMOTE:
-                ERROR(CLASS_XI,5);
+                ERROR(d.CLASS_XI,5);
                 g.TPL_REMOTE = g.FALSE;
             g.INCLUDE_END = g.FALSE;
         goto_LOOP = True;
@@ -850,23 +956,28 @@ def STREAM():
                         READ_CARD();
                     goto_CHECK_ORDER = False
                     if not ORDER_OK(g.PREV_CARD):
-                        ERROR(CLASS_M,2);
+                        ERROR(d.CLASS_M,2);
                         goto_COMMENT_CARD = True
                         continue
                 goto_LOOP = False
-                print("\nGG B", g.END_GROUP, '"%s"' % g.CURRENT_CARD, g.CARD_TYPE)
-                if g.END_GROUP:
-                    break # GO TO FOUND_GROUP
                 ct = g.CARD_TYPE[BYTE(g.CURRENT_CARD)]
+                print("\nGG A END_GROUP=%d CURRENT_CARD=\"%s\" ct=%d" % (g.END_GROUP, g.CURRENT_CARD, ct))
+                if g.END_GROUP:
+                    print("GG A.1 PREV_CARD=%d M_LINE=\"%s\"" % (g.PREV_CARD, M_LINE))
+                    break # GO TO FOUND_GROUP
+                print("\nGG B")
             if ct == 0:
+                print("\nGG 0--DUMMY")
                 # CASE 0--DUMMY
-               pass
+                pass
             elif ct == 1:
+                print("\nGG 1--E LINE")
                 # CASE 1--E LINE 
                 COMP(0);
                 goto_LOOP = True;
                 continue
             elif ct == 2:
+                print("\nGG 2--M LINE CURRENT_CARD=\"%s\" TEXT_LIMIT=%d" % (g.CURRENT_CARD, g.TEXT_LIMIT[0]))
                 # CASE 2--M LINE
                 M_LINE = g.CURRENT_CARD;
                 if g.SRN_PRESENT:
@@ -876,19 +987,21 @@ def STREAM():
                     else:
                         g.SRN=SUBSTR(g.CURRENT_CARD,g.TEXT_LIMIT[0]+1);
                         g.RVL[1] = SUBSTR(g.SRN,6,2);
-                BYTE(g.SAVE_CARD, BYTE('M'));
+                g.SAVE_CARD = BYTE(g.SAVE_CARD, 0, BYTE('M'));
                 g.PREV_CARD = BYTE(g.CURRENT_CARD);
                 goto_READ = True;
                 continue
             elif ct == 3:
+                print("\nGG 3--S LINE")
                 # CASE 3--S LINE
                 COMP(1);
                 goto_LOOP = True;
                 continue
             elif ct == 4:
+                print("\nGG 4--COMMENT")
                 # CASE 4--COMMENT
                 if not goto_COMMENT_CARD:
-                    BYTE(g.CURRENT_CARD, 0, BYTE('C'));
+                    g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'));
                 goto_COMMENT_CARD = False
                 if g.PREV_CARD == BYTE('C'):
                     g.COMMENTING = g.TRUE;
@@ -917,27 +1030,30 @@ def STREAM():
                     g.INCLUDE_LIST = g.TRUE;
                     g.SRN_COUNT=0;
                     if g.TPL_REMOTE:
-                        ERROR(CLASS_XI,5);
+                        ERROR(d.CLASS_XI,5);
                         g.TPL_REMOTE = g.FALSE;
                     g.INCLUDE_END = g.FALSE;
                 goto_CHECK_ORDER = True;
                 continue
             elif ct == 5:
                 # CASE 5--DIRECTIVE
-                BYTE(g.CURRENT_CARD, 0, BYTE('D'));
+                g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('D'));
                 goto_COMMENT_CARD = True
                 continue
         
         # FOUND_GROUP was here!
+        print("GG FOUND_GROUP:")
         g.END_GROUP = g.FALSE;
         E_LINE = SUBSTR(E_LINE, 0, LENGTH(M_LINE));
+        print("GG E_COUNT=%d E_LINE=\"%s\"" % (E_COUNT, E_LINE))
         if E_COUNT <= 0:
             for CP in range(1, g.TEXT_LIMIT[0]+1):
-                E_INDICATOR[CP] = 0;
+                e_indicator(CP, 0);
             E_COUNT = LAST_E_COUNT;
         S_LINE = SUBSTR(S_LINE, 0, LENGTH(M_LINE));
+        print("GG S_COUNT=%d S_LINE=\"%s\"" % (S_COUNT, S_LINE))
         if S_COUNT <= 0:
-            for CP in range(1, g.TEXT_LIMIT[0]):
+            for CP in range(1, g.TEXT_LIMIT[0]+1):
                 S_INDICATOR[CP] = 0;
             S_COUNT = LAST_S_COUNT;
     
@@ -953,7 +1069,7 @@ def STREAM():
             if not g.INCLUDING or not TEMPLATE_FLAG or \
                     (g.INCLUDING and TEMPLATE_FLAG and \
                     (INDEX > (TPL_LRECL-1))):
-                if (CARD_TYPE(BYTE(g.CURRENT_CARD)) >= 4) or g.INCLUDE_END:
+                if (g.CARD_TYPE[BYTE(g.CURRENT_CARD)] >= 4) or g.INCLUDE_END:
                     g.GROUP_NEEDED = g.TRUE;
                 else:
                    # OUT OF DATA--GET MORE 
@@ -963,28 +1079,29 @@ def STREAM():
     def STACK(TYPE):
         nonlocal E_IND, EP, CHAR_TEMP, E_STACK
         # Local:
-        POINT = EP(TYPE) + SHL(TYPE, IND_SHIFT);
+        POINT = ep(TYPE) + SHL(TYPE, IND_SHIFT);
         
         goto_NOT_MULTIPLE = False
-        if EP(TYPE) < 0:
+        if ep(TYPE) < 0:
             goto_NOT_MULTIPLE = True
-        if not goto_NOT_MULTIPLE and BYTE(E_LINE(TYPE), INDEX) == BYTE(g.X1):
-            if BYTE(E_STACK(TYPE), EP(TYPE)) == BYTE(g.X1):
-                E_IND(POINT, E_IND(POINT) + 1);
+        if not goto_NOT_MULTIPLE and BYTE(e_line(TYPE), INDEX) == BYTE(g.X1):
+            if BYTE(e_stack(TYPE), ep(TYPE)) == BYTE(g.X1):
+                e_ind(POINT, e_ind(POINT) + 1);
                 return
         # NOT_MULTIPLE is here!
-        EP(TYPE, EP(TYPE) + 1);
-        if EP(TYPE) > IND_LIM:
+        ep(TYPE, ep(TYPE) + 1);
+        if ep(TYPE) > IND_LIM:
             if TYPE == 0:
-                ERROR(CLASS_ME,1);
+                ERROR(d.CLASS_ME,1);
             elif TYPE == 1:
-                ERROR(CLASS_MS,1);
+                ERROR(d.CLASS_MS,1);
         POINT = POINT + 1;
-        CHAR_TEMP = SUBSTR(E_LINE(TYPE), INDEX, 1);
+        CHAR_TEMP = SUBSTR(e_line(TYPE), INDEX, 1);
         if CHAR_TEMP != g.X1:
             g.NONBLANK_FOUND = g.TRUE;
-        E_STACK(TYPE, E_STACK(TYPE) + CHAR_TEMP);
-        E_IND(POINT, E_INDICATOR(INDEX + SHL(TYPE, IND_SHIFT)));    
+        e_stack(TYPE, e_stack(TYPE) + CHAR_TEMP);
+        print("ST TYPE=%d INDEX=%d IND_SHIFT=%d" % (TYPE, INDEX, IND_SHIFT))
+        e_ind(POINT, e_indicator(INDEX + SHL(TYPE, IND_SHIFT)));    
     
     def BUILD_XSCRIPTS():
         nonlocal M_LINE, M_BLANKS, S_STACK, E_STACK, S_BLANKS, E_BLANKS, SP, \
@@ -1019,13 +1136,13 @@ def STREAM():
                 S_STACK = SUBSTR(S_STACK, 0, SP);
             else:
                 S_STACK = '';
-            S_BLANKS = S_IND(SP);
+            S_BLANKS = s_ind(SP);
         if BYTE(E_STACK, EP) == BYTE(g.X1):
             if EP > 0:
                 E_STACK = SUBSTR(E_STACK, 0, EP);
             else:
                 E_STACK = '';
-            E_BLANKS = E_IND(EP);
+            E_BLANKS = e_ind(EP);
         if E_BLANKS >= S_BLANKS:
             M_BLANKS = S_BLANKS;
         else:
@@ -1051,7 +1168,7 @@ def STREAM():
                 while firstTry or goto_PARM_DONE:
                     firstTry = False
                     if not goto_PARM_DONE and PARM_EXPAN_LEVEL>=PARM_EXPAN_LIMIT:
-                        ERROR(CLASS_IR,6, 0);
+                        ERROR(d.CLASS_IR,6, 0);
                         g.MACRO_EXPAN_LEVEL,PARM_EXPAN_LEVEL,g.MACRO_FOUND=0;
                         goto_MACRO_DONE = True
                     elif not goto_PARM_DONE and \
@@ -1136,7 +1253,7 @@ def STREAM():
                 RETURN_CHAR[II] = RETURN_CHAR[II] - 1;
                 g.NEXT_CHAR = TYPE_CHAR(II);
                 g.OVER_PUNCH = 0;
-                print("SA")
+                print("SA.1")
                 return;
         II = 0;
         if ARROW_FLAG:
@@ -1144,7 +1261,7 @@ def STREAM():
             g.NEXT_CHAR = SAVE_NEXT_CHAR1;
             g.OVER_PUNCH = SAVE_OVER_PUNCH1;
             g.BLANK_COUNT = SAVE_BLANK_COUNT1;
-            print("SB")
+            print("SA.2")
             return;
         if g.GROUP_NEEDED:
             GET_GROUP();
@@ -1152,9 +1269,13 @@ def STREAM():
             g.GROUP_NEEDED = g.FALSE;
         goto_BEGINNING = True
         while goto_BEGINNING:
+            print("SB.0")
             goto_BEGINNING = False
             if RETURNING_M:
+                print("SB.M M_BLANKS=%d INDEX=%d M_LINE=\"%s\" byte=%d" \
+                      % (M_BLANKS, INDEX, M_LINE, BYTE(M_LINE, INDEX)))
                 if M_BLANKS >= 0:
+                    print("SB.M.1")
                     g.NEXT_CHAR = BYTE(g.X1);
                     ARROW = -LAST_E_IND;
                     LAST_E_IND = 0;
@@ -1162,10 +1283,12 @@ def STREAM():
                     M_BLANKS = -1;
                     break # GO TO FOUND_CHAR;
                 if BYTE(M_LINE, INDEX) != BYTE(g.X1):
+                    print("SB.M.2 E_COUNT=%d S_COUNT=%d ARROW=%d" \
+                          % (E_COUNT,S_COUNT,-LAST_E_IND))
                     if E_COUNT > 0:
                         if BYTE(E_LINE, INDEX) != BYTE(g.X1):
-                           if E_INDICATOR(INDEX) != 1:
-                               ERROR(CLASS_ME,3);
+                           if e_indicator(INDEX) != 1:
+                               ERROR(d.CLASS_ME,3);
                            else:
                                g.OVER_PUNCH = BYTE(E_LINE, INDEX);
                         else:
@@ -1174,7 +1297,7 @@ def STREAM():
                         g.OVER_PUNCH = 0;
                     if S_COUNT > 0:
                         if BYTE(S_LINE, INDEX) != BYTE(g.X1):
-                            ERROR(CLASS_MS,3);
+                            ERROR(d.CLASS_MS,3);
                     ARROW = -LAST_E_IND;
                     LAST_E_IND = 0;
                     if not g.INCLUDING:
@@ -1186,9 +1309,11 @@ def STREAM():
                             g.RVL[0] = g.NEXT_CHAR_RVL;
                         g.NEXT_CHAR_RVL = g.RVL[1];
                     g.NEXT_CHAR = BYTE(M_LINE, INDEX);
+                    print("SB.M.2A NEXT_CHAR=%d" % g.NEXT_CHAR)
                     CHOP();
                     break # GO TO FOUND_CHAR;
                 else:
+                    print("SB.M.3")
                     BUILD_XSCRIPTS();
                     g.OVER_PUNCH = 0;
                     RETURNING_M = g.FALSE;
@@ -1196,18 +1321,19 @@ def STREAM():
                     RETURNING_S = g.TRUE;
                     PNTR = 0;
             if RETURNING_S:
+                print("SB.S")
                 if LENGTH(S_STACK) > 0 and PNTR < LENGTH(S_STACK):
                     if BYTE(S_STACK, PNTR) == BYTE(g.X1):
-                        if S_IND(PNTR) >= 0: # MORE LEFT
+                        if s_ind(PNTR) >= 0: # MORE LEFT
                             g.NEXT_CHAR = BYTE(g.X1);
-                            g.BLANK_COUNT = S_IND(PNTR);
+                            g.BLANK_COUNT = s_ind(PNTR);
                             PNTR = PNTR + 1;
-                            ARROW = LAST_S_IND - S_IND(PNTR);
-                            LAST_S_IND = S_IND(PNTR);
+                            ARROW = LAST_S_IND - s_ind(PNTR);
+                            LAST_S_IND = s_ind(PNTR);
                     else:   # A NON-BLANK
                         g.NEXT_CHAR = BYTE(S_STACK, PNTR);
-                        ARROW = LAST_S_IND - S_IND(PNTR);
-                        LAST_S_IND = S_IND(PNTR);
+                        ARROW = LAST_S_IND - s_ind(PNTR);
+                        LAST_S_IND = s_ind(PNTR);
                         PNTR = PNTR + 1;
                     break # GO TO FOUND_CHAR;
                 else:    # CAN'T RETURN S 
@@ -1216,24 +1342,27 @@ def STREAM():
                     LAST_E_IND = -LAST_S_IND;
                     PNTR = 0;
             if RETURNING_E:
+                print("SB.E")
                 if LENGTH(E_STACK) > 0 and PNTR < LENGTH(E_STACK):
                     if BYTE(E_STACK, PNTR) == BYTE(g.X1):
-                        if E_IND(PNTR) >= 0: # MORE TO GO
+                        if e_ind(PNTR) >= 0: # MORE TO GO
                             g.NEXT_CHAR = BYTE(g.X1);
-                            g.BLANK_COUNT = E_IND(PNTR);
+                            g.BLANK_COUNT = e_ind(PNTR);
                             PNTR = PNTR + 1;
-                            ARROW = E_IND(PNTR) - LAST_E_IND;
-                            LAST_E_IND = E_IND(PNTR);
+                            ARROW = e_ind(PNTR) - LAST_E_IND;
+                            LAST_E_IND = e_ind(PNTR);
                     else: # A NON-BLANK
                         g.NEXT_CHAR = BYTE(E_STACK, PNTR);
-                        ARROW = E_IND(PNTR) - LAST_E_IND;
-                        LAST_E_IND = E_IND(PNTR);
+                        ARROW = e_ind(PNTR) - LAST_E_IND;
+                        LAST_E_IND = e_ind(PNTR);
                         PNTR = PNTR + 1;
                     break # GO TO FOUND_CHAR;
                 else: # CAN'T RETURN E 
                     RETURNING_E = g.FALSE;
                     RETURNING_M = g.TRUE;
             goto_BEGINNING = True
+            print("SB GO TO BEGINNING, RETURNING_E=%d _M=%d _S=%d" % \
+                  (RETURNING_E, RETURNING_M, RETURNING_E))
             continue
         # FOUND_CHAR was here!
         if ARROW != 0:
@@ -1253,14 +1382,14 @@ def STREAM():
                     else:
                         goto_EXPONENT = False
                         if ARROW > 1:
-                            ERROR(CLASS_ME,2);
+                            ERROR(d.CLASS_ME,2);
                         STACK_RETURN_CHAR(2, BYTE('*'));
                         STACK_RETURN_CHAR(ARROW, BYTE('('));
                 elif goto_SUBS or g.OLD_LEVEL == 0:
                     if goto_SUBS or ARROW < 0:
                         goto_SUBS = False
                         if ARROW < -1:
-                            ERROR(CLASS_MS,2);
+                            ERROR(d.CLASS_MS,2);
                         STACK_RETURN_CHAR(1, BYTE('$'));
                         STACK_RETURN_CHAR(-ARROW, BYTE('('));
                     else:
@@ -1275,11 +1404,11 @@ def STREAM():
                     else:
                         STACK_RETURN_CHAR(-g.OLD_LEVEL, BYTE(')'));
                         if g.NEW_LEVEL > 1:
-                            ERROR(CLASS_ME,2);
+                            ERROR(d.CLASS_ME,2);
                         STACK_RETURN_CHAR(2, BYTE('*'));
                         STACK_RETURN_CHAR(g.NEW_LEVEL, BYTE('('));
             ARROW = 0;
             goto_STACK_CHECK = True
             continue
-    print("SC")
+    print("SC NEXT_CHAR=%d OVER_PUNCH=%d" % (g.NEXT_CHAR, g.OVER_PUNCH))
     return;

@@ -11,6 +11,7 @@ History:    2023-08-31 RSB  Created a stub.
 
 from xplBuiltins import *
 import g
+import HALINCL.CERRDECL as d
 from ERROR import ERROR
 from STREAM import STREAM
 from HEX import HEX
@@ -273,11 +274,11 @@ def SCAN():
                 HOLD_CHAR = SHR(TRANS_IN(CHAR), 8) & 0xFF;  # LEVEL 2 ESCAPE
             if HOLD_CHAR == 0x00:
                 if g.OVER_PUNCH != VALID_00_OP or CHAR != VALID_00_CHAR:
-                    ERROR(CLASS_MO, 6, HEX(CHAR, 2));
+                    ERROR(d.CLASS_MO, 6, HEX(CHAR, 2));
                     return CHAR;
             return HOLD_CHAR;
         else: # ILLEGAL OVER PUNCH */
-            ERROR(CLASS_MO, 1, HEX(CHAR, 2));
+            ERROR(d.CLASS_MO, 1, HEX(CHAR, 2));
             return CHAR;  # NO TRANSLATION 
 
     def BUILD_BCD():
@@ -299,7 +300,7 @@ def SCAN():
         D_QUOTE_FLAG = g.FALSE;
         CENT_FLAG= g.FALSE;
         
-        if VAR_LENGTH[SYT_INDEX]==0:
+        if VAR_LENGTH[g.SYT_INDEX]==0:
            LAST_ARG = g.TRUE;
         else:
             if g.NEXT_CHAR == BYTE('('):
@@ -332,14 +333,14 @@ def SCAN():
                                         if QUOTE_FLAG==g.FALSE:
                                             break;
                         if LENGTH(g.TEMP_STRING) == 250:
-                           ERROR(CLASS_IR,7);
+                           ERROR(d.CLASS_IR,7);
                            return;
-                        g.ONE_BYTE = chr(g.NEXT_CHAR);
+                        ONE_BYTE = BYTE(ONE_BYTE, 0, g.NEXT_CHAR);
                         g.TEMP_STRING = g.TEMP_STRING + g.ONE_BYTE;
                         if g.NEXT_CHAR == BYTE(g.X1):
                             if g.BLANK_COUNT > 0:
                                 if (LENGTH(g.TEMP_STRING)+g.BLANK_COUNT) > 250:
-                                    ERROR(CLASS_IR,7);
+                                    ERROR(d.CLASS_IR,7);
                                     return;
                                 else:
                                     for K in range(1, g.BLANK_COUNT+1):
@@ -359,7 +360,7 @@ def SCAN():
             else:
                 LAST_ARG = g.TRUE;
         if ARG_COUNT != g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL+1] or LAST_ARG == g.FALSE:
-            ERROR(CLASS_IR,8);
+            ERROR(d.CLASS_IR,8);
             return;
         noBackup = False
         if g.NEXT_CHAR==BYTE('`'):
@@ -424,7 +425,6 @@ def SCAN():
     But when a "GO TO" is in progress, precisely one of them will be True,
     and will be reset to False immediately when the target position is reached.
     '''
-    
     goto_SCAN_END = False
     goto_SCAN_TOP = False
     goto_SCAN_START = False
@@ -439,27 +439,31 @@ def SCAN():
         ''' 
         The stuff below isn't looped in the original code.  It's
         a workaround to implement some of the goto_XXXX jumps 
-        described above. 
+        described above, which tend to jump right into the middle 
+        of blocks. 
         '''
         
         if not (goto_SCAN_END or goto_DEC_POINT_ENTRY) \
                 or goto_SCAN_TOP or goto_SCAN_START:
             if goto_SCAN_TOP: # CONTROL RETURNED HERE FROM COMMENT SEARCH
+                print("SC @ SCAN_TOP:")
                 goto_SCAN_TOP = False
             
             if not goto_SCAN_START:
+                print("SC A", g.SCAN_COUNT, CHAR_NEEDED)
                 g.SCAN_COUNT = g.SCAN_COUNT + 1;
                 if CHAR_NEEDED:
                     STREAM();
                     CHAR_NEEDED = g.FALSE;
             else:
+                print("SC B SCAN_START:")
                 goto_SCAN_START = False
                 
             g.M_TOKENS[g.MACRO_EXPAN_LEVEL]=g.M_TOKENS[g.MACRO_EXPAN_LEVEL]+1;
             g.BCD = '';
-            FIXING=0;
+            g.FIXING=0;
             g.VALUE = 0;
-            SYT_INDEX = 0;
+            g.SYT_INDEX = 0;
             g.RESERVED_WORD = g.TRUE;
             g.IMPLIED_TYPE = 0;
         
@@ -476,24 +480,27 @@ def SCAN():
                         g.SRN[1]=g.SRN[0];
                         g.INCL_SRN[1] = g.INCL_SRN[0];
                         g.SRN_COUNT[1]=g.SRN_COUNT[0];
+                print("SC B.1", g.NEXT_CHAR)
                 ct = g.CHARTYPE[g.NEXT_CHAR]
                 
             # DO CASE CHARTYPE(g.NEXT_CHAR);
             if ct == 0:
+                print("SC C", g.NEXT_CHAR, "ILLEGAL CHARACTERS")
                 # CASE 0--ILLEGAL CHARACTERS
                 g.C[0] = HEX(g.NEXT_CHAR, 2);
-                ERROR(CLASS_DT,4,g.C[0]);
+                ERROR(d.CLASS_DT,4,g.C[0]);
                 if g.OVER_PUNCH != 0:
-                   ERROR(CLASS_MO,1);
-                STREAM()();
+                   ERROR(d.CLASS_MO,1);
+                STREAM();
             elif ct == 1:
+                print("SC C", g.NEXT_CHAR, "DIGITS")
                 # CASE 1--DIGITS
                 if not goto_DEC_POINT_ENTRY:
                     g.RESERVED_WORD = g.FALSE
                     DEC_POINT = g.FALSE;
                     BUILD_BCD();
                     if g.OVER_PUNCH != 0:
-                        ERROR(CLASS_MO,1);
+                        ERROR(d.CLASS_MO,1);
                     STREAM();
                     g.TOKEN = NUMBER;
                     if g.NEXT_CHAR==BYTE(g.X1) or g.NEXT_CHAR==BYTE(')'):
@@ -513,7 +520,7 @@ def SCAN():
                     while g.CHARTYPE[DIGIT] == 1:
                         if not goto_SIG_CHECK:
                             if g.OVER_PUNCH != 0:
-                               ERROR(CLASS_MO,1);
+                               ERROR(d.CLASS_MO,1);
                             BUILD_BCD();
                             BUILD_INTERNAL_BCD();
                         else:
@@ -540,16 +547,16 @@ def SCAN():
                     if DIGIT == BYTE(PERIOD):
                         if DEC_POINT:
                             BUILD_BCD();
-                            ERROR(CLASS_LF,2);
+                            ERROR(d.CLASS_LF,2);
                             if g.OVER_PUNCH != 0:
-                                ERROR(CLASS_MO,1);
+                                ERROR(d.CLASS_MO,1);
                             goto_GET_NEW_CHAR = True;
                             continue
                         DEC_POINT = g.TRUE;
                         BUILD_BCD();
                         BUILD_INTERNAL_BCD();
                         if g.OVER_PUNCH != 0:
-                            ERROR(CLASS_MO,1);
+                            ERROR(d.CLASS_MO,1);
                         goto_GET_NEW_CHAR = True;
                         continue;
         
@@ -575,7 +582,7 @@ def SCAN():
                                 else:
                                     goto_EXP_CHECK = False
                                 if g.OVER_PUNCH != 0:
-                                    ERROR(CLASS_MO,1);
+                                    ERROR(d.CLASS_MO,1);
                                 BUILD_BCD();
                                 BUILD_INTERNAL_BCD();
                                 STREAM();
@@ -585,7 +592,7 @@ def SCAN():
                                     EXP_SIGN = DIGIT;
                                     goto_EXP_CHECK = True;
                                     continue;
-                                ERROR(CLASS_LF, 1);
+                                ERROR(d.CLASS_LF, 1);
                                 goto_RESET_LITERAL = True
                                 break
                             else:
@@ -605,7 +612,7 @@ def SCAN():
                     if not goto_NUMBER_DONE:
                         if goto_RESET_LITERAL or EXP_DIGITS <= 0:
                             if not goto_RESET_LITERAL:
-                                ERROR(CLASS_LF,5);
+                                ERROR(d.CLASS_LF,5);
                             else:
                                 goto_RESET_LITERAL = False;
                             INTERNAL_BCD = SUBSTR(INTERNAL_BCD, 0, EXP_BEGIN - 1);
@@ -614,15 +621,16 @@ def SCAN():
                         goto_NUMBER_DONE = False
                 
                 if SIG_DIGITS > 74:
-                    ERROR(CLASS_LF,3);
+                    ERROR(d.CLASS_LF,3);
                 g.EXP_OVERFLOW = MONITOR(10, INTERNAL_BCD);  # CONVERT THE NUMBER
                 if g.EXP_OVERFLOW:
-                    ERROR(CLASS_LC, 2, g.BCD);
+                    ERROR(d.CLASS_LC, 2, g.BCD);
                 PREP_LITERAL();
                 goto_SCAN_END = True;
                 # END OF CASE 1
                 
             elif ct == 2:
+                print("SC C", g.NEXT_CHAR, "INDENTS & RESERVED WORDS")
                 # CASE 2--LETTERS=IDENTS & RESERVED WORDS
                 if not goto_CENT_START:
                     g.STRING_OVERFLOW = g.FALSE;
@@ -643,7 +651,7 @@ def SCAN():
                                 BUILD_BCD();
                                 if g.OVER_PUNCH != 0:
                                     if g.IMPLIED_TYPE > 0:
-                                        ERROR(CLASS_MO,3);
+                                        ERROR(d.CLASS_MO,3);
                                     else:
                                         for g.I in range(1, OVER_PUNCH_SIZE+1):
                                             if g.OVER_PUNCH == OVER_PUNCH_TYPE(g.I):
@@ -651,12 +659,12 @@ def SCAN():
                                                 goto_NEW_CHAR = True;
                                                 break;
                                         if not goto_NEW_CHAR:
-                                            ERROR(CLASS_MO,4);
+                                            ERROR(d.CLASS_MO,4);
                                             g.OVER_PUNCH = 0;
                             else:
                                 # TOO MANY CHARACTERS IN IDENT
                                 if not g.STRING_OVERFLOW:
-                                    ERROR(CLASS_IL,2);
+                                    ERROR(d.CLASS_IL,2);
                                     g.STRING_OVERFLOW = g.TRUE;
                             goto_NEW_CHAR = False;
                             STREAM();
@@ -666,7 +674,7 @@ def SCAN():
                     else:
                         if S1:
                             if g.NEXT_CHAR != BYTE('`'):
-                                ERROR(CLASS_IL, 1);
+                                ERROR(d.CLASS_IL, 1);
                         goto_FOUND_TOKEN = True;
                         break;
                 # OF DO FOREVER
@@ -689,7 +697,7 @@ def SCAN():
                                 if g.S == g.BCD:
                                     g.TOKEN = g.I;
                                     if g.IMPLIED_TYPE > 0:
-                                        ERROR(CLASS_MC,4,g.BCD);
+                                        ERROR(d.CLASS_MC,4,g.BCD);
                                     g.I = SET_CONTEXT(g.I);
                                     if g.I > 0:
                                         if g.TOKEN==TEMPORARY:
@@ -821,7 +829,7 @@ def SCAN():
                     else:
                         g.S = g.TOKEN;
                     OUTPUT(0, g.BCD + ' :  TOKEN = ' + g.S + ', IMPLIED_TYPE = ' \
-                                + g.IMPLIED_TYPE + ', SYT_INDEX = ' + SYT_INDEX \
+                                + g.IMPLIED_TYPE + ', g.SYT_INDEX = ' + g.SYT_INDEX \
                                 + ', CONTEXT = ' + g.CONTEXT);
                 if g.MACRO_FOUND:
                     if g.OLD_PEL!=g.PARM_REPLACE_PTR:
@@ -853,7 +861,7 @@ def SCAN():
                         while g.NEXT_CHAR==BYTE(g.X1):
                            STREAM();
                         if g.MACRO_EXPAN_LEVEL+1 > MACRO_EXPAN_LIMIT:
-                            ERROR(CLASS_IR,9,g.BCD);
+                            ERROR(d.CLASS_IR,9,g.BCD);
                             g.MACRO_EXPAN_LEVEL = 0
                             g.PARM_REPLACE_PTR = 0
                             g.MACRO_FOUND=0;
@@ -861,7 +869,7 @@ def SCAN():
                             g.OVER_PUNCH=g.SAVE_OVER_PUNCH;
                             g.PRINTING_ENABLED=PRINT_FLAG;
                             return;
-                        MACRO_EXPAN_STACK(g.MACRO_EXPAN_LEVEL+1, SYT_INDEX);
+                        MACRO_EXPAN_STACK(g.MACRO_EXPAN_LEVEL+1, g.SYT_INDEX);
                         if g.PRINTING_ENABLED==PRINT_FLAG:
                             g.RESTORE=PRINT_FLAG;
                             if g.FOUND_CENT:
@@ -876,7 +884,7 @@ def SCAN():
                         g.GRAMMAR_FLAGS[STMT_PTR] = g.GRAMMAR_FLAGS[STMT_PTR] \
                                                     or MACRO_ARG_FLAG;
                         g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL+1]= \
-                            VAR_LENGTH(SYT_INDEX);
+                            VAR_LENGTH(g.SYT_INDEX);
                         PARAMETER_PROCESSING();
                         g.PRINTING_ENABLED=g.PASS;
                         if g.TEMP_STRING == '':
@@ -885,7 +893,7 @@ def SCAN():
                            g.M_CENT(g.MACRO_EXPAN_LEVEL, g.FOUND_CENT);
                            g.M_PRINT(g.MACRO_EXPAN_LEVEL, g.RESTORE);
                            g.FOUND_CENT=g.FALSE;
-                           g.MACRO_POINT = SYT_ADDR(SYT_INDEX);
+                           g.MACRO_POINT = SYT_ADDR(g.SYT_INDEX);
                            if g.MACRO_EXPAN_LEVEL == 1:
                               g.MACRO_FOUND = g.TRUE ;
                               g.SAVE_NEXT_CHAR=g.NEXT_CHAR;
@@ -909,7 +917,7 @@ def SCAN():
             elif ct == 3:
                 # CASE 3--SPECIAL SINGLE CHARACTERS 
                 if g.OVER_PUNCH != 0:
-                    ERROR(CLASS_MO,1);
+                    ERROR(d.CLASS_MO,1);
                 g.TOKEN = TX(g.NEXT_CHAR);
                 CHAR_NEEDED = g.TRUE;
                 goto_SCAN_END = True
@@ -917,10 +925,11 @@ def SCAN():
                 # END OF CASE 3 
                
             elif ct == 4:
+                print("SC C", g.NEXT_CHAR, "PERIOD")
                 # CASE 4--PERIOD
                 # COULD BE DOT PRODUCT OR DECIMAL POINT
                 if g.OVER_PUNCH != 0:
-                    ERROR(CLASS_MO,1);
+                    ERROR(d.CLASS_MO,1);
                 BUILD_BCD();
                 STREAM();
                 if g.CHARTYPE[g.NEXT_CHAR] == 1:
@@ -929,7 +938,7 @@ def SCAN():
                     g.TOKEN = NUMBER;
                     DIGIT = g.NEXT_CHAR;
                     if g.OVER_PUNCH != 0:
-                        ERROR(CLASS_MO,1);
+                        ERROR(d.CLASS_MO,1);
                     g.RESERVED_WORD = g.FALSE;
                     goto_DEC_POINT_ENTRY = True;
                     break;
@@ -939,11 +948,12 @@ def SCAN():
                 # END OF CASE 4
                 
             elif ct == 5:
+                print("SC C", g.NEXT_CHAR, "SINGLE QUOTE")
                 # CASE 5--SINGLE QUOTE = CHARACTER LITERAL
                 g.I = 0;
                 g.STRING_OVERFLOW, g.RESERVED_WORD = g.FALSE;
                 if g.OVER_PUNCH != 0:
-                    ERROR(CLASS_MO, 5);
+                    ERROR(d.CLASS_MO, 5);
                 g.TOKEN = CHARACTER_STRING;
                 goto_CHECK = True;
                 goto_BUILD = False;
@@ -959,7 +969,7 @@ def SCAN():
                                 if LENGTH(g.BCD) < CHAR_LENGTH_LIM:
                                     BUILD_BCD();
                                 else:
-                                    ERROR(CLASS_LS,1);
+                                    ERROR(d.CLASS_LS,1);
                                     # Originally the label STR_TOO_LONG
                                     # preceded the following code.
                                     g.STRING_OVERFLOW = g.TRUE;
@@ -973,12 +983,12 @@ def SCAN():
                         while g.NEXT_CHAR == ESCP:
                             ESCAPE_LEVEL = ESCAPE_LEVEL + 1;
                             if g.OVER_PUNCH != 0:
-                                ERROR(CLASS_MO, 8);
+                                ERROR(d.CLASS_MO, 8);
                             STREAM();
                         TEMP_CHAR = CHAR_OP_CHECK(g.NEXT_CHAR);
                         if ESCAPE_LEVEL >= 0:
                             if ESCAPE_LEVEL > 1:
-                                ERROR(CLASS_MO, 7, HEX(g.NEXT_CHAR, 2));
+                                ERROR(d.CLASS_MO, 7, HEX(g.NEXT_CHAR, 2));
                                 ESCAPE_LEVEL = 1;
                             g.OVER_PUNCH = CHAR_OP(ESCAPE_LEVEL);
                             if g.NEXT_CHAR == BYTE(g.X1):   # HANDLE MULT BLANKS CAREFULLY
@@ -1010,13 +1020,14 @@ def SCAN():
                         goto_SCAN_END = True;
                         break;
                     if g.OVER_PUNCH != 0:
-                        ERROR(CLASS_MO,1);
+                        ERROR(d.CLASS_MO,1);
                     goto_BUILD = True;
                 if goto_SCAN_END:
                     break;
                 # END OF CASE 5
                 
             elif ct == 6:
+                print("SC C", g.NEXT_CHAR, "BLANK")
                 # CASE 6--BLANK
                 while g.NEXT_CHAR == BYTE(g.X1):  
                     g.DONT_SET_WAIT = g.TRUE;
@@ -1025,16 +1036,17 @@ def SCAN():
                 # OF CASE 6
                
             elif ct == 7:
+                print("SC C", g.NEXT_CHAR, "| or ||")
                 # CASE 7--'|' OR'||' 
                 g.TOKEN = TX(g.NEXT_CHAR);
                 if g.OVER_PUNCH != 0:
-                    ERROR(CLASS_MO,1);
+                    ERROR(d.CLASS_MO,1);
                 STREAM();
                 if g.NEXT_CHAR != BYTE('|'):
                     goto_SCAN_END = True;
                     break;
                 if g.OVER_PUNCH != 0:
-                    ERROR(CLASS_MO,1);
+                    ERROR(d.CLASS_MO,1);
                 g.TOKEN = CONCATENATE;
                 STREAM();
                 goto_SCAN_END = True;
@@ -1042,16 +1054,17 @@ def SCAN():
                 # END OF CASE 7
                
             elif ct == 8:
+                print("SC C", g.NEXT_CHAR, "* or **")
                 # CASE 8--'*' OR '**'
                 g.TOKEN = TX(g.NEXT_CHAR);
                 if g.OVER_PUNCH != 0:
-                    ERROR(CLASS_MO,1);
+                    ERROR(d.CLASS_MO,1);
                 STREAM();
                 if g.NEXT_CHAR != BYTE('*'):
                     goto_SCAN_END = True;
                     break;
                 if g.OVER_PUNCH != 0:
-                    ERROR(CLASS_MO,1);
+                    ERROR(d.CLASS_MO,1);
                 g.TOKEN = EXPONENTIATE;
                 STREAM();
                 goto_SCAN_END = True;
@@ -1059,6 +1072,7 @@ def SCAN():
                 # END OF CASE 8
                
             elif ct == 9:
+                print("SC C", g.NEXT_CHAR, "EOF")
                 # CASE 9--HEX'FE' = EOF
                 g.TOKEN = EOFILE;
                 STREAM();
@@ -1067,12 +1081,14 @@ def SCAN():
                 # END OF CASE 9
                
             elif ct == 10:
+                print("SC C", g.NEXT_CHAR, "SPECIALS AS BLANKS")
                 # CASE 10--SPECIAL CHARACTERS TREATED AS BLANKS */
                 g.NEXT_CHAR = BYTE(g.X1);
                 g.BLANK_COUNT = 0;
                 # END OF CASE 10 
                
             elif ct == 11:
+                print("SC C", g.NEXT_CHAR, "DOUBLE QUOTES")
                 # CASE 11--DOUBLE QUOTES FOR REPLACE DEFINITION
                 g.TOKEN = REPLACE_TEXT;
                 g.TEMP_STRING=g.X1;
@@ -1112,6 +1128,7 @@ def SCAN():
                 # END OF CASE 11
                 
             elif ct == 12:
+                print("SC C", g.NEXT_CHAR, "%")
                 #  CASE 12 - % FOR %MACROS
                 g.RESERVED_WORD = g.FALSE;
                 g.STRING_OVERFLOW=g.FALSE;
@@ -1122,23 +1139,24 @@ def SCAN():
                     else:
                         g.STRING_OVERFLOW=g.TRUE;
                     if g.OVER_PUNCH!=0:
-                        ERROR(CLASS_MO,1);
+                        ERROR(d.CLASS_MO,1);
                     STREAM();
                     if not LETTER_OR_DIGIT(g.NEXT_CHAR):
                         if g.STRING_OVERFLOW:
-                            ERROR(CLASS_IL,2);
+                            ERROR(d.CLASS_IL,2);
                         S1=LENGTH(g.BCD);
-                        for SYT_INDEX in range(1, PC_INDEX+1):
-                           if SUBSTR(PCNAME,SHL(SYT_INDEX,4),S1)==g.BCD:
+                        for g.SYT_INDEX in range(1, PC_INDEX+1):
+                           if SUBSTR(PCNAME,SHL(g.SYT_INDEX,4),S1)==g.BCD:
                                 goto_SCAN_END = True;
                                 break;
-                        ERROR(CLASS_XM,1,g.BCD);
-                        SYT_INDEX=0;
+                        ERROR(d.CLASS_XM,1,g.BCD);
+                        g.SYT_INDEX=0;
                         goto_SCAN_END = True;
                         break;
                 # END OF CASE 12
                
             elif ct == 13:
+                print("SC C", g.NEXT_CHAR, "CENT")
                 #  CASE 13 - ¢ FOR ¢MACROS
                 # ... replaced already in this ASCII port by `.
                 if goto_CASE13:
@@ -1168,12 +1186,12 @@ def SCAN():
                             if g.SOME_BCD=='':
                                 goto_SCAN_START = True;
                                 break;
-                            SYT_INDEX=0;
+                            g.SYT_INDEX=0;
                             g.BCD=g.SOME_BCD;
                             goto_CENT_START = True;
                             break;
                         else:
-                            ERROR(CLASS_IR,4,g.BCD);
+                            ERROR(d.CLASS_IR,4,g.BCD);
                             goto_SCAN_START = True;
                             break;
                 else:
@@ -1183,11 +1201,13 @@ def SCAN():
                         goto_SCAN_START = True;
                         break;
                     else:
-                        ERROR(CLASS_IR,4,g.BCD);
+                        ERROR(d.CLASS_IR,4,g.BCD);
                         goto_SCAN_START = True;
                         break;
                 #  END OF CASE 13  */
-                
+            else:
+                print("SC C", g.NEXT_CHAR, "UKNOWN")
+
             # END OF DO CASE...
             if goto_SCAN_END or goto_CENT_START:
                 break
@@ -1204,9 +1224,9 @@ def SCAN():
                 g.COMMENT_COUNT = g.COMMENT_COUNT + 1;
                 if g.COMMENT_COUNT >= 256:
                     if g.COMMENT_COUNT == 256:
-                        ERROR(CLASS_M, 3);
+                        ERROR(d.CLASS_M, 3);
                 COMMENT_PTR = MIN(g.COMMENT_COUNT, 255);
-                BYTE(SAVE_COMMENT, COMMENT_PTR, g.NEXT_CHAR);
+                SAVE_COMMENT = BYTE(SAVE_COMMENT, COMMENT_PTR, g.NEXT_CHAR);
         
         goto_SCAN_END = True;
         goto_TEST_SEARCH = False;
@@ -1258,7 +1278,7 @@ def SCAN():
                 break
             
             while g.NEXT_CHAR == BYTE(g.X1):
-                if g.M_TOKENS(g.MACRO_EXPAN_LEVEL) <= 1:
+                if g.M_TOKENS[g.MACRO_EXPAN_LEVEL] <= 1:
                     return;
                 if g.GROUP_NEEDED and g.MACRO_EXPAN_LEVEL==0:
                     CHAR_NEEDED = g.TRUE;
@@ -1273,7 +1293,7 @@ def SCAN():
                 goto_TEST_SEARCH = True;
                 continue
             if g.OVER_PUNCH != 0:
-                ERROR(CLASS_MO, 1);
+                ERROR(d.CLASS_MO, 1);
             STREAM();  # LOOK AT NEXT CHAR
             if g.NEXT_CHAR != BYTE('*'):  # NOT REALLY A COMMENT
                 CHAR_ALREADY_SCANNED = g.NEXT_CHAR;
@@ -1284,7 +1304,7 @@ def SCAN():
         
             # IF WE GET HERE, WE HAVE A GENUINE COMMENT
             if g.OVER_PUNCH != 0:
-                ERROR(CLASS_MO, 1);
+                ERROR(d.CLASS_MO, 1);
             goto_SEARCH_NEXT_CHAR = False;
             goto_STORE_NEXT_CHAR = True;
             while goto_STORE_NEXT_CHAR:
@@ -1301,7 +1321,7 @@ def SCAN():
                         break;
                     STREAM();
                     if g.OVER_PUNCH != 0:
-                        ERROR(CLASS_MO, 1);
+                        ERROR(d.CLASS_MO, 1);
                 if goto_SET_SEARCH:
                     continue
                 

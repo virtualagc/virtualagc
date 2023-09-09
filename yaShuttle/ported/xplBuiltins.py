@@ -20,6 +20,7 @@ from copy import deepcopy
 from decimal import Decimal, ROUND_HALF_UP
 import json
 import math
+import ebcdic
 
 # Python's native round() function uses a silly method (in the sense that it is
 # unlike the expectation of every programmer who ever lived) called 'banker's
@@ -77,7 +78,8 @@ outputDevices = ["blob", "blob", "blob", "blob", "blob", "pds", "pds", "blob",
 dummy = sys.stdin.readlines() # Source code.
 for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬","~")\
-                        .replace("^","~").replace("¢","`").expandtabs(8)
+                        .replace("^","~").replace("¢","`").expandtabs(8)\
+                        .ljust(80)
 inputDevices[0] = {
     "file": sys.stdin,
     "open": True,
@@ -485,12 +487,6 @@ def SUBSTR(de, ne, ne2=None):
 def STRING(s):
     return str(s)
 
-# STRING_GT() is completely undocumented, as far as I know.  I'm going to 
-# assume it's a string-comparison operation.  As to whether the particular
-# collation sequence is significant or not ...
-def STRING_GT(s1, s2):
-    return s1 > s2
-
 def LENGTH(s):
     return len(s)
 
@@ -505,21 +501,32 @@ def PAD(s, n):
 def MIN(a, b):
     return min(a, b)
 
-# It's a bit tricky what to do with this.  It's for sorting strings, mostly,
-# I think, but by returning the ord() of a string character, we're going to 
-# be enforcing an ASCII sorting order (well, actually a UTF-8 order, not that
-# that's different) rather than an EBCDIC one.  It remains
-# to be seen if that's the correct thing to do.  In general,
+# For BYTE() and STRING_GT(), the ebcdic module is used to interconvert between
+# strings and EBCDIC bytearrays.
+
+# If s is a string (in our case, always encoded as ASCII), i an integer, and
+# b a byte-code, then BYTE() has the following usages:
 #    BYTE(s)                Returns byte-value of s[0].
 #    BYTE(s,i)              Returns byte-value of s[i].
 #    BYTE(s,i,b)            Sets byte-value of s[i] to b.
+# Even though our strings are always encoded as ASCII, the byte-values 
+# we associate with the individual characters are always EBCDIC.  We 
+# therefore have to convert freely back and forth between EBCDIC and ASCII.
 # The documentation doesn't recognize the possibility that the string s is 
 # empty, and thus doesn't say what is supposed to be returned in that case.
 # However, this does sometimes occur.
+
 def BYTE(s, index=0, value=None):
     if value == None:
-        if index < 0 or index >= len(s):
-            return -1
-        return ord(s[index])
-    s = s[:index] + chr(value) + s[index+1:]
+        try:
+            return s[index].encode('cp1140')[0] # Get EBCDIC byte code.
+        except:
+            return 0
+    return s[:index] + bytearray([value]).decode('cp1140') + s[index+1:]
+
+# STRING_GT() is completely undocumented, as far as I know.  I'm going to 
+# assume it's a string-comparison operation.  As to whether the particular
+# collation sequence is significant or not ...
+def STRING_GT(s1, s2):
+    return s1.encode('cp1140') > s2.encode('cp1140')
 

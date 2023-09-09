@@ -68,7 +68,7 @@ def GET_SUBSET(SUBSET,FLAGS):
     def GET_TOKEN():
         nonlocal A_TOKEN, CP, I, S
         Tp = 3;
-        TERM = (0,ord('('),ord(')'),ord(','));
+        TERM = (0,BYTE('('),BYTE(')'),BYTE(','));
         A_TOKEN='';
         while True:
             CP=CP+1;

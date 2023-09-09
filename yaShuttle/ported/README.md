@@ -1,6 +1,6 @@
 # Introduction
 
-My plan for this folder (ported/) is to explore the idea of porting a portion of the original HAL/S-FC compiler from its XPL language form to the Python 3 language.
+My plan for this folder (ported/) is to port a portion of the original HAL/S-FC compiler from its XPL language form to the Python 3 language.
 
 This port will be of just the original compiler's PASS1 (or "phase 1"), which parses HAL/S source code and produces output in the form of the HALMAT intermediate language.  Since only 20% of HALMAT's documentation has survived, the output-code generator will have to be augmented to additionally produce my own intermediate language, PALMAT.  PALMAT is directly executable on my emulator.
 
@@ -54,9 +54,18 @@ In addition to the usual alphanumeric and underline characters, identifiers in X
 
 For example, the global variable `MAXR#` becomes `g.MAXRp`.  But that's a worst case.  Any local variables not containing these funny characters would simply retain the same names in Python as they originally had in XML.
 
+# EBCDIC vs ASCII vs UTF-8
+
+All PASS and BFS HAL/S source code, to my belief, was originally character-encoded using EBCDIC.  Before any of this HAL/S source code ever reached me &mdash; well, as I write this, *none* of it has yet reached me &mdash; somebody recoded it in UTF-8.  Actually, except for two special characters, "¬" and "¢", it is all 7-bit ASCII.  This hybrid existence is troublesome, so I have adopted the following conventions for external storage of the source code vs internal storage in the compiler:
+
+  * All HAL/S source code is nominally 7-bit ASCII.  If the UTF-8 characters "¬" and "¢" are found, they are transparently converted to "~" and "`" respectively.  ("^", which should never be present, is also transparently converted to "~".)
+  * All TAB characters are transparently expanded as if there were tab stops every 8 columns.
+
+However, the original XPL form of the compiler *relied* upon the storage format being EBCDIC, because in processing (such as tokenization) it used the byte-codes of the characters, and it expected those byte codes to be EBCDIC.  Therefore, my approach is simply to make sure that any processing which converts between characters and byte codes, or vice-versa, correctly translates between ASCII and EBCDIC.  The conversion function that takes a character and converts it to a byte code is the built-in `BYTE()` function of XPL.  In our recreation of the `BYTE()` function, therefore, it converts between ASCII and EBCDIC as needed.  For example, `BYTE('a')` returns 0x81 (the EBCDIC code for 'a') rather than 0x61 (the ASCII code for 'a').  Similarly, a usage like `BYTE(s, 2, b)` that replaces the string character `s[2]` by the character with byte-value `b`, expects `b` to be an EBCDIC code.  For example `BYTE('hello', 2, 0x81)` returns `'healo'`.
+
 # Mysteries and Inferences
 
-There's a reasonably-significant amount of syntax in the XPL source code that's not documented (as far as I can tell) in XPL, HAL/S, or PL/I documentation, most of which is pretty easy to figure out.  Some is not that obvious, and my guesses are quite suspect.  It's those suspicious cases I'll cover here.
+There's a reasonably-significant amount of syntax in the XPL source code that's not documented (as far as I can tell).  Some is not that obvious, and my guesses are quite suspect.  It's those suspicious cases I'll cover here.
 
 ## Dynamic Memory Allocation: `BASED` and its Macros
 
@@ -92,7 +101,7 @@ MACRO_TEXT(52) = 69;
 X = MACRO_TEXT(25);
 </pre>
 
-To preserve the dotted notation, I implement `BASED ... END` blocks as an array of Python class objects.  Unfortunately, this requires both a `class` name and a separate array name, so I use the lower-case form of the identifier as the `class` name:
+To preserve the dotted notation, I implement `BASED ... END` blocks as arrays of Python class objects.  Unfortunately, this requires both a `class` name and a separate array name, so I use the lower-case form of the identifier as the `class` name:
 
 <pre>
 class macro_texts:
@@ -138,7 +147,7 @@ I handle this with CLI switch `--bfs`.  If used, then the internal variable `pfs
 There are XPL "implicitly declared" functions and variables that are always available (see Table 6.9.1 in "A Compiler Generator").
 To the extent needed, these are replaced by Python functions and variables of the same name.
 
-However, some of these implicte "variables", such as `TIME` and `DATE`, are supposed to have different values every time they are accessed.  For example, `TIME` is the number of centiseconds elapsed since midnight (timezone unspecified).  I don't think there's any satisfactory way to implement this in Python while retaining the same syntax, so `TIME`, `DATE`, and presumably other such "variables", are instead implemented as Python functions:  in this case, `g.TIME()` and `g.DATE()`.
+However, some of these implicit "variables", such as `TIME` and `DATE`, are supposed to have different values every time they are accessed.  For example, `TIME` is the number of centiseconds elapsed since midnight (timezone unspecified).  I don't think there's any satisfactory way to implement this in Python while retaining the same syntax, so `TIME`, `DATE`, and presumably other such "variables", are instead implemented as Python functions:  in this case, `g.TIME()` and `g.DATE()`.
 
 ## Semicolons
 
