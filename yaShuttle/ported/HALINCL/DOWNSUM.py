@@ -12,7 +12,7 @@ History:    2023-08-31 RSB  Created a stub.
 from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
-import HALINCL.DWNTABLE as d
+import HALINCL.DWNTABLE as t
 
 '''
 /***********************************************************/
@@ -48,8 +48,8 @@ def DOWNGRADE_SUMMARY():
                     SEARCH_FOR_CLS = 1;
                     COUNT = 0;
                     while SEARCH_FOR_CLS == 1:
-                        if DWN_CLS[DOWN_COUNT] == d.ERR_VALUE[COUNT]:
-                            TEMP_CLS = SUBSTR(d.ERROR_INDEX[COUNT],6,2);
+                        if DWN_CLS[DOWN_COUNT] == t.ERR_VALUE[COUNT]:
+                            TEMP_CLS = SUBSTR(t.ERROR_INDEX[COUNT],6,2);
                             SEARCH_FOR_CLS = 0;
                         else:
                             COUNT = COUNT + 1;
@@ -94,8 +94,8 @@ def DOWNGRADE_SUMMARY():
                         TEMP3 = DWN_UNKN[I];
                     else:
                         while SEARCH_FOR_CLS == 1:
-                            if DWN_CLS[DOWN_COUNT] == d.ERR_VALUE[COUNT]:
-                                TEMP_CLS = SUBSTR(d.ERROR_INDEX[COUNT],6,2);
+                            if DWN_CLS[DOWN_COUNT] == t.ERR_VALUE[COUNT]:
+                                TEMP_CLS = SUBSTR(t.ERROR_INDEX[COUNT],6,2);
                                 SEARCH_FOR_CLS = 0;
                             else:
                                 COUNT = COUNT + 1;

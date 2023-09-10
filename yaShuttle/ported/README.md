@@ -67,6 +67,45 @@ However, the original XPL form of the compiler *relied* upon the storage format 
 
 There's a reasonably-significant amount of syntax in the XPL source code that's not documented (as far as I can tell).  Some is not that obvious, and my guesses are quite suspect.  It's those suspicious cases I'll cover here.
 
+## Initialization of Local Variables Within Their Parent Procedures
+
+It appears to me (undocumented!) that local variables in XPL procedures are not initialized at all, unless they have `INITIAL` clauses in their `DECLARE` statements.  *Moreover*, if such initialization occurs, it only does so at program start (or more reasonably, upon the first call to the procedure).
+
+The upshot of this is that local variables within procedures *retain their values* between calls to the procedures.  There's no magical way to do this easily in Python (like the `static` clause in C), so we have to resort to a bit of trickery.
+
+The particular trickery I use is to associate each ported XPL procedure with a class whose sole function is to hold the procedure's local variables and to initialize them.  The class has the same name as the associated function, except with the prefix "`c`".  There's a single instance of each such class, with a name the same as the function, except having the prefix "`l`".  For example, consider the following XPL procedure:
+<pre> 
+MYFUNC: PROCEDURE;
+    DECLARE I FIXED INITIAL(5);    
+    DECLARE S CHARACTER;
+    ...
+    S = STRING(I)
+    ...
+</pre>
+It might translate into Python as follows:
+<pre>
+class cMYFUNC:
+    def __init__(self):
+        self.I = 5
+        self.S = ''
+lMYFUNC = cMYFUNC()
+def MYFUNC():
+    l = lMYFUNC     # A convenient namespace for locals
+    ...
+    l.S = STRING(l.I)
+    ...
+</pre>
+Note that *every* variable in the Python port that comes directly from a variable in XPL will therefore have an associated namespace, usually "`l.`" for locals and "`g.`" for globals, although some globals may come elsewhere than from g.py, and may therefore sometimes have other namespaces than "`g.`".  For consistency, I typically try to use the following additional namespace conventions:
+<pre>
+import HALINCL.COMMON as h
+import HALINCL.CERRORS as c
+import HALINCL.CERRDECL as d
+import HALINCL.DWNTABLE as t
+</pre>
+Moreover, it's not always possible to have "`l.`" as the namespace for variables local to a procedure, because parent namespaces are within scope as well.  What I mean is that if you have procedure definition embedded within a procedure definition, the outermost procedure will have "`l.`" as a local namespace, so the inner procedure can't use "`l.`" without losing access to its parent's local variables, and thus it might use "`ll.`" instead.  Similarly, if the embedded procedure also had an embedded procedure definition, the embedded procedure of the embedded procedure might use "`lll.`".  And so on.
+
+The point, however, is that any variable &mdash; particularly since I tend to use camel case in my own variable names, any all-upper-case variable &mdash; unaccompanied by an explicit namespace had better be some variable I introduced for the purposes of the port, and not any variable being taken over essentially as-is from XPL.  Well ... there are some exceptions:  Variables immediately assigned a new value at the top of a procedure obviously don't need to be persistent, and if those are the only types of locals in a given procedure, there's no need for the class rigamarole described above.
+
 ## Dynamic Memory Allocation: `BASED` and its Macros
 
 I believe that constructs such as

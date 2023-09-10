@@ -14,6 +14,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
 '''
 
 import sys
+from copy import deepcopy
 from xplBuiltins import OUTPUT, BYTE
 import HALINCL.COMMON as h
 
@@ -1824,29 +1825,38 @@ def MACRO_TEXT(n, value=None):
         return MACRO_TEXTS[n].MAC_TXT
     MACRO_TEXTS[n].MAC_TXT = value
     
+def enlargeSYM_TAB(n):
+    while len(h.SYM_TAB) <= n:
+        h.SYM_TAB.append(h.sym_tab())
 def SYT_NAME(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_NAME
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_NAME = deepcopy(value)
 def SYT_ADDR(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_ADDR
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_ADDR = value
 def SYT_XREF(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_XREF
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_XREF = value
 def SYT_NEST(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_NEST
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_NEST = value
 def SYT_SCOPE(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_SCOPE
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_SCOPE = value
-def SYT_LENGTH(n, value=None):
+def VAR_LENGTH(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_LENGTH
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_LENGTH = value
 def SYT_ARRAY(n, value=None):
     if value == None:
@@ -1859,18 +1869,22 @@ def SYT_PTR(n, value=None):
 def SYT_LINK1(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_LINK1
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_LINK1 = value
 def SYT_LINK2(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_LINK2
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_LINK2 = value
 def SYT_CLASS(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_CLASS
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_CLASS = value
 def SYT_FLAGS(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_FLAGS
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_FLAGS = value
 def SYT_FLAGS2(n, value=None):
     if value == None:
@@ -1879,10 +1893,12 @@ def SYT_FLAGS2(n, value=None):
 def SYT_LOCKp(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_LOCKp
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_LOCKp = value
 def SYT_TYPE(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_TYPE
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_TYPE = value
 def EXTENT(n, value=None):
     if value == None:
@@ -1895,6 +1911,7 @@ def SYT_HASHLINK(n, value=None):
 def SYT_SORT(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_SORT
+    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_SORT = value
 
 def OUTER_REF(n, value=None):
@@ -1930,13 +1947,20 @@ def LIT3(n, value=None):
     LIT_PG[n].LITERAL3 = deepcopy(value)
 
 def XREF(n, value=None):
+    # Logically, the while-loop should *follow* the return from the conditional
+    # below.  However, the calling program appears to ask for a value from 
+    # XREF prior to any being assigned to it, so I've placed it before.
+    while len(h.CROSS_REF) <= n:
+        h.CROSS_REF.append(h.cross_ref())
     if value == None:
-        return CROSS_REF[n].CR_REF
+        return h.CROSS_REF[n].CR_REF
     h.CROSS_REF[n].CR_REF = value
 
 def ATOMS(n, value=None):
     if value == None:
         return h.FOR_ATOMS[n].CONST_ATOMS
+    while len(h.FOR_ATOMS) <= n:
+        h.FOR_ATOMS.append(h.for_atoms())
     h.FOR_ATOMS[n].CONST_ATOMS = value
 
 DW = [0]*2

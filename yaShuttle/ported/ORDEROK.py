@@ -11,7 +11,7 @@ History:    2023-08-31 RSB  Ported from XPL
 
 from xplBuiltins import *
 import g
-import HALINCL.CERRDECL as c
+import HALINCL.CERRDECL as d
 from ERROR import ERROR
 
 '''
@@ -48,7 +48,7 @@ def ORDER_OK(TYPE):
     print("OO ctCURRENT_CARD=%d ctTYPE=%d" % (ctc, ctt))
     if ctc == 0:
         #  CASE 0 -- ILLEGAL CARD TYPES  
-        ERROR(c.CLASS_M,1);
+        ERROR(d.CLASS_M,1);
         g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'))
         # Note fallthrough.
     elif ctc == 1 or ctc == 2:

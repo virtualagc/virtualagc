@@ -12,7 +12,7 @@ History:    2023-08-31 RSB  Ported from XPL
 from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
-import HALINCL.CERRDECL as c
+import HALINCL.CERRDECL as d
 
 '''
  /***************************************************************************/
@@ -107,14 +107,14 @@ import HALINCL.CERRDECL as c
 def ERROR(CLASS, NUM, TEXT=""):
     ERRORFILE = 5;
 
-    if CLASS <= c.CLASS_ZS:
+    if CLASS <= d.CLASS_ZS:
         g.LAST = g.LAST + 1;
         if g.LAST > g.SAVE_ERROR_LIM:
             # BUFFER FULL
             g.TOO_MANY_ERRORS = g.TRUE;
             g.LAST = g.LAST - 1;
         else:
-            g.C[0] = SUBSTR(c.ERROR_CLASSES, SHL(CLASS - 1, 1), 2);
+            g.C[0] = SUBSTR(d.ERROR_CLASSES, SHL(CLASS - 1, 1), 2);
             if BYTE(g.C[0], 1) == BYTE(g.X1):
                 g.C[0] = SUBSTR(g.C[0], 0, 1);
             g.SAVE_ERROR_MESSAGE[g.LAST] = PAD(g.C[0] + str(NUM), 8) + TEXT;
@@ -135,10 +135,10 @@ def ERROR(CLASS, NUM, TEXT=""):
                 goto_AGAIN = False
                 g.C[0]=PAD(g.C[0]+str(NUM),8);
                 if MONITOR(2,5,g.C[0]):
-                    CLASS=c.CLASS_BX;
+                    CLASS=d.CLASS_BX;
                     NUM=113;
                     TEXT = g.C[0];
-                    g.C[0]=SUBSTR(c.ERROR_CLASSES,SHL(CLASS-1,1),2);
+                    g.C[0]=SUBSTR(d.ERROR_CLASSES,SHL(CLASS-1,1),2);
                     if BYTE(g.C[0],1)==BYTE(g.X1):
                         g.C[0]=SUBSTR(g.C[0],0,1);
                     goto_AGAIN = True
@@ -156,9 +156,9 @@ def ERROR(CLASS, NUM, TEXT=""):
         NEXT_ELEMENT(h.ADVISE);
         ADV_STMTp(RECORD_USED(h.ADVISE)-1, g.STMT_NUM);
         ADV_ERRORp(RECORD_USED(h.ADVISE)-1, \
-                       SUBSTR(c.ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM));
+                       SUBSTR(d.ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM));
         '''
         h.ADVISE.append(h.advise())
         h.ADVISE[-1].ADV_STMTp = g.STMT_NUM
-        h.ADVISE[-1].ADV_ERRORp = SUBSTR(c.ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM)
+        h.ADVISE[-1].ADV_ERRORp = SUBSTR(d.ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM)
         

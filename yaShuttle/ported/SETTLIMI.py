@@ -10,7 +10,7 @@ History:    2023-08-31 RSB  Ported from XPL
 '''
 
 import g
-import HALINCL.CERRDECL as c
+import HALINCL.CERRDECL as d
 from ERROR import ERROR
 
 '''
@@ -39,7 +39,7 @@ def SET_T_LIMIT(LRECL):
     T_LIMIT = 0
     
     if LRECL<0:
-        ERROR(c.CLASS_B, 3);
+        ERROR(d.CLASS_B, 3);
     if g.SDL_OPTION:
         T_LIMIT=71;
     else:
