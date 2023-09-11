@@ -13,9 +13,11 @@ from xplBuiltins import *
 import g
 from OUTPUTWR import OUTPUT_WRITER
 
-# It's unclear what's going on with the CURRENT_DIR parameters.  Most CALLs
-# to PRINT_COMMENT don't have it, but *some* do.  Defaulting it to an empty
-# string is just my guess.
+'''
+It's unclear what's going on with the CURRENT_DIR parameters.  Most CALLs
+to PRINT_COMMENT don't have it, but *some* do.  Defaulting it to an empty
+string is just my guess.
+'''
 def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
     # FORMAT_CHAR, C, T, and R are locals, but look appear to need persistence.
     
@@ -90,5 +92,23 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
         g.S=SUBSTR(g.CURRENT_CARD,1,g.TEXT_LIMIT[0])+SUBSTR(g.X70,0,g.I)+g.S;
         OUTPUT(1, C+R+g.INCLUDE_CHAR+SUBSTR(g.CURRENT_CARD,0,1)+g.VBAR+g.S);
     g.NEXT_CC = ' ';
-    CURRENT_DIR = '';
+    '''
+    Since CURRENT_DIR is a parameter of the procedure, the commented-out line 
+    below appears to be pointless if the XPL compiler is implemented according 
+    to the documentation (McKeeman et al section 6.14) ... namely, that changes
+    within procedures to procedure parameters have no effect in the calling
+    code.  But I *suspect* that the 
+    XPL compiler was implemented in a non-compliant manner, in which string 
+    parameters were passed by reference rather than by value, and hence the 
+    commented-out line (depending on the implementation details) could 
+    conceivably empty the string corresponding to CURRENT_DIR in the calling
+    code. If that's true, then there is a boundary case (in the STREAM module,
+    for a HAL/S source line that's a Data Directive), in which that could have
+    a visible effect.  Given that all of this is based on inference, I'll not
+    attempt to implement anything based on those inferences at present, but 
+    it's possible that this will have to be revisited in the future.
+    If we had the text of CR12713, it could potentially clear up some of the 
+    mystery.
+    '''
+    #CURRENT_DIR = '';
     g.PREV_ELINE = g.FALSE;

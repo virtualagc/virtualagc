@@ -533,6 +533,13 @@ def STRING_GT(s1, s2):
 # The following is supposed to give the address in memory of the variable that's
 # it's parameter.  Of course, that's specific to the IBM implementation, and
 # (perhaps) utterly meaningless to us, so at least for now I'm simply providing
-# it as a dummy.
+# it as a dummy.  Each "variable" is simply assigned a unique number, from 0
+# upward.  This assumes that the variables are simple ... i.e., not arrays.
+ADDResses = []
 def ADDR(variable):
+    global ADDResses
+    if variable not in ADDResses:
+        ADDResses.append(variable)
+    return ADDResses.index(variable)
+    
     return 0

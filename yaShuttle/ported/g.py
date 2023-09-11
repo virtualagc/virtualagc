@@ -33,6 +33,7 @@ assumeASCII = True # Set False if original EBCDIC encoding is still used.
 
 SANITY_CHECK = False
 pfs = True
+debug3 = False
 
 # Apparently comes from MONITOR.bal, normally, but we don't have that and so
 # must hard-code something that's big enough but not too big.
@@ -64,6 +65,8 @@ if '--ebcdic' in sys.argv:
     assumeASCII = False # I wouldn't suggest using this.
 if '--sanity' in sys.argv:
     SANITY_CHECK = True
+if '--debug3' in sys.argv:
+    debug3 = True # Change in CONTROL[3] below.
 if '--help' in sys.argv:
     print('This is PASS 1 of HAL/S-FC as ported to Python 3.')
     print('Usage:')
@@ -71,6 +74,7 @@ if '--help' in sys.argv:
     print('The allowed OPTIONS are:')
     print('--pfs           Compile for PFS (PASS).')
     print('--bfs           Compile for BFS. (Default is --pfs.)')
+    print('--debug3        Activate HAL/S-FC parser messages.')
     print('--sanity        Perform a sanity check on the Python port.')
     print('--help          Show this explanation.')
     sys.exit(0)
@@ -963,7 +967,7 @@ T_INDEX = 0
 START_POINT = 0
 FIRST_TIME_PARM = [1]*9 + [0]*(PARM_EXPAN_LIMIT-1)
 DONT_SET_WAIT = 0
-MAX_XREF = [0]*MACRO_EXPAN_LIMIT
+MAC_XREF = [0]*MACRO_EXPAN_LIMIT
 MAC_CTR = (-1) & 0xFFFF
 SAVE_PE = 0
 OLD_TOPS = 0
@@ -1272,6 +1276,8 @@ MATRIX_COUNT = 0
 CROSS = 10
 DOT = 11
 CONTROL = [0]*16 # INPUT CONTROLABLE SWITCHES
+if debug3:
+    CONTROL[3] = -1
 XREF_FULL = 0
 XREF_MASK = 0x1FFF
 XREF_ASSIGN = 0x8000
@@ -1334,6 +1340,7 @@ NO_LOOK_AHEAD_DONE = 0
 STACKSIZE = 75 # SIZE OF STACK (Really? Astounding!)
 PARSE_STACK = [0]*STACKSIZE # TOKENS OF THE PARTIALLY PARSED TEXT
 LOOK = 0
+LOOK_STACK = [0]*STACKSIZE
 STATE_STACK = [0]*STACKSIZE
 STATE = 0
 VAR = [0]*STACKSIZE

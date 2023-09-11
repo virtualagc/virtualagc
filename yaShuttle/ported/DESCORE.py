@@ -44,7 +44,7 @@ def DESCORE(CHAR):
     while I<LENGTH(CHAR):
         if BYTE(CHAR,I)!=BYTE('_'):
             K=BYTE(CHAR,I);
-            BYTE(CHAR,J,K);
+            CHAR = BYTE(CHAR,J,K);
             J=J+1;
         I=I+1;
     CHAR=SUBSTR(CHAR,0,J);

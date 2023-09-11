@@ -1228,8 +1228,6 @@ def STREAM():
         while goto_BEGINNING:
             goto_BEGINNING = False
             if l.RETURNING_M:
-                print("SB.M M_BLANKS=%d INDEX=%d M_LINE=\"%s\" byte=%d" \
-                      % (l.M_BLANKS, l.INDEX, l.M_LINE, BYTE(l.M_LINE, l.INDEX)))
                 if l.M_BLANKS >= 0:
                     g.NEXT_CHAR = BYTE(g.X1);
                     ARROW = -l.LAST_E_IND;
@@ -1357,5 +1355,5 @@ def STREAM():
             ARROW = 0;
             goto_STACK_CHECK = True
             continue
-    print("SC NEXT_CHAR=%d OVER_PUNCH=%d" % (g.NEXT_CHAR, g.OVER_PUNCH))
+    print("SCAN: NEXT_CHAR=%d OVER_PUNCH=%d" % (g.NEXT_CHAR, g.OVER_PUNCH))
     return;

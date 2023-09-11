@@ -11,10 +11,12 @@ History:    2023-09-09 RSB  Began porting from XPL
 
 from xplBuiltins import *
 import g
+import HALINCL.COMMON as h # For debugging.
 import HALINCL.CERRDECL as d
 from ERROR import ERROR
 from HASH import HASH
 from HALINCL.ENTER import ENTER
+from SETXREF import SET_XREF
 
 '''
  /***************************************************************************/
@@ -243,6 +245,7 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
     if g.CONTEXT == g.REPLACE_PARM_CONTEXT:
         goto_NOT_FOUND = True;
     else:
+        print("IDENTIFY:", g.IDENT_COUNT, g.LABEL_IMPLIED, '"%s"' % BCD, g.NEXT_CHAR)
         if CENT_IDENTIFY:
             goto_LOOKUP = True;
         else:
@@ -251,29 +254,27 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                 BCD = g.X1 + BCD;
                 l.L = l.L + 1;
                 goto_LOOKUP = True;  # CAN'T BE A BUILT-IN
-            else:
-                if g.EQUATE_IMPLIED:
-                    BCD = '@' + BCD;
-                    l.L = l.L + 1;
-                    g.EQUATE_IMPLIED = g.FALSE;
-                    goto_LOOKUP = True;
-                else:
-                    if l.L>1:
-                        if l.L<=BI_LIMIT:
-                            for l.J in range(BI_INDEX(l.L-1), BI_INDEX(l.L)):
-                                if PAD(BCD,10) == SUBSTR(BI_NAME(BI_INDX(l.J)),BI_LOC(l.J),10):
-                                    g.SYT_TYPE(RECORD_TOP(SYM_TAB), SHR(BI_INFO(l.J),24));
-                                    l.I=RECORD_TOP(SYM_TAB);
-                                    g.SYT_INDEX=l.J+SYT_MAX-l.I;
-                                    if g.IMPLIED_TYPE!=0:
-                                        g.IMPLIED_TYPE=0;
-                                        ERROR(d.CLASS_MC,2);
-                                    if QUALIFICATION>0:
-                                        goto_Q_TRAP = True;
-                                    elif (BI_INFO(l.J)&0xFF0000)==0:
-                                        goto_BUILT_IN = True;
-                                    else:
-                                        goto_YES_ARG = True;
+            elif g.EQUATE_IMPLIED:
+                BCD = '@' + BCD;
+                l.L = l.L + 1;
+                g.EQUATE_IMPLIED = g.FALSE;
+                goto_LOOKUP = True;
+            elif l.L>1:
+                if l.L<=g.BI_LIMIT:
+                    for l.J in range(g.BI_INDEX[l.L-1], g.BI_INDEX[l.L]):
+                        if PAD(BCD,10) == SUBSTR(g.BI_NAME[g.BI_INDX[l.J]],g.BI_LOC[l.J],10):
+                            g.SYT_TYPE(RECORD_TOP(SYM_TAB), SHR(g.BI_INFO[l.J],24));
+                            l.I=RECORD_TOP(SYM_TAB);
+                            g.SYT_INDEX=l.J+SYT_MAX-l.I;
+                            if g.IMPLIED_TYPE!=0:
+                                g.IMPLIED_TYPE=0;
+                                ERROR(d.CLASS_MC,2);
+                            if QUALIFICATION>0:
+                                goto_Q_TRAP = True;
+                            elif (BI_INFO(l.J)&0xFF0000)==0:
+                                goto_BUILT_IN = True;
+                            else:
+                                goto_YES_ARG = True;
     firstTry = True
     while firstTry or goto_LOOKUP or goto_NOT_FOUND or goto_Q_TRAP \
             or goto_BUILT_IN or goto_YES_ARG or goto_MAYBE_FOUND \
@@ -284,18 +285,14 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
             or goto_FUNC_CHECK:
         firstTry = False
         goto_LOOKUP = False
-        if goto_MAYBE_FOUND or goto_NOT_FOUND_YET or goto_DO_LAB \
-                or goto_LAB_OP_CHECK or goto_MAKE_DEFAULT or goto_ADD_DEFAULT \
-                or not (goto_BUILT_IN or goto_YES_ARG or goto_MAKE_TOKEN \
-                        or goto_TEMPL_FIXUP or goto_BAD_LAB_DEF \
-                        or goto_NO_OVERPUNCH or goto_DUPL_LABEL \
-                        or goto_FUNC_CHECK or goto_FUNC_TOKEN_ZERO):
-            if not goto_MAYBE_FOUND or goto_DO_LAB or goto_LAB_OP_CHECK \
-                    or goto_MAKE_DEFAULT or goto_ADD_DEFAULT \
-                    or goto_LABELJOIN or goto_PARMJOIN:
-                if not goto_DO_LAB and not goto_LAB_OP_CHECK \
-                        and not goto_MAKE_DEFAULT and not goto_ADD_DEFAULT \
-                        and not goto_LABELJOIN and not goto_PARMJOIN:
+        if not (goto_BUILT_IN or goto_YES_ARG or goto_MAKE_TOKEN \
+                or goto_TEMPL_FIXUP or goto_BAD_LAB_DEF \
+                or goto_NO_OVERPUNCH or goto_DUPL_LABEL \
+                or goto_FUNC_CHECK or goto_FUNC_TOKEN_ZERO):
+            if not goto_MAYBE_FOUND:
+                if not (goto_DO_LAB or goto_LAB_OP_CHECK \
+                        or goto_MAKE_DEFAULT or goto_ADD_DEFAULT \
+                        or goto_LABELJOIN or goto_PARMJOIN):
                     if not goto_NOT_FOUND:
                         if not goto_Q_TRAP:
                             if not goto_NOT_FOUND_YET:
@@ -325,9 +322,8 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                 # DO CASE g.CONTEXT;
                 if (g.CONTEXT == 0 or goto_DO_LAB or goto_MAKE_DEFAULT \
                         or goto_ADD_DEFAULT) \
-                        and not goto_LAB_OP_CHECK \
-                        and not goto_LABELJOIN \
-                        and not goto_PARMJOIN:
+                        and not (goto_LAB_OP_CHECK or goto_LABELJOIN \
+                                 or goto_PARMJOIN):
                     #  ORDINARY                            #  CASE 0
                     if not goto_ADD_DEFAULT:
                         if not goto_MAKE_DEFAULT:
