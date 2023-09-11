@@ -37,6 +37,7 @@ from PRINT2 import PRINT2
 '''
 
 def OUTPUT_GROUP():
+    # There are no locals.
     if g.NEXT < 0:
         return;
     if g.LISTING2_COUNT + g.NEXT + 2 > g.LINE_LIM:

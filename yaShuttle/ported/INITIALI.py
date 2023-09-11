@@ -116,6 +116,8 @@ from HALINCL.CERRDECL import CLASS_BI
 #           INITIALIZATION         
 
 def INITIALIZATION():
+    # INITIALIZATION() is called only once, and therefore couldn't possibly
+    # need persistent locals.
 
     SUBHEAD = 'STMT                                   ' + \
               '               SOURCE                                                  CURRENT g.S' + \
@@ -410,11 +412,8 @@ def INITIALIZATION():
     g.CARD_COUNT = g.CARD_COUNT + 1;
     g.SAVE_CARD = g.CURRENT_CARD;
     SOURCE_COMPARE();
-    print("\nIN A")
     STREAM();
-    print("\nIN B", g.NEXT_CHAR, g.OVER_PUNCH)
     SCAN();
-    print("\nC")
     if g.CONTROL[4]:
         OUTPUT(0, 'SCANNER: ' + g.TOKEN);
     SRN_UPDATE();

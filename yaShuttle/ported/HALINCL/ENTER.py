@@ -14,6 +14,7 @@ import g
 from HALINCL.ENTERXRE import ENTER_XREF
 
 def ENTER(NAME, CLASS):
+    # No locals.
 
     g.NDECSY(g.NDECSY() + 1);     #  DON'T OCCUPY LAST SLOT
     # NEXT_ELEMENT(SYM_TAB);

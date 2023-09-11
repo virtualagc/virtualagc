@@ -2,7 +2,7 @@
 '''
 License:    The author, Ron Burkey, declares this program to be in the Public
             Domain, and may be used or modified in any way desired.
-Filename:   CHARTIME.py
+Filename:   PRINTTIM.py
 Purpose:    This is part of the port of the original XPL source code for 
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
@@ -33,5 +33,6 @@ from CHARTIME import CHARTIME
 '''
 
 def PRINT_TIME(MESSAGE, T):
+    # C is the only local, and requires no persistence
     C = CHARTIME(T);
     OUTPUT(0, MESSAGE + C + g.PERIOD);

@@ -530,3 +530,9 @@ def BYTE(s, index=0, value=None):
 def STRING_GT(s1, s2):
     return s1.encode('cp1140') > s2.encode('cp1140')
 
+# The following is supposed to give the address in memory of the variable that's
+# it's parameter.  Of course, that's specific to the IBM implementation, and
+# (perhaps) utterly meaningless to us, so at least for now I'm simply providing
+# it as a dummy.
+def ADDR(variable):
+    return 0

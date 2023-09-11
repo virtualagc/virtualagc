@@ -19,8 +19,8 @@ History:    2023-08-28 RSB  Began porting process from XPL.
 /**********************************************************************/        00000070
 '''
 
-def RECORD_TOP(n):
-    return RECORD_USED(n) - 1
+def RECORD_TOP(array):
+    return len(array) - 1
 
 def RECORD_LINK():
     return

@@ -48,15 +48,19 @@ import g
 '''
 
 def GET_SUBSET(SUBSET,FLAGS):
-    CP = 0
-    L = 0
-    LIMIT = 0
+    # The locals are A_TOKEN, S, I, L, LIMIT, CP, and SUBSET_MSG.
+    # They don't require persistence.  They're initialized below only to
+    # cater to the 'nonlocal' declarations in the embedded functions.
+    A_TOKEN = ''
     S = ''
-    A_TOKEN = ""
+    I = 0
+    L = 0
+    CP = 0
     SUBSET_MSG = '0 *** LANGUAGE SUBSET IN EFFECT: ';
 
     def VALUE():
         nonlocal L
+        # J and M are local, but don't need persistence.
         L=0;
         for J in range(1, LENGTH(A_TOKEN)+1):
             M=BYTE(A_TOKEN,J-1)-BYTE('0');
@@ -67,6 +71,7 @@ def GET_SUBSET(SUBSET,FLAGS):
 
     def GET_TOKEN():
         nonlocal A_TOKEN, CP, I, S
+        # The only locals, Tp and TERM, require no persistence.
         Tp = 3;
         TERM = (0,BYTE('('),BYTE(')'),BYTE(','));
         A_TOKEN='';
@@ -88,6 +93,7 @@ def GET_SUBSET(SUBSET,FLAGS):
                 A_TOKEN=A_TOKEN+SUBSTR(S,CP,1);
 
     def SUBSET_ERROR(NUM):
+        # The locals, T, S_PREFIX, and S_MSG, require no persistence.
         S_PREFIX = '  *** SUBSET ACQUISITION ERROR - ';
         S_MSG = ('PREMATURE EOF',
            'BAD SYNTAX: ','UNKNOWN FUNCTION: ',

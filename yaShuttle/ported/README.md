@@ -67,6 +67,18 @@ However, the original XPL form of the compiler *relied* upon the storage format 
 
 There's a reasonably-significant amount of syntax in the XPL source code that's not documented (as far as I can tell).  Some is not that obvious, and my guesses are quite suspect.  It's those suspicious cases I'll cover here.
 
+## Changes to Parameter Values Within Procedures
+
+XPL documentation explicitly states [McKeeman section 6.14]:
+
+> All parameters are called by value in XPL, hence assignments to the corresponding formal perameter with the procedure definition have no effect outside the procedure.  To pass values out of a procedure, one must either use the <return statement> or make an assignment to a global variable.
+
+Alas, the creators of XPL didn't reckon with the ability of the Shuttle's coders to exploit undocumented holes (or perhaps deliberate divergence from the definition of XPL) in the XPL compiler.  Formal parameters which are strings are apparently passed by reference in the Intermetrics/United Space Alliance version of the XPL compiler, and the source code for HAL/S-FC exploits this by allowing strings passed by formal parameters into a procedure to be altered by the procedure, and for those changes to be visible by the calling code.  An example is the PASS1.PROCS/PRINT2 module, which alters its formal string parameter `LINE`.
+
+In fact, most (or all) calls to `PRINT2` pass `LINE` parameters that are string expressions or literals, rather than strings stored in variables, so the adjustments to `LINE` made by `PRINT2` are *not* changing strings stored in variables, but rather changing strings that had better not be changed.
+
+At any rate, the Python implementation doesn't allow such changes to migrate outside the functions.  These parameter manipulations within procedures are very rare in the XPL code, so I suppose it's possible that they simply made a mistake (without any visible results) in these instances, and I'm making a bigger deal of it than it really is.
+
 ## Initialization of Local Variables Within Their Parent Procedures
 
 It appears to me (undocumented!) that local variables in XPL procedures are not initialized at all, unless they have `INITIAL` clauses in their `DECLARE` statements.  *Moreover*, if such initialization occurs, it only does so at program start (or more reasonably, upon the first call to the procedure).

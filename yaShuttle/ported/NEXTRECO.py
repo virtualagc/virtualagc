@@ -37,6 +37,7 @@ import g
 '''
 
 def NEXT_RECORD():
+    # There are no locals.
     if g.LOOKED_RECORD_AHEAD:
         g.LOOKED_RECORD_AHEAD = g.FALSE;
         return;

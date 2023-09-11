@@ -29,6 +29,7 @@ from xplBuiltins import *
 '''
 
 def CHAR_INDEX(STRING1, STRING2):
+    # None of the locals need persistence.
     L1 = LENGTH(STRING1);
     L2 = LENGTH(STRING2);
     if L2 > L1:

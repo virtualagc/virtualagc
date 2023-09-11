@@ -42,10 +42,10 @@ from ERROR import ERROR
 '''
 
 def ORDER_OK(TYPE):
+    # There are no locals (from XPL).
     
     ctc = g.CARD_TYPE[BYTE(g.CURRENT_CARD)]
     ctt = g.CARD_TYPE[TYPE]
-    print("OO ctCURRENT_CARD=%d ctTYPE=%d" % (ctc, ctt))
     if ctc == 0:
         #  CASE 0 -- ILLEGAL CARD TYPES  
         ERROR(d.CLASS_M,1);

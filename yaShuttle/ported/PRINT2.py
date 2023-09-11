@@ -31,16 +31,20 @@ import g
  /***************************************************************************/
 '''
 
+class cPRINT2:
+    def __init__(self):
+        self.PAGE_NUM = 0
+lPRINT2 = cPRINT2()
+
 def PRINT2(LINE, SPACE):
-    # Local
-    PAGE_NUM = 0
+    l = lPRINT2
     
     g.LISTING2_COUNT = g.LISTING2_COUNT + SPACE;
     if g.LISTING2_COUNT > g.LINE_LIM:
-        PAGE_NUM = PAGE_NUM + 1;
+        l.PAGE_NUM = l.PAGE_NUM + 1;
         OUTPUT(2, \
             '1  H A L   C O M P I L A T I O N   --   P H A S E   1   --   U N F O R M A T T E D   S O U R C E   L I S T I N G             PAGE ' \
-            + str(PAGE_NUM));
+            + str(l.PAGE_NUM));
         LINE = BYTE(LINE, 0, BYTE('-'));
         g.LISTING2_COUNT = 4;
     OUTPUT(2, LINE);

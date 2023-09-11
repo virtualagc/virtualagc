@@ -39,6 +39,7 @@ MONTH = ['JANUARY', 'FEBRUARY', 'MARCH',
 DAYS = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274,
         305, 335, 366]
 def CHARDATE(D):
+    # None of the locals need to be persistent.
     YEAR = (D // 1000) + 1900;
     DAY = D % 1000;
     if (YEAR & 0x3) != 0:

@@ -105,6 +105,7 @@ import HALINCL.CERRDECL as d
 '''
 
 def ERROR(CLASS, NUM, TEXT=""):
+    # ERRORFILE and SEVERITY are locals, but don't need persistence.
     ERRORFILE = 5;
 
     if CLASS <= d.CLASS_ZS:
@@ -144,9 +145,9 @@ def ERROR(CLASS, NUM, TEXT=""):
                     goto_AGAIN = True
                     continue
             g.S = INPUT(ERRORFILE);
-            g.SEVERITY = BYTE(g.S) - BYTE('0');
-            if g.SEVERITY > 2:
-                g.MAX_SEVERITY = g.SEVERITY;
+            SEVERITY = BYTE(g.S) - BYTE('0');
+            if SEVERITY > 2:
+                g.MAX_SEVERITY = SEVERITY;
                 g.COMPILING = FALSE;
                 g.monitorLabel = "SCAN_DISASTER";
                 return

@@ -37,8 +37,8 @@ import g
 '''
 
 def HEX(NUM, WIDTH):
-    # Locals:
-    CHAR_TEMP = '';
+    # The only local, CHAR_TEMP, requires no persistence.
+    CHAR_TEMP = ''
     
     while True:
         CHAR_TEMP = SUBSTR('0123456789ABCDEF', NUM & 0xF, 1) + CHAR_TEMP;

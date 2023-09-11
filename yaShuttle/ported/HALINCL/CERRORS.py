@@ -26,68 +26,82 @@ from CHARINDE import CHAR_INDEX
 #*********************************************************
 '''
 
+class cCOMMON_ERRORS:
+    def __init__(self):
+        self.ERRORFILE = 5;
+        self.SEVERITY = 0;
+        self.K = 0;
+        self.IMBED = 0;
+        self.C = '';
+        self.S = '';
+        self.CLS_COMPARE = ''
+        self.NUMIT = ''
+        self.TEMP_STMT = ''
+        self.AST = '***** ';
+        self.DOWN_COUNT = 0
+        self.FOUND = 0;
+lCOMMON_ERRORS = cCOMMON_ERRORS()
 def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
-    ERRORFILE = 5;
-    AST = '***** ';
-   
-    FOUND = 0;
-    NUMIT = NUM;
-    TEMP_STMT = STMTp;
-    DOWN_COUNT = 1;
+    l = lCOMMON_ERRORS
+    
+    l.FOUND = 0;
+    l.NUMIT = NUM;
+    l.TEMP_STMT = STMTp;
+    l.DOWN_COUNT = 1;
     while True:
-        C=SUBSTR(d.ERROR_CLASSES,(CLASS-1)<<1,2);
-        if BYTE(C,1)==BYTE(' '):
-            C=SUBSTR(C,0,1);
-        C=PAD(C+str(NUM),8);
-        if MONITOR(2,5,C):
+        l.C=SUBSTR(d.ERROR_CLASSES,(CLASS-1)<<1,2);
+        if BYTE(l.C,1)==BYTE(' '):
+            l.C=SUBSTR(l.C,0,1);
+        l.C=PAD(l.C+str(NUM),8);
+        if MONITOR(2,5,l.C):
            CLASS=d.CLASS_BX;
            NUM=113;
-           TEXT = C;
+           TEXT = l.C;
         else:
             break
-    CLS_COMPARE = CLASS;
-    S = INPUT(ERRORFILE);
-    SEVERITY = BYTE(S) - BYTE('0');
+    l.CLS_COMPARE = CLASS;
+    l.S = INPUT(l.ERRORFILE);
+    l.SEVERITY = BYTE(l.S) - BYTE('0');
     #  DETERMINE IF THERE IS A DOWNGRADE FOR THIS STMT  
-    while FOUND == 0  and DOWN_COUNT <= len(h.DOWN_INFO) - 1:
-        if NUMIT == DWN_ERR(DOWN_COUNT) and CLS_COMPARE == DWN_CLS(DOWN_COUNT):
-            if TEMP_STMT == DWN_STMT(DOWN_COUNT):
-                if SEVERITY == 1:
-                    SEVERITY = 0;
+    while l.FOUND == 0  and l.DOWN_COUNT <= len(h.DOWN_INFO) - 1:
+        if l.NUMIT == DWN_ERR(l.DOWN_COUNT) and l.CLS_COMPARE == DWN_CLS(l.DOWN_COUNT):
+            if l.TEMP_STMT == DWN_STMT(l.DOWN_COUNT):
+                if l.SEVERITY == 1:
+                    l.SEVERITY = 0;
                     OUTPUT(0, AST + ' THE FOLLOWING ERROR WAS DOWNGRADED FROM A '+\
                              'SEVERITY ONE ERROR TO A SEVERITY ZERO ERROR '+AST);
-                    FOUND = 1;
+                    l.FOUND = 1;
                     # NOTE THAT THE ERROR WAS DOWNGRADED SUCCESSFULLY  
-                    DWN_VER(DOWN_COUNT, 1);
+                    DWN_VER(l.DOWN_COUNT, 1);
             else:
                 OUTPUT(0, AST + ' AN ATTEMPT WAS MADE TO DOWNGRADE AN ' +
                            'ERROR OTHER THAN A SEVERITY ONE ERROR ' +
                            'REMOVE DOWNGRADE DIRECTIVE AND RECOMPILE ' + AST);
-                SEVERITY = 2;
-                FOUND = 1;
-        DOWN_COUNT = DOWN_COUNT + 1;
-    OUTPUT(1, '0' + AST + C + ' ERROR #' + str(ERRORp) + ' OF SEVERITY ' + \
-                  str(SEVERITY) + ' OCCURRED ' + AST );
+                l.SEVERITY = 2;
+                l.FOUND = 1;
+        l.DOWN_COUNT = l.DOWN_COUNT + 1;
+    OUTPUT(1, '0' + AST + l.C + ' ERROR #' + str(ERRORp) + ' OF SEVERITY ' + \
+                  str(l.SEVERITY) + ' OCCURRED ' + AST );
     OUTPUT(0, AST + ' DURING CONVERSION OF HAL/S STATEMENT ' +
                 str(STMTp()) + '.' + AST);
-    S = INPUT(ERRORFILE);
+    l.S = INPUT(l.ERRORFILE);
     if LENGTH(TEXT) > 0:
-        IMBED=g.TRUE;
-    while LENGTH(S)>0:
-        if IMBED:
-            K = CHAR_INDEX(S,'??');
-            if K >= 0:
-                if K == 0:
-                    S = TEXT + SUBSTR(S,2);
+        l.IMBED=g.TRUE;
+    while LENGTH(l.S)>0:
+        if l.IMBED:
+            l.K = CHAR_INDEX(l.S,'??');
+            if l.K >= 0:
+                if l.K == 0:
+                    l.S = TEXT + SUBSTR(l.S,2);
                 else:
-                    S = SUBSTR(S,0,K) + TEXT + SUBSTR(S,K+2);
-                IMBED = g.FALSE;
-        OUTPUT(0, AST + S);
-        S = INPUT(ERRORFILE);
+                    l.S = SUBSTR(l.S,0,l.K) + TEXT + SUBSTR(l.S,l.K+2);
+                l.IMBED = g.FALSE;
+        OUTPUT(0, AST + l.S);
+        l.S = INPUT(l.ERRORFILE);
     TEXT = '';
-    # CR12416: TREAT SEVERITY 1 ERRORS AS WARNINGS 
-    if SEVERITY == 1: 
+    # TREAT l.SEVERITY 1 ERRORS AS WARNINGS 
+    if l.SEVERITY == 1: 
         h.SEVERITY_ONE = g.TRUE;
-        SEVERITY = 0;
-    return SEVERITY;
+        l.SEVERITY = 0;
+    return l.SEVERITY;
     

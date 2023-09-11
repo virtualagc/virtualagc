@@ -901,7 +901,6 @@ def STREAM():
             l.E_COUNT[TYPE] = l.E_COUNT[TYPE] + 1;
     
     def GET_GROUP():
-        print("GG @ END_GROUP=%d" % g.END_GROUP)
         l.E_LINE = l.BLANKS + l.BLANKS;
         l.S_LINE = l.BLANKS + l.BLANKS;
         l.LAST_E_COUNT = l.E_COUNT;
@@ -940,23 +939,18 @@ def STREAM():
                         continue
                 goto_LOOP = False
                 ct = g.CARD_TYPE[BYTE(g.CURRENT_CARD)]
-                print("\nGG A END_GROUP=%d CURRENT_CARD=\"%s\" ct=%d" % (g.END_GROUP, g.CURRENT_CARD, ct))
                 if g.END_GROUP:
-                    print("GG A.1 PREV_CARD=%d M_LINE=\"%s\"" % (l.PREV_CARD, l.M_LINE))
                     break # GO TO FOUND_GROUP
-                print("\nGG B")
             if ct == 0:
-                print("\nGG 0--DUMMY")
                 # CASE 0--DUMMY
                 pass
             elif ct == 1:
-                print("\nGG 1--E LINE")
                 # CASE 1--E LINE 
                 COMP(0);
                 goto_LOOP = True;
                 continue
             elif ct == 2:
-                print("\nGG 2--M LINE CURRENT_CARD=\"%s\" TEXT_LIMIT=%d" % (g.CURRENT_CARD, g.TEXT_LIMIT[0]))
+                print()
                 # CASE 2--M LINE
                 l.M_LINE = g.CURRENT_CARD;
                 if g.SRN_PRESENT:
@@ -971,13 +965,11 @@ def STREAM():
                 goto_READ = True;
                 continue
             elif ct == 3:
-                print("\nGG 3--S LINE")
                 # CASE 3--S LINE
                 COMP(1);
                 goto_LOOP = True;
                 continue
             elif ct == 4:
-                print("\nGG 4--COMMENT")
                 # CASE 4--COMMENT
                 if not goto_COMMENT_CARD:
                     g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'));
@@ -1021,16 +1013,13 @@ def STREAM():
                 continue
         
         # FOUND_GROUP was here!
-        print("GG FOUND_GROUP:")
         g.END_GROUP = g.FALSE;
         l.E_LINE = SUBSTR(l.E_LINE, 0, LENGTH(l.M_LINE));
-        print("GG E_COUNT=%d E_LINE=\"%s\"" % (l.E_COUNT, l.E_LINE))
         if l.E_COUNT <= 0:
             for l.CP in range(1, g.TEXT_LIMIT[0]+1):
                 e_indicator(l.CP, 0);
             l.E_COUNT = l.LAST_E_COUNT;
         l.S_LINE = SUBSTR(l.S_LINE, 0, LENGTH(l.M_LINE));
-        print("GG S_COUNT=%d S_LINE=\"%s\"" % (l.S_COUNT, l.S_LINE))
         if l.S_COUNT <= 0:
             for l.CP in range(1, g.TEXT_LIMIT[0]+1):
                 l.S_INDICATOR[l.CP] = 0;
@@ -1076,7 +1065,6 @@ def STREAM():
         if l.CHAR_TEMP != g.X1:
             g.NONBLANK_FOUND = g.TRUE;
         e_stack(TYPE, e_stack(TYPE) + l.CHAR_TEMP);
-        print("ST TYPE=%d INDEX=%d IND_SHIFT=%d" % (TYPE, l.INDEX, l.IND_SHIFT))
         e_ind(POINT, e_indicator(l.INDEX + SHL(TYPE, l.IND_SHIFT)));    
     
     def BUILD_XSCRIPTS():
@@ -1214,7 +1202,6 @@ def STREAM():
                 goto_CHECK_STRING_POSITION = True
                 continue
     
-    print("S@")
     g.BLANK_COUNT = -1;
     goto_STACK_CHECK = True
     while goto_STACK_CHECK:
@@ -1225,7 +1212,6 @@ def STREAM():
                 l.RETURN_CHAR[l.II] = l.RETURN_CHAR[l.II] - 1;
                 g.NEXT_CHAR = l.TYPE_CHAR(l.II);
                 g.OVER_PUNCH = 0;
-                print("SA.1")
                 return;
         l.II = 0;
         if l.ARROW_FLAG:
@@ -1233,7 +1219,6 @@ def STREAM():
             g.NEXT_CHAR = l.SAVE_NEXT_CHAR1;
             g.OVER_PUNCH = l.SAVE_OVER_PUNCH1;
             g.BLANK_COUNT = l.SAVE_BLANK_COUNT1;
-            print("SA.2")
             return;
         if g.GROUP_NEEDED:
             GET_GROUP();
@@ -1241,13 +1226,11 @@ def STREAM():
             g.GROUP_NEEDED = g.FALSE;
         goto_BEGINNING = True
         while goto_BEGINNING:
-            print("SB.0")
             goto_BEGINNING = False
             if l.RETURNING_M:
                 print("SB.M M_BLANKS=%d INDEX=%d M_LINE=\"%s\" byte=%d" \
                       % (l.M_BLANKS, l.INDEX, l.M_LINE, BYTE(l.M_LINE, l.INDEX)))
                 if l.M_BLANKS >= 0:
-                    print("SB.M.1")
                     g.NEXT_CHAR = BYTE(g.X1);
                     ARROW = -l.LAST_E_IND;
                     l.LAST_E_IND = 0;
@@ -1255,8 +1238,6 @@ def STREAM():
                     l.M_BLANKS = -1;
                     break # GO TO FOUND_CHAR;
                 if BYTE(l.M_LINE, l.INDEX) != BYTE(g.X1):
-                    print("SB.M.2 E_COUNT=%d S_COUNT=%d ARROW=%d" \
-                          % (l.E_COUNT,l.S_COUNT,-l.LAST_E_IND))
                     if l.E_COUNT > 0:
                         if BYTE(l.E_LINE, l.INDEX) != BYTE(g.X1):
                            if e_indicator(l.INDEX) != 1:
@@ -1281,11 +1262,9 @@ def STREAM():
                             g.RVL[0] = g.NEXT_CHAR_RVL;
                         g.NEXT_CHAR_RVL = g.RVL[1];
                     g.NEXT_CHAR = BYTE(l.M_LINE, l.INDEX);
-                    print("SB.M.2A NEXT_CHAR=%d" % g.NEXT_CHAR)
                     CHOP();
                     break # GO TO FOUND_CHAR;
                 else:
-                    print("SB.M.3")
                     BUILD_XSCRIPTS();
                     g.OVER_PUNCH = 0;
                     l.RETURNING_M = g.FALSE;
@@ -1293,7 +1272,6 @@ def STREAM():
                     l.RETURNING_S = g.TRUE;
                     l.PNTR = 0;
             if l.RETURNING_S:
-                print("SB.S")
                 if LENGTH(l.S_STACK) > 0 and l.PNTR < LENGTH(l.S_STACK):
                     if BYTE(l.S_STACK, l.PNTR) == BYTE(g.X1):
                         if s_ind(l.PNTR) >= 0: # MORE LEFT
@@ -1314,7 +1292,6 @@ def STREAM():
                     l.LAST_E_IND = -l.LAST_S_IND;
                     l.PNTR = 0;
             if l.RETURNING_E:
-                print("SB.E")
                 if LENGTH(l.E_STACK) > 0 and l.PNTR < LENGTH(l.E_STACK):
                     if BYTE(l.E_STACK, l.PNTR) == BYTE(g.X1):
                         if e_ind(l.PNTR) >= 0: # MORE TO GO
@@ -1333,8 +1310,6 @@ def STREAM():
                     l.RETURNING_E = g.FALSE;
                     l.RETURNING_M = g.TRUE;
             goto_BEGINNING = True
-            print("SB GO TO BEGINNING, RETURNING_E=%d _M=%d _S=%d" % \
-                  (l.RETURNING_E, l.RETURNING_M, l.RETURNING_S))
             continue
         # FOUND_CHAR was here!
         if ARROW != 0:

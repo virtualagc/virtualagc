@@ -35,8 +35,7 @@ from ERROR import ERROR
 '''
 
 def SET_T_LIMIT(LRECL):
-    # Locals:
-    T_LIMIT = 0
+    # T_LIMIT is the only local, and requires no persistence.
     
     if LRECL<0:
         ERROR(d.CLASS_B, 3);

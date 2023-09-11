@@ -11,6 +11,8 @@ History:    2023-09-06 RSB  Ported
 
 from xplBuiltins import *
 import g
+from NEXTRECO import NEXT_RECORD
+from HALINCL.PRINTCOM import PRINT_COMMENT
 
 '''
    /* ROUTINE TO PICK OUT TOKENS FROM A DIRECTIVE CARD.            */
@@ -21,39 +23,42 @@ import g
    /* D_TOKEN RETURNS THE TOKEN FOUND                              */
 '''
 
+class cD_TOKEN:
+    def __init__(self):
+        self.I = 0
+        self.J = 0
+        self.pSPECIALS = 3
+        self.SPECIALS = ' ,:;'
+lD_TOKEN = cD_TOKEN()
 def D_TOKEN():
-    # Locals
-    I = 0
-    J = 0
-    pSPECIALS = 3
-    SPECIALS = ' ,:;';
+    l = lD_TOKEN
     
     while True:
-        while (BYTE(CURRENT_CARD,g.D_INDEX) == BYTE(' ')) and \
-                (g.D_INDEX <= TEXT_LIMIT):
+        while (BYTE(g.CURRENT_CARD,g.D_INDEX) == BYTE(' ')) and \
+                (g.D_INDEX <= g.TEXT_LIMIT[0]):
             g.D_INDEX = g.D_INDEX + 1;
-        if g.D_INDEX <= TEXT_LIMIT:
+        if g.D_INDEX <= g.TEXT_LIMIT[0]:
            break;
         if g.D_CONTINUATION_OK: # GET NEXT RECORD 
             NEXT_RECORD();
-            if CARD_TYPE(BYTE(CURRENT_CARD)) != CARD_TYPE(BYTE('D')):
-                g.LOOKED_RECORD_AHEAD = TRUE;
-                g.D_CONTINUATION_OK = FALSE;
+            if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] != g.CARD_TYPE[BYTE('D')]:
+                g.LOOKED_RECORD_AHEAD = g.TRUE;
+                g.D_CONTINUATION_OK = g.FALSE;
                 return '';
             g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('D'));
-            PRINT_COMMENT(TRUE);
+            PRINT_COMMENT(g.TRUE);
             g.D_INDEX = 1;
             continue;
         else:
             return '';
-    for I in range(1, pSPECIALS+1):
-        if BYTE(CURRENT_CARD, g.D_INDEX)== BYTE(SPECIALS, I):
+    for l.I in range(1, l.pSPECIALS+1):
+        if BYTE(g.CURRENT_CARD, g.D_INDEX)== BYTE(l.SPECIALS, l.I):
             g.D_INDEX = g.D_INDEX + 1;
-            return SUBSTR(CURRENT_CARD, g.D_INDEX-1, 1);
-    I = g.D_INDEX;
-    while g.D_INDEX <= TEXT_LIMIT:
-        for J in range(0, pSPECIALS+1):
-            if BYTE(CURRENT_CARD, g.D_INDEX) == BYTE(SPECIALS, J):
+            return SUBSTR(g.CURRENT_CARD, g.D_INDEX-1, 1);
+    l.I = g.D_INDEX;
+    while g.D_INDEX <= g.TEXT_LIMIT[0]:
+        for l.J in range(0, l.pSPECIALS+1):
+            if BYTE(g.CURRENT_CARD, g.D_INDEX) == BYTE(l.SPECIALS, l.J):
                 break;
         g.D_INDEX = g.D_INDEX + 1;
-    return SUBSTR(CURRENT_CARD, I, g.D_INDEX - I);
+    return SUBSTR(g.CURRENT_CARD, l.I, g.D_INDEX - l.I);

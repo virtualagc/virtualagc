@@ -458,17 +458,14 @@ def SCAN():
         if not (goto_SCAN_END or goto_DEC_POINT_ENTRY) \
                 or goto_SCAN_TOP or goto_SCAN_START:
             if goto_SCAN_TOP: # CONTROL RETURNED HERE FROM COMMENT SEARCH
-                print("SC @ SCAN_TOP:")
                 goto_SCAN_TOP = False
             
             if not goto_SCAN_START:
-                print("SC A", g.SCAN_COUNT, l.CHAR_NEEDED)
                 g.SCAN_COUNT = g.SCAN_COUNT + 1;
                 if l.CHAR_NEEDED:
                     STREAM();
                     l.CHAR_NEEDED = g.FALSE;
             else:
-                print("SC B SCAN_START:")
                 goto_SCAN_START = False
                 
             g.M_TOKENS[g.MACRO_EXPAN_LEVEL]=g.M_TOKENS[g.MACRO_EXPAN_LEVEL]+1;
@@ -492,12 +489,10 @@ def SCAN():
                         g.SRN[1]=g.SRN[0];
                         g.INCL_SRN[1] = g.INCL_SRN[0];
                         g.SRN_COUNT[1]=g.SRN_COUNT[0];
-                print("SC B.1", g.NEXT_CHAR)
                 ct = g.CHARTYPE[g.NEXT_CHAR]
                 
             # DO CASE CHARTYPE(g.NEXT_CHAR);
             if ct == 0:
-                print("SC C", g.NEXT_CHAR, "ILLEGAL CHARACTERS")
                 # CASE 0--ILLEGAL CHARACTERS
                 g.C[0] = HEX(g.NEXT_CHAR, 2);
                 ERROR(d.CLASS_DT,4,g.C[0]);
@@ -505,7 +500,6 @@ def SCAN():
                    ERROR(d.CLASS_MO,1);
                 STREAM();
             elif ct == 1:
-                print("SC C", g.NEXT_CHAR, "DIGITS")
                 # CASE 1--DIGITS
                 if not goto_DEC_POINT_ENTRY:
                     g.RESERVED_WORD = g.FALSE
@@ -642,7 +636,6 @@ def SCAN():
                 # END OF CASE 1
                 
             elif ct == 2:
-                print("SC C", g.NEXT_CHAR, "INDENTS & RESERVED WORDS")
                 # CASE 2--LETTERS=IDENTS & RESERVED WORDS
                 if not goto_CENT_START:
                     g.STRING_OVERFLOW = g.FALSE;
@@ -936,7 +929,6 @@ def SCAN():
                 # END OF CASE 3 
                
             elif ct == 4:
-                print("SC C", g.NEXT_CHAR, "PERIOD")
                 # CASE 4--PERIOD
                 # COULD BE DOT PRODUCT OR DECIMAL POINT
                 if g.OVER_PUNCH != 0:
@@ -959,7 +951,6 @@ def SCAN():
                 # END OF CASE 4
                 
             elif ct == 5:
-                print("SC C", g.NEXT_CHAR, "SINGLE QUOTE")
                 # CASE 5--SINGLE QUOTE = CHARACTER LITERAL
                 g.I = 0;
                 g.STRING_OVERFLOW, g.RESERVED_WORD = g.FALSE;
@@ -1038,7 +1029,6 @@ def SCAN():
                 # END OF CASE 5
                 
             elif ct == 6:
-                print("SC C", g.NEXT_CHAR, "BLANK")
                 # CASE 6--BLANK
                 while g.NEXT_CHAR == BYTE(g.X1):  
                     g.DONT_SET_WAIT = g.TRUE;
@@ -1047,7 +1037,6 @@ def SCAN():
                 # OF CASE 6
                
             elif ct == 7:
-                print("SC C", g.NEXT_CHAR, "| or ||")
                 # CASE 7--'|' OR'||' 
                 g.TOKEN = TX(g.NEXT_CHAR);
                 if g.OVER_PUNCH != 0:
@@ -1065,7 +1054,6 @@ def SCAN():
                 # END OF CASE 7
                
             elif ct == 8:
-                print("SC C", g.NEXT_CHAR, "* or **")
                 # CASE 8--'*' OR '**'
                 g.TOKEN = TX(g.NEXT_CHAR);
                 if g.OVER_PUNCH != 0:
@@ -1083,7 +1071,6 @@ def SCAN():
                 # END OF CASE 8
                
             elif ct == 9:
-                print("SC C", g.NEXT_CHAR, "EOF")
                 # CASE 9--HEX'FE' = EOF
                 g.TOKEN = EOFILE;
                 STREAM();
@@ -1092,14 +1079,12 @@ def SCAN():
                 # END OF CASE 9
                
             elif ct == 10:
-                print("SC C", g.NEXT_CHAR, "SPECIALS AS BLANKS")
                 # CASE 10--SPECIAL CHARACTERS TREATED AS BLANKS */
                 g.NEXT_CHAR = BYTE(g.X1);
                 g.BLANK_COUNT = 0;
                 # END OF CASE 10 
                
             elif ct == 11:
-                print("SC C", g.NEXT_CHAR, "DOUBLE QUOTES")
                 # CASE 11--DOUBLE QUOTES FOR REPLACE DEFINITION
                 g.TOKEN = REPLACE_TEXT;
                 g.TEMP_STRING=g.X1;
@@ -1139,7 +1124,6 @@ def SCAN():
                 # END OF CASE 11
                 
             elif ct == 12:
-                print("SC C", g.NEXT_CHAR, "%")
                 #  CASE 12 - % FOR %MACROS
                 g.RESERVED_WORD = g.FALSE;
                 g.STRING_OVERFLOW=g.FALSE;
@@ -1167,7 +1151,6 @@ def SCAN():
                 # END OF CASE 12
                
             elif ct == 13:
-                print("SC C", g.NEXT_CHAR, "CENT")
                 #  CASE 13 - ¢ FOR ¢MACROS
                 # ... replaced already in this ASCII port by `.
                 if goto_CASE13:
@@ -1216,8 +1199,6 @@ def SCAN():
                         goto_SCAN_START = True;
                         break;
                 #  END OF CASE 13  */
-            else:
-                print("SC C", g.NEXT_CHAR, "UKNOWN")
 
             # END OF DO CASE...
             if goto_SCAN_END or goto_CENT_START:

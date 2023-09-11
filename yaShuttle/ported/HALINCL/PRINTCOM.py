@@ -17,11 +17,7 @@ from OUTPUTWR import OUTPUT_WRITER
 # to PRINT_COMMENT don't have it, but *some* do.  Defaulting it to an empty
 # string is just my guess.
 def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
-    # Locals:
-    FORMAT_CHAR = ''
-    C = ''
-    T = ''
-    R = ''
+    # FORMAT_CHAR, C, T, and R are locals, but look appear to need persistence.
     
     FORMAT_CHAR='|';
     if not g.INCLUDE_LIST2:
@@ -36,14 +32,14 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
         if g.IF_FLAG:
             g.STMT_NUM = g.STMT_NUM - 1;
             g.SAVE_SRN2 = g.SRN[2];
-            g.SRN[2] = SAVE_SRN1;
+            g.SRN[2] = g.SAVE_SRN1;
             g.SAVE_SRN_COUNT2 = g.SRN_COUNT[2];
-            g.SRN_COUNT[2] = SAVE_SRN_COUNT1;
-            IF_FLAG = FALSE;
-            OUTPUT_WRITER(SAVE1,SAVE2);
-            g.INDENT_LEVEL=g.INDENT_LEVEL+INDENT_INCR;
-            if STMT_PTR > -1:
-                LAST_WRITE = SAVE2+1;
+            g.SRN_COUNT[2] = g.SAVE_SRN_COUNT1;
+            g.IF_FLAG = g.FALSE;
+            OUTPUT_WRITER(g.SAVE1,g.SAVE2);
+            g.INDENT_LEVEL=g.INDENT_LEVEL+g.INDENT_INCR;
+            if g.STMT_PTR > -1:
+                g.LAST_WRITE = g.SAVE2+1;
             g.STMT_NUM = g.STMT_NUM + 1;
             g.SRN[2] = g.SAVE_SRN2;
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT2;
@@ -75,7 +71,7 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
             if LENGTH(g.CURRENT_CARD) >= g.TEXT_LIMIT[0] + 17:
                 T = T + g.X1 + SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 9, 8);
             else:
-                T = T + SUBSTR(X70, 0, 9);
+                T = T + SUBSTR(g.X70, 0, 9);
     if g.LISTING2:
         PRINT2(C + SUBSTR(g.X8, 1) + g.INCLUDE_CHAR + \
             SUBSTR(g.CURRENT_CARD, 0, 1) + g.VBAR + \

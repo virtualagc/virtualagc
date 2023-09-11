@@ -31,6 +31,7 @@ import g
 '''
 
 def CHARTIME(T):
+    # None of the locals need persistence.
     COLON = ':'
     C = str(T // 360000)
     C = C + COLON + str((T % 360000) // 6000) + \
