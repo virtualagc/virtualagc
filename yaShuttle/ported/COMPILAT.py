@@ -17,11 +17,11 @@ from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE
 from SAVETOKE import SAVE_TOKEN
 from POPMACRO import POP_MACRO_XREF
-
 from SYTDUMP import SYT_DUMP
 from EMITEXTE import EMIT_EXTERNAL
 from STACKDUM import STACK_DUMP
 from RECOVER import RECOVER
+
 from SYNTHESI import SYTHESIZE
 from CALLSCAN import CALL_SCAN
 

@@ -11,6 +11,10 @@ History:    2023-09-11 RSB  Began porting from XPL
 
 from xplBuiltins import *
 import g
+import HALINCL.COMMON as h
+import HALINCL.CERRDECL as d
+from BLANK import BLANK
+from ERRORS import ERRORS
 
 '''
  /***************************************************************************/
@@ -284,631 +288,703 @@ class cSYT_DUMP: # Local variables for SYT_DUMP().
 lSYT_DUMP = cSYT_DUMP()
 
 def SYT_DUMP():
+    l = lSYT_DUMP # Local variables.
+    
     # PRINTS THE SYMBOL TABLE HEADER.
-    PRINT_SYMBOL_HEADER:
-    PROCEDURE(STRUC,NEW_PAGE);
-       DECLARE STRUC BIT(1);
-       DECLARE NEW_PAGE BIT(1);
-       DECLARE J BIT(16);
-       IF STRUC THEN
-          OUTPUT(1)='0S T R U C T U R E   T E M P L A T E   S Y M B O L  &  C
-    R O S S   R E F E R E N C E   T A B L E   L I S T I N G :';
-       ELSE DO;
-          HEADER_PRINTED=TRUE;
-          IF NEW_PAGE THEN DO;
-             OUTPUT(1)=SUBHEADING;
-             EJECT_PAGE;
-          END;
-          OUTPUT(1) = '0S Y M B O L  &  C R O S S   R E F E R E N C E   T A B
-    L E   L I S T I N G :';
-       END;
-       IF MAX_LENGTH < 4 THEN J = 4;
-       ELSE J = MAX_LENGTH;
-       OUTPUT(1) = '0         (CROSS REFERENCE FLAG KEY:  4 = ASSIGNMENT, 2 =
-    REFERENCE, 1 = SUBSCRIPT USE, 0 = DEFINITION)';
-       S = ' DCL  NAME'||SUBSTR(X70,0,J-3)||'        TYPE
-    ATTRIBUTES & CROSS REFERENCE';
-       OUTPUT(1) = DOUBLE || S;
-       OUTPUT(1) = SUBHEADING || S;
-       OUTPUT = X1;
-    END;
+    def PRINT_SYMBOL_HEADER(STRUC,NEW_PAGE):
+        # Local J doesn't need to be persistent.
+        
+        if STRUC:
+            OUTPUT(1, '0S T R U C T U R E   T E M P L A T E   S Y M B O L' + \
+                      '  &  C R O S S   R E F E R E N C E   T A B L E   ' + \
+                      'L I S T I N G :');
+        else:
+            l.HEADER_PRINTED=g.TRUE;
+            if g.NEW_PAGE:
+                OUTPUT(1, g.SUBHEADING);
+                g.EJECT_PAGE();
+            OUTPUT(1, '0S Y M B O L  &  C R O S S   R E F E R E N C E   ' + \
+                      'T A B L E   L I S T I N G :');
+        if l.MAX_LENGTH < 4:
+            J = 4;
+        else:
+            J = l.MAX_LENGTH;
+        OUTPUT(1, '0         (CROSS REFERENCE FLAG KEY:  4 = ASSIGNMENT, ' + \
+                  '2 = REFERENCE, 1 = SUBSCRIPT USE, 0 = DEFINITION)');
+        l.S = ' DCL  NAME'+SUBSTR(g.X70,0,J-3)+\
+                '        TYPE ATTRIBUTES & CROSS REFERENCE';
+        OUTPUT(1, g.DOUBLE + l.S);
+        OUTPUT(1, g.SUBHEADING + l.S);
+        OUTPUT(0, g.X1);
     
-    /*CR12940 - PRINTS THE STRUCTURES THAT ARE DECLARED USING THE CURRENT TEMPLATE*/
-    PRINT_VAR_NAMES:
-    PROCEDURE(SYT_NO,M);
-       DECLARE SYT_NO FIXED;/*SYMBOL TABLE ENTRY FOR THE STRUCTURE TEMPLATE.*/
-       DECLARE M FIXED;/*INDEX INTO SORTED SYMBOL TABLE TO START LOOKING FOR*/
-                       /*STRUCTURES USING THE CURRENT STRUCTURE TEMPLTE.   */
-       DECLARE IDX FIXED;
-       DECLARE USED CHARACTER INITIAL('USED BY: ');
-       DECLARE STR_OUT CHARACTER;
-       STR_OUT = SUBSTR(X70,0,ATTR_START)||USED;
-       DO IDX = M TO SORT_COUNT;
-            IF (SYT_TYPE(SYT_SORT(IDX))=MAJ_STRUC) &
-            (VAR_LENGTH(SYT_SORT(IDX)) = SYT_NO) THEN DO;
-               IF (LENGTH(STR_OUT)+LENGTH(SYT_NAME(SYT_SORT(IDX)))>132)
-               THEN DO;
-                  OUTPUT = SUBSTR(STR_OUT,0,LENGTH(STR_OUT));
-                  STR_OUT = SUBSTR(X70,0,ATTR_START);
-               END;
-               STR_OUT = STR_OUT||SYT_NAME(SYT_SORT(IDX))||',';
-            END;
-         END;
-         IF LENGTH(STR_OUT) = ATTR_START + LENGTH(USED) THEN
-            STR_OUT = STR_OUT || '** '||SUBSTR(CUSS,46,14)||' ** ';/*CR13335*/
-         OUTPUT = SUBSTR(STR_OUT,0,LENGTH(STR_OUT)-1);
-    END PRINT_VAR_NAMES;
+    # PRINTS THE STRUCTURES THAT ARE DECLARED USING THE CURRENT TEMPLATE
+    # SYT_NO IS THE SYMBOL TABLE ENTRY FOR THE STRUCTURE TEMPLATE.
+    # M IS THE INDEX INTO SORTED SYMBOL TABLE TO START LOOKING FOR
+    #   STRUCTURES USING THE CURRENT STRUCTURE TEMPLTE.
+    def PRINT_VAR_NAMES(SYT_NO,M):
+        # The locals, IDX, USED, and STR_OUT, don't require persistence.
+        USED = 'USED BY: '
+        STR_OUT = SUBSTR(g.X70,0,l.ATTR_START)+USED;
+        for IDX in range(M, l.SORT_COUNT+1):
+            if (g.SYT_TYPE(g.SYT_SORT[IDX])==g.MAJ_STRUC) and \
+                    (g.VAR_LENGTH(g.SYT_SORT[IDX]) == g.SYT_NO):
+                if (LENGTH(STR_OUT)+LENGTH(g.SYT_NAME[g.SYT_SORT[IDX]])>132):
+                    OUTPUT(0, SUBSTR(STR_OUT,0,LENGTH(STR_OUT)));
+                    STR_OUT = SUBSTR(g.X70,0,l.ATTR_START);
+                STR_OUT = STR_OUT+g.SYT_NAME[g.SYT_SORT[IDX]] + ',';
+        if  LENGTH(STR_OUT) == l.ATTR_START + LENGTH(USED):
+            STR_OUT = STR_OUT + '** '+SUBSTR(l.CUSS,46,14)+' ** ';
+        OUTPUT(0, SUBSTR(STR_OUT,0,LENGTH(STR_OUT)-1));
     
-    ENTER_SORT:
-    PROCEDURE(LOC);
-       DECLARE LOC BIT(16);
-       SORT_COUNT = SORT_COUNT + 1;
-       SYT_SORT(SORT_COUNT) = LOC;
-       IF LENGTH(SYT_NAME(LOC)) > MAX_LENGTH THEN
-          MAX_LENGTH = LENGTH(SYT_NAME(LOC));
-    END ENTER_SORT;
+    def ENTER_SORT(LOC):
+        # No Locals
+        g.SORT_COUNT = g.SORT_COUNT + 1;
+        g.SYT_SORT[g.SORT_COUNT] = LOC;
+        if LENGTH(g.SYT_NAME[LOC]) > l.MAX_LENGTH:
+             l.MAX_LENGTH = LENGTH(g.SYT_NAME[LOC]);
     
-    CHECK_AND_ENTER:
-    PROCEDURE(LOC, ALWAYS) BIT(1);
-       DECLARE LOC BIT(16), ALWAYS BIT(1);
-       DECLARE (I, J) FIXED;
-       I = SYT_XREF(LOC);  /* PTR TO LAST ENTRY */
-       J = SYT_FLAGS(LOC);
-       IF TOKEN = EOFILE THEN DO;
-          IF (J & RIGID_FLAG) ^= 0 THEN
-             SYT_FLAGS(LOC) = (J & (^RIGID_FLAG)) | DUPL_FLAG;
-          ELSE SYT_FLAGS(LOC) = J & (^DUPL_FLAG);
-          IF I > 0 THEN DO;
-             SYT_XREF(LOC) = SHR(XREF(I), 16);
-             XREF(I) = XREF(I) & "FFFF";
-          END;  ELSE SYT_XREF(LOC) = 0;
-          END;
-       IF ALWAYS THEN DO;  /* ENTRY BEING FORCED INTO SORT ARRAY */
-          CALL ENTER_SORT(LOC);
-          ALWAYS = FALSE;  /* FOR NEXT TIME */
-          RETURN TRUE;
-       END;
-       IF (XREF(I) & XREF_MASK) > FIRST_STMT THEN DO;
-          CALL ENTER_SORT(LOC);
-          RETURN TRUE;
-       END;
-       RETURN FALSE;
-    END CHECK_AND_ENTER;
+    # Regarding the ALWAYS parameter, CHECK_AND_ENTER() is sometimes called
+    # with it in XPL, and sometimes without.  My supposition that it defaults to
+    # FALSE is based on the fact that when it's present, it's always specified
+    # as TRUE
+    def CHECK_AND_ENTER(LOC, ALWAYS=g.FALSE):
+        # Locals (I and J) don't need to be persistent.
+        I = g.SYT_XREF[LOC];  # PTR TO LAST ENTRY
+        J = g.SYT_FLAGS[LOC];
+        if g.TOKEN == g.EOFILE:
+            if (J & g.RIGID_FLAG) != 0:
+               g.SYT_FLAGS[LOC] = (J & (~g.RIGID_FLAG)) | g.DUPL_FLAG;
+            else:
+                g.SYT_FLAGS[LOC] = J & (~g.DUPL_FLAG);
+            if I > 0:
+                g.SYT_XREF[LOC] = SHR(g.XREF[I], 16);
+                g.XREF(I, g.XREF(I) & 0xFFFF);
+            else:
+                g.SYT_XREF[LOC] = 0;
+        if g.ALWAYS:  # ENTRY BEING FORCED INTO SORT ARRAY
+            ENTER_SORT(LOC);
+            g.ALWAYS = g.FALSE;  # FOR NEXT TIME
+            return g.TRUE;
+        if (g.XREF(I) & g.XREF_MASK) > g.FIRST_STMT:
+            ENTER_SORT(LOC);
+            return g.TRUE;
+        return g.FALSE;
     
-    ADD_ATTR:
-    PROCEDURE(ATTR);
-       DECLARE ATTR CHARACTER;
-       IF LENGTH(S) + LENGTH(ATTR) + 2 > 132 THEN
-          DO;
-          OUTPUT = S;
-          S = SUBSTR(X70, 0, ATTR_START);
-       END;
-       S = S || ATTR || ', ';
-    END ADD_ATTR;
+    def ADD_ATTR(ATTR):
+        # No locals
+        if LENGTH(l.S) + LENGTH(ATTR) + 2 > 132:
+           OUTPUT(0, l.S);
+           l.S = SUBSTR(g.X70, 0, l.ATTR_START);
+        l.S = l.S + ATTR + ', ';
     
-    MACRO_TEXT_RESET:
-    PROCEDURE;
-       OUTPUT = S;
-       CALL BLANK(S, 0, 132);
-       JL = ATTR_START;
-    END;
+    def MACRO_TEXT_RESET():
+        # No locals
+        OUTPUT(0, l.S);
+        BLANK(l.S, 0, 132);
+        l.JL = l.ATTR_START;
     
-    /***********************************************************************/
-    /* FINDS THE CROSS-REFERENCES FOR EACH SYMBOL AND/OR BUILT-IN FUNCTION */
-    /* AND FORMATS THE CROSS-REFERENCES FOR REPORTING IN THE COMPILATION   */
-    /* LISTING.                                                            */
-    /* INPUT PARAMETERS:                                                   */
-    /* PTR - THE INDEX IN THE XREFS ARRAY FOR THE FIRST CROSS-REFERENCE    */
-    /*       OF THE SYMBOL/BUILT-IN FUNCTION BEING PROCESSED.              */
-    /* PROCESSING_BI- EQUAL TO 1 WHEN PROCESSING A BUILT-IN      /*DR120220*/
-    /*                FUNCTION, OTHERWISE IT IS EQUAL TO 0.      /*DR120220*/
-    /***********************************************************************/
-    ADD_XREFS:
-    PROCEDURE(PTR,PROCESSING_BI) BIT(32);                  /*DR120220*/
-       DECLARE PTR BIT(16), A FIXED, PROCESSING_BI BIT(1); /*DR120220*/
-       DECLARE TMP_PTR BIT(16);                            /*DR111366*/
-       T = '';
-       A = 0;
-       LABEL_ON_END = FALSE;                               /*DR111366*/
-       DO FOREVER;
-          TMP_PTR = PTR;                                   /*DR111366*/
-          A = A | XREF(PTR);  /* COLLECT FLAGS */
-          T = T || (SHR(XREF(PTR), 13) & 7) || X1 ||
-             SUBSTR(10000 + (XREF(PTR) & XREF_MASK), 1, 4) || X2;
-          IF LENGTH(S)+LENGTH(T)+6>132 THEN DO;
-             OUTPUT=S||T;
-             S=SUBSTR(X70,0,ATTR_START);
-             T='';
-          END;
-          PTR = SHR(XREF(PTR), 16);
-          /* IF THE XREF ENTRY IS AN ASSIGN XREF & THE     /*DR111366*/
-          /* SYMBOL IS A STATEMENT LABEL THEN THE LABEL    /*DR111366*/
-          /* IS BEING USED ON AN END STATEMENT. SO THE     /*DR111366*/
-          /* ASSIGN XREF ENTRY NEEDS TO BE REMOVED AND     /*DR111366*/
-          /* LABEL_ON_END IS SET TO TRUE SO THE INACCURATE /*DR111366*/
-          /* "NOT REFERENCED" MESSAGE WILL NOT BE PRINTED. /*DR111366*/
-          IF ((SYT_TYPE(I) & STMT_LABEL) = STMT_LABEL) &   /*DR111366*/
-             ((SHR(XREF(PTR),13) & 7) = 4)                 /*DR111366*/
-             & ^PROCESSING_BI                              /*DR120220*/
-          THEN DO;                                         /*DR111366*/
-             LABEL_ON_END = TRUE;                          /*DR111366*/
-             XREF(TMP_PTR) = (XREF(TMP_PTR) & "FFFF") |    /*DR111366*/
-                             (XREF(PTR) & "FFFF0000");     /*DR111366*/
-             PTR = SHR(XREF(PTR), 16);                     /*DR111366*/
-          END;                                             /*DR111366*/
-          IF PTR = 0 THEN RETURN A;
-       END;
-    END ADD_XREFS;
+    #*********************************************************************
+    # FINDS THE CROSS-REFERENCES FOR EACH SYMBOL AND/OR BUILT-IN FUNCTION
+    # AND FORMATS THE CROSS-REFERENCES FOR REPORTING IN THE COMPILATION
+    # LISTING.
+    # INPUT PARAMETERS:
+    # PTR - THE INDEX IN THE XREFS ARRAY FOR THE FIRST CROSS-REFERENCE
+    #       OF THE SYMBOL/BUILT-IN FUNCTION BEING PROCESSED.
+    # PROCESSING_BI- EQUAL TO 1 WHEN PROCESSING A BUILT-IN
+    #                FUNCTION, OTHERWISE IT IS EQUAL TO 0.
+    #*********************************************************************
+    def ADD_XREFS(PTR,PROCESSING_BI):
+        # The locals, A and TMP_PTR, don't need to be persistent.
+        l.T = '';
+        A = 0;
+        l.LABEL_ON_END = g.FALSE;
+        while True:
+            TMP_PTR = PTR;
+            A = A | g.XREF(PTR);  # COLLECT FLAGS
+            l.T = l.T + (SHR(g.XREF(PTR), 13) & 7) + g.X1 + \
+                SUBSTR(10000 + (g.XREF(PTR) & g.XREF_MASK), 1, 4) + g.X2;
+            if LENGTH(l.S)+LENGTH(l.T)+6>132:
+                OUTPUT(0, l.S+l.T);
+                l.S=SUBSTR(g.X70,0,l.ATTR_START);
+                l.T='';
+            PTR = SHR(g.XREF(TR), 16);
+            # IF THE XREF ENTRY IS AN ASSIGN XREF & THE
+            # SYMBOL IS A STATEMENT LABEL THEN THE LABEL
+            # IS BEING USED ON AN END STATEMENT. SO THE
+            # ASSIGN XREF ENTRY NEEDS TO BE REMOVED AND
+            # LABEL_ON_END IS SET TO TRUE SO THE INACCURATE
+            # "NOT REFERENCED" MESSAGE WILL NOT BE PRINTED.
+            if ((g.SYT_TYPE[l.I] & g.STMT_LABEL) == g.STMT_LABEL) and \
+                    ((SHR(g.XREF(PTR),13) & 7) == 4) \
+                    and not g.PROCESSING_BI:
+                l.LABEL_ON_END = g.TRUE;
+                g.XREF(TMP_PTR, (g.XREF(TMP_PTR) & 0xFFFF) | \
+                                    (g.XREF(PTR) & 0xFFFF0000));
+                PTR = SHR(g.XREF(PTR), 16);
+            if PTR == 0:
+                return A;
     
-    /* PROCEDURE TO STORE BI_XREF ARRAYS IN VMEM */
-    STORE_BI_XREF:
-    PROCEDURE;
-       DECLARE (I,PTR) BIT(16);
-       BASED NODE_H BIT(16);
-       BI_XREF_CELL = GET_CELL((BI#+1)*4,ADDR(NODE_H),MODF);
-       PTR = 0;
-       DO I = 0 TO BI#;
-          NODE_H(PTR) = BI_XREF#(I);
-          NODE_H(PTR+1) = BI_XREF(I);
-          PTR = PTR+2;
-       END;
-    END STORE_BI_XREF;
+    # PROCEDURE TO STORE BI_XREF ARRAYS IN VMEM
+    class cSTORE_BI_XREF:
+        def __init__(self):
+            self.I = 0
+            self.PTR = 0
+            self.NODE_H = []
+    lSTORE_BI_XREF = cSTORE_BI_XREF()
+    def STORE_BI_XREF():
+        ll = lSTORE_BI_XREF
+        g.BI_XREF_CELL = GET_CELL((g.BIp+1)*4,ADDR(ll.NODE_H),g.MODF);
+        ll.PTR = 0;
+        for ll.I in range(0, g.BIp + 1):
+            while len(ll.NODE_H) < ll.PTR+2:
+                ll.NODE_H.append(0)
+            ll.NODE_H[ll.PTR] = g.BI_XREFp[ll.I];
+            ll.NODE_H[ll.PTR+1] = g.BI_XREF[ll.I];
+            ll.PTR = ll.PTR+2;
     
-    /* TRUNCATE PROCEDURE ADDED TO STRIP THE BLANK SPACES FROM A /*CR13335*/
-    /* CHARACTER STRING.                                         /*CR13335*/
-    TRUNCATE : PROCEDURE(STRING) CHARACTER;
-      DECLARE STRING CHARACTER, L FIXED;
+    # TRUNCATE PROCEDURE ADDED TO STRIP THE BLANK SPACES FROM A
+    # CHARACTER STRING.
+    def TRUNCATE(STRING):
+        # Local (L) doesn't need persistence.
     
-      L = LENGTH(STRING);
-      DO WHILE SUBSTR(STRING,L-1,1) = X1;
-         L = L-1;
-      END;
-    
-      RETURN SUBSTR(STRING,0,L);
-    END TRUNCATE;
+        L = LENGTH(STRING);
+        while SUBSTR(STRING,L-1,1) == g.X1:
+            L = L-1;
+        
+        return SUBSTR(STRING,0,L);
     
     
-    KI=0;
-    CONTROL(7) = 0;     /*  ONE SHOT ONLY  */
-    IF TOKEN = EOFILE THEN
-       DO;
-       OUTPUT(1)='0**** C O M P I L A T I O N   L A Y O U T ****';
-       DO M = 1 TO PROGRAM_LAYOUT_INDEX;
-          I = PROGRAM_LAYOUT(M);
-          S=SYT_NAME(I);
-          DO J=M+1 TO PROGRAM_LAYOUT_INDEX;
-             IF SYT_NAME(PROGRAM_LAYOUT(J))=S THEN KI=1;
-          END;
-          S=S||': ';
-          J = SYT_CLASS(I);
-          K = SYT_TYPE(I);
-          IF (SYT_FLAGS(I) & EXTERNAL_FLAG) ^= 0 THEN
-             S = S || 'EXTERNAL ';
-          IF J = FUNC_CLASS THEN
-             S = S || SUBSTR(LABEL_TYPES, 0, 10);
-          ELSE IF K = STMT_LABEL THEN
-             S = S || SUBSTR(LABEL_TYPES, 10, 10);
-          ELSE DO;
-             K = K - PROC_LABEL + 2;
-             K = K * 10;
-             S = S || SUBSTR(LABEL_TYPES, K, 10);
-          END;
-          K = SYT_NEST(I) * 3;
-          OUTPUT(1) = DOUBLE || SUBSTR(X70, 0, K+1) || S;
-       END;
-       IF KI THEN DO;
-          IF MAX_SEVERITY<1 THEN MAX_SEVERITY=1;
-          ERROR_COUNT=ERROR_COUNT+1;
-          SAVE_SEVERITY(ERROR_COUNT)=1;
-          SAVE_LINE_#(ERROR_COUNT)=-2;
-          CALL ERRORS (CLASS_BI, 104);
-       END;
-       EJECT_PAGE;
-    END;
+    l.KI=0;
+    g.CONTROL[7] = 0;     #  ONE SHOT ONLY
+    if g.TOKEN == g.EOFILE:
+        OUTPUT(1, '0**** C O M P I L A T I O N   L A Y O U T ****');
+        for l.M in range(1, g.PROGRAM_LAYOUT_INDEX+1):
+            l.I = g.PROGRAM_LAYOUT[l.M];
+            l.S=g.SYT_NAME(l.I);
+            while l.J in range(l.M+1, g.PROGRAM_LAYOUT_INDEX+1):
+                if g.SYT_NAME(g.PROGRAM_LAYOUT[l.J])==l.S:
+                    l.KI=1;
+            l.S=l.S+': ';
+            l.J = g.SYT_CLASS(l.I);
+            l.K = g.SYT_TYPE(l.I);
+            if (g.SYT_FLAGS(l.I) & g.EXTERNAL_FLAG) != 0:
+                l.S = l.S + 'EXTERNAL ';
+            if l.J == g.FUNC_CLASS:
+                l.S = l.S + SUBSTR(l.LABEL_TYPES, 0, 10);
+            elif l.K == g.STMT_LABEL:
+                l.S = l.S + SUBSTR(l.LABEL_TYPES, 10, 10);
+            else:
+                l.K = l.K - g.PROC_LABEL + 2;
+                l.K = l.K * 10;
+                l.S = l.S + SUBSTR(l.LABEL_TYPES, l.K, 10);
+            l.K = g.SYT_NEST(l.I) * 3;
+            OUTPUT(1, g.DOUBLE + SUBSTR(g.X70, 0, l.K+1) + l.S);
+        if l.KI:
+            if g.MAX_SEVERITY<1:
+                g.MAX_SEVERITY=1;
+            g.ERROR_COUNT=g.ERROR_COUNT+1;
+            g.SAVE_SEVERITY[g.ERROR_COUNT]=1;
+            g.SAVE_LINE_p[g.ERROR_COUNT]=-2;
+            ERRORS (d.CLASS_BI, 104);
+        g.EJECT_PAGE();
     
-    MAX_LENGTH = 0;
-    I = 1;  /* DEFAULT START OF SORT_COUNT */
-    IF SREF_OPTION THEN DO;
-       IF XREF_FULL THEN DO;
-          OUTPUT(1) = '0*****SREF OPTION WILL BE IGNORED DUE TO CROSS REFERENC
-    E TABLE OVERFLOW*****';
-          GO TO NO_SREF;
-       END;
-       DO WHILE I < BLOCK_SYTREF(1);
-          IF SYT_TYPE(I) = TEMPL_NAME THEN DO; /* STRUCTURE TEMPLATE */
-             K = I + 1;  /* FIRST ELEMENT */
-             M = FALSE;  /* SET TRUE IF ANY ELEMENTS OF STR ARE USED */
-             DO WHILE SYT_CLASS(K) = TEMPLATE_CLASS
-                   & SYT_TYPE(K) ^= TEMPL_NAME;
-                M = M | CHECK_AND_ENTER(K);
-                K = K + 1;
-             END;
-             IF M THEN  /* ENTER TPL NAME IF ANY TERMINALS USED */
-                CALL CHECK_AND_ENTER(I, TRUE);  /* FORCE ENTRY */
-             ELSE  /* CONDITIONALLY ENTER TEMPLATE NAME */
-                CALL CHECK_AND_ENTER(I);
-             I = K;  /* JUMP OVER BODY OF TEMPLATE */
-          END;
-          ELSE IF (SYT_TYPE(I) = PROC_LABEL)
-             | (SYT_TYPE(I) = PROG_LABEL)
-             | (SYT_CLASS(I) = FUNC_CLASS) THEN DO;
-             CALL CHECK_AND_ENTER(I, TRUE);  /* PRINT ALL NON-CPL TEMPLATES */
-             I = I + 1;  /* FIRST PARM (OR ANOTHER BLOCK) */
-             DO WHILE (SYT_FLAGS(I) & PARM_FLAGS) ^= 0;
-                CALL CHECK_AND_ENTER(I, TRUE);  /* ENTER PARMS TOO */
-                I = I + 1;
-             END;
-          END;
-          ELSE DO;  /* NONE OF ABOVE */
-             CALL CHECK_AND_ENTER(I);
-             IF SYT_TYPE(I) = EQUATE_LABEL THEN
-                IF TOKEN = EOFILE THEN
-                SYT_NAME(I) = SUBSTR(SYT_NAME(I), 1); /* NO @ */
-             I = I + 1;
-          END;
-       END;  /* OF WHILE I < BLOCK_SYTREF(1) */
-    END;  /* OF SREF PROCESSING */
-    NO_SREF:
-    DO I = I TO NDECSY;
-       CALL CHECK_AND_ENTER(I, TRUE);
-       IF SYT_TYPE(I) = EQUATE_LABEL THEN
-          IF TOKEN = EOFILE THEN
-          SYT_NAME(I) = SUBSTR(SYT_NAME(I), 1);  /* NO @ */
-    END;
-    IF MAX_LENGTH < 4 THEN J = 4;
-    ELSE J = MAX_LENGTH;
-    ATTR_START=J+44;
-    EXCHANGES = TRUE;
+    l.MAX_LENGTH = 0;
+    l.I = 1;  # DEFAULT START OF SORT_COUNT
+    if g.SREF_OPTION:
+        if g.XREF_FULL:
+            OUTPUT(1, '0*****SREF OPTION WILL BE IGNORED DUE TO CROSS ' + \
+                      'REFERENCE TABLE OVERFLOW*****');
+            # GO TO NO_SREF;
+        else:
+            while l.I < g.BLOCK_SYTREF[1]:
+                if g.SYT_TYPE(l.I) == g.TEMPL_NAME: # STRUCTURE TEMPLATE
+                    l.K = l.I + 1;  # FIRST ELEMENT
+                    l.M = g.FALSE;  # SET TRUE IF ANY ELEMENTS OF STR ARE USED
+                    while g.SYT_CLASS(l.K) == g.TEMPLATE_CLASS and \
+                                               g.SYT_TYPE(l.K) != g.TEMPL_NAME:
+                        l.M = l.M | CHECK_AND_ENTER(l.K);
+                        l.K = l.K + 1;
+                    if l.M:  # ENTER TPL NAME IF ANY TERMINALS USED
+                        CHECK_AND_ENTER(l.I, g.TRUE);  # FORCE ENTRY
+                    else: # CONDITIONALLY ENTER TEMPLATE NAME
+                        CHECK_AND_ENTER(l.I);
+                    l.I = l.K;  # JUMP OVER BODY OF TEMPLATE
+                elif (g.SYT_TYPE(l.I) == g.PROC_LABEL) or \
+                        (g.SYT_TYPE(l.I) == g.PROG_LABEL) or \
+                        (g.SYT_CLASS(l.I) == g.FUNC_CLASS):
+                    CHECK_AND_ENTER(l.I, g.TRUE);  # PRINT ALL NON-CPL TEMPLATES
+                    l.I = l.I + 1;  # FIRST PARM (OR ANOTHER BLOCK)
+                    while (g.SYT_FLAGS(l.I) & g.PARM_FLAGS) != 0:
+                        CHECK_AND_ENTER(l.I, g.TRUE);  # ENTER PARMS TOO
+                        l.I = l.I + 1;
+                else:  # NONE OF ABOVE
+                    CHECK_AND_ENTER(l.I);
+                    if g.SYT_TYPE(l.I) == g.EQUATE_LABEL:
+                        if g.TOKEN == g.EOFILE:
+                            g.SYT_NAME(l.I) = SUBSTR(g.SYT_NAME(l.I), 1); # NO @
+                    l.I = l.I + 1;
+            # END OF WHILE I < BLOCK_SYTREF(1)
+    # END OF SREF PROCESSING
+    # NO_SREF:
+    for l.I in range(l.I, g.NDECSY()+1):
+        CHECK_AND_ENTER(l.I, g.TRUE);
+        if g.SYT_TYPE(l.I) == g.EQUATE_LABEL:
+            if g.TOKEN == g.EOFILE:
+                g.SYT_NAME(l.I) = SUBSTR(g.SYT_NAME(l.I), 1);  # NO @
+    if l.MAX_LENGTH < 4:
+        l.J = 4;
+    else:
+        l.J = l.MAX_LENGTH;
+    l.ATTR_START=l.J+44;
+    l.EXCHANGES = g.TRUE;
     
-    IF ^CONTROL("F") THEN DO;
-       M = SHR(SORT_COUNT, 1);
-       DO WHILE M > 0;
-          DO J = 1 TO SORT_COUNT - M;
-             I = J;
-           DO WHILE STRING_GT(SYT_NAME(SYT_SORT(I)), SYT_NAME(SYT_SORT(I+M)));
-                L = SYT_SORT(I);
-                SYT_SORT(I) = SYT_SORT(I + M);
-                SYT_SORT(I + M) = L;
-                I = I - M;
-                IF I < 1 THEN GO TO LM;
-             END;  /* DO WHILE STRING_GT */
-    LM:
-          END;  /* DO J */
-          M = SHR(M, 1);
-       END;  /* DO WHILE M */
-    END;  /* OF SORTING IF NOT CONTROL(F) */
+    if not g.CONTROL[0xF]:
+        l.M = SHR(l.SORT_COUNT, 1);
+        while l.M > 0:
+            for l.J in range(1, l.SORT_COUNT - l.M + 1):
+                l.I = l.J;
+                while STRING_GT(g.SYT_NAME(g.SYT_SORT(l.I)), \
+                                g.SYT_NAME(g.SYT_SORT(l.I+l.M))):
+                    l.L = g.SYT_SORT(l.I);
+                    g.SYT_SORT(l.I) = g.SYT_SORT(l.I + l.M);
+                    g.SYT_SORT(l.I + l.M) = l.L;
+                    l.I = l.I - l.M;
+                    if l.I < 1:
+                        break # GO TO LM;
+                # END DO WHILE STRING_GT
+                '''
+                The XPL documentation isn't adequate for determining whether
+                the GO TO LM above is supposed to merely break out of the
+                DO WHILE STRING_GT, or whether it's supposed to break out of 
+                the enclosing DO J as well.  The difficulty is that labels like 
+                "LM:" are associated with statements, in this case END, and we 
+                don't know whether the END was considered to be "inside" the
+                block it was terminated or whether it was considered to be
+                "outside".  I'm assuming that for now that the GO TO LM only
+                breaks out of the DO WHILE STRING_GT, but if that turns out to
+                cause a problem, we'll have to revisit. 
+                '''
+                # LM:
+            # END DO J
+            l.M = SHR(l.M, 1);
+        # END DO WHILE M
+    # END OF SORTING IF NOT CONTROL(F)
     
-    T_CASE,T_LEVEL=0;
-    M=1;
-    /*IF 1ST SYMBOL IN SORTED LIST IS A STRUCTURE TEMPLATE */
-    /*THEN PRINT THE HEADER FOR STRUCTURES.                */
-    IF SYT_TYPE(SYT_SORT(1))=TEMPL_NAME THEN    /*CR12940*/
-       CALL PRINT_SYMBOL_HEADER(TRUE,FALSE);    /*CR12940*/
-    ELSE DO;                                    /*CR12940*/
-       CALL PRINT_SYMBOL_HEADER(FALSE,FALSE);   /*CR12940*/
-    END;                                        /*CR12940*/
-    DO WHILE M <= SORT_COUNT;
-       IF ^HEADER_PRINTED THEN                         /*CR12940*/
-          IF (SYT_TYPE(SYT_SORT(M))^=TEMPL_NAME) THEN  /*CR12940*/
-             CALL PRINT_SYMBOL_HEADER(FALSE,TRUE);     /*CR12940*/
-       DO CASE T_CASE;
-          I=SYT_SORT(M);
-          IF SYT_LINK1(I)>0 THEN DO;
-             T_LEVEL=T_LEVEL+1;
-             I=SYT_LINK1(I);
-          END;
-          ELSE DO;
-             DO WHILE SYT_LINK2(I)<0;
-                I=-SYT_LINK2(I);
-                T_LEVEL=T_LEVEL-1;
-             END;
-             IF SYT_LINK2(I)=0 THEN DO;
-                T_CASE,T_LEVEL=0;
-                GO TO NO_INDIRECT;
-             END;
-             ELSE I=SYT_LINK2(I);
-          END;
-          I=I+1;
-       END;
-       J=SYT_TYPE(I);
-       K=SYT_CLASS(I);
-       L=SYT_FLAGS(I);
-       IF (L&IMPL_T_FLAG)^=0 THEN GO TO NO_INDIRECT;
-       IF K>=TEMPLATE_CLASS THEN DO;
-          IF J=TEMPL_NAME THEN IF (L&EVIL_FLAG)=0 THEN T_CASE=1;
-       END;
-       ELSE IF K=REPL_CLASS THEN DO;
-          IF VAR_LENGTH(I)>0 THEN DO;
-             T_CASE=2;
-             T_LEVEL=-VAR_LENGTH(I);
-          END;
-       END;
-       ELSE IF K=REPL_ARG_CLASS THEN DO;
-          IF T_CASE=0 THEN GO TO NO_INDIRECT;
-          T_LEVEL=T_LEVEL+1;
-          IF T_LEVEL=0 THEN T_CASE=0;
-       END;
-       IF J=IND_CALL_LAB THEN IF ^CONTROL("F") THEN GO TO NO_INDIRECT;
-       T = PAD(SYT_NAME(I), ATTR_START - 44);
-       IF K>=TEMPLATE_CLASS THEN DO;
-          IF J=TEMPL_NAME THEN                 /*MOD-CR13336*/
-             T=SUBSTR(T,1)||X4;
-          ELSE IF T_CASE=0 THEN T=T||SUBSTR(X4,1);
-          ELSE T=X1||T||X2;
-       END;
-       ELSE IF K=REPL_ARG_CLASS THEN T=X1||T||X2;
-       ELSE T=T||SUBSTR(X4,1);
-       IF (L&IMP_DECL)^=0 THEN T=' *'||T;
-       ELSE T=X2||T;
-       JL,JI=SYT_XREF(I);
-       IF TOKEN ^= EOFILE THEN
-          JI = SHR(XREF(JI), 16);
-       ELSE IF JI <= 0 THEN
-          JI = 0;
-       ELSE DO FOREVER;
-          IF (SHR(XREF(JI),13)&7)=0 THEN GO TO DEFINITION_FOUND;
-          JI=SHR(XREF(JI),16);
-          IF JI = 0 THEN DO;
-             JI = JL;
-             GO TO DEFINITION_FOUND;
-          END;
-       END;
-    DEFINITION_FOUND:
-       KI=XREF(JI)&XREF_MASK;
-       V_ARRAY='';
-       T=I_FORMAT(KI,4)||T;
-       IF K = REPL_CLASS THEN
-          S = 'REPLACE MACRO';
-       ELSE IF K=REPL_ARG_CLASS THEN DO;
-          S='MACRO ARG';
-       END;
-       ELSE IF J<TEMPL_NAME THEN DO;
-          S=TRUNCATE( SUBSTR(VAR_NAME,J*11,11) );                 /*CR13335*/
-          IF J<MAT_TYPE THEN DO;
-             IF VAR_LENGTH(I)=-1 THEN V_LEN='*';
-             ELSE V_LEN=VAR_LENGTH(I);
-             S=S||'('||V_LEN||')';
-          END;
-          ELSE IF J=VEC_TYPE THEN S=VAR_LENGTH(I)||' - '||S;
-          ELSE IF J=MAT_TYPE THEN DO;
-             V_LEN=SHR(VAR_LENGTH(I),8)||' X ';
-             V_LEN=V_LEN||(VAR_LENGTH(I)&"FF");
-             S=V_LEN||X1||S;
-          END;
-          IF K=FUNC_CLASS|K=TPL_FUNC_CLASS THEN S=S||' FUNCTION';
-          ELSE IF SYT_ARRAY(I)^=0 THEN DO;
-             IF J=MAJ_STRUC THEN DO;
-                IF  SYT_ARRAY(I)<0 THEN V_LEN='*';
-                ELSE V_LEN=SYT_ARRAY(I);
-                S=S||'('||V_LEN||')';
-             END;
-             ELSE DO;
-                S=S||' ARRAY';
-                V_ARRAY='ARRAY(';
-                DO KL=1 TO EXT_ARRAY(SYT_ARRAY(I));
-                   IF EXT_ARRAY(SYT_ARRAY(I)+KL)<0 THEN V_ARRAY=V_ARRAY||'*,';
-                   ELSE V_ARRAY=V_ARRAY||EXT_ARRAY(SYT_ARRAY(I)+KL)||',';
-                END;
-                V_ARRAY=SUBSTR(V_ARRAY,0,LENGTH(V_ARRAY)-1)||')';
-             END;
-          END;
-          IF J=MAJ_STRUC THEN DO;
-             IF K^=TEMPLATE_CLASS THEN DO;
-    T_REFS:           V_ARRAY=SUBSTR(SYT_NAME(VAR_LENGTH(I)),1)||'-STRUCTURE';
-             END;
-             ELSE IF VAR_LENGTH(I)>0 THEN GO TO T_REFS;
-             ELSE S='MINOR NODE';
-          END;
-    N_FIX:
-          IF (L&NAME_FLAG)^=0 THEN S=NAMER||S;
-          IF T_LEVEL>0 THEN DO;
-             S=SUBSTR(X70,0,MAX_STRUC_LEVEL+1)||S;
-             IF T_LEVEL<=MAX_STRUC_LEVEL THEN BYTE(S,T_LEVEL-1)=T_LEVEL|"F0";
-          END;
-       END;
-       ELSE DO;
-          S=TRUNCATE( SUBSTR(LABEL_NAME,(J-TEMPL_NAME)*18,18) );  /*CR13335*/
-          IF (L&NAME_FLAG)^=0 THEN GO TO N_FIX;
-          L = L & SDF_INCL_OFF;
-          IF J = STMT_LABEL THEN
-             IF (VAR_LENGTH(I)>0)&(VAR_LENGTH(I)<3) THEN
-             S = 'UPDATE LABEL';
-       END;
-       S=PAD(T||S,ATTR_START);
-       IF K>=TEMPLATE_CLASS THEN IF T_CASE=0 THEN IF J^=TEMPL_NAME THEN DO;
-          KI=I;
-          DO WHILE SYT_TYPE(KI)^=TEMPL_NAME;
-             KI=KI-1;
-          END;
-          R=' **** SEE STRUCTURE TEMPLATE'||SYT_NAME(KI);
-          T='';
-          IF (SYT_FLAGS(KI)&EVIL_FLAG)=0 THEN GO TO NO_XREF;
-       END;
-       IF LENGTH(V_ARRAY)>0 THEN CALL ADD_ATTR(V_ARRAY);
-       IF (L&LATCHED_FLAG)^=0 THEN DO;
-          IF J=EVENT_TYPE THEN CALL ADD_ATTR('LATCHED');
-       END;
-       DO KL=1 TO 19;
-          IF (L&FLAG_MASK(KL))^=0 THEN                            /*CR13335*/
-             CALL ADD_ATTR(TRUNCATE(SUBSTR(CHAR_ATTR,KL*11,11))); /*CR13335*/
-       END;
-       IF ^SDL_OPTION THEN
-          IF (L & EXTERNAL_FLAG) ^= 0 THEN
-          CALL ADD_ATTR('VERSION=' || SYT_LOCK#(I));
-       IF (L&LOCK_FLAG)^=0 THEN DO;
-    /*CR13335*/ IF SYT_LOCK#(I)="FF"  THEN CALL ADD_ATTR(SUBSTR(CHAR_ATTR,0,6));
-    /*CR13335*/ ELSE CALL ADD_ATTR(SUBSTR(CHAR_ATTR,0,5)||SYT_LOCK#(I));
-       END;
-       IF CONTROL("F") THEN
-          DO;  /* EXTRA SYMBOL TABLE DUMP REQUESTED */
-          T = HEX(L);
-          CALL ADD_ATTR('FLAGS=' || T);
-          CALL ADD_ATTR('NEST=' || SYT_NEST(I));
-          CALL ADD_ATTR('SCOPE=' || SYT_SCOPE(I));
-          CALL ADD_ATTR('PTR=' || SYT_PTR(I));
-          CALL ADD_ATTR('LENGTH='||VAR_LENGTH(I));
-          CALL ADD_ATTR('LINK1=' || SYT_LINK1(I));
-          CALL ADD_ATTR('LINK2=' || SYT_LINK2(I));
-          CALL ADD_ATTR('SYT_NO=' || I);
-          CALL ADD_ATTR('ARRAY='||SYT_ARRAY(I));
-          CALL ADD_ATTR('ADDR='||SYT_ADDR(I));
-          CALL ADD_ATTR('CLASS='||SYT_CLASS(I));
-          CALL ADD_ATTR('TYPE='||SYT_TYPE(I));
-       END;
-       IF K = REPL_CLASS THEN DO;
-          CALL ADD_ATTR('MACRO TEXT="');
-          S = SUBSTR(S, 0, LENGTH(S) - 2);
-          JL = LENGTH(S);
-          S = S || SUBSTR(X256, 0, 132 - JL);  /* MAKE S 132 CHARS */
-          KL = SYT_ADDR(I);  /* PTR TO TEXT */
-          JI = MACRO_TEXT(KL);  /* FIRST CHARACTER */
-    MACRO_LOOP:
-          DO WHILE JI ^= "EF" & JL < 132;
-             IF JI = "EE" THEN DO;  /* MULTIPLE BLANKS */
-                KL = KL + 1;
-                JI = MACRO_TEXT(KL);
-                IF JI = 0 THEN GO TO MACRO_END;
-    NEWLINE:
-                IF (JI + JL) > 132 THEN DO;
-                   JI = JI - 132 + JL;
-                   CALL MACRO_TEXT_RESET;
-                   GO TO NEWLINE;
-                END;
-                ELSE JL = JL + JI;
-             END;  /* OF JI = "EE" */
-             ELSE IF JI = BYTE('"') THEN DO;  /* DOUBLE ANY " */
-                BYTE(S, JL) = JI;
-                JL = JL + 1;
-                IF JL < 132 THEN
-    DOUBLE_QUOTE:
-                BYTE(S, JL) = JI;
-                ELSE DO;
-                   CALL MACRO_TEXT_RESET;
-                   GO TO DOUBLE_QUOTE;
-                END;
-             END;  /* OF JI = BYTE('"') */
-             ELSE BYTE(S, JL) = JI;
-             JL = JL + 1;
-             KL = KL + 1;
-             JI = MACRO_TEXT(KL);
-          END;  /* OF WHILE JI ^= "EF" ETC */
-          IF JI ^= "EF" THEN DO;  /* JUST RAN OUT OF ROOM */
-             CALL MACRO_TEXT_RESET;
-             GO TO MACRO_LOOP;
-          END;
-          ELSE DO;  /* END OF MACRO TEXT */
-    MACRO_END:
-             IF JL < 132 THEN
-    ADD_QUOTE:
-             BYTE(S, JL) = BYTE('"');
-             ELSE DO;
-                CALL MACRO_TEXT_RESET;
-                GO TO ADD_QUOTE;
-             END;
-             S = SUBSTR(S, 0, JL + 1);
-          END;
-       END;  /* OF K = REPL_CLASS */
-       ELSE S = SUBSTR(S, 0, LENGTH(S) - 2);
-       T,R='';
-       KL=SYT_XREF(I);
-       IF TOKEN^=EOFILE|KL<=0 THEN
-          DO;
-          OUTPUT = S;
-          GO TO NO_INDIRECT;
-       END;
+    l.T_CASE =0 
+    l.T_LEVEL=0;
+    l.M=1;
+    #IF 1ST SYMBOL IN SORTED LIST IS A STRUCTURE TEMPLATE
+    #THEN PRINT THE HEADER FOR STRUCTURES.
+    if g.SYT_TYPE(g.SYT_SORT(1))==g.TEMPL_NAME:
+        PRINT_SYMBOL_HEADER(g.TRUE,g.FALSE);
+    else:
+        PRINT_SYMBOL_HEADER(g.FALSE,g.FALSE);
+    while l.M <= l.SORT_COUNT:
+        goto_NO_INDIRECT = False
+        if not l.HEADER_PRINTED:
+            if (g.SYT_TYPE(g.SYT_SORT(l.M))!=g.TEMPL_NAME):
+               PRINT_SYMBOL_HEADER(g.FALSE,g.TRUE);
+        # DO CASE T_CASE;
+        if l.T == 0:
+            l.I=g.SYT_SORT(l.M);
+        elif l.T == 1:
+            if g.SYT_LINK1(l.I)>0:
+                l.T_LEVEL=l.T_LEVEL+1;
+                l.I=g.SYT_LINK1(l.I);
+            else:
+                while g.SYT_LINK2(l.I)<0:
+                    l.I=-g.SYT_LINK2(l.I);
+                    l.T_LEVEL=l.T_LEVEL-1;
+                if g.SYT_LINK2(l.I)==0:
+                    l.T_CASE = 0
+                    l.T_LEVEL=0;
+                    goto_NO_INDIRECT = True;
+                else:
+                    l.I=g.SYT_LINK2(l.I);
+        elif l.T == 2:
+            l.I=l.I+1;
+        # End of DO CASE
+        if not goto_NO_INDIRECT:
+            l.J=g.SYT_TYPE(l.I);
+            l.K=g.SYT_CLASS(l.I);
+            l.L=g.SYT_FLAGS(l.I);
+            if (l.L&IMPL_T_FLAG)!=0:
+                goto_NO_INDIRECT = True
+            else:
+                if l.K>=g.TEMPLATE_CLASS:
+                    if l.J==g.TEMPL_NAME: 
+                        if (l.L&g.EVIL_FLAG)==0:
+                            l.T_CASE=1;
+                elif l.K==g.REPL_CLASS:
+                    if g.VAR_LENGTH(l.I)>0:
+                        l.T_CASE=2;
+                        l.T_LEVEL=-g.VAR_LENGTH(l.I);
+                elif l.K==g.REPL_ARG_CLASS:
+                    if l.T_CASE==0:
+                        goto_NO_INDIRECT = True
+                    else:
+                        l.T_LEVEL=l.T_LEVEL+1;
+                        if l.T_LEVEL==0:
+                            l.T_CASE=0;
+                if not goto_NO_INDIRECT:
+                    if l.J==g.IND_CALL_LAB:
+                        if not g.CONTROL[0xF]:
+                            goto_NO_INDIRECT = True
+                    if not goto_NO_INDIRECT:
+                        l.T = PAD(g.SYT_NAME(l.I), l.ATTR_START - 44);
+                        if l.K>=g.TEMPLATE_CLASS:
+                            if l.J==g.TEMPL_NAME:
+                                l.T=SUBSTR(l.T,1)+g.X4;
+                            elif l.T_CASE==0:
+                                l.T=l.T+SUBSTR(g.X4,1);
+                            else:
+                                l.T=g.X1+l.T+g.X2;
+                        elif l.K==g.REPL_ARG_CLASS:
+                            l.T=g.X1+l.T+g.X2;
+                        else:
+                            l.T=l.T+SUBSTR(g.X4,1);
+                        if (l.L&g.IMP_DECL)!=0:
+                            l.T=' *'+l.T;
+                        else:
+                            l.T=g.X2+l.T;
+                        l.JI=g.SYT_XREF(l.I);
+                        l.JL = l.JI
+                        if g.TOKEN != g.EOFILE:
+                           l.JI = SHR(g.XREF(l.JI), 16);
+                        elif l.JI <= 0:
+                           l.JI = 0;
+                        else:
+                            while True:
+                                if (SHR(g.XREF(l.JI),13)&7)==0:
+                                    break # GO TO DEFINITION_FOUND;
+                                l.JI=SHR(g.XREF(l.JI),16);
+                                if l.JI == 0:
+                                    l.JI = l.JL;
+                                    break # GO TO DEFINITION_FOUND;
+                        # DEFINITION_FOUND:
+                        l.KI=g.XREF(l.JI)&g.XREF_MASK;
+                        l.V_ARRAY='';
+                        l.T=I_FORMAT(l.KI,4)+l.T;
+                        if l.K == g.REPL_CLASS:
+                            l.S = 'REPLACE MACRO';
+                        elif l.K==g.REPL_ARG_CLASS:
+                            l.S='MACRO ARG';
+                        elif l.J<g.TEMPL_NAME:
+                            l.S=TRUNCATE( SUBSTR(l.VAR_NAME,l.J*11,11) );
+                            if l.J<g.MAT_TYPE:
+                                if g.VAR_LENGTH(l.I)==-1:
+                                    l.V_LEN='*';
+                                else:
+                                    l.V_LEN=g.VAR_LENGTH(l.I);
+                                l.S=l.S+'('+l.V_LEN+')';
+                            elif l.J==g.VEC_TYPE:
+                                l.S=g.VAR_LENGTH(l.I)+' - '+l.S;
+                            elif l.J==g.MAT_TYPE:
+                                l.V_LEN=SHR(g.VAR_LENGTH(l.I),8)+' X ';
+                                l.V_LEN=l.V_LEN+(g.VAR_LENGTH(l.I)&0xFF);
+                                l.S=l.V_LEN+g.X1+l.S;
+                            if l.K==g.FUNC_CLASS or l.K==g.TPL_FUNC_CLASS:
+                                l.S=l.S+' FUNCTION';
+                            elif g.SYT_ARRAY(l.I)!=0:
+                                if l.J==g.MAJ_STRUC:
+                                    if  g.SYT_ARRAY(l.I)<0:
+                                        l.V_LEN='*';
+                                    else:
+                                        l.V_LEN=g.SYT_ARRAY(l.I);
+                                    l.S=l.S+'('+l.V_LEN+')';
+                                else:
+                                    l.S=l.S+' ARRAY';
+                                    l.V_ARRAY='ARRAY(';
+                                    for l.KL in range(1, h.EXT_ARRAY[g.SYT_ARRAY(l.I)]+1):
+                                       if h.EXT_ARRAY[g.SYT_ARRAY(l.I)+l.KL]<0:
+                                           l.V_ARRAY=l.V_ARRAY+'*,';
+                                       else:
+                                           l.V_ARRAY=l.V_ARRAY+h.EXT_ARRAY[g.SYT_ARRAY(l.I)+l.KL]+',';
+                                    l.V_ARRAY=SUBSTR(l.V_ARRAY,0,LENGTH(l.V_ARRAY)-1)+')';
+                            if l.J==g.MAJ_STRUC:
+                                goto_T_REFS = False
+                                firstTry = True
+                                while firstTry or goto_T_REFS:
+                                    firstTry = False
+                                    if goto_T_REFS or l.K!=g.TEMPLATE_CLASS:
+                                        goto_T_REFS = False
+                                        l.V_ARRAY=SUBSTR(g.SYT_NAME(g.VAR_LENGTH(l.I)),1)+'-STRUCTURE';
+                                    elif g.VAR_LENGTH(l.I)>0:
+                                        goto_T_REFS = True
+                                        continue
+                                    else:
+                                        l.S='MINOR NODE';
+                            # N_FIX:
+                            if (l.L&g.NAME_FLAG)!=0:
+                                l.S=l.NAMER+l.S;
+                            if l.T_LEVEL>0:
+                                l.S=SUBSTR(g.X70,0,g.MAX_STRUC_LEVEL+1)+l.S;
+                                if l.T_LEVEL<=g.MAX_STRUC_LEVEL:
+                                    BYTE(l.S,l.T_LEVEL-1)=l.T_LEVEL|0xF0;
+                        else:
+                            l.S=TRUNCATE( SUBSTR(l.LABEL_NAME,(l.J-g.TEMPL_NAME)*18,18) );
+                            if (l.L&g.NAME_FLAG)!=0:
+                                # The logic to actually GO TO N_FIX is a lot
+                                # more complex than I like, so alternatively,
+                                # I've just duplicated the handful of code that
+                                # is at N_FIX here.
+                                # GO TO N_FIX;
+                                if (l.L&g.NAME_FLAG)!=0:
+                                    l.S=l.NAMER+l.S;
+                                if l.T_LEVEL>0:
+                                    l.S=SUBSTR(g.X70,0,g.MAX_STRUC_LEVEL+1)+l.S;
+                                    if l.T_LEVEL<=g.MAX_STRUC_LEVEL:
+                                        BYTE(l.S,l.T_LEVEL-1)=l.T_LEVEL|0xF0;
+                            else:
+                                l.L = l.L & g.SDF_INCL_OFF;
+                                if l.J == g.STMT_LABEL:
+                                   if (g.VAR_LENGTH(l.I)>0) and (g.VAR_LENGTH(l.I)<3):
+                                       l.S = 'UPDATE LABEL';
+                        l.S=PAD(l.T+l.S,l.ATTR_START);
+                        if l.K>=g.TEMPLATE_CLASS:
+                            if l.T_CASE==0:
+                                if l.J!=g.TEMPL_NAME:
+                                    l.KI=l.I;
+                                    while g.SYT_TYPE(l.KI)!=g.TEMPL_NAME:
+                                        l.KI=l.KI-1;
+                                    l.R=' **** SEE STRUCTURE TEMPLATE'+g.SYT_NAME(l.KI);
+                                    l.T='';
+                                    if (g.SYT_FLAGS(l.KI)&g.EVIL_FLAG)==0:
+                                        # The logic to get to N_XREF from here
+                                        # is pretty complex, so instead I've
+                                        # just duplicated the code found at
+                                        # NO_XREF and mimicked what happens 
+                                        # after that code is executed.
+                                        # GO TO NO_XREF;
+                                        if LENGTH(l.S)+LENGTH(l.T)+LENGTH(l.R)<=132:
+                                            l.S=l.S+l.T+l.R;
+                                            if LENGTH(l.S)>l.ATTR_START:
+                                                OUTPUT(0, l.S);
+                                        else:
+                                            OUTPUT(0, l.S + l.T);
+                                            OUTPUT(0, SUBSTR(g.X70, 0, l.ATTR_START) + l.R);
+                                        goto_NO_INDIRECT = True
+                        if not goto_NO_INDIRECT: # (for GO TO NO_XREF).
+                            if LENGTH(l.V_ARRAY)>0:
+                                ADD_ATTR(l.V_ARRAY);
+                            if (l.L&g.LATCHED_FLAG)!=0:
+                                if l.J==g.EVENT_TYPE:
+                                    ADD_ATTR('LATCHED');
+                            for l.KL in range(1, 19+1):
+                                if (l.L&l.FLAG_MASK(l.KL))!=0:
+                                    ADD_ATTR(TRUNCATE(SUBSTR(l.CHAR_ATTR,l.KL*11,11)));
+                            if not g.SDL_OPTION:
+                                if (l.L & g.EXTERNAL_FLAG) != 0:
+                                    ADD_ATTR('VERSION=' + g.SDL_OPTION(l.I));
+                            if (l.L&g.LOCK_FLAG)!=0:
+                                if g.SDL_OPTION(l.I)==0xFF:
+                                    ADD_ATTR(SUBSTR(l.CHAR_ATTR,0,6));
+                                else:
+                                    ADD_ATTR(SUBSTR(l.CHAR_ATTR,0,5)+g.SDL_OPTION(l.I));
+                            if g.CONTROL[0xF]:
+                                # EXTRA SYMBOL TABLE DUMP REQUESTED
+                                l.T = HEX(l.L);
+                                ADD_ATTR('FLAGS=' + l.T);
+                                ADD_ATTR('NEST=' + g.SYT_NEST(l.I));
+                                ADD_ATTR('SCOPE=' + g.SYT_SCOPE(l.I));
+                                ADD_ATTR('PTR=' + g.SYT_PTR(l.I));
+                                ADD_ATTR('LENGTH='+g.VAR_LENGTH(l.I));
+                                ADD_ATTR('LINK1=' + g.SYT_LINK1(l.I));
+                                ADD_ATTR('LINK2=' + g.SYT_LINK2(l.I));
+                                ADD_ATTR('SYT_NO=' + l.I);
+                                ADD_ATTR('ARRAY='+g.SYT_ARRAY(l.I));
+                                ADD_ATTR('ADDR='+g.SYT_ADDR(l.I));
+                                ADD_ATTR('CLASS='+g.SYT_CLASS(l.I));
+                                ADD_ATTR('TYPE='+g.SYT_TYPE(l.I));
+                            if l.K == g.REPL_CLASS:
+                                goto_MACRO_LOOP = False
+                                goto_MACRO_END = False
+                                firstTry = True
+                                while firstTry or goto_MACRO_LOOP or \
+                                        goto_MACRO_END:
+                                    firstTry = False
+                                    if not (goto_MACRO_LOOP or goto_MACRO_END):
+                                        ADD_ATTR('MACRO TEXT="');
+                                        l.S = SUBSTR(l.S, 0, LENGTH(l.S) - 2);
+                                        l.JL = LENGTH(l.S);
+                                        l.S = l.S + SUBSTR(g.X256, 0, 132 - l.JL);  # MAKE S 132 CHARS
+                                        l.KL = g.SYT_ADDR(l.I);  # PTR TO TEXT
+                                        l.JI = g.MACRO_TEXT(l.KL);  # FIRST CHARACTER
+                                    if not goto_MACRO_END:
+                                        goto_MACRO_LOOP = False
+                                        while l.JI != 0xEF  and l.JL < 132:
+                                            if l.JI == 0xEE:   # MULTIPLE BLANKS
+                                                l.KL = l.KL + 1;
+                                                l.JI = g.MACRO_TEXT(l.KL);
+                                                if l.JI == 0:
+                                                    goto_MACRO_END = True
+                                                    break
+                                                #NEWLINE:
+                                                while True:
+                                                    if (l.JI + l.JL) > 132:
+                                                        l.JI = l.JI - 132 + l.JL;
+                                                        MACRO_TEXT_RESET();
+                                                        # GO TO NEWLINE;
+                                                    else:
+                                                        l.JL = l.JL + l.JI;
+                                                        break
+                                            # END OF JI = "EE"
+                                            elif l.JI == BYTE('"'):   # DOUBLE ANY "
+                                                BYTE(l.S, l.JL) = l.JI;
+                                                l.JL = l.JL + 1;
+                                                goto_DOUBLE_QUOTE = False
+                                                firstTry = True
+                                                while firstTry or goto_DOUBLE_QUOTE:
+                                                    firstTry = False
+                                                    if l.JL < 132:
+                                                        goto_DOUBLE_QUOTE = False
+                                                        BYTE(l.S, l.JL) = l.JI;
+                                                    else:
+                                                        MACRO_TEXT_RESET();
+                                                        goto_DOUBLE_QUOTE = True;
+                                                        continue
+                                            # END OF JI = BYTE('"')
+                                            else:
+                                                BYTE(l.S, l.JL) = l.JI;
+                                            l.JL = l.JL + 1;
+                                            l.KL = l.KL + 1;
+                                            l.JI = g.MACRO_TEXT(l.KL);
+                                    # END OF WHILE JI != "EF" ETC
+                                    if l.JI != 0xEF and not goto_MACRO_END:
+                                        # JUST RAN OUT OF ROOM
+                                        MACRO_TEXT_RESET();
+                                        goto_MACRO_LOOP = True
+                                        continue
+                                    else:  # END OF MACRO TEXT
+                                        goto_MACRO_END = False
+                                        goto_ADD_QUOTE = False
+                                        firstTry = True
+                                        while firstTry or goto_ADD_QUOTE:
+                                            firstTry = False
+                                            if l.JL < 132 or goto_ADD_QUOTE:
+                                                goto_ADD_QUOTE = False
+                                                BYTE(l.S, l.JL) = BYTE('"');
+                                            else:
+                                                MACRO_TEXT_RESET();
+                                                goto_ADD_QUOTE = True
+                                                continue
+                                        l.S = SUBSTR(l.S, 0, l.JL + 1);
+                            # END OF K = REPL_CLASS
+                            else:
+                                l.S = SUBSTR(l.S, 0, LENGTH(l.S) - 2);
+                            l.T = ''
+                            l.R='';
+                            l.KL=g.SYT_XREF(l.I);
+                            if g.TOKEN!=g.EOFILE or l.KL<=0:
+                                OUTPUT(0, l.S);
+                                goto_NO_INDIRECT = True
+                            if not goto_NO_INDIRECT:
+                                l.KI=(LENGTH(l.S)-l.ATTR_START+7)/8;
+                                l.KI=(l.KI*8)+l.ATTR_START-LENGTH(l.S);
+                                if l.KI>0:
+                                    l.S=l.S+SUBSTR(g.X70,0,l.KI);
+                                ADD_ATTR('  XREF:     ');
+                                l.S=SUBSTR(l.S,0,LENGTH(l.S)-6);
+                                l.KI = 1;
+                                l.JL = SHR(ADD_XREFS(g.SYT_XREF(l.I),g.FALSE), 13) & 7;
+                                if l.JL:
+                                    l.JL=l.JL|2;  # MERGE SUBSCR & REF FLAGS
+                                if l.J==g.COMPOOL_LABEL:
+                                    l.JL=l.JL|6;
+                                elif l.J==g.PROG_LABEL and (l.L&g.EXTERNAL_FLAG)==0:
+                                    l.JL=l.JL|6;
+                                elif g.SYT_NEST(l.I)==0:
+                                    l.KI=0;
+                                elif g.SYT_SCOPE(l.I)<g.MAIN_SCOPE:
+                                    l.JL=l.JL|6;
+                                if l.K>=g.TEMPLATE_CLASS: 
+                                    if l.J==g.TEMPL_NAME:
+                                        l.JL=l.JL|4;
+                                    else:
+                                        l.JL=l.JL|8;
+                                elif l.K==g.REPL_ARG_CLASS:
+                                    l.JL=l.JL|6;
+                                elif (l.L&g.NAME_FLAG)!=0: 
+                                    pass
+                                elif l.K!=g.VAR_CLASS:
+                                    l.JL=l.JL|4;
+                                elif l.J==g.EVENT_TYPE:
+                                    l.JL=l.JL|4;
+                                if (l.L&g.INIT_CONST)!=0:
+                                    l.JL=l.JL|4;
+                                if (l.L&g.INP_OR_CONST)!=0:
+                                    l.JL=l.JL|4;
+                                if (l.L&g.ASSIGN_PARM)!=0:
+                                    l.KI=0;
+                                if (l.L&g.MISC_NAME_FLAG)!=0:
+                                    if l.J!=g.TEMPL_NAME:
+                                        l.JL=l.JL|8;
+                                if l.LABEL_ON_END:
+                                    l.JL = l.JL|6;
+                                l.JL=SHR(l.JL,1);
+                                l.R=TRUNCATE(SUBSTR(l.CUSS,l.JL*23,23));
+                                if (l.JL==1) and l.KI: 
+                                    g.NOT_ASSIGNED_FLAG=0xFF;
+                                    l.R='***** ERROR ***** REFERENCED BUT '+l.R;
+                                    OUTPUT(0, l.S + l.T);
+                                    OUTPUT(0, SUBSTR(g.X70,0,l.ATTR_START - 3) + l.R);  # MAKE IT STICK OUT
+                                    goto_NO_INDIRECT = True;  # SKIP OTHER PRINT LOGIC
+                                if not goto_NO_INDIRECT:
+                                    # NO_XREF:
+                                    if LENGTH(l.S)+LENGTH(l.T)+LENGTH(l.R)<=132:
+                                        l.S=l.S+l.T+l.R;
+                                        if LENGTH(l.S)>l.ATTR_START:
+                                            OUTPUT(0, l.S);
+                                    else:
+                                        OUTPUT(0, l.S + l.T);
+                                        OUTPUT(0, SUBSTR(g.X70, 0, l.ATTR_START) + l.R);
+        goto_NO_INDIRECT = False
+        #THE LOGIC TO GO THROUGH STRUCTURES STARTS AT THE ROOT NODE AND
+        #ENDS AT THE ROOT NODE.  TO PREVENT VARIABLES FROM BEING PRINTED
+        #TWICE, CHECK FOR T_CASE^=0 BECAUSE T_CASE=0 AT THE SECOND
+        #VISIT TO THE ROOT NODE BUT NOT THE FIRST.
+        if (g.SYT_TYPE(l.I)==g.TEMPL_NAME):
+            if (l.T_CASE!=0):
+                PRINT_VAR_NAMES(l.I);
+        if l.T_CASE==0:
+            l.M=l.M+1;
     
-    
-       KI=(LENGTH(S)-ATTR_START+7)/8;
-       KI=(KI*8)+ATTR_START-LENGTH(S);
-       IF KI>0 THEN S=S||SUBSTR(X70,0,KI);
-       CALL ADD_ATTR('  XREF:     ');
-       S=SUBSTR(S,0,LENGTH(S)-6);
-       KI = 1;
-       JL = SHR(ADD_XREFS(SYT_XREF(I),FALSE), 13) & 7;            /*DR120220*/
-       IF JL THEN JL=JL|2;  /* MERGE SUBSCR & REF FLAGS  */
-       IF J=COMPOOL_LABEL THEN JL=JL|6;
-       ELSE IF J=PROG_LABEL&(L&EXTERNAL_FLAG)=0 THEN JL=JL|6;
-       ELSE IF SYT_NEST(I)=0 THEN KI=0;
-       ELSE IF SYT_SCOPE(I)<MAIN_SCOPE THEN JL=JL|6;
-       IF K>=TEMPLATE_CLASS THEN DO;
-          IF J=TEMPL_NAME THEN JL=JL|4;
-          ELSE JL=JL|8;
-       END;
-       ELSE IF K=REPL_ARG_CLASS THEN JL=JL|6;
-       ELSE IF (L&NAME_FLAG)^=0 THEN ;
-       ELSE IF K^=VAR_CLASS THEN JL=JL|4;
-       ELSE IF J=EVENT_TYPE THEN JL=JL|4;
-       IF (L&INIT_CONST)^=0 THEN JL=JL|4;
-       IF (L&INP_OR_CONST)^=0 THEN JL=JL|4;
-       IF (L&ASSIGN_PARM)^=0 THEN KI=0;
-       IF (L&MISC_NAME_FLAG)^=0 THEN IF J^=TEMPL_NAME THEN JL=JL|8;
-       IF LABEL_ON_END THEN JL = JL|6;                /*DR111366*/
-       JL=SHR(JL,1);
-       R=TRUNCATE(SUBSTR(CUSS,JL*23,23));                         /*CR13335*/
-       IF (JL=1)&KI THEN DO;
-          NOT_ASSIGNED_FLAG="FF";
-          R='***** ERROR ***** REFERENCED BUT '||R;
-          OUTPUT = S || T;
-          OUTPUT = SUBSTR(X70,0,ATTR_START - 3) || R;  /* MAKE IT STICK OUT */
-          GO TO NO_INDIRECT;  /* SKIP OTHER PRINT LOGIC */
-       END;
-    NO_XREF:
-       IF LENGTH(S)+LENGTH(T)+LENGTH(R)<=132 THEN DO;
-          S=S||T||R;
-          IF LENGTH(S)>ATTR_START THEN OUTPUT=S;
-       END;
-       ELSE
-          DO;
-          OUTPUT = S || T;
-          OUTPUT = SUBSTR(X70, 0, ATTR_START) || R;
-       END;
-    NO_INDIRECT:
-       /*THE LOGIC TO GO THROUGH STRUCTURES STARTS AT THE ROOT NODE AND  */
-       /*ENDS AT THE ROOT NODE.  TO PREVENT VARIABLES FROM BEING PRINTED */
-       /*TWICE, CHECK FOR T_CASE^=0 BECAUSE T_CASE=0 AT THE SECOND       */
-       /*VISIT TO THE ROOT NODE BUT NOT THE FIRST.                       */
-       IF (SYT_TYPE(I)=TEMPL_NAME) THEN               /*CR12940*/
-          IF (T_CASE^=0) THEN CALL PRINT_VAR_NAMES(I);/*CR12940*/
-       IF T_CASE=0 THEN M=M+1;
-    END;
-    IF XREF_FULL THEN DO;
-       CALL ERRORS (CLASS_BI, 102);
-       NOT_ASSIGNED_FLAG = FALSE;
-    END;
-    ELSE IF NOT_ASSIGNED_FLAG THEN DO;
-       IF MAX_SEVERITY<1 THEN MAX_SEVERITY=1;
-       ERROR_COUNT=ERROR_COUNT+1;
-       SAVE_SEVERITY(ERROR_COUNT)=1;
-       SAVE_LINE_#(ERROR_COUNT)=-1;
-       CALL ERRORS (CLASS_BI, 105);
-    END;
-    OUTPUT(1) = SUBHEADING;
-    DOUBLE_SPACE;
-    IF BI_XREF THEN IF TOKEN=EOFILE THEN DO;
-       EJECT_PAGE;
-       OUTPUT(1)='0B U I L T - I N   F U N C T I O N   C R O S S   R E F E R E
-    N C E';
-       OUTPUT(1)='0   (CROSS REFERENCE FLAG KEY:  4 = ASSIGNMENT, 2 = REFERENC
-    E, 1 = SUBSCRIPT USE)';                                             /*DR120220*/
-       S='  NAME      CROSS REFERENCE';
-       OUTPUT(1)=DOUBLE||S;
-       OUTPUT(1)=SUBHEADING||S;
-       KI=BI_LIMIT+1;
-       ATTR_START=KI+6;
-       DO J = 1 TO BI#;
-          S = SUBSTR(BI_NAME(BI_INDX(J)),BI_LOC(J),10);           /*CR13335*/
-          IF BI_XREF(J)>0 THEN DO;
-    /* KEEP TRACK OF THE USED XREF CELLS */
-             BI_XREF#(0) = BI_XREF#(0)+1;
-             S=S||'XREF: ';
-             KL=BI_XREF(J);
-             BI_XREF(J) = SHR(XREF(KL), 16);
-             XREF(KL) = XREF(KL) & "FFFF";
-             CALL ADD_XREFS(BI_XREF(J),TRUE);                     /*DR120220*/
-             IF LENGTH(T)>0 THEN OUTPUT=S||T;
-          END;
-       END;
-       CALL STORE_BI_XREF;
-       OUTPUT(1)=SUBHEADING;
-       DOUBLE_SPACE;
-    END;
+    if g.XREF_FULL:
+        ERRORS (d.CLASS_BI, 102);
+        g.NOT_ASSIGNED_FLAG = g.FALSE;
+    elif g.NOT_ASSIGNED_FLAG:
+        if g.MAX_SEVERITY<1:
+            g.MAX_SEVERITY=1;
+        g.ERROR_COUNT=g.ERROR_COUNT+1;
+        g.SAVE_SEVERITY[g.ERROR_COUNT]=1;
+        g.SAVE_LINE_p[g.ERROR_COUNT]=-1;
+        ERRORS (d.CLASS_BI, 105);
+    OUTPUT(1, g.SUBHEADING);
+    g.DOUBLE_SPACE();
+    if g.BI_XREF[0]:
+        if g.TOKEN==g.EOFILE:
+            g.EJECT_PAGE();
+            OUTPUT(1, \
+                '0B U I L T - I N   F U N C T I O N   C R O S S   R E F E R E N C E');
+            OUTPUT(1, \
+                '0   (CROSS REFERENCE FLAG KEY:  4 = ASSIGNMENT, 2 = REFERENCE, 1 = SUBSCRIPT USE)');
+            l.S='  NAME      CROSS REFERENCE';
+            OUTPUT(1, g.DOUBLE+l.S);
+            OUTPUT(1, g.SUBHEADING+l.S);
+            l.KI=g.BI_LIMIT+1;
+            l.ATTR_START=l.KI+6;
+            for l.J in range(1, g.BIp+1):
+                 l.S = SUBSTR(g.BI_NAME[g.BI_INDX[l.J]],g.BI_LOC[l.J],10);
+                 if g.BI_XREF[l.J]>0:
+                 # KEEP TRACK OF THE USED XREF CELLS
+                     g.BI_XREFp[0] = g.BI_XREFp[0]+1;
+                     l.S=l.S+'XREF: ';
+                     l.KL=g.BI_XREF[l.J];
+                     g.BI_XREF[l.J] = SHR(g.XREF(l.KL), 16);
+                     g.XREF(l.KL) = g.XREF(l.KL) & 0xFFFF;
+                     ADD_XREFS(g.BI_XREF[l.J],g.TRUE);
+                     if LENGTH(l.T)>0:
+                         OUTPUT(0, l.S+l.T);
+            STORE_BI_XREF();
+            OUTPUT(1, g.SUBHEADING);
+            g.DOUBLE_SPACE();
