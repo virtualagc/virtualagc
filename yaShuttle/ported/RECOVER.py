@@ -111,7 +111,7 @@ def RECOVER():
     DECLARING=g.FALSE;
     g.RECOVERING = g.TRUE;
     goto_TOKEN_LOOP_START = False
-    if g.TOKEN != g.SEMI_COLON and g.TOKEN != EOFILE:
+    if g.TOKEN != g.SEMI_COLON and g.TOKEN != g.EOFILE:
         goto_TOKEN_LOOP_START = True;
     while goto_TOKEN_LOOP_START or (g.TOKEN!=g.SEMI_COLON and g.TOKEN!=g.EOFILE):
         if not goto_TOKEN_LOOP_START:

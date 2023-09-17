@@ -15,5 +15,5 @@ from xplBuiltins import *
 '''
 
 def SRN_UPDATE():
-    OUTPUT(0, "SRN_UPDATE not yet implemented")
+    OUTPUT(0, "(*** SRN_UPDATE not yet implemented ***)")
     return

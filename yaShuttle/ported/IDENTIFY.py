@@ -245,7 +245,6 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
     if g.CONTEXT == g.REPLACE_PARM_CONTEXT:
         goto_NOT_FOUND = True;
     else:
-        print("IDENTIFY:", g.IDENT_COUNT, g.LABEL_IMPLIED, '"%s"' % BCD, g.NEXT_CHAR)
         if CENT_IDENTIFY:
             goto_LOOKUP = True;
         else:
@@ -339,23 +338,23 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                             else:
                                 ERROR(d.CLASS_DU, 1, BCD);
                         goto_MAKE_DEFAULT = False
-                        l.I = ENTER(BCD, VAR_CLASS);
-                        g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | IMP_DECL);
-                        if BUILDING_TEMPLATE:
+                        l.I = ENTER(BCD, g.VAR_CLASS);
+                        g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | g.IMP_DECL);
+                        if g.BUILDING_TEMPLATE:
                             g.SYT_FLAGS(REF_ID_LOC, g.SYT_FLAGS(REF_ID_LOC) | EVIL_FLAG);
                     goto_ADD_DEFAULT = False
                     if g.IMPLIED_TYPE == 0:
-                        g.SYT_TYPE(l.I, DEFAULT_TYPE);
+                        g.SYT_TYPE(l.I, g.DEFAULT_TYPE);
                     else:
                         g.SYT_TYPE(l.I, g.IMPLIED_TYPE);
-                    if g.SYT_TYPE(l.I) > INT_TYPE:
+                    if g.SYT_TYPE(l.I) > g.INT_TYPE:
                         goto_SET_INITIAL_FLAGS = True
-                    if g.SYT_TYPE(l.I) <= CHAR_TYPE:
+                    if g.SYT_TYPE(l.I) <= g.CHAR_TYPE:
                         #GO TO SET_DEF_BC;
                         pass
                     else:
                         # INTEGER SCALAR VECTOR OR MATRIX
-                        if g.SYT_TYPE(l.I) >= SCALAR_TYPE:
+                        if g.SYT_TYPE(l.I) >= g.SCALAR_TYPE:
                             goto_SET_INITIAL_FLAGS = True;
                         elif g.SYT_TYPE(l.I) == VEC_TYPE:
                             g.VAR_LENGTH(l.I, DEF_VEC_LENGTH);
@@ -364,30 +363,30 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                         goto_SET_INITIAL_FLAGS = True
                     #SET_DEF_BC:
                     if not goto_SET_INITIAL_FLAGS:
-                        if g.SYT_TYPE(l.I) == CHAR_TYPE:
+                        if g.SYT_TYPE(l.I) == g.CHAR_TYPE:
                             g.VAR_LENGTH(l.I, DEF_CHAR_LENGTH);
                         else:
                             g.VAR_LENGTH(l.I, DEF_BIT_LENGTH);
                     goto_SET_INITIAL_FLAGS = False
-                    if g.SYT_TYPE(l.I) <= INT_TYPE:
-                        g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | DEFAULT_ATTR);
+                    if g.SYT_TYPE(l.I) <= g.INT_TYPE:
+                        g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | g.DEFAULT_ATTR);
                     
                     # DO CASE SYT_TYPE(I);
                     st = g.SYT_TYPE(l.I)
                     if st == 0:
                        ERROR(d.CLASS_BX, 2); # COMPILER_ERROR IF TYPE = 0
                     elif st == 1:
-                       g.TOKEN = BIT_TOKEN;
+                       g.TOKEN = g.BIT_TOKEN;
                     elif st == 2:
-                       g.TOKEN = CHAR_TOKEN;
+                       g.TOKEN = g.CHAR_TOKEN;
                     elif st == 3:
-                       g.TOKEN = ARITH_TOKEN;
+                       g.TOKEN = g.ARITH_TOKEN;
                     elif st == 4:
-                       g.TOKEN = ARITH_TOKEN;
+                       g.TOKEN = g.ARITH_TOKEN;
                     elif st == 5:
-                       g.TOKEN = ARITH_TOKEN;
+                       g.TOKEN = g.ARITH_TOKEN;
                     elif st == 6:
-                       g.TOKEN = ARITH_TOKEN;
+                       g.TOKEN = g.ARITH_TOKEN;
                     elif st == 7:
                        g.TOKEN = 0;
                     elif st == 8:
@@ -458,9 +457,9 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                         goto_PARMJOIN = False
                         if g.IMPLIED_TYPE!=0:
                             ERROR(d.CLASS_MC,5,BCD);
-                        l.FLAG = l.FLAG | IMP_DECL;
+                        l.FLAG = l.FLAG | g.IMP_DECL;
                     goto_DCLJOIN = False
-                    l.I = ENTER(BCD, VAR_CLASS);
+                    l.I = ENTER(BCD, g.VAR_CLASS);
                     g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | l.FLAG);
                     g.TOKEN = g.ID_TOKEN;
                 elif g.CONTEXT == 7:
@@ -586,17 +585,17 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                         goto_ADD_DEFAULT = True
                         continue
                     elif st == 1:
-                        g.TOKEN = BIT_TOKEN;
+                        g.TOKEN = g.BIT_TOKEN;
                     elif st == 2:
-                        g.TOKEN = CHAR_TOKEN;
+                        g.TOKEN = g.CHAR_TOKEN;
                     elif st == 3:
-                        g.TOKEN = ARITH_TOKEN;     #  UNMARKED MATRIX
+                        g.TOKEN = g.ARITH_TOKEN;     #  UNMARKED MATRIX
                     elif st == 4:
-                        g.TOKEN = ARITH_TOKEN;     #  UNMARKED VECTOR
+                        g.TOKEN = g.ARITH_TOKEN;     #  UNMARKED VECTOR
                     elif st == 5:
-                        g.TOKEN = ARITH_TOKEN;
+                        g.TOKEN = g.ARITH_TOKEN;
                     elif st == 6:
-                        g.TOKEN = ARITH_TOKEN;                #  CASE 0.1.0.6
+                        g.TOKEN = g.ARITH_TOKEN;                #  CASE 0.1.0.6
                     elif st == 7:
                         g.TOKEN = 0;    #  COMPILER ERROR
                     elif st == 8:
@@ -608,29 +607,29 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     # END OF DO CASE SYT_TYPE(I)
                 elif g.IMPLIED_TYPE == 1:
                     if g.SYT_TYPE(l.I) == BIT_TYPE:  #0.1.1
-                        g.TOKEN = BIT_TOKEN;
+                        g.TOKEN = g.BIT_TOKEN;
                     else:
                         goto_OP_TYPE_MISMATCH = True;
                         # We're going to fallthrough rather than redo the while.
                 elif g.IMPLIED_TYPE == 2:
-                    if g.SYT_TYPE(l.I) == CHAR_TYPE:
-                        g.TOKEN = CHAR_TOKEN;
+                    if g.SYT_TYPE(l.I) == g.CHAR_TYPE:
+                        g.TOKEN = g.CHAR_TOKEN;
                     else:
                         goto_OP_TYPE_MISMATCH = True;
                         # We're going to fallthrough rather than redo the while.
                 elif g.IMPLIED_TYPE == 3:
-                    if g.SYT_TYPE(l.I) == MAT_TYPE:
-                        g.TOKEN = ARITH_TOKEN;
+                    if g.SYT_TYPE(l.I) == g.MAT_TYPE:
+                        g.TOKEN = g.ARITH_TOKEN;
                     else:
                         goto_OP_TYPE_MISMATCH = True;
                         # We're going to fallthrough rather than redo the while.
                 # Note the "if" rather than "elif" to allow fallthrough of
                 # goto_OP_TYPE_MISMATCH from the cases above.
                 if g.IMPLIED_TYPE == 4 or goto_OP_TYPE_MISMATCH:
-                    if g.SYT_TYPE(l.I) == MAT_TYPE and not goto_OP_TYPE_MISMATCH:
-                        g.TOKEN = ARITH_TOKEN;
+                    if g.SYT_TYPE(l.I) == g.MAT_TYPE and not goto_OP_TYPE_MISMATCH:
+                        g.TOKEN = g.ARITH_TOKEN;
                     elif g.SYT_TYPE(l.I) == VEC_TYPE and not goto_OP_TYPE_MISMATCH:
-                        g.TOKEN = ARITH_TOKEN;
+                        g.TOKEN = g.ARITH_TOKEN;
                     else:
                         goto_OP_TYPE_MISMATCH = False
                         ERROR(d.CLASS_MO,2,BCD);
@@ -879,7 +878,7 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
             if l.I < PROCMARK:
                 goto_NOT_FOUND = True;
                 continue
-            if BUILDING_TEMPLATE:
+            if g.BUILDING_TEMPLATE:
                 g.SYT_FLAGS(REF_ID_LOC, g.SYT_FLAGS(REF_ID_LOC)|DUPL_FLAG);
                 if g.SYT_CLASS(l.I)>=TEMPLATE_CLASS:
                     if l.I<REF_ID_LOC:
@@ -902,8 +901,8 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     SET_DUPL_FLAG(l.I);
                     goto_NOT_FOUND_YET = True;
                     continue
-                if (g.SYT_FLAGS(l.I)&IMP_DECL)!=0:
-                    g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I)&(~IMP_DECL));
+                if (g.SYT_FLAGS(l.I)&g.IMP_DECL)!=0:
+                    g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I)&(~g.IMP_DECL));
                 else:
                     ERROR(d.CLASS_PM,1,BCD);
                 SET_XREF(l.I,0);

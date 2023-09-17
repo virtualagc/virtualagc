@@ -1355,5 +1355,4 @@ def STREAM():
             ARROW = 0;
             goto_STACK_CHECK = True
             continue
-    print("SCAN: NEXT_CHAR=%d OVER_PUNCH=%d" % (g.NEXT_CHAR, g.OVER_PUNCH))
     return;

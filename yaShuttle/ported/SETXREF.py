@@ -49,7 +49,7 @@ from HALINCL.ENTERXRE import ENTER_XREF
  /***************************************************************************/
 '''
 
-def SET_XREF(LOC, FLAG, FLAG2):
+def SET_XREF(LOC, FLAG, FLAG2=0):
     # There are no local variables.
     
     if LOC>0:     # FILTERS FIXV OF NON-STRUCTS

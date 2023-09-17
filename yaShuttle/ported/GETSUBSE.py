@@ -112,6 +112,15 @@ def GET_SUBSET(SUBSET,FLAGS):
             T=A_TOKEN;
         OUTPUT(0, S_PREFIX+S_MSG[NUM]+T);
 
+    '''
+    According to the "HAL/S-FC User's Manual" section 8.6, if there is no
+    device 6 to read, or if the specified SUBSET isn't found in it, then
+    the message "*** NO LANGUAGE SUBSET IN EFFECT ***" is printed and there
+    are no restrictions on the language applied.  That's the normal case,
+    and that's what happens when the following 2 lines return 1.  If 
+    restrictions were desired for some reason, the afore-mentioned section 8.6
+    describes the appropriate data (for device 6) for defining them.
+    '''
     if MONITOR(2,6,SUBSET):
         return 1;
     S=INPUT(6);

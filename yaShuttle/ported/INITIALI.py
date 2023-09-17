@@ -4,13 +4,13 @@ License:    The author, Ron Burkey, declares this program to be in the Public
             Domain, and may be used or modified in any way desired.
 Filename:   INITIALI.py
 Purpose:    This is part of the port of the original XPL source code for 
-            HAL/g.S-FC into Python.
+            HAL/S-FC into Python.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-25 RSB  Began porting from INITIALI.xpl.
 '''
 
-from xplBuiltins import * # Built-in functions
-import g # Get global variables.
+from xplBuiltins import *  # Built-in functions
+import g  # Get global variables.
 from CHARTIME import CHARTIME
 from CHARDATE import CHARDATE
 from PRINTDAT import PRINT_DATE_AND_TIME
@@ -24,7 +24,7 @@ from STREAM import STREAM
 from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE
 from HALINCL.CERRDECL import CLASS_BI
-#from HALINCL.SPACELIB import g.RECORD_USED
+# from HALINCL.SPACELIB import g.RECORD_USED
 
 '''
 *************************************************************************
@@ -115,6 +115,7 @@ from HALINCL.CERRDECL import CLASS_BI
 
 #           INITIALIZATION         
 
+
 def INITIALIZATION():
     # INITIALIZATION() is called only once, and therefore couldn't possibly
     # need persistent locals.
@@ -137,35 +138,35 @@ def INITIALIZATION():
         1,  # LABELSIZE 
         1,  # DSR 
         1,  # BLOCKSUM 
-        0 ) # MFID FOR PASS; OLDTPL FOR BFS 
+        0)  # MFID FOR PASS; OLDTPL FOR BFS 
     
     STORAGE_INCREMENT = 0
     STORAGE_MASK = 0
-    LOGHEAD ='STMT                                      ' + \
+    LOGHEAD = 'STMT                                      ' + \
              '                            SOURCE                                              ' + \
              '                    REVISION'
     TMP = 0
     if g.pfs:
         NUM1_OPT = 19
-        SORT1 = (8,5,0,13,19,2,1,15,17,14,10,16,9,11,6,7,18,3,4,12)
+        SORT1 = (8, 5, 0, 13, 19, 2, 1, 15, 17, 14, 10, 16, 9, 11, 6, 7, 18, 3, 4, 12)
     else:
         NUM1_OPT = 20
-        SORT1 = (8,5,0,13,20,2,1,15,17,18,14,10,16,9,11,6,7,19,3,4,12)
+        SORT1 = (8, 5, 0, 13, 20, 2, 1, 15, 17, 18, 14, 10, 16, 9, 11, 6, 7, 19, 3, 4, 12)
     NUM2_OPT = 12
-    SORT2 = (11,8,6,10,9,1,5,4,12,2,3,0,7)
+    SORT2 = (11, 8, 6, 10, 9, 1, 5, 4, 12, 2, 3, 0, 7)
     
     # INITIALIZE g.DATA_REMOTE FLAG                                   
-    g.DATA_REMOTE=g.FALSE;
+    g.DATA_REMOTE = g.FALSE;
     #---------------------------------------------------------------
     STORAGE_INCREMENT = MONITOR(32);
     STORAGE_MASK = -STORAGE_INCREMENT & 0xFFFFFF
     '''
     The following code relates to determining and printing out the compiler
     options which have been supplied originally by JCL, but for us by 
-    command-line options.  The available options are described by the "HAL/g.S-FC
+    command-line options.  The available options are described by the "HAL/S-FC
     User's Manual" (chapter 5), while the organization of these in IBM 
     System/360 system memory (as we would need it to work with the following
-    code) is described in the "HAL/g.S-FC and HAL/g.S-360 Compiler System Program 
+    code) is described in the "HAL/S-FC and HAL/S-360 Compiler System Program 
     Description" (IR-182-1) around p. 696. In neither sources is there an 
     explanation of how the options specifically relate to the bit-flags in
     the 32-bit variable OPTIONS_WORD, so whatever g.I know about that has been
@@ -226,8 +227,8 @@ def INITIALIZATION():
     g.S = CHARTIME(g.TIME_OF_COMPILATION())
     g.DATE_OF_COMPILATION(DATE())
     g.S = CHARDATE(g.DATE_OF_COMPILATION()) + g.X4 + g.S
-    OUTPUT(1, 'H  HAL/g.S ' + STRING(MONITOR(23)) + g.C[0] + g.X4 + g.S)
-    PRINT_DATE_AND_TIME('   HAL/g.S COMPILER PHASE 1 -- VERSION' + \
+    OUTPUT(1, 'H  HAL/S ' + STRING(MONITOR(23)) + g.C[0] + g.X4 + g.S)
+    PRINT_DATE_AND_TIME('   HAL/S COMPILER PHASE 1 -- VERSION' + \
                         ' OF ', g.DATE_OF_GENERATION, g.TIME_OF_GENERATION)
     g.DOUBLE_SPACE()
     PRINT_DATE_AND_TIME ('TODAY IS ', DATE(), TIME())
@@ -247,18 +248,18 @@ def INITIALIZATION():
     g.DOUBLE_SPACE()
     OUTPUT(0, '       *** TYPE 1 OPTIONS ***')
     OUTPUT(0, g.X1)
-    #PRINT THE TYPE 1 OPTIONS USING THE ORDER IN SORT1 ARRAY.
-    #SINCE QUASI & TRACE ARE 360 ONLY, DO NOT PRINT.  PRINT LFXI HERE  
-    #EVEN THOUGH IT IS DEFINED AS A "NONPRINTABLE" OPTION IN COMPOPT.  
+    # PRINT THE TYPE 1 OPTIONS USING THE ORDER IN SORT1 ARRAY.
+    # SINCE QUASI & TRACE ARE 360 ONLY, DO NOT PRINT.  PRINT LFXI HERE  
+    # EVEN THOUGH IT IS DEFINED AS A "NONPRINTABLE" OPTION IN COMPOPT.  
     for g.I in range(0, NUM1_OPT + 1):
-        #MAKE SURE NOT QUASI OR TRACE
+        # MAKE SURE NOT QUASI OR TRACE
         if (SORT1[g.I] != 17) & (SORT1[g.I] != 3):
-            if SORT1[g.I] == 2:  #PRINT LFXI HERE
-                if (g.OPTIONS_CODE() & 0x00200000) != 0 :
+            if SORT1[g.I] == 2:  # PRINT LFXI HERE
+                if (g.OPTIONS_CODE() & 0x00200000) != 0:
                     OUTPUT(0, g.X8 + '  LFXI')
                 else:
                     OUTPUT(0, g.X8 + 'NOLFXI')
-            if SUBSTR(STRING(CON[SORT1[g.I]]),0,2) == 'NO':
+            if SUBSTR(STRING(CON[SORT1[g.I]]), 0, 2) == 'NO':
                 OUTPUT(0, g.X8 + STRING(CON[SORT1[g.I]]))
             else:
                 OUTPUT(0, g.X8 + '  ' + STRING(CON[SORT1[g.I]]))
@@ -278,23 +279,23 @@ def INITIALIZATION():
         for g.I in range(0, NUM2_OPT + 1):
             g.C[0] = LEFT_PAD(STRING(TYPE2[SORT2[g.I]]), 15);
             if TYPE2_TYPE[SORT2[g.I]]:
-                g.S = VALS[SORT2[g.I]]; # DECIMAL VALUE
+                g.S = VALS[SORT2[g.I]];  # DECIMAL VALUE
             else:
-                g.S = STRING(VALS[SORT2[g.I]]); # DESCRIPTOR
+                g.S = STRING(VALS[SORT2[g.I]]);  # DESCRIPTOR
             if STRING(TYPE2[SORT2[g.I]]) == 'MFID':
                 OUTPUT(0, g.C[0] + EQUALS + g.S);
                 if LENGTH(g.S) > 0:
-                    VALS[SORT2[g.I]]=0;
+                    VALS[SORT2[g.I]] = 0;
                     for g.J in range(0, LENGTH(g.S)):
-                        if BYTE(g.S,g.J) < BYTE('0') or BYTE(g.S,g.J) > BYTE('9'):
+                        if BYTE(g.S, g.J) < BYTE('0') or BYTE(g.S, g.J) > BYTE('9'):
                             ERRORS (CLASS_BI, 103, g.X1 + g.S);
-                            VALS[SORT2[g.I]]=0;
+                            VALS[SORT2[g.I]] = 0;
                             break
                         else:
-                            VALS[SORT2[g.I]]=VALS[SORT2[g.I]]*10;
+                            VALS[SORT2[g.I]] = VALS[SORT2[g.I]] * 10;
                             # FOLLOWING TO AVOID 'USED ALL ACCUMULATORS'
                             TMP = VALS[SORT2[g.I]];
-                            VALS[SORT2[g.I]]=TMP+(BYTE(g.S,g.J) & 0x0F);
+                            VALS[SORT2[g.I]] = TMP + (BYTE(g.S, g.J) & 0x0F);
             else:
                 OUTPUT(0, g.C[0] + EQUALS + str(g.S));
     else:
@@ -315,9 +316,9 @@ def INITIALIZATION():
     g.LISTING2_COUNT = VALS[1]
     g.LINE_MAX = VALS[1]
     g.LINE_LIM = VALS[1];
-    g.SIMULATING=(g.OPTIONS_CODE()&0x800)!=0;
-    if (g.OPTIONS_CODE()&0x10) == 0x10:
-        g.TPL_FLAG=0;
+    g.SIMULATING = (g.OPTIONS_CODE() & 0x800) != 0;
+    if (g.OPTIONS_CODE() & 0x10) == 0x10:
+        g.TPL_FLAG = 0;
     g.SRN_PRESENT = (g.OPTIONS_CODE() & 0x80000) != 0;
     g.SDL_OPTION = (g.OPTIONS_CODE() & 0x800000) != 0;
     if g.SDL_OPTION:
@@ -334,9 +335,9 @@ def INITIALIZATION():
     if (g.OPTIONS_CODE() & 0x00040000) != 0:
         g.HMAT_OPT = g.TRUE;
     OUTPUT(0, g.X1);
-    if GET_SUBSET('$$SUBSET',0x1):
+    if GET_SUBSET('$$SUBSET', 0x1):
         OUTPUT(1, '0 *** NO LANGUAGE SUBSET IN EFFECT ***');
-    OUTPUT(1, g.SUBHEADING+g.C[0]+LOGHEAD);
+    OUTPUT(1, g.SUBHEADING + g.C[0] + LOGHEAD);
     g.EJECT_PAGE();
     OUTPUT(1, g.SUBHEADING + g.C[0] + SUBHEAD);
     g.INDENT_INCR = 2; 
@@ -358,22 +359,24 @@ def INITIALIZATION():
     g.IC_MAX = 0;
     g.CUR_IC_BLK = 0;
     g.IC_LIM = g.IC_SIZE;  # UPPER LIMIT OF TABLE  
-    MONITOR(4, 3, g.IC_SIZE*8);
+    MONITOR(4, 3, g.IC_SIZE * 8);
     g.SYTSIZE = VALS[3];
     g.MACRO_TEXT_LIM = VALS[4];
     g.LIT_CHAR_SIZE = VALS[5];
     g.XREF_LIM = VALS[7];
     g.OUTER_REF_LIM = VALS[11];
+    '''
     g.J = (g.FREELIMIT + 512) & STORAGE_MASK;  # BOUNDARY NEAR TOP OF CORE 
-    g.TEMP1=(g.J-(13000+2*1680+3*3458))&STORAGE_MASK;#TO ALLOW ROOM FOR BUFFERS
+    g.TEMP1 = (g.J - (13000 + 2 * 1680 + 3 * 3458)) & STORAGE_MASK;  # TO ALLOW ROOM FOR BUFFERS
     if g.TEMP1 - 512 <= g.FREEPOINT:
         COMPACTIFY();
-    #MONITOR(7, ADDR(g.TEMP1), g.J - g.TEMP1);
+    # MONITOR(7, ADDR(g.TEMP1), g.J - g.TEMP1);
     g.FREELIMIT = g.TEMP1 - 512;
     # INITIALIZE VMEM PAGING AND ALLOCATE SPACE FOR IN-CORE PAGES
     '''
-    ... lots of stuff just deleted here that g.I hope pertains to
-        (unnecessary now) virtual memory ...
+    '''
+    ... lots of stuff just deleted here that I hope pertains to
+        (unnecessary) virtual memory ...
     '''
     g.CARD_TYPE[BYTE('E')] = 1;
     g.CARD_TYPE[BYTE('M')] = 2;
@@ -388,16 +391,16 @@ def INITIALIZATION():
             g.K = BYTE(g.C[0], g.I + 1);
             if g.CARD_TYPE[g.J] == 0:
                 g.CARD_TYPE[g.J] = g.CARD_TYPE[g.K];
-    for g.I in range(1, g.NSY+1):
+    for g.I in range(1, g.NSY + 1):
         g.K = g.VOCAB_INDEX[g.I];
         g.J = g.K & 0xFF;
         g.C[0] = SUBSTR(g.VOCAB[g.J], SHR(g.K, 8) & 0xFFFF, SHR(g.K, 24));
         g.VOCAB_INDEX[g.I] = UNSPEC(g.C[0]);
-    g.CURRENT_CARD=INPUT(g.INPUT_DEV);
-    g.LRECL=LENGTH(g.CURRENT_CARD)-1;
-    g.TEXT_LIMIT[0]=SET_T_LIMIT(g.LRECL);
-    g.FIRST_CARD=g.TRUE;
-    if not g.pfs: # BFS
+    g.CURRENT_CARD = INPUT(g.INPUT_DEV);
+    g.LRECL = LENGTH(g.CURRENT_CARD) - 1;
+    g.TEXT_LIMIT[0] = SET_T_LIMIT(g.LRECL);
+    g.FIRST_CARD = g.TRUE;
+    if not g.pfs:  # BFS
         g.TEXT_LIMIT[1] = g.TEXT_LIMIT[0];
     if BYTE(g.CURRENT_CARD) == 0x00:
         # COMPRESSED SOURCE 
@@ -418,6 +421,7 @@ def INITIALIZATION():
         OUTPUT(0, 'SCANNER: ' + g.TOKEN);
     SRN_UPDATE();
     # INITIALIZE THE PARSE STACK 
-    g.STATE = 1;   # START-g.STATE  
-    g.SP = 0xFFFFFFFF;
+    g.STATE = 1;  # START-g.STATE  
+    # g.SP = 0xFFFFFFFF;
+    g.SP = -1
     return;

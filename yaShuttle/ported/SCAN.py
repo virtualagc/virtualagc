@@ -706,7 +706,7 @@ def SCAN():
                                     g.TOKEN = g.I;
                                     if g.IMPLIED_TYPE > 0:
                                         ERROR(d.CLASS_MC,4,g.BCD);
-                                    g.I = SET_CONTEXT(g.I);
+                                    g.I = g.SET_CONTEXT[g.I];
                                     if g.I > 0:
                                         if g.TOKEN==TEMPORARY:
                                             g.TEMPORARY_IMPLIED=g.TRUE;
@@ -926,7 +926,7 @@ def SCAN():
                 # CASE 3--SPECIAL SINGLE CHARACTERS 
                 if g.OVER_PUNCH != 0:
                     ERROR(d.CLASS_MO,1);
-                g.TOKEN = TX(g.NEXT_CHAR);
+                g.TOKEN = g.TX[g.NEXT_CHAR];
                 l.CHAR_NEEDED = g.TRUE;
                 goto_SCAN_END = True
                 break
@@ -1234,27 +1234,18 @@ def SCAN():
                 goto_SCAN_END = False;
                 if not goto_SET_SEARCH:
                     if not goto_LOOK_FOR_COMMENT:
-                        print("here A")
                         if goto_TEST_SEARCH or l.CHAR_ALREADY_SCANNED != 0:
-                            print("here B")
                             if not goto_TEST_SEARCH:
                                 g.NEXT_CHAR = l.CHAR_ALREADY_SCANNED;
                                 l.CHAR_ALREADY_SCANNED = 0;
                                 l.CHAR_NEEDED = g.FALSE;
                                 g.OVER_PUNCH = l.OVERPUNCH_ALREADY_SCANNED;
-                                print("here C", g.NEXT_CHAR, \
-                                      l.CHAR_ALREADY_SCANNED, \
-                                      l.CHAR_NEEDED, \
-                                      g.OVER_PUNCH)
                             else:
-                                print("here D")
                                 goto_TEST_SEARCH = False;
                             if l.SEARCH_NEEDED:
-                                print("here E")
                                 l.SEARCH_NEEDED = g.FALSE;
                                 goto_SCAN_TOP = True
                                 break
-                            print("here F")
                             return;
                     else:
                         goto_LOOK_FOR_COMMENT = False;

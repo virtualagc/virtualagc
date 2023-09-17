@@ -189,7 +189,7 @@ def MONITOR(function, arg2=None, arg3=None):
             close(n)
             return returnValue
         except: 
-            error("msg")
+            error(msg)
     
     elif function == 2:
         n = arg2

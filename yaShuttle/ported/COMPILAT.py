@@ -124,7 +124,6 @@ def COMPILATION_LOOP():
                 ERROR(d.CLASS_BS,3);
                 return;     #  THUS ABORTING COMPILATION
     
-    print("\n@A", g.SP, g.MAXSP, g.STACKSIZE)
     goto_COMP = True
     while goto_COMP:
         goto_COMP = False
@@ -142,9 +141,7 @@ def COMPILATION_LOOP():
                     CALL_SCAN();
                 if g.SRN_FLAG:
                     SRN_UPDATE();
-                print("\n@B", g.SP, g.MAXSP, g.STACKSIZE)
                 ADD_TO_STACK();
-                print("\n@C", g.SP)
                 g.STATE_STACK[g.SP] = g.STATE;   #   PUSH PRESENT STATE
                 g.LOOK_STACK[g.SP]=g.LOOK;
                 g.LOOK=0;
@@ -167,7 +164,7 @@ def COMPILATION_LOOP():
                                 g.STMT_END_PTR = g.STMT_PTR;
                                 if g.CONTROL[7]:
                                     SYT_DUMP();
-                        g.VAR[g.SP] = deepcopy(BCD);
+                        g.VAR[g.SP] = deepcopy(g.BCD);
                         g.FIXV[g.SP] = g.VALUE;
                         g.FIXF[g.SP]=g.FIXING;
                         g.FIXL[g.SP] = g.SYT_INDEX;
@@ -188,10 +185,10 @@ def COMPILATION_LOOP():
                 RECOVER();
             elif g.STATE > g.MAXPp:
                 #   APPLY PRODUCTION STATE
-                REDUCTIONS = REDUCTIONS + 1;
+                g.REDUCTIONS = g.REDUCTIONS + 1;
                 #   SP POINTS AT RIGHT END OF PRODUCTION
                 #   MP POINTS AT LEFT END OF PRODUCTION
-                g.MP = g.SP-g.INDEX2[STATE];
+                g.MP = g.SP-g.INDEX2[g.STATE];
                 g.MPP1 = g.MP+1;
                 SYNTHESIZE (g.STATE-g.MAXPp);   #   APPLY PRODUCTION
                 g.SP = g.MP;   #   RESET STACK POINTER
@@ -217,7 +214,7 @@ def COMPILATION_LOOP():
                     CALL_SCAN();
                 #   CHECK TOKEN AGAINST LEGAL LOOKAHEAD TRANSITION SYMBOLS
                 while g.LOOK1[I] != 0:
-                    if g.LOOK1[I] == TOKEN:
+                    if g.LOOK1[I] == g.TOKEN:
                         break # GO TO LOOK_MATCH;   #   FOUND ONE
                     I = I+1;
                 #LOOK_MATCH: 

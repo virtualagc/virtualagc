@@ -66,10 +66,11 @@ class cSAVE_TOKEN:
     def __init__(self):
         self.ACTUAL_PRINTING_ENABLED = 0
 lSAVE_TOKEN = cSAVE_TOKEN()
-def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG):
+
+def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
     l = lSAVE_TOKEN  # Locals.
     
-    if not INCLUDE_LIST:
+    if not g.INCLUDE_LIST:
         g.COMMENT_COUNT = -1
         g.STACK_PTR[g.SP] = -1;
         return;

@@ -37,7 +37,7 @@ import g
 
 def CHECK_ARRAYNESS():
     # Local I doesn't need to be persistent.
-    I=(g.CURRENT_ARRAYNESS>0);
+    I=(g.CURRENT_ARRAYNESS[0]>0);
     g.CURRENT_ARRAYNESS = 0
     g.ARRAYNESS_FLAG=0;
     return I;

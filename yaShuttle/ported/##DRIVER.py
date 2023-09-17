@@ -36,32 +36,41 @@ from ERRORSUM import ERROR_SUMMARY
 from HALINCL.DOWNSUM import DOWNGRADE_SUMMARY
 from HALINCL.SPACELIB import RECORD_LINK
 
-print("\n@@", g.SP, g.MAXSP, g.STACKSIZE)
+'''
+The global variable g.monitorLabel is used for subroutines upon error to 
+indicate the severity of error, and hence which label to "GO TO" here at this
+top level of the program.  Python has no "GO TO", so we have to accomplish this
+in a more-clunky indirect fashion.
+'''
 
-g.monitorLabel = "THE_BEGINNING"
-while True:
+# Initialization
+g.monitorLabel = None
+g.CLOCK[0] = MONITOR(18)
+INITIALIZATION()
+if g.monitorLabel != None:
     routing = g.monitorLabel
-    g.monitorLabel = None
-    if routing == "THE_BEGINNING":
-        g.CLOCK[0] = MONITOR(18)
-        INITIALIZATION()
-        print("\n@@2", g.SP, g.MAXSP, g.STACKSIZE)
+else:
+    routing = "THE BEGINNING"
 
-        if g.monitorLabel != None:
-            continue
-        g.CLOCK[1] = MONITOR(18)
-        COMPILATION_LOOP()
-        if g.monitorLabel != None:
-            continue
-        g.monitorLabel = "ALMOST_DISASTER" # Fall through
-    elif routing == "ALMOST_DISASTER":
-        OUTPUT(1, g.SUBHEADING)
-        g.CLOCK[2] = MONITOR(18)
-        if g.MAX_SEVERITY == 0 and h.SEVERITY_ONE:
-            g.MAX_SEVERITY = 1
-        PRINT_SUMMARY()
-        if g.monitorLabel != None:
-            continue
+if routing == "THE BEGINNING":
+    g.monitorLabel = None
+    g.CLOCK[1] = MONITOR(18)
+    COMPILATION_LOOP()
+    if g.monitorLabel != None:
+        routing = g.monitorLabel
+    else:
+        routing = "ALMOST_DISASTER" # Fall through
+    
+if routing == "ALMOST_DISASTER":
+    g.monitorLabel = None
+    OUTPUT(1, g.SUBHEADING)
+    g.CLOCK[2] = MONITOR(18)
+    if g.MAX_SEVERITY == 0 and h.SEVERITY_ONE:
+        g.MAX_SEVERITY = 1
+    PRINT_SUMMARY()
+    if g.monitorLabel != None:
+        routing = g.monitorLabel
+    else:
         if (g.COMPILING & 0x80) != 0: # HALMAT COMPLETE FLAG
             if g.MAX_SEVERITY < 2:
                 if g.CONTROL[1] == g.FALSE:
@@ -72,31 +81,38 @@ while True:
                     if g.MAX_SEVERITY > 0:
                         g.TOGGLE = g.TOGGLE | 0x08
                     RECORD_LINK()
-                    if g.monitorLabel != None:
-                        continue
-        g.MAX_SEVERITY = 4
-        g.monitorLabel = "ENDITNOW"
-    elif routing == "SCAN_DISASTER":
-        OUTPUT_WRITER()
         if g.monitorLabel != None:
-            continue
-        g.monitorLabel = "OUTPUT_WRITER_DISASTER"
-    elif routing == "OUTPUT_WRITER_DISASTER":
-        OUTPUT(1, g.SUBHEADING)
-        ERROR_SUMMARY()
-        if g.monitorLabel != None:
-            continue
-        g.monitorLabel = "ENDITNOW"
-    elif routing == "ENDITNOW":
-        OUTPUT(1, g.DOUBLE)
-        if g.MAX_SEVERITY > 2:
-            DOWNGRADE_SUMMARY()
-            if g.monitorLabel != None:
-                continue
-        OUTPUT(0, g.X32 + \
-                 '*****  C O M P I L A T I O N   A B A N D O N E D  *****')
-        print()
-        exit(g.MAX_SEVERITY << 2)
+            routing = g.monitorLabel
+        else:
+            g.MAX_SEVERITY = 4
+            routing = "ENDITNOW"
+        
+if routing == "SCAN_DISASTER":
+    g.monitorLabel = None
+    OUTPUT_WRITER()
+    if g.monitorLabel != None:
+        routing = g.monitorLabel
     else:
-        print("Implementation error: Unknown routing", file=sys.stderr)
-        exit(1)
+        routine = "OUTPUT_WRITER_DISASTER"
+    
+if routing == "OUTPUT_WRITER_DISASTER":
+    g.monitorLabel = None
+    OUTPUT(1, g.SUBHEADING)
+    ERROR_SUMMARY()
+    if g.monitorLabel != None:
+        routing = g.monitorLabel
+    else:
+        routing = "ENDITNOW"
+    
+if routing == "ENDITNOW":
+    g.monitorLabel = None
+    OUTPUT(1, g.DOUBLE)
+    if g.MAX_SEVERITY > 2:
+        DOWNGRADE_SUMMARY()
+    OUTPUT(0, g.X32 + \
+             '*****  C O M P I L A T I O N   A B A N D O N E D  *****')
+    print()
+    exit(g.MAX_SEVERITY << 2)
+
+print("Implementation error: Unknown routing", file=sys.stderr)
+exit(1)
