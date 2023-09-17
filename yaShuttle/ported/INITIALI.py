@@ -59,7 +59,7 @@ from HALINCL.CERRDECL import CLASS_BI
        DW_AD                                TIME_OF_COMPILATION          
        DW                                   TOKEN                        
        EJECT_PAGE                           TRUE                         
-       g.FALSE                                UNMOVEABLE                   
+       FALSE                                UNMOVEABLE                   
        FL_NO                                VMEM_MAX_PAGE                
        IC_SIZE                              VMEMREC                      
        INCLUDE_LIST_HEAD                    VOCAB                        
@@ -68,38 +68,38 @@ from HALINCL.CERRDECL import CLASS_BI
        LIT_BUF_SIZE                         X70                          
        LIT_CHAR_AD                          X8                           
  EXTERNAL VARIABLES CHANGED:                                             
-       ADDR_FIXED_LIMIT                     g.LRECL                        
-       ADDR_FIXER                           g.MACRO_TEXT_LIM               
-       g.ADDR_PRESENT                         g.NEXT                         
+       ADDR_FIXED_LIMIT                     LRECL                        
+       ADDR_FIXER                           MACRO_TEXT_LIM               
+       ADDR_PRESENT                         NEXT                         
        ADDR_ROUNDER                         NEXT_ATOM#                   
-       g.C                                    g.NT_PLUS_1                    
-       g.CARD_COUNT                           g.ONE_BYTE                     
-       g.CARD_TYPE                            g.OUTER_REF_LIM                
-       g.CASE_LEVEL                           g.PAD1                         
-       COMM                                 g.PAD2                         
-       g.COMMENT_COUNT                        g.PARTIAL_PARSE                
-       g.CUR_IC_BLK                           g.PROCMARK                     
-       g.CURRENT_CARD                         g.S                            
-       g.DATA_REMOTE                          g.SAVE_CARD                    
-       g.FIRST_CARD                           g.SDL_OPTION                   
-       FOR_ATOMS                            g.SIMULATING                   
-       FOR_DW                               g.SP                           
-       g.HMAT_OPT                             g.SREF_OPTION                  
-       g.I                                    g.SRN_PRESENT                  
-       g.IC_LIM                               g.STACK_DUMP_PTR               
-       g.IC_MAX                               g.STATE                        
-       g.IC_ORG                               g.STMT_PTR                     
-       g.INDENT_INCR                          g.SYSIN_COMPRESSED             
-       g.INPUT_REC                            g.SYTSIZE                      
-       g.J                                    TABLE_ADDR                   
-       g.K                                    g.TEMP1                        
-       g.LAST                                 g.TEXT_LIMIT                   
-       g.LAST_SPACE                           g.TPL_FLAG                     
-       g.LINE_LIM                             TPL_LRECL                    
-       g.LINE_MAX                             VMEM_PAD_ADDR                
-       g.LISTING2_COUNT                       VMEM_PAD_PAGE                
-       g.LISTING2                             g.VOCAB_INDEX                  
-       g.LIT_CHAR_SIZE                        g.XREF_LIM                     
+       C                                    NT_PLUS_1                    
+       CARD_COUNT                           ONE_BYTE                     
+       CARD_TYPE                            OUTER_REF_LIM                
+       CASE_LEVEL                           PAD1                         
+       COMM                                 PAD2                         
+       COMMENT_COUNT                        PARTIAL_PARSE                
+       CUR_IC_BLK                           PROCMARK                     
+       CURRENT_CARD                         S                            
+       DATA_REMOTE                          SAVE_CARD                    
+       FIRST_CARD                           SDL_OPTION                   
+       FOR_ATOMS                            SIMULATING                   
+       FOR_DW                               SP                           
+       HMAT_OPT                             SREF_OPTION                  
+       I                                    SRN_PRESENT                  
+       IC_LIM                               STACK_DUMP_PTR               
+       IC_MAX                               STATE                        
+       IC_ORG                               STMT_PTR                     
+       INDENT_INCR                          SYSIN_COMPRESSED             
+       INPUT_REC                            SYTSIZE                      
+       J                                    TABLE_ADDR                   
+       K                                    TEMP1                        
+       LAST                                 TEXT_LIMIT                   
+       LAST_SPACE                           TPL_FLAG                     
+       LINE_LIM                             TPL_LRECL                    
+       LINE_MAX                             VMEM_PAD_ADDR                
+       LISTING2_COUNT                       VMEM_PAD_PAGE                
+       LISTING2                             VOCAB_INDEX                  
+       LIT_CHAR_SIZE                        XREF_LIM                     
  EXTERNAL PROCEDURES CALLED:                                             
        CHARDATE                             ORDER_OK                     
        CHARTIME                             PAD                          
@@ -120,7 +120,7 @@ def INITIALIZATION():
     # need persistent locals.
 
     SUBHEAD = 'STMT                                   ' + \
-              '               SOURCE                                                  CURRENT g.S' + \
+              '               SOURCE                                                  CURRENT S' + \
               'COPE'
     
     EQUALS = ' = '
