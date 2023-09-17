@@ -7,8 +7,8 @@ way.
 
 I envisage two possible algorithms:  "clean", which is used the first time 
 through whan all of the cases are in strictl sequentially-increasing order,
-and "nonclean", when some of the cases have been reordered and thus have to
-be renumbered based on their original ordering.
+and "reference", when some of the cases have been reordered and thus have to
+be renumbered based on the reference numbers which the "clean" method embedded.
 '''
 
 import sys
@@ -17,17 +17,17 @@ clean = True
 
 productionNumber = -1
 originalLine = 0
-pattern = "elif PRODUCTION_NUMBER == "
+pattern = "if PRODUCTION_NUMBER == "
 
 if clean:
     for line in sys.stdin:
-        orignalLine += 1
-        line = line.rstrip()
+        originalLine += 1
+        line = line.rstrip('\n')
         if pattern in line:
-            index = line.index("elif PRODUCTION_NUMBER == ") + len(pattern)
+            index = line.index(pattern) + len(pattern)
             fields = line[index:].split(":")
             productionNumber += 1
             print(line[:index] + str(productionNumber) + \
-                    ": original line " + str(originalLine))
+                    ": # reference " + str(10*productionNumber))
         else:
             print(line)

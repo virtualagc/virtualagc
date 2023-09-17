@@ -471,6 +471,8 @@ def SCAN():
             g.M_TOKENS[g.MACRO_EXPAN_LEVEL]=g.M_TOKENS[g.MACRO_EXPAN_LEVEL]+1;
             g.BCD = '';
             g.FIXING=0;
+            g.DW[6] = 0;
+            g.DW[7] = 0;
             g.VALUE = 0;
             g.SYT_INDEX = 0;
             g.RESERVED_WORD = g.TRUE;

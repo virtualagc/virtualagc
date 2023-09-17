@@ -148,7 +148,7 @@ def ERROR(CLASS, NUM, TEXT=""):
             SEVERITY = BYTE(g.S) - BYTE('0');
             if SEVERITY > 2:
                 g.MAX_SEVERITY = SEVERITY;
-                g.COMPILING = FALSE;
+                g.COMPILING = g.FALSE;
                 g.monitorLabel = "SCAN_DISASTER";
                 return
         TEXT = '';

@@ -19,8 +19,13 @@ History:    2023-08-28 RSB  Began porting process from XPL.
 /**********************************************************************/        00000070
 '''
 
+# Gets the highest used index in an array.
 def RECORD_TOP(array):
     return len(array) - 1
+
+# Allocates space to add one element to an array.
+def NEXT_ELEMENT(array):
+    array.append(None)
 
 def RECORD_LINK():
     return

@@ -40,41 +40,46 @@ def hround(x):
 # Here's some stuff intended to functionally replace some of XPL's 'implicitly
 # declared' functions and variables while retaining roughly the same syntax.
 
-# Here's are lists of all open files, by their "device number". Each entry is
-# a Python string if no file has yet been opened for it.  The string is
-# either a literal "blob" or a literal "pds", and determines whether the 
-# file will be a "sequential file" or a "partitioned data set" when it is
-# opened.
+# Here's are lists of all open files, by their "device number". If the device
+# isn't open, then the entry in the inputDevices[] and/or outputDevices[] 
+# array(s) is a Python None.  Note that the behavior of output files 0 and 1
+# (both stdout) are hard-coded in the OUTPUT function and bypass the 
+# inputDevices[] list entirely.
 #
 # When there is file associated with the entry, the value will be a
 # Python dictionary structured as follows:
 #    {
-#        "file": The associated Python file object,
-#        "open": Boolean (True if open, False if closed),
-#        "blob": The file contents as a list of strings.
-#        "pds":  The file contents as a dictionary,
-#        "mem":  For a "pds", the member name last found by MONITOR(2);
-#                not used for a "blob",
-#        "ptr":  The index of the last line returned by an INPUT();
-#                for a "blob" it's the index within the file as a whole,
-#                while for a "pds" it's the index within the member,
-#        "was":  Set of PDS keys from most-recent read or write to file.
+#        "file":   The associated Python file object,
+#        "open":   Boolean (True if open, False if closed),
+#        "blob":   If an input file, the entire contents as a list of strings.
+#                  If an output file, just None, since output is written 
+#                  directly to the file without any buffering.
+#        "pds":    If an input file the file contents as a dictionary.
+#                  If an output file, just None, since output is written 
+#                  directly to the file without any buffering.
+#        "random": The file contents as a list of fixed-length Python bytearray
+#                  objects.  "Random" files are treated as input/output, and
+#                  their contents are both buffered and written to the 
+#                  associated file.
+#        "reclen": The record length (in bytes) for "random" files.
+#        "mem":    For a "pds", the member name last found by MONITOR(2);
+#                  not used for a "blob",
+#        "ptr":    The index of the last line returned by an INPUT();
+#                  for a "blob" it's the index within the file as a whole,
+#                  while for a "pds" it's the index within the member,
+#        "was":    Set of PDS keys from most-recent read or write to file.
 #    }
-# The keys "blob" and "pds" are mutually exclusive; one and only one of 
-# them is present.  The value associated with a "blob" key is the entire 
-# contents of the file as a list of strings.  For a "pds" key, the value is a 
-# dictionary whose keys are "member names", each of which is precisely 8 
-# characters long (including padding by spaces on the right).  The value 
-# associated with a member key is the entire contents of that member as a list
-# of strings.
+# The keys "blob", "pds", and "random" are mutually exclusive; one and only one
+# of them is present.  For a "pds" dictionary, the dictionary keys are  
+# "member names", each of which is precisely 8 characters long (including 
+# padding by spaces on the right).  The value associated with a member key is 
+# the entire contents of that member as a list of strings.
 
-inputDevices = ["blob", "blob", "blob", None, "pds", "pds", "pds", "blob", 
-                None, None]
-# Note that OUTPUT(0) and OUTPUT(1) are hardcoded as stdout, and don't actually
-# require any setup of outputDevices[0] and outputDevices[1].
-outputDevices = ["blob", "blob", "blob", "blob", "blob", "pds", "pds", "blob",
-                 "pds", None]
-# Open the devices that are always open.
+inputDevices = [None]*10
+outputDevices = [None]*10
+
+# Open the files that we need, other than output files 0 and 1 (whose behavior
+# is hard-coded separately), and buffer their contents where appropriate.
 dummy = sys.stdin.readlines() # Source code.
 for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬","~")\
@@ -86,7 +91,23 @@ inputDevices[0] = {
     "ptr":  -1,
     "blob":  dummy
     }
-f = open("ERRORLIB.json", "r")
+f = open("LITFILE.bin", "a+") # File of literals.
+reclen = 130
+dummy = []
+while True:
+    chunk = f.read(reclen)
+    if len(chunk) == reclen:
+        dummy.append(bytearray(chunk))
+    else:
+        break
+inputDevices[2] = {
+    "file": f,
+    "reclen": reclen,
+    "open": True,
+    "random": dummy
+    }
+outputDevices[2] = inputDevices[2]
+f = open("ERRORLIB.json", "r") # File of error message types.
 dummy = json.load(f)
 inputDevices[5] = {
     "file": f,
@@ -96,7 +117,7 @@ inputDevices[5] = {
     "pds":  dummy,
     "was":  set(dummy.keys())
     }
-inputDevices[6] = { # This apparently provides the access rights.
+inputDevices[6] = { # File of module access rights.
     "file": None,
     "open": False,
     "ptr":  -1,
@@ -463,6 +484,30 @@ def INPUT(fileNumber):
     except:
         return None
 
+# The value parameter, if any, must be a byte array of the proper length for
+# the device.  Similarly for the return value.
+def FILE(fileNumber, recordNumber, value=None):
+    if value == None:
+        # Input
+        if "random" not in inputDevices[fileNumber]:
+            return None
+        reclen = bytearray[[0]*outputDevices[fileNumber]["reclen"]]
+        if recordNumber >= reclen:
+            return bytearray([0]*reclen)
+        return inputDevices[fileNumber]["random"][recordNumber]
+    # Output
+    if "random" not in outputDevices[fileNumber]:
+        return
+    dummy = outputDevices[fileNumber]["random"]
+    reclen = outputDevices[fileNumber]["reclen"]
+    while recordNumber >= len(dummy):
+        dummy.append(None)
+    dummy[recordNumber] = value.copy()[0:reclen]
+    while len(dummy[recordNumber]) < reclen:
+        dummy[recordNumber].append(0)
+    outputDevices[fileNumber]["file"].write(dummy[recordNumber])
+    return
+
 # For XPL's DATE and TIME 'variables'.  DATE = (1000*(year-1900))+DayOfTheYear,
 # while TIME=NumberOfCentisecondsSinceMidnight.  The timezone isn't specified
 # by the definitions (as far as I know), so we just maintain consistency between
@@ -500,6 +545,9 @@ def PAD(s, n):
 
 def MIN(a, b):
     return min(a, b)
+
+def MAX(a, b):
+    return max(a, b)
 
 # For BYTE() and STRING_GT(), the ebcdic module is used to interconvert between
 # strings and EBCDIC bytearrays.
@@ -543,3 +591,10 @@ def ADDR(variable):
     return ADDResses.index(variable)
     
     return 0
+
+# Inserts inline BAL instructions.  Obviously less than useless to us.  
+# I'm not sure what to do with it.
+def INLINE(arg1=None, arg2=None, arg3=None, arg4=None, arg5=None, \
+           arg6=None, arg7=None, arg8=None, arg9=None, arg10=None):
+    return
+

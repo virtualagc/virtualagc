@@ -36,6 +36,8 @@ from ERRORSUM import ERROR_SUMMARY
 from HALINCL.DOWNSUM import DOWNGRADE_SUMMARY
 from HALINCL.SPACELIB import RECORD_LINK
 
+print("\n@@", g.SP, g.MAXSP, g.STACKSIZE)
+
 g.monitorLabel = "THE_BEGINNING"
 while True:
     routing = g.monitorLabel
@@ -43,6 +45,8 @@ while True:
     if routing == "THE_BEGINNING":
         g.CLOCK[0] = MONITOR(18)
         INITIALIZATION()
+        print("\n@@2", g.SP, g.MAXSP, g.STACKSIZE)
+
         if g.monitorLabel != None:
             continue
         g.CLOCK[1] = MONITOR(18)

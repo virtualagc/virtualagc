@@ -11,7 +11,6 @@ History:    2023-09-12 RSB  Ported from XPL
 
 from xplBuiltins import *
 import g
-from SAVEDUMP import SAVE_DUMP
 
 '''
  /***************************************************************************/

@@ -165,8 +165,25 @@ def RECOVER():
                 EMIT_SMRK();
                 g.FACTORING = g.TRUE;
                 g.FACTOR_FOUND = g.FALSE;
-                for g.I in range(0, g.FACTOR_LIM+1):
-                    g.FACTORED_TYPE(g.I) = 0;
+                # For the following lines, refer to the comments associated
+                # with TYPE in the file g.py:
+                g.FACTORED_TYPE = 0
+                g.FACTORED_BIT_LENGTH = 0
+                g.FACTORED_CHAR_LENGTH = 0
+                g.FACTORED_MAT_LENGTH = 0
+                g.FACTORED_VEC_LENGTH = 0
+                g.FACTORED_ATTRIBUTES = 0
+                g.FACTORED_ATTRIBUTES2 = 0
+                g.FACTORED_ATTR_MASK = 0
+                g.FACTORED_STRUC_PTR = 0
+                g.FACTORED_STRUC_DIM = 0
+                g.FACTORED_CLASS = 0
+                g.FACTORED_NONHAL = 0
+                g.FACTORED_LOCKp = 0
+                g.FACTORED_IC_PTR = 0
+                g.FACTORED_IC_FND = 0
+                g.FACTORED_N_DIM = 0
+                g.FACTORED_S_ARRAY = [0]*(g.N_DIM_LIM+1)
             else:
                 break # GO TO BAD_BAD;
             return;

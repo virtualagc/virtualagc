@@ -12,7 +12,8 @@ History:    2023-08-25 RSB  Created place-holder file.
 from copy import deepcopy
 from xplBuiltins import *
 import g
-import HALINCL.CERRDECLS as d
+import HALINCL.CERRDECL as d
+from ERROR import ERROR
 from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE
 from SAVETOKE import SAVE_TOKEN
@@ -22,7 +23,7 @@ from EMITEXTE import EMIT_EXTERNAL
 from STACKDUM import STACK_DUMP
 from RECOVER import RECOVER
 
-from SYNTHESI import SYTHESIZE
+from SYNTHESI import SYNTHESIZE
 from CALLSCAN import CALL_SCAN
 
 '''
@@ -123,6 +124,7 @@ def COMPILATION_LOOP():
                 ERROR(d.CLASS_BS,3);
                 return;     #  THUS ABORTING COMPILATION
     
+    print("\n@A", g.SP, g.MAXSP, g.STACKSIZE)
     goto_COMP = True
     while goto_COMP:
         goto_COMP = False
@@ -140,7 +142,9 @@ def COMPILATION_LOOP():
                     CALL_SCAN();
                 if g.SRN_FLAG:
                     SRN_UPDATE();
+                print("\n@B", g.SP, g.MAXSP, g.STACKSIZE)
                 ADD_TO_STACK();
+                print("\n@C", g.SP)
                 g.STATE_STACK[g.SP] = g.STATE;   #   PUSH PRESENT STATE
                 g.LOOK_STACK[g.SP]=g.LOOK;
                 g.LOOK=0;

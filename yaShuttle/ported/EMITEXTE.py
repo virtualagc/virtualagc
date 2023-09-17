@@ -12,6 +12,7 @@ History:    2023-09-12 RSB  Ported from XPL
 from xplBuiltins import *
 import g
 from DESCORE import DESCORE
+from BLANK import BLANK
 
 '''
  /***************************************************************************/
@@ -80,7 +81,7 @@ class cEMIT_EXTERNAL: # Local variables for EMIT_EXTERNAL
         self.I = 0
         self.J = 0
         self.K = 0
-        if not pfs:
+        if not g.pfs:
             # BFS/PASS INTERFACE; FIX COMPOOL RIGID BUG
             self.BLANK_NEEDED = g.TRUE
 lEMIT_EXTERNAL = cEMIT_EXTERNAL()
@@ -103,11 +104,11 @@ def EMIT_EXTERNAL():
     
     def ADD_CHAR(VAL):
         # No locals.
-        BYTE(l.NEWBUFF, l.BINX) = VAL;
+        BYTE(l.NEWBUFF, l.BINX,  VAL);
         l.BINX = l.BINX + 1;
         if l.BINX == g.TPL_LRECL:
             EX_WRITE();
-            BLANK(l.NEWBUFF, 0, g.TPL_LRECL);
+            l.NEWBUFF = BLANK(l.NEWBUFF, 0, g.TPL_LRECL);
             l.BINX = 1;
     
     #DO CASE EXTERNALIZE;
@@ -246,7 +247,7 @@ def EMIT_EXTERNAL():
         l.NEWBUFF=PAD(l.NEWBUFF,g.TPL_LRECL);
         g.EXTERNALIZE=1;
         g.TPL_NAME=DESCORE(g.VAR[g.MP]);
-        g.TPL_FLAG = FINDER(7, g.TPL_NAME, 1) = 0;  # IGNORE INLINE BLOCKS
+        g.TPL_FLAG = (FINDER(7, g.TPL_NAME, 1) == 0);  # IGNORE INLINE BLOCKS
         if g.TPL_FLAG:
             l.OLDBUFF=INPUT(7);
     elif g.EXTERNALIZE == 4:

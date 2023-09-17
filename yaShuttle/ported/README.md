@@ -77,9 +77,9 @@ Alas, the creators of XPL didn't reckon with the ability of the Shuttle's coders
 
 In fact, most (or all) calls to `PRINT2` pass `LINE` parameters that are string expressions or literals, rather than strings stored in variables, so the adjustments to `LINE` made by `PRINT2` are *not* changing strings stored in variables, but rather changing strings that had better not be changed.
 
-At any rate, the Python implementation doesn't allow such changes to migrate outside the functions.  These parameter manipulations within procedures are very rare in the XPL code, so I suppose it's possible that they simply made a mistake (without any visible results) in these instances, and I'm making a bigger deal of it than it really is.
+But see also the next two sections.
 
-## Initialization of Local Variables Within Their Parent Procedures
+## Persistence and Initialization of Local Variables Within Their Parent Procedures
 
 It appears to me (undocumented!) that local variables in XPL procedures are not initialized at all, unless they have `INITIAL` clauses in their `DECLARE` statements.  *Moreover*, if such initialization occurs, it only does so at program start (or more reasonably, upon the first call to the procedure).
 
@@ -117,6 +117,61 @@ import HALINCL.DWNTABLE as t
 Moreover, it's not always possible to have "`l.`" as the namespace for variables local to a procedure, because parent namespaces are within scope as well.  What I mean is that if you have procedure definition embedded within a procedure definition, the outermost procedure will have "`l.`" as a local namespace, so the inner procedure can't use "`l.`" without losing access to its parent's local variables, and thus it might use "`ll.`" instead.  Similarly, if the embedded procedure also had an embedded procedure definition, the embedded procedure of the embedded procedure might use "`lll.`".  And so on.
 
 The point, however, is that any variable &mdash; particularly since I tend to use camel case in my own variable names, any all-upper-case variable &mdash; unaccompanied by an explicit namespace had better be some variable I introduced for the purposes of the port, and not any variable being taken over essentially as-is from XPL.  Well ... there are some exceptions:  Variables immediately assigned a new value at the top of a procedure obviously don't need to be persistent, and if those are the only types of locals in a given procedure, there's no need for the class rigamarole described above.
+
+## Absence and Persistence of Parameters of Procedures
+
+It further appears to me, as usual undocumented, that parameters of functions are expected to be persistent, in the sense that if parameters are omitted from function calls, they are expected to retain the values they had on prior calls to the procedure! 
+
+An example is the `EMIT_SMRK` procedure, shown here in the entirety of its original XPL form:
+<pre>
+EMIT_SMRK:
+   PROCEDURE (T);
+      DECLARE T BIT(16) INITIAL(3);
+      IF INLINE_LEVEL=0 THEN DO;
+         CALL HALMAT_POP(XSMRK,1,XCO_N,STATEMENT_SEVERITY);
+         CALL HALMAT_PIP(STMT_NUM, 0, SMRK_FLAG, T>1);
+         IF HALMAT_RELOCATE_FLAG THEN CALL HALMAT_RELOCATE;
+         ATOM#_FAULT=NEXT_ATOM#;
+      END;
+      ELSE IF T<5 THEN DO;
+         CALL HALMAT_POP(XIMRK,1,XCO_N,STATEMENT_SEVERITY);
+         CALL HALMAT_PIP(STMT_NUM, 0, SMRK_FLAG, T>1);
+      END;
+      STATEMENT_SEVERITY=0;
+      IF SIMULATING THEN IF T=3 THEN CALL STAB_HDR;
+      IF SRN_PRESENT THEN IF T THEN SRN_FLAG=TRUE;
+      IF INLINE_STMT_RESET>0 THEN DO;
+         STMT_NUM=INLINE_STMT_RESET;
+         INLINE_STMT_RESET=0;
+      END;
+      ELSE IF T THEN STMT_NUM=STMT_NUM+1;
+      T=3;
+      SMRK_FLAG = 0;
+   END EMIT_SMRK;
+</pre>
+If parameters aren't omittable in the way I infer, then the line `DECLARE T BIT(16) INITIAL(3);` makes no sense, since the `INITIAL(3)` would overwrite the value assigned by a `CALL EMIT_SMRK(x)` to the procedure.  But in fact, `EMIT_SMRK` is sometimes called with a parameter, and sometimes with no parameters, so presumably the idea is that the `INITIAL(3)` must have an effect only when the parameter `T` is omitted from the call.
+
+But that can't be entirely true.  At the same time, near the bottom of the function we see the line `T=3;`, which also makes no sense if the parameters aren't persistent, since `T` is never used within the procedure after its final assignment, and can't have an effect outside of the procedure (if the bland assurances of the documentation are to be trusted).  No, the final assignment of `T` only makes sense if it's there to insure that `T` is returned to its default value prior the next call to the procedure.  But it also must mean that the initial value specified in `DECLARE T INITIAL(3)` is only the default for the *very first* call to the procedure, and isn't the default for subsequent calls!
+
+Since `EMIT_SMRK` always returns with `T` having the same value as specified by its `INITIAL` clause, we could handle it in Python very simply just by defining the procedure as `def EMIT_SMRK(T=3): ...`.  But what about more-complex cases in which parameters don't end up with the same values they had upon entry?  Such cases can be handled within the persistent-local-variable framework described in the preceding section.  Let's discuss it using `EMIT_SMRK`, even though we've already agreed that `EMIT_SMRK` doesn't really need any special consideration.
+
+Using the persistent-local-variable framework, our Python port of `EMIT_SMRK` might look something like the following:
+<pre>
+class cEMIT_SMRK: # Local variables *and* procedure parameters.
+    def __init__(self):
+        self.T = 3
+lEMIT_SMRK = cEMIT_SMRK()
+
+def EMIT_SMRK(T=None):
+    l = lEMIT_SMRK
+    if T != None:
+        l.T = T
+    # Hereafter, wherever T would appear in the XPL code, l.T is used in the Python code.
+    ...
+</pre>
+Thus, the procedure parameter acts exactly like any other local variable, with the exception that its otherwise-persistent value can optionally be overridden by the value provide in the call to the procedure. 
+
+If `T` had been declared *without* an `INITIAL` clause, we could just have used `self.T = None`.  That way, if the *first* call to `EMIT_SMRK` didn't include any value for the parameter `T`, there would likely be a runtime error, exactly as we'd desire.
 
 ## Dynamic Memory Allocation: `BASED` and its Macros
 
@@ -219,6 +274,20 @@ My choice is this:
 
 As far as reading from a PDS is concerned, the technique is first to find the member of the PDS you're interested in via `MONITOR(2,DEV,MEMBER)`.  You then read that member line-by-line using INPUT(DEV).  Evenually INPUT(DEV) returns an empty string to indicate the end of the member.  (That can't be right, since the member could actually contain some empty lines, presumably, but I haven't been able to find anything to indicate a different approach.)
 
-## Negative Array Indices
+## Equivalence of Arrays and Non-Arrays
 
-What do they mean?  There are a few of them.  No explanations.  I'm at a loss.
+XPL, as documented according to my understanding, has the basic datatypes of 32-bit integer (**FIXED**) and string (**CHARACTER**), as well as bit-arrays (**BIT**).  Besides which, you can have 1-dimensional arrays of these basic datatypes.
+
+> Fun fact:  If you want, say, a 10-elmement array called `MYARRAY` of integers, you'd define it with the statement `DECLARE MYARRAY(9) FIXED;`.  Notice that you use a 9 rather than a 10.  You'll be particularly amused the 50th time you've had to correct the size of a declared array. I presume that what you're specifying here is not the size of the array, but the maximum subscript, which is one less than the size, since the indices start at 0.  I presume this feature was inherited from PL/I, in which you can declare both the starting and ending indices of an array, using a syntax like `DCL MYARRAY(0:9)`, which makes sense *in PL/I* because the starting index isn't always fixed at 0 the way it is in XPL. But I digress!
+
+Another fun fact that isn't documented in XPL, but which may be an innovation by the XPL compiler-writers that the authors of XPL itself didn't intend, is that you can completely ignore the array bounds, using negative indices or positive indices greater than the declared maximum to just access whatever happens to be nearby in memory.  Not only that, but you can even ignore whether or not the variable was declared as an array or not!  Consider the following declarations:
+<pre>
+    DECLARE A FIXED;
+    DECLARE B(5) FIXED;
+</pre>
+If you like, you can just use `B` in your code, without an index even though it's declared as an array, and it will automatically be interpreted as `B(0)`.  In this example, `B[-1]` would access `A`.  Or you can use `A` *with* an index even though it's not an array.  In this example, `A[1]` would access `B[0]`, `A[2]` would access `B[1]`, and so on. 
+
+And make no mistake, whoever coded the HAL/S compiler in XPL *did* like to do this, though fortunately not too often.  Mostly just when you don't expect it and spend a while tearing your hair out trying to figure out what's going on.
+
+
+
