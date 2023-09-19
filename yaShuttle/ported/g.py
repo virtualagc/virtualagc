@@ -14,7 +14,6 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
 '''
 
 import sys
-from copy import deepcopy
 from xplBuiltins import OUTPUT, BYTE
 import HALINCL.COMMON as h
 
@@ -1046,8 +1045,8 @@ SAVE_PATCH = [] # Elements are save_patch class objeccts
 def PATCHSAVE(n, value=None):
     global SAVE_PATCH
     if value == None:
-        return SAVE_PATCH[n].SAVE_LINE
-    SAVE_PATCH[n].SAVE_LINE = deepcopy(value)
+        return SAVE_PATCH[n].SAVE_LINE[:]
+    SAVE_PATCH[n].SAVE_LINE = value[:]
 
 # COMM EQUAIVALENCES
 def LIT_CHAR_AD(value=None):
@@ -1294,7 +1293,19 @@ CROSS = 10
 DOT = 11
 CONTROL = [0]*17 # INPUT CONTROLABLE SWITCHES
 if debug3:
-    CONTROL[3] = -1
+    # Enable various debugging messages from the compiler.  Note that these
+    # would *normally* be set within the HAL/S program itself, as described
+    # in section 2.2.7 ("Debugging Aids") of the "HAL/S-FC & HAL/S-360
+    # Compiler System Program Description", but I'm turning them on here via
+    # command-line switches.
+    CONTROL[0x00] = -1 # Interlist HALMAT in the primary listing
+    CONTROL[0x03] = -1 # Phase 1 identifier trace
+    CONTROL[0x04] = -1 # Phase 1 token trace
+    CONTROL[0x08] = -1 # Phase 1 production trace
+    #CONTROL[0x0B] = -1 # Print Phase 1 HALMAT by block.
+    CONTROL[0x0C] = -1 # Print Phase 1 state trace
+    CONTROL[0x0D] = -1 # Standard Phase 1 listing
+    CONTROL[0x0E] = -1 # Print literal table from Phase 1
 XREF_FULL = 0
 XREF_MASK = 0x1FFF
 XREF_ASSIGN = 0x8000
@@ -1854,9 +1865,9 @@ def enlargeSYM_TAB(n):
         h.SYM_TAB.append(h.sym_tab())
 def SYT_NAME(n, value=None):
     if value == None:
-        return h.SYM_TAB[n].SYM_NAME
+        return h.SYM_TAB[n].SYM_NAME[:]
     enlargeSYM_TAB(n)
-    h.SYM_TAB[n].SYM_NAME = deepcopy(value)
+    h.SYM_TAB[n].SYM_NAME = value[:]
 def SYT_ADDR(n, value=None):
     if value == None:
         return h.SYM_TAB[n].SYM_ADDR
@@ -1958,17 +1969,17 @@ def LIT1(n, value=None):
     global LIT_PG
     if value == None:
         return LIT_PG[n].LITERAL1
-    LIT_PG[n].LITERAL1 = deepcopy(value)
+    LIT_PG[n].LITERAL1 = value[:]
 def LIT2(n, value=None):
     global LIT_PG
     if value == None:
         return LIT_PG[n].LITERAL2
-    LIT_PG[n].LITERAL2 = deepcopy(value)
+    LIT_PG[n].LITERAL2 = value[:]
 def LIT3(n, value=None):
     global LIT_PG
     if value == None:
         return LIT_PG[n].LITERAL3
-    LIT_PG[n].LITERAL3 = deepcopy(value)
+    LIT_PG[n].LITERAL3 = value[:]
 
 def XREF(n, value=None):
     # Logically, the while-loop should *follow* the return from the conditional
@@ -2466,33 +2477,33 @@ DWN_VER(1)  LITERALLY 'DOWN_INFO(%1%).DOWN_VER';
 def DWN_STMT(n, value=None):
     global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_STMT
+        return DOWN_INFO[n].DOWN_STMT[:]
     else:
-        DOWN_INFO[n].DOWN_STMT = value
+        DOWN_INFO[n].DOWN_STMT = value[:]
 def DWN_ERR(n, value=None):
     global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_ERR
+        return DOWN_INFO[n].DOWN_ERR[:]
     else:
-        DOWN_INFO[n].DOWN_ERR = value
+        DOWN_INFO[n].DOWN_ERR = value[:]
 def DWN_CLS(n, value=None):
     global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_CLS
+        return DOWN_INFO[n].DOWN_CLS[:]
     else:
-        DOWN_INFO[n].DOWN_CLS = value
+        DOWN_INFO[n].DOWN_CLS = value[:]
 def DWN_UNKN(n, value=None):
     global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_UNKN
+        return DOWN_INFO[n].DOWN_UNKN[:]
     else:
-        DOWN_UNKN[n].DOWN_STMT = value
+        DOWN_UNKN[n].DOWN_STMT = value[:]
 def DWN_VER(n, value=None):
     global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_VER
+        return DOWN_INFO[n].DOWN_VER[:]
     else:
-        DOWN_INFO[n].DOWN_VER = value
+        DOWN_INFO[n].DOWN_VER = value[:]
 
 PREV_ELINE = FALSE
 NEXT_CC = ''
@@ -2519,5 +2530,5 @@ def ADV_STMTp(n, value=None):
     h.ADVISE[n].STMTp = value
 def ADV_ERRORp(n, value=None):
     if value == None:
-        return h.ADVISE[n].ERRORp
-    h.ADVISE[n].ERRORp = deepcopy(value)
+        return h.ADVISE[n].ERRORp[:]
+    h.ADVISE[n].ERRORp = value[:]

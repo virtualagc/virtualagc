@@ -43,14 +43,14 @@ def NEXT_RECORD():
         return;
     if g.INCLUDING:
         if g.INCLUDE_COMPRESSED:
-            g.CURRENT_CARD = g.DECOMPRESS(1);
+            g.CURRENT_CARD = g.DECOMPRESS(1)[:];
         else:
             if g.INITIAL_INCLUDE_RECORD:
                 g.INITIAL_INCLUDE_RECORD = g.FALSE;
             else:
-                g.CURRENT_CARD = INPUT(g.INPUT_DEV);
+                g.CURRENT_CARD = INPUT(g.INPUT_DEV)[:];
     else: # NOT INCLUDE
         if g.SYSIN_COMPRESSED:
-            g.CURRENT_CARD = g.DECOMPRESS(0);
+            g.CURRENT_CARD = g.DECOMPRESS(0)[:];
         else:
-            g.CURRENT_CARD = INPUT(g.INPUT_DEV);
+            g.CURRENT_CARD = INPUT(g.INPUT_DEV)[:];

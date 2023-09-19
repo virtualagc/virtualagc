@@ -9,7 +9,6 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-11 RSB  Began porting from XPL
 '''
 
-from copy import deepcopy
 from xplBuiltins import *
 import g
 from OUTPUTWR import OUTPUT_WRITER
@@ -87,15 +86,15 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
                 g.SAVE2 = g.SAVE2 - g.PTR;
             g.LAST_WRITE = 0;
         elif g.IF_FLAG:
-            g.SAVE_SRN2 = g.SRN[2];
-            g.SRN[2] = g.SAVE_SRN1;
+            g.SAVE_SRN2 = g.SRN[2][:];
+            g.SRN[2] = g.SAVE_SRN1[:];
             g.SAVE_SRN_COUNT2 = g.SRN_COUNT[2];
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT1;
             g.STMT_NUM = g.STMT_NUM - 1;
             g.IF_FLAG = g.FALSE;
             g.PTR = OUTPUT_WRITER(g.SAVE1,g.SAVE2);
             g.STMT_NUM = g.STMT_NUM + 1;
-            g.SRN[2] = g.SAVE_SRN2;
+            g.SRN[2] = g.SAVE_SRN2[:];
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT2;
             # IF SAVE2 > PTR THEN THE ENTIRE IF STATEMENT HAS NOT
             # BEEN PRINTED YET.
@@ -119,7 +118,7 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
             if SHR(g.TOKEN_FLAGS[g.STMT_PTR], 6) != 0:
                 g.BCD_PTR = g.BCD_PTR + 1;
                 g.SAVE_BCD[BCD_PTR] = \
-                    g.SAVE_BCD[SHR(g.TOKEN_FLAGS[g.STMT_PTR],6)];
+                    g.SAVE_BCD[SHR(g.TOKEN_FLAGS[g.STMT_PTR],6)][:];
                 g.TOKEN_FLAGS[g.STMT_PTR] = (g.TOKEN_FLAGS[g.STMT_PTR] & 0x3F) \
                                                 | SHL(g.BCD_PTR, 6);
         if g.FACTOR_FOUND:
@@ -166,7 +165,7 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
                         g.ATTR_LOC = 0;
                     goto_BCD_PTR_CHECK = True
                     continue
-            g.SAVE_BCD[g.BCD_PTR] = CHAR;
+            g.SAVE_BCD[g.BCD_PTR] = CHAR[:];
             g.TOKEN_FLAGS[g.STMT_PTR] = TYPE | SHL(g.BCD_PTR, 6);
             g.TOKEN_FLAGS[g.STMT_PTR] = g.TOKEN_FLAGS[g.STMT_PTR] | \
                                         SHL(g.BCD_PTR, 6);
@@ -179,7 +178,7 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
         g.RVL_STACK2[g.STMT_PTR] = BYTE(g.RVL,1);
         # ASSIGN RVL THE RVL ASSOCIATED WITH THE FIRST CHARACTER OF THE
         # NEXT LINE.
-        g.RVL = g.NEXT_CHAR_RVL;
+        g.RVL = g.NEXT_CHAR_RVL[:];
     g.ERROR_PTR[g.STMT_PTR] = -1;
     if g.WAIT:
         g.WAIT = g.FALSE;

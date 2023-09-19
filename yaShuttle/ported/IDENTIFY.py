@@ -471,7 +471,7 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     #  REPLACE                             #  CASE 8
                     g.SYT_INDEX = ENTER(BCD, REPL_CLASS);
                     g.TOKEN = g.ID_TOKEN;
-                    g.MACRO_NAME = BCD;
+                    g.MACRO_NAME = BCD[:];
                     g.CONTEXT = g.REPLACE_PARM_CONTEXT;
                     goto_REPL_OP_CHECK = True
                     # The label is below us, so we're going to fallthrough

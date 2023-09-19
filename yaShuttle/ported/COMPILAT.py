@@ -9,7 +9,6 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-25 RSB  Created place-holder file.
 '''
 
-from copy import deepcopy
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
@@ -106,7 +105,10 @@ from CALLSCAN import CALL_SCAN
 '''
 
 def COMPILATION_LOOP():
-    # The locals, I and J, don't require persistence.
+    # The locals, I and J, don't require persistence.  However, they can't 
+    # be left uninitialized, in case CONTROL[0x0C] is set for debugging.
+    I = 0
+    J = 0
     
     #   THIS PROC PARSES THE INPUT STRING (BY CALLING THE SCANNER)
     #   AND CALLS THE CODE EMISSION PROC (SYNTHESIZE) WHENEVER A
@@ -164,7 +166,7 @@ def COMPILATION_LOOP():
                                 g.STMT_END_PTR = g.STMT_PTR;
                                 if g.CONTROL[7]:
                                     SYT_DUMP();
-                        g.VAR[g.SP] = deepcopy(g.BCD);
+                        g.VAR[g.SP] = g.BCD[:];
                         g.FIXV[g.SP] = g.VALUE;
                         g.FIXF[g.SP]=g.FIXING;
                         g.FIXL[g.SP] = g.SYT_INDEX;
@@ -224,8 +226,9 @@ def COMPILATION_LOOP():
                 #   PUSH A STATE # INTO THE STATE_STACK
                 g.STATE_STACK[g.SP] = g.INDEX2[g.STATE];
                 #   GET NEXT STATE
-                g.STATE = g.INDEX1[STATE];
+                g.STATE = g.INDEX1[g.STATE];
                 g.LOOK_STACK[g.SP] = 0
                 g.LOOK=0;
             # END OF COMPILE LOOP
             
+    

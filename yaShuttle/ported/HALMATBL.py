@@ -41,7 +41,7 @@ from IFORMAT import I_FORMAT
 
 class cHALMAT_BLAB:
     def __init__(self):
-        self.ICNT = None
+        self.ICNT = 0
 lHALMAT_BLAB = cHALMAT_BLAB()
 
 BLAB1 = '0ND    X'

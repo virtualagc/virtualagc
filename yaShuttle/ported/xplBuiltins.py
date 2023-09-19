@@ -16,7 +16,6 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
 import sys
 from time import time_ns
 from datetime import datetime
-from copy import deepcopy
 from decimal import Decimal, ROUND_HALF_UP
 import json
 import math
@@ -80,13 +79,17 @@ outputDevices = [None]*10
 
 # Open the files that we need, other than output files 0 and 1 (whose behavior
 # is hard-coded separately), and buffer their contents where appropriate.
-dummy = sys.stdin.readlines() # Source code.
+if False: # Normal
+    f = sys.stdin
+else:    # Debugging
+    f = open("SIMPLE.hal", "r")
+dummy = f.readlines() # Source code.
 for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬","~")\
                         .replace("^","~").replace("¢","`").expandtabs(8)\
                         .ljust(80)
 inputDevices[0] = {
-    "file": sys.stdin,
+    "file": f,
     "open": True,
     "ptr":  -1,
     "blob":  dummy
@@ -124,6 +127,12 @@ inputDevices[6] = { # File of module access rights.
     "mem":  "",
     "pds":  {},
     "was":  set()
+    }
+f = open("SOURCECO.txt", "w") # Source-comparision output.
+outputDevices[9] = {
+    "file": f,
+    "open": True,
+    "blob": []
     }
 
 def SHL(a, b):
@@ -427,7 +436,10 @@ def OUTPUT(fileNumber, string):
     elif fileNumber == 8:
         pass
     elif fileNumber == 9:
-        pass
+        if outputDevices[fileNumber]["open"] and \
+                "blob" in outputDevices[fileNumber]:
+            f.write(string + '\n')
+            f.flush()
 
 '''
     fileNumber 0,1  stdin, presumably the source code.

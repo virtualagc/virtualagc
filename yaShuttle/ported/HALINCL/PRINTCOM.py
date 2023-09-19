@@ -33,8 +33,8 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
         C = g.DOUBLE;
         if g.IF_FLAG:
             g.STMT_NUM = g.STMT_NUM - 1;
-            g.SAVE_SRN2 = g.SRN[2];
-            g.SRN[2] = g.SAVE_SRN1;
+            g.SAVE_SRN2 = g.SRN[2][:];
+            g.SRN[2] = g.SAVE_SRN1[:];
             g.SAVE_SRN_COUNT2 = g.SRN_COUNT[2];
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT1;
             g.IF_FLAG = g.FALSE;
@@ -43,7 +43,7 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
             if g.STMT_PTR > -1:
                 g.LAST_WRITE = g.SAVE2+1;
             g.STMT_NUM = g.STMT_NUM + 1;
-            g.SRN[2] = g.SAVE_SRN2;
+            g.SRN[2] = g.SAVE_SRN2[:];
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT2;
         else:
             g.ELSE_FLAG = g.FALSE;
@@ -59,9 +59,9 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
         R = g.X4;
     if g.INCLUDING:
         g.INCLUDE_CHAR = g.PLUS;
-        T = g.PAD1;
+        T = g.PAD1[:];
         if g.SRN_PRESENT:
-            R = g.PAD1;
+            R = g.PAD1[:];
     else:
         g.INCLUDE_CHAR = g.X1;
         if g.SRN_PRESENT:

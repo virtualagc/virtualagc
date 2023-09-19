@@ -484,8 +484,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.IF_FLAG:
             g.STMT_NUM(g.STMT_NUM() - 1);
             l.CHANGED_STMT_NUM = g.TRUE;
-        g.SAVE_SRN2 = g.SRN[2];
-        g.SRN[2] = g.SAVE_SRN1;
+        g.SAVE_SRN2 = g.SRN[2][:];
+        g.SRN[2] = g.SAVE_SRN1[:];
         g.SAVE_SRN_COUNT2 = g.SRN_COUNT[2];
         g.SRN_COUNT[2] = g.SAVE_SRN_COUNT1;
         g.IF_FLAG = g.FALSE
@@ -496,7 +496,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.STMT_NUM(g.STMT_NUM() + 1);
         if g.STMT_PTR > -1:
             g.LAST_WRITE = g.SAVE2 + 1;
-        g.SRN[2] = g.SAVE_SRN2;
+        g.SRN[2] = g.SAVE_SRN2[:];
         g.SRN_COUNT[2] = g.SAVE_SRN_COUNT2;
     
     # THIS CODE IS USED TO ALIGN THE ELSE STATEMENTS CORRECTLY.
@@ -1883,7 +1883,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             else:
                 # DO NOT OUTPUT_WRITER.  SAVE VALUES
                 # THAT ARE NEEDED WHEN OUTPUT_WRITER WILL BE CALLED.
-                g.SAVE_SRN1 = g.SRN[2];
+                g.SAVE_SRN1 = g.SRN[2][:];
                 g.SAVE_SRN_COUNT1 = g.SRN_COUNT[2];
                 g.SAVE1 = ELSEIF_PTR;
                 g.SAVE2 = g.STACK_PTR[g.SP];
@@ -3840,7 +3840,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if not g.IF_FLAG and (STMT_STACK(g.LAST_WRITE) != l.ELSE_TOKEN):
             g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
         else:
-            g.SAVE_SRN1 = g.SRN[2];
+            g.SAVE_SRN1 = g.SRN[2][:];
             g.SAVE_SRN_COUNT1 = g.SRN_COUNT[2];
             g.SAVE1 = g.LAST_WRITE;
             g.SAVE2 = g.STACK_PTR[g.SP];
@@ -3873,8 +3873,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # FROM IF-THEN OR ELSE.
         if (g.IF_FLAG | g.ELSE_FLAG) and (PRODUCTION_NUMBER == 144):
             g.SQUEEZING = g.FALSE;
-            g.SAVE_SRN2 = g.SRN[2];
-            g.SRN[2] = g.SAVE_SRN1;
+            g.SAVE_SRN2 = g.SRN[2][:];
+            g.SRN[2] = g.SAVE_SRN1[:];
             g.SAVE_SRN_COUNT2 = g.SRN_COUNT[2];
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT1;
             if g.IF_FLAG:
@@ -3885,7 +3885,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.IF_FLAG = g.FALSE
             g.ELSE_FLAG = g.FALSE;
             g.IFDO_FLAG[g.DO_LEVEL] = g.TRUE;
-            g.SRN[2] = g.SAVE_SRN2;
+            g.SRN[2] = g.SAVE_SRN2[:];
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT2;
         else:
             g.IF_FLAG = g.FALSE
@@ -4447,14 +4447,14 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.CLOSE_BCD = SYT_NAME(J);
                 if SYT_CLASS(J) == FUNC_CLASS:
                     if (g.SYT_FLAGS(J) & DEFINED_LABEL) == 0:
-                       ERROR(d.CLASS_PL, 1, CLOSE_BCD);
+                       ERROR(d.CLASS_PL, 1, g.CLOSE_BCD);
                     DISCONNECT(J);
                 elif SYT_CLASS(J) == LABEL_CLASS:
                     if (g.SYT_FLAGS(J) & DEFINED_LABEL) == 0:
                         # UNDEFINED CALLABLE LABEL
                         if g.SYT_TYPE(J) == g.STMT_LABEL:
                             DISCONNECT(J);
-                            ERROR(d.CLASS_PL, 5, CLOSE_BCD);
+                            ERROR(d.CLASS_PL, 5, g.CLOSE_BCD);
                         # UNDEFINED OBJECT OF GO TO
                         else:
                             # CALLED/SCHED BUT UNDEFINED PROCS/TASKS
@@ -4462,7 +4462,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                                 ''' CLOSING PROGRAM -
                                     MAKE UNDEFINED CALLS/SCHEDS
                                     INTO ERRORS '''
-                                ERROR(d.CLASS_PL, 6, CLOSE_BCD);
+                                ERROR(d.CLASS_PL, 6, g.CLOSE_BCD);
                                 DISCONNECT(J);
                             else:
                                 SET_OUTER_REF(J, 0x6000);
@@ -4481,7 +4481,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                             if SYT_PTR(J) == K:
                                 if g.SYT_LINK1(K) < 0:
                                     if g.DO_LEVEL < (-g.SYT_LINK1(K)):
-                                        ERROR(d.CLASS_PL, 11, CLOSE_BCD);
+                                        ERROR(d.CLASS_PL, 11, g.CLOSE_BCD);
                             DISCONNECT(J);
                             TIE_XREF(J);
                     # END OF TYPE = IND_CALL_LAB
@@ -4571,8 +4571,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.STAB2_MARK = 0;
                 XSET(STAB_STACK);
                 g.SRN_FLAG = g.FALSE;
-                g.SRN[2] = SRN_MARK;
-                g.INCL_SRN[2] = INCL_SRN_MARK;
+                g.SRN[2] = SRN_MARK[:];
+                g.INCL_SRN[2] = INCL_SRN_MARK[:];
                 g.SRN_COUNT[2] = SRN_COUNT_MARK;
             g.FIXF[g.MP] = 0;
         else:
@@ -4629,8 +4629,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.STAB_MARK = STAB_STACKTOP;
             g.STAB2_MARK = STAB2_STACKTOP;
             g.STAB_STACK = STMT_TYPE;
-            g.SRN_MARK = g.SRN[2];
-            g.INCL_SRN_MARK = g.INCL_SRN[2];
+            g.SRN_MARK = g.SRN[2][:];
+            g.INCL_SRN_MARK = g.INCL_SRN[2][:];
             g.SRN_COUNT_MARK = g.SRN_COUNT[2];
             g.STMT_TYPE = 0;
         g.INLINE_LABEL = INLINE_LABEL + 1;
@@ -5443,9 +5443,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.SYT_PTR(g.FIXL[g.MP], PROCMARK);
             if g.BLOCK_MODE[g.NEST] == CMPL_MODE:
                 g.PROCMARK = 1;  # ALL COMPOOLS IN SAME SCOPE
-            g.S = CURRENT_SCOPE;
+            g.S = g.CURRENT_SCOPE[:];
             g.CURRENT_SCOPE = g.VAR[g.MP];
-            g.SAVE_SCOPE = CURRENT_SCOPE
+            g.SAVE_SCOPE = g.CURRENT_SCOPE[:]
             g.VAR[g.MP] = S;
             g.NEST = g.NEST - 1;
             COMPRESS_OUTER_REF();

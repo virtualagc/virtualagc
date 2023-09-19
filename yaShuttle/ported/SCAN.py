@@ -9,7 +9,6 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-31 RSB  Created a stub.
 '''
 
-from copy import deepcopy
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
@@ -488,8 +487,8 @@ def SCAN():
             else:
                 if not g.MACRO_FOUND:
                     if g.SRN_PRESENT:
-                        g.SRN[1]=g.SRN[0];
-                        g.INCL_SRN[1] = g.INCL_SRN[0];
+                        g.SRN[1]=g.SRN[0][:];
+                        g.INCL_SRN[1] = g.INCL_SRN[0][:];
                         g.SRN_COUNT[1]=g.SRN_COUNT[0];
                 ct = g.CHARTYPE[g.NEXT_CHAR]
             
@@ -519,7 +518,7 @@ def SCAN():
                 else:
                     goto_DEC_POINT_ENTRY = False
                 l.SIG_DIGITS=0;
-                l.INTERNAL_BCD = g.BCD;  # START THE SAME
+                l.INTERNAL_BCD = g.BCD[:];  # START THE SAME
                 
                 goto_SIG_CHECK = True
                 goto_LOOP_END = False
@@ -1158,7 +1157,7 @@ def SCAN():
                 #  CASE 13 - ¢ FOR ¢MACROS
                 # ... replaced already in this ASCII port by `.
                 goto_CASE13 = False;
-                g.SOME_BCD=g.BCD;
+                g.SOME_BCD=g.BCD[:];
                 g.BCD='';
                 STREAM();
                 while True:
@@ -1173,7 +1172,7 @@ def SCAN():
                         if g.SOME_BCD=='':
                             goto_SCAN_START = True;
                             break;
-                        g.BCD=deepcopy(g.SOME_BCD);
+                        g.BCD=g.SOME_BCD[:];
                         goto_CENT_START = True;
                         break;
                     else:
@@ -1184,7 +1183,7 @@ def SCAN():
                                 goto_SCAN_START = True;
                                 break;
                             g.SYT_INDEX=0;
-                            g.BCD=deepcopy(g.SOME_BCD);
+                            g.BCD=g.SOME_BCD[:];
                             goto_CENT_START = True;
                             break;
                         else:

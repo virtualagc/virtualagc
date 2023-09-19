@@ -861,7 +861,7 @@ def STREAM():
             g.INCLUDE_LIST2 = g.TRUE;
             g.INCLUDE_OFFSET = g.INCLUDE_COUNT + g.CARD_COUNT - g.INCLUDE_OFFSET;
             g.INCLUDE_COUNT = g.INCLUDE_OFFSET
-        g.SAVE_CARD = g.CURRENT_CARD;
+        g.SAVE_CARD = g.CURRENT_CARD[:];
     
     def SCAN_CARD(TYPE):
         # POINT is local, but doesn't need to be persistent.
@@ -952,7 +952,7 @@ def STREAM():
             elif ct == 2:
                 print()
                 # CASE 2--M LINE
-                l.M_LINE = g.CURRENT_CARD;
+                l.M_LINE = g.CURRENT_CARD[:];
                 if g.SRN_PRESENT:
                     if g.INCLUDING:
                         g.INCL_SRN = SUBSTR(g.CURRENT_CARD,g.TEXT_LIMIT[0]+1);
@@ -1257,8 +1257,8 @@ def STREAM():
                         /*HOLD THE MOST RECENT RVL ASSOCIATED WITH A TOKEN.         */
                         '''
                         if STRING_GT(g.NEXT_CHAR_RVL,g.RVL[0]):
-                            g.RVL[0] = g.NEXT_CHAR_RVL;
-                        g.NEXT_CHAR_RVL = g.RVL[1];
+                            g.RVL[0] = g.NEXT_CHAR_RVL[:];
+                        g.NEXT_CHAR_RVL = g.RVL[1][:];
                     g.NEXT_CHAR = BYTE(l.M_LINE, l.INDEX);
                     CHOP();
                     break # GO TO FOUND_CHAR;

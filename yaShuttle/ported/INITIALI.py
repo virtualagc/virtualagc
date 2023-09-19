@@ -405,7 +405,7 @@ def INITIALIZATION():
     if BYTE(g.CURRENT_CARD) == 0x00:
         # COMPRESSED SOURCE 
         g.SYSIN_COMPRESSED = g.TRUE;
-        g.INPUT_REC = g.CURRENT_CARD;
+        g.INPUT_REC = g.CURRENT_CARD[:];
         NEXT_RECORD();  # GET FIRST REAL RECORD 
     while not ORDER_OK(BYTE('C')):
         ERROR(CLASS_M, 2);
@@ -413,15 +413,15 @@ def INITIALIZATION():
     if LENGTH(g.CURRENT_CARD) > 88:
         g.CURRENT_CARD = SUBSTR(g.CURRENT_CARD, 0, 88);
     g.CARD_COUNT = g.CARD_COUNT + 1;
-    g.SAVE_CARD = g.CURRENT_CARD;
+    g.SAVE_CARD = g.CURRENT_CARD[:];
     SOURCE_COMPARE();
     STREAM();
     SCAN();
     if g.CONTROL[4]:
-        OUTPUT(0, 'SCANNER: ' + g.TOKEN);
+        OUTPUT(0, 'SCANNER: ' + str(g.TOKEN));
     SRN_UPDATE();
     # INITIALIZE THE PARSE STACK 
-    g.STATE = 1;  # START-g.STATE  
+    g.STATE = 1;  # START-STATE  
     # g.SP = 0xFFFFFFFF;
     g.SP = -1
     return;

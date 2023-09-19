@@ -50,15 +50,15 @@ def CALL_SCAN():
     g.NO_LOOK_AHEAD_DONE = g.FALSE;
     SCAN();
     if g.CONTROL[4] or (g.PARTIAL_PARSE and g.RECOVERING):
-        g.S = HEX(g.DW(7), 0);
-        g.S = HEX(g.DW(6), 0) + g.S;
-        g.S = 'SCANNER: ' + g.TOKEN + ', NUMBER_VALUE: ' + g.S + \
-                ', VALUE: ' + g.VALUE;
+        g.S = HEX(g.DW[7], 0);
+        g.S = HEX(g.DW[6], 0) + g.S;
+        g.S = 'SCANNER: ' + str(g.TOKEN) + ', NUMBER_VALUE: ' + g.S + \
+                ', VALUE: ' + str(g.VALUE);
         if g.BCD != '':
             g.S = g.S + ', CURRENT BCD: ' + g.BCD;
         if g.RECOVERING:
             g.S = g.S + ', SKIPPED OVER BY RECOVERY';
-        g.S = g.S + ', NEXT_CHAR: ' + g.NEXT_CHAR;
+        g.S = g.S + ', NEXT_CHAR: ' + str(g.NEXT_CHAR);
         if g.RECOVERING:
             SAVE_DUMP(g.S);
         else:

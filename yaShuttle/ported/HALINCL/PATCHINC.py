@@ -110,7 +110,7 @@ def INCLUDE_OK():
     if BYTE(g.CURRENT_CARD) == 0x00:
         # COMPRESSED SOURCE
         g.INCLUDE_COMPRESSED = g.TRUE;
-        g.INPUT_REC[1] = g.CURRENT_CARD;
+        g.INPUT_REC[1] = g.CURRENT_CARD[:];
     else:
         g.INITIAL_INCLUDE_RECORD = g.TRUE;
     return g.TRUE;
