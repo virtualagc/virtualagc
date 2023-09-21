@@ -41,7 +41,7 @@ from CHECKARR import CHECK_ARRAYNESS
 
 def PROCESS_CHECK(LOC):
     if CHECK_ARRAYNESS():
-        ERROR(d.CLASS_RT, 11, VAR(LOC));
+        ERROR(d.CLASS_RT, 11, g.VAR[LOC]);
     if g.SYT_TYPE(g.FIXL[LOC]) != g.PROG_LABEL and \
             g.SYT_TYPE(g.FIXL[LOC]) != g.TASK_LABEL:
         ERROR(d.CLASS_RT, 9, g.VAR[LOC]);

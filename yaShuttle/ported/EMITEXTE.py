@@ -172,10 +172,10 @@ def EMIT_EXTERNAL():
                 while goto_INCR_PTR or \
                         ((l.J != BYTE(g.SQUOTE)) and (l.I < LENGTH(g.BCD))):
                     if not goto_INCR_PTR:
-                        if (TRANS_OUT(l.J) & 0xFF) != 0:
-                            for l.K in range(0, (SHR(TRANS_OUT(l.J), 8) & 0xFF) + 1):
+                        if (g.TRANS_OUT[l.J] & 0xFF) != 0:
+                            for l.K in range(0, (SHR(g.TRANS_OUT[l.J], 8) & 0xFF) + 1):
                                ADD_CHAR(g.ESCP);
-                            ADD_CHAR(TRANS_OUT(l.J) & 0xFF);
+                            ADD_CHAR(g.TRANS_OUT[l.J] & 0xFF);
                         else:
                             ADD_CHAR(l.J);
                     goto_INCR_PTR = False
@@ -242,7 +242,7 @@ def EMIT_EXTERNAL():
     elif g.EXTERNALIZE == 3:
         #  STARTING
         l.NEWBUFF=': EXTERNAL '+STRING(g.VOCAB_INDEX[g.PARSE_STACK[g.SP]])+g.X1;
-        l.NEWBUFF=g.X1+VAR(MP)+l.NEWBUFF;
+        l.NEWBUFF=g.X1+g.VAR[g.MP]+l.NEWBUFF;
         l.BINX=LENGTH(l.NEWBUFF);
         l.NEWBUFF=PAD(l.NEWBUFF,g.TPL_LRECL);
         g.EXTERNALIZE=1;

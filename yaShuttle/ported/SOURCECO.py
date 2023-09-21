@@ -123,16 +123,16 @@ def SOURCE_COMPARE():
                 g.NO_MORE_PATCH = g.TRUE;
                 if REPLCNT != 0:
                     for g.I in range(0, REPLCNT):
-                        OUTPUT(9, PATCHSAVE(g.I));
+                        OUTPUT(9, g.PATCHSAVE(g.I));
                 REPLCNT = 0;
                 return;
             else:
                 g.PAT_CARD = SUBSTR(g.PATCH_CARD, 0, g.TEXT_LIMIT[0]);
-                g.PATCH_SRN = SUBSTR(g.PATCH_CARD, PATCH_TEXT_LIMIT[0] + 1, 6);
+                g.PATCH_SRN = SUBSTR(g.PATCH_CARD, g.PATCH_TEXT_LIMIT[0] + 1, 6);
         if g.INCLUDING:
             if (BYTE(SUBSTR(g.CUR_CARD, 0, 1)) != BYTE('D')) and \
                     (BYTE(SUBSTR(g.CUR_CARD, 0, 1)) != BYTE('C')):
-               INCL_NUM = LEFT_PAD('(' + g.PLUS + (g.SRN_COUNT + 1) + ')', 6) \
+               INCL_NUM = LEFT_PAD('(' + g.PLUS + (g.SRN_COUNT[0] + 1) + ')', 6) \
                             + g.X1;
             else:
                INCL_NUM = g.X8;
@@ -171,7 +171,7 @@ def SOURCE_COMPARE():
                 OUTPUT(9, g.X1 + g.CURRENT_SRN + g.X1 + INCL_NUM + g.CUR_CARD + \
                     SUBSTR(g.X109, DELTA_LEN) + g.DELETED);
                 DELTA_LEN = LENGTH(g.PATCH_CARD) + LENGTH(PATCH_INCL_NUM);
-                PATCHSAVE(REPLCNT, 'R' + g.PATCH_SRN + g.X1 + PATCH_INCL_NUM \
+                g.PATCHSAVE(REPLCNT, 'R' + g.PATCH_SRN + g.X1 + PATCH_INCL_NUM \
                     + g.PAT_CARD + SUBSTR(g.X109, DELTA_LEN) + g.ADDED);
                 REPLCNT = REPLCNT + 1;
                 while RECORD_USED(g.SAVE_PATCH) <= REPLCNT:
@@ -180,7 +180,7 @@ def SOURCE_COMPARE():
                 if g.UPDATING:
                     if g.REPLACING:
                         for g.I in range(0, REPLCNT):
-                            OUTPUT(9, PATCHSAVE(g.I));
+                            OUTPUT(9, g.PATCHSAVE(g.I));
                         REPLCNT = 0;
                     g.UPDATING = g.FALSE;
                     g.ADDING, g.DELETING
@@ -196,7 +196,7 @@ def SOURCE_COMPARE():
                 if not g.DELETING:
                     if g.REPLACING:
                         for g.I in range(0, REPLCNT):
-                           OUTPUT(9, PATCHSAVE(g.I));
+                           OUTPUT(9, g.PATCHSAVE(g.I));
                         REPLCNT = 0;
                     OUTPUT(9, g.X70);
             g.DELETING = g.TRUE;
@@ -224,7 +224,7 @@ def SOURCE_COMPARE():
                 if not g.ADDING:
                     if g.REPLACING:
                         for g.I in range(0, REPLCNT):
-                            OUTPUT(9, PATCHSAVE(g.I));
+                            OUTPUT(9, g.PATCHSAVE(g.I));
                         REPLCNT = 0;
                     g.ADDING = g.TRUE;
                     g.REPLACING = g.FALSE

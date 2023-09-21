@@ -104,6 +104,7 @@ from CALLSCAN import CALL_SCAN
  /***************************************************************************/
 '''
 
+
 def COMPILATION_LOOP():
     # The locals, I and J, don't require persistence.  However, they can't 
     # be left uninitialized, in case CONTROL[0x0C] is set for debugging.
@@ -123,8 +124,8 @@ def COMPILATION_LOOP():
         if g.SP > g.MAXSP:
             g.MAXSP = g.SP;
             if g.SP > g.STACKSIZE:
-                ERROR(d.CLASS_BS,3);
-                return;     #  THUS ABORTING COMPILATION
+                ERROR(d.CLASS_BS, 3);
+                return;  #  THUS ABORTING COMPILATION
     
     goto_COMP = True
     while goto_COMP:
@@ -135,8 +136,8 @@ def COMPILATION_LOOP():
             #   FIND WHICH OF THE FOUR KINDS OF STATES WE ARE DEALING WITH:
             #   READ,APPLY PRODUCTION,LOOKAHEAD, OR PUSH STATE
             if g.CONTROL[0xC]:
-                OUTPUT(0, ' COMP: STATE='+str(g.STATE)+' I='+str(I)\
-                            +' J='+str(J));
+                OUTPUT(0, ' COMP: STATE=' + str(g.STATE) + ' I=' + str(I)\
+                            +' J=' + str(J));
             if g.STATE <= g.MAXRp:
                 #   READ STATE
                 if g.NO_LOOK_AHEAD_DONE:
@@ -144,23 +145,23 @@ def COMPILATION_LOOP():
                 if g.SRN_FLAG:
                     SRN_UPDATE();
                 ADD_TO_STACK();
-                g.STATE_STACK[g.SP] = g.STATE;   #   PUSH PRESENT STATE
-                g.LOOK_STACK[g.SP]=g.LOOK;
-                g.LOOK=0;
-                I = g.INDEX1[g.STATE];         #   GET STARTING POINT
+                g.STATE_STACK[g.SP] = g.STATE;  #   PUSH PRESENT STATE
+                g.LOOK_STACK[g.SP] = g.LOOK;
+                g.LOOK = 0;
+                I = g.INDEX1[g.STATE];  #   GET STARTING POINT
                 #   COMPARE TOKEN WITH EACH TRANSITION SYMBOL IN
                 #   READ STATE
-                for I in range(I, I+g.INDEX2[g.STATE]):
+                for I in range(I, I + g.INDEX2[g.STATE]):
                     if g.READ1[I] == g.TOKEN:
                         #   FOUND IT
                         SAVE_TOKEN(g.TOKEN, g.BCD, g.IMPLIED_TYPE);
                         POP_MACRO_XREF();
-                        g.NO_LOOK_AHEAD_DONE=g.TRUE;
+                        g.NO_LOOK_AHEAD_DONE = g.TRUE;
                         if g.TOKEN == g.SEMI_COLON:
                             if g.SUBSCRIPT_LEVEL == 0:
                                 g.SQUEEZING = g.FALSE;
                                 g.CONTEXT = 0
-                                g.TEMPORARY_IMPLIED=0;
+                                g.TEMPORARY_IMPLIED = 0;
                                 g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[ \
                                    g.STMT_PTR] | g.STMT_END_FLAG;
                                 g.STMT_END_PTR = g.STMT_PTR;
@@ -168,7 +169,7 @@ def COMPILATION_LOOP():
                                     SYT_DUMP();
                         g.VAR[g.SP] = g.BCD[:];
                         g.FIXV[g.SP] = g.VALUE;
-                        g.FIXF[g.SP]=g.FIXING;
+                        g.FIXF[g.SP] = g.FIXING;
                         g.FIXL[g.SP] = g.SYT_INDEX;
                         g.PARSE_STACK[g.SP] = g.TOKEN;
                         g.STATE = g.READ2[I];
@@ -183,52 +184,52 @@ def COMPILATION_LOOP():
                 if (g.RESERVED_WORD or (g.TOKEN == g.CHARACTER_STRING) or \
                         (g.TOKEN == g.REPLACE_TEXT)):
                     g.BCD = STRING(g.VOCAB_INDEX[g.TOKEN]);
-                ERROR(d.CLASS_P,8,g.BCD);
+                ERROR(d.CLASS_P, 8, g.BCD);
                 RECOVER();
             elif g.STATE > g.MAXPp:
                 #   APPLY PRODUCTION STATE
                 g.REDUCTIONS = g.REDUCTIONS + 1;
                 #   SP POINTS AT RIGHT END OF PRODUCTION
                 #   MP POINTS AT LEFT END OF PRODUCTION
-                g.MP = g.SP-g.INDEX2[g.STATE];
-                g.MPP1 = g.MP+1;
-                SYNTHESIZE (g.STATE-g.MAXPp);   #   APPLY PRODUCTION
-                g.SP = g.MP;   #   RESET STACK POINTER
-                g.PARSE_STACK[g.SP]=g.pPRODUCE_NAME[g.STATE-g.MAXPp]&0xFFF;
+                g.MP = g.SP - g.INDEX2[g.STATE];
+                g.MPP1 = g.MP + 1;
+                SYNTHESIZE (g.STATE - g.MAXPp);  #   APPLY PRODUCTION
+                g.SP = g.MP;  #   RESET STACK POINTER
+                g.PARSE_STACK[g.SP] = g.pPRODUCE_NAME[g.STATE - g.MAXPp] & 0xFFF;
                 I = g.INDEX1[g.STATE];
                 #   COMPARE TOP OF STATE STACK WITH TABLES
                 J = g.STATE_STACK[g.SP];
                 while g.APPLY1[I] != 0:
                     if J == g.APPLY1[I]:
-                        break # GO TO TOP_MATCH;
-                    I = I+1;
+                        break  # GO TO TOP_MATCH;
+                    I = I + 1;
                 #   HAS THE PROGRAM GOAL BEEN REACHED
                 # TOP_MATCH:  
                 if g.APPLY2[I] == 0:  #  YES, FINISHED
                     return
-                g.STATE = g.APPLY2[I];   #   PICK UP THE NEXT STATE
-                g.LOOK=0;
+                g.STATE = g.APPLY2[I];  #   PICK UP THE NEXT STATE
+                g.LOOK = 0;
             elif g.STATE <= g.MAXLp:
                 #   LOOKAHEAD STATE
-                I = g.INDEX1[g.STATE];   #   INDEX INTO THE TABLE
-                g.LOOK=g.STATE;
+                I = g.INDEX1[g.STATE];  #   INDEX INTO THE TABLE
+                g.LOOK = g.STATE;
                 if g.NO_LOOK_AHEAD_DONE:
                     CALL_SCAN();
                 #   CHECK TOKEN AGAINST LEGAL LOOKAHEAD TRANSITION SYMBOLS
                 while g.LOOK1[I] != 0:
                     if g.LOOK1[I] == g.TOKEN:
-                        break # GO TO LOOK_MATCH;   #   FOUND ONE
-                    I = I+1;
-                #LOOK_MATCH: 
+                        break  # GO TO LOOK_MATCH;   #   FOUND ONE
+                    I = I + 1;
+                # LOOK_MATCH: 
                 g.STATE = g.LOOK2[I];
-            else:   #   PUSH STATE
+            else:  #   PUSH STATE
                 ADD_TO_STACK();
                 #   PUSH A STATE # INTO THE STATE_STACK
                 g.STATE_STACK[g.SP] = g.INDEX2[g.STATE];
                 #   GET NEXT STATE
                 g.STATE = g.INDEX1[g.STATE];
                 g.LOOK_STACK[g.SP] = 0
-                g.LOOK=0;
+                g.LOOK = 0;
             # END OF COMPILE LOOP
             
     

@@ -18,10 +18,12 @@ It's unclear what's going on with the CURRENT_DIR parameters.  Most CALLs
 to PRINT_COMMENT don't have it, but *some* do.  Defaulting it to an empty
 string is just my guess.
 '''
-def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
+
+
+def PRINT_COMMENT(PRINT, CURRENT_DIR=''):
     # FORMAT_CHAR, C, T, and R are locals, but look appear to need persistence.
     
-    FORMAT_CHAR='|';
+    FORMAT_CHAR = '|';
     if not g.INCLUDE_LIST2:
         return;
     g.I = 1;
@@ -32,17 +34,17 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
         g.I = 2;
         C = g.DOUBLE;
         if g.IF_FLAG:
-            g.STMT_NUM = g.STMT_NUM - 1;
+            g.STMT_NUM(g.STMT_NUM() - 1);
             g.SAVE_SRN2 = g.SRN[2][:];
             g.SRN[2] = g.SAVE_SRN1[:];
             g.SAVE_SRN_COUNT2 = g.SRN_COUNT[2];
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT1;
             g.IF_FLAG = g.FALSE;
-            OUTPUT_WRITER(g.SAVE1,g.SAVE2);
-            g.INDENT_LEVEL=g.INDENT_LEVEL+g.INDENT_INCR;
+            OUTPUT_WRITER(g.SAVE1, g.SAVE2);
+            g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
             if g.STMT_PTR > -1:
-                g.LAST_WRITE = g.SAVE2+1;
-            g.STMT_NUM = g.STMT_NUM + 1;
+                g.LAST_WRITE = g.SAVE2 + 1;
+            g.STMT_NUM(g.STMT_NUM() + 1);
             g.SRN[2] = g.SAVE_SRN2[:];
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT2;
         else:
@@ -54,7 +56,7 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
     # FOR OTHER DIRECTIVES AND COMMENTS.
     if (g.CARD_TYPE[BYTE(g.CURRENT_CARD)] == g.CARD_TYPE[BYTE('D')]) \
             and (CURRENT_DIR == 'INCLUDE'):
-        R = I_FORMAT(g.STMT_NUM,4);
+        R = I_FORMAT(g.STMT_NUM(), 4);
     else:
         R = g.X4;
     if g.INCLUDING:
@@ -67,7 +69,7 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
         if g.SRN_PRESENT:
             # PRINT THE STATEMENT NUMBER FOR D INCLUDE.
             # IF PRINTING SRNS, ADD THE STATEMENT NUMBER TO THE SRN IN R.
-            R = PAD(SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 1, 6), 7)+R;
+            R = PAD(SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 1, 6), 7) + R;
         if g.SDL_OPTION:
             T = SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 7, 2);
             if LENGTH(g.CURRENT_CARD) >= g.TEXT_LIMIT[0] + 17:
@@ -82,15 +84,15 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
         if g.LINE_MAX == 0:
             g.LINE_MAX = g.LINE_LIM;
             C = g.PAGE;
-        g.I=100-g.TEXT_LIMIT[0];
+        g.I = 100 - g.TEXT_LIMIT[0];
         # MOVE THE REVISION LEVEL TO THE FIRST 2 COLUMNS OF
         # THE CURRENT SCOPE FIELD WHEN SDL_OPTION IS TRUE.
         if g.SDL_OPTION:
-            g.S=g.FORMAT_CHAR+SUBSTR(T,0,2)+g.FORMAT_CHAR+g.SAVE_SCOPE;
+            g.S = g.FORMAT_CHAR + SUBSTR(T, 0, 2) + g.FORMAT_CHAR + g.SAVE_SCOPE;
         else:
-            g.S=FORMAT_CHAR+g.SAVE_SCOPE;
-        g.S=SUBSTR(g.CURRENT_CARD,1,g.TEXT_LIMIT[0])+SUBSTR(g.X70,0,g.I)+g.S;
-        OUTPUT(1, C+R+g.INCLUDE_CHAR+SUBSTR(g.CURRENT_CARD,0,1)+g.VBAR+g.S);
+            g.S = FORMAT_CHAR + g.SAVE_SCOPE;
+        g.S = SUBSTR(g.CURRENT_CARD, 1, g.TEXT_LIMIT[0]) + SUBSTR(g.X70, 0, g.I) + g.S;
+        OUTPUT(1, C + R + g.INCLUDE_CHAR + SUBSTR(g.CURRENT_CARD, 0, 1) + g.VBAR + g.S);
     g.NEXT_CC = ' ';
     '''
     Since CURRENT_DIR is a parameter of the procedure, the commented-out line 
@@ -110,5 +112,5 @@ def PRINT_COMMENT(PRINT,CURRENT_DIR=''):
     If we had the text of CR12713, it could potentially clear up some of the 
     mystery.
     '''
-    #CURRENT_DIR = '';
+    # CURRENT_DIR = '';
     g.PREV_ELINE = g.FALSE;

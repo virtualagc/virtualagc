@@ -59,7 +59,7 @@ if routing == "THE BEGINNING":
     if g.monitorLabel != None:
         routing = g.monitorLabel
     else:
-        routing = "ALMOST_DISASTER" # Fall through
+        routing = "ALMOST_DISASTER"  # Fall through
     
 if routing == "ALMOST_DISASTER":
     g.monitorLabel = None
@@ -71,15 +71,15 @@ if routing == "ALMOST_DISASTER":
     if g.monitorLabel != None:
         routing = g.monitorLabel
     else:
-        if (g.COMPILING & 0x80) != 0: # HALMAT COMPLETE FLAG
+        if (g.COMPILING & 0x80) != 0:  # HALMAT COMPLETE FLAG
             if g.MAX_SEVERITY < 2:
                 if g.CONTROL[1] == g.FALSE:
-                    g.TOGGLE =  (g.CONTROL[2] & 0x80) | \
+                    g.TOGGLE(   (g.CONTROL[2] & 0x80) | \
                                 (g.CONTROL[5] & 0x40) | \
                                 (g.CONTROL[9] & 0x10) | \
-                                (g.CONTROL[6] & 0x20)
+                                (g.CONTROL[6] & 0x20) )
                     if g.MAX_SEVERITY > 0:
-                        g.TOGGLE = g.TOGGLE | 0x08
+                        g.TOGGLE(g.TOGGLE() | 0x08)
                     RECORD_LINK()
         if g.monitorLabel != None:
             routing = g.monitorLabel

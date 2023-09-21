@@ -365,7 +365,7 @@ def SYT_DUMP():
             ENTER_SORT(LOC);
             g.ALWAYS = g.FALSE;  # FOR NEXT TIME
             return g.TRUE;
-        if (g.XREF(I) & g.XREF_MASK) > g.FIRST_STMT:
+        if (g.XREF(I) & g.XREF_MASK) > g.FIRST_STMT():
             ENTER_SORT(LOC);
             return g.TRUE;
         return g.FALSE;
@@ -433,7 +433,7 @@ def SYT_DUMP():
     lSTORE_BI_XREF = cSTORE_BI_XREF()
     def STORE_BI_XREF():
         ll = lSTORE_BI_XREF
-        g.BI_XREF_CELL = GET_CELL((g.BIp+1)*4,ADDR(ll.NODE_H),g.MODF);
+        g.BI_XREF_CELL(GET_CELL((g.BIp+1)*4,ADDR(ll.NODE_H),g.MODF));
         ll.PTR = 0;
         for ll.I in range(0, g.BIp + 1):
             while len(ll.NODE_H) < ll.PTR+2:

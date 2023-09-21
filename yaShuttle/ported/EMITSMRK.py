@@ -55,13 +55,13 @@ def EMIT_SMRK(T=3):
     # No local variables.
     if INLINE_LEVEL==0:
         HALMAT_POP(XSMRK,1,XCO_N,STATEMENT_SEVERITY);
-        HALMAT_PIP(STMT_NUM, 0, SMRK_FLAG, T>1);
+        HALMAT_PIP(g.STMT_NUM(), 0, SMRK_FLAG, T>1);
         if HALMAT_RELOCATE_FLAG: 
             HALMAT_RELOCATE();
         ATOMp_FAULT=NEXT_ATOMp;
     elif T<5:
         HALMAT_POP(XIMRK,1,XCO_N,STATEMENT_SEVERITY);
-        HALMAT_PIP(STMT_NUM, 0, SMRK_FLAG, T>1);
+        HALMAT_PIP(g.STMT_NUM(), 0, SMRK_FLAG, T>1);
     STATEMENT_SEVERITY=0;
     if SIMULATING: 
         if T==3: 
@@ -70,9 +70,9 @@ def EMIT_SMRK(T=3):
         if T: 
             SRN_FLAG=TRUE;
     if INLINE_STMT_RESET>0:
-        STMT_NUM=INLINE_STMT_RESET;
+        g.STMT_NUM(INLINE_STMT_RESET);
         INLINE_STMT_RESET=0;
     if T: 
-        STMT_NUM=STMT_NUM+1;
+        g.STMT_NUM(g.STMT_NUM()+1);
     T=3;
     SMRK_FLAG = 0;

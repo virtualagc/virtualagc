@@ -160,6 +160,6 @@ def ERROR(CLASS, NUM, TEXT=""):
                        SUBSTR(d.ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM));
         '''
         h.ADVISE.append(h.advise())
-        h.ADVISE[-1].ADV_STMTp = g.STMT_NUM
+        h.ADVISE[-1].ADV_STMTp = g.STMT_NUM()
         h.ADVISE[-1].ADV_ERRORp = SUBSTR(d.ERROR_CLASSES,SHL(CLASS-1,1),2)+str(NUM)
         

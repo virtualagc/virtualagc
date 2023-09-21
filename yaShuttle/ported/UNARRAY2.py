@@ -37,7 +37,7 @@ from SETUPVAC import SETUP_VAC
 '''
 
 def UNARRAYED_SCALAR(LOC):
-    if g.PSEUDO_TYPE[g.PTR(LOC)] == g.INT_TYPE:
+    if g.PSEUDO_TYPE[g.PTR[LOC]] == g.INT_TYPE:
         HALMAT_TUPLE(g.XITOS, 0, LOC, 0, 0);
         SETUP_VAC(LOC, g.SCALAR_TYPE);
     return CHECK_ARRAYNESS or (g.PSEUDO_TYPE[g.PTR[LOC]] != g.SCALAR_TYPE);

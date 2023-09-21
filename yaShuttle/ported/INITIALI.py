@@ -353,7 +353,7 @@ def INITIALIZATION():
     g.ONE_BYTE = '?';
     g.STMT_NUM(1);
     g.PROCMARK = 1;
-    FL_NO = 1;
+    g.FL_NO(1);
     g.NT_PLUS_1 = g.NT + 1;
     g.IC_ORG = 0;
     g.IC_MAX = 0;
@@ -405,7 +405,7 @@ def INITIALIZATION():
     if BYTE(g.CURRENT_CARD) == 0x00:
         # COMPRESSED SOURCE 
         g.SYSIN_COMPRESSED = g.TRUE;
-        g.INPUT_REC = g.CURRENT_CARD[:];
+        g.INPUT_REC[0] = g.CURRENT_CARD[:];
         NEXT_RECORD();  # GET FIRST REAL RECORD 
     while not ORDER_OK(BYTE('C')):
         ERROR(CLASS_M, 2);

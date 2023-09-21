@@ -221,8 +221,10 @@ from ORDEROK import ORDER_OK
  /***************************************************************************/
 '''
 
+
 # Persistent local variables for various procedures.
 class cSTREAM:
+
     def __init__(self):
         self.BLANKS = '                                            ';
         self.M_LINE = '';
@@ -272,10 +274,10 @@ class cSTREAM:
         self.M_BLANKS = -1
         self.IND_LIM = 127
         self.IND_SHIFT = 7
-        self.E_IND = [0]*(self.IND_LIM+1)
-        self.S_IND = [0]*(self.IND_LIM+1)
-        self.E_INDICATOR = [0]*(self.IND_LIM+1)
-        self.S_INDICATOR = [0]*(self.IND_LIM+1)
+        self.E_IND = [0] * (self.IND_LIM + 1)
+        self.S_IND = [0] * (self.IND_LIM + 1)
+        self.E_INDICATOR = [0] * (self.IND_LIM + 1)
+        self.S_INDICATOR = [0] * (self.IND_LIM + 1)
         self.E_COUNT = 0
         self.S_COUNT = 0
         self.LAST_E_COUNT = 0
@@ -289,8 +291,8 @@ class cSTREAM:
         self.RETURNING_E = 0
         self.PREV_CARD = 1
         self.CHAR_TEMP = ''
-        self.RETURN_CHAR = [0]*3
-        self.TYPE_CHAR = [0]*3
+        self.RETURN_CHAR = [0] * 3
+        self.TYPE_CHAR = [0] * 3
         self.ARROW_FLAG = 0
         self.II = 0
         self.SAVE_OVER_PUNCH1 = 0
@@ -302,27 +304,34 @@ class cSTREAM:
         self.TEMPLATE_FLAG = 0
         # D TOKEN GLOBALS
         self.D_INDEX = 0
+
+
 lSTREAM = cSTREAM()
-class cPROCESS_COMMENT: # Locals specific to PROCESS_COMMENT()
+
+
+class cPROCESS_COMMENT:  # Locals specific to PROCESS_COMMENT()
+
     def __init__(self):
-        self.NEXT_DIR = ['']*2;
+        self.NEXT_DIR = [''] * 2;
         self.TMP_INCREMENT = 0;
         self.PRINT_FLAG = 0;
         self.I = 0;
         self.RECORD_NOT_WRITTEN = 0;
         self.LIST_FLAG = 0;
-        self.C = ['']*2
+        self.C = [''] * 2
         self.XC = 'C';
         self.INCLUDE_DIR = 'INCLUDE',
         self.START = 'START';
         self.EJECT_DIR = 'EJECT';
         self.SPACE_DIR = 'SPACE';
         self. TOGGLES = '0123456789ABCDEFG';
+
+
 lPROCESS_COMMENT = cPROCESS_COMMENT()
     
 
 def STREAM():
-    l = lSTREAM # Local variables for STREAM procedure.
+    l = lSTREAM  # Local variables for STREAM procedure.
     
     # Workarounds for undocumented interactions between Exxx and Sxxx variables.
     def e_line(p=0, value=None):
@@ -338,6 +347,7 @@ def STREAM():
             l.E_LINE = value
         else:
             l.S_LINE = value
+
     def e_stack(p=0, value=None):
         if p not in [0, 1]:
             print("Implementation error E_STACK/S_STACK")
@@ -351,6 +361,7 @@ def STREAM():
             l.E_STACK = value
         else:
             l.S_STACK = value
+
     def ep(p=0, value=None):
         if p not in [0, 1]:
             print("Implementation error EP/SP")
@@ -364,19 +375,21 @@ def STREAM():
             l.EP = value
         else:
             l.SP = value
+
     def e_ind(index=0, value=None):
-        if index < 0 or index >= len(l.E_IND)+len(l.S_IND):
+        if index < 0 or index >= len(l.E_IND) + len(l.S_IND):
             print("Implementation error E_IND/S_IND")
             sys.exit(1)
         if value == None:
             if index < len(l.E_IND):
                 return l.E_IND[index]
             else:
-                return l.S_IND[index-len(l.E_IND)]
+                return l.S_IND[index - len(l.E_IND)]
         if index < len(l.E_IND):
             l.E_IND[index] = value
         else:
-            l.S_IND[index-len(l.E_IND)] = value
+            l.S_IND[index - len(l.E_IND)] = value
+
     def s_ind(index=0, value=None):
         if index < -len(l.E_IND) or index >= len(l.S_IND):
             print("Implementation error E_IND/S_IND")
@@ -390,19 +403,20 @@ def STREAM():
             l.E_IND[index + len(l.E_IND)] = value
         else:
             l.S_IND[index] = value
+
     def e_indicator(index=0, value=None):
-        if index < 0 or index >= len(l.E_INDICATOR)+len(l.S_INDICATOR):
+        if index < 0 or index >= len(l.E_INDICATOR) + len(l.S_INDICATOR):
             print("Implementation error E_INDICATOR/S_INDICATOR")
             sys.exit(1)
         if value == None:
             if index < len(l.E_INDICATOR):
                 return l.E_INDICATOR[index]
             else:
-                return l.S_INDICATOR[index-len(l.E_INDICATOR)]
+                return l.S_INDICATOR[index - len(l.E_INDICATOR)]
         if index < len(l.E_INDICATOR):
             l.E_INDICATOR[index] = value
         else:
-            l.S_INDICATOR[index-len(l.E_INDICATOR)] = value
+            l.S_INDICATOR[index - len(l.E_INDICATOR)] = value
 
     # TWO-DIMENSIONAL INPUT PROCEDURES
     # GO TO STREAM_START was here, but there's no actual code between here and
@@ -451,7 +465,7 @@ def STREAM():
     '''
     from HALINCL.PRINTCOM import PRINT_COMMENT
     from HALINCL.DTOKEN import D_TOKEN
-    #from HALINCL.INCSDF import *
+    # from HALINCL.INCSDF import *
     from HALINCL.PATCHINC import INCLUDE_OK
     
     # Note: Handling the ERRPRINT label and its GO TOs from the original XPL
@@ -462,15 +476,15 @@ def STREAM():
     # a call to a new function(ERRPRINT) followed by an immediate return from 
     # PROCESS_COMMENT().
     
-    def PROCESS_COMMENT():                
-        ll = lPROCESS_COMMENT # Locals specific to PROCESS_COMMENT().
+    def PROCESS_COMMENT(): 
+        ll = lPROCESS_COMMENT  # Locals specific to PROCESS_COMMENT().
 
         def ERRPRINT():
             OUTPUT_WRITER();  # PRINT ANY ERRORS
             if not g.INCLUDING:
                 g.INCLUDE_STMT = -1;
 
-        if BYTE(g.CURRENT_CARD, BYTE('ll.C')):
+        if BYTE(g.CURRENT_CARD, BYTE('C')):
             PRINT_COMMENT(g.TRUE);
         elif BYTE(g.CURRENT_CARD) == BYTE('D'):
             # A DIRECTIVE CARD 
@@ -500,16 +514,16 @@ def STREAM():
                     if LINE_COUNT + g.J > g.LOOKED_RECORD_AHEAD:
                         g.LOOKED_RECORD_AHEAD = 0;
                     else:
-                        for ll.I in range(1, g.J+1):
+                        for ll.I in range(1, g.J + 1):
                             OUTPUT(0, g.X1);
                 return;
-            PRINT_COMMENT(g.TRUE,ll.C[0]);
+            PRINT_COMMENT(g.TRUE, ll.C[0]);
             if (ll.C[0] == 'EB') or (ll.C[0] == 'EBUG'):  # DEBUG DIRECTIVE
                 
                 def CHAR_VALUE(STR):
                     g.K = 0
                     g.J = 0;
-                    g.VAL=0;
+                    g.VAL = 0;
                     while g.J < LENGTH(STR):
                         g.K = BYTE(STR, g.J);
                         if (g.K >= BYTE('0')) and (g.K <= BYTE('9')):
@@ -521,7 +535,7 @@ def STREAM():
                 while LENGTH(ll.C[0]) != 0:
                     if SUBSTR(ll.C[0], 0, 2) == 'H(':
                         g.SMRK_FLAG = CHAR_VALUE(ll.C[0]);
-                    else: # ADD NEW DEBUG TYPES HERE
+                    else:  # ADD NEW DEBUG TYPES HERE
                         ll.C[0] = D_TOKEN;
                 for ll.I in range(1, g.TEXT_LIMIT[0]):
                     if BYTE(g.CURRENT_CARD, ll.I) == BYTE('`'):
@@ -552,7 +566,7 @@ def STREAM():
                     firstTry = False
                     if LENGTH(ll.C[0]) == 0 or goto_NO_CHAN:
                         goto_NO_CHAN = False          
-                        ERROR(d.CLASS_XD,3);
+                        ERROR(d.CLASS_XD, 3);
                         ERRPRINT()
                         return
                     ll.I = CHAR_INDEX(ll.C[0], 'CHANNEL=');
@@ -570,7 +584,7 @@ def STREAM():
                         goto_NO_CHAN = True;
                         continue
                 if g.J > 9:
-                    ERROR(d.CLASS_XD,4);
+                    ERROR(d.CLASS_XD, 4);
                     ERRPRINT()
                     return
                 ll.C[0] = D_TOKEN;
@@ -582,10 +596,10 @@ def STREAM():
                     ll.PRINT_FLAG = g.TRUE;
                 elif ll.C[0] != '':
                     l.L = l.L | 0x20;
-                    ERROR(d.CLASS_XD,1);
+                    ERROR(d.CLASS_XD, 1);
                 goto_D_DONE = False
                 if (l.L & 0x40) != 0:
-                    ERROR(d.CLASS_XD,2);
+                    ERROR(d.CLASS_XD, 2);
                     goto_D_DONE = True
                 if not goto_D_DONE:
                     if l.L == 0:
@@ -612,21 +626,21 @@ def STREAM():
                 if INCLUDE_OK():
                     OUTPUT(0, X8 + STARS + ll.START + g.INCLUDE_MSG + STARS);
             # END OF INCLUDE DIRECTIVE
-            elif ll.C[0]=='VERSION':
-                if g.TPL_VERSION>0:
-                    ll.I=BYTE(g.CURRENT_CARD,l.D_INDEX+1);
-                    g.SYT_LOCKp[g.TPL_VERSION]=ll.I;
-                    g.TPL_VERSION=0;
-            elif ll.C[0] == 'DOWNGRADE' or ll.C[0] == 'OWNGRADE': # DOWNGRADE
+            elif ll.C[0] == 'VERSION':
+                if g.TPL_VERSION > 0:
+                    ll.I = BYTE(g.CURRENT_CARD, l.D_INDEX + 1);
+                    g.SYT_LOCKp[g.TPL_VERSION] = ll.I;
+                    g.TPL_VERSION = 0;
+            elif ll.C[0] == 'DOWNGRADE' or ll.C[0] == 'OWNGRADE':  # DOWNGRADE
                 g.TEMP_CLS = ''
                 g.ULT_TEMP_CLS = ''
                 g.FIN_TMP_CLS = ''
                 g.TEMP_COUNT = 0
                 g.CONTINUE = 0;
                 ll.C[0] = D_TOKEN;
-                if LENGTH(ll.C[0]) == 0: # NO ERROR NUMBER TO DOWNGRADE 
+                if LENGTH(ll.C[0]) == 0:  # NO ERROR NUMBER TO DOWNGRADE 
                     ERRORS(d.CLASS_BI, 108);
-                elif g.DOWN_COUNT > DOWNGRADE_LIMIT: # OBTAIN CLASS
+                elif g.DOWN_COUNT > DOWNGRADE_LIMIT:  # OBTAIN CLASS
                     '''
                     /* IN ORDER TO COMPLETELY REMOVE THE LIMIT ON THE NUMBER OF          */
                     /* ALLOWABLE DOWNGRADES JUST REMOVE THIS IF STATEMENT AND   */
@@ -639,13 +653,13 @@ def STREAM():
                     NEXT_ELEMENT(g.DOWN_INFO);
                     g.DOWN_COUNT = g.DOWN_COUNT + 1;
                     for ll.I in range(0, 2):
-                       g.TEMP_CLS = SUBSTR(ll.C[0],0,ll.I+1);
-                       g.ULT_TEMP_CLS = SUBSTR(g.TEMP_CLS,ll.I,ll.I);
+                       g.TEMP_CLS = SUBSTR(ll.C[0], 0, ll.I + 1);
+                       g.ULT_TEMP_CLS = SUBSTR(g.TEMP_CLS, ll.I, ll.I);
                        if g.ULT_TEMP_CLS >= '0' and g.ULT_TEMP_CLS <= '9':
                           g.CONTINUE = 1;
-                       if g.CONTINUE == 0: # GET CLASS
-                          g.ULT_TEMP_CLS = PAD('d.CLASS_'+g.TEMP_CLS,8);
-                          g.FIN_TMP_CLS = SUBSTR(g.X1+g.ULT_TEMP_CLS, 1);
+                       if g.CONTINUE == 0:  # GET CLASS
+                          g.ULT_TEMP_CLS = PAD('d.CLASS_' + g.TEMP_CLS, 8);
+                          g.FIN_TMP_CLS = SUBSTR(g.X1 + g.ULT_TEMP_CLS, 1);
                        # END DETERMINE CLASS
                     # END OF ELSE FOR CLASS
                     '''
@@ -656,19 +670,19 @@ def STREAM():
                     ll.TMP_INCREMENT = g.INCREMENT_DOWN_STMT;
                     NEXT_RECORD();
                     g.LOOKED_RECORD_AHEAD = g.TRUE;
-                    if CARD_TYPE(BYTE(g.CURRENT_CARD)) == CARD_TYPE(BYTE('D')):
+                    if g.CARD_TYPE(BYTE(g.CURRENT_CARD)) == g.CARD_TYPE(BYTE('D')):
                         l.D_INDEX = 1;
                         ll.NEXT_DIR = D_TOKEN;
                         if ll.NEXT_DIR != 'DOWNGRADE' and ll.NEXT_DIR != 'OWNGRADE':
                             g.INCREMENT_DOWN_STMT = g.FALSE;
                     # ATTACH DOWNGRADE TO CORRECT STATEMENT
-                    if g.INCREMENT_DOWN_STMT and TOKEN==SEMI_COLON:
-                        DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1+STMT_NUM+1,1));
+                    if g.INCREMENT_DOWN_STMT and TOKEN == SEMI_COLON:
+                        DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1 + g.STMT_NUM() + 1, 1));
                     else:
-                        DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1+STMT_NUM,1));
+                        DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1 + g.STMT_NUM(), 1));
                     g.INCREMENT_DOWN_STMT = ll.TMP_INCREMENT;
                     g.TEMP_CLS = CHAR_VALUE(ll.C[0]);
-                    DWN_ERR(g.DOWN_COUNT, SUBSTR(g.X1+g.TEMP_CLS,1));
+                    DWN_ERR(g.DOWN_COUNT, SUBSTR(g.X1 + g.TEMP_CLS, 1));
                     g.CONTINUE = 1;
                     g.TEMP_COUNT = 0;
                     while g.CONTINUE == 1 and g.TEMP_COUNT <= NUM_ERR:
@@ -677,9 +691,9 @@ def STREAM():
                             g.CONTINUE = 0;
                         else:
                             g.TEMP_COUNT = g.TEMP_COUNT + 1;
-                    if g.CONTINUE == 1: # ERROR CLASS NOT FOUND
+                    if g.CONTINUE == 1:  # ERROR CLASS NOT FOUND
                         '''
-                        /* SAVE THE ERROR NUMBER LOCATED IN 'll.C' INTO 'DWN_UNKN'. CODE IN     */
+                        /* SAVE THE ERROR NUMBER LOCATED IN 'C' INTO 'DWN_UNKN'. CODE IN     */
                         /* DOWNGRADE_SUMMARY WILL USE THIS INFO TO BUILD A DOWNGRADE SUMMARY */
                         /* REPORT INSTEAD OF USING 'DWN_CLS' TO FIND THE ERROR CLASS (THERE  */
                         /* IS NO INFORMATION TO PUT INFO 'DWN_CLS' SINCE THE ERROR CLASS DOES*/
@@ -689,7 +703,7 @@ def STREAM():
                         ERRORS (d.CLASS_BI, 107);
             # END OF DOWNGRADE
             elif ll.C[0] == 'PROGRAM':
-                if g.BLOCK_MODE != 0:
+                if g.BLOCK_MODE[0] != 0:
                     ERROR(d.CLASS_XA, 3);
                     ERRPRINT()
                     return
@@ -714,7 +728,7 @@ def STREAM():
                     if LENGTH(ll.C[0]) <= 3:
                         goto_NO_ID = True;
                         continue
-                if LENGTH(ll.C[0])>=11:
+                if LENGTH(ll.C[0]) >= 11:
                     g.PROGRAM_ID = SUBSTR(ll.C[0], 3, 8);
                 else:
                     g.PROGRAM_ID = PAD(SUBSTR(ll.C[0], 3), 8);
@@ -731,7 +745,7 @@ def STREAM():
                 if LENGTH(ll.C[1]) == 0:
                     ERROR(d.CLASS_XD, 5);
                 elif LENGTH(ll.C[1]) >= 8:
-                    ll.C[1] = SUBSTR(ll.C[1],0,8);
+                    ll.C[1] = SUBSTR(ll.C[1], 0, 8);
                 else:
                     ll.C[1] = PAD(ll.C[1], 8);
                 ll.C[0] = D_TOKEN;
@@ -750,12 +764,12 @@ def STREAM():
                         if g.INCLUDING:
                             g.INPUT_DEV = 0;
                             g.INCLUDING = g.FALSE
-                            g.INCLUDE_COMPRESSED=g.FALSE;
+                            g.INCLUDE_COMPRESSED = g.FALSE;
                             g.INCLUDE_LIST = g.TRUE;
-                            g.INCLUDE_LIST2=g.TRUE;
-                            OUTPUT(8, ll.XC+STARS+'END'+ g.INCLUDE_MSG+STARS);
+                            g.INCLUDE_LIST2 = g.TRUE;
+                            OUTPUT(8, ll.XC + STARS + 'END' + g.INCLUDE_MSG + STARS);
                             g.INCLUDE_OFFSET = \
-                                g.INCLUDE_COUNT+g.CARD_COUNT+1-g.INCLUDE_OFFSET;
+                                g.INCLUDE_COUNT + g.CARD_COUNT + 1 - g.INCLUDE_OFFSET;
                             g.INCLUDE_COUNT = g.INCLUDE_OFFSET
                         else:
                             l.CREATING = g.FALSE;
@@ -763,19 +777,19 @@ def STREAM():
                             g.CURRENT_CARD = l.INPUT_PAD + X70;
                     else:
                         g.CARD_COUNT = g.CARD_COUNT + 1;
-                        if CARD_TYPE(BYTE(g.CURRENT_CARD))==CARD_TYPE(BYTE('D')):
+                        if g.CARD_TYPE(BYTE(g.CURRENT_CARD)) == g.CARD_TYPE(BYTE('D')):
                             l.D_INDEX = 1;
                             ll.C[0] = D_TOKEN;
                             if ll.C[0] == ll.INCLUDE_DIR:
-                                g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('ll.C'));
+                                g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'));
                                 COPY_TO_8();
                                 if INCLUDE_OK():
-                                    OUTPUT(8, ll.XC+STARS+ll.START+g.INCLUDE_MSG+STARS);
-                            elif ll.C[0] == 'CLOSE': # END OF INLINE BLOCK
+                                    OUTPUT(8, ll.XC + STARS + ll.START + g.INCLUDE_MSG + STARS);
+                            elif ll.C[0] == 'CLOSE':  # END OF INLINE BLOCK
                                 PRINT_COMMENT(g.TRUE);
                                 ll.C[0] = D_TOKEN;
                                 if LENGTH(ll.C[0]) >= 8:
-                                    ll.C[0] = SUBSTR(ll.C[0],0,8);
+                                    ll.C[0] = SUBSTR(ll.C[0], 0, 8);
                                 else:
                                     ll.C[0] = PAD(ll.C[0], 8);
                                 if ll.C[0] != ll.C[1]:
@@ -783,7 +797,7 @@ def STREAM():
                                 if ll.RECORD_NOT_WRITTEN:
                                     ERROR(d.CLASS_XD, 7);
                                 elif LENGTH(ll.C[1]) > 0:
-                                    if MONITOR(1, 8, ll.C[1]): # STOW THE MEMBER
+                                    if MONITOR(1, 8, ll.C[1]):  # STOW THE MEMBER
                                         ERROR(d.CLASS_XD, 9, ll.C[1]);
                                 CREATING = g.FALSE;
                             else:
@@ -792,31 +806,31 @@ def STREAM():
                             COPY_TO_8();
                 # END WHILE CREATING
             # IN THIS SECTION OF CODE,WE LOOK FOR THE DATA_REMOTE DIRECTIVE
-            elif ll.C[0]=='DATA_REMOTE' or ll.C[0]=='ATA_REMOTE': # REMOTE #D
-                g.DATA_REMOTE=g.TRUE;
+            elif ll.C[0] == 'DATA_REMOTE' or ll.C[0] == 'ATA_REMOTE':  # REMOTE #D
+                g.DATA_REMOTE = g.TRUE;
                 if pfs:
                     # CHECK FOR ILLEGAL LOCATION OF THE DIRECTIVE
-                    if g.BLOCK_MODE != 0:
-                        ERRORS(d.CLASS_XR,1);
+                    if g.BLOCK_MODE[0] != 0:
+                        ERRORS(d.CLASS_XR, 1);
                     # PART2 -- CHECK FOR ILLEGAL LOCATION OF
                     # THE DIRECTIVE INSIDE AN EXTERNAL BLOCK.
-                    if ((SYT_FLAGS(g.BLOCK_SYTREF(g.NEST))&EXTERNAL_FLAG)!=0):
-                        ERRORS(d.CLASS_XR,1);
+                    if ((SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & EXTERNAL_FLAG) != 0):
+                        ERRORS(d.CLASS_XR, 1);
             # END DATA_REMOTE
             
             #-----------------------------------------------------------------
             else:
-                ERROR(d.CLASS_XU,1);
+                ERROR(d.CLASS_XU, 1);
                 
-            if not pfs: # BFS
+            if not pfs:  # BFS
                 '''
                 /* THIS CODE RESTRICTS BFS FROM USING THE 'DATA_REMOTE' DIRECTIVE  */
                 /* AND WILL ISSUE A B102 ERROR MESSAGE.  THIS CODE WILL NEED TO BE */
                 /* REMOVED IF AND WHEN BFS BEGINS USING 'DATA_REMOTE'.             */
                 '''
                 if g.DATA_REMOTE:
-                    ERROR(d.CLASS_B,102);
-                    g.DATA_REMOTE=g.FALSE;
+                    ERROR(d.CLASS_B, 102);
+                    g.DATA_REMOTE = g.FALSE;
             #-----------------------------------------------------------------
             ERRPRINT()
     
@@ -840,14 +854,14 @@ def STREAM():
                 g.CURRENT_CARD = SUBSTR(g.CURRENT_CARD, 0, 88);
             if LENGTH(g.CURRENT_CARD) == 0:
                 if g.INCLUDING:
-                    g.INPUT_DEV=0;
+                    g.INPUT_DEV = 0;
                     g.INCLUDE_COMPRESSED = g.FALSE
-                    g.INCLUDING=g.FALSE;
+                    g.INCLUDING = g.FALSE;
                     g.INCLUDE_STMT = -1;
-                    g.INCLUDE_END=g.TRUE;
-                    if not pfs: # BFS/PASS INTERFACE; TEMPLATE LENGTH
+                    g.INCLUDE_END = g.TRUE;
+                    if not pfs:  # BFS/PASS INTERFACE; TEMPLATE LENGTH
                         if l.TEMPLATE_FLAG:
-                            g.TEXT_LIMIT[0]=g.TEXT_LIMIT[1];
+                            g.TEXT_LIMIT[0] = g.TEXT_LIMIT[1];
                     goto_READ = True;
                     continue
                 else:
@@ -867,13 +881,13 @@ def STREAM():
         # POINT is local, but doesn't need to be persistent.
         POINT = SHL(TYPE, l.IND_SHIFT);
        
-        for l.CP in range(1, g.TEXT_LIMIT[0]+1):
+        for l.CP in range(1, g.TEXT_LIMIT[0] + 1):
             if BYTE(g.CURRENT_CARD, l.CP) != BYTE(g.X1):
                 if BYTE(l.E_LINE[TYPE], l.CP) != BYTE(g.X1):
                     if TYPE == 0:
-                        ERROR(d.CLASS_ME,4);
+                        ERROR(d.CLASS_ME, 4);
                     elif TYPE == 1:
-                        ERROR(d.CLASS_MS,4);
+                        ERROR(d.CLASS_MS, 4);
                         continue
                 e_indicator(l.CP + POINT, l.E_COUNT[TYPE]);
                 l.FILL = BYTE(g.CURRENT_CARD, l.CP);
@@ -887,11 +901,11 @@ def STREAM():
         while True:
             SCAN_CARD(TYPE);
             READ_CARD();
-            if BYTE(g.CURRENT_CARD) != POINT: # NO MORE OF THIS TYPE OF CARD
+            if BYTE(g.CURRENT_CARD) != POINT:  # NO MORE OF THIS TYPE OF CARD
                 if not ORDER_OK(POINT):
-                    ERROR(d.CLASS_M,2);
+                    ERROR(d.CLASS_M, 2);
                 POINT = SHL(TYPE, l.IND_SHIFT);
-                for l.CP in range(1, g.TEXT_LIMIT[0]+1):
+                for l.CP in range(1, g.TEXT_LIMIT[0] + 1):
                     if BYTE(e_line(TYPE), l.CP) == BYTE(g.X1):
                         e_indicator(l.CP + POINT, 0);
                     elif not TYPE:
@@ -915,9 +929,9 @@ def STREAM():
             OUTPUT(0, X8 + STARS + 'END' + g.INCLUDE_MSG + STARS);
             g.NEXT_CC = DOUBLE;
             g.INCLUDE_LIST = g.TRUE;
-            g.SRN_COUNT=0;
+            g.SRN_COUNT[0] = 0;
             if g.TPL_REMOTE:
-                ERROR(d.CLASS_XI,5);
+                ERROR(d.CLASS_XI, 5);
                 g.TPL_REMOTE = g.FALSE;
             g.INCLUDE_END = g.FALSE;
         goto_LOOP = True;
@@ -934,13 +948,13 @@ def STREAM():
                         READ_CARD();
                     goto_CHECK_ORDER = False
                     if not ORDER_OK(l.PREV_CARD):
-                        ERROR(d.CLASS_M,2);
+                        ERROR(d.CLASS_M, 2);
                         goto_COMMENT_CARD = True
                         continue
                 goto_LOOP = False
                 ct = g.CARD_TYPE[BYTE(g.CURRENT_CARD)]
                 if g.END_GROUP:
-                    break # GO TO FOUND_GROUP
+                    break  # GO TO FOUND_GROUP
             if ct == 0:
                 # CASE 0--DUMMY
                 pass
@@ -955,11 +969,11 @@ def STREAM():
                 l.M_LINE = g.CURRENT_CARD[:];
                 if g.SRN_PRESENT:
                     if g.INCLUDING:
-                        g.INCL_SRN = SUBSTR(g.CURRENT_CARD,g.TEXT_LIMIT[0]+1);
-                        g.SRN_COUNT = g.SRN_COUNT + 1;
+                        g.INCL_SRN[0] = SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 1);
+                        g.SRN_COUNT[0] = g.SRN_COUNT[0] + 1;
                     else:
-                        g.SRN=SUBSTR(g.CURRENT_CARD,g.TEXT_LIMIT[0]+1);
-                        g.RVL[1] = SUBSTR(g.SRN,6,2);
+                        g.SRN[0] = SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 1);
+                        g.RVL[1] = SUBSTR(g.SRN[0], 6, 2);
                 g.SAVE_CARD = BYTE(g.SAVE_CARD, 0, BYTE('M'));
                 l.PREV_CARD = BYTE(g.CURRENT_CARD);
                 goto_READ = True;
@@ -988,7 +1002,7 @@ def STREAM():
                 '''
                 if g.SRN_PRESENT:
                     if not g.INCLUDING:
-                        g.SRN=SUBSTR(g.CURRENT_CARD,g.TEXT_LIMIT[0]+1);
+                        g.SRN[0] = SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 1);
                         g.RVL[0] = '';
                         g.RVL[1] = '';
                         g.NEXT_CHAR_RVL = '';
@@ -999,9 +1013,9 @@ def STREAM():
                     OUTPUT(0, X8 + STARS + 'END' + g.INCLUDE_MSG + STARS);
                     g.NEXT_CC = DOUBLE;
                     g.INCLUDE_LIST = g.TRUE;
-                    g.SRN_COUNT=0;
+                    g.SRN_COUNT[0] = 0;
                     if g.TPL_REMOTE:
-                        ERROR(d.CLASS_XI,5);
+                        ERROR(d.CLASS_XI, 5);
                         g.TPL_REMOTE = g.FALSE;
                     g.INCLUDE_END = g.FALSE;
                 goto_CHECK_ORDER = True;
@@ -1016,12 +1030,12 @@ def STREAM():
         g.END_GROUP = g.FALSE;
         l.E_LINE = SUBSTR(l.E_LINE, 0, LENGTH(l.M_LINE));
         if l.E_COUNT <= 0:
-            for l.CP in range(1, g.TEXT_LIMIT[0]+1):
+            for l.CP in range(1, g.TEXT_LIMIT[0] + 1):
                 e_indicator(l.CP, 0);
             l.E_COUNT = l.LAST_E_COUNT;
         l.S_LINE = SUBSTR(l.S_LINE, 0, LENGTH(l.M_LINE));
         if l.S_COUNT <= 0:
-            for l.CP in range(1, g.TEXT_LIMIT[0]+1):
+            for l.CP in range(1, g.TEXT_LIMIT[0] + 1):
                 l.S_INDICATOR[l.CP] = 0;
             l.S_COUNT = l.LAST_S_COUNT;
     
@@ -1034,7 +1048,7 @@ def STREAM():
         if l.INDEX > g.TEXT_LIMIT[0]:
             if not g.INCLUDING or not l.TEMPLATE_FLAG or \
                     (g.INCLUDING and l.TEMPLATE_FLAG and \
-                    (l.INDEX > (TPL_LRECL-1))):
+                    (l.INDEX > (TPL_LRECL - 1))):
                 if (g.CARD_TYPE[BYTE(g.CURRENT_CARD)] >= 4) or g.INCLUDE_END:
                     g.GROUP_NEEDED = g.TRUE;
                 else:
@@ -1057,9 +1071,9 @@ def STREAM():
         ep(TYPE, ep(TYPE) + 1);
         if ep(TYPE) > l.IND_LIM:
             if TYPE == 0:
-                ERROR(d.CLASS_ME,1);
+                ERROR(d.CLASS_ME, 1);
             elif TYPE == 1:
-                ERROR(d.CLASS_MS,1);
+                ERROR(d.CLASS_MS, 1);
         POINT = POINT + 1;
         l.CHAR_TEMP = SUBSTR(e_line(TYPE), l.INDEX, 1);
         if l.CHAR_TEMP != g.X1:
@@ -1110,10 +1124,10 @@ def STREAM():
             l.M_BLANKS = l.E_BLANKS;
     
     def MACRO_DIAGNOSTICS(WHERE):
-        OUTPUT(0, 'AT '+WHERE+'  NEXT_CHAR='+g.NEXT_CHAR+'  MACRO_EXPAN_LEVEL=' \
-                +g.MACRO_EXPAN_LEVEL+'  MACRO_TEXT('+g.MACRO_POINT+')='+ \
-                MACRO_TEXT(g.MACRO_POINT)+'  PARM_REPLACE_PTR('+PARM_EXPAN_LEVEL+\
-                ')='+g.PARM_REPLACE_PTR(PARM_EXPAN_LEVEL));
+        OUTPUT(0, 'AT ' + WHERE + '  NEXT_CHAR=' + g.NEXT_CHAR + '  MACRO_EXPAN_LEVEL=' \
+                +g.MACRO_EXPAN_LEVEL + '  MACRO_TEXT(' + g.MACRO_POINT + ')=' + \
+                MACRO_TEXT(g.MACRO_POINT) + '  PARM_REPLACE_PTR(' + g.PARM_EXPAN_LEVEL + \
+                ')=' + g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL]);
     
     # STREAM_START was here!
     goto_CHECK_STRING_POSITION = True
@@ -1122,36 +1136,42 @@ def STREAM():
         goto_CHECK_STRING_POSITION = False
         if g.MACRO_EXPAN_LEVEL > 0:
             g.OVER_PUNCH = 0;  # FIX ESCAPE BUG WITHIN MACRO 
-            if PARM_EXPAN_LEVEL > BASE_PARM_LEVEL(g.MACRO_EXPAN_LEVEL):
+            if g.PARM_EXPAN_LEVEL > BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL]:
                 goto_PARM_DONE = False
                 firstTry = True
                 while firstTry or goto_PARM_DONE:
                     firstTry = False
-                    if not goto_PARM_DONE and PARM_EXPAN_LEVEL>=PARM_EXPAN_LIMIT:
-                        ERROR(d.CLASS_IR,6, 0);
-                        g.MACRO_EXPAN_LEVEL,PARM_EXPAN_LEVEL,g.MACRO_FOUND=0;
+                    if not goto_PARM_DONE and g.PARM_EXPAN_LEVEL >= PARM_EXPAN_LIMIT:
+                        ERROR(d.CLASS_IR, 6, 0);
+                        g.MACRO_EXPAN_LEVEL, g.PARM_EXPAN_LEVEL, g.MACRO_FOUND = 0;
                         goto_MACRO_DONE = True
                     elif not goto_PARM_DONE and \
-                            g.PARM_REPLACE_PTR(PARM_EXPAN_LEVEL) < LENGTH( \
-                            MACRO_CALL_PARM_TABLE(PARM_STACK_PTR(PARM_EXPAN_LEVEL))):
-                        g.NEXT_CHAR=BYTE(MACRO_CALL_PARM_TABLE(PARM_STACK_PTR( \
-                            PARM_EXPAN_LEVEL)),g.PARM_REPLACE_PTR(PARM_EXPAN_LEVEL));
-                        g.PARM_REPLACE_PTR(PARM_EXPAN_LEVEL, \
-                            g.PARM_REPLACE_PTR(PARM_EXPAN_LEVEL) + 1) ;
+                            g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] < \
+                                LENGTH(MACRO_CALL_PARM_TABLE[ \
+                                    PARM_STACK_PTR[g.PARM_EXPAN_LEVEL] \
+                                ]):
+                        g.NEXT_CHAR = \
+                            BYTE(MACRO_CALL_PARM_TABLE[ \
+                                    PARM_STACK_PTR[g.PARM_EXPAN_LEVEL] \
+                                ], \
+                                g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] \
+                                );
+                        g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = \
+                            g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] + 1;
                         if g.CONTROL(3):
                             MACRO_DIAGNOSTICS(1);
                         return;
-                    elif goto_PARM_DONE or g.FIRST_TIME_PARM(PARM_EXPAN_LEVEL):
-                        if goto_PARM_DONE or g.P_CENT(PARM_EXPAN_LEVEL):
+                    elif goto_PARM_DONE or g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL]:
+                        if goto_PARM_DONE or g.P_CENT[g.PARM_EXPAN_LEVEL]:
                             if not goto_PARM_DONE:
-                                g.P_CENT(PARM_EXPAN_LEVEL, g.FALSE);
+                                g.P_CENT[g.PARM_EXPAN_LEVEL] = g.FALSE;
                             goto_PARM_DONE = False 
-                            g.FIRST_TIME_PARM(PARM_EXPAN_LEVEL, g.TRUE);
-                            PARM_EXPAN_LEVEL=PARM_EXPAN_LEVEL-1;
+                            g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.TRUE;
+                            g.PARM_EXPAN_LEVEL = g.PARM_EXPAN_LEVEL - 1;
                             goto_CHECK_STRING_POSITION = True
                             continue
-                        g.NEXT_CHAR=BYTE(g.X1);
-                        g.FIRST_TIME_PARM(PARM_EXPAN_LEVEL, g.FALSE);
+                        g.NEXT_CHAR = BYTE(g.X1);
+                        g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.FALSE;
                         if g.CONTROL(3):
                             MACRO_DIAGNOSTICS(2);
                         return;
@@ -1162,39 +1182,39 @@ def STREAM():
                 if MACRO_TEXT(g.MACRO_POINT) != 0xEF:
                     g.BLANK_COUNT = 0;
                     if MACRO_TEXT(g.MACRO_POINT) == 0xEE:
-                        g.MACRO_POINT=g.MACRO_POINT+1;
-                        g.BLANK_COUNT=MACRO_TEXT(g.MACRO_POINT);
+                        g.MACRO_POINT = g.MACRO_POINT + 1;
+                        g.BLANK_COUNT = MACRO_TEXT(g.MACRO_POINT);
                         g.NEXT_CHAR = BYTE(g.X1);
                     else:
-                        g.NEXT_CHAR=MACRO_TEXT(g.MACRO_POINT);
-                    g.MACRO_POINT=g.MACRO_POINT + 1;
+                        g.NEXT_CHAR = MACRO_TEXT(g.MACRO_POINT);
+                    g.MACRO_POINT = g.MACRO_POINT + 1;
                     if g.CONTROL(3):
                         MACRO_DIAGNOSTICS(3);
                     return;
-                if g.FIRST_TIME(g.MACRO_EXPAN_LEVEL):
-                    if not M_CENT(g.MACRO_EXPAN_LEVEL):
-                        g.FIRST_TIME(g.MACRO_EXPAN_LEVEL, g.FALSE);
+                if g.FIRST_TIME[g.MACRO_EXPAN_LEVEL]:
+                    if not M_CENT[g.MACRO_EXPAN_LEVEL]:
+                        g.FIRST_TIME[g.MACRO_EXPAN_LEVEL] = g.FALSE;
                         g.NEXT_CHAR = BYTE(g.X1);
                         if g.CONTROL(3):
                             MACRO_DIAGNOSTICS(4);
                         return;
                 else:
-                    g.FIRST_TIME(g.MACRO_EXPAN_LEVEL, g.TRUE);
-                g.TOP_OF_PARM_STACK=g.TOP_OF_PARM_STACK-NUM_OF_PARM(g.MACRO_EXPAN_LEVEL);
-                g.PRINTING_ENABLED=M_PRINT(g.MACRO_EXPAN_LEVEL);
-                if not M_CENT(g.MACRO_EXPAN_LEVEL):
+                    g.FIRST_TIME[g.MACRO_EXPAN_LEVEL] = g.TRUE;
+                g.TOP_OF_PARM_STACK = g.TOP_OF_PARM_STACK - NUM_OF_PARM[g.MACRO_EXPAN_LEVEL];
+                g.PRINTING_ENABLED = M_PRINT[g.MACRO_EXPAN_LEVEL];
+                if not M_CENT[g.MACRO_EXPAN_LEVEL]:
                     if not DONT_SET_WAIT:
                         g.WAIT = g.TRUE;
                 g.MACRO_EXPAN_LEVEL = g.MACRO_EXPAN_LEVEL - 1;
-                g.MACRO_POINT=M_P(g.MACRO_EXPAN_LEVEL);
-                g.BLANK_COUNT = M_BLANK_COUNT(g.MACRO_EXPAN_LEVEL);
+                g.MACRO_POINT = M_P[g.MACRO_EXPAN_LEVEL];
+                g.BLANK_COUNT = M_BLANK_COUNT[g.MACRO_EXPAN_LEVEL];
             if goto_MACRO_DONE or g.MACRO_EXPAN_LEVEL == 0:
                 if not goto_MACRO_DONE:
                     g.MACRO_FOUND = g.FALSE ;
                 goto_MACRO_DONE = False
                 g.NEXT_CHAR = SAVE_NEXT_CHAR;
                 g.OVER_PUNCH = SAVE_OVER_PUNCH;
-                g.PRINTING_ENABLED=PRINT_FLAG;
+                g.PRINTING_ENABLED = PRINT_FLAG;
                 if g.CONTROL(3):
                     MACRO_DIAGNOSTICS(5);
                 return;
@@ -1234,12 +1254,12 @@ def STREAM():
                     l.LAST_E_IND = 0;
                     g.BLANK_COUNT = l.M_BLANKS;
                     l.M_BLANKS = -1;
-                    break # GO TO FOUND_CHAR;
+                    break  # GO TO FOUND_CHAR;
                 if BYTE(l.M_LINE, l.INDEX) != BYTE(g.X1):
                     if l.E_COUNT > 0:
                         if BYTE(l.E_LINE, l.INDEX) != BYTE(g.X1):
                            if e_indicator(l.INDEX) != 1:
-                               ERROR(d.CLASS_ME,3);
+                               ERROR(d.CLASS_ME, 3);
                            else:
                                g.OVER_PUNCH = BYTE(l.E_LINE, l.INDEX);
                         else:
@@ -1248,7 +1268,7 @@ def STREAM():
                         g.OVER_PUNCH = 0;
                     if l.S_COUNT > 0:
                         if BYTE(l.S_LINE, l.INDEX) != BYTE(g.X1):
-                            ERROR(d.CLASS_MS,3);
+                            ERROR(d.CLASS_MS, 3);
                     ARROW = -l.LAST_E_IND;
                     l.LAST_E_IND = 0;
                     if not g.INCLUDING:
@@ -1256,12 +1276,12 @@ def STREAM():
                         /*CHECK THE RVL FOR EACH CHARACTER AS IT IS READ.  RVL WILL */
                         /*HOLD THE MOST RECENT RVL ASSOCIATED WITH A TOKEN.         */
                         '''
-                        if STRING_GT(g.NEXT_CHAR_RVL,g.RVL[0]):
+                        if STRING_GT(g.NEXT_CHAR_RVL, g.RVL[0]):
                             g.RVL[0] = g.NEXT_CHAR_RVL[:];
                         g.NEXT_CHAR_RVL = g.RVL[1][:];
                     g.NEXT_CHAR = BYTE(l.M_LINE, l.INDEX);
                     CHOP();
-                    break # GO TO FOUND_CHAR;
+                    break  # GO TO FOUND_CHAR;
                 else:
                     BUILD_XSCRIPTS();
                     g.OVER_PUNCH = 0;
@@ -1272,19 +1292,19 @@ def STREAM():
             if l.RETURNING_S:
                 if LENGTH(l.S_STACK) > 0 and l.PNTR < LENGTH(l.S_STACK):
                     if BYTE(l.S_STACK, l.PNTR) == BYTE(g.X1):
-                        if s_ind(l.PNTR) >= 0: # MORE LEFT
+                        if s_ind(l.PNTR) >= 0:  # MORE LEFT
                             g.NEXT_CHAR = BYTE(g.X1);
                             g.BLANK_COUNT = s_ind(l.PNTR);
                             l.PNTR = l.PNTR + 1;
                             ARROW = l.LAST_S_IND - s_ind(l.PNTR);
                             l.LAST_S_IND = s_ind(l.PNTR);
-                    else:   # A NON-BLANK
+                    else:  # A NON-BLANK
                         g.NEXT_CHAR = BYTE(l.S_STACK, l.PNTR);
                         ARROW = l.LAST_S_IND - s_ind(l.PNTR);
                         l.LAST_S_IND = s_ind(l.PNTR);
                         l.PNTR = l.PNTR + 1;
-                    break # GO TO FOUND_CHAR;
-                else:    # CAN'T RETURN S 
+                    break  # GO TO FOUND_CHAR;
+                else:  # CAN'T RETURN S 
                     l.RETURNING_S = g.FALSE;
                     l.RETURNING_E = g.TRUE;
                     l.LAST_E_IND = -l.LAST_S_IND;
@@ -1292,19 +1312,19 @@ def STREAM():
             if l.RETURNING_E:
                 if LENGTH(l.E_STACK) > 0 and l.PNTR < LENGTH(l.E_STACK):
                     if BYTE(l.E_STACK, l.PNTR) == BYTE(g.X1):
-                        if e_ind(l.PNTR) >= 0: # MORE TO GO
+                        if e_ind(l.PNTR) >= 0:  # MORE TO GO
                             g.NEXT_CHAR = BYTE(g.X1);
                             g.BLANK_COUNT = e_ind(l.PNTR);
                             l.PNTR = l.PNTR + 1;
                             ARROW = e_ind(l.PNTR) - l.LAST_E_IND;
                             l.LAST_E_IND = e_ind(l.PNTR);
-                    else: # A NON-BLANK
+                    else:  # A NON-BLANK
                         g.NEXT_CHAR = BYTE(l.E_STACK, l.PNTR);
                         ARROW = e_ind(l.PNTR) - l.LAST_E_IND;
                         l.LAST_E_IND = e_ind(l.PNTR);
                         l.PNTR = l.PNTR + 1;
-                    break # GO TO FOUND_CHAR;
-                else: # CAN'T RETURN E 
+                    break  # GO TO FOUND_CHAR;
+                else:  # CAN'T RETURN E 
                     l.RETURNING_E = g.FALSE;
                     l.RETURNING_M = g.TRUE;
             goto_BEGINNING = True
@@ -1327,20 +1347,20 @@ def STREAM():
                     else:
                         goto_EXPONENT = False
                         if ARROW > 1:
-                            ERROR(d.CLASS_ME,2);
+                            ERROR(d.CLASS_ME, 2);
                         STACK_RETURN_CHAR(2, BYTE('*'));
                         STACK_RETURN_CHAR(ARROW, BYTE('('));
                 elif goto_SUBS or g.OLD_LEVEL == 0:
                     if goto_SUBS or ARROW < 0:
                         goto_SUBS = False
                         if ARROW < -1:
-                            ERROR(d.CLASS_MS,2);
+                            ERROR(d.CLASS_MS, 2);
                         STACK_RETURN_CHAR(1, BYTE('$'));
                         STACK_RETURN_CHAR(-ARROW, BYTE('('));
                     else:
                         goto_EXPONENT = True
                         continue
-                else: # OLD < 0
+                else:  # OLD < 0
                     if ARROW < 0:
                         goto_SUBS = True
                         continue
@@ -1349,7 +1369,7 @@ def STREAM():
                     else:
                         STACK_RETURN_CHAR(-g.OLD_LEVEL, BYTE(')'));
                         if g.NEW_LEVEL > 1:
-                            ERROR(d.CLASS_ME,2);
+                            ERROR(d.CLASS_ME, 2);
                         STACK_RETURN_CHAR(2, BYTE('*'));
                         STACK_RETURN_CHAR(g.NEW_LEVEL, BYTE('('));
             ARROW = 0;
