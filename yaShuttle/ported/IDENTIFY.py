@@ -17,6 +17,8 @@ from ERROR import ERROR
 from HASH import HASH
 from HALINCL.ENTER import ENTER
 from SETXREF import SET_XREF
+from BUFFERMA import BUFFER_MACRO_XREF
+from HALINCL.SETDUPLF import SET_DUPL_FLAG
 
 '''
  /***************************************************************************/
@@ -270,7 +272,7 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                                 ERROR(d.CLASS_MC,2);
                             if QUALIFICATION>0:
                                 goto_Q_TRAP = True;
-                            elif (BI_INFO(l.J)&0xFF0000)==0:
+                            elif (g.BI_INFO[l.J]&0xFF0000)==0:
                                 goto_BUILT_IN = True;
                             else:
                                 goto_YES_ARG = True;
@@ -300,9 +302,11 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                             while l.I > 0 or goto_NOT_FOUND_YET:
                                 if BCD == g.SYT_NAME(l.I) and not goto_NOT_FOUND_YET:
                                    goto_MAYBE_FOUND = True;
-                                   continue
+                                   break
                                 goto_NOT_FOUND_YET = False
                                 l.I = g.SYT_HASHLINK(l.I);
+                            if goto_MAYBE_FOUND:
+                                continue
                         goto_Q_TRAP = False
                         #  SPECIAL TRAP FOR QUALIFIED STRUCTURE NAMES
                         if g.QUALIFICATION>0:
@@ -332,6 +336,7 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                                 g.SYT_TYPE(l.I, g.UNSPEC_LABEL);
                                 g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | g.DEFINED_LABEL);
                                 goto_LAB_OP_CHECK = True
+                                g.CONTEXT = -1
                                 continue
                             if BCD == 'T':
                                 g.IMPLICIT_T = g.TRUE;
@@ -341,7 +346,7 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                         l.I = ENTER(BCD, g.VAR_CLASS);
                         g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | g.IMP_DECL);
                         if g.BUILDING_TEMPLATE:
-                            g.SYT_FLAGS(REF_ID_LOC, g.SYT_FLAGS(REF_ID_LOC) | EVIL_FLAG);
+                            g.SYT_FLAGS(g.REF_ID_LOC, g.SYT_FLAGS(g.REF_ID_LOC) | g.EVIL_FLAG);
                     goto_ADD_DEFAULT = False
                     if g.IMPLIED_TYPE == 0:
                         g.SYT_TYPE(l.I, g.DEFAULT_TYPE);
@@ -349,24 +354,26 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                         g.SYT_TYPE(l.I, g.IMPLIED_TYPE);
                     if g.SYT_TYPE(l.I) > g.INT_TYPE:
                         goto_SET_INITIAL_FLAGS = True
+                        g.CONTEXT = -1
                     if g.SYT_TYPE(l.I) <= g.CHAR_TYPE:
                         #GO TO SET_DEF_BC;
                         pass
                     else:
                         # INTEGER SCALAR VECTOR OR MATRIX
                         if g.SYT_TYPE(l.I) >= g.SCALAR_TYPE:
-                            goto_SET_INITIAL_FLAGS = True;
-                        elif g.SYT_TYPE(l.I) == VEC_TYPE:
-                            g.VAR_LENGTH(l.I, DEF_VEC_LENGTH);
+                            pass
+                        elif g.SYT_TYPE(l.I) == g.VEC_TYPE:
+                            g.VAR_LENGTH(l.I, g.DEF_VEC_LENGTH);
                         else:
-                            g.VAR_LENGTH(l.I, DEF_MAT_LENGTH);
+                            g.VAR_LENGTH(l.I, g.DEF_MAT_LENGTH);
                         goto_SET_INITIAL_FLAGS = True
+                        g.CONTEXT = -1
                     #SET_DEF_BC:
                     if not goto_SET_INITIAL_FLAGS:
                         if g.SYT_TYPE(l.I) == g.CHAR_TYPE:
-                            g.VAR_LENGTH(l.I, DEF_CHAR_LENGTH);
+                            g.VAR_LENGTH(l.I, g.DEF_CHAR_LENGTH);
                         else:
-                            g.VAR_LENGTH(l.I, DEF_BIT_LENGTH);
+                            g.VAR_LENGTH(l.I, g.DEF_BIT_LENGTH);
                     goto_SET_INITIAL_FLAGS = False
                     if g.SYT_TYPE(l.I) <= g.INT_TYPE:
                         g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | g.DEFAULT_ATTR);
@@ -392,22 +399,23 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     elif st == 8:
                        g.TOKEN = 0;
                     elif st == 9:
-                       g.TOKEN = EVENT_TOKEN;  # NOT POSSIBLE??
+                       g.TOKEN = g.EVENT_TOKEN;  # NOT POSSIBLE??
                     # END OF DO CASE SYT_TYPE(I)
                 elif g.CONTEXT == 1 and not goto_LAB_OP_CHECK \
                         and not goto_LABELJOIN and not goto_PARMJOIN:
                     # EXPRESSION CONTEXT                   #  CASE 1
                     ERROR(d.CLASS_DI, 11, BCD);
                     goto_MAKE_DEFAULT = True
+                    g.CONTEXT = -1
                     continue
                 elif (g.CONTEXT == 2 or goto_LAB_OP_CHECK or goto_LABELJOIN) \
                         and not goto_PARMJOIN:
                     #  GO TO                               #  CASE 2
                     if not goto_LAB_OP_CHECK:
                         if not goto_LABELJOIN:
-                            l.FLAG = STMT_LABEL;
+                            l.FLAG = g.STMT_LABEL;
                         goto_LABELJOIN = False
-                        l.I = ENTER(BCD, LABEL_CLASS);
+                        l.I = ENTER(BCD, g.LABEL_CLASS);
                         g.SYT_TYPE(l.I, l.FLAG);
                     goto_LAB_OP_CHECK = False
                     g.TOKEN = g.LAB_TOKEN;
@@ -415,32 +423,35 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                         ERROR(d.CLASS_MC,1,BCD);
                 elif g.CONTEXT == 3 and not goto_PARMJOIN:
                     #  CALL                                #  CASE 3
-                    l.FLAG = PROC_LABEL;  # ONLY PROCS MAY BE CALLED
+                    l.FLAG = g.PROC_LABEL;  # ONLY PROCS MAY BE CALLED
                     g.CONTEXT = 0;      #  IN CASE PARAMETERS FOLLOW
-                    FIXING=1;
+                    g.FIXING=1;
                     goto_LABELJOIN = True
+                    g.CONTEXT = -1
                     continue
                 elif g.CONTEXT == 4 and not goto_PARMJOIN:
                     #  SCHEDULE                            #  CASE 4
-                    l.FLAG = TASK_LABEL;  # ONLY TASKS CAN BE "NOT FOUND"
+                    l.FLAG = g.TASK_LABEL;  # ONLY TASKS CAN BE "NOT FOUND"
                     g.CONTEXT = 0;
                     goto_LABELJOIN = True
+                    g.CONTEXT = -1
                     continue
                 elif g.CONTEXT == 5 and not goto_PARMJOIN:
                     #  DECLARE                             #  CASE 5
-                    FACTORING = g.FALSE;
+                    g.FACTORING = g.FALSE;
                     if g.IMPLIED_TYPE!=0:
                         ERROR(d.CLASS_MC,6,BCD);
-                    if TEMPORARY_IMPLIED:
-                        l.FLAG=l.FLAG|TEMPORARY_FLAG;
-                        if NEXT_CHAR==BYTE('='):
-                            TEMPORARY_IMPLIED=g.FALSE;
+                    if g.TEMPORARY_IMPLIED:
+                        l.FLAG=l.FLAG|g.TEMPORARY_FLAG;
+                        if g.NEXT_CHAR==BYTE('='):
+                            g.TEMPORARY_IMPLIED=g.FALSE;
                     if l.DONT_ENTER>0:
                         l.I=l.DONT_ENTER;
                         l.DONT_ENTER=0;
                         g.TOKEN=g.ID_TOKEN;
                         break # GO TO IDENTIFY_EXIT;
                     goto_DCLJOIN = True
+                    g.CONTEXT = -1
                 # Note that the following is an "if" rather than an "elif" to
                 # allow the goto_DCLJOIN in the preceding case to fallthrough 
                 #into it rather than going through the tedious exercise of 
@@ -450,10 +461,10 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     # INPUT PARAMETER                      #  CASE 6
                     if not goto_DCLJOIN:
                         if not goto_PARMJOIN:
-                            if LOOKUP_ONLY:
-                                g.TOKEN=STRUCT_TEMPLATE;
+                            if g.LOOKUP_ONLY:
+                                g.TOKEN=g.STRUCT_TEMPLATE;
                                 break # GO TO IDENTIFY_EXIT;
-                            l.FLAG = INPUT_PARM;
+                            l.FLAG = g.INPUT_PARM;
                         goto_PARMJOIN = False
                         if g.IMPLIED_TYPE!=0:
                             ERROR(d.CLASS_MC,5,BCD);
@@ -464,29 +475,33 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     g.TOKEN = g.ID_TOKEN;
                 elif g.CONTEXT == 7:
                     #  ASSIGN PARM                         #  CASE 7
-                    l.FLAG = ASSIGN_PARM;
+                    l.FLAG = g.ASSIGN_PARM;
                     goto_PARMJOIN = True;
+                    g.CONTEXT = -1
                     continue
                 elif g.CONTEXT == 8:
                     #  REPLACE                             #  CASE 8
-                    g.SYT_INDEX = ENTER(BCD, REPL_CLASS);
+                    g.SYT_INDEX = ENTER(BCD, g.REPL_CLASS);
                     g.TOKEN = g.ID_TOKEN;
                     g.MACRO_NAME = BCD[:];
                     g.CONTEXT = g.REPLACE_PARM_CONTEXT;
                     goto_REPL_OP_CHECK = True
+                    g.CONTEXT = -1
                     # The label is below us, so we're going to fallthrough
                     # rather than continue the enclosing while-loop.
                 elif g.CONTEXT == 9:
                     #  CLOSE                               #  CASE 9
                     l.I = - 1;    #  SHOULD NEVER BE REFERRED TO
                     goto_LAB_OP_CHECK = True; #  CLOSE PRODUCTION DOES THE WORK
+                    g.CONTEXT = -1
                     continue
                 elif g.CONTEXT == 10:
                     #     REPLACE DEFINITION PARAMETERS       # CASE 10
                     g.TOKEN = g.ID_TOKEN;
-                    g.SYT_INDEX = ENTER(BCD,REPL_ARG_CLASS);
-                    g.SYT_FLAGS(g.SYT_INDEX, INACTIVE_FLAG);
+                    g.SYT_INDEX = ENTER(BCD,g.REPL_ARG_CLASS);
+                    g.SYT_FLAGS(g.SYT_INDEX, g.INACTIVE_FLAG);
                     goto_REPL_OP_CHECK = True
+                    g.CONTEXT = -1
                     # The label is below us, so we're going to fallthrough
                     # rather than continue the enclosing while-loop.
                 elif g.CONTEXT == 11:
@@ -494,15 +509,15 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     if g.IMPLIED_TYPE != 0:
                         ERROR(d.CLASS_MC, 7, SUBSTR(BCD, 1));
                     g.TOKEN = g.ID_TOKEN;
-                    l.I = ENTER(BCD, LABEL_CLASS);
-                    g.SYT_FLAGS(l.I, INACTIVE_FLAG); ''' WILL BE LEFT IN HASH TABLE
+                    l.I = ENTER(BCD, g.LABEL_CLASS);
+                    g.SYT_FLAGS(l.I, g.INACTIVE_FLAG); ''' WILL BE LEFT IN HASH TABLE
                                                          FOREVER SINCE IT APPEARS TO
                                                          BE ALREADY DISCONNECTED BY
                                                          USE OF INACTIVE_FLAG '''
-                    g.SYT_TYPE(l.I, EQUATE_LABEL);
-                    g.CONTEXT = EXPRESSION_CONTEXT;
-                    NAMING = g.TRUE
-                    DELAY_CONTEXT_CHECK = g.TRUE;
+                    g.SYT_TYPE(l.I, g.EQUATE_LABEL);
+                    g.CONTEXT = g.EXPRESSION_CONTEXT;
+                    g.NAMING = g.TRUE
+                    g.DELAY_CONTEXT_CHECK = g.TRUE;
                     
                 # END OF DO CASE CONTEXT
                 if not goto_REPL_OP_CHECK:
@@ -511,8 +526,8 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
             #*************************************************************************
             #  HERE WHEN NAME IS ALREADY IN SYMBOL TABLE:
             goto_MAYBE_FOUND = False
-            if g.SYT_CLASS(l.I) == REPL_CLASS or goto_REPL_OP_CHECK:
-                if g.CONTEXT != REPL_CONTEXT or goto_REPL_OP_CHECK:
+            if g.SYT_CLASS(l.I) == g.REPL_CLASS or goto_REPL_OP_CHECK:
+                if g.CONTEXT != g.REPL_CONTEXT or goto_REPL_OP_CHECK:
                     if not goto_REPL_OP_CHECK:
                         g.SYT_INDEX = l.I;
                         g.TOKEN = - 1;     #  SPECIAL TOKEN FOR REPLACEMENT
@@ -522,14 +537,14 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                         ERROR(d.CLASS_MC,3);
                         g.IMPLIED_TYPE = 0;
                     return;
-                elif l.I < PROCMARK:
+                elif l.I < g.PROCMARK:
                     goto_NOT_FOUND = True
                     continue
                 else:
                     ERROR(d.CLASS_IR,5,BCD);
-            elif l.I < PROCMARK:
-                if g.CONTEXT != EQUATE_CONTEXT:
-                    if g.CONTEXT > DECLARE_CONTEXT:
+            elif l.I < g.PROCMARK:
+                if g.CONTEXT != g.EQUATE_CONTEXT:
+                    if g.CONTEXT > g.DECLARE_CONTEXT:
                         goto_NOT_FOUND = True;
                         continue
             if CENT_IDENTIFY:
@@ -561,15 +576,15 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                         if g.QUALIFICATION>0:
                             goto_NOT_FOUND_YET = True;
                             continue
-                        if g.SYT_TYPE(l.I)==MAJ_STRUC:
-                            if NEXT_CHAR==BYTE(PERIOD):
-                                g.QUALIFICATION=VAR_LENGTH(l.I);
-                                if (g.SYT_FLAGS(g.QUALIFICATION)&EVIL_FLAG)!=0:
+                        if g.SYT_TYPE(l.I)==g.MAJ_STRUC:
+                            if g.NEXT_CHAR==BYTE(g.PERIOD):
+                                g.QUALIFICATION=g.VAR_LENGTH(l.I);
+                                if (g.SYT_FLAGS(g.QUALIFICATION)&g.EVIL_FLAG)!=0:
                                     goto_Q_TRAP = True;
                                     continue
                     goto_TEMPL_FIXUP = False
-                    if LABEL_IMPLIED or goto_BAD_LAB_DEF:
-                        if l.I < PROCMARK or goto_BAD_LAB_DEF:
+                    if g.LABEL_IMPLIED or goto_BAD_LAB_DEF:
+                        if l.I < g.PROCMARK or goto_BAD_LAB_DEF:
                             goto_BAD_LAB_DEF = False
                             ERROR(d.CLASS_PM,3,BCD);
                             goto_DO_LAB = True
@@ -601,12 +616,12 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     elif st == 8:
                         g.TOKEN = 0;    #  COMPILER ERROR
                     elif st == 9:
-                        g.TOKEN = EVENT_TOKEN;               #  CASE 0.1.0.9
+                        g.TOKEN = g.EVENT_TOKEN;               #  CASE 0.1.0.9
                     elif st == 10:
-                        g.TOKEN = STRUC_TOKEN;               #  CASE 0.1.0.10
+                        g.TOKEN = g.STRUC_TOKEN;               #  CASE 0.1.0.10
                     # END OF DO CASE SYT_TYPE(I)
                 elif g.IMPLIED_TYPE == 1:
-                    if g.SYT_TYPE(l.I) == BIT_TYPE:  #0.1.1
+                    if g.SYT_TYPE(l.I) == g.BIT_TYPE:  #0.1.1
                         g.TOKEN = g.BIT_TOKEN;
                     else:
                         goto_OP_TYPE_MISMATCH = True;
@@ -628,7 +643,7 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                 if g.IMPLIED_TYPE == 4 or goto_OP_TYPE_MISMATCH:
                     if g.SYT_TYPE(l.I) == g.MAT_TYPE and not goto_OP_TYPE_MISMATCH:
                         g.TOKEN = g.ARITH_TOKEN;
-                    elif g.SYT_TYPE(l.I) == VEC_TYPE and not goto_OP_TYPE_MISMATCH:
+                    elif g.SYT_TYPE(l.I) == g.VEC_TYPE and not goto_OP_TYPE_MISMATCH:
                         g.TOKEN = g.ARITH_TOKEN;
                     else:
                         goto_OP_TYPE_MISMATCH = False
@@ -642,37 +657,37 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     and not goto_BUILT_IN and not goto_YES_ARG \
                     and not goto_FUNC_CHECK and not goto_FUNC_TOKEN_ZERO:
                 #  LABEL NAME             #  CASE 0.2
-                if LABEL_IMPLIED or goto_DUPL_LABEL:     #  LABEL DEFINITION
+                if g.LABEL_IMPLIED or goto_DUPL_LABEL:     #  LABEL DEFINITION
                     # DUPLICATE NAME OF EXTERNAL LABEL THAT IS NOT GOING
                     # INTO SDF. SO TREAT IT AS A NEW LABEL FOR THIS
                     # COMPILATION UNIT
                     if g.SYT_TYPE(l.I) == 0 and not goto_DUPL_LABEL:
                         goto_DO_LAB = True
                         continue 
-                    if l.I < PROCMARK and not goto_DUPL_LABEL:
+                    if l.I < g.PROCMARK and not goto_DUPL_LABEL:
                         goto_DO_LAB = True
                         continue
-                    elif (g.SYT_FLAGS(l.I) & DEFINED_LABEL) == 0 \
+                    elif (g.SYT_FLAGS(l.I) & g.DEFINED_LABEL) == 0 \
                             and not goto_DUPL_LABEL:
-                        g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I)|DEFINED_LABEL);
+                        g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I)|g.DEFINED_LABEL);
                         SET_XREF(l.I,0);
-                    elif g.SYT_TYPE(l.I) != IND_CALL_LAB:
+                    elif g.SYT_TYPE(l.I) != g.IND_CALL_LAB:
                         goto_DUPL_LABEL = False
                         ERROR(d.CLASS_PL,2,BCD);
                 goto_LAB_OP_CHECK = True
                 continue
             elif sc == 3 or goto_BUILT_IN or goto_YES_ARG or goto_FUNC_CHECK \
                     or goto_FUNC_TOKEN_ZERO:
-                if LABEL_IMPLIED and not goto_BUILT_IN and not goto_YES_ARG \
+                if g.LABEL_IMPLIED and not goto_BUILT_IN and not goto_YES_ARG \
                         and not goto_FUNC_CHECK and not goto_FUNC_TOKEN_ZERO: 
                     #  FUNCTION NAME         #  CASE 0.3
-                    if l.I < PROCMARK:
+                    if l.I < g.PROCMARK:
                         goto_BAD_LAB_DEF = True
                         continue
-                    if (g.SYT_FLAGS(l.I) & DEFINED_LABEL) != 0:
+                    if (g.SYT_FLAGS(l.I) & g.DEFINED_LABEL) != 0:
                         goto_DUPL_LABEL = True
                         continue
-                    g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | DEFINED_LABEL);
+                    g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | g.DEFINED_LABEL);
                     SET_XREF(l.I,0);
                     goto_LAB_OP_CHECK = True
                     continue
@@ -683,16 +698,16 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                             if g.IMPLIED_TYPE != 0:
                                 ERROR(d.CLASS_MC, 2);
                                 g.IMPLIED_TYPE = 0;
-                            if (SYT_FLAGS2(l.I)&NONHAL_FLAG)!=0:
+                            if (g.SYT_FLAGS2(l.I)&g.NONHAL_FLAG)!=0:
                                 goto_YES_ARG = True;
                                 continue
-                            if (g.SYT_FLAGS(l.I)&DEFINED_LABEL)==0:
+                            if (g.SYT_FLAGS(l.I)&g.DEFINED_LABEL)==0:
                                 goto_YES_ARG = True;
                                 continue
                             if g.SYT_PTR(l.I) == 0:
                                 goto_NO_ARG_FUNC = True
                                 # Will fall through rather than loop.
-                            elif (g.SYT_FLAGS(g.SYT_PTR(l.I)) & INPUT_PARM) == 0:
+                            elif (g.SYT_FLAGS(g.SYT_PTR(l.I)) & g.INPUT_PARM) == 0:
                                 goto_NO_ARG_FUNC = True
                                 # Will fall through rather than loop
                         goto_YES_ARG = False
@@ -703,32 +718,32 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                                 goto_FUNC_TOKEN_ZERO = False
                                 ERROR(d.CLASS_BX, 2);    # COMPILER ERROR
                             elif st == 1:
-                                g.TOKEN = BIT_FUNC_TOKEN;
+                                g.TOKEN = g.BIT_FUNC_TOKEN;
                             elif st == 3:
-                                g.TOKEN = CHAR_FUNC_TOKEN;
+                                g.TOKEN = g.CHAR_FUNC_TOKEN;
                             elif st == 4:
-                                g.TOKEN = ARITH_FUNC_TOKEN;
+                                g.TOKEN = g.ARITH_FUNC_TOKEN;
                             elif st == 5:
-                                g.TOKEN = ARITH_FUNC_TOKEN;
+                                g.TOKEN = g.ARITH_FUNC_TOKEN;
                             elif st == 6:
-                                g.TOKEN = ARITH_FUNC_TOKEN;
+                                g.TOKEN = g.ARITH_FUNC_TOKEN;
                             elif st == 7:
-                                g.TOKEN = ARITH_FUNC_TOKEN;
+                                g.TOKEN = g.ARITH_FUNC_TOKEN;
                             elif st == 8:
                                 g.TOKEN = 0;    # COMPILER ERROR
                             elif st == 9:
-                                g.TOKEN = ARITH_FUNC_TOKEN;
+                                g.TOKEN = g.ARITH_FUNC_TOKEN;
                             elif st == 10:
                                 g.TOKEN = 0;  # EVENT = COMPILER ERROR
                             elif st == 11:
-                                g.TOKEN = STRUCT_FUNC_TOKEN;
+                                g.TOKEN = g.STRUCT_FUNC_TOKEN;
                             # END OF DO CASE SYT_TYPE(I)
                             goto_END_FUNC_CHECK = True
                             # Falls through, rather than looping.
                         if not goto_END_FUNC_CHECK:
                             goto_NO_ARG_FUNC = False
-                            if not NAMING:
-                                FIXING=2;
+                            if not g.NAMING:
+                                g.FIXING=2;
                     goto_BUILT_IN = False
                     if not goto_END_FUNC_CHECK:
                         # DO CASE SYT_TYPE(I);
@@ -737,25 +752,25 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                             goto_FUNC_TOKEN_ZERO = True
                             continue
                         elif st == 1:
-                            g.TOKEN = NO_ARG_BIT_FUNC;
+                            g.TOKEN = g.NO_ARG_BIT_FUNC;
                         elif st == 2:
-                            g.TOKEN = NO_ARG_CHAR_FUNC;
+                            g.TOKEN = g.NO_ARG_CHAR_FUNC;
                         elif st == 3:
-                            g.TOKEN = NO_ARG_ARITH_FUNC;
+                            g.TOKEN = g.NO_ARG_ARITH_FUNC;
                         elif st == 4:
-                            g.TOKEN = NO_ARG_ARITH_FUNC;
+                            g.TOKEN = g.NO_ARG_ARITH_FUNC;
                         elif st == 5:
-                            g.TOKEN = NO_ARG_ARITH_FUNC;
+                            g.TOKEN = g.NO_ARG_ARITH_FUNC;
                         elif st == 6:
-                            g.TOKEN = NO_ARG_ARITH_FUNC;
+                            g.TOKEN = g.NO_ARG_ARITH_FUNC;
                         elif st == 7:
                             g.TOKEN = 0;    # COMPILER ERROR
                         elif st == 8:
-                            g.TOKEN = NO_ARG_ARITH_FUNC;
+                            g.TOKEN = g.NO_ARG_ARITH_FUNC;
                         elif st == 9:
                             g.TOKEN = 0;   # EVENT = COMPILER ERROR
                         elif st == 10:
-                            g.TOKEN = NO_ARG_STRUCT_FUNC;
+                            g.TOKEN = g.NO_ARG_STRUCT_FUNC;
                     goto_END_FUNC_CHECK = False
                 # END OF FUNC_CHECK
             elif sc == 4:
@@ -772,38 +787,38 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                 doElse = True
                 if g.QUALIFICATION>0:
                     doElse = False
-                    if g.SYT_TYPE(g.QUALIFICATION)==MAJ_STRUC:
-                        if VAR_LENGTH(g.QUALIFICATION)>0:
-                            g.QUALIFICATION=VAR_LENGTH(g.QUALIFICATION);
-                            if (g.SYT_FLAGS(g.QUALIFICATION)&EVIL_FLAG)!=0:
+                    if g.SYT_TYPE(g.QUALIFICATION)==g.MAJ_STRUC:
+                        if g.VAR_LENGTH(g.QUALIFICATION)>0:
+                            g.QUALIFICATION=g.VAR_LENGTH(g.QUALIFICATION);
+                            if (g.SYT_FLAGS(g.QUALIFICATION)&g.EVIL_FLAG)!=0:
                                 goto_Q_TRAP = True;
                                 continue
                     g.KIN=SYT_LINK1(g.QUALIFICATION);
                     while g.KIN>0:
                         if g.KIN==l.I:
-                            if g.SYT_TYPE(l.I)!=MAJ_STRUC|NEXT_CHAR!=BYTE(PERIOD):
+                            if g.SYT_TYPE(l.I)!=g.MAJ_STRUC|(g.NEXT_CHAR!=BYTE(g.PERIOD)):
                                 g.QUALIFICATION=0;
                             else:
                                 g.QUALIFICATION=l.I;
                             goto_TEMPL_BRANCH = True
                             # Falls through
                         else:
-                            g.KIN=SYT_LINK2(g.KIN);
+                            g.KIN=g.SYT_LINK2(g.KIN);
                     if not goto_TEMPL_BRANCH:
                         goto_NOT_FOUND_YET = True;
                         continue
                 if doElse or goto_TEMPL_BRANCH: # Was "else", now falls through.
                     if not goto_TEMPL_BRANCH:
                         g.KIN=l.I;
-                        while g.SYT_TYPE(g.KIN)!=TEMPL_NAME:
+                        while g.SYT_TYPE(g.KIN)!=g.TEMPL_NAME:
                             g.KIN=g.KIN-1;
                         if g.SYT_PTR(g.KIN)==0:
                             goto_NOT_FOUND_YET = True;
                             continue
-                        VALUE=g.SYT_PTR(g.KIN);
+                        g.VALUE=g.SYT_PTR(g.KIN);
                     goto_TEMPL_BRANCH = False
                     # DO CASE SYT_CLASS(I)-TEMPLATE_CLASS;
-                    diff = g.SYT_CLASS(l.I)-TEMPLATE_CLASS
+                    diff = g.SYT_CLASS(l.I)-g.TEMPLATE_CLASS
                     if diff == 0:
                         goto_TEMPL_FIXUP = True
                         continue
@@ -823,19 +838,19 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
         elif g.CONTEXT == 3:
             #  CALL                                #  CASE 3
             g.CONTEXT = 0;     #  IN CASE ARGUMENTS FOLLOW
-            FIXING=1;
+            g.FIXING=1;
             l.K = g.SYT_TYPE(l.I);
-            if g.SYT_CLASS(l.I)!=LABEL_CLASS:
+            if g.SYT_CLASS(l.I)!=g.LABEL_CLASS:
                 goto_MAKE_TOKEN = True
                 continue
-            if l.I < PROCMARK:
-                l.J = ENTER(BCD, LABEL_CLASS);
-                if (l.K == IND_CALL_LAB) or (l.K == PROC_LABEL):
-                    g.SYT_TYPE(l.J, IND_CALL_LAB);
+            if l.I < g.PROCMARK:
+                l.J = ENTER(BCD, g.LABEL_CLASS);
+                if (l.K == g.IND_CALL_LAB) or (l.K == g.PROC_LABEL):
+                    g.SYT_TYPE(l.J, g.IND_CALL_LAB);
                     g.SYT_PTR(l.J, l.I);
-                    g.SYT_FLAGS(l.J, g.SYT_FLAGS(l.J) | DEFINED_LABEL);
+                    g.SYT_FLAGS(l.J, g.SYT_FLAGS(l.J) | g.DEFINED_LABEL);
                 else:
-                    g.SYT_TYPE(l.J, PROC_LABEL);
+                    g.SYT_TYPE(l.J, g.PROC_LABEL);
                     goto_OVERRIDE_ERR = True
                     # Falls through
                 if not goto_OVERRIDE_ERR:
@@ -848,20 +863,20 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
             #  GO TO                               #  CASE 2
             if not goto_OVERRIDE_ERR:
                 l.K = g.SYT_TYPE(l.I);
-            if l.I < PROCMARK or goto_OVERRIDE_ERR:
+            if l.I < g.PROCMARK or goto_OVERRIDE_ERR:
                 if not goto_OVERRIDE_ERR:
-                    l.J = ENTER(BCD, LABEL_CLASS);
-                    g.SYT_TYPE(l.J, STMT_LABEL);
-                if g.SYT_CLASS(l.I) != LABEL_CLASS or goto_OVERRIDE_ERR:
+                    l.J = ENTER(BCD, g.LABEL_CLASS);
+                    g.SYT_TYPE(l.J, g.STMT_LABEL);
+                if g.SYT_CLASS(l.I) != g.LABEL_CLASS or goto_OVERRIDE_ERR:
                     goto_OVERRIDE_ERR = False
                     ERROR(d.CLASS_PM, 4, BCD);
                 l.I = l.J;
-            elif g.SYT_CLASS(l.I) != LABEL_CLASS:
+            elif g.SYT_CLASS(l.I) != g.LABEL_CLASS:
                 goto_MAKE_TOKEN = True
                 continue
-            elif g.SYT_TYPE(l.I) == UNSPEC_LABEL:
-                g.SYT_TYPE(l.I, STMT_LABEL);
-            elif g.SYT_TYPE(l.I) > UNSPEC_LABEL:
+            elif g.SYT_TYPE(l.I) == g.UNSPEC_LABEL:
+                g.SYT_TYPE(l.I, g.STMT_LABEL);
+            elif g.SYT_TYPE(l.I) > g.UNSPEC_LABEL:
                 ERROR(d.CLASS_DT, 3, BCD);
             goto_LAB_OP_CHECK = True
             continue
@@ -872,22 +887,22 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
             continue
         elif g.CONTEXT == 5:
             #  DECLARE                             #  CASE 5
-            if LOOKUP_ONLY:
-                g.TOKEN = STRUCT_TEMPLATE;
+            if g.LOOKUP_ONLY:
+                g.TOKEN = g.STRUCT_TEMPLATE;
                 break # GO TO IDENTIFY_EXIT;
-            if l.I < PROCMARK:
+            if l.I < g.PROCMARK:
                 goto_NOT_FOUND = True;
                 continue
             if g.BUILDING_TEMPLATE:
-                g.SYT_FLAGS(REF_ID_LOC, g.SYT_FLAGS(REF_ID_LOC)|DUPL_FLAG);
-                if g.SYT_CLASS(l.I)>=TEMPLATE_CLASS:
-                    if l.I<REF_ID_LOC:
+                g.SYT_FLAGS(g.REF_ID_LOC, g.SYT_FLAGS(g.REF_ID_LOC)|g.DUPL_FLAG);
+                if g.SYT_CLASS(l.I)>=g.TEMPLATE_CLASS:
+                    if l.I<g.REF_ID_LOC:
                         SET_DUPL_FLAG(l.I);
                         goto_NOT_FOUND_YET = True;
                         continue
                     else:
-                        l.FLAG=DUPL_FLAG;
-            elif TEMPORARY_IMPLIED:
+                        l.FLAG=g.DUPL_FLAG;
+            elif g.TEMPORARY_IMPLIED:
                 ERROR(d.CLASS_PM,1,BCD);
                 goto_NOT_FOUND = True;
                 continue
@@ -897,7 +912,7 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
                     ERROR(d.CLASS_PM, 2, SUBSTR(BCD, 1));  # DUPL TEMPLATE
                     goto_NOT_FOUND = True;  # ENTER ANYWAY
                     continue
-                if g.SYT_CLASS(l.I) >= TEMPLATE_CLASS:
+                if g.SYT_CLASS(l.I) >= g.TEMPLATE_CLASS:
                     SET_DUPL_FLAG(l.I);
                     goto_NOT_FOUND_YET = True;
                     continue
@@ -912,8 +927,8 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
         elif g.CONTEXT in [6, 7]:
             #  INPUT PARAMETER                     #  CASE 6
             #  ASSIGN PARAMETER                    #  CASE 7
-            if LOOKUP_ONLY:
-                g.TOKEN=STRUCT_TEMPLATE;
+            if g.LOOKUP_ONLY:
+                g.TOKEN=g.STRUCT_TEMPLATE;
                 break # GO TO IDENTIFY_EXIT;
             ERROR(d.CLASS_FN,3,BCD);
             g.TOKEN = g.ID_TOKEN;
@@ -934,8 +949,9 @@ def IDENTIFY(BCD,CENT_IDENTIFY):
             # EQUATE
             ERROR(d.CLASS_DU, 6, SUBSTR(BCD, 1));
             g.TOKEN = g.ID_TOKEN;
-            g.CONTEXT = EXPRESSION_CONTEXT;
-            NAMING, DELAY_CONTEXT_CHECK = g.TRUE;
+            g.CONTEXT = g.EXPRESSION_CONTEXT;
+            g.NAMING = g.TRUE
+            g.DELAY_CONTEXT_CHECK = g.TRUE;
         # END OF DO CASE CONTEXT WHEN NAME WAS FOUND
     
     # IDENTIFY_EXIT:

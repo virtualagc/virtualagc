@@ -13,10 +13,14 @@ from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
 from ERROR import ERROR
-from STREAM import STREAM
 from HEX import HEX
 from IDENTIFY import IDENTIFY
 from SAVETOKE import SAVE_TOKEN
+from PREPLITE import PREP_LITERAL
+from HALINCL.FINISHMA import FINISH_MACRO_TEXT
+from HALINCL.SPACELIB import NEXT_ELEMENT
+
+from STREAM import STREAM
 
 '''
  /***************************************************************************/
@@ -332,6 +336,8 @@ def SCAN():
         # seems to me to be employing a trick of some kind whose nature I don't
         # understand, for purposes I don't grasp.
         g.BCD = BYTE(g.BCD, len(g.BCD), g.NEXT_CHAR)
+        if g.BCD == "CLOSE":
+            return
 
     def BUILD_INTERNAL_BCD():
         # Same comments as for BUILD_BCD().
@@ -554,27 +560,29 @@ def SCAN():
                 goto_SIG_CHECK = True
                 goto_LOOP_END = False
                 goto_GET_NEW_CHAR = False
-                while not goto_GET_NEW_CHAR:
-                    while g.CHARTYPE[l.DIGIT] == 1:
-                        if not goto_SIG_CHECK:
-                            if g.OVER_PUNCH != 0:
-                               ERROR(d.CLASS_MO, 1);
-                            BUILD_BCD();
-                            BUILD_INTERNAL_BCD();
-                        else:
-                            goto_SIG_CHECK = False
-                        if l.SIG_DIGITS == 0:
-                            if l.DIGIT == BYTE('0'):
-                                if LENGTH(g.BCD) == 1:
+                while goto_SIG_CHECK or goto_GET_NEW_CHAR:
+                    while goto_SIG_CHECK or goto_GET_NEW_CHAR \
+                            or g.CHARTYPE[l.DIGIT] == 1:
+                        if not goto_GET_NEW_CHAR:
+                            if not goto_SIG_CHECK:
+                                if g.OVER_PUNCH != 0:
+                                   ERROR(d.CLASS_MO, 1);
+                                BUILD_BCD();
+                                BUILD_INTERNAL_BCD();
+                            else:
+                                goto_SIG_CHECK = False
+                            if l.SIG_DIGITS == 0:
+                                if l.DIGIT == BYTE('0'):
+                                    if LENGTH(g.BCD) == 1:
+                                        goto_LOOP_END = True;
+                                    else:
+                                        goto_GET_NEW_CHAR = True;
+                            if not goto_LOOP_END and not goto_GET_NEW_CHAR:
+                                l.SIG_DIGITS = l.SIG_DIGITS + 1;
+                                if l.SIG_DIGITS > 74:
+                                    goto_GET_NEW_CHAR = True;  # TOO MANY SIG DIGITS
+                                elif LENGTH(g.BCD) == 1:
                                     goto_LOOP_END = True;
-                                else:
-                                    goto_GET_NEW_CHAR = False;
-                        if not goto_LOOP_END and not goto_GET_NEW_CHAR:
-                            l.SIG_DIGITS = l.SIG_DIGITS + 1;
-                            if l.SIG_DIGITS > 74:
-                                goto_GET_NEW_CHAR = True;  # TOO MANY SIG DIGITS
-                            elif LENGTH(g.BCD) == 1:
-                                goto_LOOP_END = True;
                         if not goto_LOOP_END:
                             goto_GET_NEW_CHAR = False
                             STREAM();
@@ -732,7 +740,7 @@ def SCAN():
                                 if BYTE(g.S) > BYTE(g.BCD):
                                     goto_END_CHECK_RESERVED_WORD = True;
                                     break;
-                                if g.S[0] == g.BCD[0]:
+                                if g.S == g.BCD:
                                     g.TOKEN = g.I;
                                     if g.IMPLIED_TYPE > 0:
                                         ERROR(d.CLASS_MC, 4, g.BCD);
@@ -990,7 +998,8 @@ def SCAN():
             elif ct == 5:
                 # CASE 5--SINGLE QUOTE = CHARACTER LITERAL
                 g.I = 0;
-                g.STRING_OVERFLOW, g.RESERVED_WORD = g.FALSE;
+                g.STRING_OVERFLOW = g.FALSE
+                g.RESERVED_WORD = g.FALSE;
                 if g.OVER_PUNCH != 0:
                     ERROR(d.CLASS_MO, 5);
                 g.TOKEN = g.CHARACTER_STRING;
@@ -1092,7 +1101,7 @@ def SCAN():
                
             elif ct == 8:
                 # CASE 8--'*' OR '**'
-                g.TOKEN = g.TX(g.NEXT_CHAR);
+                g.TOKEN = g.TX[g.NEXT_CHAR];
                 if g.OVER_PUNCH != 0:
                     ERROR(d.CLASS_MO, 1);
                 STREAM();

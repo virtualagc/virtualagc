@@ -1017,7 +1017,7 @@ class link_sort:
         self.SYM_SORT = 0
 
 
-LINK_SORTS = []  # Elements are link_sort class objects.
+LINK_SORT = []  # Elements are link_sort class objects.
 
 PHASE1_FREESIZE = 0
 
@@ -2609,59 +2609,39 @@ INCREMENT_DOWN_STMT = 0
 PREV_STMT_NUM = -1
 INCLUDE_STMT = -1
 
-'''
-# I haven't ported the following lines because DOWN_INFO is no longer used
-# in REL32.
-
-# INCLUDE COMMON DECLS FOR REL19:  $%COMDEC19
-DWN_STMT(1) LITERALLY 'DOWN_INFO(%1%).DOWN_STMT';
-DWN_ERR(1)  LITERALLY 'DOWN_INFO(%1%).DOWN_ERR';
-DWN_CLS(1)  LITERALLY 'DOWN_INFO(%1%).DOWN_CLS';
-#******************** DR108630 - TEV - 10/29/93 ********************
-DWN_UNKN(1) LITERALLY 'DOWN_INFO(%1%).DOWN_UNKN';
-#******************** END DR108630 *********************************
-DWN_VER(1)  LITERALLY 'DOWN_INFO(%1%).DOWN_VER';
-'''
-
-
 def DWN_STMT(n, value=None):
-    global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_STMT[:]
+        return h.DOWN_INFO[n].DOWN_STMT[:]
     else:
-        DOWN_INFO[n].DOWN_STMT = value[:]
+        h.DOWN_INFO[n].DOWN_STMT = value[:]
 
 
 def DWN_ERR(n, value=None):
-    global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_ERR[:]
+        return h.DOWN_INFO[n].DOWN_ERR[:]
     else:
-        DOWN_INFO[n].DOWN_ERR = value[:]
+        h.DOWN_INFO[n].DOWN_ERR = value[:]
 
 
 def DWN_CLS(n, value=None):
-    global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_CLS[:]
+        return h.DOWN_INFO[n].DOWN_CLS[:]
     else:
-        DOWN_INFO[n].DOWN_CLS = value[:]
+        h.DOWN_INFO[n].DOWN_CLS = value[:]
 
 
 def DWN_UNKN(n, value=None):
-    global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_UNKN[:]
+        return h.DOWN_INFO[n].DOWN_UNKN[:]
     else:
-        DOWN_UNKN[n].DOWN_STMT = value[:]
+        h.DOWN_INFO[n].DOWN_UNKN = value[:]
 
 
 def DWN_VER(n, value=None):
-    global DOWN_INFO
     if value == None:
-        return DOWN_INFO[n].DOWN_VER[:]
+        return h.DOWN_INFO[n].DOWN_VER[:]
     else:
-        DOWN_INFO[n].DOWN_VER = value[:]
+        h.DOWN_INFO[n].DOWN_VER = value[:]
 
 
 PREV_ELINE = FALSE

@@ -83,6 +83,7 @@ if False: # Normal
     f = sys.stdin
 else:    # Debugging
     f = open("SIMPLE.hal", "r")
+    #f = open("/home/rburkey/git/virtualagc/yaShuttle/Source Code/Programming in HAL-S/021-SIMPLE.hal", "r")
 dummy = f.readlines() # Source code.
 for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬","~")\
@@ -457,26 +458,15 @@ indicates the following:
                                 a flag called EOF_FLAG upon encountering such a
                                 string.
     
-    End of sequential file      The byte 0xFE, which STREAM refers to as "the 
-                                EOF symbol" though it seems to have no specific
-                                interpretation in EBCDIC.
+    End of sequential file      A zero-length string.  At least, that's what
+                                I see in the READ_CARD procedure, which is 
+                                what reads the HAL/S source-code files.  
+                                However, it's possible for a sequential file to
+                                contain zero-length strings other than at the
+                                end, so at least for device 0 (source code),
+                                I replace zero-length strings by strings which
+                                contain a single blank
 
-So as far as PDS files are concerned, I see no problem with returning empty 
-strings upon end-of-member. 
-
-As far as sequential files are concerned, though, I can't really use 0xFE
-because a standalone byte of 0xFE (nor 0xFF) has no interpretation whatever in 
-either 7-bit ASCII or in UTF-8, so whichever encoding is being used, I cannot
-guarantee what would happen if this character is encountered within a string by
-present or future Python.  I feel that using an ASCII device-control code
-(in the range 0x00-0x1F) is better.  The Wikipedia article on ASCII specifically
-discusses end-of-file markers and says that while there is no specific EOF code,
-both 0x1A (SUB, but often informally called EOF) and 0x04 (EOT, "end of 
-transmission") have both been used for that purpose historically.  There are 
-arguments for either, but on balance, EOT seems more appropriate to me at the
-moment.  Fortunately, byte 0x04 is not a printable character in EBCDIC either
-(it's a control character, though unfortunately *not* EOT), so it cannot be
-confused with a printable character even in EBCDIC.
 '''
 asciiEOT = 0x04
 def INPUT(fileNumber):
@@ -490,9 +480,12 @@ def INPUT(fileNumber):
             data = file['pds'][mem]
         if index < len(data):
             file['ptr'] = index
-            return data[index]
+            line = data[index]
+            if len(line) == 0:
+                line = ' '
+            return line
         else:
-            return asciiEOT
+            return ''
     except:
         return None
 

@@ -5436,8 +5436,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.MAX_SCOPEp(g.SCOPEp)
             if (g.SYT_FLAGS(g.FIXL[g.MP]) & EXTERNAL_FLAG) != 0: 
                 NEXT_ELEMENT(CSECT_LENGTHS);
-                g.CSECT_LENGTHS[g.SCOPEp].PRIMARY = 0x7FFF;  # SET LENGTH TO MAX
-                g.CSECT_LENGTHS[g.SCOPEp].REMOTE = 0x7FFF;  # TO TURN OFF PHASE2
+                h.CSECT_LENGTHS[g.SCOPEp].PRIMARY = 0x7FFF;  # SET LENGTH TO MAX
+                h.CSECT_LENGTHS[g.SCOPEp].REMOTE = 0x7FFF;  # TO TURN OFF PHASE2
                 # %COPY CHECKING
             SYT_SCOPE(g.FIXL[g.MP], g.SCOPEp);  # UPDATE BLOCK NAME TO SAME SCOPE
             # AS CONTENTS
