@@ -7,6 +7,7 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2022-12-08 RSB  Suffixed the filename with ".xpl".
+                2023-09-22 RSB  Fixed the cent symbol.
     Note:       Inline comments beginning with "/*/" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
@@ -32,7 +33,7 @@ FINISH_MACRO_TEXT:                                                              
       IF FIRST_FREE ^= 0 THEN                                                   00000900
          DO;                                                                    00001000
             II = MACRO_TEXT(FIRST_FREE-1);                                      00001100
-            IF (MACRO_TEXT(FIRST_FREE-2)=BYTE(')') & II=BYTE('›')) |            00001200
+            IF (MACRO_TEXT(FIRST_FREE-2)=BYTE(')') & II=BYTE('Â¢')) |            00001200
                II=BYTE(')') | MACRO_ARG_COUNT>0 THEN DO;                        00001300
                NEXT_ELEMENT(MACRO_TEXTS);                                       00001310
                NEXT_ELEMENT(MACRO_TEXTS);                                       00001320
