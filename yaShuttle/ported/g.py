@@ -84,21 +84,6 @@ if '--help' in sys.argv:
 PARM_FIELD = ','.join(sys.argv[1:])
 
 #------------------------------------------------------------------------------
-# Here are some workarounds intended to get around some of the goofier aspects 
-# of XPL and/or Python vs one another.
-
-# The original program is unapologetic spaghetti code, and subroutines
-# (i.e., CALL'd PROCEDUREs) are expected to be able to 'GO TO' labels in the
-# top-level program (the 'monitor', ##DRIVER) at will. Python, of course, has
-# no 'goto' statement.  A called procedure that expects to do this should 
-# put the desired label name (as a string) in the following shared variable 
-# before returning, and the calling code should check it to determine how to 
-# route control.  A Python None should be placed in the variable before any 
-# such procedure call; that's interpreted by the calling code to mean to 
-# proceed to the next statement without any unusual routing.
-monitorLabel = None
-
-#------------------------------------------------------------------------------
 # Here's some stuff intended to functionally replace some of XPL's 'implicitly
 # declared' functions and variables while retaining roughly the same syntax.
 
@@ -1224,6 +1209,22 @@ TEMPLATE_CLASS = 7  # DONT REORDER ANY CLASSES
 TPL_LAB_CLASS = 8  # BECAUSE OF SNEAKY
 TPL_FUNC_CLASS = 9  # INDEXING
 
+# VAR_CLASS through TPL_FUNC_CLASS are sometimes accessed in the XPL source 
+# as an array called VAR_CLASS() with subscripts of 0 through 7.  I replace 
+# that usage with a function:
+def VAR_CLASSf(cl):
+    if cl == 0:   return VAR_CLASS;
+    elif cl == 1: return LABEL_CLASS;
+    elif cl == 2: return FUNC_CLASS;
+    elif cl == 3: return REPL_ARG_CLASS;
+    elif cl == 4: return REPL_CLASS;
+    elif cl == 5: return TEMPLATE_CLASS;
+    elif cl == 6: return TPL_LAB_CLASS;
+    elif cl == 7: return TPL_FUNC_CLASS;
+    print("Implementation error in VAR_CLASS(CLASS) (CLASS=%d)" % cl, \
+          file=sys.stderr)
+    sys.exit(1)
+
 SCOPEp = 0
 KIN = 0
 QUALIFICATION = 0
@@ -1301,6 +1302,10 @@ all of the variables to 0.  I handle this by coding the reinitialization as
 non-array operations in SYNTHESI and RECOVER -- actually, I just cut-and-past
 the code below into those modules -- so there's no need to make any other
 special provisions for this dual-usage nonsense.
+
+One case that can't be handled so congenially as that is for the ridiculous 
+usage TYPE(TYPE), for which I introduce a new function, TYPEf(), used only in
+the form TYPEf(TYPE).
 '''
 
 TYPE = 0
@@ -1320,6 +1325,50 @@ IC_PTR = 0
 IC_FND = 0
 N_DIM = 0
 S_ARRAY = [0] * (N_DIM_LIM + 1)
+
+def TYPEf(t, value = None):
+    global TYPE, BIT_LENGTH, CHAR_LENGTH, MAT_LENGTH, VEC_LENGTH, ATTRIBUTES, \
+            ATTRIBUTES2, ATTR_MASK, STRUC_PTR, STRUC_DIM, CLASS, NONHAL, \
+            LOCKp, IC_PTR, IC_FND, N_DIM, S_ARRAY
+    if t < 0 or t > 16 + N_DIM_LIM:
+        print("Implementation error in TYPE(TYPE) (TYPE=%d)" % t, \
+              file=sys.stderr)
+        sys.exit(1)
+    if value == None:
+        if   t == 0:  return TYPE;
+        elif t == 1:  return BIT_LENGTH;
+        elif t == 2:  return CHAR_LENGTH;
+        elif t == 3:  return MAT_LENGTH;
+        elif t == 4:  return VEC_LENGTH;
+        elif t == 5:  return ATTRIBUTES;
+        elif t == 6:  return ATTRIBUTES2;
+        elif t == 7:  return ATTR_MASK;
+        elif t == 8:  return STRUC_PTR;
+        elif t == 9:  return STRUC_DIM;
+        elif t == 10: return CLASS;
+        elif t == 11: return NONHAL;
+        elif t == 12: return LOCKp;
+        elif t == 13: return IC_PTR;
+        elif t == 14: return IC_FND;
+        elif t == 15: return N_DIM;
+        return S_ARRAY[t - 16];
+    if   t == 0:  TYPE = value;
+    elif t == 1:  BIT_LENGTH = value;
+    elif t == 2:  CHAR_LENGTH = value;
+    elif t == 3:  MAT_LENGTH = value;
+    elif t == 4:  VEC_LENGTH = value;
+    elif t == 5:  ATTRIBUTES = value;
+    elif t == 6:  ATTRIBUTES2 = value;
+    elif t == 7:  ATTR_MASK = value;
+    elif t == 8:  STRUC_PTR = value;
+    elif t == 9:  STRUC_DIM = value;
+    elif t == 10: CLASS = value;
+    elif t == 11: NONHAL = value;
+    elif t == 12: LOCKp = value;
+    elif t == 13: IC_PTR = value;
+    elif t == 14: IC_FND = value;
+    elif t == 15: N_DIM = value;
+    S_ARRAY[t - 16] = value;
 
 FACTORED_TYPE = 0
 FACTORED_BIT_LENGTH = 0
@@ -2443,7 +2492,6 @@ OUTPUT_WRITER_DISASTER = 'OUTPUT_WRITER_DISASTER'
 PAD1 = ''
 PAD2 = ''
 SMRK_FLAG = 0
-SCAN_DISASTER = 'SCAN_DISASTER'
 
 # TEMPLATE EMISSION DECLARATIONS
 EXTERNALIZE = 0

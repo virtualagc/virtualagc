@@ -23,96 +23,29 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
  /***************************************************************************/
 '''
 
-import sys
-from xplBuiltins import *
-
+from xplBuiltins import MONITOR
 import g
-import HALINCL.COMMON as h
 from INITIALI import INITIALIZATION
 from COMPILAT import COMPILATION_LOOP
-from PRINTSUM import PRINT_SUMMARY
-from OUTPUTWR import OUTPUT_WRITER
-from ERRORSUM import ERROR_SUMMARY
-from HALINCL.DOWNSUM import DOWNGRADE_SUMMARY
-from HALINCL.SPACELIB import RECORD_LINK
+from ALMOST_DISASTER import ALMOST_DISASTER
 
 '''
-The global variable g.monitorLabel is used for subroutines upon error to 
-indicate the severity of error, and hence which label to "GO TO" here at this
-top level of the program.  Python has no "GO TO", so we have to accomplish this
-in a more-clunky indirect fashion.
+Originally, 5 parts comprised this driver module, one of which (THE_BEGINNING)
+was always run, but the other 4 were selectively entered via GO TO statements
+at this level or lower levels in the module hierarchy.  Since Python has no
+GO TO, we have to do things differently.  It's relatively easy to work around
+this just for the GO TO's at *this* level, but the ones at the lower levels
+are a bit of a conundrum.  Fortunately, the blocks of code we need to reach
+all result directly or indirectly in exits from the program, so what we do
+instead is to provide each of the 4 problematic blocks of code as a separate
+subroutine, callable from any level of the code.
 '''
 
 # Initialization
-g.monitorLabel = None
 g.CLOCK[0] = MONITOR(18)
 INITIALIZATION()
-if g.monitorLabel != None:
-    routing = g.monitorLabel
-else:
-    routing = "THE BEGINNING"
 
-if routing == "THE BEGINNING":
-    g.monitorLabel = None
-    g.CLOCK[1] = MONITOR(18)
-    COMPILATION_LOOP()
-    if g.monitorLabel != None:
-        routing = g.monitorLabel
-    else:
-        routing = "ALMOST_DISASTER"  # Fall through
-    
-if routing == "ALMOST_DISASTER":
-    g.monitorLabel = None
-    OUTPUT(1, g.SUBHEADING)
-    g.CLOCK[2] = MONITOR(18)
-    if g.MAX_SEVERITY == 0 and h.SEVERITY_ONE:
-        g.MAX_SEVERITY = 1
-    PRINT_SUMMARY()
-    if g.monitorLabel != None:
-        routing = g.monitorLabel
-    else:
-        if (g.COMPILING & 0x80) != 0:  # HALMAT COMPLETE FLAG
-            if g.MAX_SEVERITY < 2:
-                if g.CONTROL[1] == g.FALSE:
-                    g.TOGGLE(   (g.CONTROL[2] & 0x80) | \
-                                (g.CONTROL[5] & 0x40) | \
-                                (g.CONTROL[9] & 0x10) | \
-                                (g.CONTROL[6] & 0x20) )
-                    if g.MAX_SEVERITY > 0:
-                        g.TOGGLE(g.TOGGLE() | 0x08)
-                    RECORD_LINK()
-        if g.monitorLabel != None:
-            routing = g.monitorLabel
-        else:
-            g.MAX_SEVERITY = 4
-            routing = "ENDITNOW"
-        
-if routing == "SCAN_DISASTER":
-    g.monitorLabel = None
-    OUTPUT_WRITER()
-    if g.monitorLabel != None:
-        routing = g.monitorLabel
-    else:
-        routine = "OUTPUT_WRITER_DISASTER"
-    
-if routing == "OUTPUT_WRITER_DISASTER":
-    g.monitorLabel = None
-    OUTPUT(1, g.SUBHEADING)
-    ERROR_SUMMARY()
-    if g.monitorLabel != None:
-        routing = g.monitorLabel
-    else:
-        routing = "ENDITNOW"
-    
-if routing == "ENDITNOW":
-    g.monitorLabel = None
-    OUTPUT(1, g.DOUBLE)
-    if g.MAX_SEVERITY > 2:
-        DOWNGRADE_SUMMARY()
-    OUTPUT(0, g.X32 + \
-             '*****  C O M P I L A T I O N   A B A N D O N E D  *****')
-    print()
-    exit(g.MAX_SEVERITY << 2)
-
-print("Implementation error: Unknown routing", file=sys.stderr)
-exit(1)
+# THE_BEGINNING:
+g.CLOCK[1] = MONITOR(18)
+COMPILATION_LOOP()
+ALMOST_DISASTER() # GO TO ALMOST_DISASTER

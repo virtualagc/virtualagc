@@ -104,7 +104,7 @@ def EMIT_EXTERNAL():
     
     def ADD_CHAR(VAL):
         # No locals.
-        BYTE(l.NEWBUFF, l.BINX,  VAL);
+        l.NEWBUFF = BYTE(l.NEWBUFF, l.BINX,  VAL);
         l.BINX = l.BINX + 1;
         if l.BINX == g.TPL_LRECL:
             EX_WRITE();

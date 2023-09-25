@@ -51,7 +51,16 @@ def SET_BLOCK_SRN(SYMNUM):
     for g.I in range(0, 5 + 1):
         BLOCK_SRN = (BLOCK_SRN * 10) + (BYTE(g.SRN, g.I) - BYTE('0'));
     # INCREMENT ENTRY COUNT AND ENTER PAIR
+    '''
+    The documentation isn't exactly forthcoming -- i.e., there doesn't appear
+    to be any whatsoever -- but it appears to me that what LOCATE() *may* do
+    is to alter the location of the SRN_BLOCK_RECORD[] array to correspond to
+    BLOCK_SRN_DATA.  At least temporarily, let's just pretend we don't want
+    to do that.
     LOCATE(g.BLOCK_SRN_DATA(), ADDR(g.SRN_BLOCK_RECORD), v.MODF);
+    '''
+    while len(g.SRN_BLOCK_RECORD) < BLOCK_PTR + 2:
+        g.SRN_BLOCK_RECORD.append(0)
     g.SRN_BLOCK_RECORD[0] = g.SRN_BLOCK_RECORD[0] + 1;
     g.SRN_BLOCK_RECORD[BLOCK_PTR] = SYMNUM;
     g.SRN_BLOCK_RECORD[BLOCK_PTR + 1] = BLOCK_SRN;

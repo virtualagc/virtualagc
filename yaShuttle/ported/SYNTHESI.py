@@ -15,6 +15,7 @@ import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
 from ADDANDSU import ADD_AND_SUBTRACT
 from ARITHLIT import ARITH_LITERAL
+from CHECKCO2 import CHECK_CONFLICTS
 from COMPRESS import COMPRESS_OUTER_REF
 from DESCORE  import DESCORE
 from EMITEXTE import EMIT_EXTERNAL
@@ -22,6 +23,7 @@ from EMITSMRK import EMIT_SMRK
 from ERROR    import ERROR
 from GETICQ   import GET_ICQ
 from GETLITER import GET_LITERAL
+from HALMATBA import HALMAT_BACKUP
 from HALMATOU import HALMAT_OUT
 from HALMATPI import HALMAT_PIP
 from HALMATPO import HALMAT_POP
@@ -1010,16 +1012,16 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if tmt == 0:
             #  MATRIX
             g.TEMP2 = g.PSEUDO_LENGTH[g.PTR[g.MP]];
-            if (g.PSEUDO_FORM[I] == XSYT)or(g.PSEUDO_FORM[I] == XXPT):
+            if (g.PSEUDO_FORM[g.I] == g.XSYT)or(g.PSEUDO_FORM[g.I] == XXPT):
                 if g.VAR[g.SP] == 'T': 
                     HALMAT_TUPLE(XMTRA, 0, g.MP, 0, 0);
                     SETUP_VAC(g.MP, g.TEMP, SHL(g.TEMP2, 8) | SHR(g.TEMP2, 8));
                     if IMPLICIT_T:
-                        g.SYT_FLAGS(g.LOC_P[I], g.SYT_FLAGS(g.LOC_P[I]) | IMPL_T_FLAG);
+                        g.SYT_FLAGS(g.LOC_P[g.I], g.SYT_FLAGS(g.LOC_P[g.I]) | IMPL_T_FLAG);
                         g.IMPLICIT_T = g.FALSE;
                     goto_T_FOUND = True;
             if not goto_T_FOUND:
-                if g.PSEUDO_TYPE_P[I] != INT_TYPE | g.PSEUDO_FORM[I] != XLIT:
+                if g.PSEUDO_TYPE_P[g.I] != g.INT_TYPE | g.PSEUDO_FORM[g.I] != g.XLIT:
                     ERROR(d.CLASS_E, 2);
                 if (g.TEMP2 & 0xFF) != SHR(g.TEMP2, 8): 
                     ERROR(d.CLASS_EM, 4);
@@ -1047,32 +1049,32 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 else:
                     g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD);
                     g.TEMP = LIT_RESULT_TYPE(g.MP, g.SP);
-                    if g.TEMP == INT_TYPE: 
-                        if MAKE_FIXED_LIT(g.LOC_P[I]) < 0:
+                    if g.TEMP == g.INT_TYPE: 
+                        if MAKE_FIXED_LIT(g.LOC_P[g.I]) < 0:
                             g.TEMP = g.SCALAR_TYPE;
                     g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.TEMP;
             if goto_POWER_FAIL or not al:  # was else: 
                 goto_POWER_FAIL = False
                 g.TEMP2 = XSPEX(g.TEMP - g.SCALAR_TYPE);
-                if g.PSEUDO_TYPE_P[I] < g.SCALAR_TYPE: 
+                if g.PSEUDO_TYPE_P[g.I] < g.SCALAR_TYPE: 
                     ERROR(d.CLASS_E, 3);
                 goto_REGULAR_EXP = False
                 firstTry = True
                 while firstTry or goto_REGULAR_EXP:
                     firstTry = False
-                    if g.PSEUDO_TYPE_P[I] != INT_TYPE or goto_REGULAR_EXP:
+                    if g.PSEUDO_TYPE_P[g.I] != g.INT_TYPE or goto_REGULAR_EXP:
                         if not goto_REGULAR_EXP:
                             g.TEMP2 = XSEXP;
                         goto_REGULAR_EXP = False
                         g.PTR = 0;
                         g.PSEUDO_TYPE = g.SCALAR_TYPE;
                         MATCH_SIMPLES(g.MP, 0);
-                    elif g.PSEUDO_FORM[I] != XLIT:
+                    elif g.PSEUDO_FORM[g.I] != g.XLIT:
                        g.TEMP2 = XSIEX;
                        goto_REGULAR_EXP = True
                        continue
                     else:
-                       g.TEMP = MAKE_FIXED_LIT(g.LOC_P[I]);
+                       g.TEMP = MAKE_FIXED_LIT(g.LOC_P[g.I]);
                        if g.TEMP < 0: 
                            g.TEMP2 = XSIEX;
                            goto_REGULAR_EXP = True
@@ -1121,8 +1123,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 else:
                     g.TEMP_SYN = ARITH_SHAPER_SUB(MAT_DIM_LIM);
                     g.TEMP1 = ARITH_SHAPER_SUB(MAT_DIM_LIM);
-                    g.PSEUDO_LENGTH[g.TEMP] = SHL(TEMP_SYN, 8) | TEMP1;
-                    g.INX[g.TEMP] = TEMP_SYN * TEMP1;
+                    g.PSEUDO_LENGTH[g.TEMP] = SHL(g.TEMP_SYN, 8) | g.TEMP1;
+                    g.INX[g.TEMP] = g.TEMP_SYN * g.TEMP1;
             elif fm == 1:
                 #  VECTOR
                 if g.INX[g.TEMP] != 1: 
@@ -1130,26 +1132,26 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     goto_DEFAULT_SHAPER = True
                 else:
                     g.TEMP_SYN = ARITH_SHAPER_SUB(VEC_LENGTH_LIM);
-                    g.PSEUDO_LENGTH[g.TEMP], g.INX[g.TEMP] = TEMP_SYN;
+                    g.PSEUDO_LENGTH[g.TEMP], g.INX[g.TEMP] = g.TEMP_SYN;
             elif fm in (2, 3):
                 #  2 - SCALAR
                 #  3 - INTEGER
                 # SCALAR_SHAPER:
-                if (g.INX[g.TEMP] < 1) or (g.INX[g.TEMP] > N_DIM_LIM):
+                if (g.INX[g.TEMP] < 1) or (g.INX[g.TEMP] > g.N_DIM_LIM):
                     ERROR(d.CLASS_QS, 4);
                     goto_DEFAULT_SHAPER = True
                 else:
                     g.TEMP_SYN = 1;
-                    for TEMP1 in range(1, 1 + g.INX[g.TEMP]):
+                    for g.TEMP1 in range(1, 1 + g.INX[g.TEMP]):
                         g.PTR_TOP = g.PTR_TOP + 1;  # OLD STACKS BEING REINSTATED
-                        g.LOC_P[g.PTR_TOP] = ARITH_SHAPER_SUB(ARRAY_DIM_LIM);
-                        g.TEMP_SYN = g.LOC_P[g.PTR_TOP] * TEMP_SYN;
+                        g.LOC_P[g.PTR_TOP] = ARITH_SHAPER_SUB(g.ARRAY_DIM_LIM);
+                        g.TEMP_SYN = g.LOC_P[g.PTR_TOP] * g.TEMP_SYN;
                     # IF THE TOTAL NUMBER OF ELEMENTS BEING CREATED
                     # WITH A SHAPING FUNCTION IS GREATER THAN 32767
                     # OR LESS THAN 1 THEN GENERATE A QS8 ERROR
-                    if (TEMP_SYN > ARRAY_DIM_LIM) or (TEMP_SYN < 1):  # ""
+                    if (g.TEMP_SYN > g.ARRAY_DIM_LIM) or (g.TEMP_SYN < 1):  # ""
                         ERROR(d.CLASS_QS, 8);
-                    g.PSEUDO_LENGTH[g.TEMP] = TEMP_SYN;
+                    g.PSEUDO_LENGTH[g.TEMP] = g.TEMP_SYN;
         if goto_DEFAULT_SHAPER:
             goto_DEFAULT_SHAPER = False
             # DO CASE FIXL[MP];
@@ -1174,7 +1176,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.FCN_LOC[g.FCN_LV] = g.FIXL[g.MP];
             SAVE_ARRAYNESS();
             HALMAT_POP(XSFST, 0, XCO_N, g.FCN_LV);
-            g.VAL_P[g.PTR_TOP] = LAST_POPp;
+            g.VAL_P[g.PTR_TOP] = g.LAST_POPp;
     elif PRODUCTION_NUMBER == 23:  # reference 230
         #  <ARITH CONV>  ::=  INTEGER
         g.FIXL[g.MP] = 3;
@@ -1199,7 +1201,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         END_ANY_FCN();
     elif PRODUCTION_NUMBER == 29:  # reference 290
         #  <PRIMARY>  ::=  <MODIFIED ARITH FUNC>
-        SETUP_NO_ARG_FCN(TEMP_SYN);
+        SETUP_NO_ARG_FCN(g.TEMP_SYN);
     # reference 300 has been relocated.
     elif PRODUCTION_NUMBER == 31:  # reference 310
         #  <PRIMARY> ::= <PRE PRIMARY>
@@ -1239,7 +1241,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PTR[g.MP] = 1;
     elif PRODUCTION_NUMBER == 39:  # reference 390
         # <ANY STATEMENT>::= <BLOCK DEFINITION>
-        g.PTR[g.MP] = g.BLOCK_MODE[g.NEST + 1] = UPDATE_MODE;  # WHAT BLOCK WAS
+        g.PTR[g.MP] = g.BLOCK_MODE[g.NEST + 1] = g.UPDATE_MODE;  # WHAT BLOCK WAS
     elif PRODUCTION_NUMBER == 40:  # reference 400
         #  <BASIC STATEMENT>  ::= <LABEL DEFINITION> <BASIC STATEMENT>
         goto_LABEL_INCORP = True
@@ -1248,35 +1250,35 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.XSET(0x4);
         g.PTR_TOP = g.PTR_TOP - g.INX[g.PTR[g.MP]];
         if NAME_PSEUDOS: NAME_ARRAYNESS(g.MP);
-        HALMAT_FIX_PIPp(LAST_POPp, g.INX[g.PTR[g.MP]]);
+        HALMAT_FIX_PIPp(g.LAST_POPp, g.INX[g.PTR[g.MP]]);
         EMIT_ARRAYNESS();
         goto_FIX_NOLAB = True
     # reference 420 has been relocated.
     elif PRODUCTION_NUMBER == 43:  # reference 430
         #  <BASIC STATEMENT>  ::=  EXIT  <LABEL>  ;
-        SET_XREF(g.FIXL[g.MPP1], XREF_REF);
+        SET_XREF(g.FIXL[g.MPP1], g.XREF_REF);
         goto_EXITTING = True
     # reference 440 has been relocated.
     elif PRODUCTION_NUMBER == 45:  # reference 450
         #  <BASIC STATEMENT>  ::=  REPEAT  <LABEL>  ;
-        SET_XREF(g.FIXL[g.MPP1], XREF_REF);
+        SET_XREF(g.FIXL[g.MPP1], g.XREF_REF);
         goto_REPEATING = True
     elif PRODUCTION_NUMBER == 46:  # reference 460
         #  <BASIC STATEMENT>  ::=  GO TO  <LABEL>  ;
         g.I = g.FIXL[g.MP + 2];
-        SET_XREF(I, XREF_REF);
-        if g.SYT_LINK1(I) < 0: 
-            if g.DO_LEVEL < (-g.SYT_LINK1(I)): 
+        SET_XREF(g.I, g.XREF_REF);
+        if g.SYT_LINK1(g.I) < 0: 
+            if g.DO_LEVEL < (-g.SYT_LINK1(g.I)): 
                 ERROR(d.CLASS_GL, 3);
-        elif g.SYT_LINK1(I) == 0: 
-            g.SYT_LINK1(I, g.STMT_NUM());
+        elif g.SYT_LINK1(g.I) == 0: 
+            g.SYT_LINK1(g.I, g.STMT_NUM());
         g.XSET(0x1001);
-        if VAR_LENGTH(I) > 3: 
-            ERROR(d.CLASS_GL, VAR_LENGTH(I));
-        elif VAR_LENGTH(I) == 0: 
-            g.VAR_LENGTH(I, 3);
+        if VAR_LENGTH(g.I) > 3: 
+            ERROR(d.CLASS_GL, VAR_LENGTH(g.I));
+        elif VAR_LENGTH(g.I) == 0: 
+            g.VAR_LENGTH(g.I, 3);
         HALMAT_POP(XBRA, 1, 0, 0);
-        HALMAT_PIP(I, XSYT, 0, 0);
+        HALMAT_PIP(g.I, g.XSYT, 0, 0);
         goto_FIX_NOLAB = True
     # reference 470 has been relocated.
     elif PRODUCTION_NUMBER == 48:  # reference 480
@@ -1293,9 +1295,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         END_ANY_FCN();
     elif PRODUCTION_NUMBER == 52:  # reference 520
         # <BASIC STATEMENT>::= RETURN ;
-        if SYT_CLASS(g.BLOCK_SYTREF[g.NEST]) == FUNC_CLASS: 
+        if SYT_CLASS(g.BLOCK_SYTREF[g.NEST]) == g.FUNC_CLASS: 
             ERROR(d.CLASS_PF, 1);
-        elif g.BLOCK_MODE[g.NEST] == UPDATE_MODE: 
+        elif g.BLOCK_MODE[g.NEST] == g.UPDATE_MODE: 
             ERROR(d.CLASS_UP, 2);
         HALMAT_POP(XRTRN, 0, 0, 0);
         g.XSET(0x7);
@@ -1308,9 +1310,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             ERROR(d.CLASS_PF, 9);
         if CHECK_ARRAYNESS: 
             ERROR(d.CLASS_PF, 3);
-        if g.BLOCK_MODE[g.NEST] == UPDATE_MODE: 
+        if g.BLOCK_MODE[g.NEST] == g.UPDATE_MODE: 
             ERROR(d.CLASS_UP, 2);
-        elif SYT_CLASS(g.BLOCK_SYTREF[g.NEST]) != FUNC_CLASS:
+        elif SYT_CLASS(g.BLOCK_SYTREF[g.NEST]) != g.FUNC_CLASS:
             ERROR(d.CLASS_PF, 2);
         else:
             g.PTR = 0;
@@ -1333,7 +1335,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         elif g.TEMP == 11:
             pass;
         HALMAT_TUPLE(XRTRN, 0, g.MPP1, 0, 0);
-        HALMAT_FIX_PIPTAGS(NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.MPP1]], 0);
+        HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.MPP1]], 0);
         g.PTR_TOP = g.PTR[g.MPP1] - 1;
         goto_FIX_NOLAB = True
     elif PRODUCTION_NUMBER == 54:  # reference 540
@@ -1362,19 +1364,19 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         HALMAT_POP(g.TEMP, 1, 0, 0);
         HALMAT_PIP(g.DO_LOC[g.DO_LEVEL], XINL, 0, 0);
         g.I = 0;
-        while g.SYT_LINK2(I) > 0:
-            g.J = g.SYT_LINK2(I);
+        while g.SYT_LINK2(g.I) > 0:
+            g.J = g.SYT_LINK2(g.I);
             if g.SYT_LINK1(J) < 0: 
                 if g.DO_LEVEL == (-g.SYT_LINK1(J)): 
                     g.SYT_LINK1(J, -(DO_LEVEL_LIM + 1));
-                    g.SYT_LINK2(I, g.SYT_LINK2(J));
+                    g.SYT_LINK2(g.I, g.SYT_LINK2(J));
             g.I = J;
         if g.DO_LOC[0] == 0: 
             g.I = g.DO_CHAIN[g.DO_LEVEL];
-            while I > 0:
-                g.CLOSE_BCD = SYT_NAME(I);
-                DISCONNECT(I);
-                g.I = g.SYT_LINK1(I);
+            while g.I > 0:
+                g.CLOSE_BCD = SYT_NAME(g.I);
+                DISCONNECT(g.I);
+                g.I = g.SYT_LINK1(g.I);
             g.DO_LEVEL = g.DO_LEVEL - 1;
         else:
             g.DO_LOC[0] = g.DO_LOC[0] - 1;
@@ -1392,7 +1394,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 59:  # reference 590
         # <BASIC STATEMENT>::= <FILE EXP> = <EXPRESSION> ;
         HALMAT_TUPLE(XFILE, 0, g.MP, g.SP - 1, g.FIXV[g.MP]);
-        HALMAT_FIX_PIPTAGS(NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.SP - 1]], 1);
+        HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.SP - 1]], 1);
         if KILL_NAME(g.SP - 1): 
             ERROR(d.CLASS_T, 5);
         EMIT_ARRAYNESS();
@@ -1409,7 +1411,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             ERROR(d.CLASS_T, 7);
         if (l.H1 & 0x6) == 0x2: 
             ERROR(d.CLASS_T, 8);
-        HALMAT_FIX_PIPTAGS(NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.MP]], 0);
+        HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.MP]], 0);
         if KILL_NAME(g.MP): 
             ERROR(d.CLASS_T, 5);
         CHECK_ARRAYNESS();  # DR 173
@@ -1520,7 +1522,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             # CHECK PCARGBITS OF THE %MACRO ARGUMENT TO
             # SEE IF IT REQUIRES NAME CONTEXT CHECKING.
             # IF SO, SET NAMING FLAG.
-            if ((g.PCARGBITS[PCARGOFF] & 0x80) != 0):
+            if ((g.PCARGBITS[g.PCARGOFF] & 0x80) != 0):
                 g.NAMING = g.TRUE;
             
             g.ALT_PCARG[0] = g.ALT_PCARGp[g.FIXL[g.MP]];
@@ -1535,20 +1537,20 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PTR_TOP = g.PTR[g.MPP1] - 1;
     elif PRODUCTION_NUMBER == 80:  # reference 800
         #  <% MACRO ARG>  ::=  <NAME VAR>
-        if PCARGOFF > 0:
+        if g.PCARGOFF > 0:
             if PCARGp == 0: 
                 g.PCARGOFF = 0;
             else:
-                g.TEMP = g.PCARGBITS[PCARGOFF];
+                g.TEMP = g.PCARGBITS[g.PCARGOFF];
                 if (g.TEMP & 0x1) == 0: 
                     ERROR(d.CLASS_XM, 5);
                 else:
                     l.H1 = g.PSEUDO_TYPE_P[g.PTR[g.MP]];
                     if l.H1 > 0x40: 
                         l.H1 = (l.H1 & 0xF) + 10;
-                    elif TEMP_SYN == 0: 
+                    elif g.TEMP_SYN == 0: 
                         l.H1 = l.H1 + 20;
-                    if (SHL(1, l.H1) & g.PCARGTYPE[PCARGOFF]) == 0:
+                    if (SHL(1, l.H1) & g.PCARGTYPE[g.PCARGOFF]) == 0:
                         ERROR(d.CLASS_XM, 4);  # ILLEGAL TYPE
                     if g.EXT_P[g.PTR[g.MP]] > 0: 
                         if SHR(g.TEMP, 6):
@@ -1558,10 +1560,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         if SHR(g.TEMP, 5):
                             ERROR(d.CLASS_XM, 7);  # NO ARRAYNESS
                     if SHR(g.TEMP, 4): 
-                        if TEMP_SYN != 2: 
+                        if g.TEMP_SYN != 2: 
                             g.TEMP_SYN = 3;
                     if SHR(g.TEMP, 7): 
-                        CHECK_NAMING(TEMP_SYN, g.MP);
+                        CHECK_NAMING(g.TEMP_SYN, g.MP);
                     else:
                         if SHR(g.TEMP, 4): 
                             CHECK_ASSIGN_CONTEXT(g.MP);
@@ -1571,39 +1573,39 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                             l.H2 = g.FIXV[g.MP];
                         else:
                             l.H2 = g.FIXL[g.MP];
-                        if (g.SYT_FLAGS(l.H2) & (TEMPORARY_FLAG)) != 0:
+                        if (g.SYT_FLAGS(l.H2) & (g.TEMPORARY_FLAG)) != 0:
                             if SHR(g.TEMP, 8): 
                                 ERROR(d.CLASS_XM, 8);
                         l.H2 = g.VAL_P[g.PTR[g.MP]];
                         # NO SUBSCRIPTS ARE ALLOWED ON THE SOURCE OF %NAMEBIAS
-                        if PCARGOFF == 2:
+                        if g.PCARGOFF == 2:
                             if SHR(g.TEMP, 2):
                                 if SHR(l.H2, 5): 
                                     ERROR(d.CLASS_XM, 9);
                         elif SHR(g.TEMP, 2):
                             if SHR(l.H2, 4): 
                                 ERROR(d.CLASS_XM, 9);
-                g.PCARGOFF = PCARGOFF + 1;
+                g.PCARGOFF = g.PCARGOFF + 1;
                 
                 # CHECK PCARGBITS OF THE %MACRO ARGUMENT TO
                 # SEE IF IT REQUIRES NAME CONTEXT CHECKING.
                 # IF SO, SET NAMING FLAG.
-                if ((g.PCARGBITS[PCARGOFF] & 0x80) != 0):
+                if ((g.PCARGBITS[g.PCARGOFF] & 0x80) != 0):
                    g.NAMING = g.TRUE;
                 
             g.PCARGp[0] = g.PCARGp[0] - 1;
             g.ALT_PCARGp[0] = g.ALT_PCARGp[0] - 1;
     elif PRODUCTION_NUMBER == 81:  # reference 810
         #  <% MACRO ARG>  ::=  <CONSTANT>
-        if PCARGOFF > 0: 
+        if g.PCARGOFF > 0: 
             if PCARGp == 0: 
                 g.PCARGOFF = 0;
-            elif (g.PCARGBITS[PCARGOFF] & 0x8) == 0: 
+            elif (g.PCARGBITS[g.PCARGOFF] & 0x8) == 0: 
                 ERROR(d.CLASS_XM, 3);
             # LITERALS ILLEGAL
-            elif (SHL(1, g.PSEUDO_TYPE_P[g.PTR[g.MP]]) & g.PCARGTYPE[PCARGOFF]) == 0:
+            elif (SHL(1, g.PSEUDO_TYPE_P[g.PTR[g.MP]]) & g.PCARGTYPE[g.PCARGOFF]) == 0:
                 ERROR(d.CLASS_XM, 4);  #  TYPE ILLEGAL
-            g.PCARGOFF = PCARGOFF + 1;
+            g.PCARGOFF = g.PCARGOFF + 1;
         g.PCARGp[0] = g.PCARGp[0] - 1;
         g.ALT_PCARGp[0] = g.ALT_PCARGp[0] - 1;
     # reference 820 has been relocated.
@@ -1643,7 +1645,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <BIT FUNC HEAD>  ::=  BIT  <SUB OR QUALIFIER>
         g.NOSPACE();
         g.PTR[g.MP] = g.PTR[g.SP];
-        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = BIT_TYPE;
+        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.BIT_TYPE;
         g.VAR[g.MP] = 'BIT CONVERSION FUNCTION';
         if PUSH_FCN_STACK(3): 
             g.FCN_LOC[g.FCN_LV] = 1;
@@ -1662,13 +1664,13 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(2, g.TEMP2, g.TEMP);
         else:
             HALMAT_TUPLE(XBNOT, 0, g.SP, 0, g.INX[g.PTR[g.SP]]);
-            SETUP_VAC(g.SP, BIT_TYPE);
+            SETUP_VAC(g.SP, g.BIT_TYPE);
         g.INX[g.PTR[g.SP]] = g.INX[g.PTR[g.SP]] & 1;
         g.PTR[g.MP] = g.PTR[g.SP];
     elif PRODUCTION_NUMBER == 96:  # reference 960
         # <BIT CAT> ::= <BIT CAT> <CAT> <NOT> <BIT PRIM>
         HALMAT_TUPLE(XBNOT, 0, g.SP, 0, 0);
-        SETUP_VAC(g.SP, BIT_TYPE);
+        SETUP_VAC(g.SP, g.BIT_TYPE);
         goto_DO_BIT_CAT = True;
     elif PRODUCTION_NUMBER == 97:  # reference 970
         #  <BIT FACTOR> ::= <BIT CAT>
@@ -1798,7 +1800,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <CHAR FUNC HEAD>  ::=  CHARACTER  <SUB OR QUALIFIER>
         g.NOSPACE();
         g.PTR[g.MP] = g.PTR[g.SP];
-        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = CHAR_TYPE;
+        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.CHAR_TYPE;
         g.VAR[g.MP] = 'CHARACTER CONVERSION FUNCTION';
         if PUSH_FCN_STACK(3): 
             g.FCN_LOC[g.FCN_LV] = 0;
@@ -1860,10 +1862,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.ELSEIF_PTR = g.STACK_PTR[g.SP];
         # MOVE ELSEIF_PTR TO FIRST PRINTABLE REPLACE MACRO TOKEN-111342
         g.I = ELSEIF_PTR;
-        while (I > 0) and ((g.GRAMMAR_FLAGS[I - 1] & MACRO_ARG_FLAG) != 0):
-           g.I = I - 1;
-           if ((g.GRAMMAR_FLAGS[I] & PRINT_FLAG) != 0):
-                g.ELSEIF_PTR = I;
+        while (g.I > 0) and ((g.GRAMMAR_FLAGS[g.I - 1] & MACRO_ARG_FLAG) != 0):
+           g.I = g.I - 1;
+           if ((g.GRAMMAR_FLAGS[g.I] & PRINT_FLAG) != 0):
+                g.ELSEIF_PTR = g.I;
         if ELSEIF_PTR > 0:
             if STMT_END_PTR > -1:
                 g.SQUEEZING = g.FALSE;
@@ -1917,7 +1919,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         HALMAT_TUPLE(XBTRU, 0, g.MPP1, 0, 0);
         if g.PSEUDO_LENGTH[g.PTR[g.MPP1]] > 1: 
             ERROR(d.CLASS_GB, 1, 'IF');
-        g.TEMP = LAST_POPp;
+        g.TEMP = g.LAST_POPp;
         EMIT_ARRAYNESS();
         goto_EMIT_IF = True
     elif PRODUCTION_NUMBER == 143:  # reference 1430
@@ -1968,12 +1970,12 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if UNARRAYED_SIMPLE(g.SP - 1): 
             ERROR(d.CLASS_GC, 3);
         HALMAT_POP(XDFOR, g.TEMP2 + 3, XCO_N, 0);
-        EMIT_PUSH_DO(1, 5, g.PSEUDO_TYPE_P[g.PTR[g.SP]] == INT_TYPE, g.MP - 2, g.FIXL[g.MP]);
+        EMIT_PUSH_DO(1, 5, g.PSEUDO_TYPE_P[g.PTR[g.SP]] == g.INT_TYPE, g.MP - 2, g.FIXL[g.MP]);
         g.TEMP = g.PTR[g.MP];
         while g.TEMP <= g.PTR_TOP:
             HALMAT_PIP(g.LOC_P[g.TEMP], g.PSEUDO_FORM[g.TEMP], 0, 0);
             g.TEMP = g.TEMP + 1;
-        g.FIXV[g.MP] = LAST_POPp;
+        g.FIXV[g.MP] = g.LAST_POPp;
         g.PTR_TOP = g.PTR[g.MP] - 1;
         g.PTR[g.MP] = g.TEMP2 | g.FIXF[g.MP];  ''' RECORD DO TYPE AND WHETHER
                                          LOOP VAR IS TEMPORARY '''
@@ -1988,7 +1990,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         HALMAT_POP(XDFOR, 2, XCO_N, 0);
         EMIT_PUSH_DO(1, 5, 0, g.MP - 3, g.FIXL[g.MP - 1]);
         HALMAT_PIP(g.LOC_P[g.TEMP], g.PSEUDO_FORM[g.TEMP], 0, 0);
-        g.FIXV[g.MP - 1] = LAST_POPp;  # IN <FOR KEY> STACK ENTRY
+        g.FIXV[g.MP - 1] = g.LAST_POPp;  # IN <FOR KEY> STACK ENTRY
         goto_DO_DISCRETE = True
     # reference 1600 relocated.
     elif PRODUCTION_NUMBER == 161:  # reference 1610
@@ -2014,20 +2016,20 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <FOR KEY>  ::=  FOR TEMPORARY  <IDENTIFIER>  =
         g.ID_LOC = g.FIXL[g.MP + 2];
         g.PTR[g.MP] = PUSH_INDIRECT(1);
-        g.LOC_P[g.PTR_TOP] = ID_LOC;
-        g.PSEUDO_FORM[g.PTR_TOP] = XSYT;
-        g.PSEUDO_TYPE_P[g.PTR_TOP] = INT_TYPE
-        g.SYT_TYPE(ID_LOC, INT_TYPE);
-        g.TEMP = DEFAULT_ATTR & SD_FLAGS;
-        g.SYT_FLAGS(ID_LOC, g.SYT_FLAGS(ID_LOC) | g.TEMP);
-        g.FIXL[g.MP] = ID_LOC
-        g.DO_CHAIN = ID_LOC;
+        g.LOC_P[g.PTR_TOP] = g.ID_LOC;
+        g.PSEUDO_FORM[g.PTR_TOP] = g.XSYT;
+        g.PSEUDO_TYPE_P[g.PTR_TOP] = g.INT_TYPE
+        g.SYT_TYPE(g.ID_LOC, g.INT_TYPE);
+        g.TEMP = g.DEFAULT_ATTR & g.SD_FLAGS;
+        g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.TEMP);
+        g.FIXL[g.MP] = g.ID_LOC
+        g.DO_CHAIN = g.ID_LOC;
         g.FIXF[g.MP] = 8;  # DO CHAIN EXISTS FOR CURRENT DO
         g.CONTEXT = 0;
         g.FACTORING = g.TRUE;
         if g.SIMULATING: 
             STAB_VAR(g.MP);
-        SET_XREF(ID_LOC, XREF_ASSIGN);
+        SET_XREF(g.ID_LOC, XREF_ASSIGN);
     elif PRODUCTION_NUMBER == 165:  # reference 1650
         # <ENDING>::= END
         # ON END STATEMENT, REPLACE THE CURRENT SCOPE WITH
@@ -2130,19 +2132,19 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 176:  # reference 1760
         #  <CALL KEY>  ::=  CALL  <LABEL VAR>
         g.I = g.FIXL[g.MPP1];
-        if g.SYT_TYPE(I) == g.PROC_LABEL: 
-            if g.SYT_LINK1(I) < 0:
-                if g.DO_LEVEL < (-g.SYT_LINK1(I)): 
+        if g.SYT_TYPE(g.I) == g.PROC_LABEL: 
+            if g.SYT_LINK1(g.I) < 0:
+                if g.DO_LEVEL < (-g.SYT_LINK1(g.I)): 
                     ERROR(d.CLASS_PL, 8, g.VAR[g.MPP1]);
-        if g.SYT_LINK1(I) == 0: 
-            g.SYT_LINK1(I, g.STMT_NUM());
-        while g.SYT_TYPE(I) == IND_CALL_LAB:
-            g.I = SYT_PTR(I);
-        if g.SYT_TYPE(I) != g.PROC_LABEL: 
+        if g.SYT_LINK1(g.I) == 0: 
+            g.SYT_LINK1(g.I, g.STMT_NUM());
+        while g.SYT_TYPE(g.I) == IND_CALL_LAB:
+            g.I = SYT_PTR(g.I);
+        if g.SYT_TYPE(g.I) != g.PROC_LABEL: 
             ERROR(d.CLASS_DT, 3, g.VAR[g.MPP1]);
         if CHECK_ARRAYNESS: 
             ERROR(d.CLASS_PL, 7, g.VAR[g.MPP1]);
-        if (g.SYT_FLAGS(I) & ACCESS_FLAG) != 0:
+        if (g.SYT_FLAGS(g.I) & g.ACCESS_FLAG) != 0:
             ERROR(d.CLASS_PS, 6, g.VAR[g.MPP1]);
         g.XSET(0x2);
         g.FCN_ARG = 0;
@@ -2165,11 +2167,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.EXT_P[g.PTR[g.MP]] = 0;
         # if THE DECLARED VALUE IS A DOUBLE CONSTANT SCALAR OR
         # INTEGER,: SET LIT1 EQUAL TO 5.
-        if (TYPE == g.SCALAR_TYPE) or (FACTORED_TYPE == g.SCALAR_TYPE) or \
-                (TYPE == INT_TYPE) or (FACTORED_TYPE == INT_TYPE) or \
-                ((TYPE == 0) and (FACTORED_TYPE == 0)):
-            if ((ATTRIBUTES & DOUBLE_FLAG) != 0) and \
-                    ((g.FIXV[g.MP - 1] & CONSTANT_FLAG) != 0):
+        if (g.TYPE == g.SCALAR_TYPE) or (g.FACTORED_TYPE == g.SCALAR_TYPE) or \
+                (g.TYPE == g.INT_TYPE) or (g.FACTORED_TYPE == g.INT_TYPE) or \
+                ((g.TYPE == 0) and (g.FACTORED_TYPE == 0)):
+            if ((g.ATTRIBUTES & g.DOUBLE_FLAG) != 0) and \
+                    ((g.FIXV[g.MP - 1] & g.CONSTANT_FLAG) != 0):
                 LIT1(GET_LITERAL(g.LOC_P[g.PTR[g.MP]]), 5);
     elif PRODUCTION_NUMBER == 182:  # reference 1820
         #  <EXPRESSION> ::= <BIT EXP>
@@ -2206,7 +2208,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 192:  # reference 1920
         #  <LIST EXP>  ::=  <ARITH EXP>  #  <EXPRESSION>
         if g.FCN_MODE[g.FCN_LV] == 2: 
-            if g.PSEUDO_FORM[g.PTR[g.MP]] != XLIT: 
+            if g.PSEUDO_FORM[g.PTR[g.MP]] != g.XLIT: 
                 g.TEMP = 0;
             else:
                 g.TEMP = MAKE_FIXED_LIT(g.LOC_P[g.PTR[g.MP]]);
@@ -2240,14 +2242,14 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             CHECK_ASSIGN_CONTEXT(g.MP);
     elif PRODUCTION_NUMBER == 196:  # reference 1960
         #  <VARIABLE  ::=  <EVENT VAR>
-        if CONTEXT > 0: 
-            if not NAME_PSEUDOS: g.PSEUDO_TYPE_P[g.PTR[g.MP]] = BIT_TYPE;
+        if g.CONTEXT > 0: 
+            if not NAME_PSEUDOS: g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.BIT_TYPE;
         if not DELAY_CONTEXT_CHECK: 
             CHECK_ASSIGN_CONTEXT(g.MP);
         g.PSEUDO_LENGTH[g.PTR[g.MP]] = 1;
     elif PRODUCTION_NUMBER == 197:  # reference 1970
         #  <VARIABLE>  ::=  <SUBBIT HEAD>  <VARIABLE>  )
-        if CONTEXT == 0:
+        if g.CONTEXT == 0:
             if SHR(g.VAL_P[g.PTR[g.MPP1]], 7): 
                 ERROR(d.CLASS_QX, 7);
             g.TEMP = 1;
@@ -2261,10 +2263,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if not DELAY_CONTEXT_CHECK: CHECK_ASSIGN_CONTEXT(g.MP);
     elif PRODUCTION_NUMBER == 199:  # reference 1990
         #  <VARIABLE>  ::=  <NAME KEY>  (  <NAME VAR>  )
-        if TEMP_SYN != 2: 
-            if CONTEXT == 0: 
+        if g.TEMP_SYN != 2: 
+            if g.CONTEXT == 0: 
                 g.TEMP_SYN = 3;
-        CHECK_NAMING(TEMP_SYN, g.MP + 2);
+        CHECK_NAMING(g.TEMP_SYN, g.MP + 2);
         g.DELAY_CONTEXT_CHECK = g.FALSE;
     elif PRODUCTION_NUMBER == 200:  # reference 2000
         #  <NAME VAR>  ::=  <VARIABLE>
@@ -2282,7 +2284,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 201:  # reference 2010
         #  <NAME VAR>  ::=  <LABEL VAR>
         l.H1 = g.SYT_TYPE(g.FIXL[g.MP]);
-        if l.H1 == TASK_LABEL or l.H1 == g.PROG_LABEL: 
+        if l.H1 == g.TASK_LABEL or l.H1 == g.PROG_LABEL: 
             pass  # GO TO OK_LABELS;
         elif g.VAR[g.MP - 2] == 'NAME':
             ERROR(d.CLASS_EN, 4, g.VAR[g.MP]);
@@ -2302,7 +2304,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.TEMP_SYN = 0;
     elif PRODUCTION_NUMBER == 206:  # reference 2060
         #  <NAME EXP>  ::=  <NAME KEY>  (  <NAME VAR>  )
-        CHECK_NAMING(TEMP_SYN, g.MP + 2);
+        CHECK_NAMING(g.TEMP_SYN, g.MP + 2);
         g.DELAY_CONTEXT_CHECK = g.FALSE;
     # reference 2070 relocated
     elif PRODUCTION_NUMBER == 208:  # reference 2080
@@ -2346,16 +2348,16 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 220:  # reference 2200
         #  <QUAL STRUCT>  ::=  <STRUCTURE ID>
         g.PTR[g.MP] = PUSH_INDIRECT(1);
-        g.PSEUDO_TYPE_P[g.PTR_TOP] = MAJ_STRUC;
+        g.PSEUDO_TYPE_P[g.PTR_TOP] = g.MAJ_STRUC;
         g.EXT_P[g.PTR_TOP] = g.STACK_PTR[g.SP];
         if g.FIXV[g.MP] == 0: 
             g.FIXV[g.MP] = g.FIXL[g.MP];
             g.FIXL[g.MP] = VAR_LENGTH(g.FIXL[g.MP]);
-            SET_XREF(g.FIXL[g.MP], XREF_REF);
+            SET_XREF(g.FIXL[g.MP], g.XREF_REF);
         g.LOC_P[g.PTR_TOP] = g.FIXV[g.MP];
         g.INX[g.PTR_TOP] = 0;
         g.VAL_P[g.PTR_TOP] = SHL(NAMING, 8);
-        g.PSEUDO_FORM[g.PTR_TOP] = XSYT;
+        g.PSEUDO_FORM[g.PTR_TOP] = g.XSYT;
     elif PRODUCTION_NUMBER == 221:  # reference 2210
         #  <QUAL STRUCT>  ::=  <QUAL STRUCT>  .  <STRUCTURE ID>
         g.TEMP = VAR_LENGTH(g.FIXL[g.SP]);
@@ -2364,7 +2366,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.LOC_P[g.PTR_TOP] = g.FIXL[g.SP];
             g.INX[g.PTR_TOP - 1] = 1;
             g.INX[g.PTR_TOP] = 0;
-            SET_XREF(g.TEMP, XREF_REF);
+            SET_XREF(g.TEMP, g.XREF_REF);
             g.FIXL[g.MP] = g.TEMP;
         else:
             g.FIXL[g.MP] = g.FIXL[g.SP];
@@ -2496,7 +2498,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.FIXL[g.MP] == 1: 
             g.PTR[g.MP] = PUSH_INDIRECT(1);
             g.PSEUDO_FORM[g.PTR[g.MP]] = 0;  #  MUSNT FALL IN LIT OR VAC
-            g.PSEUDO_TYPE_P[g.PTR[g.MP]] = INT_TYPE;
+            g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.INT_TYPE;
         g.VAL_P[g.PTR[g.MP]] = g.FIXL[g.MP];
     elif PRODUCTION_NUMBER == 245:  # reference 2450
         #  <# EXPRESSION>  ::=  #
@@ -2609,7 +2611,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     g.TEMP = 0;
                     ERROR(d.CLASS_LS, 1);
                     g.S = SUBSTR(g.VAR[g.SP], 0, g.TEMP2);
-                    g.VAR[g.MP] = g.VAR[g.MP] + S;
+                    g.VAR[g.MP] = g.VAR[g.MP] + g.S;
                 else:
                     g.VAR[g.MP] = g.VAR[g.MP] + g.VAR[g.SP];
         goto_CHAR_LITS = True
@@ -2671,26 +2673,26 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             HALMAT_POP(XEDCL, 0, XCO_N, 1);
         goto_CHECK_DECLS = False
         g.I = g.BLOCK_MODE[g.NEST];
-        if (I == FUNC_MODE) or (I == g.PROC_MODE): 
+        if (g.I == g.FUNC_MODE) or (g.I == g.PROC_MODE): 
             g.J = g.BLOCK_SYTREF[g.NEST];  # PROC FUNC NAME
             if SYT_PTR(J) != 0: 
                 g.J = SYT_PTR(J);  # POINT TO FIRST ARG
-                while (g.SYT_FLAGS(J) & PARM_FLAGS) != 0:
-                    if (g.SYT_FLAGS(J) & IMP_DECL) != 0:
+                while (g.SYT_FLAGS(J) & g.PARM_FLAGS) != 0:
+                    if (g.SYT_FLAGS(J) & g.IMP_DECL) != 0:
                         # UNDECLARED PARAMETER
                         ERROR(d.CLASS_DU, 2, SYT_NAME(J));
                         g.PARMS_PRESENT = 0;
-                        g.SYT_TYPE(J, DEFAULT_TYPE);
-                        g.SYT_FLAGS(J, g.SYT_FLAGS(J) | DEFAULT_ATTR);
+                        g.SYT_TYPE(J, g.DEFAULT_TYPE);
+                        g.SYT_FLAGS(J, g.SYT_FLAGS(J) | g.DEFAULT_ATTR);
                     g.J = J + 1;  # NEXT PARAMETER
-                if (g.EXTERNAL_MODE > 0) and (g.EXTERNAL_MODE < CMPL_MODE):
+                if (g.EXTERNAL_MODE > 0) and (g.EXTERNAL_MODE < g.CMPL_MODE):
                     while J <= g.NDECSY():
                         if SYT_CLASS(J) < REPL_ARG_CLASS:
                             ERROR(d.CLASS_DU, 3, SYT_NAME(J));
                             g.SYT_FLAGS(J, g.SYT_FLAGS(J) | DUMMY_FLAG);
                     g.J = J + 1;
                 END;
-        if EXTERNALIZE: 
+        if g.EXTERNALIZE: 
             g.EXTERNALIZE = 4;
         g.PTR[g.MP] = 0;
     elif PRODUCTION_NUMBER == 296:  # reference 2960
@@ -2699,8 +2701,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     # reference 2970 relocated
     elif PRODUCTION_NUMBER == 298:  # reference 2980
         #  <ARITH INLINE DEF>  ::=  FUNCTION  ;
-        g.TYPE = DEFAULT_TYPE;
-        g.ATTRIBUTES = DEFAULT_ATTR & SD_FLAGS;
+        g.TYPE = g.DEFAULT_TYPE;
+        g.ATTRIBUTES = g.DEFAULT_ATTR & g.SD_FLAGS;
         g.TEMP = 0;
         g.INLINE_DEFS = True
     elif PRODUCTION_NUMBER == 299:  # reference 2990
@@ -2720,18 +2722,19 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if STRUC_DIM != 0: 
             ERROR(d.CLASS_DD, 12);
             g.STRUC_DIM = 0;
-        g.TEMP = STRUC_PTR;
-        g.TYPE = MAJ_STRUC;
+        g.TEMP = g.STRUC_PTR;
+        g.TYPE = g.MAJ_STRUC;
         goto_INLINE_DEFS = True
     elif PRODUCTION_NUMBER == 302:  # reference 3020
         #  <BLOCK STMT>  ::=  <BLOCK STMT TOP>  ;
         OUTPUT_WRITER();
-        if PARMS_PRESENT <= 0: 
-            if EXTERNALIZE: EXTERNALIZE = 4;
+        if g.PARMS_PRESENT <= 0: 
+            if g.EXTERNALIZE: 
+                g.EXTERNALIZE = 4;
         g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
-        if TPL_REMOTE:
-            if g.EXTERNAL_MODE > 0 and g.NEST == 1 and g.BLOCK_MODE[g.NEST] == CMPL_MODE:
-                g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | REMOTE_FLAG);
+        if g.TPL_REMOTE:
+            if g.EXTERNAL_MODE > 0 and g.NEST == 1 and g.BLOCK_MODE[g.NEST] == g.CMPL_MODE:
+                g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.REMOTE_FLAG);
             else:
                 ERROR(d.CLASS_PS, 13);
         g.TPL_REMOTE = g.FALSE;
@@ -2742,32 +2745,32 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             ERROR(d.CLASS_PS, 3);
         elif g.NEST != 1: 
             ERROR(d.CLASS_PS, 4);
-        elif (g.SYT_FLAGS(g.FIXL[g.MP]) & ACCESS_FLAG) != 0: 
+        elif (g.SYT_FLAGS(g.FIXL[g.MP]) & g.ACCESS_FLAG) != 0: 
             ERROR(d.CLASS_PS, 10);
         else:
-            g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | ACCESS_FLAG);
+            g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.ACCESS_FLAG);
             g.ACCESS_FOUND = g.TRUE;
     elif PRODUCTION_NUMBER == 304:  # reference 3040
         #  <BLOCK STMT TOP>  ::= <BLOCK STMT TOP> RIGID
-        if g.BLOCK_MODE[g.NEST] != CMPL_MODE: 
+        if g.BLOCK_MODE[g.NEST] != g.CMPL_MODE: 
             ERROR(d.CLASS_PS, 12);
-        elif (g.SYT_FLAGS(g.FIXL[g.MP]) and RIGID_FLAG) != 0: 
+        elif (g.SYT_FLAGS(g.FIXL[g.MP]) and g.RIGID_FLAG) != 0: 
             ERROR(d.CLASS_PS, 11);
         else:
-            g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | RIGID_FLAG);
+            g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.RIGID_FLAG);
     elif PRODUCTION_NUMBER == 305:  # reference 3050
         #  <BLOCK STMT TOP>  ::=  <BLOCK STMT HEAD>
         pass;
     elif PRODUCTION_NUMBER == 306:  # reference 3060
         #  <BLOCK STMT TOP>  ::=  <BLOCK STMT HEAD>  EXCLUSIVE
-        if g.BLOCK_MODE[g.NEST] > FUNC_MODE: 
+        if g.BLOCK_MODE[g.NEST] > g.FUNC_MODE: 
             ERROR(d.CLASS_PS, 2, 'EXCLUSIVE');
-        g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | EXCLUSIVE_FLAG);
+        g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.EXCLUSIVE_FLAG);
     elif PRODUCTION_NUMBER == 307:  # reference 3070
         #  <BLOCK STMT TOP>  ::=  <BLOCK STMT HEAD>  REENTRANT
-        if g.BLOCK_MODE[g.NEST] > FUNC_MODE: 
+        if g.BLOCK_MODE[g.NEST] > g.FUNC_MODE: 
             ERROR(d.CLASS_PS, 2, 'REENTRANT');
-        g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | REENTRANT_FLAG);
+        g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.REENTRANT_FLAG);
     elif PRODUCTION_NUMBER == 308:  # reference 3080
         #  <LABEL DEFINITION>  ::=  <LABEL>  :
         if g.NEST == 0: 
@@ -2810,18 +2813,18 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.NEST > 0: 
             ERROR(d.CLASS_PE, 1);
         else:
-            g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | EXTERNAL_FLAG);
+            g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.EXTERNAL_FLAG);
             g.EXTERNAL_MODE = 1;  # JUST A FLAG FOR NOW
             if g.BLOCK_MODE[0] > 0: 
                 ERROR(d.CLASS_PE, 2);
             if g.SIMULATING:
-                g.STAB2_STACKTOP = STAB2_STACKTOP - 1;
+                g.STAB2_STACKTOP = g.STAB2_STACKTOP - 1;
                 g.SIMULATING = 2;
     # reference 3110 relocated
     elif PRODUCTION_NUMBER == 312:  # reference 3120
         #  <BLOCK STMT HEAD>  ::=  <LABEL EXTERNAL>  COMPOOL
         g.TEMP = XCDEF;
-        g.TEMP2 = CMPL_MODE;
+        g.TEMP2 = g.CMPL_MODE;
         g.PARMS_PRESENT = 1;  #  FIX SO ALL DECLARES EMITTED IN CMPL TEMPLATE
         SET_LABEL_TYPE(g.FIXL[g.MP], COMPOOL_LABEL);
         # THIS IS A COMPOOL COMPILATION
@@ -2830,7 +2833,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # THE ERROR
         # PART 1. ALSO CHECK IF COMPOOL IS NOT
         #         EXTERNAL BEFORE EMITTING THE XR2 ERROR.
-        if DATA_REMOTE and (g.EXTERNAL_MODE == 0):
+        if g.DATA_REMOTE and (g.EXTERNAL_MODE == 0):
             ERROR(d.CLASS_XR, 2);
             g.DATA_REMOTE = g.FALSE;
         if g.EXTERNAL_MODE > 0: 
@@ -2843,7 +2846,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <BLOCK STMT HEAD>  ::=  <LABEL DEFINITION>  TASK
         g.TEMP = XTDEF;
         g.TEMP2 = g.TASK_MODE;
-        SET_LABEL_TYPE(g.FIXL[g.MP], TASK_LABEL);
+        SET_LABEL_TYPE(g.FIXL[g.MP], g.TASK_LABEL);
         g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.LATCHED_FLAG);
         if g.NEST == 1:
             if g.BLOCK_MODE[1] == g.PROG_MODE: 
@@ -2862,12 +2865,12 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.VAR[g.MPP1] = g.VAR[g.MP];
         g.IMPLIED_UPDATE_LABEL = IMPLIED_UPDATE_LABEL + 1;
         g.VAR[g.MP] = l.UPDATE_NAME + IMPLIED_UPDATE_LABEL;
-        g.NAME_HASH = HASH(g.VAR[g.MP], SYT_HASHSIZE);
-        g.I = ENTER(g.VAR[g.MP], LABEL_CLASS);
-        g.FIXL[g.MP] = I;
-        g.SYT_TYPE(I, UNSPEC_LABEL);
-        g.SYT_FLAGS(I, g.SYT_FLAGS(I) | DEFINED_LABEL);
-        g.VAR_LENGTH(I, 2);
+        g.NAME_HASH = HASH(g.VAR[g.MP], g.SYT_HASHSIZE);
+        g.I = ENTER(g.VAR[g.MP], g.LABEL_CLASS);
+        g.FIXL[g.MP] = g.I;
+        g.SYT_TYPE(g.I, g.UNSPEC_LABEL);
+        g.SYT_FLAGS(g.I, g.SYT_FLAGS(g.I) | g.DEFINED_LABEL);
+        g.VAR_LENGTH(g.I, 2);
         if g.SIMULATING: 
             STAB_LAB(g.FIXL[g.MP]);
         goto_UPDATE_HEAD = True
@@ -2887,14 +2890,14 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <FUNCTION NAME>  ::=  <LABEL EXTERNAL>  FUNCTION
         g.ID_LOC = g.FIXL[g.MP];
         g.FACTORING = g.FALSE;
-        if SYT_CLASS(ID_LOC) != FUNC_CLASS:
-            if SYT_CLASS(ID_LOC) != LABEL_CLASS or g.SYT_TYPE(ID_LOC) != UNSPEC_LABEL:
+        if SYT_CLASS(g.ID_LOC) != g.FUNC_CLASS:
+            if SYT_CLASS(g.ID_LOC) != g.LABEL_CLASS or g.SYT_TYPE(g.ID_LOC) != g.UNSPEC_LABEL:
                 ERROR(d.CLASS_PL, 4);
             else:
-                g.SYT_CLASS(ID_LOC, FUNC_CLASS);
-                g.SYT_TYPE(ID_LOC, 0);
+                g.SYT_CLASS(g.ID_LOC, g.FUNC_CLASS);
+                g.SYT_TYPE(g.ID_LOC, 0);
         g.TEMP = XFDEF;
-        g.TEMP2 = FUNC_MODE;
+        g.TEMP2 = g.FUNC_MODE;
         goto_PROC_FUNC_HEAD = True
     # reference 3210 relocated
     elif PRODUCTION_NUMBER == 322:  # reference 3220
@@ -2917,34 +2920,34 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         pass;
     elif PRODUCTION_NUMBER == 328:  # reference 3280
         #  <PARAMETER LIST>  ::=  <PARAMETER HEAD>  <IDENTIFIER>  )
-        g.PARMS_PRESENT = PARMS_PRESENT + 1;
+        g.PARMS_PRESENT = g.PARMS_PRESENT + 1;
     elif PRODUCTION_NUMBER == 329:  # reference 3290
         #  <PARAMETER HEAD>  ::=  (
         pass;
     elif PRODUCTION_NUMBER == 330:  # reference 3300
         #  <PARAMETER HEAD>  ::=  <PARAMETER HEAD>  <IDENTIFIER>  ,
-        g.PARMS_PRESENT = PARMS_PRESENT + 1;
+        g.PARMS_PRESENT = g.PARMS_PRESENT + 1;
     elif PRODUCTION_NUMBER == 331:  # reference 3310
         #  <ASSIGN LIST>  ::=  <ASSIGN>  <PARAMETER LIST>
         pase;
     elif PRODUCTION_NUMBER == 332:  # reference 3320
         #  <ASSIGN>  ::=  ASSIGN
-        if CONTEXT == PARM_CONTEXT: 
-            g.CONTEXT = ASSIGN_CONTEXT;
+        if g.CONTEXT == g.PARM_CONTEXT: 
+            g.CONTEXT = g.ASSIGN_CONTEXT;
         else:
             g.ASSIGN_ARG_LIST = g.TRUE;
     elif PRODUCTION_NUMBER == 333:  # reference 3330
         #  <DECLARE ELEMENT>  ::=  <DECLARE STATEMENT>
-        g.STMT_TYPE = DECL_STMT_TYPE;
+        g.STMT_TYPE = g.DECL_STMT_TYPE;
         if g.SIMULATING: 
             STAB_HDR();
         EMIT_SMRK(1);
     # reference 3340 relocated.
     elif PRODUCTION_NUMBER == 335:  # reference 3350
         #  <DECLARE ELEMENT>  ::=  <STRUCTURE STMT>
-        g.SYT_ADDR(REF_ID_LOC, STRUC_SIZE);
+        g.SYT_ADDR(g.REF_ID_LOC, g.STRUC_SIZE);
         g.REF_ID_LOC = 0;
-        g.STMT_TYPE = STRUC_STMT_TYPE;
+        g.STMT_TYPE = g.STRUC_STMT_TYPE;
         if g.SIMULATING: 
             STAB_HDR();
         goto_EMIT_NULL = True;
@@ -2952,21 +2955,21 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <DECLARE ELEMENT>  ::=  EQUATE  EXTERNAL  <IDENTIFIER>  TO <VARIABLE>  ;
         g.I = g.FIXL[g.MP + 2];  # EQUATE NAME
         g.J = g.SP - 1;
-        if SYT_CLASS(g.FIXL[J]) == TEMPLATE_CLASS:
+        if SYT_CLASS(g.FIXL[J]) == g.TEMPLATE_CLASS:
             g.J = g.FIXV[J];  # ROOT PTR SAVED IN FIXV FOR STRUCS
         else:
             g.J = g.FIXL[J];  # SYT PTR IN FIXL FOR OTHERS
-        g.SYT_PTR(I, J);  # POINT AT REFERENCED ITEM
-        if (g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & EXTERNAL_FLAG) != 0:
-            g.SYT_FLAGS(I, g.SYT_FLAGS(I) | DUMMY_FLAG);  # IGNORE IN TEMPLATES
-        if SYT_SCOPE(I) != SYT_SCOPE(J):
+        g.SYT_PTR(g.I, J);  # POINT AT REFERENCED ITEM
+        if (g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & g.EXTERNAL_FLAG) != 0:
+            g.SYT_FLAGS(g.I, g.SYT_FLAGS(g.I) | DUMMY_FLAG);  # IGNORE IN TEMPLATES
+        if g.SYT_SCOPE(g.I) != g.SYT_SCOPE(J):
             ERROR(d.CLASS_DU, 7, g.VAR[g.SP - 1]);
-        if g.SYT_TYPE(J) > MAJ_STRUC:
+        if g.SYT_TYPE(J) > g.MAJ_STRUC:
             ERROR(d.CLASS_DU, 8, g.VAR[g.SP - 1]);
         if (g.SYT_FLAGS(J) & ILL_EQUATE_ATTR) != 0:
             ERROR(d.CLASS_DU, 9, g.VAR[g.SP - 1]);
-        if (g.SYT_FLAGS(J) & AUTO_FLAG) != 0:
-            if (g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & REENTRANT_FLAG) != 0:
+        if (g.SYT_FLAGS(J) & g.AUTO_FLAG) != 0:
+            if (g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & g.REENTRANT_FLAG) != 0:
                 ERROR(d.CLASS_DU, 13, g.VAR[g.SP - 1]);
         g.TEMP = g.PTR[g.SP - 1];
         if (g.VAL_P[g.TEMP] & 0x40) != 0:
@@ -2983,7 +2986,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if SYT_PTR(J) < 0:
             ERROR(d.CLASS_DU, 12, g.VAR[g.SP - 1]);
         HALMAT_POP(XEINT, 2, 0, g.PSEUDO_TYPE_P[g.TEMP]);
-        HALMAT_PIP(g.FIXL[g.MP + 2], XSYT, 0, 0);
+        HALMAT_PIP(g.FIXL[g.MP + 2], g.XSYT, 0, 0);
         HALMAT_PIP(g.LOC_P[g.TEMP], g.PSEUDO_FORM[g.TEMP], 0, 0);
         CHECK_ARRAYNESS();
         g.PTR_TOP = g.PTR[g.SP - 1] - 1;
@@ -3038,7 +3041,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FACTORED_IC_PTR = 0
         g.FACTORED_IC_FND = 0
         g.FACTORED_N_DIM = 0
-        g.FACTORED_S_ARRAY = [0] * (N_DIM_LIM + 1)
+        g.FACTORED_S_ARRAY = [0] * (g.N_DIM_LIM + 1)
         g.FACTOR_FOUND = g.FALSE;
     elif PRODUCTION_NUMBER == 346:  # reference 3460
         #  <DECLARATION LIST>  ::=  <DECLARATION>
@@ -3101,30 +3104,30 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 356:  # reference 3560
         # <STRUCT SPEC> ::= <STRUCT TEMPLATE> <STRUCT SPEC BODY>
         g.STRUC_PTR = g.FIXL[g.MP];
-        if g.SYT_TYPE(STRUC_PTR) != TEMPL_NAME:
-            g.SYT_FLAGS(STRUC_PTR, g.SYT_FLAGS(STRUC_PTR) | EVIL_FLAG);
-        SET_XREF(STRUC_PTR, XREF_REF);
+        if g.SYT_TYPE(g.STRUC_PTR) != g.TEMPL_NAME:
+            g.SYT_FLAGS(g.STRUC_PTR, g.SYT_FLAGS(g.STRUC_PTR) | g.EVIL_FLAG);
+        SET_XREF(g.STRUC_PTR, g.XREF_REF);
         g.NOSPACE();
     elif PRODUCTION_NUMBER == 357:  # reference 3570
         # <STRUCT SPEC BODY> ::= - STRUCTURE
         g.NOSPACE();
     elif PRODUCTION_NUMBER == 358:  # reference 3580
         # <STRUCT SPEC BODY> ::= <STRUCT SPEC HEAD> <LITERAL EXP OR*> )
-        g.CONTEXT = DECLARE_CONTEXT;
+        g.CONTEXT = g.DECLARE_CONTEXT;
         g.I = g.FIXV[g.MPP1];
-        if not ((I > 1) and (I <= ARRAY_DIM_LIM) or (I == -1)):
+        if not ((g.I > 1) and (g.I <= g.ARRAY_DIM_LIM) or (g.I == -1)):
             ERROR(d.CLASS_DD, 11);
             g.STRUC_DIM = 2;  # A DEFAULT
         else:
-            g.STRUC_DIM = I;
+            g.STRUC_DIM = g.I;
     elif PRODUCTION_NUMBER == 359:  # reference 3590
         # <STRUCT SPEC HEAD> ::= - STRUCTURE (
         g.NOSPACE();
         g.TOKEN_FLAGS[g.STACK_PTR[g.MPP1]] = g.TOKEN_FLAGS[g.STACK_PTR[g.MPP1]] | 0x20;
     elif PRODUCTION_NUMBER == 360:  # reference 3600
         #  <DECLARATION>  ::=  <NAME ID>
-        if not BUILDING_TEMPLATE:
-            if NAME_IMPLIED: 
+        if not g.BUILDING_TEMPLATE:
+            if g.NAME_IMPLIED: 
                 g.ATTR_LOC = g.STACK_PTR[g.MP];
             else:
                 g.ATTR_LOC = -1;
@@ -3145,7 +3148,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     # reference 3660 relocated
     elif PRODUCTION_NUMBER == 367:  # reference 3670
         #  <ARRAY SPEC> ::= <ARRAY HEAD> <LITERAL EXP OR *> )
-        g.CONTEXT = DECLARE_CONTEXT;
+        g.CONTEXT = g.DECLARE_CONTEXT;
         goto_CHECK_ARRAY_SPEC = True
     elif PRODUCTION_NUMBER == 368:  # reference 3680
         #  <ARRAY SPEC>  ::=  FUNCTION
@@ -3160,15 +3163,15 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.CLASS = 1;
     elif PRODUCTION_NUMBER == 371:  # reference 3710
         #  <ARRAY SPEC>  ::=  TASK
-        g.TYPE = TASK_LABEL;
+        g.TYPE = g.TASK_LABEL;
         g.CLASS = 1;
     elif PRODUCTION_NUMBER == 372:  # reference 3720
         #  <ARRAY HEAD> ::= ARRAY (
         g.STARRED_DIMS = 0
         g.N_DIM = 0;
-        for I in range(0, 1 + N_DIM_LIM):
-            g.S_ARRAY[I] = 0;
-        g.FIXL[g.SP], g.FIXV[g.SP] = ARRAY_FLAG;
+        for g.I in range(0, 1 + g.N_DIM_LIM):
+            g.S_ARRAY[g.I] = 0;
+        g.FIXL[g.SP], g.FIXV[g.SP] = g.ARRAY_FLAG;
         goto_INCORPORATE_ATTR = True;
     # reference 3730 relocated
     elif PRODUCTION_NUMBER == 374:  # reference 3740
@@ -3180,7 +3183,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         pass;
     elif PRODUCTION_NUMBER == 377:  # reference 3770
         #  <TYPE SPEC> ::= <STRUCT SPEC>
-        g.TYPE = MAJ_STRUC;
+        g.TYPE = g.MAJ_STRUC;
     elif PRODUCTION_NUMBER == 378:  # reference 3780
         #  <TYPE SPEC>  ::=  <BIT SPEC>
         pass;
@@ -3192,29 +3195,29 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         pass;
     elif PRODUCTION_NUMBER == 381:  # reference 3810
         #  <TYPE SPEC>  ::=  EVENT
-        g.TYPE = EVENT_TYPE;
+        g.TYPE = g.EVENT_TYPE;
     elif PRODUCTION_NUMBER == 382:  # reference 3820
         #  <BIT SPEC>  ::=  BOOLEAN
-        g.TYPE = BIT_TYPE;
+        g.TYPE = g.BIT_TYPE;
         g.BIT_LENGTH = 1;  # BOOLEAN
     elif PRODUCTION_NUMBER == 383:  # reference 3830
         #  <BIT SPEC>  ::=  BIT  (  <LITERAL EXP OR *>  )
         g.NOSPACE();
-        g.CONTEXT = DECLARE_CONTEXT;
+        g.CONTEXT = g.DECLARE_CONTEXT;
         g.J = g.FIXV[g.MP + 2];
         g.K = DEF_BIT_LENGTH;
         if J == -1: 
             ERROR(d.CLASS_DS, 4);  # "*" ILLEGAL
-        elif (J <= 0) | (J > BIT_LENGTH_LIM):
+        elif (J <= 0) | (J > g.BIT_LENGTH_LIM):
             ERROR(d.CLASS_DS, 1);
         else:
             g.K = J;
-        g.TYPE = BIT_TYPE;
+        g.TYPE = g.BIT_TYPE;
         g.BIT_LENGTH = K;
     elif PRODUCTION_NUMBER == 384:  # reference 3840
         #  <CHAR SPEC>  ::=  CHARACTER  (  <LITERAL EXP OR *>  )
         g.NOSPACE();
-        g.CONTEXT = DECLARE_CONTEXT;
+        g.CONTEXT = g.DECLARE_CONTEXT;
         g.J = g.FIXV[g.MP + 2];
         g.K = DEF_CHAR_LENGTH;
         if J == -1: 
@@ -3224,42 +3227,42 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         else:
             g.K = J;
         g.CHAR_LENGTH = K;
-        g.TYPE = CHAR_TYPE;
+        g.TYPE = g.CHAR_TYPE;
     elif PRODUCTION_NUMBER == 385:  # reference 3850
         #  <ARITH SPEC>  ::=  <PREC SPEC>
         g.ATTR_MASK = ATTR_MASK | g.FIXL[g.MP];
-        g.ATTRIBUTES = ATTRIBUTES | g.FIXV[g.MP];
+        g.ATTRIBUTES = g.ATTRIBUTES | g.FIXV[g.MP];
     elif PRODUCTION_NUMBER == 386:  # reference 3860
         #  <ARITH SPEC>  ::=  <SQ DQ NAME>
         pass;
     elif PRODUCTION_NUMBER == 387:  # reference 3870
         #  <ARITH SPEC>  ::=  <SQ DQ NAME>  <PREC SPEC>
         g.ATTR_MASK = ATTR_MASK | g.FIXL[g.SP];
-        g.ATTRIBUTES = ATTRIBUTES | g.FIXV[g.SP];
+        g.ATTRIBUTES = g.ATTRIBUTES | g.FIXV[g.SP];
     elif PRODUCTION_NUMBER == 388:  # reference 3880
         #  <SQ DQ NAME> ::= <DOUBLY QUAL NAME HEAD> <LITERAL EXP OR *> )
-        g.CONTEXT = DECLARE_CONTEXT;
+        g.CONTEXT = g.DECLARE_CONTEXT;
         g.I = g.FIXV[g.MPP1];  # VALUE
         g.TYPE = g.FIXL[g.MP];
-        if TYPE == g.VEC_TYPE:
-            if I == -1:
+        if g.TYPE == g.VEC_TYPE:
+            if g.I == -1:
                 ERROR(d.CLASS_DD, 7);
                 g.I = 3;
-            elif (I <= 1) or (I > VEC_LENGTH_LIM):
+            elif (g.I <= 1) or (g.I > VEC_LENGTH_LIM):
                 ERROR(d.CLASS_DD, 5);
                 g.I = 3;
-            g.VEC_LENGTH = I;
+            g.VEC_LENGTH = g.I;
         else:  # MATRIX
-           if I == -1:
+           if g.I == -1:
                ERROR(d.CLASS_DD, 9);
                g.I = 3;
-           elif (I <= 1) or (I > MAT_DIM_LIM):
+           elif (g.I <= 1) or (g.I > MAT_DIM_LIM):
                ERROR(d.CLASS_DD, 4);
                g.I = 3;
-           g.MAT_LENGTH = SHL(g.FIXV[g.MP], 8) + (I & 0xFF);
+           g.MAT_LENGTH = SHL(g.FIXV[g.MP], 8) + (g.I & 0xFF);
     elif PRODUCTION_NUMBER == 389:  # reference 3890
         #  <SQ DQ NAME> ::= INTEGER
-        g.TYPE = INT_TYPE;
+        g.TYPE = g.INT_TYPE;
     elif PRODUCTION_NUMBER == 390:  # reference 3900
         #  <SQ DQ NAME> ::= SCALAR
         g.TYPE = g.SCALAR_TYPE;
@@ -3281,18 +3284,18 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXL[g.MP] = g.MAT_TYPE;
         g.I = g.FIXV[g.MP + 2];
         g.FIXV[g.MP] = 3;  # DEFAULT IF BAD SPEC FOLLOWS
-        if I == -1: 
+        if g.I == -1: 
             ERROR(d.CLASS_DD, 9);
-        elif (I <= 1) or (I > MAT_DIM_LIM):
+        elif (g.I <= 1) or (g.I > MAT_DIM_LIM):
             ERROR(d.CLASS_DD, 4);
         else:
-            g.FIXV[g.MP] = I;
+            g.FIXV[g.MP] = g.I;
     elif PRODUCTION_NUMBER == 395:  # reference 3950
         #  <LITERAL EXP OR *> ::= <ARITH EXP>
         g.PTR_TOP = g.PTR[g.MP] - 1;
         CHECK_ARRAYNESS();
         CHECK_IMPLICIT_T();
-        if g.PSEUDO_FORM[g.PTR[g.SP]] != XLIT:
+        if g.PSEUDO_FORM[g.PTR[g.SP]] != g.XLIT:
             ERROR(d.CLASS_VE, 1);
             g.TEMP = 0;
         else:
@@ -3305,13 +3308,13 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXV[g.SP] = -1;
     elif PRODUCTION_NUMBER == 397:  # reference 3970
         #  <PREC_SPEC> ::= SINGLE
-        g.FIXL[g.MP] = SD_FLAGS;
-        g.FIXV[g.MP] = SINGLE_FLAG;
+        g.FIXL[g.MP] = g.SD_FLAGS;
+        g.FIXV[g.MP] = g.SINGLE_FLAG;
         g.PTR[g.MP] = 1;
     elif PRODUCTION_NUMBER == 398:  # reference 3980
         #  <PREC SPEC> ::= DOUBLE
-        g.FIXL[g.MP] = SD_FLAGS;
-        g.FIXV[g.MP] = DOUBLE_FLAG;
+        g.FIXL[g.MP] = g.SD_FLAGS;
+        g.FIXV[g.MP] = g.DOUBLE_FLAG;
         g.PTR[g.MP] = 2;
     elif PRODUCTION_NUMBER == 399:  # reference 3990
         #  <MINOR ATTR LIST> ::= <MINOR ATTRIBUTE>
@@ -3320,30 +3323,30 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     # reference 4010 relocated
     elif PRODUCTION_NUMBER == 402:  # reference 4020
         #  <MINOR ATTRIBUTE> ::= AUTOMATIC
-        g.I = AUTO_FLAG;
+        g.I = g.AUTO_FLAG;
         goto_SET_AUTSTAT = True
     elif PRODUCTION_NUMBER == 403:  # reference 4030
         #  <MINOR ATTRIBUTE> ::= DENSE
-        if (TYPE == 0) and (BUILDING_TEMPLATE and (TYPE == BIT_TYPE) and \
-                          ((ATTRIBUTES & ARRAY_FLAG) == 0) and \
-                          (not NAME_IMPLIED)):
-            g.FIXL[g.MP] = ALDENSE_FLAGS;
-            g.FIXV[g.MP] = DENSE_FLAG;
+        if (g.TYPE == 0) and (g.BUILDING_TEMPLATE and (g.TYPE == g.BIT_TYPE) and \
+                          ((g.ATTRIBUTES & g.ARRAY_FLAG) == 0) and \
+                          (not g.NAME_IMPLIED)):
+            g.FIXL[g.MP] = g.ALDENSE_FLAGS;
+            g.FIXV[g.MP] = g.DENSE_FLAG;
     elif PRODUCTION_NUMBER == 404:  # reference 4040
         #  <MINOR ATTRIBUTE> ::= ALIGNED
-        g.FIXL[g.MP] = ALDENSE_FLAGS;
-        g.FIXV[g.MP] = ALIGNED_FLAG;
+        g.FIXL[g.MP] = g.ALDENSE_FLAGS;
+        g.FIXV[g.MP] = g.ALIGNED_FLAG;
     elif PRODUCTION_NUMBER == 405:  # reference 4050
         #  <MINOR ATTRIBUTE> ::= ACCESS
-        if g.BLOCK_MODE[g.NEST] == CMPL_MODE:
-            g.FIXL[g.MP] = ACCESS_FLAG;
-            g.FIXV[g.MP] = ACCESS_FLAG;
+        if g.BLOCK_MODE[g.NEST] == g.CMPL_MODE:
+            g.FIXL[g.MP] = g.ACCESS_FLAG;
+            g.FIXV[g.MP] = g.ACCESS_FLAG;
             g.ACCESS_FOUND = g.TRUE;
         else:
             ERROR(d.CLASS_DC, 5);
     elif PRODUCTION_NUMBER == 406:  # reference 4060
         #  <MINOR ATTRIBUTE>  ::=  LOCK ( <LITERAL EXP OR *> )
-        g.CONTEXT = DECLARE_CONTEXT;
+        g.CONTEXT = g.DECLARE_CONTEXT;
         g.LOCKp = g.FIXV[g.MP + 2];
         if g.LOCKp < 0: 
             g.LOCKp = 0xFF;
@@ -3353,10 +3356,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXL[g.MP], g.FIXV[g.MP] = LOCK_FLAG;
     elif PRODUCTION_NUMBER == 407:  # reference 4070
         #  <MINOR ATTRIBUTE>  ::=  REMOTE
-        g.FIXL[g.MP], g.FIXV[g.MP] = REMOTE_FLAG;
+        g.FIXL[g.MP], g.FIXV[g.MP] = g.REMOTE_FLAG;
     elif PRODUCTION_NUMBER == 408:  # reference 4080
         #  <MINOR ATTRIBUTE> ::= RIGID
-        g.FIXL[g.MP], g.FIXV[g.MP] = RIGID_FLAG;
+        g.FIXL[g.MP], g.FIXV[g.MP] = g.RIGID_FLAG;
     # reference 4090 relocated
     elif PRODUCTION_NUMBER == 410:  # reference 4100
         #  <MINOR ATTRIBUTE> ::= <INIT/CONST HEAD> * )
@@ -3371,14 +3374,14 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.NONHAL = g.FIXV[g.MP + 2];
         #   DISCONNECT SYT_FLAGS FROM NONHAL; SET
         #   NONHAL IN SYT_FLAGS2 ARRAY.
-        g.FIXL[g.MP] = NONHAL_FLAG;
-        g.SYT_FLAGS2(ID_LOC, g.SYT_FLAGS2(ID_LOC) | NONHAL_FLAG);
-        g.ATTRIBUTES2 = ATTRIBUTES2 | NONHAL_FLAG;
+        g.FIXL[g.MP] = g.NONHAL_FLAG;
+        g.SYT_FLAGS2(g.ID_LOC, g.SYT_FLAGS2(g.ID_LOC) | g.NONHAL_FLAG);
+        g.ATTRIBUTES2 = g.ATTRIBUTES2 | g.NONHAL_FLAG;
     # reference 4130 relocated
     elif PRODUCTION_NUMBER == 414:  # reference 4140
         #  <INIT/CONST HEAD> ::= CONSTANT (
-        g.FIXL[g.MP] = INIT_CONST;
-        g.FIXV[g.MP] = CONSTANT_FLAG;
+        g.FIXL[g.MP] = g.INIT_CONST;
+        g.FIXV[g.MP] = g.CONSTANT_FLAG;
         goto_DO_INIT_CONST_HEAD = True
     elif PRODUCTION_NUMBER == 415:  # reference 4150
         #  <INIT/CONST HEAD>  ::=  <INIT/CONST HEAD>  <REPEATED CONSTANT>  ,
@@ -3398,28 +3401,28 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 420:  # reference 4200
         #  <REPEATED CONSTANT>  ::=  <REPEAT HEAD>
         g.IC_LINE = g.IC_LINE - 1;
-        g.NUM_STACKS = NUM_STACKS - 1;
-        g.NUM_FL_NO = NUM_FL_NO - 1;
-        g.NUM_ELEMENTS = NUM_ELEMENTS + g.INX[g.PTR[g.MP]];
+        g.NUM_STACKS = g.NUM_STACKS - 1;
+        g.NUM_FL_NO = g.NUM_FL_NO - 1;
+        g.NUM_ELEMENTS = g.NUM_ELEMENTS + g.INX[g.PTR[g.MP]];
         g.PTR_TOP = g.PTR[g.MP] - 1;
     elif PRODUCTION_NUMBER == 421:  # reference 4210
         #  <REPEAT HEAD>  ::=  <ARITH EXP>  #
         CHECK_ARRAYNESS();
-        if g.PSEUDO_FORM[g.PTR[g.MP]] != XLIT: 
+        if g.PSEUDO_FORM[g.PTR[g.MP]] != g.XLIT: 
             g.TEMP_SYN = 0;
         else:
             g.TEMP_SYN = MAKE_FIXED_LIT(g.LOC_P[g.PTR[g.MP]]);
-        if TEMP_SYN < 1: 
+        if g.TEMP_SYN < 1: 
             ERROR(d.CLASS_DI, 1);
             g.TEMP_SYN = 0;
-        if TEMP_SYN > g.NUM_EL_MAX: 
+        if g.TEMP_SYN > g.NUM_EL_MAX: 
             g.TEMP_SYN = g.NUM_EL_MAX;
-        g.INX[g.PTR[g.MP]] = TEMP_SYN;
-        g.FIXV[g.MP] = NUM_ELEMENTS;
-        g.NUM_FL_NO = NUM_FL_NO + 1;
-        SET_INIT(TEMP_SYN, 1, 0, 0, NUM_FL_NO);
+        g.INX[g.PTR[g.MP]] = g.TEMP_SYN;
+        g.FIXV[g.MP] = g.NUM_ELEMENTS;
+        g.NUM_FL_NO = g.NUM_FL_NO + 1;
+        SET_INIT(g.TEMP_SYN, 1, 0, 0, g.NUM_FL_NO);
         g.FIXL[g.MP] = g.IC_LINE;
-        g.NUM_STACKS = NUM_STACKS + 1;
+        g.NUM_STACKS = g.NUM_STACKS + 1;
     elif PRODUCTION_NUMBER == 422:  # reference 4220
         #  <NESTED REPEAT HEAD>  ::=  <REPEAT HEAD>  (
         pass;
@@ -3471,7 +3474,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 438:  # reference 4380
         #  <SCHEDULE HEAD>  ::=  SCHEDULE  <LABEL VAR>
         PROCESS_CHECK(g.MPP1);
-        if (g.SYT_FLAGS(g.FIXL[g.MPP1]) & ACCESS_FLAG) != 0:
+        if (g.SYT_FLAGS(g.FIXL[g.MPP1]) & g.ACCESS_FLAG) != 0:
             ERROR(d.CLASS_PS, 5, g.VAR[g.MPP1]);
         SET_XREF_RORS(g.MPP1, 0x6000);
         REFER_LOC, g.PTR[g.MP] = g.PTR[g.MPP1];
@@ -3648,11 +3651,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif goto_ARITH_LITS or PRODUCTION_NUMBER == 19:  # reference 190
         #  <PRE PRIMARY> ::= <NUMBER>
         if not goto_ARITH_LITS:
-            g.TEMP = INT_TYPE;
+            g.TEMP = g.INT_TYPE;
         goto_ARITH_LITS = False
         g.PTR[g.MP] = PUSH_INDIRECT(1);
         g.LOC_P[g.PTR[g.MP]] = g.FIXL[g.MP];
-        g.PSEUDO_FORM[g.PTR[g.MP]] = XLIT ;
+        g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT ;
         g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.TEMP;
     elif goto_LABEL_INCORP or PRODUCTION_NUMBER == 35:  # reference 350
         #  <OTHER STATEMENT>  ::= <LABEL DEFINITION> <OTHER STATEMENT>
@@ -3673,7 +3676,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if not goto_YES_EVENT:
             SET_XREF_RORS(g.MP, 0x2000);
             g.TEMP = g.PSEUDO_TYPE_P[g.PTR[g.MP]];
-            if (g.TEMP == TASK_LABEL) or (g.TEMP == g.PROG_LABEL):
+            if (g.TEMP == g.TASK_LABEL) or (g.TEMP == g.PROG_LABEL):
                 pass;
             else:
                 ERROR(d.CLASS_RT, 14, g.VAR[g.MP]);
@@ -3682,18 +3685,18 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             else:
                 g.INX[g.PTR[g.MP]] = 2;
         goto_YES_EVENT = False
-        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = BIT_TYPE;
+        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.BIT_TYPE;
         g.PSEUDO_LENGTH[g.PTR[g.MP]] = 1;
     elif goto_DO_BIT_CAT or PRODUCTION_NUMBER == 94:  # reference 940
         #  <BIT CAT>  ::=  <BIT CAT>  <CAT>  <BIT PRIM>
         goto_DO_BIT_CAT = False
         g.INX[g.PTR[g.MP]] = g.FALSE;
         g.TEMP = g.PSEUDO_LENGTH[g.PTR[g.MP]] + g.PSEUDO_LENGTH[g.PTR[g.SP]];
-        if g.TEMP > BIT_LENGTH_LIM:
-            g.TEMP = BIT_LENGTH_LIM;
+        if g.TEMP > g.BIT_LENGTH_LIM:
+            g.TEMP = g.BIT_LENGTH_LIM;
             ERROR(d.CLASS_EB, 1);
         HALMAT_TUPLE(XBCAT, 0, g.MP, g.SP, 0);
-        SETUP_VAC(g.MP, BIT_TYPE, g.TEMP);
+        SETUP_VAC(g.MP, g.BIT_TYPE, g.TEMP);
         g.PTR_TOP = g.PTR[g.MP];
     elif goto_DO_LIT_BIT_FACTOR or goto_DO_BIT_FACTOR or \
             PRODUCTION_NUMBER == 98:  # reference 980
@@ -3719,7 +3722,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.TEMP = g.PSEUDO_LENGTH[g.PTR[g.MP]];
             if g.TEMP < g.PSEUDO_LENGTH[g.PTR[g.SP]]:
                 g.TEMP = g.PSEUDO_LENGTH[g.PTR[g.SP]];
-            SETUP_VAC(g.MP, BIT_TYPE, g.TEMP);
+            SETUP_VAC(g.MP, g.BIT_TYPE, g.TEMP);
         g.PTR_TOP = g.PTR[g.MP];
     elif goto_EMIT_REL or PRODUCTION_NUMBER == 109:  # reference 1090
         #  <COMPARISON> ::= <ARITH EXP> <RELATIONAL OP> <ARITH EXP>
@@ -3754,7 +3757,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         else:
             goto_DO_CHAR_CAT = False
             HALMAT_TUPLE(XCCAT, 0, g.MP, g.SP, 0);
-            SETUP_VAC(g.MP, CHAR_TYPE);
+            SETUP_VAC(g.MP, g.CHAR_TYPE);
         g.PTR_TOP = g.PTR[g.MP];
     elif goto_ASSIGNING or goto_END_ASSIGN or \
             PRODUCTION_NUMBER == 136:  # reference 1360
@@ -3774,8 +3777,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if not goto_END_ASSIGN:
             goto_ASSIGNING = False
             g.TEMP = g.PSEUDO_TYPE_P[g.PTR[g.SP]];
-            if g.TEMP == INT_TYPE: 
-                if g.PSEUDO_FORM[g.PTR[g.SP]] == XLIT: 
+            if g.TEMP == g.INT_TYPE: 
+                if g.PSEUDO_FORM[g.PTR[g.SP]] == g.XLIT: 
                     g.TEMP2 = GET_LITERAL(g.LOC_P[g.PTR[g.SP]]);
                     if LIT2(g.TEMP2) == 0: 
                         g.TEMP = 0;
@@ -3842,8 +3845,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # DETERMINES IF IF-THEN WAS ALREADY PRINTED IN REPLACE MACRO-11342
         if (g.GRAMMAR_FLAGS[g.LAST_WRITE] & PRINT_FLAG) == 0:
             g.IF_FLAG = g.FALSE;
-            for I in range((g.LAST_WRITE + 1), 1 + g.STACK_PTR[g.SP]):
-                if (g.GRAMMAR_FLAGS[I] & PRINT_FLAG) != 0:
+            for g.I in range((g.LAST_WRITE + 1), 1 + g.STACK_PTR[g.SP]):
+                if (g.GRAMMAR_FLAGS[g.I] & PRINT_FLAG) != 0:
                     g.IF_FLAG = g.TRUE;
         if not g.IF_FLAG and (g.STMT_STACK[g.LAST_WRITE] != l.ELSE_TOKEN):
             g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
@@ -3900,8 +3903,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.ELSE_FLAG = g.FALSE;
             OUTPUT_WRITER(g.LAST_WRITE, g.STMT_PTR);
         if g.FIXL[g.MPP1] > 0:
-            HALMAT_POP(XTDCL, 1, 0, 0);
-            HALMAT_PIP(g.FIXL[g.MPP1], XSYT, 0, 0);
+            HALMAT_POP(g.XTDCL, 1, 0, 0);
+            HALMAT_PIP(g.FIXL[g.MPP1], g.XSYT, 0, 0);
         EMIT_SMRK();
         g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
         g.NEST_LEVEL = NEST_LEVEL + 1;
@@ -3965,7 +3968,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 HALMAT_PIP(g.DO_LOC[g.DO_LEVEL], XINL, 0, 0);
                 HALMAT_PIP(g.FL_NO(), XINL, 0, 0);
                 g.FL_NO(g.FL_NO() + 2);
-                g.FIXV[g.MP] = LAST_POPp;
+                g.FIXV[g.MP] = g.LAST_POPp;
     elif goto_WHILE_KEY or PRODUCTION_NUMBER == 153:  # reference 1530
         # <WHILE KEY>::= WHILE
         if not goto_WHILE_KEY:
@@ -3983,7 +3986,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             if g.PSEUDO_LENGTH[g.PTR[g.SP]] > 1: 
                 ERROR(d.CLASS_GB, 1, 'WHILE/UNTIL');
             HALMAT_TUPLE(XBTRU, 0, g.SP, 0, 0);
-            SETUP_VAC(g.SP, BIT_TYPE);
+            SETUP_VAC(g.SP, g.BIT_TYPE);
         goto_DO_FLOWSET = False
         g.INX[g.PTR[g.SP]] = g.FIXL[g.MP];
         g.PTR[g.MP] = g.PTR[g.SP];
@@ -3995,7 +3998,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PTR_TOP = g.PTR[g.SP] - 1;
         HALMAT_TUPLE(XAFOR, XCO_N, g.SP, 0, 0);
         g.FL_NO(g.FL_NO() + 1);
-        g.FIXV[g.MP] = LAST_POPp;
+        g.FIXV[g.MP] = g.LAST_POPp;
     elif goto_ON_ERROR_ACTION or PRODUCTION_NUMBER == 169:  # reference 1690
         #  <ON CLAUSE>  ::=  ON ERROR <SUBSCRIPT>  SYSTEM
         if not goto_ON_ERROR_ACTION:
@@ -4026,7 +4029,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             goto_ASSIGN_ARG = False
             g.FCN_ARG = g.FCN_ARG + 1;
             HALMAT_TUPLE(XXXAR, XCO_N, g.SP, 0, 0);
-            HALMAT_FIX_PIPTAGS(NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.SP]] | \
+            HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.SP]] | \
                                SHL(NAME_PSEUDOS, 7), 1);
             if NAME_PSEUDOS: 
                 KILL_NAME(g.SP);
@@ -4078,7 +4081,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     g.LOC_P[l.H1] = g.FIXL[g.MPP1];
                 else:
                     g.FIXV[g.MP], g.LOC_P[l.H1] = g.FIXV[g.MPP1];
-                g.PSEUDO_FORM[l.H1] = XSYT;
+                g.PSEUDO_FORM[l.H1] = g.XSYT;
             else:
                 g.VAR[g.MP] = g.VAR[g.MP] + PERIOD + g.VAR[g.MPP1];
                 g.TOKEN_FLAGS[g.EXT_P[l.H1]] = g.TOKEN_FLAGS[g.EXT_P[l.H1]] | 0x20;
@@ -4086,13 +4089,13 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 goto_UNQ_TEST1 = True
                 while goto_UNQ_TEST1:
                     goto_UNQ_TEST1 = False
-                    while I > 0:
-                        g.I = g.SYT_LINK2(I);
-                    g.I = -I;
-                    if I == 0: 
+                    while g.I > 0:
+                        g.I = g.SYT_LINK2(g.I);
+                    g.I = -g.I;
+                    if g.I == 0: 
                         ERROR (d.CLASS_IS, 2, g.VAR[g.MPP1]);
                         break  # GO TO UNQ_TEST2;
-                    if I != g.FIXL[g.MP]: 
+                    if g.I != g.FIXL[g.MP]: 
                         goto_UNQ_TEST1 = True
                         continue
             # UNQ_TEST2:
@@ -4103,33 +4106,33 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.TEMP_SYN = g.INX[l.H1];
         g.TEMP3 = g.LOC_P[l.H1];
         if ATTACH_SUBSCRIPT: 
-            HALMAT_TUPLE(XTSUB, 0, g.MP, 0, MAJ_STRUC | NAME_BIT);
-            g.INX[l.H1] = NEXT_ATOMp - 1;
-            HALMAT_FIX_PIPp(LAST_POPp, EMIT_SUBSCRIPT(0x8));
+            HALMAT_TUPLE(g.XTSUB, 0, g.MP, 0, g.MAJ_STRUC | g.NAME_BIT);
+            g.INX[l.H1] = g.NEXT_ATOMp - 1;
+            HALMAT_FIX_PIPp(g.LAST_POPp, EMIT_SUBSCRIPT(0x8));
             SETUP_VAC(g.MP, g.PSEUDO_TYPE_P[l.H1]);
             g.VAL_P[l.H1] = g.VAL_P[l.H1] | 0x20;
         g.PTR_TOP = l.H1;  # BASH DOWN STACKS
         if g.FIXV[g.MP] > 0:
             HALMAT_TUPLE(XEXTN, 0, g.MP, 0, 0);
             g.TEMP = l.H1;
-            if (g.SYT_FLAGS(TEMP3) & NAME_FLAG) != 0:
+            if (g.SYT_FLAGS(g.TEMP3) & g.NAME_FLAG) != 0:
                 g.VAL_P[l.H1] = g.VAL_P[l.H1] | 0x4000;
             l.H2 = g.FALSE;
             
-            l.PRl.PREV_LIVES_REMOTE = (g.SYT_FLAGS(TEMP3) & REMOTE_FLAG) != 0;
-            l.PREV_POINTS = (g.SYT_FLAGS(TEMP3) & NAME_FLAG) != 0;
+            l.PRl.PREV_LIVES_REMOTE = (g.SYT_FLAGS(g.TEMP3) & g.REMOTE_FLAG) != 0;
+            l.PREV_POINTS = (g.SYT_FLAGS(g.TEMP3) & g.NAME_FLAG) != 0;
             l.PREV_REMOTE = l.PREV_LIVES_REMOTE;
             
-            while TEMP_SYN != 0:
+            while g.TEMP_SYN != 0:
                 g.TEMP = g.TEMP + 1;
                 g.TEMP3 = g.LOC_P[g.TEMP];
-                HALMAT_PIP(TEMP3, XSYT, 0, 0);
-                l.H2 = l.H2 | (g.SYT_FLAGS(TEMP3) & NAME_FLAG) != 0;
+                HALMAT_PIP(g.TEMP3, g.XSYT, 0, 0);
+                l.H2 = l.H2 | (g.SYT_FLAGS(g.TEMP3) & g.NAME_FLAG) != 0;
                 
                 # KEEP TRACK OF THE REMOTENESS -----------------
                 # OF THE NODE BEING PROCESSED
-                l.PREV_REMOTE = ((g.SYT_FLAGS(TEMP3) & NAME_FLAG) > 0);
-                l.REMOTE_SET = ((g.SYT_FLAGS(TEMP3) & REMOTE_FLAG) > 0);
+                l.PREV_REMOTE = ((g.SYT_FLAGS(g.TEMP3) & g.NAME_FLAG) > 0);
+                l.REMOTE_SET = ((g.SYT_FLAGS(g.TEMP3) & g.REMOTE_FLAG) > 0);
                 if (l.REMOTE_SET and not l.PREV_REMOTE) \
                         or (l.PREV_POINTS and l.PREV_REMOTE) \
                         or (l.PREV_LIVES_REMOTE and not l.PREV_POINTS):
@@ -4151,18 +4154,18 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.VAL_P[l.H1] = g.VAL_P[l.H1] | 0x8000;
             
             g.PTR_TOP = g.TEMP;  # WAIT - DONT LOSE EXTN TILL XREF DONE
-            if VAR_LENGTH(TEMP3) == g.FIXL[g.MP]:
+            if VAR_LENGTH(g.TEMP3) == g.FIXL[g.MP]:
                 if g.TEMP == l.H1: 
                     g.VAL_P[l.H1] = g.VAL_P[l.H1] | 0x4;
                 g.VAL_P[l.H1] = g.VAL_P[l.H1] | 0x1000;
-                HALMAT_FIX_PIPTAGS(NEXT_ATOMp - 1, 0, 1);
-                if (g.SYT_FLAGS(TEMP3) & NAME_FLAG) != 0:
+                HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, 0, 1);
+                if (g.SYT_FLAGS(g.TEMP3) & g.NAME_FLAG) != 0:
                     g.VAL_P[l.H1] = g.VAL_P[l.H1] | 0x200;
-            HALMAT_PIP(g.FIXL[g.MP], XSYT, 0, 1);
-            l.H2 = (l.H2 or (g.SYT_FLAGS(g.FIXL[g.MP]) & NAME_FLAG) != 0);
-            HALMAT_FIX_PIPp(LAST_POPp, g.TEMP - l.H1 + 2);
-            HALMAT_FIX_POPTAG(LAST_POPp, l.H2);
-            g.LOC_P[l.H1], l.H2 = LAST_POPp;
+            HALMAT_PIP(g.FIXL[g.MP], g.XSYT, 0, 1);
+            l.H2 = (l.H2 or (g.SYT_FLAGS(g.FIXL[g.MP]) & g.NAME_FLAG) != 0);
+            HALMAT_FIX_PIPp(g.LAST_POPp, g.TEMP - l.H1 + 2);
+            HALMAT_FIX_POPTAG(g.LAST_POPp, l.H2);
+            g.LOC_P[l.H1], l.H2 = g.LAST_POPp;
             g.PSEUDO_FORM[l.H1] = XXPT;
         else:
             l.H2 = -1;
@@ -4182,10 +4185,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             if g.PSEUDO_FORM[INX] > 0: 
                 g.VAL_P[l.H1] = g.VAL_P[l.H1] | 0x40;
         elif IND_LINK > 0: 
-            HALMAT_TUPLE(XDSUB, 0, g.MP, 0, g.PSEUDO_TYPE_P[l.H1] | NAME_BIT);
-            g.INX[l.H1] = NEXT_ATOMp - 1;
+            HALMAT_TUPLE(XDSUB, 0, g.MP, 0, g.PSEUDO_TYPE_P[l.H1] | g.NAME_BIT);
+            g.INX[l.H1] = g.NEXT_ATOMp - 1;
             g.VAL_P[l.H1] = g.VAL_P[l.H1] | 0x20;
-            HALMAT_FIX_PIPp(LAST_POPp, EMIT_SUBSCRIPT(0x0));
+            HALMAT_FIX_PIPp(g.LAST_POPp, EMIT_SUBSCRIPT(0x0));
             SETUP_VAC(g.MP, g.PSEUDO_TYPE_P[l.H1]);
         g.FIXF[g.MP] = g.PTR_TOP;  # RECORD WHERE TOP IS IN CASE CHANGED
         ASSOCIATE()(l.H2);
@@ -4196,7 +4199,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.PTR[g.SP] = PUSH_INDIRECT(1);
             g.LOC_P[g.PTR[g.SP]] = g.FIXV[g.SP];
             g.PSEUDO_FORM[g.PTR[g.SP]] = XIMD;
-            g.PSEUDO_TYPE_P[g.PTR[g.SP]] = INT_TYPE;
+            g.PSEUDO_TYPE_P[g.PTR[g.SP]] = g.INT_TYPE;
         goto_SIMPLE_SUBS = False
         g.INX[g.PTR[g.SP]] = 1;
         g.VAL_P[g.PTR[g.SP]] = 0;
@@ -4232,7 +4235,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.TEMP = g.FIXF[g.MP - 1];
         if g.TEMP > 0:
             HALMAT_POP(XXXST, 1, XCO_N, g.TEMP + g.FCN_LV - 1);
-            HALMAT_PIP(g.FIXL[g.MP - 1], XSYT, 0, 0);
+            HALMAT_PIP(g.FIXL[g.MP - 1], g.XSYT, 0, 0);
         g.NAMING = g.FALSE;
         if SUBSCRIPT_LEVEL == 0:
             if ARRAYNESS_FLAG: SAVE_ARRAYNESS();
@@ -4245,9 +4248,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     if goto_SS_CHEX or PRODUCTION_NUMBER == 263:  # reference 2630
         # <BIT QUALIFIER> ::= <$(> @ <RADIX> )
         if not goto_SS_CHEX:
-            if TEMP3 == 0: 
+            if g.TEMP3 == 0: 
                 g.TEMP3 = 2;
-            g.PSEUDO_FORM[g.PTR[g.MP]] = TEMP3;
+            g.PSEUDO_FORM[g.PTR[g.MP]] = g.TEMP3;
         goto_SS_CHEX = False
         if SUBSCRIPT_LEVEL > 0:
             g.SUBSCRIPT_LEVEL = SUBSCRIPT_LEVEL - 1;
@@ -4263,115 +4266,115 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if not goto_DO_BIT_CONSTANT_END:
             g.S = g.VAR[g.SP];
             g.I = 1;
-            g.K = LENGTH(S);
+            g.K = LENGTH(g.S);
             g.L = g.FIXL[g.MP];
             g.TEMP_SYN = 0;  #  START WITH VALUE CALC. = O
             # DO CASE TEMP3;
-            if TEMP3 == 0:
+            if g.TEMP3 == 0:
                 g.C[0] = 'D';
                 if L != 1:
                     ERROR(d.CLASS_LB, 2);
                     g.L = 1;
                 g.TEMP2 = 0;  #  INDICATE START FROM 1ST CHAR
-                if SUBSTR(S, g.TEMP2) > '2147483647':
+                if SUBSTR(g.S, g.TEMP2) > '2147483647':
                     ERROR(d.CLASS_LB, 1);
                     goto_DO_BIT_CONSTANT_END = True
                 else:
-                    for g.TEMP in range(g.TEMP2, 1 + LENGTH(S) - 1):  #  CHECK FOR CHAR 1 TO 9
-                        l.H1 = BYTE(S, g.TEMP);
+                    for g.TEMP in range(g.TEMP2, 1 + LENGTH(g.S) - 1):  #  CHECK FOR CHAR 1 TO 9
+                        l.H1 = BYTE(g.S, g.TEMP);
                         if not ((l.H1 >= BYTE('0')) & (l.H1 <= BYTE('9'))): 
                             ERROR(d.CLASS_LB, 4);
                             g.TEMP_SYN = 0;
                             goto_DO_BIT_CONSTANT_END = True
                             break
                         else:
-                            g.TEMP_SYN = TEMP_SYN * 10;  #  ADD IN NEXT DIGIT
-                            g.TEMP_SYN = TEMP_SYN + (l.H1 & 0x0F);
+                            g.TEMP_SYN = g.TEMP_SYN * 10;  #  ADD IN NEXT DIGIT
+                            g.TEMP_SYN = g.TEMP_SYN + (l.H1 & 0x0F);
                     #  END OF DO FOR
                     if not goto_DO_BIT_CONSTANT_END:
                         g.I = 1;
-                        while SHR(TEMP_SYN, I) != 0:
-                            g.I = I + 1;
+                        while SHR(g.TEMP_SYN, g.I) != 0:
+                            g.I = g.I + 1;
                         goto_DO_BIT_CONSTANT_END = True
                 #  END OF CASE 0
-            elif TEMP3 == 1:
+            elif g.TEMP3 == 1:
                 # CASE 1, BIN
                 g.C[0] = 'B';
-                for g.TEMP in range(0, 1 + LENGTH(S) - 1):  #  CHECK FOR '0' OR '1'
-                   l.H1 = BYTE(S, g.TEMP);
+                for g.TEMP in range(0, 1 + LENGTH(g.S) - 1):  #  CHECK FOR '0' OR '1'
+                   l.H1 = BYTE(g.S, g.TEMP);
                    if not ((l.H1 == BYTE('0')) or (l.H1 == BYTE('1'))):
                        ERROR(d.CLASS_LB, 5);
                        g.TEMP_SYN = 0;
                        goto_DO_BIT_CONSTANT_END = True
                    else:
-                       g.TEMP_SYN = SHL(TEMP_SYN, 1);  #  ADDIN NEXT VALUE
-                       g.TEMP_SYN = TEMP_SYN | (l.H1 & 0x0F);
+                       g.TEMP_SYN = SHL(g.TEMP_SYN, 1);  #  ADDIN NEXT VALUE
+                       g.TEMP_SYN = g.TEMP_SYN | (l.H1 & 0x0F);
                 #  END OF CASE 1
-            elif TEMP3 == 2:
+            elif g.TEMP3 == 2:
                 # CASE 2, NO RADIX BASE 2 AT MOMENT
                 pass;
-            elif TEMP3 == 3:
+            elif g.TEMP3 == 3:
                 # CASE 3, OCT
                 g.C[0] = 'O';
-                for g.TEMP in range(0, 1 + LENGTH(S) - 1):  #  CHECK FOR OCTAL CHARACTERS
-                    l.H1 = BYTE(S, g.TEMP);
+                for g.TEMP in range(0, 1 + LENGTH(g.S) - 1):  #  CHECK FOR OCTAL CHARACTERS
+                    l.H1 = BYTE(g.S, g.TEMP);
                     if not ((l.H1 >= BYTE('0')) and (l.H1 <= BYTE('7'))):
                         ERROR(d.CLASS_LB, 6);
                         g.TEMP_SYN = 0;
                         goto_DO_BIT_CONSTANT_END = True
                     else:
-                        g.TEMP_SYN = SHL(TEMP_SYN, 3);  #  ADD IN NEXT VALUE
-                        g.TEMP_SYN = TEMP_SYN | (l.H1 & 0x0F);
+                        g.TEMP_SYN = SHL(g.TEMP_SYN, 3);  #  ADD IN NEXT VALUE
+                        g.TEMP_SYN = g.TEMP_SYN | (l.H1 & 0x0F);
                 #  END OF CASE 3
-            elif TEMP3 == 4:
+            elif g.TEMP3 == 4:
                 # CASE 4, HEX
                 g.C[0] = 'H';
-                for g.TEMP in range(0, 1 + LENGTH(S) - 1):  #  CHECK FOR HEXADECIMAL CHARACTERS
-                    l.H1 = BYTE(S, g.TEMP);
+                for g.TEMP in range(0, 1 + LENGTH(g.S) - 1):  #  CHECK FOR HEXADECIMAL CHARACTERS
+                    l.H1 = BYTE(g.S, g.TEMP);
                     if not ((l.H1 >= BYTE('0')) and (l.H1 <= BYTE('9'))):
                         if not ((l.H1 >= BYTE('A')) and (l.H1 <= BYTE('F'))):
                             ERROR(d.CLASS_LB, 7);
                             g.TEMP_SYN = 0;
                             goto_DO_BIT_CONSTANT_END = True
                         else:
-                            g.TEMP_SYN = SHL(TEMP_SYN, 4);  #  GET NEW VAL WITH NUM.DIG.
-                            g.TEMP_SYN = TEMP_SYN + 9 + (l.H1 & 0x0F);
+                            g.TEMP_SYN = SHL(g.TEMP_SYN, 4);  #  GET NEW VAL WITH NUM.DIG.
+                            g.TEMP_SYN = g.TEMP_SYN + 9 + (l.H1 & 0x0F);
                     else:
-                       g.TEMP_SYN = SHL(TEMP_SYN, 4);  #  ADD IN NUM. VALUE
-                       g.TEMP_SYN = TEMP_SYN + (l.H1 & 0x0F);
+                       g.TEMP_SYN = SHL(g.TEMP_SYN, 4);  #  ADD IN NUM. VALUE
+                       g.TEMP_SYN = g.TEMP_SYN + (l.H1 & 0x0F);
                 # END OF CASE 4
             #  END OF DO CASE
             #  INCORPORATE REPETITION FACTOR
             if not goto_DO_BIT_CONSTANT_END:
-                g.TEMP2 = TEMP_SYN;
-                g.J = TEMP3 * K;
+                g.TEMP2 = g.TEMP_SYN;
+                g.J = g.TEMP3 * K;
                 for g.TEMP in range(2, 1 + L):
-                    g.TEMP_SYN = SHL(TEMP_SYN, J) | g.TEMP2;
+                    g.TEMP_SYN = SHL(g.TEMP_SYN, J) | g.TEMP2;
                 g.I = J * L;
-                if I > BIT_LENGTH_LIM: 
-                    if I - TEMP3 < BIT_LENGTH_LIM:
-                        l.H1 = BYTE(S);
+                if g.I > g.BIT_LENGTH_LIM: 
+                    if g.I - g.TEMP3 < g.BIT_LENGTH_LIM:
+                        l.H1 = BYTE(g.S);
                         if l.H1 >= BYTE('A') and l.H1 <= BYTE('F'): 
                             l.H1 = l.H1 + 9;
                         l.H1 = l.H1 & 0x0F;
-                        if SHR(l.H1, BIT_LENGTH_LIM + TEMP3 - I) != 0:
+                        if SHR(l.H1, g.BIT_LENGTH_LIM + g.TEMP3 - g.I) != 0:
                             ERROR(d.CLASS_LB, 1);
                     else:
                         ERROR(d.CLASS_LB, 1);
-                    g.I = BIT_LENGTH_LIM;
+                    g.I = g.BIT_LENGTH_LIM;
         goto_DO_BIT_CONSTANT_END = False
         g.PTR[g.MP] = PUSH_INDIRECT(1);
-        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = BIT_TYPE;
-        g.PSEUDO_FORM[g.PTR[g.MP]] = XLIT;
-        g.PSEUDO_LENGTH[g.PTR[g.MP]] = I;
-        g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(2, TEMP_SYN, I);
+        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.BIT_TYPE;
+        g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
+        g.PSEUDO_LENGTH[g.PTR[g.MP]] = g.I;
+        g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(2, g.TEMP_SYN, g.I);
     elif goto_CHAR_LITS or PRODUCTION_NUMBER == 275:  # reference 2750
         #  <CHAR CONST>  ::=  <CHAR STRING>
         goto_CHAR_LITS = False
         g.PTR[g.MP] = PUSH_INDIRECT(1);
         g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(0, g.VAR[g.MP]);
-        g.PSEUDO_FORM[g.PTR[g.MP]] = XLIT;
-        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = CHAR_TYPE;
+        g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
+        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.CHAR_TYPE;
         g.PSEUDO_LENGTH[g.PTR[g.MP]] = LENGTH(g.VAR[g.MP]);
     elif goto_IO_CONTROL or PRODUCTION_NUMBER == 277:  # reference 2770
         #  <IO CONTROL>  ::=  SKIP  (  <ARITH EXP>  )
@@ -4387,7 +4390,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto_CHECK_READ = False
         if g.INX[g.PTR[g.MP]] == 0: 
             if SHR(g.VAL_P[g.PTR[g.SP]], 7): ERROR(d.CLASS_T, 3);
-            if g.PSEUDO_TYPE_P[g.PTR[g.SP]] == EVENT_TYPE: ERROR(d.CLASS_T, 2);
+            if g.PSEUDO_TYPE_P[g.PTR[g.SP]] == g.EVENT_TYPE: 
+                ERROR(d.CLASS_T, 2);
         elif g.TEMP > 0: 
             pass;
         elif READ_ALL_TYPE(g.SP): 
@@ -4402,9 +4406,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.INLINE_LEVEL > 0: 
             ERROR(d.CLASS_PP, 5);
         HALMAT_TUPLE(XXXAR, XCO_N, g.MP, 0, 0);
-        HALMAT_FIX_PIPTAGS(NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.MP]], g.TEMP);
-        if g.PSEUDO_TYPE_P[g.PTR[g.MP]] == MAJ_STRUC:
-            if (g.SYT_FLAGS(VAR_LENGTH(g.FIXV[g.MP])) & MISC_NAME_FLAG) != 0:
+        HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, g.PSEUDO_TYPE_P[g.PTR[g.MP]], g.TEMP);
+        if g.PSEUDO_TYPE_P[g.PTR[g.MP]] == g.MAJ_STRUC:
+            if (g.SYT_FLAGS(VAR_LENGTH(g.FIXV[g.MP])) & g.MISC_NAME_FLAG) != 0:
                 ERROR(d.CLASS_T, 6);
         EMIT_ARRAYNESS();
         g.PTR_TOP = g.PTR[g.MP] - 1;
@@ -4423,20 +4427,20 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         else:
             g.LOC_P[g.PTR[g.MP]] = g.FIXV[g.MP + 2];
             g.I = g.IODEV[g.FIXV[g.MP + 2]];
-            if (I & 0x28) == 0: 
+            if (g.I & 0x28) == 0: 
                 if g.TEMP == 2: 
-                    if (I & 0x01) == 0: 
-                        g.I = I | 0x04;
+                    if (g.I & 0x01) == 0: 
+                        g.I = g.I | 0x04;
                     else:
-                        g.I = I | 0x02;
+                        g.I = g.I | 0x02;
                 else:
-                    g.I = I | 0x01;
-                    if (I & 0x04) != 0: 
-                        if (I & 0x40) != 0: 
-                            g.I = I | 0x80;
+                    g.I = g.I | 0x01;
+                    if (g.I & 0x04) != 0: 
+                        if (g.I & 0x40) != 0: 
+                            g.I = g.I | 0x80;
                         else:
-                            g.I = (I & 0xFB) | 0x02;
-            g.IODEV[g.FIXV[g.MP + 2]] = I;
+                            g.I = (g.I & 0xFB) | 0x02;
+            g.IODEV[g.FIXV[g.MP + 2]] = g.I;
         g.PSEUDO_FORM[g.PTR[g.MP]] = XIMD;
         g.INX[g.PTR[g.MP]] = g.TEMP;
         if UPDATE_BLOCK_LEVEL > 0: 
@@ -4448,17 +4452,17 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.TEMP2 = 0;
         goto_CLOSE_SCOPE = False
         HALMAT_POP(g.TEMP, 1, 0, g.TEMP2);
-        HALMAT_PIP(g.BLOCK_SYTREF[g.NEST], XSYT, 0, 0);
-        for I in range(0, 1 + g.NDECSY() - REGULAR_PROCMARK):
-            g.J = g.NDECSY() - I;
+        HALMAT_PIP(g.BLOCK_SYTREF[g.NEST], g.XSYT, 0, 0);
+        for g.I in range(0, 1 + g.NDECSY() - REGULAR_PROCMARK):
+            g.J = g.NDECSY() - g.I;
             if (g.SYT_FLAGS(J) & INACTIVE_FLAG) == 0:
                 g.CLOSE_BCD = SYT_NAME(J);
-                if SYT_CLASS(J) == FUNC_CLASS:
-                    if (g.SYT_FLAGS(J) & DEFINED_LABEL) == 0:
+                if SYT_CLASS(J) == g.FUNC_CLASS:
+                    if (g.SYT_FLAGS(J) & g.DEFINED_LABEL) == 0:
                        ERROR(d.CLASS_PL, 1, g.CLOSE_BCD);
                     DISCONNECT(J);
-                elif SYT_CLASS(J) == LABEL_CLASS:
-                    if (g.SYT_FLAGS(J) & DEFINED_LABEL) == 0:
+                elif SYT_CLASS(J) == g.LABEL_CLASS:
+                    if (g.SYT_FLAGS(J) & g.DEFINED_LABEL) == 0:
                         # UNDEFINED CALLABLE LABEL
                         if g.SYT_TYPE(J) == g.STMT_LABEL:
                             DISCONNECT(J);
@@ -4498,57 +4502,58 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 # END OF LABEL CLASS
                 else:
                     DISCONNECT(J);  # ALL OTHER CLASSES
-        if g.BLOCK_MODE[g.NEST] == UPDATE_MODE:
+        if g.BLOCK_MODE[g.NEST] == g.UPDATE_MODE:
             g.UPDATE_BLOCK_LEVEL = UPDATE_BLOCK_LEVEL - 1;
         if LENGTH(g.VAR[g.SP - 1]) > 0:
             if g.VAR[g.SP - 1] != CURRENT_SCOPE:
                 ERROR(d.CLASS_PL, 3, CURRENT_SCOPE);
         if REGULAR_PROCMARK > g.NDECSY():  # NO LOCAL NAMES
             g.SYT_PTR(g.FIXL[g.MP], 0);
-        if (g.SYT_FLAGS(g.FIXL[g.MP]) & ACCESS_FLAG) != 0:
-            if g.BLOCK_MODE[g.NEST] == CMPL_MODE:
-                for I in range(g.FIXL[g.MP], 1 + g.NDECSY()):
-                    g.SYT_FLAGS(I, g.SYT_FLAGS(I) | READ_ACCESS_FLAG);
+        if (g.SYT_FLAGS(g.FIXL[g.MP]) & g.ACCESS_FLAG) != 0:
+            if g.BLOCK_MODE[g.NEST] == g.CMPL_MODE:
+                for g.I in range(g.FIXL[g.MP], 1 + g.NDECSY()):
+                    g.SYT_FLAGS(g.I, g.SYT_FLAGS(g.I) | READ_ACCESS_FLAG);
         ''' IF THIS IS THE CLOSE OF A COMPOOL INCLUDED REMOTE
             THEN MAKE SURE THAT ALL OF THE ITEMS IN THE COMPOOL
             ARE ALSO FLAGED AS REMOTE - EXCEPT FOR NAME TYPES AND
             STRUCTURE TEMPLATE VARIABLES. '''
-        if ((g.SYT_FLAGS(g.FIXL[g.MP]) & EXTERNAL_FLAG) != 0) \
-                and ((g.SYT_FLAGS(g.FIXL[g.MP]) & REMOTE_FLAG) != 0):
-            if g.BLOCK_MODE[g.NEST] == CMPL_MODE:
-                for I in range(g.FIXL[g.MP], 1 + g.NDECSY()):
+        if ((g.SYT_FLAGS(g.FIXL[g.MP]) & g.EXTERNAL_FLAG) != 0) \
+                and ((g.SYT_FLAGS(g.FIXL[g.MP]) & g.REMOTE_FLAG) != 0):
+            if g.BLOCK_MODE[g.NEST] == g.CMPL_MODE:
+                for g.I in range(g.FIXL[g.MP], 1 + g.NDECSY()):
                     # IF 16-BIT NAME VARIABLE WAS INITIALIZED TO NON-REMOTE VARIABLE IN
                     # A REMOTELY INCLUDED COMPOOL, IT IS NOW INVALID.
                     
                     def TEMPL_INITIAL_CHECK():
                         # IS POINTED TO BY A NAME VARIABLE
-                        if (g.SYT_FLAGS(I) & MISC_NAME_FLAG) != 0:
-                            if g.SYT_TYPE(I) != TEMPL_NAME:  # NOT A TEMPLATE
+                        if (g.SYT_FLAGS(g.I) & g.MISC_NAME_FLAG) != 0:
+                            if g.SYT_TYPE(g.I) != g.TEMPL_NAME:  # NOT A TEMPLATE
                                                           # NON-REMOTE
-                                if (g.SYT_FLAGS(I) & REMOTE_FLAG) == 0:
+                                if (g.SYT_FLAGS(g.I) & g.REMOTE_FLAG) == 0:
                                     ERROR(d.CLASS_DI, 21);
            
                     TEMPL_INITIAL_CHECK();
                     # INCLUDED_REMOTE MEANS VARIABLE LIVES REMOTE ONLY BECAUSE
                     # IT WAS INCLUDED REMOTE (IT RESIDES IN #P, NOT IN #R)
-                    if (SYT_CLASS(I) != TEMPLATE_CLASS): 
+                    if (SYT_CLASS(g.I) != g.TEMPLATE_CLASS): 
                             # NOT A NAME VARIABLE AND NOT INITIALLY DECLARED REMOTE
-                            if ((g.SYT_FLAGS(I) & NAME_FLAG) == 0) and \
-                                    ((g.SYT_FLAGS(I) & REMOTE_FLAG) == 0):
-                                g.SYT_FLAGS(I, g.SYT_FLAGS(I) | REMOTE_FLAG | \
-                                                INCLUDED_REMOTE);
+                            if ((g.SYT_FLAGS(g.I) & g.NAME_FLAG) == 0) and \
+                                    ((g.SYT_FLAGS(g.I) & g.REMOTE_FLAG) == 0):
+                                g.SYT_FLAGS(g.I, g.SYT_FLAGS(g.I) | g.REMOTE_FLAG | \
+                                                g.INCLUDED_REMOTE);
                                 # FOR NAME VARIABLES, SET THAT THEY NOW LIVE REMOTE
-                                if ((g.SYT_FLAGS(I) & NAME_FLAG) != 0):
-                                    g.SYT_FLAGS(I, g.SYT_FLAGS(I) | \
-                                                    INCLUDED_REMOTE);
+                                if ((g.SYT_FLAGS(g.I) & g.NAME_FLAG) != 0):
+                                    g.SYT_FLAGS(g.I, g.SYT_FLAGS(g.I) | \
+                                                    g.INCLUDED_REMOTE);
 
-        g.SYT_FLAGS(g.NDECSY(), g.SYT_FLAGS(g.NDECSY()) | ENDSCOPE_FLAG);
+        g.SYT_FLAGS(g.NDECSY(), g.SYT_FLAGS(g.NDECSY()) | g.ENDSCOPE_FLAG);
         g.CURRENT_SCOPE = g.VAR[g.MP];
         if g.PTR[g.MPP1]: 
             # DO CASE g.EXTERNAL_MODE;
             if g.EXTERNAL_MODE == 0:
                 #  NOT EXTERNAL
-                if g.BLOCK_MODE[g.NEST] == CMPL_MODE: ERROR(d.CLASS_PC, 1);
+                if g.BLOCK_MODE[g.NEST] == g.CMPL_MODE: 
+                    ERROR(d.CLASS_PC, 1);
             elif g.EXTERNAL_MODE == 1:
                 #  PROC MODE
                 ERROR(d.CLASS_PS, 1);
@@ -4563,13 +4568,13 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 ERROR(d.CLASS_PS, 1);
         OUTPUT_WRITER();
         EMIT_SMRK();
-        if g.BLOCK_MODE[g.NEST] == INLINE_MODE: 
+        if g.BLOCK_MODE[g.NEST] == g.INLINE_MODE: 
             g.INLINE_INDENT_RESET = g.EXT_P[g.PTR[g.MP]];
             g.INDENT_LEVEL = INLINE_INDENT + g.INDENT_INCR;
             g.INLINE_STMT_RESET = g.STMT_NUM();
             g.STMT_NUM(g.INX[g.PTR[g.MP]]);
             g.INX[g.PTR[g.MP]] = 0;
-            if g.PSEUDO_TYPE_P[g.PTR[g.MP]] == MAJ_STRUC: 
+            if g.PSEUDO_TYPE_P[g.PTR[g.MP]] == g.MAJ_STRUC: 
                 g.FIXL[g.MP] = g.PSEUDO_LENGTH[g.PTR[g.MP]];
             RESET_ARRAYNESS();
             g.INLINE_LEVEL = g.INLINE_LEVEL - 1;
@@ -4592,13 +4597,13 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PROCMARK = REGULAR_PROCMARK
         g.SCOPEp = g.SCOPEp_STACK[g.NEST];
         g.I = 0;
-        while ON_ERROR_PTR < -SYT_ARRAY(g.BLOCK_SYTREF[g.NEST]):
-            if EXT_ARRAY(ON_ERROR_PTR) == 0x3FFF: 
-                g.I = I + 0x1001;
+        while g.ON_ERROR_PTR < -g.SYT_ARRAY(g.BLOCK_SYTREF[g.NEST]):
+            if EXT_ARRAY(g.ON_ERROR_PTR) == 0x3FFF: 
+                g.I = g.I + 0x1001;
             else:
-                g.I = I + 1;
-            g.ON_ERROR_PTR = ON_ERROR_PTR + 1;
-        g.SYT_ARRAY(g.BLOCK_SYTREF[g.NEST], I | 0xE000);
+                g.I = g.I + 1;
+            g.ON_ERROR_PTR = g.ON_ERROR_PTR + 1;
+        g.SYT_ARRAY(g.BLOCK_SYTREF[g.NEST], g.I | 0xE000);
         g.NEST = g.NEST - 1;
         g.DO_INX[g.DO_LEVEL] = g.DO_INX[g.DO_LEVEL] & 0x7F;
         if g.NEST == 0:
@@ -4610,22 +4615,22 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.TPL_VERSION = g.BLOCK_SYTREF[g.NEST + 1];
                 g.SYT_LOCKp(TPL_VERSION, 0);
             elif g.BLOCK_MODE[0] > 0:
-                if EXTERNALIZE == 4: 
+                if g.EXTERNALIZE == 4: 
                     g.EXTERNALIZE = 2;
                 EMIT_EXTERNAL();
     elif goto_INLINE_DEFS or PRODUCTION_NUMBER == 297:  # reference 2970
         #  <ARITH INLINE DEF>  ::=  FUNCTION <ARITH SPEC>  ;
         if not goto_INLINE_DEFS:
-            if TYPE == 0: 
-                g.TYPE = DEFAULT_TYPE;
-            if (ATTRIBUTES & SD_FLAGS) == 0: 
-                g.ATTRIBUTES = ATTRIBUTES | (DEFAULT_ATTR & SD_FLAGS);
-            if TYPE < g.SCALAR_TYPE: 
-                g.TEMP = TYPE(TYPE);
+            if g.TYPE == 0: 
+                g.TYPE = g.DEFAULT_TYPE;
+            if (g.ATTRIBUTES & g.SD_FLAGS) == 0: 
+                g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.SD_FLAGS);
+            if g.TYPE < g.SCALAR_TYPE: 
+                g.TEMP = g.TYPEf(g.TYPE);
             else:
                 g.TEMP = 0;
         goto_INLINE_DEFS = False
-        if CONTEXT == EXPRESSION_CONTEXT: 
+        if g.CONTEXT == g.EXPRESSION_CONTEXT: 
             ERROR(d.CLASS_PP, 11);
         g.CONTEXT = 0;
         g.GRAMMAR_FLAGS[g.STACK_PTR[g.MP]] = g.GRAMMAR_FLAGS[g.STACK_PTR[g.MP]] | INLINE_FLAG;
@@ -4634,28 +4639,28 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.INLINE_LEVEL > 1: 
             ERROR(d.CLASS_PP, 10);
         else:
-            g.STAB_MARK = STAB_STACKTOP;
-            g.STAB2_MARK = STAB2_STACKTOP;
-            g.STAB_STACK[0] = STMT_TYPE;
+            g.STAB_MARK = g.STAB_STACKTOP;
+            g.STAB2_MARK = g.STAB2_STACKTOP;
+            g.STAB_STACK[0] = g.STMT_TYPE;
             g.SRN_MARK = g.SRN[2][:];
             g.INCL_SRN_MARK = g.INCL_SRN[2][:];
             g.SRN_COUNT_MARK = g.SRN_COUNT[2];
             g.STMT_TYPE = 0;
-        g.INLINE_LABEL = INLINE_LABEL + 1;
-        g.VAR[g.MP] = l.INLINE_NAME + INLINE_LABEL;
-        g.NAME_HASH = HASH(g.VAR[g.MP], SYT_HASHSIZE);
-        g.FIXL[g.MP] = ENTER(g.VAR[g.MP], FUNC_CLASS);
-        g.FIXL[g.MP] = I
+        g.INLINE_LABEL = g.INLINE_LABEL + 1;
+        g.VAR[g.MP] = l.INLINE_NAME + g.INLINE_LABEL;
+        g.NAME_HASH = HASH(g.VAR[g.MP], g.SYT_HASHSIZE);
+        g.FIXL[g.MP] = ENTER(g.VAR[g.MP], g.FUNC_CLASS);
+        g.FIXL[g.MP] = g.I
         if g.SIMULATING: 
-            STAB_LAB(I);
-        SET_XREF(I, XREF_REF);
-        g.SYT_TYPE(I, TYPE);
-        g.SYT_FLAGS(I, g.SYT_FLAGS(I) | DEFINED_LABEL | ATTRIBUTES);
-        g.VAR_LENGTH(I, g.TEMP);
+            STAB_LAB(g.I);
+        SET_XREF(g.I, g.XREF_REF);
+        g.SYT_TYPE(g.I, g.TYPE);
+        g.SYT_FLAGS(g.I, g.SYT_FLAGS(g.I) | g.DEFINED_LABEL | g.ATTRIBUTES);
+        g.VAR_LENGTH(g.I, g.TEMP);
         HALMAT_POP(XIDEF, 1, 0, g.INLINE_LEVEL);
-        HALMAT_PIP(I, XSYT, 0, 0);
-        SETUP_VAC(g.MP, TYPE, g.TEMP);
-        g.TEMP2 = INLINE_MODE;
+        HALMAT_PIP(g.I, g.XSYT, 0, 0);
+        SETUP_VAC(g.MP, g.TYPE, g.TEMP);
+        g.TEMP2 = g.INLINE_MODE;
         # See the comments in g.py for TYPE to understand the next few lines
         g.TYPE = 0
         g.BIT_LENGTH = 0
@@ -4683,12 +4688,12 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <BLOCK STMT HEAD>  ::=  <LABEL DEFINITION>  UPDATE
         if not goto_UPDATE_HEAD:
             g.VAR_LENGTH(g.FIXL[g.MP], 1);
-            HALMAT_BACKUP(LAST_POPp);
+            HALMAT_BACKUP(g.LAST_POPp);
         goto_UPDATE_HEAD = False
         if UPDATE_BLOCK_LEVEL > 0: 
             ERROR(d.CLASS_UI, 2);
         g.UPDATE_BLOCK_LEVEL = UPDATE_BLOCK_LEVEL + 1;
-        g.TEMP2 = UPDATE_MODE;
+        g.TEMP2 = g.UPDATE_MODE;
         g.TEMP = XUDEF;
         SET_LABEL_TYPE(g.FIXL[g.MP], g.STMT_LABEL);
         if g.NEST == 0: 
@@ -4699,37 +4704,37 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif goto_FUNC_HEADER or PRODUCTION_NUMBER == 316:  # reference 3160
         #  <BLOCK STMT HEAD>  ::=  <FUNCTION NAME>
         goto_FUNC_HEADER = False
-        if PARMS_PRESENT == 0:
+        if g.PARMS_PRESENT == 0:
             g.PARMS_WATCH = g.FALSE;
             if MAIN_SCOPE == g.SCOPEp: 
                 g.COMSUB_END(g.FIXL[g.MP]);
         g.FACTORING = g.TRUE;
         g.DO_INIT = g.FALSE;
-        if TYPE == 0:
-            g.TYPE = DEFAULT_TYPE;
-        elif TYPE == EVENT_TYPE:
-            ERROR(d.CLASS_FT, 3, SYT_NAME(ID_LOC));
-            g.TYPE = DEFAULT_TYPE;
-        if (ATTRIBUTES & SD_FLAGS) == 0:
-            if (TYPE >= g.MAT_TYPE) and (TYPE <= INT_TYPE):
-                g.ATTRIBUTES = ATTRIBUTES | (DEFAULT_ATTR & SD_FLAGS);
-        if TYPE == MAJ_STRUC: 
+        if g.TYPE == 0:
+            g.TYPE = g.DEFAULT_TYPE;
+        elif g.TYPE == g.EVENT_TYPE:
+            ERROR(d.CLASS_FT, 3, SYT_NAME(g.ID_LOC));
+            g.TYPE = g.DEFAULT_TYPE;
+        if (g.ATTRIBUTES & g.SD_FLAGS) == 0:
+            if (g.TYPE >= g.MAT_TYPE) and (g.TYPE <= g.INT_TYPE):
+                g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.SD_FLAGS);
+        if g.TYPE == g.MAJ_STRUC: 
             CHECK_STRUC_CONFLICTS();
-        if g.SYT_TYPE(ID_LOC) == 0: 
+        if g.SYT_TYPE(g.ID_LOC) == 0: 
             SET_SYT_ENTRIES();
         else:
-            if g.SYT_TYPE(ID_LOC) != TYPE:
-                ERROR(d.CLASS_DT, 1, SYT_NAME(ID_LOC));
+            if g.SYT_TYPE(g.ID_LOC) != g.TYPE:
+                ERROR(d.CLASS_DT, 1, SYT_NAME(g.ID_LOC));
             else:  # TYPES MATCH, WHAT ABOUT SIZES
-               if TYPE <= g.VEC_TYPE:
-                    if TYPE(TYPE) != VAR_LENGTH(ID_LOC):
-                        ERROR(d.CLASS_FT, 4, SYT_NAME(ID_LOC));
-               elif TYPE == MAJ_STRUC: 
-                    if STRUC_PTR != VAR_LENGTH(ID_LOC):
-                        ERROR(d.CLASS_FT, 6, SYT_NAME(ID_LOC));
-               if (ATTRIBUTES & SD_FLAGS) != 0:
-                    if ((g.SYT_FLAGS(ID_LOC) & ATTRIBUTES) & SD_FLAGS) == 0:
-                        ERROR(d.CLASS_FT, 7, SYT_NAME(ID_LOC));
+               if g.TYPE <= g.VEC_TYPE:
+                    if g.TYPEf(g.TYPE) != VAR_LENGTH(g.ID_LOC):
+                        ERROR(d.CLASS_FT, 4, SYT_NAME(g.ID_LOC));
+               elif g.TYPE == g.MAJ_STRUC: 
+                    if g.STRUC_PTR != VAR_LENGTH(g.ID_LOC):
+                        ERROR(d.CLASS_FT, 6, SYT_NAME(g.ID_LOC));
+               if (g.ATTRIBUTES & g.SD_FLAGS) != 0:
+                    if ((g.SYT_FLAGS(g.ID_LOC) & g.ATTRIBUTES) & g.SD_FLAGS) == 0:
+                        ERROR(d.CLASS_FT, 7, SYT_NAME(g.ID_LOC));
             # END OF TYPES MATCH
             # See the comments in g.py for TYPE to understand the next few lines
             g.TYPE = 0
@@ -4773,9 +4778,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif goto_DECL_STAT or PRODUCTION_NUMBER == 343:  # reference 3430
         #  <DECLARE STATEMENT>  ::=  DECLARE  <DECLARE BODY>  ;
         if not goto_DECL_STAT:
-            if PARMS_PRESENT <= 0: 
+            if g.PARMS_PRESENT <= 0: 
                 g.PARMS_WATCH = g.FALSE;
-                if EXTERNALIZE: 
+                if g.EXTERNALIZE: 
                     g.EXTERNALIZE = 4;
         goto_DECL_STAT = False
         g.FACTORING = g.TRUE;
@@ -4802,21 +4807,21 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXL[g.MPP1] = g.FIXL[g.MP];
         g.ID_LOC = g.FIXL[g.MPP1]
         g.STRUC_SIZE = 0;
-        g.REF_ID_LOC = ID_LOC;
+        g.REF_ID_LOC = g.ID_LOC;
         if g.FIXV[g.SP] > 1: 
             ERROR(d.CLASS_DQ, 1);
         g.FIXV[g.MP] = 1;
-        g.SYT_CLASS(ID_LOC, TEMPLATE_CLASS);
-        g.SYT_TYPE(ID_LOC, TEMPL_NAME);
-        if (ATTRIBUTES & ILL_TEMPL_ATTR) != 0 or \
-                (ATTRIBUTES2 & NONHAL_FLAG) != 0: 
-            ERROR(d.CLASS_DA, 22, SYT_NAME(ID_LOC));
-            g.ATTRIBUTES = ATTRIBUTES & ~ILL_TEMPL_ATTR;
-            g.ATTRIBUTES2 = ATTRIBUTES2 & ~NONHAL_FLAG;
+        g.SYT_CLASS(g.ID_LOC, g.TEMPLATE_CLASS);
+        g.SYT_TYPE(g.ID_LOC, g.TEMPL_NAME);
+        if (g.ATTRIBUTES & g.ILL_TEMPL_ATTR) != 0 or \
+                (g.ATTRIBUTES2 & g.NONHAL_FLAG) != 0: 
+            ERROR(d.CLASS_DA, 22, SYT_NAME(g.ID_LOC));
+            g.ATTRIBUTES = g.ATTRIBUTES & ~g.ILL_TEMPL_ATTR;
+            g.ATTRIBUTES2 = g.ATTRIBUTES2 & ~g.NONHAL_FLAG;
             g.DO_INIT = g.FALSE;
-        if (ATTRIBUTES & ALDENSE_FLAGS) == 0:
-            g.ATTRIBUTES = ATTRIBUTES | (DEFAULT_ATTR & ALDENSE_FLAGS);
-        g.SYT_FLAGS(ID_LOC, g.SYT_FLAGS(ID_LOC) | ATTRIBUTES);
+        if (g.ATTRIBUTES & g.ALDENSE_FLAGS) == 0:
+            g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.ALDENSE_FLAGS);
+        g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.ATTRIBUTES);
         HALMAT_INIT_CONST();
         # See the comments in g.py for TYPE to understand the next few lines
         g.TYPE = 0
@@ -4848,40 +4853,40 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <STRUCT STMT HEAD> ::= <STRUCT STMT HEAD> <DECLARATION> , <LEVEL>
         if not goto_STRUCT_GOING_DOWN:
             goto_STRUCT_GOING_UP = False
-            if (g.SYT_FLAGS(ID_LOC) & DUPL_FLAG) != 0:
-                g.SYT_FLAGS(ID_LOC, g.SYT_FLAGS(ID_LOC) & (not DUPL_FLAG));
-                g.S = SYT_NAME(ID_LOC);
+            if (g.SYT_FLAGS(g.ID_LOC) & g.DUPL_FLAG) != 0:
+                g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) & (~ g.DUPL_FLAG));
+                g.S = SYT_NAME(g.ID_LOC);
                 g.TEMP_SYN = g.SYT_LINK1(g.FIXL[g.MP]);
-                while TEMP_SYN != ID_LOC:
-                    if S == SYT_NAME(TEMP_SYN):
-                        ERROR(d.CLASS_DQ, 9, S);
+                while g.TEMP_SYN != g.ID_LOC:
+                    if g.S == SYT_NAME(g.TEMP_SYN):
+                        ERROR(d.CLASS_DQ, 9, g.S);
                         g.S = '';
-                    g.TEMP_SYN = g.SYT_LINK2(TEMP_SYN);
+                    g.TEMP_SYN = g.SYT_LINK2(g.TEMP_SYN);
         if goto_STRUCT_GOING_DOWN or g.FIXV[g.SP] > g.FIXV[g.MP]:
             if not goto_STRUCT_GOING_DOWN: 
                 if g.FIXV[g.SP] > g.FIXV[g.MP] + 1: 
                     ERROR(d.CLASS_DQ, 2);
                 g.FIXV[g.MP] = g.FIXV[g.MP] + 1;
-                if (TYPE | CLASS) != 0:
-                    ERROR(d.CLASS_DT, 5, SYT_NAME(ID_LOC));  # TYPE NOT LEGAL
-                if (ATTRIBUTES & ILL_MINOR_STRUC) != 0 or NAME_IMPLIED or \
-                        (ATTRIBUTES2 & NONHAL_FLAG) != 0: 
-                    ERROR(d.CLASS_DA, 20, SYT_NAME(ID_LOC));
-                    g.ATTRIBUTES = ATTRIBUTES & (not ILL_MINOR_STRUC);
-                    g.ATTRIBUTES2 = ATTRIBUTES2 & (not NONHAL_FLAG);
+                if (g.TYPE | g.CLASS) != 0:
+                    ERROR(d.CLASS_DT, 5, SYT_NAME(g.ID_LOC));  # TYPE NOT LEGAL
+                if (g.ATTRIBUTES & g.ILL_MINOR_STRUC) != 0 or g.NAME_IMPLIED or \
+                        (g.ATTRIBUTES2 & g.NONHAL_FLAG) != 0: 
+                    ERROR(d.CLASS_DA, 20, SYT_NAME(g.ID_LOC));
+                    g.ATTRIBUTES = g.ATTRIBUTES & (~ g.ILL_MINOR_STRUC);
+                    g.ATTRIBUTES2 = g.ATTRIBUTES2 & (~ g.NONHAL_FLAG);
                     g.NAME_IMPLIED = g.FALSE;
                     g.DO_INIT = 0;
                 if N_DIM != 0: 
-                    ERROR(d.CLASS_DA, 21, SYT_NAME(ID_LOC));
+                    ERROR(d.CLASS_DA, 21, SYT_NAME(g.ID_LOC));
                     g.N_DIM = 0;
-                    g.ATTRIBUTES = ATTRIBUTES & (not ARRAY_FLAG);
-                g.SYT_CLASS(ID_LOC, TEMPLATE_CLASS);
-                g.TYPE = MAJ_STRUC;
-                if (ATTRIBUTES & ALDENSE_FLAGS) == 0:
-                    g.ATTRIBUTES = ATTRIBUTES | (g.SYT_FLAGS(g.FIXL[g.MP]) & ALDENSE_FLAGS);
+                    g.ATTRIBUTES = g.ATTRIBUTES & (~ g.ARRAY_FLAG);
+                g.SYT_CLASS(g.ID_LOC, g.TEMPLATE_CLASS);
+                g.TYPE = g.MAJ_STRUC;
+                if (g.ATTRIBUTES & g.ALDENSE_FLAGS) == 0:
+                    g.ATTRIBUTES = g.ATTRIBUTES | (g.SYT_FLAGS(g.FIXL[g.MP]) & g.ALDENSE_FLAGS);
                 # GIVE ALIGNED/DENSE OF PARENT IF NOT LOCALLY SPECIFIED
-                if (ATTRIBUTES & RIGID_FLAG) == 0:
-                    g.ATTRIBUTES = ATTRIBUTES | (g.SYT_FLAGS(g.FIXL[g.MP]) & RIGID_FLAG);
+                if (g.ATTRIBUTES & g.RIGID_FLAG) == 0:
+                    g.ATTRIBUTES = g.ATTRIBUTES | (g.SYT_FLAGS(g.FIXL[g.MP]) & g.RIGID_FLAG);
                 SET_SYT_ENTRIES();
                 if g.STACK_PTR[g.SP] > 0:
                     OUTPUT_WRITER(g.LAST_WRITE, g.STACK_PTR[g.SP] - 1);
@@ -4901,56 +4906,56 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.FIXL[g.MP] = g.LOC_P[g.PTR_TOP];
                 g.PTR_TOP = g.PTR_TOP - 1;
                 g.FIXV[g.MP] = g.FIXV[g.MP] - 1;
-            if TYPE == 0: 
-                g.TYPE = DEFAULT_TYPE;
-            elif TYPE == MAJ_STRUC: 
-                if not NAME_IMPLIED:
-                    if STRUC_PTR == REF_ID_LOC:
+            if g.TYPE == 0: 
+                g.TYPE = g.DEFAULT_TYPE;
+            elif g.TYPE == g.MAJ_STRUC: 
+                if not g.NAME_IMPLIED:
+                    if g.STRUC_PTR == g.REF_ID_LOC:
                         ERROR(d.CLASS_DT, 6);
-                        g.SYT_FLAGS(REF_ID_LOC, g.SYT_FLAGS(REF_ID_LOC) | EVIL_FLAG);
-            if CLASS != 0: 
-                if NAME_IMPLIED:
-                    g.ATTRIBUTES = ATTRIBUTES | DEFINED_LABEL;
-                    if TYPE == g.PROC_LABEL: 
-                        ERROR(d.CLASS_DA, 14, SYT_NAME(ID_LOC));
-                    elif CLASS == 2: 
-                        ERROR(d.CLASS_DA, 13, SYT_NAME(ID_LOC));
+                        g.SYT_FLAGS(g.REF_ID_LOC, g.SYT_FLAGS(g.REF_ID_LOC) | g.EVIL_FLAG);
+            if g.CLASS != 0: 
+                if g.NAME_IMPLIED:
+                    g.ATTRIBUTES = g.ATTRIBUTES | g.DEFINED_LABEL;
+                    if g.TYPE == g.PROC_LABEL: 
+                        ERROR(d.CLASS_DA, 14, SYT_NAME(g.ID_LOC));
+                    elif g.CLASS == 2: 
+                        ERROR(d.CLASS_DA, 13, SYT_NAME(g.ID_LOC));
                 else:
-                    ERROR(d.CLASS_DT, 7, SYT_NAME(ID_LOC));
+                    ERROR(d.CLASS_DT, 7, SYT_NAME(g.ID_LOC));
                     g.CLASS = 0;
-                    if TYPE > ANY_TYPE: 
-                        g.TYPE = DEFAULT_TYPE;
+                    if g.TYPE > g.ANY_TYPE: 
+                        g.TYPE = g.DEFAULT_TYPE;
             CHECK_CONSISTENCY();
-            if (ATTRIBUTES & ILL_TERM_ATTR(NAME_IMPLIED)) != 0 or \
-                    (ATTRIBUTES2 & NONHAL_FLAG) != 0:
-                ERROR(d.CLASS_DA, 23, SYT_NAME(ID_LOC));
+            if (g.ATTRIBUTES & ILL_TERM_ATTR(g.NAME_IMPLIED)) != 0 or \
+                    (g.ATTRIBUTES2 & g.NONHAL_FLAG) != 0:
+                ERROR(d.CLASS_DA, 23, SYT_NAME(g.ID_LOC));
                 #  ILL_NAME_ATTR MUST BE SUBSET OF ILL_TERM_ATTR
-                g.ATTRIBUTES = (~ILL_TERM_ATTR(NAME_IMPLIED)) & ATTRIBUTES;
-                g.ATTRIBUTES2 = (~NONHAL_FLAG) & ATTRIBUTES2;
+                g.ATTRIBUTES = (~ILL_TERM_ATTR(g.NAME_IMPLIED)) & g.ATTRIBUTES;
+                g.ATTRIBUTES2 = (~g.NONHAL_FLAG) & g.ATTRIBUTES2;
                 g.DO_INIT = g.FALSE;
-            g.SYT_CLASS(ID_LOC, TEMPLATE_CLASS + CLASS);
-            if TYPE == MAJ_STRUC: 
+            g.SYT_CLASS(g.ID_LOC, g.TEMPLATE_CLASS + g.CLASS);
+            if g.TYPE == g.MAJ_STRUC: 
                 CHECK_STRUC_CONFLICTS();
-            elif TYPE == EVENT_TYPE: 
+            elif g.TYPE == g.EVENT_TYPE: 
                 CHECK_EVENT_CONFLICTS();
-            if (ATTRIBUTES & SD_FLAGS) == 0:
-                if (TYPE >= g.MAT_TYPE) & (TYPE <= INT_TYPE):
-                    g.ATTRIBUTES = ATTRIBUTES | (DEFAULT_ATTR & SD_FLAGS);
-            if (ATTRIBUTES & ALDENSE_FLAGS) == 0:
-                if (not NAME_IMPLIED) and ((ATTRIBUTES & ARRAY_FLAG) == 0) and \
-                        (TYPE == BIT_TYPE):
-                    g.ATTRIBUTES = ATTRIBUTES | (g.SYT_FLAGS(g.FIXL[g.SP]) & ALDENSE_FLAGS);
+            if (g.ATTRIBUTES & g.SD_FLAGS) == 0:
+                if (g.TYPE >= g.MAT_TYPE) & (g.TYPE <= g.INT_TYPE):
+                    g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.SD_FLAGS);
+            if (g.ATTRIBUTES & g.ALDENSE_FLAGS) == 0:
+                if (not g.NAME_IMPLIED) and ((g.ATTRIBUTES & g.ARRAY_FLAG) == 0) and \
+                        (g.TYPE == g.BIT_TYPE):
+                    g.ATTRIBUTES = g.ATTRIBUTES | (g.SYT_FLAGS(g.FIXL[g.SP]) & g.ALDENSE_FLAGS);
                 else:
-                    g.ATTRIBUTES = ATTRIBUTES | ALIGNED_FLAG;
-            if (ATTRIBUTES & RIGID_FLAG) == 0:
-                g.ATTRIBUTES = ATTRIBUTES | (g.SYT_FLAGS(g.FIXL[g.SP]) & RIGID_FLAG);
-            if NAME_IMPLIED: 
-                g.SYT_FLAGS(REF_ID_LOC, g.SYT_FLAGS(REF_ID_LOC) | MISC_NAME_FLAG);
+                    g.ATTRIBUTES = g.ATTRIBUTES | g.ALIGNED_FLAG;
+            if (g.ATTRIBUTES & g.RIGID_FLAG) == 0:
+                g.ATTRIBUTES = g.ATTRIBUTES | (g.SYT_FLAGS(g.FIXL[g.SP]) & g.RIGID_FLAG);
+            if g.NAME_IMPLIED: 
+                g.SYT_FLAGS(g.REF_ID_LOC, g.SYT_FLAGS(g.REF_ID_LOC) | g.MISC_NAME_FLAG);
             SET_SYT_ENTRIES();
-            g.STRUC_SIZE = ICQ_TERMp(ID_LOC) * ICQ_ARRAYp(ID_LOC) + STRUC_SIZE;
+            g.STRUC_SIZE = ICQ_TERMp(g.ID_LOC) * ICQ_ARRAYp(g.ID_LOC) + g.STRUC_SIZE;
             g.NAME_IMPLIED = g.FALSE;
             if g.FIXV[g.SP] > 0: 
-                g.SYT_LINK2(g.FIXL[g.MPP1], TEMP_SYN + 1);
+                g.SYT_LINK2(g.FIXL[g.MPP1], g.TEMP_SYN + 1);
                 if g.STACK_PTR[g.SP] > 0:
                     OUTPUT_WRITER(g.LAST_WRITE, g.STACK_PTR[g.SP] - 1);
                 g.LAST_WRITE = g.STACK_PTR[g.SP];
@@ -4963,7 +4968,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif goto_SPEC_VAR or PRODUCTION_NUMBER == 361:  # reference 3610
         #  <DECLARATION>  ::=  <NAME ID>  <ATTRIBUTES>
         if not goto_SPEC_VAR:
-            if not BUILDING_TEMPLATE:
+            if not g.BUILDING_TEMPLATE:
                 if (g.TOKEN_FLAGS[0] & 7) == 7: 
                     g.ATTR_LOC = 0;
                 elif (g.TOKEN_FLAGS[1] & 7) == 7: 
@@ -4973,25 +4978,26 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto_SPEC_VAR = False
         g.DO_INIT = g.TRUE;
         CHECK_CONFLICTS();
-        g.I = g.SYT_FLAGS(ID_LOC);
-        if (I & PARM_FLAGS) != 0:
-            g.PARMS_PRESENT = PARMS_PRESENT - 1;
-            if PARMS_PRESENT == 0 and PARMS_WATCH: 
+        g.I = g.SYT_FLAGS(g.ID_LOC);
+        if (g.I & g.PARM_FLAGS) != 0:
+            g.PARMS_PRESENT = g.PARMS_PRESENT - 1;
+            if g.PARMS_PRESENT == 0 and g.PARMS_WATCH: 
                 g.COMSUB_END(g.NDECSY());
-            if (ATTRIBUTES & ILL_INIT_ATTR) != 0: 
+            if (g.ATTRIBUTES & g.ILL_INIT_ATTR) != 0: 
                 ERROR(d.CLASS_DI, 12, g.VAR[g.MP]);
                 g.DO_INIT = g.FALSE;
-                g.ATTRIBUTES = ATTRIBUTES & (not ILL_INIT_ATTR);
-            if CLASS > 0 & (not NAME_IMPLIED): 
+                g.ATTRIBUTES = g.ATTRIBUTES & (~ g.ILL_INIT_ATTR);
+            if g.CLASS > 0 & (not g.NAME_IMPLIED): 
                 ERROR(d.CLASS_D, 1, g.VAR[g.MP]);
-                NONHAL, CLASS = 0;
-                if TYPE > ANY_TYPE: 
-                    g.TYPE = DEFAULT_TYPE;
+                g.NONHAL = 0
+                g.CLASS = 0;
+                if g.TYPE > g.ANY_TYPE: 
+                    g.TYPE = g.DEFAULT_TYPE;
             #  REMOTE NOW OK FOR ASSIGN PARMS & IGNORED FOR INPUT PARMS
             #  SO REMOVE D14 ERROR MESSAGE.
-        elif PARMS_WATCH: 
+        elif g.PARMS_WATCH: 
             ERROR(d.CLASS_D, 15);
-        if TYPE == EVENT_TYPE: 
+        if g.TYPE == g.EVENT_TYPE: 
             CHECK_EVENT_CONFLICTS();
         goto_MODE_CHECK = False  # Internal to this case only
         goto_FIX_AUTSTAT = False  # Internal to this case only
@@ -4999,133 +5005,133 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         firstTry = True
         while firstTry or goto_FIX_AUTSTAT:
             firstTry = False
-            if not NAME_IMPLIED:
+            if not g.NAME_IMPLIED:
                 if not goto_FIX_AUTSTAT:
-                    if NONHAL > 0:
-                        if TYPE == g.PROC_LABEL or CLASS == 2:
-                            g.ATTRIBUTES = ATTRIBUTES | EXTERNAL_FLAG | DEFINED_LABEL;
-                            g.SYT_ARRAY(ID_LOC, NONHAL | 0xFF00);
+                    if g.NONHAL > 0:
+                        if g.TYPE == g.PROC_LABEL or g.CLASS == 2:
+                            g.ATTRIBUTES = g.ATTRIBUTES | g.EXTERNAL_FLAG | g.DEFINED_LABEL;
+                            g.SYT_ARRAY(g.ID_LOC, g.NONHAL | 0xFF00);
                             goto_MODE_CHECK = True
                         else:
                             ERROR(d.CLASS_D, 11, g.VAR[g.MP]);
                             #   DISCONNECT SYT_FLAGS WITH NONHAL
                             #   THIS ALSO DISCONNECTS ATTRIBUTES WITH NONHAL
-                            g.SYT_FLAGS2(ID_LOC, g.SYT_FLAGS2(ID_LOC) & (~NONHAL_FLAG));
+                            g.SYT_FLAGS2(g.ID_LOC, g.SYT_FLAGS2(g.ID_LOC) & (~g.NONHAL_FLAG));
                             nonHAL = True
                     if nonHAL:
                         pass
-                    elif goto_MODE_CHECK or CLASS == 2:
+                    elif goto_MODE_CHECK or g.CLASS == 2:
                         goto_MODE_CHECK = False
-                        if g.BLOCK_MODE[g.NEST] == CMPL_MODE: 
+                        if g.BLOCK_MODE[g.NEST] == g.CMPL_MODE: 
                             ERROR(d.CLASS_D, 2, g.VAR[g.MP]);
-                    elif CLASS == 1:
-                        if TYPE == TASK_LABEL:
+                    elif g.CLASS == 1:
+                        if g.TYPE == g.TASK_LABEL:
                             if g.NEST > 1 | g.BLOCK_MODE[1] != g.PROG_MODE:
                                 ERROR(d.CLASS_PT, 1);
                         else:
                             ERROR(d.CLASS_DN, 1, g.VAR[g.MP]);
                             g.CLASS = 0;
-                            g.TYPE = DEFAULT_TYPE;
-                if not goto_FIX_AUTSTAT and CLASS != 0:
-                    if (ATTRIBUTES & ILL_INIT_ATTR) != 0:
+                            g.TYPE = g.DEFAULT_TYPE;
+                if not goto_FIX_AUTSTAT and g.CLASS != 0:
+                    if (g.ATTRIBUTES & g.ILL_INIT_ATTR) != 0:
                         ERROR(d.CLASS_DI, 13, g.VAR[g.MP]);
-                        g.ATTRIBUTES = ATTRIBUTES & (~ILL_INIT_ATTR);
+                        g.ATTRIBUTES = g.ATTRIBUTES & (~g.ILL_INIT_ATTR);
                         g.DO_INIT = g.FALSE;
-                    if TEMPORARY_IMPLIED: 
+                    if g.TEMPORARY_IMPLIED: 
                         ERROR(d.CLASS_D, 8, g.VAR[g.MP]);
                         g.CLASS = 0;
-                        if TYPE > ANY_TYPE: 
-                            g.TYPE = DEFAULT_TYPE;
-                elif not goto_FIX_AUTSTAT and TEMPORARY_IMPLIED: 
-                    if (ATTRIBUTES & ILL_TEMPORARY_ATTR) != 0 or \
-                            (ATTRIBUTES2 & NONHAL_FLAG) != 0:
+                        if g.TYPE > g.ANY_TYPE: 
+                            g.TYPE = g.DEFAULT_TYPE;
+                elif not goto_FIX_AUTSTAT and g.TEMPORARY_IMPLIED: 
+                    if (g.ATTRIBUTES & g.ILL_TEMPORARY_ATTR) != 0 or \
+                            (g.ATTRIBUTES2 & g.NONHAL_FLAG) != 0:
                         ERROR(d.CLASS_D, 8, g.VAR[g.MP]);
-                        g.ATTRIBUTES = ATTRIBUTES & (not ILL_TEMPORARY_ATTR);
-                        g.ATTRIBUTES2 = ATTRIBUTES2 & (not NONHAL_FLAG);
+                        g.ATTRIBUTES = g.ATTRIBUTES & (~ g.ILL_TEMPORARY_ATTR);
+                        g.ATTRIBUTES2 = g.ATTRIBUTES2 & (~ g.NONHAL_FLAG);
                         g.DO_INIT = g.FALSE;
                 else:
                     goto_FIX_AUTSTAT = False
-                    if (ATTRIBUTES & ALDENSE_FLAGS) == 0:
-                        g.ATTRIBUTES = ATTRIBUTES | (DEFAULT_ATTR & ALDENSE_FLAGS);
-                    if g.BLOCK_MODE[g.NEST] != CMPL_MODE:
-                        if (I & PARM_FLAGS) == 0:
-                            if (ATTRIBUTES & AUTSTAT_FLAGS) == 0:
-                                    g.ATTRIBUTES = ATTRIBUTES | (DEFAULT_ATTR & AUTSTAT_FLAGS);
+                    if (g.ATTRIBUTES & g.ALDENSE_FLAGS) == 0:
+                        g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.ALDENSE_FLAGS);
+                    if g.BLOCK_MODE[g.NEST] != g.CMPL_MODE:
+                        if (g.I & g.PARM_FLAGS) == 0:
+                            if (g.ATTRIBUTES & g.AUTSTAT_FLAGS) == 0:
+                                    g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.AUTSTAT_FLAGS);
             else: 
                 # ADD ILLEGAL TEMP ATTRIBUTE CHECKING FROM ABOVE FOR NAME TEMPS TOO
-                if TEMPORARY_IMPLIED: 
-                    if CLASS != 0:
+                if g.TEMPORARY_IMPLIED: 
+                    if g.CLASS != 0:
                         ERROR(d.CLASS_D, 8, g.VAR[g.MP]);
                         g.CLASS = 0;
-                        if TYPE > ANY_TYPE: 
-                            g.TYPE = DEFAULT_TYPE;
+                        if g.TYPE > g.ANY_TYPE: 
+                            g.TYPE = g.DEFAULT_TYPE;
                     # ONLY DIFFERENCE FOR NAME TEMPS IS THAT REMOTE IS LEGAL
-                    elif (((ATTRIBUTES & ILL_TEMPORARY_ATTR) != 0) and \
-                            ((ATTRIBUTES & ILL_TEMPORARY_ATTR) != REMOTE_FLAG)) or \
-                            (ATTRIBUTES2 & NONHAL_FLAG) != 0:
+                    elif (((g.ATTRIBUTES & g.ILL_TEMPORARY_ATTR) != 0) and \
+                            ((g.ATTRIBUTES & g.ILL_TEMPORARY_ATTR) != g.REMOTE_FLAG)) or \
+                            (g.ATTRIBUTES2 & g.NONHAL_FLAG) != 0:
                         ERROR(d.CLASS_D, 8, g.VAR[g.MP]);
-                        g.ATTRIBUTES = ATTRIBUTES & (not ILL_TEMPORARY_ATTR);
-                        g.ATTRIBUTES2 = ATTRIBUTES2 & (not NONHAL_FLAG);
+                        g.ATTRIBUTES = g.ATTRIBUTES & (~ g.ILL_TEMPORARY_ATTR);
+                        g.ATTRIBUTES2 = g.ATTRIBUTES2 & (~ g.NONHAL_FLAG);
                         g.DO_INIT = g.FALSE;
-                if (ATTRIBUTES & ILL_NAME_ATTR) != 0 or \
-                        (ATTRIBUTES2 & NONHAL_FLAG) != 0:
+                if (g.ATTRIBUTES & g.ILL_NAME_ATTR) != 0 or \
+                        (g.ATTRIBUTES2 & g.NONHAL_FLAG) != 0:
                     ERROR(d.CLASS_D, 12, g.VAR[g.MP]);
-                    g.ATTRIBUTES = ATTRIBUTES & (not ILL_NAME_ATTR);
-                    g.ATTRIBUTES2 = ATTRIBUTES2 & (not NONHAL_FLAG);
-                if TYPE == g.PROC_LABEL: 
+                    g.ATTRIBUTES = g.ATTRIBUTES & (~ g.ILL_NAME_ATTR);
+                    g.ATTRIBUTES2 = g.ATTRIBUTES2 & (~ g.NONHAL_FLAG);
+                if g.TYPE == g.PROC_LABEL: 
                     ERROR(d.CLASS_DA, 14, g.VAR[g.MP]);
-                elif CLASS == 2: 
+                elif g.CLASS == 2: 
                     ERROR(d.CLASS_DA, 13, g.VAR[g.MP]);
-                if CLASS > 0: 
-                    g.ATTRIBUTES = ATTRIBUTES | DEFINED_LABEL;
+                if g.CLASS > 0: 
+                    g.ATTRIBUTES = g.ATTRIBUTES | g.DEFINED_LABEL;
                 goto_FIX_AUTSTAT = True
                 continue
-        g.SYT_CLASS(ID_LOC, VAR_CLASS(CLASS));
-        if TYPE == MAJ_STRUC: 
+        g.SYT_CLASS(g.ID_LOC, g.VAR_CLASSf(g.CLASS));
+        if g.TYPE == g.MAJ_STRUC: 
             CHECK_STRUC_CONFLICTS();
-        if (ATTRIBUTES & SD_FLAGS) == 0: 
-            if TYPE >= g.MAT_TYPE & TYPE <= INT_TYPE:
-                g.ATTRIBUTES = ATTRIBUTES | (DEFAULT_ATTR & SD_FLAGS);
+        if (g.ATTRIBUTES & g.SD_FLAGS) == 0: 
+            if g.TYPE >= g.MAT_TYPE & g.TYPE <= g.INT_TYPE:
+                g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.SD_FLAGS);
         SET_SYT_ENTRIES();
         g.NAME_IMPLIED = g.FALSE;
-        if TEMPORARY_IMPLIED:
+        if g.TEMPORARY_IMPLIED:
             g.ATTR_INDENT = 10;
             if g.DO_CHAIN[g.DO_LEVEL] == 0:
-                g.DO_CHAIN[g.DO_LEVEL] = ID_LOC;
-                HALMAT_POP(XTDCL, 1, 0, 0);
-                HALMAT_PIP(ID_LOC, XSYT, 0, 0);
+                g.DO_CHAIN[g.DO_LEVEL] = g.ID_LOC;
+                HALMAT_POP(g.XTDCL, 1, 0, 0);
+                HALMAT_PIP(g.ID_LOC, g.XSYT, 0, 0);
             else: 
-                g.SYT_LINK1(g.DO_CHAIN[0], ID_LOC);
-            g.DO_CHAIN[0] = ID_LOC;
+                g.SYT_LINK1(g.DO_CHAIN[0], g.ID_LOC);
+            g.DO_CHAIN[0] = g.ID_LOC;
         else:
             g.ATTR_INDENT = 8;
         # SET REMOTE ATTRIBUTE FOR ALL NON-NAME #D DATA WHEN THE
         # DATA_REMOTE DIRECTIVE IS IN EFFECT
         # (MUST NOT BE AUTOMATIC OR A PARAMETER TO BE #D DATA.)
-        if DATA_REMOTE: 
-            if ((g.SYT_FLAGS(ID_LOC) & NAME_FLAG) == 0) and \
-                    ((g.SYT_FLAGS(ID_LOC) & TEMPORARY_FLAG) == 0) and \
-                    (g.SYT_TYPE(ID_LOC) != TASK_LABEL) and \
-                    (g.SYT_TYPE(ID_LOC) != g.PROC_LABEL) and \
-                    (SYT_CLASS(ID_LOC) != FUNC_CLASS) and \
-                    ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & EXTERNAL_FLAG) == 0) and \
-                    not (((g.SYT_FLAGS(ID_LOC) & AUTO_FLAG) != 0) and \
-                    ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & REENTRANT_FLAG) != 0)) and \
-                    ((g.SYT_FLAGS(ID_LOC) & PARM_FLAGS) == 0):
-                if (g.SYT_FLAGS(ID_LOC) & REMOTE_FLAG) != 0:
+        if g.DATA_REMOTE: 
+            if ((g.SYT_FLAGS(g.ID_LOC) & g.NAME_FLAG) == 0) and \
+                    ((g.SYT_FLAGS(g.ID_LOC) & g.TEMPORARY_FLAG) == 0) and \
+                    (g.SYT_TYPE(g.ID_LOC) != g.TASK_LABEL) and \
+                    (g.SYT_TYPE(g.ID_LOC) != g.PROC_LABEL) and \
+                    (SYT_CLASS(g.ID_LOC) != g.FUNC_CLASS) and \
+                    ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & g.EXTERNAL_FLAG) == 0) and \
+                    not (((g.SYT_FLAGS(g.ID_LOC) & g.AUTO_FLAG) != 0) and \
+                    ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & g.REENTRANT_FLAG) != 0)) and \
+                    ((g.SYT_FLAGS(g.ID_LOC) & g.PARM_FLAGS) == 0):
+                if (g.SYT_FLAGS(g.ID_LOC) & g.REMOTE_FLAG) != 0:
                     ERROR(d.CLASS_XR, 3);
-                if g.SYT_TYPE(ID_LOC) == EVENT_TYPE:
+                if g.SYT_TYPE(g.ID_LOC) == g.EVENT_TYPE:
                     ERROR(d.CLASS_DA, 9);
-                g.SYT_FLAGS(ID_LOC, g.SYT_FLAGS(ID_LOC) | REMOTE_FLAG);
+                g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.REMOTE_FLAG);
             elif SDL_OPTION and \
-                    ((g.SYT_FLAGS(ID_LOC) & NAME_FLAG) == 0) and \
-                    ((g.SYT_FLAGS(ID_LOC) & PARM_FLAGS) == 0) and \
-                    ((g.SYT_FLAGS(ID_LOC) & REMOTE_FLAG) != 0):
+                    ((g.SYT_FLAGS(g.ID_LOC) & g.NAME_FLAG) == 0) and \
+                    ((g.SYT_FLAGS(g.ID_LOC) & g.PARM_FLAGS) == 0) and \
+                    ((g.SYT_FLAGS(g.ID_LOC) & g.REMOTE_FLAG) != 0):
                 ERROR(d.CLASS_XR, 5);
-        if ((g.SYT_FLAGS(ID_LOC) & NAME_FLAG) == 0) and \
-                ((g.SYT_FLAGS(ID_LOC) & INPUT_PARM) != 0) and \
-                ((g.SYT_FLAGS(ID_LOC) & REMOTE_FLAG) != 0):
-            g.SYT_FLAGS(ID_LOC, g.SYT_FLAGS(ID_LOC) & ~REMOTE_FLAG);
+        if ((g.SYT_FLAGS(g.ID_LOC) & g.NAME_FLAG) == 0) and \
+                ((g.SYT_FLAGS(g.ID_LOC) & g.INPUT_PARM) != 0) and \
+                ((g.SYT_FLAGS(g.ID_LOC) & g.REMOTE_FLAG) != 0):
+            g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) & ~g.REMOTE_FLAG);
             ERROR(d.CLASS_YD, 100);
     elif goto_CHECK_ARRAY_SPEC or PRODUCTION_NUMBER == 365:  # reference 3650
         #  <ATTRIBUTES> ::= <ARRAY SPEC>
@@ -5133,9 +5139,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if N_DIM > 1:
             if STARRED_DIMS > 0:
                 ERROR(d.CLASS_DD, 6);
-                for I in range(0, 1 + N_DIM - 1):
-                    if g.S_ARRAY[I] == -1:
-                        g.S_ARRAY[I] = 2;  # DEFAULT
+                for g.I in range(0, 1 + N_DIM - 1):
+                    if g.S_ARRAY[g.I] == -1:
+                        g.S_ARRAY[g.I] = 2;  # DEFAULT
         goto_MAKE_ATTRIBUTES = True
     if goto_MAKE_ATTRIBUTES or PRODUCTION_NUMBER == 366:  # reference 3660
         #  <ATTRIBUTES> ::= <TYPE & MINOR ATTR>
@@ -5187,15 +5193,15 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif goto_ARRAY_SPEC or PRODUCTION_NUMBER == 373:  # reference 3730
         #  <ARRAY HEAD> ::= <ARRAY HEAD> <LITERAL_EXP OR *> ,
         goto_ARRAY_SPEC = False
-        if N_DIM >= N_DIM_LIM:
+        if N_DIM >= g.N_DIM_LIM:
             ERROR(d.CLASS_DD, 3);
         else:
             g.K = 2;  # A DEFAULT
             g.I = g.FIXV[g.MPP1];
-            if not (I > 1 and I <= ARRAY_DIM_LIM and I == -1):
+            if not (g.I > 1 and g.I <= g.ARRAY_DIM_LIM and g.I == -1):
                 ERROR(d.CLASS_DD, 1);
             else:
-                g.K = I;
+                g.K = g.I;
             if K == -1: 
                 g.STARRED_DIMS = STARRED_DIMS + 1;
             g.S_ARRAY[N_DIM] = K;
@@ -5203,7 +5209,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif goto_SPEC_TYPE or PRODUCTION_NUMBER == 375:  # reference 3750
         #  <TYPE & MINOR ATTR> ::= <TYPE SPEC> <MINOR ATTR LIST>
         goto_SPEC_TYPE = False
-        if CLASS:
+        if g.CLASS:
             ERROR(d.CLASS_DC, 1);
             g.CLASS = 0;
     elif goto_INCORPORATE_ATTR or PRODUCTION_NUMBER == 400:  # reference 4000
@@ -5213,17 +5219,17 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             ERROR(d.CLASS_DA, 25);
         else:
             g.ATTR_MASK = ATTR_MASK | g.FIXL[g.SP];
-            g.ATTRIBUTES = ATTRIBUTES | g.FIXV[g.SP];
+            g.ATTRIBUTES = g.ATTRIBUTES | g.FIXV[g.SP];
     elif goto_SET_AUTSTAT or PRODUCTION_NUMBER == 401:  # reference 4010
         #  <MINOR ATTRIBUTE> ::= STATIC
         if not goto_SET_AUTSTAT:
             g.I = STATIC_FLAG;
         goto_SET_AUTSTAT = False
-        if g.BLOCK_MODE[g.NEST] == CMPL_MODE:
+        if g.BLOCK_MODE[g.NEST] == g.CMPL_MODE:
             ERROR(d.CLASS_DC, 2);
         else:
-            g.FIXL[g.MP] = AUTSTAT_FLAGS;
-            g.FIXV[g.MP] = I;
+            g.FIXL[g.MP] = g.AUTSTAT_FLAGS;
+            g.FIXV[g.MP] = g.I;
     elif goto_DO_QUALIFIED_ATTRIBUTE or PRODUCTION_NUMBER == 409:  # reference 4090
         #  <MINOR ATTRIBUTE> ::= <INIT/CONST HEAD> <REPEATED CONSTANT> )
         if not goto_DO_QUALIFIED_ATTRIBUTE:
@@ -5231,28 +5237,29 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto_DO_QUALIFIED_ATTRIBUTE = False
         g.BI_FUNC_FLAG = g.FALSE;
         CHECK_IMPLICIT_T();
-        g.CONTEXT = DECLARE_CONTEXT;
-        if (NUM_ELEMENTS >= g.NUM_EL_MAX) or (NUM_ELEMENTS < 1):
+        g.CONTEXT = g.DECLARE_CONTEXT;
+        if (g.NUM_ELEMENTS >= g.NUM_EL_MAX) or (g.NUM_ELEMENTS < 1):
             ERROR(d.CLASS_DI, 2);
-        g.LOC_P[g.PTR[g.MP]] = NUM_ELEMENTS;  # SAVE NUMBER OF ELEMENTS TO SET
-        g.VAL_P[g.PTR[g.MP]] = NUM_FL_NO;  # SAVE NUMBER OF GVR'S USED
-        g.PSEUDO_LENGTH[g.PTR[g.MP]] = NUM_STACKS;  # INDICATE LENGTH OF LIST
-        g.IC_PTR = g.PTR[g.MP];  # SAVE PTR TO THIS I/C LIST
+        g.LOC_P[g.PTR[g.MP]] = g.NUM_ELEMENTS;  # SAVE NUMBER OF ELEMENTS TO SET
+        g.VAL_P[g.PTR[g.MP]] = g.NUM_FL_NO;  # SAVE NUMBER OF GVR'S USED
+        g.PSEUDO_LENGTH[g.PTR[g.MP]] = g.NUM_STACKS;  # INDICATE LENGTH OF LIST
+        g.IC_PTR = g.PTR[g.MP];  # SAVE PTR TO THIS g.I/C LIST
         g.IC_FND = g.TRUE;
-        if BUILDING_TEMPLATE: 
+        if g.BUILDING_TEMPLATE: 
             g.PTR_TOP = g.PTR[g.MP] - 1;
         # KILL STACKS IF STRUCTURE TEMPLATE
     elif goto_DO_INIT_CONST_HEAD or PRODUCTION_NUMBER == 413:  # reference 4130
         #  <INIT/CONST HEAD> ::= INITIAL (
         if not goto_DO_INIT_CONST_HEAD:
-            g.FIXL[g.MP] = INIT_CONST;
-            g.FIXV[g.MP] = INIT_FLAG;
+            g.FIXL[g.MP] = g.INIT_CONST;
+            g.FIXV[g.MP] = g.INIT_FLAG;
         goto_DO_INIT_CONST_HEAD = False
         g.BI_FUNC_FLAG = g.TRUE;
         g.PTR[g.MP] = PUSH_INDIRECT(1);
-        NUM_ELEMENTS, NUM_FL_NO = 0;
+        g.NUM_ELEMENTS = 0
+        g.NUM_FL_NO = 0;
         g.NUM_STACKS = 1;  #  THIS IS FIRST INDIRECT LOC NEEDED
-        g.PSEUDO_FORM[g.PTR[g.MP]] = 0;  #  INDICATE I/C LIST TOP, IE., STRI
+        g.PSEUDO_FORM[g.PTR[g.MP]] = 0;  #  INDICATE g.I/C LIST TOP, IE., STRI
         g.INX[g.PTR[g.MP]] = g.IC_LINE;
     elif goto_INIT_ELEMENT or goto_END_REPEAT_INIT or \
             PRODUCTION_NUMBER == 418:  # reference 4180
@@ -5280,40 +5287,40 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_DI, 15);
                 if (g.VAL_P[g.TEMP] & 0x400) == 0: 
                     RESET_ARRAYNESS();
-                if SYT_CLASS(g.FIXL[g.MP]) == TEMPLATE_CLASS:
-                    if (((g.SYT_FLAGS(g.FIXV[g.MP]) & ASSIGN_PARM) > 0) or \
-                            (((g.SYT_FLAGS(g.FIXV[g.MP]) & AUTO_FLAG) != 0) and \
+                if SYT_CLASS(g.FIXL[g.MP]) == g.TEMPLATE_CLASS:
+                    if (((g.SYT_FLAGS(g.FIXV[g.MP]) & g.ASSIGN_PARM) > 0) or \
+                            (((g.SYT_FLAGS(g.FIXV[g.MP]) & g.AUTO_FLAG) != 0) and \
                              ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) and \
-                               REENTRANT_FLAG) != 0))):
+                               g.REENTRANT_FLAG) != 0))):
                         ERROR(d.CLASS_DI, 3);
-                elif (((g.SYT_FLAGS(g.FIXL[g.MP]) & ASSIGN_PARM) > 0) or \
-                        (((g.SYT_FLAGS(g.FIXL[g.MP]) & AUTO_FLAG) != 0) and \
+                elif (((g.SYT_FLAGS(g.FIXL[g.MP]) & g.ASSIGN_PARM) > 0) or \
+                        (((g.SYT_FLAGS(g.FIXL[g.MP]) & g.AUTO_FLAG) != 0) and \
                          ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) and \
-                           REENTRANT_FLAG) != 0))):
+                           g.REENTRANT_FLAG) != 0))):
                     ERROR(d.CLASS_DI, 3);
-            elif g.PSEUDO_FORM[g.TEMP] != XLIT: 
+            elif g.PSEUDO_FORM[g.TEMP] != g.XLIT: 
                 ERROR(d.CLASS_DI, 3);
             CHECK_ARRAYNESS();
-            SET_INIT(g.LOC_P[g.TEMP], 2, g.PSEUDO_FORM[g.TEMP], g.PSEUDO_TYPE_P[g.TEMP], NUM_ELEMENTS);
-            g.NUM_ELEMENTS = NUM_ELEMENTS + 1;
-            g.NUM_STACKS = NUM_STACKS + 1;
-        if TEMP_SYN or goto_END_REPEAT_INIT:
+            SET_INIT(g.LOC_P[g.TEMP], 2, g.PSEUDO_FORM[g.TEMP], g.PSEUDO_TYPE_P[g.TEMP], g.NUM_ELEMENTS);
+            g.NUM_ELEMENTS = g.NUM_ELEMENTS + 1;
+            g.NUM_STACKS = g.NUM_STACKS + 1;
+        if g.TEMP_SYN or goto_END_REPEAT_INIT:
             goto_END_REPEAT_INIT = False
-            SET_INIT(0, 3, 0, 0, NUM_FL_NO);
-            g.NUM_FL_NO = NUM_FL_NO - 1;
-            g.NUM_STACKS = NUM_STACKS + 1;
-            g.TEMP_SYN = NUM_ELEMENTS - g.FIXV[g.MP];
-            g.IC_LEN[GET_ICQ(g.FIXL[g.MP])] = TEMP_SYN;
-            g.NUM_ELEMENTS = g.INX[g.PTR[g.MP]] * TEMP_SYN + g.FIXV[g.MP];
+            SET_INIT(0, 3, 0, 0, g.NUM_FL_NO);
+            g.NUM_FL_NO = g.NUM_FL_NO - 1;
+            g.NUM_STACKS = g.NUM_STACKS + 1;
+            g.TEMP_SYN = g.NUM_ELEMENTS - g.FIXV[g.MP];
+            g.IC_LEN[GET_ICQ(g.FIXL[g.MP])] = g.TEMP_SYN;
+            g.NUM_ELEMENTS = g.INX[g.PTR[g.MP]] * g.TEMP_SYN + g.FIXV[g.MP];
         g.PTR_TOP = g.PTR[g.MP] - 1;
     elif goto_DO_CONSTANT or PRODUCTION_NUMBER == 424:  # reference 4240
         #  <CONSTANT>  ::=  <NUMBER>
         if not goto_DO_CONSTANT:
-            g.TEMP_SYN = INT_TYPE;
+            g.TEMP_SYN = g.INT_TYPE;
         goto_DO_CONSTANT = False
         g.PTR[g.MP] = PUSH_INDIRECT(1);
-        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = TEMP_SYN;
-        g.PSEUDO_FORM[g.PTR[g.MP]] = XLIT;
+        g.PSEUDO_TYPE_P[g.PTR[g.MP]] = g.TEMP_SYN;
+        g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
         g.LOC_P[g.PTR[g.MP]] = g.FIXL[g.MP];
     elif goto_CLOSE_IT or PRODUCTION_NUMBER == 430:  # reference 4300
         #  <CLOSING> ::= CLOSE
@@ -5415,52 +5422,52 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 #  ALL BLOCKS AND TEMPLATES COME HERE
                 goto_NEW_SCOPE = False
                 SET_BLOCK_SRN(g.FIXL[g.MP]);
-                if not PAGE_THROWN:
-                    if (g.SYT_FLAGS(g.FIXL[g.MP]) & EXTERNAL_FLAG) == 0:
+                if not g.PAGE_THROWN:
+                    if (g.SYT_FLAGS(g.FIXL[g.MP]) & g.EXTERNAL_FLAG) == 0:
                         g.LINE_MAX = 0;
-                if g.TEMP2 != UPDATE_MODE:
-                    HALMAT_BACKUP(LAST_POPp);
-                if not HALMAT_CRAP: 
+                if g.TEMP2 != g.UPDATE_MODE:
+                    HALMAT_BACKUP(g.LAST_POPp);
+                if not g.HALMAT_CRAP: 
                     g.HALMAT_OK = g.EXTERNAL_MODE = 0;
                 HALMAT_POP(g.TEMP, 1, 0, 0);
-                HALMAT_PIP(g.FIXL[g.MP], XSYT, 0, 0);
+                HALMAT_PIP(g.FIXL[g.MP], g.XSYT, 0, 0);
             goto_INLINE_ENTRY = False
             g.XSET(0x16);
             g.NEST = g.NEST + 1;
             g.DO_INX[g.DO_LEVEL] = g.DO_INX[g.DO_LEVEL] | 0x80;
             g.BLOCK_MODE[g.NEST] = g.TEMP2;
             g.BLOCK_SYTREF[g.NEST] = g.FIXL[g.MP];
-            SYT_ARRAY(g.BLOCK_SYTREF[g.NEST], -ON_ERROR_PTR);
-            if g.NEST > MAXNEST:
+            g.SYT_ARRAY(g.BLOCK_SYTREF[g.NEST], -g.ON_ERROR_PTR);
+            if g.NEST > g.MAXNEST:
                 g.MAXNEST = g.NEST;
-                if g.NEST >= NEST_LIM:
+                if g.NEST >= g.NEST_LIM:
                     ERROR(d.CLASS_BN, 1);
             g.SCOPEp_STACK[g.NEST] = g.SCOPEp;
             g.SCOPEp = g.MAX_SCOPEp() + 1;
             g.MAX_SCOPEp(g.SCOPEp)
-            if (g.SYT_FLAGS(g.FIXL[g.MP]) & EXTERNAL_FLAG) != 0: 
-                NEXT_ELEMENT(CSECT_LENGTHS);
+            if (g.SYT_FLAGS(g.FIXL[g.MP]) & g.EXTERNAL_FLAG) != 0: 
+                NEXT_ELEMENT(h.CSECT_LENGTHS);
                 h.CSECT_LENGTHS[g.SCOPEp].PRIMARY = 0x7FFF;  # SET LENGTH TO MAX
                 h.CSECT_LENGTHS[g.SCOPEp].REMOTE = 0x7FFF;  # TO TURN OFF PHASE2
                 # %COPY CHECKING
-            SYT_SCOPE(g.FIXL[g.MP], g.SCOPEp);  # UPDATE BLOCK NAME TO SAME SCOPE
+            g.SYT_SCOPE(g.FIXL[g.MP], g.SCOPEp);  # UPDATE BLOCK NAME TO SAME SCOPE
             # AS CONTENTS
-            g.PROCMARK_STACK[g.NEST] = PROCMARK;
+            g.PROCMARK_STACK[g.NEST] = g.PROCMARK;
             g.PROCMARK = g.NDECSY() + 1;
-            g.REGULAR_PROCMARK = PROCMARK
-            g.SYT_PTR(g.FIXL[g.MP], PROCMARK);
-            if g.BLOCK_MODE[g.NEST] == CMPL_MODE:
+            g.REGULAR_PROCMARK = g.PROCMARK
+            g.SYT_PTR(g.FIXL[g.MP], g.PROCMARK);
+            if g.BLOCK_MODE[g.NEST] == g.CMPL_MODE:
                 g.PROCMARK = 1;  # ALL COMPOOLS IN SAME SCOPE
             g.S = g.CURRENT_SCOPE[:];
             g.CURRENT_SCOPE = g.VAR[g.MP];
             g.SAVE_SCOPE = g.CURRENT_SCOPE[:]
-            g.VAR[g.MP] = S;
+            g.VAR[g.MP] = g.S;
             g.NEST = g.NEST - 1;
             COMPRESS_OUTER_REF();
             g.NEST = g.NEST + 1;
-            g.OUTER_REF_PTR_P[g.NEST] = OUTER_REF_INDEX + 1;
+            g.OUTER_REF_PTR[g.NEST] = g.OUTER_REF_INDEX + 1;
             ENTER_LAYOUT(g.FIXL[g.MP]);
-            if g.BLOCK_MODE[g.NEST] == INLINE_MODE: 
+            if g.BLOCK_MODE[g.NEST] == g.INLINE_MODE: 
                 if g.STACK_PTR[g.MP] > 0: 
                     OUTPUT_WRITER(0, g.STACK_PTR[g.MP] - 1);
                 g.EXT_P[g.PTR[g.MP]] = g.INDENT_LEVEL;
@@ -5473,8 +5480,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 EMIT_SMRK();
             else:
                 g.INDENT_STACK[g.NEST] = g.INDENT_LEVEL;
-                g.NEST_STACK[g.NEST] = NEST_LEVEL;
-                g.INDENT_LEVEL, NEST_LEVEL = 0;
+                g.NEST_STACK[g.NEST] = g.NEST_LEVEL;
+                g.INDENT_LEVEL = 0
+                g.NEST_LEVEL = 0;
     
     # END OF PART_2
     if (g.PREV_STMT_NUM != g.STMT_NUM()):

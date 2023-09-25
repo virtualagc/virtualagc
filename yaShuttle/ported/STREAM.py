@@ -1152,12 +1152,10 @@ def STREAM():
                                 LENGTH(MACRO_CALL_PARM_TABLE[ \
                                     PARM_STACK_PTR[g.PARM_EXPAN_LEVEL] \
                                 ]):
-                        g.NEXT_CHAR = \
-                            BYTE(MACRO_CALL_PARM_TABLE[ \
-                                    PARM_STACK_PTR[g.PARM_EXPAN_LEVEL] \
-                                ], \
-                                g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] \
-                                );
+                        g.NEXT_CHAR = BYTE(MACRO_CALL_PARM_TABLE[
+                                            PARM_STACK_PTR[g.PARM_EXPAN_LEVEL]
+                                            ], \
+                                    g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] );
                         g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = \
                             g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] + 1;
                         if g.CONTROL(3):

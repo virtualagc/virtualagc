@@ -720,7 +720,7 @@ def SYT_DUMP():
                             if l.T_LEVEL>0:
                                 l.S=SUBSTR(g.X70,0,g.MAX_STRUC_LEVEL+1)+l.S;
                                 if l.T_LEVEL<=g.MAX_STRUC_LEVEL:
-                                    BYTE(l.S,l.T_LEVEL-1, l.T_LEVEL|0xF0);
+                                    l.S = BYTE(l.S,l.T_LEVEL-1, l.T_LEVEL|0xF0);
                         else:
                             l.S=TRUNCATE( SUBSTR(l.LABEL_NAME,(l.J-g.TEMPL_NAME)*18,18) );
                             if (l.L&g.NAME_FLAG)!=0:
@@ -734,7 +734,7 @@ def SYT_DUMP():
                                 if l.T_LEVEL>0:
                                     l.S=SUBSTR(g.X70,0,g.MAX_STRUC_LEVEL+1)+l.S;
                                     if l.T_LEVEL<=g.MAX_STRUC_LEVEL:
-                                        BYTE(l.S,l.T_LEVEL-1, l.T_LEVEL|0xF0);
+                                        l.S = BYTE(l.S,l.T_LEVEL-1, l.T_LEVEL|0xF0);
                             else:
                                 l.L = l.L & g.SDF_INCL_OFF;
                                 if l.J == g.STMT_LABEL:
@@ -830,7 +830,7 @@ def SYT_DUMP():
                                                         break
                                             # END OF JI = "EE"
                                             elif l.JI == BYTE('"'):   # DOUBLE ANY "
-                                                BYTE(l.S, l.JL,  l.JI);
+                                                l.S = BYTE(l.S, l.JL,  l.JI);
                                                 l.JL = l.JL + 1;
                                                 goto_DOUBLE_QUOTE = False
                                                 firstTry = True
@@ -838,14 +838,14 @@ def SYT_DUMP():
                                                     firstTry = False
                                                     if l.JL < 132:
                                                         goto_DOUBLE_QUOTE = False
-                                                        BYTE(l.S, l.JL,  l.JI);
+                                                        l.S = BYTE(l.S, l.JL,  l.JI);
                                                     else:
                                                         MACRO_TEXT_RESET();
                                                         goto_DOUBLE_QUOTE = True;
                                                         continue
                                             # END OF JI = BYTE('"')
                                             else:
-                                                BYTE(l.S, l.JL,  l.JI);
+                                                l.S = BYTE(l.S, l.JL,  l.JI);
                                             l.JL = l.JL + 1;
                                             l.KL = l.KL + 1;
                                             l.JI = g.MACRO_TEXT(l.KL);
@@ -863,7 +863,7 @@ def SYT_DUMP():
                                             firstTry = False
                                             if l.JL < 132 or goto_ADD_QUOTE:
                                                 goto_ADD_QUOTE = False
-                                                BYTE(l.S, l.JL,  BYTE('"'));
+                                                l.S = BYTE(l.S, l.JL,  BYTE('"'));
                                             else:
                                                 MACRO_TEXT_RESET();
                                                 goto_ADD_QUOTE = True

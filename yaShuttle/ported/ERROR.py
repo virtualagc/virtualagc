@@ -13,6 +13,7 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
+from SCAN_DISASTER import SCAN_DISASTER
 
 '''
  /***************************************************************************/
@@ -149,8 +150,7 @@ def ERROR(CLASS, NUM, TEXT=""):
             if SEVERITY > 2:
                 g.MAX_SEVERITY = SEVERITY;
                 g.COMPILING = g.FALSE;
-                g.monitorLabel = "SCAN_DISASTER";
-                return
+                SCAN_DISASTER()
         TEXT = '';
     else:
         '''

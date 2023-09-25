@@ -289,5 +289,30 @@ If you like, you can just use `B` in your code, without an index even though it'
 
 And make no mistake, whoever coded the HAL/S compiler in XPL *did* like to do this, though fortunately not too often.  Mostly just when you don't expect it and spend a while tearing your hair out trying to figure out what's going on.
 
-
-
+A ghastly construction (or a fun one, depending on your perspective) relates to the following declarations
+<pre>
+   DECLARE N_DIM_LIM LITERALLY '3';
+    ...
+   DECLARE (TYPE,
+      BIT_LENGTH,
+      CHAR_LENGTH,
+      MAT_LENGTH,
+      VEC_LENGTH,
+      ATTRIBUTES,
+      ATTRIBUTES2,
+      ATTR_MASK,
+      STRUC_PTR,
+      STRUC_DIM,
+      CLASS,
+      NONHAL,
+      LOCK#,
+      IC_PTR,
+      IC_FND,
+      N_DIM) FIXED,
+      S_ARRAY(N_DIM_LIM) FIXED;
+</pre>
+found in the PASS 1 monitor module, `##DRIVER`.  The construction in question is
+<pre>
+    TYPE(TYPE)
+</pre>
+If `TYPE` has the value 0, then in array terms `TYPE(TYPE)` would refer to `TYPE` itself; i.e., `TYPE(TYPE)` would be 0.  Whereas if `TYPE==1`, then `TYPE(TYPE)` would be `BIT_LENGTH`.  If `TYPE==2`, then `TYPE(TYPE)` would be `CHAR_LENGTH`.  And so on, right up to `TYPE==19`, where `TYPE(TYPE)` corresponds to `S_ARRAY(3)`.  It's hard to deal with slapdash stuff such as this in a uniform way in Python.  In this case, I introduce a function I call `TYPEf()`, used solely as `TYPEf(TYPE)`.  Other absurdities involving `TYPE` and its kissing cousing `FACTORED_TYPE` are handled using other methods.

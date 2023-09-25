@@ -11,6 +11,7 @@ History:    2023-08-29 RSB  Ported
 
 import g
 import HALINCL.CERRORS as c
+from ALMOST_DISASTER import ALMOST_DISASTER
 
 '''
  /***************************************************************************/
@@ -58,4 +59,4 @@ def ERRORS(CLASS, NUM, TEXT):  # HANDLES ONCE QUIET MESSAGES
        g.MAX_SEVERITY = SEVERITY;
     if g.MAX_SEVERITY > 2:
        g.COMPILING = g.FALSE;
-       g.monitorLabel = "ALMOST_DISASTER"
+       ALMOST_DISASTER()

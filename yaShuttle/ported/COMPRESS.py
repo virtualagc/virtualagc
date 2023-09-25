@@ -43,20 +43,20 @@ import g
 def COMPRESS_OUTER_REF():
     # Locals I, J, and TMP don't need to be persistent.
     
-    J = g.OUTER_REF_PTR[NEST] & 0x7FFF;
+    J = g.OUTER_REF_PTR[g.NEST] & 0x7FFF;
     if J >= g.OUTER_REF_INDEX:
         return;
     for I in range(J, g.OUTER_REF_INDEX):
-        if OUTER_REF(I) != -1:
+        if g.OUTER_REF(I) != -1:
             TMP = g.OUTER_REF(I);
             for J in range(I + 1, g.OUTER_REF_INDEX):
                 if TMP == g.OUTER_REF(J):
                     if g.OUTER_REF_FLAGS(I) == g.OUTER_REF_FLAGS(J):
                         g.OUTER_REF(J, -1);
-    TMP = (g.OUTER_REF_PTR[NEST] & 0x7FFF) - 1;
+    TMP = (g.OUTER_REF_PTR[g.NEST] & 0x7FFF) - 1;
     for I in range(TMP + 1, g.OUTER_REF_INDEX):
-        if OUTER_REF(I) != -1:
+        if g.OUTER_REF(I) != -1:
             TMP = TMP + 1;
-            OUTER_REF(TMP, OUTER_REF(I));
-            OUTER_REF_FLAGS(TMP, OUTER_REF_FLAGS(I));
+            g.OUTER_REF(TMP, g.OUTER_REF(I));
+            g.OUTER_REF_FLAGS(TMP, g.OUTER_REF_FLAGS(I));
     g.OUTER_REF_INDEX = TMP;
