@@ -27,8 +27,6 @@ import HALINCL.COMMON as h
 # so translating those into ASCII is not straightforward.  Our assumption is
 # that logical-NOT has been translated as '~' and cent has been translated 
 # as '`'. 
-assumeASCII = True  # Set False if original EBCDIC encoding is still used.
-                # Not that it would work!
 
 SANITY_CHECK = False
 pfs = True
@@ -60,8 +58,6 @@ pVALS = [400, "", 0, 1, 1200, 59,
 
 if '--bfs' in sys.argv:
     pfs = False
-if '--ebcdic' in sys.argv:
-    assumeASCII = False  # I wouldn't suggest using this.
 if '--sanity' in sys.argv:
     SANITY_CHECK = True
 if '--debug3' in sys.argv:
@@ -2456,19 +2452,14 @@ if SANITY_CHECK and len(TRANS_OUT) != 255 + 1:
     print('Bad TRANS_OUT', file=sys.stderr)
     sys.exit(1)
 
-if assumeASCII:
-    ESCP = BYTE('`')  # Backtick replaces cent character (missing from ASCII).
-    CHAR_OP = (BYTE('_'), BYTE('='))
-    VALID_00_OP = BYTE('_')
-    VALID_00_CHAR = BYTE('0')
-else:
-    ESCP = 0x4A  # THE ESCAPE CHARACTER
-    CHAR_OP = (0x6D, 0x7E)  # OVER PUNCH ESCAPES
-    VALID_00_OP = 0x6D  # THE OVERPUNCH VALID IN GENERATING
-                       # THE X'00' CHARACTER
-    VALID_00_CHAR = 0xF0  # THE CHARACTER WHICH, WHEN
-                         # 'ESCAPED' BY THE PROPER OP CHAR
-                         # GENERATES X'00' INTERNALLY
+# Recall that the backtick replaces the cent character (missing from ASCII).
+ESCP = BYTE('`')  # THE ESCAPE CHARACTER
+CHAR_OP = (BYTE('_'), BYTE('='))  # OVER PUNCH ESCAPES
+VALID_00_OP = BYTE('_') # THE OVERPUNCH VALID IN GENERATING
+                        # THE X'00' CHARACTER
+VALID_00_CHAR = BYTE('0')   # THE CHARACTER WHICH, WHEN
+                            # 'ESCAPED' BY THE PROPER OP CHAR
+                            # GENERATES X'00' INTERNALLY
 
 STACK_DUMPED = 0
 SEVERITY = 0
@@ -2657,7 +2648,14 @@ INCREMENT_DOWN_STMT = 0
 PREV_STMT_NUM = -1
 INCLUDE_STMT = -1
 
+def fixup_DOWN_INFO(n):
+    while len(h.DOWN_INFO) <= n:
+        h.DOWN_INFO.append(h.down_info())
+
 def DWN_STMT(n, value=None):
+    if n < 0:
+        n = 0
+    fixup_DOWN_INFO(n)
     if value == None:
         return h.DOWN_INFO[n].DOWN_STMT[:]
     else:
@@ -2665,6 +2663,9 @@ def DWN_STMT(n, value=None):
 
 
 def DWN_ERR(n, value=None):
+    if n < 0:
+        n = 0
+    fixup_DOWN_INFO(n)
     if value == None:
         return h.DOWN_INFO[n].DOWN_ERR[:]
     else:
@@ -2672,6 +2673,9 @@ def DWN_ERR(n, value=None):
 
 
 def DWN_CLS(n, value=None):
+    if n < 0:
+        n = 0
+    fixup_DOWN_INFO(n)
     if value == None:
         return h.DOWN_INFO[n].DOWN_CLS[:]
     else:
@@ -2679,6 +2683,9 @@ def DWN_CLS(n, value=None):
 
 
 def DWN_UNKN(n, value=None):
+    if n < 0:
+        n = 0
+    fixup_DOWN_INFO(n)
     if value == None:
         return h.DOWN_INFO[n].DOWN_UNKN[:]
     else:
@@ -2686,6 +2693,9 @@ def DWN_UNKN(n, value=None):
 
 
 def DWN_VER(n, value=None):
+    if n < 0:
+        n = 0
+    fixup_DOWN_INFO(n)
     if value == None:
         return h.DOWN_INFO[n].DOWN_VER[:]
     else:

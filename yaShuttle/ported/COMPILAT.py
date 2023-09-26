@@ -230,6 +230,6 @@ def COMPILATION_LOOP():
                 g.STATE = g.INDEX1[g.STATE];
                 g.LOOK_STACK[g.SP] = 0
                 g.LOOK = 0;
-            # END OF COMPILE LOOP
+        # END OF COMPILE LOOP
             
     

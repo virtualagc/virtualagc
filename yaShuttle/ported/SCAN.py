@@ -312,24 +312,29 @@ def SCAN():
     def CHAR_OP_CHECK(CHAR):
         ll = lCHAR_OP_CHECK  # Locals specific to CHAR_OP_CHECK()
         
-        if g.OVER_PUNCH == 0:
+        if g.OVER_PUNCH == 0: 
             return CHAR;
-        # Note that while the if/else hierarchy below differs from the original
-        # IF/ELSE hierarchy, the logic should be identical; the chance was made
-        # to avoid the original's GO GO VALID_TEST.
-        if g.OVER_PUNCH in g.CHAR_OP:
-            if g.OVER_PUNCH == g.CHAR_OP[0]:  # LEVEL 1 ESCAPE 
-                ll.HOLD_CHAR = g.TRANS_IN[CHAR] & 0xFF;
-            else:  # g.OVER_PUNCH == CHAR_OP[1]
+        goto_VALID_TEST = False
+        firstTry = True
+        while firstTry or goto_VALID_TEST:
+            firstTry = False
+            if g.OVER_PUNCH == g.CHAR_OP[0] or goto_VALID_TEST: # LEVEL 1 ESCAPE
+                if not goto_VALID_TEST:
+                    ll.HOLD_CHAR = g.TRANS_IN[CHAR] & 0xFF;
+                goto_VALID_TEST = False
+                if ll.HOLD_CHAR == 0x00:
+                    if g.OVER_PUNCH != g.VALID_00_OP or CHAR != g.VALID_00_CHAR:
+                        ERROR(d.CLASS_MO, 6, HEX(CHAR, 2));
+                        return CHAR;
+                return ll.HOLD_CHAR;
+            elif g.OVER_PUNCH == g.CHAR_OP[1]: 
                 ll.HOLD_CHAR = SHR(g.TRANS_IN[CHAR], 8) & 0xFF;  # LEVEL 2 ESCAPE
-            if ll.HOLD_CHAR == 0x00:
-                if g.OVER_PUNCH != g.VALID_00_OP or CHAR != g.VALID_00_CHAR:
-                    ERROR(d.CLASS_MO, 6, HEX(CHAR, 2));
-                    return CHAR;
-            return ll.HOLD_CHAR;
-        else:  # ILLEGAL OVER PUNCH */
-            ERROR(d.CLASS_MO, 1, HEX(CHAR, 2));
-            return CHAR;  # NO TRANSLATION 
+                goto_VALID_TEST = True;  # SEE IF IT A LEGAL ESCAPE
+                continue
+            else:   # ILLEGAL OVER PUNCH
+                ERROR(d.CLASS_MO, 1, HEX(CHAR, 2));
+                return CHAR;  # NO TRANSLATION
+        
 
     def BUILD_BCD():
         # This doesn't much resemble the original XPL, because the original
@@ -1058,9 +1063,11 @@ def SCAN():
                                     g.NEXT_CHAR = BYTE(g.X1);
                             else:
                                 g.NEXT_CHAR = CHAR_OP_CHECK(l.TEMP_CHAR);
+                                pass
                         # END OF ESCAPE LEVEL >= 0 
                         else:
                             g.NEXT_CHAR = l.TEMP_CHAR;
+                            pass
                     # END OF DO WHILE...
                     STREAM();
                     if g.NEXT_CHAR != BYTE(g.SQUOTE):

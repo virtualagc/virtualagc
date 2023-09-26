@@ -72,7 +72,7 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
                              'SEVERITY ONE ERROR TO A SEVERITY ZERO ERROR '+AST);
                     l.FOUND = 1;
                     # NOTE THAT THE ERROR WAS DOWNGRADED SUCCESSFULLY  
-                    DWN_VER(l.DOWN_COUNT, 1);
+                    DWN_VER(l.DOWN_COUNT, '1');
             else:
                 OUTPUT(0, AST + ' AN ATTEMPT WAS MADE TO DOWNGRADE AN ' +
                            'ERROR OTHER THAN A SEVERITY ONE ERROR ' +

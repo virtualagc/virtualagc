@@ -12,7 +12,11 @@ History:    2023-09-24 RSB  Began porting from XPL
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
-from ERROR    import ERROR
+import HALINCL.COMMON as h
+from ERROR import ERROR
+from HALMATIN import HALMAT_INIT_CONST
+from HALINCL.ENTERDIM import ENTER_DIMS
+from HALINCL.ICQTERMp import ICQ_TERMp
 
 '''
  /***************************************************************************/
@@ -77,79 +81,79 @@ from ERROR    import ERROR
 
 
 def SET_SYT_ENTRIES():
-    SYT_TYPE(ID_LOC) = TYPE;
-    if (ATTRIBUTES & LOCK_FLAG) != 0:
-        if (NEST == 1 and BLOCK_MODE(NEST) >= CMPL_MODE) or \
-                (SYT_FLAGS(ID_LOC) and ASSIGN_PARM) != 0:
-            SYT_LOCKp(ID_LOC) = LOCKp;
+    g.SYT_TYPE(g.ID_LOC, g.TYPE);
+    if (g.ATTRIBUTES & g.LOCK_FLAG) != 0:
+        if (g.NEST == 1 and g.BLOCK_MODE[g.NEST] >= g.CMPL_MODE) or \
+                (g.SYT_FLAGS(g.ID_LOC) and g.ASSIGN_PARM) != 0:
+            g.SYT_LOCKp(g.ID_LOC, g.LOCKp);
         else: 
-            ATTRIBUTES = ATTRIBUTES & (~LOCK_FLAG);
-            ERROR(d.CLASS_DL, 1, SYT_NAME(ID_LOC));
-    if NAME_IMPLIED: 
-        ATTRIBUTES = ATTRIBUTES | NAME_FLAG;
-    SYT_FLAGS(ID_LOC) = SYT_FLAGS(ID_LOC) | ATTRIBUTES;
-    if TYPE == CHAR_TYPE:
+            g.ATTRIBUTES = g.ATTRIBUTES & (~g.LOCK_FLAG);
+            ERROR(d.CLASS_DL, 1, g.SYT_NAME(g.ID_LOC));
+    if g.NAME_IMPLIED: 
+        g.ATTRIBUTES = g.ATTRIBUTES | g.NAME_FLAG;
+    g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.ATTRIBUTES);
+    if g.TYPE == g.CHAR_TYPE:
         goto_CHAR_STAR_ERR = False
         firstTry = True
         while firstTry or goto_CHAR_STAR_ERR:
             firstTry = False
-            if not goto_CHAR_STAR_ERR and NAME_IMPLIED:
-                if N_DIM != 0: 
+            if not goto_CHAR_STAR_ERR and g.NAME_IMPLIED:
+                if g.N_DIM != 0: 
                     goto_CHAR_STAR_ERR = True
                     continue
-            elif not goto_CHAR_STAR_ERR and (SYT_FLAGS(ID_LOC) & PARM_FLAGS) != 0:
-                if CHAR_LENGTH != -1:
-                    CHAR_LENGTH = -1;
+            elif not goto_CHAR_STAR_ERR and (g.SYT_FLAGS(g.ID_LOC) & g.PARM_FLAGS) != 0:
+                if g.CHAR_LENGTH != -1:
+                    g.CHAR_LENGTH = -1;
                     ERROR(d.CLASS_DS, 11);
             else: 
                 goto_CHAR_STAR_ERR = False
-                if CHAR_LENGTH == -1:
-                    CHAR_LENGTH = DEF_CHAR_LENGTH;
+                if g.CHAR_LENGTH == -1:
+                    g.CHAR_LENGTH = g.DEF_CHAR_LENGTH;
                     ERROR(d.CLASS_DS, 3);
-    if TYPE <= VEC_TYPE:
-        VAR_LENGTH(ID_LOC) = TYPE(TYPE);
-    if N_DIM != 0:
+    if g.TYPE <= g.VEC_TYPE:
+        g.VAR_LENGTH[g.ID_LOC] = g.TYPEf(g.TYPE);
+    if g.N_DIM != 0:
         # STUFF THE DIMENSIONS
-        if EXT_ARRAY_PTR + N_DIM >= ON_ERROR_PTR:
+        if g.EXT_ARRAY_PTR + g.N_DIM >= g.ON_ERROR_PTR:
             ERROR(d.CLASS_BX, 5);
         else: 
-            if (N_DIM == 1) and (S_ARRAY == -1):
-                if (SYT_FLAGS(ID_LOC) & PARM_FLAGS) != 0 and (not NAME_IMPLIED):
-                    S_ARRAY[0] = -ID_LOC;
+            if (g.N_DIM == 1) and (g.S_ARRAY == -1):
+                if (g.SYT_FLAGS(g.ID_LOC) & g.PARM_FLAGS) != 0 and (not g.NAME_IMPLIED):
+                    g.S_ARRAY[0] = -g.ID_LOC;
                 else: 
-                    S_ARRAY[0] = 2;
-                    ERROR(d.CLASS_DD, 10, SYT_NAME(ID_LOC));
+                    g.S_ARRAY[0] = 2;
+                    ERROR(d.CLASS_DD, 10, g.SYT_NAME(g.ID_LOC));
                 ENTER_DIMS();
                 # IF AN ARRAY'S SIZE IS NOT AN * THEN CHECK IF THE TOTAL
                 # NUMBER OF ELEMENTS IN AN ARRAY IS GREATER THAN 32767
                 # OR LESS THAN 1. IF IT IS THEN GENERATE A DD1 ERROR.
-                if EXT_ARRAY(SYT_ARRAY(ID_LOC) + 1) > 0:
-                    if (ICQ_TERMp(ID_LOC) * ICQ_ARRAYp(ID_LOC) > ARRAY_DIM_LIM) \
-                            or (ICQ_TERMp(ID_LOC) * ICQ_ARRAYp(ID_LOC) < 1):
+                if h.EXT_ARRAY[g.SYT_ARRAY(g.ID_LOC) + 1] > 0:
+                    if (ICQ_TERMp(g.ID_LOC) * ICQ_ARRAYp(g.ID_LOC) > g.ARRAY_DIM_LIM) \
+                            or (ICQ_TERMp(g.ID_LOC) * ICQ_ARRAYp(g.ID_LOC) < 1):
                         ERROR(d.CLASS_DD, 1);
-    if TYPE == MAJ_STRUC:
-        VAR_LENGTH(ID_LOC) = STRUC_PTR;
-        if STRUC_DIM == -1:
-            if (SYT_FLAGS(ID_LOC) & PARM_FLAGS) != 0 and (not NAME_IMPLIED):
-                STRUC_DIM = -ID_LOC;
+    if g.TYPE == g.MAJ_STRUC:
+        g.VAR_LENGTH[g.ID_LOC] = g.STRUC_PTR;
+        if g.STRUC_DIM == -1:
+            if (g.SYT_FLAGS(g.ID_LOC) & g.PARM_FLAGS) != 0 and (not g.NAME_IMPLIED):
+                g.STRUC_DIM = -g.ID_LOC;
             else: 
-                ERROR(d.CLASS_DD, 8, SYT_NAME(ID_LOC));
-                STRUC_DIM = 2;
-        if STRUC_DIM != 0:
-            SYT_ARRAY(ID_LOC) = STRUC_DIM;
+                ERROR(d.CLASS_DD, 8, g.SYT_NAME(g.ID_LOC));
+                g.STRUC_DIM = 2;
+        if g.STRUC_DIM != 0:
+            g.SYT_ARRAY(g.ID_LOC, g.STRUC_DIM);
             # IF A STRUCTURE'S SIZE IS NOT AN * THEN CHECK IF THE TOTAL
             # NUMBER OF ELEMENTS IN A MAJOR STRUCTURE IS GREATER THAN
             # 32767 OR LESS THAN 1. IF IT IS THEN GENERATE A DD11 ERROR.
-            if STRUC_DIM > 0:
-                if (ICQ_TERMp(ID_LOC) * SYT_ARRAY(ID_LOC) > ARRAY_DIM_LIM) \
-                        or (ICQ_TERMp(ID_LOC) * SYT_ARRAY(ID_LOC) < 1):
+            if g.STRUC_DIM > 0:
+                if (ICQ_TERMp(g.ID_LOC) * g.SYT_ARRAY(g.ID_LOC) > g.ARRAY_DIM_LIM) \
+                        or (ICQ_TERMp(g.ID_LOC) * g.SYT_ARRAY(g.ID_LOC) < 1):
                     ERROR(d.CLASS_DD, 11);
-        elif (ICQ_TERMp(ID_LOC) > ARRAY_DIM_LIM) or \
-                (ICQ_TERMp(ID_LOC) < 1):
+        elif (ICQ_TERMp(g.ID_LOC) > g.ARRAY_DIM_LIM) or \
+                (ICQ_TERMp(g.ID_LOC) < 1):
             ERROR(d.CLASS_DD, 11);
-    elif TYPE == TASK_LABEL or TYPE == PROG_LABEL:
-        SYT_FLAGS(ID_LOC) = SYT_FLAGS(ID_LOC) | LATCHED_FLAG;
+    elif g.TYPE == g.TASK_LABEL or g.TYPE == g.PROG_LABEL:
+        g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.LATCHED_FLAG);
     HALMAT_INIT_CONST();
-    for I in range(0, FACTOR_LIM + 1):
+    for I in range(0, g.FACTOR_LIM + 1):
         g.TYPEf(I, 0);
     

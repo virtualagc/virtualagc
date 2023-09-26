@@ -34,6 +34,7 @@ from OUTPUTWR import OUTPUT_WRITER
 from PROCESS2 import PROCESS_CHECK
 from SETBLOCK import SET_BLOCK_SRN
 from SETLABEL import SET_LABEL_TYPE
+from SETSYTEN import SET_SYT_ENTRIES
 from SETUPVAC import SETUP_VAC
 from SETXREFR import SET_XREF_RORS
 from STACKDUM import STACK_DUMP
@@ -456,10 +457,6 @@ lSYNTHESIZE = cSYNTHESIZE()
 def SYNTHESIZE(PRODUCTION_NUMBER):
     l = lSYNTHESIZE  # Local variables.
     
-    if False:
-        # This is just to simplify debugging of SCAN. Bypass in production.
-        return
-    
     def SET_INIT(A, B, C, D, E):
         # Local Q doesn't need to be persistent
         g.IC_LINE = g.IC_LINE + 1;
@@ -482,6 +479,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     
     if g.CONTROL[8]:
         OUTPUT(0, '->->->->->->PRODUCTION NUMBER ' + str(PRODUCTION_NUMBER))
+        
+    if True:
+        # This is just to simplify debugging of SCAN. Bypass in production.
+        return
+    
     if SHR(g.pPRODUCE_NAME[PRODUCTION_NUMBER], 12):
         ERROR(d.CLASS_XS, 2, '#' + PRODUCTION_NUMBER);
     
@@ -4598,7 +4600,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.SCOPEp = g.SCOPEp_STACK[g.NEST];
         g.I = 0;
         while g.ON_ERROR_PTR < -g.SYT_ARRAY(g.BLOCK_SYTREF[g.NEST]):
-            if EXT_ARRAY(g.ON_ERROR_PTR) == 0x3FFF: 
+            if h.EXT_ARRAY[g.ON_ERROR_PTR] == 0x3FFF: 
                 g.I = g.I + 0x1001;
             else:
                 g.I = g.I + 1;

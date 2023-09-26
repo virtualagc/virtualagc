@@ -91,6 +91,7 @@ def SOURCE_COMPARE():
     if not g.FIRST_CARD:
         if not g.INITIAL_INCLUDE_RECORD:
             g.CURRENT_CARD = INPUT(g.INPUT_DEV)[:];
+            pass
     else:
         if not g.COMPARE_SOURCE:
             g.INITIAL_INCLUDE_RECORD = g.FALSE;

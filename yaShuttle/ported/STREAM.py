@@ -241,7 +241,7 @@ class cSTREAM:
         #        (EP,SP)
         #        (E_IND, S_IND)
         #        (E_INDICATOR, S_INDICATOR)
-        # Consider EP,EP, for example.  Even though EP is defined as ascalar rather
+        # Consider EP,EP, for example.  Even though EP is defined as a scalar rather
         # than as an array, the original coders seemed to have the expectation that
         # they could address EP as EP(0) and SP as EP(1).  There is no provision in
         # XPL for doing using this, as far as I can see.  The case of E_INDICATOR
@@ -777,6 +777,7 @@ def STREAM():
                             l.CREATING = g.FALSE;
                             g.END_OF_INPUT = g.TRUE;
                             g.CURRENT_CARD = l.INPUT_PAD + X70;
+                            pass
                     else:
                         g.CARD_COUNT = g.CARD_COUNT + 1;
                         if g.CARD_TYPE(BYTE(g.CURRENT_CARD)) == g.CARD_TYPE(BYTE('D')):
@@ -854,6 +855,7 @@ def STREAM():
             NEXT_RECORD();
             if LENGTH(g.CURRENT_CARD) > 88:
                 g.CURRENT_CARD = SUBSTR(g.CURRENT_CARD, 0, 88);
+                pass
             if LENGTH(g.CURRENT_CARD) == 0:
                 if g.INCLUDING:
                     g.INPUT_DEV = 0;
@@ -869,6 +871,7 @@ def STREAM():
                 else:
                     g.END_OF_INPUT = g.TRUE;
                     g.CURRENT_CARD = l.INPUT_PAD + g.X70;
+                    pass
         g.CARD_COUNT = g.CARD_COUNT + 1;
         if g.LISTING2:
             if g.CARD_COUNT != 0:
@@ -989,6 +992,7 @@ def STREAM():
                 # CASE 4--COMMENT
                 if not goto_COMMENT_CARD:
                     g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'));
+                    pass
                 goto_COMMENT_CARD = False
                 if l.PREV_CARD == BYTE('C'):
                     g.COMMENTING = g.TRUE;
@@ -1128,7 +1132,7 @@ def STREAM():
     def MACRO_DIAGNOSTICS(WHERE):
         OUTPUT(0, 'AT ' + WHERE + '  NEXT_CHAR=' + g.NEXT_CHAR + '  MACRO_EXPAN_LEVEL=' \
                 +g.MACRO_EXPAN_LEVEL + '  MACRO_TEXT(' + g.MACRO_POINT + ')=' + \
-                MACRO_TEXT(g.MACRO_POINT) + '  PARM_REPLACE_PTR(' + g.PARM_EXPAN_LEVEL + \
+                g.MACRO_TEXT(g.MACRO_POINT) + '  PARM_REPLACE_PTR(' + g.PARM_EXPAN_LEVEL + \
                 ')=' + g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL]);
     
     # STREAM_START was here!
@@ -1179,14 +1183,14 @@ def STREAM():
                         goto_PARM_DONE = True
                         continue
             if not goto_MACRO_DONE:
-                if MACRO_TEXT(g.MACRO_POINT) != 0xEF:
+                if g.MACRO_TEXT(g.MACRO_POINT) != 0xEF:
                     g.BLANK_COUNT = 0;
-                    if MACRO_TEXT(g.MACRO_POINT) == 0xEE:
+                    if g.MACRO_TEXT(g.MACRO_POINT) == 0xEE:
                         g.MACRO_POINT = g.MACRO_POINT + 1;
-                        g.BLANK_COUNT = MACRO_TEXT(g.MACRO_POINT);
+                        g.BLANK_COUNT = g.MACRO_TEXT(g.MACRO_POINT);
                         g.NEXT_CHAR = BYTE(g.X1);
                     else:
-                        g.NEXT_CHAR = MACRO_TEXT(g.MACRO_POINT);
+                        g.NEXT_CHAR = g.MACRO_TEXT(g.MACRO_POINT);
                     g.MACRO_POINT = g.MACRO_POINT + 1;
                     if g.CONTROL(3):
                         MACRO_DIAGNOSTICS(3);
@@ -1212,9 +1216,9 @@ def STREAM():
                 if not goto_MACRO_DONE:
                     g.MACRO_FOUND = g.FALSE ;
                 goto_MACRO_DONE = False
-                g.NEXT_CHAR = SAVE_NEXT_CHAR;
-                g.OVER_PUNCH = SAVE_OVER_PUNCH;
-                g.PRINTING_ENABLED = PRINT_FLAG;
+                g.NEXT_CHAR = g.SAVE_NEXT_CHAR;
+                g.OVER_PUNCH = g.SAVE_OVER_PUNCH;
+                g.PRINTING_ENABLED = g.PRINT_FLAG;
                 if g.CONTROL(3):
                     MACRO_DIAGNOSTICS(5);
                 return;
@@ -1230,7 +1234,7 @@ def STREAM():
             if l.RETURN_CHAR[l.II] != 0:
                 l.ARROW_FLAG = g.TRUE;
                 l.RETURN_CHAR[l.II] = l.RETURN_CHAR[l.II] - 1;
-                g.NEXT_CHAR = l.TYPE_CHAR(l.II);
+                g.NEXT_CHAR = l.TYPE_CHAR[l.II];
                 g.OVER_PUNCH = 0;
                 return;
         l.II = 0;

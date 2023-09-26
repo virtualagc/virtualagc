@@ -50,6 +50,7 @@ def ORDER_OK(TYPE):
         #  CASE 0 -- ILLEGAL CARD TYPES  
         ERROR(d.CLASS_M,1);
         g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'))
+        pass
         # Note fallthrough.
     elif ctc == 1 or ctc == 2:
         #  CASE 1 -- E CARD  

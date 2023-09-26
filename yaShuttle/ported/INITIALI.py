@@ -412,6 +412,7 @@ def INITIALIZATION():
         NEXT_RECORD();
     if LENGTH(g.CURRENT_CARD) > 88:
         g.CURRENT_CARD = SUBSTR(g.CURRENT_CARD, 0, 88);
+        pass
     g.CARD_COUNT = g.CARD_COUNT + 1;
     g.SAVE_CARD = g.CURRENT_CARD[:];
     SOURCE_COMPARE();

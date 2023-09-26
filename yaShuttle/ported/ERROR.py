@@ -105,9 +105,14 @@ from SCAN_DISASTER import SCAN_DISASTER
  /***************************************************************************/
 '''
 
+debugIt = True
+
 def ERROR(CLASS, NUM, TEXT=""):
     # ERRORFILE and SEVERITY are locals, but don't need persistence.
     ERRORFILE = 5;
+
+    if debugIt:
+        print("\n!ERROR", CLASS, NUM, TEXT)
 
     if CLASS <= d.CLASS_ZS:
         g.LAST = g.LAST + 1;
@@ -136,6 +141,11 @@ def ERROR(CLASS, NUM, TEXT=""):
             while goto_AGAIN:
                 goto_AGAIN = False
                 g.C[0]=PAD(g.C[0]+str(NUM),8);
+                if debugIt:
+                    errMsg = inputDevices[5]["pds"][g.C[0]]
+                    for i in range(1, len(errMsg)):
+                        errMsg[i] = errMsg[i].replace("??", TEXT)
+                    print("!ERROR", errMsg)
                 if MONITOR(2,5,g.C[0]):
                     CLASS=d.CLASS_BX;
                     NUM=113;

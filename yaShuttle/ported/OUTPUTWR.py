@@ -14,6 +14,7 @@ import g
 import HALINCL.CERRDECL as d
 from ERROR import ERROR
 from OUTPUT_WRITER_DISASTER import OUTPUT_WRITER_DISASTER
+from HALINCL.CHECKDWN import CHECK_DOWN
 
 '''
  #*************************************************************************
@@ -361,7 +362,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             l.ERRORS_PRINTED = g.TRUE;
             g.ERROR_COUNT = g.ERROR_COUNT + 1;
             g.SAVE_LINE_p[g.ERROR_COUNT] = g.STMT_NUM();
-            C = SAVE_ERROR_MESSAGE(I);
+            C = g.SAVE_ERROR_MESSAGE[I];
             l.ERRORCODE = SUBSTR(C, 0, 8);  # MEMBER NAME
             if MONITOR(2, 5, l.ERRORCODE):
                 ERRORS (d.CLASS_BI, 100, g.X1 + l.ERRORCODE);
@@ -384,8 +385,9 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                     g.COMPILING = g.FALSE;
                 else:
                     OUTPUT_WRITER_DISASTER()
-            OUTPUT(1, '0***** ' + l.ERRORCODE + ' ERROR #' + 
-                   g.ERROR_COUNT + ' OF SEVERITY ' + l.SEVERITY + '. *****');
+            OUTPUT(1, '0***** ' + str(l.ERRORCODE) + ' ERROR #' + \
+                   str(g.ERROR_COUNT) + ' OF SEVERITY ' + str(l.SEVERITY) + \
+                   '. *****');
             if l.SEVERITY > g.MAX_SEVERITY:
                 g.MAX_SEVERITY = l.SEVERITY;
             if l.SEVERITY > g.STATEMENT_SEVERITY:
@@ -400,7 +402,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                         else:
                             S = SUBSTR(S, 0, K) + C + SUBSTR(S, K + 2);
                         l.IMBEDDING = g.FALSE;
-                OUTPUT = g.STARS + g.X1 + S;
+                OUTPUT(0, g.STARS + g.X1 + S);
                 S = INPUT(5);
                 # ERROR_PRINT_END:
         # END OF LOOP ON ERROR MSGS

@@ -58,7 +58,7 @@ def DOWNGRADE_SUMMARY():
         #  CHANGED HARDCODED 10 TO RECORD_TOP(DOWN_INFO) FOR CR11088
         while l.END_OF_LIST == 0 and l.DOWN_COUNT <= len(h.DOWN_INFO):
             if g.DWN_ERR(l.DOWN_COUNT) > ' ':
-                if g.DWN_VER(l.DOWN_COUNT) == 1:
+                if g.DWN_VER(l.DOWN_COUNT) == '1':
                     l.SEARCH_FOR_CLS = 1;
                     l.COUNT = 0;
                     while l.SEARCH_FOR_CLS == 1:
@@ -96,7 +96,7 @@ def DOWNGRADE_SUMMARY():
             OUTPUT(0, '  ');
             OUTPUT(0, '  ');
             for l.I in range(1, len(h.DOWN_INFO)+1):
-                if g.DWN_VER(l.I) != 1:
+                if g.DWN_VER(l.I) != '1':
                     l.DOWN_COUNT = l.I;
                     l.SEARCH_FOR_CLS = 1;
                     l.COUNT = 0;
