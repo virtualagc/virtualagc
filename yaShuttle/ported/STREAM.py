@@ -256,16 +256,14 @@ class cSTREAM:
         self.S_LINE = ""
         self.E_STACK = ""
         self.S_STACK = ""
-        # Regarding the following comment, I haven't so far found any case in
-        # which 0xFE would appear.  However, given that 0xFE isn't a legal code
-        # in 7-BIT ASCII or UTF-8, nor a defined character in EBCDIC, I would 
-        # choose to use 0x04 instead if the need for it arises in the future. 
         ''' THE EOF SYMBOL IS A HEX'FE'. IT IS CREATED BY A 12-11-0-6-8-9
             MULTIPLE PUNCH ON A CARD.
             THE FORMAT OF INPUT_PAD IS:
                       'M XY YX Z Z '' Z Z " Z Z'
             WHERE X IS A "/", Y IS A "*", AND Z IS THE EOF SYMBOL '''
-        self.INPUT_PAD = 'M /**/ ` ` '' ` ` " ` `';
+        # Note that ASCII '\x04' is transparently converted back and forth with
+        # the numerical code 0xFE by the BYTE() built-in function.
+        self.INPUT_PAD = 'M /**/ \x04 \x04 \'\' \x04 \x04 " \x04 \x04';
         self.LAST_E_IND = 0
         self.LAST_S_IND = 0
         self.E_BLANKS = 0
@@ -540,6 +538,8 @@ def STREAM():
                     else:  # ADD NEW DEBUG TYPES HERE
                         ll.C[0] = D_TOKEN;
                 for ll.I in range(1, g.TEXT_LIMIT[0]):
+                    # See section 2.2.7 (PDF p. 40) of "HAL/S-FC & HAL/S-360
+                    # Compiler System Program Description".
                     if BYTE(g.CURRENT_CARD, ll.I) == BYTE('`'):
                         g.J = CHAR_INDEX(TOGGLES, SUBSTR(g.CURRENT_CARD, ll.I + 1, 1));
                         if g.J > -1:

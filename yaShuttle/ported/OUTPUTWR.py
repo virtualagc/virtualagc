@@ -15,6 +15,7 @@ import HALINCL.CERRDECL as d
 from ERROR import ERROR
 from OUTPUT_WRITER_DISASTER import OUTPUT_WRITER_DISASTER
 from HALINCL.CHECKDWN import CHECK_DOWN
+from HALINCL.COMROUT import CHAR_INDEX
 
 '''
  #*************************************************************************

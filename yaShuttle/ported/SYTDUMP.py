@@ -14,7 +14,7 @@ import g
 import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
 from BLANK import BLANK
-from ERRORS import ERRORS
+from IFORMAT import I_FORMAT
 
 '''
  /***************************************************************************/
@@ -271,7 +271,8 @@ class cSYT_DUMP: # Local variables for SYT_DUMP().
             0x00080000,     # EXCLUSIVE
             0x00100000,     # EXTERNAL
             0x00000080,     # REMOTE
-            0x02000000      # INCLUDED_REMOTE
+            0x02000000,     # INCLUDED_REMOTE
+            0
             )
         '''
         CHANGED CHAR_ATTR FROM A CHARACTER ARRAY OF 19 TO A SINGLE
@@ -290,6 +291,10 @@ lSYT_DUMP = cSYT_DUMP()
 def SYT_DUMP():
     l = lSYT_DUMP # Local variables.
     
+    # This import is from within the function in order to avoid a 
+    # "partially initialized module" circular import error.
+    from ERRORS import ERRORS
+    
     # PRINTS THE SYMBOL TABLE HEADER.
     def PRINT_SYMBOL_HEADER(STRUC,NEW_PAGE):
         # Local J doesn't need to be persistent.
@@ -300,7 +305,7 @@ def SYT_DUMP():
                       'L I S T I N G :');
         else:
             l.HEADER_PRINTED=g.TRUE;
-            if g.NEW_PAGE:
+            if NEW_PAGE:
                 OUTPUT(1, g.SUBHEADING);
                 g.EJECT_PAGE();
             OUTPUT(1, '0S Y M B O L  &  C R O S S   R E F E R E N C E   ' + \
@@ -338,10 +343,10 @@ def SYT_DUMP():
     
     def ENTER_SORT(LOC):
         # No Locals
-        g.SORT_COUNT = g.SORT_COUNT + 1;
-        g.SYT_SORT[g.SORT_COUNT] = LOC;
-        if LENGTH(g.SYT_NAME[LOC]) > l.MAX_LENGTH:
-             l.MAX_LENGTH = LENGTH(g.SYT_NAME[LOC]);
+        l.SORT_COUNT = l.SORT_COUNT + 1;
+        g.SYT_SORT(l.SORT_COUNT, LOC);
+        if LENGTH(g.SYT_NAME(LOC)) > l.MAX_LENGTH:
+             l.MAX_LENGTH = LENGTH(g.SYT_NAME(LOC));
     
     # Regarding the ALWAYS parameter, CHECK_AND_ENTER() is sometimes called
     # with it in XPL, and sometimes without.  My supposition that it defaults to
@@ -349,21 +354,21 @@ def SYT_DUMP():
     # as TRUE
     def CHECK_AND_ENTER(LOC, ALWAYS=g.FALSE):
         # Locals (I and J) don't need to be persistent.
-        I = g.SYT_XREF[LOC];  # PTR TO LAST ENTRY
-        J = g.SYT_FLAGS[LOC];
+        I = g.SYT_XREF(LOC);  # PTR TO LAST ENTRY
+        J = g.SYT_FLAGS(LOC);
         if g.TOKEN == g.EOFILE:
             if (J & g.RIGID_FLAG) != 0:
-               g.SYT_FLAGS[LOC] = (J & (~g.RIGID_FLAG)) | g.DUPL_FLAG;
+               g.SYT_FLAGS(LOC, (J & (~g.RIGID_FLAG)) | g.DUPL_FLAG);
             else:
-                g.SYT_FLAGS[LOC] = J & (~g.DUPL_FLAG);
+                g.SYT_FLAGS(LOC, J & (~g.DUPL_FLAG));
             if I > 0:
-                g.SYT_XREF[LOC] = SHR(g.XREF[I], 16);
+                g.SYT_XREF(LOC, SHR(g.XREF(I), 16));
                 g.XREF(I, g.XREF(I) & 0xFFFF);
             else:
-                g.SYT_XREF[LOC] = 0;
-        if g.ALWAYS:  # ENTRY BEING FORCED INTO SORT ARRAY
+                g.SYT_XREF(LOC, 0);
+        if ALWAYS:  # ENTRY BEING FORCED INTO SORT ARRAY
             ENTER_SORT(LOC);
-            g.ALWAYS = g.FALSE;  # FOR NEXT TIME
+            ALWAYS = g.FALSE;  # FOR NEXT TIME
             return g.TRUE;
         if (g.XREF(I) & g.XREF_MASK) > g.FIRST_STMT():
             ENTER_SORT(LOC);
@@ -401,20 +406,20 @@ def SYT_DUMP():
         while True:
             TMP_PTR = PTR;
             A = A | g.XREF(PTR);  # COLLECT FLAGS
-            l.T = l.T + (SHR(g.XREF(PTR), 13) & 7) + g.X1 + \
-                SUBSTR(10000 + (g.XREF(PTR) & g.XREF_MASK), 1, 4) + g.X2;
+            l.T = l.T + str((SHR(g.XREF(PTR), 13) & 7)) + g.X1 + \
+                SUBSTR(str(10000 + (g.XREF(PTR) & g.XREF_MASK)), 1, 4) + g.X2;
             if LENGTH(l.S)+LENGTH(l.T)+6>132:
                 OUTPUT(0, l.S+l.T);
                 l.S=SUBSTR(g.X70,0,l.ATTR_START);
                 l.T='';
-            PTR = SHR(g.XREF(TR), 16);
+            PTR = SHR(g.XREF(PTR), 16);
             # IF THE XREF ENTRY IS AN ASSIGN XREF & THE
             # SYMBOL IS A STATEMENT LABEL THEN THE LABEL
             # IS BEING USED ON AN END STATEMENT. SO THE
             # ASSIGN XREF ENTRY NEEDS TO BE REMOVED AND
             # LABEL_ON_END IS SET TO TRUE SO THE INACCURATE
             # "NOT REFERENCED" MESSAGE WILL NOT BE PRINTED.
-            if ((g.SYT_TYPE[l.I] & g.STMT_LABEL) == g.STMT_LABEL) and \
+            if ((g.SYT_TYPE(l.I) & g.STMT_LABEL) == g.STMT_LABEL) and \
                     ((SHR(g.XREF(PTR),13) & 7) == 4) \
                     and not g.PROCESSING_BI:
                 l.LABEL_ON_END = g.TRUE;
@@ -608,7 +613,7 @@ def SYT_DUMP():
             l.J=g.SYT_TYPE(l.I);
             l.K=g.SYT_CLASS(l.I);
             l.L=g.SYT_FLAGS(l.I);
-            if (l.L&IMPL_T_FLAG)!=0:
+            if (l.L&g.IMPL_T_FLAG)!=0:
                 goto_NO_INDIRECT = True
             else:
                 if l.K>=g.TEMPLATE_CLASS:
@@ -771,7 +776,7 @@ def SYT_DUMP():
                                 if l.J==g.EVENT_TYPE:
                                     ADD_ATTR('LATCHED');
                             for l.KL in range(1, 19+1):
-                                if (l.L&l.FLAG_MASK(l.KL))!=0:
+                                if (l.L&l.FLAG_MASK[l.KL])!=0:
                                     ADD_ATTR(TRUNCATE(SUBSTR(l.CHAR_ATTR,l.KL*11,11)));
                             if not g.SDL_OPTION:
                                 if (l.L & g.EXTERNAL_FLAG) != 0:
@@ -879,7 +884,7 @@ def SYT_DUMP():
                                 OUTPUT(0, l.S);
                                 goto_NO_INDIRECT = True
                             if not goto_NO_INDIRECT:
-                                l.KI=(LENGTH(l.S)-l.ATTR_START+7)/8;
+                                l.KI=(LENGTH(l.S)-l.ATTR_START+7)//8;
                                 l.KI=(l.KI*8)+l.ATTR_START-LENGTH(l.S);
                                 if l.KI>0:
                                     l.S=l.S+SUBSTR(g.X70,0,l.KI);

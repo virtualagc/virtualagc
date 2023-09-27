@@ -82,8 +82,8 @@ outputDevices = [None]*10
 if False: # Normal
     f = sys.stdin
 else:    # Debugging
-    f = open("SIMPLE.hal", "r")
-    #f = open("/home/rburkey/git/virtualagc/yaShuttle/Source Code/Programming in HAL-S/021-SIMPLE.hal", "r")
+    #f = open("SIMPLE.hal", "r")
+    f = open("/home/rburkey/git/virtualagc/yaShuttle/Source Code/Programming in HAL-S/021-SIMPLE.hal", "r")
 dummy = f.readlines() # Source code.
 for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬","~")\
@@ -165,11 +165,11 @@ def MONITOR(function, arg2=None, arg3=None):
     def close(n):
         global outputDevices
         device = outputDevices[n]
-        if device["open"]: 
+        if isinstance(device, list) and "open" in device and device["open"]: 
             device["file"].close()
             device["open"] = False
         else:
-            error()
+            print("\nTrying to close device %d, which is not open" % n)
     
     if function == 0: 
         n = arg2
@@ -265,6 +265,9 @@ def MONITOR(function, arg2=None, arg3=None):
         error()
     
     elif function == 9:
+        if dwArea == None:
+            print("\nNo MONITOR(5) prior to MONITOR(9)", file=sys.stderr)
+            exit(1)
         op = arg2
         try:
             if op == 1:
@@ -298,6 +301,9 @@ def MONITOR(function, arg2=None, arg3=None):
             return 1
     
     elif function == 10:
+        if dwArea == None:
+            print("\nNo MONITOR(5) prior to MONITOR(10)", file=sys.stderr)
+            exit(1)
         s = arg2
         try:
             dwArea[0][dwArea[1]] = float(s)
@@ -374,7 +380,7 @@ the so-called ANSI control characters:
     '_'    Single space the line and print
     '0'    Double space the line and print
     '-'    Triple space the line and print
-    '+'    Do not space the line and print
+    '+'    Do not space the line and print (but does return carriage to left!)
     '1'    Form feed
     'H'    Heading line.
     '2'    Subheading line.
@@ -403,6 +409,10 @@ def OUTPUT(fileNumber, string):
             queue.append('')
             queue.append('')
         elif ansi == '+':
+            # This would overstrike the line.  I.e., it's like a carriage return
+            # without a line feed.  But I have no actual way to do that, so we 
+            # need to advance to the next line.
+            queue.append('')
             pass
         elif ansi == '1':
             lineCount = linesPerPage
@@ -483,7 +493,7 @@ def INPUT(fileNumber):
             line = data[index]
             if len(line) == 0:
                 line = ' '
-            return line
+            return line[:]
         else:
             return ''
     except:
@@ -577,6 +587,8 @@ def BYTE(s, index=0, value=None):
                 return 0x4A
             elif c == '~': # Replacement for logical-not sign
                 return 0x5F
+            elif c == '\x04': # Replacement for EOF.
+                return 0xFE
             else: # Everything else.
                 return c.encode('cp1140')[0] # Get EBCDIC byte code.
         except:
@@ -585,6 +597,8 @@ def BYTE(s, index=0, value=None):
         c = '`'
     elif value == 0x5F: # Replacement for logical-not sign.
         c = '~' 
+    elif value == 0xFE: # Replacement for EOF.
+        c = '\x04'
     else: # Everything else.
         c = bytearray([value]).decode('cp1140')
     return s[:index] + c + s[index+1:]

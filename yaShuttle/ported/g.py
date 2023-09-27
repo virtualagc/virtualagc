@@ -909,7 +909,7 @@ X256 = ' ' * 256
 #   IDENTIFIERS ONLY. 
 
 ERROR_COUNT = 0
-MAX_SEVERITY = -1
+MAX_SEVERITY = 0
 STATEMENT_SEVERITY = -1
 VALUE = 0
 
@@ -1031,7 +1031,7 @@ class init_apgarea:
         self.AREAPG = [0] * 1260
 
 
-APGAREA = []  # Elements are init_apgarea class objects.
+INIT_APGAREA = []  # Elements are init_apgarea class objects.
 
 
 class init_afcbarea:
@@ -1418,7 +1418,7 @@ if debug3:
     CONTROL[0x04] = -1  # Phase 1 token trace
     CONTROL[0x08] = -1  # Phase 1 production trace
     # CONTROL[0x0B] = -1 # Print Phase 1 HALMAT by block.
-    CONTROL[0x0C] = -1  # Print Phase 1 state trace
+    #CONTROL[0x0C] = -1  # Print Phase 1 state trace
     CONTROL[0x0D] = -1  # Standard Phase 1 listing
     CONTROL[0x0E] = -1  # Print literal table from Phase 1
 XREF_FULL = 0

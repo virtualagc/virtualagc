@@ -16,6 +16,8 @@ import HALINCL.CERRDECL as d
 from ERROR    import ERROR
 from HALMATPI import HALMAT_PIP
 from HALMATPO import HALMAT_POP
+from HOWTOINI import HOW_TO_INIT_ARGS
+from ICQOUTPU import ICQ_OUTPUT
 
 '''
  /***************************************************************************/
@@ -101,37 +103,37 @@ def HALMAT_INIT_CONST ():
         return g.TRUE;
     # END ROUND_SCALAR;
     
-    if IC_FOUND == 0:  #  RETURN IN CASE OF NO INITIALIZATION
+    if g.IC_FOUND == 0:  #  RETURN IN CASE OF NO INITIALIZATION
         return;
-    if IC_FOUND > 1:  # IS NORMAL NON_FACTORED CASE
-        ICQ = IC_PTR2;  # SET UP LIST PRT
-        IC_FOUND = IC_FOUND - 2;  # THIS INIT CAN ONLY BE USED ONCE
-        IC_LINE = g.INX[IC_PTR2];  # TO REUSE FILE_SPACE
-        PTR_TOP = IC_PTR2 - 1;  # SO RESET PTR_TOP AND INDICATORS
+    if g.IC_FOUND > 1:  # IS NORMAL NON_FACTORED CASE
+        g.ICQ = g.IC_PTR2;  # SET UP LIST PRT
+        g.IC_FOUND = g.IC_FOUND - 2;  # THIS INIT CAN ONLY BE USED ONCE
+        g.IC_LINE = g.INX[g.IC_PTR2];  # TO REUSE FILE_SPACE
+        g.PTR_TOP = g.IC_PTR2 - 1;  # SO RESET PTR_TOP AND INDICATORS
     else:  # FACTORED CASE, SET PTR, BUT CAN'T RESET SINCE MULT. USAGE
-        ICQ = IC_PTR1;
-    if DO_INIT: 
-        DO_INIT = g.FALSE;
+        g.ICQ = g.IC_PTR1;
+    if g.DO_INIT: 
+        g.DO_INIT = g.FALSE;
     else: 
         return;
     # DO CASE HOW_TO_INIT_ARGS(LOC_P(ICQ));
-    howto = HOW_TO_INIT_ARGS(LOC_P(ICQ))
+    howto = HOW_TO_INIT_ARGS(g.LOC_P[g.ICQ])
     if howto == 0:
         #  CASE 0,  TOO FEW ELEMENTS
-        if PSEUDO_TYPE(ICQ) == 0: 
+        if g.PSEUDO_TYPE[g.ICQ] == 0: 
             ERROR(CLASS_DI, 5, g.VAR(g.MP));
         ICQ_OUTPUT();
     elif howto == 1:
         #  CASE 1, ONE ARGUMENT
-        if PSEUDO_TYPE(ICQ) != 0:
+        if g.PSEUDO_TYPE[g.ICQ] != 0:
             if not MULTI_VALUED(): 
                 ERROR(CLASS_DI, 4, g.VAR(g.MP));
             ICQ_OUTPUT();
         else: 
-            I = GET_ICQ(g.INX[ICQ] + 1);
+            I = GET_ICQ(g.INX[g.ICQ] + 1);
             while IC_FORM(I) != 2:
-                g.INX[ICQ] = g.INX[ICQ] + 1;
-                I = GET_ICQ(g.INX[ICQ] + 1);
+                g.INX[g.ICQ] = g.INX[g.ICQ] + 1;
+                I = GET_ICQ(g.INX[g.ICQ] + 1);
             
             goto_NON_EVALUABLE = False
             if MULTI_VALUED() > 0: 
@@ -174,11 +176,11 @@ def HALMAT_INIT_CONST ():
     elif howto == 2:
         #  CASE 2,  MATCHES TERMINAL NUMBER
         ICQ_OUTPUT();
-        if PSEUDO_TYPE(ICQ) == 0: 
+        if g.PSEUDO_TYPE[g.ICQ] == 0: 
             ICQ_ARRAYNESS_OUTPUT();
     elif howto == 3:
         #  CASE 3,  MATCHES TOTAL NUMBER
-        if PSEUDO_TYPE(ICQ) != 0: 
+        if g.PSEUDO_TYPE[g.ICQ] != 0: 
             ERROR(CLASS_DI, 4, g.VAR(g.MP));
         ICQ_OUTPUT();
     elif howto == 4:

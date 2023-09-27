@@ -374,6 +374,7 @@ def INITIALIZATION():
     g.FREELIMIT = g.TEMP1 - 512;
     # INITIALIZE VMEM PAGING AND ALLOCATE SPACE FOR IN-CORE PAGES
     '''
+    MONITOR(5, g.DW, 0)
     '''
     ... lots of stuff just deleted here that I hope pertains to
         (unnecessary) virtual memory ...

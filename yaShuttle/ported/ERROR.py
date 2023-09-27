@@ -142,10 +142,11 @@ def ERROR(CLASS, NUM, TEXT=""):
                 goto_AGAIN = False
                 g.C[0]=PAD(g.C[0]+str(NUM),8);
                 if debugIt:
-                    errMsg = inputDevices[5]["pds"][g.C[0]]
+                    errMsg = inputDevices[5]["pds"][g.C[0]][:]
                     for i in range(1, len(errMsg)):
                         errMsg[i] = errMsg[i].replace("??", TEXT)
                     print("!ERROR", errMsg)
+                    pass
                 if MONITOR(2,5,g.C[0]):
                     CLASS=d.CLASS_BX;
                     NUM=113;
