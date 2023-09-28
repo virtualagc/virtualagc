@@ -28,6 +28,6 @@ if clean:
             fields = line[index:].split(":")
             productionNumber += 1
             print(line[:index] + str(productionNumber) + \
-                    ": # reference " + str(10*productionNumber))
+                    ": # reference " + str(10 * productionNumber))
         else:
             print(line)

@@ -50,11 +50,12 @@ from HALMATPO import HALMAT_POP
  /***************************************************************************/
 '''
 
-def HALMAT_TUPLE(POPCODE,COPT,OP1,OP2,TAG,OP1T1=0,OP1T2=0,OP2T1=0,OP2T2=0):
+
+def HALMAT_TUPLE(POPCODE, COPT, OP1, OP2, TAG, OP1T1=0, OP1T2=0, OP2T1=0, OP2T2=0):
     # This procedure is called with as few as 5 parameters, but the final 4
     # are always reset to 0, so we don't need to allow for persistence.    
-    HALMAT_POP(POPCODE,(OP1>0)+(OP2>0),COPT,TAG);
-    if OP1>0:
-        HALMAT_PIP(g.LOC_P[g.PTR[OP1]],g.PSEUDO_FORM[g.PTR[OP1]], OP1T1,OP1T2);
-    if OP2>0:
-        HALMAT_PIP(g.LOC_P[g.PTR[OP2]],g.PSEUDO_FORM[g.PTR[OP2]], OP2T1,OP2T2);
+    HALMAT_POP(POPCODE, (OP1 > 0) + (OP2 > 0), COPT, TAG);
+    if OP1 > 0:
+        HALMAT_PIP(g.LOC_P[g.PTR[OP1]], g.PSEUDO_FORM[g.PTR[OP1]], OP1T1, OP1T2);
+    if OP2 > 0:
+        HALMAT_PIP(g.LOC_P[g.PTR[OP2]], g.PSEUDO_FORM[g.PTR[OP2]], OP2T1, OP2T2);

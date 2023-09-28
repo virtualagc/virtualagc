@@ -47,7 +47,8 @@ import g
  /***************************************************************************/
 '''
 
-def GET_SUBSET(SUBSET,FLAGS):
+
+def GET_SUBSET(SUBSET, FLAGS):
     # The locals are A_TOKEN, S, I, L, LIMIT, CP, and SUBSET_MSG.
     # They don't require persistence.  They're initialized below only to
     # cater to the 'nonlocal' declarations in the embedded functions.
@@ -61,56 +62,56 @@ def GET_SUBSET(SUBSET,FLAGS):
     def VALUE():
         nonlocal L
         # J and M are local, but don't need persistence.
-        L=0;
-        for J in range(1, LENGTH(A_TOKEN)+1):
-            M=BYTE(A_TOKEN,J-1)-BYTE('0');
-            if (M<0)or(M>9):
+        L = 0;
+        for J in range(1, LENGTH(A_TOKEN) + 1):
+            M = BYTE(A_TOKEN, J - 1) - BYTE('0');
+            if (M < 0)or(M > 9):
                 return -1;
-            L=L*10+M;
+            L = L * 10 + M;
         return L;
 
     def GET_TOKEN():
         nonlocal A_TOKEN, CP, I, S
         # The only locals, Tp and TERM, require no persistence.
         Tp = 3;
-        TERM = (0,BYTE('('),BYTE(')'),BYTE(','));
-        A_TOKEN='';
+        TERM = (0, BYTE('('), BYTE(')'), BYTE(','));
+        A_TOKEN = '';
         while True:
-            CP=CP+1;
-            if CP>LIMIT:
+            CP = CP + 1;
+            if CP > LIMIT:
                 while True:
-                    S=INPUT(6);
-                    I=0;
-                    if LENGTH(S)==0:
+                    S = INPUT(6);
+                    I = 0;
+                    if LENGTH(S) == 0:
                         return 0;
-                    if BYTE(S)!=BYTE('C'):
+                    if BYTE(S) != BYTE('C'):
                         break;
-                CP=0;
-            if BYTE(S,CP)!=BYTE(g.X1):
-                for I in range(1, Tp+1):
-                    if BYTE(S,CP)==TERM[I]:
+                CP = 0;
+            if BYTE(S, CP) != BYTE(g.X1):
+                for I in range(1, Tp + 1):
+                    if BYTE(S, CP) == TERM[I]:
                         return I;
-                A_TOKEN=A_TOKEN+SUBSTR(S,CP,1);
+                A_TOKEN = A_TOKEN + SUBSTR(S, CP, 1);
 
     def SUBSET_ERROR(NUM):
         # The locals, T, S_PREFIX, and S_MSG, require no persistence.
         S_PREFIX = '  *** SUBSET ACQUISITION ERROR - ';
         S_MSG = ('PREMATURE EOF',
-           'BAD SYNTAX: ','UNKNOWN FUNCTION: ',
+           'BAD SYNTAX: ', 'UNKNOWN FUNCTION: ',
            'UNKNOWN PRODUCTION: ', 'ILLEGAL BIT LENGTH: ');
         if NUM == 0:
-            T='';
+            T = '';
         elif NUM == 1:
-            T=S;
+            T = S;
             while GET_TOKEN():
                 pass;
         elif NUM == 2:
-            T=A_TOKEN;
+            T = A_TOKEN;
         elif NUM == 3:
-            T=A_TOKEN;
+            T = A_TOKEN;
         elif NUM == 4:
-            T=A_TOKEN;
-        OUTPUT(0, S_PREFIX+S_MSG[NUM]+T);
+            T = A_TOKEN;
+        OUTPUT(0, S_PREFIX + S_MSG[NUM] + T);
 
     '''
     According to the "HAL/S-FC User's Manual" section 8.6, if there is no
@@ -121,23 +122,23 @@ def GET_SUBSET(SUBSET,FLAGS):
     restrictions were desired for some reason, the afore-mentioned section 8.6
     describes the appropriate data (for device 6) for defining them.
     '''
-    if MONITOR(2,6,SUBSET):
+    if MONITOR(2, 6, SUBSET):
         return 1;
-    S=INPUT(6);
-    if LENGTH(S)==0:
+    S = INPUT(6);
+    if LENGTH(S) == 0:
         return 1;
-    LIMIT=LENGTH(S)-1;
-    OUTPUT(1, SUBSET_MSG+S);
+    LIMIT = LENGTH(S) - 1;
+    OUTPUT(1, SUBSET_MSG + S);
     OUTPUT(0, g.X1);
-    CP=LIMIT;
-    I=1;
+    CP = LIMIT;
+    I = 1;
     while I != 0:
         gt = GET_TOKEN()
         if gt == 0:
-            if LENGTH(A_TOKEN)>0:
+            if LENGTH(A_TOKEN) > 0:
                 SUBSET_ERROR(0);
         elif gt == 1:
-            if A_TOKEN=='$BUILTINS':
+            if A_TOKEN == '$BUILTINS':
                 while I:
                     gt2 = GET_TOKEN()
                     if gt2 == 0:
@@ -145,17 +146,17 @@ def GET_SUBSET(SUBSET,FLAGS):
                     elif gt2 == 1:
                         SUBSET_ERROR(1);
                     elif gt2 == 2 or gt2 == 3:
-                        L=BIp;
-                        while L>0:
-                            if SUBSTR(g.BI_NAME[g.BI_INDX[L]],g.BI_LOC[L],10) \
-                                    == PAD(A_TOKEN,10):
-                                g.BI_FLAGS[L]=g.BI_FLAGS[L]|FLAGS;
-                                L=-1;
+                        L = BIp;
+                        while L > 0:
+                            if SUBSTR(g.BI_NAME[g.BI_INDX[L]], g.BI_LOC[L], 10) \
+                                    == PAD(A_TOKEN, 10):
+                                g.BI_FLAGS[L] = g.BI_FLAGS[L] | FLAGS;
+                                L = -1;
                             else: 
-                                L=L-1;
-                        if L==0:
+                                L = L - 1;
+                        if L == 0:
                             SUBSET_ERROR(2);
-            elif A_TOKEN=='$PRODUCTIONS':
+            elif A_TOKEN == '$PRODUCTIONS':
                 while I:
                     gt2 = GET_TOKEN()
                     if gt2 == 0:
@@ -163,9 +164,9 @@ def GET_SUBSET(SUBSET,FLAGS):
                     elif gt2 == 1:
                        SUBSET_ERROR(1);
                     elif gt2 == 2 or gt2 == 3:
-                        L=VALUE;
-                        if (L>0)and(L<=Pp):
-                            g.pPRODUCE_NAME[L]= g.pPRODUCE_NAME[L]|SHL(FLAGS,12);
+                        L = VALUE;
+                        if (L > 0)and(L <= Pp):
+                            g.pPRODUCE_NAME[L] = g.pPRODUCE_NAME[L] | SHL(FLAGS, 12);
                         else:
                             SUBSET_ERROR(3);
             elif A_TOKEN == '$BITLENGTH':

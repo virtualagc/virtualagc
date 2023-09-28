@@ -49,6 +49,7 @@ from SETXREF import SET_XREF
  /***************************************************************************/
 '''
 
+
 def SET_XREF_RORS(I, J=0, K=0x4000):
     # L is local
     if g.SUBSCRIPT_LEVEL > 0:

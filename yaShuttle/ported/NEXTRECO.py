@@ -36,6 +36,7 @@ import g
  /***************************************************************************/
 '''
 
+
 def NEXT_RECORD():
     # There are no locals.
     if g.LOOKED_RECORD_AHEAD:
@@ -51,7 +52,7 @@ def NEXT_RECORD():
             else:
                 g.CURRENT_CARD = INPUT(g.INPUT_DEV)[:];
                 pass
-    else: # NOT INCLUDE
+    else:  # NOT INCLUDE
         if g.SYSIN_COMPRESSED:
             g.CURRENT_CARD = g.DECOMPRESS(0)[:];
             pass

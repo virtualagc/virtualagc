@@ -139,6 +139,7 @@ outputDevices[9] = {
 def SHL(a, b):
     return a << b
 
+
 def SHR(a, b):
     return a >> b
 

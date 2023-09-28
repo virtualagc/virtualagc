@@ -36,6 +36,7 @@ import g
  /***************************************************************************/
 '''
 
+
 def HEX(NUM, WIDTH):
     # The only local, CHAR_TEMP, requires no persistence.
     CHAR_TEMP = ''

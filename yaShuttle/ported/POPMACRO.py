@@ -31,10 +31,11 @@ from SETXREF import SET_XREF
  /***************************************************************************/
 '''
 
+
 def POP_MACRO_XREF():
     # Local I doesn't require persistence.
     
-    for I in range(0, g.MAC_CTR+1):
-        SET_XREF(g.MAC_XREF[I],g.XREF_REF);
-    g.MAC_CTR=-1;
+    for I in range(0, g.MAC_CTR + 1):
+        SET_XREF(g.MAC_XREF[I], g.XREF_REF);
+    g.MAC_CTR = -1;
     return;

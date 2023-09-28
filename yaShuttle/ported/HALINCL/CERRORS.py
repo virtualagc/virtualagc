@@ -26,7 +26,9 @@ from CHARINDE import CHAR_INDEX
 #*********************************************************
 '''
 
+
 class cCOMMON_ERRORS:
+
     def __init__(self):
         self.ERRORFILE = 5;
         self.SEVERITY = 0;
@@ -40,7 +42,11 @@ class cCOMMON_ERRORS:
         self.AST = '***** ';
         self.DOWN_COUNT = 0
         self.FOUND = 0;
+
+
 lCOMMON_ERRORS = cCOMMON_ERRORS()
+
+
 def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
     l = lCOMMON_ERRORS
     
@@ -49,13 +55,13 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
     l.TEMP_STMT = STMTp;
     l.DOWN_COUNT = 1;
     while True:
-        l.C=SUBSTR(d.ERROR_CLASSES,(CLASS-1)<<1,2);
-        if BYTE(l.C,1)==BYTE(' '):
-            l.C=SUBSTR(l.C,0,1);
-        l.C=PAD(l.C+str(NUM),8);
-        if MONITOR(2,5,l.C):
-           CLASS=d.CLASS_BX;
-           NUM=113;
+        l.C = SUBSTR(d.ERROR_CLASSES, (CLASS - 1) << 1, 2);
+        if BYTE(l.C, 1) == BYTE(' '):
+            l.C = SUBSTR(l.C, 0, 1);
+        l.C = PAD(l.C + str(NUM), 8);
+        if MONITOR(2, 5, l.C):
+           CLASS = d.CLASS_BX;
+           NUM = 113;
            TEXT = l.C;
         else:
             break
@@ -68,33 +74,33 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
             if l.TEMP_STMT == DWN_STMT(l.DOWN_COUNT):
                 if l.SEVERITY == 1:
                     l.SEVERITY = 0;
-                    OUTPUT(0, AST + ' THE FOLLOWING ERROR WAS DOWNGRADED FROM A '+\
-                             'SEVERITY ONE ERROR TO A SEVERITY ZERO ERROR '+AST);
+                    OUTPUT(0, AST + ' THE FOLLOWING ERROR WAS DOWNGRADED FROM A ' + \
+                             'SEVERITY ONE ERROR TO A SEVERITY ZERO ERROR ' + AST);
                     l.FOUND = 1;
                     # NOTE THAT THE ERROR WAS DOWNGRADED SUCCESSFULLY  
                     DWN_VER(l.DOWN_COUNT, '1');
             else:
-                OUTPUT(0, AST + ' AN ATTEMPT WAS MADE TO DOWNGRADE AN ' +
-                           'ERROR OTHER THAN A SEVERITY ONE ERROR ' +
+                OUTPUT(0, AST + ' AN ATTEMPT WAS MADE TO DOWNGRADE AN ' + 
+                           'ERROR OTHER THAN A SEVERITY ONE ERROR ' + 
                            'REMOVE DOWNGRADE DIRECTIVE AND RECOMPILE ' + AST);
                 l.SEVERITY = 2;
                 l.FOUND = 1;
         l.DOWN_COUNT = l.DOWN_COUNT + 1;
     OUTPUT(1, '0' + AST + l.C + ' ERROR #' + str(ERRORp) + ' OF SEVERITY ' + \
-                  str(l.SEVERITY) + ' OCCURRED ' + AST );
-    OUTPUT(0, AST + ' DURING CONVERSION OF HAL/S STATEMENT ' +
+                  str(l.SEVERITY) + ' OCCURRED ' + AST);
+    OUTPUT(0, AST + ' DURING CONVERSION OF HAL/S STATEMENT ' + 
                 str(STMTp()) + '.' + AST);
     l.S = INPUT(l.ERRORFILE);
     if LENGTH(TEXT) > 0:
-        l.IMBED=g.TRUE;
-    while LENGTH(l.S)>0:
+        l.IMBED = g.TRUE;
+    while LENGTH(l.S) > 0:
         if l.IMBED:
-            l.K = CHAR_INDEX(l.S,'??');
+            l.K = CHAR_INDEX(l.S, '??');
             if l.K >= 0:
                 if l.K == 0:
-                    l.S = TEXT + SUBSTR(l.S,2);
+                    l.S = TEXT + SUBSTR(l.S, 2);
                 else:
-                    l.S = SUBSTR(l.S,0,l.K) + TEXT + SUBSTR(l.S,l.K+2);
+                    l.S = SUBSTR(l.S, 0, l.K) + TEXT + SUBSTR(l.S, l.K + 2);
                 l.IMBED = g.FALSE;
         OUTPUT(0, AST + l.S);
         l.S = INPUT(l.ERRORFILE);

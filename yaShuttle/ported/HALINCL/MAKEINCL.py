@@ -12,6 +12,7 @@ History:    2023-08-31 RSB  Made a stub
 from xplBuiltins import *
 import g
 
+
 def MAKE_INCL_CELL(NAME, FLAGS, REV_CAT):
     # MAKE AN ENTRY IN THE VMEM INCLUDE CELL CHAIN
 

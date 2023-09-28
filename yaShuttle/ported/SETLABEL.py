@@ -58,6 +58,7 @@ from ERROR import ERROR
  /***************************************************************************/
 '''
 
+
 def SET_LABEL_TYPE(LOC, NEWTYPE):
     # Locals are OLDTYPE, I, J; neither locals nor parameters need persistence.
     
@@ -70,7 +71,7 @@ def SET_LABEL_TYPE(LOC, NEWTYPE):
             #  STATEMENT LABEL
             if OLDTYPE > g.UNSPEC_LABEL or goto_LABEL_TYPE_CONFLICT:
                 goto_LABEL_TYPE_CONFLICT = False
-                ERROR(d.CLASS_DT,3,g.SYT_NAME(LOC));
+                ERROR(d.CLASS_DT, 3, g.SYT_NAME(LOC));
             if g.EXTERNAL_MODE != 0: 
                 g.SYT_TYPE(LOC, 0);
             else:
@@ -92,11 +93,11 @@ def SET_LABEL_TYPE(LOC, NEWTYPE):
                         I = g.SYT_PTR(I);
                     elif g.SYT_TYPE(I) == g.PROC_LABEL:
                         g.SYT_TYPE(I, g.IND_CALL_LAB);
-                        break # GO TO LINKUP;
+                        break  # GO TO LINKUP;
                 # LINKUP:
                 g.SYT_PTR(J, LOC);  # LINK I-CALLS TO REAL DEFINITION
-                if g.SYT_LINK1(J)>0: 
-                    if g.DO_LEVEL>0:
+                if g.SYT_LINK1(J) > 0: 
+                    if g.DO_LEVEL > 0:
                         if g.DO_STMTp[g.DO_LEVEL] > g.SYT_LINK1(J):
                             ERROR(d.CLASS_PL, 10);
                 if g.SYT_LINK1(LOC) >= 0: 

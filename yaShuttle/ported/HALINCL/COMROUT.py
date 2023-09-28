@@ -28,6 +28,7 @@ PAD:
       ELSE RETURN STRING || SUBSTR(X72, 72 + L - WIDTH);
    END PAD;
 '''
+
    
 def CHAR_INDEX(STRING1, STRING2):
     # Locals are L1, L2, I.

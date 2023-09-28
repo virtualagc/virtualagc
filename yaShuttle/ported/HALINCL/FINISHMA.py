@@ -15,12 +15,14 @@ import HALINCL.COMMON as h
 import HALINCL.VMEM2 as v
 from HALINCL.SPACELIB import NEXT_ELEMENT
 
+
 # I doubt if any of the local variables in FINISH_MACRO_TEXT *need* to be 
 # persistent, but it's tricky to tell at a glance.  So I'll just make them
 # all persistent, which is the safest thing to do in XPL
 class cFINISH_MACRO_TEXT:
+
     def __init__(self):
-        self.NODE_F = [] # Array of integer.
+        self.NODE_F = []  # Array of integer.
         self.ARG_FLAG = 0
         self.NEXT_CELL_PTR = 0
         self.TEXT_PTR = 0
@@ -28,29 +30,32 @@ class cFINISH_MACRO_TEXT:
         self.CELLSIZE = 0
         self.TEXT_SIZE = 0
         self.II = 0
+
+
 lFINISH_MACRO_TEXT = cFINISH_MACRO_TEXT()
 
+
 def FINISH_MACRO_TEXT():
-    l = lFINISH_MACRO_TEXT # All local variables
+    l = lFINISH_MACRO_TEXT  # All local variables
     
     # ROUTINE TO PUT TERMINATION CHARACTERS ONTO END OF REPLACE
     # MACRO TEXT, AND (IF SIMULATING) MOVE THE MACRO TEXT TO
     # VIRTUAL MEMORY
     if g.FIRST_FREE() != 0:
-        l.II = g.MACRO_TEXT(g.FIRST_FREE()-1);
-        if (g.MACRO_TEXT(g.FIRST_FREE()-2)==BYTE(')') and l.II==BYTE('`')) \
-                or l.II==BYTE(')') or g.MACRO_ARG_COUNT>0:
+        l.II = g.MACRO_TEXT(g.FIRST_FREE() - 1);
+        if (g.MACRO_TEXT(g.FIRST_FREE() - 2) == BYTE(')') and l.II == BYTE('`')) \
+                or l.II == BYTE(')') or g.MACRO_ARG_COUNT > 0:
             NEXT_ELEMENT(g.MACRO_TEXTS);
             NEXT_ELEMENT(g.MACRO_TEXTS);
             g.MACRO_TEXT(g.FIRST_FREE(), 0xEE);
-            g.MACRO_TEXT(g.FIRST_FREE()+1, 0);
-            g.FIRST_FREE(g.FIRST_FREE()+2);
+            g.MACRO_TEXT(g.FIRST_FREE() + 1, 0);
+            g.FIRST_FREE(g.FIRST_FREE() + 2);
     g.MACRO_TEXT(g.FIRST_FREE(), 0xEF);
     if g.SIMULATING > 0:
-        if g.MACRO_TEXT(g.FIRST_FREE()-2)==0xEE and \
-                g.MACRO_TEXT(g.FIRST_FREE()-1)==0:
-            l.TEXT_SIZE = (g.FIRST_FREE() - 2 ) - g.START_POINT;
-            l.TEXT_PTR = (g.FIRST_FREE()-2) - g.MACRO_CELL_LIM;
+        if g.MACRO_TEXT(g.FIRST_FREE() - 2) == 0xEE and \
+                g.MACRO_TEXT(g.FIRST_FREE() - 1) == 0:
+            l.TEXT_SIZE = (g.FIRST_FREE() - 2) - g.START_POINT;
+            l.TEXT_PTR = (g.FIRST_FREE() - 2) - g.MACRO_CELL_LIM;
             if g.MACRO_ARG_COUNT > 0: 
                 l.ARG_FLAG = 0x80000000;
             else:
@@ -59,31 +64,31 @@ def FINISH_MACRO_TEXT():
             l.TEXT_SIZE = g.FIRST_FREE() - g.START_POINT;
             l.TEXT_PTR = g.FIRST_FREE() - g.MACRO_CELL_LIM;
             l.ARG_FLAG = 0;
-        if l.TEXT_SIZE<0: 
+        if l.TEXT_SIZE < 0: 
             l.TEXT_SIZE = 0;
         l.NEXT_CELL_PTR = -1;
         while l.TEXT_SIZE >= g.MACRO_CELL_LIM:
             l.CELLSIZE = g.MACRO_CELL_LIM;
-            if g.MACRO_TEXT(l.TEXT_PTR-1) == 0xEE:
+            if g.MACRO_TEXT(l.TEXT_PTR - 1) == 0xEE:
                 l.TEXT_PTR = l.TEXT_PTR + 1;
                 l.CELLSIZE = l.CELLSIZE - 1;
-            g.REPLACE_TEXT_PTR = GET_CELL(l.CELLSIZE+6,ADDR(l.NODE_F),v.MODF);
+            g.REPLACE_TEXT_PTR = GET_CELL(l.CELLSIZE + 6, ADDR(l.NODE_F), v.MODF);
             l.NODE_F[0] = l.NEXT_CELL_PTR;
-            l.NODE_F[1] = SHL(l.CELLSIZE,16);
+            l.NODE_F[1] = SHL(l.CELLSIZE, 16);
             g.MACRO_BYTES(g.MACRO_BYTES() + g.MACRO_CELL_LIM);
-            MOVE(l.CELLSIZE,ADDR(g.MACRO_TEXT(l.TEXT_PTR)), v.VMEM_LOC_ADDR+6);
+            MOVE(l.CELLSIZE, ADDR(g.MACRO_TEXT(l.TEXT_PTR)), v.VMEM_LOC_ADDR + 6);
             l.NEXT_CELL_PTR = g.REPLACE_TEXT_PTR;
             l.TEXT_PTR = l.TEXT_PTR - g.MACRO_CELL_LIM;
             l.TEXT_SIZE = l.TEXT_SIZE - l.CELLSIZE;
         if l.TEXT_SIZE > 0:
-            g.REPLACE_TEXT_PTR=GET_CELL(l.TEXT_SIZE+6,ADDR(l.NODE_F),v.MODF);
+            g.REPLACE_TEXT_PTR = GET_CELL(l.TEXT_SIZE + 6, ADDR(l.NODE_F), v.MODF);
             l.NODE_F[0] = l.NEXT_CELL_PTR;
-            l.NODE_F[1] = SHL(l.TEXT_SIZE,16);
+            l.NODE_F[1] = SHL(l.TEXT_SIZE, 16);
             l.NEXT_CELL_PTR = g.REPLACE_TEXT_PTR;
-            g.MACRO_BYTES(g.MACRO_BYTES()+((l.TEXT_SIZE+3)&0xFFFC));
-            MOVE(l.TEXT_SIZE,ADDR(g.MACRO_TEXT(g.START_POINT)), \
+            g.MACRO_BYTES(g.MACRO_BYTES() + ((l.TEXT_SIZE + 3) & 0xFFFC));
+            MOVE(l.TEXT_SIZE, ADDR(g.MACRO_TEXT(g.START_POINT)), \
                  v.VMEM_LOC_ADDR + 6);
-        g.REPLACE_TEXT_PTR = GET_CELL(8,ADDR(l.NODE_F),v.MODF);
+        g.REPLACE_TEXT_PTR = GET_CELL(8, ADDR(l.NODE_F), v.MODF);
         l.NODE_F[0] = l.NEXT_CELL_PTR;
         l.NODE_F[1] = 0xFFFF0000 + l.BLANK_BYTES;
         g.REPLACE_TEXT_PTR = g.REPLACE_TEXT_PTR | l.ARG_FLAG;

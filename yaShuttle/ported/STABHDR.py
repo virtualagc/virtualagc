@@ -62,12 +62,17 @@ import g
  /***************************************************************************/
 '''
 
+
 class cSTAB_HDR:
+
     def __init__(self):
         self.FIRST_CALL = 1
         self.NODE_H = []
         self.NODE_F = []
+
+
 lSTAB_HDR = cSTAB_HDR()
+
 
 def STAB_HDR():
     

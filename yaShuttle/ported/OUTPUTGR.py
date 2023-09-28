@@ -36,6 +36,7 @@ from PRINT2 import PRINT2
  /***************************************************************************/
 '''
 
+
 def OUTPUT_GROUP():
     # There are no locals.
     if g.NEXT < 0:
@@ -43,7 +44,7 @@ def OUTPUT_GROUP():
     if g.LISTING2_COUNT + g.NEXT + 2 > g.LINE_LIM:
         g.LISTING2_COUNT = g.LINE_LIM;
     PRINT2(g.DOUBLE + g.SAVE_GROUP[0] + g.X1 + g.CURRENT_SCOPE, 2);
-    for g.I in range(1, g.NEXT+1):
+    for g.I in range(1, g.NEXT + 1):
         PRINT2(g.X1 + g.SAVE_GROUP[g.I] + g.X1 + g.CURRENT_SCOPE, 1);
     if g.TOO_MANY_LINES:
         PRINT2(' *** WARNING *** INPUT BUFFER FILLED; NOT ALL SOURCE LINES ARE PRINTED.', 1);

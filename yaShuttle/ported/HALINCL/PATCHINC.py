@@ -21,23 +21,29 @@ from HALINCL.MAKEINCL import MAKE_INCL_CELL
    /* RETURNS TRUE IF TEMPLATE IS TO BE PROCESSED, FALSE OTHERWISE. */
 '''
 
+
 class cINCLUDE_OK:
+
     def __init__(self):
         self.INCL_FLAGS = 0
         self.LIST_FLAG = 0
         self.SDF_FLAG = 0
+
+
 lINCLUDE_OK = cINCLUDE_OK()
+
+
 def INCLUDE_OK():
     l = lINCLUDE_OK
     
     if g.INCLUDING:
-        ERROR(d.CLASS_XI,1);
+        ERROR(d.CLASS_XI, 1);
         return g.FALSE;
     l.INCL_FLAGS = 0;
     g.C[0] = D_TOKEN();
     g.TEMPLATE_FLAG = g.FALSE
     l.SDF_FLAG = g.FALSE;
-    if g.C[0]  == 'TEMPLATE':
+    if g.C[0] == 'TEMPLATE':
         l.SDF_FLAG = g.TRUE
         g.TEMPLATE_FLAG = g.TRUE;
         l.INCL_FLAGS = l.INCL_FLAGS | g.INCL_TEMPLATE_FLAG;
@@ -48,7 +54,7 @@ def INCLUDE_OK():
     else:
         g.MEMBER = g.C[0];
     if LENGTH(g.MEMBER) == 0:
-        ERROR(d.CLASS_XI,2);
+        ERROR(d.CLASS_XI, 2);
         return g.FALSE;
     g.C[0] = D_TOKEN();
     l.LIST_FLAG = g.TRUE;
@@ -85,17 +91,17 @@ def INCLUDE_OK():
         g.MEMBER = PAD(g.MEMBER, 8);
     else:
         g.MEMBER = SUBSTR(g.MEMBER, 0, 8);
-    if FINDER(4, g.MEMBER, 0): # FIND THE MEMBER
-        ERROR(d.CLASS_XI,3,g.MEMBER);
+    if FINDER(4, g.MEMBER, 0):  # FIND THE MEMBER
+        ERROR(d.CLASS_XI, 3, g.MEMBER);
         return g.FALSE;
     if g.TEMPLATE_FLAG:
-        g.COMPARE_SOURCE=g.FALSE;
+        g.COMPARE_SOURCE = g.FALSE;
         # SAVE CURRENT STMT NUMBER FOR 'INCLUDE TEMPLATE NOSDF'
         g.INCLUDE_STMT = g.STMT_NUM();
-    l.INCL_FLAGS = l.INCL_FLAGS | SHL(0x1,SHR(g.INCLUDE_FILEp,1));
+    l.INCL_FLAGS = l.INCL_FLAGS | SHL(0x1, SHR(g.INCLUDE_FILEp, 1));
     g.REV_CAT = MONITOR(15);
     g.INCLUDE_MSG = ' OF INCLUDED MEMBER, RVL ' \
-                    + STRING(0x01000000 | ADDR(g.REV_CAT)) + \
+                    +STRING(0x01000000 | ADDR(g.REV_CAT)) + \
                     ', CATENATION NUMBER ' + (g.REV_CAT & 0xFFFF);
     g.INCLUDE_LIST = l.LIST_FLAG
     g.INCLUDE_LIST2 = l.LIST_FLAG;

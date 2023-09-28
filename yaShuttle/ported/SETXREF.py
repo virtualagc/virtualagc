@@ -49,20 +49,21 @@ from HALINCL.ENTERXRE import ENTER_XREF
  /***************************************************************************/
 '''
 
+
 def SET_XREF(LOC, FLAG, FLAG2=0):
     # There are no local variables.
     
-    if LOC>0:     # FILTERS FIXV OF NON-STRUCTS
-        if FLAG2==0:
-            if FLAG==XREF_SUBSCR: 
-                FLAG2=XREF_REF;
+    if LOC > 0:  # FILTERS FIXV OF NON-STRUCTS
+        if FLAG2 == 0:
+            if FLAG == XREF_SUBSCR: 
+                FLAG2 = XREF_REF;
             else:
-                FLAG2=FLAG;
-        if (SYT_TYPE(LOC)==IND_CALL_LAB) or \
-                ((SYT_TYPE(LOC)==PROC_LABEL or SYT_TYPE(LOC)== STMT_LABEL or \
-                  SYT_TYPE(LOC)==TASK_LABEL) and SYT_FLAGS(LOC)!=DEFINED_LABEL):
+                FLAG2 = FLAG;
+        if (SYT_TYPE(LOC) == IND_CALL_LAB) or \
+                ((SYT_TYPE(LOC) == PROC_LABEL or SYT_TYPE(LOC) == STMT_LABEL or \
+                  SYT_TYPE(LOC) == TASK_LABEL) and SYT_FLAGS(LOC) != DEFINED_LABEL):
             g.NO_NEW_XREF = TRUE;
-        SYT_XREF(LOC, ENTER_XREF(SYT_XREF(LOC),FLAG));
+        SYT_XREF(LOC, ENTER_XREF(SYT_XREF(LOC), FLAG));
         if g.NO_NEW_XREF: 
             g.NO_NEW_XREF = FALSE;
         goto_ENTER_OUTER_REF = False
@@ -72,4 +73,4 @@ def SET_XREF(LOC, FLAG, FLAG2=0):
             goto_ENTER_OUTER_REF = False
             if FLAG2 != 0:
                 SET_OUTER_REF(LOC, FLAG2);
-    FLAG2=0;
+    FLAG2 = 0;

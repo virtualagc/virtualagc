@@ -13,6 +13,7 @@ import g
 import HALINCL.CERRDECL as d
 from ERROR import ERROR
 
+
 def SET_DUPL_FLAG(DUPL_TERM):
     # J is local.
     J = DUPL_TERM;

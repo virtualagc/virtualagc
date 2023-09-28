@@ -44,10 +44,11 @@ from HALMAT import HALMAT
  /***************************************************************************/
 '''
 
-def HALMAT_POP(POPCODE,PIPp,COPT,TAG):
+
+def HALMAT_POP(POPCODE, PIPp, COPT, TAG):
     # thearameters don't require persistence.
     # There are no locals.
-    g.CURRENT_ATOM=SHL(TAG,24)|SHL(PIPp,16)|SHL(POPCODE&0xFFF,4)| \
-                        SHL(COPT&0x7,1);
+    g.CURRENT_ATOM = SHL(TAG, 24) | SHL(PIPp, 16) | SHL(POPCODE & 0xFFF, 4) | \
+                        SHL(COPT & 0x7, 1);
     HALMAT();
-    g.LAST_POPp=g.NEXT_ATOMp-1;
+    g.LAST_POPp = g.NEXT_ATOMp - 1;

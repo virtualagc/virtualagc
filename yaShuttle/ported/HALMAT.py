@@ -45,17 +45,18 @@ from HALMATOU import HALMAT_OUT
  /***************************************************************************/
 '''
 
+
 def HALMAT():
     # No locals and no parameters.
     if g.CONTROL[0]: 
-        HALMAT_BLAB(g.CURRENT_ATOM,g.NEXT_ATOMp);
+        HALMAT_BLAB(g.CURRENT_ATOM, g.NEXT_ATOMp);
     if g.HALMAT_OK:
         if g.NEXT_ATOMp == g.ATOMp_LIM: 
             HALMAT_OUT();
-        if g.NEXT_ATOMp==(g.ATOMp_FAULT - 1):
-            ERROR(d.CLASS_BB,1);
-            g.HALMAT_OK=g.FALSE;
-            g.HALMAT_CRAP=g.TRUE;
+        if g.NEXT_ATOMp == (g.ATOMp_FAULT - 1):
+            ERROR(d.CLASS_BB, 1);
+            g.HALMAT_OK = g.FALSE;
+            g.HALMAT_CRAP = g.TRUE;
         else:
             g.ATOMS(NEXT_ATOMp, g.CURRENT_ATOM);
-            g.NEXT_ATOMp=g.NEXT_ATOMp+1;
+            g.NEXT_ATOMp = g.NEXT_ATOMp + 1;

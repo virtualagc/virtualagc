@@ -41,6 +41,7 @@ from ERROR import ERROR
  /***************************************************************************/
 '''
 
+
 def ORDER_OK(TYPE):
     # There are no locals (from XPL).
     
@@ -48,7 +49,7 @@ def ORDER_OK(TYPE):
     ctt = g.CARD_TYPE[TYPE]
     if ctc == 0:
         #  CASE 0 -- ILLEGAL CARD TYPES  
-        ERROR(d.CLASS_M,1);
+        ERROR(d.CLASS_M, 1);
         g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'))
         pass
         # Note fallthrough.

@@ -14,7 +14,8 @@ import g
 import HALINCL.CERRDECL as d
 from ERROR import ERROR
 
-def SAVE_LITERAL(TYPE,VAL,SIZE=0,CMPOOL=0):
+
+def SAVE_LITERAL(TYPE, VAL, SIZE=0, CMPOOL=0):
     '''
     LIT_TOP=LIT_TOP+1;
     if LIT_TOP=LIT_TOP_MAX:

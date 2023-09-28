@@ -14,9 +14,12 @@ from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
 from ERROR    import ERROR
+from GETICQ   import GET_ICQ
+from GETLITER import GET_LITERAL
 from HALMATPI import HALMAT_PIP
 from HALMATPO import HALMAT_POP
 from HOWTOINI import HOW_TO_INIT_ARGS
+from ICQCHECK import ICQ_CHECK_TYPE
 from ICQOUTPU import ICQ_OUTPUT
 
 '''
@@ -131,7 +134,7 @@ def HALMAT_INIT_CONST ():
             ICQ_OUTPUT();
         else: 
             I = GET_ICQ(g.INX[g.ICQ] + 1);
-            while IC_FORM(I) != 2:
+            while g.IC_FORM[I] != 2:
                 g.INX[g.ICQ] = g.INX[g.ICQ] + 1;
                 I = GET_ICQ(g.INX[g.ICQ] + 1);
             
@@ -139,9 +142,9 @@ def HALMAT_INIT_CONST ():
             if MULTI_VALUED() > 0: 
                 goto_NON_EVALUABLE = True
             else:
-                sf = ((SYT_FLAGS(g.ID_LOC) & CONSTANT_FLAG) != 0)
+                sf = ((g.SYT_FLAGS(g.ID_LOC) & g.CONSTANT_FLAG) != 0)
                 if sf:
-                    if IC_LEN(I) != XLIT: 
+                    if g.IC_LEN[I] != g.XLIT: 
                         goto_NON_EVALUABLE = True
                     else:
                         ICQ_CHECK_TYPE(I);
@@ -169,9 +172,9 @@ def HALMAT_INIT_CONST ():
                                 g.SYT_PTR(g.ID_LOC, -g.IC_LOC[I]);
             if goto_NON_EVALUABLE or not sf:  # Was just ELSE
                 goto_NON_EVALUABLE = False
-                HALMAT_POP(ICQ_CHECK_TYPE(I, 1), 2, 0, IC_TYPE(I));
+                HALMAT_POP(ICQ_CHECK_TYPE(I, 1), 2, 0, g.IC_TYPE[I]);
                 HALMAT_PIP(g.ID_LOC, g.XSYT, 0, 0);
-                HALMAT_PIP(g.IC_LOC[I], IC_LEN[I], 0, 0);
+                HALMAT_PIP(g.IC_LOC[I], g.IC_LEN[I], 0, 0);
                 ICQ_ARRAYNESS_OUTPUT();
     elif howto == 2:
         #  CASE 2,  MATCHES TERMINAL NUMBER

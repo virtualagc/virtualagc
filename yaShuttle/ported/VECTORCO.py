@@ -37,6 +37,7 @@ from ERROR import ERROR
  /***************************************************************************/
 '''
 
-def VECTOR_COMPARE(I,J,CLASS,NUM):
-    if g.PSEUDO_LENGTH[g.PTR[I]]!=g.PSEUDO_LENGTH[g.PTR[J]]:
-        ERROR(d.CLASS,NUM);
+
+def VECTOR_COMPARE(I, J, CLASS, NUM):
+    if g.PSEUDO_LENGTH[g.PTR[I]] != g.PSEUDO_LENGTH[g.PTR[J]]:
+        ERROR(d.CLASS, NUM);

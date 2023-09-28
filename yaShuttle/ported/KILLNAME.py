@@ -37,6 +37,7 @@ from RESETARR import RESET_ARRAYNESS
  /***************************************************************************/
 '''
 
+
 def KILL_NAME(LOC):
     if g.NAME_PSEUDOS:
        if (g.VAL_P[g.PTR[LOC]] & 0x400) == 0:

@@ -23,23 +23,29 @@ from HALINCL.PRINTCOM import PRINT_COMMENT
    /* D_TOKEN RETURNS THE TOKEN FOUND                              */
 '''
 
+
 class cD_TOKEN:
+
     def __init__(self):
         self.I = 0
         self.J = 0
         self.pSPECIALS = 3
         self.SPECIALS = ' ,:;'
+
+
 lD_TOKEN = cD_TOKEN()
+
+
 def D_TOKEN():
     l = lD_TOKEN
     
     while True:
-        while (BYTE(g.CURRENT_CARD,g.D_INDEX) == BYTE(' ')) and \
+        while (BYTE(g.CURRENT_CARD, g.D_INDEX) == BYTE(' ')) and \
                 (g.D_INDEX <= g.TEXT_LIMIT[0]):
             g.D_INDEX = g.D_INDEX + 1;
         if g.D_INDEX <= g.TEXT_LIMIT[0]:
            break;
-        if g.D_CONTINUATION_OK: # GET NEXT RECORD 
+        if g.D_CONTINUATION_OK:  # GET NEXT RECORD 
             NEXT_RECORD();
             if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] != g.CARD_TYPE[BYTE('D')]:
                 g.LOOKED_RECORD_AHEAD = g.TRUE;
@@ -51,13 +57,13 @@ def D_TOKEN():
             continue;
         else:
             return '';
-    for l.I in range(1, l.pSPECIALS+1):
-        if BYTE(g.CURRENT_CARD, g.D_INDEX)== BYTE(l.SPECIALS, l.I):
+    for l.I in range(1, l.pSPECIALS + 1):
+        if BYTE(g.CURRENT_CARD, g.D_INDEX) == BYTE(l.SPECIALS, l.I):
             g.D_INDEX = g.D_INDEX + 1;
-            return SUBSTR(g.CURRENT_CARD, g.D_INDEX-1, 1);
+            return SUBSTR(g.CURRENT_CARD, g.D_INDEX - 1, 1);
     l.I = g.D_INDEX;
     while g.D_INDEX <= g.TEXT_LIMIT[0]:
-        for l.J in range(0, l.pSPECIALS+1):
+        for l.J in range(0, l.pSPECIALS + 1):
             if BYTE(g.CURRENT_CARD, g.D_INDEX) == BYTE(l.SPECIALS, l.J):
                 break;
         g.D_INDEX = g.D_INDEX + 1;

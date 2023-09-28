@@ -74,6 +74,7 @@ import g
  *************************************************************************
 '''
 
+
 def SOURCE_COMPARE():
     # The local variables are as follows.  Since SOURCE_COMPARE() is called
     # precisely once, persistence is not an issue.
@@ -134,7 +135,7 @@ def SOURCE_COMPARE():
             if (BYTE(SUBSTR(g.CUR_CARD, 0, 1)) != BYTE('D')) and \
                     (BYTE(SUBSTR(g.CUR_CARD, 0, 1)) != BYTE('C')):
                INCL_NUM = LEFT_PAD('(' + g.PLUS + (g.SRN_COUNT[0] + 1) + ')', 6) \
-                            + g.X1;
+                            +g.X1;
             else:
                INCL_NUM = g.X8;
             if (BYTE(SUBSTR(g.PAT_CARD, 0, 1)) != BYTE('D')) and \
@@ -173,7 +174,7 @@ def SOURCE_COMPARE():
                     SUBSTR(g.X109, DELTA_LEN) + g.DELETED);
                 DELTA_LEN = LENGTH(g.PATCH_CARD) + LENGTH(PATCH_INCL_NUM);
                 g.PATCHSAVE(REPLCNT, 'R' + g.PATCH_SRN + g.X1 + PATCH_INCL_NUM \
-                    + g.PAT_CARD + SUBSTR(g.X109, DELTA_LEN) + g.ADDED);
+                    +g.PAT_CARD + SUBSTR(g.X109, DELTA_LEN) + g.ADDED);
                 REPLCNT = REPLCNT + 1;
                 while RECORD_USED(g.SAVE_PATCH) <= REPLCNT:
                     NEXT_ELEMENT(g.SAVE_PATCH);

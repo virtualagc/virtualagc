@@ -41,18 +41,19 @@ import g
  /***************************************************************************/
 '''
 
+
 def GET_LITERAL(PTR):
     if PTR == 0:
         return 0;
     if PTR >= g.LITORG:
         if PTR < g.LITLIM:
             return PTR - g.LITORG;
-    FILE(g.LITFILE,g.CURLBLK, g.LIT1(0));
-    g.CURLBLK=PTR/g.LIT_BUF_SIZE;
-    g.LITORG=g.CURLBLK*g.LIT_BUF_SIZE;
-    g.LITLIM=g.LITORG+g.LIT_BUF_SIZE;
-    if g.CURLBLK<=g.LITMAX:
-        LIT1(0, FILE(g.LITFILE,g.CURLBLK));
+    FILE(g.LITFILE, g.CURLBLK, g.LIT1(0));
+    g.CURLBLK = PTR / g.LIT_BUF_SIZE;
+    g.LITORG = g.CURLBLK * g.LIT_BUF_SIZE;
+    g.LITLIM = g.LITORG + g.LIT_BUF_SIZE;
+    if g.CURLBLK <= g.LITMAX:
+        LIT1(0, FILE(g.LITFILE, g.CURLBLK));
     else:
-        g.LITMAX=g.LITMAX+1;
+        g.LITMAX = g.LITMAX + 1;
     return PTR - g.LITORG;

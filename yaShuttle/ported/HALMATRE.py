@@ -41,46 +41,47 @@ import g
  /***************************************************************************/
 '''
 
+
 def HALMAT_RELOCATE(D1=None, D4=None):
     # The parameters don't need to be persistent (in fact, they're not even
     # used at all).  Nor do the locals (I, D2, D3).
     I = 0
        
-    def MOVE_BLOCK(START,STOP,DELTA):
+    def MOVE_BLOCK(START, STOP, DELTA):
         # The parameters don't require persistence.
         nonlocal I
-        for I in range(1-STOP, -START + 1):
-            g.ATOMS(DELTA-I, g.ATOMS(-I));
+        for I in range(1 - STOP, -START + 1):
+            g.ATOMS(DELTA - I, g.ATOMS(-I));
     
     # FIRST MOVE CODE 
-    g.HALMAT_RELOCATE_FLAG=g.FALSE;
+    g.HALMAT_RELOCATE_FLAG = g.FALSE;
     if not g.HALMAT_OK: 
         return;
-    if g.ATOMp_FAULT==g.ATOMp_LIM:
-        g.ATOMp_FAULT=0;
+    if g.ATOMp_FAULT == g.ATOMp_LIM:
+        g.ATOMp_FAULT = 0;
         return;
-    D1=g.ATOMp_FAULT-g.NEXT_ATOMp;
-    D2=g.ATOMp_LIM-g.ATOMp_FAULT;
+    D1 = g.ATOMp_FAULT - g.NEXT_ATOMp;
+    D2 = g.ATOMp_LIM - g.ATOMp_FAULT;
     D3 = 2 - g.ATOMp_FAULT;
     D4 = 2;
-    while D1<D2:
-        MOVE_BLOCK(D4,g.NEXT_ATOMp,D1);
-        MOVE_BLOCK(g.ATOMp_FAULT,g.ATOMp_FAULT+D1,D3);
-        D4=D4+D1;
-        D2=D2-D1;
-        g.NEXT_ATOMp=g.NEXT_ATOMp+D1;
-        g.ATOMp_FAULT=g.ATOMp_FAULT+D1;
-    MOVE_BLOCK(D4,g.NEXT_ATOMp,D2);
-    MOVE_BLOCK(g.ATOMp_FAULT,g.ATOMp_LIM,D3);
-    g.NEXT_ATOMp=g.NEXT_ATOMp+D2;
-    g.ATOMp_FAULT = 2;    # NOW RELOCATE VACS
-    D3=SHL(-D3,16);
-    D2 = SHL(D2 + D4 - g.ATOMp_FAULT,16);
+    while D1 < D2:
+        MOVE_BLOCK(D4, g.NEXT_ATOMp, D1);
+        MOVE_BLOCK(g.ATOMp_FAULT, g.ATOMp_FAULT + D1, D3);
+        D4 = D4 + D1;
+        D2 = D2 - D1;
+        g.NEXT_ATOMp = g.NEXT_ATOMp + D1;
+        g.ATOMp_FAULT = g.ATOMp_FAULT + D1;
+    MOVE_BLOCK(D4, g.NEXT_ATOMp, D2);
+    MOVE_BLOCK(g.ATOMp_FAULT, g.ATOMp_LIM, D3);
+    g.NEXT_ATOMp = g.NEXT_ATOMp + D2;
+    g.ATOMp_FAULT = 2;  # NOW RELOCATE VACS
+    D3 = SHL(-D3, 16);
+    D2 = SHL(D2 + D4 - g.ATOMp_FAULT, 16);
     for I in range(2, g.NEXT_ATOMp):
-        D4=SHR(g.ATOMS(I)&0xF0,4);
+        D4 = SHR(g.ATOMS(I) & 0xF0, 4);
         if g.ATOMS(I): 
-            if (D4==g.XVAC) or (D4==g.XXPT):
-                if g.ATOMS(I)>=D3:
-                    g.ATOMS(I, g.ATOMS(I)-D3);
+            if (D4 == g.XVAC) or (D4 == g.XXPT):
+                if g.ATOMS(I) >= D3:
+                    g.ATOMS(I, g.ATOMS(I) - D3);
                 else:
-                    g.ATOMS(I, g.ATOMS(I)+D2);
+                    g.ATOMS(I, g.ATOMS(I) + D2);

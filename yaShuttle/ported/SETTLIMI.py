@@ -34,15 +34,16 @@ from ERROR import ERROR
  /***************************************************************************/
 '''
 
+
 def SET_T_LIMIT(LRECL):
     # T_LIMIT is the only local, and requires no persistence.
     
-    if LRECL<0:
+    if LRECL < 0:
         ERROR(d.CLASS_B, 3);
     if g.SDL_OPTION:
-        T_LIMIT=71;
+        T_LIMIT = 71;
     else:
-        T_LIMIT=LRECL;
+        T_LIMIT = LRECL;
         if g.SRN_PRESENT:
-            T_LIMIT=T_LIMIT-8;
+            T_LIMIT = T_LIMIT - 8;
     return T_LIMIT

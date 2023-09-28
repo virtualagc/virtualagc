@@ -44,32 +44,37 @@ import g
  /***************************************************************************/
 '''
 
+
 class cHALMAT_OUT:
+
     def __init__(self):
         self.SAVE_ATOM = None
+
+
 lHALMAT_OUT = cHALMAT_OUT()
+
 
 def HALMAT_OUT():
     # Local I doesn't need to be persistent.
     # Local SAVE_ATOM appears to require persistence.
     l = lHALMAT_OUT
     
-    if g.ATOMp_FAULT<0: 
-        g.ATOMp_FAULT=g.NEXT_ATOMp-1;    # FINAL BLOCK
+    if g.ATOMp_FAULT < 0: 
+        g.ATOMp_FAULT = g.NEXT_ATOMp - 1;  # FINAL BLOCK
     else:
         g.NEXT_ATOMp = 2;
         if g.HALMAT_RELOCATE_FLAG: 
-            return;    # BACKUP OVER WRAPAROUND
-        l.SAVE_ATOM=g.ATOMS(g.ATOMp_FAULT);
-        g.ATOMS(g.ATOMp_FAULT, SHL(g.XXREC,4));
+            return;  # BACKUP OVER WRAPAROUND
+        l.SAVE_ATOM = g.ATOMS(g.ATOMp_FAULT);
+        g.ATOMS(g.ATOMp_FAULT, SHL(g.XXREC, 4));
     g.ATOMS(1, SHL(g.ATOMp_FAULT, 16) | 1);  # INSERT PTR TO XREC IN XPXRC
     if g.CONTROL[11]: 
         g.EJECT_PAGE();
-        OUTPUT(0, '         *** HALMAT BLOCK '+g.HALMAT_BLOCK+' ***');
+        OUTPUT(0, '         *** HALMAT BLOCK ' + g.HALMAT_BLOCK + ' ***');
         g.DOUBLE_SPACE();
         for I in range(0, g.ATOMp_FAULT + 1):
-            HALMAT_BLAB(g.ATOMS(I),I);
-    FILE(g.HALMAT_FILE,g.HALMAT_BLOCK,g.ATOMS(0));
-    g.HALMAT_BLOCK=g.HALMAT_BLOCK+1;
+            HALMAT_BLAB(g.ATOMS(I), I);
+    FILE(g.HALMAT_FILE, g.HALMAT_BLOCK, g.ATOMS(0));
+    g.HALMAT_BLOCK = g.HALMAT_BLOCK + 1;
     g.ATOMS(g.ATOMp_FAULT, l.SAVE_ATOM);
-    g.HALMAT_RELOCATE_FLAG=g.TRUE;
+    g.HALMAT_RELOCATE_FLAG = g.TRUE;

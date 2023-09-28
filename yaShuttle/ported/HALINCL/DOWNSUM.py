@@ -25,7 +25,9 @@ import HALINCL.DWNTABLE as t
 /***********************************************************/
 '''
 
-class cDOWNGRADE_SUMMARY: # Local variables for the procedure.
+
+class cDOWNGRADE_SUMMARY:  # Local variables for the procedure.
+
     def __init__(self):
         self.I = 0
         self.COUNT = 0
@@ -36,7 +38,10 @@ class cDOWNGRADE_SUMMARY: # Local variables for the procedure.
         self.TEMP3 = ''
         self.END_OF_LIST = 0
         self.SEARCH_FOR_CLS = 0
+
+
 lDOWNGRADE_SUMMARY = cDOWNGRADE_SUMMARY()
+
 
 def DOWNGRADE_SUMMARY():
     l = lDOWNGRADE_SUMMARY
@@ -63,23 +68,23 @@ def DOWNGRADE_SUMMARY():
                     l.COUNT = 0;
                     while l.SEARCH_FOR_CLS == 1:
                         if g.DWN_CLS(l.DOWN_COUNT) == t.ERR_VALUE[l.COUNT]:
-                            l.TEMP_CLS = SUBSTR(t.ERROR_INDEX[l.COUNT],6,2);
+                            l.TEMP_CLS = SUBSTR(t.ERROR_INDEX[l.COUNT], 6, 2);
                             l.SEARCH_FOR_CLS = 0;
                         else:
                             l.COUNT = l.COUNT + 1;
-                    l.TEMP1 = SUBSTR(l.TEMP_CLS,0,1);
-                    l.TEMP2 = SUBSTR(l.TEMP_CLS,1,1);
+                    l.TEMP1 = SUBSTR(l.TEMP_CLS, 0, 1);
+                    l.TEMP2 = SUBSTR(l.TEMP_CLS, 1, 1);
                     if l.TEMP2 == ' ':
                         l.TEMP3 = l.TEMP1 + g.DWN_ERR(l.DOWN_COUNT);
                     else:
                         l.TEMP3 = l.TEMP_CLS + g.DWN_ERR(l.DOWN_COUNT);
-                    OUTPUT(0, '*** ERROR NUMBER '+l.TEMP3+' AT STATEMENT NUMBER '\
-                              + g.DWN_STMT(l.DOWN_COUNT) + ' ***');
+                    OUTPUT(0, '*** ERROR NUMBER ' + l.TEMP3 + ' AT STATEMENT NUMBER '\
+                              +g.DWN_STMT(l.DOWN_COUNT) + ' ***');
                     OUTPUT(0, '*** WAS DOWNGRADED FROM A SEVERITY ONE ERROR TO'\
-                              + ' A SEVERITY ZERO ERROR MESSAGE ***');
+                              +' A SEVERITY ZERO ERROR MESSAGE ***');
                     OUTPUT(0, '  ');
                     OUTPUT(0, '  ');
-                    #SUCCESSFUL DOWNGRADE
+                    # SUCCESSFUL DOWNGRADE
                 else:
                     # SET NOT_DOWNGRADED TO INDICATE THAT THERE WAS AT
                     # LEAST ONE DOWNGRADE NOT USED.
@@ -95,7 +100,7 @@ def DOWNGRADE_SUMMARY():
             OUTPUT(0, '*****  DOWNGRADE DIRECTIVES THAT WERE NOT DOWNGRADED *****');
             OUTPUT(0, '  ');
             OUTPUT(0, '  ');
-            for l.I in range(1, len(h.DOWN_INFO)+1):
+            for l.I in range(1, len(h.DOWN_INFO) + 1):
                 if g.DWN_VER(l.I) != '1':
                     l.DOWN_COUNT = l.I;
                     l.SEARCH_FOR_CLS = 1;
@@ -109,12 +114,12 @@ def DOWNGRADE_SUMMARY():
                     else:
                         while l.SEARCH_FOR_CLS == 1:
                             if g.DWN_CLS(l.DOWN_COUNT) == t.ERR_VALUE[l.COUNT]:
-                                l.TEMP_CLS = SUBSTR(t.ERROR_INDEX[l.COUNT],6,2);
+                                l.TEMP_CLS = SUBSTR(t.ERROR_INDEX[l.COUNT], 6, 2);
                                 l.SEARCH_FOR_CLS = 0;
                             else:
                                 l.COUNT = l.COUNT + 1;
-                        l.TEMP1 = SUBSTR(l.TEMP_CLS,0,1);
-                        l.TEMP2 = SUBSTR(l.TEMP_CLS,1,1);
+                        l.TEMP1 = SUBSTR(l.TEMP_CLS, 0, 1);
+                        l.TEMP2 = SUBSTR(l.TEMP_CLS, 1, 1);
                         if l.TEMP2 == ' ':
                             l.TEMP3 = l.TEMP1 + g.DWN_ERR(l.DOWN_COUNT);
                         else:

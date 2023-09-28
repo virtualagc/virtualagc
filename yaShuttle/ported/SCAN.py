@@ -318,7 +318,7 @@ def SCAN():
         firstTry = True
         while firstTry or goto_VALID_TEST:
             firstTry = False
-            if g.OVER_PUNCH == g.CHAR_OP[0] or goto_VALID_TEST: # LEVEL 1 ESCAPE
+            if g.OVER_PUNCH == g.CHAR_OP[0] or goto_VALID_TEST:  # LEVEL 1 ESCAPE
                 if not goto_VALID_TEST:
                     ll.HOLD_CHAR = g.TRANS_IN[CHAR] & 0xFF;
                 goto_VALID_TEST = False
@@ -331,10 +331,9 @@ def SCAN():
                 ll.HOLD_CHAR = SHR(g.TRANS_IN[CHAR], 8) & 0xFF;  # LEVEL 2 ESCAPE
                 goto_VALID_TEST = True;  # SEE IF IT A LEGAL ESCAPE
                 continue
-            else:   # ILLEGAL OVER PUNCH
+            else:  # ILLEGAL OVER PUNCH
                 ERROR(d.CLASS_MO, 1, HEX(CHAR, 2));
                 return CHAR;  # NO TRANSLATION
-        
 
     def BUILD_BCD():
         # This doesn't much resemble the original XPL, because the original

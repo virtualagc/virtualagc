@@ -13,7 +13,8 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
 
-LAST_EXT_PTR = 1 # Really a local variable of ENTER_DIMS().
+LAST_EXT_PTR = 1  # Really a local variable of ENTER_DIMS().
+
 
 def ENTER_DIMS():
     global LAST_EXT_PTR

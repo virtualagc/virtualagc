@@ -40,6 +40,7 @@ from SAVEDUMP import SAVE_DUMP
  /***************************************************************************/
 '''
 
+
 def STACK_DUMP():
     # Local (LINE) doesn't need to be persistent.
     
@@ -47,7 +48,7 @@ def STACK_DUMP():
         return;  # NO PARTIAL PARSE UNLESS ASKED FOR IN PARM FIELD
     g.STACK_DUMPED = g.TRUE;
     LINE = '***** PARTIAL PARSE TO THIS POINT IS: ';
-    for g.I in range(1, g.SP+1):
+    for g.I in range(1, g.SP + 1):
         if LENGTH(LINE) > 105:
             SAVE_DUMP(LINE);
             LINE = g.X4;

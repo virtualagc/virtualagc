@@ -1205,11 +1205,12 @@ TEMPLATE_CLASS = 7  # DONT REORDER ANY CLASSES
 TPL_LAB_CLASS = 8  # BECAUSE OF SNEAKY
 TPL_FUNC_CLASS = 9  # INDEXING
 
+
 # VAR_CLASS through TPL_FUNC_CLASS are sometimes accessed in the XPL source 
 # as an array called VAR_CLASS() with subscripts of 0 through 7.  I replace 
 # that usage with a function:
 def VAR_CLASSf(cl):
-    if cl == 0:   return VAR_CLASS;
+    if cl == 0: return VAR_CLASS;
     elif cl == 1: return LABEL_CLASS;
     elif cl == 2: return FUNC_CLASS;
     elif cl == 3: return REPL_ARG_CLASS;
@@ -1220,6 +1221,7 @@ def VAR_CLASSf(cl):
     print("Implementation error in VAR_CLASS(CLASS) (CLASS=%d)" % cl, \
           file=sys.stderr)
     sys.exit(1)
+
 
 SCOPEp = 0
 KIN = 0
@@ -1322,7 +1324,8 @@ IC_FND = 0
 N_DIM = 0
 S_ARRAY = [0] * (N_DIM_LIM + 1)
 
-def TYPEf(t, value = None):
+
+def TYPEf(t, value=None):
     global TYPE, BIT_LENGTH, CHAR_LENGTH, MAT_LENGTH, VEC_LENGTH, ATTRIBUTES, \
             ATTRIBUTES2, ATTR_MASK, STRUC_PTR, STRUC_DIM, CLASS, NONHAL, \
             LOCKp, IC_PTR, IC_FND, N_DIM, S_ARRAY
@@ -1331,16 +1334,16 @@ def TYPEf(t, value = None):
               file=sys.stderr)
         sys.exit(1)
     if value == None:
-        if   t == 0:  return TYPE;
-        elif t == 1:  return BIT_LENGTH;
-        elif t == 2:  return CHAR_LENGTH;
-        elif t == 3:  return MAT_LENGTH;
-        elif t == 4:  return VEC_LENGTH;
-        elif t == 5:  return ATTRIBUTES;
-        elif t == 6:  return ATTRIBUTES2;
-        elif t == 7:  return ATTR_MASK;
-        elif t == 8:  return STRUC_PTR;
-        elif t == 9:  return STRUC_DIM;
+        if   t == 0: return TYPE;
+        elif t == 1: return BIT_LENGTH;
+        elif t == 2: return CHAR_LENGTH;
+        elif t == 3: return MAT_LENGTH;
+        elif t == 4: return VEC_LENGTH;
+        elif t == 5: return ATTRIBUTES;
+        elif t == 6: return ATTRIBUTES2;
+        elif t == 7: return ATTR_MASK;
+        elif t == 8: return STRUC_PTR;
+        elif t == 9: return STRUC_DIM;
         elif t == 10: return CLASS;
         elif t == 11: return NONHAL;
         elif t == 12: return LOCKp;
@@ -1348,23 +1351,25 @@ def TYPEf(t, value = None):
         elif t == 14: return IC_FND;
         elif t == 15: return N_DIM;
         return S_ARRAY[t - 16];
-    if   t == 0:  TYPE = value;
-    elif t == 1:  BIT_LENGTH = value;
-    elif t == 2:  CHAR_LENGTH = value;
-    elif t == 3:  MAT_LENGTH = value;
-    elif t == 4:  VEC_LENGTH = value;
-    elif t == 5:  ATTRIBUTES = value;
-    elif t == 6:  ATTRIBUTES2 = value;
-    elif t == 7:  ATTR_MASK = value;
-    elif t == 8:  STRUC_PTR = value;
-    elif t == 9:  STRUC_DIM = value;
+    if   t == 0: TYPE = value;
+    elif t == 1: BIT_LENGTH = value;
+    elif t == 2: CHAR_LENGTH = value;
+    elif t == 3: MAT_LENGTH = value;
+    elif t == 4: VEC_LENGTH = value;
+    elif t == 5: ATTRIBUTES = value;
+    elif t == 6: ATTRIBUTES2 = value;
+    elif t == 7: ATTR_MASK = value;
+    elif t == 8: STRUC_PTR = value;
+    elif t == 9: STRUC_DIM = value;
     elif t == 10: CLASS = value;
     elif t == 11: NONHAL = value;
     elif t == 12: LOCKp = value;
     elif t == 13: IC_PTR = value;
     elif t == 14: IC_FND = value;
     elif t == 15: N_DIM = value;
-    S_ARRAY[t - 16] = value;
+    else:
+        S_ARRAY[t - 16] = value;
+
 
 FACTORED_TYPE = 0
 FACTORED_BIT_LENGTH = 0
@@ -1418,7 +1423,7 @@ if debug3:
     CONTROL[0x04] = -1  # Phase 1 token trace
     CONTROL[0x08] = -1  # Phase 1 production trace
     # CONTROL[0x0B] = -1 # Print Phase 1 HALMAT by block.
-    #CONTROL[0x0C] = -1  # Print Phase 1 state trace
+    # CONTROL[0x0C] = -1  # Print Phase 1 state trace
     CONTROL[0x0D] = -1  # Standard Phase 1 listing
     CONTROL[0x0E] = -1  # Print literal table from Phase 1
 XREF_FULL = 0
@@ -1462,9 +1467,9 @@ IDENT_COUNT = 0
 CLOCK = [0] * (5 + 1)
 
 # COMMONLY USED STRINGS
-X1 =   ' ' * 1
-X4 =   ' ' * 4
-X2 =   ' ' * 2
+X1 = ' ' * 1
+X4 = ' ' * 4
+X2 = ' ' * 2
 X109 = ' ' * 109
 PERIOD = '.'
 SQUOTE = '\''
@@ -1547,11 +1552,13 @@ MAX_PTR_TOP = 0
 BI_LIMIT = 9
 BIp = 63
 
-def BI_XREF_CELL(value = None):
+
+def BI_XREF_CELL(value=None):
     global COMM
     if value == None:
         return COMM[29]
     COMM[29] = value
+
 
 # LITERALS FOR SHAPING FUNCTION INDEXES INTO BI_XREF AND BI_XREF#
 BIT_NDX = 57
@@ -1747,21 +1754,21 @@ REFER_LOC = 0
 SUB_SEEN = 0
 
 
-def SUB_COUNT(value = None):
+def SUB_COUNT(value=None):
     global INX
     if value == None:
         return INX[PTR[MP]]
     INX[PTR[MP]] = value
 
 
-def STRUCTURE_SUB_COUNT(value = None):
+def STRUCTURE_SUB_COUNT(value=None):
     global PSEUDO_LENGTH
     if value == None:
         return PSEUDO_LENGTH[PTR[MP]]
     PSEUDO_LENGTH[PTR[MP]] = value
 
 
-def ARRAY_SUB_COUNT(value = None):
+def ARRAY_SUB_COUNT(value=None):
     global VAL_P
     if value == None:
         return VAL_P[PTR[MP]]
@@ -1916,7 +1923,7 @@ ASSIGN_TYPE = (
       0b0000000001100000,  # IORS
       0b0000000000000000,  # EVENT
       0b0000010000000000,  # STRUCTURE
-      0b0000011111111110   # ANY TYPE
+      0b0000011111111110  # ANY TYPE
       )
 STRING_MASK = 0b1100110
 
@@ -2316,7 +2323,7 @@ PRINT_FLAG = 0x0400
 PRINT_FLAG_OFF = 0xFBFF
 PRINTING_ENABLED = 0x0400
 COMMENT_COUNT = 0
-SAVE_COMMENT = ' '*256
+SAVE_COMMENT = ' ' * 256
 
 LAST_SPACE = 0
 LAST_WRITE = 0
@@ -2455,9 +2462,9 @@ if SANITY_CHECK and len(TRANS_OUT) != 255 + 1:
 # Recall that the backtick replaces the cent character (missing from ASCII).
 ESCP = BYTE('`')  # THE ESCAPE CHARACTER
 CHAR_OP = (BYTE('_'), BYTE('='))  # OVER PUNCH ESCAPES
-VALID_00_OP = BYTE('_') # THE OVERPUNCH VALID IN GENERATING
+VALID_00_OP = BYTE('_')  # THE OVERPUNCH VALID IN GENERATING
                         # THE X'00' CHARACTER
-VALID_00_CHAR = BYTE('0')   # THE CHARACTER WHICH, WHEN
+VALID_00_CHAR = BYTE('0')  # THE CHARACTER WHICH, WHEN
                             # 'ESCAPED' BY THE PROPER OP CHAR
                             # GENERATES X'00' INTERNALLY
 
@@ -2648,9 +2655,11 @@ INCREMENT_DOWN_STMT = 0
 PREV_STMT_NUM = -1
 INCLUDE_STMT = -1
 
+
 def fixup_DOWN_INFO(n):
     while len(h.DOWN_INFO) <= n:
         h.DOWN_INFO.append(h.down_info())
+
 
 def DWN_STMT(n, value=None):
     if n < 0:

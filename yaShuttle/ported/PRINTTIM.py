@@ -32,6 +32,7 @@ from CHARTIME import CHARTIME
  /***************************************************************************/
 '''
 
+
 def PRINT_TIME(MESSAGE, T):
     # C is the only local, and requires no persistence
     C = CHARTIME(T);

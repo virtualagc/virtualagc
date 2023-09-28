@@ -44,8 +44,9 @@ from HALMAT import HALMAT
  /***************************************************************************/
 '''
 
-def HALMAT_PIP(OPERAND,QUAL,TAG1,TAG2):
+
+def HALMAT_PIP(OPERAND, QUAL, TAG1, TAG2):
     # No persistence required.
-    g.CURRENT_ATOM=SHL(OPERAND,16)|SHL(TAG1,8)|SHL(QUAL&0xF,4) \
-                    |SHL(TAG2&0x7,1)|0x1;
+    g.CURRENT_ATOM = SHL(OPERAND, 16) | SHL(TAG1, 8) | SHL(QUAL & 0xF, 4) \
+                    | SHL(TAG2 & 0x7, 1) | 0x1;
     HALMAT();

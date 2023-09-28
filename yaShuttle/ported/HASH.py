@@ -31,13 +31,14 @@ import g
  /***************************************************************************/
 '''
 
+
 def HASH(BCD, HASHSIZE):
     # HASH, I, and J are local but needn't be persistent.
     
     HASH = 0;
     J = LENGTH(BCD) - 1;
-    if J > 22: #  AVOID OVERFLOW  
+    if J > 22:  #  AVOID OVERFLOW  
         J = 22;
     for I in range(0, J + 1):
-        HASH = BYTE(BCD,I)+SHL(HASH,1);
+        HASH = BYTE(BCD, I) + SHL(HASH, 1);
     return HASH % HASHSIZE;

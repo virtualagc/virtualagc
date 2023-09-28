@@ -15,7 +15,7 @@ import g
 import HALINCL.CERRDECL as d
 from ERROR    import ERROR
 from GETICQ   import GET_ICQ
-from HALMATF3 import FIX_HALMAT_PIPTAGS
+from HALMATF3 import HALMAT_FIX_PIPTAGS
 from HALMATPI import HALMAT_PIP
 from HALMATPO import HALMAT_POP
 from ICQCHECK import ICQ_CHECK_TYPE

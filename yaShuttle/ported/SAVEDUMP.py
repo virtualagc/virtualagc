@@ -29,6 +29,7 @@ import g
  /***************************************************************************/
 '''
 
+
 def SAVE_DUMP(MSG):
     # No locals
     g.STACK_DUMP_PTR = g.STACK_DUMP_PTR + 1;

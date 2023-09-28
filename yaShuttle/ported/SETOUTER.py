@@ -38,6 +38,7 @@ from COMPRESS import COMPRESS_OUTER_REF
  /***************************************************************************/
 '''
 
+
 def SET_OUTER_REF(LOC, FLAG):
     # There are no local variables.
     if g.OUTER_REF_INDEX == g.OUTER_REF_LIM:
@@ -47,4 +48,4 @@ def SET_OUTER_REF(LOC, FLAG):
     g.OUTER_REF_INDEX = g.OUTER_REF_INDEX + 1;
     OUTER_REF(g.OUTER_REF_INDEX, LOC);
     OUTER_REF_FLAGS(g.OUTER_REF_INDEX, SHR(FLAG, 13));
-    g.OUTER_REF_MAX = MAX(g.OUTER_REF_MAX,g.OUTER_REF_INDEX);
+    g.OUTER_REF_MAX = MAX(g.OUTER_REF_MAX, g.OUTER_REF_INDEX);

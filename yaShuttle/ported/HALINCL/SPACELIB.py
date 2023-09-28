@@ -22,14 +22,17 @@ import HALINCL.COMMON as h
 /**********************************************************************/        00000070
 '''
 
+
 # Not sure what this is supposed to be.  I just use it as an indication as 
 # to whether or not any space has been allocated or not for an array.
 def RECORD_ALLOC(array):
     return len(array)
 
+
 # Gets the highest used index in an array.
 def RECORD_TOP(array):
     return len(array) - 1
+
 
 # Allocates space to add one element to an array.
 def NEXT_ELEMENT(array):
@@ -55,15 +58,19 @@ def NEXT_ELEMENT(array):
         print("Unknown array type in call to NEXT_ELEMENT")
         array.append(None)
 
+
 def RECORD_FREE(array):
     array.clear()
+
     
 # No idea what this does, but I suspect it's safe to ignore.
 def RECORD_SEAL(array):
     return
 
+
 def RECORD_LINK():
     return
+
 
 COMPACTIFIES = [0] * (1 + 1)
 REALLOCATIONS = 0

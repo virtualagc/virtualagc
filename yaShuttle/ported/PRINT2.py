@@ -31,10 +31,15 @@ import g
  /***************************************************************************/
 '''
 
+
 class cPRINT2:
+
     def __init__(self):
         self.PAGE_NUM = 0
+
+
 lPRINT2 = cPRINT2()
+
 
 def PRINT2(LINE, SPACE):
     l = lPRINT2
@@ -44,7 +49,7 @@ def PRINT2(LINE, SPACE):
         l.PAGE_NUM = l.PAGE_NUM + 1;
         OUTPUT(2, \
             '1  H A L   C O M P I L A T I O N   --   P H A S E   1   --   U N F O R M A T T E D   S O U R C E   L I S T I N G             PAGE ' \
-            + str(l.PAGE_NUM));
+            +str(l.PAGE_NUM));
         '''
         I haven't ported the commented-out line below because it's pointless.
         In the first place, LINE isn't used in the remainder of this function,
@@ -56,6 +61,6 @@ def PRINT2(LINE, SPACE):
         Not that that's what would happen in the Python port of the line that
         I'd use, namely LINE = BYTE(LINE, 0, BYTE('-')), but still ...
         '''
-        #BYTE(LINE) = BYTE('-');
+        # BYTE(LINE) = BYTE('-');
         g.LISTING2_COUNT = 4;
     OUTPUT(2, LINE);

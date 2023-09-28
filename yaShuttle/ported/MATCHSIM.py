@@ -43,11 +43,12 @@ from SETUPVAC import SETUP_VAC
  /***************************************************************************/
 '''
 
-def MATCH_SIMPLES(LOC1,LOC2):
-    T1=PSEUDO_TYPE(g.PTR[LOC1]);
-    T2=PSEUDO_TYPE(g.PTR[LOC2]);
+
+def MATCH_SIMPLES(LOC1, LOC2):
+    T1 = PSEUDO_TYPE(g.PTR[LOC1]);
+    T2 = PSEUDO_TYPE(g.PTR[LOC2]);
     if T1 != T2:
         if T2 == g.INT_TYPE:
-            LOC1=LOC2;
-        HALMAT_TUPLE(g.XITOS,0,LOC1,0,0);
-        SETUP_VAC(LOC1,g.SCALAR_TYPE);
+            LOC1 = LOC2;
+        HALMAT_TUPLE(g.XITOS, 0, LOC1, 0, 0);
+        SETUP_VAC(LOC1, g.SCALAR_TYPE);

@@ -31,5 +31,6 @@ from VECTORCO import VECTOR_COMPARE
  /***************************************************************************/
 '''
 
-def MATRIX_COMPARE(I,J,CLASS,NUM):
-    VECTOR_COMPARE(I,J,CLASS,NUM);
+
+def MATRIX_COMPARE(I, J, CLASS, NUM):
+    VECTOR_COMPARE(I, J, CLASS, NUM);
