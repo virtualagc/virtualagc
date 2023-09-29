@@ -2150,30 +2150,35 @@ def OUTER_REF_FLAGS(n, value=None):
 
 
 def LIT_CHAR(n, value=None):
+    while len(h.LIT_NDX) <= n:
+        h.LIT_NDX.append(h.lit_ndx())
     if value == None:
         return h.LIT_NDX[n].CHAR_LIT
     h.LIT_NDX[n].CHAR_LIT = value
 
 
 def LIT1(n, value=None):
-    global LIT_PG
+    while len(h.LIT_PG) <= n:
+        h.LIT_PG.append(h.lit_pg())
     if value == None:
-        return LIT_PG[n].LITERAL1
-    LIT_PG[n].LITERAL1 = value[:]
+        return h.LIT_PG[n].LITERAL1
+    h.LIT_PG[n].LITERAL1 = value[:]
 
 
 def LIT2(n, value=None):
-    global LIT_PG
+    while len(h.LIT_PG) <= n:
+        h.LIT_PG.append(h.lit_pg())
     if value == None:
-        return LIT_PG[n].LITERAL2
-    LIT_PG[n].LITERAL2 = value[:]
+        return h.LIT_PG[n].LITERAL2
+    h.LIT_PG[n].LITERAL2 = value[:]
 
 
 def LIT3(n, value=None):
-    global LIT_PG
+    while len(h.LIT_PG) <= n:
+        h.LIT_PG.append(h.lit_pg())
     if value == None:
-        return LIT_PG[n].LITERAL3
-    LIT_PG[n].LITERAL3 = value[:]
+        return h.LIT_PG[n].LITERAL3
+    h.LIT_PG[n].LITERAL3 = value[:]
 
 
 def XREF(n, value=None):

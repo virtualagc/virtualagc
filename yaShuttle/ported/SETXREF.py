@@ -11,6 +11,7 @@ History:    2023-09-16 RSB  Ported from XPL
 
 from xplBuiltins import *
 import g
+from HALINCL.ENTERXRE import ENTER_XREF
 from SETOUTER import SET_OUTER_REF
 from HALINCL.ENTERXRE import ENTER_XREF
 
@@ -55,21 +56,21 @@ def SET_XREF(LOC, FLAG, FLAG2=0):
     
     if LOC > 0:  # FILTERS FIXV OF NON-STRUCTS
         if FLAG2 == 0:
-            if FLAG == XREF_SUBSCR: 
-                FLAG2 = XREF_REF;
+            if FLAG == g.XREF_SUBSCR: 
+                FLAG2 = g.XREF_REF;
             else:
                 FLAG2 = FLAG;
-        if (SYT_TYPE(LOC) == IND_CALL_LAB) or \
-                ((SYT_TYPE(LOC) == PROC_LABEL or SYT_TYPE(LOC) == STMT_LABEL or \
-                  SYT_TYPE(LOC) == TASK_LABEL) and SYT_FLAGS(LOC) != DEFINED_LABEL):
-            g.NO_NEW_XREF = TRUE;
-        SYT_XREF(LOC, ENTER_XREF(SYT_XREF(LOC), FLAG));
+        if (g.SYT_TYPE(LOC) == g.IND_CALL_LAB) or \
+                ((g.SYT_TYPE(LOC) == g.PROC_LABEL or g.SYT_TYPE(LOC) == g.STMT_LABEL or \
+                  g.SYT_TYPE(LOC) == g.TASK_LABEL) and g.SYT_FLAGS(LOC) != g.DEFINED_LABEL):
+            g.NO_NEW_XREF = g.TRUE;
+        g.SYT_XREF(LOC, ENTER_XREF(g.SYT_XREF(LOC), FLAG));
         if g.NO_NEW_XREF: 
             g.NO_NEW_XREF = FALSE;
         goto_ENTER_OUTER_REF = False
-        if SYT_TYPE(LOC) == IND_CALL_LAB or SYT_TYPE(LOC) == CALLED_LABEL:
+        if g.SYT_TYPE(LOC) == g.IND_CALL_LAB or g.SYT_TYPE(LOC) == g.CALLED_LABEL:
              goto_ENTER_OUTER_REF = True;
-        if goto_ENTER_OUTER_REF or SYT_NEST(LOC) < NEST:
+        if goto_ENTER_OUTER_REF or g.SYT_NEST(LOC) < g.NEST:
             goto_ENTER_OUTER_REF = False
             if FLAG2 != 0:
                 SET_OUTER_REF(LOC, FLAG2);

@@ -512,7 +512,8 @@ def FILE(fileNumber, recordNumber, value=None):
             return bytearray([0]*reclen)
         return inputDevices[fileNumber]["random"][recordNumber]
     # Output
-    if "random" not in outputDevices[fileNumber]:
+    if not isinstance(outputDevices[fileNumber], dict) or \
+            "random" not in outputDevices[fileNumber]:
         return
     dummy = outputDevices[fileNumber]["random"]
     reclen = outputDevices[fileNumber]["reclen"]
@@ -521,7 +522,8 @@ def FILE(fileNumber, recordNumber, value=None):
     dummy[recordNumber] = value.copy()[0:reclen]
     while len(dummy[recordNumber]) < reclen:
         dummy[recordNumber].append(0)
-    outputDevices[fileNumber]["file"].write(dummy[recordNumber])
+    # I don't actually know how to handle this case ... come back to it later.
+    #outputDevices[fileNumber]["file"].write(dummy[recordNumber])
     return
 
 # For XPL's DATE and TIME 'variables'.  DATE = (1000*(year-1900))+DayOfTheYear,

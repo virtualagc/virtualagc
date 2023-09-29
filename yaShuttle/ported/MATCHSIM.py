@@ -45,8 +45,8 @@ from SETUPVAC import SETUP_VAC
 
 
 def MATCH_SIMPLES(LOC1, LOC2):
-    T1 = PSEUDO_TYPE(g.PTR[LOC1]);
-    T2 = PSEUDO_TYPE(g.PTR[LOC2]);
+    T1 = g.PSEUDO_TYPE[g.PTR[LOC1]];
+    T2 = g.PSEUDO_TYPE[g.PTR[LOC2]];
     if T1 != T2:
         if T2 == g.INT_TYPE:
             LOC1 = LOC2;

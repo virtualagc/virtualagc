@@ -49,15 +49,15 @@ ARITH_VALID = (0b0001, 0b0010, 0b1100, 0b1100)
 
 
 def MATCH_ARITH(LOC1, LOC2):
-    I = g.PSEUDO_TYPE[g.PTR[g.LOC1]] - g.MAT_TYPE;
-    if (SHL(1, g.PSEUDO_TYPE[g.PTR[g.LOC2]] - g.MAT_TYPE) & g.ARITH_VALID[I]) == 0:
+    I = g.PSEUDO_TYPE[g.PTR[LOC1]] - g.MAT_TYPE;
+    if (SHL(1, g.PSEUDO_TYPE[g.PTR[LOC2]] - g.MAT_TYPE) & ARITH_VALID[I]) == 0:
         ERROR(d.CLASS_E, 6);
     else:
         if I == 0:
-            MATRIX_COMPARE(g.LOC1, g.LOC2, d.CLASS_EM, 1);
+            MATRIX_COMPARE(LOC1, LOC2, d.CLASS_EM, 1);
         elif I == 1:
-            VECTOR_COMPARE(g.LOC1, g.LOC2, d.CLASS_EV, 1);
+            VECTOR_COMPARE(LOC1, LOC2, d.CLASS_EV, 1);
         elif I == 2:
-            MATCH_SIMPLES(g.LOC1, g.LOC2);
+            MATCH_SIMPLES(LOC1, LOC2);
         elif I == 3:
-            MATCH_SIMPLES(g.LOC1, g.LOC2);
+            MATCH_SIMPLES(LOC1, LOC2);
