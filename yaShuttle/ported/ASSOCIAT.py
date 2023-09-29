@@ -14,6 +14,8 @@ from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
 from ERROR import ERROR
+from HALMATF2 import HALMAT_FIX_POPTAG
+from SAVEARRA import SAVE_ARRAYNESS
 
 '''
  /***************************************************************************/
@@ -69,55 +71,58 @@ from ERROR import ERROR
 '''
 
 
-def ASSOCIATE(TAG = -1):
+def ASSOCIATE(TAG=-1):
     # Locals: I, J, K, L
     
-    IF FIXV(MP)=0 THEN I=FIXL(MP);
-    ELSE I=FIXV(MP);
-    IF (SYT_FLAGS(I) & READ_ACCESS_FLAG) ^= 0 THEN
-       CALL ERROR(CLASS_PS, 9, VAR(MP));
-    IF (SYT_FLAGS(I) & LOCK_FLAG) ^= 0 THEN  /* LOCKED */
-       IF ^ASSIGN_ARG_LIST THEN
-       IF UPDATE_BLOCK_LEVEL <= 0 THEN
-       CALL ERROR(CLASS_UI, 1, VAR(MP));
-    J=PSEUDO_TYPE(PTR(MP));
-    L = EXT_P(PTR(MP));  /* RHS OF TOKEN LIST */
-    IF J>TEMPL_NAME THEN GO TO ARR_STRUC_CHECK;
-    IF L >= 0 THEN DO;
-       I = TOKEN_FLAGS(L);
-       K = I & "1F";  /* IMPLIED TYPE */
-       IF K = 7 THEN GO TO ARR_STRUC_CHECK;
-       IF K >= 3 THEN
-          IF K <= 4 THEN
-          IF (J & "1F") ^= K THEN
-          CALL ERROR(CLASS_SV, 2, VAR(MP));
-       I = (I - K) | (J & "1F");  /* FINAL TYPE */
-       TOKEN_FLAGS(L) = I;  /* MARK GOES ON RIGTHMOST TOKEN */
-    END;
-    ARR_STRUC_CHECK:
-    K = STACK_PTR(MP);
-    J=VAL_P(PTR(MP));
-    IF DELAY_CONTEXT_CHECK THEN IF SUBSCRIPT_LEVEL = 0 THEN DO;
-       CALL SAVE_ARRAYNESS;
-       IF (J&"206")="202" THEN DO;
-          AS_PTR=AS_PTR-1;
-          EXT_P(PTR(MP))=ARRAYNESS_STACK(AS_PTR);
-          IF TAG>=0 THEN CALL HALMAT_FIX_POPTAG(TAG,1);
-          J=J&"DFFE";
-          ARRAYNESS_STACK(AS_PTR)=ARRAYNESS_STACK(AS_PTR+1)-1;
-       END;
-       ELSE DO;
-          EXT_P(PTR(MP))=0;
-          J=J&"FFFC";
-       END;
-    END;
-    IF J THEN DO;             /*  ARRAY MARKS NEEDED  */
-       GRAMMAR_FLAGS(K) = GRAMMAR_FLAGS(K) | LEFT_BRACKET_FLAG;
-       GRAMMAR_FLAGS(L) = GRAMMAR_FLAGS(L) | RIGHT_BRACKET_FLAG;
-    END;
-    IF SHR(J,1) THEN DO;     /*  STRUCTURE MARKS NEEDED  */
-       GRAMMAR_FLAGS(K) = GRAMMAR_FLAGS(K) | LEFT_BRACE_FLAG;
-       GRAMMAR_FLAGS(L) = GRAMMAR_FLAGS(L) | RIGHT_BRACE_FLAG;
-    END;
-    TAG=-1;
-    IF SHR(J,13) THEN VAL_P(PTR(MP))=J|"10";
+    if g.FIXV[g.MP] == 0: 
+        I = g.FIXL[g.MP];
+    else: 
+        I = g.FIXV[g.MP];
+    if (g.SYT_FLAGS(I) & g.READ_ACCESS_FLAG) != 0:
+        ERROR(d.CLASS_PS, 9, g.VAR[g.MP]);
+    if (g.SYT_FLAGS(I) & g.LOCK_FLAG) != 0:  # LOCKED
+        if not g.ASSIGN_ARG_LIST:
+            if g.UPDATE_BLOCK_LEVEL <= 0:
+                ERROR(d.CLASS_UI, 1, g.VAR[g.MP]);
+    J = g.PSEUDO_TYPE[g.PTR[g.MP]];
+    L = g.EXT_P[g.PTR[g.MP]];  # RHS OF TOKEN LIST
+    if J > g.TEMPL_NAME: 
+        pass  # GO TO ARR_STRUC_CHECK;
+    else:
+        if L >= 0:
+            I = g.TOKEN_FLAGS[L];
+            K = I & 0x1F;  # IMPLIED TYPE
+            if K == 7: 
+                pass  # GO TO ARR_STRUC_CHECK;
+            else:
+                if K >= 3:
+                    if K <= 4:
+                        if (J & 0x1F) != K:
+                            ERROR(d.CLASS_SV, 2, g.VAR[g.MP]);
+                I = (I - K) | (J & 0x1F);  # FINAL TYPE
+                g.TOKEN_FLAGS[L] = I;  # MARK GOES ON RIGTHMOST TOKEN
+    # ARR_STRUC_CHECK:
+    K = g.STACK_PTR[g.MP];
+    J = g.VAL_P[g.PTR[g.MP]];
+    if g.DELAY_CONTEXT_CHECK: 
+        if g.SUBSCRIPT_LEVEL == 0:
+            SAVE_ARRAYNESS();
+            if (J & 0x206) == 0x202:
+                g.AS_PTR = g.AS_PTR - 1;
+                g.EXT_P[g.PTR[g.MP]] = g.ARRAYNESS_STACK[g.AS_PTR];
+                if TAG >= 0: 
+                    HALMAT_FIX_POPTAG(TAG, 1);
+                J = J & 0xDFFE;
+                g.ARRAYNESS_STACK[g.AS_PTR] = g.ARRAYNESS_STACK[g.AS_PTR + 1] - 1;
+            else:
+                g.EXT_P[g.PTR[g.MP]] = 0;
+                J = J & 0xFFFC;
+    if J:  #  ARRAY MARKS NEEDED
+        g.GRAMMAR_FLAGS[K] = g.GRAMMAR_FLAGS[K] | g.LEFT_BRACKET_FLAG;
+        g.GRAMMAR_FLAGS[L] = g.GRAMMAR_FLAGS[L] | g.RIGHT_BRACKET_FLAG;
+    if SHR(J, 1):  #  STRUCTURE MARKS NEEDED
+        g.GRAMMAR_FLAGS[K] = g.GRAMMAR_FLAGS[K] | g.LEFT_BRACE_FLAG;
+        g.GRAMMAR_FLAGS[L] = g.GRAMMAR_FLAGS[L] | g.RIGHT_BRACE_FLAG;
+    TAG = -1;
+    if SHR(J, 13): 
+        g.VAL_P[g.PTR[g.MP]] = J | 0x10;
