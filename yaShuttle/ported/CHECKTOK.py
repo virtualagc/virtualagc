@@ -78,7 +78,7 @@ def CHECK_TOKEN(NSTATE,NLOOK,NTOKEN):
                     g.J=0;
                 else:
                     g.I=g.I+1;
-            NSTATE=APPLY2[g.I];
+            NSTATE=g.APPLY2[g.I];
         elif NSTATE<=g.MAXLp:    # LOOK AHEAD STATE
             g.I=g.INDEX1[NSTATE];
             g.J=NTOKEN;

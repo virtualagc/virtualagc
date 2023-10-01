@@ -11,6 +11,7 @@ History:    2023-09-16 RSB  Ported from XPL
 
 from xplBuiltins import *
 import g
+import HALINCL.COMMON as h
 
 '''
  /***************************************************************************/
@@ -74,7 +75,11 @@ def HALMAT_OUT():
         g.DOUBLE_SPACE();
         for I in range(0, g.ATOMp_FAULT + 1):
             HALMAT_BLAB(g.ATOMS(I), I);
-    FILE(g.HALMAT_FILE, g.HALMAT_BLOCK, g.ATOMS(0));
+    # We need to convert the ATOMS list to a bytearray.
+    b = bytearray([])
+    for i in h.FOR_ATOMS:
+        b += (i.CONST_ATOMS & 0xFFFFFFFF).to_bytes(4, "little")
+    FILE(g.HALMAT_FILE, g.HALMAT_BLOCK, b);
     g.HALMAT_BLOCK = g.HALMAT_BLOCK + 1;
     g.ATOMS(g.ATOMp_FAULT, l.SAVE_ATOM);
     g.HALMAT_RELOCATE_FLAG = g.TRUE;

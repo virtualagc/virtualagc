@@ -125,6 +125,21 @@ def INITIALIZATION():
               'COPE'
     
     EQUALS = ' = '
+    '''
+    Inferences ....  I believe that the "type 2" options are communicated to
+    the compiler (from the JCL) via the TYPE2 and VALS lists, with the former
+    containing the names of the parameters and the latter containing their 
+    values, in the same order.
+    
+    I think that TYPE2_TYPE gives that order.  I.e., TYPE2[0] and VALS[0]
+    correspond to TITLE (see p. 5-6 of HAL/S-FC User's Manual), TYPE2[1] and
+    VALS[1] correspond to LINECT, and so on.
+    
+    The array SORT2 appears to list indices in TYPE2[]/VALS[0] corresponding
+    to the sorted order of the names of the type 2 options.  E.g., index 11
+    is BLOCKSUM (alphabetically first) and index 7 is XREFSIZE (alphabetically
+    last).
+    '''
     TYPE2_TYPE = (
         0,  # TITLE 
         1,  # LINECT 
@@ -160,54 +175,6 @@ def INITIALIZATION():
     #---------------------------------------------------------------
     STORAGE_INCREMENT = MONITOR(32);
     STORAGE_MASK = -STORAGE_INCREMENT & 0xFFFFFF
-    '''
-    The following code relates to determining and printing out the compiler
-    options which have been supplied originally by JCL, but for us by 
-    command-line options.  The available options are described by the "HAL/S-FC
-    User's Manual" (chapter 5), while the organization of these in IBM 
-    System/360 system memory (as we would need it to work with the following
-    code) is described in the "HAL/S-FC and HAL/S-360 Compiler System Program 
-    Description" (IR-182-1) around p. 696. In neither sources is there an 
-    explanation of how the options specifically relate to the bit-flags in
-    the 32-bit variable OPTIONS_WORD, so whatever g.I know about that has been
-    gleaned from looking at how the source code processes that word.
-        Flag          Pass         Keyword (abbreviation)
-        ----          ----         ----------------------
-        0x40000000    1            REGOPT (R) for BFS
-        0x10000000    3            DEBUG
-        0x08000000    3            DLIST
-        0x04000000    1            MICROCODE (MC)
-        0x02000000    1            REGOPT (R) for PFS
-        0x01000000    ?            STATISTICS
-        0x00800000    1            SDL (NONE)
-        0x00400000    4            DECK (D)
-        0x00200000    1            LFXI (NONE)
-        0x00100000    1            ADDRS (A)
-        0x00080000    1            SRN (NONE)
-        0x00040000    1            HALMAT (HM)
-        0x00020000    1            CODE_LISTING_REQUESTED
-        0x00010000    1            g.PARTIAL_PARSE
-        0x00008000    3,4          SDF_SUMMARY, TABLST (TL)
-        0x00004000    1            EXTRA_LISTING
-        0x00002000    1            SREF (SR)
-        0x00001000    3,4          TABDMP (TBD)
-        0x00000800    1            g.SIMULATING
-        0x00000400    1            Z_LINKAGE ... perhaps ZCON (Z)
-        0x00000200    ?            TRACE
-        0x00000080    3            HIGHOPT (HO)
-        0x00000040    1,2,4        NO_VM_OPT, ?, BRIEF
-        0x00000020    4            ALL
-        0x00000010    1            TEMPLATE (TP)
-        0x00000008    2,3          TRACE
-        0x00000004    1            LIST (L)
-        0x00000002    1            g.LISTING2 (L2)
-        ?                          DUMP (DP)
-        ?                          LSTALL (LA)
-        ?                          PARSE (P)
-        ?                          SCAL (SC) for BFS only
-        ?                          TABLES (TBL)
-        ?                          VARSYM (VS)
-    '''
     
     g.OPTIONS_CODE(g.pOPTIONS_CODE)
     CON = g.pCON
@@ -216,7 +183,7 @@ def INITIALIZATION():
     VALS = g.pVALS
     NPVALS = []
     
-    g.C[0] = VALS[TYPE2.index("TITLE")]
+    g.C[0] = VALS[0]
     if LENGTH(g.C[0]) == 0:
         g.C[0] = 'T H E  V I R T U A L  A G C  P R O J E C T'
     g.J = LENGTH(g.C[0])
@@ -313,9 +280,9 @@ def INITIALIZATION():
     g.LISTING2 = (g.OPTIONS_CODE() & 0x02) != 0;
     g.SREF_OPTION = (g.OPTIONS_CODE() & 0x2000) != 0;
     g.PARTIAL_PARSE = (g.OPTIONS_CODE() & 0x010000) != 0;
-    g.LISTING2_COUNT = VALS[1]
-    g.LINE_MAX = VALS[1]
-    g.LINE_LIM = VALS[1];
+    g.LINE_LIM = int(VALS[1]);
+    g.LISTING2_COUNT = g.LINE_LIM
+    g.LINE_MAX = g.LINE_LIM
     g.SIMULATING = (g.OPTIONS_CODE() & 0x800) != 0;
     if (g.OPTIONS_CODE() & 0x10) == 0x10:
         g.TPL_FLAG = 0;
@@ -360,11 +327,11 @@ def INITIALIZATION():
     g.CUR_IC_BLK = 0;
     g.IC_LIM = g.IC_SIZE;  # UPPER LIMIT OF TABLE  
     MONITOR(4, 3, g.IC_SIZE * 8);
-    g.SYTSIZE = VALS[3];
-    g.MACRO_TEXT_LIM = VALS[4];
-    g.LIT_CHAR_SIZE = VALS[5];
-    g.XREF_LIM = VALS[7];
-    g.OUTER_REF_LIM = VALS[11];
+    g.SYTSIZE = int(VALS[3]);
+    g.MACRO_TEXT_LIM = int(VALS[4]);
+    g.LIT_CHAR_SIZE = int(VALS[5]);
+    g.XREF_LIM = int(VALS[7]);
+    g.OUTER_REF_LIM = int(VALS[11]);
     '''
     g.J = (g.FREELIMIT + 512) & STORAGE_MASK;  # BOUNDARY NEAR TOP OF CORE 
     g.TEMP1 = (g.J - (13000 + 2 * 1680 + 3 * 3458)) & STORAGE_MASK;  # TO ALLOW ROOM FOR BUFFERS
@@ -398,8 +365,8 @@ def INITIALIZATION():
         g.C[0] = SUBSTR(g.VOCAB[g.J], SHR(g.K, 8) & 0xFFFF, SHR(g.K, 24));
         g.VOCAB_INDEX[g.I] = UNSPEC(g.C[0]);
     g.CURRENT_CARD = INPUT(g.INPUT_DEV);
-    g.LRECL = LENGTH(g.CURRENT_CARD) - 1;
-    g.TEXT_LIMIT[0] = SET_T_LIMIT(g.LRECL);
+    g.LRECL[0] = LENGTH(g.CURRENT_CARD) - 1;
+    g.TEXT_LIMIT[0] = SET_T_LIMIT(g.LRECL[0]);
     g.FIRST_CARD = g.TRUE;
     if not g.pfs:  # BFS
         g.TEXT_LIMIT[1] = g.TEXT_LIMIT[0];

@@ -61,7 +61,7 @@ def STAB_VAR(LOC):
     
     if g.FIXV[LOC]>0:
         STAB_STACKER((g.FIXV[LOC] & 0x7FFF) | 0x8000);
-        for I in range(g.PTR(LOC)+1, g.FIXF[LOC] + 1):
+        for I in range(g.PTR[LOC]+1, g.FIXF[LOC] + 1):
             STAB_STACKER(g.LOC_P[I] & 0x7FFF);
         if SYT_TYPE(g.FIXL[LOC])==g.TEMPL_NAME: 
             return;

@@ -1445,7 +1445,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             g.TOO_MANY_ERRORS = g.FALSE;
         if g.OUT_PREV_ERROR != 0:
             OUTPUT(0, '***** LAST ERROR WAS DETECTED AT STATEMENT ' + \
-                        g.OUT_PREV_ERROR + g.PERIOD + g.X1 + g.STARS);
+                        str(g.OUT_PREV_ERROR) + g.PERIOD + g.X1 + g.STARS);
         g.OUT_PREV_ERROR = g.STMT_NUM();
         if l.LAST_ERROR_WRITTEN >= g.LAST:
             l.LAST_ERROR_WRITTEN = -1
@@ -1455,7 +1455,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
     g.SAVE_SCOPE = g.CURRENT_SCOPE;
     if g.STACK_DUMPED: 
         for I in range(0, g.STACK_DUMP_PTR + 1):
-            OUTPUT(0, SAVE_STACK_DUMP(I));  
+            OUTPUT(0, g.SAVE_STACK_DUMP[I]);  
         g.STACK_DUMP_PTR = -1;
         g.STACK_DUMPED = g.FALSE;
     return l.PTR;

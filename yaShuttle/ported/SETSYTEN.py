@@ -117,7 +117,7 @@ def SET_SYT_ENTRIES():
         if g.EXT_ARRAY_PTR + g.N_DIM >= g.ON_ERROR_PTR:
             ERROR(d.CLASS_BX, 5);
         else: 
-            if (g.N_DIM == 1) and (g.S_ARRAY == -1):
+            if (g.N_DIM == 1) and (g.S_ARRAY[0] == -1):
                 if (g.SYT_FLAGS(g.ID_LOC) & g.PARM_FLAGS) != 0 and (not g.NAME_IMPLIED):
                     g.S_ARRAY[0] = -g.ID_LOC;
                 else: 

@@ -98,7 +98,7 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG):
             if not FLAG or not neither:
                 if T1 < 0 or T2 < 0 or goto_SR_ERR1:
                     goto_SR_ERR1 = False
-                    ERROR(CLASS_SR, 1, g.VAR(g.MP));
+                    ERROR(CLASS_SR, 1, g.VAR[g.MP]);
                     g.FIX_DIM = 2;
                 elif T2 == T1 and neither:
                     if FLAG == 2: 
@@ -111,7 +111,7 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG):
                     g.INX[g.IND_LINK] = MODE | 0x1;
                 elif T2 < T1 or goto_SR_ERR2:
                     goto_SR_ERR2 = False
-                    ERROR(CLASS_SR, 2, g.VAR(g.MP));
+                    ERROR(CLASS_SR, 2, g.VAR[g.MP]);
                     g.FIX_DIM = 2;
                 else: 
                     g.FIX_DIM = T2 - T1 + 1;

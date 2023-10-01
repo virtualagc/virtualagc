@@ -597,9 +597,9 @@ def SYT_DUMP():
             if (g.SYT_TYPE(g.SYT_SORT(l.M)) != g.TEMPL_NAME):
                PRINT_SYMBOL_HEADER(g.FALSE, g.TRUE);
         # DO CASE T_CASE;
-        if l.T == 0:
+        if l.T_CASE == 0:
             l.I = g.SYT_SORT(l.M);
-        elif l.T == 1:
+        elif l.T_CASE == 1:
             if g.SYT_LINK1(l.I) > 0:
                 l.T_LEVEL = l.T_LEVEL + 1;
                 l.I = g.SYT_LINK1(l.I);
@@ -613,7 +613,7 @@ def SYT_DUMP():
                     goto_NO_INDIRECT = True;
                 else:
                     l.I = g.SYT_LINK2(l.I);
-        elif l.T == 2:
+        elif l.T_CASE == 2:
             l.I = l.I + 1;
         # End of DO CASE
         if not goto_NO_INDIRECT:

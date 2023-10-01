@@ -879,7 +879,7 @@ def SCAN():
                     if g.TOKEN > 0:
                         g.S = STRING(g.VOCAB_INDEX[g.TOKEN]);
                     else:
-                        g.S = g.TOKEN;
+                        g.S = str(g.TOKEN);
                     OUTPUT(0, g.BCD + ' :  TOKEN = ' + g.S + \
                                 ', IMPLIED_TYPE = ' + str(g.IMPLIED_TYPE) + \
                                 ', SYT_INDEX = ' + str(g.SYT_INDEX) + \
@@ -994,7 +994,7 @@ def SCAN():
                     g.RESERVED_WORD = g.FALSE;
                     goto_DEC_POINT_ENTRY = True;
                     break;
-                g.TOKEN = g.TX(BYTE(g.PERIOD));
+                g.TOKEN = g.TX[BYTE(g.PERIOD)];
                 goto_SCAN_END = True
                 break
                 # END OF CASE 4
@@ -1090,7 +1090,7 @@ def SCAN():
                
             elif ct == 7:
                 # CASE 7--'|' OR'||' 
-                g.TOKEN = g.TX(g.NEXT_CHAR);
+                g.TOKEN = g.TX[g.NEXT_CHAR];
                 if g.OVER_PUNCH != 0:
                     ERROR(d.CLASS_MO, 1);
                 STREAM();

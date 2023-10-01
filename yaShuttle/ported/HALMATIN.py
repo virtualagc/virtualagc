@@ -19,6 +19,7 @@ from GETLITER import GET_LITERAL
 from HALMATPI import HALMAT_PIP
 from HALMATPO import HALMAT_POP
 from HOWTOINI import HOW_TO_INIT_ARGS
+from ICQARRA2 import ICQ_ARRAYNESS_OUTPUT
 from ICQCHECK import ICQ_CHECK_TYPE
 from ICQOUTPU import ICQ_OUTPUT
 
@@ -124,13 +125,13 @@ def HALMAT_INIT_CONST ():
     if howto == 0:
         #  CASE 0,  TOO FEW ELEMENTS
         if g.PSEUDO_TYPE[g.ICQ] == 0: 
-            ERROR(CLASS_DI, 5, g.VAR(g.MP));
+            ERROR(CLASS_DI, 5, g.VAR[g.MP]);
         ICQ_OUTPUT();
     elif howto == 1:
         #  CASE 1, ONE ARGUMENT
         if g.PSEUDO_TYPE[g.ICQ] != 0:
             if not MULTI_VALUED(): 
-                ERROR(CLASS_DI, 4, g.VAR(g.MP));
+                ERROR(CLASS_DI, 4, g.VAR[g.MP]);
             ICQ_OUTPUT();
         else: 
             I = GET_ICQ(g.INX[g.ICQ] + 1);
@@ -184,11 +185,11 @@ def HALMAT_INIT_CONST ():
     elif howto == 3:
         #  CASE 3,  MATCHES TOTAL NUMBER
         if g.PSEUDO_TYPE[g.ICQ] != 0: 
-            ERROR(CLASS_DI, 4, g.VAR(g.MP));
+            ERROR(CLASS_DI, 4, g.VAR[g.MP]);
         ICQ_OUTPUT();
     elif howto == 4:
         #  CASE 4,  TOO MANY ELEMENTS
-        ERROR(CLASS_DI, 10, g.VAR(g.MP));
+        ERROR(CLASS_DI, 10, g.VAR[g.MP]);
         ICQ_OUTPUT();
     # END of DO CASE;
     g.INIT_EMISSION = g.TRUE;

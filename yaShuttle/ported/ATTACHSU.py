@@ -57,7 +57,7 @@ from SLIPSUBS import SLIP_SUBSCRIPT
 def ATTACH_SUB_COMPONENT(SUBp):
     # Locals: I, T1
     
-    I = g.PTR(g.MP);
+    I = g.PTR[g.MP];
     if SUBp > 0: 
         # DO CASE PSEUDO_TYPE(I);
         pt = g.PSEUDO_TYPE[I]
@@ -82,7 +82,7 @@ def ATTACH_SUB_COMPONENT(SUBp):
                 goto_COMP_SLIP = False
                 g.VAL_P[I] = g.VAL_P[I] | 0x8;
                 if SUBp > 0: 
-                    ERROR(d.CLASS_SC, 4, g.VAR(g.MP));
+                    ERROR(d.CLASS_SC, 4, g.VAR[g.MP]);
                     SLIP_SUBSCRIPT(SUBp);
             elif pt == 2:
                 #  CHARACTER
@@ -92,7 +92,7 @@ def ATTACH_SUB_COMPONENT(SUBp):
             elif pt == 3:
                 #  MATRIX
                 if SUBp == 1: 
-                    ERROR(d.CLASS_SC, 5, g.VAR(g.MP));
+                    ERROR(d.CLASS_SC, 5, g.VAR[g.MP]);
                     SLIP_SUBSCRIPT(SUBp);
                 else: 
                     REDUCE_SUBSCRIPT(0x0, SHR(g.PSEUDO_LENGTH[I], 8), 2);

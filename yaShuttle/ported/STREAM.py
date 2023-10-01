@@ -19,7 +19,8 @@ import g
 import HALINCL.CERRDECL as d
 from OUTPUTGR import OUTPUT_GROUP
 from NEXTRECO import NEXT_RECORD
-from ORDEROK import ORDER_OK
+from ORDEROK  import ORDER_OK
+from SAVEINPU import SAVE_INPUT
 
 '''
  /***************************************************************************/
@@ -672,7 +673,7 @@ def STREAM():
                     ll.TMP_INCREMENT = g.INCREMENT_DOWN_STMT;
                     NEXT_RECORD();
                     g.LOOKED_RECORD_AHEAD = g.TRUE;
-                    if g.CARD_TYPE(BYTE(g.CURRENT_CARD)) == g.CARD_TYPE(BYTE('D')):
+                    if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] == g.CARD_TYPE[BYTE('D')]:
                         l.D_INDEX = 1;
                         ll.NEXT_DIR = D_TOKEN;
                         if ll.NEXT_DIR != 'DOWNGRADE' and ll.NEXT_DIR != 'OWNGRADE':
@@ -780,7 +781,7 @@ def STREAM():
                             pass
                     else:
                         g.CARD_COUNT = g.CARD_COUNT + 1;
-                        if g.CARD_TYPE(BYTE(g.CURRENT_CARD)) == g.CARD_TYPE(BYTE('D')):
+                        if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] == g.CARD_TYPE[BYTE('D')]:
                             l.D_INDEX = 1;
                             ll.C[0] = D_TOKEN;
                             if ll.C[0] == ll.INCLUDE_DIR:
@@ -1162,7 +1163,7 @@ def STREAM():
                                     g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL]);
                         g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = \
                             g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] + 1;
-                        if g.CONTROL(3):
+                        if g.CONTROL[3]:
                             MACRO_DIAGNOSTICS(1);
                         return;
                     elif goto_PARM_DONE or g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL]:
@@ -1176,7 +1177,7 @@ def STREAM():
                             continue
                         g.NEXT_CHAR = BYTE(g.X1);
                         g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.FALSE;
-                        if g.CONTROL(3):
+                        if g.CONTROL[3]:
                             MACRO_DIAGNOSTICS(2);
                         return;
                     else:
@@ -1192,14 +1193,14 @@ def STREAM():
                     else:
                         g.NEXT_CHAR = g.MACRO_TEXT(g.MACRO_POINT);
                     g.MACRO_POINT = g.MACRO_POINT + 1;
-                    if g.CONTROL(3):
+                    if g.CONTROL[3]:
                         MACRO_DIAGNOSTICS(3);
                     return;
                 if g.FIRST_TIME[g.MACRO_EXPAN_LEVEL]:
                     if not M_CENT[g.MACRO_EXPAN_LEVEL]:
                         g.FIRST_TIME[g.MACRO_EXPAN_LEVEL] = g.FALSE;
                         g.NEXT_CHAR = BYTE(g.X1);
-                        if g.CONTROL(3):
+                        if g.CONTROL[3]:
                             MACRO_DIAGNOSTICS(4);
                         return;
                 else:
@@ -1219,7 +1220,7 @@ def STREAM():
                 g.NEXT_CHAR = g.SAVE_NEXT_CHAR;
                 g.OVER_PUNCH = g.SAVE_OVER_PUNCH;
                 g.PRINTING_ENABLED = g.PRINT_FLAG;
-                if g.CONTROL(3):
+                if g.CONTROL[3]:
                     MACRO_DIAGNOSTICS(5);
                 return;
             else:

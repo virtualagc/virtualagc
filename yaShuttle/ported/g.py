@@ -41,43 +41,226 @@ FREEPOINT = 0  # Must be somewhat smaller than FREELIMIT
 # compiler, some of which I may allow to be altered by command-line parameters.
 # The names correspond to the documentation, as prefixed by 'p'.
 pOPTIONS_CODE = 0
-pCON = ["NOADDRS", "NODECK", "NODUMP", "NOHALMAT", "NOHIGHOPT", "NOLFXI",
-        "NOLIST", "NOLISTING2", "NOLSTALL", "NOMICROCODE", "NOPARSE",
-        "NOREGOPT", "NOSCAL", "NOSDL", "NOSREF", "NOSRN", "NOTABDMP",
-        "NOTABLES", "NOTABLST", "NOTEMPLATE", "NOVARSYM", "NOZCON", ""]
-pPRO = ["ADDRS", "DECK", "DUMP", "HALMAT", "HIGHOPT", "LFXI",
-        "LIST", "LISTING2", "LSTALL", "MICROCODE", "PARSE",
-        "REGOPT", "SCAL", "SDL", "SREF", "SRN", "TABDMP",
-        "TABLES", "TABLST", "TEMPLATE", "VARSYM", "ZCON", ""]
-pDESC = ["BLOCKSUM", "CARDTYPE", "COMPUNIT", "DSR", "LABELSIZE", "LINECT",
-         "LITSTRING", "MACROSIZE", "MFID", "OLDTPL", "PAGES", "SYMBOLS",
-         "TITLE", "XREFSIZE", ""]
-pVALS = [400, "", 0, 1, 1200, 59,
-         2500, 500, "", 0, 2500, 200,
-         "", 200]
+pCON = ["NOADDRS", "NODECK", "NODUMP", "NOHALMAT", "NOHIGHOPT", "LFXI",
+        "NOLIST", "NOLISTING2", "NOLSTALL", "MICROCODE", "NOPARSE",
+        "NOREGOPT", "SCAL", "NOSDL", "NOSREF", "NOSRN", "NOTABDMP",
+        "TABLES", "NOTABLST", "NOTEMPLATE", "NOVARSYM", "ZCON"]
+pPRO = [""] * len(pCON)
+# (See the comments for TYPE2_TYPE in INITIALI.py.)  Since we have no 
+# operating system to communicate the names and values of type 2 options to
+# us from the JCL, pDESC and pVALS provide those for us.
+pDESC = ["TITLE", "LINECT", "PAGES", "SYMBOLS", "MACROSIZE", "LITSTRING", 
+         "COMPUNIT", "XREFSIZE", "CARDTYPE", "LABELSIZE", "DSR", "BLOCKSUM", 
+         "MFID"]
+bfsDESC = pDESC.index("MFID")
+pVALS = ["", "59", "2500", "200", "500", "2500", "0", "2000", "", "1200", 
+         "1", "400", "0"]
 
-if '--bfs' in sys.argv:
-    pfs = False
-if '--sanity' in sys.argv:
-    SANITY_CHECK = True
-if '--debug3' in sys.argv:
-    debug3 = True  # Makes changes to CONTROL[] below.
-if '--help' in sys.argv:
-    print('This is PASS 1 of HAL/S-FC as ported to Python 3.')
-    print('Usage:')
-    print('\tHAL-S-FC.py [OPTIONS] <SOURCE.hal')
-    print('The allowed OPTIONS are:')
-    print('--pfs           Compile for PFS (PASS).')
-    print('--bfs           Compile for BFS. (Default is --pfs.)')
-    print('--debug3        Activate HAL/S-FC parser messages.')
-    print('--sanity        Perform a sanity check on the Python port.')
-    print('--help          Show this explanation.')
-    sys.exit(0)
+for parm in sys.argv[1:]:
+    if parm == '--bfs':
+        pfs = False
+        index = pDESC.index("MFID")
+        pDESC[bfsDESC] = "OLDTPL"
+        pVALS[bfsDESC] = 0
+    elif parm == '--sanity':
+        SANITY_CHECK = True
+    elif parm == '--debug3':
+        debug3 = True  # Makes changes to CONTROL[] below.
+    elif parm in pCON or ("NO" + parm) in pCON or \
+            (parm.startswith("NO") and parm[2:] in pCON):
+        # Type 1 option:
+        if parm in pCON:
+            index = pCON.index(parm)
+        elif parm.startswith("NO") and parm[2:] in pCON:
+            index = pCON.index(parm[2:])
+        else:
+            index = pCON.index("NO" + parm)
+        pCON[index] = parm
+    elif "=" in parm and parm.split("=")[0] in (pDESC + ["MFID", "OLDTPL"]):
+        # Type 2 option:
+        fields = parm.split("=")
+        if fields[0] in ["MFID", "OLDTPL"]:
+            index = bfsDESC
+        else:
+            index = pDESC.index(fields[0])
+        value = fields[1]
+        if index not in [0, 8]: # I.e., not TITLE or CARDTYPE
+            pVALS[index] = int(value)
+        else:
+            pVALS[index] = value
+    elif parm == '--help':
+        print('This is PASS 1 of HAL/S-FC as ported to Python 3.')
+        print('Usage:')
+        print('\tHAL-S-FC.py [OPTIONS] <SOURCE.hal')
+        print('The allowed "modern" OPTIONS are:')
+        print('--pfs           Compile for PFS (PASS).')
+        print('--bfs           Compile for BFS. (Default is --pfs.)')
+        print('--debug3        Activate HAL/S-FC parser messages.')
+        print('--sanity        Perform a sanity check on the Python port.')
+        print('--help          Show this explanation.')
+        print('Additionally, many of the options from the original JCL')
+        print('PARMLISTs can be used.  For "type 1" options (i.e., those')
+        print('without values), you can use either the form XXXX or NOXXXX,')
+        print('where XXXX is among these: ADDRS, DECK, DUMP, HALMAT, HIGHOPT,')
+        print('LFXI, LIST, LISTING2, LSTALL, MICROCODE, PARSE, REGOPT, SCAL,')
+        print('SDL, SREF, SRN, TABDMP, TABLES, TABLST, TEMPLATE, VARSYM, ZCON.')
+        print('If neither XXXX nor NOXXXX is specified, the following defaults')
+        print('are used:')
+        chunks = 5
+        chunk = (len(pCON) + chunks - 1) // chunks
+        for i in range(0, len(pCON), chunk):
+            for j in range(i, min(i + chunk, len(pCON))):
+                print("    %-10s" % pCON[j], end="")
+            print()
+        print('As for "type 2" options, i.e. those with values, they can be')
+        print('specified in the form XXXX=value, where the defaults for PFS')
+        print('are the following:')
+        chunks = 4
+        chunk = (len(pDESC) + chunks - 1) // chunks
+        for i in range(0, len(pDESC), chunk):
+            for j in range(i, min(i + chunk, len(pDESC))):
+                s = "%s=%s" % (pDESC[j], str(pVALS[j]))
+                print("    %-14s" % s, end="")
+            print()
+        print("For --bfs, OLDTPL=None is the default and MFID is unavailable.")
+        print("TITLE and CARDTYPE are strings; all others are integers.")
+        print('While these original options are syntactically allowed on the')
+        print('command line, this does not necessarily imply that they are all')
+        print('applicable to PHASE 1, nor that they are fully ported, nor that')
+        print('this comprises the complete list of all original options.')
+        sys.exit(0)
+    else:
+        print("Unrecognized command-line options:", parm)
+        print("Use --help for more information.")
+        sys.exit(1)
 
-# I believe that the variable PARM_FIELD, not defined anywhere in the XPL
-# source code, is the value of the PARM='...' string in the JCL.  Of course,
-# we have no JCL, but the command-line parameters are the equivalent.
-PARM_FIELD = ','.join(sys.argv[1:])
+'''
+The following code relates to determining and printing out the compiler
+options which have been supplied originally by JCL, but for us by 
+command-line options.  The available options are described by the "HAL/S-FC
+User's Manual" (chapter 5), while the organization of these in IBM 
+System/360 system memory (as we would need it to work with the following
+code) is described in the "HAL/S-FC and HAL/S-360 Compiler System Program 
+Description" (IR-182-1) around p. 696. In neither source is there an 
+explanation of how the options specifically relate to the bit-flags in
+the 32-bit variable OPTIONS_WORD, so whatever I know about that has been
+gleaned from looking at how the source code processes that word.
+    Flag          Pass         Keyword (abbreviation)
+    ----          ----         ----------------------
+    0x40000000    1            REGOPT (R) for BFS
+    0x10000000    3            DEBUG
+    0x08000000    3            DLIST
+    0x04000000    1            MICROCODE (MC)
+    0x02000000    1            REGOPT (R) for PFS
+    0x01000000    ?            STATISTICS
+    0x00800000    1            SDL (NONE)
+    0x00400000    4            DECK (D)
+    0x00200000    1            LFXI (NONE)
+    0x00100000    1            ADDRS (A)
+    0x00080000    1            SRN (NONE)
+    0x00040000    1            HALMAT (HM)
+    0x00020000    1            CODE_LISTING_REQUESTED
+    0x00010000    1            PARTIAL_PARSE
+    0x00008000    3,4          SDF_SUMMARY, TABLST (TL)
+    0x00004000    1            EXTRA_LISTING
+    0x00002000    1            SREF (SR)
+    0x00001000    3,4          TABDMP (TBD)
+    0x00000800    1            SIMULATING
+    0x00000400    1            Z_LINKAGE ... perhaps ZCON (Z)
+    0x00000200    ?            TRACE
+    0x00000080    3            HIGHOPT (HO)
+    0x00000040    1,2,4        NO_VM_OPT, ?, BRIEF
+    0x00000020    4            ALL
+    0x00000010    1            TEMPLATE (TP)
+    0x00000008    2,3          TRACE
+    0x00000004    1            LIST (L)
+    0x00000002    1            LISTING2 (L2)
+    ?                          DUMP (DP)
+    ?                          LSTALL (LA)
+    ?                          SCAL (SC) for BFS only
+    ?                          TABLES (TBL)
+    ?                          VARSYM (VS)
+'''
+
+if pfs:
+    regoptFlag = 0x02000000
+    scalFlag = None
+else:
+    regoptFlag = 0x40000000
+    scalFlag = None
+parmFlags = {
+    "REGOPT":        regoptFlag,
+    "DEBUG":         0x10000000,
+    "DLIST":         0x08000000,
+    "MICROCODE":     0x04000000,
+    "STATISTICS":    0x01000000,
+    "SDL":           0x00800000,
+    "DECK":          0x00400000,
+    "LXFI":          0x00200000,
+    "ADDRS":         0x00100000,
+    "SRN":           0x00080000,
+    "HALMAT":        0x00040000,
+    "CODE_LISTING_REQUESTED": 0x00020000,
+    "PARSE":         0x00010000,
+    "TABLST":        0x00008000,
+    "SDF_SUMMARY":   0x00008000,
+    "EXTRA_LISTING": 0x00004000,
+    "SREF":          0x00004000,
+    "TABDMP":        0x00001000,
+    "SIMULATING":    0x00000800,
+    "ZCON":          0x00000400,
+    "TRACE":         0x00000200,
+    "HIGHOPT":       0x00000080,
+    "NO_VM_OPT":     0x00000040,
+    "BRIEF":         0x00000040,
+    "LSTALL":        0x00000020,
+    "TEMPLATE":      0x00000010,
+    "TRACE":         0x00000008,
+    "LIST":          0x00000004,
+    "LISTING2":      0x00000002,
+    "DUMP":          None, # TBD
+    "LSTALL":        None, # TBD
+    "SCAL":          None, # TBD for BFS, none for PFS
+    "TABLES":        None, # TBD
+    "VARSYM":        None # TBD
+    }
+
+PARM_FIELD = ""
+def fixParm(option):
+    global pOPTIONS_CODE, pCON, PARM_FIELD
+    if option not in parmFlags:
+        return
+    if option in sys.argv[1:]:
+        NO = False
+        parm = option[:]
+    elif ("NO" + option) in sys.argv[1:]:
+        NO = True
+        parm = "NO" + option
+    else:
+        return
+    mask = parmFlags[option]
+    if mask == None:
+        return
+    if option in pCON:
+        index = pCON.index(option)
+        pOPTIONS_CODE |= mask
+    elif ("NO" + option) in pCON:
+        index = pCON.index("NO" + option)
+        pOPTIONS_CODE &= ~mask
+    else:
+        return
+    pCON[index] = parm
+    if len(PARM_FIELD) == 0:
+        PARM_FIELD = parm
+    else:
+        PARM_FIELD = PARM_FIELD + "," + parm
+    if NO:
+        pOPTIONS_CODE &= ~mask
+    else:
+        pOPTIONS_CODE |= mask
+
+for parm in parmFlags:
+    fixParm(parm)
 
 #------------------------------------------------------------------------------
 # Here's some stuff intended to functionally replace some of XPL's 'implicitly

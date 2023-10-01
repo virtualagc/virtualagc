@@ -35,6 +35,7 @@ from GETICQ   import GET_ICQ
 from GETLITER import GET_LITERAL
 from HALMATBA import HALMAT_BACKUP
 from HALMATF3 import HALMAT_FIX_PIPTAGS
+from HALMATFI import HALMAT_FIX_PIPp
 from HALMATOU import HALMAT_OUT
 from HALMATPI import HALMAT_PIP
 from HALMATPO import HALMAT_POP
@@ -48,6 +49,8 @@ from MULTIPLY import MULTIPLY_SYNTHESIZE
 from OUTPUTWR import OUTPUT_WRITER
 from PROCESS2 import PROCESS_CHECK
 from PUSHINDI import PUSH_INDIRECT
+from RESETARR import RESET_ARRAYNESS
+from SAVEARRA import SAVE_ARRAYNESS
 from SETBLOCK import SET_BLOCK_SRN
 from SETLABEL import SET_LABEL_TYPE
 from SETSYTEN import SET_SYT_ENTRIES
@@ -691,7 +694,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         HALMAT_POP(g.XXREC, 0, 0, 1);
         g.ATOMp_FAULT = -1;
         HALMAT_OUT();
-        FILE(g.LITFILE, g.CURLBLK, g.LIT1(0));
+        FILE(g.LITFILE, g.CURLBLK, bytearray(g.LIT1(0)));
         g.COMPILING = 0x80;
         g.STMT_PTR = g.STMT_PTR - 1;
     elif PRODUCTION_NUMBER == 2:  # reference 20
@@ -1093,8 +1096,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         if not goto_REGULAR_EXP:
                             g.TEMP2 = XSEXP;
                         goto_REGULAR_EXP = False
-                        g.PTR = 0;
-                        g.PSEUDO_TYPE = g.SCALAR_TYPE;
+                        g.PTR[0] = 0;
+                        g.PSEUDO_TYPE[0] = g.SCALAR_TYPE;
                         MATCH_SIMPLES(g.MP, 0);
                     elif g.PSEUDO_FORM[g.I] != g.XLIT:
                        g.TEMP2 = XSIEX;
@@ -1342,11 +1345,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         elif g.SYT_CLASS(g.BLOCK_SYTREF[g.NEST]) != g.FUNC_CLASS:
             ERROR(d.CLASS_PF, 2);
         else:
-            g.PTR = 0;
-            g.LOC_P = g.BLOCK_SYTREF[g.NEST];
-            g.PSEUDO_LENGTH[0] = g.VAR_LENGTH(LOC_P);
+            g.PTR[0] = 0;
+            g.LOC_P[0] = g.BLOCK_SYTREF[g.NEST];
+            g.PSEUDO_LENGTH[0] = g.VAR_LENGTH(g.LOC_P[0]);
             g.TEMP = g.SYT_TYPE(g.BLOCK_SYTREF[g.NEST]);
-            if (SHL(1, g.PSEUDO_TYPE[g.PTR[g.MPP1]]) & ASSIGN_TYPE(g.TEMP)) == 0:
+            if (SHL(1, g.PSEUDO_TYPE[g.PTR[g.MPP1]]) & g.ASSIGN_TYPE[g.TEMP]) == 0:
                 ERROR(d.CLASS_PF, 4);
         # DO CASE TEMP;
         if g.TEMP in (0, 1, 2):
@@ -1374,14 +1377,14 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         didl = g.DO_INX[g.DO_LEVEL] & 0x7F
         if didl == 0:
             # SIMPLE DO
-            g.TEMP = XESMP;
+            g.TEMP = g.QUALIFICATION;
         elif didl == 1:
             # DO FOR
-            g.TEMP = XEFOR;
+            g.TEMP = g.QUALIFICATION;
         elif didl == 2:
             # DO CASE
             HALMAT_FIX_POPTAG(g.FIXV[g.MP], 1);
-            g.TEMP = XECAS;
+            g.TEMP = g.QUALIFICATION;
             g.INFORMATION = '';
             g.CASE_LEVEL = g.CASE_LEVEL - 1;
         elif didl == 3:
@@ -2050,7 +2053,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.TEMP = g.DEFAULT_ATTR & g.SD_FLAGS;
         g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.TEMP);
         g.FIXL[g.MP] = g.ID_LOC
-        g.DO_CHAIN = g.ID_LOC;
+        g.DO_CHAIN[0] = g.ID_LOC;
         g.FIXF[g.MP] = 8;  # DO CHAIN EXISTS FOR CURRENT DO
         g.CONTEXT = 0;
         g.FACTORING = g.TRUE;
@@ -2174,7 +2177,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if (g.SYT_FLAGS(g.I) & g.ACCESS_FLAG) != 0:
             ERROR(d.CLASS_PS, 6, g.VAR[g.MPP1]);
         g.XSET(0x2);
-        g.FCN_ARG = 0;
+        g.FCN_ARG[0] = 0;
         g.PTR[g.MP] = g.PTR[g.MPP1];
         SET_XREF_RORS(g.SP, 0x6000);
         if g.INLINE_LEVEL > 0: 
@@ -3107,7 +3110,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     OUTPUT_WRITER();
                     g.LAST_WRITE = 0;
                     g.INDENT_LEVEL = g.INDENT_LEVEL + g.ATTR_INDENT;
-        if INIT_EMISSION: 
+        if g.INIT_EMISSION: 
             g.INIT_EMISSION = g.FALSE;
             EMIT_SMRK(0);
     elif PRODUCTION_NUMBER == 349:  # reference 3490
@@ -3794,7 +3797,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif goto_ASSIGNING or goto_END_ASSIGN or \
             PRODUCTION_NUMBER == 136:  # reference 1360
         # <ASSIGNMENT>::=<VARIABLE><=1><EXPRESSION>
-        if not ASSIGNING and not END_ASSIGN:
+        if not goto_ASSIGNING and not goto_END_ASSIGN:
             g.INX[g.PTR[g.SP]] = 2;
             if g.NAME_PSEUDOS: 
                 NAME_COMPARE(g.MP, g.SP, d.CLASS_AV, 5);
@@ -3803,7 +3806,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_AA, 1);
                 goto_END_ASSIGN = True
             else:
-                if RESET_ARRAYNESS > 2: 
+                if RESET_ARRAYNESS() > 2: 
                     ERROR(d.CLASS_AA, 1);
                 HALMAT_TUPLE(g.XXASN[g.PSEUDO_TYPE[g.PTR[g.SP]]], 0, g.SP, g.MP, 0);
         if not goto_END_ASSIGN:
@@ -3814,7 +3817,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     g.TEMP2 = GET_LITERAL(g.LOC_P[g.PTR[g.SP]]);
                     if g.LIT2(g.TEMP2) == 0: 
                         g.TEMP = 0;
-            if (SHL(1, g.TEMP) & ASSIGN_TYPE(g.PSEUDO_TYPE[g.PTR[g.MP]])) == 0:
+            if (SHL(1, g.TEMP) & g.ASSIGN_TYPE[g.PSEUDO_TYPE[g.PTR[g.MP]]]) == 0:
                 ERROR(d.CLASS_AV, 1, g.VAR[g.MP]);
             elif g.TEMP > 0: 
                 # DO CASE PSEUDO_TYPE[PTR[MP]];
@@ -3905,7 +3908,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if not goto_DO_DONE:
             g.XSET(0x11);
             g.FIXL[g.MPP1] = 0;
-            HALMAT_POP(XDSMP, 1, 0, 0);
+            HALMAT_POP(g.QUALIFICATION, 1, 0, 0);
             EMIT_PUSH_DO(0, 1, 0, g.MP - 1);
         goto_DO_DONE = False
         g.FIXV[g.MP] = 0;
@@ -4059,7 +4062,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <CALL ASSIGN LIST> ::= <VARIABLE>
         if g.INLINE_LEVEL == 0 or goto_ASSIGN_ARG:
             goto_ASSIGN_ARG = False
-            g.FCN_ARG = g.FCN_ARG + 1;
+            g.FCN_ARG[0] = g.FCN_ARG[0] + 1;
             HALMAT_TUPLE(g.XXXAR, g.XCO_N, g.SP, 0, 0);
             HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, g.PSEUDO_TYPE[g.PTR[g.SP]] | \
                                SHL(g.NAME_PSEUDOS, 7), 1);

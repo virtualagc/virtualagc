@@ -39,13 +39,13 @@ def hround(x):
 # Here's some stuff intended to functionally replace some of XPL's 'implicitly
 # declared' functions and variables while retaining roughly the same syntax.
 
-# Here's are lists of all open files, by their "device number". If the device
-# isn't open, then the entry in the inputDevices[] and/or outputDevices[] 
-# array(s) is a Python None.  Note that the behavior of output files 0 and 1
+# Here's are lists of all open "devices", by their "device number". If the 
+# device isn't open, then the entry in the inputDevices[] and/or outputDevices[] 
+# array(s) is a Python None.  Note that the behavior of output devices 0 and 1
 # (both stdout) are hard-coded in the OUTPUT function and bypass the 
 # inputDevices[] list entirely.
 #
-# When there is file associated with the entry, the value will be a
+# When there is Python file associated with the device, the value will be a
 # Python dictionary structured as follows:
 #    {
 #        "file":   The associated Python file object,
@@ -73,6 +73,24 @@ def hround(x):
 # "member names", each of which is precisely 8 characters long (including 
 # padding by spaces on the right).  The value associated with a member key is 
 # the entire contents of that member as a list of strings.
+#
+# NOTE: It took me a good long time to figure this out, but the
+# input and output "devices" which are accessed via the INPUT and OUTPUT
+# statements are *separate* from the random-access files accessed by READ
+# and WRITE statements.  What really puzzled me was that device 2 is used for
+# outputting LISTING2, whereas file 2 is used for inputting and outputting to
+# the LITFILE.  But finally I did figure it out, fortunately.  If you look at
+# sample JCL, you'll see that all of these have separate DD cards defining
+# them.  We simply open 6 random-access files called "HAL-S-FC.file1" through
+# "HAL-S-FC.file2" and then wash our hands of the matter.
+
+# The entries of the files[] array are 3-lists of the open random-access file 
+# pointer, the record size, and the current file size (in bytes).
+files = [None]
+for i in range(1, 7):
+    f = open("FILE%d.bin" % i, "a+b")
+    f.seek(2, 0)
+    files.append([f, 7200, f.tell()])
 
 inputDevices = [None]*10
 outputDevices = [None]*10
@@ -82,8 +100,9 @@ outputDevices = [None]*10
 if False: # Normal
     f = sys.stdin
 else:    # Debugging
-    #f = open("SIMPLE.hal", "r")
-    f = open("/home/rburkey/git/virtualagc/yaShuttle/Source Code/Programming in HAL-S/021-SIMPLE.hal", "r")
+    f = open("SIMPLE.hal", "r")
+    #f = open("/home/rburkey/git/virtualagc/yaShuttle/Source Code/Programming in HAL-S/021-SIMPLE.hal", "r")
+    #f = open("/home/rburkey/git/virtualagc/yaShuttle/Source Code/Programming in HAL-S/091-NEWTON_SQRT.hal", "r")
 dummy = f.readlines() # Source code.
 for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬","~")\
@@ -95,22 +114,12 @@ inputDevices[0] = {
     "ptr":  -1,
     "blob":  dummy
     }
-f = open("LITFILE.bin", "a+") # File of literals.
-reclen = 130
-dummy = []
-while True:
-    chunk = f.read(reclen)
-    if len(chunk) == reclen:
-        dummy.append(bytearray(chunk))
-    else:
-        break
-inputDevices[2] = {
+f = open("LISTING2.hal", "w") # Secondary output listing
+outputDevices[2] = {
     "file": f,
-    "reclen": reclen,
     "open": True,
-    "random": dummy
+    "blob": []
     }
-outputDevices[2] = inputDevices[2]
 f = open("ERRORLIB.json", "r") # File of error message types.
 dummy = json.load(f)
 inputDevices[5] = {
@@ -154,7 +163,7 @@ compilationReturnBits = 0
 namePassedToCompiler = ""
 def MONITOR(function, arg2=None, arg3=None):
     global inputDevices, outputDevices, dwArea, compilationReturnBits, \
-            namePassedToCompiler
+            namePassedToCompiler, files
     
     def error(msg=''):
         if len(msg) > 0:
@@ -227,7 +236,8 @@ def MONITOR(function, arg2=None, arg3=None):
         close(n)
     
     elif function == 4:
-        pass
+        # Change block size of a random-access file.
+        files[arg2][1] = arg3
     
     elif function == 5:
         # This is modified from the documented form of MONITOR(5,ADDR(DW))
@@ -447,7 +457,7 @@ def OUTPUT(fileNumber, string):
         pass
     elif fileNumber == 8:
         pass
-    elif fileNumber == 9:
+    elif fileNumber in [2, 9]:
         if outputDevices[fileNumber]["open"] and \
                 "blob" in outputDevices[fileNumber]:
             f.write(string + '\n')
@@ -501,30 +511,33 @@ def INPUT(fileNumber):
         return None
 
 # The value parameter, if any, must be a byte array of the proper length for
-# the device.  Similarly for the return value.
+# the device.  Similarly for the return value.  
 def FILE(fileNumber, recordNumber, value=None):
+    global files
+    if fileNumber < 1 or fileNumber >= len(files):
+        return None
+    f = files[fileNumber][0]
+    reclen = files[fileNumber][1]
+    size = files[fileNumber][2]
+    desiredSize = recordNumber * reclen + reclen
     if value == None:
         # Input
-        if "random" not in inputDevices[fileNumber]:
-            return None
-        reclen = bytearray[[0]*outputDevices[fileNumber]["reclen"]]
-        if recordNumber >= reclen:
+        if desiredSize > size:
             return bytearray([0]*reclen)
-        return inputDevices[fileNumber]["random"][recordNumber]
+        f.seek(recordNumber * reclen, 0)
+        return bytearray(f.read(reclen))
     # Output
-    if not isinstance(outputDevices[fileNumber], dict) or \
-            "random" not in outputDevices[fileNumber]:
-        return
-    dummy = outputDevices[fileNumber]["random"]
-    reclen = outputDevices[fileNumber]["reclen"]
-    while recordNumber >= len(dummy):
-        dummy.append(None)
-    dummy[recordNumber] = value.copy()[0:reclen]
-    while len(dummy[recordNumber]) < reclen:
-        dummy[recordNumber].append(0)
-    # I don't actually know how to handle this case ... come back to it later.
-    #outputDevices[fileNumber]["file"].write(dummy[recordNumber])
-    return
+    if size < desiredSize:
+        f.seek(0,2)
+        f.write(bytearray([0] * (desiredSize - size)))
+        size = desiredSize
+        files[fileNumber][2] = size
+    f.seek(recordNumber * reclen)
+    if len(value) < reclen:
+        value = value + bytearray([0] * (reclen - len(value)))
+    elif len(value) > reclen:
+        value = value[:reclen]
+    f.write(value)
 
 # For XPL's DATE and TIME 'variables'.  DATE = (1000*(year-1900))+DayOfTheYear,
 # while TIME=NumberOfCentisecondsSinceMidnight.  The timezone isn't specified

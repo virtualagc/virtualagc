@@ -74,22 +74,22 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
             if l.TEMP_STMT == DWN_STMT(l.DOWN_COUNT):
                 if l.SEVERITY == 1:
                     l.SEVERITY = 0;
-                    OUTPUT(0, AST + ' THE FOLLOWING ERROR WAS DOWNGRADED FROM A ' + \
-                             'SEVERITY ONE ERROR TO A SEVERITY ZERO ERROR ' + AST);
+                    OUTPUT(0, l.AST + ' THE FOLLOWING ERROR WAS DOWNGRADED FROM A ' + \
+                             'SEVERITY ONE ERROR TO A SEVERITY ZERO ERROR ' + l.AST);
                     l.FOUND = 1;
                     # NOTE THAT THE ERROR WAS DOWNGRADED SUCCESSFULLY  
                     DWN_VER(l.DOWN_COUNT, '1');
             else:
-                OUTPUT(0, AST + ' AN ATTEMPT WAS MADE TO DOWNGRADE AN ' + 
+                OUTPUT(0, l.AST + ' AN ATTEMPT WAS MADE TO DOWNGRADE AN ' + 
                            'ERROR OTHER THAN A SEVERITY ONE ERROR ' + 
-                           'REMOVE DOWNGRADE DIRECTIVE AND RECOMPILE ' + AST);
+                           'REMOVE DOWNGRADE DIRECTIVE AND RECOMPILE ' + l.AST);
                 l.SEVERITY = 2;
                 l.FOUND = 1;
         l.DOWN_COUNT = l.DOWN_COUNT + 1;
-    OUTPUT(1, '0' + AST + l.C + ' ERROR #' + str(ERRORp) + ' OF SEVERITY ' + \
-                  str(l.SEVERITY) + ' OCCURRED ' + AST);
-    OUTPUT(0, AST + ' DURING CONVERSION OF HAL/S STATEMENT ' + 
-                str(STMTp()) + '.' + AST);
+    OUTPUT(1, '0' + l.AST + l.C + ' ERROR #' + str(ERRORp) + ' OF SEVERITY ' + \
+                  str(l.SEVERITY) + ' OCCURRED ' + l.AST);
+    OUTPUT(0, l.AST + ' DURING CONVERSION OF HAL/S STATEMENT ' + 
+                str(STMTp) + '.' + l.AST);
     l.S = INPUT(l.ERRORFILE);
     if LENGTH(TEXT) > 0:
         l.IMBED = g.TRUE;
@@ -102,7 +102,7 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
                 else:
                     l.S = SUBSTR(l.S, 0, l.K) + TEXT + SUBSTR(l.S, l.K + 2);
                 l.IMBED = g.FALSE;
-        OUTPUT(0, AST + l.S);
+        OUTPUT(0, l.AST + l.S);
         l.S = INPUT(l.ERRORFILE);
     TEXT = '';
     # TREAT l.SEVERITY 1 ERRORS AS WARNINGS 

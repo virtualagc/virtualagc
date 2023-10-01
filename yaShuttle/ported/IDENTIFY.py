@@ -13,12 +13,14 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h  # For debugging.
 import HALINCL.CERRDECL as d
+import HALINCL.SPACELIB as s
 from ERROR import ERROR
 from HASH import HASH
 from HALINCL.ENTER import ENTER
 from SETXREF import SET_XREF
 from BUFFERMA import BUFFER_MACRO_XREF
 from HALINCL.SETDUPLF import SET_DUPL_FLAG
+
 
 '''
  /***************************************************************************/
@@ -269,13 +271,13 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                 if l.L <= g.BI_LIMIT:
                     for l.J in range(g.BI_INDEX[l.L - 1], g.BI_INDEX[l.L]):
                         if PAD(BCD, 10) == SUBSTR(g.BI_NAME[g.BI_INDX[l.J]], g.BI_LOC[l.J], 10):
-                            g.SYT_TYPE(RECORD_TOP(SYM_TAB), SHR(g.BI_INFO[l.J], 24));
-                            l.I = RECORD_TOP(SYM_TAB);
-                            g.SYT_INDEX = l.J + SYT_MAX - l.I;
+                            g.SYT_TYPE(s.RECORD_TOP(h.SYM_TAB), SHR(g.BI_INFO[l.J], 24));
+                            l.I = s.RECORD_TOP(h.SYM_TAB);
+                            g.SYT_INDEX = l.J + g.SYT_MAX - l.I;
                             if g.IMPLIED_TYPE != 0:
                                 g.IMPLIED_TYPE = 0;
                                 ERROR(d.CLASS_MC, 2);
-                            if QUALIFICATION > 0:
+                            if g.QUALIFICATION > 0:
                                 goto_Q_TRAP = True;
                             elif (g.BI_INFO[l.J] & 0xFF0000) == 0:
                                 goto_BUILT_IN = True;
