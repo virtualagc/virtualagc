@@ -55,24 +55,25 @@ from HALINCL.SAVELITE import SAVE_LITERAL
  /***************************************************************************/
 '''
 
+
 def ADD_AND_SUBTRACT(MODE):
     # Persistence not required.
-    al = ARITH_LITERAL(g.MP,SP)
+    al = ARITH_LITERAL(g.MP, g.SP)
     goto_AS_FAIL = False
     if al: 
-        if MONITOR(9,MODE+1):
-            ERROR(d.CLASS_VA,MODE+1);
+        if MONITOR(9, MODE + 1):
+            ERROR(d.CLASS_VA, MODE + 1);
             goto_AS_FAIL = True
-        g.LOC_P[g.PTR[g.MP]]=SAVE_LITERAL(1,DW_AD);
-        g.PSEUDO_TYPE[g.PTR[g.MP]]=LIT_RESULT_TYPE(g.MP,g.SP);
+        g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD);
+        g.PSEUDO_TYPE[g.PTR[g.MP]] = LIT_RESULT_TYPE(g.MP, g.SP);
     if goto_AS_FAIL or not al:
         goto_AS_FAIL = False
-        MATCH_ARITH(g.MP,g.SP);
-        g.TEMP=g.PSEUDO_TYPE[g.PTR[g.MP]];
+        MATCH_ARITH(g.MP, g.SP);
+        g.TEMP = g.PSEUDO_TYPE[g.PTR[g.MP]];
         if MODE == 0:
-            MODE=g.XMADD[g.TEMP-g.MAT_TYPE];
+            MODE = g.XMADD(g.TEMP - g.MAT_TYPE);
         elif MODE == 1:
-            MODE=g.XMSUB[g.TEMP-g.MAT_TYPE];
-        HALMAT_TUPLE(MODE,0,g.MP,g.SP,0);
-        SETUP_VAC(g.MP,g.TEMP);
-    g.PTR_TOP=g.PTR[g.MP];
+            MODE = g.XMSUB(g.TEMP - g.MAT_TYPE);
+        HALMAT_TUPLE(MODE, 0, g.MP, g.SP, 0);
+        SETUP_VAC(g.MP, g.TEMP);
+    g.PTR_TOP = g.PTR[g.MP];

@@ -21,7 +21,10 @@ from SETTLIMI import SET_T_LIMIT
 from ORDEROK import ORDER_OK
 from SOURCECO import SOURCE_COMPARE
 from STREAM import STREAM
-from SCAN import SCAN
+if g.scan1:
+    from SCAN1 import SCAN
+else:
+    from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE
 from HALINCL.CERRDECL import CLASS_BI
 # from HALINCL.SPACELIB import g.RECORD_USED

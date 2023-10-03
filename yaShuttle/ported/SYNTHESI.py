@@ -9,6 +9,9 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-12 RSB  Began porting from XPL
 '''
 
+import sys
+noSyn = ("--no-syn" in sys.argv[1:])
+
 from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
@@ -501,7 +504,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     if g.CONTROL[8]:
         OUTPUT(0, '->->->->->->PRODUCTION NUMBER ' + str(PRODUCTION_NUMBER))
         
-    if False:
+    if noSyn:
         # This is just to simplify debugging of SCAN. Bypass in production.
         if PRODUCTION_NUMBER == 1: 
             # <COMPILATION>::= <COMPILE LIST> _|_
@@ -2962,7 +2965,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PARMS_PRESENT = g.PARMS_PRESENT + 1;
     elif PRODUCTION_NUMBER == 331:  # reference 3310
         #  <ASSIGN LIST>  ::=  <ASSIGN>  <PARAMETER LIST>
-        pase;
+        pass;
     elif PRODUCTION_NUMBER == 332:  # reference 3320
         #  <ASSIGN>  ::=  ASSIGN
         if g.CONTEXT == g.PARM_CONTEXT: 
@@ -3917,7 +3920,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # SIMPLE DO.  IF AN IF-THEN OR ELSE WAS THE PREVIOUS STATEMENT
         # PRINT THE DO ON THE SAME LINE USING SRN & STATEMENT NUMBER
         # FROM IF-THEN OR ELSE.
-        if (g.IF_FLAG | g.ELSE_FLAG) and (PRODUCTION_NUMBER == 144):
+        if (g.IF_FLAG or g.ELSE_FLAG) and (PRODUCTION_NUMBER == 144):
             g.SQUEEZING = g.FALSE;
             g.SAVE_SRN2 = g.SRN[2][:];
             g.SRN[2] = g.SAVE_SRN1[:];

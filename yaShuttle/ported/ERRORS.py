@@ -43,7 +43,7 @@ from ALMOST_DISASTER import ALMOST_DISASTER
  /***************************************************************************/
 '''
 
-def ERRORS(CLASS, NUM, TEXT):  # HANDLES ONCE QUIET MESSAGES
+def ERRORS(CLASS, NUM, TEXT = ''):  # HANDLES ONCE QUIET MESSAGES
     # The only local, SEVERITY, doesn't require persistence.
     
     g.ERROR_COUNT = g.ERROR_COUNT + 1;

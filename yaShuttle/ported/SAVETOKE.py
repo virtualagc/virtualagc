@@ -114,33 +114,33 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
         g.BCD_PTR = 0;
         for g.STMT_PTR in range(0, g.STMT_PTR - PTR + 1):
             g.I = g.STMT_PTR + PTR;
-            g.STMT_STACK[g.STMT_PTR] = g.STMT_STACK[I];
-            g.RVL_STACK1[g.STMT_PTR] = g.RVL_STACK1[I];
-            g.RVL_STACK2[g.STMT_PTR] = g.RVL_STACK2[I];
-            g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[I];
-            g.TOKEN_FLAGS[g.STMT_PTR] = g.TOKEN_FLAGS[I];
-            g.ERROR_PTR[g.STMT_PTR] = g.ERROR_PTR[I];
+            g.STMT_STACK[g.STMT_PTR] = g.STMT_STACK[g.I];
+            g.RVL_STACK1[g.STMT_PTR] = g.RVL_STACK1[g.I];
+            g.RVL_STACK2[g.STMT_PTR] = g.RVL_STACK2[g.I];
+            g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.I];
+            g.TOKEN_FLAGS[g.STMT_PTR] = g.TOKEN_FLAGS[g.I];
+            g.ERROR_PTR[g.STMT_PTR] = g.ERROR_PTR[g.I];
             if SHR(g.TOKEN_FLAGS[g.STMT_PTR], 6) != 0:
                 g.BCD_PTR = g.BCD_PTR + 1;
-                g.SAVE_BCD[BCD_PTR] = \
+                g.SAVE_BCD[g.BCD_PTR] = \
                     g.SAVE_BCD[SHR(g.TOKEN_FLAGS[g.STMT_PTR], 6)][:];
                 g.TOKEN_FLAGS[g.STMT_PTR] = (g.TOKEN_FLAGS[g.STMT_PTR] & 0x3F) \
                                                 | SHL(g.BCD_PTR, 6);
         if g.FACTOR_FOUND:
             g.GRAMMAR_FLAGS[1] = g.GRAMMAR_FLAGS[1] | g.ATTR_BEGIN_FLAG;
-        for I in range(0, g.SP):
-            if g.STACK_PTR[I] < PTR:
-                if not (g.FACTORING & g.STACK_PTR[I] == 1):
-                    g.STACK_PTR[I] = -1;
+        for g.I in range(0, g.SP):
+            if g.STACK_PTR[g.I] < PTR:
+                if not (g.FACTORING & g.STACK_PTR[g.I] == 1):
+                    g.STACK_PTR[g.I] = -1;
             else:
-                g.STACK_PTR[I] = g.STACK_PTR[I] - PTR;
+                g.STACK_PTR[g.I] = g.STACK_PTR[g.I] - PTR;
         if g.ELSEIF_PTR < PTR:
             g.ELSEIF_PTR = -1;
         else:
             g.ELSEIF_PTR = g.ELSEIF_PTR - PTR;
-        for I in range(2, PTR_TOP + 1):
-            if g.EXT_P[I] != 0:
-                g.EXT_P[I] = g.EXT_P[I] - PTR;
+        for g.I in range(2, PTR_TOP + 1):
+            if g.EXT_P[g.I] != 0:
+                g.EXT_P[g.I] = g.EXT_P[g.I] - PTR;
     
     g.STMT_PTR = g.STMT_PTR + 1;
     goto_STMT_PTR_CHECK = True

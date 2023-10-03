@@ -316,3 +316,13 @@ found in the PASS 1 monitor module, `##DRIVER`.  The construction in question is
     TYPE(TYPE)
 </pre>
 If `TYPE` has the value 0, then in array terms `TYPE(TYPE)` would refer to `TYPE` itself; i.e., `TYPE(TYPE)` would be 0.  Whereas if `TYPE==1`, then `TYPE(TYPE)` would be `BIT_LENGTH`.  If `TYPE==2`, then `TYPE(TYPE)` would be `CHAR_LENGTH`.  And so on, right up to `TYPE==19`, where `TYPE(TYPE)` corresponds to `S_ARRAY(3)`.  It's hard to deal with slapdash stuff such as this in a uniform way in Python.  In this case, I introduce a function I call `TYPEf()`, used solely as `TYPEf(TYPE)`.  Other absurdities involving `TYPE` and its kissing cousing `FACTORED_TYPE` are handled using other methods.
+
+## Conditional Code in XPL
+
+In the XPL, you occasionally find code enclosed between an opening delimiter like "`/?X`" and a closing delimiter like "`?/`", where `X` represents one `A`, `B`, `C`, or `P`.  I interpret this as being conditionally-included code, and `X` as representing some particular condition for inclusion.
+
+  * `/?A ... ?/` &mdash; TBD.  This is used only within the module HALINCL/SPACELIB, and the conditional code often (perhaps always) appears to relate to the printing of certain kinds of messages.  But I don't understand SPACELIB, so it's hard to be sure.
+  * `/?B ... ?/` &mdash; For conditional code exclusive to the backup flight software.
+  * `/?C ... ?/` &mdash; TBD.  This is used only within the `COMPACTIFY` procedure in the module HALINCL/SPACELIB, and the conditional code only appears to be the printing of certain messages possibly useful in debugging.
+  * `/?P ... ?/` &mdash; For conditional code exclusive to the primary flight software.
+

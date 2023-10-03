@@ -49,6 +49,8 @@ ARITH_VALID = (0b0001, 0b0010, 0b1100, 0b1100)
 
 
 def MATCH_ARITH(LOC1, LOC2):
+    # Local: I, ARITH_VALID
+    
     I = g.PSEUDO_TYPE[g.PTR[LOC1]] - g.MAT_TYPE;
     if (SHL(1, g.PSEUDO_TYPE[g.PTR[LOC2]] - g.MAT_TYPE) & ARITH_VALID[I]) == 0:
         ERROR(d.CLASS_E, 6);

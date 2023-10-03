@@ -71,7 +71,9 @@ from BLANK import BLANK
  /***************************************************************************/
 '''
 
-class cEMIT_EXTERNAL: # Local variables for EMIT_EXTERNAL
+
+class cEMIT_EXTERNAL:  # Local variables for EMIT_EXTERNAL
+
     def __init__(self):
         self.NEWBUFF = ''
         self.OLDBUFF = ''
@@ -84,10 +86,13 @@ class cEMIT_EXTERNAL: # Local variables for EMIT_EXTERNAL
         if not g.pfs:
             # BFS/PASS INTERFACE; FIX COMPOOL RIGID BUG
             self.BLANK_NEEDED = g.TRUE
+
+
 lEMIT_EXTERNAL = cEMIT_EXTERNAL()
 
+
 def EMIT_EXTERNAL():
-    l = lEMIT_EXTERNAL # Local variables.
+    l = lEMIT_EXTERNAL  # Local variables.
     
     def EX_WRITE():
         # No locals.
@@ -95,23 +100,23 @@ def EMIT_EXTERNAL():
         if g.TPL_FLAG == 0:
             pass
         elif g.TPL_FLAG == 1:
-            if l.NEWBUFF!=SUBSTR(l.OLDBUFF,0,g.TPL_LRECL):
-                g.TPL_FLAG=2;
+            if l.NEWBUFF != SUBSTR(l.OLDBUFF, 0, g.TPL_LRECL):
+                g.TPL_FLAG = 2;
             else:
-                l.OLDBUFF=INPUT(7);
-        elif g.TPL_FLAG in [2,3]:
+                l.OLDBUFF = INPUT(7);
+        elif g.TPL_FLAG in [2, 3]:
             pass
     
     def ADD_CHAR(VAL):
         # No locals.
-        l.NEWBUFF = BYTE(l.NEWBUFF, l.BINX,  VAL);
+        l.NEWBUFF = BYTE(l.NEWBUFF, l.BINX, VAL);
         l.BINX = l.BINX + 1;
         if l.BINX == g.TPL_LRECL:
             EX_WRITE();
             l.NEWBUFF = BLANK(l.NEWBUFF, 0, g.TPL_LRECL);
             l.BINX = 1;
     
-    #DO CASE EXTERNALIZE;
+    # DO CASE EXTERNALIZE;
     if g.EXTERNALIZE == 0:
         #  NOT OPERATING
         pass
@@ -133,25 +138,25 @@ def EMIT_EXTERNAL():
                     a numerical value, and that that numerical value is 1 when 
                     the expression is true or 0 when it is false.
                     '''
-                    mt = g.MACRO_TEXT(l.I+1)
-                    if g.MACRO_TEXT(l.I+1)!=0:
+                    mt = g.MACRO_TEXT(l.I + 1)
+                    if g.MACRO_TEXT(l.I + 1) != 0:
                         mt += 1
                     for l.J in range(1, mt + 1):
                         ADD_CHAR(BYTE(g.X1));
                     l.I = l.I + 1;
                 else:
-                    ADD_CHAR(l.J); # NORMAL TEXT 
+                    ADD_CHAR(l.J);  # NORMAL TEXT 
                 l.I = l.I + 1;
                 l.J = g.MACRO_TEXT(l.I);
             # END OF WHILE NOT "EF"
             ADD_CHAR(BYTE('"'));
-            if not pfs:
+            if not g.pfs:
                 # BFS/PASS INTERFACE; DELETE EXTRA BLANKS IN TEMPLATE
                 l.BLANK_NEEDED = g.TRUE;
         # END OF TOKEN = REPLACE_TEXT
         elif g.RESERVED_WORD:
             l.CHAR = STRING(g.VOCAB_INDEX[g.TOKEN]);
-            if not pfs:
+            if not g.pfs:
                 # BFS/PASS INTERFACE; DELETE EXTRA BLANKS IN TEMPLATE
                 if LENGTH(l.CHAR) == 1:
                     l.BLANK_NEEDED = g.FALSE;
@@ -164,7 +169,7 @@ def EMIT_EXTERNAL():
         elif g.TOKEN == g.CHARACTER_STRING:
             ADD_CHAR(BYTE(g.SQUOTE));
             l.I = 0;
-            l.J = BYTE(BCD, l.I);
+            l.J = BYTE(g.BCD, l.I);
             goto_INCR_PTR = False
             firstTry = True
             while firstTry or goto_INCR_PTR:
@@ -187,68 +192,68 @@ def EMIT_EXTERNAL():
                     ADD_CHAR(BYTE(g.SQUOTE));
                     goto_INCR_PTR = True
                     continue
-            if not pfs:
+            if not g.pfs:
                 # BFS/PASS INTERFACE; DELETE EXTRA BLANKS IN TEMPLATE
                 l.BLANK_NEEDED = g.FALSE;
         # END OF TOKEN = CHARACTER_STRING
-        else:   # TOKEN = ANYTHING ELSE
-            if not pfs:
+        else:  # TOKEN = ANYTHING ELSE
+            if not g.pfs:
                 # BFS/PASS INTERFACE; DELETE EXTRA BLANKS IN TEMPLATE
                 if l.BLANK_NEEDED:
                     ADD_CHAR(BYTE(g.X1));
             for l.I in range(0, LENGTH(g.BCD)):
                 ADD_CHAR(BYTE(g.BCD, l.I));
-            if not pfs:
+            if not g.pfs:
                 # BFS/PASS INTERFACE; DELETE EXTRA BLANKS IN TEMPLATE
                 l.BLANK_NEEDED = g.TRUE;
         # END OF TOKEN = ANYTHING ELSE
-        if pfs:
+        if g.pfs:
             # BFS/PASS INTERFACE; DELETE EXTRA BLANKS IN TEMPLATE FOR BFS
-            ADD_CHAR(BYTE(g.X1));    # SPACE BETWEEN TOKENS
+            ADD_CHAR(BYTE(g.X1));  # SPACE BETWEEN TOKENS
         # END OF RUNNING
     elif g.EXTERNALIZE == 2:
         #  STOPPING
-        if l.BINX>1:
+        if l.BINX > 1:
             EX_WRITE();
-        l.NEWBUFF=PAD(' CLOSE ;   ',g.TPL_LRECL);
+        l.NEWBUFF = PAD(' CLOSE ;   ', g.TPL_LRECL);
         EX_WRITE();
-        g.EXTERNALIZE=0;
-        if g.TPL_FLAG==3:
+        g.EXTERNALIZE = 0;
+        if g.TPL_FLAG == 3:
             return;
-        if g.TPL_FLAG==0:
+        if g.TPL_FLAG == 0:
             l.J = 0x01
-            l.VERSION = BYTE(l.VERSION,10, 0x01);
+            l.VERSION = BYTE(l.VERSION, 10, 0x01);
         else:
-            while LENGTH(l.OLDBUFF)>0:
-                l.NEWBUFF=l.OLDBUFF;
-                l.OLDBUFF=INPUT(7);
+            while LENGTH(l.OLDBUFF) > 0:
+                l.NEWBUFF = l.OLDBUFF;
+                l.OLDBUFF = INPUT(7);
             MONITOR(3, 7);  # CLOSE THE TEMPLATE FILE
-            if SUBSTR(l.NEWBUFF,0,10)!=SUBSTR(l.VERSION,0,10):
+            if SUBSTR(l.NEWBUFF, 0, 10) != SUBSTR(l.VERSION, 0, 10):
                 l.I = 0x01
-                l.J=0x01;
-                if not SDL_OPTION:
+                l.J = 0x01;
+                if not g.SDL_OPTION:
                     ERROR(d.CLASS_XV, 1, g.TPL_NAME);
             else:
-                l.J=BYTE(l.NEWBUFF,10);
-                if l.J==0x01:
-                    l.I=0x01;
+                l.J = BYTE(l.NEWBUFF, 10);
+                if l.J == 0x01:
+                    l.I = 0x01;
                 else:
-                    l.I=l.J+1;
-                if g.TPL_FLAG==2:
-                    l.J=l.I;
-            l.VERSION = BYTE(l.VERSION,10, I);
+                    l.I = l.J + 1;
+                if g.TPL_FLAG == 2:
+                    l.J = l.I;
+            l.VERSION = BYTE(l.VERSION, 10, I);
         g.SYT_LOCKp(g.BLOCK_SYTREF[1], l.J);
         OUTPUT(6, l.VERSION + BYTE(l.VERSION, 10));
     elif g.EXTERNALIZE == 3:
         #  STARTING
-        l.NEWBUFF=': EXTERNAL '+STRING(g.VOCAB_INDEX[g.PARSE_STACK[g.SP]])+g.X1;
-        l.NEWBUFF=g.X1+g.VAR[g.MP]+l.NEWBUFF;
-        l.BINX=LENGTH(l.NEWBUFF);
-        l.NEWBUFF=PAD(l.NEWBUFF,g.TPL_LRECL);
-        g.EXTERNALIZE=1;
-        g.TPL_NAME=DESCORE(g.VAR[g.MP]);
+        l.NEWBUFF = ': EXTERNAL ' + STRING(g.VOCAB_INDEX[g.PARSE_STACK[g.SP]]) + g.X1;
+        l.NEWBUFF = g.X1 + g.VAR[g.MP] + l.NEWBUFF;
+        l.BINX = LENGTH(l.NEWBUFF);
+        l.NEWBUFF = PAD(l.NEWBUFF, g.TPL_LRECL);
+        g.EXTERNALIZE = 1;
+        g.TPL_NAME = DESCORE(g.VAR[g.MP]);
         g.TPL_FLAG = (FINDER(7, g.TPL_NAME, 1) == 0);  # IGNORE INLINE BLOCKS
         if g.TPL_FLAG:
-            l.OLDBUFF=INPUT(7);
+            l.OLDBUFF = INPUT(7);
     elif g.EXTERNALIZE == 4:
-        pass #  QUIESCENT
+        pass  #  QUIESCENT

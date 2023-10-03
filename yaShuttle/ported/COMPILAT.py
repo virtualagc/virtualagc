@@ -13,7 +13,10 @@ from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
 from ERROR import ERROR
-from SCAN import SCAN
+if g.scan1:
+    from SCAN1 import SCAN
+else:
+    from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE
 from SAVETOKE import SAVE_TOKEN
 from POPMACRO import POP_MACRO_XREF
@@ -162,8 +165,7 @@ def COMPILATION_LOOP():
                                 g.SQUEEZING = g.FALSE;
                                 g.CONTEXT = 0
                                 g.TEMPORARY_IMPLIED = 0;
-                                g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[ \
-                                   g.STMT_PTR] | g.STMT_END_FLAG;
+                                g.GRAMMAR_FLAGS[g.STMT_PTR] |= g.STMT_END_FLAG;
                                 g.STMT_END_PTR = g.STMT_PTR;
                                 if g.CONTROL[7]:
                                     SYT_DUMP();
@@ -194,6 +196,8 @@ def COMPILATION_LOOP():
                 g.MP = g.SP - g.INDEX2[g.STATE];
                 g.MPP1 = g.MP + 1;
                 SYNTHESIZE (g.STATE - g.MAXPp);  #   APPLY PRODUCTION
+                if (g.STATE - g.MAXPp) == 131:
+                    pass
                 g.SP = g.MP;  #   RESET STACK POINTER
                 g.PARSE_STACK[g.SP] = g.pPRODUCE_NAME[g.STATE - g.MAXPp] & 0xFFF;
                 I = g.INDEX1[g.STATE];

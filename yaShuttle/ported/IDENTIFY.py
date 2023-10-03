@@ -914,7 +914,6 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                 goto_NOT_FOUND = True;
                 continue
             else:
-                DO;
                 if g.TEMPLATE_IMPLIED:
                     ERROR(d.CLASS_PM, 2, SUBSTR(BCD, 1));  # DUPL TEMPLATE
                     goto_NOT_FOUND = True;  # ENTER ANYWAY

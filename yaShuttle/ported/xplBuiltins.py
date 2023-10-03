@@ -21,6 +21,11 @@ import json
 import math
 import ebcdic
 
+sourceFile = None # Use stdin by default for HAL/S source-code file.
+for parm in sys.argv[1:]:
+    if parm.startswith("--hal="):
+        sourceFile = parm[6:]
+
 # Python's native round() function uses a silly method (in the sense that it is
 # unlike the expectation of every programmer who ever lived) called 'banker's
 # rounding', wherein half-integers sometimes round up and sometimes
@@ -88,7 +93,7 @@ def hround(x):
 # pointer, the record size, and the current file size (in bytes).
 files = [None]
 for i in range(1, 7):
-    f = open("FILE%d.bin" % i, "a+b")
+    f = open("FILE%d.bin" % i, "w+b")
     f.seek(2, 0)
     files.append([f, 7200, f.tell()])
 
@@ -97,12 +102,10 @@ outputDevices = [None]*10
 
 # Open the files that we need, other than output files 0 and 1 (whose behavior
 # is hard-coded separately), and buffer their contents where appropriate.
-if False: # Normal
+if sourceFile == None: # HAL/S source code.
     f = sys.stdin
 else:    # Debugging
-    f = open("SIMPLE.hal", "r")
-    #f = open("/home/rburkey/git/virtualagc/yaShuttle/Source Code/Programming in HAL-S/021-SIMPLE.hal", "r")
-    #f = open("/home/rburkey/git/virtualagc/yaShuttle/Source Code/Programming in HAL-S/091-NEWTON_SQRT.hal", "r")
+    f = open(sourceFile, "r")
 dummy = f.readlines() # Source code.
 for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬","~")\

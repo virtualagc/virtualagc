@@ -359,17 +359,17 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
     def ERROR_PRINT():
         # Locals are C and NEW_SEVERITY.
         
-        for I in range(l.LAST_ERROR_WRITTEN + 1, l.CURRENT_ERROR_PTR + 1):
+        for g.I in range(l.LAST_ERROR_WRITTEN + 1, l.CURRENT_ERROR_PTR + 1):
             l.ERRORS_PRINTED = g.TRUE;
             g.ERROR_COUNT = g.ERROR_COUNT + 1;
             g.SAVE_LINE_p[g.ERROR_COUNT] = g.STMT_NUM();
-            C = g.SAVE_ERROR_MESSAGE[I];
+            C = g.SAVE_ERROR_MESSAGE[g.I];
             l.ERRORCODE = SUBSTR(C, 0, 8);  # MEMBER NAME
             if MONITOR(2, 5, l.ERRORCODE):
                 ERRORS (d.CLASS_BI, 100, g.X1 + l.ERRORCODE);
                 continue  # GO TO ERROR_PRINT_END;
-            S = INPUT(5);  # READ FROM ERROR FILE
-            l.SEVERITY = BYTE(S) - BYTE('0');
+            g.S = INPUT(5);  # READ FROM ERROR FILE
+            l.SEVERITY = BYTE(g.S) - BYTE('0');
             NEW_SEVERITY = CHECK_DOWN(l.ERRORCODE, l.SEVERITY);
             l.SEVERITY = NEW_SEVERITY;
             g.SAVE_SEVERITY[g.ERROR_COUNT] = l.SEVERITY;
@@ -393,18 +393,18 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 g.MAX_SEVERITY = l.SEVERITY;
             if l.SEVERITY > g.STATEMENT_SEVERITY:
                 g.STATEMENT_SEVERITY = l.SEVERITY;
-            S = INPUT(5);
-            while LENGTH(S) > 0:
+            g.S = INPUT(5);
+            while LENGTH(g.S) > 0:
                 if l.IMBEDDING:
-                    K = CHAR_INDEX(S, '??');
-                    if K >= 0:
-                        if K == 0:
-                            S = C + SUBSTR(S, 2);
+                    g.K = CHAR_INDEX(g.S, '??');
+                    if g.K >= 0:
+                        if g.K == 0:
+                            g.S = C + SUBSTR(g.S, 2);
                         else:
-                            S = SUBSTR(S, 0, K) + C + SUBSTR(S, K + 2);
+                            g.S = SUBSTR(g.S, 0, g.K) + C + SUBSTR(g.S, g.K + 2);
                         l.IMBEDDING = g.FALSE;
-                OUTPUT(0, g.STARS + g.X1 + S);
-                S = INPUT(5);
+                OUTPUT(0, g.STARS + g.X1 + g.S);
+                g.S = INPUT(5);
                 # ERROR_PRINT_END:
         # END OF LOOP ON ERROR MSGS
         l.LAST_ERROR_WRITTEN = l.CURRENT_ERROR_PTR;
@@ -414,17 +414,17 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         if g.STMT_STACK[PNTR] == 0:
             l.SPACE_NEEDED = 0;
             return '';
-        if (g.GRAMMAR_FLAGS[PNTR] & PRINT_FLAG) == 0:
+        if (g.GRAMMAR_FLAGS[PNTR] & g.PRINT_FLAG) == 0:
            if  not RECOVERING:
                return '';
-        g.GRAMMAR_FLAGS[PNTR] &= PRINT_FLAG_OFF;
+        g.GRAMMAR_FLAGS[PNTR] &= g.PRINT_FLAG_OFF;
         l.SPACE_NEEDED = 1;
         goto_PARAM_MACRO = False
         if l.MACRO_WRITTEN:
             l.MACRO_WRITTEN = g.FALSE;
             if g.LAST_SPACE == 2:
-                if SHR(TOKEN_FLAGS(PNTR), 6) == 0:
-                    if g.STMT_STACK[PNTR] == LEFT_PAREN:
+                if SHR(g.TOKEN_FLAGS[PNTR], 6) == 0:
+                    if g.STMT_STACK[PNTR] == g.LEFT_PAREN:
                         goto_PARAM_MACRO = True;  # LEAVE LAST_SPACE ALONE
             if not goto_PARAM_MACRO:
                 g.LAST_SPACE = 0;  # FORCE A SPACE AFTER A NON-PARAM MACRO NAME
@@ -434,16 +434,16 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         if I <= 4:
             if I > 1:
                 l.SPACE_NEEDED = 0;
-        if SHR(TOKEN_FLAGS(PNTR), 5):
+        if SHR(g.TOKEN_FLAGS[PNTR], 5):
             g.LAST_SPACE = 2;
         else:
             g.LAST_SPACE = L & 0x0F;
-        if SHR(TOKEN_FLAGS(PNTR), 6) == 0:
-            g.C[0] = STRING(VOCAB_INDEX(g.STMT_STACK[PNTR]));
+        if SHR(g.TOKEN_FLAGS[PNTR], 6) == 0:
+            g.C[0] = STRING(g.VOCAB_INDEX[g.STMT_STACK[PNTR]]);
         else:
-            J = TOKEN_FLAGS(PNTR);
+            J = g.TOKEN_FLAGS[PNTR];
             g.C[0] = SAVE_BCD(SHR(J, 6));  # IDENTIFIER
-            if g.STMT_STACK[PNTR] == CHARACTER_STRING:
+            if g.STMT_STACK[PNTR] == g.CHARACTER_STRING:
                 
                 def ADD(STRING):
                     # T is local
@@ -458,10 +458,10 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 
                 g.C[1] = ''
                 g.C[2] = '';
-                if (g.GRAMMAR_FLAGS[PNTR] & MACRO_ARG_FLAG) != 0: 
+                if (g.GRAMMAR_FLAGS[PNTR] & g.MACRO_ARG_FLAG) != 0: 
                     return g.C[0];
                 S = g.C[0];
-                g.C[0] = SQUOTE;
+                g.C[0] = g.SQUOTE;
                 I = 0
                 J = 0
                 K = 0;
@@ -470,15 +470,15 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 while firstTry or goto_SEARCH:
                     firstTry = False
                     goto_SEARCH = False
-                    while (BYTE(S, I) != BYTE(SQUOTE)) and (I < LENGTH(S)):
+                    while (BYTE(S, I) != BYTE(g.SQUOTE)) and (I < LENGTH(S)):
                         if OFFSET != 0:  # NOT AN M-LINE
-                            if (TRANS_OUT(BYTE(S, I)) & 0xFF) != 0:
+                            if (g.TRANS_OUT[BYTE(S, I)] & 0xFF) != 0:
                                 if I != J:
                                     ADD(SUBSTR(S, J, I - J));
-                                for L in range(0, (SHR(TRANS_OUT(BYTE(S, I)), 8) \
+                                for L in range(0, (SHR(g.TRANS_OUT[BYTE(S, I)], 8) \
                                                     & 0xFF) + 1):
-                                    ADD(STRING(ADDR(ESCP)));
-                                ADD(STRING(ADDR(TRANS_OUT(BYTE(S, I))) + 1));
+                                    ADD(STRING[ADDR(g.ESCP)]);
+                                ADD(STRING[ADDR(g.TRANS_OUT[BYTE(S, I)]) + 1]);
                                 J, I = I + 1;
                             else:
                                 I = I + 1;
@@ -487,21 +487,21 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                     if I != J:
                         ADD(SUBSTR(S, J, I - J));
                     if I != LENGTH(S):
-                        ADD(SQUOTE + SQUOTE);
+                        ADD(g.SQUOTE + g.SQUOTE);
                         I = I + 1;
                         J = I;
                         goto_SEARCH = True
                         continue
-                ADD(SQUOTE);
+                ADD(g.SQUOTE);
                 return g.C[0];
             J = g.GRAMMAR_FLAGS[PNTR];
-            if (J & LEFT_BRACKET_FLAG) != 0:
+            if (J & g.LEFT_BRACKET_FLAG) != 0:
                 g.C[0] = '[' + g.C[0];
-            if (J & RIGHT_BRACKET_FLAG) != 0:
+            if (J & g.RIGHT_BRACKET_FLAG) != 0:
                g.C[0] = g.C[0] + ']';
-            if (J & LEFT_BRACE_FLAG) != 0:
+            if (J & g.LEFT_BRACE_FLAG) != 0:
                 g.C[0] = '{' + g.C[0];
-            if (J & RIGHT_BRACE_FLAG) != 0:
+            if (J & g.RIGHT_BRACE_FLAG) != 0:
                 g.C[0] = g.C[0] + '}';
         return g.C[0];
     

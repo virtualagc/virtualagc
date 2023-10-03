@@ -11,7 +11,10 @@ History:    2023-09-16 RSB  Ported from XPL
 
 from xplBuiltins import *
 import g
-from SCAN     import SCAN
+if g.scan1:
+    from SCAN1 import SCAN
+else:
+    from SCAN import SCAN
 from HEX      import HEX
 from SAVEDUMP import SAVE_DUMP
 
