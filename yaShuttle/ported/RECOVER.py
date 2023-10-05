@@ -152,7 +152,7 @@ def RECOVER():
     CHECK_ARRAYNESS();
     while g.SP > 0:
         g.STATE = CHECK_TOKEN(g.STATE_STACK[g.SP], g.LOOK_STACK[g.SP], g.TOKEN);
-        if g.STATE > 0 & g.STATE_NAME[g.STATE_STACK[g.SP]] != g.SUB_START_TOKEN:
+        if g.STATE > 0 and g.STATE_NAME[g.STATE_STACK[g.SP]] != g.SUB_START_TOKEN:
             g.SP = g.SP - 1;
             STACK_DUMP();
             if g.TOKEN != g.EOFILE:

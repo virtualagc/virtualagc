@@ -48,6 +48,10 @@ from SAVEDUMP import SAVE_DUMP
  /***************************************************************************/
 '''
 
+contextNames = ("ORDINARY", "EXPRESSION", "GO TO", "CALL", "SCHEDULE",
+                "DECLARE", "PARAMETER", "ASSIGN", "REPLACE", 
+                "REPLACE PARAMETER", "EQUATE")
+
 def CALL_SCAN():
     # No local variables.
     g.NO_LOOK_AHEAD_DONE = g.FALSE;
@@ -64,5 +68,18 @@ def CALL_SCAN():
         g.S = g.S + ', NEXT_CHAR: ' + str(g.NEXT_CHAR);
         if g.RECOVERING:
             SAVE_DUMP(g.S);
+            if g.extraTrace:
+                print("   { RECOVERING ... }", end="")
         else:
             OUTPUT(0, g.S);
+            if g.extraTrace:
+                s = BYTE('', 0, g.NEXT_CHAR)
+                if g.CONTEXT >= 0:
+                    s1 = contextNames[g.CONTEXT] + " CONTEXT"
+                else:
+                    s1 = "TBD CONTEXT"
+                print("   { \"%s\" \'%s\' %s }" % \
+                      (g.VOCAB_INDEX[g.TOKEN], s, s1), end="")
+            if g.TOKEN == 103:
+                pass
+

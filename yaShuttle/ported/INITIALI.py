@@ -391,6 +391,9 @@ def INITIALIZATION():
     SCAN();
     if g.CONTROL[4]:
         OUTPUT(0, 'SCANNER: ' + str(g.TOKEN));
+        if g.extraTrace:
+            s = BYTE('', 0, g.NEXT_CHAR)
+            print("   { \"%s\" \'%s\' }" % (g.VOCAB_INDEX[g.TOKEN], s), end="")
     SRN_UPDATE();
     # INITIALIZE THE PARSE STACK 
     g.STATE = 1;  # START-STATE  

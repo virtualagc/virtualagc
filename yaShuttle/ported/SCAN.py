@@ -1292,8 +1292,6 @@ def SCAN():
                                 l.SEARCH_NEEDED = g.FALSE;
                                 goto_SCAN_TOP = True
                                 break
-                            if g.TOKEN == 131:
-                                pass
                             return;
                     else:
                         goto_LOOK_FOR_COMMENT = False;
@@ -1310,8 +1308,6 @@ def SCAN():
                                                          AHEAD IN g.NEXT_CHAR WHICH REALLY WAS
                                                          IN COLUMN 80 AND WILL BE SCANNED OUT
                                                          NEXT TIME '''
-                    if g.TOKEN == 131:
-                        pass
                     return;
                 else:
                     if l.CHAR_NEEDED:
@@ -1322,8 +1318,6 @@ def SCAN():
 
             while g.NEXT_CHAR == BYTE(g.X1):
                 if g.M_TOKENS[g.MACRO_EXPAN_LEVEL] <= 1:
-                    if g.TOKEN == 131:
-                        pass
                     return;
                 if g.GROUP_NEEDED and g.MACRO_EXPAN_LEVEL == 0:
                     l.CHAR_NEEDED = g.TRUE;

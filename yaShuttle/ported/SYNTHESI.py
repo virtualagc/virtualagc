@@ -480,7 +480,7 @@ lSYNTHESIZE = cSYNTHESIZE()
 
 def SYNTHESIZE(PRODUCTION_NUMBER):
     l = lSYNTHESIZE  # Local variables.
-    
+        
     def SET_INIT(A, B, C, D, E):
         # Local Q doesn't need to be persistent
         g.IC_LINE = g.IC_LINE + 1;
@@ -503,6 +503,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     
     if g.CONTROL[8]:
         OUTPUT(0, '->->->->->->PRODUCTION NUMBER ' + str(PRODUCTION_NUMBER))
+        if g.extraTrace:
+            print("   { \"%s\" }" % g.VOCAB_INDEX[g.pPRODUCE_NAME[PRODUCTION_NUMBER]], end="")
         
     if noSyn:
         # This is just to simplify debugging of SCAN. Bypass in production.

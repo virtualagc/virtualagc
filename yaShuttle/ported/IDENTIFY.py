@@ -220,6 +220,8 @@ lIDENTIFY = cIDENTIFY()
 
 def IDENTIFY(BCD, CENT_IDENTIFY):
     l = lIDENTIFY
+    if g.CONTEXT == g.DECLARE_CONTEXT:
+        pass
     
     # Workaround-variables for spaghetti code.  Lots of them.  Nasty!
     goto_NOT_FOUND = False
@@ -458,7 +460,7 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                         g.TOKEN = g.ID_TOKEN;
                         break  # GO TO IDENTIFY_EXIT;
                     goto_DCLJOIN = True
-                    g.CONTEXT = -1
+                    # g.CONTEXT = -1  Why did I put this here?
                 # Note that the following is an "if" rather than an "elif" to
                 # allow the goto_DCLJOIN in the preceding case to fallthrough 
                 # into it rather than going through the tedious exercise of 
