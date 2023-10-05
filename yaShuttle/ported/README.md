@@ -60,7 +60,7 @@ For example, the global variable `MAXR#` becomes `g.MAXRp`.  But that's a worst 
 
 All PASS and BFS HAL/S source code, to my belief, was originally character-encoded using EBCDIC.  Before any of this HAL/S source code ever reached me &mdash; well, as I write this, *none* of it has yet reached me &mdash; somebody recoded it in UTF-8.  Actually, except for two special characters, "¬" and "¢", it is all 7-bit ASCII.  This hybrid existence is troublesome, so I have adopted the following conventions for external storage of the source code vs internal storage in the compiler:
 
-  * All HAL/S source code is nominally 7-bit ASCII.  If the UTF-8 characters "¬" and "¢" are found, they are transparently converted to "~" and "`" respectively.  ("^", which should never be present, is also transparently converted to "~".)
+  * All HAL/S source code is nominally 7-bit ASCII.  If the UTF-8 characters logical-not (¬) and cent (¢) are found, they are transparently converted to tilde (&#126;) and backtick (`) respectively.  Carat (^), which should never be present, is also transparently converted to tilde.)
   * All TAB characters are transparently expanded as if there were tab stops every 8 columns.
 
 However, the original XPL form of the compiler *relied* upon the storage format being EBCDIC, because in processing (such as tokenization) it used the byte-codes of the characters, and it expected those byte codes to be EBCDIC.  Therefore, my approach is simply to make sure that any processing which converts between characters and byte codes, or vice-versa, correctly translates between ASCII and EBCDIC.  The conversion function that takes a character and converts it to a byte code is the built-in `BYTE()` function of XPL.  In our recreation of the `BYTE()` function, therefore, it converts between ASCII and EBCDIC as needed.  For example, `BYTE('a')` returns 0x81 (the EBCDIC code for 'a') rather than 0x61 (the ASCII code for 'a').  Similarly, a usage like `BYTE(s, 2, b)` that replaces the string character `s[2]` by the character with byte-value `b`, expects `b` to be an EBCDIC code.  For example `BYTE('hello', 2, 0x81)` returns `'healo'`.
@@ -457,11 +457,7 @@ So far, the descriptions of `LOOK1`/`LOOK2` are entirely analogous to those of `
 
 The other difference is that `LOOK1` and `LOOK2` perform the same roles for "look-ahead" states (see the `STATE_NAMES` section above) that `READ1` and `READ2` do for "named" states.  Thus, `LOOK1` provides blocks of the allowed next input tokens for any given look-ahead state, while `LOOK2` provides the next state corresponding to those allowed tokens.
 
-## `APPLY1`
-
-TBD
-
-## `APPLY2`
+## `APPLY1` and `APPLY2`
 
 TBD
 
