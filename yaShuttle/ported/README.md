@@ -171,7 +171,7 @@ Thus, the procedure parameter acts exactly like any other local variable, with t
 
 If `T` had been declared *without* an `INITIAL` clause, we could just have used `self.T = None`.  That way, if the *first* call to `EMIT_SMRK` didn't include any value for the parameter `T`, there would likely be a runtime error, exactly as we'd desire.
 
-## Dynamic Memory Allocation: `BASED` and its Macros
+# Dynamic Memory Allocation: `BASED` and its Macros
 
 I believe that constructs such as
 
@@ -215,7 +215,7 @@ class macro_texts:
 
 A function like `ALLOCATE_SPACE(MACRO_TEXTS, n)` would produce a python list like:
 
-MACRO_TEXTS = [macro_texts(0), macro_texts(0), ...]
+MACRO_TEXTS = [macro_texts(), macro_texts(), ...]
 
 Meanwhile, I implement macros like `MACRO_TEXT(n)` as Python functions:
 
@@ -256,13 +256,13 @@ However, some of these implicit "variables", such as `TIME` and `DATE`, are supp
 
 # Semicolons
 
-XPL requires semicolons at the ends of statements.  Python does not, but it *allows* semicolons to delimit multiple statements written on a single line, and thus is tolerant of them.  I didn't know that, and removed many in the porting process before discovering it.  The upshot is that I've tended to leave the semicolons in place, just because it's easier for me, but I did remove a number of them before realizing it was legal in Python to keep them.  I may end up eventually removing them after all, simply because it's not really a Python thing to keep them.
+XPL requires semicolons at the ends of statements.  Python does not, but it *allows* semicolons to delimit multiple statements written on a single line, and thus is tolerant of them.  I didn't know that, and removed many in the porting process before discovering it.  The upshot is that I've tended to leave the semicolons in place, just because it's easier for me.  I may end up eventually removing them after all, simply because it's not really a Python thing to keep them, and indeed some Python lint/prettyprinter software annoyingly (if appropriately) goes out of its way to produce warnings upon finding them.  Since in our case there are 10's of thousands of such warnings, it's *very* irritating.
 
 # Partitioned Data Sets (PDS)
 
-There seems to be a concept of two different types of files used by the compiler system:  "sequential files" and "partitioned data sets" (PDS).  The sequential file is just what it sounds like. 
+There seems to be a concept of three different types of files used by the compiler system, handled by different mechanisms:  "sequential files", "random access files", and "partitioned data sets" (PDS).  The former two are just what they sound like, and it's only the PDS that needs discussion.
 
-A PDS apparently consists of member chunks, of variable sizes, with each chunk accessible via a unique member name that's exactly 8 characters long (padded with spaces if necessary).  This is a concept built into IBM's z/OS operating system.  Each such PDS must therefore have an associated index that can associate member names with offsets into the PDS.  Chunks can be read, written, or replaced, presumably therefore capable of dynamic changes in size.
+A PDS apparently consists of member chunks, of variable sizes, with each chunk accessible via a unique member name that's exactly 8 characters long (padded with spaces if necessary).  This is a concept built into IBM's z/OS operating system.  Each such PDS must therefore have an associated index that can match member names with offsets into the PDS.  Chunks can be read, written, or replaced, and are presumably therefore capable of dynamic changes in size.
 
 How IBM chose to implement the PDS concept is irrelevant to us, and I can implement it however I choose.  Because whatever concerns IBM originally had about execution speed and efficient disk storage are essentially meaningless 50+ years later, I can use whatever method I deem quickest in getting me to workable, maintainable code.  If you don't like it ... tough!
 
@@ -271,7 +271,7 @@ My choice is this:
   * While in use, each PDS is fully buffered in compiler memory, in the form of a Python dictionary.  The dictionary keys are the member names, and the values associated with the keys are whatever is convenient for the purpose of porting the specific PDS.
   * The storage of the PDS as a file is in the form of a JSON representation of the dictionary.
 
-As far as reading from a PDS is concerned, the technique is first to find the member of the PDS you're interested in via `MONITOR(2,DEV,MEMBER)`.  You then read that member line-by-line using INPUT(DEV).  Evenually INPUT(DEV) returns an empty string to indicate the end of the member.  (That can't be right, since the member could actually contain some empty lines, presumably, but I haven't been able to find anything to indicate a different approach.)
+As far as reading from a PDS is concerned, the technique is first to find the member of the PDS you're interested in via `MONITOR(2,DEV,MEMBER)`.  You then read that member line-by-line using INPUT(DEV).  Evenually INPUT(DEV) returns an empty string to indicate the end of the member.
 
 # Equivalence of Arrays and Non-Arrays
 
@@ -284,7 +284,7 @@ Another fun fact that isn't documented in XPL, but which may be an innovation by
     DECLARE A FIXED;
     DECLARE B(5) FIXED;
 </pre>
-If you like, you can just use `B` in your code, without an index even though it's declared as an array, and it will automatically be interpreted as `B(0)`.  In this example, `B[-1]` would access `A`.  Or you can use `A` *with* an index even though it's not an array.  In this example, `A[1]` would access `B[0]`, `A[2]` would access `B[1]`, and so on. 
+If you like, you can just use `B` in your code, without an index even though it's declared as an array, and it will automatically be interpreted as `B(0)`.  In this example, the XPL expression `B(-1)` would access `A`.  Or you can use `A` *with* an index even though it's not an array.  In this example, `A(1)` would access `B(0)`, `A[2]` would access `B(1)`, and so on. 
 
 And make no mistake, whoever coded the HAL/S compiler in XPL *did* like to do this, though fortunately not too often.  Mostly just when you don't expect it and spend a while tearing your hair out trying to figure out what's going on.
 
@@ -314,7 +314,7 @@ found in the PASS 1 monitor module, `##DRIVER`.  The construction in question is
 <pre>
     TYPE(TYPE)
 </pre>
-If `TYPE` has the value 0, then in array terms `TYPE(TYPE)` would refer to `TYPE` itself; i.e., `TYPE(TYPE)` would be 0.  Whereas if `TYPE==1`, then `TYPE(TYPE)` would be `BIT_LENGTH`.  If `TYPE==2`, then `TYPE(TYPE)` would be `CHAR_LENGTH`.  And so on, right up to `TYPE==19`, where `TYPE(TYPE)` corresponds to `S_ARRAY(3)`.  It's hard to deal with slapdash stuff such as this in a uniform way in Python.  In this case, I introduce a function I call `TYPEf()`, used solely as `TYPEf(TYPE)`.  Other absurdities involving `TYPE` and its kissing cousing `FACTORED_TYPE` are handled using other methods.
+If `TYPE` has the value 0, then in array terms `TYPE(TYPE)` would refer to `TYPE` itself; i.e., `TYPE(TYPE)` would be 0.  Whereas if `TYPE==1`, then `TYPE(TYPE)` would be `BIT_LENGTH`.  If `TYPE==2`, then `TYPE(TYPE)` would be `CHAR_LENGTH`.  And so on, right up to `TYPE==19`, where `TYPE(TYPE)` corresponds to `S_ARRAY(3)`.  It's hard to deal with slapdash stuff such as this in a uniform way in Python.  In this case, I introduce a function I call `TYPEf()`, used solely as `TYPEf(TYPE)`.  Other absurdities involving `TYPE` and its kissing-cousin `FACTORED_TYPE` are handled using other methods.
 
 # More Conditional Code in XPL
 
@@ -367,9 +367,9 @@ The next array we encounter is `VOCAB_INDEX`, which looks something like this:
    ARRAY VOCAB_INDEX(NSY) FIXED INITIAL ( 0, 16777216, 16777472, ... , 352370187, 369152779, 385935627);
 </pre>
 Fortunately, it's possible with enough effort to figure out what these entries mean.  Each 32-bit integer entry consists of bit-fields, as follows:
-  * D31-D24: Ignored
-  * D23-D8: Offset into one of the 12 strings of `VOCAB` specifying a vocabulary string.
-  * D7-D0: Length of the vocabulary string.
+  * D31-D24: Length in characters of the associated vocabulary string.
+  * D23-D8: Offset into the particular entry of `VOCAB` specifying holding the vocabulary string.
+  * D7-D0: Index (0-11) into the `VOCAB` array, giving the specific entry that holds the vocabulary string.
 
 One of the first actions of the compiler, in ##DRIVER is to call the `INITIALIZE()` function, and one of the actions of the `INITIALIZE()` function is to use these entries in `VOCAB_INDEX` along with the concatenated strings in `VOCAB` to actually create a stand-alone string for each symbol, reserved word, or BNF nonterminal.  It then stores the pointers to those strings directly in `VOCAB_INDEX`, overwriting the confusing integer data initially stored there.
 
@@ -385,7 +385,7 @@ For whatever reason, efficient binary searches or `VOCAB_INDEX` are not used, no
 </pre>
 Thus strings 1-19 in `VOCAB_INDEX` are each a single character, strings 20-30 have two characters, strings 31-44 have three characters, and so on.  And there is one weird exception, namely `VOCAB_INDEX[76]='END_OF_FILE'`, which is the first string in the 3-character region.  Presumably that's because it was at some point `EOF`.
 
-As noted above, string 0 is not used.  The values 1-142 are the potential values for the "tokens" that result from the tokenization of the source code.  Strings 143 and beyond are BNF nonterminals, and thus don't need to appear in `V_INDEX` because no searches are ever conducted for them during tokenizaton.  But BNF terminals do appear in the range 1-142.  For example, the BNF terminal `&lt;IDENTIFIER>` can be recognized by the tokenizer with the regular expression \b[A-Z]([A-Z0-9_]*[A-Z0-9])?\b and doesn't require any other means of recognition. (I don't claim that the compiler uses regular expressions; it doesn't.)
+As noted above, string 0 is not used.  The values 1-142 are the potential values for the "tokens" that result from the tokenization of the source code.  Strings 143 and beyond are BNF nonterminals, and thus don't need to appear in `V_INDEX` because no searches are ever conducted for them during tokenizaton.  But BNF terminals do appear in the range 1-142.  For example, the BNF terminal `<IDENTIFIER>` can be recognized by the tokenizer with the regular expression \b[A-Z]([A-Z0-9_]*[A-Z0-9])?\b and doesn't require any other means of recognition. (I don't claim that the compiler uses regular expressions; it doesn't.)
 
 Of the BNF nonterminals, there are precisely 169, so we'd expect there to be 142+169=311 vocabulary strings in `VOCAB_INDEX`, which as noted earlier, is the correct number.
 
@@ -434,7 +434,7 @@ The description above covers only states 0-441.  For the sake of completeness, h
 
 ## `#PRODUCE_NAME` (Ported as `pPRODUCE_NAME`)
 
-It appears to me that `#PRODUCE_NAME` returns a state number for any given production number.  (See above.)  In general, I think, any given state may give rise to several possible BNF productions, due the fact that any given BNF nonterminal rule may represent several different alternative rules.  For example, in the example given earlier, we saw that nonterminal &lt;ARITH EXP> (state 190) may give rise to production 4 (&lt;ARITH EXP> ::= &lt;TERM>), production 5 (&lt;ARITH EXP> ::= + &lt;TERM>), production 6 (&lt;ARITH EXP> ::= - &lt;TERM>), production 7 (&lt;ARITH EXP> ::= &lt;ARITH EXP> + &lt;TERM>), or production 8 (&lt;ARITH EXP> ::= &lt;ARITH EXP> - &lt;TERM>).  This we'd expect each of `pPRODUCE_NAME[5]` through `pPRODUCE_NAME[8]` to give us 190 ... which in fact it does.
+It appears to me that `#PRODUCE_NAME` returns a state number for any given production number.  (See above.)  In general, I think, any given state may give rise to several possible BNF productions, due the fact that any given BNF nonterminal rule may represent several different alternative rules.  For example, in the example given earlier, we saw that nonterminal <ARITH EXP> (state 190) may give rise to production 4 (<ARITH EXP> ::= <TERM>), production 5 (<ARITH EXP> ::= + <TERM>), production 6 (<ARITH EXP> ::= - <TERM>), production 7 (<ARITH EXP> ::= <ARITH EXP> + <TERM>), or production 8 (<ARITH EXP> ::= <ARITH EXP> - <TERM>).  This we'd expect each of `pPRODUCE_NAME[5]` through `pPRODUCE_NAME[8]` to give us 190 ... which in fact it does.
 
 Thus in spite of being called `pPRODUCE_NAME`, this array *cannot* in fact be used to get a descriptive name of the BNF rule associated with the production.  It can, of course, be used to recover the name of the associated nonterminal:
 <pre>
