@@ -14,6 +14,8 @@ from xplBuiltins import OUTPUT
 import g
 import HALINCL.CERRDECL as d
 from ERROR import ERROR
+from HALINCL.ICQTERMp import ICQ_TERMp
+from HALINCL.ICQARRAY import ICQ_ARRAYp
 
 '''
  /***************************************************************************/
@@ -46,15 +48,15 @@ def HOW_TO_INIT_ARGS(NA):
     # Locals are NU, NW.
     
     if g.SYT_TYPE(g.ID_LOC) == g.MAJ_STRUC and (not g.NAME_IMPLIED):
-        NU = g.ICQ_TERMp(g.ID_LOC);
+        NU = ICQ_TERMp(g.ID_LOC);
         NW = NU
         if g.SYT_ARRAY(g.ID_LOC) > 0:
             NU = g.SYT_ARRAY(g.ID_LOC) * NU;
     else:
         if NA <= 1:
             return 1;
-        NW = g.ICQ_TERMp(g.ID_LOC);
-        NU = g.ICQ_ARRAYp(g.ID_LOC) * NW;
+        NW = ICQ_TERMp(g.ID_LOC);
+        NU = ICQ_ARRAYp(g.ID_LOC) * NW;
     if NA == NU:
         return 3;  # MATCHES TOTAL NUMBER OF ELEMENTS
     if NA == NW:

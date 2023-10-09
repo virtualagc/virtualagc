@@ -43,6 +43,7 @@ from HALMATOU import HALMAT_OUT
 from HALMATPI import HALMAT_PIP
 from HALMATPO import HALMAT_POP
 from HALMATTU import HALMAT_TUPLE
+from IORS     import IORS
 from KILLNAME import KILL_NAME
 from LABELMAT import LABEL_MATCH
 from MAKEFIXE import MAKE_FIXED_LIT
@@ -535,7 +536,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.SRN_COUNT[2] = g.SAVE_SRN_COUNT1;
         g.IF_FLAG = g.FALSE
         g.ELSE_FLAG = g.FALSE;  # MUST BE BEFORE OUTPUTWR CALL
-        OUTPUT_WRITER(SAVE1, g.SAVE2);
+        OUTPUT_WRITER(g.SAVE1, g.SAVE2);
         g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
         if l.CHANGED_STMT_NUM:
             g.STMT_NUM(g.STMT_NUM() + 1);
@@ -859,6 +860,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 while MATRICES_MAY_GO_RIGHT:
                     goto_MATRICES_MAY_GO_RIGHT = False
                     g.MATRIX_PASSED = 0;
+                    g.PP = BEGINP
                     for g.PP in range(BEGINP, g.SP + 1):
                         if g.FIXV[g.PP] == g.MAT_TYPE: 
                             g.MATRIX_PASSED = MATRIX_PASSED + 1; 
@@ -893,6 +895,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_EO, 1);
                     g.PTR_TOP = g.PTR[g.MP];
                     return;
+                g.PP = g.MP
                 for g.PP in range(g.MP, g.SP + 1):
                    if g.FIXV[g.PP] == g.VEC_TYPE:
                         g.VECTORP = g.PP;
@@ -925,6 +928,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             goto_CROSS_PRODUCTS = False
             while g.CROSS_COUNT > 0:
                 g.VECTORP = 0;
+                g.PP = g.MP
                 for g.PP in range(g.MP, 1 + g.SP):
                     if g.FIXV[g.PP] == g.VEC_TYPE: 
                         g.VECTORP = g.PP;
@@ -973,6 +977,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto_DOT_PRODUCTS_LOOP = False
         while g.DOT_COUNT > 0:
             g.VECTORP = 0;
+            g.PP = BEGINP
             for g.PP in range(BEGINP, 1 + g.SP):
                 if g.FIXV[g.PP] == g.VEC_TYPE: 
                     g.VECTORP = g.PP;
@@ -1065,7 +1070,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         elif tmt == 1:
             #  VECTOR
             ERROR(d.CLASS_EV, 4);
-            g.TEMP2 = XSEXP;
+            g.TEMP2 = g.XSEXP;
             # Rather than implement the GO TO FINISH_EXP, I've just duplicated
             # the code that's at FINISH_EXP.
             # GO TO FINISH_EXP;
@@ -1099,7 +1104,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     firstTry = False
                     if g.PSEUDO_TYPE[g.I] != g.INT_TYPE or goto_REGULAR_EXP:
                         if not goto_REGULAR_EXP:
-                            g.TEMP2 = XSEXP;
+                            g.TEMP2 = g.XSEXP;
                         goto_REGULAR_EXP = False
                         g.PTR[0] = 0;
                         g.PSEUDO_TYPE[0] = g.SCALAR_TYPE;
@@ -1193,12 +1198,12 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             fm = g.FIXL[g.MP]
             if fm == 0:
                 #  MATRIX
-                g.PSEUDO_LENGTH[g.PTR_TOP] = DEF_MAT_LENGTH;
-                g.TEMP = DEF_MAT_LENGTH & 0xFF;
+                g.PSEUDO_LENGTH[g.PTR_TOP] = g.DEF_MAT_LENGTH;
+                g.TEMP = g.DEF_MAT_LENGTH & 0xFF;
                 g.INX[g.PTR_TOP] = g.TEMP * g.TEMP;
             elif fm == 1:
                 #  VECTOR
-                g.PSEUDO_LENGTH[g.PTR_TOP], g.INX[g.PTR_TOP] = DEF_VEC_LENGTH;
+                g.PSEUDO_LENGTH[g.PTR_TOP], g.INX[g.PTR_TOP] = g.DEF_VEC_LENGTH;
             elif fm == 2:
                 #  SCALAR
                 g.INX[g.PTR_TOP] = 0;
@@ -2471,7 +2476,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if STRUCTURE_SUB_COUNT >= 0: 
             ERROR(d.CLASS_SP, 1);
         if g.SUB_SEEN: 
-            g.STRUCTURE_SUB_COUNT = SUB_COUNT;
+            g.STRUCTURE_SUB_COUNT = g.SUB_COUNT;
         else:
             ERROR(d.CLASS_SP, 4);
         g.SUB_SEEN = 1;
@@ -2482,7 +2487,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.ARRAY_SUB_COUNT() >= 0: 
             ERROR(d.CLASS_SP, 2);
         if g.SUB_SEEN: 
-            g.ARRAY_SUB_COUNT(SUB_COUNT - STRUCTURE_SUB_COUNT);
+            g.ARRAY_SUB_COUNT(g.SUB_COUNT - g.STRUCTURE_SUB_COUNT);
         else:
             ERROR(d.CLASS_SP, 3);
         g.SUB_SEEN = 1;
@@ -2500,7 +2505,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 237:  # reference 2370
         #  <SUB HEAD> ::= <SUB START> <SUB>
         g.SUB_SEEN = 1;
-        g.SUB_COUNT = SUB_COUNT + 1 ;
+        g.SUB_COUNT = g.SUB_COUNT + 1 ;
     elif PRODUCTION_NUMBER == 238:  # reference 2380
         #  <SUB> ::= <SUB EXP>
         g.INX[g.PTR[g.MP]] = 1;
@@ -3308,11 +3313,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 391:  # reference 3910
         #  <SQ DQ NAME> ::= VECTOR
         g.TYPE = g.VEC_TYPE;
-        g.VEC_LENGTH = DEF_VEC_LENGTH;
+        g.VEC_LENGTH = g.DEF_VEC_LENGTH;
     elif PRODUCTION_NUMBER == 392:  # reference 3920
         #  <SQ DQ NAME> ::= MATRIX
         g.TYPE = g.MAT_TYPE;
-        g.MAT_LENGTH = DEF_MAT_LENGTH;
+        g.MAT_LENGTH = g.DEF_MAT_LENGTH;
     elif PRODUCTION_NUMBER == 393:  # reference 3930
         #  <DOUBLY QUAL NAME HEAD> ::= VECTOR (
         g.NOSPACE();
@@ -3930,7 +3935,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.SRN_COUNT[2] = g.SAVE_SRN_COUNT1;
             if g.IF_FLAG:
                 g.STMT_NUM(g.STMT_NUM() - 1);
-            OUTPUT_WRITER(SAVE1, g.STMT_PTR);
+            OUTPUT_WRITER(g.SAVE1, g.STMT_PTR);
             if g.IF_FLAG:
                 g.STMT_NUM(g.STMT_NUM() + 1);
             g.IF_FLAG = g.FALSE

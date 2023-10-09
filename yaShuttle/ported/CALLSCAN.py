@@ -80,6 +80,4 @@ def CALL_SCAN():
                     s1 = "TBD CONTEXT"
                 print("   { \"%s\" \'%s\' %s }" % \
                       (g.VOCAB_INDEX[g.TOKEN], s, s1), end="")
-            if g.TOKEN == 103:
-                pass
 

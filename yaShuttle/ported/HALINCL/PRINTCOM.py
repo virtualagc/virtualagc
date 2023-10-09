@@ -12,6 +12,7 @@ History:    2023-09-06 RSB  Ported
 from xplBuiltins import *
 import g
 from OUTPUTWR import OUTPUT_WRITER
+from PRINT2 import PRINT2
 
 '''
 It's unclear what's going on with the CURRENT_DIR parameters.  Most CALLs
@@ -21,7 +22,7 @@ string is just my guess.
 
 
 def PRINT_COMMENT(PRINT, CURRENT_DIR=''):
-    # FORMAT_CHAR, C, T, and R are locals, but look appear to need persistence.
+    # FORMAT_CHAR, C, T, and R are locals, but don't appear to need persistence.
     
     FORMAT_CHAR = '|';
     if not g.INCLUDE_LIST2:
@@ -88,7 +89,7 @@ def PRINT_COMMENT(PRINT, CURRENT_DIR=''):
         # MOVE THE REVISION LEVEL TO THE FIRST 2 COLUMNS OF
         # THE CURRENT SCOPE FIELD WHEN SDL_OPTION IS TRUE.
         if g.SDL_OPTION:
-            g.S = g.FORMAT_CHAR + SUBSTR(T, 0, 2) + g.FORMAT_CHAR + g.SAVE_SCOPE;
+            g.S = FORMAT_CHAR + SUBSTR(T, 0, 2) + FORMAT_CHAR + g.SAVE_SCOPE;
         else:
             g.S = FORMAT_CHAR + g.SAVE_SCOPE;
         g.S = SUBSTR(g.CURRENT_CARD, 1, g.TEXT_LIMIT[0]) + SUBSTR(g.X70, 0, g.I) + g.S;

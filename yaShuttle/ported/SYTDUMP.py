@@ -690,10 +690,10 @@ def SYT_DUMP():
                                     l.V_LEN = g.VAR_LENGTH(l.I);
                                 l.S = l.S + '(' + str(l.V_LEN) + ')';
                             elif l.J == g.VEC_TYPE:
-                                l.S = g.VAR_LENGTH(l.I) + ' - ' + l.S;
+                                l.S = str(g.VAR_LENGTH(l.I)) + ' - ' + l.S;
                             elif l.J == g.MAT_TYPE:
-                                l.V_LEN = SHR(g.VAR_LENGTH(l.I), 8) + ' X ';
-                                l.V_LEN = l.V_LEN + (g.VAR_LENGTH(l.I) & 0xFF);
+                                l.V_LEN = str(SHR(g.VAR_LENGTH(l.I), 8)) + ' X ';
+                                l.V_LEN = l.V_LEN + str(g.VAR_LENGTH(l.I) & 0xFF);
                                 l.S = l.V_LEN + g.X1 + l.S;
                             if l.K == g.FUNC_CLASS or l.K == g.TPL_FUNC_CLASS:
                                 l.S = l.S + ' FUNCTION';

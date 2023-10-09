@@ -78,7 +78,7 @@ def ICQ_OUTPUT():
         HALMAT_PIP(g.ID_LOC, g.XSYT, 0, 0);
         HALMAT_PIP(g.STRUC_PTR, g.XSYT, 0, 0);
         CT = g.LAST_POPp;
-        K = XXPT;
+        K = g.XXPT;
     else: 
         CT = g.ID_LOC;
         K = g.XSYT;
@@ -98,16 +98,16 @@ def ICQ_OUTPUT():
                     goto_EMIT_XINT = False
                     HALMAT_POP(ICQ_CHECK_TYPE(K, 0), 2, 0, g.IC_TYPE[K]);
                     HALMAT_PIP(g.IC_VAL[K], g.XOFF, 0, 0);
-                    HALMAT_PIP(IC_LOC(K), IC_LEN(K), 0, 0);
-                    if IC_LEN(K) == XLIT: 
+                    HALMAT_PIP(g.IC_LOC[K], g.IC_LEN[K], 0, 0);
+                    if g.IC_LEN[K] == g.XLIT: 
                         CT_OFFPTR = g.IC_VAL[K];
-                        CT_LITPTR = IC_LOC(K);
+                        CT_LITPTR = g.IC_LOC[K];
                         CT_LIT = 1;
                     else: 
                         CT_LIT = 0;
-                elif IC_LEN(K) != XLIT or CT_LIT == 255 or \
+                elif g.IC_LEN[K] != g.XLIT or CT_LIT == 255 or \
                         (CT_OFFPTR + CT_LIT) != g.IC_VAL[K] or \
-                        (CT_LITPTR + CT_LIT) != IC_LOC(K):
+                        (CT_LITPTR + CT_LIT) != g.IC_LOC[K]:
                     HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, CT_LIT, 0);
                     goto_EMIT_XINT = True
                     continue
@@ -119,11 +119,11 @@ def ICQ_OUTPUT():
                 HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, CT_LIT, 0);
                 CT_LIT = 0;
             if IC_FORM(K) == 1:  #  SLRI
-                HALMAT_POP(XSLRI, 2, 0, g.IC_VAL[K]);
-                HALMAT_PIP(IC_LOC(K), g.XIMD, 0, 0);
-                HALMAT_PIP(IC_LEN(K), g.XIMD, 0, 0);
+                HALMAT_POP(g.XSLRI, 2, 0, g.IC_VAL[K]);
+                HALMAT_PIP(g.IC_LOC[K], g.XIMD, 0, 0);
+                HALMAT_PIP(g.IC_LEN[K], g.XIMD, 0, 0);
             else: 
-                HALMAT_POP(XELRI, 0, 0, g.IC_VAL[K]);  # ELRI  
+                HALMAT_POP(g.XELRI, 0, 0, g.IC_VAL[K]);  # ELRI  
     if CT_LIT > 0: 
         HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, CT_LIT, 0);
-    HALMAT_POP(XETRI, 0, 0, 0);
+    HALMAT_POP(g.XETRI, 0, 0, 0);

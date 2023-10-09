@@ -111,7 +111,7 @@ def SET_SYT_ENTRIES():
                     g.CHAR_LENGTH = g.DEF_CHAR_LENGTH;
                     ERROR(d.CLASS_DS, 3);
     if g.TYPE <= g.VEC_TYPE:
-        g.VAR_LENGTH[g.ID_LOC] = g.TYPEf(g.TYPE);
+        g.VAR_LENGTH(g.ID_LOC, g.TYPEf(g.TYPE));
     if g.N_DIM != 0:
         # STUFF THE DIMENSIONS
         if g.EXT_ARRAY_PTR + g.N_DIM >= g.ON_ERROR_PTR:
@@ -132,7 +132,7 @@ def SET_SYT_ENTRIES():
                             or (ICQ_TERMp(g.ID_LOC) * ICQ_ARRAYp(g.ID_LOC) < 1):
                         ERROR(d.CLASS_DD, 1);
     if g.TYPE == g.MAJ_STRUC:
-        g.VAR_LENGTH[g.ID_LOC] = g.STRUC_PTR;
+        g.VAR_LENGTH(g.ID_LOC, g.STRUC_PTR);
         if g.STRUC_DIM == -1:
             if (g.SYT_FLAGS(g.ID_LOC) & g.PARM_FLAGS) != 0 and (not g.NAME_IMPLIED):
                 g.STRUC_DIM = -g.ID_LOC;

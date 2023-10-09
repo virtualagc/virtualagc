@@ -327,6 +327,12 @@ In the XPL, you occasionally find code enclosed between an opening delimiter lik
   * `/?C ... ?/` &mdash; TBD.  This is used only within the `COMPACTIFY` procedure in the module HALINCL/SPACELIB, and the conditional code only appears to be the printing of certain messages possibly useful in debugging.
   * `/?P ... ?/` &mdash; For conditional code exclusive to the primary flight software.
 
+Besides those, there seem to be the following constructs:
+  * `/%INCLUDE module-name %/`
+  * `/* $%module-name - function-name */`
+
+I think that the former may indicate that source code from a particular module is supposed to be included, and that the latter may indicate that a particular external function resides in a particular module.  On the other hand, constructs like this appear only in the STREAM module, and in the particular uses there I don't find that they seem to have any obvservable effect.  In other words, my approach to them is simply to ignore them.
+
 # The Vocabulary, States, and Tokens
 
 ## Background
@@ -542,6 +548,77 @@ In principle, here are 12 possible contexts recognized by the compiler, any one 
 
 For example, upon encountering an &lt;IDENTIFIER> (say, "MYVAR"), the compiler will react differently in the "DECLARE" context than in the "EXPRESSION" context.
 
-The array `SET_CONTEXT` has an entry for each possible token &mdash; i.e., it has entries `SET_CONTEXT[1]` through `SET_CONTEXT[142]`, with `SET_CONTEXT[0]` being unused, and appears to provide a context for each of these tokens.  For example, if `g.TOKEN` is 25 (`g.VOCAB_INDEX[25] == 'GO'), we find that `g.SET_CONTEXT[25] == 2` ("GO TO").
+The array `SET_CONTEXT` has an entry for each possible token &mdash; i.e., it has entries `SET_CONTEXT[1]` through `SET_CONTEXT[142]`, with `SET_CONTEXT[0]` being unused, and appears to provide a context for each of these tokens.  For example, if `g.TOKEN` is 25 (`g.VOCAB_INDEX[25] == 'GO'`), we find that `g.SET_CONTEXT[25] == 2` ("GO TO").
 
+# `LINE_COUNT`
 
+The apparent global variable `LINE_COUNT` is never declared nor assigned a value, and yet is used in a couple of comparisons (in the OUTPUTWR and STREAM modules).  Nor is it a built-in of standard XML.  I have no explanation, unless it's a built-in of Intermetrics "enhancement" of XPL.
+
+The comparisons seem to relate to the maximum number of lines per printed page, so presumably `LINE_COUNT` is should somehow be set to zero at the start of each printed page, and then incremented for each printed line.  My workaround is to have the `OUTPUT` built-in function treat it in that manner.
+
+# Value of Loop Counter After a For-Loop
+
+Naively, an XPL for-loop such as
+<pre>
+    DO I = A TO B [BY C];
+        ...
+    END;
+</pre>
+would be implemented in Python (assuming that the step C is positive) as:
+<pre>
+    for I in range(A, B+1 [, C]):
+        ...
+</pre>
+This takes into account that in XPL `I<=B`, whereas in Python `I<B`.
+
+Unfortunately, that's not the end of it, since in some cases the code tests the value of the loop counter (`I`) after the loop terminates, but XPL and Python don't leave identical values in the loop counter.
+
+I haven't found the documentation &mdash; I'm sure it exists &mdash; for Python that tells me what the terminating value of the loop counter *should* be.  However, what I find empirically is that:
+
+  * The last in-range value of the loop is used.
+  * If there were no in-range values, the counter continues to hold whatever value it had before the loop ... which could be `None` if the loop counter had never been previously assigned a value.
+
+For example:
+<pre>
+    # If i never assigned a value at all:
+    for i in range(2, 1):
+        pass
+    # i == None
+    ...
+    i = 12
+    for i in range(2,1):
+        pass
+    # i == 2
+    ...
+    for i in range(1, 100):
+        pass
+    # i == 99
+</pre>
+
+For XPL, as far as I can tell (as usual!) it's simply not documentated at all what the post-loop value is.  It *is* documented in HAL/S, however, and for HAL/S the loop counter is always assigned a value, and on termination of the loop it still contains the value at which the loop *failed*.  This appears to be the case for PL/I as well, though I could easily be wrong.  Assuming these are the same as in XPL (which agrees with my observation of what the compiler's source code seems to expect), the equivalent loops in XPL to the ones we just saw would instead result in:
+<pre>
+    /* If i never assigned a value at all: */
+    DO I = 2 TO 0;
+        ;
+    END;
+    # I = 2
+    ...
+    I = 12;
+    DO I = 2 to 0;
+        ;
+    END;
+    # I == 12
+    ...
+    DO I = 1 TO 99;
+        ;
+    END;
+    # I = 100
+</pre>
+
+In the case of either language, if the loop is broken prematurely, the loop counter will simply retain whatever value it had when the loop was broken.
+
+It's difficult to see any reasonably-elegant way to systematically handle this difference as look as a Python for-loop is used to model the XPL for-loop, nor does a Python while-loop fit the bill perfectly.  
+
+At this point,  I'm handling the situation simply by examining each for-loop and determining what kinds of tests of the loop counter are performed after the loop terminates, and to implement whatever's needed on a case-by-case basis.  Unfortunately, even this isn't necessarily a perfect solution, because global variables are often chosen as loop counters, and there's no good way to know what tests could conceivably be performed on such global variables.
+
+The problem doesn't seem to extend to XPL `DO WHILE` loops implemented as Python `while` loops.

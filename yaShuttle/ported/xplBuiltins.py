@@ -182,7 +182,8 @@ def MONITOR(function, arg2=None, arg3=None):
             device["file"].close()
             device["open"] = False
         else:
-            print("\nTrying to close device %d, which is not open" % n)
+            #print("\nTrying to close device %d, which is not open" % n)
+            pass
     
     if function == 0: 
         n = arg2
@@ -403,10 +404,10 @@ the so-called ANSI control characters:
 headingLine = ''
 subHeadingLine = ''
 pageCount = 0
-lineCount = 0
+LINE_COUNT = 0
 linesPerPage = 59 # Should get this from LINECT parameter.
 def OUTPUT(fileNumber, string):
-    global headingLine, subHeadingLine, pageCount, lineCount
+    global headingLine, subHeadingLine, pageCount, LINE_COUNT
     if fileNumber == 0:
         string = ' ' + string
         fileNumber = 1
@@ -429,7 +430,7 @@ def OUTPUT(fileNumber, string):
             queue.append('')
             pass
         elif ansi == '1':
-            lineCount = linesPerPage
+            LINE_COUNT = linesPerPage
         elif ansi == 'H':
             headingLine = string[1:]
             return
@@ -438,20 +439,20 @@ def OUTPUT(fileNumber, string):
             return
         queue.append(string[1:])
         for i in range(len(queue)):
-            if lineCount == 0 or lineCount >= linesPerPage:
+            if LINE_COUNT == 0 or LINE_COUNT >= linesPerPage:
                 if pageCount > 0:
                     print('\n\f', end='')
                 pageCount += 1
-                lineCount = 0
+                LINE_COUNT = 0
                 if len(headingLine) > 0:
                     print(headingLine)
-                    lineCount += 1
+                    LINE_COUNT += 1
                 if len(subHeadingLine) > 0:
                     print(subHeadingLine)
-                    lineCount += 1
-                if lineCount > 0:
+                    LINE_COUNT += 1
+                if LINE_COUNT > 0:
                     print()
-                    lineCount += 1
+                    LINE_COUNT += 1
             if i < len(queue) - 1:
                 print(queue[i])
             else:
@@ -463,6 +464,7 @@ def OUTPUT(fileNumber, string):
     elif fileNumber in [2, 9]:
         if outputDevices[fileNumber]["open"] and \
                 "blob" in outputDevices[fileNumber]:
+            f = outputDevices[fileNumber]["file"]
             f.write(string + '\n')
             f.flush()
 

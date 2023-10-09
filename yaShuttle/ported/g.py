@@ -30,7 +30,6 @@ import HALINCL.COMMON as h
 
 SANITY_CHECK = False
 pfs = True
-debug3 = False
 scan1 = False
 intersection = False
 extraTrace = False
@@ -73,8 +72,6 @@ for parm in sys.argv[1:]:
         pVALS[bfsDESC] = 0
     elif parm == '--sanity':
         SANITY_CHECK = True
-    elif parm == '--debug3':
-        debug3 = True  # Makes changes to CONTROL[] below.
     elif parm == "--scan1":
         scan1 = True
     elif parm == "--extra":
@@ -111,8 +108,7 @@ for parm in sys.argv[1:]:
         print('--hal=SOURCE.hal Choose HAL/S source-code file (default stdin).')
         print('--pfs            Compile for PFS (PASS).')
         print('--bfs            Compile for BFS. (Default is --pfs.)')
-        print('--debug3         Activate HAL/S-FC parser messages.')
-        print('--extra          Extra tracing messages for --debug3.')
+        print('--extra          Enhances messages for some ¢-toggles.')
         print('--no-syn         Do not synthesize HALMAT.')
         print('--sanity         Perform a sanity check on the Python port.')
         print('--help           Show this explanation.')
@@ -2126,20 +2122,6 @@ MATRIX_COUNT = 0
 CROSS = 10
 DOT = 11
 CONTROL = [0] * (16 + 1)  # INPUT CONTROLABLE SWITCHES
-if debug3:
-    # Enable various debugging messages from the compiler.  Note that these
-    # would *normally* be set within the HAL/S program itself, as described
-    # in section 2.2.7 ("Debugging Aids") of the "HAL/S-FC & HAL/S-360
-    # Compiler System Program Description", but I'm turning them on here via
-    # command-line switches.
-    #CONTROL[0x00] = -1  # Interlist HALMAT in the primary listing
-    CONTROL[0x03] = -1  # Phase 1 identifier trace
-    CONTROL[0x04] = -1  # Phase 1 token trace
-    CONTROL[0x08] = -1  # Phase 1 production trace
-    # CONTROL[0x0B] = -1 # Print Phase 1 HALMAT by block.
-    # CONTROL[0x0C] = -1  # Print Phase 1 state trace
-    CONTROL[0x0D] = -1  # Standard Phase 1 listing
-    CONTROL[0x0E] = -1  # Print literal table from Phase 1
 XREF_FULL = 0
 XREF_MASK = 0x1FFF
 XREF_ASSIGN = 0x8000
@@ -2971,7 +2953,7 @@ IND_ERR_p = 0
 SAVE_SEVERITY = [0] * (ERRLIM + 1)
 SAVE_LINE_p = [0] * (ERRLIM + 1)
 INCLUDING = 0
-INCLUDE_LIST = 0
+INCLUDE_LIST = TRUE
 INCLUDE_LIST2 = TRUE
 INCLUDE_END = 0
 INCLUDE_OPENED = 0
@@ -3460,7 +3442,7 @@ def DWN_VER(n, value=None):
 
 
 PREV_ELINE = FALSE
-NEXT_CC = ''
+NEXT_CC = '0'
 SAVE_DO_LEVEL = -1
 IFDO_FLAG = [0] * (DO_LEVEL_LIM + 1)
 IF_FLAG = FALSE

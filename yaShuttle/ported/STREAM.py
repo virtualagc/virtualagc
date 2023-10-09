@@ -17,9 +17,12 @@ technique.
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
-from OUTPUTGR import OUTPUT_GROUP
+from CHARINDE import CHAR_INDEX
+from ERROR    import ERROR
 from NEXTRECO import NEXT_RECORD
 from ORDEROK  import ORDER_OK
+from OUTPUTGR import OUTPUT_GROUP
+from OUTPUTWR import OUTPUT_WRITER
 from SAVEINPU import SAVE_INPUT
 
 '''
@@ -490,7 +493,7 @@ def STREAM():
         elif BYTE(g.CURRENT_CARD) == BYTE('D'):
             # A DIRECTIVE CARD 
             l.D_INDEX = 1;
-            ll.C[0] = D_TOKEN;
+            ll.C[0] = D_TOKEN();
             if (ll.C[0] == ll.EJECT_DIR) or (ll.C[0] == ll.SPACE_DIR):
                 PRINT_COMMENT(g.FALSE);
                 if ll.C[0] == ll.EJECT_DIR:
@@ -498,7 +501,7 @@ def STREAM():
                         g.LOOKED_RECORD_AHEAD = 0;
                         g.PAGE_THROWN = g.TRUE;
                 else:  # SPACE DIRECTIVE 
-                    ll.C[0] = D_TOKEN;
+                    ll.C[0] = D_TOKEN();
                     if LENGTH(ll.C[0]) == 0:
                         g.J = 1;  # 1 SPACE
                     else:
@@ -532,17 +535,18 @@ def STREAM():
                         g.J = g.J + 1;
                     return g.VAL;
                 
-                ll.C[0] = D_TOKEN;
+                ll.C[0] = D_TOKEN();
                 while LENGTH(ll.C[0]) != 0:
                     if SUBSTR(ll.C[0], 0, 2) == 'H(':
                         g.SMRK_FLAG = CHAR_VALUE(ll.C[0]);
                     else:  # ADD NEW DEBUG TYPES HERE
-                        ll.C[0] = D_TOKEN;
+                        ll.C[0] = D_TOKEN();
                 for ll.I in range(1, g.TEXT_LIMIT[0]):
                     # See section 2.2.7 (PDF p. 40) of "HAL/S-FC & HAL/S-360
                     # Compiler System Program Description".
                     if BYTE(g.CURRENT_CARD, ll.I) == BYTE('`'):
-                        g.J = CHAR_INDEX(TOGGLES, SUBSTR(g.CURRENT_CARD, ll.I + 1, 1));
+                        g.J = CHAR_INDEX(ll.TOGGLES, \
+                                         SUBSTR(g.CURRENT_CARD, ll.I + 1, 1));
                         if g.J > -1:
                             goto_COMPLEMENT = False
                             if ll.I < g.TEXT_LIMIT[0] - 1:
@@ -556,13 +560,14 @@ def STREAM():
                             else:
                                 goto_COMPLEMENT = False
                                 g.CONTROL[g.J] = not g.CONTROL[g.J];
-                            if g.J == "D":
-                                g.INCLUDE_LIST, g.INCLUDE_LIST2 = g.CONTROL[g.J];
-                        if g.CONTROL["A"]:
+                            if g.J == 0x0D:
+                                g.INCLUDE_LIST2 = g.CONTROL[g.J];
+                                g.INCLUDE_LIST = g.INCLUDE_LIST2
+                        if g.CONTROL[0x0A]:
                             EXIT();
             # END OF DEBUG DIRECTIVE
             elif ll.C[0] == 'DEVICE':
-                ll.C[0] = D_TOKEN;
+                ll.C[0] = D_TOKEN();
                 goto_NO_CHAN = False
                 firstTry = True
                 while firstTry or goto_NO_CHAN:
@@ -577,6 +582,7 @@ def STREAM():
                         goto_NO_CHAN = True;
                         continue
                     g.J = 0;
+                    ll.I = 8
                     for ll.I in range(8, LENGTH(ll.C[0])):
                         g.K = BYTE(ll.C[0], ll.I);
                         if CHARTYPE(g.K) != 1:
@@ -590,7 +596,7 @@ def STREAM():
                     ERROR(d.CLASS_XD, 4);
                     ERRPRINT()
                     return
-                ll.C[0] = D_TOKEN;
+                ll.C[0] = D_TOKEN();
                 ll.PRINT_FLAG = g.FALSE;
                 l.L = g.J(g.J);
                 if ll.C[0] == 'UNPAGED':
@@ -640,7 +646,7 @@ def STREAM():
                 g.FIN_TMP_CLS = ''
                 g.TEMP_COUNT = 0
                 g.CONTINUE = 0;
-                ll.C[0] = D_TOKEN;
+                ll.C[0] = D_TOKEN();
                 if LENGTH(ll.C[0]) == 0:  # NO ERROR NUMBER TO DOWNGRADE 
                     ERRORS(d.CLASS_BI, 108);
                 elif g.DOWN_COUNT > DOWNGRADE_LIMIT:  # OBTAIN CLASS
@@ -675,7 +681,7 @@ def STREAM():
                     g.LOOKED_RECORD_AHEAD = g.TRUE;
                     if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] == g.CARD_TYPE[BYTE('D')]:
                         l.D_INDEX = 1;
-                        ll.NEXT_DIR = D_TOKEN;
+                        ll.NEXT_DIR = D_TOKEN();
                         if ll.NEXT_DIR != 'DOWNGRADE' and ll.NEXT_DIR != 'OWNGRADE':
                             g.INCREMENT_DOWN_STMT = g.FALSE;
                     # ATTACH DOWNGRADE TO CORRECT STATEMENT
@@ -714,7 +720,7 @@ def STREAM():
                     ERROR(d.CLASS_XA, 1);
                     ERRPRINT()
                     return
-                ll.C[0] = D_TOKEN;
+                ll.C[0] = D_TOKEN();
                 goto_NO_ID = False
                 firstTry = True
                 while firstTry or goto_NO_ID:
@@ -744,14 +750,14 @@ def STREAM():
                     ll.RECORD_NOT_WRITTEN = g.FALSE;
                     MONITOR(16, 0x10);
                 
-                ll.C[1] = D_TOKEN;
+                ll.C[1] = D_TOKEN();
                 if LENGTH(ll.C[1]) == 0:
                     ERROR(d.CLASS_XD, 5);
                 elif LENGTH(ll.C[1]) >= 8:
                     ll.C[1] = SUBSTR(ll.C[1], 0, 8);
                 else:
                     ll.C[1] = PAD(ll.C[1], 8);
-                ll.C[0] = D_TOKEN;
+                ll.C[0] = D_TOKEN();
                 if LENGTH(ll.C[0]) > 0:
                     ll.LIST_FLAG = (ll.C[0] == 'LIST');
                 else:
@@ -783,7 +789,7 @@ def STREAM():
                         g.CARD_COUNT = g.CARD_COUNT + 1;
                         if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] == g.CARD_TYPE[BYTE('D')]:
                             l.D_INDEX = 1;
-                            ll.C[0] = D_TOKEN;
+                            ll.C[0] = D_TOKEN();
                             if ll.C[0] == ll.INCLUDE_DIR:
                                 g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'));
                                 COPY_TO_8();
@@ -791,7 +797,7 @@ def STREAM():
                                     OUTPUT(8, ll.XC + g.STARS + ll.START + g.INCLUDE_MSG + g.STARS);
                             elif ll.C[0] == 'CLOSE':  # END OF INLINE BLOCK
                                 PRINT_COMMENT(g.TRUE);
-                                ll.C[0] = D_TOKEN;
+                                ll.C[0] = D_TOKEN();
                                 if LENGTH(ll.C[0]) >= 8:
                                     ll.C[0] = SUBSTR(ll.C[0], 0, 8);
                                 else:
@@ -826,7 +832,7 @@ def STREAM():
             else:
                 ERROR(d.CLASS_XU, 1);
                 
-            if not pfs:  # BFS
+            if not g.pfs:  # BFS
                 '''
                 /* THIS CODE RESTRICTS BFS FROM USING THE 'DATA_REMOTE' DIRECTIVE  */
                 /* AND WILL ISSUE A B102 ERROR MESSAGE.  THIS CODE WILL NEED TO BE */

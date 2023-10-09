@@ -31,7 +31,13 @@ class cD_TOKEN:
         self.J = 0
         self.pSPECIALS = 3
         self.SPECIALS = ' ,:;'
-
+        # D_INDEX and D_CONTINUATION_OK are neither local nor global variable
+        # in the original XPL source code.  (They are local in STREAM, and 
+        # are used similarly to how they are used here ... for whatever that's
+        # worth!)  Why the original XPL compiler thought they were DECLARE'd
+        # in *this* scope is currently beyond me.
+        self.D_INDEX = 1
+        self.D_CONTINUATION_OK = g.FALSE
 
 lD_TOKEN = cD_TOKEN()
 
@@ -40,31 +46,35 @@ def D_TOKEN():
     l = lD_TOKEN
     
     while True:
-        while (BYTE(g.CURRENT_CARD, g.D_INDEX) == BYTE(' ')) and \
-                (g.D_INDEX <= g.TEXT_LIMIT[0]):
-            g.D_INDEX = g.D_INDEX + 1;
-        if g.D_INDEX <= g.TEXT_LIMIT[0]:
+        while (BYTE(g.CURRENT_CARD, l.D_INDEX) == BYTE(' ')) and \
+                (l.D_INDEX <= g.TEXT_LIMIT[0]):
+            l.D_INDEX = l.D_INDEX + 1;
+        if l.D_INDEX <= g.TEXT_LIMIT[0]:
            break;
-        if g.D_CONTINUATION_OK:  # GET NEXT RECORD 
+        if l.D_CONTINUATION_OK:  # GET NEXT RECORD 
             NEXT_RECORD();
             if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] != g.CARD_TYPE[BYTE('D')]:
                 g.LOOKED_RECORD_AHEAD = g.TRUE;
-                g.D_CONTINUATION_OK = g.FALSE;
+                l.D_CONTINUATION_OK = g.FALSE;
                 return '';
             g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('D'));
             PRINT_COMMENT(g.TRUE);
-            g.D_INDEX = 1;
+            l.D_INDEX = 1;
             continue;
         else:
             return '';
     for l.I in range(1, l.pSPECIALS + 1):
-        if BYTE(g.CURRENT_CARD, g.D_INDEX) == BYTE(l.SPECIALS, l.I):
-            g.D_INDEX = g.D_INDEX + 1;
-            return SUBSTR(g.CURRENT_CARD, g.D_INDEX - 1, 1);
-    l.I = g.D_INDEX;
-    while g.D_INDEX <= g.TEXT_LIMIT[0]:
+        if BYTE(g.CURRENT_CARD, l.D_INDEX) == BYTE(l.SPECIALS, l.I):
+            l.D_INDEX = l.D_INDEX + 1;
+            return SUBSTR(g.CURRENT_CARD, l.D_INDEX - 1, 1);
+    l.I = l.D_INDEX;
+    escape_TOKEN = False
+    while l.D_INDEX <= g.TEXT_LIMIT[0]:
         for l.J in range(0, l.pSPECIALS + 1):
-            if BYTE(g.CURRENT_CARD, g.D_INDEX) == BYTE(l.SPECIALS, l.J):
+            if BYTE(g.CURRENT_CARD, l.D_INDEX) == BYTE(l.SPECIALS, l.J):
+                escape_TOKEN = True
                 break;
-        g.D_INDEX = g.D_INDEX + 1;
-    return SUBSTR(g.CURRENT_CARD, l.I, g.D_INDEX - l.I);
+        if escape_TOKEN:
+            break
+        l.D_INDEX = l.D_INDEX + 1;
+    return SUBSTR(g.CURRENT_CARD, l.I, l.D_INDEX - l.I);

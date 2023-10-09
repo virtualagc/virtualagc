@@ -1196,6 +1196,7 @@ def SCAN():
                            if SUBSTR(g.PCNAME, SHL(g.SYT_INDEX, 4), l.S1) == g.BCD:
                                 goto_SCAN_END = True;
                                 break;
+                        g.SYT_INDEX += 1
                         ERROR(d.CLASS_XM, 1, g.BCD);
                         g.SYT_INDEX = 0;
                         goto_SCAN_END = True;

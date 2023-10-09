@@ -47,9 +47,9 @@ def UNBRANCHABLE(LOC, CAUSE):
     FLAGGED = g.FALSE;
     LOC = g.FIXF[LOC];
     while LOC > 0:
-        if g.VAR_LENGTH[LOC] == 3:
+        if g.VAR_LENGTH(LOC) == 3:
             FLAGGED = g.TRUE;
-        g.VAR_LENGTH[LOC] = CAUSE;
+        g.VAR_LENGTH(LOC, CAUSE);
         LOC = g.SYT_PTR(LOC);
     if FLAGGED:
         ERROR(d.CLASS_GL, CAUSE);

@@ -126,6 +126,7 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
                     g.SAVE_BCD[SHR(g.TOKEN_FLAGS[g.STMT_PTR], 6)][:];
                 g.TOKEN_FLAGS[g.STMT_PTR] = (g.TOKEN_FLAGS[g.STMT_PTR] & 0x3F) \
                                                 | SHL(g.BCD_PTR, 6);
+        g.STMT_PTR += 1
         if g.FACTOR_FOUND:
             g.GRAMMAR_FLAGS[1] = g.GRAMMAR_FLAGS[1] | g.ATTR_BEGIN_FLAG;
         for g.I in range(0, g.SP):
