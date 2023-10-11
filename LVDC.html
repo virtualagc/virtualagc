@@ -118,9 +118,10 @@ document.write(headerTemplate.replace("@TITLE@","Launch Vehicle Digital Computer
         <li><a href="#ANATOMY">AS-206RAM Program Structure</a><br>
         </li>
       </ul>
-      <li><a moz-do-not-send="true" href="#Flowcharts">AS-512 and AS-513
-          Flowcharts</a><br>
-      </li>
+      <li><a moz-do-not-send="true" href="#Flowcharts">Flight Program Flowcharts</a></li>
+<li><a moz-do-not-send="true" href="#PreflightFlowcharts">Preflight Program Flowcharts</a><br>
+</li>
+
       <li><a href="#MIT_Instrumentation_Laboratory_vs_IBM">MIT
           Instrumentation Laboratory vs IBM Federal Systems Division</a></li>
       <li><big><a href="#yaLVDC_the_LVDC_CPU_Emulation"><small><small><big><small><big><span style="font-weight: bold;">yaLVDC</span>, the
@@ -1213,133 +1214,12 @@ miles above the radius of the launch pad.</font><br>
       could consist essentially of nothing but boot code.<br>
     </p>
     <h3><a name="Preflight_Program"></a>Preflight Program</h3>
-    <p>I know barely anything about the Preflight Program at present,
-      beyond the inferences at the end of the preceding section.&nbsp;
-      There is no surviving documentation or source code for it as far
-      as I know.&nbsp; I will provide information about it if/when it
-      becomes available.<br>
+    <p>Until recently (as I write this), little about the Preflight 
+Program has been known.&nbsp; Just from inspection of the available LVDC
+ Flight Program source code, some inferences were possible.&nbsp; For 
+example:<br>
     </p>
-    <p>As it relates to the <a href="#Evolution_of_the_Flight_Software">AS-206RAM
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        Flight Program</a>, however, I do have a couple of reasons to
-      believe that the AS-206RAM Flight Program would have been used in
-      conjunction with a Preflight Program:<br>
-    </p>
+    
     <ol>
       <li>In the AS-206RAM Flight Program (1967), there are jumps to
         various memory locations in regions of core memory at which
@@ -1348,14 +1228,28 @@ miles above the radius of the launch pad.</font><br>
           more detail below</a>.<br>
       </li>
       <li>One of the original LVDC software developers (thanks, Pat
-        Woods!) tells me that he believes that the Flight Program shared
+        Woods!) has told me that he believes that the Flight Program shared
         memory with a Preflight Program that ran before liftoff.</li>
-    </ol>
-    <p>Similarly, the AS-512 and AS-513 Flight Programs have a couple of
+<li>Similarly, the AS-512 and AS-513 Flight Programs have a couple of
       modules — namely, PREFLIGHT DCS LINKAGE and PREFLIGHT G &amp; C
       STEERING — whose sole purpose is linking the Flight Program to the
-      Preflight Program.<br>
-    </p>
+      Preflight Program.</li>
+
+    </ol>
+    Fortunately, some quite-significant documentation has become available, in the form of a document called the "<a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf">LVDC Preflight Program Descriptions</a>"
+ for the AS-512 (Apollo 17), AS-513 (Skylab 1), and AS-206 (Skylab 2) 
+missions.&nbsp; This document is similar to the Equations Defining 
+Document (EDD) for the LVDC Flight Program, in that it includes 
+somewhat-detailed theory-of-operation descriptions of the various 
+subroutines of the Preflight Program, as well as software flowcharts for
+ those subroutines. <br>
+<br>
+I don't propose to dissect this document for you, but you can read it 
+yourself if you're interested.&nbsp; In addition to that document, our 
+document library also contains several revisions of the "Saturn 
+Preflight Program Verification Plan", which you may find provide 
+additional helpful information.&nbsp; See also the "<a moz-do-not-send="true" href="#PreflightFlowcharts">Preflight Program Flowcharts</a>" section below.<br>
+
     <ol>
     </ol>
     <h3><a name="Flight_Program_in_General"></a>Flight Program</h3>
@@ -20596,30 +20490,7 @@ Assembly
       inspection of the AS-206RAM assembly listing.&nbsp; It is quite
       different from the much-later AS-512 Flight Program and AS-513
       Flight Program.&nbsp; The latter two programs are perhaps best
-      understood from the <a moz-do-not-send="true" href="#Flowcharts">AS-512
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        and AS-513 Flowcharts</a> section below.<br>
+      understood from the <a moz-do-not-send="true" href="#Flowcharts">Flight Program Flowcharts</a> section below.<br>
     </p>
     <p>Overall structure of the AS-206RAM program: <br>
     </p>
@@ -23321,8 +23192,43 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         example.<br>
       </font></blockquote>
     <p> </p>
-    <h2><a name="Flowcharts"></a>AS-512 and AS-513 Flowcharts</h2>
-    <p>If you are familiar with the movie <a moz-do-not-send="true" href="https://en.wikipedia.org/wiki/Contact_(1997_American_film)">Contact</a>,
+    <h2><a name="Flowcharts"></a>Flight Program Flowcharts</h2>
+    <p>Apollo and Gemini software documentation often includes flowchart
+ representations of the software, sometimes called the "math 
+flow".&nbsp; In the case of Gemini, indeed, one gets the impression that
+ it's the math flow that is the "software", and that any implementation 
+of the math flow in some computer language or the other is merely an 
+afterthought.&nbsp; Whereas today, it's my impression that software 
+flowcharts have largely fallen out of use.&nbsp; In fact, except in the 
+one case I was asked to create flowcharts (from an already-existing code
+ base) for a patent application, I don't recall having encountered a 
+flowchart in my entire career of about 35 years writing embedded 
+software applications.&nbsp; But perhaps it was different back in the 
+1960's and early 1970's.&nbsp; One thing I can say for sure is that a 
+flowchart is <i>very</i> useful if you don't have access to actual LVDC source code, as is the case for almost anybody reading this page.<br>
+</p>
+<p>In the specific case of the LVDC, flowcharts for the flight program's
+ various "application modules" are provided by the IBM Federal Services 
+Division document known as the "LVDC Equation Defining Document (EDD) 
+for the Saturn Flight Program".&nbsp; There are two separate versions of
+ the EDD (and various mission-specific revisions of each), one for the 
+Saturn IB Flight Program and one for the Saturn V Flight Program.&nbsp; 
+As of <i>this</i> writing, we have only EDDs for the Saturn IB — i.e., <i>not</i> for the Saturn V — and <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf">the flowcharts are found in Part III of that EDD</a>.&nbsp;
+ The only revision of Part III of the Saturn IB EDD we have happens to 
+be specific to the Apollo-Soyuz Test Project (ASTP), and thus is 
+presumably directly applicable to LVDC Flight Program AS-210, with 
+decreasing applicability to earlier AS-<i>xxx</i> Flight Program 
+versions.&nbsp; There will be a table a bit later with links to the 
+flowcharts for specific application modules, after I satisfy myself I've
+ bored you sufficiently with this long-winded introduction.<br>
+</p>
+<p>Now, at the time I wrote the paragraphs above, our acquisition of 
+Part III of the Saturn IB EDD was a new thing ... indeed, I had first 
+seen it earlier in the day.&nbsp; Before that, we had no published LVDC 
+Flight Program flowcharts at all.&nbsp; That's is part of what motivates
+ the discussion in the following paragraphs.<br>
+</p>
+<p>If you are familiar with the movie <a moz-do-not-send="true" href="https://en.wikipedia.org/wiki/Contact_(1997_American_film)">Contact</a>,
       based on Carl Sagan's novel, you may recall that it is the story
       of a SETI research team that begins to receive signals from
       space.&nbsp; Eventually, they discover that hidden in the signal
@@ -23335,6 +23241,7 @@ example of this that I'm aware of is when the LVDC Flight Program is put
       pages that the team thinks determines the page ordering, but they
       can't understand how the markings and the ordering work in detail.<br>
     </p>
+
     <p>Curiously, something similar happens in the LVDC flight-software
       source code for AS-512 and AS-513.&nbsp; There are indeed
       mysterious markings along the edges of the pages, and it's very
@@ -23523,17 +23430,25 @@ example of this that I'm aware of is when the LVDC Flight Program is put
       in advance?&nbsp; Again, Hollywood thinking!&nbsp; Not meaningful
       in the real world.<br>
     </p>
-    <p>But I digress.&nbsp; Without further ado, here are the
-      flowcharts, in the order in which they appear in the actual source
-      code, categorized by the LVDC source-code modules to which they
-      relate:<br>
+    <p>But I digress.&nbsp; <br>
+</p>
+<p>Without further ado, here are all of the available LVDC Flight 
+Program
+      flowcharts, both from published IBM Federal Services Division 
+documentation and from my automated-generation effort.&nbsp; They're 
+roughly in the order in which they appear in the actual source
+      code, with some exceptions since for AS-210 I couldn't always 
+determine the probable location in the source code.<br>
     </p>
+
     <table cellspacing="6" cellpadding="2" align="center">
       <tbody>
         <tr>
-          <th valign="top">Software Module<br>
+          <th valign="top">Application Module<br>
           </th>
-          <th valign="top">AS-512<br>
+          <th valign="top">AS-210<br>
+</th>
+<th valign="top">AS-512<br>
           </th>
           <th valign="top">AS-513<br>
           </th>
@@ -23541,6 +23456,8 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">GFP DATA PACK</td>
           <td valign="top">(none)<br>
+</td>
+<td valign="top">(none)<br>
           </td>
           <td valign="top">(none)<br>
           </td>
@@ -23548,13 +23465,17 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">GFP EXECUTIVE MACRO DEFINITIONS</td>
           <td valign="top">(none)<br>
+</td>
+<td valign="top">(none)<br>
           </td>
           <td valign="top">(none)<br>
           </td>
         </tr>
         <tr>
           <td valign="top">GFP EXECUTIVE CONTROL PROGRAM</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MISSION_EXECUTIVE.dot.ps.png">MISSION
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MISSION_EXECUTIVE.dot.ps.png">MISSION
 
 
 
@@ -23608,7 +23529,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">PHASE INITIALIZATION</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_INITIALIZATION_(IN).dot.ps.png">PHASE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=223">PHASE INITIALIZATION (IN)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_INITIALIZATION_(IN).dot.ps.png">PHASE
 
 
 
@@ -23662,7 +23585,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">SECOND OPPORTUNITY INITIALIZE</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SECOND_OPPORTUNITY_INITIALIZE_(SO).dot.ps.png">SECOND
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SECOND_OPPORTUNITY_INITIALIZE_(SO).dot.ps.png">SECOND
 
 
 
@@ -23692,7 +23617,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">PHASE ACTIVATOR</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_ACTIVATOR_(PA).dot.ps.png">PHASE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=333">PHASE ACTIVATOR (PA)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_ACTIVATOR_(PA).dot.ps.png">PHASE
 
 
 
@@ -23745,8 +23672,20 @@ example of this that I'm aware of is when the LVDC Flight Program is put
           </td>
         </tr>
         <tr>
+  <td valign="top">PHASE I TIME UPDATE<br>
+  </td>
+  <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=448">PHASE I TIME UPDATE (UM)</a><br>
+  </td>
+  <td valign="top">(n/a)<br>
+  </td>
+  <td valign="top">(n/a)<br>
+  </td>
+</tr>
+<tr>
           <td valign="top">PHASE I AND III TIME UPDATE</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_I_AND_III_TIME_UPDATE_(UM).dot.ps.png">PHASE
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_I_AND_III_TIME_UPDATE_(UM).dot.ps.png">PHASE
 
 
 
@@ -23800,7 +23739,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">ACCELEROMETER READ</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ACCELEROMETER_READ_(AR).dot.ps.png">ACCELEROMETER
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=73">ACCELEROMETER READ (AR)<br>
+  </a></td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ACCELEROMETER_READ_(AR).dot.ps.png">ACCELEROMETER
 
 
 
@@ -23854,7 +23795,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">SIMULATED ACCELEROMETERS</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SIMULATED_ACCELEROMETERS_(SA).dot.ps.png">SIMULATED
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=365">SIMULATED ACCELEROMETERS (SA)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SIMULATED_ACCELEROMETERS_(SA).dot.ps.png">SIMULATED
 
 
 
@@ -23908,7 +23851,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">ACCELEROMETER PROCESSING</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ACCELEROMETER_PROCESSING_(AP).dot.ps.png">ACCELEROMETER
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=62">ACCELEROMETER PROCESSING (AP)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ACCELEROMETER_PROCESSING_(AP).dot.ps.png">ACCELEROMETER
 
 
 
@@ -23962,7 +23907,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">F/M CALCULATIONS</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/F-M_CALCULATIONS_(DV).dot.ps.png">F/M
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=151">F/M CALCULATIONS (DV)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/F-M_CALCULATIONS_(DV).dot.ps.png">F/M
 
 
 
@@ -24016,7 +23963,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">BOOST NAVIGATION</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/BOOST_NAVIGATION_(NE).dot.ps.png">BOOST
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=283">BOOST NAVIGATION (NE)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/BOOST_NAVIGATION_(NE).dot.ps.png">BOOST
 
 
 
@@ -24070,7 +24019,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">SIMULATED PLATFORM GIMBAL ANGLES</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SIMULATED_PLATFORM_GIMBAL_ANGLES_(PG).dot.ps.png">SIMULATED
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=356">SIMULATED PLATFORM GIMBAL ANGLES (PG)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SIMULATED_PLATFORM_GIMBAL_ANGLES_(PG).dot.ps.png">SIMULATED
 
 
 
@@ -24124,7 +24075,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         </tr>
         <tr>
           <td valign="top">TIME TILT GUIDANCE</td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME_TILT_GUIDANCE_(TT).dot.ps.png">TIME
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=439">TIME TILT GUIDANCE (TT)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME_TILT_GUIDANCE_(TT).dot.ps.png">TIME
 
 
 
@@ -24179,7 +24132,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ITERATIVE GUIDANCE MODE<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ITERATIVE_GUIDANCE_MODE_(IG).dot.ps.png">ITERATIVE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=206">ITERATIVE GUIDANCE MODE (IG)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ITERATIVE_GUIDANCE_MODE_(IG).dot.ps.png">ITERATIVE
 
 
 
@@ -24236,6 +24191,8 @@ example of this that I'm aware of is when the LVDC Flight Program is put
           <td valign="top">S-II CUTOFF PREDICTION<br>
           </td>
           <td valign="top">(n/a)<br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/S-II_CUTOFF_PREDICTION_(HS).dot.ps.png">S-II
 
@@ -24267,7 +24224,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">S-II INBOARD ENGINE CUTOFF<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/S-II_INBOARD_ENGINE_CUTOFF_(IO).dot.ps.png">S-II
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/S-II_INBOARD_ENGINE_CUTOFF_(IO).dot.ps.png">S-II
 
 
 
@@ -24299,7 +24258,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">S-IVB CUTOFF PREDICTION<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/S-IVB_CUTOFF_PREDICTION_(HS).dot.ps.png">S-IVB
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=198">S-IVB CUTOFF PREDICTION (HS)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/S-IVB_CUTOFF_PREDICTION_(HS).dot.ps.png">S-IVB
 
 
 
@@ -24331,7 +24292,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">CUTOFF LOGIC<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/CUTOFF_LOGIC_(CO).dot.ps.png">CUTOFF
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=95">CUTOFF LOGIC (CO)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/CUTOFF_LOGIC_(CO).dot.ps.png">CUTOFF
 
 
 
@@ -24387,7 +24350,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">CMC CUTOFF<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/CMC_CUTOFF_(CI).dot.ps.png">CMC
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/CMC_CUTOFF_(CI).dot.ps.png">CMC
 
 
 
@@ -24419,7 +24384,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">STEERING MISALIGNMENT CORRECTION<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/STEERING_MISALIGNMENT_CORRECTION_(SM).dot.ps.png">STEERING
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=376">STEERING MISALIGNMENT CORRECTION (SM)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/STEERING_MISALIGNMENT_CORRECTION_(SM).dot.ps.png">STEERING
 
 
 
@@ -24475,7 +24442,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">M/F SMOOTHING<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/M-F_SMOOTHING_(ST).dot.ps.png">M/F
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=406">M/F SMOOTHING (ST)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/M-F_SMOOTHING_(ST).dot.ps.png">M/F
 
 
 
@@ -24531,7 +24500,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">CHI COMPUTATIONS<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/CHI_COMPUTATIONS_(CC).dot.ps.png">CHI
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=87">CHI COMPUTATIONS (CC)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/CHI_COMPUTATIONS_(CC).dot.ps.png">CHI
 
 
 
@@ -24587,7 +24558,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">MINOR LOOP SUPPORT<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MINOR_LOOP_SUPPORT_(MS).dot.ps.png">MINOR
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=273">MINOR LOOP SUPPORT (MS)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MINOR_LOOP_SUPPORT_(MS).dot.ps.png">MINOR
 
 
 
@@ -24643,7 +24616,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">APS ATTITUDE CONTROL TEST<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/APS_ATTITUDE_CONTROL_TEST_(AC).dot.ps.png">APS
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=57">ATTITUDE CONTROL TEST (AC)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/APS_ATTITUDE_CONTROL_TEST_(AC).dot.ps.png">APS
 
 
 
@@ -24675,7 +24650,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">MINOR LOOP ERROR MONITOR<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MINOR_LOOP_ERROR_MONITOR_(EC).dot.ps.png">MINOR
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=160">MINOR LOOP ERROR MONITOR (EC)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MINOR_LOOP_ERROR_MONITOR_(EC).dot.ps.png">MINOR
 
 
 
@@ -24731,7 +24708,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ETC/BTC<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ETC-BTC_(EB).dot.ps.png">ETC/BTC
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=156">ETC/BTC (EB)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ETC-BTC_(EB).dot.ps.png">ETC/BTC
 
 
 
@@ -24787,7 +24766,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">DATA OUTPUT MULTIPLEXER TELEMETRY<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DATA_OUTPUT_MULTIPLEXER_(DOM)_TELEMETRY(OD).dot.ps.png">DATA
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=311">DIGITAL OUTPUT MULTIPLEXER (DOM) TELEMETRY (OD)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DATA_OUTPUT_MULTIPLEXER_(DOM)_TELEMETRY(OD).dot.ps.png">DATA
 
 
 
@@ -24843,7 +24824,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">MINOR LOOP<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MINOR_LOOP_(ML).dot.ps.png">MINOR
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=249">MINOR LOOP (ML)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MINOR_LOOP_(ML).dot.ps.png">MINOR
 
 
 
@@ -24899,7 +24882,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">DISAGREEMENT BIT PROCESSING<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DISAGREEMENT_BIT_PROCESSING_(DG).dot.ps.png">DISAGREEMENT
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#105">DISAGREEMENT BIT PROCESSING (DG)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DISAGREEMENT_BIT_PROCESSING_(DG).dot.ps.png">DISAGREEMENT
 
 
 
@@ -24955,7 +24940,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">LADDER RAMP PROCESSOR<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/LADDER_RAMP_PROCESSOR_(LR).dot.ps.png">LADDER
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=242">LADDER RAMP PROCESSOR (LR)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/LADDER_RAMP_PROCESSOR_(LR).dot.ps.png">LADDER
 
 
 
@@ -25011,7 +24998,17 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">DISCRETE PROCESSOR<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DISCRETE_PROCESSOR_(DP).dot.ps.png">DISCRETE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=112">DISCRETE PROCESSOR (DP)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=115">DISCRETE INPUTS 14 and 15 (DP1)</a><br>
+(n/a)<br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=118">DISCRETE INPUT 9 (DP3)</a><br>
+(n/a)<br>
+(n/a)<br>
+(n/a)<br>
+(n/a)<br>
+(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DISCRETE_PROCESSOR_(DP).dot.ps.png">DISCRETE
 
 
 
@@ -25312,7 +25309,7 @@ example of this that I'm aware of is when the LVDC Flight Program is put
 
 
               INPUTS 13 AND 21 (DP2)</a><br>
-            <br>
+            (n/a)<br>
             <a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/DISCRETES_10_AND_15_(DP4).dot.ps.png">DISCRETES
 
 
@@ -25338,9 +25335,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
 
 
               10 AND 15 (DP4)</a><br>
-            <br>
-            <br>
-            <br>
+            (n/a)<br>
+            (n/a)<br>
+            (n/a)<br>
             <a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/WATER_VALVE_DISCRETE_(DP6).dot.ps.png">WATER
 
 
@@ -25371,7 +25368,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ABSOLUTE/COMMAND FREEZE UTILITY<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ABSOLUTE-COMMAND_FREEZE_UTILITY_(FR).dot.ps.png">ABSOLUTE/COMMAND
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=172">ABSOLUTE/COMMAND FREEZE UTILITY (FR)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ABSOLUTE-COMMAND_FREEZE_UTILITY_(FR).dot.ps.png">ABSOLUTE/COMMAND
 
 
 
@@ -25427,7 +25426,16 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">TIME BASE ROUTINES<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME_BASE_SET_(TB).dot.ps.png">TIME
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=409">TIME BASE SET (TB)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=412">TIME BASE 1 (TB1)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=415">TIME BASE 2 (TB2)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=421">TIME BASE 3 (TB3)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=425">TIME BASE 4 (TB-4)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=430">TIME BASE 5 (TB-5)</a><br>
+(n/a)<br>
+(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME_BASE_SET_(TB).dot.ps.png">TIME
 
 
 
@@ -25778,14 +25786,15 @@ example of this that I'm aware of is when the LVDC Flight Program is put
 
 
               BASE 5 (TB5)</a><br>
-            <br>
-            <br>
+            (n/a)<br>(n/a)<br>
           </td>
         </tr>
         <tr>
           <td valign="top">LIFT-OFF SEARCH<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/LIFT-OFF_SEARCH_(LO).dot.ps.png">LIFT-OFF
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=238">LIFT-OFF SEARCH (LO)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/LIFT-OFF_SEARCH_(LO).dot.ps.png">LIFT-OFF
 
 
 
@@ -25841,7 +25850,10 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">EVENTS PROCESSOR<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/EVENTS_PROCESSOR_(EP).dot.ps.png">EVENTS
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=166">EVENTS PROCESSOR (EP)</a><br>
+(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/EVENTS_PROCESSOR_(EP).dot.ps.png">EVENTS
 
 
 
@@ -25948,6 +25960,8 @@ example of this that I'm aware of is when the LVDC Flight Program is put
           <td valign="top">WATER VALVE ACTIVE<br>
           </td>
           <td valign="top">(n/a)<br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/WATER_VALVE_ACTIVE_(EPWM).dot.ps.png">WATER
 
@@ -25979,7 +25993,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">SWITCH SELECTOR PROCESSOR<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SWITCH_SELECTOR_PROCESSOR_(SS).dot.ps.png">SWITCH
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=385">SWITCH SELECTOR PROCESSOR (SS)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SWITCH_SELECTOR_PROCESSOR_(SS).dot.ps.png">SWITCH
 
 
 
@@ -26035,7 +26051,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">PHASE II CONTROL<br>
           </td>
-          <td valign="top">(n/a)<br>
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=91">PHASE II CONTROL (CM)</a><br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/PHASE_II_CONTROL_(CM).dot.ps.png">PHASE
 
@@ -26067,7 +26085,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">PHASE II AND IV CONTROL<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_II_&amp;_IV_CONTROL_(CM).dot.ps.png">PHASE
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_II_&amp;_IV_CONTROL_(CM).dot.ps.png">PHASE
 
 
 
@@ -26099,7 +26119,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">PHASE II TIME UPDATE<br>
           </td>
-          <td valign="top">(n/a)<br>
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=445">PHASE II TIME UPDATE (TU)</a><br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/PHASE_II_TIME_UPDATE_(TU).dot.ps.png">PHASE
 
@@ -26131,7 +26153,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">PHASE II AND IV TIME UPDATE<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_II_&amp;_IV_TIME_UPDATE_(TU).dot.ps.png">PHASE
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PHASE_II_&amp;_IV_TIME_UPDATE_(TU).dot.ps.png">PHASE
 
 
 
@@ -26163,7 +26187,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ORBIT NAVIGATION<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ORBIT_NAVIGATION_(NZ).dot.ps.png">ORBIT
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=297">ORBIT NAVIGATION (NZ)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ORBIT_NAVIGATION_(NZ).dot.ps.png">ORBIT
 
 
 
@@ -26219,7 +26245,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">NAVIGATION UPDATE IMPLEMENTATION<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/NAVIGATION_UPDATE_IMPLEMENTATION_(NU).dot.ps.png">NAVIGATION
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=292">NAVIGATION UPDATE IMPLEMENTATION (NU)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/NAVIGATION_UPDATE_IMPLEMENTATION_(NU).dot.ps.png">NAVIGATION
 
 
 
@@ -26275,7 +26303,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ORBIT GUIDANCE<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ORBIT_GUIDANCE_(OG).dot.ps.png">ORBIT
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=315">ORBIT GUIDANCE (OG)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ORBIT_GUIDANCE_(OG).dot.ps.png">ORBIT
 
 
 
@@ -26331,7 +26361,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ORBITAL GUIDANCE MANEUVER PROCESSOR<br>
           </td>
-          <td valign="top">(n/a)<br>
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=269">ORBITAL GUIDANCE MANEUVER PROCESSOR (MP)</a><br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/ORBITAL_GUIDANCE_MANEUVER_PROCESSOR_(MP).dot.ps.png">ORBITAL
 
@@ -26363,7 +26395,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">COMPRESSED DATA TELEMETRY<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/COMPRESSED_DATA_TELEMETRY_(CT).dot.ps.png">COMPRESSED
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=99">COMPRESSED DATA TELEMETRY (CT)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/COMPRESSED_DATA_TELEMETRY_(CT).dot.ps.png">COMPRESSED
 
 
 
@@ -26419,7 +26453,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">NAVIGATION EXTRAPOLATION<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/NAVIGATION_EXTRAPOLATION_(NI).dot.ps.png">NAVIGATION
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=288">NAVIGATION EXTRAPOLATION (NI)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/NAVIGATION_EXTRAPOLATION_(NI).dot.ps.png">NAVIGATION
 
 
 
@@ -26475,7 +26511,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ACQUISITION GAIN/LOSS<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ACQUISITION_GAIN-LOSS_(GL).dot.ps.png">ACQUISITION
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=182">ACQUISITION GAIN/LOSS (GL)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ACQUISITION_GAIN-LOSS_(GL).dot.ps.png">ACQUISITION
 
 
 
@@ -26531,7 +26569,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">TIME-TO-GO TO RESTART AND BETA TEST<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME-TO-GO_TO_RESTART_AND_BETA_TEST_(RS).dot.ps.png">TIME-TO-GO
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME-TO-GO_TO_RESTART_AND_BETA_TEST_(RS).dot.ps.png">TIME-TO-GO
 
 
 
@@ -26563,7 +26603,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">TIME BASE 6 CHECK<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME_BASE_6_CHECK_(CS).dot.ps.png">TIME
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME_BASE_6_CHECK_(CS).dot.ps.png">TIME
 
 
 
@@ -26595,7 +26637,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">TARGET UPDATE<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TARGET_UPDATE_(TG).dot.ps.png">TARGET
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TARGET_UPDATE_(TG).dot.ps.png">TARGET
 
 
 
@@ -26627,7 +26671,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">RESTART CALCULATIONS<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/RESTART_CALCULATIONS_(TC).dot.ps.png">RESTART
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/RESTART_CALCULATIONS_(TC).dot.ps.png">RESTART
 
 
 
@@ -26659,7 +26705,14 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">DATA COMPRESSION ROUTINES<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ONE_SECOND_DATA_COMPRESSION_(PC01).dot.ps.png">ONE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=336">ONE SECOND DATA COMPRESSION (PC01)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=339">FIFTY SECOND DATA COMPRESSION (PC50)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=343">SIXTY SECOND DATA COMPRESSION (PC60)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=352">ONE HUNDRED SECOND DATA COMPRESSION (PC99)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=346">DATA COMPRESSION POSITION UTILITY (PC70)</a><br>
+  <a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=349">DATA COMPRESSION STORE UTILITY (PC80)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ONE_SECOND_DATA_COMPRESSION_(PC01).dot.ps.png">ONE
 
 
 
@@ -26965,7 +27018,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">DIGITAL COMMAND SYSTEM<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DIGITAL_COMMAND_SYSTEM_(DCS)_(DS).dot.ps.png">DIGITAL
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=124">DIGITAL COMMAND SYSTEM (DCS) (DS)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DIGITAL_COMMAND_SYSTEM_(DCS)_(DS).dot.ps.png">DIGITAL
 
 
 
@@ -27021,7 +27076,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ALTERNATE SEQUENCE<br>
           </td>
-          <td valign="top">(n/a)<br>
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=80">ALTERNATE SEQUENCE REQUESTER (AS)</a><br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/ALTERNATE_SEQUENCE_(AS).dot.ps.png">ALTERNATE
 
@@ -27054,6 +27111,8 @@ example of this that I'm aware of is when the LVDC Flight Program is put
           <td valign="top">TIME BASE TWO SET MODULE<br>
           </td>
           <td valign="top">(n/a)<br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/TIME_BASE_TWO_SET_MODULE_(II).dot.ps.png">TIME
 
@@ -27085,7 +27144,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">TIME BASE 8 ENABLE<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME_BASE_8_ENABLE_(EE).dot.ps.png">TIME
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/TIME_BASE_8_ENABLE_(EE).dot.ps.png">TIME
 
 
 
@@ -27117,7 +27178,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ORBIT ACCELERATIONS<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ORBIT_ACCELERATIONS_(OA).dot.ps.png">ORBIT
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=306">ORBIT ACCELERATIONS (OA)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ORBIT_ACCELERATIONS_(OA).dot.ps.png">ORBIT
 
 
 
@@ -27149,7 +27212,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ORBIT VELOCITY CALCULATIONS<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ORBIT_VELOCITY_CALCULATIONS_(OV).dot.ps.png">ORBIT
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=329">ORBIT VELOCITY CALCULATIONS (OV)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ORBIT_VELOCITY_CALCULATIONS_(OV).dot.ps.png">ORBIT
 
 
 
@@ -27205,7 +27270,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">EXTRA ACCELEROMETER READ MODULE<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/EXTRA_ACCELEROMETER_READ_(ER).dot.ps.png">EXTRA
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/EXTRA_ACCELEROMETER_READ_(ER).dot.ps.png">EXTRA
 
 
 
@@ -27261,7 +27328,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">PREFLIGHT G AND C STEERING<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PREFLIGHT_G_&amp;_C_STEERING_(GC).dot.ps.png">PREFLIGHT
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=176">PREFLIGHT G &amp; C STEERING (GC)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PREFLIGHT_G_&amp;_C_STEERING_(GC).dot.ps.png">PREFLIGHT
 
 
 
@@ -27317,7 +27386,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">PREFLIGHT DCS LINKAGE<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PREFLIGHT_DCS_LINKAGE_(HD).dot.ps.png">PREFLIGHT
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=192">PREFLIGHT DCS LINKAGE (HD)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/PREFLIGHT_DCS_LINKAGE_(HD).dot.ps.png">PREFLIGHT
 
 
 
@@ -27373,7 +27444,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">VARIABLE LAUNCH AZIMUTH<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/VARIABLE_LAUNCH_AZIMUTH_(LA).dot.ps.png">VARIABLE
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/VARIABLE_LAUNCH_AZIMUTH_(LA).dot.ps.png">VARIABLE
 
 
 
@@ -27405,7 +27478,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">POLYNOMIAL EVALUATION UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/POLYNOMIAL_EVALUATION_UTILITY_(PN).dot.ps.png">POLYNOMIAL
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/POLYNOMIAL_EVALUATION_UTILITY_(PN).dot.ps.png">POLYNOMIAL
 
 
 
@@ -27437,7 +27512,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">MEMORY DUMP TELEMETRY<br>
           </td>
-          <td valign="top">(n/a)<br>
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=148">MEMORY DUMP TELEMETRY (DT)</a><br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/MEMORY_DUMP_TELEMETRY_(DT).dot.ps.png">MEMORY
 
@@ -27469,7 +27546,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">SECTOR DUMP TELEMETRY<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SECTOR_DUMP_TELEMETRY_(DT).dot.ps.png">SECTOR
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SECTOR_DUMP_TELEMETRY_(DT).dot.ps.png">SECTOR
 
 
 
@@ -27501,7 +27580,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">SINE-COSINE UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SINE-COSINE_UTILITY_(SC).dot.ps.png">SINE-COSINE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=369">SINE-COSINE UTILITY (SC)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SINE-COSINE_UTILITY_(SC).dot.ps.png">SINE-COSINE
 
 
 
@@ -27557,7 +27638,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">MATRIX MULTIPLY UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MATRIX_MULTIPLY_UTILITY_(MM).dot.ps.png">MATRIX
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=266">MATRIX MULTIPLY UTILITY (MM)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MATRIX_MULTIPLY_UTILITY_(MM).dot.ps.png">MATRIX
 
 
 
@@ -27613,7 +27696,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">EXPONENTIAL UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/EXPONENTIAL_UTILITY_(EX).dot.ps.png">EXPONENTIAL
+          <td valign="top">(n/a)<br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/EXPONENTIAL_UTILITY_(EX).dot.ps.png">EXPONENTIAL
 
 
 
@@ -27668,7 +27753,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">MATRIX TRANSPOSE UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MATRIX_TRANSPOSE_UTILITY_(MT).dot.ps.png">MATRIX
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=279">MATRIX TRANSPOSE UTILITY (MT)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/MATRIX_TRANSPOSE_UTILITY_(MT).dot.ps.png">MATRIX
 
 
 
@@ -27724,7 +27811,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">VECTOR CROSS PRODUCT UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/VECTOR_CROSS_PRODUCT_UTILITY_(VC).dot.ps.png">VECTOR
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=451">VECTOR CROSS PRODUCT UTILITY (VC)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/VECTOR_CROSS_PRODUCT_UTILITY_(VC).dot.ps.png">VECTOR
 
 
 
@@ -27780,7 +27869,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">NATURAL LOG UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/NATURAL_LOG_UTILITY_(LN).dot.ps.png">NATURAL
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=235">NATURAL LOG UTILITY (LN)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/NATURAL_LOG_UTILITY_(LN).dot.ps.png">NATURAL
 
 
 
@@ -27836,7 +27927,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">SQUARE ROOT UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SQUARE_ROOT_UTILITY_(SR).dot.ps.png">SQUARE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=379">SQUARE ROOT UTILITY (SR)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SQUARE_ROOT_UTILITY_(SR).dot.ps.png">SQUARE
 
 
 
@@ -27892,7 +27985,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">VECTOR DOT PRODUCT UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/VECTOR_DOT_PRODUCT_UTILITY_(VD).dot.ps.png">VECTOR
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=454">VECTOR DOT PRODUCT UTILITY (VD)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/VECTOR_DOT_PRODUCT_UTILITY_(VD).dot.ps.png">VECTOR
 
 
 
@@ -27949,6 +28044,8 @@ example of this that I'm aware of is when the LVDC Flight Program is put
           <td valign="top">MATRIX COMPUTATION UTILITY<br>
           </td>
           <td valign="top">(n/a)<br>
+</td>
+<td valign="top">(n/a)<br>
           </td>
           <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-513-flowcharts/MATRIX_COMPUTATION_UTILITY_(BC).dot.ps.png">MATRIX
 
@@ -27980,7 +28077,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">ARCTANGENT UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ARCTANGENT_UTILITY_(AT).dot.ps.png">ARCTANGENT
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=84">ARCTANGENT UTILITY (AT)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/ARCTANGENT_UTILITY_(AT).dot.ps.png">ARCTANGENT
 
 
 
@@ -28036,7 +28135,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">FIXED POINT DIVIDE UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/FIXED_POINT_DIVIDE_UTILITY_(FD).dot.ps.png">FIXED
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=169">FIXED POINT DIVIDE UTILITY (FD)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/FIXED_POINT_DIVIDE_UTILITY_(FD).dot.ps.png">FIXED
 
 
 
@@ -28092,7 +28193,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">REAL-TIME TELEMETRY DELAY UTILITY<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/REAL-TIME_TELEMETRY_DELAY_UTILITY_(TR).dot.ps.png">REAL-TIME
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=433">REAL-TIME TELEMETRY DELAY UTILITY (TR)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/REAL-TIME_TELEMETRY_DELAY_UTILITY_(TR).dot.ps.png">REAL-TIME
 
 
 
@@ -28148,7 +28251,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">DISCRETE OUTPUT REGISTER SET/RESET<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DISCRETE_OUTPUT_REGISTER_SET-RESET_UTILITY_(DO).dot.ps.png">DISCRETE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=109">DISCRETE OUTPUT REGISTER SET/RESET UTILITY (DO)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/DISCRETE_OUTPUT_REGISTER_SET-RESET_UTILITY_(DO).dot.ps.png">DISCRETE
 
 
 
@@ -28204,7 +28309,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">GRAVITATION ACCELERATION<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/GRAVITATION_ACCELERATION_(GR).dot.ps.png">GRAVITATION
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=186">GRAVITATION ACCELERATION (GR)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/GRAVITATION_ACCELERATION_(GR).dot.ps.png">GRAVITATION
 
 
 
@@ -28260,7 +28367,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">SCALE DIVIDE UTILITY<br>
           </td>
-          <td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SCALE_DIVIDE_UTILITY_(SD).dot.ps.png">SCALE
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=373">SCALE DIVIDE UTILITY (SD)</a><br>
+</td>
+<td valign="top" bgcolor="#ffffcc"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SCALE_DIVIDE_UTILITY_(SD).dot.ps.png">SCALE
 
 
 
@@ -28316,7 +28425,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">GIMBAL ANGLE RTC TEST UTILITY<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/GIMBAL_ANGLE_RTC_TEST_UTILITY_(GF).dot.ps.png">GIMBAL
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=179">GIMBAL ANGLE RTC TEST UTILITY (GF)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/GIMBAL_ANGLE_RTC_TEST_UTILITY_(GF).dot.ps.png">GIMBAL
 
 
 
@@ -28372,7 +28483,9 @@ example of this that I'm aware of is when the LVDC Flight Program is put
         <tr>
           <td valign="top">SIMULTANEOUS MEMORY ERROR<br>
           </td>
-          <td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SIMULTANEOUS_MEMORY_ERROR_(TS).dot.ps.png">SIMULTANEOUS
+          <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=436">SIMULTANEOUS MEMORY ERROR (TS)</a><br>
+</td>
+<td valign="top"><a moz-do-not-send="true" href="flowcharts/AS-512-flowcharts/SIMULTANEOUS_MEMORY_ERROR_(TS).dot.ps.png">SIMULTANEOUS
 
 
 
@@ -28424,10 +28537,47 @@ example of this that I'm aware of is when the LVDC Flight Program is put
 
               MEMORY ERROR (TS)</a><br>
           </td>
-        </tr>
+        </tr><tr>
+  <td valign="top">ROLL GUIDANCE<br>
+  </td>
+  <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=361">ROLL GUIDANCE (RG)</a><br>
+  </td>
+  <td valign="top">(n/a)<br>
+  </td>
+  <td valign="top">(n/a)<br>
+  </td>
+</tr>
+<tr>
+  <td valign="top">WATER METHANOL PROCESSOR<br>
+  </td>
+  <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_edd_saturn_ib_parts_iii_iv_rev_k.pdf#page=457">WATER METHANOL PROCESSOR (WM)</a><br>
+  </td>
+  <td valign="top">(n/a)<br>
+  </td>
+  <td valign="top">(n/a)<br>
+  </td>
+</tr>
+
       </tbody>
     </table>
-    <p>It may also be worth noting that I've devised color-coded,
+    <p>Given that the AS-210 flowcharts come directly from IBM 
+documentation, whereas the AS-512 and AS-513 flowcharts were 
+somewhat-speculatively semi-automatically generated by my software, it's
+ worthwhile asking how closely the two agree.&nbsp; That's important not
+ just for my own vanity (or embarrassment as the case may be), but 
+because we'd like to know whether we can usefully rely on the 
+automatically-generated ones.&nbsp; It doesn't take too much looking to 
+realize that there are often significant disagreements.&nbsp; On the 
+other hand, perhaps there <i>should</i> be significant disagreements, 
+due to mission differences and due to the differences between the Saturn
+ IB and the Saturn V.&nbsp; But in addition to cases where the 
+differences are obvious, there are also cases where the similarities are
+ eerie.&nbsp; As an example of the latter, consider the side-by-side 
+complete flowcharts for the CHI COMPUTATIONS module seen below;  AS-210 is to the left and AS-512 is to the right.&nbsp; Whether the automatically-generated flowcharts are trustworthy or not <i>in general</i>, I fear, must for now remain a matter of personal opinion.<br>
+</p>
+<div align="center"><img moz-do-not-send="true" src="CC-edd.jpg" alt="" width="396" height="922"> &nbsp; &nbsp; &nbsp; <img moz-do-not-send="true" src="CC-mine.png" alt="" width="319" height="922"><br>
+</div>
+<p>On a slightly-related topic, it may also be worth noting that I've devised color-coded,
       syntax-highlighted HTML LVDC program listings, with internal
       hyperlinks, just like we've had for AGC and AGS program listings
       for a long time.&nbsp; These things are nifty, because the
@@ -28440,10 +28590,205 @@ example of this that I'm aware of is when the LVDC Flight Program is put
           #ffff44">highlighted in yellow</span> above</a>, and in it you
       can see how the flowchart integration has been handled.<br>
     </p>
+
     <p>Also see <a moz-do-not-send="true" href="#FlowDirective">the <tt>FLOW</tt>
         assembly-language directive</a> above and the <a moz-do-not-send="true" href="LVDC-flowchart-editor-tutorial.html">LVDC
         flowchart-editing tutorial</a>.<br>
 </p>
+<h2><a name="PreflightFlowcharts"></a>Preflight Program Flowcharts</h2>
+<p>Just as the EDD contains software flowcharts for the associated LVDC Flight Program, a document called the "<a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf">LVDC Preflight Program Descriptions</a>"
+ contains flowcharts for the various subroutines of the LVDC Preflight 
+Program.&nbsp; The only revision of the latter document in our library 
+claims to have an effectivity for the AS-512 (Apollo 17), AS-513 (Skylab
+ 1), and AS-206 (Skylab 2) missions.&nbsp; And just as in the preceding 
+section, we can index those flowcharts for you here.&nbsp; Unlike the 
+preceding section, though, I don't currently have any idea as to the 
+overall ordering of these subroutines within the Preflight Program's 
+source code.<br>
+</p>
+<table cellspacing="2" cellpadding="2" border="1" align="center">
+  <tbody>
+    <tr>
+      <th valign="top">AS-512/513/206<br>
+      </th>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=13">Power Up Initialize Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=16">Forced Begin and Initialize Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=18">Mode Sort Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=21">Verify and Prepare to Load Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=25">Load Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=27">Sector Sumcheck Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=29">Sector Dump Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=31">Gimbal Angle Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=34">Accelerometer Pulse Count Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=38">Switch Selector Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=43">CIU Read Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=47">Exercise Attitude Command Test Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=52">G &amp; C Steering Test Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=54">Discrete Input Monitor Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=56">Discrete Output Monitor Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=58">DOM Test Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=61">Ladder Error Test Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=65">Minor Loop, Switch Selector and Real Time Counter Tests</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=68">Memory Error Test</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=72">Interrupt Processing Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=77">Prepare to Launch Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=83">Special Loader<br>
+        </a></td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=96">Telemetry Test Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=97">Command Receiver Linkage Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=98">Repeatable Flight Sim Linkage Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=100">S-IB Targeting Dump Routine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=102">Read Input Data Subroutine (RIS)</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=104">Sync Reset Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=107">Error Monitor Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=109">Issue Status Code Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=111">Output-Interrupt Generate Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=113">Instruction Execute Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=115">CW Execute Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=118">Accelerometer Monitor Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=120">Resolver Error Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=121">Real Time Update Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=122">Register Initialize Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=124">Real Time Delta Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=127">LVDA Timing and Counter Test Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=132">Output Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=133">S-IB Azimuth Calculate Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=135">HOP 400 Initialize Subroutine</a><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><a moz-do-not-send="true" href="Documents/lvdc_preflight_program_descriptions.pdf#page=136">TLC Monitor Subroutine</a><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p><br>
+</p>
+
 <h2><a name="UnBlackBoxify"></a>Un-Black-Boxifying the LVDC</h2>
 <p>Given that the LVDC was basically a pure <a moz-do-not-send="true" href="https://en.wikipedia.org/wiki/Black_box">black box</a>
  — in every respect other than its color, which wasn't black — it may be
@@ -30413,7 +30758,7 @@ Commons
 
           No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2023-08-22.<br>
+          2023-10-11.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted

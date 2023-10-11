@@ -401,6 +401,7 @@ I've input the data.
 """
 
 cutoffMonths = 2
+cutoffFiles = 25
 if shuttle:
     blurbTop = """ 
     This is our library of Space Shuttle documents related in some way to the 
@@ -438,8 +439,8 @@ if shuttle:
     
     blurbRecentlyAdded = """
     This section lists all documents updated in the last 
-    """ + "%d" % cutoffMonths + """
-    months. 
+    """ + "%d" % cutoffMonths + """ months
+    or the last """ + "%d" % cutoffFiles + """ files, whichever is greeater. 
     <br><br>
     The entries are arranged from most-recently added to least-recently added.
     """
@@ -520,8 +521,8 @@ else:
 
     blurbRecentlyAdded = """
     This section lists all documents updated in the last 
-    """ + "%d" % cutoffMonths + """
-    months. Note that recently-added <a href="#EngineeringDrawings">G&N 
+    """ + "%d" % cutoffMonths + """ months or the last """ + \
+    "%d" % cutoffFiles + """ files, whichever is greater. Note that recently-added <a href="#EngineeringDrawings">G&N 
     engineering drawings</a> are <i>not</i> included in the list.
     <br><br>
     The entries are arranged from most-recently added to least-recently added.
@@ -1921,7 +1922,6 @@ f.close()
 # Step 4:  Output the HTML file header.
 currentEpoch = int(time.time())
 cutoffEpoch = currentEpoch - cutoffMonths * 30 * 24 * 3600
-cutoffFiles = 25
 if fancyHeaderAndFooter:
     print(fileHeader)
 else:
