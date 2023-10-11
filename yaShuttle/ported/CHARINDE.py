@@ -28,13 +28,14 @@ from xplBuiltins import *
  /***************************************************************************/
 '''
 
+
 def CHAR_INDEX(STRING1, STRING2):
     # None of the locals need persistence.
     L1 = LENGTH(STRING1);
     L2 = LENGTH(STRING2);
     if L2 > L1:
-       return -1;
+        return -1;
     for I in range(0, L1 - L2 + 1):
-       if SUBSTR(STRING1, I, L2) == STRING2:
-          return I;
+        if SUBSTR(STRING1, I, L2) == STRING2:
+            return I;
     return -1;

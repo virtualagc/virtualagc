@@ -15,6 +15,7 @@ import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
 from BLANK import BLANK
 from IFORMAT import I_FORMAT
+from PAD import PAD
 
 '''
  /***************************************************************************/
@@ -292,6 +293,11 @@ class cSYT_DUMP:  # Local variables for SYT_DUMP().
 
 lSYT_DUMP = cSYT_DUMP()
 
+class cPRINT_VAR_NAMES:
+    def __init__(self):
+        self.M = 0
+        
+lPRINT_VAR_NAMES = cPRINT_VAR_NAMES()
 
 def SYT_DUMP():
     l = lSYT_DUMP  # Local variables.
@@ -331,17 +337,22 @@ def SYT_DUMP():
     # SYT_NO IS THE SYMBOL TABLE ENTRY FOR THE STRUCTURE TEMPLATE.
     # M IS THE INDEX INTO SORTED SYMBOL TABLE TO START LOOKING FOR
     #   STRUCTURES USING THE CURRENT STRUCTURE TEMPLTE.
-    def PRINT_VAR_NAMES(SYT_NO, M):
+    def PRINT_VAR_NAMES(SYT_NO, M = None):
         # The locals, IDX, USED, and STR_OUT, don't require persistence.
+        # But parameter M is optional, and so it does require it.
+        ll = lPRINT_VAR_NAMES
+        if M != None:
+            ll.M = M
+        
         USED = 'USED BY: '
         STR_OUT = SUBSTR(g.X70, 0, l.ATTR_START) + USED;
-        for IDX in range(M, l.SORT_COUNT + 1):
-            if (g.SYT_TYPE(g.SYT_SORT[IDX]) == g.MAJ_STRUC) and \
-                    (g.VAR_LENGTH(g.SYT_SORT[IDX]) == g.SYT_NO):
-                if (LENGTH(STR_OUT) + LENGTH(g.SYT_NAME[g.SYT_SORT[IDX]]) > 132):
+        for IDX in range(ll.M, l.SORT_COUNT + 1):
+            if (g.SYT_TYPE(g.SYT_SORT(IDX)) == g.MAJ_STRUC) and \
+                    (g.VAR_LENGTH(g.SYT_SORT(IDX)) == SYT_NO):
+                if (LENGTH(STR_OUT) + LENGTH(g.SYT_NAME(g.SYT_SORT(IDX))) > 132):
                     OUTPUT(0, SUBSTR(STR_OUT, 0, LENGTH(STR_OUT)));
                     STR_OUT = SUBSTR(g.X70, 0, l.ATTR_START);
-                STR_OUT = STR_OUT + g.SYT_NAME[g.SYT_SORT[IDX]] + ',';
+                STR_OUT = STR_OUT + g.SYT_NAME(g.SYT_SORT(IDX)) + ',';
         if  LENGTH(STR_OUT) == l.ATTR_START + LENGTH(USED):
             STR_OUT = STR_OUT + '** ' + SUBSTR(l.CUSS, 46, 14) + ' ** ';
         OUTPUT(0, SUBSTR(STR_OUT, 0, LENGTH(STR_OUT) - 1));
@@ -703,7 +714,7 @@ def SYT_DUMP():
                                         l.V_LEN = '*';
                                     else:
                                         l.V_LEN = g.SYT_ARRAY(l.I);
-                                    l.S = l.S + '(' + l.V_LEN + ')';
+                                    l.S = l.S + '(' + str(l.V_LEN) + ')';
                                 else:
                                     l.S = l.S + ' ARRAY';
                                     l.V_ARRAY = 'ARRAY(';

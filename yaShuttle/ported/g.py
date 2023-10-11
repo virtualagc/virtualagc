@@ -78,6 +78,10 @@ for parm in sys.argv[1:]:
         extraTrace = True
     elif parm == "--intersection":
         intersection = True
+    elif parm == "--utf8":
+        pass
+    elif parm == "--ascii":
+        pass
     elif parm in pCON or ("NO" + parm) in pCON or \
             (parm.startswith("NO") and parm[2:] in pCON):
         # Type 1 option:
@@ -108,6 +112,8 @@ for parm in sys.argv[1:]:
         print('--hal=SOURCE.hal Choose HAL/S source-code file (default stdin).')
         print('--pfs            Compile for PFS (PASS).')
         print('--bfs            Compile for BFS. (Default is --pfs.)')
+        print('--utf8           (Default.) Use UTF-8 in program listings.')
+        print('--ascii          Use ASCII in program listings.')
         print('--extra          Enhances messages for some ¢-toggles.')
         print('--no-syn         Do not synthesize HALMAT.')
         print('--sanity         Perform a sanity check on the Python port.')
@@ -1675,7 +1681,28 @@ MACRO_ADDR = 0
 MACRO_TEXT_LIM = 0
 REPLACE_TEXT_PTR = 0
 
+'''
+It appears to me that MACRO_TEXTS is essentially an array of BYTE codes
+comprising the concatenated text of all defined macros.  In other words, as
+each new macro is defined, its text is appended to the end of MACRO_TEXTS[].
+During the processing of any given macro (call it the "current" one), 
+START_POINT is the index the beginning of the current macro's text, T_INDEX
+is the index of the character currently being processed (I guess), and 
+FIRST_FREE is the index of the first character of the macro following the 
+current macro.
 
+For us, this is slightly complicated by the fact that FIRST_FREE is also 
+supposed to be aliased to COMM[9] (COMM being defined in HALINCL/COMMON), so
+we actually provide it as a function rather than as a variable.
+
+According to the docs, the macro text is processed in several ways:
+    1.  Pairs of " (i.e., "") from the source code have been replaced by a 
+        single " (i.e., ").
+    2.  Multiple blanks have been replaced by the BYTE code 0xEE (otherwise
+        unused in EBCDIC) and a count (BLANK_COUNT).
+    3.  The string is terminated by the BYTE count 0xEF (again, otherwise
+        unused in EBCDIC).
+'''
 class macro_texts:
 
     def __init__(self):
@@ -1928,7 +1955,7 @@ def VAR_CLASSf(cl):
     elif cl == 5: return TEMPLATE_CLASS;
     elif cl == 6: return TPL_LAB_CLASS;
     elif cl == 7: return TPL_FUNC_CLASS;
-    print("Implementation error in VAR_CLASS(CLASS) (CLASS=%d)" % cl, \
+    print("\nImplementation error in VAR_CLASS(CLASS) (CLASS=%d)" % cl, \
           file=sys.stderr)
     sys.exit(1)
 
@@ -2039,28 +2066,51 @@ def TYPEf(t, value=None):
     global TYPE, BIT_LENGTH, CHAR_LENGTH, MAT_LENGTH, VEC_LENGTH, ATTRIBUTES, \
             ATTRIBUTES2, ATTR_MASK, STRUC_PTR, STRUC_DIM, CLASS, NONHAL, \
             LOCKp, IC_PTR, IC_FND, N_DIM, S_ARRAY
-    if t < 0 or t > 16 + N_DIM_LIM:
-        print("Implementation error in TYPE(TYPE) (TYPE=%d)" % t, \
+    global FACTORED_TYPE, FACTORED_BIT_LENGTH, FACTORED_CHAR_LENGTH, \
+            FACTORED_MAT_LENGTH, FACTORED_VEC_LENGTH, FACTORED_ATTRIBUTES, \
+            FACTORED_ATTRIBUTES2, FACTORED_ATTR_MASK, FACTORED_STRUC_PTR, \
+            FACTORED_STRUC_DIM, FACTORED_CLASS, FACTORED_NONHAL, \
+            FACTORED_LOCKp, FACTORED_IC_PTR, FACTORED_IC_FND, \
+            FACTORED_N_DIM, FACTORED_S_ARRAY
+    if t < 0 or t >= 2 * (16 + N_DIM_LIM + 1):
+        print("\nImplementation error in TYPE(TYPE) (TYPE=%d)" % t, \
               file=sys.stderr)
         sys.exit(1)
     if value == None:
-        if   t == 0: return TYPE;
-        elif t == 1: return BIT_LENGTH;
-        elif t == 2: return CHAR_LENGTH;
-        elif t == 3: return MAT_LENGTH;
-        elif t == 4: return VEC_LENGTH;
-        elif t == 5: return ATTRIBUTES;
-        elif t == 6: return ATTRIBUTES2;
-        elif t == 7: return ATTR_MASK;
-        elif t == 8: return STRUC_PTR;
-        elif t == 9: return STRUC_DIM;
+        if   t == 0:  return TYPE;
+        elif t == 1:  return BIT_LENGTH;
+        elif t == 2:  return CHAR_LENGTH;
+        elif t == 3:  return MAT_LENGTH;
+        elif t == 4:  return VEC_LENGTH;
+        elif t == 5:  return ATTRIBUTES;
+        elif t == 6:  return ATTRIBUTES2;
+        elif t == 7:  return ATTR_MASK;
+        elif t == 8:  return STRUC_PTR;
+        elif t == 9:  return STRUC_DIM;
         elif t == 10: return CLASS;
         elif t == 11: return NONHAL;
         elif t == 12: return LOCKp;
         elif t == 13: return IC_PTR;
         elif t == 14: return IC_FND;
         elif t == 15: return N_DIM;
-        return S_ARRAY[t - 16];
+        elif t <= 19: return S_ARRAY[t - 16];
+        elif t == 20: return FACTORED_TYPE;
+        elif t == 21: return FACTORED_BIT_LENGTH;
+        elif t == 22: return FACTORED_CHAR_LENGTH;
+        elif t == 23: return FACTORED_MAT_LENGTH;
+        elif t == 24: return FACTORED_VEC_LENGTH;
+        elif t == 25: return FACTORED_ATTRIBUTES;
+        elif t == 26: return FACTORED_ATTRIBUTES2;
+        elif t == 27: return FACTORED_ATTR_MASK;
+        elif t == 28: return FACTORED_STRUC_PTR;
+        elif t == 29: return FACTORED_STRUC_DIM;
+        elif t == 30: return FACTORED_CLASS;
+        elif t == 31: return FACTORED_NONHAL;
+        elif t == 32: return FACTORED_LOCKp;
+        elif t == 33: return FACTORED_IC_PTR;
+        elif t == 34: return FACTORED_IC_FND;
+        elif t == 35: return FACTORED_N_DIM;
+        elif t <= 39: return FACTORED_S_ARRAY[t - 36];
     if   t == 0: TYPE = value;
     elif t == 1: BIT_LENGTH = value;
     elif t == 2: CHAR_LENGTH = value;
@@ -2077,8 +2127,24 @@ def TYPEf(t, value=None):
     elif t == 13: IC_PTR = value;
     elif t == 14: IC_FND = value;
     elif t == 15: N_DIM = value;
-    else:
-        S_ARRAY[t - 16] = value;
+    elif t <= 19: S_ARRAY[t - 16] = value;
+    elif t == 20: FACTORED_TYPE = value;
+    elif t == 21: FACTORED_BIT_LENGTH = value;
+    elif t == 22: FACTORED_CHAR_LENGTH = value;
+    elif t == 23: FACTORED_MAT_LENGTH = value;
+    elif t == 24: FACTORED_VEC_LENGTH = value;
+    elif t == 25: FACTORED_ATTRIBUTES = value;
+    elif t == 26: FACTORED_ATTRIBUTES2 = value;
+    elif t == 27: FACTORED_ATTR_MASK = value;
+    elif t == 28: FACTORED_STRUC_PTR = value;
+    elif t == 29: FACTORED_STRUC_DIM = value;
+    elif t == 30: FACTORED_CLASS = value;
+    elif t == 31: FACTORED_NONHAL = value;
+    elif t == 32: FACTORED_LOCKp = value;
+    elif t == 33: FACTORED_IC_PTR = value;
+    elif t == 34: FACTORED_IC_FND = value;
+    elif t == 35: FACTORED_N_DIM = value;
+    elif t <= 39: FACTORED_S_ARRAY[t - 36] = value;
 
 
 FACTORED_TYPE = 0
@@ -2716,6 +2782,22 @@ UNMOVEABLE = 0
 # LITERALS TO CHANGE REFERENCES TO VARIABLES TO RECORD FORMAT
 def MACRO_TEXT(n, value=None):
     global MACRO_TEXTS
+    if n < 0:
+        # For whatever reason, the FINISH_MACRO_TEXT() function likes to 
+        # check the final character of the *previous* macro text, to test
+        # whether it's a BYTE(')'} or else a 0xEE (the escape character for
+        # space compression in these texts).  Which is great, except that if
+        # the current macro is the very first one, there's no previous macro
+        # text to check.  The vagaries of Intermetrics version of XPL mean
+        # that whatever character happens to appear in memory prior to 
+        # MACRO_TEXTS[] is going to be checked (possibly part of the variable
+        # REPLACE_TEXT_PTR but, I think, not necessarily).  Lovely!  So rather 
+        # than flag a negative index n as an error, which would be the sensible
+        # thing to do, we're simply going to return a byte (namely 0x00) 
+        # guaranteed to be neither EBCDIC ')' or 0xEE.
+        return 0x00
+    while len(MACRO_TEXTS) <= n:
+        MACRO_TEXTS.append(macro_texts())
     if value == None:
         return MACRO_TEXTS[n].MAC_TXT
     MACRO_TEXTS[n].MAC_TXT = value
@@ -2848,16 +2930,19 @@ def EXTENT(n, value=None):
 
 
 def SYT_HASHLINK(n, value=None):
+    global LINK_SORT
+    while len(LINK_SORT) <= n:
+        LINK_SORT.append(link_sort())
     if value == None:
-        return h.SYM_TAB[n].SYM_HASHLINK
-    h.SYM_TAB[n].SYM_HASHLINK = value
+        return LINK_SORT[n].SYM_HASHLINK
+    LINK_SORT[n].SYM_HASHLINK = value
 
 
 def SYT_SORT(n, value=None):
+    global LINK_SORT
     if value == None:
-        return h.SYM_TAB[n].SYM_SORT
-    enlargeSYM_TAB(n)
-    h.SYM_TAB[n].SYM_SORT = value
+        return LINK_SORT[n].SYM_SORT
+    LINK_SORT[n].SYM_SORT = value
 
 
 def OUTER_REF(n, value=None):
@@ -2918,10 +3003,14 @@ def XREF(n, value=None):
 
 
 def ATOMS(n, value=None):
-    if value == None:
-        return h.FOR_ATOMS[n].CONST_ATOMS
+    if n < 0:
+        print("\nImplementation error: negative index for FOR_ATOMS", \
+              file=sys.stderr)
+        sys.exit(1)
     while len(h.FOR_ATOMS) <= n:
         h.FOR_ATOMS.append(h.for_atoms())
+    if value == None:
+        return h.FOR_ATOMS[n].CONST_ATOMS
     h.FOR_ATOMS[n].CONST_ATOMS = value
 
 
@@ -3073,7 +3162,7 @@ SPACE_FLAGS = (
     0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00,  # 123-132
     0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # 133-142
     #  END OF FIRST PART OF SPACE TABLE USED FOR M-LINE SPACING
-    0x22, 0x22, 0x12, 0x22, 0x22, 0x22, 0x22, 0x22, 0x20,  #  0-  9
+          0x22, 0x22, 0x12, 0x22, 0x22, 0x22, 0x22, 0x22, 0x20,  #  1-  9
     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,  # 10- 19
     0x00, 0x22, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # 20- 29
     0x55, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x00, 0x00, 0x02,  # 30- 39
@@ -3088,7 +3177,7 @@ SPACE_FLAGS = (
     0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x01, 0x00, 0x00,  # 123-132
     0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  # 133-142
     )
-if SANITY_CHECK and len(SPACE_FLAGS) != 284 + 1:
+if SANITY_CHECK and len(SPACE_FLAGS) != 2 * NT + 1:
     print('Bad SPACE_FLAGS', file=sys.stderr)
     sys.exit(1)
 

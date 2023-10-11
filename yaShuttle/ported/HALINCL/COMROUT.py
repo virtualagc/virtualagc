@@ -6,30 +6,29 @@ Filename:   COMROUT.py
 Purpose:    This is part of the port of the original XPL source code for 
             HAL/S-FC into Python.  
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
-History:    2023-09-27 RSB  Ported
+History:    2023-09-27 RSB  Ported CHAR_INDEX
+            2023-10-09 RSB  Ported PAD
 '''
 
 from xplBuiltins import *
 import g
 
-'''
-I hadn't realized there was XPL code for the PAD function, so I added my own
-version of it to xplBuiltins long ago.  For now at least, let's just ignore it,
-rather than replacing my version.
+X72 = ' ' * 72
 
-   /* ROUTINE TO PAD STRINGS WITH BLANKS TO A FIXED LENGTH */
-PAD:
-   PROCEDURE(STRING,WIDTH) CHARACTER;
-      DECLARE STRING CHARACTER, (WIDTH,L) FIXED;
-      DECLARE X72 CHARACTER INITIAL
- ('                                                                        ');
-      L = LENGTH(STRING);
-      IF L >= WIDTH THEN RETURN STRING;
-      ELSE RETURN STRING || SUBSTR(X72, 72 + L - WIDTH);
-   END PAD;
-'''
+# This is a modified duplicate from PAD.
+# ROUTINE TO PAD STRINGS WITH BLANKS TO A FIXED LENGTH
+def PAD(STRING, WIDTH):
+    # Locals L, X72
+    
+    L = LENGTH(STRING);
+    if L >= WIDTH:
+        return STRING;
+    else:
+        return STRING + SUBSTR(X72, 72 + L - WIDTH);
+# END PAD;
 
-   
+# Note that the following is a duplicate from CHARINDE, so I'm not sure why
+# it's here.
 def CHAR_INDEX(STRING1, STRING2):
     # Locals are L1, L2, I.
     
@@ -41,3 +40,4 @@ def CHAR_INDEX(STRING1, STRING2):
         if SUBSTR(STRING1, I, L2) == STRING2:
             return I;
     return -1;
+# END CHAR_INDEX;

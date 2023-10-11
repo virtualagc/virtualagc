@@ -14,6 +14,7 @@ import g
 import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
 from SCAN_DISASTER import SCAN_DISASTER
+from PAD import PAD
 
 '''
  /***************************************************************************/

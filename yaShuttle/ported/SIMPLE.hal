@@ -5,10 +5,13 @@ C It'll undoubtedly evolve as the work progresses.
  SIMPLE: PROGRAM;
         DECLARE INTEGER INITIAL(1), A, B;
         DECLARE C INTEGER, D INTEGER, V VECTOR INITIAL(10,20,30);
-        DECLARE M MATRIX INITIAL(1,2,3,4,5,6,7,8,9), S;
-        C = 2 A + 3 B + 1;
-C       D = C**2 + V$2;
-        D = C**2 + M$(1,2);
+        DECLARE M MATRIX INITIAL(1,2,3,4,5,6,7,8,9), S; /* A comment */
+        DECLARE E;
+        DECLARE F INTEGER;
+        C = 2 A + 3 B + 1; /* Another inline comment */
+        D = C**2 + V$2;
+        D = C**2 + M$(1,2); /* Here is a really long inline comment */
         S = M$(2,1);
+        V$2 = 12;
         WRITE(6) A, B, 'HELLO', C, 3 A - 2 C - 6;
  CLOSE SIMPLE;

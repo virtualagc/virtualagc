@@ -177,7 +177,9 @@ def BLOCK_SUMMARY():
     # END CHECK_IDENT;
     
     def OUT_BLOCK_SUMMARY():
-        # No locals
+        # No locals.  I have replaced references like CLASS(I) by 
+        # TYPE(I+10), in lieu of defining a new function g.CLASSf() just for
+        # a couple of instances.  See the comments for g.TYPEf().
         nonlocal I, J, PTR, HEADER_ISSUED, FIRST_TIME
         for J in range(g.OUTER_REF_PTR[g.NEST] & 0x7FFF, g.OUTER_REF_INDEX + 1):
             if g.OUTER_REF(J) == -1: 
@@ -186,22 +188,22 @@ def BLOCK_SUMMARY():
                 PTR = g.OUTER_REF(J);
                 g.TEMP1 = g.OUTER_REF_FLAGS(J);
                 if g.TEMP1 == 0:
-                    if CLASS(I) == 0: 
+                    if g.TYPEf(I + 10) == 0: 
                         OUTPUT_IDENT(g.TRUE);
                         g.OUTER_REF(J, -1);
                 else: 
                     INDIRECT();
-                    if g.SYT_CLASS(PTR) <= CLASS(I):
+                    if g.SYT_CLASS(PTR) <= g.TYPEf(I + 10):
                         # DO CASE CONDITION(I);
                         ci = CONDITION(I)
                         if ci == 0:
-                            if g.SYT_TYPE(PTR) == TYPE(I): 
+                            if g.SYT_TYPE(PTR) == g.TYPEf(I): 
                                 CHECK_IDENT();
                         elif ci == 1:
-                            if g.SYT_TYPE(PTR) >= TYPE(I): 
+                            if g.SYT_TYPE(PTR) >= g.TYPEf(I): 
                                 CHECK_IDENT();
                         elif ci == 2:
-                            if g.SYT_CLASS(PTR) == CLASS(I): 
+                            if g.SYT_CLASS(PTR) == g.TYPEf(I + 10): 
                                 CHECK_IDENT();
                         # END DO CASE
             # NEXT_ENTRY:

@@ -12,6 +12,7 @@ History:    2023-09-30 RSB  Ported from XPL
 from xplBuiltins import *
 import g
 from IFORMAT import I_FORMAT
+from PAD import PAD
 
 '''
  /***************************************************************************/
@@ -59,7 +60,7 @@ def SAVE_INPUT():
         g.TOO_MANY_LINES = g.TRUE;
         g.NEXT = g.SAVEp;
         return;
-    g.S = g.CARD_COUNT - g.INCLUDE_OFFSET;
+    g.S = str(g.CARD_COUNT - g.INCLUDE_OFFSET);
     g.S = PAD(g.S, 4);
     if (g.INCLUDING or g.INCLUDE_END):
         g.INCLUDE_CHAR = g.PLUS;

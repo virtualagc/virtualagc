@@ -13,6 +13,7 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
 import HALINCL.DWNTABLE as t
+from PAD import PAD
 from HALINCL.SPACELIB import RECORD_TOP
 
 '''

@@ -16,6 +16,7 @@ import HALINCL.CERRDECL as d
 import HALINCL.SPACELIB as s
 from ERROR import ERROR
 from HASH import HASH
+from PAD import PAD
 from HALINCL.ENTER import ENTER
 from SETXREF import SET_XREF
 from BUFFERMA import BUFFER_MACRO_XREF
@@ -250,6 +251,7 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
     goto_NO_ARG_FUNC = False
     goto_FUNC_TOKEN_ZERO = False
     goto_OVERRIDE_ERR = False
+    goto_END_FUNC_CHECK = False
     
     l.FLAG = 0;
     g.IDENT_COUNT = g.IDENT_COUNT + 1;
@@ -802,15 +804,15 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                             if (g.SYT_FLAGS(g.QUALIFICATION) & g.EVIL_FLAG) != 0:
                                 goto_Q_TRAP = True;
                                 continue
-                    g.KIN = SYT_LINK1(g.QUALIFICATION);
+                    g.KIN = g.SYT_LINK1(g.QUALIFICATION);
                     while g.KIN > 0:
                         if g.KIN == l.I:
-                            if g.SYT_TYPE(l.I) != g.MAJ_STRUC | (g.NEXT_CHAR != BYTE(g.PERIOD)):
+                            if g.SYT_TYPE(l.I) != g.MAJ_STRUC or (g.NEXT_CHAR != BYTE(g.PERIOD)):
                                 g.QUALIFICATION = 0;
                             else:
                                 g.QUALIFICATION = l.I;
                             goto_TEMPL_BRANCH = True
-                            # Falls through
+                            break
                         else:
                             g.KIN = g.SYT_LINK2(g.KIN);
                     if not goto_TEMPL_BRANCH:

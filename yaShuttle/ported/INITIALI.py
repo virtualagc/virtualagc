@@ -13,12 +13,14 @@ from xplBuiltins import *  # Built-in functions
 import g  # Get global variables.
 from CHARTIME import CHARTIME
 from CHARDATE import CHARDATE
+from EMITARRA import EMIT_ARRAYNESS
 from PRINTDAT import PRINT_DATE_AND_TIME
 from ERRORS import ERRORS
 from GETSUBSE import GET_SUBSET
 from UNSPEC import UNSPEC
 from SETTLIMI import SET_T_LIMIT
 from ORDEROK import ORDER_OK
+from PAD import PAD
 from SOURCECO import SOURCE_COMPARE
 from STREAM import STREAM
 if g.scan1:
@@ -344,6 +346,10 @@ def INITIALIZATION():
     g.FREELIMIT = g.TEMP1 - 512;
     # INITIALIZE VMEM PAGING AND ALLOCATE SPACE FOR IN-CORE PAGES
     '''
+    g.ATOMS(0, 0x00010050); # XPXRC OP CODE-ONE OPERAND
+    g.NEXT_ATOMp = 2; # SKIP FIRST 2 ENTRIES - ALWAYS XPRC
+    EMIT_ARRAYNESS(); # DUMMY CALL TO INITIALIZE A PARM
+    
     MONITOR(5, g.DW, 0)
     '''
     ... lots of stuff just deleted here that I hope pertains to

@@ -13,12 +13,12 @@ History:    2023-08-25 RSB  Created place-holder file.
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
-from ERROR   import ERROR
-from BLANK   import BLANK
-from IFORMAT import I_FORMAT
+from ERROR    import ERROR
+from BLANK    import BLANK
+from CHARINDE import CHAR_INDEX
+from IFORMAT  import I_FORMAT
 from OUTPUT_WRITER_DISASTER import OUTPUT_WRITER_DISASTER
 from HALINCL.CHECKDWN import CHECK_DOWN
-from HALINCL.COMROUT import CHAR_INDEX
 
 '''
  #*************************************************************************
@@ -446,7 +446,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         else:
             g.LAST_SPACE = g.L & 0x0F;
         if SHR(g.TOKEN_FLAGS[PNTR], 6) == 0:
-            g.C[0] = STRING(g.VOCAB_INDEX[g.STMT_STACK[PNTR]]);
+            g.C[0] = g.VOCAB_INDEX[g.STMT_STACK[PNTR]];
         else:
             g.J = g.TOKEN_FLAGS[PNTR];
             g.C[0] = g.SAVE_BCD[SHR(g.J, 6)];  # IDENTIFIER
@@ -655,7 +655,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             ll.CHAR = g.INFORMATION;
             g.INFORMATION = '';
         elif g.IF_FLAG and (g.LABEL_COUNT == 0):
-            ll.CHAR = 'DO=ST#' + g.STMT_NUM() + 1;
+            ll.CHAR = 'DO=ST#' + str(g.STMT_NUM() + 1);
         else:
             ll.CHAR = g.SAVE_SCOPE[:];
         # PRINT REVISION LEVEL ON M-LINE FOR SDL
@@ -1346,78 +1346,80 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                         # NOT A CHARACTER STRING
                         if not goto_STLABEL:
                             g.C[0] = ATTACH(l.PTR, 0);
-                            if LENGTH(g.C[0]) == 0: 
-                                goto_PTR_LOOP_END = True
-                            else:
+                        if LENGTH(g.C[0]) == 0 and not goto_STLABEL: 
+                            goto_PTR_LOOP_END = True
+                        else:
+                            if not goto_STLABEL:
                                 l.M_PTR = l.M_PTR + l.SPACE_NEEDED;
-                                if LENGTH(g.C[0]) + l.M_PTR >= l.LINESIZE:
-                                    EXPAND(l.PTR - 1);
-                                    if g.SQUEEZING:
-                                        g.SQUEEZING = g.FALSE;
-                                        g.GRAMMAR_FLAGS[l.PTR] |= g.PRINT_FLAG;
-                                        goto_OUTPUT_WRITER_END = True
-                                        break
-                                    l.M_PTR = MIN(g.INDENT_LEVEL, l.INDENT_LIMIT);
-                        if not goto_PTR_LOOP_END:
-                            if l.PTR == l.PTR_START or goto_STLABEL:
-                                goto_STLABEL = False 
-                                if g.LABEL_COUNT > 0:
-                                    l.TEMP = 0;
-                                    l.LABEL_TOO_LONG = g.TRUE;
-                                    for g.I in range(l.LABEL_START, l.LABEL_END + 1, 2):
-                                        g.J = g.TOKEN_FLAGS[g.I];
-                                        l.TEMP = l.TEMP + LENGTH(g.SAVE_BCD[SHR(g.J, 6)]) + 2;
-                                    if ((g.NEST_LEVEL == 0) and (l.TEMP <= l.M_PTR)) \
-                                            or ((g.NEST_LEVEL < 10) and \
-                                                (l.TEMP < (l.M_PTR - 1))) or \
-                                                ((g.NEST_LEVEL >= 10) and \
-                                                  (l.TEMP < (l.M_PTR - 2))):
-                                        g.J = l.M_PTR - l.TEMP;
-                                        l.LABEL_TOO_LONG = g.FALSE;
-                                    else:
-                                        g.J = 0;
-                                    for g.I in range(l.LABEL_START, l.LABEL_END + 1, 2):
-                                        g.K = g.TOKEN_FLAGS[g.I];
-                                        g.S = g.SAVE_BCD[SHR(g.K, 6)];
-                                        if (LENGTH(g.S) + 2 + g.J) > l.LINESIZE:
-                                            g.J = g.I;
-                                            l.CHAR = g.S;
-                                            EXPAND(0);
-                                            g.I = g.J;
-                                            g.S = l.CHAR;
+                            if LENGTH(g.C[0]) + l.M_PTR >= l.LINESIZE \
+                                    and not goto_STLABEL:
+                                EXPAND(l.PTR - 1);
+                                if g.SQUEEZING:
+                                    g.SQUEEZING = g.FALSE;
+                                    g.GRAMMAR_FLAGS[l.PTR] |= g.PRINT_FLAG;
+                                    goto_OUTPUT_WRITER_END = True
+                                    break
+                                l.M_PTR = MIN(g.INDENT_LEVEL, l.INDENT_LIMIT);
+                            if not goto_PTR_LOOP_END:
+                                if l.PTR == l.PTR_START or goto_STLABEL:
+                                    goto_STLABEL = False 
+                                    if g.LABEL_COUNT > 0:
+                                        l.TEMP = 0;
+                                        l.LABEL_TOO_LONG = g.TRUE;
+                                        for g.I in range(l.LABEL_START, l.LABEL_END + 1, 2):
+                                            g.J = g.TOKEN_FLAGS[g.I];
+                                            l.TEMP = l.TEMP + LENGTH(g.SAVE_BCD[SHR(g.J, 6)]) + 2;
+                                        if ((g.NEST_LEVEL == 0) and (l.TEMP <= l.M_PTR)) \
+                                                or ((g.NEST_LEVEL < 10) and \
+                                                    (l.TEMP < (l.M_PTR - 1))) or \
+                                                    ((g.NEST_LEVEL >= 10) and \
+                                                      (l.TEMP < (l.M_PTR - 2))):
+                                            g.J = l.M_PTR - l.TEMP;
+                                            l.LABEL_TOO_LONG = g.FALSE;
+                                        else:
                                             g.J = 0;
-                                        for g.L in range(0, LENGTH(g.S)):
-                                            g.K = BYTE(g.S, g.L);
-                                            l.BUILD_M = BYTE(l.BUILD_M, g.J + g.L, g.K);
-                                        g.L += 1  # Terminal value differs from XPL to Python.
-                                        l.BUILD_M = BYTE(l.BUILD_M, g.J + g.L, BYTE(':'));
-                                        g.J = g.J + g.L + 2;
-                                    if l.LABEL_TOO_LONG:
-                                        EXPAND(0);
-                                    g.LABEL_COUNT = 0;
-                            if l.PRINT_LABEL: 
-                                goto_AFTER_EXPAND = True
-                                break
-                            for g.I in range(0, LENGTH(g.C[0])):
-                                g.J = BYTE(g.C[0], g.I);
-                                l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR + g.I, g.J);
-                            g.I = g.TOKEN_FLAGS[l.PTR] & 0x1F;  # TYPE FOR OVERPUNCH
-                            if g.I > 0:
-                                if (g.I < g.SCALAR_TYPE) or (g.I == g.MAJ_STRUC):
-                                    g.K = g.OVER_PUNCH_TYPE[g.I];
-                                    g.I = (SHL(l.M_PTR, 1) - 1 + LENGTH(g.C[0])) / 2;
-                                    l.BUILD_E = BYTE(l.BUILD_E, g.I, g.K);
-                                    l.BUILD_E_IND[g.I] = 1;
-                                    if l.MAX_E_LEVEL == 0:
-                                        MAX_E_LEVEL = 1;
-                            if (g.GRAMMAR_FLAGS[l.PTR] & g.MACRO_ARG_FLAG) != 0:
-                                # REPLACE NAME, SO UNDERLINE IT
-                                if g.I == 7:
-                                    l.MACRO_WRITTEN = g.TRUE;
+                                        for g.I in range(l.LABEL_START, l.LABEL_END + 1, 2):
+                                            g.K = g.TOKEN_FLAGS[g.I];
+                                            g.S = g.SAVE_BCD[SHR(g.K, 6)];
+                                            if (LENGTH(g.S) + 2 + g.J) > l.LINESIZE:
+                                                g.J = g.I;
+                                                l.CHAR = g.S;
+                                                EXPAND(0);
+                                                g.I = g.J;
+                                                g.S = l.CHAR;
+                                                g.J = 0;
+                                            for g.L in range(0, LENGTH(g.S)):
+                                                g.K = BYTE(g.S, g.L);
+                                                l.BUILD_M = BYTE(l.BUILD_M, g.J + g.L, g.K);
+                                            g.L += 1  # Terminal value differs from XPL to Python.
+                                            l.BUILD_M = BYTE(l.BUILD_M, g.J + g.L, BYTE(':'));
+                                            g.J = g.J + g.L + 2;
+                                        if l.LABEL_TOO_LONG:
+                                            EXPAND(0);
+                                        g.LABEL_COUNT = 0;
+                                if l.PRINT_LABEL: 
+                                    goto_AFTER_EXPAND = True
+                                    break
                                 for g.I in range(0, LENGTH(g.C[0])):
-                                    l.M_UNDERSCORE = BYTE(l.M_UNDERSCORE, l.M_PTR + g.I, BYTE('_'));
-                                l.M_UNDERSCORE_NEEDED = g.TRUE;
-                            l.M_PTR = l.M_PTR + LENGTH(g.C[0]);
+                                    g.J = BYTE(g.C[0], g.I);
+                                    l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR + g.I, g.J);
+                                g.I = g.TOKEN_FLAGS[l.PTR] & 0x1F;  # TYPE FOR OVERPUNCH
+                                if g.I > 0:
+                                    if (g.I < g.SCALAR_TYPE) or (g.I == g.MAJ_STRUC):
+                                        g.K = g.OVER_PUNCH_TYPE[g.I];
+                                        g.I = (SHL(l.M_PTR, 1) - 1 + LENGTH(g.C[0])) // 2;
+                                        l.BUILD_E = BYTE(l.BUILD_E, g.I, g.K);
+                                        l.BUILD_E_IND[g.I] = 1;
+                                        if l.MAX_E_LEVEL == 0:
+                                            MAX_E_LEVEL = 1;
+                                if (g.GRAMMAR_FLAGS[l.PTR] & g.MACRO_ARG_FLAG) != 0:
+                                    # REPLACE NAME, SO UNDERLINE IT
+                                    if g.I == 7:
+                                        l.MACRO_WRITTEN = g.TRUE;
+                                    for g.I in range(0, LENGTH(g.C[0])):
+                                        l.M_UNDERSCORE = BYTE(l.M_UNDERSCORE, l.M_PTR + g.I, BYTE('_'));
+                                    l.M_UNDERSCORE_NEEDED = g.TRUE;
+                                l.M_PTR = l.M_PTR + LENGTH(g.C[0]);
                     goto_PTR_LOOP_END = False
             # END OF DO PTR = PTR_START TO PTR_END
             if not goto_AFTER_EXPAND and not goto_OUTPUT_WRITER_END:

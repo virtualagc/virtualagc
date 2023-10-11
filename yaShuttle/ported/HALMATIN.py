@@ -155,10 +155,10 @@ def HALMAT_INIT_CONST ():
                         #   OR EMIT AN ERROR IF OUTSIDE OF RANGE OF INTEGERS
                         if g.SYT_TYPE(g.ID_LOC) == g.INT_TYPE:
                             if ROUND_SCALAR(g.IC_LOC[I]):
-                                if IC_TYPE(I) == g.SCALAR_TYPE:
-                                    g.IC_LOC[I] = SAVE_LITERAL(1, DW_AD);
+                                if g.IC_TYPE[I] == g.SCALAR_TYPE:
+                                    g.IC_LOC[I] = SAVE_LITERAL(1, g.DW_AD);
                             else: 
-                                ERRORS(CLASS_DI, 17);
+                                ERRORS(d.CLASS_DI, 17);
                             if (g.SYT_TYPE(g.ID_LOC) == g.CHAR_TYPE) and \
                                     (LIT1(CONSTLIT) == 0):
                                 DO;

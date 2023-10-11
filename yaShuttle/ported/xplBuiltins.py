@@ -22,9 +22,14 @@ import math
 import ebcdic
 
 sourceFile = None # Use stdin by default for HAL/S source-code file.
+outUTF8 = True
 for parm in sys.argv[1:]:
     if parm.startswith("--hal="):
         sourceFile = parm[6:]
+    elif parm == "--ascii":
+        outUTF8 = False
+    elif parm == "--utf8":
+        outUTF8 = True
 
 # Python's native round() function uses a silly method (in the sense that it is
 # unlike the expectation of every programmer who ever lived) called 'banker's
@@ -104,8 +109,34 @@ outputDevices = [None]*10
 # is hard-coded separately), and buffer their contents where appropriate.
 if sourceFile == None: # HAL/S source code.
     f = sys.stdin
-else:    # Debugging
-    f = open(sourceFile, "r")
+    sourceFile = "stdin"
+else:
+    # Get the source-file name from the compiler's --hal switch.
+    # If the file turns out to not be in the current folder, try several others.
+    # This is just a convenience for me in debugging, based on the notion that
+    # the compiler is being run from the yaShuttle/ported/ folder in the source 
+    # tree.  The other folders don't need to be checked in a production version
+    # of the compiler, since they most likely don't even exist.
+    folders = (
+        ".",
+        "../Source Code/Programming in HAL-S",
+        "../Source Code/HAL-S-360 Users Manual"
+        )
+    f = None
+    i = 0
+    while f == None and i < len(folders):
+        try:
+            s = folders[i] + "/" + sourceFile
+            f = open(s, "r")
+            sourceFile = s
+            break
+        except:
+            f = None
+            i += 1
+    if f == None:
+        print("Couldn't find the source file (%s)" % sourceFile, \
+              file = sys.stderr)
+        sys.exit(1)
 dummy = f.readlines() # Source code.
 for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬","~")\
@@ -280,21 +311,39 @@ def MONITOR(function, arg2=None, arg3=None):
         error()
     
     elif function == 9:
+        '''
+        This is a bit confusing, so let me try to summarize my understanding of
+        it.  There are no built-in floating-point operations in XPL nor 
+        (apparently) in the CPU, so they're handled in a roundabout way via
+        the MONITOR(5,...) and MONITOR(9,...) calls.  MONITOR(5) sets ups a 
+        working area in which to hold floating-point operands and results.
+        This is done within an array of apparently 32-bit values called DW or 
+        FOR_DW (due to renaming by macros).  It appears to me that the 
+        first (or only) operand and resultant are always assigned to be the
+        combination of DW[0] and DW[1], while the second operand (if any) is
+        always DW[2] and DW[3].  Additionally, in Python we have no need to
+        store a "double-word" value as two separte entries, so we always can
+        just store the operands or resultants in just one word of each 
+        double-word.  The upshot of all that in terms of the code you see 
+        below is that the first operand or resultant will always be in 
+        dwArea[0][dwArea[1]], while the second operand (if any) will always be
+        in dwArea[0][dwArea[1]+2] 
+        '''
         if dwArea == None:
             print("\nNo MONITOR(5) prior to MONITOR(9)", file=sys.stderr)
             exit(1)
         op = arg2
         try:
             if op == 1:
-                dwArea[0][dwArea[1]] = dwArea[0][dwArea[1]] + dwArea[0][dwArea[1]+1]
+                dwArea[0][dwArea[1]] = dwArea[0][dwArea[1]] + dwArea[0][dwArea[1]+2]
             elif op == 2:
-                dwArea[0][dwArea[1]] = dwArea[0][dwArea[1]] - dwArea[0][dwArea[1]+1]
+                dwArea[0][dwArea[1]] = dwArea[0][dwArea[1]] - dwArea[0][dwArea[1]+2]
             elif op == 3:
-                dwArea[0][dwArea[1]] = dwArea[0][dwArea[1]] * dwArea[0][dwArea[1]+1]
+                dwArea[0][dwArea[1]] = dwArea[0][dwArea[1]] * dwArea[0][dwArea[1]+2]
             elif op == 4:
-                dwArea[0][dwArea[1]] = dwArea[0][dwArea[1]] / dwArea[0][dwArea[1]+1]
+                dwArea[0][dwArea[1]] = dwArea[0][dwArea[1]] / dwArea[0][dwArea[1]+2]
             elif op == 5:
-                dwArea[0][dwArea[1]] = pow(dwArea[0][dwArea[1]], dwArea[0][dwArea[1]+1])
+                dwArea[0][dwArea[1]] = pow(dwArea[0][dwArea[1]], dwArea[0][dwArea[1]+2])
             # Unfortunately, the documentation doesn't specify the angular 
             # units.
             elif op == 6:
@@ -437,7 +486,10 @@ def OUTPUT(fileNumber, string):
         elif ansi == '2':
             subHeadingLine = string[1:]
             return
-        queue.append(string[1:])
+        if outUTF8:
+            queue.append(string[1:].replace("`", "¢").replace("~", "¬"))
+        else:
+            queue.append(string[1:])
         for i in range(len(queue)):
             if LINE_COUNT == 0 or LINE_COUNT >= linesPerPage:
                 if pageCount > 0:
@@ -465,6 +517,8 @@ def OUTPUT(fileNumber, string):
         if outputDevices[fileNumber]["open"] and \
                 "blob" in outputDevices[fileNumber]:
             f = outputDevices[fileNumber]["file"]
+            if outUTF8:
+                string = string.replace("`", "¢").replace("~", "¬")
             f.write(string + '\n')
             f.flush()
 
@@ -574,10 +628,13 @@ def LENGTH(s):
 def LEFT_PAD(s, n):
     return s.rjust(n, ' ')
 
+'''
+# Replaced by function of same name in HALINCL/COMROUT.
 def PAD(s, n):
     if isinstance(s, int):
         s = str(s)
     return s.ljust(n, ' ')
+'''
 
 def MIN(a, b):
     return min(a, b)

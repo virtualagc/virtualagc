@@ -23,6 +23,7 @@ from NEXTRECO import NEXT_RECORD
 from ORDEROK  import ORDER_OK
 from OUTPUTGR import OUTPUT_GROUP
 from OUTPUTWR import OUTPUT_WRITER
+from PAD      import PAD
 from SAVEINPU import SAVE_INPUT
 
 '''
@@ -352,6 +353,20 @@ def STREAM():
         else:
             l.S_LINE = value
 
+    def e_count(p=0, value=None):
+        if p not in [0, 1]:
+            print("Implementation error E_COUNT/S_COUNT")
+            sys.exit(1)
+        if value == None:
+            if p == 0:
+                return l.E_COUNT
+            else:
+                return l.S_COUNT
+        if p == 0:
+            l.E_COUNT = value
+        else:
+            l.S_COUNT = value
+
     def e_stack(p=0, value=None):
         if p not in [0, 1]:
             print("Implementation error E_STACK/S_STACK")
@@ -488,7 +503,7 @@ def STREAM():
             if not g.INCLUDING:
                 g.INCLUDE_STMT = -1;
 
-        if BYTE(g.CURRENT_CARD, BYTE('C')):
+        if BYTE(g.CURRENT_CARD) == BYTE('C'):
             PRINT_COMMENT(g.TRUE);
         elif BYTE(g.CURRENT_CARD) == BYTE('D'):
             # A DIRECTIVE CARD 
@@ -895,21 +910,21 @@ def STREAM():
        
         for l.CP in range(1, g.TEXT_LIMIT[0] + 1):
             if BYTE(g.CURRENT_CARD, l.CP) != BYTE(g.X1):
-                if BYTE(l.E_LINE[TYPE], l.CP) != BYTE(g.X1):
+                if BYTE(e_line(TYPE), l.CP) != BYTE(g.X1):
                     if TYPE == 0:
                         ERROR(d.CLASS_ME, 4);
                     elif TYPE == 1:
                         ERROR(d.CLASS_MS, 4);
                         continue
-                e_indicator(l.CP + POINT, l.E_COUNT[TYPE]);
+                e_indicator(l.CP + POINT, e_count(TYPE));
                 l.FILL = BYTE(g.CURRENT_CARD, l.CP);
-                l.E_LINE[TYPE] = BYTE(l.E_LINE[TYPE], l.CP, l.FILL);
+                e_line(TYPE, BYTE(e_line(TYPE), l.CP, l.FILL));
     
     def COMP(TYPE):
         # POINT is local but doesn't need to be persistent.
         POINT = 0xC5 + 0x1D * TYPE;
         
-        l.E_COUNT[TYPE] = 1;
+        e_count(TYPE, 1)
         while True:
             SCAN_CARD(TYPE);
             READ_CARD();
@@ -921,10 +936,10 @@ def STREAM():
                     if BYTE(e_line(TYPE), l.CP) == BYTE(g.X1):
                         e_indicator(l.CP + POINT, 0);
                     elif not TYPE:
-                        l.FILL = l.E_COUNT - e_indicator(l.CP) + 1;
+                        l.FILL = e_count() - e_indicator(l.CP) + 1;
                         e_indicator(l.CP, l.FILL);
                 return;
-            l.E_COUNT[TYPE] = l.E_COUNT[TYPE] + 1;
+            e_count(TYPE, e_count(TYPE) + 1);
     
     def GET_GROUP():
         l.E_LINE = l.BLANKS + l.BLANKS;
@@ -976,7 +991,6 @@ def STREAM():
                 goto_LOOP = True;
                 continue
             elif ct == 2:
-                print()
                 # CASE 2--M LINE
                 l.M_LINE = g.CURRENT_CARD[:];
                 if g.SRN_PRESENT:
@@ -1149,7 +1163,7 @@ def STREAM():
         goto_CHECK_STRING_POSITION = False
         if g.MACRO_EXPAN_LEVEL > 0:
             g.OVER_PUNCH = 0;  # FIX ESCAPE BUG WITHIN MACRO 
-            if g.PARM_EXPAN_LEVEL > BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL]:
+            if g.PARM_EXPAN_LEVEL > g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL]:
                 goto_PARM_DONE = False
                 firstTry = True
                 while firstTry or goto_PARM_DONE:
@@ -1203,7 +1217,7 @@ def STREAM():
                         MACRO_DIAGNOSTICS(3);
                     return;
                 if g.FIRST_TIME[g.MACRO_EXPAN_LEVEL]:
-                    if not M_CENT[g.MACRO_EXPAN_LEVEL]:
+                    if not g.M_CENT[g.MACRO_EXPAN_LEVEL]:
                         g.FIRST_TIME[g.MACRO_EXPAN_LEVEL] = g.FALSE;
                         g.NEXT_CHAR = BYTE(g.X1);
                         if g.CONTROL[3]:
@@ -1211,14 +1225,15 @@ def STREAM():
                         return;
                 else:
                     g.FIRST_TIME[g.MACRO_EXPAN_LEVEL] = g.TRUE;
-                g.TOP_OF_PARM_STACK = g.TOP_OF_PARM_STACK - NUM_OF_PARM[g.MACRO_EXPAN_LEVEL];
-                g.PRINTING_ENABLED = M_PRINT[g.MACRO_EXPAN_LEVEL];
-                if not M_CENT[g.MACRO_EXPAN_LEVEL]:
-                    if not DONT_SET_WAIT:
+                g.TOP_OF_PARM_STACK = g.TOP_OF_PARM_STACK - \
+                                      g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL];
+                g.PRINTING_ENABLED = g.M_PRINT[g.MACRO_EXPAN_LEVEL];
+                if not g.M_CENT[g.MACRO_EXPAN_LEVEL]:
+                    if not g.DONT_SET_WAIT:
                         g.WAIT = g.TRUE;
                 g.MACRO_EXPAN_LEVEL = g.MACRO_EXPAN_LEVEL - 1;
-                g.MACRO_POINT = M_P[g.MACRO_EXPAN_LEVEL];
-                g.BLANK_COUNT = M_BLANK_COUNT[g.MACRO_EXPAN_LEVEL];
+                g.MACRO_POINT =g. M_P[g.MACRO_EXPAN_LEVEL];
+                g.BLANK_COUNT = g.M_BLANK_COUNT[g.MACRO_EXPAN_LEVEL];
             if goto_MACRO_DONE or g.MACRO_EXPAN_LEVEL == 0:
                 if not goto_MACRO_DONE:
                     g.MACRO_FOUND = g.FALSE ;

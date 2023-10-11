@@ -56,7 +56,7 @@ lHALMAT_OUT = cHALMAT_OUT()
 
 
 def HALMAT_OUT():
-    # Local I doesn't need to be persistent.
+    # Local (I) doesn't need to be persistent.
     # Local SAVE_ATOM appears to require persistence.
     l = lHALMAT_OUT
     

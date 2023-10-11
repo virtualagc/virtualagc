@@ -12,6 +12,7 @@ History:    2023-09-06 RSB  Ported
 from xplBuiltins import *
 import g
 from OUTPUTWR import OUTPUT_WRITER
+from PAD import PAD
 from PRINT2 import PRINT2
 
 '''
