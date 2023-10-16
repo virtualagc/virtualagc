@@ -30,7 +30,10 @@ for parm in sys.argv[1:]:
 #-----------------------------------------------------------------------------
 # The following are lists of various categories of global objects found in g.py
 
-noArgFunctions = ("EJECT_PAGE", "DOUBLE_SPACE", "NOSPACE")
+noArgFunctions = ("EJECT_PAGE", "DOUBLE_SPACE", "NOSPACE", "STMT_NUM", 
+                  "STREAM", "SCAN", "BUILD_BCD", "BUILD_INTERNAL_BCD",
+                  "PREP_LITERAL", "ID_LOOP", "PARM_FOUND", "END_OF_MACRO",
+                  "PUSH_MACRO", "PARAMETER_PROCESSING", "BUILD_COMMENT")
 
 argFunctions = (
 "ARRAY_SUB_COUNT",
@@ -63,6 +66,7 @@ argFunctions = (
 "OUTER_REF",
 "OUTER_REF_FLAGS",
 "PATCHSAVE",
+"SAVE_LINE_p",
 "STMT_DATA_HEAD",
 "STMT_NUM",
 "STRUCTURE_SUB_COUNT",
@@ -108,6 +112,8 @@ arrayVariables = (
 "C",
 "CARD_TYPE",
 "CASE_STACK",
+"CHARTYPE",
+"CHAR_OP",
 "CLOCK",
 "CONTROL",
 "CURRENT_ARRAYNESS",
@@ -115,6 +121,7 @@ arrayVariables = (
 "DO_INX",
 "DO_LOC",
 "DO_PARSE",
+"DO_STMTp",
 "DW",
 "ERROR_PTR",
 "EXT_P",
@@ -144,6 +151,7 @@ arrayVariables = (
 "LOC_P",
 "LOOK_STACK",
 "LRECL",
+"LETTER_OR_DIGIT",
 "MACRO_CALL_PARM_TABLE",
 "MACRO_EXPAN_STACK",
 "MACRO_TEXTS",
@@ -184,6 +192,7 @@ arrayVariables = (
 "SAVE_SEVERITY",
 "SAVE_STACK_DUMP",
 "SCOPEp_STACK",
+"SPACE_FLAGS",
 "SRN",
 "SRN_BLOCK_RECORD",
 "SRN_COUNT",
@@ -195,10 +204,14 @@ arrayVariables = (
 "SYT_HASHSTART",
 "TEXT_LIMIT",
 "TOKEN_FLAGS",
+"TRANS_IN",
+"TRANS_OUT",
+"TX",
 "VAL_P",
 "VAR",
 "VAR_ARRAYNESS",
-"VOCAB_INDEX"
+"VOCAB_INDEX",
+"V_INDEX"
     )
 
 # Here's a list of all simple (i.e., non-arrayed) variables I find in g.py.
@@ -323,6 +336,7 @@ simpleVariables = (
 "EQUATE_TOKEN",
 "ERRLIM",
 "ERROR_COUNT",
+"ESCP",
 "EVENT_TOKEN",
 "EVENT_TYPE",
 "EVIL_FLAG",
@@ -655,6 +669,7 @@ simpleVariables = (
 "SAVE_BCD_MAX",
 "SAVE_BLANK_COUNT",
 "SAVE_CARD",
+"SAVE_COMMENT",
 "SAVE_DO_LEVEL",
 "SAVE_ERROR_LIM",
 "SAVE_INDENT_LEVEL",
@@ -686,6 +701,7 @@ simpleVariables = (
 "SMRK_FLAG",
 "SOME_BCD",
 "SP",
+"SQUOTE",
 "SQUEEZING",
 "SREF_OPTION",
 "SRN_COUNT_MARK",
@@ -770,6 +786,8 @@ simpleVariables = (
 "UPDATE_INPUT_DEV",
 "UPDATE_MODE",
 "UPDATING",
+"VALID_00_CHAR",
+"VALID_00_OP",
 "VALUE",
 "VAR_CLASS",
 "VBAR",
@@ -953,7 +971,11 @@ pendingIndentation = 0
 bufferedLine = ""
 first = False
 bufferedDataset = []
+lineCount = 0
+gotoTargets = []
 
+if fix:
+    print("#!/usr/bin/env python")
 
 def printBuffer():
     global indentationLevel, indentation, pendingIndentation, bufferedLine
@@ -969,12 +991,35 @@ def printBuffer():
 
 printBuffer()
 
-for line in f:
-    line = line.rstrip("\n").replace("¬", "~").replace("¢", "`")[:80].strip()
+for rawLine in f:
+    line = rawLine.rstrip("\n").replace("¬", "~").replace("¢", "`")[:80].strip()
     if fix:
+        # File header.
+        if lineCount == 0:
+            if rawLine[:2] == "/*" or rawLine[:3] == " /*":
+                print('"""')
+                lineCount = 1
+                continue
+        elif lineCount == 1:
+            if rawLine[:2] == "*/" or rawLine[:3] == " */":
+                print('"""')
+                print()
+                lineCount = 2
+                print("from xplBuiltins import *")
+                print("import g")
+                print("import HALINCL.CERRDECL as d")
+                print("import HALINCL.COMMON as h")
+                print("from ERROR import ERROR")
+                print()
+            else:
+                line = rawLine[:80].rstrip()
+                if line[:1] == " ":
+                    line = line[1:]
+                print(line)
+            continue
         line = re.sub(r" */\* *[CD]R[0-9]+ *\*/ *", " ", line)
         line = re.sub(r" */\* *[CD]R[0-9]+ *, *[CD]R[0-9]+ *\*/ *", " ", line)
-        line = re.sub(r"/\* *[CD]R[0-9]+ *", "/*", line)
+        line = re.sub(r"/\* *[CD]R[0-9]+ *[-]* *", "/*", line)
         line = re.sub(r'"([0-9A-F]+)"', "0x\\1", line)
     if inIdentifier:
         # Take care of the case in which the preceding line ended with an
@@ -1074,6 +1119,8 @@ for line in f:
 # regular-expression substitutions when porting the XPL to Python, such as 
 # converting "IF" to "if", "^=" to "!=", etc.
 if fix:
+    inDECLARE = False
+    inOUTPUT = False
     for i in range(len(bufferedDataset)):
         line = bufferedDataset[i]
         line = re.sub(r"\bIF\b", "if", line)
@@ -1083,24 +1130,71 @@ if fix:
         line = re.sub(r"\bRETURN\b", "return", line)
         line = re.sub(r" *\|\| *", " + ", line)
         line = re.sub(r"\^=", "!=", line)
+        line = re.sub(r"\^<", ">=", line)
+        line = re.sub(r"\^>", "<=", line)
         line = re.sub(r"\bCALL *", "", line)
         line = re.sub(r"\bERROR *\( *CLASS_", "ERROR(d.CLASS_", line)
         line = re.sub(r"\bERRORS *\( *CLASS_", "ERRORS(d.CLASS_", line)
+        line = re.sub(r"\bEND *; *$", "#END", line)
+        line = re.sub(r"\bEND *;", "'''END;'''", line)
+        line = re.sub(r"\bDO +FOREVER *;", "while True:", line)
+        line = re.sub(r"\bDO *; *$", "#DO", line)
+        line = re.sub(r"\bDO *;", "'''DO;'''", line)
+        line = re.sub(r"\bDO +WHILE +([^;]+);", "while \\1:", line)
+        line = re.sub(r"\bDO +WHILE", "while", line)
+        line = re.sub(r"\bDO +([^=]+) *= *(.*) +TO +([^;]+) *;", \
+                      "for \\1 in range(\\2, \\3 + 1):", line)
+        line = re.sub(r"^( *)(END +[A-Zp][A-Z0-9_p]* *;)", "\\1# \\2", line)
+        line = re.sub(r"^( *)([A-Zp][A-Z0-9_p]*) *: *PROCEDURE *\(([^)]*)\).*", \
+                      "\\1def \\2(\\3):", line)
+        line = re.sub(r"^( *)([A-Zp][A-Z0-9_p]*) *: *PROCEDURE [^ (]*[A-Zp]", \
+                      "\\1def \\2():", line)
+        if i > 0 and "PROCEDURE" in line and ":" in bufferedDataset[i - 1]:
+            new = bufferedDataset[i - 1] + " " + line
+            if ")" in new:
+                new = re.sub(r"\).*", ")", new)
+            else:
+                new = re.sub(r"PROCEDURE", "PROCEDURE()", new)
+            spaces = re.sub(r"^( *).*", "\\1", new)
+            identifier = re.sub(r"^ *([A-Zp][A-Z0-9_p]*) *:.*$", "\\1", new)
+            if len(identifier) > 0:
+                args = re.sub(r".*PROCEDURE *\(([^)]*)\).*", "\\1", new)
+                #bufferedDataset[i - 1] = spaces + "#" + new
+                bufferedDataset[i - 1] = ""
+                line = spaces + "def " + identifier + "(" + args + "):"
+        if "DECLARE" in line:
+            line = re.sub(r"\b(DECLARE .*)", "#\\1", line)
+            inDECLARE = (line[-1:] != ";")
+        elif inDECLARE:
+            line = re.sub(r"^( *)(.*)", "\\1#\\2", line)
+            inDECLARE = (line[-1:] != ";")
+        if "GO TO" in line:
+            gotoTarget = re.sub(r".* GO +TO +([A-Z_0-9]+).*", "\\1", line)
+            if gotoTarget not in gotoTargets:
+                gotoTargets.append(gotoTarget)
+                print(re.sub(r".* GO +TO +([A-Z_0-9]+)", "goto_\\1 = False", line))
+            line = re.sub(r"\bGO +TO +([A-Z_0-9]+)", "goto_\\1 = True", line)
         # Note that this won't correctly account for local variables of the 
         # same name as globals, so those have to be fixed up separately.
+        for var in arrayVariables:
+            if var in line:
+                line = re.sub("\\b" + var + " *\\(([^)]+) *\)",  \
+                              "g." + var + "[\\1]", line)
         for var in simpleVariables + argFunctions:
             if var in line:
                 line = re.sub("\\b" + var + "\\b", "g." + var, line)
         for var in noArgFunctions:
             if var in line:
                 line = re.sub("\\b" + var + "\\b", "g." + var + "()", line)
-        for var in arrayVariables:
-            if var in line:
-                line = re.sub("\\b" + var + " *\\(([^)]+) *\)",  \
-                              "g." + var + "[\\1]", \
-                              line)
                 
         bufferedDataset[i] = line
+    # Another pass:
+    if len(gotoTargets) > 0:
+        gotoTargetPattern = " (" + "|".join(gotoTargets) + ") *:"
+        for i in range(len(bufferedDataset)):
+            line = bufferedDataset[i]
+            line = re.sub(gotoTargetPattern, " goto_\\1 = False", line)
+            bufferedDataset[i] = line
 
 # Finally, unmangle and print out the fixed-up code.  Besides unmangling, 
 # convert end-of-line comments by replacing "/*" with "#

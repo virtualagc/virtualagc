@@ -1,13 +1,26 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 '''
 Access:     Public Domain, no restrictions believed to exist.
 Filename:   OUTPUTWR.xpl
-Purpose:    This is a part of "Phase 1" (syntax analysis) of the HAL/g.S-FC
+Purpose:    This is a part of "Phase 1" (syntax analysis) of the HAL/S-FC
             compiler program.
 Reference:  "HAL/S Compiler Functional Specification", section 2.1.2.
 Language:   XPL.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-25 RSB  Created place-holder file.
+            2023-10-14 RSB  Completed 3rd independent port of this module,
+                            reconciling all 3, and it still doesn't print
+                            some of the spaces around identifiers or numbers
+                            properly.  For example, 
+                                C = 4 2 A + 6 3 1.2 B + 1;
+                            prints as
+                                C= 42A+ 631.2B+ 1;
+                            Whereas stuff like 
+                                S = M$(2,1); /* M matrix */
+                            prints perfectly (except the space after D) as
+                                    2   -
+                                D= C  + V ;
+                                         2
 '''
 
 from xplBuiltins import *
@@ -337,30 +350,48 @@ lCOMMENT_BRACKET = cCOMMENT_BRACKET()
 
 def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
     # Note that the only overlap detected between the locals and globals in
-    # g.py were l.TEMP, l.SEVERITY, and l.INCLUDE_COUNT, so take care to distinguich
+    # g.py were TEMP, SEVERITY, and INCLUDE_COUNT, so take care to distinguich
     # between g. and l. for those.
     l = lOUTPUT_WRITER
     if PTR_START != None:
         l.PTR_START = PTR_START
     if PTR_END != None:
         l.PTR_END = PTR_END
-    
-    # Workaround junk for spaghetti GO TO's and their target labels.
-    goto_OUTPUT_WRITER_BEGINNING = False
-    goto_OUTPUT_WRITER_END = False
-    goto_PRINT_ANY_ERRORS = False
-    goto_AFTER_EXPAND = False
-    goto_STLABEL = False
-    goto_INCR_SUB_START = False
-    goto_FULL_LINE = False
-    goto_PTR_LOOP_END = False
+
+    # Workaround-variables for spaghetti GO TO's and their target labels.
+    goto_PRINT_ANY_ERRORS = False;
+    goto_OUTPUT_WRITER_BEGINNING = False;
+    goto_ERROR_PRINT_END = False;
+    goto_PARAM_MACRO = False;
+    goto_SEARCH = False;
+    goto_START_SEARCH = False;
+    goto_AFTER_EXPAND = False;
+    goto_STLABEL = False;
+    goto_DOLLAR_CHECK1 = False;
+    goto_S_LOOP = False;
+    goto_MORE_S_C = False;
+    goto_INCR_SUB_START = False;
+    goto_S_FULL = False;
+    goto_E_BEGIN = False;
+    goto_E_LOOP = False;
+    goto_DOLLAR_CHECK2 = False;
+    goto_MORE_E_C = False;
+    goto_INCR_EXP_START = False;
+    goto_E_FULL = False;
+    goto_FULL_LINE = False;
+    goto_S_BEGIN = False;
+    goto_PTR_LOOP_END = False;
+    goto_MORE_M_C = False;
+    goto_OUTPUT_WRITER_END = False;
+    goto_NEXT_LINE = False;
+    goto_LINEDONE = False;
 
     l.ERRORS_PRINTED = g.FALSE;
     if g.STMT_PTR < 0: 
-        goto_PRINT_ANY_ERRORS = True
+        goto_PRINT_ANY_ERRORS = True;
     else:
         goto_OUTPUT_WRITER_BEGINNING = True;  # COLLECT A FEW BRANCHES
-    
+
     def ERROR_PRINT():
         # Locals are C and NEW_SEVERITY.
 
@@ -371,29 +402,37 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             C = g.SAVE_ERROR_MESSAGE[g.I];
             l.ERRORCODE = SUBSTR(C, 0, 8);  # MEMBER NAME
             if MONITOR(2, 5, l.ERRORCODE):
+            # DO;
                 ERRORS(d.CLASS_BI, 100, g.X1 + l.ERRORCODE);
                 continue  # GO TO ERROR_PRINT_END;
+            # END
             g.S = INPUT(5);  # READ FROM ERROR FILE
             l.SEVERITY = BYTE(g.S) - BYTE('0');
             NEW_SEVERITY = CHECK_DOWN(l.ERRORCODE, l.SEVERITY);
             l.SEVERITY = NEW_SEVERITY;
             g.SAVE_SEVERITY[g.ERROR_COUNT] = l.SEVERITY;
             if LENGTH(C) > 8:
+            # DO;
                 # SOME IMBEDDED TEXT EXISTS
                 C = SUBSTR(C, 8);
                 l.IMBEDDING = g.TRUE;
+            # END
             if g.ERROR_COUNT >= g.ERRLIM - 3:
+            # DO;
                 g.MAX_SEVERITY = MAX(g.MAX_SEVERITY, 2);
                 if l.PRNTERRWARN:
+                # DO;
                     l.PRNTERRWARN = g.FALSE;
                     ERRORS(d.CLASS_BI, 106);
+                # END
                 if g.COMPILING:
                     g.COMPILING = g.FALSE;
                 else:
                     OUTPUT_WRITER_DISASTER()
-            OUTPUT(1, '0***** ' + str(l.ERRORCODE) + ' ERROR #' + \
-                   str(g.ERROR_COUNT) + ' OF SEVERITY ' + str(l.SEVERITY) + \
-                   '. *****');
+            # END
+            OUTPUT(1, '0***** ' + l.ERRORCODE + ' ERROR #' + \
+                   str(g.ERROR_COUNT) + ' OF SEVERITY ' + str(l.SEVERITY) \
+                   + '. *****');
             if l.SEVERITY > g.MAX_SEVERITY:
                 g.MAX_SEVERITY = l.SEVERITY;
             if l.SEVERITY > g.STATEMENT_SEVERITY:
@@ -401,16 +440,21 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             g.S = INPUT(5);
             while LENGTH(g.S) > 0:
                 if l.IMBEDDING:
+                # DO;
                     g.K = CHAR_INDEX(g.S, '??');
                     if g.K >= 0:
+                    # DO;
                         if g.K == 0:
                             g.S = C + SUBSTR(g.S, 2);
                         else:
                             g.S = SUBSTR(g.S, 0, g.K) + C + SUBSTR(g.S, g.K + 2);
                         l.IMBEDDING = g.FALSE;
+                    # END
+                # END
                 OUTPUT(0, g.STARS + g.X1 + g.S);
                 g.S = INPUT(5);
-            # ERROR_PRINT_END:
+            # END
+          # ERROR_PRINT_END:
         # END OF LOOP ON ERROR MSGS
         l.LAST_ERROR_WRITTEN = l.CURRENT_ERROR_PTR;
     # END ERROR_PRINT;
@@ -418,16 +462,18 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
     def ATTACH(PNTR, OFFSET):
         # No locals.
         l.CURRENT_ERROR_PTR = MAX(l.CURRENT_ERROR_PTR, g.ERROR_PTR[PNTR]);
-        if g.STMT_STACK[PNTR] == 0:
+        if g.STMT_STACK[PNTR] == 0: 
+        # DO;
             l.SPACE_NEEDED = 0;
             return '';
+        # END
         if (g.GRAMMAR_FLAGS[PNTR] & g.PRINT_FLAG) == 0:
             if not g.RECOVERING:
                 return '';
         g.GRAMMAR_FLAGS[PNTR] = g.GRAMMAR_FLAGS[PNTR] & g.PRINT_FLAG_OFF;
         l.SPACE_NEEDED = 1;
-        goto_PARAM_MACRO = False
-        if l.MACRO_WRITTEN:
+        if l.MACRO_WRITTEN: 
+        # DO;
             l.MACRO_WRITTEN = g.FALSE;
             if g.LAST_SPACE == 2:
                 if SHR(g.TOKEN_FLAGS[PNTR], 6) == 0:
@@ -435,6 +481,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                         goto_PARAM_MACRO = True;  # LEAVE LAST_SPACE ALONE
             if not goto_PARAM_MACRO:
                 g.LAST_SPACE = 0;  # FORCE A SPACE AFTER A NON-PARAM MACRO NAME
+        # END
         goto_PARAM_MACRO = False
         g.L = g.SPACE_FLAGS[g.STMT_STACK[PNTR] + OFFSET];  # SELECT LINE TYPE
         g.I = SHR(g.L, 4) + g.LAST_SPACE;
@@ -448,18 +495,22 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         if SHR(g.TOKEN_FLAGS[PNTR], 6) == 0:
             g.C[0] = g.VOCAB_INDEX[g.STMT_STACK[PNTR]];
         else:
+        # DO;
             g.J = g.TOKEN_FLAGS[PNTR];
             g.C[0] = g.SAVE_BCD[SHR(g.J, 6)];  # IDENTIFIER
             if g.STMT_STACK[PNTR] == g.CHARACTER_STRING:
-                
+            # DO;
+
                 def ADD(STRING):
                     # T is local
                     if LENGTH(g.C[g.K]) + LENGTH(STRING) > 256:
+                    # DO;
                         l.TEMP = 256 - LENGTH(g.C[g.K]);
                         T = SUBSTR(STRING, 0, l.TEMP);
                         g.C[g.K] = g.C[g.K] + T;
                         g.K = g.K + 1;
                         g.C[g.K] = SUBSTR(STRING, l.TEMP);
+                    # END
                     else:
                         g.C[g.K] = g.C[g.K] + STRING;
                 # END ADD;
@@ -478,29 +529,38 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                     goto_SEARCH = False
                     while (BYTE(g.S, g.I) != BYTE(g.SQUOTE)) and (g.I < LENGTH(g.S)):
                         if OFFSET != 0:  # NOT AN M-LINE
+                        # DO;
                             if (g.TRANS_OUT[BYTE(g.S, g.I)] & 0xFF) != 0:
+                            # DO;
                                 if g.I != g.J:
                                     ADD(SUBSTR(g.S, g.J, g.I - g.J));
                                 for g.L in range(0, (SHR(g.TRANS_OUT[BYTE(g.S, g.I)], 8) \
                                                     & 0xFF) + 1):
                                     ADD(STRING[ADDR(g.ESCP)]);
+                                # END
                                 ADD(STRING[ADDR(g.TRANS_OUT[BYTE(g.S, g.I)]) + 1]);
                                 g.I = g.I + 1;
                                 g.J = g.I
+                            # END
                             else:
                                 g.I = g.I + 1;
+                        # END
                         else:
                             g.I = g.I + 1;
+                    # END
                     if g.I != g.J:
                         ADD(SUBSTR(g.S, g.J, g.I - g.J));
                     if g.I != LENGTH(g.S):
+                    # DO;
                         ADD(g.SQUOTE + g.SQUOTE);
                         g.I = g.I + 1;
                         g.J = g.I;
                         goto_SEARCH = True
                         continue
+                    # END
                 ADD(g.SQUOTE);
                 return g.C[0];
+            # END
             g.J = g.GRAMMAR_FLAGS[PNTR];
             if (g.J & g.LEFT_BRACKET_FLAG) != 0:
                 g.C[0] = '[' + g.C[0];
@@ -510,7 +570,9 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 g.C[0] = '{' + g.C[0];
             if (g.J & g.RIGHT_BRACE_FLAG) != 0:
                 g.C[0] = g.C[0] + '}';
+        # END
         return g.C[0];
+    # END ATTACH;
     
     def EXPAND(PTR):
         # PTR overlaps with the l. namespace, as does CHAR in the locals,
@@ -521,28 +583,32 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         
         if (g.GRAMMAR_FLAGS[PTR] & g.STMT_END_FLAG) != 0:
             if g.COMMENT_COUNT >= 0:
+            # DO;
                 g.COMMENT_COUNT = MIN(g.COMMENT_COUNT, 255);
-               
+    
                 def COMMENT_BRACKET(STRING, LOC):
                     # Take care with LOC and locals I, J, PTR for potential 
                     # namespace conflicts.
-                    cb = lCOMMENT_BRACKET
+                    lll = lCOMMENT_BRACKET
                     
                     STRING = BYTE(STRING, LOC, BYTE('/'));
                     STRING = BYTE(STRING, LOC + 1, BYTE('*'));
                     LOC = LOC + 2;
-                    for I in range(cb.PTR, MIN(cb.PTR + ll.NUM, g.COMMENT_COUNT) + 1):
+                    for I in range(lll.PTR, MIN(lll.PTR + ll.NUM, g.COMMENT_COUNT) + 1):
                         J = BYTE(g.SAVE_COMMENT, I);
                         STRING = BYTE(STRING, LOC, J);
                         LOC = LOC + 1;
+                    # END
                     I += 1  # Terminal value of for-loop differs for XPL vs Python.
                     STRING = BYTE(STRING, LOC, BYTE('*'));
                     STRING = BYTE(STRING, LOC + 1, BYTE('/'));
-                    cb.PTR = I;
-                    ll.NUM = MIN(ll.NUM, g.COMMENT_COUNT - cb.PTR + 1);
+                    lll.PTR = I;
+                    ll.NUM = MIN(ll.NUM, g.COMMENT_COUNT - lll.PTR + 1);
                     if ll.NUM <= 0:
-                        cb.PTR = 0;
+                    # DO;
+                        lll.PTR = 0;
                         g.COMMENT_COUNT = -1;
+                    # END
                     return STRING
                 # END COMMENT_BRACKET;
                 
@@ -550,19 +616,25 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 g.I = g.COMMENT_COUNT;
                 while BYTE(g.SAVE_COMMENT, g.COMMENT_COUNT) == BYTE(g.X1):
                     g.COMMENT_COUNT = g.COMMENT_COUNT - 1;
+                # END
                 g.COMMENT_COUNT = g.COMMENT_COUNT + (g.COMMENT_COUNT != g.I);
                 g.I = MAX(l.M_PTR, l.COMMENT_LOC + 1);
                 if g.COMMENT_COUNT < l.LINESIZE - g.I - 4:
+                # DO;
                     # COMMENT WILL FIT ON M LINE
                     ll.M_COMMENT_NEEDED = g.TRUE;
                     ll.LOC = g.I;
                     ll.NUM = g.COMMENT_COUNT;
+                # END
                 elif g.COMMENT_COUNT < l.LINESIZE - l.M_PTR - 5:
+                # DO;
                     # WILL FIT IF RIGHT JUSTIFIED
                     ll.M_COMMENT_NEEDED = g.TRUE;
                     ll.LOC = l.LINESIZE - g.COMMENT_COUNT - 5;
                     ll.NUM = g.COMMENT_COUNT;
+                # END
                 elif l.M_PTR < l.COMMENT_LOC:
+                # DO;
                     # NEED MORE THAN ONE LINE
                     ll.M_COMMENT_NEEDED = g.TRUE
                     ll.S_COMMENT_NEEDED = g.TRUE;
@@ -570,10 +642,14 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                     ll.NUM = l.LINESIZE - ll.LOC - 5;
                     ll.NUM_S_NEEDED = (g.COMMENT_COUNT - 1) // ll.NUM;
                     l.MAX_S_LEVEL = MAX(ll.NUM_S_NEEDED, l.MAX_S_LEVEL);
-                else:
+                # END
+                else: 
+                # DO;
                     ll.POST_COMMENT_NEEDED = g.TRUE;
                     ll.LOC = l.COMMENT_LOC;
                     ll.NUM = l.LINESIZE - ll.LOC - 5;
+                # END
+            # END
         if l.MAX_E_LEVEL + MAX(l.MAX_S_LEVEL, g.SDL_OPTION) + 2 + \
                 LINE_COUNT > g.LINE_MAX:
             ll.C = g.PAGE;
@@ -583,20 +659,25 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         g.LINE_MAX = g.LINE_LIM;
         g.S = I_FORMAT(g.STMT_NUM(), 4);
         if (g.INCLUDING or g.INCLUDE_END): 
+        # DO;
             g.INCLUDE_CHAR = g.PLUS;
             if g.SRN_PRESENT:
                 g.S = LEFT_PAD(g.PLUS + l.INCLUDE_COUNT, 6) + g.X1 + g.S;
             l.T = g.PAD1[:];
+        # END
         else:  # NOT AN INCLUDED LINE
+        # DO;
             g.INCLUDE_CHAR = g.X1;
             if g.SRN_PRESENT:
                 g.S = SUBSTR(l.SDL_INFO, 0, 6) + g.X1 + g.S;  # SRN
             if g.SDL_OPTION:
+            # DO;
                 l.T = l.C_RVL;  # RECORD REVISION INDICATOR
                 if LENGTH(l.SDL_INFO) >= 16:
                     l.T = l.T + g.X1 + SUBSTR(l.SDL_INFO, 8, 8);
                 else:
                     l.T = l.T + SUBSTR(X70, 0, 9);
+            # END
             else:
                 l.T = g.PAD1[:];
         if l.MAX_E_LEVEL != 0:
@@ -604,14 +685,19 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 ll.BUILD = BLANK(ll.BUILD, 0, l.LINESIZE);
                 for g.I in range(0, l.LINESIZE):
                     if l.BUILD_E_IND[g.I] == l.MAX_E_LEVEL:
+                    # DO;
                         l.BUILD_E_IND[g.I] = 0;
                         g.K = BYTE(l.BUILD_E, g.I);
                         ll.BUILD = BYTE(ll.BUILD, g.I, g.K);
+                    # END
                     if l.BUILD_E_UND[g.I] == l.MAX_E_LEVEL:
+                    # DO;
                         # SOME UNDERLINING TO BE DONE
                         l.BUILD_E_UND[g.I] = 0;
                         l.UNDER_LINE = BYTE(l.UNDER_LINE, g.I, BYTE('_'));
                         l.UNDERLINING = g.TRUE;
+                    # END
+                # END
                 # PRINT A BLANK LINE BEFORE E-LINES.
                 if (ll.C != g.PAGE) and (not g.PREV_ELINE): 
                     ll.C = g.DOUBLE;
@@ -625,24 +711,34 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                 ll.BUILD + g.VBAR);
                 g.PREV_ELINE = g.TRUE;
                 if l.UNDERLINING:
+                # DO;
                     l.UNDERLINING = g.FALSE;
                     OUTPUT(1, g.PLUS + g.PAD2 + l.UNDER_LINE);
                     l.UNDER_LINE = BLANK(l.UNDER_LINE, 0, l.LINESIZE);
+                # END
                 l.MAX_E_LEVEL = l.MAX_E_LEVEL - 1;
                 ll.C = g.X1;
+            # END
             l.BUILD_E = BLANK(l.BUILD_E, 0, l.LINESIZE);
+        # END
         if ll.M_COMMENT_NEEDED:
+        # DO;
             l.BUILD_M = COMMENT_BRACKET(l.BUILD_M, ll.LOC);
             ll.M_COMMENT_NEEDED = g.FALSE;
+        # END
         if not l.LINE_CONTINUED:
             if g.NEST_LEVEL > 0:
                 if BYTE(l.BUILD_M, 1) == BYTE(g.X1):
+                # DO;
                     ll.CHAR = g.NEST_LEVEL;
                     if g.NEST_LEVEL < 10:
                         l.BUILD_M = BYTE(l.BUILD_M, 0, BYTE(ll.CHAR));
                     else:
+                    # DO;
                         l.BUILD_M = BYTE(l.BUILD_M, 0, BYTE(ll.CHAR));
                         l.BUILD_M = BYTE(l.BUILD_M, 1, BYTE(ll.CHAR, 1));
+                    # END
+                # END
         # ON THE END STATEMENT, REPLACE THE CURRENT SCOPE WITH
         # THE STATEMENT NUMBER OF THE DO STATEMENT.  ON THE CASES OF THE
         # CASE STATEMENT, MOVE THE INFORMATION FIELD IDENTIFYING THE
@@ -652,8 +748,10 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         if g.END_FLAG and (g.LABEL_COUNT == 0):
             ll.CHAR = 'ST#' + str(g.DO_STMTp[g.DO_LEVEL + 1]);
         elif (LENGTH(g.INFORMATION) > 0) and (g.LABEL_COUNT == 0):
+        # DO;
             ll.CHAR = g.INFORMATION;
             g.INFORMATION = '';
+        # END
         elif g.IF_FLAG and (g.LABEL_COUNT == 0):
             ll.CHAR = 'DO=ST#' + str(g.STMT_NUM() + 1);
         else:
@@ -667,22 +765,30 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         OUTPUT(1, ll.C + ll.CHAR);
         g.PREV_ELINE = g.FALSE;
         if l.M_UNDERSCORE_NEEDED:
+        # DO;
             l.M_UNDERSCORE_NEEDED = g.FALSE;
             OUTPUT(1, g.PLUS + g.PAD2 + l.M_UNDERSCORE);
             l.M_UNDERSCORE = BLANK(l.M_UNDERSCORE, 0, l.LINESIZE);
+        # END
         l.BUILD_M = BLANK(l.BUILD_M, 0, l.LINESIZE);
         if l.MAX_S_LEVEL != 0:
+        # DO;
             for g.J in range(1, l.MAX_S_LEVEL + 1):
                 ll.BUILD = BLANK(ll.BUILD, 0, l.LINESIZE);
                 for g.I in range(0, l.LINESIZE):
                     if l.BUILD_S_IND[g.I] == g.J:
+                    # DO;
                         l.BUILD_S_IND[g.I] = 0;
                         g.K = BYTE(l.BUILD_S, g.I);
                         ll.BUILD = BYTE(ll.BUILD, g.I, g.K);
+                    # END
                     if l.BUILD_S_UND[g.I] == g.J:
+                    # DO;
                         l.BUILD_S_UND[g.I] = 0;
                         l.UNDER_LINE = BYTE(l.UNDER_LINE, g.I, BYTE('_'));
                         l.UNDERLINING = g.TRUE;
+                    # END
+                # END
                 if ll.S_COMMENT_NEEDED:
                     if g.J <= ll.NUM_S_NEEDED:
                         ll.BUILD = COMMENT_BRACKET(ll.BUILD, ll.LOC);
@@ -698,19 +804,26 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                 ll.BUILD + g.VBAR);
                 g.PREV_ELINE = g.FALSE;
                 if l.UNDERLINING:
+                # DO;
                     l.UNDERLINING = g.FALSE;
                     OUTPUT(1, g.PLUS + g.PAD2 + l.UNDER_LINE);
                     l.UNDER_LINE = BLANK(l.UNDER_LINE, 0, l.LINESIZE);
+                # END
+            # END
             l.BUILD_S = BLANK(l.BUILD_S, 0, l.LINESIZE);
+        # END
         ll.S_COMMENT_NEEDED = g.FALSE;
         l.MAX_S_LEVEL = 0
         l.MAX_E_LEVEL = 0;
         if ll.POST_COMMENT_NEEDED:
+        # DO;
             while ll.NUM > 0:
                 ll.BUILD = BLANK(ll.BUILD, 0, l.LINESIZE);
                 ll.BUILD = COMMENT_BRACKET(ll.BUILD, ll.LOC);
                 OUTPUT(1, g.X1 + g.PAD2 + ll.BUILD);
+            # END
             ll.POST_COMMENT_NEEDED = g.FALSE;
+        # END
         
         ERROR_PRINT();
         l.LINE_CONTINUED = g.FALSE;
@@ -731,6 +844,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 NUM_LEFT = NUM_LEFT + 1;
             elif g.STMT_STACK[g.I] == g.RT_PAREN:
                 NUM_RIGHT = NUM_RIGHT + 1;
+        # END
         if NUM_LEFT == NUM_RIGHT:
             if (g.STMT_STACK[START] == g.LEFT_PAREN) and \
                     (g.STMT_STACK[g.I] == g.RT_PAREN):
@@ -746,6 +860,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         # No locals.
         while ((g.TOKEN_FLAGS[POINT] & 0x1F) == 7) and (POINT <= l.PTR_END):
             POINT = POINT + 1;
+        # END
         return POINT;
     # END SKIP_REPL;
     
@@ -753,29 +868,37 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         # Locals are FINISH and DEPTH.
         FINISH = START;
         if (g.GRAMMAR_FLAGS[START] & g.FUNC_FLAG) != 0:
+        # DO;
             # A FUNCTION - CHECK FOR SUBSCRIPTING AND ARGUMENTS
             DEPTH = 1;
             while (g.STMT_STACK[FINISH + 1] == g.DOLLAR) and \
                     ((FINISH + 1) < l.PTR_END):
                 FINISH = FINISH + 2;
                 if g.STMT_STACK[FINISH] == g.LEFT_PAREN:
+                # DO;
                     l.FIND_ONLY = g.TRUE;
                     FINISH = MATCH(FINISH);
                     l.FIND_ONLY = g.FALSE;
+                # END
                 elif (g.GRAMMAR_FLAGS[FINISH] & g.FUNC_FLAG) != 0:
                     DEPTH = DEPTH + 1;
             # END OF DO WHILE...
             for DEPTH in range(0, DEPTH + 1):
                 if (FINISH + 1) < l.PTR_END:
                     if g.STMT_STACK[FINISH + 1] == g.LEFT_PAREN:
+                    # DO;
                         # ARGUMENT LIST
                         l.FIND_ONLY = g.TRUE;
                         FINISH = MATCH(FINISH + 1);
                         l.FIND_ONLY = g.FALSE;
-            if g.STMT_STACK[FINISH + 1] == g.LEFT_PAREN:
+                    # END
+            # END
+            if g.STMT_STACK[FINISH + 1] == g.LEFT_PAREN: 
                 ERROR(d.CLASS_BS, 6);
-        else:
-            goto_START_SEARCH = True
+        # END
+        else: 
+            # DO;
+            goto_START_SEARCH = True;
             while goto_START_SEARCH or ((g.STMT_STACK[START] == g.STRUC_TOKEN) \
                     and (g.STMT_STACK[DEPTH] == g.DOT_TOKEN)):
                 if not goto_START_SEARCH:
@@ -783,11 +906,13 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 goto_START_SEARCH = False
                 START = SKIP_REPL(FINISH);
                 DEPTH = SKIP_REPL(START + 1);
+            # END
+        # END
         return FINISH;
     # END CHECK_FOR_FUNC;
     
-    goto_OUTPUT_WRITER_BEGINNING = False
     if not goto_PRINT_ANY_ERRORS:
+        goto_OUTPUT_WRITER_BEGINNING = False
         l.PRINT_LABEL = g.FALSE;
         g.I = 2;
         l.SDL_INFO = g.SRN[g.I];
@@ -795,8 +920,10 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         if not l.LINE_CONTINUED: 
             l.M_PTR = MAX(MIN(g.INDENT_LEVEL, l.INDENT_LIMIT), 0);
         if g.INLINE_INDENT_RESET >= 0: 
+        # DO;
             g.INDENT_LEVEL = g.INLINE_INDENT_RESET;
             g.INLINE_INDENT_RESET = -1;
+        # END
         if l.PTR_END == -1:
             l.PTR_END = g.STMT_PTR;
         if (l.PTR_END == g.OUTPUT_STACK_MAX) and g.SQUEEZING:
@@ -804,182 +931,222 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         while ((g.GRAMMAR_FLAGS[l.PTR_START] & g.PRINT_FLAG) == 0) and \
                 (l.PTR_START <= l.PTR_END):
             l.PTR_START = l.PTR_START + 1;
+        # END
         if l.PTR_START > l.PTR_END:
             goto_AFTER_EXPAND = True
         else:
             # FIND MOST RECENT RVL. THE RVL FOR EACH TOKEN WAS SAVED IN SAVE_TOKEN
             if g.SDL_OPTION and (not g.INCLUDING) and (not g.INCLUDE_END):
-                l.C_RVL = STRING(ADDR(g.RVL_STACK1(l.PTR_START))) + \
-                                    STRING(ADDR(g.RVL_STACK2(l.PTR_START)));
+            # DO;
+                l.C_RVL = STRING(ADDR(g.RVL_STACK1[l.PTR_START])) + \
+                                    STRING(ADDR(g.RVL_STACK2[l.PTR_START]));
                 for l.IDX in range(l.PTR_START + 1, l.PTR_END + 1):
                     if ((g.GRAMMAR_FLAGS[l.IDX] & g.PRINT_FLAG) != 0):
-                        l.C_TMP = STRING(ADDR(g.RVL_STACK1(l.IDX))) + \
-                                    STRING(ADDR(g.RVL_STACK2(l.IDX)));
+                    # DO;
+                        l.C_TMP = STRING(ADDR(g.RVL_STACK1[l.IDX])) + \
+                                    STRING(ADDR(g.RVL_STACK2[l.IDX]));
                         if STRING_GT(l.C_TMP, l.C_RVL): 
                             l.C_RVL = l.C_TMP;
+                    # END
+                # END
                 l.IDX += 1
                 if STRING_GT(l.C_RVL, SUBSTR(g.SRN[2], 6, 2)):
                     g.SRN[2] = SUBSTR(g.SRN[2], 0, 6) + l.C_RVL;
+            # END
             l.LABEL_START = l.PTR_START;
             if g.LABEL_COUNT > 0:
                 while ((g.GRAMMAR_FLAGS[l.PTR_START] & g.LABEL_FLAG) != 0) \
                         and (l.PTR_START < l.PTR_END):
                     l.PTR_START = l.PTR_START + 2;
+                # END
             l.LABEL_END = l.PTR_START - 1;
             while ((g.GRAMMAR_FLAGS[l.PTR_START] & g.PRINT_FLAG) == 0) and \
                         (l.PTR_START <= l.PTR_END):
                 l.PTR_START = l.PTR_START + 1;
+            # END
             if (l.PTR_START > l.PTR_END) and (g.LABEL_COUNT > 0): 
+            # DO;
                 l.PRINT_LABEL = g.TRUE;
                 goto_STLABEL = True;
-                '''
-                A conundrum!  To get to STLABEL, we have to somehow get into
-                the DO PTR = PTR_START TO PTR_END block below.  This requires
-                reworking the DO-block, which would otherwise translate into
-                a simple Python for-loop, in a relatively-weird way.
-                '''
+            # END
+            '''
+            Note that the original DO FOR loop that follows has been 
+            refactored as a DO WHILE to allow entry to it via GO TO STLABEL.
+            Moreover, doing that has allowed the label PTR_LOOP_END which was
+            formerly at the *end* of the DO FOR to move to the *beginning* of 
+            the DO WHILE, and to implement GO TO PTR_LOOP_END as just continue.
+            '''
+            #for l.PTR  in range(l.PTR_START, l.PTR_END + 1):
             if not goto_STLABEL:
                 l.PTR = l.PTR_START - 1
-            while goto_STLABEL or (l.PTR < l.PTR_END):
+            while goto_STLABEL or l.PTR < l.PTR_END:
+                goto_PTR_LOOP_END = False
                 if not goto_STLABEL:
                     l.PTR += 1
                     
                     l.SUB_START[0] = 0
                     l.EXP_START[0] = 0;
                     if (g.GRAMMAR_FLAGS[l.PTR] & g.INLINE_FLAG) != 0: 
-                        INLINE_INDENT = l.M_PTR + 1;
+                        g.INLINE_INDENT = l.M_PTR + 1;
                     if g.STMT_STACK[l.PTR] == g.DOLLAR:
+                    # DO;
                         l.PTR = l.PTR + 1;
                         l.SUB_START[0] = l.PTR;
                         l.S_LEVEL = 0;
                         if l.MAX_S_LEVEL == 0:
                             l.MAX_S_LEVEL = 1;
                         if g.STMT_STACK[l.SUB_START[0]] == g.LEFT_PAREN:
+                        # DO;
                             l.SUB_END[0] = MATCH(l.SUB_START[0]);
                             if l.SUB_END[0] < l.PTR_END:
                                 if g.STMT_STACK[l.SUB_END[0] + 1] == g.DOLLAR:
                                     if (l.SUB_END[0] - l.SUB_START[0]) > 2:
+                                    # DO;
                                         g.STMT_STACK[l.SUB_START[0]] = TX(BYTE('('));
                                         g.STMT_STACK[l.SUB_END[0]] = TX(BYTE(')'));
+                                    # END
+                        # END
                         else:
                             l.SUB_END[0] = CHECK_FOR_FUNC(l.SUB_START[0]);
                         while (g.STMT_STACK[l.SUB_END[0] + 1] == g.DOLLAR) and \
                                     ((l.SUB_END[0] + 1) < l.PTR_END):
                             l.SUB_END[0] = l.SUB_END[0] + 2;
                             if g.STMT_STACK[l.SUB_END[0]] == g.LEFT_PAREN:
-
+                            # DO;
                                 l.FIND_ONLY = g.TRUE;
                                 l.SUB_END[0] = MATCH(l.SUB_END[0]);
                                 l.FIND_ONLY = g.FALSE;
+                            # END
                             else:
                                 l.SUB_END[0] = CHECK_FOR_FUNC(l.SUB_END[0]);
+                        # END
                         l.PTR = l.SUB_END[0] + 1;
+                    # END
                     if (g.STMT_STACK[l.PTR] == g.EXPONENTIATE) and (l.PTR < l.PTR_END):
+                    # DO;
                         l.PTR = l.PTR + 1;
                         l.EXP_START[0] = l.PTR;
                         l.E_LEVEL = 0;
                         if l.MAX_E_LEVEL == 0:
                             l.MAX_E_LEVEL = 1;
                         if g.STMT_STACK[l.EXP_START[0]] == g.LEFT_PAREN:
+                        # DO;
                             l.EXP_END[0] = MATCH(l.EXP_START[0]);
                             if l.EXP_END[0] < l.PTR_END:
                                 if g.STMT_STACK[l.EXP_END[0] + 1] == g.EXPONENTIATE:
                                     if (l.EXP_END[0] - l.EXP_START[0]) > 2:
+                                    # DO;
                                         g.STMT_STACK[l.EXP_START[0]] = TX(BYTE('('));
                                         g.STMT_STACK[l.EXP_END[0]] = TX(BYTE(')'));
+                                    # END
+                        # END
                         else:
                             l.EXP_END[0] = CHECK_FOR_FUNC(l.EXP_START[0]);
-                        goto_DOLLAR_CHECK1 = True
-                        while ((g.STMT_STACK[l.EXP_END[0] + 1] == g.EXPONENTIATE) \
-                                    and ((l.EXP_END[0] + 1) < l.PTR_END)) or \
+                        goto_DOLLAR_CHECK1 = True;
+                        while ((g.STMT_STACK[l.EXP_END[0] + 1] == g.EXPONENTIATE) and \
+                                ((l.EXP_END[0] + 1) < l.PTR_END)) or \
                                     goto_DOLLAR_CHECK1:
                             if not goto_DOLLAR_CHECK1:
                                 l.EXP_END[0] = l.EXP_END[0] + 2;
                             if g.STMT_STACK[l.EXP_END[0]] == g.LEFT_PAREN \
                                     and not goto_DOLLAR_CHECK1:
+                            # DO;
                                 l.FIND_ONLY = g.TRUE;
                                 l.EXP_END[0] = MATCH(l.EXP_END[0]);
                                 l.FIND_ONLY = g.FALSE;
+                            # END
                             elif (g.GRAMMAR_FLAGS[l.EXP_END[0]] & g.FUNC_FLAG) != 0 \
                                     and not goto_DOLLAR_CHECK1:
                                 l.EXP_END[0] = CHECK_FOR_FUNC(l.EXP_END[0]);
                             else:
+                            # DO;
                                 goto_DOLLAR_CHECK1 = False
-                                while (g.STMT_STACK[l.EXP_END[0] + 1] == g.DOLLAR) \
-                                            and (l.EXP_END[0] + 1 < l.PTR_END):
+                                while (g.STMT_STACK[l.EXP_END[0] + 1] == g.DOLLAR) and \
+                                        (l.EXP_END[0] + 1 < l.PTR_END):
                                     l.EXP_END[0] = l.EXP_END[0] + 2;
                                     if g.STMT_STACK[l.EXP_END[0]] == g.LEFT_PAREN:
+                                    # DO;
                                         l.FIND_ONLY = g.TRUE;
                                         l.EXP_END[0] = MATCH(l.EXP_END[0]);
                                         l.FIND_ONLY = g.FALSE;
+                                    # END
                                     else:
                                         l.EXP_END[0] = CHECK_FOR_FUNC(l.EXP_END[0]);
+                                # END
+                            # END
+                        # END
                         l.PTR = l.EXP_END[0] + 1;
+                    # END
                     if l.SUB_START[0] + l.EXP_START[0] != 0:
+                    # DO;
                         goto_S_BEGIN = True
-                        goto_S_LOOP = False
-                        goto_E_BEGIN = False
-                        goto_E_LOOP = False
-                        goto_S_FULL = False
-                        while goto_S_BEGIN or goto_S_LOOP or goto_E_BEGIN \
-                                or goto_E_LOOP:
-                            goto_S_BEGIN = False
-                            if not (goto_S_LOOP or goto_E_BEGIN or \
-                                    goto_E_LOOP):
+                        while goto_S_BEGIN or goto_S_LOOP or goto_E_LOOP:
+                            if not goto_S_LOOP and not goto_E_LOOP:
+                                goto_S_BEGIN = False
                                 l.E_PTR = l.M_PTR
                                 l.S_PTR = l.M_PTR;
-                            if (l.SUB_START[0] != 0 and not goto_E_BEGIN and not goto_E_LOOP) \
+                            if (l.SUB_START[0] != 0 and not goto_E_LOOP) \
                                     or goto_S_LOOP:
                                 goto_S_LOOP = False
                                 g.LAST_SPACE = 2;
                                 while l.SUB_START[l.S_LEVEL] <= l.SUB_END[l.S_LEVEL]:
                                     if g.STMT_STACK[l.SUB_START[l.S_LEVEL]] == 0:
-                                        l.SUB_START[l.S_LEVEL] = \
-                                            l.SUB_START[l.S_LEVEL] + 1;
+                                    # DO;
+                                        l.SUB_START[l.S_LEVEL] = l.SUB_START[l.S_LEVEL] + 1;
                                         goto_S_LOOP = True
                                         break
+                                    # END
                                     if g.STMT_STACK[l.SUB_START[l.S_LEVEL]] == g.DOLLAR:
-                                        if l.S_LEVEL == l.MAX_LEVEL:
+                                    # DO;
+                                        if l.S_LEVEL == l.MAX_LEVEL:  # DO;
                                             ERROR(d.CLASS_BS, 7);
-                                            l.SUB_START[l.S_LEVEL] = \
-                                                l.SUB_START[l.S_LEVEL] + 1;
+                                            l.SUB_START[l.S_LEVEL] = l.SUB_START[l.S_LEVEL] + 1;
                                             goto_S_LOOP = True
                                             break
+                                        # END
                                         l.S_LEVEL = l.S_LEVEL + 1;
                                         if l.MAX_S_LEVEL <= l.S_LEVEL:
                                             l.MAX_S_LEVEL = l.S_LEVEL + 1;
-                                        l.SUB_START[l.S_LEVEL] = \
-                                            l.SUB_START[l.S_LEVEL - 1] + 1;
+                                        l.SUB_START[l.S_LEVEL] = l.SUB_START[l.S_LEVEL - 1] + 1;
                                         if g.STMT_STACK[l.SUB_START[l.S_LEVEL]] == g.LEFT_PAREN:
-                                            l.SUB_END[l.S_LEVEL] = \
-                                                MATCH(l.SUB_START[l.S_LEVEL]);
+                                        # DO;
+                                            l.SUB_END[l.S_LEVEL] = MATCH(l.SUB_START[l.S_LEVEL]);
                                             if l.SUB_END[l.S_LEVEL] < l.PTR_END:
                                                 if g.STMT_STACK[l.SUB_START[l.S_LEVEL] + 1] == g.DOLLAR:
                                                     if (l.SUB_END[l.S_LEVEL] - l.SUB_START[l.S_LEVEL]) > 2:
-                                                        g.STMT_STACK[l.SUB_START[l.S_LEVEL]] = TX(BYTE('('));
-                                                        g.STMT_STACK[l.SUB_END[l.S_LEVEL]] = TX(BYTE(')'));
+                                                    # DO;
+                                                        g.STMT_STACK[l.SUB_START[l.S_LEVEL]] = \
+                                                            TX(BYTE('('));
+                                                        g.STMT_STACK[l.SUB_END[l.S_LEVEL]] = \
+                                                            TX(BYTE(')'));
+                                                    # END
+                                        # END
                                         else:
                                             l.SUB_END[l.S_LEVEL] = \
                                                 CHECK_FOR_FUNC(l.SUB_START[l.S_LEVEL]);
-                                        while (g.STMT_STACK[l.SUB_END[l.S_LEVEL] + 1] \
-                                                  == g.DOLLAR) and \
-                                                  ((l.SUB_END[l.S_LEVEL] + 1) < l.PTR_END):
+                                        while (g.STMT_STACK[l.SUB_END[l.S_LEVEL] + 1] == g.DOLLAR) \
+                                                and ((l.SUB_END[l.S_LEVEL] + 1) < l.PTR_END):
                                             l.SUB_END[l.S_LEVEL] = l.SUB_END[l.S_LEVEL] + 2;
                                             if g.STMT_STACK[l.SUB_END[l.S_LEVEL]] == g.LEFT_PAREN:
+                                            # DO;
                                                 l.FIND_ONLY = g.TRUE;
                                                 l.SUB_END[l.S_LEVEL] = MATCH(l.SUB_END[l.S_LEVEL]);
                                                 l.FIND_ONLY = g.FALSE;
+                                            # END
                                             else:
                                                 l.SUB_START[l.S_LEVEL] = \
                                                     CHECK_FOR_FUNC(l.SUB_END[l.S_LEVEL]);
+                                        # END
                                         if l.SUB_END[l.S_LEVEL] >= l.PTR:
                                             l.PTR = l.SUB_END[l.S_LEVEL] + 1;
                                         goto_S_LOOP = True
                                         break
+                                    # END
                                     sss = (g.STMT_STACK[l.SUB_START[l.S_LEVEL]] == g.CHARACTER_STRING)
                                     if sss:
+                                    # DO;
                                         if l.S_CHAR_PTR < l.S_CHAR_PTR_MAX:
-                                            pass  # GO TO MORE_S_C;
+                                            goto_MORE_S_C = True;
                                         else:
                                             g.C[0] = ATTACH(l.SUB_START[l.S_LEVEL], g.NT);
                                             if LENGTH(g.C[0]) == 0: 
@@ -992,10 +1159,10 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.S_CHAR_PTR_MAX = \
                                                         l.S_CHAR_PTR_MAX + LENGTH(g.C[g.I]);
                                                 l.S_PTR = l.S_PTR + l.SPACE_NEEDED;
-                                        # MORE_S_C:
                                         if not goto_INCR_SUB_START:
+                                            goto_MORE_S_C = False
                                             while (l.S_CHAR_PTR < l.S_CHAR_PTR_MAX) and \
-                                                        (l.S_PTR < l.LINESIZE):
+                                                    (l.S_PTR < l.LINESIZE):
                                                 g.J = BYTE(l.SAVE_S_C[SHR(l.S_CHAR_PTR, 8)], \
                                                          (l.S_CHAR_PTR & 0xFF));
                                                 l.BUILD_S = BYTE(l.BUILD_S, l.S_PTR, g.J);
@@ -1005,11 +1172,14 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.BUILD_S_UND[l.S_PTR] = l.S_LEVEL + 1;
                                                 l.S_PTR = l.S_PTR + 1;
                                                 l.S_CHAR_PTR = l.S_CHAR_PTR + 1;
+                                            # END
                                             if l.S_CHAR_PTR < l.S_CHAR_PTR_MAX:
                                                 goto_S_FULL = True
                                         if not goto_S_FULL:
                                             goto_INCR_SUB_START = True
+                                    # END
                                     if not sss or goto_INCR_SUB_START or goto_S_FULL:  # was ELSE
+                                    # DO;
                                         # NOT A CHARACTER STRING
                                         if not goto_INCR_SUB_START:
                                             if not goto_S_FULL:
@@ -1021,6 +1191,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.S_PTR = l.S_PTR + l.SPACE_NEEDED;
                                                 if LENGTH(g.C[0]) + l.S_PTR >= l.LINESIZE \
                                                         or goto_S_FULL:
+                                                # DO;
                                                     goto_S_FULL = False
                                                     # RESTORE PRINT FLAG TO OVERFLOWING TOKEN
                                                     g.GRAMMAR_FLAGS[l.SUB_START[l.S_LEVEL]] \
@@ -1029,64 +1200,77 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.SAVE_MAX_S_LEVEL = l.S_LEVEL + 1;
                                                     goto_E_BEGIN = True
                                                     break
+                                                # END
                                                 for g.I in range(0, LENGTH(g.C[0])):
                                                     g.J = BYTE(g.C[0], g.I);
                                                     l.BUILD_S = BYTE(l.BUILD_S, l.S_PTR + g.I, g.J);
                                                     l.BUILD_S_IND[l.S_PTR + g.I] = l.S_LEVEL + 1;
+                                                # END
                                                 if (g.TOKEN_FLAGS[l.SUB_START[l.S_LEVEL]] & 7) == 7:
                                                     l.MACRO_WRITTEN = g.TRUE;
                                                 if (g.GRAMMAR_FLAGS[l.SUB_START[l.S_LEVEL]] \
-                                                        & g.MACRO_ARG_FLAG) != 0: 
+                                                        & g.MACRO_ARG_FLAG) != 0:  # DO;
                                                     for g.I in range(0, LENGTH(g.C[0])):
                                                         l.BUILD_S_UND[l.S_PTR + g.I] = l.S_LEVEL + 1;
+                                                    # END
+                                                # END
                                                 l.S_PTR = l.S_PTR + LENGTH(g.C[0]);
                                         goto_INCR_SUB_START = False
                                         l.SUB_START[l.S_LEVEL] = l.SUB_START[l.S_LEVEL] + 1;
-                                    # OF NOT A CHARACTER STRING
+                                    # END OF NOT A CHARACTER STRING
                                 # END OF DO WHILE SUB_START <= SUB_END
-                                if goto_S_LOOP or goto_E_BEGIN:
+                                if goto_S_LOOP:
                                     continue
                             # END OF SUB_START != 0
-                            if not (goto_E_BEGIN or goto_E_LOOP):
-                                if l.S_LEVEL != 0:
-                                    l.S_LEVEL = l.S_LEVEL - 1;
-                                    l.SUB_START[l.S_LEVEL] = l.SUB_START[l.S_LEVEL + 1];
-                                    l.MACRO_WRITTEN = g.FALSE;
-                                    goto_S_LOOP = True
-                                    continue
+                            if l.S_LEVEL != 0 and not (goto_E_BEGIN or goto_E_LOOP):
+                            # DO;
+                                l.S_LEVEL = l.S_LEVEL - 1;
+                                l.SUB_START[l.S_LEVEL] = l.SUB_START[l.S_LEVEL + 1];
+                                l.MACRO_WRITTEN = g.FALSE;
+                                goto_S_LOOP = True
+                                continue
+                            # END
                             goto_E_BEGIN = False
-                            if l.EXP_START[0] != 0 or goto_E_LOOP: 
+                            if l.EXP_START[0] != 0 or goto_E_LOOP:  # DO;
                                 goto_E_LOOP = False
                                 g.LAST_SPACE = 2;
                                 while l.EXP_START[l.E_LEVEL] <= l.EXP_END[l.E_LEVEL]:
                                     if g.STMT_STACK[l.EXP_START[l.E_LEVEL]] == 0:
+                                    # DO;
                                         l.EXP_START[l.E_LEVEL] = l.EXP_START[l.E_LEVEL] + 1;
                                         goto_E_LOOP = True
                                         break
+                                    # END
                                     if g.STMT_STACK[l.EXP_START[l.E_LEVEL]] == g.EXPONENTIATE:
-                                        if l.E_LEVEL == l.MAX_LEVEL: 
+                                    # DO;
+                                        if l.E_LEVEL == l.MAX_LEVEL:  # DO;
                                             ERROR(d.CLASS_BS, 7);
                                             l.EXP_START[l.E_LEVEL] = l.EXP_START[l.E_LEVEL] + 1;
                                             goto_E_LOOP = True
                                             break
+                                        # END
                                         l.E_LEVEL = l.E_LEVEL + 1;
                                         if l.MAX_E_LEVEL <= l.E_LEVEL:
                                             l.MAX_E_LEVEL = l.E_LEVEL + 1;
                                         l.EXP_START[l.E_LEVEL] = l.EXP_START[l.E_LEVEL - 1] + 1;
                                         if g.STMT_STACK[l.EXP_START[l.E_LEVEL]] == g.LEFT_PAREN:
+                                        # DO;
                                             l.EXP_END[l.E_LEVEL] = MATCH(l.EXP_START[l.E_LEVEL]);
                                             if l.EXP_END[l.E_LEVEL] < l.PTR_END:
-                                                if g.STMT_STACK[l.EXP_END[l.E_LEVEL] + 1] \
-                                                        == g.EXPONENTIATE:
+                                                if g.STMT_STACK[l.EXP_END[l.E_LEVEL] + 1] == \
+                                                        g.EXPONENTIATE:
                                                     if (l.EXP_END[l.E_LEVEL] - \
                                                             l.EXP_START[l.E_LEVEL]) > 2:
+                                                    # DO;
                                                         g.STMT_STACK[l.EXP_START[l.E_LEVEL]] = \
                                                             TX(BYTE('('));
                                                         g.STMT_STACK[l.EXP_END[l.E_LEVEL]] = \
                                                             TX(BYTE(')'));
-                                            else:
-                                                l.EXP_END[l.E_LEVEL] = \
-                                                    CHECK_FOR_FUNC(l.EXP_START[l.E_LEVEL]);
+                                                    # END
+                                        # END
+                                        else:
+                                            l.EXP_END[l.E_LEVEL] = \
+                                                CHECK_FOR_FUNC(l.EXP_START[l.E_LEVEL]);
                                         goto_DOLLAR_CHECK2 = True
                                         while ((g.STMT_STACK[l.EXP_END[l.E_LEVEL] + 1] \
                                                 == g.EXPONENTIATE) and \
@@ -1096,11 +1280,13 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                 l.EXP_END[l.E_LEVEL] = l.EXP_END[l.E_LEVEL] + 2;
                                             if g.STMT_STACK[l.EXP_END[l.E_LEVEL]] == g.LEFT_PAREN \
                                                     and not goto_DOLLAR_CHECK2:
+                                            # DO;
                                                 l.FIND_ONLY = g.TRUE;
                                                 l.EXP_END[l.E_LEVEL] = MATCH(l.EXP_END[l.E_LEVEL]);
                                                 l.FIND_ONLY = g.FALSE;
-                                            elif ((g.GRAMMAR_FLAGS[l.EXP_END[l.E_LEVEL]] & \
-                                                    g.FUNC_FLAG) != 0) and not goto_DOLLAR_CHECK2:
+                                            # END
+                                            elif (g.GRAMMAR_FLAGS[l.EXP_END[l.E_LEVEL]] & \
+                                                    g.FUNC_FLAG) != 0 and not goto_DOLLAR_CHECK2:
                                                 l.EXP_END[l.E_LEVEL] = \
                                                     CHECK_FOR_FUNC(l.EXP_END[l.E_LEVEL]);
                                             else:
@@ -1110,24 +1296,27 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.EXP_END[l.E_LEVEL] = l.EXP_END[l.E_LEVEL] + 2;
                                                     if g.STMT_STACK[l.EXP_END[l.E_LEVEL]] == \
                                                             g.LEFT_PAREN:
+                                                    # DO;
                                                         l.FIND_ONLY = g.TRUE;
                                                         l.EXP_END[l.E_LEVEL] = \
                                                             MATCH(l.EXP_END[l.E_LEVEL]);
                                                         l.FIND_ONLY = g.FALSE;
+                                                    # END
                                                     else:
                                                         l.EXP_END[l.E_LEVEL] = \
                                                             CHECK_FOR_FUNC(l.EXP_END[l.E_LEVEL]);
+                                                # END
+                                        # END
                                         if l.EXP_END[l.E_LEVEL] >= l.PTR:
                                             l.PTR = l.EXP_END[l.E_LEVEL] + 1;
                                         goto_E_LOOP = True
                                         break
+                                    # END
                                     ss = g.STMT_STACK[l.EXP_START[l.E_LEVEL]] == g.CHARACTER_STRING
-                                    goto_INCR_EXP_START = False
-                                    goto_E_FULL = False
                                     if ss:
+                                    # DO;
                                         if l.E_CHAR_PTR < l.E_CHAR_PTR_MAX:
-                                            # GO TO MORE_E_C;
-                                            pass
+                                            goto_MORE_E_C = True;
                                         else:
                                             g.C[0] = ATTACH(l.EXP_START[l.E_LEVEL], g.NT);
                                             if LENGTH(g.C[0]) == 0: 
@@ -1138,9 +1327,10 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                 for g.I in range(0, 2 + 1):
                                                     l.SAVE_E_C[g.I] = g.C[g.I];
                                                     l.E_CHAR_PTR_MAX = l.E_CHAR_PTR_MAX + LENGTH(g.C[g.I]);
+                                                # END
                                                 l.E_PTR = l.E_PTR + l.SPACE_NEEDED;
-                                        # MORE_E_C:
                                         if not goto_INCR_EXP_START:
+                                            goto_MORE_E_C = False
                                             while (l.E_CHAR_PTR < l.E_CHAR_PTR_MAX) and \
                                                     (l.E_PTR < l.LINESIZE):
                                                 g.J = BYTE(l.SAVE_E_C[SHR(l.E_CHAR_PTR, 8)], \
@@ -1150,14 +1340,16 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                 if (g.GRAMMAR_FLAGS[l.EXP_START[l.E_LEVEL]] \
                                                         & g.MACRO_ARG_FLAG) != 0:
                                                     l.BUILD_E_UND[l.E_PTR] = l.E_LEVEL + 1;
-                                                    l.E_PTR = l.E_PTR + 1;
-                                                    l.E_CHAR_PTR = l.E_CHAR_PTR + 1;
+                                                l.E_PTR = l.E_PTR + 1;
+                                                l.E_CHAR_PTR = l.E_CHAR_PTR + 1;
+                                            # END
                                             if l.E_CHAR_PTR < l.E_CHAR_PTR_MAX:
                                                 goto_E_FULL = True
-                                        if not goto_E_FULL:
-                                            goto_INCR_EXP_START = True
-                                    if not ss or goto_INCR_EXP_START \
-                                            or goto_E_FULL:  # originally just ELSE
+                                            else:
+                                                goto_INCR_EXP_START = True;
+                                    # END
+                                    if not ss or goto_INCR_EXP_START or goto_E_FULL: # ELSE
+                                    # DO;
                                         # NOT A CHARACTER STRING
                                         if not goto_INCR_EXP_START:
                                             if not goto_E_FULL:
@@ -1169,6 +1361,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.E_PTR = l.E_PTR + l.SPACE_NEEDED;
                                                 if goto_E_FULL or \
                                                         (LENGTH(g.C[0]) + l.E_PTR >= l.LINESIZE):
+                                                # DO;
                                                     goto_E_FULL = False
                                                     g.GRAMMAR_FLAGS[l.EXP_START[l.E_LEVEL]] \
                                                         |= g.PRINT_FLAG;
@@ -1176,16 +1369,21 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.SAVE_MAX_E_LEVEL = l.E_LEVEL + 1;
                                                     goto_FULL_LINE = True
                                                     break
+                                                # END
                                                 for g.I in range(0, LENGTH(g.C[0])):
+                                                # DO;
                                                     g.J = BYTE(g.C[0], g.I);
                                                     l.BUILD_E = BYTE(l.BUILD_E, l.E_PTR + g.I, g.J);
                                                     l.BUILD_E_IND[l.E_PTR + g.I] = l.E_LEVEL + 1;
+                                                # END
                                                 if (g.TOKEN_FLAGS[l.EXP_START[l.E_LEVEL]] & 7) == 7:
                                                     l.MACRO_WRITTEN = g.TRUE;
                                                 if (g.GRAMMAR_FLAGS[l.EXP_START[l.E_LEVEL]] \
-                                                        & g.MACRO_ARG_FLAG) != 0: 
+                                                        & g.MACRO_ARG_FLAG) != 0:  # DO;
                                                     for g.I in range(0, LENGTH(g.C[0])):
                                                         l.BUILD_E_UND[l.E_PTR + g.I] = l.E_LEVEL + 1;
+                                                    # END
+                                                # END
                                                 l.E_PTR = l.E_PTR + LENGTH(g.C[0]);
                                         goto_INCR_EXP_START = False
                                         l.EXP_START[l.E_LEVEL] = l.EXP_START[l.E_LEVEL] + 1;
@@ -1195,13 +1393,16 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                     continue
                             # END OF EXP_START != 0
                             if l.E_LEVEL != 0 and not goto_FULL_LINE:
+                            # DO;
                                 l.E_LEVEL = l.E_LEVEL - 1;
                                 l.EXP_START[l.E_LEVEL] = l.EXP_START[l.E_LEVEL + 1];
                                 l.MACRO_WRITTEN = g.FALSE;
                                 goto_E_LOOP = True
                                 continue
+                            # END
                             goto_FULL_LINE = False
                             if l.LINE_FULL:
+                            # DO;
                                 EXPAND(0);
                                 l.MAX_E_LEVEL = l.SAVE_MAX_E_LEVEL;
                                 l.MAX_S_LEVEL = l.SAVE_MAX_S_LEVEL;
@@ -1211,239 +1412,276 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                 if (l.E_CHAR_PTR + l.S_CHAR_PTR) == 0:
                                     l.M_PTR = MAX(MIN(g.INDENT_LEVEL, l.INDENT_LIMIT), 0);
                                 else:
-                                    l.M_PTR = 0;  
-                                    l.LINE_CONTINUED = g.TRUE;  
+                                # DO;
+                                    l.M_PTR = 0;
+                                    l.LINE_CONTINUED = g.TRUE;
+                                # END
                                 goto_S_BEGIN = True
                                 continue
-                        if l.E_PTR > l.S_PTR:
-                            l.M_PTR = l.E_PTR;
-                        else:
-                            l.M_PTR = l.S_PTR;
-                        g.LAST_SPACE = 1;
+                            # END
+                            if l.E_PTR > l.S_PTR:
+                                l.M_PTR = l.E_PTR;
+                            else:
+                                l.M_PTR = l.S_PTR;
+                            g.LAST_SPACE = 1;
+                        # End of while goto_S_BEGIN
                     # END OF DO IF SUB_START + EXP_START != 0
                     if l.PTR > l.PTR_END: 
                         goto_PTR_LOOP_END = True
-                ss = g.STMT_STACK[l.PTR] == g.CHARACTER_STRING
-                if ss and not goto_STLABEL and not goto_PTR_LOOP_END:
+                        continue
+                # END of if not goto_STLABEL
+                if  g.STMT_STACK[l.PTR] == g.CHARACTER_STRING and not goto_STLABEL:
+                # DO;
                     g.C[0] = ATTACH(l.PTR, 0);
                     if LENGTH(g.C[0]) == 0: 
                         goto_PTR_LOOP_END = True
-                    else:
-                        goto_MORE_M_C = False
-                        if l.M_CHAR_PTR < l.M_CHAR_PTR_MAX:
-                            # GO TO MORE_M_C
-                            pass
-                        else:
-                            l.M_CHAR_PTR = 0
-                            l.M_CHAR_PTR_MAX = 0;
-                            for g.I in range(0, 2 + 1):
-                                l.M_CHAR_PTR_MAX = l.M_CHAR_PTR_MAX + LENGTH(g.C[g.I]);
-                            l.M_PTR = l.M_PTR + l.SPACE_NEEDED;
+                        continue
+                    if l.M_CHAR_PTR < l.M_CHAR_PTR_MAX:
                         goto_MORE_M_C = True
-                        while goto_MORE_M_C:
-                            goto_MORE_M_C = False
-                            while (l.M_CHAR_PTR < l.M_CHAR_PTR_MAX) and (l.M_PTR < l.LINESIZE):
-                                g.J = BYTE(g.C[SHR(l.M_CHAR_PTR, 8)], (l.M_CHAR_PTR & 0xFF));
-                                if (g.TRANS_OUT[g.J] & 0xFF) != 0: 
-                                    # ALT CHAR SET
-                                    g.K = CHAR_OP(SHR(g.TRANS_OUT[g.J], 8) & 0xFF);  # OP CHAR
-                                    l.BUILD_E = BYTE(l.BUILD_E, l.M_PTR, g.K);
-                                    l.BUILD_E_IND[l.M_PTR] = 1;
-                                    if l.MAX_E_LEVEL == 0: 
-                                        l.MAX_E_LEVEL = 1;
-                                    g.J = g.TRANS_OUT[g.J] & 0xFF;  # BACK TO NORMAL CHAR SET
-                                l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, g.J);
-                                if (g.GRAMMAR_FLAGS[l.PTR] & g.MACRO_ARG_FLAG) != 0: 
-                                    l.M_UNDERSCORE = BYTE(l.M_UNDERSCORE, l.M_PTR, BYTE('_'));
-                                    l.M_UNDERSCORE_NEEDED = g.TRUE;
+                    else:
+                        l.M_CHAR_PTR = 0
+                        l.M_CHAR_PTR_MAX = 0;
+                        for g.I in range(0, 2 + 1):
+                            l.M_CHAR_PTR_MAX = l.M_CHAR_PTR_MAX + LENGTH(g.C[g.I]);
+                        # END
+                        l.M_PTR = l.M_PTR + l.SPACE_NEEDED;
+                    goto_MORE_M_C = True
+                    while goto_MORE_M_C:
+                        goto_MORE_M_C = False
+                        while (l.M_CHAR_PTR < l.M_CHAR_PTR_MAX) and (l.M_PTR < l.LINESIZE):
+                            g.J = BYTE(g.C[SHR(l.M_CHAR_PTR, 8)], (l.M_CHAR_PTR & 0xFF));
+                            if (g.TRANS_OUT[g.J] & 0xFF) != 0:  # DO;
+                                # ALT CHAR SET
+                                g.K = CHAR_OP(SHR(g.TRANS_OUT[g.J], 8) & 0xFF);  # OP CHAR
+                                l.BUILD_E = BYTE(l.BUILD_E, l.M_PTR, g.K);
+                                l.BUILD_E_IND[l.M_PTR] = 1;
+                                if l.MAX_E_LEVEL == 0: 
+                                    l.MAX_E_LEVEL = 1;
+                                g.J = g.TRANS_OUT[g.J] & 0xFF;  # BACK TO NORMAL CHAR SET
+                            # END
+                            l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, g.J);
+                            if (g.GRAMMAR_FLAGS[l.PTR] & g.MACRO_ARG_FLAG) != 0:  # DO;
+                                l.M_UNDERSCORE = BYTE(l.M_UNDERSCORE, l.M_PTR, BYTE('_'));
+                                l.M_UNDERSCORE_NEEDED = g.TRUE;
+                            # END
+                            l.M_PTR = l.M_PTR + 1;
+                            l.M_CHAR_PTR = l.M_CHAR_PTR + 1;
+                        # END
+                        if l.M_CHAR_PTR < l.M_CHAR_PTR_MAX:
+                        # DO;
+
+                            def RESET():
+                                # No locals
+                                EXPAND(0);
+                                if l.M_CHAR_PTR == 0:
+                                    l.M_PTR = MAX(MIN(g.INDENT_LEVEL, l.INDENT_LIMIT), 0);
+                                else:
+                                # DO;
+                                    l.M_PTR = 0;
+                                    l.LINE_CONTINUED = g.TRUE;
+                                # END
+                            # END RESET;
+
+                            RESET();
+                            if g.SQUEEZING:  # DO;
+                                g.SQUEEZING = g.FALSE;
+                                g.GRAMMAR_FLAGS[l.PTR] |= g.PRINT_FLAG;
+                                goto_OUTPUT_WRITER_END = True
+                                break
+                            # END
+                            goto_MORE_M_C = True
+                            continue
+                        # END
+                    if goto_OUTPUT_WRITER_END:
+                        break
+                    l.M_CHAR_PTR_MAX = 0;
+                # END
+                elif g.STMT_STACK[l.PTR] == g.REPLACE_TEXT and not goto_STLABEL:
+                # DO;
+                    if (g.GRAMMAR_FLAGS[l.PTR] & g.PRINT_FLAG) == 0:
+                        if not g.RECOVERING: 
+                            goto_PTR_LOOP_END = True
+                            continue
+                    l.M_PTR = l.M_PTR + 1;
+                    l.M_CHAR_PTR = g.SYT_ADDR(g.MAC_NUM);
+                    l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, BYTE('"'));
+                    l.M_PTR = l.M_PTR + 1;
+                    
+                    def PRINT_TEXT(LINELENGTH):
+                        # Local WAS_HERE doesn't need persistence.
+                        WAS_HERE = g.FALSE;
+                        g.J = g.MACRO_TEXT(l.M_CHAR_PTR);
+                        goto_LINEDONE = True
+                        while goto_LINEDONE:
+                            goto_LINEDONE = False
+                            while g.J != 0xEF and l.M_PTR < LINELENGTH:
+                                if g.J == 0xEE:   # DO;
+                                    l.M_CHAR_PTR = l.M_CHAR_PTR + 1;
+                                    g.J = g.MACRO_TEXT(l.M_CHAR_PTR);
+                                    if g.J == 0:  # DO;
+                                        l.M_CHAR_PTR = l.M_CHAR_PTR + 1;
+                                        return;
+                                    # END
+                                    goto_NEXT_LINE = True
+                                    while goto_NEXT_LINE:
+                                        goto_NEXT_LINE = False
+                                        if (g.J + l.M_PTR) >= LINELENGTH:  # DO;
+                                            g.J = g.J - LINELENGTH + l.M_PTR;
+                                            RESET();
+                                            goto_NEXT_LINE = True
+                                            continue
+                                        # END
+                                        else:
+                                            l.M_PTR = l.M_PTR + g.J;
+                                # END
+                                elif g.J == BYTE('"'):  # DO;
+                                    if WAS_HERE: 
+                                        WAS_HERE = g.FALSE;
+                                    else:  # DO;
+                                        WAS_HERE = g.TRUE;
+                                        l.M_CHAR_PTR = l.M_CHAR_PTR - 1;
+                                    # END
+                                    l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, g.J);
+                                # END
+                                else:
+                                    l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, g.J);
                                 l.M_PTR = l.M_PTR + 1;
                                 l.M_CHAR_PTR = l.M_CHAR_PTR + 1;
-                            if l.M_CHAR_PTR < l.M_CHAR_PTR_MAX:
-                                
-                                def RESET():
-                                    # No locals
-                                    EXPAND(0);
-                                    if l.M_CHAR_PTR == 0:
-                                        l.M_PTR = MAX(MIN(g.INDENT_LEVEL, l.INDENT_LIMIT), 0);
-                                    else:
-                                        l.M_PTR = 0;  
-                                        l.LINE_CONTINUED = g.TRUE;
-                                # END RESET  
-                                    
-                                RESET();
-                                if g.SQUEEZING: 
-                                    g.SQUEEZING = g.FALSE;
-                                    g.GRAMMAR_FLAGS[l.PTR] |= g.PRINT_FLAG;
-                                    goto_OUTPUT_WRITER_END = True
-                                    break
-                                goto_MORE_M_C = True
-                                continue
-                        if not goto_OUTPUT_WRITER_END:
-                            l.M_CHAR_PTR_MAX = 0;
-                if (not ss and not goto_OUTPUT_WRITER_END) \
-                        or goto_PTR_LOOP_END or goto_STLABEL:  # had been ELSE
-                    if goto_PTR_LOOP_END:
-                        pass
-                    elif g.STMT_STACK[l.PTR] == g.REPLACE_TEXT \
-                            and not goto_STLABEL:
-                        if (g.GRAMMAR_FLAGS[l.PTR] & g.PRINT_FLAG) == 0:
-                            if not g.RECOVERING: 
-                                goto_PTR_LOOP_END = True
-                        if not goto_PTR_LOOP_END:
-                            l.M_PTR = l.M_PTR + 1;
-                            l.M_CHAR_PTR = g.SYT_ADDR(g.MAC_NUM);
-                            l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, BYTE('"'));
-                            l.M_PTR = l.M_PTR + 1;
-                            
-                            def PRINT_TEXT(LINELENGTH):
-                                # Local WAS_HERE doesn't need persistence.
-                                WAS_HERE = g.FALSE;
                                 g.J = g.MACRO_TEXT(l.M_CHAR_PTR);
+                            # END
+                            if g.J != 0xEF:  # DO;
+                                RESET();
                                 goto_LINEDONE = True
-                                while goto_LINEDONE:
-                                    goto_LINEDONE = False
-                                    while g.J != 0xEF and l.M_PTR < LINELENGTH:
-                                        if g.J == 0xEE: 
-                                            l.M_CHAR_PTR = l.M_CHAR_PTR + 1;
-                                            g.J = g.MACRO_TEXT(l.M_CHAR_PTR);
-                                            if g.J == 0:
-                                                l.M_CHAR_PTR = l.M_CHAR_PTR + 1;
-                                                return;
-                                            goto_NEXT_LINE = True
-                                            while goto_NEXT_LINE:
-                                                goto_NEXT_LINE = False
-                                                if (g.J + l.M_PTR) >= LINELENGTH: 
-                                                    g.J = g.J - LINELENGTH + l.M_PTR;
-                                                    RESET();
-                                                    goto_NEXT_LINE = True
-                                                    continue
-                                                else:
-                                                    l.M_PTR = l.M_PTR + g.J;
-                                        elif g.J == BYTE('"'): 
-                                            if WAS_HERE: 
-                                                WAS_HERE = g.FALSE;
-                                            else:
-                                                WAS_HERE = g.TRUE;
-                                                l.M_CHAR_PTR = l.M_CHAR_PTR - 1;
-                                            l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, g.J);
-                                        else:
-                                            l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, g.J);
-                                        l.M_PTR = l.M_PTR + 1;
-                                        l.M_CHAR_PTR = l.M_CHAR_PTR + 1;
-                                        g.J = g.MACRO_TEXT(l.M_CHAR_PTR);
-                                    if g.J != 0xEF: 
-                                        RESET();
-                                        goto_LINEDONE = True
-                                        continue
-                                if l.M_PTR == LINELENGTH: 
-                                    RESET();
-                            # END PRINT_TEXT;
-                            
-                            PRINT_TEXT(l.LINESIZE);
-                            l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, BYTE('"'));
-                            l.M_PTR = l.M_PTR + 1;
-                    else:
-                        # NOT A CHARACTER STRING
-                        if not goto_STLABEL:
-                            g.C[0] = ATTACH(l.PTR, 0);
-                        if LENGTH(g.C[0]) == 0 and not goto_STLABEL: 
+                                continue
+                            # END
+                        if l.M_PTR == LINELENGTH: 
+                            RESET();
+                    # END PRINT_TEXT;
+                    
+                    PRINT_TEXT(l.LINESIZE);
+                    l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, BYTE('"'));
+                    l.M_PTR = l.M_PTR + 1;
+                # END
+                else:
+                # DO;
+                    # NOT A CHARACTER STRING
+                    if not goto_STLABEL:
+                        g.C[0] = ATTACH(l.PTR, 0);
+                        if LENGTH(g.C[0]) == 0: 
                             goto_PTR_LOOP_END = True
-                        else:
-                            if not goto_STLABEL:
-                                l.M_PTR = l.M_PTR + l.SPACE_NEEDED;
-                            if LENGTH(g.C[0]) + l.M_PTR >= l.LINESIZE \
-                                    and not goto_STLABEL:
-                                EXPAND(l.PTR - 1);
-                                if g.SQUEEZING:
-                                    g.SQUEEZING = g.FALSE;
-                                    g.GRAMMAR_FLAGS[l.PTR] |= g.PRINT_FLAG;
-                                    goto_OUTPUT_WRITER_END = True
-                                    break
-                                l.M_PTR = MIN(g.INDENT_LEVEL, l.INDENT_LIMIT);
-                            if not goto_PTR_LOOP_END:
-                                if l.PTR == l.PTR_START or goto_STLABEL:
-                                    goto_STLABEL = False 
-                                    if g.LABEL_COUNT > 0:
-                                        l.TEMP = 0;
-                                        l.LABEL_TOO_LONG = g.TRUE;
-                                        for g.I in range(l.LABEL_START, l.LABEL_END + 1, 2):
-                                            g.J = g.TOKEN_FLAGS[g.I];
-                                            l.TEMP = l.TEMP + LENGTH(g.SAVE_BCD[SHR(g.J, 6)]) + 2;
-                                        if ((g.NEST_LEVEL == 0) and (l.TEMP <= l.M_PTR)) \
-                                                or ((g.NEST_LEVEL < 10) and \
-                                                    (l.TEMP < (l.M_PTR - 1))) or \
-                                                    ((g.NEST_LEVEL >= 10) and \
-                                                      (l.TEMP < (l.M_PTR - 2))):
-                                            g.J = l.M_PTR - l.TEMP;
-                                            l.LABEL_TOO_LONG = g.FALSE;
-                                        else:
-                                            g.J = 0;
-                                        for g.I in range(l.LABEL_START, l.LABEL_END + 1, 2):
-                                            g.K = g.TOKEN_FLAGS[g.I];
-                                            g.S = g.SAVE_BCD[SHR(g.K, 6)];
-                                            if (LENGTH(g.S) + 2 + g.J) > l.LINESIZE:
-                                                g.J = g.I;
-                                                l.CHAR = g.S;
-                                                EXPAND(0);
-                                                g.I = g.J;
-                                                g.S = l.CHAR;
-                                                g.J = 0;
-                                            for g.L in range(0, LENGTH(g.S)):
-                                                g.K = BYTE(g.S, g.L);
-                                                l.BUILD_M = BYTE(l.BUILD_M, g.J + g.L, g.K);
-                                            g.L += 1  # Terminal value differs from XPL to Python.
-                                            l.BUILD_M = BYTE(l.BUILD_M, g.J + g.L, BYTE(':'));
-                                            g.J = g.J + g.L + 2;
-                                        if l.LABEL_TOO_LONG:
-                                            EXPAND(0);
-                                        g.LABEL_COUNT = 0;
-                                if l.PRINT_LABEL: 
-                                    goto_AFTER_EXPAND = True
-                                    break
-                                for g.I in range(0, LENGTH(g.C[0])):
-                                    g.J = BYTE(g.C[0], g.I);
-                                    l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR + g.I, g.J);
-                                g.I = g.TOKEN_FLAGS[l.PTR] & 0x1F;  # TYPE FOR OVERPUNCH
-                                if g.I > 0:
-                                    if (g.I < g.SCALAR_TYPE) or (g.I == g.MAJ_STRUC):
-                                        g.K = g.OVER_PUNCH_TYPE[g.I];
-                                        g.I = (SHL(l.M_PTR, 1) - 1 + LENGTH(g.C[0])) // 2;
-                                        l.BUILD_E = BYTE(l.BUILD_E, g.I, g.K);
-                                        l.BUILD_E_IND[g.I] = 1;
-                                        if l.MAX_E_LEVEL == 0:
-                                            MAX_E_LEVEL = 1;
-                                if (g.GRAMMAR_FLAGS[l.PTR] & g.MACRO_ARG_FLAG) != 0:
-                                    # REPLACE NAME, SO UNDERLINE IT
-                                    if g.I == 7:
-                                        l.MACRO_WRITTEN = g.TRUE;
-                                    for g.I in range(0, LENGTH(g.C[0])):
-                                        l.M_UNDERSCORE = BYTE(l.M_UNDERSCORE, l.M_PTR + g.I, BYTE('_'));
-                                    l.M_UNDERSCORE_NEEDED = g.TRUE;
-                                l.M_PTR = l.M_PTR + LENGTH(g.C[0]);
-                    goto_PTR_LOOP_END = False
+                            continue
+                        l.M_PTR = l.M_PTR + l.SPACE_NEEDED;
+                        if LENGTH(g.C[0]) + l.M_PTR >= l.LINESIZE:
+                        # DO;
+                            EXPAND(l.PTR - 1);
+                            if g.SQUEEZING:
+                            # DO;
+                                g.SQUEEZING = g.FALSE;
+                                g.GRAMMAR_FLAGS[l.PTR] |= g.PRINT_FLAG;
+                                goto_OUTPUT_WRITER_END = True
+                                break
+                            # END
+                            l.M_PTR = MIN(g.INDENT_LEVEL, l.INDENT_LIMIT);
+                        # END
+                    if l.PTR == l.PTR_START or goto_STLABEL:
+                        goto_STLABEL = False 
+                        if g.LABEL_COUNT > 0:
+                        # DO;
+                            l.TEMP = 0;
+                            l.LABEL_TOO_LONG = g.TRUE;
+                            for g.I in range(l.LABEL_START, l.LABEL_END + 2, 2):
+                                g.J = g.TOKEN_FLAGS[g.I];
+                                l.TEMP = l.TEMP + LENGTH(g.SAVE_BCD[SHR(g.J, 6)]) + 2;
+                            # END
+                            if ((g.NEST_LEVEL == 0) and (l.TEMP <= l.M_PTR)) or \
+                                    ((g.NEST_LEVEL < 10) and (l.TEMP < (l.M_PTR - 1))) or \
+                                    ((g.NEST_LEVEL >= 10) and (l.TEMP < (l.M_PTR - 2))):  # DO;
+                                g.J = l.M_PTR - l.TEMP;
+                                l.LABEL_TOO_LONG = g.FALSE;
+                            # END
+                            else:
+                                g.J = 0;
+                            for g.I in range(l.LABEL_START, l.LABEL_END + 2, 2):
+                                g.K = g.TOKEN_FLAGS[g.I];
+                                g.S = g.SAVE_BCD[SHR(g.K, 6)];
+                                if (LENGTH(g.S) + 2 + g.J) > l.LINESIZE:  # DO;
+                                    g.J = g.I;
+                                    l.CHAR = g.S;
+                                    EXPAND(0);
+                                    g.I = g.J;
+                                    g.S = l.CHAR;
+                                    g.J = 0;
+                                # END
+                                for g.L in range(0, LENGTH(g.S)):
+                                    g.K = BYTE(g.S, g.L);
+                                    l.BUILD_M = BYTE(l.BUILD_M, g.J + g.L, g.K);
+                                # END
+                                g.L += 1  # Terminal value differs from XPL to Python.
+                                l.BUILD_M = BYTE(l.BUILD_M, g.J + g.L, BYTE(':'));
+                                g.J = g.J + g.L + 2;
+                            # END
+                            if l.LABEL_TOO_LONG:
+                                EXPAND(0);
+                            g.LABEL_COUNT = 0;
+                        # END
+                    if l.PRINT_LABEL: 
+                        goto_AFTER_EXPAND = True
+                        break
+                    for g.I in range(0, LENGTH(g.C[0])):
+                        g.J = BYTE(g.C[0], g.I);
+                        l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR + g.I, g.J);
+                    # END
+                    g.I = g.TOKEN_FLAGS[l.PTR] & 0x1F;  # TYPE FOR OVERPUNCH
+                    if g.I > 0:
+                        if (g.I < g.SCALAR_TYPE) or (g.I == g.MAJ_STRUC):
+                        # DO;
+                            g.K = g.OVER_PUNCH_TYPE[g.I];
+                            g.I = (SHL(l.M_PTR, 1) - 1 + LENGTH(g.C[0])) // 2;
+                            l.BUILD_E = BYTE(l.BUILD_E, g.I, g.K);
+                            l.BUILD_E_IND[g.I] = 1;
+                            if l.MAX_E_LEVEL == 0:
+                                l.MAX_E_LEVEL = 1;
+                        # END
+                    if (g.GRAMMAR_FLAGS[l.PTR] & g.MACRO_ARG_FLAG) != 0:
+                    # DO;
+                        # REPLACE NAME, SO UNDERLINE IT
+                        if g.I == 7:
+                            l.MACRO_WRITTEN = g.TRUE;
+                        for g.I  in range(0, LENGTH(g.C[0]) - 1 + 1):
+                            l.M_UNDERSCORE = BYTE(l.M_UNDERSCORE, \
+                                                  l.M_PTR + g.I, BYTE('_'));
+                        # END
+                        l.M_UNDERSCORE_NEEDED = g.TRUE;
+                    # END
+                    l.M_PTR = l.M_PTR + LENGTH(g.C[0]);
+                # END
             # END OF DO PTR = PTR_START TO PTR_END
             if not goto_AFTER_EXPAND and not goto_OUTPUT_WRITER_END:
                 EXPAND(l.PTR_END);  # EXPAND BUFFERS
-                if g.SQUEEZING and (l.PTR > OUTPUT_STACK_MAX - 2): 
+                if g.SQUEEZING and (l.PTR > g.OUTPUT_STACK_MAX - 2):  # DO;
                     if l.PTR > l.PTR_END + 1: 
                         l.PTR = l.PTR_END + 1;
                     g.SQUEEZING = g.FALSE;
                     if (l.SUB_START[0] != 0) and \
                             ((g.STMT_STACK[l.SUB_END[0] + 1] == g.DOLLAR) or \
                              (g.STMT_STACK[l.PTR_END] == g.EXPONENTIATE)):
-                        ERROR (d.CLASS_BS, 6);
+                        ERROR(d.CLASS_BS, 6);
                     if (l.EXP_START[0] != 0) and \
                             ((g.STMT_STACK[l.PTR_END] == g.DOLLAR) or \
                              (g.STMT_STACK[l.EXP_END[0] + 1] == g.EXPONENTIATE)):
-                        ERROR (d.CLASS_BS, 6);
-        goto_AFTER_EXPAND = False
-        if l.PTR_END == g.STMT_PTR and not goto_OUTPUT_WRITER_END:
-            if g.STMT_PTR == g.STMT_END_PTR: 
-                g.STMT_END_PTR = -2;
-            g.STMT_PTR = -1;
-            g.BCD_PTR = 0
-            g.LAST_WRITE = 0
-            g.ELSEIF_PTR = 0;
+                        ERROR(d.CLASS_BS, 6);
+                # END
+        if not goto_OUTPUT_WRITER_END:
+            goto_AFTER_EXPAND = False
+            if l.PTR_END == g.STMT_PTR:
+            # DO;
+                if g.STMT_PTR == g.STMT_END_PTR: 
+                    g.STMT_END_PTR = -2;
+                g.STMT_PTR = -1;
+                g.BCD_PTR = 0
+                g.LAST_WRITE = 0
+                g.ELSEIF_PTR = 0;
+            # END
         goto_OUTPUT_WRITER_END = False
         g.LAST_SPACE = 2;
         l.MACRO_WRITTEN = g.FALSE;
@@ -1454,14 +1692,17 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
     l.PTR_END = -1;
 
     if g.STMT_PTR == -1:  # ALL TOKEN WRITTEN
-        if l.LAST_ERROR_WRITTEN < g.LAST: 
+        if l.LAST_ERROR_WRITTEN < g.LAST:  # DO;
             # GET ALL ERRORS
             l.CURRENT_ERROR_PTR = g.LAST;
             ERROR_PRINT();
-    if l.ERRORS_PRINTED: 
+        # END
+    if l.ERRORS_PRINTED:  # DO;
         if g.TOO_MANY_ERRORS:
+        # DO;
             ERRORS(d.CLASS_BI, 101);
             g.TOO_MANY_ERRORS = g.FALSE;
+        # END
         if g.OUT_PREV_ERROR != 0:
             OUTPUT(0, '***** LAST ERROR WAS DETECTED AT STATEMENT ' + \
                         str(g.OUT_PREV_ERROR) + g.PERIOD + g.X1 + g.STARS);
@@ -1472,10 +1713,12 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             g.LAST = -1;
         # END OF DO WHEN ERRORS_PRINTED
     g.SAVE_SCOPE = g.CURRENT_SCOPE;
-    if g.STACK_DUMPED: 
+    if g.STACK_DUMPED:  # DO;
         for g.I in range(0, g.STACK_DUMP_PTR + 1):
-            OUTPUT(0, g.SAVE_STACK_DUMP[g.I]);  
+            OUTPUT(0, g.SAVE_STACK_DUMP[g.I]);
+        # END
         g.STACK_DUMP_PTR = -1;
         g.STACK_DUMPED = g.FALSE;
+    # END
     return l.PTR;
 # END OUTPUT_WRITER

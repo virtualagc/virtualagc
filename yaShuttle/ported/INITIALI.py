@@ -11,6 +11,7 @@ History:    2023-08-25 RSB  Began porting from INITIALI.xpl.
 
 from xplBuiltins import *  # Built-in functions
 import g  # Get global variables.
+import HALINCL.COMMON as h
 from CHARTIME import CHARTIME
 from CHARDATE import CHARDATE
 from EMITARRA import EMIT_ARRAYNESS
@@ -25,11 +26,13 @@ from SOURCECO import SOURCE_COMPARE
 from STREAM import STREAM
 if g.scan1:
     from SCAN1 import SCAN
+elif g.scan2:
+    from SCAN2 import SCAN
 else:
     from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE
 from HALINCL.CERRDECL import CLASS_BI
-# from HALINCL.SPACELIB import g.RECORD_USED
+from HALINCL.SPACELIB import RECORD_USED, RECORD_CONSTANT, RECORD_ALLOC
 
 '''
 *************************************************************************
@@ -337,24 +340,71 @@ def INITIALIZATION():
     g.LIT_CHAR_SIZE = int(VALS[5]);
     g.XREF_LIM = int(VALS[7]);
     g.OUTER_REF_LIM = int(VALS[11]);
-    '''
-    g.J = (g.FREELIMIT + 512) & STORAGE_MASK;  # BOUNDARY NEAR TOP OF CORE 
-    g.TEMP1 = (g.J - (13000 + 2 * 1680 + 3 * 3458)) & STORAGE_MASK;  # TO ALLOW ROOM FOR BUFFERS
-    if g.TEMP1 - 512 <= g.FREEPOINT:
-        COMPACTIFY();
+    #g.J = (g.FREELIMIT + 512) & STORAGE_MASK;  # BOUNDARY NEAR TOP OF CORE 
+    #g.TEMP1 = (g.J - (13000 + 2 * 1680 + 3 * 3458)) & STORAGE_MASK;  # TO ALLOW ROOM FOR BUFFERS
+    #if g.TEMP1 - 512 <= g.FREEPOINT:
+    #    COMPACTIFY();
     # MONITOR(7, ADDR(g.TEMP1), g.J - g.TEMP1);
-    g.FREELIMIT = g.TEMP1 - 512;
-    # INITIALIZE VMEM PAGING AND ALLOCATE SPACE FOR IN-CORE PAGES
-    '''
+    #g.FREELIMIT = g.TEMP1 - 512;
+    #/* INITIALIZE VMEM PAGING AND ALLOCATE SPACE FOR IN-CORE PAGES */
+    #CALL VMEM_INIT;
+    #RECORD_CONSTANT(VMEMREC,VMEM_MAX_PAGE,UNMOVEABLE);
+    #RECORD_USED(VMEMREC) = RECORD_ALLOC(VMEMREC);
+    #DO I=0 TO VMEM_MAX_PAGE;
+    #    VMEM_PAD_PAGE(I)= -1;
+    #    VMEM_PAD_ADDR(I) = ADDR(VMEMREC(I));
+    #END;
+    #/* GET AREA FOR SYM SRN TABLE */
+    #BLOCK_SRN_DATA=GET_CELL(2044,ADDR(SRN_BLOCK_RECORD),MODF);
+    RECORD_CONSTANT(h.FOR_DW,13,g.UNMOVEABLE);
+    RECORD_USED(h.FOR_DW, RECORD_ALLOC(h.FOR_DW));
+    RECORD_CONSTANT(h.LIT_NDX,g.LIT_CHAR_SIZE-1,g.UNMOVEABLE);
+    RECORD_USED(h.LIT_NDX, RECORD_ALLOC(h.LIT_NDX));
+    RECORD_CONSTANT(h.FOR_ATOMS,g.ATOMp_LIM,g.MOVEABLE);
+    RECORD_USED(h.FOR_ATOMS, RECORD_ALLOC(h.FOR_ATOMS));
     g.ATOMS(0, 0x00010050); # XPXRC OP CODE-ONE OPERAND
     g.NEXT_ATOMp = 2; # SKIP FIRST 2 ENTRIES - ALWAYS XPRC
     EMIT_ARRAYNESS(); # DUMMY CALL TO INITIALIZE A PARM
-    
+    #ALLOCATE_SPACE(CROSS_REF,XREF_LIM);
+    #NEXT_ELEMENT(CROSS_REF);
+    g.I = g.LIT_BUF_SIZE * 12;
+    MONITOR(4, 2, g.I);
+    RECORD_CONSTANT(h.LIT_PG,3,g.MOVEABLE);
+    RECORD_USED(h.LIT_PG, RECORD_ALLOC(h.LIT_PG));
+    # I think the following lines probably store the addresses of LIT_NDX[]
+    # and FOR_DW[] in the variables LIT_CHAR_AD and DW_AD.  Which, I hope, is
+    # meaningless for us.
+    #CALL INLINE("58",1,0,LIT_NDX);
+    #CALL INLINE("50",1,0,LIT_CHAR_AD);           /* ST  1,LIT_CHAR_AD */
+    #CALL INLINE("58",1,0,FOR_DW);
+    #CALL INLINE("50",1,0,DW_AD);                   /* ST  1,DW_AD       */
     MONITOR(5, g.DW, 0)
-    '''
-    ... lots of stuff just deleted here that I hope pertains to
-        (unnecessary) virtual memory ...
-    '''
+    #TABLE_ADDR = DW_AD + 24;
+    #ADDR_FIXER = TABLE_ADDR + 8;
+    #DW(8) = "4E000000";
+    #DW(9) = 0;
+    #ADDR_FIXED_LIMIT = ADDR_FIXER + 8;
+    #DW(10) = "487FFFFF";
+    #DW(11) = "FFFFFFFF";
+    #ADDR_ROUNDER = ADDR_FIXED_LIMIT + 8;
+    #DW(12) = "407FFFFF";
+    #DW(13) = "FFFFFFFF";
+    #ALLOCATE_SPACE(SYM_TAB,SYTSIZE+1);
+    #NEXT_ELEMENT(SYM_TAB);
+    #NEXT_ELEMENT(SYM_TAB);
+    #ALLOCATE_SPACE(CSECT_LENGTHS,50);
+    #RECORD_USED(CSECT_LENGTHS) = 1;
+    #ALLOCATE_SPACE(DOWN_INFO, NUM_DWNS);
+    #NEXT_ELEMENT(DOWN_INFO);
+    #/* NOW DO THE NON COMMON BASED VARIABLES */
+    #ALLOCATE_SPACE(OUTER_REF_TABLE,OUTER_REF_LIM+1);
+    #NEXT_ELEMENT(OUTER_REF_TABLE);
+    #ALLOCATE_SPACE(MACRO_TEXTS,MACRO_TEXT_LIM);
+    #NEXT_ELEMENT(MACRO_TEXTS);
+    #NEXT_ELEMENT(MACRO_TEXTS);
+    #ALLOCATE_SPACE(LINK_SORT,SYTSIZE+1);
+    #NEXT_ELEMENT(LINK_SORT);
+    #NEXT_ELEMENT(LINK_SORT);
     g.CARD_TYPE[BYTE('E')] = 1;
     g.CARD_TYPE[BYTE('M')] = 2;
     g.CARD_TYPE[BYTE('S')] = 3;

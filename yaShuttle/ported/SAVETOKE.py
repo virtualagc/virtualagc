@@ -173,6 +173,8 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
                     continue
             g.SAVE_BCD[g.BCD_PTR] = CHAR[:];
             g.TOKEN_FLAGS[g.STMT_PTR] = TYPE | SHL(g.BCD_PTR, 6);
+            # Well, the following line seems to have no effect whatsoever,
+            # given the preceding line ... but the original XPL has it.
             g.TOKEN_FLAGS[g.STMT_PTR] = g.TOKEN_FLAGS[g.STMT_PTR] | \
                                         SHL(g.BCD_PTR, 6);
     g.STMT_STACK[g.STMT_PTR] = TOKEN;

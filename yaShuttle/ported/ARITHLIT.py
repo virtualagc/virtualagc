@@ -68,7 +68,7 @@ def ARITH_LITERAL(LOC1=None,LOC2=None,PWR_MODE=None):
     if PWR_MODE != None:
         l.PWR_MODE = PWR_MODE
           
-    if g.PSEUDO_FORM[g.PTR[l.LOC1]]!=g.XLIT: 
+    if g.PSEUDO_FORM[g.PTR[l.LOC1]] != g.XLIT: 
         return g.FALSE;
     g.LIT_PTR=GET_LITERAL(g.LOC_P[g.PTR[l.LOC1]]);
     # IF EITHER LITERAL IS A DOUBLE THEN SET DOUBLELIT = TRUE

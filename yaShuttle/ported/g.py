@@ -31,6 +31,7 @@ import HALINCL.COMMON as h
 SANITY_CHECK = False
 pfs = True
 scan1 = False
+scan2 = False
 intersection = False
 extraTrace = False
 
@@ -74,6 +75,8 @@ for parm in sys.argv[1:]:
         SANITY_CHECK = True
     elif parm == "--scan1":
         scan1 = True
+    elif parm == "--scan2":
+        scan2 = True
     elif parm == "--extra":
         extraTrace = True
     elif parm == "--intersection":
@@ -120,6 +123,7 @@ for parm in sys.argv[1:]:
         print('--help           Show this explanation.')
         print('--dummy=X        This option is ignored.')
         print('--scan1          Use SCAN1 rather than SCAN')
+        print('--scan2          Use SCAN2 rather than SCAN')
         print('--intersection   Helps test overlap between globals/locals.')
         print('Additionally, many of the options from the original JCL')
         print('PARMLISTs can be used.  For "type 1" options (i.e., those')

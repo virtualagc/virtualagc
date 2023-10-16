@@ -30,15 +30,21 @@ from COMPILAT import COMPILATION_LOOP
 from ALMOST_DISASTER import ALMOST_DISASTER
 
 '''
-Originally, 5 parts comprised this driver module, one of which (THE_BEGINNING)
-was always run, but the other 4 were selectively entered via GO TO statements
+In XPL, 5 parts comprised this driver module, one of which (THE_BEGINNING)
+always executed, but the other 4 were only run selectively via GO TO statements
 at this level or lower levels in the module hierarchy.  Since Python has no
-GO TO, we have to do things differently.  It's relatively easy to work around
-this just for the GO TO's at *this* level, but the ones at the lower levels
-are a bit of a conundrum.  Fortunately, the blocks of code we need to reach
-all result directly or indirectly in exits from the program, so what we do
-instead is to provide each of the 4 problematic blocks of code as a separate
-subroutine, callable from any level of the code.
+GO TO, we have to do things differently.  Fortunately, those GO TO targets, if 
+reached, each result directly or indirectly in termination of the program, so 
+what we do is just to provide each of those 4 GO TO blocks of code as separate
+subroutines, callable from any level of the code without having to come back
+up to this level.
+
+For example, if there are no errors, COMPILATION_LOOP() below does not return,
+and terminates the program by means that don't concern us at the moment,
+*without* falling through to ALMOST_DISASTER().  Whereas in case of error,
+COMPILATION_LOOP() does return and falls through.  ALMOST_DISASTER() is itself
+an error exit.  The other error exits (not shown below) are SCAN_DISASTER(), 
+OUTPUT_WRITER_DISASTER(), and ENDITNOW().
 '''
 
 # Initialization

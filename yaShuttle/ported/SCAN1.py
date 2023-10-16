@@ -994,7 +994,8 @@ def SCAN():
             elif ct == 5:
                 # CASE 5--SINGLE QUOTE = CHARACTER LITERAL
                 g.I = 0;
-                g.STRING_OVERFLOW, g.RESERVED_WORD = g.FALSE;
+                g.STRING_OVERFLOW = g.FALSE
+                g.RESERVED_WORD = g.FALSE;
                 if g.OVER_PUNCH != 0:
                     ERROR(d.CLASS_MO, 5);
                 g.TOKEN = g.CHARACTER_STRING;

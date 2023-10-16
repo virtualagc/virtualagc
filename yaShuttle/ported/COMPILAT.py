@@ -15,6 +15,8 @@ import HALINCL.CERRDECL as d
 from ERROR import ERROR
 if g.scan1:
     from SCAN1 import SCAN
+elif g.scan2:
+    from SCAN2 import SCAN
 else:
     from SCAN import SCAN
 from SRNUPDAT import SRN_UPDATE

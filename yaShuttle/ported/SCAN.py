@@ -1,13 +1,19 @@
-#!/usr/bin/env python3
-'''
+#!/usr/bin/env python
+"""
 License:    The author, Ron Burkey, declares this program to be in the Public
             Domain, and may be used or modified in any way desired.
 Filename:   SCAN.py
 Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
-History:    2023-08-31 RSB  Created a stub.
-'''
+History:    2022-12-07 RSB  Suffixed the filename with ".xpl".  Before this
+                            file had been received, it appears as though
+                            an EBCDIC-to-ASCII conversion had incorrectly
+                            encoded the character '¢' (U.S. cent) as 0x9B.
+                            This has been repaired.
+            2022-12-14 RSB  Changed encoding from ISO 8859-15 (or -1)
+                            to UTF-8.
+"""
 
 from xplBuiltins import *
 import g
@@ -22,230 +28,228 @@ from HALINCL.SPACELIB import NEXT_ELEMENT
 
 from STREAM import STREAM
 
-'''
- /***************************************************************************/
- /* PROCEDURE NAME:  SCAN                                                   */
- /* MEMBER NAME:     SCAN                                                   */
- /* LOCAL DECLARATIONS:                                                     */
- /*          BLANK_BYTES       BIT(16)                                      */
- /*          BUILD(1535)       LABEL                                        */
- /*          BUILD_BCD         LABEL                                        */
- /*          BUILD_COMMENT(1507)  LABEL                                     */
- /*          BUILD_INTERNAL_BCD(19)  LABEL                                  */
- /*          CASE13(1516)      LABEL                                        */
- /*          CENT_START        LABEL                                        */
- /*          CHAR_ALREADY_SCANNED  BIT(8)                                   */
- /*          CHAR_NEEDED       BIT(8)                                       */
- /*          CHAR_OP_CHECK(13) LABEL                                        */
- /*          CHECK(1500)       LABEL                                        */
- /*          COMMENT_PTR       BIT(16)                                      */
- /*          CONCAT(1533)      LABEL                                        */
- /*          DEC_POINT         BIT(8)                                       */
- /*          DEC_POINT_ENTRY   LABEL                                        */
- /*          DIGIT             BIT(8)                                       */
- /*          END_CHECK_RESERVED_WORD(1512)  LABEL                           */
- /*          END_OF_CENT(1558) LABEL                                        */
- /*          ESCAPE_LEVEL      BIT(16)                                      */
- /*          EXP_BEGIN         BIT(16)                                      */
- /*          EXP_CHECK         LABEL                                        */
- /*          EXP_DIGITS        BIT(16)                                      */
- /*          EXP_DONE          LABEL                                        */
- /*          EXP_SIGN          BIT(16)                                      */
- /*          FOUND_ERROR       LABEL                                        */
- /*          FOUND_TOKEN(1505) LABEL                                        */
- /*          GET_NEW_CHAR      LABEL                                        */
- /*          ID_LOOP(1524)     LABEL                                        */
- /*          INTERNAL_BCD      CHARACTER;                                   */
- /*          LOOK_FOR_COMMENT(1572)  LABEL                                  */
- /*          LOOP_END          LABEL                                        */
- /*          NUMBER_DONE       LABEL                                        */
- /*          OVERPUNCH_ALREADY_SCANNED  BIT(8)                              */
- /*          PARAMETER_PROCESSING(19)  LABEL                                */
- /*          PARM_FOUND(1514)  LABEL                                        */
- /*          POWER_INDICATOR(1541)  LABEL                                   */
- /*          PUSH_MACRO(1498)  LABEL                                        */
- /*          RESET_LITERAL     LABEL                                        */
- /*          SCAN_END          LABEL                                        */
- /*          SCAN_START        LABEL                                        */
- /*          SCAN_TOP          LABEL                                        */
- /*          SEARCH_NEEDED     BIT(8)                                       */
- /*          SEARCH_NEXT_CHAR(1545)  LABEL                                  */
- /*          SET_SEARCH(1554)  LABEL                                        */
- /*          SIG_CHECK         LABEL                                        */
- /*          SIG_DIGITS        BIT(16)                                      */
- /*          START_EXPONENT(1551)  LABEL                                    */
- /*          STORE_NEXT_CHAR(1576)  LABEL                                   */
- /*          STR_TOO_LONG(1534)  LABEL                                      */
- /*          S1                BIT(16)                                      */
- /*          TEMP_CHAR         BIT(8)                                       */
- /*          TEST_SEARCH(1564) LABEL                                        */
- /* EXTERNAL VARIABLES REFERENCED:                                          */
- /*          CHAR_LENGTH_LIM                                                */
- /*          CHAR_OP                                                        */
- /*          CHARACTER_STRING                                               */
- /*          CHARTYPE                                                       */
- /*          CLASS_DT                                                       */
- /*          CLASS_IL                                                       */
- /*          CLASS_IR                                                       */
- /*          CLASS_LC                                                       */
- /*          CLASS_LF                                                       */
- /*          CLASS_LS                                                       */
- /*          CLASS_M                                                        */
- /*          CLASS_MC                                                       */
- /*          CLASS_MO                                                       */
- /*          CLASS_XM                                                       */
- /*          COMMA                                                          */
- /*          CONCATENATE                                                    */
- /*          CONST_DW                                                       */
- /*          CONTROL                                                        */
- /*          DECLARE_CONTEXT                                                */
- /*          DW                                                             */
- /*          EOFILE                                                         */
- /*          EQUATE_TOKEN                                                   */
- /*          ESCP                                                           */
- /*          EXPONENTIATE                                                   */
- /*          EXPRESSION_CONTEXT                                             */
- /*          FALSE                                                          */
- /*          FIRST_FREE                                                     */
- /*          FOREVER                                                        */
- /*          GROUP_NEEDED                                                   */
- /*          ID_LIMIT                                                       */
- /*          ID_TOKEN                                                       */
- /*          LEFT_PAREN                                                     */
- /*          LETTER_OR_DIGIT                                                */
- /*          LEVEL                                                          */
- /*          MAC_TXT                                                        */
- /*          MACRO_ARG_FLAG                                                 */
- /*          MACRO_EXPAN_LIMIT                                              */
- /*          MACRO_TEXT                                                     */
- /*          MAX_STRING_SIZE                                                */
- /*          MAX_STRUC_LEVEL                                                */
- /*          NUMBER                                                         */
- /*          ONE_BYTE                                                       */
- /*          OVER_PUNCH_SIZE                                                */
- /*          OVER_PUNCH_TYPE                                                */
- /*          PARM_CONTEXT                                                   */
- /*          PC_INDEX                                                       */
- /*          PC_LIMIT                                                       */
- /*          PCNAME                                                         */
- /*          PERCENT_MACRO                                                  */
- /*          PRINT_FLAG                                                     */
- /*          RECOVERING                                                     */
- /*          REPLACE_TEXT                                                   */
- /*          RESERVED_LIMIT                                                 */
- /*          RT_PAREN                                                       */
- /*          SAVE_COMMENT                                                   */
- /*          SET_CONTEXT                                                    */
- /*          SRN_PRESENT                                                    */
- /*          STMT_PTR                                                       */
- /*          STRUCTURE_WORD                                                 */
- /*          SUBSCRIPT_LEVEL                                                */
- /*          SYM_ADDR                                                       */
- /*          SYM_LENGTH                                                     */
- /*          SYM_NAME                                                       */
- /*          SYM_TAB                                                        */
- /*          SYT_ADDR                                                       */
- /*          SYT_NAME                                                       */
- /*          TEMPORARY                                                      */
- /*          TRANS_IN                                                       */
- /*          TRUE                                                           */
- /*          TX                                                             */
- /*          V_INDEX                                                        */
- /*          VALID_00_CHAR                                                  */
- /*          VALID_00_OP                                                    */
- /*          VAR_LENGTH                                                     */
- /*          VOCAB_INDEX                                                    */
- /*          X1                                                             */
- /* EXTERNAL VARIABLES CHANGED:                                             */
- /*          BASE_PARM_LEVEL                                                */
- /*          BCD                                                            */
- /*          BLANK_COUNT                                                    */
- /*          C                                                              */
- /*          COMM                                                           */
- /*          COMMENT_COUNT                                                  */
- /*          CONTEXT                                                        */
- /*          DONT_SET_WAIT                                                  */
- /*          EQUATE_IMPLIED                                                 */
- /*          EXP_OVERFLOW                                                   */
- /*          EXP_TYPE                                                       */
- /*          FIRST_TIME                                                     */
- /*          FIRST_TIME_PARM                                                */
- /*          FIXING                                                         */
- /*          FOR_DW                                                         */
- /*          FOUND_CENT                                                     */
- /*          GRAMMAR_FLAGS                                                  */
- /*          IMPLIED_TYPE                                                   */
- /*          I                                                              */
- /*          INCL_SRN                                                       */
- /*          K                                                              */
- /*          LABEL_IMPLIED                                                  */
- /*          LOOKUP_ONLY                                                    */
- /*          M_BLANK_COUNT                                                  */
- /*          M_CENT                                                         */
- /*          M_P                                                            */
- /*          M_PRINT                                                        */
- /*          M_TOKENS                                                       */
- /*          MACRO_CALL_PARM_TABLE                                          */
- /*          MACRO_EXPAN_LEVEL                                              */
- /*          MACRO_EXPAN_STACK                                              */
- /*          MACRO_FOUND                                                    */
- /*          MACRO_POINT                                                    */
- /*          MACRO_TEXTS                                                    */
- /*          NEW_MEL                                                        */
- /*          NEXT_CHAR                                                      */
- /*          NUM_OF_PARM                                                    */
- /*          OLD_MEL                                                        */
- /*          OLD_MP                                                         */
- /*          OLD_PEL                                                        */
- /*          OLD_PR_PTR                                                     */
- /*          OLD_TOPS                                                       */
- /*          OVER_PUNCH                                                     */
- /*          P_CENT                                                         */
- /*          PARM_COUNT                                                     */
- /*          PARM_EXPAN_LEVEL                                               */
- /*          PARM_REPLACE_PTR                                               */
- /*          PARM_STACK_PTR                                                 */
- /*          PASS                                                           */
- /*          PRINTING_ENABLED                                               */
- /*          RESERVED_WORD                                                  */
- /*          RESTORE                                                        */
- /*          SAVE_PE                                                        */
- /*          SOME_BCD                                                       */
- /*          START_POINT                                                    */
- /*          SUPPRESS_THIS_TOKEN_ONLY                                       */
- /*          S                                                              */
- /*          SAVE_BLANK_COUNT                                               */
- /*          SAVE_NEXT_CHAR                                                 */
- /*          SAVE_OVER_PUNCH                                                */
- /*          SCAN_COUNT                                                     */
- /*          SRN                                                            */
- /*          SRN_COUNT                                                      */
- /*          STRING_OVERFLOW                                                */
- /*          SYT_INDEX                                                      */
- /*          T_INDEX                                                        */
- /*          TEMP_INDEX                                                     */
- /*          TEMP_STRING                                                    */
- /*          TEMPLATE_IMPLIED                                               */
- /*          TEMPORARY_IMPLIED                                              */
- /*          TOKEN                                                          */
- /*          TOKEN_FLAGS                                                    */
- /*          TOP_OF_PARM_STACK                                              */
- /*          VALUE                                                          */
- /*          WAIT                                                           */
- /* EXTERNAL PROCEDURES CALLED:                                             */
- /*          ERROR                                                          */
- /*          FINISH_MACRO_TEXT                                              */
- /*          HEX                                                            */
- /*          IDENTIFY                                                       */
- /*          MIN                                                            */
- /*          PREP_LITERAL                                                   */
- /*          SAVE_TOKEN                                                     */
- /*          STREAM                                                         */
- /* CALLED BY:                                                              */
- /*          INITIALIZATION                                                 */
- /*          CALL_SCAN                                                      */
- /***************************************************************************/
-'''
+#*************************************************************************
+# PROCEDURE NAME:  SCAN
+# MEMBER NAME:     SCAN
+# LOCAL DECLARATIONS:
+#          BLANK_BYTES       BIT(16)
+#          BUILD(1535)       LABEL
+#          BUILD_BCD         LABEL
+#          BUILD_COMMENT(1507)  LABEL
+#          BUILD_INTERNAL_BCD(19)  LABEL
+#          CASE13(1516)      LABEL
+#          CENT_START        LABEL
+#          CHAR_ALREADY_SCANNED  BIT(8)
+#          CHAR_NEEDED       BIT(8)
+#          CHAR_OP_CHECK(13) LABEL
+#          CHECK(1500)       LABEL
+#          COMMENT_PTR       BIT(16)
+#          CONCAT(1533)      LABEL
+#          DEC_POINT         BIT(8)
+#          DEC_POINT_ENTRY   LABEL
+#          DIGIT             BIT(8)
+#          END_CHECK_RESERVED_WORD(1512)  LABEL
+#          END_OF_CENT(1558) LABEL
+#          ESCAPE_LEVEL      BIT(16)
+#          EXP_BEGIN         BIT(16)
+#          EXP_CHECK         LABEL
+#          EXP_DIGITS        BIT(16)
+#          EXP_DONE          LABEL
+#          EXP_SIGN          BIT(16)
+#          FOUND_ERROR       LABEL
+#          FOUND_TOKEN(1505) LABEL
+#          GET_NEW_CHAR      LABEL
+#          ID_LOOP(1524)     LABEL
+#          INTERNAL_BCD      CHARACTER;
+#          LOOK_FOR_COMMENT(1572)  LABEL
+#          LOOP_END          LABEL
+#          NUMBER_DONE       LABEL
+#          OVERPUNCH_ALREADY_SCANNED  BIT(8)
+#          PARAMETER_PROCESSING(19)  LABEL
+#          PARM_FOUND(1514)  LABEL
+#          POWER_INDICATOR(1541)  LABEL
+#          PUSH_MACRO(1498)  LABEL
+#          RESET_LITERAL     LABEL
+#          SCAN_END          LABEL
+#          SCAN_START        LABEL
+#          SCAN_TOP          LABEL
+#          SEARCH_NEEDED     BIT(8)
+#          SEARCH_NEXT_CHAR(1545)  LABEL
+#          SET_SEARCH(1554)  LABEL
+#          SIG_CHECK         LABEL
+#          SIG_DIGITS        BIT(16)
+#          START_EXPONENT(1551)  LABEL
+#          STORE_NEXT_CHAR(1576)  LABEL
+#          STR_TOO_LONG(1534)  LABEL
+#          S1                BIT(16)
+#          TEMP_CHAR         BIT(8)
+#          TEST_SEARCH(1564) LABEL
+# EXTERNAL VARIABLES REFERENCED:
+#          CHAR_LENGTH_LIM
+#          CHAR_OP
+#          CHARACTER_STRING
+#          CHARTYPE
+#          CLASS_DT
+#          CLASS_IL
+#          CLASS_IR
+#          CLASS_LC
+#          CLASS_LF
+#          CLASS_LS
+#          CLASS_M
+#          CLASS_MC
+#          CLASS_MO
+#          CLASS_XM
+#          COMMA
+#          CONCATENATE
+#          CONST_DW
+#          CONTROL
+#          DECLARE_CONTEXT
+#          DW
+#          EOFILE
+#          EQUATE_TOKEN
+#          ESCP
+#          EXPONENTIATE
+#          EXPRESSION_CONTEXT
+#          FALSE
+#          FIRST_FREE
+#          FOREVER
+#          GROUP_NEEDED
+#          ID_LIMIT
+#          ID_TOKEN
+#          LEFT_PAREN
+#          LETTER_OR_DIGIT
+#          LEVEL
+#          MAC_TXT
+#          MACRO_ARG_FLAG
+#          MACRO_EXPAN_LIMIT
+#          MACRO_TEXT
+#          MAX_STRING_SIZE
+#          MAX_STRUC_LEVEL
+#          NUMBER
+#          ONE_BYTE
+#          OVER_PUNCH_SIZE
+#          OVER_PUNCH_TYPE
+#          PARM_CONTEXT
+#          PC_INDEX
+#          PC_LIMIT
+#          PCNAME
+#          PERCENT_MACRO
+#          PRINT_FLAG
+#          RECOVERING
+#          REPLACE_TEXT
+#          RESERVED_LIMIT
+#          RT_PAREN
+#          SAVE_COMMENT
+#          SET_CONTEXT
+#          SRN_PRESENT
+#          STMT_PTR
+#          STRUCTURE_WORD
+#          SUBSCRIPT_LEVEL
+#          SYM_ADDR
+#          SYM_LENGTH
+#          SYM_NAME
+#          SYM_TAB
+#          SYT_ADDR
+#          SYT_NAME
+#          TEMPORARY
+#          TRANS_IN
+#          TRUE
+#          TX
+#          V_INDEX
+#          VALID_00_CHAR
+#          VALID_00_OP
+#          VAR_LENGTH
+#          VOCAB_INDEX
+#          X1
+# EXTERNAL VARIABLES CHANGED:
+#          BASE_PARM_LEVEL
+#          BCD
+#          BLANK_COUNT
+#          C
+#          COMM
+#          COMMENT_COUNT
+#          CONTEXT
+#          DONT_SET_WAIT
+#          EQUATE_IMPLIED
+#          EXP_OVERFLOW
+#          EXP_TYPE
+#          FIRST_TIME
+#          FIRST_TIME_PARM
+#          FIXING
+#          FOR_DW
+#          FOUND_CENT
+#          GRAMMAR_FLAGS
+#          IMPLIED_TYPE
+#          I
+#          INCL_SRN
+#          K
+#          LABEL_IMPLIED
+#          LOOKUP_ONLY
+#          M_BLANK_COUNT
+#          M_CENT
+#          M_P
+#          M_PRINT
+#          M_TOKENS
+#          MACRO_CALL_PARM_TABLE
+#          MACRO_EXPAN_LEVEL
+#          MACRO_EXPAN_STACK
+#          MACRO_FOUND
+#          MACRO_POINT
+#          MACRO_TEXTS
+#          NEW_MEL
+#          NEXT_CHAR
+#          NUM_OF_PARM
+#          OLD_MEL
+#          OLD_MP
+#          OLD_PEL
+#          OLD_PR_PTR
+#          OLD_TOPS
+#          OVER_PUNCH
+#          P_CENT
+#          PARM_COUNT
+#          PARM_EXPAN_LEVEL
+#          PARM_REPLACE_PTR
+#          PARM_STACK_PTR
+#          PASS
+#          PRINTING_ENABLED
+#          RESERVED_WORD
+#          RESTORE
+#          SAVE_PE
+#          SOME_BCD
+#          START_POINT
+#          SUPPRESS_THIS_TOKEN_ONLY
+#          S
+#          SAVE_BLANK_COUNT
+#          SAVE_NEXT_CHAR
+#          SAVE_OVER_PUNCH
+#          SCAN_COUNT
+#          SRN
+#          SRN_COUNT
+#          STRING_OVERFLOW
+#          SYT_INDEX
+#          T_INDEX
+#          TEMP_INDEX
+#          TEMP_STRING
+#          TEMPLATE_IMPLIED
+#          TEMPORARY_IMPLIED
+#          TOKEN
+#          TOKEN_FLAGS
+#          TOP_OF_PARM_STACK
+#          VALUE
+#          WAIT
+# EXTERNAL PROCEDURES CALLED:
+#          ERROR
+#          FINISH_MACRO_TEXT
+#          HEX
+#          IDENTIFY
+#          MIN
+#          PREP_LITERAL
+#          SAVE_TOKEN
+#          STREAM
+# CALLED BY:
+#          INITIALIZATION
+#          CALL_SCAN
+#*************************************************************************
 
 
 # Persistent local variables for various procedures.
@@ -272,6 +276,7 @@ class cSCAN:  # Local variables for SCAN procedure.
 
 lSCAN = cSCAN()
 
+
 class cCHAR_OP_CHECK:  # Local variables for CHAR_OP_CHECK procedure.
 
     def __init__(self):
@@ -296,51 +301,81 @@ class cPARAMETER_PROCESSING:  # Local variables for PARAMETER_PROCESSING proc.
 lPARAMETER_PROCESSING = cPARAMETER_PROCESSING()
 
 
-class cEND_OF_MACRO:  # Variables local to END_OF_MACRO procedure.
-
-    def __init__(self):
-        self.MP = 0
-
-
-lEND_OF_MACRO = cEND_OF_MACRO()
-
-
 def SCAN():
     l = lSCAN  # Locals specific to SCAN()
 
+    goto_VALID_TEST = False;
+    goto_CHECK_ARG_NUM = False;
+    goto_UP_ARG_COUNT = False;
+    goto_NO_BACKUP = False;
+    goto_SCAN_END = False;
+    goto_SIG_CHECK = False;
+    goto_LOOP_END = False;
+    goto_GET_NEW_CHAR = False;
+    goto_FOUND_ERROR = False;
+    goto_EXP_CHECK = False;
+    goto_RESET_LITERAL = False;
+    goto_EXP_DONE = False;
+    goto_POWER_INDICATOR = False;
+    goto_NUMBER_DONE = False;
+    goto_START_EXPONENT = False;
+    goto_NEW_CHAR = False;
+    goto_FOUND_TOKEN = False;
+    goto_CASE13 = False;
+    goto_END_CHECK_RESERVED_WORD = False;
+    goto_SCAN_START = False;
+    goto_DEC_POINT_ENTRY = False;
+    goto_CHECK = False;
+    goto_STR_TOO_LONG = False;
+    goto_BUILD = False;
+    goto_CONCAT = False;
+    goto_END_OF_CENT = False;
+    goto_CENT_START = False;
+    goto_SCAN_TOP = False;
+    goto_SET_SEARCH = False;
+    goto_TEST_SEARCH = False;
+    goto_SEARCH_NEXT_CHAR = False;
+    goto_STORE_NEXT_CHAR = False;
+    goto_LOOK_FOR_COMMENT = False;
+
     def CHAR_OP_CHECK(CHAR):
         ll = lCHAR_OP_CHECK  # Locals specific to CHAR_OP_CHECK()
+        nonlocal goto_VALID_TEST
 
         if g.OVER_PUNCH == 0:
             return CHAR;
-        goto_VALID_TEST = False
         firstTry = True
         while firstTry or goto_VALID_TEST:
             firstTry = False
-            if g.OVER_PUNCH == g.CHAR_OP[0] or goto_VALID_TEST:  # LEVEL 1 ESCAPE
+            if g.OVER_PUNCH == g.CHAR_OP[0] or goto_VALID_TEST:  # DO
+                # LEVEL 1 ESCAPE
                 if not goto_VALID_TEST:
                     ll.HOLD_CHAR = g.TRANS_IN[CHAR] & 0xFF;
                 goto_VALID_TEST = False
                 if ll.HOLD_CHAR == 0x00:
-                    if g.OVER_PUNCH != g.VALID_00_OP or CHAR != g.VALID_00_CHAR:
+                    if g.OVER_PUNCH != g.VALID_00_OP or CHAR != g.VALID_00_CHAR:  # DO
                         ERROR(d.CLASS_MO, 6, HEX(CHAR, 2));
                         return CHAR;
+                    # END
                 return ll.HOLD_CHAR;
-            elif g.OVER_PUNCH == g.CHAR_OP[1]:
+            # END
+            elif g.OVER_PUNCH == g.CHAR_OP[1]:  # DO
                 ll.HOLD_CHAR = SHR(g.TRANS_IN[CHAR], 8) & 0xFF;  # LEVEL 2 ESCAPE
                 goto_VALID_TEST = True;  # SEE IF IT A LEGAL ESCAPE
                 continue
+            # END
             else:  # ILLEGAL OVER PUNCH
+            # DO;
                 ERROR(d.CLASS_MO, 1, HEX(CHAR, 2));
                 return CHAR;  # NO TRANSLATION
+            # END
+    # END CHAR_OP_CHECK;
 
     def BUILD_BCD():
         # This doesn't much resemble the original XPL, because the original
-        # seems to me to be employing a trick of some kind whose nature I don't
-        # understand, for purposes I don't grasp.
+        # seems to me to be employing a trick (unnecessary in our implementation)
+        # extend the size of the allocated storage for BCD.
         g.BCD = BYTE(g.BCD, len(g.BCD), g.NEXT_CHAR)
-        if g.BCD == "CLOSE":
-            return
 
     def BUILD_INTERNAL_BCD():
         # Same comments as for BUILD_BCD().
@@ -348,13 +383,20 @@ def SCAN():
 
     def PARAMETER_PROCESSING():
         ll = lPARAMETER_PROCESSING  # Locals specific to PARAMETER_PROCESSING()
-        ll.ARG_COUNT = 0;
-        ll.NUM_OF_PAREN = 0;
+        nonlocal goto_CHECK_ARG_NUM, goto_NO_BACKUP, goto_UP_ARG_COUNT
 
-        if g.VAR_LENGTH(g.SYT_INDEX) == 0:
-           ll.LAST_ARG = g.TRUE;
-           # GO TO CHECK_ARG_NUM;
-        elif g.NEXT_CHAR == BYTE('('):
+        ll.LAST_ARG = g.FALSE;
+        ll.QUOTE_FLAG = g.FALSE;
+        ll.D_QUOTE_FLAG = g.FALSE;
+        ll.CENT_FLAG = g.FALSE;
+        ll.ARG_COUNT = 0;
+        ll.NUM_OF_PAREN = 0 ;
+
+        if g.VAR_LENGTH(g.SYT_INDEX) == 0:  # DO
+            ll.LAST_ARG = g.TRUE;
+            goto_CHECK_ARG_NUM = True; # Fallthrough okay.
+        # END
+        elif g.NEXT_CHAR == BYTE('('):  # DO
             g.TOKEN_FLAGS[g.STMT_PTR] |= 0x20;
             g.RESERVED_WORD = g.TRUE;
             SAVE_TOKEN(g.LEFT_PAREN, 0, 0x20, 1);
@@ -365,84 +407,106 @@ def SCAN():
                     STREAM();
                     if g.NEXT_CHAR == BYTE(g.SQUOTE):
                         ll.QUOTE_FLAG = not ll.QUOTE_FLAG;
-                    elif ll.QUOTE_FLAG == g.FALSE:
+                    elif ll.QUOTE_FLAG == g.FALSE:  # DO
                         if g.NEXT_CHAR == BYTE('('):
                             ll.NUM_OF_PAREN = ll.NUM_OF_PAREN + 1;
-                        elif g.NEXT_CHAR == BYTE(')'):
+                        elif g.NEXT_CHAR == BYTE(')'):  # DO
                             ll.NUM_OF_PAREN = ll.NUM_OF_PAREN - 1;
-                            if ll.NUM_OF_PAREN < 0:
+                            if ll.NUM_OF_PAREN < 0:  # DO
                                 ll.LAST_ARG = g.TRUE;
-                                STREAM();
-                                break;
+                                STREAM()
+                                goto_UP_ARG_COUNT = True;
+                                break
+                            # END
+                        # END
                         elif g.NEXT_CHAR == BYTE('"'):
                             ll.D_QUOTE_FLAG = not ll.D_QUOTE_FLAG;
                         elif g.NEXT_CHAR == BYTE('`'):
                             ll.CENT_FLAG = not ll.CENT_FLAG;
-                        elif g.NEXT_CHAR == BYTE(','):
+                        elif g.NEXT_CHAR == BYTE(','):  # DO
                             if ll.NUM_OF_PAREN == 0 and ll.D_QUOTE_FLAG == g.FALSE:
                                 if ll.CENT_FLAG == g.FALSE:
                                     if ll.QUOTE_FLAG == g.FALSE:
+                                        goto_UP_ARG_COUNT = True;
                                         break;
-                    if LENGTH(g.TEMP_STRING) == 250:
-                       ERROR(d.CLASS_IR, 7);
-                       return;
+                        # END
+                    # END
+                    if LENGTH(g.TEMP_STRING) == 250:  # DO
+                        ERROR(d.CLASS_IR, 7);
+                        return;
+                    # END
                     g.ONE_BYTE = BYTE(g.ONE_BYTE, 0, g.NEXT_CHAR);
                     g.TEMP_STRING = g.TEMP_STRING + g.ONE_BYTE;
                     if g.NEXT_CHAR == BYTE(g.X1):
                         if g.BLANK_COUNT > 0:
-                            if (LENGTH(g.TEMP_STRING) + g.BLANK_COUNT) > 250:
+                            if (LENGTH(g.TEMP_STRING) + g.BLANK_COUNT) > 250:  # DO
                                 ERROR(d.CLASS_IR, 7);
                                 return;
+                            # END
                             else:
                                 for g.K in range(1, g.BLANK_COUNT + 1):
                                     g.TEMP_STRING = g.TEMP_STRING + g.X1;
+                                # END
+                # END OF DO FOREVER
+                goto_UP_ARG_COUNT = False
                 ll.ARG_COUNT = ll.ARG_COUNT + 1;
                 g.TEMP_STRING = SUBSTR(g.TEMP_STRING, 1);
                 g.MACRO_CALL_PARM_TABLE[ll.I + g.TOP_OF_PARM_STACK] = SUBSTR(g.TEMP_STRING, 1);
-                if LENGTH(g.TEMP_STRING) > 0:
+                if LENGTH(g.TEMP_STRING) > 0:  # DO
                     g.RESERVED_WORD = g.FALSE;
                     SAVE_TOKEN(g.CHARACTER_STRING, g.TEMP_STRING, 0, 1);
                     g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] | g.MACRO_ARG_FLAG;
+                # END
                 if ll.LAST_ARG == g.TRUE:
+                    goto_CHECK_ARG_NUM = True;
                     break;
                 g.RESERVED_WORD = g.TRUE;
                 SAVE_TOKEN(g.COMMA, 0, 0x20, 1);
                 g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] | g.MACRO_ARG_FLAG;
+            # END for
+        # END if
         else:
             ll.LAST_ARG = g.TRUE;
-        # CHECK_ARG_NUM:
-        if ll.ARG_COUNT != g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL + 1] or ll.LAST_ARG == g.FALSE:
+        goto_CHECK_ARG_NUM = False
+        if ll.ARG_COUNT != g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL + 1] or \
+                ll.LAST_ARG == g.FALSE:  # DO
             ERROR(d.CLASS_IR, 8);
             return;
-        noBackup = False
+        # END
         if g.NEXT_CHAR == BYTE('`'):
             if g.FOUND_CENT:
                 if g.MACRO_EXPAN_LEVEL > 0:
-                    noBackup = True
+                    goto_NO_BACKUP = True
                 else:
                     STREAM();
-        if not noBackup:
-            if g.PARM_EXPAN_LEVEL > g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL]:
-                if g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL]:
-                    g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = \
-                        g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] - 1;
-                else:
-                    g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.TRUE;
+        if goto_NO_BACKUP:
+            pass
+        elif g.PARM_EXPAN_LEVEL > g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL]:  # DO
+            if g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL]:
+                g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = \
+                    g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] - 1;
             else:
-                if g.FIRST_TIME[g.MACRO_EXPAN_LEVEL]:
-                    if g.MACRO_TEXT(g.MACRO_POINT - 2) == 0xEE:
-                        g.MACRO_POINT = g.MACRO_POINT - 2;
-                    elif g.MACRO_TEXT(g.MACRO_POINT) != 0xEF:
-                        g.MACRO_POINT = g.MACRO_POINT - 1;
-                    elif g.MACRO_TEXT(g.MACRO_POINT) == 0xEF and \
-                            g.MACRO_TEXT(g.MACRO_POINT - 1) == g.NEXT_CHAR:
-                        g.MACRO_POINT = g.MACRO_POINT - 1;
-                else:
-                    g.FIRST_TIME[g.MACRO_EXPAN_LEVEL] = g.TRUE;
-        if ll.ARG_COUNT > 0:
+                g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.TRUE;
+        # END
+        else:  # DO
+            if g.FIRST_TIME[g.MACRO_EXPAN_LEVEL]:  # DO
+                if g.MACRO_TEXT(g.MACRO_POINT - 2) == 0xEE:
+                    g.MACRO_POINT = g.MACRO_POINT - 2;
+                elif g.MACRO_TEXT(g.MACRO_POINT) != 0xEF:
+                    g.MACRO_POINT = g.MACRO_POINT - 1;
+                elif g.MACRO_TEXT(g.MACRO_POINT) == 0xEF and \
+                        g.MACRO_TEXT(g.MACRO_POINT - 1) == g.NEXT_CHAR:
+                    g.MACRO_POINT = g.MACRO_POINT - 1;
+            # END
+            else:
+                g.FIRST_TIME[g.MACRO_EXPAN_LEVEL] = g.TRUE;
+        # END
+        goto_NO_BACKUP = False
+        if ll.ARG_COUNT > 0:  # DO
             g.RESERVED_WORD = g.TRUE;
             SAVE_TOKEN(g.RT_PAREN, 0, 0, 1);
             g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] | g.MACRO_ARG_FLAG;
+        # END
         g.M_P[g.MACRO_EXPAN_LEVEL] = g.MACRO_POINT;
         g.M_BLANK_COUNT[g.MACRO_EXPAN_LEVEL] = g.BLANK_COUNT;
         g.MACRO_EXPAN_LEVEL = g.MACRO_EXPAN_LEVEL + 1;
@@ -450,40 +514,27 @@ def SCAN():
         g.TOP_OF_PARM_STACK = g.TOP_OF_PARM_STACK + ll.ARG_COUNT;
         g.TEMP_STRING = '';
         g.RESERVED_WORD = g.FALSE;
+    # END PARAMETER_PROCESSING;
 
     #--------------------------------------------------------------------
     # ROUTINE TO DETERMINE IF END OF MACRO HAS BEEN REACHED BY
     # MACRO_POINT
     #--------------------------------------------------------------------
+
     def END_OF_MACRO():
-        ll = lEND_OF_MACRO  # Variables local to END_OF_MACRO procedure.
-        ll.MP = g.MACRO_POINT;
+        MP = g.MACRO_POINT;
         # FIRST SKIP BLANKS
-        while g.MACRO_TEXT(ll.MP) == 0xEE or g.MACRO_TEXT(ll.MP) == BYTE(g.X1):
-            if g.MACRO_TEXT(ll.MP) == 0xEE:
-                ll.MP = ll.MP + 1;
-            ll.MP = ll.MP + 1;
+        while (g.MACRO_TEXT(MP) == 0xEE or g.MACRO_TEXT(MP) == BYTE(g.X1)):
+            if g.MACRO_TEXT(MP) == 0xEE:
+                MP = MP + 1;
+            MP = MP + 1;
+        # END
         # THEN CHECK FOR END OF MACRO CHARACTER
-        if g.MACRO_TEXT(ll.MP) == 0xEF:
+        if g.MACRO_TEXT(MP) == 0xEF:
             if g.NEXT_CHAR == BYTE(g.X1):
                 return g.TRUE;
         return g.FALSE;
-
-    '''
-    The internals of SCAN() are pure spaghetti, with innumerable labels
-    for the XPL to GO TO, and no jump operation in Python3 at all to do it with.
-    The various boolean variables goto_XXXX you'll find below, with XXXX
-    corresponding to one of the labels that are targets for GO TO in the
-    original XPL, are the workarounds.  Normally, all of them will be False.
-    But when a "GO TO" is in progress, precisely one of them will be True,
-    and will be reset to False immediately when the target position is reached.
-    '''
-    goto_SCAN_END = False
-    goto_SCAN_TOP = False
-    goto_SCAN_START = False
-    goto_DEC_POINT_ENTRY = False
-    goto_CASE13 = False
-    goto_CENT_START = False
+    # END END_OF_MACRO;
 
     if l.SEARCH_NEEDED:  # PRE-SEARCH FOR COMMENTS
         goto_SCAN_END = True;
@@ -668,7 +719,7 @@ def SCAN():
                         goto_START_EXPONENT = True
                     else:
                         goto_NUMBER_DONE = False
-
+                # End of while goto_START_EXPONENT or goto_POWER_INDICATOR
                 if l.SIG_DIGITS > 74:
                     ERROR(d.CLASS_LF, 3);
                 g.EXP_OVERFLOW = MONITOR(10, l.INTERNAL_BCD);  # CONVERT THE NUMBER
@@ -676,6 +727,7 @@ def SCAN():
                     ERROR(d.CLASS_LC, 2, g.BCD);
                 PREP_LITERAL();
                 goto_SCAN_END = True;
+                break
                 # END OF CASE 1
 
             elif ct == 2:
@@ -684,7 +736,7 @@ def SCAN():
                     g.STRING_OVERFLOW = g.FALSE;
                     g.LABEL_IMPLIED = g.FALSE;
                     g.IMPLIED_TYPE = 0;
-                goto_FOUND_TOKEN = False;
+                    goto_FOUND_TOKEN = False;
                 while True:
                     goto_CENT_START = False;
                     if g.LETTER_OR_DIGIT[g.NEXT_CHAR]:
@@ -692,7 +744,8 @@ def SCAN():
 
                         def ID_LOOP():
                             # No locals
-                            goto_NEW_CHAR = False;
+                            nonlocal goto_NEW_CHAR
+
                             # Note the original freakish syntax in XPL:
                             #    S1=NEXT_CHAR=BYTE('_')
                             l.S1 = (g.NEXT_CHAR == BYTE('_'));
@@ -707,6 +760,7 @@ def SCAN():
                                                 g.IMPLIED_TYPE = g.I;
                                                 goto_NEW_CHAR = True;
                                                 break;
+                                        # END for
                                         if not goto_NEW_CHAR:
                                             ERROR(d.CLASS_MO, 4);
                                             g.OVER_PUNCH = 0;
@@ -717,6 +771,7 @@ def SCAN():
                                     g.STRING_OVERFLOW = g.TRUE;
                             goto_NEW_CHAR = False;
                             STREAM();
+                        # END ID_LOOP
 
                         ID_LOOP();
                         # END OF DO...VALID CHARACTER
@@ -778,6 +833,7 @@ def SCAN():
                                                    g.CONTEXT = g.I;
                                     goto_SCAN_END = True
                                     break
+                            # END for
                             if goto_SCAN_END:
                                 break
 
@@ -959,10 +1015,10 @@ def SCAN():
 
                     PUSH_MACRO();
                     goto_SCAN_START = True;
+                    break
                 elif not g.MACRO_FOUND:
                     g.SAVE_BLANK_COUNT = -1;
-                if not goto_SCAN_START:
-                    goto_SCAN_END = True;
+                goto_SCAN_END = True;
                 break;
                 # END OF CASE 2
 
@@ -1008,9 +1064,7 @@ def SCAN():
                 g.TOKEN = g.CHARACTER_STRING;
                 goto_CHECK = True;
                 goto_BUILD = False;
-                firstTry = True
-                while firstTry or goto_BUILD:
-                    firstTry = False;
+                while goto_CHECK or goto_BUILD:
                     while goto_BUILD or goto_CHECK or g.NEXT_CHAR != BYTE(g.SQUOTE):
                         goto_BUILD = False;
                         if not goto_CHECK:
@@ -1026,6 +1080,7 @@ def SCAN():
                                     g.STRING_OVERFLOW = g.TRUE;
                                     goto_SCAN_END = True;
                                     break;
+                            # END for
                         if goto_SCAN_END:
                             break;
                         goto_CHECK = False;
@@ -1062,11 +1117,13 @@ def SCAN():
                             else:
                                 g.NEXT_CHAR = CHAR_OP_CHECK(l.TEMP_CHAR);
                                 pass
-                        # END OF ESCAPE LEVEL >= 0
+                        # END OF if ESCAPE LEVEL >= 0
                         else:
                             g.NEXT_CHAR = l.TEMP_CHAR;
                             pass
                     # END OF DO WHILE...
+                    if goto_SCAN_END:
+                        break;
                     STREAM();
                     if g.NEXT_CHAR != BYTE(g.SQUOTE):
                         g.VALUE = LENGTH(g.BCD);
@@ -1075,6 +1132,8 @@ def SCAN():
                     if g.OVER_PUNCH != 0:
                         ERROR(d.CLASS_MO, 1);
                     goto_BUILD = True;
+                    continue
+                # End of while goto_CHECK or goto_BUILD
                 if goto_SCAN_END:
                     break;
                 # END OF CASE 5
@@ -1172,7 +1231,8 @@ def SCAN():
                                    g.BLANK_COUNT = g.BLANK_COUNT - 255;
                                    g.T_INDEX = g.T_INDEX + 1;
                                    goto_CONCAT = True
-                    # END OF DO FOREVER
+                                   continue
+                    # END OF DO FOREVER (while goto_CONCAT)
                 # END OF CASE 11
 
             elif ct == 12:
@@ -1196,11 +1256,16 @@ def SCAN():
                            if SUBSTR(g.PCNAME, SHL(g.SYT_INDEX, 4), l.S1) == g.BCD:
                                 goto_SCAN_END = True;
                                 break;
+                        if goto_SCAN_END:
+                            break
                         g.SYT_INDEX += 1
                         ERROR(d.CLASS_XM, 1, g.BCD);
                         g.SYT_INDEX = 0;
                         goto_SCAN_END = True;
                         break;
+                # End of DO FOREVER
+                if goto_SCAN_END:
+                    break
                 # END OF CASE 12
 
             elif ct == 13:
@@ -1214,8 +1279,9 @@ def SCAN():
                     if g.LETTER_OR_DIGIT[g.NEXT_CHAR]:
                         ID_LOOP();
                     else:
+                        goto_END_OF_CENT = True
                         break;
-
+                goto_END_OF_CENT = False
                 g.FOUND_CENT = g.TRUE;
                 if g.NEXT_CHAR == BYTE('`'):
                     if g.PARM_FOUND:
@@ -1363,13 +1429,17 @@ def SCAN():
                     if g.OVER_PUNCH != 0:
                         ERROR(d.CLASS_MO, 1);
                 if goto_SET_SEARCH:
-                    continue
+                    break
 
                 if BYTE(g.SAVE_COMMENT, l.COMMENT_PTR) != BYTE('*'):
                     goto_STORE_NEXT_CHAR = True;
                     continue;
+            if goto_SET_SEARCH:
+                continue
             g.COMMENT_COUNT = g.COMMENT_COUNT - 1;  # UNSAVE THE '*'
             l.COMMENT_PTR = l.COMMENT_PTR - 1;  # HERE TOO
             l.CHAR_NEEDED = g.TRUE;
             goto_LOOK_FOR_COMMENT = True;
             continue;
+        if goto_SCAN_TOP:
+            continue

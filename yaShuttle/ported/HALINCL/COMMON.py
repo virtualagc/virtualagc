@@ -115,8 +115,6 @@ class for_dw:
 
 
 FOR_DW = []  # Elements are for_dw class objects
-for i in range(16):
-    FOR_DW.append(for_dw())
 
 # BUFFER FOR THE HALMAT FILE 
 
