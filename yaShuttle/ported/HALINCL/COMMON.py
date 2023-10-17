@@ -96,14 +96,14 @@ CROSS_REF = []  # Elements are cross_ref class objects
 
 # TABLE FOR CHARACTER LITERALS 
 
-
+'''
+# LIT_CHAR[] is aliased to LIT_NDX[].CHAR_LIT, so there's actually no need 
+# (for us) to have a separate LIT_NDX[], as it's not used for anything else.
 class lit_ndx:
-
     def __init__(self):
         self.CHAR_LIT = 0
-
-
 LIT_NDX = []  # Elements are lit_ndx class objects
+'''
 
 # WORK AREA FOR FLOATING POINT ARITHMETIC ROUTINES 
 
@@ -166,16 +166,14 @@ CSECT_LENGTHS = []  # Elements are csect_lengths class objects
 
 # BUFFER FOR THE LITERAL FILE 
 
-
 class lit_pg:
-
     def __init__(self):
-        self.LITERAL1 = [0] * 129
-        self.LITERAL2 = [0] * 129
-        self.LITERAL3 = [0] * 129
-
+        self.LITERAL1 = [0] * 130
+        self.LITERAL2 = [0] * 130
+        self.LITERAL3 = [0] * 130
 
 LIT_PG = []  # Elements are lit_pg class objects.
+lit_char = bytearray([])
 
 # BUFFER FOR THE VMEM FILE 
 

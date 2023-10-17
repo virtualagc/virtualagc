@@ -605,6 +605,47 @@ It's the final calculation that's tricky to understand, so let's go through it i
 
 Several of these make no sense, and I've **bolded* a couple that are particularly nonsensical.  I don't presently have any explanation for this, unless the documentation is wrong about the interpretation of the field values in `SPACE_FLAGS`.  And actually, the documentation *must* be wrong, since if you look in `SPACE_FLAGS`, you find rare but occasional entries like 0x50 or 0x55, for which the documentation has no information.
 
+## Literal Data
+
+Literal data and some(?) constant data is passed from one compiler phase to the next via an external file, some of which is paged into memory at any given time.  Naively, this sounds like an insignificant fact, given that we implement only Phase 1 of the compiler.  But in fact, it's very important, because Phase 1 not only writes out data to this memory buffer and file, but also reads it back.  And without the ability to read back the literal data, the compiler cannot function.
+
+By literal data, I am referring to the numbers (and bit values and character strings) used in ways like the following:
+<pre>
+    DECLARE A INTEGER CONSTANT(5), C CHARACTER(19) CONSTANT("HELLO"), B BIT(1) CONSTANT(TRUE), V VECTOR(A), S SCALAR;
+    S = 2 7 + 6;
+</pre>
+The values 5, "HELLO", `TRUE`, 2, 7, and 6 (or at least some of them) must be known at compile-time, because the compiler will try to use 2, 7, and 6 to compute the value of `S` at compile time (rather than run time), and it will need the (constant) value of `A` in order to allocate space for vector `V` at compile time.
+
+The compiler deals with these constants by dumping them out into the literal file or its associated memory buffer as soon as it finds out about them, and then forgetting them in all other respects.  So when it later has to perform the compile-time calculations or allocations just mentioned, it has to read all of those values back from the literal table.
+
+In the original XPL version of the compiler, this worked conceptually (but not in detail) as follows:  There were 3 arrays, each of 32-bit integers, called `LIT1`, `LIT2`, and `LIT3`.  For each literal, there was an entry in each of these 3 arrays.  The `LIT1` array gave the *type* of the literal:  Either character-string (0), numerical (1), or bit (2).
+
+For character-string literals, `LIT3` was ignored, but `LIT2` encoded the length of the string (minus 1) as the bits 31-24, and a pointer to the string as bits 23-0.  Obviously, therefore, literal character strings are between 1 and 256 bytes in length.  The 24-bit pointer was an offset into yet a 4th array, which was a byte-array called `LIT_CHAR`.  `LIT_CHAR` simply holds all of the literal character-strings, concatenated.
+
+Supposedly `LIT_CHAR` has a maximum size, which according to some of the documentation is given by the variable `LITCHARS`, which is in turn set by a compiler option.  Other of the documentation would lead us to believe that the size of `LIT_CHAR` is instead limited by the compiler option `LITSTRINGS`, which defaults to 2500.  Neither claim has any obvious connection to the XPL code that I can detect.  So I suspect that the fixed size of `LIT_CHAR` and the use of the `LITSTRINGS` or `LITCHARS` option to allocate it, has something to do with the operating system and that the sizing is effected by the JCL rather than by anything we can see in the compiler source code.  Thus none of that sizing nonsense seems to have any relevance beyond the System/360 environment, and we can just ignore it. So for us, `LIT_CHAR` can be any size we like, with no fixed limit.  It's unclear why 24-bit addresses would be needed for an array that only contains 2500 bytes.
+
+For numerical literals, IBM double-precision floating-point format was used.  `LIT1` held the more-significant 32-bit portion (which is an IBM single-precision floating-point value, though not necessarily with the same rounding in the least-significant bit that you'd get by converting a double-precision value to a single-precision value) and `LIT2` held the less-significan 32-bit portion..
+
+The IBM documentation I've seen for System/360 floating-point numbers is pretty opaque.  Fortunately, wikipedia explains it                 very simply.  Here are the bits of a single-precision number:
+<pre>
+S EEEEEEE FFFFFFFF FFFFFFFF FFFFFFFF
+</pre>
+S is the sign, E is the exponent, and F is the fraction.  The exponent is a power of 16, biased by 64, and thus represents                 16<sup>-64</sup> through 16<sup>+63</sup>. The fraction is an unsigned number, of which the leftmost bit represents 1/2, the next bit represents 1/4, and so on.  Double-precision is the same, except that there are 32 additional bits in 4 extra `FFFFFFFF` groups.
+
+For bit literals, `LIT2` was a 32-bit pattern giving the actual data bits.  Thus for a `BIT(1)` literal, only one bit was used, for a `BIT(2)` literal, two bits were used, and so on.  `LIT3` have the number of bits; i.e., 1 for `BIT(1)`, 2 for `BIT(2)`, etc.  The documentation does not explain the packing of this data within `LIT1` and `LIT2`; my assumption is that they were packed to the right.
+
+As I mentioned above, this discription is conceptual but is not correct in detail.  The point which is incorrect is in treating each of `LIT1`, `LIT2`, and `LIT3` as arrays.  In fact, apparently due to the need or perceived need to page this data into memory from an external file, these 3 conceptual arrays were packed into an array of pages, `LIT_PG`, according to the following scheme:
+<pre>
+COMMON   BASED LIT_PG RECORD DYNAMIC:
+         LITERAL1(129)               FIXED,
+         LITERAL2(129)               FIXED,
+         LITERAL3(129)               FIXED,
+END;
+</pre>
+In other words `LIT_PG(0)` contained the entries 0-129 of `LIT1`, `LIT1`, and `LIT3`, while `LIT_PG(1)` contained entries 130-259, and so on.
+
+I've chosen to preserve this arrangement, which we don't need in any memory-conservation sense and don't really like in terms of maintainability, because it helps us to more-easily preserve the external file format used in the literal file.
+
 # `LINE_COUNT`
 
 The apparent global variable `LINE_COUNT` is never declared nor assigned a value, and yet is used in a couple of comparisons (in the OUTPUTWR and STREAM modules).  Nor is it a built-in of standard XML.  I have no explanation, unless it's a built-in of Intermetrics "enhancement" of XPL.

@@ -2964,35 +2964,29 @@ def OUTER_REF_FLAGS(n, value=None):
 
 
 def LIT_CHAR(n, value=None):
-    while len(h.LIT_NDX) <= n:
-        h.LIT_NDX.append(h.lit_ndx())
+    while len(h.lit_char) <= n:
+        h.lit_char.append(0)
     if value == None:
-        return h.LIT_NDX[n].CHAR_LIT
-    h.LIT_NDX[n].CHAR_LIT = value
+        return h.lit_char[n]
+    h.lit_char[n] = value
 
 
 def LIT1(n, value=None):
-    while len(h.LIT_PG) <= n:
-        h.LIT_PG.append(h.lit_pg())
     if value == None:
-        return h.LIT_PG[n].LITERAL1
-    h.LIT_PG[n].LITERAL1 = value[:]
+        return h.LIT_PG[0].LITERAL1[n]
+    h.LIT_PG[0].LITERAL1[n] = value
 
 
 def LIT2(n, value=None):
-    while len(h.LIT_PG) <= n:
-        h.LIT_PG.append(h.lit_pg())
     if value == None:
-        return h.LIT_PG[n].LITERAL2
-    h.LIT_PG[n].LITERAL2 = value[:]
+        return h.LIT_PG[0].LITERAL2[n]
+    h.LIT_PG[0].LITERAL2[n] = value
 
 
 def LIT3(n, value=None):
-    while len(h.LIT_PG) <= n:
-        h.LIT_PG.append(h.lit_pg())
     if value == None:
-        return h.LIT_PG[n].LITERAL3
-    h.LIT_PG[n].LITERAL3 = value[:]
+        return h.LIT_PG[0].LITERAL3[n]
+    h.LIT_PG[0].LITERAL3[n] = value
 
 
 def XREF(n, value=None):
@@ -3017,8 +3011,8 @@ def ATOMS(n, value=None):
         return h.FOR_ATOMS[n].CONST_ATOMS
     h.FOR_ATOMS[n].CONST_ATOMS = value
 
-
-DW = [0] * 56
+# In principle, DW[] has 14 32-bit entries, and thus would occupy 56 bytes.
+DW = [0] * 14
 
 ILL_ATTR = (0x0, 0x00C20000, 0x00C20000, 0x00020000, 0x00020000, 0x00020000,
             0x00020000, 0x0, 0x0, 0x00C01181, 0x00C20000)

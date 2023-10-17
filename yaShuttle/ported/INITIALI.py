@@ -338,6 +338,7 @@ def INITIALIZATION():
     g.SYTSIZE = int(VALS[3]);
     g.MACRO_TEXT_LIM = int(VALS[4]);
     g.LIT_CHAR_SIZE = int(VALS[5]);
+    h.LIT_CHAR = bytearray([0] * g.LIT_CHAR_SIZE)
     g.XREF_LIM = int(VALS[7]);
     g.OUTER_REF_LIM = int(VALS[11]);
     #g.J = (g.FREELIMIT + 512) & STORAGE_MASK;  # BOUNDARY NEAR TOP OF CORE 
@@ -356,10 +357,12 @@ def INITIALIZATION():
     #END;
     #/* GET AREA FOR SYM SRN TABLE */
     #BLOCK_SRN_DATA=GET_CELL(2044,ADDR(SRN_BLOCK_RECORD),MODF);
-    RECORD_CONSTANT(h.FOR_DW,13,g.UNMOVEABLE);
-    RECORD_USED(h.FOR_DW, RECORD_ALLOC(h.FOR_DW));
-    RECORD_CONSTANT(h.LIT_NDX,g.LIT_CHAR_SIZE-1,g.UNMOVEABLE);
-    RECORD_USED(h.LIT_NDX, RECORD_ALLOC(h.LIT_NDX));
+    #RECORD_CONSTANT(h.FOR_DW,13,g.UNMOVEABLE);
+    #RECORD_USED(h.FOR_DW, RECORD_ALLOC(h.FOR_DW));
+    
+    #RECORD_CONSTANT(h.LIT_NDX,g.LIT_CHAR_SIZE-1,g.UNMOVEABLE);
+    #RECORD_USED(h.LIT_NDX, RECORD_ALLOC(h.LIT_NDX));
+    
     RECORD_CONSTANT(h.FOR_ATOMS,g.ATOMp_LIM,g.MOVEABLE);
     RECORD_USED(h.FOR_ATOMS, RECORD_ALLOC(h.FOR_ATOMS));
     g.ATOMS(0, 0x00010050); # XPXRC OP CODE-ONE OPERAND
@@ -367,18 +370,28 @@ def INITIALIZATION():
     EMIT_ARRAYNESS(); # DUMMY CALL TO INITIALIZE A PARM
     #ALLOCATE_SPACE(CROSS_REF,XREF_LIM);
     #NEXT_ELEMENT(CROSS_REF);
+    # The following calculation relates to the LIT_PG array, which is a 
+    # buffer for paging the literal file (LITFILE) into and out of 
+    # memory.  Each element of LIT_PG[] is a structure of 3 arrays of 
+    # LIT_BUF_SIZE (130) 32-bit (4-byte) values.  Therefore, each element of 
+    # LIT_PG[] is 3 * LIT_BUF_SIZE * 4 bytes (1560) in size.  However, LIT_PG is 
+    # defined to contain 4 elements -- i.e., LIT_PG[0] through LIT_PG[3] exist
+    # in memory -- which is handled by the call to RECORD_CONSTANT.  I'm not
+    # sure why LIT_PG[] has 4 elements, when only LIT_PG[0] seems ever to 
+    # be used.  Perhaps, once upon a time, the notion was to buffer 4 pages
+    # at a time for efficiency, but then they forgot to actually do it.
     g.I = g.LIT_BUF_SIZE * 12;
     MONITOR(4, 2, g.I);
     RECORD_CONSTANT(h.LIT_PG,3,g.MOVEABLE);
     RECORD_USED(h.LIT_PG, RECORD_ALLOC(h.LIT_PG));
     # I think the following lines probably store the addresses of LIT_NDX[]
-    # and FOR_DW[] in the variables LIT_CHAR_AD and DW_AD.  Which, I hope, is
-    # meaningless for us.
+    # and FOR_DW[] in the variables LIT_CHAR_AD and DW_AD. 
     #CALL INLINE("58",1,0,LIT_NDX);
     #CALL INLINE("50",1,0,LIT_CHAR_AD);           /* ST  1,LIT_CHAR_AD */
     #CALL INLINE("58",1,0,FOR_DW);
     #CALL INLINE("50",1,0,DW_AD);                   /* ST  1,DW_AD       */
-    MONITOR(5, g.DW, 0)
+    g.LIT_CHAR_AD(0)
+    MONITOR(5, g.DW)
     #TABLE_ADDR = DW_AD + 24;
     #ADDR_FIXER = TABLE_ADDR + 8;
     #DW(8) = "4E000000";

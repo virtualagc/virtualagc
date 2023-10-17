@@ -304,54 +304,24 @@ lPARAMETER_PROCESSING = cPARAMETER_PROCESSING()
 def SCAN():
     l = lSCAN  # Locals specific to SCAN()
 
-    goto_VALID_TEST = False;
-    goto_CHECK_ARG_NUM = False;
-    goto_UP_ARG_COUNT = False;
-    goto_NO_BACKUP = False;
-    goto_SCAN_END = False;
-    goto_SIG_CHECK = False;
-    goto_LOOP_END = False;
-    goto_GET_NEW_CHAR = False;
-    goto_FOUND_ERROR = False;
-    goto_EXP_CHECK = False;
-    goto_RESET_LITERAL = False;
-    goto_EXP_DONE = False;
-    goto_POWER_INDICATOR = False;
-    goto_NUMBER_DONE = False;
-    goto_START_EXPONENT = False;
-    goto_NEW_CHAR = False;
-    goto_FOUND_TOKEN = False;
-    goto_CASE13 = False;
-    goto_END_CHECK_RESERVED_WORD = False;
-    goto_SCAN_START = False;
-    goto_DEC_POINT_ENTRY = False;
-    goto_CHECK = False;
-    goto_STR_TOO_LONG = False;
-    goto_BUILD = False;
-    goto_CONCAT = False;
-    goto_END_OF_CENT = False;
-    goto_CENT_START = False;
-    goto_SCAN_TOP = False;
-    goto_SET_SEARCH = False;
-    goto_TEST_SEARCH = False;
-    goto_SEARCH_NEXT_CHAR = False;
-    goto_STORE_NEXT_CHAR = False;
-    goto_LOOK_FOR_COMMENT = False;
+    goto = None
 
     def CHAR_OP_CHECK(CHAR):
         ll = lCHAR_OP_CHECK  # Locals specific to CHAR_OP_CHECK()
-        nonlocal goto_VALID_TEST
+        
+        goto = None
 
         if g.OVER_PUNCH == 0:
             return CHAR;
         firstTry = True
-        while firstTry or goto_VALID_TEST:
+        while firstTry or goto == "VALID_TEST":
             firstTry = False
-            if g.OVER_PUNCH == g.CHAR_OP[0] or goto_VALID_TEST:  # DO
+            if (goto == None and g.OVER_PUNCH == g.CHAR_OP[0]) \
+                    or goto == "VALID_TEST":  # DO
                 # LEVEL 1 ESCAPE
-                if not goto_VALID_TEST:
+                if goto == None:
                     ll.HOLD_CHAR = g.TRANS_IN[CHAR] & 0xFF;
-                goto_VALID_TEST = False
+                if goto == "VALID_TEST": goto = None
                 if ll.HOLD_CHAR == 0x00:
                     if g.OVER_PUNCH != g.VALID_00_OP or CHAR != g.VALID_00_CHAR:  # DO
                         ERROR(d.CLASS_MO, 6, HEX(CHAR, 2));
@@ -361,7 +331,7 @@ def SCAN():
             # END
             elif g.OVER_PUNCH == g.CHAR_OP[1]:  # DO
                 ll.HOLD_CHAR = SHR(g.TRANS_IN[CHAR], 8) & 0xFF;  # LEVEL 2 ESCAPE
-                goto_VALID_TEST = True;  # SEE IF IT A LEGAL ESCAPE
+                goto = "VALID_TEST";  # SEE IF IT A LEGAL ESCAPE
                 continue
             # END
             else:  # ILLEGAL OVER PUNCH
@@ -383,7 +353,8 @@ def SCAN():
 
     def PARAMETER_PROCESSING():
         ll = lPARAMETER_PROCESSING  # Locals specific to PARAMETER_PROCESSING()
-        nonlocal goto_CHECK_ARG_NUM, goto_NO_BACKUP, goto_UP_ARG_COUNT
+
+        goto = None
 
         ll.LAST_ARG = g.FALSE;
         ll.QUOTE_FLAG = g.FALSE;
@@ -394,7 +365,7 @@ def SCAN():
 
         if g.VAR_LENGTH(g.SYT_INDEX) == 0:  # DO
             ll.LAST_ARG = g.TRUE;
-            goto_CHECK_ARG_NUM = True; # Fallthrough okay.
+            goto = "CHECK_ARG_NUM"; # Fallthrough okay.
         # END
         elif g.NEXT_CHAR == BYTE('('):  # DO
             g.TOKEN_FLAGS[g.STMT_PTR] |= 0x20;
@@ -415,7 +386,7 @@ def SCAN():
                             if ll.NUM_OF_PAREN < 0:  # DO
                                 ll.LAST_ARG = g.TRUE;
                                 STREAM()
-                                goto_UP_ARG_COUNT = True;
+                                goto = "UP_ARG_COUNT";
                                 break
                             # END
                         # END
@@ -427,7 +398,7 @@ def SCAN():
                             if ll.NUM_OF_PAREN == 0 and ll.D_QUOTE_FLAG == g.FALSE:
                                 if ll.CENT_FLAG == g.FALSE:
                                     if ll.QUOTE_FLAG == g.FALSE:
-                                        goto_UP_ARG_COUNT = True;
+                                        goto = "UP_ARG_COUNT";
                                         break;
                         # END
                     # END
@@ -448,7 +419,7 @@ def SCAN():
                                     g.TEMP_STRING = g.TEMP_STRING + g.X1;
                                 # END
                 # END OF DO FOREVER
-                goto_UP_ARG_COUNT = False
+                if goto == "UP_ARG_COUNT": goto = None
                 ll.ARG_COUNT = ll.ARG_COUNT + 1;
                 g.TEMP_STRING = SUBSTR(g.TEMP_STRING, 1);
                 g.MACRO_CALL_PARM_TABLE[ll.I + g.TOP_OF_PARM_STACK] = SUBSTR(g.TEMP_STRING, 1);
@@ -458,7 +429,7 @@ def SCAN():
                     g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] | g.MACRO_ARG_FLAG;
                 # END
                 if ll.LAST_ARG == g.TRUE:
-                    goto_CHECK_ARG_NUM = True;
+                    goto = "CHECK_ARG_NUM";
                     break;
                 g.RESERVED_WORD = g.TRUE;
                 SAVE_TOKEN(g.COMMA, 0, 0x20, 1);
@@ -467,7 +438,7 @@ def SCAN():
         # END if
         else:
             ll.LAST_ARG = g.TRUE;
-        goto_CHECK_ARG_NUM = False
+        if goto == "CHECK_ARG_NUM": goto = None
         if ll.ARG_COUNT != g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL + 1] or \
                 ll.LAST_ARG == g.FALSE:  # DO
             ERROR(d.CLASS_IR, 8);
@@ -476,10 +447,10 @@ def SCAN():
         if g.NEXT_CHAR == BYTE('`'):
             if g.FOUND_CENT:
                 if g.MACRO_EXPAN_LEVEL > 0:
-                    goto_NO_BACKUP = True
+                    goto = "NO_BACKUP"
                 else:
                     STREAM();
-        if goto_NO_BACKUP:
+        if goto != None:
             pass
         elif g.PARM_EXPAN_LEVEL > g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL]:  # DO
             if g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL]:
@@ -501,7 +472,7 @@ def SCAN():
             else:
                 g.FIRST_TIME[g.MACRO_EXPAN_LEVEL] = g.TRUE;
         # END
-        goto_NO_BACKUP = False
+        if goto == "NO_BACKUP": goto = None
         if ll.ARG_COUNT > 0:  # DO
             g.RESERVED_WORD = g.TRUE;
             SAVE_TOKEN(g.RT_PAREN, 0, 0, 1);
@@ -537,26 +508,25 @@ def SCAN():
     # END END_OF_MACRO;
 
     if l.SEARCH_NEEDED:  # PRE-SEARCH FOR COMMENTS
-        goto_SCAN_END = True;
+        goto = "SCAN_END";
 
     while True:
         '''
         The stuff below isn't looped in the original code.  It's
-        a workaround to implement some of the goto_XXXX jumps
+        a workaround to implement some of the goto == "XXXX" jumps
         described above, which tend to jump right into the middle
         of blocks.
         '''
 
-        if not (goto_SCAN_END or goto_DEC_POINT_ENTRY):
-            goto_SCAN_TOP = False  # CONTROL RETURNED HERE FROM COMMENT SEARCH
+        if goto in [None, "SCAN_TOP", "SCAN_START"]:
+            if goto == "SCAN_TOP": goto = None  # CONTROL RETURNED HERE FROM COMMENT SEARCH
 
-            if not goto_SCAN_START:
+            if goto == None:
                 g.SCAN_COUNT = g.SCAN_COUNT + 1;
                 if l.CHAR_NEEDED:
                     STREAM();
                     l.CHAR_NEEDED = g.FALSE;
-            else:
-                goto_SCAN_START = False
+            if goto == "SCAN_START": goto = None
 
             g.M_TOKENS[g.MACRO_EXPAN_LEVEL] = g.M_TOKENS[g.MACRO_EXPAN_LEVEL] + 1;
             g.BCD = '';
@@ -568,12 +538,12 @@ def SCAN():
             g.RESERVED_WORD = g.TRUE;
             g.IMPLIED_TYPE = 0;
 
-        while not goto_SCAN_END:  # START OF SCAN
-            if goto_DEC_POINT_ENTRY:
+        while goto != "SCAN_END":  # START OF SCAN
+            if goto == "DEC_POINT_ENTRY":
                 ct = 1
-            elif goto_CENT_START:
+            elif goto == "CENT_START":
                 ct = 2
-            elif goto_CASE13:
+            elif goto == "CASE13":
                 ct = 13
             else:
                 if not g.MACRO_FOUND:
@@ -593,7 +563,7 @@ def SCAN():
                 STREAM();
             elif ct == 1:
                 # CASE 1--DIGITS
-                if not goto_DEC_POINT_ENTRY:
+                if goto == None:
                     g.RESERVED_WORD = g.FALSE
                     l.DEC_POINT = g.FALSE;
                     BUILD_BCD();
@@ -606,41 +576,37 @@ def SCAN():
                         if g.VALUE >= 1 and g.VALUE <= g.MAX_STRUC_LEVEL:
                             g.TOKEN = g.LEVEL;
                     l.DIGIT = BYTE(g.BCD);
-                else:
-                    goto_DEC_POINT_ENTRY = False
+                if goto == "DEC_POINT_ENTRY": goto = None
                 l.SIG_DIGITS = 0;
                 l.INTERNAL_BCD = g.BCD[:];  # START THE SAME
 
-                goto_SIG_CHECK = True
-                goto_LOOP_END = False
-                goto_GET_NEW_CHAR = False
-                while goto_SIG_CHECK or goto_GET_NEW_CHAR:
-                    while goto_SIG_CHECK or goto_GET_NEW_CHAR \
-                            or g.CHARTYPE[l.DIGIT] == 1:
-                        if not goto_GET_NEW_CHAR:
-                            if not goto_SIG_CHECK:
+                goto = "SIG_CHECK"
+                while goto in ["SIG_CHECK", "GET_NEW_CHAR"]:
+                    while goto in ["SIG_CHECK", "GET_NEW_CHAR"] \
+                            or (goto == None and g.CHARTYPE[l.DIGIT] == 1):
+                        if goto in [None, "SIG_CHECK"]:
+                            if goto == None:
                                 if g.OVER_PUNCH != 0:
                                    ERROR(d.CLASS_MO, 1);
                                 BUILD_BCD();
                                 BUILD_INTERNAL_BCD();
-                            else:
-                                goto_SIG_CHECK = False
-                            if l.SIG_DIGITS == 0:
+                            if goto == "SIG_CHECK": goto = None
+                            if l.SIG_DIGITS == 0 and goto == None:
                                 if l.DIGIT == BYTE('0'):
                                     if LENGTH(g.BCD) == 1:
-                                        goto_LOOP_END = True;
+                                        goto = "LOOP_END";
                                     else:
-                                        goto_GET_NEW_CHAR = True;
-                            if not goto_LOOP_END and not goto_GET_NEW_CHAR:
+                                        goto = "GET_NEW_CHAR";
+                            if goto == None:
                                 l.SIG_DIGITS = l.SIG_DIGITS + 1;
                                 if l.SIG_DIGITS > 74:
-                                    goto_GET_NEW_CHAR = True;  # TOO MANY SIG DIGITS
+                                    goto = "GET_NEW_CHAR";  # TOO MANY SIG DIGITS
                                 elif LENGTH(g.BCD) == 1:
-                                    goto_LOOP_END = True;
-                        if not goto_LOOP_END:
-                            goto_GET_NEW_CHAR = False
+                                    goto = "LOOP_END";
+                        if goto == "GET_NEW_CHAR": goto = None
+                        if goto == None:
                             STREAM();
-                        goto_LOOP_END = False
+                        if goto == "LOOP_END": goto = None
                         l.DIGIT = g.NEXT_CHAR;
                     # OF DO WHILE...
 
@@ -648,39 +614,41 @@ def SCAN():
                         if l.DEC_POINT:
                             BUILD_BCD();
                             ERROR(d.CLASS_LF, 2);
+                            # FOUND_ERROR:
                             if g.OVER_PUNCH != 0:
                                 ERROR(d.CLASS_MO, 1);
-                            goto_GET_NEW_CHAR = True;
+                            goto = "GET_NEW_CHAR";
                             continue
                         l.DEC_POINT = g.TRUE;
                         BUILD_BCD();
                         BUILD_INTERNAL_BCD();
+                        # Was GO TO FOUND_ERROR, but I instead duplicated the
+                        # code that is at FOUND_ERROR.
                         if g.OVER_PUNCH != 0:
                             ERROR(d.CLASS_MO, 1);
-                        goto_GET_NEW_CHAR = True;
+                        goto = "GET_NEW_CHAR";
                         continue;
 
-                goto_START_EXPONENT = True
-                goto_POWER_INDICATOR = False
-                while goto_START_EXPONENT or goto_POWER_INDICATOR:
-                    goto_START_EXPONENT = False
-                    goto_EXP_DONE = False
-                    goto_RESET_LITERAL = False
-                    if not goto_POWER_INDICATOR:
+                if goto == "START_EXPONENT": goto = None
+                firstTry = True
+                while firstTry or goto in ["START_EXPONENT", "POWER_INDICATOR"]:
+                    firstTry = False
+                    if goto == None:
                         g.EXP_TYPE = l.DIGIT;
-                    if goto_POWER_INDICATOR or g.EXP_TYPE == BYTE('E'):
-                        goto_POWER_INDICATOR = False
+                    if goto == "POWER_INDICATOR" or \
+                            (goto == None and g.EXP_TYPE == BYTE('E')):
+                        if goto == "POWER_INDICATOR": goto = None
                         l.EXP_SIGN = 0;
                         l.EXP_BEGIN = 0;
                         l.EXP_DIGITS = 0;
                         l.EXP_BEGIN = LENGTH(l.INTERNAL_BCD) + 1;
-                        goto_EXP_CHECK = True
-                        while goto_EXP_CHECK:
-                            while goto_EXP_CHECK or g.CHARTYPE[l.DIGIT] == 1:
-                                if not goto_EXP_CHECK:
+                        goto = "EXP_CHECK"
+                        while goto == "EXP_CHECK":
+                            while goto == "EXP_CHECK" or \
+                                    (goto == None and g.CHARTYPE[l.DIGIT] == 1):
+                                if goto == None:
                                     l.EXP_DIGITS = l.EXP_DIGITS + 1;
-                                else:
-                                    goto_EXP_CHECK = False
+                                if goto == "EXP_CHECK": goto = None
                                 if g.OVER_PUNCH != 0:
                                     ERROR(d.CLASS_MO, 1);
                                 BUILD_BCD();
@@ -690,61 +658,59 @@ def SCAN():
                             if LENGTH(l.INTERNAL_BCD) == l.EXP_BEGIN:
                                 if l.DIGIT == BYTE('+') or l.DIGIT == BYTE('-'):
                                     l.EXP_SIGN = l.DIGIT;
-                                    goto_EXP_CHECK = True;
+                                    goto = "EXP_CHECK";
                                     continue;
                                 ERROR(d.CLASS_LF, 1);
-                                goto_RESET_LITERAL = True
+                                goto = "RESET_LITERAL"
                                 break
                             else:
-                                goto_EXP_DONE = True
+                                goto = "EXP_DONE"
                                 break
 
-                    goto_NUMBER_DONE = False
-                    if not goto_RESET_LITERAL:
-                        if not goto_EXP_DONE:
+                    if goto in [None, "EXP_DONE"]:
+                        if goto == None:
                             if g.EXP_TYPE == BYTE('H') or g.EXP_TYPE == BYTE('B'):
-                                goto_POWER_INDICATOR = True;
+                                goto = "POWER_INDICATOR";
                                 continue
-                            goto_NUMBER_DONE = True
-                        else:
-                            goto_EXP_DONE = False
+                            goto = "NUMBER_DONE"
+                        if goto == "EXP_DONE": goto = None
 
-                    if not goto_NUMBER_DONE:
-                        if goto_RESET_LITERAL or l.EXP_DIGITS <= 0:
-                            if not goto_RESET_LITERAL:
+                    if goto in [None, "RESET_LITERAL"]:
+                        if goto == "RESET_LITERAL" or \
+                                (goto == None and l.EXP_DIGITS <= 0):
+                            if goto == None:
                                 ERROR(d.CLASS_LF, 5);
-                            else:
-                                goto_RESET_LITERAL = False;
+                            if goto == "RESET_LITERAL": goto = None;
                             l.INTERNAL_BCD = SUBSTR(l.INTERNAL_BCD, 0, l.EXP_BEGIN - 1);
-                        goto_START_EXPONENT = True
-                    else:
-                        goto_NUMBER_DONE = False
-                # End of while goto_START_EXPONENT or goto_POWER_INDICATOR
+                        goto = "START_EXPONENT"
+                    if goto == "NUMBER_DONE": goto = None
+                # End of while goto == "START_EXPONENT" or goto == "POWER_INDICATOR"
                 if l.SIG_DIGITS > 74:
                     ERROR(d.CLASS_LF, 3);
                 g.EXP_OVERFLOW = MONITOR(10, l.INTERNAL_BCD);  # CONVERT THE NUMBER
                 if g.EXP_OVERFLOW:
                     ERROR(d.CLASS_LC, 2, g.BCD);
                 PREP_LITERAL();
-                goto_SCAN_END = True;
+                goto = "SCAN_END";
                 break
                 # END OF CASE 1
 
             elif ct == 2:
                 # CASE 2--LETTERS=IDENTS & RESERVED WORDS
-                if not goto_CENT_START:
+                if goto == None:
                     g.STRING_OVERFLOW = g.FALSE;
                     g.LABEL_IMPLIED = g.FALSE;
                     g.IMPLIED_TYPE = 0;
-                    goto_FOUND_TOKEN = False;
+                if goto == "FOUND_TOKEN": goto = None;
                 while True:
-                    goto_CENT_START = False;
+                    if goto == "CENT_START": goto = None;
                     if g.LETTER_OR_DIGIT[g.NEXT_CHAR]:
                         # VALID CHARACTER
 
                         def ID_LOOP():
                             # No locals
-                            nonlocal goto_NEW_CHAR
+
+                            goto = None
 
                             # Note the original freakish syntax in XPL:
                             #    S1=NEXT_CHAR=BYTE('_')
@@ -758,10 +724,10 @@ def SCAN():
                                         for g.I in range(1, g.OVER_PUNCH_SIZE + 1):
                                             if g.OVER_PUNCH == g.OVER_PUNCH_TYPE[g.I]:
                                                 g.IMPLIED_TYPE = g.I;
-                                                goto_NEW_CHAR = True;
+                                                goto = "NEW_CHAR";
                                                 break;
                                         # END for
-                                        if not goto_NEW_CHAR:
+                                        if goto == None:
                                             ERROR(d.CLASS_MO, 4);
                                             g.OVER_PUNCH = 0;
                             else:
@@ -769,7 +735,7 @@ def SCAN():
                                 if not g.STRING_OVERFLOW:
                                     ERROR(d.CLASS_IL, 2);
                                     g.STRING_OVERFLOW = g.TRUE;
-                            goto_NEW_CHAR = False;
+                            if goto == "NEW_CHAR": goto = None;
                             STREAM();
                         # END ID_LOOP
 
@@ -779,14 +745,13 @@ def SCAN():
                         if l.S1:
                             if g.NEXT_CHAR != BYTE('`'):
                                 ERROR(d.CLASS_IL, 1);
-                        goto_FOUND_TOKEN = True;
+                        goto = "FOUND_TOKEN";
                         break;
                 # OF DO FOREVER
 
-                goto_FOUND_TOKEN = False;
-                goto_END_CHECK_RESERVED_WORD = False;
+                if goto == "FOUND_TOKEN": goto = None;
                 if g.NEXT_CHAR == BYTE('`'):
-                    goto_CASE13 = True
+                    goto = "CASE13"
                     continue
                 else:
                     l.S1 = LENGTH(g.BCD);
@@ -796,7 +761,7 @@ def SCAN():
                             for g.I in range(g.V_INDEX[l.S1 - 1], g.V_INDEX[l.S1]):
                                 g.S = STRING(g.VOCAB_INDEX[g.I]);
                                 if BYTE(g.S) > BYTE(g.BCD):
-                                    goto_END_CHECK_RESERVED_WORD = True;
+                                    goto = "END_CHECK_RESERVED_WORD";
                                     break;
                                 if g.S == g.BCD:
                                     g.TOKEN = g.I;
@@ -831,13 +796,13 @@ def SCAN():
                                            if g.CONTEXT != g.DECLARE_CONTEXT:
                                                if g.CONTEXT != g.EXPRESSION_CONTEXT:
                                                    g.CONTEXT = g.I;
-                                    goto_SCAN_END = True
+                                    goto = "SCAN_END"
                                     break
                             # END for
-                            if goto_SCAN_END:
+                            if goto == "SCAN_END":
                                 break
 
-                goto_END_CHECK_RESERVED_WORD = False;
+                if goto == "END_CHECK_RESERVED_WORD": goto = None;
                 g.RESERVED_WORD = g.FALSE;
                 if g.MACRO_EXPAN_LEVEL > 0:
                     '''
@@ -896,7 +861,7 @@ def SCAN():
 
                     g.FOUND_CENT = g.FALSE;
                     if PARM_FOUND():
-                        goto_SCAN_START = True;
+                        goto = "SCAN_START";
                         break;
 
                 g.OLD_MEL = g.MACRO_EXPAN_LEVEL;
@@ -925,7 +890,7 @@ def SCAN():
                 if g.RECOVERING:
                     g.LOOKUP_ONLY = g.FALSE;
                     g.TEMPLATE_IMPLIED = g.FALSE;
-                    goto_SCAN_END = True;  # WITHOUT CALLING IDENTIFY
+                    goto = "SCAN_END";  # WITHOUT CALLING IDENTIFY
                     break;
                 IDENTIFY(g.BCD, 0);
                 g.LOOKUP_ONLY = g.FALSE;
@@ -1014,11 +979,11 @@ def SCAN():
                         return;
 
                     PUSH_MACRO();
-                    goto_SCAN_START = True;
+                    goto = "SCAN_START";
                     break
                 elif not g.MACRO_FOUND:
                     g.SAVE_BLANK_COUNT = -1;
-                goto_SCAN_END = True;
+                goto = "SCAN_END";
                 break;
                 # END OF CASE 2
 
@@ -1028,7 +993,7 @@ def SCAN():
                     ERROR(d.CLASS_MO, 1);
                 g.TOKEN = g.TX[g.NEXT_CHAR];
                 l.CHAR_NEEDED = g.TRUE;
-                goto_SCAN_END = True
+                goto = "SCAN_END"
                 break
                 # END OF CASE 3
 
@@ -1047,10 +1012,10 @@ def SCAN():
                     if g.OVER_PUNCH != 0:
                         ERROR(d.CLASS_MO, 1);
                     g.RESERVED_WORD = g.FALSE;
-                    goto_DEC_POINT_ENTRY = True;
+                    goto = "DEC_POINT_ENTRY";
                     break;
                 g.TOKEN = g.TX[BYTE(g.PERIOD)];
-                goto_SCAN_END = True
+                goto = "SCAN_END"
                 break
                 # END OF CASE 4
 
@@ -1062,12 +1027,13 @@ def SCAN():
                 if g.OVER_PUNCH != 0:
                     ERROR(d.CLASS_MO, 5);
                 g.TOKEN = g.CHARACTER_STRING;
-                goto_CHECK = True;
-                goto_BUILD = False;
-                while goto_CHECK or goto_BUILD:
-                    while goto_BUILD or goto_CHECK or g.NEXT_CHAR != BYTE(g.SQUOTE):
-                        goto_BUILD = False;
-                        if not goto_CHECK:
+                goto = "CHECK";
+                while goto in ["CHECK", "BUILD"]:
+                    if goto == "BUILD": goto = None;
+                    while goto in ["BUILD", "CHECK"] or \
+                            (goto == None and g.NEXT_CHAR != BYTE(g.SQUOTE)):
+                        if goto == "BUILD": goto = None;
+                        if goto == None:
                             if g.NEXT_CHAR != BYTE(g.X1):
                                 g.BLANK_COUNT = 0;
                             for g.I in range(0, g.BLANK_COUNT + 1):
@@ -1078,12 +1044,12 @@ def SCAN():
                                     # Originally the label STR_TOO_LONG
                                     # preceded the following code.
                                     g.STRING_OVERFLOW = g.TRUE;
-                                    goto_SCAN_END = True;
+                                    goto = "SCAN_END";
                                     break;
                             # END for
-                        if goto_SCAN_END:
+                        if goto == "SCAN_END":
                             break;
-                        goto_CHECK = False;
+                        if goto == "CHECK": goto = None;
                         STREAM();
                         l.ESCAPE_LEVEL = -1;
                         while g.NEXT_CHAR == g.ESCP:
@@ -1110,7 +1076,7 @@ def SCAN():
                                         and duplicate the jump.
                                         '''
                                         g.STRING_OVERFLOW = g.TRUE;
-                                        goto_SCAN_END = True;
+                                        goto = "SCAN_END";
                                         break;
                                     g.BLANK_COUNT = g.BLANK_COUNT - 1;
                                     g.NEXT_CHAR = BYTE(g.X1);
@@ -1122,19 +1088,19 @@ def SCAN():
                             g.NEXT_CHAR = l.TEMP_CHAR;
                             pass
                     # END OF DO WHILE...
-                    if goto_SCAN_END:
+                    if goto == "SCAN_END":
                         break;
                     STREAM();
                     if g.NEXT_CHAR != BYTE(g.SQUOTE):
                         g.VALUE = LENGTH(g.BCD);
-                        goto_SCAN_END = True;
+                        goto = "SCAN_END";
                         break;
                     if g.OVER_PUNCH != 0:
                         ERROR(d.CLASS_MO, 1);
-                    goto_BUILD = True;
+                    goto = "BUILD";
                     continue
-                # End of while goto_CHECK or goto_BUILD
-                if goto_SCAN_END:
+                # End of while goto == "CHECK" or goto == "BUILD"
+                if goto == "SCAN_END":
                     break;
                 # END OF CASE 5
 
@@ -1153,13 +1119,13 @@ def SCAN():
                     ERROR(d.CLASS_MO, 1);
                 STREAM();
                 if g.NEXT_CHAR != BYTE('|'):
-                    goto_SCAN_END = True;
+                    goto = "SCAN_END";
                     break;
                 if g.OVER_PUNCH != 0:
                     ERROR(d.CLASS_MO, 1);
                 g.TOKEN = g.CONCATENATE;
                 STREAM();
-                goto_SCAN_END = True;
+                goto = "SCAN_END";
                 break;
                 # END OF CASE 7
 
@@ -1170,13 +1136,13 @@ def SCAN():
                     ERROR(d.CLASS_MO, 1);
                 STREAM();
                 if g.NEXT_CHAR != BYTE('*'):
-                    goto_SCAN_END = True;
+                    goto = "SCAN_END";
                     break;
                 if g.OVER_PUNCH != 0:
                     ERROR(d.CLASS_MO, 1);
                 g.TOKEN = g.EXPONENTIATE;
                 STREAM();
-                goto_SCAN_END = True;
+                goto = "SCAN_END";
                 break;
                 # END OF CASE 8
 
@@ -1184,7 +1150,7 @@ def SCAN():
                 # CASE 9--HEX'FE' = EOF
                 g.TOKEN = g.EOFILE;
                 STREAM();
-                goto_SCAN_END = True;
+                goto = "SCAN_END";
                 break;
                 # END OF CASE 9
 
@@ -1208,11 +1174,11 @@ def SCAN():
                         if g.NEXT_CHAR != BYTE('"'):
                             g.FIRST_FREE(g.T_INDEX);
                             FINISH_MACRO_TEXT();
-                            goto_SCAN_END = True;
+                            goto = "SCAN_END";
                             break;
-                    goto_CONCAT = True
-                    while goto_CONCAT:
-                        goto_CONCAT = False;
+                    goto = "CONCAT"
+                    while goto == "CONCAT":
+                        if goto == "CONCAT": goto = None;
                         NEXT_ELEMENT(g.MACRO_TEXTS);
                         g.MACRO_TEXT(g.T_INDEX, g.NEXT_CHAR);
                         g.T_INDEX = g.T_INDEX + 1;
@@ -1230,9 +1196,9 @@ def SCAN():
                                    l.BLANK_BYTES = l.BLANK_BYTES + 254;
                                    g.BLANK_COUNT = g.BLANK_COUNT - 255;
                                    g.T_INDEX = g.T_INDEX + 1;
-                                   goto_CONCAT = True
+                                   goto = "CONCAT"
                                    continue
-                    # END OF DO FOREVER (while goto_CONCAT)
+                    # END OF DO FOREVER (while goto == "CONCAT")
                 # END OF CASE 11
 
             elif ct == 12:
@@ -1254,24 +1220,24 @@ def SCAN():
                         l.S1 = LENGTH(g.BCD);
                         for g.SYT_INDEX in range(1, g.PC_INDEX + 1):
                            if SUBSTR(g.PCNAME, SHL(g.SYT_INDEX, 4), l.S1) == g.BCD:
-                                goto_SCAN_END = True;
+                                goto = "SCAN_END";
                                 break;
-                        if goto_SCAN_END:
+                        if goto == "SCAN_END":
                             break
                         g.SYT_INDEX += 1
                         ERROR(d.CLASS_XM, 1, g.BCD);
                         g.SYT_INDEX = 0;
-                        goto_SCAN_END = True;
+                        goto = "SCAN_END";
                         break;
                 # End of DO FOREVER
-                if goto_SCAN_END:
+                if goto == "SCAN_END":
                     break
                 # END OF CASE 12
 
             elif ct == 13:
                 #  CASE 13 - ¢ FOR ¢MACROS
                 # ... replaced already in this ASCII port by `.
-                goto_CASE13 = False;
+                if goto == "CASE13": goto = None;
                 g.SOME_BCD = g.BCD[:];
                 g.BCD = '';
                 STREAM();
@@ -1279,50 +1245,50 @@ def SCAN():
                     if g.LETTER_OR_DIGIT[g.NEXT_CHAR]:
                         ID_LOOP();
                     else:
-                        goto_END_OF_CENT = True
+                        goto = "END_OF_CENT"
                         break;
-                goto_END_OF_CENT = False
+                if goto == "END_OF_CENT": goto = None
                 g.FOUND_CENT = g.TRUE;
                 if g.NEXT_CHAR == BYTE('`'):
                     if g.PARM_FOUND:
                         if g.SOME_BCD == '':
-                            goto_SCAN_START = True;
+                            goto = "SCAN_START";
                             break;
                         g.BCD = g.SOME_BCD[:];
-                        goto_CENT_START = True;
+                        goto = "CENT_START";
                         break;
                     else:
                         IDENTIFY(g.BCD, 1);
                         if g.TOKEN < 0:
                             PUSH_MACRO();
                             if g.SOME_BCD == '':
-                                goto_SCAN_START = True;
+                                goto = "SCAN_START";
                                 break;
                             g.SYT_INDEX = 0;
                             g.BCD = g.SOME_BCD[:];
-                            goto_CENT_START = True;
+                            goto = "CENT_START";
                             break;
                         else:
                             ERROR(d.CLASS_IR, 4, g.BCD);
-                            goto_SCAN_START = True;
+                            goto = "SCAN_START";
                             break;
                 else:
                     IDENTIFY(g.BCD, 1);
                     if g.TOKEN < 0:
                         PUSH_MACRO();
-                        goto_SCAN_START = True;
+                        goto = "SCAN_START";
                         break;
                     else:
                         ERROR(d.CLASS_IR, 4, g.BCD);
-                        goto_SCAN_START = True;
+                        goto = "SCAN_START";
                         break;
                 #  END OF CASE 13  */
 
             # END OF DO CASE...
-            if goto_SCAN_END or goto_CENT_START:
+            if goto in ["SCAN_END", "CENT_START"]:
                 break
         # END OF DO FOREVER
-        if goto_SCAN_START or goto_DEC_POINT_ENTRY or goto_CENT_START:
+        if goto in ["SCAN_START", "DEC_POINT_ENTRY", "CENT_START"]:
             continue
 
         def BUILD_COMMENT():
@@ -1336,38 +1302,35 @@ def SCAN():
                 l.COMMENT_PTR = MIN(g.COMMENT_COUNT, 255);
                 g.SAVE_COMMENT = BYTE(g.SAVE_COMMENT, l.COMMENT_PTR, g.NEXT_CHAR);
 
-        goto_SCAN_END = True;
-        goto_TEST_SEARCH = False;
-        goto_LOOK_FOR_COMMENT = False;
-        goto_SET_SEARCH = False;
-        while goto_SCAN_END or goto_TEST_SEARCH or goto_LOOK_FOR_COMMENT \
-                or goto_SET_SEARCH:
-            while goto_SCAN_END or goto_TEST_SEARCH or goto_LOOK_FOR_COMMENT \
-                    or goto_SET_SEARCH:
-                goto_SCAN_END = False;
-                if not goto_SET_SEARCH:
-                    if not goto_LOOK_FOR_COMMENT:
-                        if goto_TEST_SEARCH or l.CHAR_ALREADY_SCANNED != 0:
-                            if not goto_TEST_SEARCH:
+        goto = "SCAN_END";
+        while goto in ["SCAN_END", "TEST_SEARCH", "LOOK_FOR_COMMENT",
+                       "SET_SEARCH"]:
+            while goto in ["SCAN_END", "TEST_SEARCH", "LOOK_FOR_COMMENT",
+                           "SET_SEARCH"]:
+                if goto == "SCAN_END": goto = None;
+                if goto in [None, "TEST_SEARCH", "LOOK_FOR_COMMENT"]:
+                    if goto in [None, "TEST_SEARCH"]:
+                        if goto == "TEST_SEARCH" or \
+                                (goto == None and l.CHAR_ALREADY_SCANNED != 0):
+                            if goto == None:
                                 g.NEXT_CHAR = l.CHAR_ALREADY_SCANNED;
                                 l.CHAR_ALREADY_SCANNED = 0;
                                 l.CHAR_NEEDED = g.FALSE;
                                 g.OVER_PUNCH = l.OVERPUNCH_ALREADY_SCANNED;
-                            else:
-                                goto_TEST_SEARCH = False;
+                            if goto == "TEST_SEARCH": goto = None;
                             if l.SEARCH_NEEDED:
                                 l.SEARCH_NEEDED = g.FALSE;
-                                goto_SCAN_TOP = True
+                                goto = "SCAN_TOP"
                                 break
                             return;
-                    else:
-                        goto_LOOK_FOR_COMMENT = False;
-                if goto_SET_SEARCH or (g.GROUP_NEEDED and g.MACRO_EXPAN_LEVEL == 0):
-                    goto_SET_SEARCH = False;
+                    if goto == "LOOK_FOR_COMMENT": goto = None;
+                if goto == "SET_SEARCH" or \
+                        (goto == None and g.GROUP_NEEDED and g.MACRO_EXPAN_LEVEL == 0):
+                    if goto == "SET_SEARCH": goto = None;
                     if l.SEARCH_NEEDED:
                         STREAM();
                         l.CHAR_NEEDED = g.FALSE;
-                        goto_SCAN_END = True;
+                        goto = "SCAN_END";
                         continue;
                     l.SEARCH_NEEDED = l.CHAR_NEEDED; ''' NO SEARCH NEEDED IF CHAR_NEEDED
                                                          IS NOT ON BECAUSE THE GROUP_NEEDED
@@ -1380,7 +1343,7 @@ def SCAN():
                     if l.CHAR_NEEDED:
                         l.CHAR_NEEDED = g.FALSE;
                         STREAM();
-            if goto_SCAN_TOP:
+            if goto == "SCAN_TOP":
                 break
 
             while g.NEXT_CHAR == BYTE(g.X1):
@@ -1388,15 +1351,15 @@ def SCAN():
                     return;
                 if g.GROUP_NEEDED and g.MACRO_EXPAN_LEVEL == 0:
                     l.CHAR_NEEDED = g.TRUE;
-                    goto_SET_SEARCH = True;
+                    goto = "SET_SEARCH";
                     break;
                 else:
                     STREAM();
-            if goto_SET_SEARCH:
+            if goto == "SET_SEARCH":
                 continue;
 
             if (g.NEXT_CHAR != BYTE('/')) or g.GROUP_NEEDED:
-                goto_TEST_SEARCH = True;
+                goto = "TEST_SEARCH";
                 continue
             if g.OVER_PUNCH != 0:
                 ERROR(d.CLASS_MO, 1);
@@ -1405,41 +1368,40 @@ def SCAN():
                 l.CHAR_ALREADY_SCANNED = g.NEXT_CHAR;
                 g.NEXT_CHAR = BYTE('/');
                 l.OVERPUNCH_ALREADY_SCANNED = g.OVER_PUNCH;
-                goto_TEST_SEARCH = True;
+                goto = "TEST_SEARCH";
                 continue;
 
             # IF WE GET HERE, WE HAVE A GENUINE COMMENT
             if g.OVER_PUNCH != 0:
                 ERROR(d.CLASS_MO, 1);
-            goto_SEARCH_NEXT_CHAR = False;
-            goto_STORE_NEXT_CHAR = True;
-            while goto_STORE_NEXT_CHAR:
-                while goto_STORE_NEXT_CHAR or goto_SEARCH_NEXT_CHAR \
-                        or g.NEXT_CHAR != BYTE('/'):
-                    goto_STORE_NEXT_CHAR = False;
-                    if not goto_SEARCH_NEXT_CHAR:
+            if goto == "SEARCH_NEXT_CHAR": goto = None;
+            goto = "STORE_NEXT_CHAR";
+            while goto == "STORE_NEXT_CHAR":
+                while goto in ["STORE_NEXT_CHAR", "SEARCH_NEXT_CHAR"] \
+                        or (goto == None and g.NEXT_CHAR != BYTE('/')):
+                    if goto == "STORE_NEXT_CHAR": goto = None;
+                    if goto == None:
                         BUILD_COMMENT();
-                    else:
-                        goto_SEARCH_NEXT_CHAR = False;
+                    if goto == "SEARCH_NEXT_CHAR": goto = None;
                     if g.GROUP_NEEDED:
                         l.CHAR_NEEDED = g.TRUE;
-                        goto_SET_SEARCH = True;
+                        goto = "SET_SEARCH";
                         break;
                     STREAM();
                     if g.OVER_PUNCH != 0:
                         ERROR(d.CLASS_MO, 1);
-                if goto_SET_SEARCH:
+                if goto == "SET_SEARCH":
                     break
 
                 if BYTE(g.SAVE_COMMENT, l.COMMENT_PTR) != BYTE('*'):
-                    goto_STORE_NEXT_CHAR = True;
+                    goto = "STORE_NEXT_CHAR";
                     continue;
-            if goto_SET_SEARCH:
+            if goto == "SET_SEARCH":
                 continue
             g.COMMENT_COUNT = g.COMMENT_COUNT - 1;  # UNSAVE THE '*'
             l.COMMENT_PTR = l.COMMENT_PTR - 1;  # HERE TOO
             l.CHAR_NEEDED = g.TRUE;
-            goto_LOOK_FOR_COMMENT = True;
+            goto = "LOOK_FOR_COMMENT";
             continue;
-        if goto_SCAN_TOP:
+        if goto == "SCAN_TOP":
             continue

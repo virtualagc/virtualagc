@@ -1147,9 +1147,10 @@ if fix:
         line = re.sub(r"^( *)(END +[A-Zp][A-Z0-9_p]* *;)", "\\1# \\2", line)
         line = re.sub(r"^( *)([A-Zp][A-Z0-9_p]*) *: *PROCEDURE *\(([^)]*)\).*", \
                       "\\1def \\2(\\3):", line)
-        line = re.sub(r"^( *)([A-Zp][A-Z0-9_p]*) *: *PROCEDURE [^ (]*[A-Zp]", \
+        line = re.sub(r"^( *)([A-Zp][A-Z0-9_p]*) *: *PROCEDURE[^ (]*[A-Zp]", \
                       "\\1def \\2():", line)
         if i > 0 and "PROCEDURE" in line and ":" in bufferedDataset[i - 1]:
+            #print(bufferedDataset[i-1], line, file=sys.stderr)
             new = bufferedDataset[i - 1] + " " + line
             if ")" in new:
                 new = re.sub(r"\).*", ")", new)
@@ -1172,20 +1173,26 @@ if fix:
             gotoTarget = re.sub(r".* GO +TO +([A-Z_0-9]+).*", "\\1", line)
             if gotoTarget not in gotoTargets:
                 gotoTargets.append(gotoTarget)
-                print(re.sub(r".* GO +TO +([A-Z_0-9]+)", "goto_\\1 = False", line))
-            line = re.sub(r"\bGO +TO +([A-Z_0-9]+)", "goto_\\1 = True", line)
-        # Note that this won't correctly account for local variables of the 
-        # same name as globals, so those have to be fixed up separately.
-        for var in arrayVariables:
-            if var in line:
-                line = re.sub("\\b" + var + " *\\(([^)]+) *\)",  \
-                              "g." + var + "[\\1]", line)
-        for var in simpleVariables + argFunctions:
-            if var in line:
-                line = re.sub("\\b" + var + "\\b", "g." + var, line)
-        for var in noArgFunctions:
-            if var in line:
-                line = re.sub("\\b" + var + "\\b", "g." + var + "()", line)
+                #print(re.sub(r".* GO +TO +([A-Z_0-9]+)", "goto_\\1 = False", line))
+            line = re.sub(r"\bGO +TO +([A-Z_0-9]+)", 'goto = "\\1"', line)
+        if "def" not in line:
+            # Note that this won't correctly account for local variables of the 
+            # same name as globals, so those have to be fixed up separately.
+            for var in arrayVariables:
+                if var in line:
+                    line = re.sub("\\b" + var + " *\\(([^)]+) *\)",  \
+                                  "g." + var + "[\\1]", line)
+            for var in simpleVariables:
+                if var in line:
+                    line = re.sub("\\b" + var + "\\b", "g." + var, line)
+            for var in argFunctions:
+                if var in line:
+                    line = re.sub("\\b" + var + "\\b", "g." + var, line)
+            for var in noArgFunctions:
+                if var in line:
+                    line = re.sub("\\b(?<!END )" + var + "(?! *:)\\b", "g." + var + "()", line)
+        for j in range(5):
+            line = re.sub(r"^( *(if|elif|while) .*[^!><=])=([^=].*:)", "\\1==\\3", line)
                 
         bufferedDataset[i] = line
     # Another pass:
@@ -1193,7 +1200,7 @@ if fix:
         gotoTargetPattern = " (" + "|".join(gotoTargets) + ") *:"
         for i in range(len(bufferedDataset)):
             line = bufferedDataset[i]
-            line = re.sub(gotoTargetPattern, " goto_\\1 = False", line)
+            line = re.sub(gotoTargetPattern, ' if goto == "\\1": goto = None', line)
             bufferedDataset[i] = line
 
 # Finally, unmangle and print out the fixed-up code.  Besides unmangling, 

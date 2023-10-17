@@ -13,6 +13,8 @@ History:    2023-09-27 RSB  Ported.
 from xplBuiltins import *
 import g
 from GETLITER import GET_LITERAL
+from HEX import HEX
+from IFORMAT import I_FORMAT
 
 '''
  /***************************************************************************/

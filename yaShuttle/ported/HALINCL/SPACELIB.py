@@ -135,13 +135,13 @@ def RECORD_UNSEAL(array):
 
 # I suspect that what the following does is to allocate an array with a given
 # number of records, so that number can later be extended.
-def RECORD_CONSTANT(array, size, options):
+def RECORD_CONSTANT(array, topIndex, options):
+    size = topIndex + 1
     if array is h.FOR_DW:
-        for i in range(size):
-            array.append(h.for_dw())
-    elif array is h.LIT_NDX:
-        for i in range(size):
-            array.append(h.lit_ndx())
+        # DW is aliased to FOR_DW, which has no other purpose.  We just use
+        # DW directly, and it has a fixed size so we don't need to worry 
+        # about it.
+        return
     elif array is h.FOR_ATOMS:
         for i in range(size):
             array.append(h.for_atoms())

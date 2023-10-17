@@ -116,36 +116,8 @@ def SETUP_NO_ARG_FCN(optional_PSEUDO_PREC=None):
                 # CLOCKTIME
                 g.PSEUDO_TYPE[g.PTR[g.MP]] = g.SCALAR_TYPE;
                 FLOATING(TIME());
-                '''
-                Originally,
-                    CALL FLOATING(TIME);
-                    DW(2)="42640000";
-                    DW(3)=0;
-                    CALL MONITOR(9,4);
-                    
-                The IBM documentation I've seen for System/360 floating-point
-                numbers is pure garbage.  Fortunately, wikipedia explains it
-                very simply.  Here are the bits of a single-precision number:
-                    S EEEEEEE FFFFFFFF FFFFFFFF FFFFFFFF
-                where S is the sign, E is the exponent, and F is the fraction.
-                The exponent is a power of 16, biased by 64, and thus represents
-                16**-64 through 16**63. The fraction is an unsigned number, of
-                which the leftmost bit represents 1/2, the next bit represents
-                1/4, and so on.  Double-precision is the same, except that there
-                are 32 additional bits in extra FFFFFFFF groups.
-                
-                Thus 0x42640000 0x00000000 should parse as
-                    S = 0 (i.e., positive)
-                    Exponent = 16**(0x42-0x40) = 16**2 = 2**8.
-                    Fraction = 0.0110 0100 ...
-                or in total, 1100100 (binary), or 100 decimal.
-                
-                So finally, what this code is attempting to do is to convert
-                centiseconds (from TIME()) to seconds, which means that all
-                it's trying to do in the end is to divide TIME() by 100.
-                '''
-                g.DW[2] = double(100);
-                g.DW[3] = 0;
+                g.DW[2] = 0x42640000 # This is IBM DP float for 100.0.
+                g.DW[3] = 0x00000000
                 MONITOR(9, 4);  # CHANGE TO SECONDS
             # END of DO CASE
             g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD);

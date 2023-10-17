@@ -651,7 +651,17 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         HALMAT_POP(g.XXREC, 0, 0, 1);
         g.ATOMp_FAULT = -1;
         HALMAT_OUT();
-        FILE(g.LITFILE, g.CURLBLK, bytearray(g.LIT1(0)));
+        # Must form a bytearray from h.LIT_PG[0] for the call to FILE().
+        b = bytearray([])
+        lit_pg = h.LIT_PG[0]
+        for lit in [lit_pg.LITERAL1, lit_pg.LITERAL2, lit_pg.LITERAL3]:
+            for j in range(g.LIT_BUF_SIZE):
+                v = lit[j]
+                b.append((v >> 24) & 0xFF)
+                b.append((v >> 16) & 0xFF)
+                b.append((v >> 8) & 0xFF)
+                b.append(v & 0xFF)
+        FILE(g.LITFILE, g.CURLBLK, b);
         g.COMPILING = 0x80;
         g.STMT_PTR = g.STMT_PTR - 1;
     elif PRODUCTION_NUMBER == 2:  # reference 20

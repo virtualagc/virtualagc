@@ -12,6 +12,7 @@ History:    2023-09-16 RSB  Ported from XPL
 from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
+from HALMATBL import HALMAT_BLAB
 
 '''
  /***************************************************************************/
@@ -71,7 +72,7 @@ def HALMAT_OUT():
     g.ATOMS(1, SHL(g.ATOMp_FAULT, 16) | 1);  # INSERT PTR TO XREC IN XPXRC
     if g.CONTROL[11]: 
         g.EJECT_PAGE();
-        OUTPUT(0, '         *** HALMAT BLOCK ' + g.HALMAT_BLOCK + ' ***');
+        OUTPUT(0, '         *** HALMAT BLOCK ' + str(g.HALMAT_BLOCK) + ' ***');
         g.DOUBLE_SPACE();
         for I in range(0, g.ATOMp_FAULT + 1):
             HALMAT_BLAB(g.ATOMS(I), I);
