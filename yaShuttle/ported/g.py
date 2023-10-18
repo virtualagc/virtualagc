@@ -14,7 +14,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
 '''
 
 import sys
-from xplBuiltins import OUTPUT, BYTE
+from xplBuiltins import OUTPUT, BYTE, fromFloatIBM
 import HALINCL.COMMON as h
 
 #------------------------------------------------------------------------------
@@ -2733,7 +2733,26 @@ LITORG = 0
 LITMAX = 0
 CURLBLK = 0
 LITLIM = LIT_BUF_SIZE
-DW_AD = 0
+
+'''
+DW_AD, in principle, is the address of the DW[] array.  Now, DW[0] through
+DW_AD[3] is the floating-point working area, so DW[0] and DW[1] are typically
+loaded with the most-significant and least-significan 32-words of an IBM DP
+floating-point number, so what you're almost always trying to do if you use
+DW_AD is to pass a "pointer", without otherwise wouldn't exist in HAL/S, to
+whatever DP value is stored in DW[0],DW[1].  Typically, this will be used by
+some INLINE code that does something perverted to that value, and of course, we
+have to replace that inline code by some Python code, for which a "pointer"
+(there being no such thing in Python for floats) would be useless, and what 
+we really want is the Python float for that value.
+
+Most of these dreadful INLINEs are in the function SAVE_LITERAL(), whose 2nd
+parameter is often DW_AD in XPL.  But the Python version of SAVE_LITERAL()
+expects the value of the literal in that parameter, so using DW_AD() in place
+of DW_AD would be exactly what's wanted.
+'''
+def DW_AD():
+    return fromFloatIBM(DW[0], DW[1])
 
 LOCK_FLAG = 0x0001
 REENTRANT_FLAG = 0x0002

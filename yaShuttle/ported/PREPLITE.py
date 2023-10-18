@@ -103,5 +103,5 @@ def PREP_LITERAL():
     CALL INLINE("60",6,0,1,0);          /* STD 6,0(0,1)   */
     '''
     #g.SYT_INDEX = SAVE_LITERAL(1, h.TABLE_ADDR);
-    g.SYT_INDEX = SAVE_LITERAL(1, fromFloatIBM(g.DW[0], g.DW[1]));
+    g.SYT_INDEX = SAVE_LITERAL(1, g.DW_AD());
     return

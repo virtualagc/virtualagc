@@ -103,6 +103,20 @@ from HALINCL.ICQARRAY import ICQ_ARRAYp
 from HALINCL.ICQTERMp import ICQ_TERMp
 from HALINCL.SAVELITE import SAVE_LITERAL
 
+# I've created a file listing the rules associated with specific production
+# numbers, and read it into memory so that those names can be printed for
+# documentation purposes (via the --extra CLI switch).  Alas, that info wasn't
+# present in the original XPL source, except as program comments (from which
+# I've extracted it); the best that was present there was the left-hand sides
+# of the rules, which obviously are less human-friendly.  The file has lines 
+# consisting of the rule number (starting from 1), a tab, and the text of the 
+# rule, so this needs a little massaging to put it into useful form.
+PRODUCTION_NUMBERS = [None] # First entry (PRODUCTION_NUMBER == 0) is a dummy.
+f = open("PRODUCTION_NUMBERS.txt", "r")
+for line in f:
+    PRODUCTION_NUMBERS.append(line.rstrip().split('\t')[1])
+f.close()
+
 '''
  /***************************************************************************/
  /* PROCEDURE NAME:  SYNTHESIZE                                             */
@@ -541,7 +555,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     if g.CONTROL[8]:
         OUTPUT(0, '->->->->->->PRODUCTION NUMBER ' + str(PRODUCTION_NUMBER))
         if g.extraTrace:
-            print("   { \"%s\" }" % g.VOCAB_INDEX[g.pPRODUCE_NAME[PRODUCTION_NUMBER]], end="")
+            #print("   { \"%s\" }" % \
+            #      g.VOCAB_INDEX[g.pPRODUCE_NAME[PRODUCTION_NUMBER]], end="")
+            print("   { \"%s\" }" % PRODUCTION_NUMBERS[PRODUCTION_NUMBER], \
+                  end="")
         
     if noSyn:
         # This is just to simplify debugging of SCAN. Bypass in production.
@@ -681,9 +698,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 6:  # reference 60
         #  <ARITH EXP> ::= -1 <TERM>
         if ARITH_LITERAL(g.SP, 0):
-            INLINE(0x58, 1, 0, g.DW_AD);  # L   1,DW_AD
-            INLINE(0x97, 8, 0, 1, 0);  # XI  0(1),X'80'
-            g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(1, g.DW_AD);
+            # My guess is that INLINE code is being used here, unnecessarily,
+            # as an optimization for quickly negating a numeric literal
+            # previously stored as an IBM DP float in DW[0] and DW[1].  
+            negatedValue = -fromFloatIBM(g.DW[0], g.DW[1])
+            g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(1, negatedValue);
         else:
             g.TEMP = g.PSEUDO_TYPE[g.PTR[g.SP]];
             HALMAT_TUPLE(g.XMNEG[g.TEMP - g.MAT_TYPE], 0, g.SP, 0, 0);
@@ -707,7 +726,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 ERROR(d.CLASS_VA, 4);
                 goto = "DIV_FAIL";
             else:
-                g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD);
+                g.LOC_P[g.PTR[g.MP]] = \
+                    SAVE_LITERAL(1, g.DW_AD());
                 g.PSEUDO_TYPE[g.PTR[g.MP]] = g.SCALAR_TYPE;
         if goto == "DIV_FAIL" or (goto == None and not al):
             if goto == "DIV_FAIL": goto = None
@@ -783,7 +803,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_VA, 5);
                     goto = "POWER_FAIL"
                 else:
-                    g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD);
+                    g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD());
                     g.TEMP = LIT_RESULT_TYPE(g.MP, g.SP);
                     if g.TEMP == g.INT_TYPE: 
                         if MAKE_FIXED_LIT(g.LOC_P[g.I]) < 0:
@@ -2920,15 +2940,15 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.NOSPACE();
         g.CONTEXT = g.DECLARE_CONTEXT;
         g.J = g.FIXV[g.MP + 2];
-        g.K = DEF_BIT_LENGTH;
+        g.K = g.DEF_BIT_LENGTH;
         if g.J == -1: 
             ERROR(d.CLASS_DS, 4);  # "*" ILLEGAL
-        elif (g.J <= 0) | (g.J > g.BIT_LENGTH_LIM):
+        elif (g.J <= 0) or (g.J > g.BIT_LENGTH_LIM):
             ERROR(d.CLASS_DS, 1);
         else:
             g.K = g.J;
         g.TYPE = g.BIT_TYPE;
-        g.BIT_LENGTH = K;
+        g.BIT_LENGTH = g.K;
     elif PRODUCTION_NUMBER == 384:  # reference 3840
         #  <CHAR SPEC>  ::=  CHARACTER  (  <LITERAL EXP OR *>  )
         g.NOSPACE();
@@ -2963,7 +2983,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             if g.I == -1:
                 ERROR(d.CLASS_DD, 7);
                 g.I = 3;
-            elif (g.I <= 1) or (g.I > VEC_LENGTH_LIM):
+            elif (g.I <= 1) or (g.I > g.VEC_LENGTH_LIM):
                 ERROR(d.CLASS_DD, 5);
                 g.I = 3;
             g.VEC_LENGTH = g.I;
@@ -2971,7 +2991,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
            if g.I == -1:
                ERROR(d.CLASS_DD, 9);
                g.I = 3;
-           elif (g.I <= 1) or (g.I > MAT_DIM_LIM):
+           elif (g.I <= 1) or (g.I > g.MAT_DIM_LIM):
                ERROR(d.CLASS_DD, 4);
                g.I = 3;
            g.MAT_LENGTH = SHL(g.FIXV[g.MP], 8) + (g.I & 0xFF);
@@ -3001,7 +3021,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXV[g.MP] = 3;  # DEFAULT IF BAD SPEC FOLLOWS
         if g.I == -1: 
             ERROR(d.CLASS_DD, 9);
-        elif (g.I <= 1) or (g.I > MAT_DIM_LIM):
+        elif (g.I <= 1) or (g.I > g.MAT_DIM_LIM):
             ERROR(d.CLASS_DD, 4);
         else:
             g.FIXV[g.MP] = g.I;
@@ -3764,7 +3784,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.INX[g.PTR[g.SP]] = 2;
             if g.NAME_PSEUDOS: 
                 NAME_COMPARE(g.MP, g.SP, d.CLASS_AV, 5);
-                HALMAT_TUPLE(XNASN, 0, g.SP, g.MP, 0);
+                HALMAT_TUPLE(g.XNASN, 0, g.SP, g.MP, 0);
                 if COPINESS(g.MP, g.SP) > 2: 
                     ERROR(d.CLASS_AA, 1);
                 goto = "END_ASSIGN"
@@ -4297,7 +4317,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             # DO CASE TEMP3;
             if g.TEMP3 == 0:
                 g.C[0] = 'D';
-                if L != 1:
+                if g.L != 1:
                     ERROR(d.CLASS_LB, 2);
                     g.L = 1;
                 g.TEMP2 = 0;  #  INDICATE START FROM 1ST CHAR
@@ -4375,10 +4395,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             #  INCORPORATE REPETITION FACTOR
             if not goto == "DO_BIT_CONSTANT_END":
                 g.TEMP2 = g.TEMP_SYN;
-                g.J = g.TEMP3 * K;
-                for g.TEMP in range(2, 1 + L):
+                g.J = g.TEMP3 * g.K;
+                for g.TEMP in range(2, 1 + g.L):
                     g.TEMP_SYN = SHL(g.TEMP_SYN, g.J) | g.TEMP2;
-                g.I = g.J * L;
+                g.I = g.J * g.L;
                 if g.I > g.BIT_LENGTH_LIM: 
                     if g.I - g.TEMP3 < g.BIT_LENGTH_LIM:
                         l.H1 = BYTE(g.S);
@@ -4518,15 +4538,15 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     elif g.SYT_TYPE(g.J) == g.IND_CALL_LAB:
                         g.SYT_NEST(g.J, g.NEST - 1);
                         g.K = g.SYT_PTR(g.J);
-                        while g.SYT_TYPE(K) == g.IND_CALL_LAB:
-                            g.K = g.SYT_PTR(K);
-                        if SYT_NEST(K) >= SYT_NEST(g.J):
+                        while g.SYT_TYPE(g.K) == g.IND_CALL_LAB:
+                            g.K = g.SYT_PTR(g.K);
+                        if SYT_NEST(g.K) >= SYT_NEST(g.J):
                             ''' IND CALL HAS REACHED SAME SCOPE AS
                                 DEFINITION OF LABEL. SO LEAVE
                                 AS IND CALL AND DISCONNECT FROM SYT '''
-                            if g.SYT_PTR(g.J) == K:
-                                if g.SYT_LINK1(K) < 0:
-                                    if g.DO_LEVEL < (-g.SYT_LINK1(K)):
+                            if g.SYT_PTR(g.J) == g.K:
+                                if g.SYT_LINK1(g.K) < 0:
+                                    if g.DO_LEVEL < (-g.SYT_LINK1(g.K)):
                                         ERROR(d.CLASS_PL, 11, g.CLOSE_BCD);
                             DISCONNECT(g.J);
                             TIE_XREF(g.J);
@@ -5278,9 +5298,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 ERROR(d.CLASS_DD, 1);
             else:
                 g.K = g.I;
-            if K == -1: 
+            if g.K == -1: 
                 g.STARRED_DIMS = g.STARRED_DIMS + 1;
-            g.S_ARRAY[g.N_DIM] = K;
+            g.S_ARRAY[g.N_DIM] = g.K;
             g.N_DIM = g.N_DIM + 1;
     if goto == "SPEC_TYPE" or \
             (goto == None and PRODUCTION_NUMBER == 375):  # reference 3750

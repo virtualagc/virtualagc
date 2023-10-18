@@ -37,7 +37,7 @@ GO TO, we have to do things differently.  Fortunately, those GO TO targets, if
 reached, each result directly or indirectly in termination of the program, so 
 what we do is just to provide each of those 4 GO TO blocks of code as separate
 subroutines, callable from any level of the code without having to come back
-up to this level.
+here after the subroutines complete.
 
 For example, if there are no errors, COMPILATION_LOOP() below does not return,
 and terminates the program by means that don't concern us at the moment,

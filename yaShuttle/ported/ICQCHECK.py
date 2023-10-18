@@ -81,17 +81,17 @@ def ICQ_CHECK_TYPE(J, K=None):
     if g.SYT_TYPE(SYT) == g.CHAR_TYPE:  #  CAN ONLY BE SET TO CHAR
         if I != g.CHAR_TYPE:
             ERROR(d.CLASS_DI, 6, g.VAR[g.MP]);
-        return g.XBINT(g.CHAR_TYPE - g.BIT_TYPE);
+        return g.XBINT[g.CHAR_TYPE - g.BIT_TYPE];
     
     if g.SYT_TYPE(SYT) == g.BIT_TYPE: 
         if I != g.BIT_TYPE:
             ERROR(d.CLASS_DI, 7, g.VAR[g.MP]);
-        return g.XBINT;
+        return g.XBINT[0];
     
     if g.SYT_TYPE(SYT) == g.EVENT_TYPE: 
         if I != g.BIT_TYPE:
             ERROR(d.CLASS_DI, 7, g.VAR[g.MP]);
-        return g.XBINT;
+        return g.XBINT[0];
     #  MUST NOW BE EITHER MATRIX, VECTOR, SCALAR, OR INTEGER
     if (I != g.INT_TYPE) and (I != g.SCALAR_TYPE):
         ERROR(d.CLASS_DI, 8, g.VAR[g.MP]);

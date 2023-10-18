@@ -23,6 +23,26 @@ from HALINCL.PRINTCOM import PRINT_COMMENT
    /* D_TOKEN RETURNS THE TOKEN FOUND                              */
 '''
 
+'''
+Big pain in the neck!  Internally, D_TOKEN() accesses and/or updates the
+variables D_INDEX and D_CONTINUATION_OK, which are neither parameters, nor
+local variables, nor global variables.  In fact, they are *local* variables
+of STREAM(), which calls D_TOKEN().  So somehow we must provide access to 
+them.
+
+To complicate matter further, D_TOKEN() is also called by INCLUDE_OK() 
+(module PATCHINC), for which they are *not* local variables.  However, 
+INCLUDE_OK() is called (only) by STREAM(), so presumably that's how D_TOKEN()
+gets access to them.
+
+There are several possible workarounds in Python.  The simplest would seem to
+be to make D_INDEX and D_CONTINUATION_OK global variables in this DTOKEN
+module, and to give STREAM() access to them via that method rather than as 
+locals to STREAM().
+'''
+
+D_INDEX = 1
+D_CONTINUATION_OK = g.FALSE
 
 class cD_TOKEN:
 
@@ -31,50 +51,43 @@ class cD_TOKEN:
         self.J = 0
         self.pSPECIALS = 3
         self.SPECIALS = ' ,:;'
-        # D_INDEX and D_CONTINUATION_OK are neither local nor global variable
-        # in the original XPL source code.  (They are local in STREAM, and 
-        # are used similarly to how they are used here ... for whatever that's
-        # worth!)  Why the original XPL compiler thought they were DECLARE'd
-        # in *this* scope is currently beyond me.
-        self.D_INDEX = 1
-        self.D_CONTINUATION_OK = g.FALSE
 
 lD_TOKEN = cD_TOKEN()
 
-
 def D_TOKEN():
+    global D_INDEX, D_CONTINUATION_OK
     l = lD_TOKEN
     
     while True:
-        while (BYTE(g.CURRENT_CARD, l.D_INDEX) == BYTE(' ')) and \
-                (l.D_INDEX <= g.TEXT_LIMIT[0]):
-            l.D_INDEX = l.D_INDEX + 1;
-        if l.D_INDEX <= g.TEXT_LIMIT[0]:
+        while (BYTE(g.CURRENT_CARD, D_INDEX) == BYTE(' ')) and \
+                (D_INDEX <= g.TEXT_LIMIT[0]):
+            D_INDEX = D_INDEX + 1;
+        if D_INDEX <= g.TEXT_LIMIT[0]:
            break;
-        if l.D_CONTINUATION_OK:  # GET NEXT RECORD 
+        if D_CONTINUATION_OK:  # GET NEXT RECORD 
             NEXT_RECORD();
             if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] != g.CARD_TYPE[BYTE('D')]:
                 g.LOOKED_RECORD_AHEAD = g.TRUE;
-                l.D_CONTINUATION_OK = g.FALSE;
+                D_CONTINUATION_OK = g.FALSE;
                 return '';
             g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('D'));
             PRINT_COMMENT(g.TRUE);
-            l.D_INDEX = 1;
+            D_INDEX = 1;
             continue;
         else:
             return '';
     for l.I in range(1, l.pSPECIALS + 1):
-        if BYTE(g.CURRENT_CARD, l.D_INDEX) == BYTE(l.SPECIALS, l.I):
-            l.D_INDEX = l.D_INDEX + 1;
-            return SUBSTR(g.CURRENT_CARD, l.D_INDEX - 1, 1);
-    l.I = l.D_INDEX;
+        if BYTE(g.CURRENT_CARD, D_INDEX) == BYTE(l.SPECIALS, l.I):
+            D_INDEX = D_INDEX + 1;
+            return SUBSTR(g.CURRENT_CARD, D_INDEX - 1, 1);
+    l.I = D_INDEX;
     escape_TOKEN = False
-    while l.D_INDEX <= g.TEXT_LIMIT[0]:
+    while D_INDEX <= g.TEXT_LIMIT[0]:
         for l.J in range(0, l.pSPECIALS + 1):
-            if BYTE(g.CURRENT_CARD, l.D_INDEX) == BYTE(l.SPECIALS, l.J):
+            if BYTE(g.CURRENT_CARD, D_INDEX) == BYTE(l.SPECIALS, l.J):
                 escape_TOKEN = True
                 break;
         if escape_TOKEN:
             break
-        l.D_INDEX = l.D_INDEX + 1;
-    return SUBSTR(g.CURRENT_CARD, l.I, l.D_INDEX - l.I);
+        D_INDEX = D_INDEX + 1;
+    return SUBSTR(g.CURRENT_CARD, l.I, D_INDEX - l.I);

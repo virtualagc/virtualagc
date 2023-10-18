@@ -120,7 +120,7 @@ def SETUP_NO_ARG_FCN(optional_PSEUDO_PREC=None):
                 g.DW[3] = 0x00000000
                 MONITOR(9, 4);  # CHANGE TO SECONDS
             # END of DO CASE
-            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD);
+            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD());
             g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
         else: 
             if g.BI_FLAGS[0]: 

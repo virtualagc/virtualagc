@@ -46,7 +46,7 @@ from HALMAT import HALMAT
 
 
 def HALMAT_POP(POPCODE, PIPp, COPT, TAG):
-    # thearameters don't require persistence.
+    # The parameters aren't optional.
     # There are no locals.
     g.CURRENT_ATOM = SHL(TAG, 24) | SHL(PIPp, 16) | SHL(POPCODE & 0xFFF, 4) | \
                         SHL(COPT & 0x7, 1);

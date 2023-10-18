@@ -58,5 +58,5 @@ def HALMAT():
             g.HALMAT_OK = g.FALSE;
             g.HALMAT_CRAP = g.TRUE;
         else:
-            g.ATOMS(NEXT_ATOMp, g.CURRENT_ATOM);
+            g.ATOMS(g.NEXT_ATOMp, g.CURRENT_ATOM);
             g.NEXT_ATOMp = g.NEXT_ATOMp + 1;

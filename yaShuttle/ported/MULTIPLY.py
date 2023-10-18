@@ -85,7 +85,7 @@ def MULTIPLY_SYNTHESIZE(I, J, K, DOCASE):
                 ERROR(d.CLASS_VA, 3);
                 goto_MUL_FAIL = True
             else:
-                g.LOC_P[g.PTR[K]] = SAVE_LITERAL(1, g.DW_AD);
+                g.LOC_P[g.PTR[K]] = SAVE_LITERAL(1, g.DW_AD());
                 g.PSEUDO_TYPE[g.PTR[K]] = LIT_RESULT_TYPE(I, J);
         if not al or goto_MUL_FAIL:  # Was just ELSE
             goto_MUL_FAIL = False

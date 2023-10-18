@@ -17,6 +17,14 @@ from ERROR import ERROR
 from GETLITER import GET_LITERAL
 
 
+'''
+Note that for literals of TYPE==1, the original SAVE_LITERAL() would have 
+expected the literal to be loaded into DW[0],DW[1] as an IBM DP float, and
+would have expected the 2nd parameter to be DW_AD ... i.e., it would have
+expected a *pointer* to the literal's value rather than the value itself.
+This is accomplished in Python by using DW_AD() as the 2nd parameter, because
+DW_AD() actually provides the desired value rather than a pointer to it.
+'''
 def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
     g.LIT_TOP(g.LIT_TOP() + 1);
     if g.LIT_TOP() == g.LIT_TOP_MAX: ERROR(d.CLASS_BT, 3);

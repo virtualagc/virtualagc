@@ -77,9 +77,9 @@ def CALL_SCAN():
             if g.extraTrace:
                 s = BYTE('', 0, g.NEXT_CHAR)
                 if g.CONTEXT >= 0:
-                    s1 = contextNames[g.CONTEXT] + " CONTEXT"
+                    s1 = "CONTEXT=" + contextNames[g.CONTEXT]
                 else:
-                    s1 = "TBD CONTEXT"
+                    s1 = "CONTEXT=TBD"
                 print("   { \"%s\" \'%s\' %s }" % \
                       (g.VOCAB_INDEX[g.TOKEN], s, s1), end="")
 

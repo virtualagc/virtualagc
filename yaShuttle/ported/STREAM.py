@@ -308,7 +308,10 @@ class cSTREAM:
         self.CREATING = 0
         self.TEMPLATE_FLAG = 0
         # D TOKEN GLOBALS
-        self.D_INDEX = 0
+        # These were originally local to STREAM(), but I've changed them to
+        # be globals of the DTOKEN module.
+        # self.D_INDEX = 0
+        # self.D_CONTINUATION_OK = g.FALSE
 
 
 lSTREAM = cSTREAM()
@@ -449,41 +452,43 @@ def STREAM():
     
     The original 4 lines above are a bit mysterious.  Note that $char within
     an XPL comment is interpreted as a control code for the compiler, but $%
-    is *not* standard XPL, and therefore is presumably something (but what?)
-    specific to Intermetrics's version of XPL.  I think it may be expressing
-    the notion that PRINT_COMMENT, D_TOKEN, and PATCH_INCLUDE are external
-    procedures or functions found in the modules PRINTCOM, DTOKEN, and PATCHINC 
-    respectively.  As it happens, though PATCH_INCLUDE isn't used here in this
-    module, nor is it present in the PATCHINC module ... rather, INCLUDE_OK()
-    is in both of those. I have no explanation regarding this discrepancy.
+    is *not* standard XPL, and therefore is presumably something 
+    specific to Intermetrics's version of XPL.  I believe that these are all
+    "include" directives, in which the form
+        /* $%module - procedure */
+    includes a specific PROCEDURE from a given module, while the form
+        /%INCLUDE module %/
+    simply includes an entire module.
     
-    As far as the "INCLUDE INCSDF" line is concerned, note that the procedure 
-    INCLUDE_SDF() comprises the entirety of the original HALINCL/INCSDF module.  
-    At the same time, the comments within our present module (STREAM) indicate 
-    that INCLUDE_SDF() is declared locally in STREAM, even though no such 
-    declaration is present.  I infer that the intention is to include the 
-    entire contents of the HALINCL/INCSDF module at the current location in 
-    *this* module, thus making INCLUDE_SDF() local to this module.
+    As for why you'd want to do that, consider the D_TOKEN() function.
     
-    But I don't actually find that INCLUDE_SDF is used in this module, so I'm
-    not sure why it would be included.
+    The D_TOKEN() function makes use of the D_INDEX and D_CONTINUATION_OK 
+    local variables of SEARCH(), which (since the source code for D_TOKEN 
+    is a separate module not ordinarily local to SEARCH) it would 
+    otherwise have no knowledge of.  The trick above would seem to
+    be that by making procedure D_TOKEN internal to procedure SEARCH,
+    it gains the necessary access to SEARCH's local variables.
+    But it makes the D_TOKEN() procedure invisible to any other 
+    global procedure that would want to call it.  The only other 
+    procedure calling D_TOKEN is INCLUDE_OK() from the PATCHINC
+    module, so PATCHINC is also embedded in SEARCH.  
+        
+    D_TOKEN calls PRINT_COMMENT() (in PRINTCOM), but I'm not sure as of 
+    yet why that means PRINT_COMMENT has to be embedded here, and perhaps
+    I'll come back to that issue later. 
+        
+    As for the inclusion of INCSDF, its PROCEDURE INCLUDE_SDF() is similar 
+    to D_TOKEN(), in that it accesses (and modifies) D_CONTINUATION_OK, so
+    it is made local to SEARCH for the same reason.  
+
+    I handle the D_INDEX/D_CONTINUATION_OK problem somewhat similarly.
+    See the Python "import" statements below and the comments in the 
+    DTOKEN module.
+    ***
     
-    As for why it requires these 4 weird commands (not encountered elsewhere)  
-    to accomplish these things, it may have something to do with these imports
-    being local to the STREAM function rather than being global in nature.  Or
-    perhaps it has to do with the 4 additional modules referenced not being
-    members of the same hierarchical directory containing STREAM, but instead
-    being members of the HALINCL directory elsewhere in the hierarchy.  
-    Perhaps mose likely, these 4 lines aren't needed at all, and are present
-    simply for some legacy documentation reason.  Or perhaps not.  Ultimately,
-    I guess it doesn't matter one or the other exactly how it worked originally
-    as long as we can fake it adequately now.
-    
-    At any rate, what that all implies, if true, is that each of the 4 mystery
-    lines corresponds to a Python "import", as follows:
     '''
     from HALINCL.PRINTCOM import PRINT_COMMENT
-    from HALINCL.DTOKEN import D_TOKEN
+    import HALINCL.DTOKEN as hd
     # from HALINCL.INCSDF import *
     from HALINCL.PATCHINC import INCLUDE_OK
     
@@ -507,8 +512,8 @@ def STREAM():
             PRINT_COMMENT(g.TRUE);
         elif BYTE(g.CURRENT_CARD) == BYTE('D'):
             # A DIRECTIVE CARD 
-            l.D_INDEX = 1;
-            ll.C[0] = D_TOKEN();
+            hd.D_INDEX = 1;
+            ll.C[0] = hd.D_TOKEN();
             if (ll.C[0] == ll.EJECT_DIR) or (ll.C[0] == ll.SPACE_DIR):
                 PRINT_COMMENT(g.FALSE);
                 if ll.C[0] == ll.EJECT_DIR:
@@ -516,7 +521,7 @@ def STREAM():
                         g.LOOKED_RECORD_AHEAD = 0;
                         g.PAGE_THROWN = g.TRUE;
                 else:  # SPACE DIRECTIVE 
-                    ll.C[0] = D_TOKEN();
+                    ll.C[0] = hd.D_TOKEN();
                     if LENGTH(ll.C[0]) == 0:
                         g.J = 1;  # 1 SPACE
                     else:
@@ -550,12 +555,12 @@ def STREAM():
                         g.J = g.J + 1;
                     return g.VAL;
                 
-                ll.C[0] = D_TOKEN();
+                ll.C[0] = hd.D_TOKEN();
                 while LENGTH(ll.C[0]) != 0:
                     if SUBSTR(ll.C[0], 0, 2) == 'H(':
                         g.SMRK_FLAG = CHAR_VALUE(ll.C[0]);
                     else:  # ADD NEW DEBUG TYPES HERE
-                        ll.C[0] = D_TOKEN();
+                        ll.C[0] = hd.D_TOKEN();
                 for ll.I in range(1, g.TEXT_LIMIT[0]):
                     # See section 2.2.7 (PDF p. 40) of "HAL/S-FC & HAL/S-360
                     # Compiler System Program Description".
@@ -582,7 +587,7 @@ def STREAM():
                             EXIT();
             # END OF DEBUG DIRECTIVE
             elif ll.C[0] == 'DEVICE':
-                ll.C[0] = D_TOKEN();
+                ll.C[0] = hd.D_TOKEN();
                 goto_NO_CHAN = False
                 firstTry = True
                 while firstTry or goto_NO_CHAN:
@@ -611,7 +616,7 @@ def STREAM():
                     ERROR(d.CLASS_XD, 4);
                     ERRPRINT()
                     return
-                ll.C[0] = D_TOKEN();
+                ll.C[0] = hd.D_TOKEN();
                 ll.PRINT_FLAG = g.FALSE;
                 l.L = g.J(g.J);
                 if ll.C[0] == 'UNPAGED':
@@ -652,7 +657,7 @@ def STREAM():
             # END OF INCLUDE DIRECTIVE
             elif ll.C[0] == 'VERSION':
                 if g.TPL_VERSION > 0:
-                    ll.I = BYTE(g.CURRENT_CARD, l.D_INDEX + 1);
+                    ll.I = BYTE(g.CURRENT_CARD, hd.D_INDEX + 1);
                     g.SYT_LOCKp[g.TPL_VERSION] = ll.I;
                     g.TPL_VERSION = 0;
             elif ll.C[0] == 'DOWNGRADE' or ll.C[0] == 'OWNGRADE':  # DOWNGRADE
@@ -661,7 +666,7 @@ def STREAM():
                 g.FIN_TMP_CLS = ''
                 g.TEMP_COUNT = 0
                 g.CONTINUE = 0;
-                ll.C[0] = D_TOKEN();
+                ll.C[0] = hd.D_TOKEN();
                 if LENGTH(ll.C[0]) == 0:  # NO ERROR NUMBER TO DOWNGRADE 
                     ERRORS(d.CLASS_BI, 108);
                 elif g.DOWN_COUNT > DOWNGRADE_LIMIT:  # OBTAIN CLASS
@@ -695,8 +700,8 @@ def STREAM():
                     NEXT_RECORD();
                     g.LOOKED_RECORD_AHEAD = g.TRUE;
                     if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] == g.CARD_TYPE[BYTE('D')]:
-                        l.D_INDEX = 1;
-                        ll.NEXT_DIR = D_TOKEN();
+                        hd.D_INDEX = 1;
+                        ll.NEXT_DIR = hd.D_TOKEN();
                         if ll.NEXT_DIR != 'DOWNGRADE' and ll.NEXT_DIR != 'OWNGRADE':
                             g.INCREMENT_DOWN_STMT = g.FALSE;
                     # ATTACH DOWNGRADE TO CORRECT STATEMENT
@@ -735,7 +740,7 @@ def STREAM():
                     ERROR(d.CLASS_XA, 1);
                     ERRPRINT()
                     return
-                ll.C[0] = D_TOKEN();
+                ll.C[0] = hd.D_TOKEN();
                 goto_NO_ID = False
                 firstTry = True
                 while firstTry or goto_NO_ID:
@@ -765,14 +770,14 @@ def STREAM():
                     ll.RECORD_NOT_WRITTEN = g.FALSE;
                     MONITOR(16, 0x10);
                 
-                ll.C[1] = D_TOKEN();
+                ll.C[1] = hd.D_TOKEN();
                 if LENGTH(ll.C[1]) == 0:
                     ERROR(d.CLASS_XD, 5);
                 elif LENGTH(ll.C[1]) >= 8:
                     ll.C[1] = SUBSTR(ll.C[1], 0, 8);
                 else:
                     ll.C[1] = PAD(ll.C[1], 8);
-                ll.C[0] = D_TOKEN();
+                ll.C[0] = hd.D_TOKEN();
                 if LENGTH(ll.C[0]) > 0:
                     ll.LIST_FLAG = (ll.C[0] == 'LIST');
                 else:
@@ -803,8 +808,8 @@ def STREAM():
                     else:
                         g.CARD_COUNT = g.CARD_COUNT + 1;
                         if g.CARD_TYPE[BYTE(g.CURRENT_CARD)] == g.CARD_TYPE[BYTE('D')]:
-                            l.D_INDEX = 1;
-                            ll.C[0] = D_TOKEN();
+                            hd.D_INDEX = 1;
+                            ll.C[0] = hd.D_TOKEN();
                             if ll.C[0] == ll.INCLUDE_DIR:
                                 g.CURRENT_CARD = BYTE(g.CURRENT_CARD, 0, BYTE('C'));
                                 COPY_TO_8();
@@ -812,7 +817,7 @@ def STREAM():
                                     OUTPUT(8, ll.XC + g.STARS + ll.START + g.INCLUDE_MSG + g.STARS);
                             elif ll.C[0] == 'CLOSE':  # END OF INLINE BLOCK
                                 PRINT_COMMENT(g.TRUE);
-                                ll.C[0] = D_TOKEN();
+                                ll.C[0] = hd.D_TOKEN();
                                 if LENGTH(ll.C[0]) >= 8:
                                     ll.C[0] = SUBSTR(ll.C[0], 0, 8);
                                 else:

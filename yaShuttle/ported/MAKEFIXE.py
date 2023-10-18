@@ -9,6 +9,9 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-28 RSB  Made a stub.
 '''
 
+from xplBuiltins import *
+import g
+from GETLITER import GET_LITERAL
 
 '''
  /***************************************************************************/
@@ -43,35 +46,35 @@ History:    2023-09-28 RSB  Made a stub.
  /***************************************************************************/
 '''
 
-# No idea what's going on here.  Perhaps come back to it later.  The
-# documentation provides the information that it's a "procedure".  Splendid!
-def MAKE_FIXED_LIT(PTR):
-    return 0
+'''
+MAKE_FIXED_LIT() is called from SYNTHESI to do various things, which I believe
+includes handling the numeric literals (say, 2 and 3) in declarations 
+such as:
+ 
+    DECLARE V VECTOR(2);
+    DECLARE M MATRIX(2,3);
+    DECLARE B BIT(2);
+    DECLARE C CHARACTER(3);
+    
+and (probably) lots more of a similar nature
 
+Unfortunately, the XPL source is an indecipherable (to me!) mess of INLINEs,
+and the documentation in IR-182-1 is useless: MAKE_FIXED_LIT, it tells us,
+is a "procedure". Which is a factoid I had managed to deduce for myself.
+However, it appears to me that what the INLINEs are probably trying to do is
+to detect that N can be interpreted as an integer, and to perform whatever
+processing (such as rounding) that's needed to do that, probably with range
+checking.  
+
+The assumption is seemingly that the literal has been loaded as an IBM DP float, 
+into the floating-point working area at DW[0] and DW[1].  Therefore, perhaps, 
+all we really need to do, is to convert that value to a python float and round 
+it correctly to an integer.
 '''
-MAKE_FIXED_LIT:
-   PROCEDURE(PTR);
-      DECLARE PTR FIXED;
-      DECLARE LIMIT_OK LABEL;
-      PTR=GET_LITERAL(PTR);
-      DW(0)=LIT2(PTR);
-      DW(1)=LIT3(PTR);
-      PTR=ADDR(LIMIT_OK);
-      CALL INLINE("58",3,0,DW_AD);             /*  L    3,DW_AD            */
-      CALL INLINE("68",0,0,3,0);               /*  LD   0,0(0,3)           */
-      CALL INLINE("20", 0, 0);                            /* LPDR 0,0         */
-      CALL INLINE("58", 1, 0, ADDR_ROUNDER);/* L   1,ADDR_ROUNDER         */
-      CALL INLINE("6A", 0, 0, 1, 0);        /* AD  0,0(0,1)               */
-      CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);/* L 1,ADDR_FIXED_LIMIT   */
-      CALL INLINE("58",2,0,PTR);                   /*   L   2,  PTR   */
-      CALL INLINE("69", 0, 0, 1, 0);        /* CD  0,0(0,1)               */
-      CALL INLINE("07",12,2);                  /*  BNHR 2                  */
-      CALL INLINE("68",0,0,1,0);               /*  LD   0,0(0,1)           */
-LIMIT_OK:
-      CALL INLINE("58", 1, 0, ADDR_FIXER);  /* L   1,ADDR_FIXER           */
-      CALL INLINE("6E", 0, 0, 1, 0);        /* AW  0,0(0,1)               */
-      CALL INLINE("60",0,0,3,8);                   /*  STD 0,8(0,3)   */
-      IF SHR(DW(0),31) THEN RETURN -DW(3);
-      RETURN DW(3);
-   END MAKE_FIXED_LIT;
-'''
+
+def MAKE_FIXED_LIT(PTR):
+    PTR=GET_LITERAL(PTR);
+    g.DW[0]=g.LIT2(PTR);
+    g.DW[1]=g.LIT3(PTR);
+    return hround(fromFloatIBM(g.DW[0], g.DW[1]))
+# END MAKE_FIXED_LIT;

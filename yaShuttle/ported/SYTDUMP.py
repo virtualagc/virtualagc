@@ -13,9 +13,10 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
-from BLANK import BLANK
+from BLANK   import BLANK
+from HEX     import HEX
 from IFORMAT import I_FORMAT
-from PAD import PAD
+from PAD     import PAD
 
 '''
  /***************************************************************************/
@@ -808,17 +809,17 @@ def SYT_DUMP():
                                 # EXTRA SYMBOL TABLE DUMP REQUESTED
                                 l.T = HEX(l.L);
                                 ADD_ATTR('FLAGS=' + l.T);
-                                ADD_ATTR('NEST=' + g.SYT_NEST(l.I));
-                                ADD_ATTR('SCOPE=' + g.SYT_SCOPE(l.I));
-                                ADD_ATTR('PTR=' + g.SYT_PTR(l.I));
-                                ADD_ATTR('LENGTH=' + g.VAR_LENGTH(l.I));
-                                ADD_ATTR('LINK1=' + g.SYT_LINK1(l.I));
-                                ADD_ATTR('LINK2=' + g.SYT_LINK2(l.I));
-                                ADD_ATTR('SYT_NO=' + l.I);
-                                ADD_ATTR('ARRAY=' + g.SYT_ARRAY(l.I));
-                                ADD_ATTR('ADDR=' + g.SYT_ADDR(l.I));
-                                ADD_ATTR('CLASS=' + g.SYT_CLASS(l.I));
-                                ADD_ATTR('TYPE=' + g.SYT_TYPE(l.I));
+                                ADD_ATTR('NEST=' + str(g.SYT_NEST(l.I)));
+                                ADD_ATTR('SCOPE=' + str(g.SYT_SCOPE(l.I)));
+                                ADD_ATTR('PTR=' + str(g.SYT_PTR(l.I)));
+                                ADD_ATTR('LENGTH=' + str(g.VAR_LENGTH(l.I)));
+                                ADD_ATTR('LINK1=' + str(g.SYT_LINK1(l.I)));
+                                ADD_ATTR('LINK2=' + str(g.SYT_LINK2(l.I)));
+                                ADD_ATTR('SYT_NO=' + str(l.I));
+                                ADD_ATTR('ARRAY=' + str(g.SYT_ARRAY(l.I)));
+                                ADD_ATTR('ADDR=' + str(g.SYT_ADDR(l.I)));
+                                ADD_ATTR('CLASS=' + str(g.SYT_CLASS(l.I)));
+                                ADD_ATTR('TYPE=' + str(g.SYT_TYPE(l.I)));
                             if l.K == g.REPL_CLASS:
                                 goto_MACRO_LOOP = False
                                 goto_MACRO_END = False
