@@ -803,6 +803,12 @@ def MAX(a, b):
 
 
 def BYTE(s, index=0, value=None):
+    if not isinstance(s, str):
+        print("Implementation error: BYTE called with non-string argument:", \
+              s, file = sys.stderr)
+        if False:
+            0/0 # Just my way of triggering an error for the debugger.
+        sys.exit(1)
     if value == None:
         try:
             c = s[index]

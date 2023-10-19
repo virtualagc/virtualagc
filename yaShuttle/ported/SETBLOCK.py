@@ -49,7 +49,7 @@ def SET_BLOCK_SRN(SYMNUM):
     # CONVERT SRN TO FIXED
     BLOCK_SRN = 0;
     for g.I in range(0, 5 + 1):
-        BLOCK_SRN = (BLOCK_SRN * 10) + (BYTE(g.SRN, g.I) - BYTE('0'));
+        BLOCK_SRN = (BLOCK_SRN * 10) + (BYTE(g.SRN[0], g.I) - BYTE('0'));
     # INCREMENT ENTRY COUNT AND ENTER PAIR
     '''
     The documentation isn't exactly forthcoming -- i.e., there doesn't appear

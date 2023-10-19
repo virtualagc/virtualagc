@@ -85,6 +85,8 @@ for parm in sys.argv[1:]:
         pass
     elif parm == "--ascii":
         pass
+    elif parm == "--debugwr":
+        pass
     elif parm in pCON or ("NO" + parm) in pCON or \
             (parm.startswith("NO") and parm[2:] in pCON):
         # Type 1 option:
@@ -124,6 +126,7 @@ for parm in sys.argv[1:]:
         print('--dummy=X        This option is ignored.')
         print('--scan1          Use SCAN1 rather than SCAN')
         print('--scan2          Use SCAN2 rather than SCAN')
+        print('--debugwr        Print debugging messages for OUTPUTWR.')
         print('--intersection   Helps test overlap between globals/locals.')
         print('Additionally, many of the options from the original JCL')
         print('PARMLISTs can be used.  For "type 1" options (i.e., those')

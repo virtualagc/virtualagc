@@ -539,6 +539,132 @@ def SCAN():
             g.IMPLIED_TYPE = 0;
 
         while goto != "SCAN_END":  # START OF SCAN
+            
+            # See the comments in case 2 of the DO CASE below.
+            def ID_LOOP():
+                # No locals
+
+                goto = None
+
+                # Note the original freakish syntax in XPL:
+                #    S1=NEXT_CHAR=BYTE('_')
+                l.S1 = (g.NEXT_CHAR == BYTE('_'));
+                if LENGTH(g.BCD) < g.ID_LIMIT:
+                    BUILD_BCD();
+                    if g.OVER_PUNCH != 0:
+                        if g.IMPLIED_TYPE > 0:
+                            ERROR(d.CLASS_MO, 3);
+                        else:
+                            for g.I in range(1, g.OVER_PUNCH_SIZE + 1):
+                                if g.OVER_PUNCH == g.OVER_PUNCH_TYPE[g.I]:
+                                    g.IMPLIED_TYPE = g.I;
+                                    goto = "NEW_CHAR";
+                                    break;
+                            # END for
+                            if goto == None:
+                                ERROR(d.CLASS_MO, 4);
+                                g.OVER_PUNCH = 0;
+                else:
+                    # TOO MANY CHARACTERS IN IDENT
+                    if not g.STRING_OVERFLOW:
+                        ERROR(d.CLASS_IL, 2);
+                        g.STRING_OVERFLOW = g.TRUE;
+                if goto == "NEW_CHAR": goto = None;
+                STREAM();
+            # END ID_LOOP
+            
+            # See the comments for case 2 in the DO CASE below.
+            def PUSH_MACRO():
+                # No locals
+                g.SUPPRESS_THIS_TOKEN_ONLY = g.FALSE;
+                #           GET NEXT NON-BLANK BEFORE
+                #           PARAMETER_PROCESSING
+                while g.NEXT_CHAR == BYTE(g.X1):
+                   STREAM();
+                if g.MACRO_EXPAN_LEVEL + 1 > g.MACRO_EXPAN_LIMIT:
+                    ERROR(d.CLASS_IR, 9, g.BCD);
+                    g.MACRO_EXPAN_LEVEL = 0
+                    g.PARM_EXPAN_LEVEL = 0
+                    g.MACRO_FOUND = 0;
+                    g.NEXT_CHAR = g.SAVE_NEXT_CHAR;
+                    g.OVER_PUNCH = g.SAVE_OVER_PUNCH;
+                    g.PRINTING_ENABLED = g.PRINT_FLAG;
+                    return;
+                g.MACRO_EXPAN_STACK[g.MACRO_EXPAN_LEVEL + 1] = g.SYT_INDEX;
+                if g.PRINTING_ENABLED == g.PRINT_FLAG:
+                    g.RESTORE = g.PRINT_FLAG;
+                    if g.FOUND_CENT:
+                        g.PASS = g.PRINT_FLAG;
+                        g.PRINTING_ENABLED = 0;
+                    else:
+                        g.PASS = 0;
+                else:
+                    g.RESTORE = 0;
+                    g.PASS = 0;
+                SAVE_TOKEN(g.ID_TOKEN, g.BCD, 7);
+                g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] \
+                                            or g.MACRO_ARG_FLAG;
+                g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL + 1] = \
+                    g.VAR_LENGTH(g.SYT_INDEX);
+                PARAMETER_PROCESSING();
+                g.PRINTING_ENABLED = g.PASS;
+                if g.TEMP_STRING == '':
+                   g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL] = g.PARM_EXPAN_LEVEL;
+                   g.M_TOKENS[g.MACRO_EXPAN_LEVEL] = 0;
+                   g.M_CENT[g.MACRO_EXPAN_LEVEL] = g.FOUND_CENT;
+                   g.M_PRINT[g.MACRO_EXPAN_LEVEL] = g.RESTORE;
+                   g.FOUND_CENT = g.FALSE;
+                   g.MACRO_POINT = g.SYT_ADDR(g.SYT_INDEX);
+                   if g.MACRO_EXPAN_LEVEL == 1:
+                      g.MACRO_FOUND = g.TRUE ;
+                      g.SAVE_NEXT_CHAR = g.NEXT_CHAR;
+                      g.SAVE_OVER_PUNCH = g.OVER_PUNCH;
+                      g.BLANK_COUNT = 0
+                      g.OVER_PUNCH = 0;
+                else:
+                    g.FOUND_CENT = g.FALSE;
+                STREAM();
+                return;
+            # END PUSH_MACRO
+            
+            # See the comments in case 13 of the DO CASE below.
+            def PARM_FOUND():
+                # No locals
+                g.TEMP_INDEX = g.MACRO_EXPAN_LEVEL;
+                g.PARM_COUNT = g.NUM_OF_PARM[g.TEMP_INDEX];
+                while g.TEMP_INDEX > 0:
+                    for g.I in range(1, g.NUM_OF_PARM[g.TEMP_INDEX] + 1):
+                        if g.BCD == g.SYT_NAME[g.MACRO_EXPAN_STACK[g.TEMP_INDEX] + g.I]:
+                            g.PARM_EXPAN_LEVEL = g.PARM_EXPAN_LEVEL + 1;
+                            g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.TRUE;
+                            g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = 0;
+                            g.PARM_STACK_PTR[g.PARM_EXPAN_LEVEL] = \
+                                g.I + g.TOP_OF_PARM_STACK - g.PARM_COUNT;
+                            if g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL] + 1 == \
+                                    g.PARM_EXPAN_LEVEL:
+                                if not g.FOUND_CENT:
+                                    if not g.END_OF_MACRO:
+                                        if g.MACRO_TEXT(g.MACRO_POINT - 2) == 0xEE:
+                                            g.MACRO_POINT = g.MACRO_POINT - 1;
+                                        g.MACRO_POINT = g.MACRO_POINT - 1;
+                            else:
+                                if g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL - 1]:
+                                    #  CHECK FOR CENT SIGN
+                                    if g.NEXT_CHAR != BYTE('`'):
+                                        g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL - 1] = \
+                                            g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL - 1] - 1;
+                                else:
+                                    g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL - 1] = g.TRUE;
+                            g.BLANK_COUNT = 0
+                            g.OVER_PUNCH = 0;
+                            g.P_CENT[g.PARM_EXPAN_LEVEL] = g.FOUND_CENT;
+                            STREAM();
+                            return 1;
+                    g.TEMP_INDEX = g.TEMP_INDEX - 1;
+                    g.PARM_COUNT = g.PARM_COUNT + g.NUM_OF_PARM[g.TEMP_INDEX];
+                return 0;
+            # END PARM_FOUND
+
             if goto == "DEC_POINT_ENTRY":
                 ct = 1
             elif goto == "CENT_START":
@@ -706,38 +832,12 @@ def SCAN():
                     if goto == "CENT_START": goto = None;
                     if g.LETTER_OR_DIGIT[g.NEXT_CHAR]:
                         # VALID CHARACTER
-
-                        def ID_LOOP():
-                            # No locals
-
-                            goto = None
-
-                            # Note the original freakish syntax in XPL:
-                            #    S1=NEXT_CHAR=BYTE('_')
-                            l.S1 = (g.NEXT_CHAR == BYTE('_'));
-                            if LENGTH(g.BCD) < g.ID_LIMIT:
-                                BUILD_BCD();
-                                if g.OVER_PUNCH != 0:
-                                    if g.IMPLIED_TYPE > 0:
-                                        ERROR(d.CLASS_MO, 3);
-                                    else:
-                                        for g.I in range(1, g.OVER_PUNCH_SIZE + 1):
-                                            if g.OVER_PUNCH == g.OVER_PUNCH_TYPE[g.I]:
-                                                g.IMPLIED_TYPE = g.I;
-                                                goto = "NEW_CHAR";
-                                                break;
-                                        # END for
-                                        if goto == None:
-                                            ERROR(d.CLASS_MO, 4);
-                                            g.OVER_PUNCH = 0;
-                            else:
-                                # TOO MANY CHARACTERS IN IDENT
-                                if not g.STRING_OVERFLOW:
-                                    ERROR(d.CLASS_IL, 2);
-                                    g.STRING_OVERFLOW = g.TRUE;
-                            if goto == "NEW_CHAR": goto = None;
-                            STREAM();
-                        # END ID_LOOP
+                        
+                        # In the original XPL, the ID_LOOP() procedure was
+                        # defined here.  However, at least in Python (as I've
+                        # had to trick it up to handle GO TO statements, that
+                        # would make it out-of-scope for some of the calls to
+                        # it below.  So I've had to move it.
 
                         ID_LOOP();
                         # END OF DO...VALID CHARACTER
@@ -823,41 +923,9 @@ def SCAN():
                     /*-------------------------------------------------------*/
                     '''
 
-                    def PARM_FOUND():
-                        # No locals
-                        g.TEMP_INDEX = g.MACRO_EXPAN_LEVEL;
-                        g.PARM_COUNT = g.NUM_OF_PARM[g.TEMP_INDEX];
-                        while g.TEMP_INDEX > 0:
-                            for g.I in range(1, g.NUM_OF_PARM[g.TEMP_INDEX] + 1):
-                                if g.BCD == g.SYT_NAME[g.MACRO_EXPAN_STACK[g.TEMP_INDEX] + g.I]:
-                                    g.PARM_EXPAN_LEVEL = g.PARM_EXPAN_LEVEL + 1;
-                                    g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.TRUE;
-                                    g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = 0;
-                                    g.PARM_STACK_PTR[g.PARM_EXPAN_LEVEL] = \
-                                        g.I + g.TOP_OF_PARM_STACK - g.PARM_COUNT;
-                                    if g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL] + 1 == \
-                                            g.PARM_EXPAN_LEVEL:
-                                        if not g.FOUND_CENT:
-                                            if not g.END_OF_MACRO:
-                                                if g.MACRO_TEXT(g.MACRO_POINT - 2) == 0xEE:
-                                                    g.MACRO_POINT = g.MACRO_POINT - 1;
-                                                g.MACRO_POINT = g.MACRO_POINT - 1;
-                                    else:
-                                        if g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL - 1]:
-                                            #  CHECK FOR CENT SIGN
-                                            if g.NEXT_CHAR != BYTE('`'):
-                                                g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL - 1] = \
-                                                    g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL - 1] - 1;
-                                        else:
-                                            g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL - 1] = g.TRUE;
-                                    g.BLANK_COUNT = 0
-                                    g.OVER_PUNCH = 0;
-                                    g.P_CENT[g.PARM_EXPAN_LEVEL] = g.FOUND_CENT;
-                                    STREAM();
-                                    return 1;
-                            g.TEMP_INDEX = g.TEMP_INDEX - 1;
-                            g.PARM_COUNT = g.PARM_COUNT + g.NUM_OF_PARM[g.TEMP_INDEX];
-                        return 0;
+                    # The PARM_FOUND() procedure, originally defined here by 
+                    # the XPL, had to be moved outward to remain in scope for
+                    # some calls to it.
 
                     g.FOUND_CENT = g.FALSE;
                     if PARM_FOUND():
@@ -926,57 +994,9 @@ def SCAN():
                     if g.STMT_STACK[g.STMT_PTR] == g.SEMI_COLON and g.STMT_END_PTR == g.STMT_PTR:
                         OUTPUT_WRITER(g.LAST_WRITE, g.STMT_PTR);
 
-                    def PUSH_MACRO():
-                        # No locals
-                        g.SUPPRESS_THIS_TOKEN_ONLY = g.FALSE;
-                        #           GET NEXT NON-BLANK BEFORE
-                        #           PARAMETER_PROCESSING
-                        while g.NEXT_CHAR == BYTE(g.X1):
-                           STREAM();
-                        if g.MACRO_EXPAN_LEVEL + 1 > g.MACRO_EXPAN_LIMIT:
-                            ERROR(d.CLASS_IR, 9, g.BCD);
-                            g.MACRO_EXPAN_LEVEL = 0
-                            g.PARM_EXPAN_LEVEL = 0
-                            g.MACRO_FOUND = 0;
-                            g.NEXT_CHAR = g.SAVE_NEXT_CHAR;
-                            g.OVER_PUNCH = g.SAVE_OVER_PUNCH;
-                            g.PRINTING_ENABLED = g.PRINT_FLAG;
-                            return;
-                        g.MACRO_EXPAN_STACK[g.MACRO_EXPAN_LEVEL + 1] = g.SYT_INDEX;
-                        if g.PRINTING_ENABLED == g.PRINT_FLAG:
-                            g.RESTORE = g.PRINT_FLAG;
-                            if g.FOUND_CENT:
-                                g.PASS = g.PRINT_FLAG;
-                                g.PRINTING_ENABLED = 0;
-                            else:
-                                g.PASS = 0;
-                        else:
-                            g.RESTORE = 0;
-                            g.PASS = 0;
-                        SAVE_TOKEN(g.ID_TOKEN, g.BCD, 7);
-                        g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] \
-                                                    or g.MACRO_ARG_FLAG;
-                        g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL + 1] = \
-                            g.VAR_LENGTH(g.SYT_INDEX);
-                        PARAMETER_PROCESSING();
-                        g.PRINTING_ENABLED = g.PASS;
-                        if g.TEMP_STRING == '':
-                           g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL] = g.PARM_EXPAN_LEVEL;
-                           g.M_TOKENS[g.MACRO_EXPAN_LEVEL] = 0;
-                           g.M_CENT[g.MACRO_EXPAN_LEVEL] = g.FOUND_CENT;
-                           g.M_PRINT[g.MACRO_EXPAN_LEVEL] = g.RESTORE;
-                           g.FOUND_CENT = g.FALSE;
-                           g.MACRO_POINT = g.SYT_ADDR(g.SYT_INDEX);
-                           if g.MACRO_EXPAN_LEVEL == 1:
-                              g.MACRO_FOUND = g.TRUE ;
-                              g.SAVE_NEXT_CHAR = g.NEXT_CHAR;
-                              g.SAVE_OVER_PUNCH = g.OVER_PUNCH;
-                              g.BLANK_COUNT = 0
-                              g.OVER_PUNCH = 0;
-                        else:
-                            g.FOUND_CENT = g.FALSE;
-                        STREAM();
-                        return;
+                    # Procedure PUSH_MACRO(), originally defined here in XPL,
+                    # had to be moved to remain in-scope for some of the calls
+                    # to it.
 
                     PUSH_MACRO();
                     goto = "SCAN_START";
@@ -1029,7 +1049,6 @@ def SCAN():
                 g.TOKEN = g.CHARACTER_STRING;
                 goto = "CHECK";
                 while goto in ["CHECK", "BUILD"]:
-                    if goto == "BUILD": goto = None;
                     while goto in ["BUILD", "CHECK"] or \
                             (goto == None and g.NEXT_CHAR != BYTE(g.SQUOTE)):
                         if goto == "BUILD": goto = None;
@@ -1250,7 +1269,7 @@ def SCAN():
                 if goto == "END_OF_CENT": goto = None
                 g.FOUND_CENT = g.TRUE;
                 if g.NEXT_CHAR == BYTE('`'):
-                    if g.PARM_FOUND:
+                    if PARM_FOUND():
                         if g.SOME_BCD == '':
                             goto = "SCAN_START";
                             break;
