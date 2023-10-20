@@ -34,6 +34,7 @@ scan1 = False
 scan2 = False
 intersection = False
 extraTrace = False
+debugwr = False
 
 # Apparently comes from MONITOR.bal, normally, but we don't have that and so
 # must hard-code something that's big enough but not too big.
@@ -73,10 +74,10 @@ for parm in sys.argv[1:]:
         pVALS[bfsDESC] = 0
     elif parm == '--sanity':
         SANITY_CHECK = True
-    elif parm == "--scan1":
-        scan1 = True
-    elif parm == "--scan2":
-        scan2 = True
+    #elif parm == "--scan1":
+    #    scan1 = True
+    #elif parm == "--scan2":
+    #    scan2 = True
     elif parm == "--extra":
         extraTrace = True
     elif parm == "--intersection":
@@ -86,7 +87,7 @@ for parm in sys.argv[1:]:
     elif parm == "--ascii":
         pass
     elif parm == "--debugwr":
-        pass
+        debugwr = True
     elif parm in pCON or ("NO" + parm) in pCON or \
             (parm.startswith("NO") and parm[2:] in pCON):
         # Type 1 option:
@@ -124,8 +125,8 @@ for parm in sys.argv[1:]:
         print('--sanity         Perform a sanity check on the Python port.')
         print('--help           Show this explanation.')
         print('--dummy=X        This option is ignored.')
-        print('--scan1          Use SCAN1 rather than SCAN')
-        print('--scan2          Use SCAN2 rather than SCAN')
+        #print('--scan1          Use SCAN1 rather than SCAN')
+        #print('--scan2          Use SCAN2 rather than SCAN')
         print('--debugwr        Print debugging messages for OUTPUTWR.')
         print('--intersection   Helps test overlap between globals/locals.')
         print('Additionally, many of the options from the original JCL')
@@ -304,7 +305,9 @@ for parm in parmFlags:
 # TIME when the compiler itself was compiled, and of course it never was 
 # compiled!  I suppose I could fetch the file timestamp, but then there's more
 # than one file comprising the compiler, so which one would I choose?
-DATE_OF_GENERATION = 123239
+# Note:  Can use https://www.epochconverter.com/daynumbers to get the current
+# day number.
+DATE_OF_GENERATION = 123293
 TIME_OF_GENERATION = 0
 
 #------------------------------------------------------------------------------
@@ -3124,13 +3127,30 @@ ERROR_PTR = [0] * (OUTPUT_STACK_MAX + 1)
 #       THE RESULT OF A REPLACE EXPANSION. THE CORRESPONDING
 #       ENTRY IN STACK_PTR WILL CONTAIN A -1 THUS SELECTING
 #       THE UNFLO ELEMENT.
-# (Huh? Whatever this is trying to say, it seems unlikely it's going to work.
-# I think it may be talking about writing to TOKEN_FLAGS[-1] and 
-# GRAMMAR_FLAGS[-1], which definitely won't work as expected in Python.  TBD)
-TOKEN_FLAGS_UNFLOW = 0
-TOKEN_FLAGS = [0] * (OUTPUT_STACK_MAX + 1)
-GRAMMAR_FLAGS_UNFLOW = 0
-GRAMMAR_FLAGS = [0] * (OUTPUT_STACK_MAX + 1)
+TOKEN_FLAGS_UNFLO = 0
+token_flags = [0] * (OUTPUT_STACK_MAX + 1)
+def TOKEN_FLAGS(n, value = None):
+    global token_flags, TOKEN_FLAGS_UNFLO
+    if value == None:
+        if n == -1:
+            return TOKEN_FLAGS_UNFLO
+        return token_flags[n]
+    if n == -1:
+        TOKEN_FLAGS_UNFLO = value
+    else:
+        token_flags[n] = value
+GRAMMAR_FLAGS_UNFLO = 0
+grammar_flags = [0] * (OUTPUT_STACK_MAX + 1)
+def GRAMMAR_FLAGS(n, value = None):
+    global grammar_flags, GRAMMAR_FLAGS_UNFLO
+    if value == None:
+        if n == -1:
+            return GRAMMAR_FLAGS_UNFLO
+        return grammar_flags[n]
+    if n == -1:
+        GRAMMAR_FLAGS_UNFLO = value
+    else:
+        grammar_flags[n] = value
 ATTR_LOC = 0
 ATTR_INDENT = 0
 ATTR_FOUND = 0
@@ -3144,8 +3164,7 @@ SAVE_SCOPE = ''
 
 
 def NOSPACE():
-    global TOKEN_FLAGS
-    TOKEN_FLAGS[STACK_PTR[MP]] |= 0x20
+    TOKEN_FLAGS(STACK_PTR[MP], TOKEN_FLAGS(STACK_PTR[MP]) | 0x20)
 
     
 LABEL_FLAG = 0x0001

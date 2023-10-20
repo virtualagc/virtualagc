@@ -436,6 +436,13 @@ def INITIALIZATION():
         g.J = g.K & 0xFF;
         g.C[0] = SUBSTR(g.VOCAB[g.J], SHR(g.K, 8) & 0xFFFF, SHR(g.K, 24));
         g.VOCAB_INDEX[g.I] = UNSPEC(g.C[0]);
+        
+    if g.debugwr:
+        for i in range(1, g.NT + 1):
+            print("TOKEN=%d, ID='%s', PRE=%d, POST=%d" \
+                  % (i, g.VOCAB_INDEX[i], g.SPACE_FLAGS[i] >> 4,
+                     g.SPACE_FLAGS[i] & 0x0F), file=sys.stderr)
+        
     g.CURRENT_CARD = INPUT(g.INPUT_DEV);
     g.LRECL[0] = LENGTH(g.CURRENT_CARD) - 1;
     g.TEXT_LIMIT[0] = SET_T_LIMIT(g.LRECL[0]);

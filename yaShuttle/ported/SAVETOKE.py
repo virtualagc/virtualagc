@@ -117,18 +117,18 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
             g.STMT_STACK[g.STMT_PTR] = g.STMT_STACK[g.I];
             g.RVL_STACK1[g.STMT_PTR] = g.RVL_STACK1[g.I];
             g.RVL_STACK2[g.STMT_PTR] = g.RVL_STACK2[g.I];
-            g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.I];
-            g.TOKEN_FLAGS[g.STMT_PTR] = g.TOKEN_FLAGS[g.I];
+            g.GRAMMAR_FLAGS(g.STMT_PTR, g.GRAMMAR_FLAGS(g.I));
+            g.TOKEN_FLAGS(g.STMT_PTR, g.TOKEN_FLAGS(g.I));
             g.ERROR_PTR[g.STMT_PTR] = g.ERROR_PTR[g.I];
-            if SHR(g.TOKEN_FLAGS[g.STMT_PTR], 6) != 0:
+            if SHR(g.TOKEN_FLAGS(g.STMT_PTR), 6) != 0:
                 g.BCD_PTR = g.BCD_PTR + 1;
                 g.SAVE_BCD[g.BCD_PTR] = \
-                    g.SAVE_BCD[SHR(g.TOKEN_FLAGS[g.STMT_PTR], 6)][:];
-                g.TOKEN_FLAGS[g.STMT_PTR] = (g.TOKEN_FLAGS[g.STMT_PTR] & 0x3F) \
-                                                | SHL(g.BCD_PTR, 6);
+                    g.SAVE_BCD[SHR(g.TOKEN_FLAGS(g.STMT_PTR), 6)][:];
+                g.TOKEN_FLAGS(g.STMT_PTR, (g.TOKEN_FLAGS(g.STMT_PTR) & 0x3F) \
+                                                | SHL(g.BCD_PTR, 6));
         g.STMT_PTR += 1
         if g.FACTOR_FOUND:
-            g.GRAMMAR_FLAGS[1] = g.GRAMMAR_FLAGS[1] | g.ATTR_BEGIN_FLAG;
+            g.GRAMMAR_FLAGS(1, g.GRAMMAR_FLAGS(1) | g.ATTR_BEGIN_FLAG);
         for g.I in range(0, g.SP):
             if g.STACK_PTR[g.I] < PTR:
                 if not (g.FACTORING & g.STACK_PTR[g.I] == 1):
@@ -155,7 +155,7 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
                 g.ATTR_LOC = 0;
             goto_STMT_PTR_CHECK = True
             continue
-    g.TOKEN_FLAGS[g.STMT_PTR] = TYPE;
+    g.TOKEN_FLAGS(g.STMT_PTR, TYPE);
     if not g.RESERVED_WORD:
         if g.PRINTING_ENABLED > 0:
             # NOT IN V TABLE, SO SAVE IT
@@ -172,11 +172,11 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
                     goto_BCD_PTR_CHECK = True
                     continue
             g.SAVE_BCD[g.BCD_PTR] = CHAR[:];
-            g.TOKEN_FLAGS[g.STMT_PTR] = TYPE | SHL(g.BCD_PTR, 6);
+            g.TOKEN_FLAGS(g.STMT_PTR, TYPE | SHL(g.BCD_PTR, 6));
             # Well, the following line seems to have no effect whatsoever,
             # given the preceding line ... but the original XPL has it.
-            g.TOKEN_FLAGS[g.STMT_PTR] = g.TOKEN_FLAGS[g.STMT_PTR] | \
-                                        SHL(g.BCD_PTR, 6);
+            g.TOKEN_FLAGS(g.STMT_PTR, g.TOKEN_FLAGS(g.STMT_PTR) | \
+                                        SHL(g.BCD_PTR, 6));
     g.STMT_STACK[g.STMT_PTR] = TOKEN;
     if not g.INCLUDING:
         # SAVE EACH BYTE OF RVL INTO CORRESPONDING ARRAY.  THIS ALLOWS
@@ -195,9 +195,9 @@ def SAVE_TOKEN(TOKEN, CHAR, TYPE, MACRO_ARG=g.FALSE):
         l.ACTUAL_PRINTING_ENABLED = g.PRINTING_ENABLED;
     if g.SUPPRESS_THIS_TOKEN_ONLY:
         g.SUPPRESS_THIS_TOKEN_ONLY = 0
-        g.GRAMMAR_FLAGS[g.STMT_PTR] = 0;
+        g.GRAMMAR_FLAGS(g.STMT_PTR, 0);
     else:
-        g.GRAMMAR_FLAGS[g.STMT_PTR] = l.ACTUAL_PRINTING_ENABLED;
+        g.GRAMMAR_FLAGS(g.STMT_PTR, l.ACTUAL_PRINTING_ENABLED);
     if TYPE != 7:  # DON'T POINT AT REPLACES
         if not MACRO_ARG:  # DON'T POINT AT REPLACE ARG
             g.STACK_PTR[g.SP] = g.STMT_PTR;

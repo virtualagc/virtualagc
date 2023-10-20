@@ -368,10 +368,11 @@ def SCAN():
             goto = "CHECK_ARG_NUM"; # Fallthrough okay.
         # END
         elif g.NEXT_CHAR == BYTE('('):  # DO
-            g.TOKEN_FLAGS[g.STMT_PTR] |= 0x20;
+            g.TOKEN_FLAGS(g.STMT_PTR, g.TOKEN_FLAGS(g.STMT_PTR) | 0x20);
             g.RESERVED_WORD = g.TRUE;
             SAVE_TOKEN(g.LEFT_PAREN, 0, 0x20, 1);
-            g.GRAMMAR_FLAGS[g.STMT_PTR] |= g.MACRO_ARG_FLAG;
+            g.GRAMMAR_FLAGS(g.STMT_PTR, 
+                            g.GRAMMAR_FLAGS(g.STMT_PTR) | g.MACRO_ARG_FLAG);
             for ll.I in range(1, g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL + 1] + 1):
                 g.TEMP_STRING = g.X1;
                 while True:
@@ -426,14 +427,16 @@ def SCAN():
                 if LENGTH(g.TEMP_STRING) > 0:  # DO
                     g.RESERVED_WORD = g.FALSE;
                     SAVE_TOKEN(g.CHARACTER_STRING, g.TEMP_STRING, 0, 1);
-                    g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] | g.MACRO_ARG_FLAG;
+                    g.GRAMMAR_FLAGS(g.STMT_PTR, \
+                                g.GRAMMAR_FLAGS(g.STMT_PTR) | g.MACRO_ARG_FLAG);
                 # END
                 if ll.LAST_ARG == g.TRUE:
                     goto = "CHECK_ARG_NUM";
                     break;
                 g.RESERVED_WORD = g.TRUE;
                 SAVE_TOKEN(g.COMMA, 0, 0x20, 1);
-                g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] | g.MACRO_ARG_FLAG;
+                g.GRAMMAR_FLAGS(g.STMT_PTR, \
+                                g.GRAMMAR_FLAGS(g.STMT_PTR) | g.MACRO_ARG_FLAG);
             # END for
         # END if
         else:
@@ -476,7 +479,8 @@ def SCAN():
         if ll.ARG_COUNT > 0:  # DO
             g.RESERVED_WORD = g.TRUE;
             SAVE_TOKEN(g.RT_PAREN, 0, 0, 1);
-            g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] | g.MACRO_ARG_FLAG;
+            g.GRAMMAR_FLAGS(g.STMT_PTR, \
+                            g.GRAMMAR_FLAGS(g.STMT_PTR) | g.MACRO_ARG_FLAG);
         # END
         g.M_P[g.MACRO_EXPAN_LEVEL] = g.MACRO_POINT;
         g.M_BLANK_COUNT[g.MACRO_EXPAN_LEVEL] = g.BLANK_COUNT;
@@ -602,8 +606,8 @@ def SCAN():
                     g.RESTORE = 0;
                     g.PASS = 0;
                 SAVE_TOKEN(g.ID_TOKEN, g.BCD, 7);
-                g.GRAMMAR_FLAGS[g.STMT_PTR] = g.GRAMMAR_FLAGS[g.STMT_PTR] \
-                                            or g.MACRO_ARG_FLAG;
+                g.GRAMMAR_FLAGS(g.STMT_PTR, g.GRAMMAR_FLAGS(g.STMT_PTR) \
+                                            or g.MACRO_ARG_FLAG);
                 g.NUM_OF_PARM[g.MACRO_EXPAN_LEVEL + 1] = \
                     g.VAR_LENGTH(g.SYT_INDEX);
                 PARAMETER_PROCESSING();

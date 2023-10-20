@@ -1619,9 +1619,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.ELSEIF_PTR = g.STACK_PTR[g.SP];
         # MOVE ELSEIF_PTR TO FIRST PRINTABLE REPLACE MACRO TOKEN
         g.I = g.ELSEIF_PTR;
-        while (g.I > 0) and ((g.GRAMMAR_FLAGS[g.I - 1] & g.MACRO_ARG_FLAG) != 0):
+        while (g.I > 0) and ((g.GRAMMAR_FLAGS(g.I - 1) & g.MACRO_ARG_FLAG) != 0):
            g.I = g.I - 1;
-           if ((g.GRAMMAR_FLAGS[g.I] & g.PRINT_FLAG) != 0):
+           if ((g.GRAMMAR_FLAGS(g.I) & g.PRINT_FLAG) != 0):
                 g.ELSEIF_PTR = g.I;
         if g.ELSEIF_PTR > 0:
             if g.STMT_END_PTR > -1:
@@ -1637,7 +1637,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # PUT THE ELSE ON THE SAME LINE AS THE DO.
         g.ELSE_FLAG = g.TRUE;
         # DETERMINES IF ELSE WAS ALREADY PRINTED IN REPLACE MACRO-11342
-        if (g.GRAMMAR_FLAGS[g.ELSEIF_PTR] & g.PRINT_FLAG) == 0:
+        if (g.GRAMMAR_FLAGS(g.ELSEIF_PTR) & g.PRINT_FLAG) == 0:
             g.ELSE_FLAG = g.FALSE;
         if g.NO_LOOK_AHEAD_DONE: 
             CALL_SCAN();
@@ -1794,7 +1794,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # THE STATEMENT NUMBER OF THE DO.  SET A FLAG HERE TO BE USED
         # IN OUTPUT_WRITER IF THE END ISN'T IN A NON-EXPANDED
         # REPLACE MACRO.
-        if ((g.GRAMMAR_FLAGS[g.STACK_PTR[g.SP]] & g.PRINT_FLAG) != 0):
+        if ((g.GRAMMAR_FLAGS(g.STACK_PTR[g.SP]) & g.PRINT_FLAG) != 0):
             g.END_FLAG = g.TRUE;
         # USED TO ALIGN ELSE CORRECTLY
         if (g.DO_INX[g.DO_LEVEL] == 0) and g.IFDO_FLAG[g.DO_LEVEL]:
@@ -1806,7 +1806,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # THE STATEMENT NUMBER OF THE DO.  SET A FLAG HERE TO BE USED
         # IN OUTPUT_WRITER IF THE END ISN'T IN A NON-EXPANDED
         # REPLACE MACRO.
-        if ((g.GRAMMAR_FLAGS[g.STACK_PTR[g.SP]] & g.PRINT_FLAG) != 0):
+        if ((g.GRAMMAR_FLAGS(g.STACK_PTR[g.SP]) & g.PRINT_FLAG) != 0):
             g.END_FLAG = g.TRUE;
         # USED TO ALIGN ELSE CORRECTLY
         if (g.DO_INX[g.DO_LEVEL] == 0) and g.IFDO_FLAG[g.DO_LEVEL]:
@@ -2130,8 +2130,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         else:
             g.FIXL[g.MP] = g.FIXL[g.SP];
         g.VAR[g.MP] = g.VAR[g.MP] + g.PERIOD + g.VAR[g.SP];
-        g.TOKEN_FLAGS[g.STACK_PTR[g.MPP1]] = g.TOKEN_FLAGS[g.STACK_PTR[g.MPP1]] | 0x20;
-        g.TOKEN_FLAGS[g.EXT_P[g.PTR[g.MP]]] = g.TOKEN_FLAGS[g.EXT_P[g.PTR[g.MP]]] | 0x20;
+        g.TOKEN_FLAGS(g.STACK_PTR[g.MPP1], \
+                      g.TOKEN_FLAGS(g.STACK_PTR[g.MPP1]) | 0x20);
+        g.TOKEN_FLAGS(g.EXT_P[g.PTR[g.MP]], \
+                      g.TOKEN_FLAGS(g.EXT_P[g.PTR[g.MP]]) | 0x20);
         g.EXT_P[g.PTR[g.MP]] = g.STACK_PTR[g.SP];
     elif PRODUCTION_NUMBER == 222:  # reference 2220
         #  <PREFIX>  ::=  <EMPTY>
@@ -2142,7 +2144,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXV[g.MP] = 0;
     elif PRODUCTION_NUMBER == 223:  # reference 2230
         #  <PREFIX>  ::=  <QUAL STRUCT>  .
-        g.TOKEN_FLAGS[g.STACK_PTR[g.SP]] = g.TOKEN_FLAGS[g.STACK_PTR[g.SP]] | 0x20;
+        g.TOKEN_FLAGS(g.STACK_PTR[g.SP], \
+                      g.TOKEN_FLAGS(g.STACK_PTR[g.SP]) | 0x20);
     elif PRODUCTION_NUMBER == 224:  # reference 2240
         # <SUBBIT HEAD>::= <SUBBIT KEY> <SUBSCRIPT>(
         g.PTR[g.MP], g.TEMP = g.PTR[g.MPP1];
@@ -2335,7 +2338,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXL[g.MP] = 1;
     elif PRODUCTION_NUMBER == 269:  # reference 2690
         #  <BIT CONST HEAD>  ::=  <RADIX>  (  <NUMBER>  )
-        g.TOKEN_FLAGS[g.STACK_PTR[g.SP]] = g.TOKEN_FLAGS[g.STACK_PTR[g.SP]] | 0x20;
+        g.TOKEN_FLAGS(g.STACK_PTR[g.SP], \
+                      g.TOKEN_FLAGS(g.STACK_PTR[g.SP]) | 0x20);
         if g.FIXV[g.MP + 2] == 0:
             ERROR(d.CLASS_LB, 8);
             g.FIXL[g.MP] = 1;
@@ -2358,7 +2362,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     # reference 2750 relocated
     elif PRODUCTION_NUMBER == 276:  # reference 2760
         #  <CHAR CONST>  ::=  CHAR  (  <NUMBER>  )  <CHAR STRING>
-        g.TOKEN_FLAGS[g.STACK_PTR[g.SP - 1]] = g.TOKEN_FLAGS[g.STACK_PTR[g.SP - 1]] | 0x20;
+        g.TOKEN_FLAGS(g.STACK_PTR[g.SP - 1], 
+                      g.TOKEN_FLAGS(g.STACK_PTR[g.SP - 1]) | 0x20);
         g.VAR[g.MP] = g.VAR[g.SP];
         g.TEMP = g.FIXV[g.MP + 2];
         if g.TEMP < 1: 
@@ -2526,8 +2531,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.LABEL_COUNT = g.LABEL_COUNT + 1;
         if g.SIMULATING: 
             STAB_LAB(g.FIXL[g.MP]);
-        g.GRAMMAR_FLAGS[g.STACK_PTR[g.MP]] = \
-            g.GRAMMAR_FLAGS[g.STACK_PTR[g.MP]] | g.LABEL_FLAG;
+        g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP], \
+                        g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP]) | g.LABEL_FLAG);
         # IF THE XREF ENTRY IS FOR THE LABEL'S DEFINITION (FLAG=0),
         # THEN CHECK THE STATEMENT NUMBER.  IF IT IS NOT EQUAL TO CURRENT
         # STATEMENT NUMBER, CHANGE IT TO THE CURRENT STATEMENT NUMBER.
@@ -2797,7 +2802,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.LAST_WRITE = 0;
         else:
             g.ATTR_FOUND = g.TRUE;
-            if (g.GRAMMAR_FLAGS[1] & g.ATTR_BEGIN_FLAG) != 0:
+            if (g.GRAMMAR_FLAGS(1) & g.ATTR_BEGIN_FLAG) != 0:
                 # <ARRAY, TYPE, & ATTR> FACTORED
                 OUTPUT_WRITER(0, g.STACK_PTR[g.MP] - 1);
                 g.LAST_WRITE = g.STACK_PTR[g.MP];
@@ -2857,7 +2862,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 359:  # reference 3590
         # <STRUCT SPEC HEAD> ::= - STRUCTURE (
         g.NOSPACE();
-        g.TOKEN_FLAGS[g.STACK_PTR[g.MPP1]] = g.TOKEN_FLAGS[g.STACK_PTR[g.MPP1]] | 0x20;
+        g.TOKEN_FLAGS(g.STACK_PTR[g.MPP1], \
+                      g.TOKEN_FLAGS(g.STACK_PTR[g.MPP1]) | 0x20);
     elif PRODUCTION_NUMBER == 360:  # reference 3600
         #  <DECLARATION>  ::=  <NAME ID>
         if not g.BUILDING_TEMPLATE:
@@ -3560,7 +3566,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if goto == "INLINE_SCOPE": goto = None
         g.TEMP2 = g.INLINE_LEVEL;
         g.TEMP = XICLS;
-        g.GRAMMAR_FLAGS[g.STACK_PTR[g.SP]] = g.GRAMMAR_FLAGS[g.STACK_PTR[g.SP]] | INLINE_FLAG;
+        g.GRAMMAR_FLAGS(g.STACK_PTR[g.SP], \
+                        g.GRAMMAR_FLAGS(g.STACK_PTR[g.SP]) | g.INLINE_FLAG);
         goto = "CLOSE_SCOPE"
     if goto == "WAIT_TIME" or \
             (goto == None and PRODUCTION_NUMBER == 62):  # reference 620
@@ -3863,10 +3870,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # ARE NEEDED WHEN OUTPUT_WRITER WILL BE CALLED.
         g.IF_FLAG = g.TRUE;
         # DETERMINES IF IF-THEN WAS ALREADY PRINTED IN REPLACE MACRO-11342
-        if (g.GRAMMAR_FLAGS[g.LAST_WRITE] & g.PRINT_FLAG) == 0:
+        if (g.GRAMMAR_FLAGS(g.LAST_WRITE) & g.PRINT_FLAG) == 0:
             g.IF_FLAG = g.FALSE;
             for g.I in range((g.LAST_WRITE + 1), 1 + g.STACK_PTR[g.SP]):
-                if (g.GRAMMAR_FLAGS[g.I] & g.PRINT_FLAG) != 0:
+                if (g.GRAMMAR_FLAGS(g.I) & g.PRINT_FLAG) != 0:
                     g.IF_FLAG = g.TRUE;
         if not g.IF_FLAG and (g.STMT_STACK[g.LAST_WRITE] != l.ELSE_TOKEN):
             g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
@@ -4119,7 +4126,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.PSEUDO_FORM[l.H1] = g.XSYT;
             else:
                 g.VAR[g.MP] = g.VAR[g.MP] + g.PERIOD + g.VAR[g.MPP1];
-                g.TOKEN_FLAGS[g.EXT_P[l.H1]] = g.TOKEN_FLAGS[g.EXT_P[l.H1]] | 0x20;
+                g.TOKEN_FLAGS(g.EXT_P[l.H1], \
+                              g.TOKEN_FLAGS(g.EXT_P[l.H1]) | 0x20);
                 g.I = g.FIXL[g.MPP1];
                 goto = "UNQ_TEST1"
                 while goto == "UNQ_TEST1":
@@ -4716,7 +4724,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.CONTEXT == g.EXPRESSION_CONTEXT: 
             ERROR(d.CLASS_PP, 11);
         g.CONTEXT = 0;
-        g.GRAMMAR_FLAGS[g.STACK_PTR[g.MP]] = g.GRAMMAR_FLAGS[g.STACK_PTR[g.MP]] | INLINE_FLAG;
+        g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP], \
+                        g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP]) | g.INLINE_FLAG);
         g.PTR[g.MP] = PUSH_INDIRECT(1);
         g.INLINE_LEVEL = g.INLINE_LEVEL + 1;
         if g.INLINE_LEVEL > 1: 
@@ -4880,7 +4889,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.ATTR_LOC > 1: 
             OUTPUT_WRITER(g.LAST_WRITE, g.ATTR_LOC - 1);
             if not g.ATTR_FOUND: 
-                if (g.GRAMMAR_FLAGS[1] & g.ATTR_BEGIN_FLAG) != 0:
+                if (g.GRAMMAR_FLAGS(1) & g.ATTR_BEGIN_FLAG) != 0:
                     g.INDENT_LEVEL = g.INDENT_LEVEL + g.ATTR_INDENT + g.INDENT_INCR;
             elif g.INDENT_LEVEL == g.SAVE_INDENT_LEVEL:
                 g.INDENT_LEVEL = g.INDENT_LEVEL + g.ATTR_INDENT;
@@ -5063,9 +5072,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <DECLARATION>  ::=  <NAME ID>  <ATTRIBUTES>
         if (goto == None and not g.BUILDING_TEMPLATE) or goto == "SPEC_VAR":
             if goto == None:
-                if (g.TOKEN_FLAGS[0] & 7) == 7: 
+                if (g.TOKEN_FLAGS(0) & 7) == 7: 
                     g.ATTR_LOC = 0;
-                elif (g.TOKEN_FLAGS[1] & 7) == 7: 
+                elif (g.TOKEN_FLAGS(1) & 7) == 7: 
                     g.ATTR_LOC = 1;
                 else:
                     g.ATTR_LOC = MAX(0, g.STACK_PTR[g.MP]);
@@ -5241,8 +5250,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             (goto == None and PRODUCTION_NUMBER == 366):  # reference 3660
         #  <ATTRIBUTES> ::= <TYPE & MINOR ATTR>
         if goto == "MAKE_ATTRIBUTES": goto = None
-        g.GRAMMAR_FLAGS[g.STACK_PTR[g.MP]] = \
-                        g.GRAMMAR_FLAGS[g.STACK_PTR[g.MP]] | g.ATTR_BEGIN_FLAG;
+        g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP], \
+                        g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP]) | g.ATTR_BEGIN_FLAG);
         CHECK_CONSISTENCY();
         if g.FACTORING:
             # See the comments in g.py for TYPE to understand the next few lines

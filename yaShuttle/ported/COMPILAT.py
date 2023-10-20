@@ -167,7 +167,8 @@ def COMPILATION_LOOP():
                                 g.SQUEEZING = g.FALSE;
                                 g.CONTEXT = 0
                                 g.TEMPORARY_IMPLIED = 0;
-                                g.GRAMMAR_FLAGS[g.STMT_PTR] |= g.STMT_END_FLAG;
+                                g.GRAMMAR_FLAGS(g.STMT_PTR, \
+                                    g.GRAMMAR_FLAGS(g.STMT_PTR) | g.STMT_END_FLAG);
                                 g.STMT_END_PTR = g.STMT_PTR;
                                 if g.CONTROL[7]:
                                     SYT_DUMP();

@@ -556,18 +556,18 @@ Herein I try to figure out how spacing in lines of source code printed by the `O
 
 Tokens are printed out one by one by the `OUTPUT_WRITER` module, with the function `ATTACH` figuring out the spacing between the tokens.  The current token in a `CALL ATTACH(PNTR)` is indicated by `PNTR`, with `STATE_STACK[PNTR]` being the token itself, `SAVE_BCD[PNTR]` being the text of the token (if it's something like an identifier or a literal that has a variable textual value), and `TOKEN_FLAGS[PNTR]` representing ... well, some flags associated with the specific instance of the token.  (As opposed to `GRAMMAR_FLAGS[]`, which would give flags generically associated with the token type rather than the specific instance of the token.)
 
-Each token printed has both a possible "pre-spacing" and a possible "post-spacing".  The post-spacing is computed by `ATTACH` and temporarily stored in a global variable called `LAST_SPACE` for use during the *next* call to `ATTACH`.  So when a call to `ATTACH` is made for a given token, `ATTACH` determines what the pre-spacing for the token should be *sans* `LAST_SPACE`, then combines that computed pre-spacing with `LAST_SPACE` in some manner to obtain the spacing it actually uses in front of the token.
+Each type of token has both a possible "pre-spacing" and a possible "post-spacing" for printing.  The post-spacing is computed by `ATTACH` and temporarily stored in a global variable called `LAST_SPACE` for use during the *next* call to `ATTACH`.  So when a call to `ATTACH` is made for a given token, `ATTACH` determines what the pre-spacing for the token should be *sans* `LAST_SPACE`, then combines that computed pre-spacing with `LAST_SPACE` in some manner to obtain the spacing it actually uses in front of the token.
 
 The theoretical pre-spacing *sans* `LAST_SPACE` comes from a global array of constants called `SPACE_FLAGS`, which has an entry for each token type.  (Actually, it's more complex than that:  entry 0 is unused, entries 1-142 are the flags for tokens appearing on the M-line, and entries 143-244 are the flags for the tokens appearing on the S- or E-lines.)
 
-Each 8-bit entry in `LAST_SPACE` encodes two separate 4-bit values.  The high-order nibble is the theoretical pre-spacing, while the low-order nibble is the theoretical post-spacing.  The documentation describes the nibble values as:
+Each 8-bit entry in `SPACE_FLAGS` encodes two separate 4-bit values.  The high-order nibble is the theoretical pre-spacing, while the low-order nibble is the theoretical post-spacing.  The *documentation* describes the nibble values as:
 
- 0. Always wants a space, if not overridden by "the other" token.
- 1. Only wants a space if the "other token" wants one too.
- 2. Never wants a space.
- 3. Always gets a space.
+ 0. "Always wants a space, if not overridden by the other token."
+ 1. "Only wants a space if the "other token" wants one too."
+ 2. "Never wants a space."
+ 3. "Always gets a space."
 
-The documentation doesn't define what it means by "the other" token.  I assume it means the preceding token in the output.
+In point of fact, though, if you examine the values in `SPACE_FLAGS`, we find that the nibbles are always 0, 1, 2, or 5.  There are no 3's.  It appears to me as though the 5's may originally have been 3's, but were replaced when somebody noticed that it would enable processing the pairwise cases by simple arithmetic rather than by complicated lookups or DO CASE statements.  Well, it's a working hypothesis.
 
 The `TOKEN_FLAGS` array contains 16-bit values with, as I said, each entry corresponding to a token in the current line.  Each entry is parsed into bit-fields, as follows:
 
@@ -577,33 +577,33 @@ The `TOKEN_FLAGS` array contains 16-bit values with, as I said, each entry corre
 
 `ATTACH` computes the post-spacing to be stored in `LAST_SPACE` and passed along to the *next* call to `ATTACH` by using 2 (never wants a space) if the "no space" flag is set in the token's entry in `TOKEN_FLAGS`, but otherwise just uses the post-spacing field from the entry in `SPACE_FLAGS`.
 
-Pre-spacing is trickier.  `ATTACH` performs the pre-spacing computation (which it stores in a local variable called `SPACE_NEEDED`, which equals the number of spaces to add) like so:
+Pre-spacing is trickier.  `ATTACH` performs the pre-spacing computation (which it stores in a local variable called `SPACE_NEEDED`, which gives the actual number of spaces to add, like so:
 
-  * Defaults to 0 (in terms of the 4 values mentioned above) for the first token in the line, and to 1 for the succeding tokens.
+  * Defaults to 0 for the first token in the line, and to 1 for the succeding tokens.
   * However, it may be changed to 0 under several conditions:
        * If the preceding token was the name of a macro having no parameter list.
-       * If the theoretical pre-spacing (from `SPACE_FLAGS`), *added* to `LAST_SPACE`, has a value of 2, 3, or 4.
+       * If the theoretical pre-spacing code (from `SPACE_FLAGS`), *added* to `LAST_SPACE` (the post-spacing code of the preceding token), has a value of 2, 3, or 4.
 
-It's the final calculation that's tricky to understand, so let's go through it in detail in terms of the values for both the preceding and current tokens.  I've marked the ones than change `SPACE_NEEDED` to 0 with an X: 
+It's the final calculation that's tricky to understand, so let's go through it in detail in terms of the values for both the preceding and current tokens, on the assumption about the meaning of pre- or post-spacing codes of 5 that I advanced above.  I've bolded the ones that change `SPACE_NEEDED` to 0: 
   
   * preceding conditionally wants, current conditionally wants:  0 + 0 = 0
   * preceding conditionally wants, current conditionally doesn't want:  0 + 1 = 1
-  * (X) preceding conditionally wants, current never wants:  0 + 2 = 2
-  * **(X) preceding conditionally wants, current always gets:  0 + 3 = 3** 
+  * **preceding conditionally wants, current never wants:  0 + 2 = 2**
+  * preceding conditionally wants, current always gets:  0 + 5 = 5 
   * preceding conditionally doesn't want, current conditionally wants:  1 + 0 = 1
-  * (X) preceding conditionally doesn't want, current conditionally doesn't want:
-  * (X) preceding conditionally doesn't want, current never wants:  1 + 2 = 3
-  * (X) preceding conditionally doesn't want, current always gets:  1 + 3 = 4
-  * (X) preceding never wants, current conditionally wants:  2 + 0 = 2
-  * (X) preceding never wants, current conditionally doesn't want:  2 + 1 = 3
-  * (X) preceding never wants, current never wants:  2 + 2 = 4
-  * preceding never wants, current always gets:  2 + 3 = 5
-  * **(X) preceding always gets, current conditionally wants:  3 + 0 = 3**
-  * (X) preceding always gets, current conditionally doesn't want:  3 + 1 = 4
-  * preceding always gets, current never wants:  3 + 2 = 5
-  * preceding always gets, current always gets:  3 + 3 = 6
+  * **preceding conditionally doesn't want, current conditionally doesn't want:  1 + 1 = 2**
+  * **preceding conditionally doesn't want, current never wants:  1 + 2 = 3**
+  * preceding conditionally doesn't want, current always gets:  1 + 5 = 6
+  * **preceding never wants, current conditionally wants:  2 + 0 = 2**
+  * **preceding never wants, current conditionally doesn't want:  2 + 1 = 3**
+  * **preceding never wants, current never wants:  2 + 2 = 4**
+  * preceding never wants, current always gets:  2 + 5 = 7
+  * preceding always gets, current conditionally wants:  5 + 0 = 5
+  * preceding always gets, current conditionally doesn't want:  5 + 1 = 6
+  * preceding always gets, current never wants:  5 + 2 = 7
+  * preceding always gets, current always gets:  5 + 5 = 10
 
-Several of these make no sense, and I've **bolded* a couple that are particularly nonsensical.  I don't presently have any explanation for this, unless the documentation is wrong about the interpretation of the field values in `SPACE_FLAGS`.  And actually, the documentation *must* be wrong, since if you look in `SPACE_FLAGS`, you find rare but occasional entries like 0x50 or 0x55, for which the documentation has no information.
+Some of these are debatable, I suppose, but they generally make sense according to my expectations as to where spaces would be inserted.
 
 ## Literal Data
 

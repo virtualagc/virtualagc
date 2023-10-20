@@ -457,9 +457,9 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                   "SPACES=0x%02X, FLAGS=0x%02X, C[0]='%s', BUILD_M='%s'") \
                   % (PNTR, g.STMT_STACK[PNTR], ols, l.SPACE_NEEDED,
                      g.VOCAB_INDEX[g.STMT_STACK[PNTR]], 
-                     g.SAVE_BCD[SHR(g.TOKEN_FLAGS[PNTR], 6)],
+                     g.SAVE_BCD[SHR(g.TOKEN_FLAGS(PNTR), 6)],
                      g.SPACE_FLAGS[g.STMT_STACK[PNTR]],
-                     g.TOKEN_FLAGS[PNTR], g.C[0],
+                     g.TOKEN_FLAGS(PNTR), g.C[0],
                      l.BUILD_M), file=sys.stderr)
         # End of debug()
         
@@ -469,16 +469,16 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             l.SPACE_NEEDED = 0;
             return '';
         # END
-        if (g.GRAMMAR_FLAGS[PNTR] & g.PRINT_FLAG) == 0:
+        if (g.GRAMMAR_FLAGS(PNTR) & g.PRINT_FLAG) == 0:
             if not g.RECOVERING:
                 return '';
-        g.GRAMMAR_FLAGS[PNTR] = g.GRAMMAR_FLAGS[PNTR] & g.PRINT_FLAG_OFF;
+        g.GRAMMAR_FLAGS(PNTR, g.GRAMMAR_FLAGS(PNTR) & g.PRINT_FLAG_OFF);
         l.SPACE_NEEDED = 1;
         if l.MACRO_WRITTEN: 
         # DO;
             l.MACRO_WRITTEN = g.FALSE;
             if g.LAST_SPACE == 2:
-                if SHR(g.TOKEN_FLAGS[PNTR], 6) == 0:
+                if SHR(g.TOKEN_FLAGS(PNTR), 6) == 0:
                     if g.STMT_STACK[PNTR] == g.LEFT_PAREN:
                         goto = "PARAM_MACRO";  # LEAVE LAST_SPACE ALONE
             if goto == None:
@@ -490,15 +490,44 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         if g.I <= 4:
             if g.I > 1:
                 l.SPACE_NEEDED = 0;
-        if SHR(g.TOKEN_FLAGS[PNTR], 5):
+        '''
+        In XPL, the IF conditional below looks like this:
+        
+            IF SHR(TOKEN_FLAGS(PNTR), 5) THEN
+               LAST_SPACE = 2;
+            ELSE
+               LAST_SPACE = L & "0F";
+               
+        I'm at a loss to see how the first half of the conditional makes any
+        sense.  Bit 5 of TOKEN_FLAGS(PNTR) is a "no space" flag, so if the 
+        IF were simply detecting bit 5, it makes eminent sense:  having 
+        detected the "no space" flag, then LAST_SPACE would be assigned a code
+        of 2, which is interpreted as "never wants a space".
+        
+        But that's not what the IF detects, because bits 16-6 of 
+        TOKEN_FLAGS(PNTR) provide an index into the SAVE_BCD[] array, and for
+        any <identifier> or <number> token, that index is going to be 
+        non-zero ... which means that spaces won't be printed after identifiers
+        or numbers, and that's exactly what happens in the output listing.
+        (Which is the reason I've spent literally a week investigating this in 
+        the first place!)
+        
+        I can only interpret it as an inexplicable bug in OUTPUTWR that 
+        shouldn't exist in a module that had been in use for 30 years already.
+        Mysterious!  At any rate, I've changed it here to mask *just* the
+        "no space" flag in the test.  But that's even more mysterious, since
+        why would they even have used a shift operation here, rather than 
+        just a simple logical-and anyway?
+        '''
+        if SHR(g.TOKEN_FLAGS(PNTR), 5) & 1:
             g.LAST_SPACE = 2;
         else:
             g.LAST_SPACE = g.L & 0x0F;
-        if SHR(g.TOKEN_FLAGS[PNTR], 6) == 0:
+        if SHR(g.TOKEN_FLAGS(PNTR), 6) == 0:
             g.C[0] = g.VOCAB_INDEX[g.STMT_STACK[PNTR]];
         else:
         # DO;
-            g.J = g.TOKEN_FLAGS[PNTR];
+            g.J = g.TOKEN_FLAGS(PNTR);
             g.C[0] = g.SAVE_BCD[SHR(g.J, 6)];  # IDENTIFIER
             if g.STMT_STACK[PNTR] == g.CHARACTER_STRING:
             # DO;
@@ -519,7 +548,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 
                 g.C[1] = ''
                 g.C[2] = '';
-                if (g.GRAMMAR_FLAGS[PNTR] & g.MACRO_ARG_FLAG) != 0: 
+                if (g.GRAMMAR_FLAGS(PNTR) & g.MACRO_ARG_FLAG) != 0: 
                     debug()
                     return g.C[0];
                 g.S = g.C[0];
@@ -565,7 +594,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 debug()
                 return g.C[0];
             # END
-            g.J = g.GRAMMAR_FLAGS[PNTR];
+            g.J = g.GRAMMAR_FLAGS(PNTR);
             if (g.J & g.LEFT_BRACKET_FLAG) != 0:
                 g.C[0] = '[' + g.C[0];
             if (g.J & g.RIGHT_BRACKET_FLAG) != 0:
@@ -587,7 +616,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         nonlocal onEntry # Used only by debug() function.
         ll = lEXPAND
         
-        if (g.GRAMMAR_FLAGS[PTR] & g.STMT_END_FLAG) != 0:
+        if (g.GRAMMAR_FLAGS(PTR) & g.STMT_END_FLAG) != 0:
             if g.COMMENT_COUNT >= 0:
             # DO;
                 g.COMMENT_COUNT = MIN(g.COMMENT_COUNT, 255);
@@ -897,7 +926,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
     
     def SKIP_REPL(POINT):
         # No locals.
-        while ((g.TOKEN_FLAGS[POINT] & 0x1F) == 7) and (POINT <= l.PTR_END):
+        while ((g.TOKEN_FLAGS(POINT) & 0x1F) == 7) and (POINT <= l.PTR_END):
             POINT = POINT + 1;
         # END
         return POINT;
@@ -906,7 +935,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
     def CHECK_FOR_FUNC(START):
         # Locals are FINISH and DEPTH.
         FINISH = START;
-        if (g.GRAMMAR_FLAGS[START] & g.FUNC_FLAG) != 0:
+        if (g.GRAMMAR_FLAGS(START) & g.FUNC_FLAG) != 0:
         # DO;
             # A FUNCTION - CHECK FOR SUBSCRIPTING AND ARGUMENTS
             DEPTH = 1;
@@ -919,7 +948,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                     FINISH = MATCH(FINISH);
                     l.FIND_ONLY = g.FALSE;
                 # END
-                elif (g.GRAMMAR_FLAGS[FINISH] & g.FUNC_FLAG) != 0:
+                elif (g.GRAMMAR_FLAGS(FINISH) & g.FUNC_FLAG) != 0:
                     DEPTH = DEPTH + 1;
             # END OF DO WHILE...
             for DEPTH in range(0, DEPTH + 1):
@@ -969,7 +998,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             l.PTR_END = g.STMT_PTR;
         if (l.PTR_END == g.OUTPUT_STACK_MAX) and g.SQUEEZING:
             l.PTR_END = l.PTR_END - 2;
-        while ((g.GRAMMAR_FLAGS[l.PTR_START] & g.PRINT_FLAG) == 0) and \
+        while ((g.GRAMMAR_FLAGS(l.PTR_START) & g.PRINT_FLAG) == 0) and \
                 (l.PTR_START <= l.PTR_END):
             l.PTR_START = l.PTR_START + 1;
         # END
@@ -982,7 +1011,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 l.C_RVL = STRING(ADDR(g.RVL_STACK1[l.PTR_START])) + \
                                     STRING(ADDR(g.RVL_STACK2[l.PTR_START]));
                 for l.IDX in range(l.PTR_START + 1, l.PTR_END + 1):
-                    if ((g.GRAMMAR_FLAGS[l.IDX] & g.PRINT_FLAG) != 0):
+                    if ((g.GRAMMAR_FLAGS(l.IDX) & g.PRINT_FLAG) != 0):
                     # DO;
                         l.C_TMP = STRING(ADDR(g.RVL_STACK1[l.IDX])) + \
                                     STRING(ADDR(g.RVL_STACK2[l.IDX]));
@@ -996,12 +1025,12 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             # END
             l.LABEL_START = l.PTR_START;
             if g.LABEL_COUNT > 0:
-                while ((g.GRAMMAR_FLAGS[l.PTR_START] & g.LABEL_FLAG) != 0) \
+                while ((g.GRAMMAR_FLAGS(l.PTR_START) & g.LABEL_FLAG) != 0) \
                         and (l.PTR_START < l.PTR_END):
                     l.PTR_START = l.PTR_START + 2;
                 # END
             l.LABEL_END = l.PTR_START - 1;
-            while ((g.GRAMMAR_FLAGS[l.PTR_START] & g.PRINT_FLAG) == 0) and \
+            while ((g.GRAMMAR_FLAGS(l.PTR_START) & g.PRINT_FLAG) == 0) and \
                         (l.PTR_START <= l.PTR_END):
                 l.PTR_START = l.PTR_START + 1;
             # END
@@ -1028,7 +1057,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                     
                     l.SUB_START[0] = 0
                     l.EXP_START[0] = 0;
-                    if (g.GRAMMAR_FLAGS[l.PTR] & g.INLINE_FLAG) != 0: 
+                    if (g.GRAMMAR_FLAGS(l.PTR) & g.INLINE_FLAG) != 0: 
                         g.INLINE_INDENT = l.M_PTR + 1;
                     if g.STMT_STACK[l.PTR] == g.DOLLAR:
                     # DO;
@@ -1098,7 +1127,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                 l.EXP_END[0] = MATCH(l.EXP_END[0]);
                                 l.FIND_ONLY = g.FALSE;
                             # END
-                            elif (g.GRAMMAR_FLAGS[l.EXP_END[0]] & g.FUNC_FLAG) != 0 \
+                            elif (g.GRAMMAR_FLAGS(l.EXP_END[0]) & g.FUNC_FLAG) != 0 \
                                     and goto == None:
                                 l.EXP_END[0] = CHECK_FOR_FUNC(l.EXP_END[0]);
                             elif goto in [None, "DOLLAR_CHECK1"]:
@@ -1210,7 +1239,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                          (l.S_CHAR_PTR & 0xFF));
                                                 l.BUILD_S = BYTE(l.BUILD_S, l.S_PTR, g.J);
                                                 l.BUILD_S_IND[l.S_PTR] = l.S_LEVEL + 1;
-                                                if (g.GRAMMAR_FLAGS[l.SUB_START[l.S_LEVEL]] \
+                                                if (g.GRAMMAR_FLAGS(l.SUB_START[l.S_LEVEL]) \
                                                         & g.MACRO_ARG_FLAG) != 0:
                                                     l.BUILD_S_UND[l.S_PTR] = l.S_LEVEL + 1;
                                                 l.S_PTR = l.S_PTR + 1;
@@ -1238,8 +1267,8 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                             # DO;
                                                 if goto == "S_FULL": goto = None
                                                 # RESTORE PRINT FLAG TO OVERFLOWING TOKEN
-                                                g.GRAMMAR_FLAGS[l.SUB_START[l.S_LEVEL]] \
-                                                    |= g.PRINT_FLAG;
+                                                g.GRAMMAR_FLAGS(l.SUB_START[l.S_LEVEL], \
+                                                    g.GRAMMAR_FLAGS(l.SUB_START[l.S_LEVEL]) | g.PRINT_FLAG);
                                                 l.LINE_FULL = g.TRUE;
                                                 l.SAVE_MAX_S_LEVEL = l.S_LEVEL + 1;
                                                 goto = "E_BEGIN"
@@ -1250,9 +1279,9 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                 l.BUILD_S = BYTE(l.BUILD_S, l.S_PTR + g.I, g.J);
                                                 l.BUILD_S_IND[l.S_PTR + g.I] = l.S_LEVEL + 1;
                                             # END
-                                            if (g.TOKEN_FLAGS[l.SUB_START[l.S_LEVEL]] & 7) == 7:
+                                            if (g.TOKEN_FLAGS(l.SUB_START[l.S_LEVEL]) & 7) == 7:
                                                 l.MACRO_WRITTEN = g.TRUE;
-                                            if (g.GRAMMAR_FLAGS[l.SUB_START[l.S_LEVEL]] \
+                                            if (g.GRAMMAR_FLAGS(l.SUB_START[l.S_LEVEL]) \
                                                     & g.MACRO_ARG_FLAG) != 0:  # DO;
                                                 for g.I in range(0, LENGTH(g.C[0])):
                                                     l.BUILD_S_UND[l.S_PTR + g.I] = l.S_LEVEL + 1;
@@ -1331,7 +1360,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                 l.EXP_END[l.E_LEVEL] = MATCH(l.EXP_END[l.E_LEVEL]);
                                                 l.FIND_ONLY = g.FALSE;
                                             # END
-                                            elif (g.GRAMMAR_FLAGS[l.EXP_END[l.E_LEVEL]] & \
+                                            elif (g.GRAMMAR_FLAGS(l.EXP_END[l.E_LEVEL]) & \
                                                     g.FUNC_FLAG) != 0 and goto == None:
                                                 l.EXP_END[l.E_LEVEL] = \
                                                     CHECK_FOR_FUNC(l.EXP_END[l.E_LEVEL]);
@@ -1383,7 +1412,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                          (l.E_CHAR_PTR & 0xFF));
                                                 l.BUILD_E = BYTE(l.BUILD_E, l.E_PTR, g.J);
                                                 l.BUILD_E_IND[l.E_PTR] = l.E_LEVEL + 1;
-                                                if (g.GRAMMAR_FLAGS[l.EXP_START[l.E_LEVEL]] \
+                                                if (g.GRAMMAR_FLAGS(l.EXP_START[l.E_LEVEL]) \
                                                         & g.MACRO_ARG_FLAG) != 0:
                                                     l.BUILD_E_UND[l.E_PTR] = l.E_LEVEL + 1;
                                                 l.E_PTR = l.E_PTR + 1;
@@ -1410,8 +1439,8 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                          LENGTH(g.C[0]) + l.E_PTR >= l.LINESIZE):
                                                 # DO;
                                                     if goto == "E_FULL": goto = None
-                                                    g.GRAMMAR_FLAGS[l.EXP_START[l.E_LEVEL]] \
-                                                        |= g.PRINT_FLAG;
+                                                    g.GRAMMAR_FLAGS(l.EXP_START[l.E_LEVEL], \
+                                                        g.GRAMMAR_FLAGS(l.EXP_START[l.E_LEVEL]) | g.PRINT_FLAG);
                                                     l.LINE_FULL = g.TRUE;
                                                     l.SAVE_MAX_E_LEVEL = l.E_LEVEL + 1;
                                                     goto = "FULL_LINE"
@@ -1423,9 +1452,9 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                                     l.BUILD_E = BYTE(l.BUILD_E, l.E_PTR + g.I, g.J);
                                                     l.BUILD_E_IND[l.E_PTR + g.I] = l.E_LEVEL + 1;
                                                 # END
-                                                if (g.TOKEN_FLAGS[l.EXP_START[l.E_LEVEL]] & 7) == 7:
+                                                if (g.TOKEN_FLAGS(l.EXP_START[l.E_LEVEL]) & 7) == 7:
                                                     l.MACRO_WRITTEN = g.TRUE;
-                                                if (g.GRAMMAR_FLAGS[l.EXP_START[l.E_LEVEL]] \
+                                                if (g.GRAMMAR_FLAGS(l.EXP_START[l.E_LEVEL]) \
                                                         & g.MACRO_ARG_FLAG) != 0:  # DO;
                                                     for g.I in range(0, LENGTH(g.C[0])):
                                                         l.BUILD_E_UND[l.E_PTR + g.I] = l.E_LEVEL + 1;
@@ -1508,7 +1537,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                                 g.J = g.TRANS_OUT[g.J] & 0xFF;  # BACK TO NORMAL CHAR SET
                             # END
                             l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR, g.J);
-                            if (g.GRAMMAR_FLAGS[l.PTR] & g.MACRO_ARG_FLAG) != 0:  # DO;
+                            if (g.GRAMMAR_FLAGS(l.PTR) & g.MACRO_ARG_FLAG) != 0:  # DO;
                                 l.M_UNDERSCORE = BYTE(l.M_UNDERSCORE, l.M_PTR, BYTE('_'));
                                 l.M_UNDERSCORE_NEEDED = g.TRUE;
                             # END
@@ -1533,7 +1562,8 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                             RESET();
                             if g.SQUEEZING:  # DO;
                                 g.SQUEEZING = g.FALSE;
-                                g.GRAMMAR_FLAGS[l.PTR] |= g.PRINT_FLAG;
+                                g.GRAMMAR_FLAGS(l.PTR, \
+                                        g.GRAMMAR_FLAGS(l.PTR) | g.PRINT_FLAG);
                                 goto = "OUTPUT_WRITER_END"
                                 break
                             # END
@@ -1546,7 +1576,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 # END
                 elif g.STMT_STACK[l.PTR] == g.REPLACE_TEXT and goto == None:
                 # DO;
-                    if (g.GRAMMAR_FLAGS[l.PTR] & g.PRINT_FLAG) == 0:
+                    if (g.GRAMMAR_FLAGS(l.PTR) & g.PRINT_FLAG) == 0:
                         if not g.RECOVERING: 
                             goto = "PTR_LOOP_END"
                             continue
@@ -1625,7 +1655,8 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                             if g.SQUEEZING:
                             # DO;
                                 g.SQUEEZING = g.FALSE;
-                                g.GRAMMAR_FLAGS[l.PTR] |= g.PRINT_FLAG;
+                                g.GRAMMAR_FLAGS(l.PTR,
+                                    g.GRAMMAR_FLAGS(l.PTR) | g.PRINT_FLAG);
                                 goto = "OUTPUT_WRITER_END"
                                 break
                             # END
@@ -1639,7 +1670,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                             l.TEMP = 0;
                             l.LABEL_TOO_LONG = g.TRUE;
                             for g.I in range(l.LABEL_START, l.LABEL_END + 1, 2):
-                                g.J = g.TOKEN_FLAGS[g.I];
+                                g.J = g.TOKEN_FLAGS(g.I);
                                 l.TEMP = l.TEMP + LENGTH(g.SAVE_BCD[SHR(g.J, 6)]) + 2;
                             # END
                             if ((g.NEST_LEVEL == 0) and (l.TEMP <= l.M_PTR)) or \
@@ -1651,7 +1682,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                             else:
                                 g.J = 0;
                             for g.I in range(l.LABEL_START, l.LABEL_END + 1, 2):
-                                g.K = g.TOKEN_FLAGS[g.I];
+                                g.K = g.TOKEN_FLAGS(g.I);
                                 g.S = g.SAVE_BCD[SHR(g.K, 6)];
                                 if (LENGTH(g.S) + 2 + g.J) > l.LINESIZE:  # DO;
                                     g.J = g.I;
@@ -1680,7 +1711,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                         g.J = BYTE(g.C[0], g.I);
                         l.BUILD_M = BYTE(l.BUILD_M, l.M_PTR + g.I, g.J);
                     # END
-                    g.I = g.TOKEN_FLAGS[l.PTR] & 0x1F;  # TYPE FOR OVERPUNCH
+                    g.I = g.TOKEN_FLAGS(l.PTR) & 0x1F;  # TYPE FOR OVERPUNCH
                     if g.I > 0:
                         if (g.I < g.SCALAR_TYPE) or (g.I == g.MAJ_STRUC):
                         # DO;
@@ -1691,7 +1722,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                             if l.MAX_E_LEVEL == 0:
                                 l.MAX_E_LEVEL = 1;
                         # END
-                    if (g.GRAMMAR_FLAGS[l.PTR] & g.MACRO_ARG_FLAG) != 0:
+                    if (g.GRAMMAR_FLAGS(l.PTR) & g.MACRO_ARG_FLAG) != 0:
                     # DO;
                         # REPLACE NAME, SO UNDERLINE IT
                         if g.I == 7:
