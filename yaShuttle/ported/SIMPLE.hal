@@ -1,10 +1,10 @@
-DEBUG ¢1+ ¢F+
+DEBUG ¢1+
 C This is my initial test program for the Python 3 port of HAL/S-FC.
 C It'll undoubtedly evolve as the work progresses.
 
  SIMPLE: PROGRAM;
         DECLARE INTEGER INITIAL(1), A, B;
-        DECLARE VB VECTOR(7);
+        DECLARE VBL INTEGER CONSTANT(7), VB VECTOR(VBL);
         DECLARE C INTEGER INITIAL(13), D, V VECTOR(5) INITIAL(10,20,30, 40, 50);
         DECLARE M MATRIX(3,2) INITIAL(1,2,3,4,5,6), S; /* A comment */
         DECLARE E DOUBLE;
@@ -15,9 +15,11 @@ C It'll undoubtedly evolve as the work progresses.
 DEBUG ¢3 ¢4 ¢8
         D = V$2;
 DEBUG ¢3 ¢4 ¢8
-C        D = C**2 + V$2;
-C        D = C**2 + M$(1,2); /* Here is a really long inline comment */
-C        S = M$(2,1);
-C        V$2 = 12;
+        V$2 = 3;
+        D = M$(1,2);
+        D = C**2 + V$2;
+        D = C**2 + M$(1,2); /* Here is a really long inline comment */
+        S = M$(2,1);
+        V$2 = 12;
         WRITE(6) A, B, 'HELLO', C, 3 A - 2 C - 6;
  CLOSE SIMPLE;

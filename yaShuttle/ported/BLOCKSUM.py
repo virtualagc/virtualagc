@@ -141,11 +141,11 @@ def BLOCK_SUMMARY():
             if PTR == 0x3FFF: 
                 g.S = '*:*';
             else: 
-                g.S = SHR(PTR, 6) + ':';
+                g.S = str(SHR(PTR, 6)) + ':';
                 if (PTR & 0x3F) == 0x3F: 
                     g.S = g.S + '*';
                 else: 
-                    g.S = g.S + (PTR & 0x3F);
+                    g.S = g.S + str(PTR & 0x3F);
         elif FLAG == 4: 
             g.S = g.SYT_NAME(PTR) + '*';
         else: 

@@ -88,19 +88,18 @@ def ASSOCIATE(TAG=-1):
     L = g.EXT_P[g.PTR[g.MP]];  # RHS OF TOKEN LIST
     if J > g.TEMPL_NAME: 
         pass  # GO TO ARR_STRUC_CHECK;
-    else:
-        if L >= 0:
-            I = g.TOKEN_FLAGS(L);
-            K = I & 0x1F;  # IMPLIED TYPE
-            if K == 7: 
-                pass  # GO TO ARR_STRUC_CHECK;
-            else:
-                if K >= 3:
-                    if K <= 4:
-                        if (J & 0x1F) != K:
-                            ERROR(d.CLASS_SV, 2, g.VAR[g.MP]);
-                I = (I - K) | (J & 0x1F);  # FINAL TYPE
-                g.TOKEN_FLAGS(L, I);  # MARK GOES ON RIGTHMOST TOKEN
+    elif L >= 0:
+        I = g.TOKEN_FLAGS(L);
+        K = I & 0x1F;  # IMPLIED TYPE
+        if K == 7: 
+            pass  # GO TO ARR_STRUC_CHECK;
+        else:
+            if K >= 3:
+                if K <= 4:
+                    if (J & 0x1F) != K:
+                        ERROR(d.CLASS_SV, 2, g.VAR[g.MP]);
+            I = (I - K) | (J & 0x1F);  # FINAL TYPE
+            g.TOKEN_FLAGS(L, I);  # MARK GOES ON RIGTHMOST TOKEN
     # ARR_STRUC_CHECK:
     K = g.STACK_PTR[g.MP];
     J = g.VAL_P[g.PTR[g.MP]];
@@ -117,12 +116,12 @@ def ASSOCIATE(TAG=-1):
             else:
                 g.EXT_P[g.PTR[g.MP]] = 0;
                 J = J & 0xFFFC;
-    if J:  #  ARRAY MARKS NEEDED
+    if J & 1:  #  ARRAY MARKS NEEDED
         g.GRAMMAR_FLAGS(K, g.GRAMMAR_FLAGS(K) | g.LEFT_BRACKET_FLAG);
         g.GRAMMAR_FLAGS(L, g.GRAMMAR_FLAGS(L) | g.RIGHT_BRACKET_FLAG);
-    if SHR(J, 1):  #  STRUCTURE MARKS NEEDED
+    if SHR(J, 1) & 1:  #  STRUCTURE MARKS NEEDED
         g.GRAMMAR_FLAGS(K, g.GRAMMAR_FLAGS(K) | g.LEFT_BRACE_FLAG);
         g.GRAMMAR_FLAGS(L, g.GRAMMAR_FLAGS(L) | g.RIGHT_BRACE_FLAG);
     TAG = -1;
-    if SHR(J, 13): 
+    if SHR(J, 13) & 1: 
         g.VAL_P[g.PTR[g.MP]] = J | 0x10;

@@ -490,35 +490,6 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         if g.I <= 4:
             if g.I > 1:
                 l.SPACE_NEEDED = 0;
-        '''
-        In XPL, the IF conditional below looks like this:
-        
-            IF SHR(TOKEN_FLAGS(PNTR), 5) THEN
-               LAST_SPACE = 2;
-            ELSE
-               LAST_SPACE = L & "0F";
-               
-        I'm at a loss to see how the first half of the conditional makes any
-        sense.  Bit 5 of TOKEN_FLAGS(PNTR) is a "no space" flag, so if the 
-        IF were simply detecting bit 5, it makes eminent sense:  having 
-        detected the "no space" flag, then LAST_SPACE would be assigned a code
-        of 2, which is interpreted as "never wants a space".
-        
-        But that's not what the IF detects, because bits 16-6 of 
-        TOKEN_FLAGS(PNTR) provide an index into the SAVE_BCD[] array, and for
-        any <identifier> or <number> token, that index is going to be 
-        non-zero ... which means that spaces won't be printed after identifiers
-        or numbers, and that's exactly what happens in the output listing.
-        (Which is the reason I've spent literally a week investigating this in 
-        the first place!)
-        
-        I can only interpret it as an inexplicable bug in OUTPUTWR that 
-        shouldn't exist in a module that had been in use for 30 years already.
-        Mysterious!  At any rate, I've changed it here to mask *just* the
-        "no space" flag in the test.  But that's even more mysterious, since
-        why would they even have used a shift operation here, rather than 
-        just a simple logical-and anyway?
-        '''
         if SHR(g.TOKEN_FLAGS(PNTR), 5) & 1:
             g.LAST_SPACE = 2;
         else:

@@ -56,6 +56,8 @@ from SLIPSUBS import SLIP_SUBSCRIPT
 def ATTACH_SUB_COMPONENT(SUBp):
     # Locals: I, T1
     
+    goto = None
+    
     I = g.PTR[g.MP];
     if SUBp > 0: 
         firstTry = True

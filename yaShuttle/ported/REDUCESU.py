@@ -56,7 +56,7 @@ from CHECKSUB import CHECK_SUBSCRIPT
 '''
 
 
-def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG):
+def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
     # Locals: T1, T2, IND_LINK_SAVE
       
     IND_LINK_SAVE = g.IND_LINK;
@@ -157,5 +157,5 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG):
                     continue
             #*******************************************************************
     # END of DO CASE
-    FLAG = FALSE;
+    FLAG = g.FALSE;
     g.VAL_P[g.NEXT_SUB] = 0;

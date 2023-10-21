@@ -199,8 +199,6 @@ def COMPILATION_LOOP():
                 g.MP = g.SP - g.INDEX2[g.STATE];
                 g.MPP1 = g.MP + 1;
                 SYNTHESIZE (g.STATE - g.MAXPp);  #   APPLY PRODUCTION
-                if (g.STATE - g.MAXPp) == 131:
-                    pass
                 g.SP = g.MP;  #   RESET STACK POINTER
                 g.PARSE_STACK[g.SP] = g.pPRODUCE_NAME[g.STATE - g.MAXPp] & 0xFFF;
                 I = g.INDEX1[g.STATE];

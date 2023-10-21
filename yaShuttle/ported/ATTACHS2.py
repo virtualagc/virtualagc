@@ -63,7 +63,7 @@ def ATTACH_SUB_ARRAY(SUBp):
     if SUBp < 0: 
         return g.TRUE;
     I = g.PTR[g.MP];
-    g.INX[g.INX] = g.INX[g.INX[0]] - SUBp;
+    g.INX[g.INX[0]] = g.INX[g.INX[0]] - SUBp;
     goto_ARR_SLIP = False
     firstTry = True
     while firstTry or goto_ARR_SLIP:

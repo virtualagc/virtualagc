@@ -78,9 +78,9 @@ def CHECK_ASSIGN_CONTEXT(LOC):
     if g.SIMULATING: 
         STAB_VAR(LOC);
     SET_XREF_RORS(LOC, 0, g.XREF_ASSIGN);
-    if SHR(T, 5): 
+    if SHR(T, 5) & 1: 
         HALMAT_FIX_PIPTAGS(g.INX[g.PTR[LOC]], 0, 1);
-    if SHR(T, 6): 
+    if SHR(T, 6) & 1: 
         ERROR(d.CLASS_SQ, 3, g.VAR[LOC]);
     if g.DELAY_CONTEXT_CHECK: 
         return;

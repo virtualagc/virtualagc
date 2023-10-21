@@ -59,6 +59,7 @@ from EMITARRA import EMIT_ARRAYNESS
 from EMITEXTE import EMIT_EXTERNAL
 from EMITPUSH import EMIT_PUSH_DO
 from EMITSMRK import EMIT_SMRK
+from EMITSUBS import EMIT_SUBSCRIPT
 from ERROR    import ERROR
 from GETICQ   import GET_ICQ
 from GETLITER import GET_LITERAL
@@ -571,7 +572,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.STMT_PTR = g.STMT_PTR - 1;
         return
     
-    if SHR(g.pPRODUCE_NAME[PRODUCTION_NUMBER], 12):
+    if SHR(g.pPRODUCE_NAME[PRODUCTION_NUMBER], 12) & 1:
         ERROR(d.CLASS_XS, 2, '#' + PRODUCTION_NUMBER);
     
     # THIS CODE CHECKS TO SEE IF THE PREVIOUS STATEMENT WAS AN
@@ -1162,9 +1163,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # <BASIC STATEMENT>::= <VARIABLE> = <FILE EXP> ;
         HALMAT_TUPLE(XFILE, 0, g.SP - 1, g.MP, g.FIXV[g.SP - 1]);
         l.H1 = g.VAL_P[g.PTR[g.MP]];
-        if SHR(l.H1, 7): 
+        if SHR(l.H1, 7) & 1: 
             ERROR(d.CLASS_T, 4);
-        if SHR(l.H1, 4): 
+        if SHR(l.H1, 4) & 1: 
             ERROR(d.CLASS_T, 7);
         if (l.H1 & 0x6) == 0x2: 
             ERROR(d.CLASS_T, 8);
@@ -1310,19 +1311,19 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     if (SHL(1, l.H1) & g.PCARGTYPE[g.PCARGOFF]) == 0:
                         ERROR(d.CLASS_XM, 4);  # ILLEGAL TYPE
                     if g.EXT_P[g.PTR[g.MP]] > 0: 
-                        if SHR(g.TEMP, 6):
+                        if SHR(g.TEMP, 6) & 1:
                             ERROR(d.CLASS_XM, 10);  # NO NAME COPINESS
                     RESET_ARRAYNESS();
                     if CHECK_ARRAYNESS(): 
-                        if SHR(g.TEMP, 5):
+                        if SHR(g.TEMP, 5) & 1:
                             ERROR(d.CLASS_XM, 7);  # NO ARRAYNESS
-                    if SHR(g.TEMP, 4): 
+                    if SHR(g.TEMP, 4) & 1: 
                         if g.TEMP_SYN != 2: 
                             g.TEMP_SYN = 3;
-                    if SHR(g.TEMP, 7): 
+                    if SHR(g.TEMP, 7) & 1: 
                         CHECK_NAMING(g.TEMP_SYN, g.MP);
                     else:
-                        if SHR(g.TEMP, 4): 
+                        if SHR(g.TEMP, 4) & 1: 
                             CHECK_ASSIGN_CONTEXT(g.MP);
                         else:
                             SET_XREF_RORS(g.MP);
@@ -1331,16 +1332,16 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         else:
                             l.H2 = g.FIXL[g.MP];
                         if (g.SYT_FLAGS(l.H2) & (g.TEMPORARY_FLAG)) != 0:
-                            if SHR(g.TEMP, 8): 
+                            if SHR(g.TEMP, 8) & 1: 
                                 ERROR(d.CLASS_XM, 8);
                         l.H2 = g.VAL_P[g.PTR[g.MP]];
                         # NO SUBSCRIPTS ARE ALLOWED ON THE SOURCE OF %NAMEBIAS
                         if g.PCARGOFF == 2:
-                            if SHR(g.TEMP, 2):
-                                if SHR(l.H2, 5): 
+                            if SHR(g.TEMP, 2) & 1:
+                                if SHR(l.H2, 5) & 1: 
                                     ERROR(d.CLASS_XM, 9);
-                        elif SHR(g.TEMP, 2):
-                            if SHR(l.H2, 4): 
+                        elif SHR(g.TEMP, 2) & 1:
+                            if SHR(l.H2, 4) & 1: 
                                 ERROR(d.CLASS_XM, 9);
                 g.PCARGOFF = g.PCARGOFF + 1;
                 
@@ -2008,7 +2009,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 197:  # reference 1970
         #  <VARIABLE>  ::=  <SUBBIT HEAD>  <VARIABLE>  )
         if g.CONTEXT == 0:
-            if SHR(g.VAL_P[g.PTR[g.MPP1]], 7): 
+            if SHR(g.VAL_P[g.PTR[g.MPP1]], 7) & 1: 
                 ERROR(d.CLASS_QX, 7);
             g.TEMP = 1;
         else:
@@ -2031,10 +2032,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <NAME VAR>  ::=  <VARIABLE>
         l.H1 = g.VAL_P[g.PTR[g.MP]];
         g.ARRAYNESS_FLAG = 0;
-        if SHR(l.H1, 11): 
+        if SHR(l.H1, 11) & 1: 
             ERROR(d.CLASS_EN, 1);
         g.VAL_P[g.PTR[g.MP]] = l.H1 | 0x800;
-        if SHR(l.H1, 7): 
+        if SHR(l.H1, 7) & 1: 
             ERROR(d.CLASS_EN, 2);
         if (l.H1 & 0x880) != 0: 
             g.TEMP_SYN = 2;
@@ -2171,7 +2172,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 227:  # reference 2270
         #  <SUBSCRIPT>  ::=  <QUALIFIER>
         g.SUB_END_PTR = g.STMT_PTR;
-        g.SUB_COUNT = 0;
+        g.SUB_COUNT(0);
         g.FIXL[g.MP] = 0;
         g.STRUCTURE_SUB_COUNT(0);
         g.ARRAY_SUB_COUNT(0);
@@ -2196,7 +2197,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.STRUCTURE_SUB_COUNT() >= 0: 
             ERROR(d.CLASS_SP, 1);
         if g.SUB_SEEN: 
-            g.STRUCTURE_SUB_COUNT(g.SUB_COUNT);
+            g.STRUCTURE_SUB_COUNT(g.SUB_COUNT());
         else:
             ERROR(d.CLASS_SP, 4);
         g.SUB_SEEN = 1;
@@ -2207,7 +2208,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.ARRAY_SUB_COUNT() >= 0: 
             ERROR(d.CLASS_SP, 2);
         if g.SUB_SEEN: 
-            g.ARRAY_SUB_COUNT(g.SUB_COUNT - g.STRUCTURE_SUB_COUNT());
+            g.ARRAY_SUB_COUNT(g.SUB_COUNT() - g.STRUCTURE_SUB_COUNT());
         else:
             ERROR(d.CLASS_SP, 3);
         g.SUB_SEEN = 1;
@@ -2225,7 +2226,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 237:  # reference 2370
         #  <SUB HEAD> ::= <SUB START> <SUB>
         g.SUB_SEEN = 1;
-        g.SUB_COUNT = g.SUB_COUNT + 1 ;
+        g.SUB_COUNT(g.SUB_COUNT() + 1 );
     elif PRODUCTION_NUMBER == 238:  # reference 2380
         #  <SUB> ::= <SUB EXP>
         g.INX[g.PTR[g.MP]] = 1;
@@ -3623,7 +3624,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if goto == "EXITTING": goto = None
         g.TEMP = g.DO_LEVEL;
         while g.TEMP > 1:
-            if SHR(g.DO_INX[g.TEMP], 7): 
+            if SHR(g.DO_INX[g.TEMP], 7) & 1: 
                 ERROR(d.CLASS_GE, 3);
             if LABEL_MATCH(): 
                 HALMAT_POP(g.XBRA, 1, 0, 0);
@@ -3640,7 +3641,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if goto == "REPEATING": goto = None
         g.TEMP = g.DO_LEVEL;
         while g.TEMP > 1:
-            if SHR(g.DO_INX[g.TEMP], 7): 
+            if SHR(g.DO_INX[g.TEMP], 7) & 1: 
                 ERROR(d.CLASS_GE, 4);
             if g.DO_INX[g.TEMP]: 
                 if LABEL_MATCH():
@@ -4077,9 +4078,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_FD, 7);
             CHECK_ARRAYNESS();
             l.H1 = g.VAL_P[g.PTR[g.SP]];
-            if SHR(l.H1, 7): 
+            if SHR(l.H1, 7) & 1: 
                 ERROR(d.CLASS_FS, 1);
-            if SHR(l.H1, 4): 
+            if SHR(l.H1, 4) & 1: 
                 ERROR(d.CLASS_SV, 1, g.VAR[g.SP]);
             if (l.H1 & 0x6) == 0x2: 
                 ERROR(d.CLASS_FS, 2, g.VAR[g.SP]);
@@ -4122,7 +4123,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 if g.FIXV[g.MPP1] == 0: 
                     g.LOC_P[l.H1] = g.FIXL[g.MPP1];
                 else:
-                    g.FIXV[g.MP], g.LOC_P[l.H1] = g.FIXV[g.MPP1];
+                    g.FIXV[g.MP] = g.FIXV[g.MPP1];
+                    g.LOC_P[l.H1] = g.FIXV[g.MPP1];
                 g.PSEUDO_FORM[l.H1] = g.XSYT;
             else:
                 g.VAR[g.MP] = g.VAR[g.MP] + g.PERIOD + g.VAR[g.MPP1];
@@ -4248,7 +4250,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if goto == "SIMPLE_SUBS": goto = None
         g.INX[g.PTR[g.SP]] = 1;
         g.VAL_P[g.PTR[g.SP]] = 0;
-        g.SUB_COUNT = 1;
+        g.SUB_COUNT(1);
         g.ARRAY_SUB_COUNT(-1);
         g.STRUCTURE_SUB_COUNT(-1);
         goto = "SS_CHEX"
@@ -4256,7 +4258,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             (goto == None and PRODUCTION_NUMBER == 231):  # reference 2310
         #  <SUB START>  ::=  <$> (
         if goto == "SUB_START": goto = None
-        g.SUB_COUNT = 0;
+        g.SUB_COUNT(0);
         g.STRUCTURE_SUB_COUNT(-1);
         g.ARRAY_SUB_COUNT(-1);
         g.SUB_SEEN = 0;
@@ -4448,7 +4450,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <READ PHRASE>  ::=  <READ KEY>  <READ ARG>
         if goto == "CHECK_READ": goto = None
         if g.INX[g.PTR[g.MP]] == 0: 
-            if SHR(g.VAL_P[g.PTR[g.SP]], 7): ERROR(d.CLASS_T, 3);
+            if SHR(g.VAL_P[g.PTR[g.SP]], 7) & 1: ERROR(d.CLASS_T, 3);
             if g.PSEUDO_TYPE[g.PTR[g.SP]] == g.EVENT_TYPE: 
                 ERROR(d.CLASS_T, 2);
         elif g.TEMP > 0: 

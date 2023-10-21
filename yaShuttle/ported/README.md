@@ -567,6 +567,8 @@ Each 8-bit entry in `SPACE_FLAGS` encodes two separate 4-bit values.  The high-o
  2. "Never wants a space."
  3. "Always gets a space."
 
+(**Note:** The list above should be numbered 0, 1, 2, 3; but I found out belatedly that not all markdown implementations support that numbering, so it may appear *incorrectly* to be numbered as 1, 2, 3, 4.)
+
 In point of fact, though, if you examine the values in `SPACE_FLAGS`, we find that the nibbles are always 0, 1, 2, or 5.  There are no 3's.  It appears to me as though the 5's may originally have been 3's, but were replaced when somebody noticed that it would enable processing the pairwise cases by simple arithmetic rather than by complicated lookups or DO CASE statements.  Well, it's a working hypothesis.
 
 The `TOKEN_FLAGS` array contains 16-bit values with, as I said, each entry corresponding to a token in the current line.  Each entry is parsed into bit-fields, as follows:
@@ -645,6 +647,79 @@ END;
 In other words `LIT_PG(0)` contained the entries 0-129 of `LIT1`, `LIT1`, and `LIT3`, while `LIT_PG(1)` contained entries 130-259, and so on.
 
 I've chosen to preserve this arrangement, which we don't need in any memory-conservation sense and don't really like in terms of maintainability, because it helps us to more-easily preserve the external file format used in the literal file.
+
+## Compatible Datatypes, Automatic Conversions
+
+IR-182-1 describes (sort of; see p. 352) how to determine data type compatibility &mdash; i.e., which data types on the right-hand side of an assignment can be auto-converted to which data types on the left-hand side &mdash; in terms of various quantities with names like `ASSIGN_xxx`.  While it's true that some quantities with names of that pattern still exist in the compiler's source code, any connection to the description in IR-182-1 (or vice-versa) is long gone.  Presumably the framework was pretty-substantially reworked at some point.  Nor is there much other surviving documentation for the current framework that I know of.  So here my own inferences concerning how it works.
+
+Each of the several datatypes that can appear on the LHS or RHS of an assignment is associated with a numerical value, as follows.  The numerical types marked n/a are present (or absent, depending on the point of view) because this classification also applies to various things like function parameters, procedure names, and so forth, that can't appear on the LHS or RHS of assignments.  
+
+ 1. BIT(...)
+ 2. CHARACTER(...)
+ 3. MATRIX
+ 4. VECTOR
+ 5. SCALAR
+ 6. INTEGER
+ 7. (n/a)
+ 8. (n/a>
+ 9. EVENT
+ 10. STRUCTURE
+ 11. (and beyond, n/a)
+
+Any given identifier will have its entry in the global `SYM_TAB` array (defined in HALINCL/COMMON).  The entries in this array are class objects, and the specific field called `SYM_TYPE` will have a numerical value from the list above to indicate type of the associated identifier.  `SYM_TAB(n).SYM_TYPE` is accessed in the code as `SYT_TYPE(n)` (via an alias), and the discussion of SYT_TYPE in IR-182-1 provides additional info I haven't reproduced here.
+
+The array `ASSIGN_TYPE` has these same 11 entries (plus 0, which isn't used), and the entry for a data type is a collection of bit-flags telling which data types are compatible with it.  In general, it will always be true that bit `1<<X` is set for `ASSIGN_TYPE(X)`, since that doesn't require any conversion at all; in some cases, those are the only allowed types.
+
+Consider, for example, `ASSIGN_TYPE(6)`.  Type 6 is "INTEGER", so `ASSIGN_TYPE(6)` tells us which data types can be auto-converted *to* an integer.  The value of `ASSIGN_TYPE(6)` is binary 1100001, so bits 0, 5, and 6 are set.  I can't explain about bit 0, because that's a mystery, 5 and 6 are "SCALAR" and "INTEGER", so both scalars and integers can be converted to integers.
+
+Actually, if you go through the settings implied by `ASSIGN_TYPE`, you see that they follow these rules:
+
+  * Only BIT, CHARACTER, MATRIX, VECTOR, SCALAR, INTEGER, and STRUCTURE can appear on the LHS of an assignment.
+  * Each of these can receive a value on the RHS of the same type.
+  * Also, INTEGERs and SCALARs can appear on the RHS for any of the following LHS:  INTEGER, SCALAR, or CHARACTER.
+  * And the mystery type 0 can be on the RHS for any of the following LHS:  CHARACTER, MATRIX, VECTOR, SCALAR, INTEGER.
+
+In particular, INTEGER and SCALAR can be auto-converted to a CHARACTER string, but not vice-versa, and BIT *cannot* be auto-converted to or from INTEGER.  I guess I'm confused, because I thought they could be.  And indeed, my claims about `ASSIGN_TYPE` directly contradict the "HAL/S Programmer's Guide, Appendix A" (2005) for REL32V17, which says this (contradictions in **bold**):
+
+  * **Bit strings**, scalars, and character strings (if they represent signed whole numbers) can be converted to INTEGER.
+  * Integers, **bit strings**, and character strings can be converted to SCALAR.
+  * **Integers**, **scalars**, and **character** strings (if consisting only of 0's and 1's) can be converted to BIT.
+  * Integers, scalars, and **bit strings** can be converted to CHARACTER.
+
+Is it possible that some of these conversions were added between REV32V0 (for which we have the compiler source code) and REV32V17 (to which the programmer's guide just mentioned applies)?  As it happens, No!  The next-most-current document we have that describes the conversions, "HAL/S Language Specification, Appendix D" (1980), lists the same conversions, in seemingly-identical language.  
+
+> **Aside:**  Some other differences between the 1980 and 2005 document are interesting:  The 1980 document further considers conversions to and from a data type it calls `FIXED`, which it says "are used when the computer provides relatively inefficient support for SCALARS".  In other words, an implementation of HAL/S would have had either a `SCALAR` type or a `FIXED` type, but I think there wouldn't have been much reason to have both in any single implementation.  In any case, the compiler version we're working with doesn't seem to have had a `FIXED` type.
+
+So there's clearly some misunderstanding on my part about what auto-conversions were allowed.
+
+## The Boolean Conditional Trap of Death!
+
+*Like* Python or C++, booleans in XPL can be treated as having numerical values, namely 0 for "false" and 1 for "true".  Thus if you have statements such as
+<pre>
+DECLARE I FIXED;
+...
+I = (A <= B);
+</pre>
+then you'll find that I has either a value of 0 or of 1.
+
+*Unlike* Python, C, C++, or any other language I recall, when you have conditionals in Intermetrics's variety of XPL like
+<pre>
+DECLARE I FIXED;
+...
+IF I THEN;
+    ... come here for "true" ...
+ELSE
+    ... come here for "false" ...
+</pre>
+it is *not* the case the "true" branch is taken when `I ^= 0` and the "false" branch is taken when `I = 0`.  
+
+Rather, **the "true" branch is taken when `I & 1 ^= 0` and the "false" branch is taken when `I & 1 = 0`**.
+
+I have found several instances in which not knowing this &mdash; and how would you know it? &mdash; leads to a problem.  Those instances have fortunately been detectable once you know the secret, because they involve the pattern
+<pre>
+IF SHR(V, N) THEN; ...;
+</pre>
+where `V` is a value consisting of bit fields and the purpose of the shift operation is to isolate bit `N`.  But there are likely other cases in there's no `SHR` present to flag the potential problem.  (The `SHR` itself is mysterious anyway, since surely a test like `IF V & MASK THEN;` is more economical than a shift!  Well, let's not think too much about that.)
 
 # `LINE_COUNT`
 
