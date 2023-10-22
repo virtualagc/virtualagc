@@ -17,6 +17,7 @@ from ERROR import ERROR
 from ATTACHS2 import ATTACH_SUB_ARRAY
 from ATTACHS3 import ATTACH_SUB_STRUCTURE
 from ATTACHSU import ATTACH_SUB_COMPONENT
+from CHECKARR import CHECK_ARRAYNESS
 from GETARRAY import GET_ARRAYNESS
 from MATCHARR import MATCH_ARRAYNESS
 from RESETARR import RESET_ARRAYNESS
@@ -89,7 +90,7 @@ def ATTACH_SUBSCRIPT():
     g.INX[0] = g.PTR[g.SP];
     I = 2;
     g.IND_LINK = 0;
-    if not GET_ARRAYNESS(): 
+    if not (GET_ARRAYNESS() & 1): 
         if g.FIXL[g.SP] == 3:
             ERROR(d.CLASS_FT, 8, g.VAR[g.MP]);
             g.INX[g.INX[0]] = 0;
@@ -106,22 +107,22 @@ def ATTACH_SUBSCRIPT():
             if g.SYT_CLASS(g.FIXL[g.MP]) != g.TEMPLATE_CLASS: 
                 goto_SS_FUNNIES = True
         if g.PSEUDO_TYPE[g.PTR[g.MP]] < g.SCALAR_TYPE and not goto_SS_FUNNIES: 
-            if I: 
+            if I & 1: 
                 I = ATTACH_SUB_STRUCTURE(0);
-            if (I != 2) and J and (g.INX[g.INX[0]] == 0): 
-                ESCAPE;
-            if J: 
+            if (I != 2) and (J & 1) and (g.INX[g.INX[0]] == 0): 
+                g.ESCAPE();
+            if J & 1: 
                 ATTACH_SUB_ARRAY(0);
             ATTACH_SUB_COMPONENT(g.INX[g.INX[0]]);
-        elif J & (SYT_ARRAY(g.FIXL[g.MP]) > 0) and not goto_SS_FUNNIES:
-            if I: 
+        elif (J & 1) & (SYT_ARRAY(g.FIXL[g.MP]) > 0) and not goto_SS_FUNNIES:
+            if I & 1: 
                 I = ATTACH_SUB_STRUCTURE(0);
             if (I != 2) and (g.INX[g.INX[0]] == 0): 
                 ESCAPE;
             ATTACH_SUB_ARRAY(g.INX[g.INX[0]]);
         else:
             goto_SS_FUNNIES = False
-            if I & (SYT_ARRAY(FIXV(g.MP)) != 0):
+            if (I & 1) & (SYT_ARRAY(FIXV(g.MP)) != 0):
                 I = ATTACH_SUB_STRUCTURE(g.INX[g.INX[0]]);
             elif g.INX[g.INX[0]] > 0: 
                 ERROR(d.CLASS_SV, 3, g.VAR[g.MP]);

@@ -58,7 +58,7 @@ def CALL_SCAN():
     # No local variables.
     g.NO_LOOK_AHEAD_DONE = g.FALSE;
     SCAN();
-    if g.CONTROL[4] or (g.PARTIAL_PARSE and g.RECOVERING):
+    if (g.CONTROL[4] & 1) or (g.PARTIAL_PARSE and g.RECOVERING):
         g.S = HEX(g.DW[7], 0);
         g.S = HEX(g.DW[6], 0) + g.S;
         g.S = 'SCANNER: ' + str(g.TOKEN) + ', NUMBER_VALUE: ' + g.S + \

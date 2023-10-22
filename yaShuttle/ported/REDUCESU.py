@@ -58,7 +58,9 @@ from CHECKSUB import CHECK_SUBSCRIPT
 
 def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
     # Locals: T1, T2, IND_LINK_SAVE
-      
+    
+    goto = None
+    
     IND_LINK_SAVE = g.IND_LINK;
     
     def STEPPER():
@@ -75,69 +77,66 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
     
     # DO CASE STEPPER;
     st = STEPPER()
-    goto_SR_ERR1 = False
-    goto_SR_ERR2 = False
     firstTry = True
-    while firstTry or goto_SR_ERR1 or goto_SR_ERR2:
+    while firstTry or goto != None:
         firstTry = False
-        neither = not (goto_SR_ERR1 or goto_SR_ERR2)
-        if st == 0 and neither:
+        if st == 0 and goto == None:
             #  ASTERISK
             g.FIX_DIM = SIZE;
-        elif st == 1 and neither:
+        elif st == 1 and goto == None:
             #  INDEX
             CHECK_SUBSCRIPT(MODE, SIZE, 0);
             g.FIX_DIM = 1;
-        elif st == 2 or not neither:
+        elif (st == 2 and goto == None) or goto != None:
             #  TO-PARTITION
-            if neither:
+            if goto == None:
                 T1 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
                 g.VAL_P[g.NEXT_SUB] = 1;
                 STEPPER();
                 T2 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
-            if not FLAG or not neither:
-                if T1 < 0 or T2 < 0 or goto_SR_ERR1:
-                    goto_SR_ERR1 = False
+            if (not FLAG and goto == None) or goto != None:
+                if ((T1 < 0 or T2 < 0) and goto == None) or goto == "SR_ERR1":
+                    if goto == "SR_ERR1": goto = None
                     ERROR(CLASS_SR, 1, g.VAR[g.MP]);
                     g.FIX_DIM = 2;
-                elif T2 == T1 and neither:
+                elif T2 == T1 and goto == None:
                     if FLAG == 2: 
-                        goto_SR_ERR2 = True
+                        goto = "SR_ERR2"
                         continue
                     g.FIX_DIM = 1;
                     g.IND_LINK = g.NEXT_SUB - 1;
                     g.VAL_P[g.IND_LINK] = 0
                     g.PSEUDO_LENGTH[g.IND_LINK] = 0;
                     g.INX[g.IND_LINK] = MODE | 0x1;
-                elif T2 < T1 or goto_SR_ERR2:
-                    goto_SR_ERR2 = False
+                elif (T2 < T1 and goto == None) or goto == "SR_ERR2":
+                    if goto == "SR_ERR2": goto = None
                     ERROR(CLASS_SR, 2, g.VAR[g.MP]);
                     g.FIX_DIM = 2;
                 else: 
                     g.FIX_DIM = T2 - T1 + 1;
             elif (T2 > 0 and T2 < T1): 
-                goto_SR_ERR2 = True
+                goto = "SR_ERR2"
                 continue
-        elif st == 3:
+        elif st == 3 and goto == None:
             #  AT-PARTITION
             T1 = CHECK_SUBSCRIPT(MODE, SIZE, 1);
             g.VAL_P[g.NEXT_SUB] = 1;
             STEPPER();
             T2 = CHECK_SUBSCRIPT(MODE, SIZE, 0);
-            if not FLAG:
+            if not (FLAG & 1):
                 if T1 < 0: 
-                    goto_SR_ERR1 = True
+                    goto = "SR_ERR1"
                     continue
                 if T2 < 0: 
                     T2 = T1;
                 else: 
                     T2 = T1 + T2 - 1;
                 if (T2 > SIZE and SIZE > 0) or T1 == 0: 
-                    goto_SR_ERR2 = True
+                    goto = "SR_ERR2"
                     continue
                 if T1 == 1:
                     if FLAG == 2: 
-                        goto_SR_ERR2 = True
+                        goto = "SR_ERR2"
                         continue
                     g.INX[g.NEXT_SUB] = MODE | 0x1;
                     g.PSEUDO_LENGTH[IND_LINK_SAVE] = g.NEXT_SUB;
@@ -145,15 +144,15 @@ def REDUCE_SUBSCRIPT(MODE, SIZE, FLAG = g.FALSE):
             #************ GENERATE SR1 & SR2 ERRORS FOR CHARACTER VARIABLES*****
             else:  # FLAG=1*/
                 if T1 < -1: 
-                    goto_SR_ERR1 = True
+                    goto = "SR_ERR1"
                     continue
                 if (T1 > SIZE and SIZE > 0): 
-                    goto_SR_ERR2 = True
+                    goto = "SR_ERR2"
                     continue
                 else: 
                     T2 = T1 + T2 - 1;
                 if (T2 > SIZE and SIZE > 0): 
-                    goto_SR_ERR2 = True
+                    goto = "SR_ERR2"
                     continue
             #*******************************************************************
     # END of DO CASE

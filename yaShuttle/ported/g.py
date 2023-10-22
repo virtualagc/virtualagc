@@ -2411,7 +2411,7 @@ if SANITY_CHECK and len(BI_INFO) != BIp + 1:
     print('Bad BI_INFO', file=sys.stderr)
     sys.exit(1)
     
-BI_ARG = [
+BI_ARG_TYPE = [
       0,  # (0) UNUSED                                                    
       8,  # (1) IORS                                                      
       8,  # (2) IORS                                                      
@@ -2428,7 +2428,7 @@ BI_ARG = [
       0xB,  # (D) ANY                                                       
       4  # (E) VECTOR                                                    
     ]
-if SANITY_CHECK and len(BI_ARG) != 14 + 1:
+if SANITY_CHECK and len(BI_ARG_TYPE) != 14 + 1:
     print('Bad BI_ARG', file=sys.stderr)
     sys.exit(1)
     
@@ -2927,6 +2927,8 @@ def SYT_CLASS(n, value=None):
 
 def SYT_FLAGS(n, value=None):
     if value == None:
+        if (n >= len(h.SYM_TAB)):
+            print("\n!!",n,">=", len(h.SYM_TAB), file=sys.stderr)
         return h.SYM_TAB[n].SYM_FLAGS
     enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_FLAGS = value

@@ -8,6 +8,8 @@ Other than the addition of PALMAT generation, the intention is for the port to b
 
 As far as this "README" is concerned, some involves factual background material or else descriptions of implementation decisions I've made.  However, quite a lot of it is devoted to what may be called "inferences and mysteries": i.e., to trying to puzzle out details about how the Intermetrics "enhancements" to XPL may have functioned or to how the original XPL code of the HAL/S compiler worked.  Obviously, that's a work in progress and subject to my own temporary or permanent misunderstanding.
 
+**Note:**  I discovered belatedly, after the vast majority of this README was written, that Section 13 of document IR-182-1 ("HAL/S-FC & HAL/S-360 Compiler Program Description") covers differences between standard XPL and the Intermetrics version of XPL.  Very few of the issues puzzed about in this README are covered there, and where there is overlap, I have not necessarily bothered subsequently to alter my sometimes-pithy musings.
+
 # Some Bookkeeping Details
 
 File hierarchy:  The original hierarchy of XPL modules looked like so:
@@ -702,7 +704,7 @@ I = (A <= B);
 </pre>
 then you'll find that I has either a value of 0 or of 1.
 
-*Unlike* Python, C, C++, or any other language I recall, when you have conditionals in Intermetrics's variety of XPL like
+*Unlike* Python, C, C++, or any other language I recall, when you have conditionals in XPL like
 <pre>
 DECLARE I FIXED;
 ...
@@ -719,7 +721,17 @@ I have found several instances in which not knowing this &mdash; and how would y
 <pre>
 IF SHR(V, N) THEN; ...;
 </pre>
-where `V` is a value consisting of bit fields and the purpose of the shift operation is to isolate bit `N`.  But there are likely other cases in there's no `SHR` present to flag the potential problem.  (The `SHR` itself is mysterious anyway, since surely a test like `IF V & MASK THEN;` is more economical than a shift!  Well, let's not think too much about that.)
+where `V` is a value consisting of bit fields and the purpose of the shift operation is to isolate bit `N`.  But there are likely other cases in there's no `SHR` present to flag the potential problem.  (The `SHR` itself is mysterious anyway, since surely a test like `IF V & MASK THEN;` is more economical than a shift!  Well, it's best not dwell too much on that.)
+
+Regarding the origin of this behavior, I thought perhaps XPL had inherited it from PL/I.  However, IBM's Enterprise PL/I for z/OS Language Reference, Version 5 Release 1, p.244, explicitly states that in a statement of the form 
+<pre>
+IF expression THEN unit1 ELSE unit2
+</pre>
+`unit1` will be executed if *any* bit in `expression` is 1, while `unit2` will be executed if *every* bit in `expression` is 0 ... so that's not what XPL is doing.
+
+I thought this was some quirk of the Intermetrics version of XPL, but it's not.  If you dig deeply enough in McKeeman *et al.* (*A Compiler Generator*), on p. 139 you do find in converting a "numeric" to a "conditional" that "the low-order bit is tested; 1 yields true, 0 yields false".  So apparently this is a standard feature of XPL.
+
+Note that this same consideration applies whenever an integer is assigned to a `BIT(1)` variable as well ... which is something that I've been ignoring so far (treating XPL `FIXED`, `BIT(16)`, `BIT(8)`, and `BIT(1)` all as integers), so I guess that's something I'll have to look into.  This as far as assignments are concerned, vs conditionals, that should have been obvious anyway, and I have nobody to blaim but myself.
 
 # `LINE_COUNT`
 

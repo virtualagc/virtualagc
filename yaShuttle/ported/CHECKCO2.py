@@ -103,10 +103,10 @@ def CHECK_CONFLICTS():
                     goto_TYPE_CONFLICT = True
                     continue
             g.CLASS=g.CLASS|g.FACTORED_CLASS;
-    if g.IC_FND:
+    if g.IC_FND & 1:
         g.IC_FOUND = g.IC_FOUND | 2;
         g.IC_PTR2 = g.IC_PTR;
-        if g.FACTORED_IC_FND:
+        if g.FACTORED_IC_FND & 1:
             g.FACTORED_ATTRIBUTES=g.FACTORED_ATTRIBUTES&(~g.INIT_CONST);
             g.FACTORED_ATTR_MASK=g.FACTORED_ATTR_MASK&(~g.INIT_CONST);
             ERROR(d.CLASS_DI, 9, g.SYT_NAME(g.ID_LOC));
@@ -117,7 +117,7 @@ def CHECK_CONFLICTS():
     g.ATTRIBUTES = g.ATTRIBUTES | (g.FACTORED_ATTRIBUTES & (~I));
     g.ATTR_MASK = g.ATTR_MASK | (g.FACTORED_ATTR_MASK & (~I));
     CHECK_CONSISTENCY();
-    if  not g.FACTOR_FOUND: 
+    if  not (g.FACTOR_FOUND & 1): 
         return;
     if g.FACTORED_LOCKp!=0:
         if g.LOCKp!=0: 

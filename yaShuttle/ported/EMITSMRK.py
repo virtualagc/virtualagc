@@ -67,12 +67,12 @@ def EMIT_SMRK(T=3):
         if T==3: 
             STAB_HDR();
     if g.SRN_PRESENT: 
-        if T: 
+        if T & 1: 
             g.SRN_FLAG=g.TRUE;
     if g.INLINE_STMT_RESET>0:
         g.STMT_NUM(g.INLINE_STMT_RESET);
         g.INLINE_STMT_RESET=0;
-    if T: 
+    if T & 1: 
         g.STMT_NUM(g.STMT_NUM()+1);
     T=3;
     g.SMRK_FLAG = 0;

@@ -11,6 +11,7 @@ History:    2023-09-16 RSB  Ported from XPL
 
 from xplBuiltins import *
 import g
+import HALINCL.COMMON as h
 
 '''
  /***************************************************************************/
@@ -76,7 +77,7 @@ def GET_LITERAL(PTR):
             b.append((v >> 16) & 0xFF)
             b.append((v >> 8) & 0xFF)
             b.append(v & 0xFF)
-    FILE(g.LITFILE, g.CURLBLK, h.LIT_PG);
+    FILE(g.LITFILE, g.CURLBLK, b);
     g.CURLBLK = PTR // g.LIT_BUF_SIZE;
     g.LITORG = g.CURLBLK * g.LIT_BUF_SIZE;
     g.LITLIM = g.LITORG + g.LIT_BUF_SIZE;

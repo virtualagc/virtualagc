@@ -60,6 +60,7 @@ from EMITEXTE import EMIT_EXTERNAL
 from EMITPUSH import EMIT_PUSH_DO
 from EMITSMRK import EMIT_SMRK
 from EMITSUBS import EMIT_SUBSCRIPT
+from ENDANYFC import END_ANY_FCN
 from ERROR    import ERROR
 from GETICQ   import GET_ICQ
 from GETLITER import GET_LITERAL
@@ -78,25 +79,30 @@ from LABELMAT import LABEL_MATCH
 from MAKEFIXE import MAKE_FIXED_LIT
 from MATCHARI import MATCH_ARITH
 from MATCHSIM import MATCH_SIMPLES
+from MATRIXCO import MATRIX_COMPARE
 from MULTIPLY import MULTIPLY_SYNTHESIZE
 from OUTPUTWR import OUTPUT_WRITER
 from PROCESS2 import PROCESS_CHECK
+from PUSHFCNS import PUSH_FCN_STACK
 from PUSHINDI import PUSH_INDIRECT
 from RESETARR import RESET_ARRAYNESS
 from SAVEARRA import SAVE_ARRAYNESS
 from SETBLOCK import SET_BLOCK_SRN
 from SETLABEL import SET_LABEL_TYPE
 from SETSYTEN import SET_SYT_ENTRIES
+from SETUPCAL import SETUP_CALL_ARG
 from SETUPNOA import SETUP_NO_ARG_FCN
 from SETUPVAC import SETUP_VAC
 from SETXREF  import SET_XREF
 from SETXREFR import SET_XREF_RORS
 from SRNUPDAT import SRN_UPDATE
 from STACKDUM import STACK_DUMP
+from STARTNOR import START_NORMAL_FCN
 from UNARRAY2 import UNARRAYED_SCALAR
 from UNARRAY3 import UNARRAYED_SIMPLE
 from UNARRAYE import UNARRAYED_INTEGER
 from UNBRANCH import UNBRANCHABLE
+from VECTORCO import VECTOR_COMPARE
 from HALINCL.CHECKSTR import CHECK_STRUC_CONFLICTS
 from HALINCL.DISCONNE import DISCONNECT
 from HALINCL.ENTERLAY import ENTER_LAYOUT
@@ -772,10 +778,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.TEMP2 = g.PSEUDO_LENGTH[g.PTR[g.MP]];
             if (g.PSEUDO_FORM[g.I] == g.XSYT)or(g.PSEUDO_FORM[g.I] == g.XXPT):
                 if g.VAR[g.SP] == 'T': 
-                    HALMAT_TUPLE(XMTRA, 0, g.MP, 0, 0);
+                    HALMAT_TUPLE(g.XMTRA, 0, g.MP, 0, 0);
                     SETUP_VAC(g.MP, g.TEMP, SHL(g.TEMP2, 8) | SHR(g.TEMP2, 8));
-                    if IMPLICIT_T:
-                        g.SYT_FLAGS(g.LOC_P[g.I], g.SYT_FLAGS(g.LOC_P[g.I]) | IMPL_T_FLAG);
+                    if g.IMPLICIT_T:
+                        g.SYT_FLAGS(g.LOC_P[g.I], g.SYT_FLAGS(g.LOC_P[g.I]) | g.IMPL_T_FLAG);
                         g.IMPLICIT_T = g.FALSE;
                     goto = "T_FOUND";
             if goto == None:
@@ -783,7 +789,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_E, 2);
                 if (g.TEMP2 & 0xFF) != SHR(g.TEMP2, 8): 
                     ERROR(d.CLASS_EM, 4);
-                HALMAT_TUPLE(XMINV, 0, g.MP, g.SP, 0);
+                HALMAT_TUPLE(g.XMINV, 0, g.MP, g.SP, 0);
                 SETUP_VAC(g.MP, g.TEMP);
         elif tmt == 1:
             #  VECTOR
@@ -858,7 +864,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto = "ARITH_LITS"
     elif PRODUCTION_NUMBER == 21:  # reference 210
         #  <ARITH FUNC HEAD>  ::=  <ARITH FUNC>
-        START_NORMAL_FCN;
+        START_NORMAL_FCN();
     elif PRODUCTION_NUMBER == 22:  # reference 220
         #  <ARITH FUNC HEAD>  ::=  <ARITH CONV> <SUBSCRIPT>
         g.NOSPACE();
@@ -1552,7 +1558,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PTR[g.MP] = g.PTR[g.MPP1];
     elif PRODUCTION_NUMBER == 127:  # reference 1270
         #  <CHAR FUNC HEAD>  ::=  <CHAR FUNC>
-        if START_NORMAL_FCN: 
+        if START_NORMAL_FCN(): 
             ASSOCIATE();
     elif PRODUCTION_NUMBER == 128:  # reference 1280
         #  <CHAR FUNC HEAD>  ::=  CHARACTER  <SUB OR QUALIFIER>
@@ -3371,12 +3377,12 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     g.PP = g.PP + 1;
                     if g.FIXV[g.PP] == g.MAT_TYPE:
                         g.MATRIX_COUNT = g.MATRIX_COUNT - 1;
-                        if MATRIXP == 0: 
+                        if g.MATRIXP == 0: 
                             g.MATRIXP = g.PP;
                         else: 
-                            MULTIPLY_SYNTHESIZE(MATRIXP, g.PP, MATRIXP, 8);
+                            MULTIPLY_SYNTHESIZE(g.MATRIXP, g.PP, g.MATRIXP, 8);
                 if g.SCALARP != 0: 
-                    MULTIPLY_SYNTHESIZE(MATRIXP, g.SCALARP, g.TERMP, 2);
+                    MULTIPLY_SYNTHESIZE(g.MATRIXP, g.SCALARP, g.TERMP, 2);
                 g.PTR_TOP = g.PTR[g.MP];
                 return;
         
@@ -3391,27 +3397,27 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 while goto == "MATRICES_MAY_GO_RIGHT":
                     if goto == "MATRICES_MAY_GO_RIGHT": goto = None
                     g.MATRIX_PASSED = 0;
-                    g.PP = BEGINP
-                    for g.PP in range(BEGINP, g.SP + 1):
+                    g.PP = g.BEGINP
+                    for g.PP in range(g.BEGINP, g.SP + 1):
                         if g.FIXV[g.PP] == g.MAT_TYPE: 
-                            g.MATRIX_PASSED = MATRIX_PASSED + 1; 
+                            g.MATRIX_PASSED = g.MATRIX_PASSED + 1; 
                         elif g.FIXV[g.PP] == g.DOT or g.FIXV[g.PP] == g.CROSS: 
                             g.MATRIX_PASSED = 0; 
                         elif g.FIXV[g.PP] == g.VEC_TYPE:
                             #  THIS ILLEGAL SYNTAX WILL BE CAUGHT ELSEWHERE
                             g.PPTEMP = g.PP;
-                            while MATRIX_PASSED > 0:
-                                PPTEMPg.TEMPPTEMP - 1;
-                                if g.FIXV[PPTEMP] == g.MAT_TYPE:
-                                    g.MATRIX_PASSED = MATRIX_PASSED - 1;
-                                    MULTIPLY_SYNTHESIZE(PPTEMP, g.PP, g.PP, 7);
-                            for PPTEMP in range(g.PP + 1, g.SP + 1):
-                                if g.FIXV[PPTEMP] == g.MAT_TYPE:
-                                    MULTIPLY_SYNTHESIZE(g.PP, PPTEMP, g.PP, 6); 
-                                if g.FIXV[PPTEMP] == g.VEC_TYPE: 
-                                    g.PP = PPTEMP;  
-                                elif g.FIXV[PPTEMP] == g.DOT or g.FIXV[PPTEMP] == g.CROSS:
-                                    g.BEGINP = PPTEMP + 1;
+                            while g.MATRIX_PASSED > 0:
+                                g.PPTEMP = g.PPTEMP - 1;
+                                if g.FIXV[g.PPTEMP] == g.MAT_TYPE:
+                                    g.MATRIX_PASSED = g.MATRIX_PASSED - 1;
+                                    MULTIPLY_SYNTHESIZE(g.PPTEMP, g.PP, g.PP, 7);
+                            for g.PPTEMP in range(g.PP + 1, g.SP + 1):
+                                if g.FIXV[g.PPTEMP] == g.MAT_TYPE:
+                                    MULTIPLY_SYNTHESIZE(g.PP, g.PPTEMP, g.PP, 6); 
+                                if g.FIXV[g.PPTEMP] == g.VEC_TYPE: 
+                                    g.PP = g.PPTEMP;  
+                                elif g.FIXV[g.PPTEMP] == g.DOT or g.FIXV[g.PPTEMP] == g.CROSS:
+                                    g.BEGINP = g.PPTEMP + 1;
                                     goto = "MATRICES_MAY_GO_RIGHT"
                                     break
                             if goto != None:
@@ -3513,8 +3519,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if goto == "DOT_PRODUCTS_LOOP": goto = None
         while g.DOT_COUNT > 0:
             g.VECTORP = 0;
-            g.PP = BEGINP
-            for g.PP in range(BEGINP, 1 + g.SP):
+            g.PP = g.BEGINP
+            for g.PP in range(g.BEGINP, 1 + g.SP):
                 if g.FIXV[g.PP] == g.VEC_TYPE: 
                     g.VECTORP = g.PP;
                 if g.FIXV[g.PP] == g.DOT:
@@ -3539,6 +3545,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                                 break
                         if goto == "DOT_PRODUCTS_LOOP":
                             break
+                        # If we got to here, the for-loop terminated normally.
+                        # But that will mean that the loop index is one too 
+                        # small (because of differences in XPL vs Python loop
+                        # handling).
+                        g.PP += 1
                     ERROR(d.CLASS_ED, 1);
                     g.PTR_TOP = g.PTR[g.MP];
                     return;
@@ -4143,7 +4154,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     if g.I != g.FIXL[g.MP]: 
                         goto = "UNQ_TEST1"
                         continue
-            # UNQ_TEST2:
+                # UNQ_TEST2:
             g.FIXL[g.MP] = g.FIXL[g.MPP1];
             g.EXT_P[l.H1] = g.STACK_PTR[g.MPP1];
         if goto == "STRUC_IDS": goto = None

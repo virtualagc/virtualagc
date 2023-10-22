@@ -759,10 +759,10 @@ def SCAN():
                         goto = "GET_NEW_CHAR";
                         continue;
 
-                if goto == "START_EXPONENT": goto = None
                 firstTry = True
                 while firstTry or goto in ["START_EXPONENT", "POWER_INDICATOR"]:
                     firstTry = False
+                    if goto == "START_EXPONENT": goto = None
                     if goto == None:
                         g.EXP_TYPE = l.DIGIT;
                     if goto == "POWER_INDICATOR" or \
@@ -967,7 +967,7 @@ def SCAN():
                 IDENTIFY(g.BCD, 0);
                 g.LOOKUP_ONLY = g.FALSE;
                 g.TEMPLATE_IMPLIED = g.FALSE;
-                if g.CONTROL[3]:
+                if g.CONTROL[3] & 1:
                     if g.TOKEN > 0:
                         g.S = STRING(g.VOCAB_INDEX[g.TOKEN]);
                     else:

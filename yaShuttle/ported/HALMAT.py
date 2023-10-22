@@ -48,7 +48,7 @@ from HALMATOU import HALMAT_OUT
 
 def HALMAT():
     # No locals and no parameters.
-    if g.CONTROL[0]: 
+    if g.CONTROL[0] & 1: 
         HALMAT_BLAB(g.CURRENT_ATOM, g.NEXT_ATOMp);
     if g.HALMAT_OK:
         if g.NEXT_ATOMp == g.ATOMp_LIM: 

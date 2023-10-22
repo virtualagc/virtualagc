@@ -254,7 +254,7 @@ def EMIT_EXTERNAL():
         g.EXTERNALIZE = 1;
         g.TPL_NAME = DESCORE(g.VAR[g.MP]);
         g.TPL_FLAG = (FINDER(7, g.TPL_NAME, 1) == 0);  # IGNORE INLINE BLOCKS
-        if g.TPL_FLAG:
+        if g.TPL_FLAG & 1:
             l.OLDBUFF = INPUT(7);
     elif g.EXTERNALIZE == 4:
         pass  #  QUIESCENT

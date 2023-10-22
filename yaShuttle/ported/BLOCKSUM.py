@@ -86,6 +86,7 @@ TYPE = (0x48, 0x48, 0x48, 9, 9, 0x48, 0x48, 0x47, 0,
         0x47, 0, 0, 1, 0, 0x3E, 1, 0, 0x3E)
 CONDITION = (1, 1, 1, 0, 0, 1, 1, 0, 2, 0, 2, 0, 1, 2, 0, 1, 2, 0)
 MASK = (3, 7, 5, 4, 2, 1, 6, 3, 3, 3, 3, 0, 0, 2, 2, 0, 2, 2)
+MASK2 = (0,0,0,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0) # BIT(8(
 HEADING = (
     'PROGRAMS AND TASKS SCHEDULED    PROGRAMS AND TASKS TERMINATED   ' + \
     'PROGRAMS AND TASKS CANCELLED    EVENTS SIGNALLED, SET OR RESET  ' + \
@@ -164,11 +165,11 @@ def BLOCK_SUMMARY():
         nonlocal I, J, PTR, HEADER_ISSUED, FIRST_TIME
         if g.SYT_NEST(PTR) >= g.NEST: 
             return;
-        if MASK2(I): 
+        if MASK2[I]: 
             if g.SYT_NEST(PTR) > 0: 
                 return;
-        if MASK(I) != 0: 
-            if g.TEMP1 != MASK(I): 
+        if MASK[I] != 0: 
+            if g.TEMP1 != MASK[I]: 
                 return; 
             else: 
                 g.TEMP1 = 0;

@@ -253,7 +253,7 @@ def INITIALIZATION():
     if g.pfs:
         for g.I in range(0, NUM2_OPT + 1):
             g.C[0] = LEFT_PAD(STRING(TYPE2[SORT2[g.I]]), 15);
-            if TYPE2_TYPE[SORT2[g.I]]:
+            if TYPE2_TYPE[SORT2[g.I]] & 1:
                 g.S = VALS[SORT2[g.I]];  # DECIMAL VALUE
             else:
                 g.S = STRING(VALS[SORT2[g.I]]);  # DESCRIPTOR
@@ -279,7 +279,7 @@ def INITIALIZATION():
         #***********************************
         for g.I in range(0, NUM2_OPT + 1):
             g.C[0] = LEFT_PAD(STRING(TYPE2[SORT2[g.I]]), 15);
-            if TYPE2_TYPE[SORT2[g.I]]:
+            if TYPE2_TYPE[SORT2[g.I]] & 1:
                 g.S = VALS[SORT2[g.I]];  # DECIMAL VALUE
             else:
                 g.S = STRING(VALS[SORT2[g.I]]);  # DESCRIPTER
@@ -465,7 +465,7 @@ def INITIALIZATION():
     SOURCE_COMPARE();
     STREAM();
     SCAN();
-    if g.CONTROL[4]:
+    if g.CONTROL[4] & 1:
         OUTPUT(0, 'SCANNER: ' + str(g.TOKEN));
         if g.extraTrace:
             s = BYTE('', 0, g.NEXT_CHAR)

@@ -79,7 +79,7 @@ def HALMAT_RELOCATE(D1=None, D4=None):
     D2 = SHL(D2 + D4 - g.ATOMp_FAULT, 16);
     for I in range(2, g.NEXT_ATOMp):
         D4 = SHR(g.ATOMS(I) & 0xF0, 4);
-        if g.ATOMS(I): 
+        if g.ATOMS(I) & 1: 
             if (D4 == g.XVAC) or (D4 == g.XXPT):
                 if g.ATOMS(I) >= D3:
                     g.ATOMS(I, g.ATOMS(I) - D3);

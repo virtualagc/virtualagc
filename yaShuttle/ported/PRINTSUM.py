@@ -109,7 +109,7 @@ def PRINT_SUMMARY():
         RECORD_SEAL(h.CROSS_REF);
         RECORD_SEAL(h.SYM_ADD);
         RECORD_SEAL(h.CSECT_LENGTHS);
-        if g.CONTROL[14]: 
+        if g.CONTROL[14] & 1: 
             LIT_DUMP();
     # NO_DUMPS:
     g.EJECT_PAGE();
@@ -154,7 +154,7 @@ def PRINT_SUMMARY():
         MONITOR(0, 6);  # CLOSE THE TEMPLATE FILE
         return;  # NO MORE TEMPLATE PROCESSING
     MONITOR(16, 0x80);
-    if not g.TPL_FLAG: 
+    if not (g.TPL_FLAG & 1): 
         MONITOR(1, 6, g.TPL_NAME);
         MONITOR(16, 0x40);
     else: 

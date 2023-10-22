@@ -77,7 +77,7 @@ def ATTACH_SUB_COMPONENT(SUBp):
                 if goto == None:
                     g.VAL_P[I] = g.VAL_P[I] | 0x10;
                     SUBp = SUBp - 1;
-                    if g.INX[g.NEXT_SUB] == 0 and not g.VAL_P[I]: 
+                    if g.INX[g.NEXT_SUB] == 0 and not (g.VAL_P[I] & 1): 
                         g.VAL_P[I] = g.VAL_P[I] & 0xFFEF;
                 if goto == "COMP_SLIP": goto = None
                 g.VAL_P[I] = g.VAL_P[I] | 0x8;
@@ -86,14 +86,14 @@ def ATTACH_SUB_COMPONENT(SUBp):
                     SLIP_SUBSCRIPT(SUBp);
                 # END
             # END
-            elif pt == 2:
+            elif pt == 2 and goto == None:
             #  CHARACTER
             # DO
                 REDUCE_SUBSCRIPT(0x0, g.PSEUDO_LENGTH[I], 1);
                 goto = "FIXING_BIT_AND_CHAR";
                 continue
             # END
-            elif pt == 3:
+            elif pt == 3 and goto == None:
             #  MATRIX
             # DO
                 if SUBp == 1:  # DO
@@ -119,7 +119,7 @@ def ATTACH_SUB_COMPONENT(SUBp):
                     continue
                 # END
             # END
-            elif pt == 4:
+            elif pt == 4 and goto == None:
             #  VECTOR
             # DO
                 REDUCE_SUBSCRIPT(0x0, g.PSEUDO_LENGTH[I], 2);

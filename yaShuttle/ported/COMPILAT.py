@@ -140,7 +140,7 @@ def COMPILATION_LOOP():
             
             #   FIND WHICH OF THE FOUR KINDS OF STATES WE ARE DEALING WITH:
             #   READ,APPLY PRODUCTION,LOOKAHEAD, OR PUSH STATE
-            if g.CONTROL[0xC]:
+            if g.CONTROL[0xC] & 1:
                 OUTPUT(0, ' COMP: STATE=' + str(g.STATE) + ' I=' + str(I)\
                             +' J=' + str(J));
             if g.STATE <= g.MAXRp:
@@ -170,7 +170,7 @@ def COMPILATION_LOOP():
                                 g.GRAMMAR_FLAGS(g.STMT_PTR, \
                                     g.GRAMMAR_FLAGS(g.STMT_PTR) | g.STMT_END_FLAG);
                                 g.STMT_END_PTR = g.STMT_PTR;
-                                if g.CONTROL[7]:
+                                if g.CONTROL[7] & 1:
                                     SYT_DUMP();
                         g.VAR[g.SP] = g.BCD[:];
                         g.FIXV[g.SP] = g.VALUE;

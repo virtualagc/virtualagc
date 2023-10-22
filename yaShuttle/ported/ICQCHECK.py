@@ -95,6 +95,6 @@ def ICQ_CHECK_TYPE(J, K=None):
     #  MUST NOW BE EITHER MATRIX, VECTOR, SCALAR, OR INTEGER
     if (I != g.INT_TYPE) and (I != g.SCALAR_TYPE):
         ERROR(d.CLASS_DI, 8, g.VAR[g.MP]);
-    if l.K: 
+    if l.K & 1: 
         return g.XBINT[g.SYT_TYPE(SYT) - g.BIT_TYPE];
     return g.XBINT[g.SCALAR_TYPE - g.BIT_TYPE];

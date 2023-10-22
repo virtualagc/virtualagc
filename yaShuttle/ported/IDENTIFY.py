@@ -838,7 +838,7 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                 goto = "LAB_OP_CHECK"
                 continue
         # Note the "if" rather than "elif" for fallthrough of OVERRID_ERR.
-        if (g.CONTEXT == 2 == None) or goto == "OVERRIDE_ERR":
+        if (g.CONTEXT == 2 and goto == None) or goto == "OVERRIDE_ERR":
             #  GO TO                               #  CASE 2
             if goto == None:
                 l.K = g.SYT_TYPE(l.I);

@@ -130,7 +130,7 @@ def HALMAT_INIT_CONST ():
     elif howto == 1:
         #  CASE 1, ONE ARGUMENT
         if g.PSEUDO_TYPE[g.ICQ] != 0:
-            if not MULTI_VALUED(): 
+            if not (MULTI_VALUED() & 1): 
                 ERROR(d.CLASS_DI, 4, g.VAR[g.MP]);
             ICQ_OUTPUT();
         else: 
@@ -154,7 +154,7 @@ def HALMAT_INIT_CONST ():
                         #   ROUND SCALARS IN INTEGER CONSTANT DECLARE
                         #   OR EMIT AN ERROR IF OUTSIDE OF RANGE OF INTEGERS
                         if g.SYT_TYPE(g.ID_LOC) == g.INT_TYPE:
-                            if ROUND_SCALAR(g.IC_LOC[I]):
+                            if ROUND_SCALAR(g.IC_LOC[I]) & 1:
                                 if g.IC_TYPE[I] == g.SCALAR_TYPE:
                                     g.IC_LOC[I] = SAVE_LITERAL(1, g.DW_AD());
                             else: 
