@@ -114,7 +114,7 @@ def ATTACH_SUBSCRIPT():
             if J & 1: 
                 ATTACH_SUB_ARRAY(0);
             ATTACH_SUB_COMPONENT(g.INX[g.INX[0]]);
-        elif (J & 1) & (SYT_ARRAY(g.FIXL[g.MP]) > 0) and not goto_SS_FUNNIES:
+        elif (J & 1) != 0 & (g.SYT_ARRAY(g.FIXL[g.MP]) > 0) and not goto_SS_FUNNIES:
             if I & 1: 
                 I = ATTACH_SUB_STRUCTURE(0);
             if (I != 2) and (g.INX[g.INX[0]] == 0): 
@@ -122,7 +122,7 @@ def ATTACH_SUBSCRIPT():
             ATTACH_SUB_ARRAY(g.INX[g.INX[0]]);
         else:
             goto_SS_FUNNIES = False
-            if (I & 1) & (SYT_ARRAY(FIXV(g.MP)) != 0):
+            if (I & 1) != 0 and (g.SYT_ARRAY(g.FIXV[g.MP]) != 0):
                 I = ATTACH_SUB_STRUCTURE(g.INX[g.INX[0]]);
             elif g.INX[g.INX[0]] > 0: 
                 ERROR(d.CLASS_SV, 3, g.VAR[g.MP]);

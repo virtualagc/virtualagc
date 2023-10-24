@@ -139,7 +139,7 @@ class advise:
 
 ADVISE = []  # Elements are advise class objects
 
-EXT_ARRAY = [0] * EXT_SIZE
+EXT_ARRAY = [0] * (EXT_SIZE + 1)
 IODEV = [0] * 9
 COMMON_RETURN_CODE = 0
 TABLE_ADDR = 0
@@ -176,15 +176,25 @@ LIT_PG = []  # Elements are lit_pg class objects.
 lit_char = bytearray([])
 
 # BUFFER FOR THE VMEM FILE 
+'''
+Here's what this looked like in XPL:
 
+    COMMON   BASED VMEMREC RECORD:
+             VMEM_NDX(840)  FIXED,          /* VMEM_NDX IS ONE VMEMPAGE */
+    END;
 
-class vmemrec:
+However ... VMEMREC provides the memory buffers for the Virtual Memory system,
+and the Virtual Memory system treats each buffer as an array of VMEM_PAGE_SIZE
+(= 4 * 840) *bytes*.  In other words, this odd definition as 840 32-bit 
+*integers* has little to do with how VMEMREC is actually used by the software.  
+Perhaps the purpose of defining it in terms of FIXED rather than as BIT(8) has 
+to do with insuring alignment on 32-bit memory boundaries; or perhaps not: the 
+reasoning is likely irrelevant for our purposes anyway.  
 
-    def __init__(self):
-        self.VMEM_NDX = [0] * 840  # VMEM_NDX IS ONE VMEMPAGE 
-
-
-VMEMREC = []  # Elements are vmemrec class objects.
+For *our* purposes, each buffer should be a bytearray of length VMEM_PAGE_SIZE, 
+and so I'm implementing VMEMREC that way in Python.
+'''
+VMEMREC = []  # Elements are bytearray objects of length VMEM_PAGE_SIZE.
 
 
 class init_tab:

@@ -11,13 +11,13 @@ C/ i.e., angle from x-axis in vertical plane in degrees; and distance.
         WRITE(6) 'Input a cartesian 3-vector (0,0,0 to quit):';
 E               -
 M       READ(5) P;
-E          -          -          -
+
 M       IF P  = 0 AND P  = 0 AND P  = 0 THEN EXIT;
 S           1          2          3
-E                                    -    -
+
 M       WRITE(6) 'BEARING =', ARCTAN(P  / P ) DEGREES_PER_RADIAN;
 S                                     2    1
-E                                      -          - 
+
 M       WRITE(6) 'ELEVATION =', ARCTAN(P  / ABVAL(P      )) DEGREES_PER_RADIAN;
 S                                       3          2 AT 1
 

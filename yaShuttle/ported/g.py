@@ -116,6 +116,8 @@ for parm in sys.argv[1:]:
         print('\tHAL-S-FC.py [OPTIONS] [<SOURCE.hal]')
         print('The allowed "modern" OPTIONS are:')
         print('--hal=SOURCE.hal Choose HAL/S source-code file (default stdin).')
+        print('                 Note that an extension of .hal is')
+        print('                 automatically added if missing.')
         print('--pfs            Compile for PFS (PASS).')
         print('--bfs            Compile for BFS. (Default is --pfs.)')
         print('--utf8           (Default.) Use UTF-8 in program listings.')
@@ -124,7 +126,8 @@ for parm in sys.argv[1:]:
         print('--no-syn         Do not synthesize HALMAT.')
         print('--sanity         Perform a sanity check on the Python port.')
         print('--help           Show this explanation.')
-        print('--dummy=X        This option is ignored.')
+        print('--dummy=X        This option is ignored. (It is useful for')
+        print('                 commenting out --hal switches.)')
         #print('--scan1          Use SCAN1 rather than SCAN')
         #print('--scan2          Use SCAN2 rather than SCAN')
         print('--debugwr        Print debugging messages for OUTPUTWR.')
@@ -1933,7 +1936,7 @@ def BLOCK_SRN_DATA(value=None):
     h.COMM[addr] = value
 
 
-SRN_BLOCK_RECORD = []  # Dynamically allocated list.
+SRN_BLOCK_RECORD = []  # Later changed to a pointer to a non-empty array.
 
 
 def COMSUB_END(value=None):
@@ -2326,10 +2329,9 @@ BIp = 63
 
 
 def BI_XREF_CELL(value=None):
-    global COMM
     if value == None:
-        return COMM[29]
-    COMM[29] = value
+        return h.COMM[29]
+    h.COMM[29] = value
 
 
 # LITERALS FOR SHAPING FUNCTION INDEXES INTO BI_XREF AND BI_XREF#
@@ -3390,7 +3392,6 @@ def XSET(flags):
     global STMT_TYPE
     STMT_TYPE |= flags
 
-
 SRN = [''] * (2 + 1)
 INCL_SRN = [''] * (2 + 1)
 SRN_PRESENT = 0
@@ -3420,15 +3421,15 @@ PCCOPY_INDEX = 3
 PC_LIMIT = 9  # LONGEST NAME
 if pfs:
     PC_INDEX = 6  # NUMBER OF NAMES
-    ALT_PCARGp = (0, 2, 1, 2, 2, 1, 3)
-    PCARGp = (0, 2, 1, 2, 3, 1, 3)
-    PCARGOFF = (0, 1, 3, 5, 7, 10, 11)
+    ALT_PCARGp = [0, 2, 1, 2, 2, 1, 3]
+    PCARGp = [0, 2, 1, 2, 3, 1, 3]
+    PCARGOFF = [0, 1, 3, 5, 7, 10, 11]
     PCARG_MAX = 13  # TOTAL NUMBER OF ARGS
 else:
     PC_INDEX = 5  # NUMBER OF NAMES
-    ALT_PCARGp = (0, 0, 1, 2, 2, 1)
-    PCARGp = (0, 0, 1, 2, 3, 1)
-    PCARGOFF = (0, 0, 1, 3, 5, 8)
+    ALT_PCARGp = [0, 0, 1, 2, 2, 1]
+    PCARGp = [0, 0, 1, 2, 3, 1]
+    PCARGOFF = [0, 0, 1, 3, 5, 8]
     PCARG_MAX = 8  # TOTAL NUMBER OF ARGS
 if pfs:
     PCARGTYPE = (0,

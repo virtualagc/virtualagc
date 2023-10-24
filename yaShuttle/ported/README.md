@@ -700,7 +700,7 @@ So there's clearly some misunderstanding on my part about what auto-conversions 
 <pre>
 DECLARE I FIXED;
 ...
-I = (A <= B);
+I = (A &lt;= B);
 </pre>
 then you'll find that I has either a value of 0 or of 1.
 
@@ -805,3 +805,53 @@ It's difficult to see any reasonably-elegant way to systematically handle this d
 At this point,  I'm handling the situation simply by examining each for-loop and determining what kinds of tests of the loop counter are performed after the loop terminates, and to implement whatever's needed on a case-by-case basis.  Unfortunately, even this isn't necessarily a perfect solution, because global variables are often chosen as loop counters, and there's no good way to know what tests could conceivably be performed on such global variables.
 
 The problem doesn't seem to extend to XPL `DO WHILE` loops implemented as Python `while` loops.
+
+# Virtual Memory
+
+## Virtual Memory Modules
+
+The "virtual memory" system used by the HAL/S compiler is implemented by the VMEM* modules in the HALINCL/ folder.  Almost all of pass 1 of the compiler doesn't seem to depend on this system in any way ... but eventually you reach a point in the implementation where it's unclear if you can do without it or not.  Unfortunately, as usual, there is no explanation at all provided in the program comments as to what any of this system is supposed to do.  Moreover, it apparently came after the documentation provided by IR-182-1, so there is no *written* documentation available to me that describes it or even mentions it.  Which means it simply has to be figured out from the source code.  That's what I'm going to try to do here.
+
+The starting point, I reckon, is the two modules VMEM1 and VMEM2, which are nothing but declarations.  
+
+The remaining modules, VMEM3, VMEM3A, VMEM3F, and VMEM5A are not truly different, but rather differ primarily in terms of which mix of functions they contain:
+
+  * VMEM3 contains all of the functions contained in the other 3 modules.
+  * VMEM3A removes the function `HEX1()`, and modifies functions that call it.  Perhaps more importantly, the error response in VMEM3A is simplified (or at least changed) from that of VMEM3.  Whereas VMEM3 relies on the global `ERROR()`, VMEM3A generally just prints an error message and then exits. 
+  * VMEM3F removes a variety of additional functions &mdash; `DUMP_VMEM_STATUS()`, `GET_CELL()`, `MISC_ALLOCATE()`, ..., `VMEM_INIT()`, `VMEM_AUGMENT()` &mdash; as well has having a simplified error-response.
+  * VMEM5A removes everything *except* the `GET_CELL()` function.
+
+Regarding which combinations of these various modules are *actually* supposed to be used, the only clue I can find is in occasional statements of the form:
+<pre>
+    /* INCLUDE ...: $%... */
+</pre>
+I'm not sure how reliable these are, since they sometimes appear in obscure modules where you wouldn't expect them (such as MIN vs ##DRIVER), but here's what I find:
+
+  * PASS1:  VMEM3
+  * PASS2:  VMEM3F + VMEM5A
+  * PASS3:  VMEM3A
+
+This is reasonable in terms of what little I know.  In summary, it would appear to me that insofar as pass 1 of the compiler is concerned, only VMEM1, VMEM2, and VMEM3 need to be ported.
+
+## Virtual Memory Framework
+
+The "physical" virtual memory is a random-access file &mdash; i.e., not something in physical memory &mdash; which for our purposes is always file number `VMEM_FILEp` (== 6), accessed via the built-in function `FILE()`.  For us, this translates to the file with filename "FILE6.bin".  The physical virtual memory consists of `VMEM_TOTAL_PAGES+1` (== 400) "pages" of `VMEM_PAGE_SIZE` (== 3360) bytes each.
+
+At any given time, `VMEM_LIM_PAGES+1` (== 3) page buffers in memory may buffer pages from the physical virtual memory.  Those memory-buffered pages are maintained by (among other things), the following variables:
+
+  * The list `VMEM_PAD_PAGE[]`, which contains the page numbers (0 through `VMEM_LIM_PAGES`) of the corresponding "physical" pages.
+  * The list `VMEM_PAD_ADDR[]`, which contains the "addresses" of the buffered pages.  The "addresses" were originally absolute numerical addresses in core memory, but that's a concept which is now (and I suspect forever) of no value.  We use it instead to contain references to the Python `bytearray` objects we use to represent the buffers, with each `bytearray` being `VMEM_PAGE_SIZE` bytes in size.
+
+There is a procedure (defined in VMEM3 *et al.*) called `MOVE(LENGTH, FROM, INTO)`, which originally was supposed to copy `LENGTH` bytes from the absolute numerical address `FROM` to the absolute numerical address `INTO` in core memory.  (Actually, it uses `LEGNTH`, but let's not concern ourselves with that novelty.)  None of those concepts are relevant to the current situation.  However, in our Python port we still need to copy a "certain amount" of data from "somewhere" to "somewhere else" &mdash; usually from a Python string or `bytearray` or list of some type into a virtual memory page buffer, or vice versa &mdash; so we need to adapt the `MOVE()` function to that purpose.  The adaptations are of several kinds:
+
+  * The `FROM` and `INTO` parameters may now take a variety of forms:
+       * They are integers for sources or destinations that are virtual-memory buffers.  Consider byte `A` within virtual-memory buffer `N`. It will be given the address `A + VMEM_PAGE_SIZE &times; N`.  This allows external code calling `MOVE()` to continue to perform simple arithmetic in Python on the absolute addresses in the manner the XPL was wont to.
+       * For a source or destination that's a Python list, string, or bytearray, the `FROM` or `INTO` can instead be the Python ordered pair `(OBJECT, INDEX)`, where `OBJECT` is the reference to the list, `bytearray`, or string, and `INDEX` is the starting index into the list for the transfer. 
+       * Or alternatively, `FROM` or `INTO` can just be a list, string, or bytearray reference, in which case it is assumed that the starting offset into it is 0.
+  * `LENGTH` remains the number of bytes to transfer, but *only* in the case of a transfer from a location in a string or virtual-memory buffer to another string or virtual-memory-buffer location.  In the case of an list-to-list, list-to-buffer, or buffer-to-list transfer, it is instead the number of list elements to transfer.
+  * In XPL, `MOVE()` is completely agnostic as to the nature of the data being transferred.  This is no longer the case in Python, since Python data must be converted to or from IBM data codings, or at least data codings of the proper size in bytes, and it may as well be to the IBM coding.  This means that when `MOVE()` is given a reference to a list, it must *recognize* that list in order to know how to perform the necessary data conversions, or even how to extract data from the list elements at all.  As a result, only a specific set of Python lists hardcoded into the `MOVE()` function can participate.
+  * In the Python version of `MOVE()`, only integral numbers of list elements, aligned on list-element boundaries, can be transferred.
+  * In the case of `INTO` referring to a string, whatever string is referred to cannot be changed in place, since strings in Python are immutable.  Instead, the `MOVE()` function returns the address of a new string (of the same length as the original) which the calling code should use to replace the original one.
+
+In principle, in XPL `MOVE()` could also be used to transfer non-list data, or data not aligned on the obvious boundaries.  If this situation needs to be supported, some rethinking may become necessary.
+

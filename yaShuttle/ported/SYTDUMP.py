@@ -13,10 +13,25 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
+import HALINCL.VMEM2 as v2
 from BLANK   import BLANK
 from HEX     import HEX
 from IFORMAT import I_FORMAT
 from PAD     import PAD
+
+# For accessing continuous options in the memory neighborhood of SDL_OPTION.
+# I'm not sure how many of them are accessed in this way.
+def sdl_option(n):
+    if n == -2:
+        return g.SRN_PRESENT
+    elif n == -1:
+        return g.ADDR_PRESENT
+    elif n == 0:
+        return g.SDL_OPTION
+    elif n == 1:
+        return g.SREF_OPTION
+    print("Illegal SDL_OPTION(%d)" % n, file=sys.stderr)
+    return None
 
 '''
  /***************************************************************************/
@@ -303,9 +318,10 @@ lPRINT_VAR_NAMES = cPRINT_VAR_NAMES()
 def SYT_DUMP():
     l = lSYT_DUMP  # Local variables.
     
-    # This import is from within the function in order to avoid a 
+    # These imports are from within the function in order to avoid a 
     # "partially initialized module" circular import error.
     from ERRORS import ERRORS
+    from HALINCL.VMEM3 import GET_CELL
     
     # PRINTS THE SYMBOL TABLE HEADER.
     def PRINT_SYMBOL_HEADER(STRUC, NEW_PAGE):
@@ -438,7 +454,7 @@ def SYT_DUMP():
             # "NOT REFERENCED" MESSAGE WILL NOT BE PRINTED.
             if ((g.SYT_TYPE(l.I) & g.STMT_LABEL) == g.STMT_LABEL) and \
                     ((SHR(g.XREF(PTR), 13) & 7) == 4) \
-                    and not g.PROCESSING_BI:
+                    and not PROCESSING_BI:
                 l.LABEL_ON_END = g.TRUE;
                 g.XREF(TMP_PTR, (g.XREF(TMP_PTR) & 0xFFFF) | \
                                     (g.XREF(PTR) & 0xFFFF0000));
@@ -458,7 +474,7 @@ def SYT_DUMP():
 
     def STORE_BI_XREF():
         ll = lSTORE_BI_XREF
-        g.BI_XREF_CELL(GET_CELL((g.BIp + 1) * 4, ADDR(ll.NODE_H), g.MODF));
+        g.BI_XREF_CELL(GET_CELL((g.BIp + 1) * 4, v2.MODF)[0]);
         ll.PTR = 0;
         for ll.I in range(0, g.BIp + 1):
             while len(ll.NODE_H) < ll.PTR + 2:
@@ -799,12 +815,12 @@ def SYT_DUMP():
                                     ADD_ATTR(TRUNCATE(SUBSTR(l.CHAR_ATTR, l.KL * 11, 11)));
                             if not g.SDL_OPTION:
                                 if (l.L & g.EXTERNAL_FLAG) != 0:
-                                    ADD_ATTR('VERSION=' + g.SDL_OPTION(l.I));
+                                    ADD_ATTR('VERSION=' + str(sdl_option(l.I)));
                             if (l.L & g.LOCK_FLAG) != 0:
-                                if g.SDL_OPTION(l.I) == 0xFF:
+                                if sdl_option(l.I) == 0xFF:
                                     ADD_ATTR(SUBSTR(l.CHAR_ATTR, 0, 6));
                                 else:
-                                    ADD_ATTR(SUBSTR(l.CHAR_ATTR, 0, 5) + g.SDL_OPTION(l.I));
+                                    ADD_ATTR(SUBSTR(l.CHAR_ATTR, 0, 5) + sdl_option(l.I));
                             if g.CONTROL[0xF]:
                                 # EXTRA SYMBOL TABLE DUMP REQUESTED
                                 l.T = HEX(l.L);

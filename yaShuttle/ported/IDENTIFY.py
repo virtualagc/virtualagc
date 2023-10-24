@@ -834,7 +834,7 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                     # Falls through
                 if goto == None:
                     l.I = l.J;
-            if goto == NOne:
+            if goto == None:
                 goto = "LAB_OP_CHECK"
                 continue
         # Note the "if" rather than "elif" for fallthrough of OVERRID_ERR.

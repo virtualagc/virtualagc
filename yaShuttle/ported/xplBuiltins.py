@@ -14,6 +14,7 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
 '''
 
 import sys
+import os
 from time import time_ns
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
@@ -21,15 +22,22 @@ import json
 import math
 import ebcdic
 
+scriptFolder = os.path.dirname(__file__) # Requires a / at the end.
+
 sourceFile = None  # Use stdin by default for HAL/S source-code file.
 outUTF8 = True
+listing2 = False
 for parm in sys.argv[1:]:
     if parm.startswith("--hal="):
         sourceFile = parm[6:]
+        if not sourceFile.endswith(".hal"):
+            sourceFile = sourceFile + ".hal"
     elif parm == "--ascii":
         outUTF8 = False
     elif parm == "--utf8":
         outUTF8 = True
+    elif parm == "LISTING2":
+        listing2 = True
 
 
 # Python's native round() function uses a silly method (in the sense that it is
@@ -237,13 +245,17 @@ inputDevices[0] = {
     "ptr":-1,
     "blob": dummy
     }
-f = open("LISTING2.hal", "w")  # Secondary output listing
-outputDevices[2] = {
-    "file": f,
-    "open": True,
-    "blob": []
-    }
-f = open("ERRORLIB.json", "r")  # File of error message types.
+if listing2:
+    f = open("LISTING2.hal", "w")  # Secondary output listing
+    outputDevices[2] = {
+        "file": f,
+        "open": True,
+        "blob": []
+        }
+try:
+    f = open("ERRORLIB.json", "r")  # File of error message types.
+except:
+    f = open(scriptFolder + "/ERRORLIB.json", "r")
 dummy = json.load(f)
 inputDevices[5] = {
     "file": f,
@@ -534,8 +546,8 @@ def MONITOR(function, arg2=None, arg3=None):
         return "REL32V0   "
     
     elif function == 31:
-        # This appears to be related somehow to control of virtual memory,
-        # something of which we have no need.
+        # This is used by the virtual-memory modules (VMEM3).  I have no idea
+        # what it may do, but it doesn't seem to return a value.
         pass
         
     elif function == 32:  # Returns the 'storage increment', whatever that may be.
@@ -867,3 +879,6 @@ def INLINE(arg1=None, arg2=None, arg3=None, arg4=None, arg5=None, \
            arg6=None, arg7=None, arg8=None, arg9=None, arg10=None):
     return
 
+def EXIT():
+    sys.exit(1)
+    

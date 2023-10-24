@@ -95,7 +95,7 @@ def CHECK_CONFLICTS():
             if g.TYPE==0: 
                 if g.FACTORED_TYPE==0:
                     g.TYPE=g.DEFAULT_TYPE;
-                    DOUBLELIT = g.FALSE;
+                    g.DOUBLELIT = g.FALSE;
                 else: 
                     g.TYPE=g.FACTORED_TYPE;
             elif g.FACTORED_TYPE!=0:

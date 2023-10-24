@@ -188,7 +188,7 @@ def END_ANY_FCN():
             # TEMP PTR TO SECOND ARG
             g.PTR[g.SP - 2] = MAXPTR + 2;
             # DITTO FOR THIRD ARG
-            BI_FLAGS = g.BI_FLAGS[g.FCN_LOC[g.FCN_LV]];
+            g.BI_FLAGS[0] = g.BI_FLAGS[g.FCN_LOC[g.FCN_LV]];
             BI_INFO = g.BI_INFO[g.FCN_LOC[g.FCN_LV]];
             ARGp = SHR(BI_INFO, 16) & 0xFF;
             ARGPTR = BI_INFO & 0xFF;
@@ -252,13 +252,13 @@ def END_ANY_FCN():
                 elif ba == 3:
                     # MATRIX TYPE
                     # DO
-                        if (BI_FLAGS & 0x80) != 0: 
+                        if (g.BI_FLAGS[0] & 0x80) != 0: 
                             g.PSEUDO_LENGTH[g.PTR[g.MP]] = \
                                 SHL(g.PSEUDO_LENGTH[MAXPTR], 8) | \
                                 SHR(g.PSEUDO_LENGTH[MAXPTR], 8);
                         else: 
                             g.PSEUDO_LENGTH[g.PTR[g.MP]] = g.PSEUDO_LENGTH[MAXPTR];
-                        if (BI_FLAGS & 0x40) != 0:  # DO
+                        if (g.BI_FLAGS[0] & 0x40) != 0:  # DO
                             if (g.PSEUDO_LENGTH[MAXPTR] & 0xFF) != \
                                     SHR(g.PSEUDO_LENGTH[MAXPTR], 8):
                                 ERROR(d.CLASS_FD, 6, g.VAR[g.MP]);
@@ -320,17 +320,17 @@ def END_ANY_FCN():
                 SETUP_VAC(g.MP, g.PSEUDO_TYPE[g.PTR[g.MP]]);
             # END
             if goto == "BI_FUNCS_DONE": goto = None
-            if BI_FLAGS: 
-                ERROR(d.CLASS_XS, 1,
-            SUBSTR(g.BI_NAME[g.BI_INDX[g.FCN_LOC[g.FCN_LV]]], \
-                    g.BI_LOC[g.FCN_LOC[g.FCN_LV]], 10));
+            if g.BI_FLAGS[0] & 1: 
+                ERROR(d.CLASS_XS, 1, \
+                      SUBSTR(g.BI_NAME[g.BI_INDX[g.FCN_LOC[g.FCN_LV]]], \
+                             g.BI_LOC[g.FCN_LOC[g.FCN_LV]], 10));
             if goto == "BI_FUNCS_EXIT": goto = None
         # END
     elif fn == 2:
         #  ARITHMETIC SHAPERS
         # DO
             ARGp = g.PTR[g.MP];
-            g.TEMP2 = XMSHP(g.FCN_LOC[g.FCN_LV]);
+            g.TEMP2 = g.XMSHP[g.FCN_LOC[g.FCN_LV]];
             if g.FCN_LOC[g.FCN_LV] >= 2:  # DO
                 #  INTEGER AND SCALAR
                 RESET_ARRAYNESS;
@@ -463,8 +463,8 @@ def END_ANY_FCN():
         # DO
             I = g.PSEUDO_TYPE[MAXPTR];
             BI_INFO = g.BI_INFO[g.FCN_LOC[g.FCN_LV]];
-            BI_FLAGS = g.BI_FLAGS[g.FCN_LOC[g.FCN_LV]];
-            if BI_FLAGS: 
+            g.BI_FLAGS[0] = g.BI_FLAGS[g.FCN_LOC[g.FCN_LV]];
+            if g.BI_FLAGS[0] & 1: 
                 ERROR(d.CLASS_XS, 1, \
                       SUBSTR(g.BI_NAME[g.BI_INDX[g.FCN_LOC[g.FCN_LV]]], \
                               g.BI_LOC[g.FCN_LOC[g.FCN_LV]], 10));
@@ -473,7 +473,7 @@ def END_ANY_FCN():
             if g.FCN_ARG[g.FCN_LV] > 1: ERROR(d.CLASS_FN, 4, g.VAR[g.MP]);
             HALMAT_POP(g.XLFNC, 1, 0, g.FCN_LV);
             HALMAT_PIP(g.FCN_LOC[g.FCN_LV], g.XIMD, I, 0);
-            if SHR(BI_FLAGS, 4): I = SHR(BI_INFO, 24);
+            if SHR(g.BI_FLAGS[0], 4): I = SHR(BI_INFO, 24);
             SETUP_VAC(g.MP, I);
             HALMAT_POP(g.XSFND, 0, g.XCO_N, g.FCN_LV);
             RESET_ARRAYNESS();

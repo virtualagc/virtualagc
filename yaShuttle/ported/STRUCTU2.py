@@ -9,6 +9,8 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-10-10 RSB  Ported
 '''
 
+import g
+
 #*************************************************************************
 # PROCEDURE NAME:  STRUCTURE_FCN
 # MEMBER NAME:     STRUCTU2

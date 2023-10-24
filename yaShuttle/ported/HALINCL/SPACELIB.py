@@ -11,6 +11,7 @@ History:    2023-08-28 RSB  Began porting process from XPL.
 
 import g
 import HALINCL.COMMON as h
+import HALINCL.VMEM1 as v1
 
 '''
 /**********************************************************************/        00000010
@@ -148,6 +149,9 @@ def RECORD_CONSTANT(array, topIndex, options):
     elif array is h.LIT_PG:
         for i in range(size):
             array.append(h.lit_pg())
+    elif array is h.VMEMREC:
+        for i in range(size):
+            array.append(bytearray([0] * v1.VMEM_PAGE_SIZE))
     else:
         for i in range(size):
             array.append(None)

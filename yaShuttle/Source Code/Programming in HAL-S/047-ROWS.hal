@@ -13,7 +13,7 @@ C/ It illustrates slicing in vectors and matrices.
 C  MULTIPLY A ROW BY A (NONZERO) CONSTANT:
 
   M = MM;
-E    -        -
+  
 M    M    = C MM   ;
 S     I,*       I,*
   WRITE(6) M;
@@ -21,7 +21,7 @@ S     I,*       I,*
 C  ADD A CONSTANT MULTIPLE OF ROW J TO ROW I:
 
   M = MM;
-E    -      -         -
+
 M    M    = MM    + C MM   ;
 S     I,*     I,*       J,*
   WRITE(6) M;
@@ -29,15 +29,13 @@ S     I,*     I,*       J,*
 C  EXCHANGE ROWS I AND J:
  
   M = MM;
-E     -     -
+
 M    TEMP = M   ;
 S            I,*
 
-E    -      -
 M    M    = M   ;
 S     I,*    J,*
 
-E    -       -
 M    M    = TEMP;
 S     J,*
   WRITE(6) M;

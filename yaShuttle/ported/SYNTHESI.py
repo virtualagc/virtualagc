@@ -42,17 +42,23 @@ import g
 import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
 import HALINCL.COMDEC19 as c19
+import HALINCL.SPACELIB as sl
 from ADDANDSU import ADD_AND_SUBTRACT
 from ARITHLIT import ARITH_LITERAL
+from ARITHSHA import ARITH_SHAPER_SUB
 from ASSOCIAT import ASSOCIATE
 from ATTACHS4 import ATTACH_SUBSCRIPT
+from BITLITER import BIT_LITERAL
 from BLOCKSUM import BLOCK_SUMMARY
 from CALLSCAN import CALL_SCAN
 from CHECKARR import CHECK_ARRAYNESS
 from CHECKASS import CHECK_ASSIGN_CONTEXT
 from CHECKCO2 import CHECK_CONFLICTS
 from CHECKCON import CHECK_CONSISTENCY
+from CHECKEV2 import CHECK_EVENT_CONFLICTS
+from CHECKEVE import CHECK_EVENT_EXP
 from CHECKIMP import CHECK_IMPLICIT_T
+from CHECKNAM import CHECK_NAMING
 from COMPRESS import COMPRESS_OUTER_REF
 from DESCORE  import DESCORE
 from EMITARRA import EMIT_ARRAYNESS
@@ -62,6 +68,7 @@ from EMITSMRK import EMIT_SMRK
 from EMITSUBS import EMIT_SUBSCRIPT
 from ENDANYFC import END_ANY_FCN
 from ERROR    import ERROR
+from ERRORSUB import ERROR_SUB
 from GETICQ   import GET_ICQ
 from GETLITER import GET_LITERAL
 from HALMATBA import HALMAT_BACKUP
@@ -85,6 +92,7 @@ from OUTPUTWR import OUTPUT_WRITER
 from PROCESS2 import PROCESS_CHECK
 from PUSHFCNS import PUSH_FCN_STACK
 from PUSHINDI import PUSH_INDIRECT
+from READALLT import READ_ALL_TYPE
 from RESETARR import RESET_ARRAYNESS
 from SAVEARRA import SAVE_ARRAYNESS
 from SETBLOCK import SET_BLOCK_SRN
@@ -93,9 +101,11 @@ from SETSYTEN import SET_SYT_ENTRIES
 from SETUPCAL import SETUP_CALL_ARG
 from SETUPNOA import SETUP_NO_ARG_FCN
 from SETUPVAC import SETUP_VAC
+from SETBIXRE import SET_BI_XREF
 from SETXREF  import SET_XREF
 from SETXREFR import SET_XREF_RORS
 from SRNUPDAT import SRN_UPDATE
+from STABHDR  import STAB_HDR
 from STACKDUM import STACK_DUMP
 from STARTNOR import START_NORMAL_FCN
 from UNARRAY2 import UNARRAYED_SCALAR
@@ -119,7 +129,10 @@ from HALINCL.SAVELITE import SAVE_LITERAL
 # consisting of the rule number (starting from 1), a tab, and the text of the 
 # rule, so this needs a little massaging to put it into useful form.
 PRODUCTION_NUMBERS = [None] # First entry (PRODUCTION_NUMBER == 0) is a dummy.
-f = open("PRODUCTION_NUMBERS.txt", "r")
+try:
+    f = open("PRODUCTION_NUMBERS.txt", "r")
+except:
+    f = open(scriptFolder + "/PRODUCTION_NUMBERS.txt", "r")
 for line in f:
     PRODUCTION_NUMBERS.append(line.rstrip().split('\t')[1])
 f.close()
@@ -832,13 +845,13 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         g.PSEUDO_TYPE[0] = g.SCALAR_TYPE;
                         MATCH_SIMPLES(g.MP, 0);
                     elif g.PSEUDO_FORM[g.I] != g.XLIT:
-                       g.TEMP2 = XSIEX;
+                       g.TEMP2 = g.XSIEX;
                        goto = "REGULAR_EXP"
                        continue
                     else:
                        g.TEMP = MAKE_FIXED_LIT(g.LOC_P[g.I]);
                        if g.TEMP < 0: 
-                           g.TEMP2 = XSIEX;
+                           g.TEMP2 = g.XSIEX;
                            goto = "REGULAR_EXP"
                            continue
                 # FINISH_EXP:
@@ -868,8 +881,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 22:  # reference 220
         #  <ARITH FUNC HEAD>  ::=  <ARITH CONV> <SUBSCRIPT>
         g.NOSPACE();
-        g.TEMP, NEXT_SUB = g.PTR[g.SP];
-        g.PTR_TOP, g.PTR[g.MP] = g.TEMP;
+        g.NEXT_SUB = g.PTR[g.SP];
+        g.TEMP = g.NEXT_SUB
+        g.PTR_TOP = g.TEMP
+        g.PTR[g.MP] = g.TEMP;
         if g.INX[g.TEMP] == 0: 
             goto = "DEFAULT_SHAPER"
         else:
@@ -883,8 +898,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_QS, 2);
                     goto = "DEFAULT_SHAPER"
                 else:
-                    g.TEMP_SYN = ARITH_SHAPER_SUB(MAT_DIM_LIM);
-                    g.TEMP1 = ARITH_SHAPER_SUB(MAT_DIM_LIM);
+                    g.TEMP_SYN = ARITH_SHAPER_SUB(g.MAT_DIM_LIM);
+                    g.TEMP1 = ARITH_SHAPER_SUB(g.MAT_DIM_LIM);
                     g.PSEUDO_LENGTH[g.TEMP] = SHL(g.TEMP_SYN, 8) | g.TEMP1;
                     g.INX[g.TEMP] = g.TEMP_SYN * g.TEMP1;
             elif fm == 1:
@@ -893,8 +908,9 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     ERROR(d.CLASS_QS, 3);
                     goto = "DEFAULT_SHAPER"
                 else:
-                    g.TEMP_SYN = ARITH_SHAPER_SUB(VEC_LENGTH_LIM);
-                    g.PSEUDO_LENGTH[g.TEMP], g.INX[g.TEMP] = g.TEMP_SYN;
+                    g.TEMP_SYN = ARITH_SHAPER_SUB(g.VEC_LENGTH_LIM);
+                    g.PSEUDO_LENGTH[g.TEMP] = g.TEMP_SYN
+                    g.INX[g.TEMP] = g.TEMP_SYN;
             elif fm in (2, 3):
                 #  2 - SCALAR
                 #  3 - INTEGER
@@ -927,7 +943,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 g.INX[g.PTR_TOP] = g.TEMP * g.TEMP;
             elif fm == 1:
                 #  VECTOR
-                g.PSEUDO_LENGTH[g.PTR_TOP], g.INX[g.PTR_TOP] = g.DEF_VEC_LENGTH;
+                g.PSEUDO_LENGTH[g.PTR_TOP] = g.DEF_VEC_LENGTH
+                g.INX[g.PTR_TOP] = g.DEF_VEC_LENGTH;
             elif fm == 2:
                 #  SCALAR
                 g.INX[g.PTR_TOP] = 0;
@@ -939,24 +956,24 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if PUSH_FCN_STACK(2): 
             g.FCN_LOC[g.FCN_LV] = g.FIXL[g.MP];
             SAVE_ARRAYNESS();
-            HALMAT_POP(XSFST, 0, g.XCO_N, g.FCN_LV);
+            HALMAT_POP(g.XSFST, 0, g.XCO_N, g.FCN_LV);
             g.VAL_P[g.PTR_TOP] = g.LAST_POPp;
     elif PRODUCTION_NUMBER == 23:  # reference 230
         #  <ARITH CONV>  ::=  INTEGER
         g.FIXL[g.MP] = 3;
-        SET_BI_XREF(INT_NDX);
+        SET_BI_XREF(g.INT_NDX);
     elif PRODUCTION_NUMBER == 24:  # reference 240
         #  <ARITH CONV>  ::=  SCALAR
         g.FIXL[g.MP] = 2;
-        SET_BI_XREF(SCLR_NDX);
+        SET_BI_XREF(g.SCLR_NDX);
     elif PRODUCTION_NUMBER == 25:  # reference 250
         #  <ARITH CONV>  ::=  VECTOR
         g.FIXL[g.MP] = 1;
-        SET_BI_XREF(VEC_NDX);
+        SET_BI_XREF(g.VEC_NDX);
     elif PRODUCTION_NUMBER == 26:  # reference 260
         #  <ARITH CONV>  ::=  MATRIX
         g.FIXL[g.MP] = 0;
-        SET_BI_XREF(MTX_NDX);
+        SET_BI_XREF(g.MTX_NDX);
     elif PRODUCTION_NUMBER == 27:  # reference 270
         #  <PRIMARY> ::= <ARITH VAR>
         pass;
@@ -1063,7 +1080,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             ERROR(d.CLASS_PF, 1);
         elif g.BLOCK_MODE[g.NEST] == g.UPDATE_MODE: 
             ERROR(d.CLASS_UP, 2);
-        HALMAT_POP(XRTRN, 0, 0, 0);
+        HALMAT_POP(g.XRTRN, 0, 0, 0);
         g.XSET(0x7);
         goto = "FIX_NOLAB"
     elif PRODUCTION_NUMBER == 53:  # reference 530
@@ -1098,7 +1115,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             STRUCTURE_COMPARE(g.VAR_LENGTH(LOC_P), g.FIXL[g.MPP1], d.CLASS_PF, 7);
         elif g.TEMP == 11:
             pass;
-        HALMAT_TUPLE(XRTRN, 0, g.MPP1, 0, 0);
+        HALMAT_TUPLE(g.XRTRN, 0, g.MPP1, 0, 0);
         HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, g.PSEUDO_TYPE[g.PTR[g.MPP1]], 0);
         g.PTR_TOP = g.PTR[g.MPP1] - 1;
         goto = "FIX_NOLAB"
@@ -1222,50 +1239,50 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 71:  # reference 710
         #  <BASIC  STATEMENT>  ::=  <SIGNAL CLAUSE>  ;
         g.XSET(0xD);
-        HALMAT_TUPLE(XSGNL, 0, g.MP, 0, g.INX[g.PTR[g.MP]]);
+        HALMAT_TUPLE(g.XSGNL, 0, g.MP, 0, g.INX[g.PTR[g.MP]]);
         g.PTR_TOP = g.PTR[g.MP] - 1;
         goto = "FIX_NOLAB"
     elif PRODUCTION_NUMBER == 72:  # reference 720
         #  <BASIC STATEMENT>  ::=  SEND ERROR <SUBSCRIPT>  ;
         ERROR_SUB(2);
-        HALMAT_TUPLE(XERSE, 0, g.MP + 2, 0, 0, g.FIXV[g.MP] & 0x3F);
+        HALMAT_TUPLE(g.XERSE, 0, g.MP + 2, 0, 0, g.FIXV[g.MP] & 0x3F);
         SET_OUTER_REF(g.FIXV[g.MP], 0x0000);
         g.PTR_TOP = g.PTR[g.MP + 2] - 1;
         goto = "FIX_NOLAB"
     elif PRODUCTION_NUMBER == 73:  # reference 730
         #  <BASIC STATEMENT>  ::=  <ON CLAUSE>  ;
-        HALMAT_TUPLE(XERON, 0, g.MP, 0, g.FIXL[g.MP], g.FIXV[g.MP] & 0x3F);
+        HALMAT_TUPLE(g.XERON, 0, g.MP, 0, g.FIXL[g.MP], g.FIXV[g.MP] & 0x3F);
         g.PTR_TOP = g.PTR[g.MP] - 1;
         goto = "FIX_NOLAB"
     elif PRODUCTION_NUMBER == 74:  # reference 740
         #  <BASIC STATEMENT>  ::=  <ON CLAUSE> AND <SIGNAL CLAUSE> ;
-        HALMAT_TUPLE(XERON, 0, g.MP, g.MP + 2, g.FIXL[g.MP], g.FIXV[g.MP] & 0x3F, 0, 0, g.INX[g.PTR[g.MP + 2]]);
+        HALMAT_TUPLE(g.XERON, 0, g.MP, g.MP + 2, g.FIXL[g.MP], g.FIXV[g.MP] & 0x3F, 0, 0, g.INX[g.PTR[g.MP + 2]]);
         g.PTR_TOP = g.PTR[g.MP] - 1;
         goto = "FIX_NOLAB"
     elif PRODUCTION_NUMBER == 75:  # reference 750
         #  <BASIC STATEMENT>  ::=  OFF ERROR <SUBSCRIPT>  ;
         ERROR_SUB(0);
-        HALMAT_TUPLE(XERON, 0, g.MP + 2, 0, 3, g.FIXV[g.MP] & 0x3F);
+        HALMAT_TUPLE(g.XERON, 0, g.MP + 2, 0, 3, g.FIXV[g.MP] & 0x3F);
         g.PTR_TOP = g.PTR[g.MP + 2] - 1;
         goto = "FIX_NOLAB"
     elif PRODUCTION_NUMBER == 76:  # reference 760
         #  <BASIC STATEMENT>  ::=  <% MACRO NAME> ;
-        HALMAT_POP(XPMHD, 0, 0, g.FIXL[g.MP]);
-        HALMAT_POP(XPMIN, 0, 0, g.FIXL[g.MP]);
-        g.XSET (PC_STMT_TYPE_BASE + g.FIXL[g.MP]);
-        if PCARGp(g.FIXL[g.MP]) != 0:
-            if ALT_PCARGp(g.FIXL[g.MP]) != 0:
+        HALMAT_POP(g.XPMHD, 0, 0, g.FIXL[g.MP]);
+        HALMAT_POP(g.XPMIN, 0, 0, g.FIXL[g.MP]);
+        g.XSET (g.PC_STMT_TYPE_BASE + g.FIXL[g.MP]);
+        if g.PCARGp[g.FIXL[g.MP]] != 0:
+            if g.ALT_PCARGp[g.FIXL[g.MP]] != 0:
                 ERROR(d.CLASS_XM, 2, g.VAR[g.MP]);
         goto = "FIX_NOLAB"
     elif PRODUCTION_NUMBER == 77:  # reference 770
         #  <BASIC STATEMENT>  ::=  <% MACRO HEAD> <% MACRO ARG> ) ;
-        if PCARGp != 0:
-            if ALT_PCARGp != 0:
+        if g.PCARGp[0] != 0:
+            if g.ALT_PCARGp[0] != 0:
                 ERROR(d.CLASS_XM, 2, g.VAR[g.MP]);
-        HALMAT_TUPLE(XPMAR, 0, g.MPP1, 0, 0, g.PSEUDO_TYPE[g.PTR[g.MPP1]]);
+        HALMAT_TUPLE(g.XPMAR, 0, g.MPP1, 0, 0, g.PSEUDO_TYPE[g.PTR[g.MPP1]]);
         g.PTR_TOP = g.PTR[g.MPP1] - 1;
         g.DELAY_CONTEXT_CHECK = g.FALSE;
-        HALMAT_POP(XPMIN, 0, 0, g.FIXL[g.MP]);
+        HALMAT_POP(g.XPMIN, 0, 0, g.FIXL[g.MP]);
         g.ASSIGN_ARG_LIST = g.FALSE;  # RESTORE LOCK GROUP CHECKING
         
         # RESET PCARGOFF HERE SO THAT IT CAN BE USED
@@ -1286,26 +1303,26 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             # CHECK PCARGBITS OF THE %MACRO ARGUMENT TO
             # SEE IF IT REQUIRES NAME CONTEXT CHECKING.
             # IF SO, SET NAMING FLAG.
-            if ((g.PCARGBITS[g.PCARGOFF] & 0x80) != 0):
+            if ((g.PCARGBITS[g.PCARGOFF[0]] & 0x80) != 0):
                 g.NAMING = g.TRUE;
             
-            g.ALT_PCARG[0] = g.ALT_PCARGp[g.FIXL[g.MP]];
-        g.XSET (PC_STMT_TYPE_BASE + g.FIXL[g.MP]);
-        HALMAT_POP(XPMHD, 0, 0, g.FIXL[g.MP]);
+            g.ALT_PCARGp[0] = g.ALT_PCARGp[g.FIXL[g.MP]];
+        g.XSET (g.PC_STMT_TYPE_BASE + g.FIXL[g.MP]);
+        HALMAT_POP(g.XPMHD, 0, 0, g.FIXL[g.MP]);
         g.DELAY_CONTEXT_CHECK = g.TRUE;
-        if g.FIXL[g.MP] == PCCOPY_INDEX:
+        if g.FIXL[g.MP] == g.PCCOPY_INDEX:
             g.ASSIGN_ARG_LIST = g.TRUE;  # INHIBIT LOCK CHECK IN ASSOCIATE
     elif PRODUCTION_NUMBER == 79:  # reference 790
         #  <% MACRO HEAD>  ::=  <% MACRO HEAD> <% MACRO ARG> ,
-        HALMAT_TUPLE(XPMAR, 0, g.MPP1, 0, 0, g.PSEUDO_TYPE[g.PTR[g.MPP1]]);
+        HALMAT_TUPLE(g.XPMAR, 0, g.MPP1, 0, 0, g.PSEUDO_TYPE[g.PTR[g.MPP1]]);
         g.PTR_TOP = g.PTR[g.MPP1] - 1;
     elif PRODUCTION_NUMBER == 80:  # reference 800
         #  <% MACRO ARG>  ::=  <NAME VAR>
-        if g.PCARGOFF > 0:
-            if PCARGp == 0: 
-                g.PCARGOFF = 0;
+        if g.PCARGOFF[0] > 0:
+            if g.PCARGp[0] == 0: 
+                g.PCARGOFF[0] = 0;
             else:
-                g.TEMP = g.PCARGBITS[g.PCARGOFF];
+                g.TEMP = g.PCARGBITS[g.PCARGOFF[0]];
                 if (g.TEMP & 0x1) == 0: 
                     ERROR(d.CLASS_XM, 5);
                 else:
@@ -1314,7 +1331,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         l.H1 = (l.H1 & 0xF) + 10;
                     elif g.TEMP_SYN == 0: 
                         l.H1 = l.H1 + 20;
-                    if (SHL(1, l.H1) & g.PCARGTYPE[g.PCARGOFF]) == 0:
+                    if (SHL(1, l.H1) & g.PCARGTYPE[g.PCARGOFF[0]]) == 0:
                         ERROR(d.CLASS_XM, 4);  # ILLEGAL TYPE
                     if g.EXT_P[g.PTR[g.MP]] > 0: 
                         if SHR(g.TEMP, 6) & 1:
@@ -1342,34 +1359,34 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                                 ERROR(d.CLASS_XM, 8);
                         l.H2 = g.VAL_P[g.PTR[g.MP]];
                         # NO SUBSCRIPTS ARE ALLOWED ON THE SOURCE OF %NAMEBIAS
-                        if g.PCARGOFF == 2:
+                        if g.PCARGOFF[0] == 2:
                             if SHR(g.TEMP, 2) & 1:
                                 if SHR(l.H2, 5) & 1: 
                                     ERROR(d.CLASS_XM, 9);
                         elif SHR(g.TEMP, 2) & 1:
                             if SHR(l.H2, 4) & 1: 
                                 ERROR(d.CLASS_XM, 9);
-                g.PCARGOFF = g.PCARGOFF + 1;
+                g.PCARGOFF[0] = g.PCARGOFF[0] + 1;
                 
                 # CHECK PCARGBITS OF THE %MACRO ARGUMENT TO
                 # SEE IF IT REQUIRES NAME CONTEXT CHECKING.
                 # IF SO, SET NAMING FLAG.
-                if ((g.PCARGBITS[g.PCARGOFF] & 0x80) != 0):
+                if ((g.PCARGBITS[g.PCARGOFF[0]] & 0x80) != 0):
                    g.NAMING = g.TRUE;
                 
             g.PCARGp[0] = g.PCARGp[0] - 1;
             g.ALT_PCARGp[0] = g.ALT_PCARGp[0] - 1;
     elif PRODUCTION_NUMBER == 81:  # reference 810
         #  <% MACRO ARG>  ::=  <CONSTANT>
-        if g.PCARGOFF > 0: 
-            if PCARGp == 0: 
-                g.PCARGOFF = 0;
-            elif (g.PCARGBITS[g.PCARGOFF] & 0x8) == 0: 
+        if g.PCARGOFF[0] > 0: 
+            if g.PCARGp[0] == 0: 
+                g.PCARGOFF[0] = 0;
+            elif (g.PCARGBITS[g.PCARGOFF[0]] & 0x8) == 0: 
                 ERROR(d.CLASS_XM, 3);
             # LITERALS ILLEGAL
-            elif (SHL(1, g.PSEUDO_TYPE[g.PTR[g.MP]]) & g.PCARGTYPE[g.PCARGOFF]) == 0:
+            elif (SHL(1, g.PSEUDO_TYPE[g.PTR[g.MP]]) & g.PCARGTYPE[g.PCARGOFF[0]]) == 0:
                 ERROR(d.CLASS_XM, 4);  #  TYPE ILLEGAL
-            g.PCARGOFF = g.PCARGOFF + 1;
+            g.PCARGOFF[0] = g.PCARGOFF[0] + 1;
         g.PCARGp[0] = g.PCARGp[0] - 1;
         g.ALT_PCARGp[0] = g.ALT_PCARGp[0] - 1;
     # reference 820 has been relocated.
@@ -1427,13 +1444,13 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.TEMP2 = SHR(g.TEMP2, HOST_BIT_LENGTH_LIM - g.TEMP);
             g.LOC_P[g.PTR[g.SP]] = SAVE_LITERAL(2, g.TEMP2, g.TEMP);
         else:
-            HALMAT_TUPLE(XBNOT, 0, g.SP, 0, g.INX[g.PTR[g.SP]]);
+            HALMAT_TUPLE(g.XBNOT, 0, g.SP, 0, g.INX[g.PTR[g.SP]]);
             SETUP_VAC(g.SP, g.BIT_TYPE);
         g.INX[g.PTR[g.SP]] = g.INX[g.PTR[g.SP]] & 1;
         g.PTR[g.MP] = g.PTR[g.SP];
     elif PRODUCTION_NUMBER == 96:  # reference 960
         # <BIT CAT> ::= <BIT CAT> <CAT> <NOT> <BIT PRIM>
-        HALMAT_TUPLE(XBNOT, 0, g.SP, 0, 0);
+        HALMAT_TUPLE(g.XBNOT, 0, g.SP, 0, 0);
         SETUP_VAC(g.SP, g.BIT_TYPE);
         goto = "DO_BIT_CAT";
     elif PRODUCTION_NUMBER == 97:  # reference 970
@@ -1508,7 +1525,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         pass;
     elif PRODUCTION_NUMBER == 115:  # reference 1150
         # <RELATIONAL FACTOR> ::= <RELATIONAL FACTOR> <AND> <REL PRIM>
-        HALMAT_TUPLE(XCAND, g.XCO_N, g.MP, g.SP, 0);
+        HALMAT_TUPLE(g.XCAND, g.XCO_N, g.MP, g.SP, 0);
         SETUP_VAC(g.MP, 0);
         g.PTR_TOP = g.PTR[g.MP];
     elif PRODUCTION_NUMBER == 116:  # reference 1160
@@ -1516,7 +1533,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         pass;
     elif PRODUCTION_NUMBER == 117:  # reference 1170
         # <RELATIONAL EXP> ::= < RELATIONAL EXP> <OR> < RELATIONAL FACTOR>
-        HALMAT_TUPLE(XCOR, g.XCO_N, g.MP, g.SP, 0);
+        HALMAT_TUPLE(g.XCOR, g.XCO_N, g.MP, g.SP, 0);
         SETUP_VAC(g.MP, 0);
         g.PTR_TOP = g.PTR[g.MP];
     elif PRODUCTION_NUMBER == 118:  # reference 1180
@@ -1568,7 +1585,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.VAR[g.MP] = 'CHARACTER CONVERSION FUNCTION';
         if PUSH_FCN_STACK(3): 
             g.FCN_LOC[g.FCN_LV] = 0;
-        SET_BI_XREF(CHAR_NDX);
+        SET_BI_XREF(g.CHAR_NDX);
     elif PRODUCTION_NUMBER == 129:  # reference 1290
         #  <SUB OR QUALIFIER>  ::=  <SUBSCRIPT>
         g.TEMP = g.PTR[g.MP];
@@ -1820,11 +1837,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.MOVE_ELSE = g.FALSE;
         g.SAVE_DO_LEVEL = g.DO_LEVEL;
         g.TEMP = g.MP - 1;
-        while g.PARSE_STACK[g.TEMP] == LABEL_DEFINITION:
+        while g.PARSE_STACK[g.TEMP] == g.LABEL_DEFINITION:
             g.TEMP = g.TEMP - 1;
         g.TEMP = g.TEMP - 1;
         # Note that ENDING_DONE is entirely local to this case.
-        while g.PARSE_STACK[g.TEMP] == LABEL_DEFINITION:
+        while g.PARSE_STACK[g.TEMP] == g.LABEL_DEFINITION:
             if g.FIXL[g.TEMP] == g.FIXL[g.SP]:
                 # CREATE AN ASSIGN XREF ENTRY FOR A LABEL THAT
                 # IS USED ON AN END STATEMENT SO THE "NOT
@@ -1849,7 +1866,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 168:  # reference 1680
         #    <ON PHRASE>  ::= ON ERROR  <SUBSCRIPT>
         ERROR_SUB(1);
-        HALMAT_POP(XERON, 2, 0, 0);
+        HALMAT_POP(g.XERON, 2, 0, 0);
         HALMAT_PIP(g.LOC_P[g.PTR[g.MP + 2]], g.XIMD, g.FIXV[g.MP] & 0x3F, 0);
         HALMAT_PIP(g.FL_NO(), g.XINL, 0, 0);
         g.FIXL[g.MP] = g.FL_NO();
@@ -1857,7 +1874,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PTR_TOP = g.PTR[g.SP] - 1;
         if g.INX[g.PTR[g.SP]] == 0:
             g.SUB_END_PTR = g.STACK_PTR[g.MP] + 1;  # NULL SUBSCRIPT
-        OUTPUT_WRITER(g.LAST_WRITE, SUB_END_PTR);
+        OUTPUT_WRITER(g.LAST_WRITE, g.SUB_END_PTR);
         g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
         EMIT_SMRK();
         g.XSET(0x400);
@@ -2568,10 +2585,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     # reference 3110 relocated
     elif PRODUCTION_NUMBER == 312:  # reference 3120
         #  <BLOCK STMT HEAD>  ::=  <LABEL EXTERNAL>  COMPOOL
-        g.TEMP = XCDEF;
+        g.TEMP = g.XCDEF;
         g.TEMP2 = g.CMPL_MODE;
         g.PARMS_PRESENT = 1;  #  FIX SO ALL DECLARES EMITTED IN CMPL TEMPLATE
-        SET_LABEL_TYPE(g.FIXL[g.MP], COMPOOL_LABEL);
+        SET_LABEL_TYPE(g.FIXL[g.MP], g.COMPOOL_LABEL);
         # THIS IS A COMPOOL COMPILATION
         # CHECK IF #D OPTION IS ON.   EMIT FATAL ERROR IF ITS.
         # TURN OFF DATA REMOTE TO ALLOW FOR FUTURE DOWNGRADE OF
@@ -2589,7 +2606,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             goto = "OUTERMOST_BLOCK"
     elif PRODUCTION_NUMBER == 313:  # reference 3130
         #  <BLOCK STMT HEAD>  ::=  <LABEL DEFINITION>  TASK
-        g.TEMP = XTDEF;
+        g.TEMP = g.XTDEF;
         g.TEMP2 = g.TASK_MODE;
         SET_LABEL_TYPE(g.FIXL[g.MP], g.TASK_LABEL);
         g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.LATCHED_FLAG);
@@ -2641,7 +2658,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             else:
                 g.SYT_CLASS(g.ID_LOC, g.FUNC_CLASS);
                 g.SYT_TYPE(g.ID_LOC, 0);
-        g.TEMP = XFDEF;
+        g.TEMP = g.XFDEF;
         g.TEMP2 = g.FUNC_MODE;
         goto = "PROC_FUNC_HEAD"
     # reference 3210 relocated
@@ -3098,10 +3115,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.LOCKp = g.FIXV[g.MP + 2];
         if g.LOCKp < 0: 
             g.LOCKp = 0xFF;
-        elif LOCKp < 1 or LOCKp > LOCK_LIM:
+        elif g.LOCKp < 1 or g.LOCKp > g.LOCK_LIM:
             ERROR(d.CLASS_DL, 3);
             g.LOCKp = 0xFF;
-        g.FIXL[g.MP], g.FIXV[g.MP] = LOCK_FLAG;
+        g.FIXL[g.MP], g.FIXV[g.MP] = g.LOCK_FLAG;
     elif PRODUCTION_NUMBER == 407:  # reference 4070
         #  <MINOR ATTRIBUTE>  ::=  REMOTE
         g.FIXL[g.MP], g.FIXV[g.MP] = g.REMOTE_FLAG;
@@ -3437,11 +3454,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         ERROR(d.CLASS_EO, 1);
                         g.PTR_TOP = g.PTR[g.MP];
                         return;
-                    g.PP = g.MP
                     for g.PP in range(g.MP, g.SP + 1):
                        if g.FIXV[g.PP] == g.VEC_TYPE:
                             g.VECTORP = g.PP;
                             g.PP = g.SP + 1;
+                            break
                 if goto == "COMBINE_SCALARS_AND_VECTORS": goto = None
                 if g.SCALARP != 0:
                     MULTIPLY_SYNTHESIZE(g.VECTORP, g.SCALARP, g.TERMP, 1);  
@@ -3590,7 +3607,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 ERROR(d.CLASS_RT, 6, 'WAIT');
         if goto == "WAIT_TIME": goto = None
         g.XSET(0xB);
-        HALMAT_TUPLE(XWAIT, 0, g.SP - 1, 0, g.TEMP);
+        HALMAT_TUPLE(g.XWAIT, 0, g.SP - 1, 0, g.TEMP);
         g.PTR_TOP = g.PTR[g.SP - 1] - 1;
         goto = "UPDATE_CHECK"
     if goto == "UP_PRIO" or \
@@ -3610,7 +3627,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         # <BASIC STATEMENT>::= <SCHEDULE PHRASE>;
         if goto == "SCHEDULE_EMIT": goto = None
         g.XSET(0x9);
-        HALMAT_POP(XSCHD, g.PTR_TOP - g.REFER_LOC + 1, 0, g.INX[g.REFER_LOC]);
+        HALMAT_POP(g.XSCHD, g.PTR_TOP - g.REFER_LOC + 1, 0, g.INX[g.REFER_LOC]);
         while g.REFER_LOC <= g.PTR_TOP:
             HALMAT_PIP(g.LOC_P[g.REFER_LOC], g.PSEUDO_FORM[g.REFER_LOC], 0, 0);
             g.REFER_LOC = g.REFER_LOC + 1;
@@ -3620,7 +3637,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             (goto == None and PRODUCTION_NUMBER == 61):  # reference 610
         # <BASIC STATEMENT>  ::=  <WAIT KEY>  FOR DEPENDENT ;
         if not goto == "UPDATE_CHECK":
-            HALMAT_POP(XWAIT, 0, 0, 0);
+            HALMAT_POP(g.XWAIT, 0, 0, 0);
             g.XSET(0xB);
         if goto == "UPDATE_CHECK": goto = None
         if g.UPDATE_BLOCK_LEVEL > 0: 
@@ -3749,7 +3766,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(2, g.TEMP, g.TEMP2);
         else:
             if not goto == "DO_BIT_FACTOR":
-                g.TEMP = XBAND ;
+                g.TEMP = g.XBAND ;
             if goto == "DO_BIT_FACTOR": goto = None
             g.TEMP2 = g.INX[g.PTR[g.MP]] & g.INX[g.PTR[g.SP]] & 1;
             HALMAT_TUPLE(g.TEMP, 0, g.MP, g.SP, g.TEMP2);
@@ -3834,7 +3851,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     # CHARACTER IS SCALAR AND SHOULD BE IN DOUBLE
                     # PRECISION (DOUBLELIT=TRUE).  IF TRUE, THEN SET
                     # LIT1 EQUAL TO 5.
-                    if (g.PSEUDO_TYPE[g.PTR[g.SP]] == g.SCALAR_TYPE) & DOUBLELIT:  # "
+                    if (g.PSEUDO_TYPE[g.PTR[g.SP]] == g.SCALAR_TYPE) and g.DOUBLELIT:  # "
                         g.LIT1(GET_LITERAL(g.LOC_P[g.PTR[g.SP]]), 5);
                 elif pt == 3:
                     MATRIX_COMPARE(g.MP, g.SP, d.CLASS_AV, 2);  # MATRIX
@@ -3903,7 +3920,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.XSET(0x13);
             g.TEMP = g.PTR[g.SP - 1];
             HALMAT_FIX_POPTAG(g.FIXV[g.MPP1], SHL(g.INX[g.TEMP], 4) | g.PTR[g.MPP1]);
-            HALMAT_POP(XCFOR, 1, 0, g.INX[g.TEMP]);
+            HALMAT_POP(g.XCFOR, 1, 0, g.INX[g.TEMP]);
         if goto == "EMIT_WHILE": goto = None
         HALMAT_PIP(g.LOC_P[g.TEMP], g.PSEUDO_FORM[g.TEMP], 0, 0);
         g.PTR_TOP = g.TEMP - 1;
@@ -4119,7 +4136,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.VAR[g.MP] = g.VAR[g.MPP1];
         else:
             g.FIXL[g.SP] = g.FIXL[g.SP] | 2;
-            goto.MOST_IDS = True
+            goto = "MOST_IDS"
     if goto in ["MOST_IDS", "STRUC_IDS"] or \
             (goto == None and PRODUCTION_NUMBER == 219):  # reference 2190
         #  <EVENT VAR>  ::=  <PREFIX>  (EVENT ID>  <SUBSCRIPT>
@@ -4813,7 +4830,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if goto == "FUNC_HEADER": goto = None
         if g.PARMS_PRESENT == 0:
             g.PARMS_WATCH = g.FALSE;
-            if MAIN_SCOPE == g.SCOPEp: 
+            if g.MAIN_SCOPE == g.SCOPEp: 
                 g.COMSUB_END(g.FIXL[g.MP]);
         g.FACTORING = g.TRUE;
         g.DO_INIT = g.FALSE;
@@ -5119,7 +5136,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             firstTry = True
             while firstTry or goto == "FIX_AUTSTAT":
                 firstTry = False
-                if not g.NAME_IMPLIED:
+                if (goto == None and not g.NAME_IMPLIED) \
+                        or goto  == "FIX_AUTSTAT":
                     if goto == None:
                         if g.NONHAL > 0:
                             if g.TYPE == g.PROC_LABEL or g.CLASS == 2:
@@ -5413,12 +5431,12 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 if g.SYT_CLASS(g.FIXL[g.MP]) == g.TEMPLATE_CLASS:
                     if (((g.SYT_FLAGS(g.FIXV[g.MP]) & g.ASSIGN_PARM) > 0) or \
                             (((g.SYT_FLAGS(g.FIXV[g.MP]) & g.AUTO_FLAG) != 0) and \
-                             ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) and \
+                             ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & \
                                g.REENTRANT_FLAG) != 0))):
                         ERROR(d.CLASS_DI, 3);
                 elif (((g.SYT_FLAGS(g.FIXL[g.MP]) & g.ASSIGN_PARM) > 0) or \
                         (((g.SYT_FLAGS(g.FIXL[g.MP]) & g.AUTO_FLAG) != 0) and \
-                         ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) and \
+                         ((g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & \
                            g.REENTRANT_FLAG) != 0))):
                     ERROR(d.CLASS_DI, 3);
             elif g.PSEUDO_FORM[g.TEMP] != g.XLIT: 
@@ -5575,7 +5593,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.SCOPEp = g.MAX_SCOPEp() + 1;
             g.MAX_SCOPEp(g.SCOPEp)
             if (g.SYT_FLAGS(g.FIXL[g.MP]) & g.EXTERNAL_FLAG) != 0: 
-                NEXT_ELEMENT(h.CSECT_LENGTHS);
+                sl.NEXT_ELEMENT(h.CSECT_LENGTHS);
                 h.CSECT_LENGTHS[g.SCOPEp].PRIMARY = 0x7FFF;  # SET LENGTH TO MAX
                 h.CSECT_LENGTHS[g.SCOPEp].REMOTE = 0x7FFF;  # TO TURN OFF PHASE2
                 # %COPY CHECKING

@@ -66,7 +66,7 @@ def SET_XREF(LOC, FLAG, FLAG2=0):
             g.NO_NEW_XREF = g.TRUE;
         g.SYT_XREF(LOC, ENTER_XREF(g.SYT_XREF(LOC), FLAG));
         if g.NO_NEW_XREF: 
-            g.NO_NEW_XREF = FALSE;
+            g.NO_NEW_XREF = g.FALSE;
         goto_ENTER_OUTER_REF = False
         if g.SYT_TYPE(LOC) == g.IND_CALL_LAB or g.SYT_TYPE(LOC) == g.CALLED_LABEL:
              goto_ENTER_OUTER_REF = True;

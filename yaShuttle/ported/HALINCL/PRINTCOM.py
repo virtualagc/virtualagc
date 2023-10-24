@@ -11,9 +11,10 @@ History:    2023-09-06 RSB  Ported
 
 from xplBuiltins import *
 import g
+from IFORMAT  import I_FORMAT
 from OUTPUTWR import OUTPUT_WRITER
-from PAD import PAD
-from PRINT2 import PRINT2
+from PAD      import PAD
+from PRINT2   import PRINT2
 
 '''
 It's unclear what's going on with the CURRENT_DIR parameters.  Most CALLs

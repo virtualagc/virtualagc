@@ -18,6 +18,8 @@ from EMITARRA import EMIT_ARRAYNESS
 from HALMATF3 import HALMAT_FIX_PIPTAGS
 from HALMATTU import HALMAT_TUPLE
 from KILLNAME import KILL_NAME
+from RESETARR import RESET_ARRAYNESS
+from SAVEARRA import SAVE_ARRAYNESS
 
 #*************************************************************************
 # PROCEDURE NAME:  SETUP_CALL_ARG
