@@ -130,7 +130,7 @@ def BLOCK_SUMMARY():
             FIRST_TIME = g.FALSE;
         g.TEMP1 = SHR(I, 3);
         g.TEMP2 = SHL(I - SHL(g.TEMP1, 3), 5);
-        OUTPUT(1, g.DOUBLE + SUBSTR(HEADING(g.TEMP1), g.TEMP2, 32));
+        OUTPUT(1, g.DOUBLE + SUBSTR(HEADING[g.TEMP1], g.TEMP2, 32));
         HEADER_ISSUED = g.TRUE;
     # END ISSUE_HEADER;
     

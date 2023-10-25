@@ -17,7 +17,8 @@ from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
 import HALINCL.COMMON as h
-from ERROR import ERROR
+from ERROR    import ERROR
+from HASH     import HASH
 
 #*************************************************************************
 #
@@ -753,6 +754,7 @@ def SDF_FOUND(SDF_FOUND: PROCEDURE BIT(1)):
     else: ERROR(d.CLASS_XI, g.I+9, COMPILER);
     return g.FALSE;
 # END SDF_FOUND;
+
 # THIS IS THE START OF INCLUDE_SDF PROPER
 # CHECK FOR LEGAL INCLUDE
 if g.NEST > 0: #DO

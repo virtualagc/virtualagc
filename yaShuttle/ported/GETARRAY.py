@@ -60,6 +60,8 @@ def GET_ARRAYNESS():
         g.VAR_ARRAYNESS[0] = 0;
     I = g.SYT_ARRAY(g.FIXL[g.MP]);
     if I > 0:
+        if I >= len(h.EXT_ARRAY):
+            pass
         for J in range(1, h.EXT_ARRAY[I] + 1):
             g.VAR_ARRAYNESS[g.VAR_ARRAYNESS[0] + J] = h.EXT_ARRAY[I + J];
         g.VAR_ARRAYNESS[0] = g.VAR_ARRAYNESS[0] + h.EXT_ARRAY[I];

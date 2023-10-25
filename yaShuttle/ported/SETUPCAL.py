@@ -116,7 +116,7 @@ def SETUP_CALL_ARG():
                                SHL(g.NAME_PSEUDOS, 7), 0);
             g.PTR_TOP = I - 1;
             if g.FCN_LV == 0:  # DO
-                g.FCN_ARG = g.FCN_ARG + 1;
+                g.FCN_ARG[0] = g.FCN_ARG[0] + 1;
                 if g.NAME_PSEUDOS:  # DO
                     KILL_NAME(g.SP);
                     if g.EXT_P[I] != 0: ERROR(d.CLASS_FD, 7);

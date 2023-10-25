@@ -22,6 +22,8 @@ def HEX1(HVAL, N):
     HEXCODES = '0123456789ABCDEF';
     STRING = '';
     
+    HVAL &= 0xFFFFFFFF
+    
     goto = "H_LOOP"
     while goto != None:
         if goto == "H_LOOP": goto = None

@@ -1,17 +1,22 @@
 C/ Adapted from PDF p. 127 of "Programming in HAL/S".
 
-  LIMIT:
-  FUNCTION(VALUE, BOUND) SCALAR;
-     DECLARE SCALAR,
-     		VALUE, BOUND;
-     IF VALUE > BOUND THEN
-        RETURN BOUND;
-     IF VALUE < -BOUND THEN
-        RETURN -BOUND;
-     RETURN VALUE;
-  CLOSE LIMIT;
+  PROG_LIMIT:
+  PROGRAM;
   
-  WRITE(6) LIMIT(52, 100);
-  WRITE(6) LIMIT(-52, 100);
-  WRITE(6) LIMIT(101, 100);
-  WRITE(6) LIMIT(-101, 100);
+     LIMIT:
+     FUNCTION(VALUE, BOUND) SCALAR;
+        DECLARE SCALAR,
+                VALUE, BOUND;
+        IF VALUE > BOUND THEN
+           RETURN BOUND;
+        IF VALUE < -BOUND THEN
+           RETURN -BOUND;
+        RETURN VALUE;
+     CLOSE LIMIT;
+  
+     WRITE(6) LIMIT(52, 100);
+     WRITE(6) LIMIT(-52, 100);
+     WRITE(6) LIMIT(101, 100);
+     WRITE(6) LIMIT(-101, 100);
+  CLOSE PROG_LIMIT;
+  

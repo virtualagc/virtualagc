@@ -2853,110 +2853,119 @@ def enlargeSYM_TAB(n):
 
 
 def SYT_NAME(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_NAME[:]
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_NAME = value[:]
 
 
 def SYT_ADDR(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_ADDR
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_ADDR = value
 
 
 def SYT_XREF(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_XREF
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_XREF = value
 
 
 def SYT_NEST(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_NEST
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_NEST = value
 
 
 def SYT_SCOPE(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_SCOPE
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_SCOPE = value
 
 
 def VAR_LENGTH(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_LENGTH
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_LENGTH = value
 
 
+# The values stored in SYT_ARRAY (which is 16 bits) are generally positive, but
+# in the case of non-HAL functions have been OR'd with 0xFF000 and therefore
+# must be either truncated or else sign-extended to full integers that are
+# properaly negative or unsigned as the case may be.
 def SYT_ARRAY(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
-        return h.SYM_TAB[n].SYM_ARRAY
-    h.SYM_TAB[n].SYM_ARRAY = value
+        value = h.SYM_TAB[n].SYM_ARRAY
+        if (value & 0x8000) != 0:
+            value = (~0xFFFF & -1) | value
+        return value
+    h.SYM_TAB[n].SYM_ARRAY = value & 0xFFFF
 
 
 def SYT_PTR(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_PTR
     h.SYM_TAB[n].SYM_PTR = value
 
 
 def SYT_LINK1(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_LINK1
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_LINK1 = value
 
 
 def SYT_LINK2(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_LINK2
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_LINK2 = value
 
 
 def SYT_CLASS(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_CLASS
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_CLASS = value
 
 
 def SYT_FLAGS(n, value=None):
-    if value == None:
-        if (n >= len(h.SYM_TAB)):
-            print("\n!!",n,">=", len(h.SYM_TAB), file=sys.stderr)
-        return h.SYM_TAB[n].SYM_FLAGS
     enlargeSYM_TAB(n)
+    if value == None:
+        return h.SYM_TAB[n].SYM_FLAGS
     h.SYM_TAB[n].SYM_FLAGS = value
 
 
 def SYT_FLAGS2(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_FLAGS2
     h.SYM_TAB[n].SYM_FLAGS2 = value
 
 
 def SYT_LOCKp(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_LOCKp
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_LOCKp = value
 
 
 def SYT_TYPE(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].SYM_TYPE
-    enlargeSYM_TAB(n)
     h.SYM_TAB[n].SYM_TYPE = value
 
 
 def EXTENT(n, value=None):
+    enlargeSYM_TAB(n)
     if value == None:
         return h.SYM_TAB[n].XTNT
     h.SYM_TAB[n].XTNT = value
@@ -3150,7 +3159,10 @@ def GRAMMAR_FLAGS(n, value = None):
     if value == None:
         if n == -1:
             return GRAMMAR_FLAGS_UNFLO
-        return grammar_flags[n]
+        try:
+            return grammar_flags[n]
+        except:
+            return None
     if n == -1:
         GRAMMAR_FLAGS_UNFLO = value
     else:

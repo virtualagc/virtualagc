@@ -1017,12 +1017,15 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             formerly at the *end* of the DO FOR to move to the *beginning* of 
             the DO WHILE, and to implement GO TO PTR_LOOP_END as just continue.
             '''
-            #for l.PTR  in range(l.PTR_START, l.PTR_END + 1):
+            #DO PTR = PTR_START TO PTR_END;
             if goto == None:
                 l.PTR = l.PTR_START - 1
             while goto in ["STLABEL", "PTR_LOOP_END"] \
                     or (goto == None and l.PTR < l.PTR_END):
-                if goto == "PTR_LOOP_END": goto = None
+                if goto == "PTR_LOOP_END": 
+                    goto = None
+                    if l.PTR >= l.PTR_END:
+                        break
                 if goto == None:
                     l.PTR += 1
                     

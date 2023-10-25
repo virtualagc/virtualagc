@@ -86,7 +86,7 @@ def ERROR_SUB(MODE):
         else: 
             goto = "BAD_ERROR_SUB";
             return LOC
-        if (LOC < 0) or (LOC > RUN_ERR_MAX): 
+        if (LOC < 0) or (LOC > RUN_ERR_MAX[0]): 
             goto = "BAD_ERROR_SUB";
             return LOC
         return LOC;

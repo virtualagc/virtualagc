@@ -38,8 +38,12 @@ import g
 
 
 def HEX(NUM, WIDTH=0):
-    # The only local, CHAR_TEMP, requires no persistence.
+    # The only local, CHAR_TEMP, requires no persistence.  Note that NUM is
+    # a 32-bit datatype (in XPL), and we have to truncate negative values to
+    # 32 bits in Python, or else the loop is unending.
     CHAR_TEMP = ''
+    
+    NUM &= 0xFFFFFFFF
     
     while True:
         CHAR_TEMP = SUBSTR('0123456789ABCDEF', NUM & 0xF, 1) + CHAR_TEMP;

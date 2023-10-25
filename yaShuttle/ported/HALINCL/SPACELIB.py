@@ -91,9 +91,21 @@ def RECORD_TOP(array):
 
 ''' [DECLARE]
         SET_RECORD_WIDTH(2) _AS '_DOPE_WIDTH(ADDR(%1%))=%2%',
-        ALLOCATE_SPACE(2) _AS
-         'CALL _ALLOCATE_SPACE(ADDR(%1%),%2% _IFAQ(%1%))',
 '''
+
+def ALLOCATE_SPACE(array, records):
+    if array is h.CSECT_LENGTHS:
+        while len(array) < records:
+            array.append(h.csect_lengths())
+    elif array is g.LINK_SORT:
+        while len(array) < records:
+            array.append(g.link_sort())
+    elif array is h.SYM_TAB:
+        while len(array) < records:
+            array.append(h.sym_tab())
+    else:
+        print("Unknown array in ALLOCATE_SPACE", file=sys.stderr)
+        sys.exit(1)
 
 # Allocates space to add one element to an array.
 def NEXT_ELEMENT(array):

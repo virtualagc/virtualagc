@@ -19,7 +19,10 @@ from HEX     import HEX
 from IFORMAT import I_FORMAT
 from PAD     import PAD
 
-# For accessing continuous options in the memory neighborhood of SDL_OPTION.
+'''
+Huh?
+
+# For accessing contiguous options in the memory neighborhood of SDL_OPTION.
 # I'm not sure how many of them are accessed in this way.
 def sdl_option(n):
     if n == -2:
@@ -30,8 +33,11 @@ def sdl_option(n):
         return g.SDL_OPTION
     elif n == 1:
         return g.SREF_OPTION
-    print("Illegal SDL_OPTION(%d)" % n, file=sys.stderr)
-    return None
+    elif n == 2:
+        return g.SRN_FLAG
+    print("\n*** Illegal SDL_OPTION(%d) ***\n" % n, file=sys.stderr)
+    sys.exit(1)
+'''
 
 '''
  /***************************************************************************/
@@ -815,12 +821,12 @@ def SYT_DUMP():
                                     ADD_ATTR(TRUNCATE(SUBSTR(l.CHAR_ATTR, l.KL * 11, 11)));
                             if not g.SDL_OPTION:
                                 if (l.L & g.EXTERNAL_FLAG) != 0:
-                                    ADD_ATTR('VERSION=' + str(sdl_option(l.I)));
+                                    ADD_ATTR('VERSION=' + str(g.SYT_LOCKp(l.I)));
                             if (l.L & g.LOCK_FLAG) != 0:
-                                if sdl_option(l.I) == 0xFF:
+                                if g.SYT_LOCKp(l.I) == 0xFF:
                                     ADD_ATTR(SUBSTR(l.CHAR_ATTR, 0, 6));
                                 else:
-                                    ADD_ATTR(SUBSTR(l.CHAR_ATTR, 0, 5) + sdl_option(l.I));
+                                    ADD_ATTR(SUBSTR(l.CHAR_ATTR, 0, 5) + str(g.SYT_LOCKp(l.I)));
                             if g.CONTROL[0xF]:
                                 # EXTRA SYMBOL TABLE DUMP REQUESTED
                                 l.T = HEX(l.L);

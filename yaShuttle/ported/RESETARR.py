@@ -49,7 +49,7 @@ def RESET_ARRAYNESS():
                     J = g.AS_PTR - I;
                     if g.CURRENT_ARRAYNESS[I] > 0:
                         if g.ARRAYNESS_STACK[J] > 0:
-                            if gCURRENT_ARRAYNESS[I] != g.ARRAYNESS_STACK[J]:
+                            if g.CURRENT_ARRAYNESS[I] != g.ARRAYNESS_STACK[J]:
                                 MISMATCH = 3;
             else:
                 MISMATCH = 3;

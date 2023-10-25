@@ -231,15 +231,15 @@ def END_ANY_FCN():
                     #  CHARACTER TYPE
                     # DO
                         if g.PSEUDO_TYPE[MAXPTR] != g.CHAR_TYPE:  # DO
-                            HALMAT_TUPLE(XBTOC(g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE),
-                            0, g.SP - 1, 0, 0);
+                            HALMAT_TUPLE(g.XBTOC[g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE], \
+                                         0, g.SP - 1, 0, 0);
                             SETUP_VAC(g.SP - 1, g.CHAR_TYPE);
                         # END
                         if ARGp == 2:  # DO
                             if g.BI_ARG_TYPE[ARGPTR + 1] == g.CHAR_TYPE:  # DO
                                 if g.PSEUDO_TYPE[MAXPTR + 1] != g.CHAR_TYPE:  # DO
-                                    HALMAT_TUPLE(XBTOC(g.PSEUDO_TYPE[MAXPTR + 1] - g.BIT_TYPE)
-                                    , 0, g.SP, 0, 0);
+                                    HALMAT_TUPLE(g.XBTOC[g.PSEUDO_TYPE[MAXPTR + 1] - g.BIT_TYPE], \
+                                                 0, g.SP, 0, 0);
                                     SETUP_VAC(g.SP, g.CHAR_TYPE);
                                 # END
                             # END
@@ -403,7 +403,8 @@ def END_ANY_FCN():
         #  STRING  SHAPERS
         # DO
             g.NEXT_SUB = g.PTR[g.MP];
-            g.IND_LINK, PSEUDO_LENGTH = 0;
+            g.IND_LINK = 0
+            g.PSEUDO_LENGTH[0] = 0;
             if g.FCN_ARG[g.FCN_LV] > 1: ERROR(d.CLASS_QD, 2);
             if (SHL(1, g.PSEUDO_TYPE[MAXPTR]) & g.STRING_MASK) == 0:  # DO
                 ERROR(d.CLASS_QX, 4);
@@ -425,7 +426,7 @@ def END_ANY_FCN():
                             REDUCE_SUBSCRIPT(0, g.PSEUDO_LENGTH[MAXPTR], 1);
                         else: REDUCE_SUBSCRIPT(0, -1, 1);
                     # END
-                    ARGp = XBTOC(g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE);
+                    ARGp = g.XBTOC[g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE];
                 # END
             elif fl == 1:
                 #  BIT
@@ -456,7 +457,7 @@ def END_ANY_FCN():
                 else: HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], INX[I], g.VAL_P[I]);
                 ARGp = ARGp + 1;
             # END
-            HALMAT_FIX_PIPp(LAST_POPp, ARGp);
+            HALMAT_FIX_PIPp(g.LAST_POPp, ARGp);
         # END
     elif fn == 4:
         #  L-FUNC  BUILT-INS
