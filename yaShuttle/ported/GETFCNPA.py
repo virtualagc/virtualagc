@@ -43,7 +43,8 @@ def GET_FCN_PARM():
     L = g.SYT_PTR(g.FCN_LOC[g.FCN_LV]);
     if g.FCN_ARG[g.FCN_LV] > 0:  # DO
         L = L + g.FCN_ARG[g.FCN_LV];
-        if (g.SYT_FLAGS(L - 1) & g.ENDSCOPE_FLAG) != 0 | (g.SYT_FLAGS(L) & g.INPUT_PARM) == 0:
+        if (g.SYT_FLAGS(L - 1) & g.ENDSCOPE_FLAG) != 0 or \
+                (g.SYT_FLAGS(L) & g.INPUT_PARM) == 0:
             L = 0;
     # END
     if L > 0:  # DO

@@ -1,17 +1,17 @@
-C/ Adapted from PDF p. 257 of "Programming in HAL/S".
-C/ The 6 at that's supposed to be at the beginning of the 2nd S line
-C/ has instead been moved to the end of the first S line, due to a
-C/ limitation in the modern preprocessor that I'm not inclined to fix.
+C/ Adapted from PDF p. 257 of "Programming in HAL/S".  Enclosing brackets
+C/ have been removed from array variables, because they are not legal syntax.
+C/ As originally divided up in the book, the lines are in fact too long for
+C/ the original HAL/S compiler.  Rather than worrying about how to split up 
+C/ multiline (E/M/S) code into shorter lines, I've flattened the code into the 
+C/ single-line format. (Unintentionally making it far easier to comprehend.
+C/ Oops!  My bad!)
 
      DECLARE DATA ARRAY(3) BIT(16);
      DECLARE AVERAGE BIT(16);
      
-E       .                                .                                               .
-M    AVERAGE = BIT        (SUM(INTEGER([DATA]        )) / 3) || BIT        (SUM(INTEGER([DATA]
-S                 5 AT #-4                   *:1 TO 5              5 AT #-4                   *:5 AT 6
-
-E                                          .                       .            .          .
-M     )) / 3) || BIT        (SUM(INTEGER([DATA]         )) / 3) || DATA     AND DATA     & DATA     ;
-S                   5 AT #-4                   *:5 AT 11               1:16         2:16       3:16
+     AVERAGE = BIT$(5 AT #-4)(SUM(INTEGER(DATA$(*:1 TO 5))) / 3) || 
+               BIT$(5 AT #-4)(SUM(INTEGER(DATA$(*:5 AT 6))) / 3) || 
+               BIT$(5 AT #-4)(SUM(INTEGER(DATA$(*:5 AT 11))) / 3) || 
+               DATA$(1:16) AND DATA$(2:16) & DATA$(3:16);
 
   

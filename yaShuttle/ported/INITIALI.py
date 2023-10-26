@@ -230,7 +230,7 @@ def INITIALIZATION():
     # EVEN THOUGH IT IS DEFINED AS A "NONPRINTABLE" OPTION IN COMPOPT.  
     for g.I in range(0, NUM1_OPT + 1):
         # MAKE SURE NOT QUASI OR TRACE
-        if (SORT1[g.I] != 17) & (SORT1[g.I] != 3):
+        if (SORT1[g.I] != 17) and (SORT1[g.I] != 3):
             if SORT1[g.I] == 2:  # PRINT LFXI HERE
                 if (g.OPTIONS_CODE() & 0x00200000) != 0:
                     OUTPUT(0, g.X8 + '  LFXI')

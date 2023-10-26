@@ -1,10 +1,11 @@
-C/ From PDF p. 154 of "Programming in HAL/S".
+C/ From PDF p. 154 of "Programming in HAL/S".  Surrounding brackets have 
+C/ been removed from array variables, since they are not legal HAL/S syntax.
 
   ADD:
   PROGRAM;
      DECLARE TOTAL SCALAR INITIAL(0) AUTOMATIC;
      DECLARE A ARRAY(100) SCALAR INITIAL(0);
-     READ(5) [A];
+     READ(5) A;
 M    DO FOR TEMPORARY I = 1 TO 100 UNTIL A  = 0;
 S                                         I
 

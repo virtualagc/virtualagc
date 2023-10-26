@@ -1,4 +1,5 @@
-C/ Adapted from PDF p. 113 in "Programming in HAL/S".
+C/ Adapted from PDF p. 113 in "Programming in HAL/S". Surrounding brackets have 
+C/ been removed from array variables, since they are not legal HAL/S syntax. 
 
   EXAMPLE_7:
   PROGRAM;
@@ -14,8 +15,8 @@ M       MISMATCH    = 0;
 S       	I,I
 
         DO FOR J = I + 1 TO 4;
-M	   IF [ATTITUDE]    ¬= [ATTITUDE]    THEN
-S		        I,*              J,*
+M	   IF ATTITUDE    ¬= ATTITUDE    THEN
+S		      I,*            J,*
 
 M	      MISMATCH   , MISMATCH    = 1;
 S		      J,I	   I,J

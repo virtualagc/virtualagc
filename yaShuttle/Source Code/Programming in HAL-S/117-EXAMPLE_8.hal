@@ -1,4 +1,5 @@
-C/ Adapted from PDF p. 117 of "Programming in HAL/S".
+C/ Adapted from PDF p. 117 of "Programming in HAL/S". Surrounding brackets have 
+C/ been removed from array variables, since they are not legal HAL/S syntax.
 
   EXAMPLE_8:
   PROGRAM;
@@ -15,29 +16,29 @@ C/ Adapted from PDF p. 117 of "Programming in HAL/S".
      DECLARE I INTEGER;
      
      WRITE(6) 'POSITIONS =';
-     DO FOR I = 1 TO 5; WRITE(6) '         ', POSITIONS$(I,*); END;
+     DO FOR I = 1 TO 5; WRITE(6) '         ', POSITIONS$(I:*); END;
      WRITE(6) 'OLD_POSN = ';
-     DO FOR I = 1 TO 5; WRITE(6) '         ', OLD_POSN$(I,*); END;
+     DO FOR I = 1 TO 5; WRITE(6) '         ', OLD_POSN$(I:*); END;
      WRITE(6) 'MY_POSN =', MY_POSN;
      WRITE(6) 'DELTA_T =', DELTA_T;
      WRITE(6)   '---------------------------------------',
      		'--------------------------------------';
 
-E        -              -            -
-M    [VELOCITY] = ([POSITIONS] - [OLD_POSN]) / DELTA_T;
-E                            -           -
-M    [DISTANCE] = ABVAL([POSITIONS] - MY_POSN);
-E                          -                  -           -
-M    [APPROACH_RATE] = [VELOCITY] . UNIT([POSITIONS] - MY_POSN);
-E        -             -
-M    [OLD_POSN] = [POSITIONS];
+E       -            -          -
+M    VELOCITY = (POSITIONS - OLD_POSN) / DELTA_T;
+E                         -          -
+M    DISTANCE = ABVAL(POSITIONS - MY_POSN);
+E                       -                -          -
+M    APPROACH_RATE = VELOCITY . UNIT(POSITIONS - MY_POSN);
+E       -           -
+M    OLD_POSN = POSITIONS;
      WRITE(6) 'VELOCITY =';
-     DO FOR I = 1 TO 5; WRITE(6) '         ', VELOCITY$(I,*); END;
+     DO FOR I = 1 TO 5; WRITE(6) '         ', VELOCITY$(I:*); END;
      WRITE(6) 'DISTANCE =';
      DO FOR I = 1 TO 5; WRITE(6) '         ', DISTANCE$I; END;
      WRITE(6) 'APPROACH_RATE =';
      DO FOR I = 1 TO 5; WRITE(6) '         ', APPROACH_RATE$I; END;
      WRITE(6) 'OLD_POSN =';
-     DO FOR I = 1 TO 5; WRITE(6) '         ', OLD_POSN$(I,*); END;
+     DO FOR I = 1 TO 5; WRITE(6) '         ', OLD_POSN$(I:*); END;
   CLOSE EXAMPLE_8;
   

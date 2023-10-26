@@ -855,3 +855,23 @@ There is a procedure (defined in VMEM3 *et al.*) called `MOVE(LENGTH, FROM, INTO
 
 In principle, in XPL `MOVE()` could also be used to transfer non-list data, or data not aligned on the obvious boundaries.  If this situation needs to be supported, some rethinking may become necessary.
 
+# Sample HAL/S Source Code
+
+Most available samples of HAL/S source code &mdash; in lieu of actual Shuttle flight software source code &mdash; has been taken from Ryer's 1978 book, *Programming in HAL/S*.  Ryer tells us on his p. 2-9 (PDF p. 29) that
+
+> Any HAL/S code which appears in a box ... is extracted from an actual listing: it has not been re-typed and is therefore free of any syntax errors.
+
+This "error-free" characteristic is somewhat imaginary, since there are lot of problems with the ~100 boxes of sample code provided in the book.  Though perhaps some of those problems are due to differences between JPL's HAL/S compiler and Intermetrics's HAL/S compiler.  In particular, since the output listing from the compiler contains various kinds of markup not normally present in HAL/S source code as actually written by programmers, there's not any guarantee that such marked-up source code output by the compiler will necessarily be legal HAL/S source code according to the notions of whatever compiler uses it as input.  That means often had to edit the sample source code provided by Ryer, in order to make it legal for our compiler.  Besides which, my version of the compiler may sometimes accept Ryer syntax that the original Intermetrics compiler did not ... or vice versa.  
+
+Here are some problems I've noted in this respect, in the code from Ryer's book:
+
+  * The sample code does not necessarily respect the Intermetrics compiler's line-length limit of 80 characters max.
+  * The original Intermetrics compiler does not accept some of the overpunch characters (for example, it will accept the overpunch '-' for a vector, but not '+' for a structure, even though it adds these to the output listing when not present initially).  These are all decorations without any syntactic meaning, of course, and so can be removed without penalty.
+  * The original Intermetrics compiler does not accept enclosing brackets for array variables (such as `[A]`), nor I assume enclosing braces for structure variables (such as `{S}`), even though Ryer strongly implies that they are acceptable.  Enclosing brackets and braces therefore need to be removed.
+
+# Known Errors
+
+This section contains a list of all the compile-time errors I encounter in test-compiles of my HAL/S source-code sample.  These are very hard to figure out the root causes for, and sometimes to relate what's actually going on in the error messages themselves, so here are my stream-of-consciousness notes on the subject.  Once all errors are resolved, I'll eliminate this section entirely.
+
+  * DI3 &mdash; In the `INITIAL()` or `CONSTANT()` attributes of a `DECLARE` statement, expressions consisting of numeric literals work just fine.  But any expression, no matter how simple, containing a symbol already declared as a `CONSTANT` fails, even though from the symbol table and literal table of the listing we know that these symbols are in fact recognized as constants and do in fact have the correct values.
+  * SR4 &mdash; Subscripts of `VECTOR`s seem always to be rejected, on the grounds that they are "less than 1".

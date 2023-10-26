@@ -103,7 +103,7 @@ def INCLUDE_OK():
     g.REV_CAT = MONITOR(15);
     g.INCLUDE_MSG = ' OF INCLUDED MEMBER, RVL ' \
                     +STRING(0x01000000 | ADDR(g.REV_CAT)) + \
-                    ', CATENATION NUMBER ' + (g.REV_CAT & 0xFFFF);
+                    ', CATENATION NUMBER ' + str(g.REV_CAT & 0xFFFF);
     g.INCLUDE_LIST = l.LIST_FLAG
     g.INCLUDE_LIST2 = l.LIST_FLAG;
     g.INCLUDE_OFFSET = g.CARD_COUNT + 1;

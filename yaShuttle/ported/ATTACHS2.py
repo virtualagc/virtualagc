@@ -59,17 +59,15 @@ from SLIPSUBS import SLIP_SUBSCRIPT
 
 def ATTACH_SUB_ARRAY(SUBp):
     # Locals: I, K
+    goto = "firstTry"
     
-    if SUBp < 0: 
-        return g.TRUE;
+    if SUBp < 0: return g.TRUE;
     I = g.PTR[g.MP];
     g.INX[g.INX[0]] = g.INX[g.INX[0]] - SUBp;
-    goto_ARR_SLIP = False
-    firstTry = True
-    while firstTry or goto_ARR_SLIP:
-        firstTry = False
-        if g.SYT_ARRAY(g.FIXL[g.MP]) <= 0 or goto_ARR_SLIP:
-            goto_ARR_SLIP = False
+    while goto != None:
+        if goto == "firstTry": goto = None
+        if g.SYT_ARRAY(g.FIXL[g.MP]) <= 0 or goto == "ARR_SLIP":
+            if goto == "ARR_SLIP": goto = None
             if SUBp > 0:
                ERROR(d.CLASS_SC, 2, g.VAR[g.MP]);
                SLIP_SUBSCRIPT(SUBp);
@@ -92,6 +90,6 @@ def ATTACH_SUB_ARRAY(SUBp):
                     g.VAL_P[I] = g.VAL_P[I] & 0xFFFE;
                 else: 
                     g.VAL_P[I] = g.VAL_P[I] | 0x10;
-                goto_ARR_SLIP = True
+                goto = "ARR_SLIP"
                 continue
     return g.FALSE;

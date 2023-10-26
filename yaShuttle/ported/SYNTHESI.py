@@ -86,6 +86,7 @@ from HASH     import HASH
 from IORS     import IORS
 from KILLNAME import KILL_NAME
 from LABELMAT import LABEL_MATCH
+from LITRESUL import LIT_RESULT_TYPE
 from MAKEFIXE import MAKE_FIXED_LIT
 from MATCHARI import MATCH_ARITH
 from MATCHSIM import MATCH_SIMPLES
@@ -112,6 +113,7 @@ from SRNUPDAT import SRN_UPDATE
 from STABHDR  import STAB_HDR
 from STACKDUM import STACK_DUMP
 from STARTNOR import START_NORMAL_FCN
+from STRUCTUR import STRUCTURE_COMPARE
 from UNARRAY2 import UNARRAYED_SCALAR
 from UNARRAY3 import UNARRAYED_SIMPLE
 from UNARRAYE import UNARRAYED_INTEGER
@@ -4029,7 +4031,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 if g.CASE_LEVEL <= g.CASE_LEVEL_LIM:
                     g.CASE_STACK[g.CASE_LEVEL] = g.CASE_STACK[g.CASE_LEVEL] + 1;
                 g.TEMP = 0;
-                while (g.TEMP < g.CASE_LEVEL) & (g.TEMP < g.CASE_LEVEL_LIM):
+                while (g.TEMP < g.CASE_LEVEL) and (g.TEMP < g.CASE_LEVEL_LIM):
                     g.INFORMATION = g.INFORMATION + g.CASE_STACK[g.TEMP] + g.PERIOD;
                     g.TEMP = g.TEMP + 1;
                 g.INFORMATION = g.INFORMATION + str(g.CASE_STACK[g.TEMP]);
@@ -4372,7 +4374,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 else:
                     for g.TEMP in range(g.TEMP2, 1 + LENGTH(g.S) - 1):  #  CHECK FOR CHAR 1 TO 9
                         l.H1 = BYTE(g.S, g.TEMP);
-                        if not ((l.H1 >= BYTE('0')) & (l.H1 <= BYTE('9'))): 
+                        if not (l.H1 >= BYTE('0') and l.H1 <= BYTE('9')): 
                             ERROR(d.CLASS_LB, 4);
                             g.TEMP_SYN = 0;
                             goto = "DO_BIT_CONSTANT_END"
@@ -5077,7 +5079,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             elif g.TYPE == g.EVENT_TYPE: 
                 CHECK_EVENT_CONFLICTS();
             if (g.ATTRIBUTES & g.SD_FLAGS) == 0:
-                if (g.TYPE >= g.MAT_TYPE) & (g.TYPE <= g.INT_TYPE):
+                if (g.TYPE >= g.MAT_TYPE) and (g.TYPE <= g.INT_TYPE):
                     g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.SD_FLAGS);
             if (g.ATTRIBUTES & g.ALDENSE_FLAGS) == 0:
                 if (not g.NAME_IMPLIED) and ((g.ATTRIBUTES & g.ARRAY_FLAG) == 0) and \
@@ -5230,7 +5232,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             if g.TYPE == g.MAJ_STRUC: 
                 CHECK_STRUC_CONFLICTS();
             if (g.ATTRIBUTES & g.SD_FLAGS) == 0: 
-                if g.TYPE >= g.MAT_TYPE & g.TYPE <= g.INT_TYPE:
+                if g.TYPE >= g.MAT_TYPE and g.TYPE <= g.INT_TYPE:
                     g.ATTRIBUTES = g.ATTRIBUTES | (g.DEFAULT_ATTR & g.SD_FLAGS);
             SET_SYT_ENTRIES();
             g.NAME_IMPLIED = g.FALSE;

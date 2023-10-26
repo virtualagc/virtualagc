@@ -127,8 +127,8 @@ def CHECK_NAMING(VALUE, LOC):
         # END
     elif VALUE == 2:
         pass;
-    elif VALUE == 3:
         #  ERROR CASE
+    elif VALUE == 3:
         # DO
         #  ASSIGNMENT
         if SHR(H2, 9) & 1:  # DO

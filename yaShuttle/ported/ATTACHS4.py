@@ -86,6 +86,7 @@ from RESETARR import RESET_ARRAYNESS
 
 def ATTACH_SUBSCRIPT():
     # Locals: I, J
+    goto = None
     
     g.INX[0] = g.PTR[g.SP];
     I = 2;
@@ -102,11 +103,10 @@ def ATTACH_SUBSCRIPT():
         g.PSEUDO_LENGTH[0] = 0;
         I = ATTACH_SUB_STRUCTURE(g.PSEUDO_LENGTH[g.INX[0]]);
         J = ATTACH_SUB_ARRAY(g.VAL_P[g.INX[0]]);
-        goto_SS_FUNNIES = False
         if g.SYT_CLASS(g.FIXL[g.MP]) != g.VAR_CLASS:
             if g.SYT_CLASS(g.FIXL[g.MP]) != g.TEMPLATE_CLASS: 
-                goto_SS_FUNNIES = True
-        if g.PSEUDO_TYPE[g.PTR[g.MP]] < g.SCALAR_TYPE and not goto_SS_FUNNIES: 
+                goto = "SS_FUNNIES"
+        if g.PSEUDO_TYPE[g.PTR[g.MP]] < g.SCALAR_TYPE and goto == None: 
             if I & 1: 
                 I = ATTACH_SUB_STRUCTURE(0);
             if (I != 2) and (J & 1) and (g.INX[g.INX[0]] == 0): 
@@ -114,14 +114,14 @@ def ATTACH_SUBSCRIPT():
             if J & 1: 
                 ATTACH_SUB_ARRAY(0);
             ATTACH_SUB_COMPONENT(g.INX[g.INX[0]]);
-        elif (J & 1) != 0 & (g.SYT_ARRAY(g.FIXL[g.MP]) > 0) and not goto_SS_FUNNIES:
+        elif (J & 1) != 0 and (g.SYT_ARRAY(g.FIXL[g.MP]) > 0) and goto == None:
             if I & 1: 
                 I = ATTACH_SUB_STRUCTURE(0);
             if (I != 2) and (g.INX[g.INX[0]] == 0): 
                 ESCAPE;
             ATTACH_SUB_ARRAY(g.INX[g.INX[0]]);
         else:
-            goto_SS_FUNNIES = False
+            if goto == "SS_FUNNIES": goto = None
             if (I & 1) != 0 and (g.SYT_ARRAY(g.FIXV[g.MP]) != 0):
                 I = ATTACH_SUB_STRUCTURE(g.INX[g.INX[0]]);
             elif g.INX[g.INX[0]] > 0: 

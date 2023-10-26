@@ -1,11 +1,12 @@
-C/ From PDF p. 141 of "Programming in HAL/S".
+C/ From PDF p. 141 of "Programming in HAL/S".  Surrounding brackets have 
+C/ been removed from array variables, since they are not legal HAL/S syntax.
 
   VSUM:
   FUNCTION(V) VECTOR;
      DECLARE V ARRAY(*) VECTOR;
      DECLARE TOTAL VECTOR INITIAL(0);
-E				     -
-M    DO FOR TEMPORARY N = 1 TO SIZE([V]);
+E				    -
+M    DO FOR TEMPORARY N = 1 TO SIZE(V);
 E         -       -     -
 M       TOTAL = TOTAL + V  ;
 S  			 N:

@@ -232,7 +232,7 @@ def SOURCE_COMPARE():
                     g.REPLACING = g.FALSE
                     g.DELETING = g.FALSE;
                     OUTPUT(9, g.X70);
-            if g.INCLUDING & g.PRINT_INCL_HEAD:
+            if g.INCLUDING and g.PRINT_INCL_HEAD:
                 OUTPUT(9, g.X1 + PATCH_INCL_HEAD);
                 OUTPUT(9, 'I' + g.STARS + ' START ' + g.INCL_LOG_MSG);
                 OUTPUT(9, g.X1);

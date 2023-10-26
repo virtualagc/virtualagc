@@ -60,14 +60,11 @@ def GET_ARRAYNESS():
         g.VAR_ARRAYNESS[0] = 0;
     I = g.SYT_ARRAY(g.FIXL[g.MP]);
     if I > 0:
-        if I >= len(h.EXT_ARRAY):
-            pass
         for J in range(1, h.EXT_ARRAY[I] + 1):
             g.VAR_ARRAYNESS[g.VAR_ARRAYNESS[0] + J] = h.EXT_ARRAY[I + J];
         g.VAR_ARRAYNESS[0] = g.VAR_ARRAYNESS[0] + h.EXT_ARRAY[I];
         K = K | 1;
     I = g.FIXL[g.MP];
-    if (g.SYT_FLAGS(I) & g.NAME_FLAG) != 0: 
-        K = K | 0x200;
+    if (g.SYT_FLAGS(I) & g.NAME_FLAG) != 0: K = K | 0x200;
     g.VAL_P[g.PTR[g.MP]] = g.VAL_P[g.PTR[g.MP]] | K;
-    return SHR(K, 9);
+    return SHR(K, 9) & 0xFFFF;

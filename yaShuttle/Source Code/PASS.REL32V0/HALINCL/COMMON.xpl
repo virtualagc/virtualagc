@@ -31,7 +31,7 @@
 /*                                                         */                   00011400
 /*  07/08/91 RSJ  24V0  CR11096F ADD DATA_REMOTE BOOLEAN   */                   00011400
 /*                                                         */                   00011400
-/*  12/23/92 PMA  8V0   *        MERGE 7V0 AND 24V0        */
+/*  12/23/92 PMA  8V0   *        MERGE 7V0 SYMAND 24V0        */
 /*                               COMPILERS.                */
 /*                               * REFERENCE 24V0 CR/DR    */
 /*                                                         */

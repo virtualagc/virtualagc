@@ -2903,7 +2903,7 @@ def SYT_ARRAY(n, value=None):
     if value == None:
         value = h.SYM_TAB[n].SYM_ARRAY
         if (value & 0x8000) != 0:
-            value = (~0xFFFF & -1) | value
+            value = (~0xFFFF & -1) | (0xFFFF & value)
         return value
     h.SYM_TAB[n].SYM_ARRAY = value & 0xFFFF
 
