@@ -662,7 +662,8 @@ def STREAM():
             # END OF INCLUDE DIRECTIVE
             elif ll.C[0] == 'VERSION':
                 if g.TPL_VERSION > 0:
-                    ll.I = BYTE(g.CURRENT_CARD, hd.D_INDEX + 1);
+                    #ll.I = BYTE(g.CURRENT_CARD, hd.D_INDEX + 1);
+                    ll.I = int(g.CURRENT_CARD[hd.D_INDEX + 1:], 16)
                     g.SYT_LOCKp[g.TPL_VERSION] = ll.I;
                     g.TPL_VERSION = 0;
             elif ll.C[0] == 'DOWNGRADE' or ll.C[0] == 'OWNGRADE':  # DOWNGRADE
@@ -843,7 +844,7 @@ def STREAM():
             # IN THIS SECTION OF CODE,WE LOOK FOR THE DATA_REMOTE DIRECTIVE
             elif ll.C[0] == 'DATA_REMOTE' or ll.C[0] == 'ATA_REMOTE':  # REMOTE #D
                 g.DATA_REMOTE = g.TRUE;
-                if pfs:
+                if g.pfs:
                     # CHECK FOR ILLEGAL LOCATION OF THE DIRECTIVE
                     if g.BLOCK_MODE[0] != 0:
                         ERRORS(d.CLASS_XR, 1);
@@ -895,7 +896,7 @@ def STREAM():
                     g.INCLUDING = g.FALSE;
                     g.INCLUDE_STMT = -1;
                     g.INCLUDE_END = g.TRUE;
-                    if not pfs:  # BFS/PASS INTERFACE; TEMPLATE LENGTH
+                    if not g.pfs:  # BFS/PASS INTERFACE; TEMPLATE LENGTH
                         if g.TEMPLATE_FLAG:
                             g.TEXT_LIMIT[0] = g.TEXT_LIMIT[1];
                     goto_READ = True;

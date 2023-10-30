@@ -86,6 +86,8 @@ for parm in sys.argv[1:]:
         pass
     elif parm == "--ascii":
         pass
+    elif parm == "--templib":
+        pass
     elif parm == "--debugwr":
         debugwr = True
     elif parm in pCON or ("NO" + parm) in pCON or \
@@ -120,6 +122,7 @@ for parm in sys.argv[1:]:
         print('                 automatically added if missing.')
         print('--pfs            Compile for PFS (PASS).')
         print('--bfs            Compile for BFS. (Default is --pfs.)')
+        print('--templib        Identify &&TEMPLIB with TEMPLIB.')
         print('--utf8           (Default.) Use UTF-8 in program listings.')
         print('--ascii          Use ASCII in program listings.')
         print('--extra          Enhances messages for some ¢-toggles.')

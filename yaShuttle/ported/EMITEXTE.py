@@ -224,7 +224,8 @@ def EMIT_EXTERNAL():
             return;
         if g.TPL_FLAG == 0:
             l.J = 0x01
-            l.VERSION = BYTE(l.VERSION, 10, 0x01);
+            #l.VERSION = BYTE(l.VERSION, 10, 0x01);
+            l.VERSION = l.VERSION[:10] + ("%02X" % 0x01)
         else:
             while LENGTH(l.OLDBUFF) > 0:
                 l.NEWBUFF = l.OLDBUFF;
@@ -236,16 +237,19 @@ def EMIT_EXTERNAL():
                 if not g.SDL_OPTION:
                     ERROR(d.CLASS_XV, 1, g.TPL_NAME);
             else:
-                l.J = BYTE(l.NEWBUFF, 10);
-                if l.J == 0x01:
+                #l.J = BYTE(l.NEWBUFF, 10);
+                l.J = int(l.NEWBUFF[10:], 16)
+                if l.J == 0xFF:
                     l.I = 0x01;
                 else:
                     l.I = l.J + 1;
                 if g.TPL_FLAG == 2:
                     l.J = l.I;
-            l.VERSION = BYTE(l.VERSION, 10, I);
+            #l.VERSION = BYTE(l.VERSION, 10, l.I);
+            l.VERSION = l.VERSION[:10] + ("%02X" % l.I)
         g.SYT_LOCKp(g.BLOCK_SYTREF[1], l.J);
-        OUTPUT(6, l.VERSION + str(BYTE(l.VERSION, 10)));
+        #OUTPUT(6, l.VERSION + str(BYTE(l.VERSION, 10)));
+        OUTPUT(6, l.VERSION)
     elif g.EXTERNALIZE == 3:
         #  STARTING
         l.NEWBUFF = ': EXTERNAL ' + STRING(g.VOCAB_INDEX[g.PARSE_STACK[g.SP]]) + g.X1;

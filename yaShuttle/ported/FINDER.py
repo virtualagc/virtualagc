@@ -44,7 +44,7 @@ FILENUM = (0x80000008, 0x4, 0x80000006)
 # TRUE IF DD STATEMENT MISSING
 # In other words, PDS files that can actually be opened whould be g.FALSE in the 
 # following list.
-FILENODD = [g.TRUE] * (MAXLIBFILES + 1) 
+FILENODD = [g.FALSE] * (MAXLIBFILES + 1) 
 
 # This function returns g.FALSE upon success, g.TRUE upon failure.
 def FINDER(FILENO, NAME, START):
@@ -53,10 +53,10 @@ def FINDER(FILENO, NAME, START):
     
     for I in range(START, MAXLIBFILES + 1):
         if not FILENODD[I]: #DO
-            MONITOR(8, FILENO, FILENUM(I)); # SET FILENO WITH NEW DDNAME
+            MONITOR(8, FILENO, FILENUM[I]); # SET FILENO WITH NEW DDNAME
             RETCODE = MONITOR(2, FILENO, NAME); # FIND THE MEMBER
             if RETCODE == 0: #DO
-                g.INCLUDE_FILEp = FILENUM(I);
+                g.INCLUDE_FILEp = FILENUM[I];
                 return g.FALSE;
             #END
             FILENODD[I] = SHR(RETCODE, 1) & 1;

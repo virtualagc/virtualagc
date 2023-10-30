@@ -27,6 +27,7 @@ scriptFolder = os.path.dirname(__file__) # Requires a / at the end.
 sourceFile = None  # Use stdin by default for HAL/S source-code file.
 outUTF8 = True
 listing2 = False
+templib = False
 for parm in sys.argv[1:]:
     if parm.startswith("--hal="):
         sourceFile = parm[6:]
@@ -38,6 +39,8 @@ for parm in sys.argv[1:]:
         outUTF8 = True
     elif parm == "LISTING2":
         listing2 = True
+    elif parm == "--templib":
+        templib = True
 
 
 # Python's native round() function uses a silly method (in the sense that it is
@@ -245,11 +248,15 @@ inputDevices[0] = {
     "buf": dummy
     }
 
-def openGenericInputDevice(n, name, isPDS = False):
+def openGenericInputDevice(n, name, isPDS = False, rw = False):
+    if rw:
+        mode = "r+"
+    else:
+        mode = "r"
     try:
-        f = open(name, "r")
+        f = open(name, mode)
     except:
-        f = open(scriptFolder + "/" + name, "r")
+        f = open(scriptFolder + "/" + name, mode)
     inputDevices[n] = {
         "file": f,
         "open": True,
@@ -273,10 +280,13 @@ def openGenericOutputDevice(n, name, isPDS = False):
 
 if listing2:
     openGenericOutputDevice(2, "LISTING2.hal") # Secondary output listing.
-openGenericInputDevice(4, "TEMPLIB.json", True) # Template library.
+openGenericInputDevice(4, "TEMPLIB.json", True, templib) # Template library.
 openGenericInputDevice(5, "ERRORLIB.json", True) # Error-message library.
 openGenericInputDevice(6, "ACCESS.json", True) # File of module access rights.
-openGenericOutputDevice(6, "&&TEMPLIB.json", True) # Temporary templates.
+if templib:
+    outputDevices[6] = inputDevices[4]
+else:
+    openGenericOutputDevice(6, "&&TEMPLIB.json", True) # Temporary templates.
 openGenericOutputDevice(8, "&&TEMPINC.json", True) # Temporary includes.
 openGenericOutputDevice(9, "SOURCECO.txt")  # Source-comparision output.
 
@@ -313,7 +323,7 @@ def MONITOR(function, arg2=None, arg3=None):
     def error(msg=''):
         if len(msg) > 0:
             msg = '(' + msg + ') '
-        print("Error %sin MONITOR(%s,%s,%s)" % \
+        print("\nError %sin MONITOR(%s,%s,%s)" % \
               (msg, str(function), str(arg2), str(arg3)), file=sys.stderr)
         sys.exit(1)
     
@@ -428,7 +438,7 @@ def MONITOR(function, arg2=None, arg3=None):
         fileno = arg2
         filenum = arg3
         if fileno < 1 or fileno >= maxDevices or \
-                filenum < 1 or filenum >= maxDevices:
+                filenum < 1 or (filenum & 0x7FFFFFFF) >= maxDevices:
             error("Illegal FILENO or FILENUM in MONITOR(8)")
         redirections[fileno] = filenum
     
