@@ -114,6 +114,7 @@ from STABHDR  import STAB_HDR
 from STACKDUM import STACK_DUMP
 from STARTNOR import START_NORMAL_FCN
 from STRUCTUR import STRUCTURE_COMPARE
+from TIEXREF  import TIE_XREF
 from UNARRAY2 import UNARRAYED_SCALAR
 from UNARRAY3 import UNARRAYED_SIMPLE
 from UNARRAYE import UNARRAYED_INTEGER
@@ -2498,7 +2499,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <BLOCK STMT>  ::=  <BLOCK STMT TOP>  ;
         OUTPUT_WRITER();
         if g.PARMS_PRESENT <= 0: 
-            if g.EXTERNALIZE: 
+            if g.EXTERNALIZE & 1: 
                 g.EXTERNALIZE = 4;
         g.INDENT_LEVEL = g.INDENT_LEVEL + g.INDENT_INCR;
         if g.TPL_REMOTE:
@@ -2943,7 +2944,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         for g.I in range(0, 1 + g.N_DIM_LIM):
             g.S_ARRAY[g.I] = 0;
         g.FIXV[g.SP] = g.ARRAY_FLAG;
-        g.FIXL[g.SP] = g.FIXV[g.SP]
+        g.FIXL[g.SP] = g.ARRAY_FLAG;
         goto = "INCORPORATE_ATTR";
     # reference 3730 relocated
     elif PRODUCTION_NUMBER == 374:  # reference 3740
@@ -3132,7 +3133,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.FIXL[g.MP], g.FIXV[g.MP] = g.REMOTE_FLAG;
     elif PRODUCTION_NUMBER == 408:  # reference 4080
         #  <MINOR ATTRIBUTE> ::= RIGID
-        g.FIXL[g.MP], g.FIXV[g.MP] = g.RIGID_FLAG;
+        g.FIXL[g.MP] = g.RIGID_FLAG
+        g.FIXV[g.MP] = g.RIGID_FLAG;
     # reference 4090 relocated
     elif PRODUCTION_NUMBER == 410:  # reference 4100
         #  <MINOR ATTRIBUTE> ::= <INIT/CONST HEAD> * )
@@ -4587,7 +4589,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         g.K = g.SYT_PTR(g.J);
                         while g.SYT_TYPE(g.K) == g.IND_CALL_LAB:
                             g.K = g.SYT_PTR(g.K);
-                        if SYT_NEST(g.K) >= SYT_NEST(g.J):
+                        if g.SYT_NEST(g.K) >= g.SYT_NEST(g.J):
                             ''' IND CALL HAS REACHED SAME SCOPE AS
                                 DEFINITION OF LABEL. SO LEAVE
                                 AS IND CALL AND DISCONNECT FROM SYT '''
@@ -4744,7 +4746,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                             ERROR(d.CLASS_DU, 3, g.SYT_NAME(g.J));
                             g.SYT_FLAGS(g.J, g.SYT_FLAGS(g.J) | g.DUMMY_FLAG);
                     g.J = g.J + 1;
-        if g.EXTERNALIZE: 
+        if g.EXTERNALIZE & 1: 
             g.EXTERNALIZE = 4;
         g.PTR[g.MP] = 0;
     if goto == "INLINE_DEFS" or \
@@ -4917,7 +4919,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if goto == None:
             if g.PARMS_PRESENT <= 0: 
                 g.PARMS_WATCH = g.FALSE;
-                if g.EXTERNALIZE: 
+                if g.EXTERNALIZE & 1: 
                     g.EXTERNALIZE = 4;
         if goto == "DECL_STAT": goto = None
         g.FACTORING = g.TRUE;

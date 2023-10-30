@@ -155,52 +155,50 @@ for s in range(-1, 2, 2):
 # When there is Python file associated with the device, the value will be a
 # Python dictionary structured as follows:
 #    {
-#        "file":   The associated Python file object,
-#        "open":   Boolean (True if open, False if closed),
-#        "blob":   If an input file, the entire contents as a list of strings.
-#                  If an output file, just None, since output is written 
-#                  directly to the file without any buffering.
-#        "pds":    If an input file the file contents as a dictionary.
-#                  If an output file, just None, since output is written 
-#                  directly to the file without any buffering.
-#        "random": The file contents as a list of fixed-length Python bytearray
-#                  objects.  "Random" files are treated as input/output, and
-#                  their contents are both buffered and written to the 
-#                  associated file.
-#        "reclen": The record length (in bytes) for "random" files.
-#        "mem":    For a "pds", the member name last found by MONITOR(2);
-#                  not used for a "blob",
-#        "ptr":    The index of the last line returned by an INPUT();
-#                  for a "blob" it's the index within the file as a whole,
-#                  while for a "pds" it's the index within the member,
-#        "was":    Set of PDS keys from most-recent read or write to file.
+#        "file":     The associated Python file object,
+#        "open":     Boolean (True if open, False if closed),
+#        "pds":      For PDS datasets only.  If "pds" isn't present, then the 
+#                    file is a flat sequential dataset.  The value is the
+#                    entire contents of the file (whether input or output)
+#                    as a Python dictionary whose keys are the member names
+#                    (each exactly 8 characters, right padded with spaces) and
+#                    whose values are Python lists of strings.
+#        "buf":      For a sequential file (either input or output), the 
+#                    entire contents of the file, buffered as a list of strings.
+#                    For a PDS file, the entire contents of the currently
+#                    selected member, buffered as a list of strings.  In the
+#                    case of a PDS *output* file, the buffer will not be 
+#                    physically written to the file until an appropriate call
+#                    to MONITOR(1, ...) occurs.
+#        "mem":      For a PDS file, the member name last found by 
+#                    MONITOR(2).  Not used for a flat sequential file.
+#        "ptr":      The index of the last line returned by an INPUT();
+#                    for a "buf" it's the index within the file as a whole,
+#                    while for a "pds" it's the index within the member,
 #    }
-# The keys "blob", "pds", and "random" are mutually exclusive; one and only one
-# of them is present.  For a "pds" dictionary, the dictionary keys are  
-# "member names", each of which is precisely 8 characters long (including 
-# padding by spaces on the right).  The value associated with a member key is 
-# the entire contents of that member as a list of strings.
-#
-# NOTE: It took me a good long time to figure this out, but the
-# input and output "devices" which are accessed via the INPUT and OUTPUT
-# statements are *separate* from the random-access files accessed by READ
-# and WRITE statements.  What really puzzled me was that device 2 is used for
-# outputting LISTING2, whereas file 2 is used for inputting and outputting to
-# the LITFILE.  But finally I did figure it out, fortunately.  If you look at
-# sample JCL, you'll see that all of these have separate DD cards defining
-# them.  We simply open 6 random-access files called "HAL-S-FC.file1" through
-# "HAL-S-FC.file2" and then wash our hands of the matter.
+# For "pds", the dictionary keys are "member names", each of which is 
+# precisely 8 characters long (including padding by spaces on the right).  
+# The value associated with a member key is the entire contents of that member 
+# as a list of strings.
 
-# The entries of the files[] array are 3-lists of the open random-access file 
-# pointer, the record size, and the current file size (in bytes).
+maxDevices = 10
+inputDevices = [None] * maxDevices
+outputDevices = [None] * maxDevices
+
+# Note that while textual-data files (the "buf" and "pds" files from above)
+# are handled by the INPUT(...)/OUTPUT(...) mechanism, random-access files
+# are handled by the entirely-different FILE() method. Thus random-access files
+# do not appear in inputDevices[] and outputDevices[] above, but rather in
+# files[] below.  And although all are accessed by "file number", with the 
+# file numbers overlapping all three of these cases, the individual files of
+# the same file-number differ essentially entirely.  The entries of the files[] 
+# array are 3-lists of the open random-access file pointer, the record size, 
+# and the current file size (in bytes).
 files = [None]
 for i in range(1, 7):
     f = open("FILE%d.bin" % i, "w+b")
     f.seek(2, 0)
     files.append([f, 7200, f.tell()])
-
-inputDevices = [None] * 10
-outputDevices = [None] * 10
 
 # Open the files that we need, other than output files 0 and 1 (whose behavior
 # is hard-coded separately), and buffer their contents where appropriate.
@@ -239,47 +237,48 @@ for i in range(len(dummy)):
     dummy[i] = dummy[i].rstrip('\n\r').replace("¬", "~")\
                         .replace("^", "~").replace("¢", "`").expandtabs(8)\
                         .ljust(80)
+
 inputDevices[0] = {
     "file": f,
     "open": True,
     "ptr":-1,
-    "blob": dummy
-    }
-if listing2:
-    f = open("LISTING2.hal", "w")  # Secondary output listing
-    outputDevices[2] = {
-        "file": f,
-        "open": True,
-        "blob": []
-        }
-try:
-    f = open("ERRORLIB.json", "r")  # File of error message types.
-except:
-    f = open(scriptFolder + "/ERRORLIB.json", "r")
-dummy = json.load(f)
-inputDevices[5] = {
-    "file": f,
-    "open": True,
-    "ptr":-1,
-    "mem": "",
-    "pds": dummy,
-    "was": set(dummy.keys())
-    }
-inputDevices[6] = {  # File of module access rights.
-    "file": None,
-    "open": False,
-    "ptr":-1,
-    "mem": "",
-    "pds": {},
-    "was": set()
-    }
-f = open("SOURCECO.txt", "w")  # Source-comparision output.
-outputDevices[9] = {
-    "file": f,
-    "open": True,
-    "blob": []
+    "buf": dummy
     }
 
+def openGenericInputDevice(n, name, isPDS = False):
+    try:
+        f = open(name, "r")
+    except:
+        f = open(scriptFolder + "/" + name, "r")
+    inputDevices[n] = {
+        "file": f,
+        "open": True,
+        "ptr":-1,
+        "buf": []
+        }
+    if isPDS:
+        inputDevices[n]["pds"] = json.load(f)
+        inputDevices[n]["mem"] = ""
+    
+def openGenericOutputDevice(n, name, isPDS = False):
+    global outputDevices
+    outputDevices[n] = {
+        "file": open(name, "w"),
+        "open": True,
+        "ptr": -1,
+        "buf": []
+        }
+    if isPDS:
+        outputDevices[n]["pds"] = {}
+
+if listing2:
+    openGenericOutputDevice(2, "LISTING2.hal") # Secondary output listing.
+openGenericInputDevice(4, "TEMPLIB.json", True) # Template library.
+openGenericInputDevice(5, "ERRORLIB.json", True) # Error-message library.
+openGenericInputDevice(6, "ACCESS.json", True) # File of module access rights.
+openGenericOutputDevice(6, "&&TEMPLIB.json", True) # Temporary templates.
+openGenericOutputDevice(8, "&&TEMPINC.json", True) # Temporary includes.
+openGenericOutputDevice(9, "SOURCECO.txt")  # Source-comparision output.
 
 def SHL(a, b):
     return a << b
@@ -293,16 +292,23 @@ def SHR(a, b):
 # & HAL/S-360 Compiler System Program Description" (IR-182-1).  Note that the
 # only function numbers actually appearing in the source code are:
 #    0-10, 12, 13, 15-18, 21-23, 31-32
-# The latter two aren't mentioned in the documentation.
+# The latter two aren't mentioned in the documentation.  On the other hand,
+# the file MONITOR.ASM contains the code (unfortunately in IBM Basic Assembly
+# Language, BAL) that handles all calls to MONITOR(), beginning at line 2644.
+# Unfortunately, the BAL code is rather opaque to those of us who understand
+# neither BAL nor the runtime environment provided by the these old IBM 
+# computers.  There are some comments in the BAL code, however, which may
+# provide a little more insight than provided by the non-comments in the 
+# IR-182.1, so I've brought those comments over into the code below.
 compilerStartTime = time_ns()
 dwArea = None
 compilationReturnBits = 0
 namePassedToCompiler = ""
 
-
+redirections = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] # For MONITOR(8).
 def MONITOR(function, arg2=None, arg3=None):
     global inputDevices, outputDevices, dwArea, compilationReturnBits, \
-            namePassedToCompiler, files
+            namePassedToCompiler, files, redirections
     
     def error(msg=''):
         if len(msg) > 0:
@@ -321,68 +327,74 @@ def MONITOR(function, arg2=None, arg3=None):
             # print("\nTrying to close device %d, which is not open" % n)
             pass
     
+    # Close an OUTPUT file.
     if function == 0: 
         n = arg2
         close(n)
-        
+    
+    # Stow function.
     elif function == 1:
         n = arg2
         member = arg3
-        msg = ''
-        try:
-            msg = "no file"
-            device = outputDevices[n]
-            file = device["file"]
-            msg = "not PDS"
-            pds = device["pds"]
-            msg = "other"
-            was = device["was"]
-            if member in was:
-                returnValue = 1
-            else:
-                returnValue = 0
-            was.clear()
-            was[0:0] = pds.keys()
-            file.seek(0)
-            j = json.dump(pds, file)
-            file.truncate()
-            close(n)
-            return returnValue
-        except: 
-            error(msg)
+        device = outputDevices[n]
+        if device == None or not device["open"]:
+            error("not open")
+        if "pds" not in device:
+            error("not PDS")
+        file = device["file"]
+        pds = device["pds"]
+        if member in pds:
+            returnValue = 1
+        else:
+            returnValue = 0
+        pds[member] = device["buf"]
+        device["buf"] = []
+        file.seek(0)
+        j = json.dump(pds, file)
+        file.flush()
+        file.truncate()
+        file.flush()
+        return returnValue
     
+    # FIND-prepare for PDS INPUT.
     elif function == 2:
-        n = arg2
+        redirect = redirections[arg2]
+        temporary = redirect & 0x80000000
+        n = redirect & 0x7FFFFFFF
         member = arg3
-        msg = ''
-        try:
-            msg = "not PDS"
-            if member in inputDevices[n]["pds"]:
-                inputDevices[n]["mem"] = member
-                inputDevices[n]["ptr"] = -1
-                return 0
-            '''
-            if n in (4, 7):
-                if member in inputDevices[6]["pds"]:
-                    inputDevices[6]["mem"] = member
-                    return 0
-            '''
-            return 1
-        except:
-            error(msg)
-        
+        if temporary:
+            file = outputDevices[n]
+        else:
+            file = inputDevices[n]
+        if "pds" not in file:
+            error("not PDS")
+        if member in file["pds"]:
+            file["mem"] = member
+            file["ptr"] = -1
+            return 0
+        return 1
+    
+    # Close an INPUT file.
     elif function == 3: 
-        n = arg2
+        redirect = redirections[arg2]
+        temporary = redirect & 0x8000000
+        n = redirect & 0x7FFFFFFF
+        redirections[arg2] = arg2
+        if temporary:
+            return
         close(n)
     
+    # Change FILE blocking.
     elif function == 4:
         # Change block size of a random-access file.
         files[arg2][1] = arg3
     
+    # Set up for floating point package.
     elif function == 5:
         # arg2 must be an array of 32-bit integers.
         dwArea = arg2
     
+    # GETMAIN for pointer variable.
     elif function == 6:
         # This won't be right if the based variable is anything other than 
         # FIXED ... say if it's strings or multiple fields.  But it does add
@@ -398,6 +410,7 @@ def MONITOR(function, arg2=None, arg3=None):
         except:
             error()
     
+    # FREEMAIN pointer variable storage
     elif function == 7:
         array = arg2
         n = arg3
@@ -407,9 +420,19 @@ def MONITOR(function, arg2=None, arg3=None):
         except:
             error()
     
+    # Set PDS DDNAME.
     elif function == 8:
-        error()
+        # Function 8 is not covered by any documentation available to me.
+        # (Well, IR-182-1 says it's "not used" and will cause an ABEND.)
+        # At any rate, I'm guessing somewhat.
+        fileno = arg2
+        filenum = arg3
+        if fileno < 1 or fileno >= maxDevices or \
+                filenum < 1 or filenum >= maxDevices:
+            error("Illegal FILENO or FILENUM in MONITOR(8)")
+        redirections[fileno] = filenum
     
+    # Compile-time eval of floating point
     elif function == 9:
         '''
         This is a bit confusing, so let me try to summarize my understanding of
@@ -466,6 +489,7 @@ def MONITOR(function, arg2=None, arg3=None):
         except:
             return 1
     
+    # Character to floating-point conversion.
     elif function == 10:
         if dwArea == None:
             print("\nNo MONITOR(5) prior to MONITOR(10)", file=sys.stderr)
@@ -477,6 +501,11 @@ def MONITOR(function, arg2=None, arg3=None):
         except:
             return 1
     
+    # Not supported
+    elif function == 11:
+        error("Call to MONITOR(11)")
+    
+    # Floating-point to character conversion.
     elif function == 12:
         p = arg2 # 0 for SP, 8 for DP
         value = fromFloatIBM(dwArea[0], dwArea[1])
@@ -507,10 +536,17 @@ def MONITOR(function, arg2=None, arg3=None):
         value = value.replace("e", "E")
         return value
     
+    # For options passing.
     elif function == 13:
         # Unneeded
         return 0
     
+    # For SDF handling.
+    elif function == 14:
+        # TBD
+        pass
+    
+    # PDS member revision level ind & cat number.
     elif function == 15:
         # The documented explanation is sheerest gobbledygook.  I think perhaps
         # it's saying that the so-called template library maintains a revision
@@ -518,7 +554,8 @@ def MONITOR(function, arg2=None, arg3=None):
         # can be used to retrieve that revision code.  All of which is as
         # meaningless to us as it can possibly be.  I return a nonsense value.
         return 32 * 65536 + 0
-        
+    
+    # Incorporate flags into return code.
     elif function == 16:
         try:
             orFlag = 0x80 & arg2
@@ -529,30 +566,86 @@ def MONITOR(function, arg2=None, arg3=None):
                 compilationReturnBits = code
         except:
             error()
-        
+    
+    # Set compilation characteristic name
     elif function == 17:
         namePassedToCompiler = arg2
-        
+    
+    # Get current task elapsed time
     elif function == 18:
         return (time_ns() - compilerStartTime) // 10000000
     
+    # GETMAIN a list of areas
+    elif function == 19:
+        # TBD
+        pass
+    
+    # FREEMAIN a list of areas
+    elif function == 20:
+        # TBD
+        pass
+    
+    # Determine how much core is left
     elif function == 21:
         return 1000000000
-        
+    
+    # Calls to the SDF access package.
     elif function == 22:
         pass
-        
+    
+    # Return program identification.
     elif function == 23:
         return "REL32V0   "
     
-    elif function == 31:
-        # This is used by the virtual-memory modules (VMEM3).  I have no idea
-        # what it may do, but it doesn't seem to return a value.
+    # Read a block of a load module.
+    elif function == 24:
+        # TBD
         pass
-        
+    
+    # Read a mass-memory load block.
+    elif function == 25:
+        # TBD
+        pass
+    
+    # Read a MAF (memory analysis file) block
+    elif function == 26:
+        # TBD
+        pass
+    
+    # Write a MAF block
+    elif function == 27:
+        # TBD
+        pass
+    
+    # Link to dump analysis service routine
+    elif function == 28:
+        # TBD
+        pass
+    
+    # Return current page number
+    elif function == 29:
+        # TBD
+        return 0
+    
+    # Return JFCB as string
+    elif function == 30:
+        # TBD
+        pass
+    
+    # Virtual-memory lookahead service.
+    elif function == 31:
+        pass
+    
+    # Find out subpool minimum size.  (Actually, MONITOR.ASM says "monimum".
+    # I assume that's an error, but perhaps it's correct and just too witty for
+    # me to understand.)
     elif function == 32:  # Returns the 'storage increment', whatever that may be.
         return 16384
-
+    
+    # Find out FILE max REC# and BLKSIZ.
+    elif function == 33:
+        pass
+    
 '''
 The following function replaces the XPL constructs
     OUTPUT(fileNumber) = string
@@ -588,6 +681,24 @@ linesPerPage = 59  # Should get this from LINECT parameter.
 
 def OUTPUT(fileNumber, string):
     global headingLine, subHeadingLine, pageCount, LINE_COUNT
+    if fileNumber > 1:
+        file = outputDevices[fileNumber]
+        if file == None:
+            print("\nOUTPUT to nonexistent device %d" % fileNumber, \
+                  file = sys.stderr)
+            return
+        if not file["open"]:
+            print("\nOUTPUT to closed device %d" % fileNumber, \
+                  file = sys.stderr)
+            return
+        file["buf"].append(string)
+        if "pds" not in file:
+            f = file["file"]
+            if outUTF8:
+                string = string.replace("`", "¢").replace("~", "¬")
+            f.write(string + '\n')
+            f.flush()
+        return
     if fileNumber == 0:
         string = ' ' + string
         fileNumber = 1
@@ -640,18 +751,6 @@ def OUTPUT(fileNumber, string):
                 print(queue[i])
             else:
                 print(queue[i], end='')
-    elif fileNumber == 6:
-        pass
-    elif fileNumber == 8:
-        pass
-    elif fileNumber in [2, 9]:
-        if outputDevices[fileNumber]["open"] and \
-                "blob" in outputDevices[fileNumber]:
-            f = outputDevices[fileNumber]["file"]
-            if outUTF8:
-                string = string.replace("`", "¢").replace("~", "¬")
-            f.write(string + '\n')
-            f.flush()
 
 '''
     fileNumber 0,1  stdin, presumably the source code.
@@ -660,7 +759,10 @@ def OUTPUT(fileNumber, string):
     fileNumber 5    Error library (a PDS).
     fileNumber 6    An access-control PDS, providing acceptable language subsets
     fileNumber 7    For reading in structure templates from PDS.
-    
+
+There are cases for certain PDS files where output is both written to the 
+file and read back from it as well.  In those cases ... TBD.
+
 The available documentation doesn't tell us what INPUT() is supposed to return
 at the end-of-file or end-of-member, though the XPL code I've looked at 
 indicates the following:
@@ -683,11 +785,17 @@ asciiEOT = 0x04
 
 
 def INPUT(fileNumber):
+    fileNumber = redirections[fileNumber]
+    temporary = fileNumber & 0x80000000
+    fileNumber &= 0x7FFFFFFF
     try:
-        file = inputDevices[fileNumber]
+        if temporary:
+            file = outputDevices[fileNumber]
+        else:
+            file = inputDevices[fileNumber]
         index = file['ptr'] + 1
-        if 'blob' in file:
-            data = file['blob']
+        if "pds" not in file:
+            data = file['buf']
         else:
             mem = file["mem"]
             data = file['pds'][mem]

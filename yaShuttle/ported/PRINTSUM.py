@@ -168,5 +168,5 @@ def PRINT_SUMMARY():
         g.S = ' FOUND AND CHANGED ';
     # END;
     if not g.SDL_OPTION:
-        g.S = g.S + ', VERSION=' + g.SYT_LOCKp(g.BLOCK_SYTREF[1]);
+        g.S = g.S + ', VERSION=' + str(g.SYT_LOCKp(g.BLOCK_SYTREF[1]));
     OUTPUT(0, '******* TEMPLATE LIBRARY MEMBER ' + g.TPL_NAME + g.S);

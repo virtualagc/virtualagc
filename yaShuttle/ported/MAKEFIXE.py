@@ -76,5 +76,8 @@ def MAKE_FIXED_LIT(PTR):
     PTR=GET_LITERAL(PTR);
     g.DW[0]=g.LIT2(PTR);
     g.DW[1]=g.LIT3(PTR);
-    return hround(fromFloatIBM(g.DW[0], g.DW[1]))
+    i = hround(fromFloatIBM(g.DW[0], g.DW[1]))
+    if i < 0:
+        i = -i
+    return i
 # END MAKE_FIXED_LIT;

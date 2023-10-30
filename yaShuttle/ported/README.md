@@ -869,9 +869,66 @@ Here are some problems I've noted in this respect, in the code from Ryer's book:
   * The original Intermetrics compiler does not accept some of the overpunch characters (for example, it will accept the overpunch '-' for a vector, but not '+' for a structure, even though it adds these to the output listing when not present initially).  These are all decorations without any syntactic meaning, of course, and so can be removed without penalty.
   * The original Intermetrics compiler does not accept enclosing brackets for array variables (such as `[A]`), nor I assume enclosing braces for structure variables (such as `{S}`), even though Ryer strongly implies that they are acceptable.  Enclosing brackets and braces therefore need to be removed.
 
-# Known Errors
+# FINDER(), MONITOR(8), D INCLUDE, and Related Puzzles
 
-This section contains a list of all the compile-time errors I encounter in test-compiles of my HAL/S source-code sample.  These are very hard to figure out the root causes for, and sometimes to relate what's actually going on in the error messages themselves, so here are my stream-of-consciousness notes on the subject.  Once all errors are resolved, I'll eliminate this section entirely.
+The seemingly-unrelated topics listed in the heading are addressed together in this section due to the fact that I encountered them all at once when trying to work through inclusion of so-called "templates".
 
-  * DI3 &mdash; In the `INITIAL()` or `CONSTANT()` attributes of a `DECLARE` statement, expressions consisting of numeric literals work just fine.  But any expression, no matter how simple, containing a symbol already declared as a `CONSTANT` fails, even though from the symbol table and literal table of the listing we know that these symbols are in fact recognized as constants and do in fact have the correct values.
-  * SR4 &mdash; Subscripts of `VECTOR`s seem always to be rejected, on the grounds that they are "less than 1".
+Templates are imported via the "`D INCLUDE TEMPLATE name`" compiler directive.  The compiler has several possible sources, all of them PDS files, and prioritizes searches for the member `name` among these files.  (Actually, a mangled form of `name` is sought, but that's not immediately relevant to the issues I'm confronting, so I'll ignore that.)  The prioritized PDS files searched, in descending order, are:
+
+ 0. The file attached to `OUTPUT8`.  Originally, this dataset was temporary, having no filename as such.   For us, it will be a file called "&&TMPINC.json".  It pertains to a different but related set of compiler directives (than "`D INCLUDE TEMPLATE name`"), namely "`D DEFINE name`", "`D CLOSE name`", and "`D INCLUDE name`".  The first two store (without compiling) the arbitrary block of code enclosed by them on OUTPUT8, while the latter imports that named block of code at whatever point the directive appears.  
+ 1. The file attached to `INPUT4`, which I think may be called "TEMPLIB" (for "template library" rather than "temporary library"; for us, "TEMPLIB.json").  This would be a permanent, persistent template library.
+ 2. The file attached to `OUTPUT6`, which is called "&&TEMPLIB" (for us, "&&TEMPLIB.json"). It is the "&&" prefix that indicates the temporary nature of the file, so this would stand for "temporary template library".  This is the temporary file to which the compiler outputs templates it has itself constructed during compilation of the current compilation unit. 
+
+(**Note:** The item-numbering in the list above is 0, 1, 2.  Not all markdown systems support a starting number of 0, so this may show up incorrectely as 1, 2, 3 when viewed.)  I'm speaking here only of pass 1 of the compiler.  It appears to be the case that in later passes, additional PDS files may be searched as well.
+
+The searching itself is handled by the `FINDER` procedure in the module of the same name, as assisted by a call to `MONITOR(8, ...)`, which according to our best documentation (IR-182-1), is "Not in use. If called, produces ABEND 3000".  However, our best documentation is apparently out of date and wrong.  
+
+I infer that what `MONITOR(8, fileno, filenum)` does is to associate a `filenum` with a `fileno`.  What that apparently means is that if thereafter you use commands like `INPUT(fileno, ...)` what you'll *actually* achieve instead is `INPUT(filenum, ...)`.  Upon reflection, I'm guessing that this redirection applies only upon *input*.  At the very least, if it was able to affect outputs, there are no instances of that in the compiler's source code.  In other words, `OUTPUT(...)` is unaffected.  Moreover, In addition to `INPUT` statements, the redirection also appears from the compiler's source code to affect `MONITOR(2, fileno)` (find PDS file member name) and `MONITOR(2, fileno, name)` (close input file) calls, which are all of the `MONITOR` calls directly related to input files.  HAL/S source code does not check for return codes from `MONITOR(8, ...)`, so I'm guessing it doesn't have one.
+
+`FINDER(fileno, name, start)` then works as follows.  It searches the list of files I mentioned above (0, 1, 2) for the specified PDS-file member `name`.  The PDS file found also seeks to the start of member `name`.  *And*, the PDS file is also associated via `MONITOR(8)` with `fileno`, so that subsequent `INPUT(fileno)` statements operate on that PDS file.  It returns `FALSE` upon success and `TRUE` upon failure.  The `start` parameter is used to restrict the starting pointing in the file-search list; if 0, the entire list is searched; if 1, the search starts at index 1; and so on.
+
+However ... you'll notice that two of the files on the search list are *output* files, whereas the explanation above is really only relevant to *input* files.  So this leaves us with a bit of a mystery as to how to input from an output-file.  One clue may be provided by the construction of the search list `FINDER()` uses.  The search list (for the 3 file types) hardcoded into the `FINDER` module has entries of one of following the two forms:
+
+  * `filenum` (1-9) for files believed to be permanent input files.
+  * `0x80000000+filenum` for file believed to be temporary output files.
+
+More explicitly, the search list is:
+
+        (0x80000008, 0x4, 0x80000006)
+
+I don't understand the code in MONITOR.asm, but the code for `MONITOR(8, ...)` definitely allows for the possibility of either input-files or output-files, seemingly by selecting either a an "INPUT PDS WORK AREA" or an "OUTPUT PDS WORK AREA".  So in terms of the Python port, I guess that would correspond to using memory buffer for the file, whether input or output.  In particular, device INPUT6 is used for inputting access rights, and thus if `FINDER()` finds 0x80000006, it must definitely be interpreted in such a way as to input from OUTPUT6 rather than from INPUT6.
+
+However, that leaves another puzzle:  How do you output to a PDS file anyway?  (Which is something I've not yet had cause to think about, let alone implement.)  Naively, it would seem as though you must use `MONITOR(2, ...)` to select a member name, just as you would for a PDS input file, and then to `OUTPUT(...)` to it, in place of the `INPUT(...)` for an input file.  *But*, the documentation in IR-182-1, the comments in MONITOR.asm, and the code in MONITOR.asm (to the extent I can understand it) all seem to be clear that `MONITOR(2, ...)` applies to *input* PDS files rather than to output files.
+
+The necessary clue, I think, is provided if you look at `OUTPUT(8, ...)` statements in the compiler source code, which occur only in the `STREAM` module.  It appears to me that they work like this:
+
+  * When `OUTPUT(8, ...)` is processed, it does not immediately perform any output, but simply buffers the output text in memory.
+  * Eventually, a `CALL MONITOR(1, 8, name)` appears, and this "stows" the buffered data in the PDS file in the selected member name.  Presumably the member `name` is created if it doesn't already exist, the data already in it is is discarded if it does exist`, and the memory buffer is cleared.
+
+More specifically, output begins to be buffered when "`D DEFINE name`" (see above) is encountered, and the "stow" occurs when "`D CLOSE name`" is encountered.  Thus the member `name` is immediately available thereafter.
+
+`OUTPUT(6, ...)` is a bit trickier to understand, because it operates on a compilation-unit by compilation-unit basis.  In other words, each member in the PDS file is associated with an entire compilation unit:
+
+  * Again, `OUTPUT(6, ...)` (which occurs only in the `EMIT_EXTERNAL()` function) stores text in a memory buffer.
+  * `CALL MONITOR(1, 6, name)` (which occurs only once, optionally, at the end, in `PRINT_SUMMARY()`) "stows" the data using a name somehow related to the compilation unit.
+
+# OPTIONS_CODE
+
+There is a variable called `OPTIONS_CODE` which conveys so-called "type 1" options, in the form of bit-flags, from the PARM field of the JCL to the compiler.  Unfortunately, while IR-182-1 lists some of these, it seems neither up-to-date, nor does it explain how of the bits in `OPTIONS_CODE` actually get set.  There's no code in the compiler to set them, so they just magically appear.  There are many more of them in IR-182-1 than there are known parameters (at least in compiler pass 1).
+
+By looking at the compiler code, we can find the following actually being *checked*:
+
+  * 0x00000002 &mdash; LISTING2
+  * 0x00000010 &mdash; X0, NO TEMP (or "TPL_FLAG=0")
+  * 0x00000800 &mdash; TABLES (or "SIMULATING")
+  * 0x00002000 &mdash; X9 (or "SREF")
+  * 0x00010000 &mdash; PARSE(?) (or "PARTIAL_PARSE")
+  * 0x00040000 &mdash; FCDATA (or "HMAT_OPT")
+  * 0x00080000 &mdash; SRN
+  * 0x00100000 &mdash; ADDRS (or "ADDR")
+  * 0x00200000 &mdash; LXFI
+  * 0x00800000 &mdash; SDL
+
+The interpretations of some of these are clear ... of others, not so much.  For example, all of the switches which IR-182-1 claims are relevant to pass 1 (vs 2, 3, 4) are in this list, but not all of the ones in this list are claimed to be relevant to pass 1.
+
+The particulare irritation to me at the moment is that the compiler seemingly only auto-generates templates if 0x10 is set, which some of IR-182-1 claims is true as well, but which the "NO TEMP" notation in the list above (from IR-182-1 p. 3-18) seemingly says the opposite.

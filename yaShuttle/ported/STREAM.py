@@ -305,11 +305,16 @@ class cSTREAM:
         self.SAVE_BLANK_COUNT1 = 0
         self.I = 0
         self.L = 0
-        self.CREATING = 0
-        self.TEMPLATE_FLAG = 0
+        # The following were originally local to STREAM(), but I've moved them
+        # to the globals in g.py.
+        # self.CREATING = 0
+        # self.TEMPLATE_FLAG = 0
+        # INCLUDE CELL FLAG BITS
+        # self.INCL_TEMPLATE_FLAG = 0x02
+        # self.INCL_REMOTE_FLAG = 0x01
+        # The following were originally local to STREAM(), but I've changed 
+        # them to be globals of the DTOKEN module.
         # D TOKEN GLOBALS
-        # These were originally local to STREAM(), but I've changed them to
-        # be globals of the DTOKEN module.
         # self.D_INDEX = 0
         # self.D_CONTINUATION_OK = g.FALSE
 
@@ -328,7 +333,7 @@ class cPROCESS_COMMENT:  # Locals specific to PROCESS_COMMENT()
         self.LIST_FLAG = 0;
         self.C = [''] * 2
         self.XC = 'C';
-        self.INCLUDE_DIR = 'INCLUDE',
+        self.INCLUDE_DIR = 'INCLUDE';
         self.START = 'START';
         self.EJECT_DIR = 'EJECT';
         self.SPACE_DIR = 'SPACE';
@@ -786,8 +791,8 @@ def STREAM():
                 if g.INCLUDING:
                     ERROR(d.CLASS_XD, 8);
                 else:
-                    l.CREATING = g.TRUE;
-                while l.CREATING:
+                    g.CREATING = g.TRUE;
+                while g.CREATING:
                     NEXT_RECORD();
                     if LENGTH(g.CURRENT_CARD) == 0:
                         if g.INCLUDING:
@@ -801,7 +806,7 @@ def STREAM():
                                 g.INCLUDE_COUNT + g.CARD_COUNT + 1 - g.INCLUDE_OFFSET;
                             g.INCLUDE_COUNT = g.INCLUDE_OFFSET
                         else:
-                            l.CREATING = g.FALSE;
+                            g.CREATING = g.FALSE;
                             g.END_OF_INPUT = g.TRUE;
                             g.CURRENT_CARD = l.INPUT_PAD + X70;
                             pass
@@ -829,7 +834,7 @@ def STREAM():
                                 elif LENGTH(ll.C[1]) > 0:
                                     if MONITOR(1, 8, ll.C[1]):  # STOW THE MEMBER
                                         ERROR(d.CLASS_XD, 9, ll.C[1]);
-                                CREATING = g.FALSE;
+                                g.CREATING = g.FALSE;
                             else:
                                 COPY_TO_8();
                         else:
@@ -891,7 +896,7 @@ def STREAM():
                     g.INCLUDE_STMT = -1;
                     g.INCLUDE_END = g.TRUE;
                     if not pfs:  # BFS/PASS INTERFACE; TEMPLATE LENGTH
-                        if l.TEMPLATE_FLAG:
+                        if g.TEMPLATE_FLAG:
                             g.TEXT_LIMIT[0] = g.TEXT_LIMIT[1];
                     goto_READ = True;
                     continue
@@ -1078,8 +1083,8 @@ def STREAM():
     def CHOP():
         l.INDEX = l.INDEX + 1;
         if l.INDEX > g.TEXT_LIMIT[0]:
-            if not g.INCLUDING or not l.TEMPLATE_FLAG or \
-                    (g.INCLUDING and l.TEMPLATE_FLAG and \
+            if not g.INCLUDING or not g.TEMPLATE_FLAG or \
+                    (g.INCLUDING and g.TEMPLATE_FLAG and \
                     (l.INDEX > (g.TPL_LRECL - 1))):
                 if (g.CARD_TYPE[BYTE(g.CURRENT_CARD)] >= 4) or g.INCLUDE_END:
                     g.GROUP_NEEDED = g.TRUE;

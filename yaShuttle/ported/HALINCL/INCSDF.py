@@ -1,60 +1,26 @@
 #!/usr/bin/env python
 """
    Access:     Public Domain, no restrictions believed to exist.
-   Filename:   INCSDF.xpl
+   Filename:   INCSDF.py
    Purpose:    Part of the HAL/S-FC compiler.
-   Reference:  "HAL/S-FC & HAL/S-360 Compiler System Program Description",
-               section TBD.
-   Language:   XPL.
    Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
-   History:    2022-12-08 RSB  Suffixed the filename with ".xpl".
-   Note:       Inline comments beginning with "/*/" were created by the
-               Virtual AGC Project. Inline comments beginning merely with
-               "/*" are from the original Space Shuttle development.
+   History:    2023-10-28 RSB  Created just a stub, which at present will never
+                               be called.
 """
 
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
 import HALINCL.COMMON as h
-from ERROR    import ERROR
-from HASH     import HASH
+from ERROR import ERROR
 
-#*************************************************************************
-#
-# REVISION HISTORY:
-#
-# DATE     WHO  RLS   DR/CR #  DESCRIPTION
-#
-# 01/21/91 TKK  23V2  CR11098  DELETE SPILL CODE FROM COMPILER
-#
-# 07/08/91 RSJ  24V0  CR11096F IMPLEMENT THE INCREMENTAL #D OPTION
-#
-# 09/04/91 DAS  24V0  CR11120  #DFLAG - COMSUB REMOTE FLAG NOT SET,
-#                              SO MUST LOOK AT SDF DATA_REMOTE FLAG
-#
-# 12/23/92 PMA  8V0   *        MERGED 7V0 AND 24V0 COMPILERS.
-#                              * REFERENCE 24V0 CR/DRS
-#
-# 01/02/97 DCP  28V0/ DR109040 NAME TASK DECLARED IN COMPOOL GETS
-#               12V0           EN4 ERROR
-#
-# 12/02/97 JAC  29V0  DR109074 DOWNGRADE OF DI21 ERROR FAILS WHEN
-#               14V0           INCLUDING A REMOTELY INCLUDED COMPOOL
-#
-# 12/11/97 DCP  29V0/ DR109083 CONSTANT DOUBLE SCALAR CONVERTED TO A
-#               14V0           CHARACTER AS SINGLE PRECISION
-#
-# 04/26/01 DCP  31V0/ CR13335  ALLEVIATE SOME DATA SPACE PROBLEMS IN
-#               16V0           HAL/S COMPILER
-#
-# 10/17/00 TKN  31V0/ DR111350 COMPILER PHASE3 LISTING INCORRECT
-#               16V0
-#
-#*************************************************************************
 # ROUTINE TO INCLUDE VARIABLES FROM AN EXTERNAL UNIT'S SDF
 
 def INCLUDE_SDF(UNIT, INCL_FLAGS):
+    
+    return
+
+    '''
     #DECLARE UNIT CHARACTER,
     #INCL_FLAGS BIT(8);
     #DECLARE  (NEXT_SYMBOL,CUR_SYMBOL,LAST_COMSUB_SYMB,UNIT_SYMBp) BIT(16),
@@ -149,9 +115,9 @@ def INCLUDE_SDF(UNIT, INCL_FLAGS):
     #SDF_BLK_CATEGORY     LITERALLY 'SDF_B(30)';
     # DECLARES FOR SDFPKG
     #DECLARE  COMMTABL(29) FIXED;
-    BASED    COMMTABL_BYTE BIT(8),
-    COMMTABL_HALFWORD BIT(16),
-    COMMTABL_FULLWORD FIXED;
+    #BASED    COMMTABL_BYTE BIT(8),
+    #COMMTABL_HALFWORD BIT(16),
+    #COMMTABL_FULLWORD FIXED;
     #DECLARE  COMMTABL_ADDR FIXED;
     #DECLARE  SDFPKG_APGAREA       LITERALLY 'COMMTABL_FULLWORD(0)',
     #SDFPKG_AFCBAREA      LITERALLY 'COMMTABL_FULLWORD(1)',
@@ -754,7 +720,6 @@ def SDF_FOUND(SDF_FOUND: PROCEDURE BIT(1)):
     else: ERROR(d.CLASS_XI, g.I+9, COMPILER);
     return g.FALSE;
 # END SDF_FOUND;
-
 # THIS IS THE START OF INCLUDE_SDF PROPER
 # CHECK FOR LEGAL INCLUDE
 if g.NEST > 0: #DO
@@ -904,5 +869,6 @@ if g.SIMULATING:
 MAKE_INCL_CELL(SDF_NAME, INCL_FLAGS,
 SHL(REV,16) | CAT);
 return g.TRUE;
-END INCLUDE_SDF /* $S */ ;
-# $S
+    '''
+# END INCLUDE_SDF 
+

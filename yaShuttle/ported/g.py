@@ -2846,6 +2846,11 @@ def debugSYM_TAB():
         print("\t", e.__dict__)
     print("-" * 80)
 
+def extendSign16(value):
+    if (value & 0x8000) != 0:
+        value = (~0xFFFF & -1) | (0xFFFF & value)
+    return value
+    
 
 def enlargeSYM_TAB(n):
     while len(h.SYM_TAB) <= n:
@@ -2869,8 +2874,8 @@ def SYT_ADDR(n, value=None):
 def SYT_XREF(n, value=None):
     enlargeSYM_TAB(n)
     if value == None:
-        return h.SYM_TAB[n].SYM_XREF
-    h.SYM_TAB[n].SYM_XREF = value
+        return extendSign16(h.SYM_TAB[n].SYM_XREF)
+    h.SYM_TAB[n].SYM_XREF = value & 0xFFFF
 
 
 def SYT_NEST(n, value=None):
@@ -2893,40 +2898,32 @@ def VAR_LENGTH(n, value=None):
         return h.SYM_TAB[n].SYM_LENGTH
     h.SYM_TAB[n].SYM_LENGTH = value
 
-
-# The values stored in SYT_ARRAY (which is 16 bits) are generally positive, but
-# in the case of non-HAL functions have been OR'd with 0xFF000 and therefore
-# must be either truncated or else sign-extended to full integers that are
-# properaly negative or unsigned as the case may be.
 def SYT_ARRAY(n, value=None):
     enlargeSYM_TAB(n)
     if value == None:
-        value = h.SYM_TAB[n].SYM_ARRAY
-        if (value & 0x8000) != 0:
-            value = (~0xFFFF & -1) | (0xFFFF & value)
-        return value
+        return extendSign16(h.SYM_TAB[n].SYM_ARRAY)
     h.SYM_TAB[n].SYM_ARRAY = value & 0xFFFF
 
 
 def SYT_PTR(n, value=None):
     enlargeSYM_TAB(n)
     if value == None:
-        return h.SYM_TAB[n].SYM_PTR
-    h.SYM_TAB[n].SYM_PTR = value
+        return extendSign16(h.SYM_TAB[n].SYM_PTR)
+    h.SYM_TAB[n].SYM_PTR = value & 0xFFFF
 
 
 def SYT_LINK1(n, value=None):
     enlargeSYM_TAB(n)
     if value == None:
-        return h.SYM_TAB[n].SYM_LINK1
-    h.SYM_TAB[n].SYM_LINK1 = value
+        return extendSign16(h.SYM_TAB[n].SYM_LINK1)
+    h.SYM_TAB[n].SYM_LINK1 = value & 0xFFFF
 
 
 def SYT_LINK2(n, value=None):
     enlargeSYM_TAB(n)
     if value == None:
-        return h.SYM_TAB[n].SYM_LINK2
-    h.SYM_TAB[n].SYM_LINK2 = value
+        return extendSign16(h.SYM_TAB[n].SYM_LINK2)
+    h.SYM_TAB[n].SYM_LINK2 = value & 0xFFFF
 
 
 def SYT_CLASS(n, value=None):
@@ -3673,3 +3670,10 @@ if intersection:
         if len(intersection) != 0:
             print("\nIntersection (%d, '%s')" % (gCount, msg), intersection)
 
+# Formerly local variables of STREAM().  I've moved them here because they're
+# also used by PATCHINC, which formerly had been embedded as an inline in 
+# STREAM() via /* $%PATCHINC - D_TOKEN */ in XPL, but not in Python.
+CREATING = 0
+TEMPLATE_FLAG = 0
+INCL_TEMPLATE_FLAG = 0x02
+INCL_REMOTE_FLAG = 0x01

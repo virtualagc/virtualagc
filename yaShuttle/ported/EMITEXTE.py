@@ -11,9 +11,10 @@ History:    2023-09-12 RSB  Ported from XPL
 
 from xplBuiltins import *
 import g
-from DESCORE import DESCORE
-from BLANK import BLANK
-from PAD import PAD
+from BLANK    import BLANK
+from DESCORE  import DESCORE
+from FINDER   import FINDER
+from PAD      import PAD
 
 '''
  /***************************************************************************/
@@ -244,7 +245,7 @@ def EMIT_EXTERNAL():
                     l.J = l.I;
             l.VERSION = BYTE(l.VERSION, 10, I);
         g.SYT_LOCKp(g.BLOCK_SYTREF[1], l.J);
-        OUTPUT(6, l.VERSION + BYTE(l.VERSION, 10));
+        OUTPUT(6, l.VERSION + str(BYTE(l.VERSION, 10)));
     elif g.EXTERNALIZE == 3:
         #  STARTING
         l.NEWBUFF = ': EXTERNAL ' + STRING(g.VOCAB_INDEX[g.PARSE_STACK[g.SP]]) + g.X1;

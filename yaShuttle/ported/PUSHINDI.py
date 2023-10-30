@@ -42,10 +42,8 @@ from ERROR import ERROR
 
 def PUSH_INDIRECT(I):
     g.PTR_TOP = g.PTR_TOP + I;
-    if g.PTR_TOP > g.PTR_MAX:
-        ERROR(dCLASS_BS, 2);
-    elif g.PTR_TOP > g.MAX_PTR_TOP:
-        g.MAX_PTR_TOP = g.PTR_TOP;
+    if g.PTR_TOP > g.PTR_MAX: ERROR(dCLASS_BS, 2);
+    elif g.PTR_TOP > g.MAX_PTR_TOP:g.MAX_PTR_TOP = g.PTR_TOP;
     g.VAL_P[g.PTR_TOP] = 0
     g.EXT_P[g.PTR_TOP] = 0;
     return g.PTR_TOP;
