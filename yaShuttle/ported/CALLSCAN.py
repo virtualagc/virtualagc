@@ -57,6 +57,8 @@ contextNames = ("ORDINARY", "EXPRESSION", "GO TO", "CALL", "SCHEDULE",
 def CALL_SCAN():
     # No local variables.
     g.NO_LOOK_AHEAD_DONE = g.FALSE;
+    #if g.TOKEN in [3, 7]:
+    #    pass
     SCAN();
     if (g.CONTROL[4] & 1) or (g.PARTIAL_PARSE and g.RECOVERING):
         g.S = HEX(g.DW[7], 0);
@@ -80,6 +82,6 @@ def CALL_SCAN():
                     s1 = "CONTEXT=" + contextNames[g.CONTEXT]
                 else:
                     s1 = "CONTEXT=TBD"
-                print("   { \"%s\" \'%s\' %s }" % \
+                print("   { \"%s\" NEXT_CHAR=\'%s\' %s }" % \
                       (g.VOCAB_INDEX[g.TOKEN], s, s1), end="")
 

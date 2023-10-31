@@ -1,13 +1,13 @@
 C/ Adapted from PDF p. 120 of "Programming in HAL/S".  Although it is probably
 C/ not immediately obvious, the purpose of this example is to demonstrate
 C/ ARRAY(...) BOOLEAN.  What the program seems to do is this:  There's input
-C/ data in the form of an array of altimeter data (ALT), along with an array
-C/ of timestamps at which the data was collected (TIMETAG), and what the program
+C/ data in the form of an array of altimeter data (ALT), along with an array of
+C/ timestamps at which the data was collected (TIMETAG), and what the program
 C/ does is to maintain an array of validity flags (DATA_VALID) for that input
 C/ data.  Any given altimeter reading is valid or invalid depending on whether
 C/ it is in-range or out-of-range, on whether too much time has passed since
 C/ the reading, and on whether it departs too much from the long-term running
-C/ average of the readings.  In real life, of course, such data would be sampled
+C/ average of the readings.  In real life, such data would be sampled
 C/ periodically, so I've made it a PROCEDURE that can be called repeatedly.
 
   EXAMPLE_A:
@@ -64,22 +64,26 @@ C  OR TOO LARGE OR TOO OLD OR TOO FAR FROM THE AVERAGE
           DECLARE DATA_VALID ARRAY(4) BOOLEAN, AVERAGE SCALAR;
           
           CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-          		 SCALAR(RUNTIME-0.01, RUNTIME-0.02, RUNTIME-0.03, RUNTIME-0.04)) 
-          		ASSIGN(DATA_VALID, AVERAGE);
+          		 SCALAR(RUNTIME-0.01, RUNTIME-0.02, RUNTIME-0.03, 
+          		 RUNTIME-0.04)) 
+          		 ASSIGN(DATA_VALID, AVERAGE);
           WRITE(6) AVERAGE, DATA_VALID;
           
           CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-          		 SCALAR(RUNTIME-0.05, RUNTIME-0.06, RUNTIME-0.08, RUNTIME-0.10)) 
-          		ASSIGN(DATA_VALID, AVERAGE);
+          		 SCALAR(RUNTIME-0.05, RUNTIME-0.06, 
+          		 RUNTIME-0.08, RUNTIME-0.10))  
+          		 ASSIGN(DATA_VALID, AVERAGE);
           WRITE(6) AVERAGE, DATA_VALID;
           
           CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-          		 SCALAR(RUNTIME-0.11, RUNTIME-0.12, RUNTIME-0.13, RUNTIME-0.14)) 
+          		 SCALAR(RUNTIME-0.11, RUNTIME-0.12, 
+          		 RUNTIME-0.13, RUNTIME-0.14)) 
           		ASSIGN(DATA_VALID, AVERAGE);
           WRITE(6) AVERAGE, DATA_VALID;
           
             CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-          		 SCALAR(RUNTIME-0.01, RUNTIME-0.02, RUNTIME-0.03, RUNTIME-0.04)) 
+          		 SCALAR(RUNTIME-0.01, RUNTIME-0.02, 
+          		 RUNTIME-0.03, RUNTIME-0.04)) 
           		ASSIGN(DATA_VALID, AVERAGE);
           WRITE(6) AVERAGE, DATA_VALID;
   

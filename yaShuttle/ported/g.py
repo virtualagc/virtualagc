@@ -14,6 +14,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
 '''
 
 import sys
+
 from xplBuiltins import OUTPUT, BYTE, fromFloatIBM
 import HALINCL.COMMON as h
 
@@ -3680,3 +3681,9 @@ CREATING = 0
 TEMPLATE_FLAG = 0
 INCL_TEMPLATE_FLAG = 0x02
 INCL_REMOTE_FLAG = 0x01
+
+
+# This was originally a local of CHECK_SUBSCRIPT() in CHECKSUB, but I've moved
+# it here in order to watchpoint its changes more easily.  There's no naming
+# conflict, so it still behaves the same as it did as a local.
+NEWSIZE = None

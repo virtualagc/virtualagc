@@ -1,8 +1,19 @@
 DEBUG `E `F
 
- TP: PROCEDURE(X, Y) ASSIGN(Z);
-        DECLARE SCALAR, X, Y, Z;
+C TP: PROCEDURE;
+C        DECLARE V VECTOR(35) INITIAL(7), X SCALAR;
+CDEBUG `3 `4 `8
+C        X = V$(2);
+C        X = V$2 ;
+C        X = V$2;
+C        X = V$26 ;
+CDEBUG `3 `4 `8
+C CLOSE TP;
+
+ TP: PROCEDURE(X, Y) ASSIGN(Z, Q);
+        DECLARE SCALAR, X, Y, Z, Q;
         Z = X + Y;
+        Q = 1;
  CLOSE TP;
 
 C TEST: PROGRAM;

@@ -360,7 +360,7 @@ def MONITOR(function, arg2=None, arg3=None):
         pds[member] = device["buf"]
         device["buf"] = []
         file.seek(0)
-        j = json.dump(pds, file)
+        j = json.dump(pds, file, indent=4)
         file.flush()
         file.truncate()
         file.flush()
@@ -749,8 +749,10 @@ def OUTPUT(fileNumber, string):
                 pageCount += 1
                 LINE_COUNT = 0
                 if len(headingLine) > 0:
-                    print(headingLine)
+                    print(headingLine + ("     PAGE %d" % pageCount))
                     LINE_COUNT += 1
+                else:
+                    print("PAGE %d" % pageCount)
                 if len(subHeadingLine) > 0:
                     print(subHeadingLine)
                     LINE_COUNT += 1

@@ -82,7 +82,7 @@ def LIT_DUMP():
             S = HEX(g.LIT2(TEMP));
             if LENGTH(S) < 8:
                 S = SUBSTR(ZEROS, LENGTH(S)) + S;
-            S = S + ' (' + g.LIT3(TEMP) + ')';
+            S = S + ' (' + str(g.LIT3(TEMP)) + ')';
         # END;
         OUTPUT(0, I_FORMAT(g.I, 4) + SUBSTR(T, SHL(g.LIT1(TEMP), 3), 8) + S);
     g.DOUBLE_SPACE();

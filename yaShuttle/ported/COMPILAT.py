@@ -173,7 +173,7 @@ def COMPILATION_LOOP():
                                 if g.CONTROL[7] & 1:
                                     SYT_DUMP();
                         g.VAR[g.SP] = g.BCD[:];
-                        g.FIXV[g.SP] = g.VALUE;
+                        g.FIXV[g.SP] = hround(g.VALUE) & 0xFFFFFFFF;
                         g.FIXF[g.SP] = g.FIXING;
                         g.FIXL[g.SP] = g.SYT_INDEX;
                         g.PARSE_STACK[g.SP] = g.TOKEN;

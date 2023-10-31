@@ -64,27 +64,28 @@ from MAKEFIXE import MAKE_FIXED_LIT
  /***************************************************************************/
 '''
 
-
 def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
-    # Locals: NEWSIZE, SHARP_LOC
+    # Locals: NEWSIZE, SHARP_LOC.  I've actually made NEWSIZE a global in g.py
+    # in order to make it easier to put a watchpoint on it, but it should still
+    # behave the same way.
     
     goto = None
     
     if g.PSEUDO_FORM[g.NEXT_SUB] == g.XIMD: 
-        NEWSIZE = g.LOC_P[g.NEXT_SUB];
+        g.NEWSIZE = g.LOC_P[g.NEXT_SUB];
     elif g.PSEUDO_FORM[g.NEXT_SUB] == g.XLIT:
-        NEWSIZE = MAKE_FIXED_LIT(g.LOC_P[g.NEXT_SUB]);
+        g.NEWSIZE = MAKE_FIXED_LIT(g.LOC_P[g.NEXT_SUB]);
         # IF A CHARACTER SUBSCRIPT (FLAG=1) IS LITERALLY A -1, CHANGE
         # IT TO A -2 TO DISTINGUISH IT FROM A CHECK_SUBSCRIPT RETURN
         # VALUE OF -1 WHICH INDICATES AN UNKNOWN SUBSCRIPT
         # (E.G. A VARIABLE).
-        if NEWSIZE == -1 and FLAG: 
-            NEWSIZE = -2;
+        if g.NEWSIZE == -1 and FLAG: 
+            g.NEWSIZE = -2;
         g.PSEUDO_FORM[g.NEXT_SUB] = g.XIMD;
         g.PSEUDO_TYPE[g.NEXT_SUB] = g.INT_TYPE;
-        g.LOC_P[g.NEXT_SUB] = NEWSIZE;
+        g.LOC_P[g.NEXT_SUB] = g.NEWSIZE;
     else: 
-        NEWSIZE = -1;
+        g.NEWSIZE = -1;
     if g.VAL_P[g.NEXT_SUB] > 0: 
         if MODE == 0x0 and g.PSEUDO_TYPE[g.PTR[g.MP]] == g.CHAR_TYPE:
             MODE = g.XCSZ;
@@ -98,7 +99,7 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
                 ERROR(d.CLASS_SR, 5, g.VAR[g.MP]);
                 return -1;
             SHARP_LOC = SIZE
-            NEWSIZE = SIZE;
+            g.NEWSIZE = SIZE;
     # DO CASE VAL_P[NEXT_SUB];
     vn = g.VAL_P[g.NEXT_SUB]
     firstTry = True
@@ -111,15 +112,15 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
                 if g.PSEUDO_FORM[g.NEXT_SUB] == g.XIMD:
                     g.PSEUDO_TYPE[g.NEXT_SUB] = 0;
                     if FLAG: 
-                        return NEWSIZE;
-                    if NEWSIZE < 1: 
+                        return g.NEWSIZE;
+                    if g.NEWSIZE < 1: 
                         ERROR(d.CLASS_SR, 4, g.VAR[g.MP]);
                         return 1;
-                    elif SIZE > 0 and NEWSIZE > SIZE:
+                    elif SIZE > 0 and g.NEWSIZE > SIZE:
                         ERROR(d.CLASS_SR, 3, g.VAR[g.MP]);
                         return SIZE;
                     else: 
-                        return NEWSIZE;
+                        return g.NEWSIZE;
                 MODE = 0;
             if goto == "SHARP_UNKNOWN ": goto = None
             if (goto == None and g.PSEUDO_TYPE[g.NEXT_SUB] == g.SCALAR_TYPE) \
@@ -131,11 +132,11 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
                 g.LOC_P[g.NEXT_SUB] = g.LAST_POPp;
                 g.PSEUDO_FORM[g.NEXT_SUB] = g.XVAC;
             if (MODE & 0xF) == g.XIMD:
-                if NEWSIZE == 0x10: 
-                    NEWSIZE = g.XMADD[g.INT_TYPE - g.MAT_TYPE];
+                if g.NEWSIZE == 0x10: 
+                    g.NEWSIZE = g.XMADD[g.INT_TYPE - g.MAT_TYPE];
                 else: 
-                    NEWSIZE = g.XMSUB[g.INT_TYPE - g.MAT_TYPE];
-                HALMAT_POP(NEWSIZE, 2, 0, 0);
+                    g.NEWSIZE = g.XMSUB[g.INT_TYPE - g.MAT_TYPE];
+                HALMAT_POP(g.NEWSIZE, 2, 0, 0);
                 HALMAT_PIP(SIZE, g.XIMD, 0, 0);
                 MODE = 0;
                 goto = "SHARP_ELIM "
@@ -154,24 +155,24 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
             if not goto == "SHARP_PM":
                 if g.PSEUDO_FORM[g.NEXT_SUB] == g.XIMD:
                     if MODE == g.XIMD: 
-                        NEWSIZE = g.LOC_P[g.NEXT_SUB] + NEWSIZE;
-                        g.LOC_P[g.NEXT_SUB] = NEWSIZE
+                        g.NEWSIZE = g.LOC_P[g.NEXT_SUB] + g.NEWSIZE;
+                        g.LOC_P[g.NEXT_SUB] = g.NEWSIZE
                         goto = "SHARP_GONE "
                         continue
-                NEWSIZE = 0x10;
+                g.NEWSIZE = 0x10;
             if goto == "SHARP_PM ": goto = None
-            MODE = MODE | NEWSIZE;
+            MODE = MODE | g.NEWSIZE;
             goto = "SHARP_UNKNOWN "
             continue
         elif vn == 3:
             #  SHARP MINUS EXPRESSION
             if g.PSEUDO_FORM[g.NEXT_SUB] == g.XIMD:
                 if MODE == g.XIMD:
-                    NEWSIZE = NEWSIZE - g.LOC_P[g.NEXT_SUB];
-                    g.LOC_P[g.NEXT_SUB] = NEWSIZE
+                    g.NEWSIZE = g.NEWSIZE - g.LOC_P[g.NEXT_SUB];
+                    g.LOC_P[g.NEXT_SUB] = g.NEWSIZE
                     goto = "SHARP_GONE "
                     continue
-            NEWSIZE = 0x20;
+            g.NEWSIZE = 0x20;
             goto = "SHARP_PM "
             continue
     # END of DO CASE

@@ -12,6 +12,9 @@ C/ software, but hard-code 19th-century constants for it to work with?  Still,
 C/ we mustn't be uncharitable; it's not as if there was an internet in 1978 to
 C/ make it easy to look up the number.
 
+ MASS_TEST: PROGRAM;
+  DECLARE REST_MASS, SPEED;
+
   MASS:
   FUNCTION(REST_MASS, SPEED) SCALAR;
      DECLARE SCALAR, 
@@ -27,10 +30,11 @@ M    RETURN SQRT(1 - V  / C  );
      RETURN REST_MASS / TAU(SPEED);
   CLOSE MASS;
   
-  DECLARE REST_MASS, SPEED;
   DO UNTIL REST_MASS < 0;
      WRITE(6) 'INPUT REST MASS (ANY UNITS) AND SPEED (KM/SEC), OR -1; TO QUIT:';
      READ(5) REST_MASS, SPEED;
      WRITE(6) MASS(REST_MASS, SPEED);
   END;
-  
+ 
+ CLOSE MASS_TEST;
+ 

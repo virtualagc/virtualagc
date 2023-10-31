@@ -4531,6 +4531,8 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.LOC_P[g.PTR[g.MP]] = 0;
         else:
             g.LOC_P[g.PTR[g.MP]] = g.FIXV[g.MP + 2];
+            if not isinstance(g.FIXV[g.MP + 2], int):
+                pass
             g.I = h.IODEV[g.FIXV[g.MP + 2]];
             if (g.I & 0x28) == 0: 
                 if g.TEMP == 2: 
