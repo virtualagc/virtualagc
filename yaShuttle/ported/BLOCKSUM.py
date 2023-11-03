@@ -196,7 +196,7 @@ def BLOCK_SUMMARY():
                     INDIRECT();
                     if g.SYT_CLASS(PTR) <= g.TYPEf(I + 10):
                         # DO CASE CONDITION(I);
-                        ci = CONDITION(I)
+                        ci = CONDITION[I]
                         if ci == 0:
                             if g.SYT_TYPE(PTR) == g.TYPEf(I): 
                                 CHECK_IDENT();

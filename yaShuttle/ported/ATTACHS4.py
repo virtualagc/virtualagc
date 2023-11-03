@@ -107,25 +107,21 @@ def ATTACH_SUBSCRIPT():
             if g.SYT_CLASS(g.FIXL[g.MP]) != g.TEMPLATE_CLASS: 
                 goto = "SS_FUNNIES"
         if g.PSEUDO_TYPE[g.PTR[g.MP]] < g.SCALAR_TYPE and goto == None: 
-            if I & 1: 
-                I = ATTACH_SUB_STRUCTURE(0);
+            if I & 1: I = ATTACH_SUB_STRUCTURE(0);
             if (I != 2) and (J & 1) and (g.INX[g.INX[0]] == 0): 
                 g.ESCAPE();
-            if J & 1: 
-                ATTACH_SUB_ARRAY(0);
+            if J & 1: ATTACH_SUB_ARRAY(0);
             ATTACH_SUB_COMPONENT(g.INX[g.INX[0]]);
         elif (J & 1) != 0 and (g.SYT_ARRAY(g.FIXL[g.MP]) > 0) and goto == None:
-            if I & 1: 
-                I = ATTACH_SUB_STRUCTURE(0);
+            if I & 1: I = ATTACH_SUB_STRUCTURE(0);
             if (I != 2) and (g.INX[g.INX[0]] == 0): 
-                ESCAPE;
+                g.ESCAPE();
             ATTACH_SUB_ARRAY(g.INX[g.INX[0]]);
         else:
             if goto == "SS_FUNNIES": goto = None
             if (I & 1) != 0 and (g.SYT_ARRAY(g.FIXV[g.MP]) != 0):
                 I = ATTACH_SUB_STRUCTURE(g.INX[g.INX[0]]);
-            elif g.INX[g.INX[0]] > 0: 
-                ERROR(d.CLASS_SV, 3, g.VAR[g.MP]);
+            elif g.INX[g.INX[0]] > 0: ERROR(d.CLASS_SV, 3, g.VAR[g.MP]);
         if g.VAR_ARRAYNESS[0] > 0:  # RESIDUAL ARRAYNESS COMPACTIFICATION
             J = 1;
             for g.VAR_ARRAYNESS[0] in range(1, g.VAR_ARRAYNESS[0] + 1):
@@ -143,7 +139,7 @@ def ATTACH_SUBSCRIPT():
             g.LOC_P[g.PTR[g.MP]] = -g.SYT_PTR(g.FIXL[g.MP]);
             g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
     if g.NAME_BIT != 0: 
-        if CHECK_ARRAYNESS():
+        if CHECK_ARRAYNESS() & 1:
             g.VAL_P[g.PTR[g.MP]] = g.VAL_P[g.PTR[g.MP]] | 0x10;
     if g.SUBSCRIPT_LEVEL == 0: 
         g.ARRAYNESS_FLAG = g.SAVE_ARRAYNESS_FLAG;

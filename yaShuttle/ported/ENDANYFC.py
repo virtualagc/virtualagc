@@ -139,18 +139,19 @@ from HALINCL.SAVELITE import SAVE_LITERAL
 
 
 def END_ANY_FCN():
-    # Locals: ARGp, I, MACPTR, ARGPTR.
+    # Locals: ARGp, I, MAXPTR, ARGPTR.
 
     goto = None
 
     def BI_COMPILE_TIME():
-        if (SHR(BI_INFO, 8) & 0xF) == 0: return;
+        nonlocal goto
+        if (SHR(g.BI_INFO[0], 8) & 0xF) == 0: return;
         if ARITH_LITERAL(g.SP - 1, 0):  # DO
-            if MONITOR(9, SHR(BI_INFO, 8) & 0xF):  # DO
+            if MONITOR(9, SHR(g.BI_INFO[0], 8) & 0xF):  # DO
                 ERROR(d.CLASS_VF, 1, g.VAR[g.MP]);
                 return;
             # END
-            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD);
+            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD());
             g.PSEUDO_FORM[g.PTR[g.MP]] = g.XLIT;
             goto = "BI_FUNCS_EXIT";
 
@@ -189,9 +190,9 @@ def END_ANY_FCN():
             g.PTR[g.SP - 2] = MAXPTR + 2;
             # DITTO FOR THIRD ARG
             g.BI_FLAGS[0] = g.BI_FLAGS[g.FCN_LOC[g.FCN_LV]];
-            BI_INFO = g.BI_INFO[g.FCN_LOC[g.FCN_LV]];
-            ARGp = SHR(BI_INFO, 16) & 0xFF;
-            ARGPTR = BI_INFO & 0xFF;
+            g.BI_INFO[0] = g.BI_INFO[g.FCN_LOC[g.FCN_LV]];
+            ARGp = SHR(g.BI_INFO[0], 16) & 0xFF;
+            ARGPTR = g.BI_INFO[0] & 0xFF;
             if ARGp != g.FCN_ARG[g.FCN_LV]: ERROR(d.CLASS_FN, 4, g.VAR[g.MP]);
             elif (SHL(1, g.PSEUDO_TYPE[MAXPTR]) & \
                     g.ASSIGN_TYPE[g.BI_ARG_TYPE[ARGPTR]]) == 0:
@@ -270,7 +271,7 @@ def END_ANY_FCN():
                 elif ba == 5:
                     #  SCALAR TYPE
                     # DO
-                        BI_COMPILE_TIME;
+                        BI_COMPILE_TIME();
                         if g.PSEUDO_TYPE[MAXPTR] == g.INT_TYPE:  # DO
                             HALMAT_TUPLE(g.XITOS, 0, g.SP - 1, 0, 0);
                             SETUP_VAC(g.SP - 1, g.SCALAR_TYPE);
@@ -289,7 +290,7 @@ def END_ANY_FCN():
                 elif ba == 6:
                     #  INTEGER TYPE
                     # DO
-                        BI_COMPILE_TIME;
+                        BI_COMPILE_TIME();
                         if g.PSEUDO_TYPE[MAXPTR] == g.SCALAR_TYPE:  # DO
                             HALMAT_TUPLE(g.XSTOI, 0, g.SP - 1, 0, 0);
                             SETUP_VAC(g.SP - 1, g.INT_TYPE);
@@ -308,9 +309,9 @@ def END_ANY_FCN():
                     #  IORS TYPE
                     # DO
                         if ARGp == 2: MATCH_SIMPLES(g.SP - 1, g.SP);
-                        if SHR(BI_INFO, 24) == g.IORS_TYPE:
+                        if SHR(g.BI_INFO[0], 24) == g.IORS_TYPE:
                             g.PSEUDO_TYPE[g.PTR[g.MP]] = g.PSEUDO_TYPE[MAXPTR];
-                        if ARGp == 1: BI_COMPILE_TIME;
+                        if ARGp == 1: BI_COMPILE_TIME();
                     # END
                 # END DO CASE
                 HALMAT_POP(g.XBFNC, ARGp, 0, g.FCN_LOC[g.FCN_LV]);
@@ -463,18 +464,18 @@ def END_ANY_FCN():
         #  L-FUNC  BUILT-INS
         # DO
             I = g.PSEUDO_TYPE[MAXPTR];
-            BI_INFO = g.BI_INFO[g.FCN_LOC[g.FCN_LV]];
+            g.BI_INFO[0] = g.BI_INFO[g.FCN_LOC[g.FCN_LV]];
             g.BI_FLAGS[0] = g.BI_FLAGS[g.FCN_LOC[g.FCN_LV]];
             if g.BI_FLAGS[0] & 1: 
                 ERROR(d.CLASS_XS, 1, \
                       SUBSTR(g.BI_NAME[g.BI_INDX[g.FCN_LOC[g.FCN_LV]]], \
                               g.BI_LOC[g.FCN_LOC[g.FCN_LV]], 10));
-            if (SHL(1, I) & g.ASSIGN_TYPE[g.BI_ARG_TYPE[BI_INFO & 0xFF]]) == 0:
+            if (SHL(1, I) & g.ASSIGN_TYPE[g.BI_ARG_TYPE[g.BI_INFO[0] & 0xFF]]) == 0:
                 ERROR(d.CLASS_FT, 2, g.VAR[g.MP]);
             if g.FCN_ARG[g.FCN_LV] > 1: ERROR(d.CLASS_FN, 4, g.VAR[g.MP]);
             HALMAT_POP(g.XLFNC, 1, 0, g.FCN_LV);
             HALMAT_PIP(g.FCN_LOC[g.FCN_LV], g.XIMD, I, 0);
-            if SHR(g.BI_FLAGS[0], 4): I = SHR(BI_INFO, 24);
+            if SHR(g.BI_FLAGS[0], 4): I = SHR(g.BI_INFO[0], 24);
             SETUP_VAC(g.MP, I);
             HALMAT_POP(g.XSFND, 0, g.XCO_N, g.FCN_LV);
             RESET_ARRAYNESS();

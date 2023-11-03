@@ -559,10 +559,9 @@ def MONITOR(function, arg2=None, arg3=None):
     # PDS member revision level ind & cat number.
     elif function == 15:
         # The documented explanation is sheerest gobbledygook.  I think perhaps
-        # it's saying that the so-called template library maintains a revision
-        # code for each structure template stored in it, and that this function
-        # can be used to retrieve that revision code.  All of which is as
-        # meaningless to us as it can possibly be.  I return a nonsense value.
+        # it's saying that each member of a PDS file maintains has a separate
+        # revision code and "cat number", whatever that may be.  I'm not sure
+        # what that means, or if we have to worry about it, so I return 0,0.
         return 32 * 65536 + 0
     
     # Incorporate flags into return code.

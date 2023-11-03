@@ -12,6 +12,7 @@ History:    2023-09-30 RSB  Ported.
 
 from xplBuiltins import *
 import g
+import HALINCL.COMMON as h
 from HALMATFI import HALMAT_FIX_PIPp
 from HALMATPI import HALMAT_PIP
 from HALMATPO import HALMAT_POP
@@ -67,8 +68,8 @@ def ICQ_ARRAYNESS_OUTPUT():
             g.I = 2;
             HALMAT_PIP(g.SYT_ARRAY(g.ID_LOC), g.XIMD, 0, 0);
         else: 
-            for g.I in range(1, EXT_ARRAY(g.SYT_ARRAY(g.ID_LOC)) + 1):
-                HALMAT_PIP(EXT_ARRAY(g.SYT_ARRAY(g.ID_LOC) + g.I), g.XIMD, 0, 0);
+            for g.I in range(1, h.EXT_ARRAY[g.SYT_ARRAY(g.ID_LOC)] + 1):
+                HALMAT_PIP(h.EXT_ARRAY[g.SYT_ARRAY(g.ID_LOC) + g.I], g.XIMD, 0, 0);
             g.I += 1 # Terminating value differs in XPL vs Python for-loops.
         HALMAT_FIX_PIPp(g.LAST_POPp, g.I - 1);
         HALMAT_POP(g.XDLPE, 0, g.XCO_N, 0);

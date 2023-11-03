@@ -108,12 +108,13 @@ def ATTACH_SUB_COMPONENT(SUBp):
                         g.PSEUDO_TYPE[I] = g.SCALAR_TYPE;
                         g.PSEUDO_LENGTH[I] = 0;
                     # END
-                    elif T1 == 1 and g.FIX_DIM == 1:  # DO
+                    elif T1 == 1 or g.FIX_DIM == 1:  # DO
                         g.PSEUDO_TYPE[I] = g.VEC_TYPE;
                         g.PSEUDO_LENGTH[I] = T1 + g.FIX_DIM - 1;
                     # END
                     else: g.PSEUDO_LENGTH[I] = SHL(T1, 8) | g.FIX_DIM;
-                    if g.PSEUDO_TYPE[I] != g.SCALAR_TYPE: g.VAL_P[I] = g.VAL_P[I] | 0x10;
+                    if g.PSEUDO_TYPE[I] != g.SCALAR_TYPE: 
+                        g.VAL_P[I] = g.VAL_P[I] | 0x10;
                     SUBp = SUBp - 2;
                     goto = "COMP_SLIP";
                     continue

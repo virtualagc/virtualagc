@@ -41,10 +41,6 @@ from ERROR import ERROR
 def MATCH_ARRAYNESS():
     # Local: J
 
-    # The import is delayed until here to avoid a "partially initialized"
-    # circular-import error.
-    from ATTACHS4 import ATTACH_SUBSCRIPT
-
     if g.VAR_ARRAYNESS[0] == 0: 
         return;
     if g.CURRENT_ARRAYNESS[0] == 0:

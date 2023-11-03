@@ -131,7 +131,7 @@ def INITIALIZATION():
     # need persistent locals.
 
     SUBHEAD = 'STMT                                   ' + \
-              '               SOURCE                                                  CURRENT S' + \
+              '              SOURCE                                                  CURRENT S' + \
               'COPE'
     
     EQUALS = ' = '
@@ -167,9 +167,9 @@ def INITIALIZATION():
     
     STORAGE_INCREMENT = 0
     STORAGE_MASK = 0
-    LOGHEAD = 'STMT                                      ' + \
-             '                            SOURCE                                              ' + \
-             '                    REVISION'
+    LOGHEAD =                                'STMT                                      ' + \
+        '                           SOURCE                                              ' + \
+        '                   REVISION'
     TMP = 0
     if g.pfs:
         NUM1_OPT = 19
@@ -411,7 +411,12 @@ def INITIALIZATION():
     NEXT_ELEMENT(h.SYM_TAB);
     NEXT_ELEMENT(h.SYM_TAB);
     
+    # ALLOCATE_SPACE() is actually implemented in Python to do nothing, so the
+    # NEXT_ELEMENT() (which wasn't originally present in XPL) has been added
+    # to insure that there actually is an existing record in CSECT_LENGTHS[]
+    # when RECORD_USED() is called.
     ALLOCATE_SPACE(h.CSECT_LENGTHS,50);
+    NEXT_ELEMENT(h.CSECT_LENGTHS)
     RECORD_USED(h.CSECT_LENGTHS, 1);
     
     #ALLOCATE_SPACE(DOWN_INFO, NUM_DWNS);

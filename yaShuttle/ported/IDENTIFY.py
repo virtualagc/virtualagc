@@ -219,6 +219,9 @@ lIDENTIFY = cIDENTIFY()
 
 
 def IDENTIFY(BCD, CENT_IDENTIFY):
+    if BCD == "ABS":
+        pass
+    
     l = lIDENTIFY
     if g.CONTEXT == g.DECLARE_CONTEXT:
         pass
@@ -246,19 +249,38 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
             elif l.L > 1:
                 if l.L <= g.BI_LIMIT:
                     for l.J in range(g.BI_INDEX[l.L - 1], g.BI_INDEX[l.L]):
-                        if PAD(BCD, 10) == SUBSTR(g.BI_NAME[g.BI_INDX[l.J]], g.BI_LOC[l.J], 10):
-                            g.SYT_TYPE(s.RECORD_TOP(h.SYM_TAB), SHR(g.BI_INFO[l.J], 24));
+                        if PAD(BCD, 10) == SUBSTR(g.BI_NAME[g.BI_INDX[l.J]], \
+                                                  g.BI_LOC[l.J], 10):
+                            
+                            '''
+                            The following 3 lines really confused me at first, 
+                            causing me to successively "fix" each of them.  In
+                            particular, SYT_INDEX. But ... what happens is that 
+                            later on, START_NORMAL_FCN() (in STARTNOR) will 
+                            detect not only that this is a built-in function,
+                            but also *which* built-in function it is, by
+                            seeing how much SYT_INDEX exceeds SYT_MAX, thus 
+                            allowing the code here to otherwise temporarily 
+                            pretend we're dealing with a user-defined function. 
+                            In other words, no "fixes" are needed here, and the 
+                            seemingly-related problems I was worried about when 
+                            I analyzed this code were actually elsewhere.
+                            '''
+                            g.SYT_TYPE(s.RECORD_TOP(h.SYM_TAB), 
+                                       SHR(g.BI_INFO[l.J], 24));
                             l.I = s.RECORD_TOP(h.SYM_TAB);
                             g.SYT_INDEX = l.J + g.SYT_MAX - l.I;
+                            
                             if g.IMPLIED_TYPE != 0:
                                 g.IMPLIED_TYPE = 0;
                                 ERROR(d.CLASS_MC, 2);
-                            if g.QUALIFICATION > 0:
+                            if g.QUALIFICATION & 1 > 0:
                                 goto = "Q_TRAP";
                             elif (g.BI_INFO[l.J] & 0xFF0000) == 0:
                                 goto = "BUILT_IN";
                             else:
                                 goto = "YES_ARG";
+                            break;
     firstTry = True
     while firstTry or goto != None:
         firstTry = False
@@ -698,8 +720,10 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                                 ERROR(d.CLASS_BX, 2);  # COMPILER ERROR
                             elif st == 1:
                                 g.TOKEN = g.BIT_FUNC_TOKEN;
-                            elif st == 3:
+                            elif st == 2:
                                 g.TOKEN = g.CHAR_FUNC_TOKEN;
+                            elif st == 3:
+                                g.TOKEN = g.ARITH_FUNC_TOKEN;
                             elif st == 4:
                                 g.TOKEN = g.ARITH_FUNC_TOKEN;
                             elif st == 5:
@@ -707,14 +731,12 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                             elif st == 6:
                                 g.TOKEN = g.ARITH_FUNC_TOKEN;
                             elif st == 7:
-                                g.TOKEN = g.ARITH_FUNC_TOKEN;
-                            elif st == 8:
                                 g.TOKEN = 0;  # COMPILER ERROR
-                            elif st == 9:
+                            elif st == 8:
                                 g.TOKEN = g.ARITH_FUNC_TOKEN;
-                            elif st == 10:
+                            elif st == 9:
                                 g.TOKEN = 0;  # EVENT = COMPILER ERROR
-                            elif st == 11:
+                            elif st == 10:
                                 g.TOKEN = g.STRUCT_FUNC_TOKEN;
                             # END OF DO CASE SYT_TYPE(I)
                             goto = "END_FUNC_CHECK"

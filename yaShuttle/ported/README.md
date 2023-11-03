@@ -951,9 +951,14 @@ The interpretations of some of these are clear ... of others, not so much.  For 
 
 The particulare irritation to me at the moment is that the compiler seemingly only auto-generates templates if 0x10 is set, which some of IR-182-1 claims is true as well, but which the "NO TEMP" notation in the list above (from IR-182-1 p. 3-18) seemingly says the opposite.
 
+# Compile-Time Computation of "Built-In" Functions
+
+Compile-time computation of built-in HAL/S functions (like `ABS`, `MOD`, and so forth) is performed in the compiler by use of the `MONITOR(9)` call.  As far as I know right now, this is undocumented, as the only documentation I've found so far for `MONITOR(9)` pertains to its ability to perform floating-point operations like `sin` and `cos`.  In fact, `MONITOR(9)` causes an ABEND in the source code MONITOR.bal, so I suppose that MONITOR.bal must not belong with the compiler at all.  However, in the `END_ANY_FCN()` function of the compiler's ENDANYFC module, there's an inline function called `BI_COMPILE_TIME()` that I think performs *some* of the built-in function computations, and it indeed calls `MONITOR(9)`.
+
+
+
 # Some Features *Not* Supported in the Original Compiler
 
 The principal source for the prospective HAL/S programmer, in my view, is Ryer's *Programming in HAL/S* (1978), and most of my samples of HAL/S code were extracted from that book.  However, not all features discussed (sometimes at length) in Ryer were supported by the actual HAL/S compiler used for the Shuttle's flight software.  I intend to list them here as I discover them ... or more accurately, perhaps, as I retire laboriously typed source-code samples now revealed to be irrelevant.
 
-  * (I don't have a definitive answer about this one yet, so it's just speculation.)  When you have `INITIAL(...)` or `CONSTANT(...)` attributes in `DECLARE` statements, arithmetical expressions can appear within the parentheses.  Ryer (see pp. 32-33) says these expressions can use numeric literals *and* previously-declared symbolic constants.  When I try it, any symbolic constant simply triggers an error message that the expression cannot be computed at compile time.  I suspect that symbolic constants cannot, in fact, appear.  (While undeniably useful, the same effect could be achieved with `REPLACE` statements, so if this use of symbolic constants weren't allowed, it wouldn't be a tragedy.  The "modern" compiler can use symbolic constants in this context just fine.)
   * No `FIXED` datatype is supported, rendering all of Ryer's Chapter 14 useless.  (See Section 2.3.3 of the 2005 revision of the "HAL/S Language Specification".)

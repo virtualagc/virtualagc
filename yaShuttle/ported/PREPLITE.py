@@ -106,6 +106,9 @@ def PREP_LITERAL():
         CALL INLINE("60",6,0,1,0);          /* STD 6,0(0,1)   */
         '''
         g.VALUE = fromFloatIBM(g.DW[0], g.DW[1])
+        if g.VALUE.is_integer() \
+                and g.VALUE < (1 << 31) and g.VALUE >= -(1 << 31):
+            g.VALUE = int(g.VALUE)
     #g.SYT_INDEX = SAVE_LITERAL(1, h.TABLE_ADDR);
     g.SYT_INDEX = SAVE_LITERAL(1, g.DW_AD());
     return

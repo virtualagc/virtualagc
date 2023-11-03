@@ -11,6 +11,8 @@ History:    2023-09-10 RSB  Ported
 
 from xplBuiltins import *
 import g
+import HALINCL.COMMON   as h
+import HALINCL.SPACELIB as s
 from HALINCL.ENTERXRE import ENTER_XREF
 
 
@@ -18,9 +20,9 @@ def ENTER(NAME, CLASS):
     # No locals.
 
     g.NDECSY(g.NDECSY() + 1);  #  DON'T OCCUPY LAST SLOT
-    # NEXT_ELEMENT(SYM_TAB);
+    s.NEXT_ELEMENT(h.SYM_TAB);
     # DELETED NEXT_ELEMENT(DOWN_INFO) FROM THIS SPOT 
-    # NEXT_ELEMENT(LINK_SORT);
+    s.NEXT_ELEMENT(g.LINK_SORT);
     g.SYT_NAME(g.NDECSY(), NAME);
     g.SYT_CLASS(g.NDECSY(), CLASS);
     g.SYT_SCOPE(g.NDECSY(), g.SCOPEp);

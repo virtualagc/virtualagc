@@ -745,7 +745,9 @@ def SYT_DUMP():
                                        if h.EXT_ARRAY[g.SYT_ARRAY(l.I) + l.KL] < 0:
                                            l.V_ARRAY = l.V_ARRAY + '*,';
                                        else:
-                                           l.V_ARRAY = l.V_ARRAY + h.EXT_ARRAY[g.SYT_ARRAY(l.I) + l.KL] + ',';
+                                           l.V_ARRAY = l.V_ARRAY + \
+                                                str(h.EXT_ARRAY[g.SYT_ARRAY(l.I) + l.KL]) \
+                                                + ',';
                                     l.V_ARRAY = SUBSTR(l.V_ARRAY, 0, LENGTH(l.V_ARRAY) - 1) + ')';
                             if l.J == g.MAJ_STRUC:
                                 goto_T_REFS = False

@@ -82,6 +82,8 @@ def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
     elif TYPE == 1:
     # ARITHMETIC
     # DO
+        if not isinstance(VAL, (int, float)):
+            pass
         msw, lsw = toFloatIBM(VAL)
         g.LIT2(g.LIT_PTR, msw);
         g.LIT3(g.LIT_PTR, lsw);

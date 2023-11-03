@@ -23,15 +23,14 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
  /***************************************************************************/
 '''
 
-from watchpoints import watch
-
 from xplBuiltins import MONITOR
 import g
 from INITIALI import INITIALIZATION
 from COMPILAT import COMPILATION_LOOP
 from ALMOST_DISASTER import ALMOST_DISASTER
 
-#watch(g.VALUE, g.NEWSIZE)
+#from watchpoints import watch
+#watch(g.FIXL)
 
 '''
 In XPL, 5 parts comprised this driver module, one of which (THE_BEGINNING)

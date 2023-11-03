@@ -15,12 +15,12 @@ S			 N
      END;
      RMS = SQRT(TOTAL/COUNT);
      WRITE(6) RMS;
-     /* Compare vs formula for sum of squares.  Note that division and 
-        exponentiation operators are evaluated from *right-to-left*, so 
-        if the expression inside the square root were written instead as
-                     COUNT (COUNT+1) (2 COUNT + 1) / 6 / COUNT
-        (which would be the natural way of writing it), the result 
-        would be wrong. because the denominator would become (6/COUNT). */
+C       Compare vs formula for sum of squares.  Note that division and 
+C       exponentiation operators are evaluated from *right-to-left*, so 
+C       if the expression inside the square root were written instead as
+C                    COUNT (COUNT+1) (2 COUNT + 1) / 6 / COUNT
+C       (which would be the natural way of writing it), the result 
+C       would be wrong. because the denominator would become (6/COUNT).
      WRITE(6) SQRT((COUNT (COUNT+1) (2 COUNT + 1) / 6) / COUNT);
   CLOSE EXAMPLE_5;
   

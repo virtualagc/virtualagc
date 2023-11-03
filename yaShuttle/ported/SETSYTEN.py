@@ -16,6 +16,7 @@ import HALINCL.COMMON as h
 from ERROR import ERROR
 from HALMATIN import HALMAT_INIT_CONST
 from HALINCL.ENTERDIM import ENTER_DIMS
+from HALINCL.ICQARRAY import ICQ_ARRAYp
 from HALINCL.ICQTERMp import ICQ_TERMp
 
 '''
@@ -123,14 +124,14 @@ def SET_SYT_ENTRIES():
                 else: 
                     g.S_ARRAY[0] = 2;
                     ERROR(d.CLASS_DD, 10, g.SYT_NAME(g.ID_LOC));
-                ENTER_DIMS();
-                # IF AN ARRAY'S SIZE IS NOT AN * THEN CHECK IF THE TOTAL
-                # NUMBER OF ELEMENTS IN AN ARRAY IS GREATER THAN 32767
-                # OR LESS THAN 1. IF IT IS THEN GENERATE A DD1 ERROR.
-                if h.EXT_ARRAY[g.SYT_ARRAY(g.ID_LOC) + 1] > 0:
-                    if (ICQ_TERMp(g.ID_LOC) * ICQ_ARRAYp(g.ID_LOC) > g.ARRAY_DIM_LIM) \
-                            or (ICQ_TERMp(g.ID_LOC) * ICQ_ARRAYp(g.ID_LOC) < 1):
-                        ERROR(d.CLASS_DD, 1);
+            ENTER_DIMS();
+            # IF AN ARRAY'S SIZE IS NOT AN * THEN CHECK IF THE TOTAL
+            # NUMBER OF ELEMENTS IN AN ARRAY IS GREATER THAN 32767
+            # OR LESS THAN 1. IF IT IS THEN GENERATE A DD1 ERROR.
+            if h.EXT_ARRAY[g.SYT_ARRAY(g.ID_LOC) + 1] > 0:
+                if (ICQ_TERMp(g.ID_LOC) * ICQ_ARRAYp(g.ID_LOC) > g.ARRAY_DIM_LIM) \
+                        or (ICQ_TERMp(g.ID_LOC) * ICQ_ARRAYp(g.ID_LOC) < 1):
+                    ERROR(d.CLASS_DD, 1);
     if g.TYPE == g.MAJ_STRUC:
         g.VAR_LENGTH(g.ID_LOC, g.STRUC_PTR);
         if g.STRUC_DIM == -1:

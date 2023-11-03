@@ -1,44 +1,14 @@
 DEBUG `E `F
 
-C TP: PROCEDURE;
-C        DECLARE V VECTOR(35) INITIAL(7), X SCALAR;
-CDEBUG `3 `4 `8
-C        X = V$(2);
-C        X = V$2 ;
-C        X = V$2;
-C        X = V$26 ;
-CDEBUG `3 `4 `8
-C CLOSE TP;
-
- TP: PROCEDURE(X, Y) ASSIGN(Z, Q);
-        DECLARE SCALAR, X, Y, Z, Q;
-        Z = X + Y;
-        Q = 1;
+ TP: PROGRAM;
+ 
+     DECLARE I INTEGER;
+DEBUG `3`4`8
+     LOOP:
+     DO FOR I = 1 TO 10;
+DEBUG `3`4`8
+         WRITE(6) I;
+         REPEAT LOOP;
+     END;
+ 
  CLOSE TP;
-
-C TEST: PROGRAM;
- 
-C DECLARE SCALAR, A INITIAL(1), B INITIAL(2), C;
-C CALL TP(A, B) ASSIGN(C);
- 
-CDEBUG `3 `4 `8
-C DECLARE A ARRAY(10) SCALAR;
-C A$1 = 12;
- 
-C DECLARE X SCALAR INITIAL(10), V VECTOR INITIAL(100, 200, 300),
-C        M MATRIX INITIAL(1,2,3,4,5,6,7,8,9);
-CDEBUG `3 `4 `8
-C X = V$2;
-C X = M$(2,2);
-C V$2 = X;
-
-CDEBUG `3 `4 `8
-C     DECLARE A CONSTANT(25);
-C     DECLARE B INITIAL(A);
-
-CDEBUG `3 `4 `8
-C DECLARE A ARRAY(10) INTEGER INITIAL(0);
-C A$5 = 12;
-
-C CLOSE TEST;
-

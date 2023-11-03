@@ -537,6 +537,28 @@ f.close()
  /***************************************************************************/
 '''
 
+# Fakes up a loop that clears TYPE[] when pretending that TYPE is an array
+# of memory locations.
+def clearListTYPE():
+    g.TYPE = 0
+    g.BIT_LENGTH = 0
+    g.CHAR_LENGTH = 0
+    g.MAT_LENGTH = 0
+    g.VEC_LENGTH = 0
+    g.ATTRIBUTES = 0
+    g.ATTRIBUTES2 = 0
+    g.ATTR_MASK = 0
+    g.STRUC_PTR = 0
+    g.STRUC_DIM = 0
+    g.CLASS = 0
+    g.NONHAL = 0
+    g.LOCKp = 0
+    g.IC_PTR = 0
+    g.IC_FND = 0
+    g.N_DIM = 0
+    g.S_ARRAY = [0] * (g.N_DIM_LIM + 1)
+
+
 #                  THE SYNTHESIS ALGORITHM FOR HAL
 
 
@@ -2924,7 +2946,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 367:  # reference 3670
         #  <ARRAY SPEC> ::= <ARRAY HEAD> <LITERAL EXP OR *> )
         g.CONTEXT = g.DECLARE_CONTEXT;
-        goto = "CHECK_ARRAY_SPEC"
+        goto = "ARRAY_SPEC"
     elif PRODUCTION_NUMBER == 368:  # reference 3680
         #  <ARRAY SPEC>  ::=  FUNCTION
         g.CLASS = 2;
@@ -3834,12 +3856,10 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             if g.NAME_PSEUDOS: 
                 NAME_COMPARE(g.MP, g.SP, d.CLASS_AV, 5);
                 HALMAT_TUPLE(g.XNASN, 0, g.SP, g.MP, 0);
-                if COPINESS(g.MP, g.SP) > 2: 
-                    ERROR(d.CLASS_AA, 1);
+                if COPINESS(g.MP, g.SP) > 2: ERROR(d.CLASS_AA, 1);
                 goto = "END_ASSIGN"
             else:
-                if RESET_ARRAYNESS() > 2: 
-                    ERROR(d.CLASS_AA, 1);
+                if RESET_ARRAYNESS() > 2: ERROR(d.CLASS_AA, 1);
                 HALMAT_TUPLE(g.XXASN[g.PSEUDO_TYPE[g.PTR[g.SP]]], 0, g.SP, g.MP, 0);
         if goto in [None, "ASSIGNING"]:
             if goto == "ASSIGNING": goto = None
@@ -3847,8 +3867,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             if g.TEMP == g.INT_TYPE: 
                 if g.PSEUDO_FORM[g.PTR[g.SP]] == g.XLIT: 
                     g.TEMP2 = GET_LITERAL(g.LOC_P[g.PTR[g.SP]]);
-                    if g.LIT2(g.TEMP2) == 0: 
-                        g.TEMP = 0;
+                    if g.LIT2(g.TEMP2) == 0: g.TEMP = 0;
             if (SHL(1, g.TEMP) & g.ASSIGN_TYPE[g.PSEUDO_TYPE[g.PTR[g.MP]]]) == 0:
                 ERROR(d.CLASS_AV, 1, g.VAR[g.MP]);
             elif g.TEMP > 0: 
@@ -4800,24 +4819,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         SETUP_VAC(g.MP, g.TYPE, g.TEMP);
         g.TEMP2 = g.INLINE_MODE;
         # See the comments in g.py for TYPE to understand the next few lines
-        g.TYPE = 0
-        g.BIT_LENGTH = 0
-        g.CHAR_LENGTH = 0
-        g.MAT_LENGTH = 0
-        g.VEC_LENGTH = 0
-        g.ATTRIBUTES = 0
-        g.ATTRIBUTES2 = 0
-        g.ATTR_MASK = 0
-        g.STRUC_PTR = 0
-        g.STRUC_DIM = 0
-        g.CLASS = 0
-        g.NONHAL = 0
-        g.LOCKp = 0
-        g.IC_PTR = 0
-        g.IC_FND = 0
-        g.N_DIM = 0
-        g.S_ARRAY = [0] * (g.N_DIM_LIM + 1)
-        # (End of TYPE loop)------------------------------------------------
+        clearListTYPE()
         SAVE_ARRAYNESS();
         if (g.SUBSCRIPT_LEVEL | g.EXPONENT_LEVEL) != 0: 
             ERROR(d.CLASS_B, 2);
@@ -4877,24 +4879,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                         ERROR(d.CLASS_FT, 7, g.SYT_NAME(g.ID_LOC));
             # END OF TYPES MATCH
             # See the comments in g.py for TYPE to understand the next few lines
-            g.TYPE = 0
-            g.BIT_LENGTH = 0
-            g.CHAR_LENGTH = 0
-            g.MAT_LENGTH = 0
-            g.VEC_LENGTH = 0
-            g.ATTRIBUTES = 0
-            g.ATTRIBUTES2 = 0
-            g.ATTR_MASK = 0
-            g.STRUC_PTR = 0
-            g.STRUC_DIM = 0
-            g.CLASS = 0
-            g.NONHAL = 0
-            g.LOCKp = 0
-            g.IC_PTR = 0
-            g.IC_FND = 0
-            g.N_DIM = 0
-            g.S_ARRAY = [0] * (g.N_DIM_LIM + 1)
-            # (End of TYPE loop)------------------------------------------------
+            clearListTYPE()
     if goto == "EMIT_NULL" or \
             (goto == None and PRODUCTION_NUMBER == 334):  # reference 3340
         #  <DECLARE ELEMENT>  ::=  <REPLACE STMT>  ;
@@ -4970,24 +4955,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.SYT_FLAGS(g.ID_LOC, g.SYT_FLAGS(g.ID_LOC) | g.ATTRIBUTES);
         HALMAT_INIT_CONST();
         # See the comments in g.py for TYPE to understand the next few lines
-        g.TYPE = 0
-        g.BIT_LENGTH = 0
-        g.CHAR_LENGTH = 0
-        g.MAT_LENGTH = 0
-        g.VEC_LENGTH = 0
-        g.ATTRIBUTES = 0
-        g.ATTRIBUTES2 = 0
-        g.ATTR_MASK = 0
-        g.STRUC_PTR = 0
-        g.STRUC_DIM = 0
-        g.CLASS = 0
-        g.NONHAL = 0
-        g.LOCKp = 0
-        g.IC_PTR = 0
-        g.IC_FND = 0
-        g.N_DIM = 0
-        g.S_ARRAY = [0] * (g.N_DIM_LIM + 1)
-        # (End of TYPE loop)------------------------------------------------
+        clearListTYPE()
         g.SAVE_INDENT_LEVEL = g.INDENT_LEVEL;
         if g.STACK_PTR[g.SP] > 0:
             OUTPUT_WRITER(0, g.STACK_PTR[g.SP] - 1);
@@ -5319,23 +5287,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.FACTORED_IC_FND = g.IC_FND
             g.FACTORED_N_DIM = g.N_DIM
             g.FACTORED_S_ARRAY = g.S_ARRAY
-            g.TYPE = 0
-            g.BIT_LENGTH = 0
-            g.CHAR_LENGTH = 0
-            g.MAT_LENGTH = 0
-            g.VEC_LENGTH = 0
-            g.ATTRIBUTES = 0
-            g.ATTRIBUTES2 = 0
-            g.ATTR_MASK = 0
-            g.STRUC_PTR = 0
-            g.STRUC_DIM = 0
-            g.CLASS = 0
-            g.NONHAL = 0
-            g.LOCKp = 0
-            g.IC_PTR = 0
-            g.IC_FND = 0
-            g.N_DIM = 0
-            g.S_ARRAY = [0] * (g.N_DIM_LIM + 1)
+            clearListTYPE()
             # (End of TYPE/FACTORED_TYPE loop)----------------------------------
             g.FACTOR_FOUND = g.TRUE;
             if g.FACTORED_IC_FND:
@@ -5350,7 +5302,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         else:
             g.K = 2;  # A DEFAULT
             g.I = g.FIXV[g.MPP1];
-            if not (g.I > 1 and g.I <= g.ARRAY_DIM_LIM and g.I == -1):
+            if not ((g.I > 1 and g.I <= g.ARRAY_DIM_LIM) or g.I == -1):
                 ERROR(d.CLASS_DD, 1);
             else:
                 g.K = g.I;

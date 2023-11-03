@@ -85,13 +85,24 @@ def RECORD_ALLOC(array):
 def RECORD_USED(integer, value):
     return
 
-# Gets the highest available index in an allocated array.
+# So ... I've implemented this as the highest available index in an array,
+# but that can't be right.  There's a place in IDENTIFY, for example, where
+# it's clearly the next element after that.  So I don't know what the deal is
+# with it.  
 def RECORD_TOP(array):
     return len(array) - 1
 
 ''' [DECLARE]
         SET_RECORD_WIDTH(2) _AS '_DOPE_WIDTH(ADDR(%1%))=%2%',
 '''
+
+'''
+The following implementation of ALLOCATE_SPACE() *seemed* like a good idea at
+the time, but it's really not.  It defeats the RECORD_TOP() implementation 
+above.  To keep RECORD_TOP() working, we can't really allocate any new elements
+of an array until the new element is actually used for something.  However,
+any array we want to support in ALLOCATE_SPACE() would already have been 
+implemented (as a function rather than a simple list) so as to do that anyway.
 
 def ALLOCATE_SPACE(array, records):
     if array is h.CSECT_LENGTHS:
@@ -106,6 +117,9 @@ def ALLOCATE_SPACE(array, records):
     else:
         print("Unknown array in ALLOCATE_SPACE", file=sys.stderr)
         sys.exit(1)
+'''
+def ALLOCATE_SPACE(array, records):
+    return
 
 # Allocates space to add one element to an array.
 def NEXT_ELEMENT(array):
