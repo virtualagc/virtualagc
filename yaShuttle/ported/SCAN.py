@@ -638,7 +638,7 @@ def SCAN():
                 g.PARM_COUNT = g.NUM_OF_PARM[g.TEMP_INDEX];
                 while g.TEMP_INDEX > 0:
                     for g.I in range(1, g.NUM_OF_PARM[g.TEMP_INDEX] + 1):
-                        if g.BCD == g.SYT_NAME[g.MACRO_EXPAN_STACK[g.TEMP_INDEX] + g.I]:
+                        if g.BCD == g.SYT_NAME(g.MACRO_EXPAN_STACK[g.TEMP_INDEX] + g.I):
                             g.PARM_EXPAN_LEVEL = g.PARM_EXPAN_LEVEL + 1;
                             g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.TRUE;
                             g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = 0;
@@ -647,7 +647,7 @@ def SCAN():
                             if g.BASE_PARM_LEVEL[g.MACRO_EXPAN_LEVEL] + 1 == \
                                     g.PARM_EXPAN_LEVEL:
                                 if not g.FOUND_CENT:
-                                    if not g.END_OF_MACRO:
+                                    if not END_OF_MACRO():
                                         if g.MACRO_TEXT(g.MACRO_POINT - 2) == 0xEE:
                                             g.MACRO_POINT = g.MACRO_POINT - 1;
                                         g.MACRO_POINT = g.MACRO_POINT - 1;

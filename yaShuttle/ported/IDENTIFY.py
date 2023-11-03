@@ -282,8 +282,11 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                                 goto = "YES_ARG";
                             break;
     firstTry = True
+    firstTryB = False
+    context = g.CONTEXT
     while firstTry or goto != None:
         firstTry = False
+
         if goto == "LOOKUP": goto = None
         if goto in [None, "NOT_FOUND_YET", "Q_TRAP", "NOT_FOUND", "DO_LAB",
                     "MAKE_DEFAULT", "ADD_DEFAULT", "SET_INITIAL_FLAGS",
@@ -322,8 +325,11 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                         g.TOKEN = 0;
                         return;
             
-                # DO CASE g.CONTEXT;
-                if (goto == None and g.CONTEXT == 0) \
+                # DO CASE CONTEXT;
+                if firstTryB:
+                    context = -1
+                firstTryB = True
+                if (goto == None and context == 0) \
                         or goto in ["DO_LAB", "MAKE_DEFAULT", "ADD_DEFAULT"]:
                     #  ORDINARY                            #  CASE 0
                     if goto in [None, "DO_LAB", "MAKE_DEFAULT"]:
@@ -335,7 +341,6 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                                 g.SYT_TYPE(l.I, g.UNSPEC_LABEL);
                                 g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | g.DEFINED_LABEL);
                                 goto = "LAB_OP_CHECK"
-                                g.CONTEXT = -1
                                 continue
                             if BCD == 'T':
                                 g.IMPLICIT_T = g.TRUE;
@@ -353,8 +358,9 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                         g.SYT_TYPE(l.I, g.IMPLIED_TYPE);
                     if g.SYT_TYPE(l.I) > g.INT_TYPE:
                         goto = "SET_INITIAL_FLAGS"
-                        g.CONTEXT = -1
-                    if g.SYT_TYPE(l.I) <= g.CHAR_TYPE:
+                    if goto != None:
+                        pass
+                    elif g.SYT_TYPE(l.I) <= g.CHAR_TYPE:
                         # GO TO SET_DEF_BC;
                         pass
                     else:
@@ -366,7 +372,6 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                         else:
                             g.VAR_LENGTH(l.I, g.DEF_MAT_LENGTH);
                         goto = "SET_INITIAL_FLAGS"
-                        g.CONTEXT = -1
                     # SET_DEF_BC:
                     if goto == None:
                         if g.SYT_TYPE(l.I) == g.CHAR_TYPE:
@@ -400,13 +405,12 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                     elif st == 9:
                        g.TOKEN = g.EVENT_TOKEN;  # NOT POSSIBLE??
                     # END OF DO CASE SYT_TYPE(I)
-                elif g.CONTEXT == 1 and goto == None:
+                elif context == 1 and goto == None:
                     # EXPRESSION CONTEXT                   #  CASE 1
                     ERROR(d.CLASS_DI, 11, BCD);
                     goto = "MAKE_DEFAULT"
-                    g.CONTEXT = -1
                     continue
-                elif (g.CONTEXT == 2 and goto == None) \
+                elif (context == 2 and goto == None) \
                         or goto in ["LABELJOIN", "LAB_OP_CHECK"]:
                     #  GO TO                               #  CASE 2
                     if goto in [None, "LABELJOIN"]:
@@ -419,22 +423,20 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                     g.TOKEN = g.LAB_TOKEN;
                     if g.IMPLIED_TYPE != 0:
                         ERROR(d.CLASS_MC, 1, BCD);
-                elif g.CONTEXT == 3 and goto == None:
+                elif context == 3 and goto == None:
                     #  CALL                                #  CASE 3
                     l.FLAG = g.PROC_LABEL;  # ONLY PROCS MAY BE CALLED
                     g.CONTEXT = 0;  #  IN CASE PARAMETERS FOLLOW
                     g.FIXING = 1;
                     goto = "LABELJOIN"
-                    g.CONTEXT = -1
                     continue
-                elif g.CONTEXT == 4 and goto == None:
+                elif context == 4 and goto == None:
                     #  SCHEDULE                            #  CASE 4
                     l.FLAG = g.TASK_LABEL;  # ONLY TASKS CAN BE "NOT FOUND"
                     g.CONTEXT = 0;
                     goto = "LABELJOIN"
-                    g.CONTEXT = -1
                     continue
-                elif g.CONTEXT == 5 and goto == None:
+                elif context == 5 and goto == None:
                     #  DECLARE                             #  CASE 5
                     g.FACTORING = g.FALSE;
                     if g.IMPLIED_TYPE != 0:
@@ -449,13 +451,12 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                         g.TOKEN = g.ID_TOKEN;
                         break  # GO TO IDENTIFY_EXIT;
                     goto = "DCLJOIN"
-                    # g.CONTEXT = -1
                 # Note that the following is an "if" rather than an "elif" to
                 # allow the goto == "DCLJOIN" in the preceding case to fallthrough 
                 # into it rather than going through the tedious exercise of 
                 # cycling through the containing while-loop ... though perhaps
                 # for consistency it might have been better to do so.
-                if (g.CONTEXT == 6 and goto == None) \
+                if (context == 6 and goto == None) \
                         or goto in ["DCLJOIN", "PARMJOIN"]:
                     # INPUT PARAMETER                      #  CASE 6
                     if goto in [None, "PARMJOIN"]:
@@ -472,38 +473,34 @@ def IDENTIFY(BCD, CENT_IDENTIFY):
                     l.I = ENTER(BCD, g.VAR_CLASS);
                     g.SYT_FLAGS(l.I, g.SYT_FLAGS(l.I) | l.FLAG);
                     g.TOKEN = g.ID_TOKEN;
-                elif g.CONTEXT == 7 and goto == None:
+                elif context == 7 and goto == None:
                     #  ASSIGN PARM                         #  CASE 7
                     l.FLAG = g.ASSIGN_PARM;
                     goto = "PARMJOIN";
-                    g.CONTEXT = -1
                     continue
-                elif g.CONTEXT == 8 and goto == None:
+                elif context == 8 and goto == None:
                     #  REPLACE                             #  CASE 8
                     g.SYT_INDEX = ENTER(BCD, g.REPL_CLASS);
                     g.TOKEN = g.ID_TOKEN;
                     g.MACRO_NAME = BCD[:];
                     g.CONTEXT = g.REPLACE_PARM_CONTEXT;
                     goto = "REPL_OP_CHECK"
-                    g.CONTEXT = -1
-                    # The label is below us, so we're going to fallthrough
+                    # REPL_OP_CHECK is below us, so we're going to fallthrough
                     # rather than continue the enclosing while-loop.
-                elif g.CONTEXT == 9 and goto == None:
+                elif context == 9 and goto == None:
                     #  CLOSE                               #  CASE 9
                     l.I = -1;  #  SHOULD NEVER BE REFERRED TO
                     goto = "LAB_OP_CHECK";  #  CLOSE PRODUCTION DOES THE WORK
-                    g.CONTEXT = -1
                     continue
-                elif g.CONTEXT == 10 and goto == None:
+                elif context == 10 and goto == None:
                     #     REPLACE DEFINITION PARAMETERS       # CASE 10
                     g.TOKEN = g.ID_TOKEN;
                     g.SYT_INDEX = ENTER(BCD, g.REPL_ARG_CLASS);
                     g.SYT_FLAGS(g.SYT_INDEX, g.INACTIVE_FLAG);
                     goto = "REPL_OP_CHECK"
-                    g.CONTEXT = -1
-                    # The label is below us, so we're going to fallthrough
+                    # REPL_OP_CHECK is below us, so we're going to fallthrough
                     # rather than continue the enclosing while-loop.
-                elif g.CONTEXT == 11 and goto == None:
+                elif context == 11 and goto == None:
                     # EQUATE
                     if g.IMPLIED_TYPE != 0:
                         ERROR(d.CLASS_MC, 7, SUBSTR(BCD, 1));

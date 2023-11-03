@@ -1463,7 +1463,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.VAR[g.MP] = 'BIT CONVERSION FUNCTION';
         if PUSH_FCN_STACK(3): 
             g.FCN_LOC[g.FCN_LV] = 1;
-        SET_BI_XREF(BIT_NDX);
+        SET_BI_XREF(g.BIT_NDX);
     elif PRODUCTION_NUMBER == 93:  # reference 930
         #  <BIT CAT> ::= <BIT PRIM>
         pass;
@@ -1547,7 +1547,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
     elif PRODUCTION_NUMBER == 113:  # reference 1130
         #  <COMPARISON>  ::=  <NAME EXP>  <RELATIONAL OP>  <NAME EXP>
         NAME_COMPARE(g.MP, g.SP, d.CLASS_C, 4);
-        g.TEMP = g.XNEQU(g.REL_OP);
+        g.TEMP = g.XNEQU[g.REL_OP];
         g.VAR[g.MP] = 'NAME';
         if COPINESS(g.MP, g.SP): 
             ERROR(d.CLASS_EA, 1, g.VAR[g.SP]);

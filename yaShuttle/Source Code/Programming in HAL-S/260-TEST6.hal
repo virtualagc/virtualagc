@@ -1,5 +1,7 @@
 C/ Adapted from PDF p. 260 of "Programming in HAL/S".
 
+ T260: PROGRAM; 
+ 
      STRUCTURE IMU_DATA:
         1 DELTA_V ARRAY(3) INTEGER DOUBLE,
         1 ATTITUDE ARRAY(3) INTEGER,
@@ -10,13 +12,12 @@ C/ Adapted from PDF p. 260 of "Programming in HAL/S".
      DECLARE PITCH_ANGLE SCALAR;
      
      DECLARE BEST_IMU NAME IMU_DATA-STRUCTURE;
-     
+  
   LOW_RATE:
   TASK;
      DECLARE BEST INTEGER;
-     DECLARE TBD PROCEDURE;
      CALL TBD ASSIGN(BEST);
-E            +                +
+     
 M    NAME(BEST_IMU) = NAME(IMU_INPT     );
 S     				   BEST;
 
@@ -36,4 +37,9 @@ C	...
 
   CLOSE HI_RATE;
   
+  TBD: PROCEDURE(N);
+     DECLARE N INTEGER, I INTEGER;
+     I = N;
+  CLOSE TBD;
   
+ CLOSE T260;

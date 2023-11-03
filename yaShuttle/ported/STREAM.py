@@ -662,7 +662,7 @@ def STREAM():
             # END OF INCLUDE DIRECTIVE
             elif ll.C[0] == 'VERSION':
                 if g.TPL_VERSION > 0:
-                    #ll.I = BYTE(g.CURRENT_CARD, hd.D_INDEX + 1);
+                    # ll.I = BYTE(g.CURRENT_CARD, hd.D_INDEX + 1);
                     ll.I = int(g.CURRENT_CARD[hd.D_INDEX + 1:], 16)
                     g.SYT_LOCKp[g.TPL_VERSION] = ll.I;
                     g.TPL_VERSION = 0;
@@ -1162,10 +1162,17 @@ def STREAM():
             l.M_BLANKS = l.E_BLANKS;
     
     def MACRO_DIAGNOSTICS(WHERE):
-        OUTPUT(0, 'AT ' + WHERE + '  NEXT_CHAR=' + g.NEXT_CHAR + '  MACRO_EXPAN_LEVEL=' \
-                +g.MACRO_EXPAN_LEVEL + '  MACRO_TEXT(' + g.MACRO_POINT + ')=' + \
-                g.MACRO_TEXT(g.MACRO_POINT) + '  PARM_REPLACE_PTR(' + g.PARM_EXPAN_LEVEL + \
-                ')=' + g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL]);
+        try:
+            OUTPUT(0, 'AT ' + str(WHERE) + '  NEXT_CHAR=\'' + 
+                   BYTE("", 0, g.NEXT_CHAR) + \
+                   '\'  MACRO_EXPAN_LEVEL=' + \
+                    str(g.MACRO_EXPAN_LEVEL) + '  MACRO_TEXT(' + \
+                    str(g.MACRO_POINT) + ')=' + \
+                    str(g.MACRO_TEXT(g.MACRO_POINT)) + '  PARM_REPLACE_PTR(' + \
+                    str(g.PARM_EXPAN_LEVEL) + \
+                    ')=' + str(g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL]));
+        except:
+            pass
     
     # STREAM_START was here!
     goto_CHECK_STRING_POSITION = True
@@ -1179,17 +1186,21 @@ def STREAM():
                 firstTry = True
                 while firstTry or goto_PARM_DONE:
                     firstTry = False
-                    if not goto_PARM_DONE and g.PARM_EXPAN_LEVEL >= PARM_EXPAN_LIMIT:
+                    if not goto_PARM_DONE and \
+                            g.PARM_EXPAN_LEVEL >= g.PARM_EXPAN_LIMIT:
                         ERROR(d.CLASS_IR, 6, 0);
-                        g.MACRO_EXPAN_LEVEL, g.PARM_EXPAN_LEVEL, g.MACRO_FOUND = 0;
+                        g.MACRO_EXPAN_LEVEL = 0
+                        g.PARM_EXPAN_LEVEL = 0
+                        g.MACRO_FOUND = 0;
                         goto_MACRO_DONE = True
+                        break
                     elif not goto_PARM_DONE and \
                             g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] < \
-                                LENGTH(MACRO_CALL_PARM_TABLE[ \
-                                    PARM_STACK_PTR[g.PARM_EXPAN_LEVEL] \
+                                LENGTH(g.MACRO_CALL_PARM_TABLE[ \
+                                    g.PARM_STACK_PTR[g.PARM_EXPAN_LEVEL] \
                                 ]):
-                        g.NEXT_CHAR = BYTE(MACRO_CALL_PARM_TABLE[
-                                            PARM_STACK_PTR[g.PARM_EXPAN_LEVEL]
+                        g.NEXT_CHAR = BYTE(g.MACRO_CALL_PARM_TABLE[
+                                            g.PARM_STACK_PTR[g.PARM_EXPAN_LEVEL]
                                             ], \
                                     g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL]);
                         g.PARM_REPLACE_PTR[g.PARM_EXPAN_LEVEL] = \
@@ -1205,7 +1216,7 @@ def STREAM():
                             g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.TRUE;
                             g.PARM_EXPAN_LEVEL = g.PARM_EXPAN_LEVEL - 1;
                             goto_CHECK_STRING_POSITION = True
-                            continue
+                            break
                         g.NEXT_CHAR = BYTE(g.X1);
                         g.FIRST_TIME_PARM[g.PARM_EXPAN_LEVEL] = g.FALSE;
                         if g.CONTROL[3]:
@@ -1214,6 +1225,8 @@ def STREAM():
                     else:
                         goto_PARM_DONE = True
                         continue
+                if goto_CHECK_STRING_POSITION:
+                    continue
             if not goto_MACRO_DONE:
                 if g.MACRO_TEXT(g.MACRO_POINT) != 0xEF:
                     g.BLANK_COUNT = 0;
@@ -1243,7 +1256,7 @@ def STREAM():
                     if not g.DONT_SET_WAIT:
                         g.WAIT = g.TRUE;
                 g.MACRO_EXPAN_LEVEL = g.MACRO_EXPAN_LEVEL - 1;
-                g.MACRO_POINT =g. M_P[g.MACRO_EXPAN_LEVEL];
+                g.MACRO_POINT = g. M_P[g.MACRO_EXPAN_LEVEL];
                 g.BLANK_COUNT = g.M_BLANK_COUNT[g.MACRO_EXPAN_LEVEL];
             if goto_MACRO_DONE or g.MACRO_EXPAN_LEVEL == 0:
                 if not goto_MACRO_DONE:

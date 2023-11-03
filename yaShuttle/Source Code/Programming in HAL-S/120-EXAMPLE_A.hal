@@ -8,49 +8,54 @@ C/ data.  Any given altimeter reading is valid or invalid depending on whether
 C/ it is in-range or out-of-range, on whether too much time has passed since
 C/ the reading, and on whether it departs too much from the long-term running
 C/ average of the readings.  In real life, such data would be sampled
-C/ periodically, so I've made it a PROCEDURE that can be called repeatedly.
+C/ periodically, so I've made it an inline PROCEDURE that can be called 
+C/ repeatedly, and inside of a PROGRAM to do so.
 
-  EXAMPLE_A:
-  PROCEDURE(ALT, TIMETAG) ASSIGN(DATA_VALID, AVERAGE);
+  TEST_EXAMPLE_A: PROGRAM;
+  
+  DECLARE DATA_VALID ARRAY(4) BOOLEAN, AVERAGE SCALAR;
+  
+    EXAMPLE_A:
+    PROCEDURE(ALT, TIMETAG) ASSIGN(DATA_VALID, AVERAGE);
      DECLARE ARRAY(4),
-     		ALT SCALAR,
-     		TIMETAG SCALAR,
-     		DATA_VALID BOOLEAN;
+                ALT SCALAR,
+                TIMETAG SCALAR,
+                DATA_VALID BOOLEAN;
      DECLARE SCALAR INITIAL(0),
-     		TOTAL, NUMBER_GOOD;
+                TOTAL, NUMBER_GOOD;
      DECLARE AVERAGE SCALAR;
      DO FOR TEMPORARY J = 1 TO 4;
 M       IF RUNTIME - TIMETAG  > .1 OR ALT  <=0 OR ALT  > 50000 THEN
-S			    J            J           J
+S                           J            J           J
 
 E           .
-M	DATA_VALID   = FALSE;
+M       DATA_VALID   = FALSE;
 S                 J:
 
-	ELSE
-	   DO;
+        ELSE
+           DO;
 E                 .
-M	      DATA_VALID   = TRUE;
-S		 	J:
+M             DATA_VALID   = TRUE;
+S                       J:
 
-	      NUMBER_GOOD = NUMBER_GOOD + 1;
-M	      TOTAL = TOTAL + ALT ;
-S	      			 J
+              NUMBER_GOOD = NUMBER_GOOD + 1;
+M             TOTAL = TOTAL + ALT ;
+S                                J
 
-	   END;
+           END;
      END;
      AVERAGE = TOTAL / NUMBER_GOOD;
      DO FOR TEMPORARY I = 1 TO 4;
 E              .
-M	IF DATA_VALID   THEN
-S     		     I:
+M       IF DATA_VALID   THEN
+S                    I:
 
-M	   IF ABS(ALT  - AVERAGE) > .1 AVERAGE THEN
-S		     I
+M          IF ABS(ALT  - AVERAGE) > .1 AVERAGE THEN
+S                    I
 
-E		  .
-M	      DATA_VALID   = FALSE;
-S			I:
+E                 .
+M             DATA_VALID   = FALSE;
+S                       I:
 
      END;
      
@@ -59,32 +64,31 @@ C  OR TOO LARGE OR TOO OLD OR TOO FAR FROM THE AVERAGE
 
   CLOSE EXAMPLE_A;
   
-          TEST_EXAMPLE_A: PROGRAM;
-          
-          DECLARE DATA_VALID ARRAY(4) BOOLEAN, AVERAGE SCALAR;
-          
-          CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-          		 SCALAR(RUNTIME-0.01, RUNTIME-0.02, RUNTIME-0.03, 
-          		 RUNTIME-0.04)) 
-          		 ASSIGN(DATA_VALID, AVERAGE);
-          WRITE(6) AVERAGE, DATA_VALID;
-          
-          CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-          		 SCALAR(RUNTIME-0.05, RUNTIME-0.06, 
-          		 RUNTIME-0.08, RUNTIME-0.10))  
-          		 ASSIGN(DATA_VALID, AVERAGE);
-          WRITE(6) AVERAGE, DATA_VALID;
-          
-          CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-          		 SCALAR(RUNTIME-0.11, RUNTIME-0.12, 
-          		 RUNTIME-0.13, RUNTIME-0.14)) 
-          		ASSIGN(DATA_VALID, AVERAGE);
-          WRITE(6) AVERAGE, DATA_VALID;
-          
-            CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
-          		 SCALAR(RUNTIME-0.01, RUNTIME-0.02, 
-          		 RUNTIME-0.03, RUNTIME-0.04)) 
-          		ASSIGN(DATA_VALID, AVERAGE);
-          WRITE(6) AVERAGE, DATA_VALID;
+  
+  
+  
+  CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
+  		 SCALAR(RUNTIME-0.01, RUNTIME-0.02, RUNTIME-0.03, 
+  		 RUNTIME-0.04)) 
+  		 ASSIGN(DATA_VALID, AVERAGE);
+  WRITE(6) AVERAGE, DATA_VALID;
+  
+  CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
+  		 SCALAR(RUNTIME-0.05, RUNTIME-0.06, 
+  		 RUNTIME-0.08, RUNTIME-0.10))  
+  		 ASSIGN(DATA_VALID, AVERAGE);
+  WRITE(6) AVERAGE, DATA_VALID;
+  
+  CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
+  		 SCALAR(RUNTIME-0.11, RUNTIME-0.12, 
+  		 RUNTIME-0.13, RUNTIME-0.14)) 
+  		ASSIGN(DATA_VALID, AVERAGE);
+  WRITE(6) AVERAGE, DATA_VALID;
+  
+    CALL EXAMPLE_A(SCALAR(9800, 9900, 10000, 10100), 
+  		 SCALAR(RUNTIME-0.01, RUNTIME-0.02, 
+  		 RUNTIME-0.03, RUNTIME-0.04)) 
+  		ASSIGN(DATA_VALID, AVERAGE);
+  WRITE(6) AVERAGE, DATA_VALID;
   
   CLOSE TEST_EXAMPLE_A;

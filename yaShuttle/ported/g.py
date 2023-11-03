@@ -2824,13 +2824,9 @@ def MACRO_TEXT(n, value=None):
         # space compression in these texts).  Which is great, except that if
         # the current macro is the very first one, there's no previous macro
         # text to check.  The vagaries of Intermetrics version of XPL mean
-        # that whatever character happens to appear in memory prior to 
-        # MACRO_TEXTS[] is going to be checked (possibly part of the variable
-        # REPLACE_TEXT_PTR but, I think, not necessarily).  Lovely!  So rather 
-        # than flag a negative index n as an error, which would be the sensible
-        # thing to do, we're simply going to return a byte (namely 0x00) 
-        # guaranteed to be neither EBCDIC ')' or 0xEE.
-        return 0x00
+        # that what's going to be checked (I think!) is the least-significant
+        # byte of the variable REPLACE_TEXT_PTR.
+        return REPLACE_TEXT_PTR & 0xFF;
     while len(MACRO_TEXTS) <= n:
         MACRO_TEXTS.append(macro_texts())
     if value == None:

@@ -133,9 +133,9 @@ def CHECK_SUBSCRIPT(MODE, SIZE, FLAG):
                 g.PSEUDO_FORM[g.NEXT_SUB] = g.XVAC;
             if (MODE & 0xF) == g.XIMD:
                 if g.NEWSIZE == 0x10: 
-                    g.NEWSIZE = g.XMADD[g.INT_TYPE - g.MAT_TYPE];
+                    g.NEWSIZE = g.XMADD(g.INT_TYPE - g.MAT_TYPE);
                 else: 
-                    g.NEWSIZE = g.XMSUB[g.INT_TYPE - g.MAT_TYPE];
+                    g.NEWSIZE = g.XMSUB(g.INT_TYPE - g.MAT_TYPE);
                 HALMAT_POP(g.NEWSIZE, 2, 0, 0);
                 HALMAT_PIP(SIZE, g.XIMD, 0, 0);
                 MODE = 0;

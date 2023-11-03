@@ -440,7 +440,7 @@ def END_ANY_FCN():
                         g.PSEUDO_LENGTH[g.PTR_TOP] = g.FIX_DIM;
                     # END
                     else: g.PSEUDO_LENGTH[g.PTR_TOP] = g.BIT_LENGTH_LIM;
-                    ARGp = XBTOB(g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE);
+                    ARGp = g.XBTOB[g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE];
                 # END
             # END DO CASE
             HALMAT_TUPLE(ARGp, 0, g.SP - 1, 0, g.PSEUDO_FORM[g.PTR_TOP]);

@@ -47,10 +47,6 @@ import HALINCL.COMMON as h
 def GET_ARRAYNESS():
     # Locals: I, J, K
     
-    # This is here, as opposed to the top of the file, to avoid a
-    # "partially initialized" circular import error.
-    from ATTACHS4 import ATTACH_SUBSCRIPT
-    
     if g.SYT_ARRAY(g.FIXV[g.MP]) != 0: 
         g.VAR_ARRAYNESS[0] = 1;
         g.VAR_ARRAYNESS[1] = g.SYT_ARRAY(g.FIXV[g.MP]);
