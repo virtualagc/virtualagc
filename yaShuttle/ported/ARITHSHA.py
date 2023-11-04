@@ -55,7 +55,7 @@ def ARITH_SHAPER_SUB(SIZE):
         DEF_SIZE = g.LOC_P[g.NEXT_SUB];
         # Was: GO TO TRY_VAL_SUB;  However, it was easier to cut-and-paste the
         # code from TRY_VAL_SUB than to actually fake up a GO TO.
-        if (DEF_SIZE < 2) | (DEF_SIZE > SIZE):  # DO
+        if (DEF_SIZE < 2) or (DEF_SIZE > SIZE):  # DO
             ERROR(d.CLASS_QS, 8);
             if DEF_SIZE < 2: return 2;
             return SIZE;
@@ -65,7 +65,7 @@ def ARITH_SHAPER_SUB(SIZE):
     else:  # DO
         DEF_SIZE = MAKE_FIXED_LIT(g.LOC_P[g.NEXT_SUB]);
         # TRY_VAL_SUB:
-        if (DEF_SIZE < 2) | (DEF_SIZE > SIZE):  # DO
+        if (DEF_SIZE < 2) or (DEF_SIZE > SIZE):  # DO
             ERROR(d.CLASS_QS, 8);
             if DEF_SIZE < 2: return 2;
             return SIZE;

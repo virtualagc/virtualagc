@@ -1,0 +1,17 @@
+C/ Adapted from PDF p. 264 of "Programming in HAL/S".
+C/ Note that code sample 269-PROCESS_CONTROL.hal needs to be
+C/ compiled before this code sample in order to get the 
+C/ definition of PROCESS_CONTROL into the template library.
+
+D INCLUDE TEMPLATE CPL269 # For PROCESS_CONTROL
+
+ CPL264: COMPOOL;
+ 
+  STRUCTURE TQE:
+C TIMER QUEUE ELEMENT
+     1 TIME SCALAR,
+     1 ACTION INTEGER,
+     1 AFFECTED_PROCESS NAME PROCESS_CONTROL-STRUCTURE,
+     1 NEXT NAME TQE-STRUCTURE;
+
+ CLOSE CPL264;

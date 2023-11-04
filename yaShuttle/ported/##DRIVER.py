@@ -30,7 +30,7 @@ from COMPILAT import COMPILATION_LOOP
 from ALMOST_DISASTER import ALMOST_DISASTER
 
 #from watchpoints import watch
-#watch(g.CONTEXT)
+#watch(g.FIXL[6])
 
 '''
 In XPL, 5 parts comprised this driver module, one of which (THE_BEGINNING)

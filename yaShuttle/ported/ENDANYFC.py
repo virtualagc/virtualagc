@@ -308,10 +308,10 @@ def END_ANY_FCN():
                 elif ba == 8:
                     #  IORS TYPE
                     # DO
-                        if ARGp == 2: MATCH_SIMPLES(g.SP - 1, g.SP);
-                        if SHR(g.BI_INFO[0], 24) == g.IORS_TYPE:
-                            g.PSEUDO_TYPE[g.PTR[g.MP]] = g.PSEUDO_TYPE[MAXPTR];
-                        if ARGp == 1: BI_COMPILE_TIME();
+                    if ARGp == 2: MATCH_SIMPLES(g.SP - 1, g.SP);
+                    if SHR(g.BI_INFO[0], 24) == g.IORS_TYPE:
+                        g.PSEUDO_TYPE[g.PTR[g.MP]] = g.PSEUDO_TYPE[MAXPTR];
+                    if ARGp == 1: BI_COMPILE_TIME();
                     # END
                 # END DO CASE
                 HALMAT_POP(g.XBFNC, ARGp, 0, g.FCN_LOC[g.FCN_LV]);
@@ -334,18 +334,18 @@ def END_ANY_FCN():
             g.TEMP2 = g.XMSHP[g.FCN_LOC[g.FCN_LV]];
             if g.FCN_LOC[g.FCN_LV] >= 2:  # DO
                 #  INTEGER AND SCALAR
-                RESET_ARRAYNESS;
+                RESET_ARRAYNESS();
                 if g.INX[ARGp] == 0:  # DO
-                    if g.FIXV[g.SP - 1]:  # DO
+                    if g.FIXV[g.SP - 1] & 1:  # DO
                         HALMAT_XNOP(g.VAL_P[ARGp]);
                         HALMAT_BACKUP(g.VAL_P[MAXPTR]);
-                        if RESET_ARRAYNESS == 3: ERROR(d.CLASS_QA, 1);
+                        if RESET_ARRAYNESS() == 3: ERROR(d.CLASS_QA, 1);
                         # DO CASE FCN_LOC[FCN_LV]-2;
                         fl = g.FCN_LOC[g.FCN_LV] - 2
                         if fl == 0:
-                            g.TEMP = XBTOS(g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE);
+                            g.TEMP = g.XBTOS[g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE];
                         elif fl == 1:
-                            g.TEMP = XBTOI(g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE);
+                            g.TEMP = g.XBTOI[g.PSEUDO_TYPE[MAXPTR] - g.BIT_TYPE];
                         # END DO CASE
                         # IF THERE WAS NO PRECISION SPECIFIED ON THE
                         # ARITHMETIC CONVERSION (PSEUDO_FORM=0) AND
@@ -367,7 +367,8 @@ def END_ANY_FCN():
                     else:  # DO
                         g.CURRENT_ARRAYNESS[0] = 1;
                         g.CURRENT_ARRAYNESS[1] = g.FIXL[g.SP - 1];
-                        if g.CURRENT_ARRAYNESS[1] < 2: ERROR(d.CLASS_QA, 2);
+                        if g.CURRENT_ARRAYNESS[1] < 2: 
+                            ERROR(d.CLASS_QA, 2);
                     # END
                 # END
                 else:  # DO
@@ -375,7 +376,8 @@ def END_ANY_FCN():
                     for I in range(1, g.CURRENT_ARRAYNESS[0] + 1):
                         g.CURRENT_ARRAYNESS[I] = g.LOC_P[ARGp + I];
                     # END
-                    if g.FIXL[g.SP - 1] <= 0: ERROR(d.CLASS_QA, 2);
+                    if g.FIXL[g.SP - 1] <= 0: 
+                        ERROR(d.CLASS_QA, 2);
                     elif g.FIXL[g.SP - 1] != g.PSEUDO_LENGTH[ARGp]:
                         ERROR(d.CLASS_QA, 3);
                 # END
@@ -385,7 +387,7 @@ def END_ANY_FCN():
                 for I in range(2, g.CURRENT_ARRAYNESS[0] + 1):
                     HALMAT_PIP(g.CURRENT_ARRAYNESS[I], g.XIMD, 0, 0);
                 # END
-                if RESET_ARRAYNESS == 3: ERROR(d.CLASS_QA, 4);
+                if RESET_ARRAYNESS() == 3: ERROR(d.CLASS_QA, 4);
             # END
             else:  # DO
                 #  VECTOR AND MATRIX
@@ -455,7 +457,9 @@ def END_ANY_FCN():
                     HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], 0, 0);
                     ARGp = ARGp + 1;
                 # END
-                else: HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], INX[I], g.VAL_P[I]);
+                else: 
+                    HALMAT_PIP(g.LOC_P[I], g.PSEUDO_FORM[I], 
+                               g.INX[I], g.VAL_P[I]);
                 ARGp = ARGp + 1;
             # END
             HALMAT_FIX_PIPp(g.LAST_POPp, ARGp);
@@ -475,7 +479,7 @@ def END_ANY_FCN():
             if g.FCN_ARG[g.FCN_LV] > 1: ERROR(d.CLASS_FN, 4, g.VAR[g.MP]);
             HALMAT_POP(g.XLFNC, 1, 0, g.FCN_LV);
             HALMAT_PIP(g.FCN_LOC[g.FCN_LV], g.XIMD, I, 0);
-            if SHR(g.BI_FLAGS[0], 4): I = SHR(g.BI_INFO[0], 24);
+            if SHR(g.BI_FLAGS[0], 4) & 1: I = SHR(g.BI_INFO[0], 24);
             SETUP_VAC(g.MP, I);
             HALMAT_POP(g.XSFND, 0, g.XCO_N, g.FCN_LV);
             RESET_ARRAYNESS();

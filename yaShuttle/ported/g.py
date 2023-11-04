@@ -2853,8 +2853,11 @@ def extendSign16(value):
     
 
 def enlargeSYM_TAB(n):
-    while len(h.SYM_TAB) <= n:
-        h.SYM_TAB.append(h.sym_tab())
+    try:
+        while len(h.SYM_TAB) <= n:
+            h.SYM_TAB.append(h.sym_tab())
+    except:
+        pass
 
 
 def SYT_NAME(n, value=None):

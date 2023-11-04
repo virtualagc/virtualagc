@@ -1,0 +1,19 @@
+C/ This file contains nothing but a structure template.  It should be 
+C/ compiled by itself (with the compiler's --templib command-line switch)
+C/ in order to add the template to the template library
+C/ prior to compiling source files which need it, such as 260-TEST5 et al.
+
+ CPL189: COMPOOL;
+ 
+ STRUCTURE IMU_DATA RIGID:
+    1 DELTA_V ARRAY(3) INTEGER DOUBLE,
+    1 ATTITUDE ARRAY(3) INTEGER,
+    1 TIME BIT(32),
+    1 STAT DENSE,
+       2 F1 BOOLEAN,
+       2 F2 BOOLEAN,
+       2 F3 BOOLEAN,
+       2 UNUSED BIT(13),
+    1 OP_MODE INTEGER;
+ 
+ CLOSE CPL189;

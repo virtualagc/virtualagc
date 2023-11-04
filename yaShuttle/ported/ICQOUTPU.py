@@ -118,7 +118,7 @@ def ICQ_OUTPUT():
             if CT_LIT > 0: 
                 HALMAT_FIX_PIPTAGS(g.NEXT_ATOMp - 1, CT_LIT, 0);
                 CT_LIT = 0;
-            if IC_FORM(K) == 1:  #  SLRI
+            if g.IC_FORM[K] == 1:  #  SLRI
                 HALMAT_POP(g.XSLRI, 2, 0, g.IC_VAL[K]);
                 HALMAT_PIP(g.IC_LOC[K], g.XIMD, 0, 0);
                 HALMAT_PIP(g.IC_LEN[K], g.XIMD, 0, 0);

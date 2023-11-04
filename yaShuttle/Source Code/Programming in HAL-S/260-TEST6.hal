@@ -1,12 +1,11 @@
-C/ Adapted from PDF p. 260 of "Programming in HAL/S".
+C/ Adapted from PDF p. 260 of "Programming in HAL/S".  Be sure to compile
+C/ 189-IMU_DATA.hal in advance (with the compiler switch --templib) to 
+C/ insure that common-block CPL189 is in the template library.
+
+D INCLUDE TEMPLATE CPL189
 
  T260: PROGRAM; 
  
-     STRUCTURE IMU_DATA:
-        1 DELTA_V ARRAY(3) INTEGER DOUBLE,
-        1 ATTITUDE ARRAY(3) INTEGER,
-        1 STATUS BIT(16);
-        
      DECLARE IMU_INPT IMU_DATA-STRUCTURE(3);
      DECLARE BEST_INTEGER;
      DECLARE PITCH_ANGLE SCALAR;

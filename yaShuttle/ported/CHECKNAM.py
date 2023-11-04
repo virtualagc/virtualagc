@@ -94,7 +94,8 @@ def CHECK_NAMING(VALUE, LOC):
         # DO
         #  DATA RFEFERENCE
         if goto == None:
-            if SHR(H2, 4): ERROR(d.CLASS_EN, 7, g.VAR[g.MP]);
+            if SHR(H2, 4) & 1: 
+                ERROR(d.CLASS_EN, 7, g.VAR[g.MP]);
             SET_XREF_RORS(LOC);
         if goto == "ACCESS_NAME" or not (SHR(H2, 9) & 1):  # DO
             if goto == None:
@@ -146,5 +147,6 @@ def CHECK_NAMING(VALUE, LOC):
     # END DO CASE
     g.FIXL[g.MP] = g.FIXL[LOC];
     g.FIXV[g.MP] = g.FIXV[LOC];
-    if SHR(H2, 6): ERROR(d.CLASS_EN, 14);
+    if SHR(H2, 6) & 1: 
+        ERROR(d.CLASS_EN, 14);
 # END CHECK_NAMING;

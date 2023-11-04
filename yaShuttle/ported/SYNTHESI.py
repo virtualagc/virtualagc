@@ -1145,7 +1145,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         elif g.TEMP in (5, 6, 7, 8, 9):
             pass
         elif g.TEMP == 10:
-            STRUCTURE_COMPARE(g.VAR_LENGTH(LOC_P), g.FIXL[g.MPP1], d.CLASS_PF, 7);
+            STRUCTURE_COMPARE(g.VAR_LENGTH(g.LOC_P[0]), g.FIXL[g.MPP1], d.CLASS_PF, 7);
         elif g.TEMP == 11:
             pass;
         HALMAT_TUPLE(g.XRTRN, 0, g.MPP1, 0, 0);
@@ -1574,7 +1574,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.PTR[g.MP] = g.PTR[g.MPP1] ;  # MOVE INDIRECT STACKS
     elif PRODUCTION_NUMBER == 119:  # reference 1190
         # <REL PRIM> ::= <NOT> (1 <RELATIONAL EXP> )
-        HALMAT_TUPLE(XCNOT, g.XCO_N, g.MP + 2, 0, 0);
+        HALMAT_TUPLE(g.XCNOT, g.XCO_N, g.MP + 2, 0, 0);
         g.PTR[g.MP] = g.PTR[g.MP + 2];
         SETUP_VAC(g.MP, 0);
     elif PRODUCTION_NUMBER == 120:  # reference 1200
@@ -2781,7 +2781,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.NAMING = g.FALSE;
         if g.SYT_PTR(g.J) < 0:
             ERROR(d.CLASS_DU, 12, g.VAR[g.SP - 1]);
-        HALMAT_POP(XEINT, 2, 0, g.PSEUDO_TYPE[g.TEMP]);
+        HALMAT_POP(g.XEINT, 2, 0, g.PSEUDO_TYPE[g.TEMP]);
         HALMAT_PIP(g.FIXL[g.MP + 2], g.XSYT, 0, 0);
         HALMAT_PIP(g.LOC_P[g.TEMP], g.PSEUDO_FORM[g.TEMP], 0, 0);
         CHECK_ARRAYNESS();
@@ -3655,7 +3655,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.XSET(0xC);
         if UNARRAYED_INTEGER(g.SP - 1):
             ERROR(d.CLASS_RT, 4, 'UPDATE PRIORITY');
-        HALMAT_TUPLE(XPRIO, 0, g.SP - 1, g.TEMP, g.TEMP > 0);
+        HALMAT_TUPLE(g.XPRIO, 0, g.SP - 1, g.TEMP, g.TEMP > 0);
         goto = "UPDATE_CHECK"
     if goto == "SCHEDULE_EMIT" or \
             (goto == None and PRODUCTION_NUMBER == 69):  # reference 690
@@ -3782,7 +3782,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         if g.TEMP > g.BIT_LENGTH_LIM:
             g.TEMP = g.BIT_LENGTH_LIM;
             ERROR(d.CLASS_EB, 1);
-        HALMAT_TUPLE(XBCAT, 0, g.MP, g.SP, 0);
+        HALMAT_TUPLE(g.XBCAT, 0, g.MP, g.SP, 0);
         SETUP_VAC(g.MP, g.BIT_TYPE, g.TEMP);
         g.PTR_TOP = g.PTR[g.MP];
     if goto in ["DO_LIT_BIT_FACTOR", "DO_BIT_FACTOR"] or \
@@ -3856,11 +3856,14 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             if g.NAME_PSEUDOS: 
                 NAME_COMPARE(g.MP, g.SP, d.CLASS_AV, 5);
                 HALMAT_TUPLE(g.XNASN, 0, g.SP, g.MP, 0);
-                if COPINESS(g.MP, g.SP) > 2: ERROR(d.CLASS_AA, 1);
+                if COPINESS(g.MP, g.SP) > 2: 
+                    ERROR(d.CLASS_AA, 1);
                 goto = "END_ASSIGN"
             else:
-                if RESET_ARRAYNESS() > 2: ERROR(d.CLASS_AA, 1);
-                HALMAT_TUPLE(g.XXASN[g.PSEUDO_TYPE[g.PTR[g.SP]]], 0, g.SP, g.MP, 0);
+                if RESET_ARRAYNESS() > 2: 
+                    ERROR(d.CLASS_AA, 1);
+                HALMAT_TUPLE(g.XXASN[g.PSEUDO_TYPE[g.PTR[g.SP]]], \
+                             0, g.SP, g.MP, 0);
         if goto in [None, "ASSIGNING"]:
             if goto == "ASSIGNING": goto = None
             g.TEMP = g.PSEUDO_TYPE[g.PTR[g.SP]];
@@ -4814,7 +4817,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         g.SYT_TYPE(g.I, g.TYPE);
         g.SYT_FLAGS(g.I, g.SYT_FLAGS(g.I) | g.DEFINED_LABEL | g.ATTRIBUTES);
         g.VAR_LENGTH(g.I, g.TEMP);
-        HALMAT_POP(XIDEF, 1, 0, g.INLINE_LEVEL);
+        HALMAT_POP(g.XIDEF, 1, 0, g.INLINE_LEVEL);
         HALMAT_PIP(g.I, g.XSYT, 0, 0);
         SETUP_VAC(g.MP, g.TYPE, g.TEMP);
         g.TEMP2 = g.INLINE_MODE;

@@ -422,8 +422,9 @@ def SCAN():
                 # END OF DO FOREVER
                 if goto == "UP_ARG_COUNT": goto = None
                 ll.ARG_COUNT = ll.ARG_COUNT + 1;
+                g.MACRO_CALL_PARM_TABLE[ll.I + g.TOP_OF_PARM_STACK] \
+                    = SUBSTR(g.TEMP_STRING, 1);
                 g.TEMP_STRING = SUBSTR(g.TEMP_STRING, 1);
-                g.MACRO_CALL_PARM_TABLE[ll.I + g.TOP_OF_PARM_STACK] = SUBSTR(g.TEMP_STRING, 1);
                 if LENGTH(g.TEMP_STRING) > 0:  # DO
                     g.RESERVED_WORD = g.FALSE;
                     SAVE_TOKEN(g.CHARACTER_STRING, g.TEMP_STRING, 0, 1);
