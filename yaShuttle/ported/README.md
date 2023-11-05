@@ -1,16 +1,66 @@
-# Introduction
+# Table of Contents
 
-My plan for this folder (ported/) is to port a portion of the original HAL/S-FC compiler from its XPL language form to the Python 3 language.
+  * [Introduction](#Introduction)
+  * [Some Bookkeeping Details](#Bookkeeping)
+  * [EBCDIC vs ASCII vs UTF-8](#EBCDIC)
+  * [Changes to Parameter Values Within Procedures](#Parameters)
+  * [Persistence and Initialization of Local Variables Within Their Parent Procedures](#Persistence)
+  * [Absence and Persistence of Parameters of Procedures](#Absence)
+  * [Dynamic Memory Allocation: BASED and its Macros](#BASED)
+  * [PASS vs BFS Conditionals](#PASSvBFS)
+  * [TIME, DATE, and other XPL Built-In Functions](#Builtins)
+  * [Semicolons](#Semicolons)
+  * [Partitioned Data Sets (PDS)](#PDS)
+  * [Equivalence of Arrays and Non-Arrays](#Equivalence)
+  * [More Conditional Code in XPL](#Conditionals)
+  * [The Vocabulary, States, and Tokens](#Vocabulary)
+    * [Background](#Background)
+    * [VOCAB, VOCAB_INDEX, and V_INDEX](#VOCAB)
+    * [Digression: BNF Rules for Nonterminals, and "Productions"](#BNF)
+    * [STATE_NAME](#STATE_NAME)
+    * [#PRODUCE_NAME (Ported as pPRODUCE_NAME)](#PRODUCE_NAME)
+    * [READ1 and READ2](#READx)
+    * [LOOK1 and LOOK2](#LOOKx)
+    * [APPLY1 and APPLY2](#APPLYx)
+    * [INDEX1 and INDEX2](#INDEXx)
+    * [CHARTYPE](#CHARTYPE)
+    * [TX](#TX)
+    * [LETTER_OR_DIGIT](#LETTER_OR_DIGIT)
+    * [SET_CONTEXT](#SET_CONTEXT)
+    * [SPACE_FLAGS, TOKEN_FLAGS, and LAST_SPACE](#SPACE_FLAGS)
+    * [Literal Data](#Literal)
+    * [Compatible Datatypes, Automatic Conversions](#Autoconvert)
+    * [The Boolean Conditional Trap of Death!](#Death)
+  * [LINE_COUNT](#LINE_COUNT)
+  * [Value of Loop Counter After a For-Loop](#ForLoop)
+  * [Virtual Memory](#VirtualMemory)
+    * [Virtual Memory Modules](#Modules)
+    * [Virtual Memory Framework](#Framework)
+  * [Sample HAL/S Source Code](#Samples)
+  * [FINDER(), MONITOR(8), D INCLUDE, and Related Puzzles](#FINDER)
+  * [Version Management for the Template Library](#TemplateVersioning)
+  * [OPTIONS_CODE](#OPTIONS_CODE)
+  * [Compile-Time Computation of "Built-In" Functions](#Computation)
+  * [Some Features Not Supported in the Original Compiler](#NotSupported)
+  * [Roster of Remaining Problems with the Port](#Problems)
 
-This port will be of just the original compiler's PASS1 (or "phase 1"), which parses HAL/S source code and produces output in the form of the HALMAT intermediate language.  Since only 20% of HALMAT's documentation has survived, the output-code generator will have to be augmented to additionally produce my own intermediate language, PALMAT.  PALMAT is directly executable on my emulator.
+# <a name="Introduction"></a>Introduction
 
-Other than the addition of PALMAT generation, the intention is for the port to be very direct, without any "reimaginings" to make the compiler better or more efficient.  The idea is that the XPL and the Python should correspond very directly and obviously in a side-by-side comparison.
+My plan for this folder (ported/) is to port a portion of the original Intermetrics HAL/S-FC compiler from its XPL language form to the Python 3 language.
 
-As far as this "README" is concerned, some involves factual background material or else descriptions of implementation decisions I've made.  However, quite a lot of it is devoted to what may be called "inferences and mysteries": i.e., to trying to puzzle out details about how the Intermetrics "enhancements" to XPL may have functioned or to how the original XPL code of the HAL/S compiler worked.  Obviously, that's a work in progress and subject to my own temporary or permanent misunderstanding.
+This port will be of just the original compiler's PASS1 (or "phase 1"), which parses HAL/S source code and produces output in the form of the HALMAT intermediate language.  Since only 20% of HALMAT's documentation has survived over the intervening decades, HALMAT has been rendered basically unusable.  Therefore, the compiler's output-code generator will have to be augmented to additionally produce my own intermediate language, PALMAT.  PALMAT is directly executable on my emulator.  Another possibility is to port the portion of the compiler that generates IBM Basic Assembly Language (BAL) object code from the HALMAT intermediate language, and to emulate execution of BAL.  
+
+I probably won't discuss any of those latter issues in this README.  In other respects, though, the intention is for the port to be very direct, without any "reimaginings" to make the compiler better or more efficient.  The idea is that the XPL and the Python versions of the compiler source code should correspond very directly and obviously in a side-by-side comparison.
+
+As far as this "README" is concerned, some involves factual background material or else descriptions of implementation decisions I've made in the course of this porting effort.  But it has turned out that quite a lot of this README is devoted to what may be called "inferences and mysteries": i.e., to trying to puzzle out details about how the Intermetrics "enhancements" to XPL may have functioned or to how the original XPL code of the HAL/S compiler worked.  Obviously, that's a work in progress and subject to my own temporary or permanent misunderstanding.
+
+> **Aside**:  Since the object of the HAL/S compiler that is being ported from XPL to Python is to process HAL/S source code, and since &mdash; superficially! &mdash; XPL and HAL/S seem rather similar, it's easy to become confused when thinking about these issues or reading my descriptions of them to think statements being made about XPL are really about HAL/S or vice-versa.  Don't fall into that trap!
+> 
+> An example is integer datatypes.  XPL has integer datatypes of `FIXED` (32-bit), `BIT(16)` (16-bit), `BIT(8)` (8-bit), and `BIT(1)` (1-bit), the latter of which doubles as a boolean datatype.  The only integer datatype in HAL/S, on the other hand, is `INTEGER`.  But to confuse the matter, HAL/S also has `BIT(n)` datatypes (where `n` is a positive integer).  However, in HAL/S `BIT(n)` is an array of `n` booleans and can only be considered as an integer with quite a bit of imagination; `BIT(n)` isn't *used* as an integer.  And whereas the HAL/S documentation *speaks* of a `FIXED` datatype, it is *not supported* by the Intermetrics HAL/S compiler, and rather than being an integer would be a fixed-point datatype rather than an integer type.
 
 **Note:**  I discovered belatedly, after the vast majority of this README was written, that Section 13 of document IR-182-1 ("HAL/S-FC & HAL/S-360 Compiler Program Description") covers differences between standard XPL and the Intermetrics version of XPL.  Very few of the issues puzzed about in this README are covered there, and where there is overlap, I have not necessarily bothered subsequently to alter my sometimes-pithy musings.
 
-# Some Bookkeeping Details
+# <a name="Bookkeeping"></a>Some Bookkeeping Details
 
 File hierarchy:  The original hierarchy of XPL modules looked like so:
 
@@ -50,7 +100,7 @@ Those functions and macros are then used just as-is, without any name changes, w
 </pre>
 It's important *not* to import g.py with `from g import *`, because assignments to variables defined in g.py won't change the values of those variables in other files importing g.py if they're not in the `g.` namespace.  However, assignments in the `g.` namespace do affect all files that import g.py.
 
-In addition to the usual alphanumeric and underline characters, identifiers in XPL can include the characters '@', '#', and '$', which are not allowed in Python identifiers.  However, it so happens that all of the original HAL/S-FC source code contained only upper-case characters when alphabetic.  Therefore, I use the uniform system of replacing disallowed characters in identifiers as follows:
+In addition to the usual alphanumeric and underline characters, identifiers in XPL can include the characters '@', '#', and '$', which are not allowed in Python identifiers.  However, it so happens that all of the original HAL/S-FC source code contained only upper-case characters when alphabetic.  Therefore, I use the uniform system of replacing disallowed characters in identifiers by lower-case alphabetic characters as follows:
 
   * '@' -> 'a'
   * '#' -> 'p'
@@ -58,16 +108,17 @@ In addition to the usual alphanumeric and underline characters, identifiers in X
 
 For example, the global variable `MAXR#` becomes `g.MAXRp`.  But that's a worst case.  Any local variables not containing these funny characters would simply retain the same names in Python as they originally had in XML.
 
-# EBCDIC vs ASCII vs UTF-8
+# <a name="EBCDIC"></a>EBCDIC vs ASCII vs UTF-8
 
 All PASS and BFS HAL/S source code, to my belief, was originally character-encoded using EBCDIC.  Before any of this HAL/S source code ever reached me &mdash; well, as I write this, *none* of it has yet reached me &mdash; somebody recoded it in UTF-8.  Actually, except for two special characters, "¬" and "¢", it is all 7-bit ASCII.  This hybrid existence is troublesome, so I have adopted the following conventions for external storage of the source code vs internal storage in the compiler:
 
   * All HAL/S source code is nominally 7-bit ASCII.  If the UTF-8 characters logical-not (¬) and cent (¢) are found, they are transparently converted to tilde (&#126;) and backtick (&#96;) respectively.  Carat (^), which should never be present, is also transparently converted to tilde.  Put a different way, ¬ &#126; ^ are now all equivalent, but &#126; is the preferred form used internally; similarly, ¢ &#96; are equivalent but &#96; is the preferred form used internally.
   * All TAB characters are transparently expanded as if there were tab stops every 8 columns.
 
-However, the original XPL form of the compiler *relied* upon the storage format being EBCDIC, because in processing (such as tokenization) it used the byte-codes of the characters, and it expected those byte codes to be EBCDIC.  Therefore, my approach is simply to make sure that any processing which converts between characters and byte codes, or vice-versa, correctly translates between ASCII and EBCDIC.  The conversion function that takes a character and converts it to a byte code is the built-in `BYTE()` function of XPL.  In our recreation of the `BYTE()` function, therefore, it converts between ASCII and EBCDIC as needed.  For example, `BYTE('a')` returns 0x81 (the EBCDIC code for 'a') rather than 0x61 (the ASCII code for 'a').  Similarly, a usage like `BYTE(s, 2, b)` that replaces the string character `s[2]` by the character with byte-value `b`, expects `b` to be an EBCDIC code.  For example `BYTE('hello', 2, 0x81)` returns `'healo'`.
+However, the original XPL form of the compiler *relied* upon the storage format being EBCDIC, because in processing (such as tokenization) it used the byte-codes of the characters, and it expected those byte codes to be EBCDIC.  Therefore, my approach is simply to make sure that any processing which converts between characters and byte codes, or vice-versa, correctly translates between ASCII and EBCDIC.  The pre-existing conversion function that the compiler originally used for taking a character and converting it to a byte code is the built-in `BYTE()` function of XPL.  In our recreation of that built-in `BYTE()` function, therefore, I've contrived for it to transparently convert between ASCII and EBCDIC as needed.  For example, `BYTE('a')` returns 0x81 (the EBCDIC code for 'a') rather than 0x61 (the ASCII code for 'a').  Similarly, a usage like `BYTE(s, 2, b)` that replaces the string character `s[2]` by the character with byte-value `b`, expects `b` to be an EBCDIC code.  For example `BYTE('hello', 2, 0x81)` returns `'healo'`.
 
-# Changes to Parameter Values Within Procedures
+
+# <a name="Parameters"></a>Changes to Parameter Values Within Procedures
 
 XPL documentation explicitly states [McKeeman section 6.14]:
 
@@ -79,7 +130,7 @@ In fact, most (or all) calls to `PRINT2` pass `LINE` parameters that are string 
 
 But see also the next two sections.
 
-# Persistence and Initialization of Local Variables Within Their Parent Procedures
+# <a name="Persistence"></a>Persistence and Initialization of Local Variables Within Their Parent Procedures
 
 It appears to me (undocumented!) that local variables in XPL procedures are not initialized at all, unless they have `INITIAL` clauses in their `DECLARE` statements.  *Moreover*, if such initialization occurs, it only does so at program start (or more reasonably, upon the first call to the procedure).
 
@@ -118,7 +169,7 @@ Moreover, it's not always possible to have "`l.`" as the namespace for variables
 
 The point, however, is that any variable &mdash; particularly since I tend to use camel case in my own variable names, any all-upper-case variable &mdash; unaccompanied by an explicit namespace had better be some variable I introduced for the purposes of the port, and not any variable being taken over essentially as-is from XPL.  Well ... there are some exceptions:  Variables immediately assigned a new value at the top of a procedure obviously don't need to be persistent, and if those are the only types of locals in a given procedure, there's no need for the class rigamarole described above.
 
-# Absence and Persistence of Parameters of Procedures
+# <a name="Absence"></a>Absence and Persistence of Parameters of Procedures
 
 It further appears to me, as usual undocumented, that parameters of functions are expected to be persistent, in the sense that if parameters are omitted from function calls, they are expected to retain the values they had on prior calls to the procedure! 
 
@@ -173,7 +224,7 @@ Thus, the procedure parameter acts exactly like any other local variable, with t
 
 If `T` had been declared *without* an `INITIAL` clause, we could just have used `self.T = None`.  That way, if the *first* call to `EMIT_SMRK` didn't include any value for the parameter `T`, there would likely be a runtime error, exactly as we'd desire.
 
-# Dynamic Memory Allocation: `BASED` and its Macros
+# <a name="BASED"></a>Dynamic Memory Allocation: `BASED` and its Macros
 
 I believe that constructs such as
 
@@ -235,7 +286,7 @@ This preserves syntax like `X = MACRO_TEXT(25)`, but XPL syntax like `MACRO_TEXT
 MACRO_TEXT(52, 69)
 </pre>
 
-# PASS vs BFS Conditionals
+# <a name="PASSvBFS"></a>PASS vs BFS Conditionals
 
 It appears as though there must have been some parameter supplied to the compiler to determine whether compilation was for PASS (PFS) or whether it was for BFS, and there were conditionals that looked like this:
 <pre>
@@ -249,18 +300,18 @@ It appears as though there must have been some parameter supplied to the compile
 
 I handle this with CLI switch `--bfs`.  If used, then the internal variable `g.pfs=False`, but by default `g.pfs=True`.  These facts are used to create the conditional Python code corresponding to the conditional XPL code.
 
-# TIME, DATE, and other XPL Built-In Functions
+# <a name="Builtins"></a>TIME, DATE, and other XPL Built-In Functions
 
 There are XPL "implicitly declared" functions and variables that are always available (see Table 6.9.1 in "A Compiler Generator").
 To the extent needed, these are replaced by Python functions and variables of the same name.
 
 However, some of these implicit "variables", such as `TIME` and `DATE`, are supposed to have different values every time they are accessed.  For example, `TIME` is the number of centiseconds elapsed since midnight (timezone unspecified).  I don't think there's any satisfactory way to implement this in Python while retaining the same syntax, so `TIME`, `DATE`, and presumably other such "variables", are instead implemented as Python functions:  in this case, `g.TIME()` and `g.DATE()`.
 
-# Semicolons
+# <a name="Semicolons"></a>Semicolons
 
 XPL requires semicolons at the ends of statements.  Python does not, but it *allows* semicolons to delimit multiple statements written on a single line, and thus is tolerant of them.  I didn't know that, and removed many in the porting process before discovering it.  The upshot is that I've tended to leave the semicolons in place, just because it's easier for me.  I may end up eventually removing them after all, simply because it's not really a Python thing to keep them, and indeed some Python lint/prettyprinter software annoyingly (if appropriately) goes out of its way to produce warnings upon finding them.  Since in our case there are 10's of thousands of such warnings, it's *very* irritating.
 
-# Partitioned Data Sets (PDS)
+# <a name="PDS"></a>Partitioned Data Sets (PDS)
 
 There seems to be a concept of three different types of files used by the compiler system, handled by different mechanisms:  "sequential files", "random access files", and "partitioned data sets" (PDS).  The former two are just what they sound like, and it's only the PDS that needs discussion.
 
@@ -275,7 +326,7 @@ My choice is this:
 
 As far as reading from a PDS is concerned, the technique is first to find the member of the PDS you're interested in via `MONITOR(2,DEV,MEMBER)`.  You then read that member line-by-line using INPUT(DEV).  Evenually INPUT(DEV) returns an empty string to indicate the end of the member.
 
-# Equivalence of Arrays and Non-Arrays
+# <a name="Equivalence"></a>Equivalence of Arrays and Non-Arrays
 
 XPL, as documented according to my understanding, has the basic datatypes of 32-bit integer (**FIXED**) and string (**CHARACTER**), as well as bit-arrays (**BIT**).  Besides which, you can have 1-dimensional arrays of these basic datatypes.
 
@@ -318,9 +369,9 @@ found in the PASS 1 monitor module, `##DRIVER`.  The construction in question is
 </pre>
 If `TYPE` has the value 0, then in array terms `TYPE(TYPE)` would refer to `TYPE` itself; i.e., `TYPE(TYPE)` would be 0.  Whereas if `TYPE==1`, then `TYPE(TYPE)` would be `BIT_LENGTH`.  If `TYPE==2`, then `TYPE(TYPE)` would be `CHAR_LENGTH`.  And so on, right up to `TYPE==19`, where `TYPE(TYPE)` corresponds to `S_ARRAY(3)`.  It's hard to deal with slapdash stuff such as this in a uniform way in Python.  In this case, I introduce a function I call `TYPEf()`, used solely as `TYPEf(TYPE)`.  Other absurdities involving `TYPE` and its kissing-cousin `FACTORED_TYPE` are handled using other methods.
 
-# More Conditional Code in XPL
+# <a name="Conditionals"></a>More Conditional Code in XPL
 
-I already discussed PFS-specific vs BFS-specific conditional compilation above.  But there's more to it than just those cases.
+I already discussed [PFS-specific vs BFS-specific conditional compilation](#PASSvBFS) above.  But there's more to it than just those cases.
 
 In the XPL, you occasionally find code enclosed between an opening delimiter like "`/?X`" and a closing delimiter like "`?/`", where `X` represents one `A`, `B`, `C`, or `P`.  I interpret this as being conditionally-included code, and `X` as representing some particular condition for inclusion.
 
@@ -335,9 +386,9 @@ Besides those, there seem to be the following constructs:
 
 I think that the former may indicate that source code from a particular module is supposed to be included, and that the latter may indicate that a particular external function resides in a particular module.  On the other hand, constructs like this appear only in the STREAM module, and in the particular uses there I don't find that they seem to have any obvservable effect.  In other words, my approach to them is simply to ignore them.
 
-# The Vocabulary, States, and Tokens
+# <a name="Vocabulary"></a>The Vocabulary, States, and Tokens
 
-## Background
+## <a name="Background"></a>Background
 
 If you attempt to understand the XPL code of the original compiler by starting at the beginning, you immediately run into very-confusing and seemingly-intractible details.  The "beginning" is the top-level file, the XPL module called "##DRIVER". (Though everything we discuss in *this* section is ported into our Python file g.py rather than into ##DRIVER.py).
 
@@ -361,7 +412,7 @@ The difficulty is that ##DRIVER (and consequently g.py) begin with declaration o
   * `LETTER_OR_DIGIT`
   * `SET_CONTEXT`
 
-## `VOCAB`, `VOCAB_INDEX`, and `V_INDEX`
+## <a name="VOCAB"></a>VOCAB, VOCAB_INDEX, and V_INDEX
 
 The first array we encounter, `VOCAB` is the least-incomprehensible.  In the code it is an array of 12 long strings.  However, in principle, it could just as easily be presented as a single very-long string formed just by concatenating the 12 entries of the array.  The reason this is not done in the actual code is presumably that such a very-long string would exceed the apparent limit (255 characters) of XPL strings.
 
@@ -397,7 +448,7 @@ As noted above, string 0 is not used.  The values 1-142 are the potential values
 
 Of the BNF nonterminals, there are precisely 169, so we'd expect there to be 142+169=311 vocabulary strings in `VOCAB_INDEX`, which as noted earlier, is the correct number.
 
-## Digression:  BNF Rules for Nonterminals, and "Productions"
+## <a name="BNF"></a>Digression:  BNF Rules for Nonterminals, and "Productions"
 
 The facts about the BNF rules for nonterminals that were mentioned in the preceding section can be deduced from a complete listing of the BNF nonterminals which appears in the comments at the beginning of the file ##DRIVER.xpl.  Each rule recognized by the HAL/S compiler developers &mdash; I daresay that this set of rules is not formally correct in a theoretical context, for a variety of reasons &mdash; is accompanied in those comments by a somewhat-unique identifying number called the "production number" (formally `PRODUCTION_NUMBER` in the SYNTHESI module).  Here's a partial listing:
 <pre>
@@ -423,7 +474,7 @@ These production numbers come into effect when a some substring of the source co
 
 As you can see, there are precisely 453 types of productions.  I presently think there's no way to programmatically recover descriptive names of these productions, though descriptive names for all of them are in fact listed in comments of the SYNTHESI module source code.
 
-## `STATE_NAME`
+## <a name="STATE_NAME"></a>STATE_NAME
 
 The compiler's syntax analyzer, implemented by the modules STREAM and SCAN, is a state-machine, and in the course of determining that any given production of HALMAT needs to be produced, SCAN may pass through a number of intermediate states.  I believe that there are 810 (0 through `g.MAXPp`) possible states, though only the first 442 (0 through `g.MAXRp`) of them actualy have names, due to being meaningfully-related to specific BNF rules.
 
@@ -440,7 +491,7 @@ The description above covers only states 0-441.  For the sake of completeness, h
   * 667 through 810 (`g.MAXPp`) &mdash; TBD
   * 811 through 1263 (`g.MAXPp+g.Pp`) &mdash; "production" states.  These are states temporarily entered into in order to generated HALMAT, thence to return to one of the named states.  (See `#PRODUCE_NAME` below.  The `PRODUCTION_NUMBER` is `g.STATE-g.MAXPp`.)
 
-## `#PRODUCE_NAME` (Ported as `pPRODUCE_NAME`)
+## <a name="PRODUCE_NAME"></a>#PRODUCE_NAME (Ported as pPRODUCE_NAME)
 
 It appears to me that `#PRODUCE_NAME` returns a state number for any given production number.  (See above.)  In general, I think, any given state may give rise to several possible BNF productions, due the fact that any given BNF nonterminal rule may represent several different alternative rules.  For example, in the example given earlier, we saw that nonterminal &lt;ARITH EXP> (state 190) may give rise to production 4 (&lt;ARITH EXP> ::= &lt;TERM>), production 5 (&lt;ARITH EXP> ::= + &lt;TERM>), production 6 (&lt;ARITH EXP> ::= - &lt;TERM>), production 7 (&lt;ARITH EXP> ::= &lt;ARITH EXP> + &lt;TERM>), or production 8 (&lt;ARITH EXP> ::= &lt;ARITH EXP> - &lt;TERM>).  This we'd expect each of `pPRODUCE_NAME[5]` through `pPRODUCE_NAME[8]` to give us 190 ... which in fact it does.
 
@@ -449,7 +500,7 @@ Thus in spite of being called `pPRODUCE_NAME`, this array *cannot* in fact be us
 g.VOCAB_INDEX[g.pPRODUCE_NAME[PRODUCTION_NUMBER]]
 </pre>
 
-## `READ1` and `READ2`
+## <a name="READx"></a>READ1 and READ2
 
 The `READ1` and `READ2` arrays are the same size, and are organized in the same way.  Each consists of a sequence of blocks of variable size, and each block corresponds to information specific to one of the states (`g.STATE`) of the scanner state machine.  The blocks have corresponding positions and lengths in the the two arrays.  (See `INDEX1` and `INDEX2` below to understand how to locate the blocks in `READ1` and `READ2` that correspond to specific states.)
 
@@ -457,7 +508,7 @@ For any given state, `READ1` provides a list of the tokens which can legally be 
 
 Meanwhile, `READ2` provides the next scanning state that we'll enter when the specific token found in `READ1` has been found in the input stream.  In the example from the preceding paragraph, for example, once token 131 (`READ1[904]`) has been identified in the input stream while we're in state 58, the next state we'll enter is `g.STATE=g.READ2[904]`, which happens to be 538.
 
-## `LOOK1` and `LOOK2`
+## <a name="LOOKx"></a>LOOK1 and LOOK2
 
 The `LOOK1` and `LOOK2` arrays are the same size as each other, and are organized in the same way.  Each consists of a sequence of blocks of variable size, and each block corresponds to information specific to one of the states (`g.STATE`) of the scanner state machine.  The blocks have corresponding positions and lengths in the the two arrays.  (See `INDEX1` and `INDEX2` below to understand how to locate the blocks in `LOOK1` and `LOOK2` that correspond to specific states.)
 
@@ -465,11 +516,11 @@ So far, the descriptions of `LOOK1`/`LOOK2` are entirely analogous to those of `
 
 The other difference is that `LOOK1` and `LOOK2` perform the same roles for "look-ahead" states (see the `STATE_NAMES` section above) that `READ1` and `READ2` do for "named" states.  Thus, `LOOK1` provides blocks of the allowed next input tokens for any given look-ahead state, while `LOOK2` provides the next state corresponding to those allowed tokens.
 
-## `APPLY1` and `APPLY2`
+## <a name="APPLYx"></a>APPLY1 and APPLY2
 
 TBD
 
-## `INDEX1` and `INDEX2`
+## <a name="INDEXx"></a>INDEX1 and INDEX2
 
 The `INDEX1` and `INDEX2` arrays provide a way to gain access to the information encoded in the `READ1`/`READ2` or `LOOK1`/`LOOK1` arrays (see above).  
 
@@ -483,7 +534,7 @@ Similarly, if the state number is in the range 442 through 666 (`g.MAXLp`), then
 
 For example, suppose that we are in the scanning state identified as `g.STATE==59`.  We find that `g.INDEX1[59]==939` and `g.INDEX2[59]==3`.  Therefore, only `READ1[939]`/`READ2[939]`, `READ1[940]`/`READ2[940]`, and `READ1[940]`/`READ2[940]` are all applicable to scanning state 59.
 
-## `CHARTYPE`
+## <a name="CHARTYPE"></a>CHARTYPE
 
 The `CHARTYPE` array has 256 entries, one for each possible EBCDIC characters (including even those that aren't in the legal HAL/S character set).  Given an EBCDIC character, it characterizes the type of character it is, in terms of 14 different classifications (0 through 13).  Those categories are:
 
@@ -506,7 +557,7 @@ There is no actual EOF character in EBCDIC, but the original HAL/S developers ap
 
 Similar comments apply to the special characters ¢ and ¬ as have already been discussed:  The `BYTE` function always returns the numerical code expected by the original XPL version of the compiler.
 
-## `TX`
+## <a name="TX"></a>TX
 
 The `TX` array provides translations from EBCDIC character codes to token codes ... but only for those EBCDIC characters comprising an entire token by themselves.  All other characters (such as alphanumerics) will simply have an entry in `TX` of 0.  (Recall that 0 is not a legal identifying code for a token.)
 
@@ -514,7 +565,7 @@ For example, the period character is an entire token by itself, having a token c
 
 Similarly, the less-than sign has a token code of 2 (`VOCAB_INDEX[2]=='&lt;'`), and the EBCDIC less-than sign is encoded numerically as 76 (decimal), so `TX[76]==2`.
 
-## `LETTER_OR_DIGIT`
+## <a name="LETTER_OR_DIGIT"></a>LETTER_OR_DIGIT
 
 The `LETTER_OR_DIGIT` array is a cruder form of the `CHARTYPE` array described earlier.  Like `CHARTYPE`, it has 256 entries, one for each possible EBCDIC characters (including even those that aren't in the legal HAL/S character set).  The array has an entry of 1 (`g.TRUE`) wherever the character is alphanumeric, and 0 (`g.FALSE`) where it is not.  For example,
 <pre>
@@ -528,7 +579,7 @@ Note that:
 </pre>
 Thus there are 26+26+10+1=63 entries altogether that are `g.TRUE`.
 
-## `SET_CONTEXT`
+## <a name="SET_CONTEXT"></a>SET_CONTEXT
 
 > **Aside**: The process of scanning and tokenizing the HAL/S source code is not context-free, which is one reason why the BNF formalism &mdash; which in principle describes context-free grammars &mdash; is not an adequate description of HAL/S grammar.  
 
@@ -552,7 +603,7 @@ For example, upon encountering an &lt;IDENTIFIER> (say, "MYVAR"), the compiler w
 
 The array `SET_CONTEXT` has an entry for each possible token &mdash; i.e., it has entries `SET_CONTEXT[1]` through `SET_CONTEXT[142]`, with `SET_CONTEXT[0]` being unused, and appears to provide a context for each of these tokens.  For example, if `g.TOKEN` is 25 (`g.VOCAB_INDEX[25] == 'GO'`), we find that `g.SET_CONTEXT[25] == 2` ("GO TO").
 
-## `SPACE_FLAGS`, `TOKEN_FLAGS`, and `LAST_SPACE`
+## <a name="SPACE_FLAGS"></a>SPACE_FLAGS, TOKEN_FLAGS, and LAST_SPACE
 
 Herein I try to figure out how spacing in lines of source code printed by the `OUTPUT_WRITER` module works, because it's not always working for me.
 
@@ -609,7 +660,7 @@ It's the final calculation that's tricky to understand, so let's go through it i
 
 Some of these are debatable, I suppose, but they generally make sense according to my expectations as to where spaces would be inserted.
 
-## Literal Data
+## <a name="Literal"></a>Literal Data
 
 Literal data and some(?) constant data is passed from one compiler phase to the next via an external file, some of which is paged into memory at any given time.  Naively, this sounds like an insignificant fact, given that we implement only Phase 1 of the compiler.  But in fact, it's very important, because Phase 1 not only writes out data to this memory buffer and file, but also reads it back.  And without the ability to read back the literal data, the compiler cannot function.
 
@@ -650,7 +701,7 @@ In other words `LIT_PG(0)` contained the entries 0-129 of `LIT1`, `LIT1`, and `L
 
 I've chosen to preserve this arrangement, which we don't need in any memory-conservation sense and don't really like in terms of maintainability, because it helps us to more-easily preserve the external file format used in the literal file.
 
-## Compatible Datatypes, Automatic Conversions
+## <a name="Autoconvert"></a>Compatible Datatypes, Automatic Conversions
 
 IR-182-1 describes (sort of; see p. 352) how to determine data type compatibility &mdash; i.e., which data types on the right-hand side of an assignment can be auto-converted to which data types on the left-hand side &mdash; in terms of various quantities with names like `ASSIGN_xxx`.  While it's true that some quantities with names of that pattern still exist in the compiler's source code, any connection to the description in IR-182-1 (or vice-versa) is long gone.  Presumably the framework was pretty-substantially reworked at some point.  Nor is there much other surviving documentation for the current framework that I know of.  So here my own inferences concerning how it works.
 
@@ -694,7 +745,7 @@ Is it possible that some of these conversions were added between REV32V0 (for wh
 
 So there's clearly some misunderstanding on my part about what auto-conversions were allowed.
 
-## The Boolean Conditional Trap of Death!
+## <a name="Death"></a>The Boolean Conditional Trap of Death!
 
 *Like* Python or C++, booleans in XPL can be treated as having numerical values, namely 0 for "false" and 1 for "true".  Thus if you have statements such as
 <pre>
@@ -733,13 +784,13 @@ I thought this was some quirk of the Intermetrics version of XPL, but it's not. 
 
 Note that this same consideration applies whenever an integer is assigned to a `BIT(1)` variable as well ... which is something that I've been ignoring so far (treating XPL `FIXED`, `BIT(16)`, `BIT(8)`, and `BIT(1)` all as integers), so I guess that's something I'll have to look into.  This as far as assignments are concerned, vs conditionals, that should have been obvious anyway, and I have nobody to blaim but myself.
 
-# `LINE_COUNT`
+# <a name="LINE_COUNT"></a>LINE_COUNT
 
 The apparent global variable `LINE_COUNT` is never declared nor assigned a value, and yet is used in a couple of comparisons (in the OUTPUTWR and STREAM modules).  Nor is it a built-in of standard XML.  I have no explanation, unless it's a built-in of Intermetrics "enhancement" of XPL.
 
 The comparisons seem to relate to the maximum number of lines per printed page, so presumably `LINE_COUNT` is should somehow be set to zero at the start of each printed page, and then incremented for each printed line.  My workaround is to have the `OUTPUT` built-in function treat it in that manner.
 
-# Value of Loop Counter After a For-Loop
+# <a name="ForLoop"></a>Value of Loop Counter After a For-Loop
 
 Naively, an XPL for-loop such as
 <pre>
@@ -806,9 +857,9 @@ At this point,  I'm handling the situation simply by examining each for-loop and
 
 The problem doesn't seem to extend to XPL `DO WHILE` loops implemented as Python `while` loops.
 
-# Virtual Memory
+# <a name="VirtualMemory"></a>Virtual Memory
 
-## Virtual Memory Modules
+## <a name="Modules"></a>Virtual Memory Modules
 
 The "virtual memory" system used by the HAL/S compiler is implemented by the VMEM* modules in the HALINCL/ folder.  Almost all of pass 1 of the compiler doesn't seem to depend on this system in any way ... but eventually you reach a point in the implementation where it's unclear if you can do without it or not.  Unfortunately, as usual, there is no explanation at all provided in the program comments as to what any of this system is supposed to do.  Moreover, it apparently came after the documentation provided by IR-182-1, so there is no *written* documentation available to me that describes it or even mentions it.  Which means it simply has to be figured out from the source code.  That's what I'm going to try to do here.
 
@@ -833,7 +884,7 @@ I'm not sure how reliable these are, since they sometimes appear in obscure modu
 
 This is reasonable in terms of what little I know.  In summary, it would appear to me that insofar as pass 1 of the compiler is concerned, only VMEM1, VMEM2, and VMEM3 need to be ported.
 
-## Virtual Memory Framework
+## <a name="Framework"></a>Virtual Memory Framework
 
 The "physical" virtual memory is a random-access file &mdash; i.e., not something in physical memory &mdash; which for our purposes is always file number `VMEM_FILEp` (== 6), accessed via the built-in function `FILE()`.  For us, this translates to the file with filename "FILE6.bin".  The physical virtual memory consists of `VMEM_TOTAL_PAGES+1` (== 400) "pages" of `VMEM_PAGE_SIZE` (== 3360) bytes each.
 
@@ -855,7 +906,7 @@ There is a procedure (defined in VMEM3 *et al.*) called `MOVE(LENGTH, FROM, INTO
 
 In principle, in XPL `MOVE()` could also be used to transfer non-list data, or data not aligned on the obvious boundaries.  If this situation needs to be supported, some rethinking may become necessary.
 
-# Sample HAL/S Source Code
+# <a name="Samples"></a>Sample HAL/S Source Code
 
 Most available samples of HAL/S source code &mdash; in lieu of actual Shuttle flight software source code &mdash; has been taken from Ryer's 1978 book, *Programming in HAL/S*.  Ryer tells us on his p. 2-9 (PDF p. 29) that
 
@@ -869,7 +920,7 @@ Here are some problems I've noted in this respect, in the code from Ryer's book:
   * The original Intermetrics compiler does not accept some of the overpunch characters (for example, it will accept the overpunch '-' for a vector, but not '+' for a structure, even though it adds these to the output listing when not present initially).  These are all decorations without any syntactic meaning, of course, and so can be removed without penalty.
   * The original Intermetrics compiler does not accept enclosing brackets for array variables (such as `[A]`), nor I assume enclosing braces for structure variables (such as `{S}`), even though Ryer strongly implies that they are acceptable.  Enclosing brackets and braces therefore need to be removed.
 
-# FINDER(), MONITOR(8), D INCLUDE, and Related Puzzles
+# <a name="FINDER"></a>FINDER(), MONITOR(8), D INCLUDE, and Related Puzzles
 
 The seemingly-unrelated topics listed in the heading are addressed together in this section due to the fact that I encountered them all at once when trying to work through inclusion of so-called "templates".
 
@@ -916,7 +967,7 @@ More specifically, output begins to be buffered when "`D DEFINE name`" (see abov
   * Again, `OUTPUT(6, ...)` (which occurs only in the `EMIT_EXTERNAL()` function) stores text in a memory buffer.
   * `CALL MONITOR(1, 6, name)` (which occurs only once, optionally, at the end, in `PRINT_SUMMARY()`) "stows" the data using a name somehow related to the compilation unit.
 
-# Version Management for the Template Library
+# <a name="TemplateVersioning"></a>Version Management for the Template Library
 
 Related but distinct from the preceding section's issues is an unfortunate issue related to how the original compiler manages the version stamps for the templates in the template library.  Each member in the template library has a version stamp, which *logically* is an integer from 1 to 255 that begins with 1 on the first version of the template, increases every time the template is altered, and rolls around from 255 to 1 if perchance the number of saved versions is very large.  (Only *one* version of the template is stored in any given template library, so to manually preserve more than one version of a template, more than one template library must be manually saved as well.)  Version numbers are normally automatically generated by the compiler, but can also be set manually within the HAL/S source code with a compiler directive of the form "`D VERSION code`".  Whether auto-generated or set manually, since the template-library files are themselves textual in nature, the version codes also appear in the template library files in that same form: i.e., "`D VERSION code`".
 
@@ -930,7 +981,7 @@ I don't see any way to handle this other than to alter the compiler functionally
 At present, this is no problem since we have only a single original flight-software source-code file so far, and it contains no such lines.  But if we were to obtain any files of the problematic type in the future, fixing these problems could turn out to be impossible.  That's because all such source files would have been "converted" by some unknown method from EBCDIC to ASCII long before we ever received them, and there's no knowing how EBCDIC representations of these single-byte version codes may have been treated by the conversion process:  How did some unknown software convert some unprintable EBCDIC code to some irrelevant ASCII code?  Most likely the version codes are all very small numbers, and most likely were left as-is, but who really knows?
 
 
-# OPTIONS_CODE
+# <a name="OPTIONS_CODE"></a>OPTIONS_CODE
 
 There is a variable called `OPTIONS_CODE` which conveys so-called "type 1" options, in the form of bit-flags, from the PARM field of the JCL to the compiler.  Unfortunately, while IR-182-1 lists some of these, it seems neither up-to-date, nor does it explain how of the bits in `OPTIONS_CODE` actually get set.  There's no code in the compiler to set them, so they just magically appear.  There are many more of them in IR-182-1 than there are known parameters (at least in compiler pass 1).
 
@@ -951,14 +1002,83 @@ The interpretations of some of these are clear ... of others, not so much.  For 
 
 The particulare irritation to me at the moment is that the compiler seemingly only auto-generates templates if 0x10 is set, which some of IR-182-1 claims is true as well, but which the "NO TEMP" notation in the list above (from IR-182-1 p. 3-18) seemingly says the opposite.
 
-# Compile-Time Computation of "Built-In" Functions
+# <a name="Computation"></a>Compile-Time Computation of "Built-In" Functions
 
 Compile-time computation of built-in HAL/S functions (like `ABS`, `MOD`, and so forth) is performed in the compiler by use of the `MONITOR(9)` call.  As far as I know right now, this is undocumented, as the only documentation I've found so far for `MONITOR(9)` pertains to its ability to perform floating-point operations like `sin` and `cos`.  In fact, `MONITOR(9)` causes an ABEND in the source code MONITOR.bal, so I suppose that MONITOR.bal must not belong with the compiler at all.  However, in the `END_ANY_FCN()` function of the compiler's ENDANYFC module, there's an inline function called `BI_COMPILE_TIME()` that I think performs *some* of the built-in function computations, and it indeed calls `MONITOR(9)`.
 
+TBD
 
-
-# Some Features *Not* Supported in the Original Compiler
+# <a name="NotSupported"></a>Some Features *Not* Supported in the Original Compiler
 
 The principal source for the prospective HAL/S programmer, in my view, is Ryer's *Programming in HAL/S* (1978), and most of my samples of HAL/S code were extracted from that book.  However, not all features discussed (sometimes at length) in Ryer were supported by the actual HAL/S compiler used for the Shuttle's flight software.  I intend to list them here as I discover them ... or more accurately, perhaps, as I retire laboriously typed source-code samples now revealed to be irrelevant.
 
   * No `FIXED` datatype is supported, rendering all of Ryer's Chapter 14 useless.  (See Section 2.3.3 of the 2005 revision of the "HAL/S Language Specification".)
+
+TBD
+
+# <a name="Problems"></a>Roster of Remaining Problems with the Port
+
+As of 2023-11-05, the number of compiler errors generated during compilation of the sample HAL/S source code scraped from Ryer (i.e., from the book *Programming in HAL/S*) has reached a pleasingly-small but unfortunately non-zero number.  As a consequence, it has become useful to categorize and discuss my attempts to address these issues individually.  That's done in the succeeding subsections.
+
+If run from the folder "yaShuttle/Source Code/ Programming in HAL-S" in the Virtual AGC source tree, the following command summarizes the errors found:
+<pre>
+rm report.log ; \
+for f in &ast;.hal; \
+do \
+    echo $f >>report.log ; \
+    HAL-S-FC.py --extra --hal=$f >$f.lst 2>>report.log ; \
+done ; \
+egrep '^\&ast;\&ast;\&ast;\&ast;\&ast; [^ ]+  +ERROR' &ast;.hal.lst --only-matching --no-filename | \
+sort | \
+uniq -c | \
+sort -n --key=1 ; \
+echo "" ; \
+egrep --after-context=3 '^\&ast;\&ast;\&ast;\&ast;\&ast; [^ ]+  +ERROR' &ast;.hal.lst | \
+grep --only-matching '^.&ast;lst:' | \
+sort -u
+</pre>
+
+## A3
+
+TBD
+
+## BI105
+
+TBD
+
+## DC1
+
+TBD
+
+## DU1
+
+TBD
+
+## E6
+
+TBD
+
+## P4
+
+TBD
+
+## P8
+
+TBD
+
+## AV0
+
+TBD
+
+## AV1
+
+TBD
+
+## DI3
+
+TBD
+
+## PL6
+
+TBD
+
