@@ -64,8 +64,9 @@ def ADD_AND_SUBTRACT(MODE):
         if MONITOR(9, MODE + 1):
             ERROR(d.CLASS_VA, MODE + 1);
             goto_AS_FAIL = True
-        g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD());
-        g.PSEUDO_TYPE[g.PTR[g.MP]] = LIT_RESULT_TYPE(g.MP, g.SP);
+        else:
+            g.LOC_P[g.PTR[g.MP]] = SAVE_LITERAL(1, g.DW_AD());
+            g.PSEUDO_TYPE[g.PTR[g.MP]] = LIT_RESULT_TYPE(g.MP, g.SP);
     if goto_AS_FAIL or not al:
         goto_AS_FAIL = False
         MATCH_ARITH(g.MP, g.SP);

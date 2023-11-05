@@ -5317,7 +5317,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             (goto == None and PRODUCTION_NUMBER == 375):  # reference 3750
         #  <TYPE & MINOR ATTR> ::= <TYPE SPEC> <MINOR ATTR LIST>
         if goto == "SPEC_TYPE": goto = None
-        if g.CLASS:
+        if g.CLASS & 1:
             ERROR(d.CLASS_DC, 1);
             g.CLASS = 0;
     if goto == "INCORPORATE_ATTR" or \

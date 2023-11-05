@@ -53,24 +53,18 @@ from GETLITER import GET_LITERAL
 
 class cARITH_LITERAL:
     def __init__(self):
-        self.LOC1 = None
-        self.LOC2 = None
         self.PWR_MODE = None
 lARITH_LITERAL = cARITH_LITERAL()
 
-def ARITH_LITERAL(LOC1=None,LOC2=None,PWR_MODE=None):
-    # PWR_MODE seems to require persistence.  I can't tell about LOC1 and LOC2.
+def ARITH_LITERAL(LOC1, LOC2, PWR_MODE=None):
+    # PWR_MODE is optional and seems to need its persistence managed..
     l = lARITH_LITERAL
-    if LOC1 != None:
-        l.LOC1 = LOC1
-    if LOC2 != None:
-        l.LOC2 = LOC2
     if PWR_MODE != None:
         l.PWR_MODE = PWR_MODE
           
-    if g.PSEUDO_FORM[g.PTR[l.LOC1]] != g.XLIT: 
+    if g.PSEUDO_FORM[g.PTR[LOC1]] != g.XLIT: 
         return g.FALSE;
-    g.LIT_PTR=GET_LITERAL(g.LOC_P[g.PTR[l.LOC1]]);
+    g.LIT_PTR=GET_LITERAL(g.LOC_P[g.PTR[LOC1]]);
     # IF EITHER LITERAL IS A DOUBLE THEN SET DOUBLELIT = TRUE
     # SO THE COMPILER WILL KNOW TO CHANGE LIT1 (OF THE RESULT)
     # TO 5 LATER ON.  THE EXCEPTION IS WHEN THE CALCULATION IS
@@ -82,11 +76,11 @@ def ARITH_LITERAL(LOC1=None,LOC2=None,PWR_MODE=None):
         g.DOUBLELIT = g.TRUE;
     g.DW[0]=g.LIT2(g.LIT_PTR);
     g.DW[1]=g.LIT3(g.LIT_PTR);
-    if l.LOC2==0: 
+    if LOC2==0: 
         return g.TRUE;
-    if g.PSEUDO_FORM[g.PTR[l.LOC2]]!=g.XLIT: 
+    if g.PSEUDO_FORM[g.PTR[LOC2]]!=g.XLIT: 
         return g.FALSE;
-    g.LIT_PTR=GET_LITERAL(g.LOC_P[g.PTR[l.LOC2]]);
+    g.LIT_PTR=GET_LITERAL(g.LOC_P[g.PTR[LOC2]]);
     if ((g.TYPE==0) and (g.FACTORED_TYPE==0)) and (g.LIT1(g.LIT_PTR)==5): 
         if (l.PWR_MODE and (g.PSEUDO_TYPE[g.PTR[g.SP]]!=g.INT_TYPE)) or \
                 not l.PWR_MODE:

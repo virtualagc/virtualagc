@@ -1,12 +1,10 @@
 DEBUG `E `F
-
-D INCLUDE TEMPLATE CPL189 # For IMU_DATA
+DEBUG `3`4`8
 
  TP: PROGRAM;
-    DECLARE IMU_DATA-STRUCTURE, A NAME, 
-                                B INITIAL(1, 2, 3, 4, 5, 6, BIN'010101111',
-                                          3#TRUE, BIN'0', 12);
+
+    DECLARE C SCALAR CONSTANT(7);
+    DECLARE X INITIAL(C + 1);
     
-    NAME(A) = NAME(B);
  CLOSE TP;
  

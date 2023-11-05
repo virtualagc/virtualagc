@@ -1020,7 +1020,7 @@ TBD
 
 As of 2023-11-05, the number of compiler errors generated during compilation of the sample HAL/S source code scraped from Ryer (i.e., from the book *Programming in HAL/S*) has reached a pleasingly-small but unfortunately non-zero number.  As a consequence, it has become useful to categorize and discuss my attempts to address these issues individually.  That's done in the succeeding subsections.
 
-If run from the folder "yaShuttle/Source Code/ Programming in HAL-S" in the Virtual AGC source tree, the following command summarizes the errors found:
+If run (under **bash** in Linux) from the folder "yaShuttle/Source Code/ Programming in HAL-S" in the Virtual AGC source tree, the following command summarizes the errors found:
 <pre>
 rm report.log ; \
 for f in &ast;.hal; \
@@ -1038,47 +1038,39 @@ grep --only-matching '^.&ast;lst:' | \
 sort -u
 </pre>
 
-## A3
-
-TBD
-
-## BI105
-
-TBD
-
-## DC1
-
-TBD
-
-## DU1
-
-TBD
-
 ## E6
 
-TBD
+<pre>
+***** E6       ERROR #x OF SEVERITY 2. *****
+***** INCOMPATIBLE ARITHMETIC OPERAND TYPES IN EXPRESSION
+</pre>
 
-## P4
-
-TBD
-
-## P8
-
-TBD
-
-## AV0
+Count: 1
+File(s): 176-P.hal
 
 TBD
 
 ## AV1
 
+<pre>
+***** AV1      ERROR #x OF SEVERITY 2. *****
+***** TYPE OF xxxx IS ILLEGAL FOR ASSIGNMENT FROM GIVEN RIGHT-HAND SIDE.
+</pre>
+
+Count: 2
+File(s): 176-P.hal
+
 TBD
 
 ## DI3
 
-TBD
+<pre>
+***** DI3      ERROR #1 OF SEVERITY 2. *****
+***** EXPRESSION IN INITIAL LIST IS NOT COMPUTABLE AT COMPILE TIME
+</pre>
 
-## PL6
+Count: 3:
+File(s): 032-INITIAL_AND_CONSTANT.hal, 095-TAN_SUMS.hal
 
-TBD
+This failure occurs when a previously-defined `CONSTANT` is used in expressions within later `CONSTANT(...)` or `INITIAL(...)` attributes in `DECLARE` statements.  (As opposed to using merely numerical literals and arithmetical operators in the expressions.)
 

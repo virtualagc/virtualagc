@@ -2982,10 +2982,12 @@ def SYT_HASHLINK(n, value=None):
 
 def SYT_SORT(n, value=None):
     global LINK_SORT
+    while len(LINK_SORT) <= n:
+        LINK_SORT.append(link_sort())
     if value == None:
         return LINK_SORT[n].SYM_SORT
     LINK_SORT[n].SYM_SORT = value
-
+    
 
 def OUTER_REF(n, value=None):
     global OUTER_REF_TABLE
