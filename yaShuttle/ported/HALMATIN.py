@@ -83,7 +83,8 @@ from ICQOUTPU import ICQ_OUTPUT
  /***************************************************************************/
 ''' 
 
-
+maxFIXED = (1 << 31) - 1
+minFIXED = -(1 << 31)
 def HALMAT_INIT_CONST ():
     # Locals: I, TEMP, CONSTLIT
 
@@ -104,7 +105,13 @@ def HALMAT_INIT_CONST ():
     #  AND FLOATING.  IT RETURNS FALSE IF THE NUMBER IS OUTSIDE THE RANGE OF
     #  ALLOWED INTEGERS OR IT RETURNS TRUE AND THE ROUNDED NUMBER IS IN DW().
     def ROUND_SCALAR(PTR):
-        return g.TRUE;
+        PTR = GET_LITERAL(PTR)
+        x = fromFloatIBM(g.LIT2(PTR), g.LIT3(PTR))
+        x = hround(x)
+        if x > maxFIXED or x < minFIXED:
+            return g.FALSE
+        g.DW[0], g.DW[1] = toFloatIBM(x)
+        return g.TRUE
     # END ROUND_SCALAR;
     
     if g.IC_FOUND == 0:  #  RETURN IN CASE OF NO INITIALIZATION
@@ -159,18 +166,18 @@ def HALMAT_INIT_CONST ():
                                     g.IC_LOC[I] = SAVE_LITERAL(1, g.DW_AD());
                             else: 
                                 ERRORS(d.CLASS_DI, 17);
-                            if (g.SYT_TYPE(g.ID_LOC) == g.CHAR_TYPE) and \
-                                    (LIT1(CONSTLIT) == 0):
-                                DO;
-                                TEMP = STRING(LIT2(CONSTLIT));
-                                if (LENGTH(TEMP) > g.VAR_LENGTH(g.ID_LOC)):
-                                    ERROR(d.CLASS_DI, 18, g.SYT_NAME(g.ID_LOC));
-                                    TEMP = SUBSTR(TEMP, 0, g.VAR_LENGTH(g.ID_LOC));
-                                    g.SYT_PTR(g.ID_LOC, -SAVE_LITERAL(0, TEMP));
-                                else:
-                                    g.SYT_PTR(g.ID_LOC, -g.IC_LOC[I]);
+                        if (g.SYT_TYPE(g.ID_LOC) == g.CHAR_TYPE) and \
+                                (LIT1(CONSTLIT) == 0):
+                            DO;
+                            TEMP = STRING(LIT2(CONSTLIT));
+                            if (LENGTH(TEMP) > g.VAR_LENGTH(g.ID_LOC)):
+                                ERROR(d.CLASS_DI, 18, g.SYT_NAME(g.ID_LOC));
+                                TEMP = SUBSTR(TEMP, 0, g.VAR_LENGTH(g.ID_LOC));
+                                g.SYT_PTR(g.ID_LOC, -SAVE_LITERAL(0, TEMP));
                             else:
                                 g.SYT_PTR(g.ID_LOC, -g.IC_LOC[I]);
+                        else:
+                            g.SYT_PTR(g.ID_LOC, -g.IC_LOC[I]);
             if goto_NON_EVALUABLE or not sf:  # Was just ELSE
                 goto_NON_EVALUABLE = False
                 HALMAT_POP(ICQ_CHECK_TYPE(I, 1), 2, 0, g.IC_TYPE[I]);

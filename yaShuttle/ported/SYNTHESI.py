@@ -3359,6 +3359,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                    "DOT_PRODUCTS_LOOP"] or \
                    (goto == None and PRODUCTION_NUMBER == 11):  # reference 110
         #  <PRODUCT> ::= <FACTOR>
+        
         if goto == None:
             PRODUCTION_NUMBER = -1
             g.CROSS_COUNT = 0
@@ -3397,7 +3398,11 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     g.MP = g.TERMP + 1;  # IT WAS DECREMENTED AT START OF LOOP
                     g.TERMP = 0;  # GET OUT OF LOOP
             g.TERMP = g.MP;
-            
+            #print("\n!@", g.SCALAR_COUNT, 
+            #       g.FIXV[g.MP], g.FIXV[g.SP], g.MP, g.SP, 
+            #       g.PTR[g.MP], g.PTR[g.SP],
+            #       file=sys.stderr)
+        
             if g.TERMP == g.SP: 
                 return;
             

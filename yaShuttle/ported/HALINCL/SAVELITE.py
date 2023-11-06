@@ -38,7 +38,7 @@ def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
     # DO
         '''
         It would appear that this procedure implicitly makes use of the 
-        knowledge of the internal formst of the object (VAL) which is passed 
+        knowledge of the internal forms of the object (VAL) which is passed 
         to a function in lieu of the actual contents of the string being 
         referenced.  That, of course, is of no value to us whatsoever, given
         that we don't have a System/360 environment and whatever conventions

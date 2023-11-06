@@ -29,9 +29,6 @@ from INITIALI import INITIALIZATION
 from COMPILAT import COMPILATION_LOOP
 from ALMOST_DISASTER import ALMOST_DISASTER
 
-#from watchpoints import watch
-#watch(g.PSEUDO_FORM[3], g.FIXV[5])
-
 '''
 In XPL, 5 parts comprised this driver module, one of which (THE_BEGINNING)
 always executed, but the other 4 were only run selectively via GO TO statements
@@ -53,6 +50,10 @@ OUTPUT_WRITER_DISASTER(), and ENDITNOW().
 # Initialization
 g.CLOCK[0] = MONITOR(18)
 INITIALIZATION()
+
+#import HALINCL.COMMON as h
+#from watchpoints import watch
+#watch(h.SYM_TAB[3].SYM_PTR)
 
 # THE_BEGINNING:
 g.CLOCK[1] = MONITOR(18)

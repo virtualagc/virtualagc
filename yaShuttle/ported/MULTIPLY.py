@@ -75,6 +75,8 @@ from HALINCL.SAVELITE import SAVE_LITERAL
 def MULTIPLY_SYNTHESIZE(I, J, K, DOCASE):
     # No locals.
     
+    # print("\n!!", g.LOC_P[g.PTR[I]], g.LOC_P[g.PTR[J]], file=sys.stderr)
+    
     # DO CASE (DOCASE) ;
     if DOCASE == 0:
         # CASE 0 : SCLAR AND/OR INTEGER MULT. */

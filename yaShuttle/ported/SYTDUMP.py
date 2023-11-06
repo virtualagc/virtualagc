@@ -598,18 +598,6 @@ def SYT_DUMP():
                     if l.I < 1:
                         break  # GO TO LM;
                 # END DO WHILE STRING_GT
-                '''
-                The XPL documentation isn't adequate for determining whether
-                the GO TO LM above is supposed to merely break out of the
-                DO WHILE STRING_GT, or whether it's supposed to break out of 
-                the enclosing DO J as well.  The difficulty is that labels like 
-                "LM:" are associated with statements, in this case END, and we 
-                don't know whether the END was considered to be "inside" the
-                block it was terminated or whether it was considered to be
-                "outside".  I'm assuming that for now that the GO TO LM only
-                breaks out of the DO WHILE STRING_GT, but if that turns out to
-                cause a problem, we'll have to revisit. 
-                '''
                 # LM:
             # END DO J
             l.M = SHR(l.M, 1);
