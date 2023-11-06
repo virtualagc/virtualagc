@@ -1,6 +1,6 @@
 C/ This sample adapted from PDF p. 46 of "Programming in HAL/S)".
-C/ It reads in a 3-vector and converts it to polar coordinates:
-C/ bearing, i.e. angle from x-axis in horizontal plane in degrees; elevation,
+C/ It reads in a 3-vector and converts it to polar coordinates: bearing,
+C/ i.e. angle from x-axis in horizontal plane in degrees; elevation,
 C/ i.e., angle from x-axis in vertical plane in degrees; and distance.
 
   XYZ_TO_POLAR:
@@ -18,8 +18,8 @@ S           1          2          3
 M       WRITE(6) 'BEARING =', ARCTAN(P  / P ) DEGREES_PER_RADIAN;
 S                                     2    1
 
-M       WRITE(6) 'ELEVATION =', ARCTAN(P  / ABVAL(P      )) DEGREES_PER_RADIAN;
-S                                       3          2 AT 1
+        WRITE(6) 'ELEVATION =', 
+                 ARCTAN(P$3 / ABVAL(P$(2 AT 1))) DEGREES_PER_RADIAN;
 
 M       WRITE(6) 'DISTANCE =', ABVAL(P);
      END;

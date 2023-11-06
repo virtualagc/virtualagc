@@ -1,5 +1,5 @@
-C/ This sample was adapted from p. 37 of "Programming in HAL/S".
-C/ It computed the roots of 3 * X**2 + 4 * X - 10.  I pepped it up a bit,
+C/ This sample was adapted from p. 37 of "Programming in HAL/S". It
+C/ computed the roots of 3 * X**2 + 4 * X - 10.  I pepped it up a bit,
 C/ to have an input loop, to double-check the result by recomputing the
 C/ polynomial using the roots, and to allow complex roots.
 
@@ -20,8 +20,8 @@ C/ polynomial using the roots, and to allow complex roots.
     	    	D = D**0.5;
 	        ROOT1 = (-B + D) / (2 A);
 	        ROOT2 = (-B - D) / (2 A);
-	        WRITE(6) 'Real roots of', A, 'X**2 +', B, 'X +', C, 'are:',
-	        	ROOT1, ROOT2;
+	        WRITE(6) 'Real roots of', A, 'X**2 +', B, 'X +', C, 
+	                 'are:', ROOT1, ROOT2;
 	        WRITE(6) 'Check:', 
 	        	A ROOT1**2 + B ROOT1 + C,
 	        	A ROOT2**2 + B ROOT2 + C;
@@ -32,11 +32,12 @@ C/ polynomial using the roots, and to allow complex roots.
     	        D = (-D)**0.5;
     	        RE = -B / (2 A);
     	        IM = D / (2 A);
-    	        WRITE(6) 'Complex roots of', A, 'X**2 +', B, 'X +', C, 'are:',
-	        	RE, '+/-', IM, 'i';
-	        RE2 = RE**2 - IM**2; /* Compute root squared RE2 +/- IM2 i. */
+    	        WRITE(6) 'Complex roots of', A, 'X**2 +', B, 'X +', 
+    	                 C, 'are:', RE, '+/-', IM, 'i';
+	        RE2 = RE**2 - IM**2; /* Square of RE2 +/- IM2 i. */
 	        IM2 = 2 RE IM;
-	        WRITE(6) 'Check:', A RE2 + B RE + C, '+/-', A IM2 + B IM, 'i';
+	        WRITE(6) 'Check:', A RE2 + B RE + C, '+/-', 
+	                 A IM2 + B IM, 'i';
 	    END;
     END;
   CLOSE ROOTS;

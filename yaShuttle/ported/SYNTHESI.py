@@ -2549,7 +2549,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         #  <BLOCK STMT TOP>  ::= <BLOCK STMT TOP> RIGID
         if g.BLOCK_MODE[g.NEST] != g.CMPL_MODE: 
             ERROR(d.CLASS_PS, 12);
-        elif (g.SYT_FLAGS(g.FIXL[g.MP]) and g.RIGID_FLAG) != 0: 
+        elif (g.SYT_FLAGS(g.FIXL[g.MP]) & g.RIGID_FLAG) != 0: 
             ERROR(d.CLASS_PS, 11);
         else:
             g.SYT_FLAGS(g.FIXL[g.MP], g.SYT_FLAGS(g.FIXL[g.MP]) | g.RIGID_FLAG);
@@ -2761,7 +2761,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             ERROR(d.CLASS_DU, 7, g.VAR[g.SP - 1]);
         if g.SYT_TYPE(g.J) > g.MAJ_STRUC:
             ERROR(d.CLASS_DU, 8, g.VAR[g.SP - 1]);
-        if (g.SYT_FLAGS(g.J) & ILL_EQUATE_ATTR) != 0:
+        if (g.SYT_FLAGS(g.J) & g.ILL_EQUATE_ATTR) != 0:
             ERROR(d.CLASS_DU, 9, g.VAR[g.SP - 1]);
         if (g.SYT_FLAGS(g.J) & g.AUTO_FLAG) != 0:
             if (g.SYT_FLAGS(g.BLOCK_SYTREF[g.NEST]) & g.REENTRANT_FLAG) != 0:
@@ -2786,7 +2786,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         HALMAT_PIP(g.LOC_P[g.TEMP], g.PSEUDO_FORM[g.TEMP], 0, 0);
         CHECK_ARRAYNESS();
         g.PTR_TOP = g.PTR[g.SP - 1] - 1;
-        g.STMT_TYPE = EQUATE_TYPE;
+        g.STMT_TYPE = c19.EQUATE_TYPE;
         if g.SIMULATING: 
             STAB_HDR();
         goto = "EMIT_NULL";

@@ -218,7 +218,8 @@ else:
     folders = (
         ".",
         "../Source Code/Programming in HAL-S",
-        "../Source Code/HAL-S-360 Users Manual"
+        "../Source Code/HAL-S-360 Users Manual",
+        "../../../../workspace/PFS/Flight Software source code"
         )
     f = None
     i = 0
@@ -235,11 +236,13 @@ else:
         print("Couldn't find the source file (%s)" % sourceFile, \
               file=sys.stderr)
         sys.exit(1)
-dummy = f.readlines()  # Source code.
-for i in range(len(dummy)):
-    dummy[i] = dummy[i].rstrip('\n\r').replace("¬", "~")\
-                        .replace("^", "~").replace("¢", "`").expandtabs(8)\
-                        .ljust(80)
+#dummy = f.readlines()  # Source code.
+dummy = []
+#for i in range(len(dummy)):
+for line in f:
+    line = line.rstrip('\n\r').replace("¬", "~").replace("^", "~")\
+               .replace("¢", "`").expandtabs(8).ljust(80)
+    dummy.append(line)
 
 inputDevices[0] = {
     "file": f,

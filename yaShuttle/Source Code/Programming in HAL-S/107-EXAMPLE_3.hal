@@ -1,5 +1,6 @@
 C/ Adapted from PDF p. 107 in "Programming in HAL/S".  It performs a 
-C/ "matrix multiplication" on 3x3 ARRAY datatypes rather than MATRIX datatypes.
+C/ "matrix multiplication" on 3x3 ARRAY datatypes rather than MATRIX 
+C/ datatypes.
 
   EXAMPLE_3:
   PROGRAM;
@@ -8,10 +9,9 @@ C/ "matrix multiplication" on 3x3 ARRAY datatypes rather than MATRIX datatypes.
      		M3 INITIAL(11, 12, 13, 14, 15, 16, 17, 18, 19);
      DECLARE INTEGER,
      		ROW, COL;
-     DO FOR ROW = 1 TO 3;
-        DO FOR COL = 1 TO 3;
-M	   M1        = M2      M3      + M2      M3      + M2      M3      ;
-S	     ROW,COL     ROW,1   1,COL     ROW,2   2,COL     ROW,3   3,COL
+     DO FOR ROW = 1 TO 3;  DO FOR COL = 1 TO 3;
+M       M1        = M2      M3      + M2      M3      + M2      M3     ;
+S         ROW,COL     ROW,1   1,COL     ROW,2   2,COL     ROW,3   3,COL
 
 	END;
      END;

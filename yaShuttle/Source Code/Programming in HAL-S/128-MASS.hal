@@ -1,16 +1,17 @@
-C/ Adapted from PDF p. 128 of "Programming in HAL/S".  The function computes
-C/ the relativistic mass of an object, given the rest mass and the speed.
-C/ The text indicates that the unit of speed is km/sec, but the value of c
-C/ in the program was off by a factor of 10 if that's true.  In fact, c was 
-C/ also numerically wrong, even for 1978 precision (when the document was 
-C/ written).  Or for that matter, for the entire 20th centry.  In fact, it
-C/ used the best value for c from 1862.  (By the way, there's a great table in 
-C/ https://micro.magnet.fsu.edu/primer/lightandcolor/speedoflight.html that
-C/ shows the known values for c by year, investigator, and method.)  Go figure!  
-C/ At any rate, I've fixed all that in the code below.  Why use space-age 
-C/ software, but hard-code 19th-century constants for it to work with?  Still,
-C/ we mustn't be uncharitable; it's not as if there was an internet in 1978 to
-C/ make it easy to look up the number.
+C/ Adapted from PDF p. 128 of "Programming in HAL/S".  The function 
+C/ computes the relativistic mass of an object, given the rest mass and
+C/ the speed.  The text indicates that the unit of speed is km/sec, but
+C/ the value of c in the program was off by a factor of 10 if that's 
+C/ true.  In fact, c was also numerically wrong, even for 1978 precision
+C/ (when the document was written).  Or for that matter, for the entire
+C/ 20th centry.  In fact, it used the best value for c from 1862.  (By 
+C/ the way, there's a great table in 
+C/   https://micro.magnet.fsu.edu/primer/lightandcolor/speedoflight.html 
+C/ that shows the known values for c by year, investigator, and method.)
+C/ Go figure!  At any rate, I've fixed all that in the code below.  
+C/ Why use space-age software, but hard-code 19th-century constants for
+C/ it to work with?  Still, we mustn't be uncharitable; it's not as if 
+C/ there was an internet in 1978 to make it easy to look up the number.
 
  MASS_TEST: PROGRAM;
   DECLARE REST_MASS, SPEED;
@@ -31,7 +32,8 @@ M    RETURN SQRT(1 - V  / C  );
   CLOSE MASS;
   
   DO UNTIL REST_MASS < 0;
-     WRITE(6) 'INPUT REST MASS (ANY UNITS) AND SPEED (KM/SEC), OR -1; TO QUIT:';
+     WRITE(6) 'INPUT REST MASS (ANY UNITS) AND SPEED (KM/SEC), ',
+              'OR -1; TO QUIT:';
      READ(5) REST_MASS, SPEED;
      WRITE(6) MASS(REST_MASS, SPEED);
   END;

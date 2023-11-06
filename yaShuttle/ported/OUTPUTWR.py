@@ -351,6 +351,9 @@ lCOMMENT_BRACKET = cCOMMENT_BRACKET()
 
 
 def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
+
+    from ERRORS   import ERRORS
+
     # Note that the only overlap detected between the locals and globals in
     # g.py were TEMP, SEVERITY, and INCLUDE_COUNT, so take care to distinguich
     # between g. and l. for those.

@@ -1006,7 +1006,8 @@ def STREAM():
                 l.M_LINE = g.CURRENT_CARD[:];
                 if g.SRN_PRESENT:
                     if g.INCLUDING:
-                        g.INCL_SRN[0] = SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 1);
+                        g.INCL_SRN[0] = SUBSTR(g.CURRENT_CARD, \
+                                               g.TEXT_LIMIT[0] + 1);
                         g.SRN_COUNT[0] = g.SRN_COUNT[0] + 1;
                     else:
                         g.SRN[0] = SUBSTR(g.CURRENT_CARD, g.TEXT_LIMIT[0] + 1);
