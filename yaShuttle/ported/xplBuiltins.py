@@ -188,69 +188,6 @@ maxDevices = 10
 inputDevices = [None] * maxDevices
 outputDevices = [None] * maxDevices
 
-# Note that while textual-data files (the "buf" and "pds" files from above)
-# are handled by the INPUT(...)/OUTPUT(...) mechanism, random-access files
-# are handled by the entirely-different FILE() method. Thus random-access files
-# do not appear in inputDevices[] and outputDevices[] above, but rather in
-# files[] below.  And although all are accessed by "file number", with the 
-# file numbers overlapping all three of these cases, the individual files of
-# the same file-number differ essentially entirely.  The entries of the files[] 
-# array are 3-lists of the open random-access file pointer, the record size, 
-# and the current file size (in bytes).
-files = [None]
-for i in range(1, 7):
-    f = open("FILE%d.bin" % i, "w+b")
-    f.seek(2, 0)
-    files.append([f, 7200, f.tell()])
-
-# Open the files that we need, other than output files 0 and 1 (whose behavior
-# is hard-coded separately), and buffer their contents where appropriate.
-if sourceFile == None:  # HAL/S source code.
-    f = sys.stdin
-    sourceFile = "stdin"
-else:
-    # Get the source-file name from the compiler's --hal switch.
-    # If the file turns out to not be in the current folder, try several others.
-    # This is just a convenience for me in debugging, based on the notion that
-    # the compiler is being run from the yaShuttle/ported/ folder in the source 
-    # tree.  The other folders don't need to be checked in a production version
-    # of the compiler, since they most likely don't even exist.
-    folders = (
-        ".",
-        "../Source Code/Programming in HAL-S",
-        "../Source Code/HAL-S-360 Users Manual",
-        "../../../../workspace/PFS/Flight Software source code"
-        )
-    f = None
-    i = 0
-    while f == None and i < len(folders):
-        try:
-            s = folders[i] + "/" + sourceFile
-            f = open(s, "r")
-            sourceFile = s
-            break
-        except:
-            f = None
-            i += 1
-    if f == None:
-        print("Couldn't find the source file (%s)" % sourceFile, \
-              file=sys.stderr)
-        sys.exit(1)
-#dummy = f.readlines()  # Source code.
-dummy = []
-#for i in range(len(dummy)):
-for line in f:
-    line = line.rstrip('\n\r').replace("¬", "~").replace("^", "~")\
-               .replace("¢", "`").expandtabs(8).ljust(80)
-    dummy.append(line)
-
-inputDevices[0] = {
-    "file": f,
-    "open": True,
-    "ptr":-1,
-    "buf": dummy
-    }
-
 def openGenericInputDevice(n, name, isPDS = False, rw = False):
     if rw:
         mode = "r+"
@@ -280,18 +217,83 @@ def openGenericOutputDevice(n, name, isPDS = False):
         }
     if isPDS:
         outputDevices[n]["pds"] = {}
+    
+if "--help" not in sys.argv:
 
-if listing2:
-    openGenericOutputDevice(2, "LISTING2.hal") # Secondary output listing.
-openGenericInputDevice(4, "TEMPLIB.json", True, templib) # Template library.
-openGenericInputDevice(5, "ERRORLIB.json", True) # Error-message library.
-openGenericInputDevice(6, "ACCESS.json", True) # File of module access rights.
-if templib:
-    outputDevices[6] = inputDevices[4]
-else:
-    openGenericOutputDevice(6, "&&TEMPLIB.json", True) # Temporary templates.
-openGenericOutputDevice(8, "&&TEMPINC.json", True) # Temporary includes.
-openGenericOutputDevice(9, "SOURCECO.txt")  # Source-comparision output.
+    # Note that while textual-data files (the "buf" and "pds" files from above)
+    # are handled by the INPUT(...)/OUTPUT(...) mechanism, random-access files
+    # are handled by the entirely-different FILE() method. Thus random-access files
+    # do not appear in inputDevices[] and outputDevices[] above, but rather in
+    # files[] below.  And although all are accessed by "file number", with the 
+    # file numbers overlapping all three of these cases, the individual files of
+    # the same file-number differ essentially entirely.  The entries of the files[] 
+    # array are 3-lists of the open random-access file pointer, the record size, 
+    # and the current file size (in bytes).
+    files = [None]
+    for i in range(1, 7):
+        f = open("FILE%d.bin" % i, "w+b")
+        f.seek(2, 0)
+        files.append([f, 7200, f.tell()])
+
+    # Open the files that we need, other than output files 0 and 1 (whose behavior
+    # is hard-coded separately), and buffer their contents where appropriate.
+    if sourceFile == None:  # HAL/S source code.
+        f = sys.stdin
+        sourceFile = "stdin"
+    else:
+        # Get the source-file name from the compiler's --hal switch.
+        # If the file turns out to not be in the current folder, try several others.
+        # This is just a convenience for me in debugging, based on the notion that
+        # the compiler is being run from the yaShuttle/ported/ folder in the source 
+        # tree.  The other folders don't need to be checked in a production version
+        # of the compiler, since they most likely don't even exist.
+        folders = (
+            ".",
+            "../Source Code/Programming in HAL-S",
+            "../Source Code/HAL-S-360 Users Manual",
+            "../../../../workspace/PFS/Flight Software source code"
+            )
+        f = None
+        i = 0
+        while f == None and i < len(folders):
+            try:
+                s = folders[i] + "/" + sourceFile
+                f = open(s, "r")
+                sourceFile = s
+                break
+            except:
+                f = None
+                i += 1
+        if f == None:
+            print("Couldn't find the source file (%s)" % sourceFile, \
+                  file=sys.stderr)
+            sys.exit(1)
+    #dummy = f.readlines()  # Source code.
+    dummy = []
+    #for i in range(len(dummy)):
+    for line in f:
+        line = line.rstrip('\n\r').replace("¬", "~").replace("^", "~")\
+                   .replace("¢", "`").expandtabs(8).ljust(80)
+        dummy.append(line)
+    
+    inputDevices[0] = {
+        "file": f,
+        "open": True,
+        "ptr":-1,
+        "buf": dummy
+        }
+    
+    if listing2:
+        openGenericOutputDevice(2, "LISTING2.hal") # Secondary output listing.
+    openGenericInputDevice(4, "TEMPLIB.json", True, templib) # Template library.
+    openGenericInputDevice(5, "ERRORLIB.json", True) # Error-message library.
+    openGenericInputDevice(6, "ACCESS.json", True) # File of module access rights.
+    if templib:
+        outputDevices[6] = inputDevices[4]
+    else:
+        openGenericOutputDevice(6, "&&TEMPLIB.json", True) # Temporary templates.
+    openGenericOutputDevice(8, "&&TEMPINC.json", True) # Temporary includes.
+    openGenericOutputDevice(9, "SOURCECO.txt")  # Source-comparision output.
 
 def SHL(a, b):
     return a << b
