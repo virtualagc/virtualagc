@@ -272,8 +272,16 @@ if "--help" not in sys.argv:
     dummy = []
     #for i in range(len(dummy)):
     for line in f:
+        # Regarding the "\xef\xbb\xbf" replacement ... *apparently*,
+        # in Windows, if you make the mistake of editing a HAL/S source
+        # file containing a UTF-8 character ("¬", "¢"), Windows will
+        # thoughtfully stick the UTF-8 character encoded as 
+        # "\xef\xbb\xbf" at the beginning of the file when you save it.
+        # Of course, for us, that's pure garbage, so we remove it if
+        # it's there ... or anywhere!
         line = line.rstrip('\n\r').replace("¬", "~").replace("^", "~")\
-                   .replace("¢", "`").expandtabs(8).ljust(80)
+                   .replace("¢", "`").replace("\xef\xbb\xbf", "")\
+                   .expandtabs(8).ljust(80)
         dummy.append(line)
     
     inputDevices[0] = {
