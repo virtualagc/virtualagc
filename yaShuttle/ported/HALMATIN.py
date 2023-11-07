@@ -167,9 +167,8 @@ def HALMAT_INIT_CONST ():
                             else: 
                                 ERRORS(d.CLASS_DI, 17);
                         if (g.SYT_TYPE(g.ID_LOC) == g.CHAR_TYPE) and \
-                                (LIT1(CONSTLIT) == 0):
-                            DO;
-                            TEMP = STRING(LIT2(CONSTLIT));
+                                (g.LIT1(CONSTLIT) == 0):
+                            TEMP = STRING(g.LIT2(CONSTLIT));
                             if (LENGTH(TEMP) > g.VAR_LENGTH(g.ID_LOC)):
                                 ERROR(d.CLASS_DI, 18, g.SYT_NAME(g.ID_LOC));
                                 TEMP = SUBSTR(TEMP, 0, g.VAR_LENGTH(g.ID_LOC));

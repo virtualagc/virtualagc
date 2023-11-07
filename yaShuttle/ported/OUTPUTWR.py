@@ -685,7 +685,8 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
         # DO;
             g.INCLUDE_CHAR = g.PLUS;
             if g.SRN_PRESENT:
-                g.S = LEFT_PAD(g.PLUS + l.INCLUDE_COUNT, 6) + g.X1 + g.S;
+                g.S = LEFT_PAD(g.PLUS + str(l.INCLUDE_COUNT), 6) \
+                        + g.X1 + g.S;
             l.T = g.PAD1[:];
         # END
         else:  # NOT AN INCLUDED LINE
