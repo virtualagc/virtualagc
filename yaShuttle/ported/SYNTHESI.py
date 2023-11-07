@@ -1453,7 +1453,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         goto = "NON_EVENT"
     elif PRODUCTION_NUMBER == 91:  # reference 910
         #  <BIT FUNC HEAD>  ::= <BIT FUNC>
-        if START_NORMAL_FCN: 
+        if START_NORMAL_FCN(): 
             ASSOCIATE();
     elif PRODUCTION_NUMBER == 92:  # reference 920
         #  <BIT FUNC HEAD>  ::=  BIT  <SUB OR QUALIFIER>
@@ -2013,7 +2013,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
         END_ANY_FCN();
     elif PRODUCTION_NUMBER == 190:  # reference 1900
         #  <STRUCT FUNC HEAD>  ::=  <STRUCT FUNC>
-        if START_NORMAL_FCN: 
+        if START_NORMAL_FCN(): 
             ASSOCIATE();
     elif PRODUCTION_NUMBER == 191:  # reference 1910
         # <LIST EXP> ::= <EXPRESSION>

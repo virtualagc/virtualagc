@@ -1,15 +1,28 @@
 DEBUG `E `F
-CDEBUG `3`4`8
-
+ 
  TP: PROGRAM;
-
-    DECLARE C INTEGER CONSTANT(7);
-    DECLARE D SCALAR CONSTANT(8);
-    DECLARE X CONSTANT(3 C);
-    DECLARE Y;
-    
-    Y = C;
-    Y = D;
-    
+ 
+        STRUCTURE S:
+                1 X SCALAR,
+                1 Y INTEGER;
+        DECLARE SS S-STRUCTURE, TT S-STRUCTURE INITIAL(0, 1);
+        DECLARE I INTEGER;
+        
+        G: FUNCTION(N) INTEGER;
+                DECLARE N INTEGER;
+                RETURN N;
+        CLOSE G;
+       
+        F: FUNCTION(N) S-STRUCTURE;
+                DECLARE N INTEGER;
+                DECLARE T S-STRUCTURE;
+                T.X = 0;
+                T.Y = N;
+                RETURN T;
+        CLOSE F;
+        
+        I = G(7);
+        SS = TT;
+        SS = F(5);
  CLOSE TP;
  

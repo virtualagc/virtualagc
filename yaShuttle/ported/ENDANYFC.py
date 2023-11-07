@@ -157,6 +157,7 @@ def END_ANY_FCN():
 
         # END
     # END BI_COMPILE_TIME;
+    
     g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP], \
                     g.GRAMMAR_FLAGS(g.STACK_PTR[g.MP]) | g.FUNC_FLAG);
     MAXPTR = g.PTR[g.SP - 1];
@@ -165,6 +166,7 @@ def END_ANY_FCN():
         g.FCN_LV = g.FCN_LV - 1;
         return;
     # END
+    
     # DO CASE FCN_MODE[g.FCN_LV];
     fn = g.FCN_MODE[g.FCN_LV]
     if fn == 0:

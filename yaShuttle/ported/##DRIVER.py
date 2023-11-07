@@ -53,7 +53,7 @@ INITIALIZATION()
 
 #import HALINCL.COMMON as h
 #from watchpoints import watch
-#watch(h.SYM_TAB[3].SYM_PTR)
+#watch(g.FCN_LV)
 
 # THE_BEGINNING:
 g.CLOCK[1] = MONITOR(18)

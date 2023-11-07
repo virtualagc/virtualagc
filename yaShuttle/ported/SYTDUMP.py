@@ -507,7 +507,7 @@ def SYT_DUMP():
         for l.M in range(1, g.PROGRAM_LAYOUT_INDEX + 1):
             l.I = g.PROGRAM_LAYOUT[l.M];
             l.S = g.SYT_NAME(l.I);
-            while l.J in range(l.M + 1, g.PROGRAM_LAYOUT_INDEX + 1):
+            for l.J in range(l.M + 1, g.PROGRAM_LAYOUT_INDEX + 1):
                 if g.SYT_NAME(g.PROGRAM_LAYOUT[l.J]) == l.S:
                     l.KI = 1;
             l.S = l.S + ': ';

@@ -1,11 +1,26 @@
-C/ From PDF p. 176 of "Programming in HAL/S".
+C/ Adapted from PDF p. 176 of "Programming in HAL/S".
 
-  P:
-  PROGRAM;
+C/ Normally, if READ_ACC() were really a function in a separate 
+C/ compilation unit, its template and that of SUPER_VECTOR (its return
+C/ type) would be read in from the template library with a 
+C/ "D INCLUDE TEMPLATE compoolname" directive.  In this case,
+C/ though, there's no such function, and the following lines mimic
+C/ what could be in such an included template, without having to 
+C/ actually create any such function.  Of course, that means
+C/ that while this sample file can be compiled, the object code could
+C/ not be executed without actually supplying a READ_ACC() function too.
+  DUMMY_COMPOOL: EXTERNAL COMPOOL;
      STRUCTURE SUPER_VECTOR:
         1 V VECTOR,
         1 STATUS BOOLEAN,
         1 TIMETAG SCALAR;
+  CLOSE DUMMY_COMPOOL;
+  READ_ACC: EXTERNAL FUNCTION(N) SUPER_VECTOR-STRUCTURE;
+     DECLARE N INTEGER;
+  CLOSE READ_ACC;
+
+  P:
+  PROGRAM;
      STRUCTURE STATEVEC:
         1 POSITION SUPER_VECTOR-STRUCTURE,
         1 VELOCITY SUPER_VECTOR-STRUCTURE,
@@ -18,14 +33,6 @@ C/ From PDF p. 176 of "Programming in HAL/S".
      REPLACE TEST_DATA BY "1";
      DECLARE CYCLE INTEGER INITIAL(0);
      DECLARE DELTA_T CONSTANT(1 / 10);	/*TIME BETWEEN SAMPLES*/
-     DECLARE READ_ACC FUNCTION SUPER_VECTOR-STRUCTURE;
-     
-C     READ_ACC: FUNCTION(N) SUPER_VECTOR-STRUCTURE;
-C        DECLARE N INTEGER;
-C        DECLARE S SUPER_VECTOR-STRUCTURE 
-C                               CONSTANT(1, 2, 3, TRUE, 456.789);
-C        RETURN S;
-C     CLOSE READ_ACC;
           
      STATE2.STATE.ACCEL = READ_ACC(17);
 

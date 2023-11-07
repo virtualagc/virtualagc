@@ -1026,7 +1026,7 @@ rm report.log ; \
 for f in &ast;.hal; \
 do \
     echo $f >>report.log ; \
-    HAL-S-FC.py --extra --hal=$f >$f.lst 2>>report.log ; \
+    HAL-S-FC.py SRN --hal=$f >$f.lst 2>>report.log ; \
 done ; \
 egrep '^\&ast;\&ast;\&ast;\&ast;\&ast; [^ ]+  +ERROR' &ast;.hal.lst --only-matching --no-filename | \
 sort | \
@@ -1038,39 +1038,11 @@ grep --only-matching '^.&ast;lst:' | \
 sort -u
 </pre>
 
-## E6
+Folders in the publicly-available source tree that contain HAL/S source-code files (vs private caches of flight-software source-code files) are:
 
-<pre>
-***** E6       ERROR #x OF SEVERITY 2. *****
-***** INCOMPATIBLE ARITHMETIC OPERAND TYPES IN EXPRESSION
-</pre>
+  * yaShuttle/ported/
+  * yaShuttle/Source Code/Programming in HAL-S/
+  * yaShuttle/Source Code/HAL-S-360 Users Manual/
 
-Count: 1
-File(s): 176-P.hal
-
-TBD
-
-## AV1
-
-<pre>
-***** AV1      ERROR #x OF SEVERITY 2. *****
-***** TYPE OF xxxx IS ILLEGAL FOR ASSIGNMENT FROM GIVEN RIGHT-HAND SIDE.
-</pre>
-
-Count: 2
-File(s): 176-P.hal
-
-TBD
-
-## DI3
-
-<pre>
-***** DI3      ERROR #1 OF SEVERITY 2. *****
-***** EXPRESSION IN INITIAL LIST IS NOT COMPUTABLE AT COMPILE TIME
-</pre>
-
-Count: 3:
-File(s): 032-INITIAL_AND_CONSTANT.hal, 095-TAN_SUMS.hal
-
-This failure occurs when a previously-defined `CONSTANT` is used in expressions within later `CONSTANT(...)` or `INITIAL(...)` attributes in `DECLARE` statements.  (As opposed to using merely numerical literals and arithmetical operators in the expressions.)
+At this writing (2023-11-07), there are presently no HAL/S sample files or *available* actual flight which produce any compile-time error messages.
 
