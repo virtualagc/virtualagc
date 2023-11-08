@@ -1,28 +1,7 @@
 DEBUG `E `F
  
- TP: PROGRAM;
- 
-        STRUCTURE S:
-                1 X SCALAR,
-                1 Y INTEGER;
-        DECLARE SS S-STRUCTURE, TT S-STRUCTURE INITIAL(0, 1);
-        DECLARE I INTEGER;
-        
-        G: FUNCTION(N) INTEGER;
-                DECLARE N INTEGER;
-                RETURN N;
-        CLOSE G;
-       
-        F: FUNCTION(N) S-STRUCTURE;
-                DECLARE N INTEGER;
-                DECLARE T S-STRUCTURE;
-                T.X = 0;
-                T.Y = N;
-                RETURN T;
-        CLOSE F;
-        
-        I = G(7);
-        SS = TT;
-        SS = F(5);
+ TP: PROCEDURE(X);
+       DECLARE X SCALAR;
+       DECLARE Y SCALAR;
  CLOSE TP;
  

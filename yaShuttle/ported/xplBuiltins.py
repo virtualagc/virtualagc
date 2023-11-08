@@ -248,16 +248,16 @@ if "--help" not in sys.argv:
         # tree.  The other folders don't need to be checked in a production version
         # of the compiler, since they most likely don't even exist.
         folders = (
-            ".",
-            "../Source Code/Programming in HAL-S",
-            "../Source Code/HAL-S-360 Users Manual",
-            "../../../../workspace/PFS/Flight Software source code"
+            "",
+            "../Source Code/Programming in HAL-S/",
+            "../Source Code/HAL-S-360 Users Manual/",
+            "../../../../workspace/PFS/Flight Software source code/"
             )
         f = None
         i = 0
         while f == None and i < len(folders):
             try:
-                s = folders[i] + "/" + sourceFile
+                s = folders[i] + sourceFile
                 f = open(s, "r")
                 sourceFile = s
                 break
