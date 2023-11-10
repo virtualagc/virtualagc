@@ -23,6 +23,96 @@ document.write(headerTemplate.replace("@TITLE@","Change-Log").replace("@SUBTITLE
       left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
+  <td valign="top">2023-11-10<br>
+  </td>
+  <td valign="top">I've gotten a handful of materials related 
+peripherally or directly to the HAL/S compiler development that I 
+described in yesterday's post, and I've posted them to <a moz-do-not-send="true" href="links-shuttle.html#RecentAdditions">the Shuttle library page</a>. <br>
+    <ul>
+      <li>Slides and supplementary material for a course called "Basic HAL/S Programming".</li>
+      <li>Slides for a course called "AP-101S Assembly Language Introduction".</li>
+      <li>Slides for a course called "AP-101S Patch Fundamentals".</li>
+      <li>"HAL/S Compiler Test Results Report".</li>
+    </ul>
+    <p>My personal experience with slide-show presentations is that 
+seeing the slides outside the context of the presentation is often
+worthless, since the meat of the presentation is usually the words from 
+the presenter's mouth rather than the eye candy on the 
+slides.&nbsp; However, that's not true of the first two courses 
+mentioned above, and they're actually valuable stand-alone resources ...
+ particularly the "<a moz-do-not-send="true" href="Shuttle/Courses/Basic%20HAL-S%20Programming%20Course/CourseSlides.pdf">Basic HAL/S Programming</a>"
+ course that's so relevant to what I'm working on now.&nbsp; It's quite a
+ substantial addition to our little collection of HAL/S programmer 
+training materials, and should be either the first or second stop for 
+anybody interested in learning about HAL/S.&nbsp; (The other stop being 
+Ryer's book, <a moz-do-not-send="true" href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf">Programming in HAL/S</a>,
+ which incidentally I've been updating with comments of my own which I 
+hope are helpful. I notice that my annotations don't show up in Chrome 
+or Firefox, even if I turn enable the annotation settings.&nbsp; I 
+suppose that may be a blessing to some of you. <img moz-do-not-send="true" src="smiley.png" alt="" width="16" height="16">&nbsp;
+ But if you want to actually view my annotations, you may have to 
+download the document and experiment to find a PDF viewer that shows 
+annotations.)<br>
+</p>
+<p>I mentioned some months back that I had again acquired a big backlog 
+of documents for the Shuttle library.&nbsp; I haven't forgotten them, 
+but I haven't had any time to process them or even look at them yet, 
+because they're not really relevant to HAL/S or its compiler.<br>
+    </p>
+
+  </td>
+</tr>
+<tr>
+  <td valign="top">2023-11-09<br>
+  </td>
+  <td valign="top">As I mentioned in my last post, which was a month ago
+ but seems like a year, all of my personal effort recently has been 
+devoted to getting the original compiler for Space Shuttle flight 
+software into a form in which we can use it nowadays ourselves.&nbsp; <br>
+    <br>
+You'll recall that the Shuttle's flight software (known as PASS and BFS)
+ was written in a now-obsolete programming language called HAL/S — for 
+which, as far as I know, there are no longer any surviving functioning 
+compilers.&nbsp; Or at least, none running on common types of computer 
+systems available to common folk such as ourselves.&nbsp; We <i>do</i> 
+have the complete source code for that original compiler, which was 
+called HAL/S-FC.&nbsp; But that source code is primarily written in an 
+even-more obsolete programming language called XPL, which also has no 
+available functioning compilers, combined at some crucial points with 
+IBM 360 assembly language (known as BAL).&nbsp; And even worse, it was a
+ mostly-undocumented "enhanced" form of XPL, so even if you somehow 
+managed to get a standard XPL compiler, it still wouldn't compile the 
+source code for HAL/S-FC.<br>
+    <br>
+My workaround for these little deficiencies has been to port the 
+original HAL/S-FC's XPL source code to a modern programming language, 
+namely Python 3, that anybody can run on any common computer system, 
+such as Windows, Mac OS, or Linux.&nbsp; I won't claim that this has 
+been an easy task.&nbsp; There have been, and continue to be, many 
+hurdles along this path.&nbsp; If I had known just how many, I might 
+have elected not to attempt it at all.<br>
+    <br>
+But I'm pleased to say that a nice little milestone has been 
+reached:&nbsp; The ported HAL/S-FC can now compile without error every 
+syntactically-correct HAL/S source-code file available to me.<br>
+    <br>
+You have to take that assessment with a grain of salt, since it merely 
+means that there are no compile-time error messages.&nbsp; That's not a 
+guarantee that whatever object code the compiler generates is 
+correct.&nbsp; Nor should it be taken to imply that we can actually run 
+any of that code after compilation.&nbsp; Nor that we actually have much
+ HAL/S source code to try it on; almost all HAL/S source code we have 
+has been scraped from contemporary documentation rather than from actual
+ flight software.&nbsp; But first things first!&nbsp; It's a step 
+forward, and much much nicer than the hundreds of compiler errors I was 
+getting even very recently.<br>
+    <br>
+    <a moz-do-not-send="true" href="Shuttle.html#Original">The Shuttle page</a> has been updated with explanations on this topic, including instructions for installing and using the ported HAL/S compiler.<br>
+    <br>
+Expect that there will be lots more to come on this topic in the future as I continue trying to overcome the hurdles.<br>
+  </td>
+</tr>
+<tr>
   <td valign="top">2023-10-11<br>
   </td>
   <td valign="top">So ... I notice that it has been a couple of months 
