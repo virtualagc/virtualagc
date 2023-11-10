@@ -14,6 +14,7 @@ from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
 from ERROR    import ERROR
+from ERRORS   import ERRORS
 from GETICQ   import GET_ICQ
 from GETLITER import GET_LITERAL
 from HALMATPI import HALMAT_PIP

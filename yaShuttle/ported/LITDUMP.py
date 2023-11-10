@@ -52,6 +52,12 @@ from IFORMAT import I_FORMAT
 
 def LIT_DUMP():
     # Locals are TEMP, S, T, and ZEROS.
+    # Note that SCALAR DOUBLE is *deliberately* displayed just in 
+    # single precision in the table. (Due to DR109083; presumably 
+    # displayed differently prior to that.)  Moreover, due to the 
+    # truncation of T, the type field for any DOUBLE (INTEGER or 
+    # SCALAR) is left blank; whether that's deliberate or else just a 
+    # kooky cock-up, I don't know.
     T = '  CHAR   ARITH    BIT    '
     ZEROS = '00000000'
        
