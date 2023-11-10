@@ -2335,6 +2335,12 @@ NAME_HASH = 0
 INLINE_LEVEL = 0
 INLINE_LABEL = 0
 MAX_STRUC_LEVEL = 5
+# By setting OVER_PUNCH_SIZE to 4, rather than the 10 which would be
+# implied by the length of OVER_PUNCH_TYPE, it causes overpunches of
+# "+" (i.e., structures) to error out.  This seems to be intentional,
+# because the overpunch information is passed along in the global
+# IMPLIED_TYPE, and it looks like there's no code in IDENTIFY to deal
+# with IMPLIED_TYPE > 4.
 OVER_PUNCH_SIZE = 4
 ID_LIMIT = 32
 MAX_STRING_SIZE = 256

@@ -61,6 +61,8 @@ def LIT_DUMP():
     OUTPUT(1, '0 LOC  TYPE          LITERAL');
     OUTPUT(0, g.X1);
     for g.I in range(1, g.LIT_TOP() + 1):
+        if g.I in [8, 9]:
+            pass
         TEMP = GET_LITERAL(g.I);
         # DO CASE (LIT1(TEMP) & "3");
         lt = g.LIT1(TEMP) & 0x03

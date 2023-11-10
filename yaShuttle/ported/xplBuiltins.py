@@ -897,10 +897,19 @@ def TIME():
             now.microsecond // 10000
 
 
+# From the way SUBSTR() is used in the LITDUMP module, it's clear
+# that if ne2 is specified, then the function always returns exactly
+# ne2 characters, padded with blanks if past the end of the input 
+# string.  I.e., ne2 is *not* the max number of characters to return.
+# However, from the behavior in TRUNCATE() of the SYTDUMP module, it
+# does appear if the string is shorter when ne < 0, though it's 
+# unclear exactly what the behavior is supposed to be then.
 def SUBSTR(de, ne, ne2=None):
+    if ne < 0:
+        return ""
     if ne2 == None:
         return de[ne:]
-    return de[ne: ne + ne2]
+    return "%-*s" % (ne2, de[ne: ne + ne2])
 
 
 def STRING(s):
