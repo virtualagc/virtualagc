@@ -48,9 +48,9 @@
 
 My plan for this folder (ported/) is to port a portion of the original Intermetrics HAL/S-FC compiler from its XPL language form to the Python 3 language.
 
-This port will be of just the original compiler's PASS1 (or "phase 1"), which parses HAL/S source code and produces output in the form of the HALMAT intermediate language.  Since only 20% of HALMAT's documentation has survived over the intervening decades, HALMAT has been rendered basically unusable.  Therefore, the compiler's output-code generator will have to be augmented to additionally produce my own intermediate language, PALMAT.  PALMAT is directly executable on my emulator.  Another possibility is to port the portion of the compiler that generates IBM Basic Assembly Language (BAL) object code from the HALMAT intermediate language, and to emulate execution of BAL.  
+This port will be of just the original compiler's PASS1 and PASS2.  PASS1 parses HAL/S source code and produces output in the form of the HALMAT intermediate language.  PASS2 optimizes the HALMAT and produces executable object code for either the IBM 360 or for the GPC.  Since only 20% of HALMAT's documentation has survived over the intervening decades, HALMAT has been rendered basically unusable.  PASS 3 and PASS 4 of the compiler are not intended to be ported at the present time, since they relate to simulations for which none of the supporting software is believed to have survived.
 
-I probably won't discuss any of those latter issues in this README.  In other respects, though, the intention is for the port to be very direct, without any "reimaginings" to make the compiler better or more efficient.  The idea is that the XPL and the Python versions of the compiler source code should correspond very directly and obviously in a side-by-side comparison.
+This README is primarily about PASS1, though issues in porting PASS2 are essentially the same.  The intention is for the port to be very direct, without any "reimaginings" to make the compiler better or more efficient.  The idea is that if the XPL and the Python versions of the compiler source code were placed side-by-side, then a competent auditor should be able to easily determine that the port was correct, at least superficially.  This is one exception to this principle, which is that the main programs of PASS 1 and PASS 2, each called ##DRIVER originally, are renamed HAL-S-FC.py and HAL-S-FC-PASS2.py respectively.  This is done to insure that the compiler can be accessed in a sensible cross-platform way on any platform (Windows, Mac OS, Linux).
 
 As far as this "README" is concerned, some involves factual background material or else descriptions of implementation decisions I've made in the course of this porting effort.  But it has turned out that quite a lot of this README is devoted to what may be called "inferences and mysteries": i.e., to trying to puzzle out details about how the Intermetrics "enhancements" to XPL may have functioned or to how the original XPL code of the HAL/S compiler worked.  Obviously, that's a work in progress and subject to my own temporary or permanent misunderstanding.
 
@@ -62,7 +62,7 @@ As far as this "README" is concerned, some involves factual background material 
 
 # <a name="Bookkeeping"></a>Some Bookkeeping Details
 
-File hierarchy:  The original hierarchy of XPL modules looked like so:
+File hierarchy:  The *original* hierarchy of XPL modules looked like so:
 
   * ...
   * HALINCL/
@@ -71,23 +71,29 @@ File hierarchy:  The original hierarchy of XPL modules looked like so:
   * PASS3.PROCS/
   * ...
 
-Each XPL file *needed* for PASS 1 of the compiler is ported to Python, but files not needed won't be given any Python equivalents.  Filenames are retained, other than file extensions being replaced by ".py".  However, the file hierarchy isn't maintained in the same form, because Python wants to import modules only from the current folder or from subfolders, and *not* from folders with other relationships to the current folder.  Therefore, the following hierarchy is used for the ported files:
+Each XPL file needed for PASS 1 and PASS 2 of the compiler is ported to Python, but files not needed (yet) aren't necessarily given any Python equivalents.  With one exception described in a moment filenames are retained, except that the filename extension ".xpl" is replaced by ".py".
 
-  * ported/                 Files from PASS1.PROCS/
-      * HALINCL/            Other folders ...
-      * ...
+However, the folder hierarchy isn't maintained in the same form.  That's because because Python likes to import modules only from the base folder &mdash; i.e., the folder containing the top-level Python program being executed &mdash; or from its subfolders, and not from folders with other relationships to the base folder.  (While there are tricks which can be performed to get around this, I'm worried about portability, future maintainability, and ease of use, so I don't intend trying to use any such tricks.)
 
-For example, the "main program", originally named "PASS1.PROCS/##DRIVER" or "PASS1.PROCS/##DRIVER.xpl", thus becomes "ported/##DRIVER.py" in Python.  Whereas the original file "HALINCL/COMMON.xpl" would become "ported/HALINCL/COMMON.py".
+The following hierarchy is used for the ported files:
 
-Additionally, many variables, constants, functions, and macros defined in PASS1.PROCS/##DRIVER.xpl, as well as some which are always present and don't need to be defined in any XPL source file, are expected to be within scope for other XPL source-code files.  I've adopted the following convention:
+  * ported/                 Files originally in PASS1.PROCS.
+      * PASS2/              Files originally in PASS2.PROCS.
+          * HALINCL/        Files originally in HALINCL.
 
-  * Definitions of global variables and constants, as well as some python functions having the same names as the original XPL variables and are intended to workaround some goofy behavior of the originals, are collected in the file g.py.
-  * Definitions of global functions and macros such as `MONITOR()`, `OUTPUT()`, `BYTE()`, and so on are collected in the file xplBuiltins.py
+There's some overlap of duplicated files here, in that PASS2.PROCS/ contains a few files that are functionally the same as files of the same name in PASS1.PROCS/, but not enough to concern ourselves about.  Note that PASS 2 of the compiler is never run standalone, but is only invoked at the end of PASS 1, which means that whenever PASS 2 runs, the base import folder is that sames as for PASS 1, namely ported/.
 
-Therefore, in any of our other files ported from XPL to Python, these can be accessed by including the line:
+Additionally, many variables, constants, functions, and macros originally defined in either PASS1.PROCS/##DRIVER.xpl or PASS2.PROCS/##DRIVER.xpl (now ported/HAL-S-FC.py and ported/PASS2/HAL-S-FC-PASS2.py respectively), as well as some which are always present and don't need to be defined in any XPL source file, are expected to be within scope for all other XPL source-code files.  I've adopted the following convention:
+
+  * Definitions of global variables and constants from PASS1.PROCS/##DRIVER.XPL are collected in the file ported/g.py.
+  * Definitions of global variables and constants from PASS2.PROCS/##DRIVER.XPL are collected in the file ported/PASS2/g.py.
+  * Definitions of global functions and macros such as `MONITOR()`, `OUTPUT()`, `BYTE()`, and so on are collected in the file PASS2/xplBuiltins.py.  It is important to note that xplBuiltins.py does not itself import g.py, and thus is agnostic as to whether PASS 1 or PASS 2 code is using it.
+
+Therefore, in most of the ported compiler files you can find lines like the following:
 <pre>
-    from xplBuiltins import *
-    import g
+    from xplBuiltins import * 
+    import g                    # For PASS 1 only.
+    import PASS2.g as g         # For PASS 2 only.
 </pre>
 Those functions and macros are then used just as-is, without any name changes, whereas the global variables and constant have "`g.`" prefixed to their names.  For example, if you had a global function (say, `MONITOR`, defined in xplBuiltins.py) and a global variable (say, `CURRENT_CARD`, defined in g.py), you could access them as:
 <pre>
