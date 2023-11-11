@@ -23,7 +23,7 @@ History:    2023-09-28 RSB  Ported
 '''
 This part of the original XPL appears to be gobbledygook.  For one thing, the
 parentheses in LOCATE_STMT_DECL_CELL don't match up.  Nor is 
-LOCATE_STMT_DECL_CELL use any place in the remainder of the code base anyway, 
+LOCATE_STMT_DECL_CELL used any place in the remainder of the code base anyway, 
 as far as I can see.
 
    /* STMT_DECL DESCRIBES WHAT A STATEMENT DECLARATION CELL LOOKS LIKE
