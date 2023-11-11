@@ -50,7 +50,7 @@ My plan for this folder (ported/) is to port a portion of the original Intermetr
 
 This port will be of just the original compiler's PASS1 and PASS2.  PASS1 parses HAL/S source code and produces output in the form of the HALMAT intermediate language.  PASS2 optimizes the HALMAT and produces executable object code for either the IBM 360 or for the GPC.  Since only 20% of HALMAT's documentation has survived over the intervening decades, HALMAT has been rendered basically unusable.  PASS 3 and PASS 4 of the compiler are not intended to be ported at the present time, since they relate to simulations for which none of the supporting software is believed to have survived.
 
-This README is primarily about PASS1, though issues in porting PASS2 are essentially the same.  The intention is for the port to be very direct, without any "reimaginings" to make the compiler better or more efficient.  The idea is that if the XPL and the Python versions of the compiler source code were placed side-by-side, then a competent auditor should be able to easily determine that the port was correct, at least superficially.  This is one exception to this principle, which is that the main programs of PASS 1 and PASS 2, each called ##DRIVER originally, are renamed HAL-S-FC.py and HAL-S-FC-PASS2.py respectively.  This is done to insure that the compiler can be accessed in a sensible cross-platform way on any platform (Windows, Mac OS, Linux).
+This README is primarily about PASS1, though issues in porting PASS2 are essentially the same.  The intention is for the port to be very direct, without any "reimaginings" to make the compiler better or more efficient.  The idea is that if the XPL and the Python versions of the compiler source code were placed side-by-side, then a competent auditor should be able to easily determine that the port was correct, at least superficially.
 
 As far as this "README" is concerned, some involves factual background material or else descriptions of implementation decisions I've made in the course of this porting effort.  But it has turned out that quite a lot of this README is devoted to what may be called "inferences and mysteries": i.e., to trying to puzzle out details about how the Intermetrics "enhancements" to XPL may have functioned or to how the original XPL code of the HAL/S compiler worked.  Obviously, that's a work in progress and subject to my own temporary or permanent misunderstanding.
 
@@ -62,7 +62,7 @@ As far as this "README" is concerned, some involves factual background material 
 
 # <a name="Bookkeeping"></a>Some Bookkeeping Details
 
-File hierarchy:  The *original* hierarchy of XPL modules looked like so:
+File hierarchy and file naming:  The *original* hierarchy of XPL modules looked like so:
 
   * ...
   * HALINCL/
@@ -74,7 +74,7 @@ File hierarchy:  The *original* hierarchy of XPL modules looked like so:
 The port of the compiler duplicates this hierarchy, placing it under yaShuttle/ported/ in the source tree, with some provisos:
 
   * Folders and files not yet needed won't necessarily appear in the new file hierarchy.
-  * If the "main program" in any given folder is named "##DRIVER.xpl", then its ported version is renamed "HAL_S_FC.py".  Besides that, though, these ##DRIVER.xpl files tend to be filled with many DECLARE statements defining constants or variables intended to be globally accessible.  Those global declarations are removed from HAL_S_FC.py and placed instead in a extra file called g.py.
+  * If the "main program" in any given folder is named "##DRIVER.xpl", then its ported version is renamed "HAL_S_FC.py".  Besides that, though, these ##DRIVER.xpl files tend to be filled with many DECLARE statements defining constants or variables intended to be globally accessible.  Those global declarations are removed from HAL_S_FC.py and placed instead in a extra file called g.py, with one such file for each separae ##DRIVER.xpl.
   * Otherwise, the original filenames are retained except that the filename extension ".xpl" is replaced by ".py".
 
 Besides these ported files, the XPL language also has a variety of built-in functions which are always available but not represented by any of the compiler's XPL source code.  These built-ins are implemented in a file called xplBuiltins.xpl, which resides in the parent folder that contains all of the file hierarchy just mentioned.
@@ -89,7 +89,7 @@ The ##DRIVER.xpl/HAL_S_FC.py files just mentioned represent "main programs" (vs 
   * PASS3.PROCS/ &mdash; PASS 3 of the compiler
   * PASS4.PROCS/ &mdash; PASS 4 of the compiler
 
-Whereas HALINCL/ merely contains modules imported by some of these nominally standalone programs.  The standalone programs are invoked by a separate assembly-language program, MONITOR.
+Whereas HALINCL/ merely contains modules imported by some of these nominally standalone programs.  The standalone programs were originally invoked by a separate assembly-language program, MONITOR.  I may or may not create corresponding scripts MONITOR.bat (batch file for Windows) and MONITOR (BASH shell script for Linux/Mac OS).
 
 Python likes to import modules only from the base folder &mdash; i.e., the folder containing the top-level Python program being executed &mdash; or from its subfolders, and not from folders with other relationships to the base folder. Consequently, the first actions of any of the HAL_S_FC.py files are to:
 
@@ -1046,7 +1046,7 @@ rm report.log ; \
 for f in &ast;.hal; \
 do \
     echo $f >>report.log ; \
-    HAL-S-FC.py SRN --hal=$f >$f.lst 2>>report.log ; \
+    HAL_S_FC.py SRN --hal=$f >$f.lst 2>>report.log ; \
 done ; \
 egrep '^\&ast;\&ast;\&ast;\&ast;\&ast; [^ ]+  +ERROR' &ast;.hal.lst --only-matching --no-filename | \
 sort | \
