@@ -2,7 +2,7 @@
 '''
 License:    The author, Ron Burkey, declares this program to be in the Public
             Domain, and may be used or modified in any way desired.
-Filename:   HAL-S-FC.py ... formerly known as ##DRIVER.py
+Filename:   HAL_S_FC.py ... formerly known as ##DRIVER.py
 Purpose:    This is part of the port of the original XPL source code for 
             HAL/S-FC into Python.  Note that this port does not necessarily
             include all program comments that were present in the original code.
@@ -12,6 +12,10 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
             2023-11-10 RSB  Renamed ##DRIVER.py -> HAL-S-FC.py to avoid
                             certain cross-platform difficulties.  And
                             besides, it was just the right thing to do!
+            2023-11-11 RSB  Renamed again, to HAL_S_FC.py, since it 
+                            turns out that "HAL-S-FC" is not a valid
+                            name for a Python module (and all Python
+                            scripts are Python modules).
 
  /***************************************************************************/
  /* PROCEDURE NAME:  MAIN PROGRAM                                           */
