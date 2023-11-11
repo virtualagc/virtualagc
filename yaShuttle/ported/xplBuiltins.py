@@ -15,6 +15,7 @@ History:    2023-09-07 RSB  Split the former g.py into two files, this one
 
 import sys
 import os
+import pathlib
 from time import time_ns
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
@@ -22,7 +23,9 @@ import json
 import math
 import ebcdic
 
-scriptFolder = os.path.dirname(__file__) # Requires a / at the end.
+# This is the root directory for imports.
+scriptFolder = os.path.dirname(__file__) # Requires / at the end.
+scriptParentFolder = str(pathlib.Path(scriptFolder).parent.absolute())
 
 sourceFile = None  # Use stdin by default for HAL/S source-code file.
 outUTF8 = True
@@ -249,9 +252,8 @@ if "--help" not in sys.argv:
         # of the compiler, since they most likely don't even exist.
         folders = (
             "",
-            "../Source Code/Programming in HAL-S/",
-            "../Source Code/HAL-S-360 Users Manual/",
-            "../../../../workspace/PFS/Flight Software source code/"
+            scriptParentFolder + "/../Source Code/Programming in HAL-S/",
+            scriptParentFolder + "/../Source Code/HAL-S-360 Users Manual/"
             )
         f = None
         i = 0

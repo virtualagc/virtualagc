@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 License:    The author, Ron Burkey, declares this program to be in the Public
-            Domain, and may be used or modified in any way desired.
+            Domain, and mals -dsflkdsjfy be used or modified in any way desired.
 Filename:   HAL_S_FC.py ... formerly known as ##DRIVER.py
 Purpose:    This is part of the port of the original XPL source code for 
             HAL/S-FC into Python.  Note that this port does not necessarily
@@ -29,6 +29,21 @@ History:    2023-08-24 RSB  Began porting from ##DRIVER.xpl, segregating global
  /* CALLED BY:                                                              */
  /***************************************************************************/
 '''
+
+#####################################################################
+# Every port from ##DRIVER.xpl needs the following, in order for all
+# of them to use the same xplBuiltins.py and HALINCL/ without conflict.
+import os
+import pathlib
+import shutil
+scriptFolder = os.path.dirname(__file__)
+scriptParentFolder = str(pathlib.Path(scriptFolder).parent.absolute())
+shutil.copyfile(scriptParentFolder + "/xplBuiltins.py", \
+                scriptFolder + "/xplBuiltins.py")
+shutil.rmtree(scriptFolder + "/HALINCL", ignore_errors = True)
+shutil.copytree(scriptParentFolder + "/HALINCL", \
+                scriptFolder + "/HALINCL")
+#####################################################################
 
 from xplBuiltins import MONITOR
 import g

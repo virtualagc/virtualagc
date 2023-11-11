@@ -71,31 +71,45 @@ File hierarchy:  The *original* hierarchy of XPL modules looked like so:
   * PASS3.PROCS/
   * ...
 
-Each XPL file needed for PASS 1 and PASS 2 of the compiler is ported to Python, but files not needed (yet) aren't necessarily given any Python equivalents.  With one exception described in a moment filenames are retained, except that the filename extension ".xpl" is replaced by ".py".
+The port of the compiler duplicates this hierarchy, placing it under yaShuttle/ported/ in the source tree, with some provisos:
 
-However, the folder hierarchy isn't maintained in the same form.  That's because because Python likes to import modules only from the base folder &mdash; i.e., the folder containing the top-level Python program being executed &mdash; or from its subfolders, and not from folders with other relationships to the base folder.  (While there are tricks which can be performed to get around this, I'm worried about portability, future maintainability, and ease of use, so I don't intend trying to use any such tricks.)
+  * Folders and files not yet needed won't necessarily appear in the new file hierarchy.
+  * If the "main program" in any given folder is named "##DRIVER.xpl", then its ported version is renamed "HAL_S_FC.py".  Besides that, though, these ##DRIVER.xpl files tend to be filled with many DECLARE statements defining constants or variables intended to be globally accessible.  Those global declarations are removed from HAL_S_FC.py and placed instead in a extra file called g.py.
+  * Otherwise, the original filenames are retained except that the filename extension ".xpl" is replaced by ".py".
 
-The following hierarchy is used for the ported files:
+Besides these ported files, the XPL language also has a variety of built-in functions which are always available but not represented by any of the compiler's XPL source code.  These built-ins are implemented in a file called xplBuiltins.xpl, which resides in the parent folder that contains all of the file hierarchy just mentioned.
 
-  * ported/                 Files originally in PASS1.PROCS.
-      * PASS2/              Files originally in PASS2.PROCS.
-          * HALINCL/        Files originally in HALINCL.
+The ##DRIVER.xpl/HAL_S_FC.py files just mentioned represent "main programs" (vs merely modules used in programs):
 
-There's some overlap of duplicated files here, in that PASS2.PROCS/ contains a few files that are functionally the same as files of the same name in PASS1.PROCS/, but not enough to concern ourselves about.  Note that PASS 2 of the compiler is never run standalone, but is only invoked at the end of PASS 1, which means that whenever PASS 2 runs, the base import folder is that sames as for PASS 1, namely ported/.
+  * PASS1.PROCS/ &mdash; PASS 1 of the compiler
+  * OPT.PROCS/ &mdash; The original HALMAT optimizer ("phase 1.5" of the compiler)
+  * AUX_PROCS/ &mdash; An additional optimization program added later.
+  * FLO.PROCS/ &mdash; An additional optimization program added later.
+  * PASS2.PROCS/ &mdash; PASS 2 (object-code generation) of the compiler
+  * PASS3.PROCS/ &mdash; PASS 3 of the compiler
+  * PASS4.PROCS/ &mdash; PASS 4 of the compiler
 
-Additionally, many variables, constants, functions, and macros originally defined in either PASS1.PROCS/##DRIVER.xpl or PASS2.PROCS/##DRIVER.xpl (now ported/HAL-S-FC.py and ported/PASS2/HAL-S-FC-PASS2.py respectively), as well as some which are always present and don't need to be defined in any XPL source file, are expected to be within scope for all other XPL source-code files.  I've adopted the following convention:
+Whereas HALINCL/ merely contains modules imported by some of these nominally standalone programs.  The standalone programs are invoked by a separate assembly-language program, MONITOR.
 
-  * Definitions of global variables and constants from PASS1.PROCS/##DRIVER.XPL are collected in the file ported/g.py.
-  * Definitions of global variables and constants from PASS2.PROCS/##DRIVER.XPL are collected in the file ported/PASS2/g.py.
-  * Definitions of global functions and macros such as `MONITOR()`, `OUTPUT()`, `BYTE()`, and so on are collected in the file PASS2/xplBuiltins.py.  It is important to note that xplBuiltins.py does not itself import g.py, and thus is agnostic as to whether PASS 1 or PASS 2 code is using it.
+Python likes to import modules only from the base folder &mdash; i.e., the folder containing the top-level Python program being executed &mdash; or from its subfolders, and not from folders with other relationships to the base folder. Consequently, the first actions of any of the HAL_S_FC.py files are to:
 
-Therefore, in most of the ported compiler files you can find lines like the following:
+  * Copy xplBuiltins.py
+  * Copy HALINCL/
+
+This allows each of the standalone programs ##DRIVER.xpl/HAL_S_FC.py to have its own private copies of xplBuiltins.xpl and HALINCL/*.xpl, while at the same time insuring that each copy uses identical source code.
+
+In most of the ported compiler files you can find lines like the following:
 <pre>
     from xplBuiltins import * 
-    import g                    # For PASS 1 only.
-    import PASS2.g as g         # For PASS 2 only.
+    import g
 </pre>
-Those functions and macros are then used just as-is, without any name changes, whereas the global variables and constant have "`g.`" prefixed to their names.  For example, if you had a global function (say, `MONITOR`, defined in xplBuiltins.py) and a global variable (say, `CURRENT_CARD`, defined in g.py), you could access them as:
+These are often supplemented by:
+</pre>
+    import HALINCL.COMMON as h
+    import HALINCL.CERRDECL as d
+    from ERROR import ERROR
+</pre>
+Built-in functions (and in the above common example, ERROR) are used without any name changes, whereas the global variables and constants from g.py have "`g.`" prefixed to their names.  For example, if you had a global function (say, `MONITOR`, defined in xplBuiltins.py) and a global variable (say, `CURRENT_CARD`, defined in g.py), you could access them as:
 <pre>
     from xplBuiltins import *
     import g
@@ -104,7 +118,7 @@ Those functions and macros are then used just as-is, without any name changes, w
     ...
     g.CURRENT_CARD = ...
 </pre>
-It's important *not* to import g.py with `from g import *`, because assignments to variables defined in g.py won't change the values of those variables in other files importing g.py if they're not in the `g.` namespace.  However, assignments in the `g.` namespace do affect all files that import g.py.
+It's important *not* to import g.py with `from g import *`, because assignments to variables defined in g.py won't change the values of those variables in other files importing g.py if they're not in the `g.` namespace.  However, assignments in the `g.` namespace do affect all files that import g.py.  Other commonly used namespaces for global variables and constants (as in the example above) are "d." and "h.".
 
 In addition to the usual alphanumeric and underline characters, identifiers in XPL can include the characters '@', '#', and '$', which are not allowed in Python identifiers.  However, it so happens that all of the original HAL/S-FC source code contained only upper-case characters when alphabetic.  Therefore, I use the uniform system of replacing disallowed characters in identifiers by lower-case alphabetic characters as follows:
 
