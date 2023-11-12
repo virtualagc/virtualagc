@@ -5551,7 +5551,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                 if g.TEMP2 != g.UPDATE_MODE:
                     HALMAT_BACKUP(g.LAST_POPp);
                 if not g.HALMAT_CRAP: 
-                    g.HALMAT_OK = g.EXTERNAL_MODE = 0;
+                    g.HALMAT_OK = (g.EXTERNAL_MODE == 0);
                 HALMAT_POP(g.TEMP, 1, 0, 0);
                 HALMAT_PIP(g.FIXL[g.MP], g.XSYT, 0, 0);
             if goto == "INLINE_ENTRY": goto = None

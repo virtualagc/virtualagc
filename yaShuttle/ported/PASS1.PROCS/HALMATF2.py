@@ -36,4 +36,4 @@ import g
 
 def HALMAT_FIX_POPTAG(POP_LOC, TAG):
     if g.HALMAT_OK:
-        g.ATOMS(g.POP_LOC, (g.ATOMS(g.POP_LOC) & 0xFFFFFF) | SHL(TAG & 0xFF, 24));
+        g.ATOMS(POP_LOC, (g.ATOMS(POP_LOC) & 0xFFFFFF) | SHL(TAG & 0xFF, 24));
