@@ -1,0 +1,152 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     BLDSIM                                               */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: BUILD THE ENTIRE SIMLIB FOR PASS OR BFS              */
+00000900/*                                                                  */
+00001000/*------------------------------------------------------------------*/
+00001100/*                                                                  */
+00001200/*   SYNTAX:                                                        */
+00001300/*                                                                  */
+00001400/*     BLDSIM ID(&SYSUID.)  LIB(&ID..TOOLS.&SYSTEM.)                */
+00001500/*            SRCDSN(&LIB..SIMASM) SYSTEM(PASS)                     */
+00001600/*            TRACE MAP FIRST                                       */
+00001700/*                                                                  */
+00001800/*     ALIAS    - NONE                                              */
+00001900/*     REQUIRED - NONE                                              */
+00002000/*                                                                  */
+00002100/*------------------------------------------------------------------*/
+00002200/*                                                                  */
+00002300/*   INVOKES:   ASM101                                              */
+00002400/*              PDSALL                                              */
+00002500/*                                                                  */
+00002600/*------------------------------------------------------------------*/
+00002700/*                                                                  */
+00002800/*   PARAMETERS:                                                    */
+00002900/*                                                                  */
+00003000/*     ID       DEFAULT: &SYSUID                                    */
+00003100/*              HIGH LEVEL QUALIFIER                                */
+00003200/*                                                                  */
+00003300/*     LIB      DEFAULT: &ID..TOOLS.&SYSTEM.                        */
+00003400/*              PDS THAT WILL CONTAIN SIMULATION LIBRARY ASSEMBLY   */
+00003500/*              LISTING AND LOAD MODULES                            */
+00003600/*                                                                  */
+00003700/*     SRCDSN   DEFAULT: &LIB..SIMASM                               */
+00003800/*              PDS CONTAINING THE SIMULATION LIBRARY SOURCE CODE   */
+00003900/*                                                                  */
+00004000/*     TRACE    OPTIONAL                                            */
+00004100/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00004200/*              TERMINAL                                            */
+00004300/*                                                                  */
+00004400/*     FIRST    OPTIONAL                                            */
+00004500/*              ALLOCATE NECESSARY DATASETS THE FIRST TIME          */
+00004600/*                                                                  */
+00004700/*     MAP      OPTIONAL                                            */
+00004800/*              WHEN SPECIFIED, GENERATES A MAPPED LISTING          */
+00004900/*                                                                  */
+00005000/*     SYSTEM   DEFAULT: PASS                                       */
+00005100/*              INDICATES WHETHER THE SIMULATION LIBRARY ROUTINE IS */
+00005200/*              BEING ASSEMBLED FOR PASS OR BFS.                    */
+00005300/*                                                                  */
+00005400/*------------------------------------------------------------------*/
+00005500/*                                                                  */
+00005600/*   INPUT DATA SET NAMES:                                          */
+00005700/*                                                                  */
+00005800/*     <SRCDSN>                                                     */
+00005900/*         SIMULATION LIBRARY ROUTINE SOURCE CODE TO ASSEMBLE       */
+00006000/*                                                                  */
+00006100/*------------------------------------------------------------------*/
+00006200/*                                                                  */
+00006300/*   OUTPUT DATA SET NAMES:                                         */
+00006400/*                                                                  */
+00006500/*     <LIB>.MEMLIST                                                */
+00006600/*         MEMBER LIST OF THE SIMLIB PDS                            */
+00006700/*                                                                  */
+00006800/*------------------------------------------------------------------*/
+00006900/*                                                                  */
+00007000/*   REVISION HISTORY:                                              */
+00007100/*                                                                  */
+00007200/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00007300/*     --------  ----  ----  -------------------------------------  */
+00007400/*     5/8/94    210   LJK   BASELINED SIMLIB PROCEDURE             */
+00007410/*     1/11/96   350   LJK   INVOKED ASM101 INSTEAD OF RTLASM       */
+00007500/*------------------------------------------------------------------*/
+00007600/********************************************************************/
+00007700 
+00007800PROC 0 ID(&SYSUID.)                           +
+00007900       SYSTEM(PASS)                           +
+00008000       LIB(&ID..TOOLS.&SYSTEM.)               +
+00008100       SRCDSN(&LIB..SIMASM)                   +
+00008200       FIRST                                  +
+00008300       MAP                                    +
+00008400       TRACE
+00008500 
+00008600GLOBAL  RETCODE
+00008700IF  &TRACE. NE THEN  CONTROL CONLIST LIST
+00008800CONTROL NOMSG END(DONE)
+00008900IF &FIRST NE THEN DO
+00009000   DELETE '&LIB..SIMLIB'
+00009100   DELETE '&LIB..SIMLST'
+00009200   DELETE '&LIB..SIMOBJ'
+00009210   DELETE '&LIB..MAP'
+00009300   IF &SYSTEM = BFS THEN DO
+00009400       DELETE '&LIB..SATSLST'
+00009500       DELETE '&LIB..SDFASM'
+00009600   DONE
+00009700DONE
+00009800         /***************************************/
+00009900         /*        GENERATE MEMBER LIST         */
+00010000         /***************************************/
+00010100PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00010200SET &LIST = &LIB..MEMLIST
+00010300 
+00010400         /***************************************/
+00010500         /*    ON ATTN, DO THE FOLLOWING:       */
+00010600         /***************************************/
+00010700ATTN     DO
+00010800         ERROR    OFF
+00010900         CLOSFILE MEMBERS
+00011000         FREE     F(MEMBERS)
+00011100         EXIT
+00011200DONE
+00011300 
+00011400CONTROL  NOMSG
+00011500         FREE     F(MEMBERS)
+00011600CONTROL  MSG
+00011700 
+00011800ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00011900OPENFILE MEMBERS  INPUT
+00012000 
+00012100         /***************************************/
+00012200         /* ON ERROR, DO THE FOLLOWING:         */
+00012300         /***************************************/
+00012400ERROR DO
+00012500   CLOSFILE MEMBERS
+00012600   FREE  F(MEMBERS)
+00012700   ERROR OFF
+00012800   EXIT
+00012900DONE
+00013000         /***************************************/
+00013100         /*   GENERATE SIMLIB ON THE PDS.       */
+00013200         /***************************************/
+00013300DO  WHILE    &SYSUID NE
+00013400    GETFILE  MEMBERS
+00013500    SET  &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+00013600 
+00013700    ASM101 &MEMBERS.               +
+00013800           ID(&ID.)                +
+00013900           TEMPID(&ID.)            +
+00014000           SYSTEM(&SYSTEM.)        +
+00014100           LIB(&LIB.)              +
+00014200           SRCDSN(&SRCDSN.)        +
+00014210           SYSPRINT(&LIB..SIMLST)  +
+00014220           OBJECT  (&LIB..SIMOBJ)  +
+00014230           RUNLIB  (&LIB..SIMLIB)  +
+00014300           &FIRST.                 +
+00014400           &MAP.                   +
+00014500           &TRACE.
+00014600    SET &FIRST =
+00014700DONE

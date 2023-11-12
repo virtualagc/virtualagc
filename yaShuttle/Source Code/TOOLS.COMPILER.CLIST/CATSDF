@@ -1,0 +1,150 @@
+00010010/********************************************************************/
+00020010/*------------------------------------------------------------------*/
+00030010/*                                                                  */
+00040010/*   NAME:     CATSDF                                               */
+00050010/*                                                                  */
+00060010/*------------------------------------------------------------------*/
+00070010/*                                                                  */
+00080044/*   FUNCTION: MERGES A PDS OF SDFS INTO A SEQUENTIAL FILE FOR      */
+00090044/*             DOWNLOADING TO THE RS6000. DOWNLOAD THE SEQUENTIAL   */
+00100044/*             FILE AS BINARY AND RUN HALBURST ON THE RS6000 TO     */
+00110044/*             SPLIT THE PDS MEMBERS INTO SEPARATE SDF FILES. THE   */
+00120044/*             DEFAULT OUTPUT SEQUENTIAL FILE IS &SYSUID..SEQSDF.   */
+00130044/*             THIS PROCEDURE CAN ONLY HANDLE SDF FILES. TO PROCESS */
+00140044/*             OTHER KINDS OF FILES, REFER TO THE CATPDS CLIST.     */
+00150010/*                                                                  */
+00160010/*------------------------------------------------------------------*/
+00170010/*                                                                  */
+00180010/*   SYNTAX :                                                       */
+00190044/*     CATSDF PDS(&SYSUID..SDF)                                     */
+00200010/*              LIST()                                              */
+00210044/*              OUT(&SYSUID..SEQSDF)                                */
+00220010/*              TRACE                                               */
+00230010/*                                                                  */
+00240010/*------------------------------------------------------------------*/
+00250010/*                                                                  */
+00260010/*   INVOKES:                                                       */
+00270010/*                                                                  */
+00280044/*     'NCAMCM.TOOLS.CLOAD(CATSDF)'                                 */
+00290010/*                                                                  */
+00300010/*------------------------------------------------------------------*/
+00310010/*                                                                  */
+00320010/*   PARAMETERS:                                                    */
+00330010/*                                                                  */
+00340044/*     PDS      DEFAULT: &SYSUID..TEST.SDF                          */
+00350044/*              NAME OF THE SDF PDS TO BE MERGED                    */
+00360010/*                                                                  */
+00370010/*     LIST     LIST OF MEMBERS TO BE MERGED                        */
+00380010/*              CLIST WILL CREATE ONE IF NONE SPECIFIED             */
+00390044/*                                                                  */
+00400044/*     OUT      DEFAULT: &SYSUID..SEQSDF                            */
+00410010/*              NAME OF SEQUENTIAL OUTPUT FILE                      */
+00420010/*                                                                  */
+00430010/*     TRACE    OPTIONAL                                            */
+00440010/*              TURN TRACE ON OR OFF                                */
+00450010/*                                                                  */
+00460010/*------------------------------------------------------------------*/
+00470010/*                                                                  */
+00480010/*   INPUT DATA SET NAMES:                                          */
+00490010/*                                                                  */
+00500044/*     <IN>                                                         */
+00510044/*         THE SDF INPUT PDS                                        */
+00520010/*                                                                  */
+00530010/*------------------------------------------------------------------*/
+00540010/*                                                                  */
+00550010/*   OUTPUT DATA SET NAMES:                                         */
+00560010/*                                                                  */
+00570044/*     <OT>                                                         */
+00580010/*         NAME OF THE RESULTING OUTPUT FILE                        */
+00590010/*                                                                  */
+00600010/*------------------------------------------------------------------*/
+00610010/*                                                                  */
+00620010/*   REVISION HISTORY:                                              */
+00630010/*                                                                  */
+00640010/*  DATE      PCR  NAME  DESCRIPTION                                */
+00650010/*  --------  ---  ---   -------------------------------------      */
+00660044/*  10/04/96  0494 JCS   BASELINE                                   */
+00670010/*                                                                  */
+00680010/*------------------------------------------------------------------*/
+00690010/********************************************************************/
+00700045PROC    0    PDS(&SYSUID..TEST.SDF) +
+00710012             LIST()           +
+00720012             OUT()                +
+00730011             TRACE
+00740011 
+00750009GLOBAL RETCODE
+00760009IF        &TRACE.  NE THEN +
+00770009         CONTROL LIST CONLIST
+00780009CONTROL END(DONE)
+00790017CONTROL MSG
+00800033IF &OUT. EQ THEN DO
+00810043    CONTROL NOMSG
+00820032    DELETE '&SYSUID..SEQSDF'
+00830043    CONTROL MSG
+00840044    ALLOC DA('&SYSUID..SEQSDF') SPACE(100,10) TRACKS DSORG(PS) +
+00850012        RECFM(F B) LRECL(80) BLKSIZE(6160)
+00860031    SET &OUT = &SYSUID..SEQSDF
+00870012    DONE
+00880040CONTROL NOMSG
+00890031FREE F(IN OT)
+00900009FREE ATTR(FB80)
+00910009CONTROL MSG
+00920012    IF &LIST EQ THEN DO
+00930012        PDSALL &PDS. MAKELIST
+00940012        SET &LIST = &SYSUID..TEST.MEMLIST
+00950012        DONE
+00960013ATTN      DO
+00970013          ERROR   OFF
+00980019          CLOSFILE MEMBERS
+00990013          FREE  F(MEMBERS)
+01000013          EXIT
+01010014DONE
+01020013 
+01030021CONTROL NOMSG
+01040013        FREE    F(MEMBERS)
+01050021CONTROL MSG NOFLUSH
+01060013ALLOC F(MEMBERS) DA('&LIST.') SHR
+01070013OPENFILE MEMBERS INPUT
+01080044DO WHILE &SYSUID NE
+01090013   GETFILE MEMBERS
+01100039   SET &MEMLEN = 1
+01110039   DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS) NE
+01120035           SET &MEMLEN = &MEMLEN + 1
+01130039   DONE
+01140039   SET &MEMLEN = &MEMLEN - 1
+01150039   SET &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+01160043CONTROL NOMSG
+01170046DELETE '&SYSUID..TMPSDF'
+01180029FREE DD(IN OT)
+01190034FREE ATTR(FB80)
+01200042CONTROL MSG
+01210035SET &IN = &PDS.(&NAME.)
+01220046SET &OT = &SYSUID..TMPSDF
+01230035ALLOC FILE(IN) DA('&PDS.(&NAME.)') SHR REUSE
+01240009ATTR FB80 RECFM(F B) LRECL(80) BLKSIZE(6160)
+01250046ALLOC FILE(OT) DA('&SYSUID..TMPSDF') RELEASE USING(FB80) NEW +
+01260014    SP(10 5) TRACK
+01270009WRITE EXECUTION OF   CATSDF
+01280050CALL 'NCAMCM.TOOLS.CLOAD(CATSDF)' '&IN. &OT.'
+01290029FREE F(IN OT)
+01300034FREE ATTR(FB80)
+01310046SET &SOURCE = '&SYSUID..TMPSDF'
+01320040CONTROL NOMSG
+01330014FREE FILE(SYSIN SYSPRINT SYSUT1 SYSUT2)
+01340014CONTROL MSG
+01350035WRITE APPENDING &NAME.
+01360046ALLOC FILE(SYSUT1) DA('&SYSUID..TMPSDF') SHR REUSE
+01370028ALLOC FILE(SYSUT2) DA('&OUT.') MOD REUSE
+01380014ALLOC FILE(SYSPRINT) DUMMY REUSE
+01390014ALLOC FILE(SYSIN) DUMMY REUSE
+01400014$CALL IEBGENER
+01410009SET &SAVECC  = &LASTCC
+01420014IF &SAVECC ^= 0 THEN DO
+01430014    WRITE FAILED
+01440014DONE
+01450014ELSE WRITE SUCCESSFUL
+01460041CONTROL NOMSG
+01470014FREE FILE(SYSIN SYSPRINT SYSUT1 SYSUT2)
+01480041CONTROL MSG
+01490023DONE
+01500000EXIT

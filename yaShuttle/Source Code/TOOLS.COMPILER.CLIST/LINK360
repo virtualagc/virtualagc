@@ -1,0 +1,157 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040001/*   NAME:     LINK360                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: LINK MEMBERS DECLARED IN SYSLIN2 INTO A SINGLE LOAD  */
+00110000/*             MODULE.  THIS CLIST IS INVOKED BY CLIST MONLINK,     */
+00150000/*             AND IS USED TO LINK EDIT THE MONITOR DATA SETS.      */
+00151000/*                                                                  */
+00160000/*------------------------------------------------------------------*/
+00170000/*                                                                  */
+00180000/*   SYNTAX:                                                        */
+00190000/*      LINK360  NAME ID(&SYSUID.) LIB(&ID..REL99V0.MONITOR)        */
+00570000/*               OPT() TRACE SYSLIN2() INCLUDE TEST REUS            */
+00571000/*                                                                  */
+00580000/*------------------------------------------------------------------*/
+00590000/*                                                                  */
+00600000/*   INVOKES:                                                       */
+00660000/*      SYS1.LINKLIB(IEWL)                                          */
+00662000/*                                                                  */
+00670000/*------------------------------------------------------------------*/
+00680000/*                                                                  */
+00690000/*   PARAMETERS:                                                    */
+00700000/*                                                                  */
+00710000/*      NAME     REQUIRED                                           */
+00720000/*               NAME TO BE GIVEN TO LOAD MODULE                    */
+00730000/*                                                                  */
+00740000/*      ID       DEFAULT: &SYSUID                                   */
+00750000/*               HIGH LEVEL QUALIFIER                               */
+00760000/*                                                                  */
+00770000/*      LIB      DEFAULT: &ID..REL99V0.MONITOR                      */
+00771000/*               DATASET WHERE MEMBERS RESIDE                       */
+00780000/*                                                                  */
+00790000/*      OPT      DEFAULT: NULL                                      */
+00800000/*               ANY ADDITIONAL OPTIONS TO BE PASSED TO THE LINK    */
+00810000/*               EDITOR.                                            */
+00820000/*                                                                  */
+00830000/*      TRACE    OPTIONAL                                           */
+00840002/*               TRACE THE CLISTS EXECUTION                         */
+00850000/*                                                                  */
+00860000/*      SYSLIN2  DEFAULT: NULL                                      */
+00870000/*               CONTAINS CONTROL STATEMENTS NAMING OBJ MEMBERS TO  */
+00880000/*               BE LINKED TOGETHER.                                */
+00890000/*                                                                  */
+00900000/*      INCLUDE  OPTIONAL                                           */
+00901000/*               SYSTEM PARAMETER,                                  */
+00910000/*               ALLOWS LINKING MORE THAN ONE MODULE TOGETHER       */
+02390000/*                                                                  */
+02391000/*      TEST     OPTIONAL                                           */
+02391100/*               SYSTEM PARAMETER, USAGE UNKNOWN                    */
+02392000/*                                                                  */
+02393000/*      REUS     OPTIONAL                                           */
+02393100/*               SYSTEM PARAMETER, USAGE UNKNOWN                    */
+02394000/*                                                                  */
+02400000/*------------------------------------------------------------------*/
+02410000/*                                                                  */
+02420000/*   INPUT DATA SET NAMES:                                          */
+02640000/*                                                                  */
+02641000/*      <LIB>.OBJ                                                   */
+02642000/*          PDS OF MONITOR OBJECT                                   */
+02643000/*                                                                  */
+02650000/*------------------------------------------------------------------*/
+02660000/*                                                                  */
+02670000/*   OUTPUT DATA SET NAMES:                                         */
+02680000/*                                                                  */
+02690000/*      <LIB>.LOAD                                                  */
+03190000/*          PDS OF LOAD MODULES                                     */
+03191000/*                                                                  */
+03191100/*      <LIB>.MAPS                                                  */
+03191200/*          PDS OF MODULE MAP                                       */
+03191300/*                                                                  */
+03200000/*------------------------------------------------------------------*/
+03210000/*                                                                  */
+03220000/*   TEMPORARY DATA SET NAMES:                                      */
+03230000/*                                                                  */
+03240000/*     NONE                                                         */
+03250000/*                                                                  */
+03260000/*------------------------------------------------------------------*/
+03270000/*                                                                  */
+03280000/*   COMMENTS:                                                      */
+03330000/*                                                                  */
+03331000/*     NONE                                                         */
+03332000/*                                                                  */
+03340000/*------------------------------------------------------------------*/
+03350000/*                                                                  */
+03360000/*   REVISION HISTORY:                                              */
+03370000/*                                                                  */
+03380000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+03390000/*     --------  ----  ----  -------------------------------------  */
+03520000/*                                                                  */
+03530000/*     09/??/86  ???   SLF                                          */
+03540000/*                                                                  */
+03550000/*     04/??/87  ???   HFG                                          */
+03560000/*                                                                  */
+03561000/*     02/21/91  153   LWW   CCC BASELINE                           */
+03570000/*                                                                  */
+03570100/*     04/11/95 0425   JCS   ALLOW 2 FORMATS FOR CALL LINE          */
+03570110/*                                                                  */
+03570200/*     11/08/95 0355   LJK   CHANGE MAP FILE FROM SEQ FILE TO A PDS */
+03590000/*------------------------------------------------------------------*/
+03600000/********************************************************************/
+03600100PROC 1 NAME +
+03600200       ID(&SYSUID.) +
+03600300       LIB(&ID..REL99V0.MONITOR) +
+03600400       OPT() +
+03600600       TRACE +
+03600700       SYSLIN2() +
+03600800       INCLUDE +
+03600900       TEST +
+03601000       REUS
+03601100 
+03601700IF &TRACE. NE THEN CONTROL LIST
+03601900CONTROL END(DONE)
+03602000CONTROL NOMSG
+03602100  FREE F(SYSLIN SYSLMOD SYSLIB SYSUT1 OUTPUT5 SYSPRINT SYSTERM +
+03602200         INCLDD) ATTR(FBA121 U6144 F80)
+03602300  DELETE ('&LIB..MAPS(&NAME.)')
+03602310  DELETE ('&LIB..LOAD(&NAME.)')
+03602400 
+03602500ATTR  FBA121     RECFM(F B A) LRECL(121) BLKSIZE(1210)
+03602600ATTR  F80        RECFM(F)     LRECL(80)   BLKSIZE(80)
+03602700ATTR  U6144      RECFM(U)     LRECL(0)   BLKSIZE(6144)
+03602800 
+03602900/*   USE 'INCLDD' IF WANT TO LINK MORE THAN ONE MODULE TOGETHER.  */
+03603000/*   &SYSLIN2 CONTAINS THE CONTROL STATEMENTS NAMING THE MEMBERS. */
+03603100 
+03603200IF &INCLUDE NE THEN +
+03603300   ALLOC F(INCLDD) DA('&LIB..OBJ') USING(F80) SHR
+03603400 
+03603500ALLOC F(SYSLIN)  DA('&LIB..OBJ(&NAME.)' +
+03603600                        &SYSLIN2.)  USING(F80) SHR
+03603700ALLOC F(SYSLMOD)  DA('&LIB..LOAD(&NAME.)') USING(U6144) SHR
+03603800ALLOC F(SYSLIB)   DA('&LIB..LOAD') USING(U6144) SHR
+03603900ALLOC F(SYSUT1)   SP(2 2) TRACK
+03604000ALLOC F(OUTPUT5)  DA(*)
+03604100ALLOC F(SYSPRINT) DA('&LIB..MAPS(&NAME.)') SHR
+03604300ALLOC F(SYSTERM)  DA(*) USING(FBA121)
+03604400 
+03604500/* SETUP PARAMETER CALL LINE */
+03604600IF &TEST NE  THEN SET &TEST = &STR(,TEST)
+03604700IF &REUS NE  THEN SET &REUS = &STR(,REUS)
+03604800IF &OPT  NE  THEN SET &OPT  = &STR(,OPT)
+03604801 
+03604802CONTROL MSG
+03604803WRITE LINK EDIT OF &LIB..LOAD(&NAME.)
+03604804CONTROL NOMSG
+03604805CALL 'SYS1.LINKLIB(IEWL)' 'LIST,MAP,DCBS&TEST.&REUS.&OPT'
+03604806SET &SAVECC=&LASTCC
+03605000  FREE F(SYSLIN SYSLMOD SYSLIB SYSUT1 OUTPUT5 SYSPRINT SYSTERM  +
+03605100         INCLDD) ATTR(FBA121 U6144 F80)
+03605200CONTROL MSG
+03605300IF &SAVECC = 0 THEN +
+03605400     WRITE LINK EDIT SUCCESSFUL
+03605500ELSE +
+03605600     WRITE LINK EDIT ERROR CODE = &SAVECC ****

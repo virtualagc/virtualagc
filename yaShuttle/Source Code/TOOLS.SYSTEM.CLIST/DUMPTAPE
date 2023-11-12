@@ -1,0 +1,444 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     DUMPTAPE                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO DUMP AN ENTIRE TAPE TO A DISK VOLUME              */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     DUMPTAPE 'TAPE' LIB(TAPE) VOL(SHR331) EXP(98000)             */
+00140000/*              LEVEL(&SYSUID.) INPUT(TAPE.ASTUTE.LST(LST)) DEN( )  */
+00150000/*              Z TRACE                                             */
+00160000/*                                                                  */
+00170000/*     ALIAS    - NONE.                                             */
+00180000/*     REQUIRED - 'TAPE'                                            */
+00190000/*     DEFAULTS - LIB(TAPE) VOL(SHR331) EXP(98000) LEVEL(&SYSUID.)  */
+00200000/*                INPUT(TAPE.ASTUTE.LST(LST)) DEN(4)                */
+00210000/*                                                                  */
+00220000/*------------------------------------------------------------------*/
+00230000/*                                                                  */
+00240000/*   INVOKES:  EDITJCL CLIST FOR EACH PDS OR SEQUENTIAL DATASET ON  */
+00250000/*             THE TAPE                                             */
+00260000/*                                                                  */
+00270000/*------------------------------------------------------------------*/
+00280000/*                                                                  */
+00290000/*   PARAMETERS:                                                    */
+00300000/*                                                                  */
+00310000/*     TAPE     REQUIRED                                            */
+00320000/*              TAPE ID NUMBER                                      */
+00330000/*                                                                  */
+00340000/*     LIB      DEFAULT: TAPE                                       */
+00350000/*              PLACE TO PUT DUMPED TAPES                           */
+00360000/*                                                                  */
+00370000/*     VOL      DEFAULT: SHR331                                     */
+00380000/*              VOLUME NUMBER TO DUMP TAPE TO                       */
+00390000/*                                                                  */
+00400000/*     EXP      DEFAULT: 98000                                      */
+00410000/*              EXPIRATION DATE OF THE TAPE                         */
+00420000/*                                                                  */
+00430000/*     LEVEL    DEFAULT: &SYSUID                                    */
+00440000/*              HIGH LEVEL QUALIFIER IN YOUR ACCOUNT                */
+00450000/*                                                                  */
+00460000/*     INPUT    DEFUALT: TAPE.ASTUTE.LST(LST)                       */
+00470000/*              INPUT FILE WITH NAMES OF ALL THE TAPE FILE NAMES    */
+00480000/*              {THIS IS AN ASTUTE LISTING FILE WITH EXTRANEOUS     */
+00490000/*              LINES DELETED, THAT IS ONLY 1 LINE FOR EACH PDS OR  */
+00500000/*              SDS ON THE TAPE}.                                   */
+00510000/*                                                                  */
+00520000/*     DEN      DEFAULT: 4                                          */
+00530000/*              DENSITY OF TAPE                                     */
+00540000/*                                                                  */
+00550000/*     Z        OPTIONAL                                            */
+00560000/*              ADD Z BEFORE EACH NAME (REFER TO MEMO)              */
+00570000/*                                                                  */
+00580000/*     TRACE    OPTIONAL                                            */
+00590000/*              CLIST TRACE OPTION                                  */
+00600000/*                                                                  */
+00610000/*------------------------------------------------------------------*/
+00620000/*                                                                  */
+00630000/*   INPUT DATA SET NAMES:                                          */
+00640000/*                                                                  */
+00650000/*      <INPUT>                                                     */
+00660000/*      INPUT FILE WITH NAMES OF ALL THE TAPE FILE NAMES (THIS IS   */
+00670000/*      AN ASTUTE LISTING FILE WITH EXTRANEOUS LINES DELETED, THAT  */
+00680000/*      IS ONLY 1 LINE FOR EACH PDS OR SDS ON THE TAPE)             */
+00690000/*                                                                  */
+00700000/*------------------------------------------------------------------*/
+00710000/*                                                                  */
+00720000/*   OUTPUT DATA SET NAMES:                                         */
+00730000/*                                                                  */
+00740000/*      NONE.                                                       */
+00750000/*                                                                  */
+00760000/*------------------------------------------------------------------*/
+00770000/*                                                                  */
+00780000/*   TEMPORARY DATA SET NAMES:                                      */
+00790000/*                                                                  */
+00800000/*      NONE.                                                       */
+00810000/*                                                                  */
+00820000/*------------------------------------------------------------------*/
+00830000/*                                                                  */
+00840000/*   COMMENTS:                                                      */
+00850000/*                                                                  */
+00860000/* INSTRUCTIONS : THIS PROGRAM USES AN INPUT FILE SPECIFIED BY      */
+00870000/* ONE OF THE PARAMETERS.  THIS FILE SHOULD CONTAIN ALL THE NAMES   */
+00880000/* OF THE FILES ON THE TAPE.  THE OUTPUT FROM ASTUTE TAPEVTOC       */
+00890000/* SHOULD WORK FOR THIS.  THE FIRST LINE SHOULD BE THE FIRST FILE   */
+00900000/* AND THE LAST LINE SHOULD BE THE LAST FILE.                       */
+00910000/*                                                                  */
+00920000/* THIS CLIST CALLS ANOTHER CLIST CALLED EDITJCL WHICH TEMPORARILY  */
+00930000/* EDITS A JCL CALLED DUMPTAPE AND SUBMITS IT TO BATCH.             */
+00940000/*                                                                  */
+00950000/* THE MAJOR DRAWBACK TO THIS TOOL IS YOU FIRST MUST FIND A VOLUME  */
+00960000/* WITH ENOUGH ROOM ON IT.  USE A PROGRAM CALLED %SPACE TO FIND     */
+00970000/* A LARGE STORAGE VOLUME AND PASS IT AS A PARAMETER.  A SEPARATE   */
+00980000/* JOB WILL BE SUBMITTED FOR EACH FILE. IF A JOB RETURNS WITH A     */
+00990000/* B37 ERROR RESUBMIT THAT JOB WITH A LARGER VOLUME.                */
+01000000/*                                                                  */
+01010000/*------------------------------------------------------------------*/
+01020000/*                                                                  */
+01030000/*   REVISION HISTORY:                                              */
+01040000/*                                                                  */
+01050000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+01060000/*     --------  ----  ----  -------------------------------------  */
+01070000/*     07/17/89  ???   RSJ   ROBERT ST. JOHN CREATED THE INITIAL    */
+01080000/*                           VERSION                                */
+01090000/*                                                                  */
+01100000/*     07/25/90  026                                                */
+01110000/*                                                                  */
+01120000/*     03/13/90  080   JCS   MODIFIED HEADER TO CONFORM TO STANDARD */
+01130000/*                           FORMAT                                 */
+01140000/*                                                                  */
+01150000/*     06/26/90  099   TEV   UPDATED HEADER AND REARRANGED PARMS SO */
+01160000/*                           EACH PARAMATER IS ON ITS OWN LINE      */
+01170000/*                                                                  */
+01171014/*     12/23/93  314   RPC   UPDATED TO WORK WITH CARTRIDGE TAPES,  */
+01172014/*                           DUMP TO 3390 DASD, SPAN MULTIPLE VOLS  */
+01173014/*                                                                  */
+01180000/*------------------------------------------------------------------*/
+01190000/********************************************************************/
+01200000PROC 1  TAPE                           +
+01210000        LIB(TAPE)                      +
+01220000        VOL(SHR331)                    +
+01230000        EXP(98000)                     +
+01240000        LEVEL(&SYSUID.)                +
+01250000        INPUT(TAPE.ASTUTE.LST(LST))    +
+01260000        TAPETYPE(C)                    +
+01270000        START#(0)                      +
+01280000        ENDTAPE()                      +
+01290000        SKIP(0)                        +
+01291008        SPLTFILE                       +
+01300000        Z                              +
+01310000        TRACE
+01320000 
+01330000 IF &TRACE. NE THEN CONTROL LIST CONLIST
+01340000 CONTROL NOMSG
+01350000 FREE F(MEMBERS)
+01360000 CONTROL MSG
+01370000 ALLOC F(MEMBERS) DA(&INPUT.) SHR
+01380000 OPENFILE MEMBERS
+01390000 
+01400000         /************************************/
+01410000         /*                                  */
+01420000         /* ON ERROR, DO THE FOLLOWING:      */
+01430000         /*                                  */
+01440000         /************************************/
+01450000ERROR DO
+01460000   CLOSFILE MEMBERS
+01470000   FREE     F(MEMBERS)
+01480000   IF &MAXCC = 400 THEN DO
+01490000      SET &TAPE    EQ &NEXTTAPE
+01500000      SET &INPUT   EQ &NEXTFILE
+01510013      SET &TAPENUM EQ &TAPENUM - 1
+01520000      SET &MAXCC = 0
+01530000      GOTO AGAIN
+01540000   END
+01550000   ELSE WRITE EXITING DUMPTAPE ON ERROR CODE = &MAXCC.
+01560000   ERROR OFF
+01570000   EXIT
+01580000END
+01590000 
+01600000ATTN DO
+01610000   CLOSFILE MEMBERS
+01620000   FREE     F(MEMBERS)
+01630000   ATTN OFF
+01640000   EXIT
+01650000END
+01660000 
+01670000AGAIN: +
+01680000IF &MORE EQ &STR(Y) THEN DO
+01690003   WRITENR IS TAPE #&TAPE. THE LAST TAPE IN THE SERIES? (Y/N):
+01700000   READ &NOMORE
+01710000   IF &NOMORE EQ &STR(Y) THEN DO
+01720000      SET &MORE    EQ &STR( )
+01730000      SET &ENDTAPE EQ &STR( )
+01740003      SET &ASKNOMORE = Y
+01750000      WRITENR DO YOU WANT TO READ THIS TAPE TO THE END? (Y/N):
+01760000      READ &FINISH
+01770000      IF &FINISH EQ &STR(N) THEN DO
+01780000         SET &SKIP EQ 0
+01790000         WRITENR PLEASE ENTER THE FILE NUMBER TO STOP AT:
+01800000ST:      READ &STOP#
+01810000         IF &STOP# EQ  THEN DO
+01820000            WRITE NO DATA ENTERED ... PLEASE RE-ENTER
+01830000            GOTO ST
+01840000         END
+01850000         ELSE DO
+01860000            IF &DATATYPE(&STOP#) EQ &STR(CHAR) THEN DO
+01870000               WRITE FILE NUMBER INVALID ... PLEASE RE-ENTER
+01880000               GOTO ST
+01890000            END
+01900000         END
+01910000      END
+01920000      ELSE DO
+01930000         SET &ENDTAPE EQ 999
+01940000         WRITENR DO YOU WANT TO SKIP ANY FILES? (Y/N):
+01950000QS:      READ &QSKIP
+01960000         IF &QSKIP EQ  THEN DO
+01970000            WRITENR NO DATA ENTERED ... PLEASE RE-ENTER
+01980000            GOTO QS
+01990000         END
+02000000         ELSE DO
+02010000            IF &QSKIP EQ &STR(N) THEN DO
+02020000               SET &SKIP EQ 0
+02030000            END
+02040000            ELSE DO
+02050000               WRITENR HOW MANY FILES DO YOU WANT TO SKIP?
+02060000AS:            READ &ASKIP
+02070000               IF &ASKIP EQ  THEN DO
+02080000                  WRITENR NO DATA ENTERED ... PLEASE RE-ENTER
+02090000                  GOTO AS
+02100000               END
+02110000               ELSE DO
+02120000                  IF &DATATYPE(&ASKIP) EQ &STR(CHAR) THEN DO
+02130000                     WRITENR NUMBER ENTERED IS INVALID ... PLEASE +
+02140000                          RE-ENTER
+02150000                     GOTO AS
+02160000                  END
+02170000               END
+02171004               SET &SKIP = &ASKIP
+02180000            END
+02190000         END
+02200000      END
+02210000   END
+02220000   ELSE DO
+02230000      WRITENR PLEASE ENTER THE NEXT TAPE NUMBER :
+02240000NT:   READ &NEXTTAPE
+02250000      IF &NEXTTAPE EQ  THEN DO
+02260000         WRITE NO DATA ENTERED ... PLEASE RE-ENTER
+02270000         GOTO NT
+02280000      END
+02290000      ELSE DO
+02300000         IF &DATATYPE(&NEXTTAPE) EQ &STR(CHAR) THEN DO
+02310000            WRITE TAPE NUMBER INVALID ... PLEASE RE-ENTER
+02320000            GOTO NT
+02330000         END
+02340000      END
+02350000      WRITENR WHAT IS THE ASTUTE FILE NAME FOR THE NEW TAPE?
+02360000NF:   READ &NEXTFILE
+02370000      IF &NEXTFILE EQ  THEN DO
+02380000         WRITE NO DATA ENTERED ... PLEASE RE-ENTER
+02390000         GOTO NF
+02400000      END
+02410000      ELSE DO
+02420000         IF &SYSDSN(&NEXTFILE) NE OK THEN DO
+02430000            WRITE FILENAME ENTERED DOES NOT EXIST ... PLEASE RE-ENTER
+02440000            GOTO NF
+02450000         END
+02460000      END
+02470000   END
+02480000   ALLOC F (MEMBERS) DA(&INPUT.)
+02490000   OPENFILE MEMBERS
+02500000END
+02510000 
+02520003IF &ENDTAPE =  AND &ASKNOMORE =  THEN DO
+02530000   WRITENR DO YOU WISH TO READ THIS TAPE TO THE END? (Y/N):
+02540000YN:READ &ANSR
+02550000   IF &ANSR NE Y AND &ANSR NE N THEN DO
+02560000      WRITENR PLEASE ENTER A Y FOR YES OR N FOR NO ...
+02570000      GOTO YN
+02580000   END
+02590000   IF &ANSR = Y THEN DO
+02600001      WRITENR WHAT IS THE LAST FILE SEQUENCE NUMBER ON THIS TAPE?
+02610000SQ:   READ &SEQNUM
+02620000      IF &DATATYPE(&SEQNUM) NE NUM THEN DO
+02630000         WRITENR NUMBER INVALID ... PLEASE RE-ENTER:
+02640000         GOTO SQ
+02650000      END
+02660000      ELSE +
+02670000      IF &SEQNUM EQ 0 THEN DO
+02680000         WRITENR NUMBER MUST BE GREATER THAN ZERO ... PLEASE RE-ENTER:
+02690000         GOTO SQ
+02700000      END
+02710002      SET &ENDTAPE = &SEQNUM
+02720005      IF &SKIP EQ 0 THEN DO
+02730003         WRITENR DO YOU WANT TO SKIP ANY FILES? (Y/N):
+02740004AK:      READ &ANSKIP
+02750003         IF &ANSKIP NE Y AND &ANSKIP NE N THEN DO
+02760003            WRITENR PLEASE ENTER A Y FOR YES OR N FOR NO ...
+02770004            GOTO AK
+02780003         END
+02790003         IF &ANSKIP EQ Y THEN DO
+02800003            WRITENR ENTER THE NUMBER OF FILES TO SKIP:
+02810003FS:         READ &FILESK
+02820003            IF &DATATYPE(&FILESK) EQ CHAR THEN DO
+02830004               WRITENR INVALID NUMBER ... PLEASE RE-ENTER
+02840003               GOTO FS
+02850003            END
+02860003            ELSE +
+02870003            IF &FILESK GT &ENDTAPE THEN DO
+02880003               WRITENR ERROR ... NUMBER OF FILES TO SKIP IS GREATER +
+02890003               THAN THE NUMBER OF FILES ON TAPE ... PLEASE RE-ENTER:
+02900003               GOTO FS
+02910003            END
+02920004            SET &SKIP EQ &FILESK
+02921004         END
+02922004      END
+02930000   END
+02940000END
+02950000 
+02960000IF &DATATYPE(&TAPE) EQ &STR(CHAR) THEN DO
+02970000   WRITE TAPE NUMBER INVALID ... PLEASE RE-ENTER
+02980000TN:READ &TAPE
+02990000   IF &TAPE EQ  THEN DO
+03000000      WRITE
+03010000      WRITE NO DATA ENTERED ... PLEASE RE-ENTER
+03020000      GOTO TN
+03030000   END
+03040000   ELSE IF &DATATYPE(&TAPE) EQ &STR(CHAR) THEN DO
+03050000      WRITE
+03060000      WRITE VALUE ENTERED IS INVALID ... PLEASE RE-ENTER
+03070000      GOTO TN
+03080000   END
+03090000END
+03100000 
+03110000IF &ENDTAPE NE  THEN DO
+03120000   IF &DATATYPE(&ENDTAPE) EQ &STR(CHAR) THEN DO
+03130000      WRITE END OF TAPE FILE NUMBER INVALID ... PLEASE RE-ENTER
+03140000NO:   READ &ENDTAPE
+03150000      IF &ENDTAPE EQ  THEN DO
+03160000         WRITE NO DATA ENTERED ... PLEASE RE-ENTER
+03170000         GOTO NO
+03180000      END
+03190000   END
+03200000   ELSE DO
+03210000      IF &DATATYPE(&ENDTAPE) EQ &STR(CHAR) THEN DO
+03220000         WRITE VALUE ENTERED IS INVALID ... PLEASE RE-ENTER
+03230000         GOTO NO
+03240000      END
+03250000   END
+03260000   WRITENR IS TAPE #&TAPE. THE FIRST TAPE IN A SERIES? (Y/N):
+03270000   READ &MORE
+03280000   IF &MORE EQ &STR(Y) THEN DO
+03290000      WRITENR PLEASE ENTER THE NEXT TAPE NUMBER :
+03300000T1:   READ &NEXTTAPE
+03310000      IF &NEXTTAPE EQ  THEN DO
+03320000         WRITE NO DATA ENTERED ... PLEASE RE-ENTER
+03330000         GOTO T1
+03340000      END
+03350000      ELSE DO
+03360000         IF &DATATYPE(&NEXTTAPE) EQ &STR(CHAR) THEN DO
+03370000            WRITE TAPE NUMBER INVALID ... PLEASE RE-ENTER
+03380000            GOTO T1
+03390000         END
+03400000      END
+03410000      WRITENR WHAT IS THE ASTUTE FILE NAME FOR THE NEW TAPE?
+03420000R1:   READ &NEXTFILE
+03430000      IF &NEXTFILE EQ  THEN DO
+03440000         WRITE NO DATA ENTERED ... PLEASE RE-ENTER
+03450000         GOTO R1
+03460000      END
+03470000      ELSE DO
+03480000         IF &SYSDSN(&NEXTFILE) NE OK THEN DO
+03490000            WRITE FILENAME ENTERED DOES NOT EXIST ... PLEASE RE-ENTER
+03500000            GOTO R1
+03510000         END
+03520000      END
+03530000   END
+03540000END
+03550000 /***************************************************************/
+03560000 /*                     GET FILE INFO                           */
+03570000 /***************************************************************/
+03580000 IF &DATATYPE(&STOP#) EQ &STR(NUM) THEN DO
+03590013    IF &STOP# GT &TAPENUM THEN DO
+03591013       IF &SPLTFILE EQ  THEN +
+03600013          SET &TAPENUM = &TAPENUM - 1
+03610013    END
+03630009    ELSE +
+03640009       IF &START# NE 0 THEN +
+03650009          SET &TAPENUM EQ &START# - 1
+03660009 END
+03680009 IF &SKIP NE  THEN DO
+03690009    SET &SCOUNT = 0
+03700009    IF &START# EQ 0 AND &TAPENUM EQ 0 THEN +
+03710009       SET &TAPENUM = 0
+03720009    IF &SKIP NE 0 THEN DO
+03730009       WRITENR SKIPPING &SKIP FILES ...
+03740009       DO WHILE &SCOUNT LT &SKIP
+03750009          GETFILE MEMBERS
+03760009          SET &TAPENUM EQ &TAPENUM + 1
+03770009          SET &SCOUNT  EQ &SCOUNT  + 1
+03780009       END
+03790009       WRITE FINISHED
+03800009    END
+03801009 END
+03820000 /***************************************************************/
+03830000 /*                     GET FIRST FILE NAME                     */
+03840000 /***************************************************************/
+03850000 SET &TAPENUM=&TAPENUM+1
+03860000 GETFILE MEMBERS
+03870000 SET &BEG=1
+03880000 DO WHILE (&SUBSTR(&BEG,&MEMBERS) = ) /* SKIP ANY LEADING BLANKS */
+03890000    SET &BEG=&BEG +1
+03900000 END
+03910000 SET &FIN=&BEG
+03920000 DO WHILE (&SUBSTR(&FIN,&MEMBERS) ^= ) /* LOOK FOR END OF FILE NAME */
+03930000    SET &FIN=&FIN +1
+03940000 END
+03950000 SET &TOPFILE=&SUBSTR(&BEG:&FIN-1,&MEMBERS) /* EXTRACT FILE NAME*/
+03960000 /*******************************************************************/
+03970000 /*                    CALL EDITJCL FOR FIRST FILE                  */
+03980000 /*******************************************************************/
+03990000 
+04000000   EDITJCL &TAPENUM &TAPE &VOL &EXP &LEVEL &TOPFILE &TOPFILE &LIB +
+04010000           &TAPETYPE &Z &TRACE
+04020000   WRITE (&TAPENUM) JCL SUBMITED FOR &TOPFILE
+04030000 /*******************************************************************/
+04040000 /*         DO REST OF THE FILES, LOOPING UNTIL END OF FILE         */
+04050000 /*******************************************************************/
+04060000 DO WHILE &SYSUID NE  AND &TAPENUM LT &STOP# OR &TAPENUM LE &ENDTAPE
+04070000   SET &TAPENUM=&TAPENUM+1
+04080000   GETFILE MEMBERS
+04090000   SET &BEG=1
+04100000   DO WHILE (&SUBSTR(&BEG,&MEMBERS) = ) /* SKIP ANY LEADING BLANKS */
+04110000      SET &BEG=&BEG +1
+04120000   END
+04130000   SET &FIN=&BEG
+04140000   DO WHILE (&SUBSTR(&FIN,&MEMBERS) ^= ) /* LOOK FOR END OF FILE NAME */
+04150000      SET &FIN=&FIN +1
+04160000   END
+04170000   SET &FILENAME=&SUBSTR(&BEG:&FIN-1,&MEMBERS) /* EXTRACT FILE NAME*/
+04180000   /*******************************************************************/
+04190000   /*                    CALL EDITJCL CLIST                           */
+04200000   /*******************************************************************/
+04210000 
+04211007   IF &TAPENUM NE &SEQNUM THEN DO
+04220007      EDITJCL &TAPENUM &TAPE &VOL &EXP &LEVEL &FILENAME &TOPFILE &LIB +
+04230007              &TAPETYPE &Z &TRACE
+04231007   END
+04232007   ELSE DO
+04232111    IF &SPLTFILE NE  THEN DO
+04232207      EDITJCL &TAPENUM &TAPE &VOL &EXP &LEVEL &FILENAME &TOPFILE &LIB +
+04232307              &TAPETYPE &Z &TRACE NEXTTAPE(&NEXTTAPE.)
+04232411   END
+04232511    ELSE DO
+04232611      EDITJCL &TAPENUM &TAPE &VOL &EXP &LEVEL &FILENAME &TOPFILE &LIB +
+04232711              &TAPETYPE &Z &TRACE
+04232811    END
+04233007   END
+04240000   WRITE (&TAPENUM) JCL SUBMITED FOR &FILENAME
+04250000 
+04260000 END

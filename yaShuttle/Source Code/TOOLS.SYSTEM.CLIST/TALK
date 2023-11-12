@@ -1,0 +1,180 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     TALK                                                 */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION:   TO SEND MESSAGES TO ANOTHER USER WITHOUT HAVING TO */
+00090000/*               KEEP ON RETYPING "SEND".                           */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     TALK UID() LOGON TRACE                                       */
+00150000/*                                                                  */
+00160000/*     ALIAS    - NONE.                                             */
+00170000/*     REQUIRED - NONE.                                             */
+00190000/*                                                                  */
+00200000/*------------------------------------------------------------------*/
+00210000/*                                                                  */
+00220000/*   INVOKES:                                                       */
+00230000/*                                                                  */
+00240000/*     NONE.                                                        */
+00250000/*                                                                  */
+00260000/*------------------------------------------------------------------*/
+00270000/*                                                                  */
+00280000/*   PARAMETERS:                                                    */
+00290000/*                                                                  */
+00300000/*     UID      DEFAULT: NULL                                       */
+00310000/*              THE USER ID # FROM MENU THAT YOU WISH TO SEND       */
+00320000/*              MESSAGES TO                                         */
+00330000/*                                                                  */
+00340000/*     LOGON    OPTIONAL                                            */
+00350000/*              THE LOGON ID OF THE RECEIVEING USER (IF KNOWN)      */
+00360000/*                                                                  */
+00370000/*     TRACE    OPTIONAL                                            */
+00380000/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00390000/*                                                                  */
+00400000/*------------------------------------------------------------------*/
+00410000/*                                                                  */
+00420000/*   INPUT DATA SET NAMES                                           */
+00430000/*                                                                  */
+00440000/*     NONE.                                                        */
+00450000/*                                                                  */
+00460000/*------------------------------------------------------------------*/
+00470000/*                                                                  */
+00480000/*   OUTPUT DATA SET NAMES:                                         */
+00490000/*                                                                  */
+00500000/*     NONE.                                                        */
+00510000/*                                                                  */
+00520000/*------------------------------------------------------------------*/
+00530000/*                                                                  */
+00540000/*   TEMPORARY DATA SET NAMES:                                      */
+00550000/*                                                                  */
+00560000/*     NONE.                                                        */
+00570000/*                                                                  */
+00580000/*------------------------------------------------------------------*/
+00590000/*                                                                  */
+00600000/*   COMMENTS:                                                      */
+00610000/*                                                                  */
+00620000/*     NONE.                                                        */
+00630000/*                                                                  */
+00640000/*------------------------------------------------------------------*/
+00650000/*                                                                  */
+00660000/*   REVISION HISTORY:                                              */
+00670000/*                                                                  */
+00680000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00690000/*  --------  ---  ---   -------------------------------------      */
+00700000/*  03/14/85  ???  HFG   ORIGINAL CLIST                             */
+00710000/*                 PTB                                              */
+00720000/*                                                                  */
+00730000/*  07/05/90  102  TEV   ADDED HEADER AND REORGANIZED PARAMETERS    */
+00740000/*                       ONE PER LINE. COMMENTED OUT ALL REFERENCES */
+00750000/*                       TO THE DELETED CLIST CLRSCRN.              */
+00760000/*                                                                  */
+00770000/*------------------------------------------------------------------*/
+00780000/********************************************************************/
+00790000PROC 0 UID()     +
+00800000       LOGON     +
+00810000       TRACE
+00820000 
+00830000IF &TRACE EQ TRACE THEN CONTROL LIST CONLIST
+00840000 
+00850000SET USER EQ DUMMY
+00860000 
+00870000IF &UID. GT 0 AND &UID LT 10 THEN GOTO STEP&UID.
+00880000IF &UID EQ THEN DO     /* IF NO UID INITIALLY THEN PRINT MENU */
+00890000/* LOOP1: CLRSCRN
+00900000LOOP1: WRITE            * TALK MENU *
+00910000       WRITE
+00920000       WRITE           (0) WHO'S ON ?
+00930000       WRITE           (1) WHO'S AT FORD ?
+00940000       WRITE           (2) NCAMBNW  BRIAN
+00950000       WRITE           (3) NCAMPPB  PRESTON
+00960000       WRITE           (4) NCAMDAH  DEB
+00970000       WRITE           (5) NCAMDWE  DON
+00980000       WRITE           (6) NCAMKLS  KATH
+00990000       WRITE           (7) NCAMHFG  HOLLY
+01000000       WRITE           (8) NCAMPTB  PAUL
+01010000       WRITE           (9) NCAMSLF  STEPH
+01020000       WRITE          (10) OTHER
+01030000Q:     WRITE
+01040000       WRITENR               WHICH (0 - 10)?
+01050000       READ
+01060000  IF &SYSDVAL. GT 10 THEN GOTO LOOP1       /* LOOP BACK IF BAD VALUE */
+01070000  IF &SYSDVAL. LT 0  THEN GOTO LOOP1
+01080000END
+01090000 
+01100000ELSE GOTO START      /* GOTO START IF UID IS SPECIFIED */
+01110000GOTO STEP&SYSDVAL.   /* USE SYSDVAL TO BRANCH TO PROPER STEP */
+01120000 
+01130000STEP0: WRITE
+01140000       I2            /* PRINT THE CURRENT USERS LOGGED ON AND... */
+01150000       GOTO Q        /* THEN PROMPT AGAIN FOR THE CHOICE         */
+01160000STEP1: WRITE
+01170000       ST NFORCAB    /* PRINT THE CURRENT USERS LOGGED ON AND... */
+01180000       ST NFORWTG
+01190000       GOTO Q        /* THEN PROMPT AGAIN FOR THE CHOICE         */
+01200000STEP2: SET UID EQ NCAMBNW       /* ELSE ASSIGN UID THE PROPER VALUE */
+01210000       SET USER EQ BRIAN
+01220000       GOTO START
+01230000STEP3: SET UID EQ NCAMPPB
+01240000       SET USER EQ PRESTON
+01250000       GOTO START
+01260000STEP4: SET UID EQ NCAMDAH
+01270000       SET USER EQ DEBBIE
+01280000       GOTO START
+01290000STEP5: SET UID EQ NCAMDWE
+01300000       SET USER EQ DON
+01310000       GOTO START
+01320000STEP6: SET UID EQ NCAMKLS
+01330000       SET USER EQ KATHY
+01340000       GOTO START
+01350000STEP7: SET UID EQ NCAMHFG
+01360000       SET USER EQ HOLLY
+01370000       GOTO START
+01380000STEP8: SET UID EQ NCAMPTB
+01390000       SET USER EQ PAUL
+01400000       GOTO START
+01410000STEP9: SET UID EQ NCAMSLF
+01420000       SET USER EQ STEPHANIE
+01430000       GOTO START
+01440000STEP10: WRITENR ENTER USER ID:
+01450000       READ UID                /* READ IN "OTHER" UID */
+01460000       SET USER EQ DUMMY
+01470000 
+01480000       /* MAIN LOOP OF THE CLIST; ENTERED FOR EACH NEW UID GIVEN */
+01490000 
+01500000/*START: CLRSCRN
+01510000START: WRITE       *** TALKING TO &UID. ***
+01520000       WRITE       BETTER KNOWN AS &USER.
+01530000       WRITE
+01540000       WRITE ENTER MESSAGES WITHOUT QUOTES
+01550000       WRITE   USE ›  TO GET OPTION MENU
+01560000       WRITE ATTENTION TO TERMINATE
+01570000SET LOGON EQ            /* RESET THE LOGON VALUE TO BLANK */
+01580000 
+01590000LOOP2: READ
+01600000       SET TEST EQ &SYSDVAL.
+01610000       IF &SUBSTR(1,&TEST.Y) EQ   THEN GOTO LOOP2
+01620000       IF &SUBSTR(1,&TEST.Y) EQ › THEN +
+01630000         GOTO LOOP3                    /* LOOP3 IS OPTIONS   */
+01640000       ELSE DO
+01650000         IF &LOGON ^= THEN +
+01660000         SEND '&TEST' U(&UID) LOGON
+01670000         ELSE +
+01680000         SEND '&TEST' U(&UID)
+01690000       END
+01700000       GOTO  LOOP2
+01710000LOOP3: WRITE   USE U  TO SPECIFY ANOTHER USER
+01720000       WRITE   USE M  TO RETURN TO MAIN MENU
+01730000       WRITE   USE L  TO USE LOGON PARAMETER
+01740000       WRITENR ENTER OPTION ===>
+01750000       READ VAL
+01760000       IF &SUBSTR(1,&VAL.Y) EQ U THEN GOTO STEP10
+01770000       IF &SUBSTR(1,&VAL.Y) EQ M THEN GOTO LOOP1
+01780000       ELSE IF &SUBSTR(1,&VAL.Y) EQ L THEN +
+01790000         SET LOGON EQ LOGON            /* SET THE LOGON SWITCH */
+01800000GOTO  LOOP2
+01810000END

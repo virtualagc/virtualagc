@@ -1,0 +1,39 @@
+         MACRO                                                          00000100
+         HALSIM &TYPE                                                   00000200
+         AIF   ('&TYPE' EQ 'CSECT').CSECT                               00000300
+*                                                                       00000400
+* HALSIM DSECT FOR SDL INTERFACE                                        00000500
+*                                                                       00000600
+HALSIM   DSECT                                                          00000700
+         AGO   .NEXT                                                    00000800
+.CSECT   ANOP                                                           00000900
+HALSIM   CSECT                                                          00001000
+.NEXT    ANOP                                                           00001100
+SDLINIT  DC    V(SDINIT)      SDL INITIAL TRAP                          00001200
+SDLSTRAP DC    V(SDSTRAP)     'HOT' STATEMENT TRAP                      00001300
+SDLTTRAP DC    V(SDTTRAP)     SDL TIME QUEUE TRAP                       00001400
+SDLWTRAP DC    V(SDWTRAP)     SDL WRITE CHANNEL TRAP                    00001500
+SDLFTRAP DC    V(SDFTRAP)     FCOS TRAP                                 00001600
+SDLETRAP DC    V(SDETRAP)     HAL ERROR TRAP                            00001700
+SDLNTRAP DC    V(SDNTRAP)     NORMAL TERMINATION TRAP                   00001800
+SDLATRAP DC    V(SDATRAP)     ABNORMAL TERMINATION TRAP                 00001900
+SDLAVIN  DC    A(0)           AVIONICS INPUT                            00002000
+SDLAVOUT DC    A(0)           AVIONICS OUTPUT                           00002100
+SDLUSER1 DC    A(0)           USER FIELD (E.G. ISIM)                    00002200
+SDLUSER2 DC    A(0)           USER FIELD (E.G. OSIM)                    00002300
+SMHALMAP DC    V(HALMAP)      HALMAP ADDRESS                            00002400
+SMHALSYS DC    V(HALSYS)      HALSYS ADDRESS                            00002500
+SDLTENQ  DC    V(SVTENQ)      SDL TIMER ENQUE SERVICE ENTRY             00002600
+SDLTDEQ  DC    V(SVTDEQ)      SDL TIMER DEQUE SERVICE ENTRY             00002700
+SDLTIME  DC    V(SVTIME)      SDL 'RUNTIME' SERVICE ENTRY               00002800
+SDLPMSG  DC    V(SVPMSG)      MESSAGE CHANNEL PRINT SERVICE ENTRY       00002900
+SDLSIGNL DC    V(SVSIGNL)     SIGNAL EVENT VARIABLE SERVICE             00003000
+SDLBTOC  DC    V(SVBTOC)      BIT TO CHARACTER                          00003100
+SDLITOC  DC    V(SVITOC)      INTEGER TO CHARACTER                      00003200
+SDLETOC  DC    V(SVETOC)      SINGLE SCALAR TO CHARACTER                00003300
+SDLDTOC  DC    V(SVDTOC)      DOUBLE SCALAR TO CHARACTER                00003400
+SDLSTOP  DC    V(SVSTOP)      FORCE END OF RUN SERVICE ROUTINE          00003500
+SDLBLOCK DC    V(SVBLOCK)     RETURN CURRENT BLOCK                      00003600
+SDLCTRAP DC    V(SDCTRAP)     NEW COMPILATION TRAP                      00003700
+SDLVSTP  DC    V(SVVSTP)      SET NEW STP SERVICE ROUTINE               00003800
+         MEND                                                           00003900

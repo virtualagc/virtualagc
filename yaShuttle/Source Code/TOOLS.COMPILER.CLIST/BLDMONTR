@@ -1,0 +1,140 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     BLDMONTR                                             */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: A DRIVER CLIST TO BUILD THE MONITOR FOR PASS OR BFS  */
+00000900/*             SDFPKG IS COPIED TO THE MONITOR.LOAD DATASET.        */
+00001000/*                                                                  */
+00001100/*------------------------------------------------------------------*/
+00001200/*                                                                  */
+00001300/*   SYNTAX:                                                        */
+00001400/*      BLDMONTR ID(&SYSUID) LIB(&ID..&SYSTEM..&REL.) REL(REL99V0)  */
+00001500/*              SYSTEM(PASS) SRCLIB(&LIB.)                          */
+00001600/*              MACLIB(NCAMCM..&SYSTEM..CURRENT.DIAGNSTC.MACLIB)    */
+00001700/*                                                                  */
+00001800/*------------------------------------------------------------------*/
+00001900/*                                                                  */
+00002000/*   INVOKES:                                                       */
+00002100/*      MONASM                                                      */
+00002200/*      MONLINK                                                     */
+00002300/*      SDFPKASM                                                    */
+00002400/*      SDFLINK                                                     */
+00002500/*                                                                  */
+00002600/*------------------------------------------------------------------*/
+00002700/*                                                                  */
+00002800/*   PARAMETERS:                                                    */
+00002900/*                                                                  */
+00003000/*      ID             DEFAULT: &SYSUID                             */
+00003100/*                     HIGH LEVEL QUALIFIER                         */
+00003200/*                                                                  */
+00003300/*      SYSTEM         DEFAULT: PASS                                */
+00003400/*                     PASS = PASS COMPILER                         */
+00003500/*                     BFS  = BFS COMPILER                          */
+00003600/*                     H360 = 360 COMPILER                          */
+00003700/*                                                                  */
+00003800/*      REL            DEFAULT: REL99V0           .                 */
+00003900/*                     RELEASE VERSION                              */
+00004000/*                                                                  */
+00004100/*      LIB            DEFAULT: &ID..&SYSTEM..&REL.                 */
+00004200/*                     DATASET WHERE MEMBERS RESIDE                 */
+00004300/*                                                                  */
+00004310/*      SRCLIB         DEFAULT: &LIB.                               */
+00004320/*                     DATASET WHERE THE MONITOR SOURCE CODE RESIDE */
+00004330/*                                                                  */
+00004400/*      MACLIB         DEFAULT: NCAMCM..&SYSTEM..CURRENT.DIAGNSTC.  */
+00004500/*                              MACLIB                              */
+00004600/*                     DIAGNOSTIC MACRO LIBRARY REQUIRED BY THE     */
+00004700/*                     ASM360H CALLS                                */
+00004800/*                                                                  */
+00004900/*      TRACE          OPTIONAL                                     */
+00005000/*                     TRACE THE CLISTS EXECUTION                   */
+00005100/*                                                                  */
+00005200/*------------------------------------------------------------------*/
+00005300/*                                                                  */
+00005400/*   REVISION HISTORY:                                              */
+00005500/*                                                                  */
+00005600/*     DATE       PCR    NAME   DESCRIPTION                         */
+00005700/*     --------   ---    ----   ------------------------------      */
+00005800/*     05/06/94   343    LJK    BASELINED COMPILER BUILD CLIST      */
+00005810/*     11/08/95   355    LJK    ADD SRCLIB PARAMETER                */
+00005900/*------------------------------------------------------------------*/
+00006000/********************************************************************/
+00006100 
+00006200 PROC 0   ID(&SYSUID.)                  +
+00006300          SYSTEM(PASS)                  +
+00006400          REL(REL99V0)                  +
+00006500          LIB(&ID..&SYSTEM..&REL.)      +
+00006510          SRCLIB(&LIB.)                 +
+00006600          MACLIB(NCAMCM.&SYSTEM..CURRENT.DIAGNSTC.MACLIB) +
+00006700          TRACE
+00006800 
+00006900GLOBAL RETCODE
+00007000IF &TRACE. NE THEN +
+00007100    CONTROL LIST CONLIST
+00007200 
+00007300/* ASSEMBLE ALL MEMBERS IN THE MONITOR.ASM DATASET */
+00007400 
+00007500MONASM    ID(&ID.)                      +
+00007600          SYSTEM(&SYSTEM.)              +
+00007700          LIB(&LIB..MONITOR)            +
+00007710          SRCDSN(&SRCLIB..MONITOR.ASM)  +
+00007800          MACLIB(&MACLIB.)              +
+00007900          &TRACE.
+00008000 
+00008100/* LINK EDIT ALL MEMBERS IN MONITOR.OBJ DATASET */
+00008200 
+00008300MONLINK   ID(&ID.)                      +
+00008400          SYSTEM(&SYSTEM.)              +
+00008500          LIB(&LIB..MONITOR)            +
+00008600          &TRACE.
+00008700 
+00008800/* ASSEMBLE ALL MEMBERS IN THE SDFPKG.ASM DATASET */
+00008900 
+00009000SDFPKASM  ID(&ID.)                      +
+00009100          SYSTEM(&SYSTEM.)              +
+00009200          LIB(&LIB..SDFPKG)             +
+00009210          SRCDSN(&SRCLIB..SDFPKG.ASM)   +
+00009300          MACLIB(&MACLIB.)              +
+00009400          &TRACE.
+00009500 
+00009600/* LINK EDIT ALL MEMBERS IN SDFPKG.OBJ DATASET */
+00009700 
+00009800SDFLINK   ID(&ID.)                      +
+00009900          SYSTEM(&SYSTEM.)              +
+00010000          LIB(&LIB..SDFPKG)             +
+00010100          &TRACE.
+00010200 
+00010300/* COPY SDFPKG FROM SDFPKG.LOAD TO MONITOR.LOAD
+00010400 
+00010500  CONTROL NOMSG
+00010600  FREE F(CNTRL) ATTR(FB80)
+00010700  ATTR FB80  RECFM(F B) LRECL(80) BLKSIZE(80)
+00010800/* CREATE SYSIN DATASET FOR IEBCOPY UTILITY */
+00010900  DELETE (CNTRL.TEMP)
+00011000  ALLOC DA(CNTRL.TEMP) F(CNTRL) SPACE(1) TRACKS NEW +
+00011100        USING(FB80) REUSE
+00011200  OPENFILE CNTRL       OUTPUT
+00011300  SET &CNTRL           = &STR+
+00011400  ( COPY  OUTDD=OUT,INDD=((IN,R)) )
+00011500  PUTFILE CNTRL
+00011600  SET &CNTRL           = &STR+
+00011700  ( SELECT MEMBER=SDFPKG )
+00011800  PUTFILE CNTRL
+00011900  CLOSFILE CNTRL
+00012000  FREE F(CNTRL)
+00012100/* SETUP FILES FOR THE IEBCOPY OPERATION   */
+00012200  ALLOC FILE(SYSIN) DA('&SYSUID..CNTRL.TEMP') SHR REUSE
+00012300  ALLOC FILE(SYSPRINT) DUMMY REUSE
+00012400  ALLOC FILE(IN) DA('&LIB..SDFPKG.LOAD') SHR REUSE
+00012500  ALLOC FILE(OUT) DA('&LIB..MONITOR.LOAD') SHR REUSE
+00012600  $CALL IEBCOPY
+00012700  IF &LASTCC = 0 THEN +
+00012800     WRITE SDFPKG COPIED FROM +
+00012900           &LIB..SDFPKG.LOAD TO &LIB..MONITOR.LOAD
+00013000  ELSE WRITE COPY OF SDFPKG FAILED
+00013100  FREE FILE(IN OUT SYSIN SYSPRINT)
+00013200  DELETE (CNTRL.TEMP)
+00013300  FREE ATTR(FB80)

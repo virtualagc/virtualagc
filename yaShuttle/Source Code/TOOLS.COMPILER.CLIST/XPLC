@@ -1,0 +1,161 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     XPLC                                                 */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: PROCEDURE TO COMPILE XPL PROGRAMS USING THE XPL 90V2 */
+00000900/*             COMPILER.                                            */
+00001000/*                                                                  */
+00001100/*------------------------------------------------------------------*/
+00001200/*                                                                  */
+00001300/*   SYNTAX :                                                       */
+00001400/*     XPLC 'NAME' ID(&SYSUID) COMPILER(NCAMCM.XPL.REL90V2.XCOMLINK)*/
+00001500/*          INPUT2(NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB)) INCLUDE()   */
+00001600/*          OPT() TRACE                                             */
+00001700/*                                                                  */
+00001800/*     ALIAS    - NONE.                                             */
+00001900/*     REQUIRED - 'NAME'.                                           */
+00002000/*                                                                  */
+00002100/*------------------------------------------------------------------*/
+00002200/*                                                                  */
+00002300/*   INVOKES:                                                       */
+00002400/*                                                                  */
+00002500/*     NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                              */
+00002600/*                                                                  */
+00002700/*------------------------------------------------------------------*/
+00002800/*                                                                  */
+00002900/*   PARAMETERS:                                                    */
+00003000/*                                                                  */
+00003100/*     NAME     REQUIRED                                            */
+00003200/*              THE NAME OF THE DATASET YOU WANT TO COMPILE         */
+00003300/*                                                                  */
+00003400/*     LIB      DEFAULT: NULL                                       */
+00003500/*              SPECIFY THE PSD NAME IF THE <NAME> IS A MEMBER OF A */
+00003600/*              PDS.                                                */
+00003700/*                                                                  */
+00003800/*     COMPILER DEFAULT: NCAMCM.XPL.REL90V2.XCOMLINK                */
+00003900/*              THE XPL COMPILER                                    */
+00004000/*                                                                  */
+00004100/*     INPUT2   DEFAULT: NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB)        */
+00004200/*              THE INPUT2 DATASET                                  */
+00004300/*                                                                  */
+00004400/*     INCLUDE  DEFAULT: NULL                                       */
+00004500/*              ANY OTHER FILES THAT ARE REQUIRED FOR THE COMPILE   */
+00004600/*                                                                  */
+00004700/*     OPT      DEFAULT: NULL                                       */
+00004800/*              ALLOWS THE USER TO SPECIFY ANY OTHER OPTIONS        */
+00004900/*                                                                  */
+00005000/*     TRACE    OPTIONAL                                            */
+00005100/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00005200/*                                                                  */
+00005300/*------------------------------------------------------------------*/
+00005400/*                                                                  */
+00005500/*   INPUT DATA SET NAMES:                                          */
+00005600/*                                                                  */
+00005700/*      <NAME>.SOURCE     - OR --     <LIB>.SOURCE(<NAME>)          */
+00005800/*        NOT IN A PDS                  IN A PDS                    */
+00005900/*       LOCATION OF THE SOURCE TO COMPILE                          */
+00006000/*                                                                  */
+00006100/*      NCAMCM.XPL.REL90V2.XCOMLINK                                 */
+00006200/*        THE XPL COMPILER                                          */
+00006300/*                                                                  */
+00006400/*      NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB)                         */
+00006500/*        THE INPUT2 LIBRARY FOR THE XPL COMPILER                   */
+00006600/*                                                                  */
+00006700/*------------------------------------------------------------------*/
+00006800/*                                                                  */
+00006900/*   OUTPUT DATA SET NAMES:                                         */
+00007000/*                                                                  */
+00007100/*     <NAME>.LST                                                   */
+00007200/*        THE OUTPUT LISTING OF THE COMPILE                         */
+00007300/*                                                                  */
+00007400/*     <NAME>.OBJ                                                   */
+00007500/*        THE RESULTING OBJECT MODULE OF THE COMPILE                */
+00007600/*                                                                  */
+00007700/*------------------------------------------------------------------*/
+00007800/*                                                                  */
+00007900/*   TEMPORARY DATA SET NAMES:                                      */
+00008000/*                                                                  */
+00008100/*     NONE.                                                        */
+00008200/*                                                                  */
+00008300/*------------------------------------------------------------------*/
+00008400/*                                                                  */
+00008500/*   COMMENTS:                                                      */
+00008600/*                                                                  */
+00008700/*     NONE.                                                        */
+00008800/*                                                                  */
+00008900/*------------------------------------------------------------------*/
+00009000/*                                                                  */
+00009100/*   REVISION HISTORY:                                              */
+00009200/*                                                                  */
+00009300/*  DATE      PCR  NAME  DESCRIPTION                                */
+00009400/*  --------  ---  ---   -------------------------------------      */
+00009500/*  01/18/84  ???  DWE   ORIGINAL CLIST                             */
+00009600/*                                                                  */
+00009700/*  07/05/90  102  TEV   ADDED HEADER AND REARRANGED PARAMETERS ONE */
+00009800/*                       TO A LINE. ADDED INCLUDE ALLOC STATEMENT.  */
+00009900/*                                                                  */
+00010000/*  03/22/91  155  TKK   RENAME  PDS THAT HOLDS MEMBER XPLSM        */
+00010100/*                                                                  */
+00010200/*  03/23/94  328  TEV   UPDATE TOOLS FOR XPL 90V2 RELEASE          */
+00010300/*------------------------------------------------------------------*/
+00010400/********************************************************************/
+00010500PROC 1 NAME                                  +
+00010600       ID(&SYSUID.)                          +
+00010700       LIB(&ID..TESTX)                       +
+00010800       COMPILER(NCAMCM.XPL.REL90V2.XCOMLINK) +
+00010900       INPUT2(NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB)) +
+00011000       INCLUDE()                             +
+00011100       OPT()                                 +
+00011200       TRACE
+00011300 
+00011400IF &TRACE EQ TRACE THEN +
+00011500   CONTROL LIST CONLIST
+00011600CONTROL NOMSG END(DONE)
+00011700  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 +
+00011800    SYSPRINT LISTING2) ATTR(FBA133 F80 F7200)
+00011900ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(5985)
+00012000ATTR F80    RECFM(F)     LRECL(80)  BLKSIZE(80)
+00012100ATTR F7200  RECFM(F)     LRECL(7200)  BLKSIZE(7200)
+00012200IF &SYSDSN('&LIB..LST') NE OK THEN +
+00012300   ALLOC DA('&LIB..LST') RELEASE USING(FBA133) NEW DSORG(PO) +
+00012400         DIR(50) SP(20 5) TRACKS
+00012500DELETE ('&LIB..LST(&NAME)' '&ID..&NAME..OBJ')
+00012600CONTROL MSG
+00012700ALLOC F(PROGRAM)  DA('&COMPILER.') SHR
+00012800IF &INCLUDE. NE  THEN +
+00012900   ALLOC F(INCLUDE)  DA('&INCLUDE.') SHR
+00013000ALLOC F(FILE1) DA('&ID..&NAME..OBJ') RELEASE USING(F7200) NEW +
+00013100      SP(5 2) TRACK
+00013200ALLOC F(FILE2) NEW SPACE(5,5) BLOCK(7200)
+00013300ALLOC F(FILE3) NEW SPACE(5,5) BLOCK(7200)
+00013400ALLOC F(FILE4) NEW SPACE(5,5) BLOCK(7200)
+00013500ALLOC F(INPUT2) DA('&INPUT2.') SHR
+00013600IF &LIB EQ THEN +
+00013700   ALLOC F(SYSPRINT) DA('&ID..&NAME..LST') RELEASE USING(FBA133) NEW +
+00013800         SP(20 5) TRACKS
+00013900ELSE +
+00014000   ALLOC F(SYSPRINT) DA('&LIB..LST(&NAME)') SHR
+00014100ALLOC F(LISTING2) DA(*) USING(F80)
+00014200IF &LIB EQ THEN DO
+00014300     ALLOC F(SYSIN) DA('&ID..&NAME..SOURCE') SHR
+00014400     WRITE XPL COMPILING &NAME.
+00014500DONE
+00014600ELSE DO
+00014700     ALLOC F(SYSIN) DA('&LIB..XPL(&NAME.)') SHR
+00014800     WRITE XPL COMPILING '&LIB..XPL(&NAME.)'
+00014900DONE
+00015000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+00015100  'L2,$S$V$I,SYTSIZE=1900,REFSIZE=23000,MACROSIZE=375,CONSTANTS=500,-
+00015200EXCLUDE=ALC,PAGES=600,FREE=21000,&OPT.'
+00015300SET &SAVECC=&LASTCC
+00015400CONTROL NOMSG
+00015500  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 +
+00015600         SYSPRINT LISTING2) ATTR(FBA133 F80 F7200)
+00015700CONTROL MSG
+00015800IF &SAVECC EQ 0 THEN +
+00015900     WRITE COMPILATION SUCCESSFUL
+00016000ELSE +
+00016100     WRITE COMPILATION ERROR CODE = &SAVECC

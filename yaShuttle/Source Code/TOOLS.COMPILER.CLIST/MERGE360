@@ -1,0 +1,144 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     MERGE360                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO MERGE TOGETHER THE 360 PARTITIONED HAL/S COMPILER */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     MERGE360 'PASS' LIB(BFS.CURRENT)                             */
+00140001/*              PROG('''NCAMCM.TOOLS.XPLOBJ(XPLMERGE)''')           */
+00150000/*              IN(##DRIVER) PROCS(&LIB..&PASS..PROCS)              */
+00160000/*              OUT(&LIB..&PASS..SOURCE) OPT() TRACE LEVEL(&SYSUID.)*/
+00170000/*                                                                  */
+00180000/*     ALIAS    - NONE.                                             */
+00190000/*     REQUIRED - 'PASS'.                                           */
+00240000/*                                                                  */
+00250000/*------------------------------------------------------------------*/
+00260000/*                                                                  */
+00270000/*   INVOKES:                                                       */
+00280000/*                                                                  */
+00290001/*     'NCAMCM.TOOLS.XPLOBJ(XPLMERGE)'                              */
+00300000/*                                                                  */
+00310000/*------------------------------------------------------------------*/
+00320000/*                                                                  */
+00330000/*   PARAMETERS:                                                    */
+00340000/*                                                                  */
+00350000/*     PASS     REQUIRED                                            */
+00360000/*              PASS NAME FOR HALS PASS COMPILER                    */
+00370000/*                                                                  */
+00380000/*     LIB      DEFAULT: B360.CURRENT                               */
+00390000/*              LIBRARY THAT CODE IS IN                             */
+00400000/*                                                                  */
+00410001/*     PROG     DEFAULT: '''NCAMCM.TOOLS.XPLOBJ(XPLMERGE)'''        */
+00420000/*              NAME OF THE MERGE PROGRAM'S OBJECT CODE             */
+00430000/*                                                                  */
+00440000/*     IN       DEFAULT: ##DRIVER                                   */
+00450000/*              NAME OF THE MEMBER IN PROCS THAT CONTAINS MAIN      */
+00460000/*              INPUT FILE                                          */
+00470000/*                                                                  */
+00480000/*     PROCS    DEFAULT: &LIB..&PASS..PROCS                         */
+00490000/*              NAME OF PDS THAT CONTAINS THE PROCEDURES            */
+00500000/*                                                                  */
+00510000/*     OUT      DEFAULT: &LIB..&PASS..SOURCE                        */
+00520000/*              NAME OF THE RESULTING OUTPUT FILE                   */
+00530000/*                                                                  */
+00540000/*     OPT      DEFAULT: NULL                                       */
+00550000/*              OPTION FOR MONITOR CALL                             */
+00560000/*                                                                  */
+00570000/*     TRACE    OPTIONAL                                            */
+00580000/*              TURN TRACE ON OR OFF                                */
+00590000/*                                                                  */
+00600000/*     LEVEL    DEFAULT: &SYSUID                                    */
+00610000/*              LEVEL TO GET SOURCE FROM                            */
+00620000/*                                                                  */
+00630000/*------------------------------------------------------------------*/
+00640000/*                                                                  */
+00650000/*   INPUT DATA SET NAMES:                                          */
+00660000/*                                                                  */
+00670000/*     <PROG>                                                       */
+00680000/*         NAME OF THE MERGE PROGRAM'S OBJECT CODE                  */
+00690000/*                                                                  */
+00700000/*     <LEVEL>.<PROCS>                                              */
+00710000/*         THE FULLY QUALIFIED NAME OF THE PDS THAT CONTAINS THE    */
+00720000/*         PROCEDURES.                                              */
+00730000/*                                                                  */
+00740000/*     <LEVEL>.<PROCS>(<IN>)                                        */
+00750000/*         THE LOCAITON OF THE MAIN INPUT FILE                      */
+00760000/*                                                                  */
+00770000/*------------------------------------------------------------------*/
+00780000/*                                                                  */
+00790000/*   OUTPUT DATA SET NAMES:                                         */
+00800000/*                                                                  */
+00810000/*     <OUT>                                                        */
+00820000/*          THE NAME OF THE RESULTING OUTPUT FILE                   */
+00830000/*                                                                  */
+00840000/*------------------------------------------------------------------*/
+00850000/*                                                                  */
+00860000/*   TEMPORARY DATA SET NAMES:                                      */
+00870000/*                                                                  */
+00880000/*     NONE.                                                        */
+00890000/*                                                                  */
+00900000/*------------------------------------------------------------------*/
+00910000/*                                                                  */
+00920000/*   COMMENTS:                                                      */
+00930000/*                                                                  */
+00940000/*     NONE.                                                        */
+00950000/*                                                                  */
+00960000/*------------------------------------------------------------------*/
+00970000/*                                                                  */
+00980000/*   REVISION HISTORY:                                              */
+00990000/*                                                                  */
+01000000/*  DATE      PCR  NAME  DESCRIPTION                                */
+01010000/*  --------  ---  ---   -------------------------------------      */
+01020000/*  07/31/89  ???  RSJ   ORIGINAL CLIST                             */
+01030000/*                                                                  */
+01040000/*  08/14/89  ???  TVR   UPDATED CLIST                              */
+01050000/*                                                                  */
+01060000/*  07/06/90  104  TEV   ADDED HEADER AND REARRANGED PARAMETERS ONE */
+01070000/*                       PER LINE.                                  */
+01080000/*                                                                  */
+01081000/*  01/18/91  146  RSJ   UPDATED PROG PARAMETER TO RELFECT NEW      */
+01082000/*                       LOCATION OF THE DATASET NAME               */
+01083000/*                                                                  */
+01084001/*  09/13/91  186  LJK   RENAMED CM OBJECT MODULE                   */
+01086000/*                                                                  */
+01090000/*------------------------------------------------------------------*/
+01100000/********************************************************************/
+01110000PROC 1 PASS                                           +
+01120000       LIB(B360.CURRENT)                              +
+01130001       PROG('''NCAMCM.TOOLS.XPLOBJ(XPLMERGE)''')      +
+01140000       IN(##DRIVER)                                   +
+01150000       PROCS(&LIB..&PASS..PROCS)                      +
+01160000       OUT(&LIB..&PASS..SOURCE)                       +
+01170000       OPT()                                          +
+01180000       TRACE                                          +
+01190000       LEVEL(&SYSUID.)
+01200000 
+01210000IF       &TRACE.  NE THEN +
+01220000         CONTROL  LIST CONLIST
+01230000CONTROL NOMSG END(DONE)
+01240000  FREE F(PROGRAM OUTPUT3 SYSPRINT SYSIN INCLUDE)  ATTR(FBA133 FB88)
+01250000  DELETE (&OUT.)
+01260000CONTROL MSG
+01270000ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+01280000ATTR FB88   RECFM(F B)   LRECL(88) BLKSIZE(6160)
+01290000ALLOC F(PROGRAM)  DA(&PROG.) SHR
+01300000ALLOC F(INCLUDE)  DA('&LEVEL..&PROCS.') SHR
+01310000ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW CATALOG +
+01320000                  SP(40 40) TRACK
+01330000ALLOC F(OUTPUT3) DA(&OUT.) RELEASE USING(FB88) NEW CATALOG +
+01340000  SP(80 5) TRACK
+01350000ALLOC F(SYSIN)    DA('&LEVEL..&PROCS.(&IN.)') SHR
+01360000WRITE RUNNING XPL PROGRAM &PROG.
+01370000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' '&OPT.'
+01380000SET &SAVECC = &LASTCC
+01390000FREE F(PROGRAM OUTPUT3 SYSIN SYSPRINT INCLUDE) ATTR(FBA133)
+01400000IF &SAVECC EQ 0 THEN +
+01410000     WRITE EXECUTION SUCCESSFUL
+01420000ELSE +
+01430000     WRITE EXECUTION ERROR CODE = &SAVECC

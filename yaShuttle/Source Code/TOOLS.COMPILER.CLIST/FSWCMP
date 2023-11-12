@@ -1,0 +1,288 @@
+00000106/********************************************************************/
+00000206/*------------------------------------------------------------------*/
+00000306/*                                                                  */
+00000406/*   NAME:      FSWCMP                                              */
+00000506/*                                                                  */
+00000606/*------------------------------------------------------------------*/
+00000706/*                                                                  */
+00000806/*   FUNCTION:  A CLIST TO RUN THE ACCEPTANCE TESTS FOR FSW.        */
+00000906/*              IT FIRST COMPILE ALL FSW WITH THE NEW COMPILER AND  */
+00001006/*              COMPARE WITH A PERMANENT PDS WHICH CONTAINS THE     */
+00001106/*              OBJECT FILE OF THE BASELINE COMPILER.               */
+00001206/*                                                                  */
+00001306/*------------------------------------------------------------------*/
+00001406/*                                                                  */
+00001506/*   SYNTAX :                                                       */
+00001606/*     FSWCMP   ID(&SYSUID.) DSN(APPL) LIB(&ID..&DSN.)              */
+00001706/*              OLDLIB(&ID..&DSN..OLD) OI(OI250700)                 */
+00001806/*              NEWTERROR() SYSTEM(PASS) COMPVER(CURRENT)           */
+00001906/*              NEWCMPLR(&ID..REL99V0.COMPILER)                     */
+00002006/*              NEWERROR(NCAMCM.&SYSTEM..CURRENT.ERRORLIB)          */
+00002106/*              NEWMONTR(NCAMCM.PASS.CURRENT.MONITOR.LOAD(MONITOR)) */
+00002206/*              TRACE FIRSTRUN REFRESH INSTCNT OPT()                */
+00002306/*              INV(NCAMCM.TESTLIB.&OI..INVENTRY)                   */
+00002406/*              SRCDSN(&OI..APPL.SRC)                               */
+00002506/*              LIST(NCAMCM.TESTLIB.&OI..&DSN..MEMLIST)             */
+00002606/*                                                                  */
+00002706/*     ALIAS    - NONE.                                             */
+00002806/*     REQUIRED - NONE.                                             */
+00002906/*                                                                  */
+00003006/*------------------------------------------------------------------*/
+00003106/*                                                                  */
+00003206/*   INVOKES :  COMPDEL                                             */
+00003306/*              COMPALLO                                            */
+00003406/*              PDSALL                                              */
+00003506/*              INSTCNT                                             */
+00003606/*              PASSCLG/H360CLG                                     */
+00003706/*                                                                  */
+00003806/*------------------------------------------------------------------*/
+00003906/*                                                                  */
+00004006/*   PARAMETERS:                                                    */
+00004106/*                                                                  */
+00004206/*     ID       DEFAULT: &SYSUID                                    */
+00004306/*              HIGH LEVEL QUALIFIER                                */
+00004406/*                                                                  */
+00004506/*     DSN      DEFAULT: APPL                                       */
+00004606/*              DATA SET FOR THE TEST PROGRAMS                      */
+00004706/*                                                                  */
+00004806/*     SRCDSN   DEFAULT: OI250700.APPL.SRC                          */
+00004906/*              DATA SET WHICH CONTAINS THE SOURCE PROGRAMS         */
+00005006/*                                                                  */
+00005106/*     LIB      DEFAULT: &ID..&DSN                                  */
+00005206/*              NEW DATASET NAME QUALIFIER                          */
+00005306/*                                                                  */
+00005406/*     OLDLIB   DEFAULT: &ID..&DSN..OLD                             */
+00005506/*              OLD DATASET NAME QUALIFIER                          */
+00005606/*                                                                  */
+00005706/*     LIST     DEFAULT: NCAMCM.TESTLIB.&OI..APPL.MEMLIST           */
+00005806/*              DATA SET WHICH CONTAINS A MEMBER LIST OF WHICH      */
+00005906/*              MEMBERS IN THE DATA SET YOU WANT TO COMPILE.        */
+00006006/*                                                                  */
+00006106/*     SYSTEM   DEFAULT: PASS                                       */
+00006206/*              PASS, BFS OR H360 FOR VERSION SEPARATION PURPOSES   */
+00006306/*                                                                  */
+00006406/*     COMPVER  DEFAULT: CURRENT                                    */
+00006506/*              COMPILER VERSION                                    */
+00006606/*                                                                  */
+00006706/*     NEWCMPLR DEFAULT: &ID..REL99V0.COMPILER                      */
+00006806/*              RELEASE OF THE COMPILER YOU WANT TO TEST            */
+00006906/*                                                                  */
+00007006/*     NEWERROR DEFAULT: NCAMCM.&SYSTEM..CURRENT.ERRORLIB           */
+00007106/*              RELEASE OF THE ERROR LIBRARY YOU WANT TO TEST       */
+00007206/*                                                                  */
+00007306/*     NEWMONTR DEFAULT: NCAMCM.PASS..CURRENT.MONITOR.LOAD(MONITOR) */
+00007406/*              RELEASE OF THE MONIOTR YOU WANT TO TEST             */
+00007506/*                                                                  */
+00007606/*     NEWTERROR DEFAULT: NULL                                      */
+00007706/*              TEMPORARY ERRORLIB FOR NEW COMPILER                 */
+00007806/*                                                                  */
+00007906/*     FIRSTRUN OPTIONAL                                            */
+00008006/*              IF SPECIFIED ALL THE DATASETS WILL BE ALLOCATED     */
+00008106/*                                                                  */
+00008206/*     INSTCNT  OPTIONAL                                            */
+00008306/*              IF SPECIFIED RUN INSTRUCTION COUNT ON &LIB..LST     */
+00008406/*                                                                  */
+00008506/*     REFRESH  OPTIONAL                                            */
+00008606/*              IF SPECIFIED DELETE AND THEN REALLOCATE DATASETS    */
+00008706/*                                                                  */
+00008806/*     OI       DEFAULT: OI250700                                   */
+00008906/*              FSW VERSION                                         */
+00009006/*                                                                  */
+00009106/*     INV      DEFAULT: NCAMCM.TESTLIB.&OI..INVENTRY               */
+00009206/*              FSW INVENTORY FILE FOR A SPECIFIC OI                */
+00009306/*                                                                  */
+00009406/*     OPT      DEFAULT: NULL                                       */
+00009506/*              OTHER USER REQUESTED COMPILER OPTION                */
+00009606/*                                                                  */
+00009706/*     TRACE    OPTIONAL                                            */
+00009806/*              TRACE THE CLISTS EXECUTION                          */
+00009906/*                                                                  */
+00010006/*------------------------------------------------------------------*/
+00010106/*                                                                  */
+00010206/*   INPUT DATA SET NAMES:                                          */
+00010306/*                                                                  */
+00010406/*     <SRCDSN>                                                     */
+00010506/*          DATA SET WHICH CONTAINS THE SOURCE PROGRAMS             */
+00010606/*                                                                  */
+00010706/*     <ID>.REL99V0.COMPILER                                        */
+00010806/*          RELEASE OF THE COMPILER TO TEST                         */
+00010906/*                                                                  */
+00011006/*     NCAMCM.<SYSTEM>.CURRENT.ERRORLIB                             */
+00011106/*          RELEASE OF THE ERROR LIBRARY TO USE AS A BASELINE       */
+00011206/*                                                                  */
+00011306/*------------------------------------------------------------------*/
+00011406/*                                                                  */
+00011506/*   OUTPUT DATA SET NAMES:                                         */
+00011606/*                                                                  */
+00011706/*     <LIB>.COMPFC.MEMLIST                                         */
+00011806/*          DSN WHICH CONTAINS THE MEMBERS TO RUN COMPFC UPON       */
+00011906/*                                                                  */
+00012006/*                                                                  */
+00012106/*------------------------------------------------------------------*/
+00012206/*   REVISION HISTORY:                                              */
+00012306/*                                                                  */
+00012406/*  DATE      PCR#     NAME   DESCRIPTION                           */
+00012506/*  --------  -----    ----   -------------------------------       */
+00012606/*  02/15/91  0169     LJK    THIS IS A VERSION OF ACEPTFSW         */
+00012706/*                            RECOMPILE WITH NEW COMPILER ONLY      */
+00012806/*                            INVOKE FFUNCTST TO COMPARE TWO        */
+00012906/*                            OBJECT FILES                          */
+00013006/*  03/30/94  0332     LJK    UPDATED FOR 26V0 RELEASE              */
+00013106/*  05/12/94  0344     LJK    ADDED INSTCNT OPTION                  */
+00013206/*  10/21/94  0377     BAF    ELIMINATE REFERENCES TO 24070         */
+00013306/*  03/31/95  0418     LJK    ADD OPT PARAMETER; CHANGE OI TO 25070 */
+00013406/*                            DELETE NOLINK OPTION                  */
+00013506/*  06/28/96  0341     TEV    UPDATED CLIST FOR THE MERGE OF THE    */
+00013606/*                            INSTCNT AND INSTCNTS PROGRAMS         */
+00013706/*  09/20/96  0493     TEV    FIX PROBLEM OF DELETING A INSTCNT.RPT */
+00013806/*                            MEMBER WHEN INSTCNT WAS NOT CALLED    */
+00013907/*  10/28/97  0542     LJK    UPDATED TO PROCESS H360 FSWAT TOOLS   */
+00014006/*------------------------------------------------------------------*/
+00014106/********************************************************************/
+00014206 
+00014306PROC 0   ID       (&SYSUID.)                             +
+00014406         DSN      (APPL)                                 +
+00014506         LIB      (&ID..&DSN.)                           +
+00014606         OLDLIB   (&ID..&DSN..OLD)                       +
+00014706         SYSTEM   (PASS)                                 +
+00014806         COMPVER  (CURRENT)                              +
+00014906         NEWCMPLR (&ID..REL99V0.COMPILER)                +
+00015006         NEWERROR (NCAMCM.&SYSTEM..&COMPVER..ERRORLIB)   +
+00015106         NEWMONTR (NCAMCM.&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00015206         NEWTERROR()                                     +
+00015306         OI       (OI250700)                             +
+00015406         SRCDSN   (&OI..&DSN..SRC)                       +
+00015506         LIST     (NCAMCM.TESTLIB.&OI..&DSN..MEMLIST)    +
+00015606         INV      (NCAMCM.TESTLIB.&OI..INVENTRY)         +
+00015706         OPT      ()                                     +
+00015806         FIRSTRUN                                        +
+00015906         INSTCNT                                         +
+00016006         REFRESH                                         +
+00016106         TRACE
+00016206 
+00016306CONTROL END(DONE)
+00016406GLOBAL RETCODE
+00016506IF &TRACE NE THEN CONTROL CONLIST LIST
+00016606CONTROL NOMSG
+00016706 
+00016806IF &REFRESH NE THEN COMPDEL &LIB.
+00016906IF &FIRSTRUN EQ FIRSTRUN  OR &REFRESH EQ REFRESH  THEN +
+00017006   COMPALLO &LIB. TEST(FSW)
+00017106 
+00017208IF &SYSTEM = PASS THEN +
+00017306       SET &CMD = PASSCLG
+00017608IF &SYSTEM = H360 THEN +
+00017706       SET &CMD = H360CLG
+00018306/********************************************************/
+00018406/*                                                      */
+00018506/*  RUN PDSALL TO CREATE THE MEMBER LIST FILE           */
+00018606/*                                                      */
+00018706/********************************************************/
+00018806IF &LIST EQ THEN  DO
+00018906   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00019006   SET &LIST =  &LIB..MEMLIST
+00019106DONE
+00019206         /***************************************/
+00019306         /*                                     */
+00019406         /*    ON ATTN, DO THE FOLLOWING:       */
+00019506         /*                                     */
+00019606         /***************************************/
+00019706 
+00019806ATTN     DO
+00019906         ERROR    OFF
+00020006         CLOSFILE MEMBERS
+00020106         FREE     F(MEMBERS)
+00020206         EXIT
+00020306DONE
+00020406 
+00020506CONTROL  NOMSG
+00020606         FREE     F(MEMBERS)
+00020706CONTROL  MSG NOFLUSH
+00020806 
+00020906         /***************************************/
+00021006         /*                                     */
+00021106         /* SET UP TO READ THE FILE &LIST.      */
+00021206         /*                                     */
+00021306         /***************************************/
+00021406ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00021506OPENFILE MEMBERS  INPUT
+00021606 
+00021706         /***************************************/
+00021806         /*                                     */
+00021906         /* ON ERROR, DO THE FOLLOWING:         */
+00022006         /*                                     */
+00022106         /***************************************/
+00022206ERROR DO
+00022306   CLOSFILE MEMBERS
+00022406   FREE     F(MEMBERS)
+00022506   ERROR OFF
+00022606   GOTO FINI
+00022706DONE
+00022806         /***************************************/
+00022906         /*                                     */
+00023006         /*   PERFORM THE COMMAND ON THE PDS.   */
+00023106         /*                                     */
+00023206         /***************************************/
+00023306 
+00023406IF &NEWTERROR. NE THEN SET &NEWTERROR = TERRORLIB(&NEWTERROR.)
+00023506                  ELSE SET &NEWTERROR =
+00023606IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+00023706         ELSE SET  &OPT =
+00023806SET &PACK = 0
+00023906 
+00024006DO    WHILE    &SYSUID NE
+00024106      GETFILE  MEMBERS
+00024206      SET &PACK = &PACK + 1
+00024306      IF &PACK. = 8   THEN SET &PACK = 0
+00024406      SET &MEMLEN = 1
+00024506      DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+00024606         SET &MEMLEN =  &MEMLEN + 1
+00024706      DONE
+00024806      SET &MEMLEN = &MEMLEN - 1
+00024906      SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+00025006 
+00025106 IF &PACK = 5 THEN +
+00025206   COMPRESS '&LIB..LST'
+00025306 
+00025406 TIME
+00025506 WRITE USING THE NEW COMPILER:
+00025606     &CMD     C                                              +
+00025706              &NAME.                                         +
+00025806              LIB     (&LIB.)                                +
+00025906              ID      (&ID.)                                 +
+00026006              SYSIN   (&SRCDSN.(&NAME.))                     +
+00026106              COMPVER (&COMPVER.)                            +
+00026206              COMPILER(&NEWCMPLR.)                           +
+00026306              ERRORLIB(&NEWERROR.)                           +
+00026406              MONITOR (&NEWMONTR.)                           +
+00026506              &NEWTERROR.                                    +
+00026606              OI      (&OI.)                                 +
+00026708              INV     (&INV.)                                +
+00026806              &OPT.                                          +
+00026906              FSW                                            +
+00027006              &TRACE.
+00027106 
+00027206 SET &NEWCMP=&RETCODE
+00027306 IF &NEWCMP <  4 THEN DO
+00027406    IF &INSTCNT NE THEN DO
+00027506       INSTCNT  &NAME. MEMBER(&NAME)       +
+00027606                SYSIN(&LIB..LST)           +
+00027706                SYSOUT(&LIB..INSTCNT.RPT)  +
+00027806                &TRACE.
+00027906       SET &INSTCNT_RETCODE = &RETCODE
+00028006       IF &INSTCNT_RETCODE = 0 THEN +
+00028106          DELETE '&LIB..INSTCNT.RPT(&NAME)'
+00028206    DONE
+00028306    WRITE ** EXECUTION OF BYTECOMP FOR &NAME. NEW/OLD.OBJ **
+00028412    FBYTECMP &NAME. LIB(&LIB.) DELOBJ GENLIST NOUTPUT +
+00028506             &TRACE SYSTEM(&SYSTEM.)    +
+00028606             IN1(&OLDLIB..OBJ(&NAME.))  +
+00028706             IN2(&LIB..OBJ(&NAME.))
+00028806    DONE
+00028906 ELSE WRITE COMPARES NOT EXECUTED, NEWCMP =&NEWCMP.
+00029006 
+00029106DONE
+00029206FINI: CONTROL MSG
+00029306WRITE ***********************************************
+00029406WRITE *** FINISHED WITH THE FSW OBJECT COMPARISON ***
+00029506WRITE ***********************************************

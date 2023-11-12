@@ -1,0 +1,195 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     PDSALL                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO TAKE ACTION AGAINST EACH MEMBER OF A PDS          */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     PDSALL 'SRCDSN' ID(&SYSUID.) LIB(&ID..TEST) COMMAND()        */
+00140000/*            OPTION() TRACE COUNTEM MAKELIST LIST()                */
+00150000/*                                                                  */
+00160000/*     ALIAS    - NONE.                                             */
+00170000/*     REQUIRED - 'SRCDSN'                                          */
+00200000/*                                                                  */
+00210000/*------------------------------------------------------------------*/
+00220000/*                                                                  */
+00230001/*   INVOKES   : NCAMCM.TOOLS.MISCLOAD(MEMLIST)                     */
+00240000/*               WHICHEVER CLIST IS SPECIFIED BY THE COMMAND PARM.  */
+00250000/*                                                                  */
+00260000/*------------------------------------------------------------------*/
+00270000/*                                                                  */
+00280000/*   PARAMETERS:                                                    */
+00290000/*                                                                  */
+00300000/*     SRCDSN   REQUIRED                                            */
+00310000/*              THE DSN WHICH ALL MEMBERS SHOULD BE ACTED ON.       */
+00320000/*                                                                  */
+00330000/*     ID       DEFAULT: &SYSUID                                    */
+00340000/*              THE DATASETS HIGH LEVEL QUALIFIER                   */
+00350000/*                                                                  */
+00360000/*     LIB      DEFAULT: &ID..TEST                                  */
+00370000/*              THE DSN ON USERS ACCOUNT WHERE ALL FILES ARE        */
+00380000/*              LOCATED.                                            */
+00390000/*                                                                  */
+00400000/*     COMMAND  DEFAULT: NULL                                       */
+00410000/*              CLIST TO BE INVOKED FOR EACH MEMBER IN THE PDS      */
+00420000/*                                                                  */
+00430000/*     OPTION   DEFAULT: NULL                                       */
+00440000/*              PARAMETER NECESSARY FOR THE INVOKED CLIST           */
+00450000/*                                                                  */
+00460000/*     TRACE    OPTIONAL                                            */
+00470000/*              TRACE CLIST EXECUTION                               */
+00480000/*                                                                  */
+00490000/*     COUNTEM  OPTIONAL                                            */
+00500000/*              PASS TO PDSALL IF YOU DONT WANT THE PACK TERM RESET */
+00510000/*                                                                  */
+00520000/*     MAKELIST OPTIONAL                                            */
+00530000/*              PASS IF YOU ONLY WANT TO GENERATE THE MEMBER LIST   */
+00540000/*                                                                  */
+00550000/*     LIST     DEFAULT: NULL                                       */
+00560000/*              IF SPECIFIED, IT IS A SEQUENTIAL FILE WITH THE      */
+00570000/*              MEMBERS LISTED THAT YOU WANT A COMMAND PERFORMED    */
+00580000/*              UPON, INSTEAD OF ALL MEMBERS OF A PDS {COMMONLY     */
+00590000/*              USED FOR RESTARTING A COMMAND STRING}.              */
+00600000/*                                                                  */
+00610000/*------------------------------------------------------------------*/
+00620000/*                                                                  */
+00630000/*   INPUT DATA SET NAMES :                                         */
+00640000/*                                                                  */
+00650000/*     <SRCDSN>                                                     */
+00660000/*          DATA SET WHERE THE SOURCE MEMBER RESIDES                */
+00670000/*                                                                  */
+00680000/*     <LIB>                                                        */
+00690000/*          DATA SET WHERE THE LISTINGS/OUTPUT SHOULD GO            */
+00700000/*                                                                  */
+00710000/*     <LIB>.MEMLIST                                                */
+00720000/*          DATA SET WHICH CONTAINS THE MEMBER LIST TO PROCESS      */
+00730000/*                                                                  */
+00740000/*------------------------------------------------------------------*/
+00750000/*                                                                  */
+00760000/*   OUTPUT DATA SET NAMES :                                        */
+00770000/*                                                                  */
+00780000/*     <LIB>.MEMLIST                                                */
+00790000/*          DATA SET WHICH CONTAINS THE MEMBER LIST TO PROCESS      */
+00800000/*                                                                  */
+00810000/*------------------------------------------------------------------*/
+00820000/*                                                                  */
+00830000/*   TEMPORARY DATA SET NAMES:                                      */
+00840000/*                                                                  */
+00850000/*     NONE.                                                        */
+00860000/*                                                                  */
+00870000/*------------------------------------------------------------------*/
+00880000/*                                                                  */
+00890000/*   COMMENTS:                                                      */
+00900000/*                                                                  */
+00910000/*     NONE.                                                        */
+00920000/*                                                                  */
+00930000/*------------------------------------------------------------------*/
+00940000/*                                                                  */
+00950000/*   REVISION HISTORY :                                             */
+00960000/*                                                                  */
+00970000/*     DATE      PCR     NAME   DESCRIPTION                         */
+00980000/*     --------  ----    ----   ------------------------------      */
+00990000/*     10/26/89  062     SDM    BASELINE ORIGINAL CLIST             */
+01000000/*                                                                  */
+01010000/*     06/26/90  099     TEV    UPDATED HEADER                      */
+01020000/*                                                                  */
+01021000/*     09/19/91  186     LJK    RENAMED CM LOAD MODULE              */
+01022000/*                                                                  */
+01030000/*------------------------------------------------------------------*/
+01040000/********************************************************************/
+01050000 
+01060000PROC     1        SRCDSN                            +
+01070000                  ID(&SYSUID.)                      +
+01080000                  LIB(&ID..TEST)                    +
+01090000                  COMMAND()                         +
+01100000                  OPTION()                          +
+01110000                  TRACE                             +
+01120000                  COUNTEM                           +
+01130000                  MAKELIST                          +
+01140000                  LIST()
+01150000GLOBAL RETCODE
+01160000IF       &TRACE.  NE THEN +
+01170000         CONTROL  LIST CONLIST
+01180000IF &LIST. EQ THEN DO
+01190000         /***************************************/
+01200000         /*                                     */
+01210000         /*        GENERATE MEMBER LIST         */
+01220000         /*                                     */
+01230000         /***************************************/
+01240000CONTROL  NOMSG END(DONE)
+01250000         SET &LIST = &LIB..MEMLIST
+01260000         FREE     F(SYSLIB SYSPRINT)
+01270000         DELETE   '&LIB..MEMLIST'
+01280000CONTROL  MSG
+01290000 
+01300000ALLOC    F(SYSLIB)   DA('&SRCDSN.') SHR
+01310000ALLOC    F(SYSPRINT) DA('&LIST') NEW BLOCK(80) TRACK SP(1 1)
+01320000 
+01330000CALL     'NCAMCM.TOOLS.MISCLOAD(MEMLIST)'
+01340000SET      &SAVECC  = &LASTCC
+01350000FREE     F(SYSLIB SYSPRINT)
+01360000 
+01370000IF       &SAVECC  = 0 THEN +
+01380000         WRITE MEMBER LIST SUCCESSFUL
+01390000ELSE     +
+01400000         WRITE MEMBER LIST ERROR CODE = &SAVECC
+01410000DONE
+01420000         /***************************************/
+01430000         /* EXIT IF ONLY A LIST WAS TO BE MADE  */
+01440000         /***************************************/
+01450000IF &MAKELIST NE THEN EXIT
+01460000         /***************************************/
+01470000         /*                                     */
+01480000         /*    ON ATTN, DO THE FOLLOWING:       */
+01490000         /*                                     */
+01500000         /***************************************/
+01510000 
+01520000ATTN     DO
+01530000         ERROR    OFF
+01540000         CLOSFILE MEMBERS
+01550000         FREE     F(MEMBERS)
+01560000         EXIT
+01570000DONE
+01580000 
+01590000CONTROL  NOMSG
+01600000         FREE     F(MEMBERS)
+01610000CONTROL  MSG NOFLUSH
+01620000 
+01630000         /***************************************/
+01640000         /*                                     */
+01650000         /* SET UP TO READ THE FILE &LIST.      */
+01660000         /*                                     */
+01670000         /***************************************/
+01680000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+01690000OPENFILE MEMBERS  INPUT
+01700000 
+01710000         /***************************************/
+01720000         /*                                     */
+01730000         /* ON ERROR, DO THE FOLLOWING:         */
+01740000         /*                                     */
+01750000         /***************************************/
+01760000ERROR DO
+01770000   CLOSFILE MEMBERS
+01780000   FREE     F(MEMBERS)
+01790000   ERROR OFF
+01800000   EXIT
+01810000DONE
+01820000         /***************************************/
+01830000         /*                                     */
+01840000         /*   PERFORM THE COMMAND ON THE PDS.   */
+01850000         /*                                     */
+01860000         /***************************************/
+01870000SET &PACK = 0
+01880000DO       WHILE    &SYSUID NE
+01890000         GETFILE  MEMBERS
+01900000         SET &PACK = &PACK + 1
+01910000         IF &PACK. = 21 AND &COUNTEM EQ THEN SET &PACK = 0
+01920000         SET  &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+01930000         &COMMAND. &MEMBERS.  LIB(&LIB.) SRCDSN(&SRCDSN.) +
+01940000         PACK(&PACK.) ID(&ID.) &TRACE
+01950000DONE

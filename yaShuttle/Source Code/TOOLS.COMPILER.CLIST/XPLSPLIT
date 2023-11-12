@@ -1,0 +1,221 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     XPLSPLIT                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO INVOKE A VERSION OF THE XPL COMPILER THAT SPLITS  */
+00090000/*             UP A XPL PROGRAM                                     */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     XPLSPLIT SOURCE() INCLUDE() OUTLIB() OUTLST()                */
+00150000/*              OUTOBJ() OUTPROCS() OUTTOC()                        */
+00160001/*              COMPILER(NCAMCM.TOOLS.XPLOBJ(XPLSPLIT))             */
+00160002/*              EXCLUDE() PAGES(700) OPT() TRACE                    */
+00170000/*                                                                  */
+00180000/*     ALIAS    - NONE.                                             */
+00230000/*                                                                  */
+00240000/*------------------------------------------------------------------*/
+00250000/*                                                                  */
+00260000/*   INVOKES:                                                       */
+00270000/*                                                                  */
+00280001/*     'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'  - MONITOR PROGRAM         */
+00280002/*     'NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)'    - SPLITTER COMPILER       */
+00290000/*                                                                  */
+00300000/*------------------------------------------------------------------*/
+00310000/*                                                                  */
+00320000/*   PARAMETERS:                                                    */
+00330000/*                                                                  */
+00340000/*     SOURCE   DEFAULT: &SYSUID..XPLSPLIT.SOURCE                   */
+00350000/*              XPL SOURCE FILE TO BE SPLIT INTO PROCEDURES         */
+00360000/*                                                                  */
+00360010/*     INCLUDE  DEFAULT: &SYSUID..XPLSPLIT.INCLUDE                  */
+00360020/*              XPL INCLUDE FILES REQUIRED FOR SUCCESSFUL           */
+00360021/*              SUCCESSFUL COMPILATION OF &SOURCE                   */
+00360030/*                                                                  */
+00360040/*     OUTLIB   DEFAULT: &SYSUID..XPLSPLIT                          */
+00360050/*              HIGH-LEVEL QUALIFIER FOR OUTPUT DATASETS            */
+00360070/*                                                                  */
+00360080/*     OUTLST   DEFAULT: &OUTLIB..LST                               */
+00360090/*              RESULTING COMPILATION LISTING (SEQUENTIAL FILE)     */
+00360091/*                                                                  */
+00360092/*     OUTOBJ   DEFAULT: &OUTLIB..OBJ                               */
+00360093/*              RESULTING OBJECT FILE   (SEQUENTIAL FILE)           */
+00360094/*                                                                  */
+00360095/*     OUTPROCS DEFAULT: &OUTLIB..PROCS                             */
+00360096/*              PDS CONTAINING THE PROCEDURES SPLIT FROM THE SOURCE */
+00360097/*                                                                  */
+00360098/*     OUTTOC   DEFAULT: &OUTLIB..##TOC                             */
+00360099/*              TABLE OF CONTENTS FOR PROCEDURES IN &OUTPROCS;      */
+00360100/*              BOTH THE MEMBER NAMES AND PROCEDURE NAMES ARE       */
+00360101/*              LISTED (SEQUENTIAL FILE)                            */
+00360102/*                                                                  */
+00360110/*     COMPILER DEFAULT: NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)              */
+00360200/*              SPLITTER COMPILER                                   */
+00360300/*                                                                  */
+00360400/*     EXCLUDE  DEFAULT: NULL                                       */
+00360500/*              IDENTIFIES WHICH CONDITIONAL STATEMENTS WILL        */
+00360600/*              BE EXCLUDED FROM THE COMPILATION.                   */
+00360700/*              SHOULD BE ACP FOR BFS SYSTEM SPLIT.                 */
+00360800/*                                                                  */
+00400000/*     PAGES    DEFAULT: 700                                        */
+00410000/*              FOR PAGES MONITOR OPTION                            */
+00420000/*                                                                  */
+00420100/*     OPT      DEFAULT: NULL                                       */
+00420200/*              MONITOR CALL OPTION                                 */
+00420300/*                                                                  */
+00460000/*     TRACE    OPTIONAL                                            */
+00470000/*              FOR TRACE ON                                        */
+00480000/*                                                                  */
+00550000/*------------------------------------------------------------------*/
+00560000/*                                                                  */
+00570000/*   INPUT DATA SET NAMES:                                          */
+00580000/*                                                                  */
+00590000/*     <COMPILER>                                                   */
+00600000/*        LOCATION OF THE COMPILER'S OBJECT CODE                    */
+00610000/*                                                                  */
+00620000/*     NCAMCM.PASS.CURRENT.HALINCL(SPACELIB)                        */
+00630000/*        LOCATION OF THE XPL SPACE MAMAGEMENT LIBRARY              */
+00640000/*                                                                  */
+00640100/*     <SOURCE>                                                     */
+00640200/*        FULLY QUALIFIED LOCATION OF THE SOURCE TO COMPILE AND     */
+00640300/*        SPLIT UP                                                  */
+00640400/*                                                                  */
+00650000/*     <INCLUDE>                                                    */
+00660000/*        THE INCLUDE LIBRARY FOR <SOURCE>                          */
+00670000/*                                                                  */
+00780000/*------------------------------------------------------------------*/
+00790000/*                                                                  */
+00800000/*   OUTPUT DATA SET NAMES:                                         */
+00810000/*                                                                  */
+00810100/*     <OUTLST>                                                     */
+00810200/*         THE OUTPUT LISTING OF THE COMPILE                        */
+00810300/*                                                                  */
+00820000/*     <OUTOBJ>                                                     */
+00830000/*         THE RESULTING OBJECT MODULE OF THE COMPILE               */
+00840000/*                                                                  */
+00850000/*     <OUTPROCS>                                                   */
+00860000/*         THE RESULTING PDS THAT CONTAINS THE SPLITUP MEMBERS      */
+00870000/*                                                                  */
+00880000/*     <OUTTOC>                                                     */
+00890000/*         THE RESULTING TABLE OF CONTENTS FILE CONTAINING THE      */
+00900000/*         MEMBER NAMES OF THE PROCEDURES.                          */
+00910000/*                                                                  */
+00950000/*------------------------------------------------------------------*/
+00960000/*                                                                  */
+00970000/*   TEMPORARY DATA SET NAMES:                                      */
+00980000/*                                                                  */
+00990000/*     NONE.                                                        */
+01000000/*                                                                  */
+01010000/*------------------------------------------------------------------*/
+01020000/*                                                                  */
+01030000/*   COMMENTS:  THIS CLIST RUNS A MODIFIED XPL COMPILER.  IT SPLITS */
+01040000/*           UP ONE LARGE PROGRAM INTO ITS PRIMARY PROCEDURES       */
+01050000/*           AND TWO PIECES OF THE DRIVER.  THE FIRST PART OF THE   */
+01060000/*           DRIVER (#DRIVER1), CONTAINS THE CODE FOUND BEFORE      */
+01070000/*           THE PROCEDURE DECLARATIONS.  THE 2CND PART OF THE      */
+01080000/*           DRIVER, #DRIVER2, CONTAINS THE CODE FOUND AFTER THE    */
+01090000/*           LAST PROCEDURE DECLARATION.   PROCEDURES ARE PLACED    */
+01100000/*           INTO A MEMBER NAMED AFTER THE FIRST 8 LETTERS OF THE   */
+01110000/*           PROCEDURE NAME. AN OUTPUT FILE CALLED ##TOC   IS       */
+01120000/*           ALSO CREATED WHICH CONTAINS THE NAME OF ALL            */
+01130000/*           THE PROCEDURE WITH THEIR MEMBER NAMES.                 */
+01140000/*                                                                  */
+01150000/*           THERE IS A BUG IN THE PROGRAM THAT CAUSES A LITTLE     */
+01160000/*           MANUAL EDITING TO BE DONE IN PARTITIONING. SOMETIMES   */
+01170000/*           THE HEADER TO THE FIRST PROCEDURE GETS PUT IN          */
+01180000/*           #DRIVER1.  WHEN DOING THE EDIT BE SURE THAT THE        */
+01190000/*           EDITOR PROFILE IS SET TO 'NUMBERS OFF'.                */
+01200000/*                                                                  */
+01210000/*           THIS CLIST WAS ORIGINALLY DEVELOPED TO SPLIT THE       */
+01220000/*           HAL/S COMPILERS, BUT HAS BEEN MODIFIED TO REMOVE       */
+01230000/*           THE TAILORING FOR THE COMPILERS.  AN EXAMPLE OF HOW    */
+01240000/*           TO SPLIT PASS2 OF THE HAL/S PASS COMPILER WITH THIS    */
+01250000/*           CLIST FOLLOWS:                                         */
+01260000/*               XPLSPLIT SOURCE(NCAMXXX.REL99V0.PASS2.SOURCE)      */
+01260100/*               INCLUDE(NCAMCM.PASS.CURRENT.HALINCL)               */
+01260200/*               OUTLIB(NCAMXXX.PASS2) OPT('$V,$I') EXCLUDE(ACB)    */
+01260300/*                                                                  */
+01270000/*------------------------------------------------------------------*/
+01280000/*                                                                  */
+01290000/*   REVISION HISTORY:                                              */
+01300000/*                                                                  */
+01310000/*  DATE      PCR  NAME  DESCRIPTION                                */
+01320000/*  --------  ---  ---   -------------------------------------      */
+01330000/*  06/09/89  ???  RSJ   ORIGINAL CLIST                             */
+01340000/*                                                                  */
+01350000/*  08/10/89  ???  JCS   UPDATED CLIST                              */
+01360000/*                                                                  */
+01370000/*  07/09/90  104  TEV   ADDED HEADER. THE PRODUCT PARAMETER WAS    */
+01380000/*                       DELETED BECAUSE IT WAS NOT USED. UPDATED   */
+01390000/*                       LOCATION OF THE SPACE MANAGEMENT LIBRARY.  */
+01400000/*                                                                  */
+01401000/*  01/18/91  146  RSJ   UPDATED COMPILER PARAMETER TO REFLECT      */
+01402000/*                       NEW DATASET LOCATION                       */
+01403000/*                                                                  */
+01404001/*  09/19/91  186  LJK   RENAMED CM OBJECT MODULE                   */
+01406000/*                                                                  */
+01406100/*  03/17/95  338  HFG   CR12459 CHANGES: UPDATED REFERENCES TO     */
+01406200/*                       SPACELIB; UPDATED HALINCL REFERENCES;      */
+01406210/*                       ADDED EXCLUDE PARAMETER; MADE MORE         */
+01406300/*                       GENERIC                                    */
+01406400/*                                                                  */
+01410000/*------------------------------------------------------------------*/
+01420000/********************************************************************/
+01434800 
+01434900PROC 0   SOURCE(&SYSUID..XPLSPLIT.SOURCE)               +
+01435000         INCLUDE(&SYSUID..XPLSPLIT.INCL)                +
+01435100         OUTLIB(&SYSUID..XPLSPLIT)                      +
+01435200         OUTLST(&OUTLIB..LST)                           +
+01435300         OUTOBJ(&OUTLIB..OBJ)                           +
+01435400         OUTPROCS(&OUTLIB..PROCS)                       +
+01435500         OUTTOC(&OUTLIB..##TOC)                         +
+01435600         COMPILER(NCAMCM.TOOLS.XPLOBJ(XPLSPLIT))        +
+01435700         EXCLUDE(ACB)                                   +
+01435800         PAGES(700)                                     +
+01435900         OPT()                                          +
+01436000         TRACE                                          +
+01436100 
+01436200IF &TRACE. NE THEN +
+01436300  CONTROL LIST
+01436400CONTROL END(DONE)
+01436500CONTROL NOMSG
+01436600  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 +
+01436700         OUTPUT7 OUTPUT8 SYSPRINT LISTING2 INCLUDE)   +
+01436800       ATTR(FBA133 F7200 F133 FB88)
+01436900  DELETE ('&OUTLST'  '&OUTOBJ'  '&OUTPROCS' '&OUTTOC')
+01437000CONTROL MSG
+01437100ATTR FBA133 RECFM(F B A) LRECL(133)  BLKSIZE(2660)
+01437200ATTR F7200  RECFM(F)     LRECL(7200) BLKSIZE(7200)
+01437300ATTR F133   RECFM(F)     LRECL(133)  BLKSIZE(133)
+01437400ATTR FB88   RECFM(F B)   LRECL(88)  BLKSIZE(6160)
+01437500ALLOC REUSE F(PROGRAM)  DA('&COMPILER.') SHR
+01437600ALLOC REUSE F(FILE1)   DA('&OUTOBJ.')  RELEASE USING(F7200) +
+01437700                       NEW SPACE(10 5) TRACK
+01437800ALLOC REUSE F(FILE2)   NEW SPACE(40,10) BLOCK(7200)
+01437900ALLOC REUSE F(FILE3)   NEW SPACE(40,10) BLOCK(7200)
+01438000ALLOC REUSE F(FILE4)   NEW SPACE(40,10) BLOCK(7200)
+01438100ALLOC REUSE F(INPUT2)  DA('NCAMCM.PASS.CURRENT.HALINCL(SPACELIB)') SHR
+01438300ALLOC REUSE F(OUTPUT8) DA('&OUTPROCS.')  +
+01438400                       USING(FB88) NEW SP(40 10) TRACK DIR(40)
+01438500ALLOC REUSE F(OUTPUT7) DA('&OUTTOC.')    RELEASE +
+01438600                       USING(FB88) NEW CATALOG SP(40 40) TRACK
+01438700ALLOC REUSE F(SYSPRINT) DA('&OUTLST.') RELEASE +
+01438800                        USING(FBA133) NEW SP(40 20) TRACK
+01438900ALLOC REUSE F(LISTING2) DA(*) USING(F133) SHR
+01439000ALLOC REUSE F(INCLUDE)  DA('&INCLUDE.') SHR
+01439100ALLOC REUSE F(SYSIN)    DA('&SOURCE.') SHR
+01439200WRITE SPLITTING/COMPILING  '&SOURCE'
+01439300CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+01439400  'LISTING2,SYTSIZE=2800,REFSIZE=30000,MACROSIZE=999,CONSTANTS=500,-
+01439500EXCLUDE=&EXCLUDE.,PAGES=&PAGES.,ALTER,INDENT=1,&OPT.'
+01439600SET &SAVECC=&LASTCC
+01439700  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 OUTPUT7 +
+01439800    OUTPUT8 SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133 FB88)
+01439900IF &SAVECC EQ 0 THEN +
+01440000     WRITE COMPILATION SUCCESSFUL
+01440100ELSE +
+01440200     WRITE COMPILATION ERROR CODE = &SAVECC

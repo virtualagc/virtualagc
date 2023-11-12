@@ -1,0 +1,501 @@
+        /********************************************************************/
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   NAME :     PASSTEST                                            */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   FUNCTION : COMPILE, LINK AND EXECUTE ALL MEMBERS IN A PDS      */
+        /*              TEST CATEGORY (EX., UNITYYVZ OR EXPYYVZ)            */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   SYNTAX:                                                        */
+        /*                                                                  */
+        /*     PASSTEST 'GROUP'  ID(&SYSUID.) DSN(TEST)                     */
+        /*              LIB(&ID..&DSN..&GROUP) FIRSTRUN TRACE               */
+        /*              COMPVER(CURRENT) RUNLVER(CURRENT) ACCESS()          */
+        /*              ERRORLIB(NCAMCM.PASS.&COMPVER..ERRORLIB)            */
+        /*              COMPILER(NCAMCM.PASS.&COMPVER..COMPILER) TERRORLIB() */
+        /*              MONITOR(NCAMCM.PASS.&COMPVER..MONITOR.LOAD(MONITOR)) */
+        /*              RUNLIB(NCAMCM.PASS.&RUNLVER..RUNLIB) TRUNLIB()      */
+        /*              ZCONLIB(NCAMCM.PASS.&COMPVER..ZCONOBJ)              */
+        /*              SIMLIB(NCAMCM.TOOLS.PASS.SIMLIB)                    */
+        /*              LNKIN() HALLOAD2() HALSDF2()                        */
+        /*              CT(WMZMTCBCPCUMVM) LSIZE(300K) EXECSTEP(500000)     */
+        /*              TABLST SRN UTRACE TPLT COMPOOL(1) OPT() HO SEQ      */
+        /*              SRCDSN(NCAMCM.TESTLIB.&GROUP..HAL) LITS(2500)       */
+        /*                                                                  */
+        /*     ALIAS    - NONE.                                             */
+        /*     REQUIRED - 'GROUP'                                           */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   INVOKES:  PDSALL                                               */
+        /*             PASSCLG                                              */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*   PARAMETERS:                                                    */
+        /*                                                                  */
+        /*     GROUP    REQUIRED                                            */
+        /*              NAME OF THE TEST CATEGORY                           */
+        /*                                                                  */
+        /*     ID       DEFAULT: &SYSUID.                                   */
+        /*              HIGH LEVEL QUALIFIER                                */
+        /*                                                                  */
+        /*     DSN      DEFAULT: TEST                                       */
+        /*              A DSN LEVEL                                         */
+        /*                                                                  */
+        /*     LIB      DEFAULT: &ID..TEST                                  */
+        /*              OTHER DSN LEVELS                                    */
+        /*                                                                  */
+        /*     FIRSTRUN OPTIONAL                                            */
+        /*              INITIALIZE DATASETS THE FIRST TIME                  */
+        /*                                                                  */
+        /*     REFRESH  OPTIONAL                                            */
+        /*              IF SPECIFIED DELETE AND THEN REALLOCATE DATASETS    */
+        /*                                                                  */
+        /*     LIST     DEFAULT: NULL                                       */
+        /*              DATA SET WHICH CONTAINS A LIST OF MEMBERS IN THE    */
+        /*              SOURCE DATA SET YOU WANT TO RUN                     */
+        /*                                                                  */
+        /*     SRCDSN   DEFAULT: NCAMCM.TESTLIB.&GROUP..HAL                 */
+        /*              HAL SOURCE FILE FOR TEST CATEGORY                   */
+        /*                                                                  */
+        /*     LNKIN    DEFAULT: NULL                                       */
+        /*              OVERRIDING DIRECTIVES FOR PRELINKER                 */
+        /*                                                                  */
+        /*     TRACE    OPTIONAL                                            */
+        /*              EXECUTION OF THE CLIST WILL BE DISPLAYED ON SCREEN  */
+        /*                                                                  */
+        /*     SEQ      OPTIONAL                                            */
+        /*              SEND LISTING, OUTPUT AND UCP TO A SEQUENTIAL FILE   */
+        /*                                                                  */
+        /*     DUMP     OPTIONAL                                            */
+        /*              UPON ABEND STORE DUMP IN &NAME..DUMP                */
+        /*                                                                  */
+        /*     NOPLINK  OPTIONAL                                            */
+        /*              IF SPECIFIED, PASSCLG DOES NOT CALL PRELINKER       */
+        /*                                                                  */
+        /* OPTIONS USED IN/FOR THE COMPILATION OF SOURCE                    */
+        /*                                                                  */
+        /*     COMPVER  DEFAULT: CURRENT                                    */
+        /*              COMPILER VERSION                                    */
+        /*                                                                  */
+        /*     ERRORLIB DEFAULT: NCAMCM.PASS.&COMPVER..ERRORLIB             */
+        /*              BASELINE ERROR LIBRARY                              */
+        /*                                                                  */
+        /*     COMPILER DEFAULT: NCAMCM.PASS.&COMPVER..COMPILER             */
+        /*              COMPILER                                            */
+        /*                                                                  */
+        /*     TERRORLIB DEFAULT: NULL                                      */
+        /*              USERS TEMPORARY ERROR LIBRARY                       */
+        /*                                                                  */
+        /*     INCLUDE2 DEFAULT: NULL                                       */
+        /*              ADDITIONAL INCLUDE FILES, SUCH AS &ID..&GROUP..INC  */
+        /*                                                                  */
+        /*     HALSDF2  DEFAULT: &ID..&DSN..COMPOOL.SDF                     */
+        /*              ADDITIONAL SDF FILE, SUCH AS &ID..&GROUP..SDF       */
+        /*                                                                  */
+        /*     HALLOAD2 DEFAULT: &ID..&DSN..COMPOOL.LOAD                    */
+        /*              ADDITIONAL LOAD FILE, SUCH AS &ID..&GROUP..LOAD     */
+        /*                                                                  */
+        /*     MONITOR  DEFAULT: NCAMCM.PASS.&COMPVER..MONITOR.LOAD(MONITOR) */
+        /*              MONITOR TO RUN THE COMPILER ON S MACHINE            */
+        /*                                                                  */
+        /* OPTIONS PASSED TO THE COMPILER                                   */
+        /*                                                                  */
+        /*     CT       DEFAULT: WMZMTCBCPCUMVM                             */
+        /*              CARD TYPE                                           */
+        /*                                                                  */
+        /*     CT2      DEFAULT: NULL                                       */
+        /*              CARD TYPE 2 - WILL OVERRIDE MATCHES IN CARDTYPE (CT)*/
+        /*              ALSO WILL ALLOW NEW CARDTYPES TO BE DEFINED.        */
+        /*              ANY NEW CARD TYPES WILL BE APPENDED AT THE END OF   */
+        /*              THE EXISTING CARD TYPES. IF ANY PARTICULAR CARD     */
+        /*              TYPE IS ENTERED TWICE, THE FIRST ENTRY WILL BE      */
+        /*              RETAINED AND THE SECOND DISCARDED.                  */
+        /*                                                                  */
+        /*     SYTSZ    DEFAULT: 4096                                       */
+        /*              SYMBOL TABLE SIZE                                   */
+        /*                                                                  */
+        /*     RFSZ     DEFAULT: 5500                                       */
+        /*              CROSS REFERENCE TABLE SIZE                          */
+        /*                                                                  */
+        /*     MACSZ    DEFAULT: 4500                                       */
+        /*              LITERAL TABLE SIZE                                  */
+        /*                                                                  */
+        /*     PG       DEFAULT: 91000                                      */
+        /*              PAGE LIMIT                                          */
+        /*                                                                  */
+        /*     LITS     DEFAULT: 2500                                       */
+        /*              LITERAL STRING SIZE                                 */
+        /*                                                                  */
+        /*     REGOPT   DEFAULT: R                                          */
+        /*              REGISTER OPTIMIZATION IS DESIRED                    */
+        /*                                                                  */
+        /*     HO       OPTIONAL                                            */
+        /*              HIGHOPT COMPILER OPTION                             */
+        /*                                                                  */
+        /*     OPT      DEFAULT: NULL                                       */
+        /*              OTHER USER REQUESTED OPTION                         */
+        /*                                                                  */
+        /*     TPLT     OPTIONAL                                            */
+        /*              TEMPLATE GENERATION                                 */
+        /*                                                                  */
+        /*     TABLST   OPTIONAL                                            */
+        /*              TABLE LIST FOR PHASE IV OF SDFS                     */
+        /*                                                                  */
+        /*     SRN      OPTIONAL                                            */
+        /*              SOURCE INCLUDES LINE NUMBERS                        */
+        /*                                                                  */
+        /*     SDL      OPTIONAL                                            */
+        /*              SDL OPTION                                          */
+        /*                                                                  */
+        /*     ACCESS   DEFAULT: NULL                                       */
+        /*              A FILE THAT CAN PLACE ADDITIONAL RESTRICTIONS       */
+        /*              ON THE HAL/S LANGUAGE.                              */
+        /*                                                                  */
+        /* OPTIONS USED IN/FOR THE LINK/EDIT STEP                           */
+        /*                                                                  */
+        /*     RUNLVER  DEFAULT: &COMPVER                                   */
+        /*              RUNLIB VERSION                                      */
+        /*                                                                  */
+        /*     RUNLIB   DEFAULT: NCAMCM.PASS.&RUNLVER..RUNLIB               */
+        /*              RUNTIME LIBRARY EXECUTABLES FOR S MACHINE           */
+        /*                                                                  */
+        /*     ZCONLIB  DEFAULT: NCAMCM.PASS.&COMPVER..ZCONOBJ              */
+        /*              ZCON LIBRARY OBJECT                                 */
+        /*                                                                  */
+        /*     TRUNLIB  DEFAULT: NULL                                       */
+        /*              USERS TEMPORARY RTL EXECUTABLES                     */
+        /*                                                                  */
+        /*     SIMLIB   DEFAULT: NCAMCM.TOOLS.PASS.SIMLIB                   */
+        /*              RTL MODULES USED ONLY IN I**2 TESTING               */
+        /*                                                                  */
+        /*     COMPOOL  DEFAULT: 1                                          */
+        /*              DATA SECTOR FOR #P COMPOOL CSECTS INCLUDED LOCALLY. */
+        /*              MUST BE EITHER 0 OR 1                               */
+        /*                                                                  */
+        /*     REMOTE   DEFAULT: 2                                          */
+        /*              DATA SECTOR FOR REMOTE VARIABLES FOR AP101S ONLY    */
+        /*                                                                  */
+        /*     DDATA    DEFAULT: 3                                          */
+        /*              DATA SECTOR FOR #D DATA_REMOTE VARIABLES.           */
+        /*                                                                  */
+        /* OPTIONS PASSED TO LINKAGE EDITOR                                 */
+        /*                                                                  */
+        /*     LSIZE    DEFAULT: 300K                                       */
+        /*              REGION SIZE TO BE PASSED TO THE LINKER              */
+        /*                                                                  */
+        /*     LOPT     DEFAULT: NULL                                       */
+        /*              LINKER OPTIONS                                      */
+        /*                                                                  */
+        /*     NCAL     OPTIONAL                                            */
+        /*              EXTERNAL REFERENCES ARE NOT TO BE RESOLVED          */
+        /*              BY THE AUTOMATIC LIBRARY CALL MECHANISM DURING      */
+        /*              THE CURRENT PHASE                                   */
+        /*                                                                  */
+        /* OPTIONS USED IN/FOR THE EXECUTION STEP                           */
+        /*                                                                  */
+        /*     EXECSTEP DEFAULT: 500000                                     */
+        /*              MAXIMUM NUMBER OF INSTRUCTIONS TO EXECUTE           */
+        /*                                                                  */
+        /*     UTRACE   OPTIONAL                                            */
+        /*              UCP EXECUTION TRACE                                 */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   INPUT DATA SET NAMES:                                          */
+        /*                                                                  */
+        /*     &LIB..HAL                                                    */
+        /*         PDS OF HALS SOURCE CODE                                  */
+        /*                                                                  */
+        /*     &LIB..INC                                                    */
+        /*         PDS OF USERS INCLUDE FILES                               */
+        /*                                                                  */
+        /*     &LIB..SDF                                                    */
+        /*         PDS OF USERS SDFS                                        */
+        /*                                                                  */
+        /*     NCAMCM.PASS.<COMPVER>.COMPILER                               */
+        /*         PASS COMPILER                                            */
+        /*                                                                  */
+        /*     NCAMCM.PASS.<COMPVER>.ERRORLIB                               */
+        /*         PDS BASELINE ERROR LIBRARY                               */
+        /*                                                                  */
+        /*     NCAMCM.PASS.<RUNLVER>.RUNLIB                                 */
+        /*         PDS OF RUNTIME LIBRARY EXECUTABLES FOR S MACHINE         */
+        /*                                                                  */
+        /*     NCAMCM.PASS.<RUNLVER>.ZCONOBJ                                */
+        /*         PDS OF ZCON LIBRARY IN OBJECT FORMAT                     */
+        /*                                                                  */
+        /*     NCAMCM.TOOLS.PASS.SIMLIB                                     */
+        /*         PDS OF ADDITIONAL RTL MODULES FOR AVERSTAR TESTING       */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   TEMPORARY DATA SET NAMES:                                      */
+        /*                                                                  */
+        /*     NONE                                                         */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*  REVISION HISTORY :                                              */
+        /*                                                                  */
+        /*    DATE      PCR#     NAME   DESCRIPTION                         */
+        /*    --------  -----    ----   -------------------------------     */
+        /*    09/11/00   682     DCP    MODIFIED TESTSUIT FOR USE BY        */
+        /*                              DEVELOPMENT DURING INTEGRATION      */
+        /*                                                                  */
+        /*    12/21/01   708     DCP    UPDATE INTEGRATION DRIVER CLISTS TO */
+        /*                              PASS ACCESS PARAMETER               */
+        /*                                                                  */
+        /********************************************************************/
+ 
+        PROC     1  GROUP                                                 +
+                    ID(&SYSUID.)                                          +
+                    DSN(TEST)                                             +
+                    LIB(&ID..&DSN..&GROUP.)                               +
+                    SRCDSN(&LIB..HAL)                                     +
+                    COMPVER(CURRENT)                                      +
+                    RUNLVER(&COMPVER.)                                    +
+                    COMPILER(NCAMCM.PASS.&COMPVER..COMPILER)              +
+                    RUNLIB(NCAMCM.PASS.&RUNLVER..RUNLIB)                  +
+                    SIMLIB(NCAMCM.TOOLS.PASS.SIMLIB)                      +
+                    ERRORLIB(NCAMCM.PASS.&COMPVER..ERRORLIB)              +
+                    MONITOR(NCAMCM.PASS.&COMPVER..MONITOR.LOAD(MONITOR))  +
+                    ZCONLIB(NCAMCM.PASS.&COMPVER..ZCONOBJ)                +
+                    TRUNLIB()                                             +
+                    TERRORLIB()                                           +
+                    ACCESS()                                              +
+                    INCLUDE2()                                            +
+                    HALSDF2()                                             +
+                    HALLOAD2()                                            +
+                    LNKIN()                                               +
+                    CT(WMZMTCBCPCUMVM)                                    +
+                    CT2()                                                 +
+                    SYTSZ(4096)                                           +
+                    RFSZ(5500)                                            +
+                    MACSZ(4500)                                           +
+                    PG(91000)                                             +
+                    LSIZE(300K)                                           +
+                    LITS(2500)                                            +
+                    TPLT                                                  +
+                    TABLST                                                +
+                    HO                                                    +
+                    SRN                                                   +
+                    SDL                                                   +
+                    OPT()                                                 +
+                    REGOPT(R)                                             +
+                    REMOTE(2)                                             +
+                    DDATA(3)                                              +
+                    COMPOOL(1)                                            +
+                    LOPT()                                                +
+                    NCAL                                                  +
+                    EXECSTEP(500000)                                      +
+                    LIST()                                                +
+                    TRACE                                                 +
+                    SEQ                                                   +
+                    DUMP                                                  +
+                    NOPLINK                                               +
+                    UTRACE                                                +
+                    REFRESH                                               +
+                    FIRSTRUN
+ 
+        GLOBAL  RETCODE
+        IF  &TRACE. NE THEN  CONTROL CONLIST LIST
+        CONTROL END(DONE)
+ 
+        /********************************************************/
+        /*                                                      */
+        /*  RUN PDSALL TO CREATE THE MEMBER LIST FILE           */
+        /*                                                      */
+        /********************************************************/
+        IF &LIST. EQ THEN  DO
+           PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+           WRITE *** EXECUTING TESTLIB.&GROUP. ***
+           SET &LIST =  &LIB..MEMLIST
+        DONE
+                 /***************************************/
+                 /*                                     */
+                 /*    ON ATTN, DO THE FOLLOWING:       */
+                 /*                                     */
+                 /***************************************/
+ 
+        ATTN     DO
+                 ERROR    OFF
+                 CLOSFILE MEMBERS
+                 FREE     F(MEMBERS)
+                 EXIT
+        DONE
+ 
+        CONTROL  NOMSG
+                 FREE     F(MEMBERS)
+        CONTROL  MSG NOFLUSH
+ 
+                 /***************************************/
+                 /*                                     */
+                 /* SET UP TO READ THE FILE &LIST.      */
+                 /*                                     */
+                 /***************************************/
+        ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+        OPENFILE MEMBERS  INPUT
+ 
+                 /***************************************/
+                 /*                                     */
+                 /* ON ERROR, DO THE FOLLOWING:         */
+                 /*                                     */
+                 /***************************************/
+        ERROR DO
+        ERROR1: CLOSFILE MEMBERS
+           FREE F(MEMBERS)
+           IF &NEWRUNBT. ^= 0 THEN DO
+           WRITE ***
+           WRITE ***  COMPILE/LINK OF ALL COMPOOLS AND PROCEDURES COMPLETED ***
+           WRITE ***
+           DONE
+           ERROR OFF
+           GOTO EXECIT
+        DONE
+ 
+            IF &TERRORLIB. NE THEN SET &TERRORLIB = TERRORLIB(&TERRORLIB.)
+                ELSE SET  &TERRORLIB =
+            IF &ACCESS. NE THEN SET &ACCESS = ACCESS(&ACCESS.)
+                ELSE SET  &ACCESS =
+            IF &TRUNLIB. NE THEN SET &TRUNLIB = TRUNLIB(&TRUNLIB.)
+                ELSE SET  &TRUNLIB =
+            IF &HALSDF2. NE THEN SET &HALSDF2 = HALSDF2(&HALSDF2.)
+                ELSE SET  &HALSDF2 =
+            IF &HALLOAD2. NE THEN SET &HALLOAD2 = HALLOAD2(&HALLOAD2.)
+                ELSE SET  &HALLOAD2 =
+            IF &INCLUDE2. NE THEN SET &INCLUDE2 = INCLUDE2(&INCLUDE2.)
+                ELSE SET  &INCLUDE2 =
+            IF &LNKIN NE THEN SET &LNKIN = LNKIN(&LNKIN)
+                ELSE SET  &LNKIN =
+            IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+                ELSE SET  &OPT =
+            IF &CT2. NE THEN SET &CT2 = CT2(&CT2.)
+                ELSE SET  &CT2 =
+            IF &LENGTH(&STR(&LOPT.)) ^= 0 THEN SET &LOPT = LOPT(&STR(&LOPT.))
+                ELSE SET  &LOPT =
+ 
+        /*                                                                  */
+        /* IF THIS IS THE FIRST TIME TO RUN TESTSUIT, SET 'NEWRUN' AND      */
+        /* 'FIRST' FLAGS TO ALLOCATE NECESSARY DATASETS, OR IF 'REFRESH' IS */
+        /* SPECIFIED, SET 'FIRSTD' AND 'NEWRUN' FLAGS TO DELETE ALL         */
+        /* DATASETS AND REALLOCATE THEM.                                    */
+        /*                                                                  */
+        SET &NEWRUNBT = 0
+             IF &FIRSTRUN NE THEN DO
+                SET &FIRST  = FIRST
+                SET &NEWRUN = NEWRUN
+             DONE
+ 
+             IF &REFRESH NE THEN DO
+                SET &FIRSTD = FIRSTD
+                SET &NEWRUN = NEWRUN
+             DONE
+ 
+        /*
+        /* FIRST COMPILE AND LINK ANY COMPOOL, PROCEDURE AND FUNCTION IN DATASET
+        /*
+        DO  WHILE  &SYSUID NE
+            GETFILE MEMBERS
+              IF (&SUBSTR(1:2,&MEMBERS) > PR) THEN GOTO ERROR1
+              IF ((&SUBSTR(1:3,&MEMBERS) = CMP) OR      +
+                 (&SUBSTR(1:2,&MEMBERS) = CP ) OR       +
+                 (&SUBSTR(1:2,&MEMBERS) = PR)) THEN DO
+             SET &MEMLEN = 1
+             DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+                SET &MEMLEN =  &MEMLEN + 1
+             DONE
+             SET &MEMLEN = &MEMLEN - 1
+             SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+ 
+                TIME
+                 PASSCLG  CL &NAME. LIB(&LIB.) &FIRST &FIRSTD &NEWRUN  +
+                          COMPILER(&COMPILER.) &TERRORLIB. &TRUNLIB.   +
+                          ERRORLIB(&ERRORLIB.)  COMPVER(&COMPVER.)     +
+                          RUNLIB(&RUNLIB.) MONITOR(&MONITOR.) CT(&CT.) +
+                          ZCONLIB(&ZCONLIB.) &NOPLINK. &SEQ.           +
+                          &HALSDF2. &HALLOAD2. &TRACE. LITS(&LITS.)    +
+                          &TPLT. &TABLST. LSIZE(&LSIZE.) &OPT. &HO.    +
+                          COMPOOL(&COMPOOL.) &SRN. &LNKIN. &ACCESS     +
+                          SYSIN(&SRCDSN.(&NAME.)) &INCLUDE2.           +
+                          ID(&ID.) &DUMP SYTSZ(&SYTSZ) RFSZ(&RFSZ)     +
+                          MACSZ(&MACSZ) PG(&PG) &CT2 &SDL DDATA(&DDATA)+
+                          REGOPT(&REGOPT) REMOTE(&REMOTE) &LOPT &NCAL
+ 
+                SET &NEWRUNBT = &NEWRUNBT. + 1
+                SET &NEWRUN   =
+                SET &FIRSTD   =
+                SET &FIRST    =
+              DONE
+              IF &NEWRUNBT. = 5  THEN DO
+                COMPRESS '&LIB..LOAD'
+                COMPRESS '&LIB..LST'
+                COMPRESS '&LIB..MAPS'
+                COMPRESS '&LIB..OBJ'
+                SET &NEWRUNBT  =  1
+              DONE
+        DONE
+        /*------------------------------------------------------------------*/
+        EXECIT:CONTROL MSG
+        /*
+        /* NOW COMPILE/LINK/EXECUTE THE HAL PROGRAMS
+        /*
+        ALLOC    F(MEMBERS)  DA('&LIST.')  SHR
+        OPENFILE MEMBERS INPUT
+ 
+        ERROR DO
+           CLOSFILE MEMBERS
+           FREE   F(MEMBERS)
+           WRITE ***
+           WRITE ***  ALL &LIB. PROGRAMS COMPLETED  ***
+           WRITE ***
+           ERROR OFF
+           EXIT
+        DONE
+ 
+        DO  WHILE  &SYSUID NE
+            GETFILE MEMBERS
+            IF &SUBSTR(1:6,&MEMBERS) ^= ##INFO THEN +
+              IF &SUBSTR(1:3,&MEMBERS) ^= CMP THEN  +
+              IF &SUBSTR(1:2,&MEMBERS) ^= CP THEN   +
+              IF &SUBSTR(1:2,&MEMBERS) ^= PR THEN DO
+             SET &MEMLEN = 1
+             DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+                SET &MEMLEN =  &MEMLEN + 1
+             DONE
+             SET &MEMLEN = &MEMLEN - 1
+             SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+ 
+                  TIME
+                    PASSCLG CLG &NAME. LIB(&LIB.) &FIRST &FIRSTD &NEWRUN  +
+                     COMPILER(&COMPILER.) RUNLIB(&RUNLIB.) &TRUNLIB       +
+                     &TERRORLIB. ERRORLIB(&ERRORLIB.)  LITS(&LITS.)       +
+                     EXECSTEP(&EXECSTEP.) &TRACE CT(&CT.) COMPVER(&COMPVER.) +
+                     MONITOR(&MONITOR.) &HALSDF2. &HALLOAD2. &INCLUDE2.   +
+                     ZCONLIB(&ZCONLIB.) &NOPLINK. &SEQ. &ACCESS           +
+                     &TPLT. &TABLST. LSIZE(&LSIZE.) &OPT. &HO.            +
+                     &SRN. COMPOOL(&COMPOOL.) &UTRACE. &LNKIN.            +
+                     SYSIN(&SRCDSN.(&NAME.)) SIMLIB(&SIMLIB.)             +
+                     SYTSZ(&SYTSZ) RFSZ(&RFSZ) MACSZ(&MACSZ)              +
+                     PG(&PG) ID(&ID) &DUMP &CT2 &SDL REGOPT(&REGOPT)      +
+                     DDATA(&DDATA) REMOTE(&REMOTE) &LOPT &NCAL
+ 
+                  SET &NEWRUNBT  = &NEWRUNBT.  +  1
+                  SET &NEWRUN    =
+                  SET &FIRSTD    =
+                  SET &FIRST     =
+                DONE
+              IF &NEWRUNBT. = 5  THEN DO
+                COMPRESS '&LIB..LOAD'
+                COMPRESS '&LIB..LST'
+                COMPRESS '&LIB..MAPS'
+                COMPRESS '&LIB..OBJ'
+                COMPRESS '&LIB..SDF'
+                COMPRESS '&LIB..UCP'
+                SET &NEWRUNBT  =  1
+              DONE
+        DONE
+        EXIT

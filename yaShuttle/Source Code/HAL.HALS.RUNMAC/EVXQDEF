@@ -1,0 +1,27 @@
+         MACRO                                                          00000100
+         EVXQDEF                                                        00000200
+EVXQDEF  DSECT                                                          00000300
+*                                                                       00000400
+*        FIELD DEFINITIONS FOR EVENT QUEUE ELEMENT                      00000500
+*                                                                       00000600
+EVXQLINK DS    A PTR TO NEXT ELEMENT OR ZERO                            00000700
+EVXQPCB  DS    A PTR TO PCB                                             00000800
+* EXPRESSION TYPES: (VALUE OF EVXQTYPE)                                 00000900
+EVXFOR   EQU   0 WAIT FOR                                               00001000
+EVXON    EQU   1 SCHEDULE ON                                            00001100
+EVXUNTIL EQU   2 SCHEDULE UNTIL                                         00001200
+EVXWHILE EQU   3 SCHEDULE WHILE                                         00001300
+EVXEXCL  EQU   4 EXCLUSIVE PROCEDURE (IMPLICIT)                         00001400
+EVXUPDT  EQU   5              UPDATE BLOCK (IMPLICIT)                   00001500
+*        REST OF ELEMENT IS EVENT EXPRESSION STRUCTURE AS SET           00001600
+*        UP BY COMPILER GENERATED CODE:                                 00001700
+EVXQSTR  DS    A PTR TO POLISH STRING FORM OF EXPRESSION                00001800
+         ORG   EVXQSTR                                                  00001900
+EVXEV#    DS   X H.O. BYTE IS # EVENTS, THEN                            00002000
+EVXQTYPE EQU   EVXEV# AFTER CHECKING THE # OF EVENTS, THIS BYTE         00002100
+*              BECOMES THE EXPRESSION TYPE                              00002200
+         ORG                                                            00002300
+EVXMAXE  EQU   6 MAX # OF UNIQUE EVENT VARS IN EXPRESSION               00002400
+EVXLIST  DS    (EVXMAXE)A LIST OF EVENT VARIABLE PTRS                   00002500
+EVXQLEN  EQU   *-EVXQDEF LENGTH OF ELEMENT                              00002600
+         MEND                                                           00002700

@@ -1,0 +1,198 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     SPLITBFS                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: INVOKES A VERSION OF THE XPL COMPILER THAT SPLITS UP */
+00090000/*             AN XPL PROGRAM. TAILORED FOR BFS COMPILER.           */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     SPLITBFS 'PASS' OPT() PAGES(700) NEWREL(BFS.CURRENT)         */
+00150000/*              TRACE LEVEL(NCAMCM) LEVELOUT(&SYSUID.)              */
+00160002/*              COMPILER('''NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)''')       */
+00170000/*                                                                  */
+00180000/*     ALIAS    - NONE.                                             */
+00190000/*     REQUIRED - 'PASS'.                                           */
+00230000/*                                                                  */
+00240000/*------------------------------------------------------------------*/
+00250000/*                                                                  */
+00260000/*   INVOKES:                                                       */
+00270000/*                                                                  */
+00280002/*     'NCAMCM.TOOLS.XPLOBJ(XPLMERGE)'                              */
+00290000/*                                                                  */
+00300000/*------------------------------------------------------------------*/
+00310000/*                                                                  */
+00320000/*   PARAMETERS:                                                    */
+00330000/*                                                                  */
+00340000/*     PASS     REQUIRED                                            */
+00350000/*              WHICH PASS OF THE COMPILER TO SPLIT                 */
+00360000/*                                                                  */
+00370000/*     OPT      DEFAULT: NULL                                       */
+00380000/*              MONITOR CALL OPTION                                 */
+00390000/*                                                                  */
+00400000/*     PAGES    DEFAULT: 700                                        */
+00410000/*              FOR PAGES MONITOR OPTION                            */
+00420000/*                                                                  */
+00430000/*     NEWREL   DEFAULT: BFS.CURRENT                                */
+00440000/*              LIBRARY WHERE BFS  PASSES ARE                       */
+00450000/*                                                                  */
+00460000/*     TRACE    OPTIONAL                                            */
+00470000/*              FOR TRACE ON                                        */
+00480000/*                                                                  */
+00490000/*     LEVEL    DEFAULT: NCAMCM                                     */
+00500000/*              LEVEL WHERE SOURCE IS                               */
+00510000/*                                                                  */
+00520000/*     LEVELOUT DEFAULT: &SYSUID                                    */
+00530000/*              LEVEL WHERE OUTPUT WILL GO                          */
+00540000/*                                                                  */
+00550002/*     COMPILER DEFAULT: NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)              */
+00560000/*              SPLITTER COMPILER                                   */
+00570000/*                                                                  */
+00580000/*------------------------------------------------------------------*/
+00590000/*                                                                  */
+00600000/*   INPUT DATA SET NAMES:                                          */
+00610000/*                                                                  */
+00620000/*      <COMPILER>                                                  */
+00630000/*         LOCATION OF THE PROGRAMS' OBJECT CODE                    */
+00640000/*                                                                  */
+00650000/*      NCAMCM.BFS.HALS.LINKLIB                                     */
+00660000/*         LOCATION OF THE XPL SPACE MAMAGEMENT LIBRARY             */
+00670000/*                                                                  */
+00680000/*      <LEVEL>.<NEWREL>.XPLINCL.DATA                               */
+00690000/*         FULLY QUALIFIED LOCATION OF THE XPL INCLUDE LIBRARY      */
+00700000/*                                                                  */
+00710000/*      <LEVEL>.<NEWREL>.INCLUDE.PASS1                              */
+00720000/*         FULLY QUALIFIED LOCATION OF THE PASS1 INCLUDE LIBRARY    */
+00730000/*                                                                  */
+00740000/*      <LEVEL>.<NEWREL>.<PASS>.SOURCE                              */
+00750000/*         FULLY QUALIFIED LOCATION OF THE SOURCE TO COMPILE AND    */
+00760000/*         SPLIT UP                                                 */
+00770000/*                                                                  */
+00780000/*------------------------------------------------------------------*/
+00790000/*                                                                  */
+00800000/*   OUTPUT DATA SET NAMES:                                         */
+00810000/*                                                                  */
+00820000/*     <NEWREL>.<PASS>.OBJ                                          */
+00830000/*         THE RESULTING OBJECT MODULE OF THE COMPILE               */
+00840000/*                                                                  */
+00850000/*     <LEVELOUT>.<NEWREL>.<PASS>.PROCS                             */
+00860000/*         THE RESULTING PDS THAT CONTAINS THE SPLITUP MEMBERS      */
+00870000/*                                                                  */
+00880000/*     <LEVELOUT>.<NEWREL>.<PASS>.##TOC                             */
+00890000/*         THE RESULTING TABLE OF CONTENTS FILE CONTAINING THE      */
+00900000/*         MEMBER NAMES OF THE PROCEDURES.                          */
+00910000/*                                                                  */
+00920000/*     <NEWREL>.<PASS>.LST                                          */
+00930000/*         THE OUTPUT LISTING OF THE COMPILE                        */
+00940000/*                                                                  */
+00950000/*------------------------------------------------------------------*/
+00960000/*                                                                  */
+00970000/*   TEMPORARY DATA SET NAMES:                                      */
+00980000/*                                                                  */
+00990000/*     NONE.                                                        */
+01000000/*                                                                  */
+01010000/*------------------------------------------------------------------*/
+01020000/*                                                                  */
+01030000/*  COMMENTS:  THIS CLIST RUNS A MODIFIED XPL COMPILER. IT SPLITS   */
+01040000/*           UP ONE LARGE PROGRAM INTO ITS PRIMARY PROCEDURES       */
+01050000/*           AND TWO PIECES OF THE DRIVER.  THE FIRST PART OF THE   */
+01060000/*           DRIVER (#DRIVER1), CONTAINS THE CODE FOUND BEFORE      */
+01070000/*           THE PROCEDURE DECLARATIONS.  THE 2CND PART OF THE      */
+01080000/*           DRIVER, #DRIVER2, CONTAINS THE CODE FOUND AFTER THE    */
+01090000/*           LAST PROCEDURE DECLARATION.   PROCEDURES ARE PLACED    */
+01100000/*           INTO A MEMBER NAMED AFTER THE FIRST 8 LETTERS OF THE   */
+01110000/*           PROCEDURE NAME. AN OUTPUT FILE CALLED ##TOC   IS       */
+01120000/*           ALSO CREATED WHICH CONTAINS THE NAME OF ALL            */
+01130000/*           THE PROCEDURE WITH THEIR MEMBER NAMES.                 */
+01140000/*                                                                  */
+01150000/*           THERE IS A BUG IN THE PROGRAM THAT CAUSES A LITTLE     */
+01160000/*           MANUAL EDITING TO BE DONE IN PARTITIONING. SOMETIMES   */
+01170000/*           THE HEADER TO THE FIRST PROCEDURE GETS PUT IN          */
+01180000/*           #DRIVER1.  WHEN DOING THE EDIT BE SURE THAT THE        */
+01190000/*           EDITOR PROFILE IS SET TO 'NUMBERS OFF'.                */
+01200000/*                                                                  */
+01210000/*           TWO CLIST WERE DEVELOPED TO RUN THIS PROGRAM.  THEY    */
+01220000/*           ARE :  XPLSPLIT  AND                                   */
+01230000/*                  SPLITBFS                                        */
+01240000/*           THE FIRST IS USED TO SPLIT THE PASS COMPILER.          */
+01250000/*           THE SECOND IS USED TO SPLIT THE BFS COMPILER.          */
+01260000/*                                                                  */
+01270000/*------------------------------------------------------------------*/
+01280000/*                                                                  */
+01290000/*   REVISION HISTORY:                                              */
+01300000/*                                                                  */
+01310000/*  DATE      PCR  NAME  DESCRIPTION                                */
+01320000/*  --------  ---  ---   -------------------------------------      */
+01330000/*  06/09/89  ???  RSJ   ORIGINAL CLIST                             */
+01340000/*                                                                  */
+01350000/*  07/09/90  104  TEV   ADDED HEADER. THE PRODUCT AND              */
+01360000/*                       REL(BFS.PREVIOUS) PARAMETERS WERE DELETED. */
+01370000/*                       CHANGED 'NCAMCM.PASS.TOOLS.SPACELIB' TO    */
+01380000/*                       'NCAMCM.BFS.HALS.LINKLIB'.                 */
+01390000/*                                                                  */
+01391000/*  01/18/91  146  RSJ   UPDATED COMPILER PARAMETER TO REFLECT THE  */
+01392000/*                       NEW LOACTION OF THE DATSET                 */
+01393000/*                                                                  */
+01394002/*  09/13/91  186  LJK   RENAMED CM OBJECT MODULE                   */
+01396000/*                                                                  */
+01400000/*------------------------------------------------------------------*/
+01410000/********************************************************************/
+01420000 
+01430000PROC 1   PASS                                         +
+01440000         OPT()                                        +
+01450000         PAGES(700)                                   +
+01460000         NEWREL(BFS.CURRENT)                          +
+01470000         TRACE                                        +
+01480000         LEVEL(NCAMCM)                                +
+01490000         LEVELOUT(&SYSUID.)                           +
+01500002         COMPILER('''NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)''')
+01510000 
+01520000IF &TRACE. NE THEN +
+01530000  CONTROL LIST
+01540000CONTROL END(DONE)
+01550000CONTROL NOMSG
+01560000  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 +
+01570000    OUTPUT7 OUTPUT8 SYSPRINT LISTING2 INCLUDE)                    +
+01580000                              ATTR(FBA133 F7200 F133 FB88)
+01590000  DELETE (&NEWREL..&PASS..LST &NEWREL..&PASS..OBJ  +
+01600000          '&LEVELOUT..&NEWREL..&PASS..##TOC' +
+01610000          '&LEVELOUT..&NEWREL..&PASS..PROCS' )
+01620000IF &PASS NE PASS2 THEN SET OPT EQ &STR($V,$I)
+01630000CONTROL MSG
+01640000ATTR FBA133 RECFM(F B A) LRECL(133)  BLKSIZE(2660)
+01650000ATTR F7200  RECFM(F)     LRECL(7200) BLKSIZE(7200)
+01660000ATTR F133   RECFM(F)     LRECL(133)  BLKSIZE(133)
+01670000ATTR FB88   RECFM(F B)   LRECL(88)  BLKSIZE(6160)
+01680000ALLOC F(PROGRAM)  DA(&COMPILER.) SHR
+01690000ALLOC F(FILE1)    DA(&NEWREL..&PASS..OBJ) RELEASE USING(F7200) NEW +
+01700000  SP(10 5) TRACK
+01710000ALLOC F(FILE2) NEW SPACE(40,10) BLOCK(7200)
+01720000ALLOC F(FILE3) NEW SPACE(40,10) BLOCK(7200)
+01730000ALLOC F(FILE4) NEW SPACE(40,10) BLOCK(7200)
+01740000ALLOC F(INPUT2) DA('NCAMCM.BFS.HALS.LINKLIB') SHR
+01750000ALLOC REUSE F(OUTPUT8) DA('&LEVELOUT..&NEWREL..&PASS..PROCS') +
+01760000                       USING(FB88) NEW SP(40 10) TRACK DIR(40)
+01770000ALLOC REUSE F(OUTPUT7) DA('&LEVELOUT..&NEWREL..&PASS..##TOC') RELEASE +
+01780000                       USING(FB88) NEW CATALOG SP(40 40) TRACK
+01790000ALLOC F(SYSPRINT) DA(&NEWREL..&PASS..LST) RELEASE USING(FBA133) NEW +
+01800000  SP(80 80) TRACK
+01810000ALLOC F(LISTING2) DA(*) USING(F133)
+01820000ALLOC F(INCLUDE)  DA( +
+01830000                     '&LEVEL..&NEWREL..XPLINCL.DATA'  +
+01840000                     '&LEVEL..&NEWREL..INCLUDE.PASS1') SHR
+01850000ALLOC F(SYSIN) DA('&LEVEL..&NEWREL..&PASS..SOURCE') SHR
+01860000WRITE COMPILATION OF &LEVEL..&NEWREL..&PASS..SOURCE
+01870000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+01880000  'LISTING2,SYTSIZE=2800,REFSIZE=30000,MACROSIZE=999,CONSTANTS=500,-
+01890000EXCLUDE=AC,PAGES=&PAGES.,ALTER,INDENT=1,&OPT.'
+01900000SET &SAVECC=&LASTCC
+01910000  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 OUTPUT7 +
+01920000    OUTPUT8 SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133 FB88)
+01930000IF &SAVECC EQ 0 THEN +
+01940000     WRITE COMPILATION SUCCESSFUL
+01950000ELSE +
+01960000     WRITE COMPILATION ERROR CODE = &SAVECC

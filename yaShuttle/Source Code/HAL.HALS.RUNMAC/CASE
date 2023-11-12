@@ -1,0 +1,13 @@
+         MACRO                                                          00000100
+&L       CASE  &CASENUM,&ADRS,&FIRST=0                                  00000200
+         LCLA  &I,&J                                                    00000300
+&L       AR    &CASENUM,&CASENUM DOUBLE FOR INDEX INTO CASE TABLE       00000400
+&J       SETA  8-4*&FIRST                                               00000500
+         LH    &CASENUM,*+&J.(&CASENUM) SELECT CASE REL ADR             00000600
+         B     &SYSECT.(&CASENUM) BRANCH TO SELECTED CASE               00000700
+.LOOP    ANOP                                                           00000800
+&I       SETA  &I+1                                                     00000900
+         AIF   (&I GT N'&ADRS).MEND                                     00001000
+         DC    AL2(&ADRS(&I)-&SYSECT)                                   00001100
+         AGO   .LOOP                                                    00001200
+.MEND    MEND                                                           00001300

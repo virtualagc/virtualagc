@@ -1,0 +1,443 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040001/*   NAME :     FUNCTEST                                            */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION:  A CLIST TO PERFORM THE FUNCTIONAL TESTS FOR ALL     */
+00090000/*              MEMBERS IN A PDS USING TWO DIFFERENT COMPILERS.     */
+00100000/*              A COMPARISON IS PERFORMED ON THE .OBJ FILES AND,IF  */
+00110000/*              THE TESTS ARE EXECUTED, THE .OUT FILES.             */
+00120000/*                                                                  */
+00130000/*------------------------------------------------------------------*/
+00140000/*                                                                  */
+00150000/*   SYNTAX :                                                       */
+00160000/*     FUNCTEST 'SRCDSN' 'NAME' ID(&SYSUID.) LIB(&ID..TEST)         */
+00170000/*              SYSTEM(PASS) TEST(COMPILE)                          */
+00180000/*              NEWCMPLR(&ID..REL99V0.COMPILER)                     */
+00190000/*              OLDCMPLR(NCAMCM.&SYSTEM..CURRENT.COMPILER)          */
+00200000/*              NEWRUNLIB(NCAMCM.&SYSTEM..CURRENT.RUNLIB)           */
+00210000/*              OLDRUNLIB(NCAMCM.&SYSTEM..CURRENT.RUNLIB)           */
+00220000/*              NEWERROR(NCAMCM.&SYSTEM..CURRENT.ERRORLIB)          */
+00230000/*              OLDERROR(NCAMCM.&SYSTEM..CURRENT.ERRORLIB)          */
+00240000/*              OLDLIST(&LIB..OLD.LST(&NAME.))                      */
+00250000/*              NEWLIST(&LIB..NEW.LST(&NAME.))                      */
+00260000/*              OLDOBJ(&LIB..OLD.OBJ(&NAME.))                       */
+00270000/*              NEWOBJ(&LIB..NEW.OBJ(&NAME.))                       */
+00280000/*              OLDOUT(OLD.OUT) NEWOUT(NEW.OUT)                     */
+00290001/*              PACK(1) OI(OI250700) SRN SDL OPT() HO               */
+00300001/*              CT(WMZMTCBCPCUMVM) TRACE FSW                        */
+00310000/*                                                                  */
+00320000/*     ALIAS    - NONE.                                             */
+00330000/*     REQUIRED - 'SRCDSN' 'NAME'                                   */
+00480000/*                                                                  */
+00490000/*------------------------------------------------------------------*/
+00500000/*                                                                  */
+00510000/*   INVOKES:                                                       */
+00520000/*                                                                  */
+00530000/*     PASSCLG OR BFSCLG - DEPENDING ON &SYSTEM                     */
+00540000/*     BYTECOMP                                                     */
+00550000/*     FICOM                                                        */
+00560000/*                                                                  */
+00570000/*------------------------------------------------------------------*/
+00580000/*                                                                  */
+00590000/*   PARAMETERS:                                                    */
+00600000/*                                                                  */
+00610000/*     SRCDSN   REQUIRED                                            */
+00620000/*              DATA SET WHICH CONTAINS THE SOURCE PROGRAMS         */
+00630000/*                                                                  */
+00640000/*     NAME     REQUIRED                                            */
+00650000/*              MEMBER NAME TO TEST                                 */
+00660000/*                                                                  */
+00670000/*     ID       DEFAULT: &SYSUID                                    */
+00680000/*              HIGH LEVEL QUALIFIER                                */
+00690000/*                                                                  */
+00700000/*     LIB      DEFAULT: &ID..TEST                                  */
+00710000/*              ID.DSN                                              */
+00720000/*                                                                  */
+00730000/*     SYSTEM   DEFAULT: PASS                                       */
+00740000/*              PASS OR BFS, FOR VERSION SEPARATION PURPOSES        */
+00750000/*                                                                  */
+00760003/*     TEST     DEFAULT: COMPILE                                    */
+00770000/*              INDICATE WHICH TYPE OF TESTS TO RUN:                */
+00780000/*               COMPILE: COMPILE AND COMPARE .OBJ/.LST FILES       */
+00790000/*               EXECUTE: COMPILE AND COMPARE .OBJ/.LST/.OUT FILES  */
+00800000/*                                                                  */
+00810001/*     NEWCMPVR DEFAULT: CURRENT                                    */
+00820001/*              NEW COMPILER VERSION                                */
+00820101/*                                                                  */
+00820201/*     OLDCMPVR DEFAULT: CURRENT                                    */
+00820301/*              OLD COMPILER VERSION                                */
+00820401/*                                                                  */
+00821001/*     NEWCMPLR DEFAULT: &ID..REL99V0.COMPILER                      */
+00822001/*              RELEASE OF THE COMPILER YOU WANT TO TEST            */
+00830000/*                                                                  */
+00840000/*     OLDCMPLR DEFAULT: NCAMCM.&SYSTEM..CURRENT.COMPILER           */
+00850000/*              RELEASE OF THE COMPILER YOU USE AS A BASELINE       */
+00860000/*                                                                  */
+00870005/*     NEWMONTR DEFAULT:NCAMCM.&SYSTEM..CURRENT.MONITOR.LOAD        */
+00871005/*              (MONITOR)                                           */
+00880001/*              RELEASE OF THE MONITOR YOU WANT TO TEST             */
+00890000/*                                                                  */
+00890105/*     OLDMONTR DEFAULT:NCAMCM.&SYSTEM..CURRENT.MONITOR.LOAD        */
+00890205/*              (MONITOR)                                           */
+00890301/*              RELEASE OF THE MONITOR YOU USE AS A BASELINE        */
+00890401/*                                                                  */
+00891001/*     NEWRUNLB DEFAULT: NCAMCM.&SYSTEM..CURRENT.RUNLIB             */
+00892001/*              RELEASE OF THE RTL LIBRARY YOU WANT TO TEST         */
+00893001/*                                                                  */
+00900000/*     OLDRUNLB DEFAULT: NCAMCM.&SYSTEM..CURRENT.RUNLIB             */
+00910000/*              RELEASE OF THE RTL LIBRARY YOU USE AS A BASELINE    */
+00920000/*                                                                  */
+00930000/*     NEWERROR DEFAULT: NCAMCM.&SYSTEM..CURRENT.ERRORLIB           */
+00940000/*              RELEASE OF THE ERROR LIBRARY YOU WANT TO TEST       */
+00950000/*                                                                  */
+00960000/*     OLDERROR DEFAULT: NCAMCM.&SYSTEM..CURRENT.ERRORLIB           */
+00970000/*              RELEASE OF THE ERROR LIBRARY USED AS A BASELINE     */
+00980000/*                                                                  */
+00990000/*     OLDLIST  DEFAULT: &LIB..OLD.LST(&NAME.)                      */
+01000000/*              DSN FOR LIST FILE COMPILED WITH OLD COMPILER        */
+01010000/*                                                                  */
+01020000/*     NEWLIST  DEFAULT: &LIB..NEW.LST(&NAME.)                      */
+01030000/*              DSN FOR LIST FILE COMPILED WITH NEW COMPILER        */
+01040000/*                                                                  */
+01050000/*     OLDSDF   DEFAULT: &LIB..OLD.SDF                              */
+01060000/*              DSN FOR HALSDF FILE CREATED FROM OLD COMPILER       */
+01060100/*                                                                  */
+01061000/*     NEWSDF   DEFAULT: &LIB..NEW.SDF                              */
+01062000/*              DSN FOR HALSDF FILE CREATED FROM NEW COMPILER       */
+01071000/*                                                                  */
+01071100/*     OLDINC   DEFAULT: &LIB..OLD.INC                              */
+01071200/*              DSN FOR INCLUDE FILE CREATED FROM OLD COMPILER      */
+01071300/*                                                                  */
+01071400/*     NEWINC   DEFAULT: &LIB..NEW.INC                              */
+01071500/*              DSN FOR INCLUDE FILE CREATED FROM NEW COMPILER      */
+01071600/*                                                                  */
+01072000/*     OLDOBJ   DEFAULT: &LIB..OLD.OBJ(&NAME.)                      */
+01073000/*              DSN FOR OBJECT CODE CREATED FROM OLD COMPILER       */
+01074000/*                                                                  */
+01080000/*     NEWOBJ   DEFAULT: &LIB..NEW.OBJ(&NAME.)                      */
+01090000/*              DSN FOR OBJECT CODE CREATED FROM NEW COMPILER       */
+01100000/*                                                                  */
+01110000/*     OLDOUT   DEFAULT: OLD.OUT                                    */
+01120000/*              DSN FOR OUTPUT GENERATED DURING OLDOBJ'S EXECUTION  */
+01130000/*                                                                  */
+01140000/*     NEWOUT   DEFAULT: NEW.OUT                                    */
+01150000/*              DSN FOR OUTPUT GENERATED DURING NEWOBJ'S EXECUTION  */
+01160000/*                                                                  */
+01230000/*     PACK     DEFAULT: 1                                          */
+01240000/*              COUNT OF NUMBER OF MEMBERS PROCESSED DURING THIS    */
+01250000/*              ACCEPTANCE TEST EXECUTION.  ACCEPTST RESETS PACK    */
+01260000/*              SO IT IS NEVER GREATER THAN 7.                      */
+01270000/*                                                                  */
+01301001/*     OI       DEFAULT: OI250700                                   */
+01302001/*              VERSION OF THE FSW YOU WANT TO TEST                 */
+01303001/*                                                                  */
+01304001/*     INV      DEFAULT: NCAMCM.TESTLIB.&OI..INVENTRY               */
+01305001/*              FSW INVENTORY FILE FOR A SPECIFIC OI                */
+01306001/*                                                                  */
+01310000/*     SRN      OPTIONAL                                            */
+01320000/*              STANDARD RECORD NUMBERS INDICATOR                   */
+01330000/*                                                                  */
+01340001/*     CT       DEFAULT: WMZMTCBCPCUMVM                             */
+01350000/*              CARD TYPE                                           */
+01360000/*                                                                  */
+01361000/*     LITS     DEFAULT: 3042                                       */
+01361101/*              LITERAL STRING SIZE                                 */
+01361201/*                                                                  */
+01361301/*     FSW      OPTIONAL                                            */
+01361401/*              OPTION TO PASSCLG FOR FSW COMPILE                   */
+01361601/*                                                                  */
+01361701/*     OPT      DEFAULT: NULL                                       */
+01361801/*              OTHER USER REQUESTED COMPILER OPTION                */
+01361901/*                                                                  */
+01362001/*     HO       OPTIONAL                                            */
+01362101/*              HIGHOPT COMPILER OPTION                             */
+01362201/*                                                                  */
+01431001/*     TRACE    OPTIONAL                                            */
+01432001/*              TRACE THE CLISTS EXECUTION                          */
+01433001/*                                                                  */
+01440001/*------------------------------------------------------------------*/
+01450000/*                                                                  */
+01460000/*   INPUT DATA SET NAMES:                                          */
+01470000/*                                                                  */
+01480000/*      NONE.                                                       */
+01490000/*                                                                  */
+01500000/*------------------------------------------------------------------*/
+01510000/*                                                                  */
+01520000/*   OUTPUT DATA SET NAMES:                                         */
+01530000/*                                                                  */
+01540000/*      NONE                                                        */
+01550000/*                                                                  */
+01560000/*------------------------------------------------------------------*/
+01570000/*                                                                  */
+01580000/*   TEMPORARY DATA SET NAMES:                                      */
+01590000/*                                                                  */
+01600000/*      NONE                                                        */
+01610000/*                                                                  */
+01620000/*------------------------------------------------------------------*/
+01630000/*                                                                  */
+01640000/*   COMMENTS:                                                      */
+01650000/*                                                                  */
+01660000/*      NONE.                                                       */
+01670000/*                                                                  */
+01680000/*------------------------------------------------------------------*/
+01690000/*                                                                  */
+01700000/*   REVISION HISTORY :                                             */
+01710000/*                                                                  */
+01720000/*    DATE        PCR   NAME   DESCRIPTION                          */
+01730000/*    --------    ---   ----   -------------------------------------*/
+01740000/*    10/26/89    062   SDM    BASELINED                            */
+01750000/*                                                                  */
+01760000/*    06/25/90    099   TEV    UPDATED HEADER. EVERYWHERE HALSCLG   */
+01770000/*                             WAS CALLED, NOW BFSCLG OR PASSCLG    */
+01780000/*                             ARE CALLED DEPENDING ON &SYSTEM. ALSO*/
+01790000/*                             , THE &SYSTEM PARAMETER IS PASSES TO */
+01800000/*                             BYTECOMP.                            */
+01810000/*                                                                  */
+01820000/*    01/07/91    141   TEV    ADDED NOLINK PARAMETER               */
+01830000/*                                                                  */
+01831000/*    05/03/91    169   LJK    UPDATED FOR 23V2 RELEASE             */
+01831101/*    04/11/94    332   LJK    UPDATED FOR 26V0 RELEASE             */
+01832000/*                                                                  */
+01832101/*    10/21/94    377   BAF    ELIMINATE REFERENCES TO 24070        */
+01832201/*    04/05/95    418   LJK    ADDED OPT AND HIGHOPT OPTIONS; CHNG  */
+01832301/*                             OI TO USE OI2507; DELETE NOLINK      */
+01832401/*                                                                  */
+01832501/*    03/10/00    669   KHP    MODIFIED HEADER SO THAT A COMPLETED  */
+01832604/*                             HELP FILE CAN BE CREATED FOR THIS    */
+01832701/*                             CLIST                                */
+01840000/*------------------------------------------------------------------*/
+01850000/********************************************************************/
+01860000 
+01870000PROC 2    SRCDSN                                          +
+01880000          NAME                                            +
+01890000          ID      (&SYSUID.)                              +
+01900000          LIB     (&ID..TEST)                             +
+01910000          SYSTEM  (PASS)                                  +
+01920000          TEST    (COMPILE)                               +
+01921001          NEWCMPVR(CURRENT)                               +
+01922001          OLDCMPVR(CURRENT)                               +
+01930000          NEWCMPLR(&ID..REL99V0.COMPILER)                 +
+01940000          OLDCMPLR(NCAMCM.&SYSTEM..CURRENT.COMPILER)      +
+01950000          NEWRUNLB(NCAMCM.&SYSTEM..CURRENT.RUNLIB)        +
+01960000          OLDRUNLB(NCAMCM.&SYSTEM..CURRENT.RUNLIB)        +
+01961001          NEWMONTR(NCAMCM.&SYSTEM..CURRENT.MONITOR.LOAD(MONITOR))  +
+01962001          OLDMONTR(NCAMCM.&SYSTEM..CURRENT.MONITOR.LOAD(MONITOR))  +
+01970000          NEWERROR(NCAMCM.&SYSTEM..CURRENT.ERRORLIB)      +
+01971000          OLDERROR(NCAMCM.&SYSTEM..CURRENT.ERRORLIB)      +
+01980000          OLDTERROR()                                     +
+01981000          NEWTERROR()                                     +
+01990000          OLDLIST (&LIB..OLD.LST(&NAME.))                 +
+02000000          NEWLIST (&LIB..NEW.LST(&NAME.))                 +
+02010000          OLDOBJ  (&LIB..OLD.OBJ(&NAME.))                 +
+02020000          NEWOBJ  (&LIB..NEW.OBJ(&NAME.))                 +
+02030000          OLDOUT  (OLD.OUT)                               +
+02040000          NEWOUT  (NEW.OUT)                               +
+02041000          OLDSDF  (&LIB..OLD.SDF)                         +
+02042000          NEWSDF  (&LIB..NEW.SDF)                         +
+02043000          OLDINC  (&LIB..OLD.INC)                         +
+02044000          NEWINC  (&LIB..NEW.INC)                         +
+02070000          PACK    (1)                                     +
+02080001          OI      (OI250700)                              +
+02081001          INV     (NCAMCM.TESTLIB.&OI..INVENTRY)          +
+02090000          SRN                                             +
+02100001          CT      (WMZMTCBCPCUMVM)                        +
+02101000          SDL                                             +
+02102000          MACSZ   (4500)                                  +
+02102100          LITS    (3042)                                  +
+02103000          PG      (91000)                                 +
+02103100          OPT     ()                                      +
+02103200          HO                                              +
+02105001          FSW                                             +
+02120000          TRACE
+02130000GLOBAL RETCODE
+02140000CONTROL END(DONE)
+02150000IF &NAME. =  ##INFO THEN DO
+02160000   WRITE *****  FUNCTEST NOT PERFORMED FOR ##INFO  *****
+02170000   EXIT
+02180000DONE
+02190000 
+02200000IF &TRACE NE THEN CONTROL CONLIST LIST
+02210000 
+02220000IF &TEST EQ COMPILE OR &TEST EQ C THEN SET &ACTION = C
+02230000   ELSE IF &TEST EQ EXECUTE OR &TEST EQ E THEN SET &ACTION = CLG
+02240000     ELSE  DO
+02250000       WRITE ***
+02260000       WRITE ***  INVALID TEST PARAMETER &TEST
+02270000       WRITE ***
+02280000       EXIT
+02290000     DONE
+02300000 
+02301000IF &NEWTERROR. NE THEN SET &NEWTERROR = TERRORLIB(&NEWTERROR.)
+02302000        ELSE SET  &NEWTERROR =
+02303000IF &OLDTERROR. NE THEN SET &OLDTERROR = TERRORLIB(&OLDTERROR.)
+02304000        ELSE SET  &OLDTERROR =
+02304100IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+02304200        ELSE SET  &OPT =
+02305000 
+02310000IF &PACK = 5 THEN DO
+02350000  COMPRESS '&LIB..NEW.LST'
+02360000  COMPRESS '&LIB..NEW.OBJ'
+02370000  COMPRESS '&LIB..OLD.LST'
+02380000  COMPRESS '&LIB..OLD.OBJ'
+02410000  IF &ACTION = CLG THEN DO
+02411001     COMPRESS '&LIB..LOAD'
+02412001     COMPRESS '&LIB..MAPS'
+02413001     COMPRESS '&LIB..SIM'
+02414001     COMPRESS '&LIB..UCP'
+02420000     COMPRESS '&LIB..NEW.OUT'
+02430000     COMPRESS '&LIB..OLD.OUT'
+02440000  DONE
+02450000DONE
+02460000 
+02470000TIME
+02480000IF &SYSTEM = &STR(PASS) THEN DO
+02490000  WRITE USING THE OLD PASS COMPILER:
+02500001     PASSCLG  &ACTION.                                       +
+02510000              &NAME.                                         +
+02520000              LIB     (&LIB.)                                +
+02530000              ID      (&ID.)                                 +
+02540000              SYSIN   (&SRCDSN.(&NAME.))                     +
+02550000              COMPILER(&OLDCMPLR.)                           +
+02551001              COMPVER (&OLDCMPVR.)                           +
+02560000              RUNLIB  (&OLDRUNLB.)                           +
+02561001              MONITOR (&OLDMONTR.)                           +
+02570000              SYSPRINT(&OLDLIST.)                            +
+02580000              OBJECT  (&OLDOBJ.)                             +
+02590000              DDOUT   (&OLDOUT.)                             +
+02600000              ERRORLIB(&OLDERROR.)                           +
+02601000              &OLDTERROR.                                    +
+02610000              INCLUDE (&OLDINC.)                             +
+02620000              HALSDF  (&OLDSDF.)                             +
+02630000              CT      (&CT.)                                 +
+02640000              LITS    (&LITS.)                               +
+02650000              &SRN.                                          +
+02660000              OI      (&OI.)                                 +
+02660101              INV     (&INV.)                                +
+02661000              &SDL.                                          +
+02661100              &OPT.                                          +
+02661200              &HO.                                           +
+02662000              MACSZ   (&MACSZ.)                              +
+02663000              PG      (&PG.)                                 +
+02664001              DELETES                                        +
+02671001              &FSW.                                          +
+02690000              &TRACE
+02700000 
+02710000  SET &OLDCMP=&RETCODE
+02720000  WRITE
+02730000  WRITE USING THE NEW PASS COMPILER:
+02740001     PASSCLG  &ACTION.                                       +
+02750000              &NAME.                                         +
+02760000              LIB     (&LIB.)                                +
+02770000              ID      (&ID.)                                 +
+02780000              SYSIN   (&SRCDSN.(&NAME.))                     +
+02790101              COMPILER(&NEWCMPLR.)                           +
+02791001              COMPVER (&NEWCMPVR.)                           +
+02800000              RUNLIB  (&NEWRUNLB.)                           +
+02801001              MONITOR (&NEWMONTR.)                           +
+02810000              SYSPRINT(&NEWLIST.)                            +
+02820000              OBJECT  (&NEWOBJ.)                             +
+02830000              DDOUT   (&NEWOUT.)                             +
+02840000              ERRORLIB(&NEWERROR.)                           +
+02841000              &NEWTERROR.                                    +
+02850000              INCLUDE (&NEWINC.)                             +
+02860000              HALSDF  (&NEWSDF.)                             +
+02870000              CT      (&CT.)                                 +
+02880000              LITS    (&LITS.)                               +
+02890000              &SRN.                                          +
+02900000              OI      (&OI.)                                 +
+02900101              INV     (&INV.)                                +
+02901000              &SDL.                                          +
+02901100              &OPT.                                          +
+02901200              &HO.                                           +
+02902000              MACSZ   (&MACSZ.)                              +
+02903000              PG      (&PG.)                                 +
+02904001              DELETES                                        +
+02911001              &FSW.                                          +
+02930000              &TRACE
+02940000 
+02950000  SET &NEWCMP=&RETCODE
+02960000DONE
+02970000ELSE DO
+02980000    WRITE USING THE OLD BFS COMPILER:
+02990000      BFSCLG  &ACTION.                                       +
+03000000              &NAME.                                         +
+03010000              LIB     (&LIB.)                                +
+03020000              ID      (&ID.)                                 +
+03030000              SYSIN   (&SRCDSN.(&NAME.))                     +
+03040001              COMPVER (&OLDCMPVR.)                           +
+03041001              COMPILER(&OLDCMPLR.)                           +
+03050000              RUNLIB  (&OLDRUNLB.)                           +
+03051001              MONITOR (&OLDMONTR.)                           +
+03060000              SYSPRINT(&OLDLIST.)                            +
+03070000              OBJECT  (&OLDOBJ.)                             +
+03080000              DDOUT   (&OLDOUT.)                             +
+03090000              ERRORLIB(&OLDERROR.)                           +
+03091000              &OLDTERROR.                                    +
+03100000              INCLUDE (&OLDINC.)                             +
+03110000              HALSDF  (&OLDSDF.)                             +
+03120000              CT      (&CT.)                                 +
+03130000              LITS    (&LITS.)                               +
+03140000              &SRN.                                          +
+03151100              &OPT.                                          +
+03151200              &HO.                                           +
+03152000              MACSZ   (&MACSZ.)                              +
+03153000              PG      (&PG.)                                 +
+03154001              DELETES                                        +
+03180000              &TRACE
+03190000 
+03200000    SET &OLDCMP=&RETCODE
+03210000    WRITE
+03220000    WRITE USING THE NEW BFS COMPILER:
+03230000      BFSCLG  &ACTION.                                       +
+03240000              &NAME.                                         +
+03250000              LIB     (&LIB.)                                +
+03260000              ID      (&ID.)                                 +
+03270000              SYSIN   (&SRCDSN.(&NAME.))                     +
+03280001              COMPVER (&NEWCMPVR.)                           +
+03281001              COMPILER(&NEWCMPLR.)                           +
+03290000              RUNLIB  (&NEWRUNLB.)                           +
+03291001              MONITOR (&NEWMONTR.)                           +
+03300000              SYSPRINT(&NEWLIST.)                            +
+03310000              OBJECT  (&NEWOBJ.)                             +
+03320000              DDOUT   (&NEWOUT.)                             +
+03330000              ERRORLIB(&NEWERROR.)                           +
+03331000              &NEWTERROR.                                    +
+03340000              INCLUDE (&NEWINC.)                             +
+03350000              HALSDF  (&NEWSDF.)                             +
+03360000              CT      (&CT.)                                 +
+03370000              LITS    (&LITS.)                               +
+03380000              &SRN.                                          +
+03391100              &OPT.                                          +
+03391200              &HO.                                           +
+03392000              MACSZ   (&MACSZ.)                              +
+03393000              PG      (&PG.)                                 +
+03394001              DELETES                                        +
+03420000              &TRACE
+03430000 
+03440000   SET &NEWCMP=&RETCODE
+03450000DONE
+03460000 
+03470001IF &OLDCMP < 4 THEN DO
+03480001  IF &NEWCMP < 4 THEN DO
+03490000    WRITE ** EXECUTION OF BYTECOMP FOR &NAME. NEW/OLD.OBJ **
+03500000    BYTECOMP &NAME.           +
+03510000             LIB(&LIB.)       +
+03520000             SYSTEM(&SYSTEM)  +
+03530001             DELOBJ           +
+03540000             GENLIST          +
+03541000             &TRACE.          +
+03550000             NOUTPUT
+03551000 
+03560000    IF &ACTION = CLG THEN              +
+03570000       FICOM &NAME.       +
+03580000             LIB(&LIB.)   +
+03581000             &TRACE.      +
+03590000             TYPE(OUT)
+03600000  DONE
+03610000  ELSE WRITE COMPARES NOT EXECUTED, OLDCMP =&OLDCMP.  NEWCMP =&NEWCMP.
+03620000 DONE
+03630000ELSE WRITE COMPARES NOT EXECUTED, OLDCMP =&OLDCMP.  NEWCMP =&NEWCMP.
+06560000 

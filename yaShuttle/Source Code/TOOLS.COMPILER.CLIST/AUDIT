@@ -1,0 +1,466 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     AUDIT                                                */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: BUILD A COMPILER DATASET FROM THE INDIVIDUAL OBJECT  */
+00090000/*             MODULES OF EACH COMPILER PHASE.                      */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX: AUDIT                                                  */
+00140000/*           SYSTEM(PASS)                                           */
+00150000/*           COMPVER(CURRENT)                                       */
+00160000/*           OLDREL(NCAMCM.&SYSTEM..&COMPVER.)                      */
+00170000/*           ID(&SYSUID.) BLKSZ(6144) NEWREL(&ID..REL99V0)          */
+00180000/*           COMPILER(&NEWREL..COMPILER)                            */
+00190000/*           LISTFILE(&NEWREL..AUDIT.LST) NOPRINT PASS1 PASS2 PASS3 */
+00200000/*           PASS4 AUX OPT FLO ALL TRACE                            */
+00210000/*                                                                  */
+00220000/*     ALIAS    - NONE.                                             */
+00230000/*     REQUIRED - NONE.                                             */
+00240000/*                                                                  */
+00250000/*------------------------------------------------------------------*/
+00260000/*                                                                  */
+00270000/*   INVOKES:  IEBGENER (SYSTEM UTILITY)                            */
+00280000/*             NCAMCM..XPL.TOOLS.MONITOR(XPLSM)                     */
+00281000/*             NCAMCM.TOOLS.XPLOBJ(REFORMAT)                        */
+00290000/*                                                                  */
+00300000/*------------------------------------------------------------------*/
+00310000/*                                                                  */
+00320000/*   PARAMETERS:                                                    */
+00330000/*                                                                  */
+00340000/*     SYSTEM   DEFAULT: PASS                                       */
+00350000/*              DETERMINES WHERE TO LOOK FOR FILES AND WHAT BLOCK   */
+00360000/*              SIZE TO USE.                                        */
+00370000/*                                                                  */
+00380000/*     COMPVER  DEFAULT: CURRENT                                    */
+00390000/*              CM COMPILER VERSION                                 */
+00400000/*                                                                  */
+00410000/*     OLDREL   DEFAULT: NCAMCM.&SYSTEM..&COMPVER.                  */
+00420000/*              RELEASE OF COMPILER THAT THE OBJECT MODULE IS TO    */
+00430000/*              BE PULLED IN FROM IF THAT PHASE IS NOT SPECIFIED    */
+00440000/*              WHEN AUDIT IS INVOKED.                              */
+00450000/*                                                                  */
+00460000/*     ID       DEFAULT: &SYSUID                                    */
+00470000/*              THE HIGH LEVEL QUALIFIER OF THE OBJECT CODE FOR     */
+00480000/*              EACH PHASE                                          */
+00490000/*                                                                  */
+00500000/*     BLKSZ    DEFAULT: 6144                                       */
+00510000/*              BLOCK SIZE AND LOGICAL RECORD LENGTH ATTRIBUTE.     */
+00520000/*              IF &SYSTEM. IS BFS OR 360, THE PROGRAM CHANGES THE  */
+00530000/*              BLOCK SIZE TO 7200.                                 */
+00540000/*                                                                  */
+00550000/*     NEWREL   DEFAULT: &ID..REL99V0                               */
+00560000/*              NEW RELEASE OF THE COMPILER                         */
+00570000/*                                                                  */
+00580000/*     COMPILER DEFAULT: &NEWREL..COMPILER                          */
+00590000/*              COMPILER OBJECT FILE                                */
+00600000/*                                                                  */
+00610000/*     LISTFILE DEFAULT: &NEWREL..AUDIT.LST                         */
+00620000/*              OUTPUT FILE FOR REFORMAT PROGRAM                    */
+00630000/*                                                                  */
+00640000/*     NOPRINT  OPTIONAL                                            */
+00650000/*              IF SPECIFIED, MESSAGES WILL BE SENT TO SCREEN, ELSE */
+00660000/*              PUT THE MESSAGES IN &NEWREL..AUDIT.LST              */
+00670000/*                                                                  */
+00680000/*     PASS1    OPTIONAL                                            */
+00690000/*              IF PASS1 OR ALL IS SPECIFIED, THE COMPILER IS       */
+00700000/*              BUILT USING THE PASS1 OBJECT FILE FROM THE NEW      */
+00710000/*              RELEASE.  OTHERWISE, IT USES THE OBJECT FILE FROM   */
+00720000/*              THE OLD RELEASE (&OLDREL).                          */
+00730000/*                                                                  */
+00740000/*     PASS2    OPTIONAL                                            */
+00750000/*              IF PASS2 OR ALL IS SPECIFIED, THE COMPILER IS       */
+00760000/*              BUILT USING THE PASS2 OBJECT FILE FROM THE NEW      */
+00770000/*              RELEASE.  OTHERWISE, IT USES THE OBJECT FILE FROM   */
+00780000/*              THE OLD RELEASE (&OLDREL).                          */
+00790000/*                                                                  */
+00800000/*     PASS3    OPTIONAL                                            */
+00810000/*              IF PASS3 OR ALL IS SPECIFIED, THE COMPILER IS       */
+00820000/*              BUILT USING THE PASS3 OBJECT FILE FROM THE NEW      */
+00830000/*              RELEASE.  OTHERWISE, IT USES THE OBJECT FILE FROM   */
+00840000/*              THE OLD RELEASE (&OLDREL).                          */
+00850000/*                                                                  */
+00860000/*     PASS4    OPTIONAL                                            */
+00870000/*              IF PASS4 OR ALL IS SPECIFIED, THE COMPILER IS       */
+00880000/*              BUILT USING THE PASS4 OBJECT FILE FROM THE NEW      */
+00890000/*              RELEASE.  OTHERWISE, IT USES THE OBJECT FILE FROM   */
+00900000/*              THE OLD RELEASE (&OLDREL).                          */
+00910000/*                                                                  */
+00920000/*     AUX      OPTIONAL                                            */
+00930000/*              IF AUX   OR ALL IS SPECIFIED, THE COMPILER IS       */
+00940000/*              BUILT USING THE AUX   OBJECT FILE FROM THE NEW      */
+00950000/*              RELEASE.  OTHERWISE, IT USES THE OBJECT FILE FROM   */
+00960000/*              THE OLD RELEASE (&OLDREL).                          */
+00970000/*                                                                  */
+00980000/*     OPT      OPTIONAL                                            */
+00990000/*              IF OPT   OR ALL IS SPECIFIED, THE COMPILER IS       */
+01000000/*              BUILT USING THE OPT   OBJECT FILE FROM THE NEW      */
+01010000/*              RELEASE.  OTHERWISE, IT USES THE OBJECT FILE FROM   */
+01020000/*              THE OLD RELEASE (&OLDREL).                          */
+01030000/*                                                                  */
+01040000/*     FLO      OPTIONAL                                            */
+01050000/*              IF FLO   OR ALL IS SPECIFIED, THE COMPILER IS       */
+01060000/*              BUILT USING THE FLO   OBJECT FILE FROM THE NEW      */
+01070000/*              RELEASE.  OTHERWISE, IT USES THE OBJECT FILE FROM   */
+01080000/*              THE OLD RELEASE (&OLDREL).                          */
+01090000/*                                                                  */
+01100000/*     ALL      OPTIONAL                                            */
+01110000/*              IF ALL IS SPECIFIED, THE COMPILER IS BUILT USING    */
+01120000/*              ALL THE OBJECT FILES FROM THE NEW RELEASE.          */
+01130000/*                                                                  */
+01140000/*     TRACE    OPTIONAL                                            */
+01150000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+01160000/*              TERMINAL                                            */
+01170000/*                                                                  */
+01180000/*------------------------------------------------------------------*/
+01190000/*                                                                  */
+01200000/*   INPUT DATA SET NAMES:                                          */
+01210000/*                                                                  */
+01220000/*     <NEWREL>.PASS1.OBJ                                           */
+01230000/*         OBJECT CODE OF THE PASS1                                 */
+01240000/*                                                                  */
+01250000/*     <OLDREL>.PASS1.OBJ                                           */
+01260000/*         OBJECT CODE OF THE PASS1 - ONLY NEEDED IF PASS1 OR ALL   */
+01270000/*         IS NOT SPECIFIED IN THE INVOCATION OF AUDIT              */
+01280000/*                                                                  */
+01290000/*     <NEWREL>.PASS2.OBJ                                           */
+01300000/*         OBJECT CODE OF THE PASS2                                 */
+01310000/*                                                                  */
+01320000/*     <OLDREL>.PASS2.OBJ                                           */
+01330000/*         OBJECT CODE OF THE PASS2 - ONLY NEEDED IF PASS2 OR ALL   */
+01340000/*         IS NOT SPECIFIED IN THE INVOCATION OF AUDIT              */
+01350000/*                                                                  */
+01360000/*     <NEWREL>.PASS3.OBJ                                           */
+01370000/*         OBJECT CODE OF THE PASS3                                 */
+01380000/*                                                                  */
+01390000/*     <OLDREL>.PASS3.OBJ                                           */
+01400000/*         OBJECT CODE OF THE PASS3 - ONLY NEEDED IF PASS3 OR ALL   */
+01410000/*         IS NOT SPECIFIED IN THE INVOCATION OF AUDIT              */
+01420000/*                                                                  */
+01430000/*     <NEWREL>.PASS4.OBJ                                           */
+01440000/*         OBJECT CODE OF THE PASS4                                 */
+01450000/*                                                                  */
+01460000/*     <OLDREL>.PASS4.OBJ                                           */
+01470000/*         OBJECT CODE OF THE PASS4 - ONLY NEEDED IF PASS4 OR ALL   */
+01480000/*         IS NOT SPECIFIED IN THE INVOCATION OF AUDIT              */
+01490000/*                                                                  */
+01500000/*     <NEWREL>.AUX.OBJ                                             */
+01510000/*         OBJECT CODE OF THE AUX                                   */
+01520000/*                                                                  */
+01530000/*     <OLDREL>.AUX.OBJ                                             */
+01540000/*         OBJECT CODE OF THE AUX   - ONLY NEEDED IF AUX   OR ALL   */
+01550000/*         IS NOT SPECIFIED IN THE INVOCATION OF AUDIT              */
+01560000/*                                                                  */
+01570000/*     <NEWREL>.OPT.OBJ                                             */
+01580000/*         OBJECT CODE OF THE OPT                                   */
+01590000/*                                                                  */
+01600000/*     <OLDREL>.OPT.OBJ                                             */
+01610000/*         OBJECT CODE OF THE OPT   - ONLY NEEDED IF OPT   OR ALL   */
+01620000/*         IS NOT SPECIFIED IN THE INVOCATION OF AUDIT              */
+01630000/*                                                                  */
+01640000/*     <NEWREL>.FLO.OBJ                                             */
+01650000/*         OBJECT CODE OF THE FLO                                   */
+01660000/*                                                                  */
+01670000/*     <OLDREL>.FLO.OBJ                                             */
+01680000/*         OBJECT CODE OF THE FLO   - ONLY NEEDED IF FLO   OR ALL   */
+01690000/*         IS NOT SPECIFIED IN THE INVOCATION OF AUDIT              */
+01700000/*                                                                  */
+01710000/*------------------------------------------------------------------*/
+01720000/*                                                                  */
+01730000/*   OUTPUT DATA SET NAMES:                                         */
+01740000/*                                                                  */
+01750000/*     <COMPILER>                                                   */
+01760000/*         OBJECT CODE OF THE COMPILER CONTAINING ALL SEVEN PHASES  */
+01770000/*                                                                  */
+01780000/*     <NEWREL>.AUDIT.LST                                           */
+01790000/*         CONTAINS MESSAGES FROM THE REFORMAT PROGRAM              */
+01800000/*                                                                  */
+01810000/*------------------------------------------------------------------*/
+01820000/*                                                                  */
+01830000/*   TEMPORARY DATA SET NAMES:                                      */
+01840000/*                                                                  */
+01850000/*     TEMP.OBJ -- CONTAINS A CONCATENATION OF ALL 7 OBJECT         */
+01860000/*          MODULES USED TO BUILD THE COMPILER.                     */
+01870000/*                                                                  */
+01880000/*------------------------------------------------------------------*/
+01890000/*                                                                  */
+01900000/*   COMMENTS:                                                      */
+01910000/*                                                                  */
+01920000/* THE XPLFC CLIST(WHICH COMPILES ONE PHASE OF THE COMPILER)        */
+01930000/* MUST BE EXECUTED FIRST.                                          */
+01940000/*                                                                  */
+01950000/* THE AUDIT CLIST USES THE LATEST COMPILER PHASES FROM CM FOR      */
+01960000/* THOSE NOT SPECIFIED IN THE CLIST INVOCATION.                     */
+01970000/*                                                                  */
+01980000/* THE BLKSZ PARAMETER MUST BE SET TO 6144 IF BUILDING THE PASS     */
+01990000/* COMPILER.  THE BLKSZ PARAMETER MUST BE SET TO 7200 IF BUILDING   */
+02000000/* THE BFS OR H360 COMPILER.                                        */
+02010000/*                                                                  */
+02020000/* THE AUDIT CLIST CONCATENATES ALL 7 PHASES (OBJECT MODULES) INTO  */
+02030000/* TEMP.OBJ, THEN INVOKES THE REFORMAT PROGRAM.  REFORMAT           */
+02040000/* CALCULATES NEW BLOCK COUNTS AND REBLOCKS THE DATA.  IF THE       */
+02050000/* BLOCKSIZE OF THE RESULTING COMPILER IS THE SAME AS THAT OF THE   */
+02060000/* ORIGINAL 7 OBJECT MODULES, THEN THE COMPILER IS THE SAME AS A    */
+02070000/* SIMPLE CONCATENATION OF THE 7 FILES.                             */
+02080000/*                                                                  */
+02090000/*------------------------------------------------------------------*/
+02100000/*                                                                  */
+02110000/*   REVISION HISTORY:                                              */
+02120000/*                                                                  */
+02130000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+02140000/*     --------  ----  ----  -------------------------------------  */
+02150000/*     02/01/90  073   JAC   UPDATED FROM EXISTING CLIST.  ADDED    */
+02160000/*                           BLKSZ OPTION AND HEADER.               */
+02170000/*                                                                  */
+02180000/*     06/21/91  187   TEV   ADDED SYSTEM PARAMETER, ADDED LOGIC TO */
+02190000/*                           SET BLKSZ() TO APPROPRIATE VALUE FOR   */
+02200000/*                           BFS OR 360 SYSTEM.                     */
+02210000/*                                                                  */
+02220000/*     09/13/91  186   LJK   RENAMED CM LOAD FILE                   */
+02230000/*                                                                  */
+02240000/*     10/09/91  219   SDM   ADDED COMPVER, CHANGED BLOCKSIZE MSG.  */
+02250000/*                           CHANGED DEFAULT TO NOPRINT.            */
+02260000/*                                                                  */
+02270000/*     06/02/94  353   HFG   MODIFIED CLIST TO HANDLE XPL VERSION   */
+02280000/*                           OF REFORMAT: ADDED CODE TO CONCATENATE */
+02290000/*                           THE 7 COMPILER PHASES AND INVOKE       */
+02300000/*                           MONITOR.                               */
+02310000/*                                                                  */
+02311001/*     06/27/96  487   SMR   MODIFIED CLIST TO INCREASE DATASET     */
+02312001/*                           SIZE OF TEMP.OBJ WHEN ALLOCATED        */
+02313001/*                                                                  */
+02320000/*------------------------------------------------------------------*/
+02330000/********************************************************************/
+02340000 
+02350000PROC 0      SYSTEM(PASS)                  +
+02360000            COMPVER(CURRENT)              +
+02370000            OLDREL(NCAMCM.&SYSTEM..&COMPVER.) +
+02380000            ID(&SYSUID.)                  +
+02390000            BLKSZ(6144)                   +
+02400000            NEWREL(&ID..REL99V0)          +
+02410000            COMPILER(&NEWREL..COMPILER)   +
+02420000            LISTFILE(&NEWREL..AUDIT.LST)  +
+02430000            NOPRINT                       +
+02440000            PASS1                         +
+02450000            PASS2                         +
+02460000            PASS3                         +
+02470000            PASS4                         +
+02480000            OPT                           +
+02490000            AUX                           +
+02500000            FLO                           +
+02510000            ALL                           +
+02511000            PROGRAM(NCAMCM.TOOLS.XPLOBJ(REFORMAT)) +
+02520000            TRACE
+02520100 
+02530000 
+02540000IF &TRACE. NE THEN +
+02550000   CONTROL LIST CONLIST
+02560000CONTROL END(DONE)
+02570000 
+02580000/******************************************************/
+02590000/*  SELECT APPROPRIATE BLOCKSIZE FOR COMPILER SYSTEM  */
+02600000/******************************************************/
+02610000 
+02620000IF &SYSTEM EQ 360 THEN SET &SYSTEM EQ H360
+02630000WRITE
+02640000IF &SYSTEM EQ BFS THEN DO
+02650000   SET &BLKSZ = 7200
+02660000   WRITE AUDITING A VERSION OF THE BFS COMPILER
+02670000DONE
+02680000 
+02690000IF &SYSTEM EQ H360 THEN DO
+02700000  SET &BLKSZ = 7200
+02710000   WRITE AUDITING A VERSION OF THE H360 COMPILER
+02720000DONE
+02730000 
+02740000IF &SYSTEM EQ PASS THEN +
+02750000   WRITE AUDITING A VERSION OF THE PASS COMPILER
+02760000WRITE
+02770000 
+02780000/******************************************************/
+02790000/*  SELECT OBJECT MODULES FOR EACH COMPILER PHASE     */
+02800000/******************************************************/
+02810000 
+02820000IF &PASS1 EQ PASS1 OR &ALL EQ ALL THEN +
+02830000   SET PHASE1 EQ &STR('&NEWREL..PASS1.OBJ')
+02840000ELSE +
+02850000   SET PHASE1 EQ &STR('&OLDREL..PASS1.OBJ')
+02860000 
+02870000IF &FLO EQ FLO OR &ALL EQ ALL THEN +
+02880000   SET FLOGEN EQ &STR('&NEWREL..FLO.OBJ')
+02890000ELSE +
+02900000   SET FLOGEN EQ &STR('&OLDREL..FLO.OBJ')
+02910000 
+02920000IF &OPT EQ OPT OR &ALL EQ ALL THEN +
+02930000   SET PHASE15 EQ &STR('&NEWREL..OPT.OBJ')
+02940000ELSE +
+02950000   SET PHASE15 EQ &STR('&OLDREL..OPT.OBJ')
+02960000 
+02970000IF &AUX EQ AUX OR &ALL EQ ALL THEN +
+02980000   SET AUXMAT EQ &STR('&NEWREL..AUX.OBJ')
+02990000ELSE +
+03000000   SET AUXMAT EQ &STR('&OLDREL..AUX.OBJ')
+03010000 
+03020000IF &PASS2 EQ PASS2 OR &ALL EQ ALL THEN +
+03030000   SET PHASE2 EQ &STR('&NEWREL..PASS2.OBJ')
+03040000ELSE +
+03050000   SET PHASE2 EQ &STR('&OLDREL..PASS2.OBJ')
+03060000 
+03070000IF &PASS3 EQ PASS3 OR &ALL EQ ALL THEN +
+03080000  SET PHASE3 EQ &STR('&NEWREL..PASS3.OBJ')
+03090000ELSE +
+03100000  SET PHASE3 EQ &STR('&OLDREL..PASS3.OBJ')
+03110000 
+03120000IF &PASS4 EQ PASS4 OR &ALL EQ ALL THEN +
+03130000  SET PHASE4 EQ &STR('&NEWREL..PASS4.OBJ')
+03140000ELSE +
+03150000  SET PHASE4 EQ &STR('&OLDREL..PASS4.OBJ')
+03160000 
+03170000/***---------------------------------------***/
+03180000/*   CONCATENATE STEP                        */
+03190000/***---------------------------------------***/
+03200000WRITE *** CONCATENATING COMPILER PHASES INTO ONE DATASET ***
+03210000 
+03220000CONTROL NOMSG
+03230000  FREE F(SOURCE DEST SYSIN SYSPRINT SYSUT1 SYSUT2)
+03240000CONTROL MSG
+03250000 
+03260000SET &DEST = TEMP.OBJ
+03270000SET &SOURCE = &PHASE1.
+03280000 
+03290000/*--------------------------------------------*/
+03300000/* ALLOCATE DEST DATASET WITH SAME ATTRIBUTES */
+03310000/* AS SOURCE DATASET, ONLY BIGGER             */
+03320000/*--------------------------------------------*/
+03330000LISTDSI &SOURCE.
+03340000SET &PRIMARYSPACE = &SYSPRIMARY * 16
+03350000SET &SOURCEBLKSZ  = &SYSBLKSIZE
+03360000IF &SYSDSN(&DEST.) EQ OK +
+03370000THEN DO
+03380000   CONTROL NOMSG
+03390000   DELETE &DEST
+03400000   CONTROL MSG
+03410000DONE
+03420000ALLOC F(DEST) DA(&DEST.) LIKE(&SOURCE) +
+03430000        NEW SPACE(&PRIMARYSPACE.,&SYSSECONDS.) +
+03440000        REUSE
+03450000 
+03460000SET &COUNT = 1
+03470000SET &PROBLEMS = 0
+03480000 
+03490000        /* SOURCE IS ALREADY SET TO &PHASE1 */
+03500000FILE1:  GOTO APPEND
+03510000FILE2:  SET &SOURCE = &FLOGEN.
+03520000        GOTO APPEND
+03530000FILE3:  SET &SOURCE = &PHASE15.
+03540000        GOTO APPEND
+03550000FILE4:  SET &SOURCE = &AUXMAT.
+03560000        GOTO APPEND
+03570000FILE5:  SET &SOURCE = &PHASE2.
+03580000        GOTO APPEND
+03590000FILE6:  SET &SOURCE = &PHASE3.
+03600000        GOTO APPEND
+03610000FILE7:  SET &SOURCE = &PHASE4.
+03620000        GOTO APPEND
+03630000 
+03640000/* DO WHILE &COUNT < 8 */
+03650000APPEND: +
+03660000     CONTROL NOMSG
+03670000     FREE FILE(SYSIN SYSPRINT SYSUT1 SYSUT2)
+03680000     CONTROL MSG
+03690000/*   WRITENR APPENDING &SOURCE. TO &DEST =>  */
+03700000     ALLOC FILE(SYSUT1) DA(&SOURCE.) SHR REUSE
+03710000     ALLOC FILE(SYSUT2) DA(&DEST.) MOD REUSE
+03720000     ALLOC FILE(SYSPRINT) DUMMY REUSE
+03730000     ALLOC FILE(SYSIN) DUMMY REUSE
+03740000     $CALL IEBGENER
+03750000     SET &SAVECC = &LASTCC
+03760000     IF &SAVECC ^= 0 THEN DO
+03770000        SET &PROBLEMS = &PROBLEMS + &SAVECC
+03780000/*      WRITE FAILED  */
+03790000     DONE
+03800000/*   ELSE WRITE SUCCESSFUL  */
+03810000     FREE FILE(SYSIN SYSPRINT SYSUT1 SYSUT2)
+03820000     SET &COUNT = &COUNT + 1
+03830000     GOTO FILE&COUNT
+03840000/* DONE */
+03850000FILE8: +
+03860000 IF &PROBLEMS GT 0 THEN DO
+03870000    WRITE *** UNABLE TO APPEND PHASES INTO ONE DATASET ***
+03880000 
+03890000    CONTROL NOMSG
+03900000      FREE F(SOURCE DEST SYSIN SYSPRINT SYSUT1 SYSUT2)
+03910000    CONTROL MSG
+03920000    /***-------   END OF CONCATENATION CODE   ---------***/
+03930000 DONE
+03940000 ELSE DO
+03950000 
+03960000     /*** --------------------------------------------- ***/
+03970000     /*** ALLOCATE THE NEW COMPILER DATASET             ***/
+03980000     /*** --------------------------------------------- ***/
+03990000    CONTROL NOMSG
+04000000       FREE  DA('&COMPILER') ATTR(FBLKSZ)
+04010000       DELETE '&COMPILER'
+04020000    CONTROL MSG
+04020100    /*
+04021000    /* THE HAL COMPILER IS APPROXIMATELY 1,280,000 BYTES.  DIVIDE
+04022000    /* THIS VALUE BY &BLKSZ TO GET THE NUMBER OF BLOCKS
+04023000    /* NEEDED FOR THE ALLOCATION. ADD 1 BLOCK FOR GOOD MEASURE.
+04024000    /*
+04030000    SET &NUMBLOCKS = ( 1280000 / &BLKSZ ) + 1
+04040000    ATTR FBLKSZ RECFM(F)     LRECL(&BLKSZ.) BLKSIZE(&BLKSZ.)
+04050000    ALLOC REUSE DA('&COMPILER') NEW USING(FBLKSZ) TR +
+04060000        SPACE(&NUMBLOCKS 20) BLOCK(&BLKSZ.) RELEASE
+04070000    FREE ATTR(FBLKSZ)
+04080000 
+04090000     /*** --------------------------------------------- ***/
+04100000     /*** EXECUTE REFORMAT TO RECALCULATE BLOCK COUNTS  ***/
+04110000     /*** AND REBLOCK THE DATA                          ***/
+04120000     /*** --------------------------------------------- ***/
+04130000       CONTROL NOMSG
+04140000       FREE F(SYSPRINT FILE1 FILE2 PROGRAM LISTING2 SYSIN) +
+04150000          ATTR(TADD)
+04160000       CONTROL MSG
+04170000 
+04180000       ATTR TADD RECFM(F A) LRECL(133) BLKSIZE(1330)
+04200000       IF &NOPRINT EQ THEN DO
+04210000          CONTROL NOMSG
+04220000          DELETE '&LISTFILE'
+04230000          CONTROL MSG
+04240000          ALLOC REUSE F(SYSPRINT) DA('&LISTFILE') USING(TADD) +
+04250000                                  NEW TRACKS SP(1 1) RELEASE
+04260000       DONE
+04270000       ELSE +
+04280000          ALLOC REUSE F(SYSPRINT) DA(*) USING(TADD)
+04290000       ALLOC REUSE F(SYSIN)    DUMMY
+04300000       ALLOC REUSE F(LISTING2) DUMMY
+04310000       ALLOC REUSE F(PROGRAM)  DA('&PROGRAM') SHR
+04320000       ALLOC REUSE F(FILE1)    DA(&DEST.) SHR
+04330000       ALLOC REUSE F(FILE2)    DA('&COMPILER') SHR
+04340000 
+04350000       WRITE *** REFORMATTING &COMPILER ***
+04360000 
+04370000    /* THE FREE= PARAMETER MUST BE > 310,000 FOR REFORMAT TO WORK.*/
+04380000    /* THE BLOCKSIZE= PARAMETER IS USED BY THE REFORMAT PROGRAM   */
+04390000    /* AND MUST BE LAST IN THE PARAMETER LIST.                    */
+04400000       CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' 'SYTSIZE=1200,+
+04410000             LITSTRINGS=2100,SYMBOLS=250,FREE=409600,BLOCKSIZE=&BLKSZ'
+04420000       SET &SAVECC=&LASTCC
+04430000       IF &SAVECC = 0 +
+04440000       THEN WRITE AUDIT SUCCESSFUL
+04450000       ELSE DO
+04460000          WRITE AUDIT ERROR CODE = &SAVECC
+04470000       DONE
+04480000       WRITE
+04490000       FREE F(SYSPRINT FILE1 FILE2 PROGRAM LISTING2 SYSIN) +
+04500000            ATTR(TADD)
+04510000 
+04520000    CONTROL NOMSG
+04530000    DELETE &DEST
+04540000 DONE /* IF PROBLEMS THEN ... ELSE DO */
+04550000 
+04560000END

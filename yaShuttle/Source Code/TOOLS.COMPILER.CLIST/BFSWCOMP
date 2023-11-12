@@ -1,0 +1,239 @@
+00010000/********************************************************************/
+00011000/*------------------------------------------------------------------*/
+00012000/*                                                                  */
+00013000/*   NAME:      BFSWCOMP                                            */
+00014000/*                                                                  */
+00015000/*------------------------------------------------------------------*/
+00016000/*                                                                  */
+00017000/*   FUNCTION:  A CLIST TO COMPILE ALL BFS FSW MODULES FOR A        */
+00018000/*              SPECIFIC OI.                                        */
+00019200/*                                                                  */
+00019400/*------------------------------------------------------------------*/
+00019500/*                                                                  */
+00019600/*   SYNTAX :                                                       */
+00019700/*      BFSWCOMP ID(&SYSUID.) REL(REL99V0) LIB(&ID..&IO..&REL.)     */
+00019800/*              SYSTEM(BFS) OI(BFS262XX)                            */
+00019900/*              COMPVER(CURRENT) SRCID(NCAMCM)                      */
+00020000/*              COMPILER(&SRCID..&SYSTEM..&COMPVER..COMPILER)       */
+00020100/*              ERRORLIB(&SRCID..&SYSTEM..&COMPVER..ERRORLIB)       */
+00020300/*              MONITOR(NCAMCM.BFS.CURRENT.MONITOR.LOAD(MONITOR))   */
+00020400/*              TERRORLIB() LIST(NCAMCM.TESTLIB.&OI..MEMLIST)       */
+00021003/*              OPT() FIRSTRUN REFRESH DELETE TRACE                 */
+00022000/*                                                                  */
+00022100/*     ALIAS    - NONE.                                             */
+00022200/*     REQUIRED - NONE.                                             */
+00022300/*                                                                  */
+00022400/*------------------------------------------------------------------*/
+00022500/*                                                                  */
+00022600/*   INVOKES:   COMPDEL                                             */
+00022700/*              COMPALLO                                            */
+00022800/*              PDSALL                                              */
+00022900/*              BFSCLG                                              */
+00023000/*                                                                  */
+00024000/*------------------------------------------------------------------*/
+00025000/*                                                                  */
+00025100/*   PARAMETERS:                                                    */
+00025200/*                                                                  */
+00025300/*     ID       DEFAULT: &SYSUID                                    */
+00025400/*              HIGH LEVEL QUALIFIER                                */
+00025500/*                                                                  */
+00025600/*     REL      DEFAULT: REL99V0                                    */
+00025700/*              DATA SET FOR THE TEST PROGRAMS                      */
+00025800/*                                                                  */
+00025900/*     OI       DEFAULT: BFS262XX                                   */
+00026001/*              VERSION OF THE BFS FSW YOU WANT TO COMPILE          */
+00026100/*                                                                  */
+00026200/*     SRCDSN   DEFAULT: NROKSTB..&OI..CODEHAL                      */
+00026300/*              DATA SET WHICH CONTAINS THE SOURCE PROGRAMS         */
+00026400/*                                                                  */
+00026500/*     LIB      DEFAULT: &ID..&OI..&REL.                            */
+00026600/*              DATA SET NAME QUALIFIER                             */
+00026700/*                                                                  */
+00026800/*     LIST     DEFAULT: NCAMCM.TESTLIB.&OI..MEMLIST                */
+00026900/*              DATA SET WHICH CONTAINS A MEMBER LIST OF WHICH      */
+00027000/*              MEMBERS IN THE DATA SET YOU WANT TO COMPILE         */
+00027200/*                                                                  */
+00027300/*     SYSTEM   DEFAULT: BFS                                        */
+00027400/*              COMPILER SYSTEM                                     */
+00027500/*                                                                  */
+00027600/*     SRCID    DEFAULT: NCAMCM                                     */
+00027700/*              HIGH LEVEL QUALIFIER FOR COMPILER,ERRORLIB &MONITOR */
+00027800/*                                                                  */
+00027900/*     COMPVER  DEFAULT: CURRENT                                    */
+00028000/*              COMPILER VERSION                                    */
+00028100/*                                                                  */
+00028200/*     COMPILER DEFAULT: &SRCID..&SYSTEM..&COMPVER..COMPILER        */
+00028300/*              RELEASE OF THE COMPILER                             */
+00028400/*                                                                  */
+00028500/*     ERRORLIB DEFAULT: &SRCID..&SYSTEM..&COMPVER.ERRORLIB         */
+00028600/*              RELEASE OF THE ERROR LIBRARY                        */
+00028700/*                                                                  */
+00028800/*     MONITOR  DEFAULT: NCAMCM.BFS.CURRENT.MONITOR.LOAD(MONITOR)   */
+00028900/*              RELEASE OF THE MONITOR                              */
+00029000/*                                                                  */
+00029100/*     TERRORLIB DEFAULT: NULL                                      */
+00029200/*              TEMPORARY ERROR LIBRARY                             */
+00029300/*                                                                  */
+00029700/*     FIRSTRUN OPTIONAL                                            */
+00029800/*              IF SPECIFIED ALL THE DATASETS WILL BE ALLOCATED     */
+00029900/*                                                                  */
+00030000/*     REFRESH  OPTIONAL                                            */
+00030100/*              IF SPECIFIED DELETE AND THEN REALLOCATE DATASETS    */
+00030200/*                                                                  */
+00030300/*     DELETE   OPTIONAL                                            */
+00030400/*              DELETE THE .LST FILE AFTER SUCCESSFUL COMPILATION   */
+00030900/*                                                                  */
+00031000/*     OPT      DEFAULT: NULL                                       */
+00031100/*              OTHER USER REQUESTED COMPILER OPTION                */
+00031200/*                                                                  */
+00031600/*     TRACE    OPTIONAL                                            */
+00031700/*              TRACE THE CLISTS EXECUTION                          */
+00031800/*                                                                  */
+00031900/*------------------------------------------------------------------*/
+00032000/*                                                                  */
+00032100/*   INPUT DATA SET NAMES:                                          */
+00032200/*                                                                  */
+00032300/*     <SRCDSN>                                                     */
+00032400/*          DATASET WHICH CONTAINS THE SOURCE PROGRAMS              */
+00032500/*                                                                  */
+00032600/*     <SRCID>.<SYSTEM>.<COMPVER>.COMPILER                          */
+00032700/*          RELEASE OF THE COMPILER TO USE                          */
+00032800/*                                                                  */
+00032900/*     <SRCID>.<SYSTEM>.<COMPVER>.ERRORLIB                          */
+00033000/*          RELEASE OF THE ERROR LIBRARY TO USE                     */
+00033100/*                                                                  */
+00033200/*------------------------------------------------------------------*/
+00033300/*                                                                  */
+00033400/*   OUTPUT DATA SET NAMES:                                         */
+00033500/*                                                                  */
+00033600/*     <LIB>.OBJ                                                    */
+00033700/*          OBJECT FILE                                             */
+00033800/*                                                                  */
+00033900/*     <LIB>.LST                                                    */
+00034000/*          LISTING FILE                                            */
+00034100/*                                                                  */
+00034200/*------------------------------------------------------------------*/
+00034600/*                                                                  */
+00034700/*   REVISION HISTORY:                                              */
+00034800/*                                                                  */
+00034900/*  DATE      PCR#     NAME   DESCRIPTION                           */
+00035000/*  --------  -----    ----   -------------------------------       */
+00035300/*  04/19/96  475      LJK    BASELINED TO COMPILE BFS FSW          */
+00035400/*                                                                  */
+00035500/********************************************************************/
+00035600 
+00035700PROC 0   ID       (&SYSUID.)                             +
+00035800         REL      (REL99V0)                              +
+00035900         OI       (BFS262XX)                             +
+00036000         LIB      (&ID..&OI..&REL.)                      +
+00036100         SYSTEM   (BFS)                                  +
+00036200         SRCID    (NCAMCM)                               +
+00036300         COMPVER  (CURRENT)                              +
+00037000         COMPILER (&SRCID..&SYSTEM..&COMPVER..COMPILER)  +
+00039000         ERRORLIB (&SRCID..&SYSTEM..&COMPVER..ERRORLIB)  +
+00039100         MONITOR  (&SRCID..&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00040000         TERRORLIB()                                     +
+00060000         SRCDSN   (NROKSTB.&OI..CODEHAL)                 +
+00060100         LIST     (NCAMCM.TESTLIB.&OI..MEMLIST)          +
+00070000         OPT      ()                                     +
+00070200         FIRSTRUN                                        +
+00080000         REFRESH                                         +
+00080100         DELETE                                          +
+00090000         TRACE
+00100000 
+00110000CONTROL END(DONE)
+00120000GLOBAL RETCODE
+00130000IF &TRACE NE THEN CONTROL CONLIST LIST
+00140000CONTROL NOMSG
+00150000/********************************************************/
+00160000/*                                                      */
+00170000/*  ALLOCATE THE NECESSARY FILES FOR COMPILATION        */
+00180000/*                                                      */
+00190000/********************************************************/
+00200000 
+00210000IF &REFRESH NE THEN COMPDEL &LIB.
+00220000IF &FIRSTRUN EQ FIRSTRUN  OR &REFRESH EQ REFRESH  THEN +
+00230000   COMPALLO &LIB. TEST(FSW) SYSTEM(&SYSTEM.)
+00360000 
+00460000         /***************************************/
+00470000         /*                                     */
+00480000         /*    ON ATTN, DO THE FOLLOWING:       */
+00490000         /*                                     */
+00500000         /***************************************/
+00510000 
+00520000ATTN     DO
+00530000         ERROR    OFF
+00540000         CLOSFILE MEMBERS
+00550000         FREE     F(MEMBERS)
+00560000         EXIT
+00570000DONE
+00580000 
+00590000CONTROL  NOMSG
+00600000         FREE     F(MEMBERS)
+00610000CONTROL  MSG NOFLUSH
+00620000 
+00630000         /***************************************/
+00640000         /*                                     */
+00650000         /* SET UP TO READ THE FILE &LIST.      */
+00660000         /*                                     */
+00670000         /***************************************/
+00680000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00690000OPENFILE MEMBERS  INPUT
+00700000 
+00710000         /***************************************/
+00720000         /*                                     */
+00730000         /* ON ERROR, DO THE FOLLOWING:         */
+00740000         /*                                     */
+00750000         /***************************************/
+00760000ERROR DO
+00770000   CLOSFILE MEMBERS
+00780000   FREE     F(MEMBERS)
+00790000   ERROR OFF
+00800000   GOTO FINI
+00810000DONE
+00820000         /***************************************/
+00830000         /*                                     */
+00840000         /*   PERFORM THE COMMAND ON THE PDS.   */
+00850000         /*                                     */
+00860000         /***************************************/
+00870000IF &TERRORLIB. NE THEN SET &TERRORLIB = TERRORLIB(&TERRORLIB.)
+00880000        ELSE SET  &TERRORLIB =
+00880100IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+00880200        ELSE SET  &OPT =
+00900000DO   WHILE    &SYSUID NE
+00910000     GETFILE  MEMBERS
+00940000     SET &MEMLEN = 1
+00950000     DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+00960000        SET &MEMLEN =  &MEMLEN + 1
+00970000     DONE
+00980000     SET &MEMLEN = &MEMLEN - 1
+00990000     SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+00991000 
+01060000TIME
+01080000      BFSCLG  C                                              +
+01090000              &NAME.                                         +
+01091000              ID      (&ID.)                                 +
+01100000              LIB     (&LIB.)                                +
+01120000              SYSIN   (&SRCDSN.(&NAME.))                     +
+01121000              COMPVER (&COMPVER.)                            +
+01130000              COMPILER(&COMPILER.)                           +
+01150000              ERRORLIB(&ERRORLIB.)                           +
+01151000              MONITOR (&MONITOR.)                            +
+01160000              &TERRORLIB.                                    +
+01180000              OI      (&OI.)                                 +
+01260000              &OPT.                                          +
+01260200              FSW                                            +
+01280000              &TRACE.
+01290000 
+01300000  SET &CMP=&RETCODE
+01301000  IF &CMP < 4 AND &DELETE  NE THEN DO
+01302000    CONTROL NOMSG
+01320000    DELETE '&LIB..LST(&NAME.)'
+01321000    CONTROL MSG
+01330000  DONE
+01331000DONE
+01340000 
+01350000FINI: CONTROL MSG
+01410000WRITE *********************************************
+01420000WRITE ***   ALL BFS FSW COMPILATION COMPLETED   ***
+01430000WRITE *********************************************

@@ -1,0 +1,118 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:  CCCSOFT                                                 */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: ESTABLISH ENVIRONMENT TO INVOKE SOFTOOL'S  CHANGE &  */
+00090000/*             CONFIGURATION CONTROL. START THE PRIMARY CCC DIALOG  */
+00100000/*             PANELS.                                              */
+00110000/*                                                                  */
+00120000/*------------------------------------------------------------------*/
+00130000/*                                                                  */
+00140000/*   SYNTAX :                                                       */
+00150000/*     CCCSOFT.                                                     */
+00160000/*                                                                  */
+00170000/*     ALIAS    - NONE.                                             */
+00180000/*     REQUIRED - NONE.                                             */
+00200000/*                                                                  */
+00210000/*------------------------------------------------------------------*/
+00220000/*                                                                  */
+00230000/*   INVOKES:                                                       */
+00240000/*                                                                  */
+00250000/*     THE CCC MACRO "CCCPRIM"                                      */
+00260000/*                                                                  */
+00270000/*------------------------------------------------------------------*/
+00280000/*                                                                  */
+00290000/*   PARAMETERS:                                                    */
+00300000/*                                                                  */
+00310000/*     NONE.                                                        */
+00320000/*                                                                  */
+00330000/*------------------------------------------------------------------*/
+00340000/*                                                                  */
+00350000/*   INPUT DATA SET NAMES:                                          */
+00360000/*                                                                  */
+00370000/*     SYS4.CCCPLIB                                                 */
+00380000/*        CCC PANEL LIBRARY                                         */
+00390000/*                                                                  */
+00400000/*     SYS4.CCCMLIB                                                 */
+00410000/*        CCC MESSAGE LIBRARY                                       */
+00420000/*                                                                  */
+00430000/*     SYS4.CCCSLIB                                                 */
+00440000/*        CCC SKELETON LIBRARY                                      */
+00450000/*                                                                  */
+00460000/*     NCAMCM.HAL.CCCTLIB                                           */
+00470000/*        CCC TABLES LIBRARY                                        */
+00480000/*                                                                  */
+00490000/*     SYS4.CCCMACRO                                                */
+00500000/*        CCC MACRO LIBRARY                                         */
+00510000/*                                                                  */
+00520000/*     SYS4.CCCPARM(CCCPARM)                                        */
+00530000/*        CCC PARM LIBRARY                                          */
+00540000/*                                                                  */
+00550000/*     SYS4.CCCSYMBL                                                */
+00560000/*        CCC SYMBOLIC DATA SET                                     */
+00570000/*                                                                  */
+00580000/*------------------------------------------------------------------*/
+00590000/*                                                                  */
+00600000/*   OUTPUT DATA SET NAMES:                                         */
+00610000/*                                                                  */
+00620000/*     NONE.                                                        */
+00630000/*                                                                  */
+00640000/*------------------------------------------------------------------*/
+00650000/*                                                                  */
+00660000/*   TEMPORARY DATA SET NAMES:                                      */
+00670000/*                                                                  */
+00680000/*     NONE.                                                        */
+00690000/*                                                                  */
+00700000/*------------------------------------------------------------------*/
+00710000/*                                                                  */
+00720000/*   COMMENTS:                                                      */
+00730000/*                                                                  */
+00740000/*     NONE.                                                        */
+00750000/*                                                                  */
+00760000/*------------------------------------------------------------------*/
+00770000/*                                                                  */
+00780000/*   REVISION HISTORY:                                              */
+00790000/*                                                                  */
+00800000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00810000/*  --------  ---  ---   -------------------------------------      */
+00820000/*  ??/??/??  ???  CMA   ORIGINAL CLIST                             */
+00830000/*                                                                  */
+00840000/*  06/25/90  099  TEV   UPDATED HEADER                             */
+00850000/*                                                                  */
+00860000/*------------------------------------------------------------------*/
+00870000/********************************************************************/
+00880000PROC 0
+00890000CONTROL NOPROMPT NOLIST NOCONLIST NOFLUSH NOMSG
+00900000ALLOC FI(CCCPLIB) DA('SYS4.CCCPLIB') SHR REU
+00910000ALLOC FI(CCCMLIB) DA('SYS4.CCCMLIB') SHR REU
+00920000ALLOC FI(CCCSLIB) DA('SYS4.CCCSLIB') SHR REU
+00930000ALLOC FI(CCCTLIB) DA('NCAMCM.HAL.CCCTLIB') SHR REU
+00940000ISPEXEC LIBDEF ISPPLIB LIBRARY ID(CCCPLIB)
+00950000ISPEXEC LIBDEF ISPMLIB LIBRARY ID(CCCMLIB)
+00960000ISPEXEC LIBDEF ISPSLIB LIBRARY ID(CCCSLIB)
+00970000ISPEXEC LIBDEF ISPTLIB LIBRARY ID(CCCTLIB)
+00980000ISPEXEC LIBDEF ISPTABL LIBRARY ID(CCCTLIB)
+00990000ALLOC FI(CCCISPT)  DA('NCAMCM.HAL.CCCTLIB') SHR REU
+01000000ALLOC FI(CCCPARM)  DA('SYS4.CCCPARM(CCCPARM)')SHR REU
+01010000ALLOC FI(CCCSYM)   INPUT DA('SYS4.CCCSYMBL') SHR REU
+01020000ALLOC FI(CCCMACRO) DA('SYS4.CCCMACRO') SHR REU
+01030000SET ZCMD =
+01040000SET ZTRAIL =
+01050000ISPEXEC VPUT (ZCMD,ZTRAIL) SHARED
+01060000%CCCPRIM
+01070000ISPEXEC LIBDEF ISPPLIB
+01080000ISPEXEC LIBDEF ISPMLIB
+01090000ISPEXEC LIBDEF ISPSLIB
+01100000ISPEXEC LIBDEF ISPTLIB
+01110000/* FREE FI(CCCPLIB)            */
+01120000/* FREE FI(CCCMLIB)            */
+01130000/* FREE FI(CCCSLIB)            */
+01140000/* FREE FI(CCCTLIB)            */
+01150000/* FREE DA('NCAMCM.HAL.CCCTLIB')  */
+01160000/* FREE DA('SYS4.CCCSYMBL')    */
+01170000/* FREE DA('SYS4.CCCPARM')     */
+01180000/* FREE DA('SYS4.CCCMACRO')    */
+01190000EXIT CODE(0)

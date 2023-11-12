@@ -1,0 +1,487 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     CCLG                                                 */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080007/*   FUNCTION: A CLIST TO COMPILE, LINK AND EXECUTE A C PROGRAM.    */
+00110000/*                                                                  */
+00120000/*             EXAMPLES:   CCLG CLG TEST01 TRACE                    */
+00150000/*                                                                  */
+00160000/*------------------------------------------------------------------*/
+00170000/*                                                                  */
+00180000/*   SYNTAX:                                                        */
+00190000/*                                                                  */
+00200000/*     CCLG   'ACTION' 'NAME'  ID(&SYSUID)                          */
+00210000/*             LIB(&ID..TESTC) FIRST FIRSTD NEWRUN SEQ              */
+00240000/*             INCLUDE(&LIB..INCLUDE)                               */
+00250000/*             PRINT(&LIB..LST(&NAME.))                             */
+00310000/*             SYSIN(&LIB..C(&NAME.)) LOAD(&LIB..LOAD(&NAME.))      */
+00320000/*             OBJECT(&LIB..OBJ(&NAME.)) LOADLIB() ARLIB()          */
+00320100/*             AMODE() RMODE() NOCLINK MAP DEBUG REPORT             */
+00340030/*             COPT() LOPT() NOXREF NOWARN PAGESIZE() TRACE         */
+00410000/*                                                                  */
+00420000/*     ALIAS    - NONE.                                             */
+00430000/*     REQUIRED - 'ACTION' 'NAME'                                   */
+00440000/*                                                                  */
+00450000/*------------------------------------------------------------------*/
+00460000/*                                                                  */
+00470000/*   INVOKES:  SYS9.CMDPROC.CLIST(LC370)                            */
+00480000/*             SYS9.CMDPROC.CLIST(CLK370)                           */
+00480100/*             NCAMCM.TOOLS.SYSTEM.CLIST(CP)                        */
+00560000/*                                                                  */
+00570000/*------------------------------------------------------------------*/
+00580000/*                                                                  */
+00590000/*   PARAMETERS:                                                    */
+00600000/*                                                                  */
+00610000/*     ACTION   REQUIRED                                            */
+00620000/*              C(COMPILE), L(LINK), G(GO) OR COMBINATION           */
+00630000/*                                                                  */
+00640000/*     NAME     REQUIRED                                            */
+00650000/*              NAME OF MEMBER IN LIBRARY                           */
+00660000/*                                                                  */
+00670000/*     ID       DEFAULT: &SYSUID.                                   */
+00680000/*              HIGH LEVEL QUALIFIER                                */
+00690000/*                                                                  */
+00700000/*     LIB      DEFAULT: &ID..TESTC                                 */
+00710000/*              OTHER DSN LEVELS                                    */
+00720000/*                                                                  */
+00730000/*     FIRST    OPTIONAL                                            */
+00740000/*              INITIALIZE DATASETS THE FIRST TIME                  */
+00750000/*                                                                  */
+00760000/*     FIRSTD   OPTIONAL                                            */
+00770000/*              DELETE ALL DATASETS CREATED FROM FIRST PARM AND     */
+00780000/*              THEN INITIALIZE THESE SAME DATASETS                 */
+00790000/*                                                                  */
+00800000/*     NEWRUN   OPTIONAL                                            */
+00810000/*              REALLOCATE REPORT LISTINGS                          */
+00820000/*                                                                  */
+01040000/*     SEQ      OPTIONAL                                            */
+01050000/*              SEND LISTING TO A SEQUENTIAL FILE                   */
+01060000/*                                                                  */
+01060001/*     REPORT   OPTIONAL                                            */
+01060002/*              OPTION TO GENERATE A REPORT FOR COMPILE,LINK AND GO */
+01060003/*                                                                  */
+01060010/*     TRACE    OPTIONAL                                            */
+01060020/*              EXECUTION OF THE CLIST WILL BE DISPLAYED ON SCREEN  */
+01060040/*                                                                  */
+01060100/* NEXT ARE PARAMETERS USED IN/FOR THE COMPILE OF SOURCE            */
+01060200/*                                                                  */
+01190000/*     INCLUDE  DEFAULT: &LIB..INCLUDE                              */
+01200000/*              USERS INCLUDE/HEADER FILES                          */
+01210000/*                                                                  */
+01490000/*     SYSIN    DEFAULT: &LIB..C(&NAME)                             */
+01500000/*              C SOURCE FILE                                       */
+01510000/*                                                                  */
+01520000/*     PRINT    DEFAULT: &LIB..LST(&NAME)                           */
+01530000/*              C PRINTOUT LISTING                                  */
+01540000/*                                                                  */
+01550000/*     OBJECT   DEFAULT: &LIB..OBJ(&NAME)                           */
+01560000/*              COMPILER PRODUCED OBJECT CODE                       */
+01682000/*                                                                  */
+01682400/* THIS IS THE START OF OPTIONS PASSED TO THE COMPILER              */
+01682500/*                                                                  */
+01682800/*     NOXREF   OPTIONAL                                            */
+01682900/*              SUPPRESS GENERATION OF CROSS-REFERENCE              */
+01683100/*                                                                  */
+01683200/*     DEBUG    OPTIONAL                                            */
+01683300/*              GENERATE CODE FOR RUNTIME TRACE                     */
+01683400/*                                                                  */
+01683500/*     PAGESIZE DEFAULT: NULL                                       */
+01683600/*              ASSIGN NUMBER OF LINES PER PAGE                     */
+01683700/*                                                                  */
+01683710/*     COPT     DEFAULT: NULL                                       */
+01683720/*              OTHER OPTIONS FOR COMPILATION                       */
+01683730/*                                                                  */
+01683800/* NEXT ARE PARAMETERS USED IN/FOR THE LINK/EDIT STEP               */
+01683900/*                                                                  */
+01950100/*     LOAD     DEFAULT: &LIB..LOAD(&NAME)                          */
+01950200/*              OUTPUT LOAD MODULE DATASET                          */
+01950300/*                                                                  */
+01950301/*     LOADLIB  DEFAULT: NULL                                       */
+01950302/*              USER LOAD LIBRARY DATASET                           */
+01950303/*                                                                  */
+01950304/*     ARLIB    DEFAULT: NULL                                       */
+01950305/*              USER AR370 LIBRARY DATASET                          */
+01950306/*                                                                  */
+01950310/* THIS IS THE START OF OPTIONS PASSED TO LINKAGE EDITOR            */
+01950320/*                                                                  */
+02400000/*     LOPT     DEFAULT: NULL                                       */
+02410000/*              OTHER OPTIONS FOR LINK EDIT                         */
+02470000/*                                                                  */
+02470001/*     NOCLINK  OPTIONAL                                            */
+02470002/*              BYPASS CLINK EXECUTION                              */
+02470003/*                                                                  */
+02470014/*     AMODE    DEFAULT: NULL                                       */
+02470015/*              ASSIGN MVS/XA ADDRESSING MODE                       */
+02470016/*                                                                  */
+02470017/*     RMODE    DEFAULT: NULL                                       */
+02470018/*              ASSIGN MVS/XA RESIDENCY MODE                        */
+02470019/*                                                                  */
+02470020/*     MAP      OPTIONAL                                            */
+02470030/*              OPTION TO MAP THE LOAD MODULE                       */
+02470040/*                                                                  */
+02470500/* THIS IS THE OPTION PASSED TO THE COMPILER/LINKER                 */
+02470600/*                                                                  */
+02470700/*     NOWARN   OPTIONAL                                            */
+02470800/*              SUPPRESS WARNING MESSAGES                           */
+02470900/*                                                                  */
+02590000/*------------------------------------------------------------------*/
+02600000/*                                                                  */
+02610000/*   INPUT DATA SET NAMES:                                          */
+02620000/*                                                                  */
+02630000/*     <LIB>.C(<NAME>)                                              */
+02640000/*         PDS OF C SOURCE CODE                                     */
+02650000/*                                                                  */
+02660000/*     <LIB>.INCLUDE                                                */
+02670000/*         PDS OF USERS INCLUDE/HEADER FILES                        */
+02680000/*                                                                  */
+02680100/*     <LOADLIB>                                                    */
+02680200/*         USER LOAD LIBRARY DATASET                                */
+02680300/*                                                                  */
+02680400/*     <ARLIB>                                                      */
+02680500/*         USER AR370 LIBRARY DATASET                               */
+02680600/*                                                                  */
+02870000/*------------------------------------------------------------------*/
+02880000/*                                                                  */
+02890000/*   OUTPUT DATA SET NAMES:                                         */
+02900000/*                                                                  */
+02940000/*     <LIB>.COMPRPT                                                */
+02950000/*         PS OF COMPILATION REPORT                                 */
+02960000/*                                                                  */
+03000000/*     <LIB>.EXECRPT                                                */
+03010000/*         PS OF EXECUTION REPORT                                   */
+03020000/*                                                                  */
+03060000/*     <LIB>.LINKRPT                                                */
+03070000/*         PS OF LINKAGE REPORT                                     */
+03080000/*                                                                  */
+03090000/*     <LIB>.LOAD(<NAME>)                                           */
+03100000/*         PDS LOAD MODULE                                          */
+03110000/*                                                                  */
+03120000/*     <LIB>.LST(<NAME>)                                            */
+03130000/*         PDS OF COMPILER LISTING                                  */
+03170000/*                                                                  */
+03210000/*     <LIB>.OBJ(<NAME>)                                            */
+03220000/*         PDS OF OBJECT MODULE                                     */
+03230000/*                                                                  */
+03240000/*     <LIB>.MAP(<NAME>)                                            */
+03250000/*         PDS OF LINKAGE EDITOR OUTPUT                             */
+03260000/*                                                                  */
+03550000/*------------------------------------------------------------------*/
+03560000/*                                                                  */
+03570000/*   REVISION HISTORY:                                              */
+03580000/*                                                                  */
+03590000/*   DATE      PCR#  NAME  DESCRIPTION                              */
+03600000/*   --------  ----  ----  -----------------------------------------*/
+04369528/*   11/01/94  391   LJK   CREATED                                  */
+04369529/*                                                                  */
+04370000/*------------------------------------------------------------------*/
+04380000/********************************************************************/
+04390000 
+04400000PROC     2    ACTION                                       +
+04410000              NAME                                         +
+04420000              ID      (&SYSUID.)                           +
+04430000              LIB     (&ID..TESTC)                         +
+04430100              INCLUDE (&LIB..INCLUDE)                      +
+04430200              SYSIN   (&LIB..C(&NAME))                     +
+04430300              PRINT   (&LIB..LST(&NAME))                   +
+04430400              OBJECT  (&LIB..OBJ(&NAME))                   +
+04430500              LOAD    (&LIB..LOAD(&NAME))                  +
+04430600              LOADLIB ()                                   +
+04430700              ARLIB   ()                                   +
+04440000              AMODE   ()                                   +
+04440100              RMODE   ()                                   +
+04440200              FIRST                                        +
+04450000              FIRSTD                                       +
+04460000              NEWRUN                                       +
+04530000              SEQ                                          +
+04530100              REPORT                                       +
+04560000              NOWARN                                       +
+04560100              NOXREF                                       +
+04560200              PAGESIZE()                                   +
+04560300              DEBUG                                        +
+04720220              COPT    ()                                   +
+04720222              LOPT    ()                                   +
+04720223              NOCLINK                                      +
+04720224              MAP                                          +
+05000100              TRACE
+05010000 
+05020000/*==================================================================*/
+05030000/*                                                                  */
+05040000/* PROCEDURE TO COMPILE, LINK, AND RUN A C PROGRAM..                */
+05050000/*                                                                  */
+05160000/* BY PASSING 'NEWRUN' ALL REPORTS WILL BE DELETED AND REALLOCATED  */
+05170000/*                                                                  */
+05180000/* BY PASSING 'FIRST' ALL REQUIRED DATASETS ARE CREATED WHEN        */
+05190000/* USING THE CLIST FOR THE FIRST TIME.                              */
+05200000/*                                                                  */
+05210000/* BY PASSING 'FIRSTD' ALL DATASETS CREATED BY THE FIRST PARM WILL  */
+05220000/* BE DELETED AND REALLOCATED.                                      */
+05230000/*                                                                  */
+05240000/*==================================================================*/
+05250000 
+05260000IF &TRACE. NE THEN CONTROL LIST CONLIST
+05270100IF &TRACE. NE THEN  SET &DBCLIST = DBCLIST
+05270200              ELSE  SET &DBCLIST =
+05270300CONTROL END(DONE)
+05300300 
+05310000IF &NEWRUN NE THEN DO
+05320000/* FIRST JUST FOR SAFETY FREE ALL DATASETS
+05320100  CONTROL NOMSG
+05340000  FREE DA('&LIB..COMPRPT')
+05350000  FREE DA('&LIB..LINKRPT')
+05360000  FREE DA('&LIB..EXECRPT')
+05370000 
+05380000  DELETE ('&LIB..COMPRPT')
+05390000  DELETE ('&LIB..LINKRPT')
+05400000  DELETE ('&LIB..EXECRPT')
+05410000  CONTROL MSG
+05420000/* ALLOCATE NECESSARY REPORT FILES  */
+05430000  ALLOC DA('&LIB..COMPRPT') SPACE(1,1) CYLINDERS DSORG(PS)     +
+05440000                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+05450000  ALLOC DA('&LIB..LINKRPT') SPACE(1,1) CYLINDERS DSORG(PS)     +
+05460000                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+05470000  ALLOC DA('&LIB..EXECRPT') SPACE(1,1) CYLINDERS DSORG(PS)     +
+05480000                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+05490000DONE
+05500000 
+05501000IF &FIRSTD NE THEN DO
+05503000  IF &SYSDSN('&LIB..C') EQ OK    THEN +
+05503010     RENAME '&LIB..C' TSETC.C
+05503020  IF &SYSDSN('&LIB..INCLUDE') EQ OK THEN +
+05503030     RENAME '&LIB..INCLUDE' TSETC.INCLUDE
+05503040  CONTROL NOMSG
+05505000  DELETE '&LIB..*'
+05505100  IF &SYSDSN(TSETC.C) EQ OK      THEN +
+05505200     RENAME TSETC.C '&LIB..C'
+05505300  IF &SYSDSN(TSETC.INCLUDE) EQ OK THEN +
+05505400     RENAME TSETC.INCLUDE '&LIB..INCLUDE'
+05509000  SET &FIRST = FIRST
+05509100DONE
+05580000 
+05590000IF &FIRST NE THEN DO
+05600000 IF &SYSDSN('&LIB..OBJ') NE OK THEN DO
+05610000  CONTROL MSG
+05720000  ALLOC DA('&LIB..LOAD')     SPACE(5,5) CYLINDERS DSORG(PO) DIR(50) +
+05730000                             RECFM(U) LRECL(0)    BLKSIZE(15476)
+05760000  ALLOC DA('&LIB..OBJ')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(50) +
+05770000                             RECFM(F B) LRECL(80) BLKSIZE(3200)
+05770100  ALLOC DA('&LIB..LST')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(50) +
+05770200                             RECFM(V B A) LRECL(137) BLKSIZE(6144)
+05770300  ALLOC DA('&LIB..MAP')      SPACE(3,3) CYLINDERS DSORG(PO) DIR(20) +
+05770400                             RECFM(F B A) LRECL(121) BLKSIZE(1210)
+05920000 DONE
+05920100 IF &SYSDSN('&LIB..INCLUDE') NE OK THEN +
+05920200   ALLOC DA('&LIB..INCLUDE') SPACE(3,3) CYLINDERS DSORG(PO) DIR(20) +
+05920300                             RECFM(F B) LRECL(80) BLKSIZE(3200)
+05930000DONE
+05950000 
+05960000CONTROL NOMSG
+05970000IF &ACTION. = CLG THEN +
+05980000   GOTO COMPILE
+05990000ELSE +
+06000000IF &ACTION. = CL THEN +
+06010000   GOTO COMPILE
+06020000ELSE +
+06030000IF &ACTION. = C THEN +
+06040000   GOTO COMPILE
+06050000ELSE +
+06060000IF &ACTION. = LG THEN +
+06070000   GOTO LINK
+06080000ELSE +
+06090000IF &ACTION. = L THEN +
+06100000   GOTO LINK
+06110000ELSE +
+06120000IF &ACTION. = G THEN +
+06130000   GOTO GO
+06140000ELSE DO
+06150000   WRITE ERROR IN COMMAND LINE
+06160000   EXIT
+06170000DONE
+06180000 
+06190000 
+06200000/*------------------------------------------------------------------*/
+06210000/*                                                                  */
+06220000/* COMPILATION STEP                                                 */
+06230000/*                                                                  */
+06240000/*------------------------------------------------------------------*/
+06250000 
+06260000COMPILE: CONTROL NOMSG
+06720000IF &COPT. NE THEN SET &OTHER = OTHER(&COPT.)
+06720100      ELSE SET  &OTHER =
+06720200IF &PAGESIZE. NE THEN SET &PAGESIZE = PAGESIZE(&PAGESIZE.)
+06720300      ELSE SET  &PAGESIZE =
+06720500FREE F(ERRLIST)
+06730000DELETE ('&OBJECT.')
+06730100IF &SEQ. NE THEN SET &PRINT = &ID..&NAME..LIST
+06740000DELETE ('&PRINT.')
+06740100IF &REPORT NE THEN DO
+07200100   ALLOC F(ERRLIST)  DA('&LIB..COMPRPT') MOD REUSE
+07200110   OPENFILE ERRLIST OUTPUT
+07200180DONE
+07200200CONTROL MSG
+07530000WRITE &SYSIN ==> C COMPILER
+07540000WRITE        ==> &PRINT
+07550000WRITENR COMPILATION OF &NAME.
+07560000CONTROL MSG
+07570000 
+07800000LC370   '&SYSIN.'                       +
+07810000        OBJECT('''&OBJECT.''')          +
+07810001        LIB   ('''&INCLUDE.''')         +
+07810010        PRINT ('''&ID..&NAME..LIST''')  +
+07810100        &NOXREF.                        +
+07810200        &NOWARN.                        +
+07810210        &PAGESIZE.                      +
+07810220        &DEBUG.                         +
+07810300        &OTHER.                         +
+07830000        &DBCLIST.
+07830100 
+07850000SET &SAVECC = &LASTCC
+07850100IF &SAVECC = 0 THEN WRITE SUCCESSFUL
+07850200               ELSE WRITE ERROR CODE = &SAVECC
+07860200IF &SEQ. EQ THEN DO
+07860300   /* COPY THE LIST FILE TO A PDS */
+07861210     CP &ID..&NAME..LIST TESTC.LST DID(&ID.) DMEMBER(&NAME.)  +
+07940000        OVERWRITE &TRACE.
+07940010DONE
+07940100CONTROL MSG
+07960000IF &SAVECC = 0 THEN DO
+07970100     IF &REPORT NE THEN DO
+07980000        SET ERRLIST = &STR(COMPILATION OF &NAME - SUCCESSFUL)
+07990000        PUTFILE ERRLIST
+08020000        CLOSFILE ERRLIST
+08030000        FREE F(ERRLIST)
+08030010     DONE
+08030100     IF &ACTION. = CLG THEN +
+08030200        GOTO LINK
+08030210     ELSE +
+08030220     IF &ACTION. = CL THEN +
+08030300        GOTO LINK
+08030400     ELSE +
+08030500     EXIT
+08040000DONE
+08050000ELSE DO
+08060100     IF &REPORT NE THEN DO
+08070000        SET ERRLIST = &STR(COMPILATION OF &NAME - ERROR CODE = &SAVECC)
+08080000        PUTFILE ERRLIST
+08190000        CLOSFILE ERRLIST
+08200000        FREE F(ERRLIST)
+08200100     DONE
+08210000     EXIT
+08220000DONE
+08230000 
+08781400 
+08850000LINK: CONTROL NOMSG
+08920000 
+09470000/*------------------------------------------------------------------*/
+09480000/*                                                                  */
+09490000/* LINK EDIT STEP                                                   */
+09500000/*                                                                  */
+09510000/*------------------------------------------------------------------*/
+09520000 
+09550100IF &LOPT. NE THEN SET &OTHER = OTHER(&LOPT.)
+09550200         ELSE SET  &OTHER =
+09550210IF &ARLIB. NE THEN SET &ARLIB = ARLIB('''&ARLIB.''')
+09550220         ELSE SET  &ARLIB =
+09550230IF &LOADLIB. NE THEN SET &LOADLIB = LOADLIB('''&LOADLIB.''')
+09550240         ELSE SET  &LOADLIB =
+09550250IF &AMODE. NE THEN SET &AMODE = AMODE(&AMODE.)
+09550260         ELSE SET  &AMODE =
+09550261IF &RMODE. NE THEN SET &RMODE = RMODE(&RMODE.)
+09550262         ELSE SET  &RMODE =
+09550270CONTROL NOMSG
+09570000DELETE ('&LOAD.')
+09570010FREE F(LINKRPT)
+09570100IF &SEQ. EQ THEN +
+09570200   DELETE '&LIB..MAP(&NAME.)'
+09570300CONTROL MSG
+09590000IF &REPORT NE THEN DO
+09600000   ALLOC F(LINKRPT) DA('&LIB..LINKRPT') MOD REUSE
+09610000   OPENFILE LINKRPT OUTPUT
+10190000DONE
+10190100WRITENR LINK EDIT OF   &NAME.
+10210000CLK370  '&OBJECT.'                        +
+10220000        LOAD('''&LOAD.''')                +
+10220010        PRINT('''&ID..&NAME..LINKLIST''') +
+10220030        &LOADLIB.                         +
+10220031        &ARLIB.                           +
+10220032        &AMODE.                           +
+10220033        &RMODE.                           +
+10220034        &NOWARN.                          +
+10220040        &OTHER.                           +
+10220050        &NOCLINK.                         +
+10220060        &MAP.                             +
+10220100        &DBCLIST.
+10220200 
+10230000SET &SAVECC = &LASTCC
+10230100IF &SAVECC = 0 THEN WRITE SUCCESSFUL
+10230200               ELSE WRITE ERROR CODE = &SAVECC
+10250200IF &SEQ. EQ THEN DO
+10250300   /* COPY THE LINKLIST FILE TO A PDS */
+10251110   CP &ID..&NAME..LINKLIST TESTC.MAP DMEMBER(&NAME.) +
+10251120      DID(&ID.) OVERWRITE &TRACE.
+10251121   CONTROL NOMSG
+10251122   IF &SYSDSN('&LIB..MAP(&NAME.)') EQ OK THEN +
+10251123      DELETE  &NAME..LINKLIST
+10251130DONE
+10251300CONTROL MSG
+10300000IF &SAVECC = 0 THEN DO
+10310100    IF &REPORT NE THEN  +
+10320000       SET LINKRPT = &STR(LINK EDIT OF &NAME. - SUCCESSFUL)
+10340000DONE
+10350000ELSE DO
+10360100    IF &REPORT NE THEN  +
+10370000       SET LINKRPT = &STR(LINK EDIT OF &NAME. - ERROR CODE = &SAVECC)
+10390100DONE
+10400000 
+10400100IF &REPORT NE THEN DO
+10400200   PUTFILE LINKRPT
+10410000   CLOSFILE LINKRPT
+10420000   FREE F(LINKRPT)
+10420100DONE
+10430000 
+10440000IF &SAVECC = 0 THEN DO
+10450000     IF &ACTION. = CLG THEN +
+10460000        GOTO GO
+10470000     ELSE +
+10480000     IF &ACTION. = LG THEN +
+10490000        GOTO GO
+10500000DONE
+10540000 
+10560000EXIT
+10570000 
+11980000/*------------------------------------------------------------------*/
+11990000/*                                                                  */
+12000000/*  EXECUTION STEP                                                  */
+12010000/*                                                                  */
+12020000/*------------------------------------------------------------------*/
+12030000 
+12031008GO: CONTROL NOMSG
+12031009IF &REPORT NE THEN DO
+12050000   FREE F(RPT)
+12320000   ALLOC F(RPT)  DA('&LIB..EXECRPT') MOD REUSE
+12350000   OPENFILE RPT OUTPUT
+12580111DONE
+12580112CONTROL MSG
+12580113ERROR EXIT
+12580121WRITE EXECUTION OF   &NAME.
+12580123CALL '&LOAD.'
+12580124 
+12580125SET &SAVECC  = &LASTCC
+12690000IF &SAVECC  = 0 THEN DO
+12700000   WRITE EXECUTION COMPLETED
+12700100   IF &REPORT NE THEN   +
+12710000      SET RPT = &STR(&NAME. EXECUTED SUCCESSFULLY)
+12850000DONE
+12860000ELSE DO
+12870000   WRITE ERROR CODE = &SAVECC
+12870100   IF &REPORT NE THEN   +
+12880000      SET RPT = &STR(&NAME. EXECUTED WITH ERROR = &SAVECC)
+12900000DONE
+12900010IF &REPORT NE THEN DO
+12900100   PUTFILE RPT
+12910000   CLOSFILE RPT
+12920000   FREE F(RPT)
+12920100DONE
+12950000EXIT

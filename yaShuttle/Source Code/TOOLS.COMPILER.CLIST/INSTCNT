@@ -1,0 +1,214 @@
+00000101/********************************************************************/
+00000201/*------------------------------------------------------------------*/
+00000301/*                                                                  */
+00000413/*   NAME:     INSTCNT                                              */
+00001114/*                                                                  */
+00001201/*------------------------------------------------------------------*/
+00001301/*                                                                  */
+00001401/*   FUNCTION: TO COUNT AP101/S INSTRUCTIONS IN A HAL/S LISTING,    */
+00001513/*             ONE MEMBER OR ALL MEMBERS IN A PDS, COMPARE THE      */
+00001613/*             TO INSTRUCTION FREQUENCY TOTALS AND REPORT ANY       */
+00001713/*             DISCREPANCIES.                                       */
+00001814/*                                                                  */
+00001914/*               EXAMPLES:                                          */
+00002014/*                INSTCNT TEST MEMBER(DRXXXX)                       */
+00002114/*                 -- RUNS INSTCNT ON MEMBER 'DRXXXX' IN            */
+00002214/*                    '<ID>.TEST.LST' PUTTING THE REPORT FILE IN    */
+00002314/*                    '<ID>.TEST.INSTCNT.RPT(DRXXXX)'               */
+00002413/*                                                                  */
+00002514/*                INSTCNT TEST                                      */
+00002614/*                 -- RUNS INSTCNT ON ALL MEMBERS IN '<ID>.TEST.LST'*/
+00002714/*                    PUTTING THE REPORT FILE FOR EACH MEMBER INTO  */
+00002814/*                    '<ID>.TEST.INSTCNT.RPT(<MEMBER>)'             */
+00002914/*                                                                  */
+00003014/*                INSTCNT TEST LIST(<ID>.MEMLIST)                   */
+00003114/*                 -- RUNS INSTCNT ON ALL MEMBERS LISTED IN THE     */
+00003214/*                    MEMBER LIST PUTTING THE REPORT FILE FOR EACH  */
+00003314/*                    MEMBER INTO '<ID>.TEST.INSTCNT.RPT(<MEMBER>)' */
+00003414/*                                                                  */
+00003501/*------------------------------------------------------------------*/
+00003601/*                                                                  */
+00003701/*   SYNTAX :                                                       */
+00003826/*     INSTCNT LIB MEMBER() ID(<SYSUID>) SYSIN(<ID>.<NAME>.LST)     */
+00003913/*             SYSOUT(<ID>.<NAME>.INSTCNT.RPT) LIST() ABEND TRACE   */
+00004001/*                                                                  */
+00004101/*     ALIAS    - NONE.                                             */
+00004201/*     REQUIRED - NAME.                                             */
+00004301/*                                                                  */
+00004401/*------------------------------------------------------------------*/
+00004501/*                                                                  */
+00004601/*   INVOKES:  'NCAMCM.TOOLS.XPLOBJ(INSTCNT)'                       */
+00004714/*             PDSALL CLIST                                         */
+00004814/*                                                                  */
+00004901/*------------------------------------------------------------------*/
+00005001/*                                                                  */
+00005101/*   PARAMETERS:                                                    */
+00005201/*                                                                  */
+00005326/*     LIB      REQUIRED                                            */
+00005426/*              LEVEL OF TESTING LIBRARY (WITHOUT HLQ)              */
+00005501/*                                                                  */
+00005620/*     MEMBER   DEFAULT: NULL                                       */
+00005720/*              IF SPECIFIED, THE CLIST PROCESSES ONE MEMBER OUT OF */
+00005820/*              <SYSIN> (HAL/S LISTINGS PDS). OTHERWISE, THE INSTCNT*/
+00005920/*              PROGRAM WILL GENERATE INSTRUCTION COUNT REPORTS FOR */
+00006020/*              ALL MEMBERS OF THE <SYSIN> PDS.                     */
+00006120/*                                                                  */
+00006713/*     ID       DEFAULT: &SYSUID.                                   */
+00006813/*              THE USERID WHERE ALL FILES RESIDE                   */
+00006913/*                                                                  */
+00007026/*     SYSIN    DEFAULT: <ID>.<LIB>.LST                             */
+00007101/*              THE FULL DATASET NAME CONTAINING THE HAL/S LISTING  */
+00007201/*                                                                  */
+00007326/*     SYSOUT   DEFAULT: <ID>.<LIB>.INSTCNT.RPT                     */
+00007401/*              THE REPORT FILE CREATED BY INSTRUCTION COUNTING TOOL*/
+00007501/*                                                                  */
+00007620/*     LIST     DEFAULT: NULL                                       */
+00007720/*              DATASET CONTAINING THE LIST OF THE MEMBER NAMES TO  */
+00007820/*              PROCESS. IF NOT SPECIFIED, ALL MEMBERS OF THE PDS   */
+00007920/*              WILL BE PROCESSED.                                  */
+00008020/*                                                                  */
+00008201/*     ABEND    OPTIONAL                                            */
+00008301/*              IF THE XPL PROGRAM KEEPS ABENDING, USE THIS OPTION  */
+00008401/*              TO CREATE A PERMANENT ABEND DUMP FILE TO BE USED    */
+00008501/*              IN DEBUGGING.                                       */
+00008601/*                                                                  */
+00008701/*     TRACE    OPTIONAL                                            */
+00008801/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00008901/*              TERMINAL                                            */
+00009001/*                                                                  */
+00009101/*------------------------------------------------------------------*/
+00009201/*                                                                  */
+00009301/*   INPUT DATA SET NAMES:                                          */
+00009401/*                                                                  */
+00009501/*     TO INSTCNT XPL PROGRAM:                                      */
+00009601/*     -----------------------                                      */
+00009714/*        IF IN SEQ FILE MODE:                                      */
+00009826/*           <ID>.<LIB>.LST(<MEMBER>)                               */
+00009914/*               HAL/S LISTING CONTAINING THE MEMBER TO PROCESS     */
+00010014/*                                                                  */
+00010114/*        IF IN PDS FILE MODE:                                      */
+00010226/*           <ID>.<LIB>.LST                                         */
+00010314/*               PDS CONTAINING THE HAL/S LISTINGS                  */
+00010414/*                                                                  */
+00010526/*           <ID>.<LIB>.MEMLIST                                     */
+00010614/*               FILE CONTAINING MEMBER LIST OF PDS TO PROCESS      */
+00010701/*                                                                  */
+00010801/*------------------------------------------------------------------*/
+00010901/*                                                                  */
+00011001/*   OUTPUT DATA SET NAMES:                                         */
+00011101/*                                                                  */
+00011201/*     FROM INSTCNT XPL PROGRAM:                                    */
+00011301/*     -------------------------                                    */
+00012026/*        <ID>.<LIB>.INSTCNT.RPT                                    */
+00012101/*            THE INSTRUCTION COUNT TOOL REPORT                     */
+00012201/*                                                                  */
+00012301/*------------------------------------------------------------------*/
+00012401/*                                                                  */
+00012501/*   TEMPORARY DATA SET NAMES:                                      */
+00012601/*                                                                  */
+00012701/*     NONE.                                                        */
+00012801/*                                                                  */
+00012901/*------------------------------------------------------------------*/
+00013001/*                                                                  */
+00013101/*   COMMENTS:                                                      */
+00013201/*                                                                  */
+00013301/*     NONE.                                                        */
+00013401/*                                                                  */
+00013501/*------------------------------------------------------------------*/
+00013601/*                                                                  */
+00013701/*   REVISION HISTORY:                                              */
+00013801/*                                                                  */
+00013926/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00014001/*     --------  ----  ----  -------------------------------------  */
+00014101/*     04/25/94  0198  TEV   ORIGINAL CLIST                         */
+00014201/*                                                                  */
+00014303/*     05/08/96  0341  TEV   MODIFIED TO CALL THE COMBINED PROGRAM  */
+00014403/*                           OF INSTCNT AND INSTCNTS                */
+00014503/*                                                                  */
+00014601/*------------------------------------------------------------------*/
+00014701/********************************************************************/
+00014826PROC    1   LIB                              +
+00014901            MEMBER()                         +
+00015001            ID    (&SYSUID.)                 +
+00015126            SYSIN (&ID..&LIB..LST)           +
+00015226            SYSOUT(&ID..&LIB..INSTCNT.RPT)   +
+00015303            LIST()                           +
+00015401            ABEND                            +
+00015501            TRACE
+00015601 
+00015701GLOBAL RETCODE
+00015801IF &TRACE. NE THEN CONTROL LIST CONLIST
+00015901CONTROL END(DONE)
+00016001 
+00016101/*==================================================================*/
+00016201 
+00016301IF &MEMBER NE  THEN SET &SEQ = SEQ
+00016401 
+00016501IF &SEQ EQ THEN DO
+00016603   IF &LIST EQ  THEN DO
+00016726      PDSALL &SYSIN. LIB('&ID..&LIB.') MAKELIST
+00016826      SET &LIST = &ID..&LIB..MEMLIST
+00016903   DONE
+00017003DONE
+00017101 
+00017201CONTROL NOMSG
+00017305   DELETE INSTCNT.SYSABEND.LST
+00017401   FREE F(SYSIN,INCLUDE,PROGRAM,SYSABEND,SYSPRINT,LISTING2,ERROR,OUTPUT4)
+00017501CONTROL MSG
+00017601 
+00017703IF &SYSDSN('&SYSOUT') NE OK THEN DO
+00017804   CONTROL NOMSG
+00017903   FREE F(TEMP)
+00018011   ALLOC F(TEMP)     DA('&SYSOUT.')  NEW RECFM(F B) +
+00018103                     LRECL(80) BLKSIZE(6160) TRACKS SP(10 10) DIR(50)
+00018203   FREE F(TEMP)
+00018304   CONTROL MSG
+00018403DONE
+00018502IF &SEQ EQ  THEN DO
+00018601   ALLOC F(SYSIN)    DA('&LIST')  SHR
+00018707   ALLOC F(INCLUDE)  DA('&SYSIN') SHR
+00018807   ALLOC F(OUTPUT6)  DA('&SYSOUT')  SHR
+00018901DONE
+00019001ELSE DO
+00019102   ALLOC F(SYSIN)  DA('&SYSIN.(&MEMBER)')  SHR
+00019203   ALLOC F(OUTPUT4) DA('&SYSOUT.(&MEMBER)') SHR
+00019301DONE
+00019430ALLOC F(PROGRAM)  DA('NCAMCM.TOOLS.XPLOBJ(INSTCNT)') SHR
+00019623IF &ABEND NE  THEN +
+00019701   ALLOC F(SYSABEND) DA('&SYSUID..INSTCNT.SYSABEND.LST') +
+00019801                 CYL RECFM(F B) LRECL(133) BLKSIZE(6650) +
+00019901                 RELEASE NEW DSORG(PDS) SP(20 10)
+00020001ALLOC F(SYSPRINT) DA(*)
+00020101ALLOC F(LISTING2) DA(*)
+00020201ALLOC F(ERROR)    DUMMY
+00020301 
+00020425IF &SEQ NE  THEN DO
+00020525   SET &OPT = SEQ
+00020625   SET &TEMP = '&SYSIN(&MEMBER)'
+00020725DONE
+00020825ELSE DO
+00020925   SET &OPT = PDS
+00021125   SET &TEMP = '&SYSIN'
+00021225DONE
+00021308 
+00021404WRITENR RUNNING HAL/S FC INSTRUCTION COUNTING TOOL ON &TEMP....
+00021501CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' '&OPT.'
+00021601SET &SAVECC=&LASTCC
+00021729SET &RETCODE=&SAVECC
+00021801 
+00021901CONTROL NOMSG
+00022001   FREE F(SYSIN,INCLUDE,PROGRAM,SYSABNED,SYSPRINT,LISTING2,ERROR,OUTPUT4)
+00022101CONTROL MSG
+00022201 
+00022301IF &SAVECC = 0 THEN +
+00022401   WRITE SUCCESSFUL
+00022512ELSE IF &SAVECC = 1 THEN DO
+00022609   WRITE
+00022714   WRITE INSTRUCTION COUNT DIFFERENCES FOUND!
+00022809DONE
+00022912ELSE IF &SAVECC = 2 THEN DO
+00023012   WRITE
+00023112   WRITE INVALID PARAMETER PASSED TO THE PROGRAM.
+00023212DONE
+00024009ELSE +
+00030009   WRITE ERROR CODE &SAVECC.

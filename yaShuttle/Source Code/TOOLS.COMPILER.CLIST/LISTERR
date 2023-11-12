@@ -1,0 +1,155 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     LISTERR                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080025/*   FUNCTION: EXTRACT COMPILATION ERRORS FROM A PDS AND WRITE      */
+00090026/*        THEM TO AN OUTPUT PDS (INCLUDING XS3 ERRORS)              */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     LISTERR 'SUITE' ID(&SYSUID)                                  */
+00140025/*            INLIB(&ID..&SUITE.) OUT(&ID..&SUITE..LISTERR)         */
+00150025/*            PROG(NCAMCM.TOOLS.XPLOBJ(LISTERR) LIST() TRACE        */
+00151000/*                                                                  */
+00152000/*     ALIAS    - NONE.                                             */
+00153000/*     REQUIRED - 'SUITE'                                           */
+00154000/*     DEFAULTS - ID(&SYSUID)                                       */
+00154125/*                INLIB(&ID..&SUITE.) OUT(&ID..&SUITE..LISTERR)     */
+00154225/*                PROG(NCAMCM.TOOLS.XPLOJB(LISTERR) LIST() TRACE    */
+00154300/*                                                                  */
+00154400/*------------------------------------------------------------------*/
+00154500/*                                                                  */
+00154600/*   INVOKES:                                                       */
+00154700/*                                                                  */
+00154825/*     'NCAMCM.TOOLS.XPLOBJ(LISTERR)'                               */
+00154900/*     'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'                            */
+00155000/*                                                                  */
+00156000/*------------------------------------------------------------------*/
+00157000/*                                                                  */
+00158000/*   PARAMETERS:                                                    */
+00159000/*                                                                  */
+00160000/*     SUITE    REQUIRED                                            */
+00170000/*              NAME OF PDS WHICH CONTAINS HAL TESTCASES (NO HLQ)   */
+00180000/*                                                                  */
+00190000/*     ID       DEFAULT: &SYSUID                                    */
+00200000/*              HLQ OF DEVELOPERS ACCOUNT                           */
+00210000/*                                                                  */
+00250000/*     INLIB    DEFAULT: &TSTLIB..&SUITE                            */
+00260000/*              NAME OF PDS CONTAINING TESTCASES (W/ HLQ)           */
+00270000/*                                                                  */
+00280000/*     OUT      DEFAULT: &ID..&SUITE..LISTERR                       */
+00290000/*              OUTPUT OF PROGRAM (W/ HLQ)                          */
+00300000/*                                                                  */
+00310025/*     PROG     DEFAULT: NCAMCM.TOOLS.XPLOBJ(LISTERR)               */
+00320000/*              NAME OF THE EXECUTABLE                              */
+00330000/*                                                                  */
+00340000/*     LIST     DEFAULT: NULL                                       */
+00350000/*              SPECIFIES MEMBERLIST                                */
+00360000/*                                                                  */
+00370000/*     TRACE    OPTIONAL                                            */
+00380000/*              TURN TRACE ON OR OFF                                */
+00390000/*                                                                  */
+00400000/*------------------------------------------------------------------*/
+00410000/*                                                                  */
+00420000/*   INPUT DATA SET NAMES:                                          */
+00430000/*                                                                  */
+00440000/*     <PROG>                                                       */
+00450000/*         NAME OF THE EXECUTABLE                                   */
+00460000/*                                                                  */
+00470000/*     <INLIB>                                                      */
+00480000/*         PDS CONTAINING THE HAL TESTCASES                         */
+00490000/*                                                                  */
+00500000/*------------------------------------------------------------------*/
+00510000/*                                                                  */
+00520000/*   OUTPUT DATA SET NAMES:                                         */
+00530000/*                                                                  */
+00540000/*     <OUT>                                                        */
+00550000/*          OUTPUT OF PROGRAM                                       */
+00560000/*                                                                  */
+00570000/*------------------------------------------------------------------*/
+00580000/*                                                                  */
+00590000/*   TEMPORARY DATA SET NAMES:                                      */
+00600000/*                                                                  */
+00610000/*     NONE.                                                        */
+00620000/*                                                                  */
+00630000/*------------------------------------------------------------------*/
+00640000/*                                                                  */
+00650000/*   COMMENTS:                                                      */
+00660000/*                                                                  */
+00670000/*     NONE.                                                        */
+00680000/*                                                                  */
+00690000/*------------------------------------------------------------------*/
+00700000/*                                                                  */
+00710000/*   REVISION HISTORY:                                              */
+00720000/*                                                                  */
+00730000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00740000/*  --------  ---  ---   -----------------------------------------  */
+00750025/*  06/17/91  ???  RSJ   CREATE TOOL                                */
+00751025/*  04/15/94 0257  JCS   PUT INTO CCC AND NCAMCM                    */
+00760000/*                                                                  */
+00770000/*------------------------------------------------------------------*/
+00780000/********************************************************************/
+00790009PROC 1 CAT                                         +
+00790125       INID(&SYSUID.)  +
+00790225       REL(TEST)     +
+00791009       SUITE(&REL..&CAT.)                          +
+00800025       ID(&SYSUID.)                               +
+00820010       INLIB(&INID..&SUITE..LST)                   +
+00830009       OUT(&ID..&SUITE..LISTERR)                   +
+00840027       PROG(NCAMCM.TOOLS.XPLOBJ(LISTERR))            +
+00860000       LIST()                                      +
+00870000       TRACE
+00880000 
+00890000 
+00900000IF       &TRACE.  NE THEN +
+00910000         CONTROL  LIST CONLIST
+00920000 
+00930000CONTROL NOMSG
+00940000         FREE F(PROGRAM OUTPUT3 SYSLIB SYSIN)  ATTR(FBA133)
+00941002         DELETE '&OUT.'
+00950000CONTROL MSG
+00953100IF &LIST. EQ THEN DO
+00953200         /***************************************/
+00953300         /*                                     */
+00953400         /*        GENERATE MEMBER LIST         */
+00953500         /*                                     */
+00953600         /***************************************/
+00953700CONTROL  NOMSG END(DONE)
+00953800         SET &LIST = &ID..&SUITE..MEMLIST
+00953900         FREE     F(SYSLIB SYSPRINT)
+00954000         DELETE   '&LIST.'
+00954100CONTROL  MSG
+00954200 
+00954300ALLOC    F(SYSLIB)   DA('&INLIB.') SHR
+00954418ALLOC    F(SYSPRINT) DA('&LIST') NEW BLOCK(80) TRACK SP(100 10)
+00954500 
+00954613CALL     'NCAMCM.TOOLS.MISCLOAD(MEMLIST)'
+00954700SET      &SAVECC  = &LASTCC
+00954800FREE     F(SYSLIB SYSPRINT)
+00954900 
+00955000IF       &SAVECC  = 0 THEN +
+00955100         WRITE MEMBER LIST SUCCESSFUL
+00955200ELSE     +
+00955300         WRITE MEMBER LIST ERROR CODE = &SAVECC
+00955400DONE
+00955500 
+00956200 
+00956300CONTROL  NOMSG
+00956407   FREE F(PROGRAM OUTPUT3 SYSIN SYSPRINT INCLUDE) ATTR(FBA133)
+00956600CONTROL  MSG NOFLUSH
+00959200ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+00960700ALLOC F(PROGRAM)  DA('&PROG.') SHR
+00960807ALLOC F(INCLUDE)    DA('&INLIB.') SHR
+00960905ALLOC F(SYSIN)  DA('&LIST.') SHR
+00961000ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW CATALOG +
+00961100                            SP(40 40) TRACK
+00962119ALLOC F(OUTPUT3) DA('&OUT') NEW BLOCK(80) TRACK SP(100 10)
+00963004WRITE RUNNING XPL PROGRAM &PROG. ON &INLIB.(*)
+00964008CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'
+00965000SET &SAVECC = &LASTCC
+00966007FREE F(PROGRAM OUTPUT3 SYSIN SYSPRINT INCLUDE) ATTR(FBA133)
+00967000IF &SAVECC EQ 0 THEN WRITE EXECUTION SUCCESSFUL
+00968000ELSE WRITE EXECUTION ERROR CODE = &SAVECC

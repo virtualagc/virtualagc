@@ -1,0 +1,297 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     UPDATE                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: UPDATE A COMPILER PASS FOR ALL MEMBERS IN THE        */
+00090000/*            '&NEWREL..&PASS.UPDATES' PDS.                         */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     UPDATE 'PASS' ID(&SYSUID.) LIST()                            */
+00150000/*            OLDREL(NCAMCM.PASS.CURRENT) NEWREL(&ID..REL99V0)      */
+00160000/*            LISTING() TRACE                                       */
+00170000/*                                                                  */
+00180000/*                                                                  */
+00190000/*     ALIAS    - NONE.                                             */
+00200000/*     REQUIRED - 'PASS'                                            */
+00230000/*                                                                  */
+00240000/*------------------------------------------------------------------*/
+00250000/*                                                                  */
+00260000/*   INVOKES:                                                       */
+00270000/*                                                                  */
+00280000/*     NCAMCM.TOOLS.MISCLOAD(MEMLIST)                               */
+00290000/*     NCAMCM.XPL.TOOLS.HALS.MOINTOR(XPLSM)                         */
+00300000/*                                                                  */
+00310000/*------------------------------------------------------------------*/
+00320000/*                                                                  */
+00330000/*   PARAMETERS:                                                    */
+00340000/*                                                                  */
+00350000/*     PASS     REQUIRED                                            */
+00360000/*              THE PASS OF THE COMPILER TO UPDATE                  */
+00370000/*                                                                  */
+00380000/*     ID       DEFAULT: &SYSUID                                    */
+00390000/*              THE HIGH LEVEL QUALIFIER                            */
+00400000/*                                                                  */
+00410000/*     LIST     DEFAULT: NULL                                       */
+00420000/*              USE A PREDEFINED LIST OF MEMBERS IN THE '&NEWREL    */
+00430000/*              ..&PASS..UPDATES' PDS FOR THE MERGING ORDER OF      */
+00440000/*              THE UPDATES (DEFAULT ORDER IS ALPHABETICALLY).      */
+00450000/*              USE "PDSALL" TO GENERATE MEMBER LIST AND TAILOR     */
+00460000/*              THE ORDER ACCORDING TO THE UPDATE SEQUENCE NEEDED   */
+00470000/*                                                                  */
+00480000/*     OLDREL   DEFAULT: NCAMCM.PASS.CURRENT                        */
+00490000/*              BASELINE SOURCE TO USE                              */
+00500000/*                                                                  */
+00510000/*     NEWREL   DEFAULT: &ID..REL99V0                               */
+00520000/*              NEW DEVELOPMENTAL COMPILER SOURCE TO CREATE         */
+00530000/*                                                                  */
+00540000/*     LISTING  DEFAULT: NULL                                       */
+00550000/*              WHERE YOU WANT THE SCREEN MESSAGES SENT DURING      */
+00560000/*              "UPDATE" PROCESSING, THE CHOICES ARE:               */
+00570000/*              LISTING NOT SPECIFIED :>>  MESSAGES LOST            */
+00580000/*              LISTING(SCRN) :>>  MESSAGES SENT TO SCREEN          */
+00590000/*              LISTING(FILE) :>>  MESSAGES SENT TO A FILE SAVED    */
+00600000/*                   AS '&NEWREL..&PASS..UPDATE.LST'                */
+00610000/*                                                                  */
+00620000/*     TRACE    OPTIONAL                                            */
+00630000/*              TRACE THE CLIST EXECUTION                           */
+00640000/*                                                                  */
+00650000/*------------------------------------------------------------------*/
+00660000/*                                                                  */
+00670000/*   INPUT DATA SET NAMES:                                          */
+00680000/*                                                                  */
+00690000/*     <NEWREL>.<PASS>.UPDATES                                      */
+00700000/*         UPDATE PDS CONTAINING SOURCE FIXES FOR A PARTICULAR DR   */
+00710000/*                                                                  */
+00720000/*     <NEWREL>.<PASS>.UPDATES(<MEMBER>)                            */
+00730000/*         UPDATE FILE CONTAINING A SOURCE FIX FOR A PARTICULAR DR  */
+00740000/*                                                                  */
+00750000/*     <INPUT3>                                                     */
+00760000/*         SAVE THE UPDATE DECKS AS THEY ARE CONCATINATED TOGETHER  */
+00770000/*         DURING EXECUTION                                         */
+00780000/*                                                                  */
+00790000/*     <NEWREL>.<PASS>.SOURCE                                       */
+00800000/*         NEW DEVELOPMENTAL COMPILER SOURCE TO CREATE              */
+00810000/*                                                                  */
+00820000/*     <OLDREL>.<PASS>.SOURCE                                       */
+00830000/*         OLD DEVELOPMENTAL COMPILER SOURCE TO CREATE              */
+00840000/*                                                                  */
+00850000/*     <NEWREL>.DECKS(<PASS>)                                       */
+00860000/*         CONCATINATED UPDATES FOR EACH PHASE                      */
+00870000/*                                                                  */
+00880000/*     NCAMCM.PASS.TOOLS.SHUFFLE                                    */
+00890000/*         PROGRAM USED TO COMBINE UPDATE FILES INTO ONE FILE       */
+00900000/*         DENOTED BY <NEWREL>.DECKS                                */
+00910000/*                                                                  */
+00920000/*     NCAMCM.PASS.TOOLS.UPDATER                                    */
+00930000/*         PROGRAM USED TO INSERT UPDATE FILES INTO THE OLD RELEASE */
+00940000/*         OF THE SOURCE                                            */
+00950000/*                                                                  */
+00960000/*------------------------------------------------------------------*/
+00970000/*                                                                  */
+00980000/*   OUTPUT DATA SET NAMES:                                         */
+00990000/*                                                                  */
+01000000/*     <NEWREL>.<PASS>.MEMBERS                                      */
+01010000/*          A PREDEFINED LIST OF MEMBERS FOR THE MERGING ORDER OF   */
+01020000/*          THE UPDATES (DEFAULT ORDER IS ALPHABETICALLY).  USE     */
+01030000/*          "PDSALL" TO GENERATE MEMBER LIST AND TAILOR THE ORDER   */
+01040000/*          ACCORDING TO THE UPDATE SEQUENCE NEEDED                 */
+01050000/*                                                                  */
+01060000/*     <NEWREL>.DECKS(<PASS>)                                       */
+01070000/*         CONCATINATED UPDATES FOR EACH PHASE                      */
+01080000/*                                                                  */
+01090000/*     <NEWREL>.<PASS>.UPDATE.LST                                   */
+01100000/*         SEQUENTIAL FILE OF LISTINGS OF THE UPDATES FOR THAT      */
+01110000/*         PHASE OF THE COMPILER                                    */
+01120000/*                                                                  */
+01130000/*     <NEWREL>.<PASS>.SOURCE                                       */
+01140000/*         NEW DEVELOPMENTAL COMPILER SOURCE TO CREATE              */
+01150000/*                                                                  */
+01160000/*------------------------------------------------------------------*/
+01170000/*                                                                  */
+01180000/*   TEMPORARY DATA SET NAMES:                                      */
+01190000/*                                                                  */
+01200000/*       NONE.                                                      */
+01210000/*------------------------------------------------------------------*/
+01220000/*                                                                  */
+01230000/*   COMMENTS:                                                      */
+01240000/*                                                                  */
+01250000/*     NONE.                                                        */
+01260000/*                                                                  */
+01270000/*------------------------------------------------------------------*/
+01280000/*                                                                  */
+01290000/*   REVISION HISTORY:                                              */
+01300000/*                                                                  */
+01310000/*  DATE      PCR  NAME  DESCRIPTION                                */
+01320000/*  --------  ---  ---   -------------------------------------      */
+01330000/*  ??/??/??  ???  LJK   ORIGINAL CLIST                             */
+01340000/*                                                                  */
+01350000/*  06/29/90  099  TEV   UPDATED HEADER                             */
+01360000/*                                                                  */
+01361000/*  09/13/91  186  LJK   RENAME CM LOAD FILE                        */
+01362000/*                                                                  */
+01370000/*------------------------------------------------------------------*/
+01380000/********************************************************************/
+01390000PROC 1   PASS                        +
+01400000         ID(&SYSUID.)                +
+01410000         LIST()                      +
+01420000         OLDREL(NCAMCM.PASS.CURRENT) +
+01430000         NEWREL(&ID..REL99V0)        +
+01440000         LISTING()                   +
+01450000         TRACE
+01460000 
+01470000SET &INPUT3 EQ &STR(NCAMTST.UPDATES(DUMMY))
+01480000 
+01490000/*==================================================================*/
+01500000/*                                                                  */
+01510000/* CREATE A LIST OF ALL UPDATE MEMBERS TO BE SHUFFLED               */
+01520000/*                                                                  */
+01530000/*==================================================================*/
+01540000 
+01550000GLOBAL RETCODE
+01560000CONTROL END(DONE)
+01570000IF  &TRACE. NE THEN  CONTROL LIST CONLIST
+01580000CONTROL NOMSG
+01590000DELETE '&NEWREL..&PASS..UPDATE.LST'
+01600000ALLOC  DA('&NEWREL..&PASS..UPDATE.LST') NEW +
+01610000           LRECL(133) BLKSIZE(2660) TRACK SP(1 1)
+01620000CONTROL MSG
+01630000IF &LIST. EQ THEN DO
+01640000   WRITE ====== SHUFFLING &PASS. ======
+01650000   SET      &LIST = &NEWREL..&PASS..MEMBERS
+01660000   CONTROL  NOMSG END(DONE)
+01670000            FREE     F(SYSLIB SYSPRINT ERRLIST)
+01680000            DELETE   '&NEWREL..&PASS..MEMBERS'
+01690000   CONTROL  MSG
+01700000 
+01710000   SET      &MAXCC  = 0
+01720000   ALLOC    F(SYSLIB)   DA('&NEWREL..&PASS..UPDATES') SHR
+01730000   ALLOC    F(SYSPRINT) DA('&NEWREL..&PASS..MEMBERS') NEW +
+01740000            LRECL(80) BLKSIZE(6400) TRACK SP(1 1) RECFM(F B)
+01750000   ALLOC    F(ERRLIST)  DA(*)
+01760000 
+01770000   CALL     'NCAMCM.TOOLS.MISCLOAD(MEMLIST)'
+01780000   SET      &SAVECC  = &MAXCC
+01790000   CONTROL NOMSG
+01800000   FREE     F(SYSLIB SYSPRINT ERRLIST MEMBERS)
+01810000   CONTROL MSG
+01820000 
+01830000   IF       &SAVECC  = 0 THEN +
+01840000            WRITE MEMBER LIST CREATION SUCCESSFUL
+01850000   ELSE     DO
+01860000            WRITE MEMBER LIST ERROR CODE = &SAVECC
+01870000            EXIT
+01880000   DONE
+01890000DONE
+01900000 
+01910000ALLOC    F(MEMBERS)  DA('&LIST.')  SHR
+01920000OPENFILE MEMBERS   INPUT
+01930000 
+01940000/*==================================================================*/
+01950000/*                                                                  */
+01960000/* SHUFFLE STEP                                                     */
+01970000/*                                                                  */
+01980000/*==================================================================*/
+01990000 
+02000000CONTROL NOMSG
+02010000  DELETE '&NEWREL..DECKS(&PASS.)'
+02020000  FREE F(PROGRAM SYSIN SYSPRINT LISTING2 OUTPUT3 +
+02030000    INPUT2 INPUT3)  ATTR(FB80)
+02040000CONTROL MSG
+02050000 
+02060000/*------------------------ END OF MEMBERS FILE -----------------------*/
+02070000ERROR DO
+02080000   ERROR OFF
+02090000   CLOSFILE MEMBERS
+02100000   FREE   F(MEMBERS)
+02110000   CONTROL   MSG
+02120000   DELETE '&NEWREL..DECKS(TEMP)'
+02130000   CONTROL MSG
+02140000   WRITE ====== SHUFFLE COMPLETE ======
+02150000   GOTO UP
+02160000DONE
+02170000/*--------------------------------------------------------------------*/
+02180000DO WHILE &SYSUID NE
+02190000   GETFILE MEMBERS
+02200000   SET &LEN = 8
+02210000   DO WHILE (&SUBSTR(&LEN,&MEMBERS) = )
+02220000      SET &LEN = &LEN - 1
+02230000   DONE
+02240000   SET &MEMBER = &SUBSTR(1:&LEN,&MEMBERS)
+02250000 
+02260000   ATTR FB80         RECFM(F B) LRECL(80)   BLKSIZE(6160)
+02270000   ALLOC F(PROGRAM)  DA('NCAMCM.PASS.TOOLS.SHUFFLE') SHR
+02280000   ALLOC F(SYSIN)    DUMMY
+02290000   SET &SUMOFCC = 0
+02300000   IF &LISTING EQ THEN +
+02310000      ALLOC F(SYSPRINT) DUMMY
+02320000   ELSE +
+02330000    IF &LISTING EQ SCRN THEN +
+02340000       ALLOC F(SYSPRINT) DA(*)
+02350000    ELSE +
+02360000      ALLOC F(SYSPRINT) DA('&NEWREL..&PASS..UPDATE.LST') MOD
+02370000   ALLOC F(LISTING2) DA(*)
+02380000   ALLOC F(OUTPUT3)  DA('&NEWREL..DECKS(&PASS.)') OLD
+02390000   ALLOC F(INPUT2)   DA('&NEWREL..&PASS..UPDATES(&MEMBER.)') SHR
+02400000   ALLOC F(INPUT3)   DA('&INPUT3.') SHR
+02410000   CALL 'NCAMCM.XPL.TOOLS.HALS.MONITOR(XPLSM)'
+02420000   SET &SAVECC = &LASTCC
+02430000   SET &SUMOFCC = &SAVECC + &SUMOFCC
+02440000   CONTROL NOMSG
+02450000   FREE F(PROGRAM SYSIN SYSPRINT LISTING2 OUTPUT3 +
+02460000          INPUT2 INPUT3)  ATTR(FB80)
+02470000      COPYF '&NEWREL..DECKS(&PASS.)' '&NEWREL..DECKS(TEMP)'
+02480000      SET &INPUT3 = &NEWREL..DECKS(TEMP)
+02490000   CONTROL MSG
+02500000   IF &SAVECC = 0 THEN +
+02510000      WRITE -------->> &MEMBER. SHUFFLED
+02520000   ELSE DO
+02530000      WRITE -------->> &MEMBER. SHUFFLE ERROR CODE = &SAVECC
+02540000      EXIT
+02550000   DONE
+02560000DONE
+02570000 
+02580000/*==================================================================*/
+02590000/*                                                                  */
+02600000/* UPDATE STEP                                                      */
+02610000/*                                                                  */
+02620000/*==================================================================*/
+02630000 
+02640000UP: CONTROL NOMSG
+02650000IF &SUMOFCC NE 0 THEN DO
+02660000    WRITE UPDATE NOT PERFORMED, ERRORS DURING SHUFFLE
+02670000    EXIT
+02680000DONE
+02690000  DELETE '&NEWREL..&PASS..SOURCE'
+02700000  FREE F(PROGRAM SYSPRINT OUTPUT3 INPUT3 SYSPUNCH SYSIN) +
+02710000    ATTR(FB88)
+02720000CONTROL MSG
+02730000WRITE ====== UPDATING &PASS. ======
+02740000ATTR  FB88        RECFM(F B) LRECL(88)   BLKSIZE(6160)
+02750000ALLOC F(PROGRAM)  DA('NCAMCM.PASS.TOOLS.UPDATER') SHR
+02760000IF &LISTING EQ THEN +
+02770000  ALLOC F(SYSPRINT) DUMMY
+02780000ELSE +
+02790000 IF &LISTING EQ SCRN THEN +
+02800000   ALLOC F(SYSPRINT) DA(*)
+02810000 ELSE +
+02820000ALLOC F(SYSPRINT) DA('&NEWREL..&PASS..UPDATE.LST') MOD
+02830000ALLOC F(OUTPUT3)  DA('&NEWREL..&PASS..SOURCE') NEW USING(FB88) +
+02840000                  SPACE(200 50) TRACK BLOCK(6160) RELEASE
+02850000ALLOC F(INPUT3)   DA('&OLDREL..&PASS..SOURCE') SHR
+02860000ALLOC F(SYSPUNCH) DUMMY
+02870000ALLOC F(SYSIN)    DA('&NEWREL..DECKS(&PASS.)') SHR
+02880000CALL 'NCAMCM.XPL.TOOLS.HALS.MONITOR(XPLSM)'
+02890000SET &SAVECC=&LASTCC
+02900000FREE F(PROGRAM SYSPRINT OUTPUT3 INPUT3 SYSPUNCH SYSIN) +
+02910000  ATTR(FB88)
+02920000IF &SAVECC = 0 THEN +
+02930000     WRITE ====== UPDATE SUCCESSFUL ======
+02940000ELSE DO
+02950000     WRITE UPDATE ERROR CODE = &SAVECC
+02960000     EXIT
+02970000DONE

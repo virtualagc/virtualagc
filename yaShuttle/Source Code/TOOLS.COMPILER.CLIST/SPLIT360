@@ -1,0 +1,203 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     SPLIT360                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO INVOKE A VERSION OF THE XPL COMPILER THAT SPLITS  */
+00090000/*             UP AN XPL PROGRAM. TAILORED FOR 360 COMPILER.        */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     SPLIT360 'PASS' OPT() PAGES(700) NEWREL(B360.CURRENT)        */
+00150000/*              REL(B360.REL4V6) TRACE LEVEL(NCAMCM)                */
+00160000/*              LEVELOUT(&SYSUID.)                                  */
+00170001/*              COMPILER('''NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)''')       */
+00180000/*                                                                  */
+00190000/*     ALIAS    - NONE.                                             */
+00200000/*     REQUIRED - 'PASS'.                                           */
+00240000/*                                                                  */
+00250000/*------------------------------------------------------------------*/
+00260000/*                                                                  */
+00270000/*   INVOKES:                                                       */
+00280000/*                                                                  */
+00290001/*     'NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)'                              */
+00300000/*                                                                  */
+00310000/*------------------------------------------------------------------*/
+00320000/*                                                                  */
+00330000/*   PARAMETERS:                                                    */
+00340000/*                                                                  */
+00350000/*     PASS     REQUIRED                                            */
+00360000/*              WHICH PHASE OF THE COMPILER TO SPLIT                */
+00370000/*                                                                  */
+00380000/*     OPT      DEFAULT: NULL                                       */
+00390000/*              MONITOR CALL OPTION                                 */
+00400000/*                                                                  */
+00410000/*     PAGES    DEFAULT: 700                                        */
+00420000/*              FOR PAGES MONITOR OPTION                            */
+00430000/*                                                                  */
+00440000/*     NEWREL   DEFAULT: B360.CURRENT                               */
+00450000/*              LIBRARY WHERE 360  PASSES ARE                       */
+00460000/*                                                                  */
+00470000/*     REL      DEFAULT: B360.REL4V6                                */
+00480000/*              LIBRARY WHERE 360  INCLUDE FILES ARE                */
+00490000/*                                                                  */
+00500000/*     TRACE    OPTIONAL                                            */
+00510000/*              FOR TRACE ON                                        */
+00520000/*                                                                  */
+00530000/*     LEVEL    DEFAULT: NCAMCM                                     */
+00540000/*              LEVEL WHERE SOURCE CODE EXISTS                      */
+00550000/*                                                                  */
+00560000/*     LEVELOUT DEFAULT: &SYSUID                                    */
+00570000/*              LEVEL WHERE OUTPUT GOES                             */
+00580000/*                                                                  */
+00590001/*     COMPILER DEFAULT: '''NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)'''        */
+00600000/*              SPLITTER COMPILER                                   */
+00610000/*                                                                  */
+00620000/*------------------------------------------------------------------*/
+00630000/*                                                                  */
+00640000/*   INPUT DATA SET NAMES:                                          */
+00650000/*                                                                  */
+00660000/*      <COMPILER>                                                  */
+00670000/*         LOCATION OF THE PROGRAMS'S OBJECT CODE                   */
+00680000/*                                                                  */
+00690000/*      NCAMCM.PASS.TOOLS.SPACELIB                                  */
+00700000/*         LOCATION OF THE XPL SPACE MAMAGEMENT LIBRARY             */
+00710000/*                                                                  */
+00720000/*      <LEVEL>.<REL>.XPLINCL.DATA                                  */
+00730000/*         FULLY QUALIFIED LOCATION OF THE XPL INCLUDE LIBRARY      */
+00740000/*                                                                  */
+00750000/*      <LEVEL>.<REL>.INCLUDE.PASS1                                 */
+00760000/*         FULLY QUALIFIED LOCATION OF THE PASS1 INCLUDE LIBRARY    */
+00770000/*                                                                  */
+00780000/*      <LEVEL>.<REL>.SOURCE.<PASS>                                 */
+00790000/*         FULLY QUALIFIED LOCATION OF THE SOURCE TO COMPILE AND    */
+00800000/*         SPLIT UP                                                 */
+00810000/*                                                                  */
+00820000/*------------------------------------------------------------------*/
+00830000/*                                                                  */
+00840000/*   OUTPUT DATA SET NAMES:                                         */
+00850000/*                                                                  */
+00860000/*     <NEWREL>.<PASS>.OBJ                                          */
+00870000/*         THE RESULTING OBJECT MODULE OF THE COMPILE               */
+00880000/*                                                                  */
+00890000/*     <LEVELOUT>.<NEWREL>.<PASS>.PROCS                             */
+00900000/*         THE RESULTING PDS THAT CONTAINS THE SPLITUP MEMBERS      */
+00910000/*                                                                  */
+00920000/*     <LEVELOUT>.<NEWREL>.<PASS>.##TOC                             */
+00930000/*         THE RESULTING TABLE OF CONTENTS FILE CONTAINING THE      */
+00940000/*         MEMBER NAMES OF THE PROCEDURES.                          */
+00950000/*                                                                  */
+00960000/*     <NEWREL>.<PASS>.LST                                          */
+00970000/*         THE OUTPUT LISTING OF THE COMPILE                        */
+00980000/*                                                                  */
+00990000/*------------------------------------------------------------------*/
+01000000/*                                                                  */
+01010000/*   TEMPORARY DATA SET NAMES:                                      */
+01020000/*                                                                  */
+01030000/*     NONE.                                                        */
+01040000/*                                                                  */
+01050000/*------------------------------------------------------------------*/
+01060000/*                                                                  */
+01070000/*   COMMENTS:  THIS CLIST RUNS A MODIFIED XPL COMPILER. IT SPLITS  */
+01080000/*           UP ONE LARGE PROGRAM INTO ITS PRIMARY PROCEDURES       */
+01090000/*           AND TWO PIECES OF THE DRIVER.  THE FIRST PART OF THE   */
+01100000/*           DRIVER (#DRIVER1), CONTAINS THE CODE FOUND BEFORE      */
+01110000/*           THE PROCEDURE DECLARATIONS.  THE 2CND PART OF THE      */
+01120000/*           DRIVER, #DRIVER2, CONTAINS THE CODE FOUND AFTER THE    */
+01130000/*           LAST PROCEDURE DECLARATION.   PROCEDURES ARE PLACED    */
+01140000/*           INTO A MEMBER NAMED AFTER THE FIRST 8 LETTERS OF THE   */
+01150000/*           PROCEDURE NAME. AN OUTPUT FILE CALLED ##TOC   IS       */
+01160000/*           ALSO CREATED WHICH CONTAINS THE NAME OF ALL            */
+01170000/*           THE PROCEDURE WITH THEIR MEMBER NAMES.                 */
+01180000/*                                                                  */
+01190000/*           THERE IS A BUG IN THE PROGRAM THAT CAUSES A LITTLE     */
+01200000/*           MANUAL EDITING TO BE DONE IN PARTITIONING. SOMETIMES   */
+01210000/*           THE HEADER TO THE FIRST PROCEDURE GETS PUT IN          */
+01220000/*           #DRIVER1.  WHEN DOING THE EDIT BE SURE THAT THE        */
+01230000/*           EDITOR PROFILE IS SET TO 'NUMBERS OFF'.                */
+01240000/*                                                                  */
+01250000/*           TWO CLIST WERE DEVELOPED TO RUN THIS PROGRAM.  THEY    */
+01260000/*           ARE :  XPLSPLIT  AND                                   */
+01270000/*                  SPLITBFS                                        */
+01280000/*                  SPLIT360                                        */
+01290000/*           THE FIRST IS USED TO SPLIT THE PASS COMPILER.          */
+01300000/*           THE SECOND IS USED TO SPLIT THE BFS COMPILER.          */
+01310000/*           THE THIRD  IS USED TO SPLIT THE 360 COMPILER.          */
+01320000/*                                                                  */
+01330000/*                                                                  */
+01340000/*------------------------------------------------------------------*/
+01350000/*                                                                  */
+01360000/*   REVISION HISTORY:                                              */
+01370000/*                                                                  */
+01380000/*  DATE      PCR  NAME  DESCRIPTION                                */
+01390000/*  --------  ---  ---   -------------------------------------      */
+01400000/*  07/31/89  ???  RSJ   ORIGINAL CLIST                             */
+01410000/*                                                                  */
+01420000/*  07/06/90  104  TEV   ADDED HEADER. THE PRODUCT PARAMETER WAS    */
+01430000/*                       DELETED BECAUSE IT WAS NOT USED.           */
+01440000/*                                                                  */
+01441000/*  01/18/91  146  RSJ   UPDATED COMPILER PARAMETER TO REFLECT      */
+01442000/*                       NEW LOCATION OF THE DATASET                */
+01442101/*                                                                  */
+01442201/*  09/19/91  186  LJK   RENAMED CM OBJECT FILE                     */
+01443000/*                                                                  */
+01450000/*------------------------------------------------------------------*/
+01460000/********************************************************************/
+01470000PROC 1   PASS                                           +
+01480000         OPT()                                          +
+01490000         PAGES(700)                                     +
+01500000         NEWREL(B360.CURRENT)                           +
+01510000         REL(B360.REL4V6)                               +
+01520000         TRACE                                          +
+01530000         LEVEL(NCAMCM)                                  +
+01540000         LEVELOUT(&SYSUID.)                             +
+01550001         COMPILER('''NCAMCM.TOOLS.XPLOBJ(XPLSPLIT)''')
+01560000 
+01570000IF &TRACE. NE THEN +
+01580000  CONTROL LIST
+01590000CONTROL END(DONE)
+01600000CONTROL NOMSG
+01610000  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 +
+01620000    OUTPUT7 OUTPUT8 SYSPRINT LISTING2 INCLUDE)                    +
+01630000                              ATTR(FBA133 F7200 F133 FB88)
+01640000  DELETE (&NEWREL..&PASS..LST &NEWREL..&PASS..OBJ  +
+01650000          '&LEVELOUT..&NEWREL..&PASS..##TOC' +
+01660000          '&LEVELOUT..&NEWREL..&PASS..PROCS' )
+01670000IF &PASS NE PASS2 THEN SET OPT EQ &STR($V,$I)
+01680000CONTROL MSG
+01690000ATTR FBA133 RECFM(F B A) LRECL(133)  BLKSIZE(2660)
+01700000ATTR F7200  RECFM(F)     LRECL(7200) BLKSIZE(7200)
+01710000ATTR F133   RECFM(F)     LRECL(133)  BLKSIZE(133)
+01720000ATTR FB88   RECFM(F B)   LRECL(88)  BLKSIZE(6160)
+01730000ALLOC F(PROGRAM)  DA(&COMPILER.) SHR
+01740000ALLOC F(FILE1)    DA(&NEWREL..&PASS..OBJ) RELEASE USING(F7200) NEW +
+01750000  SP(10 5) TRACK
+01760000ALLOC F(FILE2) NEW SPACE(40,10) BLOCK(7200)
+01770000ALLOC F(FILE3) NEW SPACE(40,10) BLOCK(7200)
+01780000ALLOC F(FILE4) NEW SPACE(40,10) BLOCK(7200)
+01790000ALLOC F(INPUT2) DA('NCAMCM.PASS.TOOLS.SPACELIB') SHR
+01800000ALLOC REUSE F(OUTPUT8) DA('&LEVELOUT..&NEWREL..&PASS..PROCS') +
+01810000                       USING(FB88) NEW SP(40 10) TRACK DIR(40)
+01820000ALLOC REUSE F(OUTPUT7) DA('&LEVELOUT..&NEWREL..&PASS..##TOC') RELEASE +
+01830000                       USING(FB88) NEW CATALOG SP(40 40) TRACK
+01840000ALLOC F(SYSPRINT) DA(&NEWREL..&PASS..LST) RELEASE USING(FBA133) NEW +
+01850000  SP(80 80) TRACK
+01860000ALLOC F(LISTING2) DA(*) USING(F133)
+01870000ALLOC F(INCLUDE)  DA( +
+01880000                     '&LEVEL..&REL..XPLINCL.DATA' ) SHR
+01890000                 /*  '&LEVEL..&REL..INCLUDE.PASS1') SHR */
+01900000ALLOC F(SYSIN) DA('&LEVEL..&NEWREL..SOURCE.&PASS.') SHR
+01910000WRITE COMPILATION OF &LEVEL..&NEWREL..&PASS..SOURCE
+01920000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+01930000  'LISTING2,SYTSIZE=2800,REFSIZE=30000,MACROSIZE=999,CONSTANTS=500,-
+01940000EXCLUDE=AC,PAGES=&PAGES.,ALTER,INDENT=1,&OPT.'
+01950000SET &SAVECC=&LASTCC
+01960000  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 OUTPUT7 +
+01970000    OUTPUT8 SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133 FB88)
+01980000IF &SAVECC EQ 0 THEN +
+01990000     WRITE COMPILATION SUCCESSFUL
+02000000ELSE +
+02010000     WRITE COMPILATION ERROR CODE = &SAVECC

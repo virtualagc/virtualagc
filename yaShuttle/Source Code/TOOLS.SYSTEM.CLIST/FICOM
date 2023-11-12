@@ -1,0 +1,235 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     FICOM                                                */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO COMPARE TWO FILES (DATA SET/ DATA SET MEMBERS)    */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     FICOM 'NAMEOLD' NAMENEW(&NAMEOLD.) ID(&SYSUID.) TYPE(LST)    */
+00140037/*           LIB(&ID..TEST) OLD(&LIB..OLD.&TYPE.(&NAMEOLD.))        */
+00150000/*           NEW(&LIB..NEW.&TYPE.(&NAMENEW.))                       */
+00160035/*           DELTA(&LIB..COMPLST) BEFORE(0) AFTER(0)                */
+00170000/*           PARM1(15) MDEF(3) BUFFERS(99) LISTING HEX DBG BLANKS   */
+00180019/*           DELETES REFRESH TRACE                                  */
+00190000/*                                                                  */
+00200000/*     ALIAS    - NONE.                                             */
+00210000/*     REQUIRED - 'NEMEOLD'                                         */
+00270000/*                                                                  */
+00280000/*------------------------------------------------------------------*/
+00290000/*                                                                  */
+00301028/*   INVOKES:  NCAMCM.TOOLS.XPLOBJ(FICOM)                           */
+00302021/*             NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                      */
+00310000/*                                                                  */
+00320000/*------------------------------------------------------------------*/
+00330000/*                                                                  */
+00340000/*   PARAMETERS:                                                    */
+00350000/*                                                                  */
+00360000/*     NAMEOLD  REQUIRED                                            */
+00370000/*              MEMBER NAME                                         */
+00380000/*                                                                  */
+00390000/*     NAMENEW  DEFAULT: &NAMEOLD                                   */
+00400000/*              IF DIFFERENT THAN NAMEOLD                           */
+00410000/*                                                                  */
+00420000/*     ID       DEFAULT: &SYSUID                                    */
+00430000/*              USER ID, HIGH LEVEL QUALIFIER                       */
+00440000/*                                                                  */
+00450000/*     TYPE     DEFAULT: LST                                        */
+00460000/*              EXTENSION OF DATASET                                */
+00470000/*                                                                  */
+00480000/*     LIB      DEFAULT: &ID..TEST                                  */
+00490000/*              PARTIAL DATA SET NAME                               */
+00500000/*                                                                  */
+00510000/*     OLD      DEFAULT: &LIB..OLD.&TYPE.(&NAMEOLD)                 */
+00520000/*              FULL DSN INCLUDING MEMBER NAME, OLD FILE            */
+00530000/*                                                                  */
+00540000/*     NEW      DEFAULT: &LIB..NEW.&TYPE.(&NAMENEW)                 */
+00550000/*              FULL DSN INCLUDING MEMBER NAME, NEW FILE            */
+00560000/*                                                                  */
+00570035/*     DELTA    DEFAULT: &LIB..OUTLST                               */
+00580000/*              DSN FOR COMPARISON RESULTS                          */
+00590000/*                                                                  */
+00600000/*     BEFORE   DEFAULT: 0                                          */
+00610000/*              OPTION FOR THE FICOM PROGRAM                        */
+00620000/*                                                                  */
+00630000/*     AFTER    DEFAULT: 0                                          */
+00640000/*              OPTION FOR THE FICOM PROGRAM                        */
+00650000/*                                                                  */
+00660000/*     PARM1    DEFAULT: 15                                         */
+00670000/*              OPTION FOR THE FICOM PROGRAM                        */
+00680000/*                                                                  */
+00690000/*     MDEF     DEFAULT: 3                                          */
+00700000/*              OPTION FOR THE FICOM PROGRAM                        */
+00710000/*                                                                  */
+00720000/*     BUFFERS  DEFAULT: 99                                         */
+00730000/*              OPTION FOR THE FICOM PROGRAM                        */
+00740000/*                                                                  */
+00750000/*     LISTING  OPTIONAL                                            */
+00760000/*              IF SPECIFIED, FICOM WILL TRY AND IGNORE PAGE HEADER */
+00770000/*              INFO  (COMPARING LISTINGS)                          */
+00780000/*                                                                  */
+00790000/*     HEX      OPTIONAL                                            */
+00800000/*              IF SPECIFIED, COMPARE IN HEX MODE                   */
+00810000/*                                                                  */
+00820000/*     DBG      OPTIONAL                                            */
+00830000/*              OPTION FOR THE FICOM PROGRAM                        */
+00840000/*                                                                  */
+00850000/*     BLANKS   OPTIONAL                                            */
+00860000/*              OPTION FOR THE FICOM PROGRAM                        */
+00870000/*                                                                  */
+00880002/*     REFRESH  OPTIONAL                                            */
+00881002/*              REFRESH THE FICOM.RPT AND &LIB..OUTLST FILES        */
+00882002/*                                                                  */
+00883002/*     DELETES  OPTIONAL                                            */
+00890028/*              DELETE NEW AND OLD FILES                            */
+00900000/*                                                                  */
+00901000/*     TRACE    OPTIONAL                                            */
+00902000/*              TRACE CLIST EXECUTION                               */
+00903000/*                                                                  */
+00910000/*------------------------------------------------------------------*/
+00920000/*                                                                  */
+00930000/*   INPUT DATA SET NAMES:                                          */
+00940000/*                                                                  */
+00950000/*     <NEW>                                                        */
+00960000/*     FILE WHICH IS THE NEW VERSION YOU WANT TO COMPARE            */
+00970000/*                                                                  */
+00980000/*     <OLD>                                                        */
+00990000/*     FILE WHICH IS THE OLD VERSION YOU WANT TO COMPARE            */
+01000000/*                                                                  */
+01010000/*------------------------------------------------------------------*/
+01020000/*                                                                  */
+01030000/*   OUTPUT DATA SET NAMES:                                         */
+01040000/*                                                                  */
+01050000/*     <DELTA>                                                      */
+01060000/*     FILE WHICH CONTAINS THE DIFFERENCES                          */
+01070000/*                                                                  */
+01071000/*     <LIB>.FICOM.RPT                                              */
+01072028/*          REPORT FILE FOR THE FICOM EXECUTION                     */
+01073000/*                                                                  */
+01080000/*------------------------------------------------------------------*/
+01090000/*                                                                  */
+01100000/*   TEMPORARY DATA SET NAMES:                                      */
+01110000/*                                                                  */
+01120000/*      NONE.                                                       */
+01130000/*                                                                  */
+01140000/*------------------------------------------------------------------*/
+01150000/*                                                                  */
+01160000/*   COMMENTS:  USE THIS CLIST TO COMPARE ANY FILES WHICH OTHER     */
+01170036/*              COMPARATORS SUCH AS COMPFC AND BYTECOMP CANT DO     */
+01180000/*                                                                  */
+01190000/*------------------------------------------------------------------*/
+01200000/*                                                                  */
+01210000/*   REVISION HISTORY:                                              */
+01220000/*                                                                  */
+01230000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+01240000/*     --------  ----  ----  -------------------------------------  */
+01250000/*     10/26/89  062   SDM   MODIFIED EXISTING ONE AND BASELINED    */
+01260000/*                                                                  */
+01270000/*     06/25/90  099   TEV   UPDATED HEADER AND REARRANGED PARMS SO */
+01280000/*                           EACH PARMETER IS ON ITS OWN LINE       */
+01290000/*                                                                  */
+01291014/*     06/01/94  334   LJK   ADDED FICOM.RPT FILE; ADDED REFRESH    */
+01292017/*                           AND DELETES PARAMETERS; ALLOCATED      */
+01293014/*                           &LIB..OUTLST FILE.                     */
+01300000/*------------------------------------------------------------------*/
+01310000/********************************************************************/
+01320000 
+01330000PROC 1 NAMEOLD                             +
+01340000       NAMENEW(&NAMEOLD.)                  +
+01350000       ID(&SYSUID.)                        +
+01360000       TYPE(LST)                           +
+01370000       LIB(&ID..TEST)                      +
+01380000       OLD(&LIB..OLD.&TYPE.(&NAMEOLD.))    +
+01390000       NEW(&LIB..NEW.&TYPE.(&NAMENEW.))    +
+01400034       DELTA(&LIB..OUTLST)                 +
+01410000       BEFORE(0)                           +
+01420000       AFTER(0)                            +
+01430000       PARM1(15)                           +
+01440000       MDEF(3)                             +
+01450000       BUFFERS(99)                         +
+01460000       LISTING                             +
+01470000       HEX                                 +
+01480000       DBG                                 +
+01490000       BLANKS                              +
+01491000       DELETES                             +
+01492002       REFRESH                             +
+01500000       TRACE
+01510000 
+01520000CONTROL NOMSG NOFLUSH
+01530000IF &TRACE NE  THEN CONTROL LIST CONLIST
+01530105FREE F(SYSIN SYSPRINT INPUT2 OUTPUT3 PROGRAM REPORT)
+01531404CONTROL END(DONE)
+01531504CONTROL MSG
+01531600 
+01531900 IF &REFRESH  NE THEN DO
+01532000    CONTROL NOMSG
+01532100    FREE DA('&LIB..FICOM.RPT')
+01532200    DELETE '&LIB..FICOM.RPT'
+01533035    FREE DA('&DELTA.')
+01534035    DELETE '&DELTA.'
+01535001 DONE
+01535128 
+01535228   /* ALLOCATE FICOM REPORT FILE AND &LIB..OUTLST IF NOT EXIST */
+01535328 
+01536001 CONTROL MSG
+01537000 IF &SYSDSN('&LIB..FICOM.RPT') NE OK THEN                      +
+01538000   ALLOC DA('&LIB..FICOM.RPT') DSORG(PS) SPACE(1,1) TRACK      +
+01539000                               LRECL(133) BLKSIZE(5320) RECFM(F B)
+01539128   ALLOC F(REPORT) DA('&LIB..FICOM.RPT')  MOD
+01539200   OPENFILE REPORT OUTPUT
+01539334 IF &SYSDSN('&DELTA.') NE OK THEN                         +
+01539434    ALLOC DA('&DELTA.')  DSORG(PO)  SPACE(3,1) CYLINDERS  +
+01539528          LRECL(133) BLKSIZE(5320) RECFM(F B) DIR(25)
+01539700GLOBAL SAVECC
+01539800 SET &SAVECC EQ 0
+01539900 SET &LASTCC EQ 0
+01540027 
+01543000WRITE  EXECUTION OF FICOM FOR: &NAMEOLD. VS &NAMENEW.
+01544014CONTROL NOFLUSH
+01560035ALLOC REUSE F(SYSIN) DA('&NEW.') SHR
+01570035ALLOC REUSE F(SYSPRINT) DA(*)
+01580035ALLOC REUSE F(INPUT2) DA('&OLD.') SHR
+01590035ALLOC REUSE F(OUTPUT3) DA('&DELTA.(&NAMENEW.)') SHR
+01600035ALLOC REUSE F(PROGRAM) DA('NCAMCM.TOOLS.XPLOBJ(FICOM)') SHR
+01610000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+01620000  'ALTER,MDEF=&MDEF.,BEFORE=&BEFORE.,AFTER=&AFTER., +
+01630000PARM_1=&PARM1.,BUFFERS=&BUFFERS.,&LISTING.,&HEX.,&BLANKS.,&DBG.'
+01640000SET  &SAVECC = &LASTCC
+01650013FREE F(SYSIN SYSPRINT INPUT2 OUTPUT3 PROGRAM)
+01661128CONTROL MSG
+01661229IF &SAVECC = 0 THEN DO
+01661400   WRITE ***
+01661500   WRITE *** THE 2 FILES MATCH
+01661600   WRITE ***
+01661700 
+01661815   /* WRITE TO THE FICOM.RPT FILE */
+01661900 
+01662000  SET REPORT = &STR(   FILES &OLD. AND &NEW. MATCH)
+01662100  PUTFILE REPORT
+01662429DONE
+01662500 
+01662629ELSE DO
+01662700   WRITE ***
+01662817   WRITE ***  THE 2 FILES ARE DIFFERENT, EXAMINE &DELTA
+01662900   WRITE ***
+01663000 
+01663115         /* WRITE TO THE FICOM.RPT FILE */
+01663200 
+01663300  SET REPORT = &STR(***FILES &OLD. AND &NEW. ARE DIFFERENT)
+01663400  PUTFILE REPORT
+01665129DONE
+01665200 
+01665329CLOSFILE REPORT
+01665429FREE F(REPORT)
+01666000 
+01666129CONTROL NOMSG
+01667031IF &SAVECC = 0 THEN DELETE '&DELTA.(&NAMENEW.)'
+01667129IF &SAVECC = 0 AND &DELETES. NE THEN DO
+01669000   DELETE '&NEW.'
+01669100   DELETE '&OLD.'
+01669600   CONTROL MSG
+01669729DONE

@@ -1,0 +1,656 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     MAKEHELP                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080084/*   FUNCTION: TO CREATE THE HELP FILE(S) FOR A PDS OF CLIST(S).    */
+00081091/*             FOR USER NCAMCMA, EACH HELP FILE IS SAVED IN         */
+00082091/*             NCAMCM.TOOLS.HELP PDS AND EACH INPUT CLIST IS        */
+00083091/*             LOCATED IN NCAMCM..<FILENAME> PDS.                   */
+00084091/*             FOR OTHER USERS, EACH HELP FILE IS SAVED IN          */
+00090099/*             &OUTID..<FILENAME>.HELP PDS AND EACH INPUT CLIST IS  */
+00091091/*             LOCATED IN &ID..<FILENAME> PDS.                      */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140099/*     MAKEHELP ID(&SYSUID.) OUTID(&SYSUID.) HEDRBEG(9) HEDREND(78) */
+00150099/*              NAMEBEG(24) NAMEEND(32) FUNCTBEG(24) FUNCTEND(76)   */
+00160099/*              SYNTBEG(16) SYNTEND(76) PRMNMBEG(16) PRMNMEND(23)   */
+00170099/*              PRMDSCRB(25) PRMDSCRE(76) TRACE                     */
+00180000/*                                                                  */
+00190000/*     ALIAS    - NONE.                                             */
+00200000/*     REQUIRED - NONE.                                             */
+00250000/*                                                                  */
+00260000/*------------------------------------------------------------------*/
+00270000/*                                                                  */
+00280000/*   INVOKES:  PDSALL CLIST                                         */
+00290000/*                                                                  */
+00300000/*------------------------------------------------------------------*/
+00310000/*                                                                  */
+00320000/*   PARAMETERS:                                                    */
+00330000/*                                                                  */
+00340000/*     ID       DEFAULT: &SYSUID.                                   */
+00350099/*              THE ACCOUNT WHERE THE INPUT CLIST PDS RESIDES       */
+00351099/*                                                                  */
+00352099/*     OUTID    DEFAULT: &SYSUID.                                   */
+00353099/*              THE ACCOUNT WHERE THE OUTPUT HELP FILES RESIDE      */
+00360000/*                                                                  */
+00370000/*     HEDRBEG  DEFAULT: 9                                          */
+00380000/*              THE COLUMN # THAT THE HEADER STARTS ON              */
+00390000/*                                                                  */
+00400000/*     HEDREND  DEFAULT: 78                                         */
+00410000/*              THE COLUMN # THAT THE HEADER ENDS ON                */
+00420000/*                                                                  */
+00430000/*     NAMEBEG  DEFAULT: 24                                         */
+00440000/*              THE COLUMN # THAT THE NAME STARTS AT                */
+00450000/*                                                                  */
+00460000/*     NAMEEND  DEFAULT: 32                                         */
+00470000/*              THE COLUMN # THAT THE NAME ENDS AT                  */
+00480000/*                                                                  */
+00490000/*     FUNCTBEG DEFAULT: 24                                         */
+00500000/*              THE COLUMN # WHERE THE FUNCTION DESCRIPTION STARTS  */
+00510000/*                                                                  */
+00520000/*     FUNCTEND DEFAULT: 76                                         */
+00530000/*              THE COLUMN # WHERE THE FUNCTION DESCRIPTION ENDS    */
+00540000/*                                                                  */
+00550000/*     SYNTBEG  DEFAULT: 16                                         */
+00560000/*              THE COLUMN # WHERE THE SYNTAX STARTS                */
+00570000/*                                                                  */
+00580000/*     SYNTEND  DEFAULT: 76                                         */
+00590000/*              THE COLUMN # WHERE THE SYNTAX ENDS                  */
+00600000/*                                                                  */
+00610000/*     PRMNMBEG DEFAULT: 16                                         */
+00620000/*              THE COLUMN # WHERE THE PARAMETER NAME STARTS        */
+00630000/*                                                                  */
+00640000/*     PRMNMEND DEFAULT: 23                                         */
+00650000/*              THE COLUMN # WHERE THE PARAMETER NAME ENDS          */
+00660000/*                                                                  */
+00670000/*     PRMDSCRB DEFAULT: 25                                         */
+00680000/*              THE COLUMN # WHERE THE PARAMETER DESCRIPTION STARTS */
+00690000/*                                                                  */
+00700000/*     PRMDSCRE DEFAULT: 76                                         */
+00710000/*              THE COLUMN # WHERE THE PARAMETER DESCRIPTION ENDS   */
+00720000/*                                                                  */
+00730000/*     TRACE    OPTIONAL                                            */
+00740000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00750000/*              TERMINAL                                            */
+00760000/*                                                                  */
+00770000/*------------------------------------------------------------------*/
+00780000/*                                                                  */
+00790000/*   INPUT DATA SET NAMES:                                          */
+00800000/*                                                                  */
+00822089/*     NCAMCM.<FILENAME>(<MEMBER>)   <--- FOR USER NCAMCMA          */
+00823089/*     &ID.<FILENAME>(<MEMBER>)      <--- FOR ALL OTHER USERS       */
+00824086/*         A CLIST EITHER ENTERED BY USER OR TAKEN FROM MEMBER LIST */
+00830000/*                                                                  */
+00840000/*------------------------------------------------------------------*/
+00850000/*                                                                  */
+00860000/*   OUTPUT DATA SET NAMES:                                         */
+00870000/*                                                                  */
+00871089/*     NCAMCM.TOOLS.HELP(<MEMBER>)       <--- FOR USER NCAMCMA      */
+00880099/*     &OUTID.<FILENAME>.HELP(<MEMBER>)  <--- FOR ALL OTHER USERS   */
+00890089/*         A HELP FILE FOR A MEMBER OF A CLIST PDS                  */
+00910000/*                                                                  */
+00920000/*------------------------------------------------------------------*/
+00930000/*                                                                  */
+00940000/*   TEMPORARY DATA SET NAMES:                                      */
+00950000/*                                                                  */
+00961099/*     &SYSUID.<FILENAME>.MEMLIST  <---- FOR ALL USERS              */
+00962086/*         MEMBER LIST GENERATED BY PDSALL                          */
+00970000/*                                                                  */
+00980000/*------------------------------------------------------------------*/
+00990000/*                                                                  */
+01000000/*   COMMENTS:                                                      */
+01010000/*                                                                  */
+01014089/*  (1) THIS UTILITY ASSUMES:                                       */
+01014199/*       IF THE USER IS NCAMCMA, THE USER WILL ALWAYS CREATE A HELP */
+01014299/*       FILE FOR A CLIST PDS WHICH RESIDES IN NCAMCM ACCOUNT.  AND */
+01014399/*       THE CREATED HELP FILE WILL ALWAYS BE IN NCAMCM.TOOLS.HELP  */
+01014499/*       PDS. SETTING ID & OUTID PARAMETERS WILL NOT CHANGE THIS    */
+01014599/*       SETUP.                                                     */
+01014699/*                                                                  */
+01015086/*       IF THE USER IS NOT NCAMCMA, THE USER WILL CREATE A HELP    */
+01016099/*       FILE FOR A CLIST PDS WHICH RESIDES IN THE ACCOUNT BASED ON */
+01016199/*       THE ID PARAMETER AND ITS DEFAULT VALUE IS THE USER'S       */
+01016299/*       ACCOUNT.  THE CREATED HELP FILE WILL BE IN THE ACCOUNT     */
+01016399/*       BASED ON THE OUTID PARAMETER, AND ITS DEFAULT VALUE IS THE */
+01016499/*       USER'S ACCOUNT.  AN ERROR WILL BE ENCOUNTERED AND THIS     */
+01016599/*       CLIST WILL EXIT IF THE USER DOES NOT HAVE UPDATE ACCESS TO */
+01016699/*       THE ACCOUNT SPECIFIED BY THE OUTID PARAMETER.              */
+01050000/*                                                                  */
+01060000/*  (2) THIS UTILITY MAKES HELP FILES FOR A PDS OR ONE MEMBER OF A  */
+01070084/*       PDS.                                                       */
+01120000/*                                                                  */
+01130000/*  (3) THIS UTILITY HAS A SPECIFIC FORMAT WHICH IT ADHERES TO. THE */
+01140000/*       FORMAT IS THE FOLLOWING:                                   */
+01150000/*                                                                  */
+01160000/*         HEADER                BEGINS IN COLUMN  9 AND ENDS IN 78 */
+01170000/*         NAME                  BEGINS IN COLUMN 24 AND ENDS IN 32 */
+01180000/*         FUNCTION              BEGINS IN COLUMN 24 AND ENDS IN 76 */
+01190000/*         SYNTAX                BEGINS IN COLUMN 16 AND ENDS IN 76 */
+01200000/*         PARAMETER NAME        BEGINS IN COLUMN 16 AND ENDS IN 23 */
+01210000/*         PARAMETER DESCRIPTION BEGINS IN COLUMN 25 AND ENDS IN 76 */
+01220000/*                                                                  */
+01230000/*       IF YOUR PROGRAM HAS A DIFFERENT FORMAT, YOU MUST OVERRIDE  */
+01240000/*       THESE PARAMETERS TO SUIT YOUR PROGRAM'S VALUES OTHERWISE   */
+01250000/*       THIS UTILITY WILL NOT ACHIEVE THE RESULTS DESIRED.         */
+01260000/*                                                                  */
+01270000/*  (4) THIS PROGRAM CAN ONLY RUN INTERACTIVE SINCE IT QUERIES THE  */
+01280000/*       USER TO ENTER NAME OF THE FILE AND MEMBER NAME, IF         */
+01290000/*       APPLICABLE, TO GENERATE A HELP FILE ON.                    */
+01300000/*                                                                  */
+01310000/*  (5) THERE IS ONE ERROR CONDITION CODE THAT YOU MAY BE           */
+01320000/*       UNFORTUNATE TO ENCOUNTER, A 932. I HAVEN'T FOUND A WAY TO  */
+01330000/*       GET AROUND IT WITH ANY CODE I HAVE TRIED SO IF YOU GET A   */
+01340000/*       MESSAGE "EXITING ON ERROR CODE 932 IN MEMBER <MEMBER NAME>"*/
+01350000/*       , YOU WILL HAVE TO GO THROUGH THE NAME, FUNCTION, SYNTAX,  */
+01360000/*       AND PARAMETERS SECTIONS OF THE HEADER AND CHECK FOR ANY    */
+01370000/*       CLOSING PARENTHESIS THAT IS NOT ON THE SAME LINE AS THE    */
+01380000/*       MATCHING OPEN PARENETHESIS AND REPLACE THEM WITH SOME      */
+01390000/*       CHARACTERS THAT WILL NOT EFFECT THE PARSING OF THE LINE    */
+01400089/*       INTO A STRING (EXAMPLE: A SET OF {}).  ALSO, AN INCORRECT  */
+01401099/*       CLIST HEADER FORMAT CAN CAUSE THIS ERROR CODE 932.         */
+01402090/*       FOR THE CLIST HEADER FORMAT REFER TO NCAMCM.HEADER(CLIST)  */
+01403090/*       TEMPLATE.                                                  */
+01404099/*                                                                  */
+01405099/*  (6) ALL ATTEMPTS WERE MADE TO GENERATE CLIST COMMANDS FOR A     */
+01406099/*       CLEAN EXITS FROM THIS CLIST DUE TO THE ATTENTION KEY       */
+01407099/*       PRESSED.  HOWEVER, IF THERE IS ANY PROBLEM RERUN THIS      */
+01407199/*       CLIST AFTER EXITING VIA PRESSING THE ATTENTION KEY, THE    */
+01408099/*       USER WILL NEED TO INITIATE A FREEALL AT THE SDF LOGOFF     */
+01409099/*       SCREEN.                                                    */
+01410000/*                                                                  */
+01420000/*------------------------------------------------------------------*/
+01430000/*                                                                  */
+01440000/*   REVISION HISTORY:                                              */
+01450000/*                                                                  */
+01460000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+01470000/*     --------  ----  ----  -------------------------------------  */
+01480000/*     08/21/90  116   TEV   ORIGINAL CLIST                         */
+01490000/*                                                                  */
+01500000/*     01/11/91  143   TEV   CHANGED INDICATOR TO PROCESS ALL       */
+01510000/*                           MEMBERS FROM '*' TO '#'.               */
+01511000/*                                                                  */
+01512000/*     03/10/00  669   KHP   MAKEHELP TOOL DELETES LINES FROM       */
+01513000/*                           HEADER INFORMATION                     */
+01514084/*                                                                  */
+01515084/*     04/19/00  675   KHP   UPDATE THE MAKEHELP CLIST TO SPECIFY   */
+01516084/*                           OUTPUT FILE                            */
+01520000/*                                                                  */
+01530000/*------------------------------------------------------------------*/
+01540000/********************************************************************/
+01550000 
+01560000PROC     0        ID(&SYSUID.)        +
+01561099                  OUTID(&SYSUID.)     +
+01570000                  HEDRBEG(9)          +
+01580000                  HEDREND(78)         +
+01590000                  NAMEBEG(24)         +
+01600000                  NAMEEND(32)         +
+01610000                  FUNCTBEG(24)        +
+01620000                  FUNCTEND(76)        +
+01630000                  SYNTBEG(16)         +
+01640000                  SYNTEND(76)         +
+01650000                  PRMNMBEG(16)        +
+01660000                  PRMNMEND(23)        +
+01670000                  PRMDSCRB(25)        +
+01680000                  PRMDSCRE(76)        +
+01690000                  TRACE
+01700000 
+01710000GLOBAL RETCODE
+01720000 
+01730000IF &TRACE. NE  THEN +
+01740000      CONTROL LIST CONLIST
+01750000 
+01752099CONTROL NOFLUSH
+01760000CONTROL END(DONE)
+01770000 
+01771099/* INITIALIZE HELP PDS ALLOCATION FLAG */
+01772024SET &HPDS  = 0
+01772199/* INITIALIZE MEMLIST DATA SET ALLOCATION FLAG */
+01773024SET &MLIST = 0
+01773199/* INITIALIZE CLIST MEMBER ALLOCATION FLAG */
+01774024SET &CMEM  = 0
+01774199/* INITIALIZE HELP FILE ALLOCATION FLAG */
+01775024SET &HMEM  = 0
+01776024 
+01780000      /******************************/
+01790000      /*    DISPLAY OPENING MENU    */
+01800000      /******************************/
+01810000 
+01820000       WRITE                  *******************************
+01830000       WRITE                  ***    HELP FILE CREATOR    ***
+01840000       WRITE                  *******************************
+01850000MENU1: WRITE
+01860000       WRITE   WHAT IS THE NAME OF THE PDS YOU WISH TO CREATE +
+01870000                    A HELP FILE FOR (NO HIGH
+01880084       WRITENR   LEVEL QUALIFIER)? (RETURN EXITS) :
+01890000       READ &FILENAME
+01900000       IF &FILENAME. EQ  THEN EXIT
+01910000 
+01920000MENU2: WRITE
+01930000       WRITENR  WHAT IS THE MEMBER NAME (# = ALL MEMBERS)?
+01940000       READ &MEMBER
+01950000       IF &MEMBER. EQ  THEN EXIT
+01960000       IF &MEMBER. EQ &STR(#) THEN SET &MEMBER EQ &STR( )
+01970000 
+01980099/* SET INPUT/OUTPUT PDS IN NCAMCM ACCOUNT FOR USER NCAMCMA, AND */
+01980199/* MEMBER LIST PDS IN &SYSUID ACCOUNT                           */
+01981084IF &SYSUID. EQ &STR(NCAMCMA) THEN DO
+01981160  SET &SRCLIB EQ &STR(NCAMCM.&FILENAME.)
+01982084  SET &OUTLIB EQ &STR(NCAMCM.TOOLS)
+01982210DONE
+01982399/* SET INPUT PDS IN &ID ACCOUNT, OUTPUT PDS IN USER ACCOUNT, AND */
+01982499/* MEMBER LIST PDS IN &SYSUID ACCOUNT                            */
+01983015ELSE DO
+01983117  SET &SRCLIB EQ &STR(&ID..&FILENAME.)
+01984099  SET &OUTLIB EQ &STR(&OUTID..&FILENAME.)
+01985015DONE
+02000000      /***********************************************/
+02010000      /*    CHECK IF ENTERED FILE OR MEMBER EXISTS   */
+02020000      /***********************************************/
+02030099 
+02040004IF  &SYSDSN('&SRCLIB.')  NE  OK THEN  DO
+02050004    WRITE &SRCLIB. DOES NOT EXIST!
+02060000    GOTO  MENU1
+02070000DONE
+02080000 
+02090000IF &MEMBER. NE   THEN +
+02100004  IF  &SYSDSN('&SRCLIB.(&MEMBER.)')  NE  OK THEN DO
+02110004      WRITE &SRCLIB.(&MEMBER.) DOES NOT EXIST!
+02120000      GOTO  MENU2
+02130000  DONE
+02140000 
+02150000      /***********************************/
+02160000      /*    ON ATTN, DO THE FOLLOWING    */
+02170000      /***********************************/
+02180000ATTN    DO
+02180199     ERROR OFF
+02189799     FREE F(HELPMEM)
+02190199     FREE F(MEMNAME)
+02190399     FREE F(HELPFILE)
+02190699     IF &SYSDSN('&OUTLIB..MEMLIST') EQ OK THEN DO
+02190899        CLOSFILE MEMLIST
+02191099        FREE F(MEMLIST)
+02191299        CONTROL NOMSG
+02191399        DELETE '&SYSUID..&FILENAME..MEMLIST'
+02191699        CONTROL MSG
+02191899     DONE
+02192099     EXIT
+02192239DONE
+02320000 
+02330000      /************************************/
+02340000      /*    ON ERROR, DO THE FOLLOWING    */
+02350000      /************************************/
+02360000ERROR   DO
+02360469     IF &LASTCC. EQ SE37 THEN +
+02360599       WRITE &OUTLIB..HELP PDS IS OUT OF SPACE
+02360674     ELSE +
+02360774        IF &LASTCC. EQ SB14 THEN +
+02360899           WRITE &OUTLIB..HELP PDS DIRECTORY BLOCK SIZE IS INSUFFICIENT
+02360974        ELSE +
+02361084           /* CLOSE & FREE A HELP FILE */
+02361199           IF &HMEM. EQ 1 THEN DO
+02361274              CLOSFILE HELPMEM
+02361374              FREE F(HELPMEM)
+02361474              SET &HMEM = 0
+02362074           DONE
+02362199           /* FREE A HELP FILE DUE TO ALLOCATION FAILED */
+02362299           ELSE +
+02362399              IF &LASTCC. EQ S913 THEN +
+02362499                 FREE F(HELPMEM)
+02362599 
+02363084     /* CLOSE & FREE A CLIST */
+02368024     IF &CMEM. EQ 1 THEN DO
+02369024        CLOSFILE MEMNAME
+02370024        FREE F(MEMNAME)
+02370184        /* SET CLIST HEADER ERROR FLAG */
+02371024        SET &CMEMERR = 1
+02371125        SET &CMEM = 0
+02372024     DONE
+02372167     ELSE SET &CMEMERR = 0
+02372284     /* CLOSE, FREE & DELETE MEMBER LIST FILE */
+02372367     IF &MLIST. EQ 1 THEN DO
+02372467        CLOSFILE MEMLIST
+02372567        FREE F(MEMLIST)
+02372667        CONTROL NOMSG
+02372799        DELETE '&SYSUID..&FILENAME..MEMLIST'
+02372967        CONTROL MSG
+02373067        SET &MLIST = 0
+02373267     DONE
+02373399     /* FREE THE &OUTLIB..HELP PDS */
+02373567     IF &HPDS. EQ 1 THEN DO
+02373667        FREE F(HELPFILE)
+02373767        SET &HPDS = 0
+02373967     DONE
+02450024 
+02450184     /* EOF MEMBER LIST FILE IS READ */
+02450269     IF &LASTCC. EQ 400 AND &CMEMERR. EQ 0 THEN DO
+02450369        WRITE          &OUTLIB..HELP BUILT
+02450469        GOTO MENU1
+02450569     DONE
+02450699     /* ERROR IN A CLIST */
+02453099     IF &LASTCC. NE 12 AND &LASTCC. NE S913 AND &MEMBER. EQ THEN +
+02453183        WRITE          &OUTLIB..HELP PARTIALLY BUILT
+02453299     IF &LASTCC. EQ 12 THEN +
+02453399        WRITE EXITING ON ERROR CODE &LASTCC.
+02453499     ELSE DO
+02454099        IF &MEMBER. EQ THEN SET &MEMBER = &MEMLIST
+02572099        WRITE EXITING ON ERROR CODE &LASTCC. IN MEMBER &MEMBER.
+02573099     DONE
+02580069     EXIT
+02600000DONE
+02610000 
+02620000 
+02630000      /*******************************/
+02640000      /*    ALLOCATE NEEDED FILES    */
+02650000      /*******************************/
+02660000 
+02670074IF  &SYSDSN('&OUTLIB..HELP')  NE OK THEN +
+02680099        ALLOC F(HELPFILE)  DA('&OUTLIB..HELP')  NEW +
+02690078             CATALOG SPACE(15,5) TRACKS DSORG(PO) DIR(15) RECFM(F B) +
+02700000             LRECL(80) BLKSIZE(2400)
+02710074ELSE +
+02720099        ALLOC F(HELPFILE)  DA('&OUTLIB..HELP')  SHR REU
+02723024SET &HPDS = 1
+02730000 
+02740000IF &MEMBER EQ  THEN DO
+02750000 
+02760000      /*****************************/
+02770000      /*    MAKE MEMBER LISTING    */
+02780000      /*****************************/
+02790000 
+02800099  PDSALL &SRCLIB. LIB(&SYSUID..&FILENAME.) MAKELIST
+02810000 
+02820099  ALLOC F(MEMLIST)  DA('&SYSUID..&FILENAME..MEMLIST')  OLD
+02821024  SET &MLIST = 1
+02830000 
+02840000      /**************************************************/
+02850000      /*    READ THE MEMBER LIST'S FIRST MEMBER NAME    */
+02860000      /**************************************************/
+02870000 
+02880000  OPENFILE   MEMLIST   INPUT
+02890000  SET &ENDMARK = &STR(/*--)
+02900000 
+02910000  DO WHILE &LASTCC NE 400
+02920000        GETFILE  MEMLIST
+02930000 
+02940000        SET &MEMLEN = 1
+02950000        DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMLIST.) NE
+02960000           SET &MEMLEN = &MEMLEN + 1
+02970000        DONE
+02980000 
+02990000        SET &MEMLEN  = &MEMLEN - 1
+03000000        SET &MEMLIST = &SUBSTR(1:&MEMLEN.,&MEMLIST.)
+03010000        SET  MEMNAME EQ &MEMLIST
+03020000 
+03030000      /********************************************************/
+03040000      /*    NOW THAT YOU HAVE MEMBER NAME, READ THE MEMBER    */
+03050000      /********************************************************/
+03060000 
+03070099       ALLOC F(HELPMEM) DA('&OUTLIB..HELP(&MEMNAME.)') SHR
+03080000       OPENFILE   HELPMEM  OUTPUT
+03081024       SET &HMEM = 1
+03090088       ALLOC F(MEMNAME) DA('&SRCLIB.(&MEMNAME.)') SHR
+03100000       OPENFILE   MEMNAME  INPUT
+03101024       SET &CMEM = 1
+03110000 
+03120000      /**************************************************/
+03130000      /*    GET THE NAME AND FUNCTION FROM THE CLIST    */
+03140000      /**************************************************/
+03150000 
+03160000       SET  &HELPMEM = )F FUNCTION:
+03170000       PUTFILE  HELPMEM
+03180000 
+03190000       GETFILE  MEMNAME
+03200000       GETFILE  MEMNAME
+03210000       GETFILE  MEMNAME
+03220000       GETFILE  MEMNAME
+03230000       SET &NAME = &NRSTR(&SUBSTR(&NAMEBEG.:&NAMEEND.,&MEMNAME.))
+03240000       GETFILE  MEMNAME
+03250000       GETFILE  MEMNAME
+03260000       GETFILE  MEMNAME
+03270000       GETFILE  MEMNAME
+03280000       SET &FUNCTION = &NRSTR(&SUBSTR(&FUNCTBEG.:&FUNCTEND.,&MEMNAME.))
+03290000       SET  &HELPMEM = &STR(  &NAME. &FUNCTION.)
+03300000       PUTFILE  HELPMEM
+03310000       GETFILE  MEMNAME
+03320000 
+03330000      /*****************************************************/
+03340000      /*    GET THE REST OF THE FUNCTION FROM THE CLIST    */
+03350000      /*****************************************************/
+03360000 
+03370000       DO WHILE &STR(&SUBSTR(&HEDRBEG.:&HEDRBEG.+3,&MEMNAME.)) NE +
+03380000                &STR(&ENDMARK.)
+03390000        SET &FUNCTION = &NRSTR(&SUBSTR(&FUNCTBEG.:&FUNCTEND.,&MEMNAME.))
+03400000        SET &HELPMEM = &STR(            &FUNCTION.)
+03410000        PUTFILE  HELPMEM
+03420000        GETFILE  MEMNAME
+03430000       DONE
+03440000 
+03450000      /***************************************/
+03460000      /*    GET THE SYNTAX FROM THE CLIST    */
+03470000      /***************************************/
+03480000 
+03490000       SET     &HELPMEM = )X SYNTAX:
+03500000       PUTFILE HELPMEM
+03510000 
+03520000       GETFILE MEMNAME
+03530000       GETFILE MEMNAME
+03540000       GETFILE MEMNAME
+03550000 
+03560000       DO WHILE &STR(&SUBSTR(&HEDRBEG.:&HEDRBEG+3,&MEMNAME.)) NE +
+03570000              &STR(&ENDMARK.)
+03580000           SET &SYNTAX = &NRSTR(&SUBSTR(&SYNTBEG.:&SYNTEND.,&MEMNAME.))
+03590000           SET &HELPMEM = &STR(  &SYNTAX.)
+03600000           PUTFILE  HELPMEM
+03610000           GETFILE  MEMNAME
+03620000       DONE
+03630000 
+03640000      SET     &HELPMEM = )O OPERANDS:
+03650000      PUTFILE HELPMEM
+03660000 
+03670000      /*************************************/
+03680000      /*    FIND THE PARAMETER INDICATOR   */
+03690000      /*************************************/
+03700000 
+03710000      DO WHILE &STR(&SUBSTR(&SYNTBEG.-2:&SYNTBEG.+8,&MEMNAME.)) NE +
+03720000                                        &STR(PARAMETERS:)
+03730000           GETFILE MEMNAME
+03740000      DONE
+03750000 
+03760000      GETFILE MEMNAME
+03770000      GETFILE MEMNAME
+03780000 
+03790000      /****************************************************/
+03800000      /*    NOW THAT YOU HAVE THE PARAMETERS, GET THEM    */
+03810000      /****************************************************/
+03820000 
+03830000      DO WHILE &STR(&SUBSTR(&HEDRBEG.:&HEDRBEG.+3,&MEMNAME.)) NE +
+03840000               &STR(&ENDMARK.)
+03850022         SET &WORK = +
+03860022             &STR(&SUBSTR(&HEDRBEG.:&EVAL(&HEDRBEG.+6),&MEMNAME.))
+03870022         SET &CHECK = &STR(/*     )
+03880022         IF &STR(&WORK.) NE &STR(&CHECK.) THEN DO
+03890022            GETFILE MEMNAME
+03900022            GETFILE MEMNAME
+03910022            SET &D1 = &STR(&SUBSTR(&PRMNMBEG.:&PRMNMEND.,&MEMNAME.))
+03920022            SET &D2 = &STR(        )
+03930022            DO WHILE &STR(&D1.) EQ &STR(&D2.)
+03940022               GETFILE MEMNAME
+03950022            DONE
+03960022         DONE
+03970000         SET &NAME = &NRSTR(&SUBSTR(&PRMNMBEG.:&PRMNMEND.,&MEMNAME))
+03990000         SET &DESCR = &NRSTR(&SUBSTR(&PRMDSCRB.:&PRMDSCRE.,&MEMNAME.))
+04000000         SET &HELPMEM = ))&NAME.  &DESCR.
+04010000         PUTFILE HELPMEM
+04020000         GETFILE MEMNAME
+04030000 
+04040000      /**************************************************/
+04050000      /*    GET THE REST OF THE PARAMETER DESCRIPTION   */
+04060000      /**************************************************/
+04070000 
+04080000         DO WHILE &SUBSTR(&PRMNMBEG.:&PRMNMEND.,&MEMNAME) EQ
+04090000           SET &DESCR = &NRSTR(&SUBSTR(&PRMDSCRB.:&PRMDSCRE.,&MEMNAME))
+04100000           SET &HELPMEM = &STR(            &DESCR.)
+04110000           PUTFILE HELPMEM
+04120000           GETFILE MEMNAME
+04130000         DONE
+04140000      DONE
+04150000 
+04160000      /**************************************/
+04170000      /*    CLOSE AND FREE THE FILES AND    */
+04180000      /*    GO READ NEXT PDS MEMBER         */
+04190000      /**************************************/
+04200000 
+04210000        CLOSFILE HELPMEM
+04220000        CLOSFILE MEMNAME
+04230000        FREE F(HELPMEM MEMNAME)
+04230234        SET &CMEM = 0
+04230434        SET &HMEM = 0
+04240000 
+04250000  DONE
+04260000DONE
+04270000ELSE DO
+04280000       SET &ENDMARK = &STR(/*--)
+04290000 
+04300000      /*****************************************************/
+04310000      /*    ALLOCATE THE MEMBER IN THE PDS AND HELPFILE    */
+04320000      /*****************************************************/
+04330000 
+04340099       ALLOC F(HELPMEM) DA('&OUTLIB..HELP(&MEMBER.)') SHR
+04350000       OPENFILE   HELPMEM  OUTPUT
+04351024       SET &HMEM = 1
+04360097       ALLOC F(MEMNAME) DA('&SRCLIB.(&MEMBER.)') SHR
+04370000       OPENFILE   MEMNAME  INPUT
+04371024       SET &CMEM = 1
+04380000 
+04390000      /**************************************************/
+04400000      /*    GET THE NAME AND FUNCTION FROM THE CLIST    */
+04410000      /**************************************************/
+04420000 
+04430000       SET  &HELPMEM = )F FUNCTION:
+04440000       PUTFILE  HELPMEM
+04450000 
+04460000       GETFILE  MEMNAME
+04470000       GETFILE  MEMNAME
+04480000       GETFILE  MEMNAME
+04490000       GETFILE  MEMNAME
+04500000       SET &NAME = &NRSTR(&SUBSTR(&NAMEBEG.:&NAMEEND.,&MEMNAME.))
+04510000       GETFILE  MEMNAME
+04520000       GETFILE  MEMNAME
+04530000       GETFILE  MEMNAME
+04540000       GETFILE  MEMNAME
+04550000       SET &FUNCTION = &NRSTR(&SUBSTR(&FUNCTBEG.:&FUNCTEND.,&MEMNAME.))
+04560000       SET  &HELPMEM  = &STR(  &NAME. &FUNCTION.)
+04570000       PUTFILE  HELPMEM
+04580000       GETFILE  MEMNAME
+04590000 
+04600000      /*****************************************************/
+04610000      /*    GET THE REST OF THE FUNCTION FROM THE CLIST    */
+04620000      /*****************************************************/
+04630000 
+04640000       DO WHILE &STR(&SUBSTR(&HEDRBEG.:&HEDRBEG.+3,&MEMNAME.)) NE +
+04650000          &STR(&ENDMARK.)
+04660000        SET &FUNCTION = +
+04670000            &NRSTR(&SUBSTR(&FUNCTBEG.:&FUNCTEND.,&MEMNAME.))
+04680000        SET &HELPMEM = &STR(            &FUNCTION.)
+04690000        PUTFILE  HELPMEM
+04700000        GETFILE  MEMNAME
+04710000       DONE
+04720000 
+04730000      /***************************************/
+04740000      /*    GET THE SYNTAX FROM THE CLIST    */
+04750000      /***************************************/
+04760000 
+04770000       SET     &HELPMEM = )X SYNTAX:
+04780000       PUTFILE HELPMEM
+04790000 
+04800000       GETFILE MEMNAME
+04810000       GETFILE MEMNAME
+04820000       GETFILE MEMNAME
+04830000 
+04840000       DO WHILE &STR(&SUBSTR(&HEDRBEG.:&HEDRBEG+3,&MEMNAME.)) NE +
+04850000            &STR(&ENDMARK.)
+04860000         SET  &SYNTAX = +
+04870000              &NRSTR(&SUBSTR(&SYNTBEG.:&SYNTEND.,&MEMNAME.))
+04880000         SET  &HELPMEM = &STR(  &SYNTAX.)
+04890000         PUTFILE  HELPMEM
+04900000         GETFILE  MEMNAME
+04910000       DONE
+04920000 
+04930000 
+04940000      SET     &HELPMEM = )O OPERANDS:
+04950000      PUTFILE HELPMEM
+04960000 
+04970000      /*************************************/
+04980000      /*    FIND THE PARAMETER INDICATOR   */
+04990000      /*************************************/
+05000000 
+05010000      DO WHILE &STR(&SUBSTR(&SYNTBEG.-2:&SYNTBEG.+8,&MEMNAME.)) NE +
+05020000                                        &STR(PARAMETERS:)
+05030000           GETFILE MEMNAME
+05040000      DONE
+05050000 
+05060000      GETFILE MEMNAME
+05070000      GETFILE MEMNAME
+05080000 
+05090000      /****************************************************/
+05100000      /*    NOW THAT YOU HAVE THE PARAMETERS, GET THEM    */
+05110000      /****************************************************/
+05120000 
+05130000      DO WHILE &STR(&SUBSTR(&HEDRBEG.:&EVAL(&HEDRBEG.+3),&MEMNAME.)) +
+05140000               NE &STR(&ENDMARK.)
+05150000         SET &WORK = +
+05160000             &STR(&SUBSTR(&HEDRBEG.:&EVAL(&HEDRBEG.+6),&MEMNAME.))
+05170000         SET &CHECK = &STR(/*     )
+05180000         IF &STR(&WORK.) NE &STR(&CHECK.) THEN DO
+05190000            GETFILE MEMNAME
+05200000            GETFILE MEMNAME
+05210000            SET &D1 = &STR(&SUBSTR(&PRMNMBEG.:&PRMNMEND.,&MEMNAME.))
+05220000            SET &D2 = &STR(        )
+05230000            DO WHILE &STR(&D1.) EQ &STR(&D2.)
+05240000               GETFILE MEMNAME
+05250000            DONE
+05260000         DONE
+05270000         SET &NAME = &NRSTR(&SUBSTR(&PRMNMBEG.:&PRMNMEND.,&MEMNAME))
+05290000         SET &DESCR = &NRSTR(&SUBSTR(&PRMDSCRB.:&PRMDSCRE.,&MEMNAME.))
+05300000         SET &HELPMEM = ))&NAME.  &DESCR.
+05310000         PUTFILE HELPMEM
+05320000         GETFILE MEMNAME
+05330000 
+05340000      /**************************************************/
+05350000      /*    GET THE REST OF THE PARAMETER DESCRIPTION   */
+05360000      /**************************************************/
+05370000 
+05380000         DO WHILE &STR(&SUBSTR(&PRMNMBEG.:&PRMNMEND.,&MEMNAME)) EQ
+05390000          SET &DESCR = &NRSTR(&SUBSTR(&PRMDSCRB.:&PRMDSCRE.,&MEMNAME))
+05400000          SET &HELPMEM = &STR(            &DESCR.)
+05410000          PUTFILE HELPMEM
+05420000          GETFILE MEMNAME
+05430000         DONE
+05440000      DONE
+05450000 
+05460000      /**************************************/
+05470000      /*    CLOSE AND FREE THE FILES AND    */
+05480000      /*    GO GET NEXT MEMBER              */
+05490000      /**************************************/
+05500000 
+05510000        CLOSFILE HELPMEM
+05520000        CLOSFILE MEMNAME
+05530000        FREE F(HELPMEM MEMNAME HELPFILE)
+05531035        SET &CMEM = 0
+05532035        SET &HMEM = 0
+05540004        WRITE    &OUTLIB..HELP(&MEMBER.) BUILT
+05550000        WRITENR    DO YOU WANT A DIFFERENT PDS (Y/N OR RETURN EXITS)?
+05560000        READ &REPLY
+05570000        IF &REPLY. EQ &STR(Y) THEN +
+05580000           GOTO MENU1
+05590000        ELSE +
+05600000           IF &REPLY. EQ &STR(N) THEN +
+05610000              GOTO MENU2
+05620000           ELSE +
+05630000              EXIT
+05640000DONE

@@ -1,0 +1,151 @@
+00001000/********************************************************************/
+00002000/*------------------------------------------------------------------*/
+00003000/*                                                                  */
+00004000/*   NAME:     XPLCXPL                                              */
+00005000/*                                                                  */
+00006000/*------------------------------------------------------------------*/
+00007000/*                                                                  */
+00008000/*   FUNCTION: PROCEDURE TO COMPILE XPL COMPILER                    */
+00009000/*                                                                  */
+00009100/*------------------------------------------------------------------*/
+00009200/*                                                                  */
+00009300/*   SYNTAX:                                                        */
+00009400/*                                                                  */
+00009500/*     XPLCXPL   ID(&SYSUID.) NEWREL(&ID..XPL99V0)                  */
+00009600/*               SOURCE(&ID..XPL99V0.SOURCE)                        */
+00010200/*               COMPILER(NCAMCM.XPL.REL90V2.XCOMLINK)              */
+00010300/*               INPUT2(NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB))        */
+00010400/*               XPLINCL()                                          */
+00010600/*               PAGES(1000) OPT()  TRACE                           */
+00010700/*                                                                  */
+00010800/*     ALIAS    - NONE.                                             */
+00012400/*                                                                  */
+00012500/*------------------------------------------------------------------*/
+00012600/*                                                                  */
+00012700/*   INVOKES:  NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                      */
+00012800/*                                                                  */
+00012900/*------------------------------------------------------------------*/
+00013000/*                                                                  */
+00013100/*   PARAMETERS:                                                    */
+00013200/*                                                                  */
+00013300/*     ID       DEFAULT: &SYSUID                                    */
+00013400/*              HIGH LEVEL QUALIFIER                                */
+00013500/*                                                                  */
+00013700/*     NEWREL   DEFAULT: &ID..XPL99V0                               */
+00013800/*              RELEASE OF THE XPL COMPILER                         */
+00013900/*                                                                  */
+00014000/*     SOURCE   DEFAULT: &ID..XPL99V0.SOURCE                        */
+00014100/*              XPL COMPILER SOURCE                                 */
+00014200/*                                                                  */
+00014300/*     COMPILER DEFAULT: NCAMCM.XPL.REL90V2.XCOMLINK                */
+00014400/*              XPL COMPILER                                        */
+00014500/*                                                                  */
+00015800/*     INPUT2   DEFAULT: NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB)        */
+00015900/*              LIBRARY TO BE LINKED IN AT COMPILE TIME             */
+00016000/*                                                                  */
+00016100/*     XPLINCL  DEFAULT: NULL                                       */
+00016200/*              OPTIONAL INCLUDE FILE FOR COMPILATION               */
+00016300/*                                                                  */
+00016700/*     PAGES    DEFAULT: 1000                                       */
+00016800/*              PAGE OPTION FOR THE XPL COMPILER                    */
+00016900/*                                                                  */
+00017000/*     OPT      DEFAULT: NULL                                       */
+00017100/*              ADDITIONAL OPTION FOR THE XPL COMPILER              */
+00017200/*                                                                  */
+00018800/*     TRACE    OPTIONAL                                            */
+00018900/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00019000/*              TERMINAL                                            */
+00019100/*                                                                  */
+00019200/*------------------------------------------------------------------*/
+00019300/*                                                                  */
+00019400/*   INPUT DATA SET NAMES:                                          */
+00019500/*                                                                  */
+00019600/*     <INPUT2>                                                     */
+00019700/*         LIBRARY TO BE LINKED IN AT COMPILE TIME                  */
+00019800/*                                                                  */
+00020200/*     <XPLINCL>                                                    */
+00020300/*         OPTIONAL INCLUDE FILE                                    */
+00020400/*                                                                  */
+00020500/*     <SOURCE>                                                     */
+00020600/*         SOURCE CODE OF THE XPL COMPILER                          */
+00020700/*                                                                  */
+00020800/*------------------------------------------------------------------*/
+00020900/*                                                                  */
+00021000/*   OUTPUT DATA SET NAMES:                                         */
+00021100/*                                                                  */
+00021200/*     <NEWREL>.LST                                                 */
+00021300/*         LISTING OF THE XPL COMPILER THAT IS COMPILED             */
+00021400/*                                                                  */
+00021500/*     <NEWREL>.OBJ                                                 */
+00021600/*         OBJECT FILE OF THE XPL COMPILER THAT IS COMPILED         */
+00021700/*                                                                  */
+00021800/*------------------------------------------------------------------*/
+00021900/*                                                                  */
+00022000/*   TEMPORARY DATA SET NAMES:                                      */
+00022100/*                                                                  */
+00022200/*     NONE                                                         */
+00022300/*                                                                  */
+00022400/*------------------------------------------------------------------*/
+00022500/*   REVISION HISTORY:                                              */
+00022600/*                                                                  */
+00022700/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00022800/*     --------  ----  ----  -------------------------------------  */
+00022900/*     07/18/91  0194  LJK   BASELINED                              */
+00023000/*                                                                  */
+00023100/*     03/23/94  0328  TEV   UPDATED FOR XPL 90V2 RELEASE           */
+00023200/*                                                                  */
+00023300/*     04/07/95  0336  HFG   CHANGED MONITOR TO ELIMINATE           */
+00023400/*                           BAD RLD/TXT COUNT MESSAGE              */
+00023500/*                                                                  */
+00024000/*------------------------------------------------------------------*/
+00026200/********************************************************************/
+00026300 
+00035400PROC 0   ID(&SYSUID.)                            +
+00035500         NEWREL(&ID..XPL99V0)                    +
+00035600         SOURCE(&ID..XPL99V0.SOURCE)             +
+00035800         COMPILER(NCAMCM.XPL.REL90V2.XCOMLINK)   +
+00035900         INPUT2(NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB)) +
+00036000         XPLINCL()                               +
+00036200         PAGES(1000)                             +
+00036300         OPT()                                   +
+00036400         TRACE
+00036600 
+00037100IF &TRACE. NE THEN CONTROL CONLIST LIST
+00037300CONTROL END(DONE)
+00037400CONTROL NOMSG
+00037600  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 +
+00037700    SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133)
+00037800  DELETE ('&NEWREL..LST' '&NEWREL..OBJ')
+00037900CONTROL MSG
+00038000ATTR FBA133 RECFM(F B A) LRECL(133)  BLKSIZE(2660)
+00039000ATTR F7200  RECFM(F)     LRECL(7200) BLKSIZE(7200)
+00040000ATTR F133   RECFM(F)     LRECL(133)  BLKSIZE(133)
+00050000ALLOC F(PROGRAM)  DA('&COMPILER.') SHR
+00060000ALLOC F(FILE1)  DA('&NEWREL..OBJ') RELEASE USING(F7200) +
+00070000  NEW SP(10 5) TRACK
+00080000ALLOC F(FILE2) NEW SPACE(40,10) BLOCK(7200)
+00090000ALLOC F(FILE3) NEW SPACE(40,10) BLOCK(7200)
+00100000ALLOC F(FILE4) NEW SPACE(40,10) BLOCK(7200)
+00110000ALLOC F(INPUT2) DA('&INPUT2.') SHR
+00140000ALLOC F(SYSPRINT) DA('&NEWREL..LST') USING(FBA133) +
+00150000  RELEASE SP(40 20) TRACK
+00160000ALLOC F(LISTING2) DA(*) USING(F133)
+00161000IF &XPLINCL. NE THEN +
+00162000   ALLOC F(INCLUDE)  DA('&XPLINCL.') SHR
+00172000 
+00180000ALLOC F(SYSIN) DA('&SOURCE.') SHR
+00190000 
+00200000WRITE COMPILATION OF &SOURCE. ---> &NEWREL..OBJ
+00210000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+00220000  'LISTING2,SYTSIZE=2800,REFSIZE=30000,MACROSIZE=999,CONSTANTS=500,-
+00230000EXCLUDE=AC,PAGES=&PAGES.,ALTER,INDENT=1,&OPT.'
+00240000 
+00250000SET &SAVECC=&LASTCC
+00260000CONTROL NOMSG
+00270000  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 +
+00280000    SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133)
+00281000CONTROL MSG
+00290000IF &SAVECC EQ 0 THEN +
+00300000     WRITE COMPILATION SUCCESSFUL
+00310000ELSE +
+00320000     WRITE COMPILATION ERROR CODE = &SAVECC

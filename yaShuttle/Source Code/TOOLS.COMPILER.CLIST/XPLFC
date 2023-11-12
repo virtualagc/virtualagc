@@ -1,0 +1,375 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     XPLFC                                                */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: COMPILE FC (PASS & BFS) AND H360 COMPILER PHASES     */
+00080100/*             EXAMPLE OF A COMMON INVOCATION:                      */
+00080200/*                XPLFC PASS2 COMPVER(REL21VB)                      */
+00080300/*                                                                  */
+00080400/*------------------------------------------------------------------*/
+00080500/*                                                                  */
+00080600/*   SYNTAX:                                                        */
+00080700/*                                                                  */
+00080800/*     XPLFC 'PASS' SYSTEM(PASS) COMPVER(CURRENT)                   */
+00080900/*           NEWREL(&SYSUID..REL99V0) SOURCE(&NEWREL.)              */
+00081001/*           BINPUT2() MYINCLREL(&NEWREL)                           */
+00082000/*           BINCL(NCAMCM.&SYSTEM..&COMPVER..HALINCL)               */
+00083000/*           BXPLINCL(NCAMCM.&SYSTEM..&COMPVER..HALINCL)            */
+00084000/*           CINPUT2(NCAMCM.H360.&COMPVER..LINKLIB)                 */
+00085000/*           CINCL(NCAMCM.H360.&COMPVER..INCLUDE.PASS1)             */
+00086000/*           CXPLINCL(NCAMCM.H360.&COMPVER..XPLINCL.DATA)           */
+00087000/*           INPUT2()                                               */
+00088000/*           INCL(NCAMCM.&SYSTEM..&COMPVER..HALINCL)                */
+00089000/*           PAGES(5000) PROGRAM(NCAMCM.XPL.REL90V2.XCOMLINK) OPT() */
+00089100/*           EXCLUDE() DR() TRACE                                   */
+00090000/*                                                                  */
+00100000/*     ALIAS    - NONE.                                             */
+00110000/*     REQUIRED - 'PASS'                                            */
+00120000/*                                                                  */
+00130000/*------------------------------------------------------------------*/
+00140000/*                                                                  */
+00150000/*   INVOKES:  NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                      */
+00160000/*                                                                  */
+00170000/*------------------------------------------------------------------*/
+00180000/*                                                                  */
+00190000/*   PARAMETERS:                                                    */
+00200000/*                                                                  */
+00210000/*     PASS     REQUIRED                                            */
+00220000/*              PHASE OF THE COMPILER {PASS1, PASS2, PASS3, PASS4,  */
+00230000/*              AUX, OPT, OR FLO}                                   */
+00240000/*                                                                  */
+00250000/*     SYSTEM                                                       */
+00260000/*              DETERMINES WHICH DEFAULTS TO USE. THIS PARAMETER    */
+00270000/*              AFFECTS VALUES USED FOR THE EXCLUDE OPTION, INPUT2  */
+00271000/*              FILE, AND INCLUDE FILES. VALID VALUES ARE PASS,     */
+00272000/*              BFS, AND 360.                                       */
+00273000/*                                                                  */
+00274000/*     COMPVER                                                      */
+00275000/*              CM COMPILER VERSION TO BE USED                      */
+00276000/*                                                                  */
+00277000/*     NEWREL                                                       */
+00278000/*              WHAT TO NAME THE OBJECT AND LISTING FILES           */
+00279000/*                                                                  */
+00279101/*     MYINCLREL                                                    */
+00279201/*              HIGH LEVEL QUALIFIER OF THE DATASET THAT CONTAINS   */
+00279301/*              MODIFIED INCLUDE FILES. DEFAULTS TO &NEWREL         */
+00279401/*                                                                  */
+00280000/*     SOURCE                                                       */
+00290000/*              WHERE TO GET THE SOURCE CODE TO COMPILE        .    */
+00300000/*                                                                  */
+00310000/*     BINPUT2                                                      */
+00320000/*              LOCATION OF COMPACTIFY AND LINK ROUTINE FOR BFS6V0. */
+00330000/*              LOCATION OF FILE CONTAINING XPL COMPACTIFY AND      */
+00340000/*              SPACE MANAGEMENT ROUTINES FOR BFS7V0.               */
+00341000/*                                                                  */
+00342000/*     BINCL                                                        */
+00343000/*              BFS INCLUDE FILE FOR COMPILATION                    */
+00344000/*              REL6V0 USES .INCLUDE.PASS1                          */
+00345000/*              REL7V0 USES .HALINCL                                */
+00346000/*                                                                  */
+00347000/*     BXPLINCL                                                     */
+00348000/*              XPL INCLUDE FILE FOR COMPILATION FOR BFS6V0 ONLY.   */
+00349000/*                                                                  */
+00350000/*     CINPUT2                                                      */
+00360000/*              LOCATION OF COMPACTIFY AND LINK ROUTINE FOR HAL-360.*/
+00370000/*                                                                  */
+00380000/*     CINCL                                                        */
+00390000/*              HAL-360 INCLUDE FILE FOR COMPILATION                */
+00400000/*                                                                  */
+00410000/*     CXPLINCL                                                     */
+00420000/*              HAL-360 XPL INCLUDE FILE FOR COMPILATION            */
+00430000/*                                                                  */
+00440000/*     INPUT2                                                       */
+00450000/*              LOCATION OF FILE CONTAINING XPL COMPACTIFY AND      */
+00460000/*              SPACE MANAGEMENT ROUTINES                           */
+00470000/*                                                                  */
+00480000/*     INCL                                                         */
+00490000/*              INCLUDE FILES FOR PASS                              */
+00500000/*                                                                  */
+00510000/*     PAGES                                                        */
+00520000/*              PAGE OPTION FOR THE XPL COMPILER                    */
+00530000/*                                                                  */
+00531000/*     PROGRAM                                                      */
+00532000/*              LOCATION OF XPL COMPILER TO USE                     */
+00533000/*                                                                  */
+00540000/*     OPT                                                          */
+00550000/*              ADDITIONAL OPTIONS FOR THE XPL COMPILER             */
+00560000/*                                                                  */
+00570000/*     EXCLUDE                                                      */
+00580000/*              CONDITIONAL COMPILATION OF USER SPECIFIED CODE. IF  */
+00590000/*              NULL WILL BE SET TO ACP WHEN COMPILING BFS AND ACB  */
+00600000/*              WHEN COMPILING PASS OR HAL-360.                     */
+00610000/*                                                                  */
+00620000/*     DR                                                           */
+00630000/*              ALLOWS USER TO SPECIFY AN INCLUDE FILE FOR PURPOSES */
+00640000/*              OF DEBUGGING A PARTICULAR DR. IF NULL,              */
+00650000/*              &NEWREL..INCL IS USED                               */
+00660000/*                                                                  */
+00670000/*     TRACE    OPTIONAL                                            */
+00680000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00690000/*              TERMINAL                                            */
+00700000/*                                                                  */
+00710000/*------------------------------------------------------------------*/
+00720000/*                                                                  */
+00730000/*   INPUT DATA SET NAMES:                                          */
+00740000/*                                                                  */
+00750000/*     <SOURCE>.<PASS>.SOURCE                                       */
+00751000/*        FULLY QUALIFIED LOCATION OF THE SOURCE TO COMPILE         */
+00752000/*                                                                  */
+00753000/*     <BINPUT2>                                                    */
+00754000/*        LOCATION OF THE XPL COMPACTIFY AND LINK ROUTINE FOR BFS6V0*/
+00755000/*        LOCATION OF THE XPL SPACE MANAGEMENT LIBRARY FOR BFS7V0   */
+00756000/*                                                                  */
+00757000/*     <BINCL>                                                      */
+00758000/*        LOCATION OF THE INCLUDE LIBRARY FOR BFS                   */
+00759000/*        REL6V0 USES .INCLUDE.PASS1                                */
+00759100/*        REL7V0 USES .HALINCL                                      */
+00759200/*                                                                  */
+00759300/*     <BXPLINCL>                                                   */
+00759400/*        LOCATION OF THE XPL INCLUDE LIBRARY FOR BFS6V0 ONLY       */
+00759500/*                                                                  */
+00759600/*     <CINPUT2>                                                    */
+00759700/*        LOCATION OF THE XPL COMPACTIFY AND LINK ROUTINE FOR       */
+00759800/*        HAL-360                                                   */
+00759900/*                                                                  */
+00760000/*     <CINCL>                                                      */
+00760100/*        LOCATION OF THE INCLUDE LIBRARY FOR HAL-360               */
+00760200/*                                                                  */
+00760300/*     <CXPLINCL>                                                   */
+00760400/*        LOCATION OF THE XPL INCLUDE LIBRARY FOR HAL-360           */
+00760500/*                                                                  */
+00760600/*     <INPUT2>                                                     */
+00760700/*        LOCATION OF THE XPL SPACE MANAGEMENT LIBRARY FOR PASS     */
+00760800/*                                                                  */
+00760900/*     <INCL>                                                       */
+00761000/*        LOCATION OF THE INCLUDE LIBRARY FOR PASS                  */
+00762000/*                                                                  */
+00763000/*     <NEWREL>.INCL                                                */
+00764000/*        THIS INCLUDE FILE WILL BE USED IF THE DR PARAMETER IS NOT */
+00765000/*        SPECIFIED                                                 */
+00766000/*                                                                  */
+00767000/*     <NEWREL>.INCL.<DR>                                           */
+00768000/*        THIS INCLUDE FILE WILL BE USED IF THE DR PARAMETER IS     */
+00769000/*        SPECIFIED                                                 */
+00770000/*                                                                  */
+00780000/*------------------------------------------------------------------*/
+00790000/*                                                                  */
+00800000/*   OUTPUT DATA SET NAMES:                                         */
+00810000/*                                                                  */
+00820000/*     <NEWREL>.<PASS>.LST                                          */
+00830000/*         LISTING OF THE COMPILER PHASE THAT IS COMPILED           */
+00840000/*                                                                  */
+00850000/*     <NEWREL>.<PASS>.OBJ                                          */
+00860000/*         OBJECT FILE OF THE COMPILER PHASE THAT IS COMPILED       */
+00870000/*                                                                  */
+00880000/*------------------------------------------------------------------*/
+00890000/*                                                                  */
+00900000/*   TEMPORARY DATA SET NAMES:                                      */
+00910000/*                                                                  */
+00920000/*     NONE                                                         */
+00930000/*                                                                  */
+00940000/*------------------------------------------------------------------*/
+00950000/*                                                                  */
+00960000/*   COMMENTS:  IF COMPILING FOR BFS, INVOKE CLIST WITH SYSTEM(BFS) */
+00970000/*              PARAMETER.  IF COMPILING FOR HAL-360, INVOKE CLIST  */
+00980000/*              WITH SYSTEM(360) PARAMETER.                         */
+00990000/*                                                                  */
+01000000/*------------------------------------------------------------------*/
+01010000/*                                                                  */
+01020000/*   REVISION HISTORY:                                              */
+01030000/*                                                                  */
+01040000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+01050000/*     --------  ----  ----  -------------------------------------  */
+01060000/*     02/01/84  XXX   MGR   CREATED                                */
+01070000/*                                                                  */
+01080000/*     03/01/89  XXX   SDM   ADDED HIGH LEVEL QUALIFIER OPTION      */
+01090000/*                                                                  */
+01100000/*     07/11/89  025   LJK   ADDED PARAMETERS INPUT2, INCL, &       */
+01110000/*                           XPLINCL                                */
+01120000/*                                                                  */
+01130000/*     02/16/90  073   JAC   UPDATED TO INCLUDE BFS DEFAULTS,       */
+01140000/*                           OPTION TO COMPILE FOR BFS, AND HEADER  */
+01150000/*                                                                  */
+01160000/*     05/30/90  090   RPC   UPDATED TO CHANGE SUBMONITOR FROM      */
+01170000/*                           NCAMCM.XPL.TOOLS.HALS.MONITOR(XPLSM)   */
+01180000/*                           TO NCAMCM.XPL.TOOLS.MONITOR(XPLSM)     */
+01190000/*                                                                  */
+01200000/*     06/22/90  098   TEV   UPDATED HEADER                         */
+01210000/*                                                                  */
+01220000/*     10/11/90  123   TKK   ADDED PARAMETERS AND A DEFAULT TO      */
+01230000/*                           EXCLUDE OPTION.                        */
+01240000/*                                                                  */
+01250000/*     12/07/90  135   LWW   CHANGED PAGES DEFAULT VALUE TO 5000    */
+01260000/*                                                                  */
+01270000/*     03/13/91  157   RSJ   ADDED DR PARAMETER FOR INCL FILES      */
+01280000/*                                                                  */
+01290000/*     04/17/91  167   PMA   CHANGED PASS INCLUDE FILES TO HALINCL  */
+01300000/*                                                                  */
+01310000/*     06/19/91  187   TEV   RENAMED FCCOMP PARAMETER TO SYSTEM TO  */
+01320000/*                           BE MORE UNIFORM WITH ALL CLISTS AND    */
+01330000/*                           UPDATED HEADER                         */
+01340000/*                                                                  */
+01350000/*     07/02/91  188   RPC   UPDATED TO INCLUDE HAL-360 DEFAULTS,   */
+01360000/*                           OPTION TO COMPILE FOR HAL-360 AND      */
+01370000/*                           HEADER                                 */
+01380000/*                                                                  */
+01390000/*     10/09/91  219   SDM   ADDED COMPVER, MODIFIED INCLUDE FILES  */
+01400000/*                           TO USE &SYSTEM AND &COMPVER            */
+01410000/*                                                                  */
+01420000/*     02/07/92  227   RAH   CHANGED ALL REFERENCES OF              */
+01430000/*                           NCAMCM.BFS.PREVIOUS TO                 */
+01440000/*                           NCAMCM.BFS.CURRENT,                    */
+01441000/*                           UPDATED HEADER, ADDED PARAMETER SOURCE,*/
+01442000/*                           AND INCREASED SYSPRINT ALLOCATION.     */
+01443000/*                                                                  */
+01444000/*     08/05/92  251   ADM   MODIFICATIONS FOR BFS 7V0 TO MAKE      */
+01445000/*                           7V0 INCLUDES THE DEFAULT WHILE STILL   */
+01446000/*                           WORKING FOR 6V0.  THIS CLIST WORKS FOR */
+01447000/*                           6V0 AND LATER ONLY! IF USING EARLIER   */
+01448000/*                           THAN 6V0, SEARCH FOR REL6V0 IN THIS    */
+01448100/*                           CLIST AND MODIFY FOR THE RELEASE       */
+01448200/*                           NEEDED.                                */
+01448300/*                                                                  */
+01448400/*     03/23/94  328  TEV    UPDATED FOR XPL 90V2 RELEASE           */
+01448600/*                                                                  */
+01448700/*     02/27/95  338  HFG    CR12459 CHANGES: UPDATED REFERENCES    */
+01448800/*                           TO SPACELIB; MADE REL99V0.INCL OPTIONAL*/
+01448900/*                                                                  */
+01449000/*     04/20/95  427  HFG    DEFAULT INPUT2 TO OLD SPACELIB WHEN    */
+01449100/*                           COMPVER = CURRENT                      */
+01449200/*                                                                  */
+01449300/*     06/01/95  432  DKB    CR12459 CHANGES: DEFAULT INPUT2 TO     */
+01449400/*                           NEW SPACELIB WHEN COMPVER = CURRENT    */
+01449500/*                                                                  */
+01449600/*     10/21/97  542  LJK    DELETE THE REFERENCE OF XPL.REL89V0    */
+01449700/*                           COMPILER FOR H360 COMPILATION          */
+01449801/*                                                                  */
+01449901/*     09/21/00  684  DCP    ADDED NEW PARAMETER, MYINCLREL, TO     */
+01450001/*                           BE USED BY DEVELOPMENT INTEGRATION     */
+01450100/*------------------------------------------------------------------*/
+01450200/********************************************************************/
+01450300 
+01450400PROC 1   PASS                                           +
+01450500         SYSTEM   (PASS)                                +
+01450600         COMPVER  (CURRENT)                             +
+01450700         NEWREL   (&SYSUID..REL99V0)                    +
+01450801         MYINCLREL(&NEWREL.)                            +
+01450900         SOURCE   (&NEWREL.)                            +
+01451000         BINPUT2  ()                                    +
+01460000         BINCL    (NCAMCM.&SYSTEM..&COMPVER..HALINCL)   +
+01470000         BXPLINCL (NCAMCM.&SYSTEM..&COMPVER..HALINCL)   +
+01471000         CINPUT2  (NCAMCM.H360.&COMPVER..LINKLIB)       +
+01472000         CINCL    (NCAMCM.H360.&COMPVER..INCLUDE.PASS1) +
+01473000         CXPLINCL (NCAMCM.H360.&COMPVER..XPLINCL.DATA)  +
+01474000         INPUT2   ()                                    +
+01475000         INCL     (NCAMCM.&SYSTEM..&COMPVER..HALINCL)   +
+01476000         PAGES    (5000)                                +
+01476100         PROGRAM  (NCAMCM.XPL.REL90V2.XCOMLINK)         +
+01477000         OPT      ()                                    +
+01478000         EXCLUDE  ()                                    +
+01479000         DR       ()                                    +
+01480000         TRACE
+01490000 
+01500000IF &TRACE. NE THEN +
+01510000   CONTROL LIST CONLIST
+01520000CONTROL END(DONE)
+01521000 
+01522000IF &EXCLUDE. EQ THEN DO
+01523000   IF &SYSTEM. EQ BFS THEN +
+01524000      SET &EXCLUDE = ACP
+01525000   ELSE                   /*  BOTH PASS AND H360 SHOULD USE ACB */  +
+01526000      SET &EXCLUDE = ACB
+01527000DONE
+01528000 
+01529000IF &STR(&COMPVER) = &STR(REL6V0) THEN DO
+01530000    SET &INPUT2 = NCAMCM.BFS.HALS.LINKLIB
+01540000    SET &BXPLINCL = NCAMCM.BFS.REL6V0.XPLINCL.DATA
+01550000    SET &BINCL = NCAMCM.BFS.REL6V0.INCLUDE.PASS1
+01560000DONE
+01564000 
+01565000ELSE IF &SYSTEM. EQ 360 THEN DO
+01566000   SET &INPUT2   = &CINPUT2.
+01567000   SET &BINCL    = &CINCL.
+01568000   SET &BXPLINCL = &CXPLINCL.
+01569000DONE
+01569100 
+01569200ELSE DO
+01569300   IF &SYSTEM = BFS THEN SET &INPUT2 = &BINPUT2
+01569400/* IF INPUT2 DEFAULT HAS NOT BEEN OVER-RIDDEN
+01569500/* THEN MAKE SURE A VALID DATASET IS SPECIFIED FOR INPUT2.
+01569600   IF &INPUT2 EQ THEN DO
+01569700      IF &COMPVER = CURRENT THEN +
+01569800         SET &INPUT2 = NCAMCM.&SYSTEM..&COMPVER..HALINCL(SPACELIB)
+01569900      ELSE DO
+01570000         SET &NUB = &SUBSTR(4:5,&COMPVER.)
+01570100         IF &DATATYPE(&NUB) = NUM THEN DO
+01570200            IF (&SYSTEM = BFS   AND  &NUB < 11)  OR   +
+01570300               (&SYSTEM = PASS  AND  &NUB < 27)  THEN +
+01570400               SET &INPUT2 = NCAMCM.PASS.TOOLS.SPACELIB
+01570500            ELSE +
+01570600              SET &INPUT2 = NCAMCM.&SYSTEM..&COMPVER..HALINCL(SPACELIB)
+01570700         DONE
+01570800/*          IF NUB IS NOT A NUMBER AT THIS POINT IT IS BECAUSE THE
+01570900/*          VERSION IN COMPVER IS LESS THAN 10V0, E.G. NUB = 9V
+01571000         ELSE +
+01571100            SET &INPUT2 = NCAMCM.PASS.TOOLS.SPACELIB
+01571200      DONE
+01571300   DONE
+01571400DONE
+01571500 
+01580000CONTROL NOMSG
+01581000   FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2          +
+01582000          SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133)
+01583000   DELETE ('&NEWREL..&PASS..LST' '&NEWREL..&PASS..OBJ')
+01584000   IF &PASS NE PASS2 THEN SET OPT EQ &STR($V,$I)
+01585000CONTROL MSG
+01586000 
+01587000IF &DR. EQ THEN +
+01588001   SET &MYINCL = &MYINCLREL..INCL
+01589000ELSE  +
+01590001   SET &MYINCL = &MYINCLREL..INCL.&DR.
+01590100 
+01590200/* IF MYINCL DOESN'T EXIST THEN DON'T INCLUDE IT IN THE CONCATENATION
+01590300IF &SYSDSN('&MYINCL') = OK THEN +
+01590400   SET &MYINCL = '&MYINCL'
+01590500ELSE +
+01590600   SET &MYINCL =
+01600000 
+01610000ATTR FBA133 RECFM(F B A) LRECL(133)  BLKSIZE(4788)
+01620000ATTR F7200  RECFM(F)     LRECL(7200) BLKSIZE(7200)
+01630000ATTR F133   RECFM(F)     LRECL(133)  BLKSIZE(133)
+01640000 
+01680000ALLOC F(PROGRAM)  DA('&PROGRAM.') SHR
+01700000ALLOC F(FILE1)    DA('&NEWREL..&PASS..OBJ') RELEASE USING(F7200) +
+01710000                  NEW SP(10 5) TRACK
+01720000ALLOC F(FILE2)    NEW SPACE(40,10) BLOCK(7200)
+01730000ALLOC F(FILE3)    NEW SPACE(40,10) BLOCK(7200)
+01740000ALLOC F(FILE4)    NEW SPACE(40,10) BLOCK(7200)
+01750000ALLOC F(INPUT2)   DA('&INPUT2.') SHR
+01760000ALLOC F(SYSPRINT) DA('&NEWREL..&PASS..LST') USING(FBA133)        +
+01770000                  RELEASE SP(400 40) TRACK
+01780000ALLOC F(LISTING2) DA(*) USING(F133)
+01790000 
+01800000IF &SYSTEM. EQ PASS THEN                                          +
+01810000   ALLOC F(INCLUDE) DA(&MYINCL. '&INCL.')   SHR
+01820000ELSE                                                              +
+01821000   ALLOC F(INCLUDE) DA(&MYINCL. '&BINCL.' '&BXPLINCL.')    SHR
+01822000 
+01823200ALLOC F(SYSIN)    DA('&SOURCE..&PASS..SOURCE') SHR
+01824000 
+01825000WRITE COMPILATION OF &NEWREL..&PASS..SOURCE
+01826000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+01827000     'LISTING2,SYTSIZE=2800,REFSIZE=30000,MACROSIZE=999,CONSTANTS=500,+
+01828000     EXCLUDE=&EXCLUDE.,PAGES=&PAGES.,ALTER,INDENT=1,&OPT.'
+01829000 
+01830000SET &SAVECC=&LASTCC
+01840000FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 +
+01850000       SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133)
+01860000 
+01870000IF &SAVECC EQ 0 THEN +
+01880000     WRITE COMPILATION SUCCESSFUL
+01890000ELSE +
+01900000     WRITE COMPILATION ERROR CODE = &SAVECC

@@ -1,0 +1,11 @@
+CONS     TITLE 'CONSTANT - SET DSE CONSTANTS FOR THE 24V0(#D) COMPILER' 00000103
+CONSTANT CSECT                                                          00000200
+         ENTRY $ZDSESET,$ZDSECLR    DAS -- EXTERNAL DEFINE CONSTANTS    00000304
+         SPOFF                                                          00000400
+*                                                                       00004000
+         DC    H'0'           DAS - DUMMY FILLER                        00004104
+*                             DAS - LDM CONSTANTS FOR #D                00004204
+$ZDSESET DC    X'00030003'    DAS - SET DSES FOR R1 AND R3 TO SECTOR 3  00004304
+$ZDSECLR DC    F'0'           DAS - CLEAR DSES                          00004404
+*                                                                       00004500
+         END                                                            00004600

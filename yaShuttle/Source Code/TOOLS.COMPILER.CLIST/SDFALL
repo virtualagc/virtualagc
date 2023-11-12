@@ -1,0 +1,207 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040014/*   NAME:     SDFALL                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080024/*   FUNCTION: TO GENERATE SDFLISTS FOR ALL MEMBER OF A PDS         */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00151027/*     SDFALL  ID(&SYSUID) LIB(&ID..TEST) SYSTEM(PASS)  SCREEN  +   */
+00152027/*             SDFLIB(&LIB..SDF) COMPVER(CURRENT) SRCID(NCAMCM) +   */
+00153027/*             MONITOR(NCAMCM.PASS.CURRENT.MONITOR.LOAD(MONITOR)+   */
+00155027/*             ERRORLIB(NCAMCM.PASS.CURRENT.ERRORLIB) LIST()    +   */
+00156038/*             PROGRAM(NCAMCM.PASS.CURRENT.PASS4.OBJ) PG(91000)     */
+00157027/*                                                                  */
+00160029/*     ALIAS    - NONE                                              */
+00170024/*     REQUIRED - NONE                                              */
+00180000/*                                                                  */
+00190000/*------------------------------------------------------------------*/
+00200000/*                                                                  */
+00210000/*   INVOKES   : NCAMCM.TOOLS.MISCLOAD(MEMLIST)                     */
+00220025/*               NCAMCM.TOOLS.COMPILER.CLIST(SDFLIST)               */
+00230000/*                                                                  */
+00240000/*------------------------------------------------------------------*/
+00250000/*                                                                  */
+00260000/*   PARAMETERS:                                                    */
+00270000/*                                                                  */
+00271027/*     ID       DEFAULT: &SYSUID                                    */
+00272027/*              NAME OF HIGH LEVEL QUALIFIER                        */
+00273027/*                                                                  */
+00274027/*     LIB      DEFAULT: &ID..TEST                                  */
+00275027/*              PART OF THE NAME OF THE PDS'S INVOLVED IN THE LIST  */
+00276027/*                                                                  */
+00277027/*     SDFLIB   DEFAULT: &LIB..SDF                                  */
+00278027/*              NAME OF A PDS CONTAINING SDF'S                      */
+00279127/*                                                                  */
+00279527/*     SYSTEM   DEFAULT: PASS                                       */
+00279627/*              COMPILER SYSTEM PASS OR BFS                         */
+00279727/*                                                                  */
+00279827/*     COMPVER  DEFAULT: CURRENT                                    */
+00279927/*              COMPILER VERSION                                    */
+00280027/*                                                                  */
+00280129/*     SRCID    DEFAULT: NCAMCM                                     */
+00280232/*              HIGH LEVEL QUALIFIER FOR PROGRAM,ERRORLIB & MONITOR */
+00280329/*                                                                  */
+00280429/*     PROGRAM  DEFAULT: &SRCID..&SYSTEM..&COMPVER.PASS4.OBJ        */
+00280527/*              SDFLIST OBJECT FILE                                 */
+00280627/*                                                                  */
+00280729/*     ERRORLIB DEFAULT: &SRCID..&SYSTEM..&COMPVER..ERRORLIB        */
+00280827/*              ERRORLIB USED BY SDFLIST                            */
+00280927/*                                                                  */
+00281029/*     MONITOR  DEFAULT: &SRCID..&SYSTEM..&COMPVER..MONITOR.LOAD    */
+00281232/*              MONITOR USED BY SDFLIST                             */
+00281327/*                                                                  */
+00281427/*     SCREEN   OPTIONAL                                            */
+00281527/*              DUMPS OUTPUT TO THE SCREEN INSTEAD OF A FILE        */
+00281627/*                                                                  */
+00281735/*     PG       DEFAULT: 91000                                      */
+00281835/*              PAGE MAXIMUM LIMIT                                  */
+00281935/*                                                                  */
+00282027/*     TRACE    OPTIONAL                                            */
+00282127/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00282227/*                                                                  */
+00282327/*     LIST     DEFAULT: NULL                                       */
+00282427/*              IF SPECIFIED, IT IS A SEQUENTIAL FILE WITH THE      */
+00282527/*              MEMBERS LISTED THAT YOU WANT SDFLIST PERFORMED      */
+00282627/*              UPON, INSTEAD OF ALL MEMBERS OF A PDS.              */
+00282727/*                                                                  */
+00282827/*------------------------------------------------------------------*/
+00282927/*                                                                  */
+00283027/*   INPUT DATA SET NAMES:                                          */
+00283127/*                                                                  */
+00283227/*     <SDFLIB>                                                     */
+00283427/*        NAME OF A PDS CONTAINING SDF'S                            */
+00283627/*                                                                  */
+00284127/*------------------------------------------------------------------*/
+00284227/*                                                                  */
+00284327/*   OUTPUT DATA SET NAMES :                                        */
+00284427/*                                                                  */
+00284527/*     <LIB>.MEMLIST                                                */
+00284627/*          DATA SET WHICH CONTAINS THE MEMBER LIST TO PROCESS      */
+00284727/*                                                                  */
+00284927/*     <LIB>.SDFLIST                                                */
+00285028/*          PDS WHICH CONTAINS FORMATTED SDF DUMP                   */
+00285127/*                                                                  */
+00285227/*------------------------------------------------------------------*/
+00285327/*                                                                  */
+00285427/*   TEMPORARY DATA SET NAMES:                                      */
+00285527/*                                                                  */
+00285627/*     NONE.                                                        */
+00285727/*                                                                  */
+00285827/*------------------------------------------------------------------*/
+00285927/*                                                                  */
+00286027/*   COMMENTS:                                                      */
+00286127/*                                                                  */
+00286227/*     NONE.                                                        */
+00286327/*                                                                  */
+00286427/*------------------------------------------------------------------*/
+00286527/*                                                                  */
+00286627/*   REVISION HISTORY :                                             */
+00286727/*                                                                  */
+00286827/*     DATE      PCR     NAME   DESCRIPTION                         */
+00286927/*     --------  ----    ----   ------------------------------      */
+00287027/*     07/19/93  256     LJK    CREATED FOR TESTING 25V0            */
+00287137/*     04/06/94  332     LJK    ADDED PG PARAMETER                  */
+00287327/*------------------------------------------------------------------*/
+00288027/********************************************************************/
+01050000 
+01070021PROC 0   ID(&SYSUID.)                      +
+01080016         LIB(&ID..TEST)                    +
+01080121         SDFLIB(&LIB..SDF)                 +
+01080223         SRCID(NCAMCM)                     +
+01091014         SYSTEM(PASS)                      +
+01092023         COMPVER(CURRENT)                  +
+01100014         PROGRAM(&SRCID..&SYSTEM..&COMPVER..PASS4.OBJ)   +
+01101014         ERRORLIB(&SRCID..&SYSTEM..&COMPVER..ERRORLIB)   +
+01101134         MONITOR(&SRCID..&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+01120034         PG(91000)                         +
+01130034         SCREEN                            +
+01140022         LIST()                            +
+01140122         TRACE
+01141015 
+01150000GLOBAL RETCODE
+01160000IF       &TRACE.  NE THEN +
+01170000         CONTROL  LIST CONLIST
+01180000IF &LIST. EQ THEN DO
+01190000         /***************************************/
+01200000         /*                                     */
+01210000         /*        GENERATE MEMBER LIST         */
+01220000         /*                                     */
+01230000         /***************************************/
+01240000CONTROL  NOMSG END(DONE)
+01250000         SET &LIST = &LIB..MEMLIST
+01260000         FREE     F(SYSLIB SYSPRINT)
+01270000         DELETE   '&LIB..MEMLIST'
+01280000CONTROL  MSG
+01291038IF &SYSDSN('&LIB..SDFLIST') NE OK THEN               +
+01292038   ALLOC DA('&LIB..SDFLIST') NEW RECFM(F B A ) LRECL(133) DSORG(PO) +
+01293038   BLKSIZE(6384) SPACE(200,10) CYLINDERS DIR(50)
+01294038 
+01300000ALLOC    F(SYSLIB)   DA('&SDFLIB.') SHR
+01310000ALLOC    F(SYSPRINT) DA('&LIST') NEW BLOCK(80) TRACK SP(1 1)
+01320000 
+01330000CALL     'NCAMCM.TOOLS.MISCLOAD(MEMLIST)'
+01340000SET      &SAVECC  = &LASTCC
+01350000FREE     F(SYSLIB SYSPRINT)
+01360000 
+01370000IF       &SAVECC  = 0 THEN +
+01380000         WRITE MEMBER LIST SUCCESSFUL
+01390000ELSE     +
+01400000         WRITE MEMBER LIST ERROR CODE = &SAVECC
+01410000DONE
+01450016 
+01460000         /***************************************/
+01470000         /*                                     */
+01480000         /*    ON ATTN, DO THE FOLLOWING:       */
+01490000         /*                                     */
+01500000         /***************************************/
+01510000 
+01520000ATTN     DO
+01530000         ERROR    OFF
+01540000         CLOSFILE MEMBERS
+01550000         FREE     F(MEMBERS)
+01560000         EXIT
+01570000DONE
+01580000 
+01590000CONTROL  NOMSG
+01600000         FREE     F(MEMBERS)
+01610000CONTROL  MSG NOFLUSH
+01620000 
+01630000         /***************************************/
+01640000         /*                                     */
+01650000         /* SET UP TO READ THE FILE &LIST.      */
+01660000         /*                                     */
+01670000         /***************************************/
+01680000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+01690000OPENFILE MEMBERS  INPUT
+01700000 
+01710000         /***************************************/
+01720000         /*                                     */
+01730000         /* ON ERROR, DO THE FOLLOWING:         */
+01740000         /*                                     */
+01750000         /***************************************/
+01760000ERROR DO
+01770000   CLOSFILE MEMBERS
+01780000   FREE     F(MEMBERS)
+01790000   ERROR OFF
+01800000   EXIT
+01810000DONE
+01820000         /***************************************/
+01830000         /*                                     */
+01840026         /*   GENERATE SDFLIST ON THE PDS.      */
+01850000         /*                                     */
+01860000         /***************************************/
+01870033 
+01880000DO       WHILE    &SYSUID NE
+01890000         GETFILE  MEMBERS
+01920000         SET  &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+01921013 
+01930029         SDFLIST &MEMBERS. LIB(&LIB.) SDFLIB(&SDFLIB.)   +
+01931036                 PROGRAM(&PROGRAM.) ERRORLIB(&ERRORLIB.) +
+01940036                 ID(&ID.) MONITOR(&MONITOR.) &SCREEN.    +
+01941034                 SYSTEM(&SYSTEM) &TRACE PG(&PG.)
+01950000DONE

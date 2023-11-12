@@ -1,0 +1,232 @@
+00026700/********************************************************************/
+00027000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     B360RTL                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: DRIVER CLIST TO BUILD HAL 360 RUNTIME LIBRARY        */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00111000/*   SYNTAX:                                                        */
+00111100/*                                                                  */
+00111200/*     B360RTL ID(&SYSUID.) SYSTEM(H360) REL(REL99V0)               */
+00111300/*           LIB(&ID..&SYSTEM..&REL.)                               */
+00111400/*           SRCDSN(&LIB..RUNASM)                                   */
+00111500/*           RUNMAC(NCAMCM.&SYSTEM.CURRENT.RUNMAC)                  */
+00111616/*           TEMPMAC() FIRST LIST() SYSPARM() TEST TRACE            */
+00111800/*                                                                  */
+00111900/*------------------------------------------------------------------*/
+00112000/*                                                                  */
+00112110/*   INVOKES   : ASM360HL                                           */
+00112708/*               SYS1.ASMH.LINKLIB(IEWL)                            */
+00112803/*                                                                  */
+00112903/*------------------------------------------------------------------*/
+00113003/*                                                                  */
+00113103/*   INPUT DATA SET NAMES:                                          */
+00113203/*                                                                  */
+00113303/*    THE FOLLOWING ARE INPUT FOR THE ASSEMBLE STEP:                */
+00113403/*                                                                  */
+00113503/*     <MACLIB>                                                     */
+00113603/*        THE ADDTIONAL MACRO LIBRARY                               */
+00113703/*                                                                  */
+00113803/*     SYS1.MACLIB                                                  */
+00113903/*        THE STANDARD MACRO LIBRARY                                */
+00114003/*                                                                  */
+00114116/*     <SRCDSN>                                                     */
+00114303/*        THE SOURCE CODE TO BE ASSEMBLED                           */
+00114403/*                                                                  */
+00114503/*     THE FOLLOWING IS AN INPUT FOR THE LINK/EDIT STEP:            */
+00114603/*                                                                  */
+00114714/*      <NAME>.RUNOBJ                                               */
+00114803/*         THE NAME OF THE OBJECT MODULE TO BE LINK/EDITED          */
+00114903/*                                                                  */
+00115003/*------------------------------------------------------------------*/
+00115103/*                                                                  */
+00115203/*   OUTPUT DATA SET NAMES:                                         */
+00115303/*                                                                  */
+00115403/*    THE FOLLOWING ARE OUTPUT FOR THE ASSEMBLE STEP:               */
+00115503/*                                                                  */
+00115614/*     <NAME>.RUNLST                                                */
+00115703/*         OUTPUT LISTING OF THE ASSEMBLE                           */
+00115803/*                                                                  */
+00115914/*     <NAME>.RUNOBJ                                                */
+00116003/*         RESULTING OBJECT MODULE OF THE ASSEMBLE                  */
+00116103/*                                                                  */
+00116203/*    THE FOLLOWING ARE OUTPUT FOR THE LINK/EDIT STEP               */
+00116303/*                                                                  */
+00116414/*     <NAME>.RUNLIB    -- OR --      <LIB>.RUNLIB(<NAME>)          */
+00116503/*      NOT IN A PDS                   IN A PDS                     */
+00116603/*         RESULTING LOAD MODULE OF THE LINK/EDIT                   */
+00116703/*                                                                  */
+00116803/*     <NAME>.MAP                                                   */
+00116903/*         MAPPED OUTPUT LISTING                                    */
+00117003/*                                                                  */
+00117100/*------------------------------------------------------------------*/
+00117200/*                                                                  */
+00117300/*   PARAMETERS:                                                    */
+00117400/*                                                                  */
+00117500/*     ID       DEFAULT : &SYSUID                                   */
+00117600/*              THE DATASETS HIGH LEVEL QUALIFIER                   */
+00117700/*                                                                  */
+00117800/*     REL      DEFAULT  : REL99V0                                  */
+00117900/*              RELEASE VERSION                                     */
+00118000/*                                                                  */
+00118100/*     SYSTEM   DEFAULT : H360                                      */
+00118200/*              INDICATES H360 RUNTIME LIBRARY ROUTINE              */
+00118300/*                                                                  */
+00118400/*     SRCDSN   DEFAULT : &LIB..RUNASM                              */
+00118500/*              THE RTL SOURCE DSN (RUNASM) WHICH ALL MEMBERS       */
+00118600/*              SHOULD BE ACTED ON                                  */
+00118700/*                                                                  */
+00118800/*     LIB      DEFAULT: &ID..&SYSTEM..&REL.                        */
+00118900/*              PDS THAT WILL CONTAIN THE RUNTIME LIBRARY ASSEMBLY  */
+00119000/*              LISTING AND LOAD MODULES                            */
+00119100/*                                                                  */
+00119200/*     RUNMAC   DEFAULT: NCAMCM.&SYSTEM..CURRENT.RUNMAC             */
+00119300/*              RUNTIME LIBRARY MACROS                              */
+00119400/*                                                                  */
+00119510/*     SYSPARM  DEFAULT: NULL                                       */
+00119610/*              SYSTEM PARAMETER PASSED TO THE ASSEMBLER            */
+00119700/*                                                                  */
+00119810/*     TEMPMAC  DEFAULT: NULL                                       */
+00119910/*              TEMPORARY MACROS YOU ARE TESTING WITH               */
+00120010/*                                                                  */
+00120113/*     TEST     OPTIONAL                                            */
+00120213/*              THE OBJECT MODULE WILL CONTAIN THE SPECIAL          */
+00120313/*              SOURCE SYMBOL TABLE REQUIRED BY THE TEST            */
+00120413/*              TRANSLATOR (TESTRAN) ROUTINE.                       */
+00120513/*                                                                  */
+00120610/*     FIRST    OPTIONAL                                            */
+00120710/*              ALLOCATE DATASETS THE FIRST TIME                    */
+00120810/*                                                                  */
+00120910/*     TRACE    OPTIONAL                                            */
+00121010/*              TRACE CLIST EXECUTION                               */
+00121110/*                                                                  */
+00121510/*     LIST     DEFAULT : NULL                                      */
+00121610/*              IF SPECIFIED, IT IS A SEQUENTIAL FILE WITH THE      */
+00121710/*              MEMBERS LISTED THAT YOU WANT TO ASSEMBLE UPON.      */
+00121810/*                                                                  */
+00122000/*------------------------------------------------------------------*/
+00125900/*                                                                  */
+00126000/*   REVISION HISTORY:                                              */
+00126100/*                                                                  */
+00126200/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00126300/*     --------  ----  ----  -------------------------------------  */
+00126415/*     11/10/99  651   LJK   BASELINED 360 RTL BUILD CLIST          */
+00126500/*------------------------------------------------------------------*/
+00126600/********************************************************************/
+00126700 
+00126800PROC 0 ID(&SYSUID.)                           +
+00126900       SYSTEM(H360)                           +
+00127000       REL(REL99V0)                           +
+00127100       LIB(&ID..&SYSTEM..&REL.)               +
+00127200       SRCDSN(&LIB..RUNASM)                   +
+00128001       MACLIB(NCAMCM.&SYSTEM..CURRENT.DIAGNSTC.MACLIB) +
+00128101       MACLIB2(NCAMCM.&SYSTEM..CURRENT.RUNMAC) +
+00129000       TEMPMAC()                              +
+00129110       SYSPARM()                              +
+00130000       FIRST                                  +
+00140000       LIST()                                 +
+00151012       TEST                                   +
+00160000       TRACE
+00170000 
+00180000GLOBAL RETCODE
+00190000IF &TRACE NE THEN CONTROL CONLIST LIST
+00191010IF &SYSPARM. NE THEN SET &SYSPARM = SYSPARM(&SYSPARM.)
+00192010     ELSE SET  &SYSPARM =
+00193010IF &TEMPMAC. NE THEN SET &TEMPMAC = TEMPMAC(&TEMPMAC.)
+00194010     ELSE SET  &TEMPMAC =
+00200000CONTROL NOMSG
+00201006  FREE ATTR(F8080 FBA121 U7294)
+00202010  ATTR F8080  RECFM(F)  LRECL(80)  BLKSIZE(80)
+00203003  ATTR FBA121  RECFM(F B A) LRECL(121) BLKSIZE(1210)
+00204006  ATTR U7294   RECFM(U)     LRECL(0)   BLKSIZE(7294)
+00210000IF &FIRST NE THEN DO
+00220000   DELETE '&LIB..RUNLIB'
+00230013   DELETE '&LIB..RUNLST'
+00240000   DELETE '&LIB..MAP'
+00250013   DELETE '&LIB..RUNOBJ'
+00280004END
+00281009/* ALLOCATE LST AND OBJ IF THEY DO NOT ALREADY EXIST */
+00282003 
+00283013  IF &SYSDSN('&LIB..RUNLST') NE OK THEN    +
+00284013    ALLOC DA('&LIB..RUNLST') USING(FBA121) +
+00285007       CYLINDERS SP(5,1) DIR(30)
+00287003 
+00288013  IF &SYSDSN('&LIB..RUNOBJ') NE OK THEN   +
+00289013    ALLOC DA('&LIB..RUNOBJ') USING(F8080) +
+00289107       CYLINDERS SP(5,1) DIR(50)
+00289203 
+00289304/* ALLOCATE RUNLIB AND MAP FILES IF THEY DO NOT ALREADY EXIST */
+00289403 
+00289503  IF &SYSDSN('&LIB..RUNLIB') NE OK THEN DO
+00289613     ALLOC DA('&LIB..RUNLIB') TRACKS SP(20,10) DIR(50) +
+00289707        BLOCK(7294) USING(U7294)
+00289803     FREE DA('&LIB..RUNLIB')
+00289904  END
+00290004  IF &SYSDSN('&LIB..MAP') NE OK THEN +
+00290104     ALLOC DA('&LIB..MAP') RELEASE USING(FBA121) BLOCK(1210) +
+00290207                 CYLINDERS SP(5,1) DIR(50)
+00290303 
+00300000IF &LIST EQ THEN  DO
+00310000   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00320000   SET &LIST =  &LIB..MEMLIST
+00321000END
+00322300         /***************************************/
+00322400         /*                                     */
+00322500         /*    ON ATTN, DO THE FOLLOWING:       */
+00322600         /*                                     */
+00322700         /***************************************/
+00322800ATTN     DO
+00322900         ERROR    OFF
+00323000         CLOSFILE MEMBERS
+00323100         FREE     F(MEMBERS)
+00323200         EXIT
+00323300END
+00323400 
+00323500CONTROL  NOMSG
+00323600         FREE     F(MEMBERS)
+00323700CONTROL  MSG NOFLUSH
+00323800 
+00323900         /***************************************/
+00324000         /*                                     */
+00324100         /* SET UP TO READ THE FILE &LIST.      */
+00324200         /*                                     */
+00324300         /***************************************/
+00324400ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00324500OPENFILE MEMBERS  INPUT
+00324600 
+00324700         /***************************************/
+00324800         /*                                     */
+00324900         /* ON ERROR, DO THE FOLLOWING:         */
+00325000         /*                                     */
+00325100         /***************************************/
+00325200ERROR DO
+00325300   CLOSFILE MEMBERS
+00325400   FREE     F(MEMBERS)
+00325500   ERROR OFF
+00325600   EXIT
+00325700END
+00325804 
+00326410DO WHILE &SYSUID NE
+00326510   GETFILE MEMBERS
+00326810   SET &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+00326904 
+00327003     /********************************/
+00327109     /* ASSEMBLY AND LINK EDIT       */
+00327203     /********************************/
+00327304 
+00327410   ASM360HL &MEMBERS.              +
+00327500           ID(&ID.)                +
+00327600           LIB(&LIB.)              +
+00327700           SRCDSN(&SRCDSN.)        +
+00327801           MACLIB(&MACLIB.)        +
+00327901           MACLIB2(&MACLIB2.)      +
+00328011           &TEST.                  +
+00328110           &TEMPMAC.               +
+00328210           &SYSPARM.               +
+00328310           &TRACE.
+00328410END
+00328510  FREE ATTR(F8080 FBA121 U7294)

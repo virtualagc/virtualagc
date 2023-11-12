@@ -1,0 +1,129 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00020100/*                                                                  */
+00020210/*   NAME:     BLDQCON                                              */
+00020300/*                                                                  */
+00020400/*------------------------------------------------------------------*/
+00020500/*                                                                  */
+00020611/*   FUNCTION: A CLIST TO BUILD QCONLIB FOR BFS                     */
+00020700/*                                                                  */
+00020800/*------------------------------------------------------------------*/
+00020900/*                                                                  */
+00021000/*   SYNTAX:                                                        */
+00021100/*                                                                  */
+00021210/*     BLDQCON  ID(&SYSUID.) REL(REL99V0) SYSTEM(BFS)               */
+00021311/*              QCONLIB(&ID..&SYSTEM..&REL..QCONLIB)                */
+00021414/*              SRCDSN(NCAMCM.BFS.CURRENT.RUNLIB)                   */
+00021510/*              PROG(NCAMCM.TOOLS.XPLOBJ(BLDQCON))                  */
+00021711/*              VERSION(0) LIST() TRACE                             */
+00021800/*                                                                  */
+00021910/*     REQUIRED - NONE.                                             */
+00022000/*                                                                  */
+00022100/*------------------------------------------------------------------*/
+00022200/*                                                                  */
+00022300/*   INVOKES:  NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                      */
+00022416/*             NCAMCM.TOOLS.XPLOBJ(BLDQCON)                         */
+00022510/*                                                                  */
+00022600/*------------------------------------------------------------------*/
+00022700/*                                                                  */
+00022800/*   PARAMETERS:                                                    */
+00022900/*                                                                  */
+00023300/*     ID       DEFAULT: &SYSUID                                    */
+00023400/*              HIGH LEVEL QUALIFIER                                */
+00023500/*                                                                  */
+00023610/*     SYSTEM   DEFAULT: BFS                                        */
+00023710/*              NAME OF THE SYSTEM                                  */
+00023810/*                                                                  */
+00023910/*     REL      DEFAULT: REL99V0                                    */
+00024010/*              RELEASE VERSION                                     */
+00024110/*                                                                  */
+00024211/*     QCONLIB  DEFAULT: &ID..&SYSTEM..&REL..QCONLIB                */
+00024311/*              OUTPUT PDS FOR QCONLIB                              */
+00024400/*                                                                  */
+00024514/*     SRCDSN   DEFAULT: NCAMCM.BFS.CURRENT.RUNLIB                  */
+00024611/*              SOURCE DSN USED TO GENERATE QCONLIB MEMBER LIST     */
+00024711/*                                                                  */
+00024810/*     PROG     DEFAULT: NCAMCM.TOOLS.XPLOBJ(BLDQCON)               */
+00024900/*              NAME OF THE XPL OBJECT WHICH YOU WANT TO EXECUTE    */
+00025000/*                                                                  */
+00025411/*     LIST     DEFAULT: NULL                                       */
+00025511/*              USER SPECIFIED QCONLIB MEMBER LIST                  */
+00025600/*                                                                  */
+00025710/*     VERSION  DEFAULT: 0                                          */
+00025810/*              USER SPECIFIED OPTION FOR VERSION STAMP             */
+00025900/*                                                                  */
+00026300/*     TRACE    OPTIONAL                                            */
+00026400/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00026500/*                                                                  */
+00026600/*------------------------------------------------------------------*/
+00026700/*                                                                  */
+00026800/*   INPUT DATA SET NAMES:                                          */
+00026900/*                                                                  */
+00027017/*     <SRCDSN>                                                     */
+00027117/*         SOURCE DSN USED TO GENERATE QCONLIB MEMBER LIST          */
+00027200/*                                                                  */
+00027317/*     <LIST>                                                       */
+00027417/*         USER SPECIFIED QCONLIB MEMBER LIST                       */
+00027517/*                                                                  */
+00027600/*------------------------------------------------------------------*/
+00027700/*                                                                  */
+00027800/*   OUTPUT DATA SET NAMES:                                         */
+00027900/*                                                                  */
+00028011/*     <QCONLIB>                                                    */
+00028116/*         QCON OBJECT LIBRARY                                      */
+00028200/*                                                                  */
+00028300/*------------------------------------------------------------------*/
+00028400/*   REVISION HISTORY:                                              */
+00028500/*                                                                  */
+00028600/*   DATE     PCR#  NAME  DESCRIPTION                               */
+00028700/*  --------- ----  ----  -------------------------------------     */
+00029610/*  06/15/95  346   LJK   BASELINE QCONLIB BUILD PROCEDURE          */
+00029715/*  11/28/95  458   LJK   CHANGE THE DEFAULT OF SRCDSN TO RUNLIB    */
+00029716/*  01/11/96  463   LJK   CHANGE THE VERSION NUMBER TO 0            */
+00029800/*------------------------------------------------------------------*/
+00029900/********************************************************************/
+00030010 
+00030110PROC 0 ID(&SYSUID.)                          +
+00030210       REL(REL99V0)                          +
+00030310       SYSTEM(BFS)                           +
+00030411       QCONLIB(&ID..&SYSTEM..&REL..QCONLIB)  +
+00030514       SRCDSN(NCAMCM.BFS.CURRENT.RUNLIB)     +
+00030611       PROG(NCAMCM.TOOLS.XPLOBJ(BLDQCON))    +
+00030711       LIST()                                +
+00031110       VERSION(0)                            +
+00031200       TRACE
+00031300 
+00031413GLOBAL RETCODE
+00032000IF &TRACE.  NE THEN    +
+00033000   CONTROL  LIST CONLIST
+00034000CONTROL NOMSG
+00035010FREE F(PROGRAM OUTPUT6 SYSPRINT SYSIN)  ATTR(FBA133)
+00036010ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+00037011IF &SYSDSN('&QCONLIB.') NE OK THEN +
+00038011   ALLOC DA('&QCONLIB.') RELEASE REUSE NEW DSORG(PO) +
+00038111               RECFM(F B) LRECL(80) BLKSIZE(6160)    +
+00039011               DIR(20) SP(10 2) TRACKS
+00040011 
+00042011/*  RUN PDSALL TO CREATE THE MEMBER LIST FILE */
+00045011IF &LIST EQ THEN  DO
+00046013   PDSALL &SRCDSN. LIB(&QCONLIB.) MAKELIST
+00047011   SET &LIST =  &QCONLIB..MEMLIST
+00048012END
+00050000CONTROL MSG
+00080010ALLOC F(SYSIN) DA('&LIST.') SHR
+00090010ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW +
+00100011                        CATALOG   SP(40 40) TRACK
+00110000ALLOC F(PROGRAM) DA('&PROG.') SHR
+00121011ALLOC F(OUTPUT6) DA('&QCONLIB.') SHR
+00130000WRITE RUNNING XPL PROGRAM &PROG.
+00140000TIME
+00150010CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'  '&VERSION.'
+00160000SET &SAVECC = &LASTCC
+00170000CONTROL NOMSG
+00180010FREE F(PROGRAM SYSIN SYSPRINT OUTPUT6)
+00190000FREE ATTR(FBA133)
+00200000CONTROL MSG
+00210000IF &SAVECC EQ 0 THEN +
+00220000    WRITE EXECUTION SUCCESSFUL
+00230000ELSE +
+00240000    WRITE EXECUTION ERROR CODE = &SAVECC

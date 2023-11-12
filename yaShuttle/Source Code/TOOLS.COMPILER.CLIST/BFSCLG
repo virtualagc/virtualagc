@@ -1,0 +1,1125 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     BFSCLG                                               */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: A CLIST TO COMPILE, LINK AND EXECUTE HAL SOURCE      */
+00000900/*             CODE FOR BFS AP101S SIMULATOR                        */
+00001000/*                                                                  */
+00001100/*                  EXAMPLES:                                       */
+00001200/*                   BFSCLG CLG ETOH UTRACE                         */
+00001300/*                   BFSCLG CLG ETOH1 PROG(ETOH) UTRACE             */
+00001400/*                                                                  */
+00001500/*------------------------------------------------------------------*/
+00001600/*                                                                  */
+00001700/*   SYNTAX:                                                        */
+00001800/*                                                                  */
+00001900/*     BFSCLG ACTION NAME PROG(&NAME) ID(&SYSUID) LIB(&ID..TESTB)   */
+00002000/*            FIRST FIRSTD NEWRUN DELETES TRACE DUMP SEQ SCREEN     */
+00002100/*            INCLUDE(&LIB..INC) INCLUDE2() HALSDF2() HALOBJ2()     */
+00002200/*            HALSDF(&LIB..SDF) COMPVER(CURRENT)                    */
+00002300/*            ERRORLIB(NCAMCM.BFS.&COMPVER..ERRORLIB)               */
+00002400/*            COMPILER(NCAMCM.BFS.&COMPVER..COMPILER) TERRORLIB()   */
+00002500/*            MONITOR(NCAMCM.BFS.&COMPVER..MONITOR.LOAD(MONITOR))   */
+00002600/*            SYSIN(&LIB..HAL(&NAME.)) SYSPRINT(&LIB..LST(&NAME.))  */
+00002700/*            PLTPRINT(&LIB..PLT(&NAME.))                           */
+00002800/*            OBJECT(&LIB..OBJ(&NAME.)) SYTSZ(4096)                 */
+00002900/*            RFSZ(5500) MACSZ(4500) TPLT LITS(2500) TALBST HO      */
+00003000/*            SRN PG(91000) OPT() CT(WMZMTCBMPCUCVC) CT2() (L)      */
+00003100/*            REMOTE(2) RUNLVER(&COMPVER.)                          */
+00003200/*            RUNLIB(NCAMCM.BFS.&RUNLVER..RUNLIB) TRUNLIB()         */
+00003300/*            QCONLIB(NCAMCM.BFS.&RUNLVER..QCONLIB)                 */
+00003400/*            LNKIN(&LIB..TCP) DDOUT(OUT) FSW OI(BFS283XX)          */
+00003500/*            EXECSTEP(500000) UTRACE PLINK CP CS ACCESS()          */
+00003600/*            TITLE()                                               */
+00003700/*                                                                  */
+00003800/*     ALIAS    - NONE.                                             */
+00003900/*     REQUIRED - ACTION, NAME.                                     */
+00004000/*                                                                  */
+00004100/*------------------------------------------------------------------*/
+00004200/*                                                                  */
+00004300/*   INVOKES:  NCAMCM.BFS.<COMPVER>.MONITOR.LOAD(MONITOR)           */
+00004400/*             NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                      */
+00004600/*             NROKSTB.SUPPORT.PILOT.R07V01                         */
+00004700/*             NCAMCM.PICT.REL1V1.LOAD                              */
+00004800/*             NCAMCM.APES.REL3V2.PLILOAD(HALUCP)                   */
+00004900/*                                                                  */
+00005000/*------------------------------------------------------------------*/
+00005100/*                                                                  */
+00005200/*   PARAMETERS:                                                    */
+00005300/*                                                                  */
+00005400/*     ACTION   REQUIRED                                            */
+00005500/*              C(COMPILE), L(LINK), G(GO) OR COMBINATION           */
+00005600/*                                                                  */
+00005700/*     NAME     REQUIRED                                            */
+00005800/*              NAME OF MEMBER IN LIBRARY                           */
+00005900/*                                                                  */
+00006000/*     PROG     DEFAULT: &NAME                                      */
+00006100/*              PROGRAM NAME                                        */
+00006200/*                                                                  */
+00006300/*     ID       DEFAULT: &SYSUID.                                   */
+00006400/*              HIGH LEVEL QUALIFIER                                */
+00006500/*                                                                  */
+00006600/*     LIB      DEFAULT: &ID..TESTB                                 */
+00006700/*              OTHER DSN LEVELS                                    */
+00006800/*                                                                  */
+00006900/*     FIRST    OPTIONAL                                            */
+00007000/*              INITIALIZE DATASETS THE FIRST TIME                  */
+00007100/*                                                                  */
+00007200/*     FIRSTD   OPTIONAL                                            */
+00007300/*              DELETE ALL DATASETS CREATED FROM FIRST PARM AND     */
+00007400/*              THEN INITIALIZE THESE SAME DATASETS                 */
+00007500/*                                                                  */
+00007600/*     NEWRUN   OPTIONAL                                            */
+00007700/*              REALLOCATE REPORT LISTINGS                          */
+00007800/*                                                                  */
+00008200/*     TRACE    OPTIONAL                                            */
+00008300/*              EXECUTION OF THE CLIST WILL BE DISPLAYED            */
+00008400/*              AT THE TERMINAL                                     */
+00008500/*                                                                  */
+00008600/*     DUMP     OPTIONAL                                            */
+00008700/*              UPON ABEND STORE DUMP INTO &NAME..DUMP              */
+00008800/*                                                                  */
+00008900/*     SEQ      OPTIONAL                                            */
+00009000/*              SEND LISTING TO A SEQUENTIAL FILE                   */
+00009100/*                                                                  */
+00009200/*     SCREEN   OPTIONAL                                            */
+00009300/*              IF SPECIFIED SEND OUTPUT TO SCREEN                  */
+00009400/*              INSTEAD OF TO &LIB..&DDOUT(&NAME.)                  */
+00009500/*                                                                  */
+00009600/* NEXT ARE PARAMETERS USED IN/FOR THE COMPILE OF SOURCE            */
+00009700/*                                                                  */
+00009800/*     INCLUDE  DEFAULT: &LIB..INC                                  */
+00009900/*              USERS INCLUDE FILES                                 */
+00010000/*                                                                  */
+00010100/*     INCLUDE2 DEFAULT: NULL                                       */
+00010200/*              ADDITIONAL INCLUDE FILES                            */
+00010300/*                                                                  */
+00010400/*     HALSDF   DEFAULT: &LIB..SDF                                  */
+00010500/*              USERS SDFS                                          */
+00010600/*                                                                  */
+00010700/*     HALSDF2  DEFAULT: NULL                                       */
+00010800/*              ADDITIONAL SDF                                      */
+00010900/*                                                                  */
+00011000/*     COMPVER  DEFAULT: CURRENT                                    */
+00011100/*              COMPILER VERSION                                    */
+00011200/*                                                                  */
+00011300/*     ERRORLIB DEFAULT: NCAMCM.BFS.&COMPVER..ERRORLIB              */
+00011400/*              BASELINE ERROR LIBRARY                              */
+00011500/*                                                                  */
+00011600/*     COMPILER DEFAULT: NCAMCM.BFS.&COMPVER..COMPILER              */
+00011700/*              COMPILER                                            */
+00011800/*                                                                  */
+00011900/*     TERRORLIB DEFAULT: NULL                                      */
+00012000/*              USERS TEMPORARY ERROR LIBRARY                       */
+00012100/*                                                                  */
+00012200/*     MONITOR  DEFAULT: NCAMCM.BFS.&COMPVER..MONITOR.LOAD(MONITOR) */
+00012300/*              MONITOR TO RUN THE COMPILER ON S MACHINE            */
+00012400/*                                                                  */
+00012500/*     SYSIN    DEFAULT: &LIB..HAL(&NAME)                           */
+00012600/*              HAL SOURCE FILE                                     */
+00012700/*                                                                  */
+00012800/*     SYSPRINT DEFAULT: &LIB..LST(&NAME)                           */
+00012900/*              HAL PRINTOUT LISTING                                */
+00013000/*                                                                  */
+00013100/*     PLTPRINT DEFAULT: &LIB..PLT(&NAME)                           */
+00013200/*              PILOT PRINTOUT LISTING                              */
+00013300/*                                                                  */
+00013400/*     OBJECT   DEFAULT: &LIB..OBJ(&NAME)                           */
+00013500/*              COMPILER PRODUCED OBJECT CODE                       */
+00013600/*                                                                  */
+00013700/*     HALOBJ2  DEFAULT: NULL                                       */
+00013800/*              ADDITIONAL OBJECT FILE                              */
+00013900/*                                                                  */
+00014000/*     OI       DEFAULT: BFS283XX                                   */
+00014100/*              BFS VERSION OF FLIGHT SOFTWARE                      */
+00014200/*                                                                  */
+00014300/*     FSW      OPTIONAL                                            */
+00014400/*              A FSW MODULE IS USED FOR THE COMPILATION            */
+00014500/*                                                                  */
+00014600/* THIS IS THE START OF OPTIONS PASSED TO THE COMPILER              */
+00014700/*                                                                  */
+00014800/*     SYTSZ    DEFAULT: 4096                                       */
+00014900/*              SYMBOL TABLE SIZE                                   */
+00015000/*                                                                  */
+00015100/*     RFSZ     DEFAULT: 5500                                       */
+00015200/*              CROSS REFERENCE SIZE                                */
+00015300/*                                                                  */
+00015400/*     MACSZ    DEFAULT: 4500                                       */
+00015500/*              MAXIMUM NUMBER OF LITERALS                          */
+00015600/*                                                                  */
+00015700/*     TPLT     OPTIONAL                                            */
+00015800/*              TEMPLATE GENERATION                                 */
+00015900/*                                                                  */
+00016000/*     LITS     DEFAULT: 2500                                       */
+00016100/*              LITERAL STRING SIZE                                 */
+00016200/*                                                                  */
+00016300/*     TABLST   OPTIONAL                                            */
+00016400/*              TABLE LIST FOR PHASE IV OF SDFS                     */
+00016500/*                                                                  */
+00016600/*     TITLE    DEFAULT: PROGRAM NAME                               */
+00016700/*              TITLE FOR THE LISTING                               */
+00016800/*                                                                  */
+00016900/*     SRN      OPTIONAL                                            */
+00017000/*              SOURCE INCLUDES LINE NUMBERS                        */
+00017100/*                                                                  */
+00017200/*     PG       DEFAULT: 91000                                      */
+00017300/*              PAGE LIMIT MAXIMUM                                  */
+00017403/*              PASS PG(NULL) TO OVERRIDE CLIST DEFAULT VALUE &     */
+00017503/*              USE THE COMPILER DEFAULT VALUE                      */
+00017600/*                                                                  */
+00017700/*     HO       OPTIONAL                                            */
+00017800/*              HIGHOPT COMPILER OPTION                             */
+00017900/*                                                                  */
+00018000/*     OPT      DEFAULT: NULL                                       */
+00018100/*              OTHER USER REQUESTED OPTION                         */
+00018200/*                                                                  */
+00018300/*     CT       DEFAULT: WMZMTCBMPCUCVC                             */
+00018400/*              CARD TYPE                                           */
+00018500/*                                                                  */
+00018600/*     CT2      DEFAULT: NULL                                       */
+00018700/*              CARD TYPE 2 - WILL OVERRIDE MATCHES IN CARDTYPE (CT)*/
+00018800/*              ALSO WILL ALLOW NEW CARDTYPES TO BE DEFINED.        */
+00018900/*              ANY NEW CARD TYPES WILL BE APPENDED AT THE END OF   */
+00019000/*              THE EXISTING CARD TYPES.  IF ANY PARTICULAR CARD    */
+00019100/*              TYPE IS ENTERED TWICE (I.E. PCPD), THE FIRST ENTRY  */
+00019200/*              WILL BE RETAINED AND THE SECOND DISCARDED.          */
+00019300/*                                                                  */
+00019400/*     L        DEFAULT: L                                          */
+00019500/*              ASSEMBLY LISTING FROM PHASE II                      */
+00019600/*                                                                  */
+00019700/*     ACCESS   DEFAULT: NULL                                       */
+00019800/*              A FILE THAT CAN PLACE ADDITIONAL RESTRICTIONS ON    */
+00019900/*              THE HAL/S LANGUAGE                                  */
+00020000/*                                                                  */
+00020100/* NEXT ARE PARAMETERS USED IN/FOR THE LINK/EDIT STEP               */
+00020200/*                                                                  */
+00020300/*     CP       OPTIONAL                                            */
+00020400/*              SPECIFIES A COMPOOL COMPILATION                     */
+00020500/*                                                                  */
+00020600/*     CS       OPTIONAL                                            */
+00020700/*              SPECIFIES A COMSUB  COMPILATION                     */
+00020800/*                                                                  */
+00020900/*     REMOTE   DEFAULT: 2                                          */
+00021000/*              DATA SECTOR FOR REMOTE VARIABLES AP101S ONLY        */
+00021100/*                                                                  */
+00021200/*     RUNLIB   DEFAULT: NCAMCM.BFS.&RUNLVER..RUNLIB                */
+00021300/*              RUNTIME LIBRARY EXECUTABLES FOR S MACHINE           */
+00021400/*                                                                  */
+00021500/*     QCONLIB  DEFAULT: NCAMCM.BFS.&RUNLVER..QCONLIB               */
+00021600/*              QCON LIBRARY OBJECT                                 */
+00021700/*                                                                  */
+00021800/*     PLINK    OPTIONAL                                            */
+00021900/*              CAUSES EXECUTION OF THE PRELINK STEP                */
+00022000/*                                                                  */
+00022100/*     RUNLVER  DEFAULT: &COMPVER.                                  */
+00022200/*              RUNTIME LIBRARY VERSION FOR S MACHINE               */
+00022300/*                                                                  */
+00022400/*     TRUNLIB  DEFAULT: NULL                                       */
+00022500/*              USERS TEMPORARY RTL EXECUTABLES                     */
+00022600/*                                                                  */
+00022700/*     LNKIN    DEFAULT: &LIB..TCP                                  */
+00022800/*              EDITED TEMPLATE FOR LINK/EDIT                       */
+00022900/*                                                                  */
+00023000/* NEXT ARE PARAMETERS USED IN/FOR THE EXECUTION STEP               */
+00023100/*                                                                  */
+00023200/*     DDOUT    DEFAULT: OUT                                        */
+00023300/*              HAL OUTPUT FILE FOR EXECUTION                       */
+00023400/*                                                                  */
+00023500/*     EXECSTEP DEFAULT: 500000                                     */
+00023600/*              MAX # OF INSTRUCTIONS TO EXECUTE                    */
+00023700/*                                                                  */
+00023800/*     UTRACE   OPTIONAL                                            */
+00023900/*              UCP EXECUTION TRACE                                 */
+00024000/*                                                                  */
+00024100/*------------------------------------------------------------------*/
+00024200/*                                                                  */
+00024300/*   INPUT DATA SET NAMES:                                          */
+00024400/*                                                                  */
+00024500/*     <LIB>.HAL(<NAME>)                                            */
+00024600/*         PDS OF HALS SOURCE CODE                                  */
+00024700/*                                                                  */
+00024800/*     <LIB>.INC                                                    */
+00024900/*         PDS OF USERS INCLUDE FILES                               */
+00025000/*                                                                  */
+00025100/*     <LIB>.SDF                                                    */
+00025200/*         PDS OF USERS SDFS                                        */
+00025300/*                                                                  */
+00025400/*     NCAMCM.BFS.<COMPVER>.COMPILER                                */
+00025500/*         PS COMPILER                                              */
+00025600/*                                                                  */
+00025700/*     NROKSTB.SUPPORT.PILOTERR.R01V01                              */
+00025800/*         THE ONE AND ONLY PILOT ERROR LIBRARY                     */
+00025900/*                                                                  */
+00026000/*     NCAMCM.BFS.<RUNLVER>.RUNLIB                                  */
+00026100/*         PDS OF RUNTIME LIBRARY EXECUTABLES FOR S MACHINE         */
+00026200/*                                                                  */
+00026300/*     NCAMCM.BFS.<RUNLVER>.QCONLIB                                 */
+00026400/*         PDS OF QCON LIBRARY OBJECT                               */
+00026500/*                                                                  */
+00026600/*------------------------------------------------------------------*/
+00026700/*                                                                  */
+00026800/*   OUTPUT DATA SET NAMES:                                         */
+00026900/*                                                                  */
+00027000/*     <LIB>.COMPRPT                                                */
+00027100/*         PS OF COMPILATION REPORT                                 */
+00027200/*                                                                  */
+00027300/*     <LIB>.CON(<NAME>)                                            */
+00027400/*         PDS OF COMPOOLS LISTING                                  */
+00027500/*                                                                  */
+00027600/*     <LIB>.EXECRPT                                                */
+00027700/*         PS OF EXECUTION REPORT                                   */
+00027800/*                                                                  */
+00027900/*     <LIB>.LINKRPT                                                */
+00028000/*         PS OF LINKAGE REPORT                                     */
+00028100/*                                                                  */
+00028200/*     <LIB>.LOAD(<NAME>)                                           */
+00028300/*         PDS LOAD MODULE                                          */
+00028400/*                                                                  */
+00028500/*     <LIB>.LST                                                    */
+00028600/*         PDS OF COMPILER LISTING                                  */
+00028700/*                                                                  */
+00028800/*     <LIB>.PLT                                                    */
+00028900/*         PDS OF PILOT LISTING                                     */
+00029000/*                                                                  */
+00029100/*     <LIB>.MAPS                                                   */
+00029200/*         PDS OF MAP FOR S MACHINE                                 */
+00029300/*                                                                  */
+00029400/*     <LIB>.OBJ(<NAME>)                                            */
+00029500/*         PDS OF OBJECT MODULE                                     */
+00029600/*                                                                  */
+00029700/*     <LIB>.OUT(<NAME>)                                            */
+00029800/*         PDS OF EXECUTION RESULTS                                 */
+00029900/*                                                                  */
+00030000/*     <LIB>.SIM(<NAME>)                                            */
+00030100/*         PDS OF SIMULATION LISTING FOR S MACHINE                  */
+00030200/*                                                                  */
+00030300/*     <LIB>.TEMPLATE(<NAME>)                                       */
+00030400/*         PDS TEMPLATE                                             */
+00030500/*                                                                  */
+00030600/*     <LIB>.TESTSET                                                */
+00030700/*         PDS TESTSET                                              */
+00030800/*                                                                  */
+00030900/*     <LIB>.UCP(<NAME>)                                            */
+00031000/*         PDS OF UTRACE LISTING                                    */
+00031100/*                                                                  */
+00031200/*     <LIB>.OUT4                                                   */
+00031300/*         DEBUGGING FILE USED BY COMPILER                          */
+00031400/*                                                                  */
+00031500/*------------------------------------------------------------------*/
+00031600/*                                                                  */
+00031700/*   TEMPORARY DATA SET NAMES:                                      */
+00031800/*                                                                  */
+00031900/*     NONE                                                         */
+00032000/*                                                                  */
+00032100/*------------------------------------------------------------------*/
+00032200/*                                                                  */
+00032300/*   COMMENTS:  WHEN THE PROGRAM NAME DOES NOT MATCH THE PDS MEMBER */
+00032400/*              NAME, THE PARAMETER PROG MUST BE USED WITH THE      */
+00032500/*              PROGRAM NAME.                                       */
+00032600/*                                                                  */
+00032700/*              THE PROGRAM NAME CAN NOT BE THE SAME AS THE RTL     */
+00032800/*              ROUTINE INVOCATION NAME.                            */
+00032900/*                                                                  */
+00033000/*              THE FOLLOWING STATEMENT MUST BE PUT IN THE HAL      */
+00033100/*              TEST CASE, JUST BEFORE THE CLOSE STATEMENT:         */
+00033200/*                   B %SVCI(0);                                    */
+00033300/*                                                                  */
+00033400/*------------------------------------------------------------------*/
+00033500/*                                                                  */
+00033600/*   REVISION HISTORY:                                              */
+00033700/*                                                                  */
+00033800/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00033900/*     --------  ----  ----  -------------------------------------  */
+00034000/*     04/16/90  084   RPC   CREATED AND PUT INTO CM                */
+00034100/*                                                                  */
+00034200/*     06/06/90  088   RPC   UPDATED FOR 8 CHARACTER NAME PARM      */
+00034300/*                           UPDATED FIRSTD PARM TO USE LIB PARM    */
+00034400/*                                                                  */
+00034500/*     06/22/90  088   TEV   REARRANGED PARAMETER ORDER TO MATCH    */
+00034600/*                           HEADER ORDER. CHANGED ERRORLIB SO IT   */
+00034700/*                           IS THE SAME VERSION AS THE COMPILER.   */
+00034800/*                                                                  */
+00034900/*     07/03/90  103   TEV   TOOK OUT HARDCODE OF PILOT VERSION AND */
+00035000/*                           PASSED IT IN AS A PARAMETER            */
+00035100/*                                                                  */
+00035200/*     10/22/90  127   TKK   TOOK OUT HARDCODE OF RUNLIB AND        */
+00035300/*                           PASSED IT IN AS A PARAMETER.           */
+00035400/*                                                                  */
+00035500/*     01/07/91  141   TEV   ADDED NOLINK PARAMETER AND ALLOCATION  */
+00035600/*                           OF .OUT4 FILE IF FIRST PARAMETER IS    */
+00035700/*                           SPECIFIED.                             */
+00035800/*                                                                  */
+00035900/*     03/22/91  149   TKK   ASSIGNED OBJECT CODE PDS TO OUTPUT8    */
+00036000/*                                                                  */
+00036100/*     03/22/91  155   TKK   RENAME PDS THAT HOLDS MEMBER XPLSM     */
+00036200/*                                                                  */
+00036300/*     04/25/91  173   LWW   REPLACE HARD CODED "CURRENT" IN CALLS  */
+00036400/*                           TO MONITOR AND THE INITIALIZATION OF   */
+00036500/*                           RUNLVER WITH &COMPVER.                 */
+00036600/*                                                                  */
+00036700/*                           ALSO CORRECT THE CLIST SUCH THAT THE   */
+00036800/*                           FIRSTD PARAMETER CAUSES THE DATA SETS  */
+00036900/*                           THAT ARE DELETED TO BE REINITIALIZED   */
+00037000/*                           AFTER THEIR DELETION.                  */
+00037100/*                                                                  */
+00037200/*     06/19/91  181   RSJ   REMOVE THE NOGO OPTION AND THE NOLINK  */
+00037300/*                           OPTION.  MAKE COMPILATION OF MEMBERS   */
+00037400/*                           WITH NAMES OF 7 CHARACTERS POSSIBLE.   */
+00037500/*                           ADD PLINK OPTION TO INVOKE THE         */
+00037600/*                           PRELINKER (WHICH IS NOT NEEDED FOR     */
+00037700/*                           LINKING BFS SOFTWARE)                  */
+00037800/*                                                                  */
+00037900/*     07/11/91  192   TEV   CHANGED .OUT4 FILE ALLOCATION FROM A   */
+00038000/*                           SEQUENTIAL FILE TO A PDS.              */
+00038100/*                                                                  */
+00038200/*     07/23/91  195   RSJ   AUTOMATED THE TCP FILE FOR THE         */
+00038300/*                           LINK/EDIT STEP                         */
+00038400/*                                                                  */
+00038500/*     07/30/91  200   RSJ   CHANGED THE LST AND MAPS FILE TO USE   */
+00038600/*                           PDSS INSTEAD OF SEQ FILES              */
+00038700/*                                                                  */
+00038800/*     09/13/91  186   LJK   RENAMED CM LOAD FILE                   */
+00038900/*                                                                  */
+00039000/*     11/11/91  215   TEV   TOOK OUT HARDCODED COMPILER VERSION    */
+00039100/*                           IN ALLOCATION OF QCONLIB AND REPLACED  */
+00039200/*                           WITH &COMPVER.                         */
+00039300/*                                                                  */
+00039400/*     12/24/91  216   LWW   CHANGED DEFAULT VERSION OF PILOT FROM  */
+00039500/*                           REL5V10 TO REL5V20.                    */
+00039600/*                                                                  */
+00039700/*     01/14/92  245   LJK   DELETED PARAMETER OI AND ADDED LOGGING */
+00039800/*                           COMPLETION STATUS TO LINKRPT & EXECRPT */
+00039900/*                                                                  */
+00040000/*     05/22/92  260   PMA   CHANGED OBJECT FILE FROM OUTPUT8 TO    */
+00040100/*                           OUTPUT3 FOR 7V0 AND LATER. THIS CLIST  */
+00040200/*                           WORKS FOR 6V0 AND LATER ONLY!  IF USING*/
+00040300/*                           VERSIONS EARLIER THAN 6V0, SEARCH FOR  */
+00040400/*                           REL6V0 IN THIS CLIST AND MODIFY FOR THE*/
+00040500/*                           RELEASE NEEDED.                        */
+00040600/*                                                                  */
+00040700/*     08/05/92  267   DKB   MADE THE FOLLOWING CHANGES IN SUPPORT  */
+00040800/*                           OF BFS7V0 RELEASE: (1) ADDED LOGIC FOR */
+00040900/*                           NEW VERSION OF PILOT, (2) ADDED PLACE  */
+00041000/*                           COMMANDS TO OVERRIDE PILOT PROBLEMS    */
+00041100/*                           (#R,#D), (3) CHANGED CARD TYPE (CT)    */
+00041200/*                           PARAMETER DEFAULT TO WMZMTCBMPCUC FROM */
+00041300/*                           WMZMTCBMPC TO ACCOMODATE UNIMPLEMENTED */
+00041400/*                           BFS FEATURES, (4) REMOVED UNNEEDED     */
+00041500/*                           ERRORLIB ALLOCATION, (5) ADDED LOGIC   */
+00041600/*                           TO CHANGE .TCP FILE TO A PDS           */
+00041700/*                                                                  */
+00041800/*     10/12/92  261   PMA   ADDED 'TESTLIB' QUALIFIER TO DSN       */
+00041900/*                           'NCAMCM.RTL.CPYFILES.INCL'             */
+00042000/*                                                                  */
+00042100/*     01/19/94  320   JCS   CHANGED PILOTVER FROM REL5V20T TO      */
+00042200/*                           REL6V1. CHANGED VERSION OF HALUCP TO   */
+00042300/*                           THE SAME VERSION THAT PASSCLG USES FOR */
+00042400/*                           AP101S SIMULATION.                     */
+00042500/*                                                                  */
+00042600/*     05/10/94  345   JCS   UPDATE TO USE PILOT UNDER NROKSTB      */
+00042700/*                           INSTEAD OF THE COPY UNDER NCAMCM       */
+00042800/*                                                                  */
+00042900/*     06/21/94  360   JCS   CHANGE USAGE OF &LNKIN TO &LIB..TCP    */
+00043000/*                                                                  */
+00043100/*     09/06/94  374   JCS   UPDATE FOR PDS OF TESTSET AND LOAD     */
+00043200/*                                                                  */
+00043300/*     10/26/94  285   LJK   UPDATE .TCP FILE SKELETON              */
+00043400/*                                                                  */
+00043500/*     11/09/94  387   LWW   STEP UP TO NEW APES/HALUCP VERSION     */
+00043600/*                           REL3V2.  STEP UP TO NEW VERSION OF     */
+00043700/*                           PICT - REL1V1.                         */
+00043800/*                                                                  */
+00043900/*     12/30/94  409   JCS   ADDED VC CARD TYPE                     */
+00044000/*     04/05/95  418   LJK   ADD HIGHOPT OPTION;ABBREVIATE COMPILER */
+00044100/*                           OPTIONS                                */
+00044200/*     06/23/95  346   LJK   ADD QCONLIB PARAMETER                  */
+00044300/*     08/03/95  435   LJK   SAVE &LIB.INC FILE WITH FIRSTD OPTION  */
+00044400/*     11/10/95  303   LJK   USE SEQUENTIAL UCP FILE WHEN SEQ OPTION*/
+00044500/*                           IS SPECIFIED.                          */
+00044600/*     01/11/96  350   LJK   ADD "PLACE #Q+ FROM 0;" COMMAND IN THE */
+00044700/*                           TCP SETUP;  RENAME THE BFS SIMLIB TO   */
+00044800/*                           NCAMCM.TOOLS.BFS.SIMLIB.               */
+00044900/*     02/13/96  393   LJK   STEP UP TO THE NEW VERSION OF THE PILOT*/
+00045000/*                           (NROKSTB.SUPPORT.PILOT.R07V01).        */
+00045100/*                           DELETE PILOTVER PARAMETER.             */
+00045200/*     04/26/96  475   LJK   ADD FSW OPTION TO COMPILE BFS FSW      */
+00045300/*     12/17/99  645   LWW   ADD NEW PARAMETERE CT2                 */
+00045400/*                           CHANGE OI FROM BFS262XX TO BFS283XX    */
+00045500/*     05/17/01  706   DCP   ADD ACCESS FILE PARAMETER FOR          */
+00045600/*                           PASSCLG & BFSCLG                       */
+00045700/*     03/18/02  732   TKN   ADD THE TITLE OPTION TO THE PASSCLG &  */
+00045800/*                           BFSCLG ARGUMENT LIST                   */
+00045901/*     05/20/04  783   DCP   MODIFY TO ALLOW THE COMPILER DEFAULT   */
+00046001/*                           PAGES VALUE.                           */
+00046100/*------------------------------------------------------------------*/
+00046200/********************************************************************/
+00046300
+00046400PROC     2    ACTION                                       +
+00046500              NAME                                         +
+00046600              PROG    (&NAME)                              +
+00046700              ID      (&SYSUID.)                           +
+00046800              LIB     (&ID..TESTB)                         +
+00046900              FIRST                                        +
+00047000              FIRSTD                                       +
+00047100              NEWRUN                                       +
+00047200              TRACE                                        +
+00047300              DUMP                                         +
+00047400              SEQ                                          +
+00047500              SCREEN                                       +
+00047600              FSW                                          +
+00047700              OI(BFS283XX)                                 +
+00047800              INCLUDE ('&LIB..INC')                        +
+00047900              INCLUDE2()                                   +
+00048000              HALSDF  ('&LIB..SDF')                        +
+00048100              HALSDF2 ()                                   +
+00048200              HALOBJ2 ()                                   +
+00048300              COMPVER (CURRENT)                            +
+00048400              ERRORLIB(NCAMCM.BFS.&COMPVER..ERRORLIB)      +
+00048500              COMPILER(NCAMCM.BFS.&COMPVER..COMPILER)      +
+00048600              TERRORLIB()                                  +
+00048700              ACCESS()                                     +
+00048800              MONITOR (NCAMCM.BFS.&COMPVER..MONITOR.LOAD(MONITOR)) +
+00048900              SYSIN   ('&LIB..HAL(&NAME)')                 +
+00049000              SYSPRINT('&LIB..LST(&NAME)')                 +
+00049100              PLTPRINT('&LIB..PLT(&NAME)')                 +
+00049200              OBJECT  ('&LIB..OBJ($&NAME)')                +
+00049300              SYTSZ   (4096)                               +
+00049400              RFSZ    (5500)                               +
+00049500              MACSZ   (4500)                               +
+00049600              TPLT                                         +
+00049700              LITS    (2500)                               +
+00049800              TABLST                                       +
+00049900              TITLE   (&NAME.)                             +
+00050000              CP                                           +
+00050100              CS                                           +
+00050200              SRN                                          +
+00050300              PG      (91000)                              +
+00050400              PLINK                                        +
+00050500              HO                                           +
+00050600              OPT     ()                                   +
+00050700              CT      (WMZMTCBMPCUCVC)                     +
+00050800              CT2     ()                                   +
+00050900              L       (L)                                  +
+00051000              REMOTE  (2)                                  +
+00051100              RUNLVER (&COMPVER.)                          +
+00051200              RUNLIB  (NCAMCM.BFS.&RUNLVER..RUNLIB)        +
+00051300              QCONLIB (NCAMCM.BFS.&RUNLVER..QCONLIB)       +
+00051400              TRUNLIB ()                                   +
+00051500              LNKIN   (&LIB..TCP)                          +
+00051600              DDOUT   (OUT)                                +
+00051700              EXECSTEP(500000)                             +
+00051800              UTRACE
+00051900
+00052000/*==================================================================*/
+00052100/*                                                                  */
+00052200/* PROCEDURE TO COMPILE, LINK, AND RUN HALS/FC (101) PROGRAMS.      */
+00052300/*                                                                  */
+00052400/*     TERRORLIB AND TRUNLIB ARE CONCATENATED BEFORE ERRORLIB AND   */
+00052500/* RUNLIB(B) RESPECTIVELY. USE THESE TO INCORPORATE TEMPORARY       */
+00052600/* ERRORLIBS AND RUNLIBS INTO THE COMPILE AND LINK PROCEDURES.      */
+00052700/*                                                                  */
+00052800/*    PLINK IS AN OPTION WHICH ALLOWS THE PRELINKER TO BE INVOKED   */
+00052900/* THE PRELINK STEP IS NOT NEEDED FOR BFS, BUT THE OUTPUT OF THE    */
+00053000/* PRELINK STEP MAY BE USEFUL IN DEBUGGING ERRORS FOUND DURING      */
+00053100/* THE LINK STEP                                                    */
+00053200/*                                                                  */
+00053300/* BY PASSING 'NEWRUN' ALL REPORTS WILL BE DELETED AND REALLOCATED  */
+00053400/*                                                                  */
+00053500/* BY PASSING 'FIRST' ALL REQUIRED DATASETS ARE CREATED WHEN        */
+00053600/* USING THE CLIST FOR THE FIRST TIME.                              */
+00053700/*                                                                  */
+00053800/* BY PASSING 'FIRSTD' ALL DATASETS CREATED BY THE FIRST PARM ARE   */
+00053900/* DELETED AND REALLOCATED.                                         */
+00054000/*                                                                  */
+00054100/*==================================================================*/
+00054200
+00054300IF &TRACE. NE THEN CONTROL LIST CONLIST
+00054400IF &UTRACE. NE THEN SET &UTRACE = UTRACE(UTRACE)
+00054500IF &TABLST. NE THEN SET &TABLST = &STR(TL,)
+00054600IF &TPLT.   NE THEN SET &TPLT   = &STR(TP,)
+00054700IF &SRN.    NE THEN SET &SRN    = &STR(SRN,)
+00054800IF &HO.     NE THEN SET &HO     = &STR(HO,)
+00054900IF &TITLE. EQ  THEN SET &T =
+00055000ELSE SET &T =&STR(T=&TITLE.)
+00055100IF &PG. EQ NULL THEN SET &PG =
+00055200ELSE SET &PG = &STR(P=&PG.,)
+00055300IF &LENGTH(&STR(&OPT.)) NE 0 THEN SET &OPT = &STR(&OPT,)
+00055400
+00055500CONTROL END(DONE)
+00055600
+00055700IF &LENGTH(&NAME) > 6 THEN DO
+00055800  SET &NAME7  = &SUBSTR(1:7,&NAME)
+00055900  SET &NAME6  = &SUBSTR(1:6,&NAME)
+00056000  SET &OBJECT = &LIB..OBJ($&NAME7)
+00056100  SET &PROG   = &NAME7
+00056200DONE
+00056300
+00056400IF &FIRSTD NE THEN DO
+00056500   IF &SYSDSN('&LIB..HAL') EQ OK THEN +
+00056600      RENAME '&LIB..HAL' TSETB.HAL
+00056700   IF &SYSDSN('&LIB..INC') EQ OK THEN +
+00056800      RENAME '&LIB..INC' TSETB.INC
+00056900   CONTROL NOMSG
+00057000   DELETE '&LIB..*'
+00057100   IF &SYSDSN(TSETB.HAL) EQ OK THEN +
+00057200      RENAME TSETB.HAL '&LIB..HAL'
+00057300   IF &SYSDSN(TSETB.INC) EQ OK THEN +
+00057400      RENAME TSETB.INC '&LIB..INC'
+00057500   SET &FIRST = FIRST
+00057600DONE
+00057700
+00057800IF &NEWRUN NE THEN DO
+00057900/* FIRST JUST FOR SAFETY FREE ALL DATA SETS
+00058000  CONTROL NOMSG
+00058100  FREE DA('&LIB..COMPRPT')
+00058200  FREE DA('&LIB..LINKRPT')
+00058300  FREE DA('&LIB..EXECRPT')
+00058400
+00058500  DELETE ('&LIB..COMPRPT')
+00058600  DELETE ('&LIB..LINKRPT')
+00058700  DELETE ('&LIB..EXECRPT')
+00058800  CONTROL MSG
+00058900/*
+00059000/* ALLOCATE NECESSARY REPORT DATA SETS
+00059100/*
+00059200  ALLOC DA('&LIB..COMPRPT')  SPACE(1,1) CYLINDERS DSORG(PS)    +
+00059300                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+00059400  ALLOC DA('&LIB..LINKRPT')  SPACE(1,1) CYLINDERS DSORG(PS)    +
+00059500                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+00059600  ALLOC DA('&LIB..EXECRPT')  SPACE(1,1) CYLINDERS DSORG(PS)     +
+00059700                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+00059800DONE
+00059900
+00060000IF &FIRST NE THEN DO
+00060100 IF &SYSDSN('&LIB..TEMPLATE') NE OK THEN DO
+00060200  CONTROL NOMSG
+00060300  ALLOC DA('&LIB..TEMPLATE') SPACE(5,5) TRACKS DSORG(PO) DIR(20) +
+00060400                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+00060500  ALLOC DA('&LIB..TESTSET')  SPACE(5,5) TRACKS DSORG(PO) DIR(20) +
+00060600                             RECFM(U) LRECL(4096) BLKSIZE(4096)
+00060700  ALLOC DA('&LIB..LOAD')     SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+00060800                             RECFM(U) LRECL(7294) BLKSIZE(7294)
+00060900  ALLOC DA('&LIB..LST')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(20) +
+00061000                             RECFM(F B A) LRECL(133) BLKSIZE(6118)
+00061100  ALLOC DA('&LIB..PLT')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(20) +
+00061200                             RECFM(F B A) LRECL(133) BLKSIZE(6118)
+00061300  ALLOC DA('&LIB..OBJ')      SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+00061400                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+00061500  ALLOC DA('&LIB..OUT')      SPACE(2,2) CYLINDERS DSORG(PO) DIR(20) +
+00061600                             RECFM(F B A) LRECL(133) BLKSIZE(6118)
+00061700  ALLOC DA('&LIB..SDF')      SPACE(1,5) CYLINDERS DSORG(PO) DIR(20) +
+00061800                             RECFM(F) LRECL(1680) BLKSIZE(1680)
+00061900  ALLOC DA('&LIB..UCP')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(20) +
+00062000                             RECFM(F B A) LRECL(133) BLKSIZE(6650)
+00062100  ALLOC DA('&LIB..MAPS')     SPACE(20 5) TRACKS DSORG(PO) DIR(20)  +
+00062200                             RECFM(F B)  LRECL(20)  BLKSIZE(6000)
+00062300  ALLOC DA('&LIB..SIM')      SPACE(5 5) CYLINDERS DSORG(PO) DIR(20) +
+00062400                             RECFM(F B A)  LRECL(133)  BLKSIZE(133)
+00062500  ALLOC DA('&LIB..CON')      SPACE(1 1) CYLINDERS DSORG(PO) DIR(20) +
+00062600                             RECFM(F B)  LRECL(80)  BLKSIZE(400)
+00062700  ALLOC DA('&LIB..OUT4')     SPACE(1 1) CYLINDERS DSORG(PO) DIR(20) +
+00062800                             RECFM(F B A) LRECL(133) BLKSIZE(2660)
+00062900 DONE
+00063000 IF &SYSDSN('&LIB..INC') NE OK THEN +
+00063100    ALLOC DA('&LIB..INC')    SPACE(1,1) TRACKS DSORG(PO) DIR(20) +
+00063200                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+00063300DONE
+00063400
+00063500
+00063600CONTROL NOMSG
+00063700IF &ACTION. = CLG THEN +
+00063800   GOTO COMPILE
+00063900ELSE +
+00064000IF &ACTION. = CL THEN +
+00064100   GOTO COMPILE
+00064200ELSE +
+00064300IF &ACTION. = C THEN +
+00064400   GOTO COMPILE
+00064500ELSE +
+00064600IF &ACTION. = LG THEN +
+00064700   GOTO LINK
+00064800ELSE +
+00064900IF &ACTION. = L THEN +
+00065000   GOTO LINK
+00065100ELSE +
+00065200IF &ACTION. = G THEN +
+00065300   GOTO GO
+00065400ELSE DO
+00065500   WRITE ERROR IN HALS COMMAND LINE
+00065600   EXIT
+00065700DONE
+00065800
+00065900
+00066000/*------------------------------------------------------------------*/
+00066100/*                                                                  */
+00066200/* COMPILATION STEP                                                 */
+00066300/*                                                                  */
+00066400/*------------------------------------------------------------------*/
+00066500
+00066600COMPILE: CONTROL NOMSG
+00066700GLOBAL RETCODE
+00066800IF  &TRACE. NE THEN  CONTROL LIST CONLIST
+00066900SET &LASTCC = 0
+00067000
+00067100FREE F(PROGRAM FILE1 FILE2 FILE3 FILE4 OUTPUT4            +
+00067200       FILE5 FILE6 OUTPUT3 OUTPUT5 OUTPUT6 HALSDF INCLUDE +
+00067300       OUTPUT8 ACCESS SYSPRINT SYSIN ERROR LISTING2 SYSIN +
+00067400       ERRLIST SYSUDUMP ABNLIGNR OUTPUT7 FILE7 FILE8)     +
+00067500     ATTR(F1680 FB80 FBM133 FBA133)
+00067600
+00067700DELETE ('&OBJECT.')
+00067800CONTROL MSG
+00067900
+00068000ALLOC F(PROGRAM)  DA('&COMPILER')  SHR
+00068100IF &TERRORLIB. NE THEN                             +
+00068200   ALLOC REUSE F(ERROR)  DA('&TERRORLIB.'  '&ERRORLIB.')  SHR
+00068300ELSE                                            +
+00068400   ALLOC REUSE F(ERROR)  DA('&ERRORLIB.')  SHR
+00068500
+00068600IF &HALSDF2. NE THEN SET &SDF2 = '&HALSDF2.'
+00068700                ELSE SET &SDF2 =
+00068800ALLOC F(HALSDF) DA('&HALSDF.' &SDF2. 'NROKSTB.&OI..SDFHAL') SHR
+00068900
+00069000IF &INCLUDE2. NE  THEN SET &INC2 = '&INCLUDE2.'
+00069100                  ELSE SET &INC2 =
+00069200ALLOC F(INCLUDE) DA('&INCLUDE.'  &INC2.        +
+00069300                    'NCAMCM.TESTLIB.RTL.CPYFILES.INCL' ) SHR
+00069400
+00069500IF &DUMP. NE  THEN DO
+00069600  CONTROL NOMSG
+00069700  DELETE '&ID..&NAME..DUMP'
+00069800  ALLOC DA('&ID..&NAME..DUMP') RECFM(F B A) LRECL(133) BLKSIZE(2660) +
+00069900        SPACE(5,5) CYLINDERS
+00070000  ALLOC F(SYSUDUMP) DA('&ID..&NAME..DUMP') SHR
+00070100  ALLOC F(ABNLIGNR) DA(*) SHR
+00070200  CONTROL MSG
+00070300DONE
+00070400IF &SEQ. NE THEN DO
+00070500  CONTROL NOMSG
+00070600  IF &SYSDSN('&ID..&NAME..LST') = OK THEN DO
+00070700    DELETE ('&ID..&NAME..LST')
+00070800  DONE
+00070900  ALLOC DA('&ID..&NAME..LST') RECFM(F B A) LRECL(133) BLKSIZE(6517) +
+00071000        SPACE(5,5) CYLINDERS
+00071100  SET &SYSPRINT = &ID..&NAME..LST
+00071200  CONTROL MSG
+00071300DONE
+00071400CONTROL MSG NOFLUSH
+00071500ATTR F1680  RECFM(F)     LRECL(1680) BLKSIZE(1680)
+00071600ATTR FB80   RECFM(F B)   LRECL(80)   BLKSIZE(6160)
+00071700ATTR FBM133 RECFM(F B M) LRECL(133)  BLKSIZE(6118)
+00071800ATTR FBA133 RECFM(F B A) LRECL(133)  BLKSIZE(6118)
+00071900ALLOC F(PROGRAM)  DA('&COMPILER.') SHR
+00072000ALLOC F(SYSIN)    DA('&SYSIN.')    SHR
+00072100IF &STR(&COMPVER) = &STR(REL6V0) THEN DO  /*MODIFY FOR EARLIER RELEASE*/
+00072200     ALLOC F(OUTPUT3)  DUMMY
+00072300     ALLOC F(OUTPUT8)  DA('&LIB..OBJ') USING(FB80) OLD
+00072400DONE
+00072500ELSE DO
+00072600     ALLOC F(OUTPUT3)  DA('&OBJECT.')  SHR
+00072700     ALLOC F(OUTPUT8)  SP(4 2) TRACK DIR(5)
+00072800DONE
+00072900ALLOC F(OUTPUT5)  DA('&LIB..SDF') OLD
+00073000IF &FSW. NE THEN DO
+00073100   ALLOC F(OUTPUT4)  DUMMY
+00073200   ALLOC F(OUTPUT6)  DUMMY
+00073300DONE
+00073400ELSE DO
+00073500   ALLOC F(OUTPUT4)  DA('&LIB..OUT4(&NAME.)')  SHR
+00073600   ALLOC F(OUTPUT6)  DA('&LIB..TEMPLATE') USING(FB80) OLD
+00073700DONE
+00073800ALLOC F(OUTPUT7)  DUMMY
+00073900ALLOC F(SYSPRINT) DA('&SYSPRINT.')  SHR
+00074000ALLOC F(LISTING2) DUMMY
+00074100IF &ACCESS. NE THEN ALLOC F(ACCESS) DA('&ACCESS') SHR
+00074200   ELSE ALLOC F(ACCESS) SP(1 1) TRACK DIR(1)
+00074300ALLOC F(FILE1)    CYL SP(3,2)
+00074400ALLOC F(FILE2)    CYL SP(3,2)
+00074500ALLOC F(FILE3)    CYL SP(3,2)
+00074600ALLOC F(FILE4)    CYL SP(3,2)
+00074700ALLOC F(FILE5)    CYL SP(3,2)
+00074800ALLOC F(FILE6)    CYL SP(5,2)
+00074900ALLOC F(FILE7)    CYL SP(3,2)
+00075000ALLOC F(FILE8)    CYL SP(3,2)
+00075100ALLOC F(ERRLIST)  DA('&LIB..COMPRPT') MOD
+00075200OPENFILE ERRLIST OUTPUT
+00075300WRITE &SYSIN ==> &COMPILER
+00075400WRITE        ==> &SYSPRINT
+00075500WRITENR COMPILATION OF &NAME.
+00075600CONTROL MSG
+00075700
+00075800SET &CT2_COUNT = &LENGTH(&CT2)
+00075900IF &CT2_COUNT > 0 THEN DO
+00076000    SET &CT_COUNT = &LENGTH(&CT)
+00076100    SET &IX = &CT_COUNT / 2
+00076200    SET &IX2 = &CT2_COUNT / 2
+00076300    SET &START_IX2 = &CT2_COUNT - 1
+00076400    SET &END_IX2 = &START_IX2
+00076500    DO WHILE &IX2 > 0
+00076600        SET &START_IX = &CT_COUNT - 1
+00076700        SET &END_IX = &START_IX
+00076800        SET &MATCH_FOUND = 0
+00076900        SET &NEW_PAIR = &SUBSTR(&START_IX2:&END_IX2+1,&CT2)
+00077000        DO WHILE &IX > 0 AND &MATCH_FOUND = 0
+00077100            IF &SUBSTR(&START_IX2:&END_IX2,&CT2) EQ +
+00077200               &SUBSTR(&START_IX:&END_IX,&CT) THEN +
+00077300               SET &MATCH_FOUND = 1
+00077400            ELSE +
+00077500               DO
+00077600                   SET &IX = &IX - 1
+00077700                   SET &START_IX = &START_IX - 2
+00077800                   SET &END_IX = &START_IX
+00077900               DONE
+00078000        DONE
+00078100        IF &MATCH_FOUND = 1 THEN +
+00078200            IF &START_IX = 1 THEN +
+00078300                DO
+00078400                    SET &HALF2 = &SUBSTR(3:&CT_COUNT,&CT)
+00078500                    SET &CT = &NEW_PAIR.&HALF2
+00078600                DONE
+00078700            ELSE +
+00078800                IF &START_IX = &CT_COUNT -1 THEN +
+00078900                    DO
+00079000                        SET &HALF1 = &SUBSTR(1:&START_IX-1,&CT)
+00079100                        SET &CT = &HALF1.&NEW_PAIR
+00079200                    DONE
+00079300                ELSE +
+00079400                    DO
+00079500                        SET &HALF1 = &SUBSTR(1:&START_IX-1,&CT)
+00079600                        SET &HALF2 = +
+00079700                            &SUBSTR(&START_IX+2:&CT_COUNT,&CT)
+00079800                        SET &CT = &HALF1.&NEW_PAIR.&HALF2
+00079900                    DONE
+00080000        ELSE +
+00080100            DO
+00080200                SET &CT = &CT.&NEW_PAIR
+00080300                SET &CT_COUNT = &CT_COUNT + 2
+00080400            DONE
+00080500        SET &IX2 = &IX2 - 1
+00080600        SET &START_IX2 = &START_IX2 - 2
+00080700        SET &END_IX2 = &START_IX2
+00080800        SET &IX = &CT_COUNT / 2
+00080900        SET &START_IX = &CT_COUNT - 1
+00081000        SET &END_IX = &START_IX
+00081100    DONE
+00082000DONE
+00082300 
+00082700IF &FSW. EQ THEN +
+00082800   CALL '&MONITOR'                    +
+00082900        '&L,SYM=&SYTSZ,XS=&RFSZ,MS=&MACSZ,&TPLT.LITS=&LITS.,+
+00083000         A,TBL,&TABLST.&HO.&SRN.SR,&PG.CT=&CT,&OPT.&T.'
+00083100ELSE +
+00083200   CALL '&MONITOR'                    +
+00083300        'XA,AB,A,L,SR,P=700,LC=57,SYM=8000,XS=8000,MS=11000,+
+00083400         LITS=12000,CT=XCACZD,LBLS=3650,BS=500,SRN,&OPT.&T.'
+00083500 
+00083600SET &MAXCC = &LASTCC
+00083700SET &SAVECC = &MAXCC
+00083800SET &RETCODE = &MAXCC
+00083900 
+00084000CONTROL NOMSG
+00084100FREE F(PROGRAM FILE1 FILE2 FILE3 FILE4 OUTPUT4            +
+00084200       FILE5 FILE6 OUTPUT3 OUTPUT5 OUTPUT6 HALSDF INCLUDE +
+00084300       OUTPUT8 ACCESS SYSPRINT SYSIN ERROR LISTING2 SYSIN +
+00084400       ERRLIST SYSUDUMP ABNLIGNR OUTPUT7 FILE7 FILE8)     +
+00084500     ATTR(F1680 FB80 FBM133 FBA133)
+00084600/* RESTORE MAXCC AFTER THE FREE STATEMENT
+00084700SET &MAXCC = &SAVECC
+00084800CONTROL MSG
+00084900 
+00085000IF &MAXCC = 0 THEN DO
+00085100     WRITE SUCCESSFUL
+00085200     SET ERRLIST = &STR(COMPILATION OF &NAME. - SUCCESSFUL)
+00085300     PUTFILE ERRLIST
+00085400     CLOSFILE ERRLIST
+00085500     FREE F(ERRLIST)
+00085600DONE
+00085700ELSE DO
+00085800     WRITE ERROR CODE = &MAXCC
+00085900     SET ERRLIST = &STR(COMPILATION OF &NAME. - ERROR CODE = &MAXCC.)
+00086000     PUTFILE ERRLIST
+00086100     SET &SAVECC = &LASTCC
+00086200     CONTROL NOMSG
+00086300     ERROR DO
+00086400       SET &SAVECC = &LASTCC
+00086500     DONE
+00086600     CONTROL MSG
+00086700     IF &MAXCC = 8 THEN +
+00086800        SET &RETCODE = 9
+00086900     CLOSFILE ERRLIST
+00087000     FREE F(ERRLIST)
+00087100     EXIT
+00087200DONE
+00087300 
+00087400/*------------------------------------------------------------------*/
+00087500/*                                                                  */
+00087600/* ALIAS CREATION STEP                                              */
+00087700/*                                                                  */
+00087800/*------------------------------------------------------------------*/
+00087900 
+00088000IF &PLINK. NE  THEN DO
+00088100 
+00088200CONTROL NOMSG
+00088300DELETE '&LIB..CON(&NAME.)'
+00088400FREE F(SYSIN,OUTPUT3,PROGRAM,SYSPRINT,LISTING2,ERROR,LINKRPT)
+00088500CONTROL MSG
+00088600ALLOC F(LINKRPT) DA('&LIB..LINKRPT') MOD
+00088700OPENFILE LINKRPT OUTPUT
+00088800 
+00088900IF &SYSDSN('&LIB..OBJ($&PROG.)') = OK THEN +
+00089000   ALLOC F(SYSIN)   DA('&LIB..OBJ($&PROG.)') SHR
+00089100ELSE +
+00089200   IF &LENGTH(&NAME) = 8 THEN DO
+00089300      IF &SYSDSN('&LIB..OBJ(#P&NAME6.)') = OK THEN +
+00089400         ALLOC F(SYSIN)   DA('&LIB..OBJ(#P&NAME6.)') SHR
+00089500      ELSE +
+00089600         IF &SYSDSN('&LIB..OBJ(#C&NAME6.)') = OK THEN +
+00089700         ALLOC F(SYSIN)   DA('&LIB..OBJ(#C&NAME6.)') SHR
+00089800   DONE
+00089900   ELSE +
+00090000      IF &SYSDSN('&LIB..OBJ(#P&NAME.)') = OK THEN +
+00090100         ALLOC F(SYSIN)   DA('&LIB..OBJ(#P&NAME.)') SHR
+00090200      ELSE +
+00090300         ALLOC F(SYSIN)   DA('&LIB..OBJ(#C&NAME.)') SHR
+00090400ALLOC F(OUTPUT3) DA('&LIB..CON(&NAME.)') SHR
+00090500ALLOC F(PROGRAM) DA('NCAMCM.TOOLS.XPLOBJ(CONTROL)') SHR
+00090600ALLOC F(SYSPRINT) DA(*)
+00090700ALLOC F(LISTING2) DA(*)
+00090800ALLOC F(ERROR)    DUMMY
+00090900WRITENR PRELINK   OF   &NAME.
+00091000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' 'REMOTE=&REMOTE.'
+00091100SET &SAVECC=&LASTCC
+00091200SET &RETCODE=&SAVECC
+00091300 
+00091400CONTROL NOMSG
+00091500FREE F(SYSIN,OUTPUT3,PROGRAM,SYSPRINT,LISTING2,ERROR)
+00091600CONTROL MSG
+00091700 
+00091800 
+00091900IF &SAVECC = 0 THEN DO
+00092000    WRITE SUCCESSFUL
+00092100    SET LINKRPT = &STR(PRELINK OF &NAME. - SUCCESSFUL)
+00092200    PUTFILE LINKRPT
+00092300    CLOSFILE LINKRPT
+00092400    FREE F(LINKRPT)
+00092500    IF &ACTION. = CLG THEN +
+00092600       GOTO LINK
+00092700     ELSE +
+00092800     IF &ACTION. = CL THEN +
+00092900        GOTO LINK
+00093000     ELSE +
+00093100     EXIT
+00093200DONE
+00093300ELSE DO
+00093400    WRITE ERROR CODE = &SAVECC
+00093500    SET LINKRPT = &STR(PRELINK OF &NAME. - ERROR CODE = &SAVECC)
+00093600    PUTFILE LINKRPT
+00093700    CLOSFILE LINKRPT
+00093800    FREE F(LINKRPT)
+00093900    SET &RETCODE = 9
+00094000    EXIT
+00094100DONE
+00094200DONE
+00094300IF &ACTION. NE CLG THEN +
+00094400IF &ACTION. NE CL THEN EXIT
+00094500     /**************************************/
+00094600     /*                                    */
+00094700     /* LINK EDIT STEP                     */
+00094800     /*                                    */
+00094900     /* CALL PILOT                         */
+00095000     /*                                    */
+00095100     /**************************************/
+00095200 
+00095300LINK: CONTROL NOMSG
+00095400DELETE ('&LIB..MAPS(&NAME.)')
+00095500SET &PROG = &NAME
+00095600FREE F(HALSDF SYSIN INCLUDE PROGRAM ERROR ACCESS OUTPUT4 +
+00095700       SYSPRINT FILE1 FILE2 FILE3 FILE4 FILE5 FILE6 FILE7 FILE8 FILE9)
+00095800IF &SYSDSN('&LIB..TCP') NE OK THEN DO
+00095900   ALLOC DA('&LIB..TCP') NEW RECFM(F B) LRECL(80) BLKSIZE(6160) +
+00096000         DIR(25) SPACE(5 5) TRACKS DSORG(PO)
+00096100DONE
+00096200IF &SYSDSN('&LNKIN.(&NAME.)') NE OK THEN DO
+00096300   ALLOC F(SYSIN) DA('&LIB..TCP(&NAME.)') SHR
+00096400   OPENFILE SYSIN OUTPUT
+00096500   SET SYSIN EQ &STR(  OPTIONS SYSMASK = DF05;)
+00096600   PUTFILE SYSIN
+00096700   SET SYSIN EQ &STR(  PLACE NUCLEUS AT 0;)
+00096800   PUTFILE SYSIN
+00096900   SET SYSIN EQ &STR(  PLACE #L+ FROM 0;)
+00097000   PUTFILE SYSIN
+00097100   SET SYSIN EQ &STR(  PLACE #Q+ FROM 0;)
+00097200   PUTFILE SYSIN
+00097300   SET SYSIN EQ &STR(  PLACE #0+ FROM 0;)
+00097400   PUTFILE SYSIN
+00097500   SET SYSIN EQ &STR(  PLACE #P+ FROM 100;)
+00097600   PUTFILE SYSIN
+00097700   SET SYSIN EQ &STR(  PLACE #R+ FROM 18100;)
+00097800   PUTFILE SYSIN
+00097900   SET SYSIN EQ &STR(  PLACE #D+ FROM 8100;)
+00098000   PUTFILE SYSIN
+00098100   IF &CP NE  THEN DO
+00098200      SET SYSIN EQ &STR(  SELECT #P&NAME. CODESECTOR=2;)
+00098300      PUTFILE SYSIN
+00098400      SET SYSIN EQ &STR(  TCP TEST: '#P&NAME.';)
+00098500   DONE
+00098600   ELSE IF &CS NE  THEN DO
+00098700      SET SYSIN EQ &STR(  SELECT #C&NAME. CODESECTOR=2;)
+00098800      PUTFILE SYSIN
+00098900      SET SYSIN EQ &STR(  TCP TEST: '#C&NAME.';)
+00099000   DONE
+00099100   ELSE DO
+00099200      SET SYSIN EQ &STR(  SELECT $&NAME.  CODESECTOR=2;)
+00099300      PUTFILE SYSIN
+00099400      SET SYSIN EQ &STR(  TCP TEST: &NAME.;)
+00099500   DONE
+00099600   PUTFILE SYSIN
+00099700   CLOSFILE SYSIN
+00099800DONE
+00099900ELSE ALLOC F(SYSIN) DA('&LNKIN.(&NAME.)') SHR
+00100000 
+00100100ALLOC F(LINKRPT) DA('&LIB..LINKRPT') MOD
+00100200OPENFILE LINKRPT OUTPUT
+00100300IF &DUMP  NE  THEN DO
+00100400  CONTROL NOMSG
+00100500  DELETE '&ID..&NAME..DUMP'
+00100600  ALLOC DA('&ID..&NAME..DUMP') RECFM(F B A) LRECL(133) BLKSIZE(2660) +
+00100700        SPACE(5,5) CYLINDERS
+00100800  ALLOC F(SYSUDUMP) DA('&ID..&NAME..DUMP') SHR
+00100900  ALLOC F(ABNLIGNR) DA(*) SHR
+00101000  CONTROL MSG
+00101100DONE
+00101200IF &TRUNLIB. NE THEN  SET &TEMPRLIB = '&TRUNLIB'
+00101300                ELSE  SET &TEMPRLIB =
+00101400IF &HALOBJ2  NE THEN  SET &OBJ2 = '&HALOBJ2'
+00101500                ELSE  SET &OBJ2 =
+00101600   ALLOC F(ACCESS)  DA( &TEMPRLIB. '&LIB..OBJ'         +
+00101700                    &OBJ2.  'NCAMCM.TOOLS.BFS.SIMLIB'  +
+00101800                    '&RUNLIB.' '&QCONLIB.') SHR
+00101900ALLOC F(ERROR)    DA('NROKSTB.SUPPORT.PILOTERR.R01V01') SHR
+00102000ALLOC F(INCLUDE)  DA('&LNKIN.') SHR
+00102100ALLOC F(HALSDF)   DA('&LIB..SDF') SHR
+00102200ALLOC F(OUTPUT4)  DA('&LIB..MAPS(&NAME)') SHR
+00102300ALLOC F(PROGRAM)  DA('NROKSTB.SUPPORT.PILOT.R07V01') SHR
+00102400ALLOC F(SYSPRINT) DA('&PLTPRINT.')    SHR
+00102500ALLOC F(FILE1)    DA('&LIB..TESTSET(&NAME.)')  OLD
+00102600ALLOC F(FILE2)    CYL SP(2 1)
+00102700ALLOC F(FILE3)    CYL SP(2 1)
+00102800ALLOC F(FILE4)    CYL SP(2 1)
+00102900ALLOC F(FILE5)    CYL SP(2 1)
+00103000ALLOC F(FILE6)    CYL SP(2 1)
+00103100ALLOC F(FILE7)    CYL SP(2 1)
+00103200ALLOC F(FILE8)    CYL SP(2 1)
+00103300ALLOC F(FILE9)    CYL SP(2 1)
+00103400WRITE PILOT HAS BEEN INVOKED
+00103500CALL '&MONITOR' +
+00103600     'FREE=50000,PAGES=500,LC=57,/'
+00103700SET &PILOTCC = &LASTCC
+00103800SET &RETCODE = &PILOTCC
+00103900WRITE PILOT COMPLETED WITH CC = &PILOTCC
+00104000SET LINKRPT = &STR(PILOT OF &NAME COMPLETED WITH CC = &PILOTCC)
+00104100PUTFILE LINKRPT
+00104200CLOSFILE LINKRPT
+00104300FREE F(LINKRPT)
+00104400FREE F(HALSDF SYSIN INCLUDE PROGRAM ERROR ACCESS SYSPRINT OUTPUT4 +
+00104500       FILE1 FILE2 FILE3 FILE4 FILE5 FILE6 FILE7 FILE8 FILE9)
+00104600IF &PILOTCC >0 THEN EXIT
+00104700IF &LENGTH(&DATA) >0 THEN SET INFLE EQ &STR(INPUT(&DATA))
+00104800                     ELSE SET INFLE EQ
+00104900IF &ACTION. = CLG THEN +
+00105000   GOTO GO
+00105100ELSE +
+00105200IF &ACTION. = LG THEN +
+00105300   GOTO GO
+00105400ELSE +
+00105500   EXIT
+00105600/****  CALL PICT & UCP  ****/
+00105700/****  UCP EXECUTION STEP   ****/
+00105800GO: CONTROL NOMSG
+00105900FREE F(SYSPRINT LOADMAP TESTSET LOADMOD UCPIN UCPOUT PLIDUMP REPORT)
+00106000FREE F(CREATE PAGER FILE0 IOPTRACE CHANNEL1 CHANNEL0)
+00106100FREE F(CHANNEL5 CHANNEL6) ATTR(PAGE)
+00106200CONTROL NOMSG
+00106300DEL '&LIB..LOAD(GO)'
+00106400CONTROL MSG
+00106500ALLOC F(SYSPRINT) DUMMY
+00106600ALLOC F(LOADMAP) DA('&LIB..MAPS(&NAME)') SHR
+00106700ALLOC F(TESTSET) DA('&LIB..TESTSET(&NAME.)') SHR
+00106800ALLOC F(LOADMOD) DA('&LIB..LOAD') SHR CYL SP(1 1) DIR(1)
+00106900CALL 'NCAMCM.PICT.REL1V1.LOAD(PICT)'
+00107000SET &CC1 EQ &LASTCC
+00107100WRITE PICT COMPLETED WITH CC = &CC1
+00107200FREE F(SYSPRINT LOADMAP TESTSET )
+00107300IF &CC1 GT 0 THEN EXIT
+00107400CONTROL NOMSG
+00107500DELETE '&LIB..LOAD(&NAME.)'
+00107600RENAME '&LIB..LOAD(GO)' '&LIB..LOAD(&NAME.)'
+00107700DELETE ('&LIB..CREATE.TMP')
+00107800DELETE ('&LIB..SIM(&NAME.)')
+00107900DELETE ('&LIB..UCP(&NAME.)')
+00108000IF &SEQ. NE THEN DO
+00108100   IF &SYSDSN('&ID..&NAME..OUT') = OK THEN +
+00108200     DELETE ('&ID..&NAME..OUT')
+00108300   IF &SYSDSN('&ID..&NAME..UCP') = OK THEN +
+00108400     DELETE ('&ID..&NAME..UCP')
+00108500   ALLOC F(CHANNEL6) DA('&ID..&NAME..OUT') NEW +
+00108600         RECFM(F B A) LRECL(133) BLKSIZE(6517) SPACE(20,5) TRACKS
+00108700   ALLOC F(UCPOUT) DA('&ID..&NAME..UCP') NEW +
+00108800         RECFM(F B A) LRECL(133) BLKSIZE(6517) SPACE(5,5) CYLINDERS
+00108900DONE
+00109000ELSE DO
+00109100   ALLOC F(UCPOUT)   DA('&LIB..UCP(&NAME.)') SHR
+00109200   IF &SCREEN. EQ THEN         +
+00109300      ALLOC    F(CHANNEL6) DA('&LIB..&DDOUT.(&NAME.)') SHR
+00109400   ELSE +
+00109500      ALLOC F(CHANNEL6) DA(*)
+00109600DONE
+00109700CONTROL MSG
+00109800ALLOC F(SYSPRINT) DA('&LIB..SIM(&NAME.)') SHR +
+00109900                  RECFM(F B A)  LRECL(133)  BLKSIZE(133)
+00110000ALLOC F(CREATE)   DA('&LIB..CREATE.TMP') SPACE(20,20) CYLINDER +
+00110100                  RECFM(F) LRECL(8224) BLKSIZE(8224) KEYLEN(4) DSORG(DA)
+00110200ALLOC F(PAGER)    DA('&LIB..CREATE.TMP') SHR
+00110300ALLOC F(UCPIN)    SP(5 2) TRACK BLOCK(80) RECFM(F B) LRECL(80)
+00110400ALLOC F(PLIDUMP)  SP(9 5) TRACK BLOCK(80) RECFM(F B) LRECL(80)
+00110500ALLOC F(REPORT)   DA('&LIB..EXECRPT') MOD
+00110600 
+00110700OPENFILE REPORT OUTPUT
+00110800OPENFILE UCPIN  OUTPUT
+00110900SET UCPIN EQ &STR(TITLE    HALUCP EXECUTION OF &PROG.)
+00111000PUTFILE UCPIN
+00111100IF &UTRACE. NE THEN +
+00111200   SET UCPIN EQ &STR(TRACE ON;)
+00111300ELSE +
+00111400   SET UCPIN EQ &STR(TRACE OFF;)
+00111500PUTFILE UCPIN
+00111600SET UCPIN EQ &STR(BFS;)
+00111700PUTFILE UCPIN
+00111800SET UCPIN EQ &STR(LOAD MEMBER = &NAME;)
+00111900PUTFILE UCPIN
+00112000SET UCPIN EQ &STR(DUMP CSECT = ALL;)
+00112100PUTFILE UCPIN
+00112200SET UCPIN EQ &STR(GO  DLCOUNT = &EXECSTEP.; DUMP REGISTER;)
+00112300PUTFILE UCPIN
+00112400SET UCPIN EQ &STR(DUMP CSECT = ALL;)
+00112500PUTFILE UCPIN
+00112600SET UCPIN EQ &STR(END;)
+00112700PUTFILE UCPIN
+00112800CLOSFILE UCPIN
+00112900 
+00113000CALL 'NCAMCM.APES.REL3V2.PLILOAD(HALUCP)'
+00113100SET &SAVECC = &LASTCC
+00113200SET &RETCODE= &SAVECC
+00113300CONTROL NOMSG
+00113400DELETE ('&LIB..CREATE.TMP')
+00113500CONTROL MSG
+00113600WRITE HALUCP COMPLETED WITH CC = &SAVECC
+00113700SET REPORT = &STR(EXECUTION OF &NAME. COMPLETED WITH CC = &SAVECC)
+00113800PUTFILE REPORT
+00113900CLOSFILE REPORT
+00114000FREE F(CREATE LOADMOD SYSPRINT PLIDUMP)
+00115000FREE F(CHANNEL6 UCPIN UCPOUT REPORT)
+00120000EXIT

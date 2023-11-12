@@ -1,0 +1,264 @@
+00001007/********************************************************************/
+00002007/*------------------------------------------------------------------*/
+00003007/*                                                                  */
+00004007/*   NAME:      FSWOBJ                                              */
+00005007/*                                                                  */
+00006007/*------------------------------------------------------------------*/
+00007007/*                                                                  */
+00008007/*   FUNCTION:  A CLIST TO COMPILE ALL FSW MODULES.  .OBJ FILE WILL */
+00009007/*              BE GENERATED FOR THE FSW OBJECT COMPARISON.         */
+00009107/*                                                                  */
+00009207/*              ALL .LST FILE WILL BE DELETED UNLESS A NODELETES    */
+00009307/*              OPTION IS SPECIFIED.                                */
+00009407/*                                                                  */
+00009507/*------------------------------------------------------------------*/
+00009607/*                                                                  */
+00009707/*   SYNTAX :                                                       */
+00009807/*      FSWOBJ  ID(&SYSUID.) DSN(APPL)  LIB(&ID..&DSN..OLD)         */
+00009907/*              SYSTEM(PASS) OI(OI250700) LIST() OPT()              */
+00010007/*              SRCDSN(&OI..APPL.SRC)                               */
+00010107/*              OLDCMPLR(NCAMCM.&SYSTEM..CURRENT.COMPILER)          */
+00010207/*              OLDERROR(NCAMCM.&SYSTEM..CURRENT.ERRORLIB)          */
+00010307/*              OLDTERROR() INV(NCAMCM.TESTLIB.&OI..INVENTRY)       */
+00010407/*              OLDMONTR(NCAMCM.PASS.CURRENT.MONITOR.LOAD(MONITOR)) */
+00010507/*              COMPVER(CURRENT) FIRSTRUN REFRESH TRACE NODELETES   */
+00010607/*                                                                  */
+00010707/*     ALIAS    - NONE.                                             */
+00010807/*     REQUIRED - NONE.                                             */
+00010907/*                                                                  */
+00011007/*------------------------------------------------------------------*/
+00011107/*                                                                  */
+00011207/*   INVOKES:   COMPDEL                                             */
+00011307/*              COMPALLO                                            */
+00011407/*              PDSALL                                              */
+00011507/*              PASSCLG/H360CLG                                     */
+00011607/*                                                                  */
+00011707/*------------------------------------------------------------------*/
+00011807/*                                                                  */
+00011907/*   PARAMETERS:                                                    */
+00012007/*                                                                  */
+00012107/*     ID       DEFAULT: &SYSUID                                    */
+00012207/*              HIGH LEVEL QUALIFIER                                */
+00012307/*                                                                  */
+00012407/*     DSN      DEFAULT: APPL                                       */
+00012507/*              DATA SET FOR THE TEST PROGRAMS                      */
+00012607/*                                                                  */
+00012707/*     SRCDSN   DEFAULT: &OI..APPL.SRC                              */
+00012807/*              DATA SET WHICH CONTAINS THE SOURCE PROGRAMS         */
+00012907/*                                                                  */
+00013007/*     LIB      DEFAULT: &ID..&DSN..OLD                             */
+00013107/*              DATASET NAME QUALIFIER                              */
+00013207/*                                                                  */
+00013307/*     LIST     DEFAULT: NCAMCM.TESTLIB.&OI..APPL.MEMLIST           */
+00013407/*              DATA SET WHICH CONTAINS A MEMBER LIST OF WHICH      */
+00013507/*              MEMBERS IN THE DATA SET YOU WANT TO RUN             */
+00013607/*                                                                  */
+00013707/*     SYSTEM   DEFAULT: PASS                                       */
+00013807/*              PASS OR BFS, FOR VERSION SEPARATION PURPOSES        */
+00013907/*                                                                  */
+00014007/*     COMPVER  DEFAULT: CURRENT                                    */
+00014107/*              COMPILER VERSION                                    */
+00014207/*                                                                  */
+00014307/*     OLDCMPLR DEFAULT: NCAMCM.&SYSTEM..CURRENT.COMPILER           */
+00014407/*              RELEASE OF THE COMPILER YOU USE AS A BASELINE       */
+00014507/*                                                                  */
+00014607/*     OLDERROR DEFAULT: NCAMCM.&SYSTEM..CURRENT.ERRORLIB           */
+00014707/*              RELEASE OF THE ERROR LIBRARY USED AS A BASELINE     */
+00014807/*                                                                  */
+00014907/*     OLDMONTR DEFAULT: NCAMCM.PASS.CURRENT.MONITOR.LOAD(MONITOR)  */
+00015007/*              RELEASE OF THE MONITOR USED AS A BASELINE           */
+00015107/*                                                                  */
+00015207/*     OLDTERROR DEFAULT: NULL                                      */
+00015307/*              TEMPORARY ERROR LIBRARY USED AS A BASELINE          */
+00015407/*                                                                  */
+00015507/*     OI       DEFAULT: OI250700                                   */
+00015607/*              VERSION OF THE FSW YOU WANT TO TEST                 */
+00015707/*                                                                  */
+00015807/*     INV      DEFAULT: NCAMCM.TESTLIB.&OI..INVENTRY               */
+00015907/*              OI INVENTORY FILE                                   */
+00016007/*                                                                  */
+00016107/*     FIRSTRUN OPTIONAL                                            */
+00016207/*              IF SPECIFIED ALL THE DATASETS WILL BE ALLOCATED     */
+00016307/*                                                                  */
+00016407/*     REFRESH  OPTIONAL                                            */
+00016507/*              IF SPECIFIED DELETE AND THEN REALLOCATE DATASETS    */
+00016607/*                                                                  */
+00016707/*     NODELETES   OPTIONAL                                         */
+00016807/*                 DO NOT DELETE THE .LST FILE AFTER COMPILATION    */
+00016907/*                                                                  */
+00017007/*     OPT      DEFAULT: NULL                                       */
+00017107/*              OTHER USER REQUESTED COMPILER OPTION                */
+00017207/*                                                                  */
+00017307/*     TRACE    OPTIONAL                                            */
+00017407/*              TRACE THE CLISTS EXECUTION                          */
+00017507/*                                                                  */
+00017607/*------------------------------------------------------------------*/
+00017707/*                                                                  */
+00017807/*   INPUT DATA SET NAMES:                                          */
+00017907/*                                                                  */
+00018007/*     <SRCDSN>                                                     */
+00018107/*          DATASET WHICH CONTAINS THE SOURCE PROGRAMS              */
+00018207/*                                                                  */
+00018307/*     NCAMCM.<SYSTEM>.CURRENT.COMPILER                             */
+00018407/*          RELEASE OF THE COMPILER TO USE AS A BASELINE            */
+00018507/*                                                                  */
+00018607/*     NCAMCM.<SYSTEM>.CURRENT.ERRORLIB                             */
+00018707/*          RELEASE OF THE ERROR LIBRARY TO USE AS A BASELINE       */
+00018807/*                                                                  */
+00018907/*------------------------------------------------------------------*/
+00019007/*                                                                  */
+00019107/*   OUTPUT DATA SET NAMES:                                         */
+00019207/*                                                                  */
+00019307/*     <LIB>.OBJ                                                    */
+00019407/*          OBJECT FILE                                             */
+00019507/*                                                                  */
+00019607/*------------------------------------------------------------------*/
+00019707/*                                                                  */
+00019807/*   REVISION HISTORY:                                              */
+00019907/*                                                                  */
+00020007/*  DATE      PCR#     NAME   DESCRIPTION                           */
+00020107/*  --------  -----    ----   -------------------------------       */
+00020207/*  04/24/91  169      LJK    BASELINED FOR 23V2 RELEASE            */
+00020307/*  03/30/94  332      LJK    UPDATED FOR 26V0 INTEGRATION TEST     */
+00020407/*  05/22/94  344      LJK    ADDED NODELETES OPTION                */
+00020507/*  10/21/94  377      BAF    ELIMINATE REFERENCES TO 24070         */
+00020607/*  03/31/95  418      LJK    ADD OPT PARAMETER; CHANGE OI TO 25070 */
+00020707/*                            DELETE NOLINK OPTION.                 */
+00020807/*  10/27/97  542      LJK    UPDATED TO PROCESS H360 FSWAT TOOL    */
+00020907/********************************************************************/
+00021007 
+00021107PROC 0   ID       (&SYSUID.)                             +
+00021207         DSN      (APPL)                                 +
+00021307         LIB      (&ID..&DSN..OLD)                       +
+00021407         SYSTEM   (PASS)                                 +
+00021507         COMPVER  (CURRENT)                              +
+00021607         OLDCMPLR (NCAMCM.&SYSTEM..&COMPVER..COMPILER)   +
+00021707         OLDERROR (NCAMCM.&SYSTEM..&COMPVER..ERRORLIB)   +
+00021807         OLDMONTR (NCAMCM.&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00021907         OLDTERROR()                                     +
+00022007         OI       (OI250700)                             +
+00022107         INV      (NCAMCM.TESTLIB.&OI..INVENTRY)         +
+00022207         SRCDSN   (&OI..&DSN..SRC)                       +
+00022307         LIST     (NCAMCM.TESTLIB.&OI..&DSN..MEMLIST)    +
+00022407         OPT      ()                                     +
+00022507         FIRSTRUN                                        +
+00022607         REFRESH                                         +
+00022707         NODELETES                                       +
+00022807         TRACE
+00022907 
+00023007CONTROL END(DONE)
+00023107GLOBAL RETCODE
+00023207IF &TRACE NE THEN CONTROL CONLIST LIST
+00023307CONTROL NOMSG
+00023407/********************************************************/
+00023507/*                                                      */
+00023607/*  ALLOCATE THE NECESSARY FILES FOR COMPILATION        */
+00023707/*                                                      */
+00023807/********************************************************/
+00023907 
+00024007IF &REFRESH NE THEN COMPDEL &LIB.
+00024107IF &FIRSTRUN EQ FIRSTRUN  OR &REFRESH EQ REFRESH  THEN +
+00024207   COMPALLO &LIB. TEST(FSW)
+00024307 
+00024407IF &SYSTEM = PASS THEN +
+00024507       SET &CMD = PASSCLG
+00024807IF &SYSTEM = H360 THEN +
+00024907       SET &CMD = H360CLG
+00025207/********************************************************/
+00025307/*                                                      */
+00025407/*  RUN PDSALL TO CREATE THE MEMBER LIST FILE           */
+00025507/*                                                      */
+00025607/********************************************************/
+00025707IF &LIST EQ THEN  DO
+00025807   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00025907   SET &LIST =  &LIB..MEMLIST
+00026007DONE
+00026107         /***************************************/
+00026207         /*                                     */
+00026307         /*    ON ATTN, DO THE FOLLOWING:       */
+00026407         /*                                     */
+00026507         /***************************************/
+00026607 
+00026707ATTN     DO
+00026807         ERROR    OFF
+00026907         CLOSFILE MEMBERS
+00027007         FREE     F(MEMBERS)
+00027107         EXIT
+00027207DONE
+00027307 
+00027407CONTROL  NOMSG
+00027507         FREE     F(MEMBERS)
+00027607CONTROL  MSG NOFLUSH
+00027707 
+00027807         /***************************************/
+00027907         /*                                     */
+00028007         /* SET UP TO READ THE FILE &LIST.      */
+00028107         /*                                     */
+00028207         /***************************************/
+00028307ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00028407OPENFILE MEMBERS  INPUT
+00028507 
+00028607         /***************************************/
+00028707         /*                                     */
+00028807         /* ON ERROR, DO THE FOLLOWING:         */
+00028907         /*                                     */
+00029007         /***************************************/
+00029107ERROR DO
+00029207   CLOSFILE MEMBERS
+00029307   FREE     F(MEMBERS)
+00029407   ERROR OFF
+00029507   GOTO FINI
+00029607DONE
+00029707         /***************************************/
+00029807         /*                                     */
+00029907         /*   PERFORM THE COMMAND ON THE PDS.   */
+00030007         /*                                     */
+00030107         /***************************************/
+00030207IF &OLDTERROR. NE THEN SET &OLDTERROR = TERRORLIB(&OLDTERROR.)
+00030307        ELSE SET  &OLDTERROR =
+00030407IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+00030507        ELSE SET  &OPT =
+00030607SET &PACK = 0
+00030707DO   WHILE    &SYSUID NE
+00030807     GETFILE  MEMBERS
+00030907     SET &PACK = &PACK + 1
+00031007     IF &PACK. = 8   THEN SET &PACK = 0
+00031107     SET &MEMLEN = 1
+00031207     DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+00031307        SET &MEMLEN =  &MEMLEN + 1
+00031407     DONE
+00031507     SET &MEMLEN = &MEMLEN - 1
+00031607     SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+00031707 
+00031807IF &PACK = 5  AND &NODELETES. EQ THEN +
+00031907  COMPRESS '&LIB..LST'
+00032007TIME
+00032107WRITE USING THE OLD COMPILER:
+00032207      &CMD    C                                              +
+00032307              &NAME.                                         +
+00032407              ID      (&ID.)                                 +
+00032507              LIB     (&LIB.)                                +
+00032607              SYSIN   (&SRCDSN.(&NAME.))                     +
+00032707              COMPVER (&COMPVER.)                            +
+00032807              COMPILER(&OLDCMPLR.)                           +
+00032907              ERRORLIB(&OLDERROR.)                           +
+00033007              MONITOR (&OLDMONTR.)                           +
+00033107              &OLDTERROR.                                    +
+00033207              OI      (&OI.)                                 +
+00033307              INV     (&INV.)                                +
+00033407              &OPT.                                          +
+00033507              FSW                                            +
+00033607              &TRACE.
+00033707 
+00033807  SET &OLDCMP=&RETCODE
+00033907  IF &OLDCMP < 4 AND &NODELETES. EQ THEN DO
+00034007    CONTROL NOMSG
+00034107    DELETE '&LIB..LST(&NAME.)'
+00034207    CONTROL MSG
+00034307  DONE
+00034407DONE
+00034507 
+00034607FINI: CONTROL MSG
+00034707WRITE ******************************************
+00034807WRITE ***   ALL FSW COMPILATION COMPLETED    ***
+00034907WRITE ******************************************

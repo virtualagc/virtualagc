@@ -1,0 +1,179 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     HALSTATF                                             */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION:  TO RUN HALSTAT FOR HAL/S 101 (FC) MODULES           */
+00000900/*                                                                  */
+00001000/*------------------------------------------------------------------*/
+00001100/*                                                                  */
+00001200/*   SYNTAX :                                                       */
+00001300/*     HALSTATF 'NAME' LIB() GSD(2) GFORMAT(1) MAP(2) MFORMAT(1)    */
+00001400/*               OPT() PROCESS(ALL) NUMBER(0) TRACE                 */
+00001500/*                                                                  */
+00001600/*     ALIAS    - NONE.                                             */
+00001700/*     REQUIRED - 'NAME'.                                           */
+00002000/*                                                                  */
+00002100/*------------------------------------------------------------------*/
+00002200/*                                                                  */
+00002300/*   INVOKES:                                                       */
+00002400/*                                                                  */
+00002500/*     EDITS NCAMCM.SYSJCL.CNTL(HALSTATF) TO SUMBIT A BATCH JOB     */
+00002600/*                                                                  */
+00002700/*------------------------------------------------------------------*/
+00002800/*                                                                  */
+00002900/*   PARAMETERS:                                                    */
+00003000/*                                                                  */
+00003100/*     NAME     REQUIRED                                            */
+00003200/*              PROGRAM NAME                                        */
+00003300/*                                                                  */
+00003400/*     LIB      DEFAULT: NULL                                       */
+00003500/*              THE LOCATION OF THE DATASET IF IT IS IN A PDS       */
+00003600/*                                                                  */
+00003700/*     GSD      DEFAULT: 2                                          */
+00003800/*              GLOBAL SYMBOLIC DIRECTORY                           */
+00003900/*              REQUESTS A SUB-LISTING THAT INCLUDES ALL HAL/S      */
+00004000/*              DECLARED SYMBOLS                                    */
+00004100/*                                                                  */
+00004200/*     GFORMAT  DEFAULT 1                                           */
+00004300/*              REQUESTS CROSS REFERENCE INFORMATI0N IN THE GSD THAT*/
+00004400/*              INCLUDES BOTH ISN'S AND STATEMENT REFERENCE NUMBERS */
+00004500/*              (SRN) FROM SOURCE CARD SEQUENCE NUMBERS. THE SRN IS */
+00004600/*              INCLUDED ONLY WHEN ITS IS CONTAINED IN THE          */
+00004700/*              SIMULATION DATA FILES (SDF).                        */
+00004800/*                                                                  */
+00004900/*     MAP      DEFAULT: 2                                          */
+00005000/*              REQUESTS A MEMORY MAP SIMILAR TO A LINKAGE EDITOR   */
+00005100/*              MAP. ONLY CSECTS, ADDRESSES, LENGTHS, HAL/S NAMES,  */
+00005200/*              HAL/S VARIABLES AND KEY ATTRIBUTES.                 */
+00005300/*                                                                  */
+00005400/*     MFORMAT  DEFAULT: 1                                          */
+00005500/*              REQUESTS FULL EXPANSION OF ALL STRUCTURE TERMINALS  */
+00005600/*              IN THE MEMORY MAP.                                  */
+00005700/*                                                                  */
+00005800/*     OPT      DEFAULT: NULL                                       */
+00005900/*              ALLOWS THE USER TO SPECIFY ANY OTHER OPTIONS DESIRED*/
+00006000/*                                                                  */
+00006100/*     PROCESS  DEFAULT: ALL                                        */
+00006200/*              RUN ALL PROCESSES                                   */
+00006300/*                                                                  */
+00006400/*     NUMBER   DEFAULT: 0                                          */
+00006500/*              NUMBER OF PROCESSES TO RUN. **** DO NOT OVERRIDE IF */
+00006600/*              RUNNING WITH PROCESS PARAMETER = ALL SINCE IT WILL  */
+00006700/*              INSERT EMPTY LINES OF CODE INTO SYSIN STATEMENT AND */
+00006800/*              THE PROGRAM WILL MOST LIKELY ABEND. ****            */
+00006900/*                                                                  */
+00007000/*     TRACE    OPTIONAL                                            */
+00007100/*              TRACE THE PROCEDURE'S EXECUTION ON THE USER SCREEN  */
+00007200/*                                                                  */
+00007300/*------------------------------------------------------------------*/
+00007400/*                                                                  */
+00007500/*   INPUT DATA SET NAMES:                                          */
+00007600/*                                                                  */
+00007700/*     NONE.                                                        */
+00008500/*                                                                  */
+00008600/*------------------------------------------------------------------*/
+00008700/*                                                                  */
+00008800/*   OUTPUT DATA SET NAMES:                                         */
+00008900/*                                                                  */
+00009000/*     NONE.                                                        */
+00009200/*                                                                  */
+00009300/*------------------------------------------------------------------*/
+00009400/*                                                                  */
+00009500/*   TEMPORARY DATA SET NAMES:                                      */
+00009600/*                                                                  */
+00009700/*     NONE.                                                        */
+00009800/*                                                                  */
+00009900/*------------------------------------------------------------------*/
+00010000/*                                                                  */
+00010100/*   COMMENTS:                                                      */
+00010200/*                                                                  */
+00010300/*     THE DEFAULT SETTINGS ARE SET TO EXECUTE ALL PROCESS(ES) WHEN */
+00010400/*       THE PROGRAM IS RUNNING. YOU CAN OVERRIDE THIS FEATURE BY   */
+00010500/*       SPECIFYING THE PROCESS NAME(S) IN THE PROCESS PARAMETER AND*/
+00010600/*       THE NUMBER OF PROCESS(ES) TO EXECUTE IN THE NUMBER PARM.   */
+00010700/*                                                                  */
+00010800/*          EX: PROCESS(SCALE_LOAD) NUMBER(1) --- FOR ONE PROCESS   */
+00010900/*              PROCESS(SCALE_LOAD,SCALE_BUILD,SCALE_RUN) NUMBER(3) */
+00011000/*                --- FOR THREE PROCESSES.                          */
+00011100/*                                                                  */
+00011200/*------------------------------------------------------------------*/
+00011300/*                                                                  */
+00011400/*   REVISION HISTORY:                                              */
+00011500/*                                                                  */
+00011600/*  DATE      PCR  NAME  DESCRIPTION                                */
+00011700/*  --------  ---  ---   -------------------------------------      */
+00011800/*  12/16/83  ???  DWE   ORIGINAL CLIST                             */
+00011900/*                                                                  */
+00012000/*  08/22/90  117  TEV   ADDED HEADER AND REARRANGED PARAMETERS     */
+00012100/*                       ONE PER LINE. MODIFIED TO EDIT A JCL       */
+00012200/*                       STREAM AND SUBMIT A BATCH JOB.             */
+00012300/*                                                                  */
+00012400/*------------------------------------------------------------------*/
+00012500/********************************************************************/
+00012600 
+00012700PROC 1 NAME         +
+00012800       LIB()        +
+00012900       GSD(2)       +
+00013000       GFORMAT(1)   +
+00013100       MAP(2)       +
+00013200       MFORMAT(1)   +
+00013300       OPT()        +
+00013400       PROCESS(ALL) +
+00013500       NUMBER(0)    +
+00013600       TRACE
+00013700 
+00013800IF &TRACE. NE THEN +
+00013900  CONTROL LIST
+00014000CONTROL MSG END(DONE)
+00014100 
+00014200EDIT     'NCAMCM.SYSJCL.CNTL(HALSTATF)' CNTL NONUM
+00014300TOP
+00014400CHANGE   *   999999 /NCAMZZZ/&SYSUID./ALL
+00014500FIND     /LM=OFTMP/
+00014600IF  &LIB. EQ THEN +
+00014700    CHANGE   *   /LM=OFTMP/LM=TEMPNAME/
+00014800ELSE +
+00014900    CHANGE   *   /LM=OFTMP/LM=&NAME./
+00015000FIND     /GSD=3/
+00015100CHANGE   *   /GSD=3/GSD=&GSD./
+00015200FIND     /GFORMAT/
+00015300CHANGE   *   /GFORMAT=1/GFORMAT=&GFORMAT./
+00015400FIND     /MAP/
+00015500CHANGE   *   /MAP=3/MAP=&MAP./
+00015600FIND     /OPTION='STAT,MF=1'/
+00015700IF &OPTION. EQ           THEN +
+00015800  CHANGE   *   /OPTION='STAT,MF=1'/OPTION='STAT,MF=&MFORMAT.'/
+00015900IF &OPTION. NE           THEN +
+00016000  CHANGE   *   /OPTION='STAT,MF=1'/OPTION='STAT,MF=&MFORMAT.,&OPTION.'/
+00016100FIND     /NAME-OF-SYSPRINT/
+00016200CHANGE   *   /NAME-OF-SYSPRINT/&SYSUID..&NAME..STAT/
+00016300IF &SYSDSN('&SYSUID..&NAME..STAT') EQ OK THEN DO
+00016400   FIND        /DISP=(NEW,CATLG)/
+00016500   CHANGE   *  /DISP=(NEW,CATLG)/DISP=OLD/
+00016600   FIND        /,SPACE=(TRK,(5,1))/
+00016700   CHANGE   *  /,SPACE=(TRK,(5,1))/ /
+00016800 DONE
+00016900FIND   /NAME-OF-RUNLIB/
+00017000CHANGE   *   /NAME-OF-RUNLIB/'NCAMCM.PASS.CURRENT.RUNLIB'/
+00017100IF &LIB. EQ THEN DO
+00017200   FIND    /NAME-OF-HALLIB/
+00017300   CHANGE  *  /NAME-OF-HALLIB/&SYSUID..&NAME..LOAD/
+00017400   FIND    /NAME-OF-HALSDF/
+00017500   CHANGE  *  /NAME-OF-HALSDF/&SYSUID..&NAME..SDF/
+00017600 DONE
+00017700ELSE  DO
+00017800   FIND    /NAME-OF-HALLIB/
+00017900   CHANGE  *  /NAME-OF-HALLIB/&SYSUID..&LIB..LOAD/
+00018000   FIND    /NAME-OF-HALSDF/
+00018100   CHANGE  *  /NAME-OF-HALSDF/&SYSUID..&LIB..SDF/
+00018200 DONE
+00018300FIND   /SYSIN/
+00018400IF  &PROCESS. NE &STR(ALL) AND IF &NUMBER. EQ 1 THEN +
+00018500    INSERT PROCESS UNIT &PROCESS.;
+00018600IF  &PROCESS. NE &STR(ALL) AND IF &NUMBER. GT 1 THEN +
+00018700    INSERT PROCESS UNITS &PROCESS.;
+00018800SUBMIT
+00018900END   NOSAVE

@@ -1,0 +1,294 @@
+00010001/********************************************************************/
+00020001/*------------------------------------------------------------------*/
+00030001/*                                                                  */
+00040010/*   NAME:     XPLZAP                                               */
+00050001/*                                                                  */
+00060001/*------------------------------------------------------------------*/
+00070001/*                                                                  */
+00080013/*   FUNCTION: INVOKE THE XPLZAP PROGRAM FOR AN XPL OBJECT MODULE;  */
+00090013/*             USED TO PUT A RELEASE VERSION STAMP INTO A COMPILER  */
+00100010/*                                                                  */
+00110001/*------------------------------------------------------------------*/
+00120001/*                                                                  */
+00130001/*   SYNTAX :                                                       */
+00140025/*     XPLZAP ID(&SYSUID.) COMPILER(&ID..REL99V0.COMPILER)          */
+00150026/*            VERSION(99.0) SYSTEM(PASS)                            */
+00160026/*            INTERACT SYSIN(*) L2(*)                               */
+00170029/*            BATCH SYS2(*) TRACE PROG(NCAMCM.TOOLS.XPLOBJ(XPLZAP)) */
+00180001/*                                                                  */
+00190001/*     ALIAS    - NONE.                                             */
+00200001/*     REQUIRED - NONE.                                             */
+00210001/*                                                                  */
+00220001/*------------------------------------------------------------------*/
+00230001/*                                                                  */
+00240001/*   INVOKES:                                                       */
+00250001/*                                                                  */
+00260010/*      NCAMCM.TOOLS.MISCLOAD(DSNAME) - PRINTS NAME OF DATASET      */
+00270010/*                                      BEING ZAPPED                */
+00280001/*      NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                             */
+00290001/*                                                                  */
+00300001/*------------------------------------------------------------------*/
+00310001/*                                                                  */
+00320001/*   PARAMETERS:                                                    */
+00330001/*                                                                  */
+00340001/*     ID       DEFAULT(&SYSUID.)                                   */
+00350001/*              THE HIGH LEVEL QUALIFIER FOR THE DATASET THAT       */
+00360001/*              IS TO  BE ZAPPED                                    */
+00370001/*                                                                  */
+00380001/*     COMPILER DEFAULT(&ID..REL99V0.COMPILER)                      */
+00390010/*              NAME OF THE DATASET TO BE STAMPED WITH A RELEASE    */
+00400010/*              VERSION IDENTIFIER                                  */
+00410010/*                                                                  */
+00420001/*     VERSION  DEFAULT: 99.0                                       */
+00430001/*              THE VERSION NUMBER TO ZAP INTO THE COMPILER         */
+00440001/*                                                                  */
+00450001/*     SYSTEM   DEFAULT: PASS                                       */
+00460010/*              SPECIFY PASS, BFS, 360 OR  XPL DEPENDING ON WHICH   */
+00470010/*              TYPE OF COMPILER IS TO BE STAMPED                   */
+00480001/*                                                                  */
+00490025/*     INTERACT OPTIONAL                                            */
+00500025/*              XPLZAP WILL TAKE ITS COMMANDS FROM SYSIN, WHICH     */
+00510025/*              CAN BE THE KEYBOARD OR A DATASET                    */
+00520025/*                                                                  */
+00530025/*     SYSIN    DEFAULT: *                                          */
+00540025/*              SPECIFIES SOURCE OF INPUT COMMANDS FOR THE          */
+00550025/*              XPLZAP PROGRAM. DEFAULTS TO THE KEYBOARD.           */
+00560025/*              IF A DATASET IS SPECIFIED, INTERACT MODE            */
+00570025/*              IS ACTIVATED AUTOMATICALLY.                         */
+00580025/*                                                                  */
+00590001/*     L2       DEFAULT: *                                          */
+00600022/*              SPECIFIES THE OUTPUT FILE (LISTING2) FOR XPLZAP     */
+00610025/*              WHEN <BATCH> IS NOT SPECIFIED                       */
+00620025/*              (IGNORED WHEN <INTERACT> IS NOT SPECIFIED)          */
+00630001/*                                                                  */
+00640026/*     BATCH    OPTIONAL                                            */
+00650026/*              DIRECTS XPLZAP TO ECHO THE INPUT COMMANDS AND       */
+00660026/*              ALL OUTPUT TO SYSPRINT                              */
+00670026/*                                                                  */
+00680025/*     SYS2     DEFAULT: *                                          */
+00690025/*              SPECIFIES THE OUTPUT FILE (SYSPRINT) FOR XPLZAP     */
+00700025/*                                                                  */
+00710026/*     TRACE    OPTIONAL                                            */
+00720026/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00730026/*              TERMINAL                                            */
+00740026/*                                                                  */
+00750010/*     PROG     DEFAULT: NCAMCM.TOOLS.XPLOBJ(XPLZAP)                */
+00760010/*              THE XPLZAP PROGRAM THAT WILL BE EXECUTED            */
+00760020/*              FOR FULL IMPLEMENTATION (OLD VERSION) OF XPLZAP     */
+00760030/*              SPECIFY PROG(NCAMCM.XPL.TOOLS.XPLZAP)               */
+00770010/*                                                                  */
+00780001/*------------------------------------------------------------------*/
+00790001/*                                                                  */
+00800001/*   INPUT DATA SET NAMES:                                          */
+00810001/*                                                                  */
+00820010/*     <PROG>                                                       */
+00830001/*         PROGRAM TO PUT THE STAMP ONTO THE OBJECT CODE            */
+00840010/*         (DEFAULT: NCAMCM.TOOLS.XPLOBJ(XPLZAP) )                  */
+00850001/*                                                                  */
+00860001/*     <COMPILER>                                                   */
+00870001/*         DATASET TO GET STAMPED                                   */
+00880001/*                                                                  */
+00890001/*------------------------------------------------------------------*/
+00900001/*                                                                  */
+00910001/*   OUTPUT DATA SET NAMES:                                         */
+00920001/*                                                                  */
+00930025/*     <L2>  (WHEN <INTERACT> IS SPECIFIED AND <BATCH> IS NOT)      */
+00940025/*          OUTPUT FILE (LISTING2) FOR THE XPLZAP PROGRAM           */
+00950010/*          (DEFAULT: USER'S TERMINAL)                              */
+00960025/*                                                                  */
+00970025/*     <SYS2> (WHEN <BATCH> IS SPECIFIED)                           */
+00980025/*          OUTPUT FILE (SYSPRINT) FOR THE XPLZAP PROGRAM           */
+00990025/*          (DEFAULT: USER'S TERMINAL)                              */
+01000025/*                                                                  */
+01010025/*     NOTE: WHEN NEITHER <INTERACT> NOR <BATCH> ARE SPECIFIED,     */
+01020025/*           THE OUTPUT IS DIRECTED TO A TEMPORARY FILE AND         */
+01030025/*           ECHOED TO THE SCREEN BY THE CLIST. SEE NEXT SECTION.   */
+01040025/*                                                                  */
+01050001/*------------------------------------------------------------------*/
+01060001/*                                                                  */
+01070001/*   TEMPORARY DATA SET NAMES:                                      */
+01080001/*                                                                  */
+01090010/*     <SYSIN>  (ONLY WHEN <INTERACT> IS NOT SPECIFIED)             */
+01100010/*           USED TO SPECIFY THE STANDARD INPUT TO THE XPLZAP       */
+01110010/*           PROGRAM WHEN A COMPILER DATASET IS BEING STAMPED       */
+01120001/*                                                                  */
+01130025/*     <LISTING2>  (ONLY WHEN <INTERACT> AND <BATCH> ARE NOT        */
+01140025/*           SPECIFIED) CONTAINS THE XPLZAP OUTPUT AND IS COPIED    */
+01150025/*           TO THE SCREEN BY THE CLIST.                            */
+01160011/*                                                                  */
+01170001/*------------------------------------------------------------------*/
+01180001/*                                                                  */
+01190001/*   COMMENTS:                                                      */
+01200001/*                                                                  */
+01210012/*  -  THE XPLZAP CLIST HAS TWO MODES -- DEFAULT (NON-INTERACTIVE)  */
+01220012/*     AND INTERACTIVE -- WHICH ARE ACTIVATED BY THE ABSENCE OR     */
+01230012/*     PRESENCE OF THE 'INTERACT' PARAMETER.  IN DEFAULT MODE WITH  */
+01240012/*     ALL DEFAULT PARAMETERS, THE CLIST WILL ZAP A PASS COMPILER   */
+01250012/*     NAMED <USERID>.REL99V0.COMPILER WITH VERSION '  FC-99.0 ';   */
+01260012/*     MESSAGES FROM THE CLIST EXECTION WILL BE SENT TO THE SCREEN. */
+01270022/*     NOTE: <L2> AND <SYSIN> ARE IGNORED IN THIS MODE.             */
+01280020/*                                                                  */
+01290012/*  -  IN INTERACTIVE MODE, THE USER CAN ZAP AN OBJECT MODULE       */
+01300025/*     OTHER THAN A COMPILER, EXECUTE COMMANDS OTHER THAN THE       */
+01310025/*     DEFAULT COMMANDS, OR USE XPLZAP TO VIEW THE PORTIONS         */
+01320012/*     OF THE COMPILER (DEPENDING ON WHAT XPLZAP COMMANDS ARE       */
+01330020/*     IMPLEMENTED). FOR EXAMPLE, THE TSO COMMAND                   */
+01340011/*                                                                  */
+01350011/*        XPLZAP COMPILER(XPL.PROGRAM.OBJ) INTERACT                 */
+01360011/*                                                                  */
+01370012/*     WILL EXECUTE XPLZAP ON THE NAMED OBJECT MODULE. XPLZAP       */
+01380011/*     COMMANDS WILL BE READ FROM THE KEYBOARD OR FROM A FILE       */
+01390025/*     SPECIFIED BY <SYSIN>.  OUTPUT WILL BE DIRECTED TO THE FILE   */
+01400025/*     SPECIFIED BY <L2> (LISTING2), UNLESS <BATCH> IS SPECIFIED,   */
+01410025/*     IN WHICH CASE OUTPUT IS DIRECTED TO <SYS2> (SYSPRINT).       */
+01420022/*     NOTE: <VERSION> AND <SYSTEM> ARE IGNORED IN THIS MODE.       */
+01430011/*                                                                  */
+01440020/*  -  REFER TO SECTION 8.1, XPLZAP, OF "THE INTERMETRICS' XPL      */
+01450020/*     SYSTEM" MANUAL (IR-MA-029) FOR A DESCRIPTION OF THE          */
+01460011/*     XPLZAP PROGRAM AND COMMANDS.                                 */
+01470011/*                                                                  */
+01480001/*------------------------------------------------------------------*/
+01490001/*                                                                  */
+01500001/*   REVISION HISTORY:                                              */
+01510001/*                                                                  */
+01520001/*  DATE      PCR  NAME  DESCRIPTION                                */
+01530001/*  --------  ---  ---   -------------------------------------      */
+01540001/*  06/10/89  ???  TVR   ORIGINAL CLIST                             */
+01550001/*                                                                  */
+01560001/*  06/29/90  099  TEV   ADDED HEADER                               */
+01570001/*                                                                  */
+01580001/*  06/24/91  189  RSJ   CHANGED  CLIST TO REMOVE THE INTERACTIVE   */
+01590001/*                       XPLZAP SESSION.  TOOK OUT REQUIRED         */
+01600001/*                       NAME PARAMETER AND REPLACED WITH OPTIONAL  */
+01610001/*                       PARM.   ADDED INTERACT PARAMETER TO ALLOW  */
+01620001/*                       FOR INTERACTIVE SESSION.  ADDED VERSION    */
+01630001/*                       PARAMETER TO SPECIFY VERSION NUMBER        */
+01640001/*                                                                  */
+01650001/*  07/11/91  197  RSJ   UPDATED TO BE COMPATIBLE WITH THE BFS AND  */
+01660001/*                       360 COMPILERS.  ALSO MADE THE CLIST        */
+01670001/*                       SELF CHECKING                              */
+01680001/*                                                                  */
+01690001/*  09/13/91  186  LJK   RENAMED CM LOAD MODULE                     */
+01700001/*                                                                  */
+01710001/*  09/30/92  266  NLM   CHANGED CLIST TO INDICATE WHETHER RELEASE  */
+01720001/*                       VERSION WAS ADDED OR WAS UPDATED           */
+01730012/*                                                                  */
+01740028/*  07/11/94  354  HFG   UPDATED CLIST TO INVOKE NEW XPLZAP.        */
+01750012/*                       UPDATED INTERACTIVE SECTION; ADDED SYSIN   */
+01760025/*                       AND PROG PARAMETERS.                       */
+01770001/*------------------------------------------------------------------*/
+01780001/*******************************************************************/
+01790001 
+01800001PROC 0   ID(&SYSUID.)                     +
+01810001         COMPILER(&ID..REL99V0.COMPILER)  +
+01820001         VERSION(99.0)                    +
+01830001         SYSTEM(PASS)                     +
+01840025         INTERACT                         +
+01850025         SYSIN(*)                         +
+01860009         L2(*)                            +
+01870023         SYS2(*)                          +
+01880025         BATCH                            +
+01890025         TRACE                            +
+01910029         PROG(NCAMCM.TOOLS.XPLOBJ(XPLZAP))
+01920001 
+01930001IF &TRACE. NE THEN CONTROL LIST CONLIST
+01940001 
+01950001CONTROL NOMSG
+01960001FREE F(SYSPRINT FILE1 PROGRAM LISTING2 SYSIN) ATTR(TADD BADD)
+01970001CONTROL MSG
+01980012 
+01990027ATTR TADD RECFM(F A) LRECL(133) BLKSIZE(1330)
+02000001ATTR BADD RECFM(F) LRECL(100) BLKSIZE(100)
+02010012 
+02020025/* SET INTERACTIVE MODE IF A SYSIN FILE IS SPECIFIED */
+02030025IF &STR(&SYSIN) NE &STR(*) +
+02040020THEN SET &INTERACT = &STR(INTERACT)
+02050020 
+02060012/*** INTERACTIVE MODE: ALLOCATE SYSIN AND LISTING2 FILES  ***/
+02070012 
+02080001IF &INTERACT. NE THEN  DO
+02090001   ALLOC REUSE F(SYSIN) DA(&SYSIN.)
+02100001   IF &STR(&L2) = &STR(*) THEN +
+02110001      ALLOC REUSE F(LISTING2) DA(*) USING(BADD)
+02120001   ELSE DO
+02130022      IF &SYSDSN(&L2) = OK THEN DO
+02140022         CONTROL NOMSG
+02150022         DELETE &L2
+02160022         CONTROL MSG
+02170022      END
+02180022      ALLOC REUSE F(LISTING2) SP(5 2) TRACK USING(BADD) +
+02190022            NEW DATASET(&L2.)
+02200001   END
+02210020 
+02220001END
+02230012 
+02240012/*** DEFAULT MODE:  ALLOCATE LISTING2 AS TEMPORARY      ***/
+02250012/*** DATASET, CREATE SYSIN FILE WITH ZAP COMMANDS.      ***/
+02260012 
+02270012ELSE DO
+02280012     ALLOC REUSE F(LISTING2) SP(5 2) TRACK USING(BADD)
+02290017 
+02300012    /*THE FOLLOWING STRING HAS THE 'T' APPENDED IN ORDER TO PAD THE*/
+02310012    /*STRING WITH BLANKS.  THIS IS THE EASIEST WAY TO DO THIS */
+02320001     SET &VER = &STR(&VERSION.     T)
+02330001     SET &VER = &SUBSTR(1:5,&VER)
+02340001     ALLOC REUSE F(SYSIN) SP(5 2) TRACK BLOCK(80) RECFM(F B A) LRECL(80)
+02350001     OPENFILE SYSIN OUTPUT
+02360001     SET SYSIN EQ &STR(M)
+02370001     PUTFILE SYSIN
+02380001     SET SYSIN EQ &STR(F)
+02390001     PUTFILE SYSIN
+02400001     IF &SYSTEM EQ PASS THEN SET &VER EQ &STR(  FC-&VER.)
+02410001     IF &SYSTEM EQ BFS  THEN SET &VER EQ &STR( BFC-&VER.)
+02420001     IF &SYSTEM EQ 360  THEN SET &VER EQ &STR( 360-&VER.)
+02430001     IF &SYSTEM EQ XPL  THEN SET &VER EQ &STR( 360-&VER.)
+02440001     WRITENR ZAPPING '&VER.' INTO ==>
+02450001     SET SYSIN EQ &STR(RI '&VER.')
+02460001     PUTFILE SYSIN
+02470001     SET SYSIN EQ &STR(E)
+02480001     PUTFILE SYSIN
+02490001     CLOSFILE SYSIN
+02500001END
+02510012 
+02520012/*** INVOKE THE XPLZAP PROGRAM  ***/
+02530012 
+02540025IF &STR(&SYS2) EQ &STR(*) THEN +
+02550023   ALLOC REUSE F(SYSPRINT) DA(*) USING(TADD) SHR
+02560023ELSE DO
+02570023   IF &SYSDSN(&SYS2) EQ OK THEN DO
+02580025      CONTROL NOMSG
+02590023      DELETE &SYS2
+02600025      CONTROL MSG
+02610023   END
+02620023   ALLOC REUSE F(SYSPRINT) DA(&SYS2) NEW +
+02630023         USING(TADD) TRACK SP(10 4)
+02640023END
+02650029ALLOC REUSE F(PROGRAM) DA('&PROG.') SHR
+02660001ALLOC REUSE F(FILE1) DA('&COMPILER.') SHR
+02670001CALL 'NCAMCM.TOOLS.MISCLOAD(DSNAME)' 'FILE1'
+02680001CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' '&BATCH.'
+02690012 
+02700025/*** DEFAULT MODE PROCESSING WITH NO BATCH MODE:
+02710025/***      ECHO XPLZAP OUTPUT TO SCREEN,
+02720025/***      CHECK WHETHER STAMP WAS ADDED OR REPLACED.
+02730012 
+02740024IF &INTERACT. EQ AND &BATCH EQ THEN DO
+02750007   OPENFILE LISTING2 INPUT
+02760007   GETFILE LISTING2
+02770007   WRITE  &LISTING2
+02780007   GETFILE LISTING2
+02790007   WRITE  &LISTING2
+02800007   GETFILE LISTING2
+02810007   WRITE  &LISTING2
+02820007   GETFILE LISTING2
+02830007   WRITE  &LISTING2
+02840007   GETFILE LISTING2
+02850007   WRITE  &LISTING2
+02860007   CLOSFILE LISTING2
+02870007   SET &GOOD = &STR(OLD DATA 4040 4040 4040 4040 4040)
+02880007   WRITE
+02890007   IF &SUBSTR(1:33,&LISTING2) EQ &STR(&GOOD.) THEN +
+02900007         WRITE XPLZAP ADDED RELEASE VERSION STAMP
+02910007   ELSE  WRITE XPLZAP UPDATED RELEASE VERSION STAMP
+02920007END
+02930001FREE F(SYSPRINT FILE1 PROGRAM LISTING2 SYSIN) ATTR(TADD BADD)

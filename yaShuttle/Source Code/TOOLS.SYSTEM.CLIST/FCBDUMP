@@ -1,0 +1,133 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     FCBDUMP                                              */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: PRINTS INFORMATION REGARDING NUMBER OF BLOCKS/BYTES  */
+00000900/*             OF CODE AND DATA CONTAINED IN A SPECIFIED XPL        */
+00001000/*             OBJECT MODULE.                                       */
+00001100/*                                                                  */
+00002000/*------------------------------------------------------------------*/
+00002100/*                                                                  */
+00002200/*   SYNTAX :                                                       */
+00002300/*                                                                  */
+00002400/*     FCBDUMP 'NAME' ID(&SYSUID.) BATCH SYS2(*)                    */
+00002500/*                                                                  */
+00002600/*     ALIAS    - NONE.                                             */
+00002700/*     REQUIRED - 'NAME'                                            */
+00002800/*     DEFAULTS - ID(&SYSUID.) SYS2(*)                              */
+00002900/*                                                                  */
+00003000/*------------------------------------------------------------------*/
+00003100/*                                                                  */
+00003200/*   INVOKES:                                                       */
+00003300/*                                                                  */
+00003400/*      NCAMCM.TOOLS.MISCLOAD(DSNAME)                               */
+00003500/*      NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                             */
+00003600/*       --> NCAMCM.TOOLS.XPLOBJ(FCBDUMP)                           */
+00003700/*                                                                  */
+00003800/*------------------------------------------------------------------*/
+00003900/*                                                                  */
+00004000/*   PARAMETERS:                                                    */
+00004100/*                                                                  */
+00004200/*     NAME     REQUIRED                                            */
+00004300/*              NAME OF THE DATASET, WHICH CONTAINS THE OBJECT      */
+00004400/*              CODE, YOU WANT TO DUMP THE FILE CONTROL BLOCK       */
+00004500/*              INFORMATION FOR.                                    */
+00004600/*                                                                  */
+00004700/*     ID       DEFAULT: &SYSUID                                    */
+00004800/*              HLQ WHERE INPUT DATASET RESIDES                     */
+00004900/*                                                                  */
+00005000/*     BATCH    OPTIONAL                                            */
+00005100/*              IF SPECIFIED, THE JOB RUNS BATCH                    */
+00005200/*                                                                  */
+00005300/*     SYS2     DEFAULT: *                                          */
+00005400/*              OUTPUT DEFAULTS TO THE USER'S TERMINAL UNLESS THE   */
+00005500/*              USER OVERRIDES THIS PARAMETER                       */
+00005600/*                                                                  */
+00005700/*     INFO                                                         */
+00005800/*              THIS IS NOT REALLY A PARAMETER, BUT IS INTENDED     */
+00005900/*              TO INFORM THE USER THAT THE OBJECT CODE FOR THE     */
+00006000/*              TOOL MUST RESIDE IN THE USERS ACCOUNT. IT CAN BE    */
+00006100/*              COPIED FROM NCAMCM.TOOLS.XPLOBJ(FCBDUMP) TO THE     */
+00006200/*              FILE &SYSUID..FCBDUMP.OBJ                           */
+00006300/*                                                                  */
+00006400/*------------------------------------------------------------------*/
+00006500/*                                                                  */
+00006600/*   INPUT DATA SET NAMES:                                          */
+00006700/*                                                                  */
+00007000/*     &SYSUID..FCBDUMP.OBJ                                         */
+00007100/*         PROGRAM THAT EXTRACTS FCB INFO FROM OBJECT CODE.         */
+00007200/*         COPY FROM NCAMCM.TOOLS.XPLOBJ(FCBDUMP)                   */
+00007300/*                                                                  */
+00007400/*     <NAME>                                                       */
+00007500/*         DATASET TO EXTRACT FCB INFO FROM                         */
+00007600/*                                                                  */
+00007700/*------------------------------------------------------------------*/
+00007800/*                                                                  */
+00007900/*   OUTPUT DATA SET NAMES:                                         */
+00008000/*                                                                  */
+00008100/*     <SYS2>                                                       */
+00008200/*          OUTPUT OF THE PROGRAM (DEFAULT: USER'S TERMINAL)        */
+00008300/*                                                                  */
+00008400/*------------------------------------------------------------------*/
+00008500/*                                                                  */
+00008600/*   TEMPORARY DATA SET NAMES:                                      */
+00008700/*                                                                  */
+00008800/*     NONE.                                                        */
+00008900/*                                                                  */
+00009000/*------------------------------------------------------------------*/
+00009100/*                                                                  */
+00009200/*   COMMENTS:                                                      */
+00009300/*                                                                  */
+00009400/*     YOU CANNOT USE THE ID PARAMETER TO LOOK AT A DATASET IN      */
+00009500/*     A HLQ OTHER THAN YOUR OWN UNLESS YOU HAVE UPDATE PRIVILEGES  */
+00009600/*     FOR THAT HLQ. THE OBJECT CODE FOR THE TOOL MUST ALSO RESIDE  */
+00009700/*     IN YOUR ACCOUNT UNLESS YOU HAVE UPDATE PRIVILEGES FOR        */
+00009800/*     NCAMCM.                                                      */
+00009900/*                                                                  */
+00010000/*------------------------------------------------------------------*/
+00010100/*                                                                  */
+00010200/*   REVISION HISTORY:                                              */
+00010300/*                                                                  */
+00011000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00012000/*     --------  ----  ----  -------------------------------------  */
+00013000/*     05/14/91  154   RAH   ORIGINAL CLIST                         */
+00014000/*                                                                  */
+00014100/*     09/15/91  186   LJK   RENAME CM OBJECT FILE                  */
+00014200/*                                                                  */
+00014300/*     11/01/91  154   RAH   CLEANUP FOR WALKTHROUGH                */
+00014400/*                                                                  */
+00014500/*     03/20/00  669   KHP   MODIFIED HEADER SO THAT ITS FUNCTION   */
+00014600/*                           DISPLAYED CORRECTLY IN ITS HELP FILE   */
+00014700/*                                                                  */
+00015000/********************************************************************/
+00016000 
+00017000PROC 1 NAME           +
+00018000       ID(&SYSUID.)   +
+00019000       BATCH          +
+00020000       SYS2(*)
+00030000 
+00040000CONTROL NOMSG
+00050000FREE F(SYSPRINT FILE1 PROGRAM SYSIN) ATTR(TADD OBJB)
+00051000CONTROL MSG
+00052000 
+00053000ATTR TADD RECFM(F A) LRECL(133) BLKSIZE(133)
+00054000ATTR OBJB RECFM(F) LRECL(7200) BLKSIZE(7200)
+00055000 
+00056000IF &STR(&SYS2) = &STR(*) THEN +
+00057000   ALLOC REUSE F(SYSPRINT) DA(*) USING(TADD)
+00058000ELSE DO
+00058100   FALLOC  &SYS2
+00058200   ALLOC F(SYSPRINT) DA(&SYS2)
+00058300END
+00058400 
+00058500ALLOC REUSE F(SYSIN) DA(*) SHR
+00058600ALLOC REUSE F(PROGRAM) DA('&ID..FCBDUMP.OBJ') SHR
+00058700ALLOC REUSE F(FILE1) DA('&ID..&NAME.') USING(OBJB) SHR
+00058800 
+00058900CALL 'NCAMCM.TOOLS.MISCLOAD(DSNAME)' 'FILE1'
+00059000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' '&BATCH.'
+00059100 
+00059200FREE F(SYSPRINT FILE1 PROGRAM SYSIN) ATTR(TADD OBJB)

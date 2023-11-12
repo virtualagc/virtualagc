@@ -1,0 +1,659 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     SUPERC                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: ISRSCLST IS A SAMPLE "LINE COMMAND" CLIST THAT       */
+00090000/*              DEMONSTRATES MOST OF THE CAPABILITY OF SUPERC       */
+00100000/*              COMPARE PROGRAM.  IT HAS LIMITED ERROR RECOVERY AND */
+00110000/*              ERROR DIAGNOSTIC CAPABILITIES.  FURTHER, CERTAIN    */
+00120000/*              SUPERC FUNCTIONS ARE NOT SUPPORTED {E.G. APNDUPD}   */
+00140000/*                                                                  */
+00150000/*              THIS CLIST HAS BEEN DEVELOPED FOR EXECUTION IN AN   */
+00160000/*              ISPF/PDF ENVIRONMENT.  HOWEVER, THERE IS SOME       */
+00170000/*              ADDITIONAL LOGIC {TSO/E  R2 DEPENDENT AND A "PLIB"  */
+00180000/*              PARAMETER} THAT WILL ALLOW THE USER TO EXECUTE THE  */
+00190000/*              CLIST OUTSIDE ISPF AND FROM A PRIVATE LIBRARY.      */
+00200000/*                                                                  */
+00220000/*------------------------------------------------------------------*/
+00230000/*                                                                  */
+00240000/*   SYNTAX :                                                       */
+00250000/*     SUPERC 'NAME' NEWFILE(&SYSUID..&NAME..NEW.LST)               */
+00260000/*            OLDFILE(&SYSUID..&NAME..OLD.LST)                      */
+00260100/*            LSTLIB(&SYSUID..&NAME.)                               */
+00270000/*            OUTDD(&SYSUID..&NAME..SUPERC.LST) DELDD(DUMMY)        */
+00280000/*            STMTFILE(DUMMY) LISTING(DELTA) TYPE(LINE) PROCESS()   */
+00290000/*            UID(&SYSPREF.) BROWSE TRACE PLIB APNDLST              */
+00300000/*            LIB(SYS1.ISPLPA(ISRSUPC)) REPORT REFRESH              */
+00310000/*                                                                  */
+00320000/*     ALIAS    - NONE.                                             */
+00330000/*     REQUIRED - 'NAME'                                            */
+00390000/*                                                                  */
+00400000/*------------------------------------------------------------------*/
+00410000/*                                                                  */
+00420000/*   INVOKES:                                                       */
+00430000/*                                                                  */
+00440000/*     SRSUPC IF ISPF IS ACTIVE AND USER DOESN'T HAVE PRIVATE       */
+00450000/*             LIBRARY                                              */
+00460000/*     <LIB>  IF OUTSIDE THE ISPF ENVIRONMENT OR PRIVATE SUPERC     */
+00470000/*             LIBRARY                                              */
+00480000/*                                                                  */
+00490000/*------------------------------------------------------------------*/
+00500000/*                                                                  */
+00510000/*   PARAMETERS:                                                    */
+00520000/*                                                                  */
+00530000/*     NAME     REQUIRED                                            */
+00540000/*              THE NAMES OF THE PROGRAM YOU WANT TO COMPARE        */
+00550000/*                                                                  */
+00560000/*     NEWFILE  DEFAULT: &SYSUID..&NAME..NEW.LST                    */
+00570000/*              THE NAME OF THE NEW FILE TO COMPARE AGAINST OLD     */
+00580000/*              FILE                                                */
+00590000/*                                                                  */
+00600000/*     OLDFILE  DEFAULT: &SYSUID..&NAME..OLD.LST                    */
+00610000/*              THE NAME OF THE OLD FILE WHICH IS COMPARED AGAINST  */
+00620000/*              THE NEW FILE                                        */
+00620100/*                                                                  */
+00630000/*     LSTLIB   DEFAULT: &SYSUID..&NAME.                            */
+00630100/*              OTHER DSN LEVEL                                     */
+00630200/*                                                                  */
+00640000/*     OUTDD    DEFAULT: &SYSUID..&NAME..SUPERC.LST                 */
+00650000/*              THE NAME OF THE FILE THAT THE DIFFERNCES ARE        */
+00660000/*              SAVED INTO                                          */
+00670000/*                                                                  */
+00680000/*     DELDD    DEFAULT: DUMMY                                      */
+00690000/*              SAME AS OUTDD BUT FORMATTED DIFFERENTLY SO IT CAN   */
+00700000/*              BE USED AS INPUT TO ANOTHER PROGRAM                 */
+00710000/*                                                                  */
+00720000/*     STMTFILE DEFAULT: DUMMY                                      */
+00730000/*              A PROCESS STATEMENTS DATA SET CONTAINING PROCESS    */
+00740000/*              STATEMENTS THAT SPECIFY DIRECTIVES TO THE SUPERC    */
+00750000/*              PROGRAM                                             */
+00760000/*                                                                  */
+00770000/*     LISTING  DEFAULT: DELTA                                      */
+00780000/*              TYPE OF LISTING THAT IS DONE {OTHERS: OVSUM, CHNG,  */
+00790000/*              LONG, NOLIST}                                       */
+00800000/*                                                                  */
+00810000/*     CTYPE    DEFAULT: LINE                                       */
+00820000/*              THE TYPE OF COMPARE THAT IS DONE {OTHERS: FILE,     */
+00830000/*              WORD,BYTE}.                                         */
+00840000/*                                                                  */
+00850000/*     PROCESS  DEFAULT: NULL                                       */
+00860000/*              ANY SPECIAL TYPE OF PROCESSING OPTIONS THAT NEEDS   */
+00870000/*              TO BE DONE CAN BE SPECIFIED IN THIS PARAMETER       */
+00880000/*                                                                  */
+00890000/*     UID      DEFAULT: &SYSPREF                                   */
+00900000/*              INSURES THAT TSO USES THE DESIRED DSN PREFIX        */
+00910000/*                                                                  */
+00920000/*     BROWSE   OPTIONAL                                            */
+00930000/*              ALLOWS YOU TO BROWSE THE OUTPUT FILE                */
+00940000/*                                                                  */
+00950000/*     TRACE    OPTIONAL                                            */
+00960000/*              ALLOWS YOU TO TRACE THE EXECUTION AT THE TERMINAL   */
+00970000/*                                                                  */
+00980000/*     PLIB     OPTIONAL                                            */
+00990000/*              ALLOWS YOU TO EXECUTE CLISTS OUTSIDE ISPF AND       */
+01000000/*              FROM A PRIVATE LIBRARY {SPECIFIED IN THE <LIB>      */
+01000100/*              PARAMETER}                                          */
+01010000/*                                                                  */
+01020000/*     LIB      DEFAULT: SYS1.ISPLPA(ISRSUPC)                       */
+01030000/*              PROGRAM THAT DOES THE ACTUAL COMPARE                */
+01040000/*                                                                  */
+01040100/*     APNDLST  OPTIONAL                                            */
+01040200/*              CAUSES THE OUTPUT DATASET TO BE ALLOCATED WITH      */
+01040300/*              THE 'MOD' ATTRIBUTE, WHICH MEANS NEW OUTPUT WILL    */
+01040400/*              BE APPENDED TO THE DATASET INSTEAD OF OVERWRITING   */
+01040500/*              EXISTING DATA {NOTE: THIS IS A CLIST OPTION AND     */
+01040600/*              NOT A SUPERC PROGRAM OPTION IN THIS CASE}           */
+01040700/*                                                                  */
+01040800/*     REPORT   OPTIONAL                                            */
+01040900/*              OPTION TO GENERATE THE SUPERC REPORT FILE           */
+01041000/*                                                                  */
+01041100/*     REFRESH  OPTIONAL                                            */
+01041200/*              REFRESH THE SUPERC REPORT FILE                      */
+01041300/*                                                                  */
+01050000/*------------------------------------------------------------------*/
+01060000/*                                                                  */
+01070000/*   INPUT DATA SET NAMES:                                          */
+01080000/*                                                                  */
+01090000/*     <NEWFILE>                                                    */
+01100000/*         THE NAME OF THE NEW FILE TO COMPARE AGAINST THE OLD FILE */
+01110000/*                                                                  */
+01120000/*     <OLDFILE>                                                    */
+01130000/*         THE NAME OF THE OLD FILE TO COMPARE AGAINST THE NEW FILE */
+01140000/*                                                                  */
+01150000/*     <STMTFILE>                                                   */
+01160000/*         A PROCESS STATEMENTS DATA SET CONTAINING PROCESS         */
+01170000/*         STATEMENTS THAT SPECIFY DIRECTIVES TO THE SUPERC PROGRAM */
+01180000/*                                                                  */
+01190000/*------------------------------------------------------------------*/
+01200000/*                                                                  */
+01210000/*   OUTPUT DATA SET NAMES:                                         */
+01220000/*                                                                  */
+01230000/*     <OUTDD>                                                      */
+01240000/*         THE NAME OF THE FILE THAT THE DIFFERENCES ARE SAVED INTO */
+01250000/*                                                                  */
+01260000/*     <DELDD>                                                      */
+01270000/*         SAME AS OUTDD BUT FORMATTED DIFFERENTLY SO IT CAN BE     */
+01280000/*         USED AS INPUT TO ANOTHER PROGRAM                         */
+01290000/*                                                                  */
+01290100/*     <LSTLIB>.SUPERC.RPT                                          */
+01290200/*         PS OF THE SUPERC REPORT FILE; THIS IS OPTIONAL           */
+01290300/*                                                                  */
+01300000/*------------------------------------------------------------------*/
+01310000/*                                                                  */
+01320000/*   TEMPORARY DATA SET NAMES:                                      */
+01330000/*                                                                  */
+01340000/*     NONE.                                                        */
+01350000/*                                                                  */
+01360000/*------------------------------------------------------------------*/
+01370000/*                                                                  */
+01380000/*   COMMENTS:                                                      */
+01390000/*                                                                  */
+01400000/*     SAMPLE INVOCATION WITH SUPERC OPTIONS AND APNDLST OPTION:    */
+01410000/*                                                                  */
+01410100/*     SUPERC MYPROG CTYPE(WORD) PROCESS('NOPRTCC,SEQ') APDNLST     */
+01410200/*                                                                  */
+01420000/*------------------------------------------------------------------*/
+01430000/*                                                                  */
+01440000/*  REVISION HISTORY:                                               */
+01450000/*                                                                  */
+01460000/*  DATE      PCR  NAME  DESCRIPTION                                */
+01470000/*  --------  ---  ---   -------------------------------------      */
+01480000/*  07/??/89  ???  JAC   UPDATED EXISTING CLIST                     */
+01500000/*  06/29/90  099  TEV   ADDED HEADER                               */
+01520000/*  08/05/91  202  TEV   MODIFIED THE STMTFILE DSNAME ALLOCATION.   */
+01520100/*  09/25/94  358  LJK   ADDED ALLOCATION OF SUPERC.RPT FILE;       */
+01520200/*                       ADDED APNDLST, REPORT, REFRESH AND LSTLIB  */
+01520300/*                       PARAMETERS; RENAMED PARAMETER DEBUG TO     */
+01520400/*                       TRACE AND UPDATED THE DEFAULT OF LIB       */
+01520500/*  05/22/95  435  LJK   RENAMED LIB PARAMETER FROM SYS1.ISPFLPA    */
+01520600/*                       (ISRSUPC) TO SYS1.ISRLPA(ISRSUPC)          */
+01520700/*  03/31/97  502  JCS   RENAME ISRLPA TO ISPLPA FOR SDF 8.0.0
+01540000/*------------------------------------------------------------------*/
+01550000/********************************************************************/
+01560000PROC 1 NAME                                              +
+01560100       LSTLIB(&SYSUID..&NAME.)                           +
+01570000       NEWFILE(&SYSUID..&NAME..NEW.LST)                  +
+01580000       OLDFILE(&SYSUID..&NAME..OLD.LST)                  +
+01590000       OUTDD(&SYSUID..&NAME..SUPERC.LST)                 +
+01600000       DELDD(DUMMY)                                      +
+01610000       STMTFILE(DUMMY)                                   +
+01620000       LISTING(DELTA)                                    +
+01630000       CTYPE(LINE)                                       +
+01640000       PROCESS()                                         +
+01650000       UID(&SYSPREF.)                                    +
+01660000       BROWSE                                            +
+01680000       PLIB                                              +
+01690000       LIB(SYS1.ISPLPA(ISRSUPC))                         +
+01690100       APNDLST                                           +
+01690200       REPORT                                            +
+01690300       REFRESH                                           +
+01690400       TRACE
+01700000 
+01710000CONTROL NOMSG NOLIST NOCONLIST NOFLUSH
+01730000IF &TRACE = TRACE THEN +
+01740000  CONTROL LIST CONLIST SYMLIST
+01750000SET &RETCC = 0
+01760000FREE FI(NEWDD,ISRS,STMTFILE,OUTDD,DELDD,OLDDD,RPTF,SYSIN)
+01760100IF &REFRESH  NE THEN DO
+01760200    FREE DA('&LSTLIB..SUPERC.RPT')
+01760210    DELETE '&LSTLIB..SUPERC.RPT'
+01760220END
+01760230   /* ALLOCATE SUPERC REPORT FILE IF IT IS DESIRED */
+01760240CONTROL MSG
+01760250IF &REPORT  NE THEN DO
+01760300   IF &SYSDSN('&LSTLIB..SUPERC.RPT') NE OK THEN                  +
+01760400      ALLOC DA('&LSTLIB..SUPERC.RPT') DSORG(PS) SPACE(1,1) TRACK +
+01760500                LRECL(133) BLKSIZE(5320) RECFM(F B) RELEASE REUSE
+01760600   ALLOC F(RPTF) DA('&LSTLIB..SUPERC.RPT') MOD REUSE
+01760700   OPENFILE RPTF OUTPUT
+01760800END
+01770000IF &NEWFILE = DUMMY THEN +
+01780000   SET &NEWFILE =
+01790000IF &OLDFILE = DUMMY THEN +
+01800000   SET &OLDFILE =
+01810000/*************************************************************/
+01820000/* SET UP ERROR EXIT BEFORE FOR NEWFILE VERIFICATION.        */
+01830000/*************************************************************/
+01840000NEWDD1:ERROR +
+01850000DO
+01860000  ERROR OFF
+01870000  IF &NEWFILE ^=      THEN +
+01880000     WRITE ** INVALID DATASET NAME/MEMBER OR BUSY: &NEWFILE
+01890000  IF &FIRST =    THEN +
+01900000  DO
+01910000     SET &FIRST = DONE
+01920000     IF &UID ^=     THEN +
+01930000     DO
+01940000        WRITE +
+01950000 USE FULLY QUALIFIED DATASET NAME WITHOUT QUOTES OR "." +
+01960000                                         FOR USER PREFIX.
+01970000        WRITE +
+01980000* EXAMPLE:   &UID..SUPERC.NEWIN   AND   .SUPERC.NEWIN    +
+01990000                                           ARE EQUIVALENT.
+02000000     END
+02010000     ELSE WRITE +
+02020000* USE FULLY QUALIFIED NAME WITHOUT QUOTES.
+02030000  END
+02040000  SET &NEWFILE =
+02050000  WRITENR NEW FILE :&STR()
+02060000  READ
+02070000  SET &NEWFILE = &SYSDVAL
+02080000  IF &STR('&NEWFILE') = 'EXIT' | &STR('&NEWFILE') =  '' THEN +
+02090000    GOTO EXIT
+02100000  ELSE GOTO NEWDD1
+02110000END
+02120000/*************************************************************/
+02130000/* VERIFY/ALLOCATE NEWFILE.                                  */
+02140000/*************************************************************/
+02150000IF &NEWFILE ^=    THEN +
+02160000DO
+02170000  IF &SUBSTR(1:1,&NEWFILE) = . THEN +
+02180000      SET &NEWFILE = &UID.&NEWFILE
+02190000END
+02200000CONTROL NOMSG
+02210000ALLOC FI(NEWDD) DA('&NEWFILE') SHR  REUSE
+02220000IF &SUBSTR(&LENGTH(&NEWFILE):&LENGTH(&NEWFILE),&NEWFILE) = ) +
+02230000                                                        THEN +
+02240000DO
+02250000 
+02260000  /***********************************************************/
+02270000  /* INSURE NEWFILE IS SEQUENTIAL AND IF PO- MEMBER EXITS    */
+02280000  /***********************************************************/
+02290000  ALLOC FI(ISRS) DA('&NEWFILE') REUSE SHR
+02300000  OPENFILE ISRS
+02310000  CLOSFILE ISRS
+02320000  FREE FI(ISRS)
+02330000END
+02340000/*************************************************************/
+02350000/* OLDFILE FULLY QUALIFIED?                                  */
+02360000/*************************************************************/
+02370000CONTROL NOMSG
+02380000/*************************************************************/
+02390000/*   ERROR EXIT FOR OLDFILE VERIFICATION.                    */
+02400000/*************************************************************/
+02410000OLDDD1:ERROR +
+02420000DO
+02430000  ERROR OFF
+02440000  IF &OLDFILE ^=  THEN +
+02450000     WRITE ** INVALID DATASET NAME/MEMBER OR BUSY: &OLDFILE
+02460000  IF &FIRST =    THEN +
+02470000  DO
+02480000     SET &FIRST = DONE
+02490000     IF &UID ^= ' '  THEN +
+02500000     DO
+02510000        WRITE +
+02520000 USE FULLY QUALIFIED DATASET NAME WITHOUT QUOTES OR "." +
+02530000                                         FOR USER PREFIX.
+02540000        WRITE +
+02550000* EXAMPLE:   &UID..SUPERC.OLDIN   AND   .SUPERC.OLDIN    +
+02560000                                         ARE EQUIVALENT.
+02570000     END
+02580000     ELSE WRITE +
+02590000* USE FULLY QUALIFIED NAME WITHOUT QUOTES.
+02600000  END
+02610000  SET &OLDFILE =
+02620000  WRITENR OLD FILE :&STR()
+02630000  READ
+02640000  SET &OLDFILE = &SYSDVAL
+02650000  IF &STR('&OLDFILE') = 'EXIT' | &STR('&OLDFILE') = '' THEN +
+02660000    GOTO EXIT
+02670000  ELSE GOTO OLDDD1
+02680000END
+02690000/*************************************************************/
+02700000/* OLD FILE VERIFICATION CODE.                               */
+02710000/*************************************************************/
+02720000IF &CTYPE = SRCH THEN +
+02730000DO
+02740000   IF &STMTFILE = DUMMY THEN  +
+02750000      SET &STMTFILE = PROMPT
+02760000END
+02770000ELSE +
+02780000DO
+02790000  IF &OLDFILE ^= ' ' THEN +
+02800000  DO
+02810000     IF &SUBSTR(1:1,&OLDFILE) = . THEN +
+02820000        SET &OLDFILE = &STR(&UID.&OLDFILE)
+02830000  END
+02840000  ALLOC FI(OLDDD) DA('&OLDFILE') SHR REUSE
+02850000  IF &SUBSTR(&LENGTH(&OLDFILE):&LENGTH(&OLDFILE),&OLDFILE)=) +
+02860000                                                       THEN  +
+02870000  DO
+02880000     ALLOC FI(ISRS) DA('&OLDFILE') REUSE SHR
+02890000     OPENFILE ISRS
+02900000     CLOSFILE ISRS
+02910000     FREE FI(ISRS)
+02920000  END
+02930000END
+02940000ERROR OFF
+02950000/*************************************************************/
+02960000/* VERIFICATION/ALLOCATION OF LISTING DSN.                   */
+02970000/*************************************************************/
+02980000OUTDD1: +
+02990000IF &OUTDD = DUMMY THEN +
+03000000DO
+03010000   SET OUTDD = &UID..SUPERC.LIST
+03020000   IF &UID = ' ' THEN +
+03030000      SET OUTDD = &SYSUID..SUPERC.LIST
+03040000END
+03050000ELSE IF &SUBSTR(1:1,&OUTDD) = . THEN +
+03060000   SET &OUTDD = &STR(&UID.&OUTDD)
+03070000CONTROL NOMSG
+03080000FREE DA('&OUTDD')
+03090000ERROR +
+03100000DO
+03110000  ERROR OFF
+03120000  SET &PO = &SUBSTR(&LENGTH(&OUTDD)-1:&LENGTH(&OUTDD)-1,&OUTDD)
+03130000  IF &PO = ) THEN +
+03140000     SET &DIRM = &STR(DIR(5) DSORG(PO))
+03150000  ELSE +
+03160000     SET &DIRM = &STR(RELEASE DSORG(PS))
+03160100  IF &APNDLST = APDNLST THEN +
+03160200     ALLOC FI(OUTDD) DA('&OUTDD') SPACE (250 100) BLKSIZE(3325) +
+03160300                                  REUSE MOD &DIRM
+03160400  ELSE +
+03160500     ALLOC FI(OUTDD) DA('&OUTDD') SPACE (50 100) BLKSIZE(3325) +
+03160600                                  REUSE NEW &DIRM
+03190000  IF &LASTCC = 0 THEN +
+03200000     GOTO SYSIN1
+03210000  ELSE +
+03220000  DO
+03230000     WRITE    ** INVALID DATASET NAME/MEMBER OR BUSY: &OUTDD
+03240000     IF &FIRST =   THEN +
+03250000     DO
+03260000        SET &FIRST = DONE
+03270000        IF &UID ^= ' ' THEN +
+03280000        DO
+03290000           WRITE +
+03300000 USE FULLY QUALIFIED DATASET NAME WITHOUT QUOTES OR "." +
+03310000                                         FOR USER PREFIX.
+03320000           WRITE +
+03330000* EXAMPLE:   &UID..SUPERC.LIST    AND   .SUPERC.LIST     +
+03340000                                            ARE EQUIVALENT.
+03350000        END
+03360000        ELSE WRITE +
+03370000* USE FULLY QUALIFIED NAME WITHOUT QUOTES.
+03380000     END
+03390000     SET &OUTDD =
+03400000     WRITENR LISTING FILE :&STR()
+03410000     READ
+03420000     SET &OUTDD = &SYSDVAL
+03430000     IF &STR('&OUTDD') = 'EXIT' | &STR('&OUTDD') = '' THEN +
+03440000       GOTO EXIT
+03450000     ELSE +
+03460000       GOTO OUTDD1
+03470000  END
+03480000END
+03480100IF &APNDLST = APNDLST THEN +
+03480200   ALLOC FI(OUTDD) DA('&OUTDD') MOD  REUSE     /* ALLOC. AS MOD.*/
+03480300ELSE +
+03480400   ALLOC FI(OUTDD) DA('&OUTDD') OLD  REUSE     /* ALLOC. AS OLD.*/
+03500000/*************************************************************/
+03510000/* STATEMENTS (STMTFILE) DATA SET.                           */
+03520000/*************************************************************/
+03530000ERROR OFF
+03540000SYSIN1: +
+03550000IF &STR(&STMTFILE) ^= DUMMY THEN +
+03560000DO
+03570000  IF &STR(&STMTFILE) ^= &STR(PROMPT) THEN +
+03580000  DO
+03590000    /*********************************************************/
+03600000    /* STMTFILE DSN ERROR RECOVERY.                          */
+03610000    /*********************************************************/
+03620000    ERROR +
+03630000    DO
+03640000      WRITE  ** INVALID DATASET NAME/MEMBER OR BUSY:  &STMTFILE
+03650000      IF &FIRST = THEN +
+03660000      DO
+03670000         SET &FIRST = DONE
+03680000         IF &UID ^= ' ' THEN +
+03690000         DO
+03700000        WRITE +
+03710000 USE FULLY QUALIFIED DATASET NAME WITHOUT QUOTES OR "." +
+03720000                                         FOR USER PREFIX.
+03730000        WRITE +
+03740000* EXAMPLE:   &UID..SUPERC.STMTS   AND   .SUPERC.STMTS    +
+03750000                                           ARE EQUIVALENT.
+03760000         END
+03770000         ELSE WRITE +
+03780000* USE FULLY QUALIFIED NAME WITHOUT QUOTES.
+03790000      END
+03800000      SET &STMTFILE =
+03810000      ERROR OFF
+03820000      WRITENR STMTFILE FILE :&STR()
+03830000      READ
+03840000      SET &STMTFILE = &SYSDVAL
+03850000      IF &STR('&STMTFILE') = 'EXIT' | &STR('&STMTFILE') = '' THEN +
+03860000        GOTO EXIT
+03870000      ELSE +
+03880000      GOTO STMTFILE1       /*  RECYCLE FOR ERROR CASE  */
+03890000    END
+03900000CONT3: +
+03910000    IF &SUBSTR(1:1,&STMTFILE) = . THEN +
+03920000      SET &STMTFILE = &STR(&UID.&STMTFILE)
+03930000    CONTROL NOMSG
+03940000    /*********************************************************/
+03950000    /* VERIFICATION/ALLOCATION OF STMTFILE DSN.                 */
+03960000    /*********************************************************/
+03970000    ALLOC FI(SYSIN) DA('&STMTFILE') SHR  REUSE
+03980000    ALLOC FI(ISRS)  DA('&STMTFILE') SHR  REUSE
+03990000    OPENFILE ISRS
+04000000    CLOSFILE ISRS
+04010000    FREE FI(ISRS)
+04020000    ERROR OFF
+04030000    CONTROL NOMSG
+04040000  END
+04050000  ELSE +
+04060000  DO
+04070000    /*********************************************************/
+04080000    /* PROMPT FOR PROCESS STATEMENTS.                        */
+04090000    /*********************************************************/
+04100000    SET STMTFILE = &UID..SUPERC.STMTS
+04110000    IF &UID = ' ' THEN +
+04120000       SET STMTFILE = &SYSUID..SUPERC.STMTS
+04130000    CONTROL NOMSG
+04140000    DELETE '&STMTFILE'
+04150000    CONTROL MSG
+04160000    ALLOC FI(STMTFILE) DA('&STMTFILE') SPACE (5 5) REUSE NEW +
+04170000                          RECFM(F,B) LRECL(80) BLKSIZE(1600)
+04180000    CONTROL NOMSG
+04190000    SET &TSTMTFILE  = &STMTFILE
+04200000    OPENFILE STMTFILE OUTPUT
+04210000    IF &CTYPE = SRCH THEN +
+04220000    DO
+04230000    WRITE  ENTER SRCHFOR AND ANY OTHER PROCESS STATEMENTS
+04240000    WRITE  SRCHFOR STATEMENT FORMAT: SRCHFOR  +
+04250000                                      SEARCH-PATTERN-IN-QUOTES
+04260000    END
+04270000    ELSE +
+04280000    DO
+04290000    WRITE +
+04300000PROCESS STATEMENT FORMAT:      (COMPARE TYPE)       EXAMPLES:
+04310000    WRITE &STR( ) +
+04320000 CMPCOLM  START-COLM:STOP-COLM ...  (L,W)     +
+04330000                                           CMPCOLM  1:60 75:90
+04340000    WRITE &STR( ) +
+04350000 LSTCOLM  START-COLM:STOP-COLM      (L  )     LSTCOLM  1:75
+04360000    WRITE &STR( ) +
+04370000 DPLINE   'STRING',START-POSITION   (L,W)     +
+04380000                                           DPLINE   'PAGE ',87
+04390000    WRITE &STR(                 ) +
+04400000                 OR, START-RANGE              +
+04410000                                        DPLINE   'PAGE ',87:95
+04420000    WRITE &STR(                 ) +
+04430000                 OR  ENTIRE LINE              DPLINE   'PAGE '
+04440000    WRITE &STR( ) +
+04450000 SELECT   MEMBER, ...               (ALL)     +
+04460000                                     SELECT   MEM1,NMEM2:OMEM2
+04470000    WRITE &STR( ) +
+04480000 LNCT     NNNNNN                    (ALL)     LNCT 999
+04490000    WRITE &STR( ) +
+04500000 OTHERS: NTITLE  (ALL)  OTITLE   (ALL)  CMPLINE  (L,W)  +
+04510000                                                 CMPLNUM  (L,W)
+04520000    WRITE &STR(         ) +
+04530000         CMPBOFS (B  )  CMPCOLMN (L,W)  CMPCOLMO (L,W)  +
+04540000                                                 DPLINEC  (L,W)
+04550000    WRITE &STR(         ) +
+04560000         NCHGT   (L,W)  OCHGT    (L,W)  SLIST    (ALL)  +
+04570000                                                 * AND .* (ALL)
+04580000    WRITE
+04590000    WRITE  ENTER CONTROL STATEMENTS.
+04600000    END
+04610000    WRITENR &STR(   : )
+04620000    SET &SYSDVAL =
+04630000    READ
+04640000    DO WHILE &STR(&SYSDVAL) ^= &STR() && +
+04650000                                     &STR(&SYSDVAL) ^= &STR(/*)
+04660000      SET &STMTFILE = &STR(&SYSDVAL.   )
+04670000      IF &STR('&STMTFILE') = &STR('CANCEL') THEN +
+04680000      DO
+04690000        CLOSFILE STMTFILE
+04700000        GOTO EXIT
+04710000      END
+04720000      PUTFILE STMTFILE
+04730000      WRITENR &STR(   : )
+04740000      READ
+04750000    END
+04760000    CLOSFILE STMTFILE
+04770000    SET &STMTFILEU = U                 /* INDICATE STMTFILE USED */
+04780000    SET &STMTFILE = &TSTMTFILE        /*  RESTORE STMTFILE NAME  */
+04790000  END
+04800000END
+04810000ELSE +
+04820000DO
+04820100    SET STMTFILE = &SYSUID..SUPERC.STATEMTS
+04820200    CONTROL NOMSG
+04820300    FREE DA('&STMTFILE')
+04820400    IF &SYSDSN('&STMTFILE') NE OK THEN  +
+04820500    ALLOC FI(SYSIN) DA('&STMTFILE') SPACE(5 5) REUSE NEW RELEASE +
+04820600                    RECFM(F,B) LRECL(80) BLKSIZE(1600) DSORG(PS)
+04860000END
+04870000/*************************************************************/
+04880000/* UPDATE FILE SECTION.                                      */
+04890000/*************************************************************/
+04900000DELDD1: +
+04910000IF &DELDD = DUMMY THEN +
+04920000DO
+04930000   SET DELDD = &UID..SUPERC.UPDATE
+04940000   IF &UID = ' ' THEN +
+04950000      SET DELDD = &SYSUID..SUPERC.UPDATE
+04960000END
+04970000ELSE IF &SUBSTR(1:1,&DELDD) = . THEN +
+04980000   SET &DELDD = &STR(&UID.&DELDD)
+04990000CONTROL NOMSG
+05000000FREE DA('&DELDD')
+05010000ERROR +
+05020000DO
+05030000  ERROR OFF
+05040000  /* CHECK FOR PO DATASET SPECIFICATION
+05050000  SET &PO=&SUBSTR(&LENGTH(&DELDD)-1:&LENGTH(&DELDD)-1,&DELDD)
+05060000  IF &PO = ) THEN +
+05070000     SET &DIRM = DIR(5)
+05080000  ELSE +
+05090000     SET &DIRM = &STR(RELEASE DSORG(PS))
+05100000  ALLOC FI(DELDD) DA('&DELDD') SPACE (15 30) BLKSIZE(1600) +
+05110000                                              REUSE NEW &DIRM
+05120000  IF &LASTCC = 0 THEN +
+05130000     GOTO INVOKE1
+05140000  ELSE +
+05150000  DO
+05160000     WRITE    ** INVALID DATASET NAME/MEMBER OR BUSY: &DELDD
+05170000     IF &FIRST =   THEN +
+05180000     DO
+05190000        SET &FIRST = DONE
+05200000        IF &UID ^= ' ' THEN +
+05210000        DO
+05220000           WRITE +
+05230000 USE FULLY QUALIFIED DATASET NAME WITHOUT QUOTES OR "." +
+05240000                                         FOR USER PREFIX.
+05250000           WRITE +
+05260000* EXAMPLE:   &UID..SUPERC.UPDATE  AND   .SUPERC.UPDATE   +
+05270000                                           ARE EQUIVALENT.
+05280000        END
+05290000        ELSE WRITE +
+05300000* USE FULLY QUALIFIED NAME WITHOUT QUOTES.
+05310000     END
+05320000     SET &DELDD =
+05330000     WRITENR UPDATE FILE :&STR()
+05340000     READ
+05350000     SET &DELDD = &SYSDVAL
+05360000     IF &STR('&DELDD') = 'EXIT' | &STR('&DELDD') = '' THEN +
+05370000       GOTO EXIT
+05380000     ELSE +
+05390000       GOTO DELDD1
+05400000  END
+05410000END
+05420000ALLOC FI(DELDD) DA('&DELDD') OLD  REUSE     /* ALLOC. OLD.   */
+05430000INVOKE1: +
+05440000ERROR OFF
+05450000/*************************************************************/
+05460000/* INVOKE SUPERC.                                            */
+05470000/*************************************************************/
+05480000WRITE  *** SUPERC INVOKED FOR &NAME
+05490000IF &LISTING ^= OVSUM && &LISTING ^= DELTA && +
+05500000                 &LISTING ^= LONG  && &LISTING ^= CHNG && +
+05510000                                      &LISTING ^= NOLIST THEN +
+05520000  SET LISTING = DELTA
+05530000IF &SYSISPF = ACTIVE && &PLIB =   THEN +
+05540000DO
+05550000   /**********************************************************/
+05560000   /* ASSUME ISPF IS ACTIVE AND USER DOESN'T HAVE SUPERC IN  */
+05570000   /* A PRIVATE LIBRARY.                                     */
+05580000   /**********************************************************/
+05590000   ISPEXEC SELECT PGM(ISRSUPC) +
+05600000                          PARM(&LISTING.L,&CTYPE.CMP,&PROCESS.)
+05610000   SET &RETCC = &LASTCC
+05620000END
+05630000ELSE +
+05640000DO
+05650000   /**********************************************************/
+05660000   /* OUTSIDE OF ISPF AND/OR PRIVATE SUPERC LOAD LIBRARY USE */
+05670000   /* "CALL" INSTEAD OF "ISPEXEC SELECT."                    */
+05680000   /**********************************************************/
+05690000   CALL '&LIB' '&LISTING.L,&CTYPE.CMP,&PROCESS.'
+05700000   SET &RETCC = &LASTCC
+05710000END
+05710100IF &RETCC = 0 THEN DO
+05710200   WRITE ***
+05710210   WRITE ***  2 FILES MATCH
+05710211   WRITE ***
+05710212     /* WRITE TO THE SUPERC.RPT FILE */
+05710213   IF &REPORT  NE THEN  +
+05710214      SET RPTF = &STR(   FILES &OLDFILE AND &NEWFILE MATCH)
+05710215END
+05710216ELSE IF &RETCC = 1 THEN DO
+05710218   WRITE ***
+05710219   WRITE ***  2 FILES ARE DIFFERENT(CC=&RETCC), EXAMINE &OUTDD
+05710220   WRITE ***
+05710230     /* WRITE TO THE SUPERC.RPT FILE */
+05710240   IF &REPORT  NE THEN  +
+05710250      SET RPTF = &STR(***FILES &OLDFILE AND &NEWFILE ARE DIFFERENT)
+05710260   END
+05710261   ELSE DO
+05710262     WRITE ***
+05710263     WRITE ***  SUPERC RETURN CODE = &RETCC
+05710264     WRITE ***
+05710265   END
+05710270IF &REPORT  NE THEN DO
+05710280   PUTFILE RPTF
+05710290   CLOSFILE RPTF
+05710300   CONTROL NOMSG
+05710400   IF &RETCC = 0 THEN  DELETE '&OUTDD.'
+05710500   FREE FI(RPTF)
+05710600END
+05730000CONTROL NOMSG
+05740000FREE DA('&OUTDD')
+05750000FREE FI(NEWDD OLDDD DELDD OUTDD ISRS SYSIN)
+05760000/*************************************************************/
+05770000/* BROWSE LISTING (IF IN ISPF INVIRONMENT)                   */
+05780000/* ASSUMES TO E/ R2 OR BETTER SYSTEM.                        */
+05790000/*************************************************************/
+05800000IF &SYSISPF = ACTIVE THEN +
+05810000DO
+05820000  IF &BROWSE = BROWSE THEN +
+05830000      ISPEXEC BROWSE DATASET('&OUTDD')
+05840000END
+05850000EXIT: +
+05860000EXIT

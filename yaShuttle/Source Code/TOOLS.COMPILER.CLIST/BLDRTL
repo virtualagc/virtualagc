@@ -1,0 +1,170 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     BLDRTL                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: DRIVER CLIST TO BUILD RUNTIME LIBRARY FOR PASS OR BFS*/
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00111000/*   SYNTAX:                                                        */
+00111100/*                                                                  */
+00111200/*     BLDRTL ID(&SYSUID.) SYSTEM(PASS) REL(REL99V0)                */
+00111400/*           LIB(&ID..&SYSTEM..&REL.)                               */
+00111500/*           SRCDSN(&LIB..RUNASM)                                   */
+00111600/*           RUNMAC(NCAMCM.&SYSTEM.CURRENT.RUNMAC)                  */
+00111700/*           TEMPMAC() FIRST LIST()                                 */
+00111800/*           TRACE MAP                                              */
+00111900/*                                                                  */
+00112000/*------------------------------------------------------------------*/
+00112100/*                                                                  */
+00112200/*   INVOKES   : ASM101                                             */
+00112300/*                                                                  */
+00112400/*------------------------------------------------------------------*/
+00112500/*                                                                  */
+00112600/*   PARAMETERS:                                                    */
+00112700/*                                                                  */
+00112800/*     ID       DEFAULT : &SYSUID                                   */
+00112900/*              THE DATASETS HIGH LEVEL QUALIFIER                   */
+00113000/*                                                                  */
+00113100/*     REL      DEFAULT  : REL99V0                                  */
+00113200/*              RELEASE VERSION                                     */
+00113300/*                                                                  */
+00113700/*     SYSTEM   DEFAULT : PASS                                      */
+00113800/*              INDICATES WHETHER THE RUNTIME LIBRARY ROUTINE IS    */
+00113900/*              BEING ASSEMBLED FOR PASS OR BFS.                    */
+00114000/*                                                                  */
+00115000/*     SRCDSN   DEFAULT : &LIB..RUNASM                              */
+00116000/*              THE RTL SOURCE DSN (RUNASM) WHICH ALL MEMBERS       */
+00117000/*              SHOULD BE ACTED ON                                  */
+00118000/*                                                                  */
+00119000/*     LIB      DEFAULT: &ID..&SYSTEM..&REL.                        */
+00119100/*              PDS THAT WILL CONTAIN THE RUNTIME LIBRARY ASSEMBLY  */
+00119200/*              LISTING AND LOAD MODULES                            */
+00119300/*                                                                  */
+00119400/*     RUNMAC   DEFAULT: NCAMCM.&SYSTEM..CURRENT.RUNMAC             */
+00119500/*              RUNTIME LIBRARY MACROS                              */
+00119600/*                                                                  */
+00119700/*     TEMPMAC  DEFAULT: NULL                                       */
+00119800/*              TEMPORARY MACROS YOU ARE TESTING WITH               */
+00119900/*                                                                  */
+00120100/*     FIRST    OPTIONAL                                            */
+00120200/*              ALLOCATE DATASETS THE FIRST TIME                    */
+00120300/*                                                                  */
+00120400/*     TRACE    OPTIONAL                                            */
+00120500/*              TRACE CLIST EXECUTION                               */
+00120600/*                                                                  */
+00120700/*     MAP      OPTIONAL                                            */
+00120800/*              GENERATES MAPPED OUTPUT                             */
+00120900/*                                                                  */
+00121000/*     LIST     DEFAULT : NULL                                      */
+00121100/*              IF SPECIFIED, IT IS A SEQUENTIAL FILE WITH THE      */
+00121200/*              MEMBERS LISTED THAT YOU WANT TO ASSEMBLE UPON.      */
+00121300/*                                                                  */
+00121400/*------------------------------------------------------------------*/
+00121500/*                                                                  */
+00121600/*   REVISION HISTORY:                                              */
+00121700/*                                                                  */
+00121800/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00121900/*     --------  ----  ----  -------------------------------------  */
+00122000/*     5/3/94    343   LJK   BASELINED COMPILER BUILD CLIST         */
+00122100/*     6/7/95    346   LJK   MODIFIED TO INVOKE RTLASM DIRECTLY     */
+00122200/*     1/16/96   463   LJK   INVOKE ASM101 INSTEAD OF RTLASM        */
+00124000/*------------------------------------------------------------------*/
+00125000/********************************************************************/
+00126000 
+00127000PROC 0 ID(&SYSUID.)                           +
+00128000       SYSTEM(PASS)                           +
+00129000       REL(REL99V0)                           +
+00150000       LIB(&ID..&SYSTEM..&REL.)               +
+00150100       SRCDSN(&LIB..RUNASM)                   +
+00160000       RUNMAC(NCAMCM.&SYSTEM..CURRENT.RUNMAC) +
+00170000       TEMPMAC()                              +
+00180000       FIRST                                  +
+00190000       LIST()                                 +
+00200000       MAP                                    +
+00210000       TRACE
+00220000 
+00230000GLOBAL RETCODE
+00240000IF &TRACE NE THEN CONTROL CONLIST LIST
+00250000CONTROL NOMSG
+00260000IF &FIRST NE THEN DO
+00270000   DELETE '&LIB..RUNLIB'
+00280000   DELETE '&LIB..RUNLST'
+00280100   DELETE '&LIB..RUNOBJ'
+00290000   DELETE '&LIB..MAP'
+00300000   IF &SYSTEM = BFS THEN DO
+00310000      DELETE '&LIB..SATSLST'
+00320000      DELETE '&LIB..SDFASM'
+00321000   END
+00322000END
+00322100IF &LIST EQ THEN  DO
+00322110   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00322120   SET &LIST =  &LIB..MEMLIST
+00322130END
+00322300IF &TEMPMAC. NE THEN SET &TEMPMAC = TEMPMAC(&TEMPMAC.)
+00322400        ELSE SET &TEMPMAC =
+00322500 
+00322501         /***************************************/
+00322502         /*                                     */
+00322503         /*    ON ATTN, DO THE FOLLOWING:       */
+00322504         /*                                     */
+00322505         /***************************************/
+00322507ATTN     DO
+00322508         ERROR    OFF
+00322509         CLOSFILE MEMBERS
+00322510         FREE     F(MEMBERS)
+00322511         EXIT
+00322512END
+00322513 
+00322514CONTROL  NOMSG
+00322515         FREE     F(MEMBERS)
+00322516CONTROL  MSG NOFLUSH
+00322517 
+00322518         /***************************************/
+00322519         /*                                     */
+00322520         /* SET UP TO READ THE FILE &LIST.      */
+00322521         /*                                     */
+00322522         /***************************************/
+00322523ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00322524OPENFILE MEMBERS  INPUT
+00322525 
+00322526         /***************************************/
+00322527         /*                                     */
+00322528         /* ON ERROR, DO THE FOLLOWING:         */
+00322529         /*                                     */
+00322530         /***************************************/
+00322531ERROR DO
+00322532   CLOSFILE MEMBERS
+00322533   FREE     F(MEMBERS)
+00322534   ERROR OFF
+00322535   EXIT
+00322536END
+00322537         /***************************************/
+00322538         /*                                     */
+00322539         /*   PERFORM THE COMMAND ON THE PDS.   */
+00322540         /*                                     */
+00322541         /***************************************/
+00322542SET &PACK = 0
+00322543DO  WHILE    &SYSUID NE
+00322544    GETFILE  MEMBERS
+00322545    SET &PACK = &PACK + 1
+00322546    IF &PACK. = 21  THEN SET &PACK = 0
+00322547    SET  &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+00322560    ASM101 &MEMBERS.               +
+00322600           ID(&ID.)                +
+00322610           REL(&REL.)              +
+00322700           SYSTEM(&SYSTEM.)        +
+00322900           LIB(&LIB.)              +
+00322901           TMPLIB(&LIB.)           +
+00322910           SRCDSN(&SRCDSN.)        +
+00323000           RUNMAC(&RUNMAC.)        +
+00324000           &TEMPMAC.               +
+00324100           PACK(&PACK.)            +
+00325000           &FIRST.                 +
+00327000           &MAP.                   +
+00328000           &TRACE.
+00328100    SET &FIRST =
+00328200END

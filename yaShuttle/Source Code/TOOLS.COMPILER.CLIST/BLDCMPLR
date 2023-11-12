@@ -1,0 +1,241 @@
+00001038/********************************************************************/
+00002038/*------------------------------------------------------------------*/
+00003038/*                                                                  */
+00004038/*   NAME:     BLDCMPLR                                             */
+00005038/*                                                                  */
+00006038/*------------------------------------------------------------------*/
+00007038/*                                                                  */
+00008040/*   FUNCTION: A DRIVER CLIST TO BUILD THE COMPILER FOR PASS OR BFS */
+00009038/*                                                                  */
+00009138/*------------------------------------------------------------------*/
+00009238/*                                                                  */
+00009351/*   SYNTAX:                                                        */
+00009451/*      BLDCMPLR ID(&SYSUID.) SYSTEM(PASS) REL(REL99V0)             */
+00009551/*               OUTLIB(&ID..&SYSTEM..&REL.) SRCLIB(&OUTLIB.)       */
+00009652/*               VERSION(99.0) COMPVER(CURRENT)                     */
+00009653/*               LIB(NCAMCM.&SYSTEM..&COMPVER.)                     */
+00009853/*               BINCL(&LIB..HALINCL) BINPUT2()                     */
+00009953/*               BXPLINCL(&LIB..HALINCL) TRACE                      */
+00010053/*               INCL(&LIB..HALINCL) INPUT2()                       */
+00010152/*                                                                  */
+00010251/*------------------------------------------------------------------*/
+00010351/*                                                                  */
+00010451/*   INVOKES:                                                       */
+00010551/*      XPLMERGE                                                    */
+00010651/*      XPLFC                                                       */
+00010751/*      AUDIT                                                       */
+00010851/*      XPLZAP                                                      */
+00010951/*                                                                  */
+00011051/*------------------------------------------------------------------*/
+00011151/*                                                                  */
+00011251/*   PARAMETERS:                                                    */
+00011351/*                                                                  */
+00011451/*      ID             DEFAULT: &SYSUID.                            */
+00011551/*                     HIGH LEVEL QUALIFIER                         */
+00011651/*                                                                  */
+00011751/*      SYSTEM         DEFAULT: PASS                                */
+00011851/*                     PASS = PASS COMPILER                         */
+00011951/*                     BFS  = BFS COMPILER                          */
+00012051/*                                                                  */
+00012151/*      REL            DEFAULT: REL99V0           .                 */
+00012251/*                     RELEASE VERSION                              */
+00012351/*                                                                  */
+00012451/*      VERSION        DEFAULT: 99.0                                */
+00012551/*                     VERSION NUMBER TO ZAP INTO THE COMPILER      */
+00012651/*                                                                  */
+00012751/*      OUTLIB         DEFAULT: &ID..&SYSTEM..&REL                  */
+00012851/*                     HIGH-LEVEL QUALIFIER FOR TPROCS AND OUTPUT   */
+00012951/*                     DATASETS                                     */
+00012952/*                                                                  */
+00013051/*      SRCLIB         DEFAULT: &OUTLIB.                            */
+00013151/*                     HIGH-LEVEL QUALIFIER FOR THE SOURCE DATASET  */
+00013251/*                                                                  */
+00013351/*      COMPVER        DEFAULT: CURRENT                             */
+00013451/*                     RELEASE VERSION FOR CM DATASETS              */
+00013452/*                                                                  */
+00013453/*      LIB            DEFAULT: NCAMCM.&SYSTEM..&COMPVER            */
+00013454/*                     DATASET WHERE THE CM SOURCE DATASET RESIDE   */
+00013551/*                                                                  */
+00013653/*      BINCL          DEFAULT: &LIB..HALINCL                       */
+00013752/*                     BFS INCLUDE FILE FOR COMPILATION             */
+00013852/*                                                                  */
+00013953/*      BXPLINCL       DEFAULT: &LIB..HALINCL                       */
+00014053/*                     XPL INCLUDE FILE FOR COMPILATION FOR BFS6V0  */
+00014153/*                     ONLY                                         */
+00014156/*                                                                  */
+00014157/*      BINPUT2        DEFAULT: NULL                                */
+00014353/*                     THIS CLIST DEFAULTS TO &BINCL(SPACELIB)      */
+00014354/*                     FOR COMPILER VERSIONS 11V0 OR LATER, AND TO  */
+00014355/*                     NCAMCM.PASS.TOOLS.SPACELIB FOR ALL OTHERS;   */
+00014356/*                     LOCATION OF XPL SPACE MANAGEMENT ROUTINES    */
+00014357/*                                                                  */
+00014453/*      INCL           DEFAULT: &LIB..HALINCL                       */
+00014552/*                     INCLUDE FILES FOR PASS                       */
+00014652/*                                                                  */
+00014653/*      INPUT2         DEFAULT: NULL                                */
+00014654/*                     THIS CLIST DEFAULTS TO &INCL(SPACELIB)       */
+00014655/*                     FOR COMPILER VERSIONS 27V0 OR LATER, AND TO  */
+00014656/*                     NCAMCM.PASS.TOOLS.SPACELIB FOR ALL OTHERS;   */
+00014657/*                     LOCATION OF XPL SPACE MANAGEMENT ROUTINES    */
+00014658/*                                                                  */
+00014751/*      TRACE          OPTIONAL                                     */
+00014851/*                     TRACE THE CLISTS EXECUTION                   */
+00014951/*                                                                  */
+00015051/*------------------------------------------------------------------*/
+00015151/*                                                                  */
+00015238/*   REVISION HISTORY :                                             */
+00015338/*                                                                  */
+00015438/*     DATE       PCR    NAME   DESCRIPTION                         */
+00015538/*     --------   ---    ----   ------------------------------      */
+00015651/*     05/06/94   343    LJK    BASELINED COMPILER BUILD CLIST      */
+00015652/*                                                                  */
+00015653/*     04/04/95   336    HFG    ADDED PARMS INPUT2, BINPUT2, COMPVER*/
+00015654/*                                                                  */
+00015655/*     04/20/95   427    HFG    DEFAULT BINPUT2 AND INPUT2 TO USE   */
+00015656/*                              OLD SPACELIB WHEN COMPVER = CURRENT */
+00015657/*                                                                  */
+00015658/*     06/01/95   432    DKB    CR12459 CHANGES: DEFAULT BINPUT2    */
+00015659/*                              AND INPUT2 TO USE NEW SPACELIB      */
+00015660/*                              WHEN COMPVER = CURRENT              */
+00015738/*------------------------------------------------------------------*/
+00015838/********************************************************************/
+00015938 
+00016054 PROC 0   ID(&SYSUID.)                               +
+00016154          SYSTEM(PASS)                               +
+00016254          REL(REL99V0)                               +
+00016354          VERSION(99.0)                              +
+00016454          OUTLIB(&ID..&SYSTEM..&REL.)                +
+00016554          SRCLIB(&OUTLIB.)                           +
+00016555          COMPVER(CURRENT)                           +
+00016654          LIB(NCAMCM.&SYSTEM..&COMPVER.)             +
+00016754          BINCL(&LIB..HALINCL)                       +
+00016854          BXPLINCL(&LIB..HALINCL)                    +
+00016855          BINPUT2()                                  +
+00016954          INCL(&LIB..HALINCL)                        +
+00016955          INPUT2()                                   +
+00017050          TRACE
+00017138 
+00017238GLOBAL RETCODE
+00017239CONTROL END(DONE)
+00017346IF &TRACE.  NE THEN +
+00017446   CONTROL  LIST CONLIST
+00017550 
+00017551/*******
+00017552/* IF NO OVER-RIDES WERE PROVIDED, SET THE DEFAULTS
+00017553/* FOR BINPUT2 AND INPUT2 BASED ON VALUE OF COMPVER
+00017554/*******
+00017555IF &BINPUT2 NE THEN +
+00017556   SET &BINPUT2 = BINPUT2(&BINPUT2)
+00017558IF &INPUT2 NE THEN +
+00017559   SET &INPUT2  = INPUT2(&INPUT2)
+00017560 
+00017561IF (&BINPUT2 EQ AND &SYSTEM = BFS)  OR   +
+00017562   (&INPUT2 EQ AND &SYSTEM = PASS)  THEN DO
+00017563   IF &COMPVER = CURRENT THEN DO
+00017564      IF &SYSTEM = PASS THEN +
+00017565         SET &INPUT2 = INPUT2(&INCL(SPACELIB))
+00017566      ELSE IF &SYSTEM = BFS THEN +
+00017567         SET &BINPUT2 = BINPUT2(&BINCL(SPACELIB))
+00017568   DONE
+00017569   ELSE DO
+00017570      SET &NUB = &SUBSTR(4:5,&COMPVER.)
+00017571 
+00017580      IF &DATATYPE(&NUB) = NUM THEN DO
+00017581 
+00017590         IF &SYSTEM = BFS THEN DO
+00017591            IF &NUB < 11 THEN +
+00017600               SET &BINPUT2 = BINPUT2(NCAMCM.PASS.TOOLS.SPACELIB)
+00017601            ELSE +
+00017602               SET &BINPUT2 = BINPUT2(&BINCL(SPACELIB))
+00017603         DONE
+00017604 
+00017610         ELSE IF &SYSTEM = PASS THEN DO
+00017611            IF &NUB < 27 THEN +
+00017620               SET &INPUT2 = INPUT2(NCAMCM.PASS.TOOLS.SPACELIB)
+00017700            ELSE +
+00017810               SET &INPUT2 = INPUT2(&INCL(SPACELIB))
+00017900         DONE
+00017901 
+00017910      DONE
+00017911/*    IF NUB IS NOT A NUMBER AT THIS POINT IT IS BECAUSE THE VERSION
+00017912/*    IN COMPVER IS LESS THAN 10V0, E.G. NUB = 9V (BFS ONLY)
+00017913      ELSE +
+00017915         SET &BINPUT2 = BINPUT2(NCAMCM.PASS.TOOLS.SPACELIB)
+00017920   DONE
+00017930DONE
+00017990 
+00018040/* MERGE TOGETHER PARTITIONED PROCEDURE FOR EACH COMPILER PHASES
+00020052XPLMERGE PASS1 ID(&ID.) SYSTEM(&SYSTEM.)           +
+00021052               LIB(&LIB.) OUTLIB(&OUTLIB.)         +
+00022044               TPROCS(&SRCLIB..PASS1.PROCS) &TRACE.
+00031027 
+00031152XPLMERGE PASS2 ID(&ID.) SYSTEM(&SYSTEM.)           +
+00031252               LIB(&LIB.) OUTLIB(&OUTLIB.)         +
+00031344               TPROCS(&SRCLIB..PASS2.PROCS) &TRACE.
+00031427 
+00031552XPLMERGE PASS3 ID(&ID.) SYSTEM(&SYSTEM.)           +
+00031652               LIB(&LIB.) OUTLIB(&OUTLIB.)         +
+00031744               TPROCS(&SRCLIB..PASS3.PROCS) &TRACE.
+00031827 
+00031952XPLMERGE PASS4 ID(&ID.) SYSTEM(&SYSTEM.)           +
+00032052               LIB(&LIB.) OUTLIB(&OUTLIB.)         +
+00032144               TPROCS(&SRCLIB..PASS4.PROCS) &TRACE.
+00032227 
+00032352XPLMERGE AUX   ID(&ID.) SYSTEM(&SYSTEM.)           +
+00032452               LIB(&LIB.) OUTLIB(&OUTLIB.)         +
+00032544               TPROCS(&SRCLIB..AUX.PROCS) &TRACE.
+00032627 
+00032752XPLMERGE OPT   ID(&ID.) SYSTEM(&SYSTEM.)           +
+00032852               LIB(&LIB.) OUTLIB(&OUTLIB.)         +
+00032944               TPROCS(&SRCLIB..OPT.PROCS) &TRACE.
+00033027 
+00033152XPLMERGE FLO   ID(&ID.) SYSTEM(&SYSTEM.)           +
+00033252               LIB(&LIB.) OUTLIB(&OUTLIB.)         +
+00033345               TPROCS(&SRCLIB..FLO.PROCS) &TRACE.
+00033427 
+00033540/* COMPILE COMPILER PHASES
+00033752XPLFC PASS1    SYSTEM(&SYSTEM.) NEWREL(&OUTLIB.)   +
+00033854               INCL(&INCL.) BINCL(&BINCL.)         +
+00033855               COMPVER(&COMPVER) &INPUT2 &BINPUT2 +
+00033954               BXPLINCL(&BXPLINCL.) &TRACE.
+00033955 
+00034152XPLFC PASS2    SYSTEM(&SYSTEM.) NEWREL(&OUTLIB.)   +
+00034254               INCL(&INCL.) BINCL(&BINCL.)         +
+00034255               COMPVER(&COMPVER) &INPUT2 &BINPUT2 +
+00034354               BXPLINCL(&BXPLINCL.) &TRACE.
+00036047 
+00037052XPLFC PASS3    SYSTEM(&SYSTEM.) NEWREL(&OUTLIB.)   +
+00038054               INCL(&INCL.) BINCL(&BINCL.)         +
+00038055               COMPVER(&COMPVER) &INPUT2 &BINPUT2 +
+00038154               BXPLINCL(&BXPLINCL.) &TRACE.
+00038247 
+00038352XPLFC PASS4    SYSTEM(&SYSTEM.) NEWREL(&OUTLIB.)   +
+00038454               INCL(&INCL.) BINCL(&BINCL.)         +
+00038455               COMPVER(&COMPVER) &INPUT2 &BINPUT2 +
+00038554               BXPLINCL(&BXPLINCL.) &TRACE.
+00038647 
+00038752XPLFC AUX      SYSTEM(&SYSTEM.) NEWREL(&OUTLIB.)   +
+00038854               INCL(&INCL.) BINCL(&BINCL.)         +
+00038855               COMPVER(&COMPVER) &INPUT2 &BINPUT2 +
+00038954               BXPLINCL(&BXPLINCL.) &TRACE.
+00039047 
+00039152XPLFC OPT      SYSTEM(&SYSTEM.) NEWREL(&OUTLIB.)   +
+00039254               INCL(&INCL.) BINCL(&BINCL.)         +
+00039255               COMPVER(&COMPVER) &INPUT2 &BINPUT2 +
+00039354               BXPLINCL(&BXPLINCL.) &TRACE.
+00039447 
+00039552XPLFC FLO      SYSTEM(&SYSTEM.) NEWREL(&OUTLIB.)   +
+00039654               INCL(&INCL.) BINCL(&BINCL.)         +
+00039655               COMPVER(&COMPVER) &INPUT2 &BINPUT2 +
+00039754               BXPLINCL(&BXPLINCL.) &TRACE.
+00039847 
+00039940/* BUILD THE COMPILER FROM ALL OBJECT OF EACH COMPILER PHASE
+00040040 
+00040152AUDIT ALL      ID(&ID.) SYSTEM(&SYSTEM.)           +
+00040250               NEWREL(&OUTLIB.) &TRACE
+00040340 
+00040440/* PUT A RELEASE VERSION STAMP */
+00040540 
+00040649XPLZAP         ID(&ID.) SYSTEM(&SYSTEM.)          +
+00041049               VERSION(&VERSION.)                 +
+00050050               COMPILER(&OUTLIB..COMPILER)

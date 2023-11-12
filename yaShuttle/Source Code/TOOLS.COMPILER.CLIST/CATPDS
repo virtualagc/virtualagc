@@ -1,0 +1,144 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040043/*   NAME:     CATPDS                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080080/*   FUNCTION: MERGE PDS MEMBERS INTO A SEQUENTIAL FILE FOR         */
+00090081/*             DOWNLOADING TO THE RS6000. DOWNLOAD THE SEQUENTIAL   */
+00100081/*             FILE AS BINARY AND RUN HALBURST ON THE RS6000 TO     */
+00110081/*             SPLIT THE PDS MEMBERS INTO SEPERATE FILES. THE       */
+00120081/*             DEFAULT OUTPUT SEQUENTIAL FILE IS &SYSUID..SEQPDS.   */
+00130081/*             THIS PROCEDURE CANNOT HANDLE A LISTING, THE PASS     */
+00140081/*             RUNLIB, OR AN SDF. TO PROCESS AN SDF, USE THE CATSDF */
+00150081/*             CLIST. TO PROCESS A LISTING OR THE PASS RUNLIB, USE  */
+00160087/*             THE PDS_DOWNLOAD ON ELMER.                           */
+00170087/*             PDS_DOWNLOAD IS IN CMPUBLIC\MACROS DIRECTORY.        */
+00180081/*                                                                  */
+00190000/*------------------------------------------------------------------*/
+00200000/*                                                                  */
+00210000/*   SYNTAX :                                                       */
+00220081/*                                                                  */
+00230081/*     CATPDS PDS(&SYSUID..TEST.HAL)                                */
+00240047/*              LIST()                                              */
+00250081/*              PROG(NCAMCM.TOOLS.XPLOBJ(CATPDS))                   */
+00260081/*              OUT(&SYSUID..SEQPDS)                                */
+00270003/*              SCREEN                                              */
+00280000/*              TRACE                                               */
+00290000/*                                                                  */
+00300081/*     REQUIRED - NONE                                              */
+00310000/*                                                                  */
+00320000/*------------------------------------------------------------------*/
+00330000/*                                                                  */
+00340000/*   INVOKES:                                                       */
+00350000/*                                                                  */
+00360047/*     'NCAMCM.TOOLS.XPLOBJ(CATPDS)'                                */
+00370081/*     'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'                            */
+00380000/*                                                                  */
+00390000/*------------------------------------------------------------------*/
+00400000/*                                                                  */
+00410000/*   PARAMETERS:                                                    */
+00420000/*                                                                  */
+00430081/*     PDS      DEFAULT: &SYSUID..TEST.HAL                          */
+00440047/*              NAME OF THE PDS TO BE MERGED                        */
+00450000/*                                                                  */
+00460047/*     LIST     LIST OF MEMBERS TO BE MERGED                        */
+00470047/*              CLIST WILL CREATE ONE IF NONE SPECIFIED             */
+00480081/*                                                                  */
+00490081/*     PROG     DEFAULT: NCAMCM.TOOLS.XPLOBJ(CATPDS)                */
+00500081/*              NAME OF THE XPL MODULE THAT DOES THE CONCATENATE    */
+00510081/*                                                                  */
+00520081/*     OUT      DEFAULT: &SYSUID..SEQPDS                            */
+00530047/*              NAME OF SEQUENTIAL OUTPUT FILE                      */
+00540003/*                                                                  */
+00550000/*     SCREEN   OPTIONAL                                            */
+00560000/*              IF SPECIFIED SEND LISTING2 REPORT TO THE SCREEN     */
+00570000/*              INSTEAD OF A NULL FILE                              */
+00580047/*                                                                  */
+00590000/*     TRACE    OPTIONAL                                            */
+00600000/*              TURN TRACE ON OR OFF                                */
+00610000/*                                                                  */
+00620000/*------------------------------------------------------------------*/
+00630000/*                                                                  */
+00640000/*   INPUT DATA SET NAMES:                                          */
+00650047/*                                                                  */
+00660047/*     <PDS>                                                        */
+00670081/*         THE PDS INPUT FILE                                       */
+00680047/*                                                                  */
+00690081/*     <LIST>                                                       */
+00700081/*         LIST OF MEMBERS TO CONCATENATE                           */
+00710081/*                                                                  */
+00720000/*     <PROG>                                                       */
+00730081/*         LOCATION OF THE XPL EXECUTABLE                           */
+00740000/*                                                                  */
+00750000/*------------------------------------------------------------------*/
+00760000/*                                                                  */
+00770000/*   OUTPUT DATA SET NAMES:                                         */
+00780000/*                                                                  */
+00790000/*     <OUT>                                                        */
+00800081/*         NAME OF THE OUTPUT SEQUENTIAL FILE                       */
+00810000/*                                                                  */
+00820000/*------------------------------------------------------------------*/
+00830000/*                                                                  */
+00840000/*   REVISION HISTORY:                                              */
+00850000/*                                                                  */
+00860000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00870000/*  --------  ---  ---   -------------------------------------      */
+00880081/*  10/04/96  494  JCS   BASELINE                                   */
+00890034/*                                                                  */
+00900000/*------------------------------------------------------------------*/
+00910000/********************************************************************/
+00920000 
+00930081PROC 0 PDS(&SYSUID..TEST.HAL)                      +
+00940036       LIST()                 +
+00950086       PROG(NCAMCM.TOOLS.XPLOBJ(CATPDS))           +
+00960060       OUT()                                +
+00970000       SCREEN                                      +
+00980000       TRACE
+00990000 
+01000010GLOBAL RETCODE
+01010000IF       &TRACE.  NE THEN +
+01020000         CONTROL  LIST CONLIST
+01030000CONTROL END(DONE)
+01040061CONTROL NOMSG
+01050062IF &OUT. EQ THEN DO
+01060078    CONTROL NOMSG
+01070082    SET &OUT = '&SYSUID..SEQPDS'
+01080083    DELETE '&SYSUID..SEQPDS'
+01090083    ALLOC DA('&SYSUID..SEQPDS') SPACE (20,10) TRACKS DSORG(PS) +
+01100062        RECFM(F B) LRECL(80) BLKSIZE(6160)
+01110082   SET &OUT = &SYSUID..SEQPDS
+01120074   DONE
+01130078    CONTROL NOMSG
+01140062    FREE F(PROGRAM OUTPUT7 SYSPRINT SYSIN INCLUDE LISTING2) +
+01150057       ATTR (FBA133 FB80 FB1680)
+01160000CONTROL MSG
+01170008   IF &LIST EQ THEN DO
+01180071   PDSALL &PDS. MAKELIST
+01190071   SET &LIST =  &SYSUID..TEST.MEMLIST
+01200053   DONE
+01210000   ALLOC F(SYSIN) DA('&LIST.') SHR
+01220049   WRITE RUNNING XPL PROGRAM &PROG. FOR &PDS
+01230049   ALLOC F(ACCESS) DA('&PROG.') SHR
+01240027ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+01250032ATTR FB80   RECFM(F B)   LRECL(80) BLKSIZE(6160)
+01260003ALLOC F(PROGRAM)  DA('&PROG.') SHR
+01270049ALLOC F(INCLUDE)  DA('&PDS.') SHR
+01280003ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW CATALOG +
+01290003                  SP(40 40) TRACK
+01300063ALLOC F(OUTPUT7) DA('&OUT.')  USING(FB80) OLD
+01310003IF &SCREEN. NE THEN      +
+01320003     ALLOC F(LISTING2) DA(*)
+01330003   ELSE +
+01340003     ALLOC F(LISTING2) DUMMY
+01350031CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' 'FREE=42000,BUFNO=10'
+01360000SET &SAVECC = &LASTCC
+01370003CONTROL NOMSG
+01380055FREE F(PROGRAM OUTPUT7 SYSPRINT SYSIN INCLUDE LISTING2) +
+01390035  ATTR(FBA133 FB80 F1680)
+01400003CONTROL MSG
+01410000IF &SAVECC EQ 0 THEN +
+01420000     WRITE EXECUTION SUCCESSFUL
+01430000ELSE +
+01440000     WRITE EXECUTION ERROR CODE = &SAVECC

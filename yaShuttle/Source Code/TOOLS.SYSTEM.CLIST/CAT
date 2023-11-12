@@ -1,0 +1,149 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     CAT                                                  */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080001/*   FUNCTION: APPENDS SOURCE FILE TO THE END OF DEST FILE          */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX: CAT SOURCE DEST                                        */
+00130000/*                                                                  */
+00140000/*     ALIAS    - NONE.                                             */
+00150000/*     REQUIRED - NONE.                                             */
+00160000/*                                                                  */
+00170000/*------------------------------------------------------------------*/
+00180000/*                                                                  */
+00190000/*   INVOKES:  IEBGENER (SYSTEM UTILITY)                            */
+00200000/*                                                                  */
+00210000/*------------------------------------------------------------------*/
+00220000/*                                                                  */
+00230000/*   PARAMETERS:                                                    */
+00240000/*                                                                  */
+00250001/*     SOURCE   REQUIRED                                            */
+00260001/*              DATASET TO BE COPIED.                               */
+00270000/*                                                                  */
+00280001/*     DEST     REQUIRED                                            */
+00290001/*              DATASET TO WHICH SOURCE IS APPENDED. CREATED IF     */
+00300007/*              IT DOES NOT ALREADY EXIST. IF *, THEN SOURCE        */
+00310007/*              DATASET IS WRITTEN TO THE SCREEN.                   */
+00320007/*                                                                  */
+00330001/*     TRACE    OPTIONAL                                            */
+00340001/*              CAUSES CLIST STATEMENTS TO BE DISPLAYED AT THE      */
+00350001/*              TERMINAL AS THEY ARE EXECUTED.                      */
+00360000/*                                                                  */
+00370000/*------------------------------------------------------------------*/
+00380000/*                                                                  */
+00390000/*   INPUT DATA SET NAMES:                                          */
+00400001/*     <SOURCE>  <DEST>                                             */
+00410000/*                                                                  */
+00420000/*------------------------------------------------------------------*/
+00430000/*                                                                  */
+00440000/*   OUTPUT DATA SET NAMES:                                         */
+00450001/*     <DEST>                                                       */
+00460000/*                                                                  */
+00470000/*------------------------------------------------------------------*/
+00480000/*                                                                  */
+00490000/*   TEMPORARY DATA SET NAMES:                                      */
+00500001/*     NONE                                                         */
+00510000/*                                                                  */
+00520000/*------------------------------------------------------------------*/
+00530000/*                                                                  */
+00540000/*   COMMENTS:                                                      */
+00550003/*     IF * IS SPECIFIED FOR DEST DATASET, SOURCE DATASET WILL      */
+00560007/*     BE WRITTEN TO THE SCREEN.                                    */
+00570003/*                                                                  */
+00580009/*     THIS CLIST ONLY WORKS FOR SEQUENTIAL DATASETS.               */
+00581009/*     CONCATENATED DATSETS MUST HAVE LIKE ATTRIBUTES TO BE         */
+00590007/*     ACCEPTED AS INPUT BY THE IEBGENER UTILITY.                   */
+00600007/*                                                                  */
+00610000/*------------------------------------------------------------------*/
+00620000/*                                                                  */
+00630000/*   REVISION HISTORY:                                              */
+00640000/*                                                                  */
+00650000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00660000/*     --------  ----  ----  -------------------------------------  */
+00670000/*                                                                  */
+00680007/*     7/19/94    365  HFG   BASELINED AND PUT INTO CM              */
+00690000/*------------------------------------------------------------------*/
+00700000/********************************************************************/
+00710000 
+00720001PROC 2      SOURCE             +
+00730001            DEST               +
+00740000            TRACE
+00750000 
+00760004GLOBAL RETCODE
+00770000IF &TRACE. NE THEN +
+00780000   CONTROL LIST CONLIST
+00790001CONTROL END(DONE)
+00800000 
+00810001CONTROL NOMSG
+00820001FREE FILE(SOURCE SYSIN SYSPRINT SYSUT1 SYSUT2)
+00830001CONTROL MSG
+00840001 
+00850000IF &SYSDSN(&SOURCE) NE OK THEN DO
+00860000   WRITE *** SOURCE DATASET &SOURCE DOES NOT EXIST ***
+00870001DONE
+00880000ELSE DO
+00890001/*
+00900001/* IF DEST IS * THEN PRINT SOURCE DATASET TO TERMINAL
+00910001/*
+00920001   IF &STR(&DEST) EQ &STR(*) THEN DO
+00930001      ALLOC F(SOURCE) DA(&SOURCE) SHR REUSE
+00940001      OPENFILE SOURCE INPUT
+00950001      SET &RC = 0
+00960001/*
+00970001/* HANDLE END OF FILE ERROR
+00980001/*
+00990001      ERROR +
+01000001      DO
+01010001        SET &RC = &LASTCC
+01020001        IF &RC = 400 THEN DO
+01030001           WRITE
+01040001           WRITE *** END OF FILE  ***
+01050001        DONE
+01060001        ELSE DO
+01070001           WRITE UNEXPECTED END OF CLIST
+01080001           WRITE RETURN CODE IS &RC
+01090002           EXIT
+01100002        DONE
+01110001      DONE
+01120001/*
+01130002/* LOOP THROUGH SOURCE ECHOING LINES TO SCREEN
+01140002/* USE ERROR CODE TO TERMINATE LOOP
+01150001/*
+01160001      DO WHILE &RC = 0
+01170001         GETFILE SOURCE
+01180001         WRITE &SOURCE
+01190001      DONE
+01200002      CLOSFILE SOURCE
+01210002      FREE F(SOURCE)
+01220001   DONE
+01230001/*
+01240001/* ELSE USE IEBGENER TO COPY SOURCE TO DEST
+01250001/*
+01260001   ELSE DO
+01270001      IF &SYSDSN(&DEST.) NE OK +
+01280001      THEN DO
+01290001        LISTDSI &SOURCE.
+01300001        SET &PRIMARYSPACE = &SYSPRIMARY * 2
+01310001        ALLOC F(SYSUT2) DA(&DEST.) LIKE(&SOURCE) +
+01320002                NEW SPACE(&PRIMARYSPACE.,&SYSSECONDS.) +
+01330001                REUSE RELEASE
+01340001 
+01350001      DONE
+01360001      ELSE ALLOC FILE(SYSUT2) DA(&DEST.) MOD REUSE
+01370001 
+01380007      WRITENR CONCATENATION OF &SOURCE. TO &DEST =>
+01390001      ALLOC FILE(SYSUT1) DA(&SOURCE.) SHR REUSE
+01400006      ALLOC FILE(SYSPRINT) DUMMY REUSE
+01410001      ALLOC FILE(SYSIN) DUMMY REUSE
+01420001      $CALL IEBGENER
+01430008      IF &LASTCC ^= 0 THEN WRITE FAILED WITH CC = &LASTCC
+01440001      ELSE WRITE SUCCESSFUL
+01450002      FREE FILE(SYSIN SYSPRINT SYSUT1 SYSUT2)
+01460001   DONE
+01470001DONE
+01480002 

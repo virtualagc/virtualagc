@@ -1,0 +1,185 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     MONASM                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: ASSEMBLE ALL MEMBERS IN THE MONITOR.ASM DATASET      */
+00090000/*                                                                  */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX:                                                        */
+00140000/*      MONASM  ID(&SYSUID) LIB(&ID..&SYSTEM..REL99V0.MONITOR)      */
+00140100/*              SYSTEM(PASS) COMPVER(CURRENT) TRACE                 */
+00140110/*              SRCDSN(&LIB..ASM)                                   */
+00140200/*              MACLIB(NCAMCM..&SYSTEM..&COMPVER..DIAGNSTC.MACLIB)  */
+00140300/*      ALIAS    - NONE                                             */
+00140400/*      REQUIRED - NONE                                             */
+00150000/*                                                                  */
+00160000/*------------------------------------------------------------------*/
+00170000/*                                                                  */
+00180000/*   INVOKES:                                                       */
+00181000/*      ASM360H CLIST                                               */
+00182000/*      (DEFAULT LOCATION: NCAMCM.TOOLS.COMPILER.CLIST)             */
+00190000/*                                                                  */
+00200000/*------------------------------------------------------------------*/
+00210000/*                                                                  */
+00220000/*   PARAMETERS:                                                    */
+00230000/*                                                                  */
+00231000/*      ID             DEFAULT: &SYSUID                             */
+00232000/*                     HIGH LEVEL QUALIFIER                         */
+00233000/*                                                                  */
+00240100/*      SYSTEM         DEFAULT: PASS                                */
+00240200/*                     PASS = PASS COMPILER                         */
+00240300/*                     BFS  = BFS COMPILER                          */
+00240400/*                     H360 = 360 COMPILER                          */
+00240500/*                                                                  */
+00240600/*      LIB            DEFAULT: &ID..&SYSTEM..REL99V0.MONITOR       */
+00240700/*                     DATASET WHERE MEMBERS RESIDE                 */
+00240800/*                                                                  */
+00240810/*      SRCDSN         DEFAULT: &LIB..ASM                           */
+00240820/*                     DATASET WHERE MONITOR SOURCE CODE RESIDE     */
+00240830/*                                                                  */
+00240900/*      COMPVER        DEFAULT: CURRENT                             */
+00241000/*                     USED TO SPECIFY THE MACRO LIBRARY FOR        */
+00241100/*                     THE ASSEMBLY OPERATION                       */
+00241200/*                                                                  */
+00241300/*      MACLIB         DEFAULT: NCAMCM..&SYSTEM..&COMPVER..         */
+00241400/*                              DIAGNSTC.MACLIB                     */
+00241500/*                     DATASET WHERE MEMBERS RESIDE                 */
+00241600/*                                                                  */
+00241700/*      TRACE          OPTIONAL                                     */
+00241800/*                     TRACE THE CLISTS EXECUTION                   */
+00242000/*                                                                  */
+00250000/*------------------------------------------------------------------*/
+00260000/*                                                                  */
+00270000/*   INPUT DATA SET NAMES:                                          */
+00280000/*                                                                  */
+00281000/*      <SRCDSN>                                                    */
+00282000/*          PDS OF MONITOR ASSEMBLY SOURCE CODE                     */
+00283000/*                                                                  */
+00284000/*      <MACLIB>                                                    */
+00285000/*          MACRO LIBRARY USED FOR ASSEMBLY PROCESS                 */
+00286000/*                                                                  */
+00290000/*------------------------------------------------------------------*/
+00300000/*                                                                  */
+00310000/*   OUTPUT DATA SET NAMES:                                         */
+00320000/*                                                                  */
+00321000/*      <LIB>.OBJ                                                   */
+00322000/*          PDS OF MONITOR OBJECT FROM ASSEMBLY                     */
+00330000/*                                                                  */
+00331000/*      <LIB>.LST                                                   */
+00332000/*          PDS OF MONITOR ASSEMBLY LISTING                         */
+00333000/*                                                                  */
+00340000/*------------------------------------------------------------------*/
+00350000/*                                                                  */
+00360000/*   TEMPORARY DATA SET NAMES:                                      */
+00370000/*                                                                  */
+00380000/*     NONE                                                         */
+00390000/*                                                                  */
+00400000/*------------------------------------------------------------------*/
+00410000/*                                                                  */
+00420000/*   COMMENTS:                                                      */
+00430000/*                                                                  */
+00431000/*     NONE                                                         */
+00432000/*                                                                  */
+00440000/*------------------------------------------------------------------*/
+00450000/*                                                                  */
+00460000/*   REVISION HISTORY:                                              */
+00470000/*                                                                  */
+00480000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00490000/*     --------  ----  ----  -------------------------------------  */
+00500000/*     ??/??/??  ???    ???  20V2 BASELINE                          */
+00501000/*                                                                  */
+00502000/*     06/??/87  ???    HFG  21V6                                   */
+00503000/*                                                                  */
+00504000/*     02/25/91  153    LWW  CCC BASELINE                           */
+00504100/*                                                                  */
+00504200/*     01/16/92  168    LWW  CHANGE SYSPARM DEFAULT FROM COMP TO    */
+00505000/*                           PASS.                                  */
+00506000/*                                                                  */
+00507000/*     10/20/93  316    HFG  ADD LISTOPT TO THE MONITOR; CHANGE     */
+00508000/*                           SYSPARM TO SYSTEM; ADD COMPVER         */
+00509000/*                           AND MACLIB PARAMETERS                  */
+00509200/*                                                                  */
+00509300/*     05/22/95  431    DKB  REMOVE CODE TO PROCESS UNSUPPORTED     */
+00509400/*                           MONITOR MEMBERS LINKMON, SETDSCB, AND  */
+00509500/*                           TSETIN (CR12459 - RELEASE 27V0/11V0)   */
+00509600/*                                                                  */
+00509700/*     11/08/95  355    LJK  ADD SRCDSN PARAMETER                   */
+00510000/*------------------------------------------------------------------*/
+00520000/********************************************************************/
+00530000 
+00620000  PROC 0 TRACE  +
+00621000         ID(&SYSUID.)    +
+00621100         SYSTEM(PASS)    +
+00622000         LIB(&ID..&SYSTEM..REL99V0.MONITOR) +
+00622100         SRCDSN(&LIB..ASM)                  +
+00630000         COMPVER(CURRENT) +
+00631000         MACLIB(NCAMCM.&SYSTEM..&COMPVER..DIAGNSTC.MACLIB)
+00640000 
+00650000  IF &TRACE. NE THEN CONTROL LIST CONLIST
+00670000  CONTROL END(DONE)
+00680000  CONTROL MAIN
+00681000  CONTROL NOMSG
+00690000 
+00700000  FREE ATTR(F8080 FBA121)
+00710000  ATTR F8080  RECFM(F)      LRECL(80)  BLKSIZE(80)
+00720000  ATTR FBA121  RECFM(F B A) LRECL(121) BLKSIZE(1210)
+00730000 
+00740000/* ALLOCATE MONITOR DATA SETS IF THEY DO NOT ALREADY EXIST */
+00750000 
+00770000  IF &SYSDSN('&LIB..LST') NE OK THEN DO
+00810000    ALLOC DA('&LIB..LST') USING(FBA121) +
+00820000       TRACKS     SP(500,25) DIR(10)
+00821000  DONE
+00830000 
+00840000  IF &SYSDSN('&LIB..OBJ') NE OK THEN DO
+00890000    ALLOC DA('&LIB..OBJ') USING(F8080) +
+00900000       TRACKS    SP(500,25) DIR(10)
+00901000  DONE
+00902000 
+00920000/*******************************************************/
+00930000/* ASSEMBLE MEMBERS OF DATA SET &SRCDSN                */
+00940000/* USE THE 360 H ASSEMBLER                             */
+00950000/*******************************************************/
+00960000 
+00970000  ASM360H SDFOUT   LIB(&LIB.) MACLIB(&MACLIB.) TEST &TRACE +
+00970100                   SRCDSN(&SRCDSN.)
+00980000  ASM360H XPL@ABEN LIB(&LIB.) MACLIB(&MACLIB.) &TRACE +
+00980100                   SRCDSN(&SRCDSN.)
+00990000  ASM360H XXDEXP   LIB(&LIB.) MACLIB(&MACLIB.) TEST &TRACE +
+00990100                   SRCDSN(&SRCDSN.)
+01000000  ASM360H XXDLOG   LIB(&LIB.) MACLIB(&MACLIB.) TEST &TRACE +
+01000100                   SRCDSN(&SRCDSN.)
+01010000  ASM360H XXDSIN   LIB(&LIB.) MACLIB(&MACLIB.) TEST &TRACE +
+01010100                   SRCDSN(&SRCDSN.)
+01020000  ASM360H XXDSQRT  LIB(&LIB.) MACLIB(&MACLIB.) TEST &TRACE +
+01020100                   SRCDSN(&SRCDSN.)
+01030000  ASM360H XXDTOC   LIB(&LIB.) MACLIB(&MACLIB.) TEST &TRACE +
+01030100                   SRCDSN(&SRCDSN.)
+01040000  ASM360H XXXTOD   LIB(&LIB.) MACLIB(&MACLIB.) TEST &TRACE +
+01040100                   SRCDSN(&SRCDSN.)
+01050000  ASM360H TENSTBL  LIB(&LIB.) MACLIB(&MACLIB.) TEST &TRACE +
+01050010                   SRCDSN(&SRCDSN.)
+01060000/* AUTHORIZ: IEV017 AND IEV033 WARNINGS OK. RETURN CODE = 4 */
+01070000  ASM360H AUTHORIZ LIB(&LIB.) MACLIB(&MACLIB.) &TRACE +
+01070100                   SRCDSN(&SRCDSN.)
+01080000  ASM360H COMPOPT  LIB(&LIB.) MACLIB(&MACLIB.) SYSPARM(&SYSTEM) +
+01081000                   TEST &TRACE SRCDSN(&SRCDSN.)
+01090000/* FINDDMEM: IEV017 WARNINGS OK. RETURN CODE = 4  */
+01100000  ASM360H FINDDMEM LIB(&LIB.) MACLIB(&MACLIB.) &TRACE SRCDSN(&SRCDSN.)
+01110000  ASM360H HALLINK  LIB(&LIB.) MACLIB(&MACLIB.) &TRACE SRCDSN(&SRCDSN.)
+01120000  ASM360H HALLKED  LIB(&LIB.) MACLIB(&MACLIB.) &TRACE SRCDSN(&SRCDSN.)
+01131000  ASM360H LISTOPT  LIB(&LIB.) MACLIB(&MACLIB.) &TRACE SRCDSN(&SRCDSN.)
+01140000  ASM360H MONITOR  LIB(&LIB.) MACLIB(&MACLIB.) SYSPARM(&SYSTEM) +
+01141000                   TEST SRCDSN(&SRCDSN.) &TRACE
+01150000  ASM360H MONOPT   LIB(&LIB.) MACLIB(&MACLIB.) &TRACE SRCDSN(&SRCDSN.)
+01160000/* OPENDIR: IEV017 WARNINGS OK. RETURN CODE = 4  */
+01170000  ASM360H OPENDIR  LIB(&LIB.) MACLIB(&MACLIB.) &TRACE SRCDSN(&SRCDSN.)
+01180000/* STOWDMEM: IEV017 WARNINGS OK. RETURN CODE = 4  */
+01190000  ASM360H STOWDMEM LIB(&LIB.) MACLIB(&MACLIB.) &TRACE SRCDSN(&SRCDSN.)
+01220000 
+01230000  FREE ATTR(F8080 FBA121)

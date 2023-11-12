@@ -1,0 +1,140 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     CALLTREE                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: CREATE A CALL TREE FOR AN XPL PROGRAM                */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     CALLTREE 'PASS' LIB(PASS.CURRENT) TEMP(&LIB..&PASS..TEMPLATE)*/
+00140001/*              PROG('''NCAMCM.TOOLS.XPLOBJ(CALLTREE)''')           */
+00150000/*              IN(&LIB..&PASS..PROCS(##TOC) OUT(&LIB..&PASS..TREE) */
+00160000/*              OPT() TRACE                                         */
+00170000/*                                                                  */
+00180000/*     ALIAS    - NONE.                                             */
+00190000/*     REQUIRED - 'PASS'.                                           */
+00240000/*                                                                  */
+00250000/*------------------------------------------------------------------*/
+00260000/*                                                                  */
+00270000/*   INVOKES:                                                       */
+00280000/*                                                                  */
+00290001/*     'NCAMCM.TOOLS.XPLOBJ(CALLTREE)'                              */
+00300000/*                                                                  */
+00310000/*------------------------------------------------------------------*/
+00320000/*                                                                  */
+00330000/*   PARAMETERS:                                                    */
+00340000/*                                                                  */
+00350000/*     PASS     REQUIRED                                            */
+00360000/*              NAME OF PROGRAM TO MAKE CALLTREE                    */
+00370000/*                                                                  */
+00380000/*     LIB      DEFAULT: PASS.CURRENT                               */
+00390000/*              LIBRARY THAT CODE IS IN                             */
+00400000/*                                                                  */
+00410000/*     TEMP     DEFAULT: &LIB..&PASS..TEMPLATE                      */
+00420000/*              NAME OF PDS THAT CONTAINS THE PROCEDURE TEMPLATES   */
+00430000/*                                                                  */
+00440001/*     PROG     DEFAULT: '''NCAMCM.TOOLS.XPLOBJ(CALLTREE)'''        */
+00450000/*              NAME OF THE CALLTREE PROGRAM'S OBJECT CODE          */
+00460000/*                                                                  */
+00470000/*     IN       DEFAULT: &LIB..&PASS..PROCS(##TOC)                  */
+00480000/*              NAME OF THE MEMBER IN PROCS THAT CONTAINS MAIN      */
+00490000/*              INPUT FILE                                          */
+00500000/*                                                                  */
+00510000/*     OUT      DEFAULT : &LIB..&PASS..TREE                         */
+00520000/*              NAME OF THE RESULTING OUTPUT FILE                   */
+00530000/*                                                                  */
+00540000/*     OPT      DEFAULT: NULL                                       */
+00550000/*              OPTION FOR MONITOR CALL                             */
+00560000/*                                                                  */
+00570000/*     TRACE    OPTIONAL                                            */
+00580000/*              TURN TRACE ON OR OFF                                */
+00590000/*                                                                  */
+00600000/*------------------------------------------------------------------*/
+00610000/*                                                                  */
+00620000/*   INPUT DATA SET NAMES:                                          */
+00630000/*                                                                  */
+00640000/*     <PROG>                                                       */
+00650000/*         NAME OF THE CALLTREE PROGRAM'S OBJECT CODE               */
+00660000/*                                                                  */
+00670000/*     <TEMP>                                                       */
+00680000/*         NAME OF THE PDS THAT CONTAINS THE PROCEDURE TEMPLATES    */
+00690000/*                                                                  */
+00700000/*     <IN>                                                         */
+00710000/*         NAME OF THE MEMBER IN PROCS THAT CONTAINS MAIN INPUT     */
+00720000/*         FILE                                                     */
+00730000/*                                                                  */
+00740000/*------------------------------------------------------------------*/
+00750000/*                                                                  */
+00760000/*   OUTPUT DATA SET NAMES:                                         */
+00770000/*                                                                  */
+00780000/*     <OUT>                                                        */
+00790000/*         NAME OF THE RESULTING OUTPUT FILE                        */
+00800000/*                                                                  */
+00810000/*------------------------------------------------------------------*/
+00820000/*                                                                  */
+00830000/*   TEMPORARY DATA SET NAMES:                                      */
+00840000/*                                                                  */
+00850000/*     NONE.                                                        */
+00860000/*                                                                  */
+00870000/*------------------------------------------------------------------*/
+00880000/*                                                                  */
+00890000/*   COMMENTS:                                                      */
+00900000/*                                                                  */
+00910000/*     THE USER MAY GET SOME MESSAGES DISPLAY ON THE SCREEN.        */
+00920000/*                                                                  */
+00930000/*------------------------------------------------------------------*/
+00940000/*                                                                  */
+00950000/*   REVISION HISTORY:                                              */
+00960000/*                                                                  */
+00970000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00980000/*  --------  ---  ---   -------------------------------------      */
+00990000/*  06/29/89  ???  RSJ   ORIGINAL CLIST                             */
+01000000/*                                                                  */
+01010000/*  07/06/90  104  TEV   ADDED HEADER AND REARRANGED PARAMETERS ONE */
+01020000/*                       PER LINE.                                  */
+01030000/*                                                                  */
+01031000/*  01/18/91  146  RSJ   CHANGED DEFAULT OF PROG PARAMETER TO       */
+01032000/*                       REFLECT THE NEW LOCATION OF THE DATASET    */
+01033000/*                                                                  */
+01034001/*  09/13/91  186  LJK   RENAMED CM OBJECT FILE                     */
+01036000/*                                                                  */
+01040000/*------------------------------------------------------------------*/
+01050000/********************************************************************/
+01060000PROC 1 PASS                                          +
+01070000       LIB(PASS.CURRENT)                             +
+01080000       TEMP(&LIB..&PASS..TEMPLATE)                   +
+01090001       PROG('''NCAMCM.TOOLS.XPLOBJ(CALLTREE)''')     +
+01100000       IN(&LIB..&PASS..PROCS(##TOC))                 +
+01110000       OUT(&LIB..&PASS..TREE)                        +
+01120000       OPT()                                         +
+01130000       TRACE
+01140000 
+01150000IF       &TRACE.  NE THEN +
+01160000         CONTROL  LIST CONLIST
+01170000CONTROL NOMSG END(DONE)
+01180000  FREE F(PROGRAM OUTPUT3 SYSPRINT SYSIN INCLUDE )  ATTR(FBA133 FB88     )
+01190000  DELETE (&OUT.)
+01200000CONTROL MSG
+01210000ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+01220000ATTR FB88   RECFM(F B)   LRECL(88) BLKSIZE(6160)
+01230000ALLOC F(PROGRAM)  DA(&PROG.) SHR
+01240000ALLOC F(INCLUDE) DA(&TEMP.) SHR
+01250000ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW CATALOG +
+01260000                  SP(40 40) TRACK
+01270000/*LOC F(OUTPUT8) DA(&OUT.) RELEASE USING(FB88) NEW CATALOG + */
+01280000/*SP(80 5) TRACK */
+01290000ALLOC F(OUTPUT3) DA(&OUT.) RELEASE USING(FB88) NEW CATALOG +
+01300000  SP(80 5) TRACK
+01310000ALLOC F(SYSIN)    DA(&IN.) SHR
+01320000WRITE RUNNING XPL PROGRAM &PROG.
+01330000CALL 'NCAMCM.XPL.TOOLS.HALS.MONITOR(MONITOR)'  '&OPT.'
+01340000SET &SAVECC = &LASTCC
+01350000FREE F(PROGRAM OUTPUT3 SYSIN SYSPRINT INCLUDE ) ATTR(FBA133)
+01360000IF &SAVECC EQ 0 THEN +
+01370000     WRITE EXECUTION SUCCESSFUL
+01380000ELSE +
+01390000     WRITE EXECUTION ERROR CODE = &SAVECC

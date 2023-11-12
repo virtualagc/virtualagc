@@ -1,0 +1,859 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     H360CLG                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: A CLIST TO COMPILE, LINK AND EXECUTE HAL SOURCE      */
+00090000/*             CODE ON THE IBM/360 COMPUTER.                        */
+00100000/*                                                                  */
+00110000/*             EXAMPLES:                                            */
+00120000/*              H360CLG CLG TEST COMPVER(REL23V1) RUNLVER(REL23V1)  */
+00130000/*                                                                  */
+00140000/*------------------------------------------------------------------*/
+00150000/*                                                                  */
+00160000/*   SYNTAX:                                                        */
+00170000/*                                                                  */
+00180000/*     H360CLG 'ACTION' 'NAME' PROG(&NAME) ID(&SYSUID)              */
+00190000/*             LIB(&ID..TEST) NEWRUN TRACE                          */
+00200000/*             DUMP SEQ SCREEN NOLINK FSW FIRST FIRSTD              */
+00210000/*             INCLUDE(&LIB..INC) INCLUDE2() HALSDF(&LIB..SDF)      */
+00220000/*             HALSDF2() HALLOAD2() INCLUDE2() COMPVER(CURRENT)     */
+00230000/*             ERRORLIB(NCAMCM.H360.&COMPVER..ERRORLIB)             */
+00240000/*             COMPILER(NCAMCM.H360.&COMPVER..COMPILER) TERRORLIB() */
+00250000/*             MONITOR(NCAMCM.H360.&COMPVER..MONITOR.LOAD)          */
+00260000/*             SYSIN(&LIB..HAL(&NAME.)) SYSPRINT(&LIB..LST(&NAME.)) */
+00270000/*             OBJECT(&LIB..OBJ(&NAME.)) SYTSZ(4096)                */
+00280000/*             RFSZ(5500) MACSZ(4500) TPLT LITS(2500) TABLST        */
+00290000/*             SRN PG(91000) OPT() CT(WMZMTCBCUMVMPC) L(L)          */
+00300000/*             CP CS RUNLVER(CURRENT)                               */
+00310000/*             RUNLIB(NCAMCM.H360.&RUNLVER..RUNLIB)                 */
+00311000/*             RUNLIBQ(NCAMCM.H360.&RUNLVER..QUASI.RUNLIB) TRUNLIB()*/
+00312000/*             LOPT NCAL DDOUT(OUT)                                 */
+00313000/*                                                                  */
+00314000/*     ALIAS    - NONE.                                             */
+00315000/*     REQUIRED - 'ACTION' 'NAME'                                   */
+00316000/*                                                                  */
+00317000/*------------------------------------------------------------------*/
+00318000/*                                                                  */
+00319000/*   INVOKES:  NCAMCM.H360.<COMPVER>.MONITOR.LOAD(MONITOR)          */
+00320000/*             NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                      */
+00330000/*             NCAMCM.H360.<COMPVER>.MONITOR.LOAD(HALLINK)          */
+00331000/*             NCAMCM.TOOLS.XPLOBJ(OPT)                             */
+00332000/*                                                                  */
+00333000/*------------------------------------------------------------------*/
+00334000/*                                                                  */
+00335000/*   PARAMETERS:                                                    */
+00336000/*                                                                  */
+00337000/*     ACTION   REQUIRED                                            */
+00338000/*              C(COMPILE), L(LINK), G(GO) OR COMBINATION           */
+00339000/*                                                                  */
+00340000/*     NAME     REQUIRED                                            */
+00350000/*              NAME OF MEMBER IN LIBRARY                           */
+00360000/*                                                                  */
+00370000/*     ID       DEFAULT: &SYSUID.                                   */
+00380000/*              HIGH LEVEL QUALIFIER                                */
+00390000/*                                                                  */
+00400000/*     LIB      DEFAULT: &ID..TEST                                  */
+00410000/*              OTHER DSN LEVELS                                    */
+00420000/*                                                                  */
+00430000/*     NEWRUN   OPTIONAL                                            */
+00440000/*              REALLOCATE REPORT LISTINGS                          */
+00450000/*                                                                  */
+00460000/*     FIRST    OPTIONAL                                            */
+00470000/*              IF SPECIFIED, ALLOCATE ALL DATASETS THE FIRST TIME  */
+00480000/*                                                                  */
+00490000/*     FIRSTD   OPTIONAL                                            */
+00500000/*              IF SPECIFIED, DELETE AND REALLOCATE ALL DATASETS    */
+00510000/*                                                                  */
+00520000/*     TRACE    OPTIONAL                                            */
+00530000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED            */
+00531000/*              AT THE TERMINAL                                     */
+00532000/*                                                                  */
+00533000/*     DUMP     OPTIONAL                                            */
+00534000/*              UPON ABEND STORE DUMP INTO &NAME..DUMP              */
+00535000/*                                                                  */
+00536000/*     SEQ      OPTIONAL                                            */
+00537000/*              SEND LISTING TO A SEQUENTIAL FILE                   */
+00538000/*                                                                  */
+00539000/*     SCREEN   OPTIONAL                                            */
+00540000/*              IF SPECIFIED SEND OUTPUT TO SCREEN                  */
+00550000/*              INSTEAD OF TO &LIB..&DDOUT(&NAME.)                  */
+00560000/*                                                                  */
+00570000/*     NOLINK   OPTIONAL                                            */
+00580000/*              OPTION TO EXIT AFTER COMPILING                      */
+00590000/*                                                                  */
+00600000/* NEXT ARE PARAMETERS USED IN/FOR THE COMPILE OF SOURCE            */
+00610000/*                                                                  */
+00620000/*     INCLUDE  DEFAULT: &LIB..INC                                  */
+00630000/*              USERS INCLUDE FILES                                 */
+00640000/*                                                                  */
+00650000/*     INCLUDE2 DEFAULT: NULL                                       */
+00660000/*              ADDITIONAL INCLUDE FILES                            */
+00670000/*                                                                  */
+00680000/*     HALSDF   DEFAULT: &LIB..SDF                                  */
+00690000/*              USERS SDFS                                          */
+00700000/*                                                                  */
+00710000/*     HALSDF2  DEFAULT: NULL                                       */
+00720000/*              ADDITIONAL SDF                                      */
+00730000/*                                                                  */
+00740000/*     HALLOAD2 DEFAULT: NULL                                       */
+00750000/*              ADDITIONAL LOAD MODULE                              */
+00760000/*                                                                  */
+00770000/*     COMPVER  DEFAULT: CURRENT                                    */
+00780000/*              COMPILER VERSION                                    */
+00790000/*                                                                  */
+00800000/*     ERRORLIB DEFAULT: NCAMCM.H360.&COMPVER..ERRORLIB             */
+00810000/*              BASELINE ERROR LIBRARY                              */
+00820000/*                                                                  */
+00830000/*     COMPILER DEFAULT: NCAMCM.H360.&COMPVER..COMPILER             */
+00840000/*              COMPILER                                            */
+00841000/*                                                                  */
+00842000/*     TERRORLIB DEFAULT: NULL                                      */
+00843000/*              USERS TEMPORARY ERROR LIBRARY                       */
+00844000/*                                                                  */
+00845000/*     MONITOR  DEFAULT: NCAMCM.H360.&COMPVER..MONITOR.LOAD         */
+00846000/*              MONITOR TO RUN THE COMPILER                         */
+00847000/*                                                                  */
+00848000/*     SYSIN    DEFAULT: &LIB..HAL(&NAME)                           */
+00849000/*              HAL SOURCE FILE                                     */
+00850000/*                                                                  */
+00860000/*     SYSPRINT DEFAULT: &LIB..LST(&NAME)                           */
+00870000/*              HAL PRINTOUT LISTING                                */
+00880000/*                                                                  */
+00890000/*     OBJECT   DEFAULT: &LIB..OBJ(&NAME)                           */
+00900000/*              COMPILER PRODUCED OBJECT CODE                       */
+00910000/*                                                                  */
+00920000/* THIS IS THE START OF OPTIONS PASSED TO THE COMPILER              */
+00930000/*                                                                  */
+00940000/*     SYTSZ    DEFAULT: 4096                                       */
+00950000/*              SYMBOL TABLE SIZE                                   */
+00960000/*                                                                  */
+00970000/*     RFSZ     DEFAULT: 5500                                       */
+00980000/*              CROSS REFERENCE SIZE                                */
+00990000/*                                                                  */
+01000000/*     MACSZ    DEFAULT: 4500                                       */
+01010000/*              MAXIMUM NUMBER OF LITERALS                          */
+01020000/*                                                                  */
+01030000/*     TPLT     OPTIONAL                                            */
+01040000/*              TEMPLATE GENERATION                                 */
+01050000/*                                                                  */
+01060000/*     LITS     DEFAULT: 2500                                       */
+01070000/*              LITERAL STRING SIZE                                 */
+01080000/*                                                                  */
+01090000/*     TABLST   OPTIONAL                                            */
+01100000/*              TABLE LIST FOR PHASE IV OF SDFS                     */
+01110000/*                                                                  */
+01120000/*     SRN      OPTIONAL                                            */
+01130000/*              SOURCE INCLUDES LINE NUMBERS                        */
+01140000/*                                                                  */
+01150000/*     PG       DEFAULT: 91000                                      */
+01160000/*              PAGE LIMIT MAXIMUM                                  */
+01170000/*                                                                  */
+01180000/*     OPT      DEFAULT: NULL                                       */
+01190000/*              OTHER USER REQUESTED OPTION                         */
+01200000/*                                                                  */
+01210000/*     CT       DEFAULT: WMZMTCBCUMVMPC                             */
+01220000/*              CARD TYPE                                           */
+01230000/*                                                                  */
+01240000/*     L        DEFAULT: L                                          */
+01250000/*              ASSEMBLY LISTING FROM PHASE II                      */
+01260000/*                                                                  */
+01270000/* NEXT ARE PARAMETERS USED IN/FOR THE LINK/EDIT STEP               */
+01280000/*                                                                  */
+01290000/*     CP       OPTIONAL                                            */
+01300000/*              PASSED FOR COMPOOLS                                 */
+01310000/*                                                                  */
+01320000/*     CS       OPTIONAL                                            */
+01330000/*              PASSED FOR COMSUBS                                  */
+01340000/*                                                                  */
+01350000/*     RUNLVER  DEFAULT: CURRENT                                    */
+01360000/*              RUNTIME LIBRARY VERSION                             */
+01370000/*                                                                  */
+01380000/*     RUNLIB   DEFAULT: NCAMCM.H360.&RUNLVER..RUNLIB               */
+01390000/*              RUNTIME LIBRARY EXECUTABLES                         */
+01400000/*                                                                  */
+01410000/*     RUNLIBQ  DEFAULT: NCAMCM.H360.&RUNLVER..QUASI.RUNLIB         */
+01420000/*              RUNTIME LIBRARY EXECUTABLES USED TO SIMULATE THE    */
+01430000/*              AP101'S DOUBLE PRECISION MULTIPLY AND DIVIDE        */
+01440000/*              OPERATIONS                                          */
+01450000/*                                                                  */
+01460000/*     TRUNLIB  OPTIONAL                                            */
+01470000/*              USERS TEMPORARY RTL EXECUTABLES                     */
+01480000/*                                                                  */
+01490000/* THIS IS THE START OF OPTIONS PASSED TO LINKAGE EDITOR            */
+01500000/*                                                                  */
+01510000/*     LOPT     DEFAULT: NULL                                       */
+01520000/*              LINKER OPTIONS                                      */
+01530000/*                                                                  */
+01540000/*     NCAL     OPTIONAL                                            */
+01550000/*              EXTERNAL REFERENCES ARE NOT TO BE RESOLVED          */
+01560000/*              BY THE AUTOMATIC LIBRARY CALL MECHANISM DURING      */
+01570000/*              THE CURRENT PHASE                                   */
+01580000/*                                                                  */
+01590000/* NEXT ARE PARAMETERS USED IN/FOR THE EXECUTION STEP               */
+01600000/*                                                                  */
+01610000/*     DDOUT    DEFAULT: OUT                                        */
+01620000/*              HAL OUTPUT FILE FOR EXECUTION                       */
+01630000/*                                                                  */
+01640000/*------------------------------------------------------------------*/
+01650000/*                                                                  */
+01660000/*   INPUT DATA SET NAMES:                                          */
+01670000/*                                                                  */
+01680000/*     <LIB>.HAL(<NAME>)                                            */
+01690000/*         PDS OF HALS SOURCE CODE                                  */
+01700000/*                                                                  */
+01710000/*     <LIB>.INC                                                    */
+01720000/*         PDS OF USERS INCLUDE FILES                               */
+01730000/*                                                                  */
+01740000/*     <LIB>.SDF                                                    */
+01750000/*         PDS OF USERS SDFS                                        */
+01760000/*                                                                  */
+01770000/*     NCAMCM.H360.<COMPVER>.COMPILER                               */
+01780000/*         PS COMPILER                                              */
+01790000/*                                                                  */
+01800000/*     NCAMCM.H360.<COMPVER>.ERRORLIB                               */
+01810000/*         PDS BASELINE ERROR LIBRARY                               */
+01820000/*                                                                  */
+01830000/*     NCAMCM.H360.<RUNLVER>.RUNLIB                                 */
+01840000/*         PDS OF RUNTIME LIBRARY EXECUTABLES                       */
+01850000/*                                                                  */
+01860000/*     NCAMCM.H360.<RUNLVER>.QUASI.RUNLIB                           */
+01870000/*         PDS OF QUASI RUNTIME LIBRARY EXECUTABLES                 */
+01880000/*                                                                  */
+01890000/*------------------------------------------------------------------*/
+01900000/*                                                                  */
+01910000/*   OUTPUT DATA SET NAMES:                                         */
+01920000/*                                                                  */
+01930000/*     <LIB>.COMPRPT                                                */
+01940000/*         PS OF COMPILATION REPORT                                 */
+01950000/*                                                                  */
+01960000/*     <LIB>.CON(<NAME>)                                            */
+01970000/*         PDS OF COMPOOLS LISTING                                  */
+01980000/*                                                                  */
+01990000/*     <LIB>.LINKRPT                                                */
+02000000/*         PS OF LINKAGE REPORT                                     */
+02010000/*                                                                  */
+02020000/*     <LIB>.LOAD(<NAME>)                                           */
+02030000/*         PDS LOAD MODULE                                          */
+02040000/*                                                                  */
+02050000/*     <LIB>.LST(<NAME>)                                            */
+02060000/*         PDS OF COMPILER LISTING                                  */
+02070000/*                                                                  */
+02080000/*     <LIB>.MAP360(<NAME>)                                         */
+02090000/*         PDS OF MAP                                               */
+02100000/*                                                                  */
+02110000/*     <LIB>.OBJ(<NAME>)                                            */
+02120000/*         PDS OF OBJECT MODULE                                     */
+02130000/*                                                                  */
+02140000/*     <LIB>.OUT(<NAME>)                                            */
+02150000/*         PDS OF EXECUTION RESULTS                                 */
+02160000/*                                                                  */
+02170000/*------------------------------------------------------------------*/
+02180000/*                                                                  */
+02190000/*   TEMPORARY DATA SET NAMES:                                      */
+02200000/*                                                                  */
+02210000/*     NONE                                                         */
+02220000/*                                                                  */
+02230000/*------------------------------------------------------------------*/
+02240000/*                                                                  */
+02250000/*   COMMENTS:  THE PROGRAM NAME MUST BE THE SAME AS THE TEST CASE  */
+02260000/*              MEMBER NAME TO EXECUTE CORRECTLY.                   */
+02270000/*                                                                  */
+02280000/*------------------------------------------------------------------*/
+02290000/*                                                                  */
+02300000/*   REVISION HISTORY:                                              */
+02310000/*                                                                  */
+02320000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+02330000/*     --------  ----  ----  -------------------------------------  */
+02340000/*     07/02/91  188   RPC   CREATED AND PUT INTO CM                */
+02350000/*                                                                  */
+02360000/*     11/10/92  261   PMA   ADDED 'TESTLIB' QUALIFIER TO DSN       */
+02370000/*                           'NCAMCM.RTL.CPYFILES.INCL'.            */
+02380000/*     10/16/97  542   LJK   MODIFIED FOR VERSION 23.1 TESTING      */
+02381002/*     01/04/00  651   LJK   INCREASE THE SIZE OF MAP360 DATASET    */
+02390000/*------------------------------------------------------------------*/
+02400000/********************************************************************/
+02410000 
+02420000PROC     2    ACTION                                        +
+02430000              NAME                                          +
+02440000              ID      (&SYSUID.)                            +
+02450000              LIB     (&ID..TEST)                           +
+02460000              NEWRUN                                        +
+02470000              FIRST                                         +
+02480000              FIRSTD                                        +
+02490000              TRACE                                         +
+02500000              DUMP                                          +
+02510000              SEQ                                           +
+02520000              SCREEN                                        +
+02530000              NOLINK                                        +
+02540000              INCLUDE ('&LIB..INC')                         +
+02550000              INCLUDE2()                                    +
+02560000              HALSDF  ('&LIB..SDF')                         +
+02570000              HALSDF2 ()                                    +
+02580000              HALLOAD2()                                    +
+02590000              COMPVER (CURRENT)                             +
+02600000              ERRORLIB(NCAMCM.H360.&COMPVER..ERRORLIB)      +
+02610000              COMPILER(NCAMCM.H360.&COMPVER..COMPILER)      +
+02620000              TERRORLIB()                                   +
+02630000              MONITOR (NCAMCM.H360.CURRENT.MONITOR.LOAD)    +
+02640000              SYSIN   ('&LIB..HAL(&NAME)')                  +
+02650000              SYSPRINT('&LIB..LST(&NAME)')                  +
+02660000              OBJECT  ('&LIB..OBJ(&NAME)')                  +
+02670000              OI(SPF27080)                                  +
+02680000              INV(NCAMCM.TESTLIB.&OI..INVENTRY)             +
+02690000              FSW                                           +
+02700000              SYTSZ   (4096)                                +
+02710000              RFSZ    (5500)                                +
+02720000              MACSZ   (4500)                                +
+02730000              TPLT                                          +
+02740000              LITS    (2500)                                +
+02750000              TABLST                                        +
+02760000              SRN                                           +
+02770000              PG      (91000)                               +
+02780000              OPT     ()                                    +
+02790000              CT      (WMZMTCBCUMVMPC)                      +
+02800000              L       (L)                                   +
+02810000              CP                                            +
+02820000              CS                                            +
+02830000              RUNLVER (CURRENT)                             +
+02840000              RUNLIB  (NCAMCM.H360.&RUNLVER..RUNLIB)        +
+02850000              RUNLIBQ (NCAMCM.H360.&RUNLVER..QUASI.RUNLIB)  +
+02860000              TRUNLIB ()                                    +
+02870000              LOPT    ()                                    +
+02880000              NCAL                                          +
+02890000              DDOUT   (OUT)
+02900000 
+02910000/*==================================================================*/
+02920000/*                                                                  */
+02930000/* PROCEDURE TO COMPILE, LINK, AND RUN HAL-360 PROGRAMS.            */
+02940000/*                                                                  */
+02950000/*     TERRORLIB AND TRUNLIB ARE CONCATENATED BEFORE ERRORLIB AND   */
+02960000/* RUNLIB(Q) RESPECTIVELY. USE THESE TO INCORPORATE TEMPORARY       */
+02970000/* ERRORLIBS AND RUNLIBS INTO THE COMPILE AND LINK PROCEDURES.      */
+02980000/*                                                                  */
+02990000/* USE CP TO COMPILE AND LINK COMPOOLS.                             */
+03000000/* USE CS TO COMPILE AND LINK COMSUBS.                              */
+03010000/*                                                                  */
+03020000/*    PERFORMS A PRELINK STEP WHICH ENABLES A PROGRAM WITH INCLUDES */
+03030000/* TO LINK SUCCESSFULLY. THE PRELINK STEP CREATES ALIASES FOR THE   */
+03040000/* LOAD MODULE THAT WILL BE CREATED BY THE LINK STEP. THESE ALIASES */
+03050000/* ALLOW THE LINKAGE EDITOR TO RESOLVE REFERENCES TO THIS LOAD      */
+03060000/* MODULE BY LATEST PROGRAMS.                                       */
+03070000/*                                                                  */
+03080000/* BY PASSING 'NEWRUN' ALL REPORTS WILL BE DELETED AND REALLOCATED. */
+03090000/*                                                                  */
+03100000/* BY PASSING 'FIRST' IN THE H360CLG CLIST, ALL REQUIRED DATA SETS  */
+03110000/* ARE CREATED WHEN USING THE H360CLG CLIST FOR THE FIRST TIME.     */
+03120000/*                                                                  */
+03130000/*==================================================================*/
+03140000 
+03150000IF &TRACE. NE THEN CONTROL LIST CONLIST
+03160000IF &UTRACE. NE THEN SET &UTRACE = UTRACE(UTRACE)
+03170000IF &TABLST. NE THEN SET &TABLST = &STR(TL,)
+03180000IF &TPLT.   NE THEN SET &TPLT   = &STR(TP,)
+03190000IF &SRN.    NE THEN SET &SRN    = &STR(SRN,)
+03200000IF &SDL.    NE THEN SET &SDL    = &STR(SDL,)
+03210000IF &LENGTH(&STR(&OPT.)) NE 0 THEN SET &OPT = &STR(&OPT,)
+03220000 
+03230000 
+03240000CONTROL END(DONE)
+03250000 
+03260000IF &NEWRUN NE THEN DO
+03270000/* FIRST JUST FOR SAFETY FREE ALL DATA SETS
+03280000  CONTROL NOMSG
+03281000  FREE DA('&LIB..COMPRPT')
+03282000  FREE DA('&LIB..LINKRPT')
+03283000 
+03284000  DELETE ('&LIB..COMPRPT')
+03285000  DELETE ('&LIB..LINKRPT')
+03286000  CONTROL MSG
+03287000/* ALLOCATE NECESSARY REPORT DATA SETS
+03288000  ALLOC DA('&LIB..COMPRPT')  SPACE(1,1) CYLINDERS DSORG(PS)    +
+03289000                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+03290000  ALLOC DA('&LIB..LINKRPT')  SPACE(1,1) CYLINDERS DSORG(PS)    +
+03300000                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+03310000DONE
+03320000 
+03330000IF &FIRSTD NE THEN DO
+03340000   IF &SYSDSN('&LIB..HAL') EQ OK THEN +
+03350000     RENAME '&LIB..HAL' TSET.HAL
+03360000   IF &SYSDSN('&LIB..INC') EQ OK THEN +
+03370000     RENAME '&LIB..INC' TSET.INC
+03380000   CONTROL NOMSG
+03390000   DELETE '&LIB..*'
+03400000  IF &SYSDSN(TSET.HAL) EQ OK THEN +
+03410000     RENAME TSET.HAL '&LIB..HAL'
+03420000  IF &SYSDSN(TSET.INC) EQ OK THEN +
+03430000     RENAME TSET.INC '&LIB..INC'
+03440000   SET &FIRST = FIRST
+03450000DONE
+03460000 
+03470000IF &FIRST NE THEN DO
+03471000 IF &SYSDSN('&LIB..CON') NE OK THEN DO
+03472000  CONTROL MSG
+03473000  ALLOC DA('&LIB..CON')      SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+03474000                             RECFM(F B) LRECL(80) BLKSIZE(400)
+03475000  ALLOC DA('&LIB..LOAD')     SPACE(9,5) CYLINDERS DSORG(PO) DIR(50) +
+03476000                             RECFM(U) LRECL(6144) BLKSIZE(6144)
+03477000  ALLOC DA('&LIB..LST')      SPACE(9,5) CYLINDERS DSORG(PO) DIR(65) +
+03478000                             RECFM(F B A) LRECL(133) BLKSIZE(2660)
+03479000  ALLOC DA('&LIB..OBJ')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(20) +
+03479100                             RECFM(F B) LRECL(80) BLKSIZE(400)
+03479200  ALLOC DA('&LIB..OUT')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(20) +
+03479300                             RECFM(F B A) LRECL(133) BLKSIZE(6118)
+03479400  ALLOC DA('&LIB..SDF')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(65) +
+03479500                             RECFM(F) LRECL(1680) BLKSIZE(1680)
+03479600  ALLOC DA('&LIB..OPT')      SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+03479700                             RECFM(F B) LRECL(80) BLKSIZE(400)
+03479800 DONE
+03479900 IF &SYSDSN('&LIB..INC') NE OK THEN +
+03480000   ALLOC DA('&LIB..INC')     SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+03481000                             RECFM(F B) LRECL(80) BLKSIZE(6160)
+03481100DONE
+03481200CONTROL NOMSG
+03481300IF &SYSDSN('&LIB..MAP360') NE OK THEN +
+03481401  ALLOC DA('&LIB..MAP360')   SPACE(3,3) CYLINDERS DSORG(PO) DIR(20) +
+03481500                             RECFM(F B A) LRECL(121) BLKSIZE(605)
+03481600 
+03481700IF &ACTION. = CLG THEN +
+03481800   GOTO COMPILE
+03481900ELSE +
+03482000IF &ACTION. = CL THEN +
+03483000   GOTO COMPILE
+03484000ELSE +
+03485000IF &ACTION. = C THEN +
+03486000   GOTO COMPILE
+03486100ELSE +
+03486200IF &ACTION. = LG THEN +
+03486300   GOTO LINK
+03486400ELSE +
+03486500IF &ACTION. = L THEN +
+03486600   GOTO LINK
+03486700ELSE +
+03486800IF &ACTION. = G THEN +
+03486900   GOTO GO
+03487000ELSE DO
+03488000   WRITE ERROR IN HALS COMMAND LINE
+03489000   EXIT
+03490000DONE
+03500000 
+03510000 
+03520000/*------------------------------------------------------------------*/
+03530000/*                                                                  */
+03540000/* COMPILATION STEP                                                 */
+03550000/*                                                                  */
+03560000/*------------------------------------------------------------------*/
+03570000 
+03580000COMPILE: CONTROL NOMSG
+03590000GLOBAL RETCODE
+03600000IF  &TRACE. NE THEN  CONTROL LIST CONLIST
+03610000IF &FSW. NE THEN DO
+03620000         /***************************************/
+03630000         /*                                     */
+03640000         /*   GET ALL OPTIONS USED FOR          */
+03650000         /*   THE FSW MODULE                    */
+03660000         /*                                     */
+03670000         /***************************************/
+03680000  FREE F(OPTIONS PROGRAM SYSIN SYSPRINT OUTPUT3) ATTR(FBA133)
+03690000  ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+03700000  DELETE ('&LIB..OPT(&NAME.)')
+03710000  CONTROL MSG
+03720000  ALLOC F(OUTPUT3)  DA('&LIB..OPT(&NAME.)') SHR
+03730000  IF &SYSDSN.('&INV.(&NAME)') EQ OK THEN DO
+03740000     ALLOC F(PROGRAM)  DA('NCAMCM.TOOLS.XPLOBJ(OPT)') SHR
+03750000     ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW              +
+03760000                             CATALOG   SP(40 40) TRACK
+03761000     ALLOC F(SYSIN)    DA('&INV.(&NAME)') SHR
+03762000/*   WRITE FETCHING OPTIONS FROM FSW INVENTORY: '&INV(&NAME.)' */
+03763000     CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'
+03764000     SET &SAVECC = &LASTCC
+03765000     IF &SAVECC EQ 0 THEN WRITE OPTION FETCH SUCCESSFUL
+03766000     ELSE WRITE FAILED OPTION FETCH: ERROR CODE = &SAVECC
+03767000  DONE
+03768000  ELSE DO
+03769000     WRITE NO INVENTORY FILE FOUND: '&INV(&NAME.)'
+03769100     WRITE CREATING OPTION FIELD
+03769200     OPENFILE OUTPUT3 OUTPUT
+03769300     SET OUTPUT3 +
+03769400       EQ &STR(&L,SYM=&SYTSZ,XS=&RFSZ,MS=18000,LITS=5000,TBL,&TABLST)
+03769500     PUTFILE OUTPUT3
+03769600     SET OUTPUT3 +
+03769700       EQ &STR(A,SRN,SR,CT=FCIMACBCRCOMQC,SDL,R,P=9990,T=&NAME.)
+03769800     PUTFILE OUTPUT3
+03769900     CLOSFILE OUTPUT3
+03770000  DONE
+03770100DONE
+03770200SET &LASTCC = 0
+03770300 
+03770400CONTROL NOMSG
+03770500FREE F(PROGRAM FILE1 FILE2 FILE3 FILE4                    +
+03770600       FILE5 FILE6 OUTPUT3 OUTPUT5 OUTPUT6 HALSDF INCLUDE +
+03770700       OUTPUT8 ACCESS SYSPRINT SYSIN ERROR LISTING2       +
+03770800       ERRLIST SYSUDUMP ABNLIGNR OUTPUT4)
+03770900 
+03771000DELETE ('&OBJECT.')
+03772000DELETE ('&SYSPRINT.')
+03773000CONTROL MSG
+03774000 
+03775000ALLOC F(PROGRAM)  DA('&COMPILER.')  SHR
+03776000IF &TERRORLIB. NE THEN                             +
+03777000   ALLOC REUSE F(ERROR)  DA('&TERRORLIB.'  '&ERRORLIB.')  SHR
+03778000ELSE                                            +
+03779000   ALLOC REUSE F(ERROR)  DA('&ERRORLIB.') SHR
+03780000 
+03790000IF &HALSDF2 NE  THEN SET SDF2 = '&HALSDF2'
+03800000                ELSE SET SDF2 =
+03810000IF &FSW. NE THEN +
+03820000   ALLOC F(HALSDF) DA('&HALSDF.'  &SDF2 '&OI..SDF360') SHR
+03830000ELSE +
+03840000   ALLOC F(HALSDF) DA('&HALSDF.'  &SDF2) SHR
+03850000 
+03860000IF &INCLUDE2 NE  THEN SET INCL2 = '&INCLUDE2'
+03870000                 ELSE SET INCL2 =
+03880000IF &FSW NE THEN +
+03890000   ALLOC F(INCLUDE) DA('&INCLUDE.' &INCL2. '&OI..SM.INCL80' +
+03900000                       'NCAMCM.TESTLIB.RTL.CPYFILES.INCL' ) SHR
+03910000ELSE +
+03920000   ALLOC F(INCLUDE) DA('&INCLUDE.' &INCL2. +
+03930000                       'NCAMCM.TESTLIB.RTL.CPYFILES.INCL' ) SHR
+03940000 
+03950000IF &FSW. NE  THEN    +
+03960000   ALLOC F(OUTPUT4) DUMMY
+03970000 
+03980000ALLOC F(FILE1)    SPACE(5,5)   BLOCK(7200)
+03990000ALLOC F(FILE2)    SPACE(5,5)   BLOCK(7200)
+04000000ALLOC F(FILE3)    SPACE(25,10) BLOCK(7200)
+04010000ALLOC F(FILE4)    SPACE(5,5)   BLOCK(7200)
+04020000ALLOC F(FILE5)    SPACE(5,5)   BLOCK(7200)
+04030000ALLOC F(FILE6)    SPACE(5,5)   BLOCK(7200)
+04040000 
+04041000IF &DUMP. NE  THEN DO
+04042000  CONTROL NOMSG
+04043000  DELETE '&ID..&NAME..DUMP'
+04044000  ALLOC DA('&ID..&NAME..DUMP') RECFM(F B A) LRECL(133) BLKSIZE(2660) +
+04045000        SPACE(5,5) CYLINDERS
+04046000  ALLOC F(SYSUDUMP) DA('&ID..&NAME..DUMP') SHR
+04047000  ALLOC F(ABNLIGNR) DA(*) SHR
+04048000  CONTROL MSG
+04049000DONE
+04050000IF &SEQ. NE THEN DO
+04060000  CONTROL NOMSG
+04070000  IF &SYSDSN('&ID..&NAME..LST') = OK THEN DO
+04080000    DELETE ('&ID..&NAME..LST')
+04090000  DONE
+04100000  ALLOC DA('&ID..&NAME..LST') RECFM(F B A) LRECL(133) BLKSIZE(2660) +
+04110000        SPACE(20,5) CYLINDERS
+04120000  SET &SYSPRINT = &ID..&NAME..LST
+04130000  CONTROL MSG
+04140000DONE
+04150000ALLOC F(SYSPRINT) DA('&SYSPRINT.')  SHR
+04160000ALLOC F(OUTPUT3)  DA('&OBJECT.')  SHR
+04170000ALLOC F(OUTPUT5)  DA('&LIB..SDF') OLD
+04180000ALLOC F(OUTPUT6)  DA('&LIB..INC') OLD
+04190000ALLOC F(OUTPUT8)  SP(4 2) TRACK DIR(5)
+04200000ALLOC F(ACCESS)   SP(1 1) TRACK DIR(1)
+04210000ALLOC F(SYSIN)    DA('&SYSIN.') SHR
+04220000ALLOC F(LISTING2) DA(*) SHR
+04230000ALLOC F(ERRLIST)  DA('&LIB..COMPRPT') MOD
+04240000OPENFILE ERRLIST OUTPUT
+04250000WRITE &SYSIN ==> &COMPILER
+04260000WRITE        ==> &SYSPRINT
+04270000WRITENR COMPILATION OF &NAME.
+04280000CONTROL MSG
+04290000IF &FSW. EQ THEN +
+04300000  CALL  '&MONITOR.(MONITOR)' +
+04310000        '&L,SYM=&SYTSZ,XS=&RFSZ,MS=&MACSZ,ADDR,LITS=&LITS.,+
+04320000         TBL,&TABLST.&SRN.&TPLT.&OPT.,SR,P=&PG,CT=&CT,T=&NAME'
+04330000ELSE DO
+04340000   ALLOC F(OPTIONS) DA('&LIB..OPT(&NAME.)') SHR
+04350000   OPENFILE OPTIONS INPUT
+04360000   GETFILE OPTIONS
+04370000   SET &I = &LENGTH(&OPTIONS)
+04380000   DO WHILE &SUBSTR(&I.,&OPTIONS.) EQ
+04390000     SET &I = &I - 1
+04400000   DONE
+04410000   SET &FIRSTOPT = &SUBSTR(1:&I,&OPTIONS)
+04420000   GETFILE OPTIONS
+04430000   SET &I = &LENGTH(&OPTIONS)
+04440000   DO WHILE ((&SUBSTR(&I.,&OPTIONS.) EQ ) AND (&I > 1))
+04450000      SET &I = &I - 1
+04460000   DONE
+04470000   SET &OPTIONS = &SUBSTR(1:&I,&OPTIONS)
+04480000   CLOSFILE OPTIONS
+04490000   IF &OPTIONS NE  THEN +
+04500000      CALL '&MONITOR.(MONITOR)' +
+04510000           '&FIRSTOPT.&OPTIONS.,&OPT.'
+04520000   ELSE +
+04521000      CALL '&MONITOR.(MONITOR)' +
+04522000           '&FIRSTOPT.,&OPT.'
+04523000DONE
+04524000 
+04525000SET &MAXCC = &LASTCC
+04526000SET &SAVECC = &MAXCC
+04527000SET &RETCODE = &MAXCC
+04528000 
+04529000CONTROL NOMSG
+04530000FREE F(PROGRAM FILE1 FILE2 FILE3 FILE4 OPTIONS            +
+04530100       FILE5 FILE6 OUTPUT3 OUTPUT5 OUTPUT6 HALSDF INCLUDE +
+04530200       OUTPUT8 ACCESS SYSPRINT SYSIN ERROR SYSUDUMP ABNLIGNR OUTPUT4)
+04530300/* RESTORE MAXCC AFTER THE FREE STATEMENT
+04530400SET &MAXCC = &SAVECC
+04530500CONTROL MSG
+04530600 
+04530700IF &MAXCC = 0 THEN DO
+04530800     WRITE SUCCESSFUL
+04530900     SET ERRLIST = &STR(COMPILATION OF &NAME. - SUCCESSFUL)
+04531000     PUTFILE ERRLIST
+04531100     SET ERRLIST = &STR( )
+04531200     PUTFILE ERRLIST
+04531300     CLOSFILE ERRLIST
+04531400     FREE F(ERRLIST)
+04531500DONE
+04531600ELSE DO
+04531700     WRITE ERROR CODE = &MAXCC
+04531800     SET ERRLIST = &STR(COMPILATION OF &NAME. - ERROR CODE = &MAXCC.)
+04531900     PUTFILE ERRLIST
+04532000     SET &SAVECC = &LASTCC
+04532100     CONTROL NOMSG
+04532200     ERROR DO
+04532300       SET &SAVECC = &LASTCC
+04532400     DONE
+04532500     CONTROL MSG
+04532600     SET ERRLIST = &STR( )
+04532700     PUTFILE ERRLIST
+04532800     IF &MAXCC = 8 THEN +
+04532900        SET &RETCODE = 9
+04533000     CLOSFILE ERRLIST
+04533100     FREE F(ERRLIST)
+04533200     EXIT
+04533300DONE
+04533400 
+04533500IF &ACTION. = C THEN EXIT
+04533600 
+04533700 
+04533800/*------------------------------------------------------------------*/
+04533900/*                                                                  */
+04534000/* ALIAS CREATION STEP                                              */
+04534100/*                                                                  */
+04534200/*------------------------------------------------------------------*/
+04534300 
+04534400IF &NOLINK. NE  THEN EXIT
+04534500 
+04534600CONTROL NOMSG
+04534700DELETE '&LIB..CON(&NAME.)'
+04534800FREE F(SYSIN,OUTPUT3,PROGRAM,SYSPRINT,LISTING2,ERROR,LINKRPT)
+04534900CONTROL MSG
+04535000ALLOC F(LINKRPT) DA('&LIB..LINKRPT') MOD
+04536000OPENFILE LINKRPT OUTPUT
+04537000 
+04538000ALLOC F(SYSIN)   DA('&OBJECT.') SHR
+04539000ALLOC F(OUTPUT3) DA('&LIB..CON(&NAME.)') SHR
+04540000ALLOC F(PROGRAM) DA('NCAMCM.TOOLS.XPLOBJ(CONTROL)') SHR
+04550000ALLOC F(SYSPRINT) DA(*)
+04560000ALLOC F(LISTING2) DA(*)
+04570000ALLOC F(ERROR)    DUMMY
+04580000WRITENR PRELINK   OF   &NAME.
+04590000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'
+04600000SET &SAVECC=&LASTCC
+04610000SET &RETCODE=&SAVECC
+04620000 
+04630000CONTROL NOMSG
+04640000FREE F(SYSIN,OUTPUT3,PROGRAM,SYSPRINT,LISTING2,ERROR)
+04650000CONTROL MSG
+04660000 
+04670000 
+04680000IF &SAVECC = 0 THEN DO
+04690000    WRITE SUCCESSFUL
+04700000    SET LINKRPT = &STR(PRELINK OF &NAME. - SUCCESSFUL)
+04710000    PUTFILE LINKRPT
+04720000    CLOSFILE LINKRPT
+04730000    FREE F(LINKRPT)
+04740000    IF &ACTION. = CLG THEN +
+04750000       GOTO LINK
+04760000     ELSE +
+04770000     IF &ACTION. = CL THEN +
+04780000        GOTO LINK
+04790000     ELSE +
+04800000     EXIT
+04810000DONE
+04820000ELSE DO
+04830000    WRITE ERROR CODE = &SAVECC
+04840000    SET LINKRPT = &STR(PRELINK OF &NAME. - ERROR CODE = &SAVECC)
+04850000    PUTFILE LINKRPT
+04860000    CLOSFILE LINKRPT
+04870000    FREE F(LINKRPT)
+04880000    SET &RETCODE = 9
+04890000    EXIT
+04900000DONE
+04910000 
+04920000/*------------------------------------------------------------------*/
+04930000/*                                                                  */
+04940000/* LINK EDIT STEP                                                   */
+04950000/*                                                                  */
+04960000/*------------------------------------------------------------------*/
+04970000 
+04980000LINK: CONTROL NOMSG
+04990000FREE DD(SYSPRINT SYSLIB SYSLMOD SYSUT1 SYSLIN)
+05000000DELETE '&LIB..MAP360(&NAME.)'
+05010000DELETE '&LIB..LOAD(&NAME.)'
+05020000CONTROL MSG
+05030000 
+05040000ALLOC F(LINKRPT) DA('&LIB..LINKRPT') MOD
+05050000OPENFILE LINKRPT OUTPUT
+05060000 
+05070000IF &HALLOAD2 NE  THEN SET LOAD2 = '&HALLOAD2'
+05080000                 ELSE SET LOAD2 =
+05090000IF &DUMP  NE  THEN DO
+05100000  CONTROL NOMSG
+05110000  DELETE '&ID..&NAME..DUMP'
+05120000  ALLOC DA('&ID..&NAME..DUMP') RECFM(F B A) LRECL(133) BLKSIZE(2660) +
+05130000        SPACE(5,5) CYLINDERS
+05140000  ALLOC F(SYSUDUMP) DA('&ID..&NAME..DUMP') SHR
+05150000  ALLOC F(ABNLIGNR) DA(*) SHR
+05160000  CONTROL MSG
+05170000DONE
+05180000IF &SEQ. NE THEN DO
+05190000  CONTROL NOMSG
+05200000  IF &SYSDSN('&ID..&NAME..MAP360') = OK THEN DO
+05210000    DELETE ('&ID..&NAME..MAP360')
+05220000  DONE
+05230000  ALLOC F(SYSPRINT) +
+05240000        DA('&ID..&NAME..MAP360') RECFM(F B A) LRECL(121) BLKSIZE(605)
+05250000  CONTROL MSG
+05260000DONE
+05270000ELSE +
+05280000  ALLOC F(SYSPRINT) DA('&LIB..MAP360(&NAME.)') SHR
+05290000 
+05300000ALLOC F(SYSLIB)  DA('&RUNLIB'                       +
+05310000                    '&RUNLIBQ'                      +
+05320000                    &LOAD2.                         +
+05330000                    '&LIB..LOAD') SHR
+05340000   ALLOC F(SYSLMOD)  DA('&LIB..LOAD(&NAME.)') SHR +
+05350000                     RECFM(U) LRECL(6144) BLKSIZE(6144) DIR(1)
+05360000   ALLOC F(LINKIN)   DUMMY
+05370000   ALLOC F(SYSUT1)   SP(3 1) CYL
+05380000   ALLOC F(STACKOBJ) SP(2 2) TRACK
+05390000   ALLOC F(TEMPLOAD) SP(3 1) CYL DIR(1)
+05400000 
+05410000IF &LENGTH(&NAME) > 6 THEN DO
+05420000  SET &NAME6  = &SUBSTR(1:6,&NAME)
+05430000  SET &PROG   = &NAME6
+05440000  SET &CPOOL  = &NAME6
+05450000  SET &CSUB   = &NAME6
+05460000DONE
+05470000 
+05480000IF &CP EQ &NULL AND &CS EQ &NULL THEN DO
+05490000   ALLOC F(SYSLIN)   DA('&LIB..CON(&NAME.)' '&OBJECT.') SHR
+05500000   WRITENR LINK EDIT OF   &NAME.
+05510000   CALL '&MONITOR.(HALLINK)' +
+05520000   'SIZE=(250K,100K),LIST,MAP,NOXREF,&LOPT./HALSTART'
+05530000DONE
+05540000ELSE DO
+05550000   CONTROL NOMSG
+05560000   ALLOC F(SYSLIN)   DA('&OBJECT.') SHR
+05570000   WRITENR LINK EDIT OF   &NAME.
+05580000   CALL '&MONITOR.(HALLINK)' +
+05590000   'SIZE=(250K,100K),LIST,MAP,NOXREF,&NCAL,&LOPT./OSLOAD'
+05600000   IF &LENGTH(&NAME) > 6 THEN DO
+05610000      IF &CS EQ THEN DO
+05620000         DELETE '&LIB..LOAD(#P&CPOOL.)'
+05630000         RENAME '&LIB..LOAD(&NAME.)' '&LIB..LOAD(#P&CPOOL.)'
+05640000      DONE
+05650000      ELSE DO
+05660000         DELETE '&LIB..LOAD(#C&CSUB.)'
+05670000         RENAME '&LIB..LOAD(&NAME.)' '&LIB..LOAD(#C&CSUB.)'
+05680000      DONE
+05690000   DONE
+05700000   ELSE DO
+05710000      IF &CS EQ THEN DO
+05720000         DELETE '&LIB..LOAD(#P&NAME.)'
+05730000         RENAME '&LIB..LOAD(&NAME.)' '&LIB..LOAD(#P&NAME.)'
+05740000      DONE
+05750000      ELSE DO
+05760000         DELETE '&LIB..LOAD(#C&NAME.)'
+05770000         RENAME '&LIB..LOAD(&NAME.)' '&LIB..LOAD(#C&NAME.)'
+05780000      DONE
+05790000   DONE
+05800000   CONTROL MSG
+05810000DONE
+05820000 
+05830000SET &SAVECC=&LASTCC
+05840000SET &RETCODE=&SAVECC
+05850000 
+05860000CONTROL NOMSG
+05870000 
+05880000IF &CP EQ &NULL AND &CS EQ &NULL THEN DO
+05890000IF &SYSDSN('&LIB..LOAD($0&PROG.)') = OK THEN +
+05900000   RENAME '&LIB..LOAD($0&PROG.)' '&LIB..LOAD(&NAME.)'
+05910000ELSE +
+05920000   RENAME '&LIB..LOAD($0&NAME.)' '&LIB..LOAD(&NAME.)'
+05930000DONE
+05940000FREE DD(SYSPRINT SYSLIB SYSLMOD SYSUT1 SYSLIN STACKOBJ TEMPLOAD LINKIN)
+05950000CONTROL MSG
+05960000 
+05970000IF &SAVECC < 5 THEN DO
+05980000    WRITE SUCCESSFUL
+05990000    SET LINKRPT = &STR(LINK EDIT OF &NAME. - SUCCESSFUL)
+06000000    PUTFILE LINKRPT
+06010000DONE
+06020000ELSE DO
+06030000    WRITE ERROR CODE = &SAVECC
+06040000    SET LINKRPT = &STR(LINK EDIT OF &NAME. - ERROR CODE = &SAVECC)
+06050000    PUTFILE LINKRPT
+06060000DONE
+06070000 
+06080000CLOSFILE LINKRPT
+06090000FREE F(LINKRPT)
+06100000 
+06110000IF &SAVECC < 5 THEN DO
+06120000     IF &ACTION. = CLG THEN +
+06130000        GOTO GO
+06140000     ELSE +
+06150000     IF &ACTION. = LG THEN +
+06160000        GOTO GO
+06170000DONE
+06180000/* STOP EXECUTION OF FICOM
+06190000IF &SAVECC = 8 THEN +
+06200000   SET &RETCODE = 9
+06210000 
+06220000EXIT
+06230000 
+06240000/*------------------------------------------------------------------*/
+06250000/*                                                                  */
+06260000/* EXECUTION STEP                                                   */
+06270000/*                                                                  */
+06280000/*------------------------------------------------------------------*/
+06290000 
+06300000GO: CONTROL NOMSG
+06310000FREE F(CHANNEL1 CHANNEL5 CHANNEL6)
+06320000CONTROL MSG
+06330000ALLOC F(CHANNEL1) DA(*)
+06340000ALLOC F(CHANNEL5) DA(*)
+06350000/*ALLOC F(SYSPRINT) DA('&LIB..SIM(&NAME.)') SHR */
+06360000 
+06370000IF &SEQ. NE THEN DO
+06380000  CONTROL NOMSG
+06390000  IF &SYSDSN('&ID..&NAME..OUT') = OK THEN DO
+06400000    DELETE ('&ID..&NAME..OUT')
+06410000  DONE
+06420000  ALLOC F(CHANNEL6) DA('&ID..&NAME..OUT') NEW +
+06430000        RECFM(F B A) LRECL(133) BLKSIZE(2660)
+06440000  DONE
+06450000ELSE IF &SCREEN. EQ THEN         +
+06460000       ALLOC    F(CHANNEL6) DA('&LIB..&DDOUT.(&NAME.)') SHR
+06470000     ELSE +
+06480000       ALLOC F(CHANNEL6) DA(*)
+06490000 
+06500000WRITE EXECUTION OF &LIB..LOAD(&NAME.)
+06510000CALL  '&LIB..LOAD(&NAME.)'
+06520000 
+06530000SET &SAVECC=&LASTCC
+06540000FREE F(CHANNEL1 CHANNEL5 CHANNEL6)
+06550000IF &SAVECC = 0 THEN +
+06560000  WRITE EXECUTION SUCCESSFUL
+06570000ELSE +
+06580000  WRITE EXECUTION ERROR CODE = &SAVECC
+06590000 
+06600000EXIT

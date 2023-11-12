@@ -1,0 +1,14 @@
+         MACRO                                                          00000100
+         COUNT &N,&T,&K                                                 00000200
+         GBLA  &MINCNT,&MINTIME,&MAXCNT,&MAXTIME                        00000300
+&MAXCNT  SETA  &MAXCNT+&N                                               00000400
+&MAXTIME SETA  &MAXTIME+&T                                              00000500
+         AIF   ('&K' EQ 'COND').MEND                                    00000600
+&MINTIME SETA  &MINTIME+&T                                              00000700
+&MINCNT  SETA  &MINCNT+&N                                               00000800
+         AIF   ('&K' NE 'TOTAL').MEND                                   00000900
+         AIF   (&MINCNT EQ &MAXCNT).MAX                                 00001000
+         MNOTE *,'MINIMUM COUNT - &MINCNT, TIME - &MINTIME NANOSECS'    00001100
+.MAX     MNOTE *,'MAXIMUM COUNT - &MAXCNT, TIME - &MAXTIME NANOSECS'    00001200
+         MNOTE *,'TIME BASED ON 360/75 I,J AVERAGE TIMINGS'             00001300
+.MEND    MEND                                                           00001400

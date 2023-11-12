@@ -1,0 +1,158 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     PDSPRINT                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: PRINT ALL PRINTER FORMATED MEMBERS OF A PDS          */
+00090000/*                                                                  OS*/
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     PDSPRINT 'PDS' ID(&SYSUID.) SECONDS(15) MINUTES(0) JOB(U)    */
+00140000/*              MSG(X) CLASS(REGBATCH) LINES(40) NONFORMAT LOCAL    */
+00150000/*              TRACE                                               */
+00160000/*                                                                  */
+00170000/*     ALIAS    - NONE.                                             */
+00180000/*     REQUIRED - 'PDS'                                             */
+00210000/*                                                                  */
+00220000/*------------------------------------------------------------------*/
+00230000/*                                                                  */
+00240001/*   INVOKES:  NCAMCM.TOOLS.SYSJCL(IEBPTPCH)                        */
+00250000/*                                                                  */
+00260000/*------------------------------------------------------------------*/
+00270000/*                                                                  */
+00280000/*   PARAMETERS:                                                    */
+00290000/*                                                                  */
+00300000/*     PDS      REQUIRED                                            */
+00310000/*              NAME OF PARTITIONED DATASET TO BE PRINTED           */
+00320000/*                                                                  */
+00330000/*     ID       DEFAULT: &SYSUID.                                   */
+00340000/*              USERID WHICH JOBNAME IS TO BE SUBMITTED UNDER       */
+00350000/*                                                                  */
+00360000/*     SECONDS  DEFAULT: 15                                         */
+00370000/*              MAXIMUM NUMBER OF SECONDS IN JOBS EXECUTION TIME    */
+00380000/*                                                                  */
+00390000/*     MINUTES  DEFAULT: 0                                          */
+00400000/*              MINUTES OF EXECUTION TIME                           */
+00410000/*                                                                  */
+00420000/*     JOB      DEFAULT: U                                          */
+00430000/*              LETTER TO APPEND TO &ID FOR JOBNAME                 */
+00440000/*                                                                  */
+00450000/*     MSG      DEFAULT: X                                          */
+00460000/*              MESSAGE CLASS                                       */
+00470000/*                                                                  */
+00480000/*     CLASS    DEFAULT: REGBATCH                                   */
+00490000/*              BATCH JOB SUBMITTAL CLASS                           */
+00500000/*                                                                  */
+00510000/*     LINES    DEFAULT: 40                                         */
+00520000/*              THOUSANDS OF LINES OF PRINTOUT REQUESTED            */
+00530000/*                                                                  */
+00540000/*     NONFORMT OPTIONAL                                            */
+00550000/*              PDS MEMBERS ARE NOT FORMATTED FOR THE PRINTER       */
+00560000/*                                                                  */
+00570000/*     LOCAL    OPTIONAL                                            */
+00580000/*              SEND OUTPUT TO OUTLIST FILE SO YOU CAN PRINT IT     */
+00590000/*              VIA 3.8 LOCALLY INSTEAD OF WAITING FOR IT TO PRINT  */
+00600000/*              AT NASA.                                            */
+00610000/*                                                                  */
+00620000/*     TRACE    OPTIONAL                                            */
+00630000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED ON SCREEN  */
+00640000/*                                                                  */
+00650000/*------------------------------------------------------------------*/
+00660000/*                                                                  */
+00670000/*   INPUT DATA SET NAMES:                                          */
+00680000/*                                                                  */
+00690000/*     NCAMCM.TOOLS.SYSJCL(IEBPTPCH)                                */
+00700000/*         JCL TEMPLATE TO BE USED BY THE CLIST TO GENERATE THE JCL */
+00710000/*         &ID..PDSJCL.CNTL ON THE USERS ACCOUNT                    */
+00720000/*                                                                  */
+00730000/*------------------------------------------------------------------*/
+00740000/*                                                                  */
+00750000/*   OUTPUT DATA SET NAMES:                                         */
+00760000/*                                                                  */
+00770000/*     <ID>.PDSJCL.CNTL                                             */
+00780000/*         JCL TO BE SUBMITTED TO PRINT ALL MEMBERS                 */
+00790000/*                                                                  */
+00800000/*------------------------------------------------------------------*/
+00810000/*                                                                  */
+00820000/*   TEMPORARY DATA SET NAMES:                                      */
+00830000/*                                                                  */
+00840000/*     NONE.                                                        */
+00850000/*                                                                  */
+00860000/*------------------------------------------------------------------*/
+00870000/*                                                                  */
+00880000/*   COMMENTS:  THIS CLIST COPIES THE JCL FROM CM AND MODIFIES IT   */
+00890000/*              FOR SUBMITTAL TO USE IEBPTPCH TO PRINT ALL MEMBERS  */
+00900000/*              OF A PDS.  IF THE USER WANTS TO PRINT THE MEMBERS   */
+00910000/*              LOCALLY (2000 LINE LIMIT) A PARAMETER IS PROVIDED   */
+00920000/*              SO THAT THE OUTPUT WILL GO TO AN OUTLIST FILE AND   */
+00930000/*              CAN BE ROUTED TO THE LOCAL PRINTER VIA PANEL 3.8.   */
+00940000/*                                                                  */
+00950000/*------------------------------------------------------------------*/
+00960000/*                                                                  */
+00970000/*   REVISION HISTORY:                                              */
+00980000/*                                                                  */
+00990000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+01000000/*     --------  ----  ----  -------------------------------------  */
+01010000/*     01/18/90  071   SDM   CREATED AND PUT INTO CM                */
+01020000/*                                                                  */
+01030000/*     06/26/90  099   TEV   UPDATER HEADER                         */
+01040000/*                                                                  */
+01041001/*     09/19/91  186   LJK   RENAMED CM FILE                        */
+01042001/*                                                                  */
+01050000/*------------------------------------------------------------------*/
+01060000/********************************************************************/
+01070000 
+01080000PROC  1  PDS             +
+01090000         ID(&SYSUID.)    +
+01100000         SECONDS(15)     +
+01110000         MINUTES(0)      +
+01120000         JOB(U)          +
+01130000         MSG(X)          +
+01140000         CLASS(REGBATCH) +
+01150000         LINES(50)       +
+01160000         NONFORMT        +
+01170000         LOCAL           +
+01180000         TRACE
+01190000 
+01200000IF       &TRACE.  NE THEN +
+01210000         CONTROL  LIST CONLIST
+01220000CONTROL  END(DONE) NOMSG
+01230000GLOBAL RETCODE
+01240000 
+01250000DELETE '&SYSUID..PDSJCL.CNTL'
+01260000 
+01270000EDIT     'NCAMCM.TOOLS.SYSJCL(IEBPTPCH)' CNTL NUM
+01280000TOP
+01290000CHANGE   *       /B /&JOB. /
+01300000CHANGE   *       /(0,/(&MINUTES.,/
+01310000CHANGE   *       /15)/&SECONDS.)/
+01320000DOWN
+01330000CHANGE   *       /=9/=&MSG./
+01340000TOP
+01350000FIND     /EXPRESS/
+01360000CHANGE   *       /EXPRESS/&CLASS./
+01370000CHANGE   *       /10/&LINES./
+01380000TOP
+01390000CHANGE   *       999999 /NCAMZZZ/&SYSUID./ALL
+01400000TOP
+01410000CHANGE   *       99 /PDSTOBEPRINTED/&PDS./ALL
+01420000IF       &LOCAL NE THEN DO
+01430000  TOP
+01440000  CHANGE   *       99 /PREFORM=A/PREFORM=M/ALL
+01450000  WRITE   *** REMEMBER TO SET THE PRINTER CARRIAGE CONTROL TO 'M' ***
+01460000  TOP
+01470000  CHANGE   *       999999 /SYSOUT=P/SYSOUT=*/ALL
+01480000  DONE
+01490000SAVE PDSJCL
+01500000END
+01510000IF       &NONFORMAT. NE THEN DO
+01520000  EDIT     '&SYSUID..PDSJCL.CNTL' CNTL NUM
+01530000  TOP
+01540000  CHANGE   *       999999 /SYSOUT=P/SYSOUT=*/ALL
+01550000  SAVE
+01560000  END
+01570000DONE
+01580000SUBMIT PDSJCL

@@ -1,0 +1,204 @@
+00042300/********************************************************************/
+00042400/*------------------------------------------------------------------*/
+00042500/*                                                                  */
+00042600/*   NAME:     ASM360HL                                             */
+00042700/*                                                                  */
+00042800/*------------------------------------------------------------------*/
+00042900/*                                                                  */
+00043035/*   FUNCTION: ASSEMBLE AND LINK A H360 RUNTIME LIBRARY MEMBER.     */
+00043335/*                                                                  */
+00043435/*------------------------------------------------------------------*/
+00043535/*                                                                  */
+00043635/*   SYNTAX:                                                        */
+00043735/*      ASM360HL NAME ID(&SYSUID) LIB(&ID..H360.REL99V0)            */
+00043835/*               OPT() TEST TRACE SRCDSN(&LIB..RUNASM)              */
+00043935/*               MACLIB('NCAMCM.H360.CURRENT.DIAGNSTC.MACLIB')      */
+00044035/*               MACLIB2('NCAMCM.H360.CURRENT.RUNMAC')              */
+00044135/*                                                                  */
+00044235/*------------------------------------------------------------------*/
+00044335/*                                                                  */
+00044435/*   INVOKES:                                                       */
+00044535/*      SYS1.ASMH.LINKLIB(IEV90)                                    */
+00044635/*      SYS1.LINKLIB(IEWL)                                          */
+00044735/*                                                                  */
+00049035/*------------------------------------------------------------------*/
+00049135/*                                                                  */
+00049235/*   PARAMETERS:                                                    */
+00049335/*                                                                  */
+00049435/*      NAME           REQUIRED                                     */
+00049535/*                     NAME OF MEMBER TO BE ASSEMBLED               */
+00049635/*                                                                  */
+00049735/*      ID             DEFAULT: &SYSUID                             */
+00049835/*                     HIGH LEVEL QUALIFIER                         */
+00049935/*                                                                  */
+00050035/*      LIB            DEFAULT: &ID..H360.REL99V0                   */
+00050135/*                     DATASET WHERE MEMBERS RESIDE                 */
+00050235/*                                                                  */
+00050335/*      SRCDSN         DEFAULT: &LIB..RUNASM                        */
+00050435/*                     DATASET WHERE MONITOR SOURCE CODE RESIDE     */
+00050535/*                                                                  */
+00050635/*      OPT            DEFAULT: NULL                                */
+00050735/*                     ANY ADDITIONAL OPTIONS TO BE PASSED TO THE   */
+00050835/*                     ASSEMBLER                                    */
+00050935/*                                                                  */
+00051035/*      TEST           OPTIONAL                                     */
+00051135/*                     THE OBJECT MODULE WILL CONTAIN THE SPECIAL   */
+00051235/*                     SOURCE SYMBOL TABLE REQUIRED BY THE TEST     */
+00051335/*                     TRANSLATOR (TESTRAN) ROUTINE.                */
+00051435/*                                                                  */
+00051535/*      TRACE          OPTIONAL                                     */
+00051635/*                     TRACE THE CLISTS EXECUTION                   */
+00051735/*                                                                  */
+00051835/*      MACLIB         DEFAULT: NCAMCM.PASS.CURRENT.DIAGNSTC.MACLIB */
+00051935/*                     DIAGNOSTIC MACRO LIBRARY                     */
+00052035/*                                                                  */
+00052135/*      MACLIB2        DEFAULT: NCAMCM.HAL.HALS.RUNMAC              */
+00052235/*                     RUNTIME MACRO LIBRARY                        */
+00052335/*                                                                  */
+00052435/*      SYSPARM        DEFAULT: NULL                                */
+00052535/*                     SYSTEM PARAMETER PASSED TO THE ASSEMBLER     */
+00052635/*                                                                  */
+00052735/*------------------------------------------------------------------*/
+00052835/*                                                                  */
+00052935/*   INPUT DATA SET NAMES:                                          */
+00053035/*                                                                  */
+00053135/*      <SRCDSN>(<NAME>)                                            */
+00053235/*          DATA SET AND MEMBER - ASSEMBLY SOURCE CODE              */
+00053335/*                                                                  */
+00053435/*------------------------------------------------------------------*/
+00053535/*                                                                  */
+00053635/*   OUTPUT DATA SET NAMES:                                         */
+00053735/*                                                                  */
+00053835/*      <LIB>.RUNOBJ(<NAME>)                                        */
+00053935/*          DATA SET AND MEMBER - OBJECT                            */
+00054035/*                                                                  */
+00054135/*      <LIB>.RUNLST(<NAME>)                                        */
+00054235/*          DATA SET AND MEMBER - LISTING                           */
+00054335/*                                                                  */
+00054435/*      <LIB>.RUNLIB(<NAME>)                                        */
+00054535/*          DATA SET AND MEMBER - LOAD MODULE                       */
+00054635/*                                                                  */
+00054735/*      <LIB>.MAP(<NAME>)                                           */
+00054835/*          MAPPED OUTPUT LISTNG                                    */
+00054935/*                                                                  */
+00055228/*------------------------------------------------------------------*/
+00055328/*                                                                  */
+00055428/*   REVISION HISTORY:                                              */
+00055528/*                                                                  */
+00055628/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00055728/*     --------  ----  ----  -------------------------------------  */
+00055828/*                                                                  */
+00055931/*     11/22/99  0651   LJK  CREATED                                */
+00056028/*------------------------------------------------------------------*/
+00056128/********************************************************************/
+00056228 
+00056335PROC 1 NAME                      +
+00056435       ID(&SYSUID.)              +
+00056535       LIB(&ID..H360.REL99V0)    +
+00056635       SRCDSN(&LIB..RUNASM)      +
+00056735       OPT()                     +
+00056835       TEST                      +
+00056935       TRACE                     +
+00057035       SYSPARM()                 +
+00057128       MACLIB('NCAMCM.H360.CURRENT.DIAGNSTC.MACLIB') +
+00057228       MACLIB2('NCAMCM.H360.CURRENT.RUNMAC')
+00057328 
+00057428     /********************************/
+00057528     /* ASSEMBLY  STEP               */
+00057628     /********************************/
+00057728 
+00057828     WRITE *** EXECUTING ASM360HL FOR &NAME ***
+00057928 
+00058028IF &TRACE. NE THEN +
+00058128   CONTROL LIST
+00058228CONTROL NOMSG END(DONE)
+00058328  FREE F(SYSLIB SYSUT1 SYSUT2 SYSUT3 SYSPRINT SYSPUNCH SYSLIN +
+00058428    SYSTERM SYSIN) ATTR(FBA121 FB80)
+00058528  DELETE ('&LIB..RUNLST(&NAME.)' '&LIB..RUNOBJ(&NAME.)')
+00058628 
+00058728ATTR  FBA121      RECFM(F B A) LRECL(121) BLKSIZE(1210)
+00058828ATTR  FB80        RECFM(F B)   LRECL(80)  BLKSIZE(80)
+00058928ALLOC F(SYSLIB)   DA('&MACLIB2.'   +
+00059028                     'SYS1.MACLIB' +
+00059128                     '&MACLIB.'    +
+00059228                     'SYS1.AMODGEN' +
+00059328                     'NCAMCM.XPL.MACROS.ASM') SHR
+00059428ALLOC F(SYSUT1)   SPACE(600 100) BLOCK(1700)
+00059528ALLOC F(SYSUT2)   SPACE(300 50)  BLOCK(1700)
+00059628ALLOC F(SYSUT3)   SPACE(300 50)  BLOCK(1700)
+00059728ALLOC F(SYSPRINT) DA('&LIB..RUNLST(&NAME.)') USING(FBA121) SHR
+00059828ALLOC F(SYSPUNCH) DUMMY
+00059928ALLOC F(SYSLIN)   DA('&LIB..RUNOBJ(&NAME.)') USING(FB80) SHR
+00060028ALLOC F(SYSTERM)  DA(*)
+00060128 
+00060228ALLOC F(SYSIN)    DA('&SRCDSN.(&NAME.)') SHR
+00060328CONTROL MSG
+00060428WRITE ASSEMBLY  OF &SRCDSN.(&NAME.)
+00060528CONTROL NOMSG
+00060628 
+00060728CALL 'SYS1.ASMH.LINKLIB(IEV90)' +
+00060828     'OBJECT,ESD,RLD,&TEST,SYSPARM(&SYSPARM)'
+00060928SET &SAVECC=&LASTCC
+00061028FREE F(SYSLIB SYSUT1 SYSUT2 SYSUT3 SYSPRINT SYSPUNCH SYSLIN +
+00061128  SYSTERM SYSIN) ATTR(FBA121 FB80 U7294)
+00061228CONTROL MSG
+00061328IF &SAVECC = 0 THEN +
+00061428     WRITE ASSEMBLY  SUCCESSFUL
+00061528ELSE DO
+00061628     WRITE ASSEMBLY  ERROR CODE = &SAVECC
+00061728     EXIT
+00062000DONE
+00070000 
+01620000 
+01621005     /********************************/
+01622034     /* FIX360 STEP                  */
+01623005     /********************************/
+01624005 
+01625005   CONTROL NOMSG
+01626005   FREE F(SYSIN OUTPUT3 PROGRAM SYSPRINT) ATTR(FB80)
+01627007   DELETE '&LIB..TEMPFIX'
+01628005   CONTROL MSG
+01629005   ATTR  FB80        RECFM(F B) LRECL(80) BLKSIZE(400)
+01629130   ALLOC F(SYSIN)    DA('&LIB..RUNOBJ(&NAME.)') SHR
+01629218   ALLOC F(OUTPUT3)  DA('&LIB..TEMPFIX') USING(FB80) TRACK +
+01629318                     SPACE(10 2) BLOCK(80) RELEASE
+01629437   ALLOC F(PROGRAM)  DA('NCAMCM.TOOLS.XPLOBJ(FIX360)') SHR
+01629505   ALLOC F(SYSPRINT) DA(*)
+01629633   WRITENR FIX360    OF &NAME.
+01629705   CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'
+01629805   SET &SAVECC=&LASTCC
+01629905   FREE F(SYSIN OUTPUT3 PROGRAM SYSPRINT) ATTR(FB80)
+01630005   IF &SAVECC = 0 THEN +
+01630233      WRITE FIX360    SUCCESSFUL
+01630305   ELSE DO
+01630533      WRITE FIX360    ERROR CODE = &SAVECC
+01630605      EXIT
+01630705   DONE
+01630805 
+01631000     /********************************/
+01640000     /* LINK EDIT STEP               */
+01650000     /********************************/
+01660000 
+01670000CONTROL NOMSG
+01680003  FREE F(SYSLIN SYSLMOD SYSUT1 SYSPRINT SYSTERM SYSLIB OUTPUT5)
+01681003  FREE ATTR(FBA121)
+01690035  DELETE ('&LIB..MAP(&NAME.)')
+01700000CONTROL MSG
+01710000 
+01720000ATTR  FBA121     RECFM(F B A) LRECL(121) BLKSIZE(1210)
+01730007ALLOC F(SYSLIN)   DA('&LIB..TEMPFIX')
+01770005ALLOC F(SYSLMOD)  DA('&LIB..RUNLIB') SHR
+01780000ALLOC F(SYSUT1)   SP(2 2) TRACK
+01790001ALLOC F(SYSPRINT) DA('&LIB..MAP(&NAME.)') SHR
+01811003ALLOC F(SYSTERM)  DA(*) USING(FBA121)
+01820000WRITE LINK EDIT OF &NAME.
+01830000CALL 'SYS1.LINKLIB(IEWL)' 'MAP,LIST,LET,NCAL,&LOPT.'
+01840000SET &SAVECC=&LASTCC
+01850005FREE F(SYSLIN SYSLMOD SYSUT1 SYSPRINT SYSTERM)
+01851003FREE ATTR(FBA121)
+01852005   CONTROL NOMSG
+01853025     DEL '&LIB..TEMPFIX'
+01860000IF &SAVECC = 0 THEN +
+01870000     WRITE LINK EDIT SUCCESSFUL
+01880000ELSE +
+01890000     WRITE LINK EDIT ERROR CODE = &SAVECC

@@ -1,0 +1,308 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     FILEFIND                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: SEARCHES FOR A MEMBER NAME IN AN ACCOUNT OR USER     */
+00090000/*             LEVEL.                                               */
+00100000/*                                                                  */
+00110000/*             EXAMPLES:                                            */
+00120000/*             FILEFIND SIGNON NCAMCM                               */
+00130000/*                LOOKS FOR SIGNON MEMBER IN ALL NCAMCM DATASETS.   */
+00140000/*             FILEFIND SIGNON NCAMCM.TOOLS                         */
+00150000/*                LOOKS FOR SIGNON MEMBER IN NCAMCM.TOOLS DATASETS. */
+00160000/*             FILEFIND SIGNON NCAMCM.TOOLS FILETYPE(CLIST)         */
+00170000/*                LOOKS FOR SIGNON MEMBER IN ALL NCAMCM.TOOLS       */
+00180000/*                CLIST DATASETS.                                   */
+00190000/*                                                                  */
+00200000/*------------------------------------------------------------------*/
+00210000/*                                                                  */
+00220000/*   SYNTAX:                                                        */
+00230000/*                                                                  */
+00240000/*     FILEFIND 'MEMBER' 'ACCOUNT' PATTERN FILETYPE() TRACE         */
+00250000/*                                                                  */
+00260000/*     ALIAS    - NONE.                                             */
+00270000/*     REQUIRED - 'MEMBER' 'ACCOUNT'                                */
+00280000/*                                                                  */
+00290000/*------------------------------------------------------------------*/
+00300000/*                                                                  */
+00320000/*   INVOKES:  NONE.                                                */
+00330000/*                                                                  */
+00340000/*------------------------------------------------------------------*/
+00350000/*                                                                  */
+00360000/*   PARAMETERS:                                                    */
+00370000/*                                                                  */
+00380000/*     MEMBER  REQUIRED                                             */
+00390000/*              MEMBER NAME TO LOOK FOR.                            */
+00400000/*                                                                  */
+00410000/*     ACCOUNT  REQUIRED                                            */
+00420000/*              THE ACCOUNT TO SEARCH IN.                           */
+00430000/*                                                                  */
+00431003/*     PATTERN  OPTIONAL                                            */
+00432003/*              REQUESTS A PATTERN SEARCH                           */
+00433003/*                                                                  */
+00440000/*     FILETYPE DEFAULT: NULL                                       */
+00450000/*              TYPE OF FILE TO SEARCH IN.                          */
+00460000/*              EX: LOAD SPECIFIES TO LOOK IN ALL LOAD MODULE       */
+00470000/*                     DIRECTORIES FOR MEMBER NAME.                 */
+00480000/*                  HAL SPECIFIES TO LOOK IN ALL HAL SOURCE         */
+00490000/*                     DIRECTORIES FOR MEMBER NAME.                 */
+00500000/*                                                                  */
+00510000/*     TRACE    OPTIONAL                                            */
+00520000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00530000/*              TERMINAL                                            */
+00540000/*                                                                  */
+00550000/*------------------------------------------------------------------*/
+00560000/*                                                                  */
+00570000/*   INPUT DATA SET NAMES:                                          */
+00580000/*                                                                  */
+00590003/*     NONE.                                                        */
+00610000/*                                                                  */
+00620000/*------------------------------------------------------------------*/
+00630000/*                                                                  */
+00640000/*   OUTPUT DATA SET NAMES:                                         */
+00650000/*                                                                  */
+00660000/*     NONE.                                                        */
+00670000/*                                                                  */
+00680000/*------------------------------------------------------------------*/
+00690000/*                                                                  */
+00700000/*   TEMPORARY DATA SET NAMES:                                      */
+00710000/*                                                                  */
+00720000/*     NONE.                                                        */
+00730000/*                                                                  */
+00740000/*------------------------------------------------------------------*/
+00750000/*                                                                  */
+00760000/*   COMMENTS:                                                      */
+00770000/*                                                                  */
+00780003/*     DO NOT PERFORM A SEARCH ON THE NCAMCM HLQ AS IT CONTAINS     */
+00790003/*     RACF-PROTECTED DATASETS; YOU WILL RECEIVE ABOUT 200 RACF     */
+00791003/*     VIOLATIONS!                                                  */
+00792003/*                                                                  */
+00800000/*------------------------------------------------------------------*/
+00810000/*                                                                  */
+00820000/*   REVISION HISTORY:                                              */
+00830000/*                                                                  */
+00840000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00850000/*     --------  ----  ----  -------------------------------------  */
+00860000/*     12/20/91  0228  TEV   BASELINED THE CLIST.                   */
+00870000/*                                                                  */
+00880000/*     2/8/93    0290  TEV   ADDED FUNCTIONALITY TO LOOK FOR MEMBER */
+00890000/*                           NAME PATTERNS IN A PDS.                */
+00900000/*                                                                  */
+00901000/*     9/1/93    0311  TEV   SPEEDUP PDSHRINK AND FILEFIND CLISTS   */
+00902000/*                                                                  */
+        /*     3/27/95   0423  JCS   CHANGE LISTC L TO LISTC LEVEL          */
+00910000/*------------------------------------------------------------------*/
+00920000/********************************************************************/
+00930000PROC     2        MEMBER              +
+00940000                  ACCOUNT             +
+00950000                  PATTERN             +
+00960000                  FILETYPE()          +
+00980000                  TRACE
+00990000 
+01000000GLOBAL   RETCODE
+01010000IF       &TRACE.  NE THEN +
+01020000         CONTROL  LIST CONLIST
+01030000 
+01040000CONTROL  END(DONE) NOFLUSH
+01050000 
+01060000         /******************************************/
+01070000         /*                                        */
+01080000         /*       GENERATE DATASET LIST            */
+01090000         /*                                        */
+01100000         /******************************************/
+01110000 
+01230000 
+01240000SET &SYSOUTTRAP = 99901
+01250000LISTC    LEVEL(&ACCOUNT.)
+01251000SET &SAVECC = &LASTCC
+01260000SET &SYSOUTTRAP = 0
+01270000 
+01270100   /***************************************/
+01270200   /* CHECK LISTC RETURN CODE. EXIT IF NO */
+01270300   /* FILES WERE FOUND UNDER &ACCOUNT     */
+01270400   /***************************************/
+01270500IF &SAVECC NE 0 THEN DO
+01270600   WRITE &STR(***** NO FILES WERE FOUND UNDER '&ACCOUNT.')+
+01270700         &STR(...EXITTING *****)
+01271000   EXIT
+01272000DONE
+01272100ELSE SET &SAVECC = 0
+01273000 
+01280000   /**********************************************/
+01290000   /* SAVE THE MEMBER NAMES TO A PERMANENT ARRAY */
+01300000   /**********************************************/
+01310000SET &SAVE_DSLIST = &SYSOUTLINE
+01320000IF &TRACE NE  THEN SET &TEMP = 1
+01330000ELSE SET &TEMP = 0
+01340000LOOP1: SET &TEMP = &TEMP + 1
+01350000IF &TEMP GT &SYSOUTLINE THEN GOTO EXIT_LOOP1
+01360000SET &SAVE_DSLIST&TEMP = &&SYSOUTLINE&TEMP
+01370000GOTO LOOP1
+01380000 
+01390000EXIT_LOOP1: +
+01400000SET &DS_LIST = &SAVE_DSLIST
+01410000IF &TRACE NE  THEN SET &SAVE_COUNT = 2
+01420000ELSE SET &SAVE_COUNT = 1
+01430000SET &DS_COUNT = 1
+01440000DO WHILE &SAVE_COUNT LE &DS_LIST
+01450000   SET &DSNAME  EQ &&SAVE_DSLIST&SAVE_COUNT
+01460000   SET &STRLEN  EQ &LENGTH(&STR(&DSNAME))
+01470000 
+01480000   IF &SUBSTR(6:15,&DSNAME) NE &STR(IN-CAT ---) THEN DO
+01490000      SET &DS_LIST&DS_COUNT = &SUBSTR(17:&STRLEN,&DSNAME)
+01500000      SET &DS_COUNT = &DS_COUNT + 1
+01510000   DONE
+01520000   SET &SAVE_COUNT = &SAVE_COUNT + 1
+01530000DONE
+01540000 
+01550000SET &DS_LIST = &DS_COUNT - 1
+01560000 
+01570000ATTN   DO
+01580000       EXIT
+01590000DONE
+01600000 
+01610000ERROR    DO
+01620000         WRITE
+01630000         WRITE NUMBER OF MEMBERS FOUND = &COUNT..
+01630100         IF &MAXCC > 16 THEN +
+01631000         WRITE EXITTING COND CODE &MAXCC
+01640000         EXIT
+01650000DONE
+01660000 
+01670000         /******************************************/
+01680000         /*                                        */
+01690000         /*       PROCESS USERS CATALOG            */
+01700000         /*                                        */
+01710000         /******************************************/
+01720000 
+01730000SET &COUNT = 0
+01740000 
+01750000WRITE
+01760000 
+01770000IF &FILETYPE EQ CLIST THEN +
+01780000   SET &STRING = &STR(SEARCHING FOR CLIST '&MEMBER.' UNDER '&ACCOUNT.'.)
+01790000ELSE IF &FILETYPE EQ LOAD THEN +
+01800000   SET &STRING = &STR(SEARCHING FOR LOAD MODULE '&MEMBER.' UNDER +
+01810000                 '&ACCOUNT.'.)
+01820000ELSE IF &FILETYPE EQ HAL THEN +
+01830000   SET &STRING = &STR(SEARCHING FOR HAL PROGRAM '&MEMBER.' UNDER +
+01840000                 '&ACCOUNT.'.)
+01850000ELSE IF &FILETYPE NE THEN +
+01860000   SET &STRING = &STR(SEARCHING FOR MEMBER '&MEMBER.' OF FILETYPE +
+01870000                 '&FILETYPE.' UNDER '&ACCOUNT.'.)
+01880000ELSE +
+01890000   SET &STRING = &STR(SEARCHING FOR MEMBER '&MEMBER.' IN '&ACCOUNT.'.)
+01900000 
+01910000WRITE &STRING
+01920000WRITE
+01930000 
+01940000SET &DS_COUNT = 1
+01950000DO WHILE &DS_COUNT. LE &DS_LIST
+01960000   SET &FILELIST = &&DS_LIST&DS_COUNT.
+01970000   LISTDSI '&FILELIST.' RECALL DIRECTORY
+02020000   SET &NUMBER_OF_MEMBERS = &SYSMEMBERS.
+02040000   SET &DSNAME  = &FILELIST
+02050000   SET &TYPELEN = &LENGTH(&FILETYPE)
+02060000   SET &DSNLEN  = &LENGTH(&FILELIST)
+02070000   SET &TLEN    = &EVAL(&DSNLEN-&TYPELEN)
+02080000   IF &SYSDSORG. = PS THEN DO
+02090000      SET &INDEX = &SYSINDEX(&MEMBER.,&DSNAME.)
+02160000      IF &FILETYPE EQ  THEN +
+02100000         IF &INDEX GT 0 THEN +
+02110000            WRITE MEMBER PATTERN '&MEMBER.' FOUND IN SEQ DATASET +
+02120000                  NAME '&DSNAME.'.
+02130000   DONE /* END OF &SYSDSORG = PS */
+02140000   ELSE IF &SYSDSORG. = PO THEN DO
+02150000      SET &INDEX = &SYSINDEX(&MEMBER.,&DSNAME.)
+02160000      IF &FILETYPE EQ  THEN +
+02160000         IF &INDEX > 0 THEN +
+02170000            WRITE MEMBER PATTERN '&MEMBER.' FOUND IN PDS DATASET +
+02180000                  NAME '&DSNAME.'.
+02190000      IF &FILETYPE NE THEN DO
+02200000         IF &SUBSTR(&TLEN.+1:&DSNLEN,&DSNAME) = &STR(&FILETYPE) THEN +
+02210000            IF &DATATYPE(&MEMBER.) NE NUM THEN +
+02220000               IF &SYSDSN('&DSNAME.(&MEMBER)') = OK THEN DO
+02230000                  WRITE MEMBER '&MEMBER.' FOUND IN '&DSNAME.'.
+02240000                  SET &COUNT = &COUNT + 1
+02250000                  SET &ALREADY_FOUND = YES
+02260000               DONE
+02260100      DONE
+02270000      ELSE IF &DATATYPE(&MEMBER.) NE NUM THEN +
+02280000         IF &SYSDSN('&DSNAME.(&MEMBER)') = OK THEN DO
+02290000            WRITE MEMBER '&MEMBER.' FOUND IN '&DSNAME.'.
+02300000            SET &COUNT = &COUNT + 1
+02310000            SET &ALREADY_FOUND = YES
+02320000      DONE
+02330000      IF &PATTERN NE  THEN +
+02340000      IF &NUMBER_OF_MEMBERS GT 0 THEN DO /* CHECK FOR MEMBER PATTERNS */
+02350000 
+02350010      /****************************************/
+02350020      /* CHECK THE FILETYPE SPECIFIED IS SAME */
+02350030      /* AS THE FILE TO BE PROCESSED.  IF NOT */
+02350030      /* THE SAME, DO NOT PROCESS THIS FILE.  */
+02350040      /****************************************/
+02350100         IF &FILETYPE NE THEN +
+02350200            IF &SUBSTR(&TLEN.+1:&DSNLEN,&DSNAME) NE &STR(&FILETYPE) +
+02350300            THEN GOTO XXX
+02350400 
+02360000         IF &TRACE NE  THEN SET &MEM_COUNT = 7
+02370000         ELSE SET &MEM_COUNT = 6
+02380000      /******************************************/
+02390000      /* GENERATE THE MEMBER LIST BY "TRAPPING" */
+02400000      /* THE OUTPUT OF THE 'LISTDS' COMMAND.    */
+02410000      /******************************************/
+02420000         SET &SYSOUTTRAP = 99901
+02430000         LISTDS '&FILELIST.' M
+02440000         SET &SYSOUTTRAP = 0
+02450000 
+02460000      /**********************************************/
+02470000      /* SAVE THE MEMBER NAMES TO A PERMANENT ARRAY */
+02480000      /**********************************************/
+02490000         SET &MEMBER_LIST = &SYSOUTLINE
+02500000         SET &TEMP = 1
+02510000         LOOP2: SET &MEM_COUNT = &MEM_COUNT + 1
+02520000         IF &MEM_COUNT GT &SYSOUTLINE THEN GOTO CONT
+02530000         SET &IN_MEMBER = &&SYSOUTLINE&MEM_COUNT
+02540000         SET &MEMBER_LIST&TEMP = &IN_MEMBER.
+02550000         SET &TEMP = &TEMP + 1
+02560000         GOTO LOOP2
+02570000 
+02580000 
+02590000         CONT: +
+02600000         SET &MEMBER_LIST = &TEMP - 1
+02610000         SET &TEMP = 1
+02620000         DO WHILE &TEMP LE &MEMBER_LIST
+02630000            SET &MEMBERS = &&MEMBER_LIST&TEMP
+02631000            SET &MEMLEN1 = &LENGTH(&MEMBERS)
+02632000            IF &MEMLEN1 > 8 THEN DO
+02633000               SET &MEMLEN = 1
+02634000               DO WHILE &SUBSTR(&MEMLEN:&MEMLEN,&MEMBERS) NE
+02635000                  SET &MEMLEN = &MEMLEN + 1
+02636000               DONE
+02637000               SET &MEMLEN = &MEMLEN - 1
+02637100               SET &PDSMEMBER = &SUBSTR(1:&MEMLEN,&MEMBERS)
+02638000            DONE
+02639000            ELSE SET &PDSMEMBER = &MEMBERS
+02700000            SET &INDEX = &SYSINDEX(&MEMBER.,&PDSMEMBER.)
+02710000            IF &INDEX GT 0 THEN DO
+02720000               IF &ALREADY_FOUND EQ YES AND +
+02730000                     &MEMBER EQ &PDSMEMBER THEN +
+02740000                  SET &ALREADY_FOUND = NO
+02750000               ELSE DO
+02760000                  WRITE MEMBER PATTERN MATCH FOUND IN +
+02770000                        '&DSNAME.(&PDSMEMBER.)'.
+02780000                  SET &COUNT = &COUNT + 1
+02790000               DONE
+02800000            DONE /* END IF &INDEX GT 0 */
+02810000            SET &TEMP = &TEMP + 1
+02820000         DONE /* END DO WHILE &TEMP LE &MEM_COUNT. */
+02820100XXX: +
+02830000      DONE /* END IF &NUM_OF_MEMBERS GT 0 */
+02840000   DONE /* END IF &SYSDSORG = PO */
+02850000   SET &DS_COUNT = &DS_COUNT + 1
+02860000DONE /* END DO WHILE &DS_COUNT LE &DS_LIST */
+02870000WRITE
+02880000WRITE NUMBER OF MEMBERS FOUND = &COUNT..

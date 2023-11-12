@@ -1,0 +1,176 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     BLDZCON                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO ASSEMBLE ALL MEMBERS OF THE ZCON LIBRARY SOURCE   */
+00090000/*             PDS TO BUILD THE ZCON OBJECT LIBRARY.                */
+00090100/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX:                                                        */
+00130000/*                                                                  */
+00140000/*     BLDZCON ID(&SYSUID.) SYSTEM(PASS) REL(REL99V0)               */
+00150000/*             LIB(&ID..&PASS..&REL.)                               */
+00160000/*             SRCDSN(&LIB..ZCONASM)                                */
+00170000/*             RUNMAC(NCAMCM.&SYSTEM.CURRENT.RUNMAC)                */
+00170100/*             TEMPMAC() LIST() TRACE FIRST                         */
+00180000/*                                                                  */
+00200000/*     REQUIRED - NONE.                                             */
+00250000/*                                                                  */
+00260000/*------------------------------------------------------------------*/
+00270000/*                                                                  */
+00280000/*   INVOKES   : ASM101                                             */
+00290000/*               PDSALL                                             */
+00300000/*                                                                  */
+00310000/*------------------------------------------------------------------*/
+00320000/*                                                                  */
+00330000/*   PARAMETERS:                                                    */
+00340000/*                                                                  */
+00350000/*     ID       DEFAULT : &SYSUID                                   */
+00360000/*              THE DATASETS HIGH LEVEL QUALIFIER                   */
+00370000/*                                                                  */
+00370100/*     SYSTEM   DEFAULT : PASS                                      */
+00370200/*              PASS OR BFS                                         */
+00370300/*                                                                  */
+00380000/*     REL      DEFAULT : REL99V0                                   */
+00390000/*              RELEASE VERSION                                     */
+00400000/*                                                                  */
+00410000/*     LIB      DEFAULT  : &ID..&SYSTEM..&REL.                      */
+00420000/*              THE DSN ON USERS ACCOUNT WHERE ALL TEMPORARY FILES  */
+00430000/*              SHOULD BE LOCATED.                                  */
+00440000/*                                                                  */
+00500000/*     SRCDSN   DEFAULT : &LIB..ZCONASM                             */
+00510000/*              THE SOURCE DSN(ZCONASM) WHICH ALL MEMBERS SHOULD BE */
+00511000/*              ACTED ON                                            */
+00520000/*                                                                  */
+00530000/*     RUNMAC   DEFAULT: NCAMCM.&SYSTEM..CURRENT.RUNMAC             */
+00540000/*              RUNTIME LIBRARY MACROS                              */
+00550000/*                                                                  */
+00552000/*     TEMPMAC  DEFAULT: NULL                                       */
+00553000/*              MACROS YOU ARE TESTING WITH                         */
+00554000/*                                                                  */
+00554100/*     FIRST    OPTIONAL                                            */
+00554200/*              ALLOCATE NECESSARY DATASETS THE FIRST TIME          */
+00554300/*                                                                  */
+00554400/*     LIST     DEFAULT : NULL                                      */
+00554500/*              IF SPECIFIED, IT IS A SEQUENTIAL FILE WITH THE      */
+00554600/*              MEMBERS LISTED THAT YOU WANT A COMMAND PERFORMED    */
+00554700/*              UPON, INSTEAD OF ALL MEMBERS OF A PDS.              */
+00554800/*                                                                  */
+00581000/*     TRACE    OPTIONAL                                            */
+00582000/*              TRACE CLIST EXECUTION                               */
+00583000/*                                                                  */
+00710000/*------------------------------------------------------------------*/
+00720000/*                                                                  */
+00730000/*   INPUT DATA SET NAMES :                                         */
+00740000/*                                                                  */
+00750000/*     <SRCDSN>                                                     */
+00760000/*       SOURCE FOR THE ZCON LIBRARY (ZCONASM)                      */
+00770000/*                                                                  */
+00780000/*------------------------------------------------------------------*/
+00790000/*                                                                  */
+00800000/*   OUTPUT DATA SET NAMES :                                        */
+00810000/*                                                                  */
+00820000/*     <LIB>.MEMLIST                                                */
+00830000/*       MEMBER LIST OF THE ZCON LIBRARY SOURCE PDS                 */
+00840000/*                                                                  */
+00930000/*------------------------------------------------------------------*/
+00940000/*                                                                  */
+00950000/*   REVISION HISTORY :                                             */
+00960000/*                                                                  */
+00970000/*     DATE       PCR    NAME   DESCRIPTION                         */
+00980000/*     --------   ---    ----   ------------------------------      */
+00990000/*     06/01/95   346    LJK    CREATED FOR 27V0/11V0 RELEASE       */
+01000000/*     01/11/96   463    LJK    INVOKED ASM101 INSTEAD OF RTLASM    */
+01000100/*                              RENAME ZCONLIB TO ZCONOBJ           */
+01040000/*------------------------------------------------------------------*/
+01050000/********************************************************************/
+01060000 
+01070000PROC  0  ID(&SYSUID.)                            +
+01070100         SYSTEM(PASS)                            +
+01080000         REL(REL99V0)                            +
+01090000         LIB(&ID..&SYSTEM..&REL.)                +
+01110000         SRCDSN(&LIB..ZCONASM)                   +
+01120000         RUNMAC(NCAMCM.&SYSTEM..CURRENT.RUNMAC)  +
+01121000         TEMPMAC()                               +
+01131000         FIRST                                   +
+01132000         LIST()                                  +
+01160000         TRACE
+01160100 
+01160200CONTROL  NOMSG END(DONE)
+01170000GLOBAL RETCODE
+01180000IF  &TRACE.  NE THEN +
+01190000    CONTROL  LIST CONLIST
+01190100CONTROL NOMSG
+01190200IF &FIRST NE THEN DO
+01190300    DELETE '&LIB..ZCONOBJ'
+01190400    DELETE '&LIB..ZCONLST'
+01190500DONE
+01210100IF &LIST EQ THEN  DO
+01210200   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+01210300   SET &LIST =  &LIB..MEMLIST
+01210400DONE
+01440000         /***************************************/
+01450000         /*                                     */
+01460000         /*    ON ATTN, DO THE FOLLOWING:       */
+01470000         /*                                     */
+01480000         /***************************************/
+01500000ATTN     DO
+01510000         ERROR    OFF
+01520000         CLOSFILE MEMBERS
+01530000         FREE     F(MEMBERS)
+01540000         EXIT
+01550000DONE
+01560000 
+01570000CONTROL  NOMSG
+01580000         FREE     F(MEMBERS)
+01590000CONTROL  MSG NOFLUSH
+01600000 
+01610000         /***************************************/
+01620000         /*                                     */
+01630000         /* SET UP TO READ THE FILE &LIST.      */
+01640000         /*                                     */
+01650000         /***************************************/
+01660000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+01670000OPENFILE MEMBERS  INPUT
+01680000 
+01690000         /***************************************/
+01700000         /*                                     */
+01710000         /* ON ERROR, DO THE FOLLOWING:         */
+01720000         /*                                     */
+01730000         /***************************************/
+01740000ERROR DO
+01750000   CLOSFILE MEMBERS
+01760000   FREE     F(MEMBERS)
+01770000   ERROR OFF
+01780000   EXIT
+01790000DONE
+01800000         /***************************************/
+01810000         /*                                     */
+01820000         /*   PERFORM THE COMMAND ON THE PDS.   */
+01830000         /*                                     */
+01840000         /***************************************/
+01840100IF &TEMPMAC. NE THEN SET &TEMPMAC = TEMPMAC(&TEMPMAC.)
+01840200                ELSE SET &TEMPMAC =
+01860000DO  WHILE    &SYSUID NE
+01870000    GETFILE  MEMBERS
+01900000    SET  &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+01900100 
+01910000    ASM101 &MEMBERS.          +
+01910100           ID(&ID.)           +
+01910200           REL(&REL.)         +
+01910300           LIB(&LIB.)         +
+01910310           TMPLIB(&LIB.)      +
+01910400           SRCDSN(&SRCDSN.)   +
+01920000           RUNMAC(&RUNMAC.)   +
+01930000           &TEMPMAC.          +
+01930100           ASM                +
+01930200           &TRACE.            +
+01930300           SYSPRINT(&LIB..ZCONLST) +
+01930400           OBJECT  (&LIB..ZCONOBJ) +
+01930500           &FIRST.
+01930600    SET &FIRST =
+01940000DONE

@@ -1,0 +1,136 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     COMPDEL                                              */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: A CLIST TO DELETE THE FILES USED IN RUNNING A CLIST  */
+00000900/*             TO COMPILE, LINK AND EXECUTE A HAL/S PROGRAM         */
+00001000/*             (CLISTS LIKE PASSCLG)                                */
+00001100/*                                                                  */
+00001200/*------------------------------------------------------------------*/
+00001300/*                                                                  */
+00001400/*   SYNTAX :                                                       */
+00001500/*     COMPDEL 'LIB' HAL TRACE                                      */
+00001600/*                                                                  */
+00001700/*     ALIAS    - NONE.                                             */
+00001800/*     REQUIRED - 'LIB'                                             */
+00001900/*                                                                  */
+00002000/*------------------------------------------------------------------*/
+00002100/*                                                                  */
+00002200/*   INVOKES:                                                       */
+00002300/*                                                                  */
+00002400/*     NONE.                                                        */
+00002500/*                                                                  */
+00002600/*------------------------------------------------------------------*/
+00002700/*                                                                  */
+00002800/*   PARAMETERS:                                                    */
+00002900/*                                                                  */
+00003000/*     LIB      REQUIRED                                            */
+00003100/*              THE DATA SET NAME WHICH YOU WANT DELETED.           */
+00003200/*              (HIGH LEVEL QUALIFIER NEEDED)                       */
+00003300/*                                                                  */
+00003400/*     HAL      OPTIONAL                                            */
+00003500/*              DELETE THE .HAL DATASET                             */
+00003600/*                                                                  */
+00003700/*     TRACE    OPTIONAL                                            */
+00003800/*              DISPLAY TRACE OF CLIST EXECUTION AT THE TERMINAL    */
+00003900/*                                                                  */
+00004000/*------------------------------------------------------------------*/
+00004100/*                                                                  */
+00004200/*   INPUT DATA SET NAMES:                                          */
+00004300/*                                                                  */
+00004400/*     NONE.                                                        */
+00004500/*                                                                  */
+00004600/*------------------------------------------------------------------*/
+00004700/*                                                                  */
+00004800/*   OUTPUT DATA SET NAMES:                                         */
+00004900/*                                                                  */
+00005000/*     NONE.                                                        */
+00005100/*                                                                  */
+00005200/*------------------------------------------------------------------*/
+00005300/*                                                                  */
+00005400/*   TEMPORARY DATA SET NAMES:                                      */
+00005500/*                                                                  */
+00005600/*     NONE.                                                        */
+00005700/*                                                                  */
+00005800/*------------------------------------------------------------------*/
+00005900/*                                                                  */
+00006000/*   COMMENTS:                                                      */
+00006100/*                                                                  */
+00006200/*     NONE.                                                        */
+00006300/*                                                                  */
+00006400/*------------------------------------------------------------------*/
+00006500/*                                                                  */
+00006600/*   REVISION HISTORY:                                              */
+00006700/*                                                                  */
+00006800/*  DATE      PCR  NAME  DESCRIPTION                                */
+00006900/*  --------  ---  ---   -------------------------------------      */
+00007000/*  10/26/89  062  SDM   BASELINE ORIGINAL CLIST                    */
+00007100/*                                                                  */
+00007200/*  4/18/90   062  LJK   UPDATED TO MATCH UP WITH PASSCLG           */
+00007300/*                                                                  */
+00007400/*  06/25/90  099  TEV   UPDATED HEADER                             */
+00007500/*                                                                  */
+00007600/*  01/07/91  141  TEV   ADDED DELETION OF .OUT4 FILE               */
+00007700/*                                                                  */
+00007800/*  04/22/91  169  LJK   ADDED DELETION OF RPT AND SDF FILE         */
+00007900/*                       DELETE NEW/OLD SDF,INC AND OBJ FILES       */
+00008000/*                                                                  */
+00008100/*  03/31/93  299  JCS   ADDED DELETION OF .OPT DATASET             */
+00008200/*                                                                  */
+00008300/*  03/15/95  337  JCS   CHANGED BYTECOMP.RPT TO BYTCMP.RPT         */
+00008400/*                                                                  */
+00008410/*  07/18/95  435  LJK   RENAMED COMPFC.MEMLIST TO COMPFC.MLIST     */
+00008500/*------------------------------------------------------------------*/
+00008600/********************************************************************/
+00008700 
+00008800PROC     1  LIB         +
+00008900            HAL         +
+00009000            TRACE
+00009100 
+00009200GLOBAL RETCODE
+00009300IF &TRACE. NE THEN CONTROL LIST CONLIST
+00009400/*
+00009500/* IF SPECIFIED, DELETE THE HAL SOURCE CODE
+00009600/*
+00009700IF &HAL. EQ HAL THEN DELETE ('&LIB..HAL')
+00009800/*
+00009900/* ALWAYS DELETE ALL OTHER DATASETS
+00010000/*
+00010100CONTROL NOMSG
+00010200DELETE  ('&LIB..OUT4')
+00010300DELETE  ('&LIB..OPT')
+00010400DELETE  ('&LIB..COMPRPT')
+00010500DELETE  ('&LIB..LINKRPT')
+00010600DELETE  ('&LIB..EXECRPT')
+00010700DELETE  ('&LIB..COMPLST')
+00010800DELETE  ('&LIB..CON')
+00011200DELETE  ('&LIB..CREATE.TMP')
+00011300DELETE  ('&LIB..INC')
+00011400DELETE  ('&LIB..LOAD')
+00011500DELETE  ('&LIB..LST')
+00011600DELETE  ('&LIB..NEW.LST')
+00011700DELETE  ('&LIB..OLD.LST')
+00011800DELETE  ('&LIB..MAPS')
+00011900DELETE  ('&LIB..OBJ')
+00012000DELETE  ('&LIB..NEW.OBJ')
+00012100DELETE  ('&LIB..OLD.OBJ')
+00012200DELETE  ('&LIB..OUT')
+00012300DELETE  ('&LIB..NEW.OUT')
+00012400DELETE  ('&LIB..OLD.OUT')
+00012500DELETE  ('&LIB..NEW.SDF')
+00012600DELETE  ('&LIB..OLD.SDF')
+00012700DELETE  ('&LIB..NEW.INC')
+00012800DELETE  ('&LIB..OLD.INC')
+00012900DELETE  ('&LIB..SDF')
+00013000DELETE  ('&LIB..SIM')
+00013100DELETE  ('&LIB..UCP')
+00013200DELETE  ('&LIB..COMPFC.RPT')
+00013300DELETE  ('&LIB..BYTCMP.RPT')
+00013400DELETE  ('&LIB..COMPFC.MLIST')
+00013500CONTROL MSG
+00013600WRITE  **************************
+00013700WRITE  *** DELETION COMPLETED ***
+00013800WRITE  **************************

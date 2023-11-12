@@ -1,0 +1,24 @@
+         MACRO                                                          00000100
+         TIMQDEF                                                        00000200
+TIMQDEF  DSECT                                                          00000300
+*                                                                       00000400
+*        FIELD DEFINITIONS FOR TIMER QUEUE ELEMENT                      00000500
+*                                                                       00000600
+TIMQLINK DS    A PTR TO NEXT ELEMENT OR ZERO IF LAST                    00000700
+TIMQPCB  DS    A PTR TO PCB FOR REQUESTING PROCESS                      00000800
+         ORG   TIMQPCB                                                  00000900
+TIMQTYPE DS    X H.O. BYTE IS TYPE OF REQUEST                           00001000
+         ORG                                                            00001100
+TIMCLOCK EQU   0 CLOCK ELEMENT                                          00001200
+TIMWAIT  EQU   1 WAIT                                                   00001300
+TIMWTUNT EQU   2 WAIT UNTIL                                             00001400
+TIMIN    EQU   3 SCHEDULE IN                                            00001500
+TIMAT    EQU   4 SCHEDULE AT                                            00001600
+TIMSUNTL EQU   5 SCHEDULE UNTIL                                         00001700
+TIMEVERY EQU   6 REPEAT EVERY                                           00001800
+TIMAFTER EQU   7 REPEAT AFTER                                           00001900
+TIMSDLA  EQU   8 SDL REQUEST (ABSOLUTE)                                 00002000
+TIMSDLR  EQU   9 SDL REQUEST (RELATIVE)                                 00002100
+TIMQTOX  DS    D TIME OF EXPIRATION OF THIS REQUEST                     00002200
+TIMQLEN  EQU   *-TIMQDEF LENGTH OF TIMER QUEUE ELEMENT                  00002300
+         MEND                                                           00002400

@@ -1,0 +1,315 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     HAL360                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: COMPILE, LINK, AND GO USING THE HAL360 COMPILER      */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     HAL360 'ACTION' 'NAME' LIB(TEST) INCLUDE() LIST(LIST)        */
+00140000/*            SYTSIZE(200) REFSIZE(2000) MACROSIZE(2000) SREF OPT() */
+00150000/*            TRACE IN(*) OUT(&LIB..OUT(&NAME.))                    */
+00160000/*            COMPILER(NCAMCM.H360.CURRENT.COMPILER)                */
+00170000/*                                                                  */
+00180000/*     ALIAS    - NONE.                                             */
+00190000/*     REQUIRED - 'ACTION' 'NAME'                                   */
+00240000/*                                                                  */
+00250000/*------------------------------------------------------------------*/
+00260000/*                                                                  */
+00270000/*   INVOKES:                                                       */
+00280000/*                                                                  */
+00290000/*   NCAMCM.H360.CURRENT.COMPILER                                   */
+00300000/*   NCAMCM.XPL.TOOLS.MONITOR(MONITOR)                              */
+00310000/*   NCAMCM.H360.CURRENT.MONITOR(HALLINK)                           */
+00320000/*                                                                  */
+00330000/*------------------------------------------------------------------*/
+00340000/*                                                                  */
+00350000/*   PARAMETERS:                                                    */
+00360000/*                                                                  */
+00370000/*     ACTION   REQUIRED                                            */
+00380000/*              C (COMPILE), L (LINK), G (GO)                       */
+00390000/*              SPECIFY ONE OR MORE OPTIONS                         */
+00400000/*                                                                  */
+00410000/*     NAME     REQUIRED                                            */
+00420000/*              NAME OF THE HAL PROGRAM                             */
+00430000/*                                                                  */
+00440000/*     LIB      DEFAULT: TEST                                       */
+00450000/*              SECOND LEVEL QUALIFIER OF HAL LIBRARIES             */
+00460000/*              (HIGH LEVEL QUALIFIER IS &SYSUID)                   */
+00470000/*                                                                  */
+00480000/*     INCLUDE  DEFAULT: NULL                                       */
+00490000/*              NAME OF INCLUDE DATASET TO BE USED IN THE COMPILE   */
+00500000/*                                                                  */
+00510000/*     LIST     DEFAULT: LIST                                       */
+00520000/*              GENERATE COMPILATION LISTING                        */
+00530000/*                                                                  */
+00540000/*     SYTSIZE  DEFAULT: 200                                        */
+00550000/*              SYMBOL TABLE SIZE                                   */
+00560000/*                                                                  */
+00570000/*     REFSIZE  DEFAULT: 2000                                       */
+00580000/*              CROSS REFERENCE SIZE                                */
+00590000/*                                                                  */
+00600000/*     MACROSIZE DEFAULT: 2000                                      */
+00610000/*               MAXIMUM NUMBER OF LITERALS                         */
+00620000/*                                                                  */
+00630000/*     SREF     OPTIONAL                                            */
+00640000/*              PRINT OFF ONLY THE VARIABLES REFERENCED FROM AN     */
+00650000/*              INCLUDED EXTERNAL COMPOOL                           */
+00660000/*                                                                  */
+00670000/*     OPT      DEFAULT: NULL                                       */
+00680000/*              OTHER USER REQUESTED OPTION FOR THE COMPILATION     */
+00690000/*                                                                  */
+00700000/*     TRACE    OPTIONAL                                            */
+00710000/*              DISPLAY EXECUTION OF CLIST AT TERMINAL              */
+00720000/*              OTHER USER REQUESTED OPTION FOR THE COMPILATION     */
+00730000/*                                                                  */
+00740000/*     IN       DEFAULT: *                                          */
+00750000/*              WHERE THE INPUT FROM THE PROGRAM SHOULD BE TAKEN    */
+00760000/*              FROM, DEFAULT * IS TO ACCEPT INPUT FROM TERMINAL    */
+00770000/*                                                                  */
+00780000/*     OUT      DEFAULT: &LIB..OUT(&NAME)                           */
+00790000/*              WHERE THE OUTPUT FROM THE PROGRAM WILL GO           */
+00800000/*                                                                  */
+00810000/*     COMPILER DEFAULT: NCAMCM.H360.CURRENT.COMPILER               */
+00820000/*              HAL360 COMPILER TO BE USED FOR THE COMPILATION      */
+00830000/*                                                                  */
+00840000/*------------------------------------------------------------------*/
+00850000/*                                                                  */
+00860000/*   INPUT DATA SET NAMES:                                          */
+00870000/*                                                                  */
+00880000/*     <INCLUDE>                                                    */
+00890000/*         IF SPECIFIED, IT IS THE SOURCE CODE TO BE INCLUDED       */
+00900000/*                                                                  */
+00910000/*     NCAMCM.H360.CURRENT.ERRORLIB                                 */
+00920000/*         ERROR LIBRARY TO BE USED BY THE EXECUTION                */
+00930000/*                                                                  */
+00940000/*     NCAMCM.H360.CURRENT.RUNLIB                                   */
+00950000/*         RUN TIME LIBRARY TO BE USED BY THE EXECUTION             */
+00960000/*                                                                  */
+00970000/*     SYSUID.<LIB>.HAL(<NAME>)                                     */
+00980000/*         SOURCE CODE OF THE PROGRAM                               */
+00990000/*                                                                  */
+01000000/*     SYSUID.<LIB>.SDF                                             */
+01010000/*         SDF TO BE USED BY THE COMPILATION                        */
+01020000/*                                                                  */
+01030000/*     SYSUID.<LIB>.INC                                             */
+01040000/*         INCLUDE FILE TO BE USED BY THE COMPILATION               */
+01050000/*                                                                  */
+01060000/*------------------------------------------------------------------*/
+01070000/*                                                                  */
+01080000/*   OUTPUT DATA SET NAMES:                                         */
+01090000/*                                                                  */
+01100000/*     SYSUID.<LIB>.LST(<NAME>)                                     */
+01110000/*         COMPILATION LISTING                                      */
+01120000/*                                                                  */
+01130000/*     SYSUID.<LIB>.OBJ(<NAME>)                                     */
+01140000/*         OBJECT CODE GENERATED BY THE COMPILER                    */
+01150000/*                                                                  */
+01160000/*     SYSUID.<NAME>.MAP                                            */
+01170000/*         MAP LISTING GENERATED BY THE MONITOR (LINKAGE EDITOR)    */
+01180000/*                                                                  */
+01190000/*     SYSUID.TEST.LOAD(<NAME>)                                     */
+01200000/*         WHERE THE LOAD MODULE IS STORED                          */
+01210000/*                                                                  */
+01220000/*     SYSUID.<LIB>.SIM(<NAME>)                                     */
+01230000/*         SIMULATION TRACE GENERATED BY THE EXECUTION              */
+01240000/*                                                                  */
+01250000/*     SYSUID.<OUT>                                                 */
+01260000/*         WHERE THE OUTPUT OF THE PROGRAM WILL BE STORED           */
+01270000/*                                                                  */
+01280000/*------------------------------------------------------------------*/
+01290000/*                                                                  */
+01300000/*   TEMPORARY DATA SET NAMES:  NONE.                               */
+01310000/*                                                                  */
+01320000/*------------------------------------------------------------------*/
+01330000/*                                                                  */
+01340000/*   COMMENTS:   NONE.                                              */
+01350000/*                                                                  */
+01360000/*------------------------------------------------------------------*/
+01370000/*                                                                  */
+01380000/*   REVISION HISTORY:                                              */
+01390000/*                                                                  */
+01400000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+01410000/*     --------  ----  ----  -------------------------------------  */
+01420000/*     03/14/90  080   JCS   ADDED HEADER                           */
+01430000/*                                                                  */
+01440000/*     06/26/90  099   TEV   UPDATED HEADER                         */
+01450000/*                                                                  */
+01460000/*------------------------------------------------------------------*/
+01470000/********************************************************************/
+01480000 
+01490000PROC 2 ACTION                           +
+01500000       NAME                             +
+01510000       LIB(TEST)                        +
+01520000       INCLUDE()                        +
+01530000       LIST(LIST)                       +
+01540000       SYTSIZE(200)                     +
+01550000       REFSIZE(2000)                    +
+01560000       MACROSIZE(500)                   +
+01570000       SREF                             +
+01580000       OPT()                            +
+01590000       TRACE                            +
+01600000       IN(*)                            +
+01610000       OUT(&LIB..OUT(&NAME.))           +
+01620000       COMPILER('''NCAMCM.H360.CURRENT.COMPILER''')
+01630000 
+01640000/*------------------------------------------------------------------*/
+01650000/*                                                                  */
+01660000/* COMPILATION STEP                                                 */
+01670000/*                                                                  */
+01680000/*------------------------------------------------------------------*/
+01690000 
+01700000IF &TRACE EQ TRACE THEN CONTROL LIST
+01710000CONTROL NOMSG END(DONE)
+01720000 
+01730000IF &ACTION. = CLG THEN +
+01740000   GOTO COMPILE
+01750000ELSE +
+01760000IF &ACTION. = CL THEN +
+01770000   GOTO COMPILE
+01780000ELSE +
+01790000IF &ACTION. = C THEN +
+01800000   GOTO COMPILE
+01810000ELSE +
+01820000IF &ACTION. = LG THEN +
+01830000   GOTO LINK
+01840000ELSE +
+01850000IF &ACTION. = L THEN +
+01860000   GOTO LINK
+01870000ELSE +
+01880000IF &ACTION. = G THEN +
+01890000   GOTO GO
+01900000ELSE DO
+01910000   WRITE ERROR IN COMMAND LINE
+01920000   GOTO THEEND
+01930000DONE
+01940000 
+01950000COMPILE: FREE F(SYSIN SYSPRINT OUTPUT3 OUTPUT5 OUTPUT6 OUTPUT8 +
+01960000  FILE1 FILE2 FILE3 FILE4 FILE5 FILE6 PROGRAM ERROR) +
+01970000  ATTR(FBA133 FB133 FB80)
+01980000  DELETE (&LIB..LST(&NAME.) &LIB..OBJ(&NAME.))
+01990000CONTROL MSG
+02000000ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(2660)
+02010000ATTR FB133 RECFM(F B)    LRECL(133) BLKSIZE(133)
+02020000ATTR FB80  RECFM(F B)    LRECL(80)  BLKSIZE(400)
+02030000ALLOC REUSE F(FILE1) NEW SPACE(5,5) BLOCK(7200)
+02040000ALLOC REUSE F(FILE2) NEW SPACE(5,5) BLOCK(7200)
+02050000ALLOC REUSE F(FILE3) NEW SPACE(5,5) BLOCK(7200)
+02060000ALLOC REUSE F(FILE4) NEW SPACE(5,5) BLOCK(7200)
+02070000ALLOC REUSE F(FILE5) NEW SPACE(5,5) BLOCK(7200)
+02080000ALLOC REUSE F(FILE6) NEW SPACE(9,5) BLOCK(7200)
+02090000ALLOC REUSE F(SYSPRINT) DA(&LIB..LST(&NAME.)) +
+02100000  USING(FBA133)
+02110000ALLOC REUSE F(OUTPUT3)  DA(&LIB..OBJ(&NAME.)) +
+02120000  USING(FB80)
+02130000ALLOC REUSE F(OUTPUT8) NEW SP(2 2) TRACK DIR(1)
+02140000IF &INCLUDE NE THEN +
+02150000     ALLOC REUSE F(INCLUDE) DA(&INCLUDE.) SHR
+02160000ALLOC REUSE F(PROGRAM) DA(&COMPILER) SHR
+02170000ALLOC REUSE F(ERROR) DA('NCAMCM.H360.CURRENT.ERRORLIB') SHR
+02180000IF &LIB. EQ THEN DO
+02190000     ALLOC REUSE F(OUTPUT5) NEW SP(1 1) TRACK DIR(1)
+02200000     ALLOC REUSE F(OUTPUT6) NEW SP(1 1) TRACK DIR(1)
+02210000     ALLOC REUSE F(SYSIN)   DA(&NAME..HAL) OLD
+02220000DONE
+02230000ELSE DO
+02240000     ALLOC REUSE F(OUTPUT5) DA(&LIB..SDF) SHR
+02250000     ALLOC REUSE F(OUTPUT6) DA(&LIB..INC) SHR
+02260000     ALLOC REUSE F(SYSIN)   DA(&LIB..HAL(&NAME.)) OLD
+02270000DONE
+02280000WRITE COMPILATION OF &NAME.
+02290000CALL 'NCAMCM.XPL.TOOLS.MONITOR(MONITOR)' +
+02300000  '&LIST,SYM=&SYTSIZE,XS=&REFSIZE,MS=&MACROSIZE,TBL,NTR,SRN,&SREF'+
+02310000  ',&OPT,CT=(WC), T=''&NAME.'''
+02320000SET &SAVECC=&LASTCC
+02330000FREE F(SYSIN SYSPRINT OUTPUT3 OUTPUT5 OUTPUT6 OUTPUT8 +
+02340000FILE1 FILE2 FILE3 FILE4 FILE5 FILE6 PROGRAM ERROR) +
+02350000ATTR(FBA133 FB133 FB80)
+02360000 
+02370000IF &SAVECC = 0 THEN DO
+02380000     WRITE SUCCESSFUL
+02390000     IF &ACTION. = CLG THEN +
+02400000        GOTO LINK
+02410000     ELSE +
+02420000     IF &ACTION. = CL THEN +
+02430000        GOTO LINK
+02440000DONE
+02450000ELSE DO
+02460000     WRITE ERROR CODE = &SAVECC
+02470000DONE
+02480000 
+02490000GOTO THEEND
+02500000 
+02510000/*------------------------------------------------------------------*/
+02520000/*                                                                  */
+02530000/* LINK EDIT STEP                                                   */
+02540000/*                                                                  */
+02550000/*------------------------------------------------------------------*/
+02560000 
+02570000LINK: CONTROL NOMSG
+02580000  FREE F(SYSPRINT SYSLIB SYSLIN SYSLMOD SYSUT1 STACKOBJ TEMPLOAD) +
+02590000    ATTR(FBA121)
+02600000  DELETE (&NAME..MAP)
+02610000CONTROL MSG
+02620000ATTR FBA121 RECFM(F B A) LRECL(121) BLKSIZE(1210)
+02630000ALLOC REUSE F(SYSPRINT) DA(&NAME..MAP) RELEASE USING(FBA121) +
+02640000  NEW SP(20 5) TRACK
+02650000ALLOC REUSE F(SYSLIB)   DA('NCAMCM.H360.CURRENT.RUNLIB' &LIB..LOAD) SHR
+02660000ALLOC REUSE F(SYSLIN)   DA(&LIB..OBJ(&NAME.)) SHR
+02670000ALLOC REUSE F(SYSLMOD)  DA(&LIB..LOAD(&NAME.)) OLD
+02680000ALLOC REUSE F(SYSUT1) NEW SP(20 2) TRACK
+02690000ALLOC REUSE F(STACKOBJ) SP(20 2) TRACK
+02700000ALLOC REUSE F(TEMPLOAD) SP(30 1) CYL DIR(1)
+02710000WRITE LINK EDIT OF &NAME.
+02720000CALL 'NCAMCM.H360.CURRENT.MONITOR(HALLINK)' 'SIZE=(250K,100K)/BOTH'
+02730000SET &SAVECC=&LASTCC
+02740000FREE F(SYSPRINT SYSLIB SYSLIN SYSLMOD SYSUT1 STACKOBJ TEMPLOAD) +
+02750000  ATTR(FBA121)
+02760000 
+02770000IF &SAVECC < 5 THEN DO
+02780000  WRITE LINK EDIT SUCCESSFUL
+02790000     IF &ACTION. = CLG THEN +
+02800000        GOTO GO
+02810000     ELSE +
+02820000     IF &ACTION. = LG THEN +
+02830000        GOTO GO
+02840000DONE
+02850000ELSE DO
+02860000     WRITE LINK EDIT ERROR CODE = &SAVECC
+02870000     EXIT
+02880000DONE
+02890000 
+02900000GOTO THEEND
+02910000 
+02920000/*------------------------------------------------------------------*/
+02930000/*                                                                  */
+02940000/* EXECUTION STEP                                                   */
+02950000/*                                                                  */
+02960000/*------------------------------------------------------------------*/
+02970000 
+02980000GO: CONTROL NOMSG
+02990000  FREE F(CHANNEL5 CHANNEL6)
+03000000CONTROL MSG
+03010000ALLOC F(CHANNEL5) DA(&IN.) SHR
+03020000ALLOC F(CHANNEL6) DA(&OUT.) SHR
+03030000ALLOC F(SYSPRINT) DA(&LIB..SIM(&NAME.)) SHR
+03040000IF &LIB. EQ THEN DO
+03050000     WRITE EXECUTION OF &NAME.
+03060000     CALL &NAME.(TEMPNAME)
+03070000DONE
+03080000ELSE DO
+03090000     WRITE EXECUTION OF &LIB.(&NAME.)
+03100000     CALL  &LIB..LOAD(&NAME.)
+03110000DONE
+03120000SET &SAVECC=&LASTCC
+03130000FREE F(CHANNEL5 CHANNEL6 SYSPRINT)
+03140000IF &SAVECC = 0 THEN +
+03150000  WRITE EXECUTION SUCCESSFUL
+03160000ELSE +
+03170000  WRITE EXECUTION ERROR CODE = &SAVECC
+03180000 
+03190000THEEND: EXIT

@@ -1,0 +1,169 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     LISTXPDS                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO EXTRACT COMPILATION ERRORS FOR EACH MEMBER        */
+00081000/*             OF A PDS AND WRITE THEM OUT TO AN OUTPUT PDS         */
+00090000/*             (INCLUDING XS3 ERRORS)                               */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     LISTXPDS 'CAT' INID(&SYSUID.) REL(TEST)                      */
+00131000/*            SUITE(&REL..&CAT.) ID(&SYSUID.)                       */
+00140000/*            INLIB(&INID..&SUITE..LST) OUT(&ID..&SUITE..LISTXPDS)  */
+00150000/*            PROG(NCAMCM.TOOLS.XPLOBJ(LISTXPDS) LIST() TRACE       */
+00151000/*                                                                  */
+00152000/*     ALIAS    - NONE.                                             */
+00153000/*     REQUIRED - 'CAT'                                             */
+00154000/*     DEFAULTS - INID(&SYSUID.) REL(TEST)                          */
+00154100/*                SUITE(&REL..&CAT.) ID(&SYSUID.)                   */
+00154200/*                INLIB(&INID..&SUITE..LST)                         */
+00154300/*                OUT(&ID..&SUITE..LISTXPDS)                        */
+00154400/*                PROG(NCAMCM.TOOLS.XPLOBJ(LISTXPDS) LIST() TRACE   */
+00154500/*                                                                  */
+00154600/*------------------------------------------------------------------*/
+00154700/*                                                                  */
+00154800/*   INVOKES:                                                       */
+00154900/*                                                                  */
+00155000/*     'NCAMCM.TOOLS.XPLOBJ(LISTXPDS)'                              */
+00155100/*     'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'                            */
+00155200/*                                                                  */
+00156000/*------------------------------------------------------------------*/
+00157000/*                                                                  */
+00158000/*   PARAMETERS:                                                    */
+00159000/*                                                                  */
+00159100/*     CAT      REQUIRED                                            */
+00159200/*              (TEST CATEGORY) WITHIN THE FUNCTIONAL TEST LIBRARY  */
+00159300/*                                                                  */
+00159400/*     INID     DEFAULT: &SYSUID.                                   */
+00159500/*              HLQ OF DEVELOPERS ACCOUNT                           */
+00159600/*                                                                  */
+00159700/*     REL      DEFAULT: TEST                                       */
+00159800/*              COMPILER RELEASE                                    */
+00159900/*                                                                  */
+00160000/*     SUITE    DEFAULT: &REL..&CAT.                                */
+00170000/*              NAME OF PDS WHICH CONTAINS HAL TESTCASES (NO HLQ)   */
+00180000/*                                                                  */
+00190000/*     ID       DEFAULT: &SYSUID.                                   */
+00200000/*              HLQ OF DEVELOPERS ACCOUNT                           */
+00210000/*                                                                  */
+00220000/*     INLIB    DEFAULT: &INID..&SUITE..LST                         */
+00230000/*              NAME OF PDS CONTAINING TESTCASES (W/ HLQ)           */
+00240000/*                                                                  */
+00250000/*     OUT      DEFAULT: &ID..&SUITE..LISTXPDS                      */
+00260000/*              OUTPUT OF PROGRAM (W/ HLQ)                          */
+00270000/*                                                                  */
+00280000/*     PROG     DEFAULT: NCAMCM.TOOLS.XPLOBJ(LISTXPDS)              */
+00290000/*              NAME OF THE EXECUTABLE                              */
+00300000/*                                                                  */
+00310000/*     LIST     DEFAULT: NULL                                       */
+00320000/*              SPECIFIES MEMBERLIST                                */
+00330000/*                                                                  */
+00340000/*     TRACE    OPTIONAL                                            */
+00350000/*              TURN TRACE ON OR OFF                                */
+00360000/*                                                                  */
+00370000/*------------------------------------------------------------------*/
+00380000/*                                                                  */
+00390000/*   INPUT DATA SET NAMES:                                          */
+00400000/*                                                                  */
+00410000/*     <PROG>                                                       */
+00420000/*         NAME OF THE EXECUTABLE                                   */
+00430000/*                                                                  */
+00440000/*     <INLIB>                                                      */
+00450000/*         PDS CONTAINING THE HAL TESTCASES                         */
+00460000/*                                                                  */
+00470000/*------------------------------------------------------------------*/
+00480000/*                                                                  */
+00490000/*   OUTPUT DATA SET NAMES:                                         */
+00500000/*                                                                  */
+00510000/*     <OUT>                                                        */
+00520000/*          OUTPUT OF PROGRAM                                       */
+00530000/*                                                                  */
+00540000/*------------------------------------------------------------------*/
+00550000/*                                                                  */
+00560000/*   TEMPORARY DATA SET NAMES:                                      */
+00570000/*                                                                  */
+00580000/*     NONE.                                                        */
+00590000/*                                                                  */
+00600000/*------------------------------------------------------------------*/
+00610000/*                                                                  */
+00620000/*   COMMENTS:                                                      */
+00630000/*                                                                  */
+00640000/*     NONE.                                                        */
+00650000/*                                                                  */
+00660000/*------------------------------------------------------------------*/
+00670000/*                                                                  */
+00680000/*   REVISION HISTORY:                                              */
+00690000/*                                                                  */
+00700000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00710000/*  --------  ---  ---   -----------------------------------------  */
+00720000/*  04/15/94  257  JCS   PUT INTO CCC AND NCAMCM                    */
+00721000/*  03/25/98  552  LJK   INCREASE THE SIZE FOR OUTPUT8              */
+00722000/*  07/14/00  461  LWW   CLEANUP HEADERS                            */
+00740000/*------------------------------------------------------------------*/
+00750000/********************************************************************/
+00760000PROC 1 CAT                                         +
+00770000       INID(&SYSUID.)                              +
+00780000       REL(TEST)                                   +
+00790000       SUITE(&REL..&CAT.)                          +
+00800000       ID(&SYSUID.)                                +
+00810000       INLIB(&INID..&SUITE..LST)                   +
+00820000       OUT(&ID..&SUITE..LISTXPDS)                  +
+00830000       PROG(NCAMCM.TOOLS.XPLOBJ(LISTXPDS))         +
+00840000       LIST()                                      +
+00850000       TRACE
+00860000 
+00870000 
+00880000IF       &TRACE.  NE THEN +
+00890000         CONTROL  LIST CONLIST
+00900000 
+00910000CONTROL NOMSG
+00920000         FREE F(PROGRAM OUTPUT8 SYSLIB SYSIN)  ATTR(FBA133)
+00930000         DELETE '&OUT.'
+00940000CONTROL MSG
+00950000IF &LIST. EQ THEN DO
+00951000         /***************************************/
+00952000         /*                                     */
+00953000         /*        GENERATE MEMBER LIST         */
+00953100         /*                                     */
+00953200         /***************************************/
+00953300CONTROL  NOMSG END(DONE)
+00953400         SET &LIST = &ID..&SUITE..MEMLIST
+00953500         FREE     F(SYSLIB SYSPRINT)
+00953600         DELETE   '&LIST.'
+00953700CONTROL  MSG
+00953800 
+00953900ALLOC    F(SYSLIB)   DA('&INLIB.') SHR
+00954000ALLOC    F(SYSPRINT) DA('&LIST') NEW BLOCK(80) TRACK SP(1 1)
+00954100 
+00954200CALL     'NCAMCM.TOOLS.MISCLOAD(MEMLIST)'
+00954300SET      &SAVECC  = &LASTCC
+00954400FREE     F(SYSLIB SYSPRINT)
+00954500 
+00954600IF       &SAVECC  = 0 THEN +
+00954700         WRITE MEMBER LIST SUCCESSFUL
+00954800ELSE     +
+00954900         WRITE MEMBER LIST ERROR CODE = &SAVECC
+00955000DONE
+00956000 
+00956100 
+00956200CONTROL  NOMSG
+00956300   FREE F(PROGRAM OUTPUT8 SYSIN SYSPRINT INCLUDE) ATTR(FBA133)
+00956400CONTROL  MSG NOFLUSH
+00956500ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+00956600ALLOC F(PROGRAM)  DA('&PROG.') SHR
+00956700ALLOC F(INCLUDE)    DA('&INLIB.') SHR
+00956800ALLOC F(SYSIN)  DA('&LIST.') SHR
+00956900ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW CATALOG +
+00957000                            SP(40 40) TRACK
+00958000ALLOC F(OUTPUT8) DA('&OUT') RELEASE RECFM(F B)   LRECL(88)  +
+00958100 BLKSIZE(6160) NEW  SP(1,3) CYLINDERS DIR(100)
+00959000WRITE RUNNING XPL PROGRAM &PROG. ON &INLIB.(*)
+00960000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'
+00961000SET &SAVECC = &LASTCC
+00962000FREE F(PROGRAM OUTPUT8 SYSIN SYSPRINT INCLUDE) ATTR(FBA133)
+00963000IF &SAVECC EQ 0 THEN WRITE EXECUTION SUCCESSFUL
+00964000ELSE WRITE EXECUTION ERROR CODE = &SAVECC

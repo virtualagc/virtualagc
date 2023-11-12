@@ -1,0 +1,230 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     CROSSREF                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO PULL OUT CROSSREF MATERIAL OUT OF A TEMPLATE      */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     CROSSREF 'PASS'                                              */
+00131000/*              ID(&SYSUID.)                                        */
+00132000/*              SYSTEM(PASS)                                        */
+00133000/*              LIB(NCAMCM.&SYSTEM..CURRENT)                        */
+00134000/*              DR                                                  */
+00135001/*              PROG(NCAMCM.TOOLS.XPLOBJ(CROSSREF))                 */
+00136000/*              IN (##DRIVER)                                       */
+00137000/*              PROCS(&LIB..&PASS..PROCS)                           */
+00138000/*              OUTLIB(&ID..REL99V0)                                */
+00139000/*              TEMP(&OUTLIB..&PASS..TEMPLATE)                      */
+00140000/*              TPROCS()                                            */
+00150000/*              OUT(&OUTLIB..&PASS..DOC)                            */
+00151000/*              OPT()                                               */
+00151100/*              EXCLUDE()                                           */
+00152000/*              DRIVER  TRACE                                       */
+00153000/*                                                                  */
+00154000/*     ALIAS    - NONE.                                             */
+00155000/*     REQUIRED - 'PASS'.                                           */
+00194000/*                                                                  */
+00195000/*------------------------------------------------------------------*/
+00196000/*                                                                  */
+00197000/*   INVOKES:                                                       */
+00198000/*                                                                  */
+00199001/*     'NCAMCM.TOOLS.XPLOBJ(CROSSREF)'                              */
+00200000/*                                                                  */
+00210000/*------------------------------------------------------------------*/
+00220000/*                                                                  */
+00230000/*   PARAMETERS:                                                    */
+00240000/*                                                                  */
+00250000/*     PASS     REQUIRED                                            */
+00260000/*              PASS NAME FOR HALS PASS COMPILER                    */
+00270000/*                                                                  */
+00280000/*     ID       DEFAULT: &SYSUID.                                   */
+00290000/*              HLQ WHERE THE TPROCS FILE IS AND THE OUTPUT FILE    */
+00300000/*              WILL GO.                                            */
+00310000/*                                                                  */
+00320000/*     SYSTEM   DEFAULT: PASS                                       */
+00330000/*              COMPILER SYSTEM YOU ARE WORKING ON.                 */
+00340000/*                                                                  */
+00350000/*     LIB      DEFAULT: NCAMCM.&SYSTEM..CURRENT                    */
+00351000/*              LIBRARY THAT CODE IS IN                             */
+00352000/*                                                                  */
+00353001/*     PROG     DEFAULT: '''NCAMCM.TOOLS.XPLOBJ(CROSSREF)'''        */
+00354000/*              NAME OF THE CROSSREF PROGRAM'S OBJECT CODE          */
+00355000/*                                                                  */
+00356000/*     IN       DEFAULT: ##DRIVER                                   */
+00357000/*              NAME OF THE MEMBER IN PROCS THAT CONTAINS MAIN      */
+00358000/*              INPUT FILE                                          */
+00359000/*                                                                  */
+00359100/*     DR       DEFAULT: NULL                                       */
+00359200/*              PART OF THE NAME OF THE TPROCS FILE.                */
+00359300/*                                                                  */
+00359400/*     PROCS    DEFAULT: &LIB..&PASS..PROCS                         */
+00359500/*              NAME OF PDS THAT CONTAINS THE BASELINE PROCEDURES   */
+00359600/*                                                                  */
+00359700/*     OUTLIB   DEFAULT: &ID..REL99V0                               */
+00359800/*              NAME OF LIBRARY TO GET TPROCS FROM AND PUT THE      */
+00359900/*              OUTPUT FILE.                                        */
+00360000/*                                                                  */
+00360100/*     TPROCS   DEFAULT:                                            */
+00360200/*                IF DR IS NULL: &OUTLIB..&PASS..PROCS              */
+00360300/*                ELSE         : &OUTLIB..&PASS..&DR..PROCS         */
+00360400/*              NAME OF PDS THAT CONTAINS THE PROCEDURES CHANGED    */
+00360500/*              BY YOUR DR.                                         */
+00360600/*                                                                  */
+00360700/*     OUT      DEFAULT: &OUTLIB..&PASS..DOC                        */
+00360800/*              NAME OF THE RESULTING OUTPUT FILE                   */
+00360900/*                                                                  */
+00361000/*     OPT      DEFAULT: NULL                                       */
+00361100/*              OPTION FOR MONITOR CALL                             */
+00361200/*                                                                  */
+00361210/*     EXCLUDE  DEFAULT: NULL                                       */
+00361220/*              SPECIFIES WHICH CONDITIONAL STATEMENTS WILL BE      */
+00361221/*              OMITTED FROM THE MERGE STATEMENT PROCESSING.        */
+00361230/*                                                                  */
+00361300/*     DRIVER   OPTIONAL                                            */
+00361400/*              IF SPECIFIED WILL CAUSE THE ##DRIVER TO BE TAKEN    */
+00361500/*              FROM YOUR TPROCS FILE, OTHERWISE IT IS TAKEN FROM   */
+00361600/*              THE PROCS FILE.                                     */
+00361700/*                                                                  */
+00361800/*     TRACE    OPTIONAL                                            */
+00361900/*              TURN TRACE ON OR OFF                                */
+00362000/*                                                                  */
+00362100/*------------------------------------------------------------------*/
+00362200/*                                                                  */
+00362300/*   INPUT DATA SET NAMES:                                          */
+00362400/*                                                                  */
+00362500/*     <PROG>                                                       */
+00362600/*         LOCATION OF THE PROGRAM OBJECT CODE TO EXECUTE           */
+00362700/*                                                                  */
+00362800/*     <PROCS>                                                      */
+00362900/*         NAME OF THE PDS THAT CONTAINS THE PROCEDURES             */
+00363000/*                                                                  */
+00363100/*     <TEMP>                                                       */
+00363200/*         NAME OF THE PDS THAT CONTAINS THE PROCEDURE TEMPLATES    */
+00363300/*                                                                  */
+00363400/*     <PROCS>(<IN>)                                                */
+00363500/*         LOCATION OF THE MEMBER THAT CONTAINS MAIN INPUT FILE     */
+00363600/*                                                                  */
+00363700/*               OR                                                 */
+00363800/*                                                                  */
+00363900/*     <TPROCS>(<IN>)                                               */
+00364000/*         LOCATION OF THE MEMBER THAT CONTAINS MAIN INPUT FILE     */
+00364100/*                                                                  */
+00364200/*                                                                  */
+00364300/*------------------------------------------------------------------*/
+00364400/*                                                                  */
+00364500/*   OUTPUT DATA SET NAMES:                                         */
+00364600/*                                                                  */
+00364700/*     <OUT>                                                        */
+00364800/*         NAME OF THE RESULTING OUTPUT FILE                        */
+00364900/*                                                                  */
+00365000/*------------------------------------------------------------------*/
+00365100/*                                                                  */
+00365200/*   TEMPORARY DATA SET NAMES:                                      */
+00365300/*                                                                  */
+00365400/*     NONE.                                                        */
+00365500/*                                                                  */
+00365600/*------------------------------------------------------------------*/
+00365700/*                                                                  */
+00365800/*   COMMENTS:                                                      */
+00365900/*                                                                  */
+00366000/*     THE CROSSREF PROGRAM MAKES THE FOLLOWING ASSUMPTIONS ABOUT   */
+00367000/*     THE EXCLUDE PARAMETER AND CONDITIONAL STATEMENTS IN THE      */
+00367100/*     MERGE STATEMENTS OF THE ##DRIVER:                            */
+00367200/*     1. ONLY A SINGLE CHARACTER IS PROCESSED BY THE EXCLUDE       */
+00367300/*        PARAMETER.  ONLY PASS (P) AND BFS(B) ARE RECOGNIZED.      */
+00367400/*     2. A CONDITIONAL STATEMENT WILL APPEAR ON A LINE BY ITSELF.  */
+00367500/*     3. GROUPS OF CONDITIONAL STATEMENTS WILL NOT BE NESTED       */
+00367600/*        WITHIN EACH OTHER.                                        */
+00367700/*                                                                  */
+00368000/*------------------------------------------------------------------*/
+00369000/*                                                                  */
+00370000/*   REVISION HISTORY:                                              */
+00380000/*                                                                  */
+00390000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00400000/*  --------  ---  ---   -------------------------------------      */
+00410000/*  08/09/89  ???  RSJ   ORIGINAL CLIST                             */
+00420000/*                                                                  */
+00430000/*  07/06/90  104  TEV   ADDED HEADER AND REARRANGED PARAMETERS ONE */
+00440000/*                       PER LINE.                                  */
+00450000/*                                                                  */
+00460000/*  01/18/91  146  RSJ   CHANGED DEFAULT OF PROG PARAMETER TO       */
+00470000/*                       REFLECT THE NEW NAME OF THE DATASET        */
+00480000/*                                                                  */
+00490000/*  01/21/91  147  RSJ   CHANGED THE PARAMETERS OF THE CLIST TO     */
+00500000/*                       BE SIMILIAR TO THE XPLMERGE CLIST          */
+00510000/*                                                                  */
+00511001/*  09/13/91  186  LJK   RENAMED CM OBJECT MODULE                   */
+00513000/*                                                                  */
+00513100/*  03/08/95  338  HFG   CR12326 CHANGES: USE ##DRIVER INSTEAD OF   */
+00513200/*                       ##TOC; ADDED EXCLUDE PARM; CHANGED MONITORS*/
+00513300/*                                                                  */
+00520000/*------------------------------------------------------------------*/
+00530000/********************************************************************/
+00540000PROC 1 PASS                                           +
+00550000       ID(&SYSUID.)                                   +
+00560000       SYSTEM(PASS)                                   +
+00570000       LIB(NCAMCM.&SYSTEM..CURRENT)                   +
+00580001       PROG('''NCAMCM.TOOLS.XPLOBJ(CROSSREF)''')      +
+00590000       DR()                                           +
+00600000       PROCS(&LIB..&PASS..PROCS)                      +
+00610000       OUTLIB(&ID..REL99V0)                           +
+00620000       TEMP(&OUTLIB..&PASS..TEMPLATE)                 +
+00630000       TPROCS()                                       +
+00640000       IN(##DRIVER)                                   +
+00650000       OUT(&OUTLIB..&PASS..DOC)                       +
+00660000       OPT()                                          +
+00660010       EXCLUDE()                                      +
+00670000       DRIVER                                         +
+00680000       TRACE
+00690000 
+00700000IF       &TRACE.  NE THEN +
+00710000         CONTROL  LIST CONLIST
+00720000CONTROL NOMSG END(DONE)
+00730000  FREE F(PROGRAM OUTPUT8 SYSPRINT SYSIN INCLUDE ERROR)  ATTR(FBA133 FB88)
+00740000  DELETE ('&OUT.')
+00750000CONTROL MSG
+00750010 
+00750100IF &EXCLUDE EQ THEN DO
+00750200   IF &SYSTEM = PASS THEN +
+00750300      SET &EXCLUDE = B
+00750400   ELSE IF &SYSTEM = BFS THEN +
+00750500      SET &EXCLUDE = P
+00750600DONE
+00750700 
+00750800ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+00750900ATTR FB88   RECFM(F B)   LRECL(88) BLKSIZE(6160)
+00751000 
+00760000IF &TPROCS EQ THEN DO
+00770000   IF &DR EQ THEN +
+00780000      SET &TPROCS EQ &OUTLIB..&PASS..PROCS
+00790000   ELSE   +
+00800000      SET &TPROCS EQ &OUTLIB..&PASS..&DR..PROCS
+00810000DONE
+00810200IF &DRIVER. NE THEN +
+00810300   ALLOC F(SYSIN)    DA('&TPROCS.(&IN)') SHR
+00810400ELSE  +
+00810500   ALLOC F(SYSIN)    DA('&PROCS.(&IN)') SHR
+00810600IF &SYSDSN('&TPROCS') NE OK THEN +
+00810700   SET &TPROCS EQ
+00810800ELSE SET &TPROCS EQ '&TPROCS'
+00810900 
+00840000ALLOC F(PROGRAM)  DA(&PROG.) SHR
+00850000ALLOC F(INCLUDE) DA('&TEMP.')  SHR
+00860000ALLOC F(ERROR)   DA(&TPROCS. '&PROCS.') SHR
+00870000ALLOC F(SYSPRINT) DA(*) USING(FBA133) RELEASE NEW CATALOG +
+00870100                  SP(40 40) TRACK
+00890000ALLOC F(OUTPUT8) DA('&OUT.') USING(FB88) NEW  +
+00900000  SP(80 40) TRACK DIR(40)
+00950000WRITE RUNNING XPL PROGRAM &PROG. ON &PASS.
+00960100CALL 'NCAMCM.XPL.TOOLS.MONITOR(MONITOR)' 'EXCLUDE=&EXCLUDE,&OPT.'
+00970000SET &SAVECC = &LASTCC
+00980000FREE F(PROGRAM OUTPUT8 SYSIN SYSPRINT INCLUDE ERROR) ATTR(FBA133)
+00990000IF &SAVECC EQ 0 THEN +
+01000000     WRITE EXECUTION SUCCESSFUL
+01010000ELSE +
+01020000     WRITE EXECUTION ERROR CODE = &SAVECC

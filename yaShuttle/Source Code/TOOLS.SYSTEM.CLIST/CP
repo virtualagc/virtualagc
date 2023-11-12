@@ -1,0 +1,253 @@
+00010000/********************************************************************/
+00020004/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     CP                                                   */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: COPY A SOURCE FILE TO A DESTINATION FILE AFTER       */
+00090000/*             CREATING THE DESTINATION FILE                        */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     CP  SOURCE   DEST  DID(&SYSUID.) DMEMBER() OVERWRITE TRACE   */
+00150000/*                                                                  */
+00160000/*     ALIAS    - NONE.                                             */
+00170000/*     REQUIRED - SOURCE  DEST                                      */
+00180000/*                                                                  */
+00190000/*------------------------------------------------------------------*/
+00200000/*                                                                  */
+00210000/*   INVOKES:                                                       */
+00220000/*     IEBCOPY (FOR COPY OF PDS)                                    */
+00230000/*     IEBGENER (FOR COPY OF SEQUENTIAL DATASET)                    */
+00240000/*                                                                  */
+00250000/*------------------------------------------------------------------*/
+00260000/*                                                                  */
+00270000/*   PARAMETERS:                                                    */
+00280000/*                                                                  */
+00290000/*     SOURCE   REQUIRED                                            */
+00300000/*              FULLY QUALIFIED NAME OF SOURCE DATASET; MAY HAVE A  */
+00310000/*              MEMBER NAME IN THE SPECIFICATION;  CLIST WILL ADD   */
+00320000/*              QUOTES TO THE SPECIFICATION                         */
+00330000/*                                                                  */
+00340000/*     DEST     REQUIRED                                            */
+00350000/*              NAME OF DESTINATION DATASET WITHOUT HIGH-LEVEL      */
+00360000/*              QUALIFIER; NOTE, DEFAULT HLQ IS USER'S OWN ACCOUNT  */
+00370000/*                                                                  */
+00380000/*     DID      DEFAULT: &SYSUID.                                   */
+00390000/*              HIGH LEVEL QUALIFIER FOR THE DESTINATION FILE       */
+00400000/*                                                                  */
+00410000/*     DMEMBER  DEFAULT: NULL                                       */
+00420000/*              IT SPECIFY A NEW NAME FOR THE DESTINATION PDS       */
+00430000/*                                                                  */
+00440000/*     OVERWRITE OPTIONAL                                           */
+00450000/*              CAUSES DESTINATION DATASET (OR MEMBER) TO BE        */
+00460000/*              DELETED AND REALLOCATED IF IT ALREADY EXISTS        */
+00470000/*                                                                  */
+00480000/*     TRACE    OPTIONAL                                            */
+00490000/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00500000/*                                                                  */
+00510000/*------------------------------------------------------------------*/
+00520000/*                                                                  */
+00530000/*   INPUT DATA SET NAMES:                                          */
+00540000/*                                                                  */
+00550000/*     <SOURCE>                                                     */
+00560000/*         THE SOURCE DSN WHERE DATA IS COMING FROM; CLIST ASSUMES  */
+00570000/*         SOURCE IS IN ANOTHER ACCOUNT AND PUTS QUOTES ON THE DSN  */
+00580000/*                                                                  */
+00590000/*------------------------------------------------------------------*/
+00600000/*                                                                  */
+00610000/*   OUTPUT DATA SET NAMES:                                         */
+00620000/*                                                                  */
+00630000/*     <DID>.<DEST>                                                 */
+00640000/*         THE DESTINATION DSN WHERE DATA IS GOING TO; IF DMEMBER   */
+00650000/*         IS SPECIFIED, THE MEMBER NAME OF THE DESTINATION PDS IS  */
+00660000/*         DMEMBER INSTEAD OF THE DEFAULT SOURCE PDS MEMBER; CLIST  */
+00670005/*         WILL PUT QUOTES ON THE DSN.                              */
+00680000/*                                                                  */
+00690000/*------------------------------------------------------------------*/
+00700000/*                                                                  */
+00710000/*   TEMPORARY DATA SET NAMES:                                      */
+00720000/*                                                                  */
+00730000/*     CNTRL.TEMP                                                   */
+00740000/*                                                                  */
+00750000/*------------------------------------------------------------------*/
+00760000/*                                                                  */
+00770000/*   COMMENTS:                                                      */
+00780000/*                                                                  */
+00790000/*     THE COPY FAILS WHEN THE SOURCE IS A PARTITIONED DATASET      */
+00800000/*     WITH A MEMBER SPECIFIED, AND THE DEST IS A SEQUENTIAL        */
+00810000/*     DATASET.  THE CP CLIST TRIES TO DELETE ONLY THE MEMBER AND   */
+00820000/*     NOT THE ENTIRE DATASET, SO THE OPERATION FAILS.              */
+00830000/*                                                                  */
+00840000/*     IF A PDS MEMBER NAME(DMEMBER) IS SPECIFIED, THE CP CLIST     */
+00850000/*     ALLOWS COPYING A SEQUENTIAL FILE TO A PDS USING IEBGENER.    */
+00860000/*                                                                  */
+00870000/*------------------------------------------------------------------*/
+00880000/*                                                                  */
+00890000/*   REVISION HISTORY:                                              */
+00900000/*                                                                  */
+00910000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00920000/*  --------  ---  ---   -------------------------------------      */
+00930000/*  7/19/94   364  HFG   ORIGINAL CLIST                             */
+00940000/*  11/12/94  391  LJK   MODIFIED TO ALLOW COPYING A SEQUENTIAL     */
+00950000/*                       FILE TO A PDS MEMBER; ADDED DMEMBER AND    */
+00960000/*                       DID PARAMETERS.                            */
+00970000/*  11/14/97  533  HFG   MODIFIED THE ALLOCATION OF THE DEST        */
+00980000/*                       DATASET TO INCLUDE THE SAME BLKSIZE AS     */
+00990000/*                       THE SOURCE DATASET.                        */
+01000003/*  03/10/00  669  KHP   MODIFIED HEADER SO THAT A COMPLETED HELP   */
+01010002/*                       FILE CAN BE CREATED FOR THIS CLIST.        */
+01020001/*------------------------------------------------------------------*/
+01030000/********************************************************************/
+01040000 
+01050000PROC 2   SOURCE                  +
+01060000         DEST                    +
+01070000         DID(&SYSUID.)           +
+01080000         DMEMBER()               +
+01090000         OVERWRITE               +
+01100000         TRACE
+01110000 
+01120000CONTROL END(DONE)
+01130000IF &TRACE. NE THEN CONTROL LIST CONLIST
+01140000CONTROL NOMSG
+01150000  FREE F(SOURCE DEST CNTL SYSIN SYSPRINT SYSUT1 SYSUT2) ATTR(FB80)
+01160000CONTROL MSG
+01170000 
+01180000ATTR FB80 RECFM(F B) LRECL(80) BLKSIZE(80)
+01190000 
+01200000     /******************************************/
+01210000     /* CHECK VALIDITY OF SOURCE DATASET       */
+01220000     /******************************************/
+01230000 
+01240000SET &MESSAGE = &SYSDSN('&SOURCE.')
+01250000IF &MESSAGE ^= &STR(OK) +
+01260000   THEN DO
+01270000      WRITE ERROR OBTAINING SOURCE DATASET ('&SOURCE.')
+01280000      WRITE REASON: &MESSAGE
+01290000      EXIT
+01300000   DONE
+01310000 
+01320000     /***************************************************/
+01330000     /* CHECK FOR AND EXTRACT MEMBER FROM SOURCE DSNAME */
+01340000     /***************************************************/
+01350000 
+01360000LISTDSI '&SOURCE.'
+01370000SET &DSNAME = &SYSDSNAME
+01380000IF &DSNAME ^= &SOURCE +
+01390000   THEN DO
+01400000      SET &START  = &LENGTH(&DSNAME) + 2
+01410000      SET &MEMEND = &LENGTH(&SOURCE) - 1
+01420000      SET &MEMBER = &SUBSTR(&START.:&MEMEND.,&SOURCE.)
+01430000   DONE
+01440000 
+01450000ALLOC F(SOURCE) DA('&DSNAME.') SHR REUSE
+01460000 
+01470000     /*********************************************/
+01480000     /* CHECK WHETHER DEST DATASET ALREADY EXISTS */
+01490000     /*********************************************/
+01500000 
+01510000SET &DEST = &DID..&DEST.
+01520000SET &DMEM = &MEMBER
+01530000IF &DMEMBER ^= THEN SET &DMEM = &DMEMBER
+01540000SET &MESSAGE = &SYSDSN('&DEST.')
+01550000IF &MESSAGE = OK AND &DMEM ^= +
+01560000   THEN SET &MESSAGE = &SYSDSN('&DEST.(&DMEM.)')
+01570000IF &MESSAGE = OK +
+01580000   THEN DO
+01590000      WRITE DESTINATION DATASET (&DEST.(&DMEM.)) ALREADY EXISTS
+01600000      IF &OVERWRITE EQ +
+01610000         THEN DO
+01620000            WRITE OVERWRITE NOT SPECIFIED. TERMINATING EXECUTION.
+01630000            FREE FILE(SOURCE)
+01640000            EXIT
+01650000         DONE
+01660000         ELSE +
+01670000          IF &DMEM = THEN +
+01680000            DO
+01690000              WRITE OVERWRITE WAS SPECIFIED -- REPLACING DATASET
+01700000              DELETE '&DEST'
+01710000            DONE
+01720000            ELSE DO
+01730000              WRITE OVERWRITE WAS SPECIFIED -- REPLACING MEMBER &DMEM
+01740000              DELETE '&DEST.(&DMEM.)'
+01750000            DONE
+01760000   DONE
+01770000 
+01780000     /**********************************************/
+01790000     /* ALLOCATE DEST DATASET WITH SAME ATTRIBUTES */
+01800000     /* AS SOURCE DATASET                          */
+01810000     /**********************************************/
+01820000 
+01830000LISTDSI '&DSNAME.' DIRECTORY
+01840000IF &SYSDSN('&DEST.') NE OK +
+01850000THEN DO
+01860000    IF &DMEMBER = THEN +
+01870000       ALLOC F(DEST) DA('&DEST.') NEW LIKE('&SOURCE') +
+01880000             BLKSIZE(&SYSBLKSIZE) REUSE
+01890000    ELSE  +
+01900000       ALLOC F(DEST) DA('&DEST.') NEW LIKE('&SOURCE') +
+01910000             DSORG(PO) DIR(20) BLKSIZE(&SYSBLKSIZE) REUSE
+01920000DONE
+01930000ELSE +
+01940000   ALLOC F(DEST) DA('&DEST.') SHR REUSE
+01950000 
+01960000        /**********************************************/
+01970000        /* USE IEBCOPY TO COPY PARTITIONED DATASETS   */
+01980000        /**********************************************/
+01990000 
+02000000IF &SYSDSORG = PO +
+02010000  THEN DO
+02020000     IF &SYSDSN('&SYSUID..CNTRL.TEMP') EQ OK THEN +
+02030000        DELETE (CNTRL.TEMP)
+02040000     ALLOC DA(CNTRL.TEMP) F(CNTRL) SPACE(1) TRACKS NEW +
+02050000           USING(FB80) REUSE
+02060000     OPENFILE CNTRL       OUTPUT
+02070000     SET &CNTRL           = &STR+
+02080000     ( COPY  OUTDD=DEST,INDD=((SOURCE,R)) )
+02090000     PUTFILE CNTRL
+02100000     IF &MEMBER NE +
+02110000        THEN DO
+02120000           IF &DMEMBER EQ THEN +
+02130000              SET &CNTRL   = &STR( SELECT  MEMBER=&MEMBER.)
+02140000           ELSE +
+02150000              SET &CNTRL   = &STR( SELECT  MEMBER=((&MEMBER.,&DMEM.)) )
+02160000           PUTFILE CNTRL
+02170000        DONE
+02180000     CLOSFILE CNTRL
+02190000     FREE F(CNTRL)
+02200000 
+02210000     ALLOC FILE(SYSIN) DA('&SYSUID..CNTRL.TEMP') SHR REUSE
+02220000     ALLOC FILE(SYSPRINT) DUMMY REUSE
+02230000     $CALL IEBCOPY
+02240000     SET &SAVECC  = &LASTCC
+02250000     IF &DMEMBER ^= THEN SET &DEST = &DEST.(&DMEMBER.)
+02260000     IF &SAVECC = 0 THEN DO
+02270000        WRITE COPY OF '&SOURCE.' TO '&DEST.' SUCCESSFUL
+02280000     DONE
+02290000     ELSE WRITE COPY OF '&SOURCE.' TO '&DEST' FAILED WITH CC = &SAVECC
+02300000     FREE FILE(SOURCE DEST SYSIN SYSPRINT) ATTR(FB80)
+02310000     CONTROL NOMSG
+02320000     DELETE (CNTRL.TEMP)
+02330000     CONTROL MSG
+02340000  DONE
+02350000 
+02360000        /**********************************************/
+02370000        /* EXECUTE IEBGENER FOR A SEQUENTIAL COPY     */
+02380000        /**********************************************/
+02390000 
+02400000  ELSE DO
+02410000     FREE F(DEST SOURCE)
+02420000     ALLOC FILE(SYSUT1) DA('&SOURCE.') SHR REUSE
+02430000     IF &DMEMBER ^= THEN SET &DEST = &DEST.(&DMEMBER.)
+02440000     ALLOC FILE(SYSUT2) DA('&DEST.') SHR REUSE
+02450000     ALLOC FILE(SYSPRINT) DUMMY REUSE
+02460000     ALLOC FILE(SYSIN) DUMMY REUSE
+02470000     $CALL IEBGENER
+02480000     IF &LASTCC = 0 THEN +
+02490000        WRITE COPY OF '&SOURCE.' TO '&DEST.' SUCCESSFUL
+02500000     ELSE WRITE COPY OF '&SOURCE.' TO '&DEST.' FAILED WITH CC = &LASTCC
+02510000     FREE FILE(SYSIN SYSPRINT SYSUT1 SYSUT2) ATTR(FB80)
+02520000  DONE
+02530000 

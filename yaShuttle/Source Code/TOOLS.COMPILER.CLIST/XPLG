@@ -1,0 +1,132 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00020100/*                                                                  */
+00020200/*   NAME:     XPLG                                                 */
+00020300/*                                                                  */
+00020400/*------------------------------------------------------------------*/
+00020500/*                                                                  */
+00020605/*   FUNCTION: A CLIST TO EXECUTE AN XPL PROGRAM                    */
+00020800/*                                                                  */
+00020900/*------------------------------------------------------------------*/
+00021000/*                                                                  */
+00021100/*   SYNTAX:                                                        */
+00021200/*                                                                  */
+00021311/*     XPLG    'NAME' ID(&SYSUID.) LIB(&ID..TESTX)                  */
+00021402/*              PROG(&ID..&NAME..OBJ) SYSIN(*)                      */
+00021502/*              MONITOR(NCAMCM.XPL.TOOLS.MONITOR(XPLSM))            */
+00021605/*              PRINT(&LIB..OUT) SCREEN OPT() TRACE                 */
+00021800/*                                                                  */
+00021900/*     REQUIRED - NAME.                                             */
+00022000/*                                                                  */
+00022100/*------------------------------------------------------------------*/
+00022200/*                                                                  */
+00022300/*   INVOKES:  NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                      */
+00022400/*                                                                  */
+00022500/*------------------------------------------------------------------*/
+00022600/*                                                                  */
+00022700/*   PARAMETERS:                                                    */
+00022800/*                                                                  */
+00022900/*     NAME     REQUIRED                                            */
+00023000/*              NAME OF THE PROGRAM                                 */
+00023100/*                                                                  */
+00023200/*     ID       DEFAULT: &SYSUID                                    */
+00023300/*              HIGH LEVEL QUALIFIER                                */
+00023400/*                                                                  */
+00023500/*     LIB      DEFAULT: &ID..TESTX                                 */
+00023600/*              OTHER DSN LEVEL                                     */
+00023700/*                                                                  */
+00023809/*     PROG     DEFAULT: &ID..&NAME..OBJ                            */
+00024200/*              NAME OF THE XPL OBJECT WHICH YOU WANT TO EXECUTE    */
+00024300/*                                                                  */
+00024405/*     MONITOR  DEFAULT: NCAMCM.XPL.TOOLS.MONITOR(XPLSM)            */
+00024502/*              MONITOR TO RUN THE XPL PROGRAM                      */
+00024602/*                                                                  */
+00024705/*     PRINT    DEFAULT: &LIB..OUT                                  */
+00024805/*              XPL OUTPUT FILE FOR EXECUTION                       */
+00024900/*                                                                  */
+00025005/*     SYSIN    DEFAULT: *                                          */
+00025105/*              OPTIONAL INPUT SYSIN FILE                           */
+00025205/*                                                                  */
+00025300/*     OPT      DEFAULT: NULL                                       */
+00025401/*              ADDITIONAL USER SPECIFIED OPTION                    */
+00025500/*                                                                  */
+00025600/*     SCREEN   OPTIONAL                                            */
+00025701/*              DUMPS OUTPUT TO THE SCREEN INSTEAD OF A OUTPUT FILE */
+00025800/*                                                                  */
+00025900/*     TRACE    OPTIONAL                                            */
+00026001/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00026100/*                                                                  */
+00026200/*------------------------------------------------------------------*/
+00026300/*                                                                  */
+00026400/*   INPUT DATA SET NAMES:                                          */
+00026500/*                                                                  */
+00026603/*     <NAME>.OBJ                                                   */
+00026701/*         THE PROGRAM TO EXECUTE                                   */
+00026800/*                                                                  */
+00026901/*     <SYSIN>                                                      */
+00027001/*         OPTIONAL INPUT FILE                                      */
+00027101/*                                                                  */
+00027200/*------------------------------------------------------------------*/
+00027300/*                                                                  */
+00027400/*   OUTPUT DATA SET NAMES:                                         */
+00027500/*                                                                  */
+00027600/*     <LIB>.OUT                                                    */
+00027700/*         XPL OUTPUT FILE FOR EXECUTION                            */
+00027800/*                                                                  */
+00027900/*------------------------------------------------------------------*/
+00028300/*   REVISION HISTORY:                                              */
+00028400/*                                                                  */
+00028501/*   DATE     PCR#  NAME  DESCRIPTION                               */
+00028601/*  --------- ----  ----  -------------------------------------     */
+00028701/*  01/18/84  ???  DWE   ORIGINAL CLIST                             */
+00028801/*                                                                  */
+00028901/*  07/02/90  102  TEV   ADDED HEADER AND REARRANGED PARAMETES ONE  */
+00029001/*                       PER LINE. UPDATED INVOKED PROGRAM'S NAME   */
+00029101/*                       TO REFLECT NEW LOCATION.                   */
+00029201/*                                                                  */
+00029301/*  03/22/91  155  TKK   RENAME PDS THAT HOLDS MEMBER XPLSM         */
+00029401/*                                                                  */
+00029510/*  11/09/93  318  LJK   USE A PDS FOR OUTPUT FILE, ADDED ID, LIB,  */
+00029609/*                       MONITOR, PRINT, SYSIN & SCREEN PARAMETERS  */
+00029700/*------------------------------------------------------------------*/
+00029800/********************************************************************/
+00030000PROC 1 NAME                                +
+00030100       ID(&SYSUID.)                        +
+00030212       LIB(&ID..TESTX)                     +
+00031000       PROG(&ID..&NAME..OBJ)               +
+00040001       MONITOR(NCAMCM.XPL.TOOLS.MONITOR(XPLSM)) +
+00040100       PRINT(&LIB..OUT)                    +
+00040200       SYSIN(*)                            +
+00040300       SCREEN                              +
+00040500       OPT()                               +
+00040600       TRACE
+00040800 
+00041000IF &TRACE.  NE THEN    +
+00042000   CONTROL  LIST CONLIST
+00044000CONTROL NOMSG
+00045013FREE F(PROGRAM OUTPUT3 SYSPRINT SYSIN)  ATTR(FBA133)
+00047013ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(5985)
+00049013IF &SYSDSN('&PRINT') NE OK THEN +
+00062006   ALLOC DA('&PRINT') RELEASE USING(FBA133) NEW DSORG(PO) +
+00063006                      DIR(50) SP(20 5) TRACKS
+00063113IF &SCREEN. EQ THEN DELETE '&PRINT(&NAME.)'
+00065006CONTROL MSG
+00070013IF &STR(&SYSIN) = &STR(*) THEN   +
+00080013   ALLOC F(SYSIN) DA(*) SHR
+00090013ELSE ALLOC F(SYSIN) DA('&SYSIN.') SHR
+00100013IF &SCREEN NE THEN ALLOC F(SYSPRINT) DA(*)
+00110013ELSE ALLOC F(SYSPRINT) DA('&PRINT(&NAME.)') SHR
+00120013ALLOC F(PROGRAM) DA('&PROG.') SHR
+00130013ALLOC F(OUTPUT3) DUMMY
+00140013WRITE RUNNING XPL PROGRAM &PROG.
+00150013TIME
+00160013CALL '&MONITOR.' '&OPT.'
+00182013SET &SAVECC = &LASTCC
+00182113CONTROL NOMSG
+00182213FREE F(PROGRAM OUTPUT3 SYSIN SYSPRINT )
+00182313FREE ATTR(FBA133)
+00200013CONTROL MSG
+00210013IF &SAVECC EQ 0 THEN +
+00220013    WRITE EXECUTION SUCCESSFUL
+00230013ELSE +
+00240013    WRITE EXECUTION ERROR CODE = &SAVECC

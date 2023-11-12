@@ -1,0 +1,54 @@
+         MACRO                                                          00000100
+         FILEDEF                                                        00000200
+         DCBD  DSORG=DA,DEVD=DA                                         00000300
+*        EQUATES FOR DCBRECFM                                           00000400
+V        EQU   X'40'          VARIABLE                                  00000500
+U        EQU   X'C0'          UNDEFINED                                 00000600
+*        EQUATES FOR DCBOPTCD                                           00000700
+R        EQU   X'01'          RELATIVE BLOCK ADDRESSES                  00000800
+FD       EQU   X'10'          FEEDBACK                                  00000900
+EXT      EQU   X'20'          EXTENDED SEARCH                           00001000
+*        USE UNUSED 1ST 16 BYTES OF DCB FOR KEY AREA                    00001100
+         ORG   IHADCB                                                   00001200
+KEY      DS    CL16           KEY (MAX 16)                              00001300
+         ORG                                                            00001400
+*                                                                       00001500
+*        DECB FOR READ OR WRITE                                         00001600
+*                                                                       00001700
+DECB     DS    0XL32          DATA EVENT CONTROL BLOCK                  00001800
+DECBECB  DS    F              ECB                                       00001900
+         ORG   DECBECB+1                                                00002000
+DECBERR1 DS    X                                                        00002100
+NOTFND   EQU   X'80'          RECORD NOT FOUND                          00002200
+LENERR   EQU   X'40'          LENGTH ERROR                              00002300
+NOSPAC   EQU   X'20'          NO SPACE                                  00002400
+DECBERR2 DS    X              ERROR CODES                               00002500
+         ORG                                                            00002600
+DECBTYP1 DS    X              TYPE FIELDS                               00002700
+DECBTYP2 DS    X                                                        00002800
+RD       EQU   8              READ (OFF FOR WRITE)                      00002900
+K        EQU   4              WITH KEYS (OFF FOR ID)                    00003000
+A        EQU   2              WRITE ADD (DA)                            00003100
+DECBLEN  DS    H              LENGTH                                    00003200
+DECBDCB  DS    A              DCB ADDRESS                               00003300
+DECBADR  DS    A              AREA ADDRESS                              00003400
+         DS    A              IOB ADR                                   00003500
+DECBKEY  DS    A              KEY ADDRESS                               00003600
+DECBBLK  DS    A              BLOCK ADDRESS                             00003700
+INITLEN  EQU   *-IHADCB       LENGTH TO INITIALIZE                      00003800
+*                                                                       00003900
+*        OTHER FIELDS                                                   00004000
+*                                                                       00004100
+READ     DS    A              ADR OF READ DI OR DK ROUTINE              00004200
+WRITE    DS    A              ADR OF WRITE DI OR DK ROUTINE             00004300
+BLOCK    DS    F              RELATIVE BLOCK OR TRACK                   00004400
+*        REDEFINE FOR EACH                                              00004500
+         ORG   BLOCK+1                                                  00004600
+RELBLK   DS    XL3            3 BYTE RELATIVE BLOCK NUMBER              00004700
+         ORG   BLOCK+2                                                  00004800
+TTR      DS    XL3            2 BYTE RELATIVE TRACK, 1 BYTE REL BLOCK   00004900
+*        NOTE LAST BYTE IS ALWAYS A ONE                                 00005000
+FILEFLG  DS    X                                                        00005100
+BDW      EQU   1              BLOCK DECRIPTOR WORD NEEDED               00005200
+FILELEN  EQU   *-IHADCB       LENGTH OF CNTL BLK                        00005300
+         MEND                                                           00005400

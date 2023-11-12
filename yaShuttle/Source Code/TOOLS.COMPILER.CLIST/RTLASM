@@ -1,0 +1,497 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     RTLASM                                               */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: ASSEMBLES THE RUNTIME LIBRARY ROUTINE FOR PASS OR    */
+00000900/*             BFS.  ALSO LINKS FOR PASS.                           */
+00001000/*                                                                  */
+00001100/*------------------------------------------------------------------*/
+00001200/*                                                                  */
+00001300/*   SYNTAX:                                                        */
+00001400/*                                                                  */
+00001500/*     RTLASM 'NAME'  ID(&SYSUID.) TEMPID(&SYSUID)                  */
+00001600/*            REL(WORKING) LSTLIB(&ID..&SYSTEM..&REL.)              */
+00001700/*            SRCDSN(&LSTLIB..RTLASM) TMPLIB(&TMPID..&SYSTEM..&REL.)*/
+00001800/*            OPT() LOPT() TRACE PACK() MAP TEMPMAC() SYSTEM(PASS)  */
+00001900/*            RUNMAC(NCAMCM.&SYSTEM..CURRENT.RUNMAC) FIRST C        */
+00002000/*                                                                  */
+00002100/*     ALIAS    - NONE.                                             */
+00002200/*     REQUIRED - 'NAME'                                            */
+00002300/*                                                                  */
+00002400/*------------------------------------------------------------------*/
+00002500/*                                                                  */
+00002600/*   INVOKES:  FOR PASS:                                            */
+00002700/*                                                                  */
+00002800/*             SPF25070.GO.ASM101(ASM101)                           */
+00002900/*             NCAMCM.TOOLS.MISCLOAD(FIXOBJ)                        */
+00003000/*             SPF25070.GO.LNK101(LNK101)                           */
+00003100/*                                                                  */
+00003200/*             FOR BFS:                                             */
+00003300/*                                                                  */
+00003400/*             SPF25070.GO.ASM101(ASM101)                           */
+00003500/*             NROKSTB.SUPPORT.OILOAD.OI253(SATSOBJ)                */
+00003600/*             NROKSTB.SUPPORT.OILOAD.OI253(SATSLIST)               */
+00003700/*                                                                  */
+00003800/*------------------------------------------------------------------*/
+00003900/*                                                                  */
+00004000/*   PARAMETERS:                                                    */
+00004100/*                                                                  */
+00004200/*     NAME     REQUIRED                                            */
+00004300/*              MEMBER NAME OF THE RUNTIME LIBRARY ROUTINE TO       */
+00004400/*              ASSEMBLE                                            */
+00004500/*                                                                  */
+00004600/*     ID       DEFAULT: &SYSUID                                    */
+00004700/*              HIGH LEVEL QUALIFIER                                */
+00004800/*                                                                  */
+00004900/*     TEMPID   DEFAULT: &SYSUID                                    */
+00005000/*              HIGH LEVEL QUALIFIER OF THE TEMPORARY FILES CREATED */
+00005100/*                                                                  */
+00005200/*     REL      DEFAULT: WORKING                                    */
+00005300/*              COMPILER RELEASE                                    */
+00005400/*                                                                  */
+00005500/*     SRCDSN   DEFAULT: &LSTLIB..RUNASM                            */
+00005600/*              PDS CONTAINING THE RUNTIME LIBRARY SOURCE CODE      */
+00005700/*                                                                  */
+00005800/*     LSTLIB   DEFAULT: &ID..&SYSTEM..&REL.                        */
+00005900/*              PDS THAT WILL CONTAIN THE RUNTIME LIBRARY ASSEMBLY  */
+00006000/*              LISTING AND LOAD MODULES                            */
+00006100/*                                                                  */
+00006200/*     TMPLIB   DEFAULT: &TEMPID..&SYSTEM..&REL.                    */
+00006300/*              DATASET NAME (EXCEPT FOR THE LAST NODE) OF THE      */
+00006400/*              TEMPORARY FILES CREATED                             */
+00006500/*                                                                  */
+00006600/*     SYSPRINT DEFAULT: &LSTLIB..RUNLST                            */
+00006700/*              PDS CONTAINING THE ASSEMBLY LISTING                 */
+00006800/*                                                                  */
+00006900/*     OBJECT   DEFAULT: &LSTLIB..RUNOBJ                            */
+00007000/*              PDS CONTAINING THE ASSEMBLER PRODUCED OBJECT CODE   */
+00007100/*                                                                  */
+00007200/*     OPT()    DEFAULT: NULL                                       */
+00007300/*              ADDITIONAL ASSEMBLER OPTION                         */
+00007400/*                                                                  */
+00007500/*     LOPT()   DEFAULT: NULL                                       */
+00007600/*              ADDITIONAL LINK OPTION FOR PASS                     */
+00007700/*                                                                  */
+00007800/*     FIRST    OPTIONAL                                            */
+00007900/*              ALLOCATE NECESSARY DATASETS THE FIRST TIME          */
+00008000/*                                                                  */
+00008100/*     TRACE    OPTIONAL                                            */
+00008200/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00008300/*              TERMINAL                                            */
+00008400/*                                                                  */
+00008500/*     PACK()   DEFAULT: NULL                                       */
+00008600/*              SPECIFIES TO COMPRESS THE DATASETS IF A VALUE OF 20 */
+00008700/*              IS SPECIFIED                                        */
+00008800/*                                                                  */
+00008900/*     C        OPTIONAL                                            */
+00009000/*              WHEN SPECIFIED, DO THE ASSEMBLY STEP ONLY           */
+00009100/*                                                                  */
+00009200/*     MAP      OPTIONAL                                            */
+00009300/*              WHEN SPECIFIED, GENERATES A MAPPED LISTING          */
+00009400/*                                                                  */
+00009500/*     TEMPMAC  DEFAULT: NULL                                       */
+00009600/*              PDS THAT CONTAINS TEMPORARY RUNTIME LIBRARY MACROS. */
+00009700/*              THIS DATASET IS CONCATENATED WITH THE CURRENT RUN-  */
+00009800/*              TIME MACROS.    THE  ASSEMBLER USES THE TEMPORARY   */
+00009900/*              MACROS FIRST, THEN USES THE COMPILER RELEASE MACROS */
+00010000/*                                                                  */
+00010100/*     SYSTEM   DEFAULT: PASS                                       */
+00010200/*              INDICATES WHETHER THE RUNTIME LIBRARY ROUTINE IS    */
+00010300/*              BEING ASSEMBLED FOR PASS OR BFS.  VALID VALUES ARE  */
+00010400/*              PASS OR BFS.                                        */
+00010500/*                                                                  */
+00010600/*     RUNMAC   DEFAULT: NCAMCM.&SYSTEM..CURRENT.RUNMAC             */
+00010700/*              PDS CONTAINING THE CURRENT RUNTIME LIBRARY MACROS   */
+00010800/*                                                                  */
+00010900/*------------------------------------------------------------------*/
+00011000/*                                                                  */
+00011100/*   INPUT DATA SET NAMES:                                          */
+00011200/*                                                                  */
+00011300/*     <TEMPMAC>                                                    */
+00011400/*         TEMPORARY RUNTIME LIBRARY MACROS                         */
+00011500/*                                                                  */
+00011600/*     <RUNMAC>                                                     */
+00011700/*         CURRENT RUNTIME LIBRARY MACROS                           */
+00011800/*                                                                  */
+00011900/*     <SRCDSN>(<NAME>)                                             */
+00012000/*         RTL ROUTINE OR ZCON LIBRARY SOURCE CODE TO ASSEMBLE      */
+00012100/*                                                                  */
+00012200/*------------------------------------------------------------------*/
+00012300/*                                                                  */
+00012400/*   OUTPUT DATA SET NAMES:                                         */
+00012500/*                                                                  */
+00012600/*     <LSTLIB>.RUNLIB(<NAME>)                                      */
+00012700/*         LOAD MODULE OF THE RUNTIME LIBRARY ROUTINE               */
+00012800/*                                                                  */
+00012900/*     <OBJECT>(<NAME>)                                             */
+00013000/*         OBJECT CODE OF THE ZCON LIBRARY                          */
+00013100/*                                                                  */
+00013200/*     <SYSPRINT>(<NAME>)                                           */
+00013300/*         LISTING OF THE RUNTIME LIBRARY ROUTINE                   */
+00013400/*         (ASM101 ASSEMBLER LISTING)                               */
+00013500/*                                                                  */
+00013600/*     <TMPLIB>.MAP(<NAME>)                                         */
+00013700/*         ONLY CREATED FOR PASS - MAPPED LISTING OF THE RUNTIME    */
+00013800/*         LIBRARY ROUTINE                                          */
+00013900/*                                                                  */
+00014000/*     <LSTLIB>.SDFASM(<NAME>)                                      */
+00014100/*         ONLY CREATED FOR BFS - SDF OBJECT CODE                   */
+00014200/*                                                                  */
+00014300/*     <LSTLIB>.SATSLST(<NAME>)                                     */
+00014400/*         ONLY CREATED FOR BFS - SATSLIST LISTNG                   */
+00014500/*                                                                  */
+00014600/*                                                                  */
+00014700/*------------------------------------------------------------------*/
+00014800/*                                                                  */
+00014900/*   TEMPORARY DATA SET NAMES:                                      */
+00015000/*                                                                  */
+00015100/*     <TMPLIB>.TEMPOBJ                                             */
+00015200/*         TEMPORARY OBJECT CODE OF RUNTIME LIBRARY ROUTINE         */
+00015300/*                                                                  */
+00015400/*     <TMPLIB>.TEMPFIX                                             */
+00015500/*         USED ONLY FOR PASS - TEMPORARY FILE USED FOR FIX OBJ     */
+00015600/*                                                                  */
+00015700/*------------------------------------------------------------------*/
+00015800/*                                                                  */
+00015900/*   COMMENTS:  THIS CLIST WAS MADE GENERAL SO THE SOURCE IS TAKEN  */
+00016000/*              FROM "SRCDSN" WHICH CAN BE THE CM OR USER VERSION.  */
+00016100/*              THE RUNLST,RUNLIB AND OTHER LOAD MODULES ARE WRITTEN*/
+00016200/*              TO "LSTLIB", AND ALL TEMPORARY DATASETS ARE WRITTEN */
+00016300/*              TO "TMPLIB"                                         */
+00016400/*                                                                  */
+00016500/*              RTLASM WAS MADE GENERIC BETWEEN PASS AND BFS.  THE  */
+00016600/*              DEFAULT IS PASS.  IF ASSEMBLING A RUN-TIME LIBRARY  */
+00016700/*              ROUTINE FOR BFS, THEN RTLASM MUST BE INVOKED WITH   */
+00016800/*              SYSTEM SET TO BFS.                                  */
+00016900/*                                                                  */
+00017000/*              RTLASM WAS MADE GENERAL SO THE SOURCE CAN BE THE    */
+00017100/*              RTLASM OR ZCONASM. IF A C OPTION IS SPECIFIED,      */
+00017200/*              IT WILL ONLY PERFORM THE ASSEMBLY STEP AND GENERATE */
+00017300/*              THE PERMANENT OBJECT MODULE. THIS OPTION IS USED TO */
+00017400/*              GENERATE THE ZCONLIB IN OBJECT FORMAT.              */
+00017500/*                                                                  */
+00017600/*              IF MAP FILES ARE KEPT, OBJECT CODE PRODUCED IS      */
+00017700/*              DIFFERENT.                                          */
+00017800/*                                                                  */
+00017900/*------------------------------------------------------------------*/
+00018000/*                                                                  */
+00018100/*   REVISION HISTORY:                                              */
+00018200/*                                                                  */
+00018300/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00018400/*     --------  ----  ----  -------------------------------------  */
+00018500/*     12/83           DWE   CREATED                                */
+00018600/*                                                                  */
+00018700/*     07/86           HFG   REDIRECTED ASSEMBLY OUTPUT TO RUNLST   */
+00018800/*                                                                  */
+00018900/*     07/89           SDM   REDIRECTED LINKER OUTPUT TO MAP, IF    */
+00019000/*                           SPECIFIED.  FOR SOME REASON, IF THE    */
+00019100/*                           MAP FILES ARE KEPT, THE OBJECT CODE    */
+00019200/*                           PRODUCED IS DIFFERENT!                 */
+00019300/*                                                                  */
+00019400/*     07/05/89  021   SDM   ADDED CAPABILITY TO COMPILE SOURCE     */
+00019500/*                           FROM ONE ACCOUNT, GENERATE LOAD        */
+00019600/*                           MODULES IN ANOTHER ACCOUNT, AND KEEP   */
+00019700/*                           TEMP FILES IN "USERID" ACCOUNT         */
+00019800/*                                                                  */
+00019900/*     08/14/89  034   SDM   UPDATED SO TEMPORARY MACROS CAN BE IN  */
+00020000/*                           ONE ACCOUNT AND IS CONCATENATED WITH   */
+00020100/*                           THE NCAMCM...RUNMAC PDS                */
+00020200/*                                                                  */
+00020300/*     09/15/89  050   JAC   MADE GENERIC BETWEEN PASS AND BFS      */
+00020400/*                                                                  */
+00020500/*     10/03/89        TVR   REMOVE A FREE ALL STATEMENT            */
+00020600/*                           CHANGE DEFAULT RELEASE TO PASS.WORKING */
+00020700/*                           BECAUSE YOU NEVER WANT TO CHANGE       */
+00020800/*                           PASS.CURRENT. THE CLIST WAS ACTUALLY   */
+00020900/*                           DELETING BASELINED LOAD MODULES!       */
+00021000/*                                                                  */
+00021100/*     12/05/89        JCS   RENAME <LSTLIB>.RUNLST TO <LSTLIB>.    */
+00021200/*                           SATSLST FOR BFS                        */
+00021300/*                           RENAME <TMPLIB>.TEMPLST TO             */
+00021400/*                           <LSTLIB>.RUNLST FOR BFS. THIS IS USED  */
+00021500/*                           FOR TESTING FOR THE BFS 6V0 RELEASE SO */
+00021600/*                           THAT RUNLST FOR BFS CAN BE COMPARED    */
+00021700/*                           WITH RUNLST FOR PASS TO VERIFY THE     */
+00021800/*                           CHANGES FOR CR CCR00006. THIS VERSION  */
+00021900/*                           MAY BECOME THE CM VERSION LATER.       */
+00022000/*                                                                  */
+00022100/*     06/22/90  098   TEV   UPDATED HEADER                         */
+00022200/*                                                                  */
+00022300/*     11/02/90  130   TKK   SUBSTITUTED &SYSPARM IN FOR DEFAULT    */
+00022400/*                           VALUE ON RELEASE AND RUNMAC PARAMETERS */
+00022500/*                                                                  */
+00022600/*     04/17/91  166   JCS   CORRECT PACKING, MAP DELETION,         */
+00022700/*                           FREE STATEMENT                         */
+00022800/*                                                                  */
+00022900/*     06/19/91  185   RSJ   CORRECTED THE LOCATION OF SYSPARM      */
+00023000/*                           PARAMETER                              */
+00023100/*                                                                  */
+00023200/*     12/23/92  235   LJK   RENAME CM LOAD FILES, RENAME SYSPARM   */
+00023300/*                           TO SYSTEM, ALLOCATE DATASETS IF NOT    */
+00023400/*                           PRESENT, ADD ESD OPTION FOR LINK EDIT  */
+00023500/*                           STEP(UPDATE FOR CR11116), CHANGE THE   */
+00023600/*                           DEFAULT OF ID TO SYSUID INSTEAD OF CM. */
+00023700/*                                                                  */
+00023800/*     08/05/93  293   JCS   DELETE THE OBSOLETE OBJ AND TERM       */
+00023900/*                           OPTIONS ON THE ASSEMBLY STEP FOR PASS  */
+00024000/*                                                                  */
+00024100/*     10/29/93  317   JCS   CHANGED THE ASSEMBLER, LINKER,         */
+00024200/*                           SATSOBJ, AND SATSLIST VERSIONS         */
+00024300/*                                                                  */
+00024400/*     05/05/94  342   JCS   UPDATES FOR PASS 26V0/BFS 10V0 AND     */
+00024500/*                           CORRECTIONS TO THE HEADER              */
+00024600/*                                                                  */
+00024700/*     10/21/94  377   BAF   ELIMINATE REFERENCES TO 24070          */
+00024800/*                                                                  */
+00024900/*     05/31/95  346   LJK   ADD SYSPRINT, OBJECT AND C PARAMETERS  */
+00025000/*                           TO GENERATE ZCONLIB IN OBJECT FORMAT;  */
+00025100/*                           STEP UP TO THE SPF25070 VERSION OF THE */
+00025200/*                           ASSEMBLER AND LINKER.                  */
+00025300/*     08/09/95  435   LJK   CORRECT TYPO IN CLIST HEADER           */
+00025400/*     11/06/95  449   JCS   CHANGE FBA TO FBM, OI253 TO OI254      */
+00025410/*     12/06/95  355   LJK   ADD THE COMPRESSION OF RUNOBJ AND SKIP */
+00025420/*                           THE COMPRESSION OF RUNLIB WHEN C OPTION*/
+00025430/*                           IS SPECIFIED.                          */
+00025500/*------------------------------------------------------------------*/
+00025600/********************************************************************/
+00025700 
+00025800PROC 1 NAME                                   +
+00025900       ID(&SYSUID.)                           +
+00026000       TEMPID(&SYSUID.)                       +
+00026100       SYSTEM(PASS)                           +
+00026200       REL(WORKING)                           +
+00026300       LSTLIB(&ID..&SYSTEM..&REL.)            +
+00026400       TMPLIB(&TEMPID..&SYSTEM..&REL.)        +
+00026500       SRCDSN  (&LSTLIB..RTLASM)              +
+00026600       SYSPRINT(&LSTLIB..RUNLST)              +
+00026700       OBJECT  (&LSTLIB..RUNOBJ)              +
+00026800       OPT()                                  +
+00026900       LOPT()                                 +
+00027000       FIRST                                  +
+00027100       C                                      +
+00027200       TRACE                                  +
+00027300       PACK()                                 +
+00027400       MAP                                    +
+00027500       TEMPMAC()                              +
+00027600       RUNMAC(NCAMCM.&SYSTEM..CURRENT.RUNMAC)
+00027700 
+00027800WRITE
+00027900IF &TRACE. NE THEN +
+00028000  CONTROL LIST CONLIST
+00028100 
+00028200     /**********************************/
+00028300     /* ALLOCATE DATASETS IF NECESSARY */
+00028400     /**********************************/
+00028500 
+00028600CONTROL NOMSG
+00028700IF &FIRST NE THEN DO
+00028800   ALLOC DA('&SYSPRINT.') DSORG(PO) RECFM(F B A) +
+00028900      LRECL(121) BLKSIZE(6534) TRACKS SPACE(100 20) DIR(70) REUSE
+00029000   IF &C NE THEN +
+00029100      ALLOC DA('&OBJECT.') DSORG(PO) RECFM(F B) +
+00029200         LRECL(80) BLKSIZE(400) TRACKS SPACE(20 2) DIR(30) REUSE
+00029300   ELSE IF &SYSTEM = BFS THEN DO
+00029400      ALLOC DA('&LSTLIB..RUNLIB') DSORG(PO) RECFM(F B) +
+00029500         LRECL(80) BLKSIZE(6160) TRACKS SPACE(50 10) DIR(70) REUSE
+00029600      ALLOC DA('&LSTLIB..SATSLST') DSORG(PO) RECFM(F B M) +
+00029700         LRECL(133) BLKSIZE(6517) CYLINDERS SPACE(12 5) DIR(70) REUSE
+00029800      ALLOC DA('&LSTLIB..SDFASM') DSORG(PO) RECFM(F) REUSE +
+00029900         LRECL(1680) BLKSIZE(1680) CYLINDERS SPACE(2 1) DIR(70)
+00030000   END
+00030100   ELSE DO
+00030200      ALLOC DA('&LSTLIB..RUNLIB') DSORG(PO) RECFM(U) +
+00030300         LRECL(0) BLKSIZE(7294) TRACKS SPACE(50 10) DIR(70) REUSE
+00030400      IF &MAP NE THEN +
+00030500         ALLOC DA('&TMPLIB..MAP') DSORG(PO) RECFM(F B A) +
+00030600         LRECL(121) BLKSIZE(6534) TRACKS SPACE(20 10) DIR(70) REUSE
+00030700   END
+00030800END
+00030900 
+00031000     /********************************/
+00031100     /* ASSEMBLY  STEP               */
+00031200     /********************************/
+00031300 
+00031400IF &PACK. EQ 20  AND &MAP. NE  THEN COMPRESS '&TMPLIB..MAP'
+00031410IF &PACK. EQ 20  AND &C.   EQ  THEN COMPRESS '&LSTLIB..RUNLIB'
+00031420IF &PACK. EQ 20  AND &C.   NE  THEN COMPRESS '&LSTLIB..RUNOBJ'
+00031600IF &PACK. EQ 20  THEN COMPRESS '&SYSPRINT.'
+00031700IF &SYSTEM. = &STR(BFS) THEN DO
+00031710   IF &PACK. EQ 20  AND &C EQ THEN DO
+00031800      COMPRESS '&LSTLIB..SATSLST'
+00031900      COMPRESS '&LSTLIB..SDFASM'
+00032000   END
+00032010END
+00032100CONTROL END(DONE)
+00032200CONTROL NOMSG
+00032300FREE F(SYSLIB SYSUT1 SYSPRINT SYSLIN SYSTERM SYSIN) +
+00032400   ATTR(FBA121 FB80 FBM121)
+00032500   DELETE ('&SYSPRINT.(&NAME.)')
+00032600IF &C NE THEN DELETE ('&OBJECT.(&NAME.)')
+00032700         ELSE DELETE ('&TMPLIB..TEMPOBJ')
+00032800CONTROL MSG
+00032900ATTR  FBA121   RECFM(F B A) LRECL(121) BLKSIZE(6534)
+00033000ATTR  FBM121   RECFM(F B M) LRECL(121) BLKSIZE(6534)
+00033100ATTR  FB80        RECFM(F B)   LRECL(80)  BLKSIZE(80)
+00033200IF &TEMPMAC. NE THEN  SET &TMPMAC = '&TEMPMAC'
+00033300                ELSE  SET &TMPMAC =
+00033400ALLOC F(SYSLIB)   DA(&TMPMAC. '&RUNMAC.') SHR
+00033500ALLOC F(SYSUT1)   SPACE(10 10) TRACK
+00033600ALLOC F(SYSPRINT) DA('&SYSPRINT.(&NAME.)') SHR
+00033700IF &C NE THEN +
+00033800     ALLOC F(SYSLIN)   DA('&OBJECT.(&NAME.)') SHR
+00033900ELSE ALLOC F(SYSLIN)   DA('&TMPLIB..TEMPOBJ') USING(FB80) TRACK +
+00034000                       BLOCK(80)  SP(10 10) RELEASE
+00034100ALLOC F(SYSTERM)  DA(*)
+00034200ALLOC F(SYSIN)    DA('&SRCDSN.(&NAME.)') SHR
+00034300WRITENR ASSEMBLY  OF &SRCDSN.(&NAME.)
+00034400IF &SYSTEM. EQ PASS THEN DO
+00034500   IF &OPT. EQ THEN                                      +
+00034600      CALL 'SPF25070.GO.ASM101(ASM101)'               +
+00034700           'ESD,RLD,SYSPARM=&SYSTEM.'
+00034800   ELSE CALL 'SPF25070.GO.ASM101(ASM101)'             +
+00034900           'ESD,RLD,&OPT.,SYSPARM=&SYSTEM.'
+00035000   DONE
+00035100ELSE DO
+00035200   IF &OPT. EQ THEN                                      +
+00035300      CALL 'SPF25070.GO.ASM101(ASM101)'                  +
+00035400           'SREF,LINECNT=52,SYSPARM=&SYSTEM.'
+00035500   ELSE CALL 'SPF25070.GO.ASM101(ASM101)'              +
+00035600           'SREF,LINECNT=52,&OPT.,SYSPARM=&SYSTEM.'
+00035700DONE
+00035800SET &SAVECC=&LASTCC
+00035900FREE F(SYSLIB SYSUT1 SYSPRINT SYSLIN SYSTERM SYSIN)      +
+00036000  ATTR(FBA121 FB80 FBM121)
+00036100IF &SAVECC = 0 THEN +
+00036200     WRITE SUCCESSFUL
+00036300ELSE DO
+00036400     WRITE ERROR CODE = &SAVECC
+00036500     EXIT
+00036600DONE
+00036700 
+00036800IF &C NE THEN EXIT
+00036900IF &SYSTEM. EQ PASS THEN DO
+00037000 
+00037100     /********************************/
+00037200     /* FIX OBJ STEP                 */
+00037300     /********************************/
+00037400 
+00037500   CONTROL NOMSG
+00037600      FREE F(CHANNEL0 CHANNEL1 CHANNEL6) ATTR(FB80)
+00037700      DELETE '&TMPLIB..TEMPFIX'
+00037800   CONTROL MSG
+00037900   ATTR  FB80        RECFM(F B) LRECL(80) BLKSIZE(400)
+00038000   ALLOC F(CHANNEL0) DA('&TMPLIB..TEMPOBJ')
+00038100   ALLOC F(CHANNEL1) DA('&TMPLIB..TEMPFIX') USING(FB80) TRACK +
+00038200                     SPACE(10 2) BLOCK(80) RELEASE
+00038300   ALLOC F(CHANNEL6) SYS(9)
+00038400   WRITENR FIXOBJ    OF &NAME.
+00038500   CALL 'NCAMCM.TOOLS.MISCLOAD(FIXOBJ)' 'MSGLEVEL=0'
+00038600   SET &SAVECC=&LASTCC
+00038700   FREE F(CHANNEL0 CHANNEL1 CHANNEL6) ATTR(FB80)
+00038800   IF &SAVECC = 0 THEN +
+00038900      WRITE SUCCESSFUL
+00039000   ELSE DO
+00039100      WRITE ERROR CODE = &SAVECC
+00039200      EXIT
+00039300   DONE
+00039400 
+00039500     /********************************/
+00039600     /* LINK EDIT STEP               */
+00039700     /********************************/
+00039800 
+00039900   CONTROL NOMSG
+00040000   DELETE '&TMPLIB..TEMPOBJ'
+00040100   FREE F(SYSPRINT SYSLIN SYSLMOD SYSUT1 SYSTERM) +
+00040200        ATTR(FBM121 U7294)
+00040300   IF &MAP. NE THEN DELETE '&TMPLIB..MAP(&NAME.)'
+00040400   CONTROL MSG
+00040500   ATTR FBM121       LRECL(121) BLKSIZE(1210) RECFM(F B M)
+00040600   ATTR U7294        LRECL(0) BLKSIZE(7294) RECFM(U)
+00040700   IF &MAP. NE THEN                                   +
+00040800      ALLOC F(SYSPRINT) DA('&TMPLIB..MAP(&NAME.)') USING(FBM121)
+00040900   ELSE  ALLOC F(SYSPRINT) SYS(9) USING(FBM121)
+00041000   ALLOC F(SYSLIN)   DA('&TMPLIB..TEMPFIX')
+00041100   ALLOC F(SYSLMOD)  DA('&LSTLIB..RUNLIB') OLD
+00041200   ALLOC F(SYSUT1)   SP(10 10) TR
+00041300   ALLOC F(SYSTERM)  SYS(9) USING(FBM121)
+00041400   WRITENR LINK EDIT OF &NAME.
+00041500   CALL 'SPF25070.GO.LNK101(LNK101)'               +
+00041600        'NCAL,NOSTK,NOAUTO,NOTABLE,ESD=250,&LOPT.'
+00041700   SET &SAVECC=&LASTCC
+00041800   FREE F(SYSPRINT SYSLIN SYSLMOD SYSUT1 SYSTERM) ATTR(FBM121 U7294)
+00041900   CONTROL NOMSG
+00042000      DEL '&TMPLIB..TEMPFIX'
+00042100   CONTROL MSG
+00042200   IF &SAVECC = 0 THEN DO
+00042300      WRITE SUCCESSFUL
+00042400      CONTROL NOMSG
+00042500         IF &MAP. EQ THEN DELETE '&TMPLIB..MAP(&NAME.)'
+00042600      CONTROL MSG
+00042700   DONE
+00042800   ELSE +
+00042900     WRITE ERROR CODE = &SAVECC
+00043000DONE
+00043100 
+00043200ELSE DO /* FOR BFS */
+00043300 
+00043400     /********************************/
+00043500     /* SATSOBJ STEP                 */
+00043600     /********************************/
+00043700 
+00043800   CONTROL NOMSG
+00043900      FREE F(CHANNEL0 ASMSDF OBJOUT CHANNEL5 FILE1 FILE2) +
+00044000           ATTR(FB80 F5040)
+00044100   CONTROL MSG
+00044200   ATTR  FB80        RECFM(F B) LRECL(80) BLKSIZE(400)
+00044300   ATTR  F5040       RECFM(F) LRECL(5040) BLKSIZE(5040)
+00044400   ALLOC F(CHANNEL0) SP(2 1) TRACK BLOCK(80) RECFM(F B) LRECL(80)
+00044500   OPENFILE CHANNEL0 OUTPUT
+00044600   SET CHANNEL0 EQ &STR(TABLES SYM(EBCDIC,ALIAS) OBJ(EBCDIC,ALIAS))
+00044700   PUTFILE CHANNEL0
+00044800   CLOSFILE CHANNEL0
+00044900   ALLOC F(ASMSDF)   DA('&LSTLIB..SDFASM') OLD
+00045000   ALLOC F(OBJOUT)   DA('&LSTLIB..RUNLIB(&NAME.)') OLD
+00045100   ALLOC F(CHANNEL5) DA('&TMPLIB..TEMPOBJ')
+00045200   ALLOC F(CHANNEL6) SYS(9)
+00045300   ALLOC F(FILE1)    SPACE(10 10) TRACK USING(F5040)
+00045400   ALLOC F(FILE2)    SPACE(10 10) TRACK USING(F5040)
+00045500   WRITENR SATSOBJ  OF &NAME.
+00045600   CALL 'NROKSTB.SUPPORT.OILOAD.OI254(SATSOBJ)'       +
+00045700        'COND=EVEN,REGION=256K'
+00045800   SET &SAVECC=&LASTCC
+00045900   FREE F(CHANNEL0 ASMSDF OBJOUT CHANNEL5 CHANNEL6 FILE1 FILE2)  +
+00046000        ATTR(FB80 F5040)
+00046100   IF &SAVECC = 0 THEN +
+00046200      WRITE SUCCESSFUL
+00046300   ELSE DO
+00046400      WRITE ERROR CODE = &SAVECC
+00046500      EXIT
+00046600   DONE
+00046700 
+00046800     /********************************/
+00046900     /* SATSLIST STEP                */
+00047000     /********************************/
+00047100 
+00047200   CONTROL NOMSG
+00047300      DELETE '&TMPLIB..TEMPOBJ'
+00047400      DELETE '&LSTLIB..SATSLST(&NAME.)'
+00047500      FREE F(CHANNEL5 CHANNEL6 CHANNEL7)
+00047600   CONTROL MSG
+00047700   ALLOC F(CHANNEL7) DA('&LSTLIB..SATSLST(&NAME.)') OLD
+00047800   ALLOC F(CHANNEL5) DA('&SYSPRINT.(&NAME.)') OLD
+00047900   ALLOC F(CHANNEL6) SYS(9)
+00048000   WRITENR SATSLIST  OF &NAME.
+00048100   CALL 'NROKSTB.SUPPORT.OILOAD.OI254(SATSLIST)'                    +
+00048200        'COND=EVEN,REGION=192K,MSGLEVEL=0,HALPARM=  STAT=END         +
+00048300         COUNT=END LINECNT=57 NOB'
+00048400   SET &SAVECC=&LASTCC
+00048500   FREE F(CHANNEL5 CHANNEL6 CHANNEL7)
+00048600   IF &SAVECC = 0 THEN DO
+00048700      WRITE SUCCESSFUL
+00048800   DONE
+00048900   ELSE +
+00049000      WRITE ERROR CODE = &SAVECC
+00049100DONE

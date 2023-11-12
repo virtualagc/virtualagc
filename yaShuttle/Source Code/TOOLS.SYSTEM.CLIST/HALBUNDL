@@ -1,0 +1,259 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     HALBUNDL                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: COPIES A PDS INTO A SEQUENTIAL FILE FOR DOWNLOADING  */
+00090000/*             TO THE RS6000 WORKSTATION. DOWNLOAD THE SEQUENTIAL   */
+00100000/*             FILE AS BINARY AND RUN HALBURST ON THE RS6000 TO     */
+00110000/*             SPLIT THE PDS MEMBERS INTO SEPARATE FILES.           */
+00120000/*                                                                  */
+00130000/*------------------------------------------------------------------*/
+00140000/*                                                                  */
+00150000/*   SYNTAX :                                                       */
+00160000/*     HALBUNDL PDS                                                 */
+00170000/*              SRCID(&SYSUID.)                                     */
+00180000/*              COUNT(7)                                            */
+00190000/*              TYPE(SRC)                                           */
+00200000/*              TRACE                                               */
+00210000/*                                                                  */
+00220000/*------------------------------------------------------------------*/
+00230000/*                                                                  */
+00240000/*   INVOKES:                                                       */
+00250000/*                                                                  */
+00260000/*     IEBGENR  TO PERFORM THE COPY                                 */
+00270000/*                                                                  */
+00280000/*------------------------------------------------------------------*/
+00290000/*                                                                  */
+00300000/*   PARAMETERS:                                                    */
+00310000/*                                                                  */
+00320000/*     PDS      (REQUIRED) NAME OF THE PDS TO BE COPIED FROM        */
+00330000/*              (NO HIGH LEVEL QUALIFIER)                           */
+00340000/*                                                                  */
+00350000/*     SRCID    DEFAULT: &SYSUID                                    */
+00360000/*              HIGH LEVEL QUALIFIER TO USE WITH PDS                */
+00370000/*                                                                  */
+00380000/*     COUNT    DEFAULT: 7                                          */
+00390000/*              BEGINNING LINE OF LISTDS OUTPUT FOR FILE NAMES      */
+00400000/*                                                                  */
+00410000/*     TYPE     DEFAULT: SRC                                        */
+00420000/*              INDICATOR OF RECORD LENGTH & TRANSLATION NEEDED     */
+00430000/*              IN HALBURST:                                        */
+00440000/*              TYPE DESCRIPTION  RECORD LEN   TRANSLATE TO ASCII?  */
+00450000/*              --------------------------------------------------  */
+00460000/*              ASM  (ASSEMBLY)   80           YES                  */
+00470000/*              MAC  (MACRO)      80           YES                  */
+00480000/*              SRC  (HAL/S)      80           YES                  */
+00490000/*              OBJ  (OBJECT)     80           NO                   */
+00500000/*              XPL  (XPL)        88           YES                  */
+00510000/*              SDF  (SDF)        1680         NO                   */
+00520000/*              LIB  (LOAD)       7294         NO                   */
+00530000/*                                                                  */
+00531001/*              NOTE: ANY ALIASES ARE GIVEN A BLANK TYPE WHICH      */
+00531101/*              MAKES HALBURST CREATE A LINK TO THE ORIGINAL FILE.  */
+00532001/*                                                                  */
+00540000/*     TRACE    OPTIONAL                                            */
+00550000/*              TURN TRACE ON OR OFF                                */
+00560000/*                                                                  */
+00570000/*------------------------------------------------------------------*/
+00580000/*                                                                  */
+00590000/*   INPUT DATA SET NAMES:                                          */
+00600000/*                                                                  */
+00610000/*     <&SRCID.&PDS>                                                */
+00620000/*         THE INPUT PDS                                            */
+00630000/*                                                                  */
+00640000/*------------------------------------------------------------------*/
+00650000/*                                                                  */
+00660000/*   OUTPUT DATA SET NAMES:                                         */
+00670000/*                                                                  */
+00680000/*     <&SYSUID.&PDS.SEQ>                                           */
+00690000/*         NAME OF THE RESULTING OUTPUT FILE                        */
+00700000/*                                                                  */
+00710000/*------------------------------------------------------------------*/
+00720000/*                                                                  */
+00730000/*   REVISION HISTORY:                                              */
+00740000/*                                                                  */
+00750000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00760000/*  --------  ---  ---   -------------------------------------      */
+00770000/*  01/06/00  0663 DAS   BASELINE                                   */
+00780000/*                                                                  */
+00790000/*------------------------------------------------------------------*/
+00800000/********************************************************************/
+00810000PROC 1 PDS +
+00820000       SRCID(&SYSUID.) +
+00830000       COUNT(7) +
+00840000       LIST()   +
+00850000       TYPE(SRC)+
+00860000       TRACE
+00870002 
+00910000GLOBAL RETCODE
+00920000CONTROL NOCAPS
+00930000IF &TRACE NE  THEN CONTROL LIST CONLIST
+00940000 
+00950000   /******************************************/
+00960000   /* GENERATE THE MEMBER LIST BY "TRAPPING" */
+00970000   /* THE OUTPUT OF THE 'LISTDS' COMMAND.    */
+00980000   /******************************************/
+00990000SET &SYSOUTTRAP = 2999
+01000000LISTDS '&SRCID..&PDS' M
+01010000SET &SYSOUTTRAP = 0
+01020000IF &TRACE NE  THEN SET &COUNT = &COUNT + 1
+01030000 
+01040000   /**********************************************/
+01050000   /* SAVE THE MEMBER NAMES TO A PERMANENT ARRAY */
+01060000   /**********************************************/
+01070000SET &SAVE_MEMBER = &SYSOUTLINE
+01080000LOOP1: SET &TEMP = &TEMP + 1
+01090000IF &TEMP > &SYSOUTLINE THEN GOTO EXIT_LOOP1
+01100000SET &SAVE_MEMBER&TEMP = &&SYSOUTLINE&TEMP
+01110000GOTO LOOP1
+01120000 
+01130000 
+01140000EXIT_LOOP1: +
+01150000LISTDSI '&SRCID..&PDS'
+01160000CONTROL NOMSG
+01170000DEL &PDS..SEQ
+01180000CONTROL MSG
+01190000ALLOC F(DEST) DA(&PDS..SEQ) LIKE('&SRCID..&PDS') DSORG(PS) DIR(0) NEW +
+01200000      BLKSIZE(&SYSBLKSIZE)
+01210000CONTROL NOMSG
+01220000FREE F(DEST)
+01230000 
+01240000FREE F(MLIST)
+01250000CONTROL MSG
+01260000 
+01270000ERROR DO
+01280000   WRITE EXITTING CONDITION CODE &MAXCC
+01290000   EXIT
+01300000END
+01310000ATTN DO
+01320000   EXIT
+01330000END
+01340000 
+01350000 
+01360000 
+01370000SET &COUNTER = &SAVE_MEMBER
+01380000SET &TEMP = &COUNT
+01390000DO WHILE &TEMP LE &COUNTER
+01400000   SET &MEMTEMP = &&SAVE_MEMBER&TEMP
+01410002   /* HANDLE ALIAS CONTINUATION LINES */
+01420001   IF &SUBSTR(3:3,&MEMTEMP) = THEN GOTO GET_ALIASES
+01430000   SET &MEMTMP2 = &MEMTEMP
+01440000   SET &LEN = &LENGTH(&MEMTMP2)
+01450000   SET &MEM = &SUBSTR(1:&LEN,&MEMTMP2)
+01460000   /**********************************************/
+01480001   /* SPECIAL PROCESSING IF ALIASES PRESENT     */
+01490000   /**********************************************/
+01500000   IF &LEN>8 THEN DO
+01510000      SET &I = 1
+01520000      SET &C = &SUBSTR(&I:&I,&MEM)
+01530000      DO WHILE &C ^=
+01540000         SET &I = &I+1
+01550000         SET &C = &SUBSTR(&I:&I,&MEM)
+01560000      END
+01570000      SET &MEM = &SUBSTR(1:&I-1,&MEM) /* SAVE MEMBER NAME */
+01580000      SET &LEN = &LENGTH(&MEM)
+01581000      SET &ALIASES = 1
+01590000   END
+01591000   ELSE SET &ALIASES = 0
+01601000 
+01610000   SET &SOURCE = &SRCID..&PDS.(&MEM)
+01620000   SET &DEST   = &SYSUID..&PDS..SEQ
+01630000   SET &NDEST  = &SYSUID..&PDS..SEQ
+01640000   SET &NDEST2 = &SYSUID..&PDS..SEQ
+01650000 
+01660000   /******************************************/
+01670000   /* WRITE HEADER INFORMATION (MEMBER NAME) */
+01680000   /******************************************/
+01690000   ALLOC F(NDEST) DA('&NDEST') MOD
+01700000   OPENFILE NDEST OUTPUT
+01710000   /*********************************************/
+01730002   /* ADD BOF MARKER WITH TYPE SPECIFIER        */
+01740000   /*********************************************/
+01750000   SET &MEM8 = &MEM
+01760000   IF &TYPE = SDF THEN DO /* REMOVE ## FROM THE NAME */
+01770000      SET &MEM8 = &SUBSTR(3:&LEN,&MEM)
+01780000      SET &LEN = &LEN - 2
+01790000   END
+01800000   IF &LEN < 8 THEN SET &MEM8 = &MEM8.&SUBSTR(1:8-&LEN,       ) /*PAD*/
+01810000   SET &BOF   = &STR(                                                         &TYPE BOF)
+01820000   SET &NDEST = &STR(>>>>&MEM8.<<<<)&BOF
+01830000   PUTFILE NDEST
+01840000   CLOSFILE NDEST
+01850000   FREE F(NDEST)
+01860000 
+01870000   CONTROL NOMSG
+01880000/* FREE F(DEST SOURCE)
+01890000   CONTROL MSG
+01900000   ALLOC FILE(SYSUT1) DA('&SOURCE.') SHR REUSE
+01910000   ALLOC FILE(SYSUT2) DA('&DEST.') MOD
+01920000   ALLOC FILE(SYSPRINT) DUMMY REUSE
+01930000   ALLOC FILE(SYSIN) DUMMY REUSE
+01940000   $CALL IEBGENER
+01950000   IF &LASTCC = 0 THEN +
+01960000      WRITE COPY OF '&SOURCE.' TO '&DEST.' SUCCESSFUL
+01970000   ELSE WRITE COPY OF '&SOURCE.' TO '&DEST.' FAILED WITH CC = &LASTCC
+01980000   CONTROL NOMSG
+01990000   FREE FILE(SYSIN SYSPRINT SYSUT1 SYSUT2)
+02000000   CONTROL MSG
+02010000 
+02020000   /******************************************/
+02030000   /* WRITE TAILER INFORMATION (MEMBER NAME) */
+02040000   /******************************************/
+02050000   ALLOC F(NDEST) DA('&NDEST2') MOD
+02060000   OPENFILE NDEST OUTPUT
+02070000   /*********************************************/
+02090002   /* ADD EOF MARKER                            */
+02100000   /*********************************************/
+02110000   SET &EOF   = &STR(                                                             EOF)
+02120000   SET &NDEST = &STR(>>>>&MEM8.<<<<)&EOF
+02130000   PUTFILE NDEST
+02140000   CLOSFILE NDEST
+02150000   FREE F(NDEST)
+02160000 
+02160100   /*********************************************/
+02161100   /* HANDLE ALIASES - GIVE THEM A BLANK TYPE.  */
+02161300   /*********************************************/
+02161600GET_ALIASES: +
+02161700   IF &ALIASES=1 THEN DO
+02161800      ALLOC F(NDEST) DA('&NDEST2') MOD
+02161900      OPENFILE NDEST OUTPUT
+02162200      SET &I = 3
+02162300      SET &C = &SUBSTR(&I:&I,&MEMTEMP)
+02162400      SET &LEN=&LENGTH(&STR(&MEMTEMP)) /*&STR INCLUDES BLANKS IN LEN*/
+02162500      DO WHILE &C ^= /* SKIP ORIGINAL MEMBER NAME */
+02162600         SET &I = &I+1
+02162700         SET &C = &SUBSTR(&I:&I,&MEMTEMP)
+02162800      END
+02162900      /* DELIMITERS ARE BLANK, OPEN PAREN, CLOSE PAREN, AND COMMA */
+02163000      SET &DELIMITERS =&NRSTR( (),)
+02163300ALIAS_LOOP: +
+02163400      DO WHILE &I<&LEN AND &SYSINDEX(&STR(&C),&STR(&DELIMITERS))>0
+02163600         SET &I = &I+1
+02163700         SET &C = &SUBSTR(&I:&I,&MEMTEMP)
+02163800      END
+02163900      SET &START=&I
+02164000      DO WHILE &I<&LEN AND &SYSINDEX(&STR(&C),&STR(&DELIMITERS))=0
+02164300         SET &I = &I+1
+02164400         SET &C = &SUBSTR(&I:&I,&MEMTEMP)
+02164500      END
+02164600      SET &AMEM = &SUBSTR(&START:&I-1,&MEMTEMP)
+02164700      IF &AMEM ^= ALIAS THEN DO
+02164800         SET &ALEN = &LENGTH(&AMEM)
+02164900         IF &ALEN < 8 THEN +
+02165000            SET &AMEM = &AMEM.&SUBSTR(1:8-&ALEN,       ) /* PAD */
+02165200         SET &NDEST = &STR(>>>>&AMEM.<<<<)
+02165300         PUTFILE NDEST
+02165400      END
+02165500      IF &I<&LEN THEN GOTO ALIAS_LOOP
+02165600      CLOSFILE NDEST
+02165700      FREE F(NDEST)
+02165800   END /* OF ALIAS PROCESSING */
+02166000 
+02170000CONTINUE_LOOP: +
+02180000   SET &TEMP = &TEMP + 1
+02190000END
+02200000WRITE *** BUNDLE FROM '&SRCID..&PDS' TO +
+02210000          '&SYSUID..&PDS..SEQ' SUCCESSFUL ***

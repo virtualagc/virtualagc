@@ -1,0 +1,20 @@
+         MACRO                                                          00000100
+&NAME    SDLCALL &TRAP,&STP=NO                                          00000200
+         AIF   ('&STP' EQ 'NO').NORMAL                                  00000300
+&NAME    LH    15,8(,15)      GET STACK SIZE                            00000400
+         AR    15,13          GENERATE NEW STACK FRAME PTR              00000500
+         ST    13,4(,15)      SAVE OLD STACK FRAME                      00000600
+         LR    13,15          SET OS SAVE AREA                          00000700
+         L     14,VHALSIM     GET PTR TO HALSIM                         00000800
+         AGO   .COMM                                                    00000900
+.NORMAL  ANOP                                                           00001000
+&NAME    ST    13,STACKEND+4  SAVE STACK FRAME PTR                      00001100
+         LA    13,STACKEND    POINT TO OS SAVE AREA                     00001200
+         L     14,=V(HALSIM)                                            00001300
+.COMM    USING HALSIM,14      NEEDS HALSIM DSECT                        00001400
+         L     15,SDL&TRAP    SDL ENTRY POINT ADDRESS                   00001500
+         DROP  14                                                       00001600
+         BALR  14,15          CALL EXIT ROUTINE                         00001700
+         L     13,4(,13)      RESTORE STACK PTR                         00001800
+         L     15,0(,13)      RESTORE CURRENT BASE                      00001900
+         MEND                                                           00002000

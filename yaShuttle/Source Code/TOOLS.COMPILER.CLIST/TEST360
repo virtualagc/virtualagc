@@ -1,0 +1,401 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME :     TEST360                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION : COMPILE, LINK AND EXECUTE ALL MEMBERS IN A PDS      */
+00090000/*              (TEST CATEGORY) WITHIN THE FUNCTIONAL TEST LIBRARY  */
+00091022/*              FOR HAL/S 360 SYSTEM.                               */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00121000/*   SYNTAX:                                                        */
+00122000/*                                                                  */
+00123000/*     TEST360 'GROUP'   ID(&SYSUID.) DSN(TEST)                     */
+00124000/*              LIB(&ID..&DSN..&GROUP) FIRSTRUN TRACE               */
+00125000/*              COMPVER(CURRENT) RUNLVER(CURRENT)                   */
+00126014/*              ERRORLIB(NCAMCM.H360.&COMPVER..ERRORLIB)            */
+00126114/*              COMPILER(NCAMCM.H360.&COMPVER..COMPILER) TERRORLIB() */
+00126214/*              MONITOR(NCAMCM.H360.&COMPVER..MONITOR.LOAD)         */
+00126314/*              RUNLIB(NCAMCM.H360.&RUNLVER..RUNLIB) TRUNLIB()      */
+00126600/*              LNKIN(NCAMCM.TESTLIB.&GROUP..CON)                   */
+00126700/*              HALLOAD2(&ID..&DSN..COMPOOL.LOAD)                   */
+00126800/*              HALSDF2(&ID..&DSN..COMPOOL.SDF)                     */
+00126916/*              CT(WMZMTCBCPCUMVM)                                  */
+00127020/*              TABLST SRN TPLT OPT() SEQ NOLINK                    */
+00127100/*              SRCDSN(NCAMCM.TESTLIB.&GROUP..HAL) LITS(5000)       */
+00127200/*                                                                  */
+00127300/*     ALIAS    - NONE.                                             */
+00127400/*     REQUIRED - 'GROUP'                                           */
+00127500/*                                                                  */
+00127600/*------------------------------------------------------------------*/
+00127700/*                                                                  */
+00127800/*   INVOKES:  PDSALL                                               */
+00127914/*             H360CLG                                              */
+00128000/*                                                                  */
+00129000/*------------------------------------------------------------------*/
+00130000/*   PARAMETERS:                                                    */
+00131000/*                                                                  */
+00131100/*     GROUP    REQUIRED                                            */
+00131200/*              NAME OF THE TEST CATEGORY                           */
+00131300/*                                                                  */
+00131400/*     ID       DEFAULT: &SYSUID.                                   */
+00131500/*              HIGH LEVEL QUALIFIER                                */
+00131600/*                                                                  */
+00131700/*     DSN      DEFAULT: TEST                                       */
+00131800/*              A DSN LEVEL                                         */
+00131900/*                                                                  */
+00132000/*     LIB      DEFAULT: &ID..TEST                                  */
+00133000/*              OTHER DSN LEVELS                                    */
+00134000/*                                                                  */
+00135000/*     FIRSTRUN OPTIONAL                                            */
+00136000/*              INITIALIZE DATASETS THE FIRST TIME                  */
+00137000/*                                                                  */
+00138000/*     REFRESH  OPTIONAL                                            */
+00139000/*              IF SPECIFIED DELETE AND THEN REALLOCATE DATASETS    */
+00139100/*                                                                  */
+00139200/*     LIST     DEFAULT: NULL                                       */
+00139300/*              DATA SET WHICH CONTAINS A LIST OF MEMBERS IN THE    */
+00139400/*              SOURCE DATA SET YOU WANT TO RUN                     */
+00139500/*                                                                  */
+00139600/*     TRACE    OPTIONAL                                            */
+00139700/*              EXECUTION OF THE CLIST WILL BE DISPLAYED ON SCREEN  */
+00139800/*                                                                  */
+00139900/*     SEQ      OPTIONAL                                            */
+00140000/*              SEND LISTING, OUTPUT AND UCP TO A SEQUENTIAL   FILE */
+00150000/*                                                                  */
+00160018/*     NOLINK  OPTIONAL                                             */
+00170014/*              IF SPECIFIED, H360CLG DOES NOT CALL PRELINKER       */
+00180000/*                                                                  */
+00184000/*     COMPVER  DEFAULT: CURRENT                                    */
+00185000/*              COMPILER VERSION                                    */
+00186000/*                                                                  */
+00187000/*     RUNLVER  DEFAULT: &COMPVER                                   */
+00188000/*              RUNLIB VERSION                                      */
+00189000/*                                                                  */
+00190014/*     ERRORLIB DEFAULT: NCAMCM.H360.&COMPVER..ERRORLIB             */
+00200000/*              BASELINE ERROR LIBRARY                              */
+00210000/*                                                                  */
+00220014/*     COMPILER DEFAULT: NCAMCM.H360.&COMPVER..COMPILER             */
+00230000/*              COMPILER                                            */
+00231000/*                                                                  */
+00232000/*     TERRORLIB DEFAULT: NULL                                      */
+00233000/*              USERS TEMPORARY ERROR LIBRARY                       */
+00234000/*                                                                  */
+00234100/*     HALSDF2  DEFAULT: &ID..&DSN..COMPOOL.SDF                     */
+00234200/*              ADDITIONAL SDF FILE, SUCH AS COMPOOL.SDF            */
+00234300/*                                                                  */
+00234400/*     HALLOAD2 DEFAULT: &ID..&DSN..COMPOOL.LOAD                    */
+00234500/*              ADDITIONAL LOAD FILE, SUCH AS COMPOOL.LOAD          */
+00234600/*                                                                  */
+00234714/*     MONITOR  DEFAULT: NCAMCM.H360.&COMPVER..MONITOR.LOAD         */
+00234800/*              MONITOR TO RUN THE COMPILER ON S MACHINE            */
+00234900/*                                                                  */
+00235000/*     SRCDSN   DEFAULT: NCAMCM.TESTLIB.&GROUP..HAL                 */
+00236000/*              HAL SOURCE FILE FOR TEST CATEGORY                   */
+00237000/*                                                                  */
+00238014/*     RUNLIB   DEFAULT: NCAMCM.H360.&RUNLVER..RUNLIB               */
+00239000/*              RUNTIME LIBRARY EXECUTABLES FOR S MACHINE           */
+00239100/*                                                                  */
+00239500/*     TRUNLIB  DEFAULT: NULL                                       */
+00239600/*              USERS TEMPORARY RTL EXECUTABLES                     */
+00239700/*                                                                  */
+00240500/*     LNKIN    DEFAULT: NCAMCM.TESTLIB.&GROUP..CON                 */
+00240600/*              OVERRIDING DIRECTIVES FOR PRELINKER                 */
+00240700/*                                                                  */
+00240822/* OPTIONS PASSED TO THE COMPILER                                   */
+00240900/*                                                                  */
+00241000/*     CT       DEFAULT: WMZMTCBCPCUMVM                             */
+00241100/*              CARD TYPE                                           */
+00241200/*                                                                  */
+00241300/*     LITS     DEFAULT: 5000                                       */
+00241400/*              LITERAL STRING SIZE                                 */
+00241500/*                                                                  */
+00241900/*     OPT      DEFAULT: NULL                                       */
+00242000/*              OTHER USER REQUESTED OPTION                         */
+00242100/*                                                                  */
+00242200/*     TPLT     OPTIONAL                                            */
+00242300/*              TEMPLATE GENERATION                                 */
+00242400/*                                                                  */
+00242500/*     TABLST   OPTIONAL                                            */
+00242600/*              TABLE LIST FOR PHASE IV OF SDFS                     */
+00242700/*                                                                  */
+00242800/*     SRN      OPTIONAL                                            */
+00242900/*              SOURCE INCLUDES LINE NUMBERS                        */
+00243000/*                                                                  */
+00243114/* OPTIONS H360ED TO LINKAGE EDITOR                                 */
+00243200/*                                                                  */
+00243318/*     LOPT     DEFAULT: NULL                                       */
+00243418/*              LINKER OPTION                                       */
+00243514/*                                                                  */
+00244100/*------------------------------------------------------------------*/
+00244200/*                                                                  */
+00244300/*   INPUT DATA SET NAMES:                                          */
+00244400/*                                                                  */
+00244500/*     NCAMCM.TESTLIB.&GROUP..HAL                                   */
+00244600/*         PDS OF HALS SOURCE CODE FOR A TEST  CATEGORY             */
+00244700/*                                                                  */
+00244800/*                                                                  */
+00244914/*     NCAMCM.H360.<COMPVER>.COMPILER                               */
+00245014/*         H360 COMPIER                                             */
+00245100/*                                                                  */
+00245214/*     NCAMCM.H360.<COMPVER>.ERRORLIB                               */
+00245300/*         PDS BASELINE ERROR LIBRARY                               */
+00245400/*                                                                  */
+00245514/*     NCAMCM.H360.<RUNLVER>.RUNLIB                                 */
+00245614/*         PDS OF RUNTIME LIBRARY EXECUTABLES                       */
+00245700/*                                                                  */
+00245800/*------------------------------------------------------------------*/
+00245900/*                                                                  */
+00246000/*   OUTPUT DATA SET NAMES:                                         */
+00246100/*                                                                  */
+00246200/*     <LIB>.COMPRPT                                                */
+00246300/*         PDS OF COMPILATION REPORT                                */
+00246400/*                                                                  */
+00246800/*     <LIB>.LINKRPT                                                */
+00246900/*         PDS OF LINKAGE REPORT                                    */
+00247000/*                                                                  */
+00247100/*     <LIB>.LOAD(<NAME>)                                           */
+00247200/*         PDS LOAD MODULE                                          */
+00247300/*                                                                  */
+00247400/*     <LIB>.LST(<NAME>)                                            */
+00247500/*         PDS OF COMPILER LISTING                                  */
+00247600/*                                                                  */
+00247714/*     <LIB>.MAP360(<NAME>)                                         */
+00247814/*         PDS OF MODULE MAP                                        */
+00247900/*                                                                  */
+00248000/*     <LIB>.OBJ(<NAME>)                                            */
+00248100/*         PDS OF OBJECT MODULE                                     */
+00248200/*                                                                  */
+00248300/*     <LIB>.OUT(<NAME>)                                            */
+00248400/*         PDS OF EXECUTION RESULTS                                 */
+00248500/*                                                                  */
+00248600/*------------------------------------------------------------------*/
+00248700/*                                                                  */
+00248800/*   TEMPORARY DATA SET NAMES:                                      */
+00248900/*                                                                  */
+00249000/*     NONE                                                         */
+00249100/*                                                                  */
+00249200/*------------------------------------------------------------------*/
+00249300/*  REVISION HISTORY :                                              */
+00249400/*                                                                  */
+00249500/*    DATE      PCR#     NAME   DESCRIPTION                         */
+00249600/*    --------  -----    ----   -------------------------------     */
+00390022/*    10/17/97  0542     LJK    WRITTEN FOR TESTING H360 COMPILER   */
+00400000/********************************************************************/
+00410000 
+00420000PROC     1  GROUP                                                 +
+00430000            ID(&SYSUID.)                                          +
+00440000            DSN(TEST)                                             +
+00450000            LIB(&ID..&DSN..&GROUP.)                               +
+00460000            SRCDSN(NCAMCM.TESTLIB.&GROUP..HAL)                    +
+00470000            COMPVER(CURRENT)                                      +
+00480000            RUNLVER(&COMPVER.)                                    +
+00490001            COMPILER(NCAMCM.H360.&COMPVER..COMPILER)              +
+00500001            RUNLIB(NCAMCM.H360.&RUNLVER..RUNLIB)                  +
+00520001            ERRORLIB(NCAMCM.H360.&COMPVER..ERRORLIB)              +
+00530016            MONITOR(NCAMCM.H360.&COMPVER..MONITOR.LOAD)           +
+00550000            TRUNLIB()                                             +
+00560021            TERRORLIB()                                           +
+00570000            HALSDF2(&ID..&DSN..COMPOOL.SDF)                       +
+00580016            HALLOAD2(&ID..&DSN..COMPOOL.LOAD)                     +
+00590000            LNKIN(NCAMCM.TESTLIB.&GROUP..CON)                     +
+00600000            CT(WMZMTCBCPCUMVM)                                    +
+00620000            LITS(5000)                                            +
+00640000            TPLT                                                  +
+00650000            TABLST                                                +
+00661000            SRN                                                   +
+00662000            OPT()                                                 +
+00664000            LIST()                                                +
+00665000            TRACE                                                 +
+00666000            SEQ                                                   +
+00667018            NOLINK                                                +
+00669000            REFRESH                                               +
+00670000            FIRSTRUN
+00680000 
+00690000GLOBAL  RETCODE
+00700000IF  &TRACE. NE THEN  CONTROL CONLIST LIST
+00710000CONTROL END(DONE)
+00720000 
+00730000/********************************************************/
+00740000/*                                                      */
+00750000/*  RUN PDSALL TO CREATE THE MEMBER LIST FILE           */
+00760000/*                                                      */
+00770000/********************************************************/
+00780000IF &LIST. EQ THEN  DO
+00790000   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00800000   WRITE *** EXECUTING TESTLIB.&GROUP. ***
+00810000   SET &LIST =  &LIB..MEMLIST
+00820000DONE
+00830000         /***************************************/
+00840000         /*                                     */
+00850000         /*    ON ATTN, DO THE FOLLOWING:       */
+00860000         /*                                     */
+00870000         /***************************************/
+00880000 
+00890000ATTN     DO
+00900000         ERROR    OFF
+00910000         CLOSFILE MEMBERS
+00920000         FREE     F(MEMBERS)
+00930000         EXIT
+00940000DONE
+00950000 
+00960000CONTROL  NOMSG
+00970000         FREE     F(MEMBERS)
+00980000CONTROL  MSG NOFLUSH
+00990000 
+01000000         /***************************************/
+01010000         /*                                     */
+01020000         /* SET UP TO READ THE FILE &LIST.      */
+01030000         /*                                     */
+01040000         /***************************************/
+01050000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+01060000OPENFILE MEMBERS  INPUT
+01070000 
+01080000         /***************************************/
+01090000         /*                                     */
+01100000         /* ON ERROR, DO THE FOLLOWING:         */
+01110000         /*                                     */
+01120000         /***************************************/
+01130000ERROR DO
+01140000ERROR1: CLOSFILE MEMBERS
+01150000   FREE F(MEMBERS)
+01160000   IF &NEWRUNBT. ^= 0 THEN DO
+01170000   WRITE ***
+01180000   WRITE ***  COMPILE/LINK OF ALL COMPOOLS AND PROCEDURES COMPLETED ***
+01190000   WRITE ***
+01200000   DONE
+01210000   ERROR OFF
+01220000   GOTO EXECIT
+01230000DONE
+01240000 
+01250000    IF &TERRORLIB. NE THEN SET &TERRORLIB = TERRORLIB(&TERRORLIB.)
+01260000        ELSE SET  &TERRORLIB =
+01270000    IF &TRUNLIB. NE THEN SET &TRUNLIB = TRUNLIB(&TRUNLIB.)
+01280000        ELSE SET  &TRUNLIB =
+01290000    IF &HALSDF2. NE THEN SET &HALSDF2 = HALSDF2(&HALSDF2.)
+01300000        ELSE SET  &HALSDF2 =
+01310009    IF &HALLOAD2. NE THEN SET &HALLOAD2 = HALLOAD2(&HALLOAD2.)
+01320009        ELSE SET  &HALLOAD2 =
+01330016    IF &SYSDSN('NCAMCM.TESTLIB.&GROUP..INC') EQ OK THEN +
+01340014       SET &INCLUDE2 = INCLUDE2(NCAMCM.TESTLIB.&GROUP..INC)
+01350015        ELSE SET  &INCLUDE2 =
+01360014    IF &SYSDSN('&LNKIN.') EQ OK THEN  +
+01370014        SET &LNKIN = LNKIN(&LNKIN.)
+01380014        ELSE SET &LNKIN =
+01390000    IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+01400000        ELSE SET  &OPT =
+01410000/*                                                                  */
+01420000/* IF THIS IS THE FIRST TIME TO RUN TEST360, SET 'NEWRUN' AND       */
+01421000/* 'FIRST' FLAGS TO ALLOCATE NECESSARY DATASETS, OR IF 'REFRESH' IS */
+01422000/* SPECIFIED, SET 'FIRSTD' AND 'NEWRUN' FLAGS TO DELETE ALL         */
+01423000/* DATASETS AND REALLOCATE THEM.                                    */
+01424000/*                                                                  */
+01425000SET &NEWRUNBT = 0
+01426000     IF &FIRSTRUN NE THEN DO
+01427000        SET &FIRST  = FIRST
+01428000        SET &NEWRUN = NEWRUN
+01429000     DONE
+01430000 
+01430100     IF &REFRESH NE THEN DO
+01430200        SET &FIRSTD = FIRSTD
+01430300        SET &NEWRUN = NEWRUN
+01430400     DONE
+01430500 
+01430600/*
+01430700/* FIRST COMPILE AND LINK ANY COMPOOL, PROCEDURE AND FUNCTION IN DATASET
+01430800/*
+01430900DO  WHILE  &SYSUID NE
+01431000    GETFILE MEMBERS
+01432000      IF (&SUBSTR(1:2,&MEMBERS) > PR) THEN GOTO ERROR1
+01433000      IF ((&SUBSTR(1:3,&MEMBERS) = CMP) OR      +
+01434000         (&SUBSTR(1:2,&MEMBERS) = CP ) OR       +
+01435000         (&SUBSTR(1:2,&MEMBERS) = PR)) THEN DO
+01436000     SET &MEMLEN = 1
+01437000     DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+01438000        SET &MEMLEN =  &MEMLEN + 1
+01439000     DONE
+01440000     SET &MEMLEN = &MEMLEN - 1
+01450000     SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+01450103     IF  (&SUBSTR(1:2,&MEMBERS) = PR) THEN SET &MTYPE= CS
+01451003                                      ELSE SET &MTYPE= CP
+01460000 
+01470000        TIME
+01480015         H360CLG  CL &NAME. LIB(&LIB.) &FIRST &FIRSTD &NEWRUN  +
+01490000                  COMPILER(&COMPILER.) &TERRORLIB. &TRUNLIB.   +
+01500000                  ERRORLIB(&ERRORLIB.)  COMPVER(&COMPVER.)     +
+01510000                  RUNLIB(&RUNLIB.) MONITOR(&MONITOR.) CT(&CT.) +
+01520007                  &SEQ. &MTYPE    +
+01530015                  &HALSDF2. &HALLOAD2.  &TRACE. LITS(&LITS.)   +
+01540018                  &TPLT. &TABLST.  &OPT. &SRN. &NOLINK.        +
+01560021                  SYSIN(&SRCDSN.(&NAME.)) &INCLUDE2.
+01570000 
+01580000        SET &NEWRUNBT = &NEWRUNBT. + 1
+01590000        SET &NEWRUN   =
+01600000        SET &FIRSTD   =
+01610000        SET &FIRST    =
+01620000      DONE
+01630000      IF &NEWRUNBT. = 5  THEN DO
+01640000        COMPRESS '&LIB..LOAD'
+01650000        COMPRESS '&LIB..LST'
+01660012        COMPRESS '&LIB..MAP360'
+01670000        COMPRESS '&LIB..OBJ'
+01680000        SET &NEWRUNBT  =  1
+01690000      DONE
+01700000DONE
+01710000/*------------------------------------------------------------------*/
+01720000EXECIT:CONTROL MSG
+01730000/*
+01740000/* NOW COMPILE/LINK/EXECUTE THE HAL PROGRAMS
+01750000/*
+01760000ALLOC    F(MEMBERS)  DA('&LIST.')  SHR
+01770000OPENFILE MEMBERS INPUT
+01780000 
+01790000ERROR DO
+01800000   CLOSFILE MEMBERS
+01810000   FREE   F(MEMBERS)
+01820000   WRITE ***
+01830000   WRITE ***  ALL &LIB. PROGRAMS COMPLETED  ***
+01840000   WRITE ***
+01850000   ERROR OFF
+01860000   EXIT
+01870000DONE
+01880000 
+01890000DO  WHILE  &SYSUID NE
+01900000    GETFILE MEMBERS
+01910000    IF &SUBSTR(1:6,&MEMBERS) ^= ##INFO THEN +
+01920000      IF &SUBSTR(1:3,&MEMBERS) ^= CMP THEN  +
+01930000      IF &SUBSTR(1:2,&MEMBERS) ^= CP THEN   +
+01940000      IF &SUBSTR(1:3,&MEMBERS) ^= PRC THEN DO
+01950000     SET &MEMLEN = 1
+01960000     DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+01970000        SET &MEMLEN =  &MEMLEN + 1
+01980000     DONE
+01990000     SET &MEMLEN = &MEMLEN - 1
+02000000     SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+02010000 
+02020000          TIME
+02030015            H360CLG CLG &NAME. LIB(&LIB.) &FIRST &FIRSTD &NEWRUN  +
+02040000             COMPILER(&COMPILER.) RUNLIB(&RUNLIB.) &TRUNLIB       +
+02050000             &TERRORLIB. ERRORLIB(&ERRORLIB.)  LITS(&LITS.)       +
+02060018             &TRACE CT(&CT.) COMPVER(&COMPVER.)                   +
+02070018             MONITOR(&MONITOR.) &HALSDF2. &HALLOAD2.              +
+02090018             &TPLT. &TABLST. &OPT. &SRN. &NOLINK.                 +
+02092021             SYSIN(&SRCDSN.(&NAME.)) &INCLUDE2.
+02093000 
+02094000          SET &NEWRUNBT  = &NEWRUNBT.  +  1
+02095000          SET &NEWRUN    =
+02096000          SET &FIRSTD    =
+02097000          SET &FIRST     =
+02098000        DONE
+02099000      IF &NEWRUNBT. = 5  THEN DO
+02100000        COMPRESS '&LIB..LOAD'
+02110000        COMPRESS '&LIB..LST'
+02130000        COMPRESS '&LIB..OBJ'
+02140000        COMPRESS '&LIB..SDF'
+02160000        SET &NEWRUNBT  =  1
+02170000      DONE
+02180000DONE
+02190000EXIT

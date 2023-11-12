@@ -1,0 +1,214 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     NEWCMPLR                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO ALLOCATE THE NECESSARY DATASETS FOR CREATING A    */
+00090000/*             NEW COMPILER VIA CLISTS XPLFC AND AUDIT.             */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     NEWCMPLR 'NEWREL' ID(&SYSUID.) PASS1 PASS2 PASS3 PASS4 AUX   */
+00150000/*              OPT FLO RTL BFS TRACE                               */
+00160000/*                                                                  */
+00170000/*     ALIAS    - NONE.                                             */
+00180000/*     REQUIRED - 'NEWREL'                                          */
+00200000/*                                                                  */
+00210000/*------------------------------------------------------------------*/
+00220000/*                                                                  */
+00230000/*   INVOKES:                                                       */
+00240000/*                                                                  */
+00250000/*     NONE.                                                        */
+00260000/*                                                                  */
+00270000/*------------------------------------------------------------------*/
+00280000/*                                                                  */
+00290000/*   PARAMETERS:                                                    */
+00300000/*                                                                  */
+00310000/*     NEWREL   REQUIRED                                            */
+00320000/*              NEW NAME FOR THIS RELEASE OF THE COMPILER           */
+00330000/*              INDIVIDUALS USUALLY USE REL99V0 OR THE DR #         */
+00340000/*                                                                  */
+00350000/*     ID       DEFAULT: &SYSUID                                    */
+00360000/*              THE HIGH LEVEL QUALIFIER OF THE DATASETS            */
+00370000/*                                                                  */
+00380000/*     PASS1    OPTIONAL                                            */
+00390000/*              INDICATES THAT A NEW PASS1 WILL BE CREATED          */
+00400000/*                                                                  */
+00410000/*     PASS2    OPTIONAL                                            */
+00420000/*              INDICATES THAT A NEW PASS2 WILL BE CREATED          */
+00430000/*                                                                  */
+00440000/*     PASS3    OPTIONAL                                            */
+00450000/*              INDICATES THAT A NEW PASS3 WILL BE CREATED          */
+00460000/*                                                                  */
+00470000/*     PASS4    OPTIONAL                                            */
+00480000/*              INDICATES THAT A NEW PASS4 WILL BE CREATED          */
+00490000/*                                                                  */
+00500000/*     AUX      OPTIONAL                                            */
+00510000/*              INDICATES THAT A NEW AUX PASS WILL BE CREATED       */
+00520000/*                                                                  */
+00530000/*     OPT      OPTIONAL                                            */
+00540000/*              INDICATES THAT A NEW OPT PASS WILL BE CREATED       */
+00550000/*                                                                  */
+00560000/*     FLO      OPTIONAL                                            */
+00570000/*              INDICATES THAT A NEW FLO PASS WILL BE CREATED       */
+00580000/*                                                                  */
+00590000/*     RTL      OPTIONAL                                            */
+00600000/*              INDICATES THAT RTL DATASETS NEED TO BE CREATED TOO  */
+00610000/*                                                                  */
+00620000/*     BFS      OPTIONAL                                            */
+00630000/*              INDICATES THAT BFS RTL DATASETS ARE CREATED         */
+00640000/*                                                                  */
+00650000/*     TRACE    OPTIONAL                                            */
+00660000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00670000/*              TERMINAL                                            */
+00680000/*                                                                  */
+00690000/*------------------------------------------------------------------*/
+00700000/*                                                                  */
+00710000/*   INPUT DATA SET NAMES: NONE                                     */
+00720000/*                                                                  */
+00730000/*------------------------------------------------------------------*/
+00740000/*                                                                  */
+00750000/*   OUTPUT DATA SET NAMES:                                         */
+00760000/*                                                                  */
+00770000/*     THE FOLLOWING DATASETS WILL ALWAYS BE ALLOCATED              */
+00780000/*                                                                  */
+00790000/*     <ID>.<NEWREL>.ERRORLIB                                       */
+00800000/*         USERS OWN ERROR LIBRARY TO BE USED BY THE PROGRAMMER     */
+00810000/*                                                                  */
+00811000/*     <ID>.<NEWREL>.TERRORLIB                                      */
+00812000/*         USERS OWN TEMPORARY ERROR LIBRARY                        */
+00813000/*                                                                  */
+00820000/*     <ID>.<NEWREL>.INCL                                           */
+00830000/*         USERS OWN INCLUDE FILE STORAGE AREA                      */
+00840000/*                                                                  */
+00850000/*     ONE OF EACH OF THE FOLLOWING WILL BE CREATED BY THIS CLIST   */
+00860000/*     FOR EVERY PASS OPTION GIVEN WHERE '*' IS REPLACED BY EACH    */
+00870000/*     PASS OPTION.                                                 */
+00880000/*                                                                  */
+00890000/*     <ID>.<NEWREL>.*.PROCS                                        */
+00900000/*         DATASET FOR PROCEDURE FOR THE GIVEN PASS                 */
+00910000/*                                                                  */
+00970000/*                                                                  */
+00980000/*------------------------------------------------------------------*/
+00990000/*                                                                  */
+01000000/*   TEMPORARY DATA SET NAMES: NONE                                 */
+01010000/*                                                                  */
+01020000/*------------------------------------------------------------------*/
+01030000/*                                                                  */
+01040000/*   COMMENTS:  NONE                                                */
+01050000/*                                                                  */
+01060000/*------------------------------------------------------------------*/
+01070000/*                                                                  */
+01080000/*   REVISION HISTORY:                                              */
+01090000/*                                                                  */
+01100000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+01110000/*     --------  ----  ----  -------------------------------------  */
+01120000/*     07/01/89  XXX   LJK   CREATED AND PUT INTO CM                */
+01130000/*                                                                  */
+01140000/*     05/23/90  089   SDM   MODIFIED ID, ADDED RTL AND BFS,        */
+01150000/*                           DELETED CREATION OF .DECKS & .UPDATES  */
+01160000/*                                                                  */
+01170000/*     06/25/90  099   TEV   UPDATED HEADER.                        */
+01180000/*                                                                  */
+01181000/*     05/14/91  169   LJK   UPDATED ALLOCATION OF RUNMAC RUNLST    */
+01182000/*                           AND ADDED ALLOCATION OF PASSX.PROCS    */
+01190000/*------------------------------------------------------------------*/
+01200000/********************************************************************/
+01210000 
+01220000PROC     1  NEWREL          +
+01230000            ID(&SYSUID.)    +
+01240000            PASS1           +
+01250000            PASS2           +
+01260000            PASS3           +
+01270000            PASS4           +
+01280000            AUX             +
+01290000            OPT             +
+01300000            FLO             +
+01310000            RTL             +
+01320000            BFS             +
+01330000            TRACE
+01340000GLOBAL RETCODE
+01350000IF &TRACE NE THEN CONTROL LIST CONLIST
+01360000SET &LIB = &ID..&NEWREL
+01370000 
+01380000ALLOC   DA('&LIB..ERRORLIB')       SPACE(5,5) TRACKS +
+01390000         DSORG(PO)  RECFM(F B)      LRECL(80) BLKSIZE(400) DIR(20)
+01400000 
+01410000ALLOC   DA('&LIB..INCL')           SPACE(10,5) TRACKS +
+01420000         DSORG(PO)  RECFM(F B)      LRECL(88) BLKSIZE(6160) DIR(10)
+01430000 
+01440000IF &PASS1. NE THEN +
+01450000 ALLOC   DA('&LIB..PASS1.PROCS')    SPACE(65,10) TRACKS +
+01460000         DSORG(PO)  RECFM(F B)      LRECL(88) BLKSIZE(6160) DIR(25)
+01470000 
+01580000IF &PASS2. NE THEN +
+01590000 ALLOC   DA('&LIB..PASS2.PROCS')    SPACE(38,10) TRACKS +
+01600000         DSORG(PO)  RECFM(F B)      LRECL(88) BLKSIZE(6160) DIR(25)
+01610000 
+01720000IF &PASS3. NE THEN +
+01721000 ALLOC   DA('&LIB..PASS3.PROCS')    SPACE(15,10) TRACKS +
+01722000         DSORG(PO)  RECFM(F B)      LRECL(88) BLKSIZE(6160) DIR(25)
+01750000 
+01860000IF &PASS4. NE THEN +
+01861000 ALLOC   DA('&LIB..PASS4.PROCS')    SPACE(8,10) TRACKS +
+01862000         DSORG(PO)  RECFM(F B)      LRECL(88) BLKSIZE(6160) DIR(25)
+01890000 
+02000000IF &AUX. NE THEN +
+02001000 ALLOC   DA('&LIB..AUX.PROCS')      SPACE(14,10) TRACKS +
+02002000         DSORG(PO)  RECFM(F B)      LRECL(88) BLKSIZE(6160) DIR(25)
+02030000 
+02140000IF &FLO. NE THEN +
+02141000 ALLOC   DA('&LIB..FLO.PROCS')      SPACE(14,10) TRACKS +
+02142000         DSORG(PO)  RECFM(F B)      LRECL(88) BLKSIZE(6160) DIR(25)
+02170000 
+02280000IF &OPT. NE THEN +
+02281000 ALLOC   DA('&LIB..OPT.PROCS')      SPACE(62,10) TRACKS +
+02282000         DSORG(PO)  RECFM(F B)      LRECL(88) BLKSIZE(6160) DIR(25)
+02310000 
+02420000IF &RTL. NE THEN DO
+02430000IF &BFS EQ THEN DO
+02440000  ALLOC   DA('&LIB..RUNASM')           SPACE(33,10) TRACKS +
+02450000          DSORG(PO)  RECFM(F B)        LRECL(80) BLKSIZE(1680) DIR(25)
+02460000 
+02470000  ALLOC   DA('&LIB..RUNLIB')           SPACE(205,20) TRACKS +
+02480000          DSORG(PO)  RECFM(U)          LRECL(0) BLKSIZE(7294) DIR(70)
+02490000 
+02500000  ALLOC   DA('&LIB..RUNMAP')           SPACE(205,20) TRACKS +
+02510000          DSORG(PO)  RECFM(U)          LRECL(0) BLKSIZE(7294) DIR(70)
+02520000 
+02530000  ALLOC   DA('&LIB..RUNMAC')           SPACE(3,5) TRACKS +
+02540000          DSORG(PO)  RECFM(F B)        LRECL(80) BLKSIZE(1680) DIR(25)
+02550000 
+02560000  ALLOC   DA('&LIB..RUNLST')           SPACE(205,20) TRACKS +
+02570000          DSORG(PO)  RECFM(F B M)      LRECL(121) BLKSIZE(1210) DIR(70)
+02580000END
+02590000 
+02600000IF &BFS NE THEN DO
+02610000  ALLOC   DA('&LIB..RUNASM')           SPACE(33,10) TRACKS +
+02620000          DSORG(PO)  RECFM(F B)        LRECL(80) BLKSIZE(1680) DIR(25)
+02630000 
+02640000  ALLOC   DA('&LIB..RUNLIB')           SPACE(205,20) TRACKS +
+02650000          DSORG(PO)  RECFM(F B)        LRECL(80) BLKSIZE(6160) DIR(70)
+02660000 
+02670000  ALLOC   DA('&LIB..RUNMAP')           SPACE(205,20) TRACKS +
+02680000          DSORG(PO)  RECFM(U)          LRECL(0) BLKSIZE(7294) DIR(70)
+02690000 
+02700000  ALLOC   DA('&LIB..RUNMAC')           SPACE(3,5) TRACKS +
+02710000          DSORG(PO)  RECFM(F B)        LRECL(80) BLKSIZE(1680) DIR(25)
+02720000 
+02730000  ALLOC   DA('&LIB..RUNLST')           SPACE(205,20) TRACKS +
+02740000          DSORG(PO)  RECFM(F B M)      LRECL(121) BLKSIZE(1210) DIR(70)
+02750000 
+02760000  ALLOC   DA('&LIB..SATSLST')           SPACE(205,20) TRACKS +
+02770000          DSORG(PO)  RECFM(F B M)      LRECL(121) BLKSIZE(1210) DIR(70)
+02780000 
+02790000  ALLOC   DA('&LIB..SDFASM')           SPACE(50,20) TRACKS +
+02800000          DSORG(PO)  RECFM(F)         LRECL(1680) BLKSIZE(1680) DIR(70)
+02810000 
+02820000END
+02830000END
+02840000 
+02850000WRITE ALLOCATION OF COMPILER DATASETS COMPLETED.

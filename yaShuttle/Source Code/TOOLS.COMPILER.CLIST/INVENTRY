@@ -1,0 +1,225 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:      INVENTRY                                            */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000807/*   FUNCTION: CREATES INVENTORY FILES CONTAINING FLIGHT SOFTWARE   */
+00000938/*             PARAMETERS FOR THE SPECIFIED OI() FOR EACH NAME IN   */
+00001038/*             THE LIST() FILE.  IF NO LIST() PARAMETER IS PASSED   */
+00001138/*             TO THE CLIST, THEN THE DEFAULT IS TO USE             */
+00001238/*             NCAMCM.TESTLIB.&OI..APPL.MEMLIST.  IF THAT FILE DOES */
+00001338/*             NOT EXIST, THEN ONE WILL BE CREATED AND SAVED TO     */
+00001438/*             &SYSUID..APPL.MEMLIST.  OUTPUT FILES WILL BE SAVED   */
+00001538/*             TO &ID..&OI..INVENTRY.  TO GENERATE INVENTORY        */
+00001638/*             FILES FOR SS, ADD THE DSN(SS) PARAMETER.             */
+00001949/*                  '*** WARNING -- NO DATA FOUND ***' WILL BE      */
+00002038/*             PRINTED IF NO PARAMETER INFORMATION WAS FOUND IN THE */
+00002138/*             ORACLE DATABASE. AN OUTPUT FILE WITH MEMBER NAME AND */
+00002238/*             OI WILL STILL BE GENERATED.                          */
+00002349/*                  '*** WARNING -- PARM TOO LONG ***' WILL BE      */
+00002454/*             PRINTED IF THE PARAMETER FIELD EXCEEDS 86 CHARACTERS.*/
+00002549/*             CURRENTLY, PASSCLG ALLOCATES AN OUTPUT FILE WITH     */
+00002653/*             LRECL=80 FOR THE PARAMETERS OUTPUT FROM OPTION.      */
+00002749/*             (EXCLUDING PARM=''). THIS PARAMETER MAY BE TRUNCATED */
+00002849/*             BY THE OPTION PROGRAM OR BY INVENTRY (LRECL=120).    */
+00002952/*             CHECK &ID..&OI..INVENTRY(&NAME) AND                  */
+00003052/*             &LIB..OPT(&NAME) TO ENSURE THAT THE PARAMETER WAS    */
+00003152/*             NOT TRUNCATED.  IF IT WAS, THE SIZE OF THE OUTPUT    */
+00003253/*             FILES IN PASSCLG AND/OR INVENTRY NEED TO BE INCREASED*/
+00003338/*                  THE INVENTORY FILES ARE THEN READ BY PASSCLG    */
+00003438/*             OR H360CLG WHEN THE 'FSW' OPTION IS SPECIFIED. THESE */
+00003538/*             CLISTS CALL NCAMCM.TOOLS.XPLOBJ(OPT).  THIS PROGRAM  */
+00003638/*             LOOKS FOR 'H1', 'H3', AND 'PARM' IN THE INVENTORY    */
+00003738/*             FILE FOR THE MEMBER BEING COMPILED.  IF NOT FOUND,   */
+00003838/*             THE PROGRAM PASSES PMF DEFAULT PARAMETERS TO PASSCLG */
+00003938/*             OR H360CLG.  THE DEFAULT LOCATION TO SAVE INVENTORY  */
+00004038/*             FILES IS NCAMCM.TESTLIB.&OI..INVENTRY.               */
+00004138/*                  IF RUNNING USING BATCH, THE FOLLOWING LINE NEEDS*/
+00004249/*             TO BE ADDED TO A TEMPORARY VERSION OF                */
+00004349/*             NCAMCM.TOOLS.SYSJCL(BATCH):                          */
+00004438/*             'STEPLIB  DD DSN=ORACLED.OPROD.CMDLOAD,DISP=SHR'     */
+00004549/*                  CURRENTLY OI320000 IS THE EARLIEST OI AVAILABLE */
+00004638/*             IN ORACLE.  PREVIOUS OIS ARE AVAILABLE THROUGH IMS.  */
+00004738/*                                                                  */
+00004800/*------------------------------------------------------------------*/
+00004900/*                                                                  */
+00005000/*   SYNTAX :                                                       */
+00005100/*     INVENTRY ID(&SYSUID.) DSN(APPL) LIB(&ID..&DSN.)              */
+00005235/*              OI(OI320000)                                        */
+00005307/*              OUT(&ID..&OI..INVENTRY)                             */
+00005434/*              SRCDSN(&OI..&DSN..SRC)                              */
+00005500/*              LIST(NCAMCM.TESTLIB.&OI..&DSN..MEMLIST)             */
+00005607/*              TRACE                                               */
+00005700/*                                                                  */
+00005800/*     ALIAS    - NONE.                                             */
+00005900/*     REQUIRED - NONE.                                             */
+00006000/*                                                                  */
+00006100/*------------------------------------------------------------------*/
+00006200/*                                                                  */
+00006358/*   INVOKES :  NCAMCM.TOOLS.CLOAD(INVENTRY)                        */
+00006434/*              NCAMCM.TOOLS.XPLOBJ(PDSALL)                         */
+00006500/*                                                                  */
+00006600/*------------------------------------------------------------------*/
+00006700/*                                                                  */
+00006800/*   PARAMETERS:                                                    */
+00006900/*                                                                  */
+00007000/*     ID       DEFAULT: &SYSUID                                    */
+00007100/*              HIGH LEVEL QUALIFIER                                */
+00007200/*                                                                  */
+00007300/*     DSN      DEFAULT: APPL                                       */
+00007447/*              DATA SET FOR THE MEMBER LIST (IF LIST NOT SPECIFIED)*/
+00007546/*                                                                  */
+00007607/*     SRCDSN   DEFAULT: &OI..APPL.SRC                              */
+00007700/*              DATA SET WHICH CONTAINS THE SOURCE PROGRAMS         */
+00007847/*              (IGNORED IF LIST IS SPECIFIED)                      */
+00007900/*                                                                  */
+00008000/*     LIB      DEFAULT: &ID..&DSN                                  */
+00008147/*              NAME QUALIFIER FOR GENERATED MEMBER LIST            */
+00008247/*              (IGNORED IF LIST IS SPECIFIED)                      */
+00008300/*                                                                  */
+00008414/*     LIST     DEFAULT: NCAMCM.TESTLIB.&OI..APPL.MEMLIST           */
+00008547/*              DATA SET WHICH CONTAINS A MEMBER LIST OF MEMBERS    */
+00008647/*              NEEDING INVENTORY FILES                             */
+00008700/*                                                                  */
+00008835/*     OI       DEFAULT: OI320000                                   */
+00008900/*              FSW VERSION                                         */
+00009000/*                                                                  */
+00009107/*     OUT      DEFAULT: &ID..&OI..INVENTRY                         */
+00009200/*              FSW INVENTORY FILE FOR A SPECIFIC OI                */
+00009300/*                                                                  */
+00009700/*     TRACE    OPTIONAL                                            */
+00009800/*              TRACE THE CLISTS EXECUTION                          */
+00009900/*                                                                  */
+00010000/*------------------------------------------------------------------*/
+00010100/*                                                                  */
+00010200/*   INPUT DATA SET NAMES:                                          */
+00010300/*                                                                  */
+00010433/*     NONE                                                         */
+00010512/*                                                                  */
+00010600/*                                                                  */
+00010700/*------------------------------------------------------------------*/
+00011400/*                                                                  */
+00011500/*   OUTPUT DATA SET NAMES:                                         */
+00011600/*                                                                  */
+00011734/*     <ID>.<OI>.INVENTRY(MEMBER)                                   */
+00011834/*          COMPILATION PARAMETERS FOR EACH MEMBER IN <LIST>        */
+00011900/*                                                                  */
+00012000/*                                                                  */
+00013400/*------------------------------------------------------------------*/
+00013500/*   REVISION HISTORY:                                              */
+00013600/*                                                                  */
+00013700/*  DATE      PCR#     NAME   DESCRIPTION                           */
+00013800/*  --------  -----    ----   -------------------------------       */
+00013907/*  05/18/05  0795     JAC    CREATE PROGRAM TO GENERATE INVENTORY  */
+00014007/*                            FILES                                 */
+00014100/*------------------------------------------------------------------*/
+00014200/********************************************************************/
+00014300
+00014400PROC 0   ID       (&SYSUID.)                             +
+00014500         DSN      (APPL)                                 +
+00014600         LIB      (&ID..&DSN.)                           +
+00015335         OI       (OI320000)                             +
+00015400         SRCDSN   (&OI..&DSN..SRC)                       +
+00015506         LIST     (NCAMCM.TESTLIB.&OI..&DSN..MEMLIST)    +
+00015607         OUT      (&ID..&OI..INVENTRY)                   +
+00016100         TRACE
+00016200
+00016300CONTROL END(DONE)
+00016400GLOBAL RETCODE
+00016500IF &TRACE NE THEN CONTROL CONLIST LIST
+00016611
+00016712 ALLOC F(ORA@OSSP) DUMMY SHR REUSE
+00016931 ISPEXEC LIBDEF ISPLLIB DATASET ID('ORACLED.OPROD.CMDLOAD')
+00017030 ALLOC F(ORA$LIB) DA('ORACLED.OPROD.MESG') SHR REUSE
+00017213
+00017313 IF &SYSDSN.('&OUT.') NE OK THEN DO
+00017412 ALLOC DA('&OUT.') SPACE(200,50) TRACKS DSORG(PO)  +
+00017550        RECFM(F B) LRECL(120) BLKSIZE(1200) DIR(150)
+00017613 DONE
+00017700CONTROL NOMSG
+00017800
+00018000
+00018300/********************************************************/
+00018400/*                                                      */
+00018500/*  RUN PDSALL TO CREATE THE MEMBER LIST FILE           */
+00018600/*                                                      */
+00018700/********************************************************/
+00018819IF &SYSDSN.('&LIST.') NE OK THEN  DO
+00018937   DELETE ('&LIB..MEMLIST')
+00019000   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00019100   SET &LIST =  &LIB..MEMLIST
+00019200DONE
+00019300         /***************************************/
+00019400         /*                                     */
+00019500         /*    ON ATTN, DO THE FOLLOWING:       */
+00019600         /*                                     */
+00019700         /***************************************/
+00019800
+00019900ATTN     DO
+00020000         ERROR    OFF
+00020100         CLOSFILE MEMBERS
+00020203         FREE     F(MEMBERS)
+00020600         EXIT
+00020700DONE
+00020800
+00020900CONTROL  NOMSG
+00021000         FREE     F(MEMBERS)
+00021100CONTROL  MSG NOFLUSH
+00021200
+00021300         /***************************************/
+00021400         /*                                     */
+00021500         /* SET UP TO READ THE FILE &LIST.      */
+00021600         /*                                     */
+00021700         /***************************************/
+00021800ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00021900OPENFILE MEMBERS  INPUT
+00022000
+00022100         /***************************************/
+00022200         /*                                     */
+00022300         /* ON ERROR, DO THE FOLLOWING:         */
+00022400         /*                                     */
+00022500         /***************************************/
+00022600ERROR DO
+00022700   CLOSFILE MEMBERS
+00022800   FREE     F(MEMBERS)
+00023243   GOTO FINI
+00023339   EXIT
+00023400DONE
+00023500         /***************************************/
+00023600         /*                                     */
+00023700         /*   PERFORM THE COMMAND ON THE PDS.   */
+00023800         /*                                     */
+00023900         /***************************************/
+00024000
+00024100SET &PACK = 0
+00024200
+00024300DO    WHILE    &SYSUID NE
+00024400      GETFILE  MEMBERS
+00024500      SET &PACK = &PACK + 1
+00024600      IF &PACK. = 8   THEN SET &PACK = 0
+00024700      SET &MEMLEN = 1
+00024800      DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+00024900         SET &MEMLEN =  &MEMLEN + 1
+00025000      DONE
+00025100      SET &MEMLEN = &MEMLEN - 1
+00025208      SET &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+00025300
+00025434/********************************************************/
+00025534/*                                                      */
+00025634/*  RUN INVENTRY FOR EACH MEMBER IN LIST FILE           */
+00025734/*                                                      */
+00025834/********************************************************/
+00026110 ALLOC F(OUTFILE) DA('&OUT.(&NAME.)') SHR
+00026236 WRITE EXECUTION OF INVENTRY FOR &NAME.  &OI.
+00026557 CALL 'NCAMCM.TOOLS.CLOAD(INVENTRY)' '&NAME. &OI.'
+00027024 FREE  F(OUTFILE)
+00027100
+00029100DONE
+00029500FINI: CONTROL MSG
+00029603FREE  F(ORA@OSSP)
+00029712FREE  F(ORA$LIB)
+00029846WRITE *****************************************
+00029946WRITE *** FINISHED CREATING INVENTORY FILES ***
+00030046WRITE *****************************************

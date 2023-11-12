@@ -1,0 +1,289 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     LASERPRT                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080014/*   FUNCTION: PRINT A FILE ON THE HP4 AND HP5 LASER PRINTERS. ALSO */
+00081004/*             PRINTS OUT EACH MEMBER OF A PDS                      */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00101000/*                                                                  */
+00102000/*   SYNTAX:                                                        */
+00103000/*     LASERPRT PDS()  TRACE                                        */
+00104000/*     EXAMPLE  - LASERPRT PDS(NCAM001.TEST.CLIST)                  */
+00106000/*                                                                  */
+00107000/*     ALIAS    - NONE                                              */
+00109300/*                                                                  */
+00109400/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   INVOKES:  VPSPRINT                                             */
+00121000/*             'NCAMCM.TOOLS.MISCLOAD(MEMLIST)'                     */
+00130000/*                                                                  */
+00140000/*------------------------------------------------------------------*/
+00150000/*                                                                  */
+00160000/*   PARAMETERS:                                                    */
+00170000/*                                                                  */
+00171000/*     DA       INTERACTIVE                                         */
+00180000/*              DATASET TO BE PRINTED INCLUDING MEMBER IF PDS       */
+00190000/*              IE  DATASET1.LST      FOR &SYSUID.DATASET1.LST      */
+00200000/*              IE  DS1.LST(MEM1)     FOR &SYSUID.DS1.LST(MEM1)     */
+00210000/*              IE  '''NCAMCM.DATA''' FOR NCAMCM.DATA               */
+00220000/*              !!!!!!!!  PASSED INTERACTIVELY ONLY !!!!!!!!!       */
+00230000/*                                                                  */
+00231000/*     FILESPEC INTERACTIVE                                         */
+00240000/*              DATASET NAME FOR THE FILESPECS CONTAINING PRINTER   */
+00250000/*              PROTOCOL IN EXPRESS FORMAT                          */
+00260000/*              !!!!!!!!  PASSED INTERACTIVELY ONLY !!!!!!!!!       */
+00270000/*                                                                  */
+00271000/*     MO      INTERACTIVE                                          */
+00280000/*              L OR P; SHORT FOR LANDSCAPE OR PORTRAIT             */
+00290000/*              !!!!!!!!  PASSED INTERACTIVELY ONLY !!!!!!!!!       */
+00300000/*                                                                  */
+00361000/*     PDS      OPTIONAL                                            */
+00362000/*              THE FULLY QUALIFIED PDS WHICH TO PRINT              */
+00370000/*                                                                  */
+00470000/*     TRACE    OPTIONAL                                            */
+00480000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00490000/*              TERMINAL                                            */
+00500000/*                                                                  */
+00510000/*------------------------------------------------------------------*/
+00510100/*   INTERNAL VARIABLES:                                            */
+00510200/*                                                                  */
+00510907/*     NOEJECT  DOES NOT FORCE A PAGE EJECT AFTER THE HEADER        */
+00511000/*                                                                  */
+00511500/*     LIST     DEFAULT: NULL                                       */
+00511600/*              THE NAME OF THE DSN WHERE THE MEMBER LIST IS SAVED  */
+00511700/*                                                                  */
+00512100/*     NOEJMESS DO NOT DISPLAY A TSO END OF JOB MESSAGE             */
+00512200/*                                                                  */
+00512300/*     NONUM    THIS DATASET DOES NOT HAVE SEQUENCE NUMBERS         */
+00512400/*                                                                  */
+00512500/*     PAGELEN  FORCE PAGES TO THIS LENGTH OR LESS                  */
+00512600/*                                                                  */
+00512715/*     PRINTER  USER'S CHOICE BETWEEN HP4 AND HP5 PRINTERS.         */
+00512900/*                                                                  */
+00513015/*     PR       PRINTER LOGICAL UNIT #. THIS IS THE LU # INTERNALLY */
+00513115/*              CONVERTED FROM USER INPUT.                          */
+00513215/*                                                                  */
+00513300/*     PREDSN   NAME OF DATASET TO BE CONCATENATED AHEAD OF         */
+00513400/*              DATASET TO BE PRINTED                               */
+00513500/*                                                                  */
+00513600/*     RESET    DATASET NAME FOR THE FILESPECS CONTAINING PRINTER   */
+00513700/*              PROTOCOL IN EXPRESS FORMAT FOR PORTRAIT MODE        */
+00513800/*                                                                  */
+00513907/*     WTR      SPECIFIES THE NAME OF THE EXTERNAL WRITER TO BE     */
+00514007/*              USED WHEN PROCESSING THE PRINT REQUEST              */
+00514107/*                                                                  */
+00515000/*------------------------------------------------------------------*/
+00520000/*                                                                  */
+00530000/*   INPUT DATA SET NAMES:                                          */
+00540000/*                                                                  */
+00550000/*     NCAMCM.TOOLS.DATA                                            */
+00550100/*                                                                  */
+00551000/*     <PDS>                                                        */
+00552000/*          PDS TO PRINT OUT ALL OF THE MEMBERS                     */
+00553000/*                                                                  */
+00554000/*     &SYSUID..LASERPRT.MEMLIST                                    */
+00555000/*          DATA SET WHICH CONTAINS THE MEMBER LIST TO PROCESS      */
+00560000/*                                                                  */
+00570000/*------------------------------------------------------------------*/
+00580000/*                                                                  */
+00591000/*   OUTPUT DATA SET NAMES :                                        */
+00592000/*                                                                  */
+00593000/*     &SYSUID..LASERPRT.MEMLIST                                    */
+00594000/*          DATA SET WHICH CONTAINS THE MEMBER LIST TO PROCESS      */
+00600000/*                                                                  */
+00610000/*------------------------------------------------------------------*/
+00620000/*                                                                  */
+00630000/*   TEMPORARY DATA SET NAMES:  NONE                                */
+00640000/*                                                                  */
+00650000/*------------------------------------------------------------------*/
+00660000/*                                                                  */
+00670000/*   COMMENTS:  BE CAREFUL WHEN YOU CHANGE FONTS THAT YOUR LINE     */
+00680000/*              HEIGHT AND MARGINS DONT CAUSE PAGE OVERFLOWS !!     */
+00690000/*                                                                  */
+00700000/*------------------------------------------------------------------*/
+00710000/*                                                                  */
+00720000/*   REVISION HISTORY:                                              */
+00730000/*                                                                  */
+00740000/*                                                                  */
+00750000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00760000/*     --------  ----  ----  -------------------------------------  */
+00770000/*     09/25/89  0053  SDM   CREATED AND PUT INTO CM                */
+00771000/*                                                                  */
+00780000/*     09/28/89  0055  SDM   UPDATED RESET PROTOCOL                 */
+00781000/*                                                                  */
+00782000/*     06/26/90  0099  TEV   UPDATED HEADER                         */
+00783000/*                                                                  */
+00790000/*     11/02/90  0131  RPC   ADDED CHECK FOR DATASET EXISTENCE      */
+00800000/*                           UPGRADED TO VPS                        */
+00810000/*                           ADDED PARAMETER PDS TO PRINT ALL       */
+00810100/*                           MEMBERS OF A PDS                       */
+00811000/*                                                                  */
+00812000/*     06/26/91  0190  RPC   DELETED VPSPRINT PARM CCHAR            */
+00813000/*                                                                  */
+00814000/*     09/19/91  0186  LJK   RENAMED CM LOAD AND DATA FILE          */
+00815000/*                                                                  */
+00816000/*     01/23/92  0243  PMA   CHANGED LU NUMBER FROM C522431P TO     */
+00817000/*                           JSCP0229.  ALSO UPDATED PARAMETER      */
+00818000/*                           LIST TO INCLUDE ONLY ITEMS THAT ARE    */
+00819000/*                           ACTUALLY PASSED AS PARAMETERS.         */
+00819100/*                                                                  */
+00819200/*     09/04/96  0491  TEV   ADDED WTR() PARAMETER TO VPSPRINT CALL */
+00819300/*                           LINE TO SPECIFY PRINTER QUEUE.         */
+00819405/*                                                                  */
+00819505/*     10/31/96  0500  TEV   UPDATED LASERPRT FOR HP PRINTERS       */
+00820000/*------------------------------------------------------------------*/
+00830000/********************************************************************/
+00840000 
+00850004PROC 0 PDS() TRACE
+00860000 
+00870000IF &TRACE. NE THEN CONTROL LIST CONLIST
+00880000 
+00890000IF &PDS. NE THEN DO
+00900000         /***************************************/
+00910000         /*                                     */
+00920000         /*        GENERATE MEMBER LIST         */
+00930000         /*                                     */
+00940000         /***************************************/
+00950000CONTROL  NOMSG END(DONE)
+00960000         SET &LIST = &SYSUID..LASERPRT.MEMLIST
+00970000         FREE     F(SYSLIB SYSPRINT)
+00980000         DELETE   '&LIST.'
+00981000 
+00990000CONTROL  NOMSG
+01001000FREE     F(SYSLIB)
+01001100 
+01010000ALLOC    F(SYSLIB)   DA('&PDS.') SHR
+01020000ALLOC    F(SYSPRINT) DA('&LIST') NEW BLOCK(80) TRACK SP(1 1)
+01030000 
+01040000CALL     'NCAMCM.TOOLS.MISCLOAD(MEMLIST)'
+01050000SET      &SAVECC  = &LASTCC
+01060000FREE     F(SYSLIB SYSPRINT)
+01070000 
+01080000IF       &SAVECC  = 0 THEN +
+01090000         WRITE MEMBER LIST SUCCESSFUL
+01120000ELSE DO
+01130000         WRITE MEMBER LIST ERROR CODE = &SAVECC
+01140000         EXIT
+01150000     DONE
+01290000 
+01310000FREE     F(MEMBERS)
+01320000CONTROL  MSG NOFLUSH
+01330000 
+01340000         /***************************************/
+01350000         /*                                     */
+01360000         /* SET UP TO READ THE FILE &LIST.      */
+01370000         /*                                     */
+01380000         /***************************************/
+01390000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+01400000OPENFILE MEMBERS  INPUT
+01400100 
+01400200         /***************************************/
+01400300         /*                                     */
+01400400         /* ON ERROR, DO THE FOLLOWING:         */
+01400500         /*                                     */
+01400600         /***************************************/
+01400700ERROR DO
+01400800   CLOSFILE MEMBERS
+01400900   FREE     F(MEMBERS)
+01401000   ERROR OFF
+01401100   SET &PDS EQ
+01401200   GOTO START
+01401300DONE
+01402012GOTO MODE
+01403000DONE
+01530000 
+01540000START:  WRITENR NAME OF DATASET TO BE PRINTED:
+01550000READ &DA
+01560000 
+01570000IF &DA. EQ THEN GOTO DONE
+01580000IF &SYSDSN(&DA.) NE OK THEN DO
+01590000  WRITE &DA. DOES NOT EXIST
+01600000  GOTO DONE
+01610000DONE
+01630000 
+01660012MODE: WRITENR LANDSCAPE OR PORTRAIT?  ENTER L OR P (OR X TO EXIT):
+01670000READ &MO
+01680000/*
+01690000/*  PROVIDE ANOTHER EXIT OPPORTUNITY, OTHERWISE LOOP BACK FOR VALID MODE
+01700000/*
+01710000IF &MO EQ &STR(X) THEN GOTO DONE
+01720000IF &MO NE &STR(L) AND &MO NE &STR(P) THEN GOTO MODE
+01730000CONTROL NOMSG
+01740000 
+01741004PRINT: WRITENR NAME OF PRINTER (DEFAULT HP5):
+01742004READ &PRINTER
+01743004 
+01744009IF &PRINTER EQ  THEN SET &PRINTER = HP5
+01745004ELSE IF &PRINTER NE HP5 AND &PRINTER NE HP4 THEN GOTO PRINT
+01745106IF &PRINTER = HP5 THEN SET &PR = JSCP2103
+01745206ELSE SET &PR = JSCP2104
+01746004 
+01750000WRITENR FILESPECS FOR PRINTER COMMANDS (DEFAULT USES CM VERSIONS):
+01760000READ &FILESPEC
+01770000SET  &OLDSPEC = &FILESPEC
+01780000/*
+01790000/*  PORTRAIT PROCESSING
+01800000/*
+01810000IF &MO. = &STR(P) THEN DO
+01820000  IF &FILESPEC. EQ THEN SET &FILESPEC =  +
+01830002        'NCAMCM.TOOLS.DATA(HP3P01)'
+01840000  DONE
+01850000/*
+01860000/*  LANDSCAPE SETUP
+01870000/*
+01880000IF &MO. = &STR(L) THEN DO
+01890000  IF  &FILESPEC. EQ THEN SET &FILESPEC = +
+01900002        'NCAMCM.TOOLS.DATA(HP3L19)'
+01910000  DONE
+01920000/*
+01930000/*  PRINT THE REQUESTED DATASET
+01940000/*  RESET THE LASER PRINTER BACK TO PORTRAIT MODE, IF NECESSARY
+01950000/*
+01960000IF &MO = &STR(L) OR &OLDSPEC NE THEN DO
+01970002   SET &RESET = 'NCAMCM.TOOLS.DATA(RESETHP)'
+01980000   IF &PDS. NE THEN DO
+01990000      DO WHILE &SYSUID NE
+02000000         GETFILE MEMBERS
+02010000         SET &MEMLEN = 1
+02020000         DO WHILE &SUBSTR(&MEMLEN:&MEMLEN,&MEMBERS) NE
+02030000            SET &MEMLEN = &MEMLEN + 1
+02040000         DONE
+02050000         SET &MEMLEN = &MEMLEN - 1
+02060000         SET &MEMBERS = &SUBSTR(1:&MEMLEN,&MEMBERS)
+02070000         VPSPRINT ('&PDS.(&MEMBERS.)',&RESET) &PR. +
+02080013            PREDSN(&FILESPEC) PAGELEN(62) NOEJMESS NONUM NOEJECT WTR(&PR)
+02090009         WRITE ******  '&PDS.(&MEMBERS.)'  SENT TO &PRINTER PRINTER  ******
+02100000      DONE
+02101000   DONE
+02110000   ELSE DO
+02120013      VPSPRINT (&DA,&RESET) &PR. PREDSN(&FILESPEC) PAGELEN(62) +
+02130003        NOEJMESS NONUM NOEJECT WTR(&PR)
+02131009      WRITE ******  &DA  SENT TO &PRINTER PRINTER  ******
+02132000   DONE
+02140000DONE
+02150000IF &MO = &STR(P) THEN DO
+02160000   IF &PDS. NE THEN DO
+02170000      DO WHILE &SYSUID NE
+02180000         GETFILE MEMBERS
+02190000         SET &MEMLEN = 1
+02200000         DO WHILE &SUBSTR(&MEMLEN:&MEMLEN,&MEMBERS) NE
+02210000            SET &MEMLEN = &MEMLEN + 1
+02220000         DONE
+02230000         SET &MEMLEN = &MEMLEN - 1
+02240000         SET &MEMBERS = &SUBSTR(1:&MEMLEN,&MEMBERS)
+02250000         VPSPRINT '&PDS.(&MEMBERS.)' &PR. PREDSN(&FILESPEC) NOEJMESS +
+02260003            NONUM NOEJECT WTR(&PR)
+02270009         WRITE ******  '&PDS.(&MEMBERS.)'  SENT TO &PRINTER PRINTER  ******
+02280700      DONE
+02281000   DONE
+02290000   ELSE DO
+02300003      VPSPRINT &DA &PR. PREDSN(&FILESPEC) NOEJMESS NONUM NOEJECT WTR(&PR)
+02300109      WRITE ******  &DA  SENT TO &PRINTER PRINTER  ******
+02300200   DONE
+02301000DONE
+02320000GOTO START
+02330000DONE: EXIT

@@ -1,0 +1,184 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     FILES                                                */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: BUILD A FILE CONTAINING NAMES OF ALL FILES FOUND     */
+00000900/*             UNDER A SPECIFIC DATASET QUALIFICATION.              */
+00001000/*                                                                  */
+00001100/*------------------------------------------------------------------*/
+00001200/*                                                                  */
+00001300/*   SYNTAX :                                                       */
+00001400/*     FILES USER(&SYSUID.) SPEC() TRACE                            */
+00001500/*                                                                  */
+00001600/*     ALIAS    - NONE.                                             */
+00001700/*     REQUIRED - NONE.                                             */
+00001800/*                                                                  */
+00001900/*------------------------------------------------------------------*/
+00002000/*                                                                  */
+00002100/*   INVOKES:                                                       */
+00002200/*                                                                  */
+00002300/*     NONE.                                                        */
+00002400/*                                                                  */
+00002500/*------------------------------------------------------------------*/
+00002600/*                                                                  */
+00002700/*   PARAMETERS:                                                    */
+00002800/*                                                                  */
+00002900/*     USER     DEFAULT: &SYSUID                                    */
+00003000/*              THE HIGH LEVEL QUALIFIER OF THE USER                */
+00003100/*                                                                  */
+00003200/*     SPEC     DEFAULT: NULL                                       */
+00003300/*              THE SPECIFIC DATASET QUALIFICATION                  */
+00003400/*                                                                  */
+00003500/*     TRACE    OPTIONAL                                            */
+00003600/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00003700/*                                                                  */
+00003800/*------------------------------------------------------------------*/
+00003900/*                                                                  */
+00004000/*   INPUT DATA SET NAMES:                                          */
+00004100/*                                                                  */
+00004200/*      DSNALL.CMD                                                  */
+00004300/*         ALL OF THE FILES TO BE PUT INTO DATASET LISTING          */
+00004400/*                                                                  */
+00004500/*------------------------------------------------------------------*/
+00004600/*                                                                  */
+00004700/*   OUTPUT DATA SET NAMES:                                         */
+00004800/*                                                                  */
+00004900/*      DSNALL.CMD                                                  */
+00005000/*         ALL OF THE FILES TO BE PUT INTO DATASET LISTING          */
+00005100/*                                                                  */
+00005200/*      FILES.LST                                                   */
+00005300/*         WHERE THE GENERATED DATASET LISTING IS SAVED             */
+00005400/*                                                                  */
+00005500/*------------------------------------------------------------------*/
+00005600/*                                                                  */
+00005700/*   TEMPORARY DATA SET NAMES:                                      */
+00005800/*                                                                  */
+00005900/*     NONE.                                                        */
+00006000/*                                                                  */
+00006100/*------------------------------------------------------------------*/
+00006200/*                                                                  */
+00006300/*   COMMENTS:                                                      */
+00006400/*                                                                  */
+00006500/*     NONE.                                                        */
+00006600/*                                                                  */
+00006700/*------------------------------------------------------------------*/
+00006800/*                                                                  */
+00006900/*   REVISION HISTORY:                                              */
+00007000/*                                                                  */
+00007100/*  DATE      PCR  NAME  DESCRIPTION                                */
+00007200/*  --------  ---  ---   -------------------------------------      */
+00007300/*  01/25/84  ???  DWE   ORIGINAL CLIST                             */
+00007400/*                                                                  */
+00007500/*  07/02/90  102  TEV   ADDED HEADER AND REORGANIZED PARAMETERS    */
+00007600/*                       ONE PER LINE                               */
+00007700/*                                                                  */
+00007800/*  12/17/91  228  TEV   ADDED ERROR HANDLING, IMPROVED ACCOUNT HLQ */
+00007900/*                       RECOGNITION, AND MODIFIED THE PROCESSING   */
+00008000/*                       LOOP TO PERFORM TOP-DOWN FUNCTION.         */
+00008300/*                                                                  */
+00008310/*   3/27/95  423  JCS   CHANGE LISTC TO LISTC LEVEL                */
+00008400/*------------------------------------------------------------------*/
+00008500/********************************************************************/
+00008600PROC     0        USER(&SYSUID.)   +
+00008700                  SPEC()           +
+00008800                  TRACE
+00008900 
+00009000         /************************************/
+00009100         /*                                  */
+00009200         /* GENERATE FIRST LIST              */
+00009300         /*                                  */
+00009400         /************************************/
+00009500 
+00009600GLOBAL RETCODE
+00009700IF       &TRACE.  NE THEN +
+00009800         CONTROL  LIST CONLIST
+00009900 
+00010000CONTROL  NOMSG END(DONE)
+00010100         FREE     F(DSNFILE OUTFILE) ATTR(VBA125 FB80)
+00010200         DELETE   (DSNALL.CMD FILES.LST)
+00010300CONTROL  MSG
+00010400 
+00010500ATTR     VBA125      RECFM(V B A) LRECL(125) BLKSIZE(629)
+00010600ATTR     FB80        RECFM(F B)   LRECL(80)  BLKSIZE(6160)
+00010700ALLOC    F(DSNFILE)  DA(DSNALL.CMD) NEW TRACK SP(1 1) +
+00010800                     BLOCK(629) USING(VBA125)
+00010900ALLOC    F(OUTFILE)  DA(FILES.LST) NEW TRACK SP(1 1) +
+00011000                     BLOCK(6160) USING(FB80)
+00011100IF       &LENGTH(&STR(&SPEC.)) NE 0 THEN DO
+00011200         WRITE    GENERATING  DATASET LIST FOR &USER..&SPEC.
+00011300         LISTC    LEVEL(&USER..&SPEC.)   OUT(DSNFILE)
+00011400DONE
+00011500ELSE     DO
+00011600         WRITE    GENERATING  DATASET LIST FOR &USER.
+00011700         LISTC    L(&USER.)          OUT(DSNFILE)
+00011800DONE
+00011900SET      &SAVECC  = &LASTCC
+00012000FREE     F(DSNFILE OUTFILE)
+00012100 
+00012200IF       &SAVECC  = 0 THEN +
+00012300         WRITE    DATASET LIST SUCCESSFUL
+00012400ELSE     +
+00012500         WRITE    DATASET LIST ERROR CODE = &SAVECC
+00012600 
+00012700         /************************************/
+00012800         /*                                  */
+00012900         /* NOW BUILD THE FINAL FILE         */
+00013000         /*                                  */
+00013100         /************************************/
+00013200 
+00013300ERROR    DO
+00013400         CLOSFILE DSNFILE
+00013500         CLOSFILE OUTFILE
+00013600         FREE F(DSNFILE)
+00013700         FREE F(OUTFILE)
+00013800 
+00013900         IF &SAVECC NE 400 AND &SAVECC NE 0 THEN DO
+00014000            WRITE EXITING FILES ERROR CODE = &SAVECC
+00014100            EXIT
+00014200         DONE
+00014300         ELSE +
+00014400            EXIT
+00014500DONE
+00014600 
+00014700ATTN     DO
+00014800         ERROR    OFF
+00014900         CLOSFILE DSNFILE
+00015000         FREE     F(DSNFILE)
+00015100         CLOSFILE OUTFILE
+00015200         FREE     F(OUTFILE)
+00015300         EXIT
+00015400DONE
+00015500 
+00015600ALLOC    F(DSNFILE)  DA(DSNALL.CMD) SHR
+00015700ALLOC    F(OUTFILE)  DA(FILES.LST)  OLD
+00015800OPENFILE DSNFILE  INPUT
+00015900OPENFILE OUTFILE  OUTPUT
+00016000GETFILE  DSNFILE
+00016100 
+00016200DO       WHILE    &USER    NE
+00016300         SET      &USERLEN EQ &LENGTH(&STR(&USER))
+00016400         SET      &SYSDVAL EQ &DSNFILE
+00016500         SET      &STRLEN  EQ &LENGTH(&STR(&SYSDVAL))
+00016600 
+00016700         IF       &STRLEN  LT 26 THEN +
+00016800                  GOTO END
+00016900         SET      USERID   EQ &SUBSTR(18:18+&USERLEN-1,&STR(&SYSDVAL))
+00017000         SET      DSN      EQ +
+00017100                  &SUBSTR(18+&USERLEN.+1:&STRLEN,&STR(&SYSDVAL))
+00017200 
+00017300         IF       &USERID  EQ &USER THEN DO
+00017400                  SET      OUTFILE  EQ &STR('&USER..&DSN.')
+00017500                  PUTFILE  OUTFILE
+00017600 
+00017700         DONE
+00017800         GETFILE  DSNFILE
+00017900         SET &SAVECC = &LASTCC
+00018000END: +
+00018100DONE
+00018200 
+00018300CLOSFILE DSNFILE
+00018400CLOSFILE OUTFILE
+00019000FREE     F(DSNFILE OUTFILE)

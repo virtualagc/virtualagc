@@ -1,0 +1,175 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     ASM360H                                              */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: ASSEMBLE AN INDIVIDUAL MEMBER IN THE SELECTED        */
+00000900/*             DATASET. THIS CLIST IS INVOKED BY CLIST MONASM, AND  */
+00001000/*             IS USED TO ASSEMBLE THE MONITOR DATA SETS.           */
+00001100/*                                                                  */
+00001200/*------------------------------------------------------------------*/
+00001300/*                                                                  */
+00001400/*   SYNTAX:                                                        */
+00001500/*      ASM360H  NAME ID(&SYSUID) LIB(&ID..REL99V0.MONITOR)         */
+00001600/*               OPT() TEST TRACE SRCDSN(&LIB..ASM)                 */
+00001700/*               MACLIB('NCAMCM.PASS.CURRENT.DIAGNSTC.MACLIB')      */
+00001800/*               MACLIB2('NCAMCM.HAL.HALS.RUNMAC') SYSPARM()        */
+00001900/*                                                                  */
+00002000/*------------------------------------------------------------------*/
+00002100/*                                                                  */
+00002200/*   INVOKES:                                                       */
+00002300/*      SYS1.ASMH.NLINKLIB(IEV90)                                   */
+00002400/*                                                                  */
+00002500/*------------------------------------------------------------------*/
+00002600/*                                                                  */
+00002700/*   PARAMETERS:                                                    */
+00002800/*                                                                  */
+00002900/*      NAME           REQUIRED                                     */
+00003000/*                     NAME OF MEMBER TO BE ASSEMBLED               */
+00003100/*                                                                  */
+00003200/*      ID             DEFAULT: &SYSUID                             */
+00003300/*                     HIGH LEVEL QUALIFIER                         */
+00003400/*                                                                  */
+00003500/*      LIB            DEFAULT: &ID..REL99V0.MONITOR                */
+00003600/*                     DATASET WHERE MEMBERS RESIDE                 */
+00003700/*                                                                  */
+00003710/*      SRCDSN         DEFAULT: &LIB..ASM                           */
+00003720/*                     DATASET WHERE MONITOR SOURCE CODE RESIDE     */
+00003730/*                                                                  */
+00003800/*      OPT            DEFAULT: NULL                                */
+00003900/*                     ANY ADDITIONAL OPTIONS TO BE PASSED TO THE   */
+00004000/*                     ASSEMBLER                                    */
+00004100/*                                                                  */
+00004200/*      TEST           OPTIONAL                                     */
+00004300/*                     THE OBJECT MODULE WILL CONTAIN THE SPECIAL   */
+00004400/*                     SOURCE SYMBOL TABLE REQUIRED BY THE TEST     */
+00004500/*                     TRANSLATOR (TESTRAN) ROUTINE.                */
+00004600/*                                                                  */
+00004700/*      TRACE          OPTIONAL                                     */
+00004800/*                     TRACE THE CLISTS EXECUTION                   */
+00004900/*                                                                  */
+00005000/*      MACLIB         DEFAULT: NCAMCM.PASS.CURRENT.DIAGNSTC.MACLIB */
+00005100/*                     DIAGNOSTIC MACRO LIBRARY                     */
+00005200/*                                                                  */
+00005300/*      MACLIB2        DEFAULT: NCAMCM.HAL.HALS.RUNMAC              */
+00005400/*                     RUNTIME MACRO LIBRARY                        */
+00005500/*                                                                  */
+00005600/*      SYSPARM        DEFAULT: NULL                                */
+00005700/*                     PASSED FROM CLIST MONASM                     */
+00005800/*                                                                  */
+00005900/*------------------------------------------------------------------*/
+00006000/*                                                                  */
+00006100/*   INPUT DATA SET NAMES:                                          */
+00006200/*                                                                  */
+00006300/*      <SRCDSN>(NAME)                                              */
+00006400/*          DATA SET AND MEMBER - ASSEMBLY SOURCE CODE              */
+00006500/*                                                                  */
+00006600/*------------------------------------------------------------------*/
+00006700/*                                                                  */
+00006800/*   OUTPUT DATA SET NAMES:                                         */
+00006900/*                                                                  */
+00007000/*      <LIB>.OBJ(NAME)                                             */
+00007100/*          DATA SET AND MEMBER - OBJECT                            */
+00007200/*                                                                  */
+00007300/*      <LIB>.LST(NAME)                                             */
+00007400/*          DATA SET AND MEMBER - LISTING                           */
+00007500/*                                                                  */
+00007600/*------------------------------------------------------------------*/
+00007700/*                                                                  */
+00007800/*   TEMPORARY DATA SET NAMES:                                      */
+00007900/*                                                                  */
+00008000/*     NONE                                                         */
+00008100/*                                                                  */
+00008200/*------------------------------------------------------------------*/
+00008300/*                                                                  */
+00008400/*   COMMENTS:                                                      */
+00008500/*                                                                  */
+00008600/*     NONE                                                         */
+00008700/*                                                                  */
+00008800/*------------------------------------------------------------------*/
+00008900/*                                                                  */
+00009000/*   REVISION HISTORY:                                              */
+00009100/*                                                                  */
+00009200/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00009300/*     --------  ----  ----  -------------------------------------  */
+00009400/*                                                                  */
+00009500/*     09/??/86  ???    SLF                                         */
+00009600/*                                                                  */
+00009700/*     05/??/87  ???    HFG  21V6                                   */
+00009800/*                                                                  */
+00009900/*     02/21/91  153    LWW  CCC BASELINE.                          */
+00010000/*                           ADDED "SYS1.AMODGEN" TO SYSTEM MACRO   */
+00010100/*                           LIBRARY SEARCH HIERARCHY.  THIS WAS    */
+00010200/*                           NECESSARY BECAUSE IBM HAD MOVED THE    */
+00010300/*                           "OBTAIN" MACRO FROM SYS1.MACLIB TO     */
+00010400/*                           THERE.                                 */
+00010500/*                                                                  */
+00010600/*     09/15/92  237    LWW  CHANGED MACLIB FROM                    */
+00010700/*                           "NCAMCM.HAL.HALS.DIAGNSTC.MACLIB" TO   */
+00010800/*                           "NCAMCM.PASS.TOOLS.DIAGNSTC.MACLIB"    */
+00010900/*                           TO MATCH THE HEADER INFORMATION        */
+00011000/*                                                                  */
+00011100/*     10/28/93  309    DKB  CHANGED MACLIB DEFAULT, CALLING CLISTS */
+00011200/*                           WERE CHANGED TO SPECIFY MACLIB         */
+00011300/*                           (ALSO SEE PCR0316)                     */
+00011400/*                                                                  */
+00011410/*     11/08/95  355    LJK  ADDED SRCDSN PARAMETER                 */
+00011410/*     05/10/99  637    LJK  RENAMED THE ASSEMBLER FROM SYS1.LINKLIB*/
+00011410/*                           (IEV90) TO SYS1.ASMH.LINKLIB(IEV90)    */
+00011500/*------------------------------------------------------------------*/
+00011600/********************************************************************/
+00011700 
+00011800PROC 1 NAME +
+00011900       ID(&SYSUID.) +
+00012000       LIB(&ID..REL99V0.MONITOR) +
+00012010       SRCDSN(&LIB..ASM)         +
+00012100       OPT() +
+00012200       TEST +
+00012300       TRACE +
+00012400       MACLIB('NCAMCM.PASS.CURRENT.DIAGNSTC.MACLIB') +
+00012500       MACLIB2('NCAMCM.HAL.HALS.RUNMAC') +
+00012600       SYSPARM()
+00012700 
+00012800     WRITE *** EXECUTING ASM360H FOR &NAME ***
+00012900 
+00013000IF &TRACE. NE THEN +
+00013100   CONTROL LIST
+00013200CONTROL NOMSG END(DONE)
+00013300  FREE F(SYSLIB SYSUT1 SYSUT2 SYSUT3 SYSPRINT SYSPUNCH SYSLIN +
+00013400    SYSTERM SYSIN) ATTR(FBA121 FB80)
+00013500  DELETE ('&LIB..LST(&NAME.)' '&LIB..OBJ(&NAME.)')
+00013600 
+00013700ATTR  FBA121      RECFM(F B A) LRECL(121) BLKSIZE(1210)
+00013800ATTR  FB80        RECFM(F B)   LRECL(80)  BLKSIZE(80)
+00013900ALLOC F(SYSLIB)   DA('&MACLIB.'    +
+00014000                     '&MACLIB2'    +
+00014100                     'SYS1.MACLIB' +
+00014200                     'SYS1.AMODGEN' +
+00014300                     'NCAMCM.XPL.MACROS.ASM') SHR
+00014400ALLOC F(SYSUT1)   SPACE(600 100) BLOCK(1700)
+00014500ALLOC F(SYSUT2)   SPACE(300 50)  BLOCK(1700)
+00014600ALLOC F(SYSUT3)   SPACE(300 50)  BLOCK(1700)
+00014700ALLOC F(SYSPRINT) DA('&LIB..LST(&NAME.)') USING(FBA121) SHR
+00014800ALLOC F(SYSPUNCH) DUMMY
+00014900ALLOC F(SYSLIN)   DA('&LIB..OBJ(&NAME.)') USING(FB80) SHR
+00015000ALLOC F(SYSTERM)  DA(*)
+00015100 
+00015200ALLOC F(SYSIN)    DA('&SRCDSN.(&NAME.)') SHR
+00015300CONTROL MSG
+00015400WRITE ASSEMBLY  OF &SRCDSN.(&NAME.)
+00015500CONTROL NOMSG
+00015600 
+00015700CALL 'SYS1.ASMH.LINKLIB(IEV90)' +
+00015800     'OBJECT,ESD,RLD,&TEST,SYSPARM(&SYSPARM)'
+00015900SET &SAVECC=&LASTCC
+00016000FREE F(SYSLIB SYSUT1 SYSUT2 SYSUT3 SYSPRINT SYSPUNCH SYSLIN +
+00016100  SYSTERM SYSIN) ATTR(FBA121 FB80)
+00016200CONTROL MSG
+00016300IF &SAVECC = 0 THEN +
+00016400     WRITE ASSEMBLY  SUCCESSFUL
+00016500ELSE DO
+00016600     WRITE ASSEMBLY  ERROR CODE = &SAVECC
+00016700DONE
+00016800 

@@ -1,0 +1,173 @@
+         MACRO                                                          00000100
+         STPGEN  &N                                                     00000200
+         GBLA  &VERSCNT                                                 00000300
+         GBLC  &VCON1,&VCON2                                            00000400
+         LCLA  &I,&J,&K                                                 00000500
+         LCLB  &B(8),&HISTORY,&TIME,&PROFILE,&LASTMNT,&LASTBLK          00000600
+         LCLB  &HOTTEST,&EVERY,&NEWCOMP                                 00000700
+         LCLC  &REG,&COND                                               00000800
+.*       ASSUME NO VCONS TO RELOCATE                                    00000900
+&VCON1   SETC  '*'                                                      00001000
+&VCON2   SETC  '*'                                                      00001100
+&VERSCNT SETA  256                                                      00001200
+.*       SET BIT ARRAY B FROM INTEGER &N                                00001300
+&I       SETA  &N                                                       00001400
+.LOOP    ANOP                                                           00001500
+&J       SETA  &J+1                                                     00001600
+&K       SETA  &I/2                                                     00001700
+&B(&J)   SETB  (&I-2*&K NE 0)                                           00001800
+&I       SETA  &K                                                       00001900
+         AIF   (&J LT 8).LOOP                                           00002000
+.* SET MNEMONIC BIT VARIABLES FROM BIT ARRAY                            00002100
+&TIME    SETB  (&B(1))                                                  00002200
+&HISTORY SETB  (&B(2))                                                  00002300
+&PROFILE SETB  (&B(3))                                                  00002400
+&LASTMNT SETB  (&B(4))                                                  00002500
+&LASTBLK SETB  (&B(5))                                                  00002600
+&HOTTEST SETB  (&B(6))                                                  00002700
+&EVERY   SETB  (&B(7))                                                  00002800
+&NEWCOMP SETB  (&B(8))                                                  00002900
+*        THE OPTION BIT SETTINGS FOR THIS VERSION ARE AS FOLLOWS:       00003000
+         MNOTE *,'&TIME - TIME'                                         00003100
+         MNOTE *,'&HISTORY - HISTORY'                                   00003200
+         MNOTE *,'&PROFILE - PROFILE'                                   00003300
+         MNOTE *,'&LASTMNT - LASTMNT'                                   00003400
+         MNOTE *,'&LASTBLK - LASTBLK'                                   00003500
+         MNOTE *,'&HOTTEST - HOTTEST'                                   00003600
+         MNOTE *,'&EVERY - EVERY'                                       00003700
+         MNOTE *,'&NEWCOMP - NEWCOMP'                                   00003800
+.*       GENERATE CODE ONLY FOR SPECIFIED OPTIONS                       00003900
+STPSTART EQU   *                                                        00004000
+.LASTBLK AIF   (NOT &LASTBLK).TESTSTM                                   00004100
+****     LAST BLOCK OPTION                                              00004200
+         ST    13,LASTBLOK    SAVE STACK ADR FOR LAST BLOCK SERVICE RTN 00004300
+*                                                                       00004400
+         COUNT 1,800                                                    00004500
+.TESTSTM AIF   (&TIME OR &PROFILE OR &HOTTEST OR &EVERY).REG0           00004600
+         AIF   (&HISTORY).REG1                                          00004700
+         AIF   (NOT &LASTMNT).NEWCOMP                                   00004800
+****     LAST STATEMENT OPTION                                          00004900
+*        USE REG 15 TO AVOID STM AND LM                                 00005000
+         LH    15,0(,14)      GET STATEMENT NUMBER                      00005100
+         STH   15,6(,13)      SAVE IN STACK                             00005200
+         L     15,0(,13)      RESTORE REG 15                            00005300
+*                                                                       00005400
+         COUNT 3,2350                                                   00005500
+         AGO   .NEWCOMP                                                 00005600
+.REG1    ANOP                                                           00005700
+&REG     SETC  '1'                                                      00005800
+         AGO   .DOSTM                                                   00005900
+.REG0    ANOP                                                           00006000
+&REG     SETC  '0'                                                      00006100
+.DOSTM   STM   &REG,2,SAVETRCS  SAVE REGS USED LOCALLY                  00006200
+         LH    2,0(,14)       GET STATEMENT NUMBER                      00006300
+*                                                                       00006400
+&I       SETA  1780+195*(3-&REG)                                        00006500
+         COUNT 2,&I                                                     00006600
+         AIF   (NOT &LASTMNT).HISTORY                                   00006700
+****     LAST STATEMENT OPTION                                          00006800
+         STH   2,6(,13)       SAVE STATEMENT NUMBER IN STACK            00006900
+*                                                                       00007000
+         COUNT 1,990                                                    00007100
+.HISTORY AIF   (NOT &HISTORY).TIME                                      00007200
+****     HISTORY (BACKTRACE) OPTION                                     00007300
+         L     1,BACKPTR      GET INDEX INTO CIRCULAR BUFFER            00007400
+         STH   2,BACKBEGX(1) SAVE IN BUFFER                             00007500
+         LA    1,2(,1)        INCR BUFFER INDEX                         00007600
+         STC   1,BACKPTR+3    SAVE INDEX MOD 256                        00007700
+*                                                                       00007800
+         COUNT 4,3250                                                   00007900
+.TIME    AIF   (NOT &TIME).NEWCOMP                                      00008000
+****     PSEUDO TIMER OPTION                                            00008100
+         L     1,12(,11)      GET ADJUSTED COST-USE CSECT PTR           00008200
+         SLL   2,2            USE STATEMENT NUMBER AS INDEX             00008300
+         L     0,CLOCK        GET INTERVAL TIMER                        00008400
+         SH    0,0(1,2)       DECREMENT BY COST OF STATEMENT            00008500
+         ST    0,CLOCK        UPDATE TIMER                              00008600
+         BP    DONETIME+STPORG(,12) SKIP IF NO TIMER ACTION             00008700
+         COUNT 6,4390                                                   00008800
+         ST    14,8(,13)      SAVE RETURN ADDRESS                       00008900
+         HCALL TIMEINT        CALL TIMER INTERRUPT ROUTINE              00009000
+VCON1    EQU   *-4            DYNAMICALLY SET VCON                      00009100
+&VCON1   SETC  'VCON1'                                                  00009200
+         TM    SWAP,BACKSWAP  TEST FOR PROCESS SWAP                     00009300
+         BZ    NOSWAP+STPORG(,12) SKIP IF NO SWAP                       00009400
+         LM    0,2,SAVETRCS  RESTORE INPUT REGS                         00009500
+         HCALL DISPACHS       SWAP PROCESSES                            00009600
+VCON2    EQU   *-4            DYNAMICALLY SET VCON                      00009700
+&VCON2   SETC  'VCON2'                                                  00009800
+         STM   0,2,SAVETRCS   RESET LOCAL SAVE AREA                     00009900
+NOSWAP   EQU   *-STPSTART                                               00010000
+         L     14,8(,13)      RESTORE RETURN ADDRESS                    00010100
+         COUNT 8,8720,COND                                              00010200
+         AIF   (NOT(&PROFILE OR &HOTTEST OR &EVERY)).NOSWAP             00010300
+         L     1,12(,11)      RELOAD ADJUSTED COST-USE PTR              00010400
+         LH    2,0(,14)       RELOAD STATEMENT NUMBER                   00010500
+         SLL   2,2            GENERATE INDEX                            00010600
+         COUNT 3,1900,COND                                              00010700
+.NOSWAP  ANOP                                                           00010800
+DONETIME EQU   *-STPSTART                                               00010900
+*                                                                       00011000
+.NEWCOMP AIF   (NOT &NEWCOMP).PROFILE                                   00011100
+****     NEW COMPILATION OPTION                                         00011200
+         C     11,LASTCOMP    NEW COMPILATION BOUNDARY?                 00011300
+         BE    NOCOMP+STPORG(,12) SKIP IF NOT                           00011400
+         COUNT 2,1690                                                   00011500
+         ST    11,LASTCOMP    SAVE NEW FSIM PTR                         00011600
+         ST    14,8(,13)      SAVE RETURN ADR                           00011700
+         SDLCALL CTRAP,STP=YES                                          00011800
+         L     14,8(,13)      RESTORE RETURN ADR                        00011900
+NOCOMP   EQU   *-STPSTART                                               00012000
+*                                                                       00012100
+         COUNT 12,8440,COND                                             00012200
+.PROFILE AIF   (NOT(&PROFILE OR &HOTTEST OR &EVERY)).TESTLM             00012300
+****     PROFILE,HOTTEST, AND/OR EVERY OPTIONS                          00012400
+         AIF   (&TIME).GOTPTR                                           00012500
+         L     1,12(,11)      GET ADJUSTED COST-USE PTR                 00012600
+         SLL   2,2            GENERATE INDEX                            00012700
+         COUNT 2,1070                                                   00012800
+.GOTPTR  LH    0,2(1,2)       GET USE COUNT AND HOT BIT                 00012900
+         COUNT 1,830                                                    00013000
+         AIF   (&PROFILE).ADD                                           00013100
+         AIF   (NOT &HOTTEST).STRAP                                     00013200
+         LTR   0,0                                                      00013300
+         COUNT 1,390                                                    00013400
+         AGO   .EVERY                                                   00013500
+.ADD     A     0,USECOUNT     INCREMENT USE COUNT                       00013600
+         STH   0,2(1,2)       UPDATE USE COUNT                          00013700
+         COUNT 2,1670                                                   00013800
+         AIF   (NOT &HOTTEST).EVERY2                                    00013900
+.EVERY   AIF   (NOT &EVERY).BC                                          00014000
+****     EVERY N OPTION                                                 00014100
+         L     0,STMTCNT      GET STATEMENT COUNT                       00014200
+         BCT   0,SAVECNT+STPORG(,12) MINUS 1                            00014300
+*        TAKE HOT BIT EXIT DUE TO COUNT=0                               00014400
+         SR    0,2            GENERATE NEG CC                           00014500
+         L     0,STMTINIT     RESET COUNT                               00014600
+SAVECNT  EQU   *-STPSTART                                               00014700
+         ST    0,STMTCNT      UPDATE STATEMENT COUNTER                  00014800
+         LH    0,2(1,2)       RE-LOAD USE COUNT/HOT BIT                 00014900
+         COUNT 4,3340                                                   00015000
+         COUNT 2,1070,COND                                              00015100
+.BC      BNM   SKIPTRAP+STPORG(,12) BR TO SKIP EXIT                     00015200
+&COND    SETC  'COND'                                                   00015300
+         COUNT 1,1010                                                   00015400
+         AGO   .STRAP                                                   00015500
+.EVERY2  AIF   (NOT &EVERY).TESTLM                                      00015600
+.STRAP   ST    14,8(,13)      SAVE RETURN ADR                           00015700
+         SDLCALL STRAP,STP=YES                                          00015800
+         L     14,8(,13)                                                00015900
+SKIPTRAP EQU   *-STPSTART                                               00016000
+         COUNT 11,7640,&COND                                            00016100
+.TESTLM  AIF   ('&REG' EQ '').TESTSPM                                   00016200
+         LM    &REG,2,SAVETRCS  RESTORE LOCAL REGS                      00016300
+&I       SETA  1370+195*(3-&REG)                                        00016400
+         COUNT 1,&I                                                     00016500
+.TESTSPM AIF   (NOT(&TIME OR &NEWCOMP OR &PROFILE OR &HOTTEST OR       X00016600
+               &EVERY)).RETURN                                          00016700
+         SPM   14             RESTORE CC                                00016800
+         COUNT 1,750                                                    00016900
+.RETURN  B     2(,14)         RETURN TO NEXT STATEMENT                  00017000
+STPSIZE  EQU   *-STPSTART                                               00017100
+         COUNT 1,1010,TOTAL                                             00017200
+         MEND                                                           00017300

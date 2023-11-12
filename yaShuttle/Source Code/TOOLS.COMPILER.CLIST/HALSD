@@ -1,0 +1,137 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     HALSD                                                */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO RUN HALS/360 PROGRAMS UNDER DIAGNOSTIC PROCESSOR  */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     HALSD 'NAME' LIB() IN(*) OUT(*) NOMSG TRACE                  */
+00140000/*                                                                  */
+00150000/*     ALIAS    - NONE.                                             */
+00160000/*     REQUIRED - 'NAME'.                                           */
+00180000/*                                                                  */
+00190000/*------------------------------------------------------------------*/
+00200000/*                                                                  */
+00210000/*   INVOKES:                                                       */
+00220000/*                                                                  */
+00230000/*     NCAMCM.H360.CURRENT.MONITOR(RUNMON)                          */
+00240000/*                                                                  */
+00250000/*------------------------------------------------------------------*/
+00260000/*                                                                  */
+00270000/*   PARAMETERS:                                                    */
+00280000/*                                                                  */
+00290000/*     NAME     REQUIRED                                            */
+00300000/*              THE NAME OF THE PROGRAM TO DIAGNOSE                 */
+00310000/*                                                                  */
+00320000/*     LIB      DEFAULT: NULL                                       */
+00330000/*              IF <NAME> IS IN A PDS, SPECIFY THE LOCATION IN THIS */
+00340000/*              PARAMETER                                           */
+00350000/*                                                                  */
+00360000/*     IN       DEFAULT: *                                          */
+00370000/*              STANDARD INPUT DEFAULTED TO THE USER'S TERMINAL     */
+00380000/*                                                                  */
+00390000/*     OUT      DEFAULT: *                                          */
+00400000/*              THE FILE WHERE THE GENARATED MESSAGES ARE SAVED     */
+00410000/*              (DEFAULTED TO THE USER'S TERMINAL)                  */
+00420000/*                                                                  */
+00430000/*     NOMSG    OPTIONAL                                            */
+00440000/*              THE MESSAGES GENERATED ARE NOT SAVED INTO A FILE    */
+00450000/*                                                                  */
+00460000/*     TRACE    OPTIONAL                                            */
+00470000/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00480000/*                                                                  */
+00490000/*------------------------------------------------------------------*/
+00500000/*                                                                  */
+00510000/*   INPUT DATA SET NAMES:                                          */
+00520000/*                                                                  */
+00530000/*     <IN>                                                         */
+00540000/*        STANDARD INPUT DEFAULTED TO THE USER'S TERMINAL           */
+00550000/*                                                                  */
+00560000/*     NCAMCM.H360.CURRENT.STPLIB                                   */
+00570000/*        THE LIBRARY REQUIRED BY THE DIAGNOSTIC PROGRAM            */
+00580000/*                                                                  */
+00590000/*     NCAMCM.H360.CURRENT.DIAGPROG                                 */
+00600000/*        THE PROGRAM THAT PERFORMS THE DIAGNOSIS                   */
+00610000/*                                                                  */
+00620000/*     <NAME>.LOAD     -- OR --     <LIB>.LOAD                      */
+00630000/*        THE LOAD MODULE TO DIAGNOSE                               */
+00640000/*                                                                  */
+00650000/*     <NAME>.SDF     -- OR --     <LIB>.SDF                        */
+00660000/*        THE SIMULATION DATA FILE TO DIAGNOSE                      */
+00670000/*                                                                  */
+00680000/*------------------------------------------------------------------*/
+00690000/*                                                                  */
+00700000/*   OUTPUT DATA SET NAMES:                                         */
+00710000/*                                                                  */
+00720000/*     <OUT>                                                        */
+00730000/*        THE DATASET WHERE THE GENERATED MESSAGES ARE PLACED       */
+00740000/*                                                                  */
+00750000/*------------------------------------------------------------------*/
+00760000/*                                                                  */
+00770000/*   TEMPORARY DATA SET NAMES:                                      */
+00780000/*                                                                  */
+00790000/*     NONE.                                                        */
+00800000/*                                                                  */
+00810000/*------------------------------------------------------------------*/
+00820000/*                                                                  */
+00830000/*   COMMENTS:                                                      */
+00840000/*                                                                  */
+00850000/*     NONE.                                                        */
+00860000/*                                                                  */
+00870000/*------------------------------------------------------------------*/
+00880000/*                                                                  */
+00890000/*   REVISION HISTORY:                                              */
+00900000/*                                                                  */
+00910000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00920000/*  --------  ---  ---   -------------------------------------      */
+00930000/*  01/25/84  ???  DWE   ORIGINAL CLIST                             */
+00940000/*                                                                  */
+00950000/*  07/03/90  102  TEV   ADDED HEADER AND REORGANIZED PARAMETERS    */
+00960000/*                       ONE PER LINE. UPDATED INVOKED PROGRAM,     */
+00970000/*                       STEPLIB, AND DIAGNOSTIC PROGRAM LOCATION   */
+00980000/*                       TO CURRENT LOCATION. OPT (*) PARAMETER     */
+00990000/*                       DELETED BECAUSE IT WAS NOT USED AT ALL.    */
+01000000/*                                                                  */
+01010000/*------------------------------------------------------------------*/
+01020000/********************************************************************/
+01030000PROC 1 NAME     +
+01040000       LIB()    +
+01050000       IN(*)    +
+01060000       OUT(*)   +
+01070000       NOMSG    +
+01080000       TRACE
+01090000 
+01100000CONTROL NOMSG END(DONE)
+01110000  FREE F(CHANNEL5 CHANNEL6 REQUESTS STPLIB PROGRAM SYSPRINT +
+01120000    HALLIB HALSDF) ATTR(FBA133)
+01130000CONTROL MSG
+01140000ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(133)
+01150000ALLOC F(CHANNEL5) DA(&IN.) SHR
+01160000ALLOC F(CHANNEL6) DA(&OUT.) SHR
+01170000ALLOC F(REQUESTS) DA(*)
+01180000ALLOC F(STPLIB)   DA('NCAMCM.H360.CURRENT.STPLIB') SHR
+01190000ALLOC F(PROGRAM)  DA('NCAMCM.H360.CURRENT.DIAGPROC') SHR
+01200000IF &NOMSG EQ THEN +
+01210000  ALLOC F(SYSPRINT) DA(&OUT.) USING(FBA133)
+01220000ELSE +
+01230000  ALLOC F(SYSPRINT) DUMMY     USING(FBA133)
+01240000IF &LIB EQ THEN DO
+01250000     ALLOC F(HALLIB)   DA(&NAME..LOAD) SHR
+01260000     ALLOC F(HALSDF)   DA(&NAME..SDF)  SHR
+01270000     WRITE DEBUGGING &NAME.
+01280000     WRITE USING DIAGNOSTIC PACKAGE
+01290000DONE
+01300000ELSE DO
+01310000     ALLOC F(HALLIB)   DA(&LIB..LOAD)  SHR
+01320000     ALLOC F(HALSDF)   DA(&LIB..SDF)   SHR
+01330000     WRITE DEBUGGING &LIB..(&NAME.)
+01340000     WRITE USING DIAGNOSTIC PACKAGE
+01350000DONE
+01360000CALL 'NCAMCM.H360.CURRENT.MONITOR(RUNMON)' ''
+01370000FREE F(CHANNEL5 CHANNEL6 REQUESTS STPLIB PROGRAM SYSPRINT +
+01380000  HALLIB HALSDF) ATTR(FBA133)

@@ -1,0 +1,135 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     HEADER                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO PUT A HEADER ON A TEXT FILE                       */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     HEADER 'NAME' 'TYPE' 'OUT' LIB(COMMANDS.CLIST) HEAD(HEADER)  */
+00140001/*            PROG('''NCAMCM.TOOLS.XPLOBJ(HEADER)''')               */
+00150000/*            OPT() TRACE                                           */
+00151000/*                                                                  */
+00160000/*     ALIAS    - NONE.                                             */
+00170000/*     REQUIRED - 'NAME' 'TYPE' 'OUT'.                              */
+00200000/*                                                                  */
+00210000/*------------------------------------------------------------------*/
+00220000/*                                                                  */
+00230000/*   INVOKES:                                                       */
+00240000/*                                                                  */
+00250001/*     'NCAMCM.TOOLS.XPLOBJ(HEADER)'                                */
+00260000/*                                                                  */
+00270000/*------------------------------------------------------------------*/
+00280000/*                                                                  */
+00290000/*   PARAMETERS:                                                    */
+00300000/*                                                                  */
+00310000/*     NAME     REQUIRED                                            */
+00320000/*              NAME OF FILE TO ATTACH HEADER TO                    */
+00330000/*                                                                  */
+00340000/*     TYPE     REQUIRED                                            */
+00350000/*              TYPE OF HEADER TO ATTACH                            */
+00360000/*                                                                  */
+00370000/*     OUT      REQUIRED                                            */
+00380000/*              NAME OF OUTPUT FILE                                 */
+00390000/*                                                                  */
+00400000/*     LIB      DEFAULT: COMMANDS.CLIST                             */
+00410000/*              NAME OF PDS WHERE EVERYTHING IS                     */
+00420000/*                                                                  */
+00430000/*     HEAD     DEFAULT: HEADER                                     */
+00440000/*              PDS CONTAINING HEADERS                              */
+00450000/*                                                                  */
+00460001/*     PROG     DEFAULT: '''NCAMCM.TOOLS.XPLOBJ(HEADER)'''          */
+00470000/*              NAME OF THE PROGRAM TO PUT HEADER ON                */
+00480000/*                                                                  */
+00490000/*     OPT      DEFAULT: NULL                                       */
+00500000/*              OPTION FOR MONITOR CALL                             */
+00510000/*                                                                  */
+00520000/*     TRACE    OPTIONAL                                            */
+00530000/*              TURN TRACE ON OR OFF                                */
+00540000/*                                                                  */
+00550000/*------------------------------------------------------------------*/
+00560000/*                                                                  */
+00570000/*   INPUT DATA SET NAMES:                                          */
+00580000/*                                                                  */
+00590000/*     <PROG>                                                       */
+00600000/*         NAME OF THE PROGRAM TO PUT THE HEADER ON                 */
+00610000/*                                                                  */
+00620000/*     <LIB>(<NAME>)                                                */
+00630000/*         MEMBER NAME OF A PDS TO ATTACH A HEADER ON               */
+00640000/*                                                                  */
+00650000/*     <HEAD>(<TYPE>)                                               */
+00660000/*         LOCATION OF THE HEADER TO ATTACH                         */
+00670000/*                                                                  */
+00680000/*------------------------------------------------------------------*/
+00690000/*                                                                  */
+00700000/*   OUTPUT DATA SET NAMES:                                         */
+00710000/*                                                                  */
+00720000/*     <OUT>                                                        */
+00730000/*          FILE WITH THE HEADER ATTACHED TO IT                     */
+00740000/*                                                                  */
+00750000/*------------------------------------------------------------------*/
+00760000/*                                                                  */
+00770000/*   TEMPORARY DATA SET NAMES:                                      */
+00780000/*                                                                  */
+00790000/*     NONE.                                                        */
+00800000/*                                                                  */
+00810000/*------------------------------------------------------------------*/
+00820000/*                                                                  */
+00830000/*   COMMENTS:                                                      */
+00840000/*                                                                  */
+00850000/*     NONE.                                                        */
+00860000/*                                                                  */
+00870000/*------------------------------------------------------------------*/
+00880000/*                                                                  */
+00890000/*   REVISION HISTORY:                                              */
+00900000/*                                                                  */
+00910000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00920000/*  --------  ---  ---   -------------------------------------      */
+00930000/*  06/09/89  ???  RSJ   ORIGINAL CLIST                             */
+00940000/*                                                                  */
+00950000/*  07/06/90  104  TEV   ADDED HEADER AND REARRANGED PARAMETERS ONE */
+00960000/*                       PER LINE.                                  */
+00970000/*                                                                  */
+00971000/*  01/18/91  146  RSJ   CHANGED PROG DEFAULT PARAMETER TO REFLECT  */
+00972000/*                       THE NEW DATASET NAME                       */
+00973000/*                                                                  */
+00974001/*  09/13/91  186  LJK   RENAMED CM OBJECT MODULE                   */
+00976000/*                                                                  */
+00980000/*------------------------------------------------------------------*/
+00990000/********************************************************************/
+01000000PROC 3 NAME                                        +
+01010000       TYPE                                        +
+01020000       OUT                                         +
+01030000       LIB(COMMANDS.CLIST)                         +
+01040000       HEAD(HEADER)                                +
+01050001       PROG('''NCAMCM.TOOLS.XPLOBJ(HEADER)''')     +
+01060000       OPT()                                       +
+01070000       TRACE
+01080000 
+01090000IF       &TRACE.  NE THEN +
+01100000         CONTROL  LIST CONLIST
+01110000CONTROL NOMSG END(DONE)
+01120000  FREE F(PROGRAM OUTPUT3 SYSPRINT SYSIN INPUT2)  ATTR(FBA133)
+01130000  DELETE (&LIB.(&OUT.))
+01140000CONTROL MSG
+01150000ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+01160000ALLOC F(PROGRAM)  DA(&PROG.) SHR
+01170000ALLOC F(SYSIN)   DA(&LIB.(&NAME.)) SHR
+01180000ALLOC F(INPUT2)  DA(&HEAD.(&TYPE.)) SHR
+01190000ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW CATALOG +
+01200000                  SP(40 40) TRACK
+01210000/*ALLOC F(OUTPUT3) DA(&LIB.(&OUT.)) RELEASE USING(FBA133) NEW CATALOG +
+01220000  SP(80 5) TRACK */
+01230000 ALLOC F(OUTPUT3) DA(&LIB.(&OUT.)) SHR
+01240000WRITE RUNNING XPL PROGRAM &PROG.
+01250000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' '&OPT.'
+01260000SET &SAVECC = &LASTCC
+01270000FREE F(PROGRAM OUTPUT3 SYSIN SYSPRINT INPUT2) ATTR(FBA133)
+01280000IF &SAVECC EQ 0 THEN +
+01290000     WRITE EXECUTION SUCCESSFUL
+01300000ELSE +
+01310000     WRITE EXECUTION ERROR CODE = &SAVECC

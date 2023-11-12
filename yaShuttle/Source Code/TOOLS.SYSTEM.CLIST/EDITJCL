@@ -1,0 +1,158 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     EDITJCL                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: EDITS A SKELETON JCL AND SUBMITS A BATCH JOB TO      */
+00090000/*             COPY 1 FILE OFF OF A TAPE TO DISK                    */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     EDITJCL 'TAPENUM' 'TAPE' 'VOL' 'EXP' 'LEVEL' 'FILENAME'      */
+00150000/*             'TOPFILE' 'LIB' 'DEN' Z                              */
+00160000/*             JCL(NCAMCM.TOOLS.SYSJCL(DUMPTAPE) TRACE              */
+00170000/*                                                                  */
+00180000/*     ALIAS    - NONE.                                             */
+00190000/*     REQUIRED - 'TAPENUM' 'TAPE' 'VOL' 'EXP' 'LEVEL' 'FILENAME'   */
+00200000/*                'TOPFILE' 'LIB' 'DEN'                             */
+00220000/*                                                                  */
+00230000/*------------------------------------------------------------------*/
+00240000/*                                                                  */
+00250000/*   INVOKES:  THE FOLLOWING SKELETON JCL IS SUBMITTED:             */
+00260000/*              NCAMCM.TOOLS.SYSJCL(DUMPTAPE)                       */
+00270000/*                                                                  */
+00280000/*------------------------------------------------------------------*/
+00290000/*                                                                  */
+00300000/*   PARAMETERS:                                                    */
+00310000/*                                                                  */
+00320000/*     TAPENUM    REQUIRED                                          */
+00330000/*                NUMBER OF FILE ON TAPE                            */
+00340000/*                                                                  */
+00350000/*     TAPE       REQUIRED                                          */
+00360000/*                NUMBER OF THE TAPE                                */
+00370000/*                                                                  */
+00380000/*     VOL        REQUIRED                                          */
+00390000/*                VOLUME TO PLACE FILE ON                           */
+00400000/*                                                                  */
+00410000/*     EXP        REQUIRED                                          */
+00420000/*                EXPIRATION DATE FOR TAPE                          */
+00430000/*                                                                  */
+00440000/*     LEVEL      REQUIRED                                          */
+00450000/*                HIGH LEVEL QUALIFIER                              */
+00460000/*                                                                  */
+00470000/*     FILENAME   REQUIRED                                          */
+00480000/*                NAME OF FILE TO DUMP                              */
+00490000/*                                                                  */
+00500000/*     TOPFILE    REQUIRED                                          */
+00510000/*                FIRST FILE ON THE TAPE                            */
+00520000/*                                                                  */
+00530000/*     LIB        REQUIRED                                          */
+00540000/*                GROUP IN WHICH TO PLACE THE FILE                  */
+00550000/*                                                                  */
+00560000/*     DEN        REQUIRED                                          */
+00570000/*                DENSITY LEVEL FOR TAPE                            */
+00580000/*                                                                  */
+00590000/*     Z          OPTIONAL                                          */
+00600000/*                INSERT Z IN FRONT                                 */
+00610000/*                                                                  */
+00620000/*     JCL        DEFAULT: NCAMCM.TOOLS.SYSJCL(DUMPTAPE)            */
+00630000/*                JCL TO SUBMIT                                     */
+00640000/*                                                                  */
+00650000/*     TRACE      OPTIONAL                                          */
+00660000/*                CLIST TRACE OPTION                                */
+00670000/*                                                                  */
+00680000/*------------------------------------------------------------------*/
+00690000/*                                                                  */
+00700000/*   INPUT DATA SET NAMES:                                          */
+00710000/*                                                                  */
+00720000/*      <JCL>                                                       */
+00730000/*      JCL TO EDIT AND SUBMIT                                      */
+00740000/*                                                                  */
+00750000/*------------------------------------------------------------------*/
+00760000/*                                                                  */
+00770000/*   OUTPUT DATA SET NAMES:                                         */
+00780000/*                                                                  */
+00790000/*      NONE.                                                       */
+00800000/*                                                                  */
+00810000/*------------------------------------------------------------------*/
+00820000/*                                                                  */
+00830000/*   TEMPORARY DATA SET NAMES:                                      */
+00840000/*                                                                  */
+00850000/*      NONE.                                                       */
+00860000/*                                                                  */
+00870000/*------------------------------------------------------------------*/
+00880000/*                                                                  */
+00890000/*   COMMENTS:  THIS CLIST IS CALLED BY THE DUMPTAPE CLIST          */
+00900000/*                                                                  */
+00910000/*------------------------------------------------------------------*/
+00920000/*                                                                  */
+00930000/*   REVISION HISTORY:                                              */
+00940000/*                                                                  */
+00950000/*                                                                  */
+00960000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00970000/*     --------  ----  ----  -------------------------------------  */
+00980000/*     07/17/89  026   RSJ   ROBERT ST. JOHN CREATED THE INITIAL    */
+00990000/*                           VERSION                                */
+01000000/*                                                                  */
+01010000/*     03/14/90  080   JCS   ADDED HEADER                           */
+01020000/*                                                                  */
+01030000/*     06/25/90  099   TEV   UPDATED HEADER AND REARRANGED PARMS SO */
+01040000/*                           THAT EACH PARAMETER IS ON ITS OWN LINE */
+01050000/*                                                                  */
+01051000/*     09/15/91  186   LJK   RENAMED CM JCL MODULE                  */
+01052000/*                                                                  */
+01053001/*     12/23/93  314   RPC   UPDATED FOR 3390 DASD                  */
+01054001/*                                                                  */
+01060000/*------------------------------------------------------------------*/
+01070000/********************************************************************/
+01080000 
+01090000PROC 9 TAPENUM                                  +
+01100000       TAPE                                     +
+01110000       VOL                                      +
+01120000       EXP                                      +
+01130000       LEVEL                                    +
+01140000       FILENAME                                 +
+01150000       TOPFILE                                  +
+01160000       LIB                                      +
+01170000       DEN                                      +
+01180000       Z                                        +
+01190000       JCL(NCAMCM.TOOLS.SYSJCL(DUMPTAPE))       +
+01200000       TRACE
+01210000   IF &TRACE. NE THEN CONTROL LIST CONLIST
+01220000 SET &REPL=TAPEINPUTFILE,                                               X
+01230000 SET &REPL2=DISKOUTPUTFILE,                                  X
+01240000 SET &SPACES='                                                                               '
+01250000   SET &NUM=&LENGTH(&REPL)-&LENGTH(&FILENAME)-1
+01260000   SET &WITH=&FILENAME.,&SUBSTR(2:&NUM,&SPACES)X
+01270000   SET &NUM=&LENGTH(&REPL2)-&LENGTH(&LEVEL)-&LENGTH(&FILENAME)-&LENGTH(&LIB)-3
+01280000   SET &WITH2=&LEVEL..&LIB..&FILENAME.,&SUBSTR(2:&NUM,&SPACES)X
+01290000   IF &Z. NE THEN SET &WITH2=&LEVEL..&LIB..Z&FILENAME.,&SUBSTR(2:&NUM-1,&SPACES)X
+01300000   EDIT     '&JCL.' CNTL NONUM
+01310000   TOP
+01320000   CHANGE   *       999999 /NCAMXXX/&SYSUID./ALL
+01330000   TOP
+01340000   FIND     /DENS/
+01350000   CHANGE * /DENS/&DEN./
+01360000   TOP
+01370000   FIND     /DATE/
+01380000   CHANGE * /DATE/&EXP./
+01390000   TOP
+01400000   FIND     /TAPEID,ZZ/
+01410000   CHANGE * /TAPEID,ZZ/TAPEID,&TAPENUM./
+01420000   TOP
+01430000   FIND     /FIRSTFILE,/
+01440000   CHANGE * /FIRSTFILE,/&TOPFILE.,/
+01450000   TOP
+01460000   CHANGE * 999999 /TAPEID/&TAPE./ALL
+01470000   TOP
+01480000   CHANGE * 999999 /SHR392/&VOL./ALL
+01490000   TOP
+01500000   FIND     /TAPEINPUTFILE,/
+01510000   CHANGE *  /&REPL/&WITH/
+01520000   FIND     /DISKOUTPUTFILE,/
+01530000   CHANGE * /&REPL2/&WITH2/
+01540000   SUBMIT
+01550000   END NOSAVE

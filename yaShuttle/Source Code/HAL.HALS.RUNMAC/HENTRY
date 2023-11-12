@@ -1,0 +1,13 @@
+         MACRO                                                          00000100
+&L       HENTRY                                                         00000200
+         DS    0F ALIGN ON FULLWORD                                     00000300
+         ENTRY &L                                                       00000400
+         USING &L,15                                                    00000500
+&L       B     *+20 SKIP AROUND JUNK                                    00000600
+         DC    F'0'                                                     00000700
+         DC    AL2(STACKLEN) SIZE OF STACK                              00000800
+         DC    AL1(8),CL8'&L'                                           00000900
+         L     15,=A(&SYSECT) LOAD BASE OF MAIN ROUTINE                 00001000
+         ST    15,CURRCODE                                              00001100
+         USING &SYSECT,15                                               00001200
+         MEND                                                           00001300

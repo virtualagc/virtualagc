@@ -1,0 +1,129 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     RTLSRCH                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: SEARCHES A PASS LOAD MODULE MAP FOR RUNTIME LIBRARY  */
+00090000/*             EXTERNAL REFERENCES                                  */
+00100000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00130000/*   SYNTAX :                                                       */
+00140000/*     RTLSRCH 'OI' ID(&SYSUID.) LIB(&ID..SRCHFOR) IN(&OI..COMPRINT)*/
+00150000/*             OUT(&LIB..OUT(&OI.)) TRACE                           */
+00160000/*                                                                  */
+00170000/*     ALIAS    - NONE.                                             */
+00180000/*     REQUIRED - 'OI'                                              */
+00210000/*                                                                  */
+00220000/*------------------------------------------------------------------*/
+00230000/*                                                                  */
+00240000/*   INVOKES:  NCAMCM.TOOLS.HALLOAD(RTLSRCH)                        */
+00250000/*                                                                  */
+00260000/*------------------------------------------------------------------*/
+00270000/*                                                                  */
+00280000/*   PARAMETERS:                                                    */
+00290000/*                                                                  */
+00300000/*     OI       REQUIRED                                            */
+00310000/*              NAME OF THE OI FLIGHT SOFTWARE (EX. 0I8B0500)       */
+00320000/*                                                                  */
+00330000/*     ID       DEFAULT: &SYSUID                                    */
+00340000/*              THE HIGH LEVEL QUALIFIER OF THE OUTPUT FILE         */
+00350000/*                                                                  */
+00360000/*     LIB      DEFAULT: &ID.SRCHFOR                                */
+00370000/*              THE FIRST TWO NODES OF THE OUTPUT AND SIM FILES     */
+00380000/*                                                                  */
+00390000/*     IN       DEFAULT: &OI.COMPRINT                               */
+00400000/*              LOAD MODULE MAP TO SEARCH FOR RUN-TIME LIBRARY      */
+00410000/*              ROUTINES                                            */
+00420000/*                                                                  */
+00430000/*     OUT      DEFAULT: &LIB..OUT(&OI)                             */
+00440000/*              FILE CONTAINING THE OUTPUT (REPORT OF RTL ROUTINES  */
+00450000/*              FOUND AND NOT FOUND                                 */
+00460000/*                                                                  */
+00470000/*     TRACE    OPTIONAL                                            */
+00480000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00490000/*              TERMINAL                                            */
+00500000/*                                                                  */
+00510000/*------------------------------------------------------------------*/
+00520000/*                                                                  */
+00530000/*   INPUT DATA SET NAMES:                                          */
+00540000/*                                                                  */
+00550000/*     <IN>                                                         */
+00560000/*         INPUT FILE TO SEARCH FOR RUN-TIME LIBRARY ROUTINE        */
+00570000/*         EXTERNAL REFERENCES                                      */
+00580000/*                                                                  */
+00590000/*------------------------------------------------------------------*/
+00600000/*                                                                  */
+00610000/*   OUTPUT DATA SET NAMES:                                         */
+00620000/*                                                                  */
+00630000/*     <OUT>(<OI>)                                                  */
+00640000/*         OUTPUT FILE CONTAINING REPORT OF LIBRARY ROUTINES        */
+00650000/*         FOUND, NOT FOUND, AND INVALID.                           */
+00660000/*                                                                  */
+00670000/*     <LIB>.SIM.(<OI>)                                             */
+00680000/*         SYSTEM MESSAGES                                          */
+00690000/*                                                                  */
+00700000/*------------------------------------------------------------------*/
+00710000/*                                                                  */
+00720000/*   TEMPORARY DATA SET NAMES:                                      */
+00730000/*                                                                  */
+00740000/*     <LIB>.TEMP.LIST                                              */
+00750000/*         TEMPORARY FILE CONTAINING ERROR MESSAGE FOR END OF FILE  */
+00760000/*                                                                  */
+00770000/*------------------------------------------------------------------*/
+00780000/*                                                                  */
+00790000/*   COMMENTS:  NONE                                                */
+00800000/*                                                                  */
+00810000/*------------------------------------------------------------------*/
+00820000/*                                                                  */
+00830000/*   REVISION HISTORY:                                              */
+00840000/*                                                                  */
+00850000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00860000/*     --------  ----  ----  -------------------------------------  */
+00870000/*     10/23/89  XXX   JAC   CREATED AND PUT INTO CM                */
+00880000/*                                                                  */
+00881000/*     09/19/91  186   LJK   RENAMED CM LOAD MODULE                 */
+00882000/*                                                                  */
+00890000/*------------------------------------------------------------------*/
+00900000/********************************************************************/
+00910000 
+00920000PROC 1 OI                                     +
+00930000       ID(&SYSUID.)                           +
+00940000       LIB('&ID..SRCHFOR')                    +
+00950000       IN('&OI..COMPRINT')                    +
+00960000       OUT(&LIB..OUT)                         +
+00970000       TRACE                                  +
+00980000 
+00990000IF &TRACE. NE THEN CONTROL LIST CONLIST
+01000000CONTROL END(DONE)
+01010000 
+01020000 
+01030000/*------------------------------------------------------------------*/
+01040000/*                                                                  */
+01050000/* EXECUTION STEP                                                   */
+01060000/*                                                                  */
+01070000/*------------------------------------------------------------------*/
+01080000 
+01090000GO: CONTROL NOMSG
+01100000  DELETE (&LIB..TEMP.LIST)
+01110000  DELETE ('&LIB..SIM(&OI.)')
+01120000  FREE F(CHANNEL5 CHANNEL6 CHANNEL7 SYSPRINT)
+01130000CONTROL MSG
+01140000ALLOC F(CHANNEL5) DA('&IN.') SHR
+01150000ALLOC F(CHANNEL6) DA(&LIB..TEMP.LIST) NEW RECFM(F B A) LRECL(133) +
+01160000      BLKSIZE(2660)
+01170000ALLOC F(CHANNEL7) DA('&OUT.(&OI.)') SHR
+01180000ALLOC F(SYSPRINT) DA('&LIB..SIM(&OI.)') SHR
+01190000WRITE SEARCHING FOR RUN-TIME LIBRARY EXTERNAL REFERENCES
+01200000CALL  'NCAMCM.TOOLS.HALLOAD(RTLSRCH)'
+01210000SET &SAVECC=&LASTCC
+01220000FREE F(CHANNEL5 CHANNEL6 CHANNEL7 SYSPRINT)
+01230000IF &SAVECC = 0 THEN +
+01240000  WRITE EXECUTION SUCCESSFUL
+01250000ELSE +
+01260000  WRITE EXECUTION ERROR CODE = &SAVECC
+01270000 
+01280000THEEND: EXIT
+01290000 

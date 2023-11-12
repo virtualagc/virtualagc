@@ -1,0 +1,48 @@
+         MACRO                                                          00000100
+&L       HMAIN &MACRO=NO                                                00000200
+STACK    DSECT                                                          00000300
+         USING STACK,13                                                 00000400
+CURRCODE DS    A .            CURRENT CODE BASE                         00000500
+         DS    H .            H.O. BIT IS EXCLUSIVE FLAG                00000600
+STMTNUMB DS    H .            STATEMENT NUMBER                          00000700
+AVAILBLE DS    D .              AVAILABLE DOUBLE WORD                   00000800
+ERRLINK  DS    A .            ON ERROR LINKAGE                          00000900
+ARG0     DS    F .            CALLERS ARGUMENTS                         00001000
+ARG1     DS    F                                                        00001100
+ARG2     DS    F                                                        00001200
+ARG3     DS    F                                                        00001300
+ARG4     DS    F                                                        00001400
+         DS    10F .          REGS 5 - 14                               00001500
+         AIF   ('&MACRO' EQ 'NO').NOMAC                                 00001600
+*        ADDITIONAL STORAGE SPACE REQUIRED FOR THIS ROUTINE             00001700
+         WORKAREA                                                       00001800
+         AGO   .END                                                     00001900
+.NOMAC   ANOP                                                           00002000
+*        NO ADDITIONAL STORAGE REQUIRED FOR THIS ROUTINE                00002100
+.END     ANOP                                                           00002200
+STACKEND DS    0D                                                       00002300
+STACKLEN EQU   *-STACK                                                  00002400
+*        REGISTER EQUATES                                               00002500
+R0       EQU   0  ***NOTE*** NOT RESTORED BY HEXIT                      00002600
+R1       EQU   1  ***NOTE*** NOT RESTORED BY HEXIT                      00002700
+R2       EQU   2                                                        00002800
+R3       EQU   3                                                        00002900
+R4       EQU   4                                                        00003000
+R5       EQU   5                                                        00003100
+R6       EQU   6                                                        00003200
+R7       EQU   7                                                        00003300
+R8       EQU   8                                                        00003400
+R9       EQU   9                                                        00003500
+R10      EQU   10                                                       00003600
+R14      EQU   14             **NOTE** ALTERED BY HCALL MACRO           00003700
+F0       EQU   0                                                        00003800
+F2       EQU   2                                                        00003900
+F4       EQU   4                                                        00004000
+*F6 MAY BE USED ONLY IF SAVED AND RESTORED                              00004100
+&L       CSECT                                                          00004200
+         USING *,15                                                     00004300
+         B     *+20          SKIP AROUND JUNK                           00004400
+         DC    F'0' .         ALIGN NEXT TO PROPER BOUNDARY             00004500
+         DC    AL2(STACKLEN)  STACK SIZE OF THIS ROUTINE                00004600
+         DC    AL1(8),CL8'&L'                                           00004700
+         MEND                                                           00004800

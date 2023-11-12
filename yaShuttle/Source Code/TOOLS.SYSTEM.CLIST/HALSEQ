@@ -1,0 +1,83 @@
+00001012/********************************************************************/
+00002012/*------------------------------------------------------------------*/
+00003012/*                                                                  */
+00004012/*   NAME:     HALSEQ                                               */
+00005012/*                                                                  */
+00006012/*------------------------------------------------------------------*/
+00007012/*                                                                  */
+00008012/*   FUNCTION: PUT ALL FILES FOR THE HAL COMPILER SYSTEM THAT NEED  */
+00008112/*             TO GO ON THE RS6000 WORKSTATION INTO SEQUENTIAL      */
+00008212/*             FILES FOR DOWNLOADING. IT IS BEST TO RUN THIS CLIST  */
+00009314/*             AS A BATCH LONGRUNS JOB.                             */
+00009412/*                                                                  */
+00009512/*------------------------------------------------------------------*/
+00009612/*                                                                  */
+00009712/*   SYNTAX :                                                       */
+00009815/*     HALSEQ                                                       */
+00010215/*            PCOMPVER(CURRENT)                                     */
+00010315/*            BCOMPVER(CURRENT)                                     */
+00010415/*                                                                  */
+00010515/*------------------------------------------------------------------*/
+00010615/*                                                                  */
+00010715/*   INVOKES:                                                       */
+00010815/*                                                                  */
+00010915/*     HALBUNDL                                                     */
+00011015/*                                                                  */
+00011115/*------------------------------------------------------------------*/
+00011215/*                                                                  */
+00011315/*   PARAMETERS:                                                    */
+00011415/*                                                                  */
+00011515/*     PCOMPVER DEFAULT: CURRENT                                    */
+00013715/*              THE PASS VERSION TO DOWNLOAD                        */
+00013815/*                                                                  */
+00013915/*     BCOMPVER DEFAULT: CURRENT                                    */
+00014015/*              THE BFS  VERSION TO DOWNLOAD                        */
+00015015/*                                                                  */
+00015212/*------------------------------------------------------------------*/
+00015312/*                                                                  */
+00015412/*   REVISION HISTORY:                                              */
+00015512/*                                                                  */
+00015612/*  DATE      PCR  NAME  DESCRIPTION                                */
+00015712/*  --------  ---  ---   -------------------------------------      */
+00015812/*  01/06/00  0663 DAS   BASELINE                                   */
+00015912/*                                                                  */
+00016012/*------------------------------------------------------------------*/
+00016112/********************************************************************/
+00017015PROC 0  PCOMPVER(CURRENT) +
+00018015        BCOMPVER(CURRENT)
+00020000CONTROL LIST CONLIST
+00020100GLOBAL RETCODE
+00021004 
+00021107/* THESE ARE ALL THE PASS FILES WHICH NEED TO BE DOWNLOADED      */
+00021207/* SOME ARE COMMENTED OUT BECAUSE THEY ARENT CURRENTLY NEEDED.   */
+00021315HALBUNDL  PASS.&PCOMPVER..AUX.PROCS   SRCID(NCAMCM)   TYPE(XPL)
+00021415/*LBUNDL  PASS.&PCOMPVER..DIAGNSTC.MACLIB SRCID(NCAMCM) TYPE(MAC)
+00021515HALBUNDL  PASS.&PCOMPVER..ERRORLIB    SRCID(NCAMCM)   TYPE(SRC)
+00021615HALBUNDL  PASS.&PCOMPVER..FLO.PROCS   SRCID(NCAMCM)   TYPE(XPL)
+00022015HALBUNDL  PASS.&PCOMPVER..HALINCL     SRCID(NCAMCM)   TYPE(XPL)
+00023015/*LBUNDL  PASS.&PCOMPVER..MONITOR.ASM SRCID(NCAMCM)   TYPE(ASM)
+00024015/*LBUNDL  PASS.&PCOMPVER..MONITOR.LOAD SRCID(NCAMCM)  TYPE(LIB)
+00026015HALBUNDL  PASS.&PCOMPVER..OPT.PROCS   SRCID(NCAMCM)   TYPE(XPL)
+00028015HALBUNDL  PASS.&PCOMPVER..PASS1.PROCS SRCID(NCAMCM)   TYPE(XPL)
+00028215HALBUNDL  PASS.&PCOMPVER..PASS2.PROCS SRCID(NCAMCM)   TYPE(XPL)
+00028415HALBUNDL  PASS.&PCOMPVER..PASS3.PROCS SRCID(NCAMCM)   TYPE(XPL)
+00028615HALBUNDL  PASS.&PCOMPVER..PASS4.PROCS SRCID(NCAMCM)   TYPE(XPL)
+00028715HALBUNDL  PASS.&PCOMPVER..RUNASM      SRCID(NCAMCM)   TYPE(ASM)
+00028815HALBUNDL  PASS.&PCOMPVER..RUNLIB      SRCID(NCAMCM)   TYPE(LIB)
+00028915HALBUNDL  PASS.&PCOMPVER..RUNMAC      SRCID(NCAMCM)   TYPE(MAC)
+00029015HALBUNDL  PASS.&PCOMPVER..RUNOBJ      SRCID(NCAMCM)   TYPE(OBJ)
+00029115/*LBUNDL  PASS.&PCOMPVER..SDFPKG.ASM  SRCID(NCAMCM)   TYPE(ASM)
+00029215HALBUNDL  PASS.&PCOMPVER..ZCONASM     SRCID(NCAMCM)   TYPE(ASM)
+00029315HALBUNDL  PASS.&PCOMPVER..ZCONOBJ     SRCID(NCAMCM)   TYPE(OBJ)
+00029405 
+00029507/* THESE ARE THE BFS UNIQUE FILES THAT NEED TO BE DOWNLOADED*/
+00029615/*LBUNDL  BFS.&BCOMPVER..MONITOR.LOAD SRCID(NCAMCM)   TYPE(LIB)
+00029715HALBUNDL  BFS.&BCOMPVER..RUNLIB       SRCID(NCAMCM)   TYPE(OBJ)
+00029815HALBUNDL  BFS.&BCOMPVER..RUNOBJ       SRCID(NCAMCM)   TYPE(OBJ)
+00029915HALBUNDL  BFS.&BCOMPVER..QCONLIB      SRCID(NCAMCM)   TYPE(OBJ)
+00030005 
+00030100 
+00031000/* RESULTING SEQUENTIAL FILES WILL BE IN THE FOLLOWING FORM:     */
+00040000/*    <USERID>.<NAME>.SEQ                                        */
+00050011/* WHERE <NAME> IS THE 1ST PARAMETER PASSED TO HALBUNDL ABOVE.   */
+00060004/* SEQUENTIAL FILES MUST BE DOWNLOADED AS BINARY WITH NO CR/LF.  */

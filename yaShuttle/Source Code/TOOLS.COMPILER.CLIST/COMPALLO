@@ -1,0 +1,190 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     COMPALLO                                             */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: A CLIST TO ALLOCATE ALL NECESSARY FILES IN ORDER TO  */
+00000900/*             USE A CLIST TO COMPILE, LINK AND EXECUTE A HAL/S     */
+00001000/*             PROGRAM (CLISTS LIKE PASSCLG )                       */
+00001100/*                                                                  */
+00001200/*------------------------------------------------------------------*/
+00001300/*                                                                  */
+00001400/*   SYNTAX :                                                       */
+00001500/*     COMPALLO 'LIB' TEST() HAL TRACE                              */
+00001600/*                                                                  */
+00001700/*     ALIAS    - NONE.                                             */
+00001800/*     REQUIRED - 'LIB'.                                            */
+00001900/*                                                                  */
+00002000/*------------------------------------------------------------------*/
+00002100/*                                                                  */
+00002200/*   INVOKES:                                                       */
+00002300/*                                                                  */
+00002400/*     NONE.                                                        */
+00002500/*                                                                  */
+00002600/*------------------------------------------------------------------*/
+00002700/*                                                                  */
+00002800/*   PARAMETERS:                                                    */
+00002900/*                                                                  */
+00003000/*     LIB      REQUIRED                                            */
+00003100/*              THE DATA SET NAME WHICH YOU WANT ALLOCATED.         */
+00003200/*              (HIGH LEVEL QUALIFIER NEEDED)                       */
+00003300/*                                                                  */
+00003400/*     TEST     DEFAULT: NULL                                       */
+00003500/*               COMPILE - COMPARE .LST FILES                       */
+00003600/*               EXECUTE - COMPARE .OUT FILES                       */
+00003700/*               FSW     - FSW COMPILATION                          */
+00003800/*                                                                  */
+00003900/*     HAL      OPTIONAL                                            */
+00004000/*              ALLOCATE THE .HAL DATASET                           */
+00004100/*                                                                  */
+00004200/*     TRACE    OPTIONAL                                            */
+00004300/*              DISPLAY TRACE OF CLIST EXECUTION AT THE TERMINAL    */
+00004400/*                                                                  */
+00004500/*------------------------------------------------------------------*/
+00004600/*                                                                  */
+00004700/*   INPUT DATA SET NAMES:                                          */
+00004800/*                                                                  */
+00004900/*     NONE.                                                        */
+00005000/*                                                                  */
+00005100/*------------------------------------------------------------------*/
+00005200/*                                                                  */
+00005300/*   OUTPUT DATA SET NAMES:                                          */
+00005400/*                                                                  */
+00005500/*     NONE.                                                        */
+00005600/*                                                                  */
+00005700/*------------------------------------------------------------------*/
+00005800/*                                                                  */
+00005900/*   TEMPORARY DATA SET NAMES:                                      */
+00006000/*                                                                  */
+00006100/*     NONE.                                                        */
+00006200/*                                                                  */
+00006300/*------------------------------------------------------------------*/
+00006400/*                                                                  */
+00006500/*   COMMENTS:                                                      */
+00006600/*                                                                  */
+00006700/*     NONE.                                                        */
+00006800/*                                                                  */
+00006900/*------------------------------------------------------------------*/
+00007000/*                                                                  */
+00007100/*   REVISION HISTORY:                                              */
+00007200/*                                                                  */
+00007300/*  DATE      PCR  NAME  DESCRIPTION                                */
+00007400/*  --------  ---  ---   -------------------------------------      */
+00007500/*  10/26/89  062  SDM   BASELINE ORIGINAL CLIST                    */
+00007600/*                                                                  */
+00007700/*  04/18/90  062  LJK   UPDATE TO MATCH UP WITH PASSCLG            */
+00007800/*                                                                  */
+00007900/*  06/25/90  099  TEV   UPDATED HEADER                             */
+00008000/*                                                                  */
+00008100/*  01/07/91  141  TEV   ADDED ALLOCATION OF .OUT4 FILE AND         */
+00008200/*                       INCREASED .SDF FILE ALLOCATION SIZE.       */
+00008300/*                                                                  */
+00008400/*  04/22/91  169  LJK   ADD NEW/OLD OBJ,INC AND SDF FILES          */
+00008500/*                                                                  */
+00008600/*  04/22/91  332  LJK   INCREASED .SDF, .OBJ &.LST FILE ALLOC SIZE */
+00008700/*                       ADDED ALLOCATION OF .OPT FILE              */
+00008800/*                       DELETED ALLOCATION OF .COMPLST FILE        */
+00008810/*  05/06/96  0475 LJK   UPDATE FSW VERIFICATION TOOLS FOR BFS      */
+00008820/*                                                                  */
+00008900/*------------------------------------------------------------------*/
+00009000/********************************************************************/
+00009100 
+00009200PROC     1  LIB     +
+00009300            TEST()  +
+00009400            HAL     +
+00009410            SYSTEM(PASS) +
+00009500            TRACE
+00009600IF &TRACE NE THEN CONTROL LIST CONLIST
+00009700/*
+00009800/* IF THE HAL OPTION IS GIVEN, ALLOCATE THE .HAL DATASET ALSO.
+00009900/*
+00010000IF &HAL. NE THEN               +
+00010100  ALLOC   DA('&LIB..HAL')            SPACE(1,1) CYLINDERS +
+00010200         DSORG(PO)  RECFM(F B)     LRECL(80) BLKSIZE(1680) DIR(20)
+00010300/*
+00010400/* ALLOCATE THE FOLLOWING DATASET FOR PASS ONLY
+00010500/*
+00010510IF &SYSTEM = PASS THEN         +
+00010600  ALLOC   DA('&LIB..OPT')           SPACE(5,5) CYLINDERS +
+00010700        DSORG(PO) RECFM(F B)        LRECL(80) BLKSIZE(400) DIR(50)
+00010800/*
+00010900IF &TEST EQ  COMPILE OR &TEST EQ FSW THEN +
+00011000   GOTO TESTS
+00011100ALLOC DA('&LIB..OUT4')              SPACE(1,1) CYLINDERS +
+00011200         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(2660)  DIR(20)
+00011300ALLOC   DA('&LIB..CHANNEL1')        SPACE(1,1) CYLINDERS +
+00011400         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(13300) DIR(66)
+00011500ALLOC   DA('&LIB..IOPTRACE')        SPACE(1,1) CYLINDERS +
+00011600         DSORG(PO)  RECFM(F B A)    LRECL(121) BLKSIZE(12100) DIR(66)
+00011700ALLOC   DA('&LIB..CON')             SPACE(3,3) CYLINDERS +
+00011800         DSORG(PO)  RECFM(F B)      LRECL(80) BLKSIZE(400) DIR(66)
+00011900ALLOC   DA('&LIB..LOAD')            SPACE(5,5) CYLINDERS +
+00012000         DSORG(PO)  RECFM(U)        LRECL(6144) BLKSIZE(6144) DIR(85)
+00012100ALLOC   DA('&LIB..MAPS')            SPACE(3,3) CYLINDERS +
+00012200         DSORG(PO)  RECFM(F B A)    LRECL(121) BLKSIZE(1210) DIR(65)
+00012300ALLOC   DA('&LIB..SIM')             SPACE(3,3) CYLINDERS +
+00012400         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(133) DIR(65)
+00012500ALLOC   DA('&LIB..UCP')             SPACE(5,5) CYLINDERS +
+00012600         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(6118) DIR(65)
+00012700ALLOC   DA('&LIB..UCPERR')          SPACE(2,2) TRACKS +
+00012800         DSORG(PS)  RECFM(F)        LRECL(122) BLKSIZE(122)
+00012900ALLOC   DA('&LIB..OUT')             SPACE(5,5) CYLINDERS +
+00013000         DSORG(PO)  RECFM(F B )     LRECL(133) BLKSIZE(6118) DIR(65)
+00013100 
+00013200TESTS: CONTROL MSG
+00013300/*                                                                */
+00013400/*  NOW, IF A TEST IS COMPILE OR EXECUTE, ALLOCATE DATASETS       */
+00013500/*  NECESSARY FOR THE COMPARISON STEPS.                           */
+00013600/*                                                                */
+00013700IF &TEST EQ EXECUTE OR &TEST EQ COMPILE THEN DO
+00013800ALLOC   DA('&LIB..NEW.LST')         SPACE(20,9) CYLINDERS       +
+00013900         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(2660) DIR(65)
+00014000 
+00014100ALLOC   DA('&LIB..OLD.LST')         SPACE(20,9) CYLINDERS       +
+00014200         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(2660) DIR(65)
+00014300 
+00014400ALLOC   DA('&LIB..NEW.OBJ')         SPACE(20,5) CYLINDERS +
+00014500         DSORG(PO)  RECFM(F B)      LRECL(80) BLKSIZE(400) DIR(65)
+00014600 
+00014700ALLOC   DA('&LIB..OLD.OBJ')         SPACE(20,5) CYLINDERS +
+00014800         DSORG(PO)  RECFM(F B)      LRECL(80) BLKSIZE(400) DIR(65)
+00014900 
+00015000ALLOC   DA('&LIB..NEW.SDF')         SPACE(40,5) CYLINDERS +
+00015100         DSORG(PO)  RECFM(F)        LRECL(1680) BLKSIZE(1680) DIR(130)
+00015200 
+00015300ALLOC   DA('&LIB..OLD.SDF')         SPACE(40,5) CYLINDERS +
+00015400         DSORG(PO)  RECFM(F)        LRECL(1680) BLKSIZE(1680) DIR(130)
+00015500 
+00015600ALLOC   DA('&LIB..NEW.INC')         SPACE(5,5) CYLINDERS +
+00015700         DSORG(PO)  RECFM(F B)      LRECL(80) BLKSIZE(6160) DIR(66)
+00015800 
+00015900ALLOC   DA('&LIB..OLD.INC')         SPACE(5,5) CYLINDERS +
+00016000         DSORG(PO)  RECFM(F B)      LRECL(80) BLKSIZE(6160) DIR(66)
+00016100END
+00016200ELSE DO
+00016300ALLOC   DA('&LIB..LST')             SPACE(20,5) CYLINDERS        +
+00016400         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(2660) DIR(65)
+00016500 
+00016600ALLOC   DA('&LIB..OBJ')             SPACE(20,5) CYLINDERS +
+00016700         DSORG(PO)  RECFM(F B)      LRECL(80) BLKSIZE(400) DIR(65)
+00016800 
+00016900ALLOC   DA('&LIB..SDF')             SPACE(20,5) CYLINDERS +
+00017000         DSORG(PO)  RECFM(F)        LRECL(1680) BLKSIZE(1680) DIR(130)
+00017100 
+00017200ALLOC   DA('&LIB..INC')             SPACE(1,1) CYLINDERS +
+00017300         DSORG(PO)  RECFM(F B)      LRECL(80) BLKSIZE(6160) DIR(66)
+00017400END
+00017500 
+00017600IF &TEST EQ EXECUTE OR &TEST EQ E THEN DO
+00017700ALLOC   DA('&LIB..NEW.OUT')         SPACE(5,5) CYLINDERS       +
+00017800         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(6118) DIR(65)
+00017900 
+00018000ALLOC   DA('&LIB..OLD.OUT')         SPACE(5,5) CYLINDERS       +
+00018100         DSORG(PO)  RECFM(F B A)    LRECL(133) BLKSIZE(6118) DIR(65)
+00018200END
+00018300CONTROL MSG
+00018400WRITE  ****************************
+00018500WRITE  *** ALLOCATION COMPLETED ***
+00018600WRITE  ****************************

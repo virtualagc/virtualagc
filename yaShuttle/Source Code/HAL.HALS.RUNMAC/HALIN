@@ -1,0 +1,19 @@
+         MACRO                                                          00000100
+&NAME    HALIN  &STACK=SDLSTACK                                         00000200
+         LCLC  &STK                                                     00000300
+&STK     SETC  '&STACK'                                                 00000400
+         AIF   ('&NAME'(1,1) NE '$' OR '&STK' NE 'AUTO').GEN            00000500
+&STK     SETC  '@'.'&NAME'(2,7)                                         00000600
+.GEN     ANOP                                                           00000700
+&NAME    HMAIN                                                          00000800
+         SPACE                                                          00000900
+         STM   14,12,12(13)   SAVE REGISTERS OS STYLE                   00001000
+         LR    R14,13                                                   00001100
+         L     13,=V(&STK)                                              00001200
+         ST    15,CURRCODE    SAVE LOCAL BASE                           00001300
+         ST    R14,ARG0        CALLER'S OS SAVE AREA PTR                00001400
+         SR    R14,R14                                                  00001500
+         ST    R14,ERRLINK                                              00001600
+         ST    R14,ARG0+13*4   INHIBIT STACK WALKBACK                   00001700
+         L     12,=V(HALSYS)                                            00001800
+         MEND                                                           00001900

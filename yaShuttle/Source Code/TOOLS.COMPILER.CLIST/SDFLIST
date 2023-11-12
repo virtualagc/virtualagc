@@ -1,0 +1,205 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     SDFLIST                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: PRODUCES A FORMATTED DUMP OF AN SDF BY EXECUTING     */
+00090000/*             A STAND-ALONE VERSION OF PHASE 4 OF THE COMPILER.    */
+00100000/*                                                                  */
+00110000/*             EXAMPLE: SDFLIST TEST01   OR                         */
+00120000/*                      SDFLIST ##TEST01                            */
+00121000/*                                                                  */
+00122000/*------------------------------------------------------------------*/
+00123000/*                                                                  */
+00124000/*   SYNTAX :                                                       */
+00125000/*     SDFLIST NAME ID(&SYSUID) LIB(&ID..TEST) SYSTEM(PASS)    +    */
+00126000/*                  SDFLIB(&LIB..SDF) SCREEN COMPVER(CURRENT)  +    */
+00127000/*                  PRINT(&LIB..SDFLIST)  MONITOR(NCAMCM.      +    */
+00128000/*                  &SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)   +    */
+00129000/*                  ERRORLIB(NCAMCM.PASS.CURRENT.ERRORLIB)     +    */
+00130000/*                  PROGRAM(NCAMCM.PASS.CURRENT.PASS4.OBJ)     +    */
+00140004/*                  TRACE PG(9900)                                  */
+00141000/*                                                                  */
+00150000/*     ALIAS    - NONE.                                             */
+00160000/*     REQUIRED - NAME                                              */
+00170000/*                                                                  */
+00180000/*------------------------------------------------------------------*/
+00190000/*                                                                  */
+00200000/*   INVOKES:                                                       */
+00210000/*                                                                  */
+00220000/*     NCAMCM.PASS.CURRENT.MONITOR.LOAD(MONITOR)  OR                */
+00230000/*     NCAMCM.BFS.CURRENT.MONITOR.LOAD(MONITOR)                     */
+00240000/*                                                                  */
+00241000/*------------------------------------------------------------------*/
+00242000/*                                                                  */
+00243000/*   PARAMETERS:                                                    */
+00244000/*                                                                  */
+00245000/*     NAME     REQUIRED                                            */
+00246000/*              NAME OF A PROGRAM OR NAME OF A SDF MEMBER           */
+00247000/*                                                                  */
+00248000/*     ID       DEFAULT: &SYSUID                                    */
+00249000/*              NAME OF HIGH LEVEL QUALIFIER                        */
+00250000/*                                                                  */
+00260000/*     LIB      DEFAULT: &ID..TEST                                  */
+00270000/*              PART OF THE NAME OF THE PDS'S INVOLVED IN THE LIST  */
+00280000/*                                                                  */
+00290000/*     SDFLIB   DEFAULT: &LIB..SDF                                  */
+00300000/*              NAME OF A PDS CONTAINING SDF'S, SPECIFIED AS A      */
+00310000/*              PARAMETER TO THE CLIST                              */
+00320000/*                                                                  */
+00330000/*     PRINT    DEFAULT: &LIB..SDFLIST                              */
+00340000/*              OUTPUT PDS FOR THE FORMATTED SDF DUMP(S)            */
+00350000/*                                                                  */
+00360000/*     SYSTEM   DEFAULT: PASS                                       */
+00370000/*              COMPILER SYSTEM PASS OR BFS                         */
+00380000/*                                                                  */
+00390000/*     COMPVER  DEFAULT: CURRENT                                    */
+00391000/*              COMPILER VERSION                                    */
+00392000/*                                                                  */
+00393000/*     PROGRAM  DEFAULT: NCAMCM.&SYSTEM..&COMPVER.PASS4.OBJ         */
+00394000/*              SDFLIST OBJECT FILE                                 */
+00395000/*                                                                  */
+00396000/*     ERRORLIB DEFAULT: NCAMCM.&SYSTEM..&COMPVER..ERRORLIB         */
+00397000/*              ERRORLIB USED BY SDFLIST                            */
+00398000/*                                                                  */
+00398100/*     MONITOR  DEFAULT: NCAMCM.&SYSTEM..&COMPVER..MONITOR.LOAD     */
+00398200/*              MONITOR USED BY SDFLIST                             */
+00398300/*                                                                  */
+00398400/*     SCREEN   OPTIONAL                                            */
+00398500/*              DUMPS OUTPUT TO THE SCREEN INSTEAD OF A FILE        */
+00398600/*                                                                  */
+00398700/*     SEQ      OPTIONAL                                            */
+00398800/*              SEND SDFLIST TO A SEQUENTIAL FILE. THE DEFAULT FILE */
+00398900/*              IS &ID..&NAME..SDFLIST                              */
+00399000/*                                                                  */
+00399102/*     PG       DEFAULT: 9900                                       */
+00399200/*              PAGE LIMIT MAXIMUM                                  */
+00399400/*                                                                  */
+00400000/*     TRACE    OPTIONAL                                            */
+00410000/*              TRACES THE EXECUTION ON THE USER'S TERMINAL         */
+00420000/*                                                                  */
+00430000/*------------------------------------------------------------------*/
+00440000/*                                                                  */
+00450000/*   INPUT DATA SET NAMES:                                          */
+00460000/*                                                                  */
+00461000/*     <LIB>.SDF                                                    */
+00462000/*        NAME OF A PDS CONTAINING SDF'S.                           */
+00463000/*                                                                  */
+00464000/*------------------------------------------------------------------*/
+00465000/*                                                                  */
+00466000/*   OUTPUT DATA SET NAMES:                                         */
+00467000/*                                                                  */
+00468000/*     <LIB>.SDFLIST                                                */
+00469000/*         PDS OF FORMATTED SDF DUMP(S).                            */
+00470000/*                                                                  */
+00480000/*------------------------------------------------------------------*/
+00490000/*                                                                  */
+00500000/*   TEMPORARY DATA SET NAMES:                                      */
+00510000/*                                                                  */
+00520000/*     SYSIN:   THIS SPECIFIES WHICH MEMBER TO DUMP                 */
+00530000/*                                                                  */
+00540000/*------------------------------------------------------------------*/
+00550000/*                                                                  */
+00560000/*   COMMENTS:                                                      */
+00570000/*                                                                  */
+00580000/*     NONE.                                                        */
+00590000/*                                                                  */
+00600000/*------------------------------------------------------------------*/
+00610000/*                                                                  */
+00620000/*   REVISION HISTORY:                                              */
+00630000/*                                                                  */
+00640000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00650000/*  --------  ---  ---   -------------------------------------      */
+00660000/*  07/16/84  ???  HFG   ORIGINAL CLIST                             */
+00670000/*                                                                  */
+00680000/*  07/05/90  102  TEV   ADDED HEADER AND REORGANIZED PARAMETERS    */
+00690000/*                       ONE PER LINE. UPDATED INVOKED PROGRAM AND  */
+00700000/*                       LIBRARY LOCATION TO THE CURRENT LOCATION.  */
+00710000/*                                                                  */
+00720000/*  03/27/91  164  RSJ   STANDARDIZED THE PARAMETERS, AND CHANGED   */
+00730000/*                       THE EXECUTABLE DATASET NAME TO REFLECT THE */
+00740000/*                       BASELINED VERSION OF PASS4                 */
+00750000/*                                                                  */
+00760000/*  07/19/93  256  LJK   ADDED SYSTEM,COMPVER AND MONITOR PARAMETERS*/
+00770000/*                       USE CM VERSION OF THE MONITOR              */
+00780000/*                       CHANGE SDFLIB FROM SEQ. FILE TO A PDS      */
+00790003/*  04/01/94  332  LJK   ADDED PG PARAMETER                         */
+00800000/*                                                                  */
+00810000/*------------------------------------------------------------------*/
+00820000/********************************************************************/
+00830000PROC 1 NAME                                   +
+00840000       ID(&SYSUID.)                           +
+00850000       LIB(&ID..TEST)                         +
+00860000       SDFLIB(&LIB..SDF)                      +
+00870000       PRINT(&LIB..SDFLIST)                   +
+00880000       SYSTEM(PASS)                           +
+00890000       COMPVER(CURRENT)                       +
+00891000       PROGRAM(NCAMCM.&SYSTEM..&COMPVER..PASS4.OBJ) +
+00892000       ERRORLIB(NCAMCM.&SYSTEM..&COMPVER..ERRORLIB) +
+00893000       MONITOR(NCAMCM.&SYSTEM..&COMPVER..MONITOR.LOAD(MONITOR)) +
+00894002       PG(9900)                               +
+00895000       SCREEN                                 +
+00896000       SEQ                                    +
+00897000       TRACE
+00898000 
+00899000IF &TRACE NE    THEN CONTROL LIST
+00900000IF &SUBSTR(1:2,&NAME) NE &STR(##) THEN DO
+00910000   SET &NAME6 = &NAME
+00920000   IF &LENGTH(&NAME) = 8 THEN +
+00930000     SET &NAME6 = &SUBSTR(1:6,&NAME)
+00940000   IF &LENGTH(&NAME) = 7 THEN +
+00950000     SET &NAME6 = &SUBSTR(1:6,&NAME)
+00951000   SET &NAME = &STR(##&NAME6.)
+00952000END
+00953000WRITE EXECUTING SDFLIST ON &SDFLIB(&NAME.)
+00954000CONTROL NOMSG
+00955000FREE F(PROGRAM SYSPRINT LISTING2 OUTPUT3 OUTPUT5 OUTPUT7 SYSIN +
+00956000       HALSDF ERROR FILE1 FILE2 FILE3 FILE4 FILE5 FILE6 FILE7 FILE8)
+00957000IF &SCREEN EQ THEN    +
+00958000   IF &SEQ EQ THEN DELETE ('&PRINT(&NAME.)')
+00959000CONTROL MSG
+00960000 
+00970000IF &SYSDSN('&PRINT') NE OK THEN                                     +
+00980000  ALLOC DA('&PRINT') NEW RECFM(F B A ) LRECL(133) DSORG(PO) DIR(50) +
+00990001  BLKSIZE(6384) SPACE(20,5) CYLINDERS
+01000000 
+01010000ALLOC F(PROGRAM)  DA('&PROGRAM.')   SHR
+01020000ALLOC F(ERROR)    DA('&ERRORLIB.')  SHR
+01030000ALLOC F(OUTPUT5)  DA('&SDFLIB') SHR
+01040000ALLOC F(HALSDF)   DA('&SDFLIB') SHR
+01050000IF &SEQ. NE THEN DO
+01051000  CONTROL NOMSG
+01052000  IF &SYSDSN('&ID..&NAME..SDFLIST') = OK THEN DO
+01053000     DELETE('&ID..&NAME..SDFLIST')
+01053100  END
+01053200  ALLOC F(SYSPRINT) DA('&ID..&NAME..SDFLIST') NEW RECFM(F B A)   +
+01053300                    LRECL(133) BLKSIZE(6384) SPACE(20,5) CYLINDERS
+01053400  END
+01053500ELSE IF &SCREEN NE THEN ALLOC F(SYSPRINT) DA(*)
+01053600     ELSE ALLOC F(SYSPRINT) DA('&PRINT(&NAME.)') SHR
+01053700CONTROL MSG
+01053800ALLOC F(LISTING2) DUMMY
+01053900ALLOC F(OUTPUT3)  DUMMY
+01054000 
+01054100WRITE
+01054200ALLOC REUSE F(SYSIN) SP(5 2) TRACK BLOCK(80) RECFM(F B A ) LRECL(80)
+01054300OPENFILE SYSIN OUTPUT
+01054400SET SYSIN EQ &STR(&NAME.)
+01054500PUTFILE SYSIN
+01054600CLOSFILE SYSIN
+01054700 
+01054800ALLOC F(OUTPUT7)  DUMMY
+01054900ALLOC F(FILE1) CYL SP(1 1)
+01055000ALLOC F(FILE2) CYL SP(1 1)
+01056000ALLOC F(FILE3) CYL SP(1 1)
+01057000ALLOC F(FILE4) CYL SP(1 1)
+01058000ALLOC F(FILE5) CYL SP(1 1)
+01059000ALLOC F(FILE6) CYL SP(1 1)
+01060000ALLOC F(FILE7) CYL SP(1 1)
+01070000ALLOC F(FILE8) CYL SP(1 1)
+01080000CALL '&MONITOR.' 'TABLST,P=&PG.'
+01090000WRITE COMPLETION CODE = &LASTCC
+01100000FREE F(PROGRAM SYSPRINT LISTING2 OUTPUT3 OUTPUT5 OUTPUT7 SYSIN +
+01110000       HALSDF ERROR FILE1 FILE2 FILE3 FILE4 FILE5 FILE6 FILE7 FILE8)

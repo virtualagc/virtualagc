@@ -1,0 +1,258 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME    : COMPFC                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: PROCEDURE TO EXECUTE THE COMPFC PROGRAM WHICH        */
+00090000/*                COMPARES TWO ASSEMBLY LISTINGS FROM HALS-FC       */
+00100000/*                COMPILATIONS                                      */
+00110000/*                                                                  */
+00120000/*------------------------------------------------------------------*/
+00130000/*                                                                  */
+00140000/*   SYNTAX :                                                       */
+00150000/*     COMPFC  'NAMEOLD' NAMENEW(&NAMEOLD.) ID(&SYSUID.)            */
+00160000/*             LIB(&ID..TEST) LIST(LIST) TRACE NODELETES            */
+00170000/*             IN1(&LIB..OLD.LST(&NAMEOLD.))                        */
+00180000/*             IN2(&LIB..OLD.LST(&NAMENEW.))                        */
+00190000/*             OUT(&LIB..COMPLST(&NAMENEW.)) NEWREL(REL99V0)        */
+00200000/*             OLDREL(NCAMCM.PASS.CURRENT) REFRESH                  */
+00210000/*                                                                  */
+00220000/*     ALIAS    - NONE.                                             */
+00230000/*     REQUIRED - 'NAMEOLD'                                         */
+00290000/*                                                                  */
+00300000/*------------------------------------------------------------------*/
+00310000/*                                                                  */
+00320000/*   INVOKES:                                                       */
+00330000/*                                                                  */
+00340000/*     NCAMCM.TOOLS.HALLOAD(COMPFC)                                 */
+00350000/*                                                                  */
+00360000/*------------------------------------------------------------------*/
+00370000/*                                                                  */
+00380000/*   PARAMETERS:                                                    */
+00390000/*                                                                  */
+00400000/*     NAMEOLD     REQUIRED                                         */
+00410000/*                 NAME OF MEMBER OF THE OLD VERSION                */
+00420000/*                                                                  */
+00430000/*     NAMENEW     DEFAULT: &NAMEOLD                                */
+00440000/*                 NAME OF MEMBER OF THE NEW VERSION                */
+00450000/*                                                                  */
+00460000/*     ID          DEFAULT: &SYSUID                                 */
+00470000/*                 HIGH LEVEL QUALIFIER                             */
+00480000/*                                                                  */
+00490000/*     LIB         DEFAULT: &ID..TEST                               */
+00500000/*                 DATA SET WHERE THE MEMBERS RESIDE                */
+00510000/*                                                                  */
+00520000/*     LIST        DEFAULT: LIST                                    */
+00530000/*                 MEMBER LIST ALREADY EXISTS, USE FILE SPECIFIED   */
+00540000/*                                                                  */
+00550000/*     TRACE       OPTIONAL                                         */
+00560000/*                 TRACE THE CLISTS EXECUTION                       */
+00570000/*                                                                  */
+00571000/*     REFRESH     OPTIONAL                                         */
+00572000/*                 REFRESH THE COMPFC.RPT FILE                      */
+00573000/*                                                                  */
+00574000/*     NODELETES   OPTIONAL                                         */
+00575000/*                 DO NOT DELETE THE .LST, OUT FILES AFTER A        */
+00576000/*                 SUCCESSFUL COMPARISON.                           */
+00577000/*                                                                  */
+00578000/*     IN1         DEFAULT: &LIB..OLD.LST(&NAMEOLD)                 */
+00579000/*                 INPUT #1 DSN                                     */
+00580000/*                                                                  */
+00590000/*     IN2         DEFAULT: &LIB..NEW.LST(&NAMENEW)                 */
+00600000/*                 INPUT #2 DSN                                     */
+00610000/*                                                                  */
+00620000/*     OUT         DEFAULT: &LIB..COMPLST(&NAMENEW)                 */
+00630000/*                 OUTPUT FILE FOR THE RESULTS                      */
+00640000/*                                                                  */
+00650000/*     NEWREL      DEFAULT: REL99V0                                 */
+00660000/*                 NEW RELEASE OF THE COMPILER                      */
+00670000/*                                                                  */
+00680000/*     OLDREL      DEFAULT: NCAMCM.PASS.CURRENT                     */
+00690000/*                 OLD RELEASE OF THE COMPILER                      */
+00700000/*                                                                  */
+00710000/*------------------------------------------------------------------*/
+00720000/*                                                                  */
+00730000/*   INPUT DATA SET NAMES:                                          */
+00740000/*                                                                  */
+00750000/*     <IN1>     INPUT #1 DATA SET NAME                             */
+00760000/*                                                                  */
+00770000/*     <IN2>     INPUT #2 DATA SET NAME                             */
+00780000/*                                                                  */
+00790000/*------------------------------------------------------------------*/
+00800000/*                                                                  */
+00810000/*   OUTPUT DATA SET NAMES:                                         */
+00820000/*                                                                  */
+00830000/*     <0UT>      OUTPUT FILE FOR THE RESULTS                       */
+00840000/*                                                                  */
+00850000/*------------------------------------------------------------------*/
+00860000/*                                                                  */
+00870000/*   TEMPORARY DATA SET NAMES:                                      */
+00880000/*                                                                  */
+00890000/*     <NAMENEW>.TEMPLIST   FILE USED TO CHECK THE CONDITION CODE   */
+00900000/*                          OF THE EXECUTION OF THE COMPFC PGM.     */
+00910000/*                                                                  */
+00920000/*------------------------------------------------------------------*/
+00930000/*                                                                  */
+00940000/*   COMMENTS:                                                      */
+00950000/*                                                                  */
+00960000/*     NONE.                                                        */
+00970000/*                                                                  */
+00980000/*------------------------------------------------------------------*/
+00990000/*                                                                  */
+01000000/*   REVISION HISTORY:                                              */
+01010000/*                                                                  */
+01020000/*        DATE       PCR   NAME    DESCRIPTION                      */
+01030000/*        --------   ----  ------  ---------------------------      */
+01040000/*        09/19/89   051   LJK     BASELINE ORIGINAL CLIST          */
+01050000/*                                                                  */
+01060000/*        06/25/90   099   TEV     UPDATED HEADER                   */
+01070000/*                                                                  */
+01080000/*        11/14/90   097   LJK     ADD COMPFC.RPT FILE              */
+01090000/*                                 ADD REFRESH OPTION               */
+01100000/*                                 DELETE ALL TEMPLIST FILES        */
+01110000/*                                                                  */
+01120000/*        01/09/91   140   RAH     CHANGED LOCATION OF COMPFC LOAD  */
+01130000/*                                 MODULE                           */
+01130101/*                                                                  */
+01131001/*        09/13/91   186   LJK     RENAMED COMPFC LOAD FILE         */
+01132000/*                                                                  */
+01132100/*        05/11/94   334   JCS     MODIFIED TO DELETE .COMPLST FILE */
+01132200/*                                 IF REFRESH PARAMETER IS SPECIFIED*/
+01132300/*                                 AND TO ALLOCATE THE .COMPLST IF  */
+01132400/*                                 IT DOES NOT EXIST.               */
+01140000/*------------------------------------------------------------------*/
+01150000/********************************************************************/
+01160000 
+01170000PROC 1 NAMEOLD                             +
+01180000       NAMENEW(&NAMEOLD.)                  +
+01190000       ID(&SYSUID.)                        +
+01200000       LIB(&ID..TEST)                      +
+01210000       LIST(LIST)                          +
+01220000       TRACE                               +
+01221000       REFRESH                             +
+01222000       NODELETES                           +
+01223000       IN1(&LIB..OLD.LST(&NAMEOLD.))       +
+01224000       IN2(&LIB..NEW.LST(&NAMENEW.))       +
+01225000       OUT(&LIB..COMPLST(&NAMENEW.))       +
+01226000       NEWREL(REL99V0)                     +
+01227000       OLDREL(NCAMCM.PASS.CURRENT)
+01228000 
+01229000 
+01230000IF &TRACE EQ TRACE THEN CONTROL CONLIST LIST
+01240000CONTROL END(DONE)
+01250000CONTROL NOMSG
+01260000 FREE F(CHANNEL4 CHANNEL5 CHANNEL6 CHANNEL7 REPORT)
+01270000  FREE ATTR(FBA133)
+01280000  ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(2660)
+01290000  DEL &NAMENEW..TEMPLIST
+01300000CONTROL MSG
+01310000 
+01320000  /* ALLOCATE COMPFC REPORT FILE AND COMPLST FILE IF NOT EXIST */
+01330000 
+01340000IF &REFRESH  NE THEN DO
+01350000   CONTROL NOMSG
+01360000   FREE DA('&LIB..COMPFC.RPT')
+01370000   DELETE '&LIB..COMPFC.RPT'
+01370100   FREE DA('&LIB..COMPLST')
+01370200   DELETE '&LIB..COMPLST'
+01380000   DONE
+01381000   CONTROL MSG
+01382000IF &SYSDSN('&LIB..COMPFC.RPT') NE OK THEN                         +
+01383000  ALLOC DA('&LIB..COMPFC.RPT')  DSORG(PS)  SPACE(1,1) TRACK       +
+01384000                                LRECL(133) BLKSIZE(5320) RECFM(F B)
+01385000  ALLOC F(REPORT) DA('&LIB..COMPFC.RPT')  MOD
+01386000  OPENFILE REPORT OUTPUT
+01387000IF &SYSDSN('&LIB..COMPLST') NE OK THEN                         +
+01387100  ALLOC DA('&LIB..COMPLST')  DSORG(PO)  SPACE(3,1) CYLINDERS   +
+01387110        LRECL(133) BLKSIZE(5320) RECFM(F B A) DIR(25)
+01387200 
+01388000GLOBAL SAVECC
+01389000SET &SAVECC EQ 0
+01390000SET &LASTCC EQ 0
+01400000SET &MAXCC  EQ 0
+01410000 
+01420000  /* IF AN ERROR OCCURS THEN EXIT */
+01430000ERROR EXIT
+01440000 
+01450000ALLOC F(CHANNEL4) DA('&IN1.') SHR
+01460000 
+01470000ALLOC F(CHANNEL5) DA('&IN2.') SHR
+01480000 
+01490000ALLOC F(CHANNEL6) DA('&OUT.') SHR
+01500000 
+01510000ALLOC F(CHANNEL7) DA(&NAMENEW..TEMPLIST) RELEASE USING(FBA133) NEW +
+01520000  SP(1 0) TRACK
+01530000 
+01540000WRITE EXECUTION OF COMPFC FOR: &NAMEOLD. VS &NAMENEW.
+01550000CONTROL NOFLUSH
+01560000OPENFILE CHANNEL6 OUTPUT
+01570000 
+01580000SET CHANNEL6 = 0&NAMENEW
+01590000PUTFILE CHANNEL6
+01600000SET CHANNEL6 = (0OLD COMPILER : &OLDREL.       +
+01610000NEW COMPILER : &NEWREL.)
+01620000PUTFILE CHANNEL6
+01630000CLOSFILE CHANNEL6
+01640000CONTROL FLUSH
+01650000 
+01660000CALL  'NCAMCM.TOOLS.HALLOAD(COMPFC)'
+01670000SET &SAVECC = &LASTCC
+01680000OPENFILE CHANNEL7 INPUT
+01690000GETFILE CHANNEL7
+01700000SET &SAVECC  EQ &CHANNEL7
+01710000CLOSFILE CHANNEL7
+01720000CONTROL NOMSG
+01730000FREE F(CHANNEL4 CHANNEL5 CHANNEL6 CHANNEL7)
+01740000FREE ATTR(FBA133)
+01750000DEL &NAMENEW..TEMPLIST
+01760000CONTROL MSG
+01770000IF &SAVECC = 0 THEN DO
+01780000  WRITE ***
+01790000  WRITE *** OBJECT CODES ARE THE SAME
+01800000  WRITE ***
+01810000 
+01820000  /* WRITE TO THE COMPFC.RPT FILE */
+01821000 
+01822000 SET REPORT = &STR(   OBJECT CODES &IN1. AND &IN2. MATCH)
+01823000 PUTFILE REPORT
+01826000 DONE
+01827000 
+01828000ELSE DO
+          IF &SAVECC = 1 THEN DO
+01829000     WRITE ***
+01829100     WRITE *** OBJECT CODES ARE DIFFERENT
+01829200     WRITE ***
+01829300 
+01829400        /* WRITE TO THE COMPFC.RPT FILE */
+01829500 
+01829600    SET REPORT = &STR(***OBJECT CODES &IN1. AND &IN2. ARE DIFFERENT)
+01829700    PUTFILE REPORT
+01830000  DONE
+          ELSE DO
+01829000     WRITE ***
+01829100     WRITE *** INTERNAL COMPFC ERROR *** SEE COMPLST FILE
+01829200     WRITE ***
+01829300 
+01829400        /* WRITE TO THE COMPFC.RPT FILE */
+01829500 
+01829600    SET REPORT = &STR(*****INTERNAL COMPFC ERROR *** SEE )+
+01829600                 &STR(&NAMENEW. COMPLST FILE)
+01829700    PUTFILE REPORT
+01830000  DONE
+01830000DONE
+01830100 
+01830200CLOSFILE REPORT
+01830300FREE F(REPORT)
+01830400 
+01830401CONTROL NOMSG
+01830410IF &SAVECC = 0 THEN DELETE '&LIB..COMPLST(&NAMENEW.)'
+01830500IF &SAVECC = 0 AND &NODELETES. EQ THEN DO
+01830700  DELETE '&IN1.'
+01830800  DELETE '&IN2.'
+01831000  COMPRESS '&LIB..NEW.LST'
+01832000  COMPRESS '&LIB..OLD.LST'
+01833000  COMPRESS '&LIB..COMPLST'
+01834000  CONTROL MSG
+01835000 DONE

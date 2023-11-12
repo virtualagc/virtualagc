@@ -1,0 +1,181 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     DSTOTALS                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00090000/*   FUNCTION: CALCULATES THE NUMBER OF TRACKS OCCUPIED BY AN       */
+00100000/*             ACCOUNT OR DSN LEVEL.                                */
+00110000/*                                                                  */
+00120000/*             EXAMPLES:                                            */
+00130000/*             DSTOTALS NCAMTST                                     */
+00140000/*                CALCULATES THE TOTAL NUMBER OF TRACKS ALLOCATED   */
+00150000/*                TO ALL DATASETS UNDER NCAMTST                     */
+00160000/*             DSTOTALS NCAMCM.PASS.CURRENT                         */
+00170000/*                CALCULATES THE TOTAL NUMBER OF TRACKS ALLOCATED   */
+00180000/*                TO ALL DATASETS UNDER NCAMCM.PASS.CURRENT         */
+00190000/*             DSTOTALS NCAMTEV                                     */
+00200000/*                THIS WILL CALCULATE THE # OF TRACKS USED BY ALL   */
+00210000/*                DATASETS UNDER NCAMTEV.                           */
+00220000/*                                                                  */
+00230000/*------------------------------------------------------------------*/
+00240000/*                                                                  */
+00250000/*   SYNTAX :                                                       */
+00260000/*                                                                  */
+00270000/*     DSTOTALS 'ACCOUNT' TRACE                                     */
+00280000/*                                                                  */
+00290000/*     ALIAS    - NONE.                                             */
+00300000/*     REQUIRED - 'ACCOUNT'                                         */
+00310000/*                                                                  */
+00320000/*------------------------------------------------------------------*/
+00330000/*                                                                  */
+00340000/*   INVOKES:                                                       */
+00350000/*                                                                  */
+00360000/*      NONE.                                                       */
+00370000/*                                                                  */
+00380000/*------------------------------------------------------------------*/
+00390000/*                                                                  */
+00400000/*   PARAMETERS:                                                    */
+00410000/*                                                                  */
+00420000/*     ACCOUNT  REQUIRED                                            */
+00430000/*              THE USER LEVEL TO RUN TOTALS ON. USE NO QUOTES      */
+00440000/*              AROUND DATASET NAME.                                */
+00450000/*                EX: NCAMCM.TOOLS  NOT 'NCAMCM.TOOLS'.             */
+00460000/*                                                                  */
+00470000/*     TRACE    OPTIONAL                                            */
+00480000/*              DISPLAYS THE EXECUTION OF THE PROGRAM ON THE USER'S */
+00490000/*              TERMINAL.                                           */
+00500000/*                                                                  */
+00510000/*------------------------------------------------------------------*/
+00520000/*                                                                  */
+00530000/*   INPUT DATA SET NAMES:                                          */
+00540000/*                                                                  */
+00550000/*     NONE.                                                        */
+00560000/*                                                                  */
+00570000/*------------------------------------------------------------------*/
+00580000/*                                                                  */
+00590000/*   OUTPUT DATA SET NAMES:                                         */
+00600000/*                                                                  */
+00610000/*     NONE.                                                        */
+00620000/*                                                                  */
+00630000/*------------------------------------------------------------------*/
+00640000/*                                                                  */
+00650000/*   TEMPORARY DATA SET NAMES:                                      */
+00660000/*                                                                  */
+00670000/*     NONE.                                                        */
+00680000/*                                                                  */
+00690000/*------------------------------------------------------------------*/
+00700000/*                                                                  */
+00710000/*   COMMENTS:                                                      */
+00720000/*                                                                  */
+00730000/*   1) BEWARE! THE NCAMCM HLQ HAS SOME DATASETS THAT ARE RACF-     */
+00740000/*      PROTECTED! DO NOT RUN DSTOTALS ON THE NCAMCM 'ACCOUNT'      */
+00750000/*      UNLESS YOU WANT TO RECEIVE ABOUT 200 RACF VIOLATIONS....    */
+00760000/*      LET NCAMCMA RUN THE DSTOTALS FOR NCAMCM!                    */
+00770000/*                                                                  */
+00780000/*------------------------------------------------------------------*/
+00790000/*                                                                  */
+00800000/*   REVISION HISTORY:                                              */
+00810000/*                                                                  */
+00820000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00830000/*     --------  ----  ----  -------------------------------------  */
+00840000/*     09/01/93  0310  TEV   BASELINE DSTOTALS CLIST                */
+00850000/*                                                                  */
+00850100/*     03/27/95  0423  JCS   CHANGE LISTC L TO LISTC LEVEL          */
+00850200/*                                                                  */
+00850300/*     09/29/95  0437  TEV   ADDED RECALL PARAMETER TO LISTDSI      */
+00860000/********************************************************************/
+00870000 
+00880000PROC     1        ACCOUNT +
+00890000                  TRACE
+00900000 
+00910000GLOBAL RETCODE
+00920000IF       &TRACE.  NE THEN +
+00930000         CONTROL  LIST CONLIST
+00940000CONTROL  END(DONE)
+00950000 
+00960000 
+00970000     /**********************/
+00980000     /* GENERATE FILE LIST */
+00990000     /**********************/
+01000000 
+01010000SET &SYSOUTTRAP = 99901
+01020000LISTC    LEVEL(&ACCOUNT.)
+01030000SET &SYSOUTTRAP = 0
+01040000 
+01050000   /**********************************************/
+01060000   /* SAVE THE MEMBER NAMES TO A PERMANENT ARRAY */
+01070000   /**********************************************/
+01080000SET &SAVE_DSLIST = &SYSOUTLINE
+01090000IF &TRACE NE  THEN SET &TEMP = 1
+01100000ELSE SET &TEMP = 0
+01110000LOOP1: SET &TEMP = &TEMP + 1
+01120000IF &TEMP > &SYSOUTLINE THEN GOTO EXIT_LOOP1
+01130000SET &SAVE_DSLIST&TEMP = &&SYSOUTLINE&TEMP
+01140000GOTO LOOP1
+01150000 
+01160000EXIT_LOOP1: +
+01170000SET &DS_LIST = &SAVE_DSLIST
+01180000IF &TRACE NE  THEN SET &SAVE_COUNT = 2
+01190000ELSE SET &SAVE_COUNT = 1
+01200000SET &DS_COUNT = 1
+01210000DO WHILE &SAVE_COUNT LE &DS_LIST
+01220000   SET &DSNAME  EQ &&SAVE_DSLIST&SAVE_COUNT
+01230000   SET &STRLEN  EQ &LENGTH(&STR(&DSNAME))
+01240000 
+01250000   IF &SUBSTR(6:15,&DSNAME) NE &STR(IN-CAT ---) THEN DO
+01260000      SET &DS_LIST&DS_COUNT = &SUBSTR(17:&STRLEN,&DSNAME)
+01270000      SET &DS_COUNT = &DS_COUNT + 1
+01280000   DONE
+01290000   SET &SAVE_COUNT = &SAVE_COUNT + 1
+01300000DONE
+01310000 
+01320000SET &DS_LIST = &DS_COUNT - 1
+01330000 
+01340000WRITE
+01350000WRITE    RUNNING TOTALS FOR &ACCOUNT....
+01360000 
+01370000     /********************/
+01380000     /* ON ERROR ROUTINE */
+01390000     /********************/
+01400000ERROR DO
+01410000ERROR#1: +
+01420000     IF &MAXCC NE 0 THEN DO
+01430000        WRITE
+01440000        WRITE EXITING ERROR CODE = &MAXCC.
+01450000        WRITE
+01460000        WRITE STATISTICS BEFORE THE ERROR:
+01470000     DONE
+01480000     WRITE
+01490000     WRITE THERE ARE A TOTAL OF &TOTALTRK. TRACKS ALLOCATED TO +
+01500000             &FILECNT. DATASETS UNDER '&ACCOUNT.'
+01510000     EXIT
+01520000DONE
+01530000 
+01540000SET &FILECNT  = 0
+01550000 
+01560000WRITE
+01570000 
+01580000SET &DS_COUNT = 1
+01590000SET &TMPTRACKS = 0
+01600000SET &TOTALTRK  = 0
+01610000 
+01620000DO WHILE &DS_COUNT LE &DS_LIST
+01630000 
+01640000   SET &DSNAME = &&DS_LIST&DS_COUNT
+01650000 
+01660000   LISTDSI '&DSNAME.' RECALL
+01670000 
+01680000   IF &SYSUNITS = CYLINDER THEN +
+01690000      SET &TMPTRACKS = &EVAL(&SYSALLOC * 15)
+01700000   ELSE IF &SYSUNITS = BLOCK THEN +
+01710000      SET &TMPTRACKS = &EVAL(&SYSALLOC / &SYSBLKSTRK)
+01720000   ELSE SET &TMPTRACKS = &SYSALLOC
+01730000 
+01740000   SET &TOTALTRK  = &TOTALTRK  + &TMPTRACKS
+01750000 
+01760000   SET &FILECNT = &FILECNT + 1
+01770000   SET &DS_COUNT = &DS_COUNT + 1
+01780000DONE
+01790000GOTO ERROR#1

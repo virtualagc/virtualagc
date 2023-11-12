@@ -1,0 +1,140 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     DISASM                                               */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080011/*   FUNCTION: DISASSEMBLE AP101S OBJECT CODE                       */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130002/*     DISASM 'NAME' ID(&SYSUID)                                    */
+00140002/*            LIB(&ID..TEST) SRCDSN(&LIB..OBJLST)                   */
+00141002/*            IN(&SRCDSN.(&NAME.)) OUTLIB(&LIB.)                    */
+00142002/*            OUTDSN(&OUTLIB..DISASM) OUT(&OUTDSN.(&NAME.))         */
+00150012/*            PROG(NCAMCM.TOOLS.XPLLOAD(DISASM)) TRACE PACK()       */
+00151000/*                                                                  */
+00152000/*     ALIAS    - NONE.                                             */
+00153011/*     REQUIRED - 'NAME'                                            */
+00154300/*                                                                  */
+00154400/*------------------------------------------------------------------*/
+00154500/*                                                                  */
+00154600/*   INVOKES:                                                       */
+00154700/*                                                                  */
+00154800/*     'NCAMCM.TOOLS.XPLLOAD(DISASM)'                               */
+00154900/*     'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'                            */
+00155000/*                                                                  */
+00156000/*------------------------------------------------------------------*/
+00157000/*                                                                  */
+00158000/*   PARAMETERS:                                                    */
+00159000/*                                                                  */
+00170002/*     NAME     REQUIRED                                            */
+00180002/*              MEMBER TO PROCESS                                   */
+00181002/*                                                                  */
+00190000/*     ID       DEFAULT: &SYSUID                                    */
+00200000/*              HLQ OF DEVELOPERS ACCOUNT                           */
+00210000/*                                                                  */
+00250002/*     LIB      DEFAULT: &ID..TEST                                  */
+00260002/*              NAME OF PDS LIB FOR INPUT                           */
+00270000/*                                                                  */
+00271002/*     SRCDSN   DEFAULT: &LIB..OBJLST                               */
+00272002/*              NAME OF PDS CONTAINING INPUT                        */
+00273002/*                                                                  */
+00280002/*     IN       DEFAULT: &SRCDSN.(&NAME.)                           */
+00290002/*              INPUT OF PROGRAM (ONE MEMBER)                       */
+00300000/*                                                                  */
+00301002/*     OUTLIB   DEFAULT: &LIB.                                      */
+00302002/*              NAME OF PDS LIB FOR OUTPUT                          */
+00303002/*                                                                  */
+00304002/*     OUTDSN   DEFAULT: &OUTLIB..DISASM                            */
+00305002/*              NAME OF PDS FOR OUTPUT                              */
+00306002/*                                                                  */
+00307002/*     OUT      DEFAULT: &OUTDSN.(&NAME.)                           */
+00308002/*              OUTPUT OF PROGRAM (ONE MEMBER)                      */
+00309002/*                                                                  */
+00310000/*     PROG     DEFAULT: NCAMCM.TOOLS.XPLLOAD(DISASM)               */
+00320000/*              NAME OF THE EXECUTABLE                              */
+00360000/*                                                                  */
+00370012/*     PACK     DEFAULT: NULL                                       */
+00380012/*              UNUSED PARAMETER PASSED BY PDSALL                   */
+00390000/*                                                                  */
+00391012/*     TRACE    OPTIONAL                                            */
+00392012/*              TURN TRACE ON OR OFF                                */
+00393012/*                                                                  */
+00400000/*------------------------------------------------------------------*/
+00410000/*                                                                  */
+00420000/*   INPUT DATA SET NAMES:                                          */
+00430000/*                                                                  */
+00440000/*     <PROG>                                                       */
+00450000/*         NAME OF THE EXECUTABLE                                   */
+00460000/*                                                                  */
+00470002/*     <IN>                                                         */
+00480002/*         HAL/S OBJECT CODE FILE                                   */
+00490000/*                                                                  */
+00500000/*------------------------------------------------------------------*/
+00510000/*                                                                  */
+00520000/*   OUTPUT DATA SET NAMES:                                         */
+00530000/*                                                                  */
+00540000/*     <OUT>                                                        */
+00550002/*          DISASSEMBLED OBJECT CODE                                */
+00560000/*                                                                  */
+00570000/*------------------------------------------------------------------*/
+00580000/*                                                                  */
+00590000/*   TEMPORARY DATA SET NAMES:                                      */
+00600000/*                                                                  */
+00610000/*     NONE.                                                        */
+00620000/*                                                                  */
+00630000/*------------------------------------------------------------------*/
+00640000/*                                                                  */
+00650000/*   COMMENTS:                                                      */
+00660000/*                                                                  */
+00670000/*     NONE.                                                        */
+00680000/*                                                                  */
+00690000/*------------------------------------------------------------------*/
+00700000/*                                                                  */
+00710000/*   REVISION HISTORY:                                              */
+00720000/*                                                                  */
+00730000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00740000/*  --------  ---  ---   -----------------------------------------  */
+00750011/*  09/16/92  283  RSJ   CREATED                                    */
+00760000/*                                                                  */
+00770000/*------------------------------------------------------------------*/
+00780000/********************************************************************/
+00790002PROC 1 NAME                                       +
+00800002       ID(&SYSUID.)                               +
+00820002       LIB(&ID..TEST)                             +
+00820102       SRCDSN(&LIB..OBJLST)                       +
+00821004       IN(&SRCDSN.(&NAME.))                       +
+00822002       OUTLIB(&LIB.)                              +
+00823002       OUTDSN(&OUTLIB..DISASM)                    +
+00830002       OUT(&OUTDSN.(&NAME.))                      +
+00840010       PROG(NCAMCM.TOOLS.XPLOBJ(DISASM))          +
+00850003       PACK()                                     +
+00870000       TRACE
+00880000 
+00890000 
+00900000IF       &TRACE.  NE THEN +
+00910000         CONTROL  LIST CONLIST
+00920000 
+00956200 
+00956300CONTROL  NOMSG
+00956411   FREE F(PROGRAM OUTPUT3 SYSIN SYSPRINT) ATTR(FBA133)
+00956500   DELETE '&OUT.'
+00956600CONTROL  MSG NOFLUSH
+00959200ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+00960700ALLOC F(PROGRAM)  DA('&PROG.') SHR
+00960902ALLOC F(SYSIN)  DA('&IN.') SHR
+00961000ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW CATALOG +
+00961100                            SP(40 40) TRACK
+00961202IF &SYSDSN('&OUTDSN') NE OK THEN +
+00961309  ALLOC   DA('&OUTDSN')    SPACE(10,4) CYLINDERS +
+00961402  DSORG(PO) RECFM(F B) LRECL(133) BLKSIZE(133) DIR(65)
+00962200ALLOC F(OUTPUT3) DA('&OUT') SHR
+00963007WRITE RUNNING XPL PROGRAM &PROG. ON &IN.
+00964000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'
+00965000SET &SAVECC = &LASTCC
+00966001FREE F(PROGRAM OUTPUT3 SYSIN SYSPRINT ) ATTR(FBA133)
+00967000IF &SAVECC EQ 0 THEN WRITE EXECUTION SUCCESSFUL
+00968000ELSE WRITE EXECUTION ERROR CODE = &SAVECC

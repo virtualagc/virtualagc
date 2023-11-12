@@ -1,0 +1,454 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME :     TESTBFS                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION : COMPILE,LINK AND EXECUTE ALL MEMBERS IN A PDS       */
+00090000/*              (TEST CATEGORY) WITHIN THE FUNCTIONAL TEST LIBRARY  */
+00100000/*              THIS CLIST HAS THE EQUIVALENT FUNCTION AS TESTSUIT, */
+00101000/*              EXCEPT THIS IS A VERSION FOR THE BFS COMPILER.      */
+00102000/*                                                                  */
+00110000/*------------------------------------------------------------------*/
+00120000/*                                                                  */
+00121000/*   SYNTAX:                                                        */
+00122000/*                                                                  */
+00123000/*     TESTBFS 'GROUP'   ID(&SYSUID.)  DSN(TESTB)                   */
+00124000/*              LIB(&ID..&DSN..&GROUP) FIRSTRUN REFRESH             */
+00124100/*              COMPVER(CURRENT) CT(WMZMTCBMPCUCVC) LIST() TRACE    */
+00124200/*              RUNLVER(CURRENT)                                    */
+00125000/*              ERRORLIB(NCAMCM.BFS.&COMPVER..ERRORLIB)             */
+00126000/*              COMPILER(NCAMCM.BFS.&COMPVER..COMPILER) TERRORLIB() */
+00126100/*              MONITOR(NCAMCM.BFS.&COMPVER..MONITOR.LOAD(MONITOR)) */
+00126200/*              RUNLIB(NCAMCM.BFS.&RUNLVER..RUNLIB) TRUNLIB()       */
+00126300/*              QCONLIB(NCAMCM.BFS.&COMPVER.QCONLIB)                */
+00126400/*              LNKIN(NCAMCM.TESTLIB.&GROUP..TCP)                   */
+00126500/*              HALSDF2(&ID..&DSN..COMPOOL.SDF)                     */
+00126600/*              HALOBJ2(&ID..&DSN..COMPOOL.OBJ) EXECSTEP(3000000)   */
+00126700/*              TPLT TABLST SRN OPT() LITS(5000) UTRACE HO SEQ      */
+00126800/*              ACCESS() PG(91000)                                  */
+00126900/*              SRCDSN(NCAMCM.TESTLIB.&GROUP..HAL)                  */
+00127000/*                                                                  */
+00127100/*     ALIAS    - NONE.                                             */
+00127200/*     REQUIRED - 'GROUP'                                           */
+00127300/*                                                                  */
+00127400/*------------------------------------------------------------------*/
+00127500/*                                                                  */
+00128000/*   INVOKES:  PDSALL                                               */
+00130000/*             BFSCLG                                               */
+00130100/*                                                                  */
+00130200/*------------------------------------------------------------------*/
+00130300/*   PARAMETERS:                                                    */
+00130400/*                                                                  */
+00130500/*     GROUP    REQUIRED                                            */
+00130600/*              NAME OF THE TEST CATEGORY                           */
+00130700/*                                                                  */
+00130800/*     ID       DEFAULT: &SYSUID.                                   */
+00130900/*              HIGH LEVEL QUALIFIER                                */
+00131000/*                                                                  */
+00131100/*     DSN      DEFAULT: TESTB                                      */
+00132000/*              A DSN LEVEL                                         */
+00133000/*                                                                  */
+00133100/*     LIB      DEFAULT: &ID..&DSN..&GROUP                          */
+00133200/*              OTHER DSN LEVELS                                    */
+00133300/*                                                                  */
+00134000/*     FIRSTRUN OPTIONAL                                            */
+00135000/*              INITIALIZE DATASETS THE FIRST TIME                  */
+00136000/*                                                                  */
+00137000/*     REFRESH  OPTIONAL                                            */
+00138000/*              IF SPECIFIED DELETE AND THEN REALLOCATE DATASETS    */
+00139000/*                                                                  */
+00139100/*     LIST     DEFAULT: NULL                                       */
+00139200/*              DATA SET WHICH CONTAINS A LIST OF MEMBERS IN THE    */
+00139300/*              SOURCE DATA SET YOU WANT TO RUN                     */
+00139400/*                                                                  */
+00139500/*     TRACE    OPTIONAL                                            */
+00139600/*              EXECUTION OF THE CLIST WILL BE DISPLAYED ON SCREEN  */
+00139700/*                                                                  */
+00139800/*     SEQ      OPTIONAL                                            */
+00139900/*              SEND LISTING, OUTPUT AND UCP TO A SEQUENTIAL FILE   */
+00140000/*                                                                  */
+00140100/*     UTRACE   OPTIONAL                                            */
+00140200/*              UCP EXECUTION TRACE                                 */
+00140300/*                                                                  */
+00140400/*     COMPVER  DEFAULT: CURRENT                                    */
+00140500/*              COMPILER VERSION                                    */
+00141000/*                                                                  */
+00142000/*     RUNLVER  DEFAULT: &COMPVER                                   */
+00143000/*              RUNLIB VERSION                                      */
+00144000/*                                                                  */
+00150000/*     ERRORLIB DEFAULT: NCAMCM.BFS.CURRENT.ERRORLIB                */
+00160000/*              BASELINE ERROR LIBRARY                              */
+00170000/*                                                                  */
+00180000/*     COMPILER DEFAULT: NCAMCM.BFS.CURRENT.COMPILER                */
+00190000/*              COMPILER                                            */
+00200000/*                                                                  */
+00210000/*     TERRORLIB DEFAULT: NULL                                      */
+00220000/*              USERS TEMPORARY ERROR LIBRARY                       */
+00230000/*                                                                  */
+00230100/*     HALSDF2  DEFAULT: NULL                                       */
+00230200/*              ADDITIONAL SDF FILE                                 */
+00230300/*                                                                  */
+00230400/*     HALOBJ2  DEFAULT: NULL                                       */
+00230500/*              ADDITIONAL OBJECT FILE                              */
+00230600/*                                                                  */
+00231000/*     MONITOR  DEFAULT: NCAMCM.BFS.CURRENT.MONITOR.LOAD(MONITOR)   */
+00232000/*              MONITOR TO RUN THE COMPILER ON S MACHINE            */
+00233000/*                                                                  */
+00234000/*     SRCDSN   DEFAULT: NCAMCM.TESTLIB.&GROUP..HAL                 */
+00235000/*              HAL SOURCE FILE FOR TEST CATEGORY                   */
+00236000/*                                                                  */
+00237000/*     RUNLIB   DEFAULT: NCAMCM.BFS.CURRENT.RUNLIB                  */
+00238000/*              RUNTIME LIBRARY EXECUTABLES                         */
+00239000/*                                                                  */
+00239100/*     QCONLIB  DEFAULT: NCAMCM.BFS.&COMPVER..QCONLIB               */
+00239200/*              QCON LIBRARY OBJECT                                 */
+00239300/*                                                                  */
+00239400/*     TRUNLIB  DEFAULT: NULL                                       */
+00239500/*              USERS TEMPORARY RTL EXECUTABLES                     */
+00239600/*                                                                  */
+00239700/*     LNKIN    DEFAULT: NCAMCM.TESTLIB.&GROUP..TCP                 */
+00239800/*              OVERRIDING DIRECTIVES FOR PILOT LINKER              */
+00239900/*                                                                  */
+00240000/*     ACCESS   DEFAULT: NULL                                       */
+00240100/*              A FILE THAT CAN PLACE ADDITIONAL RESTRICTIONS ON    */
+00240200/*              THE HAL/S LANGUAGE                                  */
+00240300/*                                                                  */
+00240400/*  OPTIONS PASSED TO THE COMPILER                                  */
+00240500/*                                                                  */
+00240600/*     CT       DEFAULT: WMZMTCBMPCUCVC                             */
+00240700/*              CARD TYPE                                           */
+00240800/*                                                                  */
+00240900/*     OPT      DEFAULT: NULL                                       */
+00241000/*              OTHER USER REQUESTED OPTION                         */
+00241100/*                                                                  */
+00241200/*     TPLT     OPTIONAL                                            */
+00241300/*              TEMPLATE GENERATION                                 */
+00241400/*                                                                  */
+00241500/*     LITS     DEFAULT: 5000                                       */
+00241600/*              LITERAL STRING SIZE                                 */
+00241700/*                                                                  */
+00241800/*     PG       DEFAULT: 91000                                      */
+00241900/*              PAGE LIMIT                                          */
+00242000/*                                                                  */
+00242100/*     TABLST   OPTIONAL                                            */
+00242200/*              TABLE LIST FOR PHASE IV OF SDFS                     */
+00242300/*                                                                  */
+00242400/*     HO       OPTIONAL                                            */
+00242500/*              HIGHOPT COMPILER OPTION                             */
+00242600/*                                                                  */
+00242700/*     SRN      OPTIONAL                                            */
+00242800/*              SOURCE INCLUDES LINE NUMBERS                        */
+00242900/*                                                                  */
+00243000/*  OPTIONS PASSED TO THE HALUCP                                    */
+00243100/*                                                                  */
+00243200/*     EXECSTEP DEFAULT: 3000000                                    */
+00243300/*              MAXIMUM # OF INSTRUCTION TO EXECUTE                 */
+00243400/*                                                                  */
+00243500/*------------------------------------------------------------------*/
+00243600/*   INPUT DATA SET NAMES:                                          */
+00243700/*                                                                  */
+00243800/*     NCAMCM.TESTLIB.&GROUP..HAL                                   */
+00243900/*         PDS OF HALS SOURCE CODE FOR A TEST  CATEGORY             */
+00244000/*                                                                  */
+00244100/*     NCAMCM.BFS.<COMPVER>.COMPILER                                */
+00244200/*         BFS COMPILER                                             */
+00244300/*                                                                  */
+00244400/*     NCAMCM.BFS.<COMPVER>.ERRORLIB                                 */
+00244500/*         PDS BASELINE ERROR LIBRARY                               */
+00244600/*                                                                  */
+00244700/*     NCAMCM.BFS.<RUNLVER>.RUNLIB                                  */
+00244800/*         PDS OF RUNTIME LIBRARY EXECUTABLES                       */
+00244900/*                                                                  */
+00245000/*------------------------------------------------------------------*/
+00245100/*                                                                  */
+00245200/*   OUTPUT DATA SET NAMES:                                         */
+00245300/*                                                                  */
+00245400/*     <LIB>.COMPRPT                                                */
+00245500/*         PDS OF COMPILATION REPORT                                */
+00245600/*                                                                  */
+00245700/*     <LIB>.EXECRPT                                                */
+00245800/*         PDS OF EXECUTION REPORT                                  */
+00245900/*                                                                  */
+00246000/*     <LIB>.LINKRPT                                                */
+00246100/*         PDS OF LINKAGE REPORT                                    */
+00246200/*                                                                  */
+00246300/*     <LIB>.LST(<NAME>)                                            */
+00246400/*         PDS OF COMPILER LISTING                                  */
+00246500/*                                                                  */
+00246600/*     <LIB>.MAPS(<NAME>)                                           */
+00246700/*         PDS OF MAP FILE                                          */
+00246800/*                                                                  */
+00246900/*     <LIB>.OBJ(<NAME>)                                            */
+00247000/*         PDS OF OBJECT MODULE                                     */
+00247100/*                                                                  */
+00247200/*     <LIB>.OUT(<NAME>)                                            */
+00247300/*         PDS OF EXECUTION RESULTS                                 */
+00247400/*                                                                  */
+00247500/*------------------------------------------------------------------*/
+00247600/*                                                                  */
+00247700/*   TEMPORARY DATA SET NAMES:                                      */
+00247800/*                                                                  */
+00247900/*     NONE                                                         */
+00248000/*                                                                  */
+00248100/*------------------------------------------------------------------*/
+00248200/*  REVISION HISTORY :                                              */
+00248300/*                                                                  */
+00248400/*    DATE      PCR#     NAME   DESCRIPTION                         */
+00248500/*    --------  -----    ----   -------------------------------     */
+00248600/*    01/08/92  0245     LJK    WRITTEN FOR BFS7V0 FUNCTION TEST    */
+00248700/*    03/28/94  0297     LJK    ADDED UC CARDTYPE                   */
+00248800/*                              ADDED TABLST,TPLT,OPT,SRNOPT,LITS   */
+00248900/*                              AND UTRACE OPTIONS                  */
+00249000/*                              ADDED RUNLVER PARAMETER             */
+00249100/*    06/21/94  0360     JCS    CHANGE TO USE .TCPS IN NCAMCM       */
+00249200/*    06/29/94  0363     LJK    MODIFIED TO USE CM INCLUDE FILE     */
+00249300/*    12/30/94  0409     JCS    ADDED CARD TYPE VC                  */
+00249400/*    04/04/95  0418     LJK    ADDED HIGHOPT OPTION                */
+00249500/*    06/23/95  0346     LJK    ADDED QCONLIB PARAMETER             */
+00249600/*    11/10/95  0303     LJK    ADDED SEQ OPTION                    */
+00249700/*    11/05/98  0614     LJK    ADDED EXECSTEP OPTION               */
+00249800/*    05/24/01  0707     LWW    ADDED ACCESS PARAMETER              */
+00249900/*    05/20/04  0783     DCP    ADDED PG PARAMETER                  */
+00250001/*    10/21/05  0730     PAK    ADDED TITLE PARAMETER               */
+00250100/*                "      PAK    ADDED SYTSZ, RFSZ, AND MACSZ PARMS  */
+00250200/********************************************************************/
+00251000
+00260000PROC     1  GROUP                                                 +
+00270000            ID(&SYSUID.)                                          +
+00271000            DSN(TESTB)                                            +
+00280000            LIB(&ID..&DSN..&GROUP.)                               +
+00290000            SRCDSN(NCAMCM.TESTLIB.&GROUP..HAL)                    +
+00300000            COMPVER(CURRENT)                                      +
+00301000            RUNLVER(&COMPVER.)                                    +
+00310000            COMPILER(NCAMCM.BFS.&COMPVER..COMPILER)               +
+00320000            RUNLIB(NCAMCM.BFS.&RUNLVER..RUNLIB)                   +
+00321000            QCONLIB(NCAMCM.BFS.&COMPVER..QCONLIB)                 +
+00330000            ERRORLIB(NCAMCM.BFS.&COMPVER..ERRORLIB)               +
+00340000            MONITOR(NCAMCM.BFS.&COMPVER..MONITOR.LOAD(MONITOR))   +
+00350000            HALSDF2(&ID..&DSN..COMPOOL.SDF)                       +
+00350100            HALOBJ2(&ID..&DSN..COMPOOL.OBJ)                       +
+00350200            TRUNLIB()                                             +
+00350300            LNKIN(NCAMCM.TESTLIB.&GROUP..TCP)                     +
+00351000            CT(WMZMTCBMPCUCVC)                                    +
+00351100            TITLE()                                               +
+00351200            SYTSZ(4096)                                           +
+00351300            RFSZ(5500)                                            +
+00351400            MACSZ(4500)                                           +
+00352000            PG(91000)                                             +
+00360000            TERRORLIB()                                           +
+00360100            ACCESS()                                              +
+00361000            TABLST                                                +
+00361100            HO                                                    +
+00361200            LITS(5000)                                            +
+00362000            TPLT                                                  +
+00363000            SRN                                                   +
+00365000            OPT()                                                 +
+00366000            EXECSTEP(3000000)                                     +
+00370000            LIST()                                                +
+00380000            SEQ                                                   +
+00380100            TRACE                                                 +
+00381000            UTRACE                                                +
+00390000            REFRESH                                               +
+00400000            FIRSTRUN
+00410000
+00420000GLOBAL  RETCODE
+00430000IF  &TRACE. NE THEN  CONTROL CONLIST LIST
+00530000CONTROL END(DONE)
+00540400
+00550000/********************************************************/
+00560000/*                                                      */
+00570000/*  RUN PDSALL TO CREATE THE MEMBER LIST FILE           */
+00580000/*                                                      */
+00590000/********************************************************/
+00600000IF &LIST. EQ THEN  DO
+00610000   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+00620000   WRITE *** EXECUTING TESTLIB.&GROUP. ***
+00630000   SET &LIST =  &LIB..MEMLIST
+00640000DONE
+00650000         /***************************************/
+00660000         /*                                     */
+00670000         /*    ON ATTN, DO THE ERROR HANDLING   */
+00680000         /*                                     */
+00690000         /***************************************/
+00700000
+00710000ATTN     DO
+00720000         ERROR    OFF
+00730000         CLOSFILE MEMBERS
+00740000         FREE     F(MEMBERS)
+00750000         EXIT
+00760000DONE
+00770000
+00780000CONTROL  NOMSG
+00790000         FREE     F(MEMBERS)
+00800000CONTROL  MSG NOFLUSH
+00810000
+00820000         /***************************************/
+00830000         /*                                     */
+00840000         /* SET UP TO READ THE FILE &LIST.      */
+00850000         /*                                     */
+00860000         /***************************************/
+00870000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+00880000OPENFILE MEMBERS  INPUT
+00890000
+00900000         /***************************************/
+00910000         /*                                     */
+00920000         /* ON ERROR, DO THE ERROR HANDLING     */
+00930000         /*                                     */
+00940000         /***************************************/
+00950000ERROR DO
+00960000ERROR1: CLOSFILE MEMBERS
+00970000   FREE F(MEMBERS)
+00980000   IF &NEWRUNBT. ^= 0 THEN DO
+00990000   WRITE ***
+01000000   WRITE ***  COMPILE/LINK OF ALL COMPOOLS AND COMSUBS COMPLETED ***
+01010000   WRITE ***
+01020000   DONE
+01030000   ERROR OFF
+01040000   GOTO EXECIT
+01050000DONE
+01060000
+01090000    IF &TERRORLIB. NE THEN SET &TERRORLIB = TERRORLIB(&TERRORLIB.)
+01100000        ELSE SET  &TERRORLIB =
+01101000    IF &ACCESS. NE THEN SET &ACCESS = ACCESS(&ACCESS.)
+01102000        ELSE SET  &ACCESS =
+01110000    IF &TRUNLIB. NE THEN SET &TRUNLIB = TRUNLIB(&TRUNLIB.)
+01120000        ELSE SET  &TRUNLIB =
+01130000    IF &HALSDF2. NE THEN SET &HALSDF2 = HALSDF2(&HALSDF2.)
+01130100        ELSE SET  &HALSDF2 =
+01130200    IF &HALOBJ2. NE THEN SET &HALOBJ2 = HALOBJ2(&HALOBJ2.)
+01130300        ELSE SET  &HALOBJ2 =
+01130400    IF &SYSDSN('NCAMCM.TESTLIB.&GROUP..INC') EQ OK THEN  +
+01130500       SET &INCLUDE2 = INCLUDE2(NCAMCM.TESTLIB.&GROUP..INC)
+01130600       ELSE IF &SYSDSN('NCAMTST.TESTLIB.&GROUP..INC') EQ OK THEN  +
+01130700         SET &INCLUDE2 = INCLUDE2(NCAMTST.TESTLIB.&GROUP..INC)
+01130900         ELSE SET &INCLUDE2 =
+01131000    IF &SYSDSN('&LNKIN.') EQ OK THEN  +
+01131100       SET &LNKIN = LNKIN(&LNKIN.)
+01131200       ELSE SET &LNKIN =
+01131300    IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+01131400       ELSE SET  &OPT =
+01131500    IF &TITLE. NE THEN SET &TITLE = TITLE(&TITLE.)
+01131600       ELSE SET &TITLE =
+01131700/*                                                                  */
+01132000/* IF THIS IS THE FIRST TIME TO RUN  TESTBFS, SET 'NEWRUN' AND      */
+01133000/* 'FIRST' FLAGS TO ALLOCATE NECESSARY DATASETS, OR IF 'REFRESH' IS */
+01134000/* SPECIFIED, SET 'FIRSTD' AND 'NEWRUN' FLAGS TO DELETE ALL         */
+01134100/* DATASETS AND REALLOCATE THEM.                                    */
+01135000/*                                                                  */
+01140000SET &NEWRUNBT = 0
+01141000     IF &FIRSTRUN NE THEN DO
+01142000        SET &FIRST  = FIRST
+01142100        SET &NEWRUN = NEWRUN
+01142200     DONE
+01143100
+01144000     IF &REFRESH NE THEN DO
+01144100        SET &FIRSTD = FIRSTD
+01144200        SET &NEWRUN = NEWRUN
+01144300     DONE
+01144400
+01144500/*
+01144600/* FIRST COMPILE AND LINK ANY COMPOOL AND COMSUB IN THE DATA SET
+01144700/*
+01150000DO WHILE  &SYSUID NE
+01160000   GETFILE MEMBERS
+01167000
+01170000     IF (&SUBSTR(1:2,&MEMBERS) > PR) THEN GOTO ERROR1
+01180000     IF ((&SUBSTR(1:3,&MEMBERS) = CMP) OR      +
+01190000         (&SUBSTR(1:2,&MEMBERS) = CP ) OR       +
+01200000         (&SUBSTR(1:2,&MEMBERS) = PR)) THEN DO
+01210000     SET &MEMLEN = 1
+01220000     DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+01230000        SET &MEMLEN =  &MEMLEN + 1
+01240000     DONE
+01250000     SET &MEMLEN = &MEMLEN - 1
+01260000     SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+01330000     IF (&SUBSTR(1:2,&MEMBERS) = PR) THEN SET &MTYPE = CS
+01340000        ELSE SET &MTYPE = CP
+01350000
+01360000     TIME
+01381000     BFSCLG CL &NAME. LIB(&LIB.) &FIRSTD &NEWRUN &FIRST     +
+01382000             COMPILER(&COMPILER.) &TERRORLIB. &TRUNLIB.     +
+01383000             ERRORLIB(&ERRORLIB.) &TRACE CT(&CT.) &MTYPE    +
+01384000             RUNLIB(&RUNLIB.) MONITOR(&MONITOR.) RFSZ(&RFSZ.) +
+01384100             SYTSZ(&SYTSZ.) MACSZ(&MACSZ.) QCONLIB(&QCONLIB.) +
+01384200             &TPLT. &TABLST. &SRN. &OPT. &HO. &SEQ. &ACCESS. +
+01384300             LITS(&LITS.) &LNKIN. &INCLUDE2. PG(&PG.)       +
+01385000             SYSIN(&SRCDSN.(&NAME.))  &HALSDF2. &HALOBJ2.   +
+01385101             &TITLE.
+01386000
+01390000     SET &NEWRUNBT = &NEWRUNBT. + 1
+01400000     SET &NEWRUN   =
+01401000     SET &FIRSTD   =
+01402000     SET &FIRST    =
+01410000     DONE
+01411000
+01420000   IF &NEWRUNBT. = 5  THEN DO
+01430000      COMPRESS '&LIB..LOAD'
+01440000      COMPRESS '&LIB..LST'
+01450000      COMPRESS '&LIB..MAPS'
+01460000      COMPRESS '&LIB..OBJ'
+01470000      SET &NEWRUNBT  =  1
+01480000      DONE
+01490000DONE
+01500000/*
+01520000/*
+01530000/* NOW COMPILE/LINK/EXECUTE THE HAL PROGRAMS
+01540000/*
+01541000EXECIT:CONTROL MSG
+01542000
+01550000ALLOC    F(MEMBERS)  DA('&LIST.')  SHR
+01560000OPENFILE MEMBERS INPUT
+01570000
+01580000ERROR DO
+01590000   CLOSFILE MEMBERS
+01600000   FREE   F(MEMBERS)
+01610000   WRITE ***
+01620000   WRITE ***  ALL &LIB. PROGRAMS COMPLETED  ***
+01630000   WRITE ***
+01640000   ERROR OFF
+01650000   EXIT
+01660000DONE
+01670000
+01680000DO WHILE  &SYSUID NE
+01690000   GETFILE MEMBERS
+01700000   IF &SUBSTR(1:6,&MEMBERS) ^= ##INFO THEN +
+01710000     IF &SUBSTR(1:3,&MEMBERS) ^= CMP THEN  +
+01720000     IF &SUBSTR(1:2,&MEMBERS) ^= CP THEN   +
+01730000     IF &SUBSTR(1:3,&MEMBERS) ^= PRC THEN DO
+01740000     SET &MEMLEN = 1
+01750000     DO WHILE &SUBSTR(&MEMLEN.:&MEMLEN.,&MEMBERS.) NE
+01760000        SET &MEMLEN =  &MEMLEN + 1
+01770000     DONE
+01780000     SET &MEMLEN = &MEMLEN - 1
+01790000     SET  &NAME = &SUBSTR(1:&MEMLEN.,&MEMBERS.)
+01800000
+01810000     TIME
+01902000     BFSCLG CLG &NAME. LIB(&LIB.) &FIRSTD &NEWRUN &FIRST        +
+01903000             COMPILER(&COMPILER.) RUNLIB(&RUNLIB.) &TRUNLIB     +
+01904000             &TERRORLIB. ERRORLIB(&ERRORLIB.)  LITS(&LITS.)     +
+01905000             EXECSTEP(&EXECSTEP.) &TRACE CT(&CT.)               +
+01906000             MONITOR(&MONITOR.) &HALSDF2. &HALOBJ2. &INCLUDE2   +
+01906100             &TPLT. &TABLST. &SRN. &OPT. &HO &UTRACE. &SEQ.     +
+01906200             &ACCESS. PG(&PG.) &TITLE SYTSZ(&SYTSZ.)            +
+01906302             RFSZ(&RFSZ.) MACSZ(&MACSZ.)                        +
+01907000             SYSIN(&SRCDSN.(&NAME.)) &LNKIN. QCONLIB(&QCONLIB.)
+01908000
+01910000          SET &NEWRUNBT  = &NEWRUNBT.  +  1
+01920000          SET &NEWRUN    =
+01930000          SET &FIRSTD    =
+01931000          SET &FIRST     =
+01932000
+01940000     DONE
+01950000   IF &NEWRUNBT. = 5  THEN DO
+01960000      COMPRESS '&LIB..LOAD'
+01970000      COMPRESS '&LIB..LST'
+01980000      COMPRESS '&LIB..MAPS'
+01990000      COMPRESS '&LIB..OBJ'
+02000000      COMPRESS '&LIB..SDF'
+02010000      COMPRESS '&LIB..UCP'
+02020000      SET &NEWRUNBT  =  1
+02030000      DONE
+02040000DONE
+02050000EXIT

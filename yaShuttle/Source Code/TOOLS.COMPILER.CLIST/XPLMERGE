@@ -1,0 +1,263 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     XPLMERGE                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO MERGE TOGETHER PARTITIONED HAL/S COMPILER         */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     XPLMERGE PASS                                                */
+00140000/*              ID(&SYSUID.)                                        */
+00150000/*              SYSTEM(PASS)                                        */
+00150100/*              COMPVER(CURRENT)                                    */
+00160000/*              LIB(NCAMCM.&SYSTEM..&COMPVER.)                      */
+00161000/*              DR()                                                */
+00161100/*              PROG(NCAMCM.TOOLS.XPLOBJ(XPLMERGE))                 */
+00161200/*              IN(##DRIVER)                                        */
+00161300/*              PROCS(&LIB..&PASS..PROCS)                           */
+00161400/*              OUTLIB(&ID..REL99V0)                                */
+00161500/*              TPROCS()                                            */
+00161600/*              OUT(&OUTLIB..&PASS..SOURCE)                         */
+00161610/*              SCREEN                                              */
+00161700/*              OPT()                                               */
+00161900/*              TRACE                                               */
+00162000/*                                                                  */
+00163000/*     ALIAS    - NONE                                              */
+00164000/*     REQUIRED - PASS                                              */
+00165000/*                                                                  */
+00166000/*------------------------------------------------------------------*/
+00167000/*                                                                  */
+00168000/*   INVOKES:                                                       */
+00169000/*                                                                  */
+00170000/*     'NCAMCM.TOOLS.XPLOBJ(XPLMERGE)'                              */
+00180000/*                                                                  */
+00190000/*------------------------------------------------------------------*/
+00200000/*                                                                  */
+00210000/*   PARAMETERS:                                                    */
+00220000/*                                                                  */
+00230000/*     PASS     REQUIRED                                            */
+00240000/*              PASS NAME FOR HALS PASS COMPILER,AUX,OPT OR FLO     */
+00250000/*                                                                  */
+00260000/*     ID       DEFAULT: &SYSUID.                                   */
+00270000/*              HLQ WHERE THE TPROCS FILE IS AND THE OUTPUT FILE    */
+00280000/*              WILL GO.                                            */
+00290000/*                                                                  */
+00300000/*     SYSTEM   DEFAULT: PASS                                       */
+00310000/*                IF 360: HAL-360 DATA SETS ARE USED                */
+00311007/*                IF XPL: XPL DATA SETS ARE USED                    */
+00320000/*              COMPILER SYSTEM YOU ARE WORKING ON.                 */
+00330000/*                                                                  */
+00340000/*     COMPVER  DEFAULT: CURRENT                                    */
+00350000/*              COMPILER VERSION                                    */
+00360000/*                                                                  */
+00360100/*     LIB      DEFAULT: PASS.CURRENT                               */
+00360200/*              LIBRARY THAT CODE IS IN                             */
+00360300/*                                                                  */
+00370000/*     PROG     DEFAULT: '''NCAMCM.TOOLS.XPLOBJ(XPLMERGE)'''        */
+00380000/*              NAME OF THE MERGE PROGRAM'S OBJECT CODE             */
+00390000/*                                                                  */
+00400000/*     IN       DEFAULT: ##DRIVER                                   */
+00410000/*              NAME OF THE MEMBER IN PROCS THAT CONTAINS MAIN      */
+00420000/*              INPUT FILE                                          */
+00430000/*                                                                  */
+00440000/*     DR       DEFAULT: NULL                                       */
+00450000/*              PART OF THE NAME OF THE TPROCS FILE.                */
+00460000/*                                                                  */
+00470000/*     PROCS    DEFAULT: &LIB..&PASS..PROCS                         */
+00480000/*              NAME OF PDS THAT CONTAINS THE BASELINE PROCEDURES   */
+00490000/*                                                                  */
+00500000/*     OUTLIB   DEFAULT: &ID..REL99V0                               */
+00500100/*              NAME OF LIBRARY TO GET TPROCS FROM AND PUT THE      */
+00500200/*              OUTPUT FILE.                                        */
+00500300/*                                                                  */
+00500400/*     TPROCS   DEFAULT:                                            */
+00500500/*                IF DR IS NULL: &OUTLIB..&PASS..PROCS              */
+00500600/*                ELSE         : &OUTLIB..&PASS..&DR..PROCS         */
+00500700/*              NAME OF PDS THAT CONTAINS THE PROCEDURES CHANGED    */
+00500800/*              BY YOUR DR.                                         */
+00500900/*                                                                  */
+00501000/*     OUT      DEFAULT: &LIB..&PASS..SOURCE                        */
+00502000/*              NAME OF THE RESULTING OUTPUT FILE                   */
+00502010/*                                                                  */
+00502100/*     SCREEN   OPTIONAL                                            */
+00502200/*              IF SPECIFIED SEND LISTING2 REPORT TO THE SCREEN     */
+00502300/*              INSTEAD OF A NULL FILE                              */
+00503000/*                                                                  */
+00504000/*     OPT      DEFAULT: NULL                                       */
+00505000/*              OPTION FOR MONITOR CALL                             */
+00520000/*                                                                  */
+00530000/*     TRACE    OPTIONAL                                            */
+00540000/*              TURN TRACE ON OR OFF                                */
+00550000/*                                                                  */
+00560000/*------------------------------------------------------------------*/
+00570000/*                                                                  */
+00580000/*   INPUT DATA SET NAMES:                                          */
+00590000/*                                                                  */
+00600000/*     <PROG>                                                       */
+00610000/*         LOCATION OF THE PROGRAM OBJECT CODE TO EXECUTE           */
+00620000/*                                                                  */
+00630000/*     <PROCS>                                                      */
+00640000/*         NAME OF THE PDS THAT CONTAINS THE PROCEDURES             */
+00650000/*                                                                  */
+00660000/*     <PROCS>(<IN>)                                                */
+00670000/*         LOCATION OF THE MEMBER THAT CONTAINS MAIN INPUT FILE     */
+00680000/*                                                                  */
+00690000/*               OR                                                 */
+00700000/*                                                                  */
+00710007/*     <TPROCS>(<IN>)                                               */
+00720000/*         LOCATION OF THE MEMBER THAT CONTAINS MAIN INPUT FILE     */
+00721000/*                                                                  */
+00722000/*                                                                  */
+00723000/*------------------------------------------------------------------*/
+00724000/*                                                                  */
+00725000/*   OUTPUT DATA SET NAMES:                                         */
+00726000/*                                                                  */
+00727000/*     <OUT>                                                        */
+00728000/*         NAME OF THE RESULTING OUTPUT FILE                        */
+00729000/*                                                                  */
+00730000/*------------------------------------------------------------------*/
+00740000/*                                                                  */
+00750000/*   TEMPORARY DATA SET NAMES:                                      */
+00760000/*                                                                  */
+00770000/*     NONE.                                                        */
+00780000/*                                                                  */
+00790000/*------------------------------------------------------------------*/
+00800000/*                                                                  */
+00810000/*   COMMENTS:  THIS CLIST RUNS AN XPL PROGRAM CALLED XPLMERGE.     */
+00820000/*            THIS PROGRAM MERGES THE PARTITIONED HAL COMPILER.     */
+00830000/*            THIS CLIST IS NORMALLY INVOKED BY TYPING XPLMERGE     */
+00840000/*            PASS1, FOR PASS1.                                     */
+00870000/*                                                                  */
+00871007/*            IF MERGING THE XPL SYSTEM, PASS IN ANYTHING FOR THE   */
+00872007/*            "PASS" PARAMETER. THE CLIST WILL IGNORE THE "PASS"    */
+00873007/*            PARAMETER FOR THE XPL SYSTEMS.                        */
+00874007/*                                                                  */
+00880000/*------------------------------------------------------------------*/
+00890000/*                                                                  */
+00900000/*   REVISION HISTORY:                                              */
+00910000/*                                                                  */
+00920000/*  DATE      PCR  NAME  DESCRIPTION                                */
+00930000/*  --------  ---  ---   -------------------------------------      */
+00940000/*  10/18/83  ???  RSJ   ORIGINAL CLIST                             */
+00950000/*                                                                  */
+00960000/*  08/10/89  ???  JCS   UPDATED CLIST                              */
+00970000/*                                                                  */
+00980000/*  07/09/90  104  TEV   ADDED HEADER AND REARRANGED PARAMETERS ONE */
+00990000/*                       PER LINE.                                  */
+01000000/*                                                                  */
+01010000/*  08/22/90  109  RAH   ADDED PARAMETERS ID, SYSTEM, DR, OUTLIB,   */
+01020000/*                       TPROCS, AND DRIVER.                        */
+01030000/*                                                                  */
+01040000/*  12/07/90  136  LWW   ADDED LOGIC TO MAKE DR AN OPTIONAL         */
+01050000/*                       PARAMETER.                                 */
+01060000/*                                                                  */
+01070000/*  01/18/91  146  RSJ   UPDATED PROG PARAMETER TO REFLECT THE NEW  */
+01080000/*                       LOCATION OF THE DATASET                    */
+01081000/*                                                                  */
+01082000/*  09/13/91  186  LJK   RENAMED CM OBJECT MODULE                   */
+01083000/*                                                                  */
+01084000/*  11/18/91  203  RPC   UPDATED SYSTEM PARM FOR HAL-360 DATA SETS  */
+01085000/*                                                                  */
+01085108/*  03/21/94  326  TEV   ADDED XPL SYSTEM INTO CLIST                */
+01085109/*                                                                  */
+01085110/*  09/26/94  223  LJK   ADDED COMPVER PARAMETER                    */
+01085207/*                                                                  */
+01085208/*  01/23/95  417  JCS   DELETED DRIVER PARAMETER                   */
+01085209/*                       CHANGED OUTPUT3 TO OUTPUT7, ADDED LISTING2 */
+01085210/*                       ADDED SCREEN PARAMETER AND DRIVER DISPLAY  */
+01085211/*                                                                  */
+01085212/*  02/24/95  338  HFG   CHANGED CLIST SO TPROCS DOES NOT HAVE      */
+01085213/*                       TO BE PRE-ALLOCATED; CORRECTED PROCS       */
+01085214/*                       FOR XPL SYSTEM                             */
+01086000/*------------------------------------------------------------------*/
+01087000/********************************************************************/
+01088000 
+01089000PROC 1 PASS                                        +
+01090000       ID(&SYSUID.)                                +
+01100000       SYSTEM(PASS)                                +
+01100100       COMPVER(CURRENT)                            +
+01110000       LIB(NCAMCM.&SYSTEM..&COMPVER.)              +
+01120000       PROG(NCAMCM.TOOLS.XPLOBJ(XPLMERGE))         +
+01130000       IN(##DRIVER)                                +
+01140000       DR()                                        +
+01150000       PROCS(&LIB..&PASS..PROCS)                   +
+01160000       OUTLIB(&ID..REL99V0)                        +
+01161000       TPROCS()                                    +
+01162000       OUT(&OUTLIB..&PASS..SOURCE)                 +
+01162100       SCREEN                                      +
+01163000       OPT()                                       +
+01165000       TRACE
+01166000 
+01167000IF       &TRACE.  NE THEN +
+01168000         CONTROL  LIST CONLIST
+01168100CONTROL END(DONE)
+01169000IF &SYSTEM. EQ 360 THEN SET &SYSTEM = H360
+01169100IF &SYSTEM. EQ XPL THEN DO
+01169200   SET &PASS   =
+01170000/* DON'T CHANGE PROCS IF THE DEFAULT WAS OVER-RIDDEN */
+01170001   IF &PROCS EQ &STR(&LIB..&PASS..PROCS) THEN +
+01170010      SET &PROCS  = &STR(&LIB..PROCS)
+01170100   SET &OUT    = &STR(&OUTLIB..SOURCE)
+01170200DONE
+01171000CONTROL NOMSG
+01180000  FREE F(PROGRAM OUTPUT7 SYSPRINT SYSIN INCLUDE) ATTR(FBA133 FB88)
+01180100  FREE F(LISTING2)
+01190000  DELETE ('&OUT.')
+01200000CONTROL MSG
+01210000IF &TPROCS EQ THEN DO
+01211000   IF &SYSTEM NE XPL THEN DO
+01220000      IF &DR EQ THEN +
+01230000         SET &TPROCS EQ &OUTLIB..&PASS..PROCS
+01240000      ELSE +
+01250000         SET &TPROCS EQ &OUTLIB..&PASS..&DR..PROCS
+01251000   DONE
+01252001   ELSE DO
+01252104      IF &DR NE THEN +
+01253001         SET &TPROCS EQ &OUTLIB..&DR..PROCS
+01253104      ELSE +
+01253204         SET &TPROCS EQ &OUTLIB..PROCS
+01254001   DONE
+01260000DONE
+01260100 
+01341000IF &SYSDSN('&TPROCS.(&IN.)') = OK THEN DO
+01342000   ALLOC F(SYSIN) DA('&TPROCS.(&IN.)') SHR
+01342100   WRITE RUNNING XPL PROGRAM &PROG. USING DRIVER &TPROCS.(&IN.)
+01342200   DONE
+01343000ELSE DO
+01344000   ALLOC F(SYSIN) DA('&PROCS.(&IN.)') SHR
+01344100   WRITE RUNNING XPL PROGRAM &PROG. USING DRIVER &PROCS.(&IN.)
+01344200   DONE
+01344201 
+01344202/* IF TPROCS DATASET DOESN'T EXIST, THEN DON'T INCLUDE IT IN THE
+01344203/* INCLUDE FILE ALLOCATION.
+01344204IF &SYSDSN('&TPROCS.') = OK THEN +
+01344205   SET &TPROCS EQ '&TPROCS'
+01344206ELSE +
+01344207   SET &TPROCS EQ
+01344208 
+01344209ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+01344210ATTR FB88   RECFM(F B)   LRECL(88) BLKSIZE(6160)
+01344211ALLOC F(PROGRAM)  DA('&PROG.') SHR
+01344212ALLOC F(INCLUDE)  DA(&TPROCS. '&PROCS.') SHR
+01344213ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW CATALOG +
+01344214                  SP(40 40) TRACK
+01344215ALLOC F(OUTPUT7) DA('&OUT.') RELEASE USING(FB88) NEW CATALOG +
+01344216  SP(80 5) TRACK
+01344217IF &SCREEN. NE THEN      +
+01344218     ALLOC F(LISTING2) DA(*)
+01344219   ELSE +
+01344220     ALLOC F(LISTING2) DUMMY
+01346000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' '&OPT.'
+01347000SET &SAVECC = &LASTCC
+01347106CONTROL NOMSG
+01348000FREE F(PROGRAM OUTPUT7 SYSIN SYSPRINT INCLUDE LISTING2) +
+01348010  ATTR(FBA133 FB88)
+01348106CONTROL MSG
+01349000IF &SAVECC EQ 0 THEN +
+01350000     WRITE EXECUTION SUCCESSFUL
+01360000ELSE +
+01370000     WRITE EXECUTION ERROR CODE = &SAVECC

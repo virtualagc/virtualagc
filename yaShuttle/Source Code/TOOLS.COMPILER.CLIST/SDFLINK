@@ -1,0 +1,136 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     SDFLINK                                              */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000800/*   FUNCTION: LINK EDIT ALL MEMBERS IN SDFPKG.OBJ DATASET.         */
+00000900/*                                                                  */
+00001000/*------------------------------------------------------------------*/
+00001100/*                                                                  */
+00001200/*   SYNTAX:                                                        */
+00001300/*      SDFLINK  ID(&SYSUID) SYSTEM(PASS)                           */
+00001400/*               LIB(&ID..&SYSTEM..REL99V0.SDFPKG) TRACE            */
+00001500/*                                                                  */
+00001600/*------------------------------------------------------------------*/
+00001700/*                                                                  */
+00001800/*   INVOKES:                                                       */
+00001900/*      NCAMCM.TOOLS.COMPILER.CLIST(LINK360)                        */
+00002000/*                                                                  */
+00002100/*------------------------------------------------------------------*/
+00002200/*                                                                  */
+00002300/*   PARAMETERS:                                                    */
+00002400/*                                                                  */
+00002500/*      ID              DEFAULT: &SYSUID                            */
+00002600/*                      HIGH LEVEL QUALIFIER                        */
+00002700/*                                                                  */
+00002800/*      SYSTEM          DEFAULT: PASS                               */
+00002900/*                      USED TO IDENTIFY THE LIB DATASETS;          */
+00003000/*                      TYPICAL VALUES ARE PASS, BFS, AND H360      */
+00003100/*                                                                  */
+00003200/*      LIB             DEFAULT: &ID..&SYSTEM..REL99V0.SDFPKG       */
+00003300/*                      DATASET WHERE THE MEMBERS RESIDE            */
+00003400/*                                                                  */
+00003500/*      TRACE           OPTIONAL                                    */
+00003600/*                      TRACE THE CLISTS EXECUTION                  */
+00003700/*                                                                  */
+00003800/*------------------------------------------------------------------*/
+00003900/*                                                                  */
+00004000/*   INPUT DATA SET NAMES:                                          */
+00004100/*                                                                  */
+00004200/*      <LIB>.OBJ                                                   */
+00004300/*          PDS OF SDFPKG OBJECT                                    */
+00004400/*                                                                  */
+00004500/*------------------------------------------------------------------*/
+00004600/*                                                                  */
+00004700/*   OUTPUT DATA SET NAMES:                                         */
+00004800/*      <LIB>.LOAD                                                  */
+00004900/*          PDS OF LOAD MODULES                                     */
+00005000/*                                                                  */
+00005010/*      <LIB>.MAPS                                                  */
+00005020/*          PDS OF MODULE MAPS                                      */
+00005030/*                                                                  */
+00005100/*------------------------------------------------------------------*/
+00005200/*                                                                  */
+00005300/*   TEMPORARY DATA SET NAMES:                                      */
+00005400/*                                                                  */
+00005500/*      <USERID>.CNTRL.TEMP                                         */
+00005600/*                                                                  */
+00005700/*------------------------------------------------------------------*/
+00005800/*                                                                  */
+00005900/*   COMMENTS:                                                      */
+00006000/*                                                                  */
+00006100/*     NONE                                                         */
+00006200/*                                                                  */
+00006300/*------------------------------------------------------------------*/
+00006400/*                                                                  */
+00006500/*   REVISION HISTORY:                                              */
+00006600/*                                                                  */
+00006700/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00006800/*     --------  ----  ----  -------------------------------------  */
+00006900/*                                                                  */
+00007000/*     04/22/93  305    RSJ  25V0/9V0 BASELINE                      */
+00007100/*                                                                  */
+00007200/*     10/28/93  309    DKB  ADDED THE SYSTEM PARAMETER AND USED    */
+00007300/*                           IT IN THE LIB DEFAULT; CHANGED CLIST   */
+00007400/*                           TO CREATE .LOAD DATASET IF IT DOES     */
+00007500/*                           NOT ALREADY EXIST                      */
+00007600/*                                                                  */
+00007610/*     11/08/95  355    LJK  ADDED THE ALLOCATION OF &LIB..MAPS     */
+00007700/*------------------------------------------------------------------*/
+00007800/********************************************************************/
+00007900  PROC 0 ID(&SYSUID.) +
+00008000         SYSTEM(PASS) +
+00008100         LIB(&ID..&SYSTEM..REL99V0.SDFPKG) +
+00008200         TRACE
+00008300 
+00008400  IF &TRACE. NE THEN CONTROL LIST CONLIST
+00008500  CONTROL END(DONE)
+00008600  CONTROL MAIN
+00008700 
+00008800  WRITE *** EXECUTING SDFLINK ***
+00008900  CONTROL NOMSG
+00009000 
+00009100  FREE F(CNTRL) ATTR(FB80 U7294 FBA121)
+00009200  ATTR FB80    RECFM(F B)   LRECL(80)  BLKSIZE(80)
+00009300  ATTR U7294   RECFM(U)     LRECL(0)   BLKSIZE(7294)
+00009400  ATTR FBA121  RECFM(F B A) LRECL(121) BLKSIZE(1210)
+00009500 
+00009600/*******************************************************/
+00009700/* LINK EDIT ALL MEMBERS OF DATA SET &LIB..OBJ         */
+00009800/* USING THE 360 IEWL LINK EDITOR                      */
+00009900/*******************************************************/
+00010000 
+00010100/* ALLOCATE LOAD AND MAPS FILES IF THEY DO NOT ALREADY EXIST  */
+00010200 
+00010300  IF &SYSDSN('&LIB..LOAD') NE OK THEN DO
+00010400     ALLOC DA('&LIB..LOAD') SP(40,2) DIR(5) BLOCK(7294) +
+00010500        USING(U7294)
+00010600     FREE DA('&LIB..LOAD')
+00010700  DONE
+00010710  IF &SYSDSN('&LIB..MAPS') NE OK THEN +
+00010720     ALLOC DA('&LIB..MAPS') RELEASE USING(FBA121) BLOCK(1210) +
+00010730                            SPACE(20 5) DIR(5)
+00010800 
+00010900/* SET UP CONTROL STATEMENTS TO INCLUDE  5 OBJECT MODULES  */
+00011000/* IN LINK EDIT OF SDFPKG MEMBER                           */
+00011100 
+00011200  IF &SYSDSN('&SYSUID..CNTRL.TEMP') EQ OK THEN +
+00011300     DELETE (CNTRL.TEMP)
+00011400  ALLOC DA(CNTRL.TEMP) F(CNTRL) SPACE(1) TRACKS NEW +
+00011500        USING(FB80)
+00011600  OPENFILE CNTRL       OUTPUT
+00011700 
+00011800  SET &CNTRL           = &STR+
+00011900  ( INCLUDE INCLDD(SDFPKG,LOCATE,NDX2PTR,PAGMOD,SELECT))
+00012000  PUTFILE CNTRL
+00012100 
+00012200  CLOSFILE CNTRL
+00012300  FREE F(CNTRL)
+00012400 
+00012500  LINK360 SDFPKG LIB(&LIB.) INCLUDE      +
+00012600          SYSLIN2('''&SYSUID..CNTRL.TEMP''') &TRACE.
+00012700 
+00012800 
+00012900  FREE ATTR(FB80 U7294 FBA121)

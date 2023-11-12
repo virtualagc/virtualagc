@@ -1,0 +1,284 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     TEMPLATE                                             */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: TO PRODUCE IMPACT SUMMARY OF XPL CODE                */
+00090000/*             EXAMPLE OF A COMMON INVOCATION:                      */
+00091000/*                TEMPLATE PASS2 COMPVER(REL21VB)                   */
+00092000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX :                                                       */
+00130000/*     TEMPLATE 'PASS' SYSTEM(PASS) COMPVER(CURRENT)                */
+00130100/*              NEWREL(&SYSUID.REL99V0) SOURCE(&NEWREL.)            */
+00130200/*              COMPILER('''NCAMCM.TOOLS.XPLOBJ(TEMPLATE)''')       */
+00130300/*              BINPUT2(NCAMCM.BFS.&COMPVER..HALINCL(SPACELIB))     */
+00130400/*              BINCL(NCAMCM.BFS.&COMPVER..HALINCL)                 */
+00130500/*              BXPLINCL(NCAMCM.BFS.&COMPVER..HALINCL)              */
+00130600/*              INPUT2(NCAMCM.PASS.&COMPVER..HALINCL(SPACELIB))     */
+00130700/*              INCL(NCAMCM.PASS.&COMPVER..HALINCL)                 */
+00131000/*              PAGES(5000) OPT() EXCLUDE() DR() TRACE              */
+00160000/*                                                                  */
+00170000/*     ALIAS    - NONE.                                             */
+00180000/*     REQUIRED - 'PASS'.                                           */
+00220000/*                                                                  */
+00230000/*------------------------------------------------------------------*/
+00240000/*                                                                  */
+00250000/*   INVOKES:                                                       */
+00260000/*                                                                  */
+00270000/*     'NCAMCM.TOOLS.XPLOBJ(TEMPLATE)'                              */
+00280000/*                                                                  */
+00290000/*------------------------------------------------------------------*/
+00300000/*                                                                  */
+00310000/*   PARAMETERS:                                                    */
+00311000/*                                                                  */
+00311100/*     PASS     REQUIRED                                            */
+00311200/*              WHICH PASS OF THE COMPILER TO PROCESS               */
+00311300/*                                                                  */
+00311500/*     SYSTEM                                                       */
+00311600/*              DETERMINES WHICH DEFAULTS TO USE. THIS PARAMETER    */
+00311700/*              AFFECTS VALUES USED FOR THE EXCLUDE OPTION, INPUT2  */
+00311800/*              FILE, AND INCLUDE FILES.                            */
+00311900/*                                                                  */
+00312000/*     COMPVER                                                      */
+00312100/*              COMPILER VERSION TO USE                             */
+00312200/*                                                                  */
+00312300/*     NEWREL                                                       */
+00312400/*              WHAT TO NAME THE TEMPOBJ, TEMPLATE AND LST FILES    */
+00312500/*                                                                  */
+00312600/*     SOURCE                                                       */
+00312700/*              WHERE TO GET THE SOURCE CODE TO COMPILE             */
+00312800/*                                                                  */
+00312900/*     COMPILER                                                     */
+00313000/*              COMPILER WHICH CREATES THE TEMPLATES                */
+00314000/*                                                                  */
+00319600/*     BINPUT2                                                      */
+00319700/*              LOCATION OF THE XPL COMPACTIFY AND LINK ROUTINE     */
+00319800/*              FOR BFS                                             */
+00319900/*                                                                  */
+00320000/*     BINCL                                                        */
+00320100/*              INCLUDE FILES FOR BFS                               */
+00320200/*                                                                  */
+00320300/*     BXPLINCL                                                     */
+00320400/*              XPLINCL FILES FOR BFS                               */
+00320600/*                                                                  */
+00320700/*     INPUT2                                                       */
+00320800/*              WHERE TO GET THE COMPACTIFY AND SPACE MANAGEMENT    */
+00320900/*              ROUTINES FOR PASS.                                  */
+00321000/*                                                                  */
+00321100/*     INCL                                                         */
+00321200/*              INCLUDE FILES FOR PASS                              */
+00322000/*                                                                  */
+00354000/*     PAGES                                                        */
+00355000/*              MAXIMUM PRINTED PAGES OF LISTING                    */
+00356000/*                                                                  */
+00360000/*     OPT                                                          */
+00370000/*              OPTIONS PASSED TO THE COMPILER                      */
+00380000/*                                                                  */
+00382000/*     EXCLUDE                                                      */
+00383000/*              SOURCE CODE TO EXCLUDE FROM COMPILE. IF NULL WILL   */
+00384000/*              BE SET ACCORDING TO SYSTEM.                         */
+00385000/*                                                                  */
+00390000/*     DR                                                           */
+00400000/*              ALLOWS USER TO SPECIFY AN INCLUDE FILE FOR PURPOSES */
+00410000/*              OF DEBUGGING A PARTICULAR DR. IF NULL,              */
+00420000/*              &NEWREL..INCL IS USED                               */
+00430000/*                                                                  */
+00440000/*     TRACE    OPTIONAL                                            */
+00441000/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00442000/*              TERMINAL                                            */
+00443000/*                                                                  */
+00540000/*------------------------------------------------------------------*/
+00550000/*                                                                  */
+00560000/*   INPUT DATA SET NAMES:                                          */
+00570000/*                                                                  */
+00572000/*     <SOURCE>.<PASS>.SOURCE                                       */
+00573000/*        FULLY QUALIFIED LOCATION OF THE SOURCE TO COMPILE AND     */
+00574000/*        SPLIT UP                                                  */
+00575000/*                                                                  */
+00580000/*     <COMPILER>                                                   */
+00590000/*        LOCATION OF THE COMPILER'S OBJECT CODE                    */
+00600000/*                                                                  */
+00601000/*     <BINPUT2>                                                    */
+00602000/*        LOCATION OF THE XPL COMPACTIFY AND LINK ROUTINE FOR BFS   */
+00603000/*                                                                  */
+00640000/*     <BINCL>                                                      */
+00650000/*        LOCATION OF THE INCLUDE LIBRARY FOR BFS                   */
+00660000/*                                                                  */
+00661000/*     <BXPLINCL>                                                   */
+00662000/*        LOCATION OF THE XPL INCLUDE LIBRARY FOR BFS               */
+00663000/*                                                                  */
+00664000/*     <INPUT2>                                                     */
+00665000/*        LOCATION OF THE XPL SPACE MANAGEMENT LIBRARY FOR PASS     */
+00666000/*                                                                  */
+00670000/*     <INCL>                                                       */
+00671000/*        LOCATION OF THE INCLUDE LIBRARY FOR PASS                  */
+00790000/*                                                                  */
+00791000/*     <NEWREL>.INCL                                                */
+00792000/*        THIS INCLUDE FILE WILL BE USED IF THE DR PARAMETER IS NOT */
+00793000/*        SPECIFIED                                                 */
+00794000/*                                                                  */
+00795000/*     <NEWREL>.INCL.<DR>                                           */
+00796000/*        THIS INCLUDE FILE WILL BE USED IF THE DR PARAMETER IS     */
+00797000/*        SPECIFIED                                                 */
+00798000/*                                                                  */
+00800000/*------------------------------------------------------------------*/
+00810000/*                                                                  */
+00820000/*   OUTPUT DATA SET NAMES:                                         */
+00830000/*                                                                  */
+00840000/*     <NEWREL>.<PASS>.TEMPOBJ                                      */
+00850000/*         THE RESULTING OBJECT MODULE OF THE COMPILE               */
+00860000/*                                                                  */
+00870000/*     <NEWREL>.<PASS>.TEMPLATE                                     */
+00880000/*         THE RESULTING PDS THAT CONTAINS THE TEMPLATES            */
+00890000/*                                                                  */
+00900000/*     <NEWREL>.<PASS>.LST                                          */
+00910000/*         THE OUTPUT LISTING OF THE COMPILE                        */
+00920000/*                                                                  */
+00930000/*------------------------------------------------------------------*/
+00940000/*                                                                  */
+00950000/*   TEMPORARY DATA SET NAMES:                                      */
+00960000/*                                                                  */
+00970000/*     NONE.                                                        */
+00980000/*                                                                  */
+00990000/*------------------------------------------------------------------*/
+01000000/*                                                                  */
+01010000/*   COMMENTS:                                                      */
+01020000/*                                                                  */
+01030000/*     THE USER MAY GET SOME GENERATED MESSAGES ON THE SCREEN.      */
+01040000/*                                                                  */
+01050000/*------------------------------------------------------------------*/
+01060000/*                                                                  */
+01070000/*   REVISION HISTORY:                                              */
+01080000/*                                                                  */
+01090000/*  DATE      PCR  NAME  DESCRIPTION                                */
+01100000/*  --------  ---  ---   -------------------------------------      */
+01110000/*  06/21/89  ???  RSJ   ORIGINAL CLIST                             */
+01120000/*                                                                  */
+01130000/*  07/09/90  104  TEV   ADDED HEADER. DELETED PRODUCT PARAMTER     */
+01140000/*                       SINCE IT WAS NOT USED IN THE CLIST.        */
+01150000/*                                                                  */
+01151000/*  01/18/91  146  RSJ   UPDATED COMPILER PARAMETER TO REFLECT      */
+01152000/*                       THE NEW DATASET NAMES                      */
+01153000/*                                                                  */
+01153100/*  01/21/91  147  RSJ   CHANGED THE PARAMETERS OF THE CLIST TO     */
+01153200/*                       BE SIMILIAR TO THE XPLFC CLIST             */
+01153300/*                                                                  */
+01153400/*  01/18/91  157  RSJ   ADDED DR TO THE PARAMETER LIST TO SPECIFY  */
+01153500/*                       INCLUDE FILES                              */
+01153600/*                       ALSO CHANGED NAME OF THE MIGRATED LOAD     */
+01153700/*                       MODULE                                     */
+01153800/*                                                                  */
+01153900/*  04/23/91  171  PMA   CHANGED ALL REFERENCES OF PREVIOUS PASS    */
+01154000/*                       INCLUDE FILES TO "HALINCL".                */
+01154100/*                                                                  */
+01154200/*  09/13/91  186  LJK   RENAMED CM OBJECT MODULE                   */
+01154400/*                                                                  */
+01154500/*  14/22/91  227  RAH   CHANGED ALL REFERENCES OF                  */
+01154600/*                       NCAMCM.BFS.PREVIOUS TO NCAMCM.BFS.CURRENT. */
+01154700/*                       CHANGED PARAMETER FCCOMP TO SYSTEM.        */
+01154800/*                       ADDED PARAMETERS COMPVER AND SOURCE.       */
+01154900/*                       UPDATED HEADER.                            */
+01155000/*                                                                  */
+01155100/*  02/24/95  338  HFG   ADDED CR12459 CHANGES: UPDATED SPACELIB    */
+01155200/*                       REFERENCES; MADE MYINCL OPTIONAL FOR       */
+01155210/*                       SUCCESSFUL EXECUTION                       */
+01155300/*------------------------------------------------------------------*/
+01155400/********************************************************************/
+01156000PROC 1   PASS                                         +
+01156200         SYSTEM(PASS)                                 +
+01156300         COMPVER(CURRENT)                             +
+01157000         NEWREL(&SYSUID..REL99V0)                     +
+01157100         SOURCE(&NEWREL.)                             +
+01157200         COMPILER('''NCAMCM.TOOLS.XPLOBJ(TEMPLATE)''') +
+01158000         BINPUT2(NCAMCM.BFS.&COMPVER..HALINCL(SPACELIB)) +
+01159000         BINCL(NCAMCM.BFS.&COMPVER..HALINCL)          +
+01160000         BXPLINCL(NCAMCM.BFS.&COMPVER..HALINCL)       +
+01170000         INPUT2(NCAMCM.PASS.&COMPVER..HALINCL(SPACELIB)) +
+01180000         INCL(NCAMCM.PASS.&COMPVER..HALINCL)          +
+01200000         PAGES(5000)                                  +
+01210000         OPT()                                        +
+01212000         EXCLUDE()                                    +
+01212100         DR()                                         +
+01213000         TRACE
+01215000 
+01216000IF &TRACE. NE THEN +
+01217000  CONTROL LIST CONLIST
+01218000CONTROL END(DONE)
+01219000 
+01220000IF &EXCLUDE. EQ THEN DO
+01230000   IF &SYSTEM. EQ PASS THEN  +
+01240000      SET &EXCLUDE = ACB
+01250000   ELSE                      +
+01260000      SET &EXCLUDE = ACP
+01270000DONE
+01280000 
+01281000IF &SYSTEM. EQ BFS THEN  +
+01282000   SET &INPUT2 = &BINPUT2.
+01282100 
+01282200/* IF INPUT2 DEFAULT HAS NOT BEEN OVER-RIDDEN AND COMPVER IS NOT
+01282300/* CURRENT, THEN SET INPUT2 TO THE OLD SPACELIB IF NECESSARY
+01282400IF &INPUT2 = NCAMCM.&SYSTEM..&COMPVER..HALINCL(SPACELIB) THEN DO
+01282500   SET &NUB = &SUBSTR(4:5,&COMPVER)
+01282600   IF &DATATYPE(&NUB) = NUM THEN DO
+01282700      IF (&SYSTEM = BFS   AND  &NUB < 11)  OR +
+01282800         (&SYSTEM = PASS  AND  &NUB < 27)  THEN +
+01282900         SET &INPUT2 = NCAMCM.PASS.TOOLS.SPACELIB
+01283000   DONE
+01283100DONE
+01283200 
+01287000CONTROL NOMSG
+01288000  FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 OUTPUT8 +
+01289000         SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133 FB88)
+01300000  DELETE ('&NEWREL..&PASS..LST' '&NEWREL..&PASS..TEMPOBJ'   +
+01310000          '&NEWREL..&PASS..TEMPLATE')
+01330000CONTROL MSG
+01331000 
+01340000ATTR FBA133 RECFM(F B A) LRECL(133)  BLKSIZE(2660)
+01350000ATTR F7200  RECFM(F)     LRECL(7200) BLKSIZE(7200)
+01360000ATTR F133   RECFM(F)     LRECL(133)  BLKSIZE(133)
+01370000ATTR FB88   RECFM(F B)   LRECL(88)  BLKSIZE(6160)
+01371000IF &DR. EQ THEN +
+01372100   SET &MYINCL = &NEWREL..INCL
+01373000ELSE   +
+01373100   SET &MYINCL = &NEWREL..INCL.&DR.
+01373200 
+01373300IF &SYSDSN('&MYINCL') = OK THEN +
+01373400   SET &MYINCL = '&MYINCL'
+01373500ELSE +
+01373600   SET &MYINCL =
+01374000 
+01380000ALLOC F(PROGRAM)  DA(&COMPILER.) SHR
+01390000ALLOC F(FILE1)    DA('&NEWREL..&PASS..TEMPOBJ') RELEASE USING(F7200) +
+01400000  NEW  SP(110 5) TRACK
+01410000ALLOC F(FILE2) NEW SPACE(40,10) BLOCK(7200)
+01420000ALLOC F(FILE3) NEW SPACE(40,10) BLOCK(7200)
+01430000ALLOC F(FILE4) NEW SPACE(40,10) BLOCK(7200)
+01440000ALLOC F(INPUT2) DA('&INPUT2.') SHR
+01450000ALLOC REUSE F(OUTPUT8) DA('&NEWREL..&PASS..TEMPLATE') RELEASE +
+01460000                       USING(FB88) NEW  SP(50 10) CYL DIR(60)
+01470000ALLOC F(SYSPRINT) DA('&NEWREL..&PASS..LST') RELEASE USING(FBA133) NEW +
+01480000  SP(140 20) TRACK
+01490000ALLOC F(LISTING2) DA(*) USING(F133)
+01491000IF &SYSTEM. EQ BFS THEN                          +
+01500000   ALLOC F(INCLUDE)  DA(&MYINCL. '&BINCL.' '&BXPLINCL.') SHR
+01510000ELSE                                             +
+01520000   ALLOC F(INCLUDE)  DA(&MYINCL. '&INCL.')   SHR
+01530000ALLOC F(SYSIN) DA('&SOURCE..&PASS..SOURCE') SHR
+01531000 
+01540000WRITE CREATING TEMPLATE FOR &SOURCE..&PASS..SOURCE
+01550000CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+01560000  'LISTING2,SYTSIZE=2800,REFSIZE=30000,MACROSIZE=999,CONSTANTS=500, +
+01570000EXCLUDE=&EXCLUDE.,PAGES=&PAGES.,ALTER,INDENT=1,&OPT.'
+01580000SET &SAVECC=&LASTCC.
+01581000 
+01590000FREE F(PROGRAM SYSIN FILE1 FILE2 FILE3 FILE4 INPUT2 OUTPUT8  +
+01610000       SYSPRINT LISTING2 INCLUDE) ATTR(FBA133 F7200 F133 FB88)
+01611000 
+01620000IF &SAVECC. EQ 0 THEN +
+01630000   WRITE COMPILATION SUCCESSFUL
+01640000ELSE +
+01650000   WRITE COMPILATION ERROR CODE = &SAVECC.

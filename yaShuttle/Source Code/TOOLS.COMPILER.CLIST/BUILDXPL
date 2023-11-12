@@ -1,0 +1,213 @@
+00010001/********************************************************************/
+00020001/*------------------------------------------------------------------*/
+00030001/*                                                                  */
+00040001/*   NAME:     BUILDXPL                                             */
+00050001/*                                                                  */
+00060001/*------------------------------------------------------------------*/
+00070001/*                                                                  */
+00080001/*   FUNCTION: BUILD A NEW VERSION OF XPL COMPILER USING THE BOOT-  */
+00090007/*             STRAPPING METHOD (COMPILING ITSELF 2 TIMES).         */
+00100001/*                                                                  */
+00110001/*------------------------------------------------------------------*/
+00120001/*                                                                  */
+00130001/*   SYNTAX:                                                        */
+00140001/*                                                                  */
+00150001/*     BUILDXPL  ID(&SYSUID.) LIB(&ID..XPL99V0) VERSION(99.0)       */
+00160001/*               PROCS(NCAMCM.XPL.REL90V2.PROCS) DR() TRACE         */
+00170001/*               INPUT2(NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB))        */
+00170002/*                                                                  */
+00180001/*     ALIAS    - NONE.                                             */
+00190001/*                                                                  */
+00200001/*------------------------------------------------------------------*/
+00210001/*                                                                  */
+00220001/*   INVOKES:  CLISTS: XPLMERGE                                     */
+00230001/*                     XPLCXPL                                      */
+00240001/*                     XPLZAP                                       */
+00250001/*                                                                  */
+00260001/*------------------------------------------------------------------*/
+00270001/*                                                                  */
+00280001/*   PARAMETERS:                                                    */
+00290001/*                                                                  */
+00300001/*     ID       DEFAULT: &SYSUID                                    */
+00310001/*              HIGH LEVEL QUALIFIER                                */
+00320001/*                                                                  */
+00330001/*     LIB      DEFAULT: &ID..XPL99V0                               */
+00340001/*              LOCATION OF THE XPL LIBRARIES                       */
+00350001/*                                                                  */
+00360001/*     VERSION  DEFAULT: 99.0                                       */
+00370001/*              THE VERSION NUMBER TO BE ZAPPED INTO THE XPL        */
+00380001/*              COMPILER                                            */
+00390001/*                                                                  */
+00400001/*     PROCS    DEFAULT: NCAMCM.XPL.REL90V2.PROCS                   */
+00410001/*              WHERE THE XPL PROCS RESIDE                          */
+00420001/*                                                                  */
+00420002/*     INPUT2   DEFAULT: NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB)        */
+00420003/*              LIBRARY TO BE LINKED IN AT COMPILE TIME             */
+00420004/*                                                                  */
+00430001/*     DR       DEFAULT: NONE                                       */
+00440001/*              WHERE THE MODIFIED XPL PROCS RESIDE                 */
+00450001/*                                                                  */
+00460001/*     TRACE    OPTIONAL                                            */
+00470001/*              EXECUTION OF THE CLIST WILL BE DISPLAYED AT THE     */
+00480001/*              TERMINAL                                            */
+00490001/*                                                                  */
+00500001/*------------------------------------------------------------------*/
+00510001/*                                                                  */
+00520001/*   INPUT DATA SET NAMES:                                          */
+00530001/*                                                                  */
+00540001/*     <LIB>.PROCS                                                  */
+00550001/*         LIBRARY CONTAINING XPL PROCS                             */
+00560001/*        - OR -                                                    */
+00570001/*     <LIB>.<DR>.PROCS                                             */
+00580001/*         LIBRARY CONTAINING MODIFIED XPL PROCS                    */
+00590001/*                                                                  */
+00590002/*     <PROCS>                                                      */
+00590003/*         CM LIBRARY CONTAINING XPL PROCS                          */
+00590004/*                                                                  */
+00590005/*     <INPUT2>                                                     */
+00590006/*         LIBRARY TO BE LINKED IN AT COMPILE TIME                  */
+00590007/*                                                                  */
+00600001/*------------------------------------------------------------------*/
+00610001/*                                                                  */
+00620001/*   OUTPUT DATA SET NAMES:                                         */
+00630001/*                                                                  */
+00640001/*     <LIB>.SOURCE                                                 */
+00650001/*         MERGED XPL SOURCE CODE                                   */
+00660001/*                                                                  */
+00670001/*     <LIB>.LST                                                    */
+00680001/*         XPL COMPILATION LISTING                                  */
+00690001/*                                                                  */
+00700001/*     <LIB>.XCOMLINK                                               */
+00710001/*         UPDATED XPL COMPILER                                     */
+00720001/*                                                                  */
+00730001/*------------------------------------------------------------------*/
+00740001/*                                                                  */
+00750001/*   TEMPORARY DATA SET NAMES:                                      */
+00760001/*                                                                  */
+00770007/*     <LIB>.OBJ, <LIB>.OBJ1                                        */
+00780001/*         OBJECT DECKS CREATED IN INTERMEDIATE COMPILATION STEPS   */
+00790001/*                                                                  */
+00800001/*------------------------------------------------------------------*/
+00810001/*                                                                  */
+00820001/*   REVISION HISTORY:                                              */
+00830001/*                                                                  */
+00840001/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00850001/*     --------  ----  ----  -------------------------------------  */
+00860007/*     03/24/94  0326  TEV   BASELINED                              */
+00870001/*                                                                  */
+00870002/*     04/07/95  0336  HFG   MADE <LIB>.PROCS/<LIB>.DR.PROCS        */
+00870003/*                           OPTIONAL                               */
+00870004/*                                                                  */
+00870005/*     11/27/95  0329  LJK   ADDED INPUT2 PARAMETER                 */
+00880001/*------------------------------------------------------------------*/
+00890001/********************************************************************/
+00900001PROC 0 ID(&SYSUID.)                    +
+00910001       LIB(&ID..XPL99V0)               +
+00920001       VERSION(99.0)                   +
+00930001       PROCS(NCAMCM.XPL.REL90V2.PROCS) +
+00940001       DR()                            +
+00950001       DRIVER                          +
+00950002       INPUT2(NCAMCM.XPL.REL90V2.XPLINCL(LINKLIB)) +
+00960000       TRACE
+00970000 
+00980000GLOBAL RETCODE
+00990000IF &TRACE NE  THEN CONTROL LIST CONLIST
+01000000 
+01340001/*****************************************/
+01350001/* CHECK ALLOCATION STATUS OF BASE PROCS */
+01360001/*****************************************/
+01370001IF &SYSDSN('&PROCS.') NE OK THEN DO
+01380001   WRITE DATASET '&PROCS.' DOES NOT EXIST...EXITTING
+01390001   EXIT
+01400001END
+01410001ELSE SET &TPROCS = &STR(PROCS(&PROCS.))
+01420001 
+01430004/******************/
+01440004/* ERROR HANDLING */
+01450004/******************/
+01460004ERROR DO
+01470006   IF &MAXCC > 0 THEN WRITE ERROR CODE &MAXCC
+01480006   ELSE WRITE SUCCESSFUL
+01490004   EXIT
+01500004END
+01510004 
+01520004/*****************/
+01530004/* ATTN HANDLING */
+01540004/*****************/
+01550004ATTN DO
+01560004   EXIT
+01570004END
+01580004 
+01590004/***************************/
+01600004/* MERGE PROCS INTO SOURCE */
+01610004/***************************/
+01610005/* THE XPLMERGE CLIST CHECKS THE EXISTENCE OF <LIB>.PROCS AND
+01610006/* <LIB>.DR.PROCS.  IF THE DATASETS DO NOT EXIST THEY ARE OMITTED
+01610007/* FROM THE FILE ALLOCATION. THEIR ABSENCE NO LONGER CAUSES AN ERROR.
+01610008/*
+01620000IF &DR NE  THEN +
+01630003   XPLMERGE DUMMY SYSTEM(XPL) LIB(&LIB.) DR(&DR.) OUTLIB(&LIB) &TPROCS +
+01640001            &DRIVER
+01650000ELSE +
+01660003   XPLMERGE DUMMY SYSTEM(XPL) LIB(&LIB.) OUTLIB(&LIB) &DRIVER &TPROCS
+01670000 
+01680000/***************************************/
+01690000/* COMPILE XPL COMPILER THE FIRST TIME */
+01700000/***************************************/
+01710000XPLCXPL ID(&ID.) NEWREL(&LIB) SOURCE(&LIB..SOURCE) INPUT2(&INPUT2.)
+01720000IF &LASTCC ^= 0 THEN GOTO SKIP
+01721009 
+01722009/***********************************/
+01723009/* ZAP THE INTERMEDIATE XPL OBJECT */
+01724009/***********************************/
+01725009XPLZAP ID(&ID) COMPILER(&LIB..OBJ) SYSTEM(XPL) VERSION(&VERSION)
+01726009IF &LASTCC NE 0 THEN GOTO SKIP
+01726109 
+01727009/**************************************/
+01728009/* RENAME THE INTERMEDIATE XPL OBJECT */
+01729009/**************************************/
+01730000CONTROL NOMSG
+01740001IF &SYSDSN('&LIB..OBJ1') EQ OK THEN +
+01750001   DEL '&LIB..OBJ1'
+01760000RENAME '&LIB..OBJ' '&LIB..OBJ1'
+01770000CONTROL MSG
+01780000 
+01790000/****************************************/
+01800000/* COMPILE XPL COMPILER THE SECOND TIME */
+01810000/****************************************/
+01820000XPLCXPL ID(&ID.) NEWREL(&LIB) SOURCE(&LIB..SOURCE) +
+01820100        COMPILER(&LIB..OBJ1) INPUT2(&INPUT2.)
+01830000IF &LASTCC ^= 0 THEN GOTO SKIP
+01831009 
+01832009/*******************************/
+01833009/* RENAME THE FINAL XPL OBJECT */
+01834009/*******************************/
+01840000CONTROL NOMSG
+01850001IF &SYSDSN('&LIB..XCOMLINK') EQ OK THEN +
+01860001   DEL '&LIB..XCOMLINK'
+01870000RENAME '&LIB..OBJ' '&LIB..XCOMLINK'
+01880000CONTROL MSG
+01890000 
+01900000/****************************/
+01910000/* ZAP THE NEW XPL COMPILER */
+01920000/****************************/
+01930000XPLZAP ID(&ID) COMPILER(&LIB..XCOMLINK) SYSTEM(XPL) VERSION(&VERSION)
+01940001IF &LASTCC NE 0 THEN GOTO SKIP
+01950001 
+01960001/*****************************/
+01970001/* DELETE INTERMEDIATE FILES */
+01980001/*****************************/
+01990001CONTROL NOMSG
+02000001DEL '&LIB..OBJ1'
+02010001CONTROL MSG
+02020001SKIP_2: DO
+02030001   WRITE ** THE XPL &VERSION. COMPILER BUILD WAS SUCCESSFUL.
+02040001   WRITE ** THE NEW XPL COMPILER IS LOCATED IN '&LIB..XCOMLINK'.
+02050001   EXIT
+02060001END
+02070000 
+02080000SKIP: DO
+02090009   WRITE ** AN ERROR WAS ENCOUNTERED. THE NEW XPL COMPILER WAS NOT+
+02091009            BUILT. **
+02100000   EXIT
+02110000END

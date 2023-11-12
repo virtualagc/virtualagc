@@ -1,0 +1,45 @@
+NUCL     TITLE 'NUCLEUS - MINI INTERRUPT HANDLER FOR HALS/FC'           00000100
+NUCLEUS  CSECT                                                          00000200
+         SPOFF                                                          00000300
+         DC    X'C6C6C6C6C6C6C6C6' ILLEGAL OP CODE                      00000400
+         DC    17D'0'         ZERO FILL TO PSW PAIR                     00000500
+*                                                                       00000600
+PINOLD   DC    D'0'           PROGRAM INTERRUPT OLD PSW                 00000700
+PINNEW   DS    0D             PROGRAM INTERRUPT NEW PSW                 00000800
+         DC    Y(PROGINT)     ADR OF HANDLER                            00000900
+         DC    H'0'                                                     00001000
+         DC    X'0008'                                                  00001100
+         DC    H'0'                                                     00001200
+*                                                                       00001300
+         DC    2D'0'          RESERVED                                  00001400
+*                                                                       00001500
+SVCOLD   DC    D'0'           SVC OLD PSW                               00001600
+*                                                                       00001700
+SVCNEW   DS    0D                                                       00001800
+         DC    Y(SVCINT)      ADR OF SVC HANDLER                        00001900
+         DC    H'0'           JUNK BITS                                 00002000
+         DC    X'0008'        MORE JUNK WITH REG SET=1, P/S=0           00002100
+         DC    H'0'           JUNK                                      00002200
+         DC    56D'0'         ZERO FILL REST OF PSA AREA                00002300
+*                                                                       00002400
+SVCINT   LPS   SVCOLD         RESTORE HAL PROGRAM                       00002500
+*                                                                       00002600
+*        HANDLE PROGRAM INTERRPUTS                                      00002700
+*                                                                       00002800
+PROGINT  LPS   PINOLD         RESTORE HAL PROGRAM                       00002900
+*                                                                       00003000
+IPL      LPS   STARTPSW                                                 00003117
+         EXTRN START                                                    00003917
+STARTPSW DS    0D                                                       00004017
+*  THE PSW MASK WAS CHANGED FROM AN "A" TO A "0" TO MASK OUT THE        00004117
+*  OVERFLOW & UNDERFLOW BITS TO FULLY SIMULATE THE GPC'S DUE TO RTL     00004217
+*  TEST PROGRAMS GETTING ERRORS -- THEY ARE MASKED OUT ON REAL GPCS     00004317
+*                                                                       00004417
+* PCR0276 - MODIFIES PSW TO SET DSR TO 1 INSTEAD OF 0                   00004517
+*                                                                       00004617
+         DC    Y(START)                                                 00004717
+         DC    X'0001'                                                  00004817
+         DC    X'0001'                                                  00004917
+         DC    H'0'                                                     00005017
+*                                                                       00005117
+         END                                                            00006000

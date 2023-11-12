@@ -1,0 +1,16 @@
+         MACRO                                                          00000100
+         STACK                                                          00000200
+STACK    DSECT                                                          00000300
+         USING STACK,13                                                 00000400
+CURRCODE DS    A .            CURRENT CODE BASE                         00000500
+         DS    H .            H.O. BIT IS EXCLUSIVE FLAG                00000600
+STMTNUMB DS    H .            STATEMENT NUMBER                          00000700
+AVAILBLE DS    D .              AVAILABLE DOUBLE WORD                   00000800
+ERRLINK  DS    A .            ON ERROR LINKAGE                          00000900
+ARG0     DS    F .            CALLERS ARGUMENTS                         00001000
+ARG1     DS    F                                                        00001100
+ARG2     DS    F                                                        00001200
+ARG3     DS    F                                                        00001300
+ARG4     DS    F                                                        00001400
+         DS    10F .          REGS 5 - 14                               00001500
+         MEND                                                           00001600

@@ -1,0 +1,40 @@
+         MACRO                                                          00000100
+&LAB HERROR &NUM,&MSG,&GROUP=4,&SYSTEM=L,&GOTO=Y,&SWAP=Y,&IGNORE=Y      00000200
+         LCLA  &FLAG                                                    00000210
+         LCLB  &NEEDMVI                                                 00000300
+         LCLC  &M,&N,&L                                                 00000400
+         AIF   ('&NUM' NE '' AND '&MSG' NE '').OK                       00000500
+         MNOTE 2,'MISSING REQUIRED OPERANDS'                            00000600
+         MEXIT                                                          00000700
+.OK      ANOP                                                           00000800
+         AIF   ('&IGNORE' EQ 'Y').TSTGOTO                               00000810
+&FLAG    SETA  1                                                        00000820
+.TSTGOTO AIF   ('&GOTO' EQ 'Y').TSTSYS                                  00000830
+&FLAG    SETA  &FLAG+2                                                  00000840
+.TSTSYS  AIF   ('&SYSTEM' EQ 'L').TSTSWAP                               00000850
+&FLAG    SETA  &FLAG+8                                                  00000860
+         AIF   ('&SYSTEM' EQ 'U').TSTSWAP                               00000870
+&FLAG    SETA  &FLAG+8                                                  00000880
+.TSTSWAP AIF   ('&SWAP' EQ 'Y').ENDFLAG                                 00000882
+&FLAG    SETA  &FLAG+32                                                 00000884
+.ENDFLAG ANOP                                                           00000890
+&L       SETC  '&LAB'                                                   00000900
+&M       SETC  '&MSG'                                                   00001000
+&N       SETC  '&NUM'                                                   00001100
+         AIF   ('&MSG'(1,1) NE '(').TESTNUM                             00001200
+         CNOP  2,4                                                      00001300
+&L       ST    &MSG(1),*+14     SET MSG ADR                             00001400
+&L       SETC  ''                                                       00001500
+&M       SETC  '0'                                                      00001600
+&NEEDMVI SETB  1                                                        00001700
+.TESTNUM AIF   ('&NUM'(1,1) NE '(').TESTMVI                             00001800
+&L       STC   &NUM(1),*+9    SET ERROR NUMBER                          00001900
+&L       SETC  ''                                                       00002000
+&N       SETC  '0'                                                      00002100
+         AGO   .BAL                                                     00002200
+.TESTMVI AIF   (NOT &NEEDMVI).BAL                                       00002300
+         MVI   *+10,&FLAG     SET OPTIONS BYTE                          00002400
+.BAL     ANOP                                                           00002500
+&L       BAL   14,24(,12)  LINK TO ERROR HANDLER                        00002600
+         DC    AL1(&GROUP),AL1(&N),AL1(&FLAG),AL3(&M)                   00002700
+         MEND                                                           00002800

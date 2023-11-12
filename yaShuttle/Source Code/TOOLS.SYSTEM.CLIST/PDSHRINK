@@ -1,0 +1,255 @@
+00000100/********************************************************************/
+00000200/*------------------------------------------------------------------*/
+00000300/*                                                                  */
+00000400/*   NAME:     PDSHRINK                                             */
+00000500/*                                                                  */
+00000600/*------------------------------------------------------------------*/
+00000700/*                                                                  */
+00000900/*   FUNCTION: COMPRESSES ALL PDS ON A GIVEN ACCOUNT OR USER LEVEL  */
+00001000/*             AND FREES THE UNUSED SPACE. THIS CLIST CAN BE USED   */
+00001100/*             TO RECALL ALL THE MIGRATED DATASETS.                 */
+00001200/*                                                                  */
+00001300/*             EXAMPLES:                                            */
+00001400/*             PDSHRINK NCAMTST                                     */
+00001500/*                COMPRESSES ALL PDS UNDER NCAMTST                  */
+00001600/*             PDSHRINK NCAMTST.COMMANDS                            */
+00001700/*                COMPRESSED ALL PDS UNDER NCAMTST.COMMANDS         */
+00001800/*                                                                  */
+00001900/*------------------------------------------------------------------*/
+00002000/*                                                                  */
+00002100/*   SYNTAX :                                                       */
+00002200/*                                                                  */
+00002300/*     PDSHRINK 'ACCOUNT' TRACE                                     */
+00002400/*                                                                  */
+00002500/*     ALIAS    - NONE.                                             */
+00002600/*     REQUIRED - 'ACCOUNT'                                         */
+00002700/*                                                                  */
+00002800/*------------------------------------------------------------------*/
+00002900/*                                                                  */
+00003000/*   INVOKES:                                                       */
+00003100/*                                                                  */
+00003200/*      'SYS1.LINKLIB(IEBCOPY)'                                     */
+00003300/*                                                                  */
+00003400/*------------------------------------------------------------------*/
+00003500/*                                                                  */
+00003600/*   PARAMETERS:                                                    */
+00003700/*                                                                  */
+00003800/*     ACCOUNT  REQUIRED                                            */
+00003900/*              THE USER LEVEL TO COMPRESS ALL PDS UNDER. NO QUOTES */
+00004000/*              AROUND DATASET NAME.                                */
+00004100/*                EX: NCAMCM.TOOLS  NOT 'NCAMCM.TOOLS'.             */
+00004200/*                                                                  */
+00004300/*     TRACE    OPTIONAL                                            */
+00004400/*              DISPLAYS THE EXECUTION OF THE PROGRAM ON THE USER'S */
+00004500/*              TERMINAL.                                           */
+00004600/*                                                                  */
+00004700/*------------------------------------------------------------------*/
+00004800/*                                                                  */
+00004900/*   INPUT DATA SET NAMES:                                          */
+00005000/*                                                                  */
+00005100/*     FILES.LST                                                    */
+00005200/*          DATASET LIST CREATED BY FILES CLIST                     */
+00005300/*                                                                  */
+00005400/*     DSNAMES.SYSIN                                                */
+00005500/*          CREATED SYSIN FILE NECESSARY FOR THE COMPRESS.          */
+00005600/*                                                                  */
+00005700/*------------------------------------------------------------------*/
+00005800/*                                                                  */
+00005900/*   OUTPUT DATA SET NAMES:                                         */
+00006000/*                                                                  */
+00006100/*     DSNAMES.SYSIN                                                */
+00006200/*          CREATED SYSIN FILE NECESSARY FOR THE COMPRESS.          */
+00006300/*                                                                  */
+00006400/*------------------------------------------------------------------*/
+00006500/*                                                                  */
+00006600/*   TEMPORARY DATA SET NAMES:                                      */
+00006700/*                                                                  */
+00006800/*     NONE.                                                        */
+00006900/*                                                                  */
+00007000/*------------------------------------------------------------------*/
+00007100/*                                                                  */
+00007200/*   COMMENTS:                                                      */
+00007300/*                                                                  */
+00007400/*   1. YOU CANNOT COMPRESS DATASETS ON SOMEONE ELSE'S ACCOUNT.     */
+00007500/*      IF YOU ATTEMPT THIS, YOU WILL RECEIVE A RACF VIOLATION FOR  */
+00007600/*      EACH ATTEMPT.                                               */
+00007700/*                                                                  */
+00007800/*   2. ALL YOUR DATASETS SHOULD BE FREED PRIOR TO THE ATTEMPT AT A */
+00007900/*      COMPRESS. THIS CLIST SHOULD BE RUN WHEN YOU FIRST LOGON OR  */
+00008000/*      WHEN YOU EXIT OUT OF ISPF AND FREE ALL YOUR DATASETS.       */
+00008100/*                                                                  */
+00008200/*   3. THIS CLIST ALSO RECALLS ALL YOUR MIGRATED DATASETS BEFORE   */
+00008300/*      COMPRESSION.                                                */
+00008400/*                                                                  */
+00008500/*------------------------------------------------------------------*/
+00008600/*                                                                  */
+00008700/*   REVISION HISTORY:                                              */
+00008800/*                                                                  */
+00008900/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00009000/*     --------  ----  ----  -------------------------------------  */
+00009100/*     10/12/92  0229  TEV   ORIGINAL CLIST                         */
+00009200/*                                                                  */
+00009300/*     09/01/93  0311  TEV   SPEEDUP PDSHRINK AND FILEFIND CLISTS   */
+00009400/*                                                                  */
+00009410/*     03/27/95  0423  JCS   CHANGE LISTC L TO LISTC LEVEL          */
+00009500/********************************************************************/
+00009600 
+00009700PROC     1        ACCOUNT +
+00009800                  TRACE
+00009900 
+00010000GLOBAL RETCODE
+00010100IF       &TRACE.  NE THEN +
+00010200         CONTROL  LIST CONLIST
+00010300 
+00010400CONTROL  NOMSG    END(DONE) NOFLUSH
+00010500         FREE     ATTR(FB80)
+00010600CONTROL  MSG
+00010700 
+00010800ATTR     FB80     RECFM(F B)        BLKSIZE(6400)     LRECL(80)
+00010900 
+00011000     /***********************/
+00011100     /* GENERATE FILES LIST */
+00011200     /***********************/
+00011300 
+00012000SET &SYSOUTTRAP = 15001
+00012100LISTC    LEVEL(&ACCOUNT.)
+00012200SET &SYSOUTTRAP = 0
+00012300 
+00012400   /**********************************************/
+00012500   /* SAVE THE MEMBER NAMES TO A PERMANENT ARRAY */
+00012600   /**********************************************/
+00012700SET &SAVE_DSLIST = &SYSOUTLINE
+00012800IF &TRACE NE  THEN SET &TEMP = 1
+00012900ELSE SET &TEMP = 0
+00013000LOOP1: SET &TEMP = &TEMP + 1
+00013100IF &TEMP > &SYSOUTLINE THEN GOTO EXIT_LOOP1
+00013200SET &SAVE_DSLIST&TEMP = &&SYSOUTLINE&TEMP
+00013300GOTO LOOP1
+00013400 
+00013500EXIT_LOOP1: +
+00014900SET &DS_LIST = &SAVE_DSLIST
+00015000IF &TRACE NE  THEN SET &SAVE_COUNT = 2
+00015100ELSE SET &SAVE_COUNT = 1
+00015200SET &DS_COUNT = 1
+00015300DO WHILE &SAVE_COUNT LE &DS_LIST
+00015400   SET &USERLEN EQ &LENGTH(&STR(&USER))
+00015500   SET &DSNAME  EQ &&SAVE_DSLIST&SAVE_COUNT
+00015600   SET &STRLEN  EQ &LENGTH(&STR(&DSNAME))
+00015700 
+00015800   IF &SUBSTR(6:15,&DSNAME) NE &STR(IN-CAT ---) THEN DO
+00015900      SET &DS_LIST&DS_COUNT = &SUBSTR(17:&STRLEN,&DSNAME)
+00016000      SET &DS_COUNT = &DS_COUNT + 1
+00016100   DONE
+00016200   SET &SAVE_COUNT = &SAVE_COUNT + 1
+00016300DONE
+00016400 
+00016500SET &DS_LIST = &DS_COUNT - 1
+00017300 
+00017500WRITE
+00017600WRITE    COMPRESSING FILES UNDER &ACCOUNT....
+00018200 
+00018300     /********************/
+00018400     /* ON ERROR ROUTINE */
+00018500     /********************/
+00018600ERROR DO
+00018700ERROR#1: +
+00018800     IF &MAXCC > 16 THEN DO
+00018900        WRITE
+00019000        WRITE EXITING ERROR CODE = &SAVECC.
+00019100        WRITE
+00019200        WRITE STATISTICS BEFORE THE ERROR:
+00019300     DONE
+00019900     WRITE
+00020000     WRITE **************** TOTALS ****************
+00020100     WRITE   NUMBER OF FILES PROCESSED       = &FILECNT..
+00020200     WRITE   NUMBER OF PDS PROCESSED         = &PDSCOUNT..
+00020300     WRITE   NUMBER OF PDS COMPRESSED        = &PDSOK..
+00020400     WRITE   NUMBER OF FAILED PDS COMPRESSES = &BADPDS..
+00020500     WRITE ****************************************
+00020600     SET &SPACEFREED = &OLDTRACKS - &NEWTRACKS
+00020700     WRITE
+00020800     WRITE   YOU JUST RELEASED &SPACEFREED. TRACKS TO THE SYSTEM...
+00021500     EXIT
+00021600DONE
+00021700 
+00021800SET &PDSCOUNT = 0
+00021900SET &PDSOK    = 0
+00022000SET &BADPDS   = 0
+00022100SET &FILECNT  = 0
+00022200 
+00022300WRITE
+00022400IF &SYSDSN(DSNAMES.SYSIN) NE OK THEN DO
+00022500   ALLOC F(TEMP) DA(DSNAMES.SYSIN) LRECL(80) BLKSIZE(800) RECFM(F B) +
+00022600                 SPACE(1) TRACK NEW
+00022700   OPENFILE TEMP OUTPUT
+00022800   SET TEMP = &STR(  COPY INDD=DD1,OUTDD=DD1,LIST=NO)
+00022900   PUTFILE TEMP
+00023000   CLOSFILE TEMP
+00023100   FREE F(TEMP)
+00023200DONE
+00023300 
+00023700 
+00023800SET &DS_COUNT = 1
+00023900SET &OLDTRACKS = 0
+00024000SET &NEWTRACKS = 0
+00024100SET &TMPTRACKS = 0
+00024200SET &TOTALTRK  = 0
+00024300 
+00024400DO WHILE &DS_COUNT LE &DS_LIST
+00024500 
+00025100   SET &DSNAME = &&DS_LIST&DS_COUNT
+00025200 
+00025300   LISTDSI '&DSNAME.' RECALL
+00025400 
+00025500   IF &SYSUNITS = CYLINDER THEN +
+00025600      SET &TMPTRACKS = &EVAL(&SYSALLOC * 15)
+00025700   ELSE IF &SYSUNITS = BLOCK THEN +
+00025800      SET &TMPTRACKS = &EVAL(&SYSALLOC / &SYSBLKSTRK)
+00025900   ELSE SET &TMPTRACKS = &SYSALLOC
+00026000 
+00026100   SET &TOTALTRK  = &TOTALTRK  + &TMPTRACKS
+00026200 
+00026400   IF &SYSDSORG. EQ PO THEN DO
+00026500      SET &PDSCOUNT = &PDSCOUNT + 1
+00026600      IF &SYSALLOC GT &SYSPRIMARY AND &SYSALLOC GT &SYSUSED THEN DO
+00026700         WRITENR COMPRESS OF &DSNAME....
+00026800 
+00026900         SET &OLDTRACKS = &OLDTRACKS + &TMPTRACKS
+00027000 
+00027100         ALLOC F(SYSIN) DA(DSNAMES.SYSIN) SHR REUSE
+00027200         IF &SYSUNITS = BLOCK THEN +
+00027300            ALLOC F(DD1) DA('&DSNAME.') OLD RELEASE +
+00027400               SPACE(&SYSPRIMARY. &SYSSECONDS.) &SYSUNITS(&SYSBLKSIZE.)
+00027500         ELSE +
+00027600            ALLOC F(DD1) DA('&DSNAME.') OLD RELEASE &SYSUNITS. +
+00027700               SPACE(&SYSPRIMARY. &SYSSECONDS.)
+00027800         ALLOC F(SYSUT3) SP(15 15) TRACK UNIT(SYSDA) REUSE
+00027900         ALLOC F(SYSUT4) SP(15 15) TRACK UNIT(SYSDA) REUSE
+00028000         ALLOC F(SYSPRINT) DUMMY OLD REUSE
+00028100 
+00028200         CALL 'SYS1.LINKLIB(IEBCOPY)' 'SIZE=256K'
+00028300         SET &SAVECC = &LASTCC.
+00028400         IF &SAVECC = 0 THEN DO
+00028500              WRITE  SUCCESSFUL
+00028600              SET &PDSOK = &PDSOK + 1
+00028700 
+00028800              LISTDSI &DSNAME.
+00028900              IF &SYSUNITS = CYLINDER THEN +
+00029000                 SET &NEWTRACKS = &NEWTRACKS + &EVAL(&SYSALLOC * 15)
+00029100              ELSE IF &SYSUNITS = BLOCK THEN +
+00029200                 SET &NEWTRACKS = &NEWTRACKS + &EVAL(+
+00029300                     &SYSALLOC / &SYSBLKSTRK)
+00029400              ELSE SET &NEWTRACKS = &NEWTRACKS + &SYSALLOC
+00029500 
+00029600         DONE
+00029700         ELSE DO
+00029800            WRITE  ERROR CODE = &SAVECC.
+00029900            SET &BADPDS = &BADPDS + 1
+00030000         DONE
+00030100         FREE F(DD1 SYSPRINT SYSIN SYSUT3 SYSUT4)
+00030200      DONE
+00030300   DONE
+00030400   SET &FILECNT = &FILECNT + 1
+00030500   SET &DS_COUNT = &DS_COUNT + 1
+00040000DONE
+00050000GOTO ERROR#1

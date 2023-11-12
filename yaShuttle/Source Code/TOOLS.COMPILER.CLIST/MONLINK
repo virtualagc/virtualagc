@@ -1,0 +1,213 @@
+00010000/********************************************************************/
+00020000/*------------------------------------------------------------------*/
+00030000/*                                                                  */
+00040000/*   NAME:     MONLINK                                              */
+00050000/*                                                                  */
+00060000/*------------------------------------------------------------------*/
+00070000/*                                                                  */
+00080000/*   FUNCTION: LINK EDIT ALL MEMBERS IN MONITOR.OBJ DATASET.        */
+00090000/*                                                                  */
+00100000/*------------------------------------------------------------------*/
+00110000/*                                                                  */
+00120000/*   SYNTAX:                                                        */
+00130008/*      MONLINK  TRACE ID(&SYSUID) SYSTEM(PASS)                     */
+00131008/*               LIB(&ID..&SYSTEM..REL99V0.MONITOR)                 */
+00141005/*                                                                  */
+00150000/*------------------------------------------------------------------*/
+00160000/*                                                                  */
+00170000/*   INVOKES:                                                       */
+00180009/*      LINK360 CLIST                                               */
+00181009/*      (DEFAULT LOCATION: NCAMCM.TOOLS.COMPILER.CLIST)             */
+00190000/*                                                                  */
+00200000/*------------------------------------------------------------------*/
+00210000/*                                                                  */
+00220000/*   PARAMETERS:                                                    */
+00230000/*                                                                  */
+00240000/*      ID              DEFAULT: &SYSUID                            */
+00250000/*                      HIGH LEVEL QUALIFIER                        */
+00260000/*                                                                  */
+00270005/*      SYSTEM          DEFAULT: PASS                               */
+00280005/*                      USED TO IDENTIFY THE LIB DATASETS;          */
+00290005/*                      TYPICAL VALUES ARE PASS, BFS, AND H360      */
+00290105/*                                                                  */
+00291010/*      LIB             DEFAULT: &ID..&SYSTEM..REL99V0.MONITOR      */
+00292009/*                      DATASET WHERE THE MEMBERS RESIDE            */
+00293005/*                                                                  */
+00300000/*      TRACE           OPTIONAL                                    */
+00310000/*                      TRACE THE CLISTS EXECUTION                  */
+00320000/*                                                                  */
+00330000/*------------------------------------------------------------------*/
+00340000/*                                                                  */
+00350000/*   INPUT DATA SET NAMES:                                          */
+00360000/*                                                                  */
+00370000/*      <LIB>.OBJ                                                   */
+00380000/*          PDS OF MONITOR OBJECT                                   */
+00390000/*                                                                  */
+00400000/*------------------------------------------------------------------*/
+00410000/*                                                                  */
+00420000/*   OUTPUT DATA SET NAMES:                                         */
+00430000/*      <LIB>.LOAD                                                  */
+00440000/*          PDS OF LOAD MODULES                                     */
+00450000/*                                                                  */
+00450100/*      <LIB>.MAPS                                                  */
+00450200/*          PDS OF MODULE MAPS                                      */
+00450300/*                                                                  */
+00460000/*------------------------------------------------------------------*/
+00470000/*                                                                  */
+00480000/*   TEMPORARY DATA SET NAMES:                                      */
+00490000/*                                                                  */
+00500000/*      <USERID>.CNTRL.TEMP                                         */
+00510000/*                                                                  */
+00520000/*------------------------------------------------------------------*/
+00530000/*                                                                  */
+00540000/*   COMMENTS:                                                      */
+00550000/*                                                                  */
+00560000/*     NONE                                                         */
+00570000/*                                                                  */
+00580000/*------------------------------------------------------------------*/
+00590000/*                                                                  */
+00600000/*   REVISION HISTORY:                                              */
+00610000/*                                                                  */
+00620000/*     DATE      PCR#  NAME  DESCRIPTION                            */
+00630000/*     --------  ----  ----  -------------------------------------  */
+00640000/*                                                                  */
+00650000/*     06/??/87  ???    HFG  21V6                                   */
+00660000/*                                                                  */
+00670000/*     02/21/91  153    LWW  CCC BASELINE                           */
+00680000/*                                                                  */
+00690007/*     10/21/93  316    HFG  ADD LISTOPT TO THE MONITOR; ADD SYSTEM */
+00700008/*                           AND OLDVER PARAMETERS; CREATE .LOAD    */
+00701005/*                           DATASET IF IT DOES NOT ALREADY EXIST;  */
+00702005/*                           ADD (BFS ONLY) CODE TO COPY DSNAMEDD   */
+00703005/*                           AND READFCB MEMBERS TO .LOAD DATASET   */
+00704005/*                                                                  */
+00704006/*     05/22/95  431    DKB  REMOVE CODE THAT COPIES DSNAMEDD AND   */
+00704007/*                           READFCB AND CODE THAT LINKS LINKMON,   */
+00704008/*                           SETDSCB, AND TSETIN (I.E., REMOVE CODE */
+00704009/*                           FOR UNSUPPORTED MONITOR MEMBERS) -     */
+00704010/*                           SEE CR12459 (27V0/11V0 RELEASE)        */
+00704020/*                                                                  */
+00704030/*     11/08/95  355    LJK  ADDED THE ALLOCATION OF &LIB..MAPS     */
+00710000/*------------------------------------------------------------------*/
+00720000/********************************************************************/
+00730000  PROC 0 TRACE +
+00740000         ID(&SYSUID.)    +
+00750001         SYSTEM(PASS)    +
+00760005         LIB(&ID..&SYSTEM..REL99V0.MONITOR)
+00770000 
+00780000  IF &TRACE. NE THEN CONTROL LIST CONLIST
+00790000  CONTROL END(DONE)
+00800000  CONTROL MAIN
+00810000 
+00820000  WRITE *** EXECUTING MONLINK ***
+00830000  CONTROL NOMSG
+00840000 
+00850002  FREE F(CNTRL) ATTR(FB80 U7294 FBA121)
+00860000  ATTR FB80    RECFM(F B)   LRECL(80)  BLKSIZE(80)
+00870002  ATTR U7294   RECFM(U)     LRECL(0)   BLKSIZE(7294)
+00880000  ATTR FBA121  RECFM(F B A) LRECL(121) BLKSIZE(1210)
+00890000 
+00900000/*******************************************************/
+00910000/* LINK EDIT ALL MEMBERS OF DATA SET &LIB..OBJ         */
+00920000/* USING THE 360 IEWL LINK EDITOR                      */
+00930000/*******************************************************/
+00940000 
+00950002/* ALLOCATE LOAD AND MAPS FILES IF THEY DO NOT ALREADY EXIST */
+00960000 
+00970002  IF &SYSDSN('&LIB..LOAD') NE OK THEN DO
+00980003     ALLOC DA('&LIB..LOAD') SP(40,2) DIR(5) BLOCK(7294) +
+00990002        USING(U7294)
+00990003     FREE DA('&LIB..LOAD')
+00990004  DONE
+00990005  IF &SYSDSN('&LIB..MAPS') NE OK THEN +
+00990006     ALLOC DA('&LIB..MAPS') RELEASE USING(FBA121) BLOCK(1210) +
+00990007                            SPACE(20 5) DIR(5)
+01020002 
+01030002/* SET UP CONTROL STATEMENTS TO INCLUDE  7 OBJECT MODULES  */
+01040002/* IN LINK EDIT OF MONITOR MEMBER                          */
+01050002 
+01060002  IF &SYSDSN('&SYSUID..CNTRL.TEMP') EQ OK THEN +
+01070002     DELETE (CNTRL.TEMP)
+01080002  ALLOC DA(CNTRL.TEMP) F(CNTRL) SPACE(1) TRACKS NEW +
+01090002        USING(FB80)
+01100000  OPENFILE CNTRL       OUTPUT
+01110000  SET &CNTRL           = &STR+
+01120000  ( INCLUDE INCLDD(SDFOUT,XXXTOD,XXDSIN,XXDEXP) )
+01130000  PUTFILE CNTRL
+01140000  SET &CNTRL           = &STR+
+01150000  ( INCLUDE INCLDD(XXDLOG,XXDSQRT,XXDTOC,TENSTBL) )
+01160000  PUTFILE CNTRL
+01170000  SET &CNTRL           = &STR+
+01180000  ( ENTRY XPLSM )
+01190000  PUTFILE CNTRL
+01200000  SET &CNTRL           = &STR+
+01210000  ( NAME MONITOR(R) )
+01220000  PUTFILE CNTRL
+01230000  CLOSFILE CNTRL
+01240000  FREE F(CNTRL)
+01250000 
+01260000  LINK360 MONITOR LIB(&LIB.) INCLUDE TEST +
+01270000          SYSLIN2('''&SYSUID..CNTRL.TEMP''') &TRACE.
+01280000 
+01290000/*  INCLUDE XPL@ABEN IN LINK OF AUTHORIZ  */
+01300000 
+01310000  DELETE (CNTRL.TEMP)
+01320000  ALLOC DA(CNTRL.TEMP) F(CNTRL) SPACE(1) TRACKS NEW +
+01330000        USING(FB80)
+01340000  OPENFILE CNTRL       OUTPUT
+01350000  SET &CNTRL           = &STR+
+01360000  ( INCLUDE INCLDD(XPL@ABEN) )
+01370000  PUTFILE CNTRL
+01380000  CLOSFILE CNTRL
+01390000  FREE F(CNTRL)
+01400000 
+01410000  LINK360 AUTHORIZ LIB(&LIB.) INCLUDE &TRACE. +
+01420000                   SYSLIN2('''&SYSUID..CNTRL.TEMP''')
+01430000  LINK360 COMPOPT  LIB(&LIB.) TEST &TRACE.
+01440000 
+01450000/*  USE SAME CNTRL.TEMP TO INCLUDE XPL@ABEN IN LINK */
+01460000/*    OF FINDMEM                                    */
+01470000 
+01480000  LINK360 FINDDMEM LIB(&LIB.) INCLUDE &TRACE. +
+01490000                   SYSLIN2('''&SYSUID..CNTRL.TEMP''')
+01500000  LINK360 HALLINK  LIB(&LIB.) &TRACE.
+01510000  LINK360 HALLKED  LIB(&LIB.) &TRACE.
+01530000  LINK360 LISTOPT  LIB(&LIB.) &TRACE.
+01540000  LINK360 MONOPT   LIB(&LIB.) &TRACE.
+01550000 
+01560000/* SET UP CONTROL STATEMENTS TO CREATE ALIASES FOR OPENDIR */
+01570000/*  INCLUDE XPL@ABEN IN LINK OF OPENDIR   */
+01580000 
+01590000  DELETE (CNTRL.TEMP)
+01600000  ALLOC DA(CNTRL.TEMP) F(CNTRL) SPACE(1) TRACKS NEW +
+01610000        USING(FB80)
+01620000  OPENFILE CNTRL       OUTPUT
+01630000  SET &CNTRL           = &STR+
+01640000  ( INCLUDE INCLDD(XPL@ABEN) )
+01650000  PUTFILE CNTRL
+01660000  SET &CNTRL           = &STR+
+01670000   ( ALIAS CLOSEDIR,NEXTMEM)
+01680000  PUTFILE CNTRL
+01690000  CLOSFILE CNTRL
+01700000  FREE F(CNTRL)
+01710000 
+01720000/* OPENDIR CANNOT ALREADY EXIST IF THIS IS TO WORK */
+01730000  LINK360 OPENDIR LIB(&LIB.) INCLUDE REUS &TRACE. +
+01740000          SYSLIN2('''&SYSUID..CNTRL.TEMP''')
+01750000 
+01780000/*  INCLUDE XPL@ABEN IN LINK OF STOWDMEM  */
+01790000 
+01800000  DELETE (CNTRL.TEMP)
+01810000  ALLOC DA(CNTRL.TEMP) F(CNTRL) SPACE(1) TRACKS NEW +
+01820000        USING(FB80)
+01830000  OPENFILE CNTRL       OUTPUT
+01840000  SET &CNTRL           = &STR+
+01850000  ( INCLUDE INCLDD(XPL@ABEN) )
+01860000  PUTFILE CNTRL
+01870000  CLOSFILE CNTRL
+01880000  FREE F(CNTRL)
+01890000 
+01900000  LINK360 STOWDMEM LIB(&LIB.) INCLUDE &TRACE. +
+01910000                   SYSLIN2('''&SYSUID..CNTRL.TEMP''')
+01930000 
+01949705  FREE ATTR(FB80 U7294 FBA121)

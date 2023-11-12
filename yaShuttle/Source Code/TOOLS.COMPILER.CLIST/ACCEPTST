@@ -1,0 +1,426 @@
+00074600/********************************************************************/
+00074700/*------------------------------------------------------------------*/
+00074800/*                                                                  */
+00074900/*   NAME :     ACCEPTST                                            */
+00075000/*                                                                  */
+00075100/*------------------------------------------------------------------*/
+00076000/*                                                                  */
+00080000/*   FUNCTION : A CLIST TO RUN THE ACCEPTANCE TESTS BY FIRST        */
+00090000/*              CREATING A MEMBER LIST FILE (IF OPTION LIST=NULL)   */
+00100000/*              AND THEN RUNNING FUNCTEST ON IT FOR 2 VERSIONS OF   */
+00110000/*              THE COMPILER.                                       */
+00120000/*                                                                  */
+00130000/*------------------------------------------------------------------*/
+00140000/*                                                                  */
+00150000/*   SYNTAX :                                                       */
+00160000/*     ACCEPTST ID(&SYSUID.) DSN(TEST) LIB(&ID..&DSN.) LIST()       */
+00170000/*              TEST(COMPILE) SYSTEM(PASS)                          */
+00180000/*              NEWCMPLR(&ID..REL99V0.COMPILER)                     */
+00190000/*              OLDCMPLR(NCAMCM.&SYSTEM..CURRENT.COMPILER)          */
+00200000/*              NEWRUNLIB(NCAMCM.&SYSTEM..CURRENT.RUNLIB)           */
+00210000/*              OLDRUNLIB(NCAMCM.&SYSTEM..CURRENT.RUNLIB)           */
+00220000/*              NEWERROR(NCAMCM.&SYSTEM..CURRENT.ERRORLIB)          */
+00230000/*              OLDERROR(NCAMCM.&SYSTEM..CURRENT.ERRORLIB)          */
+00250000/*              CT(WMZMTCBCPCUMVM) FIRSTRUN REFRESH NOCOMPFC OPT()  */
+00260000/*              CMPFCMEM(&LIB..COMPFC.MLIST) TRACE HO               */
+00270000/*                                                                  */
+00280000/*     ALIAS    - NONE.                                             */
+00290000/*     REQUIRED - NONE.                                             */
+00410000/*                                                                  */
+00420000/*------------------------------------------------------------------*/
+00430000/*                                                                  */
+00440000/*   INVOKES :  COMPDEL                                             */
+00460000/*              COMPALLO                                            */
+00470000/*              PDSALL                                              */
+00480000/*              FUNCTEST                                            */
+00490000/*              COMPFC                                              */
+00500000/*                                                                  */
+00510000/*------------------------------------------------------------------*/
+00520000/*                                                                  */
+00530000/*   PARAMETERS:                                                    */
+00540000/*                                                                  */
+00550000/*     ID       DEFAULT: &SYSUID                                    */
+00560000/*              HIGH LEVEL QUALIFIER                                */
+00570000/*                                                                  */
+00580000/*     DSN      DEFAULT: TEST                                       */
+00590000/*              DATA SET FOR THE TEST PROGRAMS                      */
+00600000/*                                                                  */
+00610000/*     SRCDSN   DEFAULT: &ID..&DSN..HAL                             */
+00620000/*              DATA SET WHICH CONTAINS THE SOURCE PROGRAMS         */
+00630000/*                                                                  */
+00640000/*     LIB      DEFAULT: &ID..&DSN                                  */
+00650000/*              DATASET NAME QUALIFIER                              */
+00660000/*                                                                  */
+00670000/*     LIST     DEFAULT: NULL                                       */
+00680000/*              DATA SET WHICH CONTAINS A MEMBER LIST OF WHICH      */
+00690000/*              MEMBERS IN THE DATA SET YOU WANT RUN {THIS IS       */
+00700000/*              SPECIFIED IF THE ACCEPTST DOES NOT COMPLETE AND     */
+00710000/*              YOU WANT TO START WHERE YOU LEFT OFF, HOWEVER       */
+00720000/*              THE .MEMLIST FILE MUST BE EDITED TO ONLY CONTAIN    */
+00730000/*              THOSE MEMBERS YOU WANT RUN}.                         */
+00740000/*                                                                  */
+00750000/*     TEST     DEFAULT: COMPILE                                    */
+00760000/*              INDICATE WHICH TYPE OF TESTS TO RUN:                */
+00770000/*               COMPILE: COMPILE AND COMPARE .OBJ/.LST FILES       */
+00780000/*               EXECUTE: COMPILE AND COMPARE .OBJ/.LST/.OUT FILES  */
+00790000/*                                                                  */
+00800000/*     SYSTEM   DEFAULT: PASS                                       */
+00810000/*              PASS OR BFS, FOR VERSION SEPARATION PURPOSES        */
+00820000/*                                                                  */
+00830000/*     NEWCMPLR DEFAULT: &ID..REL99V0.COMPILER                      */
+00840000/*              RELEASE OF THE COMPILER YOU WANT TO TEST            */
+00850000/*                                                                  */
+00860000/*     OLDCMPLR DEFAULT: NCAMCM.&SYSTEM..CURRENT.COMPILER           */
+00870000/*              RELEASE OF THE COMPILER YOU USE AS A BASELINE       */
+00880000/*                                                                  */
+00890000/*     NEWRUNLB DEFAULT: NCAMCM.&SYSTEM..CURRENT.RUNLIB             */
+00900000/*              RELEASE OF THE RTL LIBRARY YOU WANT TO TEST         */
+00910000/*                                                                  */
+00920000/*     OLDRUNLB DEFUALT: NCAMCM.&SYSTEM..CURRENT.RUNLIB             */
+00930000/*              RELEASE OF THE RTL LIBRARY YOU USE AS A BASELINE    */
+00940000/*                                                                  */
+00950000/*     NEWERROR DEFAULT: NCAMCM.&SYSTEM..CURRENT.ERRORLIB           */
+00960000/*              RELEASE OF THE ERROR LIBRARY YOU WANT TO TEST       */
+00970000/*                                                                  */
+00980000/*     OLDERROR DEFAULT: NCAMCM.&SYSTEM..CURRENT.ERRORLIB           */
+00990000/*              RELEASE OF THE ERROR LIBRARY USED AS A BASELINE     */
+01000000/*                                                                  */
+01001000/*     NEWTERROR DEFAULT: NULL                                      */
+01002000/*              TEMPORARY ERRORLIB FOR NEW COMPILER                 */
+01003000/*                                                                  */
+01004000/*     OLDTERROR DEFAULT: NULL                                      */
+01005000/*              TEMPORARY ERRORLIB FOR OLD COMPILER                 */
+01006000/*                                                                  */
+01130000/*     CT       DEFAULT: WMZMTCBCPCUMVM                             */
+01140000/*              CARD TYPE                                           */
+01150000/*                                                                  */
+01150100/*     HO       OPTIONAL                                            */
+01150200/*              HIGHOPT COMPILER OPTION                             */
+01150300/*                                                                  */
+01150400/*     OPT      DEFAULT: NULL                                       */
+01150500/*              OTHER USER REQUESTED COMPILER OPTION                */
+01150600/*                                                                  */
+01160000/*     FIRSTRUN OPTIONAL                                            */
+01170000/*              IF SPECIFIED ALL THE DATASETS WILL BE ALLOCATED     */
+01180000/*                                                                  */
+01190000/*     REFRESH  OPTIONAL                                            */
+01200000/*              IF SPECIFIED DELETE AND THEN REALLOCATE DATASETS    */
+01210000/*                                                                  */
+01220000/*     NOCOMPFC OPTIONAL                                            */
+01230000/*              IF SPECIFIED DO NOT PERFORM COMPFC ON THE OBJECT    */
+01240000/*              FILES WHICH DID NOT COMPARE.                        */
+01250000/*                                                                  */
+01260000/*     CMPFCMEM DEFAULT: &LIB..COMPFC.MLIST                         */
+01270000/*              DSN WHICH CONTAINS THE MEMBERS TO RUN COMPFC UPON   */
+01280000/*                                                                  */
+01330000/*     TRACE    OPTIONAL                                            */
+01340000/*              TRACE THE CLISTS EXECUTION                          */
+01350000/*                                                                  */
+01360000/*------------------------------------------------------------------*/
+01370000/*                                                                  */
+01380000/*   INPUT DATA SET NAMES:                                          */
+01390000/*                                                                  */
+01400000/*     <ID>.<DSN>.HAL                                               */
+01410000/*          DATA SET WHICH CONTAINS THE SOURCE PROGRAMS             */
+01420000/*                                                                  */
+01430000/*     <ID>.REL99V0.COMPILER                                        */
+01440000/*          RELEASE OF THE COMPILER TO TEST                         */
+01450000/*                                                                  */
+01460000/*     NCAMCM.<SYSTEM>.CURRENT.COMPILER                             */
+01470000/*          RELEASE OF THE COMPILER TO USE AS A BASELINE            */
+01480000/*                                                                  */
+01490000/*     NCAMCM.<SYSTEM>.CURRENT.RUNLIB                               */
+01500000/*          RELEASE OF THE RTL LIBRARY TO USE AS A BASELINE         */
+01510000/*                                                                  */
+01520000/*     NCAMCM.<SYSTEM>.CURRENT.ERRORLIB                             */
+01530000/*          RELEASE OF THE ERROR LIBRARY TO USE AS A BASELINE       */
+01540000/*                                                                  */
+01550000/*     <LIB>.INC                                                    */
+01560000/*          INCLUDE FILE DATASET                                    */
+01570000/*                                                                  */
+01580000/*     <LIB>.COMPFC.MLIST                                           */
+01590000/*          DSN WHICH CONTAINS THE MEMBERS TO RUN COMPFC UPON       */
+01600000/*                                                                  */
+01610000/*------------------------------------------------------------------*/
+01620000/*                                                                  */
+01630000/*   OUTPUT DATA SET NAMES:                                         */
+01640000/*                                                                  */
+01650000/*     <LIB>.SDF                                                    */
+01660000/*          SIMULATION DATA FILE DATASET                            */
+01670000/*                                                                  */
+01680000/*     <LIB>.COMPFC.MLIST                                           */
+01690000/*          DSN WHICH CONTAINS THE MEMBERS TO RUN COMPFC UPON       */
+01700000/*                                                                  */
+01710000/*------------------------------------------------------------------*/
+01720000/*                                                                  */
+01730000/*   TEMPORARY DATA SET NAMES:                                      */
+01740000/*                                                                  */
+01750000/*     NONE                                                         */
+01760000/*                                                                  */
+01770000/*------------------------------------------------------------------*/
+01780000/*                                                                  */
+01790000/*   COMMENTS:                                                      */
+01800000/*                                                                  */
+01810000/*     IF YOU ARE RUNNING THE BFS SYSTEM, YOU MUST OVERRIDE THE CT  */
+01820000/*     PARM WITH "WMZMTCBM".                                        */
+01830000/*                                                                  */
+01840000/*------------------------------------------------------------------*/
+01850000/*                                                                  */
+01860000/*   REVISION HISTORY :                                             */
+01870000/*                                                                  */
+01880000/*    DATE      PCR#     NAME   DESCRIPTION                         */
+01890000/*    --------  -----    ----   -------------------------------     */
+01900000/*    10/26/89  062      SDM    BASELINE ORIGINAL CLIST             */
+01910000/*                                                                  */
+01920000/*    06/22/90  099      TEV    UPDATED HEADER                      */
+01930000/*                                                                  */
+01940000/*    01/07/91  141      TEV    ADDED NOLINK OPTION                 */
+01950000/*                                                                  */
+01951000/*    04/24/91  169      LJK    UPDATED FOR 23V2                    */
+01952000/*                                                                  */
+01953001/*    01/21/92  211      RSJ    DELATED THE NOGO PARAMETER.         */
+01954001/*                              CHANGE THE CL TO A C FOR THE COMPILE*/
+01954002/*    04/05/95  418      LJK    ADD OPT AND HIGHOPT OPTION; DELETE  */
+01954003/*                              NOLINK OPTION                       */
+01954004/*    07/18/95  435      LJK    RENAMED COMPFC.MEMLIST TO COMPFC.   */
+01954005/*                              MLIST                               */
+01960000/*------------------------------------------------------------------*/
+01970000/********************************************************************/
+01980000 
+01990000PROC 0   ID       (&SYSUID.)                             +
+02000000         DSN      (TEST)                                 +
+02010000         SRCDSN   (&ID..&DSN..HAL)                       +
+02020000         LIB      (&ID..&DSN.)                           +
+02030000         LIST     ()                                     +
+02040000         TEST     (COMPILE)                              +
+02050000         SYSTEM   (PASS)                                 +
+02060000         NEWCMPLR (&ID..REL99V0.COMPILER)                +
+02070000         OLDCMPLR (NCAMCM.&SYSTEM..CURRENT.COMPILER)     +
+02080000         NEWRUNLB (NCAMCM.&SYSTEM..CURRENT.RUNLIB)       +
+02090000         OLDRUNLB (NCAMCM.&SYSTEM..CURRENT.RUNLIB)       +
+02100000         NEWERROR (NCAMCM.&SYSTEM..CURRENT.ERRORLIB)     +
+02110000         OLDERROR (NCAMCM.&SYSTEM..CURRENT.ERRORLIB)     +
+02120000         NEWTERROR ()                                    +
+02130000         OLDTERROR ()                                    +
+02160000         CT       (WMZMTCBCPCUMVM)                       +
+02161000         LITS     (5000)                                 +
+02161100         OPT      ()                                     +
+02161200         HO                                              +
+02170000         FIRSTRUN                                        +
+02180000         REFRESH                                         +
+02190000         NOCOMPFC                                        +
+02200000         CMPFCMEM(&LIB..COMPFC.MLIST)                    +
+02220000         TRACE
+02230000 
+02240000CONTROL END(DONE)
+02250000GLOBAL RETCODE
+02260000IF &TRACE NE THEN CONTROL CONLIST LIST
+02270000IF &TEST EQ COMPILE OR &TEST EQ EXECUTE OR         +
+02280000   &TEST EQ C OR &TEST EQ E THEN GOTO OKAY
+02290000   ELSE  DO
+02300000     WRITE ********************************
+02310000     WRITE * INVALID TEST PARAMETER &TEST *
+02320000     WRITE ********************************
+02330000     EXIT
+02340000   DONE
+02350000OKAY:CONTROL NOMSG
+02360000/********************************************************/
+02370000/*                                                      */
+02380000/*  ALLOCATE THE NECESSARY FILES FOR KEEPING THE .LST,  */
+02390000/*  THE .OBJ, AND THE .OUT FILES FOR COMPARISON.        */
+02400000/*                                                      */
+02410000/********************************************************/
+02420000 
+02430000IF &REFRESH NE THEN COMPDEL &LIB.
+02440000IF &FIRSTRUN EQ FIRSTRUN  OR &REFRESH EQ REFRESH  THEN +
+02450000  COMPALLO &LIB. TEST(&TEST.)
+02480000 
+02490000/********************************************************/
+02500000/*                                                      */
+02510000/*  RUN PDSALL TO CREATE THE MEMBER LIST FILE           */
+02520000/*                                                      */
+02530000/********************************************************/
+02540000IF &LIST EQ THEN  DO
+02550000   PDSALL &SRCDSN. LIB(&LIB.) MAKELIST
+02560000   SET &LIST =  &LIB..MEMLIST
+02570000DONE
+02580000         /***************************************/
+02590000         /*                                     */
+02600000         /*    ON ATTN, DO THE FOLLOWING:       */
+02610000         /*                                     */
+02620000         /***************************************/
+02630000 
+02640000ATTN     DO
+02650000         ERROR    OFF
+02660000         CLOSFILE MEMBERS
+02670000         FREE     F(MEMBERS)
+02680000         EXIT
+02690000DONE
+02700000 
+02710000CONTROL  NOMSG
+02720000         FREE     F(MEMBERS)
+02730000CONTROL  MSG NOFLUSH
+02740000 
+02750000         /***************************************/
+02760000         /*                                     */
+02770000         /* SET UP TO READ THE FILE &LIST.      */
+02780000         /*                                     */
+02790000         /***************************************/
+02800000ALLOC    F(MEMBERS)  DA('&LIST.') SHR
+02810000OPENFILE MEMBERS  INPUT
+02820000 
+02830000         /***************************************/
+02840000         /*                                     */
+02850000         /* ON ERROR, DO THE FOLLOWING:         */
+02860000         /*                                     */
+02870000         /***************************************/
+02871000ERROR DO
+02872000ERROR1: CLOSFILE MEMBERS
+02873000   FREE F(MEMBERS)
+02874000   IF &NEWRUNBT. ^= 0 THEN DO
+02875000   WRITE ***
+02876000   WRITE ***   ALL COMPOOLS AND PROCEDURES COMPLETED ***
+02877000   WRITE ***
+02878000   DONE
+02879000   ERROR OFF
+02879100   GOTO EXECIT
+02879200DONE
+02879300 
+02879400/*
+02879500/* FIRST PROCESS  ANY COMPOOL OR PROCEDURE IN THE DATA SET
+02879600/*
+02879700 
+02879800IF &NEWTERROR. NE THEN SET &NEWTERROR = NEWTERROR(&NEWTERROR.)
+02879900        ELSE SET  &NEWTERROR =
+02880000IF &OLDTERROR. NE THEN SET &OLDTERROR = OLDTERROR(&OLDTERROR.)
+02880100        ELSE SET  &OLDTERROR =
+02880200IF &LENGTH(&STR(&OPT.)) ^= 0 THEN SET &OPT = OPT(&STR(&OPT.))
+02880300        ELSE SET  &OPT =
+02880310 
+02880400SET &PACK = 0
+02880500SET &NEWRUNBT = 0
+02880600DO  WHILE  &SYSUID NE
+02880700    GETFILE MEMBERS
+02880800      IF (&SUBSTR(1:2,&MEMBERS) > PR) THEN GOTO ERROR1
+02881000      IF ((&SUBSTR(1:3,&MEMBERS) = CMP) OR      +
+02881100         (&SUBSTR(1:2,&MEMBERS) = CP ) OR       +
+02881200         (&SUBSTR(1:2,&MEMBERS) = PR)) THEN DO
+02881300     SET  &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+02881400 
+02881500     FUNCTEST &SRCDSN.                                       +
+02881600              &MEMBERS.                                      +
+02881700              ID      (&ID.)                                 +
+02881800              LIB     (&LIB.)                                +
+02881900              SYSTEM  (&SYSTEM.)                             +
+02882100              TEST    (C)                                    +
+02882200              OLDCMPLR(&OLDCMPLR.)                           +
+02882300              NEWCMPLR(&NEWCMPLR.)                           +
+02882400              OLDRUNLB(&OLDRUNLB.)                           +
+02882500              NEWRUNLB(&NEWRUNLB.)                           +
+02882600              OLDERROR(&OLDERROR.)                           +
+02882700              NEWERROR(&NEWERROR.)                           +
+02882800              &OLDTERROR.                                    +
+02882900              &NEWTERROR.                                    +
+02883000              PACK    (&PACK.)                               +
+02883100              CT      (&CT.)                                 +
+02883200              LITS    (&LITS.)                               +
+02883300              &OPT.                                          +
+02883310              &HO.                                           +
+02883500              &TRACE
+02883600 
+02885200        SET &NEWRUNBT = &NEWRUNBT. + 1
+02885400    DONE
+02885500DONE
+02885600 
+02885700/*------------------------------------------------------------------*/
+02885800EXECIT:CONTROL MSG
+02885900/*
+02886000/* NOW ALL THE HAL PROGRAMS
+02886100/*
+02886200ALLOC    F(MEMBERS)  DA('&LIST.')  SHR
+02886300OPENFILE MEMBERS INPUT
+02886400 
+02886500ERROR DO
+02886600   CLOSFILE MEMBERS
+02886700   FREE   F(MEMBERS)
+02886800   WRITE ***
+02886900   WRITE ***  ALL &LIB. PROGRAMS COMPLETED  ***
+02887000   WRITE ***
+02887100   ERROR OFF
+02887200   GOTO FINI
+02887300DONE
+02887400 
+02887500DO  WHILE  &SYSUID NE
+02887600    GETFILE MEMBERS
+02887700    SET &PACK = &PACK +1
+02887800    IF &PACK. = 8 THEN SET &PACK = 0
+02887900    IF &SUBSTR(1:6,&MEMBERS) ^= ##INFO THEN +
+02888000      IF &SUBSTR(1:3,&MEMBERS) ^= CMP THEN +
+02888100      IF &SUBSTR(1:2,&MEMBERS) ^= CP THEN +
+02888200        IF &SUBSTR(1:3,&MEMBERS) ^= PRC THEN DO
+02888300     SET  &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+02888400 
+02888600     FUNCTEST &SRCDSN.                                       +
+02888700              &MEMBERS.                                      +
+02888800              ID      (&ID.)                                 +
+02888900              LIB     (&LIB.)                                +
+02889000              SYSTEM  (&SYSTEM.)                             +
+02889100              TEST    (&TEST.)                               +
+02889200              OLDCMPLR(&OLDCMPLR.)                           +
+02889300              NEWCMPLR(&NEWCMPLR.)                           +
+02889400              OLDRUNLB(&OLDRUNLB.)                           +
+02889500              NEWRUNLB(&NEWRUNLB.)                           +
+02889600              OLDERROR(&OLDERROR.)                           +
+02889700              NEWERROR(&NEWERROR.)                           +
+02889800              &OLDTERROR.                                    +
+02889900              &NEWTERROR.                                    +
+02890000              PACK    (&PACK.)                               +
+02890100              CT      (&CT.)                                 +
+02890300              &HO.                                           +
+02890310              &OPT.                                          +
+02890400              &TRACE
+02892300 
+02892400          SET &NEWRUNBT  = &NEWRUNBT.  +  1
+02893000        DONE
+02900000DONE
+03270000FINI: CONTROL MSG
+03280000IF &NOCOMPFC. NE THEN EXIT
+03281000IF &SYSDSN('&CMPFCMEM.') NE OK THEN EXIT
+03290000 
+03300000         /***************************************/
+03310000         /*                                     */
+03320000         /* SET UP TO READ THE FILE &LIST.      */
+03330000         /*                                     */
+03340000         /***************************************/
+03350000ALLOC    F(MEMBERS)  DA('&CMPFCMEM.') SHR
+03360000OPENFILE MEMBERS  INPUT
+03370000 
+03380000         /***************************************/
+03390000         /*                                     */
+03400000         /* ON ERROR, DO THE FOLLOWING:         */
+03410000         /*                                     */
+03420000         /***************************************/
+03430000ERROR DO
+03440000   CLOSFILE MEMBERS
+03450000   FREE     F(MEMBERS)
+03460000   ERROR OFF
+03470000   GOTO FINISH
+03480000DONE
+03490000         /***************************************/
+03500000         /*                                     */
+03510000         /*   RUN COMPFC ON EACH MEMBER         */
+03520000         /*                                     */
+03530000         /***************************************/
+03540000DO   WHILE    &SYSUID NE
+03550000     GETFILE  MEMBERS
+03560000     SET  &MEMBERS = &SUBSTR(1:8,&MEMBERS)
+03570000     COMPFC &MEMBERS.           +
+03571000            LIB(&LIB.)          +
+03572000            NEWREL(&NEWCMPLR.)  +
+03580000            OLDREL(&OLDCMPLR.)  +
+03581000            &TRACE.
+03590100DONE
+03600000FINISH:CONTROL MSG
+03610000WRITE ******************************************
+03620000WRITE *** FINISHED WITH THE REGRESSION TESTS ***
+03630000WRITE ******************************************

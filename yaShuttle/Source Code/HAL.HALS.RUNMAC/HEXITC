@@ -1,0 +1,9 @@
+         MACRO                                                          00000100
+&L       HEXITC &M                                                      00000200
+         AIF   (T'&M EQ 'N').OK                                         00000300
+         MNOTE *,'USE HEXIT FOR UNCONDITIONAL RETURN'                   00000400
+&L       B     4(,12)         RETURN UNCONDITIONALLY                    00000500
+         MEXIT                                                          00000600
+.OK      ANOP                                                           00000700
+&L       BC    &M,4(,12)      RETURN CONDITIONALLY                      00000800
+         MEND                                                           00000900

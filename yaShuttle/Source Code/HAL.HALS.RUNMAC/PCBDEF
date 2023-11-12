@@ -1,0 +1,55 @@
+         MACRO                                                          00000100
+         PCBDEF                                                         00000200
+PCBDEF   DSECT                                                          00000300
+PCBLINK  DS    A PTR TO NEXT PCB ON PRIORITY OR FREE QUEUE              00000400
+PCBPOP   DS    A POINTER TO FATHER PROCESS                              00000500
+PCBBROS  DS    A PTR TO BROTHERS                                        00000600
+PCBSONS  DS    A PTR TO SONS                                            00000700
+PCBENTRY DS    A ADR OF TASK/PROGRAM ENTRY POINT                        00000800
+PCBCYCLE DS    E # SECONDS IN CYCLE OF CYCLIC PROCESS                   00000900
+PCBSTACK DS    A STACK ADDRESS - IF ZERO, PROCESS UNINITIATED           00001000
+PCBOPTNS DS    H SCHEDULE OPTIONS FLAGS                                 00001100
+         ORG   PCBOPTNS                                                 00001200
+PCBOPTB  DS    X LEFT HAND BYTE OF PCBOPTNS                             00001300
+UNTILT   EQU   B'00000001' UNTIL <TIME EXPRESSION>                      00001400
+WHILEV   EQU   B'00000010' WHILE <EVENT EXPRESSION>                     00001500
+UNTILE   EQU   B'00000011' UNTIL <EVENT EXPRESSION>                     00001600
+PCBOPTA  DS    X RIGHT HAND BYTE OF PCBOPTNS                            00001700
+TASK     EQU   B'00000001' PROCESS IS A TASK                            00001800
+*UNUSED  EQU   B'00000010' (WAS PROC EVENT DCL)                         00001900
+AT       EQU   B'00000100' AT <TIME> SPECIFIED                          00002000
+IN       EQU   B'00001000' IN <TIME>                                    00002100
+ON       EQU   B'00001100' ON <EVENT EXPRESSION>                        00002200
+SPRIO    EQU   B'00010000' PRIORITY                                     00002300
+DEPEND   EQU   B'00100000' DEPENDENT                                    00002400
+REPEAT   EQU   B'01000000' REPEAT  (WITHOUT TIME)                       00002500
+EVERY    EQU   B'10000000' REPEAT EVERY <TIME>                          00002600
+AFTER    EQU   B'11000000' REPEAT AFTER <TIME>                          00002700
+PCBPRIO  DS    X PRIORITY OF PROCESS                                    00002800
+PCBWAIT  DS    X WAIT STATE                                             00002900
+WTIME    EQU   1 WAIT (ARITH EXP);                                      00003000
+WUNTIL   EQU   2 WAIT UNTIL (ARITH EXP);                                00003100
+WFOR     EQU   3 WAIT FOR (EVENT EXP);                                  00003200
+WSCHIN   EQU   4 SCHEDULE IN (ARITH EXP)                                00003300
+WSCHAT   EQU   5 SCHEDULE AT (ARITH EXP)                                00003400
+WSCHON   EQU   6 SCHEDULE ON (EVENT EXP)                                00003500
+WDEP     EQU   7 WAIT FOR DEPENDENTS                                    00003600
+WRETCLS  EQU   8              WAIT FOR DEPENDENTS AT RETURN/CLOSE       00003700
+WEXCL    EQU   9 WAIT FOR EXCLUSIVE PROCEDURE                           00003800
+WEVERY   EQU   10             INTERCYCLE REPEAT EVERY WAIT              00003900
+WAFTER   EQU   11             INTERCYCLE REPEAT AFTER WAIT              00004000
+WUPDAT   EQU   12 WAIT FOR UPDATE BLK LOCK(S)                           00004100
+*                                                                       00004200
+PCBCANCL DS    X CANCEL STATE FLAG                                      00004300
+INITIATD EQU   1 INITIATED (AFFECTS CANCEL ACTION)                      00004400
+CCANC    EQU   2 CANCELLED BY A CANCEL STATEMENT                        00004500
+CEVENT   EQU   4 CANCELLED BY UNTIL/WHILE EVENT EXP                     00004600
+CTIME    EQU   8 CANCELLED BY UNTIL TIME CONDTION                       00004700
+*                                                                       00004800
+PCBERROR DS    0XL3           AREA TO BE ZEROED EACH CYCLE              00004810
+PCBLIMCT DS    X              SYSTEM=L ERROR COUNT                      00004820
+PCBERR#S DS    H              GROUP AND ERROR NUMBERS                   00004830
+*                                                                       00004840
+PCBEND   DS    0F             ALIGN PCBS ON FULLWORD BOUNDARIES         00004900
+PCBLEN   EQU   *-PCBDEF LENGTH OF PCB                                   00005000
+         MEND                                                           00005100

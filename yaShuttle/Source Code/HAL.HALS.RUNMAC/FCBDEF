@@ -1,0 +1,42 @@
+         MACRO                                                          00000100
+         FCBDEF                                                         00000200
+*********************************************************************** 00000300
+*                                                                       00000400
+*        FILE CONTROL BLOCK FOR HAL SEQUENTIAL ACCESS CHANNEL           00000500
+*                                                                       00000600
+*********************************************************************** 00000700
+         DCBD  DSORG=QS,DEVD=DA                                         00000800
+DCBLEN   EQU   *-IHADCB                                                 00000900
+*        RECORD FORMATS (DCBRECFM)                                      00001000
+F        EQU   X'80'           FIXED RECORDS                            00001100
+V        EQU   X'40'           VARIABLE LENGTH RECORDS                  00001200
+U        EQU   X'C0'           UNDEFINED LENGTH RECORDS                 00001300
+B        EQU   X'10'           BLOCKED RECORDS                          00001400
+A        EQU   X'04'           ASA CNTL CHARS                           00001500
+M        EQU   X'02'          MACHINE CNTL CHARS                        00001600
+*        DCB OPTION (DCBOPTCD)                                          00001700
+C        EQU   X'20'          CHAINED SCHEDULING                        00001800
+*                                                                       00001900
+BUFFADR  DS    A              ADR OF FIRST BUFFER CHARACTER             00002000
+BUFFLEN  DS    F              LENGTH OF BUFFER                          00002100
+BUFFINDX DS    F              CURRENT INDEX INTO BUFFER (COLUMN#-1)     00002200
+LINE#    DS    H              LINE NUMBER                               00002300
+PAGE#    DS    H              PAGE NUMBER                               00002400
+MODE     DS    X              CURRENT MODE OF I/O                       00002500
+READ     EQU   0              READ                                      00002600
+READALL  EQU   1              READALL (CHARACTERS ONLY)                 00002700
+WRITE    EQU   2              WRITE (UNPAGED)                           00002800
+PRINT    EQU   3              WRITE (PAGED)                             00002900
+CONTROL  DS    X              CONTROL FLAGS                             00003000
+CHAR     EQU   1              LOOKING FOR CHARACTER STRING              00003100
+ATECOMMA EQU   2              SCANNER PASSED OVER COMMA SEPARATOR       00003200
+AUTOSKIP EQU   4              DO AUTOMATIC SKIP(1)                      00003300
+AUTOCOL  EQU   8              DO AUTOMATIC COLUMN(1)                    00003400
+IGNORE   EQU   16             IGNORE I/O: SEMICOLON OR BAD CHANNEL      00003500
+BADCHAR  EQU   32             ILLEGAL CHARACTER IN DATA ITEM            00003600
+AUTOTAB  EQU   64             AUTOMATIC TAB(5)                          00003700
+EOD      EQU   128            END OF FILE                               00003800
+CHANNEL# DS    C              EBCDIC CHANNEL NUMBER                     00003900
+         DS    0F                                                       00004000
+FCBLEN   EQU   *-IHADCB                                                 00004100
+         MEND                                                           00004200

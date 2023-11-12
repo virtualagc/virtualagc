@@ -1,0 +1,1220 @@
+        /********************************************************************/
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   NAME:     PASSCLG                                              */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   FUNCTION: A CLIST TO COMPILE, LINK AND EXECUTE HAL SOURCE     .*/
+        /*                                                                  */
+        /*               EXAMPLES:                                          */
+        /*                PASSCLG CLG TEST COMPVER(REL21VA) RUNLVER(REL21VA)*/
+        /*                PASSCLG CLG TEST COMPVER(REL20V11) UTRACE         */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   SYNTAX:                                                        */
+        /*                                                                  */
+        /*     PASSCLG 'ACTION' 'NAME' PROG(&NAME) ID(&SYSUID)              */
+        /*             LIB(&ID..TEST) FIRST FIRSTD NEWRUN DELETES TRACE     */
+        /*             DEBUG DBGCOMP(NCAMCM.PASS.DEBUG.COMPILER)            */
+        /*             DEBUGOPT(2) DUMP SEQ SCREEN FSW LNKIN() NOPLINK      */
+        /*             INCLUDE(&LIB..INC) INCLUDE2() HALSDF(&LIB..SDF)      */
+        /*             HALSDF2() COMPVER(CURRENT) HALLOAD2()                */
+        /*             ERRORLIB(NCAMCM.PASS.&COMPVER..ERRORLIB)             */
+        /*             INV(NCAMCM.TESTLIB.&OI..INVENTRY)                    */
+        /*             COMPILER(NCAMCM.PASS.&COMPVER..COMPILER) TERRORLIB() */
+        /*             MONITOR(NCAMCM.PASS.&COMPVER..MONITOR.LOAD(MONITOR)) */
+        /*             SYSIN(&LIB..HAL(&NAME.)) SYSPRINT(&LIB..LST(&NAME.)) */
+        /*             OBJECT(&LIB..OBJ(&NAME.)) OI(OI281100) SYTSZ(4096)   */
+        /*             RFSZ(5500) MACSZ(4500) TPLT LITS(2500) TABLST HO     */
+        /*             SRN SDL PG(91000) OPT() CT(WMZMTCBCPCUMVM) CT2() (L) */
+        /*             REMOTE(2) RUNLVER(&COMPVER.) DDATA(3) COMPOOL(1)     */
+        /*             RUNLIB(NCAMCM.PASS.&RUNLVER..RUNLIB) REGOPT(R)       */
+        /*             ZCONLIB(NCAMCM.PASS.&RUNLVER..ZCONOBJ)               */
+        /*             SIMLIB(NCAMCM.TOOLS.PASS.SIMLIB)                     */
+        /*             LOPT() NCAL DDOUT(OUT) EXECSTEP(500000) UTRACE       */
+        /*             LSIZE(300K) ACCESS() TITLE()                         */
+        /*                                                                  */
+        /*     ALIAS    - NONE.                                             */
+        /*     REQUIRED - 'ACTION' 'NAME'                                   */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   INVOKES:  NCAMCM.PASS.<COMPVER>.MONITOR.LOAD(MONITOR)          */
+        /*             NCAMCM.PASS.<COMPVER>.MONITOR.LOAD(DRIVER)           */
+        /*             NCAMCM.XPL.TOOLS.MONITOR(XPLSM)                      */
+        /*             NCAMCM.TOOLS.XPLOBJ(CONTROL)                         */
+        /*             SRSSOI29.GO.LNK101(LNK101)                           */
+        /*             NCAMCM.APES.REL3V2.PLILOAD(HALUCP)                   */
+        /*             NCAMCM.TOOLS.XPLOBJ(OPT)                             */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   PARAMETERS:                                                    */
+        /*                                                                  */
+        /*     ACTION   REQUIRED                                            */
+        /*              C(COMPILE), L(LINK), G(GO) OR COMBINATION           */
+        /*                                                                  */
+        /*     NAME     REQUIRED                                            */
+        /*              NAME OF MEMBER IN LIBRARY                           */
+        /*                                                                  */
+        /*     ID       DEFAULT: &SYSUID.                                   */
+        /*              HIGH LEVEL QUALIFIER                                */
+        /*                                                                  */
+        /*     LIB      DEFAULT: &ID..TEST                                  */
+        /*              OTHER DSN LEVELS                                    */
+        /*                                                                  */
+        /*     FIRST    OPTIONAL                                            */
+        /*              INITIALIZE DATASETS THE FIRST TIME                  */
+        /*                                                                  */
+        /*     FIRSTD   OPTIONAL                                            */
+        /*              DELETE ALL DATASETS CREATED FROM FIRST PARM AND     */
+        /*              THEN INITIALIZE THESE SAME DATASETS                 */
+        /*                                                                  */
+        /*     NEWRUN   OPTIONAL                                            */
+        /*              REALLOCATE REPORT LISTINGS                          */
+        /*                                                                  */
+        /*     DELETES  OPTIONAL                                            */
+        /*              DELETE .LOAD,MAPS,SIM,UCP,ETC.                      */
+        /*                                                                  */
+        /*     TRACE    OPTIONAL                                            */
+        /*              EXECUTION OF THE CLIST WILL BE DISPLAYED            */
+        /*              AT THE TERMINAL                                     */
+        /*                                                                  */
+        /*     DEBUG    OPTIONAL                                            */
+        /*              SPECIFIES THE DEBUG COMPILER                        */
+        /*                                                                  */
+        /*     DBGCOMP  DEFAULT: NCAMCM.PASS.DEGUG.COMPILER                 */
+        /*              THE LOCATION OF THE DEBUG COMPILER                  */
+        /*                                                                  */
+        /*     DEBUGOPT DEFAULT: 2                                          */
+        /*              THE DEBUGGING OPTION. EXAMPLE: IF YOU OVERRIDE WITH */
+        /*              2|5|10|15|, THE COMPILER WILL DEBUG THE 5TH, 10TH   */
+        /*              AND THE 15TH LINE OF THE SOURCE CODE.               */
+        /*                                                                  */
+        /*     DUMP     OPTIONAL                                            */
+        /*              UPON ABEND STORE DUMP INTO &NAME..DUMP              */
+        /*                                                                  */
+        /*     SEQ      OPTIONAL                                            */
+        /*              SEND LISTING, OUTPUT AND UCP TO A SEQUENTIAL FILE   */
+        /*                                                                  */
+        /*     SCREEN   OPTIONAL                                            */
+        /*              IF SPECIFIED SEND OUTPUT TO SCREEN                  */
+        /*              INSTEAD OF TO &LIB..&DDOUT(&NAME.)                  */
+        /*                                                                  */
+        /*     LNKIN    DEFAULT: NULL                                       */
+        /*              PDS OF THE LINKER DIRECTIVES (CON FILE)             */
+        /*                                                                  */
+        /*     NOPLINK  OPTIONAL                                            */
+        /*              IF SPECIFIED, PASSCLG DOES NOT CALL PRELINKER       */
+        /*                                                                  */
+        /* NEXT ARE PARAMETERS USED IN/FOR THE COMPILE OF SOURCE            */
+        /*                                                                  */
+        /*     INCLUDE  DEFAULT: &LIB..INC                                  */
+        /*              USERS INCLUDE FILES                                 */
+        /*                                                                  */
+        /*     INCLUDE2 DEFAULT: NULL                                       */
+        /*              ADDITIONAL INCLUDE FILES                            */
+        /*                                                                  */
+        /*     HALLOAD2 DEFAULT: NULL                                       */
+        /*              ADDITIONAL LOAD FILE                                */
+        /*                                                                  */
+        /*     HALSDF   DEFAULT: &LIB..SDF                                  */
+        /*              USERS SDFS                                          */
+        /*                                                                  */
+        /*     HALSDF2  DEFAULT: NULL                                       */
+        /*              ADDITIONAL SDF                                      */
+        /*                                                                  */
+        /*     COMPVER  DEFAULT: CURRENT                                    */
+        /*              COMPILER VERSION                                    */
+        /*                                                                  */
+        /*     ERRORLIB DEFAULT: NCAMCM.PASS.&COMPVER..ERRORLIB             */
+        /*              BASELINE ERROR LIBRARY                              */
+        /*                                                                  */
+        /*     COMPILER DEFAULT: NCAMCM.PASS.&COMPVER..COMPILER             */
+        /*              COMPILER                                            */
+        /*                                                                  */
+        /*     TERRORLIB DEFAULT: NULL                                      */
+        /*              USERS TEMPORARY ERROR LIBRARY                       */
+        /*                                                                  */
+        /*     MONITOR  DEFAULT: NCAMCM.PASS.&COMPVER..MONITOR.LOAD(MONITOR)*/
+        /*              MONITOR TO RUN THE COMPILER ON S MACHINE            */
+        /*                                                                  */
+        /*     SYSIN    DEFAULT: &LIB..HAL(&NAME)                           */
+        /*              HAL SOURCE FILE                                     */
+        /*                                                                  */
+        /*     SYSPRINT DEFAULT: &LIB..LST(&NAME)                           */
+        /*              HAL PRINTOUT LISTING                                */
+        /*                                                                  */
+        /*     OBJECT   DEFAULT: &LIB..OBJ(&NAME)                           */
+        /*              COMPILER PRODUCED OBJECT CODE                       */
+        /*                                                                  */
+        /*     OI       DEFAULT: OI281100                                   */
+        /*              PASS VERSION OF FLIGHT SOFTWARE.                    */
+        /*                                                                  */
+        /*     FSW      OPTIONAL                                            */
+        /*              FSW MODULE USES INVENTORY FILE TO DEFINE THE OPTIONS*/
+        /*                                                                  */
+        /*     INV      DEFAULT: NCAMCM.TESTLIB.&OI..INVENTRY               */
+        /*              FILE CONTAINING OPTION FOR FSW COMPILATION          */
+        /*                                                                  */
+        /* THIS IS THE START OF OPTIONS PASSED TO THE COMPILER              */
+        /*                                                                  */
+        /*     SYTSZ    DEFAULT: 4096                                       */
+        /*              SYMBOL TABLE SIZE                                   */
+        /*                                                                  */
+        /*     RFSZ     DEFAULT: 5500                                       */
+        /*              CROSS REFERENCE SIZE                                */
+        /*                                                                  */
+        /*     MACSZ    DEFAULT: 4500                                       */
+        /*              MAXIMUM NUMBER OF LITERALS                          */
+        /*                                                                  */
+        /*     TPLT     OPTIONAL                                            */
+        /*              TEMPLATE GENERATION                                 */
+        /*                                                                  */
+        /*     LITS     DEFAULT: 2500                                       */
+        /*              LITERAL STRING SIZE                                 */
+        /*                                                                  */
+        /*     TABLST   OPTIONAL                                            */
+        /*              TABLE LIST FOR PHASE IV OF SDFS                     */
+        /*                                                                  */
+        /*     TITLE    DEFAULT: PROGRAM NAME                               */
+        /*              TITLE FOR THE LISTING                               */
+        /*                                                                  */
+        /*     HO       OPTIONAL                                            */
+        /*              HIGHOPT COMPILER OPTION                             */
+        /*                                                                  */
+        /*     SRN      OPTIONAL                                            */
+        /*              SOURCE INCLUDES LINE NUMBERS                        */
+        /*                                                                  */
+        /*     PG       DEFAULT: 91000                                      */
+        /*              PAGE LIMIT MAXIMUM                                  */
+        /*              PASS PG(NULL) TO OVERRIDE THE CLIST DEFAULT VALUE & */
+        /*              USE THE COMPILER DEFAULT VALUE                      */
+        /*                                                                  */
+        /*     OPT      DEFAULT: NULL                                       */
+        /*              OTHER USER REQUESTED OPTION                         */
+        /*                                                                  */
+        /*     CT       DEFAULT: WMZMTCBCPCUMVM                             */
+        /*              CARD TYPE                                           */
+        /*                                                                  */
+        /*     CT2      DEFAULT: NULL                                       */
+        /*              CARD TYPE 2 - WILL OVERRIDE MATCHES IN CARDTYPE (CT)*/
+        /*              ALSO WILL ALLOW NEW CARDTYPES TO BE DEFINED.        */
+        /*              ANY NEW CARD TYPES WILL BE APPENDED AT THE END OF   */
+        /*              THE EXISTING CARD TYPES.  IF ANY PARTICULAR CARD    */
+        /*              TYPE IS ENTERED TWICE (I.E. PCPD), THE FIRST ENTRY  */
+        /*              WILL BE RETAINED AND THE SECOND DISCARDED.          */
+        /*                                                                  */
+        /*     L        DEFAULT: L                                          */
+        /*              ASSEMBLY LISTING FROM PHASE II                      */
+        /*                                                                  */
+        /*     SDL      OPTIONAL                                            */
+        /*              SDL OPTION                                          */
+        /*                                                                  */
+        /*     REGOPT   DEFAULT: R                                          */
+        /*              REGOPT OPTION                                       */
+        /*                                                                  */
+        /*     NLIST    OPTIONAL                                            */
+        /*              DO NOT GENERATE ANY .LST FILE                       */
+        /*                                                                  */
+        /*     ACCESS   DEFAULT: NULL                                       */
+        /*              A FILE THAT CAN PLACE ADDITIONAL RESTRICTIONS       */
+        /*              ON THE HAL/S LANGUAGE.                              */
+        /*                                                                  */
+        /* NEXT ARE PARAMETERS USED IN/FOR THE LINK/EDIT STEP               */
+        /*                                                                  */
+        /*     REMOTE   DEFAULT: 2                                          */
+        /*              DATA SECTOR FOR REMOTE VARIABLES AP101S ONLY        */
+        /*                                                                  */
+        /*     DDATA    DEFAULT: 3                                          */
+        /*              DATA SECTOR FOR #D DATA_REMOTE VARIABLES            */
+        /*              (MUST BE LESS THAN 9)                               */
+        /*                                                                  */
+        /*     COMPOOL  DEFAULT: 1                                          */
+        /*              DATA SECTOR FOR #P COMPOOL CSECTS INCLUDED LOCALLY. */
+        /*              MUST BE EITHER 0 OR 1 OTHERWISE INCORRECT EXECUTION-*/
+        /*              TIME ADDRESS RESULTION WILL OCCUR (WRONG SECTOR).   */
+        /*                                                                  */
+        /*     RUNLVER  DEFAULT: &COMPVER.                                  */
+        /*              RUNTIME LIBRARY VERSION FOR S MACHINE               */
+        /*                                                                  */
+        /*     RUNLIB   DEFAULT: NCAMCM.PASS.&RUNLVER..RUNLIB               */
+        /*              RUNTIME LIBRARY EXECUTABLES FOR S MACHINE           */
+        /*                                                                  */
+        /*     ZCONLIB  DEFAULT: NCAMCM.PASS.&RUNLVER..ZCONOBJ              */
+        /*              ZCON LIBRARY OBJECT                                 */
+        /*                                                                  */
+        /*     SIMLIB   DEFAULT: NCAMCM.TOOLS.PASS.SIMLIB                   */
+        /*              RTL MODULES USED ONLY IN I**2 TESTING               */
+        /*                                                                  */
+        /*     TRUNLIB  OPTIONAL                                            */
+        /*              USERS TEMPORARY RTL EXECUTABLES                     */
+        /*                                                                  */
+        /* THIS IS THE START OF OPTIONS PASSED TO LINKAGE EDITOR            */
+        /*                                                                  */
+        /*     LSIZE    DEFAULT: 300K                                       */
+        /*              REGION SIZE TO BE PASSED TO THE LINKER              */
+        /*                                                                  */
+        /*     LOPT     DEFAULT: NULL                                       */
+        /*              LINKER OPTIONS                                      */
+        /*                                                                  */
+        /*     NCAL     OPTIONAL                                            */
+        /*              EXTERNAL REFERENCES ARE NOT TO BE RESOLVED          */
+        /*              BY THE AUTOMATIC LIBRARY CALL MECHANISM DURING      */
+        /*              THE CURRENT PHASE                                   */
+        /*                                                                  */
+        /* NEXT ARE PARAMETERS USED IN/FOR THE EXECUTION STEP               */
+        /*                                                                  */
+        /*     DDOUT    DEFAULT: OUT                                        */
+        /*              HAL OUTPUT FILE FOR EXECUTION                       */
+        /*                                                                  */
+        /*     EXECSTEP DEFAULT: 500000                                     */
+        /*              MAX # OF INSTRUCTIONS TO EXECUTE                    */
+        /*                                                                  */
+        /*     UTRACE   OPTIONAL                                            */
+        /*              UCP EXECUTION TRACE                                 */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   INPUT DATA SET NAMES:                                          */
+        /*                                                                  */
+        /*     <LIB>.HAL(<NAME>)                                            */
+        /*         PDS OF HALS SOURCE CODE                                  */
+        /*                                                                  */
+        /*     <LIB>.INC                                                    */
+        /*         PDS OF USERS INCLUDE FILES                               */
+        /*                                                                  */
+        /*     <LIB>.SDF                                                    */
+        /*         PDS OF USERS SDFS                                        */
+        /*                                                                  */
+        /*     NCAMCM.PASS.<COMPVER>.COMPILER                               */
+        /*         PS COMPILER                                              */
+        /*                                                                  */
+        /*     NCAMCM.PASS.CURRENT.ERRORLIB                                 */
+        /*         PDS BASELINE ERROR LIBRARY                               */
+        /*                                                                  */
+        /*     NCAMCM.PASS.<RUNLVER>.RUNLIB                                 */
+        /*         PDS OF RUNTIME LIBRARY EXECUTABLES FOR S MACHINE         */
+        /*                                                                  */
+        /*     NCAMCM.PASS.<RUNLVER>.ZCONOBJ                                */
+        /*         PDS OF ZCON LIBRARY IN OBJECT FORMAT                     */
+        /*                                                                  */
+        /*     NCAMCM.TOOLS.PASS.SIMLIB                                     */
+        /*         PDS OF ADDITIONAL RTL MODULES FOR I**2 TESTING           */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   OUTPUT DATA SET NAMES:                                         */
+        /*                                                                  */
+        /*     <LIB>.COMPRPT                                                */
+        /*         PS OF COMPILATION REPORT                                 */
+        /*                                                                  */
+        /*     <LIB>.CON(<NAME>)                                            */
+        /*         PDS OF OUTPUT FROM THE PRELINKER                         */
+        /*                                                                  */
+        /*     <LIB>.EXECRPT                                                */
+        /*         PS OF EXECUTION REPORT                                   */
+        /*                                                                  */
+        /*     <LIB>.LINKRPT                                                */
+        /*         PS OF LINKAGE REPORT                                     */
+        /*                                                                  */
+        /*     <LIB>.LOAD(<NAME>)                                           */
+        /*         PDS LOAD MODULE                                          */
+        /*                                                                  */
+        /*     <LIB>.LST(<NAME>)                                            */
+        /*         PDS OF COMPILER LISTING                                  */
+        /*                                                                  */
+        /*     <LIB>.MAPS(<NAME>)                                           */
+        /*         PDS OF MAP FOR S MACHINE                                 */
+        /*                                                                  */
+        /*     <LIB>.OBJ(<NAME>)                                            */
+        /*         PDS OF OBJECT MODULE                                     */
+        /*                                                                  */
+        /*     <LIB>.OUT(<NAME>)                                            */
+        /*         PDS OF EXECUTION RESULTS                                 */
+        /*                                                                  */
+        /*     <LIB>.SIM(<NAME>)                                            */
+        /*         PDS OF SIMULATION LISTING FOR S MACHINE                  */
+        /*                                                                  */
+        /*     <LIB>.UCP(<NAME>)                                            */
+        /*         PDS OF UTRACE LISTING                                    */
+        /*                                                                  */
+        /*     <LIB>.OUT4                                                   */
+        /*         DEBUGGING FILE USED IF OUTPUT(4) IS USED IN TEST COMPILER*/
+        /*                                                                  */
+        /*     <LIB>.ZCON(<NAME>)                                           */
+        /*         PDS OF OUTPUT FROM THE PRELINKER                         */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   TEMPORARY DATA SET NAMES:                                      */
+        /*                                                                  */
+        /*     <LIB>.CREATE.TMP                                             */
+        /*         DA CREATED DURING EXECUTION                              */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*   REVISION HISTORY:                                              */
+        /*                                                                  */
+        /*     DATE      PCR#  NAME  DESCRIPTION                            */
+        /*     --------  ----  ----  -------------------------------------  */
+        /*     03/01/90  076   RPC   CREATED AND PUT INTO CM                */
+        /*                                                                  */
+        /*     03/29/90  081   RPC   NEW PARMS ADDED:  SEQ, L, FIRSTD       */
+        /*                                                                  */
+        /*     04/03/90  082   JAC   CHANGED TBLST TO TABLST (GLOBAL)       */
+        /*                                                                  */
+        /*     06/06/90  088   RPC   UPDATED FIRSTD PARM TO USE LIB PARM    */
+        /*                                                                  */
+        /*     06/22/90  098   TEV   UPDATED HEADER                         */
+        /*                                                                  */
+        /*     07/30/90  110   TEV   CHANGED DEBUG PARAMETER TO CALL UP     */
+        /*                           DEBUG COMPILER WHEN OPTION IS SUPPLIED */
+        /*                                                                  */
+        /*     01/07/91  141   TEV   ADDED NOLINK PARAMETER AND ALLOCATION  */
+        /*                           OF .OUT4 FILE IF FIRST PARAMETER IS    */
+        /*                           SPECIFIED                              */
+        /*                                                                  */
+        /*     02/11/91  086   RPC   ADDED TWO +S FOR CONTINUATION OF ELSES */
+        /*                                                                  */
+        /*     02/19/91  151   JCS   UPDATE FOR PCR110, ADD NLIST PARAMETER */
+        /*                                                                  */
+        /*     03/25/91  162   LJK   ADD SDL AND REGOPT OPTIONS             */
+        /*                                                                  */
+        /*     04/02/91  155   TKK   RENAME PDS THAT HOLDS MEMBER XPLSM     */
+        /*                                                                  */
+        /*     04/25/91  173   LWW   REPLACE HARD CODED "CURRENT" IN CALLS  */
+        /*                           TO MONITOR, MONITORB, AND THE          */
+        /*                           INITIALIZATION OF RUNLVER WITH &COMPVER*/
+        /*                                                                  */
+        /*                           ALSO CORRECT THE CLIST SUCH THAT THE   */
+        /*                           FIRSTD PARAMETER CAUSES THE DATA SETS  */
+        /*                           THAT ARE DELETED TO BE REINITIALIZED   */
+        /*                           AFTER THEIR DELETION.                  */
+        /*                                                                  */
+        /*     06/06/91  183   RSJ   CHANGED TO SUPPORT #D COMPILER.        */
+        /*                            -ADDED DDATA   PARAMETER              */
+        /*                            -ADDED SIMLIB  PARAMETER              */
+        /*                            -CHANGED CALL  FOR PRELINKER          */
+        /*                            -CHANGED SETUP FOR LINKERS            */
+        /*                            -CHANGED SETUP TO FOR HALUCP          */
+        /*                                                                  */
+        /*     07/11/91  192   TEV   CHANGED .OUT4 FILE ALLOCATION FROM A   */
+        /*                           SEQUENTIAL FILE TO A PDS.              */
+        /*                                                                  */
+        /*     09/13/91  186   LJK   RENAMED CM LOAD MODULES                */
+        /*                                                                  */
+        /*     11/11/91  215   TEV   TOOK OUT HARDCODED COMPILER VERSION    */
+        /*                           IN ALLOCATION OF ZCONLIB AND REPLACED  */
+        /*                           WITH &COMPVER.                         */
+        /*                                                                  */
+        /*     01/09/92  209   RSJ   - ADDED THE PC CARDTYPE                */
+        /*                           - ADDED A PARAMETER FOR LINKER REGION  */
+        /*                             SIZE                                 */
+        /*                           - AUTOMATICALLY DELETE THE CREATE.TMP  */
+        /*                           - TOOK OLD SDF'S AND INCLUDES OUT OF   */
+        /*                             THE CATENATION LIST                  */
+        /*                           - ADDED LOGIC SO THE NEW LINKER        */
+        /*                             CAN BE USED WITH REL24V0 OR HIGHER   */
+        /*                                                                  */
+        /*     01/13/92  241   RSJ   CHANGED THE HARDCODED OI NUMBER TO     */
+        /*                           AN ALIAS WHICH POINTS TO THE LATEST    */
+        /*                           OI RELEASE (OMLMDSPF)                  */
+        /*                                                                  */
+        /*     01/13/92  240   RSJ   ADDED THE FSW PARAMETER WHICH INVOKES  */
+        /*                           THE OPT PROGRAM TO FETCH THE PROPER    */
+        /*                           OPTIONS FOR THE INDIVIDUAL FSW MODULE  */
+        /*                                                                  */
+        /*                                                                  */
+        /*     06/23/92  269   JCS   CHANED OMLMDSPF TO ORXXDSPF FOR FSW    */
+        /*                           ALIAS. ALLOCATE OUTPUT4 TO DUMMY IF    */
+        /*                           FSW IS SPECIFIED. CHANGE               */
+        /*                           OI200900.INVENTRY TO OI212500.INVENTRY */
+        /*                                                                  */
+        /*     07/13/92  249   LJK   ADDED PARAMETER HALLOAD2 TO REFERENCE  */
+        /*                           ADDITIONAL LOAD FILE                   */
+        /*                                                                  */
+        /*     11/13/92  261   PMA   ADDED 'TESTLIB' QUALIFIER TO DSN       */
+        /*                           'NCAMCM.RTL.CPYFILES.INCL'             */
+        /*                                                                  */
+        /*     10/18/93  312   TEV   ADDED COMPOOL PARAMETER. ALSO FIXED    */
+        /*                           FSW OPTIONS PROCESSING BUG WHICH       */
+        /*                           APPENDED A BLANK LINE TO THE COMPILER  */
+        /*                           OPTIONS FIELD. CHANGED LINKER VERSIONS.*/
+        /*     12/10/93  320   JCS   DELETED LOGIC RELATED TO AP101B        */
+        /*                           CHANGED OI212500 TO OI230900 INVENTRY. */
+        /*                           ADDED UM CARD TYPE                     */
+        /*                           CHANGE TO NEW HALUCP IN NCAMCM.APES.   */
+        /*                           REL3V1.PLILOAD(HALCOMP)                */
+        /*                           CHANGED COMPOOL DEFAULT TO SECTOR 1    */
+        /*     05/13/94  349   JCS   CHANGE TO POINT TO SIMLIB IN TOOLS     */
+        /*                           SYSTEM INSTEAD OF COMPILER RELEASE     */
+        /*     05/14/94  351   JCS   CHANGE TO POINT TO SPF24070 LINKER     */
+        /*                           INSTEAD OF USING SRSRFSWD ALIAS        */
+        /*     05/22/94  344   LJK   INCREASE .LOAD FILE                    */
+        /*     10/21/94  377   BAF   ELIMINATE REFERENCES TO 24070          */
+        /*     10/26/94  357   BAF   ELIMINATE REFERENCE TO ORXXDSPF        */
+        /*                                                                  */
+        /*     11/09/94  387   LWW   STEP UP TO NEW APES/HALUCP VERSION     */
+        /*                           REL3V2.  STEP UP TO NEW VERSIONS OF    */
+        /*                           LINKERS.                               */
+        /*     12/30/94  409   JCS   ADD CARD TYPE VM                       */
+        /*     04/04/95  418   LJK   ADD HIGHOPT OPTION; CHANGED OI TO USE  */
+        /*                           OI2507; ABBREVIATE COMPILER OPTIONS    */
+        /*     06/09/95  346   LJK   ADD ALLOC F(ZCONLIB) STATEMENT TO THE  */
+        /*                           LINKER; USE SPF25070 VERSION OF LINKER */
+        /*     08/29/95  436   JCS   USE OLD PRELINKER, KEEP .INCL FILE,    */
+        /*                           SPECIFY &RUNLVER.ZCONLIB               */
+        /*     10/30/95  444   LJK   ADD ALLOC F(ZCONLIB) STATEMENT TO      */
+        /*                           REFERENCE ZCONLIB IN OBJECT FORMAT FOR */
+        /*                           COMPVER >= REL27V0; ADD ALLOCATION OF  */
+        /*                           &LIB.ZCON AND PASS TO THE PRELINKER.   */
+        /*     11/10/95  303   LJK   USE SEQUENTIAL UCP FILE WHEN SEQ OPTION*/
+        /*                           IS SPECIFIED.                          */
+        /*     06/24/96  482   LJK   RENAME ZCONLIB TO ZCONOBJ              */
+        /*     12/15/96  505   JCS   STEP UP TO SPF27020                    */
+        /*     06/25/98  552   LJK   DELETE THE REFERENCE TO FSW TLIB AND   */
+        /*                           STEP UP TO SPF28040                    */
+        /*     11/04/98  614   LJK   INCREASE DIRECTORY BLOCK SIZE FOR .LOAD*/
+        /*     12/17/99  645   LWW   ADD NEW PARAMETER CT2                  */
+        /*                           CHANGE OI FROM OI280300 TO OI281100    */
+        /*     02/25/00  672   LWW   STEP UP TO SRSSOI29                    */
+        /*     05/17/01  706   DCP   ADD ACCESS FILE PARAMETER TO           */
+        /*                           PASSCLG & BFSCLG                       */
+        /*     03/18/02  732   TKN   ADD THE TITLE OPTION TO THE PASSCLG &  */
+        /*                           BFSCLG ARGUMENT LIST                   */
+        /*     05/21/04  783   DCP   MODIFY TO ALLOW THE COMPILER DEFAULT   */
+        /*                           PAGES VALUE.                           */
+        /*------------------------------------------------------------------*/
+        /********************************************************************/
+ 
+        PROC     2    ACTION                                       +
+                      NAME                                         +
+                      ID      (&SYSUID.)                           +
+                      LIB     (&ID..TEST)                          +
+                      FIRST                                        +
+                      FIRSTD                                       +
+                      NEWRUN                                       +
+                      DELETES                                      +
+                      TRACE                                        +
+                      DEBUG                                        +
+                      DBGCOMP(NCAMCM.PASS.DEBUG.COMPILER)          +
+                      DEBUGOPT(2)                                  +
+                      DUMP                                         +
+                      SEQ                                          +
+                      SCREEN                                       +
+                      FSW                                          +
+                      OI      (OI281100)                           +
+                      INV(NCAMCM.TESTLIB.&OI..INVENTRY)            +
+                      LNKIN()                                      +
+                      NOPLINK                                      +
+                      INCLUDE ('&LIB..INC')                        +
+                      INCLUDE2()                                   +
+                      HALLOAD2()                                   +
+                      HALSDF  ('&LIB..SDF')                        +
+                      HALSDF2 ()                                   +
+                      COMPVER (CURRENT)                            +
+                      ERRORLIB(NCAMCM.PASS.&COMPVER..ERRORLIB)     +
+                      COMPILER(NCAMCM.PASS.&COMPVER..COMPILER)     +
+                      TERRORLIB()                                  +
+                      ACCESS()                                     +
+                      MONITOR (NCAMCM.PASS.&COMPVER..MONITOR.LOAD(MONITOR)) +
+                      ZCONLIB (NCAMCM.PASS.&RUNLVER..ZCONOBJ)      +
+                      SYSIN   ('&LIB..HAL(&NAME)')                 +
+                      SYSPRINT('&LIB..LST(&NAME)')                 +
+                      OBJECT  ('&LIB..OBJ(&NAME)')                 +
+                      SYTSZ   (4096)                               +
+                      RFSZ    (5500)                               +
+                      MACSZ   (4500)                               +
+                      TPLT                                         +
+                      LITS    (2500)                               +
+                      HO                                           +
+                      TABLST                                       +
+                      TITLE   (&NAME.)                             +
+                      SRN                                          +
+                      PG      (91000)                              +
+                      OPT     ()                                   +
+                      CT      (WMZMTCBCPCUMVM)                     +
+                      CT2     ()                                   +
+                      L       (L)                                  +
+                      SDL                                          +
+                      REGOPT  (R)                                  +
+                      NLIST                                        +
+                      REMOTE  (2)                                  +
+                      DDATA   (3)                                  +
+                      COMPOOL (1)                                  +
+                      RUNLVER (&COMPVER.)                          +
+                      RUNLIB  (NCAMCM.PASS.&RUNLVER..RUNLIB)       +
+                      SIMLIB  (NCAMCM.TOOLS.PASS.SIMLIB)           +
+                      TRUNLIB ()                                   +
+                      LSIZE(300K)                                  +
+                      LOPT    ()                                   +
+                      NCAL                                         +
+                      DDOUT   (OUT)                                +
+                      EXECSTEP(500000)                             +
+                      UTRACE
+ 
+        /*==================================================================*/
+        /*                                                                  */
+        /* PROCEDURE TO COMPILE, LINK, AND RUN HALS/FC (101) PROGRAMS.      */
+        /*                                                                  */
+        /*     TERRORLIB AND TRUNLIB ARE CONCATENATED BEFORE ERRORLIB AND   */
+        /* RUNLIB(B) RESPECTIVELY. USE THESE TO INCORPORATE TEMPORARY       */
+        /* ERRORLIBS AND RUNLIBS INTO THE COMPILE AND LINK PROCEDURES.      */
+        /*                                                                  */
+        /*    PERFORMS A PRELINK STEP WHICH ENABLES A PROGRAM WITH INCLUDES */
+        /* TO LINK SUCCESSFULLY. THE PRELINK STEP CREATES ALIASES FOR THE   */
+        /* LOAD MODULE THAT WILL BE CREATED BY THE LINK STEP. THESE ALIASES */
+        /* ALLOW THE LINKAGE EDITOR TO RESOLVE REFERENCES TO THIS LOAD      */
+        /* MODULE BY LATEST PROGRAMS.                                       */
+        /*                                                                  */
+        /* BY PASSING 'NEWRUN' ALL REPORTS WILL BE DELETED AND REALLOCATED  */
+        /*                                                                  */
+        /* BY PASSING 'FIRST' ALL REQUIRED DATASETS ARE CREATED WHEN        */
+        /* USING THE CLIST FOR THE FIRST TIME.                              */
+        /*                                                                  */
+        /* BY PASSING 'FIRSTD' ALL DATASETS CREATED BY THE FIRST PARM ARE   */
+        /* DELETED AND REALLOCATED.                                         */
+        /*                                                                  */
+        /*==================================================================*/
+ 
+        IF &TRACE. NE THEN CONTROL LIST CONLIST
+        IF &UTRACE. NE THEN SET &UTRACE = UTRACE(UTRACE)
+        IF &TABLST. NE THEN SET &TABLST = &STR(TL,)
+        IF &TPLT.   NE THEN SET &TPLT   = &STR(TP,)
+        IF &SRN.    NE THEN SET &SRN    = &STR(SRN,)
+        IF &SDL.    NE THEN SET &SDL    = &STR(SDL,)
+        IF &HO.     NE THEN SET &HO     = &STR(HO,)
+        IF &TITLE. EQ  THEN SET &T =
+        ELSE SET &T = &STR(T=&TITLE.)
+        IF &PG. EQ NULL THEN SET &PG =
+        ELSE SET &PG = &STR(P=&PG.,)
+        IF &LENGTH(&STR(&OPT.)) NE 0 THEN SET &OPT = &STR(&OPT,)
+ 
+        CONTROL END(DONE)
+ 
+        IF &NEWRUN NE THEN DO
+        /* FIRST JUST FOR SAFETY FREE ALL DATA SETS
+          CONTROL NOMSG
+          FREE DA('&LIB..COMPRPT')
+          FREE DA('&LIB..LINKRPT')
+          FREE DA('&LIB..EXECRPT')
+ 
+          DELETE ('&LIB..COMPRPT')
+          DELETE ('&LIB..LINKRPT')
+          DELETE ('&LIB..EXECRPT')
+          CONTROL MSG
+        /* ALLOCATE NECESSARY REPORT DATA SETS
+          ALLOC DA('&LIB..COMPRPT')  SPACE(1,1) CYLINDERS DSORG(PS)    +
+                                     RECFM(F B) LRECL(80) BLKSIZE(6160)
+          ALLOC DA('&LIB..LINKRPT')  SPACE(1,1) CYLINDERS DSORG(PS)    +
+                                     RECFM(F B) LRECL(80) BLKSIZE(6160)
+          ALLOC DA('&LIB..EXECRPT')  SPACE(1,1) CYLINDERS DSORG(PS)    +
+                                     RECFM(F B) LRECL(80) BLKSIZE(6160)
+        DONE
+ 
+        IF &FIRSTD NE THEN DO
+           IF &SYSDSN('&LIB..HAL') EQ OK THEN +
+             RENAME '&LIB..HAL' TSET.HAL
+           IF &SYSDSN('&LIB..INC') EQ OK THEN +
+             RENAME '&LIB..INC' TSET.INC
+           CONTROL NOMSG
+           DELETE '&LIB..*'
+          IF &SYSDSN(TSET.HAL) EQ OK THEN +
+             RENAME TSET.HAL '&LIB..HAL'
+          IF &SYSDSN(TSET.INC) EQ OK THEN +
+             RENAME TSET.INC '&LIB..INC'
+           SET &FIRST = FIRST
+        DONE
+ 
+        IF &FIRST NE THEN DO
+         IF &SYSDSN('&LIB..CON') NE OK THEN DO
+          CONTROL MSG
+          ALLOC DA('&LIB..CON')      SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B) LRECL(80) BLKSIZE(400)
+          ALLOC DA('&LIB..OPT')      SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B) LRECL(80) BLKSIZE(400)
+          ALLOC DA('&LIB..LOAD')     SPACE(9,5) CYLINDERS DSORG(PO) DIR(65) +
+                                     RECFM(U) LRECL(6144) BLKSIZE(6144)
+          ALLOC DA('&LIB..LST')      SPACE(9,5) CYLINDERS DSORG(PO) DIR(65) +
+                                     RECFM(F B A) LRECL(133) BLKSIZE(2660)
+          ALLOC DA('&LIB..OBJ')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B) LRECL(80) BLKSIZE(400)
+          ALLOC DA('&LIB..ZCON')     SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B) LRECL(80) BLKSIZE(400)
+          ALLOC DA('&LIB..OUT')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B A) LRECL(133) BLKSIZE(6118)
+          ALLOC DA('&LIB..SDF')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(65) +
+                                     RECFM(F) LRECL(1680) BLKSIZE(1680)
+          ALLOC DA('&LIB..UCP')      SPACE(5,5) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B A) LRECL(133) BLKSIZE(6118)
+          ALLOC DA('&LIB..MAPS')     SPACE(3 3) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B A)  LRECL(121)  BLKSIZE(1210)
+          ALLOC DA('&LIB..SIM')      SPACE(3 3) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B A)  LRECL(133)  BLKSIZE(133)
+          ALLOC DA('&LIB..OUT4')     SPACE(1 1) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B A) LRECL(133) BLKSIZE(2660)
+         DONE
+         IF &SYSDSN('&LIB..INC') NE OK THEN +
+           ALLOC DA('&LIB..INC')     SPACE(1,1) CYLINDERS DSORG(PO) DIR(20) +
+                                     RECFM(F B) LRECL(80) BLKSIZE(6160)
+        DONE
+ 
+ 
+        CONTROL NOMSG
+        IF &ACTION. = CLG THEN +
+           GOTO COMPILE
+        ELSE +
+        IF &ACTION. = CL THEN +
+           GOTO COMPILE
+        ELSE +
+        IF &ACTION. = C THEN +
+           GOTO COMPILE
+        ELSE +
+        IF &ACTION. = LG THEN +
+           GOTO LINK
+        ELSE +
+        IF &ACTION. = L THEN +
+           GOTO LINK
+        ELSE +
+        IF &ACTION. = G THEN +
+           GOTO GO
+        ELSE DO
+           WRITE ERROR IN HALS COMMAND LINE
+           EXIT
+        DONE
+ 
+ 
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /* COMPILATION STEP                                                 */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+ 
+        COMPILE: CONTROL NOMSG
+        GLOBAL RETCODE
+        IF  &TRACE. NE THEN  CONTROL LIST CONLIST
+        IF &FSW. NE THEN DO
+                 /***************************************/
+                 /*                                     */
+                 /*   GET ALL OPTIONS USED FOR          */
+                 /*   THE FSW MODULE                    */
+                 /*                                     */
+                 /***************************************/
+          FREE F(OPTIONS PROGRAM SYSIN SYSPRINT OUTPUT3) ATTR(FBA133)
+          ATTR FBA133 RECFM(F B A) LRECL(133) BLKSIZE(3458)
+          DELETE ('&LIB..OPT(&NAME.)')
+          CONTROL MSG
+          ALLOC F(OUTPUT3)  DA('&LIB..OPT(&NAME.)') SHR
+          IF &SYSDSN.('&INV.(&NAME)') EQ OK THEN DO
+             ALLOC F(PROGRAM)  DA('NCAMCM.TOOLS.XPLOBJ(OPT)') SHR
+             ALLOC F(SYSPRINT) DA(*) RELEASE USING(FBA133) NEW              +
+                                     CATALOG   SP(40 40) TRACK
+             ALLOC F(SYSIN)    DA('&INV.(&NAME)') SHR
+        /*   WRITE FETCHING OPTIONS FROM FSW INVENTORY: '&INV(&NAME.)' */
+             CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)'
+             SET &SAVECC = &LASTCC
+             IF &SAVECC EQ 0 THEN WRITE OPTION FETCH SUCCESSFUL
+             ELSE WRITE FAILED OPTION FETCH: ERROR CODE = &SAVECC
+          DONE
+          ELSE DO
+             WRITE NO INVENTORY FILE FOUND: '&INV(&NAME.)'
+             WRITE CREATING OPTION FIELD
+             OPENFILE OUTPUT3 OUTPUT
+             SET OUTPUT3 +
+               EQ &STR(&L,SYM=&SYTSZ,XS=&RFSZ,MS=18000,LITS=5000,TBL,&TABLST)
+             PUTFILE OUTPUT3
+             SET OUTPUT3 +
+               EQ &STR(A,SRN,SR,CT=FCIMACBCRCOMQC,SDL,R,P=9990,&T.)
+             PUTFILE OUTPUT3
+             CLOSFILE OUTPUT3
+          DONE
+        DONE
+        ELSE DO
+           SET &CT2_COUNT = &LENGTH(&CT2)
+           IF &CT2_COUNT > 0 THEN DO
+               SET &CT_COUNT = &LENGTH(&CT)
+               SET &IX = &CT_COUNT / 2
+               SET &IX2 = &CT2_COUNT / 2
+               SET &START_IX2 = &CT2_COUNT - 1
+               SET &END_IX2 = &START_IX2
+               DO WHILE &IX2 > 0
+                   SET &START_IX = &CT_COUNT - 1
+                   SET &END_IX = &START_IX
+                   SET &MATCH_FOUND = 0
+                   SET &NEW_PAIR = &SUBSTR(&START_IX2:&END_IX2+1,&CT2)
+                   DO WHILE &IX > 0 AND &MATCH_FOUND = 0
+                       IF &SUBSTR(&START_IX2:&END_IX2,&CT2) EQ +
+                          &SUBSTR(&START_IX:&END_IX,&CT) THEN +
+                          SET &MATCH_FOUND = 1
+                       ELSE +
+                          DO
+                          SET &IX = &IX - 1
+                          SET &START_IX = &START_IX - 2
+                          SET &END_IX = &START_IX
+                          DONE
+                   DONE
+                   IF &MATCH_FOUND = 1 THEN +
+                       IF &START_IX = 1 THEN +
+                           DO
+                           SET &HALF2 = &SUBSTR(3:&CT_COUNT,&CT)
+                           SET &CT = &NEW_PAIR.&HALF2
+                           DONE
+                       ELSE +
+                           IF &START_IX = &CT_COUNT -1 THEN +
+                               DO
+                               SET &HALF1 = &SUBSTR(1:&START_IX-1,&CT)
+                               SET &CT = &HALF1.&NEW_PAIR
+                               DONE
+                           ELSE +
+                               DO
+                               SET &HALF1 = &SUBSTR(1:&START_IX-1,&CT)
+                               SET &HALF2 = +
+                                   &SUBSTR(&START_IX+2:&CT_COUNT,&CT)
+                               SET &CT = &HALF1.&NEW_PAIR.&HALF2
+                               DONE
+                   ELSE +
+                       DO
+                       SET &CT = &CT.&NEW_PAIR
+                       SET &CT_COUNT = &CT_COUNT + 2
+                       DONE
+                   SET &IX2 = &IX2 - 1
+                   SET &START_IX2 = &START_IX2 - 2
+                   SET &END_IX2 = &START_IX2
+                   SET &IX = &CT_COUNT / 2
+                   SET &START_IX = &CT_COUNT - 1
+                   SET &END_IX = &START_IX
+               DONE
+           DONE
+        DONE
+ 
+        CONTROL NOMSG
+        SET &LASTCC = 0
+        FREE F(PROGRAM FILE1 FILE2 FILE3 FILE4 OPTIONS            +
+               FILE5 FILE6 OUTPUT3 OUTPUT5 OUTPUT6 HALSDF INCLUDE +
+               OUTPUT8 ACCESS SYSPRINT SYSIN ERROR LISTING2       +
+               ERRLIST SYSUDUMP ABNLIGNR OUTPUT4)
+ 
+        DELETE ('&OBJECT.')
+        DELETE ('&SYSPRINT.')
+        CONTROL MSG
+ 
+        IF &DEBUG. NE THEN DO
+           SET &COMPILER EQ &DBGCOMP
+           SET &DEBUG EQ &STR(DEBUG=&DEBUGOPT,)
+        DONE
+ 
+        ALLOC F(PROGRAM)  DA('&COMPILER.')  SHR
+        IF &TERRORLIB. NE THEN                             +
+           ALLOC REUSE F(ERROR)  DA('&TERRORLIB.'  '&ERRORLIB.')  SHR
+        ELSE                                            +
+           ALLOC REUSE F(ERROR)  DA('&ERRORLIB.')  SHR
+ 
+        IF &HALSDF2. NE THEN SET &SDF2 = '&HALSDF2'
+                        ELSE SET &SDF2 =
+           ALLOC F(HALSDF)  DA('&HALSDF.'  &SDF2          +
+                               '&OI..SDF101'                 ) SHR
+ 
+        SET &NUM = &SUBSTR(3:4,&OI.)
+            IF &NUM GE 27 THEN SET &TLIB =
+                          ELSE SET &TLIB = '&OI..TLIB'
+        IF &INCLUDE2. NE  THEN SET &INC2 = '&INCLUDE2'
+                          ELSE SET &INC2 =
+           ALLOC F(INCLUDE) DA('&INCLUDE.'  &INC2         +
+                               '&OI..INCL80'  &TLIB       +
+                               'NCAMCM.TESTLIB.RTL.CPYFILES.INCL'  ) SHR
+ 
+        IF &FSW. NE   THEN                           +
+           ALLOC F(OUTPUT4) DUMMY
+        ELSE                                           +
+           ALLOC F(OUTPUT4) DA('&LIB..OUT4(&NAME.)') SHR
+ 
+        ALLOC F(FILE1)    SPACE(5,5)   BLOCK(7200)
+        ALLOC F(FILE2)    SPACE(5,5)   BLOCK(7200)
+        ALLOC F(FILE3)    SPACE(5,5)   BLOCK(7200)
+        ALLOC F(FILE4)    SPACE(5,5)   BLOCK(7200)
+        ALLOC F(FILE5)    SPACE(5,5)   BLOCK(7200)
+        ALLOC F(FILE6)    SPACE(5,5)   BLOCK(7200)
+ 
+        IF &DUMP. NE  THEN DO
+          CONTROL NOMSG
+          DELETE '&ID..&NAME..DUMP'
+          ALLOC DA('&ID..&NAME..DUMP') RECFM(F B A) LRECL(133) BLKSIZE(2660) +
+                SPACE(5,5) CYLINDERS
+          ALLOC F(SYSUDUMP) DA('&ID..&NAME..DUMP') SHR
+          ALLOC F(ABNLIGNR) DA(*) SHR
+          CONTROL MSG
+        DONE
+        IF &SEQ. NE THEN DO
+          CONTROL NOMSG
+          IF &SYSDSN('&ID..&NAME..LST') = OK THEN DO
+            DELETE ('&ID..&NAME..LST')
+          DONE
+          ALLOC DA('&ID..&NAME..LST') RECFM(F B A) LRECL(133) BLKSIZE(6517) +
+                SPACE(5,5) CYLINDERS
+          SET &SYSPRINT = &ID..&NAME..LST
+          CONTROL MSG
+        DONE
+        ALLOC F(OUTPUT3)  DA('&OBJECT.')  SHR
+        ALLOC F(OUTPUT5)  DA('&HALSDF.') OLD
+        ALLOC F(OUTPUT6)  DA('&INCLUDE.') OLD
+        ALLOC F(OUTPUT8)  SP(4 2) TRACK DIR(5)
+        IF &ACCESS. NE THEN ALLOC F(ACCESS) DA('&ACCESS') SHR
+           ELSE ALLOC F(ACCESS) SP(1 1) TRACK DIR(1)
+        ALLOC F(SYSIN)    DA('&SYSIN.') SHR
+        ALLOC F(LISTING2) DA(*) SHR
+        ALLOC F(ERRLIST)  DA('&LIB..COMPRPT') MOD
+        IF &NLIST. NE THEN +
+          ALLOC F(SYSPRINT) DUMMY
+        ELSE              +
+          ALLOC F(SYSPRINT) DA('&SYSPRINT.')  SHR
+        OPENFILE ERRLIST OUTPUT
+        WRITE &SYSIN ==> &COMPILER
+        WRITE        ==> &SYSPRINT
+        WRITENR COMPILATION OF &NAME.
+        CONTROL MSG
+ 
+        IF &FSW. EQ THEN +
+             CALL  '&MONITOR'                                            +
+           '&L,SYM=&SYTSZ,XS=&RFSZ,MS=&MACSZ,LITS=&LITS.,CT=&CT,A,SR,TBL,+
+           &TPLT.&SDL.&TABLST.&SRN.&HO.&OPT.&REGOPT.,&PG.&DEBUG.&T.'
+        ELSE DO
+           ALLOC F(OPTIONS) DA('&LIB..OPT(&NAME.)') SHR
+           OPENFILE OPTIONS INPUT
+           GETFILE OPTIONS
+           SET &I = &LENGTH(&OPTIONS)
+           DO WHILE &SUBSTR(&I.,&OPTIONS.) EQ
+             SET &I = &I - 1
+           DONE
+           SET &FIRSTOPT = &SUBSTR(1:&I,&OPTIONS)
+           GETFILE OPTIONS
+           SET &I = &LENGTH(&OPTIONS)
+           DO WHILE ((&SUBSTR(&I.,&OPTIONS.) EQ ) AND (&I > 1))
+              SET &I = &I - 1
+           DONE
+           SET &OPTIONS = &SUBSTR(1:&I,&OPTIONS)
+           CLOSFILE OPTIONS
+           IF &OPTIONS NE  THEN +
+              CALL '&MONITOR' +
+                   '&FIRSTOPT.&OPTIONS.,&OPT.'
+           ELSE +
+              CALL '&MONITOR' +
+                   '&FIRSTOPT.,&OPT.'
+        DONE
+ 
+        SET &MAXCC = &LASTCC
+        SET &SAVECC = &MAXCC
+        SET &RETCODE = &MAXCC
+ 
+        CONTROL NOMSG
+        FREE F(PROGRAM FILE1 FILE2 FILE3 FILE4 OPTIONS            +
+               FILE5 FILE6 OUTPUT3 OUTPUT5 OUTPUT6 HALSDF INCLUDE +
+               OUTPUT8 ACCESS SYSPRINT SYSIN ERROR SYSUDUMP ABNLIGNR OUTPUT4)
+        /* RESTORE MAXCC AFTER THE FREE STATEMENT
+        SET &MAXCC = &SAVECC
+        CONTROL MSG
+ 
+        IF &MAXCC = 0 THEN DO
+             WRITE SUCCESSFUL
+             SET ERRLIST = &STR(COMPILATION OF &NAME. - SUCCESSFUL)
+             PUTFILE ERRLIST
+             SET ERRLIST = &STR( )
+             PUTFILE ERRLIST
+             CLOSFILE ERRLIST
+             FREE F(ERRLIST)
+        DONE
+        ELSE DO
+             WRITE ERROR CODE = &MAXCC
+             SET ERRLIST = &STR(COMPILATION OF &NAME. - ERROR CODE = &MAXCC.)
+             PUTFILE ERRLIST
+             SET &SAVECC = &LASTCC
+             CONTROL NOMSG
+             ERROR DO
+               SET &SAVECC = &LASTCC
+             DONE
+             CONTROL MSG
+             SET ERRLIST = &STR( )
+             PUTFILE ERRLIST
+             IF &MAXCC = 8 THEN +
+                SET &RETCODE = 9
+             CLOSFILE ERRLIST
+             FREE F(ERRLIST)
+             EXIT
+        DONE
+ 
+        IF &ACTION. EQ C THEN EXIT
+ 
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /*  PRELINK STEP                                                    */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+ 
+        LINK: +
+        IF &NOPLINK EQ THEN DO
+           IF &LNKIN EQ THEN SET &LIBCON = LIBCON /* USE &LIB..CON(&NAME) */
+           ELSE DO
+              IF &SYSDSN('&LNKIN.(&NAME.)') EQ OK THEN +
+                   SET &LIBCON = &STR()      /* USE &LNKIN(&NAME)    */
+              ELSE SET &LIBCON = LIBCON      /* USE &LIB..CON(&NAME) */
+           DONE
+           IF &LIBCON NE THEN DO
+              CONTROL NOMSG
+              FREE F(SYSIN,OUTPUT3,PROGRAM,SYSPRINT,LISTING2,ERROR,LINKRPT,+
+                     OUTPUT6)
+              CONTROL MSG
+              ALLOC F(LINKRPT) DA('&LIB..LINKRPT') MOD
+              OPENFILE LINKRPT OUTPUT
+ 
+              ALLOC F(SYSIN)   DA('&OBJECT.') SHR
+              ALLOC F(OUTPUT3) DA('&LIB..CON(&NAME.)') SHR
+              ALLOC F(OUTPUT6) DA('&LIB..ZCON') SHR
+              ALLOC F(PROGRAM) DA('NCAMCM.TOOLS.XPLOBJ(CONTROL)') SHR
+              ALLOC F(SYSPRINT) DA(*)
+              ALLOC F(LISTING2) DA(*)
+              ALLOC F(ERROR)    DUMMY
+              WRITENR PRELINK   OF   &NAME.
+              CALL 'NCAMCM.XPL.TOOLS.MONITOR(XPLSM)' +
+                   'REMOTE=&REMOTE.,#D=&DDATA.,COMPOOL=&COMPOOL.'
+              SET &SAVECC=&LASTCC
+              SET &RETCODE=&SAVECC
+ 
+              CONTROL NOMSG
+              FREE F(SYSIN,OUTPUT3,PROGRAM,SYSPRINT,LISTING2,ERROR,OUTPUT6)
+              CONTROL MSG
+ 
+ 
+              IF &SAVECC = 0 THEN DO
+                 WRITE SUCCESSFUL
+                 SET LINKRPT = &STR(PRELINK OF &NAME. - SUCCESSFUL)
+                 PUTFILE LINKRPT
+                 CLOSFILE LINKRPT
+                 FREE F(LINKRPT)
+              DONE
+              ELSE DO
+                 WRITE ERROR CODE = &SAVECC
+                 SET LINKRPT = &STR(PRELINK OF &NAME. - ERROR CODE = &SAVECC)
+                 PUTFILE LINKRPT
+                 CLOSFILE LINKRPT
+                 FREE F(LINKRPT)
+                 SET &RETCODE = 9
+                 EXIT
+              DONE
+           DONE
+        DONE
+        ELSE SET &LIBCON = LIBCON      /* USE '&LIB..CON(&NAME)' */
+ 
+        CONTROL NOMSG
+        SET &NUB = &SUBSTR(4:5,&COMPVER.)
+        IF &DATATYPE(&NUB) = NUM THEN DO
+               IF &NUB GE 24 THEN SET &LINKER=&STR(SRSSOI29.GO.LNK101)
+               ELSE +
+               SET &LINKER=&STR(SPF23090.GO.LNK101)
+            DONE
+        ELSE SET &LINKER=&STR(SRSSOI29.GO.LNK101)
+ 
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /* LINK EDIT STEP AP101S                                            */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+ 
+        CONTROL NOMSG
+        FREE DD(SYSPRINT SYSLIB SYSLMOD SYSUT1 SYSLIN LINKRPT ZCONLIB)
+        DELETE ('&LIB..MAPS(&NAME.)')
+        DELETE ('&LIB..LOAD(&NAME.)')
+        CONTROL MSG
+ 
+        ALLOC F(LINKRPT) DA('&LIB..LINKRPT') MOD
+        OPENFILE LINKRPT OUTPUT
+ 
+        IF &DUMP  NE  THEN DO
+          CONTROL NOMSG
+          DELETE '&ID..&NAME..DUMP'
+          ALLOC DA('&ID..&NAME..DUMP') RECFM(F B A) LRECL(133) BLKSIZE(2660) +
+                SPACE(5,5) CYLINDERS
+          ALLOC F(SYSUDUMP) DA('&ID..&NAME..DUMP') SHR
+          ALLOC F(ABNLIGNR) DA(*) SHR
+          CONTROL MSG
+        DONE
+        IF &SEQ. NE THEN DO
+          CONTROL NOMSG
+          IF &SYSDSN('&ID..&NAME..MAPS') = OK THEN DO
+            DELETE ('&ID..&NAME..MAPS')
+          DONE
+          ALLOC F(SYSPRINT) +
+                DA('&ID..&NAME..MAPS') RECFM(F B A) LRECL(121) BLKSIZE(1210)
+          CONTROL MSG
+        DONE
+        ELSE +
+          ALLOC F(SYSPRINT) DA('&LIB..MAPS(&NAME.)') SHR +
+                          RECFM(F B A)  LRECL(121)  BLKSIZE(1210)
+ 
+        IF &SYSDSN('&SIMLIB.') EQ OK THEN SET &SIMLIB1 = '&SIMLIB'
+                                     ELSE SET &SIMLIB1 =
+        IF &TRUNLIB. NE THEN  SET &TEMPRLIB = '&TRUNLIB'
+                        ELSE  SET &TEMPRLIB =
+        IF &HALLOAD2 NE THEN  SET &LOAD2 = '&HALLOAD2'
+                        ELSE  SET &LOAD2 =
+        IF &DATATYPE(&NUB) = NUM THEN DO
+           IF &NUB GE 27 THEN DO
+              SET &ZCON2 = &LIB..ZCON
+              IF (&STR(&RUNLVER) = &STR(REL27V0) THEN +
+                 SET &ZCONLIB = &STR(NCAMCM.PASS.&RUNLVER..ZCONLIB)
+           DONE
+           ELSE DO
+              SET &ZCON2 = &LIB..LOAD
+              SET &ZCONLIB = &STR(NCAMCM.PASS.&RUNLVER..ZCONLIB)
+           DONE
+        DONE
+        ELSE SET &ZCON2 = &LIB..ZCON
+        ALLOC F(SYSLIB)  DA(&TEMPRLIB.  '&RUNLIB' &SIMLIB1.       +
+                            &LOAD2.  '&LIB..LOAD') SHR
+        ALLOC F(ZCONLIB) DA('&ZCONLIB' '&ZCON2') SHR
+        ALLOC F(SYSLMOD)  DA('&LIB..LOAD(&NAME.)') SHR +
+                          RECFM(U) LRECL(6144) BLKSIZE(6144) DIR(1)
+        ALLOC F(SYSUT1)   SP(2 2) TRACK
+        IF &LIBCON NE  THEN +
+           ALLOC F(SYSLIN)  DA('&LIB..CON(&NAME.)' '&OBJECT.') SHR
+        ELSE +
+           ALLOC F(SYSLIN)  DA('&LNKIN.(&NAME.)' '&OBJECT.' ) SHR
+ 
+        WRITENR LINK EDIT OF   &NAME.
+        CALL '&LINKER.(LNK101)' +
+        'LIST,MAP,NOXREF,NOTABLE,&NCAL,SIZE=(&LSIZE,100K),&LOPT.'
+        SET &SAVECC=&LASTCC
+        SET &RETCODE=&SAVECC
+ 
+        CONTROL NOMSG
+        FREE DD(SYSPRINT SYSLIB SYSLMOD SYSUT1 SYSLIN ZCONLIB)
+        CONTROL MSG
+ 
+        IF &SAVECC = 0 THEN DO
+            WRITE SUCCESSFUL
+            SET LINKRPT = &STR(LINK EDIT OF &NAME. - SUCCESSFUL)
+            PUTFILE LINKRPT
+        DONE
+        ELSE DO
+            WRITE ERROR CODE = &SAVECC
+            SET LINKRPT = &STR(LINK EDIT OF &NAME. - ERROR CODE = &SAVECC)
+            PUTFILE LINKRPT
+        DONE
+ 
+        CLOSFILE LINKRPT
+        FREE F(LINKRPT)
+ 
+        IF &SAVECC < 5 THEN DO
+             IF &ACTION. = CLG THEN +
+                GOTO GO
+             ELSE +
+             IF &ACTION. = LG THEN +
+                GOTO GO
+        DONE
+        /* STOP EXECUTION OF FICOM
+        IF &SAVECC = 8 THEN +
+           SET &RETCODE = 9
+ 
+        EXIT
+ 
+        /*------------------------------------------------------------------*/
+        /*                                                                  */
+        /* UCP EXECUTION STEP AP101S                                        */
+        /*                                                                  */
+        /*------------------------------------------------------------------*/
+ 
+        GO: CONTROL NOMSG
+        FREE DD(SYSPRINT CREATE PAGER UCPOUT LOADMOD UCPIN PLIDUMP REPORT)
+        FREE DD(CHANNEL6)
+        DELETE ('&LIB..CREATE.TMP')
+        DELETE ('&LIB..SIM(&NAME.)')
+        DELETE ('&LIB..UCP(&NAME.)')
+        IF &SEQ. NE THEN DO
+          IF &SYSDSN('&ID..&NAME..OUT') = OK THEN +
+            DELETE ('&ID..&NAME..OUT')
+          IF &SYSDSN('&ID..&NAME..UCP') = OK THEN +
+            DELETE ('&ID..&NAME..UCP')
+          ALLOC F(CHANNEL6) DA('&ID..&NAME..OUT') NEW +
+                RECFM(F B A) LRECL(133) BLKSIZE(6517) SPACE(20,5) TRACKS
+          ALLOC F(UCPOUT) DA('&ID..&NAME..UCP') NEW +
+                RECFM(F B A) LRECL(133) BLKSIZE(6517) SPACE(5,5) CYLINDERS
+        DONE
+        ELSE DO
+          ALLOC F(UCPOUT)   DA('&LIB..UCP(&NAME.)') SHR
+          IF &SCREEN. EQ THEN         +
+             ALLOC    F(CHANNEL6) DA('&LIB..&DDOUT.(&NAME.)') SHR
+          ELSE +
+             ALLOC F(CHANNEL6) DA(*)
+        DONE
+        CONTROL MSG
+        ALLOC F(SYSPRINT) DA('&LIB..SIM(&NAME.)') SHR +
+                          RECFM(F B A)  LRECL(133)  BLKSIZE(133)
+        ALLOC F(CREATE)   DA('&LIB..CREATE.TMP') SPACE(20,20) CYLINDER +
+                          RECFM(F) LRECL(8224) BLKSIZE(8224) KEYLEN(4) DSORG(DA)
+        ALLOC F(PAGER)    DA('&LIB..CREATE.TMP') SHR
+        ALLOC F(LOADMOD)  DA('&LIB..LOAD(&NAME.)') SHR
+        ALLOC F(UCPIN)    SP(5 2) TRACK BLOCK(80) RECFM(F B) LRECL(80)
+        ALLOC F(PLIDUMP)  SP(9 5) TRACK BLOCK(80) RECFM(F B) LRECL(80)
+        ALLOC F(REPORT)   DA('&LIB..EXECRPT') MOD
+ 
+        OPENFILE UCPIN  OUTPUT
+        OPENFILE REPORT OUTPUT
+ 
+        SET UCPIN EQ &STR(TITLE     HALUCP EXECUTION OF &NAME.)
+        PUTFILE  UCPIN
+        /*DDATA MUST BE BETWEEN 0 AND 9*/
+        SET UCPIN EQ &STR(#D &DDATA.;)
+        PUTFILE  UCPIN
+        IF &UTRACE. NE THEN +
+          SET UCPIN EQ &STR(TRACE ON;)
+        ELSE +
+          SET UCPIN EQ &STR(TRACE OFF;)
+        PUTFILE  UCPIN
+        SET UCPIN EQ &STR(LOAD MEMBER = &NAME.;)
+        PUTFILE  UCPIN
+        SET UCPIN EQ &STR(DUMP CSECT = ALL;)
+        PUTFILE  UCPIN
+        SET UCPIN EQ &STR(GO  DLCOUNT=&EXECSTEP. ; DUMP REGISTER;)
+        PUTFILE  UCPIN
+        SET UCPIN EQ &STR(DUMP CSECT = ALL;)
+        PUTFILE  UCPIN
+        SET UCPIN EQ &STR(END;)
+        PUTFILE  UCPIN
+        CLOSFILE UCPIN
+ 
+        WRITE EXECUTION OF   &NAME.
+        CALL 'NCAMCM.APES.REL3V2.PLILOAD(HALUCP)'
+        SET &SAVECC  = &LASTCC
+        SET &RETCODE = &SAVECC
+ 
+        CONTROL NOMSG
+        DELETE ('&LIB..CREATE.TMP')
+        FREE DD(SYSPRINT CREATE PAGER UCPOUT LOADMOD UCPIN PLIDUMP)
+        CONTROL MSG
+ 
+        IF  &SAVECC  = 0 THEN DO
+          WRITE EXECUTION COMPLETED
+          SET REPORT = &STR(&NAME. EXECUTED SUCCESSFULLY)
+          PUTFILE REPORT
+          IF &DELETES NE THEN DO
+            CONTROL NOMSG
+            DELETE ('&LIB..LOAD(&NAME.)')
+            DELETE ('&LIB..LOAD($0&NAME.)')
+            DELETE ('&LIB..LOAD(#E&NAME.)')
+            DELETE ('&LIB..LOAD(#R&NAME.)')
+            DELETE ('&LIB..MAPS(&NAME.)')
+            DELETE ('&LIB..SIM(&NAME.)')
+            DELETE ('&LIB..UCP(&NAME.)')
+            CONTROL MSG
+          DONE
+        DONE
+        ELSE DO
+          WRITE ERROR CODE = &SAVECC
+          SET REPORT = &STR(&NAME. EXECUTED WITH ERROR = &SAVECC)
+          PUTFILE REPORT
+        DONE
+        CLOSFILE REPORT
+        FREE F(REPORT)
+        FREE DD(CHANNEL6)
+        EXIT
