@@ -74,8 +74,14 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 <ul>
   <li><a moz-do-not-send="true" href="#Modern">"Modern" HAL/S Compiler, Interpreter, and Emulator</a><br>
   </li>
-  <li><a moz-do-not-send="true" href="#Original">Port of the Original HAL/S Compiler</a><br>
+  <li><a moz-do-not-send="true" href="#Original">Port of the Original HAL/S Compiler</a></li>
+<ul>
+  <li><a moz-do-not-send="true" href="#OriginalInstallation">Installation</a></li>
+  <li><a moz-do-not-send="true" href="#OriginalUsage">Using the Original HAL/S Compiler</a></li>
+  <li><a moz-do-not-send="true" href="#OriginalWhy">Why Two Implementations of the HAL/S Compiler?</a><br>
   </li>
+</ul>
+
 </ul>
 
     
@@ -2410,6 +2416,8 @@ So were the HAL/S
 
 
 
+
+
             M**2</tt></div>
       </div>
     </blockquote>
@@ -3539,7 +3547,7 @@ future.<br>
   </p>
 
 
-<h3>Installation</h3>
+<h3><a name="OriginalInstallation"></a>Installation</h3>
 
 
 <ul>
@@ -3566,7 +3574,7 @@ long time that I won't waste your time or mine by describing it.&nbsp;
 Google it if you want.)<br>
 </blockquote>
 <ul>
-  <li>Put the virtualagc/yaShuttle/ported/ folder into your <tt>PATH</tt>.<br>
+  <li>Put the folder virtualagc/yaShuttle/ported/PASS1.PROCS/ into your <tt>PATH</tt>.<br>
   </li>
   <li><i>In Windows only</i>, you may need to make sure the environment variable <tt>PYTHONUTF8=1</tt>
  is set.&nbsp; Otherwise, any characters "¬" or "¢" appearing in your 
@@ -3611,7 +3619,7 @@ not?&nbsp; Well, you won't find out by looking at the <tt>--help</tt> message. I
 </blockquote>
 
 
-<h3>Using the Original HAL/S Compiler</h3>
+<h3><a name="OriginalUsage"></a>Using the Original HAL/S Compiler</h3>
 
 
 <p>Everything you do with the HAL/S compiler is from a command line, so 
@@ -3844,21 +3852,34 @@ PROCESSING RATE: 26000.0 CARDS PER MINUTE.
 earlier.&nbsp; But there are a few details that the contemporary HAL/S documentation 
 glosses over somewhat, but which you 
 need to understand if you're going to work with anything other than a trivially-simple HAL/S program.&nbsp; <br>
-</p>First, each HAL/S source-code file comprises a single "compilation unit", which means that it contains <i>one</i> of the following things and <i>nothing else</i> except comments and compiler directives:<br>
-
-
+</p>First, each HAL/S source-code file comprises a single "compilation 
+unit".&nbsp; As far as I can see, there are basically two general 
+categories of compilation units.&nbsp; The first type, which is what are
+ HELLO.hal example was, has the following stuff in it:<br>
 <ul>
-  <li><tt>PROGRAM</tt> block (which is what our HELLO.hal file had).<br>
+<li>Perhaps some comments.</li>
+  <li>Perhaps some compiler directives (more on this presently)<br>
   </li>
-  <li><tt>PROCEDURE</tt> block.</li>
-  <li><tt>FUNCTION</tt> block.</li>
-  <li><tt>COMPOOL</tt> block.</li>
+  <li>A single <tt>PROGRAM</tt> block.<br>
+  </li>
 </ul>
-<p>The first three of these are probably self-explanatory, or nearly so,
- and certainly well-explained by the documentation.&nbsp; It's the <tt>COMPOOL</tt> block that's tricky, and that I want to comment on.&nbsp; A <tt>COMPOOL</tt> in HAL/S functions something like a <tt>COMMON</tt>
+The second type is some mixture of the following stuff:<br>
+
+
+<ul><li>Perhaps some comments.</li>
+<li>Perhaps some compiler directives.</li>
+<li><tt>PROCEDURE</tt> blocks.</li>
+
+  <li><tt>FUNCTION</tt> blocks.</li>
+  <li><tt>COMPOOL</tt> blocks.</li>
+</ul>
+<p>It seems to have been the custom usually to put a single <tt>PROCEDURE</tt> or a single <tt>FUNCTION</tt> or a single <tt>COMPOOL</tt> in any given compilation unit, but that won't always be the case.<br>
+</p>
+<p>The <tt>COMPOOL</tt> block needs a little explanation.&nbsp; A <tt>COMPOOL</tt> in HAL/S functions something like a <tt>COMMON</tt>
  area in Fortran or an imported module in Python (except that it 
 contains just variables).&nbsp; <tt>COMPOOL</tt>s have names, and there can be many <tt>COMPOOL</tt>s present at once.<br>
 </p>
+
 
 <p>If you played with the "modern" compiler, you'll recall that it was easy to <tt>DECLARE</tt>
  global variables willy-nilly but from the comments I just made above, 
@@ -3866,9 +3887,9 @@ you'll perceive that there's no such thing as a global variable in
 HAL/S.&nbsp; Rather, what you might like to think of as a global 
 variable is actually a variable residing in a <tt>COMPOOL</tt>.<br>
 </p>
-<p>Now, since each <tt>PROCEDURE</tt> and <tt>FUNCTION</tt> has to reside in a
+<p>Now, since each <tt>PROCEDURE</tt> and <tt>FUNCTION</tt> usually resides in a
  separate (and separately-compiled) compilation unit, and since every 
-variable that's shared between compilation units has to reside in <tt>COMPOOL</tt>s in yet other separate
+variable that's shared between compilation units usually reside in <tt>COMPOOL</tt>s in yet other separate
  compilation units, to compile even a very simple program without errors you have to understand how all of these separate 
 compilation units manage to interface to each other.<br>
 </p>
@@ -3890,7 +3911,7 @@ compilation unit that needs it.&nbsp; (And yes, it's possible to
 have a circular condition in which two different compilation units 
 depend on each other, which defeats this strategy.&nbsp; We'll just ignore that in this discussion.)<br>
 </p>
-<p>So let's take an example.&nbsp; Let's suppose we have a HAL/S <tt>PROGRAM</tt> called <tt>P</tt>, a HAL/S <tt>FUNCTION</tt> called <tt>F</tt> that <tt>P</tt> wants to use, and some "global" variables (<tt>A</tt><tt>0</tt>, <tt>A1</tt>, and <tt>A2</tt>) used by both.&nbsp; Since there's no such thing as a global variable, these latter will have to go into a <tt>COMPOOL</tt> that we'll call <tt>C</tt>.&nbsp; That's 3 separate compilation units, comprising 3 separate HAL/S source-code files.&nbsp; Perhaps <tt>A</tt><tt>0</tt>, <tt>A1</tt>, and <tt>A2</tt> are the coefficients of a quadratic polynomial and <tt>F()</tt> computes the values of the polynomials. Here's what the source code for these three compilation units might look like:<br>
+<p>So let's take an example.&nbsp; Let's suppose we have a HAL/S <tt>PROGRAM</tt> called <tt>P</tt>, a HAL/S <tt>FUNCTION</tt> called <tt>F</tt> that <tt>P</tt> wants to use, and some "global" variables (<tt>A</tt><tt>0</tt>, <tt>A1</tt>, and <tt>A2</tt>) used by both.&nbsp; Since there's no such thing as a global variable, these latter will have to go into a <tt>COMPOOL</tt> that we'll call <tt>C</tt>.&nbsp; Nominally that's 3 separate compilation units, comprising 3 separate HAL/S source-code files.&nbsp; Perhaps <tt>A</tt><tt>0</tt>, <tt>A1</tt>, and <tt>A2</tt> are the coefficients of a quadratic polynomial and <tt>F()</tt> computes the values of the polynomials. Here's what the source code for these three compilation units might look like:<br>
 </p>
 <table width="100%" cellspacing="2" cellpadding="2" border="1">
   <tbody>
@@ -3988,7 +4009,8 @@ Microsoft DOS (and Digital Research CP/M) had to endure.&nbsp; It didn't
 
 
 
-<h3>Some Background</h3>
+<h3><a name="OriginalWhy"></a>Why Two Implementations of the HAL/S Compiler?<br>
+</h3>
 
 
 <p>
