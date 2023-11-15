@@ -664,7 +664,7 @@ def STREAM():
                 if g.TPL_VERSION > 0:
                     # ll.I = BYTE(g.CURRENT_CARD, hd.D_INDEX + 1);
                     ll.I = int(g.CURRENT_CARD[hd.D_INDEX + 1:], 16)
-                    g.SYT_LOCKp[g.TPL_VERSION] = ll.I;
+                    g.SYT_LOCKp(g.TPL_VERSION, ll.I);
                     g.TPL_VERSION = 0;
             elif ll.C[0] == 'DOWNGRADE' or ll.C[0] == 'OWNGRADE':  # DOWNGRADE
                 g.TEMP_CLS = ''

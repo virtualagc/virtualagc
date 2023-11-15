@@ -86,7 +86,7 @@ def GET_LITERAL(PTR):
         FILE(b, g.LITFILE, g.CURLBLK);
     else:
         g.LITMAX = g.LITMAX + 1;
-    # Convert input bytearrat to LIT_PG[0].
+    # Convert input bytearray to LIT_PG[0].
     i = 0
     for lit in [lit_pg.LITERAL1, lit_pg.LITERAL2, lit_pg.LITERAL3]:
         for j in range(g.LIT_BUF_SIZE):

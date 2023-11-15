@@ -1089,7 +1089,31 @@ I'm informed that the ordering can be obtained from the file yaShuttle/Source Co
 
 The inference is that *perhaps* AUX = "Phase 1.7".  Perhaps.  Though it hardly matters now, I expect.  The comments in CLIST AUDIT say that it is to "BUILD A COMPILER DATASET FROM THE INDIVIDUAL OBJECT MODULES OF EACH COMPILER PHASE".  Though it doesn't affect us, I think, I am further informed that the CLIST XPLZAP in the same directory was used to (as its comments say) "INVOKE THE XPLZAP PROGRAM FOR AN XPL OBJECT MODULE; USED TO PUT A RELEASE VERSION STAMP INTO A COMPILER".
 
-Thus the next program which must be ported to Python 3 is FLO.PROCS (FLOWGEN).
+Thus the next program which must be ported to Python 3 is FLO.PROCS (FLOWGEN) ... *assuming* that it actually alters the HALMAT, as opposed to merely performing some kind of analysis.  That's TBD.
+
+In the meantime, I'm trying to understand has PASS1 passes data to the optimizing passes (or to PASS2 in their absence).  As far as data passed in files is concerned, I've found the following:
+
+  * FILE1 (which in the Python port is FILE1.bin) passes the HALMAT.  I've written a program called unHALMAT.py to parse this file, insofar as it is possible to do so in the absence of most of the documentation about HALMAT.  It actually works pretty well, though obviously is not complete, so it's what should be consulted for more detail.
+  * FILE2 (.bin) passes the "literal table".
+
+## Reverse engineering the literal-table file
+
+The file's (FILE2.bin) block size is 1560 (0x618) bytes.
+
+The area 0x000-0x203 seems to be a table of 32-bit records that describe the characteristics of the literals.  There is room for 0x204/4 = 130 entries, but entry 0 seems to be unused (or used for some other purpose), so there are actually only 129 usable entries.  The literals appear in the same order (and indexing) as the optional literal-table dump of the compiler's output listing.  The entries seem to be fields of bit-flags, as follows:
+
+  * Bit 0:  Indicates an arithmetical value (INTEGER or SCALAR, with no distinction between them).
+  * Bit 1:  Indicates a BIT value.
+  * Bit 2:  Indicates precision (0=SP, 1=DP) for arithmetical values.
+
+The area 0x204-0x407 is a table of the most-significant 32-bits of the literal values (or at least for the arithmetical ones).
+
+The area 0x408-0x60B is a table of the least-significant 32-bits of the literal values.
+
+In retrospect, I see that this info is consistent with the description in section 3.1 of IR-182-1, except that the description in IR-182-1 doesn't include some of the info above.  Specifically, each block of the file would correspond to an image of the `LIT_PG` array from HALINCL/COMMON. 
+
+Besides what was said above, the entries for `CHARACTER` constants are of the form (hexadecimal) XXYYYYYY, where XX is the length of the constant string minus 1, and YYYYYY is a pointer into the `LIT_CHAR` array that holds the actual string data.  `LIT_CHAR` was apparently *not* passed to later compilation passes via a file for unknown reasons &mdash; IR-182-1 simply says that "LIT_CHAR cannot be kept on an intermediate file" &mdash; and thus it must have been passed in memory.  We, however, must pass it in a file, which we'll call LIT_CHAR.bin.  It's a binary file rather than a text file because it is a byte array of EBCDIC data rather than ASCII.
+
 
 TBD
 

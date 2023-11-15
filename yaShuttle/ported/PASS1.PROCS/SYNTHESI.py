@@ -4748,7 +4748,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     g.SIMULATING = 1;
                 g.EXTERNAL_MODE = 0;
                 g.TPL_VERSION = g.BLOCK_SYTREF[g.NEST + 1];
-                g.SYT_LOCKp(TPL_VERSION, 0);
+                g.SYT_LOCKp(g.TPL_VERSION, 0);
             elif g.BLOCK_MODE[0] > 0:
                 if g.EXTERNALIZE == 4: 
                     g.EXTERNALIZE = 2;

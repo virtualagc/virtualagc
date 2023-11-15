@@ -104,8 +104,9 @@ def INCLUDE_OK():
         g.INCLUDE_STMT = g.STMT_NUM();
     l.INCL_FLAGS = l.INCL_FLAGS | SHL(0x1, SHR(g.INCLUDE_FILEp, 1));
     g.REV_CAT = MONITOR(15);
-    g.INCLUDE_MSG = ' OF INCLUDED MEMBER, RVL ' \
-                    +STRING(0x01000000 | ADDR(g.REV_CAT)) + \
+    sREV_CAT = BYTE(BYTE('', 0, (g.REV_CAT >> 24) & 0xFF) , \
+                    1, (g.REV_CAT >> 16) & 0xFF)
+    g.INCLUDE_MSG = ' OF INCLUDED MEMBER, RVL ' + sREV_CAT + \
                     ', CATENATION NUMBER ' + str(g.REV_CAT & 0xFFFF);
     g.INCLUDE_LIST = l.LIST_FLAG
     g.INCLUDE_LIST2 = l.LIST_FLAG;

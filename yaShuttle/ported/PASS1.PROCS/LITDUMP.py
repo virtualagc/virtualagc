@@ -12,6 +12,7 @@ History:    2023-09-27 RSB  Ported.
 
 from xplBuiltins import *
 import g
+import HALINCL.COMMON as h
 from GETLITER import GET_LITERAL
 from HEX import HEX
 from IFORMAT import I_FORMAT
@@ -74,7 +75,7 @@ def LIT_DUMP():
         lt = g.LIT1(TEMP) & 0x03
         if lt == 0:
             # CHARACTER
-            S = STRING(g.LIT2(TEMP));
+            S = STRING(g.LIT2(TEMP), h.lit_char);
             if LENGTH(S) > 100:
                 S = SUBSTR(S, 0, 100);
         elif lt == 1:

@@ -1398,9 +1398,8 @@ def SCAN():
             # IF WE GET HERE, WE HAVE A GENUINE COMMENT
             if g.OVER_PUNCH != 0:
                 ERROR(d.CLASS_MO, 1);
-            if goto == "SEARCH_NEXT_CHAR": goto = None;
-            goto = "STORE_NEXT_CHAR";
-            while goto == "STORE_NEXT_CHAR":
+            goto = "SEARCH_NEXT_CHAR";
+            while goto in ["SEARCH_NEXT_CHAR", "STORE_NEXT_CHAR"]:
                 while goto in ["STORE_NEXT_CHAR", "SEARCH_NEXT_CHAR"] \
                         or (goto == None and g.NEXT_CHAR != BYTE('/')):
                     if goto == "STORE_NEXT_CHAR": goto = None;

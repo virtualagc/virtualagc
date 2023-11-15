@@ -573,11 +573,15 @@ def MONITOR(function, arg2=None, arg3=None):
     
     # PDS member revision level ind & cat number.
     elif function == 15:
-        # The documented explanation is sheerest gobbledygook.  I think perhaps
-        # it's saying that each member of a PDS file maintains has a separate
-        # revision code and "cat number", whatever that may be.  I'm not sure
-        # what that means, or if we have to worry about it, so I return 0,0.
-        return 32 * 65536 + 0
+        # The documentation (section 13.3 of IR-182-1) isn't entirely
+        # clear to me.  The way the calling software uses the returned
+        # value implies to me that while the return is a 32-bit
+        # integer, its upper halfword is treated as a string
+        # consisting of a two EBCDIC characters, while the lower
+        # halfword is treated as a short integer.  However,
+        # I still don't understand where the data is supposed to 
+        # come from.
+        return 0xF0F10000
     
     # Incorporate flags into return code.
     elif function == 16:
@@ -914,9 +918,55 @@ def SUBSTR(de, ne, ne2=None):
     return "%-*s" % (ne2, de[ne: ne + ne2])
 
 
-def STRING(s):
-    return str(s)
+'''
+Originally I thought that STRING() should work just like Python str().  
+However, I now realize that what it's intended to do is
+to receive a "pointer" like those appearing in LIT2, and to return
+the string object associated with that pointer.  The "pointers" in 
+LIT2 are 32-bit numbers of the (hex) form:
+        TTPPPPPP
+where TT is the length-1 of the string and PPPPPP is the "address" of
+the string.  Which would be fine if these pointers really all came
+from LIT2, because then the string data would always be in the 
+LIT_CHAR[] array, so we could just use the offset into the LIT_CHAR[]
+array as the address.  
 
+(It turns out that the STRING() function is actually documented, on 
+p. 13-4 of IR-182-1, and it's indeed what I said it was just now.)
+
+Unfortunately, those are not the only places the input "pointers" come
+from.  I find the following:
+    Entries from LIT2[]
+    Values provided by MONITOR(23)
+    Values computed from (mask << 24) | ADDR(...)
+    Entries from VOCAB_INDEX[]
+    Entries from CON[]
+    Entries from TYPE2[]
+    Entries from VALS[]
+We consequently have to get this whole chain of stuff working in the
+same way, in spite of the fact that there are no absolute addresses
+available in this port of the compiler.
+
+Here's the way I've decided to work it.  If STRING() receives a string
+as argument, it simply returns it.  However, if it receives a number
+as an argument, then it's treated as TTPPPPPP, and the hintArray to which
+PPPPPP applies must also be given to it as the array parameter.
+If array[PPPPPP] is itself a string, then that's returned.  Finally,
+if array[PPPPPP:] consists of numbers, then those are assumed to be
+EBCDIC and LL of them are converted to characters and the return value
+is the join of all of those characters.
+'''
+def STRING(s, hintArray = None):
+    if isinstance(s, str):
+        return str(s)
+    length = ((s >> 24) & 0xFF) + 1
+    index = s & 0xFFFFFF
+    if isinstance(hintArray[index], str):
+        return hintArray[index]
+    string = ""
+    for i in range(length):
+        string = BYTE(string, len(string), hintArray[index + i])
+    return string;
 
 def LENGTH(s):
     return len(s)

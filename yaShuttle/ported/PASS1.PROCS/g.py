@@ -3040,13 +3040,16 @@ def OUTER_REF_FLAGS(n, value=None):
     OUTER_REF_TABLE[n].OUT_REF_FLAGS = value
 
 
+litCharFile = open("LIT_CHAR.bin", "wb")
 def LIT_CHAR(n, value=None):
     while len(h.lit_char) <= n:
         h.lit_char.append(0)
     if value == None:
-        return h.lit_char[n]
-    h.lit_char[n] = value
-
+        return BYTE("", 0, h.lit_char[n]) # Convert EBCDIC to ASCII
+    byte = BYTE(value) # Convert ASCII to EBCDIC.
+    h.lit_char[n] = byte
+    litCharFile.write(bytearray([byte]))
+    litCharFile.flush()
 
 def LIT1(n, value=None):
     if value == None:

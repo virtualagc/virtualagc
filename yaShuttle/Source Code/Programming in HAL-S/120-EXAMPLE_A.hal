@@ -1,15 +1,16 @@
-C/ Adapted from PDF p. 120 of "Programming in HAL/S".  Although it is probably
-C/ not immediately obvious, the purpose of this example is to demonstrate
-C/ ARRAY(...) BOOLEAN.  What the program seems to do is this:  There's input
-C/ data in the form of an array of altimeter data (ALT), along with an array of
-C/ timestamps at which the data was collected (TIMETAG), and what the program
-C/ does is to maintain an array of validity flags (DATA_VALID) for that input
-C/ data.  Any given altimeter reading is valid or invalid depending on whether
-C/ it is in-range or out-of-range, on whether too much time has passed since
-C/ the reading, and on whether it departs too much from the long-term running
-C/ average of the readings.  In real life, such data would be sampled
-C/ periodically, so I've made it an inline PROCEDURE that can be called 
-C/ repeatedly, and inside of a PROGRAM to do so.
+C/ Adapted from PDF p. 120 of "Programming in HAL/S".  Although it is 
+C/ probably not immediately obvious, the purpose of this example is to 
+C/ demonstrate ARRAY(...) BOOLEAN.  What the program seems to do is 
+C/ this:  There's input data in the form of an array of altimeter data 
+C/ (ALT), along with an array of timestamps at which the data was 
+C/ collected (TIMETAG), and what the program does is to maintain an 
+C/ array of validity flags (DATA_VALID) for that input data.  Any given
+C/ altimeter reading is valid or invalid depending on whether it is
+C/ in-range or out-of-range, on whether too much time has passed since
+C/ the reading, and on whether it departs too much from the long-term 
+C/ running average of the readings.  In real life, such data would be 
+C/ sampled periodically, so I've made it an inline PROCEDURE that can 
+C/ be called repeatedly, and inside of a PROGRAM to do so.
 
   TEST_EXAMPLE_A: PROGRAM;
   

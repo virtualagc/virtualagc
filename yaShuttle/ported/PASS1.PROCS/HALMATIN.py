@@ -8,11 +8,13 @@ Purpose:    This is part of the port of the original XPL source code for
             include all program comments that were present in the original code.
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-25 RSB  Ported.
+            2023-11-14 RSB  Imported SAVE_LITERAL.
 '''
 
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
+import HALINCL.COMMON   as h
 from ERROR    import ERROR
 from ERRORS   import ERRORS
 from GETICQ   import GET_ICQ
@@ -23,6 +25,7 @@ from HOWTOINI import HOW_TO_INIT_ARGS
 from ICQARRA2 import ICQ_ARRAYNESS_OUTPUT
 from ICQCHECK import ICQ_CHECK_TYPE
 from ICQOUTPU import ICQ_OUTPUT
+from HALINCL.SAVELITE import SAVE_LITERAL
 
 '''
  /***************************************************************************/
@@ -169,7 +172,7 @@ def HALMAT_INIT_CONST ():
                                 ERRORS(d.CLASS_DI, 17);
                         if (g.SYT_TYPE(g.ID_LOC) == g.CHAR_TYPE) and \
                                 (g.LIT1(CONSTLIT) == 0):
-                            TEMP = STRING(g.LIT2(CONSTLIT));
+                            TEMP = STRING(g.LIT2(CONSTLIT), h.lit_char);
                             if (LENGTH(TEMP) > g.VAR_LENGTH(g.ID_LOC)):
                                 ERROR(d.CLASS_DI, 18, g.SYT_NAME(g.ID_LOC));
                                 TEMP = SUBSTR(TEMP, 0, g.VAR_LENGTH(g.ID_LOC));

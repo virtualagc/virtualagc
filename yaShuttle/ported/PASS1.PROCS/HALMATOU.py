@@ -79,7 +79,7 @@ def HALMAT_OUT():
     # We need to convert the ATOMS list to a bytearray.
     b = bytearray([])
     for i in h.FOR_ATOMS:
-        b += (i.CONST_ATOMS & 0xFFFFFFFF).to_bytes(4, "little")
+        b += (i.CONST_ATOMS & 0xFFFFFFFF).to_bytes(4, "big")
     FILE(g.HALMAT_FILE, g.HALMAT_BLOCK, b);
     g.HALMAT_BLOCK = g.HALMAT_BLOCK + 1;
     g.ATOMS(g.ATOMp_FAULT, l.SAVE_ATOM);

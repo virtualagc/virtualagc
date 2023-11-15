@@ -7,6 +7,8 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python. 
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-16 RSB  Made a stub for this.
+            2023-11-14 RSB  Save string constants in EBCDIC rather than
+                            ASCII.
 '''
 
 from xplBuiltins import *
@@ -58,16 +60,7 @@ def SAVE_LITERAL(TYPE, VAL, SIZE=None, CMPOOL=0):
         # Copy the contents of the string to LIT_CHAR[].
         a = g.LIT_CHAR_AD()
         for i in range(length):
-            # I should probably use BYTE() to convert VAL[i] (a character)
-            # into EBCDIC.  I don't want to debug that, though, so for now
-            # I'll just use the ASCII code.  It means the external file will
-            # have the wrong character coding, but that shouldn't cause any
-            # problem at the moment.
-            c = ord(VAL[i])
-            if a >= len(h.LIT_CHAR):
-                h.LIT_CHAR.append(c)
-            else:
-                h.LIT_CHAR[a] = c
+            g.LIT_CHAR(a, VAL[i])
             a += 1
         g.LIT2(g.LIT_PTR, (top << 24) | g.LIT_CHAR_AD());
         VAL = SHR(top, 24) + 1;

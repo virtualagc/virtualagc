@@ -604,7 +604,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                     DO I = PTR TO MIN(PTR + NUM, COMMENT_COUNT);
                 it has not yet been assigned a value.  Due to persistence, it
                 is assigned a value later on in COMMENT_BRACKET, and will 
-                retain that alue on the next call to COMMENT_BRACKET, but is
+                retain that value on the next call to COMMENT_BRACKET, but is
                 definitely unassigned in the first call.  There doesn't seem to
                 be any choice other than to initialize it to *some* value,
                 and the likely candidate would be 0.
