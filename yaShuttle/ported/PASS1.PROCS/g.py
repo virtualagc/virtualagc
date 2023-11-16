@@ -39,6 +39,7 @@ scan2 = False
 intersection = False
 extraTrace = False
 debugwr = False
+templib = False
 
 # Apparently comes from MONITOR.bal, normally, but we don't have that and so
 # must hard-code something that's big enough but not too big.
@@ -91,7 +92,7 @@ for parm in sys.argv[1:]:
     elif parm == "--ascii":
         pass
     elif parm == "--templib":
-        pass
+        templib = True
     elif parm == "--debugwr":
         debugwr = True
     elif parm in pCON or ("NO" + parm) in pCON or \
@@ -3070,9 +3071,6 @@ def LIT3(n, value=None):
 
 
 def XREF(n, value=None):
-    # Logically, the while-loop should *follow* the return from the conditional
-    # below.  However, the calling program appears to ask for a value from 
-    # XREF prior to any being assigned to it, so I've placed it before.
     while len(h.CROSS_REF) <= n:
         h.CROSS_REF.append(h.cross_ref())
     if value == None:

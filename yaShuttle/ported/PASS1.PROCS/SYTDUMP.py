@@ -20,26 +20,6 @@ from IFORMAT import I_FORMAT
 from PAD     import PAD
 
 '''
-Huh?
-
-# For accessing contiguous options in the memory neighborhood of SDL_OPTION.
-# I'm not sure how many of them are accessed in this way.
-def sdl_option(n):
-    if n == -2:
-        return g.SRN_PRESENT
-    elif n == -1:
-        return g.ADDR_PRESENT
-    elif n == 0:
-        return g.SDL_OPTION
-    elif n == 1:
-        return g.SREF_OPTION
-    elif n == 2:
-        return g.SRN_FLAG
-    print("\n*** Illegal SDL_OPTION(%d) ***\n" % n, file=sys.stderr)
-    sys.exit(1)
-'''
-
-'''
  /***************************************************************************/
  /* PROCEDURE NAME:  SYT_DUMP                                               */
  /* MEMBER NAME:     SYTDUMP                                                */

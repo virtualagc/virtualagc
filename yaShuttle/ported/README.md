@@ -390,6 +390,8 @@ found in the PASS 1 monitor module, `##DRIVER`.  The construction in question is
 </pre>
 If `TYPE` has the value 0, then in array terms `TYPE(TYPE)` would refer to `TYPE` itself; i.e., `TYPE(TYPE)` would be 0.  Whereas if `TYPE==1`, then `TYPE(TYPE)` would be `BIT_LENGTH`.  If `TYPE==2`, then `TYPE(TYPE)` would be `CHAR_LENGTH`.  And so on, right up to `TYPE==19`, where `TYPE(TYPE)` corresponds to `S_ARRAY(3)`.  It's hard to deal with slapdash stuff such as this in a uniform way in Python.  In this case, I introduce a function I call `TYPEf()`, used solely as `TYPEf(TYPE)`.  Other absurdities involving `TYPE` and its kissing-cousin `FACTORED_TYPE` are handled using other methods.
 
+*Finally*, I'd note that this "enhanced" XPL has a keyword, `ARRAY` which seems to be interchangeable with the keyword `DECLARE`.  If objects declared with `ARRAY` are distinguishable in any way from those declared with `DECLARE`, it isn't obvious to me.
+
 # <a name="Conditionals"></a>More Conditional Code in XPL
 
 I already discussed [PFS-specific vs BFS-specific conditional compilation](#PASSvBFS) above.  But there's more to it than just those cases.
@@ -1094,7 +1096,58 @@ Thus the next program which must be ported to Python 3 is FLO.PROCS (FLOWGEN) ..
 In the meantime, I'm trying to understand has PASS1 passes data to the optimizing passes (or to PASS2 in their absence).  As far as data passed in files is concerned, I've found the following:
 
   * FILE1 (which in the Python port is FILE1.bin) passes the HALMAT.  I've written a program called unHALMAT.py to parse this file, insofar as it is possible to do so in the absence of most of the documentation about HALMAT.  It actually works pretty well, though obviously is not complete, so it's what should be consulted for more detail.
-  * FILE2 (.bin) passes the "literal table".
+  * FILE2 (.bin) passes the "literal table".  However ... string data wasn't included in the data passed in FILE2.  Rather, if there were a string literal, the data for it in FILE2 consists merely of a memory pointer to the string data, and of course that memory point works only in memory.  For the Python port (see the section below on reverse engineering the literal-table file), I export the string data in a dedicated file (LIT_CHAR.bin), and the "pointers" in FILE2.bin become simply offsets into the LIT_CHAR.bin file.  Thus in the Python port, the *entire* literal data table is passed by files.
+
+Section 2.2.5 of IR-182-1 says this about the data passed from PASS1 to the optimizer passes or to PASS2,
+
+> The data passed via a common memory area includes all symbol table and cross reference table information. These tables contain complete descriptions of all user-defined symbols and the HAL/S statements in which they are used. Since this table data is tied to HAL/S source code it is in a machine-independent form. Additional data passed in memory includes status information, special request information, error condition data detected in Phase 1, and some literal data information.
+
+and goes on to say that the only *files* passed are the "numeric literal data" (presumably FILE1) and the HALMAT (presumably FILE2).  Deconstructing the statements about what is passed in memory is trickier.  Presumably, the "some literal data information" mentioned at the end is the string data which we do pass in a file (LIT_CHAR.bin).  The memory data that leaves us to worry about are:
+
+  * Symbol table.
+  * Cross reference table Information.
+  * Status information,
+  * Special request information.
+  * Error condition data detected in Phase 1.
+
+As far as symbol-table information is concerned, I would reason that this is some subset of the information used by PASS1's `SYT_DUMP()` procedure.  The question is "which subset"?  Upon inspection of SYTDUMP, it seems to me that it's every variable having a name of the form `SYT_xxx`.  Those in turn all come from the following in HALINCL/COMMON:
+<pre>
+    /* SYMBOL    TABLE  */
+    COMMON   BASED SYM_TAB RECORD DYNAMIC:
+             SYM_NAME                    CHARACTER,
+             SYM_ADDR                    FIXED,
+             SYM_FLAGS                   FIXED,
+             XTNT                        FIXED,
+             SYM_XREF                    BIT(16),
+             SYM_LENGTH                  BIT(16),
+             SYM_ARRAY                   BIT(16),
+             SYM_PTR                     BIT(16),
+             SYM_LINK1                   BIT(16),
+             SYM_LINK2                   BIT(16),
+             SYM_NEST                    BIT(8),
+             SYM_SCOPE                   BIT(8),
+             SYM_CLASS                   BIT(8),
+             SYM_LOCK#                   BIT(8),
+             SYM_TYPE                    BIT(8),
+             SYM_FLAGS2                  BIT(8),
+    END;
+</pre>
+PASS2, FLO, OPT, and AUX (and PASS3 too) do indeed use `SYM_TAB`, and continue to use the associated `SYT_xxx` macros.  It appears to me that they simply use HALINCL/COMMON.  It appears that the only field in `SYM_TAB` that refers to an external object outside of `SYM_TAB` is the `SYM_XREF` field.
+
+`SYM_XREF` points to an entry in the `CROSS_REF` array, defined also in HALINCL/COMMON as:
+<pre>
+/* CROSS REFERENCE TABLE */
+COMMON   BASED CROSS_REF RECORD DYNAMIC:
+         CR_REF                      FIXED,
+END;
+</pre>
+Meanwhile, the entries in `CROSS_REF`, while including pointers, are completely internal to `CROSS_REF` itself.  
+
+Consequently, it would appear that we can pass both the symbol-table and cross-reference info between compiler passes simply by saving the `SYM_TAB` and `CROSS_REF` objects to files.  I do this by saving those objects in JSON form, in the files SYM_TAB.json and CROSS_REF.json, respectively.
+
+As far as "error condition data detected in Phase 1" is concerned, it *could*  refer to the `ADVISE` array defined in HALINCL/COMMON, but ... I don't know; seems funny.
+
+TBD
 
 ## Reverse engineering the literal-table file
 

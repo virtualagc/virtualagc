@@ -24,26 +24,10 @@ import math
 import ebcdic
 
 # This is the root directory for imports.
-scriptFolder = os.path.dirname(__file__) # Requires / at the end.
+scriptFolder = os.path.dirname(__file__)  # Requires / at the end.
 scriptParentFolder = str(pathlib.Path(scriptFolder).parent.absolute())
 
-sourceFile = None  # Use stdin by default for HAL/S source-code file.
-outUTF8 = True
-listing2 = False
-templib = False
-for parm in sys.argv[1:]:
-    if parm.startswith("--hal="):
-        sourceFile = parm[6:]
-        if not sourceFile.endswith(".hal"):
-            sourceFile = sourceFile + ".hal"
-    elif parm == "--ascii":
-        outUTF8 = False
-    elif parm == "--utf8":
-        outUTF8 = True
-    elif parm == "LISTING2":
-        listing2 = True
-    elif parm == "--templib":
-        templib = True
+outUTF8 = ("--utf8" in sys.argv[1:])
 
 
 # Python's native round() function uses a silly method (in the sense that it is
@@ -59,7 +43,6 @@ def hround(x):
         # x wasn't a number.
         return None
     return i
-
 
 '''
 The following stuff is for converting back and forth from Python
@@ -191,7 +174,8 @@ maxDevices = 10
 inputDevices = [None] * maxDevices
 outputDevices = [None] * maxDevices
 
-def openGenericInputDevice(n, name, isPDS = False, rw = False):
+
+def openGenericInputDevice(name, isPDS=False, rw=False):
     if rw:
         mode = "r+"
     else:
@@ -200,29 +184,30 @@ def openGenericInputDevice(n, name, isPDS = False, rw = False):
         f = open(name, mode)
     except:
         f = open(scriptFolder + "/" + name, mode)
-    inputDevices[n] = {
+    inputDevice = {
         "file": f,
         "open": True,
         "ptr":-1,
         "buf": []
         }
     if isPDS:
-        inputDevices[n]["pds"] = json.load(f)
-        inputDevices[n]["mem"] = ""
+        inputDevice["pds"] = json.load(f)
+        inputDevice["mem"] = ""
+    return inputDevice
+
     
-def openGenericOutputDevice(n, name, isPDS = False):
-    global outputDevices
-    outputDevices[n] = {
+def openGenericOutputDevice(name, isPDS=False):
+    outputDevice = {
         "file": open(name, "w"),
         "open": True,
-        "ptr": -1,
+        "ptr":-1,
         "buf": []
         }
     if isPDS:
-        outputDevices[n]["pds"] = {}
-    
-if "--help" not in sys.argv:
+        outputDevice["pds"] = {}
+    return outputDevice
 
+if "--help" not in sys.argv:
     # Note that while textual-data files (the "buf" and "pds" files from above)
     # are handled by the INPUT(...)/OUTPUT(...) mechanism, random-access files
     # are handled by the entirely-different FILE() method. Thus random-access files
@@ -237,74 +222,7 @@ if "--help" not in sys.argv:
         f = open("FILE%d.bin" % i, "w+b")
         f.seek(2, 0)
         files.append([f, 7200, f.tell()])
-
-    # Open the files that we need, other than output files 0 and 1 (whose behavior
-    # is hard-coded separately), and buffer their contents where appropriate.
-    if sourceFile == None:  # HAL/S source code.
-        f = sys.stdin
-        sourceFile = "stdin"
-    else:
-        # Get the source-file name from the compiler's --hal switch.
-        # If the file turns out to not be in the current folder, try several others.
-        # This is just a convenience for me in debugging, based on the notion that
-        # the compiler is being run from the yaShuttle/ported/ folder in the source 
-        # tree.  The other folders don't need to be checked in a production version
-        # of the compiler, since they most likely don't even exist.
-        folders = (
-            "",
-            scriptParentFolder + "/../Source Code/Programming in HAL-S/",
-            scriptParentFolder + "/../Source Code/HAL-S-360 Users Manual/"
-            )
-        f = None
-        i = 0
-        while f == None and i < len(folders):
-            try:
-                s = folders[i] + sourceFile
-                f = open(s, "r")
-                sourceFile = s
-                break
-            except:
-                f = None
-                i += 1
-        if f == None:
-            print("Couldn't find the source file (%s)" % sourceFile, \
-                  file=sys.stderr)
-            sys.exit(1)
-    #dummy = f.readlines()  # Source code.
-    dummy = []
-    #for i in range(len(dummy)):
-    for line in f:
-        # Regarding the "\xef\xbb\xbf" replacement ... *apparently*,
-        # in Windows, if you make the mistake of editing a HAL/S source
-        # file containing a UTF-8 character ("¬", "¢"), Windows will
-        # thoughtfully stick the UTF-8 character encoded as 
-        # "\xef\xbb\xbf" at the beginning of the file when you save it.
-        # Of course, for us, that's pure garbage, so we remove it if
-        # it's there ... or anywhere!
-        line = line.rstrip('\n\r').replace("¬", "~").replace("^", "~")\
-                   .replace("¢", "`").replace("\xef\xbb\xbf", "")\
-                   .expandtabs(8).ljust(80)
-        dummy.append(line)
     
-    inputDevices[0] = {
-        "file": f,
-        "open": True,
-        "ptr":-1,
-        "buf": dummy
-        }
-    
-    if listing2:
-        openGenericOutputDevice(2, "LISTING2.hal") # Secondary output listing.
-    openGenericInputDevice(4, "TEMPLIB.json", True, templib) # Template library.
-    openGenericInputDevice(5, "ERRORLIB.json", True) # Error-message library.
-    openGenericInputDevice(6, "ACCESS.json", True) # File of module access rights.
-    if templib:
-        outputDevices[6] = inputDevices[4]
-    else:
-        openGenericOutputDevice(6, "&&TEMPLIB.json", True) # Temporary templates.
-    openGenericOutputDevice(8, "&&TEMPINC.json", True) # Temporary includes.
-    openGenericOutputDevice(9, "SOURCECO.txt")  # Source-comparision output.
-
 def SHL(a, b):
     return a << b
 
@@ -330,7 +248,9 @@ dwArea = None
 compilationReturnBits = 0
 namePassedToCompiler = ""
 
-redirections = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] # For MONITOR(8).
+redirections = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # For MONITOR(8).
+
+
 def MONITOR(function, arg2=None, arg3=None):
     global inputDevices, outputDevices, dwArea, compilationReturnBits, \
             namePassedToCompiler, files, redirections
@@ -509,7 +429,7 @@ def MONITOR(function, arg2=None, arg3=None):
             else:
                 return 1
             # Convert the result back to IBM floats, and store in working area.
-            dwArea[0],dwArea[1] = toFloatIBM(value0)
+            dwArea[0], dwArea[1] = toFloatIBM(value0)
             return 0
         except:
             return 1
@@ -521,7 +441,7 @@ def MONITOR(function, arg2=None, arg3=None):
             exit(1)
         s = arg2
         try:
-            dwArea[0],dwArea[1] = toFloatIBM(float(s))
+            dwArea[0], dwArea[1] = toFloatIBM(float(s))
             return 0
         except:
             return 1
@@ -532,7 +452,7 @@ def MONITOR(function, arg2=None, arg3=None):
     
     # Floating-point to character conversion.
     elif function == 12:
-        p = arg2 # 0 for SP, 8 for DP
+        p = arg2  # 0 for SP, 8 for DP
         value = fromFloatIBM(dwArea[0], dwArea[1])
         '''
         The "standard" HAL format for floating-point numbers is described on 
@@ -677,19 +597,8 @@ def MONITOR(function, arg2=None, arg3=None):
 '''
 The following function replaces the XPL constructs
     OUTPUT(fileNumber) = string
-    OUTPUT = string                which is shorthand for OUTPUT(0)=string.
-Interpretations:
-    fileNumber 0    The assembly listing, on stdout
-    fileNumber 1    Same as 0, but the leading character of string is used for 
-                    carriage control.
-    fileNumber 2    Unformatted source listing (LISTING2).
-    fileNumber 3    HALMAT object-file.
-    fileNumber 4    For punching duplicate card deck (Pass 4)
-    fileNumber 5    SDF (Simulation Data File), a PDS
-    fileNumber 6    Structure-template library, a PDS
-    fileNumber 8    TBD
-    fileNumber 9    Patch from one source version to another, a PDS.
-The carriage-control characters mentioned above (for fileNumber 1) may be
+    OUTPUT = string      , which is shorthand for OUTPUT(0)=string.
+The carriage-control characters for fileNumber 1 may be
 the so-called ANSI control characters:
     '_'    Single space the line and print
     '0'    Double space the line and print
@@ -713,11 +622,11 @@ def OUTPUT(fileNumber, string):
         file = outputDevices[fileNumber]
         if file == None:
             print("\nOUTPUT to nonexistent device %d" % fileNumber, \
-                  file = sys.stderr)
+                  file=sys.stderr)
             return
         if not file["open"]:
             print("\nOUTPUT to closed device %d" % fileNumber, \
-                  file = sys.stderr)
+                  file=sys.stderr)
             return
         file["buf"].append(string)
         if "pds" not in file:
@@ -917,7 +826,6 @@ def SUBSTR(de, ne, ne2=None):
         return de[ne:]
     return "%-*s" % (ne2, de[ne: ne + ne2])
 
-
 '''
 Originally I thought that STRING() should work just like Python str().  
 However, I now realize that what it's intended to do is
@@ -956,7 +864,9 @@ if array[PPPPPP:] consists of numbers, then those are assumed to be
 EBCDIC and LL of them are converted to characters and the return value
 is the join of all of those characters.
 '''
-def STRING(s, hintArray = None):
+
+
+def STRING(s, hintArray=None):
     if isinstance(s, str):
         return str(s)
     length = ((s >> 24) & 0xFF) + 1
@@ -967,6 +877,7 @@ def STRING(s, hintArray = None):
     for i in range(length):
         string = BYTE(string, len(string), hintArray[index + i])
     return string;
+
 
 def LENGTH(s):
     return len(s)
@@ -1010,9 +921,9 @@ def MAX(a, b):
 def BYTE(s, index=0, value=None):
     if not isinstance(s, str):
         print("Implementation error: BYTE called with non-string argument:", \
-              s, file = sys.stderr)
+              s, file=sys.stderr)
         if False:
-            0/0 # Just my way of triggering an error for the debugger.
+            0 / 0  # Just my way of triggering an error for the debugger.
         sys.exit(1)
     if value == None:
         try:
@@ -1072,6 +983,37 @@ def INLINE(arg1=None, arg2=None, arg3=None, arg4=None, arg5=None, \
            arg6=None, arg7=None, arg8=None, arg9=None, arg10=None):
     return
 
+
 def EXIT():
     sys.exit(1)
-    
+
+'''
+I have data stored in arrays of class instances which I want to save
+as JSON, and to be able to restore it later from the JSON.  The
+following works in Python 3, though I have suspicions about whether or 
+not it's good practice that may be allowed in Python 4 (if such a thing
+will ever exist).
+'''
+
+
+def saveClassArray(classArray, filename):
+    a = []
+    for entry in classArray:
+        a.append(entry.__dict__)
+    f = open(filename, "w")
+    json.dump(a, f, indent=4)
+    f.close()
+
+
+def loadClassArray(classType, filename):
+    f = open(filename, "r")
+    j = json.load(f)
+    f.close()
+    a = []
+    for entry in j:
+        c = classType()
+        c.__dict__ = entry
+        a.append(c)
+    return a
+
+        

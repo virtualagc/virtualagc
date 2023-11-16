@@ -1911,7 +1911,7 @@ UNRECOGNIZABLE:                                                                 
       END UNRECOGNIZABLE;                                                       01701500
                                                                                 01702000
  /* PROCEDURE TO CLEAR ALL R_INX USERS OF AN INDEXING REGISTER */               01702500
-CLEAR_INX:                                                                      01703000
+CLEAR_INX:                                                                      01703000
       PROCEDURE(R);                                                             01703500
          DECLARE (R, I) BIT(16);                                                01704000
          IF INDEXING(R) THEN                                                    01704500

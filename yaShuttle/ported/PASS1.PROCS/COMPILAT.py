@@ -12,6 +12,7 @@ History:    2023-08-25 RSB  Created place-holder file.
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
+import HALINCL.COMMON   as h
 from ERROR import ERROR
 if g.scan1:
     from SCAN1 import SCAN
@@ -211,6 +212,14 @@ def COMPILATION_LOOP():
                 #   HAS THE PROGRAM GOAL BEEN REACHED
                 # TOP_MATCH:  
                 if g.APPLY2[I] == 0:  #  YES, FINISHED
+                    saveClassArray(h.SYM_TAB, "SYM_TAB.json")
+                    saveClassArray(h.CROSS_REF, "CROSS_REF.json")
+                    #saveClassArray(h.ADVISE, "ADVISE.json")
+                    # In the next pass, undo this with:
+                    # h.SYM_TAB = loadClassArray(h.sym_tab, "SYM_TAB.json")
+                    # h.CROSS_REF = loadClassArray(h.cross_ref, "CROSS_REF.json")
+                    # h.ADVISE = loadClassArray(h.advise, "ADVISE.json")
+                    # I hope!
                     return
                 g.STATE = g.APPLY2[I];  #   PICK UP THE NEXT STATE
                 g.LOOK = 0;
@@ -237,4 +246,3 @@ def COMPILATION_LOOP():
                 g.LOOK = 0;
         # END OF COMPILE LOOP
             
-    
