@@ -14,11 +14,11 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
-version = (2023, 11, 8, 8, 14, 38)
+version = (2023, 11, 17, 13, 0, 0)
 
 import sys
 
-from xplBuiltins import OUTPUT, BYTE, fromFloatIBM
+from xplBuiltins import OUTPUT, BYTE, fromFloatIBM, scriptParentFolder
 import HALINCL.COMMON as h
 
 #------------------------------------------------------------------------------
@@ -3041,7 +3041,7 @@ def OUTER_REF_FLAGS(n, value=None):
     OUTER_REF_TABLE[n].OUT_REF_FLAGS = value
 
 
-litCharFile = open("LIT_CHAR.bin", "wb")
+litCharFile = open(scriptParentFolder + "/LIT_CHAR.bin", "wb")
 def LIT_CHAR(n, value=None):
     while len(h.lit_char) <= n:
         h.lit_char.append(0)

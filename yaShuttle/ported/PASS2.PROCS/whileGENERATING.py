@@ -19,7 +19,7 @@ from TERMINAT import TERMINATE
 
 from SUBMONITOR    import SUBMONITOR
 
-def whileGenerating(srcerr = False):
+def whileGENERATING(srcerr = False):
     if srcerr:
         g.CLASS = 9
     

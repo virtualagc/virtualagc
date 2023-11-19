@@ -27,7 +27,7 @@ shutil.copytree(scriptParentFolder + "/HALINCL", \
 from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
-from INITIALI import INITIALIZE
+from INITIALI import INITIALISE
 from PRINTDAT import PRINT_DATE_AND_TIME
 from whileGENERATING import whileGENERATING
 

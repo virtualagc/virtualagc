@@ -1,0 +1,2 @@
+def OPTIMISE(n):
+    return

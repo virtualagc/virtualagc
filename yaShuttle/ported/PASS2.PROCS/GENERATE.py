@@ -1,0 +1,2 @@
+def GENERATE():
+    return

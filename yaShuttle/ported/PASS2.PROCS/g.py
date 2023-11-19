@@ -10,6 +10,9 @@
    History:    2023-11-15 RSB  Began adapting PASS2.PROCS/##DRIVER.xpl.
 """
 
+# The version of the compiler port: (Y, M, D, H, M, S).
+version = (2023, 11, 17, 13, 0, 0)
+
 import sys
 import HALINCL.COMMON as h
 
@@ -28,7 +31,7 @@ for parm in sys.argv[1:]:
         print('is instead automatically run after PASS 1.  But if it')
         print('were to be run separately, do it as follows:')
         print('Usage:')
-        print('\tHAL-S-FC.py [OPTIONS]')
+        print('\tHAL-S-FC_PASS2.py [OPTIONS]')
         print('The allowed "modern" OPTIONS are:')
         print('--pfs            Compile for PFS (PASS).')
         print('--bfs            Compile for BFS. (Default is --pfs.)')
@@ -40,6 +43,42 @@ for parm in sys.argv[1:]:
         print("Unrecognized command-line options:", parm)
         print("Use --help for more information.")
         sys.exit(1)
+
+#------------------------------------------------------------------------------
+# Here's some stuff intended to functionally replace some of XPL's 'implicitly
+# declared' functions and variables while retaining roughly the same syntax.
+
+# Creation data/time of this port of the compiler.  They'll have to be manually 
+# maintained.  They correspond to the supposed implicit variables DATE and 
+# TIME when the compiler itself was compiled, and of course it never was 
+# compiled!  I suppose I could fetch the file timestamp, but then there's more
+# than one file comprising the compiler, so which one would I choose?
+# Not to mention the fact that once these files have passed through Git,
+# all of their timestamps change anyway.
+
+
+# A "day of the year" function I adapted from here:
+# https://www.tutorialspoint.com/day-of-the-year-in-python.
+# The input parameter is a tuple (Y, M, D, ...).
+def dayOfYear(version):
+    d = list(version)
+    days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    if d[0] % 400 == 0:
+        d[2] += 1
+    elif d[0] % 4 == 0 and d[0] % 100 != 0:
+        days[2] += 1
+    for i in range(1, len(days)):
+        days[i] += days[i - 1]
+    return days[d[1] - 1] + d[2]
+
+# The input parameter is a tuple (x, x, x, H, M, S)
+def secondsSinceMidnight(version):
+    s = 3600 * version[3] + 60 * version[4] + version[5]
+    return s
+
+DATE_OF_GENERATION = 1000 * (version[0] - 1900) + dayOfYear(version)
+TIME_OF_GENERATION = 100 * secondsSinceMidnight(version)
+#----------------------------------------------------------------------
 
 # LIMITING PHASE 2 SIZES AND LENGTHS   
 LABELSIZE = 0
@@ -54,7 +93,7 @@ STATNOLIMIT = 0  # MAX # OF STATEMENT NUMBERS
 
 TRUE = 1
 FALSE = 0
-FOR = ''
+# FOR = ''
 
 BY_NAME_TRUE = 1
 BY_NAME_FALSE = 0
@@ -1850,7 +1889,6 @@ def OPR(n, value=None):
     
 
 # MISCELLANEOUS DECLARATIONS 
-FOREVER = 'WHILE 1'
 LINEp = 0
 CLOCK = [0] * (1 + 2)
 SAVE_LOCCTR = 0

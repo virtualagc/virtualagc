@@ -9,9 +9,6 @@
 
 from xplBuiltins import *
 import g
-import HALINCL.CERRDECL as d
-import HALINCL.COMMON as h
-from ERROR import ERROR
 
 #*************************************************************************
 # PROCEDURE NAME:  PRINT_TIME

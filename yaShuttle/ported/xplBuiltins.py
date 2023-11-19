@@ -183,7 +183,7 @@ def openGenericInputDevice(name, isPDS=False, rw=False):
     try:
         f = open(name, mode)
     except:
-        f = open(scriptFolder + "/" + name, mode)
+        f = open(scriptParentFolder + "/" + name, mode)
     inputDevice = {
         "file": f,
         "open": True,
@@ -198,7 +198,7 @@ def openGenericInputDevice(name, isPDS=False, rw=False):
     
 def openGenericOutputDevice(name, isPDS=False):
     outputDevice = {
-        "file": open(name, "w"),
+        "file": open(scriptParentFolder + "/" + name, "w"),
         "open": True,
         "ptr":-1,
         "buf": []
@@ -219,7 +219,7 @@ if "--help" not in sys.argv:
     # and the current file size (in bytes).
     files = [None]
     for i in range(1, 7):
-        f = open("FILE%d.bin" % i, "w+b")
+        f = open(scriptParentFolder + "/FILE%d.bin" % i, "w+b")
         f.seek(2, 0)
         files.append([f, 7200, f.tell()])
     
@@ -1000,13 +1000,13 @@ def saveClassArray(classArray, filename):
     a = []
     for entry in classArray:
         a.append(entry.__dict__)
-    f = open(filename, "w")
+    f = open(scriptParentFolder + "/" + filename, "w")
     json.dump(a, f, indent=4)
     f.close()
 
 
 def loadClassArray(classType, filename):
-    f = open(filename, "r")
+    f = open(scriptParentFolder + "/" + filename, "r")
     j = json.load(f)
     f.close()
     a = []

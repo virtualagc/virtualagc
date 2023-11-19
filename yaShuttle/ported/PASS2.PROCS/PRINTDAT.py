@@ -48,10 +48,10 @@ def PRINT_DATE_AND_TIME(MESSAGE, D, T):
     if (YEAR & 0x3) != 0:
         if DAY > 59: DAY = DAY + 1;
     M = 1;
-    while DAY[0] > DAYS[M]:
+    while DAY > DAYS[M]:
         M = M + 1;
     # END;
     PRINT_TIME(MESSAGE + str(MONTH[M - 1]) + g.BLANK + \
                str(DAY - DAYS[M - 1]) + ', ' + str(YEAR) + \
-               '.  CLOCK TIME = ', str(T));
+               '.  CLOCK TIME = ', T);
 # END PRINT_DATE_AND_TIME;

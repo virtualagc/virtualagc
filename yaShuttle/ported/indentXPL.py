@@ -185,7 +185,7 @@ for rawLine in f:
     if inIdentifier:
         # Take care of the case in which the preceding line ended with an
         # identifier.
-        if identifier in ["PROCEDURE", "DO"]:
+        if identifier in ["PROCEDURE", "DO", "BASED"]:
             indentationLevel += 1
         elif identifier == "END" and indentationLevel > 0:
             indentationLevel -= 1
@@ -237,7 +237,7 @@ for rawLine in f:
                     identifier = identifier + c
                     bufferedLine = bufferedLine + c
                 else:
-                    if identifier in ["PROCEDURE", "DO"]:
+                    if identifier in ["PROCEDURE", "DO", "BASED"]:
                         pendingIndentation = indentationLevel + 1
                     elif identifier in ["END"]:
                         if bufferedLine.startswith(identifier):
@@ -293,7 +293,7 @@ if fix:
         line = re.sub(r"\^=", "!=", line)
         line = re.sub(r"\^<", ">=", line)
         line = re.sub(r"\^>", "<=", line)
-        line = re.sub(r"\bCALL *", "", line)
+        line = re.sub(r"\bCALL +", "", line)
         line = re.sub(r"\bERROR *\( *CLASS_", "ERROR(d.CLASS_", line)
         line = re.sub(r"\bERRORS *\( *CLASS_", "ERRORS(d.CLASS_", line)
         line = re.sub(r"\bEND *; *$", "#END", line)
