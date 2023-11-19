@@ -65,7 +65,7 @@ if g.HALMAT_DUMP and g.HMAT_OPT:
 if g.VMEM_DUMP:
     DUMP_ALL(g.FORMATTED_DUMP);
 if g.DONT_LINK:
-    return 0;
+    sys.exit(0);
 else: # DO;
    RECORD_SEAL(h.SYM_ADD);
    RECORD_LINK();

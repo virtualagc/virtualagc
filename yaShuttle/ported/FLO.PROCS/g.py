@@ -639,7 +639,7 @@ def VMEM_H(n, value = None):
     vmem_h[n] = value & 0xFFFF
     
 vmem_f = []  # FIXED
-def VMEM_f(n, value = None):
+def VMEM_F(n, value = None):
     global vmem_f
     while len(vmem_f) <= n:
         vmem_f.append(0)
