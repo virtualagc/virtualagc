@@ -13,8 +13,7 @@ from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
 import HALINCL.CERRDECL as d
-from CHARINDE import CHAR_INDEX
-from PAD import PAD
+from HALINCL.COMROUT import CHAR_INDEX, PAD
 
 '''
 #*********************************************************

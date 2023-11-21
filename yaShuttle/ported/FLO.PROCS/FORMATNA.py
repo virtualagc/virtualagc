@@ -105,7 +105,7 @@ def FORMAT_NAME_TERM_CELLS(SYMBp, PTR):
     while PTR != 0:
         LOCATE(PTR, ADDR(VMEM_F), 0);
         PTR = VMEM_F(1);
-        COREWORD(ADDR(vmem_h)) = v2.VMEM_LOC_ADDR;
+        #COREWORD(ADDR(VMEM_H)) = VMEM_LOC_ADDR;
         K = 0
         g.PTR_INX = 0;
         g.LEVEL = 1;
@@ -172,7 +172,7 @@ def FORMAT_NAME_TERM_CELLS(SYMBp, PTR):
                         break
                     else:  # DO
                         LOCATE(VMEM_F(SHR(J + 2, 1)), ADDR(VMEM_F), 0);
-                        COREWORD(ADDR(VMEM_H)) = v2.VMEM_LOC_ADDR;
+                        #COREWORD(ADDR(VMEM_H)) = VMEM_LOC_ADDR;
                         J = 2;
                     # END
                 # END DO CASE
