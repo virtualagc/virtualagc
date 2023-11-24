@@ -38,6 +38,7 @@
 #                               library.
 #               2023-07-31 RSB  Added shorthand STS-nnn-mmm to Targets field.
 #               2023-08-01 RSB  Added the "Flight STS-xxx" sections for --shuttle.
+#               2023-11-24 RSB  Corrected many STS flight titles.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -1437,10 +1438,10 @@ if shuttle:
         { "anchor" : 6 },
         { "anchor" : 7 },
         { "anchor" : 8 },
-        { "anchor" : 9, "title": "STS 41-A (STS-9" },
+        { "anchor" : 9, "title": "STS 41-A (STS-9)" },
         { "anchor" : 11, "title": "STS 41-B (STS-11)" },
         { "anchor" : 13, "title": "STS 41-C (STS-13)" },
-        { "anchor" : 14, "title": "STS 41-DR (STS-14" },
+        { "anchor" : 14, "title": "STS 41-DR (STS-14)" },
         { "anchor" : 17, "title": "STS 41-G (STS-17)" },
         { "anchor" : 19, "title": "STS 51-A (STS-19)" },
         { "anchor" : 20, "title": "STS 51-C (STS-20)" },
@@ -1591,7 +1592,8 @@ if shuttle:
         if isinstance(entry["anchor"], int):
             n = entry["anchor"]
             entry["anchor"] = "STS%d" % n
-            entry["title"] = "STS-%d" % n
+            if "title" not in entry:
+                entry["title"] = "STS-%d" % n
         if entry["anchor"].startswith("STS"):
             entry["targets"] = [entry["anchor"].replace("STS", "STS-")]
             entry["title"] = "Flight " + entry["title"]
