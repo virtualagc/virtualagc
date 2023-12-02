@@ -787,7 +787,13 @@ def FILE(arg1, arg2, arg3):
     if isInput:
         data = bytearray(f.read(reclen))
         for i in range(reclen):
-            inputArray[i] = data[i]
+            try:
+                inputArray[i] = data[i]
+            except:
+                print("Incomplete record %d (<%d bytes) from file %s" \
+                      % (recordNumber, reclen, f.name), 
+                      file = sys.stderr)
+                sys.exit(1)
         return
     f.write(outputArray)
     if f.tell() > size:

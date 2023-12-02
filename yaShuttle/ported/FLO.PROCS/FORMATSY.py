@@ -11,8 +11,10 @@
 from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
+from FORMATFO import FORMAT_FORM_PARM_CELL
 from FORMATNA import FORMAT_NAME_TERM_CELLS
-from FORMATVA import FORMAT_VAR_REF
+from FORMATNA import FORMAT_NAME_TERM_CELLS
+from FORMATVA import FORMAT_VAR_REF_CELL
 
 #*************************************************************************
 # PROCEDURE NAME:  FORMAT_SYT_VPTRS

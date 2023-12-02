@@ -36,6 +36,7 @@
   * [Virtual Memory](#VirtualMemory)
     * [Virtual Memory Modules](#Modules)
     * [Virtual Memory Framework](#Framework)
+    * [Virtual Memory User Guide](#VUser)
   * [Sample HAL/S Source Code](#Samples)
   * [FINDER(), MONITOR(8), D INCLUDE, and Related Puzzles](#FINDER)
   * [Version Management for the Template Library](#TemplateVersioning)
@@ -884,9 +885,9 @@ The problem doesn't seem to extend to XPL `DO WHILE` loops implemented as Python
 
 ## <a name="Modules"></a>Virtual Memory Modules
 
-The "virtual memory" system used by the HAL/S compiler is implemented by the VMEM* modules in the HALINCL/ folder.  Almost all of pass 1 of the compiler doesn't seem to depend on this system in any way ... but eventually you reach a point in the implementation where it's unclear if you can do without it or not.  Unfortunately, as usual, there is no explanation at all provided in the program comments as to what any of this system is supposed to do.  Moreover, it apparently came after the documentation provided by IR-182-1, so there is no *written* documentation available to me that describes it or even mentions it.  Which means it simply has to be figured out from the source code.  That's what I'm going to try to do here.
+The "virtual memory" system used by the HAL/S compiler is implemented by the VMEM\* modules in the HALINCL/ folder.  Almost all of pass 1 of the compiler doesn't seem to depend on this system in any way ... but eventually you reach a point in the implementation where it's unclear if you can do without it or not.  Unfortunately, as usual, there is no explanation at all provided in the program comments as to what any of this system is supposed to do.  Moreover, it apparently came after the documentation provided by IR-182-1, so there is no *written* documentation available to me that describes it or even mentions it.  Which means it simply has to be figured out from the source code.  That's what I'm going to try to do here.
 
-The starting point, I reckon, is the two modules VMEM1 and VMEM2, which are nothing but declarations.  
+The starting point, I reckon, is the two modules VMEM1 and VMEM2, which are nothing but declarations, and as far as I can see, every compiler pass uses both of these.  
 
 The remaining modules, VMEM3, VMEM3A, VMEM3F, and VMEM5A are not truly different, but rather differ primarily in terms of which mix of functions they contain:
 
@@ -902,8 +903,12 @@ Regarding which combinations of these various modules are *actually* supposed to
 I'm not sure how reliable these are, since they sometimes appear in obscure modules where you wouldn't expect them (such as MIN vs ##DRIVER), but here's what I find:
 
   * PASS1:  VMEM3
+  * FLO:    VMEM3
+  * OPT:    (None?)
+  * AUX:    (None?)
   * PASS2:  VMEM3F + VMEM5A
   * PASS3:  VMEM3A
+  * PASS4:  (None?)
 
 This is reasonable in terms of what little I know.  In summary, it would appear to me that insofar as pass 1 of the compiler is concerned, only VMEM1, VMEM2, and VMEM3 need to be ported.
 
@@ -928,6 +933,27 @@ There is a procedure (defined in VMEM3 *et al.*) called `MOVE(LENGTH, FROM, INTO
   * In the case of `INTO` referring to a string, whatever string is referred to cannot be changed in place, since strings in Python are immutable.  Instead, the `MOVE()` function returns the address of a new string (of the same length as the original) which the calling code should use to replace the original one.
 
 In principle, in XPL `MOVE()` could also be used to transfer non-list data, or data not aligned on the obvious boundaries.  If this situation needs to be supported, some rethinking may become necessary.
+
+# <a name="VUser"></a>Virtual Memory User Guide
+
+In porting FLOWGEN (and I presume, OPT, AUX, and PASS2), it is becoming important that the virtual memory system actually *works*, whereas for PASS1 I basically just needed it not to do anything bad.  I'm realizing belatedly that that means I need some way to actually verify that it's working.  And to do that, I need to write test code, for which I need an understanding of how the thing is actually used.  Which given that there's no documentation of it, and no helpful advice about it likely to appear from external sources, I need to first contrive a user guide for it on my own initiative.
+
+First, the basic underlying theory of what it's doing ... I think.  Some of this will be a reprise of statements already made above.  The virtual memory consists of the following two entities:
+
+ 1. Physically it's random-access file FILE6(.bin), arranged as up to 400 (`VMEM_TOTAL_PAGES+1`) "pages" of 3360 (`VMEM_PAGE_SIZE`) bytes each.  Each page has a unique index number from 0 through `VMEM_TOTAL_PAGES+1`.  The index number -1 is used to mean "no page", while `VMEM_LAST_PAGE` is the index of the highest page actually present in the file.
+ 2. There are 3 (`VMEM_LIM_PAGES+1`) pages buffered in memory at any given time.  The 3-element array `VMEM_PAD_PAGE[]` lists the page numbers that are currently memory-resident.  The array `VMEM_PAD_ADDR[]` lists the "addresses" at which the 3 memory buffers reside in memory.
+
+> It is in `VMEM_PAD_ADDR[]` that things start to go wrong on us in a straightforward port of the HAL/S compiler's code from XPL to Python, because these addresses are not fixed, but rather change in the course of operation.  That's because rather than *copying* information to or from the virtual-memory buffers when we want to get data into or out of virtual memory, you instead just change the pointers.  And since we neither have "pointers" in Python, nor would the organization of data in memory match what we need for storage in virtual memory, the use of`VMEM_PAD_ADDR[]` to store pointers to data simply doesn't work for us.
+
+Of the 3 pages potentially in memory buffers at in given moment, these are not selected by the user, but rather by the virtual-memory system according to some strategy.  Each of the three pages has one of the following three interpretations, and these are shuffled around during operation as buffered pages are released or new pages become buffered:
+
+  * `VMEM_LAST_PAGE` &mdash; the most-recently used page.
+  * `VMEM_PRIOR_PAGE` &mdash; the next-most-recently used page.
+  * `VMEM_LOOK_AHEAD_PAGE` &mdash; the "look-ahead" page, buffered automatically by the virtual-memory system on the assumption it's the next one that will be needed.
+
+ 
+
+TBD
 
 # <a name="Samples"></a>Sample HAL/S Source Code
 
@@ -1093,10 +1119,10 @@ The inference is that *perhaps* AUX = "Phase 1.7".  Perhaps.  Though it hardly m
 
 Thus the next program which must be ported to Python 3 is FLO.PROCS (FLOWGEN) ... *assuming* that it actually alters the HALMAT, as opposed to merely performing some kind of analysis.  That's TBD.
 
-In the meantime, I'm trying to understand has PASS1 passes data to the optimizing passes (or to PASS2 in their absence).  As far as data passed in files is concerned, I've found the following:
+In the meantime, I'm trying to understand has PASS1 passes data to the optimizing passes (or to PASS2 in their absence).  As far as data passed in files is concerned &mdash; apparently only the random-access files, FILE1 through FILE6 &mdash; I've found the following, insofar as data output by PASS1 is concerned:
 
   * FILE1 (which in the Python port is FILE1.bin) passes the HALMAT.  I've written a program called unHALMAT.py to parse this file, insofar as it is possible to do so in the absence of most of the documentation about HALMAT.  It actually works pretty well, though obviously is not complete, so it's what should be consulted for more detail.
-  * FILE2 (.bin) passes the "literal table".  However ... string data wasn't included in the data passed in FILE2.  Rather, if there were a string literal, the data for it in FILE2 consists merely of a memory pointer to the string data, and of course that memory point works only in memory.  For the Python port (see the section below on reverse engineering the literal-table file), I export the string data in a dedicated file (LIT_CHAR.bin), and the "pointers" in FILE2.bin become simply offsets into the LIT_CHAR.bin file.  Thus in the Python port, the *entire* literal data table is passed by files.
+  * FILE2 (.bin) passes the "literal table".  However ... while numerical-constant data was included in FILE2, string data was not.  Rather, if there were a string literal, the data for it in FILE2 consists merely of a memory pointer to the string data, and of course that memory point works only in memory.  For the Python port (see the section below on reverse engineering the literal-table file), I export the string data in a dedicated file (LIT_CHAR.bin), and the "pointers" in FILE2.bin become simply offsets into the LIT_CHAR.bin file.  Thus in the Python port, the *entire* literal data table is passed by files.
 
 Section 2.2.5 of IR-182-1 says this about the data passed from PASS1 to the optimizer passes or to PASS2,
 
@@ -1167,6 +1193,55 @@ In retrospect, I see that this info is consistent with the description in sectio
 
 Besides what was said above, the entries for `CHARACTER` constants are of the form (hexadecimal) XXYYYYYY, where XX is the length of the constant string minus 1, and YYYYYY is a pointer into the `LIT_CHAR` array that holds the actual string data.  `LIT_CHAR` was apparently *not* passed to later compilation passes via a file for unknown reasons &mdash; IR-182-1 simply says that "LIT_CHAR cannot be kept on an intermediate file" &mdash; and thus it must have been passed in memory.  We, however, must pass it in a file, which we'll call LIT_CHAR.bin.  It's a binary file rather than a text file because it is a byte array of EBCDIC data rather than ASCII.
 
+## Pass-to-Pass FILEx Usage, Continued
 
-TBD
+I already talked about FILE1 and FILE2 as output by PASS1 above.  Let's look at FILEx more generally, in the broader context of the entire sequence of passes (including optimization) described earlier:
 
+  * PASS1:
+    * Outputs:
+        * FILE1 (`HALMAT_FILE`) = HALMAT
+        * FILE2 (`LITFILE`) = Literal table (*sans* data for literal strings, passed in memory/LIT_CHAR.bin).
+        * FILE3 (`IC_FILE`) = I/C queue.  HALMAT(?) for `INITIAL`/`CONSTANT` attributes in `DECLARE` statements.
+        * FILE6 (`VMEM_FILE#`) = Virtual memory
+  * FLOWGEN:
+    * Inputs:
+        * FILE1 (`CODEFILE`) = HALMAT
+        * FILE2 (`LITFILE`) = Literal table.
+        * FILE6 (`VMEM_FILE#`) = Virtual memory
+    * Outputs:
+        * FILE6(?) (`VMEM_FILE#`) = Virtual memory
+  * OPT:
+    * Inputs:
+        * FILE1 (`CODEFILE`) = HALMAT
+        * FILE2 (`LITFILE`) = Literal table.
+    * Outputs:
+        * FILE2 (`LITFILE`) = Literal table.
+        * FILE4 (`CODE_OUTFILE`) = HALMAT
+  * AUX:
+    * Inputs:
+        * FILE4 (`HALMAT_FILE`) = HALMAT
+    * Outputs:
+        * FILE1 (`AUXMAT_FILE`) = Auxiliary HALMAT
+  * PASS2:
+    * Inputs:
+        * FILE1 (`AUX_FILE`) = Auxiliary HALMAT
+        * FILE2 (`LITFILE`) = Literal table.
+        * FILE3 (`CODE_FILE`) = 
+        * FILE4 (`CODEFILE`) = HALMAT
+        * FILE6(?) (`VMEM_FILE#`) = Virtual memory
+    * Outputs:
+        * FILE2 (`LITFILE`) = Literal table.
+        * FILE3 (`CODE_FILE`) = 
+        * FILE6(?) (`VMEM_FILE#`) = Virtual memory
+  * PASS3:
+    * Inputs:
+        * FILE2 (`LITFILE`) = Literal table.
+        * FILE5 = SDF(?)
+        * FILE6(?) (`VMEM_FILE#`) = Virtual memory
+    * Outputs:
+        * FILE5 = SDF(?)
+  * PASS4:
+    * Inputs:
+        * (None)
+    * Outputs:
+        * (None)

@@ -700,7 +700,7 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
                 if LENGTH(l.SDL_INFO) >= 16:
                     l.T = l.T + g.X1 + SUBSTR(l.SDL_INFO, 8, 8);
                 else:
-                    l.T = l.T + SUBSTR(X70, 0, 9);
+                    l.T = l.T + SUBSTR(g.X70, 0, 9);
             # END
             else:
                 l.T = g.PAD1[:];
@@ -983,13 +983,13 @@ def OUTPUT_WRITER(PTR_START=None, PTR_END=None):
             # FIND MOST RECENT RVL. THE RVL FOR EACH TOKEN WAS SAVED IN SAVE_TOKEN
             if g.SDL_OPTION and (not g.INCLUDING) and (not g.INCLUDE_END):
             # DO;
-                l.C_RVL = STRING(ADDR(g.RVL_STACK1[l.PTR_START])) + \
-                                    STRING(ADDR(g.RVL_STACK2[l.PTR_START]));
+                l.C_RVL = STRING(l.PTR_START, g.RVL_STACK1) + \
+                                    STRING(l.PTR_START, g.RVL_STACK2);
                 for l.IDX in range(l.PTR_START + 1, l.PTR_END + 1):
                     if ((g.GRAMMAR_FLAGS(l.IDX) & g.PRINT_FLAG) != 0):
                     # DO;
-                        l.C_TMP = STRING(ADDR(g.RVL_STACK1[l.IDX])) + \
-                                    STRING(ADDR(g.RVL_STACK2[l.IDX]));
+                        l.C_TMP = STRING(l.IDX, g.RVL_STACK1) + \
+                                    STRING(l.IDX, g.RVL_STACK2);
                         if STRING_GT(l.C_TMP, l.C_RVL): 
                             l.C_RVL = l.C_TMP;
                     # END
