@@ -499,6 +499,56 @@ Software:  Corona 261
 
 Flaws:  None known.
 
+## 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin
+
+Source:  Dr. Nick Gessler
+
+Software:  Sunspot, specific version number unknown; but this module (and its companions described below) are from the first release of Sunspot, presumably assembly 1021107-011. 
+
+Comments:  Note that this rope module and its companions had deteriorated considerably before coming into the hands of Dr. Gessler. There are holes in the potting so deep the wires are visible in some of them, and there is a significantly larger number of dead or dying diodes (or broken wires) in these modules than in any modules previously encountered, greatly complicating data recovery.  Aside from that, the available set of modules was missing module B23 (presumably p/n 1003733-271); thus even if all data were fully recoverable, our dump of this version of Sunspot would nevertheless be incomplete until module B23 is located and dumped.
+
+Flaws:  There are approximately 7 bad diodes.  Full data recovery is expected.
+
+## 1003733-261-BlockI-SunspotX-B22-1BadDiode.bin, 1003733-261-BlockI-SunspotX-B22-Repaired.bin
+
+Source:  Dr. Nick Gessler
+
+Software:  See 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin above.
+
+Comments:  See 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin above.
+
+Flaws:  There was 1 bad diode (strand 6).  Specifically, strand 37 has a bad bit 3, repaired using the parity method.
+
+## 1003733-281-BlockI-SunspotX-B24-ManyBadDiodes.bin
+
+Source:  Dr. Nick Gessler
+
+Software:  See 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin above.
+
+Comments:  See 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin above.
+
+Flaws:  There are many bad diodes.  One strand has 7 bad diodes by itself.  Full data recovery is *not* expected.
+
+## 1003733-291-BlockI-SunspotX-B28-20BadDiodes.bin
+
+Source:  Dr. Nick Gessler
+
+Software:  See 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin above.
+
+Comments:  See 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin above.
+
+Flaws:  There are approximately 20 bad diodes.  However, it is expected that all data *except* the last strand will be recoverable.
+
+## 1003733-311-BlockI-SunspotX-B29-ManyBadDiodes.bin
+
+Source:  Dr. Nick Gessler
+
+Software:  See 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin above.
+
+Comments:  See 1003733-251-BlockI-SunspotX-B21-7BadDiodes.bin above.
+
+Flaws:  There are many bad diodes.  Full data recovery is *not* expected.
+
 ## 2003053-031-BLK2-Retread50-B1-BadBits.bin, 2003053-031-BLK2-Retread50-B1-Repaired.bin
 
 Source:  Computer History Museum, Mountain View, California.

@@ -120,7 +120,7 @@ for parm in sys.argv[1:]:
     elif parm == '--help':
         print('This is PASS 1 of HAL/S-FC as ported to Python 3.')
         print('Usage:')
-        print('\tHAL-S-FC.py [OPTIONS] [<SOURCE.hal]')
+        print('\tHAL_S_FC.py [OPTIONS] [<SOURCE.hal]')
         print('The allowed "modern" OPTIONS are:')
         print('--hal=SOURCE.hal Choose HAL/S source-code file (default stdin).')
         print('                 Note that an extension of .hal is')
