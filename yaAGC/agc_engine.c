@@ -377,6 +377,15 @@
  *				here, and that its presence isn't too desirable for
  *				those who are porting minimized implementations,
  *				so I've commented it out.
+ *		01/03/24 MAS	Changed GOJAM simulation to clear out a lot more
+ *				yaAGC-internal state that doesn't necessarily
+ *				exactly match hardware GOJAM actions, but needs
+ *				to be cleared out nevertheless due to how yaAGC
+ *				is implemented. This is necessary to fix a
+ *				longstanding bug where the AGC would fail to
+ *				correctly exit standby, due to corruption of the
+ *				first instruction at address 4000 (usually by a
+ *				non-zero IndexValue).
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -2222,6 +2231,15 @@ agc_engine (agc_t * State)
               CpuWriteIO(State, 034, 0);
               CpuWriteIO(State, 035, 0);
               State->DownruptTimeValid = 0;
+
+              // Clear other yaAGC-internal state
+              State->IndexValue = AGC_P0;
+              State->ExtraCode = 0;
+              State->SubstituteInstruction = 0;
+              State->PendFlag = 0;
+              State->PendDelay = 0;
+              State->TookBZF = 0;
+              State->TookBZMF = 0;
 
               // Light the RESTART light on the DSKY, if we're not going into standby
               if (!State->Standby)
