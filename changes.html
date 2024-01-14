@@ -18,6 +18,102 @@ table.hidden = box.checked
     <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","Change-Log").replace("@SUBTITLE@","Software / Website / News"))
 </script><br>
+    <input id="box2024" onchange="viewOrHide(2024)" autocomplete="off" type="checkbox"><b>Hide 2024 change notes?</b> <br>
+    <table summary="" id="table2024" style="width: 90%; text-align:
+      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" border="0">
+      <tbody>
+        <tr>
+  <td valign="top">2024-01-14<br>
+  </td>
+  <td valign="top">Since I've posted nothing substantive about Space 
+Shuttle flight software in a 
+while, I suppose I should give you an update on the progress towards 
+presenting it to you in some useful 
+fashion.&nbsp; There's good news and not-so-good news, though I think 
+the good outweighs the not-so-good.&nbsp; There are three 
+somewhat-independent aspects:<br>
+<ol>
+  <li><i>Actual original flight-software source code and/or object code.</i>&nbsp;
+ I now have some of the source code and <i>all</i> of the GPC (IBM AP-101S) 
+object code in hand, in some version which I don't care to specify at 
+the moment.&nbsp; Does that sound a bit weak and wishy-washy, given my 
+normal tendency to bombard you with every detail and every speculation 
+that crosses my fevered brain?&nbsp; You're right, it is!&nbsp; The 
+problem is that I've received this material on condition that I preserve
+ it and can personally access it for compiler development, but that I <i>not</i>
+ show it to anybody else.&nbsp; Or at least, not yet.&nbsp; 
+Nor do I have any timetable on when I will be able to make to do 
+so.&nbsp; Moreover, this confidentiality obligation is on top of 
+whatever ITAR restrictions may limit distribution.&nbsp; Besides 
+which, I can't even get any legal action started on the ITAR front until
+ I'm given permission to show the source code to the attorneys.&nbsp; 
+Why 
+have I teasing you like this, given that I can't give you access to any 
+of 
+it?&nbsp; I still think it's good news.&nbsp; I have reason to believe 
+that I will be able to make the material available at some point — at 
+least if you're a "U.S. Person" for ITAR purposes — 
+even if I don't know when that will be.&nbsp; And I think that I would 
+want to know about it if I were the 
+one reading this update rather than writing it.&nbsp; <img moz-do-not-send="true" src="smiley.png" alt="" width="16" height="16"></li>
+  <li><i>HAL/S compiler/emulator development for compiling/running the flight software source code.</i>&nbsp;
+
+ Anyone who has been following my posts on the topic will recall that 
+there have been two independent but somewhat-complementary lines of 
+attack:&nbsp; first, a completely-homegrown
+ HAL/S compiler/interpreter/emulator; and second, a port of the original
+ HAL/S compiler from its now completely-obsolete XPL language into the 
+modern Python language.&nbsp; Each of these approaches is partially 
+working and partially unimplemented.&nbsp; But both are on hold at the 
+moment, due mainly to the fact that their development is very 
+exhausting; I've simply burnt myself out on it.&nbsp; Plus, the 
+compilers 
+aren't entirely useful without the missing portions of the 
+flight-software source code I'm still awaiting.&nbsp; So I'm taking a 
+break from HAL/S compiler development right now. <br>
+</li>
+  <li><i>Distribution roadmap.</i>&nbsp; The question looming over all of
+ this is how to distribute executable flight software in some manner 
+that's useful for use in spacecraft simulators such as Orbiter, if
+ there are ITAR restrictions?&nbsp; Personally, I would argue that if 
+object code is distributed in a form that cannot be executed on the 
+original Space Shuttle software, and cannot be reverse engineered in 
+such a way as to make it so-executable, then it should be fine.&nbsp; 
+For example, the original HAL/S compiler was able to compile flight 
+software into object code either for an AP-101S target <i>or</i> for an IBM 360 target, and IBM 360 object code would seem to me to be ITAR compliant.&nbsp; 
+However, not everyone agrees with me.&nbsp; It has occurred to me, though, 
+that ultimately it's not my responsibility nor that of the Virtual AGC 
+Project to distribute code that's executable on a spacecraft simulator 
+anyway.&nbsp; If/when I'm at liberty to distribute the flight-software source code to 
+ITAR-qualified individuals who are involved in spacecraft simulation, 
+<i>they</i> can use they can use their own judgement to produce object code 
+they deem distributable without ITAR rish, or not.&nbsp; In other words, it's largely
+Somebody Else's Problem.</li>
+</ol>
+<p>On a different note, Mike has sent along a new stash of Apollo documents, which I've added to the main <a moz-do-not-send="true" href="links2.html#RecentAdditions">document library</a>.&nbsp; As usual, here's his summary:<br>
+</p>
+<div dir="ltr"><meta http-equiv="content-type" content="text/html; charset=UTF-8"><div><div><ul><li>LM-3 Apollo Operations Handbook, Volume II. This goes 
+along with the Volume I that we've had a scan of for a while now. 
+Interestingly, it appears to be written for an early-ish version of 
+Sundance; it describes usage of program P05 to exit standby mode. The 
+standby-exiting logic was made automatic before Sundance actually flew.</li><li>Apollo
+ Operations Handbook, Block II Spacecraft, Volume I, from April 1970. 
+This is a somewhat later revision than our current (mostly poor-quality)
+ scans. This one should be much more readable. Even though it's only 
+from mid-1970, it already has changes anticipated for the J-missions 
+incorporated.</li><li>Apollo SCS Training Manual, Block II from 
+Honeywell. This document goes into a lot of deep&nbsp;detail on the operation
+ of the Block II Stabilization and Control System —  more, I think, than
+ any other that we currently know about.</li><li>Apollo Portable Life 
+Support Systems booklet from Hamilton Standard. We already have scans of
+ a very similar booklet whose title includes "... and Oxygen Purge 
+Systems". Despite the shorter title, this booklet is actually a later 
+revision that covers more of the system.</li></ul></div></div></div>
+
+
+  </td>
+</tr>
+</tbody></table>
     <input id="box2023" onchange="viewOrHide(2023)" autocomplete="off" type="checkbox"><b>Hide 2023 change notes?</b> <br>
     <table summary="" id="table2023" style="width: 90%; text-align:
       left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" border="0">
@@ -4259,7 +4355,7 @@ mission control, and won't for a very long time, if ever.<br>
             STS-107 (OI-29) to STS-114 (OI-30), as well as a top-level
             summary of the nature of those change.&nbsp; In brief:<br>
             <br>
-            <table cellspacing="2" cellpadding="2" border="1" align="center">
+            <table align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top"><br>
@@ -4359,7 +4455,7 @@ mission control, and won't for a very long time, if ever.<br>
     </table>
     <input id="box2022" onchange="viewOrHide(2022)" autocomplete="off" checked="checked" type="checkbox"><b>Hide 2022 change notes?</b> <br>
     <table summary="" id="table2022" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td valign="top">2022-12-30<br>
@@ -7858,7 +7954,7 @@ mission control, and won't for a very long time, if ever.<br>
     </table>
     <input id="box2021" onchange="viewOrHide(2021)" autocomplete="off" checked="checked" type="checkbox"><b>Hide 2021 change notes?</b>
     <table summary="" id="table2021" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td valign="top">2021-12-31<br>
@@ -18059,7 +18155,7 @@ mission control, and won't for a very long time, if ever.<br>
     <br>
     <input id="box2020" onchange="viewOrHide(2020)" autocomplete="off" checked="checked" type="checkbox"><b>Hide 2020 change notes?</b>
     <table summary="" id="table2020" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td valign="top">2020-12-24<br>
@@ -18072,7 +18168,7 @@ mission control, and won't for a very long time, if ever.<br>
             An accurate reconstruction of <a href="listings/LUM69R2/MAIN.agc.html">Luminary 69/2</a>
             has been available for a while.&nbsp; The upshot is:<br>
             <br>
-            <table width="80%" cellspacing="2" cellpadding="2" border="1" align="center">
+            <table width="80%" align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="middle" align="center"><font color="#ff0000"><i>We now have complete, final
@@ -28010,7 +28106,7 @@ mission control, and won't for a very long time, if ever.<br>
     <br>
     <input id="box2019" onchange="viewOrHide(2019)" autocomplete="off" checked="checked" type="checkbox"><b>Hide 2019 change notes?</b>
     <table summary="" id="table2019" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td valign="top">2019-12-30<br>
@@ -92563,7 +92659,7 @@ explanation
     <br>
     <input id="box2018" onchange="viewOrHide(2018)" autocomplete="off" checked="checked" type="checkbox"><b>Hide 2018 change notes?</b>
     <table summary="" id="table2018" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td valign="top">2018-12-31<br>
@@ -95450,7 +95546,7 @@ KiCad
             wondering if you're going blind.&nbsp; <img alt="" src="smiley.png" width="16" height="16">&nbsp; This is a
             significant milestone, though, because<br>
             <br>
-            <table width="60%" cellspacing="2" cellpadding="2" border="1" align="center">
+            <table width="60%" align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top"><font color="red">We now have
@@ -116173,7 +116269,7 @@ One
     <br>
     <input id="box2017" onchange="viewOrHide(2017)" autocomplete="off" checked="checked" type="checkbox"><b>Hide 2017 change notes?</b>
     <table summary="" id="table2017" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td valign="top">2017-12-21<br>
@@ -124482,7 +124578,7 @@ GitHub
                 admit that some of the comments in the code haven't been
                 full proof-read for typos, so</li>
             </ul>
-            <table cellspacing="2" cellpadding="2" border="1" align="center">
+            <table align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top" align="center"><font color="red"><b>Transcribed
@@ -137690,7 +137786,7 @@ Rev
                 source-code files that can be run through the assembler:<br>
               </li>
             </ul>
-            <table cellspacing="2" cellpadding="2" border="1" align="center">
+            <table align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top" align="center"><font color="red"><b>Transcribed
@@ -148021,7 +148117,7 @@ the
                 the Luminary 69 program has finally been completed, so
                 I'm now making an official announcement:</li>
             </ul>
-            <table cellspacing="2" cellpadding="2" border="1" align="center">
+            <table align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top"><b><font color="red">Transcribed <a href="https://github.com/virtualagc/virtualagc/tree/master/Luminary069">source
@@ -151236,7 +151332,7 @@ we
     <br>
     <input id="box2016" onchange="viewOrHide(2016)" autocomplete="off" checked="checked" type="checkbox"><b>Hide 2016 change notes?</b>
     <table summary="" id="table2016" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td valign="top">2016-12-30<br>
@@ -151944,7 +152040,7 @@ Speaking
           <td valign="top">2016-12-28<br>
           </td>
           <td valign="top">
-            <table summary="" cellspacing="2" cellpadding="2" border="1" align="center">
+            <table summary="" align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top"><font color="red"><b>The full Retread
@@ -153719,7 +153815,7 @@ Speaking
               </li>
               <li>Perhaps more excitingly,</li>
             </ul>
-            <table summary="" cellspacing="2" cellpadding="2" border="1" align="center">
+            <table summary="" align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top"><font color="red"><b>The full
@@ -154198,7 +154294,7 @@ listing
                 in the announcement below:<br>
               </li>
             </ul>
-            <table summary="" cellspacing="2" cellpadding="2" border="1" align="center">
+            <table summary="" align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top"><font color="red"><b>The scans of the
@@ -154956,7 +155052,7 @@ The
               <li>Finally, most-importantly,<br>
               </li>
             </ul>
-            <table summary="" cellspacing="2" cellpadding="2" border="1" align="center">
+            <table summary="" align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top"><font color="red"><b>The scans of the
@@ -155008,7 +155104,7 @@ The
                 120 source code was assembled.</li>
               <li>And most importantly:</li>
             </ul>
-            <table summary="" cellspacing="2" cellpadding="2" border="1" align="center">
+            <table summary="" align="center" cellspacing="2" cellpadding="2" border="1">
               <tbody>
                 <tr>
                   <td valign="top"><font color="red"><b>The full
@@ -160761,7 +160857,7 @@ Apollo
     <input checked="checked" disabled="disabled" autocomplete="off" type="checkbox"><b>Hide 2013 change notes? (There aren't any!)</b><br>
     <input id="box2012" onchange="viewOrHide(2012)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2012 change notes?</b>
     <table summary="" id="table2012" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2012-01-08<br>
@@ -160794,7 +160890,7 @@ Apollo
     <br>
     <input id="box2011" onchange="viewOrHide(2011)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2011 change notes?</b>
     <table summary="" id="table2011" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2011-12-27<br>
@@ -162985,7 +163081,7 @@ OBC
     <br>
     <input id="box2010" onchange="viewOrHide(2010)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2010 change notes?</b>
     <table summary="" id="table2010" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2010-09-05<br>
@@ -164424,7 +164520,7 @@ are
     <br>
     <input id="box2009" onchange="viewOrHide(2009)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2009 change notes?</b>
     <table summary="" id="table2009" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2009-11-12<br>
@@ -176381,7 +176477,7 @@ This
     <br>
     <input id="box2008" onchange="viewOrHide(2008)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2008 change notes?</b>
     <table summary="" id="table2008" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2008-02-14<br>
@@ -180403,7 +180499,7 @@ it
     <br>
     <input id="box2007" onchange="viewOrHide(2007)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2007 change notes?</b>
     <table summary="" id="table2007" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2007-12-28<br>
@@ -182046,7 +182142,7 @@ that
     <br>
     <input id="box2006" onchange="viewOrHide(2006)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2006 change notes?</b>
     <table summary="" id="table2006" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2006-02-26<br>
@@ -182458,7 +182554,7 @@ I
     <br>
     <input id="box2005" onchange="viewOrHide(2005)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2005 change notes?</b>
     <table summary="" id="table2005" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2005-12-24<br>
@@ -199942,7 +200038,7 @@ In
     <br>
     <input id="box2004" onchange="viewOrHide(2004)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2004 change notes?</b>
     <table summary="" id="table2004" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">2004-12-30<br>
@@ -210478,7 +210574,7 @@ and
     <br>
     <input id="box2003" onchange="viewOrHide(2003)" checked="checked" autocomplete="off" type="checkbox"><b>Hide 2003 change notes?</b>
     <table summary="" id="table2003" style="width: 90%; text-align:
-      left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" hidden="" border="0">
+      left; margin-left: auto; margin-right: auto;" hidden="" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">12/30/2003<br>
