@@ -203,6 +203,7 @@
 #		2022-10-29 RSB	Added LM131R1, Sunrise45, Sunrise69.
 #		2022-11-17 RSB	Added Aurora 88.
 #		2023-05-02 RSB  Added Corona 261.
+#		2024-01-25 RSB  Added Skylark 48
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -242,7 +243,7 @@
 # 	"make FORCE_clang=yes FORCE_cc=/usr/bin/clang-3.9 FORCE_CC=/usr/bin/clang++-3.9".
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2022-11-17\\\"
+NVER:=\\\"2024-01-25\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -474,7 +475,7 @@ MISSIONS += Comanche051 Artemis071 Luminary178 Luminary163 Luminary173
 MISSIONS += SundanceXXX Sundance306ish Comanche044 Comanche045 Manche45R2
 # MISSIONS += LUM99R2
 MISSIONS += Luminary096 LM131R1 Sunrise45 Sunrise69 Aurora88
-MISSIONS += Corona261
+MISSIONS += Corona261 Skylark048
 # ifndef MACOSX
 MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif

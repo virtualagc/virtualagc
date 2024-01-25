@@ -162,6 +162,9 @@
  *              2022-11-17 RSB  Added Aurora 88.
  *              2023-05-02 RSB  Tentatively enabled Corona 261.
  *              2023-06-22 RSB  Added Corona161's HTML.
+ *              2024-01-25 RSB  Enabled Skylab 2-4 and ASTP missions because
+ *                              core dump (but not yet reconstructed source
+ *                              code) is now available.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -312,12 +315,12 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "Apollo 15-17 Lunar Module", "Luminary210/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 15-17 mission.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary210", "LM1.ini" },
-            { "Apollo Skylab Command Module", "",
-                "Click this to select the Apollo-Soyuz mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "", "CM.ini" },
-            { "Apollo Soyuz Command Module", "",
-                "Click this to select an Apollo-Skylab mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "", "CM.ini" },
+            { "Apollo Skylab 2-4 Command Module", "Skylark048/MAIN.agc.html",
+                "Click this to select the Skylab 2, 3, or 4 mission.", ENABLED, CM,
+                BLOCK2, PERIPHERALS, "Skylark048", "CM.ini" },
+            { "Apollo Soyuz Command Module (ASTP)", "Skylark048/MAIN.agc.html",
+                "Click this to select an Apollo-Soyuz mission.", ENABLED, CM,
+                BLOCK2, PERIPHERALS, "Skylark048", "CM.ini" },
             { "Validation Suite", "Validation/Validation.agc.html",
                 "Click this to select the AGC validation (non-mission) software.",
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Validation", "LM.ini" },
