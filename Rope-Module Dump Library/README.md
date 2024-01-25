@@ -66,13 +66,13 @@ For BLK2 or AGC targets:  There are up to 6 rope-memory modules per AGC, with 6 
 
 ## The Simplified Explanation
 
-Dumps from physical rope-memory modules do not always contain immediately-usable data, because it sometimes happens that the modules being dumped are defective in some way.  The most-commonly-encountered problem turns out to have a relatively-easy fix, and since this problem and its fix will be referred to several times later, I'll discuss them in a general way now to avoid repetition.
+Someimtes, dumps from physical rope-memory modules do not contain immediately-usable data, because the modules being dumped are defective in some way.  The most-commonly-encountered problem turns out to have a relatively-easy fix, and since this problem and its fix will be referred to several times later, I'll discuss them in a general way now to avoid repetition.
 
 Note first that each location in fixed memory holds a data word consisting of 15 bits, plus one extra bit, called the "parity bit", for 16 in all.  The parity bit doesn't contain data as such, but provides a way of partially checking whether the 15 bits of actual data are correct.
 
 The "common problem" that I mentioned is a so-called *stuck bit*.  That means that some particular one of the 15 bits, say bit 3 as an example, always is read as a 1 regardless of which address is being queried.  Normally that wouldn't happen, and you'd expect bit 3 to vary between 0 and 1, depending on the address.  We would say that bit 3 is stuck.
 
-Because of the nature of parity bits, this problem is easily repaired by software, as long as only *one* of the data lines is stuck in any particular region of memory.  If more than one data line is stuck in the same range of memory addresses, then correction becomes much harder, and is not always possible.  However, that's outside of the scope of our discussion.
+Because of the nature of parity bits, this problem is easily repaired by software, as long as *only one* of the data lines is stuck in any particular region of memory.  If more than one data line is stuck in the same range of memory addresses, then correction becomes much harder, and is not always possible.  However, right now I'm just talking about the case of a single stuck data line.
 
 In the case of the AGC, parity bits are *odd*.  This refers to the way they are calculated.  If you express a 15-bit word in binary notation (i.e., 0's and 1's), the parity bit will have been chosen so that an odd number of bits is 1.  For example, suppose the word stored at address 05,3456 is 12345 in octal notation.  In binary,
 
@@ -128,8 +128,9 @@ But in early software versions like Sunrise and Retread, these holes were someti
 
 # <a name="Inventory">Inventory of Dumped Rope-Memory Modules</a>
 
-Unless otherwise stated, all dumps of physical rope-memory modules were performed by Mike Stewart. Two methods were used.  One involved [the AGC from the collection of Jimmie Loocke, restored in 2019](http://www.ibiblio.org/apollo/Restoration.html), at which point (as far as I know) it became the only functional AGC then in existence.  The method was to insert available rope-memory modules into this AGC, when compatible, and to exploit the AGC to dump their contents.  Eventually the restored AGC was no longer available for this purpose, and Mike designed and constructed dedicated rope-memory module reader devices which he could use for dumping additional modules as they became available.
+Unless otherwise stated, all dumps of physical rope-memory modules &mdash; and corrections to that data, where appropriate &mdash; were performed by **Mike Stewart**, so even though Mike performed all or all of the actual work, I won't keep mentioning him over and over again.  Mike is the default.
 
+As far as dumping the data is concerned, two methods were used.  One involved [the AGC from the collection of Jimmie Loocke, restored in 2019](http://www.ibiblio.org/apollo/Restoration.html), at which point (as far as I know) it became the only functional AGC then in existence.  The method was to insert available rope-memory modules into this AGC, when compatible, and to exploit the AGC to dump their contents.  Eventually, though, the restored AGC became unavailable for this purpose, so an alternate method was needed.  At that point and Mike designed and constructed dedicated rope-memory module reader devices which he could use for dumping additional modules as they became available.
 
 
 ## 1003133-18-BlockI-Sunrise33+-B29.bin
@@ -719,6 +720,66 @@ Flaws:  None known
 Source:  Anonymous collector
 
 Software:  LM131rev1
+
+Flaws:  None known
+
+## 2010802-541-AGC-Skylark48-B1.bin
+
+Source:  [New Mexico Museum of Space History](https://www.nmspacemuseum.org/), Executive Director Chris Orwoll
+
+Thanks:  Larry McGlynn
+
+Software:  Skylark48
+
+Flaws:  None known
+
+## 2010802-551-AGC-Skylark48-B2.bin
+
+Source:  [New Mexico Museum of Space History](https://www.nmspacemuseum.org/), Executive Director Chris Orwoll
+
+Thanks:  Larry McGlynn
+
+Software:  Skylark48
+
+Flaws:  None known
+
+## 2010802-561-AGC-Skylark48-B3.bin
+
+Source:  [New Mexico Museum of Space History](https://www.nmspacemuseum.org/), Executive Director Chris Orwoll
+
+Thanks:  Larry McGlynn
+
+Software:  Skylark48
+
+Flaws:  None known
+
+## 2010802-571-AGC-Skylark48-B4.bin
+
+Source:  [New Mexico Museum of Space History](https://www.nmspacemuseum.org/), Executive Director Chris Orwoll
+
+Thanks:  Larry McGlynn
+
+Software:  Skylark48
+
+Flaws:  None known
+
+## 2010802-581-AGC-Skylark48-B5.bin
+
+Source:  [New Mexico Museum of Space History](https://www.nmspacemuseum.org/), Executive Director Chris Orwoll
+
+Thanks:  Larry McGlynn
+
+Software:  Skylark48
+
+Flaws:  None known
+
+## 2010802-591-AGC-Skylark48-B6.bin
+
+Source:  [New Mexico Museum of Space History](https://www.nmspacemuseum.org/), Executive Director Chris Orwoll
+
+Thanks:  Larry McGlynn
+
+Software:  Skylark48
 
 Flaws:  None known
 
