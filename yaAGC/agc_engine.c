@@ -386,6 +386,12 @@
  *				correctly exit standby, due to corruption of the
  *				first instruction at address 4000 (usually by a
  *				non-zero IndexValue).
+ *		01/29/24 MAS	Added simulation of RADARUPT. Unlike other
+ *				interrupts, RADARUPT is automatically generated
+ *				internally by the AGC itself once a full radar
+ *				cycle has had time to complete. This is important
+ *				when running ropes sensitive to this timing,
+ *				like Artemis and Skylark.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -2144,6 +2150,11 @@ agc_engine (agc_t * State)
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME5)))
 	        State->InterruptRequests[2] = 1;
+
+              // Synchronously with TIME5, if radar activity is enabled,
+              // increment the radar gate counter.
+              if (State->InputChannel[013] & 010)
+                State->RadarGateCounter++;
 	    }
           // TIME4 is the same as TIME3, but 7.5ms out of phase
           if (010 == (037 & State->InputChannel[ChanSCALER1]))
@@ -2183,6 +2194,23 @@ agc_engine (agc_t * State)
             {
               State->Trap32 = 0;
               State->InterruptRequests[10] = 1;
+            }
+
+          // Similarly, check for radar cycle completion. As with HANDRUPT, the
+          // timing here is slightly off (early by ~13 MCT), but this should
+          // not be enough to matter.
+          if ((State->RadarGateCounter == 9) && (036 == (037 & State->InputChannel[ChanSCALER1])))
+            {
+              // Completion of a radar cycle triggers the following actions:
+              // 1. The radar gate counter is set back to 0.
+              // 2. The radar activity bit (bit 4 of channel 13) is reset.
+              // 3. Data from the radar is shifted into the RNRAD counter
+              //    (this is expected to be performed by RequestRadarData().
+              // 4. RADARUPT is set pending.
+              State->RadarGateCounter = 0;
+              State->InputChannel[013] &= ~010;
+              RequestRadarData(State);
+              State->InterruptRequests[9] = 1; // RADARUPT
             }
         }
 

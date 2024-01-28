@@ -77,6 +77,9 @@
 				same size as data packets.  Otherwise, it makes
 				low-level debugging of the streaming data hard,
 				because the packet alignment changes over time.
+		01/29/24 MAS	Added a stub RequestRadarData function for use
+				by integrators of yaAGC into spacecraft
+				simulations.
 */
 
 #include <errno.h>
@@ -502,4 +505,12 @@ ShiftToDeda (agc_t *State, int Data)
     send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
 }
 
-
+//----------------------------------------------------------------------
+// This function is provided as a stub for integrators of yaAGC into
+// more complete simulations. It is expected to populate the counter
+// RNRAD with radar data.
+void
+RequestRadarData (agc_t *State)
+{
+    // State->Erasable[0][RegRNRAD] = 012345;
+}

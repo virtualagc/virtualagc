@@ -93,6 +93,7 @@
  * 		07/13/17 MAS	Added initialization of the three HANDRUPT traps.
  * 		05/13/21 MKF	Disabled UnblockSocket for the WASI target
  *  				(there are no sockets in wasi-libc)
+ * 		01/29/24 MAS	Added initialization of RadarGateCounter.
  */
 
 // For Orbiter.
@@ -315,6 +316,8 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->Trap31A = 0;
   State->Trap31B = 0;
   State->Trap32 = 0;
+
+  State->RadarGateCounter = 0;
 
   if (initializeSunburst37)
     {
