@@ -41,6 +41,9 @@
 				the GPL, for linking to Orbiter SDK libraries.
 		05/14/05 RSB	Corrected website references.
 		05/31/05 RSB	Added ShiftToDeda.
+		01/29/24 MAS	Added a stub RequestRadarData function for use
+				by integrators of yaAGC into spacecraft
+				simulations.
 */
 
 #ifdef WIN32
@@ -182,4 +185,12 @@ ShiftToDeda (agc_t *State, int Data)
 {
 }
 
-
+//----------------------------------------------------------------------
+// This function is provided as a stub for integrators of yaAGC into
+// more complete simulations. It is expected to populate the counter
+// RNRAD with radar data.
+void
+RequestRadarData (agc_t *State)
+{
+    // State->Erasable[0][RegRNRAD] = 012345;
+}

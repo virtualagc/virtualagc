@@ -38,6 +38,9 @@
   Contact:   Michael Karl Franzl <public.michael@franzl.name>
   Reference: http://www.ibiblio.org/apollo/index.html
   Mods:      2020-06-07 MKF  Created.
+             2024-01-29 MAS  Added stub RequestRadarData function for use
+                             by integrators of yaAGC into spacecraft
+                             simulations.
 */
 
 #include "yaAGC.h"
@@ -184,5 +187,10 @@ ChannelRoutine (agc_t* State)
 
 void
 ShiftToDeda (agc_t* State, int Data)
+{
+}
+
+void
+RequestRadarData (agc_t *State)
 {
 }
