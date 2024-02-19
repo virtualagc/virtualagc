@@ -30,7 +30,7 @@
     * [SPACE_FLAGS, TOKEN_FLAGS, and LAST_SPACE](#SPACE_FLAGS)
     * [Literal Data](#Literal)
     * [Compatible Datatypes, Automatic Conversions](#Autoconvert)
-    * [The Boolean Conditional Trap of Death!](#Death)
+  * [The Boolean Conditional Trap of Death!](#Death)
   * [LINE_COUNT](#LINE_COUNT)
   * [Value of Loop Counter After a For-Loop](#ForLoop)
   * [Virtual Memory](#VirtualMemory)
