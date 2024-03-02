@@ -39,6 +39,8 @@
 #               2023-07-31 RSB  Added shorthand STS-nnn-mmm to Targets field.
 #               2023-08-01 RSB  Added the "Flight STS-xxx" sections for --shuttle.
 #               2023-11-24 RSB  Corrected many STS flight titles.
+#               2024-02-28 RSB  Added section for flight software
+#                               user notes and requirements waivers.
 #
 # Usage:
 #	./buildLibraryPage.py <DocumentLibraryDatabase.tsv >../links2.html
@@ -1407,6 +1409,7 @@ if shuttle:
         { "anchor" : "PASS", "title" : "Primary Avionics Software System (PASS) / Primary Flight Software (PFS)", "keywords" : [ "PASS", "PFS", "RTL" ] },
         { "anchor" : "BFS", "title" : "Backup Flight System (BFS)", "keywords" : [ "BFS" ] },
         { "anchor" : "FCOS", "title" : "Flight Control Operating System (FCOS)", "keywords" : [ "FCOS" ] },
+        { "anchor" : "notes", "title" : "Flight Software Waivers and User/Program Notes", "keywords" : [ "note", "notes"] },
         { "anchor" : "DPS", "title" : "Data Processing Subsystem (DPS)", "keywords" : [ "DPS" ] },
         { "anchor" : "GPC", "title" : "General Purpose Computer (GPC), IBM AP-101S Avionics Computer", "keywords" : [ "AP-101S", "GPC" ] },
         { "anchor" : "FCS", "title" : "Flight Control System (FCS)", "keywords" : [ "FCS" ] },
