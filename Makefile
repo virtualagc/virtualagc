@@ -243,7 +243,7 @@
 # 	"make FORCE_clang=yes FORCE_cc=/usr/bin/clang-3.9 FORCE_CC=/usr/bin/clang++-3.9".
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2024-01-25\\\"
+NVER:=\\\"2024-03-06\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
