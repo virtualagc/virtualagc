@@ -21,4 +21,13 @@ FIX:
       
   end FIX;
 
-TBD
+DECLARE I FIXED, BUFFER CHARACTER INITIAL('HELLO');
+
+DO WHILE LENGTH(BUFFER) > 0;
+
+  OUTPUT(0) = 'Input a number: ';
+  BUFFER = INPUT(0);
+  I = FIX(BUFFER);
+  OUTPUT(0) = I;
+
+END;

@@ -19,12 +19,89 @@ from auxiliary import error
 #                        the `string` was found.
 def PROCEDURE(tokenized, scope, inRecord = False):
     returnValue = False
+    parameters = []
+    msg = "Cannot parse PROCEDURE definition"
     
     # The name of the procedure was indistinguishable from a statement label
     # before reaching this point, and so will have been added to the list of
     # variables as a label.  Remove it.
     symbol = list(scope["variables"])[-1]
-    scope["variables"][symbol].pop("LABEL")
     scope["labels"].remove(symbol)
+    attributes = scope["variables"][symbol]
+    attributes.pop("LABEL")
+    attributes["parameters"] = parameters
+    attributes["return"] = "FIXED"
+    
+    # Now parse the remainder of the definition to get the return type and
+    # the parameter list.
+    state = "start"
+    i = 1 # Position 0 is the "PROCEDURE" token itself.
+    while i < len(tokenized):
+        token = tokenized[i]
+        i += 1
+        if state == "start":
+            if token == "(":
+                state = "parm"
+            elif token == ";":
+                state = "semicolon"
+                i -= 1 # Retry this token position.
+            elif isinstance(token, dict) and "reserved" in token and \
+                    token["reserved"] in ["FIXED", "CHARACTER", "BIT"]:
+                state = "type"
+                i -= 1 # Retry this token with different state.
+            else:
+                error(msg, scope)
+        elif state == "type":
+            if token == ";":
+                state = "semicolon"
+                i -= 1
+            elif isinstance(token, dict) and "reserved" in token and \
+                    token["reserved"] in ["FIXED", "CHARACTER", "BIT"]:
+                attributes["return"] = token["reserved"]
+                if token["reserved"] == "BIT":
+                    state = "bitstart"
+                else:
+                    state = "semicolon"
+            else:
+                error(msg, scope)
+        elif state == "parm":
+            if token == ")":
+                state == "type"
+            elif "identifier" in token:
+                parameters.append(token["identifier"])
+                state = "comma"
+            else:
+                error(msg, scope)
+        elif state == "bitstart":
+            if token == "(":
+                state = "bitsize"
+            elif token == ";":
+                state = "semicolon"
+                i -= 1
+            else:
+                error(msg, scope)
+        elif state == "bitsize":
+            if isinstance(token, dict) and "number" in token:
+                attributes["bitsize"] = token["number"]
+                state = "bitend"
+            else:
+                error(msg, scope)
+        elif state == "bitend":
+            if token == ")":
+                state = "semicolon"
+            else:
+                error(msg, scope)
+        elif state == "comma":
+            if token == ",":
+                state == "parm"
+            elif token == ")":
+                state = "type"
+            else:
+                error(msg, scope)
+        elif state == "semicolon":
+            if token == ";":
+                if i == len(tokenized) - 1:
+                    break
+            error(msg, scope)
     
     return returnValue

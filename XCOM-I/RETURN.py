@@ -3,10 +3,10 @@
 License:    The author (Ronald S. Burkey) declares that this program
             is in the Public Domain (U.S. law) and may be used or 
             modified for any purpose whatever without licensing.
-Filename:   IF.py
-Purpose:    This is the module of XCOM-I.py which processes IF statements.
+Filename:   RETURN.py
+Purpose:    This is the module of XCOM-I.py which processes RETURN statements.
 Reference:  http://www.ibibio.org/apollo/Shuttle.html
-Mods:       2024-03-26 RSB  Began.
+Mods:       2024-04-02 RSB  Adapted from IF.py.
 '''
 
 import sys
@@ -18,22 +18,20 @@ from parseExpression import parseExpression, printTree
 #    tokenized           The tokenized form of the pseudo-statement in process.
 #    scope               The dictionary for the scope in which
 #                        the `string` was found.
-def IF(tokenized, scope, inRecord = False):
+def RETURN(tokenized, scope, inRecord = False):
     if debugSink:
         print(tokenized, file=debugSink)
 
     expression = parseExpression(tokenized, 1)
     if expression != None:
         end = expression["end"]
-        if end < len(tokenized):
+        if end == len(tokenized) - 1:
             token = tokenized[end]
-            if "reserved" in token and token["reserved"] == "THEN":
-                end += 1
-                if end == len(tokenized): # Success!
-                    if debugSink:
-                        printTree(expression, indent="\t", file=debugSink)
-                    scope["code"].append({"IF": expression})
-                    return False
+            if token == ";":
+                if debugSink:
+                    printTree(expression, indent="\t", file=debugSink)
+                scope["code"].append({"RETURN": expression})
+                return False
 
     error("Cannot parse IF statement", scope)
     return True

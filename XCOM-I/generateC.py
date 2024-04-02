@@ -117,13 +117,13 @@ For example, if in XPL we had
 (which for concreteness return no values) then this would be translated in C 
 more-or-less as:
 
-    void xA(void) {
+    void A(void) {
         ...
     }
-    void xAxB(void) {
+    void AxB(void) {
         ...
     }
-    void xAxBxC(void) {
+    void AxBxC(void) {
         ...
     }
 
@@ -131,7 +131,7 @@ Fifth, parameter lists in CALLs to PROCEDUREs.  Because of the persistence of
 PROCEDURE parameters as mentioned above, parameter lists for PROCEDURE CALLs 
 are often truncated by leaving out some parameters at the ends.  For PROCEDUREs 
 allowing no parameters (such as in the example of name mangling just given), 
-this cannot arise.  However, for all XPL/I PROCDUREs allowing parameters, the 
+this cannot arise.  However, for all XPL/I PROCEDUREs allowing parameters, the 
 translations to C as functions are implemented with the variable-length 
 parameter lists supported by `stdarg.h` 
 (see https://en.wikipedia.org/wiki/Stdarg.h).  All parameters in XPL/I are 
@@ -143,6 +143,9 @@ as a C pointer.
 '''
 
 indentationQuantum = "  "
+
+# Header file in which C prototypes for PROCEDUREs are placed.
+pf = None
 
 # A function for walkModel(), for allocating simulated memory.
 variableAddress = 0 # Total contiguous bytes allocated in 24-bit address space.
@@ -189,6 +192,17 @@ def allocateVariables(scope, extra = None):
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
+        if "PROCEDURE" in attributes:
+            continue
+        if "FIXED" in attributes:
+            datatype = "FIXED"
+        elif "BIT" in attributes:
+            datatype = "BIT"
+        elif "CHARACTER" in attributes:
+            datatype = "CHARACTER"
+        else:
+            continue
+        mangled = attributes["mangled"]
         if useString and "CHARACTER" not in attributes:
             continue
         if useParameters:
@@ -205,7 +219,7 @@ def allocateVariables(scope, extra = None):
         if "top" in attributes:
             length = attributes["top"] + 1
         if useString:
-            memoryMap[variableAddress] = "String data for " + identifier
+            memoryMap[variableAddress] = (mangled, "EBCDIC codes")
             attributes["saddress"] = variableAddress
             address = attributes["address"]
             firstAddress = address
@@ -226,7 +240,7 @@ def allocateVariables(scope, extra = None):
                 else:
                     errxit("Initializer is not CHARACTER", scope);
         else:
-            memoryMap[variableAddress] = identifier
+            memoryMap[variableAddress] = (mangled, datatype)
             attributes["address"] = variableAddress
             if "INITIAL" in attributes and "CHARACTER" not in attributes:
                 # This just takes care of a single initializer right
@@ -246,7 +260,7 @@ def mangle(scope, extra = None):
     s = scope
     while True:
         symbol = s["symbol"]
-        if symbol[:1] != "_":
+        if symbol != "" and symbol[:1] != "_":
             prefix = symbol + "x" + prefix
         s = s["parent"]
         if s == None:
@@ -355,31 +369,57 @@ def generateExpression(scope, expression):
             symbol = token["identifier"]
             attributes = getAttributes(scope, symbol)
             if attributes != None:
-                # This must be a variable.
-                indices = expression["children"]
-                index = ""
-                if len(indices) > 1:
-                    errxit("Multi-dimensional arrays not allowed in XPL")
-                if len(indices) == 1:
-                    tipe, index = generateExpression(scope, indices[0])
-                if "FIXED" in attributes:
-                    tipe = "FIXED"
-                    if index == "":
-                        source = "getFIXED(" + str(attributes["address"]) + ")"
+                if "PROCEDURE" in attributes:
+                    # Recall that the way PROCEDURE parameters are modeled,
+                    # they are not passed to the C equivalents of the PROCEDUREs
+                    # as parameters, but rather as static variables in 
+                    # the `memory` array.  The trick in C to doing this in 
+                    # middle of the expression is to convert a sequence of 
+                    # several variable assignments and a function call to 
+                    # convert an XPL call like `f(b,d,...,z)` to a C construct
+                    # like `(a=b, c=d, ..., y=z, f())`, where `a`, `c`, ...,
+                    # `y` parameters within the PROCEDURE definition. 
+                    innerParameters = attributes["parameters"] 
+                    innerScope = attributes["PROCEDURE"]
+                    source = "( "
+                    outerParameters = expression["children"]
+                    if len(outerParameters) > len(innerParameters):
+                        errxit("Too many parameters in " + symbol)
+                    for k in range(len(outerParameters)):
+                        outerParameter = outerParameters[k]
+                        innerParameter = innerParameters[k]
+                        innerAddress = innerScope["variables"][innerParameter]["address"]
+                        tipe, parm = generateExpression(scope, outerParameter)
+                        source = source + "put" + tipe + "(" + \
+                                 str(innerAddress) + ", " + parm + "), "
+                    source = source + symbol + "() )"
+                    tipe = attributes["return"]
+                    return tipe, source;
+                else: # Must be a variable, possibly subscripted
+                    indices = expression["children"]
+                    index = ""
+                    if len(indices) > 1:
+                        errxit("Multi-dimensional arrays not allowed in XPL")
+                    if len(indices) == 1:
+                        tipe, index = generateExpression(scope, indices[0])
+                    if "FIXED" in attributes or "BIT" in attributes:
+                        tipe = "FIXED"
+                        if index == "":
+                            source = "getFIXED(" + str(attributes["address"]) + ")"
+                        else:
+                            source = "getFIXED(" + str(attributes["address"]) + \
+                                     " + 4*" + index + ")"
+                        return tipe, source
+                    elif "CHARACTER" in attributes:
+                        tipe = "CHARACTER"
+                        if index == "":
+                            source = "getCHARACTER(" + str(attributes["address"]) + ")"
+                        else:
+                            source = "getCHARACTER(" + str(attributes["address"]) + \
+                                     " + 4*" + index + ")"
+                        return tipe, source
                     else:
-                        source = "getFIXED(" + str(attributes["address"]) + \
-                                 " + 4*" + index + ")"
-                    return tipe, source
-                elif "CHARACTER" in attributes:
-                    tipe = "CHARACTER"
-                    if index == "":
-                        source = "getCHARACTER(" + str(attributes["address"]) + ")"
-                    else:
-                        source = "getCHARACTER(" + str(attributes["address"]) + \
-                                 " + 4*" + index + ")"
-                    return tipe, source
-                else:
-                    errxit("Unsupported variable type")
+                        errxit("Unsupported variable type")
             else:
                 errxit("Unknown variable %s" % symbol)
         else:
@@ -440,15 +480,31 @@ def generateSingleLine(scope, indent, line, indexInScope):
     if len(line) < 1: # I don't think this is possible!
         return
     if "ASSIGN" in line:
+        print(indent + "{")
+        indent += indentationQuantum
         LHSs = line["LHS"]
         RHS = line["RHS"]
         tipeR, sourceR = generateExpression(scope, RHS)
+        definedS = False
         if tipeR == "FIXED":
-            print(indent + "numberRHS = " + sourceR + ";")
+            print(indent + "int32_t numberRHS = " + sourceR + ";")
         elif tipeR == "CHARACTER":
+            definedS = True
+            print(indent + "string_t stringRHS;")
             print(indent + "strcpy(stringRHS, " + sourceR + ");")
         else:
             errxit("Unknown RHS type: " + str(RHS))
+        
+        # Use this wherever a stringRHS is needed but only a numberRHS has
+        # perhaps been provided.
+        def autoConvert():
+            nonlocal definedS;
+            if tipeR == "FIXED":
+                if not definedS:
+                    print(indent + "string_t stringRHS;")
+                    definedS = True
+                print(indent + "strcpy(stringRHS, fixedToCharacter(numberRHS));")
+
         for i in range(len(LHSs)):
             LHS = LHSs[i]
             tokenLHS = LHS["token"]
@@ -472,9 +528,11 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     if tipeR != "CHARACTER":
                         errxit("LHS/RHS type mismatch in assignment.")
                     if len(children) == 0:
+                        autoConvert()
                         print(indent + "putCHARACTER(" + str(address) + ", stringRHS);") 
                     elif len(children) == 1:
                         tipeL, sourceL = generateExpression(scope, children[0])
+                        autoConvert()
                         print(indent + "putCHARACTER(" + str(address) + "+ 4*(" + \
                               sourceL + "), stringRHS);") 
                     else:
@@ -485,6 +543,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 builtin = tokenLHS["builtin"]
                 children = LHS["children"]
                 if builtin == "OUTPUT":
+                    autoConvert()
                     if len(children) == 0:
                         print(indent + "OUTPUT(0, stringRHS);")
                     elif len(children) == 1:
@@ -497,6 +556,8 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     errxit("Unsupported builtin " + builtin)
             else:
                 errxit("Bad LHS " + str(LHS))
+        indent = indent[: -len(indentationQuantum)]
+        print(indent + "}")
     elif "FOR" in line:
         '''
         Regarding XPL iterative loops (DO var = from TO to [ BY b ]), there 
@@ -565,6 +626,12 @@ def generateSingleLine(scope, indent, line, indexInScope):
             print(";")
         else:
             print()
+    elif "ELSE" in line:
+        print(indent + "else")
+    elif "RETURN" in line:
+        tipe, source = generateExpression(scope, line["RETURN"])
+        print(indent + "return " + source + ";")
+
     else:
         print(indent + "Unimplemented:", line)
 
@@ -604,7 +671,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     if scopeName == "":
         functionName = "main"
     else:
-        functionName = scopePrefix + "x" + scopeName
+        functionName = scopePrefix[:-1] # Remove final "x".
         functionName.replace("#", "p").replace("@", "a").replace("$", "d")
     topLevel = False
     if of == None:
@@ -614,48 +681,61 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         sys.stdout = of # Redirect all `print` to this file.
     
     if topLevel:
-        print("// C source code (" + functionName + \
-              ") generated by XCOM-I on " + \
+        print("/*")
+        print("  File " + functionName + \
+              ".c generated by XCOM-I, " + \
               datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".")
         if functionName == "main":
-            msg = "// XPL/I source-code file"
+            msg = "  XPL/I source-code file"
             if len(inputFilenames) > 1:
                 msg = msg + "s"
             msg = msg + " used:"
             for inputFilename in inputFilenames:
                 msg = msg + " " + inputFilename
             print(msg + ".")
-            print('// To build the executable (aout), `cd` into "%s/" and run `make`.' \
-                  % outputFolder)
-        else:
-            msg = msg + "."
-            print(msg)
-            print()
+            print("  Recommended requirements:  GNU `gcc` and GNU `make`.")
+            print("  To build the program (aout) from the command line:")
+            print("          cd %s/" % outputFolder)
+            print("          make")
+            print("  To run the program:")
+            print("          aout [OPTIONS]")
+            print("  Use `aout --help` to see the available OPTIONS.")
+        print("*/")
         print()
         print('#include "runtimeC.h"')
+        print('#include "procedures.h"')
         print()
-        if verbose:
-            print("/*")
-            print("\t\t\t    Memory Map")
-            print("\t\t  Address\t\tVariable")
-            print("\t\t  -------\t\t--------")
-            for address in sorted(memoryMap):
-                print("\t%8d 0x%06X\t\t%s" % (address, address, memoryMap[address]))
-            print("*/")
-            print()
         if functionName == "main":
+            if verbose:
+                print("/*")
+                print("  Memory Map:")
+                print("%24s        %-16s %-8s" % \
+                      ("Address (Hex)", "Data Type", "Variable"))
+                print("%24s        %-16s %-8s" % \
+                      ("-------------", "---------", "--------"))
+                for address in sorted(memoryMap):
+                    print("       %8d (%06X)        %-16s %s" % \
+                          (address, address, memoryMap[address][1], \
+                           memoryMap[address][0]))
+                print("*/")
+                print()
             print("int\nmain(int argc, char *argv[])\n{")
-            print("  int32_t numberRHS;")
-            print("  string_t stringRHS;")
             print()
             print("  if (parseCommandLine(argc, argv)) exit(0);")
             print()
         else:
-            # Have to figure out some way to put the return-value type and
-            # parameter prototypes in the next line.
-            print("TBD\n" + functionName + "(TBD)\n{")
-            print("  int32_t numberRHS;")
-            print("  string_t stringRHS;")
+            attributes = scope["parent"]["variables"][scopeName]
+            variables = scope["variables"]
+            returnType = attributes["return"]
+            if returnType == "FIXED":
+                returnType = "int32_t"
+            elif returnType == "BIT":
+                returnType = "uint32_t"
+            elif returnType == "CHARACTER":
+                returnType = "char *"
+            header = returnType + "\n" + functionName + "(void)"
+            print("\n" + header + ";", file=pf)
+            print(header + "\n{")
             print()
     indent = indent + indentationQuantum
     
@@ -680,7 +760,25 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         sys.stdout = stdoutOld # Restore previous stdout.
 
 def generateC(globalScope):
-    global useCommon, useParameters, useString
+    global useCommon, useParameters, useString, pf
+    
+    pf = open(outputFolder + "/procedures.h", "w")
+    print("/*", file=pf)
+    print("  File procedures.h generated by XCOM-I, " + \
+          datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".", file=pf)
+    print("  Provides prototypes for the C functions corresponding to the", file=pf)
+    print("  XPL/I PROCEDUREs.", file=pf)
+    print("", file=pf)
+    print("  Note: Due to the requirement for persistence, all function", file=pf)
+    print("  parameters are passed via static addresses in the `memory`", file=pf)
+    print("  array, rather than via parameter lists, so all parameter", file=pf)
+    print("  lists are `void`.", file=pf)
+    print("*/", file=pf)
+    print("", file=pf)
+    print("#include <stdint.h>", file=pf)
+
+    # Provide mangled variable names.
+    walkModel(globalScope, mangle)
     
     # Allocate and initialize simulated memory for each variable in whatever 
     # scope. Handling the data from the INITIAL attributes
@@ -745,15 +843,14 @@ def generateC(globalScope):
             print("\n};", file=f)
     f.close()
     
-    # Mangle variable names.
-    walkModel(globalScope, mangle)
-    
     if debugSink != None:
         print('', file=debugSink)
         walkModel(globalScope, printModel)
 
     # Generate some code.
     walkModel(globalScope, generateCodeForScope, { "of": None, "indent": ""})
+    
+    pf.close()
     
 #-----------------------------------------------------------------------------
 # Interactive test mode for running this file in a stand-alone fashion rather

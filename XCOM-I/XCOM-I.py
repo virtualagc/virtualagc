@@ -33,6 +33,7 @@ from PROCEDURE import PROCEDURE
 from ASSIGNMENT import ASSIGNMENT
 from DO import DO
 from IF import IF
+from RETURN import RETURN
 from generateC import generateC
 
 logicalNot = '¬'
@@ -390,12 +391,18 @@ for lineNumber in range(len(pseudoStatements)):
         if LABEL(tokenized, scope):
             sys.exit(1) 
     elif reserved0 == "PROCEDURE":
+        # The procedure name will already have been added to the code array
+        # as a target label for goto.  Retrieve the name and delete the code.
+        if len(scope["code"]) == 0 or "TARGET" not in scope["code"][-1]:
+            error("No name specified for PROCEDURE", scope)
+        symbol = scope["code"][-1]["TARGET"]
+        del scope["code"][-1]
         if PROCEDURE(tokenized, scope):
             sys.exit(1)
         # We must now create a new scope and descend into it.
-        symbol = list(scope["variables"])[-1]
+        parent = scope
         scope = createNewScope(symbol, scope)
-        scope["parent"]["variables"][symbol]["PROCEDURE"] = scope
+        parent["variables"][symbol]["PROCEDURE"] = scope
     elif reserved0 == "END":
         # End of a PROCEDURE definition or DO...END block.
         for label in scope["labels"]:
@@ -436,8 +443,13 @@ for lineNumber in range(len(pseudoStatements)):
         #if attributes != None and "LABEL" not in attributes:
         #    error("Target symbol %s in GOTO is not a LABEL" % symbol, scope)
         scope["code"].append({"GOTO": symbol})
-        
+    elif reserved0 == "ELSE":
+        scope["code"].append({"ELSE": True})
+    elif reserved0 == "RETURN":
+        if RETURN(tokenized, scope):
+            sys.exit(1)
     else:
+        print(tokenized)
         error("Unimplemented", scope)
         #print(pseudoStatement)
         
