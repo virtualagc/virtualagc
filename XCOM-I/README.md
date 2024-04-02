@@ -6,7 +6,7 @@ First, let me get some terminology out of the way:
   * "XPL":  This is how I refer to the computer language defined in McKeeman.
   * "XCOM":  This is what the original compiler for XPL was called.  The source code for this compiler appears in McKeeman.
   * "XPL/I":  This is how I refer to the *extended* form of the XPL language created by Intermetrics, as coupled to the IBM System/360 computing environment, but alas without adequate known-surviving documentation.  My belief is that Intermetrics referred to this language simply as "XPL", without making the (in my opinion necessary) distinction between it and XPL-I.  I believe similarly that they continued to use the name "XCOM" for their compiler for XPL/I, for which the source code, to the best of my knowledge, has not survived.
-  * "HAL/S-FC": The Intermetrics compiler for the HAL/S computer language in which Space Shuttle flight software was written, along with some portions in IBM's Basic Assembly Language (BAL).  The source code for it is in the Virtual AGC source-code repository.
+  * "HAL/S-FC": The Intermetrics compiler for the HAL/S computer language in which Space Shuttle flight software was written.  HAL/S-FC is written in XPL/I, along with some portions in IBM's Basic Assembly Language (BAL).  The source code for it is in the Virtual AGC source-code repository.
   * "p-HAL-S-FC":  A hypothetical form of HAL/S-FC, ported into a form which can be executed in a modern computing environment.
   * "PASS" (or "PFS") and "BFS" are the top-level Space Shuttle flight-software programs, written in HAL/S-FC.
 
