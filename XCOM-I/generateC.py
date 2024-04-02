@@ -425,7 +425,7 @@ def generateExpression(scope, expression):
         else:
             symbol = token["builtin"]
             # Many builtins.
-            if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE"]:
+            if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR"]:
                 if symbol in ["INPUT", "SUBSTR"]:
                     builtinType = "CHARACTER"
                 else:

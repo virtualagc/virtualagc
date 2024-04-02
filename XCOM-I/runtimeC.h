@@ -149,4 +149,12 @@ BYTE(char *s, uint32_t index);
 uint8_t
 bBYTE1(char *s);
 
+uint32_t
+SHL(uint32_t value, uint32_t shift);
+
+uint32_t
+SHR(uint32_t value, uint32_t shift);
+
+
+
 #endif // RUNTIMEC_H

@@ -102,6 +102,7 @@ def PROCEDURE(tokenized, scope, inRecord = False):
             if token == ";":
                 if i == len(tokenized) - 1:
                     break
-            error(msg, scope)
+            else:
+                error(msg, scope)
     
     return returnValue

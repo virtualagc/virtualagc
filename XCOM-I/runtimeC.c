@@ -634,3 +634,13 @@ bBYTE1(char *s) {
   return BYTE(s, 0);
 }
 
+uint32_t
+SHL(uint32_t value, uint32_t shift) {
+  return value << shift;
+}
+
+uint32_t
+SHR(uint32_t value, uint32_t shift) {
+  return value >> shift;
+}
+

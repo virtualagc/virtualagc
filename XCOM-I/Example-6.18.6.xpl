@@ -18,7 +18,7 @@ RANDOM:
 declare i;
 
 do i = 1 to 100;
-  output = RANDOM(1000);
+  output = RANDOM(100000);
 end;
 
 eof
