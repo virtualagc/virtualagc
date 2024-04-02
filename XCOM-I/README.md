@@ -15,7 +15,7 @@ First, let me get some terminology out of the way:
 Because of the nature of the extensions to XPL within XPL/I, the lack of documentation, and the very close ties to the IBM System/360 computing environment, this goal for `XCOM-I.py` is not likely to be 100% achievable.  In lieu of the attainability of the ideal, the following more-practical roadmap are envisaged:
 
  1. 100% correctness in compiling XPL source code.
- 2. High (but not necessarily 100%) correctness in compiling XPL/I code *sans* any inline BAL, made usable with additional manual tweaking of the code produced by `XCOM-I.py`.
+ 2. 100% correctness in compiling XPL/I code *sans* any inline BAL.
  3. Compiling with included BAL as well.
 
 Presently, I have increasing confidence that milestones #1 and #2 are achievable, and that fairly-satisfactory workarounds can be achieved for milestone #3.
@@ -34,7 +34,7 @@ A significant problem posed by modern high-level languages with respect to XPL/I
 
 # Source Code of XPL or XPL/I Programs
 
-XPL source code accepted by `XCOM-I.py` is assumed to be encoded in 7-bit ASCII (as opposed to EBCDIC or UTF-8).  The XPL logical-not character ('¬'), which does not exist in 7-bit ASCII, is assumed to be represented instead by the ASCII carat ('^') or tilde ('~') character.  I've seen examples of both in existing XPL or XPL/I code.  With that said, on my (Linux) computer at least, XPL/I source code containing the logical-not compiles fine. Internally, `XCOM-I.py` transparently converts all of these characters to '~'.
+XPL source code accepted by `XCOM-I.py` is assumed to be encoded in 7-bit ASCII (as opposed to EBCDIC or UTF-8).  The XPL logical-not character ('¬'), which does not exist in 7-bit ASCII, is assumed to be represented instead by the ASCII carat ('^') or tilde ('&tilde;') character.  I've seen examples of both in existing XPL or XPL/I code.  With that said, on my (Linux) computer at least, XPL/I source code containing the logical-not compiles fine. Internally, `XCOM-I.py` transparently converts all of these characters to '&tilde;'.
 
 # Some Inferred Characteristics of XPL/I
 
@@ -253,7 +253,7 @@ It first performs simple normalizing of the input XPL/I source code to:
 For the most part, the normalized form of the code remains functionally-identical valid XPL/I, except for certain notable (but mostly reversible) changes:
 
   * Within single-quoted strings:
-    * Space characters (" ") are replaced by the tilde ("~") character, which is otherwise unused.
+    * Space characters (" ") are replaced by the tilde ("&tilde;") character, which is otherwise unused.
     * Pairs of successive single-quote characters ("''") are replaced by the backtick ("`") character, which is otherwise unused.
   * Outside of single-quoted strings:
     * The XPL/I string-concatenation operator ("||") is replaced by the Python string-concatenation operator ("+").
@@ -352,7 +352,7 @@ Therefore, the memory space of the compiled programs is instead treated as conti
 
   * `CHARACTER`: 32-bit "descriptor".  McKeeman and Intermetrics documentation contradict each other on the format of this descriptor.  The Intermetrics description doesn't support the empty string (i.e., '' of zero length); meanwhile, McKeeman's description is internally contradictory, in that it says the maximum length of strings is 256 but its described format doesn't support that length.  I follow the McKeeman description for `CHARACTER` but assume the maximum string length is 255:
     * The most-significant byte of the descriptor represents the character-count of the string, from 0 to 255.
-    * The least-significant 3 bytes, in big-endian order, represent a 24-bit pointer to the string-data itself.  It's unclear to me how XPL was supposed to handle the fact that in an assignment of a `CHARACTER` variable, the string being assigned to it could be longer than the string previously in the variable.  `XCOM-I.py` handles this simply by allocating 256 bytes for each `CHARACTER` value stored in memory.  (Note that in the XPL source code of the `HAL/S-FC` program, I find on the order of ~2000 `CHARACTER` variables.  Consequently, even with the maximum amount of memory allocated for every string, however short, it still means that less than 3% of memory is used for `CHARACTER` storage.)
+    * The least-significant 3 bytes, in big-endian order, represent a 24-bit pointer to the string-data itself.  It's unclear to me how XPL was supposed to handle the fact that in an assignment of a `CHARACTER` variable, the string being assigned to it could be longer than the string previously in the variable.  `XCOM-I.py` handles this simply by allocating 256 bytes for each `CHARACTER` value stored in memory.  (Note that in the XPL source code of the `HAL/S-FC` program, I find on the order of &tilde;2000 `CHARACTER` variables.  Consequently, even with the maximum amount of memory allocated for every string, however short, it still means that less than 3% of memory is used for `CHARACTER` storage.)
     * The individual characters of the string are encoded in EBCDIC.
   * `FIXED`: 32-bit 2's-complement integers, with bytes stored in big-endian order.
   * `BIT(n)`:
