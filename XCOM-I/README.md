@@ -18,9 +18,9 @@ Because of the nature of the extensions to XPL within XPL/I, the lack of documen
  2. High (but not necessarily 100%) correctness in compiling XPL/I code *sans* any inline BAL, made usable with additional manual tweaking of the code produced by `XCOM-I.py`.
  3. Compiling with included BAL as well.
 
-At this point, I view milestone #1 as being achievable, milestone #2 as being conceivably achievable, and milestone #3 as being purely inspirational.
+Presently, I have increasing confidence that milestones #1 and #2 are achievable, and that fairly-satisfactory workarounds can be achieved for milestone #3.
 
-With that said, in the (I think unlikely) event that somebody would want to use `XCOM-I.py` to compile a "pure" XPL program, it should perhaps be noted that XPL/I is a 100% drop-in replacement for XPL:  I.e., XPL/I does not merely add new features to XPL, but sometimes also changes the behavior of existing features of XPL, so that those features don't operate as they did previously.  Therefore, it's possible that compiling an XPL program using an XPL/I compiler would result in a compilation failure or in a compiled program that didn't operate as intended.  The significant language features impacted, so far as I'm aware, are:
+With that said, in the (I think unlikely) event that somebody would want to use `XCOM-I.py` to compile a "pure" XPL program, it should perhaps be noted that XPL/I is not a 100% drop-in replacement for XPL:  I.e., XPL/I does not merely add new features to XPL, but sometimes also changes the behavior of existing features of XPL, so that those features don't operate as they did previously.  Therefore, it's possible that compiling an XPL program using an XPL/I compiler would result in a compilation failure or in a compiled program that didn't operate as intended.  The significant language features impacted, so far as I'm aware, are:
 
   * Macros.  Syntactically these are the same as variables `DECLARE`'d with the attribute `LITERALLY`, but in fact that are used for preprocessing only, and result in literal substitutions of the "variable" by replacement strings.  The difference between XPL and XPL/I is that in XPL the scope of such macros is the entire remainder of the compilation, whereas in XPL/I the scope is confined to the block (such as a `PROCEDURE`) in which the macros are defined plus the sub-blocks thereof.  For example, in XPL/I you could have multiple declarations of macros of the same name but within different scopes, whereas the same apparent declarations in XPL would apply to different sections of code. Or perhaps would be disallowed entirely.
 
@@ -28,46 +28,13 @@ With that said, in the (I think unlikely) event that somebody would want to use 
 
 Rather than calling `XCOM-I.py` a "compiler", it would perhaps be more accurate to call it a "translator":  It does not produce executable code.  Rather, it converts now-obsoleted XPL/I to some more-standard, more-accessible high-level computer language.
 
-The target output language is presently undecided, but hopefully `XCOM-I.py` will be modular enough that the code-generator module for the target output language could be swapped with another if there were some desire to do so.  The languages presently under consideration are:
+The target output language is presently undecided, but hopefully `XCOM-I.py` will be modular enough that the code-generator module for the target output language could be swapped with another if there were some desire to do so.  For historical reasons, some sections of this README discuss the possibility that the target language could be Python, but it is currently almost certain that the target language in fact will be C.
 
-  * Python
-  * C
-
-The principal problem posed by modern high-level languages is that XPL/I code (at least the code for XCOM and HAL/S-FC) makes heavy use of the GOTO statement.  Furthermore, this GOTO allows jumping into possibly-deeply-nested statement hierarchies, such as `DO...END` blocks.
-
-I had *believed* that this exceeded the ability of C's `goto` statement, in that I thought its `goto` could only move to statements at the same level in the block-nesting hierarchy, or outward.  I was shocked to find that when I tested this notion that C code such as the following works fine:
-<pre>
-#include <stdio.h>
-int
-main()
-{
-  int i, j, k;
-  i = 3; 
-  j =5; 
-  k=2; 
-  goto mylabel;
-  for (i = 0; i &lt; 10; i++)
-    {
-      for (j = 0; j &lt; 10; j++)
-        {
-          for (k = 0; k &lt; 10; k++)
-            {
-              mylabel:
-              printf("%d %d %d\n", i, j, k);
-            }
-        }
-    }
-}
-</pre>
-Furthermore, while C's `goto` does not allow for leaving a procedure to go to (say) the calling code, which happens rarely but occasionally in XPL/I source code, C's `setjmp` and `longjmp` do allow for that.
-
-In summary, in addition to having a great speed advantage over Python, C also allows much easier and more-natural support for XPL/I's `GOTO`.  In short, C is the preferable output-target language for `XCOM-I.py` if consideration were given only to this (admittedly serious) problem.
-
-Discussion of how to fake XPL/I `GOTO` in Python appears in the Appendix.
+A significant problem posed by modern high-level languages with respect to XPL/I translation is that XPL/I code (at least the code for XCOM and HAL/S-FC) makes heavy use of the GOTO statement.  Furthermore, this GOTO allows jumping into possibly-deeply-nested statement hierarchies, such as `DO...END` blocks.  Implications of this fact are covered in the Appendix.
 
 # Source Code of XPL or XPL/I Programs
 
-XPL source code accepted by `XCOM-I.py` is assumed to be encoded in 7-bit ASCII (as opposed to EBCDIC or UTF-8).  The XPL logical-not character ('¬'), which does not exist in 7-bit ASCII, is assumed to be represented instead by the ASCII carat ('^') or tilde ('~') character.  I have seen XPL source code with either alternative. The source code for the original `XCOM` complies to the former.  Internally, `XCOM-I.py` transparently converts either to '~'.
+XPL source code accepted by `XCOM-I.py` is assumed to be encoded in 7-bit ASCII (as opposed to EBCDIC or UTF-8).  The XPL logical-not character ('¬'), which does not exist in 7-bit ASCII, is assumed to be represented instead by the ASCII carat ('^') or tilde ('~') character.  I've seen examples of both in existing XPL or XPL/I code.  With that said, on my (Linux) computer at least, XPL/I source code containing the logical-not compiles fine. Internally, `XCOM-I.py` transparently converts all of these characters to '~'.
 
 # Some Inferred Characteristics of XPL/I
 
@@ -397,6 +364,41 @@ Therefore, the memory space of the compiled programs is instead treated as conti
 **Note:** A variable declared as an `ARRAY` also uses the same indirect reference as `BASED`.  However, the pointer associated with a `BASED` can be assigned or otherwise changed at runtime, whereas the pointer associated with an `ARRAY` is fixed at compile-time.
 
 Similarly, mathematical operations such as addition, subtraction, multiplication, and so on, do not use built-in operators of the C or Python target language, but instead rely on custom functions that accept IBM System/360 operands and output IBM System/360 values.
+
+# The Problem of Inline Basic Assembly Language (BAL) Code
+
+Basic Assembly Language is the assembly language of the IBM System/360 mainframe computer.  The XPL/I source code for the HAL/S-FC program is strewn with inline BAL code which has been inserted into the stream of XPL/I statements.  Sometimes this insertion is to perform computational tasks not achievable directly by the XPL/I language, sometimes to speed up operations which could otherwise be performed more slowly in XPL/I, and sometimes for reasons I have not yet discerned.  This inclusion of BAL obviously is a severe problem unlikely to be accomplished *unaided* by `XCOM-I.py`, execution of those BAL instructions is unlikely to be possible.
+
+The method of inclusion is calls to a built-in procedure called `INLINE`.  Each call to `INLINE` inserts a single BAL instruction, in its assembled (i.e., numerical) machine-language form rather than in symbolic (assembly-language) form, though fortunately most or all `CALL INLINE`'s are also accompanied by the assembly-language instruction in the form of a program comment.
+
+Working around this BAL problem has two aspects.  First, how to determine what the BAL code is *trying* to accomplish, and ascertaining how to accomplish that thing in some other manner?  Second, how to implement such an alternate method without having to alter the XPL/I source-code files?
+
+I have no insight to offer with respect to the first aspect, except to note that it was possible in my older, manual port of PASS1 of `HAL/S-FC` to Python.  So undoubtedly it remains possible now, albeit with significant effort.
+
+As far as the second aspect, however, I have an approach which should work.  Consider, for example, the following block of `INLINE`s from the HAL/S-FC source-code file HALMATIN.xpl:
+<pre>
+         CALL INLINE("58", 3, 0, DW_AD);           /* L    3,DW_AD            */
+/*LOAD DOUBLE FROM STACK SPACE 3 TO REGISTER 0*/
+         CALL INLINE("68", 0, 0, 3, 0);            /* LD   0,0(0,3)           */
+/*LOAD POSITIVE VALUE OF REGISTER 0 INTO REGISTER 0*/
+         CALL INLINE("20", 0, 0);                  /* LPDR 0,0                */
+/*LOAD ROUNDING VALUE INTO STACK 1 THEN ADD TO REGISTER 0*/
+         CALL INLINE("58", 1, 0, ADDR_ROUNDER);    /* L    1,ADDR_ROUNDER     */
+         CALL INLINE("6A", 0, 0, 1, 0);            /* AD   0,0(0,1)           */
+         CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);/* L    1,ADDR_FIXED_LIMIT */
+         CALL INLINE("58", 2, 0, PTR);             /* L    2,PTR              */
+/*COMPARE REGISTER 0 TO THE POSITIVE INTEGER LIMIT*/
+         CALL INLINE("69", 0, 0, 1, 0);            /* CD   0,0(0,1)           */
+/*BRANCH TO 'LIMIT_OK' IF REGISTER 0 IS LESS THAN OR EQUAL TO THE LIMIT       */
+         CALL INLINE("07",12, 2);                  /* BNHR 2                  */
+</pre>
+Having determined what this code is supposed to accomplish:
+
+  * One would create a C source-code file that accomplishes the same thing.
+  * In some manner TBD, `XCOM-I.py` would be able to associate this C source-code file with the specific location in the XPL source code at which this block of `INLINE` instructions occurs.
+  * During compilation, whenever a pre-written C-language source-code patch was available, `XCOM-I.py` would simply delete the corresponding block of `INLINE`s, and would instead insert the contents of the C source-code file directly at the corresponding location in the C translation of the XPL/I.
+
+The XPL/I source code thus remains unchanged, but the C translation of it nevertheless ends up with C-language workarounds for the BAL `INLINE`s.  There is a cost, of course, in writing the C-language replacement patches for the BAL `INLINES`.
 
 # Appendix: Implementation of Spaghetti Code
 
