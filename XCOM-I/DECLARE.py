@@ -189,7 +189,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         #    LITERALLY '0x1234'
                         token = re.sub("^'\"([0-9A-F]+)\"'$", \
                                        "'0x\\1'", token)
-                        properties["LITERALLY"] = token[1:-1]
+                        properties["LITERALLY"] = token[1:-1]\
+                                        .replace("~", " ").replace("`", "'")
                         inLiterally = False
                     elif inBit:
                         properties["BIT"] = integer(token)

@@ -22,16 +22,20 @@ def RETURN(tokenized, scope, inRecord = False):
     if debugSink:
         print(tokenized, file=debugSink)
 
-    expression = parseExpression(tokenized, 1)
-    if expression != None:
-        end = expression["end"]
-        if end == len(tokenized) - 1:
-            token = tokenized[end]
-            if token == ";":
-                if debugSink:
-                    printTree(expression, indent="\t", file=debugSink)
-                scope["code"].append({"RETURN": expression})
-                return False
+    if len(tokenized) > 1 and tokenized[1] == ";":
+        scope["code"].append({"RETURN": None})
+        return False
+    else:
+        expression = parseExpression(tokenized, 1)
+        if expression != None:
+            end = expression["end"]
+            if end == len(tokenized) - 1:
+                token = tokenized[end]
+                if token == ";":
+                    if debugSink:
+                        printTree(expression, indent="\t", file=debugSink)
+                    scope["code"].append({"RETURN": expression})
+                    return False
 
-    error("Cannot parse IF statement", scope)
+    error("Cannot parse RETURN statement", scope)
     return True

@@ -160,6 +160,7 @@ putFIXED(uint32_t address, int32_t value)
   memory[address++] = value & 0xFF;
 }
 
+/*
 uint32_t
 getBIT(uint32_t address)
 {
@@ -171,6 +172,7 @@ putBIT(uint32_t address, uint32_t value)
 {
   putFIXED(address, (int32_t) value);
 }
+*/
 
 // The table below was adapted from the table of the same name in
 // the Virtual AGC source tree.  The table is indexed on the numeric
@@ -644,3 +646,95 @@ SHR(uint32_t value, uint32_t shift) {
   return value >> shift;
 }
 
+// In case the header file sys/time.h isn't available (to provide the
+// `gettimeofday` function), change the "#if 0" below to "#if 1".
+
+#include <time.h>
+
+#if 0
+
+// Reduced (1-second only) precision.
+uint32_t
+TIME(void) {
+  time_t t = time(NULL);
+  struct tm *timeStruct = gmtime(&t);
+  return timeStruct->tm_hour * 360000 +
+         timeStruct->tm_min * 6000 +
+         timeStruct->tm_sec * 100;
+}
+
+#else
+
+#include <sys/time.h>
+
+// Centisecond precision (as specified in McKeeman).
+uint32_t
+TIME(void) {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  struct tm *timeStruct = gmtime(&tv.tv_sec);
+  return timeStruct->tm_hour * 360000 +
+         timeStruct->tm_min  * 6000 +
+         timeStruct->tm_sec  * 100 +
+         tv.tv_usec / 10000;
+}
+
+#endif
+
+uint32_t
+DATE(void) {
+  time_t t = time(NULL);
+  struct tm *timeStruct = gmtime(&t);
+  return 1000 * timeStruct->tm_year + timeStruct->tm_yday;
+}
+
+// Because I'm lazy, `yisleap` and `get_yday` came directly from the web, as-is:
+// https://stackoverflow.com/questions/19377396/c-get-day-of-year-from-date.
+// Note that it considers January 1 to be day 1, whereas `gmtime` computes
+// it as 0.  McKeeman doesn't document it, so I use 0 and must subtract 1 from
+// what `get_yday` computes.
+int yisleap(int year)
+{
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+int get_yday(int mon, int day, int year)
+{
+    static const int days[2][13] = {
+        {0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
+        {0, 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}
+    };
+    int leap = yisleap(year);
+
+    return days[leap][mon] + day;
+}
+
+static char *Mmms[13] = {"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                         "Aug", "Sep", "Oct", "Nov", "Dec"};
+uint32_t
+DATE_OF_GENERATION(void) {
+  char Mmm[4];
+  int mm, dd, yyyy, dayOfYear;
+  int n;
+  sscanf(__DATE__, "%s %d %d", Mmm, &dd, &yyyy);
+  for (mm = 1; mm < 13; mm++)
+    if (!strcmp(Mmm, Mmms[mm]))
+      break;
+  dayOfYear = get_yday(mm, dd, yyyy);
+  return 1000 * (yyyy - 1900) + dayOfYear - 1;
+}
+
+// Some test code.
+#if 0
+int outUTF8;
+FILE *DD_INS[DD_MAX];
+FILE *DD_OUTS[DD_MAX];
+typedef char string_t[MAX_XPL_STRING + 1];
+uint8_t memory[MEMORY_SIZE];
+
+int
+main(void) {
+  printf("%s\n", __DATE__);
+  printf("%d %d\n", DATE(), DATE_OF_GENERATION());
+  return 0;
+}
+#endif

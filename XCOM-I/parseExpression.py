@@ -474,25 +474,25 @@ def parseExpression(tokenized, start):
             elif operator == "&" and bothNumbers:
                 tree["token"] = {"number": 1 & (value1 & value2)}
             elif operator == "=" and bothSame:
-                tree["token"] = {"number": value1 == value2 }
+                tree["token"] = {"number": int(value1 == value2) }
             elif operator == "<" and bothNumbers:
-                tree["token"] = {"number": value1 < value2 }
+                tree["token"] = {"number": int(value1 < value2) }
             elif operator == "<" and bothStrings:
-                tree["token"] = {"number": compare(value1, value2) < 0 }
+                tree["token"] = {"number": int(compare(value1, value2) < 0) }
             elif operator == ">" and bothNumbers:
-                tree["token"] = {"number": value1 > value2 }
+                tree["token"] = {"number": int(value1 > value2) }
             elif operator == ">" and bothStrings:
-                tree["token"] = {"number": compare(value1, value2) > 0 }
+                tree["token"] = {"number": int(compare(value1, value2) > 0) }
             elif operator == "~=" and bothSame:
-                tree["token"] = {"number": value1 != value2 }
+                tree["token"] = {"number": int(value1 != value2) }
             elif operator in ["~<", ">="] and bothNumbers:
-                tree["token"] = {"number": value1 >= value2 }
+                tree["token"] = {"number": int(value1 >= value2) }
             elif operator in ["~<", ">="] and bothStrings:
-                tree["token"] = {"number": compare(value1, value2) >= 0 }
+                tree["token"] = {"number": int(compare(value1, value2) >= 0) }
             elif operator in ["~>", "<="] and bothNumbers:
-                tree["token"] = {"number": value1 <= value2 }
+                tree["token"] = {"number": int(value1 <= value2) }
             elif operator in ["~>", "<="] and bothStrings:
-                tree["token"] = {"number": compare(value1, value2) <= 0 }
+                tree["token"] = {"number": int(compare(value1, value2) <= 0) }
             elif operator == "||" and bothStrings:
                 tree["token"] = {"string": value1 + value2 }
             elif operator == "+" and bothNumbers:

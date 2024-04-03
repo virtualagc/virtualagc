@@ -20,8 +20,8 @@ debug = False # Standalone interactive test of expression generation.
 # Just for engineering
 def errxit(msg, expression = None):
     print("Implementation error:", msg, file=sys.stderr)
-    if expression != None:
-        print(expression, file=sys.stderr)
+    #if expression != None:
+    #    print(expression, file=sys.stderr)
     sys.exit(1)
     
 
@@ -218,6 +218,12 @@ def allocateVariables(scope, extra = None):
         # The following needs tweaking TBD.
         if "top" in attributes:
             length = attributes["top"] + 1
+        if "INITIAL" in attributes:
+            initial = attributes["INITIAL"]
+            if not isinstance(initial, list):
+                initial = [initial]
+        else:
+            initial = []
         if useString:
             memoryMap[variableAddress] = (mangled, "EBCDIC codes")
             attributes["saddress"] = variableAddress
@@ -225,32 +231,36 @@ def allocateVariables(scope, extra = None):
             firstAddress = address
             for i in range(length):
                 putFIXED(address, variableAddress)
+                # INITIALize just CHARACTER variables.
+                if "INITIAL" in attributes and "CHARACTER" in attributes and \
+                        i < len(initial):
+                    initialValue = initial[i]
+                    if isinstance(initialValue, str):
+                        if len(initialValue) > 255:
+                            errxit("String initializer is %d characters" \
+                                   % len(initialValue), scope)
+                    elif isinstance(initialValue, int):
+                        initialValue = "%d" % initialValue
+                    else:
+                        errxit("Cannot evaluate initializer to CAHARACTER", scope)
+                    putCHARACTER(address, initialValue)
                 address += 4
                 variableAddress += 256
-            if "INITIAL" in attributes and "CHARACTER" in attributes:
-                # This just takes care of a single initializer right
-                # now.  Initializers if the variable is subscripted 
-                # are TBD.
-                initial = attributes["INITIAL"]
-                if isinstance(initial, str):
-                    if len(initial) > 255:
-                        errxit("String initializer is %d characters" \
-                               % len(initial), scope)
-                    putCHARACTER(firstAddress, initial)
-                else:
-                    errxit("Initializer is not CHARACTER", scope);
         else:
             memoryMap[variableAddress] = (mangled, datatype)
             attributes["address"] = variableAddress
-            if "INITIAL" in attributes and "CHARACTER" not in attributes:
-                # This just takes care of a single initializer right
-                # now.  Initializers if the variable is subscripted 
-                # are TBD.
-                initial = attributes["INITIAL"]
-                if isinstance(initial, int):
-                    putFIXED(variableAddress, initial)
-                else:
-                    errxit("Initializer is not FIXED", scope);
+            # INITIALize FIXED or BIT variables.
+            if "INITIAL" in attributes and \
+                    ("FIXED" in attributes or "BIT" in attributes):
+                for initialValue in initial:
+                    if length <= 0:
+                        errxit("Too many initializers", scope)
+                    if isinstance(initialValue, int):
+                        putFIXED(variableAddress, initialValue)
+                    else:
+                        errxit("Initializer is not integer", scope);
+                    length -= 1
+                    variableAddress += 4
             variableAddress += 4 * length
 
 # A function for `walkModel` that mangles identifier names.
@@ -379,21 +389,27 @@ def generateExpression(scope, expression):
                     # convert an XPL call like `f(b,d,...,z)` to a C construct
                     # like `(a=b, c=d, ..., y=z, f())`, where `a`, `c`, ...,
                     # `y` parameters within the PROCEDURE definition. 
-                    innerParameters = attributes["parameters"] 
-                    innerScope = attributes["PROCEDURE"]
-                    source = "( "
                     outerParameters = expression["children"]
-                    if len(outerParameters) > len(innerParameters):
-                        errxit("Too many parameters in " + symbol)
-                    for k in range(len(outerParameters)):
-                        outerParameter = outerParameters[k]
-                        innerParameter = innerParameters[k]
-                        innerAddress = innerScope["variables"][innerParameter]["address"]
-                        tipe, parm = generateExpression(scope, outerParameter)
-                        source = source + "put" + tipe + "(" + \
-                                 str(innerAddress) + ", " + parm + "), "
-                    source = source + symbol + "() )"
-                    tipe = attributes["return"]
+                    if len(outerParameters) == 0:
+                        source = symbol + "()"
+                    else:
+                        innerParameters = attributes["parameters"] 
+                        innerScope = attributes["PROCEDURE"]
+                        if len(outerParameters) > len(innerParameters):
+                            errxit("Too many parameters in " + symbol)
+                        source = "( "
+                        for k in range(len(outerParameters)):
+                            outerParameter = outerParameters[k]
+                            innerParameter = innerParameters[k]
+                            innerAddress = innerScope["variables"][innerParameter]["address"]
+                            tipe, parm = generateExpression(scope, outerParameter)
+                            source = source + "put" + tipe + "(" + \
+                                     str(innerAddress) + ", " + parm + "), "
+                        source = source + symbol + "() )"
+                    if "return" in attributes:
+                        tipe = attributes["return"]
+                    else:
+                        tipe = None
                     return tipe, source;
                 else: # Must be a variable, possibly subscripted
                     indices = expression["children"]
@@ -425,7 +441,8 @@ def generateExpression(scope, expression):
         else:
             symbol = token["builtin"]
             # Many builtins.
-            if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR"]:
+            if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
+                          "DATE", "TIME", "DATE_OF_GENERATION"]:
                 if symbol in ["INPUT", "SUBSTR"]:
                     builtinType = "CHARACTER"
                 else:
@@ -474,11 +491,31 @@ def generateExpression(scope, expression):
 # As the name implies, it operates on the pseudo-code for a single 
 # pseudo-statement, generating the C source code for it, and printing that
 # source code to the output file.
+lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
 def generateSingleLine(scope, indent, line, indexInScope):
-    global forLoopCounter
+    global forLoopCounter, lineCounter
+    lineCounter += 1
+    if lineCounter == 271: # ***DEBUG***
+        pass
     if len(line) < 1: # I don't think this is possible!
         return
+    # For inserting `case` and `break` into `switch` statements.
+    if scope["parent"] != None:
+        parent = scope["parent"]
+        if "switchCounter" in parent:
+            indent0 = indent[:-len(indentationQuantum)]
+            if "ELSE" in line:
+                parent["ifCounter"] += 1
+            if parent["ifCounter"] == 0:
+                if parent["switchCounter"] > 0:
+                    print(indent + "break;")
+                print(indent0 + "case %d:" % parent["switchCounter"])
+                parent["switchCounter"] += 1
+            if parent["ifCounter"] > 0:
+                parent["ifCounter"] -= 1
+            if "IF" in line or "ELSE" in line:
+                parent["ifCounter"] += 1
     if "ASSIGN" in line:
         print(indent + "{")
         indent += indentationQuantum
@@ -486,7 +523,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
         RHS = line["RHS"]
         tipeR, sourceR = generateExpression(scope, RHS)
         definedS = False
-        if tipeR == "FIXED":
+        if tipeR in ["FIXED", "BIT"]:
             print(indent + "int32_t numberRHS = " + sourceR + ";")
         elif tipeR == "CHARACTER":
             definedS = True
@@ -514,8 +551,6 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 address = attributes["address"]
                 children = LHS["children"]
                 if "FIXED" in attributes or "BIT" in attributes:
-                    if tipeR != "FIXED":
-                        errxit("LHS/RHS type mismatch in assignment.")
                     if len(children) == 0:
                         print(indent + "putFIXED(" + str(address) + ", numberRHS);") 
                     elif len(children) == 1:
@@ -525,7 +560,10 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     else:
                         errxit("Too many subscripts")
                 elif "CHARACTER" in attributes:
-                    if tipeR != "CHARACTER":
+                    if tipeR in ["FIXED", "BIT"]:
+                        print(indent + "string_t stringRHS;")
+                        print(indent + "strcpy(stringRHS, fixedToCharacter(numberRHS));")
+                    elif tipeR != "CHARACTER":
                         errxit("LHS/RHS type mismatch in assignment.")
                     if len(children) == 0:
                         autoConvert()
@@ -587,6 +625,9 @@ def generateSingleLine(scope, indent, line, indexInScope):
         for loop counters in this way, so my inclination right now is to 
         simply disallow it, regardless of what the syntax theoretically allows.
         '''
+        print(indent + "{")
+        line["scope"]["extraIndent"] = True
+        indent2 = indent + indentationQuantum
         fromName = "from%d" % forLoopCounter
         toName = "to%d" % forLoopCounter
         byName = "by%d" % forLoopCounter
@@ -598,16 +639,16 @@ def generateSingleLine(scope, indent, line, indexInScope):
             errxit("Subscripted loop variables not supported.")
         attributes = getAttributes(scope, variable)
         address = attributes["address"]
-        print(indent + "int32_t %s, %s, %s;" % (fromName, toName, byName))
+        print(indent2 + "int32_t %s, %s, %s;" % (fromName, toName, byName))
         tipe, source = generateExpression(scope, line["from"])
-        print(indent + fromName + " = " + source + ";")
+        print(indent2 + fromName + " = " + source + ";")
         tipe, source = generateExpression(scope, line["to"])
-        print(indent + toName + " = " + source + ";")
+        print(indent2 + toName + " = " + source + ";")
         tipe, source = generateExpression(scope, line["by"])
-        print(indent + byName + " = " + source + ";")
-        print((indent + \
+        print(indent2 + byName + " = " + source + ";")
+        print((indent2 + \
               "for (putFIXED(" + str(address) + ", " + fromName + \
-              ");\n" + indent + "     getFIXED(%d) <= %s;\n" + indent + \
+              ");\n" + indent2 + "     getFIXED(%d) <= %s;\n" + indent2 + \
               "     putFIXED(%d, getFIXED(%d) + %s)) {" ) \
               % (address, toName, address, address, byName))
     elif "WHILE" in line:
@@ -629,11 +670,45 @@ def generateSingleLine(scope, indent, line, indexInScope):
     elif "ELSE" in line:
         print(indent + "else")
     elif "RETURN" in line:
-        tipe, source = generateExpression(scope, line["RETURN"])
-        print(indent + "return " + source + ";")
-
+        if line["RETURN"] == None:
+            print(indent + "return ;")
+        else:
+            tipe, source = generateExpression(scope, line["RETURN"])
+            print(indent + "return " + source + ";")
+    elif "ELSE" in line:
+        print(indent + "else")
+    elif "EMPTY" in line:
+        print(indent + ";")
+    elif "CALL" in line:
+        procedure = line["CALL"]
+        outerParameters = line["parameters"] 
+        if len(outerParameters) == 0:
+            print(indent + procedure + "();")
+        else:
+            attributes = getAttributes(scope, procedure)
+            innerScope = attributes["PROCEDURE"]
+            indent2 = indent + indentationQuantum
+            print(indent + "{")
+            innerParameters = attributes["parameters"]
+            if len(outerParameters) > len(innerParameters):
+                errxit("Too many parameters in CALL to " + symbol)
+            for k in range(len(outerParameters)):
+                outerParameter = outerParameters[k]
+                innerParameter = innerParameters[k]
+                innerAddress = innerScope["variables"][innerParameter]["address"]
+                tipe, parm = generateExpression(scope, outerParameter)
+                print(indent2 + "put" + tipe + "(" + \
+                         str(innerAddress) + ", " + parm + "); ")
+            print(indent2 + procedure + "();")
+            print(indent + "}")
+    elif "CASE" in line:
+        tipe, source = generateExpression(scope, line["CASE"])
+        print(indent + "switch (" + source + ") {")
+        scope["switchCounter"] = 0
+        scope["ifCounter"] = 0
     else:
-        print(indent + "Unimplemented:", line)
+        print(indent + "Unimplemented:", end="", file=debugSink)
+        printDict(line)
 
 # `generateCodeForScope` is a function that's plugged into
 # `walkModel`.  It generates all of the code for a scope and its sub-scopes
@@ -657,6 +732,8 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     
     of = extra["of"]
     indent = extra["indent"]
+    if "extraIndent" in scope:
+        indent = indent + indentationQuantum
     
     if extra["of"] == None:
         pass
@@ -726,7 +803,10 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         else:
             attributes = scope["parent"]["variables"][scopeName]
             variables = scope["variables"]
-            returnType = attributes["return"]
+            if "return" in attributes:
+                returnType = attributes["return"]
+            else:
+                returnType = "void"
             if returnType == "FIXED":
                 returnType = "int32_t"
             elif returnType == "BIT":
@@ -748,14 +828,27 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         line = scope["code"][i]
         if verbose and i in scope["pseudoStatements"]:
             print(indent + "// " + scope["pseudoStatements"][i])
+        if line == None or len(line) == 0: # ***DEBUG***
+            pass
         generateSingleLine(scope, indent, line, i)
         if "scope" in line: # Code for an embedded DO...END block.
             generateCodeForScope(line["scope"], { "of": of, "indent": indent} )
     
     #---------------------------------------------------------------------
     
-    indent = indent[:-2]
-    print(indent + "}")
+    if scope["parent"] != None and "switchCounter" in scope["parent"]:
+        print(indent + "break;")
+        scope["parent"].pop("switchCounter")
+        scope["parent"].pop("ifCounter")
+    indent = indent[:-len(indentationQuantum)]
+    print(indent + "}", end="")
+    if "blockType" in scope:
+        print(" // End of " + scope["blockType"])
+    else:
+        print()
+    if "extraIndent" in scope:
+        indent = indent[:-len(indentationQuantum)]
+        print(indent + "}")
     if topLevel:
         sys.stdout = stdoutOld # Restore previous stdout.
 

@@ -17,9 +17,11 @@
 
 TARGET = aout
 CC = gcc
+# Comment out the following line in "production".
+DEBUG = -ggdb
 
 SOURCES = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) -ggdb -o $@ $(SOURCES)
+	$(CC) $(DEBUG) -o $@ $(SOURCES)

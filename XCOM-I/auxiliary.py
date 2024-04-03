@@ -60,19 +60,26 @@ def expandOneMacroInString(scope, string):
     delimiter = ''
     fields = ['']
     for c in string:
-        fields[-1] = fields[-1] + c
         if inQuote and c == delimiter:
+            fields[-1] = fields[-1] + c
             inQuote = False
             fields.append('')
         elif not inQuote and c in delimiters:
+            fields.append(c)
             inQuote = True
             delimiter = c
+        else:
+            fields[-1] = fields[-1] + c
     if fields[-1] == '':
         del fields[-1]
+    oscope = scope
     for i in range(len(fields)):
+        scope = oscope
         s = fields[i]
         if s[:1] in delimiters:
             continue
+        if s == "TRUE": # ***DEBUG***
+            pass
         # Loop on current scope and all ancestors.
         while True:
             # Loop on all macros DECLARE'd in the scope.
@@ -143,14 +150,22 @@ def expandOneMacroInString(scope, string):
                     fields[i] = newString
                     return ''.join(fields) # Replaced something!
             if scope["parent"] == None: # No parent?
-                return string # No changes to string!
+                break
             scope = scope["parent"]
+    return string;
 
 # `expandAllMacrosInString` simply calls `expandOneMacroInString` until
 # no more replacements are called.  Note that will enter an infinite
 # loop for dumb XPL code like `DECLARE A LITERALLY "A A";`.
 def expandAllMacrosInString(scope, string):
+    ostring = string # ***DEBUG***
+    if ostring == "CONTROL(BYTE('L')) = TRUE;":
+        pass
+    if "TRUE" in string: # ***DEBUG***
+        pass
     while True:
+        if not isinstance(string, str):
+            pass
         newString = expandOneMacroInString(scope, string)
         if newString == string:
             return string
@@ -195,6 +210,77 @@ def getAttributes(scope, symbol):
         scope = scope["parent"]
     return None
 
+# `printList` is a utility called by `printDict`.
+def printList(lst):
+    isList = isinstance(lst, list)
+    if isList:
+        print(" [", end="", file=debugSink)
+    else:
+        print(" (", end="", file=debugSink)
+    first = True
+    for value in lst:
+        if not first:
+            print(",", end = "", file=debugSink)
+        first = False
+        if value == None:
+            print(" None", end = "", file=debugSink)
+        elif isinstance(value, int):
+            print("", value, end="", file=debugSink)
+        elif isinstance(value, str):
+            print(" '" + value + "'", end="", file=debugSink)
+        elif isinstance(value, (list, tuple)):
+            printList(value)
+        elif isinstance(value, dict):
+            printDict(value)
+        elif isinstance(value, set):
+            print(" " + str(value), end="", file=debugSink)
+        else:
+            print(" ?", end="", file=debugSink)
+    if isList:
+        print(" ]", end="", file=debugSink)
+    else:
+        print(" )", end="", file=debugSink)
+
+# `printDict` is a utility called by `printModel`, used for printing a 
+# representation of an identifier's attributes from the variable list.
+# The principal difficulty with just printing scope["variables"][identifier]
+# is that for any real program, the hierarchy of parent and child scopes
+# embedded in this printout make it not only overwhelming in size (multigigabyte
+# for ANALYZER.xpl), but useless to look at.  So at the very least, these
+# cross references to scopes have to be eliminated.
+def printDict(dictionary):
+    print(" {", end="", file=debugSink)
+    first = True
+    for key in sorted(dictionary):
+        if key in ["parent", "children", "pseudoStatements", "lineText",
+                   "lineExpanded", "lineExpandedText", "lineNumber", "code"]:
+            continue
+        value = dictionary[key]
+        if not first:
+            print(",", end = "", file=debugSink)
+        first = False
+        if isinstance(key, str):
+            print(" '" + key + "':", end = "", file=debugSink)
+        elif isinstance(key, int):
+            print(" " + str(key) + ":", end = "", file=debugSink)
+        else:
+            continue
+        if value == None:
+            print(" None", end = "", file=debugSink)
+        elif isinstance(value, int):
+            print("", value, end="", file=debugSink)
+        elif isinstance(value, str):
+            print(" '" + value + "'", end="", file=debugSink)
+        elif isinstance(value, set):
+            print(" " + str(value), end="", file=debugSink)
+        elif isinstance(value, (list, tuple)):
+            printList(value)
+        elif isinstance(value, dict):
+            printDict(value)
+        else:
+            print(" ?", end="", file=debugSink)
+    print(" }", end="", file=debugSink)
+
 # The `function` (*a la* walkModel) for user-friendly printing of a
 # scope dictionary ... but only when --debug is used.
 def printModel(scope, extra = None):
@@ -220,8 +306,9 @@ def printModel(scope, extra = None):
         if len(scope["variables"]) > 0:
             print(indent1 + "Identifiers:", file=debugSink)
             for var in scope["variables"]:
-                print(indent2 + var + ": " + str(scope["variables"][var]), \
-                      file=debugSink)
+                print(indent2 + var + ":", end="", file=debugSink)
+                printDict(scope["variables"][var])
+                print("", file=debugSink)
         else:
             #print(indent1 + "Variables: None", file=debugSink)
             pass
@@ -236,7 +323,12 @@ def printModel(scope, extra = None):
     if "code" in scope and len(scope["code"]) > 0:
         print(indent1 + "Pseudocode:", file=debugSink)
         for p in scope["code"]:
-            print(indent2 + str(p), file=debugSink)
+            print(indent2, end="", file=debugSink)
+            if isinstance(p, dict):
+                printDict(p)
+            else:
+                print(" " + str(p), end="", file=debugSink)
+            print("", file=debugSink)
     if False:
         if len(scope["children"]) == 0:
             print(indent1 + "Children: None", file=debugSink)

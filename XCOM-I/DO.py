@@ -29,26 +29,35 @@ def DO(tokenized, scope, inRecord = False):
     
     if len(tokenized) == 2: # Just "DO;".  Okay as is.
         scope["parent"]["code"].append({"BLOCK": True, "scope": scope})
+        scope["blockType"] = "DO block"
         return False
     
-    if "reserved" in tokenized[1]: # DO WHILE
-        if tokenized[1]["reserved"] != "WHILE":
-            error("Unexpected token in DO", scope)
-            return True
+    if "reserved" in tokenized[1]: # DO WHILE or CASE
+        reserved = tokenized[1]["reserved"]
         expression = parseExpression(tokenized, 2)
         if expression == None:
-            error("DO WHILE expected an expression", scope)
+            error("DO WHILE or CASE expected an expression", scope)
             return True
         end = expression["end"]
         if tokenized[end] != ";":
-            error("Missing semicolon in DO WHILE", scope)
+            error("Missing semicolon in DO WHILE or CASE", scope)
             return True
         if debugSink != None:
             printTree(expression, indent="\t", file=debugSink)
-        scope["parent"]["code"].append({"WHILE": expression, "scope": scope})
-        return False
+        if reserved == "WHILE":
+            scope["parent"]["code"].append({"WHILE": expression, "scope": scope})
+            scope["blockType"] = "DO WHILE block"
+            return False
+        elif reserved == "CASE":
+            scope["parent"]["code"].append({"CASE": expression, "scope": scope})
+            scope["blockType"] = "DO CASE block"
+            return False
+        else:
+            error("Unexpected token in DO", scope)
+            return True
     
     # If we've gotten to here, the only possibility left is DO i = j to k [by n]
+    scope["blockType"] = "DO for-loop block"
     counter = isVariable(tokenized, 1)
     if len(counter) == 1:
         counter = counter[0]

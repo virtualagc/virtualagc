@@ -30,7 +30,6 @@ def PROCEDURE(tokenized, scope, inRecord = False):
     attributes = scope["variables"][symbol]
     attributes.pop("LABEL")
     attributes["parameters"] = parameters
-    attributes["return"] = "FIXED"
     
     # Now parse the remainder of the definition to get the return type and
     # the parameter list.
@@ -93,7 +92,7 @@ def PROCEDURE(tokenized, scope, inRecord = False):
                 error(msg, scope)
         elif state == "comma":
             if token == ",":
-                state == "parm"
+                state = "parm"
             elif token == ")":
                 state = "type"
             else:

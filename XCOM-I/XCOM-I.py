@@ -34,6 +34,7 @@ from ASSIGNMENT import ASSIGNMENT
 from DO import DO
 from IF import IF
 from RETURN import RETURN
+from CALL import CALL
 from generateC import generateC
 
 logicalNot = '¬'
@@ -448,6 +449,11 @@ for lineNumber in range(len(pseudoStatements)):
     elif reserved0 == "RETURN":
         if RETURN(tokenized, scope):
             sys.exit(1)
+    elif reserved0 == "CALL":
+        if CALL(tokenized, scope):
+            sys.exit(1)
+    elif tokenized[0] == ";":
+        scope["code"].append({"EMPTY": True})
     else:
         print(tokenized)
         error("Unimplemented", scope)

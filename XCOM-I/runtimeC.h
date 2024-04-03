@@ -44,6 +44,7 @@ getFIXED(uint32_t address);
 void
 putFIXED(uint32_t address, int32_t value);
 
+/*
 // Same for XPL `BIT` type.  Note that only `BIT(1)` through `BIT(32)` is
 // supported, and if longer `BIT(n)` is needed, then some modification is
 // needed.
@@ -51,6 +52,7 @@ uint32_t
 getBIT(uint32_t address);
 void
 putBIT(uint32_t address, uint32_t value);
+*/
 
 // Same for XPL `CHARACTER` type.  In XPL, `CHARACTER` is represented by
 // a 32-bit "descriptor", in which 8 bits are the string length
@@ -155,6 +157,19 @@ SHL(uint32_t value, uint32_t shift);
 uint32_t
 SHR(uint32_t value, uint32_t shift);
 
+//      TIME=NumberOfCentisecondsSinceMidnight
+// Otherwise, same comments as for `DATE` above.
+uint32_t
+TIME(void);
+
+// XPL's DATE built-in "variable" is modeled as a function.
+//      DATE = (1000*(year-1900))+DayOfTheYear
+// The time-zone isn't specified, so I use UTC.
+uint32_t
+DATE(void);
+
+uint32_t
+DATE_OF_GENERATION(void);
 
 
 #endif // RUNTIMEC_H
