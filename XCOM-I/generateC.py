@@ -303,7 +303,8 @@ def generateExpression(scope, expression):
         source = str(token["number"])
     elif "string" in token:
         tipe = "CHARACTER"
-        source = '"' + token["string"] + '"'
+        source = '"' + \
+                 token["string"].replace('"', '\\\"').replace("`", "''") + '"'
     elif "operator" in token:
         operator = token["operator"]
         if operator in numericOperators or operator in universalOperators:
@@ -334,10 +335,16 @@ def generateExpression(scope, expression):
             smod = "x"
             if tipe1 == "CHARACTER":
                 smod = "xs"
+            if tipe1 == None:
+                errxit("Cannot evaluate " + str(operand1))
+            elif tipe1 in ["FIXED", "BIT"] and operator in stringOperators:
+                source1 = "fixedToCharacter( " + source1 + " )"
+                tipe1 = "CHARACTER"
+            elif tipe1 == "CHARACTER" and operator in numericOperators:
+                errxit("Mismatched string and numeric")
             if tipe2 == None:
                 errxit("Cannot evaluate " + str(operand2))
-            elif tipe2 == "FIXED" and operator in stringOperators:
-                #errxit("Mismatched string and numeric")
+            elif tipe2 in ["FIXED", "BIT"] and operator in stringOperators:
                 source2 = "fixedToCharacter( " + source2 + " )"
                 tipe2 = "CHARACTER"
             elif tipe2 == "CHARACTER" and operator in numericOperators:
@@ -390,8 +397,9 @@ def generateExpression(scope, expression):
                     # like `(a=b, c=d, ..., y=z, f())`, where `a`, `c`, ...,
                     # `y` parameters within the PROCEDURE definition. 
                     outerParameters = expression["children"]
+                    mangled = attributes["mangled"]
                     if len(outerParameters) == 0:
-                        source = symbol + "()"
+                        source = mangled + "()"
                     else:
                         innerParameters = attributes["parameters"] 
                         innerScope = attributes["PROCEDURE"]
@@ -405,7 +413,7 @@ def generateExpression(scope, expression):
                             tipe, parm = generateExpression(scope, outerParameter)
                             source = source + "put" + tipe + "(" + \
                                      str(innerAddress) + ", " + parm + "), "
-                        source = source + symbol + "() )"
+                        source = source + mangled + "() )"
                     if "return" in attributes:
                         tipe = attributes["return"]
                     else:
@@ -495,9 +503,9 @@ lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
 def generateSingleLine(scope, indent, line, indexInScope):
     global forLoopCounter, lineCounter
-    lineCounter += 1
-    if lineCounter == 271: # ***DEBUG***
+    if lineCounter == 936: # ***DEBUG***
         pass
+    lineCounter += 1
     if len(line) < 1: # I don't think this is possible!
         return
     # For inserting `case` and `break` into `switch` statements.
@@ -528,7 +536,8 @@ def generateSingleLine(scope, indent, line, indexInScope):
         elif tipeR == "CHARACTER":
             definedS = True
             print(indent + "string_t stringRHS;")
-            print(indent + "strcpy(stringRHS, " + sourceR + ");")
+            
+            print(indent + "strcpy(stringRHS, %s);" % sourceR)
         else:
             errxit("Unknown RHS type: " + str(RHS))
         
@@ -536,7 +545,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
         # perhaps been provided.
         def autoConvert():
             nonlocal definedS;
-            if tipeR == "FIXED":
+            if tipeR in ["FIXED", "BIT"]:
                 if not definedS:
                     print(indent + "string_t stringRHS;")
                     definedS = True
@@ -561,16 +570,13 @@ def generateSingleLine(scope, indent, line, indexInScope):
                         errxit("Too many subscripts")
                 elif "CHARACTER" in attributes:
                     if tipeR in ["FIXED", "BIT"]:
-                        print(indent + "string_t stringRHS;")
-                        print(indent + "strcpy(stringRHS, fixedToCharacter(numberRHS));")
+                        autoConvert()
                     elif tipeR != "CHARACTER":
                         errxit("LHS/RHS type mismatch in assignment.")
                     if len(children) == 0:
-                        autoConvert()
                         print(indent + "putCHARACTER(" + str(address) + ", stringRHS);") 
                     elif len(children) == 1:
                         tipeL, sourceL = generateExpression(scope, children[0])
-                        autoConvert()
                         print(indent + "putCHARACTER(" + str(address) + "+ 4*(" + \
                               sourceL + "), stringRHS);") 
                     else:
@@ -671,7 +677,13 @@ def generateSingleLine(scope, indent, line, indexInScope):
         print(indent + "else")
     elif "RETURN" in line:
         if line["RETURN"] == None:
-            print(indent + "return ;")
+            # There are examples in ANALYZER.xpl of PROCEDURES that don't
+            # return values having their values used in IF statements.
+            # McKeeman says that such returns will be random, because they'll
+            # just be leftover values from some unspecified register.  I'll
+            # alway return a 0.
+            #print(indent + "return ;")
+            print(indent + "return 0;")
         else:
             tipe, source = generateExpression(scope, line["RETURN"])
             print(indent + "return " + source + ";")
@@ -682,10 +694,11 @@ def generateSingleLine(scope, indent, line, indexInScope):
     elif "CALL" in line:
         procedure = line["CALL"]
         outerParameters = line["parameters"] 
+        attributes = getAttributes(scope, procedure)
+        mangled = attributes["mangled"]
         if len(outerParameters) == 0:
-            print(indent + procedure + "();")
+            print(indent + mangled + "();")
         else:
-            attributes = getAttributes(scope, procedure)
             innerScope = attributes["PROCEDURE"]
             indent2 = indent + indentationQuantum
             print(indent + "{")
@@ -699,7 +712,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 tipe, parm = generateExpression(scope, outerParameter)
                 print(indent2 + "put" + tipe + "(" + \
                          str(innerAddress) + ", " + parm + "); ")
-            print(indent2 + procedure + "();")
+            print(indent2 + mangled + "();")
             print(indent + "}")
     elif "CASE" in line:
         tipe, source = generateExpression(scope, line["CASE"])
@@ -806,7 +819,10 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             if "return" in attributes:
                 returnType = attributes["return"]
             else:
-                returnType = "void"
+                # Even in XPL (vs XPL/I), PROCEDUREs without any specified
+                # type may still return values.  There are examples in 
+                # ANALYZER.xpl of that happening.
+                returnType = "int32_t" # "void"
             if returnType == "FIXED":
                 returnType = "int32_t"
             elif returnType == "BIT":
@@ -823,13 +839,16 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     # All of the code generation for actual XPL statements occurs between
     # these two horizontal lines.
     
+    lastReturned = False
     numCode = len(scope["code"])
     for i in range(numCode):
         line = scope["code"][i]
         if verbose and i in scope["pseudoStatements"]:
-            print(indent + "// " + scope["pseudoStatements"][i])
+            print(indent + "// " + scope["pseudoStatements"][i] + \
+                  (" (%d)" % lineCounter))
         if line == None or len(line) == 0: # ***DEBUG***
             pass
+        lastReturn = "RETURN" in line
         generateSingleLine(scope, indent, line, i)
         if "scope" in line: # Code for an embedded DO...END block.
             generateCodeForScope(line["scope"], { "of": of, "indent": indent} )
@@ -840,6 +859,12 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         print(indent + "break;")
         scope["parent"].pop("switchCounter")
         scope["parent"].pop("ifCounter")
+    # Add a precautionary RETURN 0 at the end of PROCEDUREs, for the reasons
+    # described in the comments for CALL.  If there was already an explicit
+    # RETURN here, or if the RETURN is somewhare else and this position cannot
+    # be reached, the C compiler may complain, but hopefully won't fail.
+    if not lastReturn and scope["symbol"] != '' and scope["symbol"][:1] != "_":
+        print(indent + "return 0;")
     indent = indent[:-len(indentationQuantum)]
     print(indent + "}", end="")
     if "blockType" in scope:
