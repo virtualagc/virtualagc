@@ -1,0 +1,122 @@
+$             X P L   G R A M M A R                                             
+$                                                                               
+$                                                                               
+$ITERATE                                                                        
+$PUNCH                                                                          
+$                                                                               
+$                                                                               
+<PROGRAM> <STATEMENT LIST>                                                      
+<STATEMENT LIST> <STATEMENT>                                                    
+     <STATEMENT LIST> <STATEMENT>                                               
+<STATEMENT>          <BASIC STATEMENT>                                          
+                     <IF STATEMENT>                                             
+<BASIC STATEMENT>    <ASSIGNMENT> ;                                             
+                     <GROUP> ;                                                  
+                     <PROCEDURE DEFINITION> ;                                   
+                     <RETURN STATEMENT> ;                                       
+                     <CALL STATEMENT> ;                                         
+                     <GO TO STATEMENT> ;                                        
+                     <DECLARATION STATEMENT>;                                   
+                     ;                                                          
+   <LABEL DEFINITION>  <BASIC STATEMENT>                                        
+<IF STATEMENT>       <IF CLAUSE> <STATEMENT>                                    
+                     <IF CLAUSE> <TRUE PART> <STATEMENT>                        
+   <LABEL DEFINITION>  <IF STATEMENT>                                           
+<IF CLAUSE>   IF <EXPRESSION> THEN                                              
+<TRUE PART>          <BASIC STATEMENT> ELSE                                     
+<GROUP>              <GROUP HEAD> <ENDING>                                      
+<GROUP HEAD>         DO ;                                                       
+                     DO <STEP DEFINITION> ;                                     
+   DO <WHILE CLAUSE> ;                                                          
+   DO <CASE SELECTOR> ;                                                         
+                     <GROUP HEAD> <STATEMENT>                                   
+<STEP DEFINITION>  <VARIABLE> <REPLACE> <EXPRESSION> <ITERATION CONTROL >       
+<ITERATION CONTROL>  TO <EXPRESSION>                                            
+   TO <EXPRESSION> BY <EXPRESSION>                                              
+<WHILE CLAUSE>  WHILE <EXPRESSION>                                              
+<CASE SELECTOR>  CASE <EXPRESSION>                                              
+<PROCEDURE DEFINITION> <PROCEDURE HEAD> <STATEMENT LIST> <ENDING>               
+<PROCEDURE HEAD>  <PROCEDURE NAME> ;                                            
+                  <PROCEDURE NAME> <TYPE> ;                                     
+   <PROCEDURE NAME> <PARAMETER LIST>;                                           
+   <PROCEDURE NAME> <PARAMETER LIST> <TYPE> ;                                   
+<PROCEDURE NAME>  <LABEL DEFINITION> PROCEDURE                                  
+<PARAMETER LIST>  <PARAMETER HEAD> <IDENTIFIER> )                               
+<PARAMETER HEAD>  (                                                             
+   <PARAMETER HEAD>  <IDENTIFIER> ,                                             
+<ENDING>             END                                                        
+                     END <IDENTIFIER>                                           
+   <LABEL DEFINITION> <ENDING>                                                  
+<LABEL DEFINITION>  <IDENTIFIER> :                                              
+<RETURN STATEMENT>   RETURN                                                     
+                     RETURN <EXPRESSION>                                        
+<CALL STATEMENT>     CALL <VARIABLE>                                            
+<GO TO STATEMENT>    <GO TO> <IDENTIFIER>                                       
+<GO TO>              GO TO                                                      
+                     GOTO                                                       
+<DECLARATION STATEMENT>  DECLARE <DECLARATION ELEMENT>                          
+                     <DECLARATION STATEMENT> , <DECLARATION ELEMENT>            
+<DECLARATION ELEMENT>  <TYPE DECLARATION>                                       
+   <IDENTIFIER> LITERALLY <STRING>                                              
+<TYPE DECLARATION> <IDENTIFIER SPECIFICATION> <TYPE>                            
+   <BOUND HEAD> <NUMBER> ) <TYPE>                                               
+   <TYPE DECLARATION> <INITIAL LIST>                                            
+<TYPE>               FIXED                                                      
+                     CHARACTER                                                  
+   LABEL                                                                        
+   <BIT HEAD> <NUMBER> )                                                        
+<BIT HEAD> BIT (                                                                
+<BOUND HEAD> <IDENTIFIER SPECIFICATION> (                                       
+<IDENTIFIER SPECIFICATION> <IDENTIFIER>                                         
+         <IDENTIFIER LIST> <IDENTIFIER> )                                       
+<IDENTIFIER LIST>  (                                                            
+     <IDENTIFIER LIST> <IDENTIFIER> ,                                           
+<INITIAL LIST>       <INITIAL HEAD> <CONSTANT> )                                
+<INITIAL HEAD>       INITIAL (                                                  
+                     <INITIAL HEAD> <CONSTANT> ,                                
+<ASSIGNMENT>  <VARIABLE> <REPLACE> <EXPRESSION>                                 
+                     <LEFT PART> <ASSIGNMENT>                                   
+<REPLACE>  =                                                                    
+<LEFT PART>          <VARIABLE> ,                                               
+<EXPRESSION>  <LOGICAL FACTOR>                                                  
+   <EXPRESSION> |  <LOGICAL FACTOR>                                             
+<LOGICAL FACTOR>     <LOGICAL SECONDARY>                                        
+                     <LOGICAL FACTOR> &   <LOGICAL SECONDARY>                   
+<LOGICAL SECONDARY>  <LOGICAL PRIMARY>                                          
+                      ~  <LOGICAL PRIMARY>                                      
+<LOGICAL PRIMARY>  <STRING EXPRESSION>                                          
+   <STRING EXPRESSION> <RELATION> <STRING EXPRESSION>                           
+<RELATION>           =                                                          
+                     <                                                          
+                     >                                                          
+                     ~ =                                                        
+                     ~ <                                                        
+                     ~ >                                                        
+                     < =                                                        
+                     > =                                                        
+<STRING EXPRESSION>  <ARITHMETIC EXPRESSION>                                    
+   <STRING EXPRESSION> ||  <ARITHMETIC EXPRESSION>                              
+<ARITHMETIC EXPRESSION> <TERM>                                                  
+                     <ARITHMETIC EXPRESSION> + <TERM>                           
+                     <ARITHMETIC EXPRESSION> - <TERM>                           
+                     + <TERM>                                                   
+                     - <TERM>                                                   
+<TERM>               <PRIMARY>                                                  
+                     <TERM> * <PRIMARY>                                         
+                     <TERM> / <PRIMARY>                                         
+                     <TERM> MOD <PRIMARY>                                       
+<PRIMARY>            <CONSTANT>                                                 
+                     <VARIABLE>                                                 
+   ( <EXPRESSION> )                                                             
+<VARIABLE>  <IDENTIFIER>                                                        
+   <SUBSCRIPT HEAD> <EXPRESSION> )                                              
+<SUBSCRIPT HEAD>     <IDENTIFIER> (                                             
+                     <SUBSCRIPT HEAD> <EXPRESSION> ,                            
+<CONSTANT>           <STRING>                                                   
+                     <NUMBER>                                                   
+$                                                                               
+$                                                                               
+$                                                                               
+$                                                                               
+$                                                                               
+$OUTPUT                                                                         

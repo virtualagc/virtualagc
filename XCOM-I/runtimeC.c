@@ -135,15 +135,17 @@ parseCommandLine(int argc, char **argv)
           printf("--ddi=N,F   Attach filename F to the logical unit number\n");
           printf("            N, for use with the INPUT(N) XPL built-in.\n");
           printf("            By default, 0 and 1 are attached to stdin.\n");
+          printf("            N can range from 0 through 9.\n");
           printf("--ddo=N,F   Attach filename F to the logical unit number\n");
           printf("            N, for use with the OUTPUT(N) XPL built-in.\n");
           printf("            By default, 0 and 1 are attached to stdout.\n");
+          printf("            N can range from 0 through 9.\n");
           printf("--commoni=F Name of the file from which to read the\n");
           printf("            initial values for COMMON memory at startup.\n");
           printf("            By default, COMMON is not initialized.\n");
           printf("--commono=F Name of the file to which data from COMMON\n");
           printf("            is written upon program termination.  By\n");
-          printf("            default, COMMON.out.\n");
+          printf("            default, the file COMMON.out is used.\n");
           printf("\n");
           returnValue = 1;
         }
@@ -153,8 +155,6 @@ parseCommandLine(int argc, char **argv)
           returnValue = -1;
         }
     }
-  if (COMMON_OUT == NULL)
-    COMMON_OUT = fopen("COMMON.out", "wb");
   if (COMMON_IN != NULL)
     {
       if (sizeOfCommon > 0)
@@ -174,6 +174,8 @@ parseCommandLine(int argc, char **argv)
       fclose(COMMON_IN);
       COMMON_IN = NULL;
     }
+  if (COMMON_OUT == NULL)
+    COMMON_OUT = fopen("COMMON.out", "wb");
   return returnValue;
 }
 
