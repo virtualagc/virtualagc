@@ -466,15 +466,16 @@ for lineNumber in range(len(pseudoStatements)):
 # dictionary.  We are thus in a position to generate object
 # code.
 if targetLanguage == "C":
+    basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
     try:
         try:
             shutil.rmtree(outputFolder, True)
         except:
             pass
         os.mkdir(outputFolder)
-        shutil.copy2("runtimeC.c", outputFolder)
-        shutil.copy2("runtimeC.h", outputFolder)
-        shutil.copy2("Makefile", outputFolder)
+        shutil.copy2(basePath + "runtimeC.c", outputFolder)
+        shutil.copy2(basePath + "runtimeC.h", outputFolder)
+        shutil.copy2(basePath + "Makefile", outputFolder)
     except:
         pass
     generateC(globalScope)
