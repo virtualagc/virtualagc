@@ -53,11 +53,14 @@ nextBuffer(void)
 int outUTF8 = 0;
 FILE *DD_INS[DD_MAX] = { NULL };
 FILE *DD_OUTS[DD_MAX] = { NULL };
+FILE *COMMON_OUT = NULL;
 
 int
 parseCommandLine(int argc, char **argv)
 {
+  extern uint32_t sizeOfCommon, sizeOfNonCommon; // from main.c
   int i, returnValue = 0;
+  FILE *COMMON_IN = NULL;
   DD_INS[0] = DD_INS[1] = stdin;
   DD_OUTS[0] = DD_OUTS[1] = stdout;
   for (i = 1; i < argc; i++)
@@ -103,6 +106,14 @@ parseCommandLine(int argc, char **argv)
                 }
             }
         }
+      else if (1 == sscanf(argv[i], "--commoni=%s", filename))
+        {
+          COMMON_IN = fopen(filename, "rb");
+        }
+      else if (1 == sscanf(argv[i], "--commono=%s", filename))
+        {
+          COMMON_OUT = fopen(filename, "wb");
+        }
       else if (!strcmp("--help", argv[i]))
         {
           printf("\n");
@@ -127,6 +138,12 @@ parseCommandLine(int argc, char **argv)
           printf("--ddo=N,F   Attach filename F to the logical unit number\n");
           printf("            N, for use with the OUTPUT(N) XPL built-in.\n");
           printf("            By default, 0 and 1 are attached to stdout.\n");
+          printf("--commoni=F Name of the file from which to read the\n");
+          printf("            initial values for COMMON memory at startup.\n");
+          printf("            By default, COMMON is not initialized.\n");
+          printf("--commono=F Name of the file to which data from COMMON\n");
+          printf("            is written upon program termination.  By\n");
+          printf("            default, COMMON.out.\n");
           printf("\n");
           returnValue = 1;
         }
@@ -135,6 +152,27 @@ parseCommandLine(int argc, char **argv)
           printf("Unknown command-line switch %s. Try --help.\n", argv[i]);
           returnValue = -1;
         }
+    }
+  if (COMMON_OUT == NULL)
+    COMMON_OUT = fopen("COMMON.out", "wb");
+  if (COMMON_IN != NULL)
+    {
+      if (sizeOfCommon > 0)
+        {
+          int length = fread(memory, sizeOfCommon, 1, COMMON_IN);
+          if (length < sizeOfCommon)
+            fprintf(stderr,
+                "Warning: COMMON file (%d) smaller than COMMON block (%d).\n",
+                length, sizeOfCommon);
+          fseek(COMMON_IN, 0, SEEK_END);
+          length = ftell(COMMON_IN);
+          if (length > sizeOfCommon)
+            fprintf(stderr,
+                "Warning: COMMON file (%d) larger than COMMON block (%d).\n",
+                length, sizeOfCommon);
+        }
+      fclose(COMMON_IN);
+      COMMON_IN = NULL;
     }
   return returnValue;
 }

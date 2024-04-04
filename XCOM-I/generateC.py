@@ -149,8 +149,8 @@ pf = None
 
 # A function for walkModel(), for allocating simulated memory.
 variableAddress = 0 # Total contiguous bytes allocated in 24-bit address space.
+areaNormal = 0 # End of COMMON and start of non-COMMON
 useCommon = False # For allocating COMMON vs non-COMMON
-useParameters = False # For allocating PROCEDURE parameters.
 useString = False # For allocating character data CHARACTER.
 memory = bytearray([0] * (1 << 24));
 memoryMap = {}
@@ -205,10 +205,7 @@ def allocateVariables(scope, extra = None):
         mangled = attributes["mangled"]
         if useString and "CHARACTER" not in attributes:
             continue
-        if useParameters:
-            if "parameter" not in attributes:
-                continue
-        elif useCommon:
+        if useCommon:
             if "common" not in attributes:
                 continue
         else:
@@ -807,8 +804,26 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
                     print("       %8d (%06X)        %-16s %s" % \
                           (address, address, memoryMap[address][1], \
                            memoryMap[address][0]))
+                if areaNormal == 0:
+                    print("  COMMON:     (empty)")
+                else:
+                    print("  COMMON:     0x%06X-0x%06X" % \
+                          (0, areaNormal - 1))
+                if variableAddress == areaNormal:
+                    print("  Non-COMMON: (empty)")
+                else:
+                    print("  Non-COMMON: 0x%06X-0x%06X" % \
+                          (areaNormal, variableAddress - 1))
+                if variableAddress >= len(memory):
+                    print("  Unused:     (none)")
+                else:
+                    print("  Unused:     0x%06X-0x%06X" % \
+                          (variableAddress, 0xFFFFFF))
                 print("*/")
                 print()
+            print("uint32_t sizeOfCommon = %d;" % areaNormal)
+            print("uint32_t sizeOfNonCommon = %d;" % (variableAddress-areaNormal));
+            print()
             print("int\nmain(int argc, char *argv[])\n{")
             print()
             print("  if (parseCommandLine(argc, argv)) exit(0);")
@@ -865,20 +880,30 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     # be reached, the C compiler may complain, but hopefully won't fail.
     if not lastReturn and scope["symbol"] != '' and scope["symbol"][:1] != "_":
         print(indent + "return 0;")
+    if "extraIndent" in scope:
+        indent = indent[:-len(indentationQuantum)]
+        print(indent + "}")
+    if scope["parent"] == None:
+        # End of main.c.
+        print()
+        if areaNormal > 0:
+            print(indent + "if (COMMON_OUT != NULL) {")
+            print(indent + indentationQuantum + "fwrite(memory, sizeOfCommon, 1, COMMON_OUT);")
+            print(indent + indentationQuantum + "fclose(COMMON_OUT);")
+            print(indent + indentationQuantum + "COMMON_OUT = NULL;")
+            print(indent + "}")
+        print(indent + "return 0;")
     indent = indent[:-len(indentationQuantum)]
     print(indent + "}", end="")
     if "blockType" in scope:
         print(" // End of " + scope["blockType"])
     else:
         print()
-    if "extraIndent" in scope:
-        indent = indent[:-len(indentationQuantum)]
-        print(indent + "}")
     if topLevel:
         sys.stdout = stdoutOld # Restore previous stdout.
 
 def generateC(globalScope):
-    global useCommon, useParameters, useString, pf
+    global useCommon, useString, pf, areaNormal
     
     pf = open(outputFolder + "/procedures.h", "w")
     print("/*", file=pf)
@@ -919,27 +944,16 @@ def generateC(globalScope):
     # and then reloaded later.  It's better to put COMMON first, so as to have 
     # addresses that don't need to be changes after reloading.
     useCommon = True # COMMON
-    useParameters = False
     useString = False
     walkModel(globalScope, allocateVariables)
     useCommon = True # COMMON string data
-    useParameters = False
     useString = True
     walkModel(globalScope, allocateVariables)
-    useCommon = False # PROCEDURE parameters
-    useParameters = True
-    useString = False
-    walkModel(globalScope, allocateVariables)
-    useCommon = False # PROCEDURE parameter string data
-    useParameters = True
-    useString = True
-    walkModel(globalScope, allocateVariables)
+    areaNormal = variableAddress
     useCommon = False # normal variables
-    useParameters = False
     useString = False
     walkModel(globalScope, allocateVariables)
     useCommon = False # normal string data
-    useParameters = False
     useString = True
     walkModel(globalScope, allocateVariables)
     

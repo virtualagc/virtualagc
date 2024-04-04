@@ -74,8 +74,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         # parentheses not appearing within quoted strings, so every 
         # component of fields[] should be a single meaningful token. 
         isCommon = ( fields[0] == "COMMON" ) # Versus DECLARE
-        if isCommon:
-            del fields[0]
+        #if isCommon:
+        #    del fields[0]
         isArray = ( fields[0] == "ARRAY" ) # Versus DECLARE or BASED.
         inArray = 0 # State variable for isArray.
         isBased = ( fields[0] == "BASED" )

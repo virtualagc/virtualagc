@@ -21,6 +21,7 @@ extern int outUTF8;
 #define DD_MAX 9
 extern FILE *DD_INS[DD_MAX];
 extern FILE *DD_OUTS[DD_MAX];
+extern FILE *COMMON_OUT;
 
 // Returns -1 on failure, 0 on success, 1 to request an immediate termination.
 int
