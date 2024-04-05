@@ -1,4 +1,4 @@
- /*/
+ /*@
     Access:     Public Domain, no restrictions believed to exist.
     Filename:   ##DRIVER.xpl
     Purpose:    This is a part of the HAL/S-FC compiler program.

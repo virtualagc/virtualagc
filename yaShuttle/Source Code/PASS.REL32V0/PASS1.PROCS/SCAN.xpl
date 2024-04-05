@@ -1,4 +1,4 @@
- /*/
+ /*@
     Encoding:   Access this file using a UTF-8 character encoding.  
     		The following should appear to be a U.S. cent symbol: '¢'.
     Access:     Public Domain, no restrictions believed to exist.
@@ -15,7 +15,7 @@
                                 This has been repaired.
                 2022-12-14 RSB	Changed encoding from ISO 8859-15 (or -1) 
                 		to UTF-8.
-    Note:       Inline comments beginning with "/*/" were created by the 
+    Note:       Inline comments beginning with "/*@" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
  */

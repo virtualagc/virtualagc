@@ -1,4 +1,4 @@
- /*/
+ /*@
     Access:     Public Domain, no restrictions believed to exist.
     Filename:   VMEM3.xpl
     Purpose:    Part of the HAL/S-FC compiler.
@@ -7,7 +7,7 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2022-12-08 RSB  Suffixed the filename with ".xpl".
-    Note:       Inline comments beginning with "/*/" were created by the 
+    Note:       Inline comments beginning with "/*@" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
  */

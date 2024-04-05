@@ -1,4 +1,4 @@
- /*/
+ /*@
     Access:     Public Domain, no restrictions believed to exist.
     Filename:   PRESCAN.xpl
     Purpose:    This is a part of optimizer of the HAL/S-FC compiler program.
@@ -8,7 +8,7 @@
     History:    2022-12-08 RSB  Suffixed the filename with ".xpl".
                                 Fixed a space that had been incorrectly 
                                 encoded as 0x00.
-    Note:       Inline comments beginning with "/*/" were created by the 
+    Note:       Inline comments beginning with "/*@" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
  */
