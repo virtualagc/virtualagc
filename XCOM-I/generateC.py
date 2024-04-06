@@ -567,8 +567,9 @@ def generateExpression(scope, expression):
 # source code to the output file.
 lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
+inlineCounter = 0
 def generateSingleLine(scope, indent, line, indexInScope):
-    global forLoopCounter, lineCounter
+    global forLoopCounter, lineCounter, inlineCounter
     if lineCounter == 936: # ***DEBUG***
         pass
     lineCounter += 1
@@ -759,30 +760,45 @@ def generateSingleLine(scope, indent, line, indexInScope):
         print(indent + ";")
     elif "CALL" in line:
         procedure = line["CALL"]
-        outerParameters = line["parameters"] 
-        attributes = getAttributes(scope, procedure)
-        try: # ***DEBUG***
-            mangled = attributes["mangled"]
-        except:
-            pass
-        if len(outerParameters) == 0:
-            print(indent + mangled + "();")
+        if procedure == "INLINE":
+            patchFilename = baseSource + "/patch%d.c" % inlineCounter
+            originalInline = scope["pseudoStatements"][indexInScope]
+            try:
+                indent2 = indent + indentationQuantum
+                patchFile = open(patchFilename, "r")
+                print(indent + "{ // (%d) %s" % (inlineCounter, originalInline))
+                for patchLine in patchFile:
+                    print(indent2 + patchLine.rstrip())
+                print(indent + "}")
+                patchFile.close()
+            except:    
+                print(indent + "; // (%d) %s" % (inlineCounter, originalInline))
+            inlineCounter += 1
         else:
-            innerScope = attributes["PROCEDURE"]
-            indent2 = indent + indentationQuantum
-            print(indent + "{")
-            innerParameters = attributes["parameters"]
-            if len(outerParameters) > len(innerParameters):
-                errxit("Too many parameters in CALL to " + symbol)
-            for k in range(len(outerParameters)):
-                outerParameter = outerParameters[k]
-                innerParameter = innerParameters[k]
-                innerAddress = innerScope["variables"][innerParameter]["address"]
-                tipe, parm = generateExpression(scope, outerParameter)
-                print(indent2 + "put" + tipe + "(" + \
-                         str(innerAddress) + ", " + parm + "); ")
-            print(indent2 + mangled + "();")
-            print(indent + "}")
+            outerParameters = line["parameters"] 
+            attributes = getAttributes(scope, procedure)
+            try: # ***DEBUG***
+                mangled = attributes["mangled"]
+            except:
+                pass
+            if len(outerParameters) == 0:
+                print(indent + mangled + "();")
+            else:
+                innerScope = attributes["PROCEDURE"]
+                indent2 = indent + indentationQuantum
+                print(indent + "{")
+                innerParameters = attributes["parameters"]
+                if len(outerParameters) > len(innerParameters):
+                    errxit("Too many parameters in CALL to " + symbol)
+                for k in range(len(outerParameters)):
+                    outerParameter = outerParameters[k]
+                    innerParameter = innerParameters[k]
+                    innerAddress = innerScope["variables"][innerParameter]["address"]
+                    tipe, parm = generateExpression(scope, outerParameter)
+                    print(indent2 + "put" + tipe + "(" + \
+                             str(innerAddress) + ", " + parm + "); ")
+                print(indent2 + mangled + "();")
+                print(indent + "}")
     elif "CASE" in line:
         tipe, source = generateExpression(scope, line["CASE"])
         print(indent + "switch (" + source + ") {")
@@ -930,7 +946,9 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     numCode = len(scope["code"])
     for i in range(numCode):
         line = scope["code"][i]
-        if verbose and i in scope["pseudoStatements"]:
+        if verbose and i in scope["pseudoStatements"] and \
+                None == re.search("\\bCALL +INLINE *\\(", \
+                                  scope["pseudoStatements"][i].upper()):
             print(indent + "// " + scope["pseudoStatements"][i] + \
                   (" (%d)" % lineCounter))
         if line == None or len(line) == 0: # ***DEBUG***
@@ -1033,11 +1051,13 @@ def generateC(globalScope):
     # runtimeC.c.
     f = open(outputFolder + "/configuration.h", "w")
     print("// Configuration settings.", file=f)
-    print("#define NULL_STRING_METHOD %d" % nullStringMethod, file=f)
+    print("#define NULL_STRING_METHOD", nullStringMethod, file=f)
     if pfs:
         print("#define PFS", file=f)
     else:
         print("#define BFS", file=f)
+    print("#define VARIABLE_ADDRESS", variableAddress, file=f)
+    print("#define AREA_NORMAL", areaNormal, file=f)
     f.close()
     
     # Write out the initialized memory as a file called memory.c.

@@ -26,15 +26,16 @@ sourceFiles = [] # One entry for each entry in lines[]; source filename for line
 verbose = False
 includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 nullStringMethod = 0
+baseSource = ""
 
 # Raw read of a source-code file.  Recursive, if /%INCLUDE ... %/ directives
 # (and similar) are encountered.
 def readFileIntoLines(filename):
-    global inputFilenames, lines, sourceFiles
+    global inputFilenames, lines, sourceFiles, baseSource
     if filename in inputFilenames:
         return
-    dir2 = os.path.dirname(filename)
-    dir = dir2 + "/" + includeFolder
+    baseSource = os.path.dirname(filename)
+    dir = baseSource + "/" + includeFolder
     try:
         inputFilenames.append(filename)
         f = open(filename, "r")
@@ -54,7 +55,7 @@ def readFileIntoLines(filename):
                 readFileIntoLines(dir + "/" + basename + ".xpl")
             elif line.lstrip().startswith('/**MERGE'):
                 fields =line.lstrip().split()
-                readFileIntoLines(dir2 + "/" + fields[1] + ".xpl")
+                readFileIntoLines(baseSource + "/" + fields[1] + ".xpl")
         f.close()
     except:
         print("Failed to read file %s" % filename, file = sys.stderr)

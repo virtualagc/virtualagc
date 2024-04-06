@@ -496,7 +496,7 @@ while True:
     elif tokenized[0] == ";":
         scope["code"].append({"EMPTY": True})
     else:
-        print(tokenized)
+        #print(tokenized)
         error("Unimplemented", scope)
         #print(pseudoStatement)
         
