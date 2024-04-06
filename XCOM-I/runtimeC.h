@@ -16,6 +16,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "configuration.h"
+
 // Command-line variables.
 extern int outUTF8;
 #define DD_MAX 9
@@ -27,8 +29,8 @@ extern FILE *COMMON_OUT;
 int
 parseCommandLine(int argc, char **argv);
 
-#define MAX_XPL_STRING 255
-typedef char string_t[MAX_XPL_STRING + 1];
+#define MAX_XPL_STRING 256
+typedef char string_t[MAX_XPL_STRING];
 
 // XPL variables are *not* translated as C variables.  Rather, they are
 // translated as sequences of bytes in the following buffer.
@@ -55,20 +57,7 @@ void
 putBIT(uint32_t address, uint32_t value);
 */
 
-// Same for XPL `CHARACTER` type.  In XPL, `CHARACTER` is represented by
-// a 32-bit "descriptor", in which 8 bits are the string length
-// and 24 bits are the address of the sequence of character data in memory.
-// In C, we'll use `char` buffers of length 256 to hold the string data,
-// nul-terminated, and hope that none of the XPL strings (which are *not*
-// nul-terminated) include any NUL characters.  The XPL character data is
-// encoded in EBCDIC, and the utility functions below translate automatically
-// between EBCDIC and the native C format.  Note that in this
-// implementation, `CHARACTER` strings (both descriptors *and* data) are in
-// fixed locations in simulated memory, and only the lengths and data can
-// change during execution.  Note that `getCHARACTER` has a circular buffer
-// of string_t buffers that it uses to return values on successive calls.
-// This buffer is chosen to be large enough that it's unlikely any of them
-// will be rewritten before their results are used.
+// Same for XPL `CHARACTER` type.
 char *
 getCHARACTER(uint32_t address);
 void
@@ -171,6 +160,10 @@ DATE(void);
 
 uint32_t
 DATE_OF_GENERATION(void);
+
+uint32_t
+MONITOR18(void);
+
 
 
 #endif // RUNTIMEC_H

@@ -24,6 +24,8 @@
  */
 
 #include "runtimeC.h"
+#include <time.h>
+#include <sys/time.h> // For gettimeofday().
 
 // `nextBuffer` is sort of a cut-rate memory-management system for builtins
 // that return string values.  In order to avoid having to allocate new memory
@@ -55,12 +57,16 @@ FILE *DD_INS[DD_MAX] = { NULL };
 FILE *DD_OUTS[DD_MAX] = { NULL };
 FILE *COMMON_OUT = NULL;
 
+// Starting time of the program run, more or less.
+struct timeval startTime;
+
 int
 parseCommandLine(int argc, char **argv)
 {
   extern uint32_t sizeOfCommon, sizeOfNonCommon; // from main.c
   int i, returnValue = 0;
   FILE *COMMON_IN = NULL;
+  gettimeofday(&startTime, NULL);
   DD_INS[0] = DD_INS[1] = stdin;
   DD_OUTS[0] = DD_OUTS[1] = stdout;
   for (i = 1; i < argc; i++)
@@ -280,8 +286,18 @@ getCHARACTER(uint32_t address)
   uint32_t index, descriptor;
   char *returnValue = nextBuffer();
   descriptor = (uint32_t) getFIXED(address);
-  length = (descriptor >> 24) & 0xFF;
+  length = ((descriptor >> 24) & 0xFF) + 1;
   index = descriptor & 0xFFFFFF;
+#if NULL_STRING_METHOD == 0
+  if (length == 1 && memory[index] == 0)
+    {
+      // These are the special conditions for an empty string.
+      *returnValue = 0;
+      return returnValue;
+    }
+#else
+#error Implementation error: NULL_STRING_METHOD.
+#endif
   if (index + length <= MEMORY_SIZE)
     {
       uint8_t c;
@@ -310,11 +326,19 @@ putCHARACTER(uint32_t address, char *str)
   descriptor = (uint32_t) getFIXED(address);
   index = descriptor & 0xFFFFFF;
   length = strlen(str);
-  if (length > 255) { // Shouldn't be possible.
-    length = 255;
+#if NULL_STRING_METHOD == 0
+  if (length == 0)
+    {
+      putFIXED(address, index);
+      memory[index] = 0;
+      return;
+    }
+#endif
+  if (length > 256) { // Shouldn't be possible.
+    length = 256;
     str[length] = 0;
   }
-  descriptor = (length << 24) | index;
+  descriptor = ((length - 1) << 24) | index;
   putFIXED(address, (int32_t) descriptor);
   if (index + length <= MEMORY_SIZE)
     {
@@ -686,10 +710,16 @@ SHR(uint32_t value, uint32_t shift) {
   return value >> shift;
 }
 
-// In case the header file sys/time.h isn't available (to provide the
-// `gettimeofday` function), change the "#if 0" below to "#if 1".
+// MONITOR functions.
 
-#include <time.h>
+uint32_t
+MONITOR18(void) {
+  struct timeval currentTime;
+  gettimeofday(&currentTime, NULL);
+  uint32_t t;
+  return 1000000 * (currentTime.tv_sec - startTime.tv_sec) +
+                   (currentTime.tv_usec - startTime.tv_usec);
+}
 
 #if 0
 
@@ -704,8 +734,6 @@ TIME(void) {
 }
 
 #else
-
-#include <sys/time.h>
 
 // Centisecond precision (as specified in McKeeman).
 uint32_t

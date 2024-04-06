@@ -14,8 +14,14 @@ import copy
 import re
 from auxiliary import error, expandAllMacrosInString
 
-# Converts strings that are decimal, 0x hex, or 0b binary to integer.
+# Converts strings like decimal, 0x hex, or 0b binary to integer.
 def integer(s):
+    # It turns out that I've sometimes inadvertantly converted the string to 
+    # upper case, and I try to catch that here than try to undo the 
+    # case changes somewhere upstream.
+    if s == "0X0303": # ***DEBUG***
+        pass
+    s = s.lower()
     if s.startswith("0x"):
         return int(s[2:], 16)
     elif s.startswith("0b"):
@@ -45,6 +51,9 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         keepGoing = False
         passCount += 1
     
+        if "DEF_MAT_LENGTH" in pseudoStatement: # ***DEBUG***
+             pass
+
         #print("Processing declaration: %s" % pseudoStatement)
         # Let's temporarily replace all spaces inside quoted strings 
         # with the otherwise-unused character '~'.  That'll help us
@@ -54,7 +63,6 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         # character '`', so we can split on single-quotes without fear.
         fields = pseudoStatement.split("'")
         for i in range(0, len(fields), 2):
-            fields[i] = fields[i].upper()
             fields[i] = fields[i].replace(",", " , ")
             fields[i] = fields[i].replace(";", " ; ")
             fields[i] = fields[i].replace(":", " : ")
@@ -68,17 +76,24 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         if inRecord:
             fields.insert(0, "DECLARE")
         #print(fields)
+        fields0 = fields[0]
+        if not fields0[:1].isdigit():
+            fields0 = fields0.upper()
         
         # At this point, I hope, the entire pseudo-statement should be  
         # nicely split up at spaces, commas, semicolons, and 
         # parentheses not appearing within quoted strings, so every 
         # component of fields[] should be a single meaningful token. 
-        isCommon = ( fields[0] == "COMMON" ) # Versus DECLARE
-        #if isCommon:
-        #    del fields[0]
-        isArray = ( fields[0] == "ARRAY" ) # Versus DECLARE or BASED.
+        if fields0 == "COMMON":
+            isCommon = True
+            if fields[1] in ["ARRAY", "BASED"]:
+                del fields[0]
+                fields0 = fields[0]
+        else:
+            isCommon = False
+        isArray = ( fields0 == "ARRAY" ) # Versus DECLARE or BASED.
         inArray = 0 # State variable for isArray.
-        isBased = ( fields[0] == "BASED" )
+        isBased = ( fields0 == "BASED" )
         inBased = 0 # State variable for isBased.
         seekingName = True
         inInitial = False
@@ -88,6 +103,10 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         group = []
         for n in range(1, len(fields)):
             field = fields[n]
+            if not field[:1].isdigit():
+                field = field.upper()
+            if field == "DEF_MAT_LENGTH": # ***DEBUG***
+                pass
             if inArray == 1:
                 if field != "(":
                     arrayTop = 0
@@ -245,7 +264,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                 
                 attributes = []
                 for symbol in group:
-                    if passCount == 1:
+                    if passCount == 1 and not inRecord:
                         if symbol in scope["variables"] or \
                                 symbol in scope["literals"]:
                             error("Symbol %s already defined" % symbol, scope)

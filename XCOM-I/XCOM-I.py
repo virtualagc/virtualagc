@@ -325,16 +325,57 @@ if False:
     sys.exit(1)
 
 # Tokenize and parse, on a pseudo-statement by pseudo-statement basis.
-for lineNumber in range(len(pseudoStatements)):
+# Note that because of macro expansion, the number of pseudo-statments
+# can increase during the loop.
+lineNumber = -1
+while True:
+    lineNumber += 1
+    if lineNumber >= len(pseudoStatements):
+        break
     #code = {} # The dictionary generated for a parsed pseudo-statement.
     #print(lineNumber, pseudoStatements[lineNumber], scope)
     #scope["code"].append(code)
     pseudoStatement = pseudoStatements[lineNumber]
-    scope["pseudoStatements"][len(scope["code"])] = pseudoStatement
-    scope["lineNumber"] = lineNumber
+    try: # ***DEBUG***
+        scope["lineNumber"] = lineNumber
+    except:
+        pass
     scope["lineText"] = pseudoStatement
+    originalPseudoStatement = pseudoStatement
     pseudoStatement = expandAllMacrosInString(scope, \
                                               pseudoStatement)
+    # It's entirely possible that the macro expansions above could have
+    # turned our nice pseudoStatement into several pseudoStatements 
+    # concatenated.  There are some macros in the virtual memory system code,
+    # for example, that do that.  But it will mess up subsequent processing,
+    # so let's detect it and fix it.
+    ps = ''
+    inQuote = False
+    retry = False
+    for i in range(len(pseudoStatement)):
+        c = pseudoStatement[i]
+        ps = ps + c
+        if ps == pseudoStatement:
+            break
+        if c == "'":
+            inQuote = not inQuote
+        if inQuote:
+            continue
+        if c in [";", ":"] or pseudoStatement[max(0,i-4):i+2] in [" THEN ", 
+                                                                  " ELSE "]:
+            pseudoStatements.insert(lineNumber, ps)
+            pseudoStatement = pseudoStatement[i+1:].lstrip()
+            pseudoStatements[lineNumber + 1] = pseudoStatement
+            ps = ''
+            retry = True
+            lineNumber -= 1
+            break
+    if retry:
+        continue
+    try: # ***DEBUG***
+        scope["pseudoStatements"][len(scope["code"])] = originalPseudoStatement
+    except:
+        pass
     scope["lineExpandedText"] = pseudoStatement
     tokenized = xtokenize(pseudoStatement)
     scope["tokenized"] = tokenized

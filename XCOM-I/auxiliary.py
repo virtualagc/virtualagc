@@ -55,6 +55,8 @@ def error(msg, scope):
 def expandOneMacroInString(scope, string):
     # We have to split the string into quoted portions and non-quoted
     # portions.
+    if "BI#" in string: # ***DEBUG***
+        pass
     delimiters = ["'", '"']
     inQuote = False
     delimiter = ''
@@ -86,18 +88,29 @@ def expandOneMacroInString(scope, string):
             #if not isinstance(scope, dict):
             #    print(scope)
             for symbol in scope["literals"]:
+                if symbol == "BI#": # ***DEBUG***
+                    pass
                 attributes = scope["literals"][symbol]
+                # In trying to make a regex pattern that can match possible
+                # identifiers, the temptation is to use the word-boundary
+                # zero-assertion, as in '\\b'+symbol+'\\b'.  The problem is
+                # that an identifier can begin or end with one of the symbols
+                # $ # @, and any of those will cause the \b test to fail.
+                # we must instead construct much more complex zero assertions
+                # to cover this case.  (Google for negative lookahead and
+                # negative lookbehind.)
+                pattern = "(?<![A-Za-z0-9_#@$])" + symbol + "(?![A-Za-z0-9_#@$])"
                 if "top" not in attributes: # Macro has no parameters!
                     # This is the easy case, since all occurrences of the
                     # symbol can simply be replaced by the same thing.
                     replacement = attributes["LITERALLY"]
-                    newString = re.sub('\\b' + symbol + '\\b', replacement, s, \
+                    newString = re.sub(pattern, replacement, s, \
                                        flags = re.IGNORECASE)
                 else:
                     # The macro has parameters.  This is a lot harder case
                     # to deal with.  We have to process with each occurrence of
                     # "symbol(...parameters...) separately, in succession.
-                    rFields = re.split('\\b' + symbol + '\\b', s, \
+                    rFields = re.split(pattern, s, \
                                        flags = re.IGNORECASE)
                     for ir in range(1, len(rFields)):
                         rField = rFields[ir]

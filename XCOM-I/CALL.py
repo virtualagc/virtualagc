@@ -33,6 +33,9 @@ def CALL(tokenized, scope, inRecord = False):
             if "identifier" in token:
                 state = "parmstart"
                 identifier = token["identifier"]
+            elif "builtin" in token:
+                state = "parmstart"
+                identifier = token["builtin"]
             else:
                 error("No procedure name in CALL statement", scope)
                 return True
@@ -89,17 +92,3 @@ def CALL(tokenized, scope, inRecord = False):
     error("Cannot parse CALL statement", scope)
     return True
     
-    '''
-    expression = parseExpression(tokenized, 1)
-    if expression != None:
-        end = expression["end"]
-        if end < len(tokenized):
-            token = tokenized[end]
-            if "reserved" in token and token["reserved"] == "THEN":
-                end += 1
-                if end == len(tokenized): # Success!
-                    if debugSink:
-                        printTree(expression, indent="\t", file=debugSink)
-                    scope["code"].append({"IF": expression})
-                    return False
-    '''

@@ -11,9 +11,11 @@ Mods:       2024-03-27 RSB  Began.
 '''
 
 import datetime
+import os
 from auxiliary import *
-from parseCommandLine import debugSink, inputFilenames, indent, outputFolder, \
-                             verbose
+from parseCommandLine import *
+from xtokenize import xtokenize
+from parseExpression import parseExpression
 
 debug = False # Standalone interactive test of expression generation.
 
@@ -180,10 +182,18 @@ def allocateVariables(scope, extra = None):
         global memory
         designator = getFIXED(address)
         length = len(s)
-        if length > 255:
-            length = 255
         saddress = designator & 0xFFFFFF
-        designator = (length << 24) | saddress
+        if nullStringMethod == 0:
+            if length == 0:
+                # In implementation 0, an empty string is stored in
+                # the memory[] array as a string of length 1 containing
+                # just the EBCDIC NUL character.
+                putFIXED(address, saddress)
+                memory[saddress] = 0
+                return
+        if length > 256:
+            length = 256
+        designator = ((length - 1) << 24) | saddress
         putFIXED(address, designator)
         # Encode the string's character data as an EBCDIC Python byte array.
         b = s.encode('cp1140')
@@ -233,7 +243,7 @@ def allocateVariables(scope, extra = None):
                         i < len(initial):
                     initialValue = initial[i]
                     if isinstance(initialValue, str):
-                        if len(initialValue) > 255:
+                        if len(initialValue) > 256:
                             errxit("String initializer is %d characters" \
                                    % len(initialValue), scope)
                     elif isinstance(initialValue, int):
@@ -246,6 +256,8 @@ def allocateVariables(scope, extra = None):
         else:
             memoryMap[variableAddress] = (mangled, datatype)
             attributes["address"] = variableAddress
+            if identifier == "SYT_MAX": # ***DEBUG***
+                pass
             # INITIALize FIXED or BIT variables.
             if "INITIAL" in attributes and \
                     ("FIXED" in attributes or "BIT" in attributes):
@@ -255,7 +267,15 @@ def allocateVariables(scope, extra = None):
                     if isinstance(initialValue, int):
                         putFIXED(variableAddress, initialValue)
                     else:
-                        errxit("Initializer is not integer", scope);
+                        # Not immediately an integer, but perhaps it's an
+                        # expression whose value can be computed.  Let's try!
+                        tokenized = xtokenize(initialValue)
+                        tree = parseExpression(tokenized, 0)
+                        if tree != None and "token" in tree and \
+                                "number" in tree["token"]:
+                            putFIXED(variableAddress, tree["token"]["number"])
+                        else:
+                            errxit("Initializer is not integer", scope);
                     length -= 1
                     variableAddress += 4
             variableAddress += 4 * length
@@ -472,6 +492,55 @@ def generateExpression(scope, expression):
                     source = source + p
                 source = source + ")"
                 return builtinType, source
+            elif symbol == "MONITOR":
+                # The parameters and return types of MONITOR vary dramatically
+                # depending on the function number.  So we have to determine
+                # that before deciding which runtime specific runtime function
+                # to call, as opposed to just calling a single MONITOR function.
+                # I'm going to assume that the function number is known at 
+                # compile-time.  If not, then the implementation below will need
+                # to be fleshed out somewhat.
+                if len(expression["children"]) < 1:
+                    errxit("No function number specified for MONITOR")
+                if "number" not in expression["children"][0]["token"]:
+                    errxit("Could not evaluate MONITOR function number")
+                functionNumber = expression["children"][0]["token"]["number"]
+                # Only certain monitor functions return values.
+                if functionNumber == 1:
+                    pass
+                elif functionNumber == 2:
+                    pass
+                elif functionNumber == 6:
+                    pass
+                elif functionNumber == 7:
+                    pass
+                elif functionNumber == 9:
+                    pass
+                elif functionNumber == 10:
+                    pass
+                elif functionNumber == 12:
+                    pass
+                elif functionNumber == 13:
+                    pass
+                elif functionNumber == 14:
+                    pass
+                elif functionNumber == 15:
+                    pass
+                elif functionNumber == 18:
+                    symbol = "MONITOR18"
+                    builtinType = "FIXED"
+                elif functionNumber == 19:
+                    pass
+                elif functionNumber == 21:
+                    pass
+                elif functionNumber == 22:
+                    pass
+                elif functionNumber == 23:
+                    pass
+                elif functionNumber == 32:
+                    pass
+                else:
+                    errxit("MONITOR(%d) returns no value" % functionNumber)
             else:
                 errxit("Builtin %s not yet supported" % symbol)
         parameters = expression["children"]
@@ -692,7 +761,10 @@ def generateSingleLine(scope, indent, line, indexInScope):
         procedure = line["CALL"]
         outerParameters = line["parameters"] 
         attributes = getAttributes(scope, procedure)
-        mangled = attributes["mangled"]
+        try: # ***DEBUG***
+            mangled = attributes["mangled"]
+        except:
+            pass
         if len(outerParameters) == 0:
             print(indent + mangled + "();")
         else:
@@ -778,7 +850,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
                 msg = msg + "s"
             msg = msg + " used:"
             for inputFilename in inputFilenames:
-                msg = msg + " " + inputFilename
+                msg = msg + " " + os.path.basename(inputFilename)
             print(msg + ".")
             print("  Recommended requirements:  GNU `gcc` and GNU `make`.")
             print("  To build the program (aout) from the command line:")
@@ -956,6 +1028,17 @@ def generateC(globalScope):
     useCommon = False # normal string data
     useString = True
     walkModel(globalScope, allocateVariables)
+    
+    # Write out any special configuration settings, for use by
+    # runtimeC.c.
+    f = open(outputFolder + "/configuration.h", "w")
+    print("// Configuration settings.", file=f)
+    print("#define NULL_STRING_METHOD %d" % nullStringMethod, file=f)
+    if pfs:
+        print("#define PFS", file=f)
+    else:
+        print("#define BFS", file=f)
+    f.close()
     
     # Write out the initialized memory as a file called memory.c.
     f = open(outputFolder + "/memory.c", "w")

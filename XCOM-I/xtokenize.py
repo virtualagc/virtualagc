@@ -83,11 +83,23 @@ def xtokenize(pseudoStatement):
         return tokens
     # Loop on the characters of the pseudoStatement.
     i = 0
+    lastOperator = ''
     while i < len(pseudoStatement):
+        if len(tokens) > 0 and isinstance(tokens[-1], dict) and \
+                 "operator" in tokens[-1]:
+            lastOperator = tokens[-1]["operator"]
+        else:
+            lastOperator = ''
         c = pseudoStatement[i]
         i += 1
         if c == " ":
             pass
+        # I've found some cases in HAL/S-FC source code in which operators
+        # like "<=" were codes as "< =".  That seems like an error to me,
+        # but I guess it must not be.  Hence, we catch that here and 
+        # correct it.
+        elif (lastOperator + c) in operatorPairs:
+            tokens[-1]["operator"] = lastOperator + c
         # Various punctuation.
         elif c in [";", "(", ")", ",", ":"]:
             tokens.append(c)
@@ -105,8 +117,11 @@ def xtokenize(pseudoStatement):
             while j < len(pseudoStatement) and \
                     pseudoStatement[j] in radixDigits:
                 j += 1
-            tokens.append({"number" : \
-                           int(pseudoStatement[i : j], len(radixDigits))})
+            try: # ***DEBUG***
+                tokens.append({"number" : \
+                               int(pseudoStatement[i : j], len(radixDigits))})
+            except:
+                pass
             i = j
         # Is this the start of an identifier (or symilar symbolically)?
         elif c.isalpha() or c in breakCharacters:
