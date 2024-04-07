@@ -27,6 +27,8 @@ verbose = False
 includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 nullStringMethod = 0
 baseSource = ""
+# Folder where XCOM-I.py itself is.
+basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
 
 # Raw read of a source-code file.  Recursive, if /%INCLUDE ... %/ directives
 # (and similar) are encountered.
@@ -34,7 +36,8 @@ def readFileIntoLines(filename):
     global inputFilenames, lines, sourceFiles, baseSource
     if filename in inputFilenames:
         return
-    baseSource = os.path.dirname(filename)
+    if baseSource == "":
+        baseSource = os.path.dirname(filename)
     dir = baseSource + "/" + includeFolder
     try:
         inputFilenames.append(filename)

@@ -1,4 +1,4 @@
 // A test of the patching system.
-printf("Patch 2, line 1\n");
-printf("Patch 2, line 2\n");
-printf("Patch 2, line 3\n");
+OUTPUT(0, "Patch 2, line 1");
+OUTPUT(0, "Patch 2, line 2");
+OUTPUT(0, "Patch 2, line 3");

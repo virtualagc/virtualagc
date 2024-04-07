@@ -219,7 +219,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         if token == ",":
                             pass
                         elif token == ")":
-                            properties["INITIAL"] = initial
+                            properties[typeInitial] = initial
                             inInitial = False
                         else:
                             if "CHARACTER" in properties:
@@ -249,8 +249,9 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     elif token == "BIT":
                         inBit = True
                         skip = 1
-                    elif token == "INITIAL":
+                    elif token in ["INITIAL", "CONSTANT"]:
                         inInitial = True
+                        typeInitial = token
                         skip = 1
                     elif token in ["CHARACTER", "FIXED", "LABEL", 
                                    "BASED", "DYNAMIC"]:

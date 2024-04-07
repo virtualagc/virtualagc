@@ -229,6 +229,19 @@ def allocateVariables(scope, extra = None):
             initial = attributes["INITIAL"]
             if not isinstance(initial, list):
                 initial = [initial]
+        elif "CONSTANT" in attributes:
+            # These are not misprints.  CONSTANT is treated just like INITIAL.
+            # The CONSTANT attribute is not present in XPL, and is undocumented
+            # in XPL/I.  There is a CONSTANT attribute in HAL/S, of course, and
+            # the difference from the INITIAL attribute there is that you can't
+            # change the value after declaration, and you can use the values 
+            # in other INITIAL or CONSTANT attributes.  In the HAL/S-FC source
+            # code, as far as I can see, you can use INITIAL for everything
+            # declared as CONSTANT.  If this turns out not to be adequate, I'll
+            # revisit it later.
+            initial = attributes["CONSTANT"]
+            if not isinstance(initial, list):
+                initial = [initial]
         else:
             initial = []
         if useString:
@@ -467,7 +480,8 @@ def generateExpression(scope, expression):
             symbol = token["builtin"]
             # Many builtins.
             if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
-                          "DATE", "TIME", "DATE_OF_GENERATION"]:
+                          "DATE", "TIME", "DATE_OF_GENERATION", "COREBYTE",
+                          "COREWORD"]:
                 if symbol in ["INPUT", "SUBSTR"]:
                     builtinType = "CHARACTER"
                 else:
@@ -541,6 +555,31 @@ def generateExpression(scope, expression):
                     pass
                 else:
                     errxit("MONITOR(%d) returns no value" % functionNumber)
+            elif symbol == "ADDR":
+                parameters = expression["children"]
+                if len(parameters) != 1:
+                    errxit("Wrong number of parameters for ADDR")
+                token = parameters[0]["token"]
+                if "identifier" not in token:
+                    errxit("Parameter of ADDR not an identifier")
+                identifer = token["identifier"]
+                sattributes = getAttributes(scope, identifier)
+                if sattributes == None:
+                    errxit("Parameter of ADDR(%s) is undefined or out of scope"\
+                           % identifier)
+                subscripts = parameters[0]["children"]
+                if len(subscripts) == 0:
+                    return "FIXED", str(attributes["address"])
+                elif len(subscripts) == 1:
+                    tipes, sources = generateExpression(scope, subscripts[0])
+                    if tipes != FIXED:
+                        errxit("Subscript of %s in ADDR is non-integer or uncalculable"\
+                               % identifier)
+                    source = "(%d + 4 * (%s))" % (attributes["address"], sources)
+                    return "FIXED", source 
+                else:
+                    errxit("In ADDR(%s(...)), %s has too many subscripts" % \
+                           identifier)
             else:
                 errxit("Builtin %s not yet supported" % symbol)
         parameters = expression["children"]
@@ -1014,10 +1053,7 @@ def generateC(globalScope):
     walkModel(globalScope, mangle)
     
     # Allocate and initialize simulated memory for each variable in whatever 
-    # scope. Handling the data from the INITIAL attributes
-    # is TBD.  For now, everything is just initialized to 0, except that
-    # string variables are initialized to be the empty string.
-    # The mechanism is to set an attribute
+    # scope. The mechanism is to set an attribute
     # of "address" for each variable in each scope["variables"], and to
     # additionally set an attribute of "saddress" for each `CHARACTER` variable
     # to indicate where the string data (vs the string descriptor) is stored.

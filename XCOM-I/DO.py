@@ -73,17 +73,17 @@ def DO(tokenized, scope, inRecord = False):
                     end += 1
                     toCounter = parseExpression(tokenized, end)
                     if toCounter != None:
+                        end = toCounter["end"]
                         byCounter = {
                             "token": {"number": 1},
                             "parent": None,
                             "children": [],
-                            "end": end + 1
+                            "end": end
                             }
-                        end = toCounter["end"]
                         if end < len(tokenized):
                             token = tokenized[end]
                             if "reserved" in token and token["reserved"] == "BY":
-                                byCounter = parseExpression(tokenized, end)
+                                byCounter = parseExpression(tokenized, end + 1)
                                 if byCounter != None:
                                     end = byCounter["end"]
                         if end < len(tokenized):
@@ -105,5 +105,5 @@ def DO(tokenized, scope, inRecord = False):
                                     "scope": scope})
                                 return False
     
-    error("Cannot parse DO WHILE", scope)
+    error("Cannot parse DO for-loop", scope)
     return True

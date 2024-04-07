@@ -451,7 +451,8 @@ while True:
             scope["variables"].pop(label)
         scope = scope["parent"]
     elif "identifier" in tokenized[0] or ("builtin" in tokenized[0] and \
-                                          tokenized[0]["builtin"] == "OUTPUT"):
+        tokenized[0]["builtin"] in ["OUTPUT", "COREWORD", "COREBYTE", "FILE",
+                                    "BYTE", "FREELIMIT"]):
         # Other than a label (already processed above), the only thing
         # that begins with an identifier appears to be an assignment
         # statement.
@@ -507,7 +508,6 @@ while True:
 # dictionary.  We are thus in a position to generate object
 # code.
 if targetLanguage == "C":
-    basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
     try:
         try:
             shutil.rmtree(outputFolder, True)

@@ -791,6 +791,43 @@ DATE_OF_GENERATION(void) {
   return 1000 * (yyyy - 1900) + dayOfYear - 1;
 }
 
+uint32_t
+MONITOR18(void);
+
+uint32_t
+COREBYTE(uint32_t address) {
+  if (address + 1 <= MEMORY_SIZE)
+    return memory[address];
+  fprintf(stderr, "Memory overflow COREBYTE(0x%X) read\n", address);
+  exit(1);
+}
+
+void
+COREBYTE2(uint32_t address, uint32_t value) {
+  if (address + 1 <= MEMORY_SIZE)
+    memory[address] = value & 0xFF;
+    return;
+  fprintf(stderr, "Memory overflow COREWORD(0x%X) write\n", address);
+  exit(1);
+}
+
+uint32_t
+COREWORD(uint32_t address) {
+  if (address + 4 <= MEMORY_SIZE)
+    return getFIXED(address);
+  fprintf(stderr, "Memory overflow COREWORD(0x%X) read\n", address);
+  exit(1);
+}
+
+void
+COREWORD2(uint32_t address, uint32_t value) {
+  if (address + 4 <= MEMORY_SIZE)
+    putFIXED(address, value);
+    return;
+  fprintf(stderr, "Memory overflow COREWORD(0x%X) write\n", address);
+  exit(1);
+}
+
 // Some test code.
 #if 0
 int outUTF8;

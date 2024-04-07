@@ -164,6 +164,18 @@ DATE_OF_GENERATION(void);
 uint32_t
 MONITOR18(void);
 
+uint32_t
+COREBYTE(uint32_t address);
+
+void
+COREBYTE2(uint32_t address, uint32_t value);
+
+uint32_t
+COREWORD(uint32_t address);
+
+void
+COREWORD2(uint32_t address, uint32_t value);
+
 
 
 #endif // RUNTIMEC_H
