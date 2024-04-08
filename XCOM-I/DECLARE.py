@@ -13,14 +13,13 @@ Mods:       2024-03-07 RSB  Began experimenting with this concept.
 import copy
 import re
 from auxiliary import error, expandAllMacrosInString
+from parseCommandLine import pfs, condA, condC
 
 # Converts strings like decimal, 0x hex, or 0b binary to integer.
 def integer(s):
     # It turns out that I've sometimes inadvertantly converted the string to 
     # upper case, and I try to catch that here than try to undo the 
     # case changes somewhere upstream.
-    if s == "0X0303": # ***DEBUG***
-        pass
     s = s.lower()
     if s.startswith("0x"):
         return int(s[2:], 16)
@@ -51,9 +50,6 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         keepGoing = False
         passCount += 1
     
-        if "DEF_MAT_LENGTH" in pseudoStatement: # ***DEBUG***
-             pass
-
         #print("Processing declaration: %s" % pseudoStatement)
         # Let's temporarily replace all spaces inside quoted strings 
         # with the otherwise-unused character '~'.  That'll help us
@@ -105,8 +101,6 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
             field = fields[n]
             if not field[:1].isdigit():
                 field = field.upper()
-            if field == "DEF_MAT_LENGTH": # ***DEBUG***
-                pass
             if inArray == 1:
                 if field != "(":
                     arrayTop = 0
@@ -167,7 +161,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     nextInGroup = ''
                 else:
                     nextInGroup = nextInGroup + field
-            elif field == "INITIAL":
+            elif field in ["INITIAL", "CONSTANT"]:
                 inInitial = True
                 attributes.append(field)
             elif field == ")" and inInitial:
@@ -206,10 +200,34 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         #     LITERALLY '"1234"'
                         # to be
                         #    LITERALLY '0x1234'
-                        token = re.sub("^'\"([0-9A-F]+)\"'$", \
-                                       "'0x\\1'", token)
-                        properties["LITERALLY"] = token[1:-1]\
+                        token = re.sub("\"([0-9A-F]+)\"", \
+                                       "0x\\1", token)
+                        token = token[1:-1]\
                                         .replace("~", " ").replace("`", "'")
+                        # There's one final ghastliness to account for, and
+                        # that's the use of macros in which the replacement
+                        # string contains somewhere within it something like:
+                        #    /?c ...text... ?/
+                        # where c is A, B, C, or P.  Constructs like the above
+                        # but *not* in quotes will already have been either
+                        # transparently eliminated or else replaced just by
+                        # ...text....  Unfortunately, expanding this macro will
+                        # now reinsert garbage like that.  So we need to 
+                        # nip it in the bud right here.  
+                        while True:
+                            match = re.search("/\\?[ABCP].*?\\?/", token)
+                            if match == None:
+                                break
+                            c = match.group()[2]
+                            s = match.span()[0]
+                            e = match.span()[1]
+                            if (c == "P" and pfs) or (c == "B" and not pfs) or \
+                                    (c == "A" and condA) or \
+                                    (c == "P" and condC):
+                                token = token[:s] + token[s+3:e-2] + token[e:]
+                            else:
+                                token = token[:s] + token[e:]
+                        properties["LITERALLY"] = token
                         inLiterally = False
                     elif inBit:
                         properties["BIT"] = integer(token)

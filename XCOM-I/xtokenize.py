@@ -26,7 +26,7 @@ reservedWords = {"BIT", "BY", "CALL", "CASE", "CHARACTER", "DO",
                      "DECLARE", "ELSE", "END", "EOF", "FIXED", "GO",
                      "GOTO", "IF", "INITIAL", "LABEL", "LITERALLY", "MOD",
                      "PROCEDURE", "RETURN", "THEN", "TO", "WHILE",
-                     "COMMON"}
+                     "COMMON", "UNTIL"}
 # See pp. 140-142 of McKeeman et al.  For `builtIns`, the key values are
 # the number of parameters accepted by the function; if the number of parameters
 # is variable, then the value is a tuple of the allowed numbers of parameters.
@@ -34,7 +34,9 @@ builtIns = {
     "ADDR": 1, 
     "BYTE": (1, 2), 
     "CLOCK_TRAP": 2, 
-    "COMPACTIFY": 0, 
+    # McKeeman says that COMPACTIFY is a built-in, but HAL/S-FC (SPACELIB),
+    # it's a user function.
+    #"COMPACTIFY": 0, 
     "COREBYTE": 1, 
     "COREWORD": 1, 
     "DATE": 0, 
@@ -59,11 +61,20 @@ builtIns = {
     "TIME": 0, 
     "TIME_OF_GENERATION": 0, 
     "TRACE": 0, 
-    "UNTRACE": 0
+    "UNTRACE": 0,
+    # XPL/I extensions:
+    "LINE_COUNT": 0, 
+    "SET_LINELIM": 1, 
+    "LINK": 0,
+    "PARM_FIELD": 0,
+    "STRING": 1,
+    "STRING_GT": 2,
+    "ABS": 1,
+    "RECORD_TOP": 1
     }
 # See p. 138 of McKeeman et al.  These are just the leading (non-alpha) 
 # characters of (potentially multi-character) operator names.
-operatorLeadins = {"|", "&", "~", "=", "<", ">", "+", "-", "*", "/", "."}
+operatorLeadins = {"|", "&", "~", "=", "<", ">", "+", "-", "*", "/", ".", "^"}
 operatorPairs = {"~=", "~<", "~>", "<=", ">=", "||"}
 
 # Returns a list of tokens, empty if the pseudoStatement isn't parsable
@@ -117,11 +128,8 @@ def xtokenize(pseudoStatement):
             while j < len(pseudoStatement) and \
                     pseudoStatement[j] in radixDigits:
                 j += 1
-            try: # ***DEBUG***
-                tokens.append({"number" : \
-                               int(pseudoStatement[i : j], len(radixDigits))})
-            except:
-                pass
+            tokens.append({"number" : \
+                            int(pseudoStatement[i : j], len(radixDigits))})
             i = j
         # Is this the start of an identifier (or symilar symbolically)?
         elif c.isalpha() or c in breakCharacters:
@@ -160,6 +168,12 @@ def xtokenize(pseudoStatement):
         # Is this the start of an operator?  Recall that the logical-not 
         # character will have been replaced by '~' prior to calling xtokenize.
         elif c in operatorLeadins:
+            # In most cases, preprocessing will have taken care of replacing
+            # all ^ not in quoted strings by ~.  However, if ^ appears in a
+            # macro, then it will appear in the code after the macro 
+            # replacement.  So let's take care of that right now.
+            if c == "^":
+                c = "~"
             # Check the multi-character possibilities.
             pair = pseudoStatement[i - 1 : i + 1]
             if pair in operatorPairs:

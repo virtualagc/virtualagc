@@ -134,6 +134,9 @@ def createNewScope(symbol = '', parent = None):
 globalScope = createNewScope() # The top-level scope
 scope = globalScope # The current scope
 
+for adhoc in adhocs:   
+    globalScope["literals"][adhoc] = { "LITERALLY": adhocs[adhoc] }
+
 # Now let's turn the massaged lines[] array into one gigantic string
 # representing the entire source.
 source = "".join(lines)
@@ -147,8 +150,9 @@ inHex = False
 inBase = False
 baseRadix = ''
 baseStart = 0
-inPfs = False
-inBfs = False
+#inPfs = False
+#inBfs = False
+inConditional = ''
 pseudoStatement = ''
 skipQuote = 0
 inRecord = False # Tracks whether continuation of "BASED RECORD:".
@@ -163,34 +167,58 @@ while True:
         continue
     c = source[i]
     
-    # Take care of /?P and /?B conditionals.
-    if c == 'P' and lastC == '?' and lastLastC == '/':
-        inPfs = True
-        inBfs = False
-        pseudoStatement = pseudoStatement[:-2]
-        lastLastC = lastC
-        lastC = c
-        continue
-    elif c == 'B' and lastC == '?' and lastLastC == '/':
-        inBfs = True
-        inPfs = False
-        pseudoStatement = pseudoStatement[:-2]
-        lastLastC = lastC
-        lastC = c
-        continue
-    elif c == '/' and lastC == '?':
-        pseudoStatement = pseudoStatement[:-1]
-        inPfs = False
-        inBfs = False
-        lastLastC = lastC
-        lastC = c
-        continue
-    elif (inPfs and not pfs) or (inBfs and pfs):
-        lastLastC = lastC
-        lastC = c
-        continue
+    if False and not inComment and not inQuote:
+        # Take care of /?P and /?B conditionals.
+        if c == 'P' and lastC == '?' and lastLastC == '/':
+            inPfs = True
+            inBfs = False
+            pseudoStatement = pseudoStatement[:-2]
+            lastLastC = lastC
+            lastC = c
+            continue
+        elif c == 'B' and lastC == '?' and lastLastC == '/':
+            inBfs = True
+            inPfs = False
+            pseudoStatement = pseudoStatement[:-2]
+            lastLastC = lastC
+            lastC = c
+            continue
+        elif c == '/' and lastC == '?':
+            pseudoStatement = pseudoStatement[:-1]
+            inPfs = False
+            inBfs = False
+            lastLastC = lastC
+            lastC = c
+            continue
+        elif (inPfs and not pfs) or (inBfs and pfs):
+            lastLastC = lastC
+            lastC = c
+            continue
         
-    # Count the number of single-quotes in succession.  
+    if not inComment and not inQuote:
+        # Take care of /?c conditionals.  Note that embedded conditionals
+        # aren't supported or detected.
+        if c in ["A", "B", "C", "P"] and lastC == '?' and lastLastC == '/':
+            inConditional = c
+            pseudoStatement = pseudoStatement[:-2]
+            lastLastC = lastC
+            lastC = c
+            continue
+        elif c == '/' and lastC == '?':
+            pseudoStatement = pseudoStatement[:-1]
+            inConditional = ''
+            lastLastC = lastC
+            lastC = c
+            continue
+        elif (inConditional == "P" and not pfs) or \
+                (inConditional == "B" and pfs) or \
+                (inConditional == "A" and not condA) or \
+                (inConditional == "C" and not condC):
+            lastLastC = lastC
+            lastC = c
+            continue
+        
+    # Just count the number of single-quotes in succession.  
     quoteCount = 0
     if c == "'":
         for j in range(i, len(source)):
@@ -336,10 +364,7 @@ while True:
     #print(lineNumber, pseudoStatements[lineNumber], scope)
     #scope["code"].append(code)
     pseudoStatement = pseudoStatements[lineNumber]
-    try: # ***DEBUG***
-        scope["lineNumber"] = lineNumber
-    except:
-        pass
+    scope["lineNumber"] = lineNumber
     scope["lineText"] = pseudoStatement
     originalPseudoStatement = pseudoStatement
     pseudoStatement = expandAllMacrosInString(scope, \
@@ -372,10 +397,7 @@ while True:
             break
     if retry:
         continue
-    try: # ***DEBUG***
-        scope["pseudoStatements"][len(scope["code"])] = originalPseudoStatement
-    except:
-        pass
+    scope["pseudoStatements"][len(scope["code"])] = originalPseudoStatement
     scope["lineExpandedText"] = pseudoStatement
     tokenized = xtokenize(pseudoStatement)
     scope["tokenized"] = tokenized

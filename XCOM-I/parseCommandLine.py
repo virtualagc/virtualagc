@@ -16,6 +16,8 @@ import os
 import re
 
 pfs = True
+condA = False
+condC = False
 inputFilenames = []
 targetLanguage = "C"
 outputFolder = "C_Output"
@@ -27,6 +29,7 @@ verbose = False
 includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 nullStringMethod = 0
 baseSource = ""
+adhocs = {}
 # Folder where XCOM-I.py itself is.
 basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
 
@@ -75,6 +78,13 @@ The available OPTIONS are:
 --help        Print this info.
 --pfs         (Default) Port for Primary Flight System.
 --bfs         (Don't use with --pfs.) Port for Backup Flight System. 
+--condA       Set "condition A" and/or "condition C".  These "conditions"
+--condC       cause certain source code to be conditionally included or
+              excluded during compilation.  Unfortunately, there's no 
+              documentation available describing what those conditions
+              represent, nor whether they're consistent with each other.
+              They seem to relate largely (but not entirely) to printing
+              additional messages during compilation.
 --include=F   Folder to use for "/%INCLUDE ... %/" directives.
               Note that this is relative to the source-code file.
               Defaults to ../HALINCL.
@@ -82,6 +92,14 @@ The available OPTIONS are:
               implementations for empty strings, because the surviving
               documentation on that topic is unclear and contradictory.
               At present, only implementation 0 is available.
+--patch=P     Path to the inline-BAL patch files.  By default, this will
+              be the same folder that contains the first XPL source-code
+              file specified on the command line.
+--adhoc=S,R   This is a way of creating global XPL macros without change
+              to source-code files.  S is the name of the macro and R is
+              the replacement text.  This switch can be used multiple 
+              times.  Its primary use is replacing RECORD_LINK by LINK
+              in HAL/S-FC source code.
 --target=L    (Default C) Set the target language for object-code.
               Only C is presently supported.
 --output=F    (Default C_Output) Name of the folder to store output files.
@@ -97,10 +115,22 @@ for parm in sys.argv[1:]:
         pfs = True
     elif parm == "--bfs":
         pfs = False
+    elif parm == "--condA":
+        condA = True
+    elif parm == "--condC":
+        condC = True
     elif parm.startswith("--include="):
         includeFolder = parm[10:]
     elif parm.startswith("--null="):
         nullStringMethod = int(parm[7:])
+    elif parm.startswith("--patch="):
+        baseSource = parm[8:]
+    elif parm.startswith("--adhoc="):
+        fields = parm[8:].split(",", 1)
+        if len(fields) != 2:
+            print("The --adhoc switch requires 2 sub-fields", file=sys.stderr)
+            sys.exit(1)
+        adhocs[fields[0]] = fields[1]
     elif parm.startswith("--debug="):
         d = parm[8:]
         if d == "stdout":
@@ -126,9 +156,10 @@ for parm in sys.argv[1:]:
         sys.exit(1)
     else:
         readFileIntoLines(parm)
-        f = open("temp.xpl", "w") # ***DEBUG***
-        f.writelines(lines)
-        f.close()
+        if True:
+            f = open("temp.xpl", "w")
+            f.writelines(lines)
+            f.close()
 
 # All of the source code is now in lines[].  Massage it a bit.
 for i in range(len(lines)):

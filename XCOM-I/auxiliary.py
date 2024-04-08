@@ -55,8 +55,6 @@ def error(msg, scope):
 def expandOneMacroInString(scope, string):
     # We have to split the string into quoted portions and non-quoted
     # portions.
-    if "BI#" in string: # ***DEBUG***
-        pass
     delimiters = ["'", '"']
     inQuote = False
     delimiter = ''
@@ -80,16 +78,12 @@ def expandOneMacroInString(scope, string):
         s = fields[i]
         if s[:1] in delimiters:
             continue
-        if s == "TRUE": # ***DEBUG***
-            pass
         # Loop on current scope and all ancestors.
         while True:
             # Loop on all macros DECLARE'd in the scope.
             #if not isinstance(scope, dict):
             #    print(scope)
             for symbol in scope["literals"]:
-                if symbol == "BI#": # ***DEBUG***
-                    pass
                 attributes = scope["literals"][symbol]
                 # In trying to make a regex pattern that can match possible
                 # identifiers, the temptation is to use the word-boundary
@@ -171,11 +165,6 @@ def expandOneMacroInString(scope, string):
 # no more replacements are called.  Note that will enter an infinite
 # loop for dumb XPL code like `DECLARE A LITERALLY "A A";`.
 def expandAllMacrosInString(scope, string):
-    ostring = string # ***DEBUG***
-    if ostring == "CONTROL(BYTE('L')) = TRUE;":
-        pass
-    if "TRUE" in string: # ***DEBUG***
-        pass
     while True:
         if not isinstance(string, str):
             pass

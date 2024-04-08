@@ -32,21 +32,25 @@ def DO(tokenized, scope, inRecord = False):
         scope["blockType"] = "DO block"
         return False
     
-    if "reserved" in tokenized[1]: # DO WHILE or CASE
+    if "reserved" in tokenized[1]: # DO WHILE or CASE or UNTIL
         reserved = tokenized[1]["reserved"]
         expression = parseExpression(tokenized, 2)
         if expression == None:
-            error("DO WHILE or CASE expected an expression", scope)
+            error("DO WHILE, CASE, or UNTIL expected an expression", scope)
             return True
         end = expression["end"]
         if tokenized[end] != ";":
-            error("Missing semicolon in DO WHILE or CASE", scope)
+            error("Missing semicolon in DO WHILE, UNTIL, or CASE", scope)
             return True
         if debugSink != None:
             printTree(expression, indent="\t", file=debugSink)
         if reserved == "WHILE":
             scope["parent"]["code"].append({"WHILE": expression, "scope": scope})
             scope["blockType"] = "DO WHILE block"
+            return False
+        elif reserved == "UNTIL":
+            scope["parent"]["code"].append({"UNTIL": expression, "scope": scope})
+            scope["blockType"] = "DO UNTIL block"
             return False
         elif reserved == "CASE":
             scope["parent"]["code"].append({"CASE": expression, "scope": scope})

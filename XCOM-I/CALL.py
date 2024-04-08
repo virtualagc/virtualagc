@@ -52,7 +52,7 @@ def CALL(tokenized, scope, inRecord = False):
             if token == ")":
                 state = "parmend"
                 i -= 1
-            elif isinstance(token, dict):
+            elif isinstance(token, dict) or token == "(":
                 expression = parseExpression(tokenized, isI)
                 if expression == None:
                     error("Cannot parse parameter expression in CALL", scope)

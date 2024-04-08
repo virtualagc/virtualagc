@@ -322,7 +322,7 @@ As given in McKeeman, the rule for XPL is:
                 |  <subscript head> <expression> )
 
 This does not account for structure variables (`BASED ... RECORD`) variables
-of XPL/I.  My approach to use McKeeman's rul instead for a terminal I call
+of XPL/I.  My approach to use McKeeman's rule instead for a terminal I call
 <unbased variable>, and to let <variable> instead be either an 
 <unbased variable> or else <unbased variable>.<unbased variable>.
 '''
@@ -555,6 +555,7 @@ if False:
         while True:
             expression = input("Input an expression: ")
             tokenized = xtokenize(expression)
+            print("<identifier>?", testIdentifier(tokenized, 0))
             tree = parseExpression(tokenized, 0)
             if tree == None:
                 print("Error:", tree["error"])

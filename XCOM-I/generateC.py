@@ -269,8 +269,6 @@ def allocateVariables(scope, extra = None):
         else:
             memoryMap[variableAddress] = (mangled, datatype)
             attributes["address"] = variableAddress
-            if identifier == "SYT_MAX": # ***DEBUG***
-                pass
             # INITIALize FIXED or BIT variables.
             if "INITIAL" in attributes and \
                     ("FIXED" in attributes or "BIT" in attributes):
@@ -580,6 +578,14 @@ def generateExpression(scope, expression):
                 else:
                     errxit("In ADDR(%s(...)), %s has too many subscripts" % \
                            identifier)
+            elif symbol == "RECORD_TOP":
+                # This isn't really a built-in, but instead it's something 
+                # from HAL/S-FC's SPACELIB, but for right now I'm pretending
+                # that it's a built-in.  I believe that it's supposed to 
+                # give you the highest memory address used by a BASED variable.
+                # And this isn't really how you support this, but it's just a
+                # placeholder.
+                return "FIXED", "0"
             else:
                 errxit("Builtin %s not yet supported" % symbol)
         parameters = expression["children"]
@@ -609,8 +615,6 @@ forLoopCounter = 0
 inlineCounter = 0
 def generateSingleLine(scope, indent, line, indexInScope):
     global forLoopCounter, lineCounter, inlineCounter
-    if lineCounter == 936: # ***DEBUG***
-        pass
     lineCounter += 1
     if len(line) < 1: # I don't think this is possible!
         return
@@ -766,6 +770,10 @@ def generateSingleLine(scope, indent, line, indexInScope):
     elif "WHILE" in line:
         tipe, source = generateExpression(scope, line["WHILE"])
         print(indent + "while (1 & (" + source + ")) {")
+    elif "UNTIL" in line:
+        tipe, source = generateExpression(scope, line["UNTIL"])
+        print(indent + "do {")
+        line["scope"]["afterEndOfScope"] = "while (!(1 & (" + source + ")));"
     elif "BLOCK" in line:
         print(indent + "{")
     elif "IF" in line:
@@ -814,30 +822,38 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 print(indent + "; // (%d) %s" % (inlineCounter, originalInline))
             inlineCounter += 1
         else:
-            outerParameters = line["parameters"] 
-            attributes = getAttributes(scope, procedure)
-            try: # ***DEBUG***
-                mangled = attributes["mangled"]
-            except:
-                pass
-            if len(outerParameters) == 0:
-                print(indent + mangled + "();")
+            # Some builtins can be CALL'd
+            if procedure in ["LINK"]:
+                print(indent + procedure + "(", end = '')
+                for i in range(len(line["parameters"])):
+                    if i > 0:
+                        print(", ", end = '')
+                    parm = line["parameters"][i]
+                    tipe, parme = generateExpression(scope, parm)
+                    print(parme, end = '')
+                print(");")
             else:
-                innerScope = attributes["PROCEDURE"]
-                indent2 = indent + indentationQuantum
-                print(indent + "{")
-                innerParameters = attributes["parameters"]
-                if len(outerParameters) > len(innerParameters):
-                    errxit("Too many parameters in CALL to " + symbol)
-                for k in range(len(outerParameters)):
-                    outerParameter = outerParameters[k]
-                    innerParameter = innerParameters[k]
-                    innerAddress = innerScope["variables"][innerParameter]["address"]
-                    tipe, parm = generateExpression(scope, outerParameter)
-                    print(indent2 + "put" + tipe + "(" + \
-                             str(innerAddress) + ", " + parm + "); ")
-                print(indent2 + mangled + "();")
-                print(indent + "}")
+                outerParameters = line["parameters"] 
+                attributes = getAttributes(scope, procedure)
+                mangled = attributes["mangled"]
+                if len(outerParameters) == 0:
+                    print(indent + mangled + "();")
+                else:
+                    innerScope = attributes["PROCEDURE"]
+                    indent2 = indent + indentationQuantum
+                    print(indent + "{")
+                    innerParameters = attributes["parameters"]
+                    if len(outerParameters) > len(innerParameters):
+                        errxit("Too many parameters in CALL to " + symbol)
+                    for k in range(len(outerParameters)):
+                        outerParameter = outerParameters[k]
+                        innerParameter = innerParameters[k]
+                        innerAddress = innerScope["variables"][innerParameter]["address"]
+                        tipe, parm = generateExpression(scope, outerParameter)
+                        print(indent2 + "put" + tipe + "(" + \
+                                 str(innerAddress) + ", " + parm + "); ")
+                    print(indent2 + mangled + "();")
+                    print(indent + "}")
     elif "CASE" in line:
         tipe, source = generateExpression(scope, line["CASE"])
         print(indent + "switch (" + source + ") {")
@@ -990,9 +1006,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
                                   scope["pseudoStatements"][i].upper()):
             print(indent + "// " + scope["pseudoStatements"][i] + \
                   (" (%d)" % lineCounter))
-        if line == None or len(line) == 0: # ***DEBUG***
-            pass
-        lastReturn = "RETURN" in line
+        lastReturned = "RETURN" in line
         generateSingleLine(scope, indent, line, i)
         if "scope" in line: # Code for an embedded DO...END block.
             generateCodeForScope(line["scope"], { "of": of, "indent": indent} )
@@ -1007,7 +1021,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     # described in the comments for CALL.  If there was already an explicit
     # RETURN here, or if the RETURN is somewhare else and this position cannot
     # be reached, the C compiler may complain, but hopefully won't fail.
-    if not lastReturn and scope["symbol"] != '' and scope["symbol"][:1] != "_":
+    if not lastReturned and scope["symbol"] != '' and scope["symbol"][:1] != "_":
         print(indent + "return 0;")
     if "extraIndent" in scope:
         indent = indent[:-len(indentationQuantum)]
@@ -1024,6 +1038,8 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         print(indent + "return 0;")
     indent = indent[:-len(indentationQuantum)]
     print(indent + "}", end="")
+    if "afterEndOfScope" in scope:
+        print(indent + scope["afterEndOfScope"], end="")
     if "blockType" in scope:
         print(" // End of " + scope["blockType"])
     else:

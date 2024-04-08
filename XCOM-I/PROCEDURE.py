@@ -20,7 +20,7 @@ from auxiliary import error
 def PROCEDURE(tokenized, scope, inRecord = False):
     returnValue = False
     parameters = []
-    msg = "Cannot parse PROCEDURE definition"
+    msg = "Cannot parse PROCEDURE definition, state '%s'"
     
     # The name of the procedure was indistinguishable from a statement label
     # before reaching this point, and so will have been added to the list of
@@ -49,7 +49,7 @@ def PROCEDURE(tokenized, scope, inRecord = False):
                 state = "type"
                 i -= 1 # Retry this token with different state.
             else:
-                error(msg, scope)
+                error(msg % state, scope)
         elif state == "type":
             if token == ";":
                 state = "semicolon"
@@ -62,7 +62,7 @@ def PROCEDURE(tokenized, scope, inRecord = False):
                 else:
                     state = "semicolon"
             else:
-                error(msg, scope)
+                error(msg % state, scope)
         elif state == "parm":
             if token == ")":
                 state == "type"
@@ -70,7 +70,7 @@ def PROCEDURE(tokenized, scope, inRecord = False):
                 parameters.append(token["identifier"])
                 state = "comma"
             else:
-                error(msg, scope)
+                error(msg % state, scope)
         elif state == "bitstart":
             if token == "(":
                 state = "bitsize"
@@ -78,30 +78,30 @@ def PROCEDURE(tokenized, scope, inRecord = False):
                 state = "semicolon"
                 i -= 1
             else:
-                error(msg, scope)
+                error(msg % state, scope)
         elif state == "bitsize":
             if isinstance(token, dict) and "number" in token:
                 attributes["bitsize"] = token["number"]
                 state = "bitend"
             else:
-                error(msg, scope)
+                error(msg % state, scope)
         elif state == "bitend":
             if token == ")":
                 state = "semicolon"
             else:
-                error(msg, scope)
+                error(msg % state, scope)
         elif state == "comma":
             if token == ",":
                 state = "parm"
             elif token == ")":
                 state = "type"
             else:
-                error(msg, scope)
+                error(msg % state, scope)
         elif state == "semicolon":
             if token == ";":
                 if i == len(tokenized) - 1:
                     break
             else:
-                error(msg, scope)
+                error(msg % state, scope)
     
     return returnValue
