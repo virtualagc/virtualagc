@@ -41,8 +41,8 @@ RANDOM:
 
 declare a fixed initial(1), b fixed initial(2), c fixed initial(3);
 common (x, y, z) fixed;
-declare d fixed initial(4), e fixed initial(5), f fixed initial(6);
-common (u, v, w) fixed;
+declare d character initial(4), e character initial(5), f character initial(6);
+common (u, v, w) character;
 
 output = 'DECLARE: ' || a || ' ' || b || ' ' || c || ' ' 
                      || d || ' ' || e || ' ' || f;
@@ -52,19 +52,18 @@ output = 'COMMON: ' || x || ' ' || y || ' ' || z || ' '
 a = RANDOM(1000);
 b = RANDOM(1000);
 c = RANDOM(1000);
-d = RANDOM(1000);
-e = RANDOM(1000);
-f = RANDOM(1000);
-u = RANDOM(1000);
-v = RANDOM(1000);
-w = RANDOM(1000);
+d = d || '-' || RANDOM(1000);
+e = e || '-' || RANDOM(1000);
+f = f || '-' || RANDOM(1000);
+u = u || '-' || RANDOM(1000);
+v = v || '-' || RANDOM(1000);
+w = w || '-' || RANDOM(1000);
 x = RANDOM(1000);
 y = RANDOM(1000);
 z = RANDOM(1000);
 
-output = 'DECLARE: ' || a || ' ' || b || ' ' || c || ' ' 
+output = 'DECLARE: abcdef = ' || a || ' ' || b || ' ' || c || ' ' 
                      || d || ' ' || e || ' ' || f;
-output = 'COMMON: ' || x || ' ' || y || ' ' || z || ' ' 
+output = 'COMMON: xyzuvw = ' || x || ' ' || y || ' ' || z || ' ' 
                     || u || ' ' || v || ' ' || w;
 
-output = '';

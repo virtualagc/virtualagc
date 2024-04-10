@@ -23,4 +23,3 @@ do y = 0 to 5;
         
 end;
 
-output = '';

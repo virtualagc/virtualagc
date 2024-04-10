@@ -96,6 +96,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         inGroup = False
         nextInGroup = ''
         attributes = []
+        if fields0 in ["ARRAY", "BASED"]:
+            attributes.append(fields0)
         group = []
         for n in range(1, len(fields)):
             field = fields[n]
@@ -172,7 +174,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                 if isCommon:
                     properties["common"] = True
                 if isArray:
-                    properties["arrayTop"] = arrayTop
+                    properties["top"] = int(arrayTop)
                 # Convert the attributes of the new variable as a
                 # list of tokens into a dictionary of properties:
                 #    attributes -> properties
@@ -271,7 +273,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         inInitial = True
                         typeInitial = token
                         skip = 1
-                    elif token in ["CHARACTER", "FIXED", "LABEL", 
+                    elif token in ["CHARACTER", "FIXED", "LABEL", "ARRAY",
                                    "BASED", "DYNAMIC"]:
                         properties[token] = True
                     elif token == "RECORD":

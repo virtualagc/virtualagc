@@ -26,7 +26,8 @@ reservedWords = {"BIT", "BY", "CALL", "CASE", "CHARACTER", "DO",
                      "DECLARE", "ELSE", "END", "EOF", "FIXED", "GO",
                      "GOTO", "IF", "INITIAL", "LABEL", "LITERALLY", "MOD",
                      "PROCEDURE", "RETURN", "THEN", "TO", "WHILE",
-                     "COMMON", "UNTIL"}
+                     # XPL/I:
+                     "COMMON", "UNTIL", "ARRAY", "BASED", "RECORD", "DYNAMIC"}
 # See pp. 140-142 of McKeeman et al.  For `builtIns`, the key values are
 # the number of parameters accepted by the function; if the number of parameters
 # is variable, then the value is a tuple of the allowed numbers of parameters.
@@ -34,9 +35,7 @@ builtIns = {
     "ADDR": 1, 
     "BYTE": (1, 2), 
     "CLOCK_TRAP": 2, 
-    # McKeeman says that COMPACTIFY is a built-in, but HAL/S-FC (SPACELIB),
-    # it's a user function.
-    #"COMPACTIFY": 0, 
+    "COMPACTIFY": 0, 
     "COREBYTE": 1, 
     "COREWORD": 1, 
     "DATE": 0, 
@@ -70,6 +69,8 @@ builtIns = {
     "STRING": 1,
     "STRING_GT": 2,
     "ABS": 1,
+    # Not XPL/I extensions per se, but replacements for SPACELIB
+    "RECORD_LINK": 0,
     "RECORD_TOP": 1
     }
 # See p. 138 of McKeeman et al.  These are just the leading (non-alpha) 

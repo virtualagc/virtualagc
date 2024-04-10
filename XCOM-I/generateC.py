@@ -150,8 +150,12 @@ indentationQuantum = "  "
 pf = None
 
 # A function for walkModel(), for allocating simulated memory.
+commonBase = 0
+nonCommonBase = 0
+freeBase = 0
+freePoint = 0
+freeLimit = 1 << 24
 variableAddress = 0 # Total contiguous bytes allocated in 24-bit address space.
-areaNormal = 0 # End of COMMON and start of non-COMMON
 useCommon = False # For allocating COMMON vs non-COMMON
 useString = False # For allocating character data CHARACTER.
 memory = bytearray([0] * (1 << 24));
@@ -177,12 +181,16 @@ def allocateVariables(scope, extra = None):
         value = (value << 8) | memory[address + 2]
         value = (value << 8) | memory[address + 3]
         return value
-        
+
+    # Note that unlike the runtime function of the same name, this version of
+    # putCHARACTER doesn't need to deal with compactification, since the
+    # *first* time, all variables can be allocated right where they belong
+    # without needing to be moved.  In fact, string data can just always be
+    # put at the current value of variableAddress.
     def putCHARACTER(address, s):
         global memory
-        designator = getFIXED(address)
         length = len(s)
-        saddress = designator & 0xFFFFFF
+        saddress = variableAddress
         if nullStringMethod == 0:
             if length == 0:
                 # In implementation 0, an empty string is stored in
@@ -190,6 +198,10 @@ def allocateVariables(scope, extra = None):
                 # just the EBCDIC NUL character.
                 putFIXED(address, saddress)
                 memory[saddress] = 0
+                return
+        elif nullStringMethod == 1:
+            if length == 0:
+                putFIXED(address, 0)
                 return
         if length > 256:
             length = 256
@@ -244,16 +256,21 @@ def allocateVariables(scope, extra = None):
                 initial = [initial]
         else:
             initial = []
+        if "top" in attributes:
+            numElements = attributes["top"] + 1
+        else:
+            numElements = 0
         if useString:
-            memoryMap[variableAddress] = (mangled, "EBCDIC codes")
-            attributes["saddress"] = variableAddress
+            memoryMap[variableAddress] = (mangled, "EBCDIC codes", numElements)
+            if nullStringMethod == 0:
+                attributes["saddress"] = variableAddress
             address = attributes["address"]
             firstAddress = address
             for i in range(length):
-                putFIXED(address, variableAddress)
-                # INITIALize just CHARACTER variables.
-                if "INITIAL" in attributes and "CHARACTER" in attributes and \
-                        i < len(initial):
+                if nullStringMethod == 0:
+                    putFIXED(address, variableAddress)
+                # INITIALize (just CHARACTER variables).
+                if "INITIAL" in attributes and i < len(initial):
                     initialValue = initial[i]
                     if isinstance(initialValue, str):
                         if len(initialValue) > 256:
@@ -263,11 +280,16 @@ def allocateVariables(scope, extra = None):
                         initialValue = "%d" % initialValue
                     else:
                         errxit("Cannot evaluate initializer to CAHARACTER", scope)
-                    putCHARACTER(address, initialValue)
+                else:
+                    initialValue = ""
+                putCHARACTER(address, initialValue)
                 address += 4
-                variableAddress += 256
+                if nullStringMethod == 0 and len(initialValue) == 0:
+                    variableAddress += 256
+                else:
+                    variableAddress += len(initialValue)
         else:
-            memoryMap[variableAddress] = (mangled, datatype)
+            memoryMap[variableAddress] = (mangled, datatype, numElements)
             attributes["address"] = variableAddress
             # INITIALize FIXED or BIT variables.
             if "INITIAL" in attributes and \
@@ -326,6 +348,10 @@ def generateExpression(scope, expression):
     if not isinstance(expression, dict):
         return tipe, source
     token = expression["token"]
+    if "operator" in token:
+        operator = token["operator"]
+    else:
+        operator = None
     if "number" in token:
         tipe = "FIXED"
         source = str(token["number"])
@@ -333,8 +359,10 @@ def generateExpression(scope, expression):
         tipe = "CHARACTER"
         source = '"' + \
                  token["string"].replace('"', '\\\"').replace("`", "''") + '"'
-    elif "operator" in token:
-        operator = token["operator"]
+    elif operator == ".":
+        # The operator is the separator between a BASED RECORD and a field name.
+        pass
+    elif operator != None:
         if operator in numericOperators or operator in universalOperators:
             tipe = "FIXED"
         elif operator in stringOperators:
@@ -664,7 +692,23 @@ def generateSingleLine(scope, indent, line, indexInScope):
         for i in range(len(LHSs)):
             LHS = LHSs[i]
             tokenLHS = LHS["token"]
-            if "identifier" in tokenLHS:
+            if tokenLHS == ".":
+                dotChildren = LHS["children"]
+                if len(dotChildren) != 2:
+                    errxit("Wrong use of RECORD separator (.)")
+                dotLHS = dotChildren[0]
+                dotRHS = dotChildren[1]
+                if not isinstance(dotLHS) or "token" not in dotLHS or \
+                        dotLHS["token"] != "identifier":
+                    errxit("LHS of RECORD separator (.) not an identifier")
+                identifier = dotLHS["token"]["identifier"]
+                attributes = getAttributes(scope, identifier)
+                if attributes == None:
+                    errxit("Unknown identifier %s" % identifier)
+                if "BASED" not in attributes or "RECORD" not in attributes:
+                    errxit("LHS of RECORD separator (.) is not BASED RECORD")
+                
+            elif "identifier" in tokenLHS:
                 identifier = tokenLHS["identifier"]
                 attributes = getAttributes(scope, identifier)
                 address = attributes["address"]
@@ -808,22 +852,26 @@ def generateSingleLine(scope, indent, line, indexInScope):
     elif "CALL" in line:
         procedure = line["CALL"]
         if procedure == "INLINE":
-            patchFilename = baseSource + "/patch%d.c" % inlineCounter
-            originalInline = scope["pseudoStatements"][indexInScope]
-            try:
-                indent2 = indent + indentationQuantum
-                patchFile = open(patchFilename, "r")
-                print(indent + "{ // (%d) %s" % (inlineCounter, originalInline))
-                for patchLine in patchFile:
-                    print(indent2 + patchLine.rstrip())
-                print(indent + "}")
-                patchFile.close()
-            except:    
-                print(indent + "; // (%d) %s" % (inlineCounter, originalInline))
-            inlineCounter += 1
+            if isinstance(line["parameters"][0], dict) and \
+                    "string" in line["parameters"][0]["token"]:
+                print(indent + line["parameters"][0]["token"]["string"])
+            else:
+                patchFilename = baseSource + "/patch%d.c" % inlineCounter
+                originalInline = scope["pseudoStatements"][indexInScope]
+                try:
+                    indent2 = indent + indentationQuantum
+                    patchFile = open(patchFilename, "r")
+                    print(indent + "{ // (%d) %s" % (inlineCounter, originalInline))
+                    for patchLine in patchFile:
+                        print(indent2 + patchLine.rstrip())
+                    print(indent + "}")
+                    patchFile.close()
+                except:    
+                    print(indent + "; // (%d) %s" % (inlineCounter, originalInline))
+                inlineCounter += 1
         else:
             # Some builtins can be CALL'd
-            if procedure in ["LINK"]:
+            if procedure in ["LINK", "COMPACTIFY"]:
                 print(indent + procedure + "(", end = '')
                 for i in range(len(line["parameters"])):
                     if i > 0:
@@ -944,29 +992,19 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
                 print("%24s        %-16s %-8s" % \
                       ("-------------", "---------", "--------"))
                 for address in sorted(memoryMap):
-                    print("       %8d (%06X)        %-16s %s" % \
-                          (address, address, memoryMap[address][1], \
-                           memoryMap[address][0]))
-                if areaNormal == 0:
-                    print("  COMMON:     (empty)")
-                else:
-                    print("  COMMON:     0x%06X-0x%06X" % \
-                          (0, areaNormal - 1))
-                if variableAddress == areaNormal:
-                    print("  Non-COMMON: (empty)")
-                else:
-                    print("  Non-COMMON: 0x%06X-0x%06X" % \
-                          (areaNormal, variableAddress - 1))
-                if variableAddress >= len(memory):
-                    print("  Unused:     (none)")
-                else:
-                    print("  Unused:     0x%06X-0x%06X" % \
-                          (variableAddress, 0xFFFFFF))
+                    if memoryMap[address][2] == 0:
+                        print("       %8d (%06X)        %-16s %s" % \
+                              (address, address, memoryMap[address][1], \
+                               memoryMap[address][0]))
+                    else:
+                        print("       %8d (%06X)        %-16s %s(%d)" % \
+                              (address, address, memoryMap[address][1], \
+                               memoryMap[address][0], memoryMap[address][2]))
                 print("*/")
                 print()
-            print("uint32_t sizeOfCommon = %d;" % areaNormal)
-            print("uint32_t sizeOfNonCommon = %d;" % (variableAddress-areaNormal));
-            print()
+            #print("uint32_t sizeOfCommon = %d;" % areaNormal)
+            #print("uint32_t sizeOfNonCommon = %d;" % (variableAddress-areaNormal));
+            #print()
             print("int\nmain(int argc, char *argv[])\n{")
             print()
             print("  if (parseCommandLine(argc, argv)) exit(0);")
@@ -1029,13 +1067,18 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     if scope["parent"] == None:
         # End of main.c.
         print()
-        if areaNormal > 0:
+        if nonCommonBase > commonBase:
             print(indent + "if (COMMON_OUT != NULL) {")
-            print(indent + indentationQuantum + "fwrite(memory, sizeOfCommon, 1, COMMON_OUT);")
+            print(indent + indentationQuantum + "if (writeCOMMON(COMMON_OUT))")
+            print(indent + 2 * indentationQuantum + \
+                  'fprintf(stderr, "Error writing COMMON file.\\n");')
             print(indent + indentationQuantum + "fclose(COMMON_OUT);")
             print(indent + indentationQuantum + "COMMON_OUT = NULL;")
             print(indent + "}")
-        print(indent + "return 0;")
+        print(indent + "if (LINE_COUNT)")
+        print(indent + indentationQuantum + \
+              "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")
+        print(indent + "return 0; // Just in case ...")
     indent = indent[:-len(indentationQuantum)]
     print(indent + "}", end="")
     if "afterEndOfScope" in scope:
@@ -1048,18 +1091,23 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         sys.stdout = stdoutOld # Restore previous stdout.
 
 def generateC(globalScope):
-    global useCommon, useString, pf, areaNormal
+    global useCommon, useString, pf, nonCommonBase, freeBase
     
     pf = open(outputFolder + "/procedures.h", "w")
     print("/*", file=pf)
     print("  File procedures.h generated by XCOM-I, " + \
-          datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".", file=pf)
-    print("  Provides prototypes for the C functions corresponding to the", file=pf)
+          datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ".", 
+          file=pf)
+    print("  Provides prototypes for the C functions corresponding to the", 
+          file=pf)
     print("  XPL/I PROCEDUREs.", file=pf)
     print("", file=pf)
-    print("  Note: Due to the requirement for persistence, all function", file=pf)
-    print("  parameters are passed via static addresses in the `memory`", file=pf)
-    print("  array, rather than via parameter lists, so all parameter", file=pf)
+    print("  Note: Due to the requirement for persistence, all function", 
+          file=pf)
+    print("  parameters are passed via static addresses in the `memory`", 
+          file=pf)
+    print("  array, rather than via parameter lists, so all parameter", 
+          file=pf)
     print("  lists are `void`.", file=pf)
     print("*/", file=pf)
     print("", file=pf)
@@ -1076,46 +1124,29 @@ def generateC(globalScope):
     # Both of these attributes are indices in the 24-bit simulated memory.
     # Thus in XPL code translated to C, the code generator looks up addresses
     # of XPL variables, and generates C code that operates on absolute numerical
-    # addresses rather than on symbolic addresses.  After the allocation is 
-    # complete, the total amount of simulated memory used is given by the global
-    # variable `variableAddress`.  The memory is partitioned so as to put the
-    # COMMON at the lowest addresses, because COMMON is supposed to persist
-    # after the program ends and a new program with the same COMMON is loaded.
-    # I don't think we actually need COMMON, but if any COMMON is encountered, 
-    # then it requires COMMON partitions to be saved (say, to a disk file)
-    # and then reloaded later.  It's better to put COMMON first, so as to have 
-    # addresses that don't need to be changes after reloading.
+    # addresses rather than on symbolic addresses.
     useCommon = True # COMMON
     useString = False
     walkModel(globalScope, allocateVariables)
+    nonCommonBase = variableAddress
+    useCommon = False # non-COMMON variables
+    useString = False
+    walkModel(globalScope, allocateVariables)
+    freeBase = variableAddress
     useCommon = True # COMMON string data
     useString = True
-    walkModel(globalScope, allocateVariables)
-    areaNormal = variableAddress
-    useCommon = False # normal variables
-    useString = False
     walkModel(globalScope, allocateVariables)
     useCommon = False # normal string data
     useString = True
     walkModel(globalScope, allocateVariables)
-    
-    # Write out any special configuration settings, for use by
-    # runtimeC.c.
-    f = open(outputFolder + "/configuration.h", "w")
-    print("// Configuration settings.", file=f)
-    print("#define NULL_STRING_METHOD", nullStringMethod, file=f)
-    if pfs:
-        print("#define PFS", file=f)
-    else:
-        print("#define BFS", file=f)
-    print("#define VARIABLE_ADDRESS", variableAddress, file=f)
-    print("#define AREA_NORMAL", areaNormal, file=f)
-    f.close()
+    freePoint = variableAddress
     
     # Write out the initialized memory as a file called memory.c.
     f = open(outputFolder + "/memory.c", "w")
-    print("// Initial memory contents.", file=f)
+    print("// Memory data generated by XCOM-i\n", file=f)
     print("#include \"runtimeC.h\"", file=f)
+    print("", file=f)
+    print("// Initial memory contents, prior to COMMON load.", file=f)
     print("uint8_t memory[MEMORY_SIZE] = {", file=f)
     for i in range(variableAddress):
         if 0 == i % 8:
@@ -1128,6 +1159,63 @@ def generateC(globalScope):
                 print(" // %8d 0x%06X" % (j, j), file=f)
         else:
             print("\n};", file=f)
+    print("\n// Memory map", file=f)
+    maxSymbolLength = 0
+    numSymbols = 0
+    for address in memoryMap:
+        variable = memoryMap[address]
+        symbol = variable[0]
+        datatype = variable[1]
+        if datatype not in ["FIXED", "CHARACTER", "BIT"]:
+            continue
+        numSymbols += 1
+        if len(symbol) > maxSymbolLength:
+            maxSymbolLength = len(symbol)
+    print("memoryMapEntry_t memoryMap[NUM_SYMBOLS] = {", file=f)
+    i = 0
+    for address in memoryMap:
+        i += 1
+        variable = memoryMap[address]
+        symbol = variable[0]
+        datatype = variable[1]
+        numElements = variable[2]
+        if datatype not in ["FIXED", "CHARACTER", "BIT"]:
+            continue
+        if i == numSymbols:
+            comma = ''
+        else:
+            comma = ','
+        print('  { %d, "%s", "%s", %d }%s' % (address, symbol, datatype, 
+                                              numElements, comma), file=f)
+    print("};", file=f)
+    f.close()
+    
+    # Write out any special configuration settings, for use by
+    # runtimeC.c.
+    f = open(outputFolder + "/configuration.h", "w")
+    print("// Configuration settings, inferred from the XPL/I source.", file=f)
+    print("#define NULL_STRING_METHOD", nullStringMethod, file=f)
+    if pfs:
+        print("#define PFS", file=f)
+    else:
+        print("#define BFS", file=f)
+    print("#define COMMON_BASE 0x%06X" % commonBase, file=f)
+    print("#define NON_COMMON_BASE 0x%06X" % nonCommonBase, file=f)
+    print("#define FREE_BASE 0x%06X" % freeBase, file=f)
+    print("#define FREE_POINT 0x%06X // Initial value for `freepoint`" % \
+          freePoint, file=f)
+    print("#define FREE_LIMIT 0x%07X" % freeLimit, file=f)
+    print("#define NUM_SYMBOLS", numSymbols, file=f)
+    print("#define MAX_SYMBOL_LENGTH", maxSymbolLength, file=f)
+    print("#define MAX_DATATYPE_LENGTH %d" % len("CHARACTER"), file=f)
+    print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)
+    print("typedef struct {", file=f)
+    print("  int address;", file=f)
+    print("  symbol_t symbol;", file=f)
+    print("  char datatype[MAX_DATATYPE_LENGTH + 1];", file=f)
+    print("  int numElements;", file=f)
+    print("} memoryMapEntry_t;", file=f)
+    print("extern memoryMapEntry_t memoryMap[NUM_SYMBOLS];", file=f)
     f.close()
     
     if debugSink != None:

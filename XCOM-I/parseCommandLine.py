@@ -27,7 +27,7 @@ lines = [] # One line of source code per entry.
 sourceFiles = [] # One entry for each entry in lines[]; source filename for line.
 verbose = False
 includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
-nullStringMethod = 0
+nullStringMethod = 1 # 0 may or may not work, but support is no longer active.
 baseSource = ""
 adhocs = {}
 # Folder where XCOM-I.py itself is.
@@ -76,37 +76,52 @@ Usage:
 The available OPTIONS are:
 
 --help        Print this info.
---pfs         (Default) Port for Primary Flight System.
---bfs         (Don't use with --pfs.) Port for Backup Flight System. 
---condA       Set "condition A" and/or "condition C".  These "conditions"
---condC       cause certain source code to be conditionally included or
-              excluded during compilation.  Unfortunately, there's no 
-              documentation available describing what those conditions
-              represent, nor whether they're consistent with each other.
-              They seem to relate largely (but not entirely) to printing
-              additional messages during compilation.
---include=F   Folder to use for "/%INCLUDE ... %/" directives.
+--pfs, -bfs   (Default --pfs.) The switches --pfs and --bfs are mutually
+              exclusive; i.e., one and only one of them is active:  --pfs 
+              implies *not* --bfs, while --bfs implies *not* --pfs.  These 
+              relate to the presence of XPL/I's conditional code-inclusion 
+              directives within XPL/I source code:
+                    /?P ...code... ?/
+                    /?B ...code... ?/
+              The code within /?P ... ?/ is included if --pfs is active,
+              and transparently discarded otherwise, while code within
+              /?B ... ?/ is included if and only if --bfs is active.  The  
+              switch --pfs is interpreted as meaning "compiling for the Primary 
+              Flight System", while --bfs is interpreted as meaning "compiling
+              for the Backup Flight System".
+--condA       These switches similarly relate to XPL/I's conditional 
+--condC       code-inclusion directives
+                    /?A ...code... ?/
+                    /?C ...code... ?/
+              These switches are independent of each other and of the --pfs
+              and --bfs switches and thus may be used in combination.  The 
+              interpretations of these conditions are, however, unknown.  They 
+              may activate the printing of extra messages during compilation.
+--include=F   Folder to use for XPL/I's "/%INCLUDE ... %/" directives.
               Note that this is relative to the source-code file.
               Defaults to ../HALINCL.
---null=N      (Default 0) Selects from among several alternative
-              implementations for empty strings, because the surviving
-              documentation on that topic is unclear and contradictory.
-              At present, only implementation 0 is available.
 --patch=P     Path to the inline-BAL patch files.  By default, this will
               be the same folder that contains the first XPL source-code
               file specified on the command line.
 --adhoc=S,R   This is a way of creating global XPL macros without change
               to source-code files.  S is the name of the macro and R is
               the replacement text.  This switch can be used multiple 
-              times.  Its primary use is replacing RECORD_LINK by LINK
-              in HAL/S-FC source code.
+              times.  In hindsight, it doesn't seem useful.
 --target=L    (Default C) Set the target language for object-code.
               Only C is presently supported.
 --output=F    (Default C_Output) Name of the folder to store output files.
---indent=N    (Default 2) Set the indentation width for (C) source code.
---debug=D     Print extra debugging messages.  D is stdout or stderr.
---verbose     Embed extra comments in C source code.
+--indent=N    (Default 2) Set the indentation width for C-language source code.
+              This is purely cosmetic effect to make it more pleasant to read
+              the code output by XCOM-I.
+--debug=D     Print extra debugging messages to device D.  D is either stdout 
+              or stderr.
+--verbose     Embed extra comments in C source code, useful for debugging.
 '''
+#--null=N      (Default 1) Selects from among several alternative
+#              implementations for empty strings, because the surviving
+#              documentation on that topic is unclear and contradictory.
+#              At present, only implementations 0 and 1 are available.
+
 for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg, file = sys.stderr)
@@ -121,8 +136,8 @@ for parm in sys.argv[1:]:
         condC = True
     elif parm.startswith("--include="):
         includeFolder = parm[10:]
-    elif parm.startswith("--null="):
-        nullStringMethod = int(parm[7:])
+    #elif parm.startswith("--null="):
+    #    nullStringMethod = int(parm[7:])
     elif parm.startswith("--patch="):
         baseSource = parm[8:]
     elif parm.startswith("--adhoc="):

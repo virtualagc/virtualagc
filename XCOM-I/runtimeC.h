@@ -120,6 +120,11 @@ xsCAT(char *s1, char *s2);
 // such as `OUTPUT`, are considerably extended from the XPL built-in of the
 // same name as documented in McKeeman.
 
+extern string_t headingLine;
+extern string_t subHeadingLine;
+extern int pageCount;
+extern int LINE_COUNT;
+extern int linesPerPage;
 void
 OUTPUT(uint32_t lun, char *msg);
 
@@ -176,6 +181,25 @@ COREWORD(uint32_t address);
 void
 COREWORD2(uint32_t address, uint32_t value);
 
+void
+COMPACTIFY(void);
 
+// A function possibly useful for debugging memory management.
+void
+printMemoryMap(char *msg);
+
+// Functions for reading COMMON from a file, or writing COMMON to a file.
+
+// Returns 0 on success or 1 on failure.
+int
+writeCOMMON(FILE *fp);
+
+// Returns:
+//     -1       Failure.
+//      0       Full success.
+//      1       Partial success: File was shorter than expected.
+//      2       Partial success: File was longer than expected.
+int
+readCOMMON(FILE *fp);
 
 #endif // RUNTIMEC_H

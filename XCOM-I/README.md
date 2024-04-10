@@ -68,150 +68,7 @@ Furthermore, all or almost all of the XPL/I source-code files for HAL/S-FC refer
  /**MERGE PAD          PAD                             */
  /**MERGE CHARINDE     CHAR_INDEX                      */
  /**MERGE ERRORS       ERRORS                          */
- /**MERGE MIN          MIN                             */
- /**MERGE MAX          MAX                             */
- /**MERGE GETLITER     GET_LITERAL                     */
- /**MERGE UNSPEC       UNSPEC                          */
- /**MERGE BLANK        BLANK                           */
- /**MERGE LEFTPAD      LEFT_PAD                        */
- /**MERGE DESCORE      DESCORE                         */
- /**MERGE HEX          HEX                             */
- /**MERGE IFORMAT      I_FORMAT                        */
- /**MERGE SAVEINPU     SAVE_INPUT                      */
- /**MERGE PRINT2       PRINT2                          */
- /**MERGE OUTPUTGR     OUTPUT_GROUP                    */
- /**MERGE SAVEDUMP     SAVE_DUMP                       */
- /**MERGE ERROR        ERROR                           */
- /**MERGE MAKEFIXE     MAKE_FIXED_LIT                  */
- /**MERGE FLOATING     FLOATING                        */
- /**MERGE HASH         HASH                            */
- /**MERGE SETTLIMI     SET_T_LIMIT                     */
- /**MERGE SRNCMP       SRNCMP                          */
- /**MERGE OUTPUTWR     OUTPUT_WRITER                   */
- /**MERGE FINDER       FINDER                          */
- /**MERGE SAVETOKE     SAVE_TOKEN                      */
- /**MERGE INTERPRE     INTERPRET_ACCESS_FILE           */
- /**MERGE DECOMPRE     DECOMPRESS                      */
- /**MERGE SOURCECO     SOURCE_COMPARE                  */
- /**MERGE NEXTRECO     NEXT_RECORD                     */
- /**MERGE ORDEROK      ORDER_OK                        */
- /**MERGE STREAM       STREAM                          */
- /**MERGE COMPRESS     COMPRESS_OUTER_REF              */
- /**MERGE BLOCKSUM     BLOCK_SUMMARY                   */
- /**MERGE SETOUTER     SET_OUTER_REF                   */
- /**MERGE SETBIXRE     SET_BI_XREF                     */
- /**MERGE SETXREF      SET_XREF                        */
- /**MERGE SETXREFR     SET_XREF_RORS                   */
- /**MERGE BUFFERMA     BUFFER_MACRO_XREF               */
- /**MERGE POPMACRO     POP_MACRO_XREF                  */
- /**MERGE IDENTIFY     IDENTIFY                        */
- /**MERGE SYTDUMP      SYT_DUMP                        */
- /**MERGE TIEXREF      TIE_XREF                        */
- /**MERGE LITDUMP      LIT_DUMP                        */
- /**MERGE PREPLITE     PREP_LITERAL                    */
- /**MERGE SCAN         SCAN                            */
- /**MERGE EMITEXTE     EMIT_EXTERNAL                   */
- /**MERGE SRNUPDAT     SRN_UPDATE                      */
- /**MERGE CHARTIME     CHARTIME                        */
- /**MERGE CHARDATE     CHARDATE                        */
- /**MERGE PRINTTIM     PRINT_TIME                      */
- /**MERGE PRINTDAT     PRINT_DATE_AND_TIME             */
- /**MERGE STABVAR      STAB_VAR                        */
- /**MERGE STABLAB      STAB_LAB                        */
- /**MERGE STABHDR      STAB_HDR                        */
- /**MERGE HALMATBL     HALMAT_BLAB                     */
- /**MERGE HALMATRE     HALMAT_RELOCATE                 */
- /**MERGE HALMATOU     HALMAT_OUT                      */
- /**MERGE HALMAT       HALMAT                          */
- /**MERGE HALMATXN     HALMAT_XNOP                     */
- /**MERGE HALMATBA     HALMAT_BACKUP                   */
- /**MERGE HALMATPO     HALMAT_POP                      */
- /**MERGE HALMATPI     HALMAT_PIP                      */
- /**MERGE HALMATTU     HALMAT_TUPLE                    */
- /**MERGE HALMATFI     HALMAT_FIX_PIP#                 */
- /**MERGE HALMATF2     HALMAT_FIX_POPTAG               */
- /**MERGE HALMATF3     HALMAT_FIX_PIPTAGS              */
- /**MERGE EMITSMRK     EMIT_SMRK                       */
- /**MERGE EMITPUSH     EMIT_PUSH_DO                    */
- /**MERGE PUSHINDI     PUSH_INDIRECT                   */
- /**MERGE LABELMAT     LABEL_MATCH                     */
- /**MERGE UNBRANCH     UNBRANCHABLE                    */
- /**MERGE SETUPVAC     SETUP_VAC                       */
- /**MERGE VECTORCO     VECTOR_COMPARE                  */
- /**MERGE MATRIXCO     MATRIX_COMPARE                  */
- /**MERGE CHECKARR     CHECK_ARRAYNESS                 */
- /**MERGE UNARRAYE     UNARRAYED_INTEGER               */
- /**MERGE UNARRAY2     UNARRAYED_SCALAR                */
- /**MERGE UNARRAY3     UNARRAYED_SIMPLE                */
- /**MERGE CHECKEVE     CHECK_EVENT_EXP                 */
- /**MERGE PROCESS2     PROCESS_CHECK                   */
- /**MERGE CHECKASS     CHECK_ASSIGN_CONTEXT            */
- /**MERGE ERRORSUB     ERROR_SUB                       */
- /**MERGE MATCHSIM     MATCH_SIMPLES                   */
- /**MERGE READALLT     READ_ALL_TYPE                   */
- /**MERGE STRUCTUR     STRUCTURE_COMPARE               */
- /**MERGE PUSHFCNS     PUSH_FCN_STACK                  */
- /**MERGE UPDATEBL     UPDATE_BLOCK_CHECK              */
- /**MERGE ARITHLIT     ARITH_LITERAL                   */
- /**MERGE PRECSCAL     PREC_SCALE                      */
- /**MERGE BITLITER     BIT_LITERAL                     */
- /**MERGE CHARLITE     CHAR_LITERAL                    */
- /**MERGE MATCHARI     MATCH_ARITH                     */
- /**MERGE LITRESUL     LIT_RESULT_TYPE                 */
- /**MERGE ADDANDSU     ADD_AND_SUBTRACT                */
- /**MERGE MULTIPLY     MULTIPLY_SYNTHESIZE             */
- /**MERGE IORS         IORS                            */
- /**MERGE EMITARRA     EMIT_ARRAYNESS                  */
- /**MERGE SAVEARRA     SAVE_ARRAYNESS                  */
- /**MERGE RESETARR     RESET_ARRAYNESS                 */
- /**MERGE ARITHTOC     ARITH_TO_CHAR                   */
- /**MERGE GETARRAY     GET_ARRAYNESS                   */
- /**MERGE NAMECOMP     NAME_COMPARE                    */
- /**MERGE KILLNAME     KILL_NAME                       */
- /**MERGE COPINESS     COPINESS                        */
- /**MERGE NAMEARRA     NAME_ARRAYNESS                  */
- /**MERGE CHECKNAM     CHECK_NAMING                    */
- /**MERGE MATCHARR     MATCH_ARRAYNESS                 */
- /**MERGE STRUCTU2     STRUCTURE_FCN                   */
- /**MERGE SETUPNOA     SETUP_NO_ARG_FCN                */
- /**MERGE STARTNOR     START_NORMAL_FCN                */
- /**MERGE GETFCNPA     GET_FCN_PARM                    */
- /**MERGE SETUPCAL     SETUP_CALL_ARG                  */
- /**MERGE ARITHSHA     ARITH_SHAPER_SUB                */
- /**MERGE CHECKSUB     CHECK_SUBSCRIPT                 */
- /**MERGE REDUCESU     REDUCE_SUBSCRIPT                */
- /**MERGE ASTSTACK     AST_STACKER                     */
- /**MERGE SLIPSUBS     SLIP_SUBSCRIPT                  */
- /**MERGE ATTACHSU     ATTACH_SUB_COMPONENT            */
- /**MERGE ATTACHS2     ATTACH_SUB_ARRAY                */
- /**MERGE ATTACHS3     ATTACH_SUB_STRUCTURE            */
- /**MERGE ATTACHS4     ATTACH_SUBSCRIPT                */
- /**MERGE EMITSUBS     EMIT_SUBSCRIPT                  */
- /**MERGE ENDANYFC     END_ANY_FCN                     */
- /**MERGE ENDSUBBI     END_SUBBIT_FCN                  */
- /**MERGE GETICQ       GET_ICQ                         */
- /**MERGE ICQARRA2     ICQ_ARRAYNESS_OUTPUT            */
- /**MERGE ICQCHECK     ICQ_CHECK_TYPE                  */
- /**MERGE ICQOUTPU     ICQ_OUTPUT                      */
- /**MERGE HOWTOINI     HOW_TO_INIT_ARGS                */
- /**MERGE HALMATIN     HALMAT_INIT_CONST               */
- /**MERGE COMPARE      COMPARE                         */
- /**MERGE CHECKCON     CHECK_CONSISTENCY               */
- /**MERGE CHECKCO2     CHECK_CONFLICTS                 */
- /**MERGE CHECKEV2     CHECK_EVENT_CONFLICTS           */
- /**MERGE SETSYTEN     SET_SYT_ENTRIES                 */
- /**MERGE GETSUBSE     GET_SUBSET                      */
- /**MERGE INITIALI     INITIALIZATION                  */
- /**MERGE CHECKIMP     CHECK_IMPLICIT_T                */
- /**MERGE CALLSCAN     CALL_SCAN                       */
- /**MERGE DUMPIT       DUMPIT                          */
- /**MERGE STACKDUM     STACK_DUMP                      */
- /**MERGE SETLABEL     SET_LABEL_TYPE                  */
- /**MERGE ASSOCIAT     ASSOCIATE                       */
- /**MERGE SETBLOCK     SET_BLOCK_SRN                   */
- /**MERGE SYNTHESI     SYNTHESIZE                      */
- /**MERGE CHECKTOK     CHECK_TOKEN                     */
- /**MERGE RECOVER      RECOVER                         */
+ ...
  /**MERGE COMPILAT     COMPILATION_LOOP                */
  /**MERGE ERRORSUM     ERROR_SUMMARY                   */
  /**MERGE PRINTSUM     PRINT_SUMMARY                   */
@@ -359,17 +216,31 @@ Therefore, the memory space of the compiled programs is instead treated as conti
     * `BIT(1)` through `BIT(32)`:  Unsigned 32-bit value.
     * `BIT(33)` through `BIT(2048)`:  32-bit "descriptor", supposedly the same as `CHARACTER`.  Note that this contradicts statements in McKeeman that the maximum number of bits in the string is 2048.  Moreover, unlike `CHARACTER`, a 0-length bit-string makes no sense.  Therefore, my best guess is that in this case the length field of the descriptor is actually the bit-string's length *minus 1*.  
     * In the actual XPL/I source code for `HAL/S-FC`, I find no bit-strings of length greater than 32.  I have no motivation to implement them.
-  * `BASED`: This is a *pointer* to what might be thought of as an array of structures.  I use 32 bits for what I assume must be a 24-bit pointer.  Note that the pointer can be changed at runtime to initialize or change the association of the variable name to the data. 
+  * `BASED`: In McKeeman, this was a 24-bit (embedded within 32 bits) of *pointer* to what might be thought of as an array of structures.  The pointer could be &mdash; had to be &mdash; changed at runtime to initialize or change the association of a particular section of memory (such as a buffer) to the `BASED` variable.  All accesses to the variable were thus indirect, via the pointer.  The approach in XCOM-I is similar, in that this is still a 32-bit value, but is implemented in a somewhat more-complex manner as described in the extended discussion that follows.
 
-**Note:** A variable declared as an `ARRAY` also uses the same indirect reference as `BASED`.  However, the pointer associated with a `BASED` can be assigned or otherwise changed at runtime, whereas the pointer associated with an `ARRAY` is fixed at compile-time.
+> **Note:** For the original Intermetrics XPL/I compiler, a variable declared as an `ARRAY` (versus `DECLARE`) also used the same indirect references as `BASED`, with the difference that the pointer associated with a `BASED` could be  &mdash; *had* to be &mdash; assigned at runtime, whereas the pointer associated with an `ARRAY` was fixed at compile-time.  The reason for this, I infer from IR-182-1, was technical:  The amount of memory set aside for declarations via `DECLARE` was limited compared to the amount of space needed for the large arrays, therefore these were allocated in a different section of memory and mere pointers were stored in the tables used for `DECLARE`.  Since XCOM-I is not structured internally the same way Intermetrics's XCOM, there's no point in this distinction, so `ARRAY`s are simply treated like `DECLARE`s.  If necessary, I can revisit this later.
+
+
 
 Similarly, mathematical operations such as addition, subtraction, multiplication, and so on, do not use built-in operators of the C or Python target language, but instead rely on custom functions that accept IBM System/360 operands and output IBM System/360 values.
+
+# SPACELIB Hell
+
+HAL/S-FC source code uses a couple of entities defined in the file HALINCL/SPACELIB.xpl.
+
+The SPACELIB library is quite problematic.  For one thing, in distinction to all other XPL source-code files, I don't see how any of its contents become available to the remainder of HAL/S-FC, as it's not included or merged by any of the other files.  Moreover, SPACELIB itself uses entities which don't seem to be defined in any way.  Then too, whatever SPACELIB is doing is so obtuse in terms of functionality and syntactical features that are used nowhere else, I despair of making it actually work in any meaningful way.
+
+With that said, I believe that SPACELIB's purpose is managing dynamic memory elements such a CHARACTER data and BASED RECORD DYNAMIC, which insofar as they were conceived in Intermetrics XCOM required runtime allocation of new memory, and reallocation and/or garbage collection of old memory.  If true, that functionality is either obsolete or else has a SPACELIB implementation that irrelevant to XCOM-I.  
+
+*Therefore*, SPACELIB should not be included among the files compiled along with HAL/S-FC, and those few items from it that are used directly have been added to the list of XPL/I built-in functions, where they are implemented very differently that as in SPACELIB.  Instead, the built-in `COMPACTIFY` provided by XCOM-I's runtime library should be used instead.
 
 # The Problem of Inline Basic Assembly Language (BAL) Code
 
 Basic Assembly Language is the assembly language of the IBM System/360 mainframe computer.  The XPL/I source code for the HAL/S-FC program is strewn with inline BAL code which has been inserted into the stream of XPL/I statements.  Sometimes this insertion is to perform computational tasks not achievable directly by the XPL/I language, sometimes to speed up operations which could otherwise be performed more slowly in XPL/I, and sometimes for reasons I have not yet discerned.  This inclusion of BAL obviously is a severe problem unlikely to be accomplished *unaided* by `XCOM-I.py`, execution of those BAL instructions is unlikely to be possible.
 
 The method of inclusion is calls to a built-in procedure called `INLINE`.  Each call to `INLINE` inserts a single BAL instruction, in its assembled (i.e., numerical) machine-language form rather than in symbolic (assembly-language) form, though fortunately most or all `CALL INLINE`'s are also accompanied by the assembly-language instruction in the form of a program comment.
+
+> **Aside**: In XCOM-I, `CALL INLINE(string)` has a second use, not available in the original compilers, but consistent with (and inspired by) Daniel Weaver's XPL-to-C translator.  In this case, the `string` is treated as if it were valid C code and is inserted into the C output as-is.  Its primary use, as I envisage it, is to be able to persistently embed calls to C-language diagnostic functions while debugging XCOM-I itself.  An example would be `CALL INLINE('printMemoryMap("Memory Map:");')`.  (FYI:  `printMemoryMap` is a diagnostic function from XCOM-I's runtime library that accesses an array called `memoryMap`, which in turn lists all variables declared in the XPL/I program by name, address, datatype, and array size; this information isn't needed by the compiled XPL program or by the runtime library, but could obviously be useful for debugging purposes, if the alternative would be just viewing raw memory.)  I suppose that other (perhaps ill-advised) uses for this functionality could be found if one were sufficiently ambitious.
 
 Working around this BAL problem has two aspects.  First, how to determine what the BAL code is *trying* to accomplish, and ascertaining how to accomplish that thing in some other manner?  Second, how to implement such an alternate method without having to alter the XPL/I source-code files?
 

@@ -26,7 +26,7 @@ import shutil
 from parseCommandLine import *
 from auxiliary import error, expandAllMacrosInString, printModel, \
                       getAttributes
-from xtokenize import xtokenize
+from xtokenize import xtokenize, digits
 from DECLARE import DECLARE
 from LABEL import LABEL
 from PROCEDURE import PROCEDURE
@@ -254,6 +254,11 @@ while True:
             continue
         if c == '"':
             inHex = False
+            for ih in range(hexStart, len(pseudoStatement)):
+                if pseudoStatement[ih] not in digits["x"]:
+                    print("Non-hex digit(s) in \"%s\"" % \
+                          pseudoStatement[hexStart:], file=sys.stderr)
+                    sys.exit(1)
             c = ''
     elif inBase:
         if c == ")":
@@ -287,6 +292,7 @@ while True:
     elif c == '"':
         inHex = True
         pseudoStatement = pseudoStatement + "0x"
+        hexStart = len(pseudoStatement)
         c = ''
     elif c == "'":
         skipQuote = quoteCount - 1
@@ -333,7 +339,23 @@ while True:
         pseudoStatement = ''
     lastLastC = lastC
     lastC = c
-    
+
+if inQuote:
+    print("Unterminated quoted string", file=sys.stderr)
+if inComment:
+    print("Unterminated inline comment", file=sys.stderr)
+if inHex:
+    print("Unterminated hexadecimal number", file=sys.stderr)
+if inBase:
+    print("Unterminated base %s number" % baseRadix, file=sys.stderr)
+if inConditional:
+    print("Unterminated conditional directive", file=sys.stderr)
+if inRecord:
+    print("Unterminated BASED RECORD", file=sys.stderr)
+if inQuote or inComment or inHex or inBase or inConditional or inRecord:
+    sys.exit(1)
+
+
 if False:
     # See what we have so far.
     for i in range(len(pseudoStatements)):
