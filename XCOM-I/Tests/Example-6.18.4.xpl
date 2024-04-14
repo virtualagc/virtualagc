@@ -35,8 +35,8 @@ declare (buffer, temp, word) character, (i, cp, #entries) fixed,
   table (500) character, count (500) fixed,
   blanks character initial('
 
-
                                            ');
+
 #entries = -1;
 output = 'Input cards';
 output, buffer = input;         /*  Get a card.  */

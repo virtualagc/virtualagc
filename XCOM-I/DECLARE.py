@@ -37,8 +37,13 @@ def integer(s):
 #                        processed.
 #    scope               The dictionary for the scope in which
 #                        the `string` was found.
+offsetInRecord = 0
 def DECLARE(pseudoStatement, scope, inRecord = False):
+    global offsetInRecord
     returnValue = False
+    
+    if not inRecord:
+        offsetInRecord = 0
     
     # We don't normally need any loop here, but if we find a new
     # macro definition, we need to apply it to the remainder of the
@@ -170,7 +175,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                 inInitial = False
                 attributes.append(field)
             elif field in [",", ";", ":"] and not inInitial:
-                properties = {}
+                properties = { }
                 if isCommon:
                     properties["common"] = True
                 if isArray:
@@ -298,7 +303,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                             "BIT" not in p and \
                             "CHARACTER" not in p and \
                             "LITERALLY" not in p and \
-                            "LABEL" not in p:
+                            "LABEL" not in p and \
+                            "RECORD" not in p:
                         p["FIXED"] = True
                     if "LITERALLY" in properties:
                         if passCount == 1 or \
@@ -315,7 +321,13 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         scope["variables"][symbol] = p
                     else:
                         variables = scope["variables"]
-                        last = variables[list(variables)[-1]]["RECORD"]
+                        basedVar = variables[list(variables)[-1]]
+                        last = basedVar["RECORD"]
+                        p["offset"] = offsetInRecord
+                        offsetInRecord += 4
+                        if "top" in p:
+                            offsetInRecord += 4 * p["top"]
+                        basedVar["recordSize"] = offsetInRecord
                         last[symbol] = p
                 
                 if keepGoing:

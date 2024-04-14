@@ -12,6 +12,7 @@ Mods:       2024-03-27 RSB  Began.
 
 import datetime
 import os
+import copy
 from auxiliary import *
 from parseCommandLine import *
 from xtokenize import xtokenize
@@ -222,6 +223,8 @@ def allocateVariables(scope, extra = None):
             datatype = "BIT"
         elif "CHARACTER" in attributes:
             datatype = "CHARACTER"
+        elif "BASED" in attributes:
+            datatype = "BASED"
         else:
             continue
         mangled = attributes["mangled"]
@@ -261,7 +264,8 @@ def allocateVariables(scope, extra = None):
         else:
             numElements = 0
         if useString:
-            memoryMap[variableAddress] = (mangled, "EBCDIC codes", numElements)
+            memoryMap[variableAddress] = [mangled, "EBCDIC codes", numElements,
+                                          {}]
             if nullStringMethod == 0:
                 attributes["saddress"] = variableAddress
             address = attributes["address"]
@@ -289,7 +293,15 @@ def allocateVariables(scope, extra = None):
                 else:
                     variableAddress += len(initialValue)
         else:
-            memoryMap[variableAddress] = (mangled, datatype, numElements)
+            if "BASED" in attributes:
+                if "RECORD" in attributes:
+                    record = attributes["RECORD"]
+                else:
+                    datatype = "BASED"
+                    record = { '': attributes }
+            else:
+                record = {}
+            memoryMap[variableAddress] = [mangled, datatype, numElements, record]
             attributes["address"] = variableAddress
             # INITIALize FIXED or BIT variables.
             if "INITIAL" in attributes and \
@@ -329,6 +341,25 @@ def mangle(scope, extra = None):
     for identifier in scope["variables"]:
         scope["variables"][identifier]["mangled"] = prefix + identifier
 
+# A function for `walkModel` that collects some statistics about BASED RECORD.
+maxRecordFields = 0
+maxRecordFieldName = 0
+def basedStats(scope, extra = None):
+    global maxRecordFields, maxRecordFieldName
+    variables = scope["variables"]
+    for variable in variables:
+        attributes = variables[variable]
+        if "BASED" not in attributes or "RECORD" not in attributes:
+            continue
+        fields = attributes["RECORD"]
+        numFields = len(fields)
+        if numFields > maxRecordFields:
+            maxRecordFields = numFields
+        for field in fields:
+            lenName = len(field)
+            if lenName > maxRecordFieldName:
+                maxRecordFieldName = lenName
+
 # Recursively generate the source code for a C expression that evaluates a tree
 # (previously returned by the `parseExpression` function) created from an XPL 
 # expression.  Returns a pair:
@@ -360,8 +391,78 @@ def generateExpression(scope, expression):
         source = '"' + \
                  token["string"].replace('"', '\\\"').replace("`", "''") + '"'
     elif operator == ".":
-        # The operator is the separator between a BASED RECORD and a field name.
-        pass
+        # The operator is the separator between a the name of a  BASED RECORD 
+        # (possibly subscripted) and the name of one of its fields (also 
+        # possibly subscripted).
+        if len(expression["children"]) != 2:
+            errxit("Wrong number of children for '.' operator")
+        baseExpression = expression["children"][0]
+        fieldExpression = expression["children"][1]
+        if "identifier" not in baseExpression["token"]:
+            errxit("Base of '.' operator not an identifier")
+        if "identifier" not in fieldExpression["token"]:
+            errxit("Field of '.' operator not an identifier")
+        baseName = baseExpression["token"]["identifier"]
+        fieldName = fieldExpression["token"]["identifier"]
+        baseAttributes = getAttributes(scope, baseName)
+        if baseAttributes == None:
+            errxit("Base (%s) of '.' operator not found" % baseName)
+        if "BASED" not in baseAttributes:
+            errxit("Base (%s) of '.' operator is not a BASED variable" %\
+                   baseName)
+        if "RECORD" not in baseAttributes:
+            errxit("BASED variable %s is not a RECORD" % baseName)
+        recordAttributes = baseAttributes["RECORD"]
+        if fieldName not in recordAttributes:
+            errxit("BASED RECORD variable %s has no %s field" % \
+                   (baseName, fieldName))
+        fieldAttributes = recordAttributes[fieldName]
+        # We're now in a position to form an expression that computes the
+        # address of this based variable (i.e., in worst case, the address
+        # of base(...).field(...)).  In pseudocode:
+        #
+        #    base address        ( = getFIXED(basedAddress) + 
+        #                            recordSize * basedIndex)   )
+        #    +
+        #    offset of field into record
+        #    +
+        #    4 * fieldIndex
+        baseSubscripts = baseExpression["children"]
+        if len(baseSubscripts) == 0:
+            sourceb = '0'
+        elif len(baseSubscripts) == 1:
+            typeb, sourceb = \
+                generateExpression(scope, baseExpression["children"][0])
+            if typeb != "FIXED":
+                errxit("Subscript of %s not integer" % baseName)
+        else:
+            errxit("BASED variable %s not subscripted properly" % baseName)
+        fieldSubscripts = fieldExpression["children"]
+        if len(fieldSubscripts) == 0:
+            sourcef = '0'
+        elif len(fieldSubscripts) == 1:
+            typef, sourcef = \
+                generateExpression(scope, fieldExpression["children"][0])
+            if typef != "FIXED":
+                errxit("Subscript of field %s.%s not integer" % \
+                       (baseName, fieldName))
+        else:
+            errxit("Field %s.%s not subscripted properly" % \
+                   (baseName, fieldName))
+        sourceAddress = "getFIXED(%d)" % baseAttributes['address'] + \
+                        " + %d * (%s)" % (baseAttributes["recordSize"],
+                                          sourceb) + \
+                        " + %d + " % fieldAttributes["offset"] + \
+                        "4 * (%s)" % sourcef
+        if "CHARACTER" in fieldAttributes:
+            return "CHARACTER", "getCHARACTER(%s)" % sourceAddress
+        elif "FIXED" in fieldAttributes:
+            return "FIXED", "getFIXED(%s)" % sourceAddress
+        elif "BIT" in fieldAttributes:
+            return "BIT", "getFIXED(%s)" % sourceAddress
+        else:
+            errxit("Cannot find datatype of field %s.%s" % \
+                   (baseName, fieldName))
     elif operator != None:
         if operator in numericOperators or operator in universalOperators:
             tipe = "FIXED"
@@ -546,66 +647,45 @@ def generateExpression(scope, expression):
                     errxit("Could not evaluate MONITOR function number")
                 functionNumber = expression["children"][0]["token"]["number"]
                 # Only certain monitor functions return values.
-                if functionNumber == 1:
-                    pass
-                elif functionNumber == 2:
-                    pass
-                elif functionNumber == 6:
-                    pass
-                elif functionNumber == 7:
-                    pass
-                elif functionNumber == 9:
-                    pass
-                elif functionNumber == 10:
-                    pass
-                elif functionNumber == 12:
-                    pass
-                elif functionNumber == 13:
-                    pass
-                elif functionNumber == 14:
-                    pass
-                elif functionNumber == 15:
-                    pass
-                elif functionNumber == 18:
-                    symbol = "MONITOR18"
+                if functionNumber in {1, 2, 6, 7, 9, 10, 12, 14, 15, 18, 
+                                      21, 22, 23, 32}:
+                    symbol = "MONITOR%d" % functionNumber;
                     builtinType = "FIXED"
-                elif functionNumber == 19:
-                    pass
-                elif functionNumber == 21:
-                    pass
-                elif functionNumber == 22:
-                    pass
-                elif functionNumber == 23:
-                    pass
-                elif functionNumber == 32:
-                    pass
+                    if functionNumber in {12, 23}:
+                        builtinType = "CHARACTER"
                 else:
-                    errxit("MONITOR(%d) returns no value" % functionNumber)
+                    errxit("MONITOR(%d) uimplemented or returns no value" % \
+                           functionNumber)
+                first = True
+                source = symbol + "("
+                for parameter in expression["children"][1:]:
+                    if not first:
+                        source = source + ", "
+                    first = False
+                    tipe, p = generateExpression(scope, parameter)
+                    source = source + p
+                source = source + ")"
+                return builtinType, source
             elif symbol == "ADDR":
                 parameters = expression["children"]
                 if len(parameters) != 1:
-                    errxit("Wrong number of parameters for ADDR")
-                token = parameters[0]["token"]
-                if "identifier" not in token:
-                    errxit("Parameter of ADDR not an identifier")
-                identifer = token["identifier"]
-                sattributes = getAttributes(scope, identifier)
-                if sattributes == None:
-                    errxit("Parameter of ADDR(%s) is undefined or out of scope"\
-                           % identifier)
-                subscripts = parameters[0]["children"]
-                if len(subscripts) == 0:
-                    return "FIXED", str(attributes["address"])
-                elif len(subscripts) == 1:
-                    tipes, sources = generateExpression(scope, subscripts[0])
-                    if tipes != FIXED:
-                        errxit("Subscript of %s in ADDR is non-integer or uncalculable"\
-                               % identifier)
-                    source = "(%d + 4 * (%s))" % (attributes["address"], sources)
-                    return "FIXED", source 
+                    errxit("ADDR takes a single parameter")
+                parameter = parameters[0]
+                token = parameter["token"]
+                if "identifier" in token: # Not BASED.
+                    fVar = token["identifier"]
+                    fSubs = parameter["children"]
+                    if len(fSubs) == 0:
+                        sources = "0";
+                    elif len(fSubs) == 1:
+                        tipes, sources = generateExpression(scope, fSubs[0])
+                    else:
+                        errxit("Wrong number of subscripts of %s in ADDR" % fVar)
+                    return "FIXED", 'ADDR(NULL, 0, "%s", %s)' % (fVar, sources)
+                elif "operator" in token and token["operator"] == ".": # BASED.
+                    errxit("ADDR of BASED not yet implemented")
                 else:
-                    errxit("In ADDR(%s(...)), %s has too many subscripts" % \
-                           identifier)
+                    errxit("Unparsable identifier in ADDR")
             elif symbol == "RECORD_TOP":
                 # This isn't really a built-in, but instead it's something 
                 # from HAL/S-FC's SPACELIB, but for right now I'm pretending
@@ -692,22 +772,75 @@ def generateSingleLine(scope, indent, line, indexInScope):
         for i in range(len(LHSs)):
             LHS = LHSs[i]
             tokenLHS = LHS["token"]
-            if tokenLHS == ".":
-                dotChildren = LHS["children"]
-                if len(dotChildren) != 2:
-                    errxit("Wrong use of RECORD separator (.)")
-                dotLHS = dotChildren[0]
-                dotRHS = dotChildren[1]
-                if not isinstance(dotLHS) or "token" not in dotLHS or \
-                        dotLHS["token"] != "identifier":
-                    errxit("LHS of RECORD separator (.) not an identifier")
-                identifier = dotLHS["token"]["identifier"]
-                attributes = getAttributes(scope, identifier)
-                if attributes == None:
-                    errxit("Unknown identifier %s" % identifier)
-                if "BASED" not in attributes or "RECORD" not in attributes:
-                    errxit("LHS of RECORD separator (.) is not BASED RECORD")
-                
+            if "operator" in tokenLHS and tokenLHS["operator"] == ".":
+                expression = LHS
+                # This was adapted from the code for '.' in 
+                # `generateExpression`, which is why I've suddenly started
+                # working with `expression` rather than `LHS`.  In fact, it's
+                # the identical code until the very end.
+                if len(expression["children"]) != 2:
+                    errxit("Wrong number of children for '.' operator")
+                baseExpression = expression["children"][0]
+                fieldExpression = expression["children"][1]
+                if "identifier" not in baseExpression["token"]:
+                    errxit("Base of '.' operator not an identifier")
+                if "identifier" not in fieldExpression["token"]:
+                    errxit("Field of '.' operator not an identifier")
+                baseName = baseExpression["token"]["identifier"]
+                fieldName = fieldExpression["token"]["identifier"]
+                baseAttributes = getAttributes(scope, baseName)
+                if baseAttributes == None:
+                    errxit("Base (%s) of '.' operator not found" % baseName)
+                if "BASED" not in baseAttributes:
+                    errxit("Base (%s) of '.' operator is not a BASED variable" %\
+                           baseName)
+                if "RECORD" not in baseAttributes:
+                    errxit("BASED variable %s is not a RECORD" % baseName)
+                recordAttributes = baseAttributes["RECORD"]
+                if fieldName not in recordAttributes:
+                    errxit("BASED RECORD variable %s has no %s field" % \
+                           (baseName, fieldName))
+                fieldAttributes = recordAttributes[fieldName]
+                baseSubscripts = baseExpression["children"]
+                if len(baseSubscripts) == 0:
+                    sourceb = '0'
+                elif len(baseSubscripts) == 1:
+                    typeb, sourceb = \
+                        generateExpression(scope, baseExpression["children"][0])
+                    if typeb != "FIXED":
+                        errxit("Subscript of %s not integer" % baseName)
+                else:
+                    errxit("BASED variable %s not subscripted properly" % baseName)
+                fieldSubscripts = fieldExpression["children"]
+                if len(fieldSubscripts) == 0:
+                    sourcef = '0'
+                elif len(fieldSubscripts) == 1:
+                    typef, sourcef = \
+                        generateExpression(scope, fieldExpression["children"][0])
+                    if typef != "FIXED":
+                        errxit("Subscript of field %s.%s not integer" % \
+                               (baseName, fieldName))
+                else:
+                    errxit("Field %s.%s not subscripted properly" % \
+                           (baseName, fieldName))
+                sourceAddress = "getFIXED(%d)" % baseAttributes['address'] + \
+                                " + %d * (%s)" % (baseAttributes["recordSize"],
+                                                  sourceb) + \
+                                " + %d + " % fieldAttributes["offset"] + \
+                                "4 * (%s)" % sourcef
+                if "CHARACTER" in fieldAttributes:
+                    print(indent + "putCHARACTER(%s, stringRHS);" \
+                                    % sourceAddress)
+                elif "FIXED" in fieldAttributes:
+                    print(indent + "putFIXED(%s, numberRHS);" \
+                                    % sourceAddress)
+                elif "BIT" in fieldAttributes:
+                    print(indent + "putFIXED(%s, numberRHS);" \
+                                    % sourceAddress)
+                else:
+                    errxit("Cannot find datatype of field %s.%s" % \
+                           (baseName, fieldName))
+
             elif "identifier" in tokenLHS:
                 identifier = tokenLHS["identifier"]
                 attributes = getAttributes(scope, identifier)
@@ -1116,6 +1249,10 @@ def generateC(globalScope):
     # Provide mangled variable names.
     walkModel(globalScope, mangle)
     
+    # Determine contraints on BASED RECORD variables (max fields and max
+    # field-name length.
+    walkModel(globalScope, basedStats)
+    
     # Allocate and initialize simulated memory for each variable in whatever 
     # scope. The mechanism is to set an attribute
     # of "address" for each variable in each scope["variables"], and to
@@ -1140,13 +1277,24 @@ def generateC(globalScope):
     useString = True
     walkModel(globalScope, allocateVariables)
     freePoint = variableAddress
-    
+
+    # Make another version of `memoryMap` that's sorted by symbol name rather
+    # than address.
+    memoryMapIndexBySymbol = {}
+    i = 0
+    for address in memoryMap:
+        if memoryMap[address][1] not in ["FIXED", "BIT", "CHARACTER", "BASED"]:
+            break
+        memoryMapIndexBySymbol[memoryMap[address][0]] = i;
+        i += 1
+
     # Write out the initialized memory as a file called memory.c.
     f = open(outputFolder + "/memory.c", "w")
     print("// Memory data generated by XCOM-i\n", file=f)
     print("#include \"runtimeC.h\"", file=f)
     print("", file=f)
-    print("// Initial memory contents, prior to COMMON load.", file=f)
+    print("// Initial memory contents, prior to COMMON load ---------------\n",\
+          file=f)
     print("uint8_t memory[MEMORY_SIZE] = {", file=f)
     for i in range(variableAddress):
         if 0 == i % 8:
@@ -1157,20 +1305,60 @@ def generateC(globalScope):
             if 7 == i % 8:
                 j = i & 0xFFFFF8
                 print(" // %8d 0x%06X" % (j, j), file=f)
-        else:
-            print("\n};", file=f)
-    print("\n// Memory map", file=f)
+    print("\n};", file=f)
+    print("\n// Lists of fields of BASED variables ------------------------\n",\
+          file=f)
     maxSymbolLength = 0
     numSymbols = 0
     for address in memoryMap:
         variable = memoryMap[address]
         symbol = variable[0]
         datatype = variable[1]
-        if datatype not in ["FIXED", "CHARACTER", "BIT"]:
+        if datatype not in ["FIXED", "CHARACTER", "BIT", "BASED"]:
             continue
         numSymbols += 1
         if len(symbol) > maxSymbolLength:
             maxSymbolLength = len(symbol)
+    for address in memoryMap:
+        variable = memoryMap[address]
+        symbol = variable[0]
+        datatype = variable[1]
+        if datatype != "BASED":
+            continue
+        record = variable[3]
+        if len(record) == 1 and "" == list(record)[0]:
+            print("// Note that BASED %s has no RECORD" % symbol, file=f)
+        print("basedField_t based_%s[%d] = {" % (symbol, len(record)), file=f)
+        i = 0
+        recordSize = 0
+        for key in record:
+            attributes = record[key]
+            size = 0
+            if "top" in attributes:
+                size = 1 + attributes["top"]
+            subDatatype = ''
+            if "BIT" in attributes:
+                subDatatype = "BIT"
+            elif "CHARACTER" in attributes:
+                subDatatype = "CHARACTER"
+            else:
+                subDatatype = "FIXED"
+            print(indentationQuantum + \
+                  '{ "%s", "%s", %d }' % (key, subDatatype, size), \
+                  end = "", file=f)
+            if size == 0:
+                recordSize += 4
+            else:
+                recordSize += 4 * size
+            i += 1
+            if i < len(record):
+                print(",", end="", file=f)
+            print("", file=f)
+        variable.append(len(record))
+        variable.append(recordSize)
+        print("};", file=f)
+    print("\n// Memory map, sorted by addresses in XPL memory -------------\n",\
+          file=f)
     print("memoryMapEntry_t memoryMap[NUM_SYMBOLS] = {", file=f)
     i = 0
     for address in memoryMap:
@@ -1178,15 +1366,35 @@ def generateC(globalScope):
         variable = memoryMap[address]
         symbol = variable[0]
         datatype = variable[1]
+        if datatype == "BASED":
+            numFieldsInRecord = variable[4]
+            recordSize = variable[5]
+        else:
+            numFieldsInRecord = 0
+            recordSize = 0
         numElements = variable[2]
-        if datatype not in ["FIXED", "CHARACTER", "BIT"]:
+        allocated = 0
+        basedFields = "NULL"
+        if datatype not in ["FIXED", "CHARACTER", "BIT", "BASED"]:
             continue
+        if datatype == "BASED":
+            basedFields = "based_" + symbol
         if i == numSymbols:
             comma = ''
         else:
             comma = ','
-        print('  { %d, "%s", "%s", %d }%s' % (address, symbol, datatype, 
-                                              numElements, comma), file=f)
+        print('  { %d, "%s", "%s", %d, %d, %d, %d, %s}%s' % \
+              (address, symbol, datatype, numElements, allocated, 
+               numFieldsInRecord, recordSize, basedFields, comma), file=f)
+    print("};", file=f)
+    print("\n// Memory map, sorted by symbol name -------------------------\n",\
+          file=f)
+    print("// Note that the collation indicated below is that of the", file=f)
+    print("// computer running XCOM-I, and may transparently change", file=f)
+    print("// at runtime on computers with different collation.", file=f)
+    print("memoryMapEntry_t *memoryMapBySymbol[NUM_SYMBOLS] = {", file=f)
+    for entry in sorted(memoryMapIndexBySymbol):
+        print("  &memoryMap[%d]," % memoryMapIndexBySymbol[entry], file=f)
     print("};", file=f)
     f.close()
     
@@ -1208,14 +1416,31 @@ def generateC(globalScope):
     print("#define NUM_SYMBOLS", numSymbols, file=f)
     print("#define MAX_SYMBOL_LENGTH", maxSymbolLength, file=f)
     print("#define MAX_DATATYPE_LENGTH %d" % len("CHARACTER"), file=f)
+    print("#define MAX_RECORD_FIELDS %d" % maxRecordFields, file=f)
+    print("#define MAX_RECORD_FIELD_NAME %d" % maxRecordFieldName, file=f)
+    print("", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)
+    print("typedef char datatype_t[MAX_DATATYPE_LENGTH + 1];", file=f)
+    print("typedef struct {", file=f)
+    print("  symbol_t symbol;", file=f)
+    print("  datatype_t datatype;", file=f)
+    print("  int numElements;", file=f)
+    print("} basedField_t;", file=f)
     print("typedef struct {", file=f)
     print("  int address;", file=f)
     print("  symbol_t symbol;", file=f)
-    print("  char datatype[MAX_DATATYPE_LENGTH + 1];", file=f)
+    print("  datatype_t datatype;", file=f)
     print("  int numElements;", file=f)
+    print("  int allocated;", file=f)
+    print("  int numFieldsInRecord;", file=f)
+    print("  int recordSize;", file=f)
+    print("  basedField_t *basedFields;", file=f)
     print("} memoryMapEntry_t;", file=f)
-    print("extern memoryMapEntry_t memoryMap[NUM_SYMBOLS];", file=f)
+    print("extern memoryMapEntry_t memoryMap[NUM_SYMBOLS]; // Sorted by address", 
+          file=f)
+    print("extern memoryMapEntry_t *memoryMapBySymbol[NUM_SYMBOLS]; // Sorted by symbol", 
+          file=f)
+    print("  ")
     f.close()
     
     if debugSink != None:

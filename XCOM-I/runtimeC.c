@@ -760,7 +760,123 @@ SHR(uint32_t value, uint32_t shift) {
   return value >> shift;
 }
 
+// Used only by `lookupAddress`.
+static int
+cmpAddresses(const void *e1, const void *e2)
+{
+  return ((memoryMapEntry_t *) e1)->address -
+         ((memoryMapEntry_t *) e2)->address;
+}
+
+// Used only by `lookupVariable` and `ADDR`.
+static int
+cmpMapSymbols(const void *e1, const void *e2) {
+  return strcasecmp((*(memoryMapEntry_t **) e1)->symbol,
+                    (*(memoryMapEntry_t **) e2)->symbol);
+}
+
+// Look up the `memoryMap` entry associated with a given address.  Returns
+// either a pointer to the record, or else NULL if not found.
+static memoryMapEntry_t *
+lookupAddress(uint32_t address)
+{
+  memoryMapEntry_t key, *found;
+  key.address = address;
+  found = bsearch(&key, memoryMap, NUM_SYMBOLS,
+                  sizeof(memoryMapEntry_t), cmpAddresses);
+  return found;
+}
+
+// Look up the `memoryMap` entry associated with a given variable name.
+// Returns either a pointer to the record, or else NULL if not found.
+static memoryMapEntry_t *
+lookupVariable(char *symbol)
+{
+  memoryMapEntry_t **found, key, *keyp = &key;
+  // Note that since `memoryMapBySymbol` contains pointers to
+  // `memoryMapEntry_t`, then the key for the binary search must
+  // also be a pointer to a memoryMapEntry_t.
+  strcpy(key.symbol, symbol);
+  found = bsearch(&keyp, &memoryMapBySymbol, NUM_SYMBOLS,
+                  sizeof(memoryMapEntry_t *), cmpMapSymbols);
+  if (found == NULL)
+    return NULL;
+  return *found;
+}
+
 // MONITOR functions.
+
+// In general, new memory is allocated at `FREEPOINT`, and `FREEPOINT` is then
+// incremented by `n`, leaving a hole if the based variable previously had
+// some memory allocated to it.  However, we can check to see if the BASED
+// variable was previously butted up against `FREEPOINT`, and can adjust the
+// size of the allocated block by moving `FREEPOINT` without creating a hole.
+// Note that new allocation is supposed to be cleared to 0.  I'm not sure what
+// is supposed to happen, though, if I'm just increasing the size of an
+// already-allocated block.  Note that `n` is expected to be an integral
+// multiple of the record size of the BASED variable, though the function will
+// not fail if not.
+uint32_t
+MONITOR6(uint32_t address, uint32_t n) {
+  memoryMapEntry_t *found;
+  uint32_t start, end;
+
+  found = lookupAddress(address);
+  if (found == NULL)
+    return 1;
+  if (strcmp(found->datatype, "BASED"))
+    return 1;
+  start = getFIXED(address);
+  end = start + found->allocated;
+  if (n <= found->allocated)
+    {
+      // To make an already-allocated block smaller, we can just mark it as
+      // being smaller.
+      found->allocated = n;
+      //found->numRecords = n / found->recordSize;
+      if (freepoint == end)
+        freepoint = start + n;
+      return 0;
+    }
+  if (freepoint + n > FREE_LIMIT)
+    COMPACTIFY();
+  if (freepoint + n > FREE_LIMIT)
+    return 1;
+  start = getFIXED(address);
+  end = start + found->allocated;
+  if (end == freepoint)
+    {
+      freepoint = start + n;
+      found->allocated = n;
+      //found->numRecords = n / found->recordSize;
+      for (; end < freepoint; end++)
+        memory[end] = 0;
+      return 0;
+    }
+  putFIXED(address, freepoint);
+  for (end = freepoint + n; freepoint < end; freepoint++)
+    memory[freepoint] = 0;
+  found->allocated = n;
+  //found->numRecords = n / found->recordSize;
+  return 0;
+}
+
+uint32_t
+MONITOR7(uint32_t address, uint32_t n) {
+  memoryMapEntry_t *found;
+
+  found = lookupAddress(address);
+  if (found == NULL)
+    return 1;
+  if (strcmp(found->datatype, "BASED"))
+    return 1;
+  if (n > found->allocated)
+    n = found->allocated;
+  if (freepoint == getFIXED(address) + found->allocated)
+    freepoint -= n;
+  found->allocated -= n;
+  return 0;
+}
 
 uint32_t
 MONITOR18(void) {
@@ -769,6 +885,11 @@ MONITOR18(void) {
   uint32_t t;
   return 1000000 * (currentTime.tv_sec - startTime.tv_sec) +
                    (currentTime.tv_usec - startTime.tv_usec);
+}
+
+uint32_t
+MONITOR21(void) {
+  return FREE_LIMIT - freepoint;
 }
 
 #if 0
@@ -875,6 +996,46 @@ COREWORD2(uint32_t address, uint32_t value) {
   exit(1);
 }
 
+// Note that the lookup of variable names required in `ADDR` depends on the
+// presence of the metadata in the `memoryMap` array, as sorted by symbols
+// `memoryMapBySymbol`.
+uint32_t
+ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
+  static int mapInitialized = 0;
+  if (!mapInitialized)
+    {
+      // In point of fact, XCOM-I has already sorted `memoryMapBySymbol`.
+      // However, it's possible for the run-time computer to have a different
+      // environment setup, with a different collating order, than the
+      // compile-time computer.  If that happens, then binary searches will
+      // no longer work properly.  Consequently, we sort it again at run-time,
+      // guaranteeing matching collation.
+      mapInitialized = 1;
+      qsort(&memoryMapBySymbol, NUM_SYMBOLS,
+            sizeof(memoryMapEntry_t *), cmpMapSymbols);
+    }
+  if (bVar != NULL)
+    {
+      fprintf(stderr, "ADDR not implemented for BASED yet.\n");
+      exit(1);
+    }
+  else
+    {
+      memoryMapEntry_t *found;
+      uint32_t address;
+      char *datatype;
+
+      found = lookupVariable(fVar);
+      if (found == NULL)
+        {
+          fprintf(stderr, "ADDR(%s) not found\n", fVar);
+          exit(1);
+        }
+      return found->address + 4 * fIndex;
+    }
+  return 0;
+}
+
 // A function for comparing struct allocated_t objects (see COMPACTIFY below),
 // for sorting them into order of increasing allocation address.
 // `allocated_t` gives the characteristics of an object (string or record)
@@ -883,9 +1044,9 @@ struct allocated_t {
   int saddress; // Address of allocation in free memory.
   int length; // Size of the allocation in free memory.
   int address; // Address of the associated variable in non-free memory.
-  // The following are just for debugging.
-  char *symbol;
-  int index;
+  char *datatype; // Just for debugging.
+  char *symbol; // Just for debugging.
+  int index; // Just for debugging.
 };
 int
 cmpAllocations(const void *e1, const void *e2)
@@ -896,7 +1057,7 @@ cmpAllocations(const void *e1, const void *e2)
   return a1->saddress - a2->saddress;
 }
 
-// Ignoring records at first, and packing only strings (not in records).
+// Ignoring records at first, and packing only strings and BASED.
 void
 COMPACTIFY(void)
 {
@@ -909,30 +1070,46 @@ COMPACTIFY(void)
   // are the positions and sizes in free memory, plus pointers back to the
   // "string descriptors" so that they can be repaired after packing.  The
   // metadata we need to determine which variables are relevant etc. are in
-  // the `memoryMap` array.
-  allocations = malloc((FREE_BASE - COMMON_BASE) / 4); // Overkill.
+  // the `memoryMap` array.  More space is allocated to `allocations` than we
+  // probably need, but it's correct in the worst-case (which is that every
+  // variable is BASED).
+  allocations = calloc( (FREE_BASE - COMMON_BASE) / 4,
+                        sizeof(struct allocated_t) );
   for (i = 0; i < NUM_SYMBOLS; i++)
     {
       int numElements, address, descriptor, k;
-      if (strcmp(memoryMap[i].datatype, "CHARACTER"))
-        continue;       // Not a CHARACTER variable.
-      numElements = memoryMap[i].numElements;
-      if (numElements == 0)
-        numElements = 1;
-      address = memoryMap[i].address;
-      for (k = 0; k < numElements; k++, address += 4)
+      if (!strcmp(memoryMap[i].datatype, "BASED"))
         {
-          descriptor = getFIXED(address);
-#if NULL_STRING_METHOD == 1
-          if (descriptor == 0) // Empty string, no allocation
-            continue;
-#endif
-          allocations[numAllocations].saddress = descriptor & 0xFFFFFF;
-          allocations[numAllocations].length = ((descriptor >> 24) & 0xFF) + 1;
+          address = memoryMap[i].address;
           allocations[numAllocations].address = address;
+          allocations[numAllocations].saddress = getFIXED(address);
+          allocations[numAllocations].length = memoryMap[i].allocated;
           allocations[numAllocations].symbol = memoryMap[i].symbol;
-          allocations[numAllocations].index = k;
+          allocations[numAllocations].index = 0;
+          allocations[numAllocations].datatype = memoryMap[i].datatype;
           numAllocations++;
+        }
+      else if (!strcmp(memoryMap[i].datatype, "CHARACTER"))
+        {
+          numElements = memoryMap[i].numElements;
+          if (numElements == 0)
+            numElements = 1;
+          address = memoryMap[i].address;
+          for (k = 0; k < numElements; k++, address += 4)
+            {
+              descriptor = getFIXED(address);
+#if NULL_STRING_METHOD == 1
+              if (descriptor == 0) // Empty string, no allocation
+                continue;
+#endif
+              allocations[numAllocations].saddress = descriptor & 0xFFFFFF;
+              allocations[numAllocations].length = ((descriptor >> 24) & 0xFF) + 1;
+              allocations[numAllocations].address = address;
+              allocations[numAllocations].symbol = memoryMap[i].symbol;
+              allocations[numAllocations].index = k;
+              allocations[numAllocations].datatype = memoryMap[i].datatype;
+              numAllocations++;
+            }
         }
     }
   if (numAllocations == 0)
@@ -960,9 +1137,12 @@ COMPACTIFY(void)
             lengthToMove = FREE_LIMIT - actual;
           bcopy(&memory[actual], &memory[expected], lengthToMove);
           allocations[i].saddress = expected;
-          // Fix the descriptor.
+          // Fix the entry for the variable.  Note that the following works
+          // for either CHARACTER or for BASED, since the MSB of a pointer
+          // (which is what's stored at the BASED variable) is always 0.
           descriptor = (getFIXED(whereDescriptor) & 0xFF000000) | expected;
           putFIXED(whereDescriptor, descriptor);
+
         }
     }
 
@@ -988,69 +1168,120 @@ COMPACTIFY(void)
 void
 printMemoryMap(char *msg) {
   int i;
-  printf("%s\n", msg);
+  printf("\n%s\n", msg);
   for (i = 0; i < NUM_SYMBOLS; i++)
     {
       int j;
       int address = memoryMap[i].address;
       char *symbol = memoryMap[i].symbol;
       char *datatype = memoryMap[i].datatype;
-      int numElements = memoryMap[i].numElements;
-      if (numElements == 0)
+      if (!strcmp(datatype, "BASED"))
         {
-          if (!strcmp(datatype, "CHARACTER"))
+          int numRecords = memoryMap[i].allocated / memoryMap[i].recordSize;
+          uint32_t raddress = getFIXED(address);
+          printf("%06X: BASED     %s = %06X\n", address, symbol,
+                 getFIXED(address));
+          for (j = 0; j < numRecords; j++)
             {
-              uint32_t descriptor = getFIXED(address);
-              uint32_t saddress = descriptor & 0xFFFFFF;
-              if (descriptor == 0)
+              int k;
+              int numFieldsInRecord = memoryMap[i].numFieldsInRecord;
+              basedField_t *basedField = memoryMap[i].basedFields;
+              for (k = 0; k < numFieldsInRecord; k++, basedField++)
                 {
-                  printf("%06X: CHARACTER %s = \"%s\"\n", address, symbol,
-                      getCHARACTER(address));
+                  int n, numElements = basedField->numElements, vector = 1;
+                  if (numElements == 0)
+                    {
+                      vector = 0;
+                      numElements = 1;
+                    }
+                  for (n = 0; n < numElements; n++, raddress += 4)
+                    {
+                      char *fieldName = basedField->symbol, *s;
+                      printf("        %06X: BASED %s %s(%d)", raddress,
+                             basedField->datatype, symbol, j);
+                      if (strlen(fieldName) != 0)
+                        {
+                          printf(".%s", fieldName);
+                          if (vector)
+                            printf("(%d)", n);
+                        }
+                      if (!strcmp(basedField->datatype, "CHARACTER"))
+                        {
+                          uint32_t descriptor = getFIXED(raddress);
+                          if (descriptor == 0)
+                            printf(" = \"%s\"", "");
+                          else
+                            printf(" = \"%s\" @%06X", getCHARACTER(raddress),
+                                   0xFFFFFF & getFIXED(raddress));
+                        }
+                      else if (!strcmp(basedField->datatype, "FIXED"))
+                        printf(" = %d", getFIXED(raddress));
+                      else if (!strcmp(basedField->datatype, "BIT"))
+                        printf(" = %u", getFIXED(raddress));
+                      printf("\n");
+                    }
                 }
-              else
-                {
-                  printf("%06X: CHARACTER %s = \"%s\" @%06X\n", address, symbol,
-                      getCHARACTER(address), saddress);
-                }
-            }
-          else if (!strcmp(datatype, "FIXED"))
-            {
-              printf("%06X: FIXED     %s = %d\n", address, symbol,
-                  getFIXED(address));
-            }
-          else if (!strcmp(datatype, "BIT"))
-            {
-              printf("%06X:       BIT %s = %u\n", address, symbol,
-                  getFIXED(address));
             }
         }
-      for (j = 0; j < numElements; j++)
+      else
         {
-          int k = address + 4 * j;
-          if (!strcmp(datatype, "CHARACTER"))
+          int numElements = memoryMap[i].numElements;
+          if (numElements == 0)
             {
-              uint32_t descriptor = getFIXED(k);
-              uint32_t saddress = descriptor & 0xFFFFFF;
-              if (descriptor == 0)
+              if (!strcmp(datatype, "CHARACTER"))
                 {
-                  printf("%06X: CHARACTER %s(%u) = \"%s\"\n", k, symbol,
-                      j, getCHARACTER(k));
+                  uint32_t descriptor = getFIXED(address);
+                  uint32_t saddress = descriptor & 0xFFFFFF;
+                  if (descriptor == 0)
+                    {
+                      printf("%06X: CHARACTER %s = \"%s\"\n", address,
+                             symbol, getCHARACTER(address));
+                    }
+                  else
+                    {
+                      printf("%06X: CHARACTER %s = \"%s\" @%06X\n",
+                             address, symbol, getCHARACTER(address), saddress);
+                    }
                 }
-              else
+              else if (!strcmp(datatype, "FIXED"))
                 {
-                  printf("%06X: CHARACTER %s(%u) = \"%s\" @%06X\n", k, symbol,
-                      j, getCHARACTER(k), saddress);
+                  printf("%06X: FIXED     %s = %d\n", address, symbol,
+                      getFIXED(address));
+                }
+              else if (!strcmp(datatype, "BIT"))
+                {
+                  printf("%06X:       BIT %s = %u\n", address, symbol,
+                      getFIXED(address));
                 }
             }
-          else if (!strcmp(datatype, "FIXED"))
+          for (j = 0; j < numElements; j++)
             {
-              printf("%06X: FIXED     %s(%u) = %d\n", k, symbol,
-                  j, getFIXED(k));
-            }
-          else if (!strcmp(datatype, "BIT"))
-            {
-              printf("%06X:       BIT %s(%u) = %u\n", k, symbol,
-                  j, getFIXED(k));
+              int k = address + 4 * j;
+              if (!strcmp(datatype, "CHARACTER"))
+                {
+                  uint32_t descriptor = getFIXED(k);
+                  uint32_t saddress = descriptor & 0xFFFFFF;
+                  if (descriptor == 0)
+                    {
+                      printf("%06X: CHARACTER %s(%u) = \"%s\"\n", k, symbol,
+                          j, getCHARACTER(k));
+                    }
+                  else
+                    {
+                      printf("%06X: CHARACTER %s(%u) = \"%s\" @%06X\n", k, symbol,
+                          j, getCHARACTER(k), saddress);
+                    }
+                }
+              else if (!strcmp(datatype, "FIXED"))
+                {
+                  printf("%06X: FIXED     %s(%u) = %d\n", k, symbol,
+                      j, getFIXED(k));
+                }
+              else if (!strcmp(datatype, "BIT"))
+                {
+                  printf("%06X:       BIT %s(%u) = %u\n", k, symbol,
+                      j, getFIXED(k));
+                }
             }
         }
     }

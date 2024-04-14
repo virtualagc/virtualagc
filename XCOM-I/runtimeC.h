@@ -166,8 +166,42 @@ DATE(void);
 uint32_t
 DATE_OF_GENERATION(void);
 
+// Allocate `n` bytes in the free-memory area (i.e., between FREEPOINT and
+// FREELIMIT in `memory`), compacting if necessary, and storing the address
+// of the allocated memory at the memory address indicated by `address`, which
+// *should* only be the address of a BASED variable as obtained by ADDR(var).
+// The address and amount are preserved (with the help of `memoryMap`), and
+// thus the allocation can itself be moved later by `COMPACTIFY` if necessary.
+// Returns 0 on success, 1 otherwise.
+uint32_t
+MONITOR6(uint32_t address, uint32_t n);
+
+// Frees memory allocated by `MONITOR6`, and the same comments mostly apply.
+// The value stored at `address`, however, is not changed by `MONITOR7`, and
+// in most cases should probably should be modified by the user afterward to
+// avoid confusion, conventionally to the value `UNALLOCATED`.  However,
+// `MONITOR7` does automatically fix `memoryMap` to say that 0 bytes have been
+// allocated, so even if the `address` isn't changed, it doesn't affect the
+// validity of a later `COMPACTIFY`.
+//
+// I'm not actually sure what it means to free `n` bytes if `n` wasn't the
+// amount originally allocated.  I'm assuming that it means to just remove `n`
+// bytes from the end of the allocation.
+uint32_t
+MONITOR7(uint32_t address, uint32_t n);
+
 uint32_t
 MONITOR18(void);
+
+// I find no calls to MONITOR function 19 or 20 in HAL/S-FC, and don't intend
+// to bother implementing them.  If they were to be implemented, I'd do it
+// as a loop of calls to MONITOR 6 or MONITOR 7.
+
+// There's a CALL to MONITOR(21) only in SPACELIB.  Since I'm not supporting
+// SPACELIB, I see no real reason to implement function 21 ... but it's so
+// darned easy, let's do it anyway.
+uint32_t
+MONITOR21(void);
 
 uint32_t
 COREBYTE(uint32_t address);
@@ -180,6 +214,25 @@ COREWORD(uint32_t address);
 
 void
 COREWORD2(uint32_t address, uint32_t value);
+
+// Gets the address of any variable, subscripted or non-subscripted,
+// BASED or non-BASED, RECORD or non-RECORD, as follows:
+//
+//  bVar  bIndex    fVar   fIndex        Declaration
+//  ----  ------    ----   ------        -----------
+//  NULL  0         var    0             DECLARE var type;
+//  NULL  0         var    index         DECLARE var(size) type;
+//  bVar  bIndex    NULL   0             BASED bVar type;
+//  bVar  bIndex    field  0             BASED bVar RECORD field type;
+//  bVar  bIndex    field  fIndex        BASED bVar RECORD field(size) type;
+//
+// In the parameters for `ADDR`, I make no distinction between
+// DECLARE / COMMON / ARRAY / COMMON ARRAY, nor any distinction between
+// BASED / COMMON BASED.  (There may or may not be an internal distinction
+// between DECLARE and ARRAY; it depends on the final implementation of
+// ARRAY, which at this writing is identical to DECLARE.)
+uint32_t
+ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex);
 
 void
 COMPACTIFY(void);
