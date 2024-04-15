@@ -583,20 +583,23 @@ def generateExpression(scope, expression):
                         errxit("Multi-dimensional arrays not allowed in XPL")
                     if len(indices) == 1:
                         tipe, index = generateExpression(scope, indices[0])
+                    baseAddress = str(attributes["address"])
+                    if "BASED" in attributes:
+                        baseAddress = "getFIXED(%s)" % baseAddress
                     if "FIXED" in attributes or "BIT" in attributes:
                         tipe = "FIXED"
                         if index == "":
-                            source = "getFIXED(" + str(attributes["address"]) + ")"
+                            source = "getFIXED(" + baseAddress + ")"
                         else:
-                            source = "getFIXED(" + str(attributes["address"]) + \
+                            source = "getFIXED(" + baseAddress + \
                                      " + 4*" + index + ")"
                         return tipe, source
                     elif "CHARACTER" in attributes:
                         tipe = "CHARACTER"
                         if index == "":
-                            source = "getCHARACTER(" + str(attributes["address"]) + ")"
+                            source = "getCHARACTER(" + baseAddress + ")"
                         else:
-                            source = "getCHARACTER(" + str(attributes["address"]) + \
+                            source = "getCHARACTER(" + baseAddress + \
                                      " + 4*" + index + ")"
                         return tipe, source
                     else:
@@ -846,12 +849,15 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 attributes = getAttributes(scope, identifier)
                 address = attributes["address"]
                 children = LHS["children"]
+                baseAddress = str(address)
+                if "BASED" in attributes:
+                    baseAddress = "getFIXED(%s)" % baseAddress
                 if "FIXED" in attributes or "BIT" in attributes:
                     if len(children) == 0:
-                        print(indent + "putFIXED(" + str(address) + ", numberRHS);") 
+                        print(indent + "putFIXED(" + baseAddress + ", numberRHS);") 
                     elif len(children) == 1:
                         tipeL, sourceL = generateExpression(scope, children[0])
-                        print(indent + "putFIXED(" + str(address) + "+ 4*(" + \
+                        print(indent + "putFIXED(" + baseAddress + "+ 4*(" + \
                               sourceL + "), numberRHS);") 
                     else:
                         errxit("Too many subscripts")
@@ -861,10 +867,10 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     elif tipeR != "CHARACTER":
                         errxit("LHS/RHS type mismatch in assignment.")
                     if len(children) == 0:
-                        print(indent + "putCHARACTER(" + str(address) + ", stringRHS);") 
+                        print(indent + "putCHARACTER(" + baseAddress + ", stringRHS);") 
                     elif len(children) == 1:
                         tipeL, sourceL = generateExpression(scope, children[0])
-                        print(indent + "putCHARACTER(" + str(address) + "+ 4*(" + \
+                        print(indent + "putCHARACTER(" + baseAddress + "+ 4*(" + \
                               sourceL + "), stringRHS);") 
                     else:
                         errxit("Too many subscripts")

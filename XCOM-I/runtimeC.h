@@ -226,6 +226,18 @@ COREWORD2(uint32_t address, uint32_t value);
 //  bVar  bIndex    field  0             BASED bVar RECORD field type;
 //  bVar  bIndex    field  fIndex        BASED bVar RECORD field(size) type;
 //
+// There is one special case: IR-182-1 p. 13-3 tells us that in the one specific
+// case of a BASED variable (say, `bVar`) used as a parameter for
+// `ADDR`, `bVar` and `bVar[0]` don't behave the same the same.  Rather,
+// `ADDR(bVar[0])` (i.e.,
+//             bVar    0       NULL    0
+// in the table above) would give us the expected address of the data for
+// `basedVariable`, whereas `ADDR(bVar)` would instead give us the
+// address of the *pointer* to the data area.  The table above, as-is, provides
+// no way to handle this special case.  For that, we'll use the following:
+//
+//  bVar  80000000  NULL   0             Returns address of data-pointer for bVar
+//
 // In the parameters for `ADDR`, I make no distinction between
 // DECLARE / COMMON / ARRAY / COMMON ARRAY, nor any distinction between
 // BASED / COMMON BASED.  (There may or may not be an internal distinction
@@ -252,6 +264,9 @@ writeCOMMON(FILE *fp);
 //      0       Full success.
 //      1       Partial success: File was shorter than expected.
 //      2       Partial success: File was longer than expected.
+// In the current implementation, I don't actually have a good way to deal
+// with the latter two cases, so the 3rd case always returns 0 and the 4th
+// case aborts.
 int
 readCOMMON(FILE *fp);
 
