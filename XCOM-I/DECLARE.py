@@ -106,7 +106,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         group = []
         for n in range(1, len(fields)):
             field = fields[n]
-            if not field[:1].isdigit():
+            if not field[:1].isdigit() and not field[:1] == "'":
                 field = field.upper()
             if inArray == 1:
                 if field != "(":
@@ -117,7 +117,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     continue
             if inBased == 1:
                 if field != "RECORD":
-                    isBased = False
+                    #isBased = False
                     inBased = 0
                 else:
                     attributes.append(field)
@@ -237,7 +237,17 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         properties["LITERALLY"] = token
                         inLiterally = False
                     elif inBit:
-                        properties["BIT"] = integer(token)
+                        bitSize = integer(token)
+                        properties["BIT"] = bitSize
+                        if not isBased or inRecord:
+                            if bitSize <= 8:
+                                properties["dirWidth"] = 1
+                            elif bitSize <= 16:
+                                properties["dirWidth"] = 2
+                            elif bitSize <= 32:
+                                properties["dirWidth"] = 4
+                            else:
+                                error("Unsupported BIT size (%d)" % bitSize, scope)
                         inBit = False
                         skip = 1
                     elif inInitial:
@@ -252,15 +262,9 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                                         .replace("~", " ").replace("`", "'")
                             elif "BIT" in properties or \
                                     "FIXED" in properties:
-                                try:
-                                    token = integer(token)
-                                except:
-                                    pass
+                                token = integer(token)
                             else:
-                                try:
-                                    token = float(token)
-                                except:
-                                    pass
+                                token = float(token)
                             if "top" in properties:
                                 if initial == None:
                                     initial = []
@@ -281,6 +285,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     elif token in ["CHARACTER", "FIXED", "LABEL", "ARRAY",
                                    "BASED", "DYNAMIC"]:
                         properties[token] = True
+                        if token in ["CHARACTER", "FIXED", "ARRAY", "BASED"]:
+                            properties["dirWidth"] = 4
                     elif token == "RECORD":
                         properties["RECORD"] = {}
                     else:
@@ -306,6 +312,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                             "LABEL" not in p and \
                             "RECORD" not in p:
                         p["FIXED"] = True
+                        p["dirWidth"] = 4
                     if "LITERALLY" in properties:
                         if passCount == 1 or \
                                 symbol not in scope["literals"] or \
@@ -324,9 +331,12 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         basedVar = variables[list(variables)[-1]]
                         last = basedVar["RECORD"]
                         p["offset"] = offsetInRecord
-                        offsetInRecord += 4
+                        try:
+                            offsetInRecord += p["dirWidth"]
+                        except:
+                            pass
                         if "top" in p:
-                            offsetInRecord += 4 * p["top"]
+                            offsetInRecord += p["dirWidth"] * p["top"]
                         basedVar["recordSize"] = offsetInRecord
                         last[symbol] = p
                 

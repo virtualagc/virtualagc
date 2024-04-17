@@ -56,6 +56,7 @@ int outUTF8 = 0;
 FILE *DD_INS[DD_MAX] = { NULL };
 FILE *DD_OUTS[DD_MAX] = { NULL };
 FILE *COMMON_OUT = NULL;
+randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES] = { { NULL } };
 
 // Starting time of the program run, more or less.
 struct timeval startTime;
@@ -73,8 +74,8 @@ parseCommandLine(int argc, char **argv)
   DD_OUTS[0] = DD_OUTS[1] = stdout;
   for (i = 1; i < argc; i++)
     {
-      int lun;
-      char filename[1024];
+      int lun, recordSize;
+      char c, filename[1024];
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
       else if (2 == sscanf(argv[i], "--ddi=%d,%s", &lun, filename))
@@ -114,6 +115,88 @@ parseCommandLine(int argc, char **argv)
                 }
             }
         }
+      else if (4 == sscanf(argv[i], "--raf=%c,%d,%d,%[^\n\r]", &c,
+                           &recordSize, &lun, filename))
+        {
+          randomAccessFile_t *ri, *ro;
+          if (lun < 1 || lun >= MAX_RANDOM_ACCESS_FILES)
+            {
+              fprintf(stderr, "Illegal device number (%d)\n", lun);
+              exit(1);
+            }
+          if (c == 'I' || c == 'i')
+            {
+              ri = &randomAccessFiles[INPUT_RANDOM_ACCESS][lun];
+              if (ri->fp != NULL)
+                {
+                  fprintf(stderr, "Input file %d (%s) already attached)\n",
+                      lun, ri->filename);
+                  exit(1);
+                }
+              ri->fp = fopen(filename, "rb");
+              if (ri->fp == NULL)
+                {
+                  fprintf(stderr, "Cannot open input file %d (%s) for reading)\n",
+                      lun, filename);
+                  exit(1);
+                }
+              ri->recordSize = recordSize;
+              strncpy(ri->filename, filename, sizeof(string_t));
+            }
+          else if (c == 'O' || c == 'o')
+            {
+              ro = &randomAccessFiles[OUTPUT_RANDOM_ACCESS][lun];
+              if (ro->fp != NULL)
+                {
+                  fprintf(stderr, "Output file %d (%s) already attached)\n",
+                      lun, ro->filename);
+                  exit(1);
+                }
+              ro->fp = fopen(filename, "ab");
+              if (ro->fp == NULL)
+                {
+                  fprintf(stderr, "Cannot open output file %d (%s) for writing)\n",
+                      lun, filename);
+                  exit(1);
+                }
+              ro->recordSize = recordSize;
+              strncpy(ro->filename, filename, sizeof(string_t));
+            }
+          else if (c == 'B' || c == 'b')
+            {
+              ri = &randomAccessFiles[INPUT_RANDOM_ACCESS][lun];
+              ro = &randomAccessFiles[OUTPUT_RANDOM_ACCESS][lun];
+              if (ri->fp != NULL)
+                {
+                  fprintf(stderr, "Input file %d (%s) already attached)\n",
+                      lun, ri->filename);
+                  exit(1);
+                }
+              if (ro->fp != NULL)
+                {
+                  fprintf(stderr, "Output file %d (%s) already attached)\n",
+                      lun, ro->filename);
+                  exit(1);
+                }
+              ro->fp = fopen(filename, "ab+");
+              if (ro->fp == NULL)
+                {
+                  fprintf(stderr, "Cannot open i/o file %d (%s) for read/write)\n",
+                      lun, filename);
+                  exit(1);
+                }
+              ro->recordSize = recordSize;
+              strncpy(ro->filename, filename, sizeof(string_t));
+              ri->fp = ro->fp;
+              ri->recordSize = recordSize;
+              strcpy(ri->filename, ro->filename);
+            }
+          else
+            {
+              fprintf(stderr, "Illegal i/o spec (%c)\n", c);
+              exit(1);
+            }
+        }
       else if (1 == sscanf(argv[i], "--commoni=%s", filename))
         {
           COMMON_IN = fopen(filename, "r");
@@ -142,28 +225,35 @@ parseCommandLine(int argc, char **argv)
           printf("        %s [OPTIONS]\n", argv[0]);
           printf("\n");
           printf("The available OPTIONS are:\n");
-          printf("--help      Displays this menu and then immediately exits.\n");
-          printf("--utf8      By default, any non-ASCII symbols for the\n");
-          printf("            U.S. cent sign and the logical-NOT symbol\n");
-          printf("            are translated to the ASCII characters ` and ~\n");
-          printf("            respectively, and will appear that way if\n");
-          printf("            output when this program is run.  If that\n");
-          printf("            is disturbing, you can try using the --utf8\n");
-          printf("            to try outputs in UTF-8 encoding instead.\n");
-          printf("--ddi=N,F   Attach filename F to the logical unit number\n");
-          printf("            N, for use with the INPUT(N) XPL built-in.\n");
-          printf("            By default, 0 and 1 are attached to stdin.\n");
-          printf("            N can range from 0 through 9.\n");
-          printf("--ddo=N,F   Attach filename F to the logical unit number\n");
-          printf("            N, for use with the OUTPUT(N) XPL built-in.\n");
-          printf("            By default, 0 and 1 are attached to stdout.\n");
-          printf("            N can range from 0 through 9.\n");
-          printf("--commoni=F Name of the file from which to read the\n");
-          printf("            initial values for COMMON memory at startup.\n");
-          printf("            By default, COMMON is not initialized.\n");
-          printf("--commono=F Name of the file to which data from COMMON\n");
-          printf("            is written upon program termination.  By\n");
-          printf("            default, the file COMMON.out is used.\n");
+          printf("--help        Displays this menu and then immediately exits.\n");
+          printf("--utf8        By default, any non-ASCII symbols for the\n");
+          printf("              U.S. cent sign and the logical-NOT symbol\n");
+          printf("              are translated to the ASCII characters ` and ~\n");
+          printf("              respectively, and will appear that way if\n");
+          printf("              output when this program is run.  If that\n");
+          printf("              is disturbing, you can try using the --utf8\n");
+          printf("              to try outputs in UTF-8 encoding instead.\n");
+          printf("--ddi=N,F     Attach filename F to the logical unit number\n");
+          printf("              N, for use with the INPUT(N) XPL built-in.\n");
+          printf("              By default, 0 and 1 are attached to stdin.\n");
+          printf("              N can range from 0 through 9.\n");
+          printf("--ddo=N,F     Attach filename F to the logical unit number\n");
+          printf("              N, for use with the OUTPUT(N) XPL built-in.\n");
+          printf("              By default, 0 and 1 are attached to stdout.\n");
+          printf("              N can range from 0 through 9.\n");
+          printf("--raf=I,R,N,F Attach filename F to device number N, for use\n");
+          printf("              with the FILE(N) XPL built-in.  R is the\n");
+          printf("              record size associated with the random-access\n");
+          printf("              file, such as 3600.  I is one of the following:\n");
+          printf("              'I' (for Input), 'O' (for Output), or 'B' (for\n");
+          printf("              Both input and output).  N is 1 through 9.\n");
+          printf("              By default, no random-access files are attached.\n");
+          printf("--commoni=F   Name of the file from which to read the\n");
+          printf("              initial values for COMMON memory at startup.\n");
+          printf("              By default, COMMON is not initialized.\n");
+          printf("--commono=F   Name of the file to which data from COMMON\n");
+          printf("              is written upon program termination.  By\n");
+          printf("              default, the file COMMON.out is used.\n");
           printf("\n");
           returnValue = 1;
         }
@@ -218,7 +308,7 @@ getFIXED(uint32_t address)
   value = memory[address++];
   value = (value << 8) | memory[address++];
   value = (value << 8) | memory[address++];
-  value = (value << 8) | memory[address++];
+  value = (value << 8) | memory[address];
   return value;
 }
 
@@ -228,22 +318,38 @@ putFIXED(uint32_t address, int32_t value)
   memory[address++] = (value >> 24) & 0xFF;
   memory[address++] = (value >> 16) & 0xFF;
   memory[address++] = (value >> 8) & 0xFF;
-  memory[address++] = value & 0xFF;
+  memory[address] = value & 0xFF;
 }
 
-/*
-uint32_t
-getBIT(uint32_t address)
+uint8_t
+getBIT8(uint32_t address)
 {
-  return (uint32_t) getFIXED(address);
+  return memory[address];
 }
 
 void
-putBIT(uint32_t address, uint32_t value)
+putBIT8(uint32_t address, uint8_t value)
 {
-  putFIXED(address, (int32_t) value);
+  memory[address] = value;
 }
-*/
+
+uint16_t
+getBIT16(uint32_t address)
+{
+  int16_t value;
+  // Convert from big-endian to native format.
+  value = memory[address++];
+  value = (value << 8) | memory[address];
+  return value;
+}
+
+void
+putBIT16(uint32_t address, uint16_t value)
+{
+  memory[address++] = (value >> 8) & 0xFF;
+  memory[address] = value & 0xFF;
+}
+
 
 // The table below was adapted from the table of the same name in
 // the Virtual AGC source tree.  The table is indexed on the numeric
@@ -312,23 +418,13 @@ getCHARACTER(uint32_t address)
   size_t length;
   uint32_t index;
   descriptor = (uint32_t) getFIXED(address);
-  length = ((descriptor >> 24) & 0xFF) + 1;
-  index = descriptor & 0xFFFFFF;
-#if NULL_STRING_METHOD == 0
-  if (length == 1 && memory[index] == 0) // Empty string?
-    {
-      *returnValue = 0;
-      return returnValue;
-    }
-#elif NULL_STRING_METHOD == 1
   if (descriptor == 0) // Empty string?
     {
       *returnValue = 0;
       return returnValue;
     }
-#else
-#error Implementation error: NULL_STRING_METHOD.
-#endif
+  length = ((descriptor >> 24) & 0xFF) + 1;
+  index = descriptor & 0xFFFFFF;
   if (index + length <= MEMORY_SIZE)
     {
       uint8_t c;
@@ -355,25 +451,17 @@ putCHARACTER(uint32_t address, char *str)
   size_t length;
   uint32_t index, descriptor, oldLength, newDescriptor;
   descriptor = (uint32_t) getFIXED(address);
-  oldLength = ((descriptor >> 24) & 0xFF) + 1;
+  if (descriptor == 0)
+    oldLength = 0;
+  else
+    oldLength = ((descriptor >> 24) & 0xFF) + 1;
   index = descriptor & 0xFFFFFF;
   length = strlen(str);
-#if NULL_STRING_METHOD == 0
-  if (length == 0)
-    {
-      putFIXED(address, index);
-      memory[index] = 0;
-      return;
-    }
-#elif NULL_STRING_METHOD == 1
   if (length == 0)
     {
       putFIXED(address, 0);
       return;
     }
-#else
-#error Implementation error: NULL_STRING_METHOD.
-#endif
   if (length > 256) { // Shouldn't be possible.
     length = 256;
     str[length] = 0;
@@ -1050,11 +1138,11 @@ ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
             {
               if (fIndex >= numElements)
                 break;
-              address += 4 * fIndex;
+              address += basedField->dirWidth * fIndex;
               return address;
             }
           else
-            address += 4 * numElements;
+            address += basedField->dirWidth * numElements;
         }
 
       fprintf(stderr, "Could not find the specified BASED variable field.\n");
@@ -1069,9 +1157,93 @@ ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
           fprintf(stderr, "ADDR(%s) not found\n", fVar);
           exit(1);
         }
-      return found->address + 4 * fIndex;
+      return found->address + found->dirWidth * fIndex;
     }
   return 0;
+}
+
+// The `FILE` built-in.  There are two versions, one for the RHS of assignments
+// (`rFILE`) and one for the LHS of assignments (`lFILE`).  McKeeman isn't
+// clear on how flexible statements like
+//      buffer = FILE(i, j);
+//      FILE(i, j) = buffer;
+// Can there be multiple buffers on the LHS?  What are the constraints on
+// `buffer`?  For example, could we use `FILE` to load the test data into a
+// `CHARACTER`?  Having looked though the available XPL and XPL/I source code,
+// I'm going to assume that only these two simplistic forms
+// can be used (i.e., that there can be only a single buffer on the LHS).
+// It further appears to me that the `buffer` is always one of the following:
+//      A subscripted BIT(8), BIT(16), BIT(32), or FIXED
+// or
+//      A BASED variable, presumably with no CHARACTER fields
+// So I assume that the data is always transferred to/from `ADDR(buffer)` for
+// a non-based variable, or `ADDR(buffer(0))` (i.e., `getFIXED(ADDR(buffer))`)
+// for a BASED variable. The determination of BASED vs non-BASED cannot be
+// made by the `lFILE` and `rFILE` functions, and must be made by the calling
+// software to provide the correct address for `buffer`.
+
+void
+lFILE(uint32_t fileNumber, uint32_t recordNumber, uint32_t address)
+{
+  FILE *fp;
+  int position, returnedValue, recordSize;
+  if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
+    {
+      fprintf(stderr, "Bad FILE number (%d)\n", fileNumber);
+      exit(1);
+    }
+  fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS]->fp;
+  recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS]->recordSize;
+  position = recordSize * recordNumber;
+  if (fp == NULL)
+    {
+      fprintf(stderr, "FILE number (%d) not open for writing\n", fileNumber);
+      exit(1);
+    }
+  if (fseek(fp, position, SEEK_SET) < 0)
+    {
+      fprintf(stderr, "Cannot seek to %d in FILE %d\n", position, fileNumber);
+      exit(1);
+    }
+  returnedValue = fwrite(&memory[address], recordSize, 1, fp);
+  if (returnedValue != 1)
+    {
+      fprintf(stderr, "Failed to write %d bytes to position %d in FILE %d\n",
+          recordSize, position, fileNumber);
+      exit(1);
+    }
+}
+
+void
+rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber)
+{
+  FILE *fp;
+  int position, returnedValue, recordSize;
+  if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
+    {
+      fprintf(stderr, "Bad FILE number (%d)\n", fileNumber);
+      exit(1);
+    }
+  fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS]->fp;
+  recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS]->recordSize;
+  position = recordSize * recordNumber;
+  if (fp == NULL)
+    {
+      fprintf(stderr, "FILE number (%d) not open for reading\n", fileNumber);
+      exit(1);
+    }
+  if (fseek(fp, position, SEEK_SET) < 0)
+    {
+      fprintf(stderr, "Cannot seek to %d in FILE %d\n", position, fileNumber);
+      exit(1);
+    }
+  returnedValue = fread(&memory[address], recordSize, 1, fp);
+  if (returnedValue != 1)
+    {
+      fprintf(stderr, "Failed to read %d bytes from position %d in FILE %d\n",
+          recordSize, position, fileNumber);
+      exit(1);
+    }
 }
 
 // A function for comparing struct allocated_t objects (see COMPACTIFY below),
@@ -1110,12 +1282,12 @@ COMPACTIFY(void)
   // metadata we need to determine which variables are relevant etc. are in
   // the `memoryMap` array.  More space is allocated to `allocations` than we
   // probably need, but it's correct in the worst-case (which is that every
-  // variable is BASED).
-  allocations = calloc( (FREE_BASE - COMMON_BASE) / 4,
+  // variable is BIT(8)).
+  allocations = calloc( FREE_BASE - COMMON_BASE,
                         sizeof(struct allocated_t) );
   for (i = 0; i < NUM_SYMBOLS; i++)
     {
-      int numElements, address, descriptor, k;
+      int numElements, address, descriptor, k, dirWidth;
       if (!strcmp(memoryMap[i].datatype, "BASED"))
         {
           address = memoryMap[i].address;
@@ -1133,13 +1305,12 @@ COMPACTIFY(void)
           if (numElements == 0)
             numElements = 1;
           address = memoryMap[i].address;
-          for (k = 0; k < numElements; k++, address += 4)
+          dirWidth = memoryMap[i].dirWidth;
+          for (k = 0; k < numElements; k++, address += dirWidth)
             {
               descriptor = getFIXED(address);
-#if NULL_STRING_METHOD == 1
               if (descriptor == 0) // Empty string, no allocation
                 continue;
-#endif
               allocations[numAllocations].saddress = descriptor & 0xFFFFFF;
               allocations[numAllocations].length = ((descriptor >> 24) & 0xFF) + 1;
               allocations[numAllocations].address = address;
@@ -1173,7 +1344,7 @@ COMPACTIFY(void)
           lengthToMove = allocations[i].length;
           if (actual + lengthToMove > FREE_LIMIT)
             lengthToMove = FREE_LIMIT - actual;
-          bcopy(&memory[actual], &memory[expected], lengthToMove);
+          memmove(&memory[expected], &memory[actual], lengthToMove);
           allocations[i].saddress = expected;
           // Fix the entry for the variable.  Note that the following works
           // for either CHARACTER or for BASED, since the MSB of a pointer
@@ -1232,7 +1403,7 @@ printMemoryMap(char *msg) {
                       vector = 0;
                       numElements = 1;
                     }
-                  for (n = 0; n < numElements; n++, raddress += 4)
+                  for (n = 0; n < numElements; n++, raddress += basedField->dirWidth)
                     {
                       char *fieldName = basedField->symbol, *s;
                       printf("        %06X: BASED %s %s(%d)", raddress,
@@ -1264,6 +1435,7 @@ printMemoryMap(char *msg) {
       else
         {
           int numElements = memoryMap[i].numElements;
+          int dirWidth = memoryMap[i].dirWidth;
           if (numElements == 0)
             {
               if (!strcmp(datatype, "CHARACTER"))
@@ -1294,7 +1466,7 @@ printMemoryMap(char *msg) {
             }
           for (j = 0; j < numElements; j++)
             {
-              int k = address + 4 * j;
+              int k = address + dirWidth * j;
               if (!strcmp(datatype, "CHARACTER"))
                 {
                   uint32_t descriptor = getFIXED(k);
@@ -1364,7 +1536,7 @@ printMemoryMap(char *msg) {
  */
 int
 writeCOMMON(FILE *fp) {
-  int i, j, k, address, numElements, allocated, based = 0;
+  int i, j, k, address, numElements, allocated, based = 0, dirWidth;
   char *datatype, *symbol;
   if (fp == NULL)
     return 1;
@@ -1384,6 +1556,7 @@ writeCOMMON(FILE *fp) {
         numElements = 1;
       allocated = memoryMap[i].allocated;
       symbol = memoryMap[i].symbol;
+      dirWidth = memoryMap[i].dirWidth;
       for (j = 0; j < numElements; j++)
         {
           if (!based && address >= NON_COMMON_BASE) // Past end of COMMON.
@@ -1392,13 +1565,13 @@ writeCOMMON(FILE *fp) {
             {
               fprintf(fp, "-\t%s\t%d\t%s\t", symbol, j, datatype);
               fprintf(fp, "'%s'\n", getCHARACTER(address));
-              address += 4;
+              address += dirWidth;
             }
           else if (!strcmp(datatype, "FIXED") || !strcmp(datatype, "BIT"))
             {
               fprintf(fp, "-\t%s\t%d\t%s\t", symbol, j, datatype);
               fprintf(fp, "%08X\n", getFIXED(address));
-              address += 4;
+              address += dirWidth;
             }
           else if (!strcmp(datatype, "BASED"))
             {
@@ -1411,10 +1584,11 @@ writeCOMMON(FILE *fp) {
                   char *basedSymbol = basedField->symbol,
                       *basedDatatype = basedField->datatype;
                   int n, oBasedNumElements = basedField->numElements;
+                  int fDirWidth = basedField->dirWidth;
                   int basedNumElements = oBasedNumElements;
                   if (oBasedNumElements == 0)
                     basedNumElements = 1;
-                  for (n = 0; n < basedNumElements; n++, address += 4)
+                  for (n = 0; n < basedNumElements; n++, address += fDirWidth)
                     {
                       fprintf(fp, ".\t%s\t%d\t%s\t", basedSymbol, n,
                           basedDatatype);
@@ -1433,41 +1607,6 @@ writeCOMMON(FILE *fp) {
 
   return 0;
 }
-
-#if 0
-int
-readCOMMON(FILE *fp) {
-  uint32_t i, index, address, value;
-  char buffer[sizeof(string_t) + 100];
-  string_t symbol, string;
-  fscanf(fp, "%*[^\n]\n"); // Skip the first line from the file, without saving.
-  for (i = 0; i < NUM_SYMBOLS; i++)
-    {
-      if (NULL == fgets(buffer, sizeof(buffer), fp))
-        return 1;
-      if (4 == sscanf(buffer, "%s %d %X CHARACTER '%[^\n]\n", symbol, &index,
-                      &address, string)) {
-          string[strlen(string) - 1] = 0; // Get rid of trailing quote.
-          putCHARACTER(address, string);
-          continue;
-      }
-      if (4 == sscanf(buffer, "%s %d %X FIXED %X\n", symbol, &index,
-                      &address, &value)) {
-          putFIXED(address, value);
-          continue;
-      }
-      if (4 == sscanf(buffer, "%s %d %X BIT %X\n", symbol, &index,
-                      &address, &value)) {
-          putFIXED(address, value);
-          continue;
-      }
-      return -1; // Corrupted
-    }
-  if (NULL != fgets(buffer, sizeof(buffer), fp))
-    return 2;
-  return 0;
-}
-#endif
 
 int
 readCOMMON(FILE *fp) {

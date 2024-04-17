@@ -27,9 +27,9 @@ lines = [] # One line of source code per entry.
 sourceFiles = [] # One entry for each entry in lines[]; source filename for line.
 verbose = False
 includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
-nullStringMethod = 1 # 0 may or may not work, but support is no longer active.
 baseSource = ""
 adhocs = {}
+standardXPL = False
 # Folder where XCOM-I.py itself is.
 basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
 
@@ -76,6 +76,13 @@ Usage:
 The available OPTIONS are:
 
 --help        Print this info.
+--xpl         Try to compile standard XPL rather than XPL/I.  This switch
+              is seldom needed, and doesn't accomplish much when it's
+              used.  Basically, all it can do is disable certain XPL/I
+              built-in functions or reserved words, allowing them to be
+              used as names of variables.  For example, the XPL/I
+              built-in `STRING` is used as a variable name in the XPL
+              source code for the standard McKeeman XPL compiler XCOM.
 --pfs, -bfs   (Default --pfs.) The switches --pfs and --bfs are mutually
               exclusive; i.e., one and only one of them is active:  --pfs 
               implies *not* --bfs, while --bfs implies *not* --pfs.  These 
@@ -126,6 +133,8 @@ for parm in sys.argv[1:]:
     if parm == "--help":
         print(helpMsg, file = sys.stderr)
         sys.exit(0)
+    elif parm == "--xpl":
+        standardXPL = True
     elif parm == "--pfs":
         pfs = True
     elif parm == "--bfs":
@@ -136,8 +145,6 @@ for parm in sys.argv[1:]:
         condC = True
     elif parm.startswith("--include="):
         includeFolder = parm[10:]
-    #elif parm.startswith("--null="):
-    #    nullStringMethod = int(parm[7:])
     elif parm.startswith("--patch="):
         baseSource = parm[8:]
     elif parm.startswith("--adhoc="):

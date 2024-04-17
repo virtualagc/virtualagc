@@ -160,6 +160,18 @@ variableAddress = 0 # Total contiguous bytes allocated in 24-bit address space.
 useCommon = False # For allocating COMMON vs non-COMMON
 useString = False # For allocating character data CHARACTER.
 memory = bytearray([0] * (1 << 24));
+'''
+`memoryMap` is a dictionary whose keys are addresses in `memory` and whose
+values are themselves dictionaries with the keys:
+    "mangled"           the mangled name of a variable
+    "datatype"          BASED, FIXED, BIT, CHARACTER, EBCDIC codes
+    "numElements"       Number of elements if variable subscripted, or else 0
+    "record"            dict describing the RECORD if BASED RECORD
+    "numFieldsInRecord" Number of fields in the RECORD, or 0
+    "recordSize"        Sum of all dirWidths in the RECORD, or 0
+    "dirWidth"          Number of bytes required in the variable index
+    "bitWidth"          from BIT(bitWidth), or 0 if not BIT
+'''
 memoryMap = {}
 def allocateVariables(scope, extra = None):
     global variableAddress, memory, memoryMap
@@ -183,6 +195,23 @@ def allocateVariables(scope, extra = None):
         value = (value << 8) | memory[address + 3]
         return value
 
+    def putBIT16(address, i):
+        global memory
+        memory[address + 0] = (i >> 8) & 0xFF
+        memory[address + 1] = i & 0xFF
+    
+    def getBIT16(address):
+        value = memory[address + 0]
+        value = (value << 8) | memory[address + 1]
+        return value
+
+    def putBIT8(address, i):
+        global memory
+        memory[address] = i & 0xFF
+    
+    def getBIT8(address):
+        return memory[address]
+
     # Note that unlike the runtime function of the same name, this version of
     # putCHARACTER doesn't need to deal with compactification, since the
     # *first* time, all variables can be allocated right where they belong
@@ -192,18 +221,9 @@ def allocateVariables(scope, extra = None):
         global memory
         length = len(s)
         saddress = variableAddress
-        if nullStringMethod == 0:
-            if length == 0:
-                # In implementation 0, an empty string is stored in
-                # the memory[] array as a string of length 1 containing
-                # just the EBCDIC NUL character.
-                putFIXED(address, saddress)
-                memory[saddress] = 0
-                return
-        elif nullStringMethod == 1:
-            if length == 0:
-                putFIXED(address, 0)
-                return
+        if length == 0:
+            putFIXED(address, 0)
+            return
         if length > 256:
             length = 256
         designator = ((length - 1) << 24) | saddress
@@ -264,15 +284,19 @@ def allocateVariables(scope, extra = None):
         else:
             numElements = 0
         if useString:
-            memoryMap[variableAddress] = [mangled, "EBCDIC codes", numElements,
-                                          {}]
-            if nullStringMethod == 0:
-                attributes["saddress"] = variableAddress
+            memoryMap[variableAddress] = {
+                "mangled": mangled, 
+                "datatype": "EBCDIC codes", 
+                "numElements": numElements,
+                "record": {},
+                "numFieldsInRecord": 0,
+                "recordSize": 0,
+                "dirWidth": 0,
+                "bitWidth": 0
+            }
             address = attributes["address"]
             firstAddress = address
             for i in range(length):
-                if nullStringMethod == 0:
-                    putFIXED(address, variableAddress)
                 # INITIALize (just CHARACTER variables).
                 if "INITIAL" in attributes and i < len(initial):
                     initialValue = initial[i]
@@ -287,11 +311,8 @@ def allocateVariables(scope, extra = None):
                 else:
                     initialValue = ""
                 putCHARACTER(address, initialValue)
-                address += 4
-                if nullStringMethod == 0 and len(initialValue) == 0:
-                    variableAddress += 256
-                else:
-                    variableAddress += len(initialValue)
+                address += attributes["dirWidth"]
+                variableAddress += len(initialValue)
         else:
             if "BASED" in attributes:
                 if "RECORD" in attributes:
@@ -301,16 +322,39 @@ def allocateVariables(scope, extra = None):
                     record = { '': attributes }
             else:
                 record = {}
-            memoryMap[variableAddress] = [mangled, datatype, numElements, record]
+            bitWidth = 0
+            if "BIT" in attributes:
+                bitWidth = attributes["BIT"]
+            memoryMap[variableAddress] = {
+                "mangled": mangled, 
+                "datatype": datatype, 
+                "numElements": numElements, 
+                "record": record, 
+                "numFieldsInRecord": 0,
+                "recordSize": 0,
+                "dirWidth": attributes["dirWidth"],
+                "bitWidth": bitWidth
+            }
             attributes["address"] = variableAddress
             # INITIALize FIXED or BIT variables.
             if "INITIAL" in attributes and \
                     ("FIXED" in attributes or "BIT" in attributes):
+                if attributes["dirWidth"] == 1:
+                    pf = putBIT8
+                elif attributes["dirWidth"] == 2:
+                    pf = putBIT16
+                else:
+                    pf = putFIXED
                 for initialValue in initial:
                     if length <= 0:
                         errxit("Too many initializers", scope)
+                    if "BIT" in attributes:
+                        bitWidth = attributes["BIT"]
+                    else:
+                        bitWidth = 32
+                    bitMask = (1 << bitWidth) - 1
                     if isinstance(initialValue, int):
-                        putFIXED(variableAddress, initialValue)
+                        pf(variableAddress, initialValue & bitMask)
                     else:
                         # Not immediately an integer, but perhaps it's an
                         # expression whose value can be computed.  Let's try!
@@ -318,12 +362,12 @@ def allocateVariables(scope, extra = None):
                         tree = parseExpression(tokenized, 0)
                         if tree != None and "token" in tree and \
                                 "number" in tree["token"]:
-                            putFIXED(variableAddress, tree["token"]["number"])
+                            pf(variableAddress, tree["token"]["number"] & bitMask)
                         else:
                             errxit("Initializer is not integer", scope);
                     length -= 1
-                    variableAddress += 4
-            variableAddress += 4 * length
+                    variableAddress += attributes["dirWidth"]
+            variableAddress += attributes["dirWidth"] * length
 
 # A function for `walkModel` that mangles identifier names.
 def mangle(scope, extra = None):
@@ -426,7 +470,7 @@ def generateExpression(scope, expression):
         #    +
         #    offset of field into record
         #    +
-        #    4 * fieldIndex
+        #    widthOfItem * fieldIndex
         baseSubscripts = baseExpression["children"]
         if len(baseSubscripts) == 0:
             sourceb = '0'
@@ -453,13 +497,19 @@ def generateExpression(scope, expression):
                         " + %d * (%s)" % (baseAttributes["recordSize"],
                                           sourceb) + \
                         " + %d + " % fieldAttributes["offset"] + \
-                        "4 * (%s)" % sourcef
+                        "%d * (%s)" % (fieldAttributes["dirWidth"], sourcef)
         if "CHARACTER" in fieldAttributes:
             return "CHARACTER", "getCHARACTER(%s)" % sourceAddress
         elif "FIXED" in fieldAttributes:
             return "FIXED", "getFIXED(%s)" % sourceAddress
         elif "BIT" in fieldAttributes:
-            return "BIT", "getFIXED(%s)" % sourceAddress
+            if fieldAttributes["dirWidth"] == 1:
+                gf = "getBIT8"
+            elif fieldAttributes["dirWidth"] == 2:
+                gf = "getBIT16"
+            else:
+                gf = "getFIXED"
+            return "BIT", "%s(%s)" % (gf, sourceAddress)
         else:
             errxit("Cannot find datatype of field %s.%s" % \
                    (baseName, fieldName))
@@ -588,11 +638,19 @@ def generateExpression(scope, expression):
                         baseAddress = "getFIXED(%s)" % baseAddress
                     if "FIXED" in attributes or "BIT" in attributes:
                         tipe = "FIXED"
+                        gf = "getFIXED"
+                        if "BIT" in attributes:
+                            bitWidth = attributes["BIT"]
+                            if bitWidth < 9:
+                                gf = "getBIT8"
+                            elif bitWidth < 17:
+                                gf = "getBIT16"
                         if index == "":
-                            source = "getFIXED(" + baseAddress + ")"
+                            source = "%s(" % gf + baseAddress + ")"
                         else:
-                            source = "getFIXED(" + baseAddress + \
-                                     " + 4*" + index + ")"
+                            source = "%s(" % gf + baseAddress + \
+                                     " + %d*" % attributes["dirWidth"] + \
+                                     index + ")"
                         return tipe, source
                     elif "CHARACTER" in attributes:
                         tipe = "CHARACTER"
@@ -600,7 +658,8 @@ def generateExpression(scope, expression):
                             source = "getCHARACTER(" + baseAddress + ")"
                         else:
                             source = "getCHARACTER(" + baseAddress + \
-                                     " + 4*" + index + ")"
+                                     " + %d*" % attributes["dirWidth"] + \
+                                     index + ")"
                         return tipe, source
                     else:
                         errxit("Unsupported variable type")
@@ -675,6 +734,22 @@ def generateExpression(scope, expression):
                     errxit("ADDR takes a single parameter")
                 parameter = parameters[0]
                 token = parameter["token"]
+                if standardXPL and "builtin" in token and \
+                        token["builtin"] == "COMPACTIFY":
+                    '''
+                    I don't know if this workaround is correct or not.  McKeeman lists
+                    `COMPACTIFY` as a built-in, but in fact both McKeeman's `XCOM` and
+                    Intermetrics's `HAL/S-FC` expect it to be a user-defined PROCEDURE.
+                    McKeeman's source code for `COMPACTIFY` states that `XCOM` automatically
+                    includes the source code for `COMPACTIFY` at the beginning of every
+                    compilation; the source code for `XCOM` explicitly uses `ADDR(COMPACTIFY)`.
+                    I think that the idea is to use it to measure the offset (in bytes)
+                    from the start of executable code for error messages.  Whatever ... if
+                    `ADDR(COMPACTIFY)` is called, we need it to return a value even if the
+                    notion that it exists in the 24-bit memory address space is bogus.
+                    '''
+                    return "FIXED", "0"
+                #endif
                 if "identifier" in token: # Not BASED.
                     fVar = token["identifier"]
                     fSubs = parameter["children"]
@@ -830,7 +905,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
                                 " + %d * (%s)" % (baseAttributes["recordSize"],
                                                   sourceb) + \
                                 " + %d + " % fieldAttributes["offset"] + \
-                                "4 * (%s)" % sourcef
+                                "%d * (%s)" % (fieldAttributes["dirWidth"], sourcef)
                 if "CHARACTER" in fieldAttributes:
                     print(indent + "putCHARACTER(%s, stringRHS);" \
                                     % sourceAddress)
@@ -838,8 +913,14 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     print(indent + "putFIXED(%s, numberRHS);" \
                                     % sourceAddress)
                 elif "BIT" in fieldAttributes:
-                    print(indent + "putFIXED(%s, numberRHS);" \
-                                    % sourceAddress)
+                    if fieldAttributes["dirWidth"] == 1:
+                        pf = "putBIT8"
+                    elif fieldAttributes["dirWidth"] == 2:
+                        pf = "putBIT16"
+                    else:
+                        pf = "putFIXED"
+                    print(indent + "%s(%s, numberRHS);" \
+                                    % (pf, sourceAddress))
                 else:
                     errxit("Cannot find datatype of field %s.%s" % \
                            (baseName, fieldName))
@@ -853,11 +934,18 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 if "BASED" in attributes:
                     baseAddress = "getFIXED(%s)" % baseAddress
                 if "FIXED" in attributes or "BIT" in attributes:
+                    if attributes["dirWidth"] == 1:
+                        pf = "putBIT8"
+                    elif attributes["dirWidth"] == 2:
+                        pf = "putBIT16"
+                    else:
+                        pf = "putFIXED"
                     if len(children) == 0:
-                        print(indent + "putFIXED(" + baseAddress + ", numberRHS);") 
+                        print(indent + "%s(" % pf + baseAddress + ", numberRHS);") 
                     elif len(children) == 1:
                         tipeL, sourceL = generateExpression(scope, children[0])
-                        print(indent + "putFIXED(" + baseAddress + "+ 4*(" + \
+                        print(indent + "%s(" % pf + baseAddress + \
+                              "+ %d*(" % attributes["dirWidth"] + \
                               sourceL + "), numberRHS);") 
                     else:
                         errxit("Too many subscripts")
@@ -870,7 +958,8 @@ def generateSingleLine(scope, indent, line, indexInScope):
                         print(indent + "putCHARACTER(" + baseAddress + ", stringRHS);") 
                     elif len(children) == 1:
                         tipeL, sourceL = generateExpression(scope, children[0])
-                        print(indent + "putCHARACTER(" + baseAddress + "+ 4*(" + \
+                        print(indent + "putCHARACTER(" + baseAddress + \
+                              "+ %d*(" % attributes["dirWidth"] + \
                               sourceL + "), stringRHS);") 
                     else:
                         errxit("Too many subscripts")
@@ -938,6 +1027,15 @@ def generateSingleLine(scope, indent, line, indexInScope):
             errxit("Subscripted loop variables not supported.")
         attributes = getAttributes(scope, variable)
         address = attributes["address"]
+        if attributes["dirWidth"] == 1:
+            pf = "putBIT8"
+            gf = "getBIT8"
+        elif attributes["dirWidth"] == 2:
+            pf = "putBIT16"
+            gf = "getBIT16"
+        else:
+            pf = "putFIXED"
+            gf = "getFIXED"
         print(indent2 + "int32_t %s, %s, %s;" % (fromName, toName, byName))
         tipe, source = generateExpression(scope, line["from"])
         print(indent2 + fromName + " = " + source + ";")
@@ -945,11 +1043,12 @@ def generateSingleLine(scope, indent, line, indexInScope):
         print(indent2 + toName + " = " + source + ";")
         tipe, source = generateExpression(scope, line["by"])
         print(indent2 + byName + " = " + source + ";")
-        print((indent2 + \
-              "for (putFIXED(" + str(address) + ", " + fromName + \
-              ");\n" + indent2 + "     getFIXED(%d) <= %s;\n" + indent2 + \
-              "     putFIXED(%d, getFIXED(%d) + %s)) {" ) \
-              % (address, toName, address, address, byName))
+        print((indent2 + "for (%s(%d, %s);\n" + \
+               indent2 + "     %s(%d) <= %s;\n" + \
+               indent2 + "     %s(%d, %s(%d) + %s)) {" ) \
+              % (pf, address, fromName, 
+                 gf, address, toName, 
+                 pf, address, gf, address, byName))
     elif "WHILE" in line:
         tipe, source = generateExpression(scope, line["WHILE"])
         print(indent + "while (1 & (" + source + ")) {")
@@ -1110,13 +1209,14 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             for inputFilename in inputFilenames:
                 msg = msg + " " + os.path.basename(inputFilename)
             print(msg + ".")
-            print("  Recommended requirements:  GNU `gcc` and GNU `make`.")
-            print("  To build the program (aout) from the command line:")
+            print("  To build the program from the command line, using defaults:")
             print("          cd %s/" % outputFolder)
             print("          make")
-            print("  To run the program:")
-            print("          aout [OPTIONS]")
-            print("  Use `aout --help` to see the available OPTIONS.")
+            print("  View the Makefile to see different options for the `make`")
+            print("  command above.  To run the program:")
+            print("          %s [OPTIONS]" % outputFolder)
+            print("  Use `%s --help` to see the available OPTIONS." % \
+                  outputFolder)
         print("*/")
         print()
         print('#include "runtimeC.h"')
@@ -1131,14 +1231,21 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
                 print("%24s        %-16s %-8s" % \
                       ("-------------", "---------", "--------"))
                 for address in sorted(memoryMap):
-                    if memoryMap[address][2] == 0:
+                    memoryMapEntry = memoryMap[address]
+                    symbol = memoryMapEntry["mangled"]
+                    datatype = memoryMapEntry["datatype"]
+                    numElements = memoryMapEntry["numElements"]
+                    bitWidth = memoryMapEntry["bitWidth"]
+                    if datatype == "BIT":
+                        datatype = datatype + "(%d)" % bitWidth
+                    if numElements == 0:
                         print("       %8d (%06X)        %-16s %s" % \
-                              (address, address, memoryMap[address][1], \
-                               memoryMap[address][0]))
+                              (address, address, datatype, \
+                               symbol))
                     else:
                         print("       %8d (%06X)        %-16s %s(%d)" % \
-                              (address, address, memoryMap[address][1], \
-                               memoryMap[address][0], memoryMap[address][2]))
+                              (address, address, datatype, \
+                               symbol, numElements-1))
                 print("*/")
                 print()
             #print("uint32_t sizeOfCommon = %d;" % areaNormal)
@@ -1289,9 +1396,10 @@ def generateC(globalScope):
     memoryMapIndexBySymbol = {}
     i = 0
     for address in memoryMap:
-        if memoryMap[address][1] not in ["FIXED", "BIT", "CHARACTER", "BASED"]:
+        entry = memoryMap[address]
+        if entry["datatype"] not in ["FIXED", "BIT", "CHARACTER", "BASED"]:
             break
-        memoryMapIndexBySymbol[memoryMap[address][0]] = i;
+        memoryMapIndexBySymbol[entry["mangled"]] = i;
         i += 1
 
     # Write out the initialized memory as a file called memory.c.
@@ -1318,8 +1426,8 @@ def generateC(globalScope):
     numSymbols = 0
     for address in memoryMap:
         variable = memoryMap[address]
-        symbol = variable[0]
-        datatype = variable[1]
+        symbol = variable["mangled"]
+        datatype = variable["datatype"]
         if datatype not in ["FIXED", "CHARACTER", "BIT", "BASED"]:
             continue
         numSymbols += 1
@@ -1327,11 +1435,11 @@ def generateC(globalScope):
             maxSymbolLength = len(symbol)
     for address in memoryMap:
         variable = memoryMap[address]
-        symbol = variable[0]
-        datatype = variable[1]
+        symbol = variable["mangled"]
+        datatype = variable["datatype"]
         if datatype != "BASED":
             continue
-        record = variable[3]
+        record = variable["record"]
         if len(record) == 1 and "" == list(record)[0]:
             print("// Note that BASED %s has no RECORD" % symbol, file=f)
         print("basedField_t based_%s[%d] = {" % (symbol, len(record)), file=f)
@@ -1343,25 +1451,29 @@ def generateC(globalScope):
             if "top" in attributes:
                 size = 1 + attributes["top"]
             subDatatype = ''
+            bitWidth = 0
             if "BIT" in attributes:
                 subDatatype = "BIT"
+                bitWidth = attributes["BIT"]
             elif "CHARACTER" in attributes:
                 subDatatype = "CHARACTER"
             else:
                 subDatatype = "FIXED"
             print(indentationQuantum + \
-                  '{ "%s", "%s", %d }' % (key, subDatatype, size), \
+                  '{ "%s", "%s", %d, %d, %d }' % (key, subDatatype, size,
+                                                  attributes["dirWidth"],
+                                                  bitWidth), \
                   end = "", file=f)
             if size == 0:
-                recordSize += 4
+                recordSize += attributes["dirWidth"]
             else:
-                recordSize += 4 * size
+                recordSize += attributes["dirWidth"] * size
             i += 1
             if i < len(record):
                 print(",", end="", file=f)
             print("", file=f)
-        variable.append(len(record))
-        variable.append(recordSize)
+        variable["numFieldsInRecord"] = len(record)
+        variable["recordSize"] = recordSize
         print("};", file=f)
     print("\n// Memory map, sorted by addresses in XPL memory -------------\n",\
           file=f)
@@ -1370,28 +1482,31 @@ def generateC(globalScope):
     for address in memoryMap:
         i += 1
         variable = memoryMap[address]
-        symbol = variable[0]
-        datatype = variable[1]
+        symbol = variable["mangled"]
+        datatype = variable["datatype"]
         if datatype == "BASED":
-            numFieldsInRecord = variable[4]
-            recordSize = variable[5]
+            numFieldsInRecord = variable["numFieldsInRecord"]
+            recordSize = variable["recordSize"]
         else:
             numFieldsInRecord = 0
             recordSize = 0
-        numElements = variable[2]
+        numElements = variable["numElements"]
         allocated = 0
         basedFields = "NULL"
         if datatype not in ["FIXED", "CHARACTER", "BIT", "BASED"]:
             continue
+        dirWidth = variable["dirWidth"]
+        bitWidth = variable["bitWidth"]
         if datatype == "BASED":
             basedFields = "based_" + symbol
         if i == numSymbols:
             comma = ''
         else:
             comma = ','
-        print('  { %d, "%s", "%s", %d, %d, %d, %d, %s}%s' % \
+        print('  { %d, "%s", "%s", %d, %d, %s, %d, %d, %d, %d }%s' % \
               (address, symbol, datatype, numElements, allocated, 
-               numFieldsInRecord, recordSize, basedFields, comma), file=f)
+               basedFields, numFieldsInRecord, recordSize, dirWidth, bitWidth,
+               comma), file=f)
     print("};", file=f)
     print("\n// Memory map, sorted by symbol name -------------------------\n",\
           file=f)
@@ -1408,11 +1523,12 @@ def generateC(globalScope):
     # runtimeC.c.
     f = open(outputFolder + "/configuration.h", "w")
     print("// Configuration settings, inferred from the XPL/I source.", file=f)
-    print("#define NULL_STRING_METHOD", nullStringMethod, file=f)
     if pfs:
         print("#define PFS", file=f)
     else:
         print("#define BFS", file=f)
+    if standardXPL:
+        print("#define STANDARD_XPL", file=f)
     print("#define COMMON_BASE 0x%06X" % commonBase, file=f)
     print("#define NON_COMMON_BASE 0x%06X" % nonCommonBase, file=f)
     print("#define FREE_BASE 0x%06X" % freeBase, file=f)
@@ -1431,6 +1547,8 @@ def generateC(globalScope):
     print("  symbol_t symbol;", file=f)
     print("  datatype_t datatype;", file=f)
     print("  int numElements;", file=f)
+    print("  int dirWidth;", file=f)
+    print("  int bitWidth;", file=f)
     print("} basedField_t;", file=f)
     print("typedef struct {", file=f)
     print("  int address;", file=f)
@@ -1438,9 +1556,11 @@ def generateC(globalScope):
     print("  datatype_t datatype;", file=f)
     print("  int numElements;", file=f)
     print("  int allocated;", file=f)
+    print("  basedField_t *basedFields;", file=f)
     print("  int numFieldsInRecord;", file=f)
     print("  int recordSize;", file=f)
-    print("  basedField_t *basedFields;", file=f)
+    print("  int dirWidth;", file=f)
+    print("  int bitWidth;", file=f)
     print("} memoryMapEntry_t;", file=f)
     print("extern memoryMapEntry_t memoryMap[NUM_SYMBOLS]; // Sorted by address", 
           file=f)
@@ -1506,7 +1626,8 @@ if debug:
                 if token == ';':
                     scope["variables"][identifier] = {
                         "FIXED": True,
-                        "address": variableAddress
+                        "address": variableAddress,
+                        "dirWidth": 4
                         }
                     variableAddress += 4
                     declaration = True
@@ -1524,7 +1645,8 @@ if debug:
                 scope["variables"][identifier] = {
                     "FIXED": True,
                     "top": top,
-                    "address": variableAddress
+                    "address": variableAddress,
+                    "dirWidth": 4
                     }
                 variableAddress += 4 * (top + 1)
                 declaration = True

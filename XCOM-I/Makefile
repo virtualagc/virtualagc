@@ -5,23 +5,64 @@
 # Purpose:	For building C-language source-code output from the XCOM-I.py
 #		XPL/I-to-C translator program.  This Makefile does *not* build 
 #		XCOM-I itself.
-# Requirements: The GNU `gcc` C compiler and GNU `make` program are assumed, 
-#		but probably all or lots of others would work as well. 
 # Reference:	https://www.ibiblio.org/apollo/Shuttle.html
 # Contact:	info@sandroid.org
 # Mod history:	2024-03-30 RSB	Wrote
 #
-# To make this as simple and cross-platform as possible, the compiled 
-# program is always called `aout`.  But of course you can rename it to 
-# anything you like.
+# You can build the executable from the C source code simply with
+#	make
+# By default, the compiled program is given the same name as the folder that 
+# holds the source code, which is determined by the XCOM-I command-line switch
+# --output=FOLDER.  On Windows, you'd typically want the executable you produce
+# to have the filename extension ".exe", but this Makefile makes no effort to
+# automatically deal with detecting this condition.  
+# 
+# There are several alterations you can make by changing how `make` is invoked.
+# Any of these alterations can be used by itself, or in combination with the 
+# others:
+#
+#	To change the filename of the executable, without changing the 
+#	folder name:
+#		make TARGET=filename
+#	where filename is the desired filename.  For example,
+#		make TARGET=myfile.exe
+#
+#	The name of the C compiler is by default assumed to be given by
+#	the setting of the environment variable CC, though if there is
+#	no environment variable called CC, it falls back to `gcc` (the
+#	GNU C compiler).  To change it to something else, you use
+#		make CC=compilername
+#	Examples: 
+#		make CC=clang
+#		make CC=i686-w64-mingw32-gcc
 
-TARGET = aout
-CC = gcc
-# Comment out the following line in "production".
-DEBUG = -ggdb
+#	To include debugging info in the executable, so that it can be
+#	debugged with `gdb` (or whatever):
+#		make DEBUG="options"
+#	where the options are specific to the compiler.  The quotation
+#	marks need to be present if there are any spaces in the options.
+#	For `gcc` or its variants:
+#		make DEBUG=-ggdb
+
+TARGET = $(notdir $(CURDIR))
+ifeq ($(strip $(CC)),)
+	CC = gcc
+endif
+# The following line includes debugging info in the executable, so that it
+# can be debugged with `gdb` or whatever.  Comment it out in "production".
+#DEBUG = -ggdb
 
 SOURCES = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
 
+.PHONY: all
+all: $(TARGET)
+
 $(TARGET): $(SOURCES) $(HEADERS)
 	$(CC) $(DEBUG) -o $@ $(SOURCES)
+
+.PHONY: clean
+clean:
+	-rm $(TARGET)	# For Linux or Mac
+	-del $(TARGET)	# For Windows
+

@@ -20,6 +20,8 @@ XPL/I directives of the form
 These directives are left unparsed.
 '''
 
+from parseCommandLine import standardXPL
+
 # See p. 132 of McKeeman et al.
 breakCharacters = ['_', '@', '#', '$'] 
 reservedWords = {"BIT", "BY", "CALL", "CASE", "CHARACTER", "DO",
@@ -73,6 +75,20 @@ builtIns = {
     "RECORD_LINK": 0,
     "RECORD_TOP": 1
     }
+if standardXPL:
+    builtIns.pop("LINE_COUNT")
+    builtIns.pop("SET_LINELIM")
+    builtIns.pop("LINK")
+    builtIns.pop("PARM_FIELD")
+    builtIns.pop("STRING")
+    builtIns.pop("STRING_GT")
+    builtIns.pop("ABS")
+    reservedWords.remove("COMMON")
+    reservedWords.remove("UNTIL")
+    reservedWords.remove("ARRAY")
+    reservedWords.remove("BASED")
+    reservedWords.remove("RECORD")
+    reservedWords.remove("DYNAMIC")
 # See p. 138 of McKeeman et al.  These are just the leading (non-alpha) 
 # characters of (potentially multi-character) operator names.
 operatorLeadins = {"|", "&", "~", "=", "<", ">", "+", "-", "*", "/", ".", "^"}

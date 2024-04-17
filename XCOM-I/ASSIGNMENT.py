@@ -21,20 +21,6 @@ from parseExpression import parseExpression, printTree
 #                        the `string` was found.
 def ASSIGNMENT(tokenized, scope):
     
-    if False:
-        # Find the attributes of the variable being assigned.
-        if "identifier" in tokenized[0]:
-            variable = tokenized[0]["identifier"]
-        else:
-            variable = tokenized[0]["builtin"]
-        attributes = None
-        s = scope
-        while s != None:
-            if variable in s["variables"]:
-                attributes = s["variables"][variable]
-                break
-            s = s["parent"]
-    
     # Identify the LHS and RHS of the assignment by the positions of the 
     # '=' token.
     LHS = None
@@ -51,24 +37,27 @@ def ASSIGNMENT(tokenized, scope):
             if len(RHS) < 2 or RHS[-1] != ';':
                 error("Missing or malformed RHS", scope)
                 return True
-            del RHS[-1]
+            #del RHS[-1]
             treeLHS = []
             start = 0
             while True:
                 tree = parseExpression(LHS, start)
                 if tree == None:
                     error("Unexpected LHS termination", scope)
-                    break
+                    return True
                 treeLHS.append(tree)
                 start = tree["end"]
                 if start >= len(LHS):
                     break
                 if LHS[start] != ",":
                     error("Missing comma in LHS", scope)
-                    break
+                    True
                 start += 1
                     
             treeRHS = parseExpression(RHS, 0)
+            if RHS[treeRHS["end"]] != ";":
+                error("Missing semi-colon at end of assignment", scope)
+                return True
             if debugSink != None:
                 print("LHS = %s, RHS = %s" % (str(LHS), str(RHS)), file=debugSink)
                 for tree in treeLHS:
@@ -79,6 +68,7 @@ def ASSIGNMENT(tokenized, scope):
                 "ASSIGN": True,
                 "LHS": treeLHS,
                 "RHS": treeRHS})
-            break
+            return False
     
-    return False
+    error("Unrecognized line", scope)
+    return True

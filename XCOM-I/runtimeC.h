@@ -37,6 +37,28 @@ typedef char string_t[MAX_XPL_STRING];
 #define MEMORY_SIZE (1 << 24)
 extern uint8_t memory[MEMORY_SIZE];
 
+// Data related to random-access files, as manipulated by the XPL
+// `FILE` built-in function.  "File numbers" 1 through 9 are available;
+// file number 0 is unused.  Each file number can have an assigned
+// input file and/or output file, or neither, and the input file can be
+// the same or different than the output file.  These files are assigned,
+// opened (or created, if necessary) in accordance to the command-line
+// parameters (--raf) of the compiled executable.  By default, no
+// random-access files are available.
+#define MAX_RANDOM_ACCESS_FILES 10
+#define INPUT_RANDOM_ACCESS 0
+#define OUTPUT_RANDOM_ACCESS 1
+typedef struct {
+  FILE *fp;
+  int recordSize;
+  string_t filename;
+} randomAccessFile_t;
+extern randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES];
+void // Corresponding to `FILE(fileNumber, recordNumber) = buffer;`
+lFILE(uint32_t fileNumber, uint32_t recordNumber, uint32_t address);
+void // Corresponding to `buffer = FILE(fileNumber, recordNumber);`
+rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber);
+
 // Read XPL `FIXED` data from memory as a C `int`.  No checking for address
 // overflow is performed and no errors are therefore possible.
 int32_t
@@ -47,15 +69,17 @@ getFIXED(uint32_t address);
 void
 putFIXED(uint32_t address, int32_t value);
 
-/*
-// Same for XPL `BIT` type.  Note that only `BIT(1)` through `BIT(32)` is
+// Same for XPL `BIT` types.  Note that only `BIT(1)` through `BIT(32)` is
 // supported, and if longer `BIT(n)` is needed, then some modification is
 // needed.
-uint32_t
-getBIT(uint32_t address);
+uint8_t
+getBIT8(uint32_t address);
 void
-putBIT(uint32_t address, uint32_t value);
-*/
+putBIT8(uint32_t address, uint8_t value);
+uint16_t
+getBIT16(uint32_t address);
+void
+putBIT16(uint32_t address, uint16_t value);
 
 // Same for XPL `CHARACTER` type.
 char *
