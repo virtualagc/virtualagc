@@ -562,5 +562,6 @@ if targetLanguage == "C":
         shutil.copy2(basePath + "runtimeC.h", outputFolder)
         shutil.copy2(basePath + "Makefile", outputFolder)
     except:
-        pass
+        error("Failed to create files runtimeC.c etc. in %s/" % outputFolder, \
+              scope)
     generateC(globalScope)

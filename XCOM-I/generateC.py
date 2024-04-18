@@ -284,35 +284,36 @@ def allocateVariables(scope, extra = None):
         else:
             numElements = 0
         if useString:
-            memoryMap[variableAddress] = {
-                "mangled": mangled, 
-                "datatype": "EBCDIC codes", 
-                "numElements": numElements,
-                "record": {},
-                "numFieldsInRecord": 0,
-                "recordSize": 0,
-                "dirWidth": 0,
-                "bitWidth": 0
-            }
-            address = attributes["address"]
-            firstAddress = address
-            for i in range(length):
-                # INITIALize (just CHARACTER variables).
-                if "INITIAL" in attributes and i < len(initial):
-                    initialValue = initial[i]
-                    if isinstance(initialValue, str):
-                        if len(initialValue) > 256:
-                            errxit("String initializer is %d characters" \
-                                   % len(initialValue), scope)
-                    elif isinstance(initialValue, int):
-                        initialValue = "%d" % initialValue
+            if len(initial) > 0:
+                memoryMap[variableAddress] = {
+                    "mangled": mangled, 
+                    "datatype": "EBCDIC codes", 
+                    "numElements": numElements,
+                    "record": {},
+                    "numFieldsInRecord": 0,
+                    "recordSize": 0,
+                    "dirWidth": 0,
+                    "bitWidth": 0
+                }
+                address = attributes["address"]
+                firstAddress = address
+                for i in range(length):
+                    # INITIALize (just CHARACTER variables).
+                    if "INITIAL" in attributes and i < len(initial):
+                        initialValue = initial[i]
+                        if isinstance(initialValue, str):
+                            if len(initialValue) > 256:
+                                errxit("String initializer is %d characters" \
+                                       % len(initialValue), scope)
+                        elif isinstance(initialValue, int):
+                            initialValue = "%d" % initialValue
+                        else:
+                            errxit("Cannot evaluate initializer to CAHARACTER", scope)
                     else:
-                        errxit("Cannot evaluate initializer to CAHARACTER", scope)
-                else:
-                    initialValue = ""
-                putCHARACTER(address, initialValue)
-                address += attributes["dirWidth"]
-                variableAddress += len(initialValue)
+                        initialValue = ""
+                    putCHARACTER(address, initialValue)
+                    address += attributes["dirWidth"]
+                    variableAddress += len(initialValue)
         else:
             if "BASED" in attributes:
                 if "RECORD" in attributes:
@@ -403,6 +404,77 @@ def basedStats(scope, extra = None):
             lenName = len(field)
             if lenName > maxRecordFieldName:
                 maxRecordFieldName = lenName
+
+# A special case of `generateExpression` (see below), which also happens to
+# be called by `generatExpression`, to generate the source code for an 
+# expression of the form `ADDR(...)`.  Returns just the string containing the
+# source code, or else abends on error.  The `parameter` parameter is the
+# parameter for ADDR as an expression tree.
+def generateADDR(scope, parameter):
+    token = parameter["token"]
+    if standardXPL and "builtin" in token and \
+            token["builtin"] == "COMPACTIFY":
+        '''
+        I don't know if this workaround is correct or not.  McKeeman lists
+        `COMPACTIFY` as a built-in, but in fact both McKeeman's `XCOM` and
+        Intermetrics's `HAL/S-FC` expect it to be a user-defined PROCEDURE.
+        McKeeman's source code for `COMPACTIFY` states that `XCOM` automatically
+        includes the source code for `COMPACTIFY` at the beginning of every
+        compilation; the source code for `XCOM` explicitly uses `ADDR(COMPACTIFY)`.
+        I think that the idea is to use it to measure the offset (in bytes)
+        from the start of executable code for error messages.  Whatever ... if
+        `ADDR(COMPACTIFY)` is called, we need it to return a value even if the
+        notion that it exists in the 24-bit memory address space is bogus.
+        '''
+        return "FIXED", "0"
+    if "identifier" in token: # not a structure field.
+        # Might still be a BASED variable, though.
+        bVar = token["identifier"]
+        bSubs = parameter["children"]
+        attributes = getAttributes(scope, bVar)
+        if attributes == None:
+            errxit("Cannot identify symbol %s in ADDR" % bVar)
+        if "BASED" in attributes:
+            if 0 == len(bSubs):
+                # This is a special case. See comments in runtimeC.h.
+                return 'ADDR("%s", 0x80000000, NULL, 0)' % bVar
+            elif 1 == len(bSubs):
+                types, sources = generateExpression(scope, bSubs[0])
+                return 'ADDR("%s", %s, NULL, 0)' % (bVar, sources)
+            else:
+                errxit("Wrong subscripting in ADDR(%s(...))" % bVar)
+        fVar = bVar
+        fSubs = bSubs
+        if len(fSubs) == 0:
+            sources = "0";
+        elif len(fSubs) == 1:
+            tipes, sources = generateExpression(scope, fSubs[0])
+        else:
+            errxit("Wrong number of subscripts of %s in ADDR" % fVar)
+        return 'ADDR(NULL, 0, "%s", %s)' % (fVar, sources)
+    elif "operator" in token and token["operator"] == ".": # BASED.
+        b = parameter["children"][0]
+        f = parameter["children"][1]
+        bVar = b["token"]["identifier"]
+        fVar = f["token"]["identifier"]
+        bSubs = b["children"]
+        fSubs = f["children"]
+        if len(bSubs) == 0:
+            sourceb = 0
+        elif len(bSubs) == 1:
+            typeb, sourceb = generateExpression(scope, bSubs[0])
+        else:
+            errxit("Wrong subscripting in %s(...).%s(...)" % (bVar, fVar))
+        if len(fSubs) == 0:
+            sourcef = 0
+        elif len(fSubs) == 1:
+            typef, sourcef = generateExpression(scope, fSubs[0])
+        else:
+            errxit("Wrong subscripting in %s(...).%s(...)" % (bVar, fVar))
+        return 'ADDR("%s", %s, "%s", %s)' % (bVar, sourceb, fVar, sourcef)
+    else:
+        errxit("Unparsable identifier in ADDR")
+
 
 # Recursively generate the source code for a C expression that evaluates a tree
 # (previously returned by the `parseExpression` function) created from an XPL 
@@ -732,38 +804,7 @@ def generateExpression(scope, expression):
                 parameters = expression["children"]
                 if len(parameters) != 1:
                     errxit("ADDR takes a single parameter")
-                parameter = parameters[0]
-                token = parameter["token"]
-                if standardXPL and "builtin" in token and \
-                        token["builtin"] == "COMPACTIFY":
-                    '''
-                    I don't know if this workaround is correct or not.  McKeeman lists
-                    `COMPACTIFY` as a built-in, but in fact both McKeeman's `XCOM` and
-                    Intermetrics's `HAL/S-FC` expect it to be a user-defined PROCEDURE.
-                    McKeeman's source code for `COMPACTIFY` states that `XCOM` automatically
-                    includes the source code for `COMPACTIFY` at the beginning of every
-                    compilation; the source code for `XCOM` explicitly uses `ADDR(COMPACTIFY)`.
-                    I think that the idea is to use it to measure the offset (in bytes)
-                    from the start of executable code for error messages.  Whatever ... if
-                    `ADDR(COMPACTIFY)` is called, we need it to return a value even if the
-                    notion that it exists in the 24-bit memory address space is bogus.
-                    '''
-                    return "FIXED", "0"
-                #endif
-                if "identifier" in token: # Not BASED.
-                    fVar = token["identifier"]
-                    fSubs = parameter["children"]
-                    if len(fSubs) == 0:
-                        sources = "0";
-                    elif len(fSubs) == 1:
-                        tipes, sources = generateExpression(scope, fSubs[0])
-                    else:
-                        errxit("Wrong number of subscripts of %s in ADDR" % fVar)
-                    return "FIXED", 'ADDR(NULL, 0, "%s", %s)' % (fVar, sources)
-                elif "operator" in token and token["operator"] == ".": # BASED.
-                    errxit("ADDR of BASED not yet implemented")
-                else:
-                    errxit("Unparsable identifier in ADDR")
+                return "FIXED", generateADDR(scope, parameters[0])
             elif symbol == "RECORD_TOP":
                 # This isn't really a built-in, but instead it's something 
                 # from HAL/S-FC's SPACELIB, but for right now I'm pretending

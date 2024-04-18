@@ -252,7 +252,7 @@ COREWORD2(uint32_t address, uint32_t value);
 //
 // There is one special case: IR-182-1 p. 13-3 tells us that in the one specific
 // case of a BASED variable (say, `bVar`) used as a parameter for
-// `ADDR`, `bVar` and `bVar[0]` don't behave the same the same.  Rather,
+// `ADDR`, `bVar` and `bVar[0]` don't behave the same.  Rather,
 // `ADDR(bVar[0])` (i.e.,
 //             bVar    0       NULL    0
 // in the table above) would give us the expected address of the data for

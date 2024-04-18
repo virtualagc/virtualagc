@@ -196,10 +196,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     elif inFirst and token == "(":
                         inTop = True
                     elif inTop:
-                        try:
-                            properties["top"] = integer(token)
-                        except:
-                            pass
+                        properties["top"] = integer(token)
                         inTop = False
                         skip = 1
                     elif inLiterally:
@@ -331,10 +328,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         basedVar = variables[list(variables)[-1]]
                         last = basedVar["RECORD"]
                         p["offset"] = offsetInRecord
-                        try:
-                            offsetInRecord += p["dirWidth"]
-                        except:
-                            pass
+                        offsetInRecord += p["dirWidth"]
                         if "top" in p:
                             offsetInRecord += p["dirWidth"] * p["top"]
                         basedVar["recordSize"] = offsetInRecord

@@ -55,18 +55,19 @@ BASED   BB1 BIT(1),
 BASED   BF FIXED,
         BC CHARACTER;
 BASED   BR RECORD:
-                B1 BIT(1),
-                B8 BIT(8),
-                B16 BIT(16),
-                B32 BIT(32),
-                F FIXED,
-                C CHARACTER,
-                BS1(5) BIT(1),
-                BS8(5) BIT(8),
-                BS16(5) BIT(16),
-                BS32(5) BIT(32),
-                FS(5) FIXED,
-                CS(5) CHARACTER,
+                B1 BIT(1),      /* 0 */
+                B8 BIT(8),      /* 1 */
+                B16 BIT(16),    /* 2 */
+                B32 BIT(32),    /* 4 */
+                F FIXED,        /* 8 */
+                C CHARACTER,    /* 12 */
+                BS1(5) BIT(1),  /* 16 */
+                BS8(5) BIT(8),  /* 22 */
+                BS16(5) BIT(16),/* 28 */
+                BS32(5) BIT(32),/* 40 */
+                FS(5) FIXED,    /* 64 */
+                CS(5) CHARACTER,/* 88 */
+                                /* 112 */
            END;
 
 OUTPUT = '';
@@ -79,7 +80,7 @@ OUTPUT = 'Allocating BB32: ' || MONITOR(6, ADDR(BB32), 64);
 OUTPUT = 'Allocating BF: ' || MONITOR(6, ADDR(BF), 64);
 OUTPUT = 'Allocating BC: ' || MONITOR(6, ADDR(BC), 64);
 OUTPUT = 'Allocating BR: ' || MONITOR(6, ADDR(BR), 
-                16 *(1 + 1 + 2 + 4 + 4 + 4 + 5 * (1 + 1 + 2 + 4 + 4 + 4)));
+                16 *(1 + 1 + 2 + 4 + 4 + 4 + 6 * (1 + 1 + 2 + 4 + 4 + 4)));
 OUTPUT = 'BB1 @' || ADDR(BB1) || ', BB1(0) @' || ADDR(BB1(0));
 OUTPUT = 'BB8 @' || ADDR(BB8) || ', BB8(0) @' || ADDR(BB8(0));
 OUTPUT = 'BB16 @' || ADDR(BB16) || ', BB16(0) @' || ADDR(BB16(0));
@@ -87,7 +88,7 @@ OUTPUT = 'BB32 @' || ADDR(BB32) || ', BB32(0) @' || ADDR(BB32(0));
 OUTPUT = 'BF @' || ADDR(BF) || ', BF(0) @' || ADDR(BF(0));
 OUTPUT = 'BC @' || ADDR(BC) || ', BC(0) @' || ADDR(BC(0));
 OUTPUT = 'BR @' || ADDR(BR) || ', BR(0) @' || ADDR(BR(0));
-/*OUTPUT = 'BR(10).BS16(3) @' || ADDR(BR(10).BS16(3));*/
+OUTPUT = 'BR(10).BS16(3) @' || ADDR(BR(10).BS16(3));
 
 TO_HEX:
 PROCEDURE(N) CHARACTER;
