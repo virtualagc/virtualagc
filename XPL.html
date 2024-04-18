@@ -43,19 +43,20 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 <ul>
 
 
-      <li> <a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
-<li><a moz-do-not-send="true" href="#compiling">Processing a Program Written in XPL</a></li>
+      <li><a moz-do-not-send="true" href="#Introduction">Introduction</a></li>
+<li><a moz-do-not-send="true" href="#compiling">Processing a Program Written in XPL, Using XCOM-I
+</a></li>
 <ul>
-  <li><a moz-do-not-send="true" href="#installation">Installation</a></li>
-  <li><a moz-do-not-send="true" href="#xpl">Compiling</a></li></ul>
-<li><a moz-do-not-send="true" href="#xpli">A Primer for Standard XPL and Intermetrics XPL/I</a><br>
+  <li><a moz-do-not-send="true" href="#installation">Installation of XCOM-I</a></li>
+  <li><a moz-do-not-send="true" href="#xpl">Compiling and Running an XPL Program</a></li></ul>
+<li><a moz-do-not-send="true" href="#xpli">A Primer for Standard XPL and Intermetrics XPL/I</a>
 </li>
 <ul>
 
   
 </ul>
 
-<li><a moz-do-not-send="true" href="#hooks">Hooks for Replacing BAL Code With C</a><br>
+<li><a moz-do-not-send="true" href="#hooks">Patches for Basic Assembly Language Code</a>
 </li>
 </ul>
 
@@ -65,21 +66,19 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 </h1>Keep in mind that this website is devoted to onboard guidance 
 software used aboard space vehicles such as those of the Apollo and 
 Space Shuttle projects, thus most of what I have to say on the topic of 
-XPL is from that point of view. For the purpose of thinking about XPL, 
+XPL is from that point of view.&nbsp; But that doesn't mean it cannot be used for general purposes as well.<br>
+<br>
+For the purpose of thinking about XPL, 
 what you need to know to follow the discussion herein is this:<br>
 <ul>
-  <li>Flight software for the Space Shuttle was primarily written in a 
-computer language called HAL/S, created by Intermetrics, Inc.&nbsp; That
- flight software was called <i>PASS</i>, and that's what I'll refer to it as from now on.<br>
-  </li>
-  <li>To compile PASS source code, you therefore need a compiler for 
-HAL/S.&nbsp; Intermetrics's HAL/S compiler, called HAL/S-FC, was 
-primarily written in a computer language they called XPL.</li>
-  <li>Thus to compile the <i>compiler</i> for PASS, you need a compiler for the XPL language.<br>
-  </li>
+  <li>Flight software for the Space Shuttle was primarily written in a computer language called <i>HAL/S</i>, created by Intermetrics, Inc.&nbsp; That flight software was called <i>PASS</i>, and that's what I'll refer to it as from now on.<br></li>
+  <li>To compile PASS source code, you therefore need a compiler for HAL/S, and more-specifically for Intermetrics's specific of HAL/S.&nbsp; Intermetrics's HAL/S compiler, called HAL/S-FC, was primarily written in a computer language they called <i>XPL</i>.</li>
+  <li>Thus to compile the <i>compiler</i> for PASS, you need a compiler for the XPL language.<br></li>
 </ul>
-So from my perspective, having an XPL compiler is just one item in a 
-chain of things that need to be accomplished in the process of 
+Well, that's certainly a mouthful of words!&nbsp; The point is that 
+having an XPL compiler is just one item — though an important one! —  in
+ a 
+chain of things that are helpful in the process of 
 resurrecting PASS for modern audiences. In more-general terms, though, 
 XPL used to be a computer language (<a moz-do-not-send="true" href="https://en.wikipedia.org/wiki/XPL">see the Wikipedia article</a>) in the 1960's that was defined by a book called <i>A Compiler Generator</i>,
  by William M. McKeeman, James J. Horning, and David B. Wortman.&nbsp; 
@@ -105,25 +104,40 @@ XPL:<br>
 <blockquote>
   <pre><font color="#663333">declare x fixed, y fixed, z fixed;<br>x(0) = 1;<br>x(1) = 2;<br>x(2) = 3;<br>output = x(0) || ' ' || x(1) || ' ' || x(2);<br></font><font color="#663333">output = x || ' ' || y || ' ' || z;</font><br></pre>
 </blockquote>
-What is this little example supposed to do?&nbsp; First, it declares 3 variables of the <font color="#663333"><code>fixed</code></font> datatype; <font color="#663333"><code>fixed</code></font> means that they are 32-bit integers.&nbsp; It then proceed to use <font color="#663333"><code>x</code></font>
- as if it were a three-element array, though it wasn't declared that 
-way, assigning values to all of its elements, and assuming that <font color="#663333"><code>x(0)</code></font> corresponds to <font color="#663333"><code>x</code></font>, <font color="#663333"><code>x(1)</code></font> corresponds to <font color="#663333"><code>y</code></font>, and <font color="#663333"><code>x(2)</code></font> corresponds to <font color="#663333"><code>z</code></font>.&nbsp; That, of course, is <i>not</i> allowed in standard XPL.&nbsp; McKeeman goes so far as to say that XPL strictly checks array bounds ... although since <font color="#663333"><code>x</code></font>
- is not declared as an array in the first place, there are no defined 
-bounds for it anyway.&nbsp; As for whether this behavior is a "feature" 
-of XPL/I — not mentioned in Intermetrics documentation at all — or 
-whether it's just sloppy syntax checking by Intermetrics's XPL/I 
-compiler is hard to say.&nbsp; But what <i>can</i> be said is that the 
-writers of the XPL/I source code for Intermetrics's HAL/S compiler used 
-this feature, and used it a lot!&nbsp; So whether it's a feature or a 
-bug is irrelevant; what's relevant is that it has to be supported.&nbsp; Finally, the program "prints out" both the elements of <font color="#663333"><code>x</code></font> (as an array) and the values of <font color="#663333"><code>x</code></font> (as a non-array), <font color="#663333"><code>y</code></font>, and <font color="#663333"><code>z</code></font>.<br>
+What is this little example supposed to do?&nbsp; First, it declares 3 variables of the <font color="#663333"><code>fixed</code></font> datatype; <font color="#663333"><code>fixed</code></font> means that <font color="#663333"><code>x</code></font>, <font color="#663333"><code>y</code></font>, and <font color="#663333"><code>z</code></font> are 32-bit integers.&nbsp; It then proceeds to use <font color="#663333"><code>x</code></font>
+ <i>as if</i> it were a three-element array, though <font color="#663333"><code>x</code></font> wasn't declared that 
+way, assigning values to each of its elements.&nbsp; In other words, the program assumes that <font color="#663333"><code>x(0)</code></font> corresponds to <font color="#663333"><code>x</code></font>, <font color="#663333"><code>x(1)</code></font> corresponds to <font color="#663333"><code>y</code></font>, and <font color="#663333"><code>x(2)</code></font> corresponds to <font color="#663333"><code>z</code></font>.&nbsp; Finally, the program "prints out" both the elements of <font color="#663333"><code>x</code></font> (as an array) and the values of <font color="#663333"><code>x</code></font> (as a non-array), <font color="#663333"><code>y</code></font>, and <font color="#663333"><code>z</code></font>.&nbsp; Naturally, those two lines of printout are identical.<br>
+<blockquote><font size="-1"><b>Aside:</b> In case you're wondering, we <i>could</i> have used <font color="#663333"><code>x(-1)</code></font> or <font color="#663333"><code>x(3)</code></font>
+ in our little program to read or write areas of memory in which no 
+variables at all had been declared.&nbsp; Or if we had declared 
+variables of some other datatype than <font color="#663333"><code>FIXED</code></font>, we could have used this same trick to access them as if they were </font><font size="-1"><font size="-1"><font color="#663333"><code>FIXED</code></font></font>.</font><br>
+</blockquote>
+The interchangeability of scalar variables with array variables is <i>not</i>
+ allowed in standard XPL, or — if you'll allow some editorializing on my
+ part — in any rational development tool supporting development of a 
+high-reliability application.&nbsp; Indeed, <i>standard</i> XPL was a 
+strictly-typed language, and McKeeman tells us explicitly that XPL 
+enforced the declared array bounds.&nbsp; As for whehter relaxation of 
+these rules is a "feature" 
+of XPL/I, or 
+whether it's just sloppiness by Intermetrics's XPL/I 
+compiler is hard to say from this remove in time.&nbsp; Perhaps some 
+members of the development team were simply so young and so steeped in 
+IBM System/360 expertise that it never occurred to them that exploiting 
+its undocumented features wasn't a great idea from a wider perspective. 
+Whatever the explanation, what <i>can</i> be said is that the 
+writers of the XPL/I source code for Intermetrics's HAL/S compiler relied on
+this "feature", and used it ... a lot!&nbsp; So in the end, whether it's a "feature" versus an exploited
+bug is irrelevant; what's relevant is that it has to be supported by any XPL/I compiler we deploy today.<br>
 <blockquote><font size="-1"><b>Aside:</b>&nbsp; Incidentally, <a moz-do-not-send="true" href="https://sourceforge.net/projects/xpl-compiler/">Daniel 
 Weaver has written an XPL-to-C translator</a>, which as far as I know is
  the
  only existing XPL compiler (prior to the present Virtual AGC 
 development effort) capable of being used on a modern computer.&nbsp; 
 The first thing anyone suggests to me when this topic is discussed is 
-"Why don't you just use it?"&nbsp; Because of XPL/I extensions like 
-array sloppiness!&nbsp; As you might expect, Daniel's translator cannot
+"Why don't you just use it?"&nbsp; The array sloppiness inherent in 
+actual usage of XPL/I is one good reason.&nbsp; As you might expect, 
+Daniel's translator cannot
  compile the XPL/I example program above.&nbsp; And why in the world 
 would anybody expect it to?&nbsp; Here's a fun printout of what you get 
 if you try to do so:<br>
@@ -131,28 +145,33 @@ if you try to do so:<br>
   <blockquote>
     <pre><font size="-1">XPL to C language translator -- version 1.1<br>2    |x(0) = 1;                                                                       |<br>           |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>3    |x(1) = 2;                                                                       |<br>           |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 2. ***<br>4    |x(2) = 3;                                                                       |<br>           |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 3. ***<br>5    |output = x(0) || ' ' || x(1) || ' ' || x(2);                                    |<br>                    |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 4. ***<br>5    |output = x(0) || ' ' || x(1) || ' ' || x(2);                                    |<br>                                   |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 5. ***<br>5    |output = x(0) || ' ' || x(1) || ' ' || x(2);                                    |<br>                                                 |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 5. ***<br>6 cards containing 7 statements were compiled.<br>6 errors (0 severe) were detected.<br>The last detected error was on line 5.</font><br></pre>
   </blockquote>
-</blockquote>
-But that's just one example of an XPL/I extension.&nbsp; Playing fast 
+</blockquote>But that's just <i>one</i> example of an XPL/I extension to XPL.&nbsp; Playing fast 
 and loose with arrays versus scalars is far from the only difference 
 between XPL and XPL/I.&nbsp; To be fair, I'll admit that it's 
 hard to make a list of all differences between XPL and XPL/I, because 
 neither is McKeeman a full and accurate description of XPL, nor is 
 Intermetrics documentation a full description of XPL/I.&nbsp; Nor did 
-Intermetrics use the term XPL/I, simply calling their language XPL, and 
-making it hard to be entirely sure what's what.&nbsp; There's a certain 
-amount trial-and-error involved.<br>
+Intermetrics use the term "XPL/I", simply calling their language "XPL", and 
+making it hard to be entirely sure what's supposed to be different between them and what's not.&nbsp; <br>
 <br>
-So ultimately, if you want to compile Intermetrics's HAL/S compiler, you
- have little choice other than to create a new compiler that's specific 
-to XPL/I.&nbsp; And that's what's discussed below.&nbsp; Like Daniel Weaver's XPL translator, the new 
-compiler is actually an XPL/I-to-C translator, though it is entirely new and is 
+By the way, I recognize that it's very dangerous to make claims about what other people <i>haven't</i>
+ accomplished, so you have to take it with a grain of salt when I say 
+that you're not going to find any existing compiler for Windows, Mac, or
+ Linux that can compile and run XPL/I programs.&nbsp; If you find out 
+that I don't know what I'm talking about, by all means let me 
+know!&nbsp; With that said, as far as I can tell, if you want to compile
+ Intermetrics's HAL/S compiler, you're going to have to rely on a 
+newly-written compiler that builds in XPL/I from the ground up.&nbsp; <br>
+<br>
+And that's what's discussed below.&nbsp; I call the new compiler <b>XCOM-I</b>, for "XCOM" (the name of McKeeman's original XPL compiler) and "I" (for "Intermetrics").<br>
+<br>
+Like Daniel Weaver's XPL translator, XCOM-I is actually an XPL/I-to-C translator, though it is entirely new and is 
 not based on Daniel's work nor on any of the original XPL 
-compilers.&nbsp; It is called <i>XCOM-I.py</i>.&nbsp; In most cases, 
-XCOM-I.py should work for standard XPL programs too, but not always, and
- you always have Daniel's translator for standard XPL programs anyway.<br>
+compilers. In most cases, 
+XCOM-I should work for standard XPL programs too, but not always.<br>
 <blockquote><font size="-1"><b>Aside:</b> And in case you wonder, XCOM-I
  does translate the sample XPL/I program given above to C without error;
- the C program compiles without errors; and if you run the compiled C 
+ the C program it creates also compiles without errors; and if you run the compiled C 
 program you get what you might expect:<br>
   </font>
   
@@ -161,104 +180,78 @@ program you get what you might expect:<br>
 </blockquote>
 
 </blockquote>
-There's one final complication, however:&nbsp; Another thing the 
+However ... there's one final complication:&nbsp; Another thing the 
 original Intermetrics authors did in the XPL/I source code they wrote 
 was to intersperse it (thankfully, sparingly!) with code written in IBM 
 System/360 Basic Assembly
- Language (BAL), and unfortunately, XCOM-I cannot translate BAL into 
-anything meaningful.&nbsp; But it does provide hooks so that you can 
+ Language (BAL).&nbsp; Unfortunately, XCOM-I cannot translate BAL into 
+anything meaningful.&nbsp; But XCOM-I does provide hooks so that you can 
 patch in replacement code, written in C, for the embedded BAL 
 code.&nbsp; 
 Those hooks will be discussed below, although little guidance can be 
 given on writing a C patch that can replace arbitrary BAL source code.<br>
-<h1><a name="compiling"></a>Processing a Program Written in XPL</h1>
-<p>Despite the title of this section, there's actually no difference 
-between how to build and run XPL/I 
-programs than XPL programs.&nbsp; There aren't even any differences 
-in command-line switches.&nbsp; Once you know how to build and run an 
-XPL program, you'll automatically know how to build and run an XPL/I 
-program.<br>
-</p>
-<p>With that said, the quantity of XPL/I source 
-code for HAL/S-FC dwarfs the source code for any standard XPL programs 
-we have, and there are differences in the way the HAL/S-FC source code 
-is organized and 
-maintained as well.&nbsp; That being the case, there are various 
-subtleties that come into play when discussing the HAL/S-FC code base 
-that I'll defer discussion of until later on.<br>
+<h1><a name="compiling"></a>Processing a Program Written in XPL, Using XCOM-I<br>
+</h1>
+<p>Despite the title of this section, there's actually no difference between how to build and run XPL/I programs than XPL programs.&nbsp; Once you know how to build and run an XPL program, you'll automatically know how to build and run an XPL/I program.<br></p>
+<p>With that said, the XPL/I source code available to us dwarfs the XPL source code we have for any standard XPL programs we have.&nbsp; Moreover, those XPL/I programs are much larger and more complex than the XPL programs.&nbsp; This means that there are differences in how the source code for the two is organized and maintained.&nbsp; In that sense we find differences in how to deal with the two.&nbsp; That's why I concentrate at first on compiling standard XPL programs, and defer some discussion of XPL/I compilation until later.
 </p>
 
-<h2><a name="installation"></a>Installation</h2>
-To install XCOM-I.py on your system, you simply need to copy <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/XCOM-I/XCOM-I">the folder called "XCOM-I" of the XCOM-I branch of the Virtual AGC software repository</a>
+<h2><a name="installation"></a>Installation of XCOM-I<br>
+</h2>
+XCOM-I is a program written in the Python 3 language.&nbsp; To install XCOM-I on your system, you simply need to copy <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/XCOM-I/XCOM-I">the folder called "XCOM-I" of the XCOM-I branch of the Virtual AGC software repository</a>
  onto your computer, and add that directory to your PATH.&nbsp; Running 
 XCOM-I requires Python 3.7 or later, but doesn't require additional 
 installation of any Python modules not present in a normal Python 
 distribution.&nbsp; <br>
-<h2><a name="xpl"></a>Standard XPL</h2>
-There are several standard XPL programs present in the XCOM-I folder 
-just mentioned, and elsewhere in the Virtual AGC software tree.&nbsp; 
-The ones in the XCOM-I folder were taken directly from McKeeman, and 
-modified only barely for those sample programs that didn't have any 
-visible output.&nbsp; So it would be a mistake to think any of them are 
+<br>
+Compiling the C programs created by running XCOM-I using the 
+instructions given below assumes the GNU `gcc` C compiler and the GNU 
+`make` program.&nbsp; Using alternative programs may be possible, probably easily, but I 
+have no way to personally survey every possible combination of development tools. <br>
+<h2><a name="xpl"></a>Compiling and Running an XPL Program<br>
+</h2>
+There are several standard XPL programs present in the folder 
+XCOM-I/Tests/.&nbsp; It would be a mistake to think any of them are 
 user-friendly.&nbsp; But they do illustrate the principles involved.<br>
-<ul>
-  <li>Example-6.18.3.xpl — Sorts a file of 100 lines (or more) of text 
-into ascending order.&nbsp; If there are less than 100 lines, it will 
-fail miserably ... that's part of the user-unfriendliness I mentioned! 
-Other quirks are that it uses collation specific to XPL itself, and 
-therefore produces peculiar results.&nbsp; For one thing, if a line of 
-text is shorter than another line of text, the shorter one always comes 
-before the longer one in the sorting order.&nbsp; If two lines are the 
-same length, then the one that's first alphabetically comes first; 
-however, this is determined by EBCDIC character coding rather than the 
-ASCII character coding everyone is familiar with today, so the results 
-may still be surprising.&nbsp; Just to be clear, the textual data is 
-input in familiar ASCII (or whatever is native to your computer setup), 
-and not in the obsolete EBCDIC coding!&nbsp; (But to comply with the 
-language requirements, the text is all transparently converted into 
-EBCDIC by XCOM-I itself.)<br>
-  </li>
-  <li>Example-6.18.4.xpl  — Splits input text into individual words, 
-counts the number of occurrences of each distinct word, and prints a 
-report of the counts.&nbsp; Again, there are peculiarities.&nbsp; Text 
-is only input until the first blank line is encountered.&nbsp; What 
-constitutes a "word" is highly unusual, and I won't describe the 
-specific rules, which are based on the oddities of EBCDIC character 
-coding.&nbsp; Suffice it to say that you'll get the best results if all 
-of the text is in upper case, with spaces separating the words, using no
- digits, lower-case letters, or punctuation.&nbsp; And only the first 
-500 distinct words are counted; any distinct words encountered beyond 
-that are ignored.</li>
-  <li>Example-6.18.5.xpl   — Contains a procedure that converts an 
-integer to string, to which I've added an interactive loop in which you 
-can input numbers and see the results of the conversion.</li>
-  <li>Example-6.18.6.xpl — Contains a procedure that returns a random 
-integer in a selected range, to which I've added a loop that simply 
-prints out a 100 random numbers in the range 0 through 99999.<br>
-  </li>
-</ul>
-<p>For the sake of discussion, suppose we wish to compile and run the 
-latter of these.&nbsp; The first step is to translate Example-6.18.6.xpl
- into C source code:<br>
+<blockquote><font size="-1"><b>Aside:</b> You'd also be very mistaken to
+ imagine that XCOM-I is user-friendly.&nbsp; I fear that there will be a
+ lot of work involved before the error messages XCOM-I spits out upon 
+occasion can be mistaken for anything <i>other</i> than spit.&nbsp; Until then, try not to make any errors in your XPL programming.</font><br>
+</blockquote>
+
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; Throughout this 
+discussion, I use the Linux/Mac convention that the symbol '/' is used 
+to separate the components of a filename and the path to the folder 
+containing it.&nbsp; Windows uses the separator '\' instead, so in some 
+places you may find that you need to replace '/' by '\'.</font><br>
+
+</blockquote>
+<ul></ul>
+<p>For the sake of discussion, suppose we wish to compile and run the program called Example-6.18.6.xpl.&nbsp; The first step is to translate Example-6.18.6.xpl into C source code:
 </p>
 
 <blockquote>
-  <pre>XCOM-I.py --verbose Example-6.18.6.xpl<br></pre>
+  <pre>cd XCOM-I<br>XCOM-I.py --verbose --output=Example-6.18.6 Tests/Example-6.18.6.xpl<br></pre>
 </blockquote>
-By default, this will create a subfolder called C_Output/ of the current
+This will create a sub-folder called Example-6.18.6/ of the current
  working folder, and put all of the files of the C translation into that
- folder.&nbsp; You can change the name of the output folder by means of 
-command-line switches, but to keep things simple I won't go into that 
-here.&nbsp; The <code>--verbose</code> switch embeds extra program 
+ folder.&nbsp; <br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; Regarding XCOM-I's command-line options ... without the <code>--output</code> switch, the default name of the output folder would be C_Output/.&nbsp; The <code>--verbose</code> switch embeds extra program 
 comments in the C code to make it easier to understand how the C code 
 relates to the original XPL code.&nbsp; You can see a list of the 
 compiler's other command-line options with
  the command <br>
+
+
+  </font>
+  <blockquote>
+    <pre><font size="-1">XCOM-I.py --help</font><br></pre>
+  </blockquote>
+</blockquote>
 <blockquote>
-  <pre>XCOM-I.py --help<br></pre>
 </blockquote>
 I also won't bore you with a lengthy description of translated C files, 
-but it might be mildly interesting to glance briefly at a couple of 
+but it might be mildly instructive to glance briefly at a couple of 
 them.&nbsp; For this example, the principal results are the files 
 RANDOM.c and main.c, and here you can see a comparison of the original 
 XPL file (left) to the C translation of them (right):<br>
@@ -269,62 +262,68 @@ XPL file (left) to the C translation of them (right):<br>
         <pre>/* This is example XPL program 6.18.6 from McKeeman p. 157.<br>   The book only provides PROCEDURE RANDOM, which is transcribed as-is.<br>   The top-level code that exercises RANDOM is new. */<br>   <br>RANDOM:<br>  procedure(range) fixed;<br>    /*  Returns a random integer in the range 0 to range - 1  */<br>    <br>    declare range fixed, rbase fixed initial(1),<br>      rmult literally '671297325';<br>      <br>    rbase = rbase * rmult;<br>    <br>    return shr(shr(rbase, 16) * range, 16);<br>    <br>  end RANDOM;<br><br>declare i;<br><br>do i = 1 to 100;<br>  output = RANDOM(100000);<br>end;<br><br>eof<br></pre>
       </td>
       <td valign="top">
-        <pre>/*<br>  File RANDOM.c generated by XCOM-I, 2024-04-03 22:57:08.<br>*/<br><br>#include "runtimeC.h"<br>#include "procedures.h"<br><br>int32_t<br>RANDOM(void)<br>{<br><br>  // rbase = rbase * rmult; (2)<br>  {<br>    int32_t numberRHS = xmultiply(getFIXED(8), 671297325);<br>    putFIXED(8, numberRHS);<br>  }<br>  // return shr(shr(rbase, 16) * range, 16); (3)<br>  return SHR(xmultiply(SHR(getFIXED(8), 16), getFIXED(4)), 16);<br>}<br><br>/*<br>  File main.c generated by XCOM-I, 2024-04-03 22:57:08.<br>  XPL/I source-code file used: Example-6.18.6.xpl.<br>  Recommended requirements:  GNU `gcc` and GNU `make`.<br>  To build the program (aout) from the command line:<br>          cd C_Output/<br>          make<br>  To run the program:<br>          aout [OPTIONS]<br>  Use `aout --help` to see the available OPTIONS.<br>*/<br><br>#include "runtimeC.h"<br>#include "procedures.h"<br><br>/*<br>  Memory Map:<br>           Address (Hex)        Data Type        Variable<br>           -------------        ---------        --------<br>              0 (000000)        FIXED            I<br>              4 (000004)        FIXED            RANDOMxRANGE<br>              8 (000008)        FIXED            RANDOMxRBASE<br>*/<br><br>int<br>main(int argc, char *argv[])<br>{<br><br>  if (parseCommandLine(argc, argv)) exit(0);<br><br>  // do i = 1 to 100; (0)<br>  {<br>    int32_t from0, to0, by0;<br>    from0 = 1;<br>    to0 = 100;<br>    by0 = 1;<br>    for (putFIXED(0, from0);<br>         getFIXED(0) &lt;= to0;<br>         putFIXED(0, getFIXED(0) + by0)) {<br>      // output = RANDOM(100000); (1)<br>      {<br>        int32_t numberRHS = ( putFIXED(4, 100000), RANDOM() );<br>        string_t stringRHS;<br>        strcpy(stringRHS, fixedToCharacter(numberRHS));<br>        OUTPUT(0, stringRHS);<br>      }<br>    } // End of DO for-loop block<br>  }<br>}<br></pre>
+        <pre>/*<br>  File RANDOM.c generated by XCOM-I, 2024-04-16 08:46:47.<br>*/<br><br>#include "runtimeC.h"<br>#include "procedures.h"<br><br>int32_t<br>RANDOM(void)<br>{<br><br>  // rbase = rbase * rmult; (2)<br>  {<br>    int32_t numberRHS = xmultiply(getFIXED(8), 671297325);<br>    putFIXED(8, numberRHS);<br>  }<br>  // return shr(shr(rbase, 16) * range, 16); (3)<br>  return SHR(xmultiply(SHR(getFIXED(8), 16), getFIXED(4)), 16);<br>}<br><br>/*<br>  File main.c generated by XCOM-I, 2024-04-16 08:46:47.<br>  XPL/I source-code file used: Example-6.18.6.xpl.<br>  To build the program from the command line, using defaults:<br>          cd Example-6.18.6/<br>          make<br>  View the Makefile to see different options for the `make`<br>  command above.  To run the program:<br>          Example-6.18.6 [OPTIONS]<br>  Use `Example-6.18.6 --help` to see the available OPTIONS.<br>*/<br><br>#include "runtimeC.h"<br>#include "procedures.h"<br><br>/*<br>  Memory Map:<br>           Address (Hex)        Data Type        Variable<br>           -------------        ---------        --------<br>              0 (000000)        FIXED            I<br>              4 (000004)        FIXED            RANDOMxRANGE<br>              8 (000008)        FIXED            RANDOMxRBASE<br>*/<br><br>int<br>main(int argc, char *argv[])<br>{<br><br>  if (parseCommandLine(argc, argv)) exit(0);<br><br>  // do i = 1 to 100; (0)<br>  {<br>    int32_t from0, to0, by0;<br>    from0 = 1;<br>    to0 = 100;<br>    by0 = 1;<br>    for (putFIXED(0, from0);<br>         getFIXED(0) &lt;= to0;<br>         putFIXED(0, getFIXED(0) + by0)) {<br>      // output = RANDOM(100000); (1)<br>      {<br>        int32_t numberRHS = ( putFIXED(4, 100000), RANDOM() );<br>        string_t stringRHS;<br>        strcpy(stringRHS, fixedToCharacter(numberRHS));<br>        OUTPUT(0, stringRHS);<br>      }<br>    }<br>  } // End of DO for-loop block<br><br>  if (LINE_COUNT)<br>    printf("\n"); // Flush buffer for OUTPUT(0) and OUTPUT(1).<br>  return 0; // Just in case ...<br>}<br><br></pre>
       </td>
     </tr>
   </tbody>
 </table>
-The next step, of course, is to compile the C programs.&nbsp; It is 
-assumed that the GNU C compiler (`gcc`) and the GNU `make` are installed
- on your computer, and if that's true, compilation is simple:<br>
-<blockquote>
-  <pre>cd C_Output<br>make<br></pre>
+The next step, of course, is to compile the C programs.&nbsp; If your 
+setup is like mine, namely a Linux system with `gcc` as the default C 
+compiler, then compilation can be accomplished like this:<br>
+<blockquote><code></code><code>cd XCOM-I<br>
+make -C Example-6.18.6</code><br>
+
 </blockquote>
-If you don't have GNU `gcc`, and for some reason don't wish to install 
-it — it's easy!  — then you'll need to modify the file called "Makefile"
- to instead use whatever C compiler is installed on your computer.&nbsp;
- I suspect almost any of them should work fine.<br>
+This just produces an executable program within the Example-6.18.6/ folder that's also called Example-6.18.6.<br>
 <br>
-Finally, you can now run the program.&nbsp; The process above always 
-names the executable file "aout" (or perhaps "aout.exe" on Windows, 
-though I'm not really sure), and this is another thing you can change in
- the Makefile; or you can just rename the file however you like 
-afterward.&nbsp; Supposing you haven't renamed it, and because this 
-particular sample program doesn't require input of any data files, you 
-run it simply like this:<br>
-<blockquote>
-  <pre>aout</pre>
-</blockquote>
-(or perhaps <code>./aout</code> on Linux), at which point your 100 random numbers would appear. <br>
-<br>
-You'd use this identical procedure to run Example-6.18.5, which is 
-intended to be interactive and thus also doesn't require any data file 
-of input values.&nbsp; Or, you could provide Example-6.18.5 with a file 
-that had an integer number on each line, like so:<br>
-<blockquote>
-  <pre>aout &lt;InputFile</pre>
-</blockquote>
-That's how you would run Examples 6.18.3 and 6.18.4 as well.&nbsp; As 
-with XCOM-I, the aout program also has various command-line options it 
-can accept, and you can get a list of those with<br>
-<blockquote>
-  <pre>aout --help</pre>
-</blockquote>
-For example, an alternate way of feeding input data into it would be with a command-line switch:<br>
-<blockquote>
-  <pre>aout --ddi=0,InputFile</pre>
+But the world being what it is, you most likely <i>don't</i> have a 
+setup like mine, so some alterations in the instructions above are 
+needed.&nbsp; For one thing, your C compiler may not be `gcc`.&nbsp; 
+Actually, the default assumption isn't that the compiler is `gcc`, but 
+rather that the shell's environment variable CC<code></code> holds the 
+name of the compiler.&nbsp; But if you're not using `gcc`, I'm sure there are 
+other C compilers that would work.&nbsp; For example, suppose you use 
+`clang`. Just change the build commands to read:<br>
+<blockquote><code>cd XCOM-I</code><br>
+  <code>
+make -C Example-6.18.6 CC=clang</code><br>
 </blockquote>
 
 
-
-If you want to see a much meatier sample program in standard XPL, you can look instead at <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/XPL-TWS-1969-03/ANALYZER.xpl">the ANALYZER.xpl program found elsewhere in the Virtual AGC software tree</a>.&nbsp; If you download that file, you'll also want <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/XPL-TWS-1969-03/XPL.bnf">the file XPL.bnf</a>, which is a data file that can be used as input to ANALYZER.&nbsp; <br>
+Or if you're on Windows — and who isn't, really? — then you'd want to 
+add the filename extension ".exe" to your executable.&nbsp; That's done 
+like so:<br>
+<blockquote><code>cd XCOM-I</code><br>
+  <code>
+make -C Example-6.18.6 TARGET=Example-6.18.6.exe</code><br>
+</blockquote>
+The Makefile itself lists other possible alterations, any or all of which can be used in combination with the others.<br>
 <br>
-McKeeman (see Section 7.1, Chapter 10, and Appendix 6) provides XPL 
+Finally, you can now run the program:<br>
+<blockquote>
+  <pre>Example-6.18.6/Example-6.18.6</pre>
+</blockquote>What this particular sample program does is just to print 100 random numbers, so that's what should happen.<br>
+<blockquote><font size="-1"><b>Aside:</b> Just like XCOM-I, the compiled
+ application also has a variety of command-line options that may affect 
+how it runs.&nbsp; None of them are really applicable to this particular
+ sample program, but you could see them with the command<br>
+  </font>
+  <blockquote>
+    <pre>Example-6.18.6/Example-6.18.6 --help</pre>
+  </blockquote>
+</blockquote>
+
+If you want to see a much meatier sample program in standard XPL, you 
+can look instead at Tests/ANALYZER.xpl program and its associated data 
+file XPL.bnf.&nbsp; McKeeman (see Section 7.1, Chapter 10, and Appendix 
+6) provides XPL 
 source code for a program of the same name, along with 
 reasonably-detailed operating instructions and theory of 
-operation.&nbsp; I found the source code online, and haven't compared it
+operation.&nbsp; I found the source code for ANALYZER.xpl online, and 
+haven't compared it
  in detail to the book, but from the program comments at the beginning 
-of ANALYZER.xpl, I believe it's the same program.&nbsp; Or at least very
+of ANALYZER.xpl, I believe it's the identical program.&nbsp; Or at least
+ very
  close to it.&nbsp; Basically, ANALYZER is supposed to be used for 
 analyzing a given BNF grammar and printing a report that complains about
  problems with the grammar.&nbsp; Thus McKeeman recommends it for 
@@ -332,178 +331,254 @@ developing BNF grammars and debugging them.&nbsp; Meanwhile, the file
 XPL.bnf purports to be just such a BNF grammar for the standard XPL 
 language itself.<br>
 <br>
-The steps for compiling and running ANALYZER with XPL.bnf are just what you'd expect from the discussion earlier:<br>
+The steps for compiling and running ANALYZER with XPL.bnf as input are just what you'd expect from the discussion earlier:<br>
 <blockquote>
-  <pre>XCOM-I.py --verbose ANALYZER.xpl
-cd C_Output
-make
-aout &lt;XPL.bnf</pre>
+  <pre>cd XCOM-I<br>XCOM-I.py --verbose --output=ANALYZER Tests/ANALYZER.xpl
+make -C ANALYZER
+ANALYZER/ANALYZER &lt;Tests/XPL.bnf</pre>
 </blockquote>
 <h1><a name="xpli"></a>A Primer for Standard XPL and Intermetrics XPL/I</h1>
 
-<p>It is a truth universally acknowledged that there is no satisfactory 
-introductory information available that will help you come up to speed 
-concerning programming in XPL.&nbsp; Or at least, it <i>would</i> be universally acknowledged if anybody had ever heard of XPL and wanted to use it for anything.&nbsp; <br>
-</p>
-<p>The best you can do, generally speaking, is to purchase a used hardback copy of McKeeman (i.e., <i>A Compiler Generator</i>).&nbsp;
- If you do, you'll find a book that's densely packed with information, 
-but that information is the source code for an XPL compiler (written in 
-XPL), lots of BNF descriptions of the language, lots of theory on how to
- write a compiler-generator program, and very little of direct interest 
-to a programmer who wants to come up to speed quickly on how to write or
- understand a program written in XPL.&nbsp; Most online information 
-about XPL, in my experience, is a simple abridgement or other rehashing 
-of <i>A Compiler Generator</i>, and adds little extra of value in a 
-tutorial sense.&nbsp; With that said, you may find some useful online 
-information in a couple of places:<br>
-</p>
+<p>It is a truth universally acknowledged that there is no satisfactory introductory information available concerning programming in XPL.&nbsp; Or at least, it <i>would</i> be universally acknowledged if anybody had ever heard of XPL and wanted to use it for anything.&nbsp; <br></p>
+<p>The best you can do, generally speaking, is to purchase a used copy of McKeeman (i.e., <i>A Compiler Generator</i>).&nbsp; If you do, you'll find a book that's densely packed with information, but that information is the source code for an XPL compiler (written in XPL), lots of BNF descriptions of the language, lots of theory on how to write a compiler-generator program, and very little of direct interest to a programmer who wants to come up to speed quickly on how to write or understand a program written in XPL.&nbsp; And as a bonus, an index of almost no use at all.&nbsp; Besides which, most online information about XPL, in my experience, is a simple abridgement or other rehashing of <i>A Compiler Generator</i>, and adds little extra of value in a tutorial sense.&nbsp; With that said, you may find some useful online information in a couple of places:<br></p>
+
 <ul>
-  <li>&nbsp;<a moz-do-not-send="true" href="https://sourceforge.net/projects/xpl-compiler/">Daniel Weaver provides some documentation (see xpl.pdf) with his XPL-to-C translator program</a>.</li>
-  <li>
-The <a moz-do-not-send="true" href="https://www.cs.toronto.edu/XPL/ldindex.html">University of Toronto XPL website has a page</a> with a small but useful transcription of some material from A Compiler Generator — albeit with unfortunate HTML formatting that make some of it almost unreadable.</li>
+  <li>&nbsp;<a moz-do-not-send="true" href="https://sourceforge.net/projects/xpl-compiler/">Daniel Weaver provides some documentation (in particular, his xpl.pdf) with his XPL-to-C translator program</a>.</li>
+  <li>The <a moz-do-not-send="true" href="https://www.cs.toronto.edu/XPL/ldindex.html">University of Toronto XPL website has a page</a> with a small but useful transcription of some material from A Compiler Generator — albeit with unfortunate HTML formatting that make some of it almost unreadable.</li>
 </ul>
-<p>And as for Intermetrics XPL/I ... well, from a tutorial perspective, it's orders of magnitude worse.&nbsp; Enough said!<br>
+<p>And as for Intermetrics XPL/I ... well, from a tutorial perspective, it's orders of magnitude worse.&nbsp; Enough said!
 </p>
 
-<p>Taking all of that into account, I figure that a very brief primer on
- XPL and XPL/I for programmers new to it would be in order.&nbsp; I'm 
-not going to spend an enormous amount of time and space on it, but 
-perhaps it will be better than nothing!<br>
+<p>Taking all of that into account, it might be reasonable to provide a full tutorial here how to write XPL or XPL/I programs.&nbsp; Perhaps I'll do that sometime.&nbsp; For now, though, I'll just cover some of the basics and quirks of the language(s).
 </p>
 <h2><a name="basics"></a>The Basics</h2>
 <h3>Character Set</h3>
-<p>The most basic characteristic of a language is the character set in 
-which the language is expressed.&nbsp; Neither McKeeman nor Intermetrics
- specifies the character set.&nbsp; I've given at a lot of thought, and my conclusion is that the originally-supported character set was:<br>
+<p>The most basic characteristic of a language is the character set in which the language is expressed.&nbsp; Neither McKeeman nor Intermetrics specifies the character set.&nbsp; I've given at a lot of thought, and my conclusion is that the originally-supported character set was:
 </p>
-<p align="center">&lt;space&gt;<br>
-A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br>
-a b c d e f g h i j k l m n o p q r s t u v w x y z<br>
-0 1 2 3 4 5 6 7 8 9<br>
-_ % + - * . / | &amp; = &lt; &gt; # @ $ , ; : ( ) ' " ! ? <br>
-¢ ¬</p>
+<p align="center">&lt;space&gt;<br>A B C D E F G H I J K L M N O P Q R S T U V W X Y Z<br>a b c d e f g h i j k l m n o p q r s t u v w x y z<br>0 1 2 3 4 5 6 7 8 9<br>_ % + - * . / | &amp; = &lt; &gt; # @ $ , ; : ( ) ' " ! ? <br>¢ ¬</p>
 <p>You'll notice that several characters common today were not originally supported, including:</p>
 <p align="center">` ~ ^ [ ] { }</p>
 
-<p>For technical reasons, when working with XCOM-I, we use the characters ~ and ^ interchangeably with ¬, but prefer ~.<br>
-</p>
-<p>Similarly, we use ` in preference to ¢.<br>
-</p>
-<p>These substitutions allow us to completely translate the original XPL
- or XPL/I source code from EBCDIC (almost unusable today) to ASCII (very
- widely used today) without any loss of information, and without being 
-forced to use multi-byte character-coding schemes such as UTF-8.<br>
+<p>Contrariwise, there are two characters (¢ and ¬) that don't exist at all in the 7-bit ASCII character set that's the common core for the character sets typically used today when writing software source code.&nbsp; Therefore, when working with XCOM-I, we use the characters ~ and ^ interchangeably with ¬ (but prefer ~).&nbsp; Similarly, we use ` in preference to ¢.&nbsp; These substitutions allow us to completely translate the original XPL or XPL/I source code between the original EBCDIC between ACII without any loss of information, and without insisting that you adopt any specific "locale" like ISO-8859-15 or UTF-8 for your computer that's not optimal for your other activities.&nbsp; With that said, I <i>hope</i> that you could to use ¢ and ¬ in XPL/I source code, if you insist on doing so, but I do not guarantee it.
 </p>
 <h3>Case Sensitivity</h3>
-<p>XPL programs are <i>not</i> case-sensitive, except in so far as the 
-contents of quoted strings are concerned.&nbsp; E.g., lower-case or 
-mixed-case symbols are treated as being identical to their upper-case 
-correspondents.<br>
+<p>XPL programs are <i>not</i> case-sensitive, except in so far as the contents of quoted strings are concerned.&nbsp; E.g., lower-case or mixed-case symbols are treated as being identical to their upper-case correspondents, but quoted strings are case-sensitive.
 </p>
 <h3>Identifiers</h3>
-<p>Identifiers cannot begin with a digit, but otherwise consist of any sequence of upper- or lower-case alphanumeric characters, <i>or</i> any of the characters @ _ # $.&nbsp; For example, @_26$8ab# is a legal name for a variable.<br>
+<p>Identifiers cannot begin with a digit, but otherwise consist of any sequence of upper- or lower-case alphanumeric characters, <i>or</i> any of the characters @ _ # $.&nbsp; For example, @_26$8ab# is a legal name for a variable.
 </p>
-<p>Identifiers cannot exceed 255 characters in length.<br>
+<p>Identifiers cannot exceed 256 characters in length.
 </p>
 <h3>Datatypes</h3>
-<p>There are only three basic datatypes:<br>
-</p>
+<p>There are only three basic datatypes:<br></p>
 <ul>
-  <li><font color="#663333"><code>FIXED</code></font> is a 32-bit signed integer.&nbsp; (Stored as 2's-complement, in big-endian byte order.)<br>
-  </li>
-  <li><font color="#663333"><code>BIT(n)</code></font>, where <font color="#663333"><code>n</code></font> is from 1 to 32, is an <font color="#663333"><code>n</code></font>-bit
- unsigned integer.&nbsp; (But always stored as a big-endian 32-bit 
-unsigned integer.)&nbsp; It is intended to provide a set of bit-fields 
-that can be individually accessed, but the language doesn't have any 
-built-in facilities to make such access convenient, so in most respects 
-these <font color="#663333"><code>BIT</code></font> datatypes are treated just like the <font color="#663333"><code>FIXED</code></font> datatype.<br>
-  </li>
-  <li><font color="#663333"><code>CHARACTER</code></font> is a 
-variable-width character string, with a string-length limited to 255 or 
-less.&nbsp; (Although the string length varies, the amount of storage 
-dedicated to it does not.&nbsp; It is stored as a 32-bit unsigned 
-integer known as a <i>descriptor</i>, with 8 bits specifying the string 
-length and 24-bits indicating an address for a 256-byte buffer at which 
-the character data is stored.&nbsp; For reasons that may become 
-apparent, the character data is not stored contiguous to the 32-bit 
-descriptor.&nbsp; Furthermore, the stored character data is encoded in 
-EBCDIC, as an array of unsigned 8-bit integers.)</li>
+  <li><font color="#663333"><code>FIXED</code></font> is a 32-bit signed integer.&nbsp; (Stored as 2's-complement, in big-endian byte order.)<br></li>
+  <li><font color="#663333"><code>BIT(n)</code></font>, where <font color="#663333"><code>n</code></font> is from 1 to 32, is an <font color="#663333"><code>n</code></font>-bit unsigned integer.&nbsp; It is apparently <i>intended</i> to provide a set of bit-fields that can be individually accessed, but the XPL language doesn't have any built-in facilities to make such access convenient, so in most respects these <font color="#663333"><code>BIT</code></font> datatypes are used as reduced-precision unsigned integers rather than as collections of logical flags.&nbsp; Note that <font color="#663333"><code>BIT(1)</code></font> through <font color="#663333"><code>B(8)</code></font> are stored in memory as single bytes, <font color="#663333"><code>BIT(9)</code></font> through <font color="#663333"><code>BIT(16)</code></font> are stored as 2-byte "half-words", and <font color="#663333"><code>BIT(17)</code></font> through <font color="#663333"><code>BIT(32)</code></font> are stored as 32-bit words.<br></li>
+  <li><font color="#663333"><code>CHARACTER</code></font> is a variable-width character string, with a string-length limited to 256 or less.&nbsp; Strings are stored as a 32-bit unsigned integer known as a <i>descriptor</i>, paired with a separate area from 1 to 256 bytes containing the individual characters of the string, encoded in EBCDIC.&nbsp; The descriptor has 8 bits specifying the string length (minus 1) and 24-bits providing the starting memory-address of the character data.</li></ul>
+<blockquote>
+  <p><font size="-1"><b>Aside:</b> The method for storing string data just described doesn't allow for 0-length "empty" strings.&nbsp; Neither the surviving documentation, nor the memories of individual developers I've consulted provide any clue on the matter, so XCOM-I's approach may not quite match the original implementations.&nbsp; XCOM-I uses a string descriptor with a value of 0 to represent an empty string, and does not allocate any additional storage beyond the descriptor in that case.</font><br></p>
+</blockquote>
+<ul>
+
 </ul>
-<p>The storage formats in memory duplicate those that would have been 
-expected on an IBM System/360 computer.&nbsp; While the storage formats 
-are not significant in abstract terms, they'll be seen to be <i>quite</i>
- significant in dealing with certain aspects of HAL/S-FC's source code, 
-and indeed I think it would be impossible to run HAL/S-FC unless these 
-IBM 360 storage formats were used.<br>
+
+<p>The storage formats in memory duplicate those that would have been expected on an IBM System/360 computer, within the limits of my ability to infer what those formats were.&nbsp; While the storage formats are not significant in abstract terms, they'll be seen to be <i>quite</i> significant in dealing with certain aspects of HAL/S-FC's source code, such as its so-called "virtual memory" system, and indeed I think it would be impossible to run HAL/S-FC unless these IBM 360 storage formats were used.
 </p>
 <blockquote>
-  <p><font size="-1"><b>Note:</b> McKeeman indicates support for bit string as long as <font color="#663333"><code>BIT(2048)</code></font>.&nbsp;
- However, bit-strings longer than 32 are considerably harder to 
-support.&nbsp; More importantly, there are no uses of such longer 
-strings HAL/S-FC source code, nor in any other available XPL 
-software.&nbsp; So I've simply chosen not to support longer bit-strings 
-in XCOM-I.<br>
-    </font></p>
+  <p><font size="-1"><b>Aside:</b> In particular, it may seem at first glance that using separate storage formats for <font color="#663333"><code>BIT(8)</code></font> vs <font color="#663333"><code>BIT(16)</code></font> vs <font color="#663333"><code>BIT(32)</code></font> is an unnecessary complication.&nbsp; Why not just use 32-bit integers to store each of these types, thus treating them in a uniform way?&nbsp; There are two reasons: First, McKeeman (p. 134) explicitly states that this is the amount of storage used.&nbsp; Second, and more important, the built-in XPL <font color="#663333"><code>FILE</code></font> function expects to use </font><font size="-1"><font size="-1"><font color="#663333"><code>BIT(8)</code></font></font> buffers for transferring data between random-access files and memory.&nbsp; If </font><font size="-1"><font size="-1"><font color="#663333"><code>BIT(8)</code></font></font> used 4 bytes per entry rather than 1 byte per entry, the </font><font size="-1"><font size="-1"><font color="#663333"><code>FILE</code></font></font> function would no longer behave as expected with existing XPL programs.<br></font></p>
+<p><font size="-1"><b>Note:</b> McKeeman indicates support for bit string as long as <font color="#663333"><code>BIT(2048)</code></font>.&nbsp; There are no uses of such longer strings HAL/S-FC's XPL source code, nor in any available standard-XPL software.&nbsp; So I've simply chosen not to support longer bit-strings in XCOM-I.<br></font></p>
+
 </blockquote>
 These basic datatypes can also be declared in single-dimension arrays — 
 multi-dimensional arrays are not allowed.&nbsp; There is no maximum 
-length beyond the available memory.&nbsp; Array indices start at 0.<br>
+array length beyond the available memory.&nbsp; Array indices start at 0.&nbsp; It is important to realize that an array of <font color="#663333"><code>CHARACTER</code></font> is not an array of characters, but rather an array of string-descriptors, nor is a <font color="#663333"><code>BIT(n)</code></font> variable an array of <font color="#663333"><code>n</code></font> bits, other than in an abstract sense.<br>
 <br>
-Variables are strictly typed, and every variable used must have an associated declaration statement.<br>
-<h3>Memory Space</h3>
-<p>The memory space for an XPL program is up to 2<sup>24</sup>=16,777,216 bytes in size.<br>
+XPL/I adds an additional feature, which is a variable-sized array of 
+"records", where each "record" is a collection of fields of the basic 
+datatypes listed above.<br>
+<br>
+Variables are supposedly strictly typed, and every variable used must have an associated declaration statement.<br>
+<h3>Memory Model for a Compiled XPL Program<br>
+</h3>
+<p>The theoretical memory space at runtime for a compiled XPL program is 2<sup>24</sup>=16,777,216 bytes in size, although the Wikipedia article on IBM System/360 tells us that the actual physical maximum was only 8 MB.&nbsp; I presume that for the original XPL and XPL/I compilers, a contiguous partition in this (theoretical) 16 MB space was dedicated to storing just the program's variables, whereas the rest was presumably devoted to the operating system and program's executable code.&nbsp; For XCOM/I, such a partitioning is not necessary, and the entire 16MB space can be used for the compiled program's variables.
 </p>
-<p>There is no stack.&nbsp; There is no dynamic memory allocation.&nbsp;
- All memory is allocated statically at compile time, and does not change
- in size or position thereafter.<br>
-</p>
-<h3>Structure of an XPL Program</h3>
-<p>An XPL program consists of any sequence of XPL <i>statements</i>, followed by the token <font color="#663333"><code>EOF</code></font>.&nbsp; In particular, declarations of variables can be intermixed with active statements such as assignments.<br>
+<p>Unfortunately, we have to stick pretty closely to the memory-space behavior as conceived by Intermetrics for it's XPL/I compiler, however poorly documented it may be, and however irrelevant it seems to a "modern"implementation, because HAL/S-FC source code sometimes relies on their hidden knowledge of that behavior.&nbsp; 
 </p>
 <blockquote>
-  <p><font size="-1"><b>Note:</b>&nbsp; The original XPL compiler, which
- was called XCOM, performed a single pass.&nbsp; It required that the 
-declaration of any particular identifier as an object (such as a 
-variable) had to precede the use of that identifier, although there were
- provisions for making a forward declaration for a </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font>, so that the </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font> could be used before it was defined.&nbsp; XCOM-I relaxes this requirement.</font><br>
-  </p>
+  
+<p><font size="-1"><b>Aside:</b> There are plenty of examples in HAL/S-FC source code where the source code exploits hidden knowledge of the internals of the compiler implementation.&nbsp; Here's one from the <font color="#663333"><code>SCAN</code></font> procedure of HAL/S-FC.&nbsp; In two of its sub-procedures, <font color="#663333"><code>BUILD_BCD</code></font> and <font color="#663333"><code>BUILD_INTERNAL_BCD</code></font>, it builds a string (<font color="#663333"><code>BCD</code></font>), character by character, whose length it does not know in advance.&nbsp; You'd think it could simply repeatedly convert each character to a string, and then use the string-concatenation operator (<font color="#663333"><code>||</code></font>) to append the new string to the old one.&nbsp; But you'd be wrong, since for some reason there's actually no way in XPL or XPL/I to convert  a character to a string.&nbsp; So instead, it:<br></font></p>
+
+  <ul>
+    <li><font size="-1">Uses an undocumented trick (namely concatenating a constant string which contains a single character to </font><font size="-1"><font size="-1"><font color="#663333"><code>BCD</code></font></font>), which forces </font><font size="-1"><font size="-1"><font size="-1"><font color="#663333"><code>BCD</code></font></font></font> to be moved to the top of allocated memory, and be followed by free memory.</font></li>
+    <li><font size="-1">Uses the COREBYTE built-in function to write the character to the address just preceding the start of free memory.</font></li>
+  </ul>
+  
+</blockquote>
+
+<p>As described in the preceding section, variables of the <font color="#663333"><code>FIXED</code></font> and <font color="#663333"><code>BIT</code></font> datatypes, or arrays thereof, have sizes that are set at compile-time, and do not change thereafter.&nbsp; Moreover, the storage for the descriptors for the <font color="#663333"><code>CHARACTER</code></font> datatype and the pointers for the <font color="#663333"><code>BASED</code></font> variables are fixed at compile time as well.&nbsp; <i>However</i>, the character strings associated with the string descriptors for the <font color="#663333"><code>CHARACTER</code></font> variables, and the number of records associated with the <font color="#663333"><code>BASED</code></font> variables, can change during execution of the compiled XPL program, and in particular can increase in size.&nbsp; When the latter happens, it is necessary for such data to be moved into a previously-free area of the 16 MB memory, leaving unused holes in the memory.&nbsp; <br></p>
+<p>The holes in memory don't directly cause a problem, but the ever-decreasing range of contiguous free memory at the end of the memory space may cause a problem eventually.&nbsp; The garbage-collection procedure called <font color="#663333"><code>COMPACTIFY</code></font> is called under these circumstances to repack the memory space, correct all pointers into the memory space, and thus increase the range of contiguous free memory.&nbsp; McKeeman (p. 140) lists <font color="#663333"><code>COMPACTIFY</code></font> among the built-in functions of XPL, but in defiance of that, explicitly provides an XPL <font color="#663333"><code>PROCEDURE</code></font> for it, whose source code must be included in other XPL programs.&nbsp; Similarly, in the original XPL/I compiler, it was a user function provided by the HAL/S-FC source code file HALINCL/SPACELIB.&nbsp; That's a problem, largely theoretical, I suppose, if someone were to write an XPL/I program that <i>wasn't</i> HAL/S-FC.&nbsp; XCOM-I provides its own implementation of <font color="#663333"><code>COMPACTIFY</code></font> in its runtime library, and it is a true built-in written in C rather than in XPL.&nbsp; <font size="-1">
+</font></p>
+<blockquote>
+  <p><font size="-1"><b>Aside:</b>&nbsp; In case you're wondering why we don't simply use the </font><font size="-1"><font color="#663333"><code>COMPACTIFY</code></font> supplied in HALINCL/SPACELIB?&nbsp; It's a good question, which I elect not to answer. </font><br></p>
+</blockquote>
+
+
+
+<h3>Structure of an XPL Program</h3>
+<p>An XPL program consists of any sequence of XPL <i>statements</i>, followed by the token <font color="#663333"><code>EOF</code></font>.&nbsp; In particular, declarations of variables can be intermixed with active statements such as assignments.
+</p>
+<blockquote>
+  <p><font size="-1"><b>Note:</b>&nbsp; The original XPL compiler, which was called XCOM, performed a single pass.&nbsp; It required that the declaration of any particular identifier as an object (such as a variable) had to precede the use of that identifier, although there were provisions for making a forward declaration for a </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font>, so that the </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font> could be used before it was defined.&nbsp; XCOM-I relaxes this requirement.</font><br></p>
 </blockquote>
 <h3>Peculiarities of PROCEDUREs<br>
 </h3>
-<p>In a view from a height, an XPL program consists of <font color="#663333"><code>PROCEDURE</code></font> definitions and of code that uses those definitions.<br>
+<p>In a view from a height, an XPL program consists of <font color="#663333"><code>PROCEDURE</code></font> definitions and of code that uses those definitions.<br></p>
+<p><font color="#663333"><code>PROCEDURE</code></font> definitions in the source code can be nested, to any desired depth. 
 </p>
-<p><font color="#663333"><code>PROCEDURE</code></font> definitions in the source code can be nested, to any desired depth. <br>
-</p>
-<p>A <font color="#663333"><code>PROCEDURE</code></font> may be invoked 
-in two different ways.&nbsp; If it returns a value, it can be used in an
- arithmetical or string expression.&nbsp; If it doesn't return a value, 
-or if it does return a value and you simply want to ignore the value, a <font color="#663333"><code>CALL</code></font> statement can be used to invoke the <font color="#663333"><code>PROCEDURE</code></font> but to discard any returned value.<br>
-</p>
-<p><b>Important:</b>&nbsp; All variables local to a <font color="#663333"><code>PROCEDURE</code></font> definition retain their values after the <font color="#663333"><code>PROCEDURE</code></font> returns.&nbsp; If the <font color="#663333"><code>PROCEDURE</code></font> is re-executed, those local variables retain the values they previously had in the prior invocation of the <font color="#663333"><code>PROCEDURE</code></font>.&nbsp; The values of those local variables, though retained, are inaccessible to code outside of the <font color="#663333"><code>PROCEDURE</code></font>, because the compiler rejects code outside of the <font color="#663333"><code>PROCEDURE</code></font>
- that attempts to access them. (In C code, this would be the same thing 
+<p>A <font color="#663333"><code>PROCEDURE</code></font> may be invoked in two different ways.&nbsp; If it returns a value, it can be used in an arithmetical or string expression.&nbsp; If it doesn't return a value, or if it does return a value and you simply want to ignore the value, a <font color="#663333"><code>CALL</code></font> statement can be used to invoke the <font color="#663333"><code>PROCEDURE</code></font> but to discard any returned value.<br></p>
+<p><b>Important:</b>&nbsp; All variables local to a <font color="#663333"><code>PROCEDURE</code></font> definition retain their values after the <font color="#663333"><code>PROCEDURE</code></font> returns.&nbsp; If the <font color="#663333"><code>PROCEDURE</code></font> is re-executed, those local variables retain the values they previously had in the prior invocation of the <font color="#663333"><code>PROCEDURE</code></font>.&nbsp; The values of those local variables, though retained, are inaccessible to code outside of the <font color="#663333"><code>PROCEDURE</code></font>, because the compiler enforces scopes of variables. (In C code, this would be the same thing 
 as saying that every local variable of every function is automatically 
-declared as <font color="#663333"><code>static</code></font>.)<br>
+declared as <font color="#663333"><code>static</code></font>.)
 </p>
-<p><b><i>Very</i> important:</b> Any <i>parameter</i>s at the end of the calling list of a <font color="#663333"><code>PROCEDURE</code></font> can be omitted from when calling the <font color="#663333"><code>PROCEDURE</code></font>, and if omitted, they retain the same values as the last time the <font color="#663333"><code>PROCEDURE</code></font> was invoked <i>or</i> the values assigned to them from within the <font color="#663333"><code>PROCEDURE</code></font> itself!&nbsp; (In essence, this is like saying that parameters of a <font color="#663333"><code>PROCEDURE</code></font> are not passed to the <font color="#663333"><code>PROCEDURE</code></font>, but rather that they are just aliases for some set of global variables dedicated to the <font color="#663333"><code>PROCEDURE</code></font>.)&nbsp; That's so weird that we need to see an example.&nbsp; Consider the following XPL <font color="#663333"><code>PROCEDURE</code></font> definition, and <font color="#663333"><code>CALL</code></font>s to it:<br>
+<p><b><i>Very</i> important:</b> Any <i>parameter</i>s at the end of the calling list of a <font color="#663333"><code>PROCEDURE</code></font> can be omitted from when calling the <font color="#663333"><code>PROCEDURE</code></font>, and if omitted, they retain the same values as the last time the <font color="#663333"><code>PROCEDURE</code></font> was invoked <i>or</i> the values previously assigned to those parameters from within the <font color="#663333"><code>PROCEDURE</code></font> itself!&nbsp; (In essence, this is like saying that parameters of a <font color="#663333"><code>PROCEDURE</code></font> are not passed to the <font color="#663333"><code>PROCEDURE</code></font>, but rather that they are just aliases for some set of global variables dedicated to the <font color="#663333"><code>PROCEDURE</code></font>.)&nbsp; That's so weird that we need to see an example.&nbsp; Consider the following XPL <font color="#663333"><code>PROCEDURE</code></font> definition, and <font color="#663333"><code>CALL</code></font>s to it:
 </p>
 <blockquote>
-  <pre>weirdo: <br>procedure(x, y, z);<br>    declare (x, y, z) fixed;		/* Declare x,y,z as integers */<br>    output = x || ' ' || y || ' ' || z; /* Print out x,y,z */<br>    x = 29;<br>    y = y + 1;<br>end weirdo;<br><br>call weirdo(1, 2, 3);<br>call weirdo(4, 5);<br>call weirdo(6);<br>call weirdo();<br>call weirdo;<br></pre>
+  <pre><font color="#663333">weirdo: <br>procedure(x, y, z);<br>    declare (x, y, z) fixed;		/* Declare x,y,z as integers */<br>    output = x || ' ' || y || ' ' || z; /* Print out x,y,z */<br>    x = 29;<br>    y = y + 1;<br>end weirdo;<br><br>call weirdo(1, 2, 3);<br>call weirdo(4, 5);<br>call weirdo(6);<br>call weirdo();<br>call weirdo;</font><br></pre>
 </blockquote>
-<p>The five calls successively print out the following:<br>
+<p>The five calls successively print out the following:
 </p>
 <blockquote>
   <pre>1 2 3<br>4 5 3<br>6 6 3<br>29 7 3<br>29 8 3<br></pre>
 </blockquote>
-<p><font color="#663333"><code>PROCEDURE</code></font>s are not recursive, either directly or indirectly. <br>
+<p><font color="#663333"><code>PROCEDURE</code></font>s cannot be recursive, either directly or indirectly.<br></p>
+<p>Taking these facts altogether, XCOM-I implements both parameters and local variables of <font color="#663333"><code>PROCEDURE</code></font>s essentially as global variables in they way they are stored:&nbsp; i.e., each parameter and each local variable of each <font color="#663333"><code>PROCEDURE</code></font> has its own <i>static</i> address (in the global memory model), assigned at compile time and unchanging thereafter.&nbsp; The compiler enforces the logical scoping of these variables.
 </p>
-<p>TBD<br>
-</p>
+
+
 
 <h1>
 
 
-  <a name="hooks"></a>Hooks for Replacing BAL Code with C</h1>
-TBD<br>
+  <a name="hooks"></a>Patches for Basic Assembly Language Code<br>
+</h1>A serious difficulty in working with previously-existing XPL code, 
+and particularly XPL/I code, is that many of these programs were not 
+written entirely in XPL or XPL/I, but also inserted IBM System/360 basic
+ assembly-language (BAL) code at various junctures.&nbsp; However good 
+XCOM-I may (or may not) be at translating XPL or XPL/I to C, it is <i>not</i> capable of inferring the intent of arbitrary BAL code, nor of translating such code into C.<br>
+<br>
+Moreover, there is a second problem associated with BAL code that has 
+been intermixed into XPL/I code, which is that while I can imagine 
+replacing such BAL code by C-language code that provides the same 
+functionality, I do <i>not</i> want to do it in a way that necessitates 
+altering the original XPL/I source code!&nbsp; Why is that?&nbsp; Well, 
+the XPL/I source code for (say) HAL/S-FC is fairly large, comprising 
+tens of thousands of lines across hundreds of files, and I'd prefer to 
+avoid storing two almost-identical copies of it in our Virtual AGC 
+source-code tree, one of which is identical to the original and one of 
+which has been altered. It's better from my perspective to have a single
+ copy of it that's verifiably identical to the original.<br>
+<br>
+Don't worry: XCOM-I accomplishes this.&nbsp; But to understand what you 
+and XCOM-I can actually do about this situation, you need to know a 
+little more about this BAL source code that's causing the problem.<br>
+<br>
+BAL source code is embedded in XPL or XPL/I code via calls to the XPL built-in function <font color="#663333"><code>INLINE</code></font> that look roughly like this:
+<blockquote>
+  <pre><pre><meta name="qrichtext" content="1"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">
+p, li { white-space: pre-wrap</style><p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'monospace';">         CALL INLINE("58", 3, 0, DW_AD);           /* L    3,DW_AD            */</span></p><span style=" font-family:'monospace';">/*LOAD DOUBLE FROM STACK SPACE 3 TO REGISTER 0*/</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'monospace';">         CALL INLINE("68", 0, 0, 3, 0);            /* LD   0,0(0,3)           */</span></pre><span style=" font-family:'monospace';">/*LOAD POSITIVE VALUE OF REGISTER 0 INTO REGISTER 0*/</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'monospace';">         CALL INLINE("20", 0, 0);                  /* LPDR 0,0                */</span></pre><span style=" font-family:'monospace';">/*LOAD ROUNDING VALUE INTO STACK 1 THEN ADD TO REGISTER 0*/</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'monospace';">         CALL INLINE("58", 1, 0, ADDR_ROUNDER);    /* L    1,ADDR_ROUNDER     */</span></pre><span style=" font-family:'monospace';">         CALL INLINE("6A", 0, 0, 1, 0);            /* AD   0,0(0,1)           */</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'monospace';">         CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);/* L    1,ADDR_FIXED_LIMIT */</span></pre><span style=" font-family:'monospace';">         CALL INLINE("58", 2, 0, PTR);             /* L    2,PTR              */</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'monospace';">/*COMPARE REGISTER 0 TO THE POSITIVE INTEGER LIMIT*/</span></pre><span style=" font-family:'monospace';">         CALL INLINE("69", 0, 0, 1, 0);            /* CD   0,0(0,1)           */</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'monospace';">/*BRANCH TO 'LIMIT_OK' IF REGISTER 0 IS LESS THAN OR EQUAL TO THE LIMIT       */</span></pre><span style=" font-family:'monospace';">         CALL INLINE("07",12, 2);                  /* BNHR 2                  */</span><pre style=" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></pre></pre></pre>
+</blockquote>
+There are several different variations to <font color="#663333"><code>INLINE</code></font>'s calling sequence, but those differences aren't important to us.&nbsp; What's important is that each <font color="#663333"><code>CALL INLINE(...)</code></font> inserts a single BAL instruction.<br>
+<br>
+Another thing that's important is that when XCOM-I encounters a <font color="#663333"><code>CALL INLINE(...)</code></font>,
+ by default it translates it simply to an empty C statement; i.e., to a C
+ statement that's just a semi-colon.&nbsp; But it also (if XCOM-I's 
+command-line <font color="#663333"><code>--verbose</code></font> switch is used) inserts a <i>numbered</i> program comment.&nbsp; The code above, for example, might be translated to C by XCOM-I as:<br>
+<pre><pre><span style=" font-family:'monospace';">        // (459) CALL INLINE("58", 3, 0, DW_AD);<br>	;<br></span><span style=" font-family:'monospace';">        // (460) CALL INLINE("68", 0, 0, 3, 0); <br>	;<br></span><span style=" font-family:'monospace';">        // (461) CALL INLINE("20", 0, 0);<br>	;<br></span><span style=" font-family:'monospace';">        // (462) CALL INLINE("58", 1, 0, ADDR_ROUNDER);<br>	;<br></span><span style=" font-family:'monospace';">        // (463) CALL INLINE("6A", 0, 0, 1, 0);<br>	;<br></span><span style=" font-family:'monospace';">        // (464) CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);<br>	;<br></span><span style=" font-family:'monospace';">        // (465) CALL INLINE("58", 2, 0, PTR);<br>	;<br></span><span style=" font-family:'monospace';">        // (466) CALL INLINE("69", 0, 0, 1, 0);<br>	;</span><br></pre></pre>
+These parenthesized numbers which XCOM-I has inserted into the comments 
+are not only all distinct from each other, but also are always the same 
+every time the source code has been compiled, as long no <font color="#663333"><code>INLINE</code></font>s have been added or removed in the meantime.&nbsp; Let's call them <i>patch numbers</i>.<br>
+<br>
+Reasonably enough, patch numbers can be used to define places at which 
+XCOM-I makes a patch.&nbsp; Suppose, for example, that we had a file 
+called "patch459.c" containing C code that we wanted to use to mimic the
+ functionality of the BAL code above.&nbsp; Similarly, we could have a 
+patch460.c, a patch461.c, and so on, but there's little reason to do so,
+ since it's just easier to put all of our replacement code for this 
+sequence of instructions into a single file.<br>
+<br>
+Each time XCOM-I encounters a <font color="#663333"><code>CALL INLINE(...)</code></font>, it looks for a patch file corresponding to the <font color="#663333"><code>INLINE</code></font>'s
+ patch number.&nbsp; If it finds such a file, then it inserts it, and 
+it's only if there's no such patch file exists that the default 
+translation into an empty C statement occurs.<br>
+<br>
+Of course, the glib explanation I've just given glosses over a lot of 
+the difficulties, such as figuring out what C code is appropriate for 
+any given BAL code.&nbsp; I can't give you any amazingly-handy insights 
+on that topic, I'm afraid.&nbsp; In the case of this <i>particular</i> 
+example, the code I've shown above is just the beginning portion of a 
+longer sequence of BAL instructions, intermixed with XPL statements, 
+which occurs in the <font color="#663333"><code>ROUND_SCALAR PROCEDURE</code></font>
+ in the HAL/S-FC source-code file HALMATIN.xpl.&nbsp; Collectively, I 
+think the entire sequence may round a double-precision floating-point 
+number previously loaded into a pair of the CPU's floating-point 
+registers (referred to by the symbolic name <font color="#663300"><code>DW[0]</code></font> and <font color="#663300"><code>DW[1]</code></font>) to an integer, compare that integer to the positive and negative limits of the 32-bit signed integer datatype (<font color="#663300"><code>FIXED</code></font>), and cap the value at those limits, ultimately storing the rounded-and-capped value back into <font color="#663300"><code>DW[0]</code></font> and <font color="#663300"><code>DW[1]</code></font>.&nbsp; (Which would not be terribly surprising given that the name of the <font color="#663300"><code>PROCEDURE</code></font> is <font color="#663300"><code>ROUND_SCALAR</code></font>.)&nbsp; <br>
+<blockquote><font size="-1"><b>Aside:</b> How did I arrive at these 
+conclusions?&nbsp; My best explanation is that you sit quietly, unfocus 
+your eyes, clear your mind, attain some kind of a zenlike state, ignore 
+the BAL instructions themselves, and think merely of the program 
+comments and symbolic names.&nbsp; On the other hand, I suspect that my 
+explanation is perhaps not of universal applicability.&nbsp; And it 
+might be fair to mention that many of these sequences of BAL 
+instructions use these same kinds of rounding and capping operations, 
+and you do get a feel for them after looking at a few.</font><br>
+</blockquote>
+<blockquote><font size="-1"><b>Aside:</b> Realize too that the values 
+stored in the CPU's floating-point registers will be in IBM 360 
+floating-point format, so to do anything useful with them, we may want 
+to translate them back and forth into the native C floating-point 
+format.</font><br>
+</blockquote>
+If all that's true, then our patch file (patch459.c) might look 
+something like the following, where I've invented some 
+plausible-sounding helper functions to implement it.&nbsp; It's not 
+important at the moment that you don't understand the patch code, or 
+even if it's correct.&nbsp; It probably isn't!&nbsp; We're just 
+exploring the principles involved in patching.&nbsp; Note that the <font color="#663300"><code>return</code></font>
+ at the end is not an essential part of the patching process; rather it 
+just happens to be appropriate for this example, but wouldn't be present
+ in most patches.<br>
+<blockquote>
+  <pre>// Note: ADDR(NULL, 0, "DW", i) gives the address of DW[i] in the simulated-memory array.<br>double x = fromFloatIBM(ADDR(NULL, 0, "DW", 0), ADDR(NULL, 0, "DW", 1));<br>double r = round(x);<br>int32_t n;<br>if (r &gt; 2147483647)<br>	n = 2147483647;<br>else if (r &lt; -2147483648)<br>	n = -2147483648;<br>else<br>	n = r;<br>toFloatIBM(ADDR(NULL, 0, "DW", 0), ADDR(NULL, 0, "DW", 1), n);<br>return 1;<br></pre>
+</blockquote>
+Putting all this together, if XCOM-I is used to compile the program once
+ again, it now finds patch-file patch459.c, but no patch460.c, 
+patch461.c, etc., so it ends up compiling our mess of <font color="#663333"><code>CALL INLINE(...)</code></font> statements to:<br>
+<pre><pre><span style=" font-family:'monospace';">        { // (459) CALL INLINE("58", 3, 0, DW_AD);<br></span><span style=" font-family:'monospace';">		// Note: ADDR(NULL, 0, "DW", i) gives the address of DW[i] in the simulated-memory array.
+		</span><span style=" font-family:'monospace';">double x = fromFloatIBM(ADDR(NULL, 0, "DW", 0), ADDR(NULL, 0, "DW", 1));<br>		double r = round(x);<br>		int32_t n;<br>		if (r &gt; 2147483647)<br>			n = 2147483647;<br>		else if (r &lt; -2147483648)<br>			n = -2147483648;<br>		else<br>			n = r;<br>		toFloatIBM(ADDR(NULL, 0, "DW", 0), ADDR(NULL, 0, "DW", 1), n);<br>		return 1;
+	}<br></span><span style=" font-family:'monospace';">        // (460) CALL INLINE("68", 0, 0, 3, 0); <br>	;<br></span><span style=" font-family:'monospace';">        // (461) CALL INLINE("20", 0, 0);<br>	;<br></span><span style=" font-family:'monospace';">        // (462) CALL INLINE("58", 1, 0, ADDR_ROUNDER);<br>	;<br></span><span style=" font-family:'monospace';">        // (463) CALL INLINE("6A", 0, 0, 1, 0);<br>	;<br></span><span style=" font-family:'monospace';">        // (464) CALL INLINE("58", 1, 0, ADDR_FIXED_LIMIT);<br>	;<br></span><span style=" font-family:'monospace';">        // (465) CALL INLINE("58", 2, 0, PTR);<br>	;<br></span><span style=" font-family:'monospace';">        // (466) CALL INLINE("69", 0, 0, 1, 0);<br>	;</span></pre></pre>
+
+Notice that the patch is automatically placed within a C <font color="#663300"><code>{...}</code></font> block, which is important if the <font color="#663333"><code>CALL INLINE(...)</code></font> happens to have been preceded by something like <code><font color="#663300">IF ... THEN</font></code> or <font color="#663300"><code>ELSE</code></font>.&nbsp; The <font color="#663300"><code>return</code></font> at the end of our patch causes all of the remainder of the <font color="#663333"><code>ROUND_SCALAR PROCEDURE</code></font> to be skipped past, probably generating a few warnings from the C compiler.&nbsp; But in a more-usual example the <font color="#663300"><code>return</code></font> wouldn't have been in the patch, and so the compiler warnings wouldn't be generated either.<br>
+<br>
+By default, XCOM-I will look for patch files in the same folder holding 
+the XPL/I source-code file it's compiling, though it has a command-line 
+option (<font color="#663300"><code>--patch=<i>PATHNAME</i></code></font>)
+ that allows a different folder to be specified, which in the case of a 
+huge XPL/I program like HAL/S-FC is probably a better idea.<br>
+<br>
+Incidentally, in XCOM-I, if <font color="#663333"><code>CALL INLINE(...) </code></font>is
+ used with a single parameter that's a string, then no patch file is 
+sought.&nbsp; Rather, XCOM-I treats that single string parameter as a 
+line of C code, and inserts the line directly into the output C 
+code.&nbsp; Thus if you were willing to modify the original XPL source 
+code rather than leaving it unchanged and using the patch-file 
+technique, you might be able to do so just by altering the parameters of
+ the <font color="#663333"><code>CALL INLINE(...) </code></font>statements to contain C source code rather than BAL source code.<br>
 <br>
 
 
@@ -521,7 +596,7 @@ TBD<br>
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-04-03<br>
+          2024-04-17<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
