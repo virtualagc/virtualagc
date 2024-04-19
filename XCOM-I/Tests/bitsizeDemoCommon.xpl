@@ -1,26 +1,23 @@
 /*
-File: bitsizeDemo.xpl
-See also bitsizeDemoCommon.xpl
+File: bitsizeDemoCommon.xpl
 
-This is a demo that XCOM-I is treating variables correctly, in 
-three different ways:
-    1.  In INITIAL, for all declaration types allowing an INITIAL clause.
-    2.  In expressions.
-    3.  On the left-hand side of assignment statements.
-The various characteristics being demo'd are:
-    *   Proper allocation of space:  i.e., 4 bytes for FIXED, CHARACTER, BIT(17)
-        through BIT(32),and BASED; 2 bytes for BIT(9) through BIT(16); and 
-        1 byte for BIT(1) through BIT(8).
-    *   Proper values returned by ADDR built-in.
-    *   Proper assignments, including truncation to proper number of bits for
-        BIT(1) through BIT(32).
-    *   Proper retrival of values in expressions.
-    *   All possible variable structuring:  basic types (FIXED, BIT(n), 
-        CHARACTER); subscripted basic types; ARRAY keyword; BASED non-RECORD;
-        BASED RECORD with fields that are basic or subscripted basic.
+This is a demo that the output files associated with COMMON are correct
+and that COMMON, COMMON ARRAY, and COMMON BASED declarations work the same way
+as DECLARE, ARRAY, and BASED declarations.  According to IR-182-1 p. 13-2, 
+
+                1) ARRAY, COMMON, and COMMON ARRAY statements may
+                   not be used to allocate data of type CHARACTER,
+                   and
+                2) BASED and COMMON data of any kind may not be
+                   initialized via the INITIAL feature.
+
+XCOM-I does not share restriction against CHARACTER in COMMON, nor that of 
+INITIAL in COMMON and COMMON ARRAY, so this demo does test those cases.
+
+The printed output from this program should be the same as for bitsizeDemo.xpl
 */
 
-DECLARE 
+COMMON 
         B1 BIT(1) INITIAL("FFFFFFFF"), 
         B2 BIT(2) INITIAL("FFFFFFFF"), 
         B3 BIT(3) INITIAL("FFFFFFFF"), 
@@ -55,24 +52,24 @@ DECLARE
         B32 BIT(32) INITIAL("FFFFFFFF"), 
         F FIXED INITIAL("A5A5A5A5"), 
         C CHARACTER INITIAL('When you wish upon a star');
-DECLARE BS6(5) BIT(6) INITIAL("F0", "F1", "F2", "F3", "F4"),
+COMMON BS6(5) BIT(6) INITIAL("F0", "F1", "F2", "F3", "F4"),
         BS13(5) BIT(13) INITIAL("FFF0", "FFF1", "FFF2", "FFF3", "FFF4"),
         BS27(5) BIT(27) INITIAL("FFFFFF0", "FFFFFF1", "FFFFFF2", "FFFFFF3",
                                 "FFFFFF4"),
         FS(5) FIXED INITIAL(1, 2, 3, 4, 5),
         CS(5) CHARACTER INITIAL('Yes', 'I', 'am', 'so', 'great');
-ARRAY   AB1(5) BIT(1) INITIAL(1111111, 2222222, 3333333, 4444444, 5555555),
+COMMON ARRAY AB1(5) BIT(1) INITIAL(1111111, 2222222, 3333333, 4444444, 5555555),
         AB8(5) BIT(8) INITIAL(1111111, 2222222, 3333333, 4444444, 5555555),
         AB16(5) BIT(16) INITIAL(1111111, 2222222, 3333333, 4444444, 5555555),
         AB32(5) BIT(32) INITIAL(1111111, 2222222, 3333333, 4444444, 5555555),
         AF(5) FIXED INITIAL(1111111, 2222222, 3333333, 4444444, 5555555);
-BASED   BB1 BIT(1),
+COMMON BASED BB1 BIT(1),
         BB8 BIT(8),
         BB16 BIT(16),
         BB32 BIT(32);
-BASED   BF FIXED,
+COMMON BASED BF FIXED,
         BC CHARACTER;
-BASED   BR RECORD:
+COMMON BASED BR RECORD:
                 B1 BIT(1),      /* 0 */
                 B8 BIT(8),      /* 1 */
                 B16 BIT(16),    /* 2 */

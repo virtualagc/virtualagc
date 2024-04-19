@@ -195,22 +195,40 @@ def allocateVariables(scope, extra = None):
         value = (value << 8) | memory[address + 3]
         return value
 
+    '''
     def putBIT16(address, i):
         global memory
         memory[address + 0] = (i >> 8) & 0xFF
         memory[address + 1] = i & 0xFF
+    '''
     
     def getBIT16(address):
         value = memory[address + 0]
         value = (value << 8) | memory[address + 1]
         return value
 
+    '''
     def putBIT8(address, i):
         global memory
         memory[address] = i & 0xFF
+    '''
     
     def getBIT8(address):
         return memory[address]
+    
+    def putBIT(bitWidth, address, value):
+        if bitWidth < 32:
+            value = value & (1 << bitWidth) - 1
+        if bitWidth <= 8:
+            memory[address] = value
+        elif bitWidth <= 16:
+            memory[address] = (value >> 8)
+            memory[address + 1] = value & 0xFF
+        else:
+            memory[address] = (value >> 24)
+            memory[address + 1] = (value >> 16) & 0xFF
+            memory[address + 2] = (value >> 8) & 0xFF
+            memory[address + 3] = value & 0xFF
 
     # Note that unlike the runtime function of the same name, this version of
     # putCHARACTER doesn't need to deal with compactification, since the
@@ -340,22 +358,15 @@ def allocateVariables(scope, extra = None):
             # INITIALize FIXED or BIT variables.
             if "INITIAL" in attributes and \
                     ("FIXED" in attributes or "BIT" in attributes):
-                if attributes["dirWidth"] == 1:
-                    pf = putBIT8
-                elif attributes["dirWidth"] == 2:
-                    pf = putBIT16
+                if "BIT" in attributes:
+                    bitWidth = attributes["BIT"]
                 else:
-                    pf = putFIXED
+                    bitWidth = 32
                 for initialValue in initial:
                     if length <= 0:
                         errxit("Too many initializers", scope)
-                    if "BIT" in attributes:
-                        bitWidth = attributes["BIT"]
-                    else:
-                        bitWidth = 32
-                    bitMask = (1 << bitWidth) - 1
                     if isinstance(initialValue, int):
-                        pf(variableAddress, initialValue & bitMask)
+                        putBIT(bitWidth, variableAddress, initialValue)
                     else:
                         # Not immediately an integer, but perhaps it's an
                         # expression whose value can be computed.  Let's try!
@@ -363,7 +374,7 @@ def allocateVariables(scope, extra = None):
                         tree = parseExpression(tokenized, 0)
                         if tree != None and "token" in tree and \
                                 "number" in tree["token"]:
-                            pf(variableAddress, tree["token"]["number"] & bitMask)
+                            putBIT(bitWidth, variableAddress, tree["token"]["number"])
                         else:
                             errxit("Initializer is not integer", scope);
                     length -= 1
@@ -505,7 +516,7 @@ def generateExpression(scope, expression):
     elif "string" in token:
         tipe = "CHARACTER"
         source = '"' + \
-                 token["string"].replace('"', '\\\"').replace("`", "''") + '"'
+                 token["string"].replace('"', '\\\"').replace("`", "'") + '"'
     elif operator == ".":
         # The operator is the separator between a the name of a  BASED RECORD 
         # (possibly subscripted) and the name of one of its fields (also 
@@ -688,9 +699,16 @@ def generateExpression(scope, expression):
                         for k in range(len(outerParameters)):
                             outerParameter = outerParameters[k]
                             innerParameter = innerParameters[k]
-                            innerAddress = innerScope["variables"][innerParameter]["address"]
+                            innerAttributes = innerScope["variables"]
+                            innerAddress = innerAttributes[innerParameter]["address"]
+                            if "CHARACTER" in innerAttributes:
+                                pfp = "putCHARACTER("
+                            elif "BIT" in innerAttributes:
+                                pfp = "putBIT(%d, " % innerAttributes["BIT"]
+                            else:
+                                pfp = "putFIXED("
                             tipe, parm = generateExpression(scope, outerParameter)
-                            source = source + "put" + tipe + "(" + \
+                            source = source + pfp + \
                                      str(innerAddress) + ", " + parm + "), "
                         source = source + mangled + "() )"
                     if "return" in attributes:
@@ -954,14 +972,8 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     print(indent + "putFIXED(%s, numberRHS);" \
                                     % sourceAddress)
                 elif "BIT" in fieldAttributes:
-                    if fieldAttributes["dirWidth"] == 1:
-                        pf = "putBIT8"
-                    elif fieldAttributes["dirWidth"] == 2:
-                        pf = "putBIT16"
-                    else:
-                        pf = "putFIXED"
-                    print(indent + "%s(%s, numberRHS);" \
-                                    % (pf, sourceAddress))
+                    print(indent + "putBIT(%d, %s, numberRHS);" \
+                                    % (fieldAttributes["BIT"], sourceAddress))
                 else:
                     errxit("Cannot find datatype of field %s.%s" % \
                            (baseName, fieldName))
@@ -975,17 +987,15 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 if "BASED" in attributes:
                     baseAddress = "getFIXED(%s)" % baseAddress
                 if "FIXED" in attributes or "BIT" in attributes:
-                    if attributes["dirWidth"] == 1:
-                        pf = "putBIT8"
-                    elif attributes["dirWidth"] == 2:
-                        pf = "putBIT16"
+                    if "BIT" in attributes:
+                        pfp = "putBIT(%d, " % attributes["BIT"]
                     else:
-                        pf = "putFIXED"
+                        pfp = "putFIXED("
                     if len(children) == 0:
-                        print(indent + "%s(" % pf + baseAddress + ", numberRHS);") 
+                        print(indent + pfp + baseAddress + ", numberRHS);") 
                     elif len(children) == 1:
                         tipeL, sourceL = generateExpression(scope, children[0])
-                        print(indent + "%s(" % pf + baseAddress + \
+                        print(indent + pfp + baseAddress + \
                               "+ %d*(" % attributes["dirWidth"] + \
                               sourceL + "), numberRHS);") 
                     else:
@@ -1068,14 +1078,15 @@ def generateSingleLine(scope, indent, line, indexInScope):
             errxit("Subscripted loop variables not supported.")
         attributes = getAttributes(scope, variable)
         address = attributes["address"]
+        if "BIT" in attributes:
+            pfp = "putBIT(%d, " % attributes["BIT"]
+        else:
+            pfp = "putFIXED("
         if attributes["dirWidth"] == 1:
-            pf = "putBIT8"
             gf = "getBIT8"
         elif attributes["dirWidth"] == 2:
-            pf = "putBIT16"
             gf = "getBIT16"
         else:
-            pf = "putFIXED"
             gf = "getFIXED"
         print(indent2 + "int32_t %s, %s, %s;" % (fromName, toName, byName))
         tipe, source = generateExpression(scope, line["from"])
@@ -1084,12 +1095,12 @@ def generateSingleLine(scope, indent, line, indexInScope):
         print(indent2 + toName + " = " + source + ";")
         tipe, source = generateExpression(scope, line["by"])
         print(indent2 + byName + " = " + source + ";")
-        print((indent2 + "for (%s(%d, %s);\n" + \
+        print((indent2 + "for (%s%d, %s);\n" + \
                indent2 + "     %s(%d) <= %s;\n" + \
-               indent2 + "     %s(%d, %s(%d) + %s)) {" ) \
-              % (pf, address, fromName, 
+               indent2 + "     %s%d, %s(%d) + %s)) {" ) \
+              % (pfp, address, fromName, 
                  gf, address, toName, 
-                 pf, address, gf, address, byName))
+                 pfp, address, gf, address, byName))
     elif "WHILE" in line:
         tipe, source = generateExpression(scope, line["WHILE"])
         print(indent + "while (1 & (" + source + ")) {")
@@ -1175,9 +1186,15 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     for k in range(len(outerParameters)):
                         outerParameter = outerParameters[k]
                         innerParameter = innerParameters[k]
-                        innerAddress = innerScope["variables"][innerParameter]["address"]
+                        innerAttributes = innerScope["variables"][innerParameter]
+                        innerAddress = innerAttributes["address"]
+                        pf = "putFIXED"
+                        if "CHARACTER" in innerAttributes:
+                            pf = "putCHARACTER"
+                        elif "BIT" in innerAttributes:
+                            pfp = "putBIT(%d, " % innerAttributes["BIT"]
                         tipe, parm = generateExpression(scope, outerParameter)
-                        print(indent2 + "put" + tipe + "(" + \
+                        print(indent2 + pfp + \
                                  str(innerAddress) + ", " + parm + "); ")
                     print(indent2 + mangled + "();")
                     print(indent + "}")

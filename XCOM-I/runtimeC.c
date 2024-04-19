@@ -327,11 +327,13 @@ getBIT8(uint32_t address)
   return memory[address];
 }
 
+/*
 void
 putBIT8(uint32_t address, uint8_t value)
 {
   memory[address] = value;
 }
+*/
 
 uint16_t
 getBIT16(uint32_t address)
@@ -343,11 +345,42 @@ getBIT16(uint32_t address)
   return value;
 }
 
+/*
 void
 putBIT16(uint32_t address, uint16_t value)
 {
   memory[address++] = (value >> 8) & 0xFF;
   memory[address] = value & 0xFF;
+}
+*/
+
+/*
+ * I didn't know this previously, but found out while writing the function
+ * below:  In C, if you do a left-shift of 32 bits or more on a 32-bit integer,
+ * the result is undefined.  I would have assumed it's 0.  Live and learn.
+ */
+void
+putBIT(uint32_t bitWidth, uint32_t address, uint32_t value)
+{
+  int mask;
+  if (bitWidth < 32)
+    value &= (1 << bitWidth) - 1;
+  if (bitWidth <= 8)
+    {
+      memory[address] = value;
+    }
+  else if (bitWidth <= 16)
+    {
+      memory[address++] = (value >> 8);
+      memory[address] = value & 0xFF;
+    }
+  else
+    {
+      memory[address++] = (value >> 24);
+      memory[address++] = (value >> 16) & 0xFF;
+      memory[address++] = (value >> 8) & 0xFF;
+      memory[address] = value & 0xFF;
+    }
 }
 
 
@@ -1668,7 +1701,7 @@ readCOMMON(FILE *fp) {
           return -1;
         }
     }
-  printMemoryMap("--- COMMON ---");
+  //printMemoryMap("--- COMMON ---");
   return 0;
 }
 

@@ -2,12 +2,23 @@
 #		in the U.S., and can be freely distributed or modified in 
 #		any desired way whatsoever.
 # Filename:	Makefile
-# Purpose:	For building C-language source-code output from the XCOM-I.py
-#		XPL/I-to-C translator program.  This Makefile does *not* build 
-#		XCOM-I itself.
+# Purpose:	1. For building C-language source-code output from the XCOM-I.py
+#		   XPL/I-to-C translator program.  
+#		2. For running tests on the XCOM-I system.
+#		3. This Makefile does *not* build XCOM-I itself, since XCOM-I
+#		   is a Python script, which does not require any building.
 # Reference:	https://www.ibiblio.org/apollo/Shuttle.html
 # Contact:	info@sandroid.org
 # Mod history:	2024-03-30 RSB	Wrote
+#
+# Compiling C-language Source-Code Files Created by XCOM-I
+# --------------------------------------------------------
+#
+# If XCOM-I has translated an XPL or XPL/I program to C, it has moved all of
+# the C source-code files (and this Makefile) into a separate project folder
+# usually named after the original XPL source-code file it has translated.
+# You can `cd` into that project folder and follow the instructions below to
+# compile those C-language files into an executable.
 #
 # You can build the executable from the C source code simply with
 #	make
@@ -43,6 +54,37 @@
 #	marks need to be present if there are any spaces in the options.
 #	For `gcc` or its variants:
 #		make DEBUG=-ggdb
+#
+# Running Tests on the XCOM-I System
+# ----------------------------------
+#
+# Included with the source code for the XCOM-I program itself is a folder
+# (Tests/) which contains various XPL and XPL/I sample programs.  A number of
+# those sample programs are intended to be tests of XCOM-I itself.  The 
+# instructions below explain how to run those tests.
+#
+#	NOTE: These tests have been tailored for my own system,
+#	which runs Linux.  I'm sure they would require adaptation
+#	on Windows or Mac OS, because the extra utility programs
+#	needed to complete some of the tests are either different
+#	or else have somewhat different syntax on those other
+#	platforms.
+#
+# First, `cd` into the folder containing the XCOM-I.py source code.  A copy
+# of this Makefile will also be in that folder.  (But this Makefile may be in
+# other folders as well, so don't let that confuse you.)
+#
+# Second, use the command `make tests`.  Note that the CC alternative described
+# in the preceding section can be used to change the compiler name.
+#
+# This process should now have created various additional folders, with names
+# like bitsizeDemo/, bitsizeDemoCommon/, and so forth, which contain the 
+# executables for the XPL test programs it has built, and possibly test
+# results for them.  (If folders by that name previously existed, they have 
+# been removed.)
+#
+# Some tests may be automated, while others may require manual inspection of
+# output files saved by the tests.  The manual inspections needed are TBD.
 
 TARGET = $(notdir $(CURDIR))
 ifeq ($(strip $(CC)),)
@@ -55,6 +97,9 @@ endif
 SOURCES = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
 
+#----------------------------------------------------------------------------
+# For building C-language files.
+
 .PHONY: all
 all: $(TARGET)
 
@@ -66,3 +111,22 @@ clean:
 	-rm $(TARGET)	# For Linux or Mac
 	-del $(TARGET)	# For Windows
 
+#----------------------------------------------------------------------------
+# For running test suite.
+
+TESTAPPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
+
+.PHONY: testclean
+testclean:
+	-rm $(TESTAPPS) -rf
+
+.PHONY: tests
+tests: testclean $(TESTAPPS)
+	echo Done
+	
+.PHONY: $(TESTAPPS)
+$(TESTAPPS): 
+	mkdir $@
+	XCOM-I.py --verbose --output=$@ Tests/$@.xpl
+	$(CC) -o $@/$@ $(wildcard $@/*.c)
+	

@@ -74,12 +74,14 @@ putFIXED(uint32_t address, int32_t value);
 // needed.
 uint8_t
 getBIT8(uint32_t address);
-void
-putBIT8(uint32_t address, uint8_t value);
+//void
+//putBIT8(uint32_t address, uint8_t value);
 uint16_t
 getBIT16(uint32_t address);
+//void
+//putBIT16(uint32_t address, uint16_t value);
 void
-putBIT16(uint32_t address, uint16_t value);
+putBIT(uint32_t bitWidth, uint32_t address, uint32_t value);
 
 // Same for XPL `CHARACTER` type.
 char *
