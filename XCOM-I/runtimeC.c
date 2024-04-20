@@ -64,10 +64,11 @@ struct timeval startTime;
 // Memory-management stuff.
 static uint32_t freepoint = FREE_POINT;
 
+int linesPerPage = 59;
 int
 parseCommandLine(int argc, char **argv)
 {
-  int i, returnValue = 0;
+  int i, j, returnValue = 0;
   FILE *COMMON_IN = NULL;
   gettimeofday(&startTime, NULL);
   DD_INS[0] = DD_INS[1] = stdin;
@@ -215,6 +216,8 @@ parseCommandLine(int argc, char **argv)
               exit(1);
             }
         }
+      else if (1 == sscanf(argv[i], "--linect=%d", &j))
+        linesPerPage = j;
       else if (!strcmp("--help", argv[i]))
         {
           printf("\n");
@@ -254,6 +257,9 @@ parseCommandLine(int argc, char **argv)
           printf("--commono=F   Name of the file to which data from COMMON\n");
           printf("              is written upon program termination.  By\n");
           printf("              default, the file COMMON.out is used.\n");
+          printf("--linect=N    (Default 59) Sets the lines per page for the\n");
+          printf("              purpose of pagination with XPL built-ins\n");
+          printf("              OUTPUT(0) and OUTPUT(1).\n");
           printf("\n");
           returnValue = 1;
         }
@@ -600,7 +606,7 @@ xGE(int32_t i1, int32_t i2) {
 
 int32_t
 xNOT(int32_t i1) {
-  return ~i1 ^ 1;
+  return ~i1;
 }
 
 int32_t
@@ -700,7 +706,6 @@ string_t headingLine = "";
 string_t subHeadingLine = "";
 int pageCount = 0;
 int LINE_COUNT = 0;
-int linesPerPage = 59;  // Should get this from LINECT parameter.
 #define MAX_QUEUE 10
 void
 OUTPUT(uint32_t lun, char *string) {

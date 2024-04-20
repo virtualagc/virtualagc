@@ -699,8 +699,8 @@ def generateExpression(scope, expression):
                         for k in range(len(outerParameters)):
                             outerParameter = outerParameters[k]
                             innerParameter = innerParameters[k]
-                            innerAttributes = innerScope["variables"]
-                            innerAddress = innerAttributes[innerParameter]["address"]
+                            innerAttributes = innerScope["variables"][innerParameter]
+                            innerAddress = innerAttributes["address"]
                             if "CHARACTER" in innerAttributes:
                                 pfp = "putCHARACTER("
                             elif "BIT" in innerAttributes:
@@ -1188,9 +1188,9 @@ def generateSingleLine(scope, indent, line, indexInScope):
                         innerParameter = innerParameters[k]
                         innerAttributes = innerScope["variables"][innerParameter]
                         innerAddress = innerAttributes["address"]
-                        pf = "putFIXED"
+                        pfp = "putFIXED("
                         if "CHARACTER" in innerAttributes:
-                            pf = "putCHARACTER"
+                            pfp = "putCHARACTER("
                         elif "BIT" in innerAttributes:
                             pfp = "putBIT(%d, " % innerAttributes["BIT"]
                         tipe, parm = generateExpression(scope, outerParameter)
@@ -1587,6 +1587,7 @@ def generateC(globalScope):
         print("#define BFS", file=f)
     if standardXPL:
         print("#define STANDARD_XPL", file=f)
+    #print("#define LINECT %d" % linect, file=f)
     print("#define COMMON_BASE 0x%06X" % commonBase, file=f)
     print("#define NON_COMMON_BASE 0x%06X" % nonCommonBase, file=f)
     print("#define FREE_BASE 0x%06X" % freeBase, file=f)

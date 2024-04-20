@@ -120,13 +120,49 @@ TESTAPPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
 testclean:
 	-rm $(TESTAPPS) -rf
 
-.PHONY: tests
-tests: testclean $(TESTAPPS)
-	echo Done
-	
 .PHONY: $(TESTAPPS)
 $(TESTAPPS): 
 	mkdir $@
-	XCOM-I.py --verbose --output=$@ Tests/$@.xpl
-	$(CC) -o $@/$@ $(wildcard $@/*.c)
+	XCOM-I.py Tests/$@.xpl
+	$(CC) -o $@/$@ $@/*.c
+
+# Here are the principles behind the tests:
+#   1.	The printed output from bitsizeDemo should be internally consistent.
+#	I.e., the printed contents of the variables should initially match
+#	those of the declaration statements' INITIAL clauses, and then later
+#	should match those of the subsequent assignments.  Additionally, the
+#	reported memory allocations should be correct in both size and location.
+#	*** Checking that is manual, and `make tests` only creates the file
+#	(out.txt) that should be examined manually for correctness. ***
+#   2.	The printed output from bitsizeDemo and bitsizeDemoCommon should be 
+#	identical.  That's checked automatically.
+#   3.  The COMMON output produced by bitsizeDemoCommon should be the input
+#	COMMON used by bitsizeDemoCommonIn.  That's done automatically.
+#   4.	The printed output of bitsizeDemoCommon should match the printed output
+#	of bitsizeDemoCommonIn, *after* various irrelevancies are stripped out:
+#	i.e., sections not expected to match; blank lines; page headings. 
+#	 That's all done and checked automatically.
+.PHONY: tests
+tests: testclean $(TESTAPPS)
+	cd bitsizeDemo && \
+	./bitsizeDemo >out.txt
+	
+	cd bitsizeDemoCommon && \
+	./bitsizeDemoCommon >out.txt && \
+	csplit out.txt '%^Address Allocations .*%' \
+		       '/^Initial Values .*/' \
+		       '%^Assignments .*%' >/dev/null && \
+	cat xx00 xx01 | \
+	egrep --invert-match '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' > xxxx
+	
+	diff -s -q bitsizeDemo/out.txt bitsizeDemoCommon/out.txt
+	
+	cd bitsizeDemoCommonIn && \
+	./bitsizeDemoCommonIn --commoni=../bitsizeDemoCommon/COMMON.out >out.txt && \
+	csplit out.txt '%^Address Allocations .*%' >/dev/null && \
+	cat xx00 | \
+	egrep --invert-match '(^Address Allocations |^COMMON |^.PAGE [0-9]|^$$)' > xxxx
+	
+	diff -s -q bitsizeDemoCommon/xxxx bitsizeDemoCommonIn/xxxx
+	
 	

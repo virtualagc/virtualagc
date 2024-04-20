@@ -20,12 +20,12 @@ condA = False
 condC = False
 inputFilenames = []
 targetLanguage = "C"
-outputFolder = "C_Output"
+outputFolder = None
 indent = "  "
 debugSink = None
 lines = [] # One line of source code per entry.
 sourceFiles = [] # One entry for each entry in lines[]; source filename for line.
-verbose = False
+verbose = True
 includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 baseSource = ""
 adhocs = {}
@@ -116,13 +116,18 @@ The available OPTIONS are:
               times.  In hindsight, it doesn't seem useful.
 --target=L    (Default C) Set the target language for object-code.
               Only C is presently supported.
---output=F    (Default C_Output) Name of the folder to store output files.
+--output=F    (Default is the base-name of the first XPL source-code file
+              given on the command line.) Name of the folder to store output 
+              files.
 --indent=N    (Default 2) Set the indentation width for C-language source code.
               This is purely cosmetic effect to make it more pleasant to read
               the code output by XCOM-I.
 --debug=D     Print extra debugging messages to device D.  D is either stdout 
               or stderr.
---verbose     Embed extra comments in C source code, useful for debugging.
+--verbose     The --verbose switch (which is the default) embeds extra comments
+--concise     in the generated C source code, useful for debugging, or just for
+              improved human readability.  Whereas the --concise switch instead
+              eliminates those extra comments, producing smaller C file sizes.
 '''
 #--null=N      (Default 1) Selects from among several alternative
 #              implementations for empty strings, because the surviving
@@ -164,6 +169,8 @@ for parm in sys.argv[1:]:
             sys.exit(1)
     elif parm == "--verbose":
         verbose = True
+    elif parm == "--concise":
+        verbose = False
     elif parm.startswith("--target="):
         targetLanguage = parm[9:].upper()
         if targetLanguage not in ["C"]:
@@ -182,6 +189,10 @@ for parm in sys.argv[1:]:
             f = open("temp.xpl", "w")
             f.writelines(lines)
             f.close()
+        if outputFolder == None:
+            head, tail = os.path.split(parm)
+            name, ext = os.path.splitext(tail)
+            outputFolder = name
 
 # All of the source code is now in lines[].  Massage it a bit.
 for i in range(len(lines)):
