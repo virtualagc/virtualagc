@@ -115,6 +115,7 @@ clean:
 # For running test suite.
 
 TESTAPPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
+TESTAPPS += Example-6.18.3 Example-6.18.4 Example-6.18.5 Example-6.18.6
 
 .PHONY: testclean
 testclean:
@@ -124,7 +125,7 @@ testclean:
 $(TESTAPPS): 
 	mkdir $@
 	XCOM-I.py Tests/$@.xpl
-	$(CC) -o $@/$@ $@/*.c
+	$(CC) $(DEBUG) -o $@/$@ $@/*.c
 
 # Here are the principles behind the tests:
 #   1.	The printed output from bitsizeDemo should be internally consistent.

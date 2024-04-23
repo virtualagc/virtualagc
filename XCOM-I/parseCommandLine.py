@@ -30,6 +30,18 @@ includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 baseSource = ""
 adhocs = {}
 standardXPL = False
+# The characters used internally to replace spaces and duplicated single-quotes
+# within quoted strings.  The exact values aren't important, except insofar as
+# they shouldn't be something that would otherwise appear in XPL strings, but
+# which are characters that won't cause Python to have a
+# conniption.  I've chosen DC2 and DC4 control characters because they're the
+# same in ASCII & EBCDIC, but that's just arbitrary.  I originally used
+# ~ and ` since they weren't in the character set originally supported by XPL,
+# but I've realized belately that my own instructions that logical-not and
+# U.S.-cent should be replaced by them make it likely that they could in fact
+# appear in strings *now*, particularly for macro definitions.
+replacementQuote = "\x12"
+replacementSpace = "\x14"
 # Folder where XCOM-I.py itself is.
 basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
 

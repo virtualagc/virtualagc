@@ -31,6 +31,11 @@ parseCommandLine(int argc, char **argv);
 
 #define MAX_XPL_STRING 256
 typedef char string_t[MAX_XPL_STRING];
+typedef struct {
+  uint16_t bitWidth;
+  uint16_t numBytes;
+  uint8_t bytes[MAX_XPL_STRING];
+} bit_t;
 
 // XPL variables are *not* translated as C variables.  Rather, they are
 // translated as sequences of bytes in the following buffer.
@@ -69,19 +74,13 @@ getFIXED(uint32_t address);
 void
 putFIXED(uint32_t address, int32_t value);
 
-// Same for XPL `BIT` types.  Note that only `BIT(1)` through `BIT(32)` is
-// supported, and if longer `BIT(n)` is needed, then some modification is
-// needed.
-uint8_t
-getBIT8(uint32_t address);
-//void
-//putBIT8(uint32_t address, uint8_t value);
-uint16_t
-getBIT16(uint32_t address);
-//void
-//putBIT16(uint32_t address, uint16_t value);
+// Same for XPL `BIT` types.  Note that the `address` parameter for `getBIT`
+// or `putBIT` must be one that can be found using `lookupAddress` in
+// runtimeC.c.
+bit_t *
+getBIT(uint32_t address);
 void
-putBIT(uint32_t bitWidth, uint32_t address, uint32_t value);
+putBIT(uint32_t address, bit_t *value);
 
 // Same for XPL `CHARACTER` type.
 char *
@@ -92,6 +91,14 @@ putCHARACTER(uint32_t address, char *s);
 // Convert a FIXED to a CHARACTER.
 char *
 fixedToCharacter(int32_t i);
+
+// Convert a BIT(1) through BIT(32) to FIXED.
+int32_t
+bitToFixed(bit_t *value);
+
+// Convert FIXED to BIT(32).
+bit_t *
+fixedToBit(uint32_t bitWidth, int32_t value);
 
 // Functions to perform various kinds of arithmetic.
 int32_t
@@ -106,36 +113,36 @@ int32_t
 xdivide(int32_t i1, int32_t i2);
 int32_t
 xmod(int32_t i1, int32_t i2);
-int32_t
+bit_t *
 xEQ(int32_t i1, int32_t i2);
-int32_t
+bit_t *
 xLT(int32_t i1, int32_t i2);
-int32_t
+bit_t *
 xGT(int32_t i1, int32_t i2);
-int32_t
+bit_t *
 xNEQ(int32_t i1, int32_t i2);
-int32_t
+bit_t *
 xLE(int32_t i1, int32_t i2);
-int32_t
+bit_t *
 xGE(int32_t i1, int32_t i2);
-int32_t
-xNOT(int32_t i1);
-int32_t
-xOR(int32_t i1, int32_t i2);
-int32_t
-xAND(int32_t i1, int32_t i2);
+bit_t *
+xNOT(bit_t *i1);
+bit_t *
+xOR(bit_t *i1, bit_t *i2);
+bit_t *
+xAND(bit_t *i1, bit_t *i2);
 
-int32_t
+bit_t *
 xsEQ(char *s1, char *s2);
-int32_t
+bit_t *
 xsLT(char *s1, char *s2);
-int32_t
+bit_t *
 xsGT(char *s1, char *s2);
-int32_t
+bit_t *
 xsNEQ(char *s1, char *s2);
-int32_t
+bit_t *
 xsLE(char *s1, char *s2);
-int32_t
+bit_t *
 xsGE(char *s1, char *s2);
 
 char *

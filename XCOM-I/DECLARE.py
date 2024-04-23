@@ -13,7 +13,7 @@ Mods:       2024-03-07 RSB  Began experimenting with this concept.
 import copy
 import re
 from auxiliary import error, expandAllMacrosInString
-from parseCommandLine import pfs, condA, condC
+from parseCommandLine import pfs, condA, condC, replacementSpace, replacementQuote
 
 # Converts strings like decimal, 0x hex, or 0b binary to integer.
 def integer(s):
@@ -57,11 +57,12 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
     
         #print("Processing declaration: %s" % pseudoStatement)
         # Let's temporarily replace all spaces inside quoted strings 
-        # with the otherwise-unused character '~'.  That'll help us
-        # split the pseudo-statement into fields, after which we can 
+        # with the otherwise-unused character `replacmentSpace`.  That'll help 
+        # us split the pseudo-statement into fields, after which we can 
         # restore those spaces.  Note that the calling code has already 
-        # replace all single-quotes inside of quoted strings by the 
-        # character '`', so we can split on single-quotes without fear.
+        # replaced all single-quotes inside of quoted strings by the 
+        # character `replacementQuote`, so we can split on single-quotes 
+        # without fear.
         fields = pseudoStatement.split("'")
         for i in range(0, len(fields), 2):
             fields[i] = fields[i].replace(",", " , ")
@@ -71,7 +72,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
             fields[i] = fields[i].replace(")", " ) ")
             fields[i] = fields[i].replace("  ", " ")
         for i in range(1, len(fields), 2):
-            fields[i] = fields[i].replace(" ", "~")
+            fields[i] = fields[i].replace(" ", replacementSpace)
         pseudoStatement = "'".join(fields)
         fields = pseudoStatement.strip().split()
         if inRecord:
@@ -207,7 +208,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         token = re.sub("\"([0-9A-F]+)\"", \
                                        "0x\\1", token)
                         token = token[1:-1]\
-                                        .replace("~", " ").replace("`", "'")
+                                .replace(replacementSpace, " ")\
+                                .replace(replacementQuote, "'")
                         # There's one final ghastliness to account for, and
                         # that's the use of macros in which the replacement
                         # string contains somewhere within it something like:
@@ -241,10 +243,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                                 properties["dirWidth"] = 1
                             elif bitSize <= 16:
                                 properties["dirWidth"] = 2
-                            elif bitSize <= 32:
-                                properties["dirWidth"] = 4
                             else:
-                                error("Unsupported BIT size (%d)" % bitSize, scope)
+                                properties["dirWidth"] = 4
                         inBit = False
                         skip = 1
                     elif inInitial:
@@ -252,16 +252,25 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                             pass
                         elif token == ")":
                             properties[typeInitial] = initial
+                            initial = None
                             inInitial = False
                         else:
                             if "CHARACTER" in properties:
-                                token = token[1:-1]\
-                                        .replace("~", " ").replace("`", "'")
+                                # I don't know if it was possible back in the
+                                # day, but I conceive of the initializer being
+                                # an integer, in which case we need to promote
+                                # it to a string.
+                                if token.isdigit():
+                                    pass
+                                else:
+                                    token = token[1:-1]\
+                                        .replace(replacementSpace, " ")\
+                                        .replace(replacementQuote, "'")
                             elif "BIT" in properties or \
                                     "FIXED" in properties:
                                 token = integer(token)
                             else:
-                                token = float(token)
+                                error("Datatype cannot have INITIAL", scope)
                             if "top" in properties:
                                 if initial == None:
                                     initial = []

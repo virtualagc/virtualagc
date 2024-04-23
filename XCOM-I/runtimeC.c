@@ -28,27 +28,34 @@
 #include <sys/time.h> // For gettimeofday().
 
 // `nextBuffer` is sort of a cut-rate memory-management system for builtins
-// that return string values.  In order to avoid having to allocate new memory
-// for such outputs, we instead maintain a circular array of string_t's, and
-// each call to a builtin that returns a string simply uses the next string_t
-// in that array.  The reason this is okay, is that functions returning strings
-// are invoked only in the context of expressions, and the number of function
-// calls an expression can make isn't very large, in a practical sense.
-// So we can just make the circular array very large and not
-// worry about it.  I hope.  (Not that allocating memory for the outputs of the
-// builtins would be a problem, but there's no mechanism for freeing that
-// memory afterward.)
+// that return CHARACTER values or BIT values.  In order to avoid having to
+// allocate new memory for such outputs, or more importantly to free such
+// memory later, we instead maintain a circular array of buffers, and
+// each call to a builtin that returns a string or a BIT simply uses the next
+// buffer in that array.  The reason this is okay, is that functions returning
+// strings or BITs are invoked only in the context of expressions, and the
+// number of function calls an expression can make isn't very large. So we can
+// just make the circular array very large and not worry about it.  I hope.
 #define MAX_BUFFS 1024
-static char *
+static void *
 nextBuffer(void)
 {
-  static string_t buffers[MAX_BUFFS];
+  static union {
+    // Note that these fields aren't every actually *used* by these names,
+    // outside of this function. They're mainly here to get the amount of
+    // storage correct.  I.e., so that the returned pointer is guaranteed to
+    // contain enough storage.
+    string_t stringBuffer;
+    bit_t bitBuffer;
+  } buffers[MAX_BUFFS];
   static int currentBuffer;
-  char *returnValue = buffers[currentBuffer++];
+  void *returnValue = &(buffers[currentBuffer++]);
   if (currentBuffer >= MAX_BUFFS)
     currentBuffer = 0;
-  *returnValue = 0;     // Clear the string.
-  return returnValue;
+  // Clear the string (by NUL-terminating it) or the BIT (by setting its width
+  // fields to 0).
+  *((uint32_t *) returnValue) = 0;
+  return (void *) returnValue;
 }
 
 // Global variables extern'd in runtimeC.h:
@@ -306,6 +313,74 @@ parseCommandLine(int argc, char **argv)
   return returnValue;
 }
 
+// Used only by `lookupAddress`.
+static int
+cmpAddresses(const void *e1, const void *e2)
+{
+  return ((memoryMapEntry_t *) e1)->address -
+         ((memoryMapEntry_t *) e2)->address;
+}
+
+// Used only by `lookupVariable` and `ADDR`.
+static int
+cmpMapSymbols(const void *e1, const void *e2) {
+  return strcasecmp((*(memoryMapEntry_t **) e1)->symbol,
+                    (*(memoryMapEntry_t **) e2)->symbol);
+}
+
+// Look up the `memoryMap` entry associated with a given address.  Returns
+// either a pointer to the record, or else NULL if not found.
+static memoryMapEntry_t *
+lookupAddress(uint32_t address)
+{
+  memoryMapEntry_t key, *found;
+  key.address = address;
+  found = bsearch(&key, memoryMap, NUM_SYMBOLS,
+                  sizeof(memoryMapEntry_t), cmpAddresses);
+  return found;
+}
+
+// Similar to `loopupAddress`, but we're looking for the entry with the given
+// address, or failing that, the closest address smaller than that.  We're
+// guaranteed that there are no duplicates.  It's a curious omission, but there
+// seems to be no library function in C for this kind of a commonly-desired
+// search, so we have to roll our own binary search.
+static memoryMapEntry_t *
+lookupFloor(uint32_t address)
+{
+  int start = 0, end = NUM_SYMBOLS, current;
+  memoryMapEntry_t *found;
+  while (end > start + 1)
+    {
+      current = (start + end) / 2;
+      found = &memoryMap[current];
+      if (found->address == address)
+        return found;
+      if (found->address > address)
+        end = current;
+      else
+        start = current;
+    }
+  return &memoryMap[start];
+}
+
+// Look up the `memoryMap` entry associated with a given variable name.
+// Returns either a pointer to the record, or else NULL if not found.
+static memoryMapEntry_t *
+lookupVariable(char *symbol)
+{
+  memoryMapEntry_t **found, key, *keyp = &key;
+  // Note that since `memoryMapBySymbol` contains pointers to
+  // `memoryMapEntry_t`, then the key for the binary search must
+  // also be a pointer to a memoryMapEntry_t.
+  strcpy(key.symbol, symbol);
+  found = bsearch(&keyp, &memoryMapBySymbol, NUM_SYMBOLS,
+                  sizeof(memoryMapEntry_t *), cmpMapSymbols);
+  if (found == NULL)
+    return NULL;
+  return *found;
+}
+
 int32_t
 getFIXED(uint32_t address)
 {
@@ -327,68 +402,70 @@ putFIXED(uint32_t address, int32_t value)
   memory[address] = value & 0xFF;
 }
 
-uint8_t
-getBIT8(uint32_t address)
+bit_t *
+getBIT(uint32_t address)
 {
-  return memory[address];
-}
-
-/*
-void
-putBIT8(uint32_t address, uint8_t value)
-{
-  memory[address] = value;
-}
-*/
-
-uint16_t
-getBIT16(uint32_t address)
-{
-  int16_t value;
-  // Convert from big-endian to native format.
-  value = memory[address++];
-  value = (value << 8) | memory[address];
+  bit_t *value = nextBuffer();
+  memoryMapEntry_t *memoryMapEntry = lookupFloor(address);;
+  uint32_t numBytes, bitWidth;
+  if (memoryMapEntry == NULL)
+    {
+      fprintf(stderr, "Address %06X not found in getBIT.\n", address);
+      exit(1);
+    }
+  bitWidth = memoryMapEntry->bitWidth;
+  numBytes = (bitWidth + 7) / 8;
+  if (numBytes == 3) // BIT(17) through BIT(24) uses 4 bytes.
+    numBytes = 4;
+  if (bitWidth > 32)
+    {
+      uint32_t descriptor;
+      descriptor = getFIXED(address);
+      if (numBytes - 1 != descriptor >> 8)
+        {
+          fprintf(stderr, "Implementation error: BIT widths don't match.\n");
+          exit(1);
+        }
+      address = descriptor & 0xFFFFFF;
+    }
+  value->bitWidth = bitWidth;
+  value->numBytes = numBytes;
+  memcpy(value->bytes, &memory[address], numBytes);
   return value;
 }
 
-/*
 void
-putBIT16(uint32_t address, uint16_t value)
+putBIT(uint32_t address, bit_t *value)
 {
-  memory[address++] = (value >> 8) & 0xFF;
-  memory[address] = value & 0xFF;
+  memoryMapEntry_t *memoryMapEntry = lookupFloor(address);;
+  uint32_t numBytes, bitWidth, maskWidth, maskAddress = address;
+  if (memoryMapEntry == NULL)
+    {
+      fprintf(stderr, "Address %06X not found in putBIT.\n", address);
+      exit(1);
+    }
+  bitWidth = memoryMapEntry->bitWidth;
+  numBytes = (bitWidth + 7) / 8;
+  if (numBytes == 3) // BIT(17) through BIT(24) uses 4 bytes.
+    maskAddress++;
+    numBytes = 4;
+  if (bitWidth > 32)
+    {
+      uint32_t descriptor;
+      descriptor = getFIXED(address);
+      if (value->numBytes != descriptor >> 8)
+        {
+          fprintf(stderr, "Implementation error: BIT widths don't match.\n");
+          exit(1);
+        }
+      address = descriptor & 0xFFFFFF;
+      maskAddress = address;
+    }
+  memcpy(&memory[address], value->bytes, numBytes);
+  maskWidth = bitWidth % 8;
+  if (maskWidth)
+    memory[maskAddress] &= (1 << maskWidth) - 1;
 }
-*/
-
-/*
- * I didn't know this previously, but found out while writing the function
- * below:  In C, if you do a left-shift of 32 bits or more on a 32-bit integer,
- * the result is undefined.  I would have assumed it's 0.  Live and learn.
- */
-void
-putBIT(uint32_t bitWidth, uint32_t address, uint32_t value)
-{
-  int mask;
-  if (bitWidth < 32)
-    value &= (1 << bitWidth) - 1;
-  if (bitWidth <= 8)
-    {
-      memory[address] = value;
-    }
-  else if (bitWidth <= 16)
-    {
-      memory[address++] = (value >> 8);
-      memory[address] = value & 0xFF;
-    }
-  else
-    {
-      memory[address++] = (value >> 24);
-      memory[address++] = (value >> 16) & 0xFF;
-      memory[address++] = (value >> 8) & 0xFF;
-      memory[address] = value & 0xFF;
-    }
-}
-
 
 // The table below was adapted from the table of the same name in
 // the Virtual AGC source tree.  The table is indexed on the numeric
@@ -537,6 +614,77 @@ fixedToCharacter(int32_t i) {
   return returnString;
 }
 
+// Convert a BIT(1) through BIT(32) to FIXED.  As near as I can figure (see
+// ps. 137 and 139 of McKeenan), BIT(1) through BIT(15) are treated as unsigned,
+// whereas BIT(16) is sign-extended.  I don't actually see that BIT(17) through
+// BIT(32) are converted at all ... but I do anyway, sign-extending them.
+// As for BIT(33) and up ... again, I don't think anything is supposed to
+// happen, but I'll just take the lowest 32 bits.
+int32_t
+bitToFixed(bit_t *value)
+{
+  int32_t fixed, numBytes, bitWidth, dirWidth;
+  uint8_t *bytes;
+  bitWidth = value->bitWidth;
+  numBytes = value->numBytes;
+  bytes = (uint8_t *) &(value->bytes);
+  if (bitWidth <= 8)
+    return bytes[0];
+  if (bitWidth <= 15)
+    return (bytes[0] << 8) | bytes[1];
+  if (bitWidth > 16)
+    dirWidth = 4;
+  else
+    dirWidth = 2;
+  if (bitWidth <= 32)
+    {
+      int signBit = 0;
+      if (dirWidth == 4)
+        fixed = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+      else
+        fixed = (bytes[0] << 8) | bytes[1];
+      signBit = fixed & (1 << (bitWidth - 1));
+      if (bitWidth <= 31 && signBit != 0 ) // sign extend.
+        {
+          int mask = (1 << bitWidth) - 1;
+          mask = ~mask;
+          fixed |= mask;
+        }
+      return fixed;
+    }
+  numBytes = (bitWidth + 7) / 8;
+  fixed = (bytes[numBytes - 4] << 24) | (bytes[numBytes - 3] << 16) |
+          (bytes[numBytes - 2] << 8)  | bytes[numBytes - 1];
+  return fixed;
+}
+
+bit_t *
+fixedToBit(uint32_t bitWidth, int32_t value)
+{
+  bit_t *buffer = (bit_t *) nextBuffer();
+  int i, mask;
+  uint32_t numBytes;
+  if (bitWidth > 32)
+    bitWidth = 32;
+  buffer->bitWidth = bitWidth;
+  numBytes = (bitWidth + 7) / 8;
+  if (numBytes == 3)
+    numBytes = 4;
+  buffer->numBytes = numBytes;
+  for (i = numBytes - 1; i > -1; i--, bitWidth -= 8)
+    {
+      if (bitWidth <= 0)
+        mask = 0;
+      else if (bitWidth < 8)
+        mask = (1 << bitWidth) - 1;
+      else
+        mask = 0xFF;
+      buffer->bytes[i] = value & mask;
+      value = value >> 8;
+    }
+  return buffer;
+}
+
 int32_t
 xadd(int32_t i1, int32_t i2)
 {
@@ -573,57 +721,139 @@ xmod(int32_t i1, int32_t i2)
   return i1 % i2;
 }
 
-int32_t
+bit_t *
 xEQ(int32_t i1, int32_t i2)
 {
-  return i1 == i2;
+  return fixedToBit(1, i1 == i2);
 }
 
-int32_t
+bit_t *
 xLT(int32_t i1, int32_t i2) {
-  return i1 < i2;
+  return fixedToBit(1, i1 < i2);
 }
 
-int32_t
+bit_t *
 xGT(int32_t i1, int32_t i2) {
-  return i1 > i2;
+  return fixedToBit(1, i1 > i2);
 }
 
-int32_t
+bit_t *
 xNEQ(int32_t i1, int32_t i2) {
-  return i1 != i2;
+  return fixedToBit(1, i1 != i2);
 }
 
-int32_t
+bit_t *
 xLE(int32_t i1, int32_t i2) {
-  return i1 <= i2;
+  return fixedToBit(1, i1 <= i2);
 }
 
-int32_t
+bit_t *
 xGE(int32_t i1, int32_t i2) {
-  return i1 >= i2;
+  return fixedToBit(1, i1 >= i2);
 }
 
-int32_t
-xNOT(int32_t i1) {
-  return ~i1;
+bit_t *
+xNOT(bit_t *i1) {
+  bit_t *result = nextBuffer();
+  int i, mask, bitWidth = i1->bitWidth, numBytes = i1->numBytes;
+  uint8_t *bytes = i1->bytes;
+  for (i = numBytes - 1; i >= 0; i--, bitWidth -= 8)
+    {
+      if (bitWidth <= 0)
+        mask = 0;
+      else if (bitWidth < 8)
+        mask = (1 << bitWidth) - 1;
+      else
+        mask = 0xFF;
+      result->bytes[i] = mask & ~(i1->bytes[i]);
+    }
+  return result;
 }
 
-int32_t
-xOR(int32_t i1, int32_t i2) {
-  return i1 | i2;
+bit_t *
+xOR(bit_t *i1, bit_t *i2) {
+  bit_t *result = nextBuffer();
+  int i, numBytes, bitWidth,
+      bitWidth1 = i1->bitWidth, bitWidth2 = i2->bitWidth,
+      numBytes1 = i1->numBytes, numBytes2 = i2->numBytes;
+  uint8_t *bytes1 = i1->bytes, *bytes2 = i2->bytes, *bytes = result->bytes;
+  numBytes = numBytes1;
+  if (numBytes2 > numBytes)
+    numBytes = numBytes2;
+  bitWidth = bitWidth1;
+  if (bitWidth2 > bitWidth)
+    bitWidth = bitWidth2;
+  result->numBytes = numBytes;
+  result->bitWidth = bitWidth;
+  bytes1 += numBytes1 - 1;
+  bytes2 += numBytes2 - 1;
+  bytes += numBytes - 1;
+  for (; numBytes > 0; numBytes--, numBytes1--, numBytes2--,
+                       bytes1--, bytes2--, bytes--)
+    {
+      uint8_t b1, b2;
+      if (numBytes1 >= 0)
+        b1 = *bytes1;
+      else
+        b1 = 0;
+      if (numBytes2 >= 0)
+        b2 = *bytes2;
+      else
+        b2 = 0;
+      *bytes++ = b1 | b2;
+    }
+  return result;
 }
 
-int32_t
-xAND(int32_t i1, int32_t i2){
-  return i1 & i2;
+bit_t *
+xAND(bit_t *i1, bit_t *i2){
+  bit_t *result = nextBuffer();
+  int i, numBytes, bitWidth,
+      bitWidth1 = i1->bitWidth, bitWidth2 = i2->bitWidth,
+      numBytes1 = i1->numBytes, numBytes2 = i2->numBytes;
+  uint8_t *bytes1 = i1->bytes, *bytes2 = i2->bytes, *bytes = result->bytes;
+  numBytes = numBytes1;
+  if (numBytes2 < numBytes)
+    numBytes = numBytes2;
+  bitWidth = bitWidth1;
+  if (bitWidth2 < bitWidth)
+    bitWidth = bitWidth2;
+  result->numBytes = numBytes;
+  result->bitWidth = bitWidth;
+  bytes1 += numBytes1 - 1;
+  bytes2 += numBytes2 - 1;
+  bytes += numBytes - 1;
+  for (; numBytes > 0; numBytes--, numBytes1--, numBytes2--,
+                       bytes--, bytes1--, bytes2--,
+                       bitWidth1 -= 8, bitWidth2 -= 8)
+    {
+      uint8_t b1, b2;
+      if (bitWidth1 > 0)
+        {
+          b1 = *bytes1;
+          if (bitWidth1 < 8)
+            b1 &= (1 << bitWidth1) - 1;
+        }
+      else
+        b1 = 0;
+      if (bitWidth2 > 0)
+        {
+          b2 = *bytes2;
+          if (bitWidth2 < 8)
+            b2 &= (1 << bitWidth2) - 1;
+        }
+      else
+        b2 = 0;
+      *bytes = b1 & b2;
+    }
+  return result;
 }
 
 // Various string-comparison functions follow.
 
 // Used by `xsXXX` functions, and not expected to be called directly.
 enum stringRelation_t { EQ, NEQ, LT, GT, LE, GE };
-int32_t
+bit_t *
 stringRelation(enum stringRelation_t relation, char *s1, char *s2) {
   int comparison = 0; // -1 for <, 0 for =, 1 for >.
   int l1 = strlen(s1), l2 = strlen(s2);
@@ -638,35 +868,35 @@ stringRelation(enum stringRelation_t relation, char *s1, char *s2) {
         if (e1 > e2) { comparison = 1; break; }
         else if (e1 < e2) { comparison = -1; break; }
       }
-  if (relation == EQ) return comparison == 0;
-  if (relation == NEQ) return comparison != 0;
-  if (relation == LT) return comparison == -1;
-  if (relation == GT) return comparison == 1;
-  if (relation == LE) return comparison != 1;
-  if (relation == GE) return comparison != -1;
-  return 0; // Shouldn't happen.
+  if (relation == EQ) return fixedToBit(1, comparison == 0);
+  if (relation == NEQ) return fixedToBit(1, comparison != 0);
+  if (relation == LT) return fixedToBit(1, comparison == -1);
+  if (relation == GT) return fixedToBit(1, comparison == 1);
+  if (relation == LE) return fixedToBit(1, comparison != 1);
+  if (relation == GE) return fixedToBit(1, comparison != -1);
+  return NULL; // Shouldn't happen.
 }
-int32_t
+bit_t *
 xsEQ(char *s1, char *s2) {
   return stringRelation(EQ, s1, s2);
 }
-int32_t
+bit_t *
 xsLT(char *s1, char *s2) {
   return stringRelation(LT, s1, s2);
 }
-int32_t
+bit_t *
 xsGT(char *s1, char *s2) {
   return stringRelation(GT, s1, s2);
 }
-int32_t
+bit_t *
 xsNEQ(char *s1, char *s2) {
   return stringRelation(NEQ, s1, s2);
 }
-int32_t
+bit_t *
 xsLE(char *s1, char *s2) {
   return stringRelation(LE, s1, s2);
 }
-int32_t
+bit_t *
 xsGE(char *s1, char *s2) {
   return stringRelation(GE, s1, s2);
 }
@@ -884,50 +1114,6 @@ SHL(uint32_t value, uint32_t shift) {
 uint32_t
 SHR(uint32_t value, uint32_t shift) {
   return value >> shift;
-}
-
-// Used only by `lookupAddress`.
-static int
-cmpAddresses(const void *e1, const void *e2)
-{
-  return ((memoryMapEntry_t *) e1)->address -
-         ((memoryMapEntry_t *) e2)->address;
-}
-
-// Used only by `lookupVariable` and `ADDR`.
-static int
-cmpMapSymbols(const void *e1, const void *e2) {
-  return strcasecmp((*(memoryMapEntry_t **) e1)->symbol,
-                    (*(memoryMapEntry_t **) e2)->symbol);
-}
-
-// Look up the `memoryMap` entry associated with a given address.  Returns
-// either a pointer to the record, or else NULL if not found.
-static memoryMapEntry_t *
-lookupAddress(uint32_t address)
-{
-  memoryMapEntry_t key, *found;
-  key.address = address;
-  found = bsearch(&key, memoryMap, NUM_SYMBOLS,
-                  sizeof(memoryMapEntry_t), cmpAddresses);
-  return found;
-}
-
-// Look up the `memoryMap` entry associated with a given variable name.
-// Returns either a pointer to the record, or else NULL if not found.
-static memoryMapEntry_t *
-lookupVariable(char *symbol)
-{
-  memoryMapEntry_t **found, key, *keyp = &key;
-  // Note that since `memoryMapBySymbol` contains pointers to
-  // `memoryMapEntry_t`, then the key for the binary search must
-  // also be a pointer to a memoryMapEntry_t.
-  strcpy(key.symbol, symbol);
-  found = bsearch(&keyp, &memoryMapBySymbol, NUM_SYMBOLS,
-                  sizeof(memoryMapEntry_t *), cmpMapSymbols);
-  if (found == NULL)
-    return NULL;
-  return *found;
 }
 
 // MONITOR functions.

@@ -159,6 +159,7 @@ freeLimit = 1 << 24
 variableAddress = 0 # Total contiguous bytes allocated in 24-bit address space.
 useCommon = False # For allocating COMMON vs non-COMMON
 useString = False # For allocating character data CHARACTER.
+useBit = False # For allocating BIT data.
 memory = bytearray([0] * (1 << 24));
 '''
 `memoryMap` is a dictionary whose keys are addresses in `memory` and whose
@@ -195,41 +196,51 @@ def allocateVariables(scope, extra = None):
         value = (value << 8) | memory[address + 3]
         return value
 
-    '''
-    def putBIT16(address, i):
-        global memory
-        memory[address + 0] = (i >> 8) & 0xFF
-        memory[address + 1] = i & 0xFF
-    '''
+    # The value returned by `getBIT` or stored to memory by `putBIT` is a 
+    # dictionary with the following keys:
+    #    "bitWidth"
+    #    "numBytes"
+    #    "bytes"
+    # "bytes" corresponds to the array of bytes used by the runtime library,
+    # but since Python has infinite-precision integers, it's easer to just use
+    # a Python integer than an array of bytes.
     
-    def getBIT16(address):
-        value = memory[address + 0]
-        value = (value << 8) | memory[address + 1]
-        return value
-
-    '''
-    def putBIT8(address, i):
-        global memory
-        memory[address] = i & 0xFF
-    '''
+    def getBIT(address):
+        bitWidth = memoryMap[address]["bitWidth"]
+        if bitWidth < 1 or bitWidth > 2048:
+            errxit("BIT width (%d) out of range" % bitWidth);
+        numBytes = memoryMap[address]["numBytes"]
+        if bitWidth > 32:
+            descriptor = getFIXED(address)
+            if numBytes - 1 != (descriptor >> 8) & 0xFF:
+                errxit("Implementation error: putBIT widths don't match")
+            address = descriptor & 0xFFFFFF;
+        value = 0
+        for i in range(numBytes):
+            value = (value << 8) | memory[address]
+            address += 1
+        return {
+            "bitWidth": bitWidth,
+            "numBytes": numBytes,
+            "bytes":  value
+            }
     
-    def getBIT8(address):
-        return memory[address]
+    def putBIT(address, value):
+        bitWidth = value["bitWidth"]
+        if bitWidth < 1 or bitWidth > 2048:
+            errxit("BIT width (%d) out of range" % bitWidth);
+        numBytes = value["numBytes"]
+        if bitWidth > 32:
+            descriptor = getFIXED(address)
+            if numBytes - 1 != (descriptor >> 8) & 0xFF:
+                errxit("Implementation error: putBIT widths don't match")
+            address = descriptor & 0xFFFFFF;
+        # Store the bytes in reverse order, because it's easier.
+        bytes = value["bytes"] & ((1 << bitWidth) - 1)
+        for i in range(numBytes - 1 , -1, -1):
+            memory[address + i] = bytes & 0xFF
+            bytes = bytes >> 8
     
-    def putBIT(bitWidth, address, value):
-        if bitWidth < 32:
-            value = value & (1 << bitWidth) - 1
-        if bitWidth <= 8:
-            memory[address] = value
-        elif bitWidth <= 16:
-            memory[address] = (value >> 8)
-            memory[address + 1] = value & 0xFF
-        else:
-            memory[address] = (value >> 24)
-            memory[address + 1] = (value >> 16) & 0xFF
-            memory[address + 2] = (value >> 8) & 0xFF
-            memory[address + 3] = value & 0xFF
-
     # Note that unlike the runtime function of the same name, this version of
     # putCHARACTER doesn't need to deal with compactification, since the
     # *first* time, all variables can be allocated right where they belong
@@ -244,8 +255,8 @@ def allocateVariables(scope, extra = None):
             return
         if length > 256:
             length = 256
-        designator = ((length - 1) << 24) | saddress
-        putFIXED(address, designator)
+        descriptor = ((length - 1) << 24) | saddress
+        putFIXED(address, descriptor)
         # Encode the string's character data as an EBCDIC Python byte array.
         b = s.encode('cp1140')
         for i in range(length):
@@ -253,12 +264,18 @@ def allocateVariables(scope, extra = None):
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
+        if "BASED" in attributes and (useString or useBit):
+            continue
         if "PROCEDURE" in attributes:
             continue
         if "FIXED" in attributes:
             datatype = "FIXED"
         elif "BIT" in attributes:
             datatype = "BIT"
+            bitWidth = attributes["BIT"]
+            numBytes = (bitWidth + 7) // 8
+            if numBytes == 3:
+                numBytes = 4
         elif "CHARACTER" in attributes:
             datatype = "CHARACTER"
         elif "BASED" in attributes:
@@ -266,7 +283,9 @@ def allocateVariables(scope, extra = None):
         else:
             continue
         mangled = attributes["mangled"]
-        if useString and "CHARACTER" not in attributes:
+        if useString and datatype != "CHARACTER":
+            continue
+        if useBit and datatype != "BIT":
             continue
         if useCommon:
             if "common" not in attributes:
@@ -274,6 +293,8 @@ def allocateVariables(scope, extra = None):
         else:
             if "common" in attributes or "parameter" in attributes:
                 continue
+        if attributes["mangled"] == "F": # ***DEBUG***
+            pass
         length = 1
         # The following needs tweaking TBD.
         if "top" in attributes:
@@ -301,7 +322,41 @@ def allocateVariables(scope, extra = None):
             numElements = attributes["top"] + 1
         else:
             numElements = 0
-        if useString:
+        if useBit:
+            if len(initial) > 0:
+                memoryMap[variableAddress] = {
+                    "mangled": mangled, 
+                    "datatype": "Long BIT data", 
+                    "numElements": numElements,
+                    "record": {},
+                    "numFieldsInRecord": 0,
+                    "recordSize": 0,
+                    "dirWidth": 0,
+                    "bitWidth": 0
+                }
+                address = attributes["address"]
+                firstAddress = address
+                for i in range(length):
+                    # INITIALize (just BIT variables).
+                    if "INITIAL" in attributes and i < len(initial):
+                        initialValue = initial[i]
+                        if not isinstance(initialValue, int):
+                            errxit("Cannot evaluate initializer to BIT", scope)
+                    else:
+                        initialValue = 0
+                    initialValue = {
+                            "bitWidth": bitWidth,
+                            "numBytes": numBytes,
+                            "bytes": initialValue
+                            }
+                    if numBytes > 4:
+                        putFIXED(address, ((numBytes - 1) << 24) | variableAddress)
+                        putBIT(address, initialValue)
+                        variableAddress += numBytes
+                    else:
+                        putBIT(address, initialValue)
+                    address += attributes["dirWidth"]
+        elif useString:
             if len(initial) > 0:
                 memoryMap[variableAddress] = {
                     "mangled": mangled, 
@@ -326,7 +381,7 @@ def allocateVariables(scope, extra = None):
                         elif isinstance(initialValue, int):
                             initialValue = "%d" % initialValue
                         else:
-                            errxit("Cannot evaluate initializer to CAHARACTER", scope)
+                            errxit("Cannot evaluate initializer to CHARACTER", scope)
                     else:
                         initialValue = ""
                     putCHARACTER(address, initialValue)
@@ -358,25 +413,32 @@ def allocateVariables(scope, extra = None):
             # INITIALize FIXED or BIT variables.
             if "INITIAL" in attributes and \
                     ("FIXED" in attributes or "BIT" in attributes):
-                if "BIT" in attributes:
-                    bitWidth = attributes["BIT"]
-                else:
-                    bitWidth = 32
                 for initialValue in initial:
                     if length <= 0:
                         errxit("Too many initializers", scope)
-                    if isinstance(initialValue, int):
-                        putBIT(bitWidth, variableAddress, initialValue)
-                    else:
+                    if not isinstance(initialValue, int):
                         # Not immediately an integer, but perhaps it's an
                         # expression whose value can be computed.  Let's try!
                         tokenized = xtokenize(initialValue)
                         tree = parseExpression(tokenized, 0)
                         if tree != None and "token" in tree and \
                                 "number" in tree["token"]:
-                            putBIT(bitWidth, variableAddress, tree["token"]["number"])
+                            initialValue = tree["token"]["number"]
                         else:
                             errxit("Initializer is not integer", scope);
+                    if "BIT" in attributes:
+                        bitWidth = attributes["BIT"]
+                        numBytes = (bitWidth + 7) // 8
+                        if numBytes == 3:
+                            numBytes = 4
+                        putBIT(variableAddress, \
+                               { 
+                                   "bytes": initialValue,
+                                   "bitWidth": bitWidth,
+                                   "numBytes": numBytes
+                               })
+                    else: # "FIXED" in attributes
+                        putFIXED(variableAddress, initialValue)
                     length -= 1
                     variableAddress += attributes["dirWidth"]
             variableAddress += attributes["dirWidth"] * length
@@ -437,7 +499,7 @@ def generateADDR(scope, parameter):
         `ADDR(COMPACTIFY)` is called, we need it to return a value even if the
         notion that it exists in the 24-bit memory address space is bogus.
         '''
-        return "FIXED", "0"
+        return "0"
     if "identifier" in token: # not a structure field.
         # Might still be a BASED variable, though.
         bVar = token["identifier"]
@@ -487,18 +549,173 @@ def generateADDR(scope, parameter):
         errxit("Unparsable identifier in ADDR")
 
 
+# `operatorTypes` relates the number of operands, the input type, the output 
+# type, operator name, and runtime-library function name, in a way that's 
+# hopefully easy to search and to determine auto-conversions.  The keys of the
+# top-level of the hierarchy are the number of operands (1 or 2, for unary or
+# binary).  The next level is the datatype of the operands (both operands being
+# the same type).  The next level is the operator name itself.  The atomic
+# values of the lowest level are order pairs of the output datatype and the
+# runtime-function library name associated with the operation.
+#
+# Searches would go something like this, given an operator name, a number of
+# operands, and datatypes of each operand, you can immediately find a match,
+# if any.  If there's no match, then there's a short list of the possible ways
+# to autoconvert the datatype(s) of the operands.  We can then do a search on
+# each of those possibilities.
+allOperators = {"|", "&", "~", "+", "-", "*", "/", "mod", "||", "=", "<", ">", 
+                "~=", "~<", "~>", "<=", ">="}
+operatorTypes = {
+    1: { 
+        "FIXED": { "-": ("FIXED", "xminus") },
+        "BIT": { "~": ("BIT", "xNOT") },
+        "CHARACTER": {}
+        },
+    2: {
+        "FIXED": {
+            "+": ("FIXED", "xadd"),
+            "-": ("FIXED", "xsubtract"),
+            "*": ("FIXED", "xmultiply"),
+            "/": ("FIXED", "xdivide"),
+            "mod": ("FIXED", "mod"),
+            "=": ("BIT", "xEQ"),
+            "<": ("BIT", "xLT"),
+            ">": ("BIT", "xGT"),
+            "~=": ("BIT", "xNEQ"),
+            "~<": ("BIT", "xGT"),
+            "~>": ("BIT", "xLT"),
+            "<=": ("BIT", "xLE"),
+            ">=": ("BIT", "xGE")
+            },
+        "BIT": {
+            "|": ("BIT", "xOR"), 
+            "&": ("BIT", "xAND")
+            },
+        "CHARACTER": {
+            "||": ("CHARACTER", "xsCAT"),
+            "=": ("BIT", "xsEQ"),
+            "<": ("BIT", "xsLT"),
+            ">": ("BIT", "xsGT"),
+            "~=": ("BIT", "xsNEQ"),
+            "~<": ("BIT", "xsGT"),
+            "~>": ("BIT", "xsLT"),
+            "<=": ("BIT", "xsLE"),
+            ">=": ("BIT", "xsGE")
+        }
+    }
+}
+# Get a list of possible autoconversions.  I'm frankly confused about
+# what conversions are allowed, and McKeeman seems to cover them
+# in a manner that (to me) seems obtuse.  On the other hand,
+# conversions not originally allowed by XCOM won't appear in any
+# existing XPL or XPL/I code, so I guess I'm free to perform illegal
+# conversions if I feel like it, as long as I correctly do the 
+# conversions that actually *were* allowed back then.  The `autoconvert`
+# function takes the `current` datatype and a list of `allowed` datatypes,
+# and returns a list of the possible conversions.  If none, then the 
+# list is empty.  Entries in the list are ordered pairs, with a string
+# indicating the datatype converted *to* as the first entry, and as the 
+# second entry a formatting string with %s where the operand can be 
+# inserted that provides the C code for performing the conversion at
+# runtime.
+def autoconvert(current, allowed):
+    conversions = []
+    if current == "CHARACTER":
+        if "CHARACTER" in allowed:
+            conversions.append(("CHARACTER", "%s"))
+    elif current == "BIT":
+        if "BIT" in allowed:
+            conversions.append(("BIT", "%s"))
+        if "FIXED" in allowed:
+            conversions.append(("FIXED", "bitToFixed(%s)"))
+        if "CHARACTER" in allowed:
+            conversions.append(("CHARACTER", 
+                                "fixedToCharacter(bitToFixed(%s))"))
+    elif current == "FIXED":
+        if "FIXED" in allowed:
+            conversions.append(("FIXED", "%s"))
+        if "BIT" in allowed:
+            conversions.append(("BIT", "fixedToBit(32, %s)"))
+        if "CHARACTER" in allowed:
+            conversions.append(("CHARACTER", "fixedToCharacter(%s)"))
+    return conversions
+
+# `autoconvertFull` combines a lot of operations typically associated with
+# `autoconvert`.  Given an `expression` tree (of an unknown datatype), it
+# determines the expression's datatype, and determines the conversion needed to
+# the datatype implied by `toAttributes`.  Finally, it combines those two steps
+# to return a string containing the source code for the expression in the 
+# desired datatype.  The return is the usual datatype,source pair.
+def autoconvertFull(scope, expression, toAttributes):
+    fromType, source = generateExpression(scope, expression)
+    if "CHARACTER" in toAttributes:
+        toType = "CHARACTER"
+    elif "FIXED" in toAttributes:
+        toType = "FIXED"
+    elif "BIT" in toAttributes:
+        toType = "BIT"
+    conversions = autoconvert(fromType, [toType])
+    if len(conversions) == 0:
+        errxit("Cannot convert %s to %s" % (fromType, toType))
+    conversion = conversions[0][1]
+    return toType, (conversion % source)
+
+# `generateOperation` is called by `generateExpression` to evaluate the result
+# of an operation from `operatorTypes`.
+def generateOperation(scope, expression):
+    
+    token = expression["token"]
+    if "operator" not in token or token["operator"] not in allOperators:
+        errxit("Implementation error: Non-operator in generateOperation")
+    operator = token["operator"]
+    operands = expression["children"]
+    numOperands = len(operands)
+    # Generate source code for the operands (sans any autoconversion to match
+    # the operator's requirements).
+    if numOperands == 1:
+        type1, source1 = generateExpression(scope, operands[0])
+    elif numOperands == 2:
+        type1, source1 = generateExpression(scope, operands[0])
+        type2, source2 = generateExpression(scope, operands[1])
+    else:
+        errxit("Wrong number of operands for operator %s" % operator)
+    # Let's find all possible operand datatypes that match the operator:
+    allowedDatatypes = {}
+    for datatype in ["FIXED", "BIT", "CHARACTER"]:
+        if operator in operatorTypes[numOperands][datatype]:
+            allowedDatatypes[datatype] = operatorTypes[numOperands][datatype][operator]
+    if numOperands == 1:
+        autoconversions = autoconvert(type1, allowedDatatypes)
+        if len(autoconversions) == 0:
+            errxit("No possible promotions of %s operand for operator %s" % \
+                   (type1, operator))
+        # Just accept the first possibility, if there's more than one.
+        type1 = autoconversions[0][0]
+        source1 = autoconversions[0][1] % source1
+        datatype, function = allowedDatatypes[type1]
+        return datatype, "%s(%s)" % (function, source1)
+    # Binary operator.
+    autoconversions1 = autoconvert(type1, allowedDatatypes)
+    autoconversions2 = autoconvert(type2, allowedDatatypes)
+    for autoconversion1 in autoconversions1:
+        for autoconversion2 in autoconversions2:
+            if autoconversion1[0] == autoconversion2[0]:
+                # Found one that works for both operands!
+                tipe = autoconversion1[0]
+                source1 = autoconversion1[1] % source1
+                source2 = autoconversion2[1] % source2
+                datatype, function = allowedDatatypes[tipe]
+                return datatype, "%s(%s, %s)" % (function, source1, source2)
+    errxit("No possible operand promotions found for operator %s" % operator)
+
 # Recursively generate the source code for a C expression that evaluates a tree
 # (previously returned by the `parseExpression` function) created from an XPL 
 # expression.  Returns a pair:
 #
-#    Indicator of the type of the result: "FIXED", "CHARACTER", "INDETERMINATE".
+#    Indicator of the type of the result: "FIXED", "BIT", "CHARACTER".
 #
 #    String containing the generated code.
 #
-numericOperators = {"|", "&", "~", "+", "-", "*", "/", "mod"}
-stringOperators = {"||"}
-universalOperators = {"=", "<", ">", "~=", "~<", "~>", "<=", ">="}
-
 def generateExpression(scope, expression):
     
     source = ""
@@ -515,8 +732,9 @@ def generateExpression(scope, expression):
         source = str(token["number"])
     elif "string" in token:
         tipe = "CHARACTER"
-        source = '"' + \
-                 token["string"].replace('"', '\\\"').replace("`", "'") + '"'
+        source = '"' + token["string"]\
+                            .replace('"', '\\\"')\
+                            .replace(replacementQuote, "'") + '"'
     elif operator == ".":
         # The operator is the separator between a the name of a  BASED RECORD 
         # (possibly subscripted) and the name of one of its fields (also 
@@ -586,91 +804,14 @@ def generateExpression(scope, expression):
         elif "FIXED" in fieldAttributes:
             return "FIXED", "getFIXED(%s)" % sourceAddress
         elif "BIT" in fieldAttributes:
-            if fieldAttributes["dirWidth"] == 1:
-                gf = "getBIT8"
-            elif fieldAttributes["dirWidth"] == 2:
-                gf = "getBIT16"
-            else:
-                gf = "getFIXED"
-            return "BIT", "%s(%s)" % (gf, sourceAddress)
+            return "BIT", "getBIT(%s)" % (sourceAddress)
         else:
             errxit("Cannot find datatype of field %s.%s" % \
                    (baseName, fieldName))
     elif operator != None:
-        if operator in numericOperators or operator in universalOperators:
-            tipe = "FIXED"
-        elif operator in stringOperators:
-            tipe = "CHARACTER"
-        operands = expression["children"]
-        operand1 = operands[0]
-        tipe1, source1 = generateExpression(scope, operand1)
-        if tipe1 == None:
-            errxit("Cannot evaluate " + str(operand1))
-        elif tipe1 == "FIXED" and operator in stringOperators:
-            #errxit("Mismatched string and numeric")
-            source1 = "fixedToCharacter( " + source1 + " )"
-            tipe1 = "CHARACTER"
-        elif tipe1 == "CHARACTER" and operator in numericOperators:
-            errxit("Mismatched string and numeric")
-        if len(operands) == 1:
-            if operator == "-":
-                source = "xminus(" + source1 + ")"
-            elif operator == "~":
-                source = "xNOT(" + source1 + ")"
-            else:
-                errxit("Unsupported unary " + operator)
-        elif len(operands) == 2:
-            operand2 = operands[1]
-            tipe2, source2 = generateExpression(scope, operand2)
-            smod = "x"
-            if tipe1 == "CHARACTER":
-                smod = "xs"
-            if tipe1 == None:
-                errxit("Cannot evaluate " + str(operand1))
-            elif tipe1 in ["FIXED", "BIT"] and operator in stringOperators:
-                source1 = "fixedToCharacter( " + source1 + " )"
-                tipe1 = "CHARACTER"
-            elif tipe1 == "CHARACTER" and operator in numericOperators:
-                errxit("Mismatched string and numeric")
-            if tipe2 == None:
-                errxit("Cannot evaluate " + str(operand2))
-            elif tipe2 in ["FIXED", "BIT"] and operator in stringOperators:
-                source2 = "fixedToCharacter( " + source2 + " )"
-                tipe2 = "CHARACTER"
-            elif tipe2 == "CHARACTER" and operator in numericOperators:
-                errxit("Mismatched string and numeric")
-            if operator == "+":
-                source = "xadd(" + source1 + ", " + source2 + ")"
-            elif operator == "-":
-                source = "xsubtract(" + source1 + ", " + source2 + ")"
-            elif operator == "*":
-                source = "xmultiply(" + source1 + ", " + source2 + ")"
-            elif operator == "/":
-                source = "xdivide(" + source1 + ", " + source2 + ")"
-            elif operator == "mod":
-                source = "xmod(" + source1 + ", " + source2 + ")"
-            elif operator == "=":
-                source = smod + "EQ(" + source1 + ", " + source2 + ")"
-            elif operator == "<":
-                source = smod + "LT(" + source1 + ", " + source2 + ")"
-            elif operator == ">":
-                source = smod + "GT(" + source1 + ", " + source2 + ")"
-            elif operator == "~=":
-                source = smod + "NEQ(" + source1 + ", " + source2 + ")"
-            elif operator == "<=" or operator == "~>":
-                source = smod + "LE(" + source1 + ", " + source2 + ")"
-            elif operator == ">=" or operator == "~<":
-                source = smod + "GE(" + source1 + ", " + source2 + ")"
-            elif operator == "|":
-                source = "xOR(" + source1 + ", " + source2 + ")"
-            elif operator == "&":
-                source = "xAND(" + source1 + ", " + source2 + ")"
-            elif operator == "||":
-                source = "xsCAT(" + source1 + ", " + source2 + ")"
-            else:
-                errxit("Unsupported binary operator " + operator)
-        else:
-            errxit("Too many operands for " + operator)
+        # Generate the code for any unary or binary arithmetical, logical, or
+        # character operator.
+        tipe, source = generateOperation(scope, expression)
     elif "identifier" in token or "builtin" in token:
         if "identifier" in token:
             symbol = token["identifier"]
@@ -701,14 +842,10 @@ def generateExpression(scope, expression):
                             innerParameter = innerParameters[k]
                             innerAttributes = innerScope["variables"][innerParameter]
                             innerAddress = innerAttributes["address"]
-                            if "CHARACTER" in innerAttributes:
-                                pfp = "putCHARACTER("
-                            elif "BIT" in innerAttributes:
-                                pfp = "putBIT(%d, " % innerAttributes["BIT"]
-                            else:
-                                pfp = "putFIXED("
-                            tipe, parm = generateExpression(scope, outerParameter)
-                            source = source + pfp + \
+                            toType, parm = autoconvertFull(scope, \
+                                                           outerParameter, \
+                                                           innerAttributes)
+                            source = source + "put" + toType + "(" + \
                                      str(innerAddress) + ", " + parm + "), "
                         source = source + mangled + "() )"
                     if "return" in attributes:
@@ -722,37 +859,30 @@ def generateExpression(scope, expression):
                     if len(indices) > 1:
                         errxit("Multi-dimensional arrays not allowed in XPL")
                     if len(indices) == 1:
-                        tipe, index = generateExpression(scope, indices[0])
+                        tipei, index = generateExpression(scope, indices[0])
+                        if tipei == "BIT":
+                            tipei = "FIXED"
+                            index = "bitToFixed(%s)" % index
                     baseAddress = str(attributes["address"])
                     if "BASED" in attributes:
                         baseAddress = "getFIXED(%s)" % baseAddress
-                    if "FIXED" in attributes or "BIT" in attributes:
+                    function = None
+                    if "FIXED" in attributes:
                         tipe = "FIXED"
-                        gf = "getFIXED"
-                        if "BIT" in attributes:
-                            bitWidth = attributes["BIT"]
-                            if bitWidth < 9:
-                                gf = "getBIT8"
-                            elif bitWidth < 17:
-                                gf = "getBIT16"
-                        if index == "":
-                            source = "%s(" % gf + baseAddress + ")"
-                        else:
-                            source = "%s(" % gf + baseAddress + \
-                                     " + %d*" % attributes["dirWidth"] + \
-                                     index + ")"
-                        return tipe, source
+                    elif "BIT" in attributes:
+                        tipe = "BIT"
                     elif "CHARACTER" in attributes:
                         tipe = "CHARACTER"
-                        if index == "":
-                            source = "getCHARACTER(" + baseAddress + ")"
-                        else:
-                            source = "getCHARACTER(" + baseAddress + \
-                                     " + %d*" % attributes["dirWidth"] + \
-                                     index + ")"
-                        return tipe, source
                     else:
                         errxit("Unsupported variable type")
+                    function = "get" + tipe
+                    if index == "":
+                        source = function + "(" + baseAddress + ")"
+                    else:
+                        source = function + "(" + baseAddress + \
+                                 " + %d*" % attributes["dirWidth"] + \
+                                 index + ")"
+                    return tipe, source
             else:
                 errxit("Unknown variable %s" % symbol)
         else:
@@ -886,25 +1016,56 @@ def generateSingleLine(scope, indent, line, indexInScope):
         RHS = line["RHS"]
         tipeR, sourceR = generateExpression(scope, RHS)
         definedS = False
-        if tipeR in ["FIXED", "BIT"]:
+        definedN = False
+        definedB = False
+        if tipeR == "FIXED":
+            definedN = True
             print(indent + "int32_t numberRHS = " + sourceR + ";")
+        elif tipeR == "BIT":
+            definedB = True
+            print(indent + "bit_t *bitRHS = " + sourceR + ";")
         elif tipeR == "CHARACTER":
             definedS = True
             print(indent + "string_t stringRHS;")
-            
             print(indent + "strcpy(stringRHS, %s);" % sourceR)
         else:
             errxit("Unknown RHS type: " + str(RHS))
         
-        # Use this wherever a stringRHS is needed but only a numberRHS has
-        # perhaps been provided.
-        def autoConvert():
-            nonlocal definedS;
-            if tipeR in ["FIXED", "BIT"]:
+        def autoConvert(fromType, toType):
+            nonlocal definedS, definedN, definedB;
+            
+            conversions = autoconvert(fromType, [toType])
+            if len(conversions) == 0:
+                errxit("Cannot convert %s to %s" % (fromType, toType))
+            conversion = conversions[0][1]
+            
+            if fromType == "CHARACTER":
+                fromVar = "stringRHS"
+            elif fromType == "FIXED":
+                fromVar = "numberRHS"
+            elif fromType == "BIT":
+                fromVar = "bitRHS"
+            if toType == "CHARACTER":
+                toVar = "stringRHS"
                 if not definedS:
-                    print(indent + "string_t stringRHS;")
+                    print(indent + "string_t %s;" % toVar)
                     definedS = True
-                print(indent + "strcpy(stringRHS, fixedToCharacter(numberRHS));")
+                if toVar != fromVar:
+                    print(indent + "strcpy(%s, %s);" % (toVar, conversion % fromVar))
+            elif toType == "FIXED":
+                toVar = "numberRHS"
+                if not definedN:
+                    print(indent + "int32_t %s;" % toVar)
+                    definedN = True
+                if toVar != fromVar:
+                    print(indent + "%s = %s;" % (toVar, conversion % fromVar))
+            elif toType == "BIT":
+                toVar = "bitRHS"
+                if not definedB:
+                    print(indent + "bit_t *%s;" % toVar)
+                    definedB = True
+                if toVar != fromVar:
+                    print(indent + "%s = %s;" % (toVar, conversion % fromVar))
 
         for i in range(len(LHSs)):
             LHS = LHSs[i]
@@ -950,6 +1111,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     errxit("BASED variable %s not subscripted properly" % baseName)
                 fieldSubscripts = fieldExpression["children"]
                 if len(fieldSubscripts) == 0:
+                    typef = "FIXED"
                     sourcef = '0'
                 elif len(fieldSubscripts) == 1:
                     typef, sourcef = \
@@ -966,14 +1128,28 @@ def generateSingleLine(scope, indent, line, indexInScope):
                                 " + %d + " % fieldAttributes["offset"] + \
                                 "%d * (%s)" % (fieldAttributes["dirWidth"], sourcef)
                 if "CHARACTER" in fieldAttributes:
-                    print(indent + "putCHARACTER(%s, stringRHS);" \
+                    if tipeR == "FIXED":
+                        print(indent + "putCHARACTER(%s, fixedToCharacter(numberRHS));" \
+                                        % sourceAddress)
+                    elif tipeR == "BIT":
+                        print(indent + "putCHARACTER(%s, fixedToCharacter(bitToFixed(bitRHS)));" \
+                                    % sourceAddress)
+                    else:
+                        print(indent + "putCHARACTER(%s, stringRHS);" \
                                     % sourceAddress)
                 elif "FIXED" in fieldAttributes:
-                    print(indent + "putFIXED(%s, numberRHS);" \
+                    if tipeR == "BIT":
+                        print(indent + "putFIXED(%s, bitToFixed(bitRHS));" \
+                                    % sourceAddress)
+                    else:
+                        print(indent + "putFIXED(%s, numberRHS);" \
                                     % sourceAddress)
                 elif "BIT" in fieldAttributes:
-                    print(indent + "putBIT(%d, %s, numberRHS);" \
-                                    % (fieldAttributes["BIT"], sourceAddress))
+                    if tipeR == "FIXED":
+                        print(indent + "putBIT(%s, fixedToBit(%d, numberRHS));" % \
+                              (sourceAddress, fieldAttributes["BIT"]))
+                    else:
+                        print(indent + "putBIT(%s, bitRHS);" % sourceAddress)
                 else:
                     errxit("Cannot find datatype of field %s.%s" % \
                            (baseName, fieldName))
@@ -986,25 +1162,30 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 baseAddress = str(address)
                 if "BASED" in attributes:
                     baseAddress = "getFIXED(%s)" % baseAddress
-                if "FIXED" in attributes or "BIT" in attributes:
-                    if "BIT" in attributes:
-                        pfp = "putBIT(%d, " % attributes["BIT"]
-                    else:
-                        pfp = "putFIXED("
+                if "FIXED" in attributes:
+                    autoConvert(tipeR, "FIXED")
                     if len(children) == 0:
-                        print(indent + pfp + baseAddress + ", numberRHS);") 
+                        print(indent + "putFIXED(" + baseAddress + ", numberRHS);") 
                     elif len(children) == 1:
                         tipeL, sourceL = generateExpression(scope, children[0])
-                        print(indent + pfp + baseAddress + \
+                        print(indent + "putFIXED(" + baseAddress + \
                               "+ %d*(" % attributes["dirWidth"] + \
                               sourceL + "), numberRHS);") 
                     else:
                         errxit("Too many subscripts")
+                elif "BIT" in attributes:
+                    autoConvert(tipeR, "BIT")
+                    if len(children) == 0:
+                        print(indent + "putBIT(" + baseAddress + ", bitRHS);") 
+                    elif len(children) == 1:
+                        tipeL, sourceL = generateExpression(scope, children[0])
+                        print(indent + "putBIT(" + baseAddress + \
+                              "+ %d*(" % attributes["dirWidth"] + \
+                              sourceL + "), bitRHS);") 
+                    else:
+                        errxit("Too many subscripts")
                 elif "CHARACTER" in attributes:
-                    if tipeR in ["FIXED", "BIT"]:
-                        autoConvert()
-                    elif tipeR != "CHARACTER":
-                        errxit("LHS/RHS type mismatch in assignment.")
+                    autoConvert(tipeR, "CHARACTER")
                     if len(children) == 0:
                         print(indent + "putCHARACTER(" + baseAddress + ", stringRHS);") 
                     elif len(children) == 1:
@@ -1020,7 +1201,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 builtin = tokenLHS["builtin"]
                 children = LHS["children"]
                 if builtin == "OUTPUT":
-                    autoConvert()
+                    autoConvert(tipeR, "CHARACTER")
                     if len(children) == 0:
                         print(indent + "OUTPUT(0, stringRHS);")
                     elif len(children) == 1:
@@ -1078,40 +1259,48 @@ def generateSingleLine(scope, indent, line, indexInScope):
             errxit("Subscripted loop variables not supported.")
         attributes = getAttributes(scope, variable)
         address = attributes["address"]
-        if "BIT" in attributes:
-            pfp = "putBIT(%d, " % attributes["BIT"]
-        else:
-            pfp = "putFIXED("
-        if attributes["dirWidth"] == 1:
-            gf = "getBIT8"
-        elif attributes["dirWidth"] == 2:
-            gf = "getBIT16"
-        else:
-            gf = "getFIXED"
+        if "FIXED" not in attributes:
+            errxit("Loop counter is not FIXED.")
         print(indent2 + "int32_t %s, %s, %s;" % (fromName, toName, byName))
         tipe, source = generateExpression(scope, line["from"])
+        if (tipe == "BIT"):
+            tipe = "FIXED"
+            source = "bitToFixed(" + source + ")"
         print(indent2 + fromName + " = " + source + ";")
         tipe, source = generateExpression(scope, line["to"])
+        if (tipe == "BIT"):
+            tipe = "FIXED"
+            source = "bitToFixed(" + source + ")"
         print(indent2 + toName + " = " + source + ";")
         tipe, source = generateExpression(scope, line["by"])
+        if (tipe == "BIT"):
+            tipe = "FIXED"
+            source = "bitToFixed(" + source + ")"
         print(indent2 + byName + " = " + source + ";")
-        print((indent2 + "for (%s%d, %s);\n" + \
-               indent2 + "     %s(%d) <= %s;\n" + \
-               indent2 + "     %s%d, %s(%d) + %s)) {" ) \
-              % (pfp, address, fromName, 
-                 gf, address, toName, 
-                 pfp, address, gf, address, byName))
+        print((indent2 + "for (putFIXED(%d, %s);\n" + \
+               indent2 + "     getFIXED(%d) <= %s;\n" + \
+               indent2 + "     putFIXED(%d, getFIXED(%d) + %s)) {" ) \
+              % (address, fromName, address, toName, address, address, byName))
     elif "WHILE" in line:
         tipe, source = generateExpression(scope, line["WHILE"])
+        if (tipe == "BIT"):
+            tipe = "FIXED"
+            source = "bitToFixed(" + source + ")"
         print(indent + "while (1 & (" + source + ")) {")
     elif "UNTIL" in line:
         tipe, source = generateExpression(scope, line["UNTIL"])
+        if (tipe == "BIT"):
+            tipe = "FIXED"
+            source = "bitToFixed(" + source + ")"
         print(indent + "do {")
         line["scope"]["afterEndOfScope"] = "while (!(1 & (" + source + ")));"
     elif "BLOCK" in line:
         print(indent + "{")
     elif "IF" in line:
         tipe, source = generateExpression(scope, line["IF"])
+        if (tipe == "BIT"):
+            tipe = "FIXED"
+            source = "bitToFixed(" + source + ")"
         print(indent + "if (1 & (" + source + "))")
     elif "GOTO" in line:
         print(indent + "goto " + line["GOTO"] + ";")
@@ -1124,17 +1313,39 @@ def generateSingleLine(scope, indent, line, indexInScope):
     elif "ELSE" in line:
         print(indent + "else")
     elif "RETURN" in line:
+        # Let's find out what the return type is supposed to be.  To do that,
+        # we have to find the declaration of the procedure.  Before doing that,
+        # we first have to figure out the name of the procedure.
+        procScope = scope
+        while procScope["symbol"] == "":
+            procScope = procScope["parent"]
+            if procScope == None:
+                errxit("RETURN outside of any PROCEDURE")
+        procedureName = procScope["symbol"]
+        procedureAttributes = getAttributes(procScope, procedureName)
+        if procedureAttributes == None:
+            errxit("PROCEDURE %s declaration not found" % procedureName)
+        toType = procedureAttributes["return"]
+        if toType == "BIT":
+            toAttributes = { "BIT": procedureAttributes["bitsize"] }
+        else:
+            toAttributes = { toType: True }
+        
         if line["RETURN"] == None:
             # There are examples in ANALYZER.xpl of PROCEDURES that don't
             # return values having their values used in IF statements.
             # McKeeman says that such returns will be random, because they'll
             # just be leftover values from some unspecified register.  I'll
-            # alway return a 0.
-            #print(indent + "return ;")
-            print(indent + "return 0;")
+            # alway return something simple of the appropriate type.
+            if toType == "FIXED":
+                source = "0"
+            elif toType == "CHARACTER":
+                source = "''"
+            elif toType == "BIT":
+                source = "fixedToBit(0)"
         else:
-            tipe, source = generateExpression(scope, line["RETURN"])
-            print(indent + "return " + source + ";")
+            toType, source = autoconvertFull(scope, line["RETURN"], toAttributes)
+        print(indent + "return " + source + ";")
     elif "ELSE" in line:
         print(indent + "else")
     elif "EMPTY" in line:
@@ -1188,14 +1399,10 @@ def generateSingleLine(scope, indent, line, indexInScope):
                         innerParameter = innerParameters[k]
                         innerAttributes = innerScope["variables"][innerParameter]
                         innerAddress = innerAttributes["address"]
-                        pfp = "putFIXED("
-                        if "CHARACTER" in innerAttributes:
-                            pfp = "putCHARACTER("
-                        elif "BIT" in innerAttributes:
-                            pfp = "putBIT(%d, " % innerAttributes["BIT"]
-                        tipe, parm = generateExpression(scope, outerParameter)
-                        print(indent2 + pfp + \
-                                 str(innerAddress) + ", " + parm + "); ")
+                        toType, parm = autoconvertFull(scope, outerParameter, innerAttributes)
+                        print(indent2 + "put" + toType + "("+ \
+                                 str(innerAddress) + ", " + \
+                                 parm + "); ")
                     print(indent2 + mangled + "();")
                     print(indent + "}")
     elif "CASE" in line:
@@ -1326,7 +1533,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             if returnType == "FIXED":
                 returnType = "int32_t"
             elif returnType == "BIT":
-                returnType = "uint32_t"
+                returnType = "bit_t *"
             elif returnType == "CHARACTER":
                 returnType = "char *"
             header = returnType + "\n" + functionName + "(void)"
@@ -1395,7 +1602,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         sys.stdout = stdoutOld # Restore previous stdout.
 
 def generateC(globalScope):
-    global useCommon, useString, pf, nonCommonBase, freeBase
+    global useCommon, useString, useBit, pf, nonCommonBase, freeBase
     
     pf = open(outputFolder + "/procedures.h", "w")
     print("/*", file=pf)
@@ -1434,17 +1641,29 @@ def generateC(globalScope):
     # of XPL variables, and generates C code that operates on absolute numerical
     # addresses rather than on symbolic addresses.
     useCommon = True # COMMON
+    useBit = False
     useString = False
     walkModel(globalScope, allocateVariables)
     nonCommonBase = variableAddress
     useCommon = False # non-COMMON variables
+    useBit = False
+    useString = False
+    walkModel(globalScope, allocateVariables)
+    useCommon = True # COMMON Long BIT data
+    useBit = True
+    useString = False
+    walkModel(globalScope, allocateVariables)
+    useCommon = False # Normal Long BIT data
+    useBit = True
     useString = False
     walkModel(globalScope, allocateVariables)
     freeBase = variableAddress
     useCommon = True # COMMON string data
+    useBit = False
     useString = True
     walkModel(globalScope, allocateVariables)
     useCommon = False # normal string data
+    useBit = False
     useString = True
     walkModel(globalScope, allocateVariables)
     freePoint = variableAddress

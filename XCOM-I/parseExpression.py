@@ -404,11 +404,16 @@ def parseExpression(tokenized, start):
         if len(string1) > len(string2):
             return 1
         # Recall that the preprocessing done on quoted strings has replaced
-        # ' ' by '~' and "''" by '`', but that "''" is actually a representation
-        # of just "'".  We need to do "~" -> " " and "`" -> "'" before making
-        # any further comparison.
-        string1 = string1.replace("~", " ").replace("`", "'")
-        string2 = string2.replace("~", " ").replace("`", "'")
+        # ' ' by `replacementSpace` and "''" by `replacementQuote`, but 
+        # that "''" is actually a representation of just "'".  We need to do
+        # `replacementSpace` -> " " and `replacmentQuoteQuote` -> "'" before 
+        # making any further comparison.
+        string1 = string1\
+                    .replace(replacementSpace, " ")\
+                    .replace(replacementQuote, "'")
+        string2 = string2\
+                    .replace(replacementSpace, " ")\
+                    .replace(replacementQuote, "'")
         for i in range(len(string1)):
             # Get EBCDIC byte codes.
             e1 = string1[i].encode('cp1140')[0]

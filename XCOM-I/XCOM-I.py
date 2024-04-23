@@ -141,7 +141,6 @@ for adhoc in adhocs:
 # representing the entire source.
 source = "".join(lines)
 
-quotedQuote = "`"
 lastC = ''
 lastLastC = ''
 inQuote = False
@@ -238,7 +237,7 @@ while True:
                 inQuote = False
                 quoteCount -= 1
             for j in range(0, quoteCount, 2):
-                pseudoStatement = pseudoStatement + "`"
+                pseudoStatement = pseudoStatement + replacementQuote
             if not inQuote:
                 pseudoStatement = pseudoStatement + "'"
             lastLastC = lastC
@@ -303,7 +302,7 @@ while True:
             quoteCount -= 2
         pseudoStatement = pseudoStatement + "'"
         for j in range(0, quoteCount, 2):
-            pseudoStatement = pseudoStatement + "`"
+            pseudoStatement = pseudoStatement + replacementQuote
         if not inQuote:
             pseudoStatement = pseudoStatement + "'"
         lastLastC = lastC
