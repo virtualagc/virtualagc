@@ -74,13 +74,17 @@ getFIXED(uint32_t address);
 void
 putFIXED(uint32_t address, int32_t value);
 
-// Same for XPL `BIT` types.  Note that the `address` parameter for `getBIT`
-// or `putBIT` must be one that can be found using `lookupAddress` in
-// runtimeC.c.
+// Same for XPL `BIT` types.  If the `address` parameter for `getBIT`
+// or `putBIT` can be found using `lookupAddress` (in runtimeC.c.), then the
+// bitWidth can be determined by the lookup, and the `bitWidth` parameter can
+// be set to 0.  Otherwise, `bitWidth` must be set.  This particularly comes
+// into play with `BASED` variables, because the `address` parameter is the
+// address of the array element, and there's no way to work backward from that
+// to get the `BASED` variable it's associated with.
 bit_t *
-getBIT(uint32_t address);
+getBIT(uint32_t bitWidth, uint32_t address);
 void
-putBIT(uint32_t address, bit_t *value);
+putBIT(uint32_t bitWidth, uint32_t address, bit_t *value);
 
 // Same for XPL `CHARACTER` type.
 char *

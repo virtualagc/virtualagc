@@ -293,8 +293,6 @@ def allocateVariables(scope, extra = None):
         else:
             if "common" in attributes or "parameter" in attributes:
                 continue
-        if attributes["mangled"] == "F": # ***DEBUG***
-            pass
         length = 1
         # The following needs tweaking TBD.
         if "top" in attributes:
@@ -577,7 +575,7 @@ operatorTypes = {
             "-": ("FIXED", "xsubtract"),
             "*": ("FIXED", "xmultiply"),
             "/": ("FIXED", "xdivide"),
-            "mod": ("FIXED", "mod"),
+            "mod": ("FIXED", "xmod"),
             "=": ("BIT", "xEQ"),
             "<": ("BIT", "xLT"),
             ">": ("BIT", "xGT"),
@@ -604,6 +602,7 @@ operatorTypes = {
         }
     }
 }
+
 # Get a list of possible autoconversions.  I'm frankly confused about
 # what conversions are allowed, and McKeeman seems to cover them
 # in a manner that (to me) seems obtuse.  On the other hand,
@@ -804,7 +803,7 @@ def generateExpression(scope, expression):
         elif "FIXED" in fieldAttributes:
             return "FIXED", "getFIXED(%s)" % sourceAddress
         elif "BIT" in fieldAttributes:
-            return "BIT", "getBIT(%s)" % (sourceAddress)
+            return "BIT", "getBIT(%d, %s)" % (fieldAttributes["BIT"], sourceAddress)
         else:
             errxit("Cannot find datatype of field %s.%s" % \
                    (baseName, fieldName))
@@ -845,8 +844,12 @@ def generateExpression(scope, expression):
                             toType, parm = autoconvertFull(scope, \
                                                            outerParameter, \
                                                            innerAttributes)
-                            source = source + "put" + toType + "(" + \
-                                     str(innerAddress) + ", " + parm + "), "
+                            if toType == "BIT":
+                                function = "putBIT(%d, " % innerAttributes["BIT"]
+                            else:
+                                function = "put" + toType + "("
+                            source = source + function + \
+                                 str(innerAddress) + ", " + parm + "), "
                         source = source + mangled + "() )"
                     if "return" in attributes:
                         tipe = attributes["return"]
@@ -875,11 +878,14 @@ def generateExpression(scope, expression):
                         tipe = "CHARACTER"
                     else:
                         errxit("Unsupported variable type")
-                    function = "get" + tipe
-                    if index == "":
-                        source = function + "(" + baseAddress + ")"
+                    if tipe == "BIT":
+                        function = "getBIT(%d, " % attributes["BIT"]
                     else:
-                        source = function + "(" + baseAddress + \
+                        function = "get" + tipe + "("
+                    if index == "":
+                        source = function + baseAddress + ")"
+                    else:
+                        source = function + baseAddress + \
                                  " + %d*" % attributes["dirWidth"] + \
                                  index + ")"
                     return tipe, source
@@ -912,6 +918,15 @@ def generateExpression(scope, expression):
                         source = source + ", "
                     first = False
                     tipe, p = generateExpression(scope, parameter)
+                    # Some cases in which I've noticed that autoconversion of
+                    # parameters is needed.
+                    if tipe != "FIXED" and symbol in ["SHL", "SHR"]:
+                        conversions = autoconvert(tipe, ["FIXED"])
+                        if len(conversions) > 0:
+                            tipe = conversions[0][0]
+                            p = conversions[0][1] % p
+                        else:
+                            errxit("%s cannot be converted to FIXED" % tipe)
                     source = source + p
                 source = source + ")"
                 return builtinType, source
@@ -1146,10 +1161,12 @@ def generateSingleLine(scope, indent, line, indexInScope):
                                     % sourceAddress)
                 elif "BIT" in fieldAttributes:
                     if tipeR == "FIXED":
-                        print(indent + "putBIT(%s, fixedToBit(%d, numberRHS));" % \
-                              (sourceAddress, fieldAttributes["BIT"]))
+                        print(indent + "putBIT(%d, %s, fixedToBit(%d, numberRHS));" % \
+                              (fieldAttributes["BIT"], 
+                               sourceAddress, fieldAttributes["BIT"]))
                     else:
-                        print(indent + "putBIT(%s, bitRHS);" % sourceAddress)
+                        print(indent + "putBIT(%d, %s, bitRHS);" % \
+                              (fieldAttributes["BIT"], sourceAddress))
                 else:
                     errxit("Cannot find datatype of field %s.%s" % \
                            (baseName, fieldName))
@@ -1162,12 +1179,20 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 baseAddress = str(address)
                 if "BASED" in attributes:
                     baseAddress = "getFIXED(%s)" % baseAddress
+                if len(children) == 1: # Compute index.
+                    tipeL, sourceL = generateExpression(scope, children[0])
+                    if tipeL != "FIXED":
+                        conversions = autoconvert(tipeL, ["FIXED"])
+                        if len(conversions) > 0:
+                            tipeL = conversions[0][0]
+                            sourceL = conversions[0][1] % sourceL
+                        else:
+                            errxit("%s cannot be converted to FIXED" % tipeL)
                 if "FIXED" in attributes:
                     autoConvert(tipeR, "FIXED")
                     if len(children) == 0:
                         print(indent + "putFIXED(" + baseAddress + ", numberRHS);") 
                     elif len(children) == 1:
-                        tipeL, sourceL = generateExpression(scope, children[0])
                         print(indent + "putFIXED(" + baseAddress + \
                               "+ %d*(" % attributes["dirWidth"] + \
                               sourceL + "), numberRHS);") 
@@ -1176,10 +1201,11 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 elif "BIT" in attributes:
                     autoConvert(tipeR, "BIT")
                     if len(children) == 0:
-                        print(indent + "putBIT(" + baseAddress + ", bitRHS);") 
+                        print(indent + "putBIT(%d, " % attributes["BIT"] +\
+                               baseAddress + ", bitRHS);") 
                     elif len(children) == 1:
-                        tipeL, sourceL = generateExpression(scope, children[0])
-                        print(indent + "putBIT(" + baseAddress + \
+                        print(indent + "putBIT(%d, " % attributes["BIT"] + \
+                              baseAddress + \
                               "+ %d*(" % attributes["dirWidth"] + \
                               sourceL + "), bitRHS);") 
                     else:
@@ -1189,7 +1215,6 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     if len(children) == 0:
                         print(indent + "putCHARACTER(" + baseAddress + ", stringRHS);") 
                     elif len(children) == 1:
-                        tipeL, sourceL = generateExpression(scope, children[0])
                         print(indent + "putCHARACTER(" + baseAddress + \
                               "+ %d*(" % attributes["dirWidth"] + \
                               sourceL + "), stringRHS);") 
@@ -1317,7 +1342,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
         # we have to find the declaration of the procedure.  Before doing that,
         # we first have to figure out the name of the procedure.
         procScope = scope
-        while procScope["symbol"] == "":
+        while procScope["symbol"].startswith("_") or procScope["symbol"] == "":
             procScope = procScope["parent"]
             if procScope == None:
                 errxit("RETURN outside of any PROCEDURE")
@@ -1325,7 +1350,10 @@ def generateSingleLine(scope, indent, line, indexInScope):
         procedureAttributes = getAttributes(procScope, procedureName)
         if procedureAttributes == None:
             errxit("PROCEDURE %s declaration not found" % procedureName)
-        toType = procedureAttributes["return"]
+        if "return" in procedureAttributes:
+            toType = procedureAttributes["return"]
+        else:
+            toType = "FIXED"
         if toType == "BIT":
             toAttributes = { "BIT": procedureAttributes["bitsize"] }
         else:
@@ -1400,13 +1428,24 @@ def generateSingleLine(scope, indent, line, indexInScope):
                         innerAttributes = innerScope["variables"][innerParameter]
                         innerAddress = innerAttributes["address"]
                         toType, parm = autoconvertFull(scope, outerParameter, innerAttributes)
-                        print(indent2 + "put" + toType + "("+ \
+                        if toType == "BIT":
+                            function = "putBIT(%d, " % innerAttributes["BIT"]
+                        else:
+                            function = "put" + toType + "("
+                        print(indent2 + function + \
                                  str(innerAddress) + ", " + \
                                  parm + "); ")
                     print(indent2 + mangled + "();")
                     print(indent + "}")
     elif "CASE" in line:
         tipe, source = generateExpression(scope, line["CASE"])
+        if tipe != "FIXED":
+            conversions = autoconvert(tipe, ["FIXED"])
+            if len(conversions) > 0:
+                tipe = conversions[0][0]
+                source = conversions[0][1] % source
+            else:
+                errxit("%s cannot be converted to FIXED" % tipe)
         print(indent + "switch (" + source + ") {")
         scope["switchCounter"] = 0
         scope["ifCounter"] = 0
@@ -1844,7 +1883,7 @@ def generateC(globalScope):
           file=f)
     print("extern memoryMapEntry_t *memoryMapBySymbol[NUM_SYMBOLS]; // Sorted by symbol", 
           file=f)
-    print("  ")
+    print("  ", file=f)
     f.close()
     
     if debugSink != None:

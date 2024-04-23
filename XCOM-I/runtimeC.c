@@ -403,17 +403,20 @@ putFIXED(uint32_t address, int32_t value)
 }
 
 bit_t *
-getBIT(uint32_t address)
+getBIT(uint32_t bitWidth, uint32_t address)
 {
   bit_t *value = nextBuffer();
-  memoryMapEntry_t *memoryMapEntry = lookupFloor(address);;
-  uint32_t numBytes, bitWidth;
-  if (memoryMapEntry == NULL)
+  uint32_t numBytes;
+  if (bitWidth == 0)
     {
-      fprintf(stderr, "Address %06X not found in getBIT.\n", address);
-      exit(1);
+      memoryMapEntry_t *memoryMapEntry = lookupFloor(address);
+      if (memoryMapEntry == NULL)
+        {
+          fprintf(stderr, "Address %06X not found in getBIT.\n", address);
+          exit(1);
+        }
+      bitWidth = memoryMapEntry->bitWidth;
     }
-  bitWidth = memoryMapEntry->bitWidth;
   numBytes = (bitWidth + 7) / 8;
   if (numBytes == 3) // BIT(17) through BIT(24) uses 4 bytes.
     numBytes = 4;
@@ -430,25 +433,30 @@ getBIT(uint32_t address)
     }
   value->bitWidth = bitWidth;
   value->numBytes = numBytes;
-  memcpy(value->bytes, &memory[address], numBytes);
+  memmove(value->bytes, &memory[address], numBytes);
   return value;
 }
 
 void
-putBIT(uint32_t address, bit_t *value)
+putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
 {
-  memoryMapEntry_t *memoryMapEntry = lookupFloor(address);;
-  uint32_t numBytes, bitWidth, maskWidth, maskAddress = address;
-  if (memoryMapEntry == NULL)
+  uint32_t numBytes, maskWidth, maskAddress = address;
+  if (bitWidth == 0)
     {
-      fprintf(stderr, "Address %06X not found in putBIT.\n", address);
-      exit(1);
+      memoryMapEntry_t *memoryMapEntry = lookupFloor(address);
+      if (memoryMapEntry == NULL)
+        {
+          fprintf(stderr, "Address %06X not found in putBIT.\n", address);
+          exit(1);
+        }
+      bitWidth = memoryMapEntry->bitWidth;
     }
-  bitWidth = memoryMapEntry->bitWidth;
   numBytes = (bitWidth + 7) / 8;
   if (numBytes == 3) // BIT(17) through BIT(24) uses 4 bytes.
-    maskAddress++;
-    numBytes = 4;
+    {
+      maskAddress++;
+      numBytes = 4;
+    }
   if (bitWidth > 32)
     {
       uint32_t descriptor;
@@ -461,7 +469,7 @@ putBIT(uint32_t address, bit_t *value)
       address = descriptor & 0xFFFFFF;
       maskAddress = address;
     }
-  memcpy(&memory[address], value->bytes, numBytes);
+  memmove(&memory[address], &value->bytes[value->numBytes - numBytes], numBytes);
   maskWidth = bitWidth % 8;
   if (maskWidth)
     memory[maskAddress] &= (1 << maskWidth) - 1;
@@ -757,6 +765,8 @@ xNOT(bit_t *i1) {
   bit_t *result = nextBuffer();
   int i, mask, bitWidth = i1->bitWidth, numBytes = i1->numBytes;
   uint8_t *bytes = i1->bytes;
+  result->bitWidth = bitWidth;
+  result->numBytes = numBytes;
   for (i = numBytes - 1; i >= 0; i--, bitWidth -= 8)
     {
       if (bitWidth <= 0)

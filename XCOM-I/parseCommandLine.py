@@ -15,6 +15,17 @@ import sys
 import os
 import re
 
+'''
+# A nifty way to trap unwanted calls to `print`.
+import builtins
+orig_print = builtins.print
+def my_print(*args, **kwargs):
+    orig_print(*args, **kwargs)
+    if ("file" not in kwargs):
+        breakpoint()
+builtins.print = my_print
+'''
+
 pfs = True
 condA = False
 condC = False

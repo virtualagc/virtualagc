@@ -114,39 +114,39 @@ clean:
 #----------------------------------------------------------------------------
 # For running test suite.
 
-TESTAPPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
-TESTAPPS += Example-6.18.3 Example-6.18.4 Example-6.18.5 Example-6.18.6
+XPLI_APPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
+XPL_APPS = Example-6.18.3 Example-6.18.4 Example-6.18.5 Example-6.18.6
+XPL_APPS += ANALYZER
 
 .PHONY: testclean
 testclean:
-	-rm $(TESTAPPS) -rf
+	-rm $(XPL_APPS) $(XPLI_APPS) -rf
 
-.PHONY: $(TESTAPPS)
-$(TESTAPPS): 
+.PHONY: $(XPL_APPS)
+$(XPL_APPS): 
+	mkdir $@
+	XCOM-I.py --xpl Tests/$@.xpl
+	$(CC) $(DEBUG) -o $@/$@ $@/*.c
+
+.PHONY: $(XPLI_APPS)
+$(XPLI_APPS): 
 	mkdir $@
 	XCOM-I.py Tests/$@.xpl
 	$(CC) $(DEBUG) -o $@/$@ $@/*.c
 
 # Here are the principles behind the tests:
-#   1.	The printed output from bitsizeDemo should be internally consistent.
-#	I.e., the printed contents of the variables should initially match
-#	those of the declaration statements' INITIAL clauses, and then later
-#	should match those of the subsequent assignments.  Additionally, the
-#	reported memory allocations should be correct in both size and location.
-#	*** Checking that is manual, and `make tests` only creates the file
-#	(out.txt) that should be examined manually for correctness. ***
-#   2.	The printed output from bitsizeDemo and bitsizeDemoCommon should be 
-#	identical.  That's checked automatically.
-#   3.  The COMMON output produced by bitsizeDemoCommon should be the input
-#	COMMON used by bitsizeDemoCommonIn.  That's done automatically.
-#   4.	The printed output of bitsizeDemoCommon should match the printed output
-#	of bitsizeDemoCommonIn, *after* various irrelevancies are stripped out:
-#	i.e., sections not expected to match; blank lines; page headings. 
-#	 That's all done and checked automatically.
+#   1.	Various test programs from the Tests/ folder are built.
+#   2.  The test programs are run, and output data collected from them.
+#   3.  The output data is either checked directly, or more-usually, compared
+#	against other the collected data files or compared to previously-
+#	determined-correct "regression" files.
+#   4.  The only manual step is occasional determination that the "regression"
+#	files are valid.
 .PHONY: tests
-tests: testclean $(TESTAPPS)
+tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	cd bitsizeDemo && \
-	./bitsizeDemo >out.txt
+	./bitsizeDemo >out.txt && \
+	diff -s -q ../Tests/bitsizeDemo.regression out.txt
 	
 	cd bitsizeDemoCommon && \
 	./bitsizeDemoCommon >out.txt && \
@@ -166,4 +166,22 @@ tests: testclean $(TESTAPPS)
 	
 	diff -s -q bitsizeDemoCommon/xxxx bitsizeDemoCommonIn/xxxx
 	
+	e=Example-6.18.3 && \
+	cd $$e && \
+	./$$e <../Tests/testdata.txt >out.txt && \
+	diff -s -q out.txt ../Tests/$$e.regression
+	
+	e=Example-6.18.4 && \
+	cd $$e && \
+	./$$e <../Tests/testdata.txt >out.txt && \
+	diff -s -q out.txt ../Tests/$$e.regression
+	
+	Example-6.18.6/Example-6.18.6 | \
+	egrep '^[0-9]+$$' | \
+	Example-6.18.5/Example-6.18.5 >Example-6.18.5/out.txt && \
+	diff -s -q Tests/Example-6.18.5-and-6.regression Example-6.18.5/out.txt
+	
+	ANALYZER/ANALYZER <Tests/SKELETON.bnf >ANALYZER/out.txt
+	
+	@echo "*** Success! ***"
 	
