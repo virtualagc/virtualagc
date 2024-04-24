@@ -102,7 +102,7 @@ bitToFixed(bit_t *value);
 
 // Convert FIXED to BIT(32).
 bit_t *
-fixedToBit(uint32_t bitWidth, int32_t value);
+fixedToBit(int32_t bitWidth, int32_t value);
 
 // Functions to perform various kinds of arithmetic.
 int32_t

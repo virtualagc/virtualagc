@@ -667,7 +667,7 @@ bitToFixed(bit_t *value)
 }
 
 bit_t *
-fixedToBit(uint32_t bitWidth, int32_t value)
+fixedToBit(int32_t bitWidth, int32_t value)
 {
   bit_t *buffer = (bit_t *) nextBuffer();
   int i, mask;
@@ -810,7 +810,7 @@ xOR(bit_t *i1, bit_t *i2) {
         b2 = *bytes2;
       else
         b2 = 0;
-      *bytes++ = b1 | b2;
+      *bytes = b1 | b2;
     }
   return result;
 }

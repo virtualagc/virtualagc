@@ -169,19 +169,24 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	e=Example-6.18.3 && \
 	cd $$e && \
 	./$$e <../Tests/testdata.txt >out.txt && \
-	diff -s -q out.txt ../Tests/$$e.regression
+	diff -s -q ../Tests/$$e.regression out.txt
 	
 	e=Example-6.18.4 && \
 	cd $$e && \
 	./$$e <../Tests/testdata.txt >out.txt && \
-	diff -s -q out.txt ../Tests/$$e.regression
+	diff -s -q ../Tests/$$e.regression out.txt
 	
 	Example-6.18.6/Example-6.18.6 | \
 	egrep '^[0-9]+$$' | \
 	Example-6.18.5/Example-6.18.5 >Example-6.18.5/out.txt && \
 	diff -s -q Tests/Example-6.18.5-and-6.regression Example-6.18.5/out.txt
 	
-	ANALYZER/ANALYZER <Tests/SKELETON.bnf >ANALYZER/out.txt
+	ANALYZER/ANALYZER <Tests/SKELETON.bnf | \
+	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
+	>ANALYZER/out.txt && \
+	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
+	Tests/ANALYZER-SKELETON.regression >ANALYZER/out.regression && \
+	diff -s -q ANALYZER/out.regression ANALYZER/out.txt
 	
 	@echo "*** Success! ***"
 	
