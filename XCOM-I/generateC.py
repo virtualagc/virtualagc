@@ -909,9 +909,9 @@ def generateExpression(scope, expression):
                     source = source + "0"
                     first = False
                 elif symbol == "SUBSTR" and len(parameters) == 2:
-                    source = "bSUBSTR2("
+                    source = "SUBSTR2("
                 elif symbol == "BYTE" and len(parameters) == 1:
-                    source = "bBYTE1("
+                    source = "BYTE1("
                 # Uniform processing.
                 for parameter in parameters:
                     if not first:

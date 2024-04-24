@@ -1102,7 +1102,7 @@ SUBSTR(char *s, uint32_t start, uint32_t length) {
 }
 
 char *
-bSUBSTR2(char *s, uint32_t start) {
+SUBSTR2(char *s, uint32_t start) {
   return SUBSTR(s, start, strlen(s) - start);
 }
 
@@ -1112,7 +1112,7 @@ BYTE(char *s, uint32_t index){
 }
 
 uint8_t
-bBYTE1(char *s) {
+BYTE1(char *s) {
   return BYTE(s, 0);
 }
 

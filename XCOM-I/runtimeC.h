@@ -175,13 +175,13 @@ char *
 SUBSTR(char *s, uint32_t start, uint32_t end);
 
 char *
-bSUBSTR2(char *s, uint32_t start);
+SUBSTR2(char *s, uint32_t start);
 
 uint8_t
 BYTE(char *s, uint32_t index);
 
 uint8_t
-bBYTE1(char *s);
+BYTE1(char *s);
 
 uint32_t
 SHL(uint32_t value, uint32_t shift);
