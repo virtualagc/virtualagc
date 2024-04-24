@@ -177,11 +177,19 @@ SUBSTR(char *s, uint32_t start, uint32_t end);
 char *
 SUBSTR2(char *s, uint32_t start);
 
+// Note that BYTE and BYTE1 auto-convert from EBCDIC to the native character
+// coding (presumably ASCII), because they're intended to operate on data
+// from CHARACTER variables.  BYTE2 performs no such conversion, because it's
+// intended to operate on the data of BIT variables.
+
 uint8_t
 BYTE(char *s, uint32_t index);
 
 uint8_t
 BYTE1(char *s);
+
+uint8_t
+BYTE2(bit_t *b, uint32_t index);
 
 uint32_t
 SHL(uint32_t value, uint32_t shift);
@@ -306,5 +314,23 @@ writeCOMMON(FILE *fp);
 // case aborts.
 int
 readCOMMON(FILE *fp);
+
+uint32_t
+FREEPOINT(void);
+
+void
+TRACE(void);
+
+void
+UNTRACE(void);
+
+uint32_t
+TIME_OF_GENERATION(void);
+
+uint32_t
+FREELIMIT(void);
+
+uint32_t
+FREEBASE(void);
 
 #endif // RUNTIMEC_H

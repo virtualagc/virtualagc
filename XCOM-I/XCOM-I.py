@@ -24,7 +24,7 @@ import re
 import os
 import shutil
 from parseCommandLine import *
-from auxiliary import error, expandAllMacrosInString, printModel, \
+from auxiliary import error, setErrorRef, expandAllMacrosInString, printModel, \
                       getAttributes
 from xtokenize import xtokenize, digits
 from DECLARE import DECLARE
@@ -39,10 +39,6 @@ from generateC import generateC
 
 logicalNot = '¬'
 usCent = '¢'
-
-pseudoStatements = [] # One pseudo-statement per entry. See the 
-# README.md's section titled "Pseudo-Statements" for an explanation of 
-# that concept.
 
 # Create the global scope (symbol,parent=None,None) or a new child scope of an 
 # existing parent scope (symbol,parent not None,None).
@@ -107,8 +103,10 @@ def createNewScope(symbol = '', parent = None):
         # of `code`, and the values are the text of pseudoStatements.  Not
         # all indices are present.  The idea is to be able to optionally
         # print out the original XPL/I pseudo-statements embedded in the
-        # generated out source code.
+        # generated out source code.  `psRefs` is a dictionary for tracking
+        # the indext numbers (in `lines`) of those pseudoStatements.
         "pseudoStatements" : {},
+        "lineRefs" : {},
         #---------------------------------------------------------------------
         # Below this line are state variables specific to the scope.  They're
         # here because the calling code isn't recursive and needs some way
@@ -140,6 +138,11 @@ for adhoc in adhocs:
 # Now let's turn the massaged lines[] array into one gigantic string
 # representing the entire source.
 source = "".join(lines)
+sourcePos = 0
+sourceRefs = { }
+for i in range(len(lines)):
+    sourceRefs[sourcePos] = i
+    sourcePos += len(lines[i])
 
 lastC = ''
 lastLastC = ''
@@ -147,6 +150,7 @@ inQuote = False
 inComment = False
 inHex = False
 inBase = False
+inStartedRef = None
 baseRadix = ''
 baseStart = 0
 #inPfs = False
@@ -157,8 +161,12 @@ skipQuote = 0
 inRecord = False # Tracks whether continuation of "BASED RECORD:".
     
 i = -1 # Position in the source.
+lineRef = None
 while True:
     i += 1
+    if i in sourceRefs:
+        lineRef = sourceRefs[i]
+        setErrorRef(lineRef)
     if i >= len(source):
         break
     if skipQuote > 0:
@@ -169,6 +177,7 @@ while True:
     if False and not inComment and not inQuote:
         # Take care of /?P and /?B conditionals.
         if c == 'P' and lastC == '?' and lastLastC == '/':
+            inStartedRef = lineRef
             inPfs = True
             inBfs = False
             pseudoStatement = pseudoStatement[:-2]
@@ -176,6 +185,7 @@ while True:
             lastC = c
             continue
         elif c == 'B' and lastC == '?' and lastLastC == '/':
+            inStartedRef = lineRef
             inBfs = True
             inPfs = False
             pseudoStatement = pseudoStatement[:-2]
@@ -199,6 +209,7 @@ while True:
         # aren't supported or detected.
         if c in ["A", "B", "C", "P"] and lastC == '?' and lastLastC == '/':
             inConditional = c
+            inStartedRef = lineRef
             pseudoStatement = pseudoStatement[:-2]
             lastLastC = lastC
             lastC = c
@@ -255,9 +266,8 @@ while True:
             inHex = False
             for ih in range(hexStart, len(pseudoStatement)):
                 if pseudoStatement[ih] not in digits["x"]:
-                    print("Non-hex digit(s) in \"%s\"" % \
-                          pseudoStatement[hexStart:], file=sys.stderr)
-                    sys.exit(1)
+                    error("Non-hex digit(s) in \"%s\"" % \
+                          pseudoStatement[hexStart:], None)
             c = ''
     elif inBase:
         if c == ")":
@@ -274,9 +284,8 @@ while True:
                 cBase = 'x'
                 baseRadix = 16
             else:
-                print("%s-bit not supported in literals" % baseRadix, \
-                      file=sys.stderr)
-                sys.exit(1)
+                error("%s-bit not supported in literals" % baseRadix, \
+                      None)
             pseudoStatement = pseudoStatement[:baseStart] + cBase + \
                 pseudoStatement[baseStart+1:]
             continue
@@ -290,6 +299,7 @@ while True:
             c = ''
     elif c == '"':
         inHex = True
+        inStartedRef = lineRef
         pseudoStatement = pseudoStatement + "0x"
         hexStart = len(pseudoStatement)
         c = ''
@@ -297,6 +307,7 @@ while True:
         skipQuote = quoteCount - 1
         if 1 == (quoteCount & 1):
             inQuote = True
+            inStartedRef = lineRef
             quoteCount -= 1
         else:
             quoteCount -= 2
@@ -310,6 +321,7 @@ while True:
         continue
     elif c == "*" and lastC == "/":
         inComment = True
+        inStartedRef = lineRef
         c = ' '
         pseudoStatement = pseudoStatement[:-1]
     elif c in [";", ":"]:
@@ -335,33 +347,45 @@ while True:
             pseudoStatement = pseudoStatement + c
     if endOfStatement:
         pseudoStatements.append(pseudoStatement.lstrip())
+        psRefs.append(lineRef)
         pseudoStatement = ''
     lastLastC = lastC
     lastC = c
 
+if False: # ***DEBUG***
+    for i in range(len(pseudoStatements)):
+        print(pseudoStatements[i].strip()
+                                 .replace(replacementQuote, "''")
+                                 .replace(replacementSpace, " "))
+        j = psRefs[i]
+        print("%s: %s" % \
+              (lineRefs[j], 
+               lines[j].strip()
+                       .replace(replacementQuote, "''")
+                       .replace(replacementSpace, " ")))
+        print("--------------------------------------------------")
+
+setErrorRef(inStartedRef)
 if inQuote:
-    print("Unterminated quoted string", file=sys.stderr)
+    error("Unterminated quoted string", None)
 if inComment:
-    print("Unterminated inline comment", file=sys.stderr)
+    error("Unterminated inline comment", None)
 if inHex:
-    print("Unterminated hexadecimal number", file=sys.stderr)
+    error("Unterminated hexadecimal number", None)
 if inBase:
-    print("Unterminated base %s number" % baseRadix, file=sys.stderr)
+    error("Unterminated base %s number" % baseRadix, None)
 if inConditional:
-    print("Unterminated conditional directive", file=sys.stderr)
+    error("Unterminated conditional directive", None)
 if inRecord:
-    print("Unterminated BASED RECORD", file=sys.stderr)
-if inQuote or inComment or inHex or inBase or inConditional or inRecord:
-    sys.exit(1)
+    error("Unterminated BASED RECORD", None)
 
-
-if False:
+if False: #***DEBUG***
     # See what we have so far.
     for i in range(len(pseudoStatements)):
         print("%06d: %s" % (i, pseudoStatements[i]))
     sys.exit(1)
     
-if False:
+if False: #***DEBUG***
     # Let's tokenize the whole thing.  (Can't really do this right now,
     # except as a test of the tokenizer, since macros haven't been 
     # expanded, and the tokenization might change when macros are 
@@ -381,6 +405,7 @@ while True:
     lineNumber += 1
     if lineNumber >= len(pseudoStatements):
         break
+    setErrorRef(psRefs[lineNumber])
     #code = {} # The dictionary generated for a parsed pseudo-statement.
     #print(lineNumber, pseudoStatements[lineNumber], scope)
     #scope["code"].append(code)
@@ -419,6 +444,7 @@ while True:
     if retry:
         continue
     scope["pseudoStatements"][len(scope["code"])] = originalPseudoStatement
+    scope["lineRefs"][len(scope["code"])] = psRefs[lineNumber]
     scope["lineExpandedText"] = pseudoStatement
     tokenized = xtokenize(pseudoStatement)
     scope["tokenized"] = tokenized
@@ -450,7 +476,7 @@ while True:
     # to do so.  Perhaps I'll rethink that later.
     if inRecord: # Declaration inside a BASED RECORD?
         if DECLARE(pseudoStatement, scope, True):
-            sys.exit(1)
+            error("Problem in DECLARE in BASED RECORD", scope)
         inRecord = False
     elif reserved0 == "EOF":
         # Once all INCLUDE constructs are implemented, EOF should probably
@@ -461,7 +487,7 @@ while True:
         pass
     elif reserved0 in ["DECLARE", "COMMON", "ARRAY", "BASED"]:
         if DECLARE(pseudoStatement, scope, False):
-            sys.exit(1)
+            error("Problem in DECLARE, COMMON, ARRAY, or BASED", scope)
         # Was the declaration a "BASED ... RECORD ...:" ?
         # If so, we'll use it (via inRecord) when processing
         # the next pseudo-statement.
@@ -474,7 +500,7 @@ while True:
             inRecord = False
     elif fields[-1][-1:] == ":": # Label?
         if LABEL(tokenized, scope):
-            sys.exit(1) 
+            error("Problem in LABEL", scope)
     elif reserved0 == "PROCEDURE":
         # The procedure name will already have been added to the code array
         # as a target label for goto.  Retrieve the name and delete the code.
@@ -483,7 +509,7 @@ while True:
         symbol = scope["code"][-1]["TARGET"]
         del scope["code"][-1]
         if PROCEDURE(tokenized, scope):
-            sys.exit(1)
+            error("Problem in PROCEDURE", scope)
         # We must now create a new scope and descend into it.
         parent = scope
         scope = createNewScope(symbol, scope)
@@ -500,7 +526,7 @@ while True:
         # that begins with an identifier appears to be an assignment
         # statement.
         if ASSIGNMENT(tokenized, scope):
-            sys.exit(1)
+            error("Problem in ASSIGNMENT", scope)
     elif reserved0 == "DO":
         # We must now create a new scope and descend into it.
         scope["blockCount"] += 1
@@ -511,10 +537,10 @@ while True:
         symbol = symbol + "_%d" % scope["blockCount"]
         scope = createNewScope(symbol, scope)
         if DO(tokenized, scope):
-            sys.exit(1)
+            error("Problem in DO", scope)
     elif reserved0 == "IF":
         if IF(tokenized, scope):
-            sys.exit(1)
+            error("Problem in IF", scope)
     elif reserved0 == "GOTO":
         if len(tokenized) != 3 or "identifier" not in tokenized[1] or \
                 tokenized[2] != ";":
@@ -533,10 +559,10 @@ while True:
         scope["code"].append({"ELSE": True})
     elif reserved0 == "RETURN":
         if RETURN(tokenized, scope):
-            sys.exit(1)
+            error("Problem in RETURN", scope)
     elif reserved0 == "CALL":
         if CALL(tokenized, scope):
-            sys.exit(1)
+            error("Problem in CALL", scope)
     elif tokenized[0] == ";":
         scope["code"].append({"EMPTY": True})
     else:

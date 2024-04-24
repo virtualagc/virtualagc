@@ -21,8 +21,14 @@ from parseExpression import parseExpression
 debug = False # Standalone interactive test of expression generation.
 
 # Just for engineering
+errxitRef = 0
 def errxit(msg, expression = None):
-    print("Implementation error:", msg, file=sys.stderr)
+    print("%s: %s" % \
+          (lineRefs[errxitRef], 
+           lines[errxitRef].strip()
+                          .replace(replacementQuote, "''")
+                          .replace(replacementSpace, " ")), file = sys.stderr)
+    print(msg, file=sys.stderr)
     #if expression != None:
     #    print(expression, file=sys.stderr)
     sys.exit(1)
@@ -208,12 +214,15 @@ def allocateVariables(scope, extra = None):
     def getBIT(address):
         bitWidth = memoryMap[address]["bitWidth"]
         if bitWidth < 1 or bitWidth > 2048:
-            errxit("BIT width (%d) out of range" % bitWidth);
+            errxit("%s: getBIT(%d) width out of range (%d) at 0x%06X" % \
+                   (identifier, bitWidth, bitWidth, address))
         numBytes = memoryMap[address]["numBytes"]
         if bitWidth > 32:
             descriptor = getFIXED(address)
-            if numBytes - 1 != (descriptor >> 8) & 0xFF:
-                errxit("Implementation error: putBIT widths don't match")
+            descriptorFromLength = (descriptor >> 24) & 0xFF
+            if numBytes - 1 != descriptorFromLength:
+                errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
+                        (identifier, address, numBytes - 1, lengthFromDescriptor))
             address = descriptor & 0xFFFFFF;
         value = 0
         for i in range(numBytes):
@@ -226,15 +235,23 @@ def allocateVariables(scope, extra = None):
             }
     
     def putBIT(address, value):
+        global variableAddress
         bitWidth = value["bitWidth"]
         if bitWidth < 1 or bitWidth > 2048:
-            errxit("BIT width (%d) out of range" % bitWidth);
+            errxit("%s: putBIT(0x%06X) width (%d) out of range" % \
+                   (identifier, address, bitWidth));
         numBytes = value["numBytes"]
         if bitWidth > 32:
             descriptor = getFIXED(address)
-            if numBytes - 1 != (descriptor >> 8) & 0xFF:
-                errxit("Implementation error: putBIT widths don't match")
-            address = descriptor & 0xFFFFFF;
+            if descriptor == 0: # Not yet assigned a value:
+                descriptor = ((numBytes - 1) << 24) | (variableAddress & 0xFFFFFF)
+                variableAddress += numBytes
+                putFIXED(address, descriptor)
+            lengthFromDescriptor = (descriptor >> 24) & 0xFF
+            if numBytes - 1 != lengthFromDescriptor:
+                errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
+                       (identifier, address, numBytes - 1, lengthFromDescriptor))
+            address = descriptor & 0xFFFFFF
         # Store the bytes in reverse order, because it's easier.
         bytes = value["bytes"] & ((1 << bitWidth) - 1)
         for i in range(numBytes - 1 , -1, -1):
@@ -617,7 +634,7 @@ operatorTypes = {
 # second entry a formatting string with %s where the operand can be 
 # inserted that provides the C code for performing the conversion at
 # runtime.
-def autoconvert(current, allowed):
+def autoconvert(current, allowed, source=None):
     conversions = []
     if current == "CHARACTER":
         if "CHARACTER" in allowed:
@@ -637,7 +654,11 @@ def autoconvert(current, allowed):
             conversions.append(("BIT", "fixedToBit(32, %s)"))
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "fixedToCharacter(%s)"))
-    return conversions
+    if source == None:
+        return conversions
+    if len(conversions) == 0:
+        errxit("Cannot convert %s to desired type(s)" % current)
+    return conversions[0][0], conversions[0][1] % source
 
 # `autoconvertFull` combines a lot of operations typically associated with
 # `autoconvert`.  Given an `expression` tree (of an unknown datatype), it
@@ -653,19 +674,14 @@ def autoconvertFull(scope, expression, toAttributes):
         toType = "FIXED"
     elif "BIT" in toAttributes:
         toType = "BIT"
-    conversions = autoconvert(fromType, [toType])
-    if len(conversions) == 0:
-        errxit("Cannot convert %s to %s" % (fromType, toType))
-    conversion = conversions[0][1]
-    return toType, (conversion % source)
+    return autoconvert(fromType, [toType], source)
 
 # `generateOperation` is called by `generateExpression` to evaluate the result
 # of an operation from `operatorTypes`.
 def generateOperation(scope, expression):
-    
     token = expression["token"]
     if "operator" not in token or token["operator"] not in allOperators:
-        errxit("Implementation error: Non-operator in generateOperation")
+        errxit("Non-operator in generateOperation")
     operator = token["operator"]
     operands = expression["children"]
     numOperands = len(operands)
@@ -684,13 +700,7 @@ def generateOperation(scope, expression):
         if operator in operatorTypes[numOperands][datatype]:
             allowedDatatypes[datatype] = operatorTypes[numOperands][datatype][operator]
     if numOperands == 1:
-        autoconversions = autoconvert(type1, allowedDatatypes)
-        if len(autoconversions) == 0:
-            errxit("No possible promotions of %s operand for operator %s" % \
-                   (type1, operator))
-        # Just accept the first possibility, if there's more than one.
-        type1 = autoconversions[0][0]
-        source1 = autoconversions[0][1] % source1
+        type1, source1 = autoconvert(type1, allowedDatatypes, source1)
         datatype, function = allowedDatatypes[type1]
         return datatype, "%s(%s)" % (function, source1)
     # Binary operator.
@@ -716,7 +726,6 @@ def generateOperation(scope, expression):
 #    String containing the generated code.
 #
 def generateExpression(scope, expression):
-    
     source = ""
     tipe = "INDETERMINATE" # Recall that `type` is a reserved word in Python.
     if not isinstance(expression, dict):
@@ -896,7 +905,8 @@ def generateExpression(scope, expression):
             # Many builtins.
             if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
                           "DATE", "TIME", "DATE_OF_GENERATION", "COREBYTE",
-                          "COREWORD"]:
+                          "COREWORD", "FREEPOINT", "TIME_OF_GENERATION",
+                          "FREELIMIT", "FREEBASE"]:
                 if symbol in ["INPUT", "SUBSTR"]:
                     builtinType = "CHARACTER"
                 else:
@@ -910,8 +920,9 @@ def generateExpression(scope, expression):
                     first = False
                 elif symbol == "SUBSTR" and len(parameters) == 2:
                     source = "SUBSTR2("
-                elif symbol == "BYTE" and len(parameters) == 1:
-                    source = "BYTE1("
+                elif symbol == "BYTE":
+                    if len(parameters) == 1:
+                        source = "BYTE1("
                 # Uniform processing.
                 for parameter in parameters:
                     if not first:
@@ -921,12 +932,9 @@ def generateExpression(scope, expression):
                     # Some cases in which I've noticed that autoconversion of
                     # parameters is needed.
                     if tipe != "FIXED" and symbol in ["SHL", "SHR"]:
-                        conversions = autoconvert(tipe, ["FIXED"])
-                        if len(conversions) > 0:
-                            tipe = conversions[0][0]
-                            p = conversions[0][1] % p
-                        else:
-                            errxit("%s cannot be converted to FIXED" % tipe)
+                        tipe, p = autoconvert(tipe, ["FIXED"], p)
+                    if tipe == "BIT" and symbol == "BYTE":
+                        source = "BYTE2("
                     source = source + p
                 source = source + ")"
                 return builtinType, source
@@ -1004,7 +1012,8 @@ lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
 inlineCounter = 0
 def generateSingleLine(scope, indent, line, indexInScope):
-    global forLoopCounter, lineCounter, inlineCounter
+    global forLoopCounter, lineCounter, inlineCounter, errxitRef
+    errxitRef = scope["lineRefs"][indexInScope]
     lineCounter += 1
     if len(line) < 1: # I don't think this is possible!
         return
@@ -1029,6 +1038,42 @@ def generateSingleLine(scope, indent, line, indexInScope):
         indent += indentationQuantum
         LHSs = line["LHS"]
         RHS = line["RHS"]
+        # `buffer = FILE(...)` is a special case, so treat it differently.
+        if "token" in RHS and "builtin" in RHS["token"] and \
+                RHS["token"]["builtin"] == "FILE":
+            # We're going to assume that the LHS represents an array
+            # of 8-bit values.
+            if len(LHSs) != 1:
+                errxit("In ...=FILE(...), require the LHS to be an array of BIT(8)")
+            LHS = LHSs[0]
+            if len(LHS) == 0 or 'token' not in LHS or \
+                    "identifier" not in LHS['token']:
+                errxit("In ...=FILE(...), require the LHS to be an array of BIT(8)")
+            bufferName = LHS['token']['identifier']
+            bufferAttributes = getAttributes(scope, bufferName)
+            if bufferAttributes == None or \
+                    "BASED" in bufferAttributes or \
+                    "BIT" not in bufferAttributes or \
+                    bufferAttributes["BIT"] != 8 or \
+                    "top" not in bufferAttributes:
+                errxit("In ...=FILE, require LHS to be an array of BIT(8)")
+            # Note: We can't have any knowledge at compile-time of the 
+            # record size needed by the file, since files are only 
+            # attached at runtime, so we cannot check whether or not
+            # the assigned buffer is adequate in size right now.
+            children = RHS["children"]
+            if len(children) != 2:
+                errxit("FILE(...) has wrong number of arguments")
+            ne1Type, ne1Source = generateExpression(scope, children[0])
+            ne2Type, ne2Source = generateExpression(scope, children[1])
+            if ne1Type != "FIXED" or ne1Source == None:
+                errxit("Cannot compute device number for FILE(...)")
+            if ne2Type != "FIXED" or ne2Source == None:
+                errxit("Cannot compute record number for FILE(...)")
+            print(indent + "rFILE(%d, %s, %s);" % (bufferAttributes["address"], 
+                                                   ne1Source,
+                                                   ne2Source))
+            return
         tipeR, sourceR = generateExpression(scope, RHS)
         definedS = False
         definedN = False
@@ -1182,12 +1227,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 if len(children) == 1: # Compute index.
                     tipeL, sourceL = generateExpression(scope, children[0])
                     if tipeL != "FIXED":
-                        conversions = autoconvert(tipeL, ["FIXED"])
-                        if len(conversions) > 0:
-                            tipeL = conversions[0][0]
-                            sourceL = conversions[0][1] % sourceL
-                        else:
-                            errxit("%s cannot be converted to FIXED" % tipeL)
+                        tipeL, sourceL = autoconvert(tipeL, ["FIXED"], sourceL)
                 if "FIXED" in attributes:
                     autoConvert(tipeR, "FIXED")
                     if len(children) == 0:
@@ -1225,7 +1265,18 @@ def generateSingleLine(scope, indent, line, indexInScope):
             elif "builtin" in tokenLHS:
                 builtin = tokenLHS["builtin"]
                 children = LHS["children"]
-                if builtin == "OUTPUT":
+                if builtin == "COREBYTE":
+                    if len(children) == 1:
+                        tipe, source = generateExpression(scope, children[0])
+                        if tipe != "FIXED":
+                            tipe, source = autoconvert(tipe, ["FIXED"], source)
+                        if definedN:
+                            print(indent + "COREBYTE2(%s, numberRHS);" % source)
+                        elif definedB:
+                            print(indent + "COREBYTE2(%s, bitToFixed(bitRHS));" % source)
+                    else:
+                        errxit("Cannot compute address for COREBYTE(...)")
+                elif builtin == "OUTPUT":
                     autoConvert(tipeR, "CHARACTER")
                     if len(children) == 0:
                         print(indent + "OUTPUT(0, stringRHS);")
@@ -1235,6 +1286,35 @@ def generateSingleLine(scope, indent, line, indexInScope):
                         print(indent + "OUTPUT(" + source + ", stringRHS);")
                     else:
                         errxit("Corrupted device number in OUTPUT")
+                elif builtin == "FILE":
+                    # We're going to assume that the RHS represents an array
+                    # of 8-bit values.
+                    if len(RHS) == 0 or 'token' not in RHS or \
+                            "identifier" not in RHS['token']:
+                        errxit("In FILE(...)=BUFFER, require BUFFER to be an array of BIT(8)")
+                    bufferName = RHS['token']['identifier']
+                    bufferAttributes = getAttributes(scope, bufferName)
+                    if bufferAttributes == None or \
+                            "BASED" in bufferAttributes or \
+                            "BIT" not in bufferAttributes or \
+                            bufferAttributes["BIT"] != 8 or \
+                            "top" not in bufferAttributes:
+                        errxit("In FILE(...)=BUFFER, require BUFFER to be an array of BIT(8)")
+                    # Note: We can't have any knowledge at compile-time of the 
+                    # record size needed by the file, since files are only 
+                    # attached at runtime, so we cannot check whether or not
+                    # the assigned buffer is adequate in size right now.
+                    children = LHS["children"]
+                    if len(children) != 2:
+                        errxit("FILE(...) has wrong number of arguments")
+                    ne1Type, ne1Source = generateExpression(scope, children[0])
+                    ne2Type, ne2Source = generateExpression(scope, children[1])
+                    if ne1Type != "FIXED" or ne1Source == None:
+                        errxit("Cannot compute device number for FILE(...)")
+                    if ne2Type != "FIXED" or ne2Source == None:
+                        errxit("Cannot compute record number for FILE(...)")
+                    print(indent + "lFILE(%s, %s, %d);", ne1Source,
+                            ne2Source, bufferAttributes["address"])
                 else:
                     errxit("Unsupported builtin " + builtin)
             else:
@@ -1345,7 +1425,13 @@ def generateSingleLine(scope, indent, line, indexInScope):
         while procScope["symbol"].startswith("_") or procScope["symbol"] == "":
             procScope = procScope["parent"]
             if procScope == None:
-                errxit("RETURN outside of any PROCEDURE")
+                expression = line["RETURN"]
+                if len(expression) == 0: 
+                    print(indent + "exit(0);")
+                else:
+                    tipe, source = generateExpression(scope, expression)
+                    print(indent + "exit(%s);" % source)
+                return;
         procedureName = procScope["symbol"]
         procedureAttributes = getAttributes(procScope, procedureName)
         if procedureAttributes == None:
@@ -1400,7 +1486,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 inlineCounter += 1
         else:
             # Some builtins can be CALL'd
-            if procedure in ["LINK", "COMPACTIFY"]:
+            if procedure in ["LINK", "COMPACTIFY", "TRACE", "UNTRACE"]:
                 print(indent + procedure + "(", end = '')
                 for i in range(len(line["parameters"])):
                     if i > 0:
@@ -1412,7 +1498,10 @@ def generateSingleLine(scope, indent, line, indexInScope):
             else:
                 outerParameters = line["parameters"] 
                 attributes = getAttributes(scope, procedure)
-                mangled = attributes["mangled"]
+                try: #***DEBUG***
+                    mangled = attributes["mangled"]
+                except:
+                    errxit("Implementation:" + str(attributes))
                 if len(outerParameters) == 0:
                     print(indent + mangled + "();")
                 else:
@@ -1440,12 +1529,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
     elif "CASE" in line:
         tipe, source = generateExpression(scope, line["CASE"])
         if tipe != "FIXED":
-            conversions = autoconvert(tipe, ["FIXED"])
-            if len(conversions) > 0:
-                tipe = conversions[0][0]
-                source = conversions[0][1] % source
-            else:
-                errxit("%s cannot be converted to FIXED" % tipe)
+            tipe, source = autoconvert(tipe, ["FIXED"], source)
         print(indent + "switch (" + source + ") {")
         scope["switchCounter"] = 0
         scope["ifCounter"] = 0
@@ -1468,7 +1552,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
 #    "indent" is a string of blanks for the indentation of the parent scope.
 #
 def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
-    
+   
     if "generated" in scope:
         return
     scope["generated"] = True;
@@ -1839,6 +1923,7 @@ def generateC(globalScope):
     # runtimeC.c.
     f = open(outputFolder + "/configuration.h", "w")
     print("// Configuration settings, inferred from the XPL/I source.", file=f)
+    print("#define XCOM_I_START_TIME %d" % TIME_OF_GENERATION, file=f)
     if pfs:
         print("#define PFS", file=f)
     else:

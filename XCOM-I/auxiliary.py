@@ -12,13 +12,24 @@ Mods:       2024-03-16 RSB  Split off from XCOM-I.py.
 
 import sys
 import re
-from parseCommandLine import debugSink
+from parseCommandLine import debugSink, lines, lineRefs
+
+# `errorRef` and `ref` are indices into the `lines` and `lineRefs` arrays.
+errorRef = None
+def setErrorRef(ref):
+    global errorRef
+    errorRef = ref
 
 # Prints a compiler error message, consisting of the message itself, the
 # current line number and line text, and the line number and line text for 
 # all the parent contexts.
 briefErrors = True
 def error(msg, scope):
+    print("%s: %s" % \
+          (lineRefs[errorRef], 
+           lines[errorRef].strip()
+                          .replace(replacementQuote, "''")
+                          .replace(replacementSpace, " ")), file = sys.stderr)
     if briefErrors:
         print("%s: %s" % (msg, scope["lineText"]), file = sys.stderr)
     else:

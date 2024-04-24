@@ -104,4 +104,6 @@ def PROCEDURE(tokenized, scope, inRecord = False):
             else:
                 error(msg % state, scope)
     
+    if "return" not in attributes:
+        attributes["return"] = "FIXED"
     return returnValue

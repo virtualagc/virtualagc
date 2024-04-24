@@ -1116,6 +1116,11 @@ BYTE1(char *s) {
   return BYTE(s, 0);
 }
 
+uint8_t
+BYTE2(bit_t *b, uint32_t index) {
+  return b->bytes[index];
+}
+
 uint32_t
 SHL(uint32_t value, uint32_t shift) {
   return value << shift;
@@ -1906,7 +1911,25 @@ readCOMMON(FILE *fp) {
   return 0;
 }
 
+uint32_t
+FREEPOINT(void) {
+  return freepoint;
+}
 
+uint32_t
+TIME_OF_GENERATION(void) {
+  return XCOM_I_START_TIME;
+}
+
+uint32_t
+FREELIMIT(void) {
+  return FREE_LIMIT;
+}
+
+uint32_t
+FREEBASE(void) {
+  return FREE_BASE;
+}
 
 // Some test code.
 #if 0

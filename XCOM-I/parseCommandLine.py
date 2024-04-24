@@ -14,6 +14,15 @@ Mods:       2024-03-27 RSB  Began experimenting with this concept.
 import sys
 import os
 import re
+import datetime
+
+def TIME(): # Equivalent to the XPL built-in.
+    now = datetime.datetime.now()
+    return  now.hour * 360000 + \
+            now.minute * 6000 + \
+            now.second * 100 + \
+            now.microsecond // 10000
+TIME_OF_GENERATION = TIME()
 
 '''
 # A nifty way to trap unwanted calls to `print`.
@@ -35,7 +44,10 @@ outputFolder = None
 indent = "  "
 debugSink = None
 lines = [] # One line of source code per entry.
-sourceFiles = [] # One entry for each entry in lines[]; source filename for line.
+lineRefs = [] # One reference (filename:number) for each line of source code.
+pseudoStatements = [] # One pseudo-statement per entry. See the 
+psRefs = [] # One index into `lineRefs` for each `pseudoStatement`
+#sourceFiles = [] # Source filename for each line.
 verbose = True
 includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 baseSource = ""
@@ -59,7 +71,8 @@ basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
 # Raw read of a source-code file.  Recursive, if /%INCLUDE ... %/ directives
 # (and similar) are encountered.
 def readFileIntoLines(filename):
-    global inputFilenames, lines, sourceFiles, baseSource
+    global inputFilenames, lines, baseSource
+    # global sourceFiles
     if filename in inputFilenames:
         return
     if baseSource == "":
@@ -68,11 +81,14 @@ def readFileIntoLines(filename):
     try:
         inputFilenames.append(filename)
         f = open(filename, "r")
+        lineNumber = 0
         for line in f:
+            lineNumber += 1
             if "$%" in line:
                 pass
             lines.append(line)
-            sourceFiles.append(os.path.basename(filename))
+            lineRefs.append("%s:%d" % (filename, lineNumber))
+            #sourceFiles.append(os.path.basename(filename))
             if "/%INCLUDE" in line:
                 fields = line.split()
                 readFileIntoLines(dir + "/" + fields[1] + ".xpl")
