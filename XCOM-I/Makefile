@@ -85,6 +85,10 @@
 #
 # Some tests may be automated, while others may require manual inspection of
 # output files saved by the tests.  The manual inspections needed are TBD.
+#
+# Note on converting ANALYZER report output (say, out.txt) to PDF:  I used
+#	enscript -B -f Courier9 -o out.ps out.txt
+#	ps2pdf out.ps out.pdf
 
 TARGET = $(notdir $(CURDIR))
 ifeq ($(strip $(CC)),)
