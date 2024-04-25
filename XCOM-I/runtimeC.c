@@ -1916,6 +1916,16 @@ FREEPOINT(void) {
   return freepoint;
 }
 
+void
+TRACE(void) {
+  // Intentionally empty.
+}
+
+void
+UNTRACE(void) {
+  // Intentionally empty.
+}
+
 uint32_t
 TIME_OF_GENERATION(void) {
   return XCOM_I_START_TIME;

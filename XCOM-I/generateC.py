@@ -18,6 +18,8 @@ from parseCommandLine import *
 from xtokenize import xtokenize
 from parseExpression import parseExpression
 
+stdoutOld = sys.stdout
+
 debug = False # Standalone interactive test of expression generation.
 
 # Just for engineering
@@ -906,13 +908,13 @@ def generateExpression(scope, expression):
             if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
                           "DATE", "TIME", "DATE_OF_GENERATION", "COREBYTE",
                           "COREWORD", "FREEPOINT", "TIME_OF_GENERATION",
-                          "FREELIMIT", "FREEBASE"]:
-                if symbol in ["INPUT", "SUBSTR"]:
+                          "FREELIMIT", "FREEBASE", "ABS", "STRING", 
+                          "STRING_GT"]:
+                if symbol in ["INPUT", "SUBSTR", "STRING"]:
                     builtinType = "CHARACTER"
                 else:
                     builtinType = "FIXED"
                 parameters = expression["children"]
-                first = True
                 source = symbol + "("
                 # Some special cases for omitted parameters.
                 if symbol == "INPUT" and len(parameters) == 0:
@@ -923,18 +925,35 @@ def generateExpression(scope, expression):
                 elif symbol == "BYTE":
                     if len(parameters) == 1:
                         source = "BYTE1("
-                # Uniform processing.
-                for parameter in parameters:
-                    if not first:
+                # (Almost) uniform processing of parameters.
+                for parmNum in range(len(parameters)):
+                    parameter = parameters[parmNum]
+                    if parmNum != 0:
                         source = source + ", "
-                    first = False
                     tipe, p = generateExpression(scope, parameter)
-                    # Some cases in which I've noticed that autoconversion of
-                    # parameters is needed.
-                    if tipe != "FIXED" and symbol in ["SHL", "SHR"]:
-                        tipe, p = autoconvert(tipe, ["FIXED"], p)
-                    if tipe == "BIT" and symbol == "BYTE":
+                    # A special case.
+                    if parmNum == 0 and tipe == "BIT" and symbol == "BYTE":
                         source = "BYTE2("
+                        symbol = "BYTE2"
+                    # Datatype conversions for parameters:
+                    autoconvertTo = tipe
+                    if parmNum == 0:
+                        if symbol in ["ABS", "COREBYTE", "COREWORD", "SHL",
+                                      "SHR", "INPUT", "STRING"]:
+                            autoconvertTo = "FIXED"
+                        elif symbol in ["BYTE", "LENGTH", "STRING_GT", 
+                                        "SUBSTR"]:
+                            autoconvertTo = "CHARACTER"
+                    elif parmNum == 1:
+                        if symbol in ["BYTE", "BYTE2", "SHL", "SHR", "SUBSTR"]:
+                            autoconvertTo = "FIXED"
+                        elif symbol in ["STRING_GT"]:
+                            autoconvertTo = "CHARACTER"
+                    elif parmNum == 2:
+                        if symbol in ["SUBSTR"]:
+                            autoconvertTo= "FIXED"
+                    if autoconvertTo != tipe:
+                        tipe, p = autoconvert(tipe, [autoconvertTo], p)
                     source = source + p
                 source = source + ")"
                 return builtinType, source
@@ -1035,6 +1054,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
                 parent["ifCounter"] += 1
     if "ASSIGN" in line:
         print(indent + "{")
+        oldIndent = indent
         indent += indentationQuantum
         LHSs = line["LHS"]
         RHS = line["RHS"]
@@ -1073,6 +1093,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
             print(indent + "rFILE(%d, %s, %s);" % (bufferAttributes["address"], 
                                                    ne1Source,
                                                    ne2Source))
+            print(oldIndent + "}")
             return
         tipeR, sourceR = generateExpression(scope, RHS)
         definedS = False
@@ -1313,8 +1334,8 @@ def generateSingleLine(scope, indent, line, indexInScope):
                         errxit("Cannot compute device number for FILE(...)")
                     if ne2Type != "FIXED" or ne2Source == None:
                         errxit("Cannot compute record number for FILE(...)")
-                    print(indent + "lFILE(%s, %s, %d);", ne1Source,
-                            ne2Source, bufferAttributes["address"])
+                    print(indent + "lFILE(%s, %s, %d);" % \
+                          (ne1Source, ne2Source, bufferAttributes["address"]))
                 else:
                     errxit("Unsupported builtin " + builtin)
             else:
@@ -1552,6 +1573,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
 #    "indent" is a string of blanks for the indentation of the parent scope.
 #
 def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
+    global stdoutOld
    
     if "generated" in scope:
         return
