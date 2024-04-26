@@ -237,7 +237,7 @@ def allocateVariables(scope, extra = None):
             }
     
     def putBIT(address, value):
-        global variableAddress
+        global variableAddress, freeLimit
         bitWidth = value["bitWidth"]
         if bitWidth < 1 or bitWidth > 2048:
             errxit("%s: putBIT(0x%06X) width (%d) out of range" % \
@@ -246,8 +246,10 @@ def allocateVariables(scope, extra = None):
         if bitWidth > 32:
             descriptor = getFIXED(address)
             if descriptor == 0: # Not yet assigned a value:
-                descriptor = ((numBytes - 1) << 24) | (variableAddress & 0xFFFFFF)
-                variableAddress += numBytes
+                # Note that we put the data for BIT strings at the *top* of
+                # memory, lowering `freelimit`.
+                freeLimit -= numBytes
+                descriptor = ((numBytes - 1) << 24) | (freeLimit & 0xFFFFFF)
                 putFIXED(address, descriptor)
             lengthFromDescriptor = (descriptor >> 24) & 0xFF
             if numBytes - 1 != lengthFromDescriptor:
@@ -339,7 +341,7 @@ def allocateVariables(scope, extra = None):
             numElements = attributes["top"] + 1
         else:
             numElements = 0
-        if useBit:
+        if useBit: # Note: `useBit` no longer used.
             if len(initial) > 0:
                 memoryMap[variableAddress] = {
                     "mangled": mangled, 
@@ -653,7 +655,7 @@ def autoconvert(current, allowed, source=None):
         if "FIXED" in allowed:
             conversions.append(("FIXED", "%s"))
         if "BIT" in allowed:
-            conversions.append(("BIT", "fixedToBit(32, %s)"))
+            conversions.append(("BIT", "fixedToBit(32, (int32_t) (%s))"))
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "fixedToCharacter(%s)"))
     if source == None:
@@ -1101,7 +1103,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
         definedB = False
         if tipeR == "FIXED":
             definedN = True
-            print(indent + "int32_t numberRHS = " + sourceR + ";")
+            print(indent + "int32_t numberRHS = (int32_t) (" + sourceR + ");")
         elif tipeR == "BIT":
             definedB = True
             print(indent + "bit_t *bitRHS = " + sourceR + ";")
@@ -1698,8 +1700,9 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         if verbose and i in scope["pseudoStatements"] and \
                 None == re.search("\\bCALL +INLINE *\\(", \
                                   scope["pseudoStatements"][i].upper()):
-            print(indent + "// " + scope["pseudoStatements"][i] + \
-                  (" (%d)" % lineCounter))
+            print(indent + "// " + \
+                  scope["pseudoStatements"][i].replace(replacementQuote, "''") \
+                  + (" (%d)" % lineCounter))
         lastReturned = "RETURN" in line
         generateSingleLine(scope, indent, line, i)
         if "scope" in line: # Code for an embedded DO...END block.
@@ -1794,6 +1797,9 @@ def generateC(globalScope):
     useBit = False
     useString = False
     walkModel(globalScope, allocateVariables)
+    '''
+    # The following extra step turns out to be unnecessary, and double-allocate
+    # space for long BIT data.
     useCommon = True # COMMON Long BIT data
     useBit = True
     useString = False
@@ -1802,6 +1808,7 @@ def generateC(globalScope):
     useBit = True
     useString = False
     walkModel(globalScope, allocateVariables)
+    '''
     freeBase = variableAddress
     useCommon = True # COMMON string data
     useBit = False
@@ -1841,6 +1848,21 @@ def generateC(globalScope):
             if 7 == i % 8:
                 j = i & 0xFFFFF8
                 print(" // %8d 0x%06X" % (j, j), file=f)
+    restart = freeLimit - 8 - (freeLimit % 8)
+    if variableAddress > 0:
+        print(",", end="", file=f)
+    print("  [0x%0X]=0x00," % (restart - 1), file=f)
+    physicalTop = 0x1000000
+    for i in range(restart, physicalTop):
+        if 0 == i % 8:
+            print("  ", end="", file=f)
+        print("0x%02X" % memory[i], end="", file=f)
+        if i < physicalTop - 1:
+            print(", ", end="", file=f)
+            if 7 == i % 8:
+                j = i & 0xFFFFF8
+                print(" // %8d 0x%06X" % (j, j), file=f)
+    print("   // %8d 0x%06X" % (physicalTop - 8, physicalTop - 8), end="", file=f)
     print("\n};", file=f)
     print("\n// Lists of fields of BASED variables ------------------------\n",\
           file=f)

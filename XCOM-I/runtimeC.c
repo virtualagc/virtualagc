@@ -70,6 +70,7 @@ struct timeval startTime;
 
 // Memory-management stuff.
 static uint32_t freepoint = FREE_POINT;
+static uint32_t freelimit = FREE_LIMIT;
 
 int linesPerPage = 59;
 int
@@ -412,7 +413,8 @@ getBIT(uint32_t bitWidth, uint32_t address)
       memoryMapEntry_t *memoryMapEntry = lookupFloor(address);
       if (memoryMapEntry == NULL)
         {
-          fprintf(stderr, "Address %06X not found in getBIT.\n", address);
+          fprintf(stderr, "Implementation error: getBIT(%d,0x%06X), address not found\n",
+              bitWidth, address);
           exit(1);
         }
       bitWidth = memoryMapEntry->bitWidth;
@@ -424,9 +426,11 @@ getBIT(uint32_t bitWidth, uint32_t address)
     {
       uint32_t descriptor;
       descriptor = getFIXED(address);
-      if (numBytes - 1 != descriptor >> 8)
+      if (numBytes - 1 != descriptor >> 24)
         {
-          fprintf(stderr, "Implementation error: BIT widths don't match.\n");
+          fprintf(stderr,
+              "Implementation error: getBIT(%d,0x%06X), BIT width mismatch, getFIXED(0x%06X)==0x%08X.\n",
+              bitWidth, address, address, descriptor);
           exit(1);
         }
       address = descriptor & 0xFFFFFF;
@@ -446,7 +450,8 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
       memoryMapEntry_t *memoryMapEntry = lookupFloor(address);
       if (memoryMapEntry == NULL)
         {
-          fprintf(stderr, "Address %06X not found in putBIT.\n", address);
+          fprintf(stderr, "Implementation error: putBIT(%d,0x%06X,...), address not found\n",
+              bitWidth, address);
           exit(1);
         }
       bitWidth = memoryMapEntry->bitWidth;
@@ -461,10 +466,11 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
     {
       uint32_t descriptor;
       descriptor = getFIXED(address);
-      if (value->numBytes != descriptor >> 8)
+      if (value->numBytes != descriptor >> 24)
         {
-          fprintf(stderr, "Implementation error: BIT widths don't match.\n");
-          exit(1);
+          fprintf(stderr,
+              "Implementation error: putBIT(%d,0x%06X), BIT width mismatch, getFIXED(0x%06X)==0x%08X.\n",
+              bitWidth, address, address, descriptor);
         }
       address = descriptor & 0xFFFFFF;
       maskAddress = address;
@@ -597,7 +603,7 @@ putCHARACTER(uint32_t address, char *str)
       index = freepoint;
       putFIXED(address, ((length - 1) << 24) | index);
       freepoint += length;
-      if (freepoint > FREE_LIMIT)
+      if (freepoint > freelimit)
         COMPACTIFY(); // Will abort the program upon failure.
     }
   descriptor = ((length - 1) << 24) | index;
@@ -1062,6 +1068,7 @@ OUTPUT(uint32_t lun, char *string) {
 #define MAX_INPUTS 128
 char *
 INPUT(uint32_t lun) {
+  int i;
   char *s;
   FILE *fp;
   if (lun < 0 || lun >= DD_MAX || DD_INS[lun] == NULL)
@@ -1075,10 +1082,19 @@ INPUT(uint32_t lun) {
     {
       // McKeeman doesn't define how to detect an end-of-file on INPUT,
       // but sample program 6.18.4 detects it by finding an empty string.
+      // XCOM seems to expect that INPUT will silently reject all cards
+      // with a non-blank in column 1.
       s[0] = 0;
       return s;
     }
   s[strcspn(s, "\r\n")] = 0; // Strip off carriage-returns and/or line-feeds.
+  // Since input is expected to be arriving on punch-cards, we want to
+  // truncate or pad all input lines to be exactly 80 characters.  This isn't
+  // normally significant, but for a legacy compiler like XCOM.xpl or
+  // SKELETON.xpl it is.
+  for (i = strlen(s); i < 80; i++)
+    s[i] = ' ';
+  s[i] = 0;
   return s;
 }
 
@@ -1088,9 +1104,28 @@ LENGTH(char *s) {
 }
 
 char *
-SUBSTR(char *s, uint32_t start, uint32_t length) {
+SUBSTR(char *s, int32_t start, int32_t length) {
   char *returnValue = nextBuffer();
   int len = strlen(s) - start;
+  if (start < 0)
+    {
+      fprintf(stderr, "SUBSTR start position is < 0.\n");
+      //exit(1); ***DEBUG***
+      start = 0;
+      len = strlen(s) - start;
+    }
+  if (length < 0)
+    {
+      fprintf(stderr, "SUBSTR length is < 0.\n");
+      //exit(1); ***DEBUG***
+      length = 0;
+    }
+  if (len < 0)
+    {
+      fprintf(stderr, "SUBSTR start+length > string length\n");
+      //exit(1); ***DEBUG***
+      len = 0;
+    }
   if (len > 0)
     {
       if (length > len)
@@ -1102,7 +1137,7 @@ SUBSTR(char *s, uint32_t start, uint32_t length) {
 }
 
 char *
-SUBSTR2(char *s, uint32_t start) {
+SUBSTR2(char *s, int32_t start) {
   return SUBSTR(s, start, strlen(s) - start);
 }
 
@@ -1165,9 +1200,9 @@ MONITOR6(uint32_t address, uint32_t n) {
         freepoint = start + n;
       return 0;
     }
-  if (freepoint + n > FREE_LIMIT)
+  if (freepoint + n > freelimit)
     COMPACTIFY();
-  if (freepoint + n > FREE_LIMIT)
+  if (freepoint + n > freelimit)
     return 1;
   start = getFIXED(address);
   end = start + found->allocated;
@@ -1217,7 +1252,7 @@ MONITOR18(void) {
 
 uint32_t
 MONITOR21(void) {
-  return FREE_LIMIT - freepoint;
+  return freelimit - freepoint;
 }
 
 #if 0
@@ -1581,8 +1616,8 @@ COMPACTIFY(void)
           int whereDescriptor = allocations[i].address, descriptor;
           // Move the data downward to fill the hole (just for this allocation).
           lengthToMove = allocations[i].length;
-          if (actual + lengthToMove > FREE_LIMIT)
-            lengthToMove = FREE_LIMIT - actual;
+          if (actual + lengthToMove > freelimit)
+            lengthToMove = freelimit - actual;
           memmove(&memory[expected], &memory[actual], lengthToMove);
           allocations[i].saddress = expected;
           // Fix the entry for the variable.  Note that the following works
@@ -1933,7 +1968,7 @@ TIME_OF_GENERATION(void) {
 
 uint32_t
 FREELIMIT(void) {
-  return FREE_LIMIT;
+  return freelimit;
 }
 
 uint32_t

@@ -49,11 +49,15 @@
 
 #	To include debugging info in the executable, so that it can be
 #	debugged with `gdb` (or whatever):
-#		make DEBUG="options"
+#		make EXTRA="options"
 #	where the options are specific to the compiler.  The quotation
 #	marks need to be present if there are any spaces in the options.
 #	For `gcc` or its variants:
-#		make DEBUG=-ggdb
+#		make EXTRA=-ggdb
+#
+#	EXTRA can also be used for any other compiler switches you like,
+# 	such as switched to turn off compiler warnings:
+#		make EXTRA="-ggdb -Wdangling-else"
 #
 # Running Tests on the XCOM-I System
 # ----------------------------------
@@ -94,9 +98,6 @@ TARGET = $(notdir $(CURDIR))
 ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
-# The following line includes debugging info in the executable, so that it
-# can be debugged with `gdb` or whatever.  Comment it out in "production".
-#DEBUG = -ggdb
 
 SOURCES = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
@@ -108,7 +109,7 @@ HEADERS = $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	$(CC) $(DEBUG) -o $@ $(SOURCES)
+	$(CC) $(EXTRA) -o $@ $(SOURCES)
 
 .PHONY: clean
 clean:
@@ -130,13 +131,13 @@ testclean:
 $(XPL_APPS): 
 	mkdir $@
 	XCOM-I.py --xpl Tests/$@.xpl
-	$(CC) $(DEBUG) -o $@/$@ $@/*.c
+	$(CC) $(EXTRA) -o $@/$@ $@/*.c
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
 	mkdir $@
 	XCOM-I.py Tests/$@.xpl
-	$(CC) $(DEBUG) -o $@/$@ $@/*.c
+	$(CC) $(EXTRA) -o $@/$@ $@/*.c
 
 # Here are the principles behind the tests:
 #   1.	Various test programs from the Tests/ folder are built.

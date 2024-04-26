@@ -172,10 +172,10 @@ uint32_t
 LENGTH(char *string);
 
 char *
-SUBSTR(char *s, uint32_t start, uint32_t end);
+SUBSTR(char *s, int32_t start, int32_t end);
 
 char *
-SUBSTR2(char *s, uint32_t start);
+SUBSTR2(char *s, int32_t start);
 
 // Note that BYTE and BYTE1 auto-convert from EBCDIC to the native character
 // coding (presumably ASCII), because they're intended to operate on data
