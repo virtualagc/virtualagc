@@ -11,8 +11,10 @@ FIX:
     nval = 0;
     
     do i = negative to length(s) - 1;
+      if byte(s,i) = byte(' ') then go to done;
       nval = nval * 10 + byte(s,i) - byte('0');
     end;
+    done:
     
     if negative then
       return -nval;

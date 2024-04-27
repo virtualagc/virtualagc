@@ -182,7 +182,7 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	diff -s -q ../Tests/$$e.regression out.txt
 	
 	Example-6.18.6/Example-6.18.6 | \
-	egrep '^[0-9]+$$' | \
+	egrep '^[0-9]+' | \
 	Example-6.18.5/Example-6.18.5 >Example-6.18.5/out.txt && \
 	diff -s -q Tests/Example-6.18.5-and-6.regression Example-6.18.5/out.txt
 	

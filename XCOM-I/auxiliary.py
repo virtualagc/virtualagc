@@ -12,7 +12,8 @@ Mods:       2024-03-16 RSB  Split off from XCOM-I.py.
 
 import sys
 import re
-from parseCommandLine import debugSink, lines, lineRefs
+from parseCommandLine import debugSink, lines, lineRefs, replacementSpace, \
+                             replacementQuote
 
 # `errorRef` and `ref` are indices into the `lines` and `lineRefs` arrays.
 errorRef = None

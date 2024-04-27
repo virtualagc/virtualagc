@@ -27,38 +27,10 @@
 #include <time.h>
 #include <sys/time.h> // For gettimeofday().
 
-// `nextBuffer` is sort of a cut-rate memory-management system for builtins
-// that return CHARACTER values or BIT values.  In order to avoid having to
-// allocate new memory for such outputs, or more importantly to free such
-// memory later, we instead maintain a circular array of buffers, and
-// each call to a builtin that returns a string or a BIT simply uses the next
-// buffer in that array.  The reason this is okay, is that functions returning
-// strings or BITs are invoked only in the context of expressions, and the
-// number of function calls an expression can make isn't very large. So we can
-// just make the circular array very large and not worry about it.  I hope.
-#define MAX_BUFFS 1024
-static void *
-nextBuffer(void)
-{
-  static union {
-    // Note that these fields aren't every actually *used* by these names,
-    // outside of this function. They're mainly here to get the amount of
-    // storage correct.  I.e., so that the returned pointer is guaranteed to
-    // contain enough storage.
-    string_t stringBuffer;
-    bit_t bitBuffer;
-  } buffers[MAX_BUFFS];
-  static int currentBuffer;
-  void *returnValue = &(buffers[currentBuffer++]);
-  if (currentBuffer >= MAX_BUFFS)
-    currentBuffer = 0;
-  // Clear the string (by NUL-terminating it) or the BIT (by setting its width
-  // fields to 0).
-  *((uint32_t *) returnValue) = 0;
-  return (void *) returnValue;
-}
+//---------------------------------------------------------------------------
+// Global variables.
 
-// Global variables extern'd in runtimeC.h:
+// Extern'd in runtimeC.h:
 int outUTF8 = 0;
 FILE *DD_INS[DD_MAX] = { NULL };
 FILE *DD_OUTS[DD_MAX] = { NULL };
@@ -73,6 +45,282 @@ static uint32_t freepoint = FREE_POINT;
 static uint32_t freelimit = FREE_LIMIT;
 
 int linesPerPage = 59;
+memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
+
+//---------------------------------------------------------------------------
+// Functions useful for CALL INLINE or debugging a la `gdb`.
+
+void
+printMemoryMap(char *msg) {
+  int i;
+  printf("\n%s\n", msg);
+  for (i = 0; i < NUM_SYMBOLS; i++)
+    {
+      int j;
+      int address = memoryMap[i].address;
+      char *symbol = memoryMap[i].symbol;
+      char *datatype = memoryMap[i].datatype;
+      if (!strcmp(datatype, "BASED"))
+        {
+          int numRecords = memoryMap[i].allocated / memoryMap[i].recordSize;
+          uint32_t raddress = getFIXED(address);
+          printf("%06X: BASED     %s = %06X\n", address, symbol,
+                 getFIXED(address));
+          for (j = 0; j < numRecords; j++)
+            {
+              int k;
+              int numFieldsInRecord = memoryMap[i].numFieldsInRecord;
+              basedField_t *basedField = memoryMap[i].basedFields;
+              for (k = 0; k < numFieldsInRecord; k++, basedField++)
+                {
+                  int n, numElements = basedField->numElements, vector = 1;
+                  if (numElements == 0)
+                    {
+                      vector = 0;
+                      numElements = 1;
+                    }
+                  for (n = 0; n < numElements; n++, raddress += basedField->dirWidth)
+                    {
+                      char *fieldName = basedField->symbol, *s;
+                      printf("        %06X: BASED %s %s(%d)", raddress,
+                             basedField->datatype, symbol, j);
+                      if (strlen(fieldName) != 0)
+                        {
+                          printf(".%s", fieldName);
+                          if (vector)
+                            printf("(%d)", n);
+                        }
+                      if (!strcmp(basedField->datatype, "CHARACTER"))
+                        {
+                          uint32_t descriptor = getFIXED(raddress);
+                          if (descriptor == 0)
+                            printf(" = \"%s\"", "");
+                          else
+                            printf(" = \"%s\" @%06X", getCHARACTER(raddress),
+                                   0xFFFFFF & getFIXED(raddress));
+                        }
+                      else if (!strcmp(basedField->datatype, "FIXED"))
+                        printf(" = %d", getFIXED(raddress));
+                      else if (!strcmp(basedField->datatype, "BIT"))
+                        printf(" = %u", getFIXED(raddress));
+                      printf("\n");
+                    }
+                }
+            }
+        }
+      else
+        {
+          int numElements = memoryMap[i].numElements;
+          int dirWidth = memoryMap[i].dirWidth;
+          if (numElements == 0)
+            {
+              if (!strcmp(datatype, "CHARACTER"))
+                {
+                  uint32_t descriptor = getFIXED(address);
+                  uint32_t saddress = descriptor & 0xFFFFFF;
+                  if (descriptor == 0)
+                    {
+                      printf("%06X: CHARACTER %s = \"%s\"\n", address,
+                             symbol, getCHARACTER(address));
+                    }
+                  else
+                    {
+                      printf("%06X: CHARACTER %s = \"%s\" @%06X\n",
+                             address, symbol, getCHARACTER(address), saddress);
+                    }
+                }
+              else if (!strcmp(datatype, "FIXED"))
+                {
+                  printf("%06X: FIXED     %s = %d\n", address, symbol,
+                      getFIXED(address));
+                }
+              else if (!strcmp(datatype, "BIT"))
+                {
+                  printf("%06X:       BIT %s = %u\n", address, symbol,
+                      getFIXED(address));
+                }
+            }
+          for (j = 0; j < numElements; j++)
+            {
+              int k = address + dirWidth * j;
+              if (!strcmp(datatype, "CHARACTER"))
+                {
+                  uint32_t descriptor = getFIXED(k);
+                  uint32_t saddress = descriptor & 0xFFFFFF;
+                  if (descriptor == 0)
+                    {
+                      printf("%06X: CHARACTER %s(%u) = \"%s\"\n", k, symbol,
+                          j, getCHARACTER(k));
+                    }
+                  else
+                    {
+                      printf("%06X: CHARACTER %s(%u) = \"%s\" @%06X\n", k, symbol,
+                          j, getCHARACTER(k), saddress);
+                    }
+                }
+              else if (!strcmp(datatype, "FIXED"))
+                {
+                  printf("%06X: FIXED     %s(%u) = %d\n", k, symbol,
+                      j, getFIXED(k));
+                }
+              else if (!strcmp(datatype, "BIT"))
+                {
+                  printf("%06X:       BIT %s(%u) = %u\n", k, symbol,
+                      j, getFIXED(k));
+                }
+            }
+        }
+    }
+}
+
+// Convert the data of a bit_t to a string in the currently-set radix.
+int bitBits = 4;
+char *
+bitToRadix(bit_t *b) {
+  char *returnValue = nextBuffer();
+  int offset;
+  int radix = 1 << bitBits;
+  int numDigits = (b->bitWidth + bitBits - 1) / bitBits;
+  int i, nextByte = b->numBytes - 1, bitsLeftInValue = 0, value = 0, thisDigit;
+  if (bitBits < 4)
+    offset = sprintf(returnValue, "\"(%d) ", bitBits);
+  else
+    offset = sprintf(returnValue, "\"");
+  if (bitBits < 1 || bitBits > 4)
+    {
+      sprintf(returnValue, "Set bitBits 1, 2, 3, or 4 (not %d)", bitBits);
+      return returnValue;
+    }
+  for (i = numDigits - 1; i >= 0; i--)
+    {
+      while (bitsLeftInValue < bitBits)
+        {
+          value = (value << 8) | b->bytes[nextByte--];
+          bitsLeftInValue += 8;
+        }
+      thisDigit = value % radix;
+      value = value / radix;
+      bitsLeftInValue -= bitBits;
+      if (thisDigit < 10)
+        returnValue[offset + i] = '0' + thisDigit;
+      else
+        returnValue[offset + i] = 'A' + (thisDigit - 10);
+    }
+  returnValue[offset + numDigits] = '"';
+  returnValue[offset + numDigits + 1] = 0;
+  return returnValue;
+}
+
+// This function could be used within a debugger to fetch the current value
+// of an identifier, perhaps subscripted.  Useful because XPL variables are
+// not modeled as C variables (easily accessed by the debugger) but rather
+// as indexes into the `memory` array and not encoded the way native C
+// variables are.
+char *
+getXPL(char *identifier) {
+  memoryMapEntry_t *entry;
+  char *returnValue = nextBuffer();
+  char *base = NULL, *field = NULL;
+  int baseIndex = 0, fieldIndex = 0;
+  char *s;
+  for (s = identifier, base = identifier; *s; s++)
+    {
+      if (*s == '.')
+        {
+          if (field != NULL)
+            {
+              sprintf(returnValue, "Too many . separators in %s.", identifier);
+              return returnValue;
+            }
+          *s = 0;
+          field = s + 1;
+        }
+    }
+  for (s = base; *s; s++)
+    {
+      if (*s == '(')
+        {
+          *s = 0;
+          baseIndex = atoi(s + 1);
+          break;
+        }
+    }
+  if (field != NULL)
+    for (s = field; *s; s++)
+      {
+        if (*s == '(')
+          {
+            *s = 0;
+            fieldIndex = atoi(s + 1);
+            break;
+          }
+      }
+  entry = lookupVariable(base);
+  if (entry == NULL)
+    {
+      sprintf(returnValue,
+          "Cannot find variable %s; could it be a macro?", base);
+      return returnValue;
+    }
+  if (entry->basedFields == NULL)
+    {
+      if (field != NULL)
+        {
+          sprintf(returnValue, "Variable %s is not BASED RECORD.", base);
+          return returnValue;
+        }
+      field = base;
+      fieldIndex = baseIndex;
+      base = NULL;
+      baseIndex = 0;
+    }
+
+
+  return rawGetXPL(base, baseIndex, field, fieldIndex);
+}
+
+void
+printXPL(char *identifier) {
+  printf("%s\n", getXPL(identifier));
+}
+
+char *
+rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex) {
+  int32_t address = rawADDR(base, baseIndex, field, fieldIndex);
+  char *returnValue = nextBuffer();
+  if (foundRawADDR == NULL || address < 0 || \
+      address + foundRawADDR->dirWidth > sizeof(memory))
+    {
+      sprintf(returnValue, "Outside of physical memory");
+      return returnValue;
+    }
+  if (!strcmp(foundRawADDR->datatype, "FIXED"))
+    {
+      int32_t i = getFIXED(address);
+      sprintf(returnValue, "%d (0x%08X)", i, i);
+      return returnValue;
+    }
+  if (!strcmp(foundRawADDR->datatype, "CHARACTER"))
+    {
+      char *s = getCHARACTER(address);
+      sprintf(returnValue, "'%s'", s);
+      return returnValue;
+    }
+  if (!strcmp(foundRawADDR->datatype, "BIT"))
+    {
+      bit_t *b = getBIT(foundRawADDR->bitWidth, address);
+      int i, offset = sprintf(returnValue, "bitWidth=%d numBytes=%d bytes=",
+                              b->bitWidth, b->numBytes);
+      sprintf(&returnValue[offset], "%s", bitToRadix(b));
+      return returnValue;
+    }
+  sprintf(returnValue, "Unrecognized datatype %s", foundRawADDR->datatype);
+  return returnValue;
+}
+
+//---------------------------------------------------------------------------
+// Utility functions.
+
 int
 parseCommandLine(int argc, char **argv)
 {
@@ -314,6 +562,37 @@ parseCommandLine(int argc, char **argv)
   return returnValue;
 }
 
+// `nextBuffer` is sort of a cut-rate memory-management system for builtins
+// that return CHARACTER values or BIT values.  In order to avoid having to
+// allocate new memory for such outputs, or more importantly to free such
+// memory later, we instead maintain a circular array of buffers, and
+// each call to a builtin that returns a string or a BIT simply uses the next
+// buffer in that array.  The reason this is okay, is that functions returning
+// strings or BITs are invoked only in the context of expressions, and the
+// number of function calls an expression can make isn't very large. So we can
+// just make the circular array very large and not worry about it.  I hope.
+#define MAX_BUFFS 1024
+void *
+nextBuffer(void)
+{
+  static union {
+    // Note that these fields aren't every actually *used* by these names,
+    // outside of this function. They're mainly here to get the amount of
+    // storage correct.  I.e., so that the returned pointer is guaranteed to
+    // contain enough storage.
+    string_t stringBuffer;
+    bit_t bitBuffer;
+  } buffers[MAX_BUFFS];
+  static int currentBuffer;
+  void *returnValue = &(buffers[currentBuffer++]);
+  if (currentBuffer >= MAX_BUFFS)
+    currentBuffer = 0;
+  // Clear the string (by NUL-terminating it) or the BIT (by setting its width
+  // fields to 0).
+  *((uint32_t *) returnValue) = 0;
+  return (void *) returnValue;
+}
+
 // Used only by `lookupAddress`.
 static int
 cmpAddresses(const void *e1, const void *e2)
@@ -331,7 +610,7 @@ cmpMapSymbols(const void *e1, const void *e2) {
 
 // Look up the `memoryMap` entry associated with a given address.  Returns
 // either a pointer to the record, or else NULL if not found.
-static memoryMapEntry_t *
+memoryMapEntry_t *
 lookupAddress(uint32_t address)
 {
   memoryMapEntry_t key, *found;
@@ -346,7 +625,7 @@ lookupAddress(uint32_t address)
 // guaranteed that there are no duplicates.  It's a curious omission, but there
 // seems to be no library function in C for this kind of a commonly-desired
 // search, so we have to roll our own binary search.
-static memoryMapEntry_t *
+memoryMapEntry_t *
 lookupFloor(uint32_t address)
 {
   int start = 0, end = NUM_SYMBOLS, current;
@@ -367,10 +646,24 @@ lookupFloor(uint32_t address)
 
 // Look up the `memoryMap` entry associated with a given variable name.
 // Returns either a pointer to the record, or else NULL if not found.
-static memoryMapEntry_t *
+memoryMapEntry_t *
 lookupVariable(char *symbol)
 {
   memoryMapEntry_t **found, key, *keyp = &key;
+  static int mapInitialized = 0;
+  if (!mapInitialized)
+    {
+      // In point of fact, XCOM-I has already sorted `memoryMapBySymbol`.
+      // However, it's possible this C program on the run-time computer to
+      // have a different sorting order than XCOM-I.py did on the compile-time
+      // computer.  (Or even on the *same* computer, in my experience!)
+      // If that happens, then binary searches will no longer work properly.
+      // Consequently, we sort it again now, at run-time, guaranteeing
+      // matching collation.
+      mapInitialized = 1;
+      qsort(&memoryMapBySymbol, NUM_SYMBOLS,
+            sizeof(memoryMapEntry_t *), cmpMapSymbols);
+    }
   // Note that since `memoryMapBySymbol` contains pointers to
   // `memoryMapEntry_t`, then the key for the binary search must
   // also be a pointer to a memoryMapEntry_t.
@@ -381,6 +674,9 @@ lookupVariable(char *symbol)
     return NULL;
   return *found;
 }
+
+//---------------------------------------------------------------------------
+// Runtime-library functions.
 
 int32_t
 getFIXED(uint32_t address)
@@ -1082,8 +1378,10 @@ INPUT(uint32_t lun) {
     {
       // McKeeman doesn't define how to detect an end-of-file on INPUT,
       // but sample program 6.18.4 detects it by finding an empty string.
+      // XCOM certainly expects an empty return on INPUT(2) at the end of file.
       // XCOM seems to expect that INPUT will silently reject all cards
-      // with a non-blank in column 1.
+      // with a non-blank in column 1, but doesn't seem to care whether
+      // it does that or not, so I don't.
       s[0] = 0;
       return s;
     }
@@ -1359,50 +1657,52 @@ COREWORD2(uint32_t address, uint32_t value) {
   exit(1);
 }
 
-// Note that the lookup of variable names required in `ADDR` depends on the
-// presence of the metadata in the `memoryMap` array, as sorted by symbols
-// `memoryMapBySymbol`.
+// Like `rawADDR` except that it aborts upon error.
 uint32_t
 ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
-  memoryMapEntry_t *found;
-  static int mapInitialized = 0;
-  if (!mapInitialized)
+  int address = rawADDR(bVar, bIndex, fVar, fIndex);
+  if (address == -1)
     {
-      // In point of fact, XCOM-I has already sorted `memoryMapBySymbol`.
-      // However, it's possible for the run-time computer to have a different
-      // environment setup, with a different collating order, than the
-      // compile-time computer.  If that happens, then binary searches will
-      // no longer work properly.  Consequently, we sort it again at run-time,
-      // guaranteeing matching collation.
-      mapInitialized = 1;
-      qsort(&memoryMapBySymbol, NUM_SYMBOLS,
-            sizeof(memoryMapEntry_t *), cmpMapSymbols);
+      fprintf(stderr, "ADDR(%s) not found\n", bVar);
+      exit(1);
     }
+  if (address == -2)
+    {
+      fprintf(stderr, "Could not find the specified BASED variable field.\n");
+      exit(1);
+    }
+  if (address == -3)
+    {
+      fprintf(stderr, "ADDR(%s) not found\n", fVar);
+      exit(1);
+    }
+  return address;
+}
+
+// Returns the address, or else a negative number upon error.
+int rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
   if (bVar != NULL) // BASED variable.
     {
       int i, j;
       uint32_t address;
       basedField_t *basedField;
-      found = lookupVariable(bVar);
-      if (found == NULL)
-        {
-          fprintf(stderr, "ADDR(%s) not found\n", bVar);
-          exit(1);
-        }
+      foundRawADDR = lookupVariable(bVar);
+      if (foundRawADDR == NULL)
+        return -1;
       if (bIndex == 0x80000000 && fVar == NULL && fIndex == 0) {
           // This special case returns just the address of a BASED
           // variable's pointer to the beginning of its memory
           // allocation.
-          return found->address;
+          return foundRawADDR->address;
       }
-      address = getFIXED(found->address);       // -> beginning of alloc.
-      address += bIndex * found->recordSize;    // -> beginning of record.
+      address = getFIXED(foundRawADDR->address);       // -> beginning of alloc.
+      address += bIndex * foundRawADDR->recordSize;    // -> beginning of record.
       if (fVar == NULL) // No field specified.
         return address;
       // Look for the specific field in the record (and the specific
       // index into it), to update the address and return it.
-      for (i = 0, basedField = found->basedFields;
-           i < found->numFieldsInRecord;
+      for (i = 0, basedField = foundRawADDR->basedFields;
+           i < foundRawADDR->numFieldsInRecord;
            i++, basedField++)
         {
           int numElements = basedField->numElements;
@@ -1418,22 +1718,16 @@ ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
           else
             address += basedField->dirWidth * numElements;
         }
-
-      fprintf(stderr, "Could not find the specified BASED variable field.\n");
-      exit(1);
+      return -2;
     }
   else
     {
 
-      found = lookupVariable(fVar);
-      if (found == NULL)
-        {
-          fprintf(stderr, "ADDR(%s) not found\n", fVar);
-          exit(1);
-        }
-      return found->address + found->dirWidth * fIndex;
+      foundRawADDR = lookupVariable(fVar);
+      if (foundRawADDR == NULL)
+        return -3;
+      return foundRawADDR->address + foundRawADDR->dirWidth * fIndex;
     }
-  return 0;
 }
 
 // The `FILE` built-in.  There are two versions, one for the RHS of assignments
@@ -1646,129 +1940,6 @@ COMPACTIFY(void)
     }
 
   free(allocations);
-}
-
-void
-printMemoryMap(char *msg) {
-  int i;
-  printf("\n%s\n", msg);
-  for (i = 0; i < NUM_SYMBOLS; i++)
-    {
-      int j;
-      int address = memoryMap[i].address;
-      char *symbol = memoryMap[i].symbol;
-      char *datatype = memoryMap[i].datatype;
-      if (!strcmp(datatype, "BASED"))
-        {
-          int numRecords = memoryMap[i].allocated / memoryMap[i].recordSize;
-          uint32_t raddress = getFIXED(address);
-          printf("%06X: BASED     %s = %06X\n", address, symbol,
-                 getFIXED(address));
-          for (j = 0; j < numRecords; j++)
-            {
-              int k;
-              int numFieldsInRecord = memoryMap[i].numFieldsInRecord;
-              basedField_t *basedField = memoryMap[i].basedFields;
-              for (k = 0; k < numFieldsInRecord; k++, basedField++)
-                {
-                  int n, numElements = basedField->numElements, vector = 1;
-                  if (numElements == 0)
-                    {
-                      vector = 0;
-                      numElements = 1;
-                    }
-                  for (n = 0; n < numElements; n++, raddress += basedField->dirWidth)
-                    {
-                      char *fieldName = basedField->symbol, *s;
-                      printf("        %06X: BASED %s %s(%d)", raddress,
-                             basedField->datatype, symbol, j);
-                      if (strlen(fieldName) != 0)
-                        {
-                          printf(".%s", fieldName);
-                          if (vector)
-                            printf("(%d)", n);
-                        }
-                      if (!strcmp(basedField->datatype, "CHARACTER"))
-                        {
-                          uint32_t descriptor = getFIXED(raddress);
-                          if (descriptor == 0)
-                            printf(" = \"%s\"", "");
-                          else
-                            printf(" = \"%s\" @%06X", getCHARACTER(raddress),
-                                   0xFFFFFF & getFIXED(raddress));
-                        }
-                      else if (!strcmp(basedField->datatype, "FIXED"))
-                        printf(" = %d", getFIXED(raddress));
-                      else if (!strcmp(basedField->datatype, "BIT"))
-                        printf(" = %u", getFIXED(raddress));
-                      printf("\n");
-                    }
-                }
-            }
-        }
-      else
-        {
-          int numElements = memoryMap[i].numElements;
-          int dirWidth = memoryMap[i].dirWidth;
-          if (numElements == 0)
-            {
-              if (!strcmp(datatype, "CHARACTER"))
-                {
-                  uint32_t descriptor = getFIXED(address);
-                  uint32_t saddress = descriptor & 0xFFFFFF;
-                  if (descriptor == 0)
-                    {
-                      printf("%06X: CHARACTER %s = \"%s\"\n", address,
-                             symbol, getCHARACTER(address));
-                    }
-                  else
-                    {
-                      printf("%06X: CHARACTER %s = \"%s\" @%06X\n",
-                             address, symbol, getCHARACTER(address), saddress);
-                    }
-                }
-              else if (!strcmp(datatype, "FIXED"))
-                {
-                  printf("%06X: FIXED     %s = %d\n", address, symbol,
-                      getFIXED(address));
-                }
-              else if (!strcmp(datatype, "BIT"))
-                {
-                  printf("%06X:       BIT %s = %u\n", address, symbol,
-                      getFIXED(address));
-                }
-            }
-          for (j = 0; j < numElements; j++)
-            {
-              int k = address + dirWidth * j;
-              if (!strcmp(datatype, "CHARACTER"))
-                {
-                  uint32_t descriptor = getFIXED(k);
-                  uint32_t saddress = descriptor & 0xFFFFFF;
-                  if (descriptor == 0)
-                    {
-                      printf("%06X: CHARACTER %s(%u) = \"%s\"\n", k, symbol,
-                          j, getCHARACTER(k));
-                    }
-                  else
-                    {
-                      printf("%06X: CHARACTER %s(%u) = \"%s\" @%06X\n", k, symbol,
-                          j, getCHARACTER(k), saddress);
-                    }
-                }
-              else if (!strcmp(datatype, "FIXED"))
-                {
-                  printf("%06X: FIXED     %s(%u) = %d\n", k, symbol,
-                      j, getFIXED(k));
-                }
-              else if (!strcmp(datatype, "BIT"))
-                {
-                  printf("%06X:       BIT %s(%u) = %u\n", k, symbol,
-                      j, getFIXED(k));
-                }
-            }
-        }
-    }
 }
 
 /*

@@ -25,6 +25,32 @@ extern FILE *DD_INS[DD_MAX];
 extern FILE *DD_OUTS[DD_MAX];
 extern FILE *COMMON_OUT;
 
+// Some functions that are perhaps useful for CALL INLINE or for running
+// the C code in a debugger.
+
+void *
+nextBuffer(void);
+
+memoryMapEntry_t *
+lookupAddress(uint32_t address);
+
+memoryMapEntry_t *
+lookupFloor(uint32_t address);
+
+memoryMapEntry_t *
+lookupVariable(char *symbol);
+
+void
+printMemoryMap(char *msg);
+
+extern int bitBits;
+char *
+getXPL(char *identifier);
+void
+printXPL(char *identifier);
+char *
+rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex);
+
 // Returns -1 on failure, 0 on success, 1 to request an immediate termination.
 int
 parseCommandLine(int argc, char **argv);
@@ -290,13 +316,11 @@ COREWORD2(uint32_t address, uint32_t value);
 // ARRAY, which at this writing is identical to DECLARE.)
 uint32_t
 ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex);
+int
+rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex);
 
 void
 COMPACTIFY(void);
-
-// A function possibly useful for debugging memory management.
-void
-printMemoryMap(char *msg);
 
 // Functions for reading COMMON from a file, or writing COMMON to a file.
 
