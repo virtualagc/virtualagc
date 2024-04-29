@@ -1,4 +1,4 @@
- /*/
+ /*@
     Access:     Public Domain, no restrictions believed to exist.
     Filename:   ##DRIVER.xpl
     Purpose:    This is a part of the HAL/S-FC compiler program.
@@ -6,9 +6,6 @@
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2023-04-16 RSB  Suffixed the filename with ".xpl".
-    Note:       Inline comments beginning with "/*/" were created by the
-                Virtual AGC Project. Inline comments beginning merely with
-                "/*" are from the original Space Shuttle development.
  */
 
  /***************************************************************************/
@@ -1085,7 +1082,7 @@ STRUCT FUNC><DOUBLY QUAL NAME HEAD>');                                          
       ,0,17,28,329,0,192,0,194,195,0,0,163,0,11,17,28,40,188,190,192,329,381    00048300
       ,0,59,0,0,0,0,0,0,0,224,412,0,257,0,0,0,0,0,378,0,0,0,96,0,81,0,0,0,20    00048350
       ,25,26,27,0,41,0,62,75,80,132,187,331,364,408,440,0,17,28,188,190,192     00048400
-      ,39,384,0,0,68,0,19,24,29,41,59,61,69,92,263,361,363,365,0,19,24,0,17    00048450
+      ,39,384,0,0,68,0,19,24,29,41,59,61,69,92,263,361,363,365,0,19,24,0,17     00048450
       ,28,188,190,192,329,382,0,17,18,20,25,26,27,28,62,68,75,80,132,187,188    00048500
       ,190,192,329,331,364,382,408,440,0,19,24,65,105,158,160,354,365,0,19,24   00048550
       ,365,0,19,24,365,0,19,24,365,0,19,24,365,0,17,18,20,25,26,27,28,62,68     00048600

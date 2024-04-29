@@ -1,0 +1,24 @@
+FACTORIAL:
+   PROCEDURE (N);
+      DECLARE (I, N, NFACT) FIXED;
+      
+      NFACT = 1;
+      DO I = 2 TO N;
+         NFACT = NFACT*I;
+      END;
+      RETURN NFACT;
+   END FACTORIAL;
+   
+   /*  THE NEXT STATEMENT HAS AN UNDECLARED IDENTIFIER  */
+   
+   DO X = 1 TO 10;
+      OUTPUT = X || ' FACTORIAL = ' || FACTORIAL(X);
+   END;
+   
+   /*  THE NEXT STATEMENT HAS A SIMULATED KEYPUNCH ERROR  */
+   
+   2 = I + 1;
+   
+   OUTPUT = TIME;
+   
+EOF

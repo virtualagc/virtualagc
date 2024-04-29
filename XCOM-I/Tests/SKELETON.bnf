@@ -1,0 +1,30 @@
+$  THIS IS A TEST GRAMMAR WHICH MAY BE USED IN SKELETON                         
+$ITERATE                                                                        
+$OUTPUT                                                                         
+<PROGRAM>               <STATEMENT LIST>                                        
+<STATEMENT LIST>        <STATEMENT>                                             
+                        <STATEMENT LIST> <STATEMENT>                            
+<STATEMENT>             <ASSIGNMENT> ;                                          
+<ASSIGNMENT>            <VARIABLE> = <EXPR>                                     
+<EXPR>                  <ARITH EXPR>                                            
+                        <IF CLAUSE> THEN <EXPR> ELSE <EXPR>                     
+<IF CLAUSE>             IF <BOOLEAN>                                            
+<BOOLEAN>               TRUE                                                    
+                        FALSE                                                   
+                        <EXPR> <RELATION> <EXPR>                                
+                        <IF CLAUSE> THEN <BOOLEAN> ELSE <BOOLEAN>               
+<RELATION>              =                                                       
+                        <                                                       
+                        >                                                       
+<ARITH EXPR>            <TERM>                                                  
+                        <ARITH EXPR> + <TERM>                                   
+                        <ARITH EXPR> - <TERM>                                   
+<TERM>                  <PRIMARY>                                               
+                        <TERM> * <PRIMARY>                                      
+                        <TERM> / <PRIMARY>                                      
+<PRIMARY>               <VARIABLE>                                              
+                        <NUMBER>                                                
+                        ( <EXPR> )                                              
+<VARIABLE>              <IDENTIFIER>                                            
+                        <VARIABLE> ( <EXPR> )                                   
+                                                                                

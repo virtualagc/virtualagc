@@ -1,0 +1,954 @@
+PAGE 1
+
+
+GRAMMAR ANALYSIS  --  THE VIRTUAL AGC PROJECT  --  ANALYZER VERSION OF APRIL 22, 2024.
+
+
+TODAY IS APRIL 22, 2024.
+
+
+             P R O D U C T I O N S
+
+
+$  THIS IS A TEST GRAMMAR WHICH MAY BE USED IN SKELETON                         
+$ITERATE                                                                        
+$OUTPUT                                                                         
+
+     1   <PROGRAM>  ::=  <STATEMENT LIST>
+
+     2   <STATEMENT LIST>  ::=  <STATEMENT>
+     3                       |  <STATEMENT LIST> <STATEMENT>
+
+     4   <STATEMENT>  ::=  <ASSIGNMENT> ;
+
+     5   <ASSIGNMENT>  ::=  <VARIABLE> = <EXPR>
+
+     6   <EXPR>  ::=  <ARITH EXPR>
+     7             |  <IF CLAUSE> THEN <EXPR> ELSE <EXPR>
+
+     8   <IF CLAUSE>  ::=  IF <BOOLEAN>
+
+     9   <BOOLEAN>  ::=  TRUE
+    10                |  FALSE
+    11                |  <EXPR> <RELATION> <EXPR>
+    12                |  <IF CLAUSE> THEN <BOOLEAN> ELSE <BOOLEAN>
+
+    13   <RELATION>  ::=  =
+    14                 |  <
+    15                 |  >
+
+    16   <ARITH EXPR>  ::=  <TERM>
+    17                   |  <ARITH EXPR> + <TERM>
+    18                   |  <ARITH EXPR> - <TERM>
+
+    19   <TERM>  ::=  <PRIMARY>
+    20             |  <TERM> * <PRIMARY>
+    21             |  <TERM> / <PRIMARY>
+
+    22   <PRIMARY>  ::=  <VARIABLE>
+    23                |  <NUMBER>
+    24                |  ( <EXPR> )
+
+    25   <VARIABLE>  ::=  <IDENTIFIER>
+    26                 |  <VARIABLE> ( <EXPR> )
+
+
+TIME USED WAS 0.00 SECONDS.
+TOTAL TIME IS 0.00 SECONDS.
+PAGE 2
+
+
+   T E R M I N A L   S Y M B O L S                                   N O N T E R M I N A L S
+
+
+    1   ;                                                            19   <EXPR>
+    2   =                                                            20   <TERM>
+    3   <                                                            21   <PROGRAM>
+    4   >                                                            22   <BOOLEAN>
+    5   +                                                            23   <PRIMARY>
+    6   -                                                            24   <VARIABLE>
+    7   *                                                            25   <RELATION>
+    8   /                                                            26   <STATEMENT>
+    9   (                                                            27   <IF CLAUSE>
+   10   )                                                            28   <ASSIGNMENT>
+   11   IF                                                           29   <ARITH EXPR>
+   12   _|_                                                          30   <STATEMENT LIST>
+   13   THEN                                                      
+   14   ELSE                                                      
+   15   TRUE                                                      
+   16   FALSE                                                     
+   17   <NUMBER>                                                  
+   18   <IDENTIFIER>                                              
+
+
+<PROGRAM> IS THE GOAL SYMBOL.
+
+
+TIME USED WAS 0.00 SECONDS.
+TOTAL TIME IS 0.00 SECONDS.
+PAGE 3
+
+
+PRODUCED HEAD SYMBOLS:  PAGE 1 OF 1
+
+
+                                                          
+                                    1111111 11122222222223
+                           1234567890123456 78901234567890
+                          +----------------+--------------+
+     1   ;                |Y               |              |
+     2   =                | Y              |              |
+     3   <                |  Y             |              |
+     4   >                |   Y            |              |
+     5   +                |    Y           |              |
+     6   -                |     Y          |              |
+     7   *                |      Y         |              |
+     8   /                |       Y        |              |
+     9   (                |        Y       |              |
+    10   )                |         Y      |              |
+    11   IF               |          Y     |              |
+    12   _|_              |           Y    |              |
+    13   THEN             |            Y   |              |
+    14   ELSE             |             Y  |              |
+    15   TRUE             |              Y |              |
+    16   FALSE            |               Y|              |
+                          +----------------+--------------+
+    17   <NUMBER>         |                |Y             |
+    18   <IDENTIFIER>     |                | Y            |
+    19   <EXPR>           |        Y Y     |YYYY  YY  Y Y |
+    20   <TERM>           |        Y       |YY Y  YY      |
+    21   <PROGRAM>        |                | Y  Y  Y Y Y Y|
+    22   <BOOLEAN>        |        Y Y   YY|YYYY YYY  Y Y |
+    23   <PRIMARY>        |        Y       |YY    YY      |
+    24   <VARIABLE>       |                | Y     Y      |
+    25   <RELATION>       | YYY            |        Y     |
+    26   <STATEMENT>      |                | Y     Y Y Y  |
+    27   <IF CLAUSE>      |          Y     |          Y   |
+    28   <ASSIGNMENT>     |                | Y     Y   Y  |
+    29   <ARITH EXPR>     |        Y       |YY Y  YY    Y |
+    30   <STATEMENT LIST> |                | Y     Y Y Y Y|
+                          +----------------+--------------+
+
+
+
+
+TIME USED WAS 0.00 SECONDS.
+TOTAL TIME IS 0.00 SECONDS.
+PAGE 4
+
+
+SENTENTIAL FORM PRODUCTION:
+
+
+F11 HAS 321 ELEMENTS.
+THE MAXIMUM DEPTH OF RECURSION WAS 22 LEVELS.
+894 SENTENTIAL FORMS WERE EXAMINED.
+
+
+TIME USED WAS 0.02 SECONDS.
+TOTAL TIME IS 0.02 SECONDS.
+PAGE 5
+
+
+C1 MATRIX FOR STACKING DECISION:  PAGE 1 OF 1
+
+
+                                              
+                                    1111111 11
+                           1234567890123456 78
+                          +----------------+--+
+     1   ;                |           N    | N|
+     2   =                |        # #     |##|
+     3   <                |        N N     |NN|
+     4   >                |        N N     |NN|
+     5   +                |        Y       |YY|
+     6   -                |        Y       |YY|
+     7   *                |        Y       |YY|
+     8   /                |        Y       |YY|
+     9   (                |        Y Y     |YY|
+    10   )                |NNNNNNNNNN  NN  |  |
+    11   IF               |        Y Y   YY|YY|
+    12   _|_              |                | Y|
+    13   THEN             |        Y Y   YY|YY|
+    14   ELSE             |        Y Y   YY|YY|
+    15   TRUE             |            NN  |  |
+    16   FALSE            |            NN  |  |
+                          +----------------+--+
+    17   <NUMBER>         |NNNNNNNN N  NN  |  |
+    18   <IDENTIFIER>     |NNNNNNNNNN  NN  |  |
+    19   <EXPR>           |N###     #  N#  |  |
+    20   <TERM>           |NNNNNNYY N  NN  |  |
+    21   <PROGRAM>        |           N    |  |
+    22   <BOOLEAN>        |            N#  |  |
+    23   <PRIMARY>        |NNNNNNNN N  NN  |  |
+    24   <VARIABLE>       |N#NNNNNNYN  NN  |  |
+    25   <RELATION>       |        Y Y     |YY|
+    26   <STATEMENT>      |           N    | N|
+    27   <IF CLAUSE>      |            Y   |  |
+    28   <ASSIGNMENT>     |Y               |  |
+    29   <ARITH EXPR>     |NNNNYY   N  NN  |  |
+    30   <STATEMENT LIST> |           N    | Y|
+                          +----------------+--+
+
+
+TABLE ENTRIES SUMMARY:
+   389    
+    47   Y
+    93   N
+    11   #
+
+
+TIME USED WAS 0.01 SECONDS.
+TOTAL TIME IS 0.03 SECONDS.
+PAGE 6
+
+
+C1 TRIPLES FOR STACKING DECISION:
+
+
+     1   N FOR  + <VARIABLE> =
+     2   N FOR  - <VARIABLE> =
+     3   N FOR  * <VARIABLE> =
+     4   N FOR  / <VARIABLE> =
+     5   Y FOR  ( <EXPR> )
+     6   Y FOR  IF <EXPR> =
+     7   Y FOR  IF <EXPR> <
+     8   Y FOR  IF <EXPR> >
+     9   N FOR  IF <VARIABLE> =
+    10   Y FOR  _|_ <VARIABLE> =
+    11   Y FOR  THEN <EXPR> =
+    12   Y FOR  THEN <EXPR> <
+    13   Y FOR  THEN <EXPR> >
+    14   Y FOR  THEN <EXPR> ELSE
+    15   Y FOR  THEN <BOOLEAN> ELSE
+    16   N FOR  THEN <VARIABLE> =
+*** ERROR, STACKING DECISION CANNOT BE MADE WITH (2,1) CONTEXT:
+    17   # FOR  ELSE <EXPR> =
+*** ERROR, STACKING DECISION CANNOT BE MADE WITH (2,1) CONTEXT:
+    18   # FOR  ELSE <EXPR> <
+*** ERROR, STACKING DECISION CANNOT BE MADE WITH (2,1) CONTEXT:
+    19   # FOR  ELSE <EXPR> >
+    20   N FOR  ELSE <EXPR> )
+    21   N FOR  ELSE <EXPR> ELSE
+    22   N FOR  ELSE <BOOLEAN> ELSE
+    23   N FOR  ELSE <VARIABLE> =
+    24   N FOR  <EXPR> = (
+    25   N FOR  <EXPR> = IF
+    26   N FOR  <EXPR> = <NUMBER>
+    27   N FOR  <EXPR> = <IDENTIFIER>
+    28   Y FOR  <VARIABLE> = (
+    29   Y FOR  <VARIABLE> = IF
+    30   Y FOR  <VARIABLE> = <NUMBER>
+    31   Y FOR  <VARIABLE> = <IDENTIFIER>
+    32   N FOR  <RELATION> <EXPR> ELSE
+    33   Y FOR  <STATEMENT LIST> <VARIABLE> =
+
+
+259 ENTRIES FOR 33 TRIPLES.
+
+
+TABLE ENTRIES SUMMARY:
+    15   Y
+    15   N
+     3   #
+
+
+TIME USED WAS 0.01 SECONDS.
+TOTAL TIME IS 0.04 SECONDS.
+
+
+ANALYSIS OF (2,1) CONFLICTS:
+
+
+PAGE 7
+
+   THE TRIPLE  ELSE <EXPR> =  MUST HAVE THE VALUE N FOR
+
+     7   <EXPR>  ::=  <IF CLAUSE> THEN <EXPR> ELSE <EXPR>
+         IN THE CONTEXT  IF ... =
+         IN THE CONTEXT  THEN ... =
+         IN THE CONTEXT  ELSE ... =
+
+   THE TRIPLE  ELSE <EXPR> =  MUST HAVE THE VALUE Y FOR
+
+    11   <BOOLEAN>  ::=  <EXPR> <RELATION> <EXPR>
+         IN THE CONTEXT  ELSE ... THEN
+         IN THE CONTEXT  ELSE ... ELSE
+
+
+   THE TRIPLE  ELSE <EXPR> <  MUST HAVE THE VALUE N FOR
+
+     7   <EXPR>  ::=  <IF CLAUSE> THEN <EXPR> ELSE <EXPR>
+         IN THE CONTEXT  IF ... <
+         IN THE CONTEXT  THEN ... <
+         IN THE CONTEXT  ELSE ... <
+
+   THE TRIPLE  ELSE <EXPR> <  MUST HAVE THE VALUE Y FOR
+
+    11   <BOOLEAN>  ::=  <EXPR> <RELATION> <EXPR>
+         IN THE CONTEXT  ELSE ... THEN
+         IN THE CONTEXT  ELSE ... ELSE
+
+
+   THE TRIPLE  ELSE <EXPR> >  MUST HAVE THE VALUE N FOR
+
+     7   <EXPR>  ::=  <IF CLAUSE> THEN <EXPR> ELSE <EXPR>
+         IN THE CONTEXT  IF ... >
+         IN THE CONTEXT  THEN ... >
+         IN THE CONTEXT  ELSE ... >
+
+   THE TRIPLE  ELSE <EXPR> >  MUST HAVE THE VALUE Y FOR
+
+    11   <BOOLEAN>  ::=  <EXPR> <RELATION> <EXPR>
+         IN THE CONTEXT  ELSE ... THEN
+         IN THE CONTEXT  ELSE ... ELSE
+
+
+
+TIME USED WAS 0.01 SECONDS.
+TOTAL TIME IS 0.05 SECONDS.
+PAGE 8
+
+
+CONTEXT CHECK FOR EQUAL AND EMBEDDED RIGHT PARTS:
+
+   THERE ARE 100 AND 86 VALID CONTEXTS, RESPECTIVELY, FOR
+    26   <VARIABLE>  ::=  <VARIABLE> ( <EXPR> )
+    24   <PRIMARY>  ::=  ( <EXPR> )
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 30 AND 30 VALID CONTEXTS, RESPECTIVELY, FOR
+    17   <ARITH EXPR>  ::=  <ARITH EXPR> + <TERM>
+    16   <ARITH EXPR>  ::=  <TERM>
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 30 AND 30 VALID CONTEXTS, RESPECTIVELY, FOR
+    18   <ARITH EXPR>  ::=  <ARITH EXPR> - <TERM>
+    16   <ARITH EXPR>  ::=  <TERM>
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 64 AND 64 VALID CONTEXTS, RESPECTIVELY, FOR
+    20   <TERM>  ::=  <TERM> * <PRIMARY>
+    19   <TERM>  ::=  <PRIMARY>
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 64 AND 64 VALID CONTEXTS, RESPECTIVELY, FOR
+    21   <TERM>  ::=  <TERM> / <PRIMARY>
+    19   <TERM>  ::=  <PRIMARY>
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 2 AND 2 VALID CONTEXTS, RESPECTIVELY, FOR
+     3   <STATEMENT LIST>  ::=  <STATEMENT LIST> <STATEMENT>
+     2   <STATEMENT LIST>  ::=  <STATEMENT>
+   THEY CAN BE RESOLVED BY LENGTH.
+PAGE 9
+
+
+C2 PRODUCTION CHOICE FUNCTION:
+
+
+   ;  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     4   <STATEMENT>  ::=  <ASSIGNMENT> ;
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   =  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    13   <RELATION>  ::=  =
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    14   <RELATION>  ::=  <
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   >  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    15   <RELATION>  ::=  >
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   )  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    26   <VARIABLE>  ::=  <VARIABLE> ( <EXPR> )
+         THERE WILL BE NO CONTEXT CHECK.
+
+    24   <PRIMARY>  ::=  ( <EXPR> )
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   TRUE  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     9   <BOOLEAN>  ::=  TRUE
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   FALSE  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    10   <BOOLEAN>  ::=  FALSE
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <NUMBER>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    23   <PRIMARY>  ::=  <NUMBER>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <IDENTIFIER>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+
+PAGE 10
+
+    25   <VARIABLE>  ::=  <IDENTIFIER>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <EXPR>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     7   <EXPR>  ::=  <IF CLAUSE> THEN <EXPR> ELSE <EXPR>
+         THERE WILL BE NO CONTEXT CHECK.
+
+     5   <ASSIGNMENT>  ::=  <VARIABLE> = <EXPR>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    11   <BOOLEAN>  ::=  <EXPR> <RELATION> <EXPR>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <TERM>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    17   <ARITH EXPR>  ::=  <ARITH EXPR> + <TERM>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    18   <ARITH EXPR>  ::=  <ARITH EXPR> - <TERM>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    16   <ARITH EXPR>  ::=  <TERM>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <BOOLEAN>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    12   <BOOLEAN>  ::=  <IF CLAUSE> THEN <BOOLEAN> ELSE <BOOLEAN>
+         THERE WILL BE NO CONTEXT CHECK.
+
+     8   <IF CLAUSE>  ::=  IF <BOOLEAN>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <PRIMARY>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    20   <TERM>  ::=  <TERM> * <PRIMARY>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    21   <TERM>  ::=  <TERM> / <PRIMARY>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    19   <TERM>  ::=  <PRIMARY>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <VARIABLE>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    22   <PRIMARY>  ::=  <VARIABLE>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <STATEMENT>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+
+PAGE 11
+
+     3   <STATEMENT LIST>  ::=  <STATEMENT LIST> <STATEMENT>
+         THERE WILL BE NO CONTEXT CHECK.
+
+     2   <STATEMENT LIST>  ::=  <STATEMENT>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <ARITH EXPR>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     6   <EXPR>  ::=  <ARITH EXPR>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <STATEMENT LIST>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     1   <PROGRAM>  ::=  <STATEMENT LIST>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+TIME USED WAS 0.01 SECONDS.
+TOTAL TIME IS 0.06 SECONDS.
+
+
+ANALYSIS COMPLETE FOR ITERATION 1
+*** 3 ERRORS WERE DETECTED.
+PAGE 12
+
+
+GRAMMAR MODIFICATION TO ATTEMPT TO RESOLVE CONFLICTS:
+
+
+    27   <ELSE1>  ::=  ELSE
+     7   <EXPR>  ::=  <IF CLAUSE> THEN <EXPR> <ELSE1> <EXPR>
+    28   <ELSE2>  ::=  ELSE
+    12   <BOOLEAN>  ::=  <IF CLAUSE> THEN <BOOLEAN> <ELSE2> <BOOLEAN>
+
+
+TIME USED WAS 0.00 SECONDS.
+TOTAL TIME IS 0.06 SECONDS.
+PAGE 13
+
+
+PRODUCED HEAD SYMBOLS:  PAGE 1 OF 1
+
+
+                                                             
+                                    1111111 1112222222222333 
+                           1234567890123456 7890123456789012 
+                          +----------------+----------------+
+     1   ;                |Y               |                |
+     2   =                | Y              |                |
+     3   <                |  Y             |                |
+     4   >                |   Y            |                |
+     5   +                |    Y           |                |
+     6   -                |     Y          |                |
+     7   *                |      Y         |                |
+     8   /                |       Y        |                |
+     9   (                |        Y       |                |
+    10   )                |         Y      |                |
+    11   IF               |          Y     |                |
+    12   _|_              |           Y    |                |
+    13   THEN             |            Y   |                |
+    14   ELSE             |             Y  |                |
+    15   TRUE             |              Y |                |
+    16   FALSE            |               Y|                |
+                          +----------------+----------------+
+    17   <NUMBER>         |                |Y               |
+    18   <IDENTIFIER>     |                | Y              |
+    19   <EXPR>           |        Y Y     |YYYY  YY  Y Y   |
+    20   <TERM>           |        Y       |YY Y  YY        |
+    21   <PROGRAM>        |                | Y  Y  Y Y Y Y  |
+    22   <BOOLEAN>        |        Y Y   YY|YYYY YYY  Y Y   |
+    23   <PRIMARY>        |        Y       |YY    YY        |
+    24   <VARIABLE>       |                | Y     Y        |
+    25   <RELATION>       | YYY            |        Y       |
+    26   <STATEMENT>      |                | Y     Y Y Y    |
+    27   <IF CLAUSE>      |          Y     |          Y     |
+    28   <ASSIGNMENT>     |                | Y     Y   Y    |
+    29   <ARITH EXPR>     |        Y       |YY Y  YY    Y   |
+    30   <STATEMENT LIST> |                | Y     Y Y Y Y  |
+    31   <ELSE1>          |             Y  |              Y |
+    32   <ELSE2>          |             Y  |               Y|
+                          +----------------+----------------+
+
+
+
+
+TIME USED WAS 0.01 SECONDS.
+TOTAL TIME IS 0.07 SECONDS.
+PAGE 14
+
+
+SENTENTIAL FORM PRODUCTION:
+
+
+F11 HAS 362 ELEMENTS.
+THE MAXIMUM DEPTH OF RECURSION WAS 23 LEVELS.
+1055 SENTENTIAL FORMS WERE EXAMINED.
+
+
+TIME USED WAS 0.00 SECONDS.
+TOTAL TIME IS 0.07 SECONDS.
+PAGE 15
+
+
+C1 MATRIX FOR STACKING DECISION:  PAGE 1 OF 1
+
+
+                                              
+                                    1111111 11
+                           1234567890123456 78
+                          +----------------+--+
+     1   ;                |           N    | N|
+     2   =                |        # #     |##|
+     3   <                |        N N     |NN|
+     4   >                |        N N     |NN|
+     5   +                |        Y       |YY|
+     6   -                |        Y       |YY|
+     7   *                |        Y       |YY|
+     8   /                |        Y       |YY|
+     9   (                |        Y Y     |YY|
+    10   )                |NNNNNNNNNN  NN  |  |
+    11   IF               |        Y Y   YY|YY|
+    12   _|_              |                | Y|
+    13   THEN             |        Y Y   YY|YY|
+    14   ELSE             |        N N   NN|NN|
+    15   TRUE             |            NN  |  |
+    16   FALSE            |            NN  |  |
+                          +----------------+--+
+    17   <NUMBER>         |NNNNNNNN N  NN  |  |
+    18   <IDENTIFIER>     |NNNNNNNNNN  NN  |  |
+    19   <EXPR>           |N###     #  N#  |  |
+    20   <TERM>           |NNNNNNYY N  NN  |  |
+    21   <PROGRAM>        |           N    |  |
+    22   <BOOLEAN>        |            N#  |  |
+    23   <PRIMARY>        |NNNNNNNN N  NN  |  |
+    24   <VARIABLE>       |N#NNNNNNYN  NN  |  |
+    25   <RELATION>       |        Y Y     |YY|
+    26   <STATEMENT>      |           N    | N|
+    27   <IF CLAUSE>      |            Y   |  |
+    28   <ASSIGNMENT>     |Y               |  |
+    29   <ARITH EXPR>     |NNNNYY   N  NN  |  |
+    30   <STATEMENT LIST> |           N    | Y|
+    31   <ELSE1>          |        Y Y     |YY|
+    32   <ELSE2>          |        Y Y   YY|YY|
+                          +----------------+--+
+
+
+TABLE ENTRIES SUMMARY:
+   415    
+    51   Y
+    99   N
+    11   #
+
+
+TIME USED WAS 0.02 SECONDS.
+TOTAL TIME IS 0.09 SECONDS.
+PAGE 16
+
+
+C1 TRIPLES FOR STACKING DECISION:
+
+
+     1   N FOR  + <VARIABLE> =
+     2   N FOR  - <VARIABLE> =
+     3   N FOR  * <VARIABLE> =
+     4   N FOR  / <VARIABLE> =
+     5   Y FOR  ( <EXPR> )
+     6   Y FOR  IF <EXPR> =
+     7   Y FOR  IF <EXPR> <
+     8   Y FOR  IF <EXPR> >
+     9   N FOR  IF <VARIABLE> =
+    10   Y FOR  _|_ <VARIABLE> =
+    11   Y FOR  THEN <EXPR> =
+    12   Y FOR  THEN <EXPR> <
+    13   Y FOR  THEN <EXPR> >
+    14   Y FOR  THEN <EXPR> ELSE
+    15   Y FOR  THEN <BOOLEAN> ELSE
+    16   N FOR  THEN <VARIABLE> =
+    17   N FOR  <EXPR> = (
+    18   N FOR  <EXPR> = IF
+    19   N FOR  <EXPR> = <NUMBER>
+    20   N FOR  <EXPR> = <IDENTIFIER>
+    21   Y FOR  <VARIABLE> = (
+    22   Y FOR  <VARIABLE> = IF
+    23   Y FOR  <VARIABLE> = <NUMBER>
+    24   Y FOR  <VARIABLE> = <IDENTIFIER>
+    25   N FOR  <RELATION> <EXPR> ELSE
+    26   Y FOR  <STATEMENT LIST> <VARIABLE> =
+    27   N FOR  <ELSE1> <EXPR> =
+    28   N FOR  <ELSE1> <EXPR> <
+    29   N FOR  <ELSE1> <EXPR> >
+    30   N FOR  <ELSE1> <EXPR> )
+    31   N FOR  <ELSE1> <EXPR> ELSE
+    32   N FOR  <ELSE1> <VARIABLE> =
+    33   Y FOR  <ELSE2> <EXPR> =
+    34   Y FOR  <ELSE2> <EXPR> <
+    35   Y FOR  <ELSE2> <EXPR> >
+    36   N FOR  <ELSE2> <BOOLEAN> ELSE
+    37   N FOR  <ELSE2> <VARIABLE> =
+
+
+281 ENTRIES FOR 37 TRIPLES.
+
+
+TABLE ENTRIES SUMMARY:
+    18   Y
+    19   N
+     0   #
+
+
+TIME USED WAS 0.01 SECONDS.
+TOTAL TIME IS 0.10 SECONDS.
+PAGE 17
+
+
+CONTEXT CHECK FOR EQUAL AND EMBEDDED RIGHT PARTS:
+
+   THERE ARE 108 AND 93 VALID CONTEXTS, RESPECTIVELY, FOR
+    26   <VARIABLE>  ::=  <VARIABLE> ( <EXPR> )
+    24   <PRIMARY>  ::=  ( <EXPR> )
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 4 AND 6 VALID CONTEXTS, RESPECTIVELY, FOR
+    27   <ELSE1>  ::=  ELSE
+    28   <ELSE2>  ::=  ELSE
+   THEY CAN BE RESOLVED BY (1,0) CONTEXT.
+
+   THERE ARE 35 AND 35 VALID CONTEXTS, RESPECTIVELY, FOR
+    17   <ARITH EXPR>  ::=  <ARITH EXPR> + <TERM>
+    16   <ARITH EXPR>  ::=  <TERM>
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 35 AND 35 VALID CONTEXTS, RESPECTIVELY, FOR
+    18   <ARITH EXPR>  ::=  <ARITH EXPR> - <TERM>
+    16   <ARITH EXPR>  ::=  <TERM>
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 71 AND 71 VALID CONTEXTS, RESPECTIVELY, FOR
+    20   <TERM>  ::=  <TERM> * <PRIMARY>
+    19   <TERM>  ::=  <PRIMARY>
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 71 AND 71 VALID CONTEXTS, RESPECTIVELY, FOR
+    21   <TERM>  ::=  <TERM> / <PRIMARY>
+    19   <TERM>  ::=  <PRIMARY>
+   THEY CAN BE RESOLVED BY LENGTH.
+
+   THERE ARE 2 AND 2 VALID CONTEXTS, RESPECTIVELY, FOR
+     3   <STATEMENT LIST>  ::=  <STATEMENT LIST> <STATEMENT>
+     2   <STATEMENT LIST>  ::=  <STATEMENT>
+   THEY CAN BE RESOLVED BY LENGTH.
+PAGE 18
+
+
+C2 PRODUCTION CHOICE FUNCTION:
+
+
+   ;  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     4   <STATEMENT>  ::=  <ASSIGNMENT> ;
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   =  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    13   <RELATION>  ::=  =
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    14   <RELATION>  ::=  <
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   >  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    15   <RELATION>  ::=  >
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   )  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    26   <VARIABLE>  ::=  <VARIABLE> ( <EXPR> )
+         THERE WILL BE NO CONTEXT CHECK.
+
+    24   <PRIMARY>  ::=  ( <EXPR> )
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   ELSE  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    27   <ELSE1>  ::=  ELSE
+         (0,1) CONTEXT WILL BE CHECKED.  LEGAL RIGHT CONTEXT:
+             ... (
+             ... IF
+             ... <NUMBER>
+             ... <IDENTIFIER>
+
+    28   <ELSE2>  ::=  ELSE
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   TRUE  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     9   <BOOLEAN>  ::=  TRUE
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   FALSE  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+PAGE 19
+
+
+    10   <BOOLEAN>  ::=  FALSE
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <NUMBER>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    23   <PRIMARY>  ::=  <NUMBER>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <IDENTIFIER>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    25   <VARIABLE>  ::=  <IDENTIFIER>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <EXPR>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     7   <EXPR>  ::=  <IF CLAUSE> THEN <EXPR> <ELSE1> <EXPR>
+         THERE WILL BE NO CONTEXT CHECK.
+
+     5   <ASSIGNMENT>  ::=  <VARIABLE> = <EXPR>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    11   <BOOLEAN>  ::=  <EXPR> <RELATION> <EXPR>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <TERM>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    17   <ARITH EXPR>  ::=  <ARITH EXPR> + <TERM>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    18   <ARITH EXPR>  ::=  <ARITH EXPR> - <TERM>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    16   <ARITH EXPR>  ::=  <TERM>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <BOOLEAN>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    12   <BOOLEAN>  ::=  <IF CLAUSE> THEN <BOOLEAN> <ELSE2> <BOOLEAN>
+         THERE WILL BE NO CONTEXT CHECK.
+
+     8   <IF CLAUSE>  ::=  IF <BOOLEAN>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <PRIMARY>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    20   <TERM>  ::=  <TERM> * <PRIMARY>
+         THERE WILL BE NO CONTEXT CHECK.
+
+    21   <TERM>  ::=  <TERM> / <PRIMARY>
+         THERE WILL BE NO CONTEXT CHECK.
+
+PAGE 20
+
+
+    19   <TERM>  ::=  <PRIMARY>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <VARIABLE>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+    22   <PRIMARY>  ::=  <VARIABLE>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <STATEMENT>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     3   <STATEMENT LIST>  ::=  <STATEMENT LIST> <STATEMENT>
+         THERE WILL BE NO CONTEXT CHECK.
+
+     2   <STATEMENT LIST>  ::=  <STATEMENT>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <ARITH EXPR>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     6   <EXPR>  ::=  <ARITH EXPR>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+   <STATEMENT LIST>  AS STACK TOP WILL CAUSE PRODUCTIONS TO BE CHECKED IN THIS ORDER:
+
+     1   <PROGRAM>  ::=  <STATEMENT LIST>
+         THERE WILL BE NO CONTEXT CHECK.
+
+
+TIME USED WAS 0.01 SECONDS.
+TOTAL TIME IS 0.11 SECONDS.
+
+
+ANALYSIS COMPLETE FOR ITERATION 2
+NO ERRORS WERE DETECTED.
+PAGE 21
+
+
+--- CARD OUTPUT ---|   DECLARE NSY LITERALLY '32', NT LITERALLY '18';
+--- CARD OUTPUT ---|   DECLARE V(NSY) CHARACTER INITIAL ( '<ERROR: TOKEN = 0>', ';', '=', '<', '>',
+--- CARD OUTPUT ---|      '+', '-', '*', '/', '(', ')', 'IF', '_|_', 'THEN', 'ELSE', 'TRUE',
+--- CARD OUTPUT ---|      'FALSE', '<NUMBER>', '<IDENTIFIER>', '<EXPR>', '<TERM>', '<PROGRAM>',
+--- CARD OUTPUT ---|      '<BOOLEAN>', '<PRIMARY>', '<VARIABLE>', '<RELATION>', '<STATEMENT>',
+--- CARD OUTPUT ---|      '<IF CLAUSE>', '<ASSIGNMENT>', '<ARITH EXPR>', '<STATEMENT LIST>', 'ELSE',
+--- CARD OUTPUT ---|      'ELSE');
+--- CARD OUTPUT ---|   DECLARE V_INDEX(12) BIT(8) INITIAL ( 1, 11, 12, 13, 16, 17, 17, 17, 18, 18,
+--- CARD OUTPUT ---|      18, 18, 19);
+--- CARD OUTPUT ---|   DECLARE C1(NSY) BIT(38) INITIAL (
+--- CARD OUTPUT ---|      "(2) 00000 00000 00000 0000",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00200 0002",
+--- CARD OUTPUT ---|      "(2) 00000 00003 03000 0033",
+--- CARD OUTPUT ---|      "(2) 00000 00002 02000 0022",
+--- CARD OUTPUT ---|      "(2) 00000 00002 02000 0022",
+--- CARD OUTPUT ---|      "(2) 00000 00001 00000 0011",
+--- CARD OUTPUT ---|      "(2) 00000 00001 00000 0011",
+--- CARD OUTPUT ---|      "(2) 00000 00001 00000 0011",
+--- CARD OUTPUT ---|      "(2) 00000 00001 00000 0011",
+--- CARD OUTPUT ---|      "(2) 00000 00001 01000 0011",
+--- CARD OUTPUT ---|      "(2) 02222 22222 20022 0000",
+--- CARD OUTPUT ---|      "(2) 00000 00001 01000 1111",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00000 0001",
+--- CARD OUTPUT ---|      "(2) 00000 00001 01000 1111",
+--- CARD OUTPUT ---|      "(2) 00000 00002 02000 2222",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00022 0000",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00022 0000",
+--- CARD OUTPUT ---|      "(2) 02222 22220 20022 0000",
+--- CARD OUTPUT ---|      "(2) 02222 22222 20022 0000",
+--- CARD OUTPUT ---|      "(2) 02333 00000 30023 0000",
+--- CARD OUTPUT ---|      "(2) 02222 22110 20022 0000",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00200 0000",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00023 0000",
+--- CARD OUTPUT ---|      "(2) 02222 22220 20022 0000",
+--- CARD OUTPUT ---|      "(2) 02322 22221 20022 0000",
+--- CARD OUTPUT ---|      "(2) 00000 00001 01000 0011",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00200 0002",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00010 0000",
+--- CARD OUTPUT ---|      "(2) 01000 00000 00000 0000",
+--- CARD OUTPUT ---|      "(2) 02222 11000 20022 0000",
+--- CARD OUTPUT ---|      "(2) 00000 00000 00200 0001",
+--- CARD OUTPUT ---|      "(2) 00000 00001 01000 0011",
+--- CARD OUTPUT ---|      "(2) 00000 00001 01000 1111");
+--- CARD OUTPUT ---|   DECLARE NC1TRIPLES LITERALLY '17';
+--- CARD OUTPUT ---|   DECLARE C1TRIPLES(NC1TRIPLES) FIXED INITIAL ( 594698, 725762, 725763, 725764,
+--- CARD OUTPUT ---|      792578, 856834, 856835, 856836, 856846, 857614, 1573385, 1573387, 1573393,
+--- CARD OUTPUT ---|      1573394, 1972226, 2102018, 2102019, 2102020);
+--- CARD OUTPUT ---|   DECLARE PRTB(28) FIXED INITIAL (0, 28, 0, 0, 0, 1575187, 2323, 0, 0, 0, 0, 0,
+--- CARD OUTPUT ---|      0, 453841695, 6146, 4889, 7429, 7430, 0, 453842464, 11, 5127, 5128, 0, 0,
+--- CARD OUTPUT ---|      30, 0, 0, 0);
+--- CARD OUTPUT ---|   DECLARE PRDTB(28) BIT(8) INITIAL (0, 4, 13, 14, 15, 26, 24, 0, 0, 9, 10, 23,
+--- CARD OUTPUT ---|      25, 7, 5, 11, 17, 18, 16, 12, 8, 20, 21, 19, 22, 3, 2, 6, 1);
+--- CARD OUTPUT ---|   DECLARE HDTB(28) BIT(8) INITIAL (0, 26, 25, 25, 25, 24, 23, 31, 32, 22, 22,
+--- CARD OUTPUT ---|      23, 24, 19, 28, 22, 29, 29, 29, 22, 27, 20, 20, 20, 23, 30, 30, 19, 21);
+--- CARD OUTPUT ---|   DECLARE PRLENGTH(28) BIT(8) INITIAL (0, 2, 1, 1, 1, 4, 3, 1, 1, 1, 1, 1, 1,
+--- CARD OUTPUT ---|      5, 3, 3, 3, 3, 1, 5, 2, 3, 3, 1, 1, 2, 1, 1, 1);
+
+PAGE 22
+
+--- CARD OUTPUT ---|   DECLARE CONTEXT_CASE(28) BIT(8) INITIAL (0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+--- CARD OUTPUT ---|      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+--- CARD OUTPUT ---|   DECLARE LEFT_CONTEXT(0) BIT(8) INITIAL ( 19);
+--- CARD OUTPUT ---|   DECLARE LEFT_INDEX(14) BIT(8) INITIAL ( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+--- CARD OUTPUT ---|      0, 1, 1);
+--- CARD OUTPUT ---|   DECLARE CONTEXT_TRIPLE(0) FIXED INITIAL ( 0);
+--- CARD OUTPUT ---|   DECLARE TRIPLE_INDEX(14) BIT(8) INITIAL ( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+--- CARD OUTPUT ---|      0, 0, 1);
+--- CARD OUTPUT ---|   DECLARE PR_INDEX(32) BIT(8) INITIAL ( 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 7, 7, 7,
+--- CARD OUTPUT ---|      7, 9, 10, 11, 12, 13, 16, 19, 19, 21, 24, 25, 25, 27, 27, 27, 28, 29, 29,
+--- CARD OUTPUT ---|      29);
+
+
+TIME USED WAS 0.00 SECONDS.
+TOTAL TIME IS 0.11 SECONDS.
