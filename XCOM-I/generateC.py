@@ -17,6 +17,7 @@ from auxiliary import *
 from parseCommandLine import *
 from xtokenize import xtokenize
 from parseExpression import parseExpression
+from asciiToEbcdic import asciiToEbcdic
 
 stdoutOld = sys.stdout
 
@@ -230,6 +231,16 @@ def allocateVariables(scope, extra = None):
         for i in range(numBytes):
             value = (value << 8) | memory[address]
             address += 1
+        # Re `bitPacking`: see comments for `parseCommandLine`.
+        if bitPacking == 1:
+            pass
+        elif bitPacking == 2:
+            shiftedBy = bitWidth % 8
+            if shiftedBy != 0:
+                value = value >> (8 - shiftedBy)
+        else:
+            errxit("Unknown setting for --packing")
+        # End of `bitPacking`.
         return {
             "bitWidth": bitWidth,
             "numBytes": numBytes,
@@ -256,8 +267,18 @@ def allocateVariables(scope, extra = None):
                 errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
                        (identifier, address, numBytes - 1, lengthFromDescriptor))
             address = descriptor & 0xFFFFFF
-        # Store the bytes in reverse order, because it's easier.
         bytes = value["bytes"] & ((1 << bitWidth) - 1)
+        # Re `bitPacking`: see comments for `parseCommandLine`.
+        if bitPacking == 1:
+            pass
+        elif bitPacking == 2:
+            if bitWidth > 32:
+                shiftedBy = bitWidth % 8
+                if shiftedBy != 0:
+                    bytes = bytes << (8 - shiftedBy)
+        else:
+            errxit("Unknown setting for --packing")
+        # End of `bitPacking`.
         for i in range(numBytes - 1 , -1, -1):
             memory[address + i] = bytes & 0xFF
             bytes = bytes >> 8
@@ -279,9 +300,8 @@ def allocateVariables(scope, extra = None):
         descriptor = ((length - 1) << 24) | saddress
         putFIXED(address, descriptor)
         # Encode the string's character data as an EBCDIC Python byte array.
-        b = s.encode('cp1140')
         for i in range(length):
-            memory[saddress + i] = b[i]
+            memory[saddress + i] = asciiToEbcdic[ord(s[i])]
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
@@ -1974,6 +1994,7 @@ def generateC(globalScope):
         print("#define BFS", file=f)
     if standardXPL:
         print("#define STANDARD_XPL", file=f)
+    print("#define BIT_PACKING %d" % bitPacking, file=f)
     #print("#define LINECT %d" % linect, file=f)
     print("#define COMMON_BASE 0x%06X" % commonBase, file=f)
     print("#define NON_COMMON_BASE 0x%06X" % nonCommonBase, file=f)

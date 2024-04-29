@@ -59,6 +59,11 @@
 # 	such as switched to turn off compiler warnings:
 #		make EXTRA="-ggdb -Wdangling-else"
 #
+#	Some targets (in particular, "make tests") also run XCOM-I, and
+#	PEXTRA allows adding extra command-line switches for XCOM-I.
+#	At the moment, this is only interesting for debugging XCOM-I
+#	itself, for adding engineering switches like --packing.
+#
 # Running Tests on the XCOM-I System
 # ----------------------------------
 #
@@ -121,7 +126,7 @@ clean:
 
 XPLI_APPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
 XPL_APPS = Example-6.18.3 Example-6.18.4 Example-6.18.5 Example-6.18.6
-XPL_APPS += ANALYZER
+XPL_APPS += ANALYZER SKELETON
 
 .PHONY: testclean
 testclean:
@@ -130,13 +135,13 @@ testclean:
 .PHONY: $(XPL_APPS)
 $(XPL_APPS): 
 	mkdir $@
-	XCOM-I.py --xpl Tests/$@.xpl
+	XCOM-I.py --xpl $(PEXTRA) Tests/$@.xpl
 	$(CC) $(EXTRA) -o $@/$@ $@/*.c
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
 	mkdir $@
-	XCOM-I.py Tests/$@.xpl
+	XCOM-I.py $(PEXTRA) Tests/$@.xpl
 	$(CC) $(EXTRA) -o $@/$@ $@/*.c
 
 # Here are the principles behind the tests:

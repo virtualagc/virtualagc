@@ -148,6 +148,9 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     # be terminated by a "variable" named "END" which 
                     # we should simply ignore.
                     continue
+                if field == "POINTER": #***DEBUG***
+                    pass
+                    pass
                 if field == "(":
                     inGroup = True
                     nextInGroup = ''

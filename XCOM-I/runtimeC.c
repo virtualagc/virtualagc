@@ -181,7 +181,7 @@ bitToRadix(bit_t *b) {
   int offset;
   int radix = 1 << bitBits;
   int numDigits = (b->bitWidth + bitBits - 1) / bitBits;
-  int i, nextByte = b->numBytes - 1, bitsLeftInValue = 0, value = 0, thisDigit;
+  int i, nextByte, bitsLeftInValue = 0, value = 0, thisDigit;
   if (bitBits < 4)
     offset = sprintf(returnValue, "\"(%d) ", bitBits);
   else
@@ -191,7 +191,9 @@ bitToRadix(bit_t *b) {
       sprintf(returnValue, "Set bitBits 1, 2, 3, or 4 (not %d)", bitBits);
       return returnValue;
     }
-  for (i = numDigits - 1; i >= 0; i--)
+  // Re `BIT_PACKING`, see the comments about `bitPacking` in parseCommandLine.py.
+#if BIT_PACKING == 1
+  for (i = numDigits - 1, nextByte = b->numBytes - 1; i >= 0; i--)
     {
       while (bitsLeftInValue < bitBits)
         {
@@ -206,6 +208,27 @@ bitToRadix(bit_t *b) {
       else
         returnValue[offset + i] = 'A' + (thisDigit - 10);
     }
+#elif BIT_PACKING == 2
+  for (i = 0, nextByte = 0; i < numDigits; i++)
+    {
+      int keep;
+      while (bitsLeftInValue < bitBits)
+        {
+          value = (value << 8) | b->bytes[nextByte++];
+          bitsLeftInValue += 8;
+        }
+      keep = bitsLeftInValue - bitBits;
+      thisDigit = value >> keep;
+      value = value & ((1 << keep) - 1);
+      bitsLeftInValue -= bitBits;
+      if (thisDigit < 10)
+        returnValue[offset + i] = '0' + thisDigit;
+      else
+        returnValue[offset + i] = 'A' + (thisDigit - 10);
+    }
+#else
+#error "Only BIT_PACKING 1 or 2 implemented in bitToRadix"
+#endif
   returnValue[offset + numDigits] = '"';
   returnValue[offset + numDigits + 1] = 0;
   return returnValue;
@@ -215,7 +238,9 @@ bitToRadix(bit_t *b) {
 // of an identifier, perhaps subscripted.  Useful because XPL variables are
 // not modeled as C variables (easily accessed by the debugger) but rather
 // as indexes into the `memory` array and not encoded the way native C
-// variables are.
+// variables are.  Because it's so easy (for me, at least) of making the
+// mistake of using brackets rather than parentheses, brackets are accepted
+// in place of parentheses.
 char *
 getXPL(char *identifier) {
   memoryMapEntry_t *entry;
@@ -225,7 +250,11 @@ getXPL(char *identifier) {
   char *s;
   for (s = identifier, base = identifier; *s; s++)
     {
-      if (*s == '.')
+      if (*s == '[')
+        *s = '(';
+      else if (*s == ']')
+        *s = ')';
+      else if (*s == '.')
         {
           if (field != NULL)
             {
@@ -740,7 +769,8 @@ getBIT(uint32_t bitWidth, uint32_t address)
 void
 putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
 {
-  uint32_t numBytes, maskWidth, maskAddress = address;
+  uint32_t numBytes;
+  uint32_t maskWidth, maskAddress = address;
   if (bitWidth == 0)
     {
       memoryMapEntry_t *memoryMapEntry = lookupFloor(address);
@@ -772,9 +802,22 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
       maskAddress = address;
     }
   memmove(&memory[address], &value->bytes[value->numBytes - numBytes], numBytes);
+  // Re `BIT_PACKING`, see the comments about `bitPacking` in parseCommandLine.py.
   maskWidth = bitWidth % 8;
+#if BIT_PACKING == 1
   if (maskWidth)
     memory[maskAddress] &= (1 << maskWidth) - 1;
+#elif BIT_PACKING == 2
+  if (maskWidth)
+    {
+      if (bitWidth <= 32)
+        memory[maskAddress] &= (1 << maskWidth) - 1;
+      else
+        memory[address + numBytes - 1] &= ~((1 << maskWidth) - 1);
+    }
+#else
+#error "Only BIT_PACKING 1 or 2 implemented in putBIT"
+#endif // BIT_PACKING
 }
 
 // The table below was adapted from the table of the same name in
@@ -809,7 +852,7 @@ static uint8_t asciiToEbcdic[128] = {
   0x4A, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, /* `abcdefg     */
   0x88, 0x89, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, /* hijklmno     */
   0x97, 0x98, 0x99, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, /* pqrstuvw     */
-  0xA7, 0xA8, 0xA9, 0xC0, 0x6A, 0xD0, 0x5F, 0x40  /* xyz{|}~      */
+  0xA7, 0xA8, 0xA9, 0xC0, 0x4F, 0xD0, 0x5F, 0x40  /* xyz{|}~      */
 };
 
 // The inverse of `asciiToEbcdic` above, in which the ASCII equivalent
@@ -822,9 +865,9 @@ static char ebcdicToAscii[256] = {
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '`', '.', '<', '(', '+', ' ',
+  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '`', '.', '<', '(', '+', '|',
   '&', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '!', '$', '*', ')', ';', '~',
-  '-', '/', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '|', ',', '%', '_', '>', '?',
+  '-', '/', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ',', '%', '_', '>', '?',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ':', '#', '@', '\'', '=', '"',
   ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', ' ', ' ', ' ', ' ', ' ', ' ',
   ' ', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', ' ', ' ', ' ', ' ', ' ', ' ',
@@ -1441,6 +1484,8 @@ SUBSTR2(char *s, int32_t start) {
 
 uint8_t
 BYTE(char *s, uint32_t index){
+  if (index >= strlen(s))
+    return 0;
   return asciiToEbcdic[s[index]];
 }
 
@@ -1451,6 +1496,8 @@ BYTE1(char *s) {
 
 uint8_t
 BYTE2(bit_t *b, uint32_t index) {
+  if (index >= b->numBytes)
+    return 0;
   return b->bytes[index];
 }
 
@@ -1760,8 +1807,8 @@ lFILE(uint32_t fileNumber, uint32_t recordNumber, uint32_t address)
       fprintf(stderr, "Bad FILE number (%d)\n", fileNumber);
       exit(1);
     }
-  fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS]->fp;
-  recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS]->recordSize;
+  fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
+  recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
     {
@@ -1792,8 +1839,8 @@ rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber)
       fprintf(stderr, "Bad FILE number (%d)\n", fileNumber);
       exit(1);
     }
-  fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS]->fp;
-  recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS]->recordSize;
+  fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
+  recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
     {

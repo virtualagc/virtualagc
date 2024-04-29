@@ -53,6 +53,29 @@ includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 baseSource = ""
 adhocs = {}
 standardXPL = False
+'''
+McKeeman et al. does not specify the packing of the bits in memory for a BIT(n)
+value.  This seems relatively easy to deduce from other clues for n<=32 because
+in that case the BIT(n) values are supposed to behave like integers.
+But for n>32, I haven't been able to deduce it from any clues or from code.
+It's a serious problem because it means that if we get it wrong, there is a 
+mismatch between the way the compiler packs INITIAL values for BIT(n) and the
+way XPL programs use those values.  It also affects how `putBIT` masks off 
+unused positions when n is not an exact multiple of 8.
+
+Consequently, I've having to experiment with different packings, to see if any 
+of them are more-congenial with the original XCOM program than others.  The 
+packing is determined by the bitPacking` variable in Python or the `BIT_PACKING`
+preprocessor constant (but having the same value as `bitPacker`) in C.  The 
+values are interpreted like so:
+    1   The rightmost bit (in an INITIAL "(1) ...") correspoinds to bit 0 in 
+        the byte that's highest in memory.
+    2   The leftmost bit corresponds to bit 7 in the byte that's lowest in 
+        memory.  (I.e., the same bit-or as for bitPacking=1, but they may be
+        aligned differently if n is not a multiple of 8.
+    3.  TBD
+'''
+bitPacking = 2 # 2 appears to be the correct value to use.
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
 # they shouldn't be something that would otherwise appear in XPL strings, but
@@ -219,6 +242,8 @@ for parm in sys.argv[1:]:
         outputFolder = parm[9:]
     elif parm.startswith("--indent="):
         indent = " " * int(parm[9:])
+    elif parm.startswith("--packing="):
+        bitPacking = int(parm[10:])
     elif parm.startswith("-"):
         print("Unknown option %s" % parm, file = sys.stderr)
         sys.exit(1)

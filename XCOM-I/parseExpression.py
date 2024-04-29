@@ -12,6 +12,7 @@ Mods:       2024-03-22 RSB  Began
 '''
 
 import sys
+from asciiToEbcdic import asciiToEbcdic
 
 '''
 Expressions are treated as Python dictionaries representing a tree structure 
@@ -416,8 +417,8 @@ def parseExpression(tokenized, start):
                     .replace(replacementQuote, "'")
         for i in range(len(string1)):
             # Get EBCDIC byte codes.
-            e1 = string1[i].encode('cp1140')[0]
-            e2 = string2[i].encode('cp1140')[0]
+            e1 = asciiToEbcdic(ord(string1[i]))
+            e2 = asciiToEbcdic(ord(string2[i]))
             if e1 < e2:
                 return -1
             if e1 > e2:
