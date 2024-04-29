@@ -385,18 +385,6 @@ if False: #***DEBUG***
         print("%06d: %s" % (i, pseudoStatements[i]))
     sys.exit(1)
     
-if False: #***DEBUG***
-    # Let's tokenize the whole thing.  (Can't really do this right now,
-    # except as a test of the tokenizer, since macros haven't been 
-    # expanded, and the tokenization might change when macros are 
-    # expanded later.)
-    tokenized = []
-    for pseudoStatement in pseudoStatements:
-        tokenized.append(xtokenize(pseudoStatement))
-        print(pseudoStatement)
-        print(tokenized[-1])
-    sys.exit(1)
-
 # Tokenize and parse, on a pseudo-statement by pseudo-statement basis.
 # Note that because of macro expansion, the number of pseudo-statments
 # can increase during the loop.

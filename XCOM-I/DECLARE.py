@@ -14,23 +14,35 @@ import copy
 import re
 from auxiliary import error, expandAllMacrosInString
 from parseCommandLine import pfs, condA, condC, replacementSpace, replacementQuote
+from xtokenize import xtokenize
+from parseExpression import parseExpression
 
-# Converts strings like decimal, 0x hex, or 0b binary to integer.
+# Converts strings like decimal, 0x hex, or 0b binary, or even simple 
+# expressions of constants, to integer.
 def integer(s):
-    # It turns out that I've sometimes inadvertantly converted the string to 
-    # upper case, and I try to catch that here than try to undo the 
-    # case changes somewhere upstream.
-    s = s.lower()
-    if s.startswith("0x"):
-        return int(s[2:], 16)
-    elif s.startswith("0b"):
-        return int(s[2:], 2)
-    elif s.startswith("0q"):
-        return int(s[2:], 4)
-    elif s.startswith("0o"):
-        return int(s[2:], 8)
-    else:
-        return int(s)
+    try:
+        # It turns out that I've sometimes inadvertantly converted the string to 
+        # upper case, and I try to catch that here than try to undo the 
+        # case changes somewhere upstream.
+        s = s.lower()
+        if s.startswith("0x"):
+            return int(s[2:], 16)
+        elif s.startswith("0b"):
+            return int(s[2:], 2)
+        elif s.startswith("0q"):
+            return int(s[2:], 4)
+        elif s.startswith("0o"):
+            return int(s[2:], 8)
+        else:
+            return int(s)
+    except:
+        tokenized = xtokenize(s)
+        tree = parseExpression(tokenized, 0)
+        if tree != None and "number" in tree["token"]:
+            return tree["token"]["number"]
+        else:
+            error("Cannot evaluate array size %s" % token, scope)
+
 
 # Returns False on success, True on fatal error.  Parameters:
 #    pseudoStatement     The text of the pseudo-statement being 

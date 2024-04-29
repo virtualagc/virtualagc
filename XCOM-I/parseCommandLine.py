@@ -50,7 +50,7 @@ psRefs = [] # One index into `lineRefs` for each `pseudoStatement`
 #sourceFiles = [] # Source filename for each line.
 verbose = True
 includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
-baseSource = ""
+baseSource = None
 adhocs = {}
 standardXPL = False
 '''
@@ -98,9 +98,12 @@ def readFileIntoLines(filename):
     # global sourceFiles
     if filename in inputFilenames:
         return
-    if baseSource == "":
+    if baseSource == None:
         baseSource = os.path.dirname(filename)
-    dir = baseSource + "/" + includeFolder
+    if baseSource != "":
+        dirHALINCL = baseSource + "/" + includeFolder
+    else:
+        dirHALINCL = includeFolder
     try:
         inputFilenames.append(filename)
         f = open(filename, "r")
@@ -114,16 +117,19 @@ def readFileIntoLines(filename):
             #sourceFiles.append(os.path.basename(filename))
             if "/%INCLUDE" in line:
                 fields = line.split()
-                readFileIntoLines(dir + "/" + fields[1] + ".xpl")
+                readFileIntoLines(dirHALINCL + "/" + fields[1] + ".xpl")
             elif None != re.search('/\\*.*\\$%.*\\*/', line):
                 # In case it isn't obvious, this was looking for 
                 # $%filename directives within a comment.
                 basename = line[:80].split('$%')[1]
                 basename = basename.split('*')[0].split()[0]
-                readFileIntoLines(dir + "/" + basename + ".xpl")
+                readFileIntoLines(dirHALINCL + "/" + basename + ".xpl")
             elif line.lstrip().startswith('/**MERGE'):
                 fields =line.lstrip().split()
-                readFileIntoLines(baseSource + "/" + fields[1] + ".xpl")
+                if baseSource != "":
+                    readFileIntoLines(baseSource + "/" + fields[1] + ".xpl")
+                else:
+                    readFileIntoLines(fields[1] + ".xpl")
         f.close()
     except:
         print("Failed to read file %s" % filename, file = sys.stderr)
