@@ -72,15 +72,16 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
       </li>
       <li><a moz-do-not-send="true" href="#Emulation">HAL/S Processing</a></li>
 <ul>
-  <li><a moz-do-not-send="true" href="#Modern">"Modern" HAL/S Compiler, Interpreter, and Emulator</a><br>
-  </li>
-  <li><a moz-do-not-send="true" href="#Original">Port of the Original HAL/S Compiler</a></li>
-<ul>
-  <li><a moz-do-not-send="true" href="#OriginalInstallation">Installation</a></li>
-  <li><a moz-do-not-send="true" href="#OriginalUsage">Using the Original HAL/S Compiler</a></li>
-  <li><a moz-do-not-send="true" href="#OriginalWhy">Why Two Implementations of the HAL/S Compiler?</a><br>
+  <li><a moz-do-not-send="true" href="#deathbyxpl">Death by XPL</a><br>
   </li>
 </ul>
+
+<ul>
+  <li><a moz-do-not-send="true" href="#Modern">HAL/S Interpreter</a><br>
+  </li>
+  <li><a moz-do-not-send="true" href="#Original">Python Port of HAL/S-FC PASS1<br>
+</a></li>
+<ul></ul>
 
 </ul>
 
@@ -429,7 +430,7 @@ it's technically correct) even where the
         the assembly language native to their CPU types, the Flight
         Control Operating System (FCOS) and were written in BAL, the assembly language of the AP-101S
         CPU.&nbsp; But once you get past those infrastructural software
-        components, the remainder of PASS was written in a higher-level
+        components, the bulk of PASS application code was written in a higher-level
         language called HAL/S, as was the BFS.&nbsp; <a moz-do-not-send="true" href="Shuttle/DPS%20Overview%20Workbook.pdf#page=22">The DPS
           Overview Workbook</a> explains the overall structure of PASS
         better than I can:&nbsp; <br>
@@ -593,13 +594,11 @@ agencies, preserving tax-payer investment!<br>
 
 <p><i>Unfortunately</i>, identifying that the source code for the 
 Shuttle's flight software still exists is not the same thing as saying 
-that I've convinced anybody to give me any of it.&nbsp; Without being 
-too specific, I will simply say that I presently have a small number of 
-PASS source-code files in hand, representing an infinitesimal fraction 
+that I've convinced anybody to give me much of it.&nbsp; Without being 
+too specific, I will simply say that I presently have some
+PASS source-code files in hand, representing a small fraction 
 of the total, but that I am not at liberty to show them to you due to 
-issues which we hope can eventually be resolved.&nbsp; It's a far cry 
-from the complete PASS/PFS and BFS source code which I hope eventually 
-to have.<br>
+issues which I hope can eventually be resolved.&nbsp; Indeed, I can't even necessarily <i>tell</i> you yet everything I have managed to acquire.&nbsp; It's an unpleasant situation that I hope and expect to improve over time.<br>
 </p>
 
 
@@ -616,10 +615,16 @@ to have.<br>
       <li>HAL/S-FC — the HAL/S compiler, used to actually compile PASS and BFS.&nbsp; More specifically, <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0">HAL/S-FC release 32V0"</a>, written
         mostly in an enhanced version of the XPL high-level language, with bits in
         BAL (IBM Basic Assembly Language) as well.&nbsp; <a moz-do-not-send="true" href="#Original">More on this below</a>.<br>
-</li><li>XCOM — the source code for the "standard" XPL compiler.&nbsp; Alas, it is guaranteed <i>not</i>
- to compile HAL/S-FC, since HAL/S-FC required an enhanced XPL compiler 
-that we don't have.&nbsp; I only present it here for illustrative 
-purposes, in lieu of the enhanced compiler.<br>
+</li><li>XCOM — the source code for the original "standard" XPL compiler.&nbsp; Alas, it is guaranteed <i>not</i>
+ to compile HAL/S-FC, since HAL/S-FC was written in an enhanced version 
+of the XPL language, which I call "XPL/I", but which Intermetrics 
+unfortunately continued to call just "XPL".&nbsp; I will persist in 
+calling it XPL/I, however, because there are reasons the distinction is 
+important.&nbsp; Intermetrics's compiler 
+for XPL/I, to the best of my knowledge, has not survived the end of the 
+Shuttle program.&nbsp; Nevertheless, there are reasons why the source 
+code for the standard compiler remains useful, and perhaps those reasons
+ will become clear below.<br>
       </li>
 </ul>
 
@@ -638,18 +643,20 @@ substantive, but a difference is a difference, and you're entitled to
 know about it if you're interested.<br>
 </p>
 <p>For one thing, Virtual AGC header blocks, consisting of program 
-comments, are added at the top every contemporary file we receive.&nbsp;
+comments, are added at the top every contemporary file we receive, so 
+that you can understand the provenance of the files as much as 
+possible.&nbsp;
  These comments are crafted in a way that lets you distinguish such 
 "modern" comments from the original contents of the files.&nbsp; <br>
 </p>
-<p><i>Flight software</i> files, when available, are also "anonymized" 
+<p><i>Flight software</i> files, when they become available, are expected to be "anonymized" 
 or "depersonalized", so as to remove all personally-identifying 
 information related to the original development teams; thus, whenever 
 the name or initials of a programmer are discovered in the program 
 comments of Shuttle flight software, we have replaced them by a unique 
-but impersonal numerical codes.&nbsp; This was done at the behest of 
+but impersonal numerical codes.&nbsp; This is at the behest of 
 some holders of the original source materials, as a condition for 
-obtaining the software.<br>
+obtaining the software.&nbsp; Whether this is a temporary or permanent condition, I cannot say.<br>
 </p>
 <p>Most significant, I expect, is the fact that the character encoding 
 of all contemporary Shuttle source code has been completely 
@@ -659,8 +666,8 @@ contemporary character-encoding system used was an IBM system called
 EBCDIC 
 (Extended Binary Coded Decimal Interchange Code), while modern source 
 code (as far as I know) is universally encoded using 7-bit ASCII 
-(American Standard Code for Information Interchange) or an extension of 
-it called UTF-8.&nbsp; But EBCDIC and ASCII are essentially 100% 
+(American Standard Code for Information Interchange) or extension of 
+it such as UTF-8.&nbsp; But EBCDIC and ASCII are essentially 100% 
 incompatible, with only rare, accidental overlaps.&nbsp; The recoding of
  the source-code files from EBCDIC to ASCII has been done before we ever
  received any of the files, and was performed by unknown people, at an 
@@ -720,7 +727,10 @@ HAL/S source code.&nbsp; The compiler transparently converts them to "~"
 "`" during the compilation, and then converts them back to "¬" and "¢" 
 in printouts or in messages it displays.&nbsp; In particular, this does 
 work fine in Mac OS and Linux, though there may be special 
-considerations trying to do this in Microsoft Windows, discussed later.<br>
+considerations trying to do this in Microsoft Windows, discussed 
+later.&nbsp; In some of the source code we receive, ¬ has instead 
+already been replaced by "^".&nbsp; Thus any software we provide also 
+silently converts "^" to "~".<br>
 </font></p>
 </blockquote>A longer explanation is that for some decades now, the most-common character encoding in the U.S. has been 7-bit
       ASCII, 128 characters in all, sometimes called "plain vanilla" ASCII or just 
@@ -1527,7 +1537,8 @@ SW</span></span></font>
 <td title="" style="padding:1px;background:#DDD">
   <font size="-1"><br>
   </font></td>
-<td title="U+007E TILDE" style="padding:1px;background:#DDD"><font size="-1"><span class="mw-redirect">~</span></font>
+<td title="U+007E TILDE" style="padding:1px;background:#DDD"><font size="-1"><span class="mw-redirect"></span></font>
+<br>
 </td>
 <td title="U+0073 LATIN SMALL LETTER S" style="padding:1px;"><font size="-1">s</font>
 </td>
@@ -2005,7 +2016,7 @@ private after I get it — depends very much on the kindness of strangers.<br>
     
 <p>We actually have quite a few revisions of some of these documents in our library, spanning the mid-1970's to the
       mid-2000's, though I've only chosen to link the latest versions of
-      those documents above.&nbsp; <br>
+      those documents above, even though from time to time the latest revision isn't always the most complete one.&nbsp; <br>
     </p>
 
 
@@ -2315,6 +2326,8 @@ So were the HAL/S
           </tt></div>
         <tt> </tt>
         <div class="moz-cite-prefix"><tt>S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -3154,106 +3167,107 @@ performed.&nbsp; Such invocations were underlined in printouts.<br>
 
     
 <h1><a name="Emulation"></a>HAL/S Processing<br>
-</h1>
+</h1>To resurrect Space Shuttle flight software to my satisfaction minimally requires achieving the following:<br>
+<ol>
+  <li>Acquire the full HAL/S source code for the flight software.</li>
+  <li>Create a HAL/S compiler (for modern generally-available computers)
+ which can produce executable object code for the flight software.</li>
+  <li>Create means of emulating the Space Shuttle's computing 
+environment well enough to execute the object code generated by the 
+compiler.</li>
+</ol>
+<p>This section concerns itself entirely with the 2nd of these, namely compilation of HAL/S.<br>
+</p>
+<p>This turns out to be a complicated topic, both because the HAL/S 
+language is very complex in comparison to assembly languages like those 
+of the Apollo AGC, AGS, or LVDC, but also because it's hard to make an 
+effective compiler entirely independently of consideration of how the 
+object code will eventually be executed.&nbsp; As a result, compiler 
+development has proceeded in fits and starts, with tremendous amounts of
+ work being done on one approach or another, only to be eventually 
+abandoned in an incomplete state.&nbsp; And yet, the abandoned work 
+remains useful in some ways, so I can't truly discard it in good 
+conscience.&nbsp; In the next subsection I'll discuss the current 
+approach to a HAL/S compiler, while the two subsections thereafter will 
+discuss those zombie approaches ... not quite dead, but not quite alive 
+either.<br>
+</p>
+<h2><a name="deathbyxpl"></a>Death by XPL</h2>
+<p>In my current thinking, the roadmap to a usable HAL/S compiler is this:<br>
+</p>
+<ol>
+  <li>Develop a compiler (<b>XCOM-I.py</b>) capable of compiling 
+programs written in Intermetrics's extended version of the XPL 
+programming language (XPL/I).&nbsp; Development of XCOM-I is proceeding 
+rapidly, and it is currently capable of compiling all (or almost all) of
+ standard XPL, as well as some XPL/I.&nbsp; It is actually an XPL/I-to-C
+ translator.&nbsp; <a moz-do-not-send="true" href="XPL.html">See the XCOM-I page</a> for links to XCOM-I, discussion of usage, and so forth.<br>
+  </li>
+  <li>Develop patches in the C language for the occasional inline Basic 
+Assembly Language instructions that appear in HAL/S-FC's XPL/I source 
+code.&nbsp; <a moz-do-not-send="true" href="XPL.html#hooks">Again, see the XCOM-I page</a>.</li>
+  <li>Use XCOM-I plus the C-language patches just mentioned to compile 
+HAL/S-FC's source code to C, and thence to native executable code on any
+ modern computer of interest.</li>
+  <li>Use HAL/S-FC to compile the Space Shuttle flight software.</li>
+</ol>
+<p>In point of fact, HAL/S-FC had a total of 7 passes,</p>
+<ol>
+  <li>PASS1 — Convert XPL/I to the HALMAT intermediate language.<br>
+  </li>
+  <li>FLOW — Generate reports?<br>
+  </li>
+  <li>OPT  — Optimize the HALMAT.<br>
+  </li>
+  <li>AUX  — Optimize the HALMAT.<br>
+  </li>
+  <li>PASS2  — Convert HALMAT to executable object code for IBM 
+System/360 or IBM AP-101S (Shuttle's onboard computers).&nbsp; I.e., 
+translate HALMAT to Basic Assembly Language (BAL).<br>
+  </li>
+  <li>PASS3  — Work with simulation data files (SDF).<br>
+  </li>
+  <li>PASS4  — Work with simulation data files (SDF).</li>
+</ol>
+
+<p>each one of which was a standalone program that executed separately, 
+and each of these could in principle be compiled with HAL/S-FC.<br>
+</p>
+<p>Emulation, or alternatively generation of object-code for non-IBM-BAL
+ computers, is outside the scope of this section.&nbsp; But it would 
+presumably either proceed from the HALMAT output of PASS1, or else from 
+the BAL output of PASS2.&nbsp; At this point, my vote would be for a 
+BAL-to-C translation system.&nbsp; In fact, <a moz-do-not-send="true" href="http://www.hercules-390.org/">emulators</a> already exist that could <i>presumably</i>
+ run IBM System/360 object code generated by PASS2 of the compiler, 
+though I don't think that would be of much help in using the code within
+ a spacecraft-simulation system. <br>
+</p>
 
 
-    Recall that the Shuttle flight software was largely written in the
-    high-level language HAL/S, and though admittedly I haven't seen much of it as 
-of yet, I suspect that some was also in to form of embedded inline Basic
- Assembly Language (BAL) code.<br>
 
-
-<br>
-
-
-All of which does us little good, even if we had any of that source 
-code, if we have no way to run any of it.&nbsp; We also first have to 
-have some way to compile that source code into an executable form, and 
-secondly, to have some way to run (or emulate running) that executable 
-code in our modern computing environment.<br>
-
-
-<br>
-
-
-In fact, I am (or have been) pursuing two separate paths in this 
-direction, which I refer to as the "modern" and "original" 
-approaches.&nbsp; Those are covered in the next two sections.<br>
-
-
-<h2><a name="Modern"></a>Modern HAL/S Compiler, Interpreter, and Emulator<br>
+<h2><a name="Modern"></a> HAL/S Interpreter<br>
 </h2>
 
 
-<i>(This section describes work in progress.)</i><br>
+<i>(This section describes a partially-completed but halted approach 
+towards HAL/S compilation and emulation that nevertheless remains useful
+ as a tool for learning HAL/S.)</i><br>
 
 
 <br>
 
 
-Although we now have the source code for the original HAL/S compiler, 
-known as HAL/S-FC, that was not the case when I began working on this 
-problem.&nbsp; In the absence of the original HAL/S-FC
-    compiler itself, I began working on my own "modern" HAL/S
-    compiler.&nbsp; I expect it to be inferior to the original HAL/S-FC 
-in some
-    senses — and indeed, perhaps in <i>many</i> — but also maybe more
-    capable of adaptation and maintenance into the future.&nbsp; Well
-    ... we'll see.&nbsp; <br>
-
-
-    <br>
-
-
-    I have found that HAL/S is quite demanding to implement, and hence I
-    expect implementation to be an ongoing project for a long
-    time.&nbsp; It may eventually surpass my own ability and available
-    time to complete it, if I have only myself to rely upon.&nbsp;
-    (Hint!)<br>
-
-
-    
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; If you are
-        knowledgeable about compiler theory, you may have noticed that a
-        BNF grammar for HAL/S is available in the original
-        documentation.&nbsp; This may lead you to hope that you can
-        relatively-easily throw together a compiler for HAL/S, using
-        modern compiler-generator tools.&nbsp; If you somehow succeed in
-        doing so, or want to discuss it in more detail, let me
-        know!&nbsp; However, it's worth noting that the original BNF is
-        incomplete and even in some places simply incorrect, which has
-        forced me to extend it and/or correct it on an ongoing
-        basis.&nbsp; Perhaps more importantly, BNF (which is supposed to
-        be used for describing <i>context-free</i> grammars) is
-        incomplete in a manner that serves to conceal the fact that the
-        grammar for HAL/S is <i>not</i> actually context-free.&nbsp; I
-        offer you a couple of examples, in the form of parsing problems
-        that you should be able to answer from a context-free grammar,
-        without recourse to any contextual information such as variable
-        declarations elsewhere in the code:&nbsp; </font><font size="-1"><br>
-        &nbsp;&nbsp;&nbsp; a) Is the HAL/S expression </font><font size="-1"><tt>A.B</tt></font><font size="-1"> a reference to
-        field </font><font size="-1"><tt>B</tt></font><font size="-1">
-        in structure </font><font size="-1"><tt>A</tt></font><font size="-1">, or is it the dot product of vectors </font><font size="-1"><tt>A</tt></font><font size="-1"> and </font><font size="-1"><tt>B</tt></font><font size="-1">?<br>
-        &nbsp;&nbsp;&nbsp; b) Is the HAL/S expression </font><font size="-1"><tt>A(B)</tt></font><font size="-1"> a call to
-        function </font><font size="-1"><tt>A</tt></font><font size="-1"> with argument </font><font size="-1"><tt>B</tt></font><font size="-1">, or is it the multiplication of </font><font size="-1"><tt>A</tt></font><font size="-1"> times </font><font size="-1"><tt>B</tt></font><font size="-1">?&nbsp; (Hint: There
-        is no multiplication operator in HAL/S.)</font><font size="-1"><br>
-      </font></blockquote>
-
-
-    In the meantime, though, those portions of the HAL/S compiler which
-    I have implemented at least preliminarily are available along with
-    an integrated emulator that together comprise a HAL/S <i>interpreter</i>
-    that you can use to experiment with HAL/S up to whatever point I
-    happen to have reached in my development effort.&nbsp; This
-    arrangement will be familiar to users of the Python language, which
-    has separate modes for running entire programs vs accepting and
-    immediately executing input interactively on a line-by-line basis.<br>
-
-
-    <br>
-
-
-    As an example, consider the following HAL/S short sample program
+The first (but now halted) of my approaches to a HAL/S compiler actually
+ involved both compilation and emulation, and allowed combining those 
+two aspects so as to create an interactive HAL/S interpreter.&nbsp; Some
+ HAL/S features were not yet implemented when the approach was 
+abandoned, but the convenience of being able to interactively enter 
+HAL/S statements and immediately see the results of doing so, while at 
+the same time being able to interactively examine the values of 
+variables or to alter those variables is valuable when used for learning
+ about HAL/S.<br>
+<br>
+As an example, consider the following HAL/S short sample program
     (called <tt>SIMPLE</tt>) which I've adapted from a program in the
     excellent book <a moz-do-not-send="true" href="Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf"><i>Programming in HAL/S</i></a> (1978) by Michael J.
     Ryer.&nbsp; The program provides an input loop, into which the user
@@ -3262,30 +3276,39 @@ in some
 
 
     
-<blockquote><tt>&nbsp; SIMPLE: PROGRAM;<br>
+<blockquote><tt>&nbsp; <font color="#663300">SIMPLE: PROGRAM;<br>
+
         &nbsp;&nbsp;&nbsp; &nbsp; DECLARE PI CONSTANT
         (3.141592653589793);<br>
+
         &nbsp;&nbsp;&nbsp; &nbsp; DECLARE R SCALAR;<br>
+
         &nbsp;&nbsp;&nbsp; &nbsp; WRITE(6) 'Input values of R to compute
         PI R**2, or else -1 to quit.';<br>
+
         &nbsp;&nbsp;&nbsp; &nbsp; DO WHILE TRUE;<br>
+
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; READ(5) R;<br>
+
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; IF R &lt; 0 THEN
         EXIT;<br>
+
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; WRITE(6) 'R =', R,
         'and PI R**2 =', PI R**2;<br>
+
         &nbsp;&nbsp;&nbsp; &nbsp; END;<br>
-        &nbsp; CLOSE SIMPLE;</tt><br>
+
+        &nbsp; CLOSE SIMPLE;</font></tt><br>
     </blockquote>
 
 
     HAL/S considers the <tt>PROGRAM</tt> to be the basic executable
     unit, and thus at runtime the expectation would be that some
-    selection of <tt>PROGRAM</tt>s is running, and possibly
+    selection of <font color="#663300"><tt>PROGRAM</tt></font>s is running, and possibly
     intercommunicating, and receiving timeslices to do so according to
     the assigned execution-priorities.&nbsp; But with the interpreter,
     we can just bypass all of that infrastructure and compute any values
-    we like, directly and immediately, without wrapping our code in a <tt>PROGRAM</tt>.&nbsp;
+    we like, directly and immediately, without wrapping our code in a <font color="#663300"><tt>PROGRAM</tt></font>.&nbsp;
 
 
 
@@ -3295,7 +3318,7 @@ in some
 
 
     
-<blockquote><tt>HAL/S &gt; DECLARE PI CONSTANT (3.141592653589793);</tt><tt><br>
+<blockquote><font color="#663300"><tt>HAL/S &gt; DECLARE PI CONSTANT (3.141592653589793);</tt><tt><br>
       </tt><tt>HAL/S &gt; DO FOR TEMPORARY I=0 TO 10; WRITE(6) I, I
         PI**2; END;</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -3320,19 +3343,19 @@ in some
         8.88264396098042E+01 <br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10&nbsp;&nbsp;
         9.86960440108936E+01 </tt><tt><br>
-      </tt><tt>HAL/S &gt; </tt><font face="Courier New, Courier,
+      </tt><tt>HAL/S &gt; </tt></font><font face="Courier New, Courier,
         monospace"><br>
       </font></blockquote>
 
 
     Which is pretty convenient!&nbsp; But if we liked, we could still go
-    to the trouble (not much!) of inputting the entire <tt>SIMPLE</tt>
+    to the trouble (not much!) of inputting the entire <font color="#663300"><tt>SIMPLE</tt></font>
     program into the interpreter, and then running it and inputting a
     few numbers into it:<br>
 
 
     
-<blockquote><tt>HAL/S &gt;
+<blockquote><font color="#663300"><tt>HAL/S &gt;
         `spool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <br>
         &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Now spooling input for
@@ -3379,29 +3402,29 @@ in some
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
         8.00000000000000E+00 and PI R**2 =&nbsp; 2.01061930240000E+02 <br>
         READ&nbsp; &gt; -1<br>
-        HAL/S &gt; </tt><br>
+        HAL/S &gt; </tt></font><br>
     </blockquote>
 
 
-    In case you're wondering, user input that begins with a backtick (`)
-    is a command to the interpreter itself. In this example, <tt>`spool</tt>
-    and <tt>`unspool</tt> are present to keep the interpreter from
-    trying to execute each statement in the definition of the <tt>SIMPLE</tt>
+    In case you're wondering, user input that begins with a backtick (<font color="#663300">`</font>)
+    is a command to the interpreter itself rather than a statement in the HAL/S language. In this example, <font color="#663300"><tt>`spool</tt></font>
+    and <font color="#663300"><tt>`unspool</tt></font> are present to keep the interpreter from
+    trying to execute each statement in the definition of the <font color="#663300"><tt>SIMPLE</tt></font>
     program individually, and instead treating them as an entire unit to
-    be processed together.&nbsp; Meanwhile, just defining the <tt>SIMPLE</tt>
-    program doesn't cause the <tt>SIMPLE</tt> program to <i>execute</i>,
-    and it's the actual execution that's triggered by <tt>`run SIMPLE</tt>.&nbsp;
+    be processed together.&nbsp; Meanwhile, just defining the <font color="#663300"><tt>SIMPLE</tt></font>
+    program doesn't cause the <font color="#663300"><tt>SIMPLE</tt></font> program to <i>execute</i>,
+    and it's the actual execution that's triggered by <font color="#663300"><tt>`run SIMPLE</tt></font>.&nbsp;
 
 
 
 
-    And of course, <tt>SIMPLE</tt> doesn't vanish after we've finished
+    And of course, <font color="#663300"><tt>SIMPLE</tt></font> doesn't vanish after we've finished
     running it; the interpreter still recalls its definition, and we
     could run it again if we liked:<br>
 
 
     
-<blockquote><tt>HAL/S &gt; `run SIMPLE</tt><tt><br>
+<blockquote><font color="#663300"><tt>HAL/S &gt; `run SIMPLE</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Running as the
         primary thread.</tt><tt><br>
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Input values
@@ -3412,7 +3435,7 @@ in some
 
       </tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; R =&nbsp;
         2.10000000000000E+01 and PI R**2 =&nbsp; 1.38544236023310E+03 </tt><tt><br>
-      </tt><tt>HAL/S &gt; </tt><br>
+      </tt><tt>HAL/S &gt; </tt></font><br>
     </blockquote>
 
 
@@ -3427,56 +3450,71 @@ in some
     <br>
 
 
-    However convenient the HAL/S interpreter may be for experimenting
-    with language features, or from my viewpoint for debugging them,
-    it's not of too much use for what must the ultimate goal of
-    integrating Shuttle flight software into spaceflight simulation
-    systems.&nbsp; For one thing, it is simply too slowly
-    executing.&nbsp; For another, the interpreter's emulation module is
-    largely written in the Python language, rather than a language like
-    C or C++ which (I assume!) would be far more useful for integration
-    purposes.&nbsp; So the HAL/S interpreter is merely a convenient rest
-    stop on the long journey towards an efficient emulator.&nbsp; If you
-    are interested in this topic, and most-especially in potentially
-    assisting it, you should consult <a moz-do-not-send="true" href="hal-s-compiler.html">the dedicated HAL/S Compiler page</a>.<br>
+    The interpreter was originally intended to be a compiler that produced object code in an intermediate language I call <i>PALMAT</i>.&nbsp;
+ After a PALMAT emulator was also incorporated into the compiler, it 
+became possible to use the compiler as an interpreter.&nbsp; The 
+definition of the PALMAT language appears in the Appendix of <a moz-do-not-send="true" href="hal-s-compiler.html">a page that was originally intended as a discussion of the (now-abandoned) compiler</a>.&nbsp;
+ While understanding of PALMAT isn't really necessary just to use the 
+HAL/S interpreter, PALMAT remains a potentially-useful tool for 
+emulation of HAL/S programs.<br>
+<blockquote><font size="-1"><b>Aside:</b> The reason this approach was 
+halted was mainly that it had become to unwieldy to continue adding the 
+still-unimplemented features of HAL/S to the compiler portion of 
+it.&nbsp; Moreover, I felt that the emulator portion, written in Python,
+ while adequate, was slower in execution than I desired and too 
+difficult to integrate into spacecraft-simulation software.&nbsp; 
+Development on it could still continue someday, if desired.</font><br>
+</blockquote>
 
-
-    <br>
-
-
-    More TBD.<br>
-
-
-<br>
 
 
 <h2><a name="Original"></a>Port of the Original HAL/S Compiler</h2>
 
 
-<p><i>(This section describes work in progress.)<br>
+<p><i><i>(This section describes a </i></i>completed<i><i> but now-abandoned approach 
+towards HAL/S compilation remains useful
+ as a tool for cross-checking other approaches towards HAL/S compilation.)</i>
 </i></p>
 
 
-<p>The alternative to using the "modern" HAL/S 
-compiler/interpreter/emulator described in the preceding section is to 
-instead use the contemporary Intermetrics HAL/S compiler.&nbsp; 
-Unfortunately, we don't have the capability of actually running the contemporary compiler
-as-is, due to the fact that it is written in an obsolete computer 
-language, on an obsolete computer system, and for which the necessary 
-infrastructure does not exist.&nbsp; However, I have ported the compiler
- from its original programming language to a modern one (Python 3), and 
-has indeed become possible once again to run it ... modulo any errors in
- my porting procedure!&nbsp; At present, it acts only as a compiler, and
- not yet as an interpreter or emulator like the "modern" HAL/S compiler 
-does, but it has the advantage of supporting the <i>complete</i> HAL/S 
-programming language as needed for processing shuttle flight software's 
-source code, producing identical outputs to the original.&nbsp; And 
-hopefully it can be extended to full interactivity sometime in the 
-future.<br>
+My second approach to the HAL/S compilation problem was to port the 
+original compiler, HAL/S-FC, from XPL/I to Python.&nbsp; HAL/S-FC 
+consisted of 7 passes:<br>
+<ol>
+  <li>PASS1 — Convert XPL/I to the HALMAT intermediate language.<br>
+  </li>
+  <li>FLOW — Generate reports?<br>
+  </li>
+  <li>OPT  — Optimize the HALMAT.<br>
+  </li>
+  <li>AUX  — Optimize the HALMAT.<br>
+  </li>
+  <li>PASS2  — Convert HALMAT to executable object code for IBM System/360 or IBM APS-100S (Shuttle's onboard computers).<br>
+  </li>
+  <li>PASS3  — Work with simulation data files (SDF).<br>
+  </li>
+  <li>PASS4  — Work with simulation data files (SDF).</li>
+</ol>
+<p><br>
+</p>
+<blockquote>
+  <p><font size="-1"><b>Note:</b>&nbsp; It's unfortunate that the Shuttle's Primary Avionics Software Subsystem (i.e., the flight software) is <i>also</i>
+ referred to as "PASS".&nbsp; But do not be confused:&nbsp; PASS1, 
+PASS2, PASS3, and PASS4 refer to passes of the compiler, and not to the 
+PASS flight software.</font><br>
+  </p>
+</blockquote>
+<p>I had felt that only PASS1 of the compiler needed to be ported, and 
+that emulation or object-code generation could proceed directly from the
+ HALMAT intermediate code produced by PASS1.&nbsp; I eventually turned 
+out not to be entirely correct in my thinking.&nbsp; Nevertheless, the 
+port of PASS1 was <i>completed</i>, apparently successfully, though it wasn't necessarily thoroughly tested. <br>
   </p>
 
 
-<h3><a name="OriginalInstallation"></a>Installation</h3>
+
+<p><a name="OriginalInstallation"></a>Installation of the PASS1 port goes as follows:</p>
+
 
 
 <ul>
@@ -3548,11 +3586,11 @@ not?&nbsp; Well, you won't find out by looking at the <tt>--help</tt> message. I
 </blockquote>
 
 
-<h3><a name="OriginalUsage"></a>Using the Original HAL/S Compiler</h3>
-
-
-<p>Everything you do with the HAL/S compiler is from a command line, so 
-everything I talk about below is something you're going to do or see on a command 
+<p><a name="OriginalUsage"></a>As far as using the port of the 
+compiler's PASS1 is concerned, everything you do with the HAL/S compiler
+ is from a command line, so 
+everything I talk about below is something you're going to do or see on a
+ command 
 line.&nbsp; <br>
 </p>
 
@@ -3912,7 +3950,8 @@ identifying names of the templates appearing in the template library are
   <li>Truncating to 8 characters if necessary.</li>
   <li>Padding with blanks if less than 8 characters long.</li>
 </ul>
-<p><b>Warning:</b> The side effect of this is that if you had, say, a <tt>FUNCTION</tt> called <tt>VELOCITY_OF_EARTH</tt> and another called <tt>VELOCITY_OF_SHIP</tt>, <i>both</i> of them would result in generation of a template called "<tt>@@VELOCI</tt>".&nbsp;
+<blockquote>
+  <p><font size="-1"><b>Warning:</b> The side effect of this is that if you had, say, a <tt>FUNCTION</tt> called <tt>VELOCITY_OF_EARTH</tt> and another called <tt>VELOCITY_OF_SHIP</tt>, <i>both</i> of them would result in generation of a template called "<tt>@@VELOCI</tt>".&nbsp;
 
  But there can be only one.&nbsp;
  The template for whichever was compiled most-recently would overwrite 
@@ -3928,195 +3967,36 @@ objects known as Partitioned Data Sets, rather than just being some
 random idiocy; it is analogous to the 8-character filenames (plus 
 3-character "extensions") that those of us old enough to experience 
 Microsoft DOS (and Digital Research CP/M) had to endure.&nbsp; It didn't
- seem so bad at the time.<br>
-</p>
-
-<p>TBD<br>
-</p>
-
-
-
-
-
-<h3><a name="OriginalWhy"></a>Why Two Implementations of the HAL/S Compiler?<br>
-</h3>
-
-
-<p>
-</p>
-
-
-
-<p>After working on the "modern" HAL/S compiler for a few months, I was 
-called away from it for several additional months due to other 
-priorities. When I returned to the still-incomplete modern HAL/S 
-compiler, some new thoughts occurred to me.&nbsp; First, as I noted 
-above, although the grammar for HAL/S is provided in Backus-Naur Form 
-(BNF), BNF is actually only appropriate for so-called "context-free" 
-grammars, while the HAL/S grammar is <i>not</i> context-free.&nbsp; 
-(Indeed, the HAL/S documentation identifies 12 separate compilation 
-contexts used by the compiler.)&nbsp; The workaround for this non-context-free situation in the 
-"modern" version of the compiler is pretty cumbersome, making the 
-compiler hard to maintain and extend.&nbsp; Meaning that it would be 
-relatively difficult to add the still-missing features.&nbsp; Second, in
- the interim we had finally received <a moz-do-not-send="true" href="#PASS">the <i>entire</i> source code for the
-      original HAL/S</a>.&nbsp; <br>
-</p>
-
-
-<p>Combining these thoughts, it seemed to me to make sense as an 
-alternate approach to attempt to get the original Intermetrics HAL/S 
-compiler working.<br>
-</p>
-
-
-<p>
-    The original compiler (HAL/S-FC) was written mostly in a language called <a moz-do-not-send="true" href="https://www.cs.toronto.edu/XPL/">XPL</a>,
-        and naïvely it would seem that HAL/S-FC could perhaps be compiled (and run on modern
-        computers) using available modern XPL compilers or else using <a moz-do-not-send="true" href="https://sourceforge.net/projects/xpl-compiler/">Daniel
-          Weaver's XPL-to-C translator</a>.&nbsp; But no; such an 
-approach is doomed to failure.&nbsp; For one thing, as far as I can 
-ascertain, no true
-        XPL compiler capable of running on modern computers
-        exists; the XPL-to-C translator fails badly if you try it with 
-the XPL source code for the HAL/S compiler.&nbsp; Perhaps more 
-significantly, the XPL compiler
-        (known as XCOM) used by Intermetrics and later by the United 
-Space Alliance to compile HAL/S-FC was in fact <i>not</i> a standard XPL compiler.&nbsp; Rather, it
-        had been customized to handle features of the HAL/S language
-        that apparently could not be conveniently handled by the
-        standard XPL compiler.&nbsp; <br>
-</p>
-
-
-<p>But we have no source code for this enhanced Intermetrics XPL 
-compiler, and no way to run that original XPL compiler even if we had a 
-copy.&nbsp; The changes are partially (but not entirely) covered in some of the surviving documentation.&nbsp; I 
-can tell you, though, that Intermetrics custom XPL has some pretty novel
- (if not unsettling) features that are probably not always consistent 
-with "pure" XPL, and depended pretty specifically on the underlying 
-characteristics of the IBM mainframes on which it ran.&nbsp; At the very
- least, it has features entirely unmentioned in standard XPL 
-documentation.<br>
-</p>
+ seem so bad at the time.</font><br>
+  </p>
+</blockquote>
 
 
 <blockquote>
-  <p><font size="-1"><b>Aside:</b>&nbsp; I won't bore you with a litany 
-of unexpected and woeful characteristics of Intermetrics XPL I've 
-discovered, but I'll give you just one so that you can get a flavor of 
-them:&nbsp; Suppose I declare the variable X as an integer.&nbsp; I can 
-later pretend that X is in fact an array of integers, so that if I use 
-X(0) in my source code, it refers to X itself, while X(1) is whatever 
-happens to follow X in memory, interpreted as an integer, and X(-1) is 
-whatever happens to precede X in memory.&nbsp; Or suppose I declare V as
- an array of integers, so that I'd expect to use it only in the form 
-V(...).&nbsp; But if I like, I can simply use V without an index, and the XPL compiler 
-interprets it as V(0).&nbsp; This is "feature" is used quite often in 
-the XPL code of the compiler, with no warning whatever.<br>
-</font></p>
-</blockquote>
+  <p><font size="-1"><b>Aside:</b>&nbsp; Why was this the port of PASS1 
+abandoned?&nbsp; It turned out that additional data concerning the 
+flight software had become available in the meantime, about which I 
+don't yet care to speak, and it became obvious PASS1 was not 
+enough.&nbsp; To make full use of the additional data would require 
+ports of <i>at least</i> the OPT, AUX, and PASS passes.&nbsp; But the 
+effort and cost in time of porting just PASS1 had been so great that I 
+couldn't really tolerate the thought of proceeding to port at least 
+three additional passes.&nbsp; Almost as significant is the fact that <a moz-do-not-send="true" href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf">the documentation for HALMAT had survived only in incomplete form</a>.&nbsp; HALMAT itself is version-dependent to some degree, and the <a moz-do-not-send="true" href="Shuttle/HALMAT%20-%20An%20Intermediate%20Language.pdf">more-complete but early documentation</a>
+ we have of it is seldom relevant to the compiler source-code version 
+available to us.&nbsp; As porting of the compiler's PASS1 progressed, I 
+became increasingly-less optimistic that adequate HALMAT documentation 
+could be recovered to use it as the basis for emulation or code 
+generation.&nbsp; But since the port of PASS1 can (or should be able to)
+ produce reports and HALMAT output identical to the original HAL/S-FC, 
+it remains valuable as a cross-checking tool, even if abandoned for 
+primary HAL/S development.</font><br>
 
-
-The approach I settled on for getting the original HAL/S compiler to 
-work in our modern computing environment was to manually port it from 
-XPL (plus a smattering of BAL) to a modern computer 
-language.&nbsp; I chose Python 3 as the modern language, though one 
-could give arguments for other languages such as C++ or Pascal.&nbsp; 
-Perhaps someone else would like to attempt a port of their own?&nbsp; <br>
-
-
-<br>
-
-
-This ignores the question of how one "ports" from a computer language 
-one doesn't understand to another language with very different characteristics?&nbsp; If Intermetrics XPL is littered with 
-landmines like the one mentioned in the "aside" above, how can you port 
-it to any other language, let alone Python?&nbsp; <br>
-
-
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; For that matter, even some of the <i>standard</i> features of XPL are pretty hair-raising.&nbsp; One that has given me no end of trouble is this:&nbsp; XPL has both integer</font><font size="-1">
- and boolean datatypes, but like many other languages having both types,
- you can use a boolean in place of an integer in various ways, with TRUE
- being interpreted as 1 and FALSE as 0.&nbsp; You can also use either an
- integer or boolean condition </font><font size="-1"><tt>X</tt></font><font size="-1"> in a conditional like "</font><font size="-1"><tt>IF X THEN Y</tt></font><font size="-1">".&nbsp; In all other programming languages I've seen, such a conditional would be interpreted as "true" if </font><font size="-1"><tt>X</tt></font><font size="-1"> were non-zero and "false" if </font><font size="-1"><tt>X</tt></font><font size="-1"> were zero.&nbsp; But not in standard or enhanced XPL!&nbsp; No, in XPL, the conditional is "true" if X is <i>odd</i> and "false" if X is <i>even</i>.&nbsp; Or to put it differently, only the least-significant bit of </font><font size="-1"><tt>X</tt></font><font size="-1">
- is used in determining whether the conditional executes or not.&nbsp; 
-Of course, it was the language-designer's privilege to defined their 
-language in any manner they so chose, regardless of whatever havoc it 
-might cause me 50+ years later.</font><br>
-</blockquote>
-
-
-In that regard, I'd 
-note that after you work with a language long enough, you begin to see 
-suspicious behavior in it, and can work backward from that to 
-understanding the atrocities occurring under the surface, even if the 
-official documentation of the language is somewhat lacking.&nbsp; <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/ported">My python port of HAL/S-FC can be found in our GitHub repository</a>, and in particular you can see <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/ported/README.md">my
- stream-of-consciousness notes concerning my discoveries about 
-Intermetrics XPL and the HAL/S compiler's XPL source code in the README 
-there</a>.&nbsp; That's where the tidbit in the "asides" above came from; but there are lots of other tidbits there as well.<br>
-
-
-<br>
-
-
-Regarding my rationale for porting the original compiler — namely that 
-my "modern" compiler had become very clunky to maintain — it's hard to 
-escape the observation that the original compiler is also extremely 
-clunky.&nbsp; For one thing, it's not only very big, but its source code
- is almost entirely uncommented.&nbsp; On the other hand, there is quite
- a lot of documentation for it that can be found in our Shuttle document
- library's HAL/S section, albeit usually of variable quality and for 
-earlier semi-obsolete versions of the compiler.&nbsp; Of particular aid 
-from my perspective has proven the "<a moz-do-not-send="true" href="Shuttle/19760020796.pdf">HAL/S-FC &amp; HAL/S-360 Compiler System Program Description</a>" (1976).&nbsp; Of lesser but still significant value are the "<a moz-do-not-send="true" href="Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf">HAL/S-FC User's Manual (PASS 32.0/BFS 17.0)</a>" (2005) and the "<a moz-do-not-send="true" href="Shuttle/2019740017615.pdf">HAL/S-360 User's Manual</a>" (1974).<br>
-
-
-<br>
-
-
-The original HAL/S compiler was partitioned into several "passes" or 
-"phases", of which the present port is limited to pass 
-1.&nbsp; <br>
-
-
-<br>
-
-
-Pass 1 has the responsibility for parsing HAL/S source code and 
-converting it into a target-dependent object code in intermediate 
-language known as HALMAT.&nbsp; In principle, HALMAT could itself be 
-executed in some kind of an emulator system, but in fact that's not the 
-way the original compiler system used it.&nbsp; Instead, subsequent 
-compiler passes optimized the HALMAT, then converted the HALMAT into directly-executable machine code, and 
-simulation.&nbsp; These subsequent passes may remain of some interest, 
-but <a moz-do-not-send="true" href="Shuttle/HAL_S-360%20Compiler%20System%20Specification%204%20Feb%201977.pdf">the documentation for HALMAT has survived only in incomplete form</a>.&nbsp; And HALMAT itself is version-dependent to some degree, so <a moz-do-not-send="true" href="Shuttle/HALMAT%20-%20An%20Intermediate%20Language.pdf">more-complete but early documentation</a>
- we have of it is not always directly relevant to the compiler version 
-we have.&nbsp; Whether the format and behavior of HALMAT can be 
-reconstructed enough to make it worthwhile to port additional passes of 
-the HAL/S compiler and/or to emulate execution of HALMAT is open to 
-question ... but I'm not optimistic, and am no longer considering 
-attempting it.&nbsp;&nbsp; If you are a Very Clever Person, perhaps you 
-might want to attempt it.&nbsp; The only additional hint I'd care to 
-provide is that I have submitted NASA FOIA requests for specific 
-document versions that I believe could have complete HALMAT 
-documentation, and have been informed that my requested documents cannot
- be found.<br>
-
-
-<br>
-
-
-Thus the porting strategy instead is to co-opt those portions of pass 1 
-of the compiler that produce HALMAT, and have them perhaps produce <a moz-do-not-send="true" href="hal-s-compiler.html#PALMAT">an intermediate format I call PALMAT</a>, for which an emulator already exists as part of the "modern compiler" discussed in the preceding section.<br>
-
-
-<br>
-
-
-<br>
 
 
     
+  </p>
+</blockquote>
+<br>
 <hr style="width: 100%; height: 2px;">
     
 <center><br>
@@ -4130,7 +4010,7 @@ of the compiler that produce HALMAT, and have them perhaps produce <a moz-do-not
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-02-28<br>
+          2024-04-28<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is

@@ -23,6 +23,73 @@ document.write(headerTemplate.replace("@TITLE@","Change-Log").replace("@SUBTITLE
       left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
+  <td valign="top">2024-04-28<br>
+  </td>
+  <td valign="top">I once again have a backlog of material people have 
+sent me, which I haven't gotten around to posting in the library 
+yet.&nbsp; Real Soon Now, I hope.<br>
+    <br>
+I've been fully occupied with HAL/S compilation (for Space Shuttle 
+flight software) the past couple of months, which partially explains the
+ delay.&nbsp; Anyone reading these postings with a view toward what <i>I</i>
+ was doing (versus less-me-centered Virtual AGC developments) may have 
+noticed that I've been concerned with HAL/S compilation for about the 
+last 18 months.&nbsp; It's a hard nut to crack, and I've been through 
+several abortive but non-negligible attempts to crack it.&nbsp; First I 
+developed a HAL/S compiler that could be used also as an interactive 
+HAL/S interpreter or emulator; it was quite useful, but never got to the
+ point of supporting 100% of HAL/S's features before I stopped work on 
+it for maintenance-difficulty reasons.&nbsp; Then I decided to port the 
+original HAL/S compiler (HAL/S-FC), which was written in the mysterious,
+ obsolete language XPL/I, to Python, so that it could be run on modern 
+computer systems; I succeeded, but only for the 1st pass (of the 
+compiler's 7 passes), and stopped working on it because the effort for 
+the first pass had been so great that I couldn't bear the thought of 
+porting any more of the passes.<br>
+    <br>
+Now I'm working on yet a third approach, and I'm feeling quite good 
+about it because I passed a major milestone on it this morning.&nbsp; As
+ I say, the original HAL/S compiler was written in the XPL/I 
+language.&nbsp; Actually, everybody (including Intermetrics, which wrote
+ the software) says that it was written in XPL, but it's not really 
+true.&nbsp; There was indeed a computer language called XPL which was 
+defined in a book called <i>A Compiler Generator</i> by McKeeman <i>et al</i>.; the book also contained the complete listing for its XPL compiler (XCOM).&nbsp; But the truth is that Intermetrics had <i>extended</i>
+ the language, so a standard XPL compiler couldn't compile it any 
+longer, and in particular couldn't compile HAL/S-FC.&nbsp; Intermetrics 
+instead had their own separate compiler for it.&nbsp; Intermetrics 
+continued to call this extended language "XPL", but I insist on calling 
+it "XPL/I" to make the distinction clear:&nbsp; An XPL/I compiler can 
+compile HAL/S-FC, but a mere XPL compiler cannot, and there are no 
+surviving XPL/I compilers that anybody I've talked to is aware of.<br>
+    <br>
+What I've been working on lately <i>is</i> an XPL/I compiler, which I 
+call XCOM-I.&nbsp; It can still compile standard XPL, but the goal is to
+ compile full XPL/I.&nbsp; XCOM-I itself is written in Python and 
+translates XPL/I to C, and hence is completely portable.&nbsp; The 
+milestone XCOM-I reached this morning was to compile the original XPL 
+compiler (XCOM) listed in <i>A Compiler Generator</i>, and then to use that original XCOM to compile some other XPL programs (listed in <i>A Compiler Generator</i>
+ also) into correct IBM System/360 object-code.&nbsp; It was a hard-won 
+milestone, and while it isn't as good as compiling HAL/S-FC itself would
+ be, I'm still happy!<br>
+    <br>
+In celebration, I've updated the Shuttle page accordingly, and in particular have made visible <a moz-do-not-send="true" href="XPL.html">a page about XCOM-I that I've been working on in the background for a while</a>.<br>
+    <br>
+I would observe that HAL/S-FC can compile HAL/S to either IBM System/360
+ object code or else to IBM AP-101S (i.e., Shuttle GPC) object code, 
+both of which are based on IBM Basic Assembly Language (BAL).&nbsp; 
+Therefore, it seems likely that the eventual technical path to emulating
+ execution of the Shuttle flight software, and in particular to 
+integrating it into spacecraft-simulator software, will be to emulate 
+execution of IBM BAL.&nbsp; A BAL-to-C translator would be even better, I
+ think.&nbsp; It would mean that Space Shuttle flight software could 
+technically be integrated into spacecraft-simulation systems simply by 
+incorporating its C code ... assuming, of course, that that weren't a 
+regulatory issue <i>vis-à-vis</i> ITAR.&nbsp; Though the fact that the C
+ code couldn't possibly execute on an AP-101S, and could be completely 
+obfuscated versus the <i>relative</i> clarity of BAL code, would speak in its favor ITAR-wise (I assume).<br>
+  </td>
+</tr>
+<tr>
   <td valign="top">2024-03-22<br>
   </td>
   <td valign="top">Fixed several bad hyperlinks.&nbsp; Thanks to Rob Schofield for pointing out the problem.<br>

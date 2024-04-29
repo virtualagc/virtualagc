@@ -1,6 +1,5 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-  <head>
+<html><head>
     <title>Virtual AGC Document Library Page</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="Author" content="Ronald Burkey">
@@ -12,7 +11,9 @@
     <script type="text/javascript">
 document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace("@SUBTITLE@","Roadmap and Theory of Operation"))
 </script><br>
-    <div align="center"><i>(This page is under construction.)</i><br>
+    <div align="center"><i>(This page is incomplete but is no longer 
+maintained. Its primary value is probably the Appendix describing the 
+PALMAT intermediate language.)</i><br>
     </div>
     <h1>Table of Contents </h1>
     <ul>
@@ -54,7 +55,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
     <p>It is not feasible at the present time to run the original Shuttle-era version of the compiler for the HAL/S language to compile Space Shuttle flight software.&nbsp; Refer to <a moz-do-not-send="true" href="Shuttle.html">our Space Shuttle flight-software page</a> for more context.<br></p>
-    <p>That orginal HAL/S compiler was known as <tt>HAL/S-FC</tt>.&nbsp; Even if it were possible to run that original compiler, it would in any case produce only object code which could be run on an IBM System/360 mainframe, or else on the IBM AP-101S General Purpose Computers (GPC) of the Shuttle itself ... neither of which (with certain provisos insofar as System/360 is concerned) can be run on "modern" computers likely to be available or useful to most folks interested in this Virtual AGC Project website.<br></p>
+    <p>That original HAL/S compiler was known as <tt>HAL/S-FC</tt>.&nbsp; Even if it were possible to run that original compiler, it would in any case produce only object code which could be run on an IBM System/360 mainframe, or else on the IBM AP-101S General Purpose Computers (GPC) of the Shuttle itself ... neither of which (with certain provisos insofar as System/360 is concerned) can be run on "modern" computers likely to be available or useful to most folks interested in this Virtual AGC Project website.<br></p>
     <p>Therefore, for the Shuttle flight software to be generally accessible, we instead need modern versions of several HAL/S-related development tools, including at minimum:<br></p>
     <ul>
       <li>A HAL/S compiler.</li>
@@ -1670,8 +1671,7 @@ document.write(headerTemplate.replace("@TITLE@","Modern HAL/S Compiler").replace
               V</tt> are initialized to 16, 5, 5, 5, 6, 6, 62, ..., 1.<br>
             <blockquote> </blockquote>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
-            <meta http-equiv="Content-Type" content="text/html;
-              charset=UTF-8">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></td>
@@ -1751,9 +1751,7 @@ p, li { white-space: pre-wrap; }
 
 
             The HAL/S run-time library functions are documented in the
-            HAL/S documentation, particularly the <a
-              moz-do-not-send="true"
-              href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
+            HAL/S documentation, particularly the <a moz-do-not-send="true" href="Shuttle/HAL_S%20Programmers%20Guide%20Nov%202005.pdf#page=415">"HAL/S
 
 
 
@@ -2829,8 +2827,7 @@ p, li { white-space: pre-wrap; }
             <p>For the other subscripting conventions of HAL/S, namely "<tt>#</tt>" and "<tt>#</tt><tt>±<i>N</i></tt>" to mean the last element in the affected direction and elements relative to it, the code generator performs the trick of replacing <tt>#</tt> by a very large integer (2,000,000,000 at this writing).  The emulator performs the reverse trick of subtracting this constant from very large superscripts, and instead adding the width of the corresponding dimension to the subscript.  This allows the emulator to compute subscript expressions involving <tt>#</tt> without having to provide special software separate from the normal expression software to do so.  However, this limits the maximum width of any dimension of a composite object to half of the large constant.<br></p>
             <p>Note that although in an <tt>ARRAY</tt> of <tt>VECTOR</tt>, <tt>MATRIX</tt>, <tt>BIT</tt> or <tt>CHARACTER</tt> HAL/S visually distinguishes between the <tt>ARRAY</tt> indices and the <tt>VECTOR</tt>/<tt>MATRIX</tt>/<tt>BIT</tt>/<tt>CHARACTER</tt> indices by having a colon (:) between the two groups indices rather than a comma (,), PALMAT makes no such distinction.  Rather, if subscripts are present, it expects the number of subscripts to correspond <i>either</i> to the dimensionality of the <tt>ARRAY</tt> or else to the dimensionality of the <tt>ARRAY</tt> <i>plus</i> the dimensionality of the <tt>VECTOR</tt>/<tt>MATRIX</tt>/<tt>BIT</tt>/<tt>CHARACTER</tt> objects comprising the <tt>ARRAY</tt>.</p>
             <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><!--EndFragment--></p>
-            <meta http-equiv="Content-Type" content="text/html;
-              charset=UTF-8">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></td>
@@ -2942,18 +2939,16 @@ p, li { white-space: pre-wrap; }
         center; text-indent: 0px; text-transform: none; white-space:
         normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width:
         0px; display: inline !important; float: none; background-color:
-        rgb(255, 255, 255);"> This page is available under the <a
-          href="https://creativecommons.org/publicdomain/zero/1.0/">
+        rgb(255, 255, 255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
-      <i><font size="-1">Last modified by <a
-            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+      <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
           2023-03-28<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
-              hosted by ibiblio.org" src="hosted.png" width="300"
-              height="100"></a><br>
+              hosted by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i></center>
     <br>
-  </body>
-</html>
+  
+
+</body></html>
