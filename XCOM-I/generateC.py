@@ -458,7 +458,7 @@ def allocateVariables(scope, extra = None):
                     if not isinstance(initialValue, int):
                         # Not immediately an integer, but perhaps it's an
                         # expression whose value can be computed.  Let's try!
-                        tokenized = xtokenize(initialValue)
+                        tokenized = xtokenize(scope, initialValue)
                         tree = parseExpression(tokenized, 0)
                         if tree != None and "token" in tree and \
                                 "number" in tree["token"]:
@@ -2050,7 +2050,7 @@ def generateC(globalScope):
 # than as a module.  Primarily for testing generation of C code for XPL
 # expressions.
 
-if debug:
+if __name__ == "__main__":
     from xtokenize import xtokenize
     from parseExpression import parseExpression
     scope = { 
@@ -2075,7 +2075,7 @@ if debug:
     print("This test is *very* user-unfriendly in case of syntax errors.")
     while True:
         line = input("Input: ")
-        tokenized = xtokenize(line)
+        tokenized = xtokenize(scope, line)
         # Do a crude check to see if a new variable is being DECLARE'd.
         declaration = False
         for i in range(len(tokenized)):

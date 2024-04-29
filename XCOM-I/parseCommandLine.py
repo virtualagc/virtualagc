@@ -175,6 +175,13 @@ The available OPTIONS are:
 --include=F   Folder to use for XPL/I's "/%INCLUDE ... %/" directives.
               Note that this is relative to the source-code file.
               Defaults to ../HALINCL.
+--source=F    (Default is the folder containing the first XPL source-code file
+              given on the command line.)  Name of the folder from which
+              XPL source-code files (other than those for --include) are drawn
+              by default.
+--output=F    (Default is the base-name of the first XPL source-code file
+              given on the command line.) Name of the folder to store output 
+              files.
 --patch=P     Path to the inline-BAL patch files.  By default, this will
               be the same folder that contains the first XPL source-code
               file specified on the command line.
@@ -184,9 +191,6 @@ The available OPTIONS are:
               times.  In hindsight, it doesn't seem useful.
 --target=L    (Default C) Set the target language for object-code.
               Only C is presently supported.
---output=F    (Default is the base-name of the first XPL source-code file
-              given on the command line.) Name of the folder to store output 
-              files.
 --indent=N    (Default 2) Set the indentation width for C-language source code.
               This is purely cosmetic effect to make it more pleasant to read
               the code output by XCOM-I.
@@ -218,6 +222,8 @@ for parm in sys.argv[1:]:
         condC = True
     elif parm.startswith("--include="):
         includeFolder = parm[10:]
+    elif parm.startswith("--source="):
+        baseSource = parm[9:]
     elif parm.startswith("--patch="):
         baseSource = parm[8:]
     elif parm.startswith("--adhoc="):

@@ -21,6 +21,7 @@ These directives are left unparsed.
 '''
 
 from parseCommandLine import standardXPL
+from auxiliary import getAttributes
 
 # See p. 132 of McKeeman et al.
 breakCharacters = ['_', '@', '#', '$'] 
@@ -105,7 +106,8 @@ digits = {
     "o": set(['0', '1', '2', '3', '4', '5', '6', '7']),
     "q": set(['0', '1', '2', '3']),
     "b": set(['0', '1'])}
-def xtokenize(pseudoStatement):
+def xtokenize(scope, pseudoStatement):
+    isProcedureDefLine = False
     tokens = []
     if pseudoStatement[:2] in ["/?", "/%"]:
         return tokens
@@ -163,9 +165,31 @@ def xtokenize(pseudoStatement):
             if identifier == "MOD":
                 tokens.append({"operator": "mod"})
             elif identifier in reservedWords:
+                if identifier == "PROCEDURE":
+                    isProcedureDefLine = True
                 tokens.append({"reserved": identifier})
-            elif identifier in builtIns:
-                tokens.append({"builtin": identifier})
+            elif identifier in builtIns and not isProcedureDefLine:
+                # Unfortunately, XPL/I appears to allow built-in function names
+                # to also be use as names of variables, and maybe other stuff.
+                # The only example of this I've found so far is `STRING` used
+                # as a PROCEDURE parameter.  Unfortunately, I've discovered 
+                # this when development of XCOM-I is so far advanced that I'm 
+                # not sure how to tack it on with 100% reliability.  My notion 
+                # right now is that *if* the `identifier` has already an 
+                # in-scope symbol, then it really is an "identifier" token. 
+                # We don't have to worry about DECLARE statements, because they 
+                # have their own tokenizer that doesn't care about built-ins, 
+                # but do additionally have to worry about PROCEDURE parameters,
+                # because the appear in the `name: PROCEDURE(parameters)` 
+                # pseudostatement before they are DECLARE's, so that's why this
+                # is conditioned on `isProcedureDefLine`.
+                # Unfortunately, if there's ever a STRING(STRING) in any XPL/I
+                # source, I'm probably sunk!
+                battributes = getAttributes(scope, identifier)
+                if battributes == None: 
+                    tokens.append({"builtin": identifier})
+                else:
+                    tokens.append({"identifier": identifier})
             else:
                 tokens.append({"identifier": identifier})
         # Is this the start of a quoted string?  Recall that quoted strings

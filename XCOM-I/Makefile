@@ -198,5 +198,5 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	Tests/ANALYZER-SKELETON.regression >ANALYZER/out.regression && \
 	diff -s -q ANALYZER/out.regression ANALYZER/out.txt
 	
-	@echo "*** Success! ***"
+	@echo "\n*********** All tests passed! ***********\n"
 	

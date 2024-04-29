@@ -434,7 +434,7 @@ while True:
     scope["pseudoStatements"][len(scope["code"])] = originalPseudoStatement
     scope["lineRefs"][len(scope["code"])] = psRefs[lineNumber]
     scope["lineExpandedText"] = pseudoStatement
-    tokenized = xtokenize(pseudoStatement)
+    tokenized = xtokenize(scope, pseudoStatement)
     scope["tokenized"] = tokenized
     if len(tokenized) == 0:
         continue

@@ -528,8 +528,12 @@ def printTree(root, indent = '', file = sys.stdout):
     for child in root["children"]:
         printTree(child, indent + "\t", file)
     
-# Test code
-if False:
+#----------------------------------------------------------------------------
+# The stuff below is executed only if this file is run as a program, and is
+# not executed if the file is imported as a module.  I wish I had known about
+# this mechanism years ago ....
+
+if __name__ == "__main__":
     from xtokenize import xtokenize
 
     if False:
@@ -550,7 +554,7 @@ if False:
             
         while True:
             expression = input("Input an expression: ")
-            tokenized = xtokenize(expression)
+            tokenized = xtokenize(globalScope, expression)
             for terminal in terminals:
                 matches = terminal[0](tokenized, 0)
                 for amatch in matches:
@@ -560,7 +564,7 @@ if False:
     else:
         while True:
             expression = input("Input an expression: ")
-            tokenized = xtokenize(expression)
+            tokenized = xtokenize(globalScope, expression)
             print("<identifier>?", testIdentifier(tokenized, 0))
             tree = parseExpression(tokenized, 0)
             if tree == None:

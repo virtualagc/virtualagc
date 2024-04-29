@@ -19,7 +19,7 @@ from parseExpression import parseExpression
 
 # Converts strings like decimal, 0x hex, or 0b binary, or even simple 
 # expressions of constants, to integer.
-def integer(s):
+def integer(scope, s):
     try:
         # It turns out that I've sometimes inadvertantly converted the string to 
         # upper case, and I try to catch that here than try to undo the 
@@ -36,7 +36,7 @@ def integer(s):
         else:
             return int(s)
     except:
-        tokenized = xtokenize(s)
+        tokenized = xtokenize(scope, s)
         tree = parseExpression(tokenized, 0)
         if tree != None and "number" in tree["token"]:
             return tree["token"]["number"]
@@ -212,7 +212,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     elif inFirst and token == "(":
                         inTop = True
                     elif inTop:
-                        properties["top"] = integer(token)
+                        properties["top"] = integer(scope, token)
                         inTop = False
                         skip = 1
                     elif inLiterally:
@@ -251,7 +251,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         properties["LITERALLY"] = token
                         inLiterally = False
                     elif inBit:
-                        bitSize = integer(token)
+                        bitSize = integer(scope, token)
                         properties["BIT"] = bitSize
                         if not isBased or inRecord:
                             if bitSize <= 8:
@@ -283,7 +283,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                                         .replace(replacementQuote, "'")
                             elif "BIT" in properties or \
                                     "FIXED" in properties:
-                                token = integer(token)
+                                token = integer(scope, token)
                             else:
                                 error("Datatype cannot have INITIAL", scope)
                             if "top" in properties:
