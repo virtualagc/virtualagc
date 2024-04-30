@@ -2170,6 +2170,11 @@ FREEPOINT(void) {
 }
 
 void
+FREEPOINT2(uint32_t value) {
+  freepoint = value;
+}
+
+void
 TRACE(void) {
   // Intentionally empty.
 }

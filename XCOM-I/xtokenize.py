@@ -39,7 +39,7 @@ builtIns = {
     "ADDR": 1, 
     "BYTE": (1, 2), 
     "CLOCK_TRAP": 2, 
-    "COMPACTIFY": 0, 
+    #"COMPACTIFY": 0, 
     "COREBYTE": 1, 
     "COREWORD": 1, 
     "DATE": 0, 
@@ -72,10 +72,7 @@ builtIns = {
     "PARM_FIELD": 0,
     "STRING": 1,
     "STRING_GT": 2,
-    "ABS": 1,
-    # Not XPL/I extensions per se, but replacements for SPACELIB
-    "RECORD_LINK": 0,
-    "RECORD_TOP": 1
+    "ABS": 1
     }
 if standardXPL:
     builtIns.pop("LINE_COUNT")

@@ -1312,7 +1312,9 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             elif "builtin" in tokenLHS:
                 builtin = tokenLHS["builtin"]
                 children = LHS["children"]
-                if builtin == "COREBYTE":
+                if builtin == "FREEPOINT":
+                    print(indent + "freepoint2(numberRHS);")
+                elif builtin == "COREBYTE":
                     if len(children) == 1:
                         tipe, source = generateExpression(scope, children[0])
                         if tipe != "FIXED":

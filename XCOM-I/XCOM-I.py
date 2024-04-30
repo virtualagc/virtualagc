@@ -402,7 +402,7 @@ while True:
     scope["lineNumber"] = lineNumber
     scope["lineText"] = pseudoStatement
     originalPseudoStatement = pseudoStatement
-    if "_CONDSPMANERR" in pseudoStatement: #***DEBUG***
+    if "MACRO_EXPAN_LEVEL" in pseudoStatement: #***DEBUG***
         pass
         pass
     pseudoStatement = expandAllMacrosInString(scope, \
@@ -427,6 +427,7 @@ while True:
         if c in [";", ":"] or pseudoStatement[max(0,i-4):i+2] in [" THEN ", 
                                                                   " ELSE "]:
             pseudoStatements.insert(lineNumber, ps)
+            psRefs.insert(lineNumber, psRefs[lineNumber])
             pseudoStatement = pseudoStatement[i+1:].lstrip()
             pseudoStatements[lineNumber + 1] = pseudoStatement
             ps = ''
@@ -513,7 +514,7 @@ while True:
         scope = scope["parent"]
     elif "identifier" in tokenized[0] or ("builtin" in tokenized[0] and \
         tokenized[0]["builtin"] in ["OUTPUT", "COREWORD", "COREBYTE", "FILE",
-                                    "BYTE", "FREELIMIT"]):
+                                    "BYTE", "FREELIMIT", "FREEPOINT"]):
         # Other than a label (already processed above), the only thing
         # that begins with an identifier appears to be an assignment
         # statement.

@@ -343,6 +343,9 @@ uint32_t
 FREEPOINT(void);
 
 void
+FREEPOINT2(uint32_t value);
+
+void
 TRACE(void);
 
 void
