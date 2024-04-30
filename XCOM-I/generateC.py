@@ -1052,7 +1052,7 @@ def generateExpression(scope, expression):
 lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
 inlineCounter = 0
-def generateSingleLine(scope, indent, line, indexInScope):
+def generateSingleLine(scope, indent, line, indexInScope, ps = None):
     global forLoopCounter, lineCounter, inlineCounter, errxitRef
     errxitRef = scope["lineRefs"][indexInScope]
     lineCounter += 1
@@ -1070,6 +1070,10 @@ def generateSingleLine(scope, indent, line, indexInScope):
                     print(indent + "break;")
                 print(indent0 + "case %d:" % parent["switchCounter"])
                 parent["switchCounter"] += 1
+                if ps != None:
+                    print(indent + "// " + \
+                          ps.replace(replacementQuote, "''") \
+                          + (" (%d)" % lineCounter))
             if parent["ifCounter"] > 0:
                 parent["ifCounter"] -= 1
             if "IF" in line or "ELSE" in line:
@@ -1443,7 +1447,7 @@ def generateSingleLine(scope, indent, line, indexInScope):
         print(indent + "do {")
         line["scope"]["afterEndOfScope"] = "while (!(1 & (" + source + ")));"
     elif "BLOCK" in line:
-        print(indent + "{")
+        print(indent + "{ r%s: ; " % line["scope"]["symbol"])
     elif "IF" in line:
         tipe, source = generateExpression(scope, line["IF"])
         if (tipe == "BIT"):
@@ -1573,9 +1577,39 @@ def generateSingleLine(scope, indent, line, indexInScope):
         tipe, source = generateExpression(scope, line["CASE"])
         if tipe != "FIXED":
             tipe, source = autoconvert(tipe, ["FIXED"], source)
-        print(indent + "switch (" + source + ") {")
+        print(indent + "{ r%s: switch (" % line["scope"]["symbol"] + source + ") {")
         scope["switchCounter"] = 0
         scope["ifCounter"] = 0
+    elif "ESCAPE" in line:
+        blockType = scope["blockType"]
+        whereTo = line["ESCAPE"]
+        if whereTo == None:
+            if blockType in ["DO block"]:
+                print(indent + "goto e%s;" % scope["symbol"])
+            else: # Looping blocks.
+                print(indent + "break;")
+        else:
+            bscope = scope;
+            while "label" not in bscope or bscope["label"] != whereTo:
+                bscope = bscope["parent"]
+                if bscope == None:
+                    errxit("DO ... END block labeled %s not found" % whereTo)
+            print(indent + "goto e%s;" % bscope["symbol"])
+    elif "REPEAT" in line:
+        blockType = scope["blockType"]
+        whereTo = line["REPEAT"]
+        if whereTo == None:
+            if blockType in ["DO block", "DO CASE block"]:
+                print(indent + "goto r%s;" % scope["symbol"])
+            else: # Looping blocks
+                print(indent + "continue;")
+        else:
+            bscope = scope;
+            while "label" not in bscope or bscope["label"] != whereTo:
+                bscope = bscope["parent"]
+                if bscope == None:
+                    errxit("DO ... END block labeled %s not found" % whereTo)
+            print(indent + "goto r%s;" % bscope["symbol"])
     else:
         print(indent + "Unimplemented:", end="", file=debugSink)
         printDict(line)
@@ -1716,15 +1750,19 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     lastReturned = False
     numCode = len(scope["code"])
     for i in range(numCode):
+        ps = None
         line = scope["code"][i]
         if verbose and i in scope["pseudoStatements"] and \
                 None == re.search("\\bCALL +INLINE *\\(", \
                                   scope["pseudoStatements"][i].upper()):
-            print(indent + "// " + \
-                  scope["pseudoStatements"][i].replace(replacementQuote, "''") \
-                  + (" (%d)" % lineCounter))
+            if scope["parent"] != None and "switchCounter" in scope["parent"]:
+                ps = scope["pseudoStatements"][i]
+            else:
+                print(indent + "// " + \
+                      scope["pseudoStatements"][i].replace(replacementQuote, "''") \
+                      + (" (%d)" % lineCounter))
         lastReturned = "RETURN" in line
-        generateSingleLine(scope, indent, line, i)
+        generateSingleLine(scope, indent, line, i, ps)
         if "scope" in line: # Code for an embedded DO...END block.
             generateCodeForScope(line["scope"], { "of": of, "indent": indent} )
     
@@ -1758,11 +1796,19 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         print(indent + indentationQuantum + \
               "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")
         print(indent + "return 0; // Just in case ...")
+    if "label" in scope and "blockType" in scope and \
+            scope["blockType"] not in ["DO block", "DO CASE block"]:
+        print(indent + "if (0) { r%s: continue; e%s: break; } // block labeled %s" % \
+              (scope["symbol"], scope["symbol"], scope["label"]))
+    elif "blockType" in scope and scope["blockType"] == "DO block":
+        print(indent + "e%s: ;" % scope["symbol"])
     indent = indent[:-len(indentationQuantum)]
     print(indent + "}", end="")
     if "afterEndOfScope" in scope:
-        print(indent + scope["afterEndOfScope"], end="")
+        print(' ' + scope["afterEndOfScope"], end="")
     if "blockType" in scope:
+        if scope["blockType"] == "DO CASE block":
+            print("}", end="")
         print(" // End of " + scope["blockType"])
     else:
         print()

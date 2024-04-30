@@ -51,6 +51,66 @@ def error(msg, scope):
                       file = sys.stderr)
             scope = scope["parent"]
 
+# This is a simplified tokenizer used only for macro replacement. Given `string`,
+# It returns a list of strings representing the tokens.  The possibilities for
+# tokens are:
+#    A quoted string (single quotes)
+#    An identifier. ([a-zA-Z0-9_#@$]+ but not with a leading digit).
+#    A number (i.e., a set of digits, possibly prefixed by "0x", "0q", "0b", "0o".
+#    any punctuation.
+# The identifiers, possibly followed by "(", ..., ")" are the potential
+# macro replacements. The tokens can be rejoined by " ".join(...), possibly 
+# with different numbers of spaces outside of quoted strings.
+digits = {
+    "b": "01",
+    "q": "0123",
+    "o": "01234567",
+    "": "0123456789",
+    "x": "0123456789ABCDEFabcdef"
+    }
+idChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_#@$"
+def mtokenize(string):
+    tokens = []
+    inside = 0 # 0 nothing, 1 quote, 2 identifier, 3 number
+    i = 0
+    radix = ''
+    while i < len(string):
+        c = string[i]
+        i += 1
+        if inside == 1:
+            tokens[-1] = tokens[-1] + c
+            if c == "'":
+                inside = 0
+        elif inside == 2:
+            if c in idChars:
+                tokens[-1] = tokens[-1] + c.upper()
+            else:
+                inside = 0
+                i -= 1
+                continue
+        elif inside == 3:
+            if len(tokens[-1]) == 1 and c in digits:
+                radix = c;
+                tokens[-1] = tokens[-1] + c
+            elif c in digits[radix]:
+                tokens[-1] = tokens[-1] + c
+            else:
+                inside = 0
+                i -= 1
+                continue
+        else: # inside = 0
+            if c == "'":
+                inside = 1
+            elif c.isdigit():
+                radix = ''
+                inside = 3
+            elif c in idChars:
+                inside = 2
+                c = c.upper()
+            if c != " ":
+                tokens.append(c)
+    return tokens
+
 # It is clear that macro expansion in strings within a given scope
 # can involve all macros DECLARE'd in the current scope, as well as all
 # macros DECLARE'd in ancestor scopes.  Furthermore, it is clear that
@@ -67,6 +127,10 @@ def error(msg, scope):
 def expandOneMacroInString(scope, string):
     # We have to split the string into quoted portions and non-quoted
     # portions.
+    if "_CONDSPMANERR" in string: #***DEBUG***
+        pass
+        pass
+    mtokens = mtokenize(string)
     delimiters = ["'", '"']
     inQuote = False
     delimiter = ''
@@ -92,82 +156,52 @@ def expandOneMacroInString(scope, string):
             continue
         # Loop on current scope and all ancestors.
         while True:
-            # Loop on all macros DECLARE'd in the scope.
+            # Loop on all macros DECLARE'd within the scope.
             #if not isinstance(scope, dict):
             #    print(scope)
             for symbol in scope["literals"]:
+                if symbol not in mtokens:
+                    continue
+                if "_CONDSPMANERR" == symbol and "_CONDSPMANERR" in s:
+                    pass #***DEBUG***
+                    pass
                 attributes = scope["literals"][symbol]
-                # In trying to make a regex pattern that can match possible
-                # identifiers, the temptation is to use the word-boundary
-                # zero-assertion, as in '\\b'+symbol+'\\b'.  The problem is
-                # that an identifier can begin or end with one of the symbols
-                # $ # @, and any of those will cause the \b test to fail.
-                # we must instead construct much more complex zero assertions
-                # to cover this case.  (Google for negative lookahead and
-                # negative lookbehind.)
-                pattern = "(?<![A-Za-z0-9_#@$])" + symbol + "(?![A-Za-z0-9_#@$])"
-                if "top" not in attributes: # Macro has no parameters!
-                    # This is the easy case, since all occurrences of the
-                    # symbol can simply be replaced by the same thing.
-                    replacement = attributes["LITERALLY"]
-                    newString = re.sub(pattern, replacement, s, \
-                                       flags = re.IGNORECASE)
-                else:
-                    # The macro has parameters.  This is a lot harder case
-                    # to deal with.  We have to process with each occurrence of
-                    # "symbol(...parameters...) separately, in succession.
-                    rFields = re.split(pattern, s, \
-                                       flags = re.IGNORECASE)
-                    for ir in range(1, len(rFields)):
-                        rField = rFields[ir]
-                        ic = 0 # Index of the leading '('.
-                        while ic < len(rField) and rField[ic] == ' ':
-                            ic += 1
-                        # We need to parse the parameters of the symbol.
-                        # If there was no list of parameters, then we can't
-                        # replace anything.
-                        if ic >= len(rField) or rField[ic] != '(':
-                            rFields[ir] = symbol + rField
-                            continue
-                        parameters = [None] # parameters[0] is ignored.
-                        parameterDepth = 1
-                        inQuote = False
-                        ic0 = ic + 1
-                        done = -1 # Index following the trailing ')'.
-                        for ic in range(ic0, len(rField)):
-                            c = rField[ic]
-                            if c == "'":
-                                inQuote = not inQuote
-                            elif inQuote:
-                                pass
-                            elif c == "," and parameterDepth == 1:
-                                parameters.append(rField[ic0 : ic].strip())
-                                ic0 = ic + 1
-                            elif c == "(":
-                                parameterDepth += 1
-                            elif c == ")":
-                                parameterDepth -= 1
-                                if parameterDepth == 0:
-                                    parameters.append(rField[ic0 : ic].strip())
-                                    done = ic + 1
+                # Found!  Let's determine the parameters:
+                found = mtokens.index(symbol)
+                end = found + 1
+                parameters = []
+                parmDepth = 0
+                if "top" in attributes:
+                    if found + 1 < len(mtokens) and mtokens[found + 1] == "(":
+                        parmDepth = 1
+                        parameters = [""]
+                        for end in range(found + 2, len(mtokens)):
+                            mtoken = mtokens[end]
+                            if mtoken == "(":
+                                parameters[-1] = parameters[-1] + mtoken
+                                parmDepth += 1
+                            elif mtoken == ")":
+                                parmDepth -= 1
+                                if parmDepth >= 1:
+                                    parameters[-1] = parameters[-1] + mtoken
+                                elif parmDepth == 0:
+                                    end += 1
                                     break
-                        # If not `done`, then the parameter list wasn't 
-                        # completed, and we can't replace anything.
-                        if done < 0:
-                            rFields[ir] = symbol + rField
-                            continue
-                        replacement = attributes["LITERALLY"]
-                        for ip in range(1, len(parameters)):
-                            replacement = replacement.replace("%%%d%%" % ip, \
-                                                              parameters[ip])
-                        rFields[ir] = replacement + rField[done:]
-                    newString = ''.join(rFields)
-                    if False and newString != s:
-                        print("A ............. %s" % s)
-                        print("B ............. %s" % newString)
-                if newString != s:
-                    fields[i] = newString
-                    return ''.join(fields) # Replaced something!
+                            elif mtoken == "," and parmDepth == 1:
+                                parameters.append[""]
+                            else:
+                                parameters[-1] = parameters[-1] + mtoken
+                        if parameters[-1] == "":
+                            parameters.pop()
+                # At this point, `parameters` contains the parameters, 
+                # and after replacement, the macro will occupy what was 
+                # formerly mtokens[found:end], with mtokens outside that range
+                # being unaffected.
+                replacement = attributes["LITERALLY"]
+                for k in range(len(parameters)):
+                    replacement = replacement.replace("%" + "%d" % (k+1) + "%", parameters[k])
+                newString = " ".join(mtokens[:found] + [replacement] + mtokens[end:])
+                return newString
             if scope["parent"] == None: # No parent?
                 break
             scope = scope["parent"]
@@ -352,3 +386,12 @@ def printModel(scope, extra = None):
                 children = children + " " + child["symbol"]
             print(indent1 + children, file=debugSink)
     return None
+
+#----------------------------------------------------------------------------
+# The stuff below is executed only if this file is run as a program, rather
+# rather than if the file is imported as a module.
+
+if __name__ == "__main__":
+    for parm in sys.argv[1:]:
+        print(parm, "->")
+        print(mtokenizer(parm))

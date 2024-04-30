@@ -144,6 +144,8 @@ Usage:
 The available OPTIONS are:
 
 --help        Print this info.
+--            If this is found, it means to skip the entire remainder of the
+              command line.
 --xpl         Try to compile standard XPL rather than XPL/I.  This switch
               is seldom needed, and doesn't accomplish much when it's
               used.  Basically, all it can do is disable certain XPL/I
@@ -200,6 +202,7 @@ The available OPTIONS are:
 --concise     in the generated C source code, useful for debugging, or just for
               improved human readability.  Whereas the --concise switch instead
               eliminates those extra comments, producing smaller C file sizes.
+-             Causes all the remainder of the command line to be ignored.
 '''
 #--null=N      (Default 1) Selects from among several alternative
 #              implementations for empty strings, because the surviving
@@ -207,7 +210,9 @@ The available OPTIONS are:
 #              At present, only implementations 0 and 1 are available.
 
 for parm in sys.argv[1:]:
-    if parm == "--help":
+    if parm == "--":
+        break
+    elif parm == "--help":
         print(helpMsg, file = sys.stderr)
         sys.exit(0)
     elif parm == "--xpl":

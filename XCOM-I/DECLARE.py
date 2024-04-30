@@ -41,7 +41,7 @@ def integer(scope, s):
         if tree != None and "number" in tree["token"]:
             return tree["token"]["number"]
         else:
-            error("Cannot evaluate array size %s" % token, scope)
+            error("Cannot evaluate %s as an integer" % s, scope)
 
 
 # Returns False on success, True on fatal error.  Parameters:

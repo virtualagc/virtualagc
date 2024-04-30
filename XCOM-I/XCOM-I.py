@@ -35,6 +35,7 @@ from DO import DO
 from IF import IF
 from RETURN import RETURN
 from CALL import CALL
+from ESCAPEorREPEAT import ESCAPEorREPEAT
 from generateC import generateC
 
 logicalNot = '¬'
@@ -401,6 +402,9 @@ while True:
     scope["lineNumber"] = lineNumber
     scope["lineText"] = pseudoStatement
     originalPseudoStatement = pseudoStatement
+    if "_CONDSPMANERR" in pseudoStatement: #***DEBUG***
+        pass
+        pass
     pseudoStatement = expandAllMacrosInString(scope, \
                                               pseudoStatement)
     # It's entirely possible that the macro expansions above could have
@@ -523,7 +527,12 @@ while True:
         else:
             symbol = scope["symbol"]
         symbol = symbol + "_%d" % scope["blockCount"]
+        label = None
+        if len(scope["code"]) > 0 and "TARGET" in scope["code"][-1]:
+            label = scope["code"][-1]["TARGET"]
         scope = createNewScope(symbol, scope)
+        if label != None:
+            scope["label"] = label
         if DO(tokenized, scope):
             error("Problem in DO", scope)
     elif reserved0 == "IF":
@@ -553,6 +562,9 @@ while True:
             error("Problem in CALL", scope)
     elif tokenized[0] == ";":
         scope["code"].append({"EMPTY": True})
+    elif reserved0 in ["ESCAPE", "REPEAT"]:
+        if ESCAPEorREPEAT(tokenized, scope):
+            error ("Problem with ESCAPE or REPEAT", scope)
     else:
         #print(tokenized)
         error("Unimplemented", scope)

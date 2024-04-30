@@ -30,7 +30,8 @@ reservedWords = {"BIT", "BY", "CALL", "CASE", "CHARACTER", "DO",
                      "GOTO", "IF", "INITIAL", "LABEL", "LITERALLY", "MOD",
                      "PROCEDURE", "RETURN", "THEN", "TO", "WHILE",
                      # XPL/I:
-                     "COMMON", "UNTIL", "ARRAY", "BASED", "RECORD", "DYNAMIC"}
+                     "COMMON", "UNTIL", "ARRAY", "BASED", "RECORD", "DYNAMIC",
+                     "ESCAPE", "REPEAT"}
 # See pp. 140-142 of McKeeman et al.  For `builtIns`, the key values are
 # the number of parameters accepted by the function; if the number of parameters
 # is variable, then the value is a tuple of the allowed numbers of parameters.
@@ -90,6 +91,8 @@ if standardXPL:
     reservedWords.remove("BASED")
     reservedWords.remove("RECORD")
     reservedWords.remove("DYNAMIC")
+    reservedWords.remove("ESCAPE")
+    reservedWords.remove("REPEAT")
 # See p. 138 of McKeeman et al.  These are just the leading (non-alpha) 
 # characters of (potentially multi-character) operator names.
 operatorLeadins = {"|", "&", "~", "=", "<", ">", "+", "-", "*", "/", ".", "^"}
