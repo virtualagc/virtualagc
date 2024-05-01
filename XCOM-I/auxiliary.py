@@ -191,7 +191,7 @@ def expandOneMacroInString(scope, string):
                                     end += 1
                                     break
                             elif mtoken == "," and parmDepth == 1:
-                                parameters.append[""]
+                                parameters.append("")
                             else:
                                 parameters[-1] = parameters[-1] + mtoken
                         if parameters[-1] == "":
