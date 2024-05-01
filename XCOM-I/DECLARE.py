@@ -12,7 +12,7 @@ Mods:       2024-03-07 RSB  Began experimenting with this concept.
 
 import copy
 import re
-from auxiliary import error, expandAllMacrosInString
+from auxiliary import error, expandAllMacrosInString, mtokenize
 from parseCommandLine import pfs, condA, condC, replacementSpace, replacementQuote
 from xtokenize import xtokenize
 from parseExpression import parseExpression
@@ -66,33 +66,11 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
     while keepGoing:
         keepGoing = False
         passCount += 1
-    
-        #print("Processing declaration: %s" % pseudoStatement)
-        # Let's temporarily replace all spaces inside quoted strings 
-        # with the otherwise-unused character `replacmentSpace`.  That'll help 
-        # us split the pseudo-statement into fields, after which we can 
-        # restore those spaces.  Note that the calling code has already 
-        # replaced all single-quotes inside of quoted strings by the 
-        # character `replacementQuote`, so we can split on single-quotes 
-        # without fear.
-        fields = pseudoStatement.split("'")
-        for i in range(0, len(fields), 2):
-            fields[i] = fields[i].replace(",", " , ")
-            fields[i] = fields[i].replace(";", " ; ")
-            fields[i] = fields[i].replace(":", " : ")
-            fields[i] = fields[i].replace("(", " ( ")
-            fields[i] = fields[i].replace(")", " ) ")
-            fields[i] = fields[i].replace("  ", " ")
-        for i in range(1, len(fields), 2):
-            fields[i] = fields[i].replace(" ", replacementSpace)
-        pseudoStatement = "'".join(fields)
-        fields = pseudoStatement.strip().split()
+        
+        fields = mtokenize(pseudoStatement)
         if inRecord:
             fields.insert(0, "DECLARE")
-        #print(fields)
         fields0 = fields[0]
-        if not fields0[:1].isdigit():
-            fields0 = fields0.upper()
         
         # At this point, I hope, the entire pseudo-statement should be  
         # nicely split up at spaces, commas, semicolons, and 
@@ -212,9 +190,16 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     elif inFirst and token == "(":
                         inTop = True
                     elif inTop:
-                        properties["top"] = integer(scope, token)
-                        inTop = False
-                        skip = 1
+                        if token != ")":
+                            if True:
+                                properties["top"] = integer(scope, token)
+                            else:
+                                if "top" not in properties:
+                                    properties["top"] = token
+                                else:
+                                    properties["top"] = properties["top"] + " " + token
+                        else:
+                            inTop = False
                     elif inLiterally:
                         # The following line fixes up things like
                         #     LITERALLY '"1234"'
@@ -283,7 +268,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                                         .replace(replacementQuote, "'")
                             elif "BIT" in properties or \
                                     "FIXED" in properties:
-                                token = integer(scope, token)
+                                #token = integer(scope, token)
+                                pass
                             else:
                                 error("Datatype cannot have INITIAL", scope)
                             if "top" in properties:

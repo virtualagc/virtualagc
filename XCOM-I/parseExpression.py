@@ -295,7 +295,7 @@ def isPrimary(tokenized, start):
 Neither <string> nor <number> have rules; they're just tokens.
 '''
 def isConstant(tokenized, start):
-    if start > len(tokenized):
+    if start >= len(tokenized):
         return []
     token = tokenized[start]
     if "string" in token or "number" in token:
@@ -375,7 +375,7 @@ def isSubscriptHead(tokenized, start):
             break
         expression = expressions[0]
         start = expression["end"]
-        if start > len(tokenized) or tokenized[start] != ",":
+        if start >= len(tokenized) or tokenized[start] != ",":
             break
         start += 1
         attachChild(newRoot, expression)
