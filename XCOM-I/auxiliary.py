@@ -32,7 +32,10 @@ def error(msg, scope):
                           .replace(replacementQuote, "''")
                           .replace(replacementSpace, " ")), file = sys.stderr)
     if briefErrors:
-        print("%s: %s" % (msg, scope["lineText"]), file = sys.stderr)
+        if scope != None:
+            print("%s: %s" % (msg, scope["lineText"]), file = sys.stderr)
+        else:
+            print("%s" % msg, file = sys.stderr)
     else:
         first = True
         print("Error: %s" % msg, file = sys.stderr)

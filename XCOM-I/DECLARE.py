@@ -17,12 +17,28 @@ from parseCommandLine import pfs, condA, condC, replacementSpace, replacementQuo
 from xtokenize import xtokenize
 from parseExpression import parseExpression
 
+# Tries to evaluate a constant expression, given as a string, at compile-time.  
+# Returns tipe,value, where tipe is "FIXED", "CHARACTER", or None.
+def evalString(scope, s):
+    tokenized = xtokenize(scope, s)
+    tree = parseExpression(tokenized, 0)
+    if tree == None:
+        return None, None
+    if "number" in tree["token"]:
+        return "FIXED", tree["token"]["number"]
+    if "string" in tree["token"]:
+        value = tree["token"]["string"] \
+            .replace(replacementSpace, " ")\
+            .replace(replacementQuote, "'")
+        return "CHARACTER", value
+    return None
+
 # Converts strings like decimal, 0x hex, or 0b binary, or even simple 
 # expressions of constants, to integer.
 def integer(scope, s):
     try:
         # It turns out that I've sometimes inadvertantly converted the string to 
-        # upper case, and I try to catch that here than try to undo the 
+        # upper case, and I try to catch that here rather than try to undo the 
         # case changes somewhere upstream.
         s = s.lower()
         if s.startswith("0x"):
@@ -36,10 +52,16 @@ def integer(scope, s):
         else:
             return int(s)
     except:
-        tokenized = xtokenize(scope, s)
-        tree = parseExpression(tokenized, 0)
-        if tree != None and "number" in tree["token"]:
-            return tree["token"]["number"]
+        tipe, value = evalString(scope, s)
+        if tipe == "FIXED":
+            return value
+        elif False:
+            tokenized = xtokenize(scope, s)
+            tree = parseExpression(tokenized, 0)
+            if tree != None and "number" in tree["token"]:
+                return tree["token"]["number"]
+            else:
+                error("Cannot evaluate %s as an integer" % s, scope)
         else:
             error("Cannot evaluate %s as an integer" % s, scope)
 
@@ -95,8 +117,12 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
         if fields0 in ["ARRAY", "BASED"]:
             attributes.append(fields0)
         group = []
-        for n in range(1, len(fields)):
+        n = 0
+        properties = { }
+        while n < len(fields) - 1:
+            n += 1
             field = fields[n]
+            
             if not field[:1].isdigit() and not field[:1] == "'":
                 field = field.upper()
             if inArray == 1:
@@ -165,9 +191,20 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
             elif field in ["INITIAL", "CONSTANT"]:
                 inInitial = True
                 attributes.append(field)
+                initialString = ''
+                initial = []
+                typeInitial = field
             elif field == ")" and inInitial:
                 inInitial = False
                 attributes.append(field)
+                if initialString != '':
+                    tipe, value = evalString(scope, initialString)
+                    if tipe != None:
+                        initial.append(value)
+                    else:
+                        error("Cannot evaluate %d" % initialString, scope)
+                    initialString = ''
+                properties[typeInitial] = initial
             elif field in [",", ";", ":"] and not inInitial:
                 properties = { }
                 if isCommon:
@@ -189,16 +226,12 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         skip -= 1
                     elif inFirst and token == "(":
                         inTop = True
+                        topString = ''
                     elif inTop:
                         if token != ")":
-                            if True:
-                                properties["top"] = integer(scope, token)
-                            else:
-                                if "top" not in properties:
-                                    properties["top"] = token
-                                else:
-                                    properties["top"] = properties["top"] + " " + token
+                            topString += " " + token
                         else:
+                            properties["top"] = integer(scope, topString)
                             inTop = False
                     elif inLiterally:
                         # The following line fixes up things like
@@ -248,36 +281,28 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         inBit = False
                         skip = 1
                     elif inInitial:
-                        if token == ",":
-                            pass
-                        elif token == ")":
-                            properties[typeInitial] = initial
-                            initial = None
-                            inInitial = False
-                        else:
-                            if "CHARACTER" in properties:
-                                # I don't know if it was possible back in the
-                                # day, but I conceive of the initializer being
-                                # an integer, in which case we need to promote
-                                # it to a string.
-                                if token.isdigit():
-                                    pass
+                        if token in [",", ")"]:
+                            if initialString != '':
+                                tipe, value = evalString(scope, initialString)
+                                if tipe != None:
+                                    initial.append(value)
                                 else:
-                                    token = token[1:-1]\
-                                        .replace(replacementSpace, " ")\
-                                        .replace(replacementQuote, "'")
-                            elif "BIT" in properties or \
-                                    "FIXED" in properties:
-                                #token = integer(scope, token)
-                                pass
-                            else:
-                                error("Datatype cannot have INITIAL", scope)
-                            if "top" in properties:
-                                if initial == None:
-                                    initial = []
-                                initial.append(token)
-                            else:
-                                initial = token
+                                    error("Cannot evaluate %d" % \
+                                          initialString, scope)
+                                initialString = ''
+                            if token == ")":
+                                properties[typeInitial] = initial
+                                initial = None
+                                inInitial = False
+                        else:
+                            initialString += " " + token
+                            if False:
+                                if "top" in properties:
+                                    if initial == None:
+                                        initial = []
+                                    initial.append(token)
+                                else:
+                                    initial = token
                     elif token == "LITERALLY":
                         inLiterally = True
                         properties["LITERALLY"] = True
@@ -287,6 +312,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         skip = 1
                     elif token in ["INITIAL", "CONSTANT"]:
                         inInitial = True
+                        initialString = ''
+                        initial = []
                         typeInitial = token
                         skip = 1
                     elif token in ["CHARACTER", "FIXED", "LABEL", "ARRAY",

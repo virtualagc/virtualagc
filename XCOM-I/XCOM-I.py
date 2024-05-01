@@ -267,8 +267,9 @@ while True:
             inHex = False
             for ih in range(hexStart, len(pseudoStatement)):
                 if pseudoStatement[ih] not in digits["x"]:
-                    error("Non-hex digit(s) in \"%s\"" % \
-                          pseudoStatement[hexStart:], None)
+                    error("Non-digit (%s) in double-quoted string" % \
+                          pseudoStatement[ih], None)
+                    sys.exit(1)
             c = ''
     elif inBase:
         if c == ")":
