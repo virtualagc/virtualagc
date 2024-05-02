@@ -147,9 +147,49 @@ if __name__ == "__main__":
                   (errorCount, filename))
             aborted.append(filename)
             return
-        # Now remove "modern" comments if requested.
+        # Now remove "modern" comments if requested.  Headers for *.hal are
+        # presently undetermined, and thus not yet supported.
         if remove:
-            pass
+            wasHeader = False
+            if len(ba) >= 6 and ba[0] == ord(' ') and ba[1] == ord('/') and \
+                    ba[2] == ord('*') and ba[3] == ord('@'):
+                # This is the kind of header expected for *.xpl files.
+                wasHeader = True
+                found = False
+                for i in range(5, len(ba)):
+                    if found:
+                        if ba[i] in [ord(' '), ord('\r')]:
+                            continue
+                        elif ba[i] == ord('\n'):
+                            i += 1
+                            break
+                        break
+                    elif ba[i] == ord('/') and ba[i-1] == ord('*'):
+                        found = True
+                # At this point, i points to the next character after the 
+                # header.
+                ba = ba[i:]
+            elif len(ba) >= 2 and \
+                    ba[0] == ord('*') and ba[1] == ord('/'):
+                # This is the kind of header expected for *.bal files.
+                wasHeader = True
+                while len(ba) >= 2 and \
+                        ba[0] == ord('*') and ba[1] == ord('/'):
+                    for i in range(3, len(ba)):
+                        if ba[i] == ord('\n'):
+                            i += 1
+                            break
+                    ba = ba[i:]
+            if wasHeader:
+                # Check for blank line after header
+                for i in range(len(ba)):
+                    if ba[i] in [ord(' '), ord('\r')]:
+                        continue
+                    if ba[i] == ord('\n'):
+                        ba = ba[i + 1:]
+                        break
+                    break
+
         # Now recode.
         if target == "ASCII":
             pass # Already correct, no changes needed.
@@ -239,9 +279,8 @@ if __name__ == "__main__":
             print("                 NOTE: --target overrides this option, so")
             print("                 make sure it *follows* --target on the")
             print("                 command line.")
-            print("    --remove     Causes removal of modern comments.  By")
-            print("                 default, modern comments are retained.")
-            print("                 (Not yet implemented.)")
+            print("    --remove     Removes file headers added by the Virtual")
+            print("                 AGC Project.  By default, these kept.")
             print("    --file=F     The requests conversion of a single file")
             print("                 rather than an entire folder.  The output")
             print("                 is to a file of the same name, but")
