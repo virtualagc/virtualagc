@@ -35,6 +35,16 @@ def my_print(*args, **kwargs):
 builtins.print = my_print
 '''
 
+# `newHex` affects the algorithm for replacing "..." by numbers.  If False, then
+# my original method is to replace numbers in non-decimal bases by tokens like
+# 0x..., 0q..., 0o..., and 0b....  However, I found that that broke the weird
+# `XSET` macro in HAL/S-FC source code, which can precede either decimal numbers
+# or double-quoted strings, but gets confused if preceding something like 0x....
+# The new algorithm simply replaces the double-quoted string by their decimal-
+# number equivalents immediately. I'll likely want to just eliminate the old
+# algorithm at some point.
+newHex = True # ***DEBUG***
+
 pfs = True
 condA = False
 condC = False
@@ -144,6 +154,7 @@ Usage:
 The available OPTIONS are:
 
 --help        Print this info.
+--old-hex     (For ***DEBUG*** only.
 --            If this is found, it means to skip the entire remainder of the
               command line.
 --xpl         Try to compile standard XPL rather than XPL/I.  This switch
@@ -212,6 +223,8 @@ The available OPTIONS are:
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm == "--old-hex": # ***DEBUG***
+        newHex = False
     elif parm == "--help":
         print(helpMsg, file = sys.stderr)
         sys.exit(0)

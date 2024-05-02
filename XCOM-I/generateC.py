@@ -25,17 +25,19 @@ debug = False # Standalone interactive test of expression generation.
 
 # Just for engineering
 errxitRef = 0
-def errxit(msg, expression = None):
+def errxit(msg, action="abend"):
     print("%s: %s" % \
           (lineRefs[errxitRef], 
            lines[errxitRef].strip()
                           .replace(replacementQuote, "''")
                           .replace(replacementSpace, " ")), file = sys.stderr)
     print(msg, file=sys.stderr)
-    #if expression != None:
-    #    print(expression, file=sys.stderr)
-    sys.exit(1)
-    
+    if action == "abend":
+        sys.exit(1)
+    elif action == "return":
+        return
+    print("Unknown action (%s) requested", file = sys.stderr)
+    sys.exit(2)
 
 '''
 Notes on the Translation of XPL or XPL/I Entities to C
@@ -301,7 +303,11 @@ def allocateVariables(scope, extra = None):
         putFIXED(address, descriptor)
         # Encode the string's character data as an EBCDIC Python byte array.
         for i in range(length):
-            memory[saddress + i] = asciiToEbcdic[ord(s[i])]
+            try: ##***DEBUG***
+                memory[saddress + i] = asciiToEbcdic[ord(s[i])]
+            except:
+                errxit("Memory overflow (%06X,%d) or else illegal character in \"%s\"" %\
+                       (saddress, i, s))
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
@@ -749,6 +755,7 @@ def generateOperation(scope, expression):
 #
 #    String containing the generated code.
 #
+# In case of error, some kinds return None,None while others abort execution.
 def generateExpression(scope, expression):
     source = ""
     tipe = "INDETERMINATE" # Recall that `type` is a reserved word in Python.
@@ -899,6 +906,8 @@ def generateExpression(scope, expression):
                         if tipei == "BIT":
                             tipei = "FIXED"
                             index = "bitToFixed(%s)" % index
+                        if tipei != "FIXED":
+                            errxit("Array index can't be computed or not integer")
                     baseAddress = str(attributes["address"])
                     if "BASED" in attributes:
                         baseAddress = "getFIXED(%s)" % baseAddress
@@ -923,7 +932,8 @@ def generateExpression(scope, expression):
                                  index + ")"
                     return tipe, source
             else:
-                errxit("Unknown variable %s" % symbol)
+                errxit("Unknown variable %s" % symbol, action="return")
+                return None,None
         else:
             symbol = token["builtin"]
             # Many builtins.
@@ -1413,8 +1423,13 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             errxit("Subscripted loop variables not supported.")
         attributes = getAttributes(scope, variable)
         address = attributes["address"]
-        if "FIXED" not in attributes:
-            errxit("Loop counter is not FIXED.")
+        if "FIXED" in attributes:
+            counterType = "FIXED"
+        elif "BIT" in attributes:
+            counterType = "BIT"
+            bitWidth = attributes["BIT"]
+        else:
+            errxit("Loop counter is not FIXED or BIT(n).")
         print(indent2 + "int32_t %s, %s, %s;" % (fromName, toName, byName))
         tipe, source = generateExpression(scope, line["from"])
         if (tipe == "BIT"):
@@ -1431,10 +1446,25 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             tipe = "FIXED"
             source = "bitToFixed(" + source + ")"
         print(indent2 + byName + " = " + source + ";")
-        print((indent2 + "for (putFIXED(%d, %s);\n" + \
-               indent2 + "     getFIXED(%d) <= %s;\n" + \
-               indent2 + "     putFIXED(%d, getFIXED(%d) + %s)) {" ) \
-              % (address, fromName, address, toName, address, address, byName))
+        if counterType == "FIXED":
+            print((indent2 + "for (putFIXED(%d, %s);\n" + \
+                   indent2 + "     getFIXED(%d) <= %s;\n" + \
+                   indent2 + "     putFIXED(%d, getFIXED(%d) + %s)) {" ) \
+                  % (address, fromName, address, toName, address, address, byName))
+        else: # counterType == "BIT"
+            print(indent2 + \
+              "for (putBIT(%d, %d, fixedToBit(%d, %s));\n" % \
+                        (bitWidth, address, 
+                         bitWidth, fromName) + \
+              indent2 + "     " + \
+              "bitToFixed(getBIT(%d, %d)) <= %s;\n" % \
+                        (bitWidth, address, toName) + \
+              indent2 + "     " +\
+              "putBIT(%d, %d, fixedToBit(%d, bitToFixed(getBIT(%d, %d)) + %s))) {" % \
+                        (bitWidth, address, 
+                         bitWidth, 
+                         bitWidth, address, byName) \
+            )
     elif "WHILE" in line:
         tipe, source = generateExpression(scope, line["WHILE"])
         if (tipe == "BIT"):

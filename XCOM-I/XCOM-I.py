@@ -243,6 +243,8 @@ while True:
             inComment = False
             c = ' '
     elif inQuote:
+        if c == usCent:
+            c = '`'
         if quoteCount > 0:
             skipQuote = quoteCount - 1
             if 1 == (quoteCount & 1):
@@ -265,11 +267,28 @@ while True:
             continue
         if c == '"':
             inHex = False
-            for ih in range(hexStart, len(pseudoStatement)):
-                if pseudoStatement[ih] not in digits["x"]:
+            if not newHex:
+                hexAccumulator = pseudoStatement[hexStart:]
+            for ih in hexAccumulator:
+                if ih not in digits["x"]:
                     error("Non-digit (%s) in double-quoted string" % \
-                          pseudoStatement[ih], None)
+                          ih, None)
                     sys.exit(1)
+            if newHex:
+                # The leading space before the %d below relates to the fact
+                # that " cannot be a character in an identifier, but digits
+                # can be.  Thus if you have a construct like XSET"..." (which
+                # actually appears in HAL/S-FC source code), it's the difference
+                # between the number being appended to XSET vs being a separate
+                # token.  Neither choice is guaranteed to be safe, however, and
+                # the one I've made is the one that preserves the purpose of
+                # XSET.  Other XPL code might expect something different, and it
+                # *is* possible to process it such that both choices are ok.  My
+                # problem is that XCOM-I currently processes the hex strings 
+                # prior to processing the macros, whereas Intermetrics's XCOM
+                # must have done it in the reverse order; and I'm too far down  
+                # the development path to want to try fixing that.
+                pseudoStatement = pseudoStatement + " %d" % int(hexAccumulator, 16)
             c = ''
     elif inBase:
         if c == ")":
@@ -288,8 +307,9 @@ while True:
             else:
                 error("%s-bit not supported in literals" % baseRadix, \
                       None)
-            pseudoStatement = pseudoStatement[:baseStart] + cBase + \
-                pseudoStatement[baseStart+1:]
+            if not newHex:
+                pseudoStatement = pseudoStatement[:baseStart] + cBase + \
+                    pseudoStatement[baseStart+1:]
             continue
         if cBase == '':
             baseRadix = baseRadix + c
@@ -298,11 +318,17 @@ while True:
             continue
         if c == '"':
             inBase = False
+            if newHex:
+                pseudoStatement = pseudoStatement + \
+                                    " %d" % int(hexAccumulator, baseRadix)
             c = ''
     elif c == '"':
         inHex = True
         inStartedRef = lineRef
-        pseudoStatement = pseudoStatement + "0x"
+        if newHex:
+            hexAccumulator = ''
+        else:
+            pseudoStatement = pseudoStatement + "0x"
         hexStart = len(pseudoStatement)
         c = ''
     elif c == "'":
@@ -344,7 +370,9 @@ while True:
         endOfStatement = True
     elif c == "^" or c == logicalNot:
         c = '~'
-    if not inComment:
+    if newHex and (inHex or inBase):
+        hexAccumulator = hexAccumulator + c
+    elif not inComment:
         if not (c == ' ' and lastC == ' ') or inQuote:
             pseudoStatement = pseudoStatement + c
     if endOfStatement:

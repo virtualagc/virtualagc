@@ -837,8 +837,8 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
 // in the Wikipedia article of the same name, so I've changed those
 // to match Wikipedia.
 static uint8_t asciiToEbcdic[128] = {
-  0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, /*              */
-  0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, /*              */
+  0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
+  0x40, 0x40, 0x25, 0x40, 0x40, 0x0D, 0x40, 0x40,
   0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, /*              */
   0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, /*              */
   0x40, 0x5A, 0x7F, 0x7B, 0x5B, 0x6C, 0x50, 0x7D, /*  !"#$%&'     */
@@ -861,9 +861,9 @@ static uint8_t asciiToEbcdic[128] = {
 // symbol to ~, a explained above.  It was generated from the table above
 // using the one-time-use program invertEbcdicTable.py.
 static char ebcdicToAscii[256] = {
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '\r', ' ', ' ',
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+    ' ', ' ', ' ', ' ', ' ', '\n', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '`', '.', '<', '(', '+', '|',
   '&', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '!', '$', '*', ')', ';', '~',
