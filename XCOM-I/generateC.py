@@ -525,30 +525,30 @@ def basedStats(scope, extra = None):
                 maxRecordFieldName = lenName
 
 # A special case of `generateExpression` (see below), which also happens to
-# be called by `generatExpression`, to generate the source code for an 
+# be called by `generateExpression`, to generate the source code for an 
 # expression of the form `ADDR(...)`.  Returns just the string containing the
 # source code, or else abends on error.  The `parameter` parameter is the
 # parameter for ADDR as an expression tree.
 def generateADDR(scope, parameter):
     token = parameter["token"]
-    if standardXPL and "builtin" in token and \
-            token["builtin"] == "COMPACTIFY":
-        '''
-        I don't know if this workaround is correct or not.  McKeeman lists
-        `COMPACTIFY` as a built-in, but in fact both McKeeman's `XCOM` and
-        Intermetrics's `HAL/S-FC` expect it to be a user-defined PROCEDURE.
-        McKeeman's source code for `COMPACTIFY` states that `XCOM` automatically
-        includes the source code for `COMPACTIFY` at the beginning of every
-        compilation; the source code for `XCOM` explicitly uses `ADDR(COMPACTIFY)`.
-        I think that the idea is to use it to measure the offset (in bytes)
-        from the start of executable code for error messages.  Whatever ... if
-        `ADDR(COMPACTIFY)` is called, we need it to return a value even if the
-        notion that it exists in the 24-bit memory address space is bogus.
-        '''
+    if standardXPL and "builtin" in token:
+        # I allow this because there's some stuff in HAL/S-FC source code that
+        # attempts various memory-management operations by exploiting hidden
+        # knowledge of how memory is allocated ... such as where the 
+        # `COMPACTIFY` function is located in memory relative to certain kinds
+        # of variables.  All of which is completely irrelevant to what's going
+        # on underneath the hood in XCOM-I.  Whether the value returned is in 
+        # any way adequate is, of course, questionable.
+        printf("Warning: ADDR(%s) of builtin" % token["builtin"], file=sys.stderr)
         return "0"
     if "identifier" in token: # not a structure field.
         # Might still be a BASED variable, though.
         bVar = token["identifier"]
+        #if "LIT_PG" in bVar: #***DEBUG***
+        #    print("***%s***" % bVar, token, file=sys.stderr)
+        if bVar == "MOVECHAR": # ***DEBUG***
+            pass
+            pass
         bSubs = parameter["children"]
         attributes = getAttributes(scope, bVar)
         if attributes == None:
@@ -592,7 +592,7 @@ def generateADDR(scope, parameter):
             errxit("Wrong subscripting in %s(...).%s(...)" % (bVar, fVar))
         return 'ADDR("%s", %s, "%s", %s)' % (bVar, sourceb, fVar, sourcef)
     else:
-        errxit("Unparsable identifier in ADDR")
+        errxit("Unparsable token in generateADDR: " + str(token))
 
 
 # `operatorTypes` relates the number of operands, the input type, the output 
@@ -685,10 +685,10 @@ def autoconvert(current, allowed, source=None):
             conversions.append(("BIT", "fixedToBit(32, (int32_t) (%s))"))
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "fixedToCharacter(%s)"))
+    if len(conversions) == 0:
+        errxit("Cannot convert type %s to any of %s" % (current, str(allowed)))
     if source == None:
         return conversions
-    if len(conversions) == 0:
-        errxit("Cannot convert %s to desired type(s)" % current)
     return conversions[0][0], conversions[0][1] % source
 
 # `autoconvertFull` combines a lot of operations typically associated with
@@ -818,6 +818,7 @@ def generateExpression(scope, expression):
         elif len(baseSubscripts) == 1:
             typeb, sourceb = \
                 generateExpression(scope, baseExpression["children"][0])
+            typeb, sourceb = autoconvert(typeb, ["FIXED"], sourceb)
             if typeb != "FIXED":
                 errxit("Subscript of %s not integer" % baseName)
         else:
@@ -828,6 +829,7 @@ def generateExpression(scope, expression):
         elif len(fieldSubscripts) == 1:
             typef, sourcef = \
                 generateExpression(scope, fieldExpression["children"][0])
+            typef, sourcef = autoconvert(typef, ["FIXED"], sourcef)
             if typef != "FIXED":
                 errxit("Subscript of field %s.%s not integer" % \
                        (baseName, fieldName))
@@ -904,9 +906,7 @@ def generateExpression(scope, expression):
                         errxit("Multi-dimensional arrays not allowed in XPL")
                     if len(indices) == 1:
                         tipei, index = generateExpression(scope, indices[0])
-                        if tipei == "BIT":
-                            tipei = "FIXED"
-                            index = "bitToFixed(%s)" % index
+                        tipei, index = autoconvert(tipei, ["FIXED"], index)
                         if tipei != "FIXED":
                             errxit("Array index can't be computed or not integer")
                     baseAddress = str(attributes["address"])
@@ -937,12 +937,24 @@ def generateExpression(scope, expression):
                 return None,None
         else:
             symbol = token["builtin"]
-            # Many builtins.
+            # Compile-time builtins.
+            if symbol == "RECORD_WIDTH":
+                children = expression["children"]
+                if len(children) == 1 and "identifier" in children[0]["token"]:
+                    var = children[0]["token"]["identifier"]
+                    attributes = getAttributes(scope, var)
+                    if "recordSize" in attributes:
+                        return "FIXED", "%s" % attributes["recordSize"]
+                    else:
+                        errxit("Variable %s has no associated record width" % var)
+                else:
+                    errxit("Parameter of RECORD_WIDTH not an identifier")
+            # Many runtime builtins.
             if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
                           "DATE", "TIME", "DATE_OF_GENERATION", "COREBYTE",
                           "COREWORD", "FREEPOINT", "TIME_OF_GENERATION",
                           "FREELIMIT", "FREEBASE", "ABS", "STRING", 
-                          "STRING_GT"]:
+                          "STRING_GT", "COREHALFWORD"]:
                 if symbol in ["INPUT", "SUBSTR", "STRING"]:
                     builtinType = "CHARACTER"
                 else:
@@ -972,7 +984,7 @@ def generateExpression(scope, expression):
                     autoconvertTo = tipe
                     if parmNum == 0:
                         if symbol in ["ABS", "COREBYTE", "COREWORD", "SHL",
-                                      "SHR", "INPUT", "STRING"]:
+                                      "SHR", "INPUT", "STRING", "COREHALFWORD"]:
                             autoconvertTo = "FIXED"
                         elif symbol in ["BYTE", "LENGTH", "STRING_GT", 
                                         "SUBSTR"]:
@@ -1056,6 +1068,40 @@ def generateExpression(scope, expression):
         errxit("Unsupported token " + str(token))
     return tipe, source
 
+# Creates an expression for ADDR(identifier), possibly with the identifier
+# having subscripts (that can be expressions) or RECORD fields (possibly with
+# subscripts that can be expressions).  If the base identifier has no subscript,
+# a subscript of 0 is added to it, to avoid the special case in which ADDR()
+# can return the address of a BASED's pointer rather than its data.  If I had
+# been clever, I would have been using this for assignments from day 1, but I've
+# introduced it belatedly only when working on `FILE`.  Returns type,source.
+def getExpressionADDR(scope, expression):
+    #print("***", expression, file=sys.stderr) # ***DEBUG***
+    if "identifier" in expression["token"] and len(expression["children"]) == 0:
+        expression["children"] = [ {
+            "token": { "number": 0 }
+            } ]
+    addrExpression = {
+        "token": { "builtin": "ADDR" },
+        "children": [ expression ]
+        }
+    return generateExpression(scope, addrExpression)
+
+# Return source for parameters of FILE (parm1,parm2) as type FIXED.
+def getParmsFILE(scope, expression):
+    children = expression["children"]
+    if len(children) != 2:
+        errxit("FILE(...) has wrong number of arguments")
+    ne1Type, ne1Source = generateExpression(scope, children[0])
+    ne1Type, ne1Source = autoconvert(ne1Type, ["FIXED"], ne1Source)
+    ne2Type, ne2Source = generateExpression(scope, children[1])
+    ne2Type, ne2Source = autoconvert(ne2Type, ["FIXED"], ne2Source)
+    if ne1Type != "FIXED" or ne1Source == None:
+        errxit("Cannot compute device number for FILE(...)")
+    if ne2Type != "FIXED" or ne2Source == None:
+        errxit("Cannot compute record number for FILE(...)")
+    return ne1Source, ne2Source
+
 # The `generateSingleLine` function is used by `generateCodeForScope`.
 # As the name implies, it operates on the pseudo-code for a single 
 # pseudo-statement, generating the C source code for it, and printing that
@@ -1095,43 +1141,36 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
         indent += indentationQuantum
         LHSs = line["LHS"]
         RHS = line["RHS"]
-        # `buffer = FILE(...)` is a special case, so treat it differently.
+        # Assignments involving `FILE` are special, in my current 
+        # implementation anyway, so treat them differently.
+        fileOnRight = False
         if "token" in RHS and "builtin" in RHS["token"] and \
                 RHS["token"]["builtin"] == "FILE":
-            # We're going to assume that the LHS represents an array
-            # of 8-bit values.
-            if len(LHSs) != 1:
-                errxit("In ...=FILE(...), require the LHS to be an array of BIT(8)")
-            LHS = LHSs[0]
-            if len(LHS) == 0 or 'token' not in LHS or \
-                    "identifier" not in LHS['token']:
-                errxit("In ...=FILE(...), require the LHS to be an array of BIT(8)")
-            bufferName = LHS['token']['identifier']
-            bufferAttributes = getAttributes(scope, bufferName)
-            if bufferAttributes == None or \
-                    "BASED" in bufferAttributes or \
-                    "BIT" not in bufferAttributes or \
-                    bufferAttributes["BIT"] != 8 or \
-                    "top" not in bufferAttributes:
-                errxit("In ...=FILE, require LHS to be an array of BIT(8)")
-            # Note: We can't have any knowledge at compile-time of the 
-            # record size needed by the file, since files are only 
-            # attached at runtime, so we cannot check whether or not
-            # the assigned buffer is adequate in size right now.
-            children = RHS["children"]
-            if len(children) != 2:
-                errxit("FILE(...) has wrong number of arguments")
-            ne1Type, ne1Source = generateExpression(scope, children[0])
-            ne2Type, ne2Source = generateExpression(scope, children[1])
-            if ne1Type != "FIXED" or ne1Source == None:
-                errxit("Cannot compute device number for FILE(...)")
-            if ne2Type != "FIXED" or ne2Source == None:
-                errxit("Cannot compute record number for FILE(...)")
-            print(indent + "rFILE(%d, %s, %s);" % (bufferAttributes["address"], 
-                                                   ne1Source,
-                                                   ne2Source))
-            print(oldIndent + "}")
-            return
+            fileOnRight = True
+            devR, recR = getParmsFILE(scope, RHS)
+        for LHS in LHSs:
+            fileOnLeft = False
+            if "token" in LHS and "builtin" in LHS["token"] and \
+                    LHS["token"]["builtin"] == "FILE":
+                fileOnLeft = True
+            if fileOnLeft or fileOnRight:
+                if fileOnLeft:
+                    devL, recL = getParmsFILE(scope, LHS)
+                    if not fileOnRight:
+                        typeR, addrR = getExpressionADDR(scope, RHS)
+                else:
+                    #print("***", line, file=sys.stderr) # ***DEBUG***
+                    typeL, addrL = getExpressionADDR(scope, LHS)
+                if fileOnLeft and not fileOnRight:
+                    print(indent + "lFILE(%s, %s, %s);" % (devL, recL, addrR))
+                elif fileOnRight and not fileOnLeft:
+                    print(indent + "rFILE(%s, %s, %s);" % (addrL, devR, recR))
+                else:
+                    print(indent + "bFILE(%s, %s, %s, %s);" % (devL, recL, devR, recR))
+                return
+        # Non-FILE case.  Note that there still could be some `FILE` on the
+        # left (but not on the right), so we'll still have to check for that
+        # below and bypass them.
         tipeR, sourceR = generateExpression(scope, RHS)
         definedS = False
         definedN = False
@@ -1153,8 +1192,6 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             nonlocal definedS, definedN, definedB;
             
             conversions = autoconvert(fromType, [toType])
-            if len(conversions) == 0:
-                errxit("Cannot convert %s to %s" % (fromType, toType))
             conversion = conversions[0][1]
             
             if fromType == "CHARACTER":
@@ -1188,6 +1225,8 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
         for i in range(len(LHSs)):
             LHS = LHSs[i]
             tokenLHS = LHS["token"]
+            if "builtin" in tokenLHS and tokenLHS["builtin"] == "FILE":
+                continue # Already did this one above.
             if "operator" in tokenLHS and tokenLHS["operator"] == ".":
                 expression = LHS
                 # This was adapted from the code for '.' in 
@@ -1223,6 +1262,7 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                 elif len(baseSubscripts) == 1:
                     typeb, sourceb = \
                         generateExpression(scope, baseExpression["children"][0])
+                    typeb, sourceb = autoconvert(typeb, ["FIXED"], sourceb)
                     if typeb != "FIXED":
                         errxit("Subscript of %s not integer" % baseName)
                 else:
@@ -1234,6 +1274,7 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                 elif len(fieldSubscripts) == 1:
                     typef, sourcef = \
                         generateExpression(scope, fieldExpression["children"][0])
+                    typef, sourcef = autoconvert(typef, ["FIXED"], sourcef)
                     if typef != "FIXED":
                         errxit("Subscript of field %s.%s not integer" % \
                                (baseName, fieldName))
@@ -1329,19 +1370,19 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             elif "builtin" in tokenLHS:
                 builtin = tokenLHS["builtin"]
                 children = LHS["children"]
-                if builtin == "FREEPOINT":
-                    print(indent + "freepoint2(numberRHS);")
-                elif builtin == "COREBYTE":
+                if builtin in ["FREEPOINT", "FREELIMIT"]:
+                    print(indent + "%s2(numberRHS);" % builtin)
+                elif builtin in ["COREBYTE", "COREWORD", "COREHALFWORD"]:
                     if len(children) == 1:
                         tipe, source = generateExpression(scope, children[0])
                         if tipe != "FIXED":
                             tipe, source = autoconvert(tipe, ["FIXED"], source)
                         if definedN:
-                            print(indent + "COREBYTE2(%s, numberRHS);" % source)
+                            print(indent + "%s2(%s, numberRHS);" % (builtin, source))
                         elif definedB:
-                            print(indent + "COREBYTE2(%s, bitToFixed(bitRHS));" % source)
+                            print(indent + "%s2(%s, bitToFixed(bitRHS));" % (builtin, source))
                     else:
-                        errxit("Cannot compute address for COREBYTE(...)")
+                        errxit("Cannot compute address for CORExxxx(...)")
                 elif builtin == "OUTPUT":
                     autoConvert(tipeR, "CHARACTER")
                     if len(children) == 0:
@@ -1352,20 +1393,52 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                         print(indent + "OUTPUT(" + source + ", stringRHS);")
                     else:
                         errxit("Corrupted device number in OUTPUT")
+                elif builtin == "BYTE":
+                    if len(children) in [1, 2]:
+                        typev, sourcev = getExpressionADDR(scope, children[0])
+                    if len(children) == 2:
+                        typei, sourcei = generateExpression(scope, children[1])
+                    else:
+                        typei = "FIXED"
+                        sourcei = "0"
+                    if tipeR == "CHARACTER":
+                        isBit = 0
+                    elif tipeR in "FIXED":
+                        isBit = 1
+                    elif tipeR in "BIT":
+                        tipeR, sourceR = autoconvert(tipeR, ["FIXED"], sourceR)
+                        if tipeR != "FIXED":
+                            errxit("Value to assign to BYTE wrong type")
+                        isBit = 1
+                    print(indent + "lBYTE(%s, %s, %s, %d);" % \
+                          (sourcev, sourcei, sourceR, isBit))
                 elif builtin == "FILE":
-                    # We're going to assume that the RHS represents an array
-                    # of 8-bit values.
-                    if len(RHS) == 0 or 'token' not in RHS or \
-                            "identifier" not in RHS['token']:
-                        errxit("In FILE(...)=BUFFER, require BUFFER to be an array of BIT(8)")
-                    bufferName = RHS['token']['identifier']
-                    bufferAttributes = getAttributes(scope, bufferName)
-                    if bufferAttributes == None or \
-                            "BASED" in bufferAttributes or \
-                            "BIT" not in bufferAttributes or \
-                            bufferAttributes["BIT"] != 8 or \
-                            "top" not in bufferAttributes:
-                        errxit("In FILE(...)=BUFFER, require BUFFER to be an array of BIT(8)")
+                    if True:
+                        # Get the ADDR of the RHS.
+                        if "identifier" in RHS["token"] and len(RHS["children"]) == 0:
+                            RHS["children"] = [ {
+                                "token": { "number": 0 }
+                                } ]
+                        addrExpression = {
+                            "token": { "builtin": "ADDR" },
+                            "children": [ RHS ]
+                            }
+                        typea, sourcea = generateExpression(scope, addrExpression)
+                    else:
+                        # We're going to assume that the RHS represents an array
+                        # of 8-bit values.
+                        if len(RHS) == 0 or 'token' not in RHS or \
+                                "identifier" not in RHS['token']:
+                            errxit("In FILE(...)=BUFFER, require BUFFER to be an array of BIT(8)")
+                        bufferName = RHS['token']['identifier']
+                        bufferAttributes = getAttributes(scope, bufferName)
+                        if bufferAttributes == None or \
+                                "BASED" in bufferAttributes or \
+                                "BIT" not in bufferAttributes or \
+                                bufferAttributes["BIT"] != 8 or \
+                                "top" not in bufferAttributes:
+                            errxit("In FILE(...)=BUFFER, require BUFFER to be an array of BIT(8)")
+                        sourcea = "%d" % bufferAttributes["address"]
                     # Note: We can't have any knowledge at compile-time of the 
                     # record size needed by the file, since files are only 
                     # attached at runtime, so we cannot check whether or not
@@ -1374,13 +1447,15 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                     if len(children) != 2:
                         errxit("FILE(...) has wrong number of arguments")
                     ne1Type, ne1Source = generateExpression(scope, children[0])
+                    ne1Type, ne1Source = autoconvert(ne1Type, ["FIXED"], ne1Source)
                     ne2Type, ne2Source = generateExpression(scope, children[1])
+                    ne2Type, ne2Source = autoconvert(ne2Type, ["FIXED"], ne2Source)
                     if ne1Type != "FIXED" or ne1Source == None:
                         errxit("Cannot compute device number for FILE(...)")
                     if ne2Type != "FIXED" or ne2Source == None:
                         errxit("Cannot compute record number for FILE(...)")
-                    print(indent + "lFILE(%s, %s, %d);" % \
-                          (ne1Source, ne2Source, bufferAttributes["address"]))
+                    print(indent + "lFILE(%s, %s, %s);" % \
+                          (ne1Source, ne2Source, sourcea))
                 else:
                     errxit("Unsupported builtin " + builtin)
             else:
@@ -1512,7 +1587,7 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             procScope = procScope["parent"]
             if procScope == None:
                 expression = line["RETURN"]
-                if len(expression) == 0: 
+                if expression == None: 
                     print(indent + "exit(0);")
                 else:
                     tipe, source = generateExpression(scope, expression)
@@ -1572,7 +1647,8 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                 inlineCounter += 1
         else:
             # Some builtins can be CALL'd
-            if procedure in ["LINK", "COMPACTIFY", "TRACE", "UNTRACE"]:
+            if procedure in ["LINK", "COMPACTIFY", "RECORD_LINK", "TRACE", 
+                             "UNTRACE", "EXIT", "MONITOR"]:
                 print(indent + procedure + "(", end = '')
                 for i in range(len(line["parameters"])):
                     if i > 0:
@@ -1689,6 +1765,8 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     # Make sure we've got an open output file of the appropriate name.
     scopeName = scope["symbol"]
     scopePrefix = scope["prefix"]
+    if "PROCEDURE" in scope:
+        print("Generating code for PROCEDURE %s" % (scopePrefix + scopeName))
     if scopeName == "":
         functionName = "main"
     else:

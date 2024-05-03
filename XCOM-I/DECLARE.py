@@ -330,6 +330,9 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                 
                 attributes = []
                 for symbol in group:
+                    if symbol == "MOVECHAR": #***DEBUG***
+                        pass
+                        pass
                     if passCount == 1 and not inRecord:
                         if symbol in scope["variables"] or \
                                 symbol in scope["literals"]:

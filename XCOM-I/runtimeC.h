@@ -89,6 +89,8 @@ void // Corresponding to `FILE(fileNumber, recordNumber) = buffer;`
 lFILE(uint32_t fileNumber, uint32_t recordNumber, uint32_t address);
 void // Corresponding to `buffer = FILE(fileNumber, recordNumber);`
 rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber);
+void // Corresponding to `FILE(...) = FILE(...);`
+bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR);
 
 // Read XPL `FIXED` data from memory as a C `int`.  No checking for address
 // overflow is performed and no errors are therefore possible.
@@ -214,6 +216,13 @@ BYTE(char *s, uint32_t index);
 uint8_t
 BYTE1(char *s);
 
+union oneByte_t {
+  char c;
+  uint8_t b;
+};
+void
+lBYTE(uint32_t address, int32_t index, union oneByte_t rhs, int bit);
+
 uint8_t
 BYTE2(bit_t *b, uint32_t index);
 
@@ -286,6 +295,12 @@ COREWORD(uint32_t address);
 void
 COREWORD2(uint32_t address, uint32_t value);
 
+uint32_t
+COREHALFWORD(uint32_t address);
+
+void
+COREHALFWORD2(uint32_t address, uint32_t value);
+
 // Gets the address of any variable, subscripted or non-subscripted,
 // BASED or non-BASED, RECORD or non-RECORD, as follows:
 //
@@ -322,6 +337,9 @@ rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex);
 void
 COMPACTIFY(void);
 
+void
+RECORD_LINK(void);
+
 // Functions for reading COMMON from a file, or writing COMMON to a file.
 
 // Returns 0 on success or 1 on failure.
@@ -357,7 +375,13 @@ TIME_OF_GENERATION(void);
 uint32_t
 FREELIMIT(void);
 
+void
+FREELIMIT2(uint32_t address);
+
 uint32_t
 FREEBASE(void);
+
+void
+EXIT(void);
 
 #endif // RUNTIMEC_H

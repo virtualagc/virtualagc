@@ -157,6 +157,7 @@ baseStart = 0
 #inPfs = False
 #inBfs = False
 inConditional = ''
+conditionalTrue = False
 pseudoStatement = ''
 skipQuote = 0
 inRecord = False # Tracks whether continuation of "BASED RECORD:".
@@ -175,56 +176,32 @@ while True:
         continue
     c = source[i]
     
-    if False and not inComment and not inQuote:
-        # Take care of /?P and /?B conditionals.
-        if c == 'P' and lastC == '?' and lastLastC == '/':
-            inStartedRef = lineRef
-            inPfs = True
-            inBfs = False
-            pseudoStatement = pseudoStatement[:-2]
-            lastLastC = lastC
-            lastC = c
-            continue
-        elif c == 'B' and lastC == '?' and lastLastC == '/':
-            inStartedRef = lineRef
-            inBfs = True
-            inPfs = False
-            pseudoStatement = pseudoStatement[:-2]
-            lastLastC = lastC
-            lastC = c
-            continue
-        elif c == '/' and lastC == '?':
-            pseudoStatement = pseudoStatement[:-1]
-            inPfs = False
-            inBfs = False
-            lastLastC = lastC
-            lastC = c
-            continue
-        elif (inPfs and not pfs) or (inBfs and pfs):
-            lastLastC = lastC
-            lastC = c
-            continue
-        
-    if not inComment and not inQuote:
+    if not inQuote:
         # Take care of /?c conditionals.  Note that embedded conditionals
-        # aren't supported or detected.
-        if c in ["A", "B", "C", "P"] and lastC == '?' and lastLastC == '/':
+        # aren't supported or detected.  However, because I've found some
+        # of these inside of quoted strings, I do evaluate them within such
+        # strings.
+        if inConditional == '' and \
+                c in ["A", "B", "C", "P"] and lastC == '?' and lastLastC == '/':
             inConditional = c
+            conditionalTrue = (c == 'P' and pfs) or \
+                              (c == 'B' and not pfs) or \
+                              (c == 'A' and condA) or \
+                              (c == 'C' and condC)
             inStartedRef = lineRef
             pseudoStatement = pseudoStatement[:-2]
             lastLastC = lastC
             lastC = c
             continue
-        elif c == '/' and lastC == '?':
-            pseudoStatement = pseudoStatement[:-1]
+        elif inConditional != '' and c == '/' and lastC == '?':
+            if conditionalTrue: # Remove the ?
+                pseudoStatement = pseudoStatement[:-1]
             inConditional = ''
+            conditionalTrue = False
             lastLastC = lastC
             lastC = c
             continue
-        elif (inConditional == "P" and not pfs) or \
-                (inConditional == "B" and pfs) or \
-                (inConditional == "A" and not condA) or \
-                (inConditional == "C" and not condC):
+        elif inConditional != "" and not conditionalTrue:
             lastLastC = lastC
             lastC = c
             continue
@@ -538,12 +515,13 @@ while True:
         parent["variables"][symbol]["PROCEDURE"] = scope
     elif reserved0 == "END":
         # End of a PROCEDURE definition or DO...END block.
-        for label in scope["labels"]:
-            scope["variables"].pop(label)
+        #for label in scope["labels"]:
+        #    scope["variables"].pop(label)
         scope = scope["parent"]
     elif "identifier" in tokenized[0] or ("builtin" in tokenized[0] and \
         tokenized[0]["builtin"] in ["OUTPUT", "COREWORD", "COREBYTE", "FILE",
-                                    "BYTE", "FREELIMIT", "FREEPOINT"]):
+                                    "BYTE", "FREELIMIT", "FREEPOINT",
+                                    "COREHALFWORD"]):
         # Other than a label (already processed above), the only thing
         # that begins with an identifier appears to be an assignment
         # statement.

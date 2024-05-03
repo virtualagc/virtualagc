@@ -23,16 +23,6 @@ def LABEL(tokenized, scope, inRecord = False):
         error("Label is not an identifier", scope)
         return True
     symbol = token["identifier"]
-    '''
-    if symbol in scope["variables"]:
-        if "LABEL" not in scope["variables"][symbol]:
-            error("%s already declared as a non-LABEL" % symbol, scope)
-            return True
-        # The label has presumably been forward-DECLARE'd.  We have to pop it
-        # because we need to make sure it's the very last thing in the variable
-        # list.
-        scope["variables"].pop(symbol)
-    '''
     scope["variables"][symbol] = { "LABEL" : True}
     scope["labels"].add(symbol)
     scope["code"].append({"TARGET": symbol})

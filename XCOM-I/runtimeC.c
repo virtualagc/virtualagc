@@ -971,8 +971,9 @@ fixedToCharacter(int32_t i) {
 // ps. 137 and 139 of McKeenan), BIT(1) through BIT(15) are treated as unsigned,
 // whereas BIT(16) is sign-extended.  I don't actually see that BIT(17) through
 // BIT(32) are converted at all ... but I do anyway, sign-extending them.
-// As for BIT(33) and up ... again, I don't think anything is supposed to
-// happen, but I'll just take the lowest 32 bits.
+// As for BIT(33) and up, it appears to me that what's desired in those cases
+// is the descriptor, but I have no way to supply it from the provided
+// parameters.  That'll have to be handled upstream from here.
 int32_t
 bitToFixed(bit_t *value)
 {
@@ -1005,10 +1006,14 @@ bitToFixed(bit_t *value)
         }
       return fixed;
     }
+  /*
   numBytes = (bitWidth + 7) / 8;
   fixed = (bytes[numBytes - 4] << 24) | (bytes[numBytes - 3] << 16) |
           (bytes[numBytes - 2] << 8)  | bytes[numBytes - 1];
   return fixed;
+  */
+  fprintf(stderr, "Implementation error handling conversion of BIT to FIXED\n");
+  exit(1);
 }
 
 bit_t *
@@ -1494,6 +1499,24 @@ BYTE1(char *s) {
   return BYTE(s, 0);
 }
 
+// `address` is the address of a string descriptor, including bit-strings.
+// `index` is an index into the string data. `rhs` is the character or byte to
+// write to memory.  `bit` is 1 for bit-strings, 0 for character.
+void
+lBYTE(uint32_t address, int32_t index, union oneByte_t rhs, int bit) {
+  uint32_t descriptor = getFIXED(address);
+  address = (descriptor & 0xFFFFFF) + index;
+  if (address >= FREE_LIMIT)
+    {
+      fprintf(stderr, "BYTE(0x%08X) out of range of memory\n", address);
+      exit(1);
+    }
+  if (bit)
+    memory[address] = rhs.b;
+  else
+    memory[address] = asciiToEbcdic[rhs.c];
+}
+
 uint8_t
 BYTE2(bit_t *b, uint32_t index) {
   if (index >= b->numBytes)
@@ -1674,7 +1697,7 @@ uint32_t
 COREBYTE(uint32_t address) {
   if (address + 1 <= MEMORY_SIZE)
     return memory[address];
-  fprintf(stderr, "Memory overflow COREBYTE(0x%X) read\n", address);
+  fprintf(stderr, "Memory overflow COREBYTE(0x%06X) read\n", address);
   exit(1);
 }
 
@@ -1683,7 +1706,7 @@ COREBYTE2(uint32_t address, uint32_t value) {
   if (address + 1 <= MEMORY_SIZE)
     memory[address] = value & 0xFF;
     return;
-  fprintf(stderr, "Memory overflow COREWORD(0x%X) write\n", address);
+  fprintf(stderr, "Memory overflow COREBYTE(0x%06X) write\n", address);
   exit(1);
 }
 
@@ -1691,7 +1714,7 @@ uint32_t
 COREWORD(uint32_t address) {
   if (address + 4 <= MEMORY_SIZE)
     return getFIXED(address);
-  fprintf(stderr, "Memory overflow COREWORD(0x%X) read\n", address);
+  fprintf(stderr, "Memory overflow COREWORD(0x%06X) read\n", address);
   exit(1);
 }
 
@@ -1700,7 +1723,27 @@ COREWORD2(uint32_t address, uint32_t value) {
   if (address + 4 <= MEMORY_SIZE)
     putFIXED(address, value);
     return;
-  fprintf(stderr, "Memory overflow COREWORD(0x%X) write\n", address);
+  fprintf(stderr, "Memory overflow COREWORD(0x%06X) write\n", address);
+  exit(1);
+}
+
+uint32_t
+COREHALFWORD(uint32_t address) {
+  if (address + 2 <= MEMORY_SIZE)
+    return (memory[address] << 8) | memory[address + 1];
+  fprintf(stderr, "Memory overflow COREHALFWORD(0x%06X) read\n", address);
+  exit(1);
+}
+
+void
+COREHALFWORD2(uint32_t address, uint32_t value) {
+  if (address + 2 <= MEMORY_SIZE)
+    {
+      memory[address] = (value >> 8) & 0xFF;
+      memory[address + 1] = value & 0xFF;
+    }
+    return;
+  fprintf(stderr, "Memory overflow COREHALFWORD(0x%06X) write\n", address);
   exit(1);
 }
 
@@ -1859,6 +1902,78 @@ rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber)
           recordSize, position, fileNumber);
       exit(1);
     }
+}
+
+void
+bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
+  static uint8_t *buffer = NULL;
+  static int bufSize = 0;
+  FILE *fpR, *fpL;
+  int returnedValue, recsizeL, recsizeR, posL, posR, recsize;
+  if (devL < 1 || devL >= MAX_RANDOM_ACCESS_FILES)
+    {
+      fprintf(stderr, "Bad left-hand FILE number (%d)\n", devL);
+      exit(1);
+    }
+  if (devR < 1 || devR >= MAX_RANDOM_ACCESS_FILES)
+    {
+      fprintf(stderr, "Bad right-hand FILE number (%d)\n", devR);
+      exit(1);
+    }
+  fpL = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devL].fp;
+  fpR = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devR].fp;
+  recsizeL = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devL].recordSize;
+  recsizeR = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devR].recordSize;
+  posL = recsizeL * recL;
+  posR = recsizeR * recR;
+  if (fpL == NULL)
+    {
+      fprintf(stderr, "Left-hand FILE (%d) not open for writing\n", devL);
+      exit(1);
+    }
+  if (fpR == NULL)
+    {
+      fprintf(stderr, "Right-hand FILE (%d) not open for reading\n", devR);
+      exit(1);
+    }
+  if (fseek(fpL, posL, SEEK_SET) < 0)
+    {
+      fprintf(stderr, "Cannot seek to %d in left-hand FILE %d\n", posL, devL);
+      exit(1);
+    }
+  if (fseek(fpR, posR, SEEK_SET) < 0)
+    {
+      fprintf(stderr, "Cannot seek to %d in right-hand FILE %d\n", posR, devR);
+      exit(1);
+    }
+  recsize = recsizeL;
+  if (recsizeR > recsizeL)
+    recsize = recsizeR;
+  if (recsize < bufSize)
+    {
+      free(buffer);
+      buffer = calloc(1, recsize);
+      bufSize = recsize;
+    }
+  returnedValue = fread(buffer, recsizeR, 1, fpR);
+  if (returnedValue != 1)
+    {
+      fprintf(stderr, "Failed to read %d bytes from position %d in FILE %d\n",
+          recsizeR, posR, devR);
+      exit(1);
+    }
+  returnedValue = fwrite(buffer, recsizeL, 1, fpL);
+  if (returnedValue != 1)
+    {
+      fprintf(stderr, "Failed to write %d bytes to position %d in FILE %d\n",
+          recsizeL, posL, devL);
+      exit(1);
+    }
+}
+
+void
+RECORD_LINK(void) {
+
 }
 
 // A function for comparing struct allocated_t objects (see COMPACTIFY below),
@@ -2194,9 +2309,24 @@ FREELIMIT(void) {
   return freelimit;
 }
 
+/*
+ * This is used by Intermetrics's `COMPACTIFY` to extend the upward limit of
+ * free memory. However, that's meaningless in terms of how XCOM-I manages
+ * memory, so I'm not sure what to do about it.
+ */
+void
+FREELIMIT2(uint32_t address) {
+  fprintf(stderr, "Warning: Attempt by COMPACTIFY to extend FREELIMIT.\n");
+}
+
 uint32_t
 FREEBASE(void) {
   return FREE_BASE;
+}
+
+void
+EXIT(void) {
+  exit(10);
 }
 
 // Some test code.

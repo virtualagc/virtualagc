@@ -58,6 +58,7 @@ builtIns = {
     "MONITOR_LINK": 0, 
     "NDESCRIPT": 0, 
     "OUTPUT": (0, 1), 
+    "RECORD_WIDTH": 1,
     "SHL": 2, 
     "SHR": 2,
     "SUBSTR": (2, 3), 
@@ -72,7 +73,8 @@ builtIns = {
     "PARM_FIELD": 0,
     "STRING": 1,
     "STRING_GT": 2,
-    "ABS": 1
+    "ABS": 1,
+    "COREHALFWORD": 1
     }
 if standardXPL:
     builtIns.pop("LINE_COUNT")
@@ -82,6 +84,8 @@ if standardXPL:
     builtIns.pop("STRING")
     builtIns.pop("STRING_GT")
     builtIns.pop("ABS")
+    builtIns.pop("COREHALFWORD")
+    builtIns.pop("RECORD_WIDTH")
     reservedWords.remove("COMMON")
     reservedWords.remove("UNTIL")
     reservedWords.remove("ARRAY")
@@ -155,11 +159,10 @@ def xtokenize(scope, pseudoStatement):
             j = i
             while j < len(pseudoStatement) and \
                     (pseudoStatement[j].isalnum() or \
-                     pseudoStatement[j] in breakCharacters or \
-                     pseudoStatement[j] == "."):
+                     pseudoStatement[j] in breakCharacters): # or pseudoStatement[j] == "."):
                 j += 1
-            if pseudoStatement[j - 1] == ".":
-                j -= 1
+            #if pseudoStatement[j - 1] == ".":
+            #    j -= 1
             identifier = pseudoStatement[i - 1 : j].upper()
             i = j
             if identifier == "MOD":
@@ -224,4 +227,7 @@ def xtokenize(scope, pseudoStatement):
                 tokens.append({"operator": c})
         else:
             tokens.append({"unrecognized": c})
+    #if "LIT_PG.LITERAL1" in pseudoStatement:
+    #    print("**A", pseudoStatement) #***DEBUG***
+    #    print("**B", tokens) #***DEBUG***
     return tokens
