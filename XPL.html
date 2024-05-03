@@ -48,7 +48,9 @@ document.write(headerTemplate.replace("@TITLE@","Space Shuttle").replace("@SUBTI
 </a></li>
 <ul>
   <li><a moz-do-not-send="true" href="#installation">Installation of <b>XCOM-I</b></a></li>
-  <li><a moz-do-not-send="true" href="#xpl">Compiling and Running XPL Programs</a></li></ul>
+  <li><a moz-do-not-send="true" href="#xpl">Compiling and Running XPL Programs</a></li>
+<li><a moz-do-not-send="true" href="halsfc">Compiling and Running HAL/S-FC</a><br></li>
+</ul>
 <li><a moz-do-not-send="true" href="#xpli">A Primer for Standard XPL and Intermetrics XPL/I</a>
 </li>
 <ul>
@@ -136,10 +138,7 @@ makes some sense.&nbsp; I would question its sensibility, however.&nbsp;
 
 </blockquote>
 <blockquote><font size="-1"><b>Aside:</b>&nbsp; Incidentally, <a moz-do-not-send="true" href="https://sourceforge.net/projects/xpl-compiler/">Daniel 
-Weaver has written an XPL-to-C translator</a>, which as far as I know is
- the
- only existing generally-available standard XPL compiler (prior to the present Virtual AGC 
-development effort).&nbsp; 
+Weaver has written an XPL-to-C translator</a>.&nbsp; 
 The first thing anyone suggests to me when this topic is discussed is 
 "Why don't you just use it?"&nbsp; The subscripting sloppiness inherent in 
 actual usage of XPL/I is one good reason.&nbsp; As you might expect, 
@@ -151,12 +150,39 @@ if you try to do so:<br>
   <blockquote>
     <pre><font size="-1">XPL to C language translator -- version 1.1<br>2    |x(0) = 1;                                                                       |<br>           |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>3    |x(1) = 2;                                                                       |<br>           |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 2. ***<br>4    |x(2) = 3;                                                                       |<br>           |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 3. ***<br>5    |output = x(0) || ' ' || x(1) || ' ' || x(2);                                    |<br>                    |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 4. ***<br>5    |output = x(0) || ' ' || x(1) || ' ' || x(2);                                    |<br>                                   |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 5. ***<br>5    |output = x(0) || ' ' || x(1) || ' ' || x(2);                                    |<br>                                                 |<br>*** Error, Identifier is not an array (detected at line 5741 in xcom). ***<br>*** Last previous error was detected on line 5. ***<br>6 cards containing 7 statements were compiled.<br>6 errors (0 severe) were detected.<br>The last detected error was on line 5.</font><br></pre>
   </blockquote>
-</blockquote>That's just <i>one</i> example of the difficulties.&nbsp; To be fair, I'll admit that it's 
-hard to make a full list of all the difficulties of XPL or all of the differences between XPL and XPL/I, because 
+</blockquote>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; Daniel has also pointed out that aside from his own compiler, <a moz-do-not-send="true" href="https://sourceforge.net/projects/intel-486-xpl-compiler/">Dave Bodenstab wrote an XPL compiler for FreeBSD, which Daniel himself has ported to Linux</a>.&nbsp; I have not tried it as of this writing.<br>
+    <br>
+    <b>Aside:</b>&nbsp; The other suggestion I receive with a fair 
+degree of regularity is, "Why not just run all of this IBM 360 software 
+in a simulator like <a moz-do-not-send="true" href="http://www.hercules-390.org/">Hercules</a>, and be done with it?&nbsp; Problem solved!"&nbsp; Well, for one thing, we don't have Intermetrics's XPL compiler, so we <i>can't</i>
+ run it on an IBM 360 simulation.&nbsp; Lacking that, we can't build 
+Intermetrics's HAL/S compiler in such a way that it could be run on an 
+IBM 360 simulation.&nbsp; But if we had the HAL/S compiler and it could 
+compile the PASS flight software to IBM 360 object code, why don't we 
+just run <i>that</i> on an IBM 360 simulator?&nbsp; Well ... tell me how
+ to integrate Hercules into a spacecraft simulator like Orbiter?&nbsp; 
+And tell me how to motivate any of <i>you</i> to learn how to use 
+Hercules in addition to the already very steep learning curve you face 
+with the flight software?&nbsp; If you can answer those questions for 
+me, I'll admit you've got a pretty good idea!&nbsp; With that said, I 
+suspect we will try to run the compiled flight software on Hercules at 
+some point, just to see it done, but it's not a satisfactory end goal 
+for most of our readers or our intended use cases.&nbsp; And I suspect 
+an emulator for the IBM 360 instruction set probably is in the works at 
+some point, but it's much more likely to be a bare-bones kind of thing, 
+similar to our emulations of the Apollo AGC, AGS, and LVDC, than a 
+full-blown IBM 360 emulator.<br>
+  </font></blockquote>
+"Subscript sloppiness", as I call it, is just <i>one</i> example of the 
+difficulties.&nbsp; To be fair, I'll admit that it's 
+hard to make a full list of all the difficulties of XPL or all of the 
+differences between XPL and XPL/I, because 
 neither is McKeeman a full and accurate description of XPL, nor is 
 Intermetrics documentation a full description of XPL/I.&nbsp; Nor did 
-Intermetrics use the term "XPL/I", simply calling their language "XPL", and 
-making it hard to be entirely sure what's supposed to be different between them and what's not.&nbsp; <br>
+Intermetrics use the term "XPL/I", simply calling their language "XPL", 
+making it hard to be entirely sure what's supposed to be different 
+between the two languages and what's not.&nbsp; <br>
 <br>
 By the way, I recognize that it's very dangerous to make claims about what other people <i>haven't</i>
  accomplished, so you have to take it with a grain of salt when I say 
@@ -164,8 +190,11 @@ that you're not going to find any existing compiler for Windows, Mac, or
  Linux that can compile and run XPL/I programs.&nbsp; If you find out 
 that I don't know what I'm talking about, by all means let me 
 know!&nbsp; <br>
-<blockquote><font size="-1"><b>Aside:</b> In point of fact, I do know of another XPL/I compiler currently under
- development, though not yet fully ready for use.&nbsp; Indeed, it was a discussion with the author of that compiler, </font><font size="-1"><font size="-1">Don Schmidt, </font>prior to the start of his own work, which motivated me to look into this topic to begin with.</font><br>
+<blockquote><font size="-1"><b>Aside:</b> In point of fact, I do know of
+ another XPL/I compiler currently under
+ development, though not yet fully ready for use.&nbsp; It's actually an
+ XPL/I to C++ translator.&nbsp; Indeed, it was a discussion with the 
+author of that compiler, </font><font size="-1"><font size="-1">Don Schmidt, </font>prior to the start of his own work, which motivated me to look into this topic to begin with.</font><br>
 </blockquote>
 With that said, 
 as far as I can tell, if you want to compile
@@ -174,7 +203,7 @@ newly-written XPL compiler having XPL/I support baked into it from the
 ground up, rather than hoping to somehow tack XPL/I capabilities onto 
 some existing XPL compiler.&nbsp; And that's what's discussed below.&nbsp; I call the new compiler <b>XCOM-I</b>, for <b>XCOM</b> (the name of McKeeman's original XPL compiler) and "I" (for "Intermetrics").<br>
 <br>
-Like Daniel Weaver's XPL translator, and Don Schmidt's compiler in development, <b>XCOM-I</b> is actually an XPL/I-to-C translator, though it is entirely new and is 
+Like Daniel Weaver's XPL translator, <b>XCOM-I</b> is actually an XPL/I-to-C translator, though it is entirely new and is 
 not based on Daniel's work nor on any of the original XPL 
 compilers. In most cases, <b>XCOM-I</b> should work for standard XPL programs too, but not always.<br>
 <blockquote><font size="-1"><b>Aside:</b> And in case you wonder, <b>XCOM-I</b>
@@ -204,8 +233,8 @@ Those hooks will be discussed later on.<br>
 </p>
 
 <h2><a name="installation"></a>Installation of XCOM-I<br>
-</h2><b>XCOM-I</b> is a program written in the Python 3 language.&nbsp; To install <b>XCOM-I</b> on your system, you simply need to copy <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/XCOM-I/XCOM-I">the folder called "XCOM-I" from the "XCOM-I" branch of the Virtual AGC software repository</a>
- onto your computer, and add that directory to your PATH.&nbsp; Running <b>XCOM-I</b> requires Python 3.7 or later, but I don't think it requires additional 
+</h2><b>XCOM-I</b> is a program written in the Python 3 language.&nbsp; To install <b>XCOM-I</b> on your system, you simply need to copy <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I">the folder called "XCOM-I" from the Virtual AGC software repository</a>
+ onto your computer, and presumably add that directory to your PATH if it's not already there.&nbsp; Running <b>XCOM-I</b> requires Python 3.7 or later, but I don't think it requires additional 
 installation of any Python modules not present in a normal Python 
 distribution.&nbsp; <br>
 <br>
@@ -498,7 +527,34 @@ The Virtual AGC Project (2024)<br>
   </tbody>
 </table>
 <br>
-Which is all very well and good, but the jackpot will be compilation via <b>XCOM-I</b> of <b>HAL/S-FC</b>, and subsequently being able to successfully run <b>HAL/S-FC</b> afterward.&nbsp; Just as there was a big leap in complexity from being able to compile <b>ANALYZER</b> (~1500 lines of XPL) to being able to compile <b>XCOM</b> (~4200 lines of XPL), there's a much larger leap to being able to compile <b>HAL/S-FC</b> (&gt;30,000 lines of XPL).<br>
+<h2><a name="halsfc"></a>Compiling and Running HAL/S-FC</h2>
+<i>(Most of what's described in this section is not yet functional, but 
+I'm writing it while working it out so that my memory is fresh.)</i><br>
+<br>
+The examples in the preceding section are all very well and good, but the Holy Grail is compilation via <b>XCOM-I</b> of <b>HAL/S-FC</b> itself, and subsequently being able to successfully run <b>HAL/S-FC</b>.&nbsp; Just as there was a big leap in complexity from being able to compile <b>ANALYZER</b> (~1500 lines of XPL) to being able to compile <b>XCOM</b> (~4200 lines of XPL), there's a much larger leap to being able to compile <b>HAL/S-FC</b> (&gt;30,000 lines of XPL).&nbsp; The steps for doing so are also somewhat more complex.<br>
+<br>
+To compile <b>HAL/S-FC</b>, I'd suggest switching over to the working directory where the <b>HAL/S-FC</b> source code actually is stored, and compiling it there, which looks like this:<br>
+<blockquote>
+  <pre><font color="#663300">cd .../virtualagc/yaShuttle/"Source Code"/PASS.REL32V0/PASS1.PROCS<br>make<br></font></pre>
+</blockquote>
+The reason that looks so simple is that I took the trouble to hide the 
+complexity the additional complexity I mentioned above by creating a 
+Makefile in that folder. &nbsp; HAL/S-FC actually consists of 7 passes, 
+each with its own, standalone executable, and the instructions above (if
+ they succeed), will thus create 7 new programs in that folder:&nbsp; 
+PASS1, FLO, OPT, AUX, PASS2, PASS3, and PASS4. You may or may not want 
+to move these into your PATH.&nbsp; The reason you might not want to 
+move them into your PATH is that a number of applications written in XPL
+ use this kind of naming pattern, and have program names like PASS1, 
+PASS2, and PASS3.<br>
+<br>
+Actually running <b>HAL/S-FC</b> to compile some XPL/I source code is 
+also tricky, because the 7 passes are run in succession, with each pass 
+passing data into the next pass either explicitly via files, or else via
+ <font color="#663300"><code>COMMON</code></font> memory.&nbsp; It's 
+thus necessary not merely to run the passes in the correct order, but to
+ use all of the command-line settings that attach files with the 
+expected names.<br>
 <br>
 TBD<br>
 <h1><a name="xpli"></a>A Primer for Standard XPL and Intermetrics XPL/I</h1>
@@ -698,11 +754,15 @@ memory for them, other than for the pointer, is allocated at
 compile-time.&nbsp; Space is instead explicitly allocated at runtime by 
 user code.&nbsp; Thus <b>XCOM-I</b> has knowledge of the <i>size</i> of each array entry, but not of the <i>number of elements</i> in the array.&nbsp; <br>
 <br>
-To actually allocate the space at runtime, you have to know the sizes of the array entries, which in this case is 4 bytes for <font color="#663300"><code>FB</code></font> (because the entry is a <font color="#663300"><code>FIXED</code></font>, which is 32 bits long) and 19 bytes for <font color="#663300"><code>RB</code></font> (4 bytes for <code>FIXED</code> field <code>F</code>, 4 bytes for <code>CHARACTER</code> field <code>C</code>, and 11 bytes for the 11-element <code>BIT(5)</code> array <code>A</code>).&nbsp; And yes, you <i>do</i>
+To actually allocate the space at runtime, you have to know the sizes of the array entries, which in this case is 4 bytes for <font color="#663300"><code>FB</code></font> (because the entry is a <font color="#663300"><code>FIXED</code></font>, which is 32 bits long) and 19 bytes for <font color="#663300"><code>RB</code></font> (4 bytes for <code>FIXED</code> field <code>F</code>, 4 bytes for <code>CHARACTER</code> field <code>C</code>, and 11 bytes for the 11-element <code>BIT(5)</code> array <code>A</code>).&nbsp; <strike>And yes, you </strike><strike><i>do</i></strike><strike>
  have to explicitly perform this size calculation for yourself, because
-XPL/I won't help you do it!&nbsp; Blame Intermetrics for that, not <b>XCOM-I</b>.&nbsp; (At least, as far as I know.)&nbsp; Suppose, for example, that we wanted <font color="#663300"><code>FB</code></font> and <font color="#663300"><code>RB</code></font> to each have 101 elements.&nbsp; The allocation process at runtime involves the XPL/I built-in <font color="#663300"><code>MONITOR</code></font> function.&nbsp; Here's what the XPL/I code looks like:<br>
+XPL/I won't help you do it!&nbsp; Blame Intermetrics for that, not </strike><strike><b>XCOM-I</b></strike><strike>.&nbsp; (At least, as far as I know.)</strike>&nbsp;
+ It appears to me that you can get the record size for a based variable 
+from the undocumented built-in compile-time function <font color="#663300"><code>RECORD_WIDTH</code></font>, thus saving yourself the manual computation. <br>
+<br>
+Suppose, for example, that we wanted <font color="#663300"><code>FB</code></font> and <font color="#663300"><code>RB</code></font> to each have 101 elements.&nbsp; The allocation process at runtime involves the XPL/I built-in <font color="#663300"><code>MONITOR</code></font> function.&nbsp; Here's what the XPL/I code looks like:<br>
 <blockquote>
-  <pre><font color="#663300">CALL MONITOR(6, ADDR(FB), 101 * 4);<br>CALL MONITOR(6, ADDR(RB), 101 * 19);</font><br></pre>
+  <pre><font color="#663300">CALL MONITOR(6, ADDR(FB), 101 * RECORD_WIDTH(FB));<br>CALL MONITOR(6, ADDR(RB), 101 * RECORD_WIDTH(RB));</font><br></pre>
 </blockquote>
 <blockquote><font size="-1"><b>Aside:</b> <font color="#663300"><code>ADDR</code></font> is an XPL built-in that returns the memory address associated with any identifier or array reference.</font><br>
 </blockquote>
@@ -876,8 +936,101 @@ and there are no command-line switches to alter this behavior.<br>
 <p>Regarding the <font color="#663300"><code>RETURN</code></font> statement, McKeeman explains that it is used to exit from a <font color="#663333"><code>PROCEDURE</code></font> and optionally to return a value.  Furthermore, the calling code can either use that return value or else ignore it.  Which makes perfect sense.  But  as usual, there are some documented and undocumented peculiarities to the <font color="#663300"><code>RETURN</code></font> statement as well:<br></p>
 <ul>
   <li>McKeeman explains (p. 146) that calling code can <i>use</i> returned values from <font color="#663300"><code>PROCEDURE</code></font>s even if the <font color="#663300"><code>PROCEDURE</code></font> has no <font color="#663300"><code>RETURN</code></font> statement, or the <font color="#663300"><code>RETURN</code></font> statement specifies no value.  In this case, we are told, the return value is simply some unpredictable value from some unspecified System/360 register.  Which is rotten, of course, but so what?  This is never going to happen, right?  Wrong!  Actual XPL code does this from time to time.  <b>XCOM-I</b>, on the other hand, <i>always</i> returns a value from a <font color="#663300"><code>PROCEDURE</code></font>, whether or not there are any <font color="#663300"><code>RETURN</code></font> statements specifying a return value; the returned value in this case is 0 if <font color="#663300"><code>FIXED</code></font>, a <font color="#663300"><code>BIT</code></font> value of the appropriate width evaluating to 0, or else the empty string for a <font color="#663300"><code>CHARACTER</code></font>.</li>
-  <li>McKeeman does not mention that <font color="#663300"><code>RETURN</code></font> statements may exist at the global level, outside of the scope of any procedure, and may return a value when they do.  <b>XCOM-I</b> treats these as exits from the program back to the operating system, with the returned value being the program's exit code.  It thus expects the return value to be a program status code.<br></li>
+  <li>McKeeman does not mention that <font color="#663300"><code>RETURN</code></font> statements may exist at the global level, outside of the scope of any procedure, and may return a value when they do.  <b>XCOM-I</b> treats these as exits from the program back to the operating system, with the returned value being the program's exit code.  It thus expects the return value to be a program status code.</li></ul>
+<h3>Blocks and Loops</h3>
+<p>Compound statements in XPL are groupings of simple statements (such as assignments or if-then-else statements) enclosed within a <font color="#663300"><code>DO ... END</code></font> block:<br></p>
+<blockquote>
+  <pre><font color="#663300">DO ...;<br>    ... simple statements ...<br>END;</font><br></pre>
+</blockquote>
+<p>There are five different kinds of <font color="#663300"><code>DO ... END</code></font> blocks.  First, there is a mere grouping:</p>
+<blockquote>
+  <pre><font color="#663300">DO;<br>    ... simple statements ...<br>END;</font></pre>
+</blockquote>
+
+<p>Then there are 3 different kinds of loops:</p>
+<pre><font color="#663300">DO <i>COUNTER</i> = <i>START</i> TO <i>END</i> [BY <i>STEP</i>];<br>    ... simple statements ...<br>END;<br><br></font><font color="#663300">DO WHILE <i>CONDITION</i>;<br>    ... simple statements ...<br>END;</font>
+<br><font color="#663300">DO UNTIL <i>CONDITION</i>;<br>    ... simple statements ...<br>END;</font>
+</pre>
+
+<p>Note that <font color="#663300"><code>DO UNTIL</code></font> is new in XPL/I and is not present in standard XPL.<br></p>
+<p>In these loops, <i><font color="#663300"><code>COUNTER</code></font></i>, <i><font color="#663300"><code>START</code></font></i>, <i><font color="#663300"><code>END</code></font></i>, and the optional <i><font color="#663300"><code>STEP</code></font></i> are all integers.  <i><font color="#663300"><code>STEP</code></font></i> defaults to 1, but must be <i>positive</i>.  <i><font color="#663300"><code>START</code></font></i>, <i><font color="#663300"><code>END</code></font></i>, and <i><font color="#663300"><code>STEP</code></font></i> may be expressions, but if so they are evaluated only a single time, at the start of the loop, and are not reevaluated thereafter.  <i><font color="#663300"><code>CONDITION</code></font></i>, on the other hand, is an expression evaluated on each loop; it is treated as "true" if its least-significant bit is 1, or "false" if its least-significant bit is 0.<br></p>
+<p>The fifth kind of <font color="#663300"><code>DO ... END</code></font> block is:<br></p>
+<blockquote>
+  <pre><font color="#663300">DO CASE EXPRESSION;<br>    STATEMENT0;<br>    STATEMENT1;<br>    STATEMENT2;<br>    ...<br>END;</font><br></pre>
+</blockquote>
+<p>The <i><font color="#663300"><code>EXPRESSION</code></font></i> must evaluate to an integer.  If 0, then <i><font color="#663300"><code>STATEMENT0</code></font></i> is executed; if 1, then <i><font color="#663300"><code>STATEMENT1</code></font></i> is executed; and so on.  At most, a single statement is executed, and there is no "fall through" from one statement to the next.  If the <i><font color="#663300"><code>EXPRESSION</code></font></i> is negative or beyond the number of available statements, McKeeman tells us that "a random jump is executed".  In XCOM-I, no statement is executed under those circumstances, and control passes to the next statement after the <font color="#663300"><code>END</code></font>.<br></p>
+<h3><code>ESCAPE</code> and <code>REPEAT</code><br>
+</h3>
+
+<p>The <font color="#663300"><code>ESCAPE</code></font> and <font color="#663300"><code>REPEAT</code></font> keywords appear to be undocumented XPL/I features not present in standard XPL.  Unfortunately, from the available material I can't think of any way to be <i>sure</i> what they do, so I can only speculate.<br></p>
+<p><font color="#663300"><code>ESCAPE</code></font> appears in two different forms:<br></p>
+<ul>
+  <li><font color="#663300"><code><font color="#663300"><code>ESCAPE;</code></font> <br></code></font></li>
+  <li><font color="#663300"><code>ESCAPE <i>LABEL</i>;</code></font> <font color="#663300"><code></code></font></li>
 </ul>
+<p>It should be noted that the HAL/S language has the keyword <code><font color="#663300">EXIT</font></code>, which also has these two forms.  (<a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/Shuttle/Programming%20in%20HAL_S%20Sept%201978.pdf#page=96">See Ryer, p. 5-12</a>.)  <code><font color="#663300">EXIT</font></code> has the following behavior in HAL/S:<br></p>
+<ul>
+<li><font color="#663300"><code><font color="#663300"><code>EXIT</code></font>;</code></font> — Exits from the innermost enclosing <font color="#663300"><code>DO ... END</code></font> block.  I.e., it's essentially a <font color="#663300"><code>GO TO</code></font> to just after the closest enclosing <font color="#663300"><code>END</code></font>.</li>
+  <li><font color="#663300"><code>EXIT <i>LABEL</i>;</code></font> — Exits from an enclosing <font color="#663300"><code>DO ... END</code></font> that isn't necessarily the innermost one, but rather the one which instead has the specified <i><font color="#663300"><code>LABEL</code></font></i> attached to it.  By "attached to it", I mean that they're directly adjacent, as in "<font color="#663300"><code><i>LABEL</i>: DO ...</code></font>".<font color="#663300"><code></code></font></li>
+</ul>
+<p>Until a more-plausible explanation comes along, my assumption is that <font color="#663300"><code><font color="#663300"><code>ESCAPE</code></font></code></font> in XPL/I has the same behavior as HAL/S's <font color="#663300"><code>EXIT</code></font>.<br></p>
+<p>For example, consider the following XPL/I code:<br></p>
+<blockquote><font color="#663300"><code>...</code><code></code></font><br>
+  <font color="#663300"><code></code><code>MYBLOCK: </code><code></code></font><br>
+  <font color="#663300"><code></code><code>DO ...</code><code></code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp; ...</code><code></code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp; DO ...</code><code></code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        ...</code><code></code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        ESCAPE; /* Escape #1 */</code><code></code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        ...</code><code></code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ESCAPE MYBLOCK; /* Escape #2 */</code><code></code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        ...</code><code></code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp; END;</code><code></code></font><br>
+  <font color="#cc0000"><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Escape #1 comes here! */</code></font><br>
+  <font color="#663300"><code></code><code>&nbsp;&nbsp;&nbsp; ...</code></font><br>
+  <font color="#663300"><code>END;</code></font><br>
+  <font color="#cc0000"><code></code><code>/* Escape #2 comes here! */</code></font><br>
+  <font color="#663300"><code>...</code></font><br>
+  <font color="#663300"><code></code></font></blockquote>
+<font color="#663300"><code><font color="#663300"><code>REPEAT</code></font></code></font> also appears in those same two forms:<br>
+<ul>
+<li><font color="#663300"><code><font color="#663300"><code>REPEAT;</code></font> <br></code></font></li><li><font color="#663300"><code><font color="#663300"><code><font color="#663300"><code>REPEAT</code></font></code></font> <i>LABEL</i>;</code></font> </li>
+</ul>
+And again, there's a <font color="#663300"><code><font color="#663300"><code><font color="#663300"><code>REPEAT</code></font></code></font></code></font>
+ keyword in HAL/S as well.&nbsp; In this case, though, from examining 
+the actual usage in HAL/S-FC source code, I believe that while the 
+keyword has a <i>similar</i> behavior in HAL/S and XPL/I, there is 
+nevertheless a distinction between them.&nbsp; Here's what I believe the
+ behavior is in XPL/I:<br>
+<ul>
+<li><font color="#663300"><code><font color="#663300"><code>REPEAT;</code></font></code><font color="#000000"> </font></font>— "Repeats" the smallest enclosing <font color="#663300"><code>DO ... END</code></font>.  In case the smallest enclosing <font color="#663300"><code>DO ... END </code></font>is a loop — <font color="#663300"><code>DO WHILE</code></font> or <font color="#663300"><code>DO UNTIL</code></font> or <font color="#663300"><code>DO I = X TO Y</code></font> — saying that it "repeats" has a pretty clear meaning: XPL/I <font color="#663300"><code><font color="#663300"><code>REPEAT</code></font></code></font> is like a Python or C <font color="#663300"><code>continue</code></font> statement.  On the other hand, if the immediately-enclosing <font color="#663300"><code>DO ... END</code></font> is <i>not</i> a loop, the expected behavior is less clear; nor are there any instances of <font color="#663300"><code>REPEAT</code></font> in non-loops in legacy XPL/I code from which we might get a clue.&nbsp; <b>XCOM-I</b> implements <font color="#663300"><code><font color="#663300"><code>REPEAT</code></font></code></font> without a label simply as a jump to the beginning of the block, which means that you could form an infinite loop if there were no other code (like <font color="#663300"><code>ESCAPE</code></font> or <font color="#663300"><code>GO TO</code></font>) to exit the loop.</li>
+<li><font color="#663300"><code><font color="#663300"><code><font color="#663300"><code>REPEAT</code></font></code></font> <i>LABEL</i>;</code></font> — Breaks out of inner loops as needed, until reaching an enclosing <font color="#663300"><code>DO ... END</code></font> loop that has the attached <i><font color="#663300"><code>LABEL</code></font></i>. <i>That's</i> the block that it repeats.</li>
+</ul><ul>
+</ul>
+<blockquote>
+  <font size="-1"><b>Aside:</b>&nbsp; The way my XPL/I implementation is different from HAL/S is that in HAL/S, <font color="#663300"><code>REPEAT</code></font> (without a label) goes to the beginning of the innermost enclosing <i>loop</i> (<font color="#663300"><code>DO WHILE</code></font> or <font color="#663300"><code>DO UNTIL</code></font> or <font color="#663300"><code>DO I = X TO Y</code></font>) rather than the innermost enclosing <font color="#663300"><code>DO ... END</code></font>.&nbsp; Which makes sense, since that's what you'd normally want.<br>
+  </font></blockquote>
+<b>Note:</b>&nbsp; Neither <font color="#663300"><code>ESCAPE</code></font> nor <font color="#663300"><code><font color="#663300"><code>REPEAT</code></font></code></font> accepts a label attached to an arbitrary statement.&nbsp; It must be a label attached to a <font color="#663300"><code>DO ... END</code></font> block, and it must at some level enclose the <font color="#663300"><code>ESCAPE</code></font> or <font color="#663300"><code><font color="#663300"><code>REPEAT</code></font></code></font> statement itself.<br>
+<h3>Counter Value After Normal Loop Termination<br>
+</h3>
+<font color="#663300"><code></code></font>For XPL code such as<br>
+<blockquote>
+  <pre><font color="#663300">DO I = 1 to 100;<br>    ...<br>END;</font><br></pre>
+</blockquote>
+it appears to be undocumented what value <font color="#663300"><code>I</code></font>
+ holds after the loop ends.&nbsp; Not all computer languages handle this
+ in the same way.&nbsp; My considered opinion is that the loop counter 
+holds the value at which the condition for continuation fails: in this 
+example, 101.&nbsp; Or, if the loop is broken prematurely (as with <font color="#663300"><code><font color="#663300"><code>ESCAPE</code></font></code></font> from the preceding section), then the value the counter held when the <font color="#663300"><code><font color="#663300"><code>ESCAPE</code></font></code></font> occurred is retained.<br>
+<blockquote><font size="-1"><b>Aside:</b></font>&nbsp; In Python, for 
+example, the counter for an equivalent loop would have the value 100 
+rather than 101 after normal termination of the loop.<br>
+</blockquote>
+<font color="#663300"><code></code></font>
+<ul>
+
+</ul>
+
 <h3><a name="builtin"></a>Built-In Runtime-Library Functions</h3>
 <p>Standard XPL has a variety of so-called "built-ins", comprising runtime-library functions callable from XPL code.  Some of these bullt-ins can appear on either the right-hand or left-hand side of assignments, and some have to be <font color="#663300"><code>CALL</code></font>'d like user-defined <font color="#663300"><code>PROCEDURE</code></font>s. XPL/I has roughly the same built-ins, plus-or-minus a few, mostly (but not entirely) defined to have the same functionality.  The compiler recognizes these built-ins, and there is no need for them to be declared in any way prior to use.  Since these built-ins were mostly written originally in IBM System/360 basic assembly language, the runtime library supplied with XCOM-I has been entirely written in C, without any reference to the original runtime-library source code.<br></p>
 <p>The list below is from McKeeman (p. 140-142), with some alterations due to XPL/I, and some hopefully-helpful notes from me.  The parameter descriptions in the list below identify the datatypes of parameters by the following convention:<br></p>
@@ -1440,6 +1593,17 @@ problem with it.&nbsp; Probably not.</font><br>
         <font color="#663300"><code></code></font></td>
     </tr>
     <tr>
+  <td valign="middle" align="center"><font color="#663300"><code>RECORD_WIDTH(V)</code></font><br>
+  </td>
+  <td valign="top"><br>
+  </td>
+  <td valign="middle">(XPL/I only.)&nbsp; IR-182-1 doesn't mention it, but it appears to me that <font color="#663300"><code>RECORD_WIDTH</code></font> is a new built-in in XPL/I which when given the symbolic name of a <font color="#663300"><code>BASED</code></font> variable returns the variable's record size (in bytes).&nbsp; In <b>HAL/S-FC</b>'s XPL/I source code (the only available example of use of <font color="#663300"><code>RECORD_WIDTH</code></font>), I find it used only for a couple of <font color="#663300"><code>BASED RECORD</code></font>
+ variables, which makes sense according to the naming, but I have no way
+ to tell just from those few examples what the actual applicability 
+was.&nbsp; In <b>XCOM-I</b>, it will work for any <font color="#663300"><code>BASED</code></font> variable, <font color="#663300"><code>RECORD</code></font> or not.<br>
+  </td>
+</tr>
+<tr>
       <td valign="middle" align="center"><font color="#663300"><code>SET_LINELIM(NE)</code><code><br>
           </code></font></td>
       <td valign="middle">This procedure establishes the number of lines
