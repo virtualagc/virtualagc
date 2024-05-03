@@ -18,6 +18,7 @@ from parseCommandLine import *
 from xtokenize import xtokenize
 from parseExpression import parseExpression
 from asciiToEbcdic import asciiToEbcdic
+from callTree import callTree
 
 stdoutOld = sys.stdout
 
@@ -1276,7 +1277,13 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             elif "identifier" in tokenLHS:
                 identifier = tokenLHS["identifier"]
                 attributes = getAttributes(scope, identifier)
-                address = attributes["address"]
+                try: # ***DEBUG***
+                    address = attributes["address"]
+                except:
+                    print(identifier, file=sys.stderr)
+                    print(attributes, file=sys.stderr)
+                    print(line, file=sys.stderr)
+                    sys.exit(1)
                 children = LHS["children"]
                 baseAddress = str(address)
                 if "BASED" in attributes:
@@ -1872,6 +1879,10 @@ def generateC(globalScope):
 
     # Provide mangled variable names.
     walkModel(globalScope, mangle)
+    
+    # Compute call-tree.  This is used for eliminating PROCEDURES that are
+    # never CALL'ed or used as functions within expressions.
+    callTree(globalScope)
     
     # Determine contraints on BASED RECORD variables (max fields and max
     # field-name length.
