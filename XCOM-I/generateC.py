@@ -497,7 +497,7 @@ def mangle(scope, extra = None):
     prefix = ""
     s = scope
     while True:
-        symbol = s["symbol"]
+        symbol = s["symbol"].replace("@", "a").replace("#", "p").replace("$","d")
         if symbol != "" and symbol[:1] != scopeDelimiter:
             prefix = symbol + "x" + prefix
         s = s["parent"]
@@ -505,7 +505,8 @@ def mangle(scope, extra = None):
             break
     scope["prefix"] = prefix
     for identifier in scope["variables"]:
-        scope["variables"][identifier]["mangled"] = prefix + identifier
+        scope["variables"][identifier]["mangled"] = \
+            prefix + identifier.replace("@", "a").replace("#", "p").replace("$","d")
 
 # A function for `walkModel` that collects some statistics about BASED RECORD.
 maxRecordFields = 0
@@ -890,7 +891,11 @@ def generateExpression(scope, expression):
                         for k in range(len(outerParameters)):
                             outerParameter = outerParameters[k]
                             innerParameter = innerParameters[k]
-                            innerAttributes = innerScope["variables"][innerParameter]
+                            try:
+                                innerAttributes = innerScope["variables"][innerParameter]
+                            except:
+                                errxit("Parameter %s may not have been DECLAREd within the PROCEDURE" \
+                                       % innerParameter)
                             innerAddress = innerAttributes["address"]
                             toType, parm = autoconvertFull(scope, \
                                                            outerParameter, \
@@ -1178,6 +1183,7 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                     print(indent + "rFILE(%s, %s, %s);" % (addrL, devR, recR))
                 else:
                     print(indent + "bFILE(%s, %s, %s, %s);" % (devL, recL, devR, recR))
+                print(oldIndent + "}")
                 return
         # Non-FILE case.  Note that there still could be some `FILE` on the
         # left (but not on the right), so we'll still have to check for that

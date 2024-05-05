@@ -126,6 +126,7 @@ clean:
 
 XPLI_APPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
 XPL_APPS = Example-6.18.3 Example-6.18.4 Example-6.18.5 Example-6.18.6
+XPL_APPS += breakCharactersDemo
 XPL_APPS += ANALYZER SKELETON
 
 .PHONY: testclean
@@ -156,7 +157,6 @@ $(XPLI_APPS):
 tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	cd bitsizeDemo && \
 	./bitsizeDemo >out.txt
-
 	diff -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
 	
 	cd bitsizeDemoCommon && \
@@ -166,7 +166,6 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 		       '%^Assignments .*%' >/dev/null && \
 	cat xx00 xx01 | \
 	egrep --invert-match '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' > xxxx
-	
 	# This test no longer works, and shouldn't.
 	#diff -s -q bitsizeDemo/out.txt bitsizeDemoCommon/out.txt
 	
@@ -175,7 +174,6 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	csplit out.txt '%^Address Allocations .*%' >/dev/null && \
 	cat xx00 | \
 	egrep --invert-match '(^Address Allocations |^COMMON |^.PAGE [0-9]|^$$)' > xxxx
-	
 	diff -s -q bitsizeDemoCommon/xxxx bitsizeDemoCommonIn/xxxx
 	
 	e=Example-6.18.3 && \
@@ -192,6 +190,11 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	egrep '^[0-9]+' | \
 	Example-6.18.5/Example-6.18.5 >Example-6.18.5/out.txt && \
 	diff -s -q Tests/Example-6.18.5-and-6.regression Example-6.18.5/out.txt
+	
+	e=breakCharactersDemo && \
+	cd $$e && \
+	./$$e >out.txt && \
+	diff -s -q ../Tests/$$e.regression out.txt
 	
 	ANALYZER/ANALYZER <Tests/SKELETON.bnf | \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \

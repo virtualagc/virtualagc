@@ -249,6 +249,9 @@ DATE(void);
 uint32_t
 DATE_OF_GENERATION(void);
 
+void
+MONITOR4(uint32_t dev, uint32_t recsize);
+
 // Allocate `n` bytes in the free-memory area (i.e., between FREEPOINT and
 // FREELIMIT in `memory`), compacting if necessary, and storing the address
 // of the allocated memory at the memory address indicated by `address`, which
@@ -272,6 +275,9 @@ MONITOR6(uint32_t address, uint32_t n);
 // bytes from the end of the allocation.
 uint32_t
 MONITOR7(uint32_t address, uint32_t n);
+
+uint32_t
+MONITOR9(uint32_t op);
 
 uint32_t
 MONITOR13(uint32_t, char *name);

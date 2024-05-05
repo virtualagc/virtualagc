@@ -1606,6 +1606,12 @@ MONITOR6(uint32_t address, uint32_t n) {
   return 0;
 }
 
+void
+MONITOR4(uint32_t dev, uint32_t recsize) {
+  fprintf(stderr, "MONITOR(4) not yet implemented\n");
+  exit(1);
+}
+
 uint32_t
 MONITOR7(uint32_t address, uint32_t n) {
   memoryMapEntry_t *found;
@@ -1622,6 +1628,12 @@ MONITOR7(uint32_t address, uint32_t n) {
   found->allocated -= n;
   found->numElements -= n / found->recordSize;
   return 0;
+}
+
+uint32_t
+MONITOR9(uint32_t op) {
+  fprintf(stderr, "MONITOR(9) not yet implemented\n");
+  exit(1);
 }
 
 uint32_t
