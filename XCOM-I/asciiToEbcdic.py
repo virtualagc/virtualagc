@@ -96,6 +96,13 @@ if __name__ == "__main__":
             print("Could not read the file")
             aborted.append(filename)
             return
+        # Step 0:  Remove all carriage-return characters.
+        i = 0
+        while i < len(ba):
+            if ba[i] == ord('\r'):
+                del ba[i]
+            else:
+                i = i + 1
         # First, convert to internal representation: ASCII with logical NOT and
         # U.S. cent converted to ~ and ` respectively.
         errorCount = 0
