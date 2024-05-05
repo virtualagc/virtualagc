@@ -586,14 +586,20 @@ TBD<br>
 </blockquote>
 
 <h3>Case Sensitivity</h3>
-<p>XPL programs are <i>not</i> case-sensitive, except in so far as the contents of quoted strings are concerned.&nbsp; E.g., lower-case or mixed-case symbols are treated as being identical to their upper-case correspondents, but quoted strings are case-sensitive.
-</p>
+<p>XPL programs are <i>not</i> case-sensitive, except in so far as the contents of quoted strings are concerned.&nbsp; E.g., lower-case or mixed-case symbols are treated as being identical to their upper-case correspondents, but quoted strings are case-sensitive.<br></p>
+<h3>Source-Code Formatting<br>
+</h3>
+<p>Input to an XPL or XPL/I program (via the <font color="#663300"><code>INPUT</code></font> built-in function) is expected to conform to computer punch-card-like conventions.  I.e., input lines are always exactly 80 characters long, and <b>XCOM-I</b> enforces this by truncating or right-padding input lines as necessary.  If the input lines are longer than 80 columns physically — say, because they have punch-card sequence numbers in columns 81-88 — the extra columns are stripped off.<br></p>
+<p>As for the source-code proper, other than being confined to columns 1-80, it is entirely free-form.  I.e., line breaks are ignored; several statements may exist on the same input card, or conversely, a single statement may be split across multiple cards.  Even though XPL <font color="#663300"><code>CHARACTER</code></font> strings are limited to 256 characters, there is seemingly no limit to the length of an XPL statement.<br></p>
+<p>There are hints in the error messages of McKeeman's <b>XCOM</b> (and I believe, in <i>A Compiler Generator</i> text) that <i>some</i> contemporary computer systems may have treated column 1 specially, perhaps accepting some kind of non-blank control characters there.  If so, it was a issue outside <b>XCOM</b> proper and is irrelevant to <b>XCOM-I</b>.  However, you do find that legacy XPL source code does often begin in column 2 rather than column 1, and I suspect that this hypothetical column-sensitivity is the reason for it.<br></p>
+<p>Regarding this column-1 ambiguity, however, there is the practical question of what to do when a long quoted string is split across multiple cards.  Does column 1 belong to the string or not?  In <b>XCOM-I</b>, I take my cue from McKeeman's source code for <b>XCOM</b> in this matter:  In spite of the fact that <b>XCOM</b>'s source code generally avoids column 1 in all other cases, column 1 <i>does</i> belong to any multi-line quoted strings.<br></p>
+
 <h3>Identifiers</h3>
 <p>Identifiers cannot begin with a digit, but otherwise consist of any sequence of upper- or lower-case alphanumeric characters, <i>or</i> any of the characters @ _ # $.&nbsp; For example, @_26$8ab# is a legal name for a variable.
 </p>
 <p>Identifiers cannot exceed 256 characters in length.
 </p>
-<h3>Datatypes, Declarations, and Literals<br>
+<h3><a name="datatypes"></a>Datatypes, Declarations, and Literals<br>
 </h3>
 <p>There are only three basic datatypes:<br></p>
 <ul>
@@ -793,6 +799,7 @@ and used in XPL/I source code like <b>HAL/S-FC</b>.&nbsp; It's not my invention
  or some wacky innovation in <b>XCOM-I</b>.<br>
 <h3>LITERALLY and Macros</h3>
 TBD<br>
+<br>
 <h3><a name="common"></a>COMMON Memory</h3>
 XPL/I also introduces the notion of <font color="#663300"><code>COMMON</code></font> memory, not present in XPL.&nbsp; The notion behind <font color="#663300"><code>COMMON</code></font>
  memory is that a very large application program like <b>HAL/S-FC</b> won't be 
@@ -916,8 +923,23 @@ and there are no command-line switches to alter this behavior.<br>
 <h3>PROCEDUREs, RETURNs, and Their Peculiarities<br>
 </h3>
 <p>In a view from a height, an XPL program consists of <font color="#663333"><code>PROCEDURE</code></font> definitions and of code that uses those definitions.<br></p>
-<p><font color="#663333"><code>PROCEDURE</code></font> definitions in the source code can be nested, to any desired depth. 
-</p>
+<p>A procedure definition looks something like this:<br></p>
+<blockquote>
+  <pre><font color="#663300"><i>label</i>:<br>PROCEDURE(... <i>parameter list</i> ...) <i>ReturnType</i>;<br>	DECLARE ... <i>for the parameters</i> ...;<br>	DECLARE ... <i>for local variables</i> ...;<br><br>	... <i>code</i> ...;<br>END <i>label</i>;</font><br></pre>
+</blockquote>
+
+<p><font color="#663333"><font color="#000000">A lot of this is optional.  Thus while the initial <font color="#663300"><code><i>label</i>:</code></font> is required (since it's the name of the procedure), the </font></font><font color="#663333"><font color="#000000"><font color="#663333"><font color="#000000"><font color="#663300"><code><i>label</i></code></font></font></font> at the end of the definition is optional, and is really there only for readability purposes.  If the procedure needs no parameters, then the <font color="#663300"><i><code>parameter list</code></i></font>, <i>including</i> its enclosing parentheses, is omitted.  If the procedure returns no value, then <font color="#663300"><i><code>ReturnType</code></i></font> is omitted; if present, it is one of the basic non-subscripted datatypes <font color="#663300"><code>FIXED</code></font>, <font color="#663300"><code>BIT(<i>n</i>)</code></font>, or <font color="#663300"><code>CHARACTER</code></font>.  Each parameter in the </font></font><font color="#663333"><font color="#000000"><font color="#663333"><font color="#000000"><font color="#663300"><i><code>parameter list</code></i></font></font></font> must have a declaration within the body of the procedure, and while those declarations don't technically have to precede the declarations of the local variables as shown above, it was apparently customary to do so.</font></font></p><font color="#663333"><code>PROCEDURE</code></font> definitions in the source code can be nested, to any desired depth.  <font color="#663333"><code>PROCEDURE</code></font> definitions and <font color="#663300"><code>DO...END</code></font>
+ blocks provide the program with a hierarchical structure of 
+"scopes".&nbsp; The hierarchical structure is provided by the 
+parent/child relationships among the scopes.  Variables are accessible 
+within the scope in which they're declared, along with any descendant scopes.  If a
+ variable is declared in more than one scope of the hierarchy, the one 
+in the innermost enclosing scope is the one that is applicable.  Note, 
+though, that variables can be declared only at the global level or in a 
+procedure, and not within <font color="#663300"><code>DO...END</code></font> blocks. <br>
+<blockquote><font size="-1"><b>Warning:</b>&nbsp; As usual, there are traps.&nbsp; As I mentioned above, </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font> definitions can be embedded within other </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font> definitions, and are accessible within that </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font> or descendant scopes.&nbsp; Can a </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font> be defined within a </font><font size="-1"><font color="#663300"><code>DO...END</code></font> block?&nbsp; It can!&nbsp; But (trap!) it is accessible anywhere in the enclosing </font><font size="-1"><font size="-1"><font color="#663333"><code>PROCEDURE</code></font></font> or that </font><font size="-1"><font size="-1"><font color="#663333"><code>PROCEDURE</code></font></font>'s descendants, and is <i>not</i> limited to the <font color="#663300"><code>DO...END</code></font> block in which it was defined.&nbsp; (For example, the <font color="#663300"><code>COMMENT_BRACKET</code></font> procedure within <b>HAL/S-FC</b>'s <font color="#663300"><code>OUTPUTWR</code></font>.xpl.) </font><br>
+
+</blockquote>
 <p>A <font color="#663333"><code>PROCEDURE</code></font> may be invoked in two different ways.&nbsp; If it returns a value via a <font color="#663300"><code>RETURN</code></font> statement, it can be used in an arithmetical expression or a string expression.&nbsp; If it doesn't return a value, or if it does return a value and you simply want to ignore the value, a <font color="#663333"><code>CALL</code></font> statement can be used to invoke the <font color="#663333"><code>PROCEDURE</code></font> but to discard any returned value.<br></p>
 <p><b>Important:</b>&nbsp; All variables local to a <font color="#663333"><code>PROCEDURE</code></font> definition retain their values after the <font color="#663333"><code>PROCEDURE</code></font> returns.&nbsp; If the <font color="#663333"><code>PROCEDURE</code></font> is re-executed, those local variables retain the values they previously had in the prior invocation of the <font color="#663333"><code>PROCEDURE</code></font>.&nbsp; The values of those local variables, though retained, are inaccessible to code outside of the <font color="#663333"><code>PROCEDURE</code></font>, because the compiler enforces scopes of variables. (In C code, this would be the same thing as saying that every local variable of every function is automatically declared as <font color="#663333"><code>static</code></font>.)
 </p>
@@ -936,7 +958,7 @@ and there are no command-line switches to alter this behavior.<br>
 <p>Regarding the <font color="#663300"><code>RETURN</code></font> statement, McKeeman explains that it is used to exit from a <font color="#663333"><code>PROCEDURE</code></font> and optionally to return a value.  Furthermore, the calling code can either use that return value or else ignore it.  Which makes perfect sense.  But  as usual, there are some documented and undocumented peculiarities to the <font color="#663300"><code>RETURN</code></font> statement as well:<br></p>
 <ul>
   <li>McKeeman explains (p. 146) that calling code can <i>use</i> returned values from <font color="#663300"><code>PROCEDURE</code></font>s even if the <font color="#663300"><code>PROCEDURE</code></font> has no <font color="#663300"><code>RETURN</code></font> statement, or the <font color="#663300"><code>RETURN</code></font> statement specifies no value.  In this case, we are told, the return value is simply some unpredictable value from some unspecified System/360 register.  Which is rotten, of course, but so what?  This is never going to happen, right?  Wrong!  Actual XPL code does this from time to time.  <b>XCOM-I</b>, on the other hand, <i>always</i> returns a value from a <font color="#663300"><code>PROCEDURE</code></font>, whether or not there are any <font color="#663300"><code>RETURN</code></font> statements specifying a return value; the returned value in this case is 0 if <font color="#663300"><code>FIXED</code></font>, a <font color="#663300"><code>BIT</code></font> value of the appropriate width evaluating to 0, or else the empty string for a <font color="#663300"><code>CHARACTER</code></font>.</li>
-  <li>McKeeman does not mention that <font color="#663300"><code>RETURN</code></font> statements may exist at the global level, outside of the scope of any procedure, and may return a value when they do.  <b>XCOM-I</b> treats these as exits from the program back to the operating system, with the returned value being the program's exit code.  It thus expects the return value to be a program status code.</li></ul>
+  <li>McKeeman does not mention that <font color="#663300"><code>RETURN</code></font> statements may exist at the global level, outside of the scope of any procedure, and may return a value when they do.  But they can.  <b>XCOM-I</b> treats these as exits from the program back to the operating system, with the returned value being the program's exit code.  It thus expects the return value to be a program status code.</li></ul>
 <h3>Blocks and Loops</h3>
 <p>Compound statements in XPL are groupings of simple statements (such as assignments or if-then-else statements) enclosed within a <font color="#663300"><code>DO ... END</code></font> block:<br></p>
 <blockquote>
@@ -1957,6 +1979,10 @@ The values of <code><font color="#663300"><i>op</i></font></code> are:<br>
 The DP floating-point result of the operation is stored back into <font color="#663300"><code>DW(0),DW(1)</code></font>, although not all of the operations can necessarily produce results of full DP accuracy from DP operands.<br>
   <br>
 The angular unit for trigonometric operations is the radian.<br>
+<br>
+Note that the values stored in these registers of the work-area are in 
+the binary format of "IBM hexadecimal floating-point", which are not 
+used anywhere else in XPL memory (unless copied from the working area).<br>
 </td>
     </tr>
     <tr>
@@ -2000,11 +2026,70 @@ which is 6 for single precision and 15 for double precision.<br>
 </td>
     </tr>
     <tr>
-      <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i>point</i>=MONITOR(13,<i>name</i>);<br>
+      <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i>address</i>=MONITOR(13,<i>name</i>);<br>
     </font></code></td>
-      <td valign="middle">N/A<br>
+      <td valign="middle">Performs DELETE of current option processor and then LOADs an option processor specified by <code><font color="#663300"><i>name</i></font></code>.
+ The option processor loaded is called and passed a pointer to the PARM 
+field in effect at the time of compiler invocation. The option processor
+ passes the PARM field and establishes an options table (see Chapter 9 
+[of document IR-182-1]) whose address is passed back as a return 
+value.&nbsp; If <code><font color="#663300"><i>name</i></font></code> is a null string, the pointer to the existing options table is returned.<br>
 </td>
-      <td valign="middle">This is a no-op for <b>XCOM-I</b>.<br>
+      <td valign="middle"><code><font color="#663300">MONITOR(13,<i>name</i>)</font></code>
+ returns an address which is used by the XPL program, in some 
+program-specific fashion, to find options settings for it that have been
+ set up by the run-time library.&nbsp; In C terms, it's the equivalent 
+for <font color="#663300"><code>argv[]</code></font>.<br>
+<br>
+The remaining gobbledygook in the documented description relates to the fact that program options (such as those for <b>HAL/S-FC</b><b></b>
+ compiler) would originally have been provided by the Job Control 
+Language (JCL) which initiated execution of the program, by means a 
+"PARM field" given on one of the JCL cards.&nbsp; For example, in the 
+JCL<br>
+<blockquote>
+  <pre><font color="#663300">//XPL EXEC PGM=MONITOR,<br>//         PARM='SYTSIZE=1800,REFSIZE=20000,LISTING2,$I,$V,$U,$W'</font><br></pre>
+</blockquote>
+the PARM field is the string <font color="#663300"><code>'SYTSIZE=1800,REFSIZE=20000,LISTING2,$I,$V,$U,$W'</code></font>,
+ and the comma-delimited items are the individual options 
+selected.&nbsp; Presumably, the operating system wouldn't have been able
+ to directly interpret the meaning of this PARM field on its own, since 
+the types of options would have been specific to the program being 
+run.&nbsp; So an "option processor" specific to the program being run 
+must be loaded to perform that interpretation.&nbsp; In the case of 
+Intermetrics's version of <b>HAL/S-FC</b>, the particular options processor for compiler pass 1 was <code><font color="#663300"><i>name</i></font></code><font color="#663300"><code>='COMPOPT '</code></font>, whereas it was an empty string for passes 2 and 3, and <font color="#663300"><code>'LISTOPT '</code></font>
+ for pass 4.&nbsp; (Note the trailing spaces to make the non-empty 
+strings come out to 8 characters.)&nbsp; While these different options 
+processors weren't identical, it appears to me that they were mutually 
+consistent. <br>
+<br>
+Again, just to be doubly clear, <code><font color="#663300">MONITOR(13)</font></code> provides access to options settings <i>not</i> for <b>XCOM</b> or <b>XCOM-I</b>, but rather for the XPL program being compiled by <b>XCOM-I</b>, and specifically for <b>HAL/S-FC</b>.&nbsp; So while I will try to fully document these options in write-ups about <b>HAL/S-FC</b>, I'll only give the briefest of summaries here in this discussion of <b>XCOM-I</b>.<br>
+<blockquote><font size="-1"><b>Note:</b> <b>HAL/S-FC</b> optional parameters are of two types:  those of <i>type 1</i> are the simple on/off parameters, such as the flags in <font color="#663300"><code>OPTIONS_CODE</code></font> as described above; those of <i>type 2</i> instead have a numerical or string value.  </font><br>
+</blockquote>The <code><font color="#663300"><i>name</i></font></code> parameter in <code><font color="#663300">MONITOR(13,<i>name</i>)</font></code> is ignored entirely by <b>XCOM-I</b>.&nbsp; That's because in the <b>XCOM-I</b> system, options are given by command-line switches that would have been evaluated long before <code><font color="#663300">MONITOR(13,<i>name</i>)</font></code> is even executed.&nbsp; The name of the options processor is instead given via the XPL program's command-line option <font color="#663300"><code>--optproc</code></font>.&nbsp; For all of the <b>HAL/S-FC</b>-related options processors, the <code><font color="#663300"><i>address</i></font></code> returned by <code><font color="#663300">MONITOR(13)</font></code> is a pointer in memory to the beginning of a block of 6 consecutive <font color="#663300"><code>FIXED</code></font> values<font size="-1"><b>:</b></font><br>
+<ul>
+  <li><font color="#663300"><font color="#000000">The<b> </b>first is a <font color="#663300"><code>FIXED</code></font> value (called </font></font><font color="#663300"><font color="#000000"><font color="#663300"><code>OPTIONS_CODE</code></font> or <font color="#663300"><code>OPTION_BITS</code></font>) that collects</font></font> 32 bit flags, each of them (in principle) itself representing a type 1 option.</li></ul>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; And what are those type 1 options? <a moz-do-not-send="true" href="Shuttle/19760020796.pdf#page=59">Document IR-182-1 (p. 3-18)</a>
+ lists interpretations of each of the bit flags by bit-number and 
+compiler pass, but unfortunately with inadequate description of what the
+ options do.  Meanwhile, <a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=66">the HAL/S-FC User's Manual (p. 5-2)</a> also lists what I presume are all of the bit flags, with good descriptions but <i>not</i>
+ by bit-position.  Unfortunately, the names are often somewhat or very 
+different between the two documents, and for those discrepant cases it 
+remains difficult to match bit-position in <font color="#663300"><code>OPTIONS_CODE</code></font>
+ with the documented type 1 option.  But most of them clearly match 
+between the documents and are thus adequately documented.  For example, 
+the option <font color="#663300"><code>LISTING2</code></font> shown in the sample JCL above can be obtained by masking, <font color="#663300"><code>OPTIONS_CODE&amp;2</code></font>, and is described as  providing a secondary, unformatted HAL/S program listing.</font></blockquote>
+<ul>
+
+  <li><font color="#663300"><font color="#000000">The remaining five values are the pointer addresses for <font color="#663300"><code>BASED FIXED</code></font> arrays:  </font><code>CON</code></font>, <font color="#663300"><code>PRO</code></font>, <font color="#663300"><code>TYPE2</code></font>, <font color="#663300"><code>VALS</code></font>, <font color="#663300"><code>NPVALS</code></font> (or <font color="#663300"><code>MONVALS</code></font>), each of which the options processor has already allocated memory for and equipped with data.  Obtaining information about these arrays of data from surviving documentation is a tad challenging, so what I have to say about it is partially based on inference:</li>
+  <ul>
+    <li><font color="#663300"><code>CON</code></font>:  This is an array of string descriptors for the selected type 1 options.  <b>HAL/S-FC</b> uses it just for printing a report in pass 1, while using <font color="#663300"><code>OPTIONS_CODE</code></font> in place of it for any other purpose.  There are 22 options altogether in <font color="#663300"><code>CON</code></font>.  Each option is literally as given in the HAL/S-FC User's Manual if selected, while it is prefixed by "NO" if not selected.  So for example, the LISTING2 option appears in this array either as <font color="#663300"><code>'LISTING2'</code></font> or as <font color="#663300"><code>'NOLISTING2'</code></font>.  The options appear in <font color="#663300"><code>CON</code></font> in alphabetical order according to their names as given in the HAL/S-FC User's Manual (i.e., <i>sans</i> any prefixes of "NO").</li>
+    <li><font color="#663300"><code>PRO</code></font>:  The interpretation is TBD, but the array is never used by <b>HAL/S-FC</b>, so <code><font color="#663300">MONITOR(13)</font></code> does not provision it, but instead always returns a pointer equal to 0.</li>
+    <li><font color="#663300"><code>TYPE2</code></font>:  This array contains the names (as string descriptors) of options of type 2.  There are 13 such type 2 options, always present in the same order:  TITLE, LINECT, PAGES, SYMBOLS, MACROSIZE, LITSTRINGS, COMPUNIT, XREFSIZE, CARDTYPE, LABELSIZE, DSR, BLOCKSUM, and MFID (for primary flight software) or OLDTPL (for backup flight software). <br></li>
+    <li><font color="#663300"><code>VALS</code></font>:  This array contains the values of the options of type 2, in the same order as the names in the <font color="#663300"><code>TYPE2</code></font> array.  The values for TITLE, CARDTYPE, and MFID/OLDTPL are string descriptors, whereas all of the other values are integers.  <a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/Shuttle/HAL_S-FC%20User's%20Manual%20Nov%202005.pdf#page=69">The HAL/S-FC User's Manual (p. 5-5)</a> describes them all.  For example, <font color="#663300"><code>TYPE2(4)</code></font> should be a string descriptor for <font color="#663300"><code>'MACROSIZE'</code></font> and <font color="#663300"><code>VALS(4)</code></font> should be the value of the <font color="#663300"><code>MACROSIZE</code></font> option (or its default 500 if not specified).</li>
+    <li><font color="#663300"><code>NPVALS/MONVALS</code></font>: The interpretation is TBD, but the array is never used by <b>HAL/S-FC</b>, so <code><font color="#663300">MONITOR(13)</font></code> does not provision it, but instead always returns a pointer equal to 0.</li>
+  </ul>
+</ul>
+
+
 </td>
     </tr>
     <tr>
@@ -2091,13 +2176,15 @@ have found the largest free block wherever it was located, whereas <b>XCOM-I</b>
 </td>
     </tr>
     <tr>
-      <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i>string</i>=MONITOR(23);<br>
+      <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i>descriptor</i>=MONITOR(23);<br>
     </font></code></td>
-      <td valign="middle">Returns the 10 character string obtained from 
+      <td valign="middle">Returns the <code><font color="#663300"><i>descriptor</i></font></code> of the 10-character string obtained from 
 the ID field of the File Control Block of the first phase of the 
-compiler. The ID field is maintained by the <b>XPLZAP</b> program and contains the identifying string printed on the header of each page of the HAL listing.<br>
+compiler.&nbsp; The ID field is maintained by the <b>XPLZAP</b> program and contains the identifying string printed on the header of each page of the HAL listing".
 </td>
-      <td valign="middle">I'm not fully clear what this means.&nbsp; At present, <code><font color="#663300"><i>string</i></font></code> is always returned as 'REL32V0&nbsp;&nbsp; '.<br>
+      <td valign="middle">I think that what the original documentation was trying to get at is that <b>HAL/S-FC</b>'s version code, printed on each of the report pages printed by <b>XCOM</b> (or now, <b>XCOM-I</b>), is given by this ID string, and that the ID string is provided to each pass of <b>HAL/S-FC</b> via a call to <code><font color="#663300">MONITOR(23)</font></code>.&nbsp; Of course, in the modern reimplementation, there is no <b>XPLZAP</b> program, and it wouldn't be compatible with <b>XCOM-I</b> if there were one.&nbsp; In <b>XCOM-I</b>, the ID string itself is by default 'REL32V0&nbsp;&nbsp; ', but it can be changed via the <b>XCOM-I</b> command-line parameter <font color="#663300"><code>--identifier</code></font>.<br>
+<br>
+As for what a "descriptor" is, see <a moz-do-not-send="true" href="#datatypes">the description of the CHARACTER datatype</a>.&nbsp;&nbsp; In brief, the return value is not itself the ID string, but an integer value (i.e., of the <font color="#663300"><code>FIXED</code></font> datatype) that provides an index for finding the ID string in memory. <br>
 </td>
     </tr>
     <tr>
