@@ -63,6 +63,8 @@ includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 baseSource = None
 adhocs = {}
 standardXPL = False
+identifier = 'REL32V0   '  # String returned by MONITOR(23)
+
 '''
 McKeeman et al. does not specify the packing of the bits in memory for a BIT(n)
 value.  This seems relatively easy to deduce from other clues for n<=32 because
@@ -185,6 +187,20 @@ The available OPTIONS are:
               and --bfs switches and thus may be used in combination.  The 
               interpretations of these conditions are, however, unknown.  They 
               may activate the printing of extra messages during compilation.
+--identifer=S (Default "REL32V0   ".)  Set the 10-character string returned 
+              by MONITOR(23).  Will be automatically truncated or padded as
+              needed.
+--optproc=N   (Default is no options processor.)  The "options processor" is 
+              used for interpreting the run-time program's (particularly
+              HAL/S-FC's) options, which originally came from JCL, instead from
+              command-line options.  For HAL/S-FC, the available processors are:
+                  For PASS1    COMPOPT
+                  For PASS2    EMPTY
+                  For PASS3    EMPTY
+                  For PASS4    LISTOPT
+              Other HAL/S-FC passes do not require options processors.
+              Note: On the command line, this option should precede any of the
+              options that are processed by the selected options processor.
 --include=F   Folder to use for XPL/I's "/%INCLUDE ... %/" directives.
               Note that this is relative to the source-code file.
               Defaults to ../HALINCL.
@@ -213,12 +229,7 @@ The available OPTIONS are:
 --concise     in the generated C source code, useful for debugging, or just for
               improved human readability.  Whereas the --concise switch instead
               eliminates those extra comments, producing smaller C file sizes.
--             Causes all the remainder of the command line to be ignored.
 '''
-#--null=N      (Default 1) Selects from among several alternative
-#              implementations for empty strings, because the surviving
-#              documentation on that topic is unclear and contradictory.
-#              At present, only implementations 0 and 1 are available.
 
 for parm in sys.argv[1:]:
     if parm == "--":
@@ -238,6 +249,8 @@ for parm in sys.argv[1:]:
         condA = True
     elif parm == "--condC":
         condC = True
+    elif parm.startswith("--identifier="):
+        identifier = "%-10s" % parm[13:23]
     elif parm.startswith("--include="):
         includeFolder = parm[10:]
     elif parm.startswith("--source="):
@@ -290,10 +303,23 @@ for parm in sys.argv[1:]:
 
 # All of the source code is now in lines[].  Massage it a bit.
 for i in range(len(lines)):
-    # If trailing linefeeds were read in, strip them off.
-    lines[i] = lines[i].rstrip("\n")
+    # If trailing linefeeds or carriage returns (Windows, I'm looking at you!)
+    # were read in, strip them off.
+    lines[i] = lines[i].rstrip("\n\r")
+    # *Apparently*, in Windows, if you make the mistake of editing a source
+    # file containing one of our problematic UTF-8 characters ("¬", "¢"), 
+    # Windows will "thoughtfully" stick an unwanted UTF-8 character encoded as 
+    # "\xef\xbb\xbf" at the beginning of the file when you save it.  I suppose
+    # this must be invisible to the user, while helping Windows magically 
+    # identify files as UTF-8 without examining the entire file.  But for 
+    # XCOM-I, it's pure, unadulterated corruption.
+    lines[i] = lines[i].replace("\xef\xbb\xbf", "")
+    # Also, if somebody modern edits a file and thoughlessly put in any tab
+    # characters, we need to expands those tabs into spaces.
+    lines[i] = lines[i].expandtabs(8)
     # Make sure each line is at least 80 columns wide.
     lines[i] = "%-80s" % lines[i]
-    # Strip off punch-card sequence numbers the ends of lines.
+    # Strip off punch-card sequence numbers at the ends of lines.
     lines[i] = lines[i][:80]
-
+    
+    

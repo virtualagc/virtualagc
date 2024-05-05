@@ -10,6 +10,7 @@ Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-03-18 RSB  Began.
 '''
 
+import sys
 from auxiliary import error
 
 # Returns False on success, True on fatal error.  Parameters:
@@ -26,8 +27,8 @@ def PROCEDURE(tokenized, scope, inRecord = False):
     # before reaching this point, and so will have been added to the list of
     # variables as a label.  Remove it.
     symbol = list(scope["variables"])[-1]
-    if symbol == "MOVE": #***DEBUG***
-        pass
+    if symbol == "COMMENT_BRACKET": #***DEBUG***
+        #print("***", symbol, scope["blockType"], file=sys.stderr)
         pass
     scope["labels"].remove(symbol)
     attributes = scope["variables"][symbol]

@@ -330,6 +330,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                 
                 attributes = []
                 for symbol in group:
+
                     if symbol == "MOVECHAR": #***DEBUG***
                         pass
                         pass

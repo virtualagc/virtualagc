@@ -25,7 +25,7 @@ import os
 import shutil
 from parseCommandLine import *
 from auxiliary import error, setErrorRef, expandAllMacrosInString, printModel, \
-                      getAttributes
+                      getAttributes, walkModel, scopeDelimiter
 from xtokenize import xtokenize, digits
 from DECLARE import DECLARE
 from LABEL import LABEL
@@ -530,11 +530,11 @@ while True:
     elif reserved0 == "DO":
         # We must now create a new scope and descend into it.
         scope["blockCount"] += 1
-        if scope["symbol"][:1] != "_":
+        if scope["symbol"][:1] != scopeDelimiter:
             symbol = ''
         else:
             symbol = scope["symbol"]
-        symbol = symbol + "_%d" % scope["blockCount"]
+        symbol = symbol + scopeDelimiter + "%d" % scope["blockCount"]
         label = None
         if len(scope["code"]) > 0 and "TARGET" in scope["code"][-1]:
             label = scope["code"][-1]["TARGET"]
@@ -577,7 +577,52 @@ while True:
         #print(tokenized)
         error("Unimplemented", scope)
         #print(pseudoStatement)
-        
+
+# There's an adjustment that must now be made occasionally.  Embedded PROCEDUREs
+# should be immediate child scopes of the PROCEDUREs in which they're embedded.
+# However, it occasionally happens that they've instead been defined in the
+# XPL source code within a DO...END block.  In those cases, they must be
+# promoted upward into the correct scopes.  This is a bit tricky to do 
+# correctly right now, but easier (I think) than having done it above.
+# The same comment is true for LABELs within a PROCEDURE, except of course that
+# it actually *makes sense* for to be within DO...END blocks.
+def fixProcedureScopes(scope, extra=None):
+    # If this scope is not itself a PROCEDURE, we
+    # have to find the enclosing PROCEDURE, or failing that the global
+    # procedure.
+    nscope = scope
+    while "blockType" in nscope and nscope["blockType"] != "PROCEDURE":
+        if nscope["parent"] == None:
+            break
+        nscope = nscope["parent"]
+    if nscope == scope:
+        return
+    # Now promote all PROCEDURE definitions and LABELs from the current scope
+    # to the enclosing PROCEDURE's scope.
+    remove = []
+    for symbol in scope["variables"]:
+        attributes = scope["variables"][symbol]
+        if "PROCEDURE" not in attributes and "LABEL" not in attributes:
+            continue
+        remove.append(symbol)
+        nscope["variables"][symbol] = attributes
+    for symbol in remove:
+        scope["variables"].pop(symbol)
+walkModel(globalScope, fixProcedureScopes)
+
+if False: # Print out a hierarchical tree of procedures.
+    def printProcedures(scope, extra=None):
+        variables = scope["variables"]
+        for v in variables:
+            variable = variables[v]
+            if "PROCEDURE" not in variable:
+                continue
+            print(v, variable["parameters"], variable["return"], \
+                  variable["PROCEDURE"]["symbol"], \
+                  variable["PROCEDURE"]["ancestors"])
+    walkModel(globalScope, printProcedures)
+    sys.exit(1)
+
 # At this point, we have generated a model of the program,
 # in the form of a abstract models of the scope hierarchy,
 # the memory space, and pseudocode, all contained in a 

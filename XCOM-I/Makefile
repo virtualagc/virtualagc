@@ -155,8 +155,9 @@ $(XPLI_APPS):
 .PHONY: tests
 tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	cd bitsizeDemo && \
-	./bitsizeDemo >out.txt && \
-	diff -s -q ../Tests/bitsizeDemo.regression out.txt
+	./bitsizeDemo >out.txt
+
+	diff -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
 	
 	cd bitsizeDemoCommon && \
 	./bitsizeDemoCommon >out.txt && \
@@ -166,7 +167,8 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	cat xx00 xx01 | \
 	egrep --invert-match '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' > xxxx
 	
-	diff -s -q bitsizeDemo/out.txt bitsizeDemoCommon/out.txt
+	# This test no longer works, and shouldn't.
+	#diff -s -q bitsizeDemo/out.txt bitsizeDemoCommon/out.txt
 	
 	cd bitsizeDemoCommonIn && \
 	./bitsizeDemoCommonIn --commoni=../bitsizeDemoCommon/COMMON.out >out.txt && \

@@ -86,7 +86,7 @@ def callTree(globalScope):
         if procedureNames[procedure]["anyCalls"] == 0:
             junkProcs.append(procedure)
     if len(junkProcs) != 0:
-        print("No code will be generated for the following unused or overridden PROCEDURE(s):")
+        print("No code is generated for the following unused or overridden PROCEDURE(s):")
         for j in junkProcs:
             print("\t" + j)
             if j in globalScope["variables"]:

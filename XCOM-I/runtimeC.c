@@ -44,6 +44,7 @@ struct timeval startTime;
 static uint32_t freepoint = FREE_POINT;
 static uint32_t freelimit = FREE_LIMIT;
 
+char *parmField = "";
 int linesPerPage = 59;
 memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
 
@@ -503,6 +504,18 @@ parseCommandLine(int argc, char **argv)
         }
       else if (1 == sscanf(argv[i], "--linect=%d", &j))
         linesPerPage = j;
+      else if (!strncmp(argv[i], "--parm=", 7))
+        {
+          char *s;
+          parmField = &argv[i][7];
+          // We actually want to do a full breakdown and setup the data area
+          // of MONITOR(13) for the options we've found.  That's TBD.  For now
+          // we just pick off linect,since that's something we previously had
+          // a dedicated command-line option for.
+          s = strstr(parmField, "linect=");
+          if (s != NULL)
+            linesPerPage = atoi(s + 7);
+        }
       else if (!strcmp("--help", argv[i]))
         {
           printf("\n");
@@ -542,9 +555,8 @@ parseCommandLine(int argc, char **argv)
           printf("--commono=F   Name of the file to which data from COMMON\n");
           printf("              is written upon program termination.  By\n");
           printf("              default, the file COMMON.out is used.\n");
-          printf("--linect=N    (Default 59) Sets the lines per page for the\n");
-          printf("              purpose of pagination with XPL built-ins\n");
-          printf("              OUTPUT(0) and OUTPUT(1).\n");
+          printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
+          printf("              have been provided in JCL.\n");
           printf("\n");
           returnValue = 1;
         }
@@ -880,13 +892,10 @@ static char ebcdicToAscii[256] = {
 };
 
 char *
-getCHARACTER(uint32_t address)
-{
+STRING(uint32_t descriptor) {
   char *returnValue = nextBuffer();
-  uint32_t descriptor;
   size_t length;
   uint32_t index;
-  descriptor = (uint32_t) getFIXED(address);
   if (descriptor == 0) // Empty string?
     {
       *returnValue = 0;
@@ -912,6 +921,12 @@ getCHARACTER(uint32_t address)
       return returnValue;
     }
   return NULL;
+}
+
+char *
+getCHARACTER(uint32_t address)
+{
+  return STRING(getFIXED(address));
 }
 
 void
@@ -1610,6 +1625,19 @@ MONITOR7(uint32_t address, uint32_t n) {
 }
 
 uint32_t
+MONITOR13(uint32_t, char *name) {
+  // Note that the `name` parameter is ignored, since the options processor
+  // is instead taken from the --optproc command-line option.
+
+  // Before returning, must fill the data area pointed to by whereMonitor13
+  // with run-time options from the command-line switches, according to the
+  // selected options processor.
+  // TBD
+
+  return WHERE_MONITOR_13;
+}
+
+uint32_t
 MONITOR18(void) {
   struct timeval currentTime;
   gettimeofday(&currentTime, NULL);
@@ -1621,6 +1649,11 @@ MONITOR18(void) {
 uint32_t
 MONITOR21(void) {
   return freelimit - freepoint;
+}
+
+uint32_t
+MONITOR23(void) {
+  return WHERE_MONITOR_23;
 }
 
 #if 0
@@ -2327,6 +2360,11 @@ FREEBASE(void) {
 void
 EXIT(void) {
   exit(10);
+}
+
+char *
+PARM_FIELD(void) {
+  return parmField;
 }
 
 // Some test code.

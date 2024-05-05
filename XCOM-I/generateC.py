@@ -13,6 +13,7 @@ Mods:       2024-03-27 RSB  Began.
 import datetime
 import os
 import copy
+import re
 from auxiliary import *
 from parseCommandLine import *
 from xtokenize import xtokenize
@@ -186,129 +187,130 @@ values are themselves dictionaries with the keys:
     "bitWidth"          from BIT(bitWidth), or 0 if not BIT
 '''
 memoryMap = {}
-def allocateVariables(scope, extra = None):
-    global variableAddress, memory, memoryMap
-    
-    # The following functions are the Python equivalents of the functions
-    # with the same names in runtimeC.c, and behave identically except that 
-    # they are used at compile-time for initialization rather than run-time.
-    # Except that `getFIXED` is always going to return an unsigned value
-    # rather than a signed value.
-    def putFIXED(address, i):
-        global memory
-        memory[address + 0] = (i >> 24) & 0xFF
-        memory[address + 1] = (i >> 16) & 0xFF
-        memory[address + 2] = (i >> 8) & 0xFF
-        memory[address + 3] = i & 0xFF
-    
-    def getFIXED(address):
-        value = memory[address + 0]
-        value = (value << 8) | memory[address + 1]
-        value = (value << 8) | memory[address + 2]
-        value = (value << 8) | memory[address + 3]
-        return value
 
-    # The value returned by `getBIT` or stored to memory by `putBIT` is a 
-    # dictionary with the following keys:
-    #    "bitWidth"
-    #    "numBytes"
-    #    "bytes"
-    # "bytes" corresponds to the array of bytes used by the runtime library,
-    # but since Python has infinite-precision integers, it's easer to just use
-    # a Python integer than an array of bytes.
-    
-    def getBIT(address):
-        bitWidth = memoryMap[address]["bitWidth"]
-        if bitWidth < 1 or bitWidth > 2048:
-            errxit("%s: getBIT(%d) width out of range (%d) at 0x%06X" % \
-                   (identifier, bitWidth, bitWidth, address))
-        numBytes = memoryMap[address]["numBytes"]
+# The following functions are the Python equivalents of the functions
+# with the same names in runtimeC.c, and behave identically except that 
+# they are used at compile-time for initialization rather than run-time.
+# Except that `getFIXED` is always going to return an unsigned value
+# rather than a signed value.
+def putFIXED(address, i):
+    global memory
+    memory[address + 0] = (i >> 24) & 0xFF
+    memory[address + 1] = (i >> 16) & 0xFF
+    memory[address + 2] = (i >> 8) & 0xFF
+    memory[address + 3] = i & 0xFF
+
+def getFIXED(address):
+    value = memory[address + 0]
+    value = (value << 8) | memory[address + 1]
+    value = (value << 8) | memory[address + 2]
+    value = (value << 8) | memory[address + 3]
+    return value
+
+# The value returned by `getBIT` or stored to memory by `putBIT` is a 
+# dictionary with the following keys:
+#    "bitWidth"
+#    "numBytes"
+#    "bytes"
+# "bytes" corresponds to the array of bytes used by the runtime library,
+# but since Python has infinite-precision integers, it's easer to just use
+# a Python integer than an array of bytes.
+
+def getBIT(address):
+    bitWidth = memoryMap[address]["bitWidth"]
+    if bitWidth < 1 or bitWidth > 2048:
+        errxit("%s: getBIT(%d) width out of range (%d) at 0x%06X" % \
+               (identifier, bitWidth, bitWidth, address))
+    numBytes = memoryMap[address]["numBytes"]
+    if bitWidth > 32:
+        descriptor = getFIXED(address)
+        descriptorFromLength = (descriptor >> 24) & 0xFF
+        if numBytes - 1 != descriptorFromLength:
+            errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
+                    (identifier, address, numBytes - 1, lengthFromDescriptor))
+        address = descriptor & 0xFFFFFF;
+    value = 0
+    for i in range(numBytes):
+        value = (value << 8) | memory[address]
+        address += 1
+    # Re `bitPacking`: see comments for `parseCommandLine`.
+    if bitPacking == 1:
+        pass
+    elif bitPacking == 2:
+        shiftedBy = bitWidth % 8
+        if shiftedBy != 0:
+            value = value >> (8 - shiftedBy)
+    else:
+        errxit("Unknown setting for --packing")
+    # End of `bitPacking`.
+    return {
+        "bitWidth": bitWidth,
+        "numBytes": numBytes,
+        "bytes":  value
+        }
+
+def putBIT(address, value):
+    global variableAddress, freeLimit
+    bitWidth = value["bitWidth"]
+    if bitWidth < 1 or bitWidth > 2048:
+        errxit("%s: putBIT(0x%06X) width (%d) out of range" % \
+               (identifier, address, bitWidth));
+    numBytes = value["numBytes"]
+    if bitWidth > 32:
+        descriptor = getFIXED(address)
+        if descriptor == 0: # Not yet assigned a value:
+            # Note that we put the data for BIT strings at the *top* of
+            # memory, lowering `freelimit`.
+            freeLimit -= numBytes
+            descriptor = ((numBytes - 1) << 24) | (freeLimit & 0xFFFFFF)
+            putFIXED(address, descriptor)
+        lengthFromDescriptor = (descriptor >> 24) & 0xFF
+        if numBytes - 1 != lengthFromDescriptor:
+            errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
+                   (identifier, address, numBytes - 1, lengthFromDescriptor))
+        address = descriptor & 0xFFFFFF
+    bytes = value["bytes"] & ((1 << bitWidth) - 1)
+    # Re `bitPacking`: see comments for `parseCommandLine`.
+    if bitPacking == 1:
+        pass
+    elif bitPacking == 2:
         if bitWidth > 32:
-            descriptor = getFIXED(address)
-            descriptorFromLength = (descriptor >> 24) & 0xFF
-            if numBytes - 1 != descriptorFromLength:
-                errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
-                        (identifier, address, numBytes - 1, lengthFromDescriptor))
-            address = descriptor & 0xFFFFFF;
-        value = 0
-        for i in range(numBytes):
-            value = (value << 8) | memory[address]
-            address += 1
-        # Re `bitPacking`: see comments for `parseCommandLine`.
-        if bitPacking == 1:
-            pass
-        elif bitPacking == 2:
             shiftedBy = bitWidth % 8
             if shiftedBy != 0:
-                value = value >> (8 - shiftedBy)
-        else:
-            errxit("Unknown setting for --packing")
-        # End of `bitPacking`.
-        return {
-            "bitWidth": bitWidth,
-            "numBytes": numBytes,
-            "bytes":  value
-            }
-    
-    def putBIT(address, value):
-        global variableAddress, freeLimit
-        bitWidth = value["bitWidth"]
-        if bitWidth < 1 or bitWidth > 2048:
-            errxit("%s: putBIT(0x%06X) width (%d) out of range" % \
-                   (identifier, address, bitWidth));
-        numBytes = value["numBytes"]
-        if bitWidth > 32:
-            descriptor = getFIXED(address)
-            if descriptor == 0: # Not yet assigned a value:
-                # Note that we put the data for BIT strings at the *top* of
-                # memory, lowering `freelimit`.
-                freeLimit -= numBytes
-                descriptor = ((numBytes - 1) << 24) | (freeLimit & 0xFFFFFF)
-                putFIXED(address, descriptor)
-            lengthFromDescriptor = (descriptor >> 24) & 0xFF
-            if numBytes - 1 != lengthFromDescriptor:
-                errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
-                       (identifier, address, numBytes - 1, lengthFromDescriptor))
-            address = descriptor & 0xFFFFFF
-        bytes = value["bytes"] & ((1 << bitWidth) - 1)
-        # Re `bitPacking`: see comments for `parseCommandLine`.
-        if bitPacking == 1:
-            pass
-        elif bitPacking == 2:
-            if bitWidth > 32:
-                shiftedBy = bitWidth % 8
-                if shiftedBy != 0:
-                    bytes = bytes << (8 - shiftedBy)
-        else:
-            errxit("Unknown setting for --packing")
-        # End of `bitPacking`.
-        for i in range(numBytes - 1 , -1, -1):
-            memory[address + i] = bytes & 0xFF
-            bytes = bytes >> 8
-    
-    # Note that unlike the runtime function of the same name, this version of
-    # putCHARACTER doesn't need to deal with compactification, since the
-    # *first* time, all variables can be allocated right where they belong
-    # without needing to be moved.  In fact, string data can just always be
-    # put at the current value of variableAddress.
-    def putCHARACTER(address, s):
-        global memory
-        length = len(s)
-        saddress = variableAddress
-        if length == 0:
-            putFIXED(address, 0)
-            return
-        if length > 256:
-            length = 256
-        descriptor = ((length - 1) << 24) | saddress
-        putFIXED(address, descriptor)
-        # Encode the string's character data as an EBCDIC Python byte array.
-        for i in range(length):
-            try: ##***DEBUG***
-                memory[saddress + i] = asciiToEbcdic[ord(s[i])]
-            except:
-                errxit("Memory overflow (%06X,%d) or else illegal character in \"%s\"" %\
-                       (saddress, i, s))
+                bytes = bytes << (8 - shiftedBy)
+    else:
+        errxit("Unknown setting for --packing")
+    # End of `bitPacking`.
+    for i in range(numBytes - 1 , -1, -1):
+        memory[address + i] = bytes & 0xFF
+        bytes = bytes >> 8
+
+# Note that unlike the runtime function of the same name, this version of
+# putCHARACTER doesn't need to deal with compactification, since the
+# *first* time, all variables can be allocated right where they belong
+# without needing to be moved.  In fact, string data can just always be
+# put at the current value of variableAddress.
+def putCHARACTER(address, s):
+    global memory
+    length = len(s)
+    saddress = variableAddress
+    if length == 0:
+        putFIXED(address, 0)
+        return
+    if length > 256:
+        length = 256
+    descriptor = ((length - 1) << 24) | saddress
+    putFIXED(address, descriptor)
+    # Encode the string's character data as an EBCDIC Python byte array.
+    for i in range(length):
+        try: ##***DEBUG***
+            memory[saddress + i] = asciiToEbcdic[ord(s[i])]
+        except:
+            errxit("Memory overflow (%06X,%d) or else illegal character in \"%s\"" %\
+                   (saddress, i, s))
+
+def allocateVariables(scope, extra = None):
+    global variableAddress, memory, memoryMap
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
@@ -496,7 +498,7 @@ def mangle(scope, extra = None):
     s = scope
     while True:
         symbol = s["symbol"]
-        if symbol != "" and symbol[:1] != "_":
+        if symbol != "" and symbol[:1] != scopeDelimiter:
             prefix = symbol + "x" + prefix
         s = s["parent"]
         if s == None:
@@ -670,11 +672,17 @@ def autoconvert(current, allowed, source=None):
     if current == "CHARACTER":
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "%s"))
+        if "FIXED" in allowed and source != None and source.startswith("getCHARACTER("):
+            # In this case, we interpreted the FIXED as being the descriptor
+            # of the string. 
+            return "FIXED", "getFIXED" + source[12:]
     elif current == "BIT":
         if "BIT" in allowed:
             conversions.append(("BIT", "%s"))
         if "FIXED" in allowed:
             conversions.append(("FIXED", "bitToFixed(%s)"))
+            #if source != None:
+            #    print("***", source, file=sys.stderr)
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", 
                                 "fixedToCharacter(bitToFixed(%s))"))
@@ -708,7 +716,7 @@ def autoconvertFull(scope, expression, toAttributes):
     return autoconvert(fromType, [toType], source)
 
 # `generateOperation` is called by `generateExpression` to evaluate the result
-# of an operation from `operatorTypes`.
+# of an operation from `operatorTypes`.  The global variable 
 def generateOperation(scope, expression):
     token = expression["token"]
     if "operator" not in token or token["operator"] not in allOperators:
@@ -949,13 +957,16 @@ def generateExpression(scope, expression):
                         errxit("Variable %s has no associated record width" % var)
                 else:
                     errxit("Parameter of RECORD_WIDTH not an identifier")
+            # Variables:
+            if symbol in ["LINE_COUNT"]:
+                return "FIXED", "LINE_COUNT"
             # Many runtime builtins.
             if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
                           "DATE", "TIME", "DATE_OF_GENERATION", "COREBYTE",
                           "COREWORD", "FREEPOINT", "TIME_OF_GENERATION",
                           "FREELIMIT", "FREEBASE", "ABS", "STRING", 
-                          "STRING_GT", "COREHALFWORD"]:
-                if symbol in ["INPUT", "SUBSTR", "STRING"]:
+                          "STRING_GT", "COREHALFWORD", "PARM_FIELD"]:
+                if symbol in ["INPUT", "SUBSTR"]:
                     builtinType = "CHARACTER"
                 else:
                     builtinType = "FIXED"
@@ -1016,14 +1027,14 @@ def generateExpression(scope, expression):
                     errxit("Could not evaluate MONITOR function number")
                 functionNumber = expression["children"][0]["token"]["number"]
                 # Only certain monitor functions return values.
-                if functionNumber in {1, 2, 6, 7, 9, 10, 12, 14, 15, 18, 
+                if functionNumber in {1, 2, 6, 7, 9, 10, 12, 13, 14, 15, 18, 
                                       21, 22, 23, 32}:
                     symbol = "MONITOR%d" % functionNumber;
                     builtinType = "FIXED"
-                    if functionNumber in {12, 23}:
+                    if functionNumber in {12}:
                         builtinType = "CHARACTER"
                 else:
-                    errxit("MONITOR(%d) uimplemented or returns no value" % \
+                    errxit("MONITOR(%d) unimplemented or returns no value" % \
                            functionNumber)
                 first = True
                 source = symbol + "("
@@ -1583,7 +1594,7 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
         # we have to find the declaration of the procedure.  Before doing that,
         # we first have to figure out the name of the procedure.
         procScope = scope
-        while procScope["symbol"].startswith("_") or procScope["symbol"] == "":
+        while procScope["symbol"].startswith(scopeDelimiter) or procScope["symbol"] == "":
             procScope = procScope["parent"]
             if procScope == None:
                 expression = line["RETURN"]
@@ -1660,10 +1671,12 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             else:
                 outerParameters = line["parameters"] 
                 attributes = getAttributes(scope, procedure)
-                try: #***DEBUG***
-                    mangled = attributes["mangled"]
-                except:
-                    errxit("Implementation:" + str(attributes))
+                if attributes == None:
+                    errxit("PROCEDURE %s not found" % procedure)
+                if "mangled" not in attributes:
+                    errxit("Implementation: Mangled name of PROCEDURE %s not found in attributes: %s" \
+                           % (procedure, str(attributes)))
+                mangled = attributes["mangled"]
                 if len(outerParameters) == 0:
                     print(indent + mangled + "();")
                 else:
@@ -1839,7 +1852,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             print("  if (parseCommandLine(argc, argv)) exit(0);")
             print()
         else:
-            attributes = scope["parent"]["variables"][scopeName]
+            attributes = getAttributes(scope, scopeName)
             variables = scope["variables"]
             if "return" in attributes:
                 returnType = attributes["return"]
@@ -1893,7 +1906,8 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     # described in the comments for CALL.  If there was already an explicit
     # RETURN here, or if the RETURN is somewhare else and this position cannot
     # be reached, the C compiler may complain, but hopefully won't fail.
-    if not lastReturned and scope["symbol"] != '' and scope["symbol"][:1] != "_":
+    if not lastReturned and scope["symbol"] != '' and \
+            scope["symbol"][:1] != scopeDelimiter:
         print(indent + "return 0;")
     if "extraIndent" in scope:
         indent = indent[:-len(indentationQuantum)]
@@ -1933,7 +1947,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         sys.stdout = stdoutOld # Restore previous stdout.
 
 def generateC(globalScope):
-    global useCommon, useString, useBit, pf, nonCommonBase, freeBase
+    global useCommon, useString, useBit, pf, nonCommonBase, freeBase, variableAddress
     
     pf = open(outputFolder + "/procedures.h", "w")
     print("/*", file=pf)
@@ -1980,6 +1994,66 @@ def generateC(globalScope):
     useString = False
     walkModel(globalScope, allocateVariables)
     nonCommonBase = variableAddress
+    
+    #-----------------------------------------------------------------------
+    # Before continuing with the other XPL variables below, now that we're
+    # out of the COMMON area we're going to allocate a little bit of memory 
+    # here for use by XCOM-I, specifically for passing info from `MONITOR` 
+    # and XCOM-I to the XPL program that needs to be accessible via XPL 
+    # variables, since uch variables need to be in `memory`.
+    
+    # First, the string whose descriptor is returned by `MONITOR(23)`.
+    whereMonitor23 = variableAddress
+    variableAddress += 4
+    putCHARACTER(whereMonitor23, identifier)
+    variableAddress += len(identifier)
+    
+    # Next, the options data returned by `MONITOR(13)`.  The data itself will
+    # all be filled in by the runtime library, but we need to make sure that the
+    # space is properly allocated and templated.
+    whereMonitor13 = variableAddress
+    # `MONITOR(13)` returns a pointer to a block of 6 `FIXED` values.
+    # I allow 16 characters for each option of type 1 or type 2 (11 is adequate,
+    # I think), plus 4 bytes for their string descriptors.  There are 22 
+    # possible type 1 options and 13 type 2 options, but I allow for 25 of each.
+    # Therefore, the entirety of either `CON` or `TYPE2` is (16+4)*25 = 500 
+    # bytes.
+    LEN_NAME = 16
+    MAX_ENTRIES = 25
+    SIZE_ALL = (LEN_NAME + 4) * MAX_ENTRIES
+    saddress = variableAddress + 24
+    putFIXED(variableAddress, 0) # `OPTIONS_CODE`
+    putFIXED(variableAddress + 4, saddress) # Pointer to `CON`.
+    putFIXED(variableAddress + 8, 0) # Pointer to unused BASED `PRO`.
+    putFIXED(variableAddress + 12, saddress + SIZE_ALL) # Pointer to `TYPE2`
+    putFIXED(variableAddress + 16, saddress + 2 * SIZE_ALL) # Pointer to `VALS`
+    putFIXED(variableAddress + 20, 0) # Pointer to unused BASED `NPVALS` or `MONVALS`
+    # Array of `CON`
+    daddress = saddress + 4 * MAX_ENTRIES
+    for i in range(MAX_ENTRIES): 
+        putFIXED(saddress + 4*i, ((LEN_NAME - 1) << 24) | daddress)
+        daddress += LEN_NAME
+    saddress = daddress
+    # Array of `TYPE2`
+    daddress = saddress + 4 * MAX_ENTRIES
+    for i in range(MAX_ENTRIES): 
+        putFIXED(saddress + 4*i, ((LEN_NAME - 1) << 24) | daddress)
+        daddress += LEN_NAME
+    saddress = daddress
+    # Array of `VALS`.  Trickier than `CON` or `TYPE2`, since 3 of the entries
+    # are string descriptors (for which we must allocate some space) but most
+    # are just `FIXED` (for which we don't).
+    daddress = saddress + 4 * MAX_ENTRIES
+    for i in range(MAX_ENTRIES): 
+        if i in [0, 8, 12]:
+            putFIXED(saddress + 4*i, ((LEN_NAME - 1) << 24) | daddress)
+            daddress += LEN_NAME
+        else:
+            putFIXED(saddress + 4*i, 0)
+    #saddress = daddress
+    variableAddress = daddress
+    #-----------------------------------------------------------------------
+    
     useCommon = False # non-COMMON variables
     useBit = False
     useString = False
@@ -2174,6 +2248,8 @@ def generateC(globalScope):
     print("#define MAX_DATATYPE_LENGTH %d" % len("CHARACTER"), file=f)
     print("#define MAX_RECORD_FIELDS %d" % maxRecordFields, file=f)
     print("#define MAX_RECORD_FIELD_NAME %d" % maxRecordFieldName, file=f)
+    print("#define WHERE_MONITOR_23 %d" % whereMonitor23, file=f)
+    print("#define WHERE_MONITOR_13 %d" % whereMonitor13, file=f)
     print("", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)
     print("typedef char datatype_t[MAX_DATATYPE_LENGTH + 1];", file=f)

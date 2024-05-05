@@ -114,6 +114,9 @@ getBIT(uint32_t bitWidth, uint32_t address);
 void
 putBIT(uint32_t bitWidth, uint32_t address, bit_t *value);
 
+char *
+STRING(uint32_t address);
+
 // Same for XPL `CHARACTER` type.
 char *
 getCHARACTER(uint32_t address);
@@ -271,6 +274,9 @@ uint32_t
 MONITOR7(uint32_t address, uint32_t n);
 
 uint32_t
+MONITOR13(uint32_t, char *name);
+
+uint32_t
 MONITOR18(void);
 
 // I find no calls to MONITOR function 19 or 20 in HAL/S-FC, and don't intend
@@ -282,6 +288,9 @@ MONITOR18(void);
 // darned easy, let's do it anyway.
 uint32_t
 MONITOR21(void);
+
+uint32_t
+MONITOR23(void);
 
 uint32_t
 COREBYTE(uint32_t address);
@@ -383,5 +392,9 @@ FREEBASE(void);
 
 void
 EXIT(void);
+
+extern char *parmField;
+char *
+PARM_FIELD(void);
 
 #endif // RUNTIMEC_H

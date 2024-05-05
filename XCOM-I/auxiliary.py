@@ -15,6 +15,8 @@ import re
 from parseCommandLine import debugSink, lines, lineRefs, replacementSpace, \
                              replacementQuote
 
+scopeDelimiter = 's'
+
 # `errorRef` and `ref` are indices into the `lines` and `lineRefs` arrays.
 errorRef = None
 def setErrorRef(ref):
@@ -345,7 +347,7 @@ def printModel(scope, extra = None):
     symbol = scope["symbol"]
     print(indent0 + "Scope: '%s'" % symbol, file=debugSink)
     print(indent1 + "Prefix: '%s'" % scope["prefix"], file=debugSink)
-    if symbol[:1] != '_':
+    if symbol[:1] != scopeDelimiter:
         if len(scope["literals"]) > 0:
             print(indent1 + "Macros:", file=debugSink)
             for macro in scope["literals"]:
