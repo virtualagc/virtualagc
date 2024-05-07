@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html>
+<body>
+<tt><br>
+<p style="margin: 0 0ch 0 0ch; text-align:center; padding:0;">PASCAL Technical Memo 5.1<br><br>
+Documentation of Internal Structure</p>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The primary documentation of the compiler internals is the code
+itself. However, as the listings for each phase (called Pass1,
+Pass2, Pass3, and PMD) are long, we have supplied in this memo a
+prose description of the major structures, both procedure and data,
+of each phase. It is intended that the reader should have digested
+Tech.&nbsp;Memos 1.1, 2.1, and 3.1 prior to starting on this one, so that
+he is familiar with the overall structure of the compiler, the
+distribution of function among phases, and the internal forms of the
+program and semantics tables in interpass communication.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;After reading the description of a phase in this memo, then with
+the aid of a cross reference listing of identifiers (produced by
+the utility program XPLXREF) and of a compilation listing (produced
+by XCOM4) one should be able to begin selective study of the 
+source code.<br><br>
+<u>Caveat</u>: This documentation is based on Release1, Version 1
+of the compiler (June 1, 1976) and it is unlikely that the 
+documentation will ever be revised to keep abreast of updates to the
+compiler itself.<br><br>
+1.&nbsp;&nbsp;<u>Pass1 internal description</u>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pass 1 is organized as five principal modules embedded in a control
+program environment. In this description we shall give the function
+associated with each module, describe principal aspects of the
+internal data base of each, and describe the input-output files and
+inter-module communications protocols. For more detail, one can
+refer to a listing of the source code and a cross-reference listing
+(use the XPL compiler and the utility program XPLXREF to obtain
+these).<br><br>
+1.0&nbsp;&nbsp;The control program and environment procedures are:<br><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">MAIN_PROCEDURE<br>
+INITIALIZE<br>
+RE_INITIALIZE<br>
+PRINT_DATE_AND_TIME<br>
+PRINT_SUMMARY<br>
+ERROR</p><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">INITIALIZE</p><p style="margin: 0 0ch 0 15ch; padding:0;">sets values of some compiler constants implemented 
+as initialized variables.</p>
+<p style="margin: 0 0ch 0 5ch; padding:0;">RE_INITIALIZE</p><p style="margin: 0 0ch 0 15ch; padding:0;">sets initial values of some global variables.</p>
+<p style="margin: 0 0ch 0 5ch; padding:0;">PRINT_SUMMARY</p><p style="margin: 0 0ch 0 15ch; padding:0;">prints pass1 compilation statistics.</p>
+<p style="margin: 0 0ch 0 5ch; padding:0;">MAIN_PROCEDURE</p><p style="margin: 0 0ch 0 15ch; padding:0;">is the control program.</p><br>
+1.1&nbsp;&nbsp;<u>Lexical analyzer</u> is responsible for getting source 
+program text from the SYSIN file, analyzing the source text to produce
+syntactic token codes, identifier or literal constant names, and
+conversion of numeric constants to their internal representation as
+32-bit, two&apos;s complement, binary radix integers or as single-precision
+hexadecimal floating point numbers.<br><br>
+The principal procedures are:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CHAR<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET_CARD<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SCAN<br><br>
+and<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;REAL_ADD<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;REAL_MULTIPLY<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TENINTO<br><br>
+The latter group performs real number conversions and is called
+from SCAN.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET_CARD performs card reading and listing. It returns the
+image of an input record in a global, CHARACTER type variable, TEXT.
+When the end of the SYSIN file is detected, TEXT is set to a string
+of end-of-file symbols. The ordinal number of the currently active
+input record is kept in the global variable CARD_COUNT.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CHAR is a procedure used to simulate character stream input; each
+call leaves the next character under the text string index pointer.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SCAN is the principal working procedure of the lexical analyzer.
+It analyzes the string in TEXT, discards portions as they are
+analyzed, and generates a call to GET_CARD upon reaching a
+record boundary. The currently scanned character is indexed within
+TEXT by the index variable CP. (Index values start from zero, in
+the XPL implementation languages.) Analysis involves a case switch
+on the equivalence class of the leading character of the string to
+be analyzed. Sequences of blanks, comments, quoted string 
+constants, and identifiers are scanned rapidly by employing the TRT
+(translate and test) instruction. Other sequences are scanned
+character-by-character. Reserved words are identified by searching
+a table, indexed by word length. Toggles appearing within
+comments are detected and switched by SCAN.<br><br>
+The data base for lexical analysis includes<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V - <p style="margin: 0 0ch 0 15ch; padding:0;">an array of character string identifiers 
+of lexical token types sorted as terminal, nonterminal 
+tokens and secondarily by length.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V_INDEX - <p style="margin: 0 0ch 0 15ch; padding:0;">indexes the terminal token names of V by length.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RESERVED_LIMIT - <p style="margin: 0 0ch 0 15ch; padding:0;">a constant; the length of the longest
+reserved word.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MARGIN_CHOP - <p style="margin: 0 0ch 0 15ch; padding:0;">record margin boundary.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CHARTYPE, TX, NOT_LETTER_OR_DIGIT, ALPHATABLE, BLANKETABLE,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COMMENTABLE, STRINGTABLE - <p style="margin: 0 0ch 0 15ch; padding:0;">character translation tables.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BUFFER, TEXT - <p style="margin: 0 0ch 0 15ch; padding:0;">character strings to hold input 
+record and portion being analyzed.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TEXT_LIMIT, CP - <p style="margin: 0 0ch 0 15ch; padding:0;">index pointers into text.</p>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Inter-module communication variables set by SCAN are:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TOKEN - <p style="margin: 0 0ch 0 15ch; padding:0;">code number of lexical token scanned;</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BCD - <p style="margin: 0 0ch 0 15ch; padding:0;">character string value of token scanned;</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NUMBER_VALUE - <p style="margin: 0 0ch 0 15ch; padding:0;">numeric conversion of token scanned;</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CONTROL - <p style="margin: 0 0ch 0 15ch; padding:0;">an array of the values of compiler control toggles
+set when &apos;$&apos; is encountered in scanning comments.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CARD_COUNT - <p style="margin: 0 0ch 0 15ch; padding:0;">ordinal number of the current input record.</p><br>
+1.2&nbsp;&nbsp;<u>Diagnostic listing editor</u> (DGNS)
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This module prepares an edited listing of the source program
+and sends it to a sequential file for later use by the execution
+profile routine, following execution of the program. The diagnostic
+listing is prepared only if the compiler parm DEBUG is set
+to a value of 2 or greater. This value is set by the monitor in 
+the predeclared global variable MONITOR_LINK(2). The 
+procedure of the diagnostic listing module is<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARAGRAPH<br><br>
+which is called from the syntactic module each time that a new
+syntactic token is obtained. Subordinate procedures and internal
+variables of this module have DGNS# as a prefix to their identifiers.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Global variables referred to by this module include<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BCD<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TEXT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TOKEN<br><br>
+It produces no intended side effect, apart from writing the file FILE3.<br><br>
+1.3&nbsp;&nbsp;<u>Lexicon and semantic table module</u>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The compiler maintains a lexicon in the form of a hash-indexed
+array of internal, sequential files. Each lexical declaration block
+(procedure, function or record block) is given a unique block number,
+and this number is incorporated as part of the hash code. Since
+each hash bucket defines a unique sequential file, there is no way
+that identifiers of the same name, but declared in different blocks,
+can ever appear in a common file. Identifier lookup within a
+sequential file is by sequential search. Nested contextual blocks
+are accounted for by maintaining a stack of the block numbers of
+currently open blocks. The block number of a block is saved in the
+VALUE field of the semantic table entry for the block heading.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Although most of the semantic table is built in Pass 2, some
+semantic data are recorded in Pass 1. Semantic table entries are
+allocated for identifiers and constants. The field of the semantic
+tables are kept in fixed-dimension arrays with a common index, as this
+is the only data structuring tool available in the XPL implementation
+language. These arrays are called;<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDENTITY - <p style="margin: 0 0ch 0 15ch; padding:0;">holds the identifier strings.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE - <p style="margin: 0 0ch 0 15ch; padding:0;">holds an index pointer to an entry for the datatype
+of a variable or function.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE - <p style="margin: 0 0ch 0 15ch; padding:0;">holds a type code that designates the category 
+of an object, i.e., constant, variable, procedure, etc.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VALUE - <p style="margin: 0 0ch 0 15ch; padding:0;">holds the internal representation of numeric constants,
+or the block number associated with procedures, functions and records.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WHERE_DECL - <p style="margin: 0 0ch 0 15ch; padding:0;">holds the input line number of the first
+appearance of an identifier.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SYMB_LINK - <p style="margin: 0 0ch 0 15ch; padding:0;">holds the index pointer to the next item in
+an internal, sequential file headed by a hash-code bucket.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N_LOOKUPS - <p style="margin: 0 0ch 0 15ch; padding:0;">holds a count of the number of subsequent
+references to an identifier.</p>
+<br>
+<pre style="margin:0;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Figure&nbsp;1&nbsp;-&nbsp;Symbol&nbsp;Table
+ 
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;______
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;BLOCK_&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;<u>S</u><u>T</u><u>A</u><u>C</u><u>K</u>_&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&boxv;______&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;identifier&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&boxv;______&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;
+&nbsp;____________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&nbsp;hash&nbsp;&nbsp;&nbsp;&nbsp;&lt;&lt;-------+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;function&nbsp;&nbsp;&lt;&lt;--------------------------*&nbsp;&nbsp;&boxv;CURRENT&nbsp;_LEVEL
+&boxv;____________&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;________________________________________
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;IDENTITY&boxv;SYMB_LINK&boxv;VAR_&boxv;VALUE&boxv;WHERE&boxv;N_&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;TYPE&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_DECL&boxv;LOOK&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;______&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;________<u>&boxv;</u>_________<u>&boxv;</u>____<u>&boxv;</u>_____<u>&boxv;</u>_____<u>&boxv;</u><u>U</u><u>P</u><u>S</u>_&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;<u>B</u><u>U</u><u>C</u><u>K</u><u>E</u><u>T</u>&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;0&boxv;______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;1&boxv;______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;________<u>&boxv;</u>_________<u>&boxv;</u>____<u>&boxv;</u>_____<u>&boxv;</u>_____<u>&boxv;</u>____&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;+---<u>-</u><u>&gt;</u><u>&apos;</u><u>A</u><u>B</u><u>C</u><u>&apos;</u>_<u>&boxv;</u>____<u>*</u><u>-</u><u>-</u><u>+</u>_<u>&boxv;</u>____<u>&boxv;</u>_____<u>&boxv;</u>_____<u>&boxv;</u>____&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&apos;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&apos;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;______&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&apos;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+----&gt;&gt;___<u>*</u><u>-</u><u>-</u>---+&nbsp;&nbsp;&boxv;________<u>&boxv;</u>_______<u>&apos;</u>_<u>&boxv;</u>____<u>&boxv;</u>_____<u>&boxv;</u>_____<u>&boxv;</u>____&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_<u>&apos;</u><u>H</u><u>2</u><u>0</u><u>&apos;</u>__<u>&boxv;</u>_<u>+</u><u>-</u><u>-</u><u>*</u><u>&lt;</u><u>-</u><u>+</u>_<u>&boxv;</u>____<u>&boxv;</u>_____<u>&boxv;</u>_____<u>&boxv;</u>____&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&apos;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&apos;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&apos;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;254&boxv;______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&apos;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;255&boxv;______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&apos;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;________<u>&boxv;</u>_<u>&apos;</u>_______<u>&boxv;</u>____<u>&boxv;</u>_____<u>&boxv;</u>_____<u>&boxv;</u>____&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;__<u>&apos;</u><u>X</u><u>1</u><u>&apos;</u>__<u>&boxv;</u>_<u>+</u><u>-</u><u>&gt;</u><u>*</u>____<u>&boxv;</u>____<u>&boxv;</u>_____<u>&boxv;</u>_____<u>&boxv;</u>____&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;________<u>&boxv;</u>_________<u>&boxv;</u>____<u>&boxv;</u>_____<u>&boxv;</u>_____<u>&boxv;</u>____&boxv;
+</pre>
+<br><br>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The principal procedures of the symbol table module are:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OPEN_BLOCK<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CLOSE_BLOCK<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ENTER_SYMBOL<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CONSTANT_INDEX<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LITERAL_INDEX<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOOKUP<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOOKUP_LITERAL<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SY_DUMP<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COMPACTIFY_SYMBOL_TABLE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PUNCH_SYMBOLS<br><br>
+The function of OPEN_BLOCK and CLOSE_BLOCK is to
+open or close a scope of declaration for identifiers. These
+procedures take a parameter OLD or NEW to indicate whether a block
+is or is not to be reopened. OLD and NEW are boolean constants.
+When a block is to be closed and never reopened (a procedure block)
+then a procedure NULLOUT is called to remove that block&apos;s entries
+from the sequential files of the lexicon this avoids unnecessary
+overhead in performing symbol table lookups.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The data base utilized by procedures OPEN_BLOCK and
+CLOSE_BLOCK includes<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CURRENT_LEVEL - a global index of the lexical level;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CURRENT_BLOCK - the most recently used unique block number;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OWN_MOD - an index to the header for the surrounding contextual block;<br><br>
+and several columns of a stack whose top is indexed by CURRENT_LEVEL:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BLOCK_STACK<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROCMARK<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SYMB_BLOCK_OWNER
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The procedures LOOKUP, LOOKUP_LITERAL, LITERAL_INDEX
+perform searches of the lexicon, and call ENTER_SYMBOL in case
+the identifier is not present. They return an index to the symbol
+table entry of the identifier given as an argument. LOOKUP takes
+as a second argument the depth (lexical level) to which a search is
+to be made. It emits a duplicate declaration message if the global
+flag IS_DECLARATION is set, and the identifier is not a
+forward declaration of a procedure. Its data base includes:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BUCKET, the table of headers of the internal sequential
+files of entries,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BLOCK_STACK, the stack of block numbers of open blocks,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CURRENT_LEVEL,<br><br>
+and the semantic tables.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Procedure CONSTANT_INDEX looks up numeric constants by their
+values, and enters them into the table if not found. 
+Numeric constants are linked onto lists headed by the entries 
+for data types INTEGER and REAL.<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SY_DUMP prints the Pass 1 and symbol table.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Procedures COMPACTIFY_SYMBOL_TABLE and PUNCH_SYMBOLS
+format and output the symbol table to a sequential 
+file (DD name SYSUT1) for use by Pass 2.<br><br>
+1.4&nbsp;&nbsp;Syntactic analysis and error recovery
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Pascal/360 compiler employs top-down, predictive parsing by
+a table-driven LL(1) parser. Error recovery is also predominately
+table-driven, and employs a multi-level strategy that keys on 
+reserved words and punctuation symbols to re-establish a legal
+syntactic context. The principal procedure of the parser is:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COMPILATION_LOOP
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COMPILATION_LOOP uses as a data base several tables prepared
+by an LL(1) constructor. These tables determine which production to
+apply, if any is applicable, for each pair (N,t) where N is a
+nonterminal symbol of the LL(1) grammar describing Pascal, and t is
+a terminal symbol. The tables implement a sparse representation
+of the decision matrix, and are therefore not easily read. However,
+the parsing decision tables occupy only 2078 bytes of storage, although
+there are 62 terminal and 96 nonterminal symbols of the grammar.
+Figure 2 illustrates the data structure that implements the decision
+matrix. GET_TOKEN is a subsidiary procedure of COMPILATION_LOOP
+from which calls to the lexical analyzer and the symbol table 
+lookup routines are made. GET_TOKEN also performs the semantic
+action of constructing a leaf node of the syntax tree for each
+&lt;identifier&gt; or &lt;constant&gt; token. However, this action is not taken
+at the time that the token is scanned. Semantic action is not taken
+on a token before it has been processed by COMPILATION_LOOP.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Global variables accessed or set by GET_TOKEN are:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TOKEN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BCD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;referenced by GET_TOKEN<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NUMBER_VALUE<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LAST_LITERAL_SCANNED - <p style="margin: 0 0ch 0 20ch; padding:0;">the index in the symbol
+table of the last scanned identifier or literal constant. Both
+referenced and set by GET_TOKEN.</p><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MINUS_FLAG - <p style="margin: 0 0ch 0 20ch; padding:0;">boolean flag that denotes a negative
+constant. Tested and cleared in GET_TOKEN.</p><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUBTREE_STACK &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set by<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUBTREE_STACKSIZE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;semantic<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARSE_TREE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;action<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PREVIOUS_TOKEN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;variables of COMPILATION_LOOP<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUCCESSFUL_INSERTION &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and used in error recovery;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TOKEN_SUPPLIED &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set in GET_TOKEN<br><br>
+Procedures called from GET_TOKEN include:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET_NODE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STACK_NODE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;semantic actions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UNSTACK<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOOKUP<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LOOKUP_LITERAL &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;symbol table routines<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARAGRAPH &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;diagnostic listing generator<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SCAN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexical analyzer
+<br><br>
+<pre style="margin:0;">
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Figure&nbsp;2&nbsp;-&nbsp;Data&nbsp;structure&nbsp;containing&nbsp;decision&nbsp;tables
+ 
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_______&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;______________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;<u>E</u><u>N</u><u>T</u><u>R</u><u>I</u><u>E</u><u>S</u>&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;<u>I</u><u>N</u><u>I</u><u>T</u><u>&boxv;</u><u>F</u><u>I</u><u>N</u>_<u>&boxv;</u><u>P</u><u>T</u><u>R</u>_&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;<u>P</u><u>R</u><u>O</u><u>D</u><u>#</u>&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&boxv;_______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_______&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____&nbsp;_
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;____<u>&boxv;</u>____<u>&boxv;</u>____&boxv;&nbsp;&nbsp;+--&gt;&gt;N,&nbsp;I1&boxv;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;+--&gt;&gt;&nbsp;I1&nbsp;&boxv;&nbsp;F1&nbsp;&boxv;&nbsp;*-----+&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;___<u>.</u>___&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&gt;--+
+&nbsp;+--&gt;&gt;N-NT1&boxv;___<u>*</u><u>-</u><u>-</u><u>-</u>---+&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N-NT&boxv;___<u>*</u><u>-</u><u>-</u><u>-</u>---+&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;<u>N</u><u>,</u>_<u>F</u><u>1</u>&boxv;_&boxv;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;_<u>I</u><u>m</u>_<u>&boxv;</u>_<u>F</u><u>m</u>_<u>&boxv;</u>_<u>P</u><u>m</u>_&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;+--&gt;&gt;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;+---------Index&nbsp;of&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Range&nbsp;of&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Production---+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;predicted&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;terminal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numbers&nbsp;to
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nonterminal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;symbol&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;apply&nbsp;for
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;symbol&nbsp;N&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;indices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decision&nbsp;pairs
+ 
+ 
+ 
+&nbsp;Figure&nbsp;3&nbsp;-&nbsp;Data&nbsp;structure&nbsp;for&nbsp;right&nbsp;hand&nbsp;sides&nbsp;of&nbsp;productions.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Terminal&nbsp;right&nbsp;head&nbsp;symbols&nbsp;are&nbsp;not&nbsp;represented.
+ 
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;________________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;<u>P</u><u>R</u>_<u>L</u><u>E</u><u>N</u><u>G</u><u>T</u><u>H</u><u>&boxv;</u><u>P</u><u>R</u>_<u>P</u><u>T</u><u>R</u>&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_<u>R</u><u>H</u><u>S</u>_&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&boxv;_________<u>&boxv;</u>______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&boxv;_________<u>&boxv;</u>______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_____&boxv;_
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;+--&gt;&gt;&nbsp;S1&nbsp;&nbsp;&boxv;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;____<u>.</u>____<u>&boxv;</u>___<u>.</u>__&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&gt;--&nbsp;n&nbsp;symbol
+&nbsp;Production&nbsp;&boxv;____<u>n</u>____<u>&boxv;</u>___<u>*</u><u>-</u><u>-</u>---+&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;right&nbsp;side
+&nbsp;number&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_<u>S</u><u>n</u>__&boxv;_&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+ 
+</pre>
+<br><br><br>
+The principal error recovery procedures embedded 
+in COMPILATION_LOOP are:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CHECK_FOR_SPELLING_ERROR - <p style="margin: 0 0ch 0 25ch; padding:0;">corrects simple 
+spelling errors in keywords.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIAGNOSE_ERROR - <p style="margin: 0 0ch 0 25ch; padding:0;">lists the terminal head symbols predicted
+from the stacktop token.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_EXPECTED - <p style="margin: 0 0ch 0 25ch; padding:0;">text acceptability of an (N,T) pair without
+actually implementing a parsing action.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SCAN_AHEAD - <p style="margin: 0 0ch 0 25ch; padding:0;">advances the lexical scan to a catch symbol.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CRASH_RESTORE -<p style="margin: 0 0ch 0 25ch; padding:0;">restores the parsing stack in case of disaster.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUPPLY_TOKEN - <p style="margin: 0 0ch 0 25ch; padding:0;">takes care of inserting a suspected missing
+token.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HARD_RECOVER - <p style="margin: 0 0ch 0 25ch; padding:0;">recovers lost context and reconfigures the
+parsing stack.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOFT_RECOVER - <p style="margin: 0 0ch 0 25ch; padding:0;">applies multi-level strategy to recover 
+from localized errors.</p><br>
+<p style="margin: 0 0ch 0 0ch; text-align:center; padding:0;"><u>THE SYNTACTIC ERROR RECOVERY STRATEGY</p></u>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In an LL(1) parser, a stack contains a list of the syntactic tokens
+that are predicted to complete a sentential form from the point of 
+scanning to its end. The tokens in the stack may be either terminal
+or nonterminal, and nonterminal tokens may have empty productions,
+allowing the prediction of optionally occurring phrases. For each
+nonterminal token, the parsing tables contain, a list of the terminal
+tokens that could legally appear at the head of the unanalyzed portion
+of the input string, and for each valid (nonterminal, terminal) pair,
+gives the production to apply. When a production is applied its
+right hand side is stacked in reverse order, replacing the nonterminal
+that is the left side symbol of the production.<br><br>
+A syntax error is detected when either<br><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">1)&nbsp;&nbsp;&nbsp;the symbol at the top of the stack is a terminal, and it
+is not matched by the head of the input string, or</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">2)&nbsp;&nbsp;&nbsp;the symbol at the top of the stack is nonterminal, but
+when paired with the head of the input string, no production is found
+to apply.</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+When an error is detected, a call is first made to procedure
+DIAGNOSE ERROR, whose task is to assemble a list of the terminal
+symbols that might have been accepted as head of the input string,
+given the predicted token at the top of the parsing stack. Next,
+a call is made to SOFT_RECOVER, which applies a sequence of recovery
+strategies, employing the first one that succeeds, if any does.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initially, SOFT_RECOVER tries a language-dependent heuristic.
+Certain punctuation symbols are fairly commonly substituted for one
+another, either because of their proximity on a keyboard, such as ,
+and . or as with = and :=, because = is used for the assignment
+operation in other commonly used program languages. If a substitute
+symbol would be acceptable in place of the one actually found at the
+head of the input string, then the substitution is made and
+the parse continues.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If no authorized substitution works, and the head of the input
+string is an identifier, whereas a keyword would have been expected,
+then the strategy is to check to see whether the identifier differs
+from an acceptable keyword by no more than a single letter insertion,
+deletion or substitution. If it does, then a spelling error is
+presumed, and the keyword is substituted.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If these attempts to recognize a trivial error of typing or spelling
+fail, then SOFT_RECOVER tries the hypothesis that a terminal
+symbol has been omitted from the input string. It looks at the next
+symbol in the parsing stack, beneath the stacktop symbol, and asks
+whether the head of the input string could be accepted from that
+predicted symbol. If it could, then the stacktop symbol is popped
+off, and the parse continues. This strategy accounts for missing
+&apos;END&apos; symbols, among others. Even if this attempt fails,
+the missing token hypothesis is not abandoned. If a unique 
+terminal symbol was expected, then it is supplied and the parse 
+continues. If a semicolon or a right parenthesis could have been 
+expected, then one or the other of these will be supplied.
+Only a single token will be gratuitously supplied, however, before
+additional parsing of the input string has taken place. The
+insertion of an extra semicolon before an &apos;ELSE&apos;, a habit of PL/1
+programmers, is treated as a special case, to be noted and corrected.
+If these strategies do not produce local recover, then a more severe
+strategy is pursued. SCAN_AHEAD advances the token scanner
+on the input string, looking for a symbol designated as a &apos;catch&apos;
+token, on which local recovery is likely to be possible. After a
+final attempt to recover on a catch symbol from the existing stack
+configuration, HARD_RECOVER is called to reconfigure the parsing
+stack.<br><br><br>
+HARD_RECOVER pops the parsing stack until one of four things
+happens:<br><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">1)&nbsp;&nbsp;&nbsp;A token appears at the top of the stack such that recovery
+on the catch symbol is assured, and the parse continues from that
+point;</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">2)&nbsp;&nbsp;&nbsp;A nonterminal token appears at the top of the stack such
+that the catch symbol could be an element of a phrase produced from
+the token. In such a case, the stack is reconfigured by replacing
+the stacktop token by the tail of a phrase that could be produced
+from it, and which predicts the catch token at the head of the
+input string.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">3)&nbsp;&nbsp;&nbsp;A token is encountered at the stacktop which could have
+been <u>preceded</u> in the stack by a token for which condition (2)
+would have been satisfied. In this case the stack is reconfigured
+as in (2) except that the stacktop symbol remains embedded in the
+stack, rather than being replaced.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">4)&nbsp;&nbsp;&nbsp;The parsing stack is emptied. Procedure CRASH_RESTORE
+reconfigures the parsing stack with a sequence of dummy nonterminal 
+tokens from which recovery can take place on any of a designated
+subset of the catch tokens. The scanner is advanced in the input
+string until one of these tokens is encountered.</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This graded sequence of recovery actions assures that at least
+one production will be applicable following a call to the error 
+recovery module, and that recovery can take place even if context
+has been lost, as occasionally happens due to a scrambled source
+program file, or a missing string quote error.<br><br>
+The data base on which the error recovery module works consists
+of constant tables:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PRODUCES_EMPTY - <p style="margin: 0 0ch 0 25ch; padding:0;">a boolean array, true for the 
+indices of nonterminals that can produce an empty string.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TERMINAL_HEADS_INDEX - an index by nonterminal symbols, into<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TERMINAL_HEADS - <p style="margin: 0 0ch 0 25ch; padding:0;">lists of the terminal heads symbols
+of strings that can be produced from each nonterminal.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CATCH_SYMBOLS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CRASH_SCAN_SYMBOLS <p style="margin: 0 0ch 0 25ch; padding:0;">sets of terminal symbols</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RESERVED_WORDS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RECOVERY_SYMBOLS - a set of nonterminals<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EQUIVALENT - table of authorized substitution tokens<br><br>
+variables (local to COMPILATION_LOOP):<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#_EXPECTED_TOKENS - <p style="margin: 0 0ch 0 25ch; padding:0;">count of the number of 
+terminals that could possibly allow the parse to continue from an
+error condition.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FOUND_SPELLING_ERROR - boolean<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PREVIOUS_TOKEN - <p style="margin: 0 0ch 0 25ch; padding:0;">holds the token previously scanned
+in case an insertion is tried.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SEMI_COLON_OK, RIGHT_PAREN_OK,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUCCESSFUL_INSERTION, TOKEN_SUPPLIED - token placeholders<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TOKENS_OUT - <p style="margin: 0 0ch 0 25ch; padding:0;">list of expected tokens formed by a call
+to DIAGNOSE_ERROR</p><br>
+1.5&nbsp;&nbsp;Semantic action module
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The semantic actions of Pass 1 are the construction
+of syntax trees according to the simplified
+internal grammar given in Tech.&nbsp;Memo.&nbsp;2.1, and the identification 
+of contextual scope of identifiers. The latter cannot be
+entirely determined from the syntax rules because of Pascal&apos;s
+definition of the scope of qualified field names of record types.<br><br>
+The principal procedures of the semantic action module are:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SYNTHESIZE - <p style="margin: 0 0ch 0 20ch; padding:0;">a giant case statement on the production
+number determined by parsing;</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STACK_NODE - <p style="margin: 0 0ch 0 20ch; padding:0;">stacks on internal node identifier for the
+syntax tree;</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UNSTACK - <p style="margin: 0 0ch 0 20ch; padding:0;">unstacks internal nodes and forms a subtree;</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UNSTACK_QUALIFIER<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WRITEOUT - <p style="margin: 0 0ch 0 20ch; padding:0;"> sends a syntax tree to an interpass
+communication file</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ASSOCIATE_TYPE_WITH_ID - <p style="margin: 0 0ch 0 20ch; padding:0;">enters the VALUE
+and DATATYPE fields into the semantic tables for identifiers of
+procedure, function, record or pointer types.</p><br>
+The data base of the semantic module includes the following -<br><br>
+Boolean flags:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_DECLARATION<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LABEL_DECL<p style="margin: 0 0ch 0 20ch; padding:0;">communicates with the semantic table module</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LABEL LOOKUP<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_FORWARD_DECL<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_FUNC_CALL<p style="margin: 0 0ch 0 20ch; padding:0;">(stack based on NESTING_LEVEL)</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_PROC_CALL<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_QUALIFIED_REFERENCE<p style="margin: 0 0ch 0 20ch; padding:0;">(stack based on NESTING_LEVEL)</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_WITHBLOCK<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_EMPTY_CASE_INSTANCE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IS_EMPTY_FIELD_LIST<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TYPE_DECL_PART<br><br>
+other variables:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FORWARD_REF_HEAD - <p style="margin: 0 0ch 0 20ch; padding:0;">points to the head of a linked
+list of semantic table entries of forward procedure headings</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NESTING_LEVEL - <p style="margin: 0 0ch 0 20ch; padding:0;">a stack pointer, corresponding 
+to the level of nesting of parenthesized expressions,
+expressions lists, and WITH statements.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NODE_STACK - a stack based on NODE_STACKSIZE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUBTREE_INDEX - <p style="margin: 0 0ch 0 20ch; padding:0;">a stack based on NODE_STACKSIZE (see Figure 4)</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NODE_STACKSIZE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NODE_NUMBER - <p style="margin: 0 0ch 0 20ch; padding:0;">a communications variable, holding the code
+for an interior node of the syntax tree.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUBTREE_STACK - a stack based on<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUBTREE_STACKSIZE (see Figure 4)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PARSE_TREE - <p style="margin: 0 0ch 0 20ch; padding:0;">an array into which the syntax tree is embedded.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WITHCOUNT - <p style="margin: 0 0ch 0 20ch; padding:0;">a stack based on NESTING_LEVEL, and which holds
+a count of qualified declaration scopes which are open at that level.</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LAST_LITERAL_SCANNED - <p style="margin: 0 0ch 0 20ch; padding:0;">a pointer to the semantic table
+entry for the literal (identifier, string or scalar constant) scanned
+most recently <u>prior</u> to obtaining the current scan token.</p><br><br><br>
+<pre style="margin:0;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Figure&nbsp;4&nbsp;
+ 
+ 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+---NODE_STACKSIZE&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;_____________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_______&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;NODE_&boxv;SUBTREE&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;SUBTREE&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;<u>S</u><u>T</u><u>A</u><u>C</u><u>K</u><u>&boxv;</u>_<u>I</u><u>N</u><u>D</u><u>E</u><u>X</u>_&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_<u>S</u><u>T</u><u>A</u><u>C</u><u>K</u>_&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;_____<u>&boxv;</u>_______&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+--&gt;&gt;_<u>5</u><u>7</u>__<u>&boxv;</u>___<u>*</u><u>-</u><u>-</u><u>-</u>---+&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;_______&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;+--&gt;&gt;___<u>*</u><u>-</u><u>-</u><u>-</u>----+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;+--&gt;&gt;_______&boxv;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SUBTREE_STACKSIZE--+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____________________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_<u>2</u>_<u>&boxv;</u><u>P</u><u>R</u><u>#</u><u>&boxv;</u>_<u>*</u>_<u>&boxv;</u>_<u>*</u>_<u>&boxv;</u><u>l</u><u>i</u><u>n</u><u>e</u><u>#</u>&boxv;&lt;----+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;___________&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;___________
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_<u>0</u>_<u>&boxv;</u>_<u>*</u>_<u>&boxv;</u>___&boxv;&lt;--+&nbsp;&nbsp;&nbsp;+--&gt;&boxv;_<u>1</u>_<u>&boxv;</u>_<u>-</u>_<u>&boxv;</u>___&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;___________&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;_<u>0</u>_<u>&boxv;</u>_<u>*</u>_<u>&boxv;</u>___&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;Symbol&lt;&lt;--+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;table&nbsp;index&lt;&lt;---------------------+&nbsp;
+</pre><br><br>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The semantic module utilizes a large data base including many
+structures. Its input data include the index of a production to be
+applied, which is paired as its parameter, and the global variable
+NODE_NUMBER indicating the code of an internal node of the syntax
+tree that is to be constructed. Ordinarily, the value of NODE_NUMBER
+has a fixed relationship to the production number, and is set from
+the constant-valued translation table NODE#TRANSLATE just before
+SYNTHESIZE is called. During error recovery, however, NODE_NUMBER
+may be initialized with a special value to designate an error node
+in the syntax tree, in order to warn Pass 2 that it is receiving
+invalid data.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Syntax trees are grown bottom-up, in spite of the fact that a
+top-down parsing algorithm is employed. Figure 4 indicates a
+subsidiary stack, embedded in an array called SUBTREE_STACK, that
+holds pointers (indices into the array PARSE_TREE) to the roots of
+a forest of partially grown trees. Another stack, NODE_STACK,
+holds the syntax code appropriate to an interior node of the syntax
+tree, and a second column of the same stack, SUBTREE_INDEX, holds a
+marker for SUBTREE_STACK to designate the first of a string of
+subtrees for that interior node. Whenever the parse predicts a
+phrase for which an interior node of the syntax tree is required, a
+procedure STACK_NODE is called to push the appropriate value onto
+NODE_STACK. Whenever a symbol table lookup occurs, the procedure
+GET_TOKEN builds a leaf node of the syntax tree and stacks 
+a pointer to it on SUBTREE_STACK. Whenever a production is applied
+for which a phrase is completed, the procedure UNSTACK is called.
+It forms a new node of PARSE_TREE, taking as its code the value
+popped from NODE_STACK, and as its successors the nodes pointed 
+to by SUBTREE_STACK starting at SUBTREE_INDEX and going up
+to SUBTREE_STACKSIZE. The newly formed node is then the root of 
+a subtree, and a pointer to it is stacked on SUBTREE_STACK.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Building syntax trees is the more straightforward of the tasks of
+SYNTHESIZE. Managing the scopes of declarations is somewhat more
+complicated, and a large number of status flag 
+variables are employed for this purpose. The semantic tables
+must contain enough information that when a <u>record</u>
+variable is referred to, the declaration block containing its
+field identifiers can be reopened. This information consists
+of a reference (in the DATATYPE field of the semantic table)
+to the entry for the record type. The record type contains in the
+VALUE field to access its field identifiers. Pointer variables must
+also have their DATATYPE fields filled in, for they may refer to
+variables of a record type. The same mechanism is employed to
+associate the identifier of a forward-declared procedure with the
+main part of its declaration block, which appears later. The
+procedure ASSOCIATE_TYPE_WITH_ID enters the requisite data into
+fields of the semantic table.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The procedure SYNTHESIZE, in its cases for the WITH statement and
+for variables, manages the setting of the flags and counters to
+indicate when qualified variable scopes are to be opened and closed.
+The procedure UNSTACK_QUALIFIER tests the stacked node number
+when a qualified variable is being analyzed, to determine whether or
+not to reopen a declaration block. In Figure 5 is illustrated a 
+possible configuration of the flags and counters during analysis<br><br><br><br>
+<pre style="margin:0;">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Figure&nbsp;5
+ 
+&nbsp;&nbsp;The&nbsp;stack&nbsp;configuration&nbsp;during&nbsp;analysis&nbsp;of&nbsp;a&nbsp;WITH
+statement&nbsp;containing&nbsp;the&nbsp;names&nbsp;of&nbsp;two&nbsp;qualified&nbsp;variables
+ 
+ 
++----NESTING_LEVEL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+--CURRENT_LEVEL
+&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&nbsp;_______________________________&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;______
+&boxv;&nbsp;&nbsp;&nbsp;&boxv;IS_WITH&boxv;IS_FUNC&boxv;IS_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;WITH&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;BLOCK_&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&boxv;BLOCK&nbsp;&nbsp;&boxv;CALL&nbsp;&nbsp;&nbsp;&boxv;QUALIFIED&boxv;COUNT&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;STACK&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;REFERENCE&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&boxv;&nbsp;&nbsp;&nbsp;&boxv;_______<u>&boxv;</u>_______<u>&boxv;</u>_________<u>&boxv;</u>_____&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;______&boxv;
++--&gt;&gt;_<u>t</u><u>r</u><u>u</u><u>e</u>__<u>&boxv;</u>_______<u>&boxv;</u>_________<u>&boxv;</u>__<u>2</u>__&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&boxv;______&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;+--&gt;&gt;______&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&boxv;
+</pre><br><br><br>
+of a WITH statement. The apparent complexity of analysis of
+qualified variables and WITH statement is one of the few unhappy
+consequences of the modularization of this compiler. Most semantic
+analysis is postponed until Pass 2, but the association of
+qualified variable names with declaration blocks
+could not reasonably be put off.
+</body>
+</html>

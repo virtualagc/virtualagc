@@ -1,0 +1,2355 @@
+Special KEYPUNCH 
+WIDTH OF COLUMN IS 65
+SENTENCES SEPARATED BY 2 BLANKS
+TEXT STARTS ON LINE 6 POSITION 10
+TABS AT 5 11 16 21 29 31 36 38 48
+INDENT (4,0),(10,0),(15,0),(20,0),(28,0),(30,0),(35,0),(37,0),(47,0)
+
+DEFINE HTML
+|/V/
+|HTML |PAR.1|(|PAR.2|,|PAR.3|,|PAR.4|,|PAR.5|,|PAR.6|,|PAR.7|,|PAR.8|,|PAR.9|)
+|GO
+
+DEFINE NOHTML
+|/V/
+|NO HTML |PAR.1|
+|GO
+
+go
+/L6m/PASCAL Technical Memo 5.2/m/
+/l2m/PASS 2 - Semantic Analysis and Generation of Symbolic Triples/m/
+/l4p/Pass 2 of the Stony Brook PASCAL compiler is responsible for
+semantic analysis of PASCAL programs.  Its inputs are the syntax
+trees and the partially-constructed symbol table produced by
+Pass 1.  Its outputs are blocks of symbolic triples, a portion of the
+fully constructed symbol table, a core image of the global
+activation record, and a partial symbol table used in conjunction
+with the post-mortem analysis routines.
+/l4/I.   Syntax Trees and the Internal Representation of PASCAL
+Programs.
+/p/The syntax diagrams given in the PASCAL report describe the
+formal syntax of the programming language in an explicit and
+unambiguous manner.  However, in an internal representation of
+a syntax tree, one prefers a notation that identifies productions
+of a context-free grammar by reference to the production index, and
+which does not explicitly contain tokens for the reserved words of
+the language.  These symbols do not need to be represented in an
+internal syntax tree, as their only function is to guide the parser
+to correct analysis of a sentence of the language.  This task will
+have already been carried out at the time that an internal
+representation  of the syntax tree is constructed.  A requirement
+of the internal representation is that it should be easy to
+define it in terms of a tree structure.
+/p/Accordingly, the following context-free grammar describes
+a substructure of the PASCAL syntax with all punctuation 
+deleted.  This grammar is used to represent the syntactic 
+structure of a program at the conclusion of Pass 1.  The
+notation used is similar to that described in section 2.9 of
+|16GRIES|17 utilizing iteration brackets.  The range of values
+of Multiplicity of each production is given by M=*.
+/p/A syntax tree is generated during execution of Pass 1, as a
+PASCAL source program is parsed.  The tree, or rather, a
+sequence of trees corresponding to major phrases of the program,
+are communicated from Pass 1 to Pass 2 in binary core-image
+format, blocked into 80-byte records.
+/p/A node of syntax tree consists of a sequence of 16-bit fields.
+The first field, called the Multiplicity of the node, gives the
+number of immediate successor nodes, and is equal to the total
+number of fields of the node, less 3.  If the Multiplicity is
+zero, the node is a leaf of the syntax tree, and the second field
+contains an index into the symbol table.  In all nodes, the last
+field contains the line number in the source program from which
+the node has been generated.
+/p/If the Multiplicity is greater than zero, then the second
+field contains the number of the production of the internal
+context-free grammar to which the node corresponds, and fields
+3 through Multiplicity + 2 contain indices of the immediate
+successor nodes.  These indices are given in units of fields
+relative to the origin of array storage containing the syntax 
+trees.
+/p/In transmission from Pass 1 to Pass 2, each syntax tree is
+preceded by an 80-byte header record whose initial five bytes
+are the characters '%TREE', and whose next five bytes are
+numerals (right justified in the five-byte field) giving the
+index of the root node.  If the 11th byte contains the character
+'P', then the $P toggle is active and the syntax tree is printed.
+If the 12th byte contains a 'T', then the $T toggle is active and
+the triples are printed.  (This is done in Pass 3.)  If the 13th
+byte contains an 'E', then the $E toggle is active for this
+block and the machine code emitted for this block is 
+printed in assembler format by the Pass 3 code generator.
+Each tree is followed by an 80-byte trailer record whose first
+four bytes contain the characters '%END'.
+/l2/Prodn.
+/lu/Number/ut3u/Production/u/
+/l2/1/t1/|35program|37 ::= <program id> |16<file id>|17@+
+<block>
+/lt1/M = 1+
+/l2/2/t1/<block> ::= |16<label decl>|17   |16<const
+decl>|17 |16<type defn>|17
+/lt3/|16<var decl list>|17 |16<proc decl list>|17 <body>
+/lt1/M = 1-6
+/l2/3/t1/|35statement list|37 ::= |16<statement|37|17@+
+/lt1/M = 1+
+/l2/4/t1/|35label decl|37 ::= |16|35unsigned integer|37|17@+
+/lt1/M = 1+
+/l2/5/t1/|35const decl|37 ::= |16|35const id|37 |35constant|37|17@+
+/l2/6/t1/|35type defn|37 ::= |16|35type id|37 |35type|37|17@+
+/lt1/M = 2* (1+)
+/l2/7/t1/|35proc decl list|37 ::= |35proc decl|37 |16|35proc decl
+list|37|17
+/lt1/M = 1,2
+/l2/8/t1/|35proc decl|37 ::= |35procedure id|37 |16|35formal
+param|37|17* |35body|37
+/lt1/M = 1+
+/l2/9/t1/<proc decl> ::= <function id> |16<formal 
+param>|17* <type id> <body>
+/lt1/M = 2+
+/l2/10/t1/<body> ::= |16<statement list>|17
+/lt1/M = 1
+/l2/11/t1/<var decl list> ::= <var decl> |16<var decl list>|17
+/lt1/M = 1,2
+/l2/12/t1/<var decl> ::= |16<variable id>|17@+ <type>
+/lt1/M = 2+
+/l2/13/t1/<statement> ::= <unsigned integer> <statement>
+/lt1/M = 2/t3///* labelled statement *//
+/l2/14/t1/<statement> ::= <variable> <expression>
+/lt1/M = 2/t3///* assignment *//
+/l2/15/t1/<statement> ::= <procedure id> |16<expression>|17*
+/lt1/M = 1+/t3///* procedure statement *//
+/l2/16/t1/<statement> ::= <statement list>
+/lt1/M =1/t3///* compound group *//
+/l2/17/t1/<statement> ::= <expression> <statement> |16<statement>|17
+/lt1/M = 2,3/t3///* conditional statement *//
+/l2/18/t1/<statement> ::= <expression> |16<case instance>|17*
+/lt1/M = 1+/t3///* CASE statement *//
+/l2/19/t1/<statement> ::= <expression> <statement>
+/lt1/M = 2/t3///* WHILE statement *//
+/l2/20/t1/<statement> ::= <statement list> <expression>
+/lt1/M = 2/t3///* UNTIL statement *//
+/l2/21/t1/<statement> ::= <variable id> <expression> <expression>
+/lt4/<statement>
+/lt1/M = 4/t3///* FOR statement -- TO *//
+/l2/22/t1/<statement> ::= <variable id> <expression> <expression>
+/lt4/<statement>
+/lt1/M = 4/t3///* FOR statement -- DOWNTO *//
+/l2/23/t1/<statement> ::= |16<variable>|17@+ <statement>
+/lt1/M = 2+/t3///* WITH statement *//
+/l2/24/t1/<statement> ::= <unsigned integer>
+/lt1/M = 1/t3///* GOTO statement *//
+/l2/25/t1/<formal param> ::= |16<variable id>|17@+ <type id>
+/lt1/M = 2+/t3///* formal VAR parameters *//
+/l2/26/t1/<formal param> ::= |16<variable id>|17@+ <type id>
+/lt1/M = 2+/t3///* formal value parameters *//
+/l2/27/t1/<formal param> ::=/t5/|16<procedure id>|17@+ |16<param
+ types>|17@+
+/lt5/|16<type id>|17
+/lt1/M = 2+/t3///* formal procedure//function parameters *//
+/l2/28/t1/<case instance> ::= |16<constant>|17@+ <statement>
+/lt1/M = 2+
+/l2/29/t1/<expression> ::= <expression>
+/lt1/M = 1/t3///* unary '+' operator *//
+/l2/30/t1/<expression> ::= <expression>
+/lt1/M = 1/t3///* unary '-' operator *//
+/l2/31/t1/<expression> ::= <expression>
+/lt1/M = 1/t3///* unary 'NOT' operator *//
+/l2/32/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '=' operator *//
+/l2/33/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '<' operator *//
+/l2/34/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '>' operator *//
+/l2/35/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '<>' operator *//
+/l2/36/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '<=' operator *//
+/l2/37/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '>=' operator *//
+/l2/38/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary 'IN' operator *//
+/l2/39/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '+' operator *//
+/l2/40/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '-' operator *//
+/l2/41/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary 'OR' operator *//
+/l2/42/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '*' operator *//
+/l2/43/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary '//' operator *//
+/l2/44/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary 'DIV' operator *//
+/l2/45/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary 'MOD' operator *//
+/l2/46/t1/<expression> ::= <expression> <expression>
+/lt1/M = 2/t3///* binary 'AND' operator *//
+/l2/47/t1/<expression> ::= <function id> |16<expression>|17*
+/lt1/M = 1+/t3///* function evaluation *//
+/l2/48/t1/<expression> ::= |16<element>|17@+
+/lt1/M = 1+/t3///* set expression *//
+/l2/49/t1/<expression> ::= <variable>
+/lt1/M = 1
+/l2/50/t1/<expression> ::= <unsigned constant>
+/lt1/M = 1
+/l2/51/t1/<variable> ::= <variable id> |16<qualifier>|17*
+/lt1/M = 1+
+/l2/52/t1///* unused *//
+/l2/53/t1/<qualifier> ::= |16<expression>|17@+
+/lt1/M = 1+/t3///* subscript list *//
+/l2/54/t1/<qualifier> ::= <empty>
+/lt1/M = 1/t3///* arrow (|46) *//
+/l2/55/t1/<qualifier> ::= <field id>
+/lt1/M = 1
+/l2/56/t1///* unused *//
+/l2/57/t1/<constant> ::= <unsigned constant>
+/lt1/M = 1/t3///* + constant *//
+/l2/58/t1/<constant> ::= <unsigned constant>
+/lt1/M = 1/t3///* - constant *//
+/l2/59/t1/<type> ::= <type id>
+/lt1/M = 1/t3///* simple type identifier *//
+/l2/60/t1/<type> ::= |16<constant id>|17@+
+/lt1/M = 1+/t3///* scalar type *//
+/l2/61/t1/<type> ::= <constant> <constant>
+/lt1/M = 2/t3///* subrange type *//
+/l2/62/t1/<type> ::= <type id>
+/lt1/M = 1/t3///* pointer type *//
+/l2/63/t1/<type> ::= |16<type>|17@+ <type>
+/lt1/M = 2+/t3///* array type *//
+/l2/64/t1/<type> ::= <type>
+/lt1/M = 1/t3///* file type *//
+/l2/65/t1/<type> ::= <type>
+/lt1/M = 1/t3///* set type *//
+/l2/66/t1/<type> ::= |16<fixed field list>|17* |16<variant field
+>|17
+/lt1/M = 1+/t3///* record type *//
+/l2/67/t1/<fixed field list> ::= |16<field id>|17@+ <type>
+/lt1/M = 2+
+/l2/68/t1/<variant field> ::= <tag id> <type id> |16<variant 
+instance>|17@+
+/lt1/M = 3+
+/l2/69/t1/<variant instance> ::= |16<constant>|17@+ <type>
+/lt1/M = 2+/t3///* <type> is always a record type -- prodn. 66 *//
+/l2/70/t1/<statement> ::= <empty>
+/lt1/M = 1
+/l2/71/t1/<type> ::= |16<type>|17@+ <type>
+/lt1/M = 2+/t3///* packed array type *//
+/l2/72/t1/<type> ::= <type>
+/lt1/M = 1/t3///* packed file type *//
+/l2/73/t1/<type> ::= <type>
+/lt1/M = 1/t3///* packed set type *//
+/l2/74/t1/<type> ::= |16<fixed field list>|17* |16variant field>|17
+/lt1/M = 1+/t3///* packed record type *//
+/l2/75/t1/<element> ::= <expression>
+/lt1/M = 1/t3///* simple set element *//
+/l2/76/t1/<element> ::= <expression> <expression>
+/lt1/M = 2/t3///* range set element *//
+/l2/77/t1/<param types> ::= |16<type id>|17@+
+/lt1/M = 1+/t3///* list of types of value parameters *//
+/l2/78/t1/<param types> ::= |16<type id>|17@+
+/lt1/M = 1+/t3///* list of types of VAR parameters *//
+/l2/79/t1/<param types> ::= |16<param types>|17@+ |16<type id>|17
+/lt1/M = 1+/t3///* PROCEDURE or FUNCTION types *//
+/l2/80/t1/<param types> ::= <empty>
+/lt1/M = 1
+/l2/81/t1/<error> ::= <empty>
+/lt1/M = 1
+/l4u/¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/u/
+/l3u/Notes/u/:
+/l2h1/1)/T/The node for <block> does not appear in the actual
+tree for <program> (production 1), nor do the nodes for <proc
+decl list> and <body> appear in the tree for <block> (production
+2), nor does the node for <body> appear in the trees for <proc
+decl> (productions 8 and 9)./h/
+/l2h1/2)/T/Productions 7, 11, 29, 52, 56 and 57 do not appear in
+any of the syntax trees produced by Pass 1./h/
+/l2h1/3)/T/The productions for <program> (production 1), <block>
+(production 2), <proc decl> (productions 8 and 9), and <body>
+(production 10) always appear in the root nodes of the syntax
+trees produced by Pass 1; no other productions may appear in the
+root node of a syntax tree.
+/h/
+/l2h1/4)/T/The distinguished terminal symbol <empty> is not
+represented by a leaf node containing a pointer into the 
+symbol table; rather it is indicated by a null reference (-1)
+appearing in the (nonterminal) node of its immediate predecessor.
+/h/
+/l2h1/5)/T/Production 81 is inserted into the syntax trees of
+programs which contain severe syntax errors as part of the 
+general error recovery strategy.
+/h/
+/l4/II.  Structure of the PASCAL Symbol Table
+/l3t1/Information in the symbol table is embedded into
+/u/records/u/ of fixed format.  All information within a single
+record is related to a single table entry.  In addition, to
+represent PASCAL data types in general, and structured types
+in particular, plexes of related records can be created 
+utilizing link pointers.  Linking of records in the symbol table
+for the purpose of representing structured data types has nothing
+to do with the logical organization of the table for the purpose
+of search on identifier keys; identifier search and scope rule
+implementation is performed in Pass 1 exclusively.
+/p/The fields of a record in the symbol table are given below, 
+along with their data types.  The types are given as pseudo-PASCAL
+types./L2/
+
+|HTML(TABLE,1,16,64)
+/l/IDENTITY:/T3/character string;
+/lT3/(* used to hold an identifier, if any *)
+/l2/DATATYPE:/T3/pointer to record;
+/lI3/(* will point to the record that describes the data
+type of this record *)/I3/
+/l2/VAR|47TYPE:/I3/(* external, variable, constant, literal, type,
+procedure, var parameter, format procedure, undefined, label,
+Fortran, caselabel, variant, field identifier, forward, multdecl);
+(* This corresponds to the use of a PASCAL scalar type to name
+the codes for all cases *)/I3/
+/l2/STRUCTYPE:/I3/(* statement, scalar, subrange, pointer, array,
+packed array, file, packed file, record, packed record, standard,
+set, packed set, tagfield, arithmetic *)/I3/
+/l2/OWNER:/T3/pointer to record;
+/lI3/(* will point to the record for the procedure name
+heading the block that contains this record *)/I3/
+/l2/S|47LIST:/T3/pointer to record;
+/lI3/(* used to link records of structured types and
+parameter lists *)/I3/
+/l2/VALUE:/T3/32 bits, untyped;
+/l2/STORAGE|47LNGTH:/T3/-1..32767;
+/lI3/(* indicates storage required in bytes, or cardinality of
+subranges.  -1 (null) is used to represent an undefined value *)
+/I3/
+/l2/PSEUDO|47REG:/T3/-3..63;
+/lT3/(* used in address assignment *)
+/l2/DISPLACEMENT:/T3/-1..32767;
+/lT3/(* used in address assignment *)
+|NOHTML(TABLE)|
+/l3p/Each of these fields is represented by a one-dimensional
+array.  Two array elements are fields of the same record if and
+only if they have the same index.
+/p/The pass 2 global variable N|47predeclared|47symb is the index of
+the last predeclared PASCAL identifier in the symbol table.  The
+global variable N|47anonymous|47symb is the index in the symbol 
+table
+of the first anonymous entry; that is, all table entries whose 
+index is less than N|47anonymous|47symb correspond to the 
+predeclared
+PASCAL identifiers or to strings or identifiers that appear in
+the text of the PASCAL program.  The global variable N|47decl|47symb
+is the index of the first unused symbol table record.  The symbol
+table entries whose indices are greater than or equal to 
+N|47anonymous|47symb, but less than N|47decl|47symb, correspond to
+unnamed types and constants.
+/l4/III.  Description of the Symbolic Triples.
+/l3p/The form of program text in communication between Pass 2
+and Pass 3 is that of sequences (one for each procedure body)
+of symbolic instructions.  The basic form of a single symbolic 
+instruction is a symbolic operation code (16 bit) followed
+by two operands (16 bits each).  Symbolic instructions, or
+triples, appear in a block of up to 14,400 bytes which can
+contain up to 2400 symbolic instructions.  This block is
+specified in an XPL declaration as an array, TRIPLES(7200)
+BIT(16), and in referring to locations within this block, 
+two-byte entities are indexed.
+/p/TRIPLES contains all the symbolic code for an individual
+procedure being compiled, and the size of the TRIPLES array
+imposes an implementation restriction on the length of individual
+procedure bodies.  The first six elements of TRIPLES are
+reserved for a header, formatted as follows:
+/l2t1/TRIPLES(0)/i4/is a pointer to the symbol table entry of
+the name of the procedure to which the code block belongs;
+/i4/
+/l2t1/TRIPLES(1)/i4/is the procedure sequence number, which
+will be used in Pass 3 to index a transfer vector;/i4/
+/l2t1/TRIPLES(2)/i4/is the index into the TRIPLES array of
+the entry point instruction;/i4/
+/l2t1/TRIPLES(3)/i4/is the length, as an index of TRIPLES, of
+the active portion of the array;
+/i4/
+/l2t1/TRIPLES(4) and TRIPLES(5) are reserved for future use.
+/p/The initial 16-bit field of each triple contains in the 
+first byte (bits 0-7), the result length less one (in bytes),
+permitting the designation of bytestring temporaries. In the
+second byte, the high order bit (bit 8 in the field) is set to
+1 if and only if the line number in the PASCAL program has
+increased by exactly one since the last previous triple was
+generated.  The low order seven bits (bits 9-15 in the field)
+contain the symbolic operation code.
+/p/A 16-bit operand consists of a two-bit mask in the high-order
+position (bits 0-1), followed by a 14-bit operand value.  The
+mask bits are interpreted as:
+/l2i1h1/00 /T/(MASK|47SYMBOL) operand value is a symbol
+table pointer;/h/
+/l2h1/01 /T/(MASK|47IMMEDIATE) operand value is immediate
+data, a 14-bit constant;/h/
+/l2h1/10 /T/(MASK|47TRIPLE) operand value is the index in
+TRIPLES of another symbolic instruction, a temporary result 
+which will not be referenced again;/h/
+/l2h1/11 /T/(MASK|47TEMP) operand value is the index of
+another triple, but not the last reference to that triple./hi/
+/p/The Pass 3 code generator uses the triples, plus the
+STORAGE|47LNGTH, PSEUD
+|47REG and DISPLACEMENT columns of the symbol table as its only
+inputs.  A symbol table entry for a procedure contains in
+STORAGE|47LNGTH the total length of its local data segment
+(or "activation record") in bytes, in PSEUDO|47REG the index of 
+the display register from which local variables of the procedure
+are addressed (0 for the program block, 1 for global procedures, 
+and +1 for each further level of static procedural nesting), and
+in DISPLACEMENT zero, which is the displacement of the implicit
+variable used to return values from a function call.  For a label, 
+STORAGE|47LNGTH and PSEUDO|47REG are both null, and
+DISPLACEMENT gives the index of a symbolic triple.
+/p/The symbolic operation codes and their interpretations are
+given in the following table.  In the table, operations for
+which a result length is given generate temporary, or intermediate, 
+results.  Operand types or results designated as Boolean may be
+represented either as Boolean typed values, or temporarily by
+condition codes.  Boolean-valued operations are always followed
+immediately by conditional jumps, which have a Boolean-type
+operand.
+/l4/Pseudo-operation group
+|HTML(TABLE,1,21,38,70)
+/l2u/operation/ut4u/result length/ut8u/operand 1//operand 2/u/
+/l2/LOAD/t4/4 bytes/t8/1-4 bytes//-----/T/¬
+/l2i1k3/create a temporary variable having the value of
+operand 1; place in a high-speed register./i1/
+/l2/LOAD|47ADDR/t4/4 bytes/t8/operand of any length//-----
+/l2i1k3/make the address of operand 1 referenceable./i1/
+/l2/TEMP/t4/1-256 bytes/t8/1-256 bytes//-----
+/l2i1k3/create a temporary variable having the value of
+operand 1.  If operand 2 is not null, then the temporary
+variable will reside solely in the run-time stack rather
+than in high-speed registers; otherwise, the result length must
+be 4 bytes, and the semantics are the same as for the LOAD
+operation./i1/
+/l2/TPOP/t4/-----/t8/operand of any length//-----
+/l2i1k3/deallocate the temporary variable designated by
+operand 1./i1/
+/l2/INDEX/t4/1-256 bytes/t8/operand of any length//1-4 bytes
+/l2i1k3/compute a reference to operand 1 indexed by the value
+of operand 2.  If operand 1 is an immediate zero, operand
+2 must be an absolute address./i1/
+/l2/S|47LENGTH/t4/-----/t8/literal constant//
+/lt8/literal constant
+/l2i1k3/when the immediately preceding operation is INDEX or
+TEMP, this triple contains the value of a storage length
+greater than 256 bytes, by concatenating its two halfword
+operands./i1/
+/l2/MONITOR/t4/(service code)/t8/operand of any length//
+/lt8/operand of any length
+/l2i1k3/a call to the run-time monitor; the form of the operands
+depends on the value of the monitor service code, which is
+stored in the return length field./i1/
+/l2/BCH|47TARGET/t4/(1 or 2)/t8/pointer to label//-----
+/l2i1k3/marks the target of a branch instruction. If the
+value in the result length field is one, then it begins a
+basic block, otherwise it does not.  Operand 1 is null
+except for user labels./i1/
+/l2/CASE|47TARGET/t4/-----/t8/-----//-----
+/l2i1k3/similar to the BCH|47TARGET; marks the beginning of a
+code segment for a component of a CASE statement./i1/
+/l2/PEND/t4/-----/t8/-----//-----
+/l2i1k3/indicates the end of a block of symbolic triples./i1/
+/l2/LINE|44/t4/-----/t8/current source line number
+/lt8///-----
+/l2i1k3/indicates the current line number in the corresponding
+PASCAL source program.  Always emitted when the line numbers
+increase by more than 1 between consecutive triples./i1/
+/l2/RANGECHK/t4/-----/t8/1-4 bytes//1-4 bytes
+/l2i1k3/if the value of operand 1 is not between zero and the
+value of operand 2, terminate execution with a VALUE OUT OF
+RANGE error message.  (Not used in Release 1.)/i1/
+/l4/Control group
+/l2u/operation/t4/result length/t8/operand 1//operand 2/u/
+/l2/BCH/t4/-----/t8/code address//
+/lt8/procedure sequence number
+/l2i1k3/unconditionally branch to operand 1, which must be
+either a BCH|47TARGET or CASE|47TARGET instruction.
+Operand 2 is null or is the sequence number identifying the
+procedure into whose code body operand 1 refers./i1/
+/l2/BNZ/t4/-----/t8/code address//(Boolean)
+/l2i1k3/test operand 2 and branch to operand 1, which must be
+a BCH|47TARGET instruction, on /u/true/u/.  If operand 2 is null, 
+the condition code, as set by the last previous instruction,
+is tested./i1/
+/l2/BZ/t4/-----/t8/code address//(Boolean)
+/l2i1k3/test operand 2 and branch to operand 1, which must be
+a BCH|47TARGET instruction, on /u/false/u/.  If operand 2 is
+null, the condition code, as set by the last previous
+instruction, is tested./i1/
+/l2/BCT/t4/-----/t8/code address//1-4 bytes
+/l2i1k3/test operand 2.  If zero or negative, branch to
+operand 1 which must be a BCH|47TARGET instruction; otherwise,
+decrement operand 2./i1/
+/l2/CASE|47JUMP/t4/-----/t8/1-4 bytes//positive constant
+/l2i1k3/indicates a case switch.  Operand 1 is the case
+selector expression; operand 2 is the cardinality of the 
+subrange type whose lower bound is the smallest case label
+and whose upper bound is the largest case label.  Operand 2
+is also the number of BCH instructions which immediately follow
+this instruction.  These BCH instructions all have as their 
+target a CASE|47TARGET instruction; a selector value of zero
+selects the first BCH instruction, one selects the second, and 
+so forth./i1/
+/l2/BLKMARK/T4/-----/t8/procedure//
+/lt8/procedure sequence number
+/l2i1k3/write a blockmark in the run-time stack.  Operand 1 is the
+index into the symbol table of a procedure to be called;
+operand 2 is its unique sequence number.  The blockmark will
+become the base of the called procedure's activation record.
+Operand 2 is null if a formal procedure is being called./i1/
+/l2/PARM/t4/-----/t8/operand of any length//
+/lt8/operand of any length
+/l2i1k3/operand 1 is an actual parameter which is to be moved
+to the location of operand 2, a formal parameter of the
+procedure being called./i1/
+/l2/PROCPARM/t4/-----/t8/procedure//
+/lt8/procedure sequence number
+/l2i1k3/operand 1 is a procedure to be passed as an actual
+parameter; operand 2 is its unique sequence number.
+If operand 2 of a PARM triple is a formal procedure or
+function, operand 1 must be the code address of a PROCPARM
+instruction./i1/
+/l2/PCALL/t4/4 bytes/t8/procedure//
+/lt8/procedure sequence number
+/l2i1k3/procedure call to operand 1, whose unique sequence number
+is operand 2.  If the call is to a proper procedure (not a
+function) this instruction is always followed by a TPOP
+instruction to release an unneeded temporary value.  Operand 2
+is null if a formal procedure is being called./i1/
+/l2/PRETURN/t4/-----/t8/-----//-----
+/l2i1k3/return from the current procedure./i1/
+/l2/FORT|47BLKMARK/t4/-----/t8/Fortran subroutine//
+/lt8/procedure sequence number
+/l2i1k3/prepare a register save area and an argument list for
+a call to the Fortran subroutine whose index into the symbol
+table is in operand 1, and whose unique sequence number is in
+operand 2.  (Not used in Release 1)./i1/
+/l2/FORT|47CALL|47REAL/t4/4 bytes/t8/Fortran subroutine//
+/lt8/procedure sequence number
+/l2i1k3/subroutine call to the Fortran subroutine whose index
+into the symbol table is in operand 1, and whose unique
+sequence number is in operand 2.  The called subroutine must
+either be a real-valued function or a proper subroutine.  In
+the latter case, this instruction is immediately followed by a
+TPOP instruction.  (Not used in Release 1.)/i1/
+/l2/FORT|47CALL|47INT/t4/4 bytes/t8/Fortran subroutine//
+/lt8/procedure sequence number
+/l2i1k3/subroutine call to the Fortran subroutine whose index
+into the symbol table is in operand 1, and whose unique
+sequence number is in operand 2.  The called subroutine must
+be a function subroutine, but not a real-valued function.
+(Not used in Release 1.)/i1/
+|NOHTML(TABLE)|
+/l5/Logical operation group
+|HTML(TABLE,1,21,38,64)
+/l3u/operation/ut4u/result length/ut8u/operand 1//operand 2/u/
+/l2/STORE,/t4/-----/t8/operand of any length//
+/l/MOVE/t8/operand of any length
+/l2i1k3/value of operand 2 is moved to location of operand 1./i1/
+/l2/NOT/t4/4 bytes/t8/1-4 bytes//-----
+/l2i1k3/logical (one's complement) complement of operand./i1/
+/l2/AND/t4/-----/t8/1-256 bytes//1-256 bytes
+/l2i1k3/replace operand 1 by logical /u/and/u/ of operand 1 with
+operand 2.  Set the condition code to /u/false/u/ if the
+resulting bitstring is all zeros; otherwise, set the condition
+code to /u/true/u/./i1/
+/l2/OR/t4/-----/t8/1-256 bytes//1-256 bytes
+/l2i1k3/replace operand 2 by logical /u/or/u/ of operand 1 with
+operand 2.  Set the condition code to /u/false/u/ if the
+resulting bitstring is all zeros; otherwise, set the condition
+code to /u/true/u/.  (AND and OR are the only operations which
+can set the condition code.)/i1/
+/l2/XOR/t4/-----/t8/operand of any length//
+/lt8/operand of any length
+/l2i1k3/replace operand 1 by the logical /u/exclusive or/u/ of
+operand 1 with operand 2./i1/
+/l2/LCOMPARE/t4/(Boolean)/t8/operand of any length//
+/lt8/operand of any length
+/l2i1k3/compare bytestrings for equality./i1/
+/l2/LGREATER/t4/(Boolean)/t8/operand of any length//
+/lt8/operand of any length
+/l2i1k3/compare logical (unsigned) operands for inequality
+(>)./i1/
+/l2/LLESS/t4/(Boolean)/t8/operand of any length//
+/lt8/operand of any length
+/l2i1k3/compare logical (unsigned) operands for inequality
+(<)./i1/
+/l2/IN/t4/(Boolean)/t8/1-4 bytes//1-256 bytes
+/l2i1k3/return /u/true/u/ if and only if operand 1 selects a bit
+in the bitstring designated by operand 2 whose value is one.
+Bits are numbered from zero, with zero selecting the leftmost
+bit./i1/
+/l2/RANGE/t4/1-256 bytes/t8/1-4 bytes//1-4 bytes
+/l2i1k3/form a bitstring of the specified return length all of
+whose bits are zero except for those selected by values
+greater than or equal to operand 1, and less than or equal
+to operand 2.  Bits are numbered from zero, with zero
+selecting the leftmost bit./i1/
+/l2/INTO/t4/-----/t8/1-4 bytes//1-256 bytes
+/l2i1k3/set that bit in operand 2 which is selected by operand
+1 to one.  Operand 1 may also be the code address of a RANGE
+instruction, in which case the bitstring created by the RANGE
+instruction is OR-ed into operand 2.  Bits are numbered from
+zero, with zero selecting the leftmost bit./i1/
+|NOHTML(TABLE)|
+/l5/Fixed-point arithmetic group
+|HTML(TABLE,1,21,38,64)
+/l3u/operation/ut4u/result length/ut8u/operand 1//operand 2/u/
+/l2/ADD/t4/4 bytes/t8/1-4 bytes//1-4 bytes
+/l2i1k3/sum of operands in signed integer arithmetic./i1/
+/l2/SUBTRACT/t4/4 bytes/t8/1-4 bytes//1-4 bytes
+/l2i1k3/difference of operand 1 less operand 2 in signed
+integer arithmetic./i1/
+/l2/MULTIPLY/t4/4 bytes/t8/1-4 bytes//1-4 bytes
+/l2i1k3/product of operands in signed integer arithmetic./i1/
+/l2/DIVIDE/t4/4 bytes/t8/1-4 bytes//1-4 bytes
+/l2i1k3/integer quotient of operand 1 divided by operand 2./i1/
+/l2/REM/t4/4 bytes/t8/1-4 bytes//1-4 bytes
+/l2i1k3/the integral remainder in the division of operand 1 by
+operand 2./i1/
+/l2/COMPARE/t4/(Boolean)/t8/1-4 bytes//1-4 bytes
+/l2i1k3/compare signed integer operands for equality./i1/
+/l2/GREATER/t4/(Boolean)/t8/1-4 bytes//1-4 bytes
+/l2i1k3/compare signed integer operands for inequality (>)./i1/
+/l2/LESS/t4/(Boolean)/t8/1-4 bytes//1-4 bytes
+/l2i1k3/compare signed integer operands for inequality (<)./i1/
+/l2/NEGATE/t4/4 bytes/t8/1-4 bytes//-----
+/l2i1k3/unary minus of signed integer operand./i1/
+/l2/ABS/t4/4 bytes/t8/1-4 bytes//-----
+/l2i1k3/absolute value of signed integer operand./i1/
+/l2/SQR/t4/4 bytes/t8/1-4 bytes//-----
+/l2i1k3/square of the signed integer operand./i1/
+/l2/ODD/t4/(Boolean)/t8/1-4 bytes//-----
+/l2i1k3/evaluate /u/true/u/ if and only if the operand is an
+odd integer./i1/
+/l2/ADD|47DECIMAL/t4/-----/t8/basic block sequence number//
+/lt8/incrementation value
+/l2i1k3/increment the basic block counter selected by operand
+1 by the value of operand 2.  This operation is used only
+to maintain execution counters for a flow summary when
+debug level > 1 is specified./i1/
+|NOHTML(TABLE)|
+/l5/Floating-point arithmetic group/l/
+|HTML(TABLE,1,21,38,64)
+/l2u/operation/ut4u/result length/ut8u/operand 1//operand 2/u/
+/l2/ADDFLT/t4/4 bytes/t8/4 bytes//4 bytes
+/l2i1k3/sum of floating-point operands./i1/
+/l2/SUBFLT/t4/4 bytes/t8/4 bytes//4 bytes
+/l2i1k3/floating-point difference of operand 1 less operand 2./i1/
+/l2/MPYFLT/t4/4 bytes/t8/4 bytes//4 bytes
+/l2i1k3/product of floating-point operands./i1/
+/l2/DIVFLT/t4/4 bytes/t8/4 bytes//4 bytes
+/l2i1k3/floating-point quotient of operand 1 divided by 
+operand 2./i1/
+/l2/COMPAREFLT/t4/(Boolean)/t8/4 bytes//4 bytes
+/l2i1k3/compare floating-point operands for equality./i1/
+/l2/GREATERFLT/t4/(Boolean)/t8/4 bytes//4 bytes
+/l2i1k3/compare floating-point operands for inequality (>)./i1/
+/l2/LESSFLT/t4/(Boolean)/t8/4 bytes//4 bytes
+/l2i1k3/compare floating-point operands for inequality (<)./i1/
+/l2/NEGATEFLT/t4/4 bytes/t8/4 bytes//-----
+/l2i1k3/unary minus of floating-point operand./i1/
+/l2/ABSFLT/t4/4 bytes/t8/4 bytes//-----
+/l2i1k3/absolute value of the floating-point operand./i1/
+/l2/SQRFLT/t4/4 bytes/t8/4 bytes//-----
+/l2i1k3/square of the floating-point operand./i1/
+/l2/FLOAT/t4/4 bytes/t8/1-4 bytes//-----
+/l2i1k3/convert integer value to a floating-point number./i1/
+/l2/TRUNCATE/t4/4 bytes/t8/4 bytes//-----
+/l2i1k3/convert floating-point value to an integer by
+truncation./i1/
+/l2/ROUND/t4/4 bytes/t8/4 bytes//-----
+/l2i1k3/convert floating-point value to an integer by
+rounding./i1/
+|NOHTML(TABLE)|
+/l5/
+/u/¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/u/
+/l3p/The form of the MONITOR instruction depends upon the service
+code (SVC) requested.  The SVC is stored in the high-order byte
+of the initial field, rather than a result length.  Below is a
+list of MONITOR calls.
+/L2v/
+width 80
+comment INDENT (1,0),(11,0),(29,0),(48,0),(80,0)
+HTML TABLE(1,6,19,38,80)
+TAB 1, 6, 19, 38, 80
+go
+/l3u/SVC/u//tu/operation/utu/returns/utu/operand//operand2/u/
+/l2/0/t/SIN/t/real value/t/real value//-----
+/l2/1/t/COS/t/real value/t/real value//-----
+/l2/2/t/ARCTAN/t/real value/t/real value//-----
+/l2/3/t/EXP/t/real value/t/real value//-----
+/l2/4/t/LN/t/real value/t/real value//-----
+/l2/5/t/SQRT/t/real value/t/real value//-----
+/l2/6/t/ABSFLT/t/real value/t/real value//-----
+/l2/7/t/SQRFLT/t/real value/t/real value//-----
+/l2/8/t/ROUND/t/integer value/t/real value//-----
+/l2/9/t/TRUNC/t/integer value/t/real value//-----
+/l2/10/t/ABS/t/integer value/t/integer value//-----
+/l2/11/t/SQR/t/integer value/t/integer value//-----
+/l2/12/t/ODD/t/Boolean value/t/integer value//-----
+/l2/13/t/EOLN/t/Boolean value/t/textfile variable//-----
+/l2/14/t/EOF/t/Boolean value/t/textfile variable//-----
+/l2/15/t/NEW/t/pointer into heap¬/t/integer storage length value//-----
+/l2/16/t/DISPOSE/t/-----/t/pointer into heap//integer storage length value
+/l2/17/t/GET/t/-----/t/file variable//-----
+/l2/18/t/PUT/t/-----/t/file variable//-----
+/l2/19/t/RESET/t/-----/t/file variable//-----
+/l2/20/t/REWRITE/t/-----/t/file variable//-----
+/l2/21/t/READ|47INT/t/integer value/t/textfile variable//-----
+/l2/22/t/READ|47REAL/t/real value/t/textfile variable//-----
+/l2/23/t/READ|47CHAR/t/char value/t/textfile variable//-----
+/l2/24/t/WRITE|47INT/t/-----/t/textfile variable//integer value
+/l2/25/t/WRITE|47REAL/t/-----/t/textfile variable//real value
+/l2/26/t/WRITE|47BOOL/t/-----/t/textfile variable//Boolean value
+/l2/27/t/WRITE|47CHAR/t/-----/t/textfile variable//char value
+/l2/28/t/WRITE|47STRING/t/-----/t/textfile variable//string descriptor
+/l2/29/t/READLN/t/-----/t/textfile variable//-----
+/l2/30/t/WRITELN/t/-----/t/textfile variable//-----
+/l2/31/t/PAGE/t/-----/t/textfile variable//-----
+/l2/32/t/RANGECHK/t/(doesn't)/t/-----//-----
+/l2/33/t/STACKOVFLO/t/(doesn't)/t/-----//-----
+/l2/34/t/RANGEMASK/t/address of bitstring¬/t/lowbound value//highbound value
+/l2/35/t/CLOCK/t/elapsed CPU time/t/-----//-----
+/lt3/(0.01 sec units)
+/l2/36/t/CARD/t/set cardinality/t/1-256 bytes//-----
+/l2/37/t/HALT/t/(doesn't)/t/-----//-----
+/l2/38/t/READ|47ALFA/t/address of alfa/t/textfile variable//-----
+/lt3/value
+|NOHTML(TABLE)|
+/l4u/¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/u/
+/v/
+width 65
+TABS AT 5 11 16 21 26 31 36 41 46
+INDENT (4,0),(10,0),(15,0),(20,0),(25,0),(30,0),(35,0)
+go
+/l4/Notes:
+/l2h1/1)/T/Service codes 6 - 12 are not used; these standard
+functions are always evaluated inline.
+/h/
+/l2h1/2)/T/Service codes 36 - 38 are not used in Release 1./h/
+/l2h1/3)/T/Service codes 32 and 33 always terminate execution
+with an error message./h/
+/l2h1/4)/T/The string descriptor in SVC 28 has the length of the
+string less one in the high-order byte, and the address of the
+string in the low-order three bytes./h/
+/l2h1/5)/T/Service codes 33 and 34 are not emitted by Pass 2;
+service code 33 monitor calls are emitted implicitly by the
+Pass 3 code generator as part of the block entry code sequence,
+and service code 34 is emitted implicitly by Pass 3 when
+generating code for a RANGE triple whose result length is
+greater than 8 bytes./h/
+/l5/IV.  The Tree Traversal Algorithm.
+/l3t1/Bearing in mind our ultimate goal, that of translating
+PASCAL
+programs into executable machine code, we consider the
+subordinate problem of translating the syntax trees of a parsed
+PASCAL program into an intermediate triples code.  The triples are,
+in one sense, a representation of the syntax trees.  Consider
+the node of a syntax tree which represents some binary operator
+such as multiplication; it will have two subtrees which can
+represent arbitrary arithmetic expressions, and these will be
+translated into the two operands of a MULTIPLY triple.  In
+another sense, the triples /u/are/u/ executable code for some
+virtual pseudo-machine.  The main task of Pass 2 can then be
+seen as that of visiting the nodes of the syntax trees in some
+systematic way so as to accumulate the operands for the triples.
+/p/A potential problem arises if, for example, one subtree of a
+multiplication node represents an expression of type REAL and 
+the other subtree represents an expression of type INTEGER.
+The expression of type INTEGER must become the operand of a
+FLOAT triple; the FLOAT triple and the expression of type
+REAL then become the two operands of an MPYFLT triple.  Note
+that some form of bookkeeping is required to keep track of the
+data type of every triple operand.  This bookkeeping process is
+known as /u/attribute/u/ /u/propagation/u/.  The process of
+ensuring that the operands of each operation are of a compatible
+data type is known as /u/coercion/u/.  These processes will be
+described in greater depth later, in conjunction with the
+semantic analysis of arithmetic expression trees.
+/p/Below is a listing of the XPL program from which Pass 2 was
+developed by the process of stepwise refinement.  The procedure
+which performs the tree traversal is called Visit|47nodes.
+Since recursion is unavailable in XPL, the tree traversal is
+accomplished iteratively using stacks, and simulates the
+following recursive procedure:
+/l3/Visit|47nodes:
+/A/
+    PROCEDURE (node);
+       DECLARE node FIXED,   /*ROOT OF TREE */
+                  i FIXED;   /*INDEX OF SUBTREE */
+       IF Multiplicity(node) = 0 THEN
+          DO;   /* A LEAF NODE */
+             Push symbol table index onto operand stack;
+             Replace index of leaf in father node with
+                index of data type of symbol;
+          END;
+       ELSE  /* NOT A LEAF NODE */
+          DO;
+             CASE statement on production number of
+                node -- preorder semantic actions;
+          END;
+          DO i = 1 TO Multiplicity(node);
+             Visit|47nodes (i'th subtree of node);
+             CASE statement on production number of
+                node -- postorder semantic actions;
+          END;
+       END Visit|47nodes;
+)
+/p/In the iterative version, the local variables node and i are
+represented by the stacks node|44stack and |44pos|47stack 
+respectively.  These stacks are implemented as one-dimensional arrays
+indexed by the global variable np, whose value is equal to the
+depth within the syntax tree of the node being visited, and
+corresponds to the depth of recursion in the recursive
+version.  The stacks themselves are manipulated by calls to the
+encapsulating procedures Leftson, Right|47bro, and Father.
+/p/When a leaf node (i.e., a node whose Multiplicity is zero)
+is visited, the symbol table index which it contains is
+pushed onto operand|44stk, a stack of operands for triples.  When
+the operand is used in the formation of a triple during a
+postorder visit of an ancestor node, operand|44stk is popped;
+possibly, a pointer to the newly generated triple is pushed
+onto the operand stack.  The data type of the object which
+has been pushed onto the operand stack will be represented by
+some record in the symbol table.  The index into the symbol
+table of this record is stored in the leaf's father node in the
+syntax tree where the index of the leaf node itself used to be;
+this rudimentary attribute propagation is accomplished by a
+call to Replace.
+/p/The other procedures in the following skeletal version of
+Pass 2 perform the functions of error logging, printing a
+formatted listing of the syntax trees, and reading the files
+containing the symbol table and syntax trees which were
+written by Pass 1.
+/v/
+width 85
+INDENT (3,0),(6,0),(9,0),(12,0),(15,0)
+go
+/l4i1/DECLARE true LITERALLY '1', false LITERALLY '0';
+/l/DECLARE forever LITERALLY 'WHILE 1';
+/l/DECLARE null LITERALLY '-1';
+/l/DECLARE multiplicity LITERALLY 'parse|47tree';
+/l/DECLARE double CHARACTER INITIAL('0');
+/l/DECLARE double|47space LITERALLY 'output(1)=double';
+/l/DECLARE identity(350) BIT(16); 
+/l/DECLARE parse|47tree(7200) BIT(16), tree|47size FIXED;
+/l/DECLARE root|47of|47subtree FIXED;
+/l/DECLARE datatype(350) BIT(16);
+/l/DECLARE node|44stack|44oflo CHARACTER INITIAL(  /i1/
+/li2/'Node stack overflow due to parse|47tree whose depth exceeds 75');/i2/
+/li1/DECLARE x1 CHARACTER INITIAL('¬');
+/l/DECLARE x70 CHARACTER INITIAL(/i1/
+/li2/'¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬');/i2/
+/li1/DECLARE sy|47text CHARACTER;
+/l/DECLARE left|47part(74) CHARACTER INITIAL('', '<PROGRAM>', '<BLOCK>',/i1/
+/li2/'<STATEMENT LIST>', '<LABEL DECL>', '<CONST DECL>', '<TYPE DEFN>',
+/l/'<PROC DECL LIST>', '<PROC DECL>', '<PROC DECL>', '<BODY>',
+/l/'<VAR DECL LIST>', '<VAR DECL>', '<STATEMENT>', '<STATEMENT>',
+/l/'<STATEMENT>', '<STATEMENT>', '<STATEMENT>', '<STATEMENT>', '<STATEMENT>',
+/l/'<STATEMENT>', '<STATEMENT>', '<STATEMENT>', '<STATEMENT>', '<STATEMENT>',
+/l/'<FORMAL PARAM>', '<FORMAL PARAM>', '<FORMAL PARAM>', '<CASE¬INSTANCE>',
+/l/'<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>',
+/l/'<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>',
+/l/'<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>',
+/l/'<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>',
+/l/'<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>', '<EXPRESSION>',
+/l/'<EXPRESSION>', '<EXPRESSION>', '<VARIABLE>', '<VARIABLE>', '<QUALIFIER>',
+/l/'<QUALIFIER>', '<QUALIFIER>', '<QUALIFIER>', '<CONSTANT>', '<CONSTANT>',
+/l/'<TYPE>', '<TYPE>', '<TYPE>', '<TYPE>', <TYPE>', '<TYPE>', '<TYPE>',
+/l/'<TYPE>', '<FIXED FIELD LIST>', '<VARIANT FIELD>', '<VARIANT INSTANCE>',
+/l/'<STATEMENT>', '<TYPE>', '<TYPE>', '<TYPE>', '<TYPE>';/i2/
+/li1/DECLARE nulref CHARACTER INITIAL(/i1/
+/li2/'Attempt to access parse|47tree by a null reference pointer');/i2/
+/li1/DECLARE node FIXED;
+/l/DECLARE npmax LITERALLY '75';
+/l/DECLARE (np, |44mp) FIXED;
+/l/DECLARE (node|44stack, |44pos|47stack) (npmax) BIT(16);/i1/
+/l2/error:
+/li1/PROCEDURE (message, severity);/i1/
+/li2/DECLARE message CHARACTER, severity FIXED;
+/l/output = '***** ERROR: ' |33|33 message;/i2/
+/li1/END error;/i1/
+/v/
+width 65
+go
+/l3/
+/A/
+leftson:
+   PROCEDURE;
+      IF node=null THEN
+         CALL error (nulref, 1);
+      ELSE
+         DO;
+           |44mp=multiplicity(node);
+           IF |44mp=0 THEN
+              node=null;
+           ELSE
+              DO;
+                 IF np >=npmax THEN
+                    DO;
+                       CALL error (node|44stack|44oflo);
+                       np=0
+                    END;
+                 np=np + 1;
+                 node|44stack(np) = node;
+                 |44pos|47stack(np) = 1;
+                 node = parse|47tree(node + 2);
+               END;
+ 
+          END;
+    END leftson;
+)
+/l3/
+/A/
+rightson:
+   PROCEDURE;
+      IF node = null THEN
+         CALL error (nulref, 1);
+      ELSE
+         DO;
+            |44mp = multiplicity(node);
+            IF |44 = 0 THEN
+               node = null;
+            ELSE
+               DO;
+                  IF np >= npmax THEN
+                     DO;
+                        CALL error (node|44stack|44oflo, 1);
+                        np = 0;
+                     END;
+                  np = np + 1;
+                  node|44stack(np) = node;
+                  |44pos|47stack(np) = |44mp;
+                  node = parse|47tree(node + |44mp + 1);
+               END;
+ 
+         END; 
+    END rightson;
+)
+/A/
+ 
+ 
+right bro:
+   PROCEDURE;
+      |44mp = multiplicity(node|44stack(np);
+      IF |44mp > |44pos|47stack(np) THEN
+         DO;
+              node = parse|47tree(node|44stack(np) + |44pos|47stack(np) +2);
+              |44pos|47stack(np) = |44pos|47stack(np) + 1;
+         END;
+      ELSE
+         node = null;
+   END right|47bro;
+)
+/l3/
+/A/
+left|47bro:
+   PROCEDURE;
+      IF |44pos|47stack(np) > 1 THEN
+         DO;
+              node = parse|47tree(node|44stack(np) + |44pos|47stack(np));
+              |44pos|47stack(np) = |44pos|47stack(np) - 1;
+         END;
+      ELSE
+         node = null;
+   END left|47bro;
+)
+/l3/
+/A/
+father:
+   PROCEDURE;
+      IF np < 1 THEN
+          CALL error (nulref, 1);
+      ELSE
+         DO;
+             node = node|44stack(np);
+             np = np - 1;
+   END father;
+)
+/l3/
+/A/
+replace:
+   PROCEDURE (newson);
+      DECLARE newson BIT(16);
+      IF np < 1 THEN
+         CALL error (nulref, 1);
+      ELSE
+         parse|47stack(node|44stack(np) + |44pos|47stack(np) + 1 = newson;
+   END replace;
+)
+/l3/
+/A/
+pad:
+   PROCEDURE (string, width) CHARACTER;
+      DECLARE string CHARACTER, (width, len) FIXED;
+      DO WHILE length (string) + 70 < width;
+         string = string |33|33 x70;
+      END;
+      len = length (string);
+      IF len >= width THEN
+         RETURN string;
+      ELSE
+         RETURN string |33|33 substr (x70, 0, width - len);
+   END pad;
+)
+/l4/
+/A/
+i|47format:
+     PROCEDURE (number, width) CHARACTER;
+        DECLARE (number, width, len) FIXED, string CHARACTER;
+        string = number;
+        len = length (string);
+        IF len >= width THEN
+           RETURN string;
+        ELSE
+           RETURN substr (x70, 0, width - len) |33|33 string;
+     END i|47format;
+)
+/l3/
+/v/
+width 85
+go
+/A/
+parse|47tree|47dump:
+   PROCEDURE (tree);
+      DECLARE tree BIT(16);  /*POINTS TO ROOT NODE*/
+      DECLARE a(100) BIT(16);  /*AUXILIARY STACK; CF KNUTH V.1 P.317*/
+      DECLARE (top|47of|47a, m, c, p) BIT(16);
+      DECLARE margin CHARACTER initial(
+         '                                                            ');
+      DECLARE overflow|47message CHARACTER INITIAL(
+         'Auxiliary stack overflow, parse tree dump aborted');
+      DECLARE indentation BIT(16), (s1, s2) CHARACTER,
+              leaf LITERALLY 'parse|47tree(p+1)',
+              production|47numb LITERALLY 'parse|47tree(p+1)',
+              line|47numb LITERALLY 'parse|47tree(p+m+2)';
+
+      indentation = length (margin) - 2;
+      top|47of|47a = 0;
+      p = tree;
+      output = 'Parse tree at this point is:';
+      DO forever;
+         IF p = null THEN
+            DO;
+               m = 0;
+               s1 = '...EMPTY PRODUCTION...';
+            END;
+         ELSE 
+            DO;
+               m = multiplicity(p);
+               IF m = 0 THEN
+                  s1 = identity(leaf);
+               ELSE
+                  s1 = production|47numb |33|33 x1
+                      |33|33 left|47part(production|47numb);
+            END;
+          s2 = substr (margin, indentation) |33|33 x1 |33|33 s1;
+          s2 = pad (s2, 127);
+          s1 = i|47format (line|47numb, 4);
+          output = s2 |33|33 '|33' |33|33 s1;
+          IF m > 0 THEN
+             DO;
+                a(top|47of|47a) = 0;
+                top|47of|47a = top|47of|47a + 1;
+                IF top|47of|47a > 100 THEN
+                   DO;
+                      output = overflow|47message;
+                      RETURN;
+                   END;
+           END;
+        IF m = 0 THEN
+           DO;  /*UNSTACK SUBTREE*/
+              IF top|47of|47a = 0 THEN
+                 RETURN;
+              top|47of|47a = top|47of|47a - 1;
+              p = a(top|47of|47a);
+              DO WHILE p = 0;
+                 IF top|47of|47a = 0 THEN
+                    RETURN;
+                 indentation = indentation + 3;
+                 top|47of|47a = top|47of|47a - 1;
+                 p = a(top|47of|47a);
+              END;
+           END;
+        ELSE
+           DO;  /* PREPARE TO DUMP LEFTMOST SUBTREE */
+              p = parse|47tree(p + 2);
+              indentation = indentation - 3;
+           END;
+     END;
+  END parse|47tree|47dump;
+)
+/l3/
+/A/
+next|47symbol:
+   PROCEDURE CHARACTER;
+      DECLARE (cp, s1, s2, text|47limit) FIXED,
+              (bcd, char) CHARACTER;
+      IF length (sy|47text) < 3 THEN
+         DO;
+            char = input(3);
+            sy|47text = sy|47 |33|33 char;
+         END;
+      bcd = '';
+      s1 = byte (x1);
+      s2 = byte (sy|47text, 1);
+      cp = 1;
+      DO WHILE |34(s1 = byte ('''') & s2 = byte (x1));
+         IF |34(s1 = byte ('''') & s2 = s1) THEN
+            DO;
+               char = substr (sy|47text, cp, 1);
+               bcd = bcd |33|33 char;
+            END;
+         ELSE
+            s2 = byte (x1);
+         s1 = s2; 
+         cp + cp + 1;
+         IF cp > text|47limit THEN
+            DO;
+               sy|47text = input(3);
+               text|47limit = 79;
+            END;
+         s2 = byte (sy|47text, cp);
+      END;
+      bcd = substr (bcd, 0, length (bcd) - 1);
+      IF cp = text|47limit THEN
+         DO;
+            char = input(3);
+            sy|47text = sy|47text |33|33 char;
+         END;
+    sy|47text = substr (sy|47text, cp + 1);
+    RETURN bcd;
+ END next|47symbol;
+)
+/l2/
+/A/
+restore|47sy|47table:
+   PROCEDURE;
+      DECLARE i FIXED;
+      n|47decl|47symb = 0;
+      sy|47text = input(3);
+      IF substr (sy|47text, 0, 5) |34 = '%SYMB' THEN
+         DO;
+            output = '%SYMB card expected.';
+            RETURN;
+         END;
+      DO i = 5 TO 9;
+         IF byte (sy|47text, i) |34= byte ('') THEN
+            n|47decl|47symb = 10*n|47decl|47symb + byte(sy|47text, i)
+                                    - byte ('0');
+      END;
+      output = 'Symbol Table size = ' |33|33 n|47decl|47symb;
+      sy|47text = input(3);
+      DO i = 0 TO n|47decl|47symb;
+         identity(i) = next|47symbol;
+      END;
+      sy|47text = input(3);
+   END restore|47sy|47table;
+)
+/l2/
+/A/
+read|47tree:
+   PROCEDURE FIXED; /*RETURNS POINTER TO ROOT*/
+      DECLARE (root, i, j) FIXED;
+      root, i = 0;
+      sy|47text = input(3);
+      IF length (sy|47text) = 0 THEN  /*END OF FILE*/
+         RETURN null;
+      IF substr (sy|47text, 0, 5) |34 = '%TREE' THEN
+         DO;
+            output = '%TREE card expected.';
+            RETURN null;
+         END;
+      DO j = 5 TO 9;
+         IF byte (sy|47text, j) ¬= byte ('') THEN
+            root = 10*root + byte (sy|47text, j) - byte ('0');
+      END;
+      sy|47text = input(3);
+      DO WHILE substr (sy|47text, 0, 4) |34 = '%END';
+         j = addr (parse|47tree(i));
+         CALL inline ("58",1,0,sy|47text)      /*L   1,SY|47TEXT     */
+         CALL inline ("58",2,0,j);           /*L   2,j           */
+         CALL inline ("D2","4","F",2,0,1,0,);/*MVC 0(80,2),0(1)  */
+         i = i + 40;
+         sy|47text = input(3);
+      END;
+      tree|47size = root + parse|47tree(root) + 3;
+      RETURN root;
+ END read|47tree;
+)
+/l3/
+/A/
+visit|47nodes:
+   PROCEDURE;
+      DECLARE |44opmax LITERALLY '12';
+      DECLARE is|47leaf LITERALLY 'parse|47tree(node)=0';
+      DECLARE fathers|47prod|47no LITERALLY 'parse|47tree(node|44stack(np)+1)';
+      DECLARE first|47visit BIT(1);
+      DECLARE operand|44stk(|44opmax) BIT(16);
+      DECLARE |44op FIXED;
+      first|47visit = true;
+      np, |44op = 0;
+      node = root|47of|47subtree;
+      DO WHILE first|47visit |33 np > 0;
+         IF first|47visit THEN
+            DO;
+               IF node = null THEN
+                  first|47visit=false;
+               ELSE
+                  IF is|47leaf THEN
+                     DO;  /*PUSH SYMBOL TABLE POINTER ONTO OPERAND STACK */
+                        IF |44op < |44opmax THEN
+                           |44op = |44op + 1;
+                        ELSE
+                           DO;
+                              CALL error ('Overflow occurred while stacking '
+                                         |33|33 'operands for triples', 1);
+                              |44op = o;
+                           END;
+                        operand|44stk(|44op) = parse|47tree(node + 1);
+                        /*OPERAND|44STK IS POPPED WHEN TRIPLES ARE FORMED*/
+                        output = identity(parse|47tree(node + 1));
+                        CALL replace (datatype(parse|47tree(node + 1)));
+                        first|47visit = false;
+                     END;
+                  ELSE
+                     DO;
+                       /*CASE STATEMENT ON PRODUCTION NUMBER OF NODE*/
+                       CALL leftson;
+                    END;
+             END;
+          ELSE
+             DO;/*REPLACE THIS BY 'DO CASE fathers|47prod|47no;'*/
+                /*CODE FOR PASS 2 MODULES GOES HERE*/
+                /*FOR PRODUCTION NUMBERS WHOSE MULTIPLICITY CAN 
+                   EXCEED ONE, THE CODE WILL INCLUDE A SEGMENT TO
+                   VISIT THE NEXT SUBTREE.  IN ADDITION, FOR 
+                   MANY OF THE PRODUCTION NUMBERS, IT WILL BE
+                   NECESSARY TO DETERMINE WHICH OF THE SIBLING 
+                   NODES IS BEING VISITED.  FOR THIS PURPOSE, 
+                   ONE CAN INTERROGATE |44POS|47STACK(NP), 
+                   WHOSE VALUE IS THE INDEX OF 'NODE' AMONG ITS
+                   FATHER'S SONS.*/
+                output = |44pos|47stack(np) |33|33 x1
+                         |33|33 left|47part(fathers|47prod|47no);
+                CALL right|47bro;
+                IF node = null THEN
+                   CALL father;
+                ELSE
+                   first|47visit = true;
+             END;
+       END;
+    END visit|47node;
+)
+/l2/
+/A/
+restore|47tree:
+   PROCEDURE;
+      CALL restore|47sy|47table;
+      root|47of|47subtree = read|47tree;
+      DO WHILE root|47of|47subtree |34 = null;
+         double|47space;
+         CALL parse|47tree|47dump (root|47of|47subtree);
+         double|47space;
+         output = 'Now, visit all nodes is post-order';
+         CALL visit|47nodes;
+         double|47space;
+         root|47of|47subtree = read|47tree;
+      END;
+   END restore|47test;
+ 
+ 
+ 
+ 
+   DO np = 0 TO 349;
+      datatype(np) = null;
+   END;
+   CALL restore|47test;
+ 
+ 
+EOF EOF EOF
+)
+/v/
+width 65
+go
+/l4/V. Constructing the PASCAL Symbol Table
+/p/Not all of the phrases of a PASCAL program, as represented
+by the syntax trees produced by Pass 1, result in executable
+code or triples.  In fact, those syntax trees whose root node
+production numbers are Production 1 (program heading), Production
+2 (/u/label, const, type/u/ and /u/var/u/ declarations), and
+Productions 8 and 9 (/u/procedure/u/ and /u/function/u/
+ headings) represent /u/declarations/u/, and do not result in 
+the production of any triples at all.  Instead, they result in
+the construction of records in the PASCAL symbol table.
+/p/Declaration trees use production numbers 1, 2, 4-6, 8, 9,
+25-27, 59-69, 71-74, and 77-80.  The combined set of preorder
+and postorder semantic actions which correspond to these
+production numbers can be thought of as a modular unit of
+Pass 2 -- the symbol table construction module.  Many of the
+problems encountered in triples generation are non-existant or
+greatly simplified in the symbol table construction module.  For
+example, there is no need to stack operands for triples, and no
+type coercion problem.  The problem of attribute propagation
+simplifies to that of remembering which record in the symbol table
+is of current interest.
+/p/Accordingly, the logic of the tree traversal algorithm has
+been altered somewhat to accommodate the special needs of the
+symbol table construction module.  A Boolean variable, local to
+Visit|47nodes, called "Is|47declaration" is set to /u/true/u/
+when the root node of a declaration tree is visited in preorder.
+When a leaf node is visited, the action taken now depends upon
+the value of Is|47declaration:
+/l4/
+/A/
+     IF multiplicity(node) = 0 THEN
+        DO;  /* A LEAF NODE */
+           table|47ptr = symbol table index from leaf node;
+           IF is|47declaration THEN
+              Replace index of leaf node in father node with
+                 value of table ptr;
+           ELSE
+              DO;
+                Push value of table|47ptr onto operand stack;
+                Replace index of leaf node in father node
+                   with datatype(table|47ptr);
+              END;
+        END;
+)
+/l2/
+/p/In a declaration tree, each subtree can usually be thought
+of as being perfectly represented by some symbol table record.
+After traversing the subtree, the index into the symbol table of 
+this record replaces the index into the syntax tree of the 
+subtree's root node, inside the root node's father node.  Also,
+the newly introduced variable table|47ptr, local to Visit|47nodes,
+is set equal to the symbol table index of this record.  In this
+way we can always keep track of which record in the symbol
+table is of current interest.
+/p/It is during the processing of declaration trees in
+Pass 2 that storage is allocated for data objects at run-time.
+Since all PASCAL procedures are potentially recursive, storage
+cannot be allocated statically, in general.  The exceptions to
+this rule are variables global to the entire program and 
+constants.  Accordingly, storage is accessed via a two-coordinate
+scheme.  The pseudo|47reg field of a symbol table record gives
+the static nesting level of the procedure which contains the
+data object represented by the symbol table record.  It can be
+thought of as the index into a virtual array of activation
+records called the /u/display/u/.  Those objects with a 
+pseudo|47reg value of zero are said to reside in the global 
+activation record; their storage is allocated statically.
+Those objects which belong to a procedure that is callable
+from the main program block have a pseudo|47reg value of one;
+those objects that belong to a procedure that is statically
+(textually) nested within another procedure have even higher
+pseudo|47reg values;  the pseudo|47reg value increases by
+one for each level of static procedural nesting.  The second
+coordinate used in accessing run-time storage is the
+/u/displacement/u/ field of a symbol table record.  Whereas the
+pseudo|47reg field selects an activation record within the 
+display, the displacement field represents the relative offset
+into the activation record of the data object.  The storage|47lngth
+ field of a symbol table record contains the number of 8-bit
+bytes of storage allocated to the corresponding data object.
+/p/Storage is allocated so as to achieve some optimization of
+address calculations in an IBM 360 architecture.  Since the
+displacement field in an IBM 360 machine instruction cannot
+span more than 4096 bytes, an activation record whose length
+exceeds this page length cannot be spanned by Base register -
+Displacement addressing alone if the base register contents remain
+fixed.  The scheme used in Pass 3 to increase the span of
+addressing involves the use of an index register when the 
+displacement exceeds the page length.  An index register is then
+loaded with an appropriate integral multiple of the page length
+constant, 4906, and the displacement is reduced to its value modulo
+4096.  The address is then specified in Index register - Base
+register - Displacement format.  The storage allocation mechanism
+in Pass 2 attempts to reduce the number of variables whose
+displacement exceeds the page length constant by placing individual
+variables, whose storage requirements are 1 to 4 bytes, in the
+lower displacements of an activation record.  If more than 4 bytes
+of storage are required for any variable, storage allocation is
+deferred.  Variables to receive deferred storage allocations are
+linked together in the symbol table by the value field of their
+symbol table records.  Storage is allocated for these large
+variables on two occasions while processing a block of a PASCAL
+program: once, at the end of a list of formal parameters, and 
+again at the conclusion of processing for the entire block.
+/p/Because blocks can be properly nested one within another, 
+storage allocation information is kept in stacks, the elements
+of which contain information about the active blocks.  There are
+four such stacks, all of which are implemented as one-dimensional
+arrays commonly indexed by current|47level:  owner|47stack,
+arrays|47allocated, stack|47limit, and halfword|47disp. 
+Current|47level is the current depth of textual nesting of identifier
+scopes.  According to the PASCAL Report, an identifier scope
+can be either a block or a /u/record/u/ type.
+/p/Owner|47stack(current|47level) is the index into the symbol
+table of the procedure or record type that delimits the scope
+of identifiers.  It is used to set the owner field in symbol
+table records.
+/p/Arrays|47allocated(current|47level) is the index into the
+symbol table of the first large variable in the current scope
+for which storage allocation has been deferred.
+/p/Stack|47limit(current|47level) is the total number of bytes
+of the current activation record or record type that have been
+allocated so far; it is always incremented in multiples of four
+to secure fullword alignment.
+/p/Halfword|47disp(current|47level) is the displacement of an
+unallocated two-byte field within the current activation record
+or record type.  When a two-byte field is allocated storage,
+halfword|47disp(current|47level) is set to the displacement of
+the resulting two-byte hole, if one must be created.  Otherwise,
+halfword|47disp is set to null.
+/p/The following list summarizes the semantic actions which 
+correspond to the production numbers encountered in
+declaration trees.
+/v/
+width 80
+INDENT (5,0),(10,0),(15,0),(20,0),(25,0),(30,0),(35,0),(40,0),(45,0)
+TAB 5 11 16 21 26 31 36 41 46
+
+SET SS='/LI1L/'
+SET SSL='/LI1L-HH1/'
+SET AA='/-H|PAR.1|H1/'
+SET BB='/-H|PAR.1|H2T1/'
+SET CC='/-H|PAR.1|H3T2/'
+SET DD='/-H|PAR.1|H4T3/'
+SET XX='/-H-I/'
+
+go
+/l4/Prodn.
+/lu/Number/ut3u/Production/u/
+/l2/1/t3/<program> ::= <program id> |16<file id>|17|12
+|SS|Semantics: <program id>/L/
+|BB|DATATYPE = null
+|BB|VAR|47TYPE = Procedure
+|BB|STRUCTYPE = Statement
+|BB|OWNER = null
+|BB|STORAGE|47LNGTH = length of global activation record, in bytes.
+|BB|VALUE = 0
+|BB|S|47LIST = symbol table index of entry for first <file¬id>.
+|BB|PSEUDO|47REG = 0
+|BB|DISPLACEMENT = 0
+|BB|<file¬id>
+|BB|S|47LIST = symbol table index of entry for next <file¬id>.
+|XX|
+/l2/4/t3/<label decl> ::= |16<unsigned integer>|17|12
+|SS|Semantics:  <unsigned integer>/L/
+|BB|DATATYPE = null
+|BB|VAR|47TYPE = Label
+|BB|STRUCTYPE = Statement
+|BB|OWNER, STORAGE|47LNGTH = symbol table index of procedure
+      name in which label declaration appears.
+|BB|VALUE = 0
+|BB|S|47LIST, PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/5/t3/<Const decl> ::= |16<const id> <constant>|17|12
+|SS|Semantics: <const id>/L/
+|BB|DATATYPE = DATATYPE(<constant>)
+|BB|VAR|47TYPE = Constant
+|BB|STRUCTYPE = STRUCTYPE(<constant>)
+|BB|OWNER = symbol table index of procedure name in which const
+    declaration appears.
+|BB|STORAGE|47LNGTH = STORAGE|47LNGTH(<constant>)
+|BB|S|47LIST = index into symbol table of entry for <constant>
+|BB|value = VALUE(<constant>)
+|BB|PSEUDO|47REG = 0
+|BB|DISPLACEMENT = DISPLACEMENT(<constant>)
+|XX|
+/l2/6/t3/<type defn> ::= |16<type id> <type>|17|12
+|SS|Semantics:  <type id>/L/
+|BB|DATATYPE = DATATYPE(<type>)
+|BB|VAR|47TYPE = Type
+|BB|STRUCTYPE = STRUCTYPE(<type>)
+|BB|OWNER = symbol table index of procedure name in which type
+    definition appears.
+|BB|STORAGE|47LNGTH = STORAGE|47LNGTH(<type>), which is
+    cardinality for scalar or subrange types.
+|BB|VALUE = 0
+|BB|S|47LIST = symbol table index of first element if type is
+    scalar, else null.
+|BB|PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/8/t3/<proc decl> ::= <procedure id> |16<formal param>|17|12
+|SS|Semantics:  <procedure id>/L/
+|BB|DATATYPE = null
+|BB|VAR|47TYPE = Procedure
+|BB|STRUCTYPE = Statement
+|BB|OWNER = symbol table index of procedure name in which this
+    procedure declaration appears.
+|BB|STORAGE|47LNGTH = length of activation record, in bytes.
+|BB|VALUE = unique sequence number for this procedure.
+|BB|S|47LIST = symbol table index of first <formal¬param>;
+    null if no <formal¬param>s.
+|BB|PSEUDO|47REG = 1 + PSEUDO|47REG(OWNER)
+|BB|DISPLACEMENT = 0
+|XX|
+/l2/9/t3/<proc decl> ::= <function id> |16<formal param>|17*
+/lt6/<type id>
+|SS|Semantics:  <function id>/L/
+|BB|Same as for <procedure id> in Production 8, except:
+|BB|DATATYPE = symbol table index of entry for <type id>
+|BB|STRUCTYPE = STRUCTYPE(<type id>)
+|XX|
+/l2/12/t3/<var decl> ::= |16<variable id>)|12 <type>
+|SS|Semantics: <variable id>/L/
+|BB|DATATYPE = symbol table index of entry for <type>
+|BB|VAR|47TYPE = Variable
+|BB|STRUCTURE = STRUCTYPE (<type>)
+|BB|OWNER = symbol table index of entry for procedure name in
+    which this variable declaration appears.
+|BB|STORAGE|47LNGTH = in case STRUCTYPE is Scalar, then 2;
+|DD|if subrange cardinality < 32768, then 2
+|DD|else 4;
+|CC|in case STRUCTYPE is Pointer or Arithmetic, then 4;
+|CC|in case STRUCTYPE is Array, File, Record, or Set, then
+    STORAGE|47LNGTH(<type>).
+|BB|S|47LIST = null
+|BB|PSEUDO|47REG = PSEUDO|47REG(OWNER)
+|BB|DISPLACEMENT = storage address in bytes relative to
+    PSEUDO|47REG
+|XX|
+/l2/25/t3/<formal param> ::= |16<variable id>|17|12 <type id>
+|SS|Semantics: <variable id>/L/
+|BB|DATATYPE = symbol table index of entry for <type id>
+|BB|VAR|47TYPE = Var parameter
+|BB|STRUCTYPE = STRUCTYPE(<type id>)
+|BB|OWNER = symbol table index of entry for name of procedure
+    of which the <variable¬id> is a parameter.
+|BB|STORAGE|47LNGTH = 4 bytes
+|BB|S|47LIST = symbol table index of entry for next
+    <variable¬id> or next <formal¬param> of OWNER.
+|BB|PSEUDO|47REG = PSEUDO|47REG(OWNER)
+|BB|DISPLACEMENT = storage address in bytes relative to
+    PSEUDO|47REG.
+|XX|
+/l2/26/t3/<formal param> ::= |16<variable id>|17|12 <type id>
+|SS|Semantics: <variable id>/L/
+|BB|Same as for <variable id> in Production 25, except:
+|BB|VAR|47TYPE = Variable
+|BB|STORAGE|47LNGTH is computed as in Production 12.
+|XX|
+/l2/27/t3/<formal param> ::= |16<procedure id>|17|12
+/lt7/|16<param types>|17|12 |16<type id>|17
+|SS|Semantics: <procedure id>/L/
+|BB|DATATYPE = if <type¬id> is present, then symbol table
+    index of entry for <type¬id>; else null.
+|BB|VAR|47TYPE = Formal procedure
+|BB|STRUCTYPE = if <type¬id> is present, then
+    STRUCTYPE(<type¬id>); else Statement.
+|BB|OWNER = symbol table index of entry for name of procedure
+    of which this <procedure¬id> is a formal parameter.
+|BB|STORAGE|47LNGTH = 12 bytes.
+|BB|VALUE = symbol table index of first <param¬types> entry.
+|BB|S|47LIST = symbol table index of entry for next
+    <procedure¬id> or next <formal¬param> of OWNER.
+|BB|PSEUDO|47REG = PSEUDO|47REG(OWNER)
+|BB|DISPLACEMENT = storage address in bytes relative to
+    PSEUDO|47REG.
+|XX|
+/l2/59/t3/<type> ::= <type id>
+|SS|Semantics: none./L/
+|XX|
+/l2/60/t3/<type> ::= |16<constant id>|17|12
+|SS|Semantics: <constant id> -- Scalar constant/L/
+|BB|DATATYPE = symbol table index of entry for <type>
+|BB|VAR|47TYPE = constant
+|BB|STRUCTYPE = Scalar
+|BB|OWNER = symbol table index of entry for name of procedure
+    in which this scalar type definition appears.
+|BB|STORAGE|47LNGTH = null
+|BB|VALUE = ordinal number of <constant id> in the scalar type,
+    starting from 0.
+|BB|S|47LIST = symbol table index of next <constant id>
+|BB|PSEUDO|47REG, DISPLACEMENT = null/L2/
+|AA|<type> -- if the type is named, then the entry for the 
+    type name is used; otherwise, a new record is created.
+|BB|DATATYPE = symbol table index of entry for <type>
+    (i.e., this entry).
+|BB|VAR|47TYPE = Type
+|BB|STRUCTYPE = Scalar
+|BB|OWNER = symbol table index of entry for name of procedure
+    in which this <type> is defined.
+|BB|STORAGE|47LNGTH = cardinality of type (i.e., number of
+    <constant¬id>s ).
+|BB|VALUE = 0
+|BB|S|47LIST = symbol table index of entry for first
+    <constant¬id>.
+|BB|PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/61/t3/<type> ::= <constant 1> <constant 2>
+|SSL|Semantics:  <type> -- if the type is named, then the entry for
+    the type name is used; otherwise, a new record is created./L/
+|BB|DATATYPE = DATATYPE(<constant¬1>), which must agree with
+    DATATYPE(<constant¬2>).
+|BB|VAR|47TYPE = Type
+|BB|STRUCTYPE = Subrange
+|BB|OWNER = Symbol table index of entry fo name of procedure or
+    record in which this <type> is defined.
+|BB|STORAGE|47LNGTH = cardinality of subrange, which is
+    VALUE(<constant¬2>) - VALUE(<constant¬1>) + 1.
+|BB|VALUE = VALUE(<constant¬2>)
+|BB|S|47LIST = symbol table index of entry for <constant¬1>
+|BB|PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/62/t3/<type> ::= <type id>
+|SS|Semantics:  <type>/L/
+|BB|DATATYPE = symbol table index of entry for <type id>
+|BB|VAR|47TYPE = Type
+|BB|STRUCTYPE = Pointer
+|BB|OWNER = symbol table index of entry for procedure or record
+    in which this <type> is defined.
+|BB|STORAGE|47LNGTH = null
+|BB|VALUE = 0
+|BB|S|47LIST, PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/63/t3/<type> ::= |16<type 1>|17|12 <type 2>
+|SSL|Semantics:  <type> is an n-dimensional array type represented as
+a recursively defined structure,/L/
+|BB|<array¬type> ::= <index¬type> <element¬type>/L/
+    where <index¬type> must be a scalar or subrange type, and
+    <element¬type> will be an (n-1)-dimensional <array¬type>.
+    Thus, we give semantics for the production:/L/
+    <array¬type> ::= <type¬1> <type¬3> <array¬type> 
+|BB|DATATYPE = symbol table index of entry for <type¬3>
+|BB|VAR|47TYPE = Type
+|BB|STRUCTYPE = Array
+|BB|OWNER = symbol table index of entry for name of procedure
+    or record in which this <array¬type> is defined.
+|BB|STORAGE|47LNGTH = STORAGE|47LNGTH(<type¬1>)*
+    STORAGE|47LNGTH of a variable of <type¬3> computed as
+    in Production 12, except that if <type¬3> is scalar or
+    subrange and the cardinality of <type¬3> |18 256, then
+    only one byte is allocated.
+|BB|VALUE = 0
+|BB|S|47LIST = symbol table index of entry for <type 1>
+|BB|PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/64/t3/<type> ::= <type 1>
+|SS|Semantics:  <type 1>/L/
+|BB|DATATYPE = symbol table index of entry for <type¬1>
+|BB|VAR|47TYPE = Type
+|BB|STRUCTYPE = File
+|BB|OWNER = symbol table index of entry for name of procedure
+    or record in which this <type> is defined.
+|BB|STORAGE|47LNGTH = storage length given to a variable of <type¬1>
+|BB|VALUE = 0
+|BB|S|47LIST, PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/65/t3/<type> ::= <type 1>
+|SS|Semantics:  <type>/L/
+|BB|DATATYPE = DATATYPE(<type¬1>)
+|BB|VAR|47TYPE = Type
+|BB|STRUCTYPE = Set
+|BB|OWNER = symbol table index of entry for name of procedure
+    or record in which this <type> is defined.
+|BB|VALUE = if <type¬1> is a scalar type then 0
+|CC|else if <type¬1> is a subrange type then
+|DD|VALUE(S|47LIST(<type¬1>)) /u/DIV/u/ 8
+|BB|STORAGE|47LNGTH = if <type¬1> is a scalar type then
+    (STORAGE|47LNGTH(<type¬1>) + 7) /u/DIV/u/ 8
+|CC|else if <type¬1> is a subrange type then
+(VALUE(<type¬1>) /u/DIV/u/ 8) -
+(VALUE(S|47LIST(<type¬1>)) /u/DIV/u/ 8) + 1
+|BB|S|47LIST = symbol table index of entry for <type¬1>
+|BB|PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/66/t3/<type> ::= |16<fixed field list>|17* |16<variant field>|17
+|SS|Semantics: <type>/L/
+|BB|DATATYPE = symbol table index of entry for <type>
+    (i.e., this entry).
+|BB|VAR|47TYPE = Type
+|BB|STRUCTYPE = Record
+|BB|OWNER = symbol table index of entry for name of procedure
+    or record type in which this <type> is defined.
+|BB|STORAGE|47LNGTH = total storage allocation given to fields
+    of the record, in bytes.
+|BB|VALUE = 0
+|BB|S|47LIST = symbol table index of entry for first field of
+    this record.
+|BB|PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/67/t3/<fixed field list> ::= |16<field id>|17|12 <type>
+|SS|Semantics: <field id>/L/
+|BB|DATATYPE = symbol table index of entry for <type>
+|BB|VAR|47TYPE = if field is a component of a
+   <variant¬instance>, then Variant,/L/
+   else Field identifier
+|BB|STRUCTYPE = STRUCTYPE(<type>)
+|BB|OWNER = symbol table index of entry for record type in
+   which this <fixed¬field¬list> appears.
+|BB|STORAGE|47LNGTH = storage allocated to a variable of
+   <type>, as in Production 12.
+|BB|VALUE = 0
+|BB|S|47LIST = symbol table index of entry for next <field¬id>
+   or entry for next field of OWNER.
+|BB|PSEUDO|47REG = null
+|BB|DISPLACEMENT = storage displacement relative to origin
+   of OWNER.
+|XX|
+/l2/68/t3/<variant field> ::= <tag id> <type id>
+/lt7/|16<variant instance>|17|12
+|SS|Semantics:  <tag id>/L/
+|BB|DATATYPE = symbol table index of entry for <type¬id>,
+    which must identify a scalar or subrange type.
+|BB|VAR|47TYPE = if field is a component of a
+    <variant¬instance>, then Variant;
+    else, Field identifier.
+|BB|STRUCTYPE = Tagfield
+|BB|OWNER = symbol table index of entry for record type in
+    which this <variant¬field> appears.
+|BB|STORAGE|47LNGTH = 2 bytes
+|BB|VALUE = 0
+|BB|S|47LIST = symbol table index of entry for first
+    <variant¬instance>
+|BB|PSEUDO|47REG = null
+|BB|DISPLACEMENT = storage displacement allocated to two byte
+    tagfield relative to origin of OWNER
+|XX|
+/l2/69/t3/<variant instance> ::= |16<constant>|17|12 <type>
+|SS|Semantics:  <type> must always be a record type (Production 66)./L/
+|BB|VALUE = VALUE of last <constant> in list of case labels.
+    <constant> -- DATATYPE of <constant> must be
+    compatible with DATATYPE of tag of <variant¬field>
+    in which it appears.  If there is more than one
+    for /u/all but the last/u/, with the following
+    specifications:
+|BB|DATATYPE = DATATYPE(<constant>)
+|BB|VAR|47TYPE = Caselabel
+|BB|STRUCTYPE = STRUCTYPE(<constant>)
+|BB|OWNER = symbol table index of entry for tagfield
+|BB|STORAGE|47LNGTH = 0
+|BB|VALUE = VALUE(<constant>)
+|BB|S|47LIST = symbol table index of entry for next case label,
+    or <type> if this is the second last <constant>
+|BB|PSEUDO|47REG, DISPLACEMENT = null
+|XX|
+/l2/71/t3/<type> ::= |16<type 1>|17|12 <type 2>
+|SS|Semantics:  same as for Production 63./L/
+|XX|
+/l2/72/t3/<type> ::= <type 1>
+|SS|Semantics:  same as for Production 64./L/
+|XX|
+/l2/73/t3/<type> ::= <type 1>
+|SS|Semantics:  same as for Production 65./L/
+|XX|
+/l2/74/t3/<type> ::= |16<fixed field list>|17* |16<variant field>|17
+|SS|Semantics:  same as for Production 66./L/
+|XX|
+/l2/77/t3/<param types> ::= |16<type id>|17|12
+|SSL|Semantics:  <type id> is the data type of a value parameter of a
+    formal /u/procedure/u/ or /u/function/u/.  Create a new entry with
+    no IDENTITY field, and enter:/L/
+|BB|DATATYPE = symbol table index of entry for <type¬id>
+|BB|VAR|47TYPE = Variable
+|BB|STRUCTYPE= STRUCTYPE(<type id>)
+|BB|OWNER = symbol table index of entry for formal procedure
+    or function of whose parameter list <param¬types> is
+    a component.
+|BB|STORAGE|47LNGTH = storage allocated to a variable of type
+    <type¬id>, computed as in Production 12.
+|BB|VALUE = 0
+|BB|S|47LIST = symbol table index of entry for next formal
+    parameter of OWNER
+|BB|PSEUDO|47REG = null
+|BB|DISPLACEMENT = storage displacement in bytes relative to
+    pseudo|47reg of OWNER
+|XX|
+/l2/78/t3/<param types> ::= |16<type id>|17|12
+|SSL|Semantics:  <type id> is the data type of a /u/var/u/ parameter  of a
+formal /u/procedure/u/ or /u/function/u/.  Create a new entry with
+no IDENTITY as in Production 77, /u/except/u/ that/L/
+|BB|VAR|47TYPE = Formal parameter
+|BB|STORAGE|47LNGTH = 4
+|XX|
+/l2/79/t3/<param types> ::= |16<param types 1>|17|12 |16<type id>|17
+|SSL|Semantics:  for <param types> create a new entry with no
+    IDENTITY field for a formal /u/procedure/u/ or /u/function/u/
+    that is itself a parameter of a formal /u/procedure/u/ or
+    /u/function/u/, and enter:
+|BB|DATATYPE = symbol table index of entry for <type¬id> if
+    present, or null otherwise.
+|BB|VAR|47TYPE = Formal procedure
+|BB|STRUCTYPE = if <type¬id> is present then
+    STRUCTYPE(<type¬id>), else Statement.
+|BB|OWNER = symbol table index of entry for formal procedure
+    of whose parameter list this formal procedure is a
+    component.
+|BB|STORAGE|47LNGTH = 12 bytes
+|BB|VALUE = symbol table index of first <param¬types¬1> entry.
+|BB|S|47LIST = symbol table index of entry for next formal
+    parameter of OWNER.
+|BB|PSEUDO|47REG = null
+|BB|DISPLACEMENT = storage address in bytes relative to
+    pseudo|47reg of OWNER.
+|XX|
+/l2/80/t3/<param types> ::= <empty>
+|SSL|Semantics:  The formal procedure whose parameter list consists
+    of this <param¬types> has no formal parameters itself; its
+    VALUE field is set to null.
+|XX|
+/v/
+width of column is 65
+INDENT (5,0),(10,0),(15,0),(20,0),(25,0),(30,0),(35,0),(40,0),(45,0)
+TAB 6 11 16 21 26 31 36 41 46
+go
+/l4/VI  Semantic Analysis of Arithmetic Expressions
+/p/The chief characteristic which distinguishes PASCAL from its
+predecessors in the ALGOL family is its rich variety of data
+structuring facilities.  The primitive data types integer, real,
+Boolean and char as well as user-defined scalar types can be
+composed to form arrays, records, files and sets.  Instances of
+any type can be dynamically allocated and referred to by means of
+pointers.  An enumerated type can serve as the basis for restrictions
+called subrange types.  It is possible for a complicated type
+construction to be represented in the PASCAL language, as well as
+in the compiler's symbol table, in more than one way.  The heart
+of any program which analyzes the semantics of PASCAL arithmetic
+expressions must therefore contain a procedure for deciding the
+compatibility of two data types.  If two data types T¬ and T¬ are
+compatible, they are structurally equivalent; a variable of type
+T¬ may then be passed as an actual parameter to a procedure which
+has a formal /u/var/u/ parameter of type T¬.
+/p/In the Stony Brook PASCAL//360 compiler, the type compatibility
+procedure (COMPTYPES) was adapted from the procedure of the same
+name in the portable PASCAL P compiler |16AMMAN|17.  A data type
+is always represented by an index into the symbol table; two types
+are said to be /u/the same/u/ if they refer to the same symbol
+table entry.  A date type name T¬ is said to be an /u/alias/u/
+of data type name T¬ if the type definition
+/lt3u/type/u/ T¬ = T¬;
+/l/appears in the program.  Two types are always compatible if
+they are the same or aliases; otherwise, if they are scalar or
+arithmetic types, they are not compatible; for subrange and set
+types, they are compatible if their highbounds and lowbounds
+are equal and their underlying base types are compatible; for
+pointer types, they are compatible if they point to compatible
+types or if one is the distinguished data type of the constant
+/u/nil/u/; array types are compatible if the corresponding index
+types have the same cardinality and the element types are
+compatible; record types are compatible if they have no variants,
+they have the same number of fields, and the data types of
+corresponding fields are compatible; finally, file types are 
+compatible if their component types are compatible.
+/p/The axiomatic definition of PASCAL |16HOARE and WIRTH|17 
+describes three implicit type coercions which may be necessary
+to evaluate arithmetic expressions.  No explicit call to a data
+type transfer function is necessary for the following three
+coercions:/l2/
+/i1h1/a)/T/coercion of an integer value to a real value;/h/
+/h1/b)/T/coercion of an integer or scalar value to a value of a
+subrange type thereof; and/h/
+/h1/c)/T/coercion of a value of subrange type to a value of the
+integer or scalar type which underlies the subrange./hi/
+/p/There are generally two distinct contexts in which coercions 
+can occur.  The first is when a value of type T¬ must be coerced
+unconditionally to a value of type T¬; this contest is called
+"assignment coercion".  The second context for type coercion
+is called "operand coercion" and occurs when two operands are
+combined using some polymorphic arithmetic or comparison operator.
+/p/Operand coercion shall be considered first.  In the Stony Brook
+PASCAL//360 compiler, it is carried out by the procedure COERCE|47OP.
+COERCE|47OP is called to make the operands compatible when a
+relational operator ( =, <>, <, >, <=, >= ) or an untyped
+arithmetic operator ( +, -, * ) is being processed; that is,
+after both operand expressions of a binary operator have been
+processed independently.
+/p/On the nth post-order visit (n > 0) to an expression node
+in the syntax tree (which must have Multiplicity |19 n) the top n
+elements of the operand stack correspond to the leftmost n subtrees
+of the father node, in general.  The top element, Operand|44stk
+(|44op), corresponds to the nth subtree, whose node was the last
+previous node visited, and the symbol table index of the data
+type of this subtree is given by the value of the variable |44tp.
+When n > 1, the leftmost n - 1 subtree indices in the father node
+have been replaced by the symbol table indices of the data types
+of the n - 1 expression subtrees.  This situation must remain
+invariant over the entire tree-traversal.
+/p/The following program segment describes the post-order semantic
+processing of the "+" operator (production 39), illustrating the
+use of COERCE|47OP:
+/v/
+width 85
+go
+/l2/
+/A/
+     DO;
+         /* REPLACE THE INDEX OF THE OPERAND SUBTREE IN THE OPERATOR
+            NODE WITH |44TP.  THE DATA TYPE OF THE OPERAND SUBTREE. */
+         CALL replace (|44tp);
+         IF |44mp = 2 THEN /* SECOND POST-ORDER VISIT */
+               DO;
+                      /* MAKE OPERANDS COMPATIBLE */
+                      CALL coerce|47op;
+                      /* FETCH UPDATED VALUE OF |44 TP FROM SYNTAX TREE */
+                      |44tp = parse|47tree(node|44stack(np) + 2);
+                      IF comptypes (|44tp, intptr) THEN
+                           CALL emit|47triple (add, operand|44stk(|44op - 1),
+                                               operand|44stk(|44op), 3);
+                      ELSE IF comptypes (|44tp, realptr) THEN
+                           CALL emit|47triple (addflt, operand|44stk(|44op-1),
+                                               operand|44stk(|44op), 3);
+                      ELSE CALL error ('ILLEGAL "|12" OPERATOR', 1);
+                      /* POP THE OPERAND STACK */
+                      |44op = |44op - 1;
+                      /* LEAVE ADD TRIPLE ON TOP OF OPERAND STACK */
+                      operand|44stk(|44op) = last|47triple;
+               END;
+     END;
+)
+/v/
+width 65
+go
+/p/Intptr and Realptr are the symbol table indices of the standard
+data types integer and real respectively.  The program segment
+given above illustrates the function of operand coercion.  Its
+primary purpose is to make both operands compatible or to issue
+an error message if this is not possible.  Furthermore, since
+arithmetic operations are undefined for operands of subrange
+types, COERCE|47OP must coerce subrange operands to their
+underlying scalar type.  Finally, if one operand is of type
+real and the other is of type integer, the integer operand must
+by coerced to type real.  A type coercion may cause triples to be
+emitted (and a corresponding adjustment to one of the top two
+elements of the operand stack), and will always update the type
+information held in the operator node of the syntax tree.
+/p/Assignment coercion is carried out by the procedure COERCE|47
+ASSIGNMENT, which is called whenever the top element of the 
+operand stack must be coerced unconditionally to a specific data
+type.  For example, the operands of a DIV or MOD operator must
+both be integers; the value of an expression used to index an
+array must be coerced to the scalar or subrange index type of the
+array.  Only the top element of the operand stack is considered;
+however, coercions from integer or scalar types to subranges is
+now possible.  Such a coercion may require emission of triples to
+check dynamically whether a value so coerced is indeed within the
+subrange.
+/p/Use of assignment coercion is illustrated by the post-order
+semantic actions associated with the integer division (DIV)
+operator (production 44):
+/l2/
+/v/
+width 85
+go
+/A/
+     DO;
+         /* REPLACE THE INDEX OF THE OPERAND SUBTREE IN THE OPERATOR
+            NODE WITH |44TP.  THE DATA TYPE OF THE OPERAND SUBTREE. */
+         CALL replace (|44tp);
+         /* MAKE THE OPERAND AN INTEGER */
+         CALL coerce|47assignment (intptr, |44tp);
+         IF |44mp = 2 THEN /* SECOND POST-ORDER VISIT */
+               DO;
+                     CALL emit|47triple (divide operand|44stk(|44op - 1),
+                                         operand|44stk(|44op), 3);
+                     /* POP THE OPERAND STACK */
+                     |44op = |44op - 1;
+                     /* LEAVE DIVIDE TRIPLE ON TOP OF OPERAND STACK */
+                     operand|44stk(|44op) = last|47triple;
+                     /* THIS EXPRESSION IS OF TYPE INTEGER */
+                     |44tp = intptr;
+                END;
+     END;
+)
+/v/
+width 65
+go
+/l4/VII Left-to-Right Control-Flow Evaluation of Boolean Expressions
+/p/The PASCAL language definition does not fully define the manner
+in which Boolean expressions are to be evaluated.  If the first
+operand of an /u/and/u/ operator has been evaluated to false,
+we know that the logical conjunction is false regardless of the
+value of the second operand.  If the second operand is evaluated,
+a function procedure with side effects might be invoked; the side
+effects might alter the future course of the computation.  A
+similar situation arises with an /u/or/u/ operator.  If the first
+operand has been evaluated to true then the disjunction is true;
+do we evaluate the second operand?  The PASCAL language definition
+does not specify how much evaluation is required in these cases.
+In both cases the Stony Brook implementation does not perform
+redundant evaluation of the second operand.  This is ensured by
+the generation of optimized triples during Pass 2.
+/p/Some insight into the process of generating triples is gained
+by looking at a few sample Boolean expressions, taken from 
+|16GRIES|17, which illustrate the optimized triples sequences that are 
+actually generated:
+/l3u/Example 1/u/:/t4/A /u/or/u/ B
+/l2t2/$1/t3/BNZ/t5/$3,A
+/lt2/$2/t3/BZ/t5/false-loc,B
+/lt2/$3/t3/BCH|47TARGET
+/p/The triple $3 is reached only if the disjunction is true;
+otherwise a branch is made to the first operand of triple $2,
+which must designate a BCH|47TARGET triple.
+/l3u/Example 2/u/:/t4u/not/u/ A /u/or/u/ B
+/l2t2/$1/t3/BZ/t5/$3,A
+/lt2/$2/t3/BZ/t5/false-loc,B
+/lt2/$3/t3/BCH|47TARGET
+/p/This is similar to the first example.  The /u/not/u/ operator
+merely causes the branching condition in the $1 triple to be
+reversed.  The $1 triple now says, "Branch to the true-location
+($3) if A is false (i.e.,zero)."
+/l3u/Example 3/u/:/t4/A /u/and/u/ B
+/l2t2/$1/t3/BZ/t5/false-loc,A
+/lt2/$2/t3/BZ/t5/false-loc,B
+/lt2/$3
+/p/If triple $3 is reached, A and B are both true.  The first
+operands of triples $1 and $2 must both designate the same
+BCH|47TARGET triple, which is branched to if the conjunction is
+false.
+/l3u/Example 4/u/:/t4/A /u/or/u/ B /u/or/u/ /u/not/u/ C
+/l2t2/$1/t3/BNZ/t5/$4,A
+/lt2/$2/t3/BNZ/t5/$4,B
+/lt2/$3/t3/BNZ/t5/false-loc,C
+/lt2/$4/t3/BCH|47TARGET
+/p/The rules of PASCAL tell us that the correct way to parse the
+disjunction above is (A /u/or/u/ B) /u/or/u/ (/u/not/u/ C).  The
+disjunction is true if A alone is true or if B alone is true and
+this is reflected in the generated triples.  A branch is taken
+to the false-location if the negated variable is true.
+/l3u/Example 5/u/:/t4/A /u/or/u/ /u/not/u/ B /u/or/u/ C
+/l2t2/$1/t3/BNZ/t5/$4,A
+/lt2/$2/t3/BZ/t5/$4,B
+/lt2/$3/t3/BZ/t5/false-loc,C
+/lt2/$4/t3/BCH|47TARGET
+/p/This is similar to the previous example.  A branch is taken
+to the true-location if the negated variable is false.
+/l3u/Example 6/u/:/t4/A /u/and/u/ (B /u/or/u/ C)
+/l2t2/$1/t3/BZ/t5/false-loc,A
+/lt2/$2/t3/BNZ/t5/$4 B
+/lt2/$3/t3/BZ/t5/false-loc,C
+/lt2/$4/t3/BCH|47TARGET
+/p/After A has been evaluated, the triples generated are simply
+those that evaluate (B /u/or/u/ C), as in example 1.  The first
+operands of triples $1 and $3 must designate the same 
+BCH|47TARGET instruction.
+/l3u/Example 7/u/:/t4/(A /u/or/u/ /u/not/u/ B) /u/and/u/ (/u/not/u/ C /u/and/u/ D)
+/l2t2/$1/t3/BNZ/t5/$3,A
+/lt2/$2/t3/BNZ/t5/false-loc,B
+/lt2/$3/t3/BCH|47TARGET
+/lt2/$4/t3/BNZ/t5/false-loc,C
+/lt2/$5/t3/BZ/t5/false-loc,D
+/p/As Boolean expressions become more complicated, intermediate
+BCH|47TARGET instructions are needed to indicate that 
+subexpressions are true (false).  In this case, if A is true
+then the value of the expression does not depend upon the value
+of B, so a branch is made to the (/u/not/u/ C /u/and/u/ D)
+subexpression.  Generally, an intermediate BCH|47TARGET is
+necessary when the first operand of a conjunction is a disjunction.
+/l3u/Example 8/u/:/t4/(A /u/and/u/ /u/not/u/ B) /u/or/u/  (/u/not/u/ C /u/and/u/ D)
+/l2t2/$1/t3/BZ/t5/$3,A
+/lt2/$2/t3/BZ/t5/$6,B
+/lt2/$3/t3/BCH|47TARGET
+/lt2/$4/t3/BNZ/t5/false-loc,C
+/lt2/$5/t3/BZ/t5/false-loc,D
+/lt2/$6/t3/BCH|47TARGET
+/p/This is similar to example 7.  The other case where an 
+intermediate BCH|47TARGET instruction is generally necessary is
+when the first operand of a disjunction is a conjunction.
+/l3u/Example 9/u/:/t4/A /u/and/u/ (/u/not/u/ (B /u/or/u/ C) /u/or/u/ D)
+/l2t2/$1/t3/BZ/t5/false-loc,A
+/lt2/$2/t3/BNZ/t5/$4,B
+/lt2/$3/t3/BNZ/t5/$6,C
+/lt2/$4/t3/BCH|47TARGET
+/lt2/$5/t3/BZ/t5/false-loc,D
+/lt2/$6/t3/BCH|47TARGET
+/p/This expression is made complicated by having an entire 
+disjunction negated.  We simplify such expressions by means of
+De Morgan's law, which states that
+/l2t2//u/not/u/ (A /u/or/u/ B) is equivalent to (/u/not/u/ A /u/and/u/ /u/not/u/ B)
+/lt1/and/t2u/not/u/ (A /u/and/u/ B) is equivalent to (/u/not/u/ A /u/or/u/ /u/not/u/ B).
+/l2/Expression 9 is then simplified to the equivalent
+/l2t2/A /u/and/u/ ((/u/not/u/ B /u/and/u/ /u/not/u/ C) /u/or/u/ D).
+/l2/Note that the generated triples correspond quite closely to
+the simplified expression.  The simplified expression has a
+conjunction as the first operand of a disjunction and so the 
+triples must therefore contain an intermediate BCH|47TARGET
+instruction.
+/l3t1/The examples above all exhibit an important property that has
+not yet been mentioned.  If the last triple in the sequence has
+been executed and does not result in a branch, the expression has
+the value true.  If the expression has the value false, then one
+of the triples that will be executed will result in a branch out
+of the expression to an unspecified location called false-location.
+This is important because when Boolean expressions appear in the
+context of the control structures /u/if/u/ - /u/then/u/ - /u/else/u/,
+/u/while/u/ - /u/do/u/, and /u/repeat/u/ - /u/until/u/, a value of
+true implies execution of the statement which immediately follows
+the Boolean expression, whereas a value of false implies a branch.
+/p/The algorithm for producing optimized triples for Boolean
+expressions uses the first operands of BZ and BNZ triples as
+temporary storage.  Those conditional branch instructions whose
+first operands will ultimately designate the same BCH|47TARGET 
+triple are temporarily chained together via their first operands;
+this chain is called a /u/fixup list/u/.  The high-order bit of
+each (16-bit) fixup list pointer determines whether the branch
+is to be taken to a "true location" (bit is 1) or to a "false
+location" (bit is 0).  A stack called Fix|47list is used to hold
+pointers to the heads of left-operand fixup lists of binary
+Boolean operator nodes whose right-operand trees have not yet
+been traversed.  Fix|47list is indexed by Np, the depth in the
+syntax tree of the current (Boolean operator) node.  The global
+variable Listhead points to the head of the current fixup list,
+and the global variable Fx holds the current Boolean value on 
+which to branch out of the expression.  In the syntax tree, the
+subtree index which originally pointed to a Boolean operator
+node (from the Boolean operator's father node) is used to hold
+the value of Fx as it propagates downward through the operand
+subtrees.  After a Boolean expression has been processed, the
+top element of the operand stack might designate a BZ or a 
+BNZ instruction; in this case, the variable Fx determines 
+whether the conditional branch instruction branches to a "true
+location" (Fx = true) or to a "false location" (Fx = false).
+The variable Listhead points to the head of the fixup chain which
+includes the triple designated by the top element of the operand
+stack.
+/p/We now present in detail the algorithm for optimizing
+Boolean expressions.  We are interested in the semantic actions
+associated with the /u/not/u/, /u/or/u/, and /u/and/u/ operators
+(productions 31, 41 and 46 respectively).  These semantic actions
+use four subsidiary procedures.  Is|47condition and Is|47negation 
+are predicates which are true if their arguments designate
+conditional branch triples and NOT triples respectively.
+/l4/
+/A/
+     is|47condition:
+          PROCEDURE (op|47ptr) BIT(1);
+               /* TESTS OPERAND TO SEE IF BZ OR BNZ TRIPLE */
+               DECLARE (op|47ptr, opcd) BIT(16);
+               IF (op|47ptr & "C000") = mask|47triple THEN
+                     DO;
+                         opcd = triples(op|47ptr & "3FFF") & "7F";
+                         IF (opcd = BZ) |33 (opcd = BNZ) THEN
+                              RETURN true;
+                     END;
+               RETURN false;
+          END is|47condition;
+ 
+ 
+     is|47negation;
+          PROCEDURE (op|47ptr) BIT(1);
+               /* DETERMINES IF OPERAND IS A "NOT" TRIPLE */
+               DECLARE (op|47ptr, opcd) BIT(16);
+               IF (op|47ptr & "C000") = mask|47triple THEN
+                    DO;
+                         opcd = triples(op|47ptr & "3FFF") & "7F";
+                         IF opcd = not THEN RETURN true;
+                    END;
+               RETURN false;
+          END is|47negation;
+)
+/p/Fixup causes each conditional branch triple on a fixup list
+to branch to the same designated BCH|47TARGET triple.
+/l3/
+/A/
+     fixup:
+          PROCEDURE (head|47ptr, target|47triple);
+               DECLARE (head|47ptr, target|47triple, next) BIT(16);
+               DO WHILE head|47ptr ~= null;
+                    head|47ptr = head|47ptr & "3FFF";
+                    next = triples(head|47ptr + 1);
+                    triples(head|47ptr + 1) = target|47triple |33 mask|47triple;
+                    head|47ptr = next;
+               END;
+          END fixup;
+)
+/l3t1/Emit|47conditional|47branch causes a BZ or a BNZ triple to
+be emitted, depending upon the Boolean value of its argument.  If
+the second operand of the conditional branch (i.e., the Boolean
+value being tested) designates a NOT triple, the NOT triple is
+overwritten by the conditional branch triple.  Emit|47conditional|47branch
+is called only in situations where the NOT triple being
+overwritten is in fact the last previous triple to be emitted.
+/l3/
+/A/
+     emit|47conditonal|47branch;
+          PROCEDURE (fx);
+               DECLARE fx BIT(1), opnd BIT(16);
+               opnd = operand|44stk(|44op);
+               IF is|47negation (opnd) THEN
+                    DO;
+                         n|47triples = n|47triples - 3;
+                         opnd = triples(n|47triples + 1);
+                         fx = 1 - fx;
+                    END;
+               IF fx THEN CALL emit|47triple (bnz, null, opnd, 0);
+               ELSE CALL emit|47triple (bz, null, opnd, 0);
+          END emit|47conditional|47branch;
+)
+/p/We now consider the semantic actions themselves.  Remembering
+that we wish to branch out of Boolean expressions if they are
+false and continue processing if they are true, the following 
+pre-order actions are applied for all productions in which Boolean
+expressions may appear, but which are not themselves Boolean
+operators (e.g., statements, procedure//function calls, 
+subscript lists, set elements, etc.).
+/l2t1/DO;
+/lt2/fx = false;     listhead = null;
+/lt1/END;
+/p/When the subtree for one of the binary Boolean operators
+/u/and/u/ and /u/or/u/ is encountered in pre-order, the
+sequence of triples emitted depends not only upon the subtree
+itself but upon the value of Fx as well.  Recall that if Fx is
+true, we branch out of the expression to a true-location, otherwise
+we branch out to a false-location.  The triples we emit are as
+follows:
+/s/
+/V/
+keypunch
+width of column is 65
+sentences separated by 2 blanks
+tabs at 8 12 21 37 41 51
+box 1 = 6 35 64
+box 2 = 6 35 64
+Go
+/l2u/Fx = false/u/:/l2/
+/b1/ /l2/ /t2/A /u/and/u/ B/t5/A /u/or/u/ B
+/l2t1/$1/t2/BZ/t3/false-loc,A/t4/$1/t5/BNZ/t6/$3,A
+/lt1/$2/t2/BZ/t3/false-loc,B/t4/$2/t5/BZ/t6/false-loc,B
+/lt4/$3/t5/BCH|47TARGET
+/l2b1/
+/l2u/Fx = true/u/:/l2/
+/b2/ /l2/ /t2/A /u/and/u/ B/t5/A /u/or/u/ B
+/lt1/$1/t2/BZ/t3/$3,A/t4/$1/t5/BNZ/t6/true-loc,A
+/lt1/$2/t2/BNZ/t3/true-loc,B/t4/$2/t5/BNZ/t6/true-loc,B
+/lt1/$3/t2/BCH|47TARGET
+/l2b2/
+/V/
+width of column 65
+TABS AT 5 11 16 21 29 31 36 38 48
+INDENT (4,0),(10,0),(15,0),(20,0),(28,0),(30,0),(35,0),(37,0),(47,0)
+GO
+/p/These triples patterns suggest the algorithm.  The value of
+Fx is inherited from the /u/and/u/ or /u/or/u/ operator's father
+node and propagates downward through the syntax tree.  When an
+/u/and/u/ or /u/or/u/ operator is visited in pre-order the value
+of Fx is saved in the operator's father node.  For an /u/and/u/
+operator, we always branch out of the left operand on false
+regardless of the inherited value of Fx, so we temporarily set
+Fx to false.  For an /u/or/u/ operator we similarly set Fx to
+true temporarily.
+/P/We then traverse the left operand, making certain that
+triples are emitted to conditionally branch out of it.  The left
+operand fixup list pointer, whose high-order bit contains the
+temporary value of Fx, is stacked in Fix|47list(Np).  Fx is then
+restored to its inherited value and the right operand subtree is
+traversed; we always branch out of the right operand on the
+inherited value of Fx.
+/p/After processing both subtrees, if the value of Fx, on the left
+operand is equal to the inherited right operand value of Fx, we
+merge the left and right operand fixup lists into a single chain
+pointed to by Listhead; otherwise, we emit a BCH|47TARGET triple
+and fix up the left operand by making all of the conditional
+branch instructions on its fixup list branch to the newly emitted
+BCH|47TARGET.
+/p/We see that this algorithm works for all four cases illustrated
+above.  Note that the semantic actions taken for /u/and /u/ and
+/u/or/u/ operators are nearly identical, differing only in the
+temporary value assigned to Fx when the operator node is visited
+in pre-order.  Also note that De Morgan's law is applied to a
+negated /u/and/u/ or /u/or/u/ operator merely by negating Fx
+when the /u/not/u/ operator is visited in pre-order (i.e. before
+visiting the /u/and/u/ or /u/or/u/ operator in pre-order), and
+then reversing the parity of the fixup list (asserting that it
+branches to a false-location, for example, instead of a true-location)
+when the /u/not/u/ operator is visited again in post-order.
+/p/For the /u/not/u/ operation itself, we wish to branch out of its
+operand (which is a Boolean expression) on true if it is a component
+of another Boolean expression, which we want to branch out of on
+false, and vice versa.  Therefore in pre-order we logically complement
+Fx, and in post-order we restore Fx to its previous value.  The 
+semantic actions associated with the /u/not/u/ operator (production
+31) are as follows:
+/v/
+width 85
+go
+/l2u/Pre-order/u/:
+/lt1/fx = 1 - fx;
+/l2u/Post-order/u/:
+/A/
+          Do;
+                  IF |34comptypes (|44tp, boolptr) THEN
+                       DO;
+                            CALL error ('BOOLEAN EXPRESSION EXPECTED', 1);
+                            |44tp = boolptr;
+                       END;
+                  IF is|47negation (operand|44stk(|44op) THEN
+                       DO; /*ELIMINATE DOUBLE NEGATIVES */
+                           operand|44stk(|44op) = triples(n|47triples - 2);
+                           n|47triple = n|47triples - 3;
+                           last|47triples = (n|47triples - 3) |33 mask|47triple;
+                       END;
+                  ELSE IF is|47condition (operand|44stk(|44op)) THEN
+                       /* REVERSE THE PARITY OF LISTHEAD */
+                       listhead = (listhead & "7FFF")
+                                  |33 shl(1 - shr(listhead, 15), 15);
+                  ELSE
+                       DO;
+                            CALL emit|47triple (not, operand|44stk(|44op), null, 3);
+                            operand|44stk(|44op) = last|47triple;
+                       END;
+                 /* RESTORE FX */
+                 fx = 1 - fx;
+          END;
+)
+/p/The semantic actions associated with /u/or/u/ and /u/and/u/
+operators (productions 41 and 46 respectively) are given below.
+/l2u/Pre-order:/u/
+/A/
+          DO;
+               CALL replace (fx); /* SAVE INHERITED VALUE OF FX */
+               fx = (parse|47tree(node + 1) = 41); /* TRUE IF OR,
+                                                    FALSE IF AND */
+               listhead = null;
+          END;
+)
+/l2u/Post-order/u/:
+/A/
+          IF |44mp = 1 THEN
+                 DO; /* FINISHED TRAVERSING LEFT SUBTREE */
+                     IF ¬comptypes (|44tp boolptr) THEN
+                          CALL error ('BOOLEAN EXPRESSION EXPECTED', 1);
+                     IF listhead ¬= null THEN
+                          fix|47list(np) = listhead;
+                     ELSE
+                          DO; /* BRANCH OUT OF LEFT OPERAND */
+                              CALL emit|47conditional|47branch (fx);
+                              fix|47list(np) = shl(fx, 15) |33 (n|47triples - 3);
+                          END;
+                    /* RESTORE FX TO ITS INHERITED VALUE */
+                    fx = parse|47tree(node|44stack(np - 1)
+                                    + |44pos|47stack(np - 1) + 1);
+                    listhead = null;
+                    |44op = |44op - 1;
+                 END;
+          ELSE
+                 DO; /* FINISHED TRAVERSING RIGHT SUBTREE */
+                     IF ¬comptypes (|44tp, boolptr) THEN
+                          DO;
+                               CALL error ('BOOLEAN EXPRESSION EXPECTED', 1);
+                               |44tp = boolptr;
+                          END;
+                     IF listhead = null THEN
+                          DO; /* BRANCH OUT OF RIGHT OPERAND */
+                              CALL emit|47conditional|47branch (fx);
+                              operand|44stk(|44op) = last|47triple;
+                              listhead = shl(fx, 15) |33 (n|47triples - 3);
+                          END;
+                     i = fix|47list(np); /* FIXUP LIST FOR LEFT OPERAND */
+                     IF shr(i, 15) ¬= fx THEN
+                          DO; /* FIX UP LEFT OPERAND */
+                              CALL emit|47triple (bch|47target, null, null, 0);
+                              CALL fixup (i last|47triple);
+                          END;
+                     ELSE
+                          DO; /* MERGE LEFT AND RIGHT FIXUP LISTS */
+                              i = i & "3FFF";
+                              DO WHILE triples(i + 1) ¬= null;
+                                   i = triples(i + 1) & "3FFF";
+                              END;
+                              triples(i + 1) = listhead;
+                              listhead = fix|47list(np);
+                           END;
+          END;

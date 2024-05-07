@@ -465,7 +465,9 @@ parseCommandLine(int argc, char **argv)
                       lun, ro->filename);
                   exit(1);
                 }
-              ro->fp = fopen(filename, "ab+");
+              ro->fp = fopen(filename, "rb+");
+              if (ro->fp == NULL)
+                ro->fp = fopen(filename, "wb+");
               if (ro->fp == NULL)
                 {
                   fprintf(stderr, "Cannot open i/o file %d (%s) for read/write)\n",
@@ -1145,6 +1147,7 @@ xNOT(bit_t *i1) {
   return result;
 }
 
+#ifndef xOR
 bit_t *
 xOR(bit_t *i1, bit_t *i2) {
   bit_t *result = nextBuffer();
@@ -1179,7 +1182,9 @@ xOR(bit_t *i1, bit_t *i2) {
     }
   return result;
 }
+#endif // xOR
 
+#ifndef xAND
 bit_t *
 xAND(bit_t *i1, bit_t *i2){
   bit_t *result = nextBuffer();
@@ -1223,6 +1228,7 @@ xAND(bit_t *i1, bit_t *i2){
     }
   return result;
 }
+#endif // xAND
 
 // Various string-comparison functions follow.
 

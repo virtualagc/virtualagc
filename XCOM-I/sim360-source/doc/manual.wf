@@ -1,0 +1,2456 @@
+ 
+Compiler reuseable
+punch not
+$1
+seperate comp
+pscll 
+runkw
+ADDCC
+extfiles rewrite
+local temp
+idlen identifierlength
+add grammer
+ 
+KEYPUNCH 
+no page
+number
+WIDTH OF COLUMN IS 70
+SENTENCES SEPARATED BY 2 BLANKS
+NO CAPITALIZE
+TEXT STARTS ON LINE 6 POSITION 15
+TABS AT 5     9     13     17     21     25     29     33     37
+INDENT (4,0),(8,0),(12,0),(16,0),(20,0),(24,0),(28,0),(32,0),(36,0)
+NO CONTROL over what format does to me
+go
+/Ml/ STONY BROOK PASCAL//360
+/l2/ USER'S GUIDE
+/l5/-RELEASE 2-
+/l14/BY
+/l2/RICHARD B. KIEBURTZ
+/l2/WILLIAM BARABASH
+/l2/CHARLES R. HILL
+/l10/FEBRUARY 1979/M/
+/s/
+/v/
+page
+go
+/m/Stony Brook Pascal//360 compiler--Release 2.0 and 2S User's 
+Guide/m/
+/p/This is the User's Guide to the Release 2.0 and Release 2S 
+compilers for Pascal, developed by the Pascal Compiler Project,
+Dept. of Computer Science, SUNY at Stony Brook.  These compilers
+run on IBM 360 or 370 hardware under any version of the OS//360
+operating system.  This User's Guide is intended to supplement
+the /u/Pascal User Manual and Report/u/, K. Jensen and N.¬Wirth,
+Second Edition, Springer-Verlag (1976), and in particular, to
+replace the subsection of that manual entitled "Pascal 6000-3.4".
+This edition of the User's Guide replaces the Release 1 edition for
+installations that are running Release 2.
+/p/Permission is hereby granted to reproduce this document, in
+whole or in part.
+/s/
+/l/A.¬¬Restrictions of the language as implemented in Release 2:
+/l2h1/1)/t/The standard procedure Dispose is not implemented.
+Storage dynamically allocated by calls to the standard procedure
+New cannot be reclaimed under this release./h/
+/l2h1/2)/t/A program cannot contain more than 500 distinct identifiers./h/
+/l2h1/3)/t/The cardinality of a /u/set/u/ type cannot exceed 
+2040./h/
+/l2h1/4)/t/A set constructor cannot contain element expressions of
+type Integer, unless these expressions are constants.  Element
+expressions of subrange types are allowed in a set constructor./h/
+/l2h1/5)/t/The maximum cardinality of a subrange type is 2@3@1-1.
+/h/
+/l2h1/6)/t/All arrays are /u/packed/u/ to the byte level.  All
+sets are /u/packed/u/ to the bit level.  An array element of a
+scalar or subrange type may not be used as an actual /u/var/u/
+parameter in a call of a procedure or function.  It may be used as
+an actual value parameter.  The attribute /u/packed/u/
+may be specified in a type definition, but has no effect 
+either semantically, on storage requirements or on 
+execution efficiency.  The standard procedures Pack and 
+Unpack are implemented for their copying effects./h/
+/l2h1/7)/t/The tag field in a variant record type definition is
+mandatory.  However, it is not tested by the implementation in an
+assignment or a reference to a variant field, and hence does not
+guarantee type security of variants.  The type of a tag field must
+be either a scalar, or a subrange type whose cardinality does not
+exceed 32768./h/
+/l2h1/8)/t/There is a limit on the maximum size of a single 
+procedure that can be compiled.  This is imposed by the internal
+storage area allocated by the compiler for the representation of a
+single abstract syntax tree, and corresponds roughly to a procedure
+body of about 300 statements./h/
+/l2h1/9)/t/The following identifiers are reserved:
+/lu/entry/u/, /u/external/u/, /u/extvar/u/, /u/fortran/u/, 
+/u/forward/u/, /u/otherwise/u/./h/
+/l2h1/10)/t/Of all the predeclared functions, the only ones that
+may be passed as /u/function/u/ parameters to another procedure or
+function are the arithmetic functions Sin, Cos, Exp, Ln, Sqrt,
+Arctan.  No predeclared procedure may be passed as a /u/procedure/u/
+parameter./h/
+/l2h1/11)/t/The end of each line of output to a Text file must be
+explicitly indicated by a call to the standard procedure Writeln.
+For print files, failure to end a line within a length appropriate
+to the buffer size of the printing device (132 characters for most
+line printers) will result in loss of the tail end of the line./h/
+/l2h1/12)/t/In writing Real values to a Text file, only
+floating-point
+format control is proved (scientific notation). The number of
+digits to be printed in front of the decimal point cannot be 
+controlled.  The effect of Write (R:m:n) is the same as that of
+Write (R:m)./h/
+
+/l3h1/B.¬¬Extensions of the language implemented in release 2.0
+(but not in 2S)/h/
+/l2i1h1/1)/t/Declarations of constants of structured types.  A
+syntax extension (see the syntax chart for <const¬decl> in the
+Appendix) allows the specification of a type in a
+/u/const/u/ declaration.  The actual value of a typed constant is
+indicated by a constructor, which is parenthesized to reflect the
+structure of the type.  This extension allows the declaration of
+constant tables./hi/
+/L1i2/Examples:/i/
+/a/ 
+        /u/const/u/ Array /u/of/u/ pairs : /u/array/u/(.1..4.) /u/of/u/
+ 
+                 /u/array/u/(.0..1.) /u/of/u/ Integer
+ 
+                      = ((1,12), (2,-5), (3,6), (4,45));
+ 
+                 Set|47const /u/set of/u/ 1..100
+ 
+                      = (.3, 5, 7..9, 23, 80, 14.);
+ 
+                 Record|47const : /u/record/u/
+ 
+                                  Name : /u/array/u/(.1..12.)/u/of/u/ Char;
+                                  Height, Weight : Integer;
+                                  Birthdate : /u/array/u/(.1..9.)
+                                          /u/of/u/ Char
+ 
+                           /u/end/u/
+ 
+                      = ('MARY JONES', 157, 54, '27 MAR 54');
+)
+/li2/The compiler will produce an error message if the type of an
+element in a constant constructor is not compatible with the
+corresponding element of the structured type declared for the
+constant.  The elements appearing in a constructor must them-
+selves be constants; they may not be variables or expressions./i/
+
+/l2i1h1/2)/t/Extended /u/case/u/ statement.  The /u/case/u/
+statement has been extended to provide a default case, and to
+allow the case labels to include range specifiers as well as
+individual constants.
+/p/When the /u/case/u/ statement is closed by the keyword 
+/u/end/u/, as in the standard Pascal syntax, this implementation
+provides the empty statement as a default, to be executed in the
+event that the value of the case selector expression does not
+match any of the caselabels.  An extended syntax
+(see syntax for <statement> given in the Appendix) 
+allows the clause
+/l2t4u/otherwise/u/ |35statement>
+/l2/to be used as an alternative ending
+(in place of /u/end/u/).
+When the alternative ending is used, the statement following the
+keyword /u/otherwise/u/ will be executed as the default case.
+/p/Lists of caselabels may now include ranges of constants,
+such as 'A'..'Z', or -5..5, in addition to individual constants.
+(In order to preserve the orthogonality of the language, the
+caselabel lists in variant records also allow range specifiers.)
+There is no limit on the cardinality of a case selector type,
+nor on the cardinality of a caselabel range.  The implementation
+of the /u/case/u/ statement uses jump tables, wherever an interval
+of values is densely populated by individually specified constant
+caselabels, and a balanced branch tree to select intervals that
+have been specified by ranges, or for which no explicit labels have
+been given.  The jump table implementation provides speed, and the
+branch tree can save considerable space.  A programmer who is
+cognizant of the implementation can direct it by writing a /u/case/u/
+statement with explicit, individual caselabels or with ranges./hi/
+/L1i2/Examples:/i/
+ 
+/l2i3//u/case/u/ X /u/of/u/
+/l2i4/¬¬1,2,3,4 :  Writeln ('Less than 5');
+/l/¬¬¬¬¬5,10    :  Writeln ('A multiple of 5');
+/l/¬¬6,7,8,9 :  Writeln ('Less than 10')
+/l2i3//u/end/u/ (*implemented by a jump table *)
+ 
+/l3//u/case/u/ X /u/of/u/
+/li4/¬¬1..4 : Writeln ('Less than 5');
+/l/¬¬6..9 : Writeln ('Less than 10')
+/lu/otherwise/u/ Writeln ('A multiple of 5')
+ 
+/l2i3/(*implemented by a branch tree*)/i/
+/l2i2/Reference: R.B.¬Kieburtz, Two generalizations of Pascal,
+Tech.¬Rept.¬No.¬66, Dept.¬of Computer Science, SUNY at Stony Brook
+1976./-i-i-i/
+
+/l2i1h1/3)/t/Fully typed parameter lists in procedure and function
+declarations.  A syntax extension (see the Appendix)
+allows the types of
+/u/procedure/u/ and /u/function/u/ parameters in a parameter list
+to be fully specified.  This specification is, in fact, mandatory
+in this implementation, and permits the compiler to perform all 
+type checking (except for subrange checks) at compilation time./h/
+
+/l2h1/4)/t/Modular compilation and program linkage.  With the
+Release 2.0 compiler, several modules (Pascal programs) may be
+compiled individually, and linked together prior to execution form
+an OS//360 object module.  Minor syntactic extensions have been
+made to support this feature.  These are:/h/
+
+/l1i2h1/a)/t/The reserved keyword /u/external/u/ may appear as a prefix to
+a program heading.  This will indicate that the program contains no
+principal entry point, but is to be executed in conjunction with
+some other program module that is not prefixed by /u/external/u/.
+In any set of program modules to be linked together, exactly one of 
+them can have this prefix omitted.  It will be the main module, or
+control program./h/
+
+/l2h1/b)/t/The reserved keyword /u/external/u/ may appear as the
+body of a procedure or function declaration.  This designates the
+procedure or function as one whose principal declaration is to
+appear in another program module. 
+An /u/external/u/ procedure or function declaration can appear only
+on the global lexical level of a program module./h/
+
+/l2h1/c)/t/The reserved keyword /u/fortran/u/ may appear as the
+body of a procedure or function declaration. This designates the
+declared name of the procedure or function as an external reference
+name for a non-Pascal routine, which is to be linked according to
+the OS//Fortran linkage protocol./h/
+/l2h1/d)/t/The reserved keyword /u/entry/u/ may follow one of the
+keywords /u/procedure/u/ or /u/function/u/ in the heading of a
+procedure or function declaration.  The attribute /u/entry/u/
+indicates that the procedure or function given by this declaration 
+may be referenced as an /u/external/u/ by other program modules.
+This attribute can only be given to a procedure or function 
+declaration on the global lexical level of a program module.
+Neither an /u/entry/u/ nor an /u/external/u/ procedure//function
+may be passed as an actual procedure//function parameter in a
+procedure call.  Note: in Release¬2.0 the compiler will check that
+an /u/external/u/ procedure//function is not used as an actual 
+parameter, but does not check for the /u/entry/u/ attribute./h/ 
+/l2h1/e)/t/A declaration paragraph headed by the reserved keyword
+/u/extvar/u/ may appear following the /u/var/u/ declarations in the
+global lexical level of a program module.  In this paragraph are
+declared the variables that are to be shared with one or more
+other modules.  All variables declared /u/extvar/u/ in any program
+module must also be declared /u/extvar/u/ in the main program module.
+A word of caution: this feature has been put into the extended
+language primarily as an aid to the translation of large, existing
+programs into separately compilable modules.  We do not recommend
+its extensive use. A large number of /u/extvar/u/ variables is the
+hallmark of a poorly modularized system of programs./h/
+
+/i1p/Since the unit of compilation is a Pascal program, 
+each component
+program module can contain its own value-persistent global variables,
+which are not directly accessible to other modules.  Similarly, the
+procedures and functions of a module that have not been explicitly
+given the /u/entry/u/ attribute are also private. Considerable
+information-hiding is therefore possible within a program module.
+The externally visible names exported from a module are those of its
+entry procedures and functions.  The names it imports are those it
+has declared as /u/external/u/ or /u/fortran/u/ procedures and functions.
+The shared variables (those declared in /u/extvar/u/ paragraphs)
+are not to be thought of as either imported or exported, but as
+existing in a common environment. All procedures, functions, and
+shared variables are fully typed in each program module in which they
+are declared.  In order to assure the type-consistency that is a 
+key feature of the Pascal language, it is necessary to check that
+the typing of corresponding names is mutually consistent in program
+modules that are to be linked together.
+/p/The predeclared Text file variables, Input and Output can 
+be referred to in all modules of a program without the need to
+declare the /u/extvar/u/ attribute.  
+So also can the print fieldwidth control variables, Intfieldsize, 
+Boolfieldsize, and Realfieldsize.
+/p/To guarantee type-consistency, we have introduced into the
+Release 2.0 programming system a new module, called the Pascal
+Linker.  The compiler produces as output a Pascal object module in
+a non-OS-standard format. This object module contains a symbol table
+describing the types of all entry, extvar, external, and fortran
+references.  Pascal object modules are input to the Linker, which
+resolves addresses, maps storage, and also checks the type 
+correctness of references across inter-module boundaries.  The Linker
+also amalgamates tables provided by the compiler for the use of the
+postmortem diagnostics program (PMD), enabling it to perform a 
+traceback and produce a symbolic dump after execution of a 
+multi-module Pascal program.  The traceback is also effective when
+Fortran routines are involved.
+/p/The Pascal Linker can also be used with a single Pascal program
+module in order to convert from the pascal object module format
+produced by the compiler into an OS//360 object module that can be
+loaded by the OS//360 Linking Loader, or further processed into a
+load module by the OS//360 Link Editor./i1/
+/l2i1u/Reference/u/: R.B.¬Kieburtz, W.¬Barabash and C.R.¬Hill, A
+type-checking linkage system for Pascal, Proceedings of the 3rd
+International Conf. on Software Engineering, pp. 23-28, IEEE
+Publications, New York, 1978./i1/
+/l2i1u/Example/u/: To illustrate the syntax, suppose a stack of
+integer values it to be defined as an external module, in order
+to hide its representation.
+/l2u/external program/u/ IntStack (Output);
+/l/¬¬¬/u/const/u/ 
+/l/¬¬¬¬¬¬Overflow = 'ATTEMPT TO POP OR READ FROM AN EMPTY INTSTACK';
+/l/¬¬¬/u/type/u/
+/l/¬¬¬¬¬¬Frame = /u/record/u/
+/l/¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬Val : Integer;
+/l/¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬Next: @Frame;
+/l/¬¬¬¬¬¬¬¬¬¬¬¬¬¬/u/end/u/; 
+/l/¬¬¬/u/var/u/ 
+/l/¬¬¬¬¬¬StackPtr : @Frame;
+/l2/¬¬¬/u/procedure entry/u/ InitStack;
+/l/¬¬¬¬¬¬/u/begin/u/ StackPtr := /u/nil end/u/;
+/l2/¬¬¬/u/function entry/u/ IsEmpty : Boolean;
+/l/¬¬¬¬¬¬/u/begin/u/ IsEmpty := (StackPrt = /u/nil/u/) /u/end/u/;   
+/l2/¬¬¬/u/procedure entry/u/ Push (X : Integer);
+/l/¬¬¬¬¬¬/u/var/u/  
+/l/¬¬¬¬¬¬¬¬¬OldPtr : @Frame;
+/l/¬¬¬¬¬¬/u/begin/u/  
+/l/¬¬¬¬¬¬¬¬¬OldPtr := StackPtr;¬¬New (StackPtr); 
+/l/¬¬¬¬¬¬¬¬¬/u/with/u/ StackPrt@ /u/do/u/
+/l/¬¬¬¬¬¬¬¬¬¬¬¬/u/begin/u/ Bal := X;¬¬Next := OldPtr; /u/end/u/
+/l/¬¬¬¬¬¬/u/end/u/;
+/l2/¬¬¬/u/procedure entry/u/ Pop;
+/l/¬¬¬¬¬¬. 
+/l/¬¬¬¬¬¬. 
+/l/¬¬¬¬¬¬. 
+/l2/¬¬¬/u/function entry/u/ Top;
+/l/¬¬¬¬¬¬. 
+/l/¬¬¬¬¬¬. 
+/l/¬¬¬¬¬¬. 
+/l2/¬¬¬/u/begin/u/ (* empty statement body *) /u/end/u/.
+/l2/In a main program that is to use the abstract variable defined
+by IntStack, we declare
+/u/program/u/ Application (Input, Output);
+/l/¬¬¬¬¬¬.
+/l/¬¬¬¬¬¬.
+/l/¬¬¬¬¬¬.
+/l2/¬¬¬/u/procedure/u/ Push( V : Integer);
+/l/¬¬¬¬¬¬/u/external/u/
+/l2/¬¬¬/u/procedure/u/ Pop;
+/l/¬¬¬¬¬¬/u/external/u/
+/l2/¬¬¬/u/function/u/ IsEmpty : Boolean;
+/l/¬¬¬¬¬¬/u/external/u/ 
+/l2/¬¬¬/u/function/u/ Top : Integer;
+/l/¬¬¬¬¬¬/u/external/u/ 
+/l2/¬¬¬/u/procedure/u/ InitStack;
+/l/¬¬¬¬¬¬/u/external/u/ 
+/l2/¬¬¬/u/begin/u/
+/l/¬¬¬¬¬¬InitStack;
+/l/¬¬¬¬¬¬¬¬¬.
+/l/¬¬¬¬¬¬¬¬¬.
+/l/¬¬¬¬¬¬¬¬¬.
+/l/¬¬¬¬¬¬/u/end/u/;/-i/
+/l3/C.¬¬Character set translations
+/i1p/The Pascal predeclared type Char is taken to include
+the entire 256 characters of the EBCDIC code, although many of 
+these do not have standard symbolic representations.  Even so, 
+some of the ASCII characters used in Pascal do not have an
+exactly corresponding EBCDIC translation, and others translate
+into characters that may not have symbolic representation on 
+the most commonly used print chains.  Therefore, some equivalent
+characters are accepted by the Pascal//360 compiler.
+/v/
+TRANSLATE UNDER 34 '|'
+GO
+/l2w8i2/
+     ASCII¬¬¬¬¬EBCDIC¬¬¬¬¬¬¬¬¬¬EBCDIC
+/l/  ¬¬¬¬¬¬¬¬translation¬¬¬¬¬¬alternate character
+/l2/¬¬¬^¬¬(no standard trans.)¬¬¬|46
+/l/¬¬¬|16¬¬¬¬hexadecimal¬"AD"¬¬¬¬(.
+/l/¬¬¬|17¬¬¬¬hexadecimal¬"BD"¬¬¬¬.)
+/l/¬¬¬|14¬¬¬¬hexadecimal¬"8B"¬¬¬¬(* or //*
+/l/¬¬¬|15¬¬¬¬hexadecimal¬"9B"¬¬¬¬*) or *//
+/i1/
+/v/
+TRANSLATE UNDER 34 ' '
+GO
+/l2/The EBCDIC translation characters are accepted by the 
+compiler, in order to minimize the number of characters that
+need to be changed in transporting Pascal programs that use the
+ASCII character set.
+/p/Since use of the two-character syntactic symbols (.¬and¬.)
+is a nuisance, and does not enhance readability of programs,
+the compiler allows substitution of ordinary parentheses as
+alternatives for these symbols in contexts where it will not
+cause syntactic ambiguity.  In particular, ordinary parentheses
+may be used as array brackets, but may not be used to bracket
+/u/set/u/ expressions.
+/p/Comment brackets may be written either as (*¬...¬*) or in the
+PL//1 notations, //*¬...¬*//.  However, we suggest the former
+notation as preferable, because the //* will be interpreted by
+OS//360 as a job control end-of-file symbol if it should happen
+to appear in the first two columns of an input record.
+/p/The following alternate symbols are also accepted as optional 
+substitutes for the standard Pascal operator symbols: /i1/
+/l2t3/standard operator¬¬alternates
+/l2t4/|35|37/t8/|34|36
+/lt4u/not/ut8/|34
+/lt4u/and/ut8/|32
+/lt4u/or/ut8/|33
+/i1p/The underscore character, /u/¬/u/ is allowed to be embedded
+within an identifier.  An identifier containing the underscore
+is distinct
+from the identifier obtained by deleting the underscore.  Thus the
+following two identifiers are distinct, One/u/¬/u/Word, OneWord.
+/p/The set of alphabetic symbols includes both upper and lower 
+case Roman letters./i/
+
+/l3/D.¬¬Print Format Control
+/i1p/Control of the width of the print field in output of arithmetic
+and Boolean values to Text files is governed by the standard Pascal
+convention of appending :¬<integer> to an expression that appears in
+an argument list to the procedures Write or Writeln.  The more
+sophisticated control of the number of places to the right of a 
+decimal in printing a Real value has not been implemented in
+Release 2.0.
+/p/If the standard format control specifier is not appended to an
+expression in an output list, then default values are provided for
+format control.  These default values are not fixed by the compiler,
+but are given by the values of predeclared and compiler-initialized
+variables.  Any of these variables may be reset under program
+control by an assignment statement.  They are:
+/l2/INTFIELDSIZE - specifies the number of columns allocated
+to print an integer value, right-justified
+in the field.  The initial value is 12.
+/l2/REALFIELDSIZE - specifies the number of columns allocated
+to print a real value in scientific notation,
+right-justified in the field.  The initial value is 14.
+/l2/BOOLFIELDSIZE - specifies the number of columns allocated
+to print a Boolean value, right justified in the field.
+If less than five columns, then only the initial letter
+"T" or "F" will be printed.  The initial value is 6.
+/l2h1/Note: Unlike some other Pascal implementations, the first
+character of a print line is not reserved for carriage control. 
+Line spacing can be accomplished by Writeln calls, and page
+throws by calls to the standard procedure Page.
+Overprinting is not supported in this release./h/
+/-i/
+/l3/E.¬¬Fully Typed Parameter Lists
+/i1p/A procedure or function given as the formal parameter in the
+declaration of another procedure must be fully typed. The extended
+syntax governing parameter lists and parameter types is given in
+the syntax charts of the Appendix to this Guide. An example of the
+use of formal function parameters is given in the following function
+heading
+/l2t2u/function/u/ Simpson (/u/function/u/ F (Real) : Real;
+/l2t7/Upper, Lower : Real) : Real;
+/l2/in which Simpson, a numerical quadrature function, is to be
+passed as a parameter the name of a function that is to be 
+integrated, along with the limits of integration. The formal
+function parameter F is  fully typed, designating that the
+function to be integrated must accept a value parameter of type
+Real, and is to produce a result of type Real./i1/
+/l3/F.¬¬Predeclared Types, Constants, Functions and Procedures
+/l2i1u/type/u/
+/l2i2/Alfa = /u/packed array/u/ |161.80|17 /u/of/u/ Char;
+/l2/This type describes a card image, a form of record much-used in
+IBM 360 systems. A variable of type Alfa can appear in the
+argument list of a Read or Readln procedure call.  If the Eoln
+condition is raised while reading a type Alfa value, prior to
+its completion, an error occurs and program execution will be
+halted./i2/
+/l2t1u/const/u/
+/l2i2/MaxInt = 2147483647;   (* 2@3@1-1 *)/i/
+/l2t1/Standard /u/procedures:/u/
+/l2i2/New, Pack, Unpack, Get, Put, Page, Reset, Rewrite, Read,
+Readln, Write, Writeln.
+/l/The only Standard procedure not implemented is Dispose.
+/l2i1/Standard /u/functions:/u/
+/l2i2/Pred, Succ, Chr, Ord, Abs, Round, Trunc, Arctan, Cos, Exp,
+Ln, Sin, Sqr, Sqrt, Eof, Eoln./i1/
+/l2/Additional predeclared procedure:
+/l2u/procedure/u/ Halt;/i/
+/l2i2/Invocation of this procedure halts execution of the program
+and initiates a post-mortem dump, if the program has been compiled
+with the debugging diagnostics level set at 1 or higher./i/
+/l2t1/Additional predeclared functions:
+/l2t1u/function/u/ Clock : Integer;
+/l2i2/This function returns the elapsed CPU time since the
+beginning of program execution, in units of hundredths of a 
+second./i/
+/l2t1u/function/u/ Card (S : /u/set of/u/ <any type>) : Integer;
+/l2i2/This returns the cardinality of the powerset
+expression given as its argument./i/
+/l3/G.¬¬Compiler Options
+/i1p/Several compiler options can be specified. Some of these are
+given as parameters on the EXEC card (or on the %PAS control card
+when student batch operation is used), others are specified by
+control toggles embedded within comments in the Pascal program text.
+Options specified by control card parameters:/i1/
+/l2t1/TIME=sss/i5/where sss is the limit on CPU time for
+execution of the Pascal program, given in seconds;/i5/
+/l2t1/LINES=nnnn/i5/where nnnn is the maximum number of lines to
+be printed by the Pascal program on the standard output file;/i5/
+/l2t1/DEBUG=d/i5/where d is one of the values 0, 1, or 2 and
+sets the level of diagnostic support;/i5/
+/l2t1/LINECNT=pp/i5/where pp sets the number of lines to be printed
+per page of output;/i5/
+/l2t1/MARGIN=mm/i5/where mm is one of 72 or 80, and sets the right-hand
+margin of records (card images) of Pascal source text;/i5/
+/l2t1/OBJECT/i5/which is only applicable for the production
+version of the compiler (Release 2.0). When this parameter is present
+the compiler will produce a Pascal object module, rather than 
+initiate execution of the compiled code immediately./i5/
+/l2t1/XREF/i5/which is only applicable for the production version,
+prints a cross-reference listing of all identifiers occurring in 
+a Pascal source program./i5/
+/l2i1/Options set by control toggles embedded in comments. A control
+toggle consists of a dollar sign followed by a letter, as for
+example,/i1/
+/l2m/(* $D - COMPILATION STATISTICS, $S -- SYMBOL TABLE *)/m/
+/l2i1h1/$B/t/trace the execution of the LL(1) parser
+(Caution - this produces voluminous output);/h/
+/l2h1/$D/t/print compilation statistics;/h/
+/l2h1/$E/t/print the code emitted in Pass 3, in symbolic
+assembly format;/h/
+/l2h1/$L/t/print a formatted listing of the source program;/h/
+/l2h1/$M/t/print unformatted listing of source program;/h/
+/l2h1/$P/t/print a symbolic dump of the parse trees produced by
+Pass 1;/h/
+/l2h1/$S/t/dump the symbol table produced by Pass 2;/h/
+/l2h1/$T/t/print the symbolic code triples generated by Pass 2;/h/
+/l2h1/$Z/t/trace the opening of identifier scopes during Pass
+1 analysis, and dump the symbol table at the end of Pass 1;/h/
+/l2h1/$|/t/set the right-hand margin of source text input records.
+Succeeding records will be truncated at the Column in which the
+stroke character appears. Note: in order to truncate record widths
+to 72 columns to allow for card sequencing numbers, the margin
+should be set by the MARGIN option on the EXEC card or compiler
+control card, rather than by using this toggle.  This is because
+the toggle itself must appear in the first column that is 
+subsequently to be ignored./hi/
+/l1i1/Of the functions invoked by these toggles, all are initially
+disabled except for the program listing function (* $L *)./i/
+/l3/H.¬¬Diagnostics Support Levels
+/i1p/The user can request diagnostics support for his program during
+its execution by specifying a DEBUG level of 0, 1, or 2 as a
+parameter on the EXEC card or the %PAS compiler control card.
+Although there is a slight cost in compilation and execution to the
+use of diagnostics levels higher than 0, we recommend them highly.
+Considerable attention has been given in this implementation to 
+making the diagnostics useful, and to reducing the overhead
+associated with their use./i/
+/l2i1u/At level 0/u/ the compiler does not initialize variables to
+Undefined, does not check for illegal assignments to variables of
+subrange type, does not check that indices of array references are
+within range, does not produce a post-mortem dump or traceback in
+case of a run error, and does not produce an execution flow
+summary following execution./i/
+/l2i1u/At level 1/u/ the compiler does not produce an execution flow
+summary, but does provide default initialization of all variables,
+does check validity of array index values and of assignments to
+variables of subrange types, and does produce a symbolic, 
+post-mortem dump in case a program terminates with a detected error
+or by executing a Halt statement. The post-mortem dump contains
+the following information:/-i/
+/l2i1h1/a)/t/the cause of the error and its approximate location, by
+source code line number,/h/
+/l2h1/b)/t/a description of each of the procedures or functions on
+the stack of activations at the time of termination. These appear in
+reverse order of activation (most recently activated first) and
+include:/h/
+/l1i2h1/i)/t/the name of the procedure or function;/h/
+/l2h1/ii)/t/a list of names and values of local variables of scalar,
+subrange, and arithmetic types, and an indication as to whether 
+pointer variables have defined or undefined values;/h/
+/l2h1/iii) the location (line number) from which the procedure 
+or function was called./h-i/
+/l1i2/In the case of recursive calls, only the most recent five
+activations of each procedure or function is printed./i/
+/l2i1u/At level 2/u/ the compiler provides the symbolic post-mortem
+dump in case of abnormal termination, and also provides an execution
+flow summary listing, whether the program terminated normally or not.
+The flow summary consists of a paragraphed, line-numbered listing of
+the source program, annotated by counts of the number of times each
+statement was executed. To determine how many times a statement was
+executed, follow the vertical stroke that appears to the left of the
+statement straight upward on the listing until a number is 
+encountered on the left. A zero execution count means that the
+particular statement was never executed in this run of the program
+and such occurrences should be noted if the purpose of the run was 
+for program testing. Diagnostics level 2 is strongly
+recommended while a program is undergoing testing.
+/p/The following sample program listing illustrates the output
+produced by the post-mortem dump and flow summary routines./i1/
+/V/
+WIDTH 110
+NO HYPH
+GO
+/SA/
+ 
+ 
+ 
+ 
+ 
+ PASS ONE -- STONY BROOK PASCAL -- COMPILER VERSION OF APRIL 10, 1979. CLOCK TIME = 17:18:7.
+                                   RELEASE 2.0
+ TODAY IS APRIL 23, 1979. CLOCK TIME = 18:11:29.
+ 
+ 0001 |33PROGRAM GRAPH(OUTPUT);
+ 0002 |33(* ADAPTED FORM JENSEN AND WIRTH PROGRAM 6.2   *)
+ 0003 |33CONST
+ 0004 |33  D=0.0625;
+ 0005 |33  S=31;
+ 0006 |33  MAX=67;
+ 0007 |33  H=34;
+ 0008 |33  C=6.28318;
+ 0009 |33  LIM=32;
+ 0010 |33VAR 
+ 0011 |33  X,Y:REAL;
+ 0012 |33  I,N:INTEGER;
+ 0013 |33  A:ARRAY(0..MAX) OF CHAR;
+ 0014 |33BEGIN
+ 0015 |33  X:=0;
+ 0016 |33  FOR I:=0 TO MAX DO
+ 0017 |33     A(I):=' ';
+ 0018 |33  FOR I:=1 TO LIM DO BEGIN
+ 0019 |33     A(H):=':';
+ 0020 |33     Y:=EXP(-X)*SIN(C*X);
+ 0021 |33     N:=TRUNC(S*Y+H+0.5);
+ 0022 |33     A(N):='*';
+ 0023 |33     WRITELN(A);
+ 0024 |33     IF I=LIM THEN HALT;
+ 0025 |33     A(N):=' ';
+ 0026 |33     X := X+D;
+ 0027 |33  END
+ 0028 |33END.
+ END OF PASS ONE APRIL 23, 1979. CLOCK TIME = 18:11:33.
+ 
+ 28 CARDS WERE PARSED.
+ NO SYNTAX ERRORS WERE DETECTED.
+) /sa/
+ 
+ 
+ 
+ => TRACE OF ACTIVE BLOCKS 
+ 
+ => PROGRAM BLOCK GRAPH 
+ 
+   VALUE OF LOCAL VARIABLES:
+   X =   1.937500E+00              Y =   -0.55132E-01              I = 32
+   N = 32
+) /sa/
+ 
+ 
+ 
+ 
+ 
+ 
+ => EXECUTION FLOW SUMMARY
+ 
+ 0001           |33      PROGRAM GRAPH(OUTPUT);
+ 0003           |33      CONST
+ 0004           |33      D = 0.0625;
+ 0005           |33      S = 31;
+ 0006           |33      MAX = 67;
+ 0007           |33      H = 34;
+ 0008           |33      C = 6.28318;
+ 0009           |33      LIM = 32;
+ 0010           |33      VAR
+ 0011           |33      X,Y : REAL;
+ 0012           |33      I,N : INTEGER;
+ 0013           |33      A : ARRAY(0..MAX) OF CHAR;
+ 
+ 0014           |33      BEGIN
+ 0015          1.--|33      X := 0;
+ 0016              |33      FOR I := 0 TO MAX DO
+ 0017            68.--|33      A(I) := ' ';
+ 0018              |33      FOR I := 1 TO LIM DO
+ 0018            32.--|33      BEGIN
+ 0019               32.--|33      A(H) := ':';
+ 0020                    |33      Y := EXP( - X)*SIN(C*X);
+ 0021                    |33      N := TRUNC(S*Y + H + 0.5);
+ 0022                    |33      A(N) := '*';
+ 0023                    |33      WRITELN(A);
+ 0024               32.--|33      IF I = LIM THEN
+ ----- HALT--------------------------------------------------------------------------------------------------------------------
+ 0024                   1.--|33      HALT;
+ ----- HALT--------------------------------------------------------------------------------------------------------------------
+ 0025               31.--|33      A(N) := ' ';
+ 0026                    |33      X := X + D;
+ 0027                 |33      END
+ 0028           |33      END.
+) /V/
+WIDTH 70
+GO
+/s/
+/l3/I.¬¬Control card and JCL procedures for running PASCAL//360
+/i1p/This section is divided into four parts. In part 1, we describe
+the control cards needed to run a Pascal program in a student batch
+environment. If your computing center provides such an environment,
+and the student version of the compiler meets your needs, then Part 1
+is all that you need to read.  Part 2 describes the use of the 
+compiler in a compile-and-go mode of operation, in case your
+computing center does not provide a special batch environment for
+small, student jobs. It is still not very complicated. Part 3
+describes the use of the production version of the compiler, which
+enables you to save compiled programs, and to link together 
+separately compiled program modules. Part 4 describes a set of JCL
+procedures that enable you to run the compiler. These procedures, or
+ones like them should be provided for most users by their local
+computing center.
+/l2h1/1. Using the compiler in a student batch environment./h/
+/l1i2h1/a)¬¬You will inform the IBM operation system that you want 
+to use the Pascal compiler by coding a special symbol in the 
+parameter field of your job run card.  Find out what this symbol 
+is from your computing center. In the event that they do not allow 
+you to specify the Pascal compiler on you run card, then place the
+following card immediately after your run card:
+/l2/ ////¬¬¬¬¬¬EXEC PASCAL/h/
+/l2h1/b)¬¬The text of a Pascal program to be compiled must be preceded by
+a control card that begins with the symbols %PAS and can contain 
+specifications of the options you desire for your job. For instance,
+if you want to give your Pascal program a maximum of 12 seconds of
+CPU time in which to complete its execution, allow it to print a
+maximum of 200 lines of output (not counting diagnostics or 
+program listing) and utilize the diagnostics at level 2 for testing
+your program, your control card would look like this:
+/l2/%PAS TIME=12,LINES=200,DEBUG=2/l2/
+The % symbol must fall in the first column of the card, and blanks
+are allowed only after the %PAS and after all of the options have
+been specified, not between these specifications.
+/p/Following the %PAS card place the text of your Pascal program,
+and following this, place a card with %EOF coded in the first four
+columns, to mark the end of your program. If your program is to 
+obtain input form data cards, these must come next, followed by 
+another %EOF card.  Thus a deck sequence looks as follows:
+/l2///// (your job card)
+/l/%PAS¬<options>
+/l/¬¬¬¬¬<Pascal source program deck>
+/l/%EOF 
+/l/¬¬¬¬¬<data to be input by the Pascal program>
+/l/%EOF (if data were present) 
+/l2/Following this deck, you may either place additional Pascal 
+programs that you wish to have compiled and executed, beginning each
+with a separate %PAS card, or you can mark the end of your job with
+a terminator card,
+/l2///*EOF
+/-h-i/
+/l2i1h1/2. Using Standard or Extended Pascal in Compile-and-Go mode
+/p/Assuming that the JCL procedures PASCAL
+and PASCALX described in
+Part 4 have been cataloged at your installation, the extended Pascal
+compiler can be invoked in compile-and-go mode by the following JCL:
+/l2/ ////¬¬¬(your job card. Specify a region size of 108 Kilobytes)
+/l/  ////¬¬¬¬¬¬EXEC PASCALX|16,options|17
+/l/  ////SYSIN¬¬¬DD¬*  
+/l2/   ¬¬¬¬¬¬¬¬¬<Pascal Program text> 
+/l2/   %EOF¬¬¬¬¬(required if data are to follow)
+/l2/   ¬¬¬¬¬¬¬¬¬<Input data for the Pascal program>
+/l2/  //*EOF
+/p/Options specified on the EXEC card will override the default
+values specified in the cataloged procedure.  For instance, if the 
+programmer wants to indicate limits of 30 seconds of CPU time, 2000
+lines of printed output, and to disable all diagnostics support, the
+EXEC card should contain/l2/
+////¬¬¬¬¬¬EXEC PASCALX,TIME=30,LINES=2000,DEBUG=0
+/p/In the event that you want to run the Standard Pascal compiler,
+the region size can be decreased to 160K (or less at some 
+installations). The same JCL procedure can be invoked for this 
+purpose by overriding certain of the data definition statements:
+/l2/////¬¬¬(your job card.  Specify a region size of 160 Kilobytes)
+/l/ ////¬¬¬¬¬¬EXEC PASCALX,REGION=160K|16,options|17
+/l/ ////PASS1¬¬¬DD¬DSNAME=PASCAL(PASS1S),DISP=SHR
+/l/ ////PASS2¬¬¬DD¬DSNAME=PASCAL(PASS2S),DISP=SHR
+/l/ ////SYSIN¬¬¬DD¬*
+/l2/  ¬¬¬¬¬¬¬¬¬<Pascal program>
+/l2/  %EOF
+/l2/  ¬¬¬¬¬¬¬¬¬<Input data for the Pascal program>
+/l2/ //*EOF
+/l2/Caution:¬¬¬Check with your friendly local computing center to
+confirm the data set names containing the Pass1S and Pass2S compiler
+modules./h/
+/l2h1/3. Saving and Linking Pascal Object Modules
+/p/The extended Pascal compiler can be used to produce a Pascal
+object module which can be saved on a date set, or passed directly to
+the Pascal Linker in a subsequent job step. The Linker can accept one
+or more Pascal object modules and perform program linkage, checking
+checking for type-consistency of inter-module references in the
+process. It produces as output an OS//360 object module which can in
+turn be loaded by the OS//360 linking loader, or link-edited with the
+run-time environment and with any externally referenced 
+Fortran routines to form an OS//360 load module.
+/p/To compile a Pascal program and save the compiler output for
+subsequent linkage, the following JCL will serve as a guide:
+/l2/////¬¬¬(your job card.  Specify a region size of
+         180 Kilobytes) 
+/l/////PASCAL EXEC PASCALX,PARM='OBJECT|16,options|17'
+/l/    ////SYSIN¬¬¬¬DD¬*
+/l2/  ¬¬¬¬¬<Pascal source program>
+/l2/ //*
+/p/The JCL procedure specifies temporary data sets to receive the
+output of the compiler.  These may then be passed to subsequent job
+steps for program linkage and execution.  If you wish to save these
+data sets for use by subsequent jobs, then you must override the DD
+statements in the procedure.  The two DD names are:/h-i/
+/l1i2h1/FILE3 which identifies the data set that will hold the execution 
+flow summary listing, if the compiler options specify DEBUG=2, and
+the program being compiled is not an /u/external/u/ module./h-i/
+/l1i2h1/SYSUT2 which identifies the data set that will hold the Pascal
+object module./hi/
+/i2p/Suppose now that the Pascal Linker is to be invoked to link the
+module compiled by the job described above, together with other,
+previously compiled Pascal object modules.  A job step to perform 
+the linkage is/l2/
+/h1/ ////LINK¬¬¬EXEC PSCLINK,NMODS=n (the number of modules to be
+linked)/hl-ii2/
+to which must be added DD statements describing the input and output
+data set.  These are:
+/l2h1/OUTPUT3 -- will receive the OS//360 object module.  The JCL
+procedure provides a temporary data set for this purpose./h/
+/l2h1/SYSPUNCH -- will receive the post-mortem diagnostics tables.
+The JCL procedure also provides a temporary data set for this
+purpose./h/
+/l2h1/INPUT2¬through¬INPUTn+1 -- contain the input Pascal object 
+modules.  The JCL procedure names a temporary data set for INPUT2
+only./h-i/
+/i2p/The Pascal program linked by the job described above can be 
+executed by a job step such as the following:
+/l2/////GO¬¬¬¬EXEC¬PGM=IEWLDRGO,REGION=120K¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬X
+/l/////¬¬¬¬¬¬¬¬¬¬¬¬PARM='EP=PA$CAL,MAP//TIME=30,LINES=2000,DEBUG=2'
+/l/////SYSLIN¬¬¬DD¬DSNAME=PASCAL.LMODS(PA$CAL),DISP=SHR¬(the¬environment)
+/l/////¬¬¬¬¬¬¬¬¬DD¬DSNAME=&&OBJ,DISP=OLD (the compiler-generated code)
+/l/////*¬¬¬¬¬¬¬¬ADDITIONAL DATA SETS CONTAINING ANY FORTRAN OBJECT
+/l/////*¬¬¬¬¬¬¬¬MODULES REFERRED TO BY THE PASCAL PROGRAM ARE
+/l/////*¬¬¬¬¬¬¬¬CATENATED HERE
+/l/////SYSLOUT¬¬DD¬SYSOUT=A
+/l/////PMD¬¬¬¬¬¬DD¬DSNAME=PASCAL.SYSLIB(PMD),DISP=SHR
+/l/////SYSUT5¬¬¬DD¬DSNAME=&&PMD,DISP=OLD (the post-mortem dump tables)
+/l/////FILE3¬¬¬¬DD¬DSNAME=&&DGNS,DISP=OLD (the folw summary listing)
+/l/////SYSPRINT¬DD¬SYSOUT=A
+/l/////SYSIN¬¬¬¬DD¬* 
+/l2/ ¬¬¬¬¬¬¬¬¬¬<Input data for the Pascal program>
+/l2///*EOF
+/p/If the parameter specifying the diagnostic level was given as 
+DEBUG=1, then the FILE3¬DD statement would be unnecessary.  If it
+had been given as DEBUG=0, then neither the FILE3¬DD nor the
+SYSUT5¬DD statements would be necessary.
+/i0/
+/l2/4. Suggested JCL Procedures
+/i1p/We suggest that JCL procedures similar to the following be used
+to invoke the Pascal/360 compiler.  If these procedures are not
+cataloged at your installation, they can be inserted into your 
+program deck immediately following the job card.  If you use your   
+own copy of these procedures, make sure that the data set and volume
+names correspond to the actual names in use at your installation.
+/l2/////PASCAL¬¬¬PROC
+/l/ ////COMPILE¬¬EXEC¬PGM=PASCAL2S,REGION=160K
+/l/ ////*¬¬¬¬¬¬¬¬¬¬¬THIS PROC INVOKES THE STANDARD PASCAL COMPILER,
+    AND
+/l/ ////*¬¬¬¬¬¬¬¬¬¬¬USES DYNAMICALLY ALLOCATED IN-CORE FILES FOR FAST 
+   
+/l/ ////*¬¬¬¬¬¬¬¬¬¬¬COMPILATION IT WILL BE NECESSARY TO USE A 
+/l/ ////*¬¬¬¬¬¬¬¬¬¬¬LARGER REGION SIZE TO COMPILE LARGE PROGRAMS.
+/l/ ////STEPLIB¬¬¬¬DD¬DSNAME=PASCAL.LMODS,DISP=SHR
+/l/ ////SYSLIB¬¬¬¬¬DD¬DSNAME=PASCAL.SYSLIB,DISP=SHR
+/l/ ////FILE3¬¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,3)
+/l/ ////SYSPRINT¬¬¬DD¬SYSOUT=A 
+/l/ ////¬¬¬¬¬¬¬¬¬PEND 
+/l3/////PASCALX¬¬PROC¬SECONDS=10,LINES=1000,DBGLVL=2,
+/l/ ////* THIS PROC INVOKES THE EXTENDED PASCAL COMPILER
+/l/ ////COMPILE¬¬EXEC¬PGM=PASCAL,REGION=180K
+/l/ ////¬¬¬¬¬¬¬¬¬PARM='TIME=&SECONDS,LINES=&LINES,DEBUG=&DBGLVL'
+/l/ ////¬¬¬¬¬¬¬¬¬EXEC¬PGM=PASCAL,REGOIN=180K 
+/l/ ////STEPLIB¬¬¬¬DD¬DSNAME=PASCAL.LOMDS,DISP=SHR 
+/l/ ////PASS1¬¬¬¬¬¬DD¬DSNAME=PASCAL.SYSLIB(PASS1),DISP=SHR
+/l/ ////PASS2¬¬¬¬¬¬DD¬DSNAME=PASCAL.SYSLIB(PASS2),DISP=SHR 
+/l/ ////PASS3¬¬¬¬¬¬DD¬DSNAME=PASCAL.SYSLIB(PASS3),DISP=SHR 
+/l/ ////PMD¬¬¬¬¬¬¬¬DD¬DSNAME=PASCAL.SYSLIB(PMD),DISP=SHR 
+/l/ ////SYSPRINT¬¬¬DD¬SYSOUT=A
+/l/ ////FILE2¬¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,3)
+/l/ ////FILE3¬¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,(1,1)),DSN=&&DGNS,
+/l/ ////¬¬¬¬¬¬¬¬¬¬¬¬¬¬DISP=(NEW,PASS) 
+/l/ ////SYSUT1¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,3)
+/l/ ////SYSUT2¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,(1,1)),DSN=&&PSC,
+/l/ ////¬¬¬¬¬¬¬¬¬¬¬¬¬¬DISP=(NEW,PASS)
+/l/ ////SYSUT3¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,(1,1))
+/l/ ////SYSUT4¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,(1,1))
+/l/ ////SYSUT5¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,(1,1))
+/l/ ////¬¬¬¬¬¬¬¬¬PEND
+/l3/////PSCLINK¬PROC
+/l/ ////LINK¬¬¬¬¬EXEC¬PGM=XPLSM,REGION=120K,
+/l/ ////¬¬¬¬¬¬¬¬¬¬¬¬¬¬PARM='NMODULES=&NMODS,TABLES=&TABLES'
+/l/ ////STEPLIB¬¬¬¬DD¬DSNAME=PASCAL.LMODS,DISP=SHR
+/l/ ////PROGRAM¬¬¬¬DD¬DSNAME=PASCAL.SYSLIB(LINKER),DISP=SHR  
+/l/ ////SYSPRINT¬¬¬DD¬SYSOUT=A
+/l/ ////SYSIN¬¬¬¬¬¬DD¬DUMMY
+/l/ ////*       OUTPUT3 WILL RECEIVE THE OS//360 OBJECT MODULE
+/l/ ////*       SYSPUNCH WILL RECEIVE TABLES NEEDED FOR A POST-MORTEM DUMP
+/l/ ////OUTPUT3¬¬¬¬DD¬DSNAME=&&OBJ,UNIT=SYSDA,SPACE=(TRK,5),
+/l/ ////¬¬¬¬¬¬¬¬¬¬¬¬¬¬DISP=(NEW,PASS),
+/l/ ////¬¬¬¬¬¬¬¬¬¬¬¬¬¬DCB=(RECFM=FB,LRECL=80,BLKSIZE=2000)
+/l/ ////SYSPUNCH¬¬¬DD¬DSNAME=&&PMD,UNIT=SYSDA,SPACE=(TRK,5),DISP=(NEW,PASS),
+/l/ ////¬¬¬¬¬¬¬¬¬¬¬¬¬¬DCB=(RECFM=FB,LRECL=80,BLKSIZE=2000)  
+/l/ ////FILE1¬¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,(1,1)) 
+/l/ ////FILE2¬¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,(1,1)) 
+/l/ ////FILE3¬¬¬¬¬¬DD¬UNIT=SYSDA,SPACE=(CYL,(1,1)) 
+/l/ ////INPUT2¬¬¬¬¬DD¬DSNAME=&&PSC,DISP=OLD
+/l/ ////*¬¬¬¬¬¬¬ADDITIONAL PASCAL OBJECT MODULES CAN BE SUPPLIED ON
+/l/ ////*¬¬¬¬¬¬¬DATA SETS HAVING DDNAMES INPUT3, INPUT4, ETC.//
+/l/ ////¬¬¬¬¬¬¬¬¬PEND
+/i0/
+/l3/J.¬¬Utility Programs
+/i1l2/ PREFIX¬--¬the common prefix editor
+/p/When a large program is created in the form of several, separately
+compiled Pascal program modules, these program modules will have to
+share some common declarations of global constants, types, variables,
+and external procedures. It is a great convenience in program 
+development if these common declarations are available on a file, and
+can be integrated automatically into a Pascal program module that is
+to be compiled and tested.
+/p/In merging a set of declarations into the text of a Pascal program
+care must be taken that the syntax is not violated by putting 
+declarations in the wrong order. If declarations of all externally
+referenceable procedures and functions are in the common file, then
+care must also be taken that the declaration of a procedure as 
+external does not duplicate its declaration as an entry
+procedure in the module that defines it. To perform this "intelligent
+merging", we have provided a common prefix editor. This program can
+be invoked by a separate job step preceding compilation.
+/p/The prefix editor takes two input data sets with DD names:
+/i0i1l2h1/INPUT2¬--¬this contains the common prefix.  The format
+is a sequence of Pascal declarations of constants, types, external 
+variables, and external (or fortran) procedure and function
+declarations, conforming to the extended Pascal syntax
+given in the Appendix.  There is no program heading and no
+statement body./h/
+/l2h1/SYSIN¬--¬this contains the text of a Pascal program
+module, conforming to the extended syntax given in the Appendix./h-i/
+/l2i1/The output appears in card-image format on a file whose 
+DD name is SYSPUNCH.
+/p/The prefix editor does not perform complete syntax checking;
+it knows only enough Pascal syntax to perform a merge on the source
+files./i/
+/i1p/To invoke the common prefix editor, we suggest use of the
+following JCL proc:/i/
+/l2t1/////PREFIX PROC
+ /lt1/////MERGE¬¬¬¬¬EXEC¬¬¬¬PGM=XPLSM,PARM=ALTER,REGION=120K
+ /lt1/////STEPLIB¬¬¬¬¬DD¬¬¬¬DSNAME=PASCAL.LMODS,DISP=SHR
+ /lt1/////PROGRAM¬¬¬¬¬DD¬¬¬¬DSNAME=PASCAL.SYSLIB(PREFIX),DISP=SHR
+ /lt1/////SYSPRINT¬¬¬¬DD¬¬¬¬SYSOUT=A
+ /lt1/////SYSPUNCH¬¬¬¬DD¬¬¬¬DSNAME=&&CARDS,UNIT=SYSDA,SPACE=(CYL,3),
+ /lt1/////¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬DISP=(NEW,PASS),
+ /lt1/////¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬DCB=(RECFM=FB,LRECL=80,BLKSIZE=2000)
+/lt1/////FILE1¬¬¬¬¬¬¬DD¬¬¬¬UNIT=SYSDA,SPACE=(CYL,(1,1))
+/lt1/////¬¬¬¬¬¬¬¬¬¬PEND
+/l3/K.¬¬LINKAGE TO FORTRAN ROUTINES
+/i1p/The facility to link to FORTRAN routines has been provided so
+that programmers may make good use of existing software when 
+programming in Pascal, and to allow the use of Pascal in developing
+systems software.  (It should be noted that the term "FORTRAN" is 
+used generically; any standard OS object module that follows the
+linkage conventions described in the OS FORTRAN G & H Programmers
+Guide can be called from a Pascal module).  Following is a 
+description of how to use this linkage facility, and its 
+limitations.
+/p/Since the linkage mechanism was designed to promote the use of
+Pascal, there are some restrictions on full FORTRAN-Pascal
+interaction.  No COMMON mechanism for sharing variables is 
+provided; communication is strictly by parameters.  Nor can FORTRAN
+routines directly call Pascal routines.  A FORTRAN routine can be
+specified within a Pascal program by a procedure or function 
+declaration giving its name and its parameter types.  This is the 
+same way that an externally defined Pascal routine would be 
+declared,
+except that the body is replaced by the reserved word /u/fortran/u/
+rather than /u/external/u/ (see syntax charts in the appendix).
+Just as with a Pascal procedure, arguments that must be altered
+by the called routine should be declared as /u/var/u/ parameters.
+Constants and expressions can be safely passed by value to FORTRAN
+routines; the compiler places these values in temporary variables
+and passes the addresses of the temporaries to the external code.
+Although the Pascal compiler cannot verify that the types of
+parameters agree with the argument-types given in FORTRAN source
+code, the Pascal system can verify that the types of parameters
+in calls to FORTRAN routines are consistent with the declarations
+given in the procedure headings in Pascal code.  The user is
+cautioned that multi-dimensional arrays in Pascal are structured
+differently than in FORTRAN.  (Arrays are stored in column major
+order in FORTRAN and in row major order in Pascal).  For the
+other structured types of Pascal, such as records and sets, there
+is no corresponding data structure supported by FORTRAN.  To
+reference these in non-Pascal code, the user would have to be
+aware of how these are allocated storage by the Pascal compiler,
+and this allocation is not always straightforward.
+/p/FORTRAN routines cannot be passed as parameters to Pascal
+procedures or functions, although they can be passed to other
+FORTRAN routines.  Similarly, Pascal routines cannot be parameters
+to FORTRAN routines.
+/p/Users should be aware that a FORTRAN (or other language)
+implementation may assume the presence of a run-time environment
+(such as IBCOM#) to do error handling.  Unless interrupt masks
+defined by the Pascal environment (PA$CAL) are overridden, 
+hardware-detected exceptional conditions will trap to locations in
+XMONITOR, a run error message will be printed, post-mortem
+analysis given if the debug level |37 0, and further execution
+will be inhibited.  It should also be noted that when linking
+to FORTRAN or (especially) to assembly language routines, run
+error messages 4.15¬-¬4.30 may not necessarily be the result
+of a Pascal compiler error, but rather may be caused by problems
+in the non-Pascal routines.  The Post-mortem package (PMD) will 
+attempt to determine in which code such errors have occurred.  
+However, it may fail to do so if a branch to a bad address occurs
+or if save area conventions are not followed by the programer.
+/l3u/Example 1/u/: The Pascal program RANDOM calls a FORTRAN
+function RAND, which returns a "random" integer.  The JCL
+procedures PASCALX and PSCLINK, described in section I, are 
+assumed to be available.
+/l3/////PSC EXEC PASCALX
+/l2/program RANDOM (OUTPUT);
+/l2/¬¬¬¬¬¬var J:¬¬INTEGER;
+/l2/¬¬¬¬¬¬function RAND: INTEGER; fortran;
+/l2/begin
+/l2/¬¬¬¬¬¬for J¬:=1 to 1000 do WRITELN(RAND)
+/l2/end.
+/l2/////LINK EXEC PSCLINK
+/l2/////GO EXEC PGM= .¬.¬.¬(as in section I.3 except that
+ a SYSLIB DD
+card should be included to define the FORTRAN library containing
+RAND)
+/l2u/Example 2/u/: The Pascal program COMPUTE calls the FORTRAN
+subroutine COMP which has 3 parameters:  integer UPLIM, integer
+LOLIM (whose value must be altered by COMP), and integer array Kl.
+/l3/////EXEC PASCALX
+/l2/program COMPUTE(INPUT, OUTPUT);
+/l2/type DATA = array (.1..100.) of INTEGER;
+/l2/var J,K: INTEGER;
+/l2/¬¬¬¬¬L:  DATA;
+/l2/¬¬¬¬¬.¬.¬.
+/l2/procedure COMP (UPLIM:  INTEGER; var LOLIM:  INTEGER;
+/l2/¬¬¬¬¬var Kl:DATA); fortran;
+/l2/begin
+/l2/¬¬¬¬¬.¬.¬.
+/l2/COMP(J,K,L)
+/l2/¬¬¬¬¬¬.¬.¬.
+/l2/end.
+/l2/////LINK¬¬¬EXEC PSCLINK
+/l2/////FTN¬¬¬¬EXEC FORTGC
+/l2/¬¬¬¬¬¬¬SUBROUTINE COMP(I1,I2,Kl)
+/l2/¬¬¬¬¬¬¬INTEGER I1,I2,Kl(100)
+/l2/¬¬¬¬¬¬¬¬¬¬¬¬¬¬.¬.¬.¬.
+/l2/¬¬¬¬¬¬¬END
+/l2/////GO EXEC PGM=¬...(as in section I.3)/i/
+/l3/L.¬¬Compiler-generated Error Messages
+/i1p/There are two kinds of error messages produced by the Stony
+Brook Pascal compiler--severe and non-severe. Severe errors 
+(severity code = 1) will always inhibit the executing of the
+erroneous program, while programs with non-severe errors would not.
+Each of the three passes of the compiler produce a distinct set of
+error messages./i1/
+/l2/1.¬¬Pass 1 diagnostics
+/i1p/Pass 1 is responsible for analyzing the syntax of your program.
+Most Pass.1 errors tell of the presence of syntax errors or
+undeclared identifiers. They appear in your program listing under
+the line in which the error is first detected. A dollar sign ($) 
+points to the erroneous symbol.
+/il2h1/1.1¬SYNTAX ERROR -- ssss NOT FOUND. 
+/l/severity:  O
+/lh2/explanation: symbol ssss was expected by the compiler 
+but not found.
+/h0l2h1/1.2¬ONE OF THE FOLLOWING SYMBOLS WAS EXPECTED:
+/l/severity: 1
+/lh2/explanation: the following line contains a list of all the
+symbols which can appear in the program without causing a syntax
+error in place of the erroneous symbol pointed to by the dollar
+sign.
+/h1l1/The above error messages are sometimes augmented by further
+diagnostics:
+/h0i1l2h1/TOKEN SUPPLIED IS  ssss.
+/lh2/explanation: the symbol ssss is assumed missing and is 
+inserted before the symbol pointed to by the dollar sign.
+/h0l2h1/TOKEN ASSUMED TO BE ssss.
+/lh2/explanation: the symbol pointed to by the dollar sign is
+replaced by symbol ssss.
+/h0l2h1/PROBABLE MISSPELLING OF A KEYWORD. TOKEN ASSUMED TO BE
+ssss.
+/lh2/explanation: the symbol pointed to by the dollar sign is
+replaced by the keyword ssss. 
+/h0l2h1/ssss PROBABLY MISSING.
+/lh2/explanation: the symbol ssss is assumed missing and is
+inserted before the symbol pointed to by the dollar sign.
+/h0-il1h1/1.3¬ILLEGAL CHARACTER:  c.
+/l/severity: 0
+/lh2/explanation: c is an illegal character appearing in the
+program; it is ignored. 
+/h0l2h1/1.4¬STRING TOO LONG. 
+/l/severity: 1 
+/lh2/explanation: A string constant whose length exceed 256
+characters appears in the program; probably due to a missing 
+string quote. 
+/h0l2h1/1.5¬BLANK SUBSTITUTED FOR STRING OF LENGTH ZERO. 
+/l/severity: 0
+/lh2/explanation: A string consisting of zero characters has been
+replaced by a string containing a single blank character.
+/h0l2h1/1.6¬INTEGER CONSTANT EXCEEDS RANGE.
+/l/severity: 0 
+/lh2/explanation: A literal integer constant whose absolute value
+exceeds maxint (=2147483647) has appeared in the program. Note that
+for literal real constants, a valid integer must precede the decimal
+point. 
+/h0l2h1/1.7¬ERROR IN REAL CONSTANT: DIGIT EXPECTED.
+/l/severity: 0 
+/lh2/explanation: In a literal real constant, a digit does not
+follow the decimal point or does not follow the 'E' in the exponent
+field. 
+/h0l2h1/1.8¬ERROR IN REAL CONSTANT: VALUE OUT OF RANGE.
+/l/severity: 0 
+/lh2/ explanation: In a literal real constant, the value of the
+exponent is not in the range 10|13@7@8-10|12@7@5. 
+/h0l2h1/1.9   DUPLICATE DECLARATION FOR nnnn.
+/l/severity: 0 
+/lh2/explanation: nnnn is the name of a label or 
+identifier that is
+declared more than once. 
+/h0l2h1/1.10¬nnnn IS AN UNDECLARED IDENTIFIER.
+/l/severity: 0
+/lh2/explanation: nnnn is the name of an identifier
+or label that
+is used without being declared. 
+/h0l2h1/1.11¬UNDECLARED LABEL nnnn.
+/l/severity: 0
+/lh2/explanation: nnnn is the name of a label 
+that is defined but
+not declared. 
+/h0l2h1/1.12¬nnnn DECLARED ON LINE llll IS AN UNDEFINED LABEL
+/l/severity: 1
+/lh2/explanation: The label nnnn declared on line llll is used in
+a /u/goto/u/ statement but its value is not defined. 
+/h0l2h1/1.13¬DUPLICATE DEFINITION OF nnnn.
+/l/severity: 1
+/lh2/explanation: The label nnnn has been defined more than 
+once.  
+/h0l2h1/1.14¬nnnn IS AN UNDECLARED TYPE.
+/l/severity: 0
+/lh2/explanation: nnnn is the name of a type which was forward-
+referenced in a pointer type definition but not subsequently
+defined. 
+/h0l2h1/1.15¬nnnn IS FORWARD DECLARED. REPETITION OF ITS PARAMETER
+ LIST IS NOT ALLOWED.
+/l/severity: 1
+/lh2/explanation: nnnn is the name of a forward-declared
+procedure or function. Its parameter list must only appear in the
+forward reference. 
+/h0l2h1/1.16¬COMPILING HALTED BY PREMATURE END OF FILE, POSSIBLY
+MISSING "END".
+/l/severity: 1
+/lh2/explanation: The compiler expected more program. Check for
+a missing /u/end/u/ or a job control card that is out of place. 
+/h0l2h1/1.17¬COMPILER ERROR-DGNS STACK OVERFLOW.
+/l/severity: 0
+/lh2/explanation: Structured statements are nested greater than
+32 deep.  A flow summary will not be produced, even though it was
+requested by the programmer. 
+/h0l2h1/1.18¬SYMBOL TABLE OVERFLOW, COMPILATION ABORTED.
+/l/severity: 1
+/lh2/explanation: The program contains too many identifiers
+and string constants to be processed correctly. 
+/h0l2h1/1.19¬PARSE TREE OVERFLOW.
+/l/severity: 1
+/lh2/explanation: This block contains too many statements or
+declarations to be processed correctly. Try breaking it up into
+two or more procedures, or using the production version of the
+compiler to compile your program.
+/h0l2h1/1.20¬SEMANTIC STACK OVERFLOW.
+/l/severity:¬¬1
+/lh2/explanation: Same as for error 1.19. 
+/h0l2h1/1.21¬CYCLIC TYPE DECLARATION
+/l/severity:  1/lh2/explanation: A type has been defined 
+recursively.
+/h0l2h1/1.22¬COMPILER ATTEMPTED TO NULL A DECLARATION BLOCK THAT IS
+NOT ASSOCIATED WITH A PROCEDURE/l/severity:  1
+/lh2/explanation:  The compiler detected an internal inconsistency.
+This may be the result of syntax errors previously detected in the
+program.
+/h0l2h1/1.23¬TOO MANY EXTERNAL REFERENCES
+/l/severity:  0/lh2/explanation:  The number of external references
+have exceeded the maximum allowed 64.
+/h0l2h1/1.24¬ENTRY PROCEDURE ONLY ALLOWED IN MAIN PROGRAM BLOCK
+/l/severity:  0/lh2/explanation:  A procedure having the ENTRY
+attribute must be given in a global declaration.
+/h0l2h1/1.25¬EXTERNAL DECLARATIONS NOT ALLOWED WITHIN A PROCEDURE
+/l/severity:  0
+/lh2/explanation:  Variables declared to be external to be given
+module must be global to the entire module.
+/h0l2h1/1.26¬RECURSIVE TYPE DEFINITION NOT ALLOWED
+/l/severity:  1
+/lh2/explanation:  Check for an indirectly-recursive type 
+definition.
+/h0l2h1/2.¬¬Pass 2 diagnostics.
+/p/Pass 2 is chiefly responsible for analyzing the semantics or
+meaning of your program. Pass 2 errors mostly report illegal uses
+of datatypes. Pass 2 errors appear on the next page of compiler 
+output following your program listing, and give the approximate line
+in your program of where the error occurred.
+/h0l2h1/2.1¬ILLEGAL CONSTANT:¬¬-nnnn
+/l/severity:¬¬1
+/lh2/explanation: the name of a constant is expected, rather than
+nnnn. 
+/h0l2h1/2.2¬ILLEGAL IDENTIFIER ON RIGHT SIDE OF CONSTANT DECLARATION
+/l/severity:¬¬1
+/lh2/explanation: the name on the right hand side of a 
+/u/const/u/
+declaration is not that of a constant. 
+/h0l2h1/2.3¬CONSTANT IDENTIFIER¬¬nnnn MAY NOT BE ASSIGNED TO.
+/l/severity:¬¬1
+/lh2/explanation: the name nnnn, which appears on the left hand
+side of an assignment operator, is that of a constant. 
+/h0l2h1/2.4¬ILLEGAL VARIABLE:¬¬nnnn.
+/l/severity:¬¬1
+/lh2/explanation: The name nnnn may not be 
+used as a variable.  It
+may be an undeclared identifier. 
+/h0l2h1/2.5¬ILLEGAL SUBSCRIPT.
+/l/severity:¬¬1
+/lh2/explanation: An attempt is made to index 
+a variable other than
+an array variable. 
+/h0l2h1/2.6¬TYPE OF VARIABLE MUST BE FILE OR POINTER.
+/l/severity:¬¬1
+/lh2/explanation: An arrow (|46) is used to qualify a variable whose
+type is neither file nor pointer. 
+/h0l2h1/2.7¬nnnn¬¬IS NOT A FIELD IN THIS RECORD.
+/l/severity:¬¬1
+/lh2/explanation: nnnn is a field identifier, 
+but is used to qualify
+a variable of the wrong record type. 
+/h0l2h1/2.8¬TYPE OF VARIABLE IS NOT RECORD.
+/l/severity:¬¬1
+/lh2/explanation: field identifier is 
+used to qualify a variable
+whose type is not record.  Possible a missing arrow (|46). 
+/h0l2h1/2.9¬nnnn¬¬IS NOT A FIELD IDENTIFIER.
+/l/severity:¬¬1
+/lh2/explanation: The name nnnn used to qualify a record variable
+is not that of a field identifier. 
+/h0l2h1/2.10¬FIELD IDENTIFIER¬¬nnnn MUST BE PRECEDED BY A 
+RECORD NAME/l/severity:¬¬1
+/lh2/explanation: Field name nnnn cannot be used as a variable by
+itself. Possibly an erroneous /u/with/u/ statement. 
+/h0l2h1/2.11¬A SUBRANGE MUST BE OF A SCALAR TYPE OR OF TYPE INTEGER.
+/l/severity:¬¬1
+/lh2/explanation: Subranges of type real and subranges of strings
+in particular are illegal. 
+/h0l2h1/2.12¬TYPES OF SUBRANGE BOUNDS DISAGREE.
+/l/severity:¬¬1
+/lh2/explanation: The upper bound and lower bound of a subrange 
+are of incompatible types. 
+/h0l2h1/2.13¬LOWER BOUND OF SUBRANGE EXCEEDS UPPER BOUND.
+/l/severity:¬¬1
+/lh2/explanation: The lower bound of a subrange must be less than
+or equal to the upper bound. 
+/h0l2h1/2.14¬CARDINALITY OF SUBRANGE > MAXINT.
+/l/severity:¬¬0
+/lh2/explanation: An implementation restriction does not allow
+subranges which contain more than maxint (=2147483647) constants. 
+/h0l2h1/2.15¬INVALID TAG TYPE IN VARIANT RECORD.
+/l/severity:¬¬1
+/lh2/explanation: The tag field in a variant 
+record is not a scalar
+or subrange. It cannot be type integer or type real, (but can be a
+subrange of integer). 
+/h0l2h1/2.16¬CARDINALITY OF TAGFIELD TYPE >32768.
+/l/severity:¬¬1
+/lh2/explanation: An implementation restriction limits the number
+of values that a tag field can assume to 2@1@5=32768. 
+/h0l2h1/2.17¬TYPE OF CASE LABEL DOES NOT AGREE WITH TYPE 
+OF TAG FIELD/l/severity:¬¬1
+/lh2/explanation: The type of the tagfield 
+in a variant record type
+is incompatible with the type of a variant's case label. 
+/h0l2h1/2.18¬VALUE OF CASE LABEL IS OUTSIDE SUBRANGE SPECIFIED 
+BY TAG TYPE.
+/l/severity:¬¬1
+/lh2/explanation: The range of values 
+which can be assigned to the
+tagfield of a variant record does not include all case labels. 
+/h0l2h1/2.19¬A SET TYPE MUST BE BASED ON A SCALAR OR SUBRANGE TYPE.
+/l/severity:¬¬1
+/lh2/explanation: One cannot declare a type to be /u/set of/u/ T,
+where T
+is an /u/array/u/, /u/record/u/, /u/set/u/ or /u/file/u/ type, or
+if T is integer or real. 
+/h0l2h1/2.20¬IMPLEMENTATION RESTRICTS LENGTH OF A SET TO 256 BYTES.
+/l/severity:¬¬1
+/lh2/explanation: One cannot declare a type to be 
+set of T, where
+T is a scalar or subrange type containing more than 2040 values. 
+/h0l2h1/2.21¬INCOMPATIBLE SET ELEMENTS.
+/l/severity:¬¬1
+/lh2/explanation: A list of set elements 
+in which two elements are
+of incompatible data types has been encountered. 
+/h0l2h1/2.22¬ILLEGAL SET ELEMENT.
+/l/severity:¬¬1
+/lh2/explanation: A list of set elements 
+in which one element is
+neither scalar nor subrange has been encountered. 
+/h0l2h1/2.23¬¬UNABLE TO DETERMINE DATATYPE OF SET EXPRESSION.
+/l/severity:¬¬1
+/lh2/explanation: An integer-valued expression has been encountered 
+in a list of set elements.  The list must contain only scalar and
+subrange expressions and constants. Not that if I is a subrange
+variable, both PRED(I) and SUCC(I) preserve the subrange. 
+/h0l2h1/2.24¬¬SET ELEMENT OF TYPE REAL.
+/l/severity:¬¬1
+/lh2/explanation: A real-valued expression has been encountered in
+a list of set elements. 
+/h0l2h1/2.25¬¬FIRST OPERAND OF "IN" MUST BE SCALAR 
+SUBRANGE OR INTEGER./l/severity:¬¬1
+/lh2/explanation: The first operand is not of a type T such that
+/u/set/u/ /u/of/u/ T1 is a valid type, where T1 = T or T1 is a valid
+subrange of T. 
+/h0l2h1/2.26¬¬FIRST OPERAND OF "IN" NOT COMPATIBLE WITH SET TYPE.
+/l/severity:¬¬1
+/lh2/explanation: The first operand of /u/in/u/ is not of type T
+such that the second operand is type /u/set/u/ /u/of/u/ T1, where
+T1 = T or T1 is a valid subrange of T. 
+/h0l2h1/2.27¬¬SET EXPRESSION REQUIRES MORE THAN 265 BYTES.
+/l/severity:¬¬1
+/lh2/explanation: The range of values required to represent all the
+elements in a list of set elements, or the union, intersection or
+difference of two such lists or set variables, has cardinality 
+greater than 2040. 
+/h0l2h1/2.28¬¬STRICT INCLUSION IS NOT ALLOWED.
+/l/severity:¬¬1
+/lh2/explanation: The operators < and > are not valid for set
+expressions. The containment operations, <=and >=, are, however,
+valid. 
+/h0l2h1/2.29¬¬INCOMPATIBLE SET TYPES.
+/l/severity:¬¬1
+/lh2/explanation: Either an operator has been encountered whose
+operands are set expressions of incompatible base types, or a set
+expression is being assigned to a set variable such that the range
+of values of the base type necessary to represent the expression is
+not contained in the range of values necessary to represent the type
+of the variable. 
+/h0l2h1/2.30¬¬ILLEGAL "+" OPERATOR.
+/l/severity:¬¬1
+/lh2/explanation: A + operator has been encountered which cannot
+be construed as either integer addition, real addition or set union. 
+/h0l2h1/2.31¬¬ILLEGAL "-" OPERATOR.
+/l/severity:¬¬1
+/lh2/explanation: A - operator has been encountered with cannot 
+be construed as either integer subtraction, real subtraction or set
+difference. 
+/h0l2h1/2.32¬¬ILLEGAL "*" OPERATOR.
+/l/severity:¬¬1
+/lh2/explanation: A * operator has been encountered which cannot be
+construed as either integer multiplication, real multiplication or
+set intersection. 
+/h0l2h1/2.33¬¬ILLEGAL UNARY "-" OPERATOR.
+/l/severity:¬¬1
+/lh2/explanation: The operand of a unary minus 
+is neither of type
+integer (or subrange thereof) or of type real. 
+/h0l2h1/2.34¬¬ILLEGAL COMPARISON.
+/l/severity:¬¬1
+/lh2/explanation: An attempt has been made 
+to compare files; or an
+attempt has been made to compare pointers, records or arrays (other
+than character arrays) for other than equality or inequality. 
+/h0l2h1/2.35¬¬ILLEGAL REAL EXPRESSION.
+/l/severity:¬¬1
+/lh2/explanation: An attempt has been made to assign a real value to
+a integer variable, or to use a real value to index an array, or to
+use a real value as an operand to the integer division operators
+/u/div/u/ and /u/mod/u/. 
+/h0l2h1/2.36¬¬INCOMPATIBLE DATATYPES.
+/l/severity:¬¬1
+/lh2/explanation: A binary operator has been encountered, whose 
+operands are of incompatible datatypes; the datatype of an array
+-¬indexing expression is incorrect; an operand of an integer
+division operator (/u/div/u/ or /u/mod/u/) has been encountered
+which is not of type integer (or subrange thereof); an operand of
+a real division operator (//) has been encountered which is not of 
+type integer (or subrange thereof) or of type real. 
+/h0l2h1/2.37¬¬VALUE OUT OF RANGE.
+/l/severity:¬¬0
+/lh2/explanation: A constant value has been assigned to a subrange 
+variable but the constant is not in the subrange; or a constant is
+used to index an array but the constant is not in the array-indexing
+subrange type. If the statement containing the error is executed, a
+run error will occur. 
+/h0l2h1/2.38¬¬THE SAME LABEL IS DEFINED TWICE.
+/l/severity:¬¬1
+/lh2/explanation: The same statement label 
+has been defined more
+than once. 
+/h0l2h1/2.39¬¬ILLEGAL ASSIGNMENT.
+/l/severity:¬¬1/lh2/explanation: An assignment 
+has been made to a
+variable whose type is file. Possibly a missing arrow (|46). 
+/h0l2h1/2.40¬¬ILLEGAL ASSIGNMENT TO PROCEDURE//FUNCTION nnnn.
+/l/severity:¬¬1
+/lh2/explanation: nnnn is the name of a procedure or function which 
+appears on the left hand side of an assignment statement. Either nnnn
+is a procedure, or it is a function but not the function currently
+being compiled. 
+/h0l2h1/2.41¬¬FUNCTION CANNOT BE DECLARED TO HAVE A STRUCTURED TYPE.
+/l/severity:¬¬1
+/lh2/explanation: A function cannot return an 
+array, record, file or set value. 
+/h0l2h1/2.42¬¬ nnnn  IS NOT A TYPE.
+/l/severity:¬¬1
+/lh2/explanation: In the declaration of a procedure or function, the
+name nnnn was encountered where a type name was expected. 
+/h0l2h1/2.43¬¬TOO MANY FORWARD-DECLARED PROCEDURES 
+ARE PENDING AT THIS POINT/l/severity:¬¬1
+/lh2/explanation: The bodies of more than ten forward-declared
+procedures and functions are pending at this point. Rearrange your
+program to eliminate forward-declared procedures or to satisfy
+forward declarations as soon as the program allows it. 
+/h0l2h1/2.44¬¬VAR PARAMETER NOT COMPATIBLE WITH TYPE nnnn.
+/l/severity:¬¬1
+/lh2/explanation: In a procedure or function call, a variable
+whose type is not compatible with nnnn, the name of the datatype of
+the formal /u/var/u/ parameter, has been supplied.
+/h0l2h1/2.45¬¬ VAR PARAMETER MUST BE A VARIABLE.
+/l/severity:¬¬1
+/lh2/explanation: An expression which contains an operator or a
+function call appears where a variable is expected in the parameter
+list of a procedure or function call.
+/h0l2h1/2.46¬¬VAR PARAMETER MUST NOT BE A SCALAR OR SUBRANGE 
+ARRARY ELEMENT/l/severity:¬¬1
+/lh2/explanation: All arrays are packed to the byte level, therefore 
+an array element of scalar or subrange type cannot be used as an
+actual /u/var/u/ parameter. It can, however, be used as a value
+parameter. 
+/h0l2h1/2.47¬¬IN PARAMETER LIST-PROCEDURE//FUNCTION NAME EXPECTED.
+/l/severity:¬¬1
+/lh2/explanation: In a procedure or function call, a procedure
+name or function name was expected as an actual parameter. 
+/h0l2h1/2.48¬¬ATTEMPT TO PASS STANDARD PROCEDURE//FUNCTION nnnn.
+/l/severity:¬¬1
+/lh2/explanation: Of all the predeclared procedures 
+and functions,
+the names of SIN, COS, EXP, LN, SQRT and ARCTAN may be passed as
+actual parameters. 
+/h0l2h1/2.49¬¬procname1 IS NOT COMPATIBLE WITH procname2.
+/l/severity:¬¬1
+/lh2/explanation: The procedure or function name 
+procname1 cannot
+be used as an actual parameter for formal procedure or function
+procname2 because either the parameter lists do not match or the
+function return types are incompatible. 
+/h0l2h1/2.50¬¬ILLEGAL PROCEDURE//FUNCTION IDENTIFIER.
+/l/severity:¬¬1
+/lh2/explanation: The procedure or function being called has not
+been properly declared or is, in fact, not a procedure or 
+function. 
+/h0l2h1/2.51¬¬WRONG NUMBER OF PARAMETERS.
+/l/severity:¬¬1
+/lh2/explanation: In a procedure or function call, the number of 
+actual parameters does not equal the number of formal parameters. 
+/h0l2h1/2.52¬¬MISSING PARAMETER IN CALL TO STANDARD 
+PROCEDURE//FUNCTION./l/severity:¬¬1
+/lh2/explanation: In a call to one of the standard procedures or
+functions, one or more actual parameters have been omitted. 
+/h0l2h1/2.53¬¬TOO MANY PARAMETERS IN CALL TO STANDARD FUNCTION.
+/l/severity:¬¬1
+/lh2/explanation: In a call to one of the standard functions of
+Pascal, more than one actual parameter has been supplied. 
+/h0l2h1/2.54¬¬ILLEGAL PARAMETER TYPE IN CALL TO STANDARD
+PROCEDURE//FUNCTION.
+/l/severity:¬¬1
+/lh2/explanation: A standard procedure or function 
+has been called with an incorrect parameter. 
+/h0l2h1/2.55¬¬WRONG NUMBER OF PARAMETERS IN CALL TO STANDARD
+            PROCEDURE.
+/l/severity:¬¬1
+/lh2/explanation: More than one parameter has been supplied in a
+call to get, put, reset, rewrite, or page; or the number of 
+parameters supplied to pack or unpack is not three. 
+/h0l2h1/2.56¬¬ILLEGAL USE OF STANDARD FILE.
+/l/severity:¬¬1
+/lh2/explanation: An attempt has been made to write, 
+writeln, page
+or put to standard file input; or an attempt has been made to read,
+readln or get from standard file output; or an attempt has been made
+to reset or rewrite either input or output. 
+/h0l2h1/2.57¬¬MISSING CORRESPONDING TAGFIELD DECLARATION.
+/l/severity:¬¬1
+/lh2/explanation: In a call to standard procedure new, an 
+attempt has been made to initialize a non-existing tagfield. 
+/h0l2h1/2.58¬¬CONSTANT REQUIRED IN TAGFIELD INITIALIZATION.
+/l/severity:¬¬1
+/lh2/explanation: In a call to standard procedure new, the 
+initialization of tagfields must be by constants. 
+/h0l2h1/2.59¬¬STANDARD FUNCTION CLOCK HAS NO PARAMETERS.
+/l/severity:¬¬1
+/lh2/explanation:  
+Clock function must not be called with parameters. 
+/h0l2h1/2.60¬¬BOOLEAN EXPRESSION EXPECTED.
+/l/severity:¬¬1
+/lh2/explanation: The expression which is used as an operand of a
+/u/not/u/, /u/and/u/, or /u/or/u/ operator is not of type Boolean; or
+the expression which follows an /u/if/u/, /u/while/u/ or 
+/u/until/u/ is not of type Boolean. 
+/h0l2h1/2.61¬¬ILLEGAL TYPE OF CASE SELECTOR.
+/l/severity:¬¬1
+/lh2/explanation: The selector expression in a /u/case/u/ statement
+must be of scalar, subrange or integer type. 
+/h0l2h1/2.62¬¬LABEL TYPE INCOMPATIBLE WITH SELECTING EXPRESSION.
+/l/severity:¬¬1
+/lh2/explanation: In a case statement, the selector
+expression is not compatible with a case label. 
+/h0l2h1/2.63¬¬MULTIDEFINED CASE LABEL.
+/l/severity:¬¬1
+/lh2/explanation: In a /u/case/u/ statement, two or more cases have
+the same label. 
+/h0l2h1/2.64¬¬CONTROL VARIABLE MUST NOT BE FORMAL.
+/l/severity:¬¬1
+/lh2/explanation: The control variable in a /u/for/u/ statement
+should not be a /u/var/u/ parameter. 
+/h0l2h1/2.65¬¬ILLEGAL OR UNDECLARED LOOP CONTROL VARIABLE.
+/l/severity:¬¬1
+/lh2/explanation: The control variable in a /u/ for /u/ statement
+is either undefined, or is declared but is not a variable. 
+/h0l2h1/2.66¬¬ILLEGAL TYPE OF LOOP CONTROL VARIABLE.
+/l/severity:¬¬1
+/lh2/explanation: The control variable in a /u/for/u/ 
+statement is not of scalar, subrange or integer type. 
+/h0l2h1/2.67¬¬WITH VARIABLES NESTED TOO DEEPLY.
+/l/severity:¬¬1
+/lh2/explanation: /u/with/u/ statements are nested more than 32
+deep. Note that
+/lu/with/u/ v1,v2,...,vn /u/do/u/ S
+/l/is an abbreviation of
+/lu/with/u/ v1 /u/do/u/
+/l/¬¬/u/with/u/ v2 /u/do/u/
+/l/¬¬¬.
+/l/¬¬¬¬¬.
+/l/¬¬¬¬¬¬¬.
+/l/¬¬¬¬¬¬¬/u/with/u/ vn /u/do/u/ S. 
+/h0l2h1/2.68¬¬ILLEGAL "WITH" VARIABLE : nnnn.
+/l/severity:¬¬1
+/lh2/explanation: The variable nnnn in a statement /u/with/u/ nnnn
+/u/do/u/ S is either undeclared, or is declared but is not a 
+variable. 
+/h0l2h1/2.69¬¬STATEMENT PART OF BLOCK nnnn IS TOO BIG.
+/l/severity:¬¬1
+/lh2/explanation: The block nnnn contains too many statements to be
+processed correctly.  Try breaking it up into two or more 
+procedures. 
+/h0l2h1/2.70¬¬SYMBOL TABLE OVERFLOW.
+/l/severity:¬¬1
+/lh2/explanation: The program is too large to be processed correctly
+with the amount of symbol table space currently available. 
+/h0l2h1/2.71¬¬COMPILER ERROR, NODE#STACK OVERFLOW.
+/l/severity:¬¬1
+/lh2/explanation: The compiler has detected an internal 
+inconsistency.  Further processing may be incorrect. 
+/h0l2h1/2.72¬¬OPERAND STOCK OVERFLOW.
+/l/severity:¬¬1
+/lh2/explanation: The compiler has detected an internal inconsistency.
+Further processing may be incorrect. 
+/h0l2h1/2.73¬¬ATTEMPT TO ACCESS PARSE TREE BY A NULL 
+ REFERENCE POINTER.
+/l/severity:¬¬1
+/lh2/explanation:¬ The compiler has detected an internal error.
+Further processing may be incorrect. 
+/h0l2h1/2.74¬EXTERNAL FILENAME filename1 IS TOO LONG, TRUNCATED TO 
+filename/l/severity:  0
+/lh2/explanation:  The filenames of external files are associated
+with DD names; OS//360 permits a maximum DD name length of 8 bytes.
+Truncation will not cause a problem provided the DD names in the 
+JCL are correct, and all external files in the program are unique
+up to 8 characters.
+/h0l2h1/2.75¬ATTEMPT TO PASS EXTERNAL PROCEDURE//FUNCTION procname
+/l/severity:  1/lh2/explanation:  Procedure 'procname', which has
+the EXTERNAL  attribute, appeared as an actual procedure parameter.
+/h0l2h1/2.76¬ATTEMPT TO PASS FORTRAN SUBROUTINE procname AS A
+PASCAL PROCEDURE//FUNCTION/l/severity:  1
+/lh2/explanation:  The routine 'procname', which is an externally
+defined FORTRAN subfunction or subprogram, appeared as an actual
+parameter where a Pascal routine was expected.
+/h0l2h1/2.77¬iden IS NOT A PROCEDURE//FUNCTION/l/severity: 1
+/lh2/explanation:  'iden' appeared as an actual procedure or 
+function parameter, but 'iden' is not a procedure or function.
+/h0l2h1/2.78¬ATTEMPT TO PASS PASCAL PROCEDURE//FUNCTION procname
+AS A FORTRAN SUBROUTINE/l/severity:  1
+/lh2/explanation:  The Pascal procedure or function 'procname'
+appeared as an actual procedure parameter to a FORTRAN routine;
+only other FORTRAN routines may be bound to FORTRAN procedure
+parameters.
+/h0l2h1/2.79¬PARAMETER TO READ//READLN MUST BE A VARIABLE
+/l/severity:  1
+/lh2/explanation:  Only simple variables can have their values
+altered by READ or READLN.
+/h0l2h1/2.80¬STANDARD PROCEDURE HALT HAS NO PARAMETERS
+/l/severity:  1/lh2/explanation:  HALT is parameterless; multiple
+HALTS occurring in a program must be distinguished by user provided
+write statements containing messages.
+/h0l2h1/2.81¬LABEL RANGES INTERSECT ON ORD(LABEL)=nn
+/l/severity:  1/lh2/explanation:  In a case statement, the
+selection of a case is ambiguous because label ranges have been
+specified which coincide at the value whose ordinality is nnn.
+/h0l2h1/2.82¬COMPILER ERROR IN PROCESSING A CASE STATEMENT
+/l/severity:  1/lh2/explanation:  The compiler has detected 
+an internal inconsistency.  Further processing may be incorrect.
+/h0l2h1/2.83¬CONSTANT nnnn IS OUTSIDE THE DECLARED RANGE lb..ub
+/l/severity:  1/lh2/explanation:  In attempting to define the
+value of a structured constant, the value component nnnn is outside
+the declared subrange type lb..ub of that component.
+/h0l2h1/2.84¬CONSTANT IS OF WRONG TYPE/l/severity:  1
+/lh2/explanation:  A constant component of a structured constant
+declaration does not agree with the declared type.
+/h0l2h1/2.85¬STRING CONSTANT OF WRONG TYPE/l/severity:  1
+/lh2/explanation:  The length of a character string constant
+must agree exactly with the length of the declared array of char.
+/h0l2h1/2.86¬FILE TYPE CONSTANT NOT ALLOWED/l/severity:  1
+/lh2/explanation:  An attempt was made to declare a file structure
+as a constant.
+/h0l2h1/2.87¬ILLEGAL LOOP CONTROL VARIABLE/l/severity:  1
+/lh2/explanation:  Control variable in a /u/for/u/ statement must
+be a simple variable.
+/h0l2h1/2.88¬ILLEGAL ATTEMPT TO MODIFY A CONSTANT/l/severity:  1
+/lh2/explanation:  An attempt has been made to change the value
+of a simple constant or a component of a structured constant.
+/h0l2h1/2.89¬INVALID TYPE IDENTIFIER/l/severity:  1
+/lh2/explanation:  An identifier used as the name of a type is not,
+in fact, a type.  It has probably been re-declared differently
+in the current block.
+/h0l2h1/2.90¬LOWBOUND OF SUBRANGE TYPE MUST BE A CONSTANT
+/l/severity:  1/lh2/explanation:  The bounds of a subrange type must
+be specified at compile time; they therefore must be constants.
+/h0l2h1/2.91¬HIGHBOUND OF SUBRANGE TYPE MUST BE A CONSTANT
+/l/severity:  1/lh2/explanation:  Same as for error 2.90.
+/h0l2h1/2.92¬A SET TYPE MUST BE BASED ON A SCALAR OR SUBRANGE TYPE
+/l/severity:  1/lh2/explanation:  Elements of a set must belong
+to a simple type (scalar or subrange).  Sets of types INTEGER, REAL,
+or of compound types are not permitted.
+/h0l2h1/2.93¬ARRAY CONSTANT HAS nnnn ACTUAL ELEMENTS.  IT SHOULD
+HAVE xxxx./l/severity:  0/lh2/explanation:  In specifying the 
+values of an array constant which has been declared to have xxxx
+elements, too many or too few actual values have been given.
+/h0l2h1/2.94¬TOO MANY FIELDS IN RECORD CONSTANT
+/l/severity:  1/lh2/explanation:  In specifying values for a 
+record constant, the number of field values given is larger
+than the number of fields declared in the record type.
+/h0l2h1/2.95¬TOO MANY FORMAT CONTROL VALUES FOLLOW AN ARGUMENT
+OF WRITE//WRITELN/l/severity:  0/lh2/explanation:  The print
+field width for printing integers, booleans, and character string
+variables can be specified by the format :|35expression|37,
+where |35expression|37 is an integer expression.  An additional
+format expression is accepted only for real variables (although
+its value has no effect in Release 2).
+/h0l2h1/2.96¬STRONG FORMAT EXPRESSION MUST BE A CONSTANT
+/l/severity:  0/lh2/explanation:  A current implementation
+restriction requires that if a field width specifier is given
+in a string-valued output expression it must be an integer
+constant.
+/h0l2/3.¬¬Pass 3 error messages.
+/i1p/Pass 3 is responsible for producing the IBM 360//370 machine
+instructions which correspond to your Pascal program.  The error
+messages which it may produce will appear at the bottom of your
+listing.  They are all prefixed by the message
+/l2/¬¬¬¬¬***COMPILER ERROR:
+/l2/and followed by the approximate location in your program where the
+error was encountered.  Pass 3 errors only occur in syntactically and
+semantically correct programs, and the presence of one will always
+bring an immediate halt to compilation./i0l/
+/l/3.1¬¬CODE ARRAY OVERFLOW
+/l/3.2¬¬TRANSFER VECTOR EXCEEDS MAX ALLOWED SIZE
+/l/3.3¬¬NO MEANS OF FLUSHING TEMPORARY
+/l/3.4¬¬ATTEMPT TO FREE A FIXED PRIORITY REG : rrr
+/l/3.5¬¬CANNOT FIND A NON FIXED PRIORITY REG
+/l/3.6¬¬TEMP STACK OVERFLOW
+/l/3.7¬¬INDEX STACK OVERFLOW
+/l/3.8¬¬ATTEMPT TO INDEX IMMED OP OTHER THAN 0
+/l/3.9¬¬FIXUP FAILURE.  NO AVAILABLE REG FOR DOUBLE INDEXING
+/i1/
+/p/Errors 3.1 and 3.9 can probably be avoided if the procedure being
+compiled is broken up into two or more smaller procedures.  Error
+3.2 indicates that there are probably too many procedures in your
+program to be processed correctly.  Errors 3.3. through 3.8 are
+probably triggered by an expression which is too complicated to be
+processed correctly.
+/i0l2/4.¬¬Run-time error messages.
+/i1p/In case the Pascal program develops an erroneous condition at
+run-time, execution may halt with a run-time error message being
+printed.  The error message will follow the output from the program.
+It will be prefixed by a row of dashes and the message
+/l2/¬¬¬¬¬***RUN ERROR,
+/l2/If possible, the approximate location of the error within 
+your program will be printed.
+/i0l2h1/4.1¬¬ATTEMPT TO READ PAST END OF FILE.
+/lh2/explanation: Either a read (or a get) was done on an input
+file with EOF true, or an attempt was made to read a number from an
+input textfile with the rest of the file containing blanks. 
+/h0l2h1/4.2¬¬VALUE OUT OF RANGE.
+/lh2/explanation: A value was assigned to a subrange variable that 
+was outside the subrange; an array index was out of range; or the 
+result of pred(X) or succ(X) was outside the range of values legal
+for the variable X. 
+/h0l2h1/4.3¬¬RUN-TIME STORAGE OVERFLOW.
+/lh2/explanation: A block entry or a call to procedure new resulted
+in all of the available memory space being used up. 
+/h0l2h1/4.4¬¬WHILE READING INTEGER CONSTANT--DIGIT EXPECTED.
+/lh2/explanation: A call to read which required character-to-integer
+conversion caused the reading of a character which was neither a
+blank nor a digit. 
+/h0l2h1/4.5¬¬WHILE READING INTEGER CONSTANT--VALUE OUT OF RANGE.
+/lh2/explanation: A call to read which required character-to-integer
+conversion was made but the input textfile contained a string of
+digits whose value was outside the range -maxint..+maxint. 
+/h0l2h1/4.6¬¬WHILE READING REAL CONSTANT-DIGIT EXPECTED.
+/lh2/explanation: A call to read which required character-to-real
+conversion caused the reading of a character which was neither a
+blank nor a digit. 
+/h0l2h1/4.7¬¬WHILE READING REAL CONSTANT--VALUE OUT OF RANGE.
+/lh2/explanation: A call to read which required character-to-real
+conversion was made but the input textfile contained a real number
+whose exponent was outside the range of representable real numbers
+(approximately¬¬10|13@7@8 to 10|12@7@5). 
+/h0l2h1/4.8¬¬ARG TO SIN OR COS TOO LARGE (>PI*2**18).
+/lh2/explanation: A call was made either to standard function sin
+or to standard function cos, with the absolute value of the
+argument greater than PI*2@1@8 (Approximately 823550.0). 
+/h0l2h1/4.9¬¬ARGUMENT TO EXP TOO LARGE (>174.673).
+/lh2/explanation: A call was made to standard function exp, but 
+the value of the argument was too large (greater than 174.673). 
+/h0l2h1/4.10 ARGUMENT TO LN 0.0 OR NEGATIVE.
+/lh2/explanation: A call was made to standard function Ln but the
+value of the argument was less than or equal to zero. 
+/h0l2h1/4.11 NEGATIVE ARGUMENT TO SQRT.
+/lh2/explanation: A call was made to standard function sqrt but
+the value of the argument was less than zero. 
+/h0l2h1/4.12 ESTIMATED LINES EXCEEDED.
+/lh2/explanation: The programmer's lines estimate has been exceeded.
+See section I on deck setup for more information on specifying a lines
+estimate. 
+/h0l2h1/4.13 ESTIMATED TIME EXCEEDED.
+/lh2/explanation: The execution of the program required more time
+than was asked for by the programmer, possible because the program
+contains an infinite loop.  See section I on deck setup for more
+information on specifying a time estimate. 
+/h0l2h1/4.14 NONSTANDARD FILES NOT YET IMPLEMENTED.
+/lh2/explanation: Standard files input and output are the only files
+so far implemented.
+/h0l2h1/4.15 IMPRECISE OR MULTIPLE-IMPRECISE PROGRAM INTERRUPTION.
+/lh2/explanation: On a model 91 or model 195, a program exception
+(or series of program exceptions) which would ordinarily generate
+messages 4.16 through 4.30 was detected during the execution of an
+instruction, but the machine could not precisely determine which 
+instruction was interrupted or why. 
+/h0l2h1/4.16 OPERATION EXCEPTION.
+/lh2/explanation: The compiler generated a bad machine instruction.
+Take your program deck /u/exactly as it is/u/ to a programming
+consultant, who will then forward it to SUNY at Stony Brook. 
+/h0l2h1/4.17 PRIVLEGED-OPERATION EXCEPTION.
+/lh2/explanation: The compiler generated a bad machine instruction.
+Take your program deck /u/exactly as it is/u/ to a programming
+consultant, who will then forward it to SUNY at Stony Brook. 
+/h0l2h1/4.18 EXECUTE EXCEPTION.
+/lh2/explanation: The compiler generated a bad machine instruction.
+Take your program deck /u/exactly as it is/u/ to a programming
+consultant, who will then forward it to SUNY at Stony Brook. 
+/h0l2h1/4.19 PROTECTION EXCEPTION.
+/lh2/explanation: The program probably tried to use a /u/nil/u/
+or undefined pointer variable.  If this was not the case, take your
+program deck /u/exactly as it is/u/ to a programming consultant, who
+will forward it to SUNY at Stony Brook. 
+/h0l2h1/4.20 ADDRESSING EXCEPTION.
+/lh2/explanation: The program probably tried to use a /u/nil/u/
+or undefined pointer variable.  If this was not the case, take your
+program deck /u/exactly as it is/u/ to a programming consultant, who
+will forward it to SUNY at Stony Brook. 
+/h0l2h1/4.21 SPECIFICATION EXCEPTION.
+/lh2/explanation: The compiler generated a bad machine instruction.
+Take your program deck /u/exactly as it is/u/ to a programming
+consultant, who will then forward it to SUNY at Stony Brook. 
+/h0l2h1/4.22 DATA EXCEPTION.
+/lh2/explanation: The compiler generated a bad machine instruction.
+Take your program deck /u/exactly as it is/u/ to a programming
+consultant, who will then forward it to SUNY at Stony Brook. 
+/h0l2h1/4.23 INTEGER OVERFLOW.
+/lh2/explanation: An integer arithmetic operation was attempted,
+but the absolute value of the result was greater than maxint
+(=2147483647) 
+/h0l2h1/4.24 INTEGER DIVISION BY ZERO.
+/lh2/explanation: The second operand of a /u/div/u/ or /u/mod/u/
+operator had value zero. 
+/h0l2h1/4.25 DECIMAL OVERFLOW EXCEPTION.
+/lh2/explanation: An overflow occurred while incrementing a statement
+execution counter for use in a flow summary.  Check for the presence
+of an infinite loop.  If none exists, try running the program at
+debug level 1.  See Sec. I for more information on specifying a
+debug level. 
+/h0l2h1/4.26 DECIMAL DIVISION EXCEPTION.
+/lh2/explanation: The compiler generated a bad machine instruction.
+Take your program deck /u/exactly as it is/u/ to a programming
+consultant, who will then forward it to SUNY at Stony Brook. 
+/h0l2h1/4.27 REAL EXPONENT OVERFLOW.
+/lh2/explanation: A real arithmetic operation was attempted, but
+the result was too large to represent (>10@7@5). 
+/h0l2h1/4.28 REAL EXPONENT UNDERFLOW.
+/lh2/explanation: A real arithmetic operation was performed, and
+the result was less than 10|13@7@8 but not exactly zero. 
+/h0l2h1/4.29 REAL SIGNIFICANCE EXCEPTION.
+/lh2/explanation: The result of a real addition  or subtraction has
+an all-zero fraction. 
+/h0l2h1/4.30 REAL DIVISION BY ZERO.
+/lh2/explanation: The second operand of a real division operator
+(//) has value zero. 
+/h0l2h1/4.31 EOLN DURING READ OF ALFA
+/lh2/explanation:  While performing a READ on a variable of the
+predeclared type ALFA, the end of line condition has occurred.
+A record may not have been exhausted by previous READs; a READLN
+rather than a READ may be required on the preceding input from 
+the file.
+/h0l2h1/4.32 HALT EXECUTED AT LINE nnn
+/lh2/explanation:  Standard procedure HALT was called at line nnn.
+As for an error condition, the last line of the standard file OUTPUT
+will have been printed, all open files closed, and PMD diagnostics
+will be initiated.
+/h0l2h2/4.33 ABEND|14S-nnnn|15
+/l/|14U-nnnn|15
+/h0lh2/¬¬¬¬explanation: This message results from an error condition
+detected by the operating system, the Pascal overlay monitor
+(OMONITOR), or PA$CAL, (the run-time environment for non load go
+programs).  The most common ABEND messages which occur when running
+Pascal are described here./p/System codes 80A or 30A result when not
+enough main storage is available to run the user's Pascal program.
+A User ABEND code of 400 is issued by PA$CAL if not enough space is
+available for it to load the PMD package, and by OMONITOR if there
+is insufficient space to load a compiler module.  If any of these
+occur, try increasing the main storage allocation on the job card
+and//or the EXEC statement of the offending job step.
+/p/S-322 and (usually) S-222 indicate estimated time exceeded
+and estimated lines exceeded, respectively.  If these cannot be
+corrected by increasing parameters on the job card or EXEC
+statement, the compiler may be looping; refer the problem to
+whoever is maintaining the compiler at your installation.
+/p/A User 4000 ABEND code is issued when the debug level is
+|37 2; and ABEND macro is executed in that case to force a core
+dump./p/The remaining user codes indicate problems with files
+used by the compiler modules for communication.  If the JCL 
+which defines these files is correct and the ABEND persists, refer
+the problem to local compiler maintenance staff.
+/-h-i/
+/l3/5.¬¬LINKER ERRORS AND WARNINGS
+/i1p/The Linker is responsible for doing type checking across
+module boundaries, resolving inter-module references, and
+producing an OS object module.  Messages 5.1-5.9 indicate
+programming linkage problems, while the remaining messages
+generally indicate problems with the files input to the linker
+(the Pascal object modules)./i/
+/l2h1/5.1¬¬DISAGREEMENT IN SCALAR CONSTANT NAMES
+/l/severity:  0/lh2/explanation:  An identifier appearing
+as a constant in the definition of an enumeration type has been
+used in defining another enumeration type which is not equivalent to
+the first.
+/h0l2h1/5.2¬¬DUPLICATE MAIN MODULES mm AND nn
+/l/severity:  1/lh2/explanation:  Both modules 'mm' and 'nn'
+have been marked as main modules.  Check to see that the data
+set names of the input modules are correct.
+/h0l2h1/5.3¬¬iden IS AN UNRESOLVED EXTERNAL VARIABLE IN MODULE mod
+/l/severity:  0/lh2/explanation:  'iden' is referenced as an 
+external variable in module 'mod', but 'iden' is not declared
+in the main module.
+/h0l2h1/5.4¬¬INCOMPATIBLE DATA TYPES DECLARED FOR iden IN MODULES
+mod1 AND mod2/l/severity:  1/lh2/explanation: 'iden' is declared in
+module 'modl' to be of a type not structurally equivalent to its
+declared type in module 'mod2'.
+/h0l2h1/5.5¬¬iden IS AN UNRESOLVED PROCEDURE NAME IN MODULE mod
+/l/severity:  0/lh2/explanation:  'iden' is declared in module 'mod'
+as an external procedure, but none of the other modules input to 
+the linker define 'iden' as an entry procedure.
+/h0l2h1/5.6¬¬INCOMPATIBLE PROCEDURE TYPES DECLARED FOR iden
+IN MODULES mod1 AND mod2/l/severity:  1
+/lh2/explanation:  The argument types (or the return type)
+of the Pascal routine 'iden' have been given inconsistent
+declarations in modules 'mod1' and 'mod2'.
+/h0l2h1/5.7¬¬INCOMPATIBLE DECLARATIONS OF FORTRAN PROCEDURE
+iden IN MODULES m1 AND m2/l/severity:  1
+/lh2/explanation:  The argument types (or the return type)
+of FORTRAN routine 'iden' have been give inconsistent declarations
+in modules 'm1' and 'm2'.
+/h0l2h1/5.8¬¬iden IS DECLARED AS AN ENTRY PROCEDURE IN TWO
+DISTINCT COMPILATION UNITS /l/severity:  1
+/lh2/explanation:  'iden' appears as an ENTRY procedure in 2
+different modules; only a single definition is permitted.  Check
+that the data set names of the input Pascal object modules are
+correct - possibly the same file is specified as input for 2
+distinct modules.
+/h0l2h1/5.9¬¬EXTERNAL REFERENCE TABLE OVERFLOW IN PASCAL LINKER
+/l/severity:  1/lh2/explanation:  Too many external references
+exist in the input Pascal modules for the linker to handle
+correctly.  Try restructuring the modules.
+/h0l2h1/5.10¬%ORG EXPECTED IN MODULE nnn
+/l/severity:  1/lh2/explanation:  An improper header record
+was found in the Pascal object module #nnn.  Check that the
+data set which should contain this module is correctly specified.
+/h0l2h1/5.11¬%DATA EXPECTED IN MODULE nnn/l/severity:  1
+/lh2/explanation:  In the Pascal object module #nnn, an 
+improper or missing marker record was detected.  Check that the
+input data sets are correctly specified.
+/h0l2h1/5.12¬NO EXTERNAL SYMBOL TABLE ENCOUNTERED ON FILE# nnn
+/l/severity:  1/lh2/explanation:  The module being input
+on file # nnn was not a valid Pascal object module; check
+that this data set was correctly specified.
+/h0l2h1/5.13¬%DATA IMAGE MISSED IN CONSTRUCTING OBJECT MODULE
+/l/severity:  1/lh2/explanation:  Same as error 5.11.
+/h0l2h1/6.0¬¬PMD MESSAGES
+/p/The PMD is a compiler module brought into core after the 
+execution of the user's Pascal program; it attempts to determine
+at what Pascal source line a run error occurred, (or a HALT was
+executed), an in what module (in a multi-modular program).  If
+the debug level is 1 a high-level dump is provided for each
+active block; if the debug level is 2, a flow summary of the main
+program module is also given.  At level 3, an ABEND macro is
+executed to force a full core dump (provided that a 'DUMP' 
+parameter is specified on the EXEC statement of the GO step
+and a SYSUDUMP DD card is included).  This low level dump is
+generally useful only to those programmers who are linking to 
+FORTRAN or assembly languages subroutines.
+/p/Messages 6.1 - 6.15 are given during normal functioning
+of PMD; messages 6.16 - 6.25 are issued only if PMD was unable
+to locate all the information it required to provide full
+diagnostics.
+/h0l2h1/6.01¬¬=|37TRACE OF ACTIVE FORTRAN SUBROUTINES
+/lh2/explanation:  When an exceptional condition arises within 
+non-Pascal code, the PMD attempts to identify the last routine 
+called, and to trace back a chain of non-Pascal references by 
+providing their names, and the internal statement numbers (ISNs)
+from where the routines were called.  To do this, it assumes the
+procedure names and ISNs are embedded in the non-Pascal
+code as per FORTRAN convention (described in the OS FORTRAN
+G & H PROGRAMMER'S GUIDE).
+/h0l2h1/6.02¬¬FORTRAN SUBROUTINE iden 'ISN' nnn
+/lh2/explanation:  During FORTRAN traceback PMD has determined
+that FORTRAN subroutine (or function) 'iden' was called from
+ISN 'nnn'.  ('iden' and//or 'nnn' may be designated as
+'(unknown)' if PMD was unable to determine this information).
+/h0l2h1/6.03¬¬TRACE OF ACTIVE BLOCKS |14OF MODULE iden|15
+/lh2/explanation:  A post-mortem traceback is being initiated
+in the Pascal module indicated.  Each block entered will cause one
+of the following messages:
+/h0l2h2/6.04¬¬=|37 PROGRAM BLOCK proc
+/h0l2h2/6.05¬¬=|37 PROCEDURE BLOCK proc
+/h0l2h2/6.06¬¬=|37 FUNCTION BLOCK proc
+/l/A dump of local variables for 'proc' will then be given,
+preceded by one of messages 6.07 or 6.08, and followed by message
+6.09.
+/h0l2h1/6.07¬¬NO LOCAL SCALAR, SUBRANGE, POINTER, OR STRING
+VARIABLES
+/lh2/explanation:  None of the types of variables for which a dump
+can be given are defined in the block.
+/h0l2h1/6.08¬¬VALUE OF LOCAL VARIABLES:
+/lh2/explanation:  The dump of local variables will follow.
+/h0l2h1/6.09¬¬proc WAS CALLED NEAR LINE nn |14OF MODULE mod|15
+/h0l2h1/6.10¬EXCEPTION OCCURRED IN EXECUTION MONITOR AT
+ADDRESS xxxxxxxx
+/lh2/explanation:  An ABEND occurred while in XMONITOR at absolute
+(hexadecimal) address xxxxxxxx.
+/h0l2h1/6.11¬EXCEPTION OCCURRED IN FORTRAN CODE AT xxxxxxxx
+/lh2/explanation:  An ABEND occurred while executing at address
+xxxxxxxx; this address is not in Pascal code or in the Pascal
+environment (PA$CAL or XMONITOR).  PMD thus assumed it is in
+non-Pascal code.
+/h0l2h1/6.12¬REENTRY ADDRESS IN PASCAL CODE=xxxxxxxx
+/lh2/explanation:  The address given is that of the next instruction
+in Pascal code that would have been executed if the exception
+hadn't occurred.  If the exception occurred in the Pascal 
+run-monitor or in FORTRAN code, this was the return address into
+Pascal code.
+/h0l2h1/6.13¬|14ERROR TRAP|15 PERFORMED NEAR LINE nnn|14OF
+MODULE mod|15/l/|14HALT COMMAND|15
+/h0l2h2/¬¬¬¬explanation:  a) The run monitor trapped an exception 
+which occurred during execution of line nnn, or/l/b) A call
+to standard procedure HALT was executed on line nnn.  If the
+program is not being run in load//go mode of execution,
+then the module name 'mod' is given.
+/h0l2h1/6.14¬¬=|37 EXECUTION FLOW SUMMARY
+/lh2/explanation:  The flow summary described in section H is
+being initiated.
+/h0l2h1/6.15¬nnn.nn SECONDS IN EXECUTION
+/lh2/explanation:  The user program has run for nnn.nn seconds
+(CPU time) before either terminating normally or from an
+exception.
+/h0l2h1/6.16¬SOURCE LINE NOT FOUND
+/lh2/explanation:  The PMD was unable to determine the source
+line number associated with an address it assumed to be located in
+Pascal code./h0l2h1/6.17¬FORTRAN TRACEBACK FAILED DUE TO 
+INCORRECT BACK CHAIN IN THE SAVE AREA/lh2/explanation:
+PMD detected an inconsistency in the save area chaining while
+attempting to provide a FORTRAN traceback (6.01).  Check that the
+non-Pascal routines follow the standard IBM save area conventions
+for FORTRAN.
+/h0l2h1/6.18¬FORTRAN TRACEBACK FAILED, POSSIBLE RECURSIVE CALL
+/lh2/explanation:  Same as 6.17.
+/h0l2h1/6.19¬¬PMD TABLE OVERFLOW/lh2/explanation:  The PMD module
+was unable to load the symbol table required to give a symbolic
+dump because it was too large.
+/h0l2h1/6.20¬%END CARD EXPECTED/lh2/explanation:  A marker
+record is missing from the PMD file.  Check that the data set 
+specifying the PMD file has been correctly passed.
+/h0l2h1/6.21¬PMD TABLE NOT FOUND /lh2/explanation:  Same as 6.20
+/h0l2h1/6.22¬FAILED TO LOCATE PROCEDURE FROM ENTRY POINT xxxxxxxx
+/lh2/explanation:¬¬PMD could not determine which procedure was active;
+the assumed entry point address xxxxxxxx could not be located in the
+transfer vector./h0l2h1/6.23¬FAILED TO LOCATE MODULE INDEX FROM
+CODE BASE ADDRESS/lh2/explanation: During a traceback, PMD could not
+determine the module from which a previous module was entered.  The
+display in an activation record may have been overwritten by a bad 
+data reference in non-Pascal code./h0l2h1/6.24¬FATAL ERROR IN 
+INITIALIZATION OF PMD POINTERS/lh2/explanation:  The PMD detected an
+inconsistency in its information about the location of the code//or
+data for the procedure active when a run error occurred or when a 
+HALT was executed./h0l2h1/6.25¬POST-MORTEM TRACEBACK FAILED
+/lh2/explanation:  PMD could not determine the last active Pascal
+module because of a bad reentry address (possibly due to a faulty
+save area link in non-Pascal code)./h0/
+/sv/
+NO HYPH 
+GO
+/a/
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬Syntax¬Charts
+¬¬¬¬¬¬¬¬¬¬¬¬(these¬should¬be¬replaced¬by¬drawn¬ones)
+
+
+program
+
+¬¬+--------------+
+¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬V¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_
+---->"EXTERNAL"---->"PROGRAM"--->|33i_d_e_n_t_i_f_i_e_r_|33---+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬+---------------------------------------------+
+¬¬|33
+¬¬|33¬¬¬¬¬¬¬¬+----------------+
+¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬V¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_
+¬¬+-->"("---->|33i_d_e_n_t_i_f_i_e_r_|33---->")"-->";"-->|33b_l_o_c_k_|33-->"."
+
+
+
+block
+
+¬¬+-----------+¬+-----------+
+¬¬|33¬¬¬¬¬¬¬¬¬¬¬|33¬|33¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬¬¬¬_¬_¬_¬_¬_¬¬¬V¬|33¬¬¬¬_¬_¬_¬_¬_¬¬¬V¬¬¬¬_¬_¬_¬_
+---->|33label|33------>|33const|33---->|33type|33-----+
+¬¬¬¬¬|33d_e_c_l_._|33¬¬¬|33¬¬¬|33d_e_c_l_._|33¬¬¬¬¬|33d_e_f_n_|33¬¬|33¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+<<---------------------+¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬+---------------------------------------+
+¬¬|33
+¬¬|33¬¬¬¬¬+-----------+¬+------------+¬+-----------+
+¬¬|33¬¬¬¬¬|33¬¬¬¬_¬_¬_¬_¬_¬¬¬|33¬|33¬¬¬¬_¬_¬_¬_¬_¬_¬¬¬|33¬|33¬¬¬¬_¬_¬_¬_¬_¬¬¬|33¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_
+¬¬|33¬¬¬¬¬|33¬¬|33¬var¬|33¬¬V¬|33¬¬|33extvar|33¬¬V¬|33¬¬|33proc/|33¬¬V¬¬|33statement|33
+¬¬+------->|33d_e_c_l_._|33------>|33¬_d_e_c_l_._|33------>|33func¬|33---->|33¬_¬_¬_p_a_r_t_¬_¬_|33-->
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33d_e_c_l_._|33¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+<<---------+
+
+
+
+statement
+.¬
+.¬
+.¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_
++--->"CASE"-->|33e_x_p_r_e_s_s_i_o_n_|33-->"OF"---+
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬+---------------------------------+
+.¬|33¬
+.¬|33¬¬+------------------------------------------------------------+
+.¬|33¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+---------------------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬¬|33¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬V¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬V
+¬¬+----->|33c_o_n_s_t_a_n_t_|33---->".."-->|33c_o_n_s_t_a_n_t_|33----->":"-->|33s_t_a_t_e_m_e_n_t_|33--+
+¬¬¬¬|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬|33¬+<<---------------","<----------------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬+<<-----------------";"<---+----------------------------------+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+----->"END"------+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬V
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+-->"OTHERWISE"---+-->
+
+
+
+const¬decl.
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+----------------+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬|33¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬¬¬V
+---->"CONST"---->|33i_d_e_n_t_i_f_i_e_r_|33---->":"-->|33t_y_p_e_|33---->"="----+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬+----------------------------------------+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33¬¬+--->"EXTERNAL"---+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33¬¬|33¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33¬¬+-->|33structured|33--+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33¬¬|33¬¬¬|33c_o_n_s_t_a_n_t_¬_¬_|33¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33¬¬|33¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬V
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬+------>|33c_o_n_s_t_a_n_t_|33------";"----->
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬+<<-----------------------------+
+
+
+
+structured¬constant
+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_
+¬¬¬¬¬¬¬¬¬¬¬¬+-->|33structured|33--+
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬|33c_o_n_s_t_a_n_t_¬_¬_|33¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬V
+---->"("-------->|33c_o_n_s_t_a_n_t_|33-------->")"--->
+¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬+<<------","<---------+
+
+
+
+extvar¬decl.
+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_
+---->"EXTVAR"------>|33i_d_e_n_t_i_f_i_e_r_|33---->":"-->|33t_y_p_e_|33-->";"----->
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬+<<----","<------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+<<---------------------------------------+
+
+
+
+field¬list
+
+¬¬¬¬¬+------------------------------------+
+¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬|33¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬¬¬V
+--------->|33i_d_e_n_t_i_f_i_e_r_|33----->":"-->|33t_y_p_e_|33--+---------------------+
+¬|33¬¬¬|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬|33¬¬¬|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬|33¬¬¬|33¬+<<-----","<------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬|33¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬|33¬¬¬+<<-----------------------------------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬|33<<------------------------------------------------------------+
+¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬+-->"CASE"-->|33i_d_e_n_t_i_f_i_e_r_|33-->":"-->|33t_y_p_e_¬_i_d_e_n_t_i_f_i_e_r_|33-->"OF"--+¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33
++------------------------------------------------------------+¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬+-----------------------------------------------------------+¬|33
+|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬|33
+|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬+-------------------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬|33
+|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬|33
+|33¬|33¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬¬|33¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬¬V¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬¬¬¬¬¬¬V¬V
++---->|33c_o_n_s_t_a_n_t_|33-->".."-->|33c_o_n_s_t_a_n_t_|33-->":"->"("->|33f_i_e_l_d_|33->")"----->
+¬¬|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬+<<----","<----------------------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬+<<------";"<-----------------------------------------------+
+
+
+
+proc/func¬decl.
+
+--+->"FUNCTION"--+¬+---------+
+¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬|33¬¬¬¬¬¬¬¬¬|33
+¬¬V¬¬¬¬¬¬¬¬¬¬¬¬¬¬V¬|33¬¬¬¬¬¬¬¬¬V¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_
+¬¬+->"PROCEDURE"---->"ENTRY"--->|33i_d_e_n_t_i_f_i_e_r_|33-->|33p_a_r_a_m_e_t_e_r_¬_l_i_s_t_|33--+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬+--------------------------------------------------------------+
+¬¬|33
+¬¬|33
+¬¬|33¬¬+--------------------------+
+¬¬|33¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬|33¬¬|33¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬V¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬
+¬¬+--->":"-->|33t_y_p_e_¬_i_d_e_n_t_i_f_i_e_r_|33--->";"--+->|33b_l_o_c_k_|33----+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+->"FORWARD"->+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+->"FORTRAN"->+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+->"EXTERNAL"---->";"--->
+
+parameter¬list
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+-------------------+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬V
+--------------------->"("--+¬¬¬+-->")"------------------------>
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬|33
++--------------------------+¬¬¬+<<--------------------------+
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+V¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
++------------------------";"<-------------------------------+
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬+--------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+V¬¬|33¬¬¬¬¬¬¬¬V¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬|33
++---->"VAR"-->|33i_d_e_n_t_i_f_i_e_r_|33-->":"-->|33t_y_p_e_¬_i_d_e_n_t_i_f_i_e_r_|33------->+
+|33¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬+<<----","<----+¬¬+---------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬|33¬¬¬_¬_¬_¬_¬_¬¬V¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬|33
++->"FUNCTION"-->|33i_d_e_n_t_i_f_i_e_r_|33-->|33param|33-->":"->|33type¬¬¬¬¬¬|33->+
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬|33t_y_p_e_s_|33¬¬¬¬¬¬¬¬|33i_d_e_n_t_i_f_i_e_r_|33¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬+<<---","<-----+¬¬+----------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬|33¬¬¬¬_¬_¬_¬_¬_¬¬V¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
++->"PROCEDURE"->|33i_d_e_n_t_i_f_i_e_r_|33------>|33param|33----------------->+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33t_y_p_e_s_|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬+<<---","<-----+
+
+
+param¬types
+
+¬¬¬¬¬¬¬+----------------------";"<----------------------+
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬|33¬+-------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬|33¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬V¬|33¬¬¬¬¬¬¬V¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+-->"("-+-->"VAR"--->|33t_y_p_e_¬_i_d_e_n_t_i_f_i_e_r_|33------------------>+->")"->
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬+<<----","<---------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬+->"FUNCTION"--->|33param|33-->":"->|33type¬¬¬¬¬¬|33->+->+
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬|33t_y_p_e_s_|33¬¬¬¬¬¬¬¬|33i_d_e_n_t_i_f_i_e_r_|33¬¬|33¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬+<<---------","<---------------+¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬+->"PROCEDURE"--->|33param|33--+-------------------->+
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬|33t_y_p_e_s_|33¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+<<--","<--+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬+----------------------------------------------->+¬
+) 
+/v/
+tab     6     11     16     21     26
+indent (5 0) (10 0) (15 0) (20 0) (25 0)
+go
+/l/
+/m/APPENDIX/m/
+/p/This appendix to the Release 2 User's manual updates that manual
+to provide complete documentation on the use of the Release 3 version
+of the compiler.  Release 3 provides additional error messages not
+given by Release 2.  The production version now has the full file
+capability defined in standard Pascal.  However, as in Release 2, 
+only the standard files INPUT and OUTPUT are supported in the
+student version.
+/l2/I. /u/The Use of Files/u/
+/p/The Stony Brook Pascal implementation distinguishes two types
+of files:  /u/internal/u/ and /u/external/u/.  External files
+are those files known to the operating system.  An external file
+must have a simple, 8 byte name (not be an array element or record
+field) declared globally as a variable and be listed in the
+program heading.  A DD statement labeled by the same name must be
+included in the JCL to specify certain attributes.  Any file
+variable that does not appear in the program heading, does not have
+a simple (unqualified) name or is declared in an inner block defaults
+to an internal file.
+/l2u/Internal Files/u/
+/p/The space for internal files is allocated from the run-time
+storage (heap).  A run-time storage error will therefore result
+if too many records are written to internal files.  While currently
+no garbage collection is done to reclaim heap space from discarded
+records allocated by use of the standard procedure NEW, space is
+re-used by an internal file when a REWRITE is issued.
+/p/Internal text files always have a line length of 80 characters.
+/l2u/External Files/u/
+/p/External files require an associated DD statement labeled
+by the file name used internally by the Pascal program.  To create
+and use an external file that is to be used only in a single
+job step, only the unit and space parameters are required on the
+DD statement (see ex. 1).  Files to be saved or passed should
+supply DISP and DSNAME parameters.  If no DCM information is
+supplied, the Pascal run monitor will use the following defaults:
+  /l2h1/¬¬1)¬RECFM = FB
+/h0l2h1/¬¬2)¬LRECL = 80 for text files and the component
+   size (size of F|46 in bytes) for non-text files.  The size
+of F|46 equals the value of the storage length entry in the symbol
+table for F minus 164).
+/h0l2h1/¬¬3)¬BLKSIZE = max (1024 div LRECL * LRECL, LRECL)
+/h0l2/Any or all of these defaults may be overridden subject to
+the following rules:
+  /l2h1/¬¬1)¬Only F, FB, FA, FBA, FS, or FBS are allowed RECFM
+ values.  FA and FBA are permitted only for text files.  FS and
+FBS are allowed when rewriting or reading a file, but not when
+modding.  (Modding is the operation of appending additional
+records onto an existing file.)
+/h0l2h1/¬¬2)¬LRECL must be |35 = 133 for text files, and = component
+   size for non-text files.
+/h0l2h1/¬¬3)¬BLKSIZE must be a multiple of LRECL.
+/h0p/An illegal value of RECFM or LRECL will result in a run error
+message and termination of the program.  An incorrect value
+of BLKSIZE will be changed to the default value.  DCB's of 
+existing files to be read or rewritten are checked for conformity
+to the above rules.
+/p/Files may appear on any device for which the Queued Access
+technique (QSAM) may be used but are limited to fixed length
+records and of course are subject to individual device restrictions.
+The user should consult the following IBM manuals for detailed
+information on JCL and OS files:
+/l2/IBM OS//360 JCL
+/l2/IBM OS DATA MANAGEMENT SERVICES
+/l2/IBM OS DATA MANAGEMENT MACROS
+/p/No limitation on the number of external files is imposed by 
+the implementation.  However, since all I//O buffers are allocated
+by the operating system, sufficient space must be available to OS.
+The SYSPACE parameter has been provided for designating the amount
+of space (in 1K byte increments) to be given to the system.  It
+is suggested that the JCL procedures in sections I.3 and I.4 be 
+modified as follows:
+/l2/////¬¬¬PARM='EP=...//SYSPACE=8,TIME=30,...
+/l2/////¬¬¬PARM='SYSPACE=&SYSPAC,...
+/p/SYSPACE, as a rule of thumb, should be twice the sum of the
+BLKSIZE parameters for each external file.
+/p/No attempt is made to recover from either DCB ABEND or SYNAD
+errors.  When such an error occurs, the operating system provides
+all relevant information in an error message; no execution flow
+summary or PMD dump is provided.  Files other than the offending
+file may not be closed properly.  While debugging such a program,
+early closure of a file can be forced by issuing a RESET on that
+file.  Under normal circumstances, however, the Pascal run
+monitor will close all open files before returning control to
+OS.  OS will close all open files after an ABEND when the program
+has not been loaded by the LOADER, such as is the case
+when running the production version of this compiler in 
+load//go mode./i1/
+/l2u/Additional considerations on the use of external files/u/
+/i1p/INPUT and OUTPUT are special external files in that the DD
+statement labels do not match the names; this is because the DD
+statements are SYSIN and SYSOUT, respectively, which also serve
+as input and output files for the compiler itself.  The user
+should thus be cautious when changing characteristics of these
+files.
+/p/The line estimate parameter applies only to the standard file
+OUTPUT.  The resources of any other file are limited only by
+the physical characteristics of the specified device and the
+supplied SPACE parameter.
+/p/PAGE (F) causes the current line of the text file F to be output.
+If carriage control is specified on the DD card for F, a '1'
+is made the first character of the new line.
+/p/RESET and REWRITE are ignored when applied to the standard
+files, but must be used for non-standard files.  Caution should
+be observed when using the REWRITE primitive because subsequent
+output operations will in fact rewrite the file (device permitting)
+/u/even if/u/ DISP=MOD is specified.  Modding is performed in a
+Pascal program by resetting, reading until EOF becomes true,
+and then writing the additional records.
+/l3u/Example 1/u/: The program READ|47WRITE creates and uses a file
+but does not require that it be saved after the program terminates.
+/l2/program READ|47WRITE(OUTPUT,F);
+/l/:
+/l/REWRITE(F);/l/:/l/RESET(F);/l/:/l/END.
+/l/////F¬¬¬DD UNIT=SYSDA,SPACE=(CYL,1)
+/l2u/Example 2/u/: The program CREATE|47DATA creates a temporary text
+file &&TEXT with a line length of 133, and carriage control.
+/l2/program CREATE|47DATA(DATA,OUTPUT);
+/l/./l/./l/./l/var DATA:  file of char;/l/./l/./l/REWRITE(DATA);
+/l/./l/./l/end.
+/l/////DATA¬DD¬UNIT=SYSDA,SPACE=(CYL,1),DCB=(RECFM=FBA,LRECL=133),
+/l/////¬¬¬¬¬¬¬¬DSN=&&TEXT,DISP=(NEW,PASS)
+/l2u/Example 3/u/: The file created in example 2 is be read by a
+Pascal program in a subsequent job step.
+/l2/program READ|47FILE (FIL,OUTPUT);
+/l/./l/./l/var FIL: file of char;/l/./l/./l/RESET(FIL);
+/l/./l/./l/end./l/////FIL¬DD¬DSN=&&TEXT,DISP=(OLD,PASS)
+/l2u/Example 4/u/: The member PASS3SRC of the catalogued partitioned
+data set USER.PASCAL.SRCELIB is to be read by the Pascal program 
+LIST.
+/l2/program LIST(OUTPUT,PDS);/l/./l/./l/RESET(PDS);
+/l/./l/./l/end.
+/l/////PDS¬DD¬DSN=USER.PASCAL.SRCELIB(PASS3SRC),DISP=SHR
+/l3/II./u/Additional Error Messages/u/
+/p/These messages are to be appended to section L of the Release 2
+User's Manual.  (The *'ed numbers are additions to existing
+messages)./-h-i/
+/v/
+tab 6 11
+indent (5,0),(10,0)
+go
+/l3/A./u/Additional Pass 1 Messages/u/
+/l2h1/1.27¬¬PROCEDURE//FUNCTION NAME CANNOT BE USED AS A POINTER
+OR RECORD NAME/l/severity:  1/lh2/explanation:  The name of a
+standard procedure or function was also used to name a pointer
+or record variable; use a different name for the variable.
+/h0l3/B./u/Additional Pass 2 Messages/u/
+/l2h1/2.97¬¬ILLEGAL ASSIGNMENT TO A VARIABLE OR COMPONENT
+/l/severity:  1/lh2/explanation:  Files tend to be large
+data structures, so Pascal does not permit file variables
+to be assigned.  For consistency, this prohibition must also extend
+to records and array variables that contain files as components.
+/h0l2h1/2.98¬¬FILE COMPONENT SIZE EXCEEDS LIMIT OF 32764 BYTES
+/l/severity:  1/lh2/explanation:  A current implementation
+restriction requires that, for any file F, the size of F|46
+ not exceed
+the maximum allowable LRECL or BLKSIZE for OS QSAM files (32764
+bytes in length).  The size of F|46 can be determined from the 
+STORAGE|47LENGTH field of the symbol table entry for F, minus 164.  
+(The symbol table is obtained by setting the $S toggle.)
+/h0l3/C./u/Additional Run-time Messages/u/
+/l2h2/4.3*¬¬RUN-TIME STORAGE OVERFLOW
+/l/Run-time storage is also used for internal files.  Too
+many records may have been written to such files.  Try increasing
+the available space by running in a larger region or decreasing the
+size of the SYSPACE parameter (see above).
+/h0l2h2/4.33*¬ABEND messages
+/l/SYNAD and DCB ABENDs (pertaining to external user files) are
+not trapped; the operating system provides the necessary information
+to determine the problem in an ABEND error message.  See /u/IBM//360
+MESSAGES AND CODES/u/ for interpreting these messages.
+/h0l2h1/4.34¬MISSING DD STATEMENT FOR FILE f
+/lh2/explanation:  The file f is external and thus requires a DD
+card to be supplied in the PASCAL step for load//go programs or in 
+the GO step when running object modules.  See above for the 
+required DD parameters.
+/h0l2h1/4.35¬RESET NOT ISSUED FOR FILE f
+/lh2/explanation: A read operation was attempted on the non-standard
+file f, but f was not first opened for reading by issuing a 
+RESET(f).This message will occur if f had not been previously
+opened at all or if f was open for writing.
+/h0l2h1/4.36¬REWRITE NOT ISSUED FOR FILE f
+/lh2/explanation: A write operation was attempted on the
+ non-standard
+file f but one of the following conditions was true:
+/l2/a)  f was not opened for either reading or writing.
+/l2/b)  f was open for reading but EOF(f) was false.
+/l2/If the file is to be created or re-written, first  issue
+a REWRITE.  If the file is to be modded, read through all its
+records until EOF(f) is true before attempting to write the
+additional records.
+/h0l2h1/4.37¬ILLEGAL RECORD LENGTH FOR FILE f
+/lh2/explanation: If f is a textfile, the LRECL must be |35=133;
+otherwise, the LRECL for f as specified on the DD statement at
+creation or on the data set label of an existing file must agree
+with the size of F|46 in the Pascal program.
+/h0l2h1/4.38¬ILLEGAL RECFM FOR FILE f
+/lh2/explanation: For external file f, the RECFM specified on
+the DD card or on the data set label is illegal for a Pascal file.
+See above for a description of legal RECFMs.
+/h0l3/D./u/Additional Linker Messages/u/
+/l2h1/5.14¬¬ILLEGAL CALL TO EXTERNAL PROGRAM m AS A PROCEDURE
+/l/severity:  1/lh2/explanation: The identifier m was referenced
+as if it were the name of a procedure or function, but it is in
+fact the name of a module.  Only the entry procedures a module
+contains can be called.
+/s/
+September, 1979
+/l3m/****¬IMPORTANT¬NOTICE¬*****/ml3/
+The production version of the compiler should be run in at 
+least 180K, due to last minute changes in PASS 2 which
+increases its size. (A USER 400 ABEND means that the compiler
+is not being run in a large enough partition).
+/l3m/PASCAL¬COMPILER¬PROJECT/m/

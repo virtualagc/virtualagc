@@ -1,0 +1,42 @@
+Stony Brook Pascal compiler for the IBM/360.
+COPYRIGHT (C) 1976 DEPARTMENT OF COMPUTER SCIENCE, SUNY AT STONY BROOK.
+Authors: Charles R. Hill, John Hennessy, Gary Goldstein, Chia Chinsaw.
+
+The State University of New York created a Pascal compiler which was
+written in XPL.  Both the Pascal and XPL compilers were released to the
+Hercules project many years ago.  The data on that release tape is the
+starting point for this project.
+
+Directory Structure
+
+ebcdic
+   Contains all the files from the release tape in EBCDIC.
+   These EBCDIC source files use 80 character fixed length records
+   without End-Of-Line characters such as Carriage-Return or Linefeed.
+
+ascii
+   Contains the ASCII version of the original EBCDIC source files.
+   The source files from the release contained patches and a program to
+   apply those patches.  The patches have been applied to all the files
+   in this directory.  This is the place to go to read the code produced
+   by SUNY at Stony Brook.
+
+port
+   These are the same files found in the ascii directory but they have been
+   modified to process source files written in ASCII as well as EBCDIC.
+   This should be your starting point if you wish to make modifications
+   to the compilers.
+
+simulator
+   This is an IBM 360 simulator, which was not on the release tape.  It will
+   run the output of both the XPL and Pascal compilers.  This simulator can
+   translate files from ASCII to EBCDIC or EBCDIC to ASCII which will allow
+   the simulator to run both the original IBM binaries and newly compiled code.
+
+examples
+   Example Pascal programs which were included on the original release
+   tape.  This directory includes a makefile to help you compile and run
+   the programs.
+
+backup.out
+   This is a backup copy of xpl.out.

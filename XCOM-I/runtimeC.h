@@ -162,10 +162,14 @@ bit_t *
 xGE(int32_t i1, int32_t i2);
 bit_t *
 xNOT(bit_t *i1);
+#ifndef xOR
 bit_t *
 xOR(bit_t *i1, bit_t *i2);
+#endif // xOR
+#ifndef xAND
 bit_t *
 xAND(bit_t *i1, bit_t *i2);
+#endif // xAND
 
 bit_t *
 xsEQ(char *s1, char *s2);

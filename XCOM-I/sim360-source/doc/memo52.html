@@ -1,0 +1,2574 @@
+<!DOCTYPE html>
+<html>
+<body>
+<tt><br><br><br><br><br><br>
+<p style="margin: 0 0ch 0 0ch; text-align:center; padding:0;">PASCAL Technical Memo 5.2</p><br>
+<p style="margin: 0 0ch 0 0ch; text-align:center; padding:0;">PASS 2 - Semantic Analysis and Generation of Symbolic Triples</p><br><br><br>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pass 2 of the Stony Brook PASCAL compiler is responsible for
+semantic analysis of PASCAL programs. Its inputs are the syntax
+trees and the partially-constructed symbol table produced by
+Pass 1. Its outputs are blocks of symbolic triples, a portion of the
+fully constructed symbol table, a core image of the global
+activation record, and a partial symbol table used in conjunction
+with the post-mortem analysis routines.<br><br><br><br>
+I. Syntax Trees and the Internal Representation of PASCAL
+Programs.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The syntax diagrams given in the PASCAL report describe the
+formal syntax of the programming language in an explicit and
+unambiguous manner. However, in an internal representation of
+a syntax tree, one prefers a notation that identifies productions
+of a context-free grammar by reference to the production index, and
+which does not explicitly contain tokens for the reserved words of
+the language. These symbols do not need to be represented in an
+internal syntax tree, as their only function is to guide the parser
+to correct analysis of a sentence of the language. This task will
+have already been carried out at the time that an internal
+representation of the syntax tree is constructed. A requirement
+of the internal representation is that it should be easy to
+define it in terms of a tree structure.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Accordingly, the following context-free grammar describes
+a substructure of the PASCAL syntax with all punctuation 
+deleted. This grammar is used to represent the syntactic 
+structure of a program at the conclusion of Pass 1. The
+notation used is similar to that described in section 2.9 of
+[GRIES] utilizing iteration brackets. The range of values
+of Multiplicity of each production is given by M=*.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A syntax tree is generated during execution of Pass 1, as a
+PASCAL source program is parsed. The tree, or rather, a
+sequence of trees corresponding to major phrases of the program,
+are communicated from Pass 1 to Pass 2 in binary core-image
+format, blocked into 80-byte records.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A node of syntax tree consists of a sequence of 16-bit fields.
+The first field, called the Multiplicity of the node, gives the
+number of immediate successor nodes, and is equal to the total
+number of fields of the node, less 3. If the Multiplicity is
+zero, the node is a leaf of the syntax tree, and the second field
+contains an index into the symbol table. In all nodes, the last
+field contains the line number in the source program from which
+the node has been generated.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the Multiplicity is greater than zero, then the second
+field contains the number of the production of the internal
+context-free grammar to which the node corresponds, and fields
+3 through Multiplicity + 2 contain indices of the immediate
+successor nodes. These indices are given in units of fields
+relative to the origin of array storage containing the syntax 
+trees.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In transmission from Pass 1 to Pass 2, each syntax tree is
+preceded by an 80-byte header record whose initial five bytes
+are the characters &apos;%TREE&apos;, and whose next five bytes are
+numerals (right justified in the five-byte field) giving the
+index of the root node. If the 11th byte contains the character
+&apos;P&apos;, then the $P toggle is active and the syntax tree is printed.
+If the 12th byte contains a &apos;T&apos;, then the $T toggle is active and
+the triples are printed. (This is done in Pass 3.) If the 13th
+byte contains an &apos;E&apos;, then the $E toggle is active for this
+block and the machine code emitted for this block is 
+printed in assembler format by the Pass 3 code generator.
+Each tree is followed by an 80-byte trailer record whose first
+four bytes contain the characters &apos;%END&apos;.<br><br>
+Prodn.<br>
+<u>Number</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Production</u><br><br>
+1&nbsp;&nbsp;&nbsp;&lt;program&gt; ::= &lt;program id&gt; [&lt;file id&gt;]<sup>+</sup>
+&lt;block&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+<br><br>
+2&nbsp;&nbsp;&nbsp;&lt;block&gt; ::= [&lt;label decl&gt;] [&lt;const
+decl&gt;] [&lt;type defn&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&lt;var decl list&gt;] [&lt;proc decl list&gt;] &lt;body&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1-6<br><br>
+3&nbsp;&nbsp;&nbsp;&lt;statement list&gt; ::= [&lt;statement&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+<br><br>
+4&nbsp;&nbsp;&nbsp;&lt;label decl&gt; ::= [&lt;unsigned integer&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+<br><br>
+5&nbsp;&nbsp;&nbsp;&lt;const decl&gt; ::= [&lt;const id&gt; &lt;constant&gt;]<sup>+</sup><br><br>
+6&nbsp;&nbsp;&nbsp;&lt;type defn&gt; ::= [&lt;type id&gt; &lt;type&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2* (1+)<br><br>
+7&nbsp;&nbsp;&nbsp;&lt;proc decl list&gt; ::= &lt;proc decl&gt; [&lt;proc decl
+list&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1,2<br><br>
+8&nbsp;&nbsp;&nbsp;&lt;proc decl&gt; ::= &lt;procedure id&gt; [&lt;formal
+param&gt;]* &lt;body&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+<br><br>
+9&nbsp;&nbsp;&nbsp;&lt;proc decl&gt; ::= &lt;function id&gt; [&lt;formal 
+param&gt;]* &lt;type id&gt; &lt;body&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+<br><br>
+10&nbsp;&nbsp;&lt;body&gt; ::= [&lt;statement list&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1<br><br>
+11&nbsp;&nbsp;&lt;var decl list&gt; ::= &lt;var decl&gt; [&lt;var decl list&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1,2<br><br>
+12&nbsp;&nbsp;&lt;var decl&gt; ::= [&lt;variable id&gt;]<sup>+</sup> &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+<br><br>
+13&nbsp;&nbsp;&lt;statement&gt; ::= &lt;unsigned integer&gt; &lt;statement&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* labelled statement */<br><br>
+14&nbsp;&nbsp;&lt;statement&gt; ::= &lt;variable&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* assignment */<br><br>
+15&nbsp;&nbsp;&lt;statement&gt; ::= &lt;procedure id&gt; [&lt;expression&gt;]*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* procedure statement */<br><br>
+16&nbsp;&nbsp;&lt;statement&gt; ::= &lt;statement list&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M =1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* compound group */<br><br>
+17&nbsp;&nbsp;&lt;statement&gt; ::= &lt;expression&gt; &lt;statement&gt; [&lt;statement&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2,3&nbsp;&nbsp;&nbsp;&nbsp;/* conditional statement */<br><br>
+18&nbsp;&nbsp;&lt;statement&gt; ::= &lt;expression&gt; [&lt;case instance&gt;]*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* CASE statement */<br><br>
+19&nbsp;&nbsp;&lt;statement&gt; ::= &lt;expression&gt; &lt;statement&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* WHILE statement */<br><br>
+20&nbsp;&nbsp;&lt;statement&gt; ::= &lt;statement list&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* UNTIL statement */<br><br>
+21&nbsp;&nbsp;&lt;statement&gt; ::= &lt;variable id&gt; &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;statement&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* FOR statement -- TO */<br><br>
+22&nbsp;&nbsp;&lt;statement&gt; ::= &lt;variable id&gt; &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;statement&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* FOR statement -- DOWNTO */<br><br>
+23&nbsp;&nbsp;&lt;statement&gt; ::= [&lt;variable&gt;]<sup>+</sup> &lt;statement&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* WITH statement */<br><br>
+24&nbsp;&nbsp;&lt;statement&gt; ::= &lt;unsigned integer&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* GOTO statement */<br><br>
+25&nbsp;&nbsp;&lt;formal param&gt; ::= [&lt;variable id&gt;]<sup>+</sup> &lt;type id&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* formal VAR parameters */<br><br>
+26&nbsp;&nbsp;&lt;formal param&gt; ::= [&lt;variable id&gt;]<sup>+</sup> &lt;type id&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* formal value parameters */<br><br>
+27&nbsp;&nbsp;&lt;formal param&gt; ::=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&lt;procedure id&gt;]<sup>+</sup> [&lt;param
+ types&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&lt;type id&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* formal procedure/function parameters */<br><br>
+28&nbsp;&nbsp;&lt;case instance&gt; ::= [&lt;constant&gt;]<sup>+</sup> &lt;statement&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+<br><br>
+29&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* unary &apos;+&apos; operator */<br><br>
+30&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* unary &apos;-&apos; operator */<br><br>
+31&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* unary &apos;NOT&apos; operator */<br><br>
+32&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;=&apos; operator */<br><br>
+33&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;&lt;&apos; operator */<br><br>
+34&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;&gt;&apos; operator */<br><br>
+35&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;&lt;&gt;&apos; operator */<br><br>
+36&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;&lt;=&apos; operator */<br><br>
+37&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;&gt;=&apos; operator */<br><br>
+38&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;IN&apos; operator */<br><br>
+39&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;+&apos; operator */<br><br>
+40&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;-&apos; operator */<br><br>
+41&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;OR&apos; operator */<br><br>
+42&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;*&apos; operator */<br><br>
+43&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;/&apos; operator */<br><br>
+44&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;DIV&apos; operator */<br><br>
+45&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;MOD&apos; operator */<br><br>
+46&nbsp;&nbsp;&lt;expression&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* binary &apos;AND&apos; operator */<br><br>
+47&nbsp;&nbsp;&lt;expression&gt; ::= &lt;function id&gt; [&lt;expression&gt;]*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* function evaluation */<br><br>
+48&nbsp;&nbsp;&lt;expression&gt; ::= [&lt;element&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* set expression */<br><br>
+49&nbsp;&nbsp;&lt;expression&gt; ::= &lt;variable&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1<br><br>
+50&nbsp;&nbsp;&lt;expression&gt; ::= &lt;unsigned constant&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1<br><br>
+51&nbsp;&nbsp;&lt;variable&gt; ::= &lt;variable id&gt; [&lt;qualifier&gt;]*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+<br><br>
+52&nbsp;&nbsp;/* unused */<br><br>
+53&nbsp;&nbsp;&lt;qualifier&gt; ::= [&lt;expression&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* subscript list */<br><br>
+54&nbsp;&nbsp;&lt;qualifier&gt; ::= &lt;empty&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* arrow (@) */<br><br>
+55&nbsp;&nbsp;&lt;qualifier&gt; ::= &lt;field id&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1<br><br>
+56&nbsp;&nbsp;/* unused */<br><br>
+57&nbsp;&nbsp;&lt;constant&gt; ::= &lt;unsigned constant&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* + constant */<br><br>
+58&nbsp;&nbsp;&lt;constant&gt; ::= &lt;unsigned constant&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* - constant */<br><br>
+59&nbsp;&nbsp;&lt;type&gt; ::= &lt;type id&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* simple type identifier */<br><br>
+60&nbsp;&nbsp;&lt;type&gt; ::= [&lt;constant id&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* scalar type */<br><br>
+61&nbsp;&nbsp;&lt;type&gt; ::= &lt;constant&gt; &lt;constant&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* subrange type */<br><br>
+62&nbsp;&nbsp;&lt;type&gt; ::= &lt;type id&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* pointer type */<br><br>
+63&nbsp;&nbsp;&lt;type&gt; ::= [&lt;type&gt;]<sup>+</sup> &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* array type */<br><br>
+64&nbsp;&nbsp;&lt;type&gt; ::= &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* file type */<br><br>
+65&nbsp;&nbsp;&lt;type&gt; ::= &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* set type */<br><br>
+66&nbsp;&nbsp;&lt;type&gt; ::= [&lt;fixed field list&gt;]* [&lt;variant field
+&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* record type */<br><br>
+67&nbsp;&nbsp;&lt;fixed field list&gt; ::= [&lt;field id&gt;]<sup>+</sup> &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+<br><br>
+68&nbsp;&nbsp;&lt;variant field&gt; ::= &lt;tag id&gt; &lt;type id&gt; [&lt;variant 
+instance&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 3+<br><br>
+69&nbsp;&nbsp;&lt;variant instance&gt; ::= [&lt;constant&gt;]<sup>+</sup> &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* &lt;type&gt; is always a record type -- prodn. 66 */<br><br>
+70&nbsp;&nbsp;&lt;statement&gt; ::= &lt;empty&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1<br><br>
+71&nbsp;&nbsp;&lt;type&gt; ::= [&lt;type&gt;]<sup>+</sup> &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* packed array type */<br><br>
+72&nbsp;&nbsp;&lt;type&gt; ::= &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* packed file type */<br><br>
+73&nbsp;&nbsp;&lt;type&gt; ::= &lt;type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* packed set type */<br><br>
+74&nbsp;&nbsp;&lt;type&gt; ::= [&lt;fixed field list&gt;]* [variant field&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* packed record type */<br><br>
+75&nbsp;&nbsp;&lt;element&gt; ::= &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* simple set element */<br><br>
+76&nbsp;&nbsp;&lt;element&gt; ::= &lt;expression&gt; &lt;expression&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* range set element */<br><br>
+77&nbsp;&nbsp;&lt;param types&gt; ::= [&lt;type id&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* list of types of value parameters */<br><br>
+78&nbsp;&nbsp;&lt;param types&gt; ::= [&lt;type id&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* list of types of VAR parameters */<br><br>
+79&nbsp;&nbsp;&lt;param types&gt; ::= [&lt;param types&gt;]<sup>+</sup> [&lt;type id&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* PROCEDURE or FUNCTION types */<br><br>
+80&nbsp;&nbsp;&lt;param types&gt; ::= &lt;empty&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1<br><br>
+81&nbsp;&nbsp;&lt;error&gt; ::= &lt;empty&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M = 1<br><br><br><br>
+<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br><br><br>
+<u>Notes</u>:<br><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">1)&nbsp;&nbsp;The node for &lt;block&gt; does not appear in the actual
+tree for &lt;program&gt; (production 1), nor do the nodes for &lt;proc
+decl list&gt; and &lt;body&gt; appear in the tree for &lt;block&gt; (production
+2), nor does the node for &lt;body&gt; appear in the trees for &lt;proc
+decl&gt; (productions 8 and 9).</p><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">2)&nbsp;&nbsp;Productions 7, 11, 29, 52, 56 and 57 do not appear in
+any of the syntax trees produced by Pass 1.</p><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">3)&nbsp;&nbsp;The productions for &lt;program&gt; (production 1), &lt;block&gt;
+(production 2), &lt;proc decl&gt; (productions 8 and 9), and &lt;body&gt;
+(production 10) always appear in the root nodes of the syntax
+trees produced by Pass 1; no other productions may appear in the
+root node of a syntax tree.
+</p><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">4)&nbsp;&nbsp;The distinguished terminal symbol &lt;empty&gt; is not
+represented by a leaf node containing a pointer into the 
+symbol table; rather it is indicated by a null reference (-1)
+appearing in the (nonterminal) node of its immediate predecessor.
+</p><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">5)&nbsp;&nbsp;Production 81 is inserted into the syntax trees of
+programs which contain severe syntax errors as part of the 
+general error recovery strategy.
+</p><br><br><br>
+II. Structure of the PASCAL Symbol Table<br><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Information in the symbol table is embedded into
+<u>records</u> of fixed format. All information within a single
+record is related to a single table entry. In addition, to
+represent PASCAL data types in general, and structured types
+in particular, plexes of related records can be created 
+utilizing link pointers. Linking of records in the symbol table
+for the purpose of representing structured data types has nothing
+to do with the logical organization of the table for the purpose
+of search on identifier keys; identifier search and scope rule
+implementation is performed in Pass 1 exclusively.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The fields of a record in the symbol table are given below, 
+along with their data types. The types are given as pseudo-PASCAL
+types.<br><br>
+ 
+<style type="text/css">
+td.td0 {width: 0ch}
+td.td1 {width: 15ch}
+td.td2 {width: 48ch}
+</style>
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+<tbody>
+<tr><td valign="top" class="td0"></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">IDENTITY:</td><td valign="top" class="td2">character string;
+</td></tr><tr>
+<td valign="top" class="td0"></td><td></td><td valign="top" class="td2">(* used to hold an identifier, if any *)
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">DATATYPE:</td><td valign="top" class="td2">pointer to record;
+</td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1"></td><td valign="top" class="td2"><p style="margin: 0 0ch 0 0ch; padding:0;">(* will point to the record that describes the data
+type of this record *)</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">VAR_TYPE:</td><td valign="top" class="td2"><p style="margin: 0 0ch 0 0ch; padding:0;">(* external, variable, constant, literal, type,
+procedure, var parameter, format procedure, undefined, label,
+Fortran, caselabel, variant, field identifier, forward, multdecl);
+(* This corresponds to the use of a PASCAL scalar type to name
+the codes for all cases *)</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">STRUCTYPE:</td><td valign="top" class="td2"><p style="margin: 0 0ch 0 0ch; padding:0;">(* statement, scalar, subrange, pointer, array,
+packed array, file, packed file, record, packed record, standard,
+set, packed set, tagfield, arithmetic *)</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">OWNER:</td><td valign="top" class="td2">pointer to record;
+</td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1"></td><td valign="top" class="td2"><p style="margin: 0 0ch 0 0ch; padding:0;">(* will point to the record for the procedure name
+heading the block that contains this record *)</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">S_LIST:</td><td valign="top" class="td2">pointer to record;
+</td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1"></td><td valign="top" class="td2"><p style="margin: 0 0ch 0 0ch; padding:0;">(* used to link records of structured types and
+parameter lists *)</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">VALUE:</td><td valign="top" class="td2">32 bits, untyped;
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">STORAGE_LNGTH:</td><td valign="top" class="td2">-1..32767;
+</td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1"></td><td valign="top" class="td2"><p style="margin: 0 0ch 0 0ch; padding:0;">(* indicates storage required in bytes, or cardinality of
+subranges. -1 (null) is used to represent an undefined value *)
+</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">PSEUDO_REG:</td><td valign="top" class="td2">-3..63;
+</td></tr><tr>
+<td valign="top" class="td0"></td><td></td><td valign="top" class="td2">(* used in address assignment *)
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td0"></td><td valign="top" class="td1">DISPLACEMENT:</td><td valign="top" class="td2">-1..32767;
+</td></tr><tr>
+<td valign="top" class="td0"></td><td></td><td valign="top" class="td2">(* used in address assignment *)
+</td></tr></tbody></table><br><br><br>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each of these fields is represented by a one-dimensional
+array. Two array elements are fields of the same record if and
+only if they have the same index.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The pass 2 global variable N_predeclared_symb is the index of
+the last predeclared PASCAL identifier in the symbol table. The
+global variable N_anonymous_symb is the index in the symbol 
+table
+of the first anonymous entry; that is, all table entries whose 
+index is less than N_anonymous_symb correspond to the 
+predeclared
+PASCAL identifiers or to strings or identifiers that appear in
+the text of the PASCAL program. The global variable N_decl_symb
+is the index of the first unused symbol table record. The symbol
+table entries whose indices are greater than or equal to 
+N_anonymous_symb, but less than N_decl_symb, correspond to
+unnamed types and constants.<br><br><br><br>
+III. Description of the Symbolic Triples.<br><br><br>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The form of program text in communication between Pass 2
+and Pass 3 is that of sequences (one for each procedure body)
+of symbolic instructions. The basic form of a single symbolic 
+instruction is a symbolic operation code (16 bit) followed
+by two operands (16 bits each). Symbolic instructions, or
+triples, appear in a block of up to 14,400 bytes which can
+contain up to 2400 symbolic instructions. This block is
+specified in an XPL declaration as an array, TRIPLES(7200)
+BIT(16), and in referring to locations within this block, 
+two-byte entities are indexed.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TRIPLES contains all the symbolic code for an individual
+procedure being compiled, and the size of the TRIPLES array
+imposes an implementation restriction on the length of individual
+procedure bodies. The first six elements of TRIPLES are
+reserved for a header, formatted as follows:<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;TRIPLES(0)<p style="margin: 0 0ch 0 20ch; padding:0;">is a pointer to the symbol table entry of
+the name of the procedure to which the code block belongs;
+</p><br>
+&nbsp;&nbsp;&nbsp;&nbsp;TRIPLES(1)<p style="margin: 0 0ch 0 20ch; padding:0;">is the procedure sequence number, which
+will be used in Pass 3 to index a transfer vector;</p><br>
+&nbsp;&nbsp;&nbsp;&nbsp;TRIPLES(2)<p style="margin: 0 0ch 0 20ch; padding:0;">is the index into the TRIPLES array of
+the entry point instruction;</p><br>
+&nbsp;&nbsp;&nbsp;&nbsp;TRIPLES(3)<p style="margin: 0 0ch 0 20ch; padding:0;">is the length, as an index of TRIPLES, of
+the active portion of the array;
+</p><br>
+&nbsp;&nbsp;&nbsp;&nbsp;TRIPLES(4) and TRIPLES(5) are reserved for future use.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The initial 16-bit field of each triple contains in the 
+first byte (bits 0-7), the result length less one (in bytes),
+permitting the designation of bytestring temporaries. In the
+second byte, the high order bit (bit 8 in the field) is set to
+1 if and only if the line number in the PASCAL program has
+increased by exactly one since the last previous triple was
+generated. The low order seven bits (bits 9-15 in the field)
+contain the symbolic operation code.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A 16-bit operand consists of a two-bit mask in the high-order
+position (bits 0-1), followed by a 14-bit operand value. The
+mask bits are interpreted as:<br><br>
+<p style="margin: 0 0ch 0 4ch; padding:0;"></p><p style="margin: 0 0ch 0 8ch; text-indent:-4ch; padding:0;">00 &nbsp;(MASK_SYMBOL) operand value is a symbol
+table pointer;</p><p style="margin: 0 0ch 0 4ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 8ch; text-indent:-4ch; padding:0;">01 &nbsp;(MASK_IMMEDIATE) operand value is immediate
+data, a 14-bit constant;</p><p style="margin: 0 0ch 0 4ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 8ch; text-indent:-4ch; padding:0;">10 &nbsp;(MASK_TRIPLE) operand value is the index in
+TRIPLES of another symbolic instruction, a temporary result 
+which will not be referenced again;</p><p style="margin: 0 0ch 0 4ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 8ch; text-indent:-4ch; padding:0;">11 &nbsp;(MASK_TEMP) operand value is the index of
+another triple, but not the last reference to that triple.</p><p style="margin: 0 0ch 0 4ch; padding:0;"></p>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Pass 3 code generator uses the triples, plus the
+STORAGE_LNGTH, PSEUD
+_REG and DISPLACEMENT columns of the symbol table as its only
+inputs. A symbol table entry for a procedure contains in
+STORAGE_LNGTH the total length of its local data segment
+(or &quot;activation record&quot;) in bytes, in PSEUDO_REG the index of 
+the display register from which local variables of the procedure
+are addressed (0 for the program block, 1 for global procedures, 
+and +1 for each further level of static procedural nesting), and
+in DISPLACEMENT zero, which is the displacement of the implicit
+variable used to return values from a function call. For a label, 
+STORAGE_LNGTH and PSEUDO_REG are both null, and
+DISPLACEMENT gives the index of a symbolic triple.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The symbolic operation codes and their interpretations are
+given in the following table. In the table, operations for
+which a result length is given generate temporary, or intermediate, 
+results. Operand types or results designated as Boolean may be
+represented either as Boolean typed values, or temporarily by
+condition codes. Boolean-valued operations are always followed
+immediately by conditional jumps, which have a Boolean-type
+operand.<br><br><br><br>
+Pseudo-operation group
+<style type="text/css">
+td.td3 {width: 0ch}
+td.td4 {width: 20ch}
+td.td5 {width: 17ch}
+td.td6 {width: 32ch}
+</style>
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+<tbody>
+<tr><td valign="top" class="td3"></td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"><u></td><td valign="top" class="td4">operation</u></td><td valign="top" class="td5"><u>result length</u></td><td valign="top" class="td6"><u>operand 1/operand 2</u>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">LOAD</td><td valign="top" class="td5">4 bytes</td><td valign="top" class="td6">1-4 bytes/-----</td><td>&nbsp;</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">create a temporary variable having the value of
+operand 1; place in a high-speed register.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">LOAD_ADDR</td><td valign="top" class="td5">4 bytes</td><td valign="top" class="td6">operand of any length/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">make the address of operand 1 referenceable.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">TEMP</td><td valign="top" class="td5">1-256 bytes</td><td valign="top" class="td6">1-256 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">create a temporary variable having the value of
+operand 1. If operand 2 is not null, then the temporary
+variable will reside solely in the run-time stack rather
+than in high-speed registers; otherwise, the result length must
+be 4 bytes, and the semantics are the same as for the LOAD
+operation.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">TPOP</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">operand of any length/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">deallocate the temporary variable designated by
+operand 1.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">INDEX</td><td valign="top" class="td5">1-256 bytes</td><td valign="top" class="td6">operand of any length/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">compute a reference to operand 1 indexed by the value
+of operand 2. If operand 1 is an immediate zero, operand
+2 must be an absolute address.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">S_LENGTH</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">literal constant/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">literal constant
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">when the immediately preceding operation is INDEX or
+TEMP, this triple contains the value of a storage length
+greater than 256 bytes, by concatenating its two halfword
+operands.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">MONITOR</td><td valign="top" class="td5">(service code)</td><td valign="top" class="td6">operand of any length/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">operand of any length
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">a call to the run-time monitor; the form of the operands
+depends on the value of the monitor service code, which is
+stored in the return length field.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">BCH_TARGET</td><td valign="top" class="td5">(1 or 2)</td><td valign="top" class="td6">pointer to label/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">marks the target of a branch instruction. If the
+value in the result length field is one, then it begins a
+basic block, otherwise it does not. Operand 1 is null
+except for user labels.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">CASE_TARGET</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">-----/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">similar to the BCH_TARGET; marks the beginning of a
+code segment for a component of a CASE statement.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">PEND</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">-----/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">indicates the end of a block of symbolic triples.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">LINE#</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">current source line number
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">indicates the current line number in the corresponding
+PASCAL source program. Always emitted when the line numbers
+increase by more than 1 between consecutive triples.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">RANGECHK</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">if the value of operand 1 is not between zero and the
+value of operand 2, terminate execution with a VALUE OUT OF
+RANGE error message. (Not used in Release 1.)</p>
+</td></tr><tr><td><br></td></tr><tr><td><br></td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">Control group
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"><u></td><td valign="top" class="td4">operation</td><td valign="top" class="td5">result length</td><td valign="top" class="td6">operand 1/operand 2</u>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">BCH</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">code address/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">procedure sequence number
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">unconditionally branch to operand 1, which must be
+either a BCH_TARGET or CASE_TARGET instruction.
+Operand 2 is null or is the sequence number identifying the
+procedure into whose code body operand 1 refers.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">BNZ</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">code address/(Boolean)
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">test operand 2 and branch to operand 1, which must be
+a BCH_TARGET instruction, on <u>true</u>. If operand 2 is null, 
+the condition code, as set by the last previous instruction,
+is tested.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">BZ</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">code address/(Boolean)
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">test operand 2 and branch to operand 1, which must be
+a BCH_TARGET instruction, on <u>false</u>. If operand 2 is
+null, the condition code, as set by the last previous
+instruction, is tested.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">BCT</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">code address/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">test operand 2. If zero or negative, branch to
+operand 1 which must be a BCH_TARGET instruction; otherwise,
+decrement operand 2.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">CASE_JUMP</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">1-4 bytes/positive constant
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">indicates a case switch. Operand 1 is the case
+selector expression; operand 2 is the cardinality of the 
+subrange type whose lower bound is the smallest case label
+and whose upper bound is the largest case label. Operand 2
+is also the number of BCH instructions which immediately follow
+this instruction. These BCH instructions all have as their 
+target a CASE_TARGET instruction; a selector value of zero
+selects the first BCH instruction, one selects the second, and 
+so forth.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">BLKMARK</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">procedure/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">procedure sequence number
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">write a blockmark in the run-time stack. Operand 1 is the
+index into the symbol table of a procedure to be called;
+operand 2 is its unique sequence number. The blockmark will
+become the base of the called procedure&apos;s activation record.
+Operand 2 is null if a formal procedure is being called.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">PARM</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">operand of any length/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">operand of any length
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">operand 1 is an actual parameter which is to be moved
+to the location of operand 2, a formal parameter of the
+procedure being called.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">PROCPARM</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">procedure/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">procedure sequence number
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">operand 1 is a procedure to be passed as an actual
+parameter; operand 2 is its unique sequence number.
+If operand 2 of a PARM triple is a formal procedure or
+function, operand 1 must be the code address of a PROCPARM
+instruction.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">PCALL</td><td valign="top" class="td5">4 bytes</td><td valign="top" class="td6">procedure/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">procedure sequence number
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">procedure call to operand 1, whose unique sequence number
+is operand 2. If the call is to a proper procedure (not a
+function) this instruction is always followed by a TPOP
+instruction to release an unneeded temporary value. Operand 2
+is null if a formal procedure is being called.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">PRETURN</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">-----/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">return from the current procedure.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">FORT_BLKMARK</td><td valign="top" class="td5">-----</td><td valign="top" class="td6">Fortran subroutine/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">procedure sequence number
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">prepare a register save area and an argument list for
+a call to the Fortran subroutine whose index into the symbol
+table is in operand 1, and whose unique sequence number is in
+operand 2. (Not used in Release 1).</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">FORT_CALL_REAL</td><td valign="top" class="td5">4 bytes</td><td valign="top" class="td6">Fortran subroutine/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">procedure sequence number
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">subroutine call to the Fortran subroutine whose index
+into the symbol table is in operand 1, and whose unique
+sequence number is in operand 2. The called subroutine must
+either be a real-valued function or a proper subroutine. In
+the latter case, this instruction is immediately followed by a
+TPOP instruction. (Not used in Release 1.)</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td valign="top" class="td4">FORT_CALL_INT</td><td valign="top" class="td5">4 bytes</td><td valign="top" class="td6">Fortran subroutine/
+</td></tr><tr>
+<td valign="top" class="td3"></td><td></td><td></td><td valign="top" class="td6">procedure sequence number
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td3"></td><td colspan="3" valign="top" class="td4"><p style="margin: 0 0ch 0 4ch; padding:0;">subroutine call to the Fortran subroutine whose index
+into the symbol table is in operand 1, and whose unique
+sequence number is in operand 2. The called subroutine must
+be a function subroutine, but not a real-valued function.
+(Not used in Release 1.)</p>
+</td></tr></tbody></table><br><br><br><br>
+Logical operation group
+<style type="text/css">
+td.td7 {width: 0ch}
+td.td8 {width: 20ch}
+td.td9 {width: 17ch}
+td.td10 {width: 26ch}
+</style>
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+<tbody>
+<tr><td valign="top" class="td7"></td></tr><tr><td><br></td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"><u></td><td valign="top" class="td8">operation</u></td><td valign="top" class="td9"><u>result length</u></td><td valign="top" class="td10"><u>operand 1/operand 2</u>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">STORE,</td><td valign="top" class="td9">-----</td><td valign="top" class="td10">operand of any length/
+</td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">MOVE</td><td></td><td valign="top" class="td10">operand of any length
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">value of operand 2 is moved to location of operand 1.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">NOT</td><td valign="top" class="td9">4 bytes</td><td valign="top" class="td10">1-4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">logical (one&apos;s complement) complement of operand.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">AND</td><td valign="top" class="td9">-----</td><td valign="top" class="td10">1-256 bytes/1-256 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">replace operand 1 by logical <u>and</u> of operand 1 with
+operand 2. Set the condition code to <u>false</u> if the
+resulting bitstring is all zeros; otherwise, set the condition
+code to <u>true</u>.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">OR</td><td valign="top" class="td9">-----</td><td valign="top" class="td10">1-256 bytes/1-256 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">replace operand 2 by logical <u>or</u> of operand 1 with
+operand 2. Set the condition code to <u>false</u> if the
+resulting bitstring is all zeros; otherwise, set the condition
+code to <u>true</u>. (AND and OR are the only operations which
+can set the condition code.)</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">XOR</td><td valign="top" class="td9">-----</td><td valign="top" class="td10">operand of any length/
+</td></tr><tr>
+<td valign="top" class="td7"></td><td></td><td></td><td valign="top" class="td10">operand of any length
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">replace operand 1 by the logical <u>exclusive or</u> of
+operand 1 with operand 2.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">LCOMPARE</td><td valign="top" class="td9">(Boolean)</td><td valign="top" class="td10">operand of any length/
+</td></tr><tr>
+<td valign="top" class="td7"></td><td></td><td></td><td valign="top" class="td10">operand of any length
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">compare bytestrings for equality.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">LGREATER</td><td valign="top" class="td9">(Boolean)</td><td valign="top" class="td10">operand of any length/
+</td></tr><tr>
+<td valign="top" class="td7"></td><td></td><td></td><td valign="top" class="td10">operand of any length
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">compare logical (unsigned) operands for inequality
+(&gt;).</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">LLESS</td><td valign="top" class="td9">(Boolean)</td><td valign="top" class="td10">operand of any length/
+</td></tr><tr>
+<td valign="top" class="td7"></td><td></td><td></td><td valign="top" class="td10">operand of any length
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">compare logical (unsigned) operands for inequality
+(&lt;).</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">IN</td><td valign="top" class="td9">(Boolean)</td><td valign="top" class="td10">1-4 bytes/1-256 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">return <u>true</u> if and only if operand 1 selects a bit
+in the bitstring designated by operand 2 whose value is one.
+Bits are numbered from zero, with zero selecting the leftmost
+bit.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">RANGE</td><td valign="top" class="td9">1-256 bytes</td><td valign="top" class="td10">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">form a bitstring of the specified return length all of
+whose bits are zero except for those selected by values
+greater than or equal to operand 1, and less than or equal
+to operand 2. Bits are numbered from zero, with zero
+selecting the leftmost bit.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td valign="top" class="td8">INTO</td><td valign="top" class="td9">-----</td><td valign="top" class="td10">1-4 bytes/1-256 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td7"></td><td colspan="3" valign="top" class="td8"><p style="margin: 0 0ch 0 4ch; padding:0;">set that bit in operand 2 which is selected by operand
+1 to one. Operand 1 may also be the code address of a RANGE
+instruction, in which case the bitstring created by the RANGE
+instruction is OR-ed into operand 2. Bits are numbered from
+zero, with zero selecting the leftmost bit.</p>
+</td></tr></tbody></table><br><br><br><br>
+Fixed-point arithmetic group
+<style type="text/css">
+td.td11 {width: 0ch}
+td.td12 {width: 20ch}
+td.td13 {width: 17ch}
+td.td14 {width: 26ch}
+</style>
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+<tbody>
+<tr><td valign="top" class="td11"></td></tr><tr><td><br></td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"><u></td><td valign="top" class="td12">operation</u></td><td valign="top" class="td13"><u>result length</u></td><td valign="top" class="td14"><u>operand 1/operand 2</u>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">ADD</td><td valign="top" class="td13">4 bytes</td><td valign="top" class="td14">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">sum of operands in signed integer arithmetic.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">SUBTRACT</td><td valign="top" class="td13">4 bytes</td><td valign="top" class="td14">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">difference of operand 1 less operand 2 in signed
+integer arithmetic.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">MULTIPLY</td><td valign="top" class="td13">4 bytes</td><td valign="top" class="td14">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">product of operands in signed integer arithmetic.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">DIVIDE</td><td valign="top" class="td13">4 bytes</td><td valign="top" class="td14">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">integer quotient of operand 1 divided by operand 2.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">REM</td><td valign="top" class="td13">4 bytes</td><td valign="top" class="td14">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">the integral remainder in the division of operand 1 by
+operand 2.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">COMPARE</td><td valign="top" class="td13">(Boolean)</td><td valign="top" class="td14">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">compare signed integer operands for equality.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">GREATER</td><td valign="top" class="td13">(Boolean)</td><td valign="top" class="td14">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">compare signed integer operands for inequality (&gt;).</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">LESS</td><td valign="top" class="td13">(Boolean)</td><td valign="top" class="td14">1-4 bytes/1-4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">compare signed integer operands for inequality (&lt;).</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">NEGATE</td><td valign="top" class="td13">4 bytes</td><td valign="top" class="td14">1-4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">unary minus of signed integer operand.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">ABS</td><td valign="top" class="td13">4 bytes</td><td valign="top" class="td14">1-4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">absolute value of signed integer operand.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">SQR</td><td valign="top" class="td13">4 bytes</td><td valign="top" class="td14">1-4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">square of the signed integer operand.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">ODD</td><td valign="top" class="td13">(Boolean)</td><td valign="top" class="td14">1-4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">evaluate <u>true</u> if and only if the operand is an
+odd integer.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td valign="top" class="td12">ADD_DECIMAL</td><td valign="top" class="td13">-----</td><td valign="top" class="td14">basic block sequence number/
+</td></tr><tr>
+<td valign="top" class="td11"></td><td></td><td></td><td valign="top" class="td14">incrementation value
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td11"></td><td colspan="3" valign="top" class="td12"><p style="margin: 0 0ch 0 4ch; padding:0;">increment the basic block counter selected by operand
+1 by the value of operand 2. This operation is used only
+to maintain execution counters for a flow summary when
+debug level &gt; 1 is specified.</p>
+</td></tr></tbody></table><br><br><br><br>
+Floating-point arithmetic group<br>
+<style type="text/css">
+td.td15 {width: 0ch}
+td.td16 {width: 20ch}
+td.td17 {width: 17ch}
+td.td18 {width: 26ch}
+</style>
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+<tbody>
+<tr><td valign="top" class="td15"></td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"><u></td><td valign="top" class="td16">operation</u></td><td valign="top" class="td17"><u>result length</u></td><td valign="top" class="td18"><u>operand 1/operand 2</u>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">ADDFLT</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">sum of floating-point operands.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">SUBFLT</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">floating-point difference of operand 1 less operand 2.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">MPYFLT</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">product of floating-point operands.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">DIVFLT</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">floating-point quotient of operand 1 divided by 
+operand 2.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">COMPAREFLT</td><td valign="top" class="td17">(Boolean)</td><td valign="top" class="td18">4 bytes/4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">compare floating-point operands for equality.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">GREATERFLT</td><td valign="top" class="td17">(Boolean)</td><td valign="top" class="td18">4 bytes/4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">compare floating-point operands for inequality (&gt;).</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">LESSFLT</td><td valign="top" class="td17">(Boolean)</td><td valign="top" class="td18">4 bytes/4 bytes
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">compare floating-point operands for inequality (&lt;).</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">NEGATEFLT</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">unary minus of floating-point operand.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">ABSFLT</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">absolute value of the floating-point operand.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">SQRFLT</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">square of the floating-point operand.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">FLOAT</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">1-4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">convert integer value to a floating-point number.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">TRUNCATE</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">convert floating-point value to an integer by
+truncation.</p>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td valign="top" class="td16">ROUND</td><td valign="top" class="td17">4 bytes</td><td valign="top" class="td18">4 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td15"></td><td colspan="3" valign="top" class="td16"><p style="margin: 0 0ch 0 4ch; padding:0;">convert floating-point value to an integer by
+rounding.</p>
+</td></tr></tbody></table><br><br><br><br>
+<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br><br><br>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The form of the MONITOR instruction depends upon the service
+code (SVC) requested. The SVC is stored in the high-order byte
+of the initial field, rather than a result length. Below is a
+list of MONITOR calls.<br><br>
+<style type="text/css">
+td.td19 {width: 0ch}
+td.td20 {width: 5ch}
+td.td21 {width: 13ch}
+td.td22 {width: 19ch}
+td.td23 {width: 42ch}
+</style>
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+<tbody>
+<tr><td valign="top" class="td19"></td></tr><tr><td><br></td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"><u></td><td valign="top" class="td20">SVC</u></td><td valign="top" class="td21"><u>operation</u></td><td valign="top" class="td22"><u>returns</u></td><td valign="top" class="td23"><u>operand/operand2</u>
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">0</td><td valign="top" class="td21">SIN</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">1</td><td valign="top" class="td21">COS</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">2</td><td valign="top" class="td21">ARCTAN</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">3</td><td valign="top" class="td21">EXP</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">4</td><td valign="top" class="td21">LN</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">5</td><td valign="top" class="td21">SQRT</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">6</td><td valign="top" class="td21">ABSFLT</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">7</td><td valign="top" class="td21">SQRFLT</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">8</td><td valign="top" class="td21">ROUND</td><td valign="top" class="td22">integer value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">9</td><td valign="top" class="td21">TRUNC</td><td valign="top" class="td22">integer value</td><td valign="top" class="td23">real value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">10</td><td valign="top" class="td21">ABS</td><td valign="top" class="td22">integer value</td><td valign="top" class="td23">integer value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">11</td><td valign="top" class="td21">SQR</td><td valign="top" class="td22">integer value</td><td valign="top" class="td23">integer value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">12</td><td valign="top" class="td21">ODD</td><td valign="top" class="td22">Boolean value</td><td valign="top" class="td23">integer value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">13</td><td valign="top" class="td21">EOLN</td><td valign="top" class="td22">Boolean value</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">14</td><td valign="top" class="td21">EOF</td><td valign="top" class="td22">Boolean value</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">15</td><td valign="top" class="td21">NEW</td><td valign="top" class="td22">pointer into heap&nbsp;</td><td valign="top" class="td23">integer storage length value/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">16</td><td valign="top" class="td21">DISPOSE</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">pointer into heap/integer storage length value
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">17</td><td valign="top" class="td21">GET</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">file variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">18</td><td valign="top" class="td21">PUT</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">file variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">19</td><td valign="top" class="td21">RESET</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">file variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">20</td><td valign="top" class="td21">REWRITE</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">file variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">21</td><td valign="top" class="td21">READ_INT</td><td valign="top" class="td22">integer value</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">22</td><td valign="top" class="td21">READ_REAL</td><td valign="top" class="td22">real value</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">23</td><td valign="top" class="td21">READ_CHAR</td><td valign="top" class="td22">char value</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">24</td><td valign="top" class="td21">WRITE_INT</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">textfile variable/integer value
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">25</td><td valign="top" class="td21">WRITE_REAL</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">textfile variable/real value
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">26</td><td valign="top" class="td21">WRITE_BOOL</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">textfile variable/Boolean value
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">27</td><td valign="top" class="td21">WRITE_CHAR</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">textfile variable/char value
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">28</td><td valign="top" class="td21">WRITE_STRING</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">textfile variable/string descriptor
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">29</td><td valign="top" class="td21">READLN</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">30</td><td valign="top" class="td21">WRITELN</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">31</td><td valign="top" class="td21">PAGE</td><td valign="top" class="td22">-----</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">32</td><td valign="top" class="td21">RANGECHK</td><td valign="top" class="td22">(doesn&apos;t)</td><td valign="top" class="td23">-----/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">33</td><td valign="top" class="td21">STACKOVFLO</td><td valign="top" class="td22">(doesn&apos;t)</td><td valign="top" class="td23">-----/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">34</td><td valign="top" class="td21">RANGEMASK</td><td valign="top" class="td22">address of bitstring&nbsp;</td><td valign="top" class="td23">lowbound value/highbound value
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">35</td><td valign="top" class="td21">CLOCK</td><td valign="top" class="td22">elapsed CPU time</td><td valign="top" class="td23">-----/-----
+</td></tr><tr>
+<td valign="top" class="td19"></td><td></td><td></td><td valign="top" class="td22">(0.01 sec units)
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">36</td><td valign="top" class="td21">CARD</td><td valign="top" class="td22">set cardinality</td><td valign="top" class="td23">1-256 bytes/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">37</td><td valign="top" class="td21">HALT</td><td valign="top" class="td22">(doesn&apos;t)</td><td valign="top" class="td23">-----/-----
+</td></tr><tr><td><br></td></tr><tr>
+<td valign="top" class="td19"></td><td valign="top" class="td20">38</td><td valign="top" class="td21">READ_ALFA</td><td valign="top" class="td22">address of alfa</td><td valign="top" class="td23">textfile variable/-----
+</td></tr><tr>
+<td valign="top" class="td19"></td><td></td><td></td><td valign="top" class="td22">value
+</td></tr></tbody></table><br><br><br><br>
+<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br><br><br><br>
+Notes:<br><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">1)&nbsp;&nbsp;Service codes 6 - 12 are not used; these standard
+functions are always evaluated inline.
+</p><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">2)&nbsp;&nbsp;Service codes 36 - 38 are not used in Release 1.</p><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">3)&nbsp;&nbsp;Service codes 32 and 33 always terminate execution
+with an error message.</p><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">4)&nbsp;&nbsp;The string descriptor in SVC 28 has the length of the
+string less one in the high-order byte, and the address of the
+string in the low-order three bytes.</p><br>
+<p style="margin: 0 0ch 0 4ch; text-indent:-4ch; padding:0;">5)&nbsp;&nbsp;Service codes 33 and 34 are not emitted by Pass 2;
+service code 33 monitor calls are emitted implicitly by the
+Pass 3 code generator as part of the block entry code sequence,
+and service code 34 is emitted implicitly by Pass 3 when
+generating code for a RANGE triple whose result length is
+greater than 8 bytes.</p><br><br><br><br>
+IV. The Tree Traversal Algorithm.<br><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bearing in mind our ultimate goal, that of translating
+PASCAL
+programs into executable machine code, we consider the
+subordinate problem of translating the syntax trees of a parsed
+PASCAL program into an intermediate triples code. The triples are,
+in one sense, a representation of the syntax trees. Consider
+the node of a syntax tree which represents some binary operator
+such as multiplication; it will have two subtrees which can
+represent arbitrary arithmetic expressions, and these will be
+translated into the two operands of a MULTIPLY triple. In
+another sense, the triples <u>are</u> executable code for some
+virtual pseudo-machine. The main task of Pass 2 can then be
+seen as that of visiting the nodes of the syntax trees in some
+systematic way so as to accumulate the operands for the triples.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A potential problem arises if, for example, one subtree of a
+multiplication node represents an expression of type REAL and 
+the other subtree represents an expression of type INTEGER.
+The expression of type INTEGER must become the operand of a
+FLOAT triple; the FLOAT triple and the expression of type
+REAL then become the two operands of an MPYFLT triple. Note
+that some form of bookkeeping is required to keep track of the
+data type of every triple operand. This bookkeeping process is
+known as <u>attribute</u> <u>propagation</u>. The process of
+ensuring that the operands of each operation are of a compatible
+data type is known as <u>coercion</u>. These processes will be
+described in greater depth later, in conjunction with the
+semantic analysis of arithmetic expression trees.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Below is a listing of the XPL program from which Pass 2 was
+developed by the process of stepwise refinement. The procedure
+which performs the tree traversal is called Visit_nodes.
+Since recursion is unavailable in XPL, the tree traversal is
+accomplished iteratively using stacks, and simulates the
+following recursive procedure:<br><br><br>
+Visit_nodes:
+<pre style="margin:0;">
+    PROCEDURE (node);
+       DECLARE node FIXED,   /*ROOT OF TREE */
+                  i FIXED;   /*INDEX OF SUBTREE */
+       IF Multiplicity(node) = 0 THEN
+          DO;   /* A LEAF NODE */
+             Push symbol table index onto operand stack;
+             Replace index of leaf in father node with
+                index of data type of symbol;
+          END;
+       ELSE  /* NOT A LEAF NODE */
+          DO;
+             CASE statement on production number of
+                node -- preorder semantic actions;
+          END;
+          DO i = 1 TO Multiplicity(node);
+             Visit_nodes (i&apos;th subtree of node);
+             CASE statement on production number of
+                node -- postorder semantic actions;
+          END;
+       END Visit_nodes;
+</pre>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In the iterative version, the local variables node and i are
+represented by the stacks node#stack and #pos_stack 
+respectively. These stacks are implemented as one-dimensional arrays
+indexed by the global variable np, whose value is equal to the
+depth within the syntax tree of the node being visited, and
+corresponds to the depth of recursion in the recursive
+version. The stacks themselves are manipulated by calls to the
+encapsulating procedures Leftson, Right_bro, and Father.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When a leaf node (i.e., a node whose Multiplicity is zero)
+is visited, the symbol table index which it contains is
+pushed onto operand#stk, a stack of operands for triples. When
+the operand is used in the formation of a triple during a
+postorder visit of an ancestor node, operand#stk is popped;
+possibly, a pointer to the newly generated triple is pushed
+onto the operand stack. The data type of the object which
+has been pushed onto the operand stack will be represented by
+some record in the symbol table. The index into the symbol
+table of this record is stored in the leaf&apos;s father node in the
+syntax tree where the index of the leaf node itself used to be;
+this rudimentary attribute propagation is accomplished by a
+call to Replace.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The other procedures in the following skeletal version of
+Pass 2 perform the functions of error logging, printing a
+formatted listing of the syntax trees, and reading the files
+containing the symbol table and syntax trees which were
+written by Pass 1.<br><br><br><br>
+<p style="margin: 0 0ch 0 3ch; padding:0;">DECLARE true LITERALLY &apos;1&apos;, false LITERALLY &apos;0&apos;;<br>
+DECLARE forever LITERALLY &apos;WHILE 1&apos;;<br>
+DECLARE null LITERALLY &apos;-1&apos;;<br>
+DECLARE multiplicity LITERALLY &apos;parse_tree&apos;;<br>
+DECLARE double CHARACTER INITIAL(&apos;0&apos;);<br>
+DECLARE double_space LITERALLY &apos;output(1)=double&apos;;<br>
+DECLARE identity(350) BIT(16);<br>
+DECLARE parse_tree(7200) BIT(16), tree_size FIXED;<br>
+DECLARE root_of_subtree FIXED;<br>
+DECLARE datatype(350) BIT(16);<br>
+DECLARE node#stack#oflo CHARACTER INITIAL( </p>
+<p style="margin: 0 0ch 0 6ch; padding:0;">&apos;Node stack overflow due to parse_tree whose depth exceeds 75&apos;);</p>
+<p style="margin: 0 0ch 0 3ch; padding:0;">DECLARE x1 CHARACTER INITIAL(&apos;&nbsp;&apos;);<br>
+DECLARE x70 CHARACTER INITIAL(</p>
+<p style="margin: 0 0ch 0 6ch; padding:0;">&apos;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&apos;);</p>
+<p style="margin: 0 0ch 0 3ch; padding:0;">DECLARE sy_text CHARACTER;<br>
+DECLARE left_part(74) CHARACTER INITIAL(&apos;&apos;, &apos;&lt;PROGRAM&gt;&apos;, &apos;&lt;BLOCK&gt;&apos;,</p>
+<p style="margin: 0 0ch 0 6ch; padding:0;">&apos;&lt;STATEMENT LIST&gt;&apos;, &apos;&lt;LABEL DECL&gt;&apos;, &apos;&lt;CONST DECL&gt;&apos;, &apos;&lt;TYPE DEFN&gt;&apos;,<br>
+&apos;&lt;PROC DECL LIST&gt;&apos;, &apos;&lt;PROC DECL&gt;&apos;, &apos;&lt;PROC DECL&gt;&apos;, &apos;&lt;BODY&gt;&apos;,<br>
+&apos;&lt;VAR DECL LIST&gt;&apos;, &apos;&lt;VAR DECL&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;,<br>
+&apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;,<br>
+&apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;STATEMENT&gt;&apos;,<br>
+&apos;&lt;FORMAL PARAM&gt;&apos;, &apos;&lt;FORMAL PARAM&gt;&apos;, &apos;&lt;FORMAL PARAM&gt;&apos;, &apos;&lt;CASE&nbsp;INSTANCE&gt;&apos;,<br>
+&apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;,<br>
+&apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;,<br>
+&apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;,<br>
+&apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;,<br>
+&apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;,<br>
+&apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;EXPRESSION&gt;&apos;, &apos;&lt;VARIABLE&gt;&apos;, &apos;&lt;VARIABLE&gt;&apos;, &apos;&lt;QUALIFIER&gt;&apos;,<br>
+&apos;&lt;QUALIFIER&gt;&apos;, &apos;&lt;QUALIFIER&gt;&apos;, &apos;&lt;QUALIFIER&gt;&apos;, &apos;&lt;CONSTANT&gt;&apos;, &apos;&lt;CONSTANT&gt;&apos;,<br>
+&apos;&lt;TYPE&gt;&apos;, &apos;&lt;TYPE&gt;&apos;, &apos;&lt;TYPE&gt;&apos;, &apos;&lt;TYPE&gt;&apos;, &lt;TYPE&gt;&apos;, &apos;&lt;TYPE&gt;&apos;, &apos;&lt;TYPE&gt;&apos;,<br>
+&apos;&lt;TYPE&gt;&apos;, &apos;&lt;FIXED FIELD LIST&gt;&apos;, &apos;&lt;VARIANT FIELD&gt;&apos;, &apos;&lt;VARIANT INSTANCE&gt;&apos;,<br>
+&apos;&lt;STATEMENT&gt;&apos;, &apos;&lt;TYPE&gt;&apos;, &apos;&lt;TYPE&gt;&apos;, &apos;&lt;TYPE&gt;&apos;, &apos;&lt;TYPE&gt;&apos;;</p>
+<p style="margin: 0 0ch 0 3ch; padding:0;">DECLARE nulref CHARACTER INITIAL(</p>
+<p style="margin: 0 0ch 0 6ch; padding:0;">&apos;Attempt to access parse_tree by a null reference pointer&apos;);</p>
+<p style="margin: 0 0ch 0 3ch; padding:0;">DECLARE node FIXED;<br>
+DECLARE npmax LITERALLY &apos;75&apos;;<br>
+DECLARE (np, #mp) FIXED;<br>
+DECLARE (node#stack, #pos_stack) (npmax) BIT(16);</p><br>
+error:<br>
+<p style="margin: 0 0ch 0 3ch; padding:0;">PROCEDURE (message, severity);</p>
+<p style="margin: 0 0ch 0 6ch; padding:0;">DECLARE message CHARACTER, severity FIXED;<br>
+output = &apos;***** ERROR: &apos; &boxv;&boxv; message;</p>
+<p style="margin: 0 0ch 0 3ch; padding:0;">END error;</p><br><br>
+<pre style="margin:0;">
+leftson:
+   PROCEDURE;
+      IF node=null THEN
+         CALL error (nulref, 1);
+      ELSE
+         DO;
+           #mp=multiplicity(node);
+           IF #mp=0 THEN
+              node=null;
+           ELSE
+              DO;
+                 IF np &gt;=npmax THEN
+                    DO;
+                       CALL error (node#stack#oflo);
+                       np=0
+                    END;
+                 np=np + 1;
+                 node#stack(np) = node;
+                 #pos_stack(np) = 1;
+                 node = parse_tree(node + 2);
+               END;
+ 
+          END;
+    END leftson;
+</pre><br><br><br>
+<pre style="margin:0;">
+rightson:
+   PROCEDURE;
+      IF node = null THEN
+         CALL error (nulref, 1);
+      ELSE
+         DO;
+            #mp = multiplicity(node);
+            IF # = 0 THEN
+               node = null;
+            ELSE
+               DO;
+                  IF np &gt;= npmax THEN
+                     DO;
+                        CALL error (node#stack#oflo, 1);
+                        np = 0;
+                     END;
+                  np = np + 1;
+                  node#stack(np) = node;
+                  #pos_stack(np) = #mp;
+                  node = parse_tree(node + #mp + 1);
+               END;
+ 
+         END; 
+    END rightson;
+</pre>
+<pre style="margin:0;">
+ 
+ 
+right bro:
+   PROCEDURE;
+      #mp = multiplicity(node#stack(np);
+      IF #mp &gt; #pos_stack(np) THEN
+         DO;
+              node = parse_tree(node#stack(np) + #pos_stack(np) +2);
+              #pos_stack(np) = #pos_stack(np) + 1;
+         END;
+      ELSE
+         node = null;
+   END right_bro;
+</pre><br><br><br>
+<pre style="margin:0;">
+left_bro:
+   PROCEDURE;
+      IF #pos_stack(np) &gt; 1 THEN
+         DO;
+              node = parse_tree(node#stack(np) + #pos_stack(np));
+              #pos_stack(np) = #pos_stack(np) - 1;
+         END;
+      ELSE
+         node = null;
+   END left_bro;
+</pre><br><br><br>
+<pre style="margin:0;">
+father:
+   PROCEDURE;
+      IF np &lt; 1 THEN
+          CALL error (nulref, 1);
+      ELSE
+         DO;
+             node = node#stack(np);
+             np = np - 1;
+   END father;
+</pre><br><br><br>
+<pre style="margin:0;">
+replace:
+   PROCEDURE (newson);
+      DECLARE newson BIT(16);
+      IF np &lt; 1 THEN
+         CALL error (nulref, 1);
+      ELSE
+         parse_stack(node#stack(np) + #pos_stack(np) + 1 = newson;
+   END replace;
+</pre><br><br><br>
+<pre style="margin:0;">
+pad:
+   PROCEDURE (string, width) CHARACTER;
+      DECLARE string CHARACTER, (width, len) FIXED;
+      DO WHILE length (string) + 70 &lt; width;
+         string = string &boxv;&boxv; x70;
+      END;
+      len = length (string);
+      IF len &gt;= width THEN
+         RETURN string;
+      ELSE
+         RETURN string &boxv;&boxv; substr (x70, 0, width - len);
+   END pad;
+</pre><br><br><br><br>
+<pre style="margin:0;">
+i_format:
+     PROCEDURE (number, width) CHARACTER;
+        DECLARE (number, width, len) FIXED, string CHARACTER;
+        string = number;
+        len = length (string);
+        IF len &gt;= width THEN
+           RETURN string;
+        ELSE
+           RETURN substr (x70, 0, width - len) &boxv;&boxv; string;
+     END i_format;
+</pre><br><br><br>
+<pre style="margin:0;">
+parse_tree_dump:
+   PROCEDURE (tree);
+      DECLARE tree BIT(16);  /*POINTS TO ROOT NODE*/
+      DECLARE a(100) BIT(16);  /*AUXILIARY STACK; CF KNUTH V.1 P.317*/
+      DECLARE (top_of_a, m, c, p) BIT(16);
+      DECLARE margin CHARACTER initial(
+         &apos;                                                            &apos;);
+      DECLARE overflow_message CHARACTER INITIAL(
+         &apos;Auxiliary stack overflow, parse tree dump aborted&apos;);
+      DECLARE indentation BIT(16), (s1, s2) CHARACTER,
+              leaf LITERALLY &apos;parse_tree(p+1)&apos;,
+              production_numb LITERALLY &apos;parse_tree(p+1)&apos;,
+              line_numb LITERALLY &apos;parse_tree(p+m+2)&apos;;
+ 
+      indentation = length (margin) - 2;
+      top_of_a = 0;
+      p = tree;
+      output = &apos;Parse tree at this point is:&apos;;
+      DO forever;
+         IF p = null THEN
+            DO;
+               m = 0;
+               s1 = &apos;...EMPTY PRODUCTION...&apos;;
+            END;
+         ELSE 
+            DO;
+               m = multiplicity(p);
+               IF m = 0 THEN
+                  s1 = identity(leaf);
+               ELSE
+                  s1 = production_numb &boxv;&boxv; x1
+                      &boxv;&boxv; left_part(production_numb);
+            END;
+          s2 = substr (margin, indentation) &boxv;&boxv; x1 &boxv;&boxv; s1;
+          s2 = pad (s2, 127);
+          s1 = i_format (line_numb, 4);
+          output = s2 &boxv;&boxv; &apos;&boxv;&apos; &boxv;&boxv; s1;
+          IF m &gt; 0 THEN
+             DO;
+                a(top_of_a) = 0;
+                top_of_a = top_of_a + 1;
+                IF top_of_a &gt; 100 THEN
+                   DO;
+                      output = overflow_message;
+                      RETURN;
+                   END;
+           END;
+        IF m = 0 THEN
+           DO;  /*UNSTACK SUBTREE*/
+              IF top_of_a = 0 THEN
+                 RETURN;
+              top_of_a = top_of_a - 1;
+              p = a(top_of_a);
+              DO WHILE p = 0;
+                 IF top_of_a = 0 THEN
+                    RETURN;
+                 indentation = indentation + 3;
+                 top_of_a = top_of_a - 1;
+                 p = a(top_of_a);
+              END;
+           END;
+        ELSE
+           DO;  /* PREPARE TO DUMP LEFTMOST SUBTREE */
+              p = parse_tree(p + 2);
+              indentation = indentation - 3;
+           END;
+     END;
+  END parse_tree_dump;
+</pre><br><br><br>
+<pre style="margin:0;">
+next_symbol:
+   PROCEDURE CHARACTER;
+      DECLARE (cp, s1, s2, text_limit) FIXED,
+              (bcd, char) CHARACTER;
+      IF length (sy_text) &lt; 3 THEN
+         DO;
+            char = input(3);
+            sy_text = sy_ &boxv;&boxv; char;
+         END;
+      bcd = &apos;&apos;;
+      s1 = byte (x1);
+      s2 = byte (sy_text, 1);
+      cp = 1;
+      DO WHILE &not;(s1 = byte (&apos;&apos;&apos;&apos;) &amp; s2 = byte (x1));
+         IF &not;(s1 = byte (&apos;&apos;&apos;&apos;) &amp; s2 = s1) THEN
+            DO;
+               char = substr (sy_text, cp, 1);
+               bcd = bcd &boxv;&boxv; char;
+            END;
+         ELSE
+            s2 = byte (x1);
+         s1 = s2; 
+         cp + cp + 1;
+         IF cp &gt; text_limit THEN
+            DO;
+               sy_text = input(3);
+               text_limit = 79;
+            END;
+         s2 = byte (sy_text, cp);
+      END;
+      bcd = substr (bcd, 0, length (bcd) - 1);
+      IF cp = text_limit THEN
+         DO;
+            char = input(3);
+            sy_text = sy_text &boxv;&boxv; char;
+         END;
+    sy_text = substr (sy_text, cp + 1);
+    RETURN bcd;
+ END next_symbol;
+</pre><br><br>
+<pre style="margin:0;">
+restore_sy_table:
+   PROCEDURE;
+      DECLARE i FIXED;
+      n_decl_symb = 0;
+      sy_text = input(3);
+      IF substr (sy_text, 0, 5) &not; = &apos;%SYMB&apos; THEN
+         DO;
+            output = &apos;%SYMB card expected.&apos;;
+            RETURN;
+         END;
+      DO i = 5 TO 9;
+         IF byte (sy_text, i) &not;= byte (&apos;&apos;) THEN
+            n_decl_symb = 10*n_decl_symb + byte(sy_text, i)
+                                    - byte (&apos;0&apos;);
+      END;
+      output = &apos;Symbol Table size = &apos; &boxv;&boxv; n_decl_symb;
+      sy_text = input(3);
+      DO i = 0 TO n_decl_symb;
+         identity(i) = next_symbol;
+      END;
+      sy_text = input(3);
+   END restore_sy_table;
+</pre><br><br>
+<pre style="margin:0;">
+read_tree:
+   PROCEDURE FIXED; /*RETURNS POINTER TO ROOT*/
+      DECLARE (root, i, j) FIXED;
+      root, i = 0;
+      sy_text = input(3);
+      IF length (sy_text) = 0 THEN  /*END OF FILE*/
+         RETURN null;
+      IF substr (sy_text, 0, 5) &not; = &apos;%TREE&apos; THEN
+         DO;
+            output = &apos;%TREE card expected.&apos;;
+            RETURN null;
+         END;
+      DO j = 5 TO 9;
+         IF byte (sy_text, j) &nbsp;= byte (&apos;&apos;) THEN
+            root = 10*root + byte (sy_text, j) - byte (&apos;0&apos;);
+      END;
+      sy_text = input(3);
+      DO WHILE substr (sy_text, 0, 4) &not; = &apos;%END&apos;;
+         j = addr (parse_tree(i));
+         CALL inline (&quot;58&quot;,1,0,sy_text)      /*L   1,SY_TEXT     */
+         CALL inline (&quot;58&quot;,2,0,j);           /*L   2,j           */
+         CALL inline (&quot;D2&quot;,&quot;4&quot;,&quot;F&quot;,2,0,1,0,);/*MVC 0(80,2),0(1)  */
+         i = i + 40;
+         sy_text = input(3);
+      END;
+      tree_size = root + parse_tree(root) + 3;
+      RETURN root;
+ END read_tree;
+</pre><br><br><br>
+<pre style="margin:0;">
+visit_nodes:
+   PROCEDURE;
+      DECLARE #opmax LITERALLY &apos;12&apos;;
+      DECLARE is_leaf LITERALLY &apos;parse_tree(node)=0&apos;;
+      DECLARE fathers_prod_no LITERALLY &apos;parse_tree(node#stack(np)+1)&apos;;
+      DECLARE first_visit BIT(1);
+      DECLARE operand#stk(#opmax) BIT(16);
+      DECLARE #op FIXED;
+      first_visit = true;
+      np, #op = 0;
+      node = root_of_subtree;
+      DO WHILE first_visit &boxv; np &gt; 0;
+         IF first_visit THEN
+            DO;
+               IF node = null THEN
+                  first_visit=false;
+               ELSE
+                  IF is_leaf THEN
+                     DO;  /*PUSH SYMBOL TABLE POINTER ONTO OPERAND STACK */
+                        IF #op &lt; #opmax THEN
+                           #op = #op + 1;
+                        ELSE
+                           DO;
+                              CALL error (&apos;Overflow occurred while stacking &apos;
+                                         &boxv;&boxv; &apos;operands for triples&apos;, 1);
+                              #op = o;
+                           END;
+                        operand#stk(#op) = parse_tree(node + 1);
+                        /*OPERAND#STK IS POPPED WHEN TRIPLES ARE FORMED*/
+                        output = identity(parse_tree(node + 1));
+                        CALL replace (datatype(parse_tree(node + 1)));
+                        first_visit = false;
+                     END;
+                  ELSE
+                     DO;
+                       /*CASE STATEMENT ON PRODUCTION NUMBER OF NODE*/
+                       CALL leftson;
+                    END;
+             END;
+          ELSE
+             DO;/*REPLACE THIS BY &apos;DO CASE fathers_prod_no;&apos;*/
+                /*CODE FOR PASS 2 MODULES GOES HERE*/
+                /*FOR PRODUCTION NUMBERS WHOSE MULTIPLICITY CAN 
+                   EXCEED ONE, THE CODE WILL INCLUDE A SEGMENT TO
+                   VISIT THE NEXT SUBTREE.  IN ADDITION, FOR 
+                   MANY OF THE PRODUCTION NUMBERS, IT WILL BE
+                   NECESSARY TO DETERMINE WHICH OF THE SIBLING 
+                   NODES IS BEING VISITED.  FOR THIS PURPOSE, 
+                   ONE CAN INTERROGATE #POS_STACK(NP), 
+                   WHOSE VALUE IS THE INDEX OF &apos;NODE&apos; AMONG ITS
+                   FATHER&apos;S SONS.*/
+                output = #pos_stack(np) &boxv;&boxv; x1
+                         &boxv;&boxv; left_part(fathers_prod_no);
+                CALL right_bro;
+                IF node = null THEN
+                   CALL father;
+                ELSE
+                   first_visit = true;
+             END;
+       END;
+    END visit_node;
+</pre><br><br>
+<pre style="margin:0;">
+restore_tree:
+   PROCEDURE;
+      CALL restore_sy_table;
+      root_of_subtree = read_tree;
+      DO WHILE root_of_subtree &not; = null;
+         double_space;
+         CALL parse_tree_dump (root_of_subtree);
+         double_space;
+         output = &apos;Now, visit all nodes is post-order&apos;;
+         CALL visit_nodes;
+         double_space;
+         root_of_subtree = read_tree;
+      END;
+   END restore_test;
+ 
+ 
+ 
+ 
+   DO np = 0 TO 349;
+      datatype(np) = null;
+   END;
+   CALL restore_test;
+ 
+ 
+EOF EOF EOF
+</pre><br><br><br><br>
+V. Constructing the PASCAL Symbol Table
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Not all of the phrases of a PASCAL program, as represented
+by the syntax trees produced by Pass 1, result in executable
+code or triples. In fact, those syntax trees whose root node
+production numbers are Production 1 (program heading), Production
+2 (<u>label, const, type</u> and <u>var</u> declarations), and
+Productions 8 and 9 (<u>procedure</u> and <u>function</u>
+ headings) represent <u>declarations</u>, and do not result in 
+the production of any triples at all. Instead, they result in
+the construction of records in the PASCAL symbol table.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Declaration trees use production numbers 1, 2, 4-6, 8, 9,
+25-27, 59-69, 71-74, and 77-80. The combined set of preorder
+and postorder semantic actions which correspond to these
+production numbers can be thought of as a modular unit of
+Pass 2 -- the symbol table construction module. Many of the
+problems encountered in triples generation are non-existant or
+greatly simplified in the symbol table construction module. For
+example, there is no need to stack operands for triples, and no
+type coercion problem. The problem of attribute propagation
+simplifies to that of remembering which record in the symbol table
+is of current interest.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Accordingly, the logic of the tree traversal algorithm has
+been altered somewhat to accommodate the special needs of the
+symbol table construction module. A Boolean variable, local to
+Visit_nodes, called &quot;Is_declaration&quot; is set to <u>true</u>
+when the root node of a declaration tree is visited in preorder.
+When a leaf node is visited, the action taken now depends upon
+the value of Is_declaration:<br><br><br><br>
+<pre style="margin:0;">
+     IF multiplicity(node) = 0 THEN
+        DO;  /* A LEAF NODE */
+           table_ptr = symbol table index from leaf node;
+           IF is_declaration THEN
+              Replace index of leaf node in father node with
+                 value of table ptr;
+           ELSE
+              DO;
+                Push value of table_ptr onto operand stack;
+                Replace index of leaf node in father node
+                   with datatype(table_ptr);
+              END;
+        END;
+</pre><br><br>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In a declaration tree, each subtree can usually be thought
+of as being perfectly represented by some symbol table record.
+After traversing the subtree, the index into the symbol table of 
+this record replaces the index into the syntax tree of the 
+subtree&apos;s root node, inside the root node&apos;s father node. Also,
+the newly introduced variable table_ptr, local to Visit_nodes,
+is set equal to the symbol table index of this record. In this
+way we can always keep track of which record in the symbol
+table is of current interest.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It is during the processing of declaration trees in
+Pass 2 that storage is allocated for data objects at run-time.
+Since all PASCAL procedures are potentially recursive, storage
+cannot be allocated statically, in general. The exceptions to
+this rule are variables global to the entire program and 
+constants. Accordingly, storage is accessed via a two-coordinate
+scheme. The pseudo_reg field of a symbol table record gives
+the static nesting level of the procedure which contains the
+data object represented by the symbol table record. It can be
+thought of as the index into a virtual array of activation
+records called the <u>display</u>. Those objects with a 
+pseudo_reg value of zero are said to reside in the global 
+activation record; their storage is allocated statically.
+Those objects which belong to a procedure that is callable
+from the main program block have a pseudo_reg value of one;
+those objects that belong to a procedure that is statically
+(textually) nested within another procedure have even higher
+pseudo_reg values; the pseudo_reg value increases by
+one for each level of static procedural nesting. The second
+coordinate used in accessing run-time storage is the
+<u>displacement</u> field of a symbol table record. Whereas the
+pseudo_reg field selects an activation record within the 
+display, the displacement field represents the relative offset
+into the activation record of the data object. The storage_lngth
+ field of a symbol table record contains the number of 8-bit
+bytes of storage allocated to the corresponding data object.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Storage is allocated so as to achieve some optimization of
+address calculations in an IBM 360 architecture. Since the
+displacement field in an IBM 360 machine instruction cannot
+span more than 4096 bytes, an activation record whose length
+exceeds this page length cannot be spanned by Base register -
+Displacement addressing alone if the base register contents remain
+fixed. The scheme used in Pass 3 to increase the span of
+addressing involves the use of an index register when the 
+displacement exceeds the page length. An index register is then
+loaded with an appropriate integral multiple of the page length
+constant, 4906, and the displacement is reduced to its value modulo
+4096. The address is then specified in Index register - Base
+register - Displacement format. The storage allocation mechanism
+in Pass 2 attempts to reduce the number of variables whose
+displacement exceeds the page length constant by placing individual
+variables, whose storage requirements are 1 to 4 bytes, in the
+lower displacements of an activation record. If more than 4 bytes
+of storage are required for any variable, storage allocation is
+deferred. Variables to receive deferred storage allocations are
+linked together in the symbol table by the value field of their
+symbol table records. Storage is allocated for these large
+variables on two occasions while processing a block of a PASCAL
+program: once, at the end of a list of formal parameters, and 
+again at the conclusion of processing for the entire block.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Because blocks can be properly nested one within another, 
+storage allocation information is kept in stacks, the elements
+of which contain information about the active blocks. There are
+four such stacks, all of which are implemented as one-dimensional
+arrays commonly indexed by current_level: owner_stack,
+arrays_allocated, stack_limit, and halfword_disp. 
+Current_level is the current depth of textual nesting of identifier
+scopes. According to the PASCAL Report, an identifier scope
+can be either a block or a <u>record</u> type.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Owner_stack(current_level) is the index into the symbol
+table of the procedure or record type that delimits the scope
+of identifiers. It is used to set the owner field in symbol
+table records.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Arrays_allocated(current_level) is the index into the
+symbol table of the first large variable in the current scope
+for which storage allocation has been deferred.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Stack_limit(current_level) is the total number of bytes
+of the current activation record or record type that have been
+allocated so far; it is always incremented in multiples of four
+to secure fullword alignment.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Halfword_disp(current_level) is the displacement of an
+unallocated two-byte field within the current activation record
+or record type. When a two-byte field is allocated storage,
+halfword_disp(current_level) is set to the displacement of
+the resulting two-byte hole, if one must be created. Otherwise,
+halfword_disp is set to null.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The following list summarizes the semantic actions which 
+correspond to the production numbers encountered in
+declaration trees.<br><br><br><br>
+Prodn.<br>
+<u>Number</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>Production</u><br><br>
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;program&gt; ::= &lt;program id&gt; [&lt;file id&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;program id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Procedure
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Statement
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = length of global activation record, in bytes.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for first &lt;file&nbsp;id&gt;.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&lt;file&nbsp;id&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for next &lt;file&nbsp;id&gt;.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;label decl&gt; ::= [&lt;unsigned integer&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;unsigned integer&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Label
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Statement
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER, STORAGE_LNGTH = symbol table index of procedure
+ name in which label declaration appears.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST, PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Const decl&gt; ::= [&lt;const id&gt; &lt;constant&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;const id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = DATATYPE(&lt;constant&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Constant
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = STRUCTYPE(&lt;constant&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of procedure name in which const
+ declaration appears.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = STORAGE_LNGTH(&lt;constant&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = index into symbol table of entry for &lt;constant&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;value = VALUE(&lt;constant&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = DISPLACEMENT(&lt;constant&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type defn&gt; ::= [&lt;type id&gt; &lt;type&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;type id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = DATATYPE(&lt;type&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Type
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = STRUCTYPE(&lt;type&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of procedure name in which type
+ definition appears.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = STORAGE_LNGTH(&lt;type&gt;), which is
+ cardinality for scalar or subrange types.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of first element if type is
+ scalar, else null.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;proc decl&gt; ::= &lt;procedure id&gt; [&lt;formal param&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;procedure id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Procedure
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Statement
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of procedure name in which this
+ procedure declaration appears.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = length of activation record, in bytes.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = unique sequence number for this procedure.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of first &lt;formal&nbsp;param&gt;;
+ null if no &lt;formal&nbsp;param&gt;s.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = 1 + PSEUDO_REG(OWNER)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;proc decl&gt; ::= &lt;function id&gt; [&lt;formal param&gt;]*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type id&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;function id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;Same as for &lt;procedure id&gt; in Production 8, except:
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type id&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = STRUCTYPE(&lt;type id&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;var decl&gt; ::= [&lt;variable id&gt;)<sup>+</sup> &lt;type&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;variable id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Variable
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTURE = STRUCTYPE (&lt;type&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for procedure name in
+ which this variable declaration appears.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = in case STRUCTYPE is Scalar, then 2;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 25ch; text-indent:-20ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if subrange cardinality &lt; 32768, then 2
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 25ch; text-indent:-20ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else 4;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 20ch; text-indent:-15ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in case STRUCTYPE is Pointer or Arithmetic, then 4;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 20ch; text-indent:-15ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in case STRUCTYPE is Array, File, Record, or Set, then
+ STORAGE_LNGTH(&lt;type&gt;).
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = PSEUDO_REG(OWNER)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = storage address in bytes relative to
+ PSEUDO_REG
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+25&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;formal param&gt; ::= [&lt;variable id&gt;]<sup>+</sup> &lt;type id&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;variable id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type id&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Var parameter
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = STRUCTYPE(&lt;type id&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for name of procedure
+ of which the &lt;variable&nbsp;id&gt; is a parameter.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = 4 bytes
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for next
+ &lt;variable&nbsp;id&gt; or next &lt;formal&nbsp;param&gt; of OWNER.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = PSEUDO_REG(OWNER)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = storage address in bytes relative to
+ PSEUDO_REG.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+26&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;formal param&gt; ::= [&lt;variable id&gt;]<sup>+</sup> &lt;type id&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;variable id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;Same as for &lt;variable id&gt; in Production 25, except:
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Variable
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH is computed as in Production 12.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+27&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;formal param&gt; ::= [&lt;procedure id&gt;]<sup>+</sup><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&lt;param types&gt;]<sup>+</sup> [&lt;type id&gt;]<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;procedure id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = if &lt;type&nbsp;id&gt; is present, then symbol table
+ index of entry for &lt;type&nbsp;id&gt;; else null.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Formal procedure
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = if &lt;type&nbsp;id&gt; is present, then
+ STRUCTYPE(&lt;type&nbsp;id&gt;); else Statement.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for name of procedure
+ of which this &lt;procedure&nbsp;id&gt; is a formal parameter.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = 12 bytes.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = symbol table index of first &lt;param&nbsp;types&gt; entry.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for next
+ &lt;procedure&nbsp;id&gt; or next &lt;formal&nbsp;param&gt; of OWNER.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = PSEUDO_REG(OWNER)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = storage address in bytes relative to
+ PSEUDO_REG.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+59&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= &lt;type id&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: none.<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+60&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= [&lt;constant id&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;constant id&gt; -- Scalar constant<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = constant
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Scalar
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for name of procedure
+ in which this scalar type definition appears.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = ordinal number of &lt;constant id&gt; in the scalar type,
+ starting from 0.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of next &lt;constant id&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG, DISPLACEMENT = null<br><br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">
+&lt;type&gt; -- if the type is named, then the entry for the 
+ type name is used; otherwise, a new record is created.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&gt;
+ (i.e., this entry).
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Type
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Scalar
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for name of procedure
+ in which this &lt;type&gt; is defined.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = cardinality of type (i.e., number of
+ &lt;constant&nbsp;id&gt;s ).
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for first
+ &lt;constant&nbsp;id&gt;.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+61&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= &lt;constant 1&gt; &lt;constant 2&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">
+Semantics: &lt;type&gt; -- if the type is named, then the entry for
+ the type name is used; otherwise, a new record is created.<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = DATATYPE(&lt;constant&nbsp;1&gt;), which must agree with
+ DATATYPE(&lt;constant&nbsp;2&gt;).
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Type
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Subrange
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = Symbol table index of entry fo name of procedure or
+ record in which this &lt;type&gt; is defined.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = cardinality of subrange, which is
+ VALUE(&lt;constant&nbsp;2&gt;) - VALUE(&lt;constant&nbsp;1&gt;) + 1.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = VALUE(&lt;constant&nbsp;2&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for &lt;constant&nbsp;1&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+62&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= &lt;type id&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;type&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type id&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Type
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Pointer
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for procedure or record
+ in which this &lt;type&gt; is defined.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST, PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+63&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= [&lt;type 1&gt;]<sup>+</sup> &lt;type 2&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">
+Semantics: &lt;type&gt; is an n-dimensional array type represented as
+a recursively defined structure,<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&lt;array&nbsp;type&gt; ::= &lt;index&nbsp;type&gt; &lt;element&nbsp;type&gt;<br>
+ where &lt;index&nbsp;type&gt; must be a scalar or subrange type, and
+ &lt;element&nbsp;type&gt; will be an (n-1)-dimensional &lt;array&nbsp;type&gt;.
+ Thus, we give semantics for the production:<br>
+ &lt;array&nbsp;type&gt; ::= &lt;type&nbsp;1&gt; &lt;type&nbsp;3&gt; &lt;array&nbsp;type&gt; 
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&nbsp;3&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Type
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Array
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for name of procedure
+ or record in which this &lt;array&nbsp;type&gt; is defined.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = STORAGE_LNGTH(&lt;type&nbsp;1&gt;)*
+ STORAGE_LNGTH of a variable of &lt;type&nbsp;3&gt; computed as
+ in Production 12, except that if &lt;type&nbsp;3&gt; is scalar or
+ subrange and the cardinality of &lt;type&nbsp;3&gt; &le; 256, then
+ only one byte is allocated.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for &lt;type 1&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+64&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= &lt;type 1&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;type 1&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&nbsp;1&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Type
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = File
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for name of procedure
+ or record in which this &lt;type&gt; is defined.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = storage length given to a variable of &lt;type&nbsp;1&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST, PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+65&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= &lt;type 1&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;type&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = DATATYPE(&lt;type&nbsp;1&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Type
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Set
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for name of procedure
+ or record in which this &lt;type&gt; is defined.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = if &lt;type&nbsp;1&gt; is a scalar type then 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 20ch; text-indent:-15ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if &lt;type&nbsp;1&gt; is a subrange type then
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 25ch; text-indent:-20ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VALUE(S_LIST(&lt;type&nbsp;1&gt;)) <u>DIV</u> 8
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = if &lt;type&nbsp;1&gt; is a scalar type then
+ (STORAGE_LNGTH(&lt;type&nbsp;1&gt;) + 7) <u>DIV</u> 8
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 20ch; text-indent:-15ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if &lt;type&nbsp;1&gt; is a subrange type then
+(VALUE(&lt;type&nbsp;1&gt;) <u>DIV</u> 8) -
+(VALUE(S_LIST(&lt;type&nbsp;1&gt;)) <u>DIV</u> 8) + 1
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for &lt;type&nbsp;1&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+66&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= [&lt;fixed field list&gt;]* [&lt;variant field&gt;]<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;type&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&gt;
+ (i.e., this entry).
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Type
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Record
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for name of procedure
+ or record type in which this &lt;type&gt; is defined.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = total storage allocation given to fields
+ of the record, in bytes.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for first field of
+ this record.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+67&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;fixed field list&gt; ::= [&lt;field id&gt;]<sup>+</sup> &lt;type&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;field id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = if field is a component of a
+ &lt;variant&nbsp;instance&gt;, then Variant,<br>
+ else Field identifier
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = STRUCTYPE(&lt;type&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for record type in
+ which this &lt;fixed&nbsp;field&nbsp;list&gt; appears.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = storage allocated to a variable of
+ &lt;type&gt;, as in Production 12.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for next &lt;field&nbsp;id&gt;
+ or entry for next field of OWNER.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = storage displacement relative to origin
+ of OWNER.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+68&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;variant field&gt; ::= &lt;tag id&gt; &lt;type id&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&lt;variant instance&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;tag id&gt;<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&nbsp;id&gt;,
+ which must identify a scalar or subrange type.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = if field is a component of a
+ &lt;variant&nbsp;instance&gt;, then Variant;
+ else, Field identifier.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = Tagfield
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for record type in
+ which this &lt;variant&nbsp;field&gt; appears.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = 2 bytes
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for first
+ &lt;variant&nbsp;instance&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = storage displacement allocated to two byte
+ tagfield relative to origin of OWNER
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+69&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;variant instance&gt; ::= [&lt;constant&gt;]<sup>+</sup> &lt;type&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: &lt;type&gt; must always be a record type (Production 66).<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = VALUE of last &lt;constant&gt; in list of case labels.
+ &lt;constant&gt; -- DATATYPE of &lt;constant&gt; must be
+ compatible with DATATYPE of tag of &lt;variant&nbsp;field&gt;
+ in which it appears. If there is more than one
+ for <u>all but the last</u>, with the following
+ specifications:
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = DATATYPE(&lt;constant&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Caselabel
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = STRUCTYPE(&lt;constant&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for tagfield
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = VALUE(&lt;constant&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for next case label,
+ or &lt;type&gt; if this is the second last &lt;constant&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG, DISPLACEMENT = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+71&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= [&lt;type 1&gt;]<sup>+</sup> &lt;type 2&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: same as for Production 63.<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+72&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= &lt;type 1&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: same as for Production 64.<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+73&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= &lt;type 1&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: same as for Production 65.<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+74&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;type&gt; ::= [&lt;fixed field list&gt;]* [&lt;variant field&gt;]<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;">
+Semantics: same as for Production 66.<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+77&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;param types&gt; ::= [&lt;type id&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">
+Semantics: &lt;type id&gt; is the data type of a value parameter of a
+ formal <u>procedure</u> or <u>function</u>. Create a new entry with
+ no IDENTITY field, and enter:<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&nbsp;id&gt;
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Variable
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE= STRUCTYPE(&lt;type id&gt;)
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for formal procedure
+ or function of whose parameter list &lt;param&nbsp;types&gt; is
+ a component.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = storage allocated to a variable of type
+ &lt;type&nbsp;id&gt;, computed as in Production 12.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = 0
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for next formal
+ parameter of OWNER
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = storage displacement in bytes relative to
+ pseudo_reg of OWNER
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+78&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;param types&gt; ::= [&lt;type id&gt;]<sup>+</sup><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">
+Semantics: &lt;type id&gt; is the data type of a <u>var</u> parameter of a
+formal <u>procedure</u> or <u>function</u>. Create a new entry with
+no IDENTITY as in Production 77, <u>except</u> that<br>
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Formal parameter
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = 4
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+79&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;param types&gt; ::= [&lt;param types 1&gt;]<sup>+</sup> [&lt;type id&gt;]<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">
+Semantics: for &lt;param types&gt; create a new entry with no
+ IDENTITY field for a formal <u>procedure</u> or <u>function</u>
+ that is itself a parameter of a formal <u>procedure</u> or
+ <u>function</u>, and enter:
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DATATYPE = symbol table index of entry for &lt;type&nbsp;id&gt; if
+ present, or null otherwise.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VAR_TYPE = Formal procedure
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STRUCTYPE = if &lt;type&nbsp;id&gt; is present then
+ STRUCTYPE(&lt;type&nbsp;id&gt;), else Statement.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;OWNER = symbol table index of entry for formal procedure
+ of whose parameter list this formal procedure is a
+ component.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;STORAGE_LNGTH = 12 bytes
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;VALUE = symbol table index of first &lt;param&nbsp;types&nbsp;1&gt; entry.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;S_LIST = symbol table index of entry for next formal
+ parameter of OWNER.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;PSEUDO_REG = null
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 15ch; text-indent:-10ch; padding:0;">&nbsp;&nbsp;&nbsp;&nbsp;DISPLACEMENT = storage address in bytes relative to
+ pseudo_reg of OWNER.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br>
+80&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;param types&gt; ::= &lt;empty&gt;<br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">
+Semantics: The formal procedure whose parameter list consists
+ of this &lt;param&nbsp;types&gt; has no formal parameters itself; its
+ VALUE field is set to null.
+</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p><br><br><br>
+VI Semantic Analysis of Arithmetic Expressions
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The chief characteristic which distinguishes PASCAL from its
+predecessors in the ALGOL family is its rich variety of data
+structuring facilities. The primitive data types integer, real,
+Boolean and char as well as user-defined scalar types can be
+composed to form arrays, records, files and sets. Instances of
+any type can be dynamically allocated and referred to by means of
+pointers. An enumerated type can serve as the basis for restrictions
+called subrange types. It is possible for a complicated type
+construction to be represented in the PASCAL language, as well as
+in the compiler&apos;s symbol table, in more than one way. The heart
+of any program which analyzes the semantics of PASCAL arithmetic
+expressions must therefore contain a procedure for deciding the
+compatibility of two data types. If two data types T&nbsp; and T&nbsp; are
+compatible, they are structurally equivalent; a variable of type
+T&nbsp; may then be passed as an actual parameter to a procedure which
+has a formal <u>var</u> parameter of type T&nbsp;.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In the Stony Brook PASCAL/360 compiler, the type compatibility
+procedure (COMPTYPES) was adapted from the procedure of the same
+name in the portable PASCAL P compiler [AMMAN]. A data type
+is always represented by an index into the symbol table; two types
+are said to be <u>the same</u> if they refer to the same symbol
+table entry. A date type name T&nbsp; is said to be an <u>alias</u>
+of data type name T&nbsp; if the type definition<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>type</u> T&nbsp; = T&nbsp;;<br>
+appears in the program. Two types are always compatible if
+they are the same or aliases; otherwise, if they are scalar or
+arithmetic types, they are not compatible; for subrange and set
+types, they are compatible if their highbounds and lowbounds
+are equal and their underlying base types are compatible; for
+pointer types, they are compatible if they point to compatible
+types or if one is the distinguished data type of the constant
+<u>nil</u>; array types are compatible if the corresponding index
+types have the same cardinality and the element types are
+compatible; record types are compatible if they have no variants,
+they have the same number of fields, and the data types of
+corresponding fields are compatible; finally, file types are 
+compatible if their component types are compatible.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The axiomatic definition of PASCAL [HOARE and WIRTH] 
+describes three implicit type coercions which may be necessary
+to evaluate arithmetic expressions. No explicit call to a data
+type transfer function is necessary for the following three
+coercions:<br><br>
+<p style="margin: 0 0ch 0 5ch; padding:0;"></p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">a)&nbsp;&nbsp;&nbsp;coercion of an integer value to a real value;</p><p style="margin: 0 0ch 0 5ch; padding:0;">
+</p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">b)&nbsp;&nbsp;&nbsp;coercion of an integer or scalar value to a value of a
+subrange type thereof; and</p><p style="margin: 0 0ch 0 5ch; padding:0;">
+</p><p style="margin: 0 0ch 0 10ch; text-indent:-5ch; padding:0;">c)&nbsp;&nbsp;&nbsp;coercion of a value of subrange type to a value of the
+integer or scalar type which underlies the subrange.</p><p style="margin: 0 0ch 0 5ch; padding:0;"></p>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;There are generally two distinct contexts in which coercions 
+can occur. The first is when a value of type T&nbsp; must be coerced
+unconditionally to a value of type T&nbsp;; this contest is called
+&quot;assignment coercion&quot;. The second context for type coercion
+is called &quot;operand coercion&quot; and occurs when two operands are
+combined using some polymorphic arithmetic or comparison operator.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Operand coercion shall be considered first. In the Stony Brook
+PASCAL/360 compiler, it is carried out by the procedure COERCE_OP.
+COERCE_OP is called to make the operands compatible when a
+relational operator ( =, &lt;&gt;, &lt;, &gt;, &lt;=, &gt;= ) or an untyped
+arithmetic operator ( +, -, * ) is being processed; that is,
+after both operand expressions of a binary operator have been
+processed independently.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On the nth post-order visit (n &gt; 0) to an expression node
+in the syntax tree (which must have Multiplicity &ge; n) the top n
+elements of the operand stack correspond to the leftmost n subtrees
+of the father node, in general. The top element, Operand#stk
+(#op), corresponds to the nth subtree, whose node was the last
+previous node visited, and the symbol table index of the data
+type of this subtree is given by the value of the variable #tp.
+When n &gt; 1, the leftmost n - 1 subtree indices in the father node
+have been replaced by the symbol table indices of the data types
+of the n - 1 expression subtrees. This situation must remain
+invariant over the entire tree-traversal.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The following program segment describes the post-order semantic
+processing of the &quot;+&quot; operator (production 39), illustrating the
+use of COERCE_OP:<br><br>
+<pre style="margin:0;">
+     DO;
+         /* REPLACE THE INDEX OF THE OPERAND SUBTREE IN THE OPERATOR
+            NODE WITH #TP.  THE DATA TYPE OF THE OPERAND SUBTREE. */
+         CALL replace (#tp);
+         IF #mp = 2 THEN /* SECOND POST-ORDER VISIT */
+               DO;
+                      /* MAKE OPERANDS COMPATIBLE */
+                      CALL coerce_op;
+                      /* FETCH UPDATED VALUE OF # TP FROM SYNTAX TREE */
+                      #tp = parse_tree(node#stack(np) + 2);
+                      IF comptypes (#tp, intptr) THEN
+                           CALL emit_triple (add, operand#stk(#op - 1),
+                                               operand#stk(#op), 3);
+                      ELSE IF comptypes (#tp, realptr) THEN
+                           CALL emit_triple (addflt, operand#stk(#op-1),
+                                               operand#stk(#op), 3);
+                      ELSE CALL error (&apos;ILLEGAL &quot;<sup>+</sup>&quot; OPERATOR&apos;, 1);
+                      /* POP THE OPERAND STACK */
+                      #op = #op - 1;
+                      /* LEAVE ADD TRIPLE ON TOP OF OPERAND STACK */
+                      operand#stk(#op) = last_triple;
+               END;
+     END;
+</pre>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Intptr and Realptr are the symbol table indices of the standard
+data types integer and real respectively. The program segment
+given above illustrates the function of operand coercion. Its
+primary purpose is to make both operands compatible or to issue
+an error message if this is not possible. Furthermore, since
+arithmetic operations are undefined for operands of subrange
+types, COERCE_OP must coerce subrange operands to their
+underlying scalar type. Finally, if one operand is of type
+real and the other is of type integer, the integer operand must
+by coerced to type real. A type coercion may cause triples to be
+emitted (and a corresponding adjustment to one of the top two
+elements of the operand stack), and will always update the type
+information held in the operator node of the syntax tree.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assignment coercion is carried out by the procedure COERCE_
+ASSIGNMENT, which is called whenever the top element of the 
+operand stack must be coerced unconditionally to a specific data
+type. For example, the operands of a DIV or MOD operator must
+both be integers; the value of an expression used to index an
+array must be coerced to the scalar or subrange index type of the
+array. Only the top element of the operand stack is considered;
+however, coercions from integer or scalar types to subranges is
+now possible. Such a coercion may require emission of triples to
+check dynamically whether a value so coerced is indeed within the
+subrange.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use of assignment coercion is illustrated by the post-order
+semantic actions associated with the integer division (DIV)
+operator (production 44):<br><br>
+<pre style="margin:0;">
+     DO;
+         /* REPLACE THE INDEX OF THE OPERAND SUBTREE IN THE OPERATOR
+            NODE WITH #TP.  THE DATA TYPE OF THE OPERAND SUBTREE. */
+         CALL replace (#tp);
+         /* MAKE THE OPERAND AN INTEGER */
+         CALL coerce_assignment (intptr, #tp);
+         IF #mp = 2 THEN /* SECOND POST-ORDER VISIT */
+               DO;
+                     CALL emit_triple (divide operand#stk(#op - 1),
+                                         operand#stk(#op), 3);
+                     /* POP THE OPERAND STACK */
+                     #op = #op - 1;
+                     /* LEAVE DIVIDE TRIPLE ON TOP OF OPERAND STACK */
+                     operand#stk(#op) = last_triple;
+                     /* THIS EXPRESSION IS OF TYPE INTEGER */
+                     #tp = intptr;
+                END;
+     END;
+</pre><br><br><br><br>
+VII Left-to-Right Control-Flow Evaluation of Boolean Expressions
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The PASCAL language definition does not fully define the manner
+in which Boolean expressions are to be evaluated. If the first
+operand of an <u>and</u> operator has been evaluated to false,
+we know that the logical conjunction is false regardless of the
+value of the second operand. If the second operand is evaluated,
+a function procedure with side effects might be invoked; the side
+effects might alter the future course of the computation. A
+similar situation arises with an <u>or</u> operator. If the first
+operand has been evaluated to true then the disjunction is true;
+do we evaluate the second operand? The PASCAL language definition
+does not specify how much evaluation is required in these cases.
+In both cases the Stony Brook implementation does not perform
+redundant evaluation of the second operand. This is ensured by
+the generation of optimized triples during Pass 2.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some insight into the process of generating triples is gained
+by looking at a few sample Boolean expressions, taken from 
+[GRIES], which illustrate the optimized triples sequences that are 
+actually generated:<br><br><br>
+<u>Example 1</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>or</u> B<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3&nbsp;&nbsp;&nbsp;BCH_TARGET
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The triple $3 is reached only if the disjunction is true;
+otherwise a branch is made to the first operand of triple $2,
+which must designate a BCH_TARGET triple.<br><br><br>
+<u>Example 2</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>not</u> A <u>or</u> B<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3&nbsp;&nbsp;&nbsp;BCH_TARGET
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is similar to the first example. The <u>not</u> operator
+merely causes the branching condition in the $1 triple to be
+reversed. The $1 triple now says, &quot;Branch to the true-location
+($3) if A is false (i.e.,zero).&quot;<br><br><br>
+<u>Example 3</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>and</u> B<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If triple $3 is reached, A and B are both true. The first
+operands of triples $1 and $2 must both designate the same
+BCH_TARGET triple, which is branched to if the conjunction is
+false.<br><br><br>
+<u>Example 4</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>or</u> B <u>or</u> <u>not</u> C<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4,B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,C<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4&nbsp;&nbsp;&nbsp;BCH_TARGET
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The rules of PASCAL tell us that the correct way to parse the
+disjunction above is (A <u>or</u> B) <u>or</u> (<u>not</u> C). The
+disjunction is true if A alone is true or if B alone is true and
+this is reflected in the generated triples. A branch is taken
+to the false-location if the negated variable is true.<br><br><br>
+<u>Example 5</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>or</u> <u>not</u> B <u>or</u> C<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4,B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,C<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4&nbsp;&nbsp;&nbsp;BCH_TARGET
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is similar to the previous example. A branch is taken
+to the true-location if the negated variable is false.<br><br><br>
+<u>Example 6</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>and</u> (B <u>or</u> C)<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4 B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,C<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4&nbsp;&nbsp;&nbsp;BCH_TARGET
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;After A has been evaluated, the triples generated are simply
+those that evaluate (B <u>or</u> C), as in example 1. The first
+operands of triples $1 and $3 must designate the same 
+BCH_TARGET instruction.<br><br><br>
+<u>Example 7</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(A <u>or</u> <u>not</u> B) <u>and</u> (<u>not</u> C <u>and</u> D)<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3&nbsp;&nbsp;&nbsp;BCH_TARGET<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,C<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$5&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,D
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;As Boolean expressions become more complicated, intermediate
+BCH_TARGET instructions are needed to indicate that 
+subexpressions are true (false). In this case, if A is true
+then the value of the expression does not depend upon the value
+of B, so a branch is made to the (<u>not</u> C <u>and</u> D)
+subexpression. Generally, an intermediate BCH_TARGET is
+necessary when the first operand of a conjunction is a disjunction.<br><br><br>
+<u>Example 8</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(A <u>and</u> <u>not</u> B) <u>or</u> (<u>not</u> C <u>and</u> D)<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$6,B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3&nbsp;&nbsp;&nbsp;BCH_TARGET<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,C<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$5&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,D<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$6&nbsp;&nbsp;&nbsp;BCH_TARGET
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is similar to example 7. The other case where an 
+intermediate BCH_TARGET instruction is generally necessary is
+when the first operand of a disjunction is a conjunction.<br><br><br>
+<u>Example 9</u>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>and</u> (<u>not</u> (B <u>or</u> C) <u>or</u> D)<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$1&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$2&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4,B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3&nbsp;&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$6,C<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$4&nbsp;&nbsp;&nbsp;BCH_TARGET<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$5&nbsp;&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,D<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$6&nbsp;&nbsp;&nbsp;BCH_TARGET
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This expression is made complicated by having an entire 
+disjunction negated. We simplify such expressions by means of
+De Morgan&apos;s law, which states that<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<u>not</u> (A <u>or</u> B) is equivalent to (<u>not</u> A <u>and</u> <u>not</u> B)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;&nbsp;<u>not</u> (A <u>and</u> B) is equivalent to (<u>not</u> A <u>or</u> <u>not</u> B).<br><br>
+Expression 9 is then simplified to the equivalent<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>and</u> ((<u>not</u> B <u>and</u> <u>not</u> C) <u>or</u> D).<br><br>
+Note that the generated triples correspond quite closely to
+the simplified expression. The simplified expression has a
+conjunction as the first operand of a disjunction and so the 
+triples must therefore contain an intermediate BCH_TARGET
+instruction.<br><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The examples above all exhibit an important property that has
+not yet been mentioned. If the last triple in the sequence has
+been executed and does not result in a branch, the expression has
+the value true. If the expression has the value false, then one
+of the triples that will be executed will result in a branch out
+of the expression to an unspecified location called false-location.
+This is important because when Boolean expressions appear in the
+context of the control structures <u>if</u> - <u>then</u> - <u>else</u>,
+<u>while</u> - <u>do</u>, and <u>repeat</u> - <u>until</u>, a value of
+true implies execution of the statement which immediately follows
+the Boolean expression, whereas a value of false implies a branch.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The algorithm for producing optimized triples for Boolean
+expressions uses the first operands of BZ and BNZ triples as
+temporary storage. Those conditional branch instructions whose
+first operands will ultimately designate the same BCH_TARGET 
+triple are temporarily chained together via their first operands;
+this chain is called a <u>fixup list</u>. The high-order bit of
+each (16-bit) fixup list pointer determines whether the branch
+is to be taken to a &quot;true location&quot; (bit is 1) or to a &quot;false
+location&quot; (bit is 0). A stack called Fix_list is used to hold
+pointers to the heads of left-operand fixup lists of binary
+Boolean operator nodes whose right-operand trees have not yet
+been traversed. Fix_list is indexed by Np, the depth in the
+syntax tree of the current (Boolean operator) node. The global
+variable Listhead points to the head of the current fixup list,
+and the global variable Fx holds the current Boolean value on 
+which to branch out of the expression. In the syntax tree, the
+subtree index which originally pointed to a Boolean operator
+node (from the Boolean operator&apos;s father node) is used to hold
+the value of Fx as it propagates downward through the operand
+subtrees. After a Boolean expression has been processed, the
+top element of the operand stack might designate a BZ or a 
+BNZ instruction; in this case, the variable Fx determines 
+whether the conditional branch instruction branches to a &quot;true
+location&quot; (Fx = true) or to a &quot;false location&quot; (Fx = false).
+The variable Listhead points to the head of the fixup chain which
+includes the triple designated by the top element of the operand
+stack.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We now present in detail the algorithm for optimizing
+Boolean expressions. We are interested in the semantic actions
+associated with the <u>not</u>, <u>or</u>, and <u>and</u> operators
+(productions 31, 41 and 46 respectively). These semantic actions
+use four subsidiary procedures. Is_condition and Is_negation 
+are predicates which are true if their arguments designate
+conditional branch triples and NOT triples respectively.<br><br><br><br>
+<pre style="margin:0;">
+     is_condition:
+          PROCEDURE (op_ptr) BIT(1);
+               /* TESTS OPERAND TO SEE IF BZ OR BNZ TRIPLE */
+               DECLARE (op_ptr, opcd) BIT(16);
+               IF (op_ptr &amp; &quot;C000&quot;) = mask_triple THEN
+                     DO;
+                         opcd = triples(op_ptr &amp; &quot;3FFF&quot;) &amp; &quot;7F&quot;;
+                         IF (opcd = BZ) &boxv; (opcd = BNZ) THEN
+                              RETURN true;
+                     END;
+               RETURN false;
+          END is_condition;
+ 
+ 
+     is_negation;
+          PROCEDURE (op_ptr) BIT(1);
+               /* DETERMINES IF OPERAND IS A &quot;NOT&quot; TRIPLE */
+               DECLARE (op_ptr, opcd) BIT(16);
+               IF (op_ptr &amp; &quot;C000&quot;) = mask_triple THEN
+                    DO;
+                         opcd = triples(op_ptr &amp; &quot;3FFF&quot;) &amp; &quot;7F&quot;;
+                         IF opcd = not THEN RETURN true;
+                    END;
+               RETURN false;
+          END is_negation;
+</pre>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Fixup causes each conditional branch triple on a fixup list
+to branch to the same designated BCH_TARGET triple.<br><br><br>
+<pre style="margin:0;">
+     fixup:
+          PROCEDURE (head_ptr, target_triple);
+               DECLARE (head_ptr, target_triple, next) BIT(16);
+               DO WHILE head_ptr &nbsp;= null;
+                    head_ptr = head_ptr &amp; &quot;3FFF&quot;;
+                    next = triples(head_ptr + 1);
+                    triples(head_ptr + 1) = target_triple &boxv; mask_triple;
+                    head_ptr = next;
+               END;
+          END fixup;
+</pre><br><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Emit_conditional_branch causes a BZ or a BNZ triple to
+be emitted, depending upon the Boolean value of its argument. If
+the second operand of the conditional branch (i.e., the Boolean
+value being tested) designates a NOT triple, the NOT triple is
+overwritten by the conditional branch triple. Emit_conditional_branch
+is called only in situations where the NOT triple being
+overwritten is in fact the last previous triple to be emitted.<br><br><br>
+<pre style="margin:0;">
+     emit_conditonal_branch;
+          PROCEDURE (fx);
+               DECLARE fx BIT(1), opnd BIT(16);
+               opnd = operand#stk(#op);
+               IF is_negation (opnd) THEN
+                    DO;
+                         n_triples = n_triples - 3;
+                         opnd = triples(n_triples + 1);
+                         fx = 1 - fx;
+                    END;
+               IF fx THEN CALL emit_triple (bnz, null, opnd, 0);
+               ELSE CALL emit_triple (bz, null, opnd, 0);
+          END emit_conditional_branch;
+</pre>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We now consider the semantic actions themselves. Remembering
+that we wish to branch out of Boolean expressions if they are
+false and continue processing if they are true, the following 
+pre-order actions are applied for all productions in which Boolean
+expressions may appear, but which are not themselves Boolean
+operators (e.g., statements, procedure/function calls, 
+subscript lists, set elements, etc.).<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DO;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fx = false; listhead = null;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;END;
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When the subtree for one of the binary Boolean operators
+<u>and</u> and <u>or</u> is encountered in pre-order, the
+sequence of triples emitted depends not only upon the subtree
+itself but upon the value of Fx as well. Recall that if Fx is
+true, we branch out of the expression to a true-location, otherwise
+we branch out to a false-location. The triples we emit are as
+follows:
+<br><br>
+<style type="text/css">
+td.td24 {width: 5ch; padding: 0}
+td.td25x0000 {width: 29ch; border-style: solid; border-width: 0px 0px 0px 0px; border-color: black; padding: 0}
+td.td25x0101 {width: 29ch; border-style: solid; border-width: 0px 1px 0px 1px; border-color: black; padding: 0}
+td.td25x1101 {width: 29ch; border-style: solid; border-width: 1px 1px 0px 1px; border-color: black; padding: 0}
+td.td25x0111 {width: 29ch; border-style: solid; border-width: 0px 1px 1px 1px; border-color: black; padding: 0}
+td.td25x1111 {width: 29ch; border-style: solid; border-width: 1px 1px 1px 1px; border-color: black; padding: 0}
+td.td26x0000 {width: 29ch; border-style: solid; border-width: 0px 0px 0px 0px; border-color: black; padding: 0}
+td.td26x0101 {width: 29ch; border-style: solid; border-width: 0px 1px 0px 1px; border-color: black; padding: 0}
+td.td26x1101 {width: 29ch; border-style: solid; border-width: 1px 1px 0px 1px; border-color: black; padding: 0}
+td.td26x0111 {width: 29ch; border-style: solid; border-width: 0px 1px 1px 1px; border-color: black; padding: 0}
+td.td26x1111 {width: 29ch; border-style: solid; border-width: 1px 1px 1px 1px; border-color: black; padding: 0}
+</style>
+<style type="text/css">
+td.td27 {width: 5ch; padding: 0}
+td.td28x0000 {width: 29ch; border-style: solid; border-width: 0px 0px 0px 0px; border-color: black; padding: 0}
+td.td28x0101 {width: 29ch; border-style: solid; border-width: 0px 1px 0px 1px; border-color: black; padding: 0}
+td.td28x1101 {width: 29ch; border-style: solid; border-width: 1px 1px 0px 1px; border-color: black; padding: 0}
+td.td28x0111 {width: 29ch; border-style: solid; border-width: 0px 1px 1px 1px; border-color: black; padding: 0}
+td.td28x1111 {width: 29ch; border-style: solid; border-width: 1px 1px 1px 1px; border-color: black; padding: 0}
+td.td29x0000 {width: 29ch; border-style: solid; border-width: 0px 0px 0px 0px; border-color: black; padding: 0}
+td.td29x0101 {width: 29ch; border-style: solid; border-width: 0px 1px 0px 1px; border-color: black; padding: 0}
+td.td29x1101 {width: 29ch; border-style: solid; border-width: 1px 1px 0px 1px; border-color: black; padding: 0}
+td.td29x0111 {width: 29ch; border-style: solid; border-width: 0px 1px 1px 1px; border-color: black; padding: 0}
+td.td29x1111 {width: 29ch; border-style: solid; border-width: 1px 1px 1px 1px; border-color: black; padding: 0}
+</style><br>
+<u>Fx = false</u>:<br><br>
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+<tbody>
+<tr><td valign="top" class="td24"></td><td valign="top" class="td25x1101"> </td><td valign="top" class="td26x1101"><br></td></tr>
+<tr><td valign="top" class="td24"></td><td valign="top" class="td25x0101"></td><td valign="top" class="td26x0101"><br></td></tr>
+<tr><td valign="top" class="td24"></td><td valign="top" class="td25x0101"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>and</u> B</td><td valign="top" class="td26x0101">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>or</u> B
+</td></tr><tr><td valign="top" class="td24"></td><td valign="top" class="td25x0101"></td><td valign="top" class="td26x0101"><br></td></tr>
+<tr><td valign="top" class="td24"></td><td valign="top" class="td25x0101">&nbsp;&nbsp;$1&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,A</td><td valign="top" class="td26x0101">&nbsp;&nbsp;$1&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3,A
+</td></tr>
+<tr><td valign="top" class="td24"></td><td valign="top" class="td25x0101">&nbsp;&nbsp;$2&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,B</td><td valign="top" class="td26x0101">&nbsp;&nbsp;$2&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;false-loc,B
+</td></tr>
+<tr><td valign="top" class="td24"></td><td valign="top" class="td25x0101"></td><td valign="top" class="td26x0101">&nbsp;&nbsp;$3&nbsp;&nbsp;BCH_TARGET
+</td></tr><tr><td valign="top" class="td24"></td><td valign="top" class="td25x0101"></td><td valign="top" class="td26x0101"><br></td></tr>
+<tr><td valign="top" class="td24"></td><td valign="top" class="td25x0111"></td><td valign="top" class="td26x0111"><br></td></tr>
+</tbody></table><br>
+<u>Fx = true</u>:<br><br>
+<table cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+<tbody>
+<tr><td valign="top" class="td27"></td><td valign="top" class="td28x1101"> </td><td valign="top" class="td29x1101"><br></td></tr>
+<tr><td valign="top" class="td27"></td><td valign="top" class="td28x0101"></td><td valign="top" class="td29x0101"><br></td></tr>
+<tr><td valign="top" class="td27"></td><td valign="top" class="td28x0101"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>and</u> B</td><td valign="top" class="td29x0101">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A <u>or</u> B
+</td></tr>
+<tr><td valign="top" class="td27"></td><td valign="top" class="td28x0101">&nbsp;&nbsp;$1&nbsp;&nbsp;BZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$3,A</td><td valign="top" class="td29x0101">&nbsp;&nbsp;$1&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true-loc,A
+</td></tr>
+<tr><td valign="top" class="td27"></td><td valign="top" class="td28x0101">&nbsp;&nbsp;$2&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true-loc,B</td><td valign="top" class="td29x0101">&nbsp;&nbsp;$2&nbsp;&nbsp;BNZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true-loc,B
+</td></tr>
+<tr><td valign="top" class="td27"></td><td valign="top" class="td28x0101">&nbsp;&nbsp;$3&nbsp;&nbsp;BCH_TARGET
+</td><td valign="top" class="td29x0101"><br></td></tr>
+<tr><td valign="top" class="td27"></td><td valign="top" class="td28x0101"></td><td valign="top" class="td29x0101"><br></td></tr>
+<tr><td valign="top" class="td27"></td><td valign="top" class="td28x0111"></td><td valign="top" class="td29x0111"><br></td></tr>
+</tbody></table>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;These triples patterns suggest the algorithm. The value of
+Fx is inherited from the <u>and</u> or <u>or</u> operator&apos;s father
+node and propagates downward through the syntax tree. When an
+<u>and</u> or <u>or</u> operator is visited in pre-order the value
+of Fx is saved in the operator&apos;s father node. For an <u>and</u>
+operator, we always branch out of the left operand on false
+regardless of the inherited value of Fx, so we temporarily set
+Fx to false. For an <u>or</u> operator we similarly set Fx to
+true temporarily.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We then traverse the left operand, making certain that
+triples are emitted to conditionally branch out of it. The left
+operand fixup list pointer, whose high-order bit contains the
+temporary value of Fx, is stacked in Fix_list(Np). Fx is then
+restored to its inherited value and the right operand subtree is
+traversed; we always branch out of the right operand on the
+inherited value of Fx.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;After processing both subtrees, if the value of Fx, on the left
+operand is equal to the inherited right operand value of Fx, we
+merge the left and right operand fixup lists into a single chain
+pointed to by Listhead; otherwise, we emit a BCH_TARGET triple
+and fix up the left operand by making all of the conditional
+branch instructions on its fixup list branch to the newly emitted
+BCH_TARGET.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We see that this algorithm works for all four cases illustrated
+above. Note that the semantic actions taken for <u>and</u>  and
+<u>or</u> operators are nearly identical, differing only in the
+temporary value assigned to Fx when the operator node is visited
+in pre-order. Also note that De Morgan&apos;s law is applied to a
+negated <u>and</u> or <u>or</u> operator merely by negating Fx
+when the <u>not</u> operator is visited in pre-order (i.e. before
+visiting the <u>and</u> or <u>or</u> operator in pre-order), and
+then reversing the parity of the fixup list (asserting that it
+branches to a false-location, for example, instead of a true-location)
+when the <u>not</u> operator is visited again in post-order.
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For the <u>not</u> operation itself, we wish to branch out of its
+operand (which is a Boolean expression) on true if it is a component
+of another Boolean expression, which we want to branch out of on
+false, and vice versa. Therefore in pre-order we logically complement
+Fx, and in post-order we restore Fx to its previous value. The 
+semantic actions associated with the <u>not</u> operator (production
+31) are as follows:<br><br>
+<u>Pre-order</u>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fx = 1 - fx;<br><br>
+<u>Post-order</u>:
+<pre style="margin:0;">
+          Do;
+                  IF &not;comptypes (#tp, boolptr) THEN
+                       DO;
+                            CALL error (&apos;BOOLEAN EXPRESSION EXPECTED&apos;, 1);
+                            #tp = boolptr;
+                       END;
+                  IF is_negation (operand#stk(#op) THEN
+                       DO; /*ELIMINATE DOUBLE NEGATIVES */
+                           operand#stk(#op) = triples(n_triples - 2);
+                           n_triple = n_triples - 3;
+                           last_triples = (n_triples - 3) &boxv; mask_triple;
+                       END;
+                  ELSE IF is_condition (operand#stk(#op)) THEN
+                       /* REVERSE THE PARITY OF LISTHEAD */
+                       listhead = (listhead &amp; &quot;7FFF&quot;)
+                                  &boxv; shl(1 - shr(listhead, 15), 15);
+                  ELSE
+                       DO;
+                            CALL emit_triple (not, operand#stk(#op), null, 3);
+                            operand#stk(#op) = last_triple;
+                       END;
+                 /* RESTORE FX */
+                 fx = 1 - fx;
+          END;
+</pre>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The semantic actions associated with <u>or</u> and <u>and</u>
+operators (productions 41 and 46 respectively) are given below.<br><br>
+<u>Pre-order:</u>
+<pre style="margin:0;">
+          DO;
+               CALL replace (fx); /* SAVE INHERITED VALUE OF FX */
+               fx = (parse_tree(node + 1) = 41); /* TRUE IF OR,
+                                                    FALSE IF AND */
+               listhead = null;
+          END;
+</pre><br><br>
+<u>Post-order</u>:
+<pre style="margin:0;">
+          IF #mp = 1 THEN
+                 DO; /* FINISHED TRAVERSING LEFT SUBTREE */
+                     IF &nbsp;comptypes (#tp boolptr) THEN
+                          CALL error (&apos;BOOLEAN EXPRESSION EXPECTED&apos;, 1);
+                     IF listhead &nbsp;= null THEN
+                          fix_list(np) = listhead;
+                     ELSE
+                          DO; /* BRANCH OUT OF LEFT OPERAND */
+                              CALL emit_conditional_branch (fx);
+                              fix_list(np) = shl(fx, 15) &boxv; (n_triples - 3);
+                          END;
+                    /* RESTORE FX TO ITS INHERITED VALUE */
+                    fx = parse_tree(node#stack(np - 1)
+                                    + #pos_stack(np - 1) + 1);
+                    listhead = null;
+                    #op = #op - 1;
+                 END;
+          ELSE
+                 DO; /* FINISHED TRAVERSING RIGHT SUBTREE */
+                     IF &nbsp;comptypes (#tp, boolptr) THEN
+                          DO;
+                               CALL error (&apos;BOOLEAN EXPRESSION EXPECTED&apos;, 1);
+                               #tp = boolptr;
+                          END;
+                     IF listhead = null THEN
+                          DO; /* BRANCH OUT OF RIGHT OPERAND */
+                              CALL emit_conditional_branch (fx);
+                              operand#stk(#op) = last_triple;
+                              listhead = shl(fx, 15) &boxv; (n_triples - 3);
+                          END;
+                     i = fix_list(np); /* FIXUP LIST FOR LEFT OPERAND */
+                     IF shr(i, 15) &nbsp;= fx THEN
+                          DO; /* FIX UP LEFT OPERAND */
+                              CALL emit_triple (bch_target, null, null, 0);
+                              CALL fixup (i last_triple);
+                          END;
+                     ELSE
+                          DO; /* MERGE LEFT AND RIGHT FIXUP LISTS */
+                              i = i &amp; &quot;3FFF&quot;;
+                              DO WHILE triples(i + 1) &nbsp;= null;
+                                   i = triples(i + 1) &amp; &quot;3FFF&quot;;
+                              END;
+                              triples(i + 1) = listhead;
+                              listhead = fix_list(np);
+                           END;
+          END;
+</body>
+</html>

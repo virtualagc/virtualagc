@@ -1,0 +1,657 @@
+KEYPUNCH 
+NO HYPH
+WIDTH OF COLUMN IS 65
+SENTENCES SEPARATED BY 2 BLANKS
+NO CAPITALIZE
+TEXT STARTS ON LINE 6 POSITION 15
+TABS AT 6 11 16 21 26 31 36 41
+INDENT (5,0),(10,0),(15,0),(20,0),(25,0),(30,0),(35,0),(40,0)
+go
+/jm/PASCAL Technical Memo 5.1
+/l2/Documentation of Internal Structure/m/
+/p/The primary documentation of the compiler internals is the code
+itself.  However, as the listings for each phase (called Pass1,
+Pass2, Pass3, and PMD) are long, we have supplied in this memo a
+prose description of the major structures, both procedure and data,
+of each phase.  It is intended that the reader should have digested
+Tech.¬Memos 1.1, 2.1, and 3.1 prior to starting on this one, so that
+he is familiar with the overall structure of the compiler, the
+distribution of function among phases, and the internal forms of the
+program and semantics tables in interpass communication.
+/p/After reading the description of a phase in this memo, then with
+the aid of a cross reference listing of identifiers (produced by
+the utility program XPLXREF) and of a compilation listing (produced
+by XCOM4) one should be able to begin selective study of the 
+source code.
+/l2u/Caveat/u/:  This documentation is based on Release1, Version 1
+of the compiler (June 1, 1976) and it is unlikely that the 
+documentation will ever be revised to keep abreast of updates to the
+compiler itself.
+/l2/1.¬¬/u/Pass1 internal description/u/
+/p/Pass 1 is organized as five principal modules embedded in a control
+program environment.  In this description we shall give the function
+associated with each module, describe principal aspects of the
+internal data base of each, and describe the input-output files and
+inter-module communications protocols.  For more detail, one can
+refer to a listing of the source code and a cross-reference listing
+(use the XPL compiler and the utility program XPLXREF to obtain
+these).
+/l2/1.0¬¬The control program and environment procedures are:
+/l2i1/MAIN¬_PROCEDURE
+/l/INITIALIZE
+/l/RE¬_INITIALIZE
+/l/PRINT¬_DATE¬_AND¬_TIME
+/l/PRINT¬_SUMMARY
+/l/ERROR/i/
+/l2i1/INITIALIZE/i3/sets values of some compiler constants implemented 
+as initialized variables./i/
+/li1/RE¬_INITIALIZE/i3/sets initial values of some global variables./i/
+/li1/PRINT¬_SUMMARY/i3/prints pass1 compilation statistics./i/
+/li1/MAIN¬_PROCEDURE/i3/is the control program./i/
+/l2/1.1¬¬/u/Lexical analyzer/u/ is responsible for getting source 
+program text from the SYSIN file, analyzing the source text to produce
+syntactic token codes, identifier or literal constant names, and
+conversion of numeric constants to their internal representation as
+32-bit, two's complement, binary radix integers or as single-precision
+hexadecimal floating point numbers.
+/l2/The principal procedures are:
+/l2t1/CHAR
+/lt1/GET¬_CARD
+/lt1/SCAN
+/l2/and
+/l2t1/FLOAT
+/lt1/REAL¬_ADD
+/lt1/REAL¬_MULTIPLY
+/lt1/TENINTO
+/l2/The latter group performs real number conversions and is called
+from SCAN.
+/p/GET¬_CARD performs card reading and listing.  It returns the
+image of an input record in a global, CHARACTER type variable, TEXT.
+When the end of the SYSIN file is detected, TEXT is set to a string
+of end-of-file symbols.  The ordinal number of the currently active
+input record is kept in the global variable CARD¬_COUNT.
+/p/CHAR is a procedure used to simulate character stream input; each
+call leaves the next character under the text string index pointer.
+/p/SCAN is the principal working procedure of the lexical analyzer.
+It analyzes the string in TEXT, discards portions as they are
+analyzed, and generates a call to GET¬_CARD upon reaching a
+record boundary.  The currently scanned character is indexed within
+TEXT by the index variable CP.  (Index values start from zero, in
+the XPL implementation languages.)  Analysis involves a case switch
+on the equivalence class of the leading character of the string to
+be analyzed.  Sequences of blanks, comments, quoted string 
+constants, and identifiers are scanned rapidly by employing the TRT
+(translate and test) instruction.  Other sequences are scanned
+character-by-character.  Reserved words are identified by searching
+a table, indexed by word length.  Toggles appearing within
+comments are detected and switched by SCAN.
+/l2/The data base for lexical analysis includes
+/l2t1/V - /i3/an array of character string identifiers 
+of lexical token types sorted as terminal, nonterminal 
+tokens and secondarily by length./i/
+/lt1/V¬_INDEX - /i3/indexes the terminal token names of V by length./i/
+/lt1/RESERVED¬_LIMIT - /i3/a constant; the length of the longest
+reserved word./i/
+/lt1/MARGIN¬_CHOP - /i3/record margin boundary./i/
+/lt1/CHARTYPE, TX, NOT¬_LETTER¬_OR¬_DIGIT, ALPHATABLE, BLANKETABLE,
+/lt1/COMMENTABLE, STRINGTABLE - /i3/character translation tables./i/
+/lt1/BUFFER, TEXT - /i3/character strings to hold input 
+record and portion being analyzed./i/
+/lt1/TEXT¬_LIMIT, CP - /i3/index pointers into text./i/
+/p/Inter-module communication variables set by SCAN are:
+/l2t1/TOKEN - /i3/code number of lexical token scanned;/i/
+/lt1/BCD - /i3/character string value of token scanned;/i/
+/lt1/NUMBER¬_VALUE - /i3/numeric conversion of token scanned;/i/
+/lt1/CONTROL - /i3/an array of the values of compiler control toggles
+set when '$' is encountered in scanning comments./i/
+/lt1/CARD¬_COUNT - /i3/ordinal number of the current input record./i/
+/l2/1.2¬¬/u/Diagnostic listing editor/u/ (DGNS)
+/p/This module prepares an edited listing of the source program
+and sends it to a sequential file for later use by the execution
+profile routine, following execution of the program.  The diagnostic
+listing is prepared only if the compiler parm DEBUG is set
+to a value of 2 or greater.  This value is set by the monitor in 
+the predeclared global variable MONITOR¬_LINK(2).   The 
+procedure of the diagnostic listing module is
+/l2t1/PARAGRAPH
+/l2/which is called from the syntactic module each time that a new
+syntactic token is obtained.  Subordinate procedures and internal
+variables of this module have DGNS# as a prefix to their identifiers.
+/p/Global variables referred to by this module include
+/l2t1/BCD
+/lt1/TEXT
+/lt1/TOKEN
+/l2/It produces no intended side effect, apart from writing the file FILE3.
+/l2/1.3¬¬/u/Lexicon and semantic table module/u/
+/p/The compiler maintains a lexicon in the form of a hash-indexed
+array of internal, sequential files.  Each lexical declaration block
+(procedure, function or record block) is given a unique block number,
+and this number is incorporated as part of the hash code.  Since
+each hash bucket defines a unique sequential file, there is no way
+that identifiers of the same name, but declared in different blocks,
+can ever appear in a common file.  Identifier lookup within a
+sequential file is by sequential search.  Nested contextual blocks
+are accounted for by maintaining a stack of the block numbers of
+currently open blocks.  The block number of a block is saved in the
+VALUE field of the semantic table entry for the block heading.
+/p/Although most of the semantic table is built in Pass 2, some
+semantic data are recorded in Pass 1.  Semantic table entries are
+allocated for identifiers and constants.  The field of the semantic
+tables are kept in fixed-dimension arrays with a common index, as this
+is the only data structuring tool available in the XPL implementation
+language.  These arrays are called;
+/l2t1/IDENTITY - /i3/holds the identifier strings./i/
+/lt1/DATATYPE - /i3/holds an index pointer to an entry for the datatype
+of a variable or function./i/
+/lt1/VAR¬_TYPE - /i3/holds a type code that designates the category 
+of an object, i.e., constant, variable, procedure, etc./i/
+/lt1/VALUE - /i3/holds the internal representation of numeric constants,
+or the block number associated with procedures, functions and records./i/
+/lt1/WHERE¬_DECL - /i3/holds the input line number of the first
+appearance of an identifier./i/
+/lt1/SYMB¬_LINK - /i3/holds the index pointer to the next item in
+an internal, sequential file headed by a hash-code bucket./i/
+/lt1/N¬_LOOKUPS - /i3/holds a count of the number of subsequent
+references to an identifier./i/
+/sv/
+WIDTH 70
+TEXT STARTS ON LINE 6 POSITION 12
+GO
+/A/
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬Figure¬1¬-¬Symbol¬Table
+
+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33BLOCK¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33S_T_A_C_K_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬0|33¬_¬_¬_¬_¬_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<identifier>¬¬¬¬¬¬¬1|33¬_¬_¬_¬_¬_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33
+¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33
+|33¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33
+|33¬¬¬¬hash¬¬¬¬<<-------+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33
+|33¬¬function¬¬<<--------------------------*¬¬|33CURRENT¬¬_LEVEL
+|33¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33
+¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33
+¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33
+¬¬¬¬¬¬|33
+¬¬¬¬¬¬|33
+¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_
+¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33IDENTITY|33SYMB¬_LINK|33VAR¬_|33VALUE|33WHERE|33N¬_¬¬|33
+¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33TYPE|33¬¬¬¬¬|33¬_DECL|33LOOK|33
+¬¬¬¬¬¬|33¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬|33¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_U_P_S_¬_|33
+¬¬¬¬¬¬|33¬¬¬¬¬|33B_U_C_K_E_T_|33¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬|33¬¬¬¬0|33¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬|33¬¬¬¬1|33¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬|33¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33
+¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬.¬¬|33¬¬+----_>_'_A_B_C_'_¬_|33_¬_¬_¬_¬_*_-_-_+_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33
+¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬.¬¬|33¬¬|33¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬'¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬.¬¬|33¬¬|33¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬'¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬|33¬¬¬¬¬|33¬_¬_¬_¬_¬_¬_|33¬¬|33¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬'¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬+---->>¬_¬_¬_*_-_-_---+¬¬|33¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_'_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33¬¬¬¬¬|33¬_'_H_2_0_'_¬_¬_|33_¬_+_-_-_*_<_-_+_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬'¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬'¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬'¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬254|33¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬'¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬255|33¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬'¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_'_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬_¬_'_X_1_'_¬_¬_|33_¬_+_-_>_*_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33
+) 
+/v/
+WIDTH 65
+TEXT STARTS ON LINE 6 POSITION 15
+GO
+/s/
+/p/The principal procedures of the symbol table module are:
+/l2t1/OPEN¬_BLOCK
+/lt1/CLOSE¬_BLOCK
+/lt1/ENTER¬_SYMBOL
+/lt1/CONSTANT¬_INDEX
+/lt1/LITERAL¬_INDEX
+/lt1/LOOKUP
+/lt1/LOOKUP¬_LITERAL
+/lt1/SY¬_DUMP
+/lt1/COMPACTIFY¬_SYMBOL¬_TABLE
+/lt1/PUNCH¬_SYMBOLS
+/l2/The function of OPEN¬_BLOCK and CLOSE¬_BLOCK is to
+open or close a scope of declaration for identifiers.  These
+procedures take a parameter OLD or NEW to indicate whether a block
+is or is not to be reopened.  OLD and NEW are boolean constants.
+When a block is to be closed and never reopened (a procedure block)
+then a procedure NULLOUT is called to remove that block's entries
+from the sequential files of the lexicon this avoids unnecessary
+overhead in performing symbol table lookups.
+/p/The data base utilized by procedures OPEN¬_BLOCK and
+CLOSE¬_BLOCK includes
+/l2t1/CURRENT¬_LEVEL - a global index of the lexical level;
+/lt1/CURRENT¬_BLOCK - the most recently used unique block number;
+/lt1/OWN¬_MOD - an index to the header for the surrounding contextual block;
+/l2/and several columns of a stack whose top is indexed by CURRENT¬_LEVEL:
+/l2t1/BLOCK¬_STACK
+/lt1/PROCMARK
+/lt1/SYMB¬_BLOCK¬_OWNER
+/p/The procedures LOOKUP, LOOKUP¬_LITERAL, LITERAL¬_INDEX
+perform searches of the lexicon, and call ENTER¬_SYMBOL in case
+the identifier is not present.  They return an index to the symbol
+table entry of the identifier given as an argument.  LOOKUP takes
+as a second argument the depth (lexical level) to which a search is
+to be made.  It emits a duplicate declaration message if the global
+flag IS¬_DECLARATION is set, and the identifier is not a
+forward declaration of a procedure.  Its data base includes:
+/l2t1/BUCKET, the table of headers of the internal sequential
+files of entries,
+/lt1/BLOCK¬_STACK, the stack of block numbers of open blocks,
+/lt1/CURRENT¬_LEVEL,
+/l2/and the semantic tables.
+/p/Procedure CONSTANT¬_INDEX looks up numeric constants by their
+values, and enters them into the table if not found. 
+Numeric constants are linked onto lists headed by the entries 
+for data types INTEGER and REAL.
+/l2t1/SY¬_DUMP prints the Pass 1 and symbol table.
+/p/Procedures COMPACTIFY¬_SYMBOL¬_TABLE and PUNCH¬_SYMBOLS
+format and output the symbol table to a sequential 
+file (DD name SYSUT1) for use by Pass 2.
+/l2/1.4¬¬Syntactic analysis and error recovery
+/p/The Pascal//360 compiler employs top-down, predictive parsing by
+a table-driven LL(1) parser.  Error recovery is also predominately
+table-driven, and employs a multi-level strategy that keys on 
+reserved words and punctuation symbols to re-establish a legal
+syntactic context.  The principal procedure of the parser is:
+/l2t1/COMPILATION¬_LOOP
+/p/COMPILATION¬_LOOP uses as a data base several tables prepared
+by an LL(1) constructor.  These tables determine which production to
+apply, if any is applicable, for each pair (N,t) where N is a
+nonterminal symbol of the LL(1) grammar describing Pascal, and t is
+a terminal symbol.  The tables implement a sparse representation
+of the decision matrix, and are therefore not easily read.  However,
+the parsing decision tables occupy only 2078 bytes of storage, although
+there are 62 terminal and 96 nonterminal symbols of the grammar.
+Figure 2 illustrates the data structure that implements the decision
+matrix.  GET¬_TOKEN is a subsidiary procedure of COMPILATION¬_LOOP
+from which calls to the lexical analyzer and the symbol table 
+lookup routines are made.  GET¬_TOKEN also performs the semantic
+action of constructing a leaf node of the syntax tree for each
+<identifier> or <constant> token.  However, this action is not taken
+at the time that the token is scanned.  Semantic action is not taken
+on a token before it has been processed by COMPILATION¬_LOOP.
+/p/Global variables accessed or set by GET¬_TOKEN are:
+/l2t1/TOKEN
+/lt1/BCD /t7/referenced by GET¬_TOKEN
+/lt1/NUMBER¬_VALUE
+/l2t1/LAST¬_LITERAL¬_SCANNED - /i4/the index in the symbol
+table of the last scanned identifier or literal constant.  Both
+referenced and set by GET¬_TOKEN./i/
+/l2t1/MINUS¬_FLAG - /i4/boolean flag that denotes a negative
+constant.  Tested and cleared in GET¬_TOKEN./i/
+/l2t1/SUBTREE¬_STACK /t7/set by
+/lt1/SUBTREE¬_STACKSIZE /t7/semantic
+/lt1/PARSE¬_TREE /t7/action
+/l2t1/PREVIOUS¬_TOKEN /t7/variables of COMPILATION¬_LOOP
+/lt1/SUCCESSFUL¬_INSERTION /t7/and used in error recovery;
+/lt1/TOKEN¬_SUPPLIED /t7/set in GET¬_TOKEN
+/l2/Procedures called from GET¬_TOKEN include:
+/l2t1/GET¬_NODE
+/lt1/STACK¬_NODE /t7/semantic actions
+/lt1/UNSTACK
+/l2t1/LOOKUP
+/lt1/LOOKUP¬_LITERAL /t7/symbol table routines
+/lt1/PARAGRAPH /t7/diagnostic listing generator
+/lt1/SCAN /t7/lexical analyzer
+/sv/
+WIDTH 70
+TEXT STARTS ON LINE 6 POSITION 12
+GO
+/A/
+
+¬¬¬¬¬¬¬Figure¬2¬-¬Data¬structure¬containing¬decision¬tables
+
+
+¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_
+¬¬¬¬¬¬¬¬¬¬¬|33E_N_T_R_I_E_S_|33¬¬¬¬¬¬|33I_N_I_T_|33_F_I_N_¬_|33_P_T_R_¬_|33¬¬¬¬¬¬|33P_R_O_D_#_|33¬¬¬¬¬¬¬¬¬¬¬
+¬¬¬¬¬¬¬¬¬¬0|33¬_¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬1|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬¬_
+¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬¬|33¬¬¬¬¬¬|33¬_¬_¬_¬_|33_¬_¬_¬_¬_|33_¬_¬_¬_¬_|33¬¬+-->>N,¬I1|33¬|33
+¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬¬|33¬¬+-->>¬I1¬|33¬F1¬|33¬*-----+¬¬¬|33¬¬.¬¬|33¬|33
+¬¬¬¬¬¬¬¬¬¬¬|33¬_¬_¬_._¬_¬_¬_|33¬¬|33¬¬¬|33¬¬.¬|33¬¬.¬|33¬¬.¬|33¬¬¬¬¬¬|33¬¬.¬¬|33¬¬>--+
+¬+-->>N-NT1|33¬_¬_¬_*_-_-_-_---+¬¬¬|33¬¬.¬|33¬¬.¬|33¬¬.¬|33¬¬¬¬¬¬|33¬¬.¬¬|33¬|33¬¬¬|33
+¬|33¬¬¬¬¬N-NT|33¬_¬_¬_*_-_-_-_---+¬¬¬|33¬¬.¬|33¬¬.¬|33¬¬.¬|33¬¬¬¬¬¬|33N_,_¬_F_1_|33¬_|33¬¬¬|33
+¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬¬|33¬¬|33¬¬¬|33¬_I_m_¬_|33_¬_F_m_¬_|33_¬_P_m_¬_|33¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33
+¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬¬|33¬¬+-->>¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33
+¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬.¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33
+¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬|33
+¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬+---------Index¬of¬¬¬¬¬¬¬¬Range¬of¬¬¬¬¬¬¬¬¬¬¬¬Production---+
+¬¬¬¬¬¬¬¬¬¬¬predicted¬¬¬¬¬¬¬terminal¬¬¬¬¬¬¬¬¬¬¬¬numbers¬to
+¬¬¬¬¬¬¬¬¬¬¬nonterminal¬¬¬¬¬symbol¬¬¬¬¬¬¬¬¬¬¬¬¬¬apply¬for
+¬¬¬¬¬¬¬¬¬¬¬symbol¬N¬¬¬¬¬¬¬¬indices¬¬¬¬¬¬¬¬¬¬¬¬¬decision¬pairs
+
+
+
+¬Figure¬3¬-¬Data¬structure¬for¬right¬hand¬sides¬of¬productions.
+¬¬¬¬¬¬¬¬¬¬¬¬Terminal¬right¬head¬symbols¬are¬not¬represented.
+
+
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_
+¬¬¬¬¬¬¬¬¬¬¬¬|33P_R_¬_L_E_N_G_T_H_|33_P_R_¬_P_T_R_|33¬¬¬¬¬¬|33¬_R_H_S_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬0|33¬_¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬¬|33¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬1|33¬_¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬¬|33¬_¬_¬_¬_¬_|33¬_
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬.¬¬¬¬|33¬¬¬.¬¬|33¬¬+-->>¬S1¬¬|33¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬.¬¬¬¬|33¬¬¬.¬¬|33¬¬|33¬¬¬|33¬¬.¬¬|33¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬_¬_¬_¬_._¬_¬_¬_¬_|33_¬_¬_¬_._¬_¬_|33¬¬|33¬¬¬|33¬¬.¬¬|33¬¬>--¬n¬symbol
+¬Production¬|33¬_¬_¬_¬_n_¬_¬_¬_¬_|33_¬_¬_¬_*_-_-_---+¬¬¬|33¬¬.¬¬|33¬|33¬¬¬¬right¬side
+¬number¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬_S_n_¬_¬_|33¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬.¬¬¬¬|33¬¬¬.¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬.¬¬¬¬|33¬¬¬.¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬.¬¬¬¬|33¬¬¬.¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬|33
+
+) 
+/v/
+WIDTH 65
+TEXT STARTS ON LINE 6 POSITION 15 
+GO
+/s/
+/l2/The principal error recovery procedures embedded 
+in COMPILATION¬_LOOP are:
+/l2t1/CHECK¬_FOR¬_SPELLING¬_ERROR - /i5/corrects simple 
+spelling errors in keywords./i/
+/lt1/DIAGNOSE¬_ERROR - /i5/lists the terminal head symbols predicted
+from the stacktop token./i/
+/lt1/IS¬_EXPECTED - /i5/text acceptability of an (N,T) pair without
+actually implementing a parsing action./i/
+/lt1/SCAN¬_AHEAD -   /i5/advances the lexical scan to a catch symbol./i/
+/lt1/CRASH¬_RESTORE -/i5/restores the parsing stack in case of disaster./i/
+/lt1/SUPPLY¬_TOKEN - /i5/takes care of inserting a suspected missing
+token./i/
+/lt1/HARD¬_RECOVER - /i5/recovers lost context and reconfigures the
+parsing stack./i/
+/lt1/SOFT¬_RECOVER - /i5/applies multi-level strategy to recover 
+from localized errors./i/
+/l2mu/THE SYNTACTIC ERROR RECOVERY STRATEGY/mu/
+/p/In an LL(1) parser, a stack contains a list of the syntactic tokens
+that are predicted to complete a sentential form from the point of 
+scanning to its end.  The tokens in the stack may be either terminal
+or nonterminal, and nonterminal tokens may have empty productions,
+allowing the prediction of optionally occurring phrases.  For each
+nonterminal token, the parsing tables contain, a list of the terminal
+tokens that could legally appear at the head of the unanalyzed portion
+of the input string, and for each valid (nonterminal, terminal) pair,
+gives the production to apply.  When a production is applied its
+right hand side is stacked in reverse order, replacing the nonterminal
+that is the left side symbol of the production.
+/l2/A syntax error is detected when either
+/l2i1h1/1)/T/the symbol at the top of the stack is a terminal, and it
+is not matched by the head of the input string, or/h/
+/l2h1/2)/T/the symbol at the top of the stack is nonterminal, but
+when paired with the head of the input string, no production is found
+to apply./hi/
+/l2/When an error is detected, a call is first made to procedure
+DIAGNOSE ERROR, whose task is to assemble a list of the terminal
+symbols that might have been accepted as head of the input string,
+given the predicted token at the top of the parsing stack.  Next,
+a call is made to SOFT¬_RECOVER, which applies a sequence of recovery
+strategies, employing the first one that succeeds, if any does.
+/p/Initially, SOFT¬_RECOVER tries a language-dependent heuristic.
+Certain punctuation symbols are fairly commonly substituted for one
+another, either because of their proximity on a keyboard, such as ,
+and . or as with = and :=, because = is used for the assignment
+operation in other commonly used program languages.  If a substitute
+symbol would be acceptable in place of the one actually found at the
+head of the input string, then the substitution is made and
+the parse continues.
+/p/If no authorized substitution works, and the head of the input
+string is an identifier, whereas a keyword would have been expected,
+then the strategy is to check to see whether the identifier differs
+from an acceptable keyword by no more than a single letter insertion,
+deletion or substitution.  If it does, then a spelling error is
+presumed, and the keyword is substituted.
+/p/If these attempts to recognize a trivial error of typing or spelling
+fail, then SOFT¬_RECOVER tries the hypothesis that a terminal
+symbol has been omitted from the input string.  It looks at the next
+symbol in the parsing stack, beneath the stacktop symbol, and asks
+whether the head of the input string could be accepted from that
+predicted symbol.  If it could, then the stacktop symbol is popped
+off, and the parse continues.  This strategy accounts for missing
+'END' symbols, among others.  Even if this attempt fails,
+the missing token hypothesis is not abandoned.  If a unique 
+terminal symbol was expected, then it is supplied and the parse 
+continues.  If a semicolon or a right parenthesis could have been 
+expected, then one or the other of these will be supplied.
+Only a single token will be gratuitously supplied, however, before
+additional parsing of the input string has taken place.  The
+insertion of an extra semicolon before an 'ELSE', a habit of PL//1
+programmers, is treated as a special case, to be noted and corrected.
+If these strategies do not produce local recover, then a more severe
+strategy is pursued.  SCAN¬_AHEAD advances the token scanner
+on the input string, looking for a symbol designated as a 'catch'
+token, on which local recovery is likely to be possible.  After a
+final attempt to recover on a catch symbol from the existing stack
+configuration, HARD¬_RECOVER is called to reconfigure the parsing
+stack.
+/l3/HARD¬_RECOVER pops the parsing stack until one of four things
+happens:
+/l2i1h1/1)/T/A token appears at the top of the stack such that recovery
+on the catch symbol is assured, and the parse continues from that
+point;/h/
+/l2h1/2)/T/A nonterminal token appears at the top of the stack such
+that the catch symbol could be an element of a phrase produced from
+the token.  In such a case, the stack is reconfigured by replacing
+the stacktop token by the tail of a phrase that could be produced
+from it, and which predicts the catch token at the head of the
+input string./h/
+/l2h1/3)/T/A token is encountered at the stacktop which could have
+been /u/preceded/u/ in the stack by a token for which condition (2)
+would have been satisfied.  In this case the stack is reconfigured
+as in (2) except that the stacktop symbol remains embedded in the
+stack, rather than being replaced./h/
+/l2h1/4)/T/The parsing stack is emptied.  Procedure CRASH¬_RESTORE
+reconfigures the parsing stack with a sequence of dummy nonterminal 
+tokens from which recovery can take place on any of a designated
+subset of the catch tokens.  The scanner is advanced in the input
+string until one of these tokens is encountered./h-i/
+/p/This graded sequence of recovery actions assures that at least
+one production will be applicable following a call to the error 
+recovery module, and that recovery can take place even if context
+has been lost, as occasionally happens due to a scrambled source
+program file, or a missing string quote error.
+/l2/The data base on which the error recovery module works consists
+of constant tables:
+/l2t1/PRODUCES¬_EMPTY - /i5/a boolean array, true for the 
+indices of nonterminals that can produce an empty string./i/
+/lt1/TERMINAL¬_HEADS¬_INDEX - an index by nonterminal symbols, into
+/lt1/TERMINAL¬_HEADS - /i5/lists of the terminal heads symbols
+of strings that can be produced from each nonterminal./i/
+/lt1/CATCH¬_SYMBOLS
+/lt1/CRASH¬_SCAN¬_SYMBOLS /i5/sets of terminal symbols/i/
+/lt1/RESERVED¬_WORDS
+/lt1/RECOVERY¬_SYMBOLS - a set of nonterminals
+/lt1/EQUIVALENT - table of authorized substitution tokens
+/l2/variables (local to COMPILATION¬_LOOP):
+/l2t1/#¬_EXPECTED¬_TOKENS - /i5/count of the number of 
+terminals that could possibly allow the parse to continue from an
+error condition./i/
+/lt1/FOUND¬_SPELLING¬_ERROR - boolean
+/lt1/PREVIOUS¬_TOKEN - /i5/holds the token previously scanned
+in case an insertion is tried./i/
+/lt1/SEMI¬_COLON¬_OK, RIGHT¬_PAREN¬_OK,
+/lt1/SUCCESSFUL¬_INSERTION, TOKEN¬_SUPPLIED - token placeholders
+/lt1/TOKENS¬_OUT - /i5/list of expected tokens formed by a call
+to DIAGNOSE¬_ERROR/i/
+/l2/1.5¬¬Semantic action module
+/p/The semantic actions of Pass 1 are the construction
+of syntax trees according to the simplified
+internal grammar given in Tech.¬Memo.¬2.1, and the identification 
+of contextual scope of identifiers.  The latter cannot be
+entirely determined from the syntax rules because of Pascal's
+definition of the scope of qualified field names of record types.
+/l2/The principal procedures of the semantic action module are:
+/l2t1/SYNTHESIZE - /i4/a giant case statement on the production
+number determined by parsing;/i/
+/lt1/STACK¬_NODE - /i4/stacks on internal node identifier for the
+syntax tree;/i/
+/lt1/UNSTACK - /i4/unstacks internal nodes and forms a subtree;/i/
+/lt1/UNSTACK¬_QUALIFIER
+/lt1/WRITEOUT - /i4/ sends a syntax tree to an interpass
+communication file/i/
+/lt1/ASSOCIATE¬_TYPE¬_WITH¬_ID - /i4/enters the VALUE
+and DATATYPE fields into the semantic tables for identifiers of
+procedure, function, record or pointer types./i/
+/l2/The data base of the semantic module includes the following -
+/l2/Boolean flags:
+/l2t1/IS¬_DECLARATION
+/lt1/LABEL¬_DECL/i4/communicates with the semantic table module/i/
+/lt1/LABEL LOOKUP
+/lt1/IS¬_FORWARD¬_DECL
+/lt1/IS¬_FUNC¬_CALL/i4/(stack based on NESTING¬_LEVEL)/i/
+/lt1/IS¬_PROC¬_CALL
+/lt1/IS¬_QUALIFIED¬_REFERENCE/i4/(stack based on NESTING¬_LEVEL)/i/
+/lt1/IS¬_WITHBLOCK
+/lt1/IS¬_EMPTY¬_CASE¬_INSTANCE
+/lt1/IS¬_EMPTY¬_FIELD¬_LIST
+/lt1/TYPE¬_DECL¬_PART
+/l2/other variables:
+/l2t1/FORWARD¬_REF¬_HEAD - /i4/points to the head of a linked
+list of semantic table entries of forward procedure headings/i/
+/lt1/NESTING¬_LEVEL - /i4/a stack pointer, corresponding 
+to the level of nesting of parenthesized expressions,
+expressions lists, and WITH statements./i/
+/lt1/NODE¬_STACK - a stack based on NODE¬_STACKSIZE
+/lt1/SUBTREE¬_INDEX - /i4/a stack based on NODE¬_STACKSIZE (see Figure 4)/i/
+/lt1/NODE¬_STACKSIZE
+/lt1/NODE¬_NUMBER - /i4/a communications variable, holding the code
+for an interior node of the syntax tree./i/
+/lt1/SUBTREE¬_STACK - a stack based on 
+/lt1/SUBTREE¬_STACKSIZE (see Figure 4)
+/lt1/PARSE¬_TREE - /i4/an array into which the syntax tree is embedded./i/
+/lt1/WITHCOUNT - /i4/a stack based on NESTING¬_LEVEL, and which holds
+a count of qualified declaration scopes  which are open at that level./i/
+/lt1/LAST¬_LITERAL¬_SCANNED - /i4/a pointer to the semantic table
+entry for the literal (identifier, string or scalar constant) scanned
+most recently /u/prior/u/ to obtaining the current scan token./i/
+/l4A/
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬Figure¬4¬
+
+
+¬¬¬¬¬+---NODE¬_STACKSIZE¬
+¬¬¬¬¬|33
+¬¬¬¬¬|33¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬
+¬¬¬¬¬|33¬¬¬|33NODE¬_|33SUBTREE|33¬¬¬¬¬¬|33SUBTREE|33
+¬¬¬¬¬|33¬¬¬|33S_T_A_C_K_|33_¬_I_N_D_E_X_¬_|33¬¬¬¬¬¬|33¬_S_T_A_C_K_¬_|33
+¬¬¬¬¬|33¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33
+¬¬¬¬¬|33¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33
+¬¬¬¬¬|33¬¬¬|33¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_|33¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33
+¬¬¬¬¬+-->>¬_5_7_¬_¬_|33_¬_¬_¬_*_-_-_-_---+¬¬¬|33¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬|33¬¬¬|33¬_¬_¬_¬_¬_¬_¬_|33
+¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬+-->>¬_¬_¬_*_-_-_-_----+
+¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬+-->>¬_¬_¬_¬_¬_¬_¬_|33¬¬¬|33
+¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬|33¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬|33
+¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬|33¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬|33
+¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬|33¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬SUBTREE¬_STACKSIZE--+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬_2_¬_|33_P_R_#_|33_¬_*_¬_|33_¬_*_¬_|33_l_i_n_e_#_|33<----+¬
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬|33¬¬¬|33¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_
+¬¬¬¬¬¬¬¬|33¬_0_¬_|33_¬_*_¬_|33_¬_¬_¬_|33<--+¬¬¬+-->|33¬_1_¬_|33_¬_-_¬_|33_¬_¬_¬_|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33¬_0_¬_|33_¬_*_¬_|33_¬_¬_¬_|33
+¬¬¬¬Symbol<<--+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+¬¬¬¬table¬index<<---------------------+¬
+) 
+/l2/
+/p/The semantic module utilizes a large data base including many
+structures.  Its input data include the index of a production to be
+applied, which is paired as its parameter, and the global variable
+NODE¬_NUMBER indicating the code of an internal node of the syntax
+tree that is to be constructed.  Ordinarily, the value of NODE¬_NUMBER
+has a fixed relationship to the production number, and is set from
+the constant-valued translation table NODE#TRANSLATE just before
+SYNTHESIZE is called.  During error recovery, however, NODE¬_NUMBER
+may be initialized with a special value to designate an error node
+in the syntax tree, in order to warn Pass 2 that it is receiving
+invalid data.
+/p/Syntax trees are grown bottom-up, in spite of the fact that a
+top-down parsing algorithm is employed.  Figure 4 indicates a
+subsidiary stack, embedded in an array called SUBTREE¬_STACK, that
+holds pointers (indices into the array PARSE¬_TREE) to the roots of
+a forest of partially grown trees.  Another stack, NODE¬_STACK,
+holds the syntax code appropriate to an interior node of the syntax
+tree, and a second column of the same stack, SUBTREE¬_INDEX, holds a
+marker for SUBTREE¬_STACK to designate the first of a string of
+subtrees for that interior node.  Whenever the parse predicts a
+phrase for which an interior node of the syntax tree is required, a
+procedure STACK¬_NODE is called to push the appropriate value onto
+NODE¬_STACK.  Whenever a symbol table lookup occurs, the procedure
+GET¬_TOKEN builds a leaf node of the syntax tree and stacks 
+a pointer to it on SUBTREE¬_STACK.  Whenever a production is applied
+for which a phrase is completed, the procedure UNSTACK is called.
+It forms a new node of PARSE¬_TREE, taking as its code the value
+popped from NODE¬_STACK, and as its successors the nodes pointed 
+to by SUBTREE¬_STACK starting at SUBTREE¬_INDEX and going up
+to SUBTREE¬_STACKSIZE.  The newly formed node is then the root of 
+a subtree, and a pointer to it is stacked on SUBTREE¬_STACK.
+/p/Building syntax trees is the more straightforward of the tasks of
+SYNTHESIZE.  Managing the scopes of declarations is somewhat more
+complicated, and a large number of status flag 
+variables are employed for this purpose.  The semantic tables
+must contain enough information that when a /u/record/u/
+variable is referred to, the declaration block containing its
+field identifiers can be reopened.  This information consists
+of a reference (in the DATATYPE field of the semantic table)
+to the entry for the record type.  The record type contains in the
+VALUE field to access its field identifiers.  Pointer variables must
+also have their DATATYPE fields filled in, for they may refer to
+variables of a record type.  The same mechanism is employed to
+associate the identifier of a forward-declared procedure with the
+main part of its declaration block, which appears later.  The
+procedure ASSOCIATE¬_TYPE¬_WITH¬_ID enters the requisite data into
+fields of the semantic table.
+/p/The procedure SYNTHESIZE, in its cases for the WITH statement and
+for variables, manages the setting of the flags and counters to
+indicate when qualified variable scopes are to be opened and closed.
+The procedure UNSTACK¬_QUALIFIER tests the stacked node number
+when a qualified variable is being analyzed, to determine whether or
+not to reopen a declaration block.  In Figure 5 is illustrated a 
+possible configuration of the flags and counters during analysis
+/l4A/
+¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬Figure¬5
+
+¬¬The¬stack¬configuration¬during¬analysis¬of¬a¬WITH
+statement¬containing¬the¬names¬of¬two¬qualified¬variables
+
+
++----NESTING¬_LEVEL¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬+--CURRENT¬_LEVEL
+|33¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬|33
+|33¬¬¬¬¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬_¬¬¬¬|33¬¬¬¬¬_¬_¬_¬_¬_¬_
+|33¬¬¬|33IS¬_WITH|33IS¬_FUNC|33IS¬_¬¬¬¬¬¬|33WITH¬|33¬¬¬|33¬¬¬|33BLOCK¬_|33
+|33¬¬¬|33BLOCK¬¬|33CALL¬¬¬|33QUALIFIED|33COUNT|33¬¬¬|33¬¬¬|33STACK¬|33
+|33¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33REFERENCE|33¬¬¬¬¬|33¬¬¬|33¬¬¬|33¬¬¬¬¬¬|33
+|33¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬|33¬¬¬|33¬¬¬¬¬¬|33
+|33¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬|33¬¬¬|33¬¬¬¬¬¬|33
+|33¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬|33¬¬¬|33¬¬¬¬¬¬|33
+|33¬¬¬|33¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_|33¬¬¬|33¬¬¬|33¬_¬_¬_¬_¬_¬_|33
++-->>¬_t_r_u_e_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_¬_¬_¬_¬_¬_¬_¬_|33_¬_¬_2_¬_¬_|33¬¬¬|33¬¬¬|33¬¬¬¬¬¬|33
+¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬|33¬¬¬|33¬¬¬¬¬¬|33
+¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬|33¬¬¬|33¬_¬_¬_¬_¬_¬_|33
+¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬+-->>¬_¬_¬_¬_¬_¬_|33
+¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33
+¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33
+¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬¬¬¬|33¬¬¬¬¬|33¬¬¬¬¬¬¬|33¬¬¬¬¬¬|33
+) 
+/l3/of a WITH statement.  The apparent complexity of analysis of
+qualified variables and WITH statement is one of the few unhappy
+consequences of the modularization of this compiler.  Most semantic
+analysis is postponed until Pass 2, but the association of
+qualified variable names with declaration blocks
+could not reasonably be put off.

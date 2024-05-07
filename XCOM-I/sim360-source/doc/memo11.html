@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<body>
+<tt>
+<p style="margin: 0 0ch 0 0ch; text-align:center; padding:0;">PASCAL Technical Memo 1.1<br><br>
+The Stony Brook PASCAL/360 Compiler</p><br>
+This memo describes the functional specification and overall
+design goals of a compiler for the programming language PASCAL,
+to run on and compile object code for IBM 360/370 computers.<br><br>
+1. <u>Language Definition</u>: We have taken as the primary
+definition of PASCAL the Revised Report on the Programming Language
+PASCAL, as published in [1]. Secondary standards for the
+language definition are the PASCAL Programmer&apos;s Manual [1],
+and the axiomatic definition given by Hoare and Wirth [2].
+We have made only the following changes in the language definition:<br><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(a)&nbsp;&nbsp;Procedure and Function parameters are required to be fully
+typed. That means that when an element of a parameter list in a
+procedure of function declaration is declared to be PROCEDURE or
+FUNCTION, that its parameter types must be declared (unless it is
+parameterless). For this purpose, we have extended the PASCAL
+syntax, as specified by the syntax diagrams in the Appendix to
+this Memorandum. Note that the syntax extension still accepts
+PROCEDURE or FUNCTION parameters whose argument types are
+unspecified, so that no syntax error occurs if programs satisfying
+the syntax given in the Revised Report are submitted to the 
+compiler.
+However, the compiler may note semantic errors,
+because of undeclared argument types.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(b)&nbsp;&nbsp;The syntactic device referred to in Section 12.3 of the 
+Revised Report, by which the output format of integer or real
+numbers is specified by a programmer, is not supported in this
+compiler. This syntactic device is not consistent with the 
+syntax diagrams of the revised report, and was not considered 
+to be a worthwhile addition. Instead, format control is achieved
+through values of predeclared variables whose values may be reset
+by assignment statements. This method of format control is
+slightly less flexible than the device specified in the Revised
+Report, but also less susceptible to casual error, and thus was
+judged preferable. The predeclared variables are called
+INTFLIELDSIZE, REALFIELDSIZE, and BOOLFIELDSIZE, and have been 
+given initial values of 12, 14, and 6, respectively.<br><br>
+Insofar as the compiler is consistent with the standard
+definition of the language referred to above, it is correct.
+Inconsistencies, if any, are to be judged as compiler errors.</p><br>
+2. <u>Implementation Restrictions</u>: We have made implementation
+restrictions that we judged to be consistent with the design of the
+PASCAL language and with the System 370 architecture.<br><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(a)&nbsp;&nbsp;The maximum number of external files supported, in addition
+to the standard files INPUT and OUTPUT is 5. File access is through
+the OS/370 QSAM macro, which we judge to be consistent with the
+definition of sequential files in PASCAL.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(b)&nbsp;&nbsp;The range of integer values is -2147483648..2147483647.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(c)&nbsp;&nbsp;The precision of representation of real values is six
+hexadecimal digits. No extended precision real type has been
+provided, although we think this would be desirable, when
+implementation on a 32 or 36-bit word machine is contemplated.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(d)&nbsp;&nbsp;The internal representation of type CHAR is EBCDIC.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(e)&nbsp;&nbsp;There is a limitation on the length of the statement list
+in the body of any individual PASCAL procedure, which is of the 
+order of 300 statements. There is no limit on total program length
+other than that imposed by the effective address space of the target
+computer.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(f)&nbsp;&nbsp;Set types may contain up to 2048 elements. The representation
+of values in a subrange type is not the same as the representation
+in the base type; the least value in a subrange always is represented
+internally by a zero value. However, this representation should
+be invisible to the programmer unless he makes use of the standard
+function ORD. (For the reason that it allows the programmer to
+make use of otherwise invisible details of implementation, we are
+not enthusiastic about the inclusion of ORD in the PASCAL language.
+However, we have implemented it, in order to remain consistent
+with the standard).</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(g)&nbsp;&nbsp;There is no difference in internal representation between
+PACKED types and their unpacked equivalents. In fact, they are
+also treated as compatible, and the operation of string comparison,
+defined on types PACKED ARRAY OF CHAR, is also defined on unpacked
+equivalents. The reason for this is that in a byte-addressable
+memory, we feel that is makes little sense to extend packing to
+the bit level, and so we have packed the storage of <u>all</u>
+structured type objects to the byte level. The standard procedures
+PACK and UNPACK are supported for the sake of consistency with
+the language standard.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(h)&nbsp;&nbsp;In our implementation, the TAG field in the declaration
+of a variant record is mandatory, not optional.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">(i)&nbsp;&nbsp;The extensions and restrictions described in [1] for 
+the PASCAL 6000 compiler are not applicable.</p><br>
+3. <u>Compiler Structure</u>: The design goals for the 
+PASCAL/370 compiler are that it should be a production-level
+compiler capable of compiling optimized code (as an option), it
+should provide highly elastic recovery support programmer debugging
+aids including a symbolic post-mortem dump, and an execution profile
+listing. We adopted the debugging aids of the Stanford ALGOL W
+compiler, 1972 edition, as our design goal. We also intended that
+the compiler should be able to run in a memory region of no more
+than 120 K bytes for code and be able to run in a memory region of
+no more than 120 K bytes for code and data, and that it should
+be able to be produced in editions to run under the OS/370, MFT,
+MVT and VS2 operating systems. An additional, but principal design
+goal is that the compiler should be structured, documented and
+written so that any competent systems programmer could maintain his
+own copy, or even make some modifications if he felt compelled to.<br><br>
+These design goals have resulted in the following design
+decisions. Both the compiler and the compiled code are supervised
+by resident monitor programs. This decision allows editions of the
+compiler to be accommodated to several different operating systems.
+The compiler is structured in three passes (four when code optimization
+is included). Pass 1 is responsible for lexical and syntax analysis,
+and for the extraction of information from the source listing that
+will be needed for debugging aids. Pass 1 produces syntax trees,
+according to a simplified, punctuation-free syntax described in a
+subsequent memorandum. It also produces a skeletal symbol table
+containing identifiers and values of constants. These are stored
+for reference by Pass 2, on temporary direct-access files. A
+paragraphed source listing is prepared at the same time, and is
+stored on a sequential access file for retrieval at the conclusion
+of execution of the PASCAL program. It can be saved with a compiled
+load module if desired.<br><br>
+Pass 2 takes as input the skeletal symbol table and syntax
+trees produced by Pass 1, and builds the complete symbol table
+containing semantic information, allocated storage to constants and
+variables, builds a core image of the constant pool needed at runtime,
+performs type-checking including legal coercions and folding of 
+constants involved in the coercions, and generates symbolic code
+triples. The symbolic code is very close to machine code in its
+level of operations, but acts on untyped, variable-length operands.
+The semantics and format of symbolic code triples are specified in
+a subsequent memo.<br><br>
+Pass 2 obtains input in blocks corresponding to the individual
+procedures and functions of the PASCAL source program. It processes
+these one at a time, and blocks its output (symbolic triples) for
+temporary storage on a direct (or sequential) access file for
+communication to Pass 3. The only portion of the symbol table
+that is communicated to Pass 3 is that which gives the storage
+assignment and lengths of operands. In case a source program
+contains serious errors, compilation will be terminated at the 
+conclusion of Pass 2, after all compile-time error checking has
+been completed.<br><br>
+Pass 3 accepts symbolic triples and operand address and length
+data, and generates a load module. It performs all register
+allocation, using a dynamic allocation algorithm, and builds a
+transfer vector containing the relative entry-point addresses of
+procedures and addresses of non-local branch targets. It builds
+another vector of execution counters, for subsequent reference by
+the execution profile monitor following execution of the object
+program.<br><br>
+The compiler monitor handles all I/O for the compiler, and
+overlays the code segments of Passes 1, 2, and 3.<br><br>
+The PASCAL monitor handles loading and relocation (only the
+transfer vector elements require address re-computation) of the
+PASCAL program and its constants, handles all I/O, manages the
+runtime heap, supports calls to most standard procedures and
+functions, handles abnormal termination and the post-mortem dump,
+and prints the execution profile listing. The post-mortem dump
+and execution profile routines are not loaded until termination
+of the PASCAL program execution occurs.<br><br>
+4. <u>Implementation and Documentation</u>: For reasons of
+convenience and familiarity, we have chosen XPL [3] as an
+implementation language. While this choice leave something to
+be desired in terms of optimization of the efficiency of the 
+compiler code (in particular, common subexpression elimination
+and folding of constants would be desirable improvements), it
+has the advantage that it provides reasonable support for structured
+programming, provides the required I/O support, provides efficient
+and flexible string-handling, and that we had available a few
+compiler development tools compatible with the use of XPL.<br><br>
+One of these tools is the XPL monitor, a brief and simple BAL
+program that is readily modified to accommodate overlaying of our
+multi-pass compiler.<br><br>
+Another tool is a parsing-table constructor for LL(1) grammars.
+We use this tool to build the tables for a top-down, syntax driven
+syntax analyzer for PASCAL. This method of syntax analysis is fast,
+requires minimal storage for parsing tables, and permits the use
+of elastic syntax-error recovery strategies.<br><br>
+Other tools include a package of routines to build, print, and
+analyze syntax trees having a variable number of successors to
+each node. We employ three principal means of documentation. 
+First is a prose description of each major functional module of
+the compiler, of the procedures each contains, of its data base 
+and of the variables it used for communication with other modules.
+This description is intended to prepare the reader to look at the
+source code, with the aid of a compiler and cross-reference listing.
+Most important, from the point of view of the original
+implementation, is a set of functional specifications of 
+major program modules and information formats. These
+specifications have been written in advance of module
+design and modified as necessary if the detailed module design
+process uncovers inconsistencies in the specification. It is 
+through this specification process, and insistence on adherence to
+the specification that technical management of the compiler
+development has been carried out.<br><br>
+We suspect that the most important form of documentation from
+the point of view of continuing compiler maintenance will be the 
+source code of the compiler itself. For this reason, we have
+attempted to make the code readable (by a competent programmer, at
+least) and are reluctant to rely on comments as secondary documentation.
+Comments are used principally to describe the intended uses of 
+global variables, and the function to be performed by major 
+procedures. They also identify the numerous case instances that
+occur in the compiler.<br><br>
+<u>REFERENCES</u><br><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">[1]&nbsp;&nbsp;Jensen and Wirth, <u>PASCAL User Manual and Report</u>,
+Springer-Verlag, 1974.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">[2]&nbsp;&nbsp;Hoare and Wirth, &quot;An Axiomatic Definition of the 
+Programming Language PASCAL,&quot; <u>Acta Information</u>, Vol. 2, pp.
+335-355, 1973.</p><br>
+<p style="margin: 0 0ch 0 5ch; text-indent:-5ch; padding:0;">[3]&nbsp;&nbsp;McKeeman, W., Horning, J.J. and Wortman, D., <u>A
+Compiler Generator</u>, Prentice-Hall, Englewood Cliffs, N.J., (1970).</p><br><br>
+<p style="margin: 0 0ch 0 0ch; text-align:center; padding:0;"><u>APPENDIX TO TECHNICAL MEMO 1.1</p></u><br>
+<u>Special characters</u>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Some ASCII characters used in the definition of PASCAL have no
+exact counterparts in the EBCDIC character set. We have made the
+following substitutions:
+<pre style="margin:0;">
+         ASCII          EBCDIC
+ 
+         ^              @
+         {   }          (* *)  or  /* */
+         [   ]          (. .)
+</pre>
+<p style="margin: 0 0ch 0 40ch; padding:0;">in <u>array</u> references or declarations,
+but not in <u>set</u> expressions.</p>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The underscore symbol, _ is also allowed to be embedded
+in an identifier, as it is in PL/1.<br><br><br>
+<u>Compiler options</u>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If you utilize the job control cards that we suggest, then
+options giving maximum execution time, maximum lines to be printed,
+and diagnostic level can be set on the EXEC card at the option of
+the user. Options calling for supplementary listing output from
+the compiler itself are set by toggles embedded within comments
+in the source program to be compiled.<br><br>
+<u>Compiler toggles</u>
+<br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Certain compiler options can be turned on or off by toggles
+which take the form of $&lt;character&gt; embedded within a comment.
+Thus the comment<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(*&nbsp;&nbsp;&nbsp;&nbsp;$P&nbsp;&nbsp;&nbsp;&nbsp;$S&nbsp;&nbsp;&nbsp;&nbsp;*)<br><br>
+turns on (or turns off, if the options were previously on)
+toggles that control printing of syntax trees and a symbol table
+used in the internal representation of a program.
+<br><br>
+Toggles that may be useful to a Pascal programmer are:
+<p style="margin: 0 0ch 0 5ch; padding:0;"><br><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$L - list source program. This option is initially <u>on</u>.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$M - list source program input lines without line members or
+margin indicators, initially <u>off</u>.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$Z - print symbol table contents after Pass 1. This option
+also prints a &apos;block stack dump&apos; message in the listing
+at various points. Initially <u>off</u>.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$&boxv; - margin control. Sets a right margin cutoff on the 
+input record. Initially 80 columns.</p><p style="margin: 0 0ch 0 5ch; padding:0;">
+</p>
+<br>
+These toggles useful primarily in debugging the compiler and
+are initially <u>off</u>.
+<p style="margin: 0 0ch 0 5ch; padding:0;"><br><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$B - trace the syntax analysis. This diagnostic produces a
+great many lines of output for each source language statement,
+and should be used sparingly, over very local contexts.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$P - dump the syntax trees used to represent the program,
+at the beginning of Pass 2. An invalid tree may cause abnormal
+termination in Pass 2 if this option is in use. This <u>should</u>
+not happen, but might occur as a consequence of a syntax error in the
+program.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$E - print a listing of the emitted machine code. Output
+comes from Pass 3.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$D - print a summary of compilation statistics.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$S - print the symbol table at the conclusion of Pass 2.
+This listing gives all semantic information and storage allocations
+to variables and constants.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$T - print the symbolic triples that represent the program
+at the beginning of Pass 2.</p><p style="margin: 0 0ch 0 5ch; padding:0;"><br>
+</p><p style="margin: 0 0ch 0 13ch; text-indent:-8ch; padding:0;">$Z - print the symbol table at the conclusion of Pass 1.
+Also, dump the block stack each time a new scope is opened by a 
+procedure heading, <u>with</u> statement, or reference to a
+<u>record</u> qualifier.</p><p style="margin: 0 0ch 0 5ch; padding:0;">
+</p>
+</body>
+</html>

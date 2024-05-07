@@ -1,0 +1,11 @@
+#
+# Pascal compiler run commands
+#
+# run pass 1
+	-o3LF /tmp/tree.tmp -o4LF /tmp/symb.tmp -f3w+ dgns.obj ../port/pass1.out
+# run pass 2
+	-i2L /tmp/tree.tmp -i3L /tmp/symb.tmp -o3LF /tmp/symb2.tmp
+	-o4LF /tmp/triple.tmp -o5LF data.obj -o7LF pmd.obj ../port/pass2.out
+# run pass 3
+	-i2L /tmp/symb2.tmp -i3L /tmp/triple.tmp
+	-o3LF code.obj -o4LF org.obj -o6LF line.obj ../port/pass3.out

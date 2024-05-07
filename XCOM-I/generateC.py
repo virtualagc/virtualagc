@@ -547,11 +547,11 @@ def generateADDR(scope, parameter):
     if "identifier" in token: # not a structure field.
         # Might still be a BASED variable, though.
         bVar = token["identifier"]
-        #if "LIT_PG" in bVar: #***DEBUG***
-        #    print("***%s***" % bVar, token, file=sys.stderr)
-        if bVar == "MOVECHAR": # ***DEBUG***
-            pass
-            pass
+        # `COMPACTIFY` is a special case, because it's always eliminated by 
+        # XCOM-I in favor of its own built-in version, but it's not identified
+        # as a built-in.
+        if bVar == "COMPACTIFY":
+            return "0"
         bSubs = parameter["children"]
         attributes = getAttributes(scope, bVar)
         if attributes == None:

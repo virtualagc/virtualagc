@@ -1,0 +1,772 @@
+//       (JOB CARD)
+// EXEC PASCAL,DBGLVL=0
+//SYSIN    DD  *
+PROGRAM     ANCESTOR(OUTPUT);
+ (* R.W.FLOYD: 'ANCESTOR' , COMM.ACM 6-62 AND 3-63  ,ALG.96 *)
+   CONST N = 100;
+  VAR I,J,K: INTEGER;
+      R: ARRAY (.1..N,1..N.) OF BOOLEAN ;
+BEGIN (* R(I,J)="I IS A PARENT OF J" *)
+     FOR I:=1 TO N DO
+        FOR J:=1 TO N DO R(I,J):=FALSE ;
+     FOR I:=1 TO N DO
+      IF I MOD 10 <>0 THEN R(I,I+1):=TRUE;
+      WRITELN (CLOCK);
+    FOR I:=1 TO N DO
+       FOR J:=1 TO N DO
+          IF R(J,I) THEN
+             FOR K:=1 TO N DO
+                IF R(I,K) THEN R(J,K):=TRUE;
+      WRITELN (CLOCK);
+       FOR I:=1 TO N DO
+        BEGIN WRITE(' ') ;
+          FOR J:=1 TO N DO WRITE(CHR(ORD(R(I,J))+ORD('0')));
+    WRITELN
+   END;
+    WRITELN (CLOCK)
+END.
+// EXEC PASCAL,DBGLVL=0
+//SYSIN    DD  *
+PROGRAM     ANCESTOR(OUTPUT);
+ (* R.W.FLOYD: 'ANCESTOR' , COMM.ACM 6-62 AND 3-63  ,ALG.96 *)
+   (*  IN THIS VERSION, USE VARIABLES OF SUBRANGE TZPES FOR INDEXING ARRAYS *)
+   CONST N = 100;
+  VAR I,J,K : 1..N;
+      R: ARRAY (.1..N,1..N.) OF BOOLEAN ;
+BEGIN (* R(I,J)="I IS A PARENT OF J" *)
+     FOR I:=1 TO N DO
+        FOR J:=1 TO N DO R(I,J):=FALSE ;
+     FOR I:=1 TO N DO
+      IF I MOD 10 <>0 THEN R(I,I+1):=TRUE;
+      WRITELN (CLOCK);
+    FOR I:=1 TO N DO
+       FOR J:=1 TO N DO
+          IF R(J,I) THEN
+             FOR K:=1 TO N DO
+                IF R(I,K) THEN R(J,K):=TRUE;
+      WRITELN (CLOCK);
+       FOR I:=1 TO N DO
+        BEGIN WRITE(' ') ;
+          FOR J:=1 TO N DO WRITE(CHR(ORD(R(I,J))+ORD('0')));
+    WRITELN
+   END;
+    WRITELN (CLOCK)
+END.
+// EXEC PASCAL
+//SYSIN    DD  *
+PROGRAM   PRIMES(OUTPUT);
+CONST N=1000; N1=33;    (* N1=SQRT(N) *)
+VAR   I,K,X,INC,LIM,SQUARE,L: INTEGER ;
+       PRIM: BOOLEAN;
+      P,V: ARRAY(.1..N1.) OF INTEGER ;
+BEGIN WRITELN (CLOCK);
+   INTFIELDSIZE := 6;
+   WRITE (2, 3);  L := 2;
+   X:=1; INC:=4; LIM:=1; SQUARE:=9;
+   FOR I:=3 TO N DO
+  BEGIN (* FIND NEXT PRIME *)
+      REPEAT X:=X+INC ; INC:=6-INC ;
+         IF SQUARE <= X THEN
+            BEGIN LIM:=LIM+1 ;
+              V(LIM):=SQUARE ; SQUARE:=SQR(P(LIM+1))
+            END ;
+         K:=2 ; PRIM:=TRUE ;
+         WHILE PRIM AND (K<LIM) DO
+         BEGIN K:=K+1 ;
+            IF V(K)<X THEN V(K):=V(K)+2*P(K) ;
+            PRIM:=X<> V(K)
+         END
+     UNTIL PRIM ;
+     IF I<=N1 THEN P(I):=X ;
+   WRITE (X);  L := L + 1;
+     IF L=20 THEN
+        BEGIN WRITELN ; L:=0
+        END
+   END;
+WRITELN;  WRITELN (CLOCK)
+END.
+// EXEC PASCAL
+//SYSIN    DD  *
+PROGRAM  POWERSOFTWO(OUTPUT);
+CONST M=30; N=90;   (* M>= N*LOG(2)   *)
+VAR EXP,I,J,L: INTEGER ;
+     C,R,T:INTEGER ;
+    D:ARRAY(.0..M.) OF INTEGER ; (*POSITIVE POWERS*)
+    F: ARRAY (.1..N.) OF INTEGER ;    (*NEGATIVE POWERS*)
+BEGIN L:=0 ; R:=1; D(0):=1;
+    WRITELN (CLOCK);
+    INTFIELDSIZE := 1;
+    FOR EXP:=1 TO N DO
+    BEGIN  (*COMPUTE AND PRINT 2**EXP  *)   C:=0;
+         FOR I:=0 TO L DO
+         BEGIN T:=2*D(I)+C ;
+              IF T>=10 THEN
+                   BEGIN D(I):=T-10; C:=1
+                   END
+              ELSE
+                   BEGIN D(I):=T; C:=0
+                   END
+         END;
+         IF C>0 THEN
+              BEGIN L:=L+1 ; D(L):=1
+              END;
+         FOR I:=M DOWNTO L DO WRITE(' ') ;
+         FOR I:=L DOWNTO 0 DO WRITE(D(I));
+         INTFIELDSIZE := 5;
+         WRITE (EXP, '  .');
+         INTFIELDSIZE:= 1;
+         (* COMPUTE AND PRINT 2**(-EXP)    *)
+         FOR J:=1 TO EXP-1 DO
+         BEGIN R:=10*R+F(J) ;
+              F(J):=R DIV 2; R:=R-2*F(J) ;  WRITE(F(J))
+         END ;
+         F(EXP):=5 ; WRITELN('5'); R:=0
+    END ;
+    WRITELN (CLOCK)
+END .
+// EXEC PASCAL
+//SYSIN    DD  *
+PROGRAM EIGHTQUEENS(OUTPUT) ;
+VAR I : INTEGER ;
+    A : ARRAY(.1..8.) OF BOOLEAN ;
+    B : ARRAY(.2..16.) OF BOOLEAN ;
+    C : ARRAY(.-7..7.) OF BOOLEAN ;
+    X : ARRAY(.1..8.) OF INTEGER ;
+    SAFE : BOOLEAN ;
+    PROCEDURE PRINT ;
+    VAR K : INTEGER ;
+    BEGIN WRITE(' ') ;
+        FOR K:=1 TO 8 DO WRITE(X(K));
+         WRITELN
+    END ;
+PROCEDURE TRYCOL(J : INTEGER ) ;
+         VAR I : INTEGER ;
+         PROCEDURE SETQUEEN ;
+         BEGIN A(I):=FALSE ; B(I+J):=FALSE ; C(I-J):=FALSE
+         END ;
+         PROCEDURE REMOVEQUEEN ;
+         BEGIN A(I):=TRUE ; B(I+J):=TRUE ; C(I-J):=TRUE
+         END ;
+              BEGIN
+                    I:=0      ;
+                   REPEAT I:=I+1 ; SAFE:=A(I) AND B(I+J) AND C(I-J) ;
+                        IF SAFE THEN
+                        BEGIN SETQUEEN ; X(J):=I ;
+                             IF J<8 THEN TRYCOL(J+1) ELSE PRINT ;
+                             REMOVEQUEEN
+                        END
+                   UNTIL I=8
+              END ;
+              BEGIN FOR I:=1 TO 8 DO A(I):=TRUE ;
+                    FOR I:=2 TO 16 DO B(I):=TRUE ;
+                    FOR I:=-7  TO 7 DO C(I):=TRUE ;
+   WRITELN (CLOCK);
+   INTFIELDSIZE := 2;
+   TRYCOL (1);
+   INTFIELDSIZE := 12;
+   WRITELN (CLOCK)
+END.
+// EXEC PASCAL
+//SYSIN    DD  *
+PROGRAM PALINDROMES(OUTPUT) ;
+    VAR I,J,L,N,R,S: INTEGER ;
+         P: BOOLEAN ;
+         D: ARRAY (.1..10.) OF INTEGER ;
+BEGIN N:=0 ;   WRITELN (CLOCK);
+    REPEAT N:=N+1 ; S:=N*N ; L:=0 ;
+         REPEAT L:=L+1 ; R:=S DIV 10 ;
+              D(.L.) := S - 10*R;  S := R
+         UNTIL S=0 ;
+         I:=1 ; J:=L ;
+         REPEAT
+            P := D(.I.) = D(.J.);
+            I := I + 1;  J := J - 1
+         UNTIL (I>=J) OR NOT P ;
+         IF P THEN
+            BEGIN
+               INTFIELDSIZE := 10;  WRITE (N);
+               INTFIELDSIZE := 50;  WRITELN (N*N)
+               END
+    UNTIL N= 10000 ;
+    INTFIELDSIZE := 12;
+    WRITELN (CLOCK)
+END .
+// EXEC PASCAL
+//SYSIN  DD *
+PROGRAM COUNTCHARACTERS(INPUT,OUTPUT) ;
+    VAR CH: CHAR ;
+        C0,C1,C2,C3,C4: INTEGER ;   (* COUNTERS *)
+BEGIN
+    WRITELN (CLOCK);
+    C0:=0 ;C1:=0 ;C2:=0 ;C3:=0 ;C4:=0 ;
+    WHILE NOT EOF(INPUT) DO
+    BEGIN WRITE(' ') ; C0:=C0+1 ;
+        WHILE NOT EOLN(INPUT) DO
+        BEGIN READ(CH) ; WRITE(CH) ;
+              IF CH=' ' THEN C1:=C1+1 ELSE
+              IF CH IN (.'A'..'Z'.) THEN C2:=C2+1  ELSE
+              IF CH IN (.'0'..'9'.) THEN C3:=C3+1 ELSE C4:=C4+1
+        END ;
+        READLN ; WRITELN ;
+    END ;
+    WRITELN (CLOCK);
+    WRITELN(C0,' LINES') ;
+    WRITELN(C1,' BLANKS') ;
+    WRITELN(C2,' LETTERS') ;
+    WRITELN(C3,' DIGITS') ;
+    WRITELN(C4,' SPECIAL CHARACTERS') ;
+END.
+%EOF
+PROGRAM     ANCESTOR(OUTPUT);
+ (* R.W.FLOYD: 'ANCESTOR' , COMM.ACM 6-62 AND 3-63  ,ALG.96 *)
+  CONST N=50;
+  VAR I,J,K: INTEGER;
+      R: ARRAY (.1..N,1..N.) OF BOOLEAN ;
+     FOR I:=1 TO N DO
+        FOR J:=1 TO N DO R(I,J):=FALSE ;
+     FOR I:=1 TO N DO
+      IF I MOD 10 <>0 THEN R(I,I+1):=TRUE;
+    FOR I:=1 TO N DO
+       FOR J:=1 TO N DO
+          IF R(J,I) THEN
+             FOR K:=1 TO N DO
+                IF R(I,K) THEN R(J,K):=TRUE;
+       FOR I:=1 TO N DO
+        BEGIN WRITE(' ') ;
+          FOR J:=1 TO N DO WRITE(CHR(ORD(R(I,J))+ORD('0')));
+    WRITELN
+   END;
+END.
+// EXEC PASCAL
+//SYSIN    DD *
+PROGRAM QUICKSORT   (OUTPUT);
+   CONST N = 1000;
+    VAR   I,Z: INTEGER ;
+         A: ARRAY(.1..N.) OF INTEGER ;
+
+    PROCEDURE  SORT(L,R: INTEGER) ;
+         VAR I,J,X,W: INTEGER ;
+         BEGIN (* QUICKSORT WITH RECURSION ON BOTH PARTITIONS *)
+            I := L ; J := R;  X := A(.(I+J) DIV 2.);
+
+            REPEAT
+               WHILE A(.I.) < X DO I := I + 1;
+               WHILE X < A(.J.) DO J := J - 1;
+               IF I <= J THEN
+                  BEGIN
+                     W := A(.I.);  A(.I.) := A(.J.);  A(.J.) := W;
+                     I := I + 1;  J := J - 1;
+                  END
+            UNTIL I > J;
+            IF L < J THEN SORT (L, J);
+            IF I < R THEN SORT (I, R)
+         END (* SORT *);
+
+BEGIN   Z:=1729 ;  (* GENERATE RANDOM SEQUENCE *)
+    FOR I:=1 TO N DO
+         BEGIN Z:=(131071*Z) MOD 2147483647 ; A(.I.) := Z
+         END ;
+    WRITELN (CLOCK);
+    SORT(1,N);
+    WRITELN (CLOCK)
+END .
+// EXEC PASCAL
+//SYSIN    DD *
+PROGRAM KNUTH (INPUT, OUTPUT);
+
+TYPE
+  PTR = @TERM;
+  TERM = RECORD
+           COEF, ABC: INTEGER;
+           LINK: PTR
+         END;
+  POLY = @TERM;
+VAR
+  PP, QQ: PTR;
+  I: INTEGER;
+   T_VEC: ARRAY (.1..8.) OF INTEGER;
+PROCEDURE ADVANCE (VAR P: PTR);
+BEGIN
+  P := P@.LINK
+END;
+
+PROCEDURE FREE_POLY (VAR P: PTR);
+
+VAR P1: PTR;
+
+BEGIN
+  ADVANCE (P);
+  WHILE P@.ABC >= 0 DO
+  BEGIN
+    P1 := P;
+    ADVANCE (P);
+    DISPOSE (P1)
+  END;
+  DISPOSE (P)
+END;
+PROCEDURE ADDPOLY (VAR P, Q: PTR);
+
+VAR
+  Q1, Q2: PTR;
+
+BEGIN
+  (* STEP A1 *)
+  Q1 := Q;
+  ADVANCE (P);
+  ADVANCE (Q);
+  (* STEP A2 *)
+  REPEAT
+    IF P@.ABC < Q@.ABC THEN
+    BEGIN
+      Q1 := Q;
+      ADVANCE (Q)
+    END
+    ELSE IF P@.ABC = Q@.ABC THEN
+    BEGIN
+      (* STEP A3 *)
+      IF P@.ABC >= 0 THEN
+      BEGIN
+        Q@.COEF := Q@.COEF + P@.COEF;
+        IF Q@.COEF = 0 THEN
+        BEGIN
+          (* STEP A4 *)
+          Q2 := Q;
+          ADVANCE (Q);
+          Q1@.LINK := Q
+        END
+        ELSE
+        BEGIN
+          Q1 := Q;
+          ADVANCE (Q)
+        END;
+        ADVANCE (P)
+      END
+    END
+    ELSE BEGIN
+      NEW (Q2);
+      Q2@.COEF := P@.COEF;
+      Q2@.ABC := P@.ABC;
+      Q2@.LINK := Q;
+      Q1@.LINK := Q2;
+      Q1 := Q2;
+      ADVANCE (P)
+    END;
+  UNTIL (P@.ABC < 0) AND (Q@.ABC < 0)
+END;
+
+PROCEDURE PRINTPOLY (VAR P: PTR);
+
+TYPE TEXTLINE = ARRAY (.1..132.) OF CHAR;
+
+VAR SUPERSCRIPTS, LINE: TEXTLINE;
+    INDEX, XS, YS, ZS: INTEGER;
+    COEFSIGNED, PRINT_ONE: BOOLEAN;
+
+  PROCEDURE NUM (NN: INTEGER; VAR DUMMY, ACTUAL: TEXTLINE;
+                 SIGNED, PRNT1: BOOLEAN);
+
+  VAR N, D, I, J: INTEGER;
+      VAL: ARRAY (.0..20.) OF CHAR;
+      MINUS: BOOLEAN;
+
+  BEGIN
+    N := NN;
+    I := -1;
+    IF N < 0 THEN
+    BEGIN
+      MINUS := TRUE;
+      N := -N
+    END
+    ELSE MINUS := FALSE;
+    IF PRNT1 OR (ABS (N) <> 1) THEN
+    REPEAT
+      I := I + 1;
+      D := N MOD 10;
+      N := N DIV 10;
+      VAL (.I.) := CHR (ORD ('0') + D)
+    UNTIL N = 0;
+    IF MINUS THEN
+    BEGIN
+      I := I + 1;
+      VAL (.I.) := '-'                                                          
+    END
+    ELSE IF SIGNED THEN
+    BEGIN
+      I := I + 1;
+      VAL (.I.) := '+'                                                          
+    END;
+    FOR J := 0 TO I DO
+    BEGIN
+      DUMMY (.INDEX + J.) := ' ';
+      ACTUAL (.INDEX + J.) := VAL (.I - J.)
+    END;
+    INDEX := INDEX + I + 1
+  END;
+
+  PROCEDURE DOIT (N: INTEGER; C: CHAR);
+  BEGIN
+    IF N > 0 THEN
+    BEGIN
+      LINE (.INDEX.) := C;
+      SUPERSCRIPTS (.INDEX.) := ' ';
+      INDEX := INDEX + 1;
+      NUM (N, LINE, SUPERSCRIPTS, FALSE, FALSE)
+    END
+  END;
+
+BEGIN
+  COEFSIGNED := FALSE;
+  FOR INDEX := 1 TO 132 DO
+  BEGIN
+    SUPERSCRIPTS (.INDEX.) := ' ';
+    LINE (.INDEX.) := ' '                                                       
+  END;
+  ADVANCE (P);
+  INDEX := 1;
+  WHILE P@.ABC >= 0 DO
+  BEGIN
+    WITH P@ DO
+    BEGIN
+      XS := ABC DIV 10000;
+      YS := (ABC DIV 100) MOD 100;
+      ZS := ABC MOD 100;
+      PRINT_ONE := (ABC = 0);
+      NUM (COEF, SUPERSCRIPTS, LINE, COEFSIGNED, PRINT_ONE);
+      COEFSIGNED := TRUE;
+      DOIT (XS, 'X');
+      DOIT (YS, 'Y');
+      DOIT (ZS, 'Z');
+    END;
+    ADVANCE (P)
+  END;
+  WRITELN;
+  WRITELN (SUPERSCRIPTS);
+  WRITELN (LINE)
+END;
+
+FUNCTION READPOLY: PTR;
+
+VAR P, P1, START: PTR;
+    FIRST: BOOLEAN;
+
+BEGIN
+  FIRST := TRUE;
+  BEGIN
+    REPEAT
+      NEW (P);
+      READ (P@.COEF, P@.ABC);
+      IF FIRST THEN
+      BEGIN
+        FIRST := FALSE;
+        START := P
+      END
+      ELSE P1@.LINK := P;
+      P1 := P
+    UNTIL P@.ABC < 0;
+    P@.LINK := START;
+    READPOLY := P
+  END;
+  READLN
+END;
+
+(* FINALLY - THE PROGRAM  *)
+
+BEGIN
+  WHILE NOT EOF(INPUT) DO
+  BEGIN
+    PP := READPOLY;
+    QQ := READPOLY;
+    PRINTPOLY (PP);
+    PRINTPOLY (QQ);
+    ADDPOLY (PP, QQ);
+    PRINTPOLY (QQ);
+    WRITELN
+  END
+END.
+%EOF
+-1 30001 -5 302 2 301 1 100 1 2 1 1 0 -1
+3 30001 2 20101 1 20100 1 303 5 302 -1 301 5 1 3 0 0 -1
+1 101 1 100 1 1 0 -1
+1 100 2 1 0 -1
+1 10000 1 100 0 -1
+1 10000 -1 100 0 -1
+1 100 1 1 1 0 0 -1
+1 200 1 201 1 2 1 1 3 0 0 -1
+3 10203 2 10202 5 203 6 201 4 3 5 2 1 0 0 -1
+1 50002 3 40103 12 501 2 101 0 -1
+//       EXEC  PASCAL
+//SYSIN DD *
+PROGRAM PASSPROC (OUTPUT);
+
+   PROCEDURE P1 (PROCEDURE P2, P3);
+         BEGIN P2; P3 END;
+
+   FUNCTION SIMPSON (A, B: REAL; FUNCTION F (REAL): REAL): REAL;
+      VAR I, N: INTEGER; S, SS, S1, S2, S4, H: REAL;
+      (* F(X) IS A REAL-VALUED FUNCTION WITH A SINGLE REAL-VALUED
+         PARAMETER.  THE FUNCTION MUST BE WELL-DEFINED IN THE INTERVAL
+         A <= X <= B                                                   *)
+      BEGIN N := 2; H := (B-A)*0.5; S1 := H*(F(A) + F(B)); S2 := 0.0;
+         S4 := 4.0*H*F(A+H); S := S1 + S2 + S4;
+         REPEAT SS := S; N := 2*N; H := H/2.0;
+            S1 := 0.5*S1; S2 := 0.5*S2 + 0.25*S4; S4 := 0; I := 1;
+            REPEAT S4 := S4 + F(A+I*H); I := I + 2
+            UNTIL I > N;
+            S4 := 4*H*S4; S := S1 + S2 + S4
+         UNTIL ABS(S-SS) < 1.0E-5;
+         SIMPSON := S/3.0
+      END (* SIMPSON *) ;
+
+   PROCEDURE P2;
+      BEGIN WRITELN(SIMPSON(0,1,SIN)) END;
+
+   PROCEDURE P3;
+      BEGIN WRITELN(SIMPSON(0,1,COS)) END;
+
+ PROCEDURE P5(PROCEDURE P2,P3);
+   BEGIN P1(P2, P3);   WRITELN(1.0);  END;
+   BEGIN P5(P2, P3) END.
+// EXEC PASCAL,SECONDS=30
+//SYSIN    DD *
+PROGRAM SOMA(OUTPUT);
+
+
+   (*************************************************************************
+   *                                                                        *
+   *               SOLUTIONS TO THE SOMA CUBE PROBLEM                       *
+   *                                                                        *
+   *                     A PASCAL PROGRAM                                   *
+   *                     BY RANCE DELONG                                    *
+   *                     MORAVIAN COLLEGE                                   *
+   *                                                                        *
+   *                     PUBLISHED IN ACM SIGPLAN NOTICES                   *
+   *                     VOL. 9 NO. 10 (OCTOBER 1974)                       *
+   *                                                                        *
+   *************************************************************************)
+
+
+
+TYPE
+   CUBE_SET = SET OF 1..27;
+   WHERE = (TOP, BOTTOM, RIGHT, LEFT, FRONT, BACK, NOWHERE);
+   PIECE_DESCRIPTION = ARRAY (.1..3.) OF WHERE;
+   AXES = (TBAXIS, RLAXIS, FBAXIS);
+   HASH_VALUE = 0..58;
+   PLIST_PTR = @ POSN_LIST_ELEMENT;
+   WHERE_SET = SET OF WHERE;
+   PIECE_RANGE = 1..7;
+   POSN_LIST_ELEMENT = RECORD
+                          PC_POSITION : CUBE_SET;
+                          NEXT_POSN : PLIST_PTR
+                       END;
+
+VAR
+   THE_CUBE : CUBE_SET;
+   PIECE : ARRAY (.1..7.) OF PIECE_DESCRIPTION;
+   MAJOR_ROTATIONS : ARRAY (.0..1.) OF AXES;
+   ROTATED : ARRAY (.AXES,WHERE.) OF WHERE;
+   SHIFT : ARRAY (.WHERE.) OF INTEGER;
+   HASH : ARRAY (.WHERE,1..2.) OF INTEGER;
+   POSN_LISTHEAD, SOLUTION_PTR : ARRAY (.1..7.) OF PLIST_PTR;
+   THOSE_CONSIDERED : SET OF HASH_VALUE;
+   P, I, SOLUTIONS : INTEGER;
+   NUMBER_USED : INTEGER;
+
+
+
+FUNCTION ORD1(S:WHERE_SET) : INTEGER;
+   VAR I,J : INTEGER;   W : WHERE;
+   BEGIN
+      I := 0; J := 1;
+      FOR W := TOP TO NOWHERE DO
+         BEGIN
+            IF W IN S THEN I := I + J;
+            J := 2*J
+         END;
+      ORD1 := I
+   END (**** ORD1 ****) ;
+
+
+PROCEDURE INITIALIZE;
+   BEGIN
+      PIECE(.1,1.) := RIGHT; PIECE(.1,2.) := FRONT; PIECE(.1,3.) := NOWHERE;
+      PIECE(.2,1.) := RIGHT; PIECE(.2,2.) := FRONT; PIECE(.2,3.) := FRONT;
+      PIECE(.3,1.) := RIGHT; PIECE(.3,2.) := FRONT; PIECE(.3,3.) := RIGHT;
+      PIECE(.4,1.) := RIGHT; PIECE(.4,2.) := FRONT; PIECE(.4,3.) := RIGHT;
+      PIECE(.5,1.) := RIGHT; PIECE(.5,2.) := TOP;   PIECE(.5,3.) := FRONT;
+      PIECE(.6,1.) := RIGHT; PIECE(.6,2.) := FRONT; PIECE(.6,3.) := TOP;
+      PIECE(.7,1.) := RIGHT; PIECE(.7,2.) := TOP;   PIECE(.7,3.) := FRONT;
+      MAJOR_ROTATIONS(.0.) := FBAXIS; MAJOR_ROTATIONS(.1.) := RLAXIS;
+      ROTATED(.TBAXIS,TOP.) := TOP; ROTATED(.TBAXIS,BOTTOM.) := BOTTOM;
+      ROTATED(.TBAXIS,RIGHT.) := BACK; ROTATED(.TBAXIS,LEFT.) := FRONT;
+      ROTATED(.TBAXIS,FRONT.) := RIGHT; ROTATED(.TBAXIS,BACK.) := LEFT;
+      ROTATED(.TBAXIS,NOWHERE.) := NOWHERE;
+      ROTATED(.RLAXIS,TOP.) := FRONT; ROTATED(.RLAXIS,BOTTOM.) := BACK;
+      ROTATED(.RLAXIS,RIGHT.) := RIGHT; ROTATED(.RLAXIS,LEFT.) := LEFT;
+      ROTATED(.RLAXIS,FRONT.) := BOTTOM; ROTATED(.RLAXIS,BACK.) := TOP;
+      ROTATED(.RLAXIS,NOWHERE.) := NOWHERE;
+      ROTATED(.FBAXIS,TOP.) := LEFT; ROTATED(.FBAXIS,BOTTOM.) := RIGHT;
+      ROTATED(.FBAXIS,RIGHT.) := TOP; ROTATED(.FBAXIS,LEFT.) := BOTTOM;
+      ROTATED(.FBAXIS,FRONT.) := FRONT; ROTATED(.FBAXIS,BACK.) := BACK;
+      ROTATED(.FBAXIS,NOWHERE.) := NOWHERE;
+      SHIFT(.TOP.) := 9; SHIFT(.BOTTOM.) := -9; SHIFT(.RIGHT.) := 1;
+      SHIFT(.LEFT.) := -1; SHIFT(.FRONT.) := 3; SHIFT(.BACK.) := -3;
+      SHIFT(.NOWHERE.) := 0;
+      HASH(.TOP,1.) := 1; HASH(.TOP,2.) := 6; HASH(.BOTTOM,1.) := -1;
+      HASH(.BOTTOM,2.) := -6; HASH(.RIGHT,1.) := 2; HASH(.RIGHT,2.) := 19;
+      HASH(.LEFT,1.) := -2; HASH(.LEFT,2.) := -19; HASH(.FRONT,1.) := 3;
+      HASH(.FRONT,2.) := 32; HASH(.BACK,1.) := -3; HASH(.BACK,2.) := -32;
+      HASH(.NOWHERE,1.) := 0; HASH(.NOWHERE,2.) := 0;
+      THE_CUBE := (..);
+      INTFIELDSIZE := 3;
+      NUMBER_USED := 0;
+      SOLUTIONS := 0
+   END (**** INITIALIZE ****) ;
+
+
+PROCEDURE RECORD_SOLUTION;
+   BEGIN
+      SOLUTIONS := SOLUTIONS + 1;
+      WRITELN(' SOLUTION ', SOLUTIONS);
+      IF (SOLUTIONS MOD 25) = 0 THEN
+         WRITELN('* * * * ELAPSED CPU TIME =', 10*CLOCK, ' MILLISECONDS.');
+      FOR (* PIECES *) P := 1 TO 7 DO
+         BEGIN
+            WRITE(P, '   ');
+            WITH SOLUTION_PTR(.P.)@ DO
+               FOR I := 1 TO 27 DO IF I IN PC_POSITION THEN WRITE(I);
+            WRITELN
+         END;
+      WRITELN
+   END (**** RECORD_SOLUTION ****) ;
+
+
+FUNCTION ORIENTATION(PIECE:PIECE_DESCRIPTION) : HASH_VALUE;
+   VAR PC : SET OF WHERE;
+   BEGIN   (* SYMMETRIC ORIENTATIONS RECEIVE SAME VALUE *)
+      IF P IN (.1,2,7.) THEN
+         IF ODD(ORD(PIECE(.1.))) THEN
+               PC := (.PRED(PIECE(.1.)),PIECE(.2.).)
+            ELSE PC := (.SUCC(PIECE(.1.)),PIECE(.2.).);
+      CASE P OF
+         1,2   : ORIENTATION := ORD1(PC) DIV 2
+                          + 32*ORD(ORD(PIECE(.1.)) > ORD(PIECE(.3.)));
+         3     : ORIENTATION := ABS(ABS(HASH(.PIECE(.1.),1.)
+                          + HASH(.PIECE(.3.),1.)) + HASH(.PIECE(.2.),2.));
+         4,5,6 : ORIENTATION := ABS(HASH(.PIECE(.1.),1.)
+                          + HASH(.PIECE(.2.),2.) + HASH(.PIECE(.3.),1.));
+         7     : ORIENTATION := ORD1(PC + (.PIECE(.3.).))
+      END
+   END (**** ORIENTATION ****) ;
+
+
+PROCEDURE ROTATE(VAR PIECE : PIECE_DESCRIPTION; AXIS : AXES);
+   BEGIN
+      FOR I := 1 TO 3 DO
+         PIECE(.I.) := ROTATED(.AXIS,PIECE(.I.).)
+   END (**** ROTATE ****) ;
+
+
+PROCEDURE GENERATE_TRANSLATIONS(PIECE : PIECE_DESCRIPTION;
+                                ORIENTATION : HASH_VALUE);
+   VAR RLDISP, FBDISP, DISP, J : INTEGER;
+       SIZE, PART : ARRAY (.0..3.) OF INTEGER;
+       CUBICLE : 1..27;
+   BEGIN RLDISP := 1; FBDISP := 3; PART(.0.) := 1;
+      FOR I := 0 TO 3 DO SIZE(.I.) := 3;
+      THOSE_CONSIDERED := THOSE_CONSIDERED + (.ORIENTATION.);
+      FOR I := 1 TO 3 DO
+         BEGIN
+            PART(.0.) := PART(.0.) + ORD(PIECE(.I.)) MOD 2
+                        * (-SHIFT(.PIECE(.I.).));
+            SIZE(.ORD(PIECE(.I.)) DIV 2.) := SIZE(.ORD(PIECE(.I.)) DIV 2.) - 1;
+         END;
+      IF (* PIECE *) P IN (.3,7.) THEN
+         FOR I := 1 TO 3 DO
+            PART(.I.) := PART(.I DIV 2.) + SHIFT(.PIECE(.I.).)
+      ELSE
+         FOR I := 1 TO 3 DO
+            PART(.I.) := PART(.I-1.) + SHIFT(.PIECE(.I.).);
+      FOR I := 1 TO SIZE(.0.)*SIZE(.1.)*SIZE(.2.) DO
+         BEGIN
+            WITH SOLUTION_PTR(.P.)@ DO (* ADD POSITION TO LIST *)
+               BEGIN
+                  PC_POSITION := (..);
+                  FOR J := 0 TO 3 DO
+                     BEGIN
+                        CUBICLE := PART(.J.);
+                        PC_POSITION := PC_POSITION + (.CUBICLE.)
+                     END;
+                  NEW(NEXT_POSN);
+                  SOLUTION_PTR(.P.) := NEXT_POSN;
+                  NEXT_POSN@.NEXT_POSN := NIL
+               END;
+            IF I MOD SIZE(.1.) = 0 THEN (* SHIFT TO NEW POSITION *)
+               BEGIN (* FORWARD, BACKWARD OR UPWARD MOVEMENT *)
+                  RLDISP := -RLDISP;
+                  IF I MOD (SIZE(.1.)*SIZE(.2.)) = 0 THEN
+                     BEGIN
+                        FBDISP := -FBDISP;
+                        DISP := 9;
+                     END
+                  ELSE DISP := FBDISP
+               END
+            ELSE DISP := RLDISP  (* RIGHT OR LEFT *) ;
+           FOR J := 0 TO 3 DO PART(.J.) := PART(.J.) + DISP
+         END
+   END (**** GENERATE_TRANSLATIONS ****) ;
+
+
+PROCEDURE GENERATE_PIECE_POSITIONS;
+   VAR M, MINOR_ROTATIONS : INTEGER; THIS_ORIENTATION : HASH_VALUE;
+   BEGIN
+      FOR (* PIECES *) P := 1 TO 7 DO
+         BEGIN
+            THOSE_CONSIDERED := (..);
+            NEW(POSN_LISTHEAD(.P.)); SOLUTION_PTR(.P.) := POSN_LISTHEAD(.P.);
+            FOR (* MAJOR_ROTATIONS *) M := 1 TO 6 DO
+               BEGIN
+                  FOR MINOR_ROTATIONS := 1 TO 4 DO
+                     BEGIN
+                        THIS_ORIENTATION := ORIENTATION(PIECE(.P.));
+                        IF NOT(THIS_ORIENTATION IN THOSE_CONSIDERED) THEN
+                           GENERATE_TRANSLATIONS(PIECE(.P.),THIS_ORIENTATION)
+                        ELSE
+                           REPEAT
+                              ROTATE(PIECE(.P.),TBAXIS);
+                              MINOR_ROTATIONS := MINOR_ROTATIONS + 1
+                           UNTIL MINOR_ROTATIONS > 3;
+                        ROTATE(PIECE(.P.),TBAXIS);
+                     END;
+                  ROTATE(PIECE(.P.),MAJOR_ROTATIONS(.M MOD 3 DIV 2.))
+               END
+         END;
+      POSN_LISTHEAD(.2.)@.NEXT_POSN@.NEXT_POSN@.NEXT_POSN := NIL
+   END (**** GENERATE_PIECE_POSITIONS ****) ;
+
+
+PROCEDURE GENERATE_SOLUTIONS(PC_NUM : PIECE_RANGE);
+   BEGIN
+      NUMBER_USED := NUMBER_USED + 1;
+      SOLUTION_PTR(.PC_NUM.) := POSN_LISTHEAD(.PC_NUM.);
+      WHILE SOLUTION_PTR(.PC_NUM.)@.NEXT_POSN <> NIL DO
+         WITH SOLUTION_PTR(.PC_NUM.)@ DO
+         BEGIN
+            IF THE_CUBE * PC_POSITION = (..) THEN
+               BEGIN
+                  THE_CUBE := THE_CUBE + PC_POSITION;
+                  IF NUMBER_USED = 7 THEN RECORD_SOLUTION
+                     ELSE GENERATE_SOLUTIONS(PC_NUM MOD 7 + 1);
+                  THE_CUBE := THE_CUBE - PC_POSITION
+               END;
+            SOLUTION_PTR(.PC_NUM.) := NEXT_POSN
+         END;
+      NUMBER_USED := NUMBER_USED - 1
+   END (**** GENERATE_SOLUTIONS ****) ;
+
+
+BEGIN
+   INITIALIZE;
+   GENERATE_PIECE_POSITIONS;
+   GENERATE_SOLUTIONS(2)
+END (**** SOMA ****) .
