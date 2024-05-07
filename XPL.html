@@ -165,14 +165,10 @@ just run <i>that</i> on an IBM 360 simulator?&nbsp; Well ... tell me how
 And tell me how to motivate any of <i>you</i> to learn how to use 
 Hercules in addition to the already very steep learning curve you face 
 with the flight software?&nbsp; If you can answer those questions for 
-me, I'll admit you've got a pretty good idea!&nbsp; With that said, I 
-suspect we will try to run the compiled flight software on Hercules at 
-some point, just to see it done, but it's not a satisfactory end goal 
-for most of our readers or our intended use cases.&nbsp; And I suspect 
-an emulator for the IBM 360 instruction set probably is in the works at 
-some point, but it's much more likely to be a bare-bones kind of thing, 
-similar to our emulations of the Apollo AGC, AGS, and LVDC, than a 
-full-blown IBM 360 emulator.<br>
+me, I'll admit you've got a pretty good idea!&nbsp; With that said, 
+there's definitely merit in emulating an IBM 360, if not necessarily 
+emulating a full IBM 360 system.&nbsp;&nbsp; I'll come back to this 
+point later<br>
   </font></blockquote>
 "Subscript sloppiness", as I call it, is just <i>one</i> example of the 
 difficulties.&nbsp; To be fair, I'll admit that it's 
@@ -454,7 +450,7 @@ Or since ANALYZER accepts the input grammar it analyzes on "device 0" (attached 
   <pre><font color="#663300">ANALYZER/ANALYZER --ddi=0,Tests/XPL.bnf --ddo=2,PUNCH.txt &lt;Tests/XPL.bnf</font></pre>
 </blockquote>
 
-For a <i>still meatier</i> sample program, we can turn to the source code of the original XPL compiler itself, <b>XCOM</b>.&nbsp; <b>XCOM</b> was itself written in XPL, so perhaps we can compile it using <b>XCOM-I</b>.&nbsp; Like <b>ANALYZER</b>, the source code for <b>XCOM</b> is in McKeeman (Appendix 3), but also like <b>ANALYZER</b>, the source code <i>we</i> have is something I found online, and I cannot guarantee it's identical to the book.&nbsp; Having compiled <b>XCOM</b>,
+<a name="compilingXCOM"></a>For a <i>still meatier</i> sample program, we can turn to the source code of the original XPL compiler itself, <b>XCOM</b>.&nbsp; <b>XCOM</b> was itself written in XPL, so perhaps we can compile it using <b>XCOM-I</b>.&nbsp; Like <b>ANALYZER</b>, the source code for <b>XCOM</b> is in McKeeman (Appendix 3), but also like <b>ANALYZER</b>, the source code <i>we</i> have is something I found online, and I cannot guarantee it's identical to the book.&nbsp; Having compiled <b>XCOM</b>,
  we'll have the dubious pleasure of being able to use it to compile 
 standard XPL programs and produce object code in IBM System/360 machine 
 code.&nbsp; <br>
@@ -526,7 +522,55 @@ The Virtual AGC Project (2024)<br>
     </tr>
   </tbody>
 </table>
-<br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; Incidentally, McKeeman's <b>XCOM</b>
+ has plenty of quirks specific to it, quite aside from any quirks XPL 
+more-generally may have as a computer language.&nbsp; I mention this 
+just in case you become excited about using <b>XCOM</b> and start writing new programs for it!&nbsp; Here are a few I've noticed:<br>
+  </font>
+  <ul>
+    <li><font size="-1">It only accepts upper-case code for identifiers and keywords ... in spite of the fact that every speck of XPL source code in the book is printed in lower case!</font></li>
+    <li><font size="-1">It requires an <font color="#663300"><code>EOF</code></font> token at the end of the source code.</font></li>
+    <li><font size="-1">It won't allow you to have two division operations (including <font color="#663300"><code>MOD</code></font> as a division) in the same statement, instead emitting an error message saying that it requires a "busy register".</font></li>
+    <li><font size="-1">I'm sure there are plenty more oddities, but I don't know that I'll be using McKeeman's <b>XCOM</b> enough in the future to discover any more of them!<br></font></li>
+  </ul>
+</blockquote>
+<h2>
+Emulating the IBM 360 CPU</h2>
+<p>As I mentioned earlier, it has often been suggested me that since so many of these legacy XPL programs assume that they are running on an IBM 360 system, and since legacy XPL compilers like McKeeman's <b>XCOM</b> and Intermetrics's <b>HAL/S-FC</b> can produce IBM 360 object code, then emulating an IBM 360 on which to run that software might be a good idea.  Alas, a full-scale IBM System/360 emulator such as <a moz-do-not-send="true" href="http://www.hercules-390.org/">Hercules</a> does not jibe with Virtual AGC's project goals very well.  For one thing, the Space Shuttle's flight computers were what are typically referred to as "embedded systems" that provided real-time control of flight systems, whereas the System/360 was instead a mainframe computer that read punch-cards, executed batch jobs and made printouts.  Even considered as a stop-gap measure, just used temporarily to see if a program compiled from XPL source code works at all, Hercules is still not a very good fit with Virtual AGC, because you'd have to navigate the learning curve of how to operate an IBM System/360 computer.  Which is fine, if that's your interest, but not so fine if your interest is in ancient flight computers rather than ancient mainframe computers!<br></p>
+<p>But that's not to say that emulating the IBM 360 CPU is a worthless idea!  To the contrary, if you had a <i>lightweight</i> emulator, it's entirely possible it could be used or adapted to achieve all of Virtual AGC's goals.<br></p>
+<p>As it happens, there is an available candidate for such lightweight IBM 360 CPU emulator.  This emulator, called <b>sim360</b>, was written by Daniel Weaver, who I've mentioned earlier as also being the author of a compiler for standard XPL.  You can find the source code for <b>sim360</b> archived as <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I/sim360">the XCOM-I/sim360-source/ folder</a> in the Virtual AGC software repository, but <a moz-do-not-send="true" href="https://sourceforge.net/projects/suny-pascal/">the official place to get the most up-to-date version is Dan's own site</a>.  It's disguised on Dan's site as a Pascal compiler, but don't be confused:  There's an IBM 360 CPU emulator in there as well!<br></p>
+<p>Assuming you're working from Virtual AGC's archived copy, the first thing you have to do is to build <b>sim360</b> itself as follows:<br></p>
+<blockquote>
+  <pre><font color="#663300">cd XCOM-I/sim360-source/simulate<br>make clean all</font><br></pre>
+</blockquote>
+<p>This will result in the executable, <b>sim360</b> itself, being created in the XCOM-I/sim360/simulate/ folder.  But you'll probably want it to be in your PATH.  You can just copy <b>sim360</b> itself into the PATH if you like; it no longer needs any of the other files in XCOM-I/sim360-source/.<br></p>
+<p>To actually run an IBM 360 program in <b>sim360</b>, you'll need an IBM 360 <i>load file</i> for it.  In the context of Virtual AGC, there are two ways to get such a load file:<br></p>
+<ul>
+  <li>You can compile an XPL program using McKeeman's <b>XCOM</b> program.  As you recall, the very last thing we did in the preceding section was to compile <b>XCOM</b> itself (using <b>XCOM-I</b>), and to show you how to use <b>XCOM</b> to compile an XPL program.</li>
+  <li>Or, you can compile a HAL/S program using Intermetrics's <b>HAL/S-FC</b> program.  As you recall, this is a goal we're working toward, but cannot do <i>yet</i> since <b>XCOM-I</b> cannot yet compile <b>HAL/S-FC</b> perfectly.</li>
+</ul>
+<p>Those facts being what they are, let's run through the complete process of compiling a simple XPL program into an IBM 360 load file, and then running that file with <b>sim360</b>.  Here's our simple program:<br></p>
+<blockquote>
+  <pre><font color="#663300">OUTPUT = 'Hello, world!';<br>EOF</font><br></pre>
+</blockquote>
+<p>It doesn't get much simpler than that!  Well, actually it does, because I've already put this file, as HELLO.xpl, into the XCOM-I/Tests/ folder for you.  Assuming that <b>XCOM</b> has itself been moved somewhere into your PATH, we can use the instructions at the end of the preceding section to compile HELLO.xpl:<br></p>
+<blockquote>
+  <pre><font color="#663300">cd XCOM-I<br>XCOM --ddi=0,Tests/HELLO</font><font color="#663300"><font color="#663300">.xpl</font> --ddi=2,Tests/XPL.LIBRARY.xpl --raf=B,3600</font><font color="#663300"><font color="#663300">,1</font>,</font><font color="#663300"><font color="#663300">HELLO</font>.obj --raf=B,3600</font><font color="#663300"><font color="#663300">,2</font>,</font><font color="#663300"><font color="#663300"><font color="#663300">HELLO</font></font>.dat --raf=B,3600</font><font color="#663300"><font color="#663300">,3</font>,</font><font color="#663300"><font color="#663300"><font color="#663300">HELLO</font></font>.str</font></pre>
+</blockquote>
+<p>Assuming that step completed with no errors, our IBM 360 load file is now HELLO.obj.  Let's run it:<br></p>
+<blockquote>
+  <pre><font color="#663300">sim360 -o0ET stdout HELLO.obj</font><br></pre>
+</blockquote>
+<p>And here's the output from that emulated run:<br></p>
+<blockquote>
+  <pre><font color="#663300">Hello, world!<br>Sim360 normal exit</font><br></pre>
+</blockquote>
+<p>The command-line switches for <b>sim360</b> probably look mysterious, but they're not so bad.  You can see a full list of command-line options with the command "<font color="#663300"><code>sim360 --help</code></font>", but what the mysterious <font color="#663300"><code>-o0ET</code></font> switch means is this:  text from <font color="#663300"><code>OUTPUT(0)</code></font> (that's where the "o" and the "0" come from) are going to be in EBCDIC (that's the "E") and we want <b>sim360</b> to translate it (that's the "T") to ASCII when it's sent to <font color="#663300"><code>stdout</code></font> (that's the ... well, you get the idea).<br></p>
+<p>This was a very simple example, but I think the potential of the method is obvious.<br></p>
+
+
+<blockquote>
+</blockquote>
 <h2><a name="halsfc"></a>Compiling and Running HAL/S-FC</h2>
 <i>(Most of what's described in this section is not yet functional, but 
 I'm writing it while working it out so that my memory is fresh.)</i><br>
@@ -702,6 +746,19 @@ for you in detail.&nbsp; What's perhaps most confusing is that the three
 the number of elements, but rather the highest legal index.&nbsp; As 
 mentioned above, indices start at 0, so the total number of elements in 
 each is 11. <br>
+<blockquote><font size="-1"><b>Aside:</b> Standard XPL, <i>à la</i> 
+McKeenan, doesn't allow expressions when expressing array sizes, whereas
+ XPL/I does allow them.&nbsp; For example, the following is fine in 
+XPL/I but is a no-no in XPL:<br>
+  </font>
+  <blockquote>
+    <pre><font size="-1">DECLARE BUFFER(3600-1) BIT(8);<br></font></pre>
+  </blockquote>
+  <font size="-1">This example will be continued in the next section, 
+where it will make a little more sense, but this is actually the kind of
+ thing you might want to do.</font><br>
+</blockquote>
+
 <br>
 There are additional attributes which can be applied to such declarations, of which the most important is probably <code><font color="#663300">INITIAL</font></code>.&nbsp; This attribute allows you to supply an initial value for the variable, such as:<br>
 <blockquote>
@@ -797,9 +854,104 @@ You may not like this too much.&nbsp; I don't, myself.&nbsp; But I
 reiterate, this is the documented mechanism invented by Intermetrics, 
 and used in XPL/I source code like <b>HAL/S-FC</b>.&nbsp; It's not my invention
  or some wacky innovation in <b>XCOM-I</b>.<br>
-<h3>LITERALLY and Macros</h3>
-TBD<br>
+<h3>LITERALLY and Macros</h3>Another attribute that can appear in <font color="#663300"><code>DECLARE</code></font> statements is the <font color="#663300"><code>LITERALLY</code></font> attribute.&nbsp; Here's an example:<br>
+<blockquote>
+  <pre><font color="#663300">DECLARE ARRAYTOP LITERALLY '255';<br>DECLARE MYARRAY(ARRAYTOP) FIXED;</font><br></pre>
+</blockquote>
+Notice that <font color="#663300"><code>ARRAYTOP</code></font> has no 
+datatype assigned to it.&nbsp; That's because its declaration is not 
+actually the declaration of a variable called "ARRAYTOP", but rather of a
+ macro of that name.&nbsp; Wherever the identifier <font color="#663300"><code>ARRAYTOP</code></font> is encountered subsequently, it's simply replaced literally by the string <font color="#663300"><code>255</code></font>, now unquoted:<br>
+<blockquote>
+  <pre><font color="#663300">DECLARE MYARRAY(255) FIXED;</font><br></pre>
+</blockquote>
+This clarifies an example of a commonly-desirable declaration I gave in 
+the preceding section, which in this section would be expressed as:<br>
+<blockquote>
+  <pre><font color="#663300">DECLARE RECSIZE LITERALLY '3600';<br>DECLARE BUFFER(RECSIZE-1) BIT(8);</font><br></pre>
+</blockquote>
+
+As noted in the preceding section, standard XPL's grammar wouldn't allow an expression (like <font color="#663300"><code>RECSIZE-1</code></font>) in that context, so this particular convenience in making declarations is only available in XPL/I.<br>
 <br>
+Macro expansions — not macro <i>declarations</i> (I hope!) — can be nested, so you can do things like this if you want:<br>
+<blockquote>
+  <pre><font color="#663300">DECLARE DEVICE LITERALLY '6', DECLARE OUT LITERALLY 'OUTPUT(DEVICE)';<br>OUT = 'My message';</font><br></pre>
+</blockquote>
+This expands to<br>
+<blockquote>
+  <pre><font color="#663300">OUTPUT(6) = 'My message';</font><br></pre>
+</blockquote>
+Macros can expand to portions of statements, as the ones above have, or to multiple statements, such as<br>
+<blockquote>
+  <pre><font color="#663300">DECLARE MYBLOCK LITERALLY 'DO; X=1; Y=X+3; END';<br>...<br>IF X=7 THEN;<br>    MYBLOCK;</font><br></pre>
+</blockquote>
+which expands to:<br>
+<blockquote>
+  <pre><font color="#663300">IF X=7 THEN;<br>    DO; X=1; Y=X+3; END;</font><br></pre>
+</blockquote>
+Macros can also have arguments.&nbsp; Consider the following:<br>
+<blockquote>
+  <pre><font color="#663300">DECLARE MYMAC(2) LITERALLY '%1% = %2%';</font><br></pre>
+</blockquote>
+This declaration means that <font color="#663300"><code>MYMAC</code></font> has 2 arguments, and that when the macro is expanded, the first argument will replace <font color="#663300"><code>%1%</code></font> and the second argument will replace <font color="#663300"><code>%2%</code></font>.&nbsp; Thus "<font color="#663300"><code>MYMAC(X, 3 * Y)</code></font>" expands to "<font color="#663300"><code>X = 3 * Y</code></font>".<br>
+<blockquote><font size="-1"><b>Warning:</b>&nbsp; As with macros in any other computer language, this can quickly get out of hand.&nbsp; <b>XCOM-I</b>,
+ for example, won't detect recursive, endlessly-expanding macros.&nbsp; 
+There's also no guarantee when multiple macros are in play that <b>XCOM-I</b> will necessarily expand macros in the same order that <b>XCOM</b> would have.&nbsp; Neither McKeeman nor Intermetrics documentation makes any mention of what that ordering should be.<br>
+    <br>
+    <b>Warning:</b>&nbsp; The scope of macro definitions is also 
+different in XPL vs XPL/I.&nbsp; In XPL, macro definitions don't respect
+ any nested scopes they appear in; i.e., any macro definition will 
+simply remain in effect until the end of the source code.&nbsp; In 
+XPL/I, macro definitions remain in effect only until the end of the 
+procedure in which they're defined, including embedded procedures.&nbsp;
+ In neither case does a macro definition have any effect on source code 
+prior to it.<br>
+  </font></blockquote>
+<h3>Logical Expressions</h3>
+<p>XPL's logical operators are <font color="#663300"><code>&amp;</code></font>, |, and <font color="#663300"><code>~</code></font> (<font color="#663300"><code>¬</code></font>), for "and", "or", and "not", respectively.  The documentation in <i>A Compiler Generator</i> is maddeningly unclear as to what these operators do.  True, table 6.8.1 calls them "logical and", "logical or", and "logical complement", but the word "logical" isn't defined ... just as my sloppy usage of the word "logical" at the beginning of this paragraph makes no distinction. Which leaves open a few loopholes that have to be closed up. The issues which we must understand are:<br></p>
+<ul>
+  <li>Are these operations bitwise or narrowly "logical".  I.e., do they operate in parallel on each bit position in a numerical value, or do they simply produce bipolar results of 1 (true) or 0 (false)?</li>
+  <li>Do these operations short circuit?  E.g., if we have an expression of the form (say) <font color="#663300"><code><i>expression1</i>&amp;<i>expression2</i></code></font>, and <i><font color="#663300"><code>expression1</code></font></i> evaluates to 0, is <i><font color="#663300"><code>expression2</code></font></i> even evaluated?</li>
+</ul>
+<p>In case you're not in the mood for a technical discussion of the matter, I'll give you the short answer up front, and having read that, you can proceed to the long discussion if you want:<br></p>
+<ul>
+  <li>The logical operations are indeed bitwise.</li>
+  <li>Under some limited circumstances, the original <b>XCOM</b> may have short-circuited evaluation of logical operations, even though there's no short-circuiting observed in the examples I've constructed.  <b>XCOM-I</b> does not at present attempt any short-circuiting.<br></li>
+</ul>
+<p>As for how I came up with this "information", there are several places we can look for guidance in guessing the answers.  For one thing, according to McKeeman's account, the XPL language was derived from the PL/I language, so we can look at PL/I documentation and hope that it applies to XPL.  Of course, we can look at the source code for McKeeman's XPL compiler (<b>XCOM</b>) as listed in the book, and see if there are any hints there.  Or we can even examine the IBM 360 object code that <b>XCOM</b> generates for these operators.   (All the while wondering how things came to this, that we have to resort to lame measures like consulting object code to figure out the basic features of the language?)<br></p>
+<p>As far as PL/I is concerned, <a moz-do-not-send="true" href="https://www.ibm.com/docs/en/SSY2V3_5.1.0/com.ibm.ent.pl1.zos.doc/lrm.pdf">IBM's PL/I Language Reference</a> (2017) tells us on p. 66 that for the <font color="#663300"><code>&amp;</code></font>, <font color="#663300"><code>|</code></font>, and <font color="#663300"><code>¬</code></font> operators, "bit operations are performed on a bit-by-bit basis".  As far as object code produced by <b>XCOM</b> is concerned, McKeeman (p. 150) shows an example in which object code for the expression "<font color="#663300"><code>SHL(K,1) &amp; SHR(I,J)</code></font>" is produced, and we do find that it simply uses the IBM 360 <font color="#663300"><code>NR</code></font> ("And Logical") instruction:<br></p>
+<blockquote>
+  <p align="left"><img moz-do-not-send="true" src="shortCircuit.jpg" alt="" width="768" height="123"></p>
+</blockquote>
+<p>Although I had to consult more than one IBM assembly-language manual to find the answer to the seemingly-simple question of what <font color="#663300"><code>NR</code></font> does, <a moz-do-not-send="true" href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-7832-00.pdf">IBM's z/Architecture Principles of Operation</a> (p. A-8) does tell us that the <font color="#663300"><code>NR</code></font> (and its cousins <font color="#663300"><code>N</code></font>, <font color="#663300"><code>NC</code></font>, and <font color="#663300"><code>NI</code></font>) are indeed bitwise operations.<br></p>
+<blockquote><font size="-1"><b>Aside:</b>  <a moz-do-not-send="true" href="https://www.ibm.com/support/pages/sites/default/files/inline-files/SA22-7832-00.pdf#page=940">Figure B-2, "Instructions Arranged by Mnemonic"</a> of the latter document is very helpful in trying to decipher such listings of IBM 360 object code.<br>
+  </font></blockquote>
+<p>Short-circuiting is a natural consideration for strictly bipolar operands and operators, but is a bit trickier to consider once we've concluded that the logical operators operate bitwise rather than in a bipolar fashion.  Certainly the object-code example from <i>A Compiler Generator</i> that was mentioned in the preceding paragraph shows no signs at all of short circuiting:  Both of the operands of the <font color="#663300"><code>&amp;</code></font> operator in that example are evaluated, with no attempt at checking the value of the first operation before proceeding to the second one.  On the other hand, that example of object-code generation by <b>XCOM</b> happens to be for an assignment statement rather than for the conditional expression of an <font color="#663300"><code>IF</code></font>, <font color="#663300"><code>DO WHILE</code></font>, or <font color="#663300"><code>DO UNTIL</code></font>.   Perhaps the evaluation of a conditional expression might be very different in those contexts.  One reason to believe that it might be different is that the final result of a conditional expression is masked to just the least-significant bit, and thus (eventually) is indeed a bipolar value; i.e., even if all of the bits were involved in the computation, all but one of them is discarded in the end, so perhaps the extra bits are discarded at the beginning rather than at the end of the computation, even though it's more work to do so.  Moreover, the PL/I Language Reference document mentioned earlier does cover short-circuit evaluation (see p. 245), and it says that short-circuiting is <i>only</i> in the context of the conditional of an <font color="#663300"><code>IF</code></font> statement (versus assignment statements).  Plus, even then the short-circuiting occurs only in certain special circumstances, such as the leading operand being a <font color="#663300"><code>BIT(1)</code></font> literal or constant variable, which leads one to believe that the value of the leading operand has to be determined to be 0 or 1 at compile-time rather than at run-time for the short-circuiting to occur.<br></p>
+<p>Unfortunately, the example of object-code generation in McKeeman doesn't show us how an <font color="#663300"><code>IF</code></font> statement would compile.  But <a moz-do-not-send="true" href="#compilingXCOM">as we saw earlier</a>, we have been able to use <b>XCOM-I</b> to create a working copy of McKeeman's <b>XCOM</b>, so we can make our own example of <font color="#663300"><code>IF</code></font>, compile it with <b>XCOM</b> and see!  Imagine we have the following ridiculous little XPL program:<br></p>
+<blockquote>
+  <pre><font color="#663300"> DECLARE I FIXED;<br> DO I = 1 TO 10;<br>     IF (I * I) &amp; (100 - I * I) THEN OUTPUT = 'hello';<br> END;<br> DO I = 1 TO 10;<br>     IF 0 &amp; (100 - I * I) THEN OUTPUT = 'hello';<br> END;<br>EOF<br></font></pre>
+</blockquote>
+<blockquote>
+  <p><font size="-1"><b>Aside:</b> By the way, compiling an XPL program with McKeeman's <b>XCOM</b> is a bit more constrained than compiling a similar program with <b>XCOM-I</b>.  For one thing, to avoid an irritating if harmless warning message, the <font color="#663300"><code>EOF</code></font> token must be present at the end of the source code, whereas <b>XCOM-I</b> doesn't care.  For another, even though XPL is case-insensitive other than inside of quoted strings, and even though all of the XPL source code in <i>A Compiler Generator</i> is printed in lower case, <b>XCOM</b> will in fact choke on any XPL source code that isn't fully upper case.  Go figure!</font><br></p>
+</blockquote>
+Compiling this silly program with <b>XCOM</b>, and pulling just the relevant portion of the <b>XCOM</b>'s report gives us the following IBM 360 object code for the conditional expressions of the <font color="#663300"><code>IFq</code></font> statements:<br>
+<pre><font color="#663300">  20 |    IF (I * I) &amp; (100 - I * I) THEN OUTPUT = 'hello';                           |  1314 C7 = 10.<br>                                                                      1314: CODE = L    1,1340(0,11)<br>                                                                      1318: CODE = M    0,1340(0,11)<br>                                                                      1322: CODE = L    2,1340(0,11)<br>                                                                      1326: CODE = L    3,1340(0,11)<br>                                                                      1330: CODE = MR   2,2<br>                                                                      1332: CODE = LA   2,100(0,0)<br>                                                                      1336: CODE = SR   2,3<br>                                                                      1338: CODE = NR   1,2<br>                                                                      1340: CODE = N    1,164(0,11)<br>                                                                      ...<br> 24 |    IF 0 &amp; (100 - I * I) THEN OUTPUT = 'hello';                                 |  1400<br>                                                                      1400: CODE = L    1,1340(0,11)<br>                                                                      1404: CODE = M    0,1340(0,11)<br>                                                                      1408: CODE = LA   2,100(0,0)<br>                                                                      1412: CODE = SR   2,1<br>                                                                      1414: CODE = N    2,1300(0,1048571)<br>                                                                      1418: CODE = N    2,164(0,11)<br>                                                                      ...<br><br></font></pre>
+<p>Not shown above is that the symbol table tells us variable <font color="#663300"><code>I</code></font> is stored at address 1340(11), which is why all of the 1340(0,11)'s appear above.  I don't understand IBM 360 assembly language, but what I <i>think</i> the code probably does is:<br></p>
+<ul>
+  <li>The first <font color="#663300"><code>IF</code></font>:</li>
+  <ul>
+    <li>1314 through 1318:  Compute the left-hand operand of the <font color="#663300"><code>&amp;</code></font> operator; i.e., <font color="#663300"><code>I*I</code></font>.</li>
+    <li>1322 through 1336:  Compute the right-hand operand of the <font color="#663300"><code>&amp;</code></font> operator; i.e., <font color="#663300"><code>100-I**</code></font>. </li>
+    <li>1338: Perform a bitwise-AND of the two operands.</li>
+    <li>1340: Mask off all but the least-significant bit.<br></li>
+  </ul>
+  <li>The second <font color="#663300"><code>IF</code></font>:</li>
+  <ul>
+<li>1400-1412:  Compute the <i>right</i>-hand operand of the <font color="#663300"><code>&amp;</code></font> operator; i.e., <font color="#663300"><code>I*I</code></font>.</li><li>1414: Perform a bitwise-AND with 0.  Admittedly, I'm not quite sure <i>why</i> it would be 0 it's AND'ing with, but it's certainly AND'ing with something.</li><li>1418: Mask off all but the least-significant bit.</li>
+  </ul>
+</ul>
+<p>But whether or not my interpretation is 100% correct, at least in this example there's no evidence of short-circuiting.  The 2nd <font color="#663300"><code>IF</code></font> in particular is pretty shocking.  Perhaps there's supposed to be some subsequent optimization I'm not aware of that would have cleaned it up.<br></p>
+
 <h3><a name="common"></a>COMMON Memory</h3>
 XPL/I also introduces the notion of <font color="#663300"><code>COMMON</code></font> memory, not present in XPL.&nbsp; The notion behind <font color="#663300"><code>COMMON</code></font>
  memory is that a very large application program like <b>HAL/S-FC</b> won't be 
@@ -2455,7 +2607,7 @@ technique, you might be able to do so just by altering the parameters of
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-04-28<br>
+          2024-05-06<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
