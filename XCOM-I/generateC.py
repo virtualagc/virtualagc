@@ -527,6 +527,80 @@ def basedStats(scope, extra = None):
             if lenName > maxRecordFieldName:
                 maxRecordFieldName = lenName
 
+# Return the scope of the innermost enclosing PROCEDURE of a scope.
+def findParentProcedure(scope):
+    while True:
+        if "blockType" not in scope:
+            return scope
+        if scope["parent"] == None:
+            return scope
+        scope = scope["parent"]
+    
+# A function for figuring out `setjmp`/`longjmp` vs normal `goto`.  Basically,
+# it:
+#    Finds all of the `goto` statements.
+#
+#    Ignores any of them which are local to the innermost enclosing PROCEDURE.
+#
+#    But if not local, adds the label to the "longjmpLabels" dictionary of the
+#    enclosing PROCEDURE of the `goto`, and adds it to the "setjmpLabels"
+#    dictionary of the target PROCEDURE as well.  The value of the entry 
+#    in both cases is the `attributes` of the target label in the target
+#    PROCEDURE.
+globalSetjmp = set()
+def mapJump(scope, extra = None):
+    global globalSetjmp
+    
+    # Look for all of the `GOTO` statements in the current scope.  
+    procedureOfLongjmp = None
+    code = scope["code"]
+    for token in code:
+        if "GOTO" in token:
+            label = token["GOTO"]
+            # We've found a `goto`.  The question we now have to answer
+            # is whether the target `label` is within the immediately-
+            # enclosing PROCEDURE (if any).  A simple `getAttributes` 
+            # would find the label, but won't tell us anything about whether
+            # or not it's within the PROCEDURE or not, so we don't use it.
+            found = False
+            inOurProc = True
+            attributes = None
+            s = scope;
+            while s != None:
+                if label in s["variables"] and "LABEL" in s["variables"][label]:
+                    found = True
+                    procedureOfSetjmp = findParentProcedure(s)
+                    attributes = procedureOfSetjmp["variables"][label]
+                    break
+                if "blockType" not in s:
+                    inOurProc = False
+                s = s["parent"]
+            # At this point:
+            #    `found` indicates whether the `label` was found in scopt at all.
+            #    If `found`:
+            #        `s` is the scope in which `label` was found.
+            #        `procedureOfSetjmp` is its enclosing PROCEDURE.
+            #        `attributes` are `label`'s attributes there.
+            #        `inOurProc` is whether `label` was in the innermost procedure.
+            if inOurProc:
+                continue    # Nothing to do!
+            if not found:
+                errxit("No label %s found in scope of GOTO %s" % (label, label))
+            if procedureOfLongjmp == None:
+                procedureOfLongjmp = findParentProcedure(scope)
+            if "longjmpLabels" not in procedureOfLongjmp:
+                procedureOfLongjmp["longjmpLabels"] = {}
+            procedureOfLongjmp["longjmpLabels"][label] = attributes
+            if "setjmpLabels" not in procedureOfSetjmp:
+                procedureOfSetjmp["setjmpLabels"] = {}
+            procedureOfSetjmp["setjmpLabels"][label] = attributes
+            globalSetjmp.add(attributes["mangled"])
+            if False: # ***DEBUG***
+                print("Long jump %s:  '%s' -> '%s'" % (attributes["mangled"], 
+                                                   procedureOfLongjmp["symbol"],
+                                                   procedureOfSetjmp["symbol"]), \
+                      globalSetjmp, file=sys.stderr)
+
 # A special case of `generateExpression` (see below), which also happens to
 # be called by `generateExpression`, to generate the source code for an 
 # expression of the form `ADDR(...)`.  Returns just the string containing the
@@ -571,6 +645,7 @@ def generateADDR(scope, parameter):
             sources = "0";
         elif len(fSubs) == 1:
             tipes, sources = generateExpression(scope, fSubs[0])
+            tipes, sources = autoconvert(tipes, ["FIXED"], sources)
         else:
             errxit("Wrong number of subscripts of %s in ADDR" % fVar)
         return 'ADDR(NULL, 0, "%s", %s)' % (fVar, sources)
@@ -585,12 +660,14 @@ def generateADDR(scope, parameter):
             sourceb = 0
         elif len(bSubs) == 1:
             typeb, sourceb = generateExpression(scope, bSubs[0])
+            typeb, sourceb = autoconvert(typeb, ["FIXED"], sourceb)
         else:
             errxit("Wrong subscripting in %s(...).%s(...)" % (bVar, fVar))
         if len(fSubs) == 0:
             sourcef = 0
         elif len(fSubs) == 1:
             typef, sourcef = generateExpression(scope, fSubs[0])
+            typef, sourcef = autoconvert(typef, ["FIXED"], sourcef)
         else:
             errxit("Wrong subscripting in %s(...).%s(...)" % (bVar, fVar))
         return 'ADDR("%s", %s, "%s", %s)' % (bVar, sourceb, fVar, sourcef)
@@ -756,6 +833,93 @@ def generateOperation(scope, expression):
                 datatype, function = allowedDatatypes[tipe]
                 return datatype, "%s(%s, %s)" % (function, source1, source2)
     errxit("No possible operand promotions found for operator %s" % operator)
+
+# The dictionary `monitorParameterTypes` tells how many parameters each MONITOR
+# function has, and what their datatypes are supposed to be.
+mptF = ["FIXED"]
+mptFC = ["FIXED", "CHARACTER"]
+mptFF = ["FIXED", "FIXED"]
+mptC = ["CHARACTER"]
+monitorParameterTypes = {
+    "0": mptF,
+    "1": mptFC,
+    "2": mptFC,
+    "3": mptF,
+    "4": mptFF,
+    "5": mptF,
+    "6": mptFF,
+    "7": mptFF,
+    "8": mptFF,
+    "9": mptF,
+    "10": mptC,
+    "11": [],
+    "12": mptF,
+    "13": mptC,
+    "14": mptFF,
+    "15": [],
+    "16": mptF,
+    "17": mptC,
+    "18": [],
+    # 19 is nonstandard.
+    # 20 is nonstandard.
+    "21": [],
+    "22": mptF,
+    "23": [],
+    # 24 through 30 are TBD
+    "31": mptFF,
+    "32": []
+    # 33 is TBD.
+    }
+mrtFIXED = ["1", "2", "6", "7", "9", "10", "13", "14", "15", "18", "19", "21",
+            "22", "23", "32"]
+mrtCHARACTER = ["12"]
+# `autoconvertMonitor` autoconverts datatypes of MONITOR parameters.  The 
+# return is a type,source ordered pair.  A returned type of None means that
+# the MONITOR function is only suitable for CALL, and returns no value itself.
+def autoconvertMonitor(scope, parameters):
+    if len(parameters) < 1:
+        errxit("No function number given in MONITOR invocation")
+    parameter = parameters[0]
+    tipef, sourcef = generateExpression(scope, parameter)
+    if not isinstance(sourcef, str) or not sourcef.isdigit():
+        errxit("MONITOR function number is not an integer")
+    if sourcef in mrtFIXED:
+        returnType = "FIXED"
+    elif sourcef in mrtCHARACTER:
+        returnType = "CHARACTER"
+    else:
+        returnType = None
+    functionName = "MONITOR" + sourcef
+    pstart= 1
+    if sourcef in ["19", "20"]:
+        errxit("MONITOR 19, 20 not implemented")
+    if sourcef == "22": # A special case.
+        if len(parameters) < 2:
+            errxit("Not enough parameters for MONITOR(22)")
+        parameter = parameters[1]
+        tipep, sourcep = generateExpression(scope, parameter)
+        if sourcep == "0":
+            functionName = functionName + "A"
+            pstart = 2
+            # Fall through.
+    source = functionName + "("
+    count = -1
+    for parameter in parameters[pstart:]:
+        count += 1
+        if count > 0:
+            source = source + ", "
+        tipep, sourcep = generateExpression(scope, parameter)
+        if sourcef in monitorParameterTypes:
+            mpt = monitorParameterTypes[sourcef]
+            if count >= len(mpt):
+                errxit("Too many parameters for MONITOR(%s)" % sourcef)
+            tipep, sourcep = autoconvert(tipep, [mpt[count]], sourcep)
+            if tipep != mpt[count]:
+                errxit("Could not autoconvert MONITOR(%s) parameter %d to %s" \
+                       % (sourcef, count, mpt[count]))
+        source = source + sourcep
+    source = source + ")"
+    return returnType, source
 
 # Recursively generate the source code for a C expression that evaluates a tree
 # (previously returned by the `parseExpression` function) created from an XPL 
@@ -965,13 +1129,27 @@ def generateExpression(scope, expression):
             # Variables:
             if symbol in ["LINE_COUNT"]:
                 return "FIXED", "LINE_COUNT"
-            # Many runtime builtins.
+            if symbol == "STRING":
+                # `STRING` is in principle a built-in function, but it's 
+                # better treated as a combination of other built-ins.
+                parameters = expression["children"]
+                if len(parameters) != 1:
+                    errxit("Wrong number of parameters for STRING")
+                parameter = parameters[0]
+                tipe, source = generateExpression(scope, parameter)
+                if source.startswith("getCHARACTER("):
+                    return tipe, "getFIXED(" + source[13:]
+                tipe, source = autoconvert(tipe, ["FIXED"], source)
+                if tipe != "FIXED":
+                    errxit("Cannot interpret argument of STRING")
+                return tipe, source
+            # Many builtins.
             if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
                           "DATE", "TIME", "DATE_OF_GENERATION", "COREBYTE",
                           "COREWORD", "FREEPOINT", "TIME_OF_GENERATION",
-                          "FREELIMIT", "FREEBASE", "ABS", "STRING", 
+                          "FREELIMIT", "FREEBASE", "ABS", 
                           "STRING_GT", "COREHALFWORD", "PARM_FIELD"]:
-                if symbol in ["INPUT", "SUBSTR"]:
+                if symbol in ["INPUT", "SUBSTR", "PARM_FIELD"]:
                     builtinType = "CHARACTER"
                 else:
                     builtinType = "FIXED"
@@ -1019,13 +1197,13 @@ def generateExpression(scope, expression):
                 source = source + ")"
                 return builtinType, source
             elif symbol == "MONITOR":
+                '''
                 # The parameters and return types of MONITOR vary dramatically
                 # depending on the function number.  So we have to determine
                 # that before deciding which runtime specific runtime function
                 # to call, as opposed to just calling a single MONITOR function.
-                # I'm going to assume that the function number is known at 
-                # compile-time.  If not, then the implementation below will need
-                # to be fleshed out somewhat.
+                # I require the function number to be a literal integer.  
+                # If not, this is all completely in adequate.
                 if len(expression["children"]) < 1:
                     errxit("No function number specified for MONITOR")
                 if "number" not in expression["children"][0]["token"]:
@@ -1050,7 +1228,8 @@ def generateExpression(scope, expression):
                     tipe, p = generateExpression(scope, parameter)
                     source = source + p
                 source = source + ")"
-                return builtinType, source
+                '''
+                return autoconvertMonitor(scope, expression["children"])
             elif symbol == "ADDR":
                 parameters = expression["children"]
                 if len(parameters) != 1:
@@ -1122,11 +1301,14 @@ def getParmsFILE(scope, expression):
 # As the name implies, it operates on the pseudo-code for a single 
 # pseudo-statement, generating the C source code for it, and printing that
 # source code to the output file.
+setjmpLabels = []
+setjmpCounter = 0
 lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
 inlineCounter = 0
 def generateSingleLine(scope, indent, line, indexInScope, ps = None):
     global forLoopCounter, lineCounter, inlineCounter, errxitRef
+    global setjmpLabels, setjmpCounter
     errxitRef = scope["lineRefs"][indexInScope]
     lineCounter += 1
     if len(line) < 1: # I don't think this is possible!
@@ -1411,24 +1593,23 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                     else:
                         errxit("Corrupted device number in OUTPUT")
                 elif builtin == "BYTE":
+                    builtin = "lBYTEc"
                     if len(children) in [1, 2]:
                         typev, sourcev = getExpressionADDR(scope, children[0])
                     if len(children) == 2:
                         typei, sourcei = generateExpression(scope, children[1])
+                        typei, sourcei = autoconvert(typei, ["FIXED"], sourcei)
                     else:
                         typei = "FIXED"
                         sourcei = "0"
-                    if tipeR == "CHARACTER":
-                        isBit = 0
-                    elif tipeR in "FIXED":
-                        isBit = 1
-                    elif tipeR in "BIT":
+                    if tipeR in "BIT":
                         tipeR, sourceR = autoconvert(tipeR, ["FIXED"], sourceR)
                         if tipeR != "FIXED":
                             errxit("Value to assign to BYTE wrong type")
-                        isBit = 1
-                    print(indent + "lBYTE(%s, %s, %s, %d);" % \
-                          (sourcev, sourcei, sourceR, isBit))
+                    if tipeR == "FIXED":
+                        builtin = "lBYTEb"
+                    print(indent + "%s(%s, %s, %s);" % \
+                          (builtin, sourcev, sourcei, sourceR))
                 elif builtin == "FILE":
                     if True:
                         # Get the ADDR of the RHS.
@@ -1586,13 +1767,42 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             source = "bitToFixed(" + source + ")"
         print(indent + "if (1 & (" + source + "))")
     elif "GOTO" in line:
-        print(indent + "goto " + line["GOTO"] + ";")
-    elif "TARGET" in line:
-        print(indent + line["TARGET"] + ":", end="")
-        if indexInScope >= len(scope["code"]) - 1:
-            print(";")
+        label = line["GOTO"]
+        procScope = findParentProcedure(scope)
+        if "longjmpLabels" in procScope and label in procScope["longjmpLabels"]:
+            mangled = procScope["longjmpLabels"][label]["mangled"]
+            print(indent + "longjmp(jb%s, 1);" % mangled)
         else:
-            print()
+            print(indent + "goto " + label + ";")
+    elif "TARGET" in line:
+        if setjmpCounter < len(setjmpLabels) and \
+                line["TARGET"] == setjmpLabels[setjmpCounter]:
+            # If we're here, it's because there are targets of longjmp in the
+            # enclosing procedure.  Therefore, we have to enhance the "label:"
+            # we'd normally put here, with `setjmp` and means to initialize the
+            # such `setjmp`
+            print(indent + "if (0) {")
+            indent1 = indent + indentationQuantum
+            indent2 = indent1 + indentationQuantum
+            print(indent1 + line["TARGET"] + ":")
+            parentProc = findParentProcedure(scope)
+            label = parentProc["variables"][setjmpLabels[setjmpCounter]]["mangled"]
+            print(indent1 + "if (setjmpInitialize) {")
+            print(indent2 + "setjmp(jb%s);" % label)
+            setjmpCounter += 1
+            if (setjmpCounter >= len(setjmpLabels)):
+                label = "setjmpInitialized"
+            else:
+                label = setjmpLabels[setjmpCounter]
+            print(indent2 + "goto %s;" % label)
+            print(indent1 + "}")
+            print(indent + "}")
+        else:
+            print(indent + line["TARGET"] + ":", end="")
+            if indexInScope >= len(scope["code"]) - 1:
+                print(";")
+            else:
+                print()
     elif "ELSE" in line:
         print(indent + "else")
     elif "RETURN" in line:
@@ -1632,7 +1842,7 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             if toType == "FIXED":
                 source = "0"
             elif toType == "CHARACTER":
-                source = "''"
+                source = '""'
             elif toType == "BIT":
                 source = "fixedToBit(0)"
         else:
@@ -1663,14 +1873,44 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                     print(indent + "; // (%d) %s" % (inlineCounter, originalInline))
                 inlineCounter += 1
         else:
+            if procedure == "MONITOR":
+                '''
+                parameters = line["parameters"]
+                if len(parameters) == 0:
+                    errxit("MONITOR function number missing")
+                tipe, parme = generateExpression(scope, parameters[0])
+                if not isinstance(parme, str) or not parme.isdigit():
+                    errxit("MONITOR function number not an integer")
+                pstart = 1
+                if parme == "22":
+                    if len(parameters) == 1:
+                        errxit("Second argument of MONITOR(22) missing")
+                    tipe, parme = generateExpression(scope, parameters[1])
+                    if parme == "0":
+                        pstart = 2
+                        print(indent + "MONITOR22A(", end="")
+                    else:
+                        print(indent + "MONITOR22(", end="")
+                else:
+                    print(indent + "MONITOR" + parme + "(", end="")
+                for i in range(pstart, len(parameters)):
+                    if i > pstart:
+                        print(", ", end = '')
+                    tipe, parme = generateExpression(scope, parameters[i])
+                    print(parme, end = '')
+                print(");")
+                '''
+                typem, sourcem = autoconvertMonitor(scope, line["parameters"])
+                print(indent + sourcem + ";")
             # Some builtins can be CALL'd
-            if procedure in ["LINK", "COMPACTIFY", "RECORD_LINK", "TRACE", 
+            elif procedure in ["LINK", "COMPACTIFY", "RECORD_LINK", "TRACE", 
                              "UNTRACE", "EXIT", "MONITOR"]:
+                parameters = line["parameters"]
                 print(indent + procedure + "(", end = '')
-                for i in range(len(line["parameters"])):
+                for i in range(len(parameters)):
                     if i > 0:
                         print(", ", end = '')
-                    parm = line["parameters"][i]
+                    parm = parameters[i]
                     tipe, parme = generateExpression(scope, parm)
                     print(parme, end = '')
                 print(");")
@@ -1763,7 +2003,9 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
 #    "indent" is a string of blanks for the indentation of the parent scope.
 #
 def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
-    global stdoutOld
+    global stdoutOld, setjmpLabels, setjmpCounter
+
+    setjmpCounter = 0
    
     if "generated" in scope:
         return
@@ -1823,6 +2065,10 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         print()
         print('#include "runtimeC.h"')
         print('#include "procedures.h"')
+        if "setjmpLabels" in scope:
+            print()
+            for label in scope["setjmpLabels"]:
+                print("jmp_buf jb%s;" % scope["setjmpLabels"][label]["mangled"])
         print()
         if functionName == "main":
             if verbose:
@@ -1877,8 +2123,20 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             print("\n" + header + ";", file=pf)
             print(header + "\n{")
             print()
+        # If there's a need to initialize buffers for calls to `setjmp`, we
+        # have to do that right now.
+        if "setjmpLabels" in scope:
+            setjmpLabels = list(sorted(scope["setjmpLabels"]))
+            indent1 = indent + indentationQuantum
+            indent2 = indent1 + indentationQuantum
+            print(indent1 + "static int setjmpInitialize = 1;") 
+            print(indent1 + "if (setjmpInitialize) { ")
+            print(indent2 + "goto %s; " % setjmpLabels[0])
+            print(indent2 + "setjmpInitialized: setjmpInitialize = 0;")
+            print(indent1 + "}")
+        
     indent = indent + indentationQuantum
-    
+        
     #---------------------------------------------------------------------
     # All of the code generation for actual XPL statements occurs between
     # these two horizontal lines.
@@ -1904,10 +2162,11 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     
     #---------------------------------------------------------------------
     
-    if scope["parent"] != None and "switchCounter" in scope["parent"]:
+    parent = scope["parent"]
+    if parent != None and "switchCounter" in parent:
         print(indent + "break;")
-        scope["parent"].pop("switchCounter")
-        scope["parent"].pop("ifCounter")
+        parent.pop("switchCounter")
+        parent.pop("ifCounter")
     # Add a precautionary RETURN 0 at the end of PROCEDUREs, for the reasons
     # described in the comments for CALL.  If there was already an explicit
     # RETURN here, or if the RETURN is somewhare else and this position cannot
@@ -1915,10 +2174,14 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     if not lastReturned and scope["symbol"] != '' and \
             scope["symbol"][:1] != scopeDelimiter:
         print(indent + "return 0;")
-    if "extraIndent" in scope:
+    if "extraIndent" in scope: # End of the actual loop of a DO for-loop block.
+        if "label" in scope and "blockType" in scope and \
+                scope["blockType"] == "DO for-loop block":
+            print(indent + "if (0) { r%s: continue; e%s: break; } // loop of block labeled %s" % \
+                  (scope["symbol"], scope["symbol"], scope["label"]))
         indent = indent[:-len(indentationQuantum)]
         print(indent + "}")
-    if scope["parent"] == None:
+    if parent == None:
         # End of main.c.
         print()
         if nonCommonBase > commonBase:
@@ -1934,7 +2197,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
               "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")
         print(indent + "return 0; // Just in case ...")
     if "label" in scope and "blockType" in scope and \
-            scope["blockType"] not in ["DO block", "DO CASE block"]:
+            scope["blockType"] in ["DO WHILE block", "DO UNTIL block",]:
         print(indent + "if (0) { r%s: continue; e%s: break; } // block labeled %s" % \
               (scope["symbol"], scope["symbol"], scope["label"]))
     elif "blockType" in scope and scope["blockType"] == "DO block":
@@ -1962,7 +2225,7 @@ def generateC(globalScope):
           file=pf)
     print("  Provides prototypes for the C functions corresponding to the", 
           file=pf)
-    print("  XPL/I PROCEDUREs.", file=pf)
+    print("  XPL/I PROCEDUREs and setjmp/longjmp.", file=pf)
     print("", file=pf)
     print("  Note: Due to the requirement for persistence, all function", 
           file=pf)
@@ -1974,6 +2237,7 @@ def generateC(globalScope):
     print("*/", file=pf)
     print("", file=pf)
     print("#include <stdint.h>", file=pf)
+    print("#include <setjmp.h>", file=pf)
 
     # Provide mangled variable names.
     walkModel(globalScope, mangle)
@@ -1985,6 +2249,14 @@ def generateC(globalScope):
     # Determine contraints on BASED RECORD variables (max fields and max
     # field-name length.
     walkModel(globalScope, basedStats)
+    
+    # Find all GO TO that are out of their immediately-enclosing procedures,
+    # so that we can determine which labels need to equipped with `setjmp`
+    # and which GO TO need to be implemented with `longjmp`.
+    walkModel(globalScope, mapJump)
+    print("", file=pf)
+    for label in sorted(globalSetjmp):
+        print("extern jmp_buf jb%s;" % label, file=pf)
     
     # Allocate and initialize simulated memory for each variable in whatever 
     # scope. The mechanism is to set an attribute

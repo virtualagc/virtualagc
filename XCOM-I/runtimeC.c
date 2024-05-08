@@ -893,6 +893,7 @@ static char ebcdicToAscii[256] = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ' ', ' ', ' ', ' ', ' '
 };
 
+#if 0
 char *
 STRING(uint32_t descriptor) {
   char *returnValue = nextBuffer();
@@ -924,11 +925,67 @@ STRING(uint32_t descriptor) {
     }
   return NULL;
 }
+#endif
+
+uint32_t
+STRING_GT(char *s1, char *s2) {
+  uint8_t blank = BYTE1(" ");
+  int i, b1, b2, len1 = strlen(s1), len2 = strlen(s2), len;
+  len = len1;
+  if (len2 > len)
+    len = len2;
+  for (i = 0; i < len; i++)
+    {
+      if (i < len1)
+        b1 = BYTE(s1, i);
+      else
+        b1 = blank;
+      if (i < len2)
+        b2 = BYTE(s2, i);
+      else
+        b2 = blank;
+      if (b1 > b2)
+        return 1;
+      if (b1 < b2)
+        return 0;
+    }
+  // Strings were the same.
+  return 0;
+}
 
 char *
 getCHARACTER(uint32_t address)
 {
-  return STRING(getFIXED(address));
+  //return STRING(getFIXED(address));
+  uint32_t descriptor = getFIXED(address);
+  char *returnValue = nextBuffer();
+  size_t length;
+  uint32_t index;
+  if (descriptor == 0) // Empty string?
+    {
+      *returnValue = 0;
+      return returnValue;
+    }
+  length = ((descriptor >> 24) & 0xFF) + 1;
+  index = descriptor & 0xFFFFFF;
+  if (index + length <= MEMORY_SIZE)
+    {
+      uint8_t c;
+      char *s = returnValue;
+      while (1)
+        {
+          if (length <= 0)
+            {
+              *s = 0;
+              break;
+            }
+          length--;
+          c = memory[index++];
+          *s++ = ebcdicToAscii[c];
+        }
+      return returnValue;
+    }
+  return NULL;
 }
 
 void
@@ -1521,10 +1578,10 @@ BYTE1(char *s) {
 }
 
 // `address` is the address of a string descriptor, including bit-strings.
-// `index` is an index into the string data. `rhs` is the character or byte to
-// write to memory.  `bit` is 1 for bit-strings, 0 for character.
+// `index` is an index into the string data. `c` or `b` is the character or
+// byte to write to memory.
 void
-lBYTE(uint32_t address, int32_t index, union oneByte_t rhs, int bit) {
+lBYTEc(uint32_t address, int32_t index, char c) {
   uint32_t descriptor = getFIXED(address);
   address = (descriptor & 0xFFFFFF) + index;
   if (address >= FREE_LIMIT)
@@ -1532,10 +1589,19 @@ lBYTE(uint32_t address, int32_t index, union oneByte_t rhs, int bit) {
       fprintf(stderr, "BYTE(0x%08X) out of range of memory\n", address);
       exit(1);
     }
-  if (bit)
-    memory[address] = rhs.b;
-  else
-    memory[address] = asciiToEbcdic[rhs.c];
+  memory[address] = asciiToEbcdic[c];
+}
+
+void
+lBYTEb(uint32_t address, int32_t index, uint8_t b) {
+  uint32_t descriptor = getFIXED(address);
+  address = (descriptor & 0xFFFFFF) + index;
+  if (address >= FREE_LIMIT)
+    {
+      fprintf(stderr, "BYTE(0x%08X) out of range of memory\n", address);
+      exit(1);
+    }
+  memory[address] = b;
 }
 
 uint8_t
@@ -1556,6 +1622,41 @@ SHR(uint32_t value, uint32_t shift) {
 }
 
 // MONITOR functions.
+
+void
+MONITOR0(uint32_t dev) {
+  fprintf(stderr, "MONITOR(0) not yet implemented\n");
+}
+
+uint32_t
+MONITOR1(uint32_t dev, char *name) {
+  fprintf(stderr, "MONITOR(1) not yet implemented\n");
+  exit(1);
+}
+
+uint32_t
+MONITOR2(uint32_t dev, char *name) {
+  fprintf(stderr, "MONITOR(2) not yet implemented\n");
+  exit(1);
+}
+
+void
+MONITOR3(uint32_t dev) {
+  fprintf(stderr, "MONITOR(3) not yet implemented\n");
+  exit(1);
+}
+
+void
+MONITOR4(uint32_t dev, uint32_t recsize) {
+  fprintf(stderr, "MONITOR(4) not yet implemented\n");
+  exit(1);
+}
+
+void
+MONITOR5(uint32_t address) {
+  fprintf(stderr, "MONITOR(5) not yet implemented\n");
+  exit(1);
+}
 
 // In general, new memory is allocated at `FREEPOINT`, and `FREEPOINT` is then
 // incremented by `n`, leaving a hole if the based variable previously had
@@ -1612,12 +1713,6 @@ MONITOR6(uint32_t address, uint32_t n) {
   return 0;
 }
 
-void
-MONITOR4(uint32_t dev, uint32_t recsize) {
-  fprintf(stderr, "MONITOR(4) not yet implemented\n");
-  exit(1);
-}
-
 uint32_t
 MONITOR7(uint32_t address, uint32_t n) {
   memoryMapEntry_t *found;
@@ -1636,6 +1731,12 @@ MONITOR7(uint32_t address, uint32_t n) {
   return 0;
 }
 
+void
+MONITOR8(uint32_t dev, uint32_t filenum) {
+  fprintf(stderr, "MONITOR(8) not yet implemented\n");
+  exit(1);
+}
+
 uint32_t
 MONITOR9(uint32_t op) {
   fprintf(stderr, "MONITOR(9) not yet implemented\n");
@@ -1643,7 +1744,23 @@ MONITOR9(uint32_t op) {
 }
 
 uint32_t
-MONITOR13(uint32_t, char *name) {
+MONITOR10(char *name) {
+  fprintf(stderr, "MONITOR(10) not yet implemented\n");
+  exit(1);
+}
+
+void
+MONITOR11(void) {
+}
+
+char *
+MONITOR12(uint32_t precision) {
+  fprintf(stderr, "MONITOR(12) not yet implemented\n");
+  exit(1);
+}
+
+uint32_t
+MONITOR13(char *name) {
   // Note that the `name` parameter is ignored, since the options processor
   // is instead taken from the --optproc command-line option.
 
@@ -1656,6 +1773,30 @@ MONITOR13(uint32_t, char *name) {
 }
 
 uint32_t
+MONITOR14(uint32_t n, uint32_t a) {
+  fprintf(stderr, "MONITOR(14) not yet implemented\n");
+  exit(1);
+}
+
+uint32_t
+MONITOR15(void) {
+  fprintf(stderr, "MONITOR(15) not yet implemented\n");
+  exit(1);
+}
+
+void
+MONITOR16(uint32_t n) {
+  fprintf(stderr, "MONITOR(16) not yet implemented\n");
+  exit(1);
+}
+
+void
+MONITOR17(char *name) {
+  fprintf(stderr, "MONITOR(17) not yet implemented\n");
+  exit(1);
+}
+
+uint32_t
 MONITOR18(void) {
   struct timeval currentTime;
   gettimeofday(&currentTime, NULL);
@@ -1665,13 +1806,49 @@ MONITOR18(void) {
 }
 
 uint32_t
+MONITOR19(uint32_t *addresses, uint32_t *sizes) {
+  fprintf(stderr, "MONITOR(19) not yet implemented\n");
+  exit(1);
+}
+
+void
+MONITOR20(uint32_t *addresses, uint32_t *sizes) {
+  fprintf(stderr, "MONITOR(20) not yet implemented\n");
+  exit(1);
+}
+
+uint32_t
 MONITOR21(void) {
   return freelimit - freepoint;
 }
 
 uint32_t
+MONITOR22(uint32_t n1) {
+  fprintf(stderr, "MONITOR(22,n1) not yet implemented\n");
+  exit(1);
+}
+
+uint32_t
+MONITOR22A(uint32_t n2) {
+  fprintf(stderr, "MONITOR(22,0,n2) not yet implemented\n");
+  exit(1);
+}
+
+uint32_t
 MONITOR23(void) {
   return WHERE_MONITOR_23;
+}
+
+void
+MONITOR31(int32_t n, uint32_t recnum) {
+  fprintf(stderr, "MONITOR(31) not yet implemented\n");
+  exit(1);
+}
+
+uint32_t
+MONITOR32(void) {
+  fprintf(stderr, "MONITOR(32) not yet implemented\n");
+  exit(1);
 }
 
 #if 0

@@ -64,6 +64,11 @@ baseSource = None
 adhocs = {}
 standardXPL = False
 identifier = 'REL32V0   '  # String returned by MONITOR(23)
+merge = None
+firstFile = True
+libFile = None
+noInclusionDirectives = False
+noOverrides = False
 
 '''
 McKeeman et al. does not specify the packing of the bits in memory for a BIT(n)
@@ -106,16 +111,10 @@ basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
 # Raw read of a source-code file.  Recursive, if /%INCLUDE ... %/ directives
 # (and similar) are encountered.
 def readFileIntoLines(filename):
-    global inputFilenames, lines, baseSource
+    global inputFilenames, lines
     # global sourceFiles
     if filename in inputFilenames:
         return
-    if baseSource == None:
-        baseSource = os.path.dirname(filename)
-    if baseSource != "":
-        dirHALINCL = baseSource + "/" + includeFolder
-    else:
-        dirHALINCL = includeFolder
     try:
         inputFilenames.append(filename)
         f = open(filename, "r")
@@ -127,21 +126,22 @@ def readFileIntoLines(filename):
             lines.append(line)
             lineRefs.append("%s:%d" % (filename, lineNumber))
             #sourceFiles.append(os.path.basename(filename))
-            if "/%INCLUDE" in line:
-                fields = line.split()
-                readFileIntoLines(dirHALINCL + "/" + fields[1] + ".xpl")
-            elif None != re.search('/\\*.*\\$%.*\\*/', line):
-                # In case it isn't obvious, this was looking for 
-                # $%filename directives within a comment.
-                basename = line[:80].split('$%')[1]
-                basename = basename.split('*')[0].split()[0]
-                readFileIntoLines(dirHALINCL + "/" + basename + ".xpl")
-            elif line.lstrip().startswith('/**MERGE'):
-                fields =line.lstrip().split()
-                if baseSource != "":
-                    readFileIntoLines(baseSource + "/" + fields[1] + ".xpl")
-                else:
-                    readFileIntoLines(fields[1] + ".xpl")
+            if not noInclusionDirectives:
+                if "/%INCLUDE" in line:
+                    fields = line.split()
+                    readFileIntoLines(dirHALINCL + "/" + fields[1] + ".xpl")
+                elif None != re.search('/\\*.*\\$%.*\\*/', line):
+                    # In case it isn't obvious, this was looking for 
+                    # $%filename directives within a comment.
+                    basename = line[:80].split('$%')[1]
+                    basename = basename.split('*')[0].split()[0]
+                    readFileIntoLines(dirHALINCL + "/" + basename + ".xpl")
+                elif line.lstrip().startswith('/**MERGE'):
+                    fields =line.lstrip().split()
+                    if baseSource != "":
+                        readFileIntoLines(baseSource + "/" + fields[1] + ".xpl")
+                    else:
+                        readFileIntoLines(fields[1] + ".xpl")
         f.close()
     except:
         print("Failed to read file %s" % filename, file = sys.stderr)
@@ -155,85 +155,121 @@ Usage:
 
 The available OPTIONS are:
 
---help        Print this info.
---old-hex     (For ***DEBUG*** only.
---            If this is found, it means to skip the entire remainder of the
-              command line.
---xpl         Try to compile standard XPL rather than XPL/I.  This switch
-              is seldom needed, and doesn't accomplish much when it's
-              used.  Basically, all it can do is disable certain XPL/I
-              built-in functions or reserved words, allowing them to be
-              used as names of variables.  For example, the XPL/I
-              built-in `STRING` is used as a variable name in the XPL
-              source code for the standard McKeeman XPL compiler XCOM.
---pfs, -bfs   (Default --pfs.) The switches --pfs and --bfs are mutually
-              exclusive; i.e., one and only one of them is active:  --pfs 
-              implies *not* --bfs, while --bfs implies *not* --pfs.  These 
-              relate to the presence of XPL/I's conditional code-inclusion 
-              directives within XPL/I source code:
+--help          Print this info.
+--old-hex       (For ***DEBUG*** only.
+--              If this is found, it means to skip the entire remainder of the
+                command line.
+--xpl           Try to compile standard XPL rather than XPL/I.  This switch
+                is seldom needed, and doesn't accomplish much when it's
+                used.  Basically, all it can do is disable certain XPL/I
+                built-in functions or reserved words, allowing them to be
+                used as names of variables.  For example, the XPL/I
+                built-in `STRING` is used as a variable name in the XPL
+                source code for the standard McKeeman XPL compiler XCOM.
+--pfs, -bfs     (Default --pfs.) The switches --pfs and --bfs are mutually
+                exclusive; i.e., one and only one of them is active:  --pfs 
+                implies *not* --bfs, while --bfs implies *not* --pfs.  These 
+                relate to the presence of XPL/I's conditional code-inclusion 
+                directives within XPL/I source code:
                     /?P ...code... ?/
                     /?B ...code... ?/
-              The code within /?P ... ?/ is included if --pfs is active,
-              and transparently discarded otherwise, while code within
-              /?B ... ?/ is included if and only if --bfs is active.  The  
-              switch --pfs is interpreted as meaning "compiling for the Primary 
-              Flight System", while --bfs is interpreted as meaning "compiling
-              for the Backup Flight System".
---condA       These switches similarly relate to XPL/I's conditional 
---condC       code-inclusion directives
+                The code within /?P ... ?/ is included if --pfs is active,
+                and transparently discarded otherwise, while code within
+                /?B ... ?/ is included if and only if --bfs is active.  The  
+                switch --pfs is interpreted as meaning "compiling for the Primary 
+                Flight System", while --bfs is interpreted as meaning "compiling
+                for the Backup Flight System".
+--condA         These switches similarly relate to XPL/I's conditional 
+--condC         code-inclusion directives
                     /?A ...code... ?/
                     /?C ...code... ?/
-              These switches are independent of each other and of the --pfs
-              and --bfs switches and thus may be used in combination.  The 
-              interpretations of these conditions are, however, unknown.  They 
-              may activate the printing of extra messages during compilation.
---identifer=S (Default "REL32V0   ".)  Set the 10-character string returned 
-              by MONITOR(23).  Will be automatically truncated or padded as
-              needed.
---optproc=N   (Default is no options processor.)  The "options processor" is 
-              used for interpreting the run-time program's (particularly
-              HAL/S-FC's) options, which originally came from JCL, instead from
-              command-line options.  For HAL/S-FC, the available processors are:
-                  For PASS1    COMPOPT
-                  For PASS2    EMPTY
-                  For PASS3    EMPTY
-                  For PASS4    LISTOPT
-              Other HAL/S-FC passes do not require options processors.
-              Note: On the command line, this option should precede any of the
-              options that are processed by the selected options processor.
---include=F   Folder to use for XPL/I's "/%INCLUDE ... %/" directives.
-              Note that this is relative to the source-code file.
-              Defaults to ../HALINCL.
---source=F    (Default is the folder containing the first XPL source-code file
-              given on the command line.)  Name of the folder from which
-              XPL source-code files (other than those for --include) are drawn
-              by default.
---output=F    (Default is the base-name of the first XPL source-code file
-              given on the command line.) Name of the folder to store output 
-              files.
---patch=P     Path to the inline-BAL patch files.  By default, this will
-              be the same folder that contains the first XPL source-code
-              file specified on the command line.
---adhoc=S,R   This is a way of creating global XPL macros without change
-              to source-code files.  S is the name of the macro and R is
-              the replacement text.  This switch can be used multiple 
-              times.  In hindsight, it doesn't seem useful.
---target=L    (Default C) Set the target language for object-code.
-              Only C is presently supported.
---indent=N    (Default 2) Set the indentation width for C-language source code.
-              This is purely cosmetic effect to make it more pleasant to read
-              the code output by XCOM-I.
---debug=D     Print extra debugging messages to device D.  D is either stdout 
-              or stderr.
---verbose     The --verbose switch (which is the default) embeds extra comments
---concise     in the generated C source code, useful for debugging, or just for
-              improved human readability.  Whereas the --concise switch instead
-              eliminates those extra comments, producing smaller C file sizes.
+                These switches are independent of each other and of the --pfs
+                and --bfs switches and thus may be used in combination.  The 
+                interpretations of these conditions are, however, unknown.  They 
+                may activate the printing of extra messages during compilation.
+--identifer=S   (Default "REL32V0   ".)  Set the 10-character string returned 
+                by MONITOR(23).  Will be automatically truncated or padded as
+                needed.
+--optproc=N     (Default is no options processor.)  The "options processor" is 
+                used for interpreting the run-time program's (particularly
+                HAL/S-FC's) options, which originally came from JCL, instead from
+                command-line options.  For HAL/S-FC, the available processors are:
+                    For PASS1    COMPOPT
+                    For PASS2    EMPTY
+                    For PASS3    EMPTY
+                    For PASS4    LISTOPT
+                Other HAL/S-FC passes do not require options processors.
+                Note: On the command line, this option should precede any of the
+                options that are processed by the selected options processor.
+--include=F     Folder to use for XPL/I's "/%INCLUDE ... %/" directives.
+                Note that this is relative to the source-code file.
+                Defaults to ../HALINCL.  If used, should precede any XPL source
+                files on the command line.
+--source=F      (Default is the folder containing the first XPL source-code file
+                given on the command line.)  Name of the folder from which
+                XPL source-code files (other than those for --include) are drawn
+                by default. If used, should precede any XPL source files on the
+                command line.
+--output=F      (Default is the base-name of the first XPL source-code file
+                given on the command line.) Name of the folder to store output 
+                files.
+--lib-file=F    (Default None.)  A "library file" to XPL source code to include
+                prior to any of the XPL files specified on the command line.
+                If the program being compiled as itself an XPL compiler (such as
+                XCOM or HAL/S-FC), it's customarily the file that contains the 
+                source code for the COMPACTIFY procedure (XPL.LIBRARY.xpl for 
+                XCOM or SPACELIB.xpl for HAL/S-FC, prefixed by an appropriate
+                path).  It's typically not needed for other use-cases, since the
+                XCOM-I runtime library has its own built-in COMPACTIFY.  If this
+                option is used, it should preceded all XPL source files on the
+                command line.
+--no-overrides  By default, XCOM-I overrides certain procedures defined by
+                XPL source code (COMPACTIFY, RECORD_LINK) in favor of the 
+                runtime-library's versions of those functions.  The 
+                --no-overrides switch disables that behavior.
+--merge=F       (Default None.)  Write a file F containing all of the merged XPL
+                source code.  Note that the resulting file is not necessarily a
+                valid XPL file itself, because any file-inclusion directives the
+                original separate source-code files contained are still present
+                in it; thus if the merged file were compiled using normal XCOM-I
+                options, double-inclusions would occur.  If the merged file will
+                itself be compiled, the --no-inclusion switch (see below) should
+                be used.  It may be advisable to give the merged file an 
+                extension like ".merged" rather than the usual ".xpl" to avoid 
+                confusion.
+--no-inclusion  Disables any file-include directives found within the XPL source
+                code.  This is typically used for "merged" files (see above).
+--patch=P       Path to the inline-BAL patch files.  By default, this will
+                be the same folder that contains the first XPL source-code
+                file specified on the command line.
+--adhoc=S,R     This is a way of creating global XPL macros without change
+                to source-code files.  S is the name of the macro and R is
+                the replacement text.  This switch can be used multiple 
+                times.  In hindsight, it doesn't seem useful.
+--target=L      (Default C) Set the target language for object-code.
+                Only C is presently supported.
+--indent=N      (Default 2) Set the indentation width for C-language source code.
+                This is purely cosmetic effect to make it more pleasant to read
+                the code output by XCOM-I.
+--debug=D       Print extra debugging messages to device D.  D is either stdout 
+                or stderr.
+--verbose       The --verbose switch (which is the default) embeds extra comments
+--concise       in the generated C source code, useful for debugging, or just for
+                improved human readability.  Whereas the --concise switch instead
+                eliminates those extra comments, producing smaller C file sizes.
 '''
 
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm.startswith("--merge="):
+        merge = parm[8:]
+    elif parm.startswith("--lib-file="):
+        libFile = parm[11:]
+    elif parm == "--no-inclusion":
+        noInclusionDirectives = True
+    elif parm == "--no-overrides":
+        noOverrides = True
     elif parm == "--old-hex": # ***DEBUG***
         newHex = False
     elif parm == "--help":
@@ -291,15 +327,26 @@ for parm in sys.argv[1:]:
         print("Unknown option %s" % parm, file = sys.stderr)
         sys.exit(1)
     else:
+        if firstFile:
+            if baseSource == None:
+                baseSource = os.path.dirname(parm)
+            if baseSource != "":
+                dirHALINCL = baseSource + "/" + includeFolder
+            else:
+                dirHALINCL = includeFolder
+            if libFile != None:
+                readFileIntoLines(libFile)
+        firstFile = False
         readFileIntoLines(parm)
-        if True:
-            f = open("temp.xpl", "w")
-            f.writelines(lines)
-            f.close()
         if outputFolder == None:
             head, tail = os.path.split(parm)
             name, ext = os.path.splitext(tail)
             outputFolder = name
+if merge != None:
+    f = open(merge, "w")
+    f.writelines(lines)
+    f.close()
+
 
 # All of the source code is now in lines[].  Massage it a bit.
 for i in range(len(lines)):

@@ -11,6 +11,7 @@ Mods:       2024-05-02 RSB  Began.
 '''
 
 from auxiliary import walkModel
+from parseCommandLine import noOverrides
 
 # For each PROCEDURE defined at the global level (versus being an embedded
 # PROCEDURE), determines how many places it's called from, other than its own
@@ -78,17 +79,25 @@ def callTree(globalScope):
     walkModel(globalScope, checkScope)
     
     junkProcs = []
-    for j in ["COMPACTIFY", "RECORD_LINK"]:
-        if j in globalScope["variables"] and \
-                "PROCEDURE" in globalScope["variables"][j]:
-            junkProcs.append(j)
+    if noOverrides:
+        overrides = []
+    else:
+        overrides = ["COMPACTIFY", "RECORD_LINK"]
+        for j in overrides:
+            if j in globalScope["variables"] and \
+                    "PROCEDURE" in globalScope["variables"][j]:
+                junkProcs.append(j)
     for procedure in procedureNames:
         if procedureNames[procedure]["anyCalls"] == 0:
             junkProcs.append(procedure)
     if len(junkProcs) != 0:
-        print("No code is generated for the following unused or overridden PROCEDURE(s):")
+        print("No code is generated for the following PROCEDURE(s):")
         for j in junkProcs:
-            print("\t" + j)
+            if j in overrides:
+                reason = "Overridden:  "
+            else:
+                reason = "Not called:  "
+            print("\t" + reason + j)
             if j in globalScope["variables"]:
                 globalScope["variables"].pop(j)
         children = globalScope["children"]

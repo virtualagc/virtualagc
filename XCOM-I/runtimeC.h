@@ -114,8 +114,13 @@ getBIT(uint32_t bitWidth, uint32_t address);
 void
 putBIT(uint32_t bitWidth, uint32_t address, bit_t *value);
 
+#if 0
 char *
 STRING(uint32_t address);
+#endif
+
+uint32_t
+STRING_GT(char *s1, char *s2);
 
 // Same for XPL `CHARACTER` type.
 char *
@@ -223,12 +228,11 @@ BYTE(char *s, uint32_t index);
 uint8_t
 BYTE1(char *s);
 
-union oneByte_t {
-  char c;
-  uint8_t b;
-};
 void
-lBYTE(uint32_t address, int32_t index, union oneByte_t rhs, int bit);
+lBYTEc(uint32_t address, int32_t index, char c);
+
+void
+lBYTEb(uint32_t address, int32_t index, uint8_t b);
 
 uint8_t
 BYTE2(bit_t *b, uint32_t index);
@@ -254,7 +258,22 @@ uint32_t
 DATE_OF_GENERATION(void);
 
 void
+MONITOR0(uint32_t dev);
+
+uint32_t
+MONITOR1(uint32_t dev, char *name);
+
+uint32_t
+MONITOR2(uint32_t dev, char *name);
+
+void
+MONITOR3(uint32_t dev);
+
+void
 MONITOR4(uint32_t dev, uint32_t recsize);
+
+void
+MONITOR5(uint32_t address);
 
 // Allocate `n` bytes in the free-memory area (i.e., between FREEPOINT and
 // FREELIMIT in `memory`), compacting if necessary, and storing the address
@@ -280,18 +299,44 @@ MONITOR6(uint32_t address, uint32_t n);
 uint32_t
 MONITOR7(uint32_t address, uint32_t n);
 
+void
+MONITOR8(uint32_t dev, uint32_t filenum);
+
 uint32_t
 MONITOR9(uint32_t op);
 
 uint32_t
-MONITOR13(uint32_t, char *name);
+MONITOR10(char *name);
+
+void
+MONITOR11(void);
+
+char *
+MONITOR12(uint32_t precision);
+
+uint32_t
+MONITOR13(char *name);
+
+uint32_t
+MONITOR14(uint32_t n, uint32_t a);
+
+uint32_t
+MONITOR15(void);
+
+void
+MONITOR16(uint32_t n);
+
+void
+MONITOR17(char *name);
 
 uint32_t
 MONITOR18(void);
 
-// I find no calls to MONITOR function 19 or 20 in HAL/S-FC, and don't intend
-// to bother implementing them.  If they were to be implemented, I'd do it
-// as a loop of calls to MONITOR 6 or MONITOR 7.
+uint32_t
+MONITOR19(uint32_t *addresses, uint32_t *sizes);
+
+void
+MONITOR20(uint32_t *addresses, uint32_t *sizes);
 
 // There's a CALL to MONITOR(21) only in SPACELIB.  Since I'm not supporting
 // SPACELIB, I see no real reason to implement function 21 ... but it's so
@@ -299,8 +344,22 @@ MONITOR18(void);
 uint32_t
 MONITOR21(void);
 
+// This is MONITOR(22, n1)
+uint32_t
+MONITOR22(uint32_t n1);
+
+// This is MONITOR(22, 0, n2)
+uint32_t
+MONITOR22A(uint32_t n2);
+
 uint32_t
 MONITOR23(void);
+
+void
+MONITOR31(int32_t n, uint32_t recnum);
+
+uint32_t
+MONITOR32(void);
 
 uint32_t
 COREBYTE(uint32_t address);
