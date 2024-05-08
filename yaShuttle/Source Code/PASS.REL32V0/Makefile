@@ -27,8 +27,7 @@ $(defaultTargets):
 		cd $@.PROCS; \
 	fi && \
 	$(XCOM)	--output=$@ \
-		--source=. \
-		../HALINCL/SPACELIB.xpl \
+		--lib-file=../HALINCL/SPACELIB.xpl \
 		'##DRIVER.xpl' && \
 	make -C $@ && \
 	mv $@/$@ ..
