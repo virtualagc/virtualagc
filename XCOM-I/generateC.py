@@ -601,6 +601,11 @@ def mapJump(scope, extra = None):
                                                    procedureOfSetjmp["symbol"]), \
                       globalSetjmp, file=sys.stderr)
 
+def sortJumps(scope, extra = None):
+    if "setjmpLabels" in scope:
+        scope["sortedSetjmpLabels"] = list(sorted(scope["setjmpLabels"]))
+        #print("'%s'" % scope["symbol"], scope["sortedSetjmpLabels"])
+
 # A special case of `generateExpression` (see below), which also happens to
 # be called by `generateExpression`, to generate the source code for an 
 # expression of the form `ADDR(...)`.  Returns just the string containing the
@@ -1301,14 +1306,11 @@ def getParmsFILE(scope, expression):
 # As the name implies, it operates on the pseudo-code for a single 
 # pseudo-statement, generating the C source code for it, and printing that
 # source code to the output file.
-setjmpLabels = []
-setjmpCounter = 0
 lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
 inlineCounter = 0
 def generateSingleLine(scope, indent, line, indexInScope, ps = None):
     global forLoopCounter, lineCounter, inlineCounter, errxitRef
-    global setjmpLabels, setjmpCounter
     errxitRef = scope["lineRefs"][indexInScope]
     lineCounter += 1
     if len(line) < 1: # I don't think this is possible!
@@ -1775,8 +1777,9 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
         else:
             print(indent + "goto " + label + ";")
     elif "TARGET" in line:
-        if setjmpCounter < len(setjmpLabels) and \
-                line["TARGET"] == setjmpLabels[setjmpCounter]:
+        if "sortedSetjmpLabels" in scope and \
+                line["TARGET"] in scope["sortedSetjmpLabels"]:
+            setjmpCounter = scope["sortedSetjmpLabels"].index(line["TARGET"])
             # If we're here, it's because there are targets of longjmp in the
             # enclosing procedure.  Therefore, we have to enhance the "label:"
             # we'd normally put here, with `setjmp` and means to initialize the
@@ -1786,14 +1789,14 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
             indent2 = indent1 + indentationQuantum
             print(indent1 + line["TARGET"] + ":")
             parentProc = findParentProcedure(scope)
-            label = parentProc["variables"][setjmpLabels[setjmpCounter]]["mangled"]
+            label = parentProc["variables"][scope["sortedSetjmpLabels"][setjmpCounter]]["mangled"]
             print(indent1 + "if (setjmpInitialize) {")
             print(indent2 + "setjmp(jb%s);" % label)
             setjmpCounter += 1
-            if (setjmpCounter >= len(setjmpLabels)):
+            if (setjmpCounter >= len(scope["sortedSetjmpLabels"])):
                 label = "setjmpInitialized"
             else:
-                label = setjmpLabels[setjmpCounter]
+                label = scope["sortedSetjmpLabels"][setjmpCounter]
             print(indent2 + "goto %s;" % label)
             print(indent1 + "}")
             print(indent + "}")
@@ -2003,9 +2006,7 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
 #    "indent" is a string of blanks for the indentation of the parent scope.
 #
 def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
-    global stdoutOld, setjmpLabels, setjmpCounter
-
-    setjmpCounter = 0
+    global stdoutOld
    
     if "generated" in scope:
         return
@@ -2125,13 +2126,12 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             print()
         # If there's a need to initialize buffers for calls to `setjmp`, we
         # have to do that right now.
-        if "setjmpLabels" in scope:
-            setjmpLabels = list(sorted(scope["setjmpLabels"]))
+        if "sortedSetjmpLabels" in scope:
             indent1 = indent + indentationQuantum
             indent2 = indent1 + indentationQuantum
             print(indent1 + "static int setjmpInitialize = 1;") 
             print(indent1 + "if (setjmpInitialize) { ")
-            print(indent2 + "goto %s; " % setjmpLabels[0])
+            print(indent2 + "goto %s; " % scope["sortedSetjmpLabels"][0])
             print(indent2 + "setjmpInitialized: setjmpInitialize = 0;")
             print(indent1 + "}")
         
@@ -2257,6 +2257,7 @@ def generateC(globalScope):
     print("", file=pf)
     for label in sorted(globalSetjmp):
         print("extern jmp_buf jb%s;" % label, file=pf)
+    walkModel(globalScope, sortJumps)
     
     # Allocate and initialize simulated memory for each variable in whatever 
     # scope. The mechanism is to set an attribute
@@ -2506,6 +2507,9 @@ def generateC(globalScope):
     # runtimeC.c.
     f = open(outputFolder + "/configuration.h", "w")
     print("// Configuration settings, inferred from the XPL/I source.", file=f)
+    fields = outputFolder.split("/\\")
+    appName = fields[-1]
+    print("#define APP_NAME \"%s\"" % appName, file=f)
     print("#define XCOM_I_START_TIME %d" % TIME_OF_GENERATION, file=f)
     if pfs:
         print("#define PFS", file=f)

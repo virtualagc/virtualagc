@@ -521,11 +521,8 @@ parseCommandLine(int argc, char **argv)
       else if (!strcmp("--help", argv[i]))
         {
           printf("\n");
-          printf("This is a C program created by translated by XCOM-I.py\n");
-          printf("from source-code files in the XPL/I language.\n");
-          printf("\n");
           printf("Usage:\n");
-          printf("        %s [OPTIONS]\n", argv[0]);
+          printf("        %s [OPTIONS]\n", APP_NAME);
           printf("\n");
           printf("The available OPTIONS are:\n");
           printf("--help        Displays this menu and then immediately exits.\n");
