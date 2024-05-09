@@ -26,6 +26,10 @@
 #include "runtimeC.h"
 #include <time.h>
 #include <sys/time.h> // For gettimeofday().
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <math.h>
 
 //---------------------------------------------------------------------------
 // Global variables.
@@ -33,7 +37,12 @@
 // Extern'd in runtimeC.h:
 int outUTF8 = 0;
 FILE *DD_INS[DD_MAX] = { NULL };
+char *DD_INS_FILENAMES[DD_MAX] = { NULL };
+pdsPartname_t DD_INS_PARTNAMES[DD_MAX] = { "" };
 FILE *DD_OUTS[DD_MAX] = { NULL };
+char *DD_OUTS_FILENAMES[DD_MAX] = { NULL };
+pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX] = { "" };
+int DD_OUTS_EXISTED[DD_MAX] = { 0 };
 FILE *COMMON_OUT = NULL;
 randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES] = { { NULL } };
 
@@ -517,6 +526,26 @@ parseCommandLine(int argc, char **argv)
           s = strstr(parmField, "linect=");
           if (s != NULL)
             linesPerPage = atoi(s + 7);
+        }
+      else if (!strcmp("--eng", argv[i]))
+        {
+          // Test of the IBM float conversions.  Note that aside from showing that
+          // toFloatIBM() and fromFloatIBM() are inverses, it also reproduces the
+          // known value 100 -> 0x42640000,0x00000000.
+          int32_t s, e;
+          uint32_t msw, lsw;
+          double x, y;
+          for (s = -1; s < 2; s += 2)
+            {
+              for (e = -10; e <= 10; e++)
+                {
+                  x = s * pow(10, e);
+                  toFloatIBM(&msw, &lsw, x);
+                  y = fromFloatIBM(msw, lsw);
+                  printf("%24.10lf 0x%08x,0x%08x %.10lf\n", x, msw, lsw, y);
+                }
+            }
+          exit(0);
         }
       else if (!strcmp("--help", argv[i]))
         {
@@ -1622,37 +1651,148 @@ SHR(uint32_t value, uint32_t shift) {
 
 void
 MONITOR0(uint32_t dev) {
-  fprintf(stderr, "MONITOR(0) not yet implemented\n");
+  if (dev >= DD_MAX)
+    return;
+  if (DD_OUTS[dev] == NULL)
+    return;
+  fflush(DD_OUTS[dev]);
+  fclose(DD_OUTS[dev]);
+  DD_OUTS[dev] = NULL;
 }
 
 uint32_t
 MONITOR1(uint32_t dev, char *name) {
-  fprintf(stderr, "MONITOR(1) not yet implemented\n");
-  exit(1);
+  int lenFile, lenPart;
+  int existed;
+  char *path = NULL;
+  if (dev >= DD_MAX)
+    {
+      fprintf(stderr, "Attempt to close non-existent output PDS %d\n", dev);
+      exit(1);
+    }
+  if (DD_OUTS[dev] != NULL)
+    {
+      fflush(DD_OUTS[dev]);
+      fclose(DD_OUTS[dev]);
+      DD_OUTS[dev] = NULL;
+    }
+  if (DD_OUTS_FILENAMES[dev] == NULL)
+    {
+      fprintf(stderr, "Attempt to use unassigned PDS file %d for output\n", dev);
+      exit(1);
+    }
+  lenFile = strlen(DD_OUTS_FILENAMES[dev]);
+  if (mkdir(DD_OUTS_FILENAMES[dev], 0777) < 0)
+      {
+        fprintf(stderr, "Unable to create PDS %s\n", DD_OUTS_FILENAMES[dev]);
+        fprintf(stderr, "Note: PDS is implemented as a folder.\n");
+        exit(1);
+      };
+  lenPart = strlen(name);
+  if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
+    {
+      fprintf(stderr,
+          "PDS partitions must have names from 1-8 characters long, dev %d\n",
+          dev);
+      exit(1);
+    }
+  path = malloc(lenFile + lenPart + 2);
+  if (path == NULL)
+    {
+      fprintf(stderr, "Out of memory in MONITOR(1,'%s')\n", name);
+      exit(1);
+    }
+  sprintf(path, "%s/%s", DD_OUTS_FILENAMES[dev], name);
+  strcpy(DD_OUTS_PARTNAMES[dev], name);
+  existed = DD_OUTS_EXISTED[dev];
+  DD_OUTS_EXISTED[dev] = (access(path, F_OK) == 0); // Partition already exists?
+  DD_OUTS[dev] = fopen(path, "wt");
+  free(path);
+  if (DD_OUTS[dev] == NULL)
+    {
+      fprintf(stderr, "Cannot open partition %s of PDS %s for OUTPUT(%d).\n",
+              name, DD_OUTS_FILENAMES[dev], dev);
+      exit(1);
+    }
+  return existed;
 }
 
 uint32_t
 MONITOR2(uint32_t dev, char *name) {
-  fprintf(stderr, "MONITOR(2) not yet implemented\n");
-  exit(1);
+  int lenFile, lenPart;
+  char *path = NULL;
+  if (dev >= DD_MAX)
+    {
+      fprintf(stderr, "Attempt to close non-existent input PDS %d\n", dev);
+      exit(1);
+    }
+  if (DD_INS[dev] != NULL)
+    {
+      fclose(DD_INS[dev]);
+      DD_INS[dev] = NULL;
+    }
+  if (DD_INS_FILENAMES[dev] == NULL)
+    {
+      fprintf(stderr, "Attempt to use unassigned PDS file %d for input\n", dev);
+      exit(1);
+    }
+  lenFile = strlen(DD_INS_FILENAMES[dev]);
+  lenPart = strlen(name);
+  if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
+    {
+      fprintf(stderr,
+          "PDS partitions must have names from 1-8 characters long, dev %d\n",
+          dev);
+      exit(1);
+    }
+  path = malloc(lenFile + lenPart + 2);
+  if (path == NULL)
+    {
+      fprintf(stderr, "Out of memory in MONITOR(1,'%s')\n", name);
+      exit(1);
+    }
+  sprintf(path, "%s/%s", DD_INS_FILENAMES[dev], name);
+  strcpy(DD_INS_PARTNAMES[dev], name);
+  DD_INS[dev] = fopen(path, "rt");
+  free(path);
+  if (DD_INS[dev] == NULL)
+    {
+      return 0;
+    }
+  return 1;
 }
 
 void
 MONITOR3(uint32_t dev) {
-  fprintf(stderr, "MONITOR(3) not yet implemented\n");
-  exit(1);
+  if (dev >= DD_MAX)
+    return;
+  if (DD_INS[dev] == NULL)
+    return;
+  fclose(DD_INS[dev]);
+  DD_INS[dev] = NULL;
 }
 
 void
 MONITOR4(uint32_t dev, uint32_t recsize) {
-  fprintf(stderr, "MONITOR(4) not yet implemented\n");
-  exit(1);
+  if (dev >= MAX_RANDOM_ACCESS_FILES)
+    {
+      fprintf(stderr, "Accessed FILE(%d), but max is %d\n",
+          dev, MAX_RANDOM_ACCESS_FILES);
+      exit(1);
+    }
+  randomAccessFiles[OUTPUT_RANDOM_ACCESS][dev].recordSize = recsize;
 }
 
+int32_t dwAccessAreaAddress = -1;
 void
-MONITOR5(uint32_t address) {
-  fprintf(stderr, "MONITOR(5) not yet implemented\n");
-  exit(1);
+MONITOR5(int32_t address) {
+  if (address < 0 || address >= MEMORY_SIZE - 14 * 4)
+    {
+      fprintf(stderr, "MONITOR(5, %0x08X) outside of physical memory\n",
+              address);
+      exit(1);
+    }
+  dwAccessAreaAddress = address;
 }
 
 // In general, new memory is allocated at `FREEPOINT`, and `FREEPOINT` is then
@@ -1733,6 +1873,83 @@ MONITOR8(uint32_t dev, uint32_t filenum) {
   fprintf(stderr, "MONITOR(8) not yet implemented\n");
   exit(1);
 }
+
+//----------------------------------------------------------------------------
+// For conversion to/from IBM hexadecimal floating point
+
+#define twoTo56 (1L << 56)
+#define twoTo52 (1L << 52)
+
+// Convert a integer or floating point to IBM double-precision float.
+// Returns as a pair (msw,lsw), each of which are 32-bit integers,
+// or (0xff000000,0x00000000) on error.
+void
+toFloatIBM(uint32_t *msw, uint32_t *lsw, double d) {
+  int s; // The sign: 1 if negative, 0 if non-negative.
+  int e; // Exponent.
+  uint64_t f;
+  if (d == 0)
+    {
+      *msw = 0x00000000;
+      *lsw = 0x00000000;
+      return;
+    }
+  // Make x positive but preserve the sign as a bit flag.
+  if (d < 0)
+    {
+      s = 1;
+      d = -d;
+    }
+  else
+      s = 0;
+  // Shift left by 24 bits.
+  d *= twoTo56;
+  // Find the exponent (biased by 64) as a power of 16:
+  e = 64;
+  while (d < twoTo52)
+    {
+      e -= 1;
+      d *= 16;
+    }
+  while (d >= twoTo56)
+    {
+      e += 1;
+      d /= 16;
+    }
+  if (e < 0)
+      e = 0;
+  if (e > 127)
+    {
+      *msw = 0xff000000;
+      *lsw = 0x00000000;
+      return;
+    }
+  // x should now be in the right range, so lets just turn it into an integer.
+  f = lround(d);
+  // Convert to a more-significant and less-significant 32-word:
+  *msw = (s << 31) | (e << 24) | ((f >> 32) & 0xffffffff);
+  *lsw = f & 0xffffffff;
+  return;
+}
+
+// Inverse of toFloatIBM(): Converts more-significant and less-significant
+// 32-bit words of an IBM DP float to a C double.
+double
+fromFloatIBM(uint32_t msw, uint32_t lsw) {
+    int s; // sign
+    int e; // exponent
+    long int f;
+    double x;
+    s = (msw >> 31) & 1;
+    e = ((msw >> 24) & 0x7f) - 64;
+    f = ((msw & 0x00ffffffL) << 32) | (lsw & 0xffffffff);
+    x = f * pow(16, e) / twoTo56;
+    if (s != 0)
+        x = -x;
+    return x;
+}
+
+//----------------------------------------------------------------------------
 
 uint32_t
 MONITOR9(uint32_t op) {

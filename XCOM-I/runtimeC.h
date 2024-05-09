@@ -19,10 +19,17 @@
 #include "configuration.h"
 
 // Command-line variables.
-extern int outUTF8;
 #define DD_MAX 9
+#define PDS_PARTNAME_SIZE 8
+typedef char pdsPartname_t[PDS_PARTNAME_SIZE + 1];
+extern int outUTF8;
 extern FILE *DD_INS[DD_MAX];
+extern char *DD_INS_FILENAMES[DD_MAX];
+extern pdsPartname_t DD_INS_PARTNAMES[DD_MAX];
 extern FILE *DD_OUTS[DD_MAX];
+extern char *DD_OUTS_FILENAMES[DD_MAX];
+extern pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX];
+extern int DD_OUTS_EXISTED[DD_MAX];
 extern FILE *COMMON_OUT;
 
 // Some functions that are perhaps useful for CALL INLINE or for running
@@ -273,7 +280,7 @@ void
 MONITOR4(uint32_t dev, uint32_t recsize);
 
 void
-MONITOR5(uint32_t address);
+MONITOR5(int32_t address);
 
 // Allocate `n` bytes in the free-memory area (i.e., between FREEPOINT and
 // FREELIMIT in `memory`), compacting if necessary, and storing the address
@@ -301,6 +308,12 @@ MONITOR7(uint32_t address, uint32_t n);
 
 void
 MONITOR8(uint32_t dev, uint32_t filenum);
+
+void
+toFloatIBM(uint32_t *msw, uint32_t *lsw, double d);
+
+double
+fromFloatIBM(uint32_t msw, uint32_t lsw);
 
 uint32_t
 MONITOR9(uint32_t op);

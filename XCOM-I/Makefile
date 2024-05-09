@@ -114,7 +114,7 @@ HEADERS = $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	@$(CC) $(EXTRA) -o $@ $(SOURCES)
+	@$(CC) $(EXTRA) -o $@ $(SOURCES) -lm
 
 .PHONY: clean
 clean:
@@ -137,13 +137,13 @@ testclean:
 $(XPL_APPS): 
 	@mkdir $@
 	@XCOM-I.py --xpl $(PEXTRA) Tests/$@.xpl
-	@$(CC) $(EXTRA) -o $@/$@ $@/*.c
+	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
 	@mkdir $@
 	@XCOM-I.py $(PEXTRA) Tests/$@.xpl
-	@$(CC) $(EXTRA) -o $@/$@ $@/*.c
+	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
 
 # Here are the principles behind the tests:
 #   1.	Various test programs from the Tests/ folder are built.
