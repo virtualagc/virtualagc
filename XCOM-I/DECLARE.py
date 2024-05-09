@@ -12,7 +12,7 @@ Mods:       2024-03-07 RSB  Began experimenting with this concept.
 
 import copy
 import re
-from auxiliary import error, expandAllMacrosInString, mtokenize
+from auxiliary import error, expandAllMacrosInString, mtokenize, globiterals
 from parseCommandLine import pfs, condA, condC, replacementSpace, replacementQuote
 from xtokenize import xtokenize
 from parseExpression import parseExpression
@@ -352,6 +352,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         p["FIXED"] = True
                         p["dirWidth"] = 4
                     if "LITERALLY" in properties:
+                        globiterals.add(symbol)
                         if passCount == 1 or \
                                 symbol not in scope["literals"] or \
                                 scope["literals"][symbol] != p:

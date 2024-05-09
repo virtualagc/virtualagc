@@ -63,7 +63,7 @@ includeFolder = "../HALINCL" # Folder for /%INCLUDE ... %/ directives.
 baseSource = None
 adhocs = {}
 standardXPL = False
-identifier = 'REL32V0   '  # String returned by MONITOR(23)
+identifierString = 'REL32V0   '  # String returned by MONITOR(23)
 merge = None
 firstFile = True
 libFile = None
@@ -151,12 +151,11 @@ def readFileIntoLines(filename):
 # process.
 helpMsg = '''
 Usage:
-    XCOM-I.py [OPTIONS] FILE1.xpl [ FILE2.xpl [ ... ] ] >OUTPUT.c
+    XCOM-I.py [OPTIONS] FILE1.xpl [ FILE2.xpl [ ... ] ]
 
 The available OPTIONS are:
 
 --help          Print this info.
---old-hex       (For ***DEBUG*** only.
 --              If this is found, it means to skip the entire remainder of the
                 command line.
 --xpl           Try to compile standard XPL rather than XPL/I.  This switch
@@ -286,7 +285,7 @@ for parm in sys.argv[1:]:
     elif parm == "--condC":
         condC = True
     elif parm.startswith("--identifier="):
-        identifier = "%-10s" % parm[13:23]
+        identifierString = "%-10s" % parm[13:23]
     elif parm.startswith("--include="):
         includeFolder = parm[10:]
     elif parm.startswith("--source="):

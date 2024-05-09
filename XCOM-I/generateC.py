@@ -635,6 +635,7 @@ def generateADDR(scope, parameter):
         attributes = getAttributes(scope, bVar)
         if attributes == None:
             errxit("Cannot identify symbol %s in ADDR" % bVar)
+        bVar = attributes["mangled"]
         if "BASED" in attributes:
             if 0 == len(bSubs):
                 # This is a special case. See comments in runtimeC.h.
@@ -658,6 +659,10 @@ def generateADDR(scope, parameter):
         b = parameter["children"][0]
         f = parameter["children"][1]
         bVar = b["token"]["identifier"]
+        attributes = getAttributes(scope, bVar)
+        if attributes == None:
+            errxit("Cannot find variable %s" % bVar)
+        bVar = attributes["mangled"]
         fVar = f["token"]["identifier"]
         bSubs = b["children"]
         fSubs = f["children"]
@@ -1143,7 +1148,12 @@ def generateExpression(scope, expression):
                 parameter = parameters[0]
                 tipe, source = generateExpression(scope, parameter)
                 if source.startswith("getCHARACTER("):
-                    return tipe, "getFIXED(" + source[13:]
+                    return "FIXED", "getFIXED(" + source[13:]
+                if source.startswith("getFIXED("):
+                    return "CHARACTER", "getCHARACTERd(" + source[9:]
+                if tipe == "FIXED":
+                    return "FIXED", "getFIXED(" + source + ")"
+                print("**", source, file=sys.stderr) #***DEBUG***
                 tipe, source = autoconvert(tipe, ["FIXED"], source)
                 if tipe != "FIXED":
                     errxit("Cannot interpret argument of STRING")
@@ -1182,6 +1192,8 @@ def generateExpression(scope, expression):
                     # Datatype conversions for parameters:
                     autoconvertTo = tipe
                     if parmNum == 0:
+                        #if "1322" in p: #***DEBUG***
+                        #    print("**", tipe, p, file=sys.stderr)
                         if symbol in ["ABS", "COREBYTE", "COREWORD", "SHL",
                                       "SHR", "INPUT", "STRING", "COREHALFWORD"]:
                             autoconvertTo = "FIXED"
@@ -1576,6 +1588,8 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                 elif builtin in ["COREBYTE", "COREWORD", "COREHALFWORD"]:
                     if len(children) == 1:
                         tipe, source = generateExpression(scope, children[0])
+                        #if "1322" in source:
+                        #    print("**", tipe, source, file=sys.stderr)
                         if tipe != "FIXED":
                             tipe, source = autoconvert(tipe, ["FIXED"], source)
                         if definedN:
@@ -2279,58 +2293,34 @@ def generateC(globalScope):
     # out of the COMMON area we're going to allocate a little bit of memory 
     # here for use by XCOM-I, specifically for passing info from `MONITOR` 
     # and XCOM-I to the XPL program that needs to be accessible via XPL 
-    # variables, since uch variables need to be in `memory`.
+    # variables, since such variables need to be in `memory`.
     
     # First, the string whose descriptor is returned by `MONITOR(23)`.
     whereMonitor23 = variableAddress
     variableAddress += 4
-    putCHARACTER(whereMonitor23, identifier)
-    variableAddress += len(identifier)
+    putCHARACTER(whereMonitor23, identifierString)
+    variableAddress += len(identifierString)
     
     # Next, the options data returned by `MONITOR(13)`.  The data itself will
     # all be filled in by the runtime library, but we need to make sure that the
     # space is properly allocated and templated.
     whereMonitor13 = variableAddress
-    # `MONITOR(13)` returns a pointer to a block of 6 `FIXED` values.
-    # I allow 16 characters for each option of type 1 or type 2 (11 is adequate,
-    # I think), plus 4 bytes for their string descriptors.  There are 22 
-    # possible type 1 options and 13 type 2 options, but I allow for 25 of each.
-    # Therefore, the entirety of either `CON` or `TYPE2` is (16+4)*25 = 500 
-    # bytes.
-    LEN_NAME = 16
+    # `MONITOR(13)` returns a pointer to a block of 6 `FIXED` values, 3 of which
+    # are pointers to arrays of FIXED.
     MAX_ENTRIES = 25
-    SIZE_ALL = (LEN_NAME + 4) * MAX_ENTRIES
+    SIZE_ARRAY = 4 * MAX_ENTRIES
     saddress = variableAddress + 24
     putFIXED(variableAddress, 0) # `OPTIONS_CODE`
     putFIXED(variableAddress + 4, saddress) # Pointer to `CON`.
     putFIXED(variableAddress + 8, 0) # Pointer to unused BASED `PRO`.
-    putFIXED(variableAddress + 12, saddress + SIZE_ALL) # Pointer to `TYPE2`
-    putFIXED(variableAddress + 16, saddress + 2 * SIZE_ALL) # Pointer to `VALS`
+    putFIXED(variableAddress + 12, saddress + SIZE_ARRAY) # Pointer to `TYPE2`
+    putFIXED(variableAddress + 16, saddress + 2 * SIZE_ARRAY) # Pointer to `VALS`
     putFIXED(variableAddress + 20, 0) # Pointer to unused BASED `NPVALS` or `MONVALS`
-    # Array of `CON`
-    daddress = saddress + 4 * MAX_ENTRIES
-    for i in range(MAX_ENTRIES): 
-        putFIXED(saddress + 4*i, ((LEN_NAME - 1) << 24) | daddress)
-        daddress += LEN_NAME
-    saddress = daddress
-    # Array of `TYPE2`
-    daddress = saddress + 4 * MAX_ENTRIES
-    for i in range(MAX_ENTRIES): 
-        putFIXED(saddress + 4*i, ((LEN_NAME - 1) << 24) | daddress)
-        daddress += LEN_NAME
-    saddress = daddress
-    # Array of `VALS`.  Trickier than `CON` or `TYPE2`, since 3 of the entries
-    # are string descriptors (for which we must allocate some space) but most
-    # are just `FIXED` (for which we don't).
-    daddress = saddress + 4 * MAX_ENTRIES
-    for i in range(MAX_ENTRIES): 
-        if i in [0, 8, 12]:
-            putFIXED(saddress + 4*i, ((LEN_NAME - 1) << 24) | daddress)
-            daddress += LEN_NAME
-        else:
-            putFIXED(saddress + 4*i, 0)
-    #saddress = daddress
-    variableAddress = daddress
+    variableAddress = saddress;
+    # Arrays of `CON`, `TYPE2`, and `VALS`, respectively.
+    for i in range(3 * MAX_ENTRIES): 
+        putFIXED(variableAddress, 0);
+        variableAddress += 4;
     #-----------------------------------------------------------------------
     
     useCommon = False # non-COMMON variables
@@ -2338,7 +2328,7 @@ def generateC(globalScope):
     useString = False
     walkModel(globalScope, allocateVariables)
     '''
-    # The following extra step turns out to be unnecessary, and double-allocate
+    # The following extra step turns out to be unnecessary, and double-allocates
     # space for long BIT data.
     useCommon = True # COMMON Long BIT data
     useBit = True

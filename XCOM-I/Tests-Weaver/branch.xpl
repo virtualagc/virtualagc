@@ -1,0 +1,756 @@
+/*
+**      XPL IBM/360 EMULATOR DIAGNOSTIC FOR BRANCH INSTRUCTIONS
+**
+**      AUTHOR: DANIEL WEAVER
+*/
+
+DECLARE EXPECT FIXED,
+   (A, B, C) FIXED,
+   JUMP_COUNT FIXED,
+   MSBIT FIXED INITIAL("80000000");
+
+DECLARE ERROR_COUNT FIXED;
+DECLARE LINE CHARACTER;
+DECLARE INFO(1) CHARACTER INITIAL('NOP ', 'JUMP');
+DECLARE X70 CHARACTER INITIAL(
+   '                                                                      ');
+
+/* CONDITION CODES */
+DECLARE CC_EQ LITERALLY '0',
+   CC_LT LITERALLY '1',
+   CC_GT LITERALLY '2',
+   CC_OV LITERALLY '3';
+
+DECLARE
+   OP_BALR LITERALLY '"05"',
+   OP_BCTR LITERALLY '"06"',
+   OP_BCR  LITERALLY '"07"',
+   OP_LNR  LITERALLY '"11"',
+   OP_LTR  LITERALLY '"12"',
+   OP_LCR  LITERALLY '"13"',
+   OP_XR   LITERALLY '"17"',
+   OP_SR   LITERALLY '"1B"',
+   OP_LA   LITERALLY '"41"',
+   OP_BAL  LITERALLY '"45"',
+   OP_BCT  LITERALLY '"46"',
+   OP_BC   LITERALLY '"47"',
+   OP_ST   LITERALLY '"50"',
+   OP_L    LITERALLY '"58"',
+   OP_BXH  LITERALLY '"86"',
+   OP_BXLE LITERALLY '"87"';
+/*
+   OP_LPDR LITERALLY '"20"',
+   OP_LNDR LITERALLY '"21"',
+   OP_LTDR LITERALLY '"22"',
+   OP_LCDR LITERALLY '"23"',
+   OP_HDR  LITERALLY '"24"',
+   OP_LDR  LITERALLY '"28"',
+   OP_CDR  LITERALLY '"29"',
+   OP_ADR  LITERALLY '"2A"',
+   OP_SDR  LITERALLY '"2B"',
+   OP_MDR  LITERALLY '"2C"',
+   OP_DDR  LITERALLY '"2D"',
+   OP_AWR  LITERALLY '"2E"',
+   OP_SWR  LITERALLY '"2F"',
+   OP_LPER LITERALLY '"30"',
+   OP_LNER LITERALLY '"31"',
+   OP_LTER LITERALLY '"32"',
+   OP_LCER LITERALLY '"33"',
+   OP_HER  LITERALLY '"34"',
+   OP_LER  LITERALLY '"38"',
+   OP_CER  LITERALLY '"39"',
+   OP_AER  LITERALLY '"3A"',
+   OP_SER  LITERALLY '"3B"',
+   OP_MER  LITERALLY '"3C"',
+   OP_DER  LITERALLY '"3D"',
+   OP_AUR  LITERALLY '"3E"',
+   OP_SUR  LITERALLY '"3F"',
+   OP_STD  LITERALLY '"60"',
+   OP_LD   LITERALLY '"68"',
+   OP_CD   LITERALLY '"69"',
+   OP_AD   LITERALLY '"6A"',
+   OP_SD   LITERALLY '"6B"',
+   OP_MD   LITERALLY '"6C"',
+   OP_DD   LITERALLY '"6D"',
+   OP_AW   LITERALLY '"6E"',
+   OP_SW   LITERALLY '"6F"',
+   OP_STE  LITERALLY '"70"',
+   OP_LE   LITERALLY '"78"',
+   OP_CE   LITERALLY '"79"',
+   OP_AE   LITERALLY '"7A"',
+   OP_SE   LITERALLY '"7B"',
+   OP_ME   LITERALLY '"7C"',
+   OP_DE   LITERALLY '"7D"',
+   OP_AU   LITERALLY '"7E"',
+   OP_SU   LITERALLY '"7F"',
+   OP_LPR  LITERALLY '"10"',
+   OP_NR   LITERALLY '"14"',
+   OP_CLR  LITERALLY '"15"',
+   OP_OR   LITERALLY '"16"',
+   OP_CR   LITERALLY '"19"',
+   OP_AR   LITERALLY '"1A"',
+   OP_MR   LITERALLY '"1C"',
+   OP_DR   LITERALLY '"1D"',
+   OP_ALR  LITERALLY '"1E"',
+   OP_SH   LITERALLY '"4B"',
+   OP_CH   LITERALLY '"49"',
+   OP_AH   LITERALLY '"4A"',
+   OP_MH   LITERALLY '"4C"',
+   OP_N    LITERALLY '"54"',
+   OP_CL   LITERALLY '"55"',
+   OP_O    LITERALLY '"56"',
+   OP_C    LITERALLY '"59"',
+   OP_A    LITERALLY '"5A"',
+   OP_S    LITERALLY '"5B"',
+   OP_M    LITERALLY '"5C"',
+   OP_D    LITERALLY '"5D"',
+   OP_AL   LITERALLY '"5E"',
+   OP_SL   LITERALLY '"5F"',
+   OP_SRL  LITERALLY '"88"',
+   OP_SLL  LITERALLY '"89"',
+   OP_SRA  LITERALLY '"8A"',
+   OP_SLA  LITERALLY '"8B"',
+   OP_SRDL LITERALLY '"8C"',
+   OP_SLDL LITERALLY '"8D"',
+   OP_SRDA LITERALLY '"8E"',
+   OP_SLDA LITERALLY '"8F"',
+   OP_TM   LITERALLY '"91"',
+   OP_NI   LITERALLY '"94"',
+   OP_OI   LITERALLY '"96"',
+   OP_XI   LITERALLY '"97"',
+   OP_CLI  LITERALLY '"95"',
+   OP_NC   LITERALLY '"D4"',
+   OP_CLC  LITERALLY '"D5"',
+   OP_OC   LITERALLY '"D6"',
+   OP_XC   LITERALLY '"D7"',
+   OP_TRT  LITERALLY '"DD"',
+   OP_TR   LITERALLY '"DC"',
+   OP_SSK  LITERALLY '"08"',
+   OP_ISK  LITERALLY '"09"',
+   OP_SVC  LITERALLY '"0A"',
+   OP_LR   LITERALLY '"18"',
+   OP_SLR  LITERALLY '"1F"',
+   OP_STH  LITERALLY '"40"',
+   OP_STC  LITERALLY '"42"',
+   OP_IC   LITERALLY '"43"',
+   OP_EX   LITERALLY '"44"',
+   OP_LH   LITERALLY '"48"',
+   OP_CVD  LITERALLY '"4E"',
+   OP_CVB  LITERALLY '"4F"',
+   OP_SSM  LITERALLY '"80"',
+   OP_LPSW LITERALLY '"82"',
+   OP_WRD  LITERALLY '"84"',
+   OP_RDD  LITERALLY '"85"',
+   OP_STM  LITERALLY '"90"',
+   OP_MVI  LITERALLY '"92"',
+   OP_TS   LITERALLY '"93"',
+   OP_LM   LITERALLY '"98"',
+   OP_SIO  LITERALLY '"9C"',
+   OP_TIO  LITERALLY '"9D"',
+   OP_HIO  LITERALLY '"9E"',
+   OP_TCH  LITERALLY '"9F"',
+   OP_MVN  LITERALLY '"D1"',
+   OP_MVC  LITERALLY '"D2"',
+   OP_MVZ  LITERALLY '"D3"',
+   OP_ED   LITERALLY '"DE"',
+   OP_EDMK LITERALLY '"DF"',
+   OP_MVO  LITERALLY '"F1"',
+   OP_PACK LITERALLY '"F2"',
+   OP_UNPK LITERALLY '"F3"',
+   OP_ZAP  LITERALLY '"F8"',
+   OP_CP   LITERALLY '"F9"',
+   OP_AP   LITERALLY '"FA"',
+   OP_SP   LITERALLY '"FB"',
+   OP_MP   LITERALLY '"FC"',
+   OP_DP   LITERALLY '"FD"';
+*/
+
+PAD:
+PROCEDURE(STRING, WIDTH) CHARACTER;
+   DECLARE STRING CHARACTER, (WIDTH, L) FIXED;
+
+   L = WIDTH - LENGTH(STRING);
+   DO WHILE L >= LENGTH(X70);
+      STRING = STRING || X70;
+      L = L - LENGTH(X70);
+   END;
+   IF L <= 0 THEN RETURN STRING;
+   RETURN STRING || SUBSTR(X70, 0, L);
+END PAD;
+
+HEX: PROCEDURE(V, L) CHARACTER;
+   DECLARE (V, L) FIXED;
+   DECLARE S CHARACTER;
+   DECLARE HEX_DIGITS CHARACTER INITIAL('0123456789ABCDEF');
+
+   S = '';
+   L = L - 4;
+   DO WHILE L >= 0;
+      S = S || SUBSTR(HEX_DIGITS, SHR(V, L) & 15, 1);
+      L = L - 4;
+   END;
+   RETURN S;
+END HEX;
+
+FAIL_HEADER: PROCEDURE(MNEMONIC);
+   DECLARE (MNEMONIC, TEXT_CODE) CHARACTER;
+
+   LINE = '*** ' || MNEMONIC;
+   LINE = LINE || SUBSTR('         FAIL ', LENGTH(LINE));
+END FAIL_HEADER;
+
+FAIL_ARITHMETIC: PROCEDURE(MNEMONIC, A, TEXT_CODE, B);
+   DECLARE (A, B) FIXED;
+   DECLARE (MNEMONIC, TEXT_CODE) CHARACTER;
+
+   LINE = '*** ' || MNEMONIC;
+   LINE = LINE || SUBSTR('         FAIL ', LENGTH(LINE)) || HEX(A, 32)
+      || TEXT_CODE || HEX(B, 32);
+END FAIL_ARITHMETIC;
+
+FAIL_RESULT: PROCEDURE(TAG, EXPECTED, GOT);
+   DECLARE (EXPECTED, GOT) FIXED;
+   DECLARE TAG CHARACTER;
+
+   LINE = LINE || TAG || HEX(EXPECTED, 32);
+   IF EXPECTED = GOT THEN LINE = LINE || '              ';
+   ELSE LINE = LINE || ' GOT: ' || HEX(GOT, 32);
+END FAIL_RESULT;
+
+FAIL_MASK_CC: PROCEDURE(MASK, CC);
+   DECLARE (MASK, CC) FIXED;
+
+   LINE = PAD(LINE || ' MASK=' || MASK, 22) || ' CC=' || CC;
+END FAIL_MASK_CC;
+
+FAIL_JUMP: PROCEDURE(J);
+   DECLARE J FIXED;
+
+   LINE = LINE || '  EXPECT: ' || INFO(EXPECT) || ' GOT: ' || INFO(J);
+END FAIL_JUMP;
+
+FAIL_BRANCH: PROCEDURE(GOT, XP);
+   DECLARE (GOT, XP) FIXED;
+
+   LINE = LINE || '  ' || INFO(GOT & 1);
+   IF GOT ~= XP THEN LINE = LINE || '  EXPECTED: ' || INFO(XP & 1);
+END FAIL_BRANCH;
+
+FAIL_PRINT: PROCEDURE;
+   OUTPUT = LINE;
+   ERROR_COUNT = ERROR_COUNT + 1;
+END FAIL_PRINT;
+
+CONDITION_CODES:
+PROCEDURE FIXED;
+   /* THIS SUBROUTINE WILL READ THE CONDITION CODES. */
+   DECLARE RESULT_CC FIXED;
+
+   CALL INLINE(OP_LA, 2, 0, 0, 0);    /* CLEAR REGISTER 2 */
+   CALL INLINE(OP_BALR, 1, 0);        /* GET CURRENT PROGRAM COUNTER */
+   CALL INLINE(OP_BC, 8, 0, 1, 24);   /* BRANCH IF EQ BIT SET */
+   CALL INLINE(OP_LA, 2, 0, 2, 1);    /* ADD 1 */
+   CALL INLINE(OP_BC, 4, 0, 1, 24);   /* BRANCH IF LT BIT SET */
+   CALL INLINE(OP_LA, 2, 0, 2, 1);    /* ADD 1 */
+   CALL INLINE(OP_BC, 2, 0, 1, 24);   /* BRANCH IF GT BIT SET */
+   CALL INLINE(OP_LA, 2, 0, 2, 1);    /* ADD 1 */
+   CALL INLINE(OP_ST, 2, 0, RESULT_CC);  /* STORE THE CONDITION CODES */
+   RETURN RESULT_CC;
+END CONDITION_CODES;
+
+SET_CONDITION_CODES:
+PROCEDURE(NCC);
+   DECLARE NCC FIXED;
+
+   DO CASE NCC;
+      /* CC=0 EQ */
+      DO;
+         CALL INLINE(OP_XR, 1, 1);  /* SET CC=EQ */
+      END;
+      /* CC=1 LT */
+      DO;
+         CALL INLINE(OP_L, 1, 0, MSBIT);
+         CALL INLINE(OP_LTR, 1, 1);  /* SET CC=LT */
+      END;
+      /* CC=2 GT */
+      DO;
+         CALL INLINE(OP_LA, 1, 0, 0, 1);    /* LOAD 1 */
+         CALL INLINE(OP_LTR, 1, 1);   /* SET CC=GT */
+      END;
+      /* CC=3 OV */
+      DO;
+         CALL INLINE(OP_L, 1, 0, MSBIT);
+         CALL INLINE(OP_LCR, 1, 1);  /* SET CC=OV */
+      END;
+   END;
+END SET_CONDITION_CODES;
+
+BRANCH_BC:
+PROCEDURE(BC, CC) FIXED;
+   /* RETURN TRUE IF THE BRANCH WAS TAKEN */
+   DECLARE (BC, CC, JUMP) FIXED;
+
+   IF 0 THEN
+      DO;
+      BRANCH_TAKEN: RETURN 1;
+      END;
+   JUMP = ADDR(BRANCH_TAKEN);
+   DO CASE BC;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 0, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 1, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 2, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 3, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 4, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 5, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 6, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 7, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 8, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 9, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 10, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 11, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 12, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 13, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 14, 0, 1, 0);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BC, 15, 0, 1, 0);
+      END;
+   END;
+   RETURN 0;
+END BRANCH_BC;
+
+BRANCH_BCR:
+PROCEDURE(BC, CC) FIXED;
+   /* RETURN TRUE IF THE BRANCH WAS TAKEN */
+   DECLARE (BC, CC, JUMP) FIXED;
+
+   IF 0 THEN
+      DO;
+      BRANCH_TAKEN: RETURN 1;
+      END;
+   JUMP = ADDR(BRANCH_TAKEN);
+   DO CASE BC;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 0, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 1, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 2, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 3, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 4, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 5, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 6, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 7, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 8, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 9, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 10, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 11, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 12, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 13, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 14, 1);
+      END;
+      DO;
+         CALL SET_CONDITION_CODES(CC);
+         CALL INLINE(OP_L, 1, 0, JUMP);
+         CALL INLINE(OP_BCR, 15, 1);
+      END;
+   END;
+   RETURN 0;
+END BRANCH_BCR;
+
+TEST_BRANCH_CONDITION:
+PROCEDURE;
+   DECLARE (I, J, K) FIXED;
+
+   OUTPUT = 'TESTING BC';
+   DO I = 0 TO 3;
+      DO J = 0 TO 15;
+         K = BRANCH_BC(J, I);
+         IF (SHR(8, I) & J) = 0 THEN EXPECT = 0;
+         ELSE EXPECT = 1;
+         IF K ~= EXPECT THEN DO;
+               CALL FAIL_HEADER('BC');
+               CALL FAIL_MASK_CC(J, I);
+               CALL FAIL_JUMP(K);
+               CALL FAIL_PRINT;
+            END;
+      END;
+   END;
+   OUTPUT = 'TESTING BCR';
+   DO I = 0 TO 3;
+      DO J = 0 TO 15;
+         K = BRANCH_BCR(J, I);
+         IF (SHR(8, I) & J) = 0 THEN EXPECT = 0;
+         ELSE EXPECT = 1;
+         IF K ~= EXPECT THEN DO;
+               CALL FAIL_HEADER('BCR');
+               CALL FAIL_MASK_CC(J, I);
+               CALL FAIL_JUMP(K);
+               CALL FAIL_PRINT;
+            END;
+      END;
+   END;
+END TEST_BRANCH_CONDITION;
+
+BRANCH_TARGET:
+PROCEDURE;
+   JUMP_COUNT = JUMP_COUNT + 1;
+END BRANCH_TARGET;
+
+BRANCH_AND_LINK:
+PROCEDURE(T);
+   DECLARE (T, SUB, RTN) FIXED;
+
+   IF 0 THEN
+      DO;
+      PROCEDURE_RETURN:
+
+         JUMP_COUNT = JUMP_COUNT + 1;
+         RETURN;
+      END;
+   RTN = ADDR(PROCEDURE_RETURN);
+   SUB = ADDR(BRANCH_TARGET);
+   JUMP_COUNT = 0;
+   DO CASE T;
+      DO;
+         OUTPUT = 'TESTING BALR';
+         CALL INLINE(OP_L, 1, 0, SUB);
+         CALL INLINE(OP_BALR, 12, 1);
+         JUMP_COUNT = JUMP_COUNT + 1;
+      END;
+      DO;
+         CALL INLINE(OP_LA, 1, 0, 0, 24);
+         CALL INLINE(OP_BALR, 12, 15);
+         JUMP_COUNT = 2;
+      END;
+      DO;
+         OUTPUT = 'TESTING BAL';
+         CALL INLINE(OP_L, 1, 0, SUB);
+         CALL INLINE(OP_BAL, 12, 0, 1, 0);
+         JUMP_COUNT = JUMP_COUNT + 1;
+      END;
+      DO;
+         CALL INLINE(OP_LA, 1, 0, 0, 24);
+         CALL INLINE(OP_BAL, 12, 0, 15, 0);
+         JUMP_COUNT = 2;
+      END;
+      DO;
+         OUTPUT = 'TESTING BCR CALL';
+         CALL INLINE(OP_L, 1, 0, SUB);
+         CALL INLINE(OP_L, 12, 0, RTN);
+         CALL INLINE(OP_BCR, 15, 1);
+         JUMP_COUNT = 6;
+      END;
+      DO;
+         JUMP_COUNT = 1;
+         CALL INLINE(OP_LA, 1, 0, 0, 24);
+         CALL INLINE(OP_L, 12, 0, RTN);
+         CALL INLINE(OP_BCR, 15, 15);
+         JUMP_COUNT = 7;
+      END;
+      DO;
+         OUTPUT = 'TESTING BC CALL';
+         CALL INLINE(OP_L, 1, 0, SUB);
+         CALL INLINE(OP_L, 12, 0, RTN);
+         CALL INLINE(OP_BC, 15, 0, 1, 0);
+         JUMP_COUNT = 6;
+      END;
+      DO;
+         JUMP_COUNT = 1;
+         CALL INLINE(OP_LA, 1, 0, 0, 24);
+         CALL INLINE(OP_L, 12, 0, RTN);
+         CALL INLINE(OP_BC, 15, 0, 15, 0);
+         JUMP_COUNT = 7;
+      END;
+   END;
+END BRANCH_AND_LINK;
+
+TEST_BRANCH_AND_LINK:
+PROCEDURE;
+   DECLARE (I, J) FIXED,
+      OPCODE(3) CHARACTER INITIAL('BALR', 'BAL', 'BCR', 'BC');
+
+   DO I = 0 TO 7;
+      CALL BRANCH_AND_LINK(I);
+      EXPECT = 2;
+      IF JUMP_COUNT ~= EXPECT THEN DO;
+            CALL FAIL_HEADER(OPCODE(SHR(I, 1)));
+            LINE = LINE || ' JUMP_COUNT=' || JUMP_COUNT;
+            CALL FAIL_PRINT;
+         END;
+   END;
+END TEST_BRANCH_AND_LINK;
+
+BRANCH_BCTR:
+PROCEDURE(RG, T);
+   DECLARE (RG, T, RTN) FIXED;
+
+   IF 0 THEN
+      DO;
+      PROCEDURE_RETURN:
+
+         CALL INLINE(OP_ST, 1, 0, C);
+         JUMP_COUNT = JUMP_COUNT + 1;
+         RETURN;
+      END;
+   RTN = ADDR(PROCEDURE_RETURN);
+   JUMP_COUNT = 0;
+   DO CASE T;
+      DO;
+         CALL INLINE(OP_L, 1, 0, RG);
+         CALL INLINE(OP_L, 2, 0, RTN);
+         CALL INLINE(OP_BCTR, 1, 2);
+         CALL INLINE(OP_ST, 1, 0, C);
+      END;
+      DO;
+         CALL INLINE(OP_L, 1, 0, RG);
+         CALL INLINE(OP_L, 2, 0, RTN);
+         CALL INLINE(OP_BCT, 1, 0, 2, 0);
+         CALL INLINE(OP_ST, 1, 0, C);
+      END;
+   END;
+END BRANCH_BCTR;
+
+TEST_BRANCH_BCTR:
+PROCEDURE;
+   DECLARE I FIXED;
+
+   OUTPUT = 'TESTING BCTR';
+   DO I = -2 TO 2;
+      CALL BRANCH_BCTR(I, 0);
+      IF I = 1 THEN EXPECT = 0;
+      ELSE EXPECT = 1;
+      IF I ~= C + 1 | JUMP_COUNT ~= EXPECT THEN DO;
+            CALL FAIL_ARITHMETIC('BCTR', I, '-', 1);
+            CALL FAIL_RESULT(' = ', I - 1, C);
+            CALL FAIL_BRANCH(JUMP_COUNT, EXPECT);
+            CALL FAIL_PRINT;
+         END;
+   END;
+   OUTPUT = 'TESTING BCT';
+   DO I = -2 TO 2;
+      CALL BRANCH_BCTR(I, 0);
+      IF I = 1 THEN EXPECT = 0;
+      ELSE EXPECT = 1;
+      IF I ~= C + 1 | JUMP_COUNT ~= EXPECT THEN DO;
+            CALL FAIL_ARITHMETIC('BCT', I, '-', 1);
+            CALL FAIL_RESULT(' = ', I - 1, C);
+            CALL FAIL_BRANCH(JUMP_COUNT, EXPECT);
+            CALL FAIL_PRINT;
+         END;
+   END;
+END TEST_BRANCH_BCTR;
+
+BRANCH_BXH: PROCEDURE(T);
+   DECLARE (T, RTN) FIXED;
+
+   IF 0 THEN
+      DO;
+      PROCEDURE_RETURN:
+         CALL INLINE(OP_ST, 1, 0, A);
+         CALL INLINE(OP_ST, 2, 0, B);
+         CALL INLINE(OP_ST, 3, 0, C);
+         RETURN;
+      END;
+   C = 0;
+   RTN = ADDR(PROCEDURE_RETURN);
+   DO CASE T;
+      DO;
+         OUTPUT = 'TESTING BXH';
+         CALL INLINE(OP_LA, 1, 0, 0, 4);
+         CALL INLINE(OP_LNR, 1, 1);
+         CALL INLINE(OP_LA, 2, 0, 0, "18");
+         CALL INLINE(OP_SR, 3, 3);
+         CALL INLINE(OP_BALR, 12, 0);
+         CALL INLINE(OP_BXH, 2, 1, 12, 10);
+         CALL INLINE(OP_L, 12, 0, RTN);
+         CALL INLINE(OP_BCR, 15, 12);
+         CALL INLINE(OP_LA, 3, 0, 3, 1);
+         CALL INLINE(OP_BCR, 15, 12);
+      END;
+      DO;
+         CALL INLINE(OP_LA, 0, 0, 0, 4);
+         CALL INLINE(OP_LNR, 0, 0);
+         CALL INLINE(OP_LA, 2, 0, 0, "1C");
+         CALL INLINE(OP_SR, 1, 1);
+         CALL INLINE(OP_SR, 3, 3);
+         CALL INLINE(OP_BALR, 12, 0);
+         CALL INLINE(OP_BXH, 2, 0, 12, 10);
+         CALL INLINE(OP_L, 12, 0, RTN);
+         CALL INLINE(OP_BCR, 15, 12);
+         CALL INLINE(OP_LA, 3, 0, 3, 1);
+         CALL INLINE(OP_BCR, 15, 12);
+      END;
+      DO;
+         OUTPUT = 'TESTING BXLE';
+         CALL INLINE(OP_LA, 1, 0, 0, 4);
+         CALL INLINE(OP_LA, 2, 0, 0, "14");
+         CALL INLINE(OP_LNR, 2, 2);
+         CALL INLINE(OP_SR, 3, 3);
+         CALL INLINE(OP_BALR, 12, 0);
+         CALL INLINE(OP_BXLE, 2, 1, 12, 10);
+         CALL INLINE(OP_L, 12, 0, RTN);
+         CALL INLINE(OP_BCR, 15, 12);
+         CALL INLINE(OP_LA, 3, 0, 3, 1);
+         CALL INLINE(OP_BCR, 15, 12);
+      END;
+      DO;
+         CALL INLINE(OP_LA, 0, 0, 0, 4);
+         CALL INLINE(OP_LA, 2, 0, 0, "18");
+         CALL INLINE(OP_LNR, 2, 2);
+         CALL INLINE(OP_SR, 1, 1);
+         CALL INLINE(OP_SR, 3, 3);
+         CALL INLINE(OP_BALR, 12, 0);
+         CALL INLINE(OP_BXLE, 2, 0, 12, 10);
+         CALL INLINE(OP_L, 12, 0, RTN);
+         CALL INLINE(OP_BCR, 15, 12);
+         CALL INLINE(OP_LA, 3, 0, 3, 1);
+         CALL INLINE(OP_BCR, 15, 12);
+      END;
+   END;
+END BRANCH_BXH;
+
+TEST_BRANCH_BXH:
+PROCEDURE;
+   DECLARE I FIXED,
+      OP(1) CHARACTER INITIAL('BXH', 'BXLE');
+
+   DO I = 0 TO 3;
+      CALL BRANCH_BXH(I);
+      EXPECT = 6;
+      IF C ~= EXPECT THEN DO;
+            CALL FAIL_ARITHMETIC(OP(SHR(I, 1)), A, ' ', B);
+            CALL FAIL_RESULT(' LOOPS: ', EXPECT, C);
+            CALL FAIL_PRINT;
+         END;
+   END;
+END TEST_BRANCH_BXH;
+
+CALL TEST_BRANCH_CONDITION;
+CALL TEST_BRANCH_AND_LINK;
+CALL TEST_BRANCH_BCTR;
+CALL TEST_BRANCH_BXH;
+
+IF ERROR_COUNT = 0 THEN OUTPUT = 'PASSED';
+ELSE OUTPUT = 'FAILED: ' || ERROR_COUNT || ' ERRORS';
+
+RETURN ERROR_COUNT;
+
+EOF;

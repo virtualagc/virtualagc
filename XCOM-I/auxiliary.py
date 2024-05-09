@@ -129,6 +129,7 @@ def mtokenize(string):
 # macros are DECLARE'd within the individual scopes), and if it finds
 # one then it returns the modified string.  If none were found, the 
 # original string is returned unchanged.
+globiterals = set() # All identifiers used as names of literals.
 def expandOneMacroInString(scope, string):
     # We have to split the string into quoted portions and non-quoted
     # portions.
@@ -136,6 +137,12 @@ def expandOneMacroInString(scope, string):
         pass
         pass
     mtokens = mtokenize(string)
+    # Do a quick check to see if there are any names of macros among the tokens.
+    # We do a more time-consuming but accurate check only if there are some.
+    # (On my computer, this maneuver only cuts compilation time for HAL/S-FC
+    # from ~8 seconds down to about ~7 seconds.  But I'll take it, I guess.)
+    if 0 == len(globiterals & set(mtokens)):
+        return string
     delimiters = ["'", '"']
     inQuote = False
     delimiter = ''

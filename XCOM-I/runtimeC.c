@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <math.h>
+#include <execinfo.h>
 
 //---------------------------------------------------------------------------
 // Global variables.
@@ -38,10 +39,12 @@
 int outUTF8 = 0;
 FILE *DD_INS[DD_MAX] = { NULL };
 char *DD_INS_FILENAMES[DD_MAX] = { NULL };
+int PDS_INS[DD_MAX] = { 0 }; // 1 if a PDS, 0 if sequential.
 pdsPartname_t DD_INS_PARTNAMES[DD_MAX] = { "" };
 FILE *DD_OUTS[DD_MAX] = { NULL };
 char *DD_OUTS_FILENAMES[DD_MAX] = { NULL };
 pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX] = { "" };
+int PDS_OUTS[DD_MAX] = { 0 }; // 1 if a PDS, 0 if sequential.
 int DD_OUTS_EXISTED[DD_MAX] = { 0 };
 FILE *COMMON_OUT = NULL;
 randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES] = { { NULL } };
@@ -360,6 +363,31 @@ rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex) {
 //---------------------------------------------------------------------------
 // Utility functions.
 
+string_t abendMessage = "";
+#define BT_BUF_SIZE 100
+void
+abend(char *msg) {
+  printf("\n");
+  fflush(stdout);
+  fprintf(stderr, "%s\n", msg);
+  if (strlen(abendMessage) > 0)
+    fprintf(stderr, "%s\n", abendMessage);
+  // Backtrace: available in Linux and (I've read) Mac OS.
+  int j, nptrs;
+  void *buffer[BT_BUF_SIZE];
+  char **strings;
+  nptrs = backtrace(buffer, BT_BUF_SIZE);
+  strings = backtrace_symbols(buffer, nptrs);
+  if (strings != NULL)
+    {
+      fprintf(stderr, "Backtrace:\n");
+      for (j = 0; j < nptrs; j++)
+        fprintf(stderr, "\t%s\n", strings[j]);
+    }
+  free(strings);
+  exit(1);
+}
+
 int
 parseCommandLine(int argc, char **argv)
 {
@@ -374,7 +402,8 @@ parseCommandLine(int argc, char **argv)
       char c, filename[1024];
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
-      else if (2 == sscanf(argv[i], "--ddi=%d,%s", &lun, filename))
+      else if (2 == sscanf(argv[i], "--ddi=%d,%s", &lun, filename) ||
+               2 == sscanf(argv[i], "--pdsi=%d,%s", &lun, filename))
         {
           if (lun < 0 || lun >= DD_MAX)
             {
@@ -384,16 +413,28 @@ parseCommandLine(int argc, char **argv)
             }
           else
             {
-              DD_INS[lun] = fopen(filename, "r");
-              if (DD_INS[lun] == NULL)
+              if (argv[i][2] == 'd')
                 {
-                  fprintf(stderr, "Cannot open file %s for reading on unit %d\n",
-                      filename, lun);
-                  returnValue = -1;
+                  DD_INS_FILENAMES[lun] = &argv[i][6];
+                  PDS_INS[lun] = 0;
+                  DD_INS[lun] = fopen(filename, "r");
+                  if (DD_INS[lun] == NULL)
+                    {
+                      fprintf(stderr, "Cannot open file %s for reading on unit %d\n",
+                          filename, lun);
+                      returnValue = -1;
+                    }
+                }
+              else
+                {
+                  DD_INS_FILENAMES[lun] = &argv[i][7];
+                  strcpy(DD_INS_PARTNAMES[lun], "");
+                  PDS_INS[lun] = 1;
                 }
             }
         }
-      else if (2 == sscanf(argv[i], "--ddo=%d,%s", &lun, filename))
+      else if (2 == sscanf(argv[i], "--ddo=%d,%s", &lun, filename) ||
+               2 == sscanf(argv[i], "--pdso=%d,%s", &lun, filename))
         {
           if (lun < 0 || lun >= DD_MAX)
             {
@@ -402,12 +443,23 @@ parseCommandLine(int argc, char **argv)
             }
           else
             {
-              DD_OUTS[lun] = fopen(filename, "w");
-              if (DD_OUTS[lun] == NULL)
+              if (argv[i][2] == 'd')
                 {
-                  fprintf(stderr, "Cannot create file %s for writing on unit %d\n",
-                      filename, lun);
-                  returnValue = -1;
+                  DD_OUTS_FILENAMES[lun] = &argv[i][6];
+                  PDS_OUTS[lun] = 0;
+                  DD_OUTS[lun] = fopen(filename, "w");
+                  if (DD_OUTS[lun] == NULL)
+                    {
+                      fprintf(stderr, "Cannot create file %s for writing on unit %d\n",
+                          filename, lun);
+                      returnValue = -1;
+                    }
+                }
+              else
+                {
+                  DD_OUTS_FILENAMES[lun] = &argv[i][7];
+                  strcpy(DD_OUTS_PARTNAMES[lun], "");
+                  PDS_OUTS[lun] = 1;
                 }
             }
         }
@@ -416,26 +468,15 @@ parseCommandLine(int argc, char **argv)
         {
           randomAccessFile_t *ri, *ro;
           if (lun < 1 || lun >= MAX_RANDOM_ACCESS_FILES)
-            {
-              fprintf(stderr, "Illegal device number (%d)\n", lun);
-              exit(1);
-            }
+            abend("Illegal device number");
           if (c == 'I' || c == 'i')
             {
               ri = &randomAccessFiles[INPUT_RANDOM_ACCESS][lun];
               if (ri->fp != NULL)
-                {
-                  fprintf(stderr, "Input file %d (%s) already attached)\n",
-                      lun, ri->filename);
-                  exit(1);
-                }
+                abend("Input file already attached");
               ri->fp = fopen(filename, "rb");
               if (ri->fp == NULL)
-                {
-                  fprintf(stderr, "Cannot open input file %d (%s) for reading)\n",
-                      lun, filename);
-                  exit(1);
-                }
+                abend("Cannot open input file for reading");
               ri->recordSize = recordSize;
               strncpy(ri->filename, filename, sizeof(string_t));
             }
@@ -443,18 +484,10 @@ parseCommandLine(int argc, char **argv)
             {
               ro = &randomAccessFiles[OUTPUT_RANDOM_ACCESS][lun];
               if (ro->fp != NULL)
-                {
-                  fprintf(stderr, "Output file %d (%s) already attached)\n",
-                      lun, ro->filename);
-                  exit(1);
-                }
+                abend("Output file already attached");
               ro->fp = fopen(filename, "ab");
               if (ro->fp == NULL)
-                {
-                  fprintf(stderr, "Cannot open output file %d (%s) for writing)\n",
-                      lun, filename);
-                  exit(1);
-                }
+                abend("Cannot open output file for writing");
               ro->recordSize = recordSize;
               strncpy(ro->filename, filename, sizeof(string_t));
             }
@@ -463,26 +496,14 @@ parseCommandLine(int argc, char **argv)
               ri = &randomAccessFiles[INPUT_RANDOM_ACCESS][lun];
               ro = &randomAccessFiles[OUTPUT_RANDOM_ACCESS][lun];
               if (ri->fp != NULL)
-                {
-                  fprintf(stderr, "Input file %d (%s) already attached)\n",
-                      lun, ri->filename);
-                  exit(1);
-                }
+                abend("Input file already attached");
               if (ro->fp != NULL)
-                {
-                  fprintf(stderr, "Output file %d (%s) already attached)\n",
-                      lun, ro->filename);
-                  exit(1);
-                }
+                abend("Output file already attached");
               ro->fp = fopen(filename, "rb+");
               if (ro->fp == NULL)
                 ro->fp = fopen(filename, "wb+");
               if (ro->fp == NULL)
-                {
-                  fprintf(stderr, "Cannot open i/o file %d (%s) for read/write)\n",
-                      lun, filename);
-                  exit(1);
-                }
+                abend("Cannot open i/o file for read/write");
               ro->recordSize = recordSize;
               strncpy(ro->filename, filename, sizeof(string_t));
               ri->fp = ro->fp;
@@ -490,28 +511,19 @@ parseCommandLine(int argc, char **argv)
               strcpy(ri->filename, ro->filename);
             }
           else
-            {
-              fprintf(stderr, "Illegal i/o spec (%c)\n", c);
-              exit(1);
-            }
+            abend("Illegal i/o spec");
         }
       else if (1 == sscanf(argv[i], "--commoni=%s", filename))
         {
           COMMON_IN = fopen(filename, "r");
           if (COMMON_IN == NULL)
-            {
-              fprintf(stderr, "Unable to open %s to read COMMON\n", filename);
-              exit(1);
-            }
+            abend("Unable to open COMMON input file");
         }
       else if (1 == sscanf(argv[i], "--commono=%s", filename))
         {
           COMMON_OUT = fopen(filename, "w");
           if (COMMON_OUT == NULL)
-            {
-              fprintf(stderr, "Unable to open %s to write COMMON\n", filename);
-              exit(1);
-            }
+            abend("Unable to open COMMON output file");
         }
       else if (1 == sscanf(argv[i], "--linect=%d", &j))
         linesPerPage = j;
@@ -570,6 +582,8 @@ parseCommandLine(int argc, char **argv)
           printf("              N, for use with the OUTPUT(N) XPL built-in.\n");
           printf("              By default, 0 and 1 are attached to stdout.\n");
           printf("              N can range from 0 through 9.\n");
+          printf("--pdsi=N,F    Same as --ddi, but for a PDS file.\n");
+          printf("--pdso=N,F    Same as --ddo, but for a PDS file.\n");
           printf("--raf=I,R,N,F Attach filename F to device number N, for use\n");
           printf("              with the FILE(N) XPL built-in.  R is the\n");
           printf("              record size associated with the random-access\n");
@@ -600,10 +614,7 @@ parseCommandLine(int argc, char **argv)
         {
           int status = readCOMMON(COMMON_IN);
           if (status < 0)
-            {
-              fprintf(stderr, "Severe error reading COMMON.\n");
-              exit(1);
-            }
+            abend("Severe error reading COMMON.");
           else if (status == 1)
             fprintf(stderr, "COMMON file smaller than expected.\n");
           else if (status == 2)
@@ -777,11 +788,7 @@ getBIT(uint32_t bitWidth, uint32_t address)
     {
       memoryMapEntry_t *memoryMapEntry = lookupFloor(address);
       if (memoryMapEntry == NULL)
-        {
-          fprintf(stderr, "Implementation error: getBIT(%d,0x%06X), address not found\n",
-              bitWidth, address);
-          exit(1);
-        }
+        abend("Implementation error: getBIT address not found");
       bitWidth = memoryMapEntry->bitWidth;
     }
   numBytes = (bitWidth + 7) / 8;
@@ -792,12 +799,7 @@ getBIT(uint32_t bitWidth, uint32_t address)
       uint32_t descriptor;
       descriptor = getFIXED(address);
       if (numBytes - 1 != descriptor >> 24)
-        {
-          fprintf(stderr,
-              "Implementation error: getBIT(%d,0x%06X), BIT width mismatch, getFIXED(0x%06X)==0x%08X.\n",
-              bitWidth, address, address, descriptor);
-          exit(1);
-        }
+        abend("Implementation error: getBIT width mismatch");
       address = descriptor & 0xFFFFFF;
     }
   value->bitWidth = bitWidth;
@@ -815,11 +817,7 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
     {
       memoryMapEntry_t *memoryMapEntry = lookupFloor(address);
       if (memoryMapEntry == NULL)
-        {
-          fprintf(stderr, "Implementation error: putBIT(%d,0x%06X,...), address not found\n",
-              bitWidth, address);
-          exit(1);
-        }
+        abend("Implementation error: putBIT address not found");
       bitWidth = memoryMapEntry->bitWidth;
     }
   numBytes = (bitWidth + 7) / 8;
@@ -834,6 +832,7 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
       descriptor = getFIXED(address);
       if (value->numBytes != descriptor >> 24)
         {
+          fflush(stdout);
           fprintf(stderr,
               "Implementation error: putBIT(%d,0x%06X), BIT width mismatch, getFIXED(0x%06X)==0x%08X.\n",
               bitWidth, address, address, descriptor);
@@ -980,10 +979,8 @@ STRING_GT(char *s1, char *s2) {
 }
 
 char *
-getCHARACTER(uint32_t address)
+getCHARACTERd(uint32_t descriptor)
 {
-  //return STRING(getFIXED(address));
-  uint32_t descriptor = getFIXED(address);
   char *returnValue = nextBuffer();
   size_t length;
   uint32_t index;
@@ -1012,6 +1009,11 @@ getCHARACTER(uint32_t address)
       return returnValue;
     }
   return NULL;
+}
+
+char *
+getCHARACTER(uint32_t address) {
+  return getCHARACTERd(getFIXED(address));
 }
 
 void
@@ -1112,8 +1114,7 @@ bitToFixed(bit_t *value)
           (bytes[numBytes - 2] << 8)  | bytes[numBytes - 1];
   return fixed;
   */
-  fprintf(stderr, "Implementation error handling conversion of BIT to FIXED\n");
-  exit(1);
+  abend("Implementation error handling conversion of BIT to FIXED");
 }
 
 bit_t *
@@ -1170,6 +1171,8 @@ xmultiply(int32_t i1, int32_t i2)
 int32_t
 xdivide(int32_t i1, int32_t i2)
 {
+  if (i2 == 0)
+    abend("Division by zero detected");
   return i1 / i2;
 }
 
@@ -1409,8 +1412,8 @@ OUTPUT(uint32_t lun, char *string) {
   int i;
   if (lun < 0 || lun >= DD_MAX || DD_OUTS[lun] == NULL)
     {
-      fprintf(stderr, "Output file %d has not been assigned.\n", lun);
-      exit(1);
+      sprintf(abendMessage, "Device = %d", lun);
+      abend("Output file has not been assigned");
     }
   fp = DD_OUTS[lun];
   string_t queue[MAX_QUEUE]; // SYSPRINT line-queue for current page.
@@ -1519,12 +1522,17 @@ INPUT(uint32_t lun) {
   int i;
   char *s;
   FILE *fp;
-  if (lun < 0 || lun >= DD_MAX || DD_INS[lun] == NULL)
+  if (lun < 0 || lun >= DD_MAX)
     {
-      fprintf(stderr, "Input file %d has not been assigned.\n", lun);
-      exit(1);
+      sprintf(abendMessage, "Device = %d", lun);
+      abend("Input device number out of range");
     }
   fp = DD_INS[lun];
+  if (fp == NULL)
+    {
+      sprintf(abendMessage, "Device = %d", lun);
+      abend("Input file not open for reading");
+    }
   s = nextBuffer();
   if (fgets(s, sizeof(string_t), fp) == NULL) // End of file.
     {
@@ -1559,6 +1567,7 @@ SUBSTR(char *s, int32_t start, int32_t length) {
   int len = strlen(s) - start;
   if (start < 0)
     {
+      fflush(stdout);
       fprintf(stderr, "SUBSTR start position is < 0.\n");
       //exit(1); ***DEBUG***
       start = 0;
@@ -1566,12 +1575,14 @@ SUBSTR(char *s, int32_t start, int32_t length) {
     }
   if (length < 0)
     {
+      fflush(stdout);
       fprintf(stderr, "SUBSTR length is < 0.\n");
       //exit(1); ***DEBUG***
       length = 0;
     }
   if (len < 0)
     {
+      fflush(stdout);
       fprintf(stderr, "SUBSTR start+length > string length\n");
       //exit(1); ***DEBUG***
       len = 0;
@@ -1611,10 +1622,7 @@ lBYTEc(uint32_t address, int32_t index, char c) {
   uint32_t descriptor = getFIXED(address);
   address = (descriptor & 0xFFFFFF) + index;
   if (address >= FREE_LIMIT)
-    {
-      fprintf(stderr, "BYTE(0x%08X) out of range of memory\n", address);
-      exit(1);
-    }
+    abend("BYTE address out of range of memory");
   memory[address] = asciiToEbcdic[c];
 }
 
@@ -1623,10 +1631,7 @@ lBYTEb(uint32_t address, int32_t index, uint8_t b) {
   uint32_t descriptor = getFIXED(address);
   address = (descriptor & 0xFFFFFF) + index;
   if (address >= FREE_LIMIT)
-    {
-      fprintf(stderr, "BYTE(0x%08X) out of range of memory\n", address);
-      exit(1);
-    }
+    abend("BYTE address out of range of memory");
   memory[address] = b;
 }
 
@@ -1667,8 +1672,8 @@ MONITOR1(uint32_t dev, char *name) {
   char *path = NULL;
   if (dev >= DD_MAX)
     {
-      fprintf(stderr, "Attempt to close non-existent output PDS %d\n", dev);
-      exit(1);
+      sprintf(abendMessage, "Device number = %d >= %d", dev, DD_MAX);
+      abend("Output device number out of range");
     }
   if (DD_OUTS[dev] != NULL)
     {
@@ -1678,30 +1683,26 @@ MONITOR1(uint32_t dev, char *name) {
     }
   if (DD_OUTS_FILENAMES[dev] == NULL)
     {
-      fprintf(stderr, "Attempt to use unassigned PDS file %d for output\n", dev);
-      exit(1);
+      sprintf(abendMessage, "Device number = %d", dev);
+      abend("Attempt to use unassigned PDS file for output");
     }
   lenFile = strlen(DD_OUTS_FILENAMES[dev]);
   if (mkdir(DD_OUTS_FILENAMES[dev], 0777) < 0)
-      {
-        fprintf(stderr, "Unable to create PDS %s\n", DD_OUTS_FILENAMES[dev]);
-        fprintf(stderr, "Note: PDS is implemented as a folder.\n");
-        exit(1);
-      };
+    {
+      sprintf(abendMessage, "Device number %d, PDS = '%s'",
+            dev, DD_OUTS_FILENAMES[dev]);
+      abend("Unable to create PDS; note that PDS is implemented as a folder");
+    }
   lenPart = strlen(name);
   if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
     {
-      fprintf(stderr,
-          "PDS partitions must have names from 1-8 characters long, dev %d\n",
-          dev);
-      exit(1);
+      sprintf(abendMessage, "Device number %d, PDS = '%s', part = '%s'",
+            dev, DD_OUTS_FILENAMES[dev], name);
+      abend("PDS partitions must have names from 1-8 characters long");
     }
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
-    {
-      fprintf(stderr, "Out of memory in MONITOR(1,'%s')\n", name);
-      exit(1);
-    }
+    abend("Out of memory in MONITOR(1)");
   sprintf(path, "%s/%s", DD_OUTS_FILENAMES[dev], name);
   strcpy(DD_OUTS_PARTNAMES[dev], name);
   existed = DD_OUTS_EXISTED[dev];
@@ -1710,9 +1711,9 @@ MONITOR1(uint32_t dev, char *name) {
   free(path);
   if (DD_OUTS[dev] == NULL)
     {
-      fprintf(stderr, "Cannot open partition %s of PDS %s for OUTPUT(%d).\n",
-              name, DD_OUTS_FILENAMES[dev], dev);
-      exit(1);
+      sprintf(abendMessage, "Device number %d, PDS = '%s'",
+            dev, DD_OUTS_FILENAMES[dev]);
+      abend("Cannot open PDS partition for OUTPUT");
     }
   return existed;
 }
@@ -1723,8 +1724,8 @@ MONITOR2(uint32_t dev, char *name) {
   char *path = NULL;
   if (dev >= DD_MAX)
     {
-      fprintf(stderr, "Attempt to close non-existent input PDS %d\n", dev);
-      exit(1);
+      sprintf(abendMessage, "Device number %d >= %d", dev, DD_MAX);
+      abend("Input device number out of range");
     }
   if (DD_INS[dev] != NULL)
     {
@@ -1733,24 +1734,20 @@ MONITOR2(uint32_t dev, char *name) {
     }
   if (DD_INS_FILENAMES[dev] == NULL)
     {
-      fprintf(stderr, "Attempt to use unassigned PDS file %d for input\n", dev);
-      exit(1);
+      sprintf(abendMessage, "Device number %d", dev);
+      abend("Attempt to use unassigned PDS file for input");
     }
   lenFile = strlen(DD_INS_FILENAMES[dev]);
   lenPart = strlen(name);
   if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
     {
-      fprintf(stderr,
-          "PDS partitions must have names from 1-8 characters long, dev %d\n",
-          dev);
-      exit(1);
+      sprintf(abendMessage, "Device number %d, PDS = '%s', part = '%s'",
+            dev, DD_INS_FILENAMES[dev], name);
+      abend("PDS partitions must have names from 1-8 characters long");
     }
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
-    {
-      fprintf(stderr, "Out of memory in MONITOR(1,'%s')\n", name);
-      exit(1);
-    }
+    abend("Out of memory in MONITOR(2)");
   sprintf(path, "%s/%s", DD_INS_FILENAMES[dev], name);
   strcpy(DD_INS_PARTNAMES[dev], name);
   DD_INS[dev] = fopen(path, "rt");
@@ -1775,11 +1772,7 @@ MONITOR3(uint32_t dev) {
 void
 MONITOR4(uint32_t dev, uint32_t recsize) {
   if (dev >= MAX_RANDOM_ACCESS_FILES)
-    {
-      fprintf(stderr, "Accessed FILE(%d), but max is %d\n",
-          dev, MAX_RANDOM_ACCESS_FILES);
-      exit(1);
-    }
+    abend("Device number for FILE() too large");
   randomAccessFiles[OUTPUT_RANDOM_ACCESS][dev].recordSize = recsize;
 }
 
@@ -1787,11 +1780,7 @@ int32_t dwAccessAreaAddress = -1;
 void
 MONITOR5(int32_t address) {
   if (address < 0 || address >= MEMORY_SIZE - 14 * 4)
-    {
-      fprintf(stderr, "MONITOR(5, %0x08X) outside of physical memory\n",
-              address);
-      exit(1);
-    }
+    abend("MONITOR(5) address overflows physical memory");
   dwAccessAreaAddress = address;
 }
 
@@ -1870,8 +1859,7 @@ MONITOR7(uint32_t address, uint32_t n) {
 
 void
 MONITOR8(uint32_t dev, uint32_t filenum) {
-  fprintf(stderr, "MONITOR(8) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(8) not yet implemented");
 }
 
 //----------------------------------------------------------------------------
@@ -1953,14 +1941,12 @@ fromFloatIBM(uint32_t msw, uint32_t lsw) {
 
 uint32_t
 MONITOR9(uint32_t op) {
-  fprintf(stderr, "MONITOR(9) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(9) not yet implemented");
 }
 
 uint32_t
 MONITOR10(char *name) {
-  fprintf(stderr, "MONITOR(10) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(10) not yet implemented");
 }
 
 void
@@ -1969,45 +1955,41 @@ MONITOR11(void) {
 
 char *
 MONITOR12(uint32_t precision) {
-  fprintf(stderr, "MONITOR(12) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(12) not yet implemented");
 }
 
 uint32_t
 MONITOR13(char *name) {
-  // Note that the `name` parameter is ignored, since the options processor
-  // is instead taken from the --optproc command-line option.
-
-  // Before returning, must fill the data area pointed to by whereMonitor13
-  // with run-time options from the command-line switches, according to the
-  // selected options processor.
-  // TBD
+  /*
+   * Note that the `name` parameter is ignored, since the options processor
+   * is instead taken from the --optproc command-line option. Before returning,
+   * must fill the data area pointed to by `whereMonitor13` with run-time
+   * options from the command-line switches, according to the selected options
+   * processor.  That's in principle!  Right now, I just process the stuff as
+   * consistent with HAL/S-FC.
+   */
 
   return WHERE_MONITOR_13;
 }
 
 uint32_t
 MONITOR14(uint32_t n, uint32_t a) {
-  fprintf(stderr, "MONITOR(14) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(14) not yet implemented");
 }
 
 uint32_t
 MONITOR15(void) {
-  fprintf(stderr, "MONITOR(15) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(15) not yet implemented");
 }
 
 void
 MONITOR16(uint32_t n) {
-  fprintf(stderr, "MONITOR(16) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(16) not yet implemented");
 }
 
 void
 MONITOR17(char *name) {
-  fprintf(stderr, "MONITOR(17) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(17) not yet implemented");
 }
 
 uint32_t
@@ -2021,14 +2003,12 @@ MONITOR18(void) {
 
 uint32_t
 MONITOR19(uint32_t *addresses, uint32_t *sizes) {
-  fprintf(stderr, "MONITOR(19) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(19) not yet implemented");
 }
 
 void
 MONITOR20(uint32_t *addresses, uint32_t *sizes) {
-  fprintf(stderr, "MONITOR(20) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(20) not yet implemented");
 }
 
 uint32_t
@@ -2038,14 +2018,12 @@ MONITOR21(void) {
 
 uint32_t
 MONITOR22(uint32_t n1) {
-  fprintf(stderr, "MONITOR(22,n1) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(22) not yet implemented");
 }
 
 uint32_t
 MONITOR22A(uint32_t n2) {
-  fprintf(stderr, "MONITOR(22,0,n2) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(22,0) not yet implemented");
 }
 
 uint32_t
@@ -2055,14 +2033,12 @@ MONITOR23(void) {
 
 void
 MONITOR31(int32_t n, uint32_t recnum) {
-  fprintf(stderr, "MONITOR(31) not yet implemented\n");
-  exit(1);
+  abend("MONITOR(31) not yet implemented");
 }
 
 uint32_t
 MONITOR32(void) {
-  fprintf(stderr, "MONITOR(32) not yet implemented\n");
-  exit(1);
+  return 16384; // I just picked this value out of thin air.
 }
 
 #if 0
@@ -2139,42 +2115,44 @@ uint32_t
 COREBYTE(uint32_t address) {
   if (address + 1 <= MEMORY_SIZE)
     return memory[address];
-  fprintf(stderr, "Memory overflow COREBYTE(0x%06X) read\n", address);
-  exit(1);
+  abend("COREBYTE read address overflows memory");
+  return 0;
 }
 
 void
 COREBYTE2(uint32_t address, uint32_t value) {
   if (address + 1 <= MEMORY_SIZE)
-    memory[address] = value & 0xFF;
-    return;
-  fprintf(stderr, "Memory overflow COREBYTE(0x%06X) write\n", address);
-  exit(1);
+    {
+      memory[address] = value & 0xFF;
+      return;
+    }
+  abend("COREBYTE write address overflows memory");
 }
 
 uint32_t
 COREWORD(uint32_t address) {
   if (address + 4 <= MEMORY_SIZE)
     return getFIXED(address);
-  fprintf(stderr, "Memory overflow COREWORD(0x%06X) read\n", address);
-  exit(1);
+  abend("COREWORD read address overflows memory");
+  return 0;
 }
 
 void
 COREWORD2(uint32_t address, uint32_t value) {
   if (address + 4 <= MEMORY_SIZE)
-    putFIXED(address, value);
-    return;
-  fprintf(stderr, "Memory overflow COREWORD(0x%06X) write\n", address);
-  exit(1);
+    {
+      putFIXED(address, value);
+      return;
+    }
+  abend("COREWORD write address overflows memory");
 }
 
 uint32_t
 COREHALFWORD(uint32_t address) {
   if (address + 2 <= MEMORY_SIZE)
     return (memory[address] << 8) | memory[address + 1];
-  fprintf(stderr, "Memory overflow COREHALFWORD(0x%06X) read\n", address);
-  exit(1);
+  abend("COREHALFWORD read address overflows memory");
+  return 0;
 }
 
 void
@@ -2183,10 +2161,9 @@ COREHALFWORD2(uint32_t address, uint32_t value) {
     {
       memory[address] = (value >> 8) & 0xFF;
       memory[address + 1] = value & 0xFF;
+      return;
     }
-    return;
-  fprintf(stderr, "Memory overflow COREHALFWORD(0x%06X) write\n", address);
-  exit(1);
+  abend("COREHALFWORD write address overflows memory");
 }
 
 // Like `rawADDR` except that it aborts upon error.
@@ -2194,20 +2171,11 @@ uint32_t
 ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
   int address = rawADDR(bVar, bIndex, fVar, fIndex);
   if (address == -1)
-    {
-      fprintf(stderr, "ADDR(%s) not found\n", bVar);
-      exit(1);
-    }
+    abend("ADDR() not found for BASED");
   if (address == -2)
-    {
-      fprintf(stderr, "Could not find the specified BASED variable field.\n");
-      exit(1);
-    }
+    abend("Could not find the specified BASED variable field");
   if (address == -3)
-    {
-      fprintf(stderr, "ADDR(%s) not found\n", fVar);
-      exit(1);
-    }
+    abend("ADDR() not found");
   return address;
 }
 
@@ -2288,30 +2256,17 @@ lFILE(uint32_t fileNumber, uint32_t recordNumber, uint32_t address)
   FILE *fp;
   int position, returnedValue, recordSize;
   if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
-    {
-      fprintf(stderr, "Bad FILE number (%d)\n", fileNumber);
-      exit(1);
-    }
+    abend("Bad FILE number");
   fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
   recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
-    {
-      fprintf(stderr, "FILE number (%d) not open for writing\n", fileNumber);
-      exit(1);
-    }
+    abend("FILE not open for writing");
   if (fseek(fp, position, SEEK_SET) < 0)
-    {
-      fprintf(stderr, "Cannot seek to %d in FILE %d\n", position, fileNumber);
-      exit(1);
-    }
+    abend("Cannot seek to specified offset in FILE");
   returnedValue = fwrite(&memory[address], recordSize, 1, fp);
   if (returnedValue != 1)
-    {
-      fprintf(stderr, "Failed to write %d bytes to position %d in FILE %d\n",
-          recordSize, position, fileNumber);
-      exit(1);
-    }
+    abend("Failed to write enough bytes to FILE");
 }
 
 void
@@ -2320,30 +2275,17 @@ rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber)
   FILE *fp;
   int position, returnedValue, recordSize;
   if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
-    {
-      fprintf(stderr, "Bad FILE number (%d)\n", fileNumber);
-      exit(1);
-    }
+    abend("Bad FILE number");
   fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
   recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
-    {
-      fprintf(stderr, "FILE number (%d) not open for reading\n", fileNumber);
-      exit(1);
-    }
+    abend("FILE not open for reading");
   if (fseek(fp, position, SEEK_SET) < 0)
-    {
-      fprintf(stderr, "Cannot seek to %d in FILE %d\n", position, fileNumber);
-      exit(1);
-    }
+    abend("Cannot seek to specified offset in FILE");
   returnedValue = fread(&memory[address], recordSize, 1, fp);
   if (returnedValue != 1)
-    {
-      fprintf(stderr, "Failed to read %d bytes from position %d in FILE %d\n",
-          recordSize, position, fileNumber);
-      exit(1);
-    }
+    abend("Failed to read desired number of bytes from FILE");
 }
 
 void
@@ -2353,15 +2295,9 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
   FILE *fpR, *fpL;
   int returnedValue, recsizeL, recsizeR, posL, posR, recsize;
   if (devL < 1 || devL >= MAX_RANDOM_ACCESS_FILES)
-    {
-      fprintf(stderr, "Bad left-hand FILE number (%d)\n", devL);
-      exit(1);
-    }
+    abend("Bad left-hand FILE number");
   if (devR < 1 || devR >= MAX_RANDOM_ACCESS_FILES)
-    {
-      fprintf(stderr, "Bad right-hand FILE number (%d)\n", devR);
-      exit(1);
-    }
+    abend("Bad right-hand FILE number");
   fpL = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devL].fp;
   fpR = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devR].fp;
   recsizeL = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devL].recordSize;
@@ -2369,25 +2305,13 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
   posL = recsizeL * recL;
   posR = recsizeR * recR;
   if (fpL == NULL)
-    {
-      fprintf(stderr, "Left-hand FILE (%d) not open for writing\n", devL);
-      exit(1);
-    }
+    abend("Left-hand FILE not open for writing");
   if (fpR == NULL)
-    {
-      fprintf(stderr, "Right-hand FILE (%d) not open for reading\n", devR);
-      exit(1);
-    }
+    abend("Right-hand FILE not open for reading");
   if (fseek(fpL, posL, SEEK_SET) < 0)
-    {
-      fprintf(stderr, "Cannot seek to %d in left-hand FILE %d\n", posL, devL);
-      exit(1);
-    }
+    abend("Cannot seek to desired offset in left-hand FILE");
   if (fseek(fpR, posR, SEEK_SET) < 0)
-    {
-      fprintf(stderr, "Cannot seek to %d in right-hand FILE %d\n", posR, devR);
-      exit(1);
-    }
+    abend("Cannot seek to desired offset in right-hand FILE");
   recsize = recsizeL;
   if (recsizeR > recsizeL)
     recsize = recsizeR;
@@ -2399,18 +2323,10 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
     }
   returnedValue = fread(buffer, recsizeR, 1, fpR);
   if (returnedValue != 1)
-    {
-      fprintf(stderr, "Failed to read %d bytes from position %d in FILE %d\n",
-          recsizeR, posR, devR);
-      exit(1);
-    }
+    abend("Failed to read specified number of bytes from FILE");
   returnedValue = fwrite(buffer, recsizeL, 1, fpL);
   if (returnedValue != 1)
-    {
-      fprintf(stderr, "Failed to write %d bytes to position %d in FILE %d\n",
-          recsizeL, posL, devL);
-      exit(1);
-    }
+    abend("Failed to write specified number of bytes to FILE");
 }
 
 void

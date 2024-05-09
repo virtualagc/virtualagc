@@ -25,9 +25,11 @@ typedef char pdsPartname_t[PDS_PARTNAME_SIZE + 1];
 extern int outUTF8;
 extern FILE *DD_INS[DD_MAX];
 extern char *DD_INS_FILENAMES[DD_MAX];
+extern int PDS_INS[DD_MAX];
 extern pdsPartname_t DD_INS_PARTNAMES[DD_MAX];
 extern FILE *DD_OUTS[DD_MAX];
 extern char *DD_OUTS_FILENAMES[DD_MAX];
+extern int PDS_OUTS[DD_MAX];
 extern pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX];
 extern int DD_OUTS_EXISTED[DD_MAX];
 extern FILE *COMMON_OUT;
@@ -130,6 +132,8 @@ uint32_t
 STRING_GT(char *s1, char *s2);
 
 // Same for XPL `CHARACTER` type.
+char *
+getCHARACTERd(uint32_t descriptor);
 char *
 getCHARACTER(uint32_t address);
 void

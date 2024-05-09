@@ -114,7 +114,7 @@ HEADERS = $(wildcard *.h)
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	@$(CC) $(EXTRA) -o $@ $(SOURCES) -lm
+	@$(CC) $(EXTRA) -o $@ $(SOURCES) -lm -rdynamic
 
 .PHONY: clean
 clean:
