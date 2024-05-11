@@ -79,7 +79,7 @@ def callTree(globalScope):
     walkModel(globalScope, checkScope)
     
     junkProcs = []
-    if noOverrides:
+    if False and noOverrides:
         overrides = []
     else:
         overrides = ["COMPACTIFY", "RECORD_LINK"]

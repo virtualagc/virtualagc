@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <math.h>
+#include <ctype.h>
 #include <execinfo.h>
 
 //---------------------------------------------------------------------------
@@ -59,6 +60,117 @@ static uint32_t freelimit = FREE_LIMIT;
 char *parmField = "";
 int linesPerPage = 59;
 memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
+int showBacktrace = 0;
+
+#define NUM_TYPE1 22
+#define NUM_TYPE2 13
+char *type1Actual[NUM_TYPE1];
+char *type2Actual[NUM_TYPE1];
+char *type1Defaults[NUM_TYPE1] = {
+  "NOADDRS", "NODECK", "NODUMP", "NOHALMAT", "NOHIGHOPT", "LFXI",
+  "NOLIST", "NOLISTING2", "NOLSTALL", "MICROCODE", "NOPARSE", "NOREGOPT",
+  "SCAL", "NOSDL", "NOSREF", "NOSRN", "NOTABDMP", "TABLES", "NOTABLST",
+  "NOTEMPLATE", "NOVARSYM", "ZCON"
+};
+char *type2Defaults[NUM_TYPE2] = {
+  NULL, "59", "2500", "200", "500", "2500",
+  "0", "2000", NULL, "1200", "1", "400", NULL
+};
+char *type1Names[NUM_TYPE1] = {
+  "ADDRS",      "DECK",     "DUMP",     "HALMAT",   "HIGHOPT",  "LFXI",
+  "LIST",       "LISTING2", "LSTALL",   "MICROCODE","PARSE",    "REGOPT",
+  "SCAL",       "SDL",      "SREF",     "SRN",      "TABDMP",   "TABLES",
+  "TABLST",     "TEMPLATE", "VARSYM",   "ZCON"
+};
+uint32_t type1NamesToOptionsCode[NUM_TYPE1] = {
+    0x00100000, 0x00400000, 0x00000001, 0x00040000, 0x00000080, 0x00200000,
+    0x00000004, 0x00000002, 0x00020000, 0x04000000, 0x00010000,
+#ifdef PFS
+                                                                0x02000000,
+    0x00000000,
+#else // BFS
+                                                                0x20000000,
+    0x02000000,
+#endif
+                0x00800000, 0x00002000, 0x00080000, 0x00001000,0x00000800,
+    0x00008000, 0x00000010, 0x00000000, 0x00000400
+};
+// Ouch!  It turns out that I didn't need `optionsCodeToType1Names` at all,
+// but rather needed `type1NamesToOptionsCode`.  Oh, well.  Here it is anyway!
+// Translates bit positions in `OPTIONS_CODE` (see IR-182-1 p. 3-18) from left
+// shifts to indices in `type1Names`. If -1, it means it's not a Type 1 option
+// and comes from somewhere else.  Or I just can't figure it; I've figured out
+// only 21 of the 22 Type parameters so far.  Missing is VARSYM.
+int optionsCodeToType1Names[32] = {
+    2, // DUMP
+    7, // LISTING2
+    6, // LIST
+    -1, // TRACE
+    19, // X0  NO TEMP in IR-182-1, but I think it may be TEMPLATE
+    -1, // X1  NO CSE in IR-182-1, but I think it's ALL
+    -1, // X2  NO VM in IR-182-1, but I think it's BRIEF
+    4,  // X3  CSE WATCH in IR-182-1, but I think it's HIGHOPT
+    -1, // X4  360 - 0 TIMES, FC - F8 COMP
+    -1, // X5  CSE TRACE
+    21, // ZCON or Z LINKAGE
+    17, // TABLES
+    16, // TABDMP or HEX DUMP
+    14, // X9 in IR-182-1, but I think it must be SREF
+    -1, // XA  360 - Extra Data, FC - ABSLIST  or EXTRA LISTING
+    18, // TABLST or SDF SUMMARY
+    10, // PARSE
+    8,  // LSTALL
+    3,  // FCDATA in IR-182-1, but I think it must be HALMAT
+    15, // SRN
+    0,  // ADDRS
+    5,  // LXFI or COMPACT CODE
+    1,  // DECK
+    13, // SDL
+    -1, // X6  Print Phase 1.5 STATISTICS
+#ifdef PFS
+    11, // REGOPT
+#else
+    12, // SCAL
+#endif
+    9,  // MICROCODE or NEW INSTRUCTIONS
+    -1, // XB in IR-182-1, but may be DLIST
+    -1, // XC in IR-182-1, but may be DEBUG
+#ifdef PFS
+    -1, // XD
+#else
+    11, // REGOPT
+#endif
+    -1, // XE
+    -1  // XF
+};
+char *type1Synonyms[NUM_TYPE1] = {
+  "A", "D", "DP", "HM", "HO", NULL,
+  "L", "L2", "LA", "MC", "P", "R",
+  "SC", NULL, "SR", NULL, "TBD", "TBL", "TL",
+  "TP", "VS", "Z"
+};
+char *negatedType1Names[NUM_TYPE1] = {
+  "NOADDRS", "NODECK", "NODUMP", "NOHALMAT", "NOHIGHOPT", "NOLFXI",
+  "NOLIST", "NOLISTING2", "NOLSTALL", "NOMICROCODE", "NOPARSE", "NOREGOPT",
+  "NOSCAL", "NOSDL", "NOSREF", "NOSRN", "NOTABDMP", "NOTABLES", "NOTABLST",
+  "NOTEMPLATE", "NOVARSYM", "NOZCON"
+};
+char *negatedType1Synonyms[NUM_TYPE1] = {
+  "NA", "ND", "NDP", "NHM", "NHO", NULL,
+  "NL", "NL2", "NLA", "NMC", "NP", "NR",
+  "NSC", NULL, "NSR", NULL, "NTBD", "NTBL", "NTL",
+  "NTP", "NVS", "NZ"
+};
+char *type2Names[NUM_TYPE2] = {
+  "TITLE", "LINECT", "PAGES", "SYMBOLS", "MACROSIZE", "LITSTRING",
+  "COMPUNIT", "XREFSIZE", "CARDTYPE", "LABELSIZE", "DSR", "BLOCKSUM",
+  "MFID"
+};
+char *type2Synonyms[NUM_TYPE2] = {
+  "T", "LC", "P", "SYM", "MS", "LITS",
+  "CU", "XS", "CT", "LBLS", NULL, "BS", "OLDTPL"
+};
+
 
 //---------------------------------------------------------------------------
 // Functions useful for CALL INLINE or debugging a la `gdb`.
@@ -373,19 +485,153 @@ abend(char *msg) {
   if (strlen(abendMessage) > 0)
     fprintf(stderr, "%s\n", abendMessage);
   // Backtrace: available in Linux and (I've read) Mac OS.
-  int j, nptrs;
-  void *buffer[BT_BUF_SIZE];
-  char **strings;
-  nptrs = backtrace(buffer, BT_BUF_SIZE);
-  strings = backtrace_symbols(buffer, nptrs);
-  if (strings != NULL)
+  if (showBacktrace)
     {
-      fprintf(stderr, "Backtrace:\n");
-      for (j = 0; j < nptrs; j++)
-        fprintf(stderr, "\t%s\n", strings[j]);
+      int j, nptrs;
+      void *buffer[BT_BUF_SIZE];
+      char **strings;
+      nptrs = backtrace(buffer, BT_BUF_SIZE);
+      strings = backtrace_symbols(buffer, nptrs);
+      if (strings != NULL)
+        {
+          fprintf(stderr, "Backtrace:\n");
+          for (j = 0; j < nptrs; j++)
+            fprintf(stderr, "\t%s\n", strings[j]);
+        }
+      free(strings);
     }
-  free(strings);
   exit(1);
+}
+
+// Try to match a string to a Type 1 PARM field.  Returns 1 if found, 0 if not.
+int
+matchParm1(char *parm, int num, char **defaults, char **names,
+          char **synonyms) {
+  int i, len;
+  char *s, *ss;
+  for (i = 0; i < num; i++)
+    {
+      s = synonyms[i];
+      if (s == NULL)
+        continue;
+      len = strlen(s);
+      if (!strncmp(parm, s, len))
+        {
+          ss = parm + len;
+          if (*ss == 0 || *ss == ',')
+            {
+              // Found it!
+              defaults[i] = names[i];
+              return 1;
+            }
+        }
+    }
+  return 0;
+}
+
+// Try to match a string to a Type 2 PARM field.  Returns 1 if found, 0 if not.
+int
+matchParm2(char *parm, int num, char **defaults, char **names) {
+  int i, len;
+  char *s, *ss, *sss, *buffer = nextBuffer();
+  for (i = 0; i < num; i++)
+    {
+      s = names[i];
+      if (s == NULL)
+        continue;
+      len = strlen(s);
+      if (!strncmp(parm, s, len))
+        {
+          ss = parm + len;
+          if (*ss == '=')
+            {
+              // Found it!
+              ss++;
+              sss = strchr(ss, ',');
+              if (sss != NULL)
+                *sss = 0;
+              strcpy(buffer, ss);
+              defaults[i] = buffer;
+              return 1;
+            }
+        }
+    }
+  return 0;
+}
+
+void
+parseParmField(int print) {
+  string_t parm;
+  char *s, *ss;
+  int i;
+  uint32_t OPTIONS_CODE = 0, address;
+  for (i = 0; i < NUM_TYPE1; i++)
+    type1Actual[i] = type1Defaults[i];
+  for (i = 0; i < NUM_TYPE2; i++)
+    type2Actual[i] = type2Defaults[i];
+  // Note that in principle, if there's a TITLE parameter, then it could
+  // contain commas, so we have to watch out for that in parsing the
+  // parameter field.  Let's go ahead and split on the commas, and then
+  // fix it up afterward if necessary.
+  for (s = parmField; s != NULL && *s != 0; ((s = strchr(s, ','))==NULL)?NULL:(++s))
+    {
+      int i;
+      strncpy(parm, s, sizeof(string_t));
+      // Is it any of the expected patterns for parameter types?
+      if (matchParm1(parm, NUM_TYPE1, type1Actual, type1Names, type1Names))
+        continue;
+      if (matchParm1(parm, NUM_TYPE1, type1Actual, type1Names, type1Synonyms))
+        continue;
+      if (matchParm1(parm, NUM_TYPE1, type1Actual, negatedType1Names, negatedType1Names))
+        continue;
+      if (matchParm1(parm, NUM_TYPE1, type1Actual, negatedType1Names, negatedType1Synonyms))
+        continue;
+      if (matchParm2(parm, NUM_TYPE2, type2Actual, type2Names))
+        continue;
+      if (matchParm2(parm, NUM_TYPE2, type2Actual, type2Synonyms))
+        continue;
+      strcpy(abendMessage, "Parameter = ");
+      strncpy(&abendMessage[12], parm, 100);
+      abend("Unrecognized PARM field");
+    }
+  if (print)
+    {
+      for (i = 0; i < NUM_TYPE1; i++)
+        printf("%s\n", type1Actual[i]);
+      for (i = 0; i < NUM_TYPE2; i++)
+        if (type2Actual[i] == NULL)
+          printf("%s = NULL\n", type2Names[i]);
+        else
+          printf("%s = %s\n", type2Names[i], type2Actual[i]);
+    }
+  // If we've gotten here, then the PARM field has been parsed, and the
+  // arrays `type1Actual` and `type2Actual` have been updated with the new
+  // settings, while `type2Names` contains the names of the Type 2 parameters.
+  // We need to interpret the Type 1 settings as bit-flags in OPTIONS_CODE.
+  for (i = 0; i < NUM_TYPE1; i++)
+    if (strncmp(type1Actual[i], "NO", 2)) // Not NO?
+      OPTIONS_CODE |= type1NamesToOptionsCode[i];
+
+  // Finally, we can update the XPL memory (for MONITOR(13)) which holds the
+  // `CON`, `TYPE2`, and `VALS` arrays.
+  putFIXED(WHERE_MONITOR_13, OPTIONS_CODE);
+  address = getFIXED(WHERE_MONITOR_13 + 4); // Address of CON
+  for (i = 0; i < NUM_TYPE1; i++)
+    putCHARACTER(address + 4 * i, type1Actual[i]);
+  address = getFIXED(WHERE_MONITOR_13 + 12); // Address of TYPE2
+  for (i = 0; i < NUM_TYPE2; i++)
+    putCHARACTER(address + 4 * i, type2Names[i]);
+  address = getFIXED(WHERE_MONITOR_13 + 16); // Address of VALS
+  for (i = 0; i < NUM_TYPE2; i++)
+    if (i == 0 || i == 8 || i == 12)
+      {
+        if (type2Actual[i] == NULL)
+          putFIXED(address + 4 * i, 0);
+        else
+          putCHARACTER(address + 4 * i, type2Actual[i]);
+      }
+    else
+      putFIXED(address + 4 * i, atoi(type2Actual[i]));
 }
 
 int
@@ -525,21 +771,14 @@ parseCommandLine(int argc, char **argv)
           if (COMMON_OUT == NULL)
             abend("Unable to open COMMON output file");
         }
-      else if (1 == sscanf(argv[i], "--linect=%d", &j))
-        linesPerPage = j;
       else if (!strncmp(argv[i], "--parm=", 7))
         {
           char *s;
           parmField = &argv[i][7];
-          // We actually want to do a full breakdown and setup the data area
-          // of MONITOR(13) for the options we've found.  That's TBD.  For now
-          // we just pick off linect,since that's something we previously had
-          // a dedicated command-line option for.
-          s = strstr(parmField, "linect=");
-          if (s != NULL)
-            linesPerPage = atoi(s + 7);
         }
-      else if (!strcmp("--eng", argv[i]))
+      else if (!strcmp(argv[i], "--backtrace"))
+        showBacktrace = 1;
+      else if (!strcmp("--eng=fp", argv[i]))
         {
           // Test of the IBM float conversions.  Note that aside from showing that
           // toFloatIBM() and fromFloatIBM() are inverses, it also reproduces the
@@ -558,6 +797,19 @@ parseCommandLine(int argc, char **argv)
                 }
             }
           exit(0);
+        }
+      else if (!strcmp("--eng=pf", argv[i]))
+        {
+          while (1)
+            {
+              string_t line;
+              printf("PARM field > ");
+              fgets(line, sizeof(line), stdin);
+              line[strlen(line)-1] = 0;
+              parmField = line;
+              parseParmField(1);
+              printf("\n");
+            }
         }
       else if (!strcmp("--help", argv[i]))
         {
@@ -599,6 +851,7 @@ parseCommandLine(int argc, char **argv)
           printf("              default, the file COMMON.out is used.\n");
           printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
           printf("              have been provided in JCL.\n");
+          printf("--backtrace   If available, print a backtrace upon abend.\n");
           printf("\n");
           returnValue = 1;
         }
@@ -608,6 +861,7 @@ parseCommandLine(int argc, char **argv)
           returnValue = -1;
         }
     }
+  parseParmField(0); // Parse the PARM-field string.
   if (COMMON_IN != NULL)
     {
       if (NON_COMMON_BASE > COMMON_BASE)
@@ -1754,9 +2008,9 @@ MONITOR2(uint32_t dev, char *name) {
   free(path);
   if (DD_INS[dev] == NULL)
     {
-      return 0;
+      return 1;
     }
-  return 1;
+  return 0;
 }
 
 void
@@ -1962,13 +2216,8 @@ uint32_t
 MONITOR13(char *name) {
   /*
    * Note that the `name` parameter is ignored, since the options processor
-   * is instead taken from the --optproc command-line option. Before returning,
-   * must fill the data area pointed to by `whereMonitor13` with run-time
-   * options from the command-line switches, according to the selected options
-   * processor.  That's in principle!  Right now, I just process the stuff as
-   * consistent with HAL/S-FC.
+   * is instead taken from the --optproc command-line option.
    */
-
   return WHERE_MONITOR_13;
 }
 
@@ -2026,14 +2275,14 @@ MONITOR22A(uint32_t n2) {
   abend("MONITOR(22,0) not yet implemented");
 }
 
-uint32_t
+char *
 MONITOR23(void) {
-  return WHERE_MONITOR_23;
+  return getCHARACTER(WHERE_MONITOR_23);
 }
 
 void
 MONITOR31(int32_t n, uint32_t recnum) {
-  abend("MONITOR(31) not yet implemented");
+  return;
 }
 
 uint32_t
@@ -2069,18 +2318,19 @@ TIME(void) {
 
 #endif
 
+// See comment for `yisleap` below.
 uint32_t
 DATE(void) {
   time_t t = time(NULL);
   struct tm *timeStruct = gmtime(&t);
-  return 1000 * timeStruct->tm_year + timeStruct->tm_yday;
+  return 1000 * timeStruct->tm_year + (timeStruct->tm_yday + 1);
 }
 
 // Because I'm lazy, `yisleap` and `get_yday` came directly from the web, as-is:
 // https://stackoverflow.com/questions/19377396/c-get-day-of-year-from-date.
 // Note that it considers January 1 to be day 1, whereas `gmtime` computes
-// it as 0.  McKeeman doesn't document it, so I use 0 and must subtract 1 from
-// what `get_yday` computes.
+// it as 0.  McKeeman doesn't document it, but I notice that HAL/S-FC is one
+// day off if 0 is used, so I leave it at 1.
 int yisleap(int year)
 {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
@@ -2108,7 +2358,7 @@ DATE_OF_GENERATION(void) {
     if (!strcmp(Mmm, Mmms[mm]))
       break;
   dayOfYear = get_yday(mm, dd, yyyy);
-  return 1000 * (yyyy - 1900) + dayOfYear - 1;
+  return 1000 * (yyyy - 1900) + dayOfYear;
 }
 
 uint32_t
@@ -2659,7 +2909,9 @@ UNTRACE(void) {
 
 uint32_t
 TIME_OF_GENERATION(void) {
-  return XCOM_I_START_TIME;
+  int h, m, s;
+  sscanf(__TIME__, "%d:%d:%d", &h, &m, &s);
+  return 360000 * h + 6000 * m + 100 * s;
 }
 
 uint32_t

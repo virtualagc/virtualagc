@@ -10,6 +10,8 @@ Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-03-27 RSB  Began.
 '''
 
+import sys
+import traceback
 import datetime
 import os
 import copy
@@ -34,6 +36,8 @@ def errxit(msg, action="abend"):
                           .replace(replacementQuote, "''")
                           .replace(replacementSpace, " ")), file = sys.stderr)
     print(msg, file=sys.stderr)
+    if showBacktrace:
+        traceback.print_stack(file=sys.stderr)
     if action == "abend":
         sys.exit(1)
     elif action == "return":
@@ -782,7 +786,7 @@ def autoconvert(current, allowed, source=None):
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "fixedToCharacter(%s)"))
     if len(conversions) == 0:
-        errxit("Cannot convert type %s to any of %s" % (current, str(allowed)))
+        errxit("Cannot convert type %s to any of %s: %s" % (current, str(allowed), source))
     if source == None:
         return conversions
     return conversions[0][0], conversions[0][1] % source
@@ -881,8 +885,8 @@ monitorParameterTypes = {
     # 33 is TBD.
     }
 mrtFIXED = ["1", "2", "6", "7", "9", "10", "13", "14", "15", "18", "19", "21",
-            "22", "23", "32"]
-mrtCHARACTER = ["12"]
+            "22", "32"]
+mrtCHARACTER = ["12", "23"]
 # `autoconvertMonitor` autoconverts datatypes of MONITOR parameters.  The 
 # return is a type,source ordered pair.  A returned type of None means that
 # the MONITOR function is only suitable for CALL, and returns no value itself.
@@ -1150,10 +1154,12 @@ def generateExpression(scope, expression):
                 if source.startswith("getCHARACTER("):
                     return "FIXED", "getFIXED(" + source[13:]
                 if source.startswith("getFIXED("):
-                    return "CHARACTER", "getCHARACTERd(" + source[9:]
+                    return "CHARACTER", "getCHARACTER(" + source[9:]
                 if tipe == "FIXED":
                     return "FIXED", "getFIXED(" + source + ")"
-                print("**", source, file=sys.stderr) #***DEBUG***
+                if tipe == "CHARACTER":
+                    print("**", tipe, source, file=sys.stderr) #***DEBUG***
+                    return tipe, source
                 tipe, source = autoconvert(tipe, ["FIXED"], source)
                 if tipe != "FIXED":
                     errxit("Cannot interpret argument of STRING")

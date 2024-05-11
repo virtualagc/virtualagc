@@ -68,7 +68,8 @@ merge = None
 firstFile = True
 libFile = None
 noInclusionDirectives = False
-noOverrides = False
+noOverrides = True #False
+showBacktrace = False
 
 '''
 McKeeman et al. does not specify the packing of the bits in memory for a BIT(n)
@@ -184,8 +185,9 @@ The available OPTIONS are:
                     /?C ...code... ?/
                 These switches are independent of each other and of the --pfs
                 and --bfs switches and thus may be used in combination.  The 
-                interpretations of these conditions are, however, unknown.  They 
-                may activate the printing of extra messages during compilation.
+                interpretations of these conditions are, however, unknown.  
+                That said, --condA causes additional information about 
+                memory management to be tracked and printed out.
 --identifer=S   (Default "REL32V0   ".)  Set the 10-character string returned 
                 by MONITOR(23).  Will be automatically truncated or padded as
                 needed.
@@ -222,9 +224,9 @@ The available OPTIONS are:
                 XCOM-I runtime library has its own built-in COMPACTIFY.  If this
                 option is used, it should preceded all XPL source files on the
                 command line.
---no-overrides  By default, XCOM-I overrides certain procedures defined by
-                XPL source code (COMPACTIFY, RECORD_LINK) in favor of the 
-                runtime-library's versions of those functions.  The 
+--no-overrides  (Ignore.) By default, XCOM-I overrides certain procedures 
+                defined by XPL source code (COMPACTIFY, RECORD_LINK) in favor 
+                of the runtime-library's versions of those functions.  The 
                 --no-overrides switch disables that behavior.
 --merge=F       (Default None.)  Write a file F containing all of the merged XPL
                 source code.  Note that the resulting file is not necessarily a
@@ -256,6 +258,7 @@ The available OPTIONS are:
 --concise       in the generated C source code, useful for debugging, or just for
                 improved human readability.  Whereas the --concise switch instead
                 eliminates those extra comments, producing smaller C file sizes.
+--backtrace     Show Python backtrace for some XCOM-I errors.
 '''
 
 for parm in sys.argv[1:]:
@@ -322,6 +325,8 @@ for parm in sys.argv[1:]:
         indent = " " * int(parm[9:])
     elif parm.startswith("--packing="):
         bitPacking = int(parm[10:])
+    elif parm == "--backtrace":
+        showBacktrace = True
     elif parm.startswith("-"):
         print("Unknown option %s" % parm, file = sys.stderr)
         sys.exit(1)

@@ -11,9 +11,10 @@ Mods:       2024-03-16 RSB  Split off from XCOM-I.py.
 '''
 
 import sys
+import traceback
 import re
 from parseCommandLine import debugSink, lines, lineRefs, replacementSpace, \
-                             replacementQuote
+                             replacementQuote, showBacktrace
 
 scopeDelimiter = 's'
 
@@ -55,6 +56,9 @@ def error(msg, scope):
                                                           scope["lineText"]), \
                       file = sys.stderr)
             scope = scope["parent"]
+    if backtrace:
+        traceback.print_stack(file=sys.stderr)
+
 
 # This is a simplified tokenizer used only for macro replacement. Given `string`,
 # It returns a list of strings representing the tokens.  The possibilities for

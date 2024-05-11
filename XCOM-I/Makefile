@@ -118,8 +118,8 @@ $(TARGET): $(SOURCES) $(HEADERS)
 
 .PHONY: clean
 clean:
-	-rm $(TARGET)	# For Linux or Mac
-	-del $(TARGET)	# For Windows
+	-rm $(TARGET)  # For Linux or Mac
+	-del $(TARGET) # For Windows
 
 #----------------------------------------------------------------------------
 # For running test suite.

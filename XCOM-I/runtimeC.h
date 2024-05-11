@@ -369,7 +369,7 @@ MONITOR22(uint32_t n1);
 uint32_t
 MONITOR22A(uint32_t n2);
 
-uint32_t
+char *
 MONITOR23(void);
 
 void
