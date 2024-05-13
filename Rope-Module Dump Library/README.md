@@ -707,6 +707,54 @@ Software:  Sundance 306
 
 Flaws:  None known
 
+## 2003972-1081-AGC-Comanche067-B1.bin
+
+Source:  Anonymous collector
+
+Software:  Comanche 67
+
+Flaws:  None known
+
+## 2003972-1091-AGC-Comanche067-B2.bin
+
+Source:  Anonymous collector
+
+Software:  Comanche 67
+
+Flaws:  None known
+
+## 2003972-1111-AGC-Comanche067-B3.bin
+
+Source:  Anonymous collector
+
+Software:  Comanche 67
+
+Flaws:  None known
+
+## 2003972-1121-AGC-Comanche067-B4.bin
+
+Source:  Anonymous collector
+
+Software:  Comanche 67
+
+Flaws:  None known
+
+## 2003972-1131-AGC-Comanche067-B5.bin
+
+Source:  Anonymous collector
+
+Software:  Comanche 67
+
+Flaws:  None known
+
+## 2003972-1141-AGC-Comanche067-B6.bin
+
+Source:  Anonymous collector
+
+Software:  Comanche 67
+
+Flaws:  None known
+
 ## 2010802-021-AGC-Comanche72-B2.bin
 
 Source:  Anonymous collector
