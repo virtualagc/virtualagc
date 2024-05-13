@@ -13,12 +13,12 @@ Mods:       2024-03-07 RSB  Began experimenting with this concept.
 import copy
 import re
 from auxiliary import error, expandAllMacrosInString, mtokenize, globiterals
-from parseCommandLine import pfs, condA, condC, replacementSpace, replacementQuote
+from parseCommandLine import ifdefs, replacementSpace, replacementQuote
 from xtokenize import xtokenize
 from parseExpression import parseExpression
 
 # Tries to evaluate a constant expression, given as a string, at compile-time.  
-# Returns tipe,value, where tipe is "FIXED", "CHARACTER", or None.
+# Returns tipe,value, where tipe is "FIXED", "CHARACTER".
 def evalString(scope, s):
     tokenized = xtokenize(scope, s)
     tree = parseExpression(tokenized, 0)
@@ -31,7 +31,7 @@ def evalString(scope, s):
             .replace(replacementSpace, " ")\
             .replace(replacementQuote, "'")
         return "CHARACTER", value
-    return None
+    return None, None
 
 # Converts strings like decimal, 0x hex, or 0b binary, or even simple 
 # expressions of constants, to integer.
@@ -202,7 +202,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     if tipe != None:
                         initial.append(value)
                     else:
-                        error("Cannot evaluate %d" % initialString, scope)
+                        error("Cannot evaluate INITIAL(%s)" % str(initialString), scope)
                     initialString = ''
                 properties[typeInitial] = initial
             elif field in [",", ";", ":"] and not inInitial:
@@ -254,15 +254,13 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         # now reinsert garbage like that.  So we need to 
                         # nip it in the bud right here.  
                         while True:
-                            match = re.search("/\\?[ABCP].*?\\?/", token)
+                            match = re.search("/\\?[A-Z].*?\\?/", token)
                             if match == None:
                                 break
                             c = match.group()[2]
                             s = match.span()[0]
                             e = match.span()[1]
-                            if (c == "P" and pfs) or (c == "B" and not pfs) or \
-                                    (c == "A" and condA) or \
-                                    (c == "P" and condC):
+                            if c in ifdefs:
                                 token = token[:s] + token[s+3:e-2] + token[e:]
                             else:
                                 token = token[:s] + token[e:]
@@ -287,8 +285,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                                 if tipe != None:
                                     initial.append(value)
                                 else:
-                                    error("Cannot evaluate %d" % \
-                                          initialString, scope)
+                                    error("Cannot evaluate INITIAL(%s)" % \
+                                          str(initialString), scope)
                                 initialString = ''
                             if token == ")":
                                 properties[typeInitial] = initial
@@ -319,7 +317,9 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     elif token in ["CHARACTER", "FIXED", "LABEL", "ARRAY",
                                    "BASED", "DYNAMIC"]:
                         properties[token] = True
-                        if token in ["CHARACTER", "FIXED", "ARRAY", "BASED"]:
+                        if token == "BASED":
+                            properties["dirWidth"] = 28
+                        elif token in ["CHARACTER", "FIXED", "ARRAY"]:
                             properties["dirWidth"] = 4
                     elif token == "RECORD":
                         properties["RECORD"] = {}

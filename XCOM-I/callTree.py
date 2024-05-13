@@ -11,7 +11,6 @@ Mods:       2024-05-02 RSB  Began.
 '''
 
 from auxiliary import walkModel
-from parseCommandLine import noOverrides
 
 # For each PROCEDURE defined at the global level (versus being an embedded
 # PROCEDURE), determines how many places it's called from, other than its own
@@ -78,33 +77,29 @@ def callTree(globalScope):
     # Walk the scope hierarchy.
     walkModel(globalScope, checkScope)
     
-    junkProcs = []
-    if False and noOverrides:
+    if not keepUnused:
+        junkProcs = []
         overrides = []
-    else:
-        overrides = ["COMPACTIFY", "RECORD_LINK"]
-        for j in overrides:
-            if j in globalScope["variables"] and \
-                    "PROCEDURE" in globalScope["variables"][j]:
-                junkProcs.append(j)
-    for procedure in procedureNames:
-        if procedureNames[procedure]["anyCalls"] == 0:
-            junkProcs.append(procedure)
-    if len(junkProcs) != 0:
-        print("No code is generated for the following PROCEDURE(s):")
-        for j in junkProcs:
-            if j in overrides:
-                reason = "Overridden:  "
-            else:
-                reason = "Not called:  "
-            print("\t" + reason + j)
-            if j in globalScope["variables"]:
-                globalScope["variables"].pop(j)
-        children = globalScope["children"]
-        #print(len(children))
-        for j in range(len(children)-1, -1, -1):
-            if children[j]["symbol"] in junkProcs:
-                del children[j]
-        #print(len(junkProcs))
-        #print(len(children))
-            
+        if False:
+            overrides = ["COMPACTIFY", "RECORD_LINK"]
+            for j in overrides:
+                if j in globalScope["variables"] and \
+                        "PROCEDURE" in globalScope["variables"][j]:
+                    junkProcs.append(j)
+        for procedure in procedureNames:
+            if procedureNames[procedure]["anyCalls"] == 0:
+                junkProcs.append(procedure)
+        if len(junkProcs) != 0:
+            print("No code is generated for the following PROCEDURE(s):")
+            for j in junkProcs:
+                if j in overrides:
+                    reason = "Overridden:  "
+                else:
+                    reason = "Not called:  "
+                print("\t" + reason + j)
+                if j in globalScope["variables"]:
+                    globalScope["variables"].pop(j)
+            children = globalScope["children"]
+            for j in range(len(children)-1, -1, -1):
+                if children[j]["symbol"] in junkProcs:
+                    del children[j]

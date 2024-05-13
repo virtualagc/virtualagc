@@ -56,7 +56,8 @@ def error(msg, scope):
                                                           scope["lineText"]), \
                       file = sys.stderr)
             scope = scope["parent"]
-    if backtrace:
+    if showBacktrace:
+        print("Backtrace:", file=sys.stderr)
         traceback.print_stack(file=sys.stderr)
 
 

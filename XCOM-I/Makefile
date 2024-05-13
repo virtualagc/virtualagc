@@ -131,7 +131,7 @@ XPL_APPS += ANALYZER SKELETON
 
 .PHONY: testclean
 testclean:
-	-rm $(XPL_APPS) $(XPLI_APPS) -rf
+	-@rm $(XPL_APPS) $(XPLI_APPS) -rf
 
 .PHONY: $(XPL_APPS)
 $(XPL_APPS): 
@@ -155,48 +155,46 @@ $(XPLI_APPS):
 #	files are valid.
 .PHONY: tests
 tests: testclean $(XPL_APPS) $(XPLI_APPS)
-	cd bitsizeDemo && \
+	@cd bitsizeDemo && \
 	./bitsizeDemo >out.txt
-	diff -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
+	@diff -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
 	
-	cd bitsizeDemoCommon && \
+	@cd bitsizeDemoCommon && \
 	./bitsizeDemoCommon >out.txt && \
 	csplit out.txt '%^Address Allocations .*%' \
 		       '/^Initial Values .*/' \
 		       '%^Assignments .*%' >/dev/null && \
 	cat xx00 xx01 | \
 	egrep --invert-match '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' > xxxx
-	# This test no longer works, and shouldn't.
-	#diff -s -q bitsizeDemo/out.txt bitsizeDemoCommon/out.txt
 	
-	cd bitsizeDemoCommonIn && \
+	@cd bitsizeDemoCommonIn && \
 	./bitsizeDemoCommonIn --commoni=../bitsizeDemoCommon/COMMON.out >out.txt && \
 	csplit out.txt '%^Address Allocations .*%' >/dev/null && \
 	cat xx00 | \
 	egrep --invert-match '(^Address Allocations |^COMMON |^.PAGE [0-9]|^$$)' > xxxx
-	diff -s -q bitsizeDemoCommon/xxxx bitsizeDemoCommonIn/xxxx
+	@diff -s -q bitsizeDemoCommon/xxxx bitsizeDemoCommonIn/xxxx
 	
-	e=Example-6.18.3 && \
+	@e=Example-6.18.3 && \
 	cd $$e && \
 	./$$e <../Tests/testdata.txt >out.txt && \
 	diff -s -q ../Tests/$$e.regression out.txt
 	
-	e=Example-6.18.4 && \
+	@e=Example-6.18.4 && \
 	cd $$e && \
 	./$$e <../Tests/testdata.txt >out.txt && \
 	diff -s -q ../Tests/$$e.regression out.txt
 	
-	Example-6.18.6/Example-6.18.6 | \
+	@Example-6.18.6/Example-6.18.6 | \
 	egrep '^[0-9]+' | \
 	Example-6.18.5/Example-6.18.5 >Example-6.18.5/out.txt && \
 	diff -s -q Tests/Example-6.18.5-and-6.regression Example-6.18.5/out.txt
 	
-	e=breakCharactersDemo && \
+	@e=breakCharactersDemo && \
 	cd $$e && \
 	./$$e >out.txt && \
 	diff -s -q ../Tests/$$e.regression out.txt
 	
-	ANALYZER/ANALYZER <Tests/SKELETON.bnf | \
+	@ANALYZER/ANALYZER <Tests/SKELETON.bnf | \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
 	>ANALYZER/out.txt && \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \

@@ -2053,6 +2053,8 @@ MONITOR6(uint32_t address, uint32_t n) {
   memoryMapEntry_t *found;
   uint32_t start, end;
 
+  return 1;
+
   found = lookupAddress(address);
   if (found == NULL)
     return 1;
@@ -2096,6 +2098,8 @@ MONITOR6(uint32_t address, uint32_t n) {
 uint32_t
 MONITOR7(uint32_t address, uint32_t n) {
   memoryMapEntry_t *found;
+
+  return 0;
 
   found = lookupAddress(address);
   if (found == NULL)
@@ -2287,7 +2291,7 @@ MONITOR31(int32_t n, uint32_t recnum) {
 
 uint32_t
 MONITOR32(void) {
-  return 16384; // I just picked this value out of thin air.
+  return 4096; // From OS/VS2.
 }
 
 #if 0
@@ -2851,7 +2855,10 @@ readCOMMON(FILE *fp) {
                       symbol, &index, &allocated))
         {
           if (index == 0)
-            MONITOR6(ADDR(symbol, 0x80000000, NULL, 0), allocated);
+            {
+              fprintf(stderr, "*FIXME* MONITOR(6) for BASED in readCOMMON\n");
+              MONITOR6(ADDR(symbol, 0x80000000, NULL, 0), allocated);
+            }
         }
       else if (3 == sscanf(line, ".\t%s\t%d\tCHARACTER\t'%[^\n\r]",
                       field, &fieldIndex, svalue))
@@ -2926,7 +2933,7 @@ FREELIMIT(void) {
  */
 void
 FREELIMIT2(uint32_t address) {
-  fprintf(stderr, "Warning: Attempt by COMPACTIFY to extend FREELIMIT.\n");
+  freelimit = address;
 }
 
 uint32_t
@@ -2936,6 +2943,7 @@ FREEBASE(void) {
 
 void
 EXIT(void) {
+  OUTPUT(0, "");
   exit(10);
 }
 

@@ -181,13 +181,10 @@ while True:
         # aren't supported or detected.  However, because I've found some
         # of these inside of quoted strings, I do evaluate them within such
         # strings.
-        if inConditional == '' and \
-                c in ["A", "B", "C", "P"] and lastC == '?' and lastLastC == '/':
+        if inConditional == '' and len(c) == 1 and c.isupper() \
+                and lastC == '?' and lastLastC == '/':
             inConditional = c
-            conditionalTrue = (c == 'P' and pfs) or \
-                              (c == 'B' and not pfs) or \
-                              (c == 'A' and condA) or \
-                              (c == 'C' and condC)
+            conditionalTrue = (c in ifdefs)
             inStartedRef = lineRef
             pseudoStatement = pseudoStatement[:-2]
             lastLastC = lastC

@@ -37,6 +37,7 @@ def errxit(msg, action="abend"):
                           .replace(replacementSpace, " ")), file = sys.stderr)
     print(msg, file=sys.stderr)
     if showBacktrace:
+        print("Backtrace:", file=sys.stderr)
         traceback.print_stack(file=sys.stderr)
     if action == "abend":
         sys.exit(1)
@@ -172,7 +173,7 @@ commonBase = 0
 nonCommonBase = 0
 freeBase = 0
 freePoint = 0
-freeLimit = 1 << 24
+freeLimit = initialFreeLimit
 variableAddress = 0 # Total contiguous bytes allocated in 24-bit address space.
 useCommon = False # For allocating COMMON vs non-COMMON
 useString = False # For allocating character data CHARACTER.
@@ -210,6 +211,11 @@ def getFIXED(address):
     value = (value << 8) | memory[address + 2]
     value = (value << 8) | memory[address + 3]
     return value
+
+def putHALFWORD(address, i):
+    global memory
+    memory[address + 0] = (i >> 8) & 0xFF
+    memory[address + 1] = i & 0xFF
 
 # The value returned by `getBIT` or stored to memory by `putBIT` is a 
 # dictionary with the following keys:
@@ -262,12 +268,16 @@ def putBIT(address, value):
     numBytes = value["numBytes"]
     if bitWidth > 32:
         descriptor = getFIXED(address)
-        if descriptor == 0: # Not yet assigned a value:
+        if False and descriptor == 0: # Not yet assigned a value:
             # Note that we put the data for BIT strings at the *top* of
             # memory, lowering `freelimit`.
             freeLimit -= numBytes
             descriptor = ((numBytes - 1) << 24) | (freeLimit & 0xFFFFFF)
             putFIXED(address, descriptor)
+        elif descriptor == 0: # Not yet assigned a value:
+            descriptor = ((numBytes - 1) << 24) | (variableAddress & 0xFFFFFF)
+            putFIXED(address, descriptor)
+            variableAddress += numBytes
         lengthFromDescriptor = (descriptor >> 24) & 0xFF
         if numBytes - 1 != lengthFromDescriptor:
             errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
@@ -313,8 +323,10 @@ def putCHARACTER(address, s):
             errxit("Memory overflow (%06X,%d) or else illegal character in \"%s\"" %\
                    (saddress, i, s))
 
+rootBASED = 0
+lastBASED = 0
 def allocateVariables(scope, extra = None):
-    global variableAddress, memory, memoryMap
+    global variableAddress, memory, memoryMap, lastBASED, rootBASED
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
@@ -493,6 +505,33 @@ def allocateVariables(scope, extra = None):
                         putFIXED(variableAddress, initialValue)
                     length -= 1
                     variableAddress += attributes["dirWidth"]
+            if "BASED" in attributes:
+                if rootBASED == 0:
+                    rootBASED = variableAddress
+                putFIXED(variableAddress, 0) # Pointer
+                if "recordSize" in attributes:
+                    recordSize = attributes["recordSize"]
+                elif "FIXED" in attributes or "CHARACTER" in attributes:
+                    recordSize = 4
+                elif "BIT" in attributes:
+                    bitWidth = attributes["BIT"]
+                    if bitWidth <= 8:
+                        recordSize = 1
+                    elif bitWidth <= 16:
+                        recordSize = 2
+                    else:
+                        recordSize = 4
+                putHALFWORD(variableAddress + 4, recordSize)
+                putHALFWORD(variableAddress + 6, 0) # #descriptors
+                putFIXED(variableAddress + 8, 0) # allocated
+                putFIXED(variableAddress + 12, 0) # used
+                if lastBASED > 0:
+                    putFIXED(lastBASED + 16, variableAddress)
+                lastBASED = variableAddress
+                putFIXED(variableAddress + 16, 0) # next
+                putFIXED(variableAddress + 20, 0) # options
+                putHALFWORD(variableAddress + 24, 0) # global factor
+                putHALFWORD(variableAddress + 26, 0) # group factor
             variableAddress += attributes["dirWidth"] * length
 
 # A function for `walkModel` that mangles identifier names.
@@ -1158,7 +1197,7 @@ def generateExpression(scope, expression):
                 if tipe == "FIXED":
                     return "FIXED", "getFIXED(" + source + ")"
                 if tipe == "CHARACTER":
-                    print("**", tipe, source, file=sys.stderr) #***DEBUG***
+                    #print("**", tipe, source, file=sys.stderr) #***DEBUG***
                     return tipe, source
                 tipe, source = autoconvert(tipe, ["FIXED"], source)
                 if tipe != "FIXED":
@@ -2384,11 +2423,10 @@ def generateC(globalScope):
             if 7 == i % 8:
                 j = i & 0xFFFFF8
                 print(" // %8d 0x%06X" % (j, j), file=f)
-    restart = freeLimit - 8 - (freeLimit % 8)
+    restart = physicalTop - 8 - (physicalTop % 8)
     if variableAddress > 0:
         print(",", end="", file=f)
     print("  [0x%0X]=0x00," % (restart - 1), file=f)
-    physicalTop = 0x1000000
     for i in range(restart, physicalTop):
         if 0 == i % 8:
             print("  ", end="", file=f)
@@ -2507,9 +2545,9 @@ def generateC(globalScope):
     appName = fields[-1]
     print("#define APP_NAME \"%s\"" % appName, file=f)
     print("#define XCOM_I_START_TIME %d" % TIME_OF_GENERATION, file=f)
-    if pfs:
+    if "P" in ifdefs:
         print("#define PFS", file=f)
-    else:
+    if "B" in ifdefs:
         print("#define BFS", file=f)
     if standardXPL:
         print("#define STANDARD_XPL", file=f)
@@ -2528,6 +2566,7 @@ def generateC(globalScope):
     print("#define MAX_RECORD_FIELD_NAME %d" % maxRecordFieldName, file=f)
     print("#define WHERE_MONITOR_23 %d" % whereMonitor23, file=f)
     print("#define WHERE_MONITOR_13 %d" % whereMonitor13, file=f)
+    print("#define ROOT_BASED %d" % rootBASED, file=f)
     print("", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)
     print("typedef char datatype_t[MAX_DATATYPE_LENGTH + 1];", file=f)

@@ -45,9 +45,7 @@ builtins.print = my_print
 # algorithm at some point.
 newHex = True # ***DEBUG***
 
-pfs = True
-condA = False
-condC = False
+ifdefs = set()
 inputFilenames = []
 targetLanguage = "C"
 outputFolder = None
@@ -68,8 +66,10 @@ merge = None
 firstFile = True
 libFile = None
 noInclusionDirectives = False
-noOverrides = True #False
 showBacktrace = False
+physicalTop = 1 << 24
+initialFreeLimit = 0x1FFFFF
+keepUnused = False
 
 '''
 McKeeman et al. does not specify the packing of the bits in memory for a BIT(n)
@@ -166,28 +166,19 @@ The available OPTIONS are:
                 used as names of variables.  For example, the XPL/I
                 built-in `STRING` is used as a variable name in the XPL
                 source code for the standard McKeeman XPL compiler XCOM.
---pfs, -bfs     (Default --pfs.) The switches --pfs and --bfs are mutually
-                exclusive; i.e., one and only one of them is active:  --pfs 
-                implies *not* --bfs, while --bfs implies *not* --pfs.  These 
-                relate to the presence of XPL/I's conditional code-inclusion 
-                directives within XPL/I source code:
-                    /?P ...code... ?/
-                    /?B ...code... ?/
-                The code within /?P ... ?/ is included if --pfs is active,
-                and transparently discarded otherwise, while code within
-                /?B ... ?/ is included if and only if --bfs is active.  The  
-                switch --pfs is interpreted as meaning "compiling for the Primary 
-                Flight System", while --bfs is interpreted as meaning "compiling
-                for the Backup Flight System".
---condA         These switches similarly relate to XPL/I's conditional 
---condC         code-inclusion directives
-                    /?A ...code... ?/
-                    /?C ...code... ?/
-                These switches are independent of each other and of the --pfs
-                and --bfs switches and thus may be used in combination.  The 
-                interpretations of these conditions are, however, unknown.  
-                That said, --condA causes additional information about 
-                memory management to be tracked and printed out.
+--cond=c        XPL/I source-code files can contain code which is conditionally
+                included or excluded, using the syntax
+                    /?c...code...?/
+                Here, c is a single upper-case alphabetical character.  This
+                would be similar, for example, to "#ifdef c" in the C computer
+                language.  Multiple --cond switches can appear on the same
+                command line. In the XPL/I source code for the HAL/S-FC program,
+                the relevant choices are:
+                    c=P    For the Primary Flight Software (PFS).
+                    c=B    For the Backup Flight Software (PFS).
+                    c=A    To produce debugging output for BASED management.
+                    c=C    To produce debugging output for COMPACTIFY.
+                and one should use *either* --cond=P or --cond=B but not both.
 --identifer=S   (Default "REL32V0   ".)  Set the 10-character string returned 
                 by MONITOR(23).  Will be automatically truncated or padded as
                 needed.
@@ -224,10 +215,6 @@ The available OPTIONS are:
                 XCOM-I runtime library has its own built-in COMPACTIFY.  If this
                 option is used, it should preceded all XPL source files on the
                 command line.
---no-overrides  (Ignore.) By default, XCOM-I overrides certain procedures 
-                defined by XPL source code (COMPACTIFY, RECORD_LINK) in favor 
-                of the runtime-library's versions of those functions.  The 
-                --no-overrides switch disables that behavior.
 --merge=F       (Default None.)  Write a file F containing all of the merged XPL
                 source code.  Note that the resulting file is not necessarily a
                 valid XPL file itself, because any file-inclusion directives the
@@ -259,11 +246,29 @@ The available OPTIONS are:
                 improved human readability.  Whereas the --concise switch instead
                 eliminates those extra comments, producing smaller C file sizes.
 --backtrace     Show Python backtrace for some XCOM-I errors.
+--freelimit=N   (Default FFFFFF for XPL, 1FFFFF for XPL/I.)  Sets the initial
+                value of FREELIMIT, which is the address boundary between the
+                free-string region of memory and the BASED-variable region of
+                memory.  The value is in hexadecimal, and should not exceed
+                FFFFFF.  If the --freelimit option is used, it should not 
+                precede the --xpl option on the command line.
+--keep-unused   By default, XPL procedures which are never called are discarded
+                without any generation of C code, and reduced analysis.  With
+                --keep-unused, those procedures are retained and processed
+                normally.
 '''
 
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm == "--keep-unused":
+        keepUnused = True
+    elif parm.startswith("--freelimit="):
+        try:
+            initialFreeLimit = int(parm[12:], 16)
+        except:
+            print("Value of --freelimit not hexadecimal", file=sys.stderr)
+            sys.exit(1)
     elif parm.startswith("--merge="):
         merge = parm[8:]
     elif parm.startswith("--lib-file="):
@@ -279,14 +284,13 @@ for parm in sys.argv[1:]:
         sys.exit(0)
     elif parm == "--xpl":
         standardXPL = True
-    elif parm == "--pfs":
-        pfs = True
-    elif parm == "--bfs":
-        pfs = False
-    elif parm == "--condA":
-        condA = True
-    elif parm == "--condC":
-        condC = True
+        initialFreeLimit = 0xFFFFFF
+    elif parm.startswith("--cond="):
+        cond = parm[7:]
+        if len(cond) != 1 or not cond.isupper():
+            print("Illegal conditional %s" % parm, file=sys.stderr)
+            sys.exit(1)
+        ifdefs.add(cond)
     elif parm.startswith("--identifier="):
         identifierString = "%-10s" % parm[13:23]
     elif parm.startswith("--include="):

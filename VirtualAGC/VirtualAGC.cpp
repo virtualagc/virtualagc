@@ -165,6 +165,7 @@
  *              2024-01-25 RSB  Enabled Skylab 2-4 and ASTP missions because
  *                              core dump (but not yet reconstructed source
  *                              code) is now available.
+ *              2024-05-13 RSB  Enabled Comanche 67 for Apollo 12 CM.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -276,9 +277,9 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             //{ "LUMINARY 99 rev 2 (LM)", "LUM99R2/MAIN.agc.html",
             //    "Click this to select Luminary 99 rev 2, a hypothetical but unflown revision of the Apollo 11 LM software.",
             //    ENABLED, LM, BLOCK2, PERIPHERALS, "LUM99R2", "LM.ini" },
-            { "Apollo 12 Command Module", "",
+            { "Apollo 12 Command Module", "Comanche067/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 12 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche067", "CM.ini" },
             { "Apollo 12 Lunar Module", "Luminary116/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 12 mission.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary116", "LM.ini" },
