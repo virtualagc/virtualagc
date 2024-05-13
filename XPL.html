@@ -658,7 +658,7 @@ TBD<br>
 </ul>
 
 <blockquote>
-  <p><font size="-1"><b>Aside:</b> The method for storing </font><font size="-1"><font color="#663333"><code>CHARACTER</code></font> data described above leaves no room for 0-length "empty" strings.  But the XPL and XPL/I languages <i>do</i> allow for empty strings; the documentation simply doesn't tell us how to encode the empty strings in memory!  Nor do the memories of individual developers I've consulted provide any clue on the matter.  Thus for empty strings, <b>XCOM-I</b> uses its own custom approach that may not quite match the original implementations. Specifically, <b>XCOM-I</b> uses a string descriptor with a value of 0 to represent an empty string, and does not allocate any additional storage beyond the descriptor in that case.  This isn't ambiguous, by the way, because for technical reasons I won't get into right here, a string descriptor of 0 wouldn't have been valid otherwise in XPL. </font><br></p>
+  <p><font size="-1"><b>Aside:</b> The method for storing </font><font size="-1"><font color="#663333"><code>CHARACTER</code></font> data described above leaves no room for 0-length "empty" strings.  But the XPL and XPL/I languages <i>do</i> allow for empty strings: p. 207 of McKeeman tells us that an empty-string is represented by a string-descriptor with the value 0x00000000, with no extra memory allocation for the non-existent "data" of the string.  This isn't ambiguous, by the way.  While 0x00000000 <i>technically</i> appears to be a descriptor for a 1-byte string whose data is located at address 0x000000, in fact address 0x000000 would always have been outside of the block of memory dedicated for storage of EBCDIC string data, rendering a descriptor of 0x00000000 unusable under the normal interpretation.</font><br></p>
 </blockquote>
 <ul>
 
@@ -836,7 +836,7 @@ about this setup, but various factoids can be inferred from <b>HAL/S-FC</b> sour
     <li><font color="#009900"><font color="#663300"><code>BIT(16)</code></font></font> giving the number of "descriptors".  I'm not clear on what that means, but <i>perhaps</i> is the number of non-constant <font color="#663300"><code>CHARACTER</code></font> values appearing per record of the <font color="#663300"><code>BASED</code></font><font color="#663300"><code></code></font>.  I could see that as being useful if the implementation of (say) garbage collection involved searching the entire <font color="#663300"><code>BASED</code></font> looking for <font color="#663300"><code>CHARACTER</code></font> data, since you could more-easily know to stop searching once they had all been found.</li>
     <li><font color="#009900"><font color="#009900"><font color="#663300"><code>FIXED</code></font></font> giving the total number of array entries for which space has been <i>allocated</i>.</font></li>
     <li><font color="#009900"><font color="#009900"><font color="#663300"><code>FIXED</code></font></font> giving the total number of array entries actually <i>used</i> so far.</font></li>
-    <li><font color="#009900"><font color="#009900"><font color="#663300"><code>FIXED</code></font></font></font>.  I think that perhaps all of the dope vectors form a linked list, and that this is the address of the next dope vector in the list, presumably in order of increasing addresses.  The list is terminated when a value of 0 is found.  Thus the process of finding usable holes in memory — or at least the portion of memory dedicated to BASED variables (vs character strings) — is just the process of searching this linked list.<br></li>
+    <li><font color="#009900"><font color="#009900"><font color="#663300"><code>FIXED</code></font></font></font>.  I think that perhaps all of the dope vectors form a linked list, and that this is the address of the next dope vector in the list, presumably in order of increasing pointers.  The list is terminated when a value of 0 is found.  Thus the process of finding usable holes in memory — or at least the portion of memory dedicated to BASED variables (vs character strings) — is just the process of searching this linked list.<br></li>
     <li><font color="#009900"><font color="#663300"><code>FIXED</code></font></font>.  It appears to me that this field supplies some properties of the <font color="#663300"><code>BASED</code></font> in the form of bit fields. It is laid out as follows:<br></li>
     <ul>
       <li>Bit 24 indicates the <font color="#663300"><code>BASED</code></font> is "constant", which appears to mean that you cannot incrementally grow it.  (The macro <font color="#663300"><code>NEXT_ELEMENT(<i>based</i>)</code></font> is used to increase the size of the specified <font color="#663300"><code><i>based</i></code></font> by 1 record, an operation which fails if the <font color="#663300"><code><i>based</i></code></font> is "constant".)</li>
@@ -1030,47 +1030,72 @@ Syntactically, <font color="#663300"><code>COMMON</code></font> data is declared
 <table width="100%" cellspacing="10" cellpadding="0">
   <tbody>
     <tr>
-      <td valign="top">The theoretical memory space at runtime for a compiled XPL program is 2<sup>24</sup>=16,777,216
+      <td valign="top">The theoretical memory space available at runtime for a compiled XPL program is 2<sup>24</sup>=16,777,216
  bytes in size, although the Wikipedia article on IBM System/360 tells 
-us that the actual physical maximum was only 8 MB.&nbsp; For the 
+us that the actual physical maximum was only 8 MB.&nbsp; <br>
+<br>
+For the 
 original XPL and XPL/I compilers, the lowest portion and highest portion
  of this (theoretical) 16 MB space was dedicated to the executable code 
 for the program and the data used by it.&nbsp; The middle of the area 
-was used for the program's data.&nbsp; For <b>XCOM-I</b>, the entire 
-16MB space can be used for the compiled program's variables and those 
+was used for the program's data.&nbsp; But in the <b>XCOM-I</b> framework, all of the program code is stored elsewhere, thus the entire 
+16MB space can be dedicated just for the variables actually <font color="#663300"><code>DECLARE</code></font>'d in the XPL source code ... plus those 
 few elements of data which the operating system needs to communicate to 
-the program, such as the values of program options.<br>
+the program, such as run-time program options.<br>
         <br>
-The memory nevertheless does need to be partitioned into blocks 
+The memory nevertheless still needs to be partitioned into blocks 
 dedicated to specific types of data, in order to facilitate management 
-of dynamic data like character strings and <font color="#663300"><code>BASED</code></font>
+of dynamic data like <font color="#663300"><code>CHARACTER</code></font> or <font color="#663300"><code>BIT</code></font><font color="#663300"><code>(n&gt;32)</code></font> strings and <font color="#663300"><code>BASED</code></font>
  variables.&nbsp; I try to follow the same partitioning scheme as used 
 by the original compilers, at least roughly.&nbsp; The broad outline of 
-this partitioning scheme is seen to the right.<br>
-
-
-        <p>In <b>XCOM-I</b>, the lowest addresses of memory are filled with static data defined at compile-time:  <font color="#663300"><code>FIXED</code></font> and <font color="#663300"><code>BIT</code></font> variables and arrays, the string-descriptors for <font color="#663300"><code>CHARACTER</code></font> variables and arrays, the dope vectors for <font color="#663300"><code>BASED</code></font> variables.  None of the allocations in this area change at runtime, though the contents of the variables residing there may change during a run.  Above that static partition we dynamic allocations which may grow or shrink, or even move to other addresses entirely.  In particular, we have all of the string data for <font color="#663300"><code>CHARACTER</code></font> values and any allocations of memory made at runtime (for example, for <font color="#663300"><code>BASED</code></font> variables).  <b>XCOM-I</b> and its runtime library do not use any of this dynamic partition (or indeed any of the simulated memory model at all) for data of their own, so all of it is available for the XPL or XPL/I program. <br></p>
-
-
-        <p>Unfortunately, we have to stick pretty closely to the memory-space behavior as conceived by Intermetrics for it's XPL/I compiler, however poorly documented it may be, and however irrelevant it seems to a "modern" implementation, because <b>HAL/S-FC</b> source code sometimes relies on their hidden knowledge of that behavior.&nbsp; 
-</p>
-
-        <blockquote>
-  
-<p><font size="-1"><b>Aside:</b> There are plenty of examples in <b>HAL/S-FC</b> source code where the source code exploits hidden knowledge of the internals of the compiler implementation.&nbsp; Here's one from the <font color="#663333"><code>SCAN</code></font> procedure of <b>HAL/S-FC</b>.&nbsp; In two of its sub-procedures, <font color="#663333"><code>BUILD_BCD</code></font> and <font color="#663333"><code>BUILD_INTERNAL_BCD</code></font>, it builds a string (<font color="#663333"><code>BCD</code></font>), character by character, whose length it does not know in advance.&nbsp; You'd think it could simply repeatedly convert each character to a string, and then use the string-concatenation operator (<font color="#663333"><code>||</code></font>) to append the new string to the old one.&nbsp; But you'd be wrong, since for some reason there's actually no way in XPL or XPL/I to convert  a character to a string.&nbsp; So instead, it:<br></font></p>
-
-  <ul><li><font size="-1">Uses an undocumented trick (namely concatenating a constant string which contains a single character to </font><font size="-1"><font size="-1"><font color="#663333"><code>BCD</code></font></font>), which forces </font><font size="-1"><font size="-1"><font size="-1"><font color="#663333"><code>BCD</code></font></font></font> to be moved to the top of allocated memory, and be followed by free memory.</font></li><li><font size="-1">Uses the <font color="#663300"><code>COREBYTE</code></font> built-in function to write the character to the address just preceding the start of free memory.</font></li></ul>
-  
-        </blockquote>
-
-
-        <p>As mentioned before, variables of the <font color="#663333"><code>FIXED</code></font> and <font color="#663333"><code>BIT</code></font> datatypes, or arrays thereof, have sizes that are set at compile-time, and do not change thereafter.&nbsp; Moreover, the storage for the descriptors for the <font color="#663333"><code>CHARACTER</code></font> datatype and the pointers for the <font color="#663333"><code>BASED</code></font> variables are fixed at compile time as well.&nbsp; <i>However</i>, the character strings associated with the string descriptors for the <font color="#663333"><code>CHARACTER</code></font> variables, and the number of records associated with the <font color="#663333"><code>BASED</code></font> variables, can change during execution of the compiled XPL program, and in particular can increase in size.&nbsp; When the latter happens, it is necessary for such data to be moved into a previously-free area of the 16 MB memory, leaving unused holes in the memory.&nbsp; <br></p>
-
-        <p>The holes in memory don't directly cause a problem, but the ever-decreasing range of contiguous free memory at the end of the memory space may cause a problem eventually.&nbsp; The garbage-collection procedure called <font color="#663333"><code>COMPACTIFY</code></font> is called under these circumstances to repack the memory space, correct all pointers into the memory space, and thus increase the range of contiguous free memory.&nbsp; McKeeman (p. 140) lists <font color="#663333"><code>COMPACTIFY</code></font> among the built-in functions of XPL, but in defiance of that, explicitly provides an XPL <font color="#663333"><code>PROCEDURE</code></font> for it, whose source code is required to be included in other XPL programs; in fact, McKeeman's <b>XCOM</b> includes it <i>automatically</i>.&nbsp; Similarly, in the original XPL/I compiler, it was a user function provided by the <b>HAL/S-FC</b> source code file HALINCL/SPACELIB.&nbsp; <b>XCOM-I</b> takes a different approach: It provides its own implementation of <font color="#663333"><code>COMPACTIFY</code></font> in its runtime library, and it is a true built-in written in C rather than in XPL.&nbsp; <font size="-1">
-</font></p>
-        <blockquote>
-
-  <font size="-1"><b>Aside:</b>&nbsp; In case you're wondering why we don't simply use the </font><font size="-1"><font color="#663333"><code>COMPACTIFY</code></font> supplied in HALINCL/SPACELIB?&nbsp; It's a good question, which I elect not to answer. </font></blockquote>
+this partitioning scheme is seen in the diagram to the right.<b>&nbsp; <br>
+  <br>
+</b>The two topmost memory blocks are problematic, in the sense that 
+they consist of allocations that may change dynamically over the course 
+of execution of the program.&nbsp; As the dynamic data grows or shrinks 
+or move around within the parent memory block during program execution, 
+it may cause "holes" of unallocated memory to appear.&nbsp; The holes in
+ memory don't directly cause a problem, but the ever-decreasing range of
+ contiguous free memory at the end of the one of these dynamic data 
+blocks may cause a problem eventually.&nbsp; <br>
+<br>
+As far as the dynamic-data block reserved for <font color="#663300"><code>CHARACTER</code></font> and <font color="#663300"><code>BIT(n&gt;32)</code></font> data is concerned, the garbage-collection procedure called <font color="#663333"><code>COMPACTIFY</code></font>
+ is called whenever allocable memory in that block runs out, to remove 
+the holes by repacking the memory space, at the same time correcting all
+ descriptors, and thus increasing the size of contiguous free 
+memory.&nbsp; Though <font color="#663333"><code>COMPACTIFY</code></font>
+ was considered a "built-in" runtime-library function in McKeeman XPL, 
+there was actually XPL source code for it. For both the original 
+McKeeman and Intermetrics XPL compilers, the XPL source code for <font color="#663333"><code>COMPACTIFY</code></font> had to be included along with the XPL program being compiled.&nbsp; <br>
+<blockquote><font size="-1"><b>Aside:</b> The </font><font size="-1"><font size="-1"><font color="#663333"><code>COMPACTIFY</code></font></font> source code just mentioned was in the file XPL.LIBRARY.xpl for McKeeman's <b>XCOM</b>,
+ and in HALINCL/SPACELIB.xpl for Intermetrics's XPL/I compiler.&nbsp; 
+Both of those XPL compilers automatically included it without the need 
+for any explicit directives within the XPL source code of the program 
+being compiled.&nbsp; </font><font size="-1"><font size="-1"><font size="-1"><font color="#663333"><code>COMPACTIFY</code></font></font></font> and any of the other contents of the library file were processed <i>first</i>; therefore, all of its declarations were available to the XPL source code of the program being compiled.</font><br>
+</blockquote>
+In that sense, <font color="#663333"><code>COMPACTIFY</code></font> was really a customizable user-supplied <font color="#663300"><code>PROCEDURE</code></font> merely masquerading as a built-in of the runtime library.&nbsp; We have both of those versions of the XPL source code for <font color="#663333"><code>COMPACTIFY</code></font>.&nbsp; They are very different. <br>
+<blockquote><font size="-1"><b>Aside:</b></font><font size="-1"> The Intermetrics version</font><font size="-1"><font size="-1"> of <font color="#663333"><code>COMPACTIFY</code></font></font> is seemingly uncompilable.&nbsp; It</font><font size="-1">
+ inexplicably references a number of variables which are nowhere 
+declared in the source code.&nbsp; I can only suppose that these 
+undeclared variables were automatically declared by the Intermetrics 
+XPL/I compiler itself, and thus required no explicit declaration in 
+XPL.&nbsp; Either that, or else the source code I've received for it is 
+for some reason irreparably broken.&nbsp; Whatever the case, without 
+additional (or any!) documentation, the Intermetrics version is not 
+currently usable, even in theory.</font><br>
+</blockquote>
+At present, <b>XCOM-I</b> takes a slightly-different approach, and instead provides its own implementation of <font color="#663333"><code>COMPACTIFY</code></font> in its runtime library; in other words, in <b>XCOM-I</b>, <font color="#663333"><code>COMPACTIFY</code></font>
+ is a true built-in written in C rather than a customizable procedure 
+supplied in XPL.&nbsp; In spite of that, just as for the original XPL 
+and XPL/I compilers, there is still a library file which <b>XCOM-I</b> 
+automatically includes during any compilation.&nbsp; This library file, 
+XPLI.LIBRARY.xpl, includes declarations needed for supporting the 
+memory-management of the dope-vector dynamic memory block.<br>
+<br>
+The dope-vector dynamic memory block reserved for contents of <font color="#663300"><code>BASED</code></font> variables naturally did not exist in XPL, since <font color="#663300"><code>BASED</code></font> variables are an XPL/I extension.&nbsp; But even for the Intermetrics XPL/I compiler, their management was not handled by <font color="#663333"><code>COMPACTIFY</code></font>, but rather by a set of macros and functions discussed in <a moz-do-not-send="true" href="#basedManagement">the section on <font color="#663300"><code>BASED</code></font> memory</a>.&nbsp;&nbsp; <i>Those</i> are what is declared in XPLI.LIBRARY.xpl.<br>
+<font size="-1">
+</font>
+        
       </td>
       <td valign="middle">
         <table width="100%" cellspacing="2" cellpadding="2" border="1">
@@ -1082,7 +1107,7 @@ this partitioning scheme is seen to the right.<br>
             <td valign="middle" align="center"><font size="-1"><br>
                 <br>
                 <br>
-                <font color="#663300"><code>BASED</code></font> Data<br>
+Data pointed to by "dope vectors" of </font><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font><br>
                 <br>
                 <br>
                 <br>
@@ -1095,10 +1120,11 @@ this partitioning scheme is seen to the right.<br>
                   <br>
 FREEPOINT<br>
                   <br>
+<br>
 FREEBASE</font><br>
               </code></font></td>
 <td valign="middle" align="center"><br>
-          <font size="-1"><font size="-1">Data for Character Strings and Long <font color="#663300"><code>BIT</code></font> Strings<br>
+          <font size="-1"><font size="-1">Data pointed to by "string descriptors" of <font color="#663300"><code>CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code></font><br>
               <br>
             </font></font>
       </td>
@@ -1106,12 +1132,26 @@ FREEBASE</font><br>
     
     
     <tr>
-      <td valign="top" align="right"><font color="#663300"><code><br>
-              </code></font></td>
+  <td valign="middle" align="center"><font size="-1"><br>
+    </font></td>
+  <td valign="middle" align="center"><font size="-1"><font size="-1"><font color="#663300"><code><br>
+BASED</code></font></font> dope vectors<br>
+      <br>
+    </font></td>
+</tr>
+<tr>
+  <td valign="bottom" align="right"><font size="-1"><font color="#663300"><code>DESCRIPTOR</code></font><br>
+    </font></td>
+  <td valign="middle" align="center"><font size="-1"><font size="-1"><font color="#663300"><code><br>
+CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code><font color="#000000"> string descriptors<br>
+        <br>
+      </font></font></font></font></td>
+</tr>
+<tr>
+      <td valign="bottom" align="right"><br>
+</td>
 <td valign="middle" align="center"><font size="-1"><br>
-            <br>
-            <font color="#663300"><code>FIXED</code></font>, Short <font color="#663300"><code>BIT</code><font color="#000000"> Strings</font></font><font color="#663300"><code></code></font>, <font color="#663300"><code>ARRAY</code></font>, descriptors for <font color="#663300"><code>CHARACTER</code></font> and long <font color="#663300"><code>BIT</code></font> strings, and </font><font size="-1"><font size="-1"><font color="#663300"><code>BASED</code></font></font> dope vectors<br>
-            <br>
+            </font><font size="-1"><font color="#663300"><font color="#000000"><font color="#663300"><code>FIXED</code></font> and <font color="#663300"><code>BIT(</code><code>≤32)</code></font> variables</font></font></font><font size="-1"><font color="#663300"><font color="#000000"> for non-<font color="#663300"><code>COMMON</code></font></font></font></font><font size="-1"><br>
             <br>
           </font>
       </td>
@@ -1120,16 +1160,18 @@ FREEBASE</font><br>
             <td valign="top"><br>
             </td>
             <td valign="middle" align="center"><font color="#663300"><code><br>
-</code></font><font color="#663300"><font size="-1" color="#000000">JCL (Command-Line) PARM Field Data</font><code><br>
+</code></font><font color="#663300"><font size="-1" color="#000000"><font size="-1"><font color="#663300"><font color="#000000"><font color="#663300"><code>FIXED</code></font> and <font color="#663300"><code>BIT(</code><code>≤32)</code></font> variables for </font><code>COMMON</code></font></font><font color="#663300"><code></code></font></font><code><br>
                   <br>
                 </code></font></td>
           </tr>
 <tr>
       <td valign="bottom" align="right"><font color="#663300"><code><font size="-1">0x000000</font></code></font></td>
 <td valign="middle" align="center"><br>
-<font size="-1"><font color="#663300"><code>COMMON<br>
-    <br>
-</code></font>
+<font size="-1"><font color="#663300"><code><font color="#663300"><font size="-1" color="#000000">Data supplied by <font color="#663300"><code>MONITOR(13)</code></font> and <font color="#663300"><code>MONITOR(23)<br>
+        <br>
+</code></font></font></font>
+    
+    </code></font>
             
           </font>
       </td>
@@ -1141,16 +1183,7 @@ FREEBASE</font><br>
     
   </tbody>
         </table>
-        <b><br>
-</b>
-<div align="center"><b><font size="-1"><i>Note:</i></font></b><font size="-1"><i> This memory map is under consideration but may not be correct in some details.</i></font><br>
-</div>
-
-      </td>
-    </tr>
-  </tbody>
-</table>
-<h3>Structure of an XPL Program vs XPL/I<br>
+        </td></tr></tbody></table><h3>Structure of an XPL Program vs XPL/I<br>
 </h3>
 <p>An XPL program consists of any sequence of XPL <i>statements</i>, followed by the token <font color="#663333"><code>EOF</code></font>.&nbsp; In particular:<br></p>
 <ul>
@@ -1161,27 +1194,59 @@ FREEBASE</font><br>
 <blockquote>
   <p><font size="-1"><b>Note:</b>&nbsp; The original XPL compiler, which was called XCOM, performed a single pass.&nbsp; It required that the declaration of any particular identifier as an object (such as a variable) had to precede the use of that identifier, although there were provisions for making a forward declaration for a </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font>, so that the </font><font size="-1"><font color="#663333"><code>PROCEDURE</code></font> could be used before it was defined.&nbsp; <b>XCOM-I</b> relaxes this requirement.<br></font></p></blockquote><font size="-1"></font>
 <p>Each of the sample programs I've encountered in standard XPL so far has been contained in a single <i>relatively</i>-small file.  For example, <b>ANALYZER</b> has a little over 1500 lines of source code, while <b>XCOM</b> has a little over 4200 lines.   <br></p>
-<p>In contrast, the XPL/I source code for Intermetrics's HAL/S compiler <b>HAL/S-FC</b> has over 120,000 lines of source code spread across over 600 files.  This huge size, along with the huge difference from programs in standard XPL, necessitates different methods for managing that source-code base, and some of those methods are reflected by compiler directives embedded within the source code.  Insofar as <b>HAL/S-FC</b> and its related applications are concerned, the top-level source-code file  (##DRIVER.xpl) for each application always contains all of the necessary directives for compiling the other source-code files needed, in the correct order, so in using XCOM-I to compile these applications you don't need to worry about any file other than ##DRIVER.xpl itself.<br></p>
+<p>In contrast, the XPL/I source code for Intermetrics's HAL/S compiler <b>HAL/S-FC</b> has over 120,000 lines of source code spread across over 600 files, though any individual pass of the compiler has no more than around 35,000 lines.  This huge size, along with the huge difference from programs in standard XPL, necessitates different methods for managing that source-code base, and some of those methods are reflected by compiler directives embedded within the source code.  Insofar as <b>HAL/S-FC</b> and its related applications are concerned, the top-level source-code file  (##DRIVER.xpl) for each application always contains all of the necessary directives for compiling the other source-code files needed, in the correct order, so in using XCOM-I to compile these applications you don't need to worry about any file other than ##DRIVER.xpl itself.<br></p>
 <blockquote>
-  <p><font size="-1"><b>Aside:</b> Due to the lack of relevant Intermetrics documentation, what I'm about to describe is not only speculative on my part, but also represents certain pragmatic compromises that I don't believe literally existed in Intermetrics' XPL compiler or development procedures.  But if it will work for us using <b>XCOM-I</b> on <b>HAL/S-FC</b> and if there are no other lurking XPL/I programs that we need to worry about, why complain?</font><br></p>
+  <p><font size="-1"><b>Aside:</b> Well, the comment about ##DRIVER.xpl isn't exactly right.  Any XPL or XPL/I program will expect that there's a separate "library file" containing source code for the <font color="#663300"><code>COMPACTIFY</code></font> procedure, but the XPL/I source code for the program won't explicitly include the library file.  That's the compiler's responsibility.<br><b></b></font></p>
+<p><font size="-1"><b>Aside:</b> Due to the lack of relevant Intermetrics documentation, what I'm about to describe is not only speculative on my part, but also represents certain pragmatic compromises that I don't believe literally existed in Intermetrics' XPL compiler or development procedures.  But if it will work for us using <b>XCOM-I</b> on <b>HAL/S-FC</b> and if there are no other lurking XPL/I programs that we need to worry about, why complain?</font><br></p>
+
 </blockquote>
 Compiler directives in XPL/I are comments or comment-like constructions 
 which aren't documented in McKeeman and have no other obvious 
 purpose.&nbsp; The specifics are covered by the subsections below.<br>
 <h4>Compiler Directive Type:&nbsp; <font color="#663300"><code>/?<i>c</i> ... XPL/I source code ... ?/</code></font></h4>
 This type of compiler directive is a conditional inclusion of source 
-code.&nbsp; The particular type of condition is represented by the <font color="#663300"><i><code>c</code></i></font>; the XPL/I source code is included if condition <font color="#663300"><i><code>c</code></i></font>
- is satisfied, and transparently discarded otherwise.&nbsp; There are 4 
-possible conditions I'm aware of, represented by 4 possible 
-single-letter replacements for <font color="#663300"><i><code>c</code></i></font>:<br>
-<ul>
-  <li><font color="#663300"><i><code>c</code></i></font> is P:  This condition is that compilation for the Primary Flight Software (PFS) is being performed.  It is satisfied if <b>XCOM-I</b> is run with the <font color="#663300"><code>--pfs</code></font> command-line switch.  (This is the default.)</li>
-  <li><font color="#663300"><i><code>c</code></i></font> is B:  This condition is that compilation for the Backup Flight Software (BFS) is being performed.  It is satisfied if <b>XCOM-I</b> is run with the <font color="#663300"><code>--bfs</code></font> command-line switch.  Note that <font color="#663300"><code>--bfs</code></font> and <font color="#663300"><code>--pfs</code></font> are mutually exclusive.</li>
-  <li><font color="#663300"><i><code>c</code></i></font> is A:  This condition is satisfied if <b>XCOM-I</b> is run with the <font color="#663300"><code>--condA</code></font> command-line switch, but I don't know what its interpretation is.</li>
-  <li><font color="#663300"><i><code>c</code></i></font> is C:  This condition is satisfied if <b>XCOM-I</b> is run with the <font color="#663300"><code>--condC</code></font> command-line switch, but I don't know what its interpretation is.</li>
-</ul>
+code, similar to the C language's <font color="#663300"><code>#if <i>c</i></code></font>.&nbsp; Here, <font color="#663300"><i><code>c</code></i></font>
+ is supposed to be an upper-case alphabetical letter that represents the
+ particular condition that needs to be "true".&nbsp; All conditions, <font color="#663300"><code>A</code></font> through <font color="#663300"><code>Z</code></font>, are by default "false".&nbsp; You make condition <font color="#663300"><i><code>c</code></i></font> "true" by using <b>XCOM-I</b>'s <font color="#663300"><code>--cond=<i>c</i></code></font> command-line switch.<br>
+<br>
+Interpretations of the possible conditions are entirely at the user's 
+disposal; i.e., they vary by the particular source-code being compiled 
+by <b>XCOM-I</b>.&nbsp; In the particular case of the XPL/I source code for the <b>HAL/S-FC</b> program, there are 4 
+possible conditions <font color="#663300"><i><code>c</code></i></font> that I'm aware of:<br>
+<br>
+<table align="center" cellspacing="2" cellpadding="2" border="1">
+  <tbody>
+    <tr>
+      <th valign="bottom" align="center">XCOM-I Command-Line Switch<br>
+      </th>
+      <th valign="top">Interpretation<br>
+      </th>
+    </tr>
+    <tr>
+      <td valign="middle" align="center"><font color="#663300"><code>--cond=P</code></font><br>
+      </td>
+      <td valign="top"><b>HAL/S-FC</b> will be specialized for compiling the Space Shuttle's Primary Flight Software (PFS).</td>
+    </tr>
+    <tr>
+      <td valign="middle" align="center"><font color="#663300"><code>--cond=B</code></font> </td>
+      <td valign="top"><b>HAL/S-FC</b> will be specialized for compiling the Space Shuttle's Backup Flight Software (BFS).<br>
+        <b>Note:</b>&nbsp; Either <font color="#663300"><code>--cond=P</code></font> or <font color="#663300"><code>--cond=B</code></font> must be used, but not both at the same time.<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="middle" align="center"><font color="#663300"><code>--cond=A</code></font></td>
+      <td valign="top">Produce debugging output related to memory management of <font color="#663300"><code>BASED</code></font> variables.</td>
+    </tr>
+    <tr>
+      <td valign="middle" align="center"><font color="#663300"><code>--cond=C</code></font></td>
+      <td valign="top">Produces debugging output related to actions by the <font color="#663300"><code>COMPACTIFY</code></font> procedure.</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<ul></ul>
 <blockquote>
-  <p><font size="-1"><b>Aside:</b> This implies that you don't just compile <b>HAL/S-FC</b>.  Rather, you compile <b>HAL/S-FC</b> <i>twice</i>, once to get a HAL/S compiler for the primary flight software, and once to get a compiler for the backup flight software. I suspect that in the original Intermetrics system, the choice between PFS and BFS was made with options for <b>HAL/S-FC</b> rather than with options for <b>XCOM</b>.  Alas, I don't presently know any way to support it in that way.</font><br></p>
+  <p><font size="-1"><b>Aside:</b> This implies that you don't just compile <b>HAL/S-FC</b> <i>once</i> to get a HAL/S compiler that works for all HAL/S programs.  Rather, you compile <b>HAL/S-FC</b> <i>twice</i>, once to get a version of the HAL/S compiler that works for the primary flight software, and once to get a version of the compiler that works for the backup flight software.</font></p>
 </blockquote>
 <h4>Compiler Directive Type:&nbsp; <font color="#663300"><code>/%INCLUDE <i>module</i> %/</code></font></h4>
 This type of compiler directive inserts an entire XPL/I source-code file, <i>module</i>.xpl, at the current point.&nbsp; It is used for importing <font color="#663300"><code>COMMON</code></font>-block
@@ -1548,11 +1613,12 @@ it's a moot point.</font><br>
           </code></font></td>
       <td valign="middle">The description of the <font color="#663300"><code>NE</code></font><font size="-1"><sup>th</sup></font> string as a numeric value.<br>
       </td>
-      <td valign="middle">McKeeman's description is puzzling; what does "the <font color="#663300"><code>NE</code></font><font size="-1"><sup>th</sup></font> string" mean?&nbsp; As far as I can tell, this library function is used only by the original McKeeman <font color="#663300"><code>COMPACTIFY</code></font> procedure (see above), and in low-level code of <b>HAL/S-FC</b> (where it magically tells where the boundary between <font color="#663300"><code>COMMON</code></font> and non-<font color="#663300"><code>COMMON</code></font> memory is).&nbsp; This is fortunate, because neither of those uses mean anything whatsoever to us in <b>XCOM-I</b>.&nbsp; I therefore choose not to implement this library function in <b>XCOM-I</b>.<br>
-      </td>
-    </tr>
-    <tr>
-      <td valign="middle" align="center"><font color="#663300"><code>EXIT</code><code><br>
+      <td valign="middle">I believe that this cryptic description is 
+referring to the fact that in the way memory is allocated for the 
+variables declared by <b>XCOM</b>, the 32-bit string descriptors for all <font color="#663300"><code>CHARACTER</code></font> and <font color="#663300"><code>BIT(n)</code></font> (<font color="#663300"><code>n</code></font>&gt;32) variables appear consecutively in memory.&nbsp; By symbolically labeling the very first of those descriptors as <font color="#663300"><code>DESCRIPTOR</code></font>, and treating <font color="#663300"><code>DESCRIPTOR</code></font> as of the <font color="#663300"><code>FIXED</code></font> datatype, <font color="#663300"><code>DESCRIPTOR</code></font>
+ becomes an easily-accessible array of all the string descriptors.&nbsp;
+ This is useful, for example, for memory-management procedures like <font color="#663300"><code>COMPACTIFY</code></font>.&nbsp; The number of elements of the array is given by the built-in <font color="#663300"><code>NDESCRIPT</code></font> (see below).<br>
+</td></tr><tr><td valign="middle" align="center"><font color="#663300"><code>EXIT</code><code><br>
           </code></font></td>
       <td valign="middle">A procedure<br>
         <blockquote><font color="#663300"><code>CALL EXIT;</code></font><br>
@@ -1799,7 +1865,7 @@ Because of the complexity of <font color="#663300"><code>MONITOR</code></font>, 
           </code></font></td>
       <td valign="middle">A fixed array which can be used for transmission of information between a program and the submonitor.<br>
       </td>
-      <td valign="middle">This is implemented in neither McKeeman <b>XCOM</b> nor in <b>XCOM-I</b>.&nbsp; There are no instances of its use in any available legacy XPL or XPL/I program.<br>
+      <td valign="middle">(See Table 8.4.6 in McKeeman.)&nbsp; I'm not presently aware of any need to implement this in <b>XCOM-I</b>.&nbsp; However, there are <font color="#663300"><code>MONITOR</code></font> functions (see above) whose operations remain a mystery, so there's a possibility that that could change.<br>
       </td>
     </tr>
     <tr>
@@ -1807,7 +1873,7 @@ Because of the complexity of <font color="#663300"><code>MONITOR</code></font>, 
           </code></font></td>
       <td valign="middle">A word variable containing the upper bound in the array <font color="#663300"><code>DESCRIPTOR</code></font> (see above) of the descriptions.<br>
       </td>
-      <td valign="middle">In fact, this is a variable used only in McKeeman's <font color="#663300"><code>COMPACTIFY</code></font> (see above).&nbsp; It is not used in any other legacy XPL or XPL/I code, and has no relevance in <b>XCOM-I</b>.&nbsp; It is not implemented.<br>
+      <td valign="middle">See <font color="#663300"><code>DESCRIPTOR</code></font> above.<br>
       </td>
     </tr>
     <tr>
@@ -2188,14 +2254,16 @@ and <code><font color="#663300"><i>n</i></font></code> should be an integral mul
   <br><b>Very important</b>:&nbsp; While it is true that <code><font color="#663300">MONITOR(6)</font></code>
  behaves in this fashion, do not interpret it to mean that this is the 
 mechanism by which user code allocates memory for its own <font color="#663300"><code>BASED</code></font> variables! <br>
+<br>
+Because of this, this is presently a no-op in <b>XCOM-I</b>.&nbsp; It always return 1 for failure.<br>
 </td>
     </tr>
     <tr>
       <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i>F</i>=MONITOR(7,ADDR(<i>basedVariable</i>),<i>n</i>);<br>
     </font></code></td>
-      <td valign="middle">Frees the memory previously allocated via <code><font color="#663300">MONITOR(6,ADDR(<i>basedVariable</i>),<i>n</i>)</font></code>.&nbsp; However, <code><font color="#663300"><i>basedVariable</i></font></code>'s pointer is not changed, a thus will continue to point to the freed area until explicitly changed.<br>
+      <td valign="middle">Frees the memory previously allocated via <code><font color="#663300">MONITOR(6,ADDR(<i>basedVariable</i>),<i>n</i>)</font></code>.&nbsp; However, <code><font color="#663300"><i>basedVariable</i></font></code>'s pointer is not changed, and thus will continue to point to the freed area until explicitly changed.<br>
 </td>
-      <td valign="middle" bgcolor="transparent">See the comments for <code><font color="#663300">MONITOR(6)</font></code>.<br>
+      <td valign="middle" bgcolor="transparent">See the comments for <code><font color="#663300">MONITOR(6)</font></code>.&nbsp; It is implemented in <b>XCOM-I</b> as a no-op that always returns 0 (for success).<br>
 </td>
     </tr>
     <tr>
@@ -2514,7 +2582,7 @@ right most byte of fullword <code><font color="#663300"><i>n</i></font></code>. 
     <tr>
       <td valign="middle" nowrap="nowrap" align="center"><code><font color="#663300"><i>I</i>=MONITOR(21);<br>
     </font></code></td>
-      <td valign="middle">Returns remaining amount of memory (in bytes) that's free for allocation via <font color="#663300"><code>MONITOR(6)</code></font> without garbage collection.<br>
+      <td valign="middle">Returns remaining amount of memory (in bytes) that's free for allocation via <font color="#663300"><code>MONITOR(6)</code></font>.<br>
 </td>
       <td valign="middle">For Intermetrics <b>XCOM</b>, I believe, <font color="#663300"><code>MONITOR(6)</code></font> could use <i>any</i> contiguous block of free memory, including those that were candidates for garbage collection.&nbsp; Whereas <b>XCOM-I</b>
  only allocates memory within the contiguous block at the end of the 
@@ -2604,7 +2672,7 @@ As for what a "descriptor" is, see <a moz-do-not-send="true" href="#datatypes">t
     </font></code></td>
       <td valign="middle">Virtual-memory lookahead service.<br>
 </td>
-      <td valign="middle">I think this may be optional.&nbsp; At any rate, it presently does nothing in XCOM-I.<br>
+      <td valign="middle">I think this may be optional.&nbsp; At any rate, it presently does nothing in <b>XCOM-I</b>.<br>
 </td>
     </tr>
     <tr>
@@ -2612,7 +2680,13 @@ As for what a "descriptor" is, see <a moz-do-not-send="true" href="#datatypes">t
     </font></code></td>
       <td valign="middle">Find out subpool minimum size<br>
 </td>
-      <td valign="middle">TBD<br>
+      <td valign="middle">The memory-allocation and -deallocation functions (<code><font color="#663300">MONITOR</font></code>
+ 6, 7, 19, and 20) are supposed to get their memory from something 
+called "SUBPOOL 22".&nbsp; SUBPOOLs apparently have block-sizes which 
+are either 2048 or 4096 bytes, depending on the operating system.&nbsp; <code><font color="#663300">MONITOR(32)</font></code>
+ returns the appropriate block size for the operating system.&nbsp; 
+Given that the block size is bigger in later versions of the operating 
+system, I infer that bigger is better, within certain limits, and hence <b>XCOM-I</b> arbitrarily returns 4096.<br>
 </td>
     </tr>
     <tr>
