@@ -566,8 +566,9 @@ else:
     <br><br>
     The collection contains many software revisions which never flew in Apollo 
     missions, and conversely there are missions for which we don't have some of 
-    the software.  And, there are missions for which we may not have the <i>exact</i>
-    software revision originally used, but do have a revision which is fine for
+    the software.  Or perhaps for which we have only a binary, without source
+    code.  And, there are missions for which we may not have the <i>exact</i>
+    software revision originally used, but do have a revision which is "fine" for
     successfully flying a simulated mission.  Here's a mission-by-mission
     summary of what we presently have and don't have:<br><br>
     <table cellspacing="2" cellpadding="2" border="1" align="center" style="font-family:sans-serif"><tbody>
@@ -582,7 +583,7 @@ else:
     <tr align="center"><td>Apollo 9</td><td>yes</td><td>fine</td><td>no</td><td>no</td></tr>
     <tr align="center"><td>Apollo 10</td><td>yes</td><td>yes</td><td>no</td><td>no</td></tr>
     <tr align="center"><td>Apollo 11</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
-    <tr align="center"><td>Apollo 12</td><td>no</td><td>yes</td><td>yes</td><td>no</td></tr>
+    <tr align="center"><td>Apollo 12</td><td>binary</td><td>yes</td><td>yes</td><td>no</td></tr>
     <tr align="center"><td>Apollo 13</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
     <tr align="center"><td>Apollo 14</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
     <tr align="center"><td>Apollo 15</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
