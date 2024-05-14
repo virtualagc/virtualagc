@@ -465,8 +465,7 @@ make -C XCOM
 
 But then compiling an XPL program using <b>XCOM</b> involves a little JCL <font color="#663300"><code>DD</code></font>
  trickery, similar to some we saw above: There's an extra file which 
-needs to be attached as an input.&nbsp; That's because when <b>XCOM</b> compiles an XPL file, it expects also always to need the source code for something called <font color="#663300"><code>COMPACTIFY</code></font>.&nbsp;
- That happens to be contained in a file called XPL.LIBRARY.xpl, so we 
+needs to be attached as an input.&nbsp; That's because when <b>XCOM</b> compiles an XPL file, it expects also always to need the source code for something called <font color="#663300"><code>COMPACTIFY</code></font>.&nbsp; For XPL code (vs XPL/I), that happens to be contained in a file called XPL.LIBRARY.xpl, so we 
 have to attach that file. Also, XCOM wants to use several "random-access
  files" for storing object code and what not, and we have to attach 
 those files.&nbsp; (Refer to <a moz-do-not-send="true" href="#file">the <font color="#663300"><code>FILE</code></font> entry in the section on XPL's built-in library functions</a>.)<br>
@@ -478,12 +477,12 @@ those files.&nbsp; (Refer to <a moz-do-not-send="true" href="#file">the <font co
 <b>XCOM</b> uses a hard-coded constant to determine the record sizes for
  these random-access files, which happens to have the default value of <font color="#663300"><code>DISKBYTES=3600</code></font>.&nbsp; Compiling an XPL program called (say) "<i>Program</i>.xpl" with <b>XCOM</b> could thus look something like this:<br>
 <blockquote>
-  <pre><font color="#663300">XCOM/XCOM --ddi=0,Tests/</font><font color="#663300"><font color="#663300"><i>Program</i>.xpl</font> --ddi=2,Tests/XPL.LIBRARY.xpl --raf=B,3600</font><font color="#663300"><font color="#663300">,1</font>,<i>Program</i>.obj --raf=B,3600</font><font color="#663300"><font color="#663300">,2</font>,<i>Program</i>.dat --raf=B,3600</font><font color="#663300"><font color="#663300">,3</font>,<i>Program</i>.str</font></pre>
+  <pre><font color="#663300">XCOM/XCOM --ddi=0,Tests/</font><font color="#663300"><font color="#663300"><i>Program</i>.xpl</font> --ddi=2,XPL.LIBRARY.xpl --raf=B,3600</font><font color="#663300"><font color="#663300">,1</font>,<i>Program</i>.obj --raf=B,3600</font><font color="#663300"><font color="#663300">,2</font>,<i>Program</i>.dat --raf=B,3600</font><font color="#663300"><font color="#663300">,3</font>,<i>Program</i>.str</font></pre>
 </blockquote>
 
 Just to reiterate, the object code produced by this process will be 
 useless to you, since it will consist of IBM System/360 machine 
-code.&nbsp; But that doesn't detract from it as a demonstration of <b>XCOM-I</b>.&nbsp; McKeeman provides source code for two sample XPL programs, <b>Example-6.18.1</b> and <b>Example-6.18.2</b>,
+code.&nbsp; (Or <i>will</i> it?&nbsp; We'll talk about that a little later.)&nbsp; But that doesn't detract from it as a demonstration of <b>XCOM-I</b>.&nbsp; McKeeman provides source code for two sample XPL programs, <b>Example-6.18.1</b> and <b>Example-6.18.2</b>,
  which we duplicate in the Tests/ folder.&nbsp; The former demonstrates 
 object-code production, while the latter demonstrates error 
 handling.&nbsp; The complete <b>XCOM</b>
@@ -861,16 +860,16 @@ With that discussion in mind, in understanding some of the things that need to h
     <li><font color="#663300"><code>RECORD_WIDTH(based)</code></font> returns the record width of the <i><font color="#663300"><code>based</code></font></i>.</li>
     <li><font color="#663300"><code>RECORD_LINK()</code></font> prepares the data for transferring <font color="#663300"><code>COMMON</code></font> memory to the next program loaded.</li>
   </ul>
-  <p>I'd note that as long as effective versions of these are provided, along with a working <font color="#663300"><code>COMPACTIFY</code></font>, it doesn't really matter if the dope-vector properties are implemented or not.<br></p>
+  <p>I'd note that as long as effective versions of these macros are provided, along with a working <font color="#663300"><code>COMPACTIFY</code></font>, it doesn't really matter if the dope-vector properties are implemented or not.<br></p>
 </blockquote>
 
 User code that initially allocates free memory — let's say 25 records to start with —  for a <font color="#663300"><code>BASED</code></font> variable is <i>typically</i> a two-step process that looks something like this:<br>
 <blockquote>
-  <pre><font color="#663300">BASED MYVARIABLE FIXED;<br>...<br>RECORD_CONSTANT(FIXED, 25, MOVEABLE); /* OR UNMOVEABLE */<br>RECORD_USED(FIXED) = RECORD_ALLOC(FIXED);</font><br></pre>
+  <pre><font color="#663300">BASED MYVARIABLE FIXED;<br>...<br>RECORD_CONSTANT(MYVARIABLE, 25, MOVEABLE); /* OR UNMOVEABLE */<br>RECORD_USED(</font><font color="#663300"><font color="#663300">MYVARIABLE</font>) = RECORD_ALLOC(</font><font color="#663300"><font color="#663300">MYVARIABLE</font>);</font><br></pre>
 </blockquote>
-Or, if you knew that you were going to need more elements later, you might allocate a bit extra, like so:<br>
+Or, if you knew that you were going to need more elements later, you might allocate a bit extra, for example:<br>
 <blockquote>
-  <pre><font color="#663300">BASED MYBASED FIXED;<br>...<br>RECORD_CONSTANT(</font><font color="#663300"><font color="#663300">MYBASED</font>, 30, MOVEABLE);<br>RECORD_USED(</font><font color="#663300"><font color="#663300"><font color="#663300">MYBASED</font></font>) = 25;</font></pre>
+  <pre><font color="#663300">BASED MYBASED FIXED;<br>...<br>ALLOCATE_SPACE(</font><font color="#663300"><font color="#663300">MYBASED</font>, 30);<br>RECORD_USED(</font><font color="#663300"><font color="#663300"><font color="#663300">MYBASED</font></font>) = 25;</font></pre>
 </blockquote>
 
 Having allocated the space for it, you can now use <font color="#663300"><code>MYBASED</code></font> just like any other array of <font color="#663300"><code>FIXED</code></font>, such as in assignments like "<font color="#663300"><code><font color="#663300"><code>MYBASED</code></font>(27) = 6;</code></font>" or "<font color="#663300"><code>X = </code></font><font color="#663300"><code><font color="#663300"><code>MYBASED</code></font>(N) + 12;</code></font>".&nbsp; <br>
@@ -1065,34 +1064,38 @@ the holes by repacking the memory space, at the same time correcting all
  descriptors, and thus increasing the size of contiguous free 
 memory.&nbsp; Though <font color="#663333"><code>COMPACTIFY</code></font>
  was considered a "built-in" runtime-library function in McKeeman XPL, 
-there was actually XPL source code for it. For both the original 
-McKeeman and Intermetrics XPL compilers, the XPL source code for <font color="#663333"><code>COMPACTIFY</code></font> had to be included along with the XPL program being compiled.&nbsp; <br>
+there was actually XPL source code for it which had to be included along with the XPL program being compiled.&nbsp; <br>
 <blockquote><font size="-1"><b>Aside:</b> The </font><font size="-1"><font size="-1"><font color="#663333"><code>COMPACTIFY</code></font></font> source code just mentioned was in the file XPL.LIBRARY.xpl for McKeeman's <b>XCOM</b>,
- and in HALINCL/SPACELIB.xpl for Intermetrics's XPL/I compiler.&nbsp; 
-Both of those XPL compilers automatically included it without the need 
+ and in the file HALINCL/SPACELIB.xpl for Intermetrics's XPL/I compiler.&nbsp; 
+Both the McKeeman and Intermetrics XPL compilers automatically included their appropriate library file without the need 
 for any explicit directives within the XPL source code of the program 
-being compiled.&nbsp; </font><font size="-1"><font size="-1"><font size="-1"><font color="#663333"><code>COMPACTIFY</code></font></font></font> and any of the other contents of the library file were processed <i>first</i>; therefore, all of its declarations were available to the XPL source code of the program being compiled.</font><br>
+being compiled.&nbsp; (Presumably there was JCL to specify the particular library file.)&nbsp; </font><font size="-1"><font size="-1"><font size="-1"><font color="#663333"><code>COMPACTIFY</code></font></font></font> and any of the other contents of the library file were processed <i>first</i>;
+ therefore, all of its declarations were available to the XPL source 
+code of the program being compiled.&nbsp; And all of the variables 
+declared in the library files precede the variables declared in the XPL 
+source code in memory.</font><br>
 </blockquote>
 In that sense, <font color="#663333"><code>COMPACTIFY</code></font> was really a customizable user-supplied <font color="#663300"><code>PROCEDURE</code></font> merely masquerading as a built-in of the runtime library.&nbsp; We have both of those versions of the XPL source code for <font color="#663333"><code>COMPACTIFY</code></font>.&nbsp; They are very different. <br>
-<blockquote><font size="-1"><b>Aside:</b></font><font size="-1"> The Intermetrics version</font><font size="-1"><font size="-1"> of <font color="#663333"><code>COMPACTIFY</code></font></font> is seemingly uncompilable.&nbsp; It</font><font size="-1">
- inexplicably references a number of variables which are nowhere 
-declared in the source code.&nbsp; I can only suppose that these 
-undeclared variables were automatically declared by the Intermetrics 
-XPL/I compiler itself, and thus required no explicit declaration in 
-XPL.&nbsp; Either that, or else the source code I've received for it is 
-for some reason irreparably broken.&nbsp; Whatever the case, without 
-additional (or any!) documentation, the Intermetrics version is not 
-currently usable, even in theory.</font><br>
-</blockquote>
-At present, <b>XCOM-I</b> takes a slightly-different approach, and instead provides its own implementation of <font color="#663333"><code>COMPACTIFY</code></font> in its runtime library; in other words, in <b>XCOM-I</b>, <font color="#663333"><code>COMPACTIFY</code></font>
- is a true built-in written in C rather than a customizable procedure 
-supplied in XPL.&nbsp; In spite of that, just as for the original XPL 
-and XPL/I compilers, there is still a library file which <b>XCOM-I</b> 
-automatically includes during any compilation.&nbsp; This library file, 
-XPLI.LIBRARY.xpl, includes declarations needed for supporting the 
-memory-management of the dope-vector dynamic memory block.<br>
 <br>
-The dope-vector dynamic memory block reserved for contents of <font color="#663300"><code>BASED</code></font> variables naturally did not exist in XPL, since <font color="#663300"><code>BASED</code></font> variables are an XPL/I extension.&nbsp; But even for the Intermetrics XPL/I compiler, their management was not handled by <font color="#663333"><code>COMPACTIFY</code></font>, but rather by a set of macros and functions discussed in <a moz-do-not-send="true" href="#basedManagement">the section on <font color="#663300"><code>BASED</code></font> memory</a>.&nbsp;&nbsp; <i>Those</i> are what is declared in XPLI.LIBRARY.xpl.<br>
+<i>(The struck-out stuff below cannot be correct, and must be 
+rethought.&nbsp; Character strings in BASED variables will not work 
+correctly otherwise.)</i><br>
+<blockquote><strike><font size="-1"><b>Aside:</b></font></strike><strike><font size="-1"> The Intermetrics version</font></strike><strike><font size="-1"><font size="-1"> of <font color="#663333"><code>COMPACTIFY</code></font></font> is seemingly uncompilable.&nbsp; Not just in <b>XCOM-I</b>, but in any compiler.&nbsp; It</font></strike><strike><font size="-1">
+ inexplicably references a number of variables which are nowhere 
+declared in the library source code.&nbsp; I can only suppose that these 
+undeclared variables undocumented built-ins of the compiler.&nbsp; Either that, or else the source code I've received for it is 
+for some reason irreparably broken.&nbsp; Whatever the case, without 
+additional (or any!) documentation, I rate the Intermetrics library as no longer functional.</font></strike><strike><br>
+</strike>
+</blockquote><strike>Because of technical difficulties I've had with the Intermetrics library, </strike><strike><b>XCOM-I</b></strike><strike> takes what we might think of as a combined approach to implementing memory management:</strike><strike><br>
+</strike>
+<ul>
+  <li><strike>When compiling an XPL program with </strike><strike><b>XCOM-I</b></strike><strike>, you should use the McKeeman library, </strike><strike><u>XPL.LIBRARY.xpl</u></strike><strike>.</strike></li>
+  <li><strike>When compiling an XPL/I program with </strike><strike><b>XCOM-I</b></strike><strike>, you should use the library </strike><strike><u>XPLI.LIBRARY.xpl</u></strike><strike>, which is basically the Intermetrics library with McKeeman's </strike><strike><font color="#663333"><code>COMPACTIFY</code></font></strike><strike> replacing Intermetrics's </strike><strike><font color="#663333"><code>COMPACTIFY</code></font></strike><strike>.</strike><br></li>
+</ul>
+
+
+The highest memory region — i.e., the dope-vector dynamic memory block reserved for contents of <font color="#663300"><code>BASED</code></font> variables — naturally did not exist in XPL, since <font color="#663300"><code>BASED</code></font> variables are an XPL/I extension.&nbsp; Nor was memory management of the <font color="#663300"><code>BASED</code></font> variables handled by <font color="#663333"><code>COMPACTIFY</code></font>, but rather by a set of macros and functions discussed in <a moz-do-not-send="true" href="#basedManagement">the section on <font color="#663300"><code>BASED</code></font> memory</a>.&nbsp;&nbsp; <i>Those</i> are defined in XPLI.LIBRARY.xpl.<br>
 <font size="-1">
 </font>
         
@@ -1102,6 +1105,14 @@ The dope-vector dynamic memory block reserved for contents of <font color="#6633
 
   <tbody>
     <tr>
+  <th valign="bottom"><font size="-1">Addresses<br>
+    </font></th>
+  <th valign="bottom"><font size="-1">Description<br>
+    </font></th>
+  <th valign="bottom"><font size="-1">Region Number<br>
+    </font></th>
+</tr>
+<tr>
             <td valign="top" align="right"><font color="#663300"><code><font size="-1">0xFFFFFF</font></code></font><br>
               <font color="#663300"><code></code></font></td>
             <td valign="middle" align="center"><font size="-1"><br>
@@ -1111,7 +1122,9 @@ Data pointed to by "dope vectors" of </font><font size="-1"><font size="-1"><fon
                 <br>
                 <br>
                 <br>
-              </font></td>
+              </font></td><td valign="middle" align="center">6<br>
+</td>
+
           </tr>
 <tr>
       <td valign="top" align="right"><font color="#663300"><code><font size="-1">FREELIMIT<br>
@@ -1127,7 +1140,9 @@ FREEBASE</font><br>
           <font size="-1"><font size="-1">Data pointed to by "string descriptors" of <font color="#663300"><code>CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code></font><br>
               <br>
             </font></font>
-      </td>
+      </td><td valign="middle" align="center">5<br>
+</td>
+
     </tr>
     
     
@@ -1137,15 +1152,19 @@ FREEBASE</font><br>
   <td valign="middle" align="center"><font size="-1"><font size="-1"><font color="#663300"><code><br>
 BASED</code></font></font> dope vectors<br>
       <br>
-    </font></td>
+    </font></td><td valign="middle" align="center">4<br>
+</td>
+
 </tr>
 <tr>
-  <td valign="bottom" align="right"><font size="-1"><font color="#663300"><code>DESCRIPTOR</code></font><br>
+  <td valign="bottom" align="right"><font size="-1"><br>
     </font></td>
   <td valign="middle" align="center"><font size="-1"><font size="-1"><font color="#663300"><code><br>
 CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code><font color="#000000"> string descriptors<br>
         <br>
-      </font></font></font></font></td>
+      </font></font></font></font></td><td valign="middle" align="center">3<br>
+</td>
+
 </tr>
 <tr>
       <td valign="bottom" align="right"><br>
@@ -1154,7 +1173,9 @@ CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code><font c
             </font><font size="-1"><font color="#663300"><font color="#000000"><font color="#663300"><code>FIXED</code></font> and <font color="#663300"><code>BIT(</code><code>≤32)</code></font> variables</font></font></font><font size="-1"><font color="#663300"><font color="#000000"> for non-<font color="#663300"><code>COMMON</code></font></font></font></font><font size="-1"><br>
             <br>
           </font>
-      </td>
+      </td><td valign="middle" align="center">2<br>
+</td>
+
     </tr>
     <tr>
             <td valign="top"><br>
@@ -1162,7 +1183,9 @@ CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code><font c
             <td valign="middle" align="center"><font color="#663300"><code><br>
 </code></font><font color="#663300"><font size="-1" color="#000000"><font size="-1"><font color="#663300"><font color="#000000"><font color="#663300"><code>FIXED</code></font> and <font color="#663300"><code>BIT(</code><code>≤32)</code></font> variables for </font><code>COMMON</code></font></font><font color="#663300"><code></code></font></font><code><br>
                   <br>
-                </code></font></td>
+                </code></font></td><td valign="middle" align="center">1<br>
+</td>
+
           </tr>
 <tr>
       <td valign="bottom" align="right"><font color="#663300"><code><font size="-1">0x000000</font></code></font></td>
@@ -1174,7 +1197,9 @@ CHARACTER</code></font> or <font color="#663300"><code>BIT(&gt;32)</code><font c
     </code></font>
             
           </font>
-      </td>
+      </td><td valign="middle" align="center">0<br>
+</td>
+
     </tr>
     
     
@@ -1515,22 +1540,25 @@ area for string data when it is exhausted. Calls can be triggered by <font color
             </code></font></blockquote>
         <font color="#663300"><code></code></font>The variables <font color="#663300"><code>FREEBASE</code></font>, <font color="#663300"><code>FREELIMIT</code></font>, <font color="#663300"><code>FREEPOINT</code></font>, <font color="#663300"><code>DESCRIPTOR</code></font>, and <font color="#663300"><code>NDESCRIPT</code></font> are used by <font color="#663300"><code>COMPACTIFY</code></font>.<br>
         <font color="#663300"><code></code></font></td>
-      <td valign="middle">The "free-storage area" is where the data for <font color="#663300"><code>CHARACTER</code></font> variables is stored.&nbsp; <br>
-<br>
-Note that while long <font color="#663300"><code>BIT</code></font>-strings (&gt;32 bits) are technically similar to <font color="#663300"><code>CHARACTER</code></font>
+      <td valign="middle">The "free-storage area" is where the data for <font color="#663300"><code>CHARACTER</code></font> and long <font color="#663300"><code>BIT</code></font>-string
+ variables is stored.&nbsp; As a program which involves string variables
+ executes, the strings tend to change size and move around in the 
+free-storage area, thus causing unused "holes" in memory to 
+develop.&nbsp; <font color="#663300"><code>COMPACTIFY</code></font> repacks the area so as to remove the holes.<br>
+<blockquote>
+  <font size="-1"><b>Aside:</b>&nbsp; While long <font color="#663300"><code>BIT</code></font>-strings (&gt;32 bits) are technically similar to <font color="#663300"><code>CHARACTER</code></font>
  strings, they differ in the fact that the amount of storage they 
 require is determined at compile-time and does not change after 
-that.&nbsp; Therefore, by storing them outside of the free-storage area,
- there's never any way for them to create holes in allocated memory, nor
- to participate in garbage collection by <font color="#663300"><code>COMPACTIFY</code></font>.<br>
-<br>
-While the same cannot be said of <font color="#663300"><code>BASED</code></font> variable — their sizes can and <i>do</i> change at runtime — data for <font color="#663300"><code>BASED</code></font>
- variables is nevertheless stored in a separate area as well, and is 
-managed via a different mechanism, and thus also not is affected by <font color="#663300"><code>COMPACTIFY</code></font> operations.<br>
-        <br>
-        <a moz-do-not-send="true" href="#MemoryModel">See the earlier discussion of this</a>.<br>
-        <br>
-Actually, not all of the variables mentioned in the description at left are necessarily meaningful in <b>XCOM-I</b>.&nbsp; <font color="#663300"><code>FREEBASE</code></font> and <font color="#663300"><code>FREELIMIT</code></font> are certainly "used", and <font color="#663300"><code>FREEPOINT</code></font> is certainly altered.<br>
+that.&nbsp; The original McKeeman and Intermetrics compilers therefore stored them outside of the free-storage area — or at least in the very lowest addresses of the free-string area </font><font size="-1"><font size="-1">—</font>
+ in order to save any execution time that would otherwise have been 
+wasted during allocation of memory or garbage allocation.&nbsp; <b>XCOM-I</b>
+ is not so picky, since even the most feeble modern computer will be 
+approximately 14.3926 gazillion times faster than an IBM 360 was.&nbsp; <b>XCOM-I</b>
+ thus saves (me) a little effort by grouping the long bit strings with 
+the character strings in memory, at an immeasurably-small cost in 
+execution time.</font><br>
+</blockquote>
+XPL/I's <font color="#663300"><code>BASED</code></font> variables are stored in a separate memory region and do not participate in garbage collection by <font color="#663300"><code>COMPACTIFY</code></font>.&nbsp; <a moz-do-not-send="true" href="#MemoryModel">See the earlier discussion of this</a>.<br>
       </td>
     </tr>
     <tr>
@@ -1690,11 +1718,11 @@ In <b>XCOM-I</b>, data allocated at runtime via the <font color="#663300"><code>
     <tr>
       <td valign="middle" align="center"><font color="#663300"><code>FREELIMIT</code><code><br>
           </code></font></td>
-      <td valign="middle">A word variable containing the absolute address of the last usable byte in the string-data area.&nbsp; For XPL/I programs, <font color="#663300"><code>FREELIMIT+1</code></font> is the start of the <font color="#663300"><code>BASED</code></font>-variable data area.<br>
+      <td valign="middle">A word variable containing the absolute address of the last usable byte in the string-data area. <br>
       </td>
-      <td valign="middle">By default, at program start (for the compiled program) <b>XCOM-I</b> arbitrarily sets <font color="#663300"><code>FREELIMIT</code></font> at <font color="#663300"><code>"1000000"</code></font> (~16 MB) for XPL or <font color="#663300"><code>"200000"</code></font> (~2 MB) for XPL/I, leaving an initial 0 or 14 MB respectively for <font color="#663300"><code>BASED</code></font> variable data.&nbsp; There's an <b>XCOM-I</b> command-line switch (<font color="#663300"><code>--freelimit=<i>N</i></code></font>) that can be used to change that initial setting.<br>
+      <td valign="middle">I believe that the description lies, and that <font color="#663300"><code>FREELIMIT</code></font> is the first unusable byte beyond the string-data area, rather than the last usable byte in it.<br>
 <br>
-However, if there are <font color="#663300"><code>BASED</code></font> variables, then it is certainly theoretically possible for increases in character-string data or <font color="#663300"><code>BASED</code></font> data to overflow their associated memory area, thus pushing <font color="#663300"><code>FREELIMIT</code></font> upward or downward from that initial setting over the course of the compiled program's run.<br>
+In XPL, all memory beyond <font color="#663300"><code>FREELIMIT</code></font> is unused by the program.&nbsp; In XPL/I, the data for <font color="#663300"><code>BASED</code></font> variables is stored at <font color="#663300"><code>FREELIMIT</code></font> and above.&nbsp; However, the memory-management technique for is to push <font color="#663300"><code>FREELIMIT</code></font> <i>downward</i> in order to make room for <font color="#663300"><code>BASED</code></font> variables.&nbsp; So for either XPL or XPL/I, the <i>initial</i> value of <font color="#663300"><code>FREELIMIT</code></font> is the highest memory location used by the program.&nbsp; XCOM-I sets the initial value of <font color="#663300"><code>FREELIMIT</code></font> at <font color="#663300"><code>"FFFC00"</code></font> (i.e., 1024 bytes below the top of physical memory), in order to leave a small amount of space for <font color="#663300"><code>COMPACTIFY</code></font> to use as scratch memory.<br>
       </td>
     </tr>
     <tr>
@@ -2704,35 +2732,11 @@ system, I infer that bigger is better, within certain limits, and hence <b>XCOM-
     
     
   </tbody>
-</table>
-
-<h1>Compactification Conundrum</h1>
-<blockquote>
-  <p><font size="-1"><b>Aside:</b>  The problem described in this section relates to the behavior of language compilers that were written in XPL or XPL/I and themselves subsequently compiled by <b>XCOM-I</b>.  I don't believe it would be an issue for non-compiler software written in XPL or XPL/I.</font><br></p>
-</blockquote>
-<p>As the title of the book <i>A Compiler Generator</i> suggests, the XPL language and the TWS (Translator Writing System) framework of which it is a part were created as method of developing compilers for other computer languages.  Or rather (McKeeman p. 7), it is "a particular TWS <i>for the IBM System/360</i>" (italics mine).  The dependence on the underlying IBM 360, both for the XPL compiler itself and for the compilers developed using the TWS is real and strong, making it difficult to use the TWS to create a cross-compiler that runs on the IBM 360 but runs on a different computer architecture difficult.  When the XPL compiler itself is not run on an IBM 360, as <b>XCOM-I</b> is not, the problem becomes doubly difficult.  But I think that <b>XCOM-I</b> can be said to have achieved it when it reached the point of being able to compile a working version of McKeeman's original <b>XCOM</b>.<br></p>
-<p>But unfortunately, the difficulties don't stop there.  Viewed at an abstract level, computer languages envisage programs that work with "data", and that data must have memory allocated to it.  In a language like C, all memory allocations are <i>static</i>, in the sense that they are either determined at compile-time or else are explicitly performed by the user via a few simple, well-documented functions like <i>malloc</i> and <i>free</i>.  In a language like Python, all memory allocations are <i>dynamic</i>, in the sense that the data can be created or destroyed at runtime, or moved around in memory, all transparently to the user.  In either case, though, it is the compiler/interpreter that provides all of the memory-management tools.  The fact that these tools must be ported if the compiler/interpreter is ported to a different architecture is irrelevant to the user, because the memory-management tools would be ported as well, in such a way as to preserve identical functionality from the user's point of view.<br></p>
-<p>Alas, that is not the case with the McKeeman TWS or XPL and XPL/I.  In the McKeeman TWS, memory for variables is initially allocated by the compiler, but then subsequently managed by user-modifiable library functions, and in particular a user-supplied garbage-collection procedure called <font color="#663300"><code>COMPACTIFY</code></font>.  As long a two different versions of <font color="#663300"><code>COMPACTIFY</code></font> both relate to the same underlying details of memory allocation as the XPL compiler program itself, this causes no problems; it merely means that developers of different compiler systems may be able to produce a more-efficient <font color="#663300"><code>COMPACTIFY</code></font> for their particular use case.<br></p>
-<p>But what if the underlying notion of the memory map of the compiler being developed differs from that of the XPL compiler?  That would mean that the initialization of data that's performed by the compiler might (would!) be incompatible with the memory-management tools (<font color="#663300"><code>COMPACTIFY</code></font>) supplied by the user.  It would mean that the XPL compiler itself would have to be modified to initially allocate memory in accordance with the rules of the compiler under development using the TWS.  In short, it would usually mean that the XPL compiler would have to use the <i>same</i> <font color="#663300"><code>COMPACTIFY</code></font> as the compiler being developed.<br></p>
-<p>And what if two <i>different</i> compilers were being developed ... say, Intermetrics's <b>HAL-S/FC</b> and McKeeman's <b>XCOM</b>.  And what if those two compilers had memory maps that differed in certain specifics?  Then they would require two different versions of <font color="#663300"><code>COMPACTIFY</code></font>.  And from what I said in the preceding paragraph, that means that they would have to be compiled by two different, mutually-incompatible XPL compilers.  Of course, that is precisely the situation that does obtain with <b>HAL-S/FC</b>:  Intermetrics had to develop its own XPL compiler to compile it, and could not use McKeeman's <b>XCOM</b>.<br></p>
-<p>Think about the implications of that for <b>XCOM-I</b>, which is intended to be able to compile both <b>HAL-S/FC</b> and <b>XCOM</b>.  How is <b>XCOM-I</b> to support multiple arbitrary (in detail at least) memory-allocation scheme?  Am I to create multiple versions of <b>XCOM-I</b>, one to compile McKeeman's <b>XCOM</b>, one to compile <b>HAL-S/FC</b>, and yet another for any other deviant vision of memory management used by some legacy compiler developed using the TWS?  I think not!  And as a further complication, I might add, neither of which is documented in enough (or any) detail to be duplicated by <b>XCOM-I</b> without very extensive reverse engineering?  The <b>HAL-S/FC</b> memory-management scheme in particular is marvelous in its complexity, opacity, and complete absence even of program comments.<br></p>
-<p>For now, <b>XCOM-I</b> ignores the problem:  It simply discards any <font color="#663300"><code>COMPACTIFY</code></font> procedure provided by the user, and substitutes its own this works well enough to compile McKeeman <b>XCOM</b>.  Most likely this is simply because the runtime memory model is so large compared to what McKeeman <b>XCOM</b> had on a physical IBM 360 that it never runs out.  I.e., that perhaps there's never a need to run <font color="#663300"><code>COMPACTIFY</code></font> at all, and hence it doesn't matter whether <font color="#663300"><code>COMPACTIFY</code></font> works or not.<br></p>
-<p>With <b>HAL/S-FC</b>, the problem goes a little deeper since its <font color="#663300"><code>COMPACTIFY</code></font> is accompanied by a number of other memory-management procedures or macros that have intimate knowledge of the underlying details of the memory map.  </p>
-When compiling an XPL program, McKeeman <b>XCOM</b> or Intermetrics <b>HAL/S-FC</b> first silently imports a "library" file using <font color="#663300"><code>INPUT(2)</code></font> and only then imports the XPL source code it's supposed to be compiling using <font color="#663300"><code>INPUT(0)</code></font>.&nbsp; The library file is just XPL source code.&nbsp; In principle, those library files would be:<br>
-<ul>
-  <li>For McKeeman <b>XCOM</b>:  XPL.LIBRARY.xpl, which just contains <font color="#663300"><code>COMPACTIFY</code></font>.</li>
-  <li>For Intermetrics <b>HAL/S-FC</b>:  HALINCL/SPACELIB.xpl, which contains <font color="#663300"><code>COMPACTIFY</code></font> and the other problematic memory-management procedures and macros mentioned above.<br></li>
-</ul>
-In the <b>XCOM-I</b> framework, though, it is most-expedient to instead 
-use called RONLIB.xpl for both cases.&nbsp; RONLIB.xpl, of my own 
-concoction, has no <font color="#663300"><code>COMPACTIFY</code></font> since <b>XCOM-I</b>'s
- built-in is used, but has conceptually-similar replacements for any of 
-the problematic memory-management procedures or macros invoked by user 
-code.&nbsp; That's all for the benefit of <b>HAL/S-FC</b>, but it's fine for McKeeman <b>XCOM</b> too, since any procedures in RONLIB.xpl not called by the remainder of <b>XCOM</b> will simply be discarded by <b>XCOM-I</b> anyway.<br>
+</table><br>
 <h1><a name="debugging"></a>Debugging XPL Programs</h1>
 
 <p>It is admittedly unlikely that many people will be writing new XPL or XPL/I programs nowadays, and will instead be compiling only legacy XPL or XPL/I programs ... assuming that I haven't already compiled all of them first!  (Which is a distinct possibility.)  Since such legacy programs will presumably all have been debugged decades before, there's not as much need for a debugger as there is for computer languages in which there are many active developers.  Nevertheless, XPL or XPL/I programs can be run under a debugger to a certain extent.<br></p>
-The trick is to realizes that while we have no debugger for the XPL language, we do have debuggers for C, and once <b>XCOM-I</b>
+The trick is to realize that while we have no debugger for the XPL language, we do have debuggers for C, and once <b>XCOM-I</b>
  has translated XPL or XPL-I software into C, such C debuggers can be 
 used.  It is merely necessary when compiling the C code to include the 
 necessary command-line switches that cause the C compiler to incorporate
@@ -2741,7 +2745,9 @@ necessary command-line switches that cause the C compiler to incorporate
 </blockquote>
 Having done this, any debugger which can accept <b>gdb</b> style debugging info, such as <b>gdb</b> itself or full-screen wrappers for <b>gdb</b>, can now be used for debugging.&nbsp; For other C compilers or other debuggers, perhaps different switches would be needed.<br>
 <br>
-The principal difficulty in debugging the code in C vs in XPL (if that were possible) is that <b>XCOM-I</b> doesn't model XPL variables as C variables, but rather as numerical locations in an array called <font color="#663300"><code>memory</code></font>.&nbsp;
+But debugging XPL code via its C translation is not as convenient as a native XPL debugger would be.<br>
+<br>
+The principal difficulty in debugging the code in C vs in XPL is that <b>XCOM-I</b> doesn't model XPL variables as C variables, but rather as numerical locations in an array called <font color="#663300"><code>memory</code></font>.&nbsp;
  Moreover, the format of this data in "memory" is that of the IBM 
 System/360 rather than the native format of the computer on which 
 debugging is being performed.&nbsp; While in my opinion, these design 
@@ -2909,7 +2915,7 @@ technique, you might be able to do so just by altering the parameters of
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-05-06<br>
+          2024-05-13<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
