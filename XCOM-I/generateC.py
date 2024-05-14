@@ -173,11 +173,11 @@ commonBase = 0
 nonCommonBase = 0
 freeBase = 0
 freePoint = 0
-freeLimit = initialFreeLimit
+freeLimit = 0
+regions = []
 variableAddress = 0 # Total contiguous bytes allocated in 24-bit address space.
 useCommon = False # For allocating COMMON vs non-COMMON
 useString = False # For allocating character data CHARACTER.
-useBit = False # For allocating BIT data.
 memory = bytearray([0] * (1 << 24));
 '''
 `memoryMap` is a dictionary whose keys are addresses in `memory` and whose
@@ -268,13 +268,7 @@ def putBIT(address, value):
     numBytes = value["numBytes"]
     if bitWidth > 32:
         descriptor = getFIXED(address)
-        if False and descriptor == 0: # Not yet assigned a value:
-            # Note that we put the data for BIT strings at the *top* of
-            # memory, lowering `freelimit`.
-            freeLimit -= numBytes
-            descriptor = ((numBytes - 1) << 24) | (freeLimit & 0xFFFFFF)
-            putFIXED(address, descriptor)
-        elif descriptor == 0: # Not yet assigned a value:
+        if descriptor == 0: # Not yet assigned a value:
             descriptor = ((numBytes - 1) << 24) | (variableAddress & 0xFFFFFF)
             putFIXED(address, descriptor)
             variableAddress += numBytes
@@ -323,17 +317,44 @@ def putCHARACTER(address, s):
             errxit("Memory overflow (%06X,%d) or else illegal character in \"%s\"" %\
                    (saddress, i, s))
 
+# `allocateVariables`, run via `walkModel` is used to assign memory addresses
+# to variables defined in the various scope.  `walkModel` is run several times
+# in succession, one for each of the memory regions in the memory model.  For
+# this purpose, I assign each of those regions a number, from lowest memory
+# to highest.  Refer to https://www.ibiblio.org/apollo/XPL.html#MemoryModel.
+# Not all regions (0 and 6) have anything in them that `allocateVariable`
+# can allocate at compile-time.
 rootBASED = 0
-lastBASED = 0
-def allocateVariables(scope, extra = None):
-    global variableAddress, memory, memoryMap, lastBASED, rootBASED
+#lastBASED = 0
+def allocateVariables(scope, region):
+    global variableAddress, memory, memoryMap, rootBASED #, lastBASED
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
-        if "BASED" in attributes and (useString or useBit):
-            continue
         if "PROCEDURE" in attributes:
             continue
+        if "LABEL" in attributes:
+            continue
+        if "parameter" in attributes:
+            continue
+        if "common" in attributes and region not in [1, 3, 4, 5]:
+            continue
+        if "common" not in attributes and region == 1:
+            continue
+        if "BASED" in attributes:
+            if region != 4:
+                continue
+        else:
+            if "FIXED" in attributes and region not in [1, 2]:
+                continue
+            if "BIT" in attributes and attributes["BIT"] <= 32 and \
+                    region not in [1, 2]:
+                continue
+            if "CHARACTER" in attributes and region not in [3, 5]:
+                continue
+            if "BIT" in attributes and attributes["BIT"] > 32 and \
+                    region not in [3, 5]:
+                continue
         if "FIXED" in attributes:
             datatype = "FIXED"
         elif "BIT" in attributes:
@@ -348,10 +369,11 @@ def allocateVariables(scope, extra = None):
             datatype = "BASED"
         else:
             continue
+        
         mangled = attributes["mangled"]
+        
+        '''
         if useString and datatype != "CHARACTER":
-            continue
-        if useBit and datatype != "BIT":
             continue
         if useCommon:
             if "common" not in attributes:
@@ -359,6 +381,8 @@ def allocateVariables(scope, extra = None):
         else:
             if "common" in attributes or "parameter" in attributes:
                 continue
+        '''
+            
         length = 1
         # The following needs tweaking TBD.
         if "top" in attributes:
@@ -386,41 +410,8 @@ def allocateVariables(scope, extra = None):
             numElements = attributes["top"] + 1
         else:
             numElements = 0
-        if useBit: # Note: `useBit` no longer used.
-            if len(initial) > 0:
-                memoryMap[variableAddress] = {
-                    "mangled": mangled, 
-                    "datatype": "Long BIT data", 
-                    "numElements": numElements,
-                    "record": {},
-                    "numFieldsInRecord": 0,
-                    "recordSize": 0,
-                    "dirWidth": 0,
-                    "bitWidth": 0
-                }
-                address = attributes["address"]
-                firstAddress = address
-                for i in range(length):
-                    # INITIALize (just BIT variables).
-                    if "INITIAL" in attributes and i < len(initial):
-                        initialValue = initial[i]
-                        if not isinstance(initialValue, int):
-                            errxit("Cannot evaluate initializer to BIT", scope)
-                    else:
-                        initialValue = 0
-                    initialValue = {
-                            "bitWidth": bitWidth,
-                            "numBytes": numBytes,
-                            "bytes": initialValue
-                            }
-                    if numBytes > 4:
-                        putFIXED(address, ((numBytes - 1) << 24) | variableAddress)
-                        putBIT(address, initialValue)
-                        variableAddress += numBytes
-                    else:
-                        putBIT(address, initialValue)
-                    address += attributes["dirWidth"]
-        elif useString:
+
+        if region == 5:
             if len(initial) > 0:
                 memoryMap[variableAddress] = {
                     "mangled": mangled, 
@@ -451,88 +442,103 @@ def allocateVariables(scope, extra = None):
                     putCHARACTER(address, initialValue)
                     address += attributes["dirWidth"]
                     variableAddress += len(initialValue)
-        else:
-            if "BASED" in attributes:
-                if "RECORD" in attributes:
-                    record = attributes["RECORD"]
-                else:
-                    datatype = "BASED"
-                    record = { '': attributes }
+            continue
+        
+        if "BASED" in attributes:
+            if "RECORD" in attributes:
+                record = attributes["RECORD"]
             else:
-                record = {}
+                datatype = "BASED"
+                record = { '': attributes }
+            if rootBASED == 0:
+                rootBASED = variableAddress
+            putFIXED(variableAddress, 0) # Pointer
             bitWidth = 0
-            if "BIT" in attributes:
+            if "recordSize" in attributes:
+                recordSize = attributes["recordSize"]
+            elif "FIXED" in attributes or "CHARACTER" in attributes:
+                recordSize = 4
+            elif "BIT" in attributes:
                 bitWidth = attributes["BIT"]
+                if bitWidth <= 8:
+                    recordSize = 1
+                elif bitWidth <= 16:
+                    recordSize = 2
+                else:
+                    recordSize = 4
+            putHALFWORD(variableAddress + 4, recordSize)
+            putHALFWORD(variableAddress + 6, 0) # #descriptors
+            putFIXED(variableAddress + 8, 0) # allocated
+            putFIXED(variableAddress + 12, 0) # used
+            '''
+            if lastBASED > 0:
+                putFIXED(lastBASED + 16, variableAddress)
+            lastBASED = variableAddress
+            '''
+            putFIXED(variableAddress + 16, 0) # next
+            putFIXED(variableAddress + 20, 0) # options
+            putHALFWORD(variableAddress + 24, 0) # global factor
+            putHALFWORD(variableAddress + 26, 0) # group factor
+            attributes["address"] = variableAddress
             memoryMap[variableAddress] = {
                 "mangled": mangled, 
                 "datatype": datatype, 
-                "numElements": numElements, 
+                "numElements": 0, 
                 "record": record, 
                 "numFieldsInRecord": 0,
-                "recordSize": 0,
-                "dirWidth": attributes["dirWidth"],
+                "recordSize": recordSize,
+                "dirWidth": 28,
                 "bitWidth": bitWidth
             }
-            attributes["address"] = variableAddress
-            # INITIALize FIXED or BIT variables.
-            if "INITIAL" in attributes and \
-                    ("FIXED" in attributes or "BIT" in attributes):
-                for initialValue in initial:
-                    if length <= 0:
-                        errxit("Too many initializers", scope)
-                    if not isinstance(initialValue, int):
-                        # Not immediately an integer, but perhaps it's an
-                        # expression whose value can be computed.  Let's try!
-                        tokenized = xtokenize(scope, initialValue)
-                        tree = parseExpression(tokenized, 0)
-                        if tree != None and "token" in tree and \
-                                "number" in tree["token"]:
-                            initialValue = tree["token"]["number"]
-                        else:
-                            errxit("Initializer is not integer", scope);
-                    if "BIT" in attributes:
-                        bitWidth = attributes["BIT"]
-                        numBytes = (bitWidth + 7) // 8
-                        if numBytes == 3:
-                            numBytes = 4
-                        putBIT(variableAddress, \
-                               { 
-                                   "bytes": initialValue,
-                                   "bitWidth": bitWidth,
-                                   "numBytes": numBytes
-                               })
-                    else: # "FIXED" in attributes
-                        putFIXED(variableAddress, initialValue)
-                    length -= 1
-                    variableAddress += attributes["dirWidth"]
-            if "BASED" in attributes:
-                if rootBASED == 0:
-                    rootBASED = variableAddress
-                putFIXED(variableAddress, 0) # Pointer
-                if "recordSize" in attributes:
-                    recordSize = attributes["recordSize"]
-                elif "FIXED" in attributes or "CHARACTER" in attributes:
-                    recordSize = 4
-                elif "BIT" in attributes:
-                    bitWidth = attributes["BIT"]
-                    if bitWidth <= 8:
-                        recordSize = 1
-                    elif bitWidth <= 16:
-                        recordSize = 2
+            variableAddress += 28
+            continue
+        record = {}
+        bitWidth = 0
+        if "BIT" in attributes:
+            bitWidth = attributes["BIT"]
+        memoryMap[variableAddress] = {
+            "mangled": mangled, 
+            "datatype": datatype, 
+            "numElements": numElements, 
+            "record": record, 
+            "numFieldsInRecord": 0,
+            "recordSize": 0,
+            "dirWidth": attributes["dirWidth"],
+            "bitWidth": bitWidth
+        }
+        attributes["address"] = variableAddress
+        # INITIALize FIXED or BIT variables.
+        if "INITIAL" in attributes and \
+                ("FIXED" in attributes or "BIT" in attributes):
+            for initialValue in initial:
+                if length <= 0:
+                    errxit("Too many initializers", scope)
+                if not isinstance(initialValue, int):
+                    # Not immediately an integer, but perhaps it's an
+                    # expression whose value can be computed.  Let's try!
+                    tokenized = xtokenize(scope, initialValue)
+                    tree = parseExpression(tokenized, 0)
+                    if tree != None and "token" in tree and \
+                            "number" in tree["token"]:
+                        initialValue = tree["token"]["number"]
                     else:
-                        recordSize = 4
-                putHALFWORD(variableAddress + 4, recordSize)
-                putHALFWORD(variableAddress + 6, 0) # #descriptors
-                putFIXED(variableAddress + 8, 0) # allocated
-                putFIXED(variableAddress + 12, 0) # used
-                if lastBASED > 0:
-                    putFIXED(lastBASED + 16, variableAddress)
-                lastBASED = variableAddress
-                putFIXED(variableAddress + 16, 0) # next
-                putFIXED(variableAddress + 20, 0) # options
-                putHALFWORD(variableAddress + 24, 0) # global factor
-                putHALFWORD(variableAddress + 26, 0) # group factor
-            variableAddress += attributes["dirWidth"] * length
+                        errxit("Initializer is not integer", scope);
+                if "BIT" in attributes:
+                    bitWidth = attributes["BIT"]
+                    numBytes = (bitWidth + 7) // 8
+                    if numBytes == 3:
+                        numBytes = 4
+                    putBIT(variableAddress, \
+                           { 
+                               "bytes": initialValue,
+                               "bitWidth": bitWidth,
+                               "numBytes": numBytes
+                           })
+                else: # "FIXED" in attributes
+                    putFIXED(variableAddress, initialValue)
+                length -= 1
+                variableAddress += attributes["dirWidth"]
+        variableAddress += attributes["dirWidth"] * length
 
 # A function for `walkModel` that mangles identifier names.
 def mangle(scope, extra = None):
@@ -1207,8 +1213,9 @@ def generateExpression(scope, expression):
             if symbol in ["INPUT", "LENGTH", "SUBSTR", "BYTE", "SHL", "SHR",
                           "DATE", "TIME", "DATE_OF_GENERATION", "COREBYTE",
                           "COREWORD", "FREEPOINT", "TIME_OF_GENERATION",
-                          "FREELIMIT", "FREEBASE", "ABS", 
-                          "STRING_GT", "COREHALFWORD", "PARM_FIELD"]:
+                          "FREELIMIT", "FREEBASE", "ABS", "NDESCRIPT",
+                          "STRING_GT", "COREHALFWORD", "PARM_FIELD",
+                          "DESCRIPTOR"]:
                 if symbol in ["INPUT", "SUBSTR", "PARM_FIELD"]:
                     builtinType = "CHARACTER"
                 else:
@@ -1240,7 +1247,8 @@ def generateExpression(scope, expression):
                         #if "1322" in p: #***DEBUG***
                         #    print("**", tipe, p, file=sys.stderr)
                         if symbol in ["ABS", "COREBYTE", "COREWORD", "SHL",
-                                      "SHR", "INPUT", "STRING", "COREHALFWORD"]:
+                                      "SHR", "INPUT", "STRING", "COREHALFWORD",
+                                      "DESCRIPTOR"]:
                             autoconvertTo = "FIXED"
                         elif symbol in ["BYTE", "LENGTH", "STRING_GT", 
                                         "SUBSTR"]:
@@ -1539,11 +1547,21 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                 else:
                     errxit("Field %s.%s not subscripted properly" % \
                            (baseName, fieldName))
-                sourceAddress = "getFIXED(%d)" % baseAttributes['address'] + \
-                                " + %d * (%s)" % (baseAttributes["recordSize"],
-                                                  sourceb) + \
-                                " + %d + " % fieldAttributes["offset"] + \
-                                "%d * (%s)" % (fieldAttributes["dirWidth"], sourcef)
+                try:
+                    sourceAddress = "getFIXED(%d)" % baseAttributes['address'] + \
+                                    " + %d * (%s)" % (baseAttributes["recordSize"],
+                                                      sourceb) + \
+                                    " + %d + " % fieldAttributes["offset"] + \
+                                    "%d * (%s)" % (fieldAttributes["dirWidth"], sourcef)
+                except:
+                    s = "Implementation problem:\n"
+                    s = s + "  %s attributes:\n" % baseName
+                    for a in baseAttributes:
+                        s = s + "    %s: %s" % (str(a), str(baseAttributes[a])) + "\n"
+                    s = s + "  %s attributes:\n" % fieldName
+                    for a in fieldAttributes:
+                        s = s + "    %s: %s" % (str(a), str(fieldAttributes[a])) + "\n"
+                    errxit(s[:-1])
                 if "CHARACTER" in fieldAttributes:
                     if tipeR == "FIXED":
                         print(indent + "putCHARACTER(%s, fixedToCharacter(numberRHS));" \
@@ -1630,7 +1648,8 @@ def generateSingleLine(scope, indent, line, indexInScope, ps = None):
                 children = LHS["children"]
                 if builtin in ["FREEPOINT", "FREELIMIT"]:
                     print(indent + "%s2(numberRHS);" % builtin)
-                elif builtin in ["COREBYTE", "COREWORD", "COREHALFWORD"]:
+                elif builtin in ["COREBYTE", "COREWORD", "COREHALFWORD",
+                                 "DESCRIPTOR"]:
                     if len(children) == 1:
                         tipe, source = generateExpression(scope, children[0])
                         #if "1322" in source:
@@ -2275,7 +2294,8 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         sys.stdout = stdoutOld # Restore previous stdout.
 
 def generateC(globalScope):
-    global useCommon, useString, useBit, pf, nonCommonBase, freeBase, variableAddress
+    global pf, nonCommonBase, freeBase, freePoint, freeLimit, \
+            variableAddress, regions
     
     pf = open(outputFolder + "/procedures.h", "w")
     print("/*", file=pf)
@@ -2318,34 +2338,13 @@ def generateC(globalScope):
         print("extern jmp_buf jb%s;" % label, file=pf)
     walkModel(globalScope, sortJumps)
     
-    # Allocate and initialize simulated memory for each variable in whatever 
-    # scope. The mechanism is to set an attribute
-    # of "address" for each variable in each scope["variables"], and to
-    # additionally set an attribute of "saddress" for each `CHARACTER` variable
-    # to indicate where the string data (vs the string descriptor) is stored.
-    # Both of these attributes are indices in the 24-bit simulated memory.
-    # Thus in XPL code translated to C, the code generator looks up addresses
-    # of XPL variables, and generates C code that operates on absolute numerical
-    # addresses rather than on symbolic addresses.
-    useCommon = True # COMMON
-    useBit = False
-    useString = False
-    walkModel(globalScope, allocateVariables)
-    nonCommonBase = variableAddress
-    
-    #-----------------------------------------------------------------------
-    # Before continuing with the other XPL variables below, now that we're
-    # out of the COMMON area we're going to allocate a little bit of memory 
-    # here for use by XCOM-I, specifically for passing info from `MONITOR` 
-    # and XCOM-I to the XPL program that needs to be accessible via XPL 
-    # variables, since such variables need to be in `memory`.
-    
+    # Memory region 0 is special, in that it contains data from MONITOR rather
+    # than from XPL declarations, so let's take care of its allocation first.
     # First, the string whose descriptor is returned by `MONITOR(23)`.
     whereMonitor23 = variableAddress
     variableAddress += 4
     putCHARACTER(whereMonitor23, identifierString)
     variableAddress += len(identifierString)
-    
     # Next, the options data returned by `MONITOR(13)`.  The data itself will
     # all be filled in by the runtime library, but we need to make sure that the
     # space is properly allocated and templated.
@@ -2365,36 +2364,31 @@ def generateC(globalScope):
     # Arrays of `CON`, `TYPE2`, and `VALS`, respectively.
     for i in range(3 * MAX_ENTRIES): 
         putFIXED(variableAddress, 0);
-        variableAddress += 4;
-    #-----------------------------------------------------------------------
+        variableAddress += 4;   
+    regions.append( [0, variableAddress] )
     
-    useCommon = False # non-COMMON variables
-    useBit = False
-    useString = False
-    walkModel(globalScope, allocateVariables)
-    '''
-    # The following extra step turns out to be unnecessary, and double-allocates
-    # space for long BIT data.
-    useCommon = True # COMMON Long BIT data
-    useBit = True
-    useString = False
-    walkModel(globalScope, allocateVariables)
-    useCommon = False # Normal Long BIT data
-    useBit = True
-    useString = False
-    walkModel(globalScope, allocateVariables)
-    '''
-    freeBase = variableAddress
-    useCommon = True # COMMON string data
-    useBit = False
-    useString = True
-    walkModel(globalScope, allocateVariables)
-    useCommon = False # normal string data
-    useBit = False
-    useString = True
-    walkModel(globalScope, allocateVariables)
-    freePoint = variableAddress
-
+    # Allocate and initialize simulated memory for memory regions 1-6.
+    # The mechanism is to set an attribute
+    # of "address" for each variable in scope["variables"], and to
+    # additionally set an attribute of "saddress" for each `CHARACTER` variable
+    # to indicate where the string data (vs the string descriptor) is stored.
+    # Both of these attributes are indices in the 24-bit simulated memory.
+    # Thus in XPL code translated to C, the code generator looks up addresses
+    # of XPL variables, and generates C code that operates on absolute numerical
+    # addresses rather than on symbolic addresses.
+    for region in range(1, 6):
+        start = variableAddress
+        walkModel(globalScope, allocateVariables, region)
+        if region == 5: 
+            freeBase = start
+            freePoint = variableAddress
+            freeLimit = 0x1000000 - 1024 # Leave a little bit free at the top.
+            variableAddress = freeLimit
+            freeLimit = variableAddress
+        regions.append( [start, variableAddress] )
+    regions.append( [variableAddress, freeLimit] ) # Region 6.
+    nonCommonBase = regions[2][0]
+    
     # Make another version of `memoryMap` that's sorted by symbol name rather
     # than address.
     memoryMapIndexBySymbol = {}
@@ -2414,11 +2408,11 @@ def generateC(globalScope):
     print("// Initial memory contents, prior to COMMON load ---------------\n",\
           file=f)
     print("uint8_t memory[MEMORY_SIZE] = {", file=f)
-    for i in range(variableAddress):
+    for i in range(freePoint):
         if 0 == i % 8:
             print("  ", end="", file=f)
         print("0x%02X" % memory[i], end="", file=f)
-        if i < variableAddress - 1:
+        if i < freePoint - 1:
             print(", ", end="", file=f)
             if 7 == i % 8:
                 j = i & 0xFFFFF8
@@ -2535,6 +2529,14 @@ def generateC(globalScope):
     for entry in sorted(memoryMapIndexBySymbol):
         print("  &memoryMap[%d]," % memoryMapIndexBySymbol[entry], file=f)
     print("};", file=f)
+    print("\n// Memory regions --------------------------------------------\n",\
+          file=f)
+    print("memoryRegion_t memoryRegions[%d] = {" % len(regions), file=f)
+    for i in range(len(regions)):
+        if i > 0:
+            print(",", file=f)
+        print("  { %d, %d }" % tuple(regions[i]), end="", file=f)
+    print("\n};", file=f)
     f.close()
     
     # Write out any special configuration settings, for use by
@@ -2593,7 +2595,12 @@ def generateC(globalScope):
           file=f)
     print("extern memoryMapEntry_t *memoryMapBySymbol[NUM_SYMBOLS]; // Sorted by symbol", 
           file=f)
-    print("  ", file=f)
+    print("typedef struct {", file=f)
+    print("  int start;", file=f)
+    print("  int end;", file=f)
+    print("} memoryRegion_t;", file=f)
+    print("extern memoryRegion_t memoryRegions[%d];" % len(regions), file=f)
+    print("", file=f)
     f.close()
     
     if debugSink != None:

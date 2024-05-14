@@ -206,7 +206,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                     initialString = ''
                 properties[typeInitial] = initial
             elif field in [",", ";", ":"] and not inInitial:
-                properties = { }
+                properties = {  }
                 if isCommon:
                     properties["common"] = True
                 if isArray:
@@ -319,7 +319,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         properties[token] = True
                         if token == "BASED":
                             properties["dirWidth"] = 28
-                        elif token in ["CHARACTER", "FIXED", "ARRAY"]:
+                        elif "dirWidth" not in properties and \
+                                token in ["CHARACTER", "FIXED", "ARRAY"]:
                             properties["dirWidth"] = 4
                     elif token == "RECORD":
                         properties["RECORD"] = {}

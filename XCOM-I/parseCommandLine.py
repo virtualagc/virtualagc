@@ -68,7 +68,6 @@ libFile = None
 noInclusionDirectives = False
 showBacktrace = False
 physicalTop = 1 << 24
-initialFreeLimit = 0x1FFFFF
 keepUnused = False
 
 '''
@@ -211,10 +210,7 @@ The available OPTIONS are:
                 XCOM or HAL/S-FC), it's customarily the file that contains the 
                 source code for the COMPACTIFY procedure (XPL.LIBRARY.xpl for 
                 XCOM or SPACELIB.xpl for HAL/S-FC, prefixed by an appropriate
-                path).  It's typically not needed for other use-cases, since the
-                XCOM-I runtime library has its own built-in COMPACTIFY.  If this
-                option is used, it should preceded all XPL source files on the
-                command line.
+                path). 
 --merge=F       (Default None.)  Write a file F containing all of the merged XPL
                 source code.  Note that the resulting file is not necessarily a
                 valid XPL file itself, because any file-inclusion directives the
@@ -246,12 +242,6 @@ The available OPTIONS are:
                 improved human readability.  Whereas the --concise switch instead
                 eliminates those extra comments, producing smaller C file sizes.
 --backtrace     Show Python backtrace for some XCOM-I errors.
---freelimit=N   (Default FFFFFF for XPL, 1FFFFF for XPL/I.)  Sets the initial
-                value of FREELIMIT, which is the address boundary between the
-                free-string region of memory and the BASED-variable region of
-                memory.  The value is in hexadecimal, and should not exceed
-                FFFFFF.  If the --freelimit option is used, it should not 
-                precede the --xpl option on the command line.
 --keep-unused   By default, XPL procedures which are never called are discarded
                 without any generation of C code, and reduced analysis.  With
                 --keep-unused, those procedures are retained and processed
@@ -263,12 +253,6 @@ for parm in sys.argv[1:]:
         break
     elif parm == "--keep-unused":
         keepUnused = True
-    elif parm.startswith("--freelimit="):
-        try:
-            initialFreeLimit = int(parm[12:], 16)
-        except:
-            print("Value of --freelimit not hexadecimal", file=sys.stderr)
-            sys.exit(1)
     elif parm.startswith("--merge="):
         merge = parm[8:]
     elif parm.startswith("--lib-file="):
@@ -284,7 +268,6 @@ for parm in sys.argv[1:]:
         sys.exit(0)
     elif parm == "--xpl":
         standardXPL = True
-        initialFreeLimit = 0xFFFFFF
     elif parm.startswith("--cond="):
         cond = parm[7:]
         if len(cond) != 1 or not cond.isupper():

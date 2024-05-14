@@ -2053,7 +2053,7 @@ MONITOR6(uint32_t address, uint32_t n) {
   memoryMapEntry_t *found;
   uint32_t start, end;
 
-  return 1;
+  abend("MONITOR6 implementation needs rework");
 
   found = lookupAddress(address);
   if (found == NULL)
@@ -2583,10 +2583,11 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
     abend("Failed to write specified number of bytes to FILE");
 }
 
+/*
 void
 RECORD_LINK(void) {
-
 }
+*/
 
 // A function for comparing struct allocated_t objects (see COMPACTIFY below),
 // for sorting them into order of increasing allocation address.
@@ -2609,6 +2610,7 @@ cmpAllocations(const void *e1, const void *e2)
   return a1->saddress - a2->saddress;
 }
 
+/*
 // Ignoring records at first, and packing only strings and BASED.
 void
 COMPACTIFY(void)
@@ -2715,6 +2717,7 @@ COMPACTIFY(void)
 
   free(allocations);
 }
+*/
 
 /*
  * Format of a COMMON file:  A sequence of ASCII lines, each of which
@@ -2947,9 +2950,30 @@ EXIT(void) {
   exit(10);
 }
 
+void
+LINK(void) {
+  OUTPUT(0, "");
+  exit(0);
+}
+
 char *
 PARM_FIELD(void) {
   return parmField;
+}
+
+uint32_t
+DESCRIPTOR(uint32_t index) {
+  return getFIXED(memoryRegions[3].start + 4 * index);
+}
+
+void
+DESCRIPTOR2(uint32_t index, uint32_t descriptor) {
+  putFIXED(memoryRegions[3].start + 4 * index, descriptor);
+}
+
+uint32_t
+NDESCRIPT(void) {
+  return (memoryRegions[3].end - memoryRegions[3].start) / 4;
 }
 
 // Some test code.

@@ -15,6 +15,7 @@ SHELL := /bin/bash # To use bash rather than sh.
 
 defaultTargets = PASS1 FLO OPT AUX PASS2 PASS3 PASS4
 XCOM = ../../../../XCOM-I/XCOM-I.py
+XLIB = ../../../../XCOM-I/XPLI.LIBRARY.xpl
 
 .PHONY: all
 all:	$(defaultTargets)
@@ -26,8 +27,8 @@ $(defaultTargets):
 	else \
 		cd $@.PROCS; \
 	fi && \
-	$(XCOM)	--output=$@ \
-		--lib-file=../HALINCL/SPACELIB.xpl \
+	$(XCOM)	--cond=P --output=$@ \
+		--lib-file=$(XLIB) \
 		'##DRIVER.xpl' && \
 	make -C $@ && \
 	mv $@/$@ ..

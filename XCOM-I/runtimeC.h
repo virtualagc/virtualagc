@@ -429,11 +429,13 @@ ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex);
 int
 rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex);
 
-void
+/* *Not* defined in runtimeC.c.  However, because XPL treats it like a built-in
+ * code that uses it prior to the definition won't have a forward declaration.
+ * So we declare it here. */
+int32_t
 COMPACTIFY(void);
-
-void
-RECORD_LINK(void);
+//void
+//RECORD_LINK(void);
 
 // Functions for reading COMMON from a file, or writing COMMON to a file.
 
@@ -479,8 +481,20 @@ FREEBASE(void);
 void
 EXIT(void);
 
+void
+LINK(void);
+
 extern char *parmField;
 char *
 PARM_FIELD(void);
+
+uint32_t
+DESCRIPTOR(uint32_t index);
+
+void
+DESCRIPTOR2(uint32_t index, uint32_t descriptor);
+
+uint32_t
+NDESCRIPT(void);
 
 #endif // RUNTIMEC_H

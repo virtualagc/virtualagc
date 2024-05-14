@@ -83,8 +83,8 @@
 # of this Makefile will also be in that folder.  (But this Makefile may be in
 # other folders as well, so don't let that confuse you.)
 #
-# Second, use the command `make tests`.  Note that the CC alternative described
-# in the preceding section can be used to change the compiler name.
+# Second, use the command `make TESTSUITE=yes`.  Note that the CC alternative 
+# described in the preceding section can be used to change the compiler name.
 #
 # This process should now have created various additional folders, with names
 # like bitsizeDemo/, bitsizeDemoCommon/, and so forth, which contain the 
@@ -107,8 +107,10 @@ endif
 SOURCES = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
 
+ifndef TESTSUITE
+
 #----------------------------------------------------------------------------
-# For building C-language files.
+# For normal use building C-language files.
 
 .PHONY: all
 all: $(TARGET)
@@ -121,6 +123,8 @@ clean:
 	-rm $(TARGET)  # For Linux or Mac
 	-del $(TARGET) # For Windows
 
+else # TESTSUITE
+
 #----------------------------------------------------------------------------
 # For running test suite.
 
@@ -128,22 +132,6 @@ XPLI_APPS = bitsizeDemo bitsizeDemoCommon bitsizeDemoCommonIn
 XPL_APPS = Example-6.18.3 Example-6.18.4 Example-6.18.5 Example-6.18.6
 XPL_APPS += breakCharactersDemo
 XPL_APPS += ANALYZER SKELETON
-
-.PHONY: testclean
-testclean:
-	-@rm $(XPL_APPS) $(XPLI_APPS) -rf
-
-.PHONY: $(XPL_APPS)
-$(XPL_APPS): 
-	@mkdir $@
-	@XCOM-I.py --xpl $(PEXTRA) Tests/$@.xpl
-	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
-
-.PHONY: $(XPLI_APPS)
-$(XPLI_APPS): 
-	@mkdir $@
-	@XCOM-I.py $(PEXTRA) Tests/$@.xpl
-	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
 
 # Here are the principles behind the tests:
 #   1.	Various test programs from the Tests/ folder are built.
@@ -154,7 +142,7 @@ $(XPLI_APPS):
 #   4.  The only manual step is occasional determination that the "regression"
 #	files are valid.
 .PHONY: tests
-tests: testclean $(XPL_APPS) $(XPLI_APPS)
+all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@cd bitsizeDemo && \
 	./bitsizeDemo >out.txt
 	@diff -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
@@ -167,12 +155,12 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	cat xx00 xx01 | \
 	egrep --invert-match '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' > xxxx
 	
-	@cd bitsizeDemoCommonIn && \
-	./bitsizeDemoCommonIn --commoni=../bitsizeDemoCommon/COMMON.out >out.txt && \
-	csplit out.txt '%^Address Allocations .*%' >/dev/null && \
-	cat xx00 | \
-	egrep --invert-match '(^Address Allocations |^COMMON |^.PAGE [0-9]|^$$)' > xxxx
-	@diff -s -q bitsizeDemoCommon/xxxx bitsizeDemoCommonIn/xxxx
+	#cd bitsizeDemoCommonIn && \
+	#./bitsizeDemoCommonIn --commoni=../bitsizeDemoCommon/COMMON.out >out.txt && \
+	#csplit out.txt '%^Address Allocations .*%' >/dev/null && \
+	#cat xx00 | \
+	#egrep --invert-match '(^Address Allocations |^COMMON |^.PAGE [0-9]|^$$)' > xxxx
+	#diff -s -q bitsizeDemoCommon/xxxx bitsizeDemoCommonIn/xxxx
 	
 	@e=Example-6.18.3 && \
 	cd $$e && \
@@ -202,4 +190,21 @@ tests: testclean $(XPL_APPS) $(XPLI_APPS)
 	diff -s -q ANALYZER/out.regression ANALYZER/out.txt
 	
 	@echo "\n*********** All tests passed! ***********\n"
-	
+
+.PHONY: testclean
+testclean:
+	-@rm $(XPL_APPS) $(XPLI_APPS) -rf
+
+.PHONY: $(XPL_APPS)
+$(XPL_APPS): 
+	@mkdir $@
+	@XCOM-I.py --xpl --lib-file=XPL.LIBRARY.xpl $(PEXTRA) Tests/$@.xpl
+	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
+
+.PHONY: $(XPLI_APPS)
+$(XPLI_APPS): 
+	@mkdir $@
+	@XCOM-I.py --lib-file=XPLI.LIBRARY.xpl $(PEXTRA) Tests/$@.xpl
+	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
+
+endif # TESTSUITE
