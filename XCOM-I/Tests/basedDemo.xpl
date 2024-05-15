@@ -4,11 +4,11 @@ DECLARE TOP_DOWN_INFO LITERALLY '4', TOP_ERR LITERALLY '5',
         TOP_DOWN_VER LITERALLY '15', TOP_ONLYF LITERALLY '5',
         TOP_ONLYC LITERALLY '6';
 COMMON BASED DOWN_INFO RECORD DYNAMIC:
+       DOWN_UNKN                   FIXED    ,     /*  UNKNOWN ERROR   */
        DOWN_STMT                   CHARACTER,     /*  STMT NUMBER     */
+       DOWN_VER(15)                BIT(9)   ,     /*  1 IF DOWNGRADE  */
        DOWN_ERR(TOP_ERR)           CHARACTER,     /*  ERROR NUMBER    */
        DOWN_CLS                    CHARACTER,     /*  ERROR CLASS     */
-       DOWN_UNKN                   FIXED    ,     /*  UNKNOWN ERROR   */
-       DOWN_VER(15)                BIT(9)   ,     /*  1 IF DOWNGRADE  */
 END;                                              /*  SUCCESSFUL      */
 COMMON (I, J, K, DOWN_INFO_RECORD_SIZE) FIXED, C CHARACTER, A(5), D(3);
 COMMON BASED ONLYF FIXED;

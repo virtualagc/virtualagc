@@ -662,7 +662,13 @@ def sortJumps(scope, extra = None):
 # parameter for ADDR as an expression tree.
 def generateADDR(scope, parameter):
     token = parameter["token"]
-    if standardXPL and "builtin" in token:
+    if "builtin" in token and token["builtin"] == "DESCRIPTOR":
+        # Used in SPACELIB as an an address below which is COMMON.  I'm not 
+        # clear why `DESCRIPTOR` is used for that purpose, but what I'm 
+        # returning here is the next address after COMMON memory region 1,
+        # and has nothing whatever to do with `DESCRIPTOR`
+        return regions[1][1]
+    elif "builtin" in token:
         # I allow this because there's some stuff in HAL/S-FC source code that
         # attempts various memory-management operations by exploiting hidden
         # knowledge of how memory is allocated ... such as where the 
@@ -670,7 +676,7 @@ def generateADDR(scope, parameter):
         # of variables.  All of which is completely irrelevant to what's going
         # on underneath the hood in XCOM-I.  Whether the value returned is in 
         # any way adequate is, of course, questionable.
-        printf("Warning: ADDR(%s) of builtin" % token["builtin"], file=sys.stderr)
+        print("Warning: ADDR(%s) of builtin" % token["builtin"], file=sys.stderr)
         return "0"
     if "identifier" in token: # not a structure field.
         # Might still be a BASED variable, though.
@@ -1374,8 +1380,21 @@ def getParmsFILE(scope, expression):
 lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
 inlineCounter = 0
-def generateSingleLine(scope, indent, line, indexInScope, ps = None):
+def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
     global forLoopCounter, lineCounter, inlineCounter, errxitRef
+    '''
+    The following line is a ridiculous trick.  Originally, the line wasn't
+    there, and `indent` was simply the 2nd parameter of this
+    `generateSingleLine` function.  This worked (and still works) fine when
+    I simply run XCOM-I.py.  *However*, at some point it began failing when
+    I debug XCOM-I.py, and instead aborted at the first use of `indent` in
+    this function, saying that it was a local variable that had not yet been
+    assigned a value, which is patently false.  After several frustrating
+    weeks of working around the inability to debug XCOM-I.py any longer, I
+    found that changing the parameter to `indent2` and than immediately
+    assigning `indent=indent2` debugged find.  Yikes!
+    '''
+    indent = indent2
     errxitRef = scope["lineRefs"][indexInScope]
     lineCounter += 1
     if len(line) < 1: # I don't think this is possible!
@@ -2471,10 +2490,15 @@ def generateC(globalScope):
                 subDatatype = "CHARACTER"
             else:
                 subDatatype = "FIXED"
+            if "offset" in attributes:
+                offset = attributes["offset"]
+            else:
+                offset = 0
             print(indentationQuantum + \
-                  '{ "%s", "%s", %d, %d, %d }' % (key, subDatatype, size,
+                  '{ "%s", "%s", %d, %d, %d, %d }' % (key, subDatatype, size,
                                                   attributes["dirWidth"],
-                                                  bitWidth), \
+                                                  bitWidth, 
+                                                  offset), \
                   end = "", file=f)
             if size == 0:
                 recordSize += attributes["dirWidth"]
@@ -2578,6 +2602,7 @@ def generateC(globalScope):
     print("  int numElements;", file=f)
     print("  int dirWidth;", file=f)
     print("  int bitWidth;", file=f)
+    print("  int offset;", file=f)
     print("} basedField_t;", file=f)
     print("typedef struct {", file=f)
     print("  int address;", file=f)

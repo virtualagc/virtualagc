@@ -32,60 +32,58 @@ reservedWords = {"BIT", "BY", "CALL", "CASE", "CHARACTER", "DO",
                      # XPL/I:
                      "COMMON", "UNTIL", "ARRAY", "BASED", "RECORD", "DYNAMIC",
                      "ESCAPE", "REPEAT"}
-# See pp. 140-142 of McKeeman et al.  For `builtIns`, the key values are
-# the number of parameters accepted by the function; if the number of parameters
-# is variable, then the value is a tuple of the allowed numbers of parameters.
+# See pp. 140-142 of McKeeman et al.  
 builtIns = {
-    "ADDR": 1, 
-    "BYTE": (1, 2), 
-    "CLOCK_TRAP": 2, 
-    #"COMPACTIFY": 0, 
-    "COREBYTE": 1, 
-    "COREWORD": 1, 
-    "DATE": 0, 
-    "DATE_OF_GENERATION": 0, 
-    "DESCRIPTOR": 1, 
-    "EXIT": 0, 
-    "FILE": 2, 
-    "FREEBASE": 0, 
-    "FREELIMIT": 0, 
-    "FREEPOINT": 0, 
-    "INLINE": (3, 4, 5), 
-    "INPUT": (0, 1), 
-    "INTERRUPT_TRAP": 2, 
-    "LENGTH": 1, 
-    "MONITOR": 2, 
-    "MONITOR_LINK": 0, 
-    "NDESCRIPT": 0, 
-    "OUTPUT": (0, 1), 
-    "RECORD_WIDTH": 1,
-    "SHL": 2, 
-    "SHR": 2,
-    "SUBSTR": (2, 3), 
-    "TIME": 0, 
-    "TIME_OF_GENERATION": 0, 
-    "TRACE": 0, 
-    "UNTRACE": 0,
+    "ADDR", 
+    "BYTE", 
+    "CLOCK_TRAP", 
+    #"COMPACTIFY", 
+    "COREBYTE", 
+    "COREWORD", 
+    "DATE", 
+    "DATE_OF_GENERATION", 
+    "DESCRIPTOR", 
+    "EXIT", 
+    "FILE", 
+    "FREEBASE", 
+    "FREELIMIT", 
+    "FREEPOINT", 
+    "INLINE", 
+    "INPUT", 
+    "INTERRUPT_TRAP", 
+    "LENGTH", 
+    "MONITOR", 
+    "MONITOR_LINK", 
+    "NDESCRIPT", 
+    "OUTPUT", 
+    "RECORD_WIDTH",
+    "SHL", 
+    "SHR",
+    "SUBSTR", 
+    "TIME", 
+    "TIME_OF_GENERATION", 
+    "TRACE", 
+    "UNTRACE",
     # XPL/I extensions:
-    "LINE_COUNT": 0, 
-    "SET_LINELIM": 1, 
-    "LINK": 0,
-    "PARM_FIELD": 0,
-    "STRING": 1,
-    "STRING_GT": 2,
-    "ABS": 1,
-    "COREHALFWORD": 1
+    "LINE_COUNT", 
+    "SET_LINELIM", 
+    "LINK",
+    "PARM_FIELD",
+    "STRING",
+    "STRING_GT",
+    "ABS",
+    "COREHALFWORD"
     }
 if standardXPL:
-    builtIns.pop("LINE_COUNT")
-    builtIns.pop("SET_LINELIM")
-    builtIns.pop("LINK")
-    builtIns.pop("PARM_FIELD")
-    builtIns.pop("STRING")
-    builtIns.pop("STRING_GT")
-    builtIns.pop("ABS")
-    builtIns.pop("COREHALFWORD")
-    builtIns.pop("RECORD_WIDTH")
+    builtIns.remove("LINE_COUNT")
+    builtIns.remove("SET_LINELIM")
+    builtIns.remove("LINK")
+    builtIns.remove("PARM_FIELD")
+    builtIns.remove("STRING")
+    builtIns.remove("STRING_GT")
+    builtIns.remove("ABS")
+    builtIns.remove("COREHALFWORD")
+    builtIns.remove("RECORD_WIDTH")
     reservedWords.remove("COMMON")
     reservedWords.remove("UNTIL")
     reservedWords.remove("ARRAY")

@@ -323,6 +323,8 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                                 token in ["CHARACTER", "FIXED", "ARRAY"]:
                             properties["dirWidth"] = 4
                     elif token == "RECORD":
+                        properties["RECORD_CHAR"] = {}
+                        properties["RECORD_NONCHAR"] = {}
                         properties["RECORD"] = {}
                     else:
                         error("Unrecognized token %s" % token, scope)
@@ -370,13 +372,40 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                         variables = scope["variables"]
                         basedVar = variables[list(variables)[-1]]
                         last = basedVar["RECORD"]
-                        p["offset"] = offsetInRecord
-                        offsetInRecord += p["dirWidth"]
-                        if "top" in p:
-                            offsetInRecord += p["dirWidth"] * p["top"]
+                        if True:
+                            # Sort the fields so that all of the string-
+                            # descriptor fields come first, but otherwise 
+                            # respecting the ordering as given in the 
+                            # declaration.  I believe this is needed for 
+                            # SPACELIB's COMPACTIFY to work.
+                            last_char = basedVar["RECORD_CHAR"]
+                            last_nonchar = basedVar["RECORD_NONCHAR"]
+                            if ("BIT" in p and p["BIT"] > 32) or \
+                                    "CHARACTER" in p:
+                                last_char[symbol] = p
+                            else:
+                                last_nonchar[symbol] = p
+                            newLast = {}
+                            basedVar["RECORD"] = newLast
+                            for key in last_char:
+                                newLast[key] = last_char[key]
+                            for key in last_nonchar:
+                                newLast[key] = last_nonchar[key]
+                            offsetInRecord = 0
+                            for key in newLast:
+                                q = newLast[key]
+                                q["offset"] = offsetInRecord
+                                offsetInRecord += q["dirWidth"]
+                                if "top" in q:
+                                    offsetInRecord += q["dirWidth"] * q["top"]
+                        else:
+                            # Use the field ordering from the declaration as-is.
+                            p["offset"] = offsetInRecord
+                            offsetInRecord += p["dirWidth"]
+                            if "top" in p:
+                                offsetInRecord += p["dirWidth"] * p["top"]
+                            last[symbol] = p
                         basedVar["recordSize"] = offsetInRecord
-                        last[symbol] = p
-                
                 if keepGoing:
                     break
                 seekingName = True

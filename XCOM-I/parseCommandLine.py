@@ -64,7 +64,6 @@ standardXPL = False
 identifierString = 'REL32V0   '  # String returned by MONITOR(23)
 merge = None
 firstFile = True
-libFile = None
 noInclusionDirectives = False
 showBacktrace = False
 physicalTop = 1 << 24
@@ -107,6 +106,7 @@ replacementQuote = "\x12"
 replacementSpace = "\x14"
 # Folder where XCOM-I.py itself is.
 basePath = os.path.dirname(os.path.realpath(__file__)) + "/"
+libFile = basePath + "SPACELIB.xpl"
 
 # Raw read of a source-code file.  Recursive, if /%INCLUDE ... %/ directives
 # (and similar) are encountered.
@@ -158,13 +158,13 @@ The available OPTIONS are:
 --help          Print this info.
 --              If this is found, it means to skip the entire remainder of the
                 command line.
---xpl           Try to compile standard XPL rather than XPL/I.  This switch
-                is seldom needed, and doesn't accomplish much when it's
-                used.  Basically, all it can do is disable certain XPL/I
-                built-in functions or reserved words, allowing them to be
-                used as names of variables.  For example, the XPL/I
-                built-in `STRING` is used as a variable name in the XPL
-                source code for the standard McKeeman XPL compiler XCOM.
+--xpl           Compile standard XPL rather than XPL/I.
+--lib-file=F    (Default SPACELIB.xpl, or XPL.LIBRARY.xpl if the --xpl option
+                is used.)  Specifies a "library file" of XPL source code to 
+                include prior to any of the XPL files specified on the command 
+                line.  Note that if both --xpl and --lib-file are used, then
+                --xpl must *precede* --lib-file on the command line; both must
+                precede the names of the first source-code file specified.
 --cond=c        XPL/I source-code files can contain code which is conditionally
                 included or excluded, using the syntax
                     /?c...code...?/
@@ -204,13 +204,6 @@ The available OPTIONS are:
 --output=F      (Default is the base-name of the first XPL source-code file
                 given on the command line.) Name of the folder to store output 
                 files.
---lib-file=F    (Default None.)  A "library file" to XPL source code to include
-                prior to any of the XPL files specified on the command line.
-                If the program being compiled as itself an XPL compiler (such as
-                XCOM or HAL/S-FC), it's customarily the file that contains the 
-                source code for the COMPACTIFY procedure (XPL.LIBRARY.xpl for 
-                XCOM or SPACELIB.xpl for HAL/S-FC, prefixed by an appropriate
-                path). 
 --merge=F       (Default None.)  Write a file F containing all of the merged XPL
                 source code.  Note that the resulting file is not necessarily a
                 valid XPL file itself, because any file-inclusion directives the
@@ -268,6 +261,7 @@ for parm in sys.argv[1:]:
         sys.exit(0)
     elif parm == "--xpl":
         standardXPL = True
+        libFile = basePath + "XPL.LIBRARY.xpl"
     elif parm.startswith("--cond="):
         cond = parm[7:]
         if len(cond) != 1 or not cond.isupper():
