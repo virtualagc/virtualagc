@@ -25,6 +25,7 @@ typedef char pdsPartname_t[PDS_PARTNAME_SIZE + 1];
 extern int outUTF8;
 extern FILE *DD_INS[DD_MAX];
 extern char *DD_INS_FILENAMES[DD_MAX];
+extern uint8_t DD_INS_UPPERCASE[DD_MAX];
 extern int PDS_INS[DD_MAX];
 extern pdsPartname_t DD_INS_PARTNAMES[DD_MAX];
 extern FILE *DD_OUTS[DD_MAX];

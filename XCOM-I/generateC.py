@@ -183,7 +183,7 @@ memory = bytearray([0] * (1 << 24));
 `memoryMap` is a dictionary whose keys are addresses in `memory` and whose
 values are themselves dictionaries with the keys:
     "mangled"           the mangled name of a variable
-    "datatype"          BASED, FIXED, BIT, CHARACTER, EBCDIC codes
+    "datatype"          BASED, FIXED, BIT, CHARACTER, EBCDIC codes, BIT string
     "numElements"       Number of elements if variable subscripted, or else 0
     "record"            dict describing the RECORD if BASED RECORD
     "numFieldsInRecord" Number of fields in the RECORD, or 0
@@ -271,11 +271,10 @@ def putBIT(address, value):
         if descriptor == 0: # Not yet assigned a value:
             descriptor = ((numBytes - 1) << 24) | (variableAddress & 0xFFFFFF)
             putFIXED(address, descriptor)
-            variableAddress += numBytes
-        lengthFromDescriptor = (descriptor >> 24) & 0xFF
-        if numBytes - 1 != lengthFromDescriptor:
-            errxit("%s: putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
-                   (identifier, address, numBytes - 1, lengthFromDescriptor))
+        lengthFromDescriptor = ((descriptor >> 24) & 0xFF) + 1
+        if numBytes != lengthFromDescriptor:
+            errxit("putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
+                   (address, numBytes - 1, lengthFromDescriptor))
         address = descriptor & 0xFFFFFF
     bytes = value["bytes"] & ((1 << bitWidth) - 1)
     # Re `bitPacking`: see comments for `parseCommandLine`.
@@ -423,25 +422,38 @@ def allocateVariables(scope, region):
                     "dirWidth": 0,
                     "bitWidth": 0
                 }
+                if "BIT" in attributes:
+                    memoryMap[variableAddress]["datatype"] = "BIT string(s)"
                 address = attributes["address"]
                 firstAddress = address
                 for i in range(length):
-                    # INITIALize (just CHARACTER variables).
-                    if "INITIAL" in attributes and i < len(initial):
-                        initialValue = initial[i]
-                        if isinstance(initialValue, str):
-                            if len(initialValue) > 256:
-                                errxit("String initializer is %d characters" \
-                                       % len(initialValue), scope)
-                        elif isinstance(initialValue, int):
-                            initialValue = "%d" % initialValue
+                    # INITIALize (just CHARACTER and BIT(>32) variables).
+                    if datatype == "CHARACTER":
+                        if "INITIAL" in attributes and i < len(initial):
+                            initialValue = initial[i]
+                            if isinstance(initialValue, str):
+                                if len(initialValue) > 256:
+                                    errxit("String initializer is %d characters" \
+                                           % len(initialValue), scope)
+                            elif isinstance(initialValue, int):
+                                initialValue = "%d" % initialValue
+                            else:
+                                errxit("Cannot evaluate initializer to CHARACTER", scope)
                         else:
-                            errxit("Cannot evaluate initializer to CHARACTER", scope)
-                    else:
-                        initialValue = ""
-                    putCHARACTER(address, initialValue)
+                            initialValue = ""
+                        putCHARACTER(address, initialValue)
+                        variableAddress += len(initialValue)
+                    else: # datatype == "BIT(>32)":
+                        bitWidth = attributes["BIT"]
+                        numBytes = (bitWidth + 7) // 8
+                        value = {
+                            "bitWidth": bitWidth,
+                            "numBytes": numBytes,
+                            "bytes": initial[i]
+                            }
+                        putBIT(address, value)
+                        variableAddress += numBytes
                     address += attributes["dirWidth"]
-                    variableAddress += len(initialValue)
             continue
         
         if "BASED" in attributes:
@@ -509,7 +521,8 @@ def allocateVariables(scope, region):
         attributes["address"] = variableAddress
         # INITIALize FIXED or BIT variables.
         if "INITIAL" in attributes and \
-                ("FIXED" in attributes or "BIT" in attributes):
+                ("FIXED" in attributes or \
+                 ("BIT" in attributes and attributes["BIT"] <= 32)):
             for initialValue in initial:
                 if length <= 0:
                     errxit("Too many initializers", scope)
@@ -541,7 +554,10 @@ def allocateVariables(scope, region):
         variableAddress += attributes["dirWidth"] * length
 
 # A function for `walkModel` that mangles identifier names.
+mangledLabels = []
+maxLengthMangled = 0
 def mangle(scope, extra = None):
+    global mangledLabels, maxLengthMangled
     # Determine the mangling prefix.
     prefix = ""
     s = scope
@@ -554,8 +570,13 @@ def mangle(scope, extra = None):
             break
     scope["prefix"] = prefix
     for identifier in scope["variables"]:
-        scope["variables"][identifier]["mangled"] = \
-            prefix + identifier.replace("@", "a").replace("#", "p").replace("$","d")
+        mangled = prefix + \
+            identifier.replace("@", "a").replace("#", "p").replace("$","d")
+        scope["variables"][identifier]["mangled"] = mangled
+        if "LABEL" in scope["variables"][identifier]:
+            mangledLabels.append(mangled)
+            if len(mangled) > maxLengthMangled:
+                maxLengthMangled = len(mangled)
 
 # A function for `walkModel` that collects some statistics about BASED RECORD.
 maxRecordFields = 0
@@ -1151,9 +1172,18 @@ def generateExpression(scope, expression):
                         tipei, index = autoconvert(tipei, ["FIXED"], index)
                         if tipei != "FIXED":
                             errxit("Array index can't be computed or not integer")
+                    entryWidth = attributes["dirWidth"]
                     baseAddress = str(attributes["address"])
                     if "BASED" in attributes:
                         baseAddress = "getFIXED(%s)" % baseAddress
+                        if "recordSize" in attributes:
+                            entryWidth = attributes["recordSize"]
+                        elif "BIT" in attributes and attributes["BIT"] <= 8:
+                            entryWidth = 1
+                        elif "BIT" in attributes and attributes["BIT"] <= 16:
+                            entryWidth = 2
+                        else:
+                            entryWidth = 4
                     function = None
                     if "FIXED" in attributes:
                         tipe = "FIXED"
@@ -1171,7 +1201,7 @@ def generateExpression(scope, expression):
                         source = function + baseAddress + ")"
                     else:
                         source = function + baseAddress + \
-                                 " + %d*" % attributes["dirWidth"] + \
+                                 " + %d*" % entryWidth + \
                                  index + ")"
                     return tipe, source
             else:
@@ -1621,9 +1651,18 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     print(line, file=sys.stderr)
                     sys.exit(1)
                 children = LHS["children"]
+                entryWidth = attributes["dirWidth"]
                 baseAddress = str(address)
                 if "BASED" in attributes:
                     baseAddress = "getFIXED(%s)" % baseAddress
+                    if "recordSize" in attributes:
+                        entryWidth = attributes["recordSize"]
+                    elif "BIT" in attributes and attributes["BIT"] <= 8:
+                        entryWidth = 1
+                    elif "BIT" in attributes and attributes["BIT"] <= 16:
+                        entryWidth = 2
+                    else:
+                        entryWidth = 4
                 if len(children) == 1: # Compute index.
                     tipeL, sourceL = generateExpression(scope, children[0])
                     if tipeL != "FIXED":
@@ -1634,7 +1673,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         print(indent + "putFIXED(" + baseAddress + ", numberRHS);") 
                     elif len(children) == 1:
                         print(indent + "putFIXED(" + baseAddress + \
-                              "+ %d*(" % attributes["dirWidth"] + \
+                              "+ %d*(" % entryWidth + \
                               sourceL + "), numberRHS);") 
                     else:
                         errxit("Too many subscripts")
@@ -1646,7 +1685,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     elif len(children) == 1:
                         print(indent + "putBIT(%d, " % attributes["BIT"] + \
                               baseAddress + \
-                              "+ %d*(" % attributes["dirWidth"] + \
+                              "+ %d*(" % entryWidth + \
                               sourceL + "), bitRHS);") 
                     else:
                         errxit("Too many subscripts")
@@ -1656,7 +1695,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         print(indent + "putCHARACTER(" + baseAddress + ", stringRHS);") 
                     elif len(children) == 1:
                         print(indent + "putCHARACTER(" + baseAddress + \
-                              "+ %d*(" % attributes["dirWidth"] + \
+                              "+ %d*(" % entryWidth + \
                               sourceL + "), stringRHS);") 
                     else:
                         errxit("Too many subscripts")
@@ -2553,6 +2592,21 @@ def generateC(globalScope):
     for entry in sorted(memoryMapIndexBySymbol):
         print("  &memoryMap[%d]," % memoryMapIndexBySymbol[entry], file=f)
     print("};", file=f)
+    print("\n// Sorted list of all labels (mangled) -----------------------\n",\
+          file=f)
+    print("char *mangledLabels[NUM_MANGLED] = {", file=f)
+    line = ""
+    for mangledLabel in sorted(mangledLabels):
+        if len(line) + len(mangledLabel) > 72:
+            print(line + ",", file=f)
+            line = ""
+        if len(line) == 0:
+            line = '  "' + mangledLabel + '"'
+        else:
+            line = line + ', "' + mangledLabel + '"'
+    if len(line) > 0:
+        print(line, file=f)
+    print("};", file=f)
     print("\n// Memory regions --------------------------------------------\n",\
           file=f)
     print("memoryRegion_t memoryRegions[%d] = {" % len(regions), file=f)
@@ -2593,7 +2647,10 @@ def generateC(globalScope):
     print("#define WHERE_MONITOR_23 %d" % whereMonitor23, file=f)
     print("#define WHERE_MONITOR_13 %d" % whereMonitor13, file=f)
     print("#define ROOT_BASED %d" % rootBASED, file=f)
+    print("#define MAX_LENGTH_MANGLED %d" % maxLengthMangled, file=f)
+    print("#define NUM_MANGLED %d" % len(mangledLabels), file=f)
     print("", file=f)
+    print("extern char *mangledLabels[NUM_MANGLED];", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)
     print("typedef char datatype_t[MAX_DATATYPE_LENGTH + 1];", file=f)
     print("typedef struct {", file=f)

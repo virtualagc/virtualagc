@@ -15,7 +15,7 @@ RANDOM:
     
   end RANDOM;
 
-declare i;
+declare i fixed;
 
 do i = 1 to 100;
   output = RANDOM(100000);

@@ -36,12 +36,13 @@
 //---------------------------------------------------------------------------
 // Global variables.
 
-// Extern'd in runtimeC.h:
+// Extern'd in runtimeC.h or configuration.h:
 int outUTF8 = 0;
 FILE *DD_INS[DD_MAX] = { NULL };
 char *DD_INS_FILENAMES[DD_MAX] = { NULL };
 int PDS_INS[DD_MAX] = { 0 }; // 1 if a PDS, 0 if sequential.
 pdsPartname_t DD_INS_PARTNAMES[DD_MAX] = { "" };
+uint8_t DD_INS_UPPERCASE[DD_MAX] = { 0 };
 FILE *DD_OUTS[DD_MAX] = { NULL };
 char *DD_OUTS_FILENAMES[DD_MAX] = { NULL };
 pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX] = { "" };
@@ -661,13 +662,21 @@ parseCommandLine(int argc, char **argv)
             {
               if (argv[i][2] == 'd')
                 {
-                  DD_INS_FILENAMES[lun] = &argv[i][6];
+                  int len = strlen(filename);
+                  char *pfilename = malloc(len + 1);
+                  strcpy(pfilename, filename);
+                  if (!strcmp(&pfilename[len-2], ",U"))
+                    {
+                      DD_INS_UPPERCASE[lun] = 1;
+                      pfilename[len-2] = 0;
+                    }
+                  DD_INS_FILENAMES[lun] = pfilename;
                   PDS_INS[lun] = 0;
-                  DD_INS[lun] = fopen(filename, "r");
+                  DD_INS[lun] = fopen(pfilename, "r");
                   if (DD_INS[lun] == NULL)
                     {
                       fprintf(stderr, "Cannot open file %s for reading on unit %d\n",
-                          filename, lun);
+                          pfilename, lun);
                       returnValue = -1;
                     }
                 }
@@ -826,10 +835,13 @@ parseCommandLine(int argc, char **argv)
           printf("              output when this program is run.  If that\n");
           printf("              is disturbing, you can try using the --utf8\n");
           printf("              to try outputs in UTF-8 encoding instead.\n");
-          printf("--ddi=N,F     Attach filename F to the logical unit number\n");
+          printf("--ddi=N,F[,U] Attach filename F to the logical unit number\n");
           printf("              N, for use with the INPUT(N) XPL built-in.\n");
           printf("              By default, 0 and 1 are attached to stdin.\n");
-          printf("              N can range from 0 through 9.\n");
+          printf("              N can range from 0 through 9. If the optional\n");
+          printf("              \",U\" is present, it causes all input to be\n");
+          printf("              silently converted to upper case; the \"U\"\n");
+          printf("              is literal.\n");
           printf("--ddo=N,F     Attach filename F to the logical unit number\n");
           printf("              N, for use with the OUTPUT(N) XPL built-in.\n");
           printf("              By default, 0 and 1 are attached to stdout.\n");
@@ -941,6 +953,10 @@ cmpMapSymbols(const void *e1, const void *e2) {
   return strcasecmp((*(memoryMapEntry_t **) e1)->symbol,
                     (*(memoryMapEntry_t **) e2)->symbol);
 }
+static int
+cmpString(const void *e1, const void *e2) {
+  return strcasecmp(*(char **) e1, *(char **) e2);
+}
 
 // Look up the `memoryMap` entry associated with a given address.  Returns
 // either a pointer to the record, or else NULL if not found.
@@ -997,6 +1013,7 @@ lookupVariable(char *symbol)
       mapInitialized = 1;
       qsort(&memoryMapBySymbol, NUM_SYMBOLS,
             sizeof(memoryMapEntry_t *), cmpMapSymbols);
+      qsort(&mangledLabels, NUM_MANGLED, sizeof(char *), cmpString);
     }
   // Note that since `memoryMapBySymbol` contains pointers to
   // `memoryMapEntry_t`, then the key for the binary search must
@@ -1053,7 +1070,11 @@ getBIT(uint32_t bitWidth, uint32_t address)
       uint32_t descriptor;
       descriptor = getFIXED(address);
       if (numBytes - 1 != descriptor >> 24)
-        abend("Implementation error: getBIT width mismatch");
+        {
+          sprintf(abendMessage, "bitWidth=%d, numBytes=%d, descriptor=(%d,%06X)",
+              bitWidth, numBytes, descriptor>>24, descriptor&0xFFFFFF);
+          abend("Implementation error: getBIT width mismatch");
+        }
       address = descriptor & 0xFFFFFF;
     }
   value->bitWidth = bitWidth;
@@ -1774,7 +1795,7 @@ OUTPUT(uint32_t lun, char *string) {
 char *
 INPUT(uint32_t lun) {
   int i;
-  char *s;
+  char *s, *ss;
   FILE *fp;
   if (lun < 0 || lun >= DD_MAX)
     {
@@ -1807,6 +1828,11 @@ INPUT(uint32_t lun) {
   for (i = strlen(s); i < 80; i++)
     s[i] = ' ';
   s[i] = 0;
+  if (DD_INS_UPPERCASE[lun])
+    {
+      for (ss = s; *ss; ss++)
+        *ss = toupper(*ss);
+    }
   return s;
 }
 
@@ -2425,11 +2451,34 @@ uint32_t
 ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
   int address = rawADDR(bVar, bIndex, fVar, fIndex);
   if (address == -1)
-    abend("ADDR() not found for BASED");
+    {
+      sprintf(abendMessage, "bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
+              bVar, bIndex, fVar, fIndex);
+        abend("ADDR() not found");
+      abend("ADDR() not found for BASED");
+    }
   if (address == -2)
-    abend("Could not find the specified BASED variable field");
+    {
+      sprintf(abendMessage, "bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
+              bVar, bIndex, fVar, fIndex);
+        abend("ADDR() not found");
+      abend("Could not find the specified BASED variable field");
+    }
   if (address == -3)
-    abend("ADDR() not found");
+    {
+      // This could have been a lookup of a LABEL, supporting an INLINE.  If so,
+      // it's not an error.
+      char *label = bsearch(&fVar, mangledLabels, NUM_MANGLED, sizeof(char *),
+                            cmpString);
+      if (label != NULL)
+        {
+          //fprintf(stderr, "FYI: Lookup ADDR(%s)\n", fVar);
+          return 0;
+        }
+      sprintf(abendMessage, "bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
+              bVar, bIndex, fVar, fIndex);
+        abend("ADDR() not found");
+    }
   return address;
 }
 

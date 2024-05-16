@@ -33,3 +33,5 @@ DO WHILE LENGTH(BUFFER) > 0;
   OUTPUT(0) = I;
 
 END;
+
+EOF

@@ -198,13 +198,13 @@ testclean:
 .PHONY: $(XPL_APPS)
 $(XPL_APPS): 
 	@mkdir $@
-	@XCOM-I.py --xpl --lib-file=XPL.LIBRARY.xpl $(PEXTRA) Tests/$@.xpl
+	@XCOM-I.py --xpl --keep-unused $(PEXTRA) Tests/$@.xpl
 	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
 	@mkdir $@
-	@XCOM-I.py --lib-file=XPLI.LIBRARY.xpl $(PEXTRA) Tests/$@.xpl
+	@XCOM-I.py --keep-unused $(PEXTRA) Tests/$@.xpl
 	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
 
 endif # TESTSUITE
