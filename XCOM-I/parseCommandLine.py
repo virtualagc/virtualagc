@@ -68,6 +68,7 @@ noInclusionDirectives = False
 showBacktrace = False
 physicalTop = 1 << 24
 keepUnused = False
+optproc = "COMPOPT_"
 
 '''
 McKeeman et al. does not specify the packing of the bits in memory for a BIT(n)
@@ -181,15 +182,20 @@ The available OPTIONS are:
 --identifer=S   (Default "REL32V0   ".)  Set the 10-character string returned 
                 by MONITOR(23).  Will be automatically truncated or padded as
                 needed.
---optproc=N     (Default is no options processor.)  The "options processor" is 
-                used for interpreting the run-time program's (particularly
-                HAL/S-FC's) options, which originally came from JCL, instead from
-                command-line options.  For HAL/S-FC, the available processors are:
-                    For PASS1    COMPOPT
-                    For PASS2    EMPTY
-                    For PASS3    EMPTY
-                    For PASS4    LISTOPT
-                Other HAL/S-FC passes do not require options processors.
+--optproc=N     (Default is COMPOPT_.)  The "options processor" is used for 
+                interpreting the run-time program's (particularly HAL/S-FC's) 
+                options, which originally came from JCL, instead from 
+                command-line options.  For HAL/S-FC, the available processors 
+                are:
+                    COMPOPT_     (automatically changed to COMPOPT_PFS 
+                                 if --cond=P or to COMPOPT_BFS if --cond=B)
+                    COMPOPT_PFS
+                    COMPOPT_BFS
+                    COMPOPT_360
+                    LISTOPT
+                    MONOPT
+                See Virtual AGC page XPL.html#programOptions for instructions
+                in using a custom options processor.
                 Note: On the command line, this option should precede any of the
                 options that are processed by the selected options processor.
 --include=F     Folder to use for XPL/I's "/%INCLUDE ... %/" directives.
@@ -244,6 +250,8 @@ The available OPTIONS are:
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm.startswith("--optproc="):
+        optproc = parm[10:]
     elif parm == "--keep-unused":
         keepUnused = True
     elif parm.startswith("--merge="):

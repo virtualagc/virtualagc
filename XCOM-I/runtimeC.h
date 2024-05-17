@@ -35,6 +35,33 @@ extern pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX];
 extern int DD_OUTS_EXISTED[DD_MAX];
 extern FILE *COMMON_OUT;
 
+typedef struct {
+  uint32_t optionsCode;
+  char *name;
+  char *defaultValue;
+  char *synonym;
+  char *negatedName;
+  char *negatedSynonym;
+} type1_t;
+
+typedef struct {
+  char *name;
+  char *defaultValue;
+  char *synonym;
+} type2_t;
+
+#define MAX_TYPE1 32
+#define MAX_TYPE2 16
+extern char *type1Actual[MAX_TYPE1];
+extern char *type2Actual[MAX_TYPE2];
+typedef struct {
+  int numParms1;
+  int numParms2;
+  type1_t type1[MAX_TYPE1];
+  type2_t type2[MAX_TYPE2];
+} optionsProcessor_t;
+extern optionsProcessor_t *optionsProcessor;
+
 // Some functions that are perhaps useful for CALL INLINE or for running
 // the C code in a debugger.
 

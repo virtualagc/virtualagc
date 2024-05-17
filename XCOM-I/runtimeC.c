@@ -63,105 +63,225 @@ int linesPerPage = 59;
 memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
 int showBacktrace = 0;
 
-#ifdef PFS
-#define NUM_TYPE1 20
-#else
-#define NUM_TYPE1 21
-#endif
-char *type1Actual[NUM_TYPE1];
-#define NUM_TYPE2 13
-char *type2Actual[NUM_TYPE2];
-
-typedef struct {
-  uint32_t optionsCode;
-  char *name;
-  char *defaultValue;
-  char *synonym;
-  char *negatedName;
-  char *negatedSynonym;
-} type1_t;
-
-typedef struct {
-  char *name;
-  char *defaultValue;
-  char *synonym;
-} type2_t;
-
-type1_t type1Unprintable[] = {
-    { 0x00000008, "TRACE", "NOTRACE", NULL, "NOTRACE", NULL },
-    { 0x00000040, "BRIEF", "NOBRIEF", NULL, "NOBRIEF", NULL },
-    { 0x00000200, "X5", "NOX5", NULL, "NOX5", NULL },
-    { 0x00004000, "EXTRA", "NOEXTRA", NULL, "NOEXTRA", NULL },
-    { 0x00200000, "LFXI", "LFXI", NULL, "NOLFXI", NULL },
-    { 0x01000000, "X6", "NOX6", NULL, "NOX6", NULL },
-    { 0x08000000, "DLIST", "NODLIST", NULL, "NODLIST", NULL },
-    { 0x10000000, "DEBUG", "NODEBUG", NULL, "NODEBUG", NULL },
-
-};
-
-#ifdef PFS
-type1_t type1[NUM_TYPE1] = {
+optionsProcessor_t COMPOPT_PFS = {
+  32 /* numParms1 */,
+  13 /* numParms2 */,
+  { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
     { 0x00000002, "LISTING2", "NOLISTING2", "L2", "NOLISTING2", "NL2" },
     { 0x00000004, "LIST", "NOLIST", "L", "NOLIST", "NL" },
-    { 0x00000010, "TEMPLATE", "NOTEMPLATE", "TP", "NOTEMPLATE", "NTP" },
-    { 0x00000000, "VARSYM", "NOVARSYM", "VS", "NOVARSYM", "NVS" },
+    { 0x00000008, "TRACE", "TRACE", "TR", "NOTRACE", "NTR" },
+    { 0x00000040, "VARSYM", "NOVARSYM", "VS", "NOVARSYM", "NVS" },
     { 0x00400000, "DECK", "NODECK", "D", "NODECK", "ND" },
-    { 0x00001000, "TABDMP", "NOTABDMP", "TBD", "NOTABDMP", "NTBD" },
     { 0x00000800, "TABLES", "TABLES", "TBL", "NOTABLES", "NTBL" },
+    { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
     { 0x00100000, "ADDRS", "NOADDRS", "A", "NOADDRS", "NA" },
-    { 0x00002000, "SREF", "NOSREF", "SR", "NOSREF", "NSR" },
+    { 0x00080000, "SRN", "NOSRN", NULL, "NOSRN", NULL },
+    { 0x00800000, "SDL", "NOSDL", NULL, "NOSDL", NULL },
+    { 0x00001000, "TABDMP", "NOTABDMP", "TBD", "NOTABDMP", "NTBD" },
+    { 0x00000400, "ZCON", "ZCON", "Z", "NOZCON", "NZ" },
+    { 0x00040000, "HALMAT", "NOHALMAT", "HM", "NOHALMAT", "NHM" },
     { 0x02000000, "REGOPT", "NOREGOPT", "R", "NOREGOPT", "NR" },
-    { 0x00080000, "SRN", "NOSRN", NULL, "NOSRN", NULL },
-    { 0x00000400, "ZCON", "ZCON", "Z", "NOZCON", "NZ" },
-    { 0x00040000, "HALMAT", "NOHALMAT", "HM", "NOHALMAT", "NHM" },
-    { 0x00010000, "PARSE", "NOPARSE", "P", "NOPARSE", "NP" },
-    { 0x00020000, "LSTALL", "NOLSTALL", "LA", "NOLSTALL", "NLA" },
-    { 0x00800000, "SDL", "NOSDL", NULL, "NOSDL", NULL },
     { 0x04000000, "MICROCODE", "MICROCODE", "MC", "NOMICROCODE", "NMC" },
-    { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
-    { 0x00000080, "HIGHOPT", "NOHIGHOPT", "HO", "NOHIGHOPT", "NHO" },
-};
-#else
-type1_t type1[NUM_TYPE1] = {
-    { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
-    { 0x00000002, "LISTING2", "NOLISTING2", "L2", "NOLISTING2", "NL2" },
-    { 0x00000004, "LIST", "NOLIST", "L", "NOLIST", "NL" },
-    { 0x00000010, "TEMPLATE", "NOTEMPLATE", "TP", "NOTEMPLATE", "NTP" },
-    { 0x00000000, "VARSYM", "NOVARSYM", "VS", "NOVARSYM", "NVS" },
-    { 0x00400000, "DECK", "NODECK", "D", "NODECK", "ND" },
-    { 0x00001000, "TABDMP", "NOTABDMP", "TBD", "NOTABDMP", "NTBD" },
-    { 0x00000800, "TABLES", "TABLES", "TBL", "NOTABLES", "NTBL" },
-    { 0x00100000, "ADDRS", "NOADDRS", "A", "NOADDRS", "NA" },
     { 0x00002000, "SREF", "NOSREF", "SR", "NOSREF", "NSR" },
-    { 0x02000000, "SCAL", "SCAL", "SC", "NOSCAL", "NSC" },
-    { 0x00080000, "SRN", "NOSRN", NULL, "NOSRN", NULL },
-    { 0x00000400, "ZCON", "ZCON", "Z", "NOZCON", "NZ" },
-    { 0x00040000, "HALMAT", "NOHALMAT", "HM", "NOHALMAT", "NHM" },
-    { 0x20000000, "REGOPT", "NOREGOPT", "R", "NOREGOPT", "NR" },
-    { 0x00020000, "LSTALL", "NOLSTALL", "LA", "NOLSTALL", "NLA" },
-    { 0x00800000, "SDL", "NOSDL", NULL, "NOSDL", NULL },
-    { 0x04000000, "MICROCODE", "MICROCODE", "MC", "NOMICROCODE", "NMC" },
-    { 0x00010000, "PARSE", "NOPARSE", "P", "NOPARSE", "NP" },
-    { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
+    { 0x20000000, "QUASI", "NOQUASI", "Q", "NOQUASI", "NQ" },
+    { 0x00000010, "TEMPLATE", "NOTEMPLATE", "TP", "NOTEMPLATE", "NTP" },
     { 0x00000080, "HIGHOPT", "NOHIGHOPT", "HO", "NOHIGHOPT", "NHO" },
-};
-#endif
-type2_t type2[NUM_TYPE2] = {
+    { 0x00010000, "PARSE", "NOPARSE", "P", "NOPARSE", "NP" },
+    { 0x00020000, "LSTALL", "NOLSTALL", "LA", "NOLSTALL", "NLA" },
+    { 0x00200000, "LFXI", "LFXI", NULL, "NOLFXI", NULL },
+    { 0x00000020, "X1", "NOX1", NULL, "NOX1", NULL },
+    { 0x00000100, "X4", "NOX4", NULL, "NOX4", NULL },
+    { 0x00000200, "X5", "NOX5", NULL, "NOX5", NULL },
+    { 0x00004000, "XA", "NOXA", NULL, "NOXA", NULL },
+    { 0x01000000, "X6", "NOX6", NULL, "NOX6", NULL },
+    { 0x08000000, "XB", "NOXB", NULL, "NOXB", NULL },
+    { 0x10000000, "XC", "NOXC", NULL, "NOXC", NULL },
+    { 0x40000000, "XE", "NOXE", NULL, "NOXE", NULL },
+    { 0x80000000, "XF", "NOXF", NULL, "NOXF", NULL }
+  },
+  { /* type2 */
     { "TITLE", NULL, "T" },
     { "LINECT", "59", "LC" },
     { "PAGES", "2500", "P" },
     { "SYMBOLS", "200", "SYM" },
     { "MACROSIZE", "500", "MS" },
-    { "LITSTRING", "2500", "LITS" },
+    { "LITSTRINGS", "2000", "LITS" },
     { "COMPUNIT", "0", "CU" },
     { "XREFSIZE", "2000", "XS" },
     { "CARDTYPE", NULL, "CT" },
     { "LABELSIZE", "1200", "LBLS" },
     { "DSR", "1", NULL },
     { "BLOCKSUM", "400", "BS" },
-    { "MFID", NULL, "OLDTPL" }
+    { "MFID", NULL, NULL }
+  }
 };
+
+optionsProcessor_t COMPOPT_BFS = {
+  32 /* numParms1 */,
+  13 /* numParms2 */,
+  { /* type1 */
+    { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
+    { 0x00000002, "LISTING2", "NOLISTING2", "L2", "NOLISTING2", "NL2" },
+    { 0x00000004, "LIST", "NOLIST", "L", "NOLIST", "NL" },
+    { 0x00000008, "TRACE", "TRACE", "TR", "NOTRACE", "NTR" },
+    { 0x00000040, "VARSYM", "NOVARSYM", "VS", "NOVARSYM", "NVS" },
+    { 0x00400000, "DECK", "NODECK", "D", "NODECK", "ND" },
+    { 0x00000800, "TABLES", "TABLES", "TBL", "NOTABLES", "NTBL" },
+    { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
+    { 0x00100000, "ADDRS", "NOADDRS", "A", "NOADDRS", "NA" },
+    { 0x00080000, "SRN", "NOSRN", NULL, "NOSRN", NULL },
+    { 0x00800000, "SDL", "NOSDL", NULL, "NOSDL", NULL },
+    { 0x00001000, "TABDMP", "NOTABDMP", "TBD", "NOTABDMP", "NTBD" },
+    { 0x00000400, "ZCON", "ZCON", "Z", "NOZCON", "NZ" },
+    { 0x00040000, "HALMAT", "NOHALMAT", "HM", "NOHALMAT", "NHM" },
+    { 0x02000000, "SCAL", "SCAL", "SC", "NOSCAL", "NSC" },
+    { 0x04000000, "MICROCODE", "MICROCODE", "MC", "NOMICROCODE", "NMC" },
+    { 0x00002000, "SREF", "NOSREF", "SR", "NOSREF", "NSR" },
+    { 0x20000000, "QUASI", "NOQUASI", "Q", "NOQUASI", "NQ" },
+    { 0x40000000, "REGOPT", "NOREGOPT", "R", "NOREGOPT", "NR" },
+    { 0x00000010, "TEMPLATE", "NOTEMPLATE", "TP", "NOTEMPLATE", "NTP" },
+    { 0x00000080, "HIGHOPT", "NOHIGHOPT", "HO", "NOHIGHOPT", "NHO" },
+    { 0x00010000, "PARSE", "NOPARSE", "P", "NOPARSE", "NP" },
+    { 0x00020000, "LSTALL", "NOLSTALL", "LA", "NOLSTALL", "NLA" },
+    { 0x00200000, "LFXI", "LFXI", NULL, "NOLFXI", NULL },
+    { 0x00000020, "X1", "NOX1", NULL, "NOX1", NULL },
+    { 0x00000100, "X4", "NOX4", NULL, "NOX4", NULL },
+    { 0x00000200, "X5", "NOX5", NULL, "NOX5", NULL },
+    { 0x00004000, "XA", "NOXA", NULL, "NOXA", NULL },
+    { 0x01000000, "X6", "NOX6", NULL, "NOX6", NULL },
+    { 0x08000000, "XB", "NOXB", NULL, "NOXB", NULL },
+    { 0x10000000, "XC", "NOXC", NULL, "NOXC", NULL },
+    { 0x8000000, "XF", "NOXF", NULL, "NOXF", NULL }
+  },
+  { /* type2 */
+    { "TITLE", NULL, "T" },
+    { "LINECT", "59", "LC" },
+    { "PAGES", "2500", "P" },
+    { "SYMBOLS", "200", "SYM" },
+    { "MACROSIZE", "500", "MS" },
+    { "LITSTRINGS", "2000", "LITS" },
+    { "COMPUNIT", "0", "CU" },
+    { "XREFSIZE", "2000", "XS" },
+    { "CARDTYPE", NULL, "CT" },
+    { "LABELSIZE", "1200", "LBLS" },
+    { "DSR", "1", NULL },
+    { "BLOCKSUM", "400", "BS" },
+    { "OLDTPL", NULL, NULL }
+  }
+};
+
+optionsProcessor_t COMPOPT_360 = {
+  32 /* numParms1 */,
+  12 /* numParms2 */,
+  { /* type1 */
+    { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
+    { 0x00000002, "LISTING2", "NOLISTING2", "L2", "NOLISTING2", "NL2" },
+    { 0x00000004, "LIST", "NOLIST", "L", "NOLIST", "NL" },
+    { 0x00000008, "TRACE", "TRACE", "TR", "NOTRACE", "NTR" },
+    { 0x00400000, "DECK", "NODECK", "D", "NODECK", "ND" },
+    { 0x00000800, "TABLES", "TABLES", "TBL", "NOTABLES", "NTBL" },
+    { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
+    { 0x00100000, "ADDRS", "NOADDRS", "A", "NOADDRS", "NA" },
+    { 0x00080000, "SRN", "NOSRN", NULL, "NOSRN", NULL },
+    { 0x00800000, "SDL", "NOSDL", NULL, "NOSDL", NULL },
+    { 0x00001000, "TABDMP", "NOTABDMP", "TBD", "NOTABDMP", "NTBD" },
+    { 0x00000400, "ZCON", "ZCON", "Z", "NOZCON", "NZ" },
+    { 0x00040000, "FCDATA", "NOFCDATA", "FD", "NOFCDATA", "NFD" },
+    { 0x02000000, "SCAL", "SCAL", "SC", "NOSCAL", "NSC" },
+    { 0x04000000, "MICROCODE", "MICROCODE", "MC", "NOMICROCODE", "NMC" },
+    { 0x00002000, "SREF", "NOSREF", "SR", "NOSREF", "NSR" },
+    { 0x20000000, "QUASI", "NOQUASI", "Q", "NOQUASI", "NQ" },
+    { 0x00010000, "PARSE", "NOPARSE", "P", "NOPARSE", "NP" },
+    { 0x00020000, "LSTALL", "NOLSTALL", "LA", "NOLSTALL", "NLA" },
+    { 0x00200000, "LFXI", "LFXI", NULL, "NOLFXI", NULL },
+    { 0x00000010, "X0", "NOX0", NULL, "NOX0", NULL },
+    { 0x00000020, "X1", "NOX1", NULL, "NOX1", NULL },
+    { 0x00000040, "X2", "NOX2", NULL, "NOX2", NULL },
+    { 0x00000080, "X3", "NOX3", NULL, "NOX3", NULL },
+    { 0x00000100, "X4", "NOX4", NULL, "NOX4", NULL },
+    { 0x00000200, "X5", "NOX5", NULL, "NOX5", NULL },
+    { 0x00004000, "XA", "NOXA", NULL, "NOXA", NULL },
+    { 0x01000000, "X6", "NOX6", NULL, "NOX6", NULL },
+    { 0x08000000, "XB", "NOXB", NULL, "NOXB", NULL },
+    { 0x10000000, "XC", "NOXC", NULL, "NOXC", NULL },
+    { 0x40000000, "XE", "NOXE", NULL, "NOXE", NULL },
+    { 0x80000000, "XF", "NOXF", NULL, "NOXF", NULL }
+  },
+  { /* type2 */
+    { "TITLE", NULL, "T" },
+    { "LINECT", "59", "LC" },
+    { "PAGES", "250", "P" },
+    { "SYMBOLS", "200", "SYM" },
+    { "MACROSIZE", "500", "MS" },
+    { "LITSTRINGS", "2000", "LITS" },
+    { "COMPUNIT", "0", "CU" },
+    { "XREFSIZE", "2000", "XS" },
+    { "CARDTYPE", NULL, "CT" },
+    { "LABELSIZE", "1200", "LBLS" },
+    { "DSR", "1", NULL },
+    { "BLOCKSUM", "400", "BS" }
+  }
+};
+
+optionsProcessor_t LISTOPT = {
+  25 /* numParms1 */,
+  4 /* numParms2 */,
+  { /* type1 */
+    { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
+    { 0x00001000, "TABDMP", "NOTABDMP", "TBD", "NOTABDMP", "NTBD" },
+    { 0x00000020, "ALL", "NOALL", NULL, "NOALL", NULL },
+    { 0x00000040, "BRIEF", "NOBRIEF", NULL, "NOBRIEF", NULL },
+    { 0x00000080, "X3", "NOX3", NULL, "NOX3", NULL },
+    { 0x00000100, "X4", "NOX4", NULL, "NOX4", NULL },
+    { 0x00000200, "X5", "NOX5", NULL, "NOX5", NULL },
+    { 0x01000000, "X6", "NOX6", NULL, "NOX6", NULL },
+    { 0x20000000, "X7", "NOX7", NULL, "NOX7", NULL },
+    { 0x40000000, "X8", "NOX8", NULL, "NOX8", NULL },
+    { 0x00000001, "X9", "NOX9", NULL, "NOX9", NULL },
+    { 0x00004000, "XA", "NOXA", NULL, "NOXA", NULL },
+    { 0x00000004, "XD", "NOXD", NULL, "NOXD", NULL },
+    { 0x00000002, "XE", "NOXE", NULL, "NOXE", NULL },
+    { 0x80000000, "XF", "NOXF", NULL, "NOXF", NULL },
+    { 0x00000400, "XG", "NOXG", NULL, "NOXG", NULL },
+    { 0x00002000, "XH", "NOXH", NULL, "NOXH", NULL },
+    { 0x00000002, "XI", "NOXI", NULL, "NOXI", NULL },
+    { 0x00010000, "XJ", "NOXJ", NULL, "NOXJ", NULL },
+    { 0x00040000, "XK", "NOXK", NULL, "NOXK", NULL },
+    { 0x00080000, "XL", "NOXL", NULL, "NOXL", NULL },
+    { 0x00100000, "XM", "NOXM", NULL, "NOXM", NULL },
+    { 0x00200000, "XN", "NOXN", NULL, "NOXN", NULL },
+    { 0x00400000, "XO", "NOXO", NULL, "NOXO", NULL },
+    { 0x00800000, "XP", "NOXP", NULL, "NOXP", NULL }
+  },
+  { /* type2 */
+    { "TITLE", NULL, "T" },
+    { "LINECT", "59", "LC" },
+    { "PAGES", "10000", "P" },
+    { "LIST", "1", "L" }
+  }
+};
+
+optionsProcessor_t MONOPT = {
+  3 /* numParms1 */,
+  5 /* numParms2 */,
+  { /* type1 */
+    { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
+    { 0x00000002, "LISTING2", "NOLISTING2", "L2", "NOLISTING2", "NL2" },
+    { 0x00000004, "ALTER", "NOALTER", NULL, "NOALTER", NULL }
+  },
+  { /* type2 */
+    { "LINECT", "59", "LC" },
+    { "PAGES", "250", "P" },
+    { "MIN", "50000", NULL },
+    { "MAX", "5000000", NULL },
+    { "FREE", "14336", NULL }
+  }
+};
+
+char *type1Actual[MAX_TYPE1];
+char *type2Actual[MAX_TYPE2];
+optionsProcessor_t *optionsProcessor = &OPTPROC;
 
 //---------------------------------------------------------------------------
 // Functions useful for CALL INLINE or debugging a la `gdb`.
@@ -506,44 +626,44 @@ abend(char *msg) {
 int
 matchType1(char *parm) {
   int i, len;
-  for (i = 0; i < NUM_TYPE1; i++)
+  for (i = 0; i < optionsProcessor->numParms1; i++)
     {
-      len = strlen(type1[i].name);
-      if (!strncmp(parm, type1[i].name, len) &&
+      len = strlen(optionsProcessor->type1[i].name);
+      if (!strncmp(parm, optionsProcessor->type1[i].name, len) &&
           (parm[len] == ',' || parm[len] == 0))
         {
-          type1Actual[i] = type1[i].name;
+          type1Actual[i] = optionsProcessor->type1[i].name;
           break;
         }
-      if (type1[i].synonym != NULL)
+      if (optionsProcessor->type1[i].synonym != NULL)
         {
-          len = strlen(type1[i].synonym);
-          if (!strncmp(parm, type1[i].synonym, len) &&
+          len = strlen(optionsProcessor->type1[i].synonym);
+          if (!strncmp(parm, optionsProcessor->type1[i].synonym, len) &&
               (parm[len] == ',' || parm[len] == 0))
             {
-              type1Actual[i] = type1[i].name;
+              type1Actual[i] = optionsProcessor->type1[i].name;
               break;
             }
         }
-      len = strlen(type1[i].negatedName);
-      if (!strncmp(parm, type1[i].negatedName, len) &&
+      len = strlen(optionsProcessor->type1[i].negatedName);
+      if (!strncmp(parm, optionsProcessor->type1[i].negatedName, len) &&
           (parm[len] == ',' || parm[len] == 0))
         {
-          type1Actual[i] = type1[i].negatedName;
+          type1Actual[i] = optionsProcessor->type1[i].negatedName;
           break;
         }
-      if (type1[i].negatedSynonym != NULL)
+      if (optionsProcessor->type1[i].negatedSynonym != NULL)
         {
-          len = strlen(type1[i].negatedSynonym);
-          if (!strncmp(parm, type1[i].negatedSynonym, len) &&
+          len = strlen(optionsProcessor->type1[i].negatedSynonym);
+          if (!strncmp(parm, optionsProcessor->type1[i].negatedSynonym, len) &&
               (parm[len] == ',' || parm[len] == 0))
             {
-              type1Actual[i] = type1[i].negatedName;
+              type1Actual[i] = optionsProcessor->type1[i].negatedName;
               break;
             }
         }
     }
-  if (i >= NUM_TYPE1) // Not found.
+  if (i >= optionsProcessor->numParms1) // Not found.
     return 0;
   return 1;
 }
@@ -551,24 +671,24 @@ int
 matchType2(char *parm) {
   int i, len;
   char *s, *ss, *buffer = nextBuffer();
-  for (i = 0; i < NUM_TYPE2; i++)
+  for (i = 0; i < optionsProcessor->numParms2; i++)
     {
-      len = strlen(type2[i].name);
-      if (!strncmp(parm, type2[i].name, len))
+      len = strlen(optionsProcessor->type2[i].name);
+      if (!strncmp(parm, optionsProcessor->type2[i].name, len))
         {
           s = parm + len + 1;
           break;
         }
-      if (type2[i].synonym == NULL)
+      if (optionsProcessor->type2[i].synonym == NULL)
         continue;
-      len = strlen(type2[i].synonym);
-      if (!strncmp(parm, type2[i].synonym, len))
+      len = strlen(optionsProcessor->type2[i].synonym);
+      if (!strncmp(parm, optionsProcessor->type2[i].synonym, len))
         {
           s = parm + len + 1;
           break;
         }
     }
-  if (i >= NUM_TYPE2)
+  if (i >= optionsProcessor->numParms2)
     return 0; // not found.
   if (parm[len] != '=')
     return 0;
@@ -588,10 +708,10 @@ parseParmField(int print) {
   char *s, *ss;
   int i;
   uint32_t OPTIONS_CODE = 0, address;
-  for (i = 0; i < NUM_TYPE1; i++)
-    type1Actual[i] = type1[i].defaultValue;
-  for (i = 0; i < NUM_TYPE2; i++)
-    type2Actual[i] = type2[i].defaultValue;
+  for (i = 0; i < optionsProcessor->numParms1; i++)
+    type1Actual[i] = optionsProcessor->type1[i].defaultValue;
+  for (i = 0; i < optionsProcessor->numParms2; i++)
+    type2Actual[i] = optionsProcessor->type2[i].defaultValue;
   // Note that in principle, if there's a TITLE parameter, then it could
   // contain commas, so we have to watch out for that in parsing the
   // parameter field.  Let's go ahead and split on the commas, and then
@@ -611,33 +731,33 @@ parseParmField(int print) {
     }
   if (print)
     {
-      for (i = 0; i < NUM_TYPE1; i++)
+      for (i = 0; i < optionsProcessor->numParms1; i++)
         printf("%s\n", type1Actual[i]);
-      for (i = 0; i < NUM_TYPE2; i++)
+      for (i = 0; i < optionsProcessor->numParms2; i++)
         if (type2Actual[i] == NULL)
-          printf("%s = NULL\n", type2[i].name);
+          printf("%s = NULL\n", optionsProcessor->type2[i].name);
         else
-          printf("%s = %s\n", type2[i].name, type2Actual[i]);
+          printf("%s = %s\n", optionsProcessor->type2[i].name, type2Actual[i]);
     }
   // If we've gotten here, then the PARM field has been parsed, and the
   // arrays `type1Actual` and `type2Actual` have been updated with the new
   // settings, while `type2Names` contains the names of the Type 2 parameters.
   // We need to interpret the Type 1 settings as bit-flags in OPTIONS_CODE.
-  for (i = 0; i < NUM_TYPE1; i++)
+  for (i = 0; i < optionsProcessor->numParms1; i++)
     if (strncmp(type1Actual[i], "NO", 2)) // Not NO?
-      OPTIONS_CODE |= type1[i].optionsCode;
+      OPTIONS_CODE |= optionsProcessor->type1[i].optionsCode;
 
   // Finally, we can update the XPL memory (for MONITOR(13)) which holds the
   // `CON`, `TYPE2`, and `VALS` arrays.
   putFIXED(WHERE_MONITOR_13, OPTIONS_CODE);
   address = getFIXED(WHERE_MONITOR_13 + 4); // Address of CON
-  for (i = 0; i < NUM_TYPE1; i++)
+  for (i = 0; i < optionsProcessor->numParms1; i++)
     putCHARACTER(address + 4 * i, type1Actual[i]);
   address = getFIXED(WHERE_MONITOR_13 + 12); // Address of TYPE2
-  for (i = 0; i < NUM_TYPE2; i++)
-    putCHARACTER(address + 4 * i, type2[i].name);
+  for (i = 0; i < optionsProcessor->numParms2; i++)
+    putCHARACTER(address + 4 * i, optionsProcessor->type2[i].name);
   address = getFIXED(WHERE_MONITOR_13 + 16); // Address of VALS
-  for (i = 0; i < NUM_TYPE2; i++)
+  for (i = 0; i < optionsProcessor->numParms2; i++)
     if (i == 0 || i == 8 || i == 12)
       {
         if (type2Actual[i] == NULL)

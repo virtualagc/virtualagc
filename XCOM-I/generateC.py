@@ -2649,6 +2649,15 @@ def generateC(globalScope):
     print("#define ROOT_BASED %d" % rootBASED, file=f)
     print("#define MAX_LENGTH_MANGLED %d" % maxLengthMangled, file=f)
     print("#define NUM_MANGLED %d" % len(mangledLabels), file=f)
+    if optproc == "COMPOPT_":
+        if "P" in ifdefs:
+            print("#define OPTPROC COMPOPT_PFS", file=f)
+        elif "B" in ifdefs:
+            print("#define OPTPROC COMPOPT_BFS", file=f)
+        else:
+            print("#define OPTPROC MONOPT", file=f)
+    else:
+        print("#define OPTPROC %s" % optproc, file=f)
     print("", file=f)
     print("extern char *mangledLabels[NUM_MANGLED];", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)
