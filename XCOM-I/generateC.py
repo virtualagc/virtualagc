@@ -2440,11 +2440,10 @@ def generateC(globalScope):
         if region == 5: 
             freeBase = start
             freePoint = variableAddress
-            freeLimit = 0x1000000 - 1024 # Leave a little bit free at the top.
+            freeLimit = 0x1000000 - 512
             variableAddress = freeLimit
-            freeLimit = variableAddress
         regions.append( [start, variableAddress] )
-    regions.append( [variableAddress, freeLimit] ) # Region 6.
+    regions.append( [variableAddress, 0x1000000] )
     nonCommonBase = regions[2][0]
     
     # Make another version of `memoryMap` that's sorted by symbol name rather
@@ -2614,6 +2613,7 @@ def generateC(globalScope):
         if i > 0:
             print(",", file=f)
         print("  { %d, %d }" % tuple(regions[i]), end="", file=f)
+        print(" /* (0x%06X, 0x%06X) */" % tuple(regions[i]), end="", file=f)
     print("\n};", file=f)
     f.close()
     

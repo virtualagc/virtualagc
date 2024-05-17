@@ -63,121 +63,114 @@ int linesPerPage = 59;
 memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
 int showBacktrace = 0;
 
-#define NUM_TYPE1 22
-#define NUM_TYPE2 13
+#ifdef PFS
+#define NUM_TYPE1 20
+#else
+#define NUM_TYPE1 21
+#endif
 char *type1Actual[NUM_TYPE1];
-char *type2Actual[NUM_TYPE1];
-char *type1Defaults[NUM_TYPE1] = {
-  "NOADDRS", "NODECK", "NODUMP", "NOHALMAT", "NOHIGHOPT", "LFXI",
-  "NOLIST", "NOLISTING2", "NOLSTALL", "MICROCODE", "NOPARSE", "NOREGOPT",
-  "SCAL", "NOSDL", "NOSREF", "NOSRN", "NOTABDMP", "TABLES", "NOTABLST",
-  "NOTEMPLATE", "NOVARSYM", "ZCON"
-};
-char *type2Defaults[NUM_TYPE2] = {
-  NULL, "59", "2500", "200", "500", "2500",
-  "0", "2000", NULL, "1200", "1", "400", NULL
-};
-char *type1Names[NUM_TYPE1] = {
-  "ADDRS",      "DECK",     "DUMP",     "HALMAT",   "HIGHOPT",  "LFXI",
-  "LIST",       "LISTING2", "LSTALL",   "MICROCODE","PARSE",    "REGOPT",
-  "SCAL",       "SDL",      "SREF",     "SRN",      "TABDMP",   "TABLES",
-  "TABLST",     "TEMPLATE", "VARSYM",   "ZCON"
-};
-uint32_t type1NamesToOptionsCode[NUM_TYPE1] = {
-    0x00100000, 0x00400000, 0x00000001, 0x00040000, 0x00000080, 0x00200000,
-    0x00000004, 0x00000002, 0x00020000, 0x04000000, 0x00010000,
-#ifdef PFS
-                                                                0x02000000,
-    0x00000000,
-#else // BFS
-                                                                0x20000000,
-    0x02000000,
-#endif
-                0x00800000, 0x00002000, 0x00080000, 0x00001000,0x00000800,
-    0x00008000, 0x00000010, 0x00000000, 0x00000400
-};
-// Ouch!  It turns out that I didn't need `optionsCodeToType1Names` at all,
-// but rather needed `type1NamesToOptionsCode`.  Oh, well.  Here it is anyway!
-// Translates bit positions in `OPTIONS_CODE` (see IR-182-1 p. 3-18) from left
-// shifts to indices in `type1Names`. If -1, it means it's not a Type 1 option
-// and comes from somewhere else.  Or I just can't figure it; I've figured out
-// only 21 of the 22 Type parameters so far.  Missing is VARSYM.
-int optionsCodeToType1Names[32] = {
-    2, // DUMP
-    7, // LISTING2
-    6, // LIST
-    -1, // TRACE
-    19, // X0  NO TEMP in IR-182-1, but I think it may be TEMPLATE
-    -1, // X1  NO CSE in IR-182-1, but I think it's ALL
-    -1, // X2  NO VM in IR-182-1, but I think it's BRIEF
-    4,  // X3  CSE WATCH in IR-182-1, but I think it's HIGHOPT
-    -1, // X4  360 - 0 TIMES, FC - F8 COMP
-    -1, // X5  CSE TRACE
-    21, // ZCON or Z LINKAGE
-    17, // TABLES
-    16, // TABDMP or HEX DUMP
-    14, // X9 in IR-182-1, but I think it must be SREF
-    -1, // XA  360 - Extra Data, FC - ABSLIST  or EXTRA LISTING
-    18, // TABLST or SDF SUMMARY
-    10, // PARSE
-    8,  // LSTALL
-    3,  // FCDATA in IR-182-1, but I think it must be HALMAT
-    15, // SRN
-    0,  // ADDRS
-    5,  // LXFI or COMPACT CODE
-    1,  // DECK
-    13, // SDL
-    -1, // X6  Print Phase 1.5 STATISTICS
-#ifdef PFS
-    11, // REGOPT
-#else
-    12, // SCAL
-#endif
-    9,  // MICROCODE or NEW INSTRUCTIONS
-    -1, // XB in IR-182-1, but may be DLIST
-    -1, // XC in IR-182-1, but may be DEBUG
-#ifdef PFS
-    -1, // XD
-#else
-    11, // REGOPT
-#endif
-    -1, // XE
-    -1  // XF
-};
-char *type1Synonyms[NUM_TYPE1] = {
-  "A", "D", "DP", "HM", "HO", NULL,
-  "L", "L2", "LA", "MC", "P", "R",
-  "SC", NULL, "SR", NULL, "TBD", "TBL", "TL",
-  "TP", "VS", "Z"
-};
-char *negatedType1Names[NUM_TYPE1] = {
-  "NOADDRS", "NODECK", "NODUMP", "NOHALMAT", "NOHIGHOPT", "NOLFXI",
-  "NOLIST", "NOLISTING2", "NOLSTALL", "NOMICROCODE", "NOPARSE", "NOREGOPT",
-  "NOSCAL", "NOSDL", "NOSREF", "NOSRN", "NOTABDMP", "NOTABLES", "NOTABLST",
-  "NOTEMPLATE", "NOVARSYM", "NOZCON"
-};
-char *negatedType1Synonyms[NUM_TYPE1] = {
-  "NA", "ND", "NDP", "NHM", "NHO", NULL,
-  "NL", "NL2", "NLA", "NMC", "NP", "NR",
-  "NSC", NULL, "NSR", NULL, "NTBD", "NTBL", "NTL",
-  "NTP", "NVS", "NZ"
-};
-char *type2Names[NUM_TYPE2] = {
-  "TITLE", "LINECT", "PAGES", "SYMBOLS", "MACROSIZE", "LITSTRING",
-  "COMPUNIT", "XREFSIZE", "CARDTYPE", "LABELSIZE", "DSR", "BLOCKSUM",
-  "MFID"
-};
-char *type2Synonyms[NUM_TYPE2] = {
-  "T", "LC", "P", "SYM", "MS", "LITS",
-  "CU", "XS", "CT", "LBLS", NULL, "BS", "OLDTPL"
+#define NUM_TYPE2 13
+char *type2Actual[NUM_TYPE2];
+
+typedef struct {
+  uint32_t optionsCode;
+  char *name;
+  char *defaultValue;
+  char *synonym;
+  char *negatedName;
+  char *negatedSynonym;
+} type1_t;
+
+typedef struct {
+  char *name;
+  char *defaultValue;
+  char *synonym;
+} type2_t;
+
+type1_t type1Unprintable[] = {
+    { 0x00000008, "TRACE", "NOTRACE", NULL, "NOTRACE", NULL },
+    { 0x00000040, "BRIEF", "NOBRIEF", NULL, "NOBRIEF", NULL },
+    { 0x00000200, "X5", "NOX5", NULL, "NOX5", NULL },
+    { 0x00004000, "EXTRA", "NOEXTRA", NULL, "NOEXTRA", NULL },
+    { 0x00200000, "LFXI", "LFXI", NULL, "NOLFXI", NULL },
+    { 0x01000000, "X6", "NOX6", NULL, "NOX6", NULL },
+    { 0x08000000, "DLIST", "NODLIST", NULL, "NODLIST", NULL },
+    { 0x10000000, "DEBUG", "NODEBUG", NULL, "NODEBUG", NULL },
+
 };
 
+#ifdef PFS
+type1_t type1[NUM_TYPE1] = {
+    { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
+    { 0x00000002, "LISTING2", "NOLISTING2", "L2", "NOLISTING2", "NL2" },
+    { 0x00000004, "LIST", "NOLIST", "L", "NOLIST", "NL" },
+    { 0x00000010, "TEMPLATE", "NOTEMPLATE", "TP", "NOTEMPLATE", "NTP" },
+    { 0x00000000, "VARSYM", "NOVARSYM", "VS", "NOVARSYM", "NVS" },
+    { 0x00400000, "DECK", "NODECK", "D", "NODECK", "ND" },
+    { 0x00001000, "TABDMP", "NOTABDMP", "TBD", "NOTABDMP", "NTBD" },
+    { 0x00000800, "TABLES", "TABLES", "TBL", "NOTABLES", "NTBL" },
+    { 0x00100000, "ADDRS", "NOADDRS", "A", "NOADDRS", "NA" },
+    { 0x00002000, "SREF", "NOSREF", "SR", "NOSREF", "NSR" },
+    { 0x02000000, "REGOPT", "NOREGOPT", "R", "NOREGOPT", "NR" },
+    { 0x00080000, "SRN", "NOSRN", NULL, "NOSRN", NULL },
+    { 0x00000400, "ZCON", "ZCON", "Z", "NOZCON", "NZ" },
+    { 0x00040000, "HALMAT", "NOHALMAT", "HM", "NOHALMAT", "NHM" },
+    { 0x00010000, "PARSE", "NOPARSE", "P", "NOPARSE", "NP" },
+    { 0x00020000, "LSTALL", "NOLSTALL", "LA", "NOLSTALL", "NLA" },
+    { 0x00800000, "SDL", "NOSDL", NULL, "NOSDL", NULL },
+    { 0x04000000, "MICROCODE", "MICROCODE", "MC", "NOMICROCODE", "NMC" },
+    { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
+    { 0x00000080, "HIGHOPT", "NOHIGHOPT", "HO", "NOHIGHOPT", "NHO" },
+};
+#else
+type1_t type1[NUM_TYPE1] = {
+    { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
+    { 0x00000002, "LISTING2", "NOLISTING2", "L2", "NOLISTING2", "NL2" },
+    { 0x00000004, "LIST", "NOLIST", "L", "NOLIST", "NL" },
+    { 0x00000010, "TEMPLATE", "NOTEMPLATE", "TP", "NOTEMPLATE", "NTP" },
+    { 0x00000000, "VARSYM", "NOVARSYM", "VS", "NOVARSYM", "NVS" },
+    { 0x00400000, "DECK", "NODECK", "D", "NODECK", "ND" },
+    { 0x00001000, "TABDMP", "NOTABDMP", "TBD", "NOTABDMP", "NTBD" },
+    { 0x00000800, "TABLES", "TABLES", "TBL", "NOTABLES", "NTBL" },
+    { 0x00100000, "ADDRS", "NOADDRS", "A", "NOADDRS", "NA" },
+    { 0x00002000, "SREF", "NOSREF", "SR", "NOSREF", "NSR" },
+    { 0x02000000, "SCAL", "SCAL", "SC", "NOSCAL", "NSC" },
+    { 0x00080000, "SRN", "NOSRN", NULL, "NOSRN", NULL },
+    { 0x00000400, "ZCON", "ZCON", "Z", "NOZCON", "NZ" },
+    { 0x00040000, "HALMAT", "NOHALMAT", "HM", "NOHALMAT", "NHM" },
+    { 0x20000000, "REGOPT", "NOREGOPT", "R", "NOREGOPT", "NR" },
+    { 0x00020000, "LSTALL", "NOLSTALL", "LA", "NOLSTALL", "NLA" },
+    { 0x00800000, "SDL", "NOSDL", NULL, "NOSDL", NULL },
+    { 0x04000000, "MICROCODE", "MICROCODE", "MC", "NOMICROCODE", "NMC" },
+    { 0x00010000, "PARSE", "NOPARSE", "P", "NOPARSE", "NP" },
+    { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
+    { 0x00000080, "HIGHOPT", "NOHIGHOPT", "HO", "NOHIGHOPT", "NHO" },
+};
+#endif
+type2_t type2[NUM_TYPE2] = {
+    { "TITLE", NULL, "T" },
+    { "LINECT", "59", "LC" },
+    { "PAGES", "2500", "P" },
+    { "SYMBOLS", "200", "SYM" },
+    { "MACROSIZE", "500", "MS" },
+    { "LITSTRING", "2500", "LITS" },
+    { "COMPUNIT", "0", "CU" },
+    { "XREFSIZE", "2000", "XS" },
+    { "CARDTYPE", NULL, "CT" },
+    { "LABELSIZE", "1200", "LBLS" },
+    { "DSR", "1", NULL },
+    { "BLOCKSUM", "400", "BS" },
+    { "MFID", NULL, "OLDTPL" }
+};
 
 //---------------------------------------------------------------------------
 // Functions useful for CALL INLINE or debugging a la `gdb`.
 
+// The `start` and `end` are addresses, and only variables within the
+// range start<=address<end are printed.  Either can be -1 to prevent it from
+// being used as a criterion.
 void
-printMemoryMap(char *msg) {
+printMemoryMap(char *msg, int start, int end) {
   int i;
   printf("\n%s\n", msg);
   for (i = 0; i < NUM_SYMBOLS; i++)
@@ -186,12 +179,17 @@ printMemoryMap(char *msg) {
       int address = memoryMap[i].address;
       char *symbol = memoryMap[i].symbol;
       char *datatype = memoryMap[i].datatype;
+      if ((start != -1 && address < start) || (end != -1 && address >= end))
+        continue;
       if (!strcmp(datatype, "BASED"))
         {
           int numRecords = memoryMap[i].allocated / memoryMap[i].recordSize;
           uint32_t raddress = getFIXED(address);
-          printf("%06X: BASED     %s = %06X\n", address, symbol,
-                 getFIXED(address));
+          printf("%06X: BASED     %s = %08X %04X %04X %08X %08X %08X %08X %04X %04X\n",
+              address, symbol, getFIXED(address), COREHALFWORD(address+4),
+              COREHALFWORD(address+6), getFIXED(address+8), getFIXED(address+12),
+              getFIXED(address+16), getFIXED(address+20),
+              COREHALFWORD(address+24), COREHALFWORD(address+26));
           for (j = 0; j < numRecords; j++)
             {
               int k;
@@ -506,58 +504,82 @@ abend(char *msg) {
 
 // Try to match a string to a Type 1 PARM field.  Returns 1 if found, 0 if not.
 int
-matchParm1(char *parm, int num, char **defaults, char **names,
-          char **synonyms) {
+matchType1(char *parm) {
   int i, len;
-  char *s, *ss;
-  for (i = 0; i < num; i++)
+  for (i = 0; i < NUM_TYPE1; i++)
     {
-      s = synonyms[i];
-      if (s == NULL)
-        continue;
-      len = strlen(s);
-      if (!strncmp(parm, s, len))
+      len = strlen(type1[i].name);
+      if (!strncmp(parm, type1[i].name, len) &&
+          (parm[len] == ',' || parm[len] == 0))
         {
-          ss = parm + len;
-          if (*ss == 0 || *ss == ',')
+          type1Actual[i] = type1[i].name;
+          break;
+        }
+      if (type1[i].synonym != NULL)
+        {
+          len = strlen(type1[i].synonym);
+          if (!strncmp(parm, type1[i].synonym, len) &&
+              (parm[len] == ',' || parm[len] == 0))
             {
-              // Found it!
-              defaults[i] = names[i];
-              return 1;
+              type1Actual[i] = type1[i].name;
+              break;
+            }
+        }
+      len = strlen(type1[i].negatedName);
+      if (!strncmp(parm, type1[i].negatedName, len) &&
+          (parm[len] == ',' || parm[len] == 0))
+        {
+          type1Actual[i] = type1[i].negatedName;
+          break;
+        }
+      if (type1[i].negatedSynonym != NULL)
+        {
+          len = strlen(type1[i].negatedSynonym);
+          if (!strncmp(parm, type1[i].negatedSynonym, len) &&
+              (parm[len] == ',' || parm[len] == 0))
+            {
+              type1Actual[i] = type1[i].negatedName;
+              break;
             }
         }
     }
-  return 0;
+  if (i >= NUM_TYPE1) // Not found.
+    return 0;
+  return 1;
 }
-
-// Try to match a string to a Type 2 PARM field.  Returns 1 if found, 0 if not.
 int
-matchParm2(char *parm, int num, char **defaults, char **names) {
+matchType2(char *parm) {
   int i, len;
-  char *s, *ss, *sss, *buffer = nextBuffer();
-  for (i = 0; i < num; i++)
+  char *s, *ss, *buffer = nextBuffer();
+  for (i = 0; i < NUM_TYPE2; i++)
     {
-      s = names[i];
-      if (s == NULL)
-        continue;
-      len = strlen(s);
-      if (!strncmp(parm, s, len))
+      len = strlen(type2[i].name);
+      if (!strncmp(parm, type2[i].name, len))
         {
-          ss = parm + len;
-          if (*ss == '=')
-            {
-              // Found it!
-              ss++;
-              sss = strchr(ss, ',');
-              if (sss != NULL)
-                *sss = 0;
-              strcpy(buffer, ss);
-              defaults[i] = buffer;
-              return 1;
-            }
+          s = parm + len + 1;
+          break;
+        }
+      if (type2[i].synonym == NULL)
+        continue;
+      len = strlen(type2[i].synonym);
+      if (!strncmp(parm, type2[i].synonym, len))
+        {
+          s = parm + len + 1;
+          break;
         }
     }
-  return 0;
+  if (i >= NUM_TYPE2)
+    return 0; // not found.
+  if (parm[len] != '=')
+    return 0;
+  // The candidate is pointed to by `s`.
+  ss = strstr(s, ",");
+  if (ss == NULL)
+    strcpy(buffer, s);
+  else
+    strncpy(buffer, s, ss - s);
+  type2Actual[i] = buffer;
+  return 1;
 }
 
 void
@@ -567,9 +589,9 @@ parseParmField(int print) {
   int i;
   uint32_t OPTIONS_CODE = 0, address;
   for (i = 0; i < NUM_TYPE1; i++)
-    type1Actual[i] = type1Defaults[i];
+    type1Actual[i] = type1[i].defaultValue;
   for (i = 0; i < NUM_TYPE2; i++)
-    type2Actual[i] = type2Defaults[i];
+    type2Actual[i] = type2[i].defaultValue;
   // Note that in principle, if there's a TITLE parameter, then it could
   // contain commas, so we have to watch out for that in parsing the
   // parameter field.  Let's go ahead and split on the commas, and then
@@ -579,17 +601,9 @@ parseParmField(int print) {
       int i;
       strncpy(parm, s, sizeof(string_t));
       // Is it any of the expected patterns for parameter types?
-      if (matchParm1(parm, NUM_TYPE1, type1Actual, type1Names, type1Names))
+      if (matchType1(parm))
         continue;
-      if (matchParm1(parm, NUM_TYPE1, type1Actual, type1Names, type1Synonyms))
-        continue;
-      if (matchParm1(parm, NUM_TYPE1, type1Actual, negatedType1Names, negatedType1Names))
-        continue;
-      if (matchParm1(parm, NUM_TYPE1, type1Actual, negatedType1Names, negatedType1Synonyms))
-        continue;
-      if (matchParm2(parm, NUM_TYPE2, type2Actual, type2Names))
-        continue;
-      if (matchParm2(parm, NUM_TYPE2, type2Actual, type2Synonyms))
+      if (matchType2(parm))
         continue;
       strcpy(abendMessage, "Parameter = ");
       strncpy(&abendMessage[12], parm, 100);
@@ -601,9 +615,9 @@ parseParmField(int print) {
         printf("%s\n", type1Actual[i]);
       for (i = 0; i < NUM_TYPE2; i++)
         if (type2Actual[i] == NULL)
-          printf("%s = NULL\n", type2Names[i]);
+          printf("%s = NULL\n", type2[i].name);
         else
-          printf("%s = %s\n", type2Names[i], type2Actual[i]);
+          printf("%s = %s\n", type2[i].name, type2Actual[i]);
     }
   // If we've gotten here, then the PARM field has been parsed, and the
   // arrays `type1Actual` and `type2Actual` have been updated with the new
@@ -611,7 +625,7 @@ parseParmField(int print) {
   // We need to interpret the Type 1 settings as bit-flags in OPTIONS_CODE.
   for (i = 0; i < NUM_TYPE1; i++)
     if (strncmp(type1Actual[i], "NO", 2)) // Not NO?
-      OPTIONS_CODE |= type1NamesToOptionsCode[i];
+      OPTIONS_CODE |= type1[i].optionsCode;
 
   // Finally, we can update the XPL memory (for MONITOR(13)) which holds the
   // `CON`, `TYPE2`, and `VALS` arrays.
@@ -621,7 +635,7 @@ parseParmField(int print) {
     putCHARACTER(address + 4 * i, type1Actual[i]);
   address = getFIXED(WHERE_MONITOR_13 + 12); // Address of TYPE2
   for (i = 0; i < NUM_TYPE2; i++)
-    putCHARACTER(address + 4 * i, type2Names[i]);
+    putCHARACTER(address + 4 * i, type2[i].name);
   address = getFIXED(WHERE_MONITOR_13 + 16); // Address of VALS
   for (i = 0; i < NUM_TYPE2; i++)
     if (i == 0 || i == 8 || i == 12)
@@ -840,8 +854,9 @@ parseCommandLine(int argc, char **argv)
           printf("              By default, 0 and 1 are attached to stdin.\n");
           printf("              N can range from 0 through 9. If the optional\n");
           printf("              \",U\" is present, it causes all input to be\n");
-          printf("              silently converted to upper case; the \"U\"\n");
-          printf("              is literal.\n");
+          printf("              silently converted to upper case, and the UTF-8\n");
+          printf("              logical-NOT and U.S. cent to be translated as\n");
+          printf("              well.  The \"U\" is literal.\n");
           printf("--ddo=N,F     Attach filename F to the logical unit number\n");
           printf("              N, for use with the OUTPUT(N) XPL built-in.\n");
           printf("              By default, 0 and 1 are attached to stdout.\n");
@@ -1830,8 +1845,24 @@ INPUT(uint32_t lun) {
   s[i] = 0;
   if (DD_INS_UPPERCASE[lun])
     {
+      // Convert to upper case.
       for (ss = s; *ss; ss++)
-        *ss = toupper(*ss);
+        {
+          *ss = toupper(*ss);
+          if (*ss == '^')
+            *ss = '~';
+        }
+      // Fix U.S. cent and logical-NOT UTF-8.
+      while (NULL != (ss = strstr(s, "\xC2\xA2")))
+        {
+          *ss = '`';
+          memmove(ss+1, ss+2, strlen(ss+2));
+        }
+      while (NULL != (ss = strstr(s, "\xC2\xAC")))
+        {
+          *ss = '~';
+          memmove(ss+1, ss+2, strlen(ss+2));
+        }
     }
   return s;
 }

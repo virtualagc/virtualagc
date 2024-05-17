@@ -1,4 +1,0 @@
-COMPACTIFY:
-PROCEDURE;
-    OUTPUT = 'Called bogus COMPACTIFY';
-END;

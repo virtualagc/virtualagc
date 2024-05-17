@@ -51,7 +51,7 @@ memoryMapEntry_t *
 lookupVariable(char *symbol);
 
 void
-printMemoryMap(char *msg);
+printMemoryMap(char *msg, int start, int end);
 
 extern int bitBits;
 char *
