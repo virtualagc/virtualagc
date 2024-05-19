@@ -16,6 +16,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-19 MAS	Updated dates for Comanche 72.
 
 
 # ************************************************************************
@@ -23,7 +24,7 @@
 # *		THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS:		 *
 # *									 *
 # *									 *
-# *				COLOSSUS 2C				 *
+# *				COLOSSUS 2D				 *
 # *									 *
 # *									 *
 # *	 THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED	 *
@@ -36,36 +37,36 @@
 # *									 *
 # ************************************************************************
 
-## MAS 2023: July 17, 1969 was the date Comanche 067 was released to Raytheon
-## for manufacture. In reality, an earlier date was likely present here. Names
-## and job titles also reflect Apollo 11, and may or may not have differed in
-## Comanche 67.
+## MAS 2024:  October 20, 1969 was the date Comanche 072 was released to
+## Raytheon for manufacture. In reality, an earlier date was likely present
+## here. Names and job titles also reflect Apollo 11, and may or may not have
+## differed in Comanche 72.
 
-#	SUBMITTED:	MARGARET H. HAMILTON		DATE:	17 JUL 69
+#	SUBMITTED:	MARGARET H. HAMILTON		DATE:	20 OCT 69
 #		M.H.HAMILTON, COLOSSUS PROGRAMMING LEADER
 #		APOLLO GUIDANCE AND NAVIGATION
 
-#	APPROVED:	DANIEL J. LICKLY		DATE:	17 JUL 69
+#	APPROVED:	DANIEL J. LICKLY		DATE:	20 OCT 69
 #		D.J.LICKLY, DIRECTOR, MISSION PROGRAM DEVELOPMENT
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	FRED H. MARTIN			DATE:	17 JUL 69
+#	APPROVED:	FRED H. MARTIN			DATE:	20 OCT 69
 #		FRED H. MARTIN, COLOSSUS PROJECT MANGER
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	NORMAN E. SEARS			DATE:	17 JUL 69
+#	APPROVED:	NORMAN E. SEARS			DATE:	20 OCT 69
 #		N.E. SEARS, DIRECTOR, MISSION DEVELOPMENT
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	RICHARD H. BATTIN		DATE:	17 JUL 69
+#	APPROVED:	RICHARD H. BATTIN		DATE:	20 OCT 69
 #		R.H. BATTIN, DIRECTOR, MISSION DEVELOPMENT
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	DAVID G. HOAG			DATE:	17 JUL 69
+#	APPROVED:	DAVID G. HOAG			DATE:	20 OCT 69
 #		D.G. HOAG, DIRECTOR
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
-#	APPROVED:	RALPH R. RAGAN			DATE:	17 JUL 69
+#	APPROVED:	RALPH R. RAGAN			DATE:	20 OCT 69
 #		R.R. RAGAN, DEPUTY DIRECTOR
 #		INSTRUMENTATION LABORATORY
 

@@ -16,6 +16,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-14 MAS	Implemented fix for COM-24, "Coding error in
+##		iterator".
 
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION	DATE - 1 SEPTEMBER 1967
 # MOD NO. - 0							LOG SECTION - CONIC SUBROUTINES
@@ -936,6 +938,10 @@ MODNGDEL	DLOAD	DSU		# TRIAL DELINDEP WOULD EXCEED MIN BOUND
 			DP9/10
 			NEWDEL
 
+## <b>Reconstruction:</b> The following code, down to the line containing "MAX",
+## has been rewritten in Comanche 72 to correct anomaly COM-24, "Coding error in
+## iterator". TWEEKIT is a single-precision value, but Comanche 67 and earlier
+## loaded it with DLOAD, introducing error.
 FIRSTIME	SLOAD	DMP
 			TWEEKIT
 			MIN

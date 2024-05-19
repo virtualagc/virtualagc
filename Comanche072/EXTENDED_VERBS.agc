@@ -16,6 +16,15 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-15 MAS	Implemented ACB-98, "Delete INHINT before
+##				FINDVAC in V89" (which also changes how R31FLAG
+##				is taken down in V85PERF). Also implemented
+##				the fix for anomaly COM-22, "V79, V41, V55, V42,
+##				do not perform CCS NEWJOB".
+##		2024-05-16 MAS	Implemented fix for COM-26, "Extended verb 92
+##				flag 6 is changed while job is not in INHINT".
+##				Also changed erasable bank for R36 as part of
+##				PCR-936.1, "Initialize V90 time to TIG".
 
 		BANK	7
 		SETLOC	EXTVERBS
@@ -112,6 +121,8 @@ SETXTACT	TS	EXTVBACT	# NO. SET FLAG TO SHOW EXT VERB DISPLAY
 		CS	TWO		# BLANK EVERYTHING EXCEPT MM AND VERB
 		TC	NVSUB
 		TC	+1
+## <b>Reconstruction:</b> The following two lines were added to Comanche 72
+## to correct anomaly COM-22, "V79, V41, V55, V42, do not perform CCS NEWJOB".
 		CCS	NEWJOB		# ALLOW POSSIBLE WAITING DISPLAY (FROM
 		TC	CHANG1		#    RELDSP) TO COME UP.
 
@@ -818,6 +829,22 @@ V83PERF		TC	TESTXACT
 		
 		TC	ENDOFJOB
 
+## <b>Reconstruction:</b> In Comanche 67 and earlier, R31FLAG is taken down
+## with the sequence
+## <pre>
+##  INHINT
+##  CS    R31FLBIT
+##  MASK  FLAGWRD9
+##  TS    FLAGWRD9
+## </pre>
+## This coding was replaced with the more space-efficient DOWNFLAG call as
+## part of ACB-98, "Delete INHINT before FINDVAC in V89". The apparent
+## disconnect between the ACB title and this change is due to the fact that
+## ACB forms did not have formal titles. Usually such forms only listed out
+## a single change, but in this instance, the ACB form covers two different
+## changes. The first change appearing on the form was apparently used as
+## its title; this second change is therefore mentioned nowhere other than
+## the original ACB form itself.
 V85PERF		TC	TESTXACT
 		TC	DOWNFLAG	# RESET R31 FLAG TO INDICATE R34
 		ADRES	R31FLAG
@@ -981,6 +1008,15 @@ CHKPOOH		CA	MODREG
 		BZF	TCQ
 		TCF	ALM/END
 		
+## <b>Reconstruction:</b> The INHINT instruction in EXDAPOFF below was added
+## to correct anomaly COM-26, "Extended verb 92 flag 6 is changed while job is
+## not in INHINT". Its exact placement is unfortunately ambiguous; while the
+## placement shown here is the most likely, it could also have appeared one
+## instruction later, one instruction earlier, or as the first instruction of
+## the function. In all cases, the anomaly would be fixed, and the resulting
+## bank checksum would be exactly the same. It is therefore unfortunately not
+## possible for us to know its precise location without finding more detailed
+## original sources.
 EXDAPOFF	EXTEND
 		DCA	IDLECADR	# SET T5 TO IDLE.
 		DXCH	T5LOC
@@ -1030,6 +1066,9 @@ IDLECADR	2CADR	T5IDLOC
 #     TERMINATE-  EXIT R63 ROUTINE
 #     PROCEED-  RESET 3AXISFLG AND CALL R60CSM FOR ATTITUDE MANEUVER.
 
+## <b>Reconstruction:</b> In Comanche 67 and earlier, V89PERF contained an
+## INHINT prior to the call to FINDVAC. It was deleted as part of ACB-98,
+## "Delete INHINT before FINDVAC in V89".
 V89PERF		TC	CHKPOOH		# DEMAND P00
 		TC	TESTXACT
 		CAF	PRIO10
@@ -1237,6 +1276,9 @@ VERB94		CAF	V94FLBIT
 #			PSI	ANGLE BTW LINE OF SIGHT AND FORWARD
 #				DIRECTION VECTOR IN HORIZONTAL PLANE - DEGREES
 
+## <b>Reconstruction:</b> In Comanche 67 and earlier, V90PERF starts R36 with
+## EBANK= RPASS36 (erasable bank 4). It was changed to EBANK= TIG (erasable
+## bank 7) as part of PCR-936.1, "Initialize V90 time to TIG".
 V90PERF		TC	TESTXACT
 		CAF	PRIO7		# R36.V90
 		TC	FINDVAC

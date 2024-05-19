@@ -16,6 +16,9 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-14 MAS	Implemented fix for anomaly COM-27, "V32E
+##				response to FLV16N45 in P37 results in
+##				indeterminate program transfer".
 
 		BANK	31
 		SETLOC	RTE1
@@ -424,6 +427,14 @@ P37W		CLEAR	CLEAR
 			T1
 		STOVL	TPASS4
 			V2(T1)/
+## <b>Reconstruction:</b> Comanche 72 has been changed to exit out of
+## interpretive code here and switch the erasable bank to 4, in order
+## to fix anomaly COM-27, "V32E response to FLV16N45 in P37 results in
+## indeterminate program transfer". Furthermore, the STORE DELVSIN
+## and CALL VN1645 were split up into two different instructions (from
+## their former STCALL) so that the CALL instruction could be given
+## the new label P37WW. The following GOTO was changed to jump to
+## this new label instead of P37W.
 		VSU	EXIT
 			V(T1)/
 		CAF	EBANK4

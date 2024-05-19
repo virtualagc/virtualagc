@@ -16,6 +16,9 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-14 MAS	Added POOFLAG to FLAGTABL as part of the fix
+##				for COM-21, "Backwards integration can occur
+##				in P27 uplink".
 
 # PROGRAM DESCRIPTION						8 APRIL, 1967
 #								SUNDISK REV 120
@@ -1091,6 +1094,8 @@ RAKE		CAF	ELEVEN			# THIS PART CLEARS FLAGWORD BITS.
 		TS	OPTIND
 		TC	MPAC	+1		# RETURN FROM INITSUB
 
+## <b>Reconstruction:</b> POOFLAG was added to FLAGTABL as part of the fix
+## for anomaly COM-21, "Backwards integration can occur in P27 uplink".
 FLAGTABL	OCT	0
 		OCT	00040			# IDLEFAIL
 		OCT	06000			# P21FLAG, STEERSW

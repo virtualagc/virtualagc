@@ -16,6 +16,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-17 MAS	Implemented fix for COM-29, "N70 instead of N71
+##				in P23".
 
 # RENDEZVOUS NAVIGATION PROGRAM 20
 #
@@ -2864,6 +2866,9 @@ P23.60		EXIT
 			0,1
 		STORE	MARKDOWN
 		EXIT
+## <b>Reconstruction:</b> The following line gained the label P23.61
+## as part of the fix for anomaly COM-29, "N70 instead of N71 display
+## in P23".
 P23.61		CAF	V05N71
 		TC	BANKCALL
 		CADR	GOFLASH
@@ -3035,6 +3040,17 @@ R23.8		SET	CALL
 		EXIT
 R23.END		TC	GOTOPOOH
 
+## <b>Reconstruction:</b> In Comanche 67 and earlier, R23.10 unconditionally
+## transfers to P23.06. It was changed to check SAVECBIT and jump to the new
+## label P23.61 if it is set in order to fix anomaly COM-29, "N70 instead of
+## N71 display in P23". Unfortunately,
+## <pre>
+##    CA    SAVECBIT
+##    MASK  FLAGWRD9
+## </pre>
+## is an equally valid way to check the flag, and results in an identical
+## memory bank checksum. It is therefore not possible for us to know the
+## true order without finding more detailed original sources.
 R23.10		TC	FALTON
 		CA	FLAGWRD9
 		MASK	SAVECBIT

@@ -16,6 +16,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-14 MAS	Implemented fix for COM-21, "Backwards
+##				integration can occur in P27 uplink".
 
 # 1.0 INTRODUCTION
 # ----------------
@@ -278,6 +280,9 @@ STATINT1	TC	INTPRET
 		SET	CALL
 			NODOFLAG
 			SETIFLGS
+## <b>Reconstruction:</b> The setting of POOFLAG here was added as part
+## of the fix for anomaly COM-21, "Backwards integration can occur in
+## P27 uplink".
 		SET	GOTO		# INHIBIT BACKWARDS INTEGRATION
 			POOFLAG
 			STATEUP
@@ -742,6 +747,10 @@ P00HCHK		DLOAD	ABS
 		DSU	BMN
 			DT/2MIN
 			A-PCHK
+## <b>Reconstruction:</b> Comanche 67 and earlier examine MODREG
+## here instead of checking POOFLAG. The change was made as part
+## of the fix for anomaly COM-21, "Backwards integration can occur in
+## P27 uplink".
 		BOFF	BON
 			POOFLAG		# IS BACKWARDS INTEGRATION INHIBITED
 			TIMESTEP	# NO

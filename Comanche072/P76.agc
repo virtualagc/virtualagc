@@ -16,6 +16,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-14 MAS	Implemented PCR-863.1, "Make P76 set NODO flag".
 
 # 1)	PROGRAM NAME - TARGET DELTA V PROGRAM (P76).
 # 2)	FUNCTIONAL DESCRIPTION - UPON ENTRY BY ASTRONAUT ACTION, P76 FLASHES DSKY REQUESTS TO THE ASTRONAUT
@@ -60,6 +61,8 @@ P76		TC	UPFLAG
 		TC	+2
 		TC	-5
 		TC	INTPRET		# RETURN TO INTERPRETIVE CODE
+## <b>Reconstruction:</b> The setting of NODOFLAG here was added to Comanche 72
+## as part of PCR-863.1, "Make P76 set NODO flag".
 		DLOAD	SET             # SET D(MPAC)=TIG IN CSEC B28
 			TIG
 			NODOFLAG	# DISALLOW V37
@@ -116,6 +119,11 @@ INTOTHIS	STCALL	TDEC1
 		EXIT
 		TC	PHASCHNG
 		OCT	04024
+## <b>Reconstruction:</b> The code below, down to ENDP76, was rewritten for
+## Comanche 72 as part of PCR-863.1, "Make P76 set NODO flag". The setting of
+## REINTFLG was moved from basic to interpretive, the basic call to INTWAKE1
+## was changed to an interpretive call to INTWAKE0, and OUT was changed to
+## clear NODOFLAG.
 		TC	INTPRET
 		SET	CALL
 			REINTFLG

@@ -16,6 +16,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-18 MAS	Implemented PCR-963, "R52 - Delete 407 alarm and
+##				drive trunnion to 50 degrees".
 
 # PROGRAM NAME - PROG52			DATE - NOV 30, 1966
 # MOD NO - 2					LOG SECTION - P51-P53
@@ -431,6 +433,10 @@ R52JA		CAF	BIT10		# IS THIS A LEM
 		CAF	V06N92		# NO
 		TC	BANKCALL
 		CADR	GODSPR
+## <b>Reconstruction:</b> In Comanche 67 and earlier, the line "TC R52EA" below
+## was instead "TC +3", and the label DOSHAFT had not yet been added. These
+## changes were made as part of PCR-963, "R52 - Delete 407 alarm and drive
+## trunnion to 50 degrees".
 R52E		CA	SWSAMPLE	# IS OSS IN CMC MODE
 		EXTEND
 		BZMF	R52F		# NO
@@ -476,6 +482,13 @@ R52I		CA	STATE +5
 R52SYNC		CAF	1.8SEC		# MAKE UP FOR LOST TIME
 		TCF	R52F +1
 
+## <b>Reconstruction:</b> R52EA and TRUNLIM below were added to Comanche 72
+## as part of PCR-963, "R52 - Delete 407 alarm and drive trunnion to 50
+## degrees". The value of TRUNLIM chosen here matches what is used in
+## Artemis 72 (the upper half of 38TRDEG), but it is also possible that
+## the value could have been one bit different (25253). This ambiguity
+## in the true value of the constant opens up possibility for error
+## in the placement of this code, while still achieving correct checksums.
 R52EA		CAF	TRUNLIM
 		TS	DESOPTT
 		TC	DOSHAFT
@@ -483,6 +496,9 @@ TRUNLIM		OCT	25252		# CORESPONDS TO 50 DEGS IN TRUNION
 		
 R52J		TC	DOWNFLAG	# CLEAR TRUNFLAG
 		ADRES	TRUNFLAG	# BIT 4 FLAG 0
+## <b>Reconstruction:</b> Comanche 67 and earlier generate program alarm 407
+## here. This call was removed as part of PCR-963, "R52 - Delete 407 alarm
+## and drive trunnion to 50 degrees".
 		TC	R52JA
 R52M		CAF	BIT6		# IS R53FLAG SET
 		MASK	STATE

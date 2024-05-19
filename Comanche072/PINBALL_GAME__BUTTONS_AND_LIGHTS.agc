@@ -16,6 +16,13 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-15 MAS	Implemented ACB-91, "V2X proceed response
+##				currently destroys content of R1, R2, R3 and
+##				returns to the V21 point of load" and ACB-99,
+##				"Remove DSP2BIT in PINBALL GAME BUTTONS AND
+##				LIGHTS".
+##		2024-05-16 MAS	Implemented PCR-806.1, "Allow N07 to address
+##				output channels".
 
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
 # MOD NO - 4		DATE - 27 APRIL 1967		ASSEMBLY - PINDISK REV 17
@@ -1683,6 +1690,9 @@ PUTXYZ		CS	SIX		# TEST THAT THE 3 DATA WORDS LOADED ARE
 		EXTEND
 		BZF	+2
 		TC	LOADLV
+## <b>Reconstruction:</b> The following code, down to ABLOAD, was completely
+## rewritten in Comanche 72 as part of PCR-806.1, "Allow N07 to address output
+## channels".
 		INHINT
 		CS	OCT30		# IS IT A CHANNEL (30 OR UNDER)
 		AD	XREG
@@ -2554,6 +2564,10 @@ DSPLV		CS	VD1		# TO BLOCK NUMERICAL CHARACTERS, CLEARS,
 
 DSPMSK		=	SEVEN
 
+## <b>Reconstruction:</b> Comanche 67 and earlier defined the routine DSP2BIT
+## here. It was deleted in Comanche 72 under ACB-99, "Remove DSP2BIT in PINBALL
+## GAME BUTTONS AND LIGHTS", in order to make room for PCR-806.1.
+
 # FOR DSPIN PLACE 0/25 OCT INTO COUNT, 5 BIT RELAY CODE INTO CODE.  BOTH
 # ARE DESTROYED.  IF BIT14 OF COUNT IS 1, SIGN IS BLANKED WITH LEFT CHAR.
 # FOR DSPIN1 PLACE 0,1 INTO BIT11 OF CODE, 2 INTO COUNT, REL ADDRESS OF
@@ -2683,6 +2697,9 @@ ENDALM		CADR	ENTER
 # IT DEMANDS 2 NUMERICAL CHARACTERS BE PUNCHED IN FOR NEW MM CODE.
 # IF NOT, IT RECYCLES.
 
+## <b>Reconstruction:</b> This SETLOC was to DSP2BIT +10D in earlier ropes, but
+## had to be changed due to ACB-99, "Remove DSP2BIT in PINBALL GAME BUTTONS AND
+## LIGHTS".
 		SETLOC	DSPLV +3
 		COUNT	41/PIN
 		
@@ -2782,6 +2799,10 @@ VBTERM		CS	ONE
 # PROCKEY PERFORMS THE SAME FUNCTION AS VBPROC.  IT MUST BE CALLED UNDER
 # EXECUTIVE CONTROL, WITH CHRPRIO.
 
+## <b>Reconstruction:</b> In Comanche 67, the load verb check below branched
+## to ALMCYCLE upon failure instead of CHARALRM. The branch target was changed
+## under ACB-91, "V2X proceed response currently destroys content of R1, R2, R3
+## and returns to the V21 point of load".
 PROCKEY		CS	VERBREG		# DONT ALLOW PROCEED DURING LOAD.
 		AD	VBSP2LD*	# DEC 22
 		EXTEND

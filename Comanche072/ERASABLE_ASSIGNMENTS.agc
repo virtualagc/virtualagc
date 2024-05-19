@@ -16,6 +16,10 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-14 MAS	Implemented fix for COM-21, "Backwards
+##				integration can occur in P27 uplink".
+##		2024-05-16 MAS	Implemented PCR-936.1, "Initialize V90 time
+##				to TIG".
 
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
 
@@ -292,6 +296,9 @@ DNTM2		EQUALS	35
 # PDSPFLAG	063D		BIT 12 FLAG 4
 # PFRATFLG	041D		BIT 4 FLAG 2
 # PINBRFLG	069D		BIT 6 FLAG 4
+## <b>Reconstruction:</b> The following line defining POOFLAG was added in
+## Comanche 72 as part of the fix for anomaly COM-21, "Backwards integration
+## can occur in P27 uplink".
 # POOFLAG	051D		BIT 9  FLAG 3
 # PRECIFLG	052D		BIT 8 FLAG 3
 # PRFTRKAT	080D		BIT 10 FLAG 5
@@ -665,6 +672,9 @@ VFLAG		=	050D		# LESS THAN TWO STARS	TWO STARS IN FIELD
 					
 VFLAGBIT	=	BIT10
 
+## <b>Reconstruction:</b> The following lines defining POOFLAG were added in
+## Comanche 72 as part of the fix for anomaly COM-21, "Backwards integration
+## can occur in P27 uplink".
 # BIT 9 FLAG 3
 POOFLAG		=	051D		# INHIBIT BACKWARDS	ALLOW BACKWARDS
 POOBIT		=	BIT9		# INTEGRATION		INTEGRATION
@@ -2301,6 +2311,9 @@ GAMMASB		EQUALS	RHOSB	+2	# B(2)DSP NOUN 51. YAWANGLE
 # R 36 SCRATCHPAD STORAGE		(13D)
 RPASS36		EQUALS	RONE		# I(6) S-S
 UNP36		EQUALS	RPASS36 +6	# I(6) S-S
+## <b>Reconstruction:</b> In Comanche 67, OPTIONY was equated to UNP36 +6. It
+## was moved to share with OPTION82 in unswitched erasable as part of PCR-936.1,
+## "Initialize V90 time to TIG", to enable R36 to be run with a different EBANK.
 OPTIONY		EQUALS	OPTION82	# I(1)TMP VEHICLE CODE
 
 # EXTENDED VERB 82 STORAGE.		(6D)

@@ -16,6 +16,9 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-14 MAS	Implemented ACB-97, "Delete redundant line
+##				inadvertently inserted in implementation of
+##				PCR 810".
 
 # PROGRAM NAME....TVCDAP, CONSISTING OF PITCHDAP, YAWDAP, ETC.
 # LOG SECTION...TVCDAPS			SUBROUTINE...DAPCSM
@@ -547,6 +550,10 @@ FWDFLTR		CAF	ZERO
 		DXCH	TMP5
 		DAS	DAP3
 
+## <b>Reconstruction:</b> The line "TS CMDTMP +1" below was accidentally
+## duplicated during the implementation of PCR-810 in Comanche 67. This
+## was corrected in Comanche 72 under ACB-97, "Delete redundant line
+## inadvertently inserted in implementation of PCR 810".
 OPTVARK		CS	DAP3	+1	# VARIABLE GAIN PACKAGE
 		EXTEND			# (ALSO, SIGN CHANGE IN FORWARD LOOP)
 		MP	VARK		#	SCALED (1.08 B+2)   CSM/LM

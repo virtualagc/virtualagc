@@ -16,6 +16,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-16 MAS	Implemented PCR-936.1, "Initialize V90 time
+##				to TIG".
 
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
 # MOD NO -1			LOG SECTION - P32-P35, P72-P75
@@ -1531,6 +1533,10 @@ SHIFTR1		LXA,2	SL*
 #	CENTRALS A,Q,L
 #	OTHER THOSE USED BY THE ABOVE LISTED SUBROUTINES
 
+## Comanche 67 and earlier used EBANK= RPASS36 (erasable bank 4) for
+## R36. It has been changed to EBANK= TIG (erasable bank 7) as part
+## of PCR 936.1, "Initialize V90 time to TIG", in order to give R36
+## easier access to TIG.
 		BANK	20
 		SETLOC	R36CM
 		BANK
@@ -1557,6 +1563,9 @@ OPTION36	VN	0412
 		SETLOC	R36LM
 		BANK
 
+## <b>Reconstruction:</b> As part of PCR 936.1, "Initialize V90 time to TIG",
+## R36A was changed to not zero DSPTEMX, and R36P3 was changed to initialize
+## DSPTEMX to TIG.
 R36A		CA	OPTIONX +1
 		TS	OPTIONY		# SAVE VEH. OPTION
 R36P3		EXTEND
@@ -1568,6 +1577,11 @@ R36P3		EXTEND
 		TCF	ENDEXT		# TERMINATE
 		TCF	+2		# PROCEED
 		TCF	-5		# RECYCLE FOR ASTRONAUT INPUT TIME
+## <b>Reconstruction:</b> The following code, down to the next SETLOC, was
+## completely rewritten in Comanche 72 as part of PCR 936.1, "Initialize V90
+## time to TIG". The logic in Comanche 67 and earlier accomplished essentially
+## the same thing, but it was written in basic instead of interpretive, and did
+## not write the time into TDEC1.
 		TC	INTPRET
 		DLOAD	BZE
 			DSPTEMX
@@ -1578,6 +1592,10 @@ ASTROTIM	STCALL	TDEC1
 		SETLOC	R36LM1
 		BANK
 		
+## <b>Reconstruction:</b> R36INT began with STORE TDEC1 in Comanche 67 and
+## earlier. It has been deleted for Comanche 72 as part of PCR 936.1,
+## "Initialize V90 time to TIG", because the storing into TDEC1 is now
+## performed by ASTROTIM.
 R36INT		SLOAD	SR1
 			OPTIONY
 		BHIZ	CALL
@@ -1669,6 +1687,11 @@ R36TAG2		DLOAD	RTB
 		TCF	ENDEXT		# TERMINATE
 		TCF	ENDEXT		# PROCEED, END OF PROGRAM
 		TCF	R36P3		# REDISPLAY OUTPUT
+## <b>Reconstruction:</b> Comanche 67 and earlier define LREGCHK here. It
+## has been deleted for Comanche 72 as part of PCR 936.1, "Initialize V90
+## time to TIG", because it is no longer necessary. Furthermore, the
+## TC INTPRET at the beginning of ENTTIM2 has been removed, and ENTTIM2
+## has been changed to jump to ASTROTIM instead of R36INT upon completion.
 ENTTIM2		RTB	GOTO
 			LOADTIME
 			ASTROTIM

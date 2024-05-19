@@ -16,6 +16,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-13 MAS	Created from Comanche 067.
+##		2024-05-14 MAS	Implemented PCR-966, "Clear preferred
+##				orientation flag in P40/41".
 
 # PROGRAM DESCRIPTION ** P40CSM **
 
@@ -427,6 +429,9 @@ P47/DSP		CAF	V1683
 		EBANK=	TIG
 		COUNT	24/P40
 		
+## <b>Reconstruction:</b> TIGAVEG has been changed to clear PFRATFLG
+## at the beginning of TIGAVEG as part of PCR-966, "Clear preferred
+## orientation flag in P40/41".
 TIGAVEG		CS	PFRATBIT	# TASK (4.37 PROTECTS)
 		MASK	FLAGWRD2
 		TS	FLAGWRD2
