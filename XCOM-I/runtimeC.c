@@ -1256,7 +1256,7 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
 
 // The table below was adapted from the table of the same name in
 // the Virtual AGC source tree.  The table is indexed on the numeric
-// codes of the ASCII charactgers. It contains the EBCDIC numeric
+// codes of the ASCII characters. It contains the EBCDIC numeric
 // code for each *printable* ASCII character, with non-printable
 // characters being translated to an EBCDIC space character.
 // There are two exceptions, however, in that the ASCII ` (EBCDIC
@@ -1271,10 +1271,10 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
 // in the Wikipedia article of the same name, so I've changed those
 // to match Wikipedia.
 static uint8_t asciiToEbcdic[128] = {
-  0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
-  0x40, 0x40, 0x25, 0x40, 0x40, 0x0D, 0x40, 0x40,
-  0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, /*              */
-  0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, /*              */
+  0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f,
+  0x16, 0x05, 0x25, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+  0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26, /*              */
+  0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, /*              */
   0x40, 0x5A, 0x7F, 0x7B, 0x5B, 0x6C, 0x50, 0x7D, /*  !"#$%&'     */
   0x4D, 0x5D, 0x5C, 0x4E, 0x6B, 0x60, 0x4B, 0x61, /* ()*+,-./     */
   0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, /* 01234567     */
@@ -1286,7 +1286,7 @@ static uint8_t asciiToEbcdic[128] = {
   0x4A, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, /* `abcdefg     */
   0x88, 0x89, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, /* hijklmno     */
   0x97, 0x98, 0x99, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, /* pqrstuvw     */
-  0xA7, 0xA8, 0xA9, 0xC0, 0x4F, 0xD0, 0x5F, 0x40  /* xyz{|}~      */
+  0xA7, 0xA8, 0xA9, 0xC0, 0x4F, 0xD0, 0x5F, 0x07  /* xyz{|}~      */
 };
 
 // The inverse of `asciiToEbcdic` above, in which the ASCII equivalent
@@ -1295,22 +1295,38 @@ static uint8_t asciiToEbcdic[128] = {
 // symbol to ~, a explained above.  It was generated from the table above
 // using the one-time-use program invertEbcdicTable.py.
 static char ebcdicToAscii[256] = {
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '\r', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', '\n', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '`', '.', '<', '(', '+', '|',
-  '&', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '!', '$', '*', ')', ';', '~',
-  '-', '/', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ',', '%', '_', '>', '?',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ':', '#', '@', '\'', '=', '"',
-  ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' ', ' ', ' ', ' ', ' ', ' ',
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '[', ']', ' ', ' ', ' ', ' ',
-  '{', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', ' ', ' ', ' ', ' ', ' ', ' ',
-  '}', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', ' ', ' ', ' ', ' ', ' ', ' ',
-  '\\', ' ', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ' ', ' ', ' ', ' ', ' ', ' ',
-  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', ' ', ' ', ' ', ' ', ' '
+  '\x00', '\x01', '\x02', '\x03', ' '   , '\x09', ' '   , '\x7F',
+  ' '   , ' '   , ' '   , '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
+  '\x10', '\x11', '\x12', '\x13', ' '   , ' '   , '\x08', ' '   ,
+  '\x18', '\x19', ' '   , ' '   , '\x1C', '\x1D', '\x1E', '\x1F',
+  ' '   , ' '   , ' '   , ' '   , ' '   , '\x0A', '\x17', '\x1B',
+  ' '   , ' '   , ' '   , ' '   , ' '   , '\x05', '\x06', '\x07',
+  ' '   , ' '   , '\x16', ' '   , ' '   , ' '   , ' '   , '\x04',
+  ' '   , ' '   , ' '   , ' '   , '\x14', '\x15', ' '   , '\x1A',
+  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , '`'   , '.'   , '<'   , '('   , '+'   , '|'   ,
+  '&'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , '!'   , '$'   , '*'   , ')'   , ';'   , '~'   ,
+  '-'   , '/'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , ' '   , ','   , '%'   , '_'   , '>'   , '?'   ,
+  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , ':'   , '#'   , '@'   , '\''  , '='   , '"'   ,
+  ' '   , 'a'   , 'b'   , 'c'   , 'd'   , 'e'   , 'f'   , 'g'   ,
+  'h'   , 'i'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , 'j'   , 'k'   , 'l'   , 'm'   , 'n'   , 'o'   , 'p'   ,
+  'q'   , 'r'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , 's'   , 't'   , 'u'   , 'v'   , 'w'   , 'x'   ,
+  'y'   , 'z'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , '['   , ']'   , ' '   , ' '   , ' '   , ' '   ,
+  '{'   , 'A'   , 'B'   , 'C'   , 'D'   , 'E'   , 'F'   , 'G'   ,
+  'H'   , 'I'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  '}'   , 'J'   , 'K'   , 'L'   , 'M'   , 'N'   , 'O'   , 'P'   ,
+  'Q'   , 'R'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  '\\'  , ' '   , 'S'   , 'T'   , 'U'   , 'V'   , 'W'   , 'X'   ,
+  'Y'   , 'Z'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  '0'   , '1'   , '2'   , '3'   , '4'   , '5'   , '6'   , '7'   ,
+  '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '
 };
 
 #if 0
@@ -2053,9 +2069,9 @@ uint8_t
 BYTE(char *s, uint32_t index){
   if (index >= strlen(s))
     {
-      fprintf(stderr, "BYTE retrieving past end of string (%d >= %d)\n",
-                      index, (int) strlen(s));
-      printBacktrace();
+      //fprintf(stderr, "BYTE retrieving past end of string (%d >= %d)\n",
+      //                index, (int) strlen(s));
+      //printBacktrace();
       return 0;
     }
   return asciiToEbcdic[s[index]];

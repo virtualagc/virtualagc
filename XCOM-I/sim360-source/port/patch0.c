@@ -45,6 +45,8 @@ if (mapCP == NULL)
 
 TABLE = getFIXED(mapTABLE->address);
 TEXT = getCHARACTER(mapTEXT->address);
+if (*TEXT == 0)
+  return fixedToBit(1, 0);
 if (TABLE == mapBLANKTABLE->address)
   {
     for (s = TEXT; *s == ' ' || *s == '\t'; s++);
@@ -58,6 +60,7 @@ else if (TABLE == mapALPHATABLE->address)
 else if (TABLE == mapSTRINGTABLE->address)
   {
     for (s = TEXT; *s && *s != '\''; s++);
+
   }
 else if (TABLE == mapCOMMENTABLE->address)
   {
@@ -65,7 +68,10 @@ else if (TABLE == mapCOMMENTABLE->address)
   }
 else
   abend("Requested translation table for SCAN_FINDS_END_OF not found");
-if (s == TEXT)
-  return fixedToBit(1, 0);
+if (*s == 0)
+  {
+    putFIXED(mapCP->address, s + 1 - TEXT);
+    return fixedToBit(1, 0);
+  }
 putFIXED(mapCP->address, s - TEXT);
 return fixedToBit(1, 1);

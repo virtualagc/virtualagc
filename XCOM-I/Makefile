@@ -83,7 +83,7 @@
 # of this Makefile will also be in that folder.  (But this Makefile may be in
 # other folders as well, so don't let that confuse you.)
 #
-# Second, use the command `make TESTSUITE=yes`.  Note that the CC alternative 
+# Second, use the command `make REGRESSION=yes`.  Note that the CC alternative 
 # described in the preceding section can be used to change the compiler name.
 #
 # This process should now have created various additional folders, with names
@@ -107,7 +107,7 @@ endif
 SOURCES = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
 
-ifndef TESTSUITE
+ifndef REGRESSION
 
 #----------------------------------------------------------------------------
 # For normal use building C-language files.
@@ -123,7 +123,7 @@ clean:
 	-rm $(TARGET)  # For Linux or Mac
 	-del $(TARGET) # For Windows
 
-else # TESTSUITE
+else # REGRESSION
 
 #----------------------------------------------------------------------------
 # For running test suite.
@@ -207,4 +207,4 @@ $(XPLI_APPS):
 	@XCOM-I.py --keep-unused $(PEXTRA) Tests/$@.xpl
 	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
 
-endif # TESTSUITE
+endif # REGRESSION

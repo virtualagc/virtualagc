@@ -4200,4 +4200,4 @@ MAIN_PROCEDURE:
 CALL MAIN_PROCEDURE;                                                            
 RETURN SEVERE_ERRORS;                                                           
 
-EOF
+EOF EOF EOF
