@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "configuration.h"
 
@@ -50,8 +51,6 @@ typedef struct {
   char *synonym;
 } type2_t;
 
-#define MAX_TYPE1 32
-#define MAX_TYPE2 16
 extern char *type1Actual[MAX_TYPE1];
 extern char *type2Actual[MAX_TYPE2];
 typedef struct {
@@ -60,10 +59,12 @@ typedef struct {
   type1_t type1[MAX_TYPE1];
   type2_t type2[MAX_TYPE2];
 } optionsProcessor_t;
-extern optionsProcessor_t *optionsProcessor;
+extern optionsProcessor_t *optionsProcessor, *USEROPT;
 
 // Some functions that are perhaps useful for CALL INLINE or for running
 // the C code in a debugger.
+
+void abend(char *msg);
 
 void *
 nextBuffer(void);
@@ -512,7 +513,7 @@ EXIT(void);
 void
 LINK(void);
 
-extern char *parmField;
+extern char parmField[1024];
 char *
 PARM_FIELD(void);
 

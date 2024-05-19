@@ -68,31 +68,7 @@ noInclusionDirectives = False
 showBacktrace = False
 physicalTop = 1 << 24
 keepUnused = False
-optproc = "COMPOPT_"
 
-'''
-McKeeman et al. does not specify the packing of the bits in memory for a BIT(n)
-value.  This seems relatively easy to deduce from other clues for n<=32 because
-in that case the BIT(n) values are supposed to behave like integers.
-But for n>32, I haven't been able to deduce it from any clues or from code.
-It's a serious problem because it means that if we get it wrong, there is a 
-mismatch between the way the compiler packs INITIAL values for BIT(n) and the
-way XPL programs use those values.  It also affects how `putBIT` masks off 
-unused positions when n is not an exact multiple of 8.
-
-Consequently, I've having to experiment with different packings, to see if any 
-of them are more-congenial with the original XCOM program than others.  The 
-packing is determined by the bitPacking` variable in Python or the `BIT_PACKING`
-preprocessor constant (but having the same value as `bitPacker`) in C.  The 
-values are interpreted like so:
-    1   The rightmost bit (in an INITIAL "(1) ...") correspoinds to bit 0 in 
-        the byte that's highest in memory.
-    2   The leftmost bit corresponds to bit 7 in the byte that's lowest in 
-        memory.  (I.e., the same bit-or as for bitPacking=1, but they may be
-        aligned differently if n is not a multiple of 8.
-    3.  TBD
-'''
-bitPacking = 2 # 2 appears to be the correct value to use.
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
 # they shouldn't be something that would otherwise appear in XPL strings, but
@@ -182,22 +158,6 @@ The available OPTIONS are:
 --identifer=S   (Default "REL32V0   ".)  Set the 10-character string returned 
                 by MONITOR(23).  Will be automatically truncated or padded as
                 needed.
---optproc=N     (Default is COMPOPT_.)  The "options processor" is used for 
-                interpreting the run-time program's (particularly HAL/S-FC's) 
-                options, which originally came from JCL, instead from 
-                command-line options.  For HAL/S-FC, the available processors 
-                are:
-                    COMPOPT_     (automatically changed to COMPOPT_PFS 
-                                 if --cond=P or to COMPOPT_BFS if --cond=B)
-                    COMPOPT_PFS
-                    COMPOPT_BFS
-                    COMPOPT_360
-                    LISTOPT
-                    MONOPT
-                See Virtual AGC page XPL.html#programOptions for instructions
-                in using a custom options processor.
-                Note: On the command line, this option should precede any of the
-                options that are processed by the selected options processor.
 --include=F     Folder to use for XPL/I's "/%INCLUDE ... %/" directives.
                 Note that this is relative to the source-code file.
                 Defaults to ../HALINCL.  If used, should precede any XPL source
@@ -250,8 +210,6 @@ The available OPTIONS are:
 for parm in sys.argv[1:]:
     if parm == "--":
         break
-    elif parm.startswith("--optproc="):
-        optproc = parm[10:]
     elif parm == "--keep-unused":
         keepUnused = True
     elif parm.startswith("--merge="):
@@ -312,8 +270,6 @@ for parm in sys.argv[1:]:
         outputFolder = parm[9:]
     elif parm.startswith("--indent="):
         indent = " " * int(parm[9:])
-    elif parm.startswith("--packing="):
-        bitPacking = int(parm[10:])
     elif parm == "--backtrace":
         showBacktrace = True
     elif parm.startswith("-"):

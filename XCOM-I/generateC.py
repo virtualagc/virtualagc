@@ -243,16 +243,9 @@ def getBIT(address):
     for i in range(numBytes):
         value = (value << 8) | memory[address]
         address += 1
-    # Re `bitPacking`: see comments for `parseCommandLine`.
-    if bitPacking == 1:
-        pass
-    elif bitPacking == 2:
-        shiftedBy = bitWidth % 8
-        if shiftedBy != 0:
-            value = value >> (8 - shiftedBy)
-    else:
-        errxit("Unknown setting for --packing")
-    # End of `bitPacking`.
+    shiftedBy = bitWidth % 8
+    if shiftedBy != 0:
+        value = value >> (8 - shiftedBy)
     return {
         "bitWidth": bitWidth,
         "numBytes": numBytes,
@@ -277,17 +270,10 @@ def putBIT(address, value):
                    (address, numBytes - 1, lengthFromDescriptor))
         address = descriptor & 0xFFFFFF
     bytes = value["bytes"] & ((1 << bitWidth) - 1)
-    # Re `bitPacking`: see comments for `parseCommandLine`.
-    if bitPacking == 1:
-        pass
-    elif bitPacking == 2:
-        if bitWidth > 32:
-            shiftedBy = bitWidth % 8
-            if shiftedBy != 0:
-                bytes = bytes << (8 - shiftedBy)
-    else:
-        errxit("Unknown setting for --packing")
-    # End of `bitPacking`.
+    if bitWidth > 32:
+        shiftedBy = bitWidth % 8
+        if shiftedBy != 0:
+            bytes = bytes << (8 - shiftedBy)
     for i in range(numBytes - 1 , -1, -1):
         memory[address + i] = bytes & 0xFF
         bytes = bytes >> 8
@@ -356,6 +342,9 @@ def allocateVariables(scope, region):
                 continue
         if "FIXED" in attributes:
             datatype = "FIXED"
+            # Realign at word boundary, as suggested by comment at line 305 in
+            # xcom4.xpl.
+            variableAddress = (variableAddress + 3) & 0xFFFFFC;
         elif "BIT" in attributes:
             datatype = "BIT"
             bitWidth = attributes["BIT"]
@@ -2409,8 +2398,8 @@ def generateC(globalScope):
     whereMonitor13 = variableAddress
     # `MONITOR(13)` returns a pointer to a block of 6 `FIXED` values, 3 of which
     # are pointers to arrays of FIXED.
-    MAX_ENTRIES = 25
-    SIZE_ARRAY = 4 * MAX_ENTRIES
+    MAX_TYPES = 64
+    SIZE_ARRAY = 4 * MAX_TYPES
     saddress = variableAddress + 24
     putFIXED(variableAddress, 0) # `OPTIONS_CODE`
     putFIXED(variableAddress + 4, saddress) # Pointer to `CON`.
@@ -2420,7 +2409,7 @@ def generateC(globalScope):
     putFIXED(variableAddress + 20, 0) # Pointer to unused BASED `NPVALS` or `MONVALS`
     variableAddress = saddress;
     # Arrays of `CON`, `TYPE2`, and `VALS`, respectively.
-    for i in range(3 * MAX_ENTRIES): 
+    for i in range(3 * MAX_TYPES): 
         putFIXED(variableAddress, 0);
         variableAddress += 4;   
     regions.append( [0, variableAddress] )
@@ -2631,8 +2620,6 @@ def generateC(globalScope):
         print("#define BFS", file=f)
     if standardXPL:
         print("#define STANDARD_XPL", file=f)
-    print("#define BIT_PACKING %d" % bitPacking, file=f)
-    #print("#define LINECT %d" % linect, file=f)
     print("#define COMMON_BASE 0x%06X" % commonBase, file=f)
     print("#define NON_COMMON_BASE 0x%06X" % nonCommonBase, file=f)
     print("#define FREE_BASE 0x%06X" % freeBase, file=f)
@@ -2649,15 +2636,8 @@ def generateC(globalScope):
     print("#define ROOT_BASED %d" % rootBASED, file=f)
     print("#define MAX_LENGTH_MANGLED %d" % maxLengthMangled, file=f)
     print("#define NUM_MANGLED %d" % len(mangledLabels), file=f)
-    if optproc == "COMPOPT_":
-        if "P" in ifdefs:
-            print("#define OPTPROC COMPOPT_PFS", file=f)
-        elif "B" in ifdefs:
-            print("#define OPTPROC COMPOPT_BFS", file=f)
-        else:
-            print("#define OPTPROC MONOPT", file=f)
-    else:
-        print("#define OPTPROC %s" % optproc, file=f)
+    print("#define MAX_TYPE1 %d" % MAX_TYPES, file=f)
+    print("#define MAX_TYPE2 %d" % MAX_TYPES, file=f)
     print("", file=f)
     print("extern char *mangledLabels[NUM_MANGLED];", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)

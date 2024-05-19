@@ -58,7 +58,7 @@ struct timeval startTime;
 static uint32_t freepoint = FREE_POINT;
 static uint32_t freelimit = FREE_LIMIT;
 
-char *parmField = "";
+char parmField[1024] = "";
 int linesPerPage = 59;
 memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
 int showBacktrace = 0;
@@ -281,7 +281,7 @@ optionsProcessor_t MONOPT = {
 
 char *type1Actual[MAX_TYPE1];
 char *type2Actual[MAX_TYPE2];
-optionsProcessor_t *optionsProcessor = &OPTPROC;
+optionsProcessor_t *optionsProcessor = NULL;
 
 //---------------------------------------------------------------------------
 // Functions useful for CALL INLINE or debugging a la `gdb`.
@@ -435,24 +435,6 @@ bitToRadix(bit_t *b) {
       sprintf(returnValue, "Set bitBits 1, 2, 3, or 4 (not %d)", bitBits);
       return returnValue;
     }
-  // Re `BIT_PACKING`, see the comments about `bitPacking` in parseCommandLine.py.
-#if BIT_PACKING == 1
-  for (i = numDigits - 1, nextByte = b->numBytes - 1; i >= 0; i--)
-    {
-      while (bitsLeftInValue < bitBits)
-        {
-          value = (value << 8) | b->bytes[nextByte--];
-          bitsLeftInValue += 8;
-        }
-      thisDigit = value % radix;
-      value = value / radix;
-      bitsLeftInValue -= bitBits;
-      if (thisDigit < 10)
-        returnValue[offset + i] = '0' + thisDigit;
-      else
-        returnValue[offset + i] = 'A' + (thisDigit - 10);
-    }
-#elif BIT_PACKING == 2
   for (i = 0, nextByte = 0; i < numDigits; i++)
     {
       int keep;
@@ -470,9 +452,6 @@ bitToRadix(bit_t *b) {
       else
         returnValue[offset + i] = 'A' + (thisDigit - 10);
     }
-#else
-#error "Only BIT_PACKING 1 or 2 implemented in bitToRadix"
-#endif
   returnValue[offset + numDigits] = '"';
   returnValue[offset + numDigits + 1] = 0;
   return returnValue;
@@ -594,8 +573,27 @@ rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex) {
 //---------------------------------------------------------------------------
 // Utility functions.
 
-string_t abendMessage = "";
 #define BT_BUF_SIZE 100
+
+// The backtrace is available in Linux and (I've read) Mac OS.
+void
+printBacktrace(void)
+{
+  int j, nptrs;
+  void *buffer[BT_BUF_SIZE];
+  char **strings;
+  nptrs = backtrace(buffer, BT_BUF_SIZE);
+  strings = backtrace_symbols(buffer, nptrs);
+  if (strings != NULL)
+    {
+      fprintf(stderr, "Backtrace:\n");
+      for (j = 0; j < nptrs; j++)
+        fprintf(stderr, "\t%s\n", strings[j]);
+    }
+  free(strings);
+}
+
+string_t abendMessage = "";
 void
 abend(char *msg) {
   printf("\n");
@@ -603,22 +601,8 @@ abend(char *msg) {
   fprintf(stderr, "%s\n", msg);
   if (strlen(abendMessage) > 0)
     fprintf(stderr, "%s\n", abendMessage);
-  // Backtrace: available in Linux and (I've read) Mac OS.
   if (showBacktrace)
-    {
-      int j, nptrs;
-      void *buffer[BT_BUF_SIZE];
-      char **strings;
-      nptrs = backtrace(buffer, BT_BUF_SIZE);
-      strings = backtrace_symbols(buffer, nptrs);
-      if (strings != NULL)
-        {
-          fprintf(stderr, "Backtrace:\n");
-          for (j = 0; j < nptrs; j++)
-            fprintf(stderr, "\t%s\n", strings[j]);
-        }
-      free(strings);
-    }
+    printBacktrace();
   exit(1);
 }
 
@@ -721,6 +705,8 @@ parseParmField(int print) {
       int i;
       strncpy(parm, s, sizeof(string_t));
       // Is it any of the expected patterns for parameter types?
+      if (parm[0] == '$')
+        continue;
       if (matchType1(parm))
         continue;
       if (matchType2(parm))
@@ -917,7 +903,7 @@ parseCommandLine(int argc, char **argv)
       else if (!strncmp(argv[i], "--parm=", 7))
         {
           char *s;
-          parmField = &argv[i][7];
+          strcpy(parmField, &argv[i][7]);
         }
       else if (!strcmp(argv[i], "--backtrace"))
         showBacktrace = 1;
@@ -949,7 +935,7 @@ parseCommandLine(int argc, char **argv)
               printf("PARM field > ");
               fgets(line, sizeof(line), stdin);
               line[strlen(line)-1] = 0;
-              parmField = line;
+              strcpy(parmField, line);
               parseParmField(1);
               printf("\n");
             }
@@ -1008,7 +994,7 @@ parseCommandLine(int argc, char **argv)
           returnValue = -1;
         }
     }
-  parseParmField(0); // Parse the PARM-field string.
+  //parseParmField(0); // Parse the PARM-field string.
   if (COMMON_IN != NULL)
     {
       if (NON_COMMON_BASE > COMMON_BASE)
@@ -1221,7 +1207,7 @@ getBIT(uint32_t bitWidth, uint32_t address)
 void
 putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
 {
-  uint32_t numBytes;
+  uint32_t numBytes, destAddress;
   uint32_t maskWidth, maskAddress = address;
   if (bitWidth == 0)
     {
@@ -1250,13 +1236,15 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
       address = descriptor & 0xFFFFFF;
       maskAddress = address;
     }
-  memmove(&memory[address], &value->bytes[value->numBytes - numBytes], numBytes);
-  // Re `BIT_PACKING`, see the comments about `bitPacking` in parseCommandLine.py.
+  destAddress = address;
   maskWidth = bitWidth % 8;
-#if BIT_PACKING == 1
-  if (maskWidth)
-    memory[maskAddress] &= (1 << maskWidth) - 1;
-#elif BIT_PACKING == 2
+  while (numBytes > value->numBytes)
+    {
+      memory[destAddress++] = 0;
+      numBytes--;
+      maskWidth = 0;
+    }
+  memmove(&memory[destAddress], &value->bytes[value->numBytes - numBytes], numBytes);
   if (maskWidth)
     {
       if (bitWidth <= 32)
@@ -1264,9 +1252,6 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
       else
         memory[address + numBytes - 1] &= ~((1 << maskWidth) - 1);
     }
-#else
-#error "Only BIT_PACKING 1 or 2 implemented in putBIT"
-#endif // BIT_PACKING
 }
 
 // The table below was adapted from the table of the same name in
@@ -1310,9 +1295,9 @@ static uint8_t asciiToEbcdic[128] = {
 // symbol to ~, a explained above.  It was generated from the table above
 // using the one-time-use program invertEbcdicTable.py.
 static char ebcdicToAscii[256] = {
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '\r', ' ', ' ',
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-    ' ', ' ', ' ', ' ', ' ', '\n', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '\r', ' ', ' ',
+  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+  ' ', ' ', ' ', ' ', ' ', '\n', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '`', '.', '<', '(', '+', '|',
   '&', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '!', '$', '*', ')', ';', '~',
@@ -1813,6 +1798,7 @@ string_t headingLine = "";
 string_t subHeadingLine = "";
 int pageCount = 0;
 int LINE_COUNT = 0;
+int pendingNewline = 0;
 #define MAX_QUEUE 10
 void
 OUTPUT(uint32_t lun, char *string) {
@@ -1875,22 +1861,33 @@ OUTPUT(uint32_t lun, char *string) {
           if (LINE_COUNT == 0 || LINE_COUNT >= linesPerPage)
             {
               if (pageCount > 0)
-                fprintf(fp, "\n\f");
+                {
+                  fprintf(fp, "\n\f");
+                  pendingNewline = 0;
+                }
               pageCount++;
               LINE_COUNT = 0;
               if (strlen(headingLine) > 0)
-                fprintf(fp, "%s     PAGE %d\n", headingLine, pageCount);
+                {
+                  fprintf(fp, "%s     PAGE %d\n", headingLine, pageCount);
+                  pendingNewline = 0;
+                }
               else
-                fprintf(fp, "PAGE %d\n", pageCount);
+                {
+                  fprintf(fp, "PAGE %d\n", pageCount);
+                  pendingNewline = 0;
+                }
               LINE_COUNT++;
               if (strlen(subHeadingLine) > 0)
                 {
                   printf("%s\n", subHeadingLine);
+                  pendingNewline = 0;
                   LINE_COUNT++;
                 }
               if (LINE_COUNT > 0)
                 {
                   fprintf(fp, "\n");
+                  pendingNewline = 0;
                   LINE_COUNT++;
                 }
             }
@@ -1903,19 +1900,37 @@ OUTPUT(uint32_t lun, char *string) {
                     c = *s;
                     *s = 0;
                     if (s > s0)
-                      fprintf(fp, "%s", s0);
+                      {
+                        fprintf(fp, "%s", s0);
+                        pendingNewline = 1;
+                      }
                     s0 = s + 1;
-                    if (c == '`') fprintf(fp, "¢");
-                    else if (c == '~') fprintf(fp, "¬");
+                    if (c == '`')
+                      {
+                        fprintf(fp, "¢");
+                        pendingNewline = 1;
+                      }
+                    else if (c == '~')
+                      {
+                        fprintf(fp, "¬");
+                        pendingNewline = 1;
+                      }
                   }
               if (s > s0)
-                fprintf(fp, "%s", s);
+                {
+                  fprintf(fp, "%s", s);
+                  pendingNewline = 1;
+                }
             }
           else
-            fprintf(fp, "%s", queue[i]);
+            {
+              fprintf(fp, "%s", queue[i]);
+              pendingNewline = 1;
+            }
           if (i < linesInQueue - 1)
             {
               fprintf(fp, "\n");
+              pendingNewline = 0;
               LINE_COUNT++;
             }
         }
@@ -1923,6 +1938,7 @@ OUTPUT(uint32_t lun, char *string) {
   else
     {
       fprintf(fp, "%s\n", string);
+      pendingNewline = 0;
     }
 }
 
@@ -2036,7 +2052,12 @@ SUBSTR2(char *s, int32_t start) {
 uint8_t
 BYTE(char *s, uint32_t index){
   if (index >= strlen(s))
-    return 0;
+    {
+      fprintf(stderr, "BYTE retrieving past end of string (%d >= %d)\n",
+                      index, (int) strlen(s));
+      printBacktrace();
+      return 0;
+    }
   return asciiToEbcdic[s[index]];
 }
 
@@ -2393,12 +2414,59 @@ MONITOR12(uint32_t precision) {
   abend("MONITOR(12) not yet implemented");
 }
 
+optionsProcessor_t *USEROPT = NULL;
 uint32_t
-MONITOR13(char *name) {
-  /*
-   * Note that the `name` parameter is ignored, since the options processor
-   * is instead taken from the --optproc command-line option.
-   */
+MONITOR13(char *namep) {
+  // First get rid of trailing spaces in the `name`.
+  char *s;
+  char name[128];
+  FILE *f;
+
+  strcpy(name, namep);
+  for (s = name; *s != 0 && !isspace(*s); s++);
+  *s = 0;
+  if (strlen(name) == 0)
+    {
+      // In this case, reload the last set of parameters processed, which have
+      // been saved in a file.
+      f = fopen("monitor13.parms", "r");
+      if (f == NULL)
+        abend("File monitor13.parms not found for MONITOR(13, 0)");
+      fgets(name, sizeof(name), f);
+      fgets(parmField, sizeof(parmField), f);
+      fclose(f);
+    }
+  if (!strcmp(name, "COMPOPT"))
+    {
+#ifdef PFS
+      optionsProcessor = &COMPOPT_PFS;
+#elif defined(BFS)
+      optionsProcessor = &COMPOPT_BFS;
+#else
+      abend("MONITOR(13, 'COMPOPT ') requires XCOM-I --cond=P or --cond=B.");
+#endif
+    }
+  else if (!strcmp(name, "LISTOPT"))
+    optionsProcessor = &LISTOPT;
+  else if (!strcmp(name, "MONOPT"))
+    optionsProcessor = &MONOPT;
+  else if (!strcmp(name, "USEROPT"))
+    {
+      if (USEROPT == NULL)
+        abend("No options processor named USEROPT has been provided");
+      optionsProcessor = USEROPT;
+    }
+  else
+    {
+      sprintf(abendMessage, "Options processor '%s'", name);
+      abend("Unrecognized options processor for MONITOR(13)");
+    }
+  parseParmField(0);
+  // Save the parameters in a file.
+  f = fopen("monitor13.parms", "w");
+  fprintf(f, "%s\n", name);
+  fprintf(f, "%s\n", parmField);
+  fclose(f);
   return WHERE_MONITOR_13;
 }
 
