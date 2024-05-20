@@ -293,3 +293,12 @@ NOSHIFT		CAF	ZERO
 VECSGNAG	TC	BANKCALL
 		CADR	VECAGREE
 		TC	DANZIG
+
+## <b>Reconstruction:</b> The following code implements PCR-984, "Avoid Coarse
+## Align during Saturn".
+
+		SETLOC	MODCHG1
+		BANK
+		COUNT*	$$/T4RPT
+
+SATCHECK	EQUALS
