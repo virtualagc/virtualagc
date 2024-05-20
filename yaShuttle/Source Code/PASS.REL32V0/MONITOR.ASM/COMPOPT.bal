@@ -454,7 +454,7 @@ ENDOPT2  DC    A(VALS-DESC)    END OF PRINTABLE TYPE2 OPTIONS           00033300
                (X6,'01000000',OFF),                                    X00039632
                (XB,'08000000',OFF),                                    X00039633
                (XC,'10000000',OFF),                                    X00039634
-               (XF,'80000000,OFF)                                      00039635
+               (XF,'80000000,OFF)                                       00039635
          AGO  .P2                                                       00039636
 .H1      ANOP                                                           00039637
          TYPE1OPT (DUMP,'00000001',OFF,DP),                            X00039638
