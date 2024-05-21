@@ -1226,7 +1226,7 @@ putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
     {
       uint32_t descriptor;
       descriptor = getFIXED(address);
-      if (value->numBytes != descriptor >> 24)
+      if ((value->numBytes - 1) != descriptor >> 24)
         {
           fflush(stdout);
           fprintf(stderr,

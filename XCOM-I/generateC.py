@@ -27,6 +27,8 @@ stdoutOld = sys.stdout
 
 debug = False # Standalone interactive test of expression generation.
 
+ppFiles = { "filenames": "" }
+
 # Just for engineering
 errxitRef = 0
 def errxit(msg, action="abend"):
@@ -267,7 +269,7 @@ def putBIT(address, value):
         lengthFromDescriptor = ((descriptor >> 24) & 0xFF) + 1
         if numBytes != lengthFromDescriptor:
             errxit("putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
-                   (address, numBytes - 1, lengthFromDescriptor))
+                   (address, numBytes, lengthFromDescriptor))
         address = descriptor & 0xFFFFFF
     bytes = value["bytes"] & ((1 << bitWidth) - 1)
     if bitWidth > 32:
@@ -1084,7 +1086,7 @@ def generateExpression(scope, expression):
         else:
             errxit("Field %s.%s not subscripted properly" % \
                    (baseName, fieldName))
-        sourceAddress = "getFIXED(%d)" % baseAttributes['address'] + \
+        sourceAddress = "getFIXED(%s)" % memoryMap[baseAttributes['address']]["superMangled"] + \
                         " + %d * (%s)" % (baseAttributes["recordSize"],
                                           sourceb) + \
                         " + %d + " % fieldAttributes["offset"] + \
@@ -1135,7 +1137,7 @@ def generateExpression(scope, expression):
                             except:
                                 errxit("Parameter %s may not have been DECLAREd within the PROCEDURE" \
                                        % innerParameter)
-                            innerAddress = innerAttributes["address"]
+                            innerAddress = memoryMap[innerAttributes["address"]]["superMangled"]
                             toType, parm = autoconvertFull(scope, \
                                                            outerParameter, \
                                                            innerAttributes)
@@ -1144,7 +1146,7 @@ def generateExpression(scope, expression):
                             else:
                                 function = "put" + toType + "("
                             source = source + function + \
-                                 str(innerAddress) + ", " + parm + "), "
+                                 innerAddress + ", " + parm + "), "
                         source = source + mangled + "() )"
                     if "return" in attributes:
                         tipe = attributes["return"]
@@ -1162,7 +1164,7 @@ def generateExpression(scope, expression):
                         if tipei != "FIXED":
                             errxit("Array index can't be computed or not integer")
                     entryWidth = attributes["dirWidth"]
-                    baseAddress = str(attributes["address"])
+                    baseAddress = memoryMap[attributes["address"]]["superMangled"]
                     if "BASED" in attributes:
                         baseAddress = "getFIXED(%s)" % baseAddress
                         if "recordSize" in attributes:
@@ -1586,7 +1588,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     errxit("Field %s.%s not subscripted properly" % \
                            (baseName, fieldName))
                 try:
-                    sourceAddress = "getFIXED(%d)" % baseAttributes['address'] + \
+                    sourceAddress = "getFIXED(%s)" % memoryMap[baseAttributes['address']]["superMangled"] + \
                                     " + %d * (%s)" % (baseAttributes["recordSize"],
                                                       sourceb) + \
                                     " + %d + " % fieldAttributes["offset"] + \
@@ -1641,7 +1643,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     sys.exit(1)
                 children = LHS["children"]
                 entryWidth = attributes["dirWidth"]
-                baseAddress = str(address)
+                baseAddress = memoryMap[address]["superMangled"]
                 if "BASED" in attributes:
                     baseAddress = "getFIXED(%s)" % baseAddress
                     if "recordSize" in attributes:
@@ -1763,7 +1765,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                                 bufferAttributes["BIT"] != 8 or \
                                 "top" not in bufferAttributes:
                             errxit("In FILE(...)=BUFFER, require BUFFER to be an array of BIT(8)")
-                        sourcea = "%d" % bufferAttributes["address"]
+                        sourcea = memoryMap[bufferAttributes["address"]]["superMangled"]
                     # Note: We can't have any knowledge at compile-time of the 
                     # record size needed by the file, since files are only 
                     # attached at runtime, so we cannot check whether or not
@@ -1830,6 +1832,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             errxit("Subscripted loop variables not supported.")
         attributes = getAttributes(scope, variable)
         address = attributes["address"]
+        superMangled = memoryMap[address]["superMangled"]
         if "FIXED" in attributes:
             counterType = "FIXED"
         elif "BIT" in attributes:
@@ -1854,23 +1857,24 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             source = "bitToFixed(" + source + ")"
         print(indent2 + byName + " = " + source + ";")
         if counterType == "FIXED":
-            print((indent2 + "for (putFIXED(%d, %s);\n" + \
-                   indent2 + "     getFIXED(%d) <= %s;\n" + \
-                   indent2 + "     putFIXED(%d, getFIXED(%d) + %s)) {" ) \
-                  % (address, fromName, address, toName, address, address, byName))
+            print((indent2 + "for (putFIXED(%s, %s);\n" + \
+                   indent2 + "     getFIXED(%s) <= %s;\n" + \
+                   indent2 + "     putFIXED(%s, getFIXED(%s) + %s)) {" ) \
+                  % (superMangled, fromName, superMangled, toName, 
+                     superMangled, superMangled, byName))
         else: # counterType == "BIT"
             print(indent2 + \
-              "for (putBIT(%d, %d, fixedToBit(%d, %s));\n" % \
-                        (bitWidth, address, 
+              "for (putBIT(%d, %s, fixedToBit(%d, %s));\n" % \
+                        (bitWidth, memoryMap[address]["superMangled"], 
                          bitWidth, fromName) + \
               indent2 + "     " + \
-              "bitToFixed(getBIT(%d, %d)) <= %s;\n" % \
-                        (bitWidth, address, toName) + \
+              "bitToFixed(getBIT(%d, %s)) <= %s;\n" % \
+                        (bitWidth, memoryMap[address]["superMangled"], toName) + \
               indent2 + "     " +\
-              "putBIT(%d, %d, fixedToBit(%d, bitToFixed(getBIT(%d, %d)) + %s))) {" % \
-                        (bitWidth, address, 
+              "putBIT(%d, %s, fixedToBit(%d, bitToFixed(getBIT(%d, %s)) + %s))) {" % \
+                        (bitWidth, memoryMap[address]["superMangled"], 
                          bitWidth, 
-                         bitWidth, address, byName) \
+                         bitWidth, memoryMap[address]["superMangled"], byName) \
             )
     elif "WHILE" in line:
         tipe, source = generateExpression(scope, line["WHILE"])
@@ -2064,14 +2068,14 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         outerParameter = outerParameters[k]
                         innerParameter = innerParameters[k]
                         innerAttributes = innerScope["variables"][innerParameter]
-                        innerAddress = innerAttributes["address"]
+                        innerAddress = memoryMap[innerAttributes["address"]]["superMangled"]
                         toType, parm = autoconvertFull(scope, outerParameter, innerAttributes)
                         if toType == "BIT":
-                            function = "putBIT(%d, " % innerAttributes["BIT"]
+                            function = "putBIT(%d, " % innerAttributes["BIT"] 
                         else:
                             function = "put" + toType + "("
                         print(indent2 + function + \
-                                 str(innerAddress) + ", " + \
+                                 innerAddress + ", " + \
                                  parm + "); ")
                     print(indent2 + mangled + "();")
                     print(indent + "}")
@@ -2131,7 +2135,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
 #    "indent" is a string of blanks for the indentation of the parent scope.
 #
 def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
-    global stdoutOld
+    global stdoutOld, ppFiles
    
     if "generated" in scope:
         return
@@ -2161,6 +2165,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         functionName.replace("#", "p").replace("@", "a").replace("$", "d")
     topLevel = False
     if of == None:
+        ppFiles["filenames"] = ppFiles["filenames"] + " " + functionName + ".c"
         of = open(outputFolder + "/" + functionName + ".c", "w")
         topLevel = True
         stdoutOld = sys.stdout
@@ -2190,7 +2195,6 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         print("*/")
         print()
         print('#include "runtimeC.h"')
-        print('#include "procedures.h"')
         if "setjmpLabels" in scope:
             print()
             for label in scope["setjmpLabels"]:
@@ -2435,6 +2439,18 @@ def generateC(globalScope):
     regions.append( [variableAddress, 0x1000000] )
     nonCommonBase = regions[2][0]
     
+    # Make #define's or all of these variables in procedures.h
+    print("// #defines for XPL variable names", file=pf)
+    for address in memoryMap:
+        variable = memoryMap[address]
+        if variable["datatype"] not in ["FIXED", "CHARACTER", "BIT", "BASED"]:
+            continue
+        symbol = "m" + variable["mangled"].replace("@", "a") \
+                                          .replace("#", "p") \
+                                          .replace("$", "d")
+        print("#define %s %d" % (symbol, address), file=pf)
+        variable["superMangled"] = symbol
+    
     # Make another version of `memoryMap` that's sorted by symbol name rather
     # than address.
     memoryMapIndexBySymbol = {}
@@ -2566,8 +2582,8 @@ def generateC(globalScope):
             comma = ''
         else:
             comma = ','
-        print('  { %d, "%s", "%s", %d, %d, %s, %d, %d, %d, %d }%s' % \
-              (address, symbol, datatype, numElements, allocated, 
+        print('  { %s, "%s", "%s", %d, %d, %s, %d, %d, %d, %d }%s' % \
+              (memoryMap[address]["superMangled"], symbol, datatype, numElements, allocated, 
                basedFields, numFieldsInRecord, recordSize, dirWidth, bitWidth,
                comma), file=f)
     print("};", file=f)

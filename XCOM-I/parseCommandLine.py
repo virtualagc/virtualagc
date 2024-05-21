@@ -68,6 +68,7 @@ noInclusionDirectives = False
 showBacktrace = False
 physicalTop = 1 << 24
 keepUnused = False
+prettyPrint = False
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -205,11 +206,16 @@ The available OPTIONS are:
                 without any generation of C code, and reduced analysis.  With
                 --keep-unused, those procedures are retained and processed
                 normally.
+--pp            "Pretty print" the output C files.  The files runtimeC.c, 
+                memory.c, and *.h are exempted from the reformatting process.
+                This option requires installation of clang-format.
 '''
 
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm == "--pp":
+        prettyPrint = True
     elif parm == "--keep-unused":
         keepUnused = True
     elif parm.startswith("--merge="):

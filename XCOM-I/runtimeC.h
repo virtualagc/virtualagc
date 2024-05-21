@@ -17,7 +17,16 @@
 #include <string.h>
 #include <ctype.h>
 
+#define MAX_XPL_STRING 256
+typedef char string_t[MAX_XPL_STRING];
+typedef struct {
+  uint16_t bitWidth;
+  uint16_t numBytes;
+  uint8_t bytes[MAX_XPL_STRING];
+} bit_t;
+
 #include "configuration.h"
+#include "procedures.h"
 
 // Command-line variables.
 #define DD_MAX 9
@@ -92,14 +101,6 @@ rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex);
 // Returns -1 on failure, 0 on success, 1 to request an immediate termination.
 int
 parseCommandLine(int argc, char **argv);
-
-#define MAX_XPL_STRING 256
-typedef char string_t[MAX_XPL_STRING];
-typedef struct {
-  uint16_t bitWidth;
-  uint16_t numBytes;
-  uint8_t bytes[MAX_XPL_STRING];
-} bit_t;
 
 // XPL variables are *not* translated as C variables.  Rather, they are
 // translated as sequences of bytes in the following buffer.

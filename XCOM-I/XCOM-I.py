@@ -36,7 +36,7 @@ from IF import IF
 from RETURN import RETURN
 from CALL import CALL
 from ESCAPEorREPEAT import ESCAPEorREPEAT
-from generateC import generateC
+from generateC import generateC, ppFiles
 
 logicalNot = '¬'
 usCent = '¢'
@@ -642,3 +642,7 @@ if targetLanguage == "C":
         error("Failed to create files runtimeC.c etc. in %s/" % outputFolder, \
               scope)
     generateC(globalScope)
+    if prettyPrint:
+        #print("Pretty-printing " + ppFiles["filenames"], file=sys.stderr)
+        os.system("cd " + outputFolder + " && clang-format --style=gnu -i " + \
+                  ppFiles["filenames"])

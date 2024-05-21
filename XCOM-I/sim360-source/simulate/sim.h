@@ -49,9 +49,9 @@ extern unsigned char core[CORESIZE + 256];
 extern int reg[16];		/* General purpose registers */
 extern int cc;			/* Condition codes */
 extern int zone;		/* Decimal arithmetic Zone field 0x30 or 0xF0 */
-extern int pp, codesize, fetch_limit, modpoint, load_point;
+extern int pp, npp, codesize, fetch_limit, modpoint, load_point;
 extern unsigned int f[16];	/* Floating point registers */
-#define ADDRESS_MASK(p) (p & 0x00ffffff)
+#define ADDRESS_MASK(p) ((p) & 0x00ffffff)
 
 /* Condition codes */
 #define CC_EQ 0
@@ -64,9 +64,11 @@ extern unsigned int f[16];	/* Floating point registers */
 #define CC3 3
 
 extern int mem_address;
+extern int callback;
 extern int returnlink;
 extern int jumptable;
-extern int simulator(void);
+extern int simulator(int stepping);
+extern int monitor_call(void);
 extern void dump_history(void);
 
 extern int return_code;
@@ -75,8 +77,13 @@ extern int exit_code;
 #define EXIT_DONE	1	/* The program has run to completion */
 #define EXIT_QUIET	2	/* Exit without Dump */
 #define EXIT_ABORT	3	/* Exit with Dump */
+#define EXIT_BREAK	4	/* Breakpoint */
 
+extern int header[16];
 extern int watch_point;
+extern int watch_point_option;
+extern int watch_point_break;
+extern int watch_point_data;
 extern void check_watch_point(void);
 extern short load_halfword(int dp);
 extern int load_word(int dp);
@@ -84,6 +91,29 @@ extern XPL_LONG load_double(int dp);
 extern void store_halfword(int value, int dp);
 extern void store_word(int value, int dp);
 extern void store_double(XPL_LONG value, int dp);
+
+extern int cpu_timer;
+extern int clock_trap_start;
+extern int clock_trap_address;
+extern int clock_trap_pp;
+extern int last_clock_trap_time;
+extern int clock_trap_delta[256];
+
+extern void hex_dump(int a, int bc);
+extern void dump_history(void);
+extern void dump_state(void);
+extern int decode(int ip, int x);
+extern char *opcode_name[16];
+extern char opcode_type[256];
+extern int opcode_count[256];
+extern int instruction_count;
+extern int enable_trace;
+#define HISTORY_MASK 15
+extern int history[HISTORY_MASK + 1];
+extern int hop[HISTORY_MASK + 1];
+extern int ea[HISTORY_MASK + 1];
+extern int da[HISTORY_MASK + 1];
+extern int hip;
 
 extern int get_ibm_time(void);
 extern int get_cpu_time(void);
@@ -106,12 +136,16 @@ extern char io_buffer[512];	/* Temporary Output buffer */
 
 extern unsigned char ebcdic[256];	/* ASCII to EBCDIC conversion table */
 extern unsigned char ascii[256];	/* EBCDIC to ASCII conversion table */
-extern unsigned char code_header[8];
-extern unsigned char org_header[8];
+extern int target_zero;			/* The character '0' from the target */
+extern int target_trans;		/* Translate from native to target */
 
 extern char control[256];
 extern int xplmon_link[4];
 extern int link_address;
+
+/* Debugger */
+extern int debugger(void);
+extern void debug_init(void);
 
 /* Decimal simulation */
 extern void decimal_init(void);
@@ -145,8 +179,3 @@ extern void add_normalized(XPL_FLOAT *a, XPL_FLOAT *b, XPL_FLOAT *c);
 extern void compare_float(XPL_FLOAT *a, XPL_FLOAT *b);
 extern void multiply_float(XPL_FLOAT *a, XPL_FLOAT *b, XPL_FLOAT *c);
 extern int divide_float(XPL_FLOAT *a, XPL_FLOAT *b, XPL_FLOAT *c);
-
-/* Pascal loader and runtime monitor */
-extern void hex_dump(int a, int bc);
-extern int pascal_simulation(int obj, char *filename, unsigned char *translate);
-extern int pascal_runtime(int routine);
