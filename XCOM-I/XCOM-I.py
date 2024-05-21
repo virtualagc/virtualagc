@@ -232,6 +232,8 @@ while True:
             lastC = c
             continue
     elif inHex:
+        if c == ' ':
+            continue
         if c == '(':
             inBase = True
             baseRadix = ''
