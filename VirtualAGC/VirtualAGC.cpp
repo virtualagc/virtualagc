@@ -166,6 +166,8 @@
  *                              core dump (but not yet reconstructed source
  *                              code) is now available.
  *              2024-05-13 RSB  Enabled Comanche 67 for Apollo 12 CM.
+ *              2024-05-21 RSB  Added/Enabed Comanche 72 and Manche 72R3 for
+ *                              Apollo 13 CM.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -283,9 +285,12 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "Apollo 12 Lunar Module", "Luminary116/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 12 mission.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary116", "LM.ini" },
-            { "Apollo 13 Command Module", "",
+            { "COMANCHE 72 (CM)", "Comanche072/MAIN.agc.html",
+                    "Click this to select Comanche 72, a preliminary software release targeting the Apollo 13 CM.",
+                    ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche072", "CM.ini" },
+            { "Apollo 13 Command Module", "Manche72R3/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 13 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Manche72R3", "CM.ini" },
             { "LUMINARY 130 (LM)", "Luminary130/MAIN.agc.html",
                 "Click this to select Luminary 130, a preliminary revision of the Apollo 13 LM software.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary130", "LM.ini" },

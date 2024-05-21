@@ -62,6 +62,7 @@
  *          	                the upper left.
  *              2022-10-28 RSB  Added LM131R1, SUNRISE45, and SUNRISE69.
  *              2022-11-17 RSB  Added Aurora 88.
+ *              2024-05-21 RSB  Added Comanche 72.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -155,6 +156,7 @@ enum
   // ID_LUM99R2BUTTON,
   ID_APOLLO12CMBUTTON,
   ID_APOLLO12LMBUTTON,
+  ID_COMANCHE72BUTTON,
   ID_APOLLO13CMBUTTON,
   ID_LUMINARY130BUTTON,
   ID_LUMINARY131BUTTON,
