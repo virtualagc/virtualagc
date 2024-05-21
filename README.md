@@ -143,13 +143,17 @@ To build, simply `cd` into the directory containing the source and do:
 
 `make`
 
-Note: Do not `configure` and do not `make install`. While there is a `configure` script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the `bin` files then you can rebuild with `make -k` to keep going. This however might mask other issues.
+**Note**:
 
-You will find that this has created a directory `VirtualAGC/temp/lVirtualAGC/`. 
+- Do not `configure` and do not `make install`. While there is a `configure` script provided, it is presently used only for setting up builds of a couple of now-obsoleted programs, and it does not matter whether you run it or not nor whether it succeeds or fails. If the build does not complete because of a difference when comparing the `bin` files then you can rebuild with `make -k` to keep going. This however might mask other issues.
+
+- Do not parallelise make, i.e. do not run `make -j$(nproc)`. This will prevent copying of files to correct places.
+
+The build results can be found at `VirtualAGC/temp/lVirtualAGC/`, which contain the binaries and required resources in the correct paths. The VirtualAGC binary can be run at `VirtualAGC/temp/lVirtualAGC/bin/VirtualAGC`.
 
 To match the default setup of the installer program execute the following:
 
-`mv yaAGC/VirtualAGC/temp/lVirtualAGC ~/VirtualAGC`
+`mv VirtualAGC/temp/lVirtualAGC ~/VirtualAGC`
 
 You can make a desktop icon called *Virtual AGC* that links to `VirtualAGC/bin/VirtualAGC`. The image normally used for the desktop icon is found at `VirtualAGC/bin/ApolloPatch2.png`.
 
