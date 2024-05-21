@@ -15,6 +15,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-19 MAS	Created from Comanche 072.
+##		2024-05-21 MAS	Added tag to bank 11 as part of PCR-984, "Avoid
+##				Coarse Align during Saturn".
 
 FIXED		MEMORY	120000 - 167777
 		COUNT	BANKSUM
@@ -109,6 +111,8 @@ ORBITAL1	EQUALS			# CONSTANTS
 INTVEL		EQUALS
 S52/2		EQUALS
 INTINIT1	EQUALS
+## <b>Reconstruction:</b> The following tag has been added in support of PCR-984,
+## "Avoid Coarse Align during Saturn".
 MODCHG1		EQUALS
 		BNKSUM	11
 		

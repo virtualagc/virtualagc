@@ -15,6 +15,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-19 MAS	Created from Comanche 072.
+##		2024-05-21 MAS	Added jump to bank 11 as part of PCR-984, "Avoid
+##				Coarse Align during Saturn".
 
 		BANK	12
 		SETLOC	T4RUP
@@ -574,10 +576,20 @@ GLOCKCHK	AD	-70DEGS
 		CAF	BIT4			# IF SO, SYSTEM SHOULD BE IN COARSE ALIGN
 		EXTEND				# TO PREVENT GIMBAL RUN-AWAY.
 		RAND	CHAN12
-		CCS	A
-		TCF	NOGIMRUN
+## <b>Reconstruction:</b> The following two instructions constitute an in-line patch
+## added in MANCHE72 revision 3 as part of PCR-984, "Avoid Coarse Align during Saturn".
+## The patch has replaced the instructions
+## <pre>
+##    CCS   A
+##    TCF   NOGIMRUN
+## </pre>
+## present in earlier ropes with a jump to the end of bank 11, where the bulk of the
+## PCR-984 code was inserted. The change was made in this way so that MANCHE72 revision
+## 3 could be released as a single-module change from Comanche 72.
+		TC	IBNKCALL
+		CADR	GLOCKCK1
 
-		TC	IBNKCALL		# GO INTO COARSE ALIGN.
+CALLCRS		TC	IBNKCALL		# GO INTO COARSE ALIGN.
 		CADR	SETCOARS
 
 		CAF	SIX			# ENABLE ISS ERROR COUNTERS IN 60 MS

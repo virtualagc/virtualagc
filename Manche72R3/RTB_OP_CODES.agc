@@ -15,6 +15,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2024-05-19 MAS	Created from Comanche 072.
+##		2024-05-21 MAS	Added implementation of PCR-984, "Avoid Coarse
+##				Align during Saturn".
 
 		BANK	22
 		SETLOC	RTBCODES
@@ -295,10 +297,37 @@ VECSGNAG	TC	BANKCALL
 		TC	DANZIG
 
 ## <b>Reconstruction:</b> The following code implements PCR-984, "Avoid Coarse
-## Align during Saturn".
+## Align during Saturn". This change was added in MANCHE72 revision 3 as a
+## single-module change from Comanche 72. It was added in response to the
+## Apollo 12 launch, in which a lightning strike caused the AGC to incorrectly
+## attempt to coarse align the IMU during launch, leading to a tumbling IMU.
+## We have placed it here, at the end of RTB OP CODES, to mimic the placement
+## of single-module-change code in the Apollo 11 software Comanche 55.
+## This implementation closely mirrors the implementation of PCR-984 in
+## Artemis 72, with slight modifications to remove PCN-1041 ("Add AVEGFLAG
+## check in implementation of PCR-984") and make jumps use inter-bank calls.
+## This implementation results in a correct banksum, but it is a sufficiently
+## large change that there may be other implementations that also achieve
+## a correct banksum. As such, we do not currently know if this implementation
+## is exactly correct.
 
 		SETLOC	MODCHG1
 		BANK
 		COUNT*	$$/T4RPT
 
-SATCHECK	EQUALS
+GLOCKCK1	CCS	A
+		TCF	NOGIMRN1
+
+		EBANK=	DAPDATR1
+		CAF	EBANK6
+		TS	EBANK
+		CS	DAPDATR1
+		MASK	PRIO30
+		CCS	A
+		TCF	CALLCRS1		# NO
+
+NOGIMRN1	TC	IBNKCALL		# YES, DON'T COARSE ALIGN
+		CADR	NOGIMRUN
+
+CALLCRS1	TC	IBNKCALL
+		CADR	CALLCRS
