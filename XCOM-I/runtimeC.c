@@ -43,6 +43,7 @@ char *DD_INS_FILENAMES[DD_MAX] = { NULL };
 int PDS_INS[DD_MAX] = { 0 }; // 1 if a PDS, 0 if sequential.
 pdsPartname_t DD_INS_PARTNAMES[DD_MAX] = { "" };
 uint8_t DD_INS_UPPERCASE[DD_MAX] = { 0 };
+char *DD_INS_EXTRA[DD_MAX] = { NULL };
 FILE *DD_OUTS[DD_MAX] = { NULL };
 char *DD_OUTS_FILENAMES[DD_MAX] = { NULL };
 pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX] = { "" };
@@ -769,6 +770,16 @@ parseCommandLine(int argc, char **argv)
       char c, filename[1024];
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
+      else if (2 == sscanf(argv[i], "--extra=%d,%c", &lun, &c))
+        {
+          if (lun < 0 || lun >= DD_MAX)
+            {
+              fprintf(stderr, "Input logical unit number %d is out of range.\n",
+                  lun);
+              returnValue = -1;
+            }
+          DD_INS_EXTRA[lun] = 1 + strstr(argv[i], ",");
+        }
       else if (2 == sscanf(argv[i], "--ddi=%d,%s", &lun, filename) ||
                2 == sscanf(argv[i], "--pdsi=%d,%s", &lun, filename))
         {
@@ -985,6 +996,27 @@ parseCommandLine(int argc, char **argv)
           printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
           printf("              have been provided in JCL.\n");
           printf("--backtrace   If available, print a backtrace upon abend.\n");
+          printf("--extra=N,L   L represents a string and N represents a device\n");
+          printf("              number for INPUT(N).  This option causes the\n");
+          printf("              string L to be returned upon the *first* use of\n");
+          printf("              INPUT(N), which subsequently reverts to providing\n");
+          printf("              lines for the actual input file number N.  For\n");
+          printf("              debugging purposes, this is useful for feeding \n");
+          printf("              in so-called \"control toggles\" that would\n");
+          printf("              ordinarily be provided in program comments, since\n");
+          printf("              it eliminates the need to modify the source code\n");
+          printf("              being compiled.  For example,\n");
+          printf("                   --extra=2,'/* $E $S */'");
+          printf("              would cause emitted IBM 360 codes to be\n");
+          printf("              interlisted with XPL source code in the printout,\n");
+          printf("              and symbol tables to be printed after each\n");
+          printf("              PROCEDURE, for the XCOM of 'A Compiler Generator'.\n");
+          printf("              Whereas\n");
+          printf("                   --extra=0,'/* $E $S */'");
+          printf("              would do the same, but only beginning with the\n");
+          printf("              main source-code file, skipping the library file.\n");
+          printf("              Other (or no) toggles might be applicable for other\n");
+          printf("              XPL compilers.\n");
           printf("\n");
           returnValue = 1;
         }
@@ -1968,6 +2000,13 @@ INPUT(uint32_t lun) {
     {
       sprintf(abendMessage, "Device = %d", lun);
       abend("Input device number out of range");
+    }
+  if (DD_INS_EXTRA[lun] != NULL)
+    {
+      char *returnValue = nextBuffer();
+      sprintf(returnValue, "%-80s", DD_INS_EXTRA[lun]);
+      DD_INS_EXTRA[lun] = NULL;
+      return returnValue;
     }
   fp = DD_INS[lun];
   if (fp == NULL)
