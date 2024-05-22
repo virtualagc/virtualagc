@@ -584,7 +584,7 @@ else:
     <tr align="center"><td>Apollo 10</td><td>yes</td><td>yes</td><td>no</td><td>no</td></tr>
     <tr align="center"><td>Apollo 11</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
     <tr align="center"><td>Apollo 12</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
-    <tr align="center"><td>Apollo 13</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
+    <tr align="center"><td>Apollo 13</td><td>yes</td><td>yes</td><td>no</td><td>no</td></tr>
     <tr align="center"><td>Apollo 14</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
     <tr align="center"><td>Apollo 15</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>
     <tr align="center"><td>Apollo 16</td><td>yes</td><td>yes</td><td>yes</td><td>no</td></tr>

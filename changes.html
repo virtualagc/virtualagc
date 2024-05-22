@@ -23,6 +23,76 @@ document.write(headerTemplate.replace("@TITLE@","Change-Log").replace("@SUBTITLE
       left; margin-left: auto; margin-right: auto;" cellspacing="10" cellpadding="2" border="0">
       <tbody>
         <tr>
+  <td valign="top">2024-05-21<br>
+  </td>
+  <td valign="top">Mike released the reconstruction of MANCHE72R3 
+today.&nbsp; That's the software for the Command Module AGC flown on 
+Apollo 13.&nbsp; It inherits the same <i>Cosmic Spoonerism</i> — like 
+that term? — suffered by the Comanche 72 reconstruction I mentioned a 
+couple of days ago:&nbsp; I.e., it has a couple of places where a couple
+ of instructions can be swapped without damaging either the 
+functionality or the memory-bank checksums, and without any guidance 
+from other related software versions to tell us which order is 
+more-likely to be the correct one.&nbsp; Ultimately, the Cosmic 
+Spoonerism isn't something to worry about, but resolving it requires 
+somehow getting additional info which we don't have now.&nbsp; At any 
+rate, <a moz-do-not-send="true" href="Colossus.html#Apollo13">both versions are now written up on the Colossus page</a>, and properly incorporated in the document library, as well as being supported in the VirtualAGC GUI.<br>
+    <br>
+Of less interest to anybody but me, I expect, I've just hit a 
+nice-little milestone with the XPL/I compiler  — I call it XCOM-I  — 
+I've been working on.&nbsp; You may recall that I'm doing that so that I
+ can eventually use XCOM-I to compile the Intermetrics compiler 
+(HAL/S-FC) for the HAL/S computer language in which Space Shuttle flight
+ software was written, and then use HAL/S-FC to compile the flight 
+software itself.&nbsp; Not that I'm anywhere close to that!&nbsp; But 
+the milestone is that I'm now able to "bootstrap" one of the old XPL 
+compilers from back in the day.&nbsp; Not Intermetrics's XPL compiler, 
+mind you, because the source code for that one has been lost.&nbsp; 
+Rather, for an XPL compiler I call XCOM45, last built (as far as I know)
+ in 1976 at the State University of New York.&nbsp; By "bootstrapping", I
+ refer to a process used by programmers who write a compiler for a 
+particular computer language in that same language, and want to use the 
+that compiler to build its own source code.&nbsp; Obviously you can't do
+ that on day one, since you can't build anything from literally nothing,
+ so there's a series of intervening steps needed to build a 
+more-and-more competent compiler that <i>eventually</i> can compile itself.&nbsp; That's "bootstrapping".&nbsp; In the case of my milestone, the bootstrapping steps look like this:<br>
+    <ol>
+      <li>Use XCOM-I (my XPL/I compiler) to compile the source code for 
+XCOM45, giving me an executable version of XCOM45 that runs on my Linux 
+computer.&nbsp; Call that version XCOM45-linux.</li>
+      <li>Use XCOM45-linux to <i>again</i> compile the source code for 
+XCOM45.&nbsp; Since the original XCOM45 ran on an IBM 360 computer, this
+ gives us an IBM 360 version of XCOM45.&nbsp; Call that version 
+XCOM45-360.</li>
+      <li>Use XCOM45-360, running in an IBM 360 simulator, to compiled the source code for XCOM45 <i>yet again</i>.&nbsp; This could give us yet another IBM 360 version of XCOM45.&nbsp; Call that version XCOM45-360A.</li>
+      <li>If all went well, XCOM45-360 and XCOM45-360A should be byte-for-byte identical ... and they are.&nbsp; <i>Voilà!</i>&nbsp;
+ XCOM45 can compile itself, 100% accurately.&nbsp; But more importantly 
+for us, XCOM-I must have been working pretty well to make that happen.</li>
+    </ol>
+    <p>If you have read that description closely   — and who <i>wouldn't</i> have wanted to do <i>that</i>?
+  — it barely mentions an important fact that I've neglected up to now 
+in this blog, which is that our software repository now contains a very 
+lightweight IBM 360 simulator called sim360.&nbsp; This was not written 
+by me, or anyone at Virtual AGC, but was instead written by Dan Weaver 
+and barely mentioned <a moz-do-not-send="true" href="https://sourceforge.net/u/shoefoot/profile/">on his own website</a>.&nbsp;
+ (See if you can find sim360 on the website.&nbsp; Give yourself a 
+cookie as a reward if you can.)&nbsp; There are several reasons it's 
+significant for <i>us</i>:&nbsp; A not inconsiderable advantage it has over full-scale IBM 360 simulators such as <a moz-do-not-send="true" href="http://www.hercules-390.org/">Hercules</a>
+ is that you don't have to know anything about operating an IBM 360 to 
+use it.&nbsp; Nor does it require any potentially-copyrighted software 
+from (say) IBM that would prevent integrating it with open-source 
+software.&nbsp; But perhaps best of all, it's <i>so</i> lightweight that
+ it probably technically can be incorporated into (say) Orbiter or the 
+VirtualAGC GUI relatively easily, and can be adapted (if any adaptation 
+is needed) to run IBM AP-101S code rather than IBM 360 code.&nbsp; 
+Admittedly I'm looking down the road a bit, but it seems to me as though
+ sim360 provides a superior technical path to running Space Shuttle 
+flight software in a spaceflight simulator.&nbsp; As for the legality of
+ that path (or <i>any</i> path) under ITAR, I make no claims.<br>
+    </p>
+  </td>
+</tr>
+<tr>
   <td valign="top">2024-05-19<br>
   </td>
   <td valign="top"><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/Comanche072">The reconstruction of the source code for Comanche 72 is now in the software repository</a>.&nbsp;
