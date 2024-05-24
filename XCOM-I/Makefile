@@ -85,6 +85,8 @@
 #
 # Second, use the command `make REGRESSION=yes`.  Note that the CC alternative 
 # described in the preceding section can be used to change the compiler name.
+# Note that this accepts the `EXTRA=...` syntax described earlier.  It also
+# accepts `XEXTRA=...` for adding optional command-line parameters to XCOM-I.py.
 #
 # This process should now have created various additional folders, with names
 # like bitsizeDemo/, bitsizeDemoCommon/, and so forth, which contain the 
@@ -198,13 +200,13 @@ testclean:
 .PHONY: $(XPL_APPS)
 $(XPL_APPS): 
 	@mkdir $@
-	@XCOM-I.py --xpl --keep-unused $(PEXTRA) Tests/$@.xpl
+	@XCOM-I.py $(XEXTRA) --xpl --keep-unused $(PEXTRA) Tests/$@.xpl
 	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
 
 .PHONY: $(XPLI_APPS)
 $(XPLI_APPS): 
 	@mkdir $@
-	@XCOM-I.py --keep-unused $(PEXTRA) Tests/$@.xpl
+	@XCOM-I.py $(XEXTRA) --keep-unused $(PEXTRA) Tests/$@.xpl
 	@$(CC) $(EXTRA) -o $@/$@ $@/*.c -lm
 
 endif # REGRESSION

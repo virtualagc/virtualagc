@@ -6,6 +6,8 @@
  * Purpose:     Header for runtimeC.c.
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
  * Mods:        2024-03-28 RSB  Began.
+ *              2024-05-23 RSB  Reworked so that descriptor_t replaces string_t,
+ *                              bit_t, and lots of char*.
  */
 
 #ifndef RUNTIMEC_H
@@ -15,15 +17,39 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdarg.h>
 #include <ctype.h>
 
 #define MAX_XPL_STRING 256
+#if 0
 typedef char string_t[MAX_XPL_STRING];
 typedef struct {
   uint16_t bitWidth;
   uint16_t numBytes;
   uint8_t bytes[MAX_XPL_STRING];
 } bit_t;
+#else
+/*
+ * `descriptor_t` is a C datatype used for any XPL CHARACTER or BIT variable
+ * while being manipulated by C code (versus its form in the `memory` array).
+ * Note that while called "descriptor_t", it's also used for BIT(<=32).
+ * The `type` field also indicates the encoding in `memory`:
+ *      ddCHARACTER    Converted into EBCDIC when placed into `memory`.
+ *                     Converted to ASCII when pulled from `memory`.
+ *      ddBIT          Not converted when placed into or pulled from `memory`.
+ * (Replaces both former `string_t` and `bit_t` datatypes.  The advantage over
+ * them is that it includes both the encoding and it allows CHARACTER to have
+ * embedded NUL characters; the latter is important, though the latter isn't.)
+ */
+enum descriptorDatatype_t { ddCHARACTER, ddBIT };
+typedef struct {
+  enum descriptorDatatype_t type;
+  uint16_t numBytes; // Number of bytes of stored data.
+  uint16_t bitWidth; // Number of bits (0 for CHARACTER).
+  uint8_t bytes[MAX_XPL_STRING+2]; // The data itself.
+} descriptor_t;
+typedef char sbuf_t[MAX_XPL_STRING + 1];
+#endif
 
 #include "configuration.h"
 #include "procedures.h"
@@ -60,8 +86,8 @@ typedef struct {
   char *synonym;
 } type2_t;
 
-extern char *type1Actual[MAX_TYPE1];
-extern char *type2Actual[MAX_TYPE2];
+extern descriptor_t type1Actual[MAX_TYPE1];
+extern descriptor_t type2Actual[MAX_TYPE2];
 typedef struct {
   int numParms1;
   int numParms2;
@@ -73,10 +99,22 @@ extern optionsProcessor_t *optionsProcessor, *USEROPT;
 // Some functions that are perhaps useful for CALL INLINE or for running
 // the C code in a debugger.
 
-void abend(char *msg);
+void abend(const char *fmt, ...);
 
-void *
+// Returns an empty string.
+descriptor_t *
 nextBuffer(void);
+
+// "Print" a C string to a new or existing descriptor_t.
+descriptor_t *
+cToDescriptor(descriptor_t *descriptor, const char *fmt, ...);
+
+// "Convert" a BIT to a CHARACTER. For long bit-strings, this is just a
+// pass-through, but for short bit ones, it's a conversion from
+// a binary representation of an integer to a decimal representation
+// thereof.
+descriptor_t *
+bitToCharacter(descriptor_t *bit);
 
 memoryMapEntry_t *
 lookupAddress(uint32_t address);
@@ -91,11 +129,11 @@ void
 printMemoryMap(char *msg, int start, int end);
 
 extern int bitBits;
-char *
+descriptor_t *
 getXPL(char *identifier);
 void
 printXPL(char *identifier);
-char *
+descriptor_t *
 rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex);
 
 // Returns -1 on failure, 0 on success, 1 to request an immediate termination.
@@ -121,7 +159,7 @@ extern uint8_t memory[MEMORY_SIZE];
 typedef struct {
   FILE *fp;
   int recordSize;
-  string_t filename;
+  sbuf_t filename;
 } randomAccessFile_t;
 extern randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES];
 void // Corresponding to `FILE(fileNumber, recordNumber) = buffer;`
@@ -148,10 +186,10 @@ putFIXED(uint32_t address, int32_t value);
 // into play with `BASED` variables, because the `address` parameter is the
 // address of the array element, and there's no way to work backward from that
 // to get the `BASED` variable it's associated with.
-bit_t *
+descriptor_t *
 getBIT(uint32_t bitWidth, uint32_t address);
 void
-putBIT(uint32_t bitWidth, uint32_t address, bit_t *value);
+putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value);
 
 #if 0
 char *
@@ -159,26 +197,26 @@ STRING(uint32_t address);
 #endif
 
 uint32_t
-STRING_GT(char *s1, char *s2);
+STRING_GT(descriptor_t *s1, descriptor_t *s2);
 
 // Same for XPL `CHARACTER` type.
-char *
+descriptor_t *
 getCHARACTERd(uint32_t descriptor);
-char *
+descriptor_t *
 getCHARACTER(uint32_t address);
 void
-putCHARACTER(uint32_t address, char *s);
+putCHARACTER(uint32_t address, descriptor_t *s);
 
 // Convert a FIXED to a CHARACTER.
-char *
+descriptor_t *
 fixedToCharacter(int32_t i);
 
 // Convert a BIT(1) through BIT(32) to FIXED.
 int32_t
-bitToFixed(bit_t *value);
+bitToFixed(descriptor_t *value);
 
 // Convert FIXED to BIT(32).
-bit_t *
+descriptor_t *
 fixedToBit(int32_t bitWidth, int32_t value);
 
 // Functions to perform various kinds of arithmetic.
@@ -194,69 +232,69 @@ int32_t
 xdivide(int32_t i1, int32_t i2);
 int32_t
 xmod(int32_t i1, int32_t i2);
-bit_t *
+descriptor_t *
 xEQ(int32_t i1, int32_t i2);
-bit_t *
+descriptor_t *
 xLT(int32_t i1, int32_t i2);
-bit_t *
+descriptor_t *
 xGT(int32_t i1, int32_t i2);
-bit_t *
+descriptor_t *
 xNEQ(int32_t i1, int32_t i2);
-bit_t *
+descriptor_t *
 xLE(int32_t i1, int32_t i2);
-bit_t *
+descriptor_t *
 xGE(int32_t i1, int32_t i2);
-bit_t *
-xNOT(bit_t *i1);
+descriptor_t *
+xNOT(descriptor_t *i1);
 #ifndef xOR
-bit_t *
-xOR(bit_t *i1, bit_t *i2);
+descriptor_t *
+xOR(descriptor_t *i1, descriptor_t *i2);
 #endif // xOR
 #ifndef xAND
-bit_t *
-xAND(bit_t *i1, bit_t *i2);
+descriptor_t *
+xAND(descriptor_t *i1, descriptor_t *i2);
 #endif // xAND
 
-bit_t *
-xsEQ(char *s1, char *s2);
-bit_t *
-xsLT(char *s1, char *s2);
-bit_t *
-xsGT(char *s1, char *s2);
-bit_t *
-xsNEQ(char *s1, char *s2);
-bit_t *
-xsLE(char *s1, char *s2);
-bit_t *
-xsGE(char *s1, char *s2);
+descriptor_t *
+xsEQ(descriptor_t *s1, descriptor_t *s2);
+descriptor_t *
+xsLT(descriptor_t *s1, descriptor_t *s2);
+descriptor_t *
+xsGT(descriptor_t *s1, descriptor_t *s2);
+descriptor_t *
+xsNEQ(descriptor_t *s1, descriptor_t *s2);
+descriptor_t *
+xsLE(descriptor_t *s1, descriptor_t *s2);
+descriptor_t *
+xsGE(descriptor_t *s1, descriptor_t *s2);
 
-char *
-xsCAT(char *s1, char *s2);
+descriptor_t *
+xsCAT(descriptor_t *s1, descriptor_t *s2);
 
 // Built-in functions.  I've adapted the code for most or all of these from my
 // previous manual port of HAL/S-FC PASS1 from XPL/I to Python.  Some of them,
 // such as `OUTPUT`, are considerably extended from the XPL built-in of the
 // same name as documented in McKeeman.
 
-extern string_t headingLine;
-extern string_t subHeadingLine;
+extern sbuf_t headingLine;
+extern sbuf_t subHeadingLine;
 extern int pageCount;
 extern int LINE_COUNT;
 extern int linesPerPage;
 void
-OUTPUT(uint32_t lun, char *msg);
+OUTPUT(uint32_t lun, descriptor_t *msg);
 
-char *
+descriptor_t *
 INPUT(uint32_t lun);
 
 uint32_t
-LENGTH(char *string);
+LENGTH(descriptor_t *string);
 
-char *
-SUBSTR(char *s, int32_t start, int32_t end);
+descriptor_t *
+SUBSTR(descriptor_t *s, int32_t start, int32_t end);
 
-char *
-SUBSTR2(char *s, int32_t start);
+descriptor_t *
+SUBSTR2(descriptor_t *s, int32_t start);
 
 // Note that BYTE and BYTE1 auto-convert from EBCDIC to the native character
 // coding (presumably ASCII), because they're intended to operate on data
@@ -264,10 +302,16 @@ SUBSTR2(char *s, int32_t start);
 // intended to operate on the data of BIT variables.
 
 uint8_t
-BYTE(char *s, uint32_t index);
+BYTE(descriptor_t *s, uint32_t index);
 
 uint8_t
-BYTE1(char *s);
+BYTE1(descriptor_t *s);
+
+uint8_t
+BYTEliteral(char *s, uint32_t index);
+
+uint8_t
+BYTE1literal(char *s);
 
 void
 lBYTEc(uint32_t address, int32_t index, char c);
@@ -275,8 +319,8 @@ lBYTEc(uint32_t address, int32_t index, char c);
 void
 lBYTEb(uint32_t address, int32_t index, uint8_t b);
 
-uint8_t
-BYTE2(bit_t *b, uint32_t index);
+//uint8_t
+//BYTE2(descriptor_t *b, uint32_t index);
 
 uint32_t
 SHL(uint32_t value, uint32_t shift);
@@ -302,10 +346,10 @@ void
 MONITOR0(uint32_t dev);
 
 uint32_t
-MONITOR1(uint32_t dev, char *name);
+MONITOR1(uint32_t dev, descriptor_t *name);
 
 uint32_t
-MONITOR2(uint32_t dev, char *name);
+MONITOR2(uint32_t dev, descriptor_t *name);
 
 void
 MONITOR3(uint32_t dev);
@@ -353,16 +397,16 @@ uint32_t
 MONITOR9(uint32_t op);
 
 uint32_t
-MONITOR10(char *name);
+MONITOR10(descriptor_t *name);
 
 void
 MONITOR11(void);
 
-char *
+descriptor_t *
 MONITOR12(uint32_t precision);
 
 uint32_t
-MONITOR13(char *name);
+MONITOR13(descriptor_t *name);
 
 uint32_t
 MONITOR14(uint32_t n, uint32_t a);
@@ -374,7 +418,7 @@ void
 MONITOR16(uint32_t n);
 
 void
-MONITOR17(char *name);
+MONITOR17(descriptor_t *name);
 
 uint32_t
 MONITOR18(void);
@@ -399,7 +443,7 @@ MONITOR22(uint32_t n1);
 uint32_t
 MONITOR22A(uint32_t n2);
 
-char *
+descriptor_t *
 MONITOR23(void);
 
 void
@@ -515,7 +559,7 @@ void
 LINK(void);
 
 extern char parmField[1024];
-char *
+descriptor_t *
 PARM_FIELD(void);
 
 uint32_t

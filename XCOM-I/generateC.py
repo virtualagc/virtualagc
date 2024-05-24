@@ -827,10 +827,13 @@ def autoconvert(current, allowed, source=None):
     if current == "CHARACTER":
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "%s"))
-        if "FIXED" in allowed and source != None and source.startswith("getCHARACTER("):
+        if "FIXED" in allowed and source != None and \
+                source.startswith("getCHARACTER("):
             # In this case, we interpreted the FIXED as being the descriptor
             # of the string. 
             return "FIXED", "getFIXED" + source[12:]
+        if "BIT" in allowed:
+            convertions.append(("BIT", "%s"))
     elif current == "BIT":
         if "BIT" in allowed:
             conversions.append(("BIT", "%s"))
@@ -839,8 +842,9 @@ def autoconvert(current, allowed, source=None):
             #if source != None:
             #    print("***", source, file=sys.stderr)
         if "CHARACTER" in allowed:
-            conversions.append(("CHARACTER", 
-                                "fixedToCharacter(bitToFixed(%s))"))
+            #conversions.append(("CHARACTER", 
+            #                    "fixedToCharacter(bitToFixed(%s))"))
+            conversions.append(("CHARACTER", "bitToCharacter(%s)"))
     elif current == "FIXED":
         if "FIXED" in allowed:
             conversions.append(("FIXED", "%s"))
@@ -1022,9 +1026,9 @@ def generateExpression(scope, expression):
         source = str(token["number"])
     elif "string" in token:
         tipe = "CHARACTER"
-        source = '"' + token["string"]\
+        source = 'cToDescriptor(NULL, "' + token["string"]\
                             .replace('"', '\\\"')\
-                            .replace(replacementQuote, "'") + '"'
+                            .replace(replacementQuote, "'") + '")'
     elif operator == ".":
         # The operator is the separator between a the name of a  BASED RECORD 
         # (possibly subscripted) and the name of one of its fields (also 
@@ -1264,10 +1268,15 @@ def generateExpression(scope, expression):
                     if parmNum != 0:
                         source = source + ", "
                     tipe, p = generateExpression(scope, parameter)
-                    # A special case.
-                    if parmNum == 0 and tipe == "BIT" and symbol == "BYTE":
-                        source = "BYTE2("
-                        symbol = "BYTE2"
+                    # Some special cases
+                    #if parmNum == 0 and tipe == "BIT" and symbol == "BYTE":
+                    #    source = "BYTE2("
+                    #    symbol = "BYTE2"
+                    if parmNum == 0 and symbol == "BYTE" and p.startswith('"'):
+                        if len(parameters) == 1:
+                            source = "BYTE1literal("
+                        else:
+                            source = "BYTEliteral("
                     # Datatype conversions for parameters:
                     autoconvertTo = tipe
                     if parmNum == 0:
@@ -1486,11 +1495,11 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             print(indent + "int32_t numberRHS = (int32_t) (" + sourceR + ");")
         elif tipeR == "BIT":
             definedB = True
-            print(indent + "bit_t *bitRHS = " + sourceR + ";")
+            print(indent + "descriptor_t *bitRHS = " + sourceR + ";")
         elif tipeR == "CHARACTER":
             definedS = True
-            print(indent + "string_t stringRHS;")
-            print(indent + "strcpy(stringRHS, %s);" % sourceR)
+            print(indent + "descriptor_t *stringRHS;")
+            print(indent + "stringRHS = %s;"  % sourceR)
         else:
             errxit("Unknown RHS type: " + str(RHS))
         
@@ -1509,10 +1518,13 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             if toType == "CHARACTER":
                 toVar = "stringRHS"
                 if not definedS:
-                    print(indent + "string_t %s;" % toVar)
+                    print(indent + "descriptor_t *stringRHS;")
                     definedS = True
                 if toVar != fromVar:
-                    print(indent + "strcpy(%s, %s);" % (toVar, conversion % fromVar))
+                    #print(indent + \
+                    #      "stringRHS = cToDescriptor(NULL, \"%%s\", %s);" \
+                    #      % (conversion % fromVar))
+                    print(indent + "stringRHS = %s;" % (conversion % fromVar))
             elif toType == "FIXED":
                 toVar = "numberRHS"
                 if not definedN:
@@ -1523,7 +1535,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             elif toType == "BIT":
                 toVar = "bitRHS"
                 if not definedB:
-                    print(indent + "bit_t *%s;" % toVar)
+                    print(indent + "descriptor_t *%s;" % toVar)
                     definedB = True
                 if toVar != fromVar:
                     print(indent + "%s = %s;" % (toVar, conversion % fromVar))
@@ -1974,7 +1986,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             if toType == "FIXED":
                 source = "0"
             elif toType == "CHARACTER":
-                source = '""'
+                source = 'cToDescriptor(NULL, "")'
             elif toType == "BIT":
                 source = "fixedToBit(0)"
         else:
@@ -2246,9 +2258,9 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             if returnType == "FIXED":
                 returnType = "int32_t"
             elif returnType == "BIT":
-                returnType = "bit_t *"
+                returnType = "descriptor_t *"
             elif returnType == "CHARACTER":
-                returnType = "char *"
+                returnType = "descriptor_t *"
             header = returnType + "\n" + functionName + "(void)"
             print("\n" + header + ";", file=pf)
             print(header + "\n{")

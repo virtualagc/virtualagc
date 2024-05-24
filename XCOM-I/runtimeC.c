@@ -7,6 +7,8 @@
  *              by the XPL/I-to-C translator XCOM-I.py.
  * Reference:   http://www.ibibio.org/apollo/Shuttle.html
  * Mods:        2024-03-28 RSB  Began.
+ *              2024-05-23 RSB  Reworked so that descriptor_t replaces string_t,
+ *                              bit_t, and lots of char*.
  *
  * The functions herein are documented in runtimeC.h.
  *
@@ -280,8 +282,8 @@ optionsProcessor_t MONOPT = {
   }
 };
 
-char *type1Actual[MAX_TYPE1];
-char *type2Actual[MAX_TYPE2];
+descriptor_t type1Actual[MAX_TYPE1];
+descriptor_t type2Actual[MAX_TYPE2];
 optionsProcessor_t *optionsProcessor = NULL;
 
 //---------------------------------------------------------------------------
@@ -341,7 +343,7 @@ printMemoryMap(char *msg, int start, int end) {
                           if (descriptor == 0)
                             printf(" = \"%s\"", "");
                           else
-                            printf(" = \"%s\" @%06X", getCHARACTER(raddress),
+                            printf(" = \"%s\" @%06X", getCHARACTER(raddress)->bytes,
                                    0xFFFFFF & getFIXED(raddress));
                         }
                       else if (!strcmp(basedField->datatype, "FIXED"))
@@ -366,12 +368,12 @@ printMemoryMap(char *msg, int start, int end) {
                   if (descriptor == 0)
                     {
                       printf("%06X: CHARACTER %s = \"%s\"\n", address,
-                             symbol, getCHARACTER(address));
+                             symbol, getCHARACTER(address)->bytes);
                     }
                   else
                     {
                       printf("%06X: CHARACTER %s = \"%s\" @%06X\n",
-                             address, symbol, getCHARACTER(address), saddress);
+                             address, symbol, getCHARACTER(address)->bytes, saddress);
                     }
                 }
               else if (!strcmp(datatype, "FIXED"))
@@ -395,12 +397,12 @@ printMemoryMap(char *msg, int start, int end) {
                   if (descriptor == 0)
                     {
                       printf("%06X: CHARACTER %s(%u) = \"%s\"\n", k, symbol,
-                          j, getCHARACTER(k));
+                          j, getCHARACTER(k)->bytes);
                     }
                   else
                     {
                       printf("%06X: CHARACTER %s(%u) = \"%s\" @%06X\n", k, symbol,
-                          j, getCHARACTER(k), saddress);
+                          j, getCHARACTER(k)->bytes, saddress);
                     }
                 }
               else if (!strcmp(datatype, "FIXED"))
@@ -418,24 +420,22 @@ printMemoryMap(char *msg, int start, int end) {
     }
 }
 
-// Convert the data of a bit_t to a string in the currently-set radix.
+// Convert the data of a BIT to a string in the currently-set radix.
 int bitBits = 4;
-char *
-bitToRadix(bit_t *b) {
-  char *returnValue = nextBuffer();
+descriptor_t *
+bitToRadix(descriptor_t *b) {
+  descriptor_t *returnValue;
   int offset;
   int radix = 1 << bitBits;
   int numDigits = (b->bitWidth + bitBits - 1) / bitBits;
   int i, nextByte, bitsLeftInValue = 0, value = 0, thisDigit;
-  if (bitBits < 4)
-    offset = sprintf(returnValue, "\"(%d) ", bitBits);
-  else
-    offset = sprintf(returnValue, "\"");
   if (bitBits < 1 || bitBits > 4)
-    {
-      sprintf(returnValue, "Set bitBits 1, 2, 3, or 4 (not %d)", bitBits);
-      return returnValue;
-    }
+    return cToDescriptor(NULL, "Set bitBits 1, 2, 3, or 4 (not %d)", bitBits);
+  if (bitBits < 4)
+    returnValue = cToDescriptor(NULL, "\"(%d) ", bitBits);
+  else
+    returnValue = cToDescriptor(NULL, "\"");
+  offset = returnValue->numBytes;
   for (i = 0, nextByte = 0; i < numDigits; i++)
     {
       int keep;
@@ -449,12 +449,13 @@ bitToRadix(bit_t *b) {
       value = value & ((1 << keep) - 1);
       bitsLeftInValue -= bitBits;
       if (thisDigit < 10)
-        returnValue[offset + i] = '0' + thisDigit;
+        returnValue->bytes[offset + i] = '0' + thisDigit;
       else
-        returnValue[offset + i] = 'A' + (thisDigit - 10);
+        returnValue->bytes[offset + i] = 'A' + (thisDigit - 10);
     }
-  returnValue[offset + numDigits] = '"';
-  returnValue[offset + numDigits + 1] = 0;
+  returnValue->bytes[offset + numDigits] = '"';
+  returnValue->bytes[offset + numDigits + 1] = 0;
+  returnValue->numBytes += numDigits + 1;
   return returnValue;
 }
 
@@ -464,11 +465,10 @@ bitToRadix(bit_t *b) {
 // as indexes into the `memory` array and not encoded the way native C
 // variables are.  Because it's so easy (for me, at least) of making the
 // mistake of using brackets rather than parentheses, brackets are accepted
-// in place of parentheses.
-char *
+// in places of parentheses.
+descriptor_t *
 getXPL(char *identifier) {
   memoryMapEntry_t *entry;
-  char *returnValue = nextBuffer();
   char *base = NULL, *field = NULL;
   int baseIndex = 0, fieldIndex = 0;
   char *s;
@@ -481,10 +481,8 @@ getXPL(char *identifier) {
       else if (*s == '.')
         {
           if (field != NULL)
-            {
-              sprintf(returnValue, "Too many . separators in %s.", identifier);
-              return returnValue;
-            }
+            return cToDescriptor(NULL,
+                                 "Too many . separators in %s.", identifier);
           *s = 0;
           field = s + 1;
         }
@@ -510,65 +508,48 @@ getXPL(char *identifier) {
       }
   entry = lookupVariable(base);
   if (entry == NULL)
-    {
-      sprintf(returnValue,
-          "Cannot find variable %s; could it be a macro?", base);
-      return returnValue;
-    }
+    return cToDescriptor(NULL,
+                         "Cannot find variable %s; could it be a macro?", base);
   if (entry->basedFields == NULL)
     {
       if (field != NULL)
-        {
-          sprintf(returnValue, "Variable %s is not BASED RECORD.", base);
-          return returnValue;
-        }
+        return cToDescriptor(NULL, "Variable %s is not BASED RECORD.", base);
       field = base;
       fieldIndex = baseIndex;
       base = NULL;
       baseIndex = 0;
     }
 
-
   return rawGetXPL(base, baseIndex, field, fieldIndex);
 }
 
 void
 printXPL(char *identifier) {
-  printf("%s\n", getXPL(identifier));
+  printf("%s\n", getXPL(identifier)->bytes);
 }
 
-char *
+descriptor_t *
 rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex) {
   int32_t address = rawADDR(base, baseIndex, field, fieldIndex);
-  char *returnValue = nextBuffer();
   if (foundRawADDR == NULL || address < 0 || \
-      address + foundRawADDR->dirWidth > sizeof(memory))
-    {
-      sprintf(returnValue, "Outside of physical memory");
-      return returnValue;
-    }
+        address + foundRawADDR->dirWidth > sizeof(memory))
+    return cToDescriptor(NULL, "Outside of physical memory");
   if (!strcmp(foundRawADDR->datatype, "FIXED"))
     {
       int32_t i = getFIXED(address);
-      sprintf(returnValue, "%d (0x%08X)", i, i);
-      return returnValue;
+      return cToDescriptor(NULL, "%d (0x%08X)", i, i);
     }
   if (!strcmp(foundRawADDR->datatype, "CHARACTER"))
-    {
-      char *s = getCHARACTER(address);
-      sprintf(returnValue, "'%s'", s);
-      return returnValue;
-    }
+    return cToDescriptor(NULL, "'%s'", getCHARACTER(address)->bytes);
   if (!strcmp(foundRawADDR->datatype, "BIT"))
     {
-      bit_t *b = getBIT(foundRawADDR->bitWidth, address);
-      int i, offset = sprintf(returnValue, "bitWidth=%d numBytes=%d bytes=",
-                              b->bitWidth, b->numBytes);
-      sprintf(&returnValue[offset], "%s", bitToRadix(b));
-      return returnValue;
+      descriptor_t *b = getBIT(foundRawADDR->bitWidth, address);
+      return cToDescriptor(NULL,
+                           "bitWidth=%d numBytes=%d bytes=%s",
+                           b->bitWidth, b->numBytes,
+                           bitToRadix(b)->bytes);
     }
-  sprintf(returnValue, "Unrecognized datatype %s", foundRawADDR->datatype);
-  return returnValue;
+  return cToDescriptor(NULL, "Unrecognized datatype %s", foundRawADDR->datatype);
 }
 
 //---------------------------------------------------------------------------
@@ -594,14 +575,16 @@ printBacktrace(void)
   free(strings);
 }
 
-string_t abendMessage = "";
 void
-abend(char *msg) {
+abend(const char *fmt, ...) {
+  va_list args;
+  sbuf_t buffer;
   printf("\n");
   fflush(stdout);
-  fprintf(stderr, "%s\n", msg);
-  if (strlen(abendMessage) > 0)
-    fprintf(stderr, "%s\n", abendMessage);
+  va_start(args, fmt);
+  fprintf(stderr, fmt, args);
+  va_end(args);
+  fprintf(stderr, "\n");
   if (showBacktrace)
     printBacktrace();
   exit(1);
@@ -617,7 +600,7 @@ matchType1(char *parm) {
       if (!strncmp(parm, optionsProcessor->type1[i].name, len) &&
           (parm[len] == ',' || parm[len] == 0))
         {
-          type1Actual[i] = optionsProcessor->type1[i].name;
+          cToDescriptor(&type1Actual[i], "%s", optionsProcessor->type1[i].name);
           break;
         }
       if (optionsProcessor->type1[i].synonym != NULL)
@@ -626,7 +609,7 @@ matchType1(char *parm) {
           if (!strncmp(parm, optionsProcessor->type1[i].synonym, len) &&
               (parm[len] == ',' || parm[len] == 0))
             {
-              type1Actual[i] = optionsProcessor->type1[i].name;
+              cToDescriptor(&type1Actual[i], "%s", optionsProcessor->type1[i].name);
               break;
             }
         }
@@ -634,7 +617,8 @@ matchType1(char *parm) {
       if (!strncmp(parm, optionsProcessor->type1[i].negatedName, len) &&
           (parm[len] == ',' || parm[len] == 0))
         {
-          type1Actual[i] = optionsProcessor->type1[i].negatedName;
+          cToDescriptor(&type1Actual[i], "%s",
+              optionsProcessor->type1[i].negatedName);
           break;
         }
       if (optionsProcessor->type1[i].negatedSynonym != NULL)
@@ -643,7 +627,8 @@ matchType1(char *parm) {
           if (!strncmp(parm, optionsProcessor->type1[i].negatedSynonym, len) &&
               (parm[len] == ',' || parm[len] == 0))
             {
-              type1Actual[i] = optionsProcessor->type1[i].negatedName;
+              cToDescriptor(&type1Actual[i], "%s",
+                      optionsProcessor->type1[i].negatedName);
               break;
             }
         }
@@ -655,7 +640,7 @@ matchType1(char *parm) {
 int
 matchType2(char *parm) {
   int i, len;
-  char *s, *ss, *buffer = nextBuffer();
+  char *s, *ss, *buffer;
   for (i = 0; i < optionsProcessor->numParms2; i++)
     {
       len = strlen(optionsProcessor->type2[i].name);
@@ -678,25 +663,26 @@ matchType2(char *parm) {
   if (parm[len] != '=')
     return 0;
   // The candidate is pointed to by `s`.
+  buffer = malloc(MAX_XPL_STRING);
   ss = strstr(s, ",");
   if (ss == NULL)
     strcpy(buffer, s);
   else
     strncpy(buffer, s, ss - s);
-  type2Actual[i] = buffer;
+  cToDescriptor(&type2Actual[i], "%s", buffer);
   return 1;
 }
 
 void
 parseParmField(int print) {
-  string_t parm;
+  sbuf_t parm;
   char *s, *ss;
   int i;
   uint32_t OPTIONS_CODE = 0, address;
   for (i = 0; i < optionsProcessor->numParms1; i++)
-    type1Actual[i] = optionsProcessor->type1[i].defaultValue;
+    cToDescriptor(&type1Actual[i], "%s", optionsProcessor->type1[i].defaultValue);
   for (i = 0; i < optionsProcessor->numParms2; i++)
-    type2Actual[i] = optionsProcessor->type2[i].defaultValue;
+    cToDescriptor(&type2Actual[i], optionsProcessor->type2[i].defaultValue);
   // Note that in principle, if there's a TITLE parameter, then it could
   // contain commas, so we have to watch out for that in parsing the
   // parameter field.  Let's go ahead and split on the commas, and then
@@ -704,7 +690,7 @@ parseParmField(int print) {
   for (s = parmField; s != NULL && *s != 0; ((s = strchr(s, ','))==NULL)?NULL:(++s))
     {
       int i;
-      strncpy(parm, s, sizeof(string_t));
+      strncpy(parm, s, sizeof(parm));
       // Is it any of the expected patterns for parameter types?
       if (parm[0] == '$')
         continue;
@@ -712,26 +698,24 @@ parseParmField(int print) {
         continue;
       if (matchType2(parm))
         continue;
-      strcpy(abendMessage, "Parameter = ");
-      strncpy(&abendMessage[12], parm, 100);
-      abend("Unrecognized PARM field");
+      abend("Unrecognized PARM field: Parameter = %s", parm);
     }
   if (print)
     {
       for (i = 0; i < optionsProcessor->numParms1; i++)
-        printf("%s\n", type1Actual[i]);
+        printf("%s\n", type1Actual[i].bytes);
       for (i = 0; i < optionsProcessor->numParms2; i++)
-        if (type2Actual[i] == NULL)
+        if (type2Actual[i].numBytes == 0)
           printf("%s = NULL\n", optionsProcessor->type2[i].name);
         else
-          printf("%s = %s\n", optionsProcessor->type2[i].name, type2Actual[i]);
+          printf("%s = %s\n", optionsProcessor->type2[i].name, type2Actual[i].bytes);
     }
   // If we've gotten here, then the PARM field has been parsed, and the
   // arrays `type1Actual` and `type2Actual` have been updated with the new
   // settings, while `type2Names` contains the names of the Type 2 parameters.
   // We need to interpret the Type 1 settings as bit-flags in OPTIONS_CODE.
   for (i = 0; i < optionsProcessor->numParms1; i++)
-    if (strncmp(type1Actual[i], "NO", 2)) // Not NO?
+    if (strncmp(type1Actual[i].bytes, "NO", 2)) // Not NO?
       OPTIONS_CODE |= optionsProcessor->type1[i].optionsCode;
 
   // Finally, we can update the XPL memory (for MONITOR(13)) which holds the
@@ -739,21 +723,22 @@ parseParmField(int print) {
   putFIXED(WHERE_MONITOR_13, OPTIONS_CODE);
   address = getFIXED(WHERE_MONITOR_13 + 4); // Address of CON
   for (i = 0; i < optionsProcessor->numParms1; i++)
-    putCHARACTER(address + 4 * i, type1Actual[i]);
+    putCHARACTER(address + 4 * i, &type1Actual[i]);
   address = getFIXED(WHERE_MONITOR_13 + 12); // Address of TYPE2
   for (i = 0; i < optionsProcessor->numParms2; i++)
-    putCHARACTER(address + 4 * i, optionsProcessor->type2[i].name);
+    putCHARACTER(address + 4 * i,
+                 cToDescriptor(NULL, optionsProcessor->type2[i].name));
   address = getFIXED(WHERE_MONITOR_13 + 16); // Address of VALS
   for (i = 0; i < optionsProcessor->numParms2; i++)
     if (i == 0 || i == 8 || i == 12)
       {
-        if (type2Actual[i] == NULL)
+        if (type2Actual[i].numBytes == 0)
           putFIXED(address + 4 * i, 0);
         else
-          putCHARACTER(address + 4 * i, type2Actual[i]);
+          putCHARACTER(address + 4 * i, &type2Actual[i]);
       }
     else
-      putFIXED(address + 4 * i, atoi(type2Actual[i]));
+      putFIXED(address + 4 * i, atoi(type2Actual[i].bytes));
 }
 
 int
@@ -864,7 +849,7 @@ parseCommandLine(int argc, char **argv)
               if (ri->fp == NULL)
                 abend("Cannot open input file for reading");
               ri->recordSize = recordSize;
-              strncpy(ri->filename, filename, sizeof(string_t));
+              strncpy(ri->filename, filename, sizeof(sbuf_t));
             }
           else if (c == 'O' || c == 'o')
             {
@@ -875,7 +860,7 @@ parseCommandLine(int argc, char **argv)
               if (ro->fp == NULL)
                 abend("Cannot open output file for writing");
               ro->recordSize = recordSize;
-              strncpy(ro->filename, filename, sizeof(string_t));
+              strncpy(ro->filename, filename, sizeof(sbuf_t));
             }
           else if (c == 'B' || c == 'b')
             {
@@ -891,7 +876,7 @@ parseCommandLine(int argc, char **argv)
               if (ro->fp == NULL)
                 abend("Cannot open i/o file for read/write");
               ro->recordSize = recordSize;
-              strncpy(ro->filename, filename, sizeof(string_t));
+              strncpy(ro->filename, filename, sizeof(sbuf_t));
               ri->fp = ro->fp;
               ri->recordSize = recordSize;
               strcpy(ri->filename, ro->filename);
@@ -942,7 +927,7 @@ parseCommandLine(int argc, char **argv)
         {
           while (1)
             {
-              string_t line;
+              sbuf_t line;
               printf("PARM field > ");
               fgets(line, sizeof(line), stdin);
               line[strlen(line)-1] = 0;
@@ -1061,35 +1046,51 @@ parseCommandLine(int argc, char **argv)
   return returnValue;
 }
 
-// `nextBuffer` is sort of a cut-rate memory-management system for builtins
+// `nextBuffer` is sort of a cut-rate memory-management system for built-ins
 // that return CHARACTER values or BIT values.  In order to avoid having to
-// allocate new memory for such outputs, or more importantly to free such
+// allocate new memory for such output, or more importantly to free such
 // memory later, we instead maintain a circular array of buffers, and
-// each call to a builtin that returns a string or a BIT simply uses the next
-// buffer in that array.  The reason this is okay, is that functions returning
+// each call to a built-in that returns a string or a BIT simply uses the next
+// buffer in that array.  The reason this is okay is that functions returning
 // strings or BITs are invoked only in the context of expressions, and the
 // number of function calls an expression can make isn't very large. So we can
 // just make the circular array very large and not worry about it.  I hope.
 #define MAX_BUFFS 1024
-void *
+descriptor_t *
 nextBuffer(void)
 {
-  static union {
-    // Note that these fields aren't every actually *used* by these names,
-    // outside of this function. They're mainly here to get the amount of
-    // storage correct.  I.e., so that the returned pointer is guaranteed to
-    // contain enough storage.
-    string_t stringBuffer;
-    bit_t bitBuffer;
-  } buffers[MAX_BUFFS];
+  static descriptor_t buffers[MAX_BUFFS];
   static int currentBuffer;
-  void *returnValue = &(buffers[currentBuffer++]);
+  descriptor_t *returnValue = &(buffers[currentBuffer++]);
   if (currentBuffer >= MAX_BUFFS)
     currentBuffer = 0;
-  // Clear the string (by NUL-terminating it) or the BIT (by setting its width
-  // fields to 0).
-  *((uint32_t *) returnValue) = 0;
-  return (void *) returnValue;
+  returnValue->type = ddCHARACTER;
+  returnValue->numBytes = 0;
+  returnValue->bitWidth = 0;
+  returnValue->bytes[0] = 0;
+  return returnValue;
+}
+
+// "Print" a C string to a new or existing descriptor_t.
+descriptor_t *
+cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
+  va_list args;
+  if (descriptor == NULL)
+    descriptor = nextBuffer();
+  va_start(args, fmt);
+  descriptor->numBytes =
+      vsnprintf(descriptor->bytes, sizeof(descriptor->bytes), fmt, args);
+  va_end(args);
+  descriptor->type = ddCHARACTER;
+  descriptor->bitWidth = 0;
+  return descriptor;
+}
+
+descriptor_t *
+bitToCharacter(descriptor_t *bit) {
+  if (bit->bitWidth > 32)
+    return bit;
+  return fixedToCharacter(bitToFixed(bit));
 }
 
 // Used only by `lookupAddress`.
@@ -1203,10 +1204,10 @@ putFIXED(uint32_t address, int32_t value)
   memory[address] = value & 0xFF;
 }
 
-bit_t *
+descriptor_t *
 getBIT(uint32_t bitWidth, uint32_t address)
 {
-  bit_t *value = nextBuffer();
+  descriptor_t *value = nextBuffer();
   uint32_t numBytes;
   if (bitWidth == 0)
     {
@@ -1223,13 +1224,12 @@ getBIT(uint32_t bitWidth, uint32_t address)
       uint32_t descriptor;
       descriptor = getFIXED(address);
       if (numBytes - 1 != descriptor >> 24)
-        {
-          sprintf(abendMessage, "bitWidth=%d, numBytes=%d, descriptor=(%d,%06X)",
+        abend("Implementation error: getBIT width mismatch, "
+              "bitWidth=%d, numBytes=%d, descriptor=(%d,%06X)",
               bitWidth, numBytes, descriptor>>24, descriptor&0xFFFFFF);
-          abend("Implementation error: getBIT width mismatch");
-        }
       address = descriptor & 0xFFFFFF;
     }
+  value->type = ddBIT;
   value->bitWidth = bitWidth;
   value->numBytes = numBytes;
   memmove(value->bytes, &memory[address], numBytes);
@@ -1237,7 +1237,7 @@ getBIT(uint32_t bitWidth, uint32_t address)
 }
 
 void
-putBIT(uint32_t bitWidth, uint32_t address, bit_t *value)
+putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
 {
   uint32_t numBytes, destAddress;
   uint32_t maskWidth, maskAddress = address;
@@ -1326,6 +1326,11 @@ static uint8_t asciiToEbcdic[128] = {
 // the substitution of the U.S. cent character to ` and the logical-NOT
 // symbol to ~, a explained above.  It was generated from the table above
 // using the one-time-use program invertEbcdicTable.py.
+// Note: It would be nice if both `asciiToEbcdic` and `ebcdicToAscii` were
+// 256 bytes, and inverses of each other, even if half the entries in the
+// latter had to be invented, but that's impossible because of the way
+// ~,^ map to logical-NOT and ` maps to U.S. cent.  I.e., the mapping isn't
+// 1-to-1.  It's just too dodgy trying to make it work.
 static char ebcdicToAscii[256] = {
   '\x00', '\x01', '\x02', '\x03', ' '   , '\x09', ' '   , '\x7F',
   ' '   , ' '   , ' '   , '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
@@ -1361,44 +1366,10 @@ static char ebcdicToAscii[256] = {
   '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '
 };
 
-#if 0
-char *
-STRING(uint32_t descriptor) {
-  char *returnValue = nextBuffer();
-  size_t length;
-  uint32_t index;
-  if (descriptor == 0) // Empty string?
-    {
-      *returnValue = 0;
-      return returnValue;
-    }
-  length = ((descriptor >> 24) & 0xFF) + 1;
-  index = descriptor & 0xFFFFFF;
-  if (index + length <= MEMORY_SIZE)
-    {
-      uint8_t c;
-      char *s = returnValue;
-      while (1)
-        {
-          if (length <= 0)
-            {
-              *s = 0;
-              break;
-            }
-          length--;
-          c = memory[index++];
-          *s++ = ebcdicToAscii[c];
-        }
-      return returnValue;
-    }
-  return NULL;
-}
-#endif
-
 uint32_t
-STRING_GT(char *s1, char *s2) {
-  uint8_t blank = BYTE1(" ");
-  int i, b1, b2, len1 = strlen(s1), len2 = strlen(s2), len;
+STRING_GT(descriptor_t *s1, descriptor_t *s2) {
+  uint8_t blank = BYTE1literal(" ");
+  int i, b1, b2, len1 = s1->numBytes, len2 = s2->numBytes, len;
   len = len1;
   if (len2 > len)
     len = len2;
@@ -1421,46 +1392,35 @@ STRING_GT(char *s1, char *s2) {
   return 0;
 }
 
-char *
+descriptor_t *
 getCHARACTERd(uint32_t descriptor)
 {
-  char *returnValue = nextBuffer();
-  size_t length;
-  uint32_t index;
-  if (descriptor == 0) // Empty string?
+  descriptor_t *returnValue = nextBuffer();
+  uint16_t numBytes;
+  uint32_t address;
+  int i;
+  if (descriptor != 0) // Empty string?
     {
-      *returnValue = 0;
-      return returnValue;
+      numBytes = ((descriptor >> 24) & 0xFF) + 1;
+      returnValue->numBytes = numBytes;
+      address = descriptor & 0xFFFFFF;
+      for (i = 0; i < numBytes; i++)
+        returnValue->bytes[i] = ebcdicToAscii[memory[address + i]];
+      // A NUL terminator isn't logically necessary, but will be lots more
+      // convenient for consumers of string data.  The buffer is big enough
+      // to hold it.
+      returnValue->bytes[numBytes] = 0;
     }
-  length = ((descriptor >> 24) & 0xFF) + 1;
-  index = descriptor & 0xFFFFFF;
-  if (index + length <= MEMORY_SIZE)
-    {
-      uint8_t c;
-      char *s = returnValue;
-      while (1)
-        {
-          if (length <= 0)
-            {
-              *s = 0;
-              break;
-            }
-          length--;
-          c = memory[index++];
-          *s++ = ebcdicToAscii[c];
-        }
-      return returnValue;
-    }
-  return NULL;
+  return returnValue;
 }
 
-char *
+descriptor_t *
 getCHARACTER(uint32_t address) {
   return getCHARACTERd(getFIXED(address));
 }
 
 void
-putCHARACTER(uint32_t address, char *str)
+putCHARACTER(uint32_t address, descriptor_t *str)
 {
   size_t length;
   uint32_t index, descriptor, oldLength, newDescriptor;
@@ -1470,7 +1430,7 @@ putCHARACTER(uint32_t address, char *str)
   else
     oldLength = ((descriptor >> 24) & 0xFF) + 1;
   index = descriptor & 0xFFFFFF;
-  length = strlen(str);
+  length = str->numBytes;
   if (length == 0)
     {
       putFIXED(address, 0);
@@ -1478,7 +1438,7 @@ putCHARACTER(uint32_t address, char *str)
     }
   if (length > 256) { // Shouldn't be possible.
     length = 256;
-    str[length] = 0;
+    str->numBytes = length;
   }
   if (length > oldLength)
     {
@@ -1494,22 +1454,20 @@ putCHARACTER(uint32_t address, char *str)
   putFIXED(address, (int32_t) descriptor);
   if (index + length <= MEMORY_SIZE)
     {
-      char c, *s = str;
-      while (1)
+      char c, *s = str->bytes;
+      for (; length > 0; length--, s++, index++)
         {
-          c = *s++;
-          if (c == 0)
-            break;
-          memory[index++] = asciiToEbcdic[(int) c];
+          c = *s;
+          if (str->type == ddCHARACTER)
+            c = asciiToEbcdic[c];
+          memory[index] = c;
         }
     }
 }
 
-char *
+descriptor_t *
 fixedToCharacter(int32_t i) {
-  char *returnString = nextBuffer();
-  sprintf(returnString, "%d", i);
-  return returnString;
+  return cToDescriptor(NULL, "%d", i);
 }
 
 // Convert a BIT(1) through BIT(32) to FIXED.  As near as I can figure (see
@@ -1520,7 +1478,7 @@ fixedToCharacter(int32_t i) {
 // is the descriptor, but I have no way to supply it from the provided
 // parameters.  That'll have to be handled upstream from here.
 int32_t
-bitToFixed(bit_t *value)
+bitToFixed(descriptor_t *value)
 {
   int32_t fixed, numBytes, bitWidth, dirWidth;
   uint8_t *bytes;
@@ -1558,12 +1516,13 @@ bitToFixed(bit_t *value)
   return fixed;
   */
   abend("Implementation error handling conversion of BIT to FIXED");
+  return 0; // Never gets to here.
 }
 
-bit_t *
+descriptor_t *
 fixedToBit(int32_t bitWidth, int32_t value)
 {
-  bit_t *buffer = (bit_t *) nextBuffer();
+  descriptor_t *buffer = nextBuffer();
   int i, mask;
   uint32_t numBytes;
   if (bitWidth > 32)
@@ -1625,40 +1584,40 @@ xmod(int32_t i1, int32_t i2)
   return i1 % i2;
 }
 
-bit_t *
+descriptor_t *
 xEQ(int32_t i1, int32_t i2)
 {
   return fixedToBit(1, i1 == i2);
 }
 
-bit_t *
+descriptor_t *
 xLT(int32_t i1, int32_t i2) {
   return fixedToBit(1, i1 < i2);
 }
 
-bit_t *
+descriptor_t *
 xGT(int32_t i1, int32_t i2) {
   return fixedToBit(1, i1 > i2);
 }
 
-bit_t *
+descriptor_t *
 xNEQ(int32_t i1, int32_t i2) {
   return fixedToBit(1, i1 != i2);
 }
 
-bit_t *
+descriptor_t *
 xLE(int32_t i1, int32_t i2) {
   return fixedToBit(1, i1 <= i2);
 }
 
-bit_t *
+descriptor_t *
 xGE(int32_t i1, int32_t i2) {
   return fixedToBit(1, i1 >= i2);
 }
 
-bit_t *
-xNOT(bit_t *i1) {
-  bit_t *result = nextBuffer();
+descriptor_t *
+xNOT(descriptor_t *i1) {
+  descriptor_t *result = nextBuffer();
   int i, mask, bitWidth = i1->bitWidth, numBytes = i1->numBytes;
   uint8_t *bytes = i1->bytes;
   result->bitWidth = bitWidth;
@@ -1677,9 +1636,9 @@ xNOT(bit_t *i1) {
 }
 
 #ifndef xOR
-bit_t *
-xOR(bit_t *i1, bit_t *i2) {
-  bit_t *result = nextBuffer();
+descriptor_t *
+xOR(descriptor_t *i1, descriptor_t *i2) {
+  descriptor_t *result = nextBuffer();
   int i, numBytes, bitWidth,
       bitWidth1 = i1->bitWidth, bitWidth2 = i2->bitWidth,
       numBytes1 = i1->numBytes, numBytes2 = i2->numBytes;
@@ -1714,9 +1673,9 @@ xOR(bit_t *i1, bit_t *i2) {
 #endif // xOR
 
 #ifndef xAND
-bit_t *
-xAND(bit_t *i1, bit_t *i2){
-  bit_t *result = nextBuffer();
+descriptor_t *
+xAND(descriptor_t *i1, descriptor_t *i2){
+  descriptor_t *result = nextBuffer();
   int i, numBytes, bitWidth,
       bitWidth1 = i1->bitWidth, bitWidth2 = i2->bitWidth,
       numBytes1 = i1->numBytes, numBytes2 = i2->numBytes;
@@ -1763,18 +1722,25 @@ xAND(bit_t *i1, bit_t *i2){
 
 // Used by `xsXXX` functions, and not expected to be called directly.
 enum stringRelation_t { EQ, NEQ, LT, GT, LE, GE };
-bit_t *
-stringRelation(enum stringRelation_t relation, char *s1, char *s2) {
+descriptor_t *
+stringRelation(enum stringRelation_t relation,
+               descriptor_t *d1,
+               descriptor_t *d2) {
   int comparison = 0; // -1 for <, 0 for =, 1 for >.
-  int l1 = strlen(s1), l2 = strlen(s2);
+  char *s1 = d1->bytes, *s2 = d2->bytes;
+  int l1 = d1->numBytes, l2 = d2->numBytes;
   if (l1 > l2)
     comparison = 1;
   else if (l1 < l2)
     comparison = -1;
   else
-    while (*s1 != 0)
+    for (; l1 > 0; l1--, s1++, s2++)
       {
-        int e1 = asciiToEbcdic[*s1++], e2 = asciiToEbcdic[*s2++];
+        int e1 = *s1, e2 = *s2;
+        if (d1->type == ddCHARACTER)
+          e1 = asciiToEbcdic[e1];
+        if (d2->type == ddCHARACTER)
+          e2 = asciiToEbcdic[e2];
         if (e1 > e2) { comparison = 1; break; }
         else if (e1 < e2) { comparison = -1; break; }
       }
@@ -1786,44 +1752,39 @@ stringRelation(enum stringRelation_t relation, char *s1, char *s2) {
   if (relation == GE) return fixedToBit(1, comparison != -1);
   return NULL; // Shouldn't happen.
 }
-bit_t *
-xsEQ(char *s1, char *s2) {
+descriptor_t *
+xsEQ(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(EQ, s1, s2);
 }
-bit_t *
-xsLT(char *s1, char *s2) {
+descriptor_t *
+xsLT(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(LT, s1, s2);
 }
-bit_t *
-xsGT(char *s1, char *s2) {
+descriptor_t *
+xsGT(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(GT, s1, s2);
 }
-bit_t *
-xsNEQ(char *s1, char *s2) {
+descriptor_t *
+xsNEQ(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(NEQ, s1, s2);
 }
-bit_t *
-xsLE(char *s1, char *s2) {
+descriptor_t *
+xsLE(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(LE, s1, s2);
 }
-bit_t *
-xsGE(char *s1, char *s2) {
+descriptor_t *
+xsGE(descriptor_t *s1, descriptor_t *s2) {
   return stringRelation(GE, s1, s2);
 }
 
-char *
-xsCAT(char *s1, char *s2) {
+descriptor_t *
+xsCAT(descriptor_t *s1, descriptor_t *s2) {
   int length;
-  char *s, *returnString = nextBuffer();
-  strcpy(returnString, s1);
-  length = strlen(returnString);
-  if (length < MAX_XPL_STRING)
-    {
-      s = &returnString[length]; // Where s2 can be copied to.
-      length = MAX_XPL_STRING - length; // Available space for s2.
-      strncpy(s, s2, length);
-    }
-  returnString[MAX_XPL_STRING] = 0;
+  descriptor_t *returnString = nextBuffer();
+  memmove(returnString->bytes, s1->bytes, s1->numBytes);
+  memmove(&returnString->bytes[s1->numBytes], s2->bytes, s2->numBytes);
+  returnString->numBytes = s1->numBytes + s2->numBytes;
+  returnString->bytes[returnString->numBytes] = 0; // A convenience terminator.
   return returnString;
 }
 
@@ -1842,31 +1803,28 @@ the so-called ANSI control characters:
     '2'    Subheading line.
     ...    Others
 */
-string_t headingLine = "";
-string_t subHeadingLine = "";
+sbuf_t headingLine = "";
+sbuf_t subHeadingLine = "";
 int pageCount = 0;
 int LINE_COUNT = 0;
 int pendingNewline = 0;
 #define MAX_QUEUE 10
 void
-OUTPUT(uint32_t lun, char *string) {
+OUTPUT(uint32_t lun, descriptor_t *string) {
   char ansi = ' '; // ANSI carriage-control character.
-  char *s = string; // Printable character data.
+  char *s = string->bytes; // Printable character data.
   FILE *fp;
   int i;
   if (lun < 0 || lun >= DD_MAX || DD_OUTS[lun] == NULL)
-    {
-      sprintf(abendMessage, "Device = %d", lun);
-      abend("Output file has not been assigned");
-    }
+    abend("Output file has not been assigned: Device = %d", lun);
   fp = DD_OUTS[lun];
-  string_t queue[MAX_QUEUE]; // SYSPRINT line-queue for current page.
+  sbuf_t queue[MAX_QUEUE]; // SYSPRINT line-queue for current page.
   int linesInQueue = 0;
   if (lun <= 1) // SYSPRINT
     {
       if (lun == 1)
         {
-          ansi = string[0];
+          ansi = string->bytes[0];
           s += 1;
         }
       if (ansi == '_')
@@ -1985,37 +1943,31 @@ OUTPUT(uint32_t lun, char *string) {
     }
   else
     {
-      fprintf(fp, "%s\n", string);
+      fprintf(fp, "%s\n", string->bytes);
       pendingNewline = 0;
     }
 }
 
 #define MAX_INPUTS 128
-char *
+descriptor_t *
 INPUT(uint32_t lun) {
+  descriptor_t *returnValue = nextBuffer();
   int i;
   char *s, *ss;
   FILE *fp;
   if (lun < 0 || lun >= DD_MAX)
-    {
-      sprintf(abendMessage, "Device = %d", lun);
-      abend("Input device number out of range");
-    }
+    abend("Input device number out of range: Device = %d", lun);
   if (DD_INS_EXTRA[lun] != NULL)
     {
-      char *returnValue = nextBuffer();
-      sprintf(returnValue, "%-80s", DD_INS_EXTRA[lun]);
+      s = DD_INS_EXTRA[lun];
       DD_INS_EXTRA[lun] = NULL;
-      return returnValue;
+      return cToDescriptor(returnValue, "%-80s", s);
     }
   fp = DD_INS[lun];
   if (fp == NULL)
-    {
-      sprintf(abendMessage, "Device = %d", lun);
-      abend("Input file not open for reading");
-    }
-  s = nextBuffer();
-  if (fgets(s, sizeof(string_t), fp) == NULL) // End of file.
+    abend("Input file not open for reading: Device = %d", lun);
+  s = returnValue->bytes;
+  if (fgets(s, sizeof(returnValue->bytes), fp) == NULL) // End of file.
     {
       // McKeeman doesn't define how to detect an end-of-file on INPUT,
       // but sample program 6.18.4 detects it by finding an empty string.
@@ -2023,8 +1975,8 @@ INPUT(uint32_t lun) {
       // XCOM seems to expect that INPUT will silently reject all cards
       // with a non-blank in column 1, but doesn't seem to care whether
       // it does that or not, so I don't.
-      s[0] = 0;
-      return s;
+      returnValue->numBytes = strlen(s);
+      return returnValue;
     }
   s[strcspn(s, "\r\n")] = 0; // Strip off carriage-returns and/or line-feeds.
   // Since input is expected to be arriving on punch-cards, we want to
@@ -2055,25 +2007,26 @@ INPUT(uint32_t lun) {
           memmove(ss+1, ss+2, strlen(ss+2));
         }
     }
-  return s;
+  returnValue->numBytes = strlen(s);
+  return returnValue;
 }
 
 uint32_t
-LENGTH(char *s) {
-  return strlen(s);
+LENGTH(descriptor_t *s) {
+  return s->numBytes;
 }
 
-char *
-SUBSTR(char *s, int32_t start, int32_t length) {
-  char *returnValue = nextBuffer();
-  int len = strlen(s) - start;
+descriptor_t *
+SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
+  descriptor_t *returnValue = nextBuffer();
+  int len = s->numBytes - start;
   if (start < 0)
     {
       fflush(stdout);
       fprintf(stderr, "SUBSTR start position is < 0.\n");
       //exit(1); ***DEBUG***
       start = 0;
-      len = strlen(s) - start;
+      len = s->numBytes - start;
     }
   if (length < 0)
     {
@@ -2093,32 +2046,47 @@ SUBSTR(char *s, int32_t start, int32_t length) {
     {
       if (length > len)
         length = len;
-      strncpy(returnValue, &s[start], length);
-      returnValue[length] = 0;
+      strncpy(returnValue->bytes, &s->bytes[start], length);
+      returnValue->numBytes = length;
     }
   return returnValue;
 }
 
-char *
-SUBSTR2(char *s, int32_t start) {
-  return SUBSTR(s, start, strlen(s) - start);
+descriptor_t *
+SUBSTR2(descriptor_t *s, int32_t start) {
+  return SUBSTR(s, start, s->numBytes - start);
 }
 
 uint8_t
-BYTE(char *s, uint32_t index){
-  if (index >= strlen(s))
+BYTE(descriptor_t *s, uint32_t index){
+  if (index >= s->numBytes)
     {
       //fprintf(stderr, "BYTE retrieving past end of string (%d >= %d)\n",
       //                index, (int) strlen(s));
       //printBacktrace();
       return 0;
     }
+  if (s->type == ddCHARACTER)
+    return asciiToEbcdic[s->bytes[index]];
+  else // s->type == ddBIT
+    return s->bytes[index];
+}
+
+uint8_t
+BYTE1(descriptor_t *s) {
+  return BYTE(s, 0);
+}
+
+uint8_t
+BYTEliteral(char *s, uint32_t index) {
+  if (index >= strlen(s))
+    return 0;
   return asciiToEbcdic[s[index]];
 }
 
 uint8_t
-BYTE1(char *s) {
-  return BYTE(s, 0);
+BYTE1literal(char *s) {
+  return BYTEliteral(s, 0);
 }
 
 // `address` is the address of a string descriptor, including bit-strings.
@@ -2142,12 +2110,14 @@ lBYTEb(uint32_t address, int32_t index, uint8_t b) {
   memory[address] = b;
 }
 
+/* Superseded now that descriptor_t has replaced bit_t
 uint8_t
 BYTE2(bit_t *b, uint32_t index) {
   if (index >= b->numBytes)
     return 0;
   return b->bytes[index];
 }
+*/
 
 uint32_t
 SHL(uint32_t value, uint32_t shift) {
@@ -2173,15 +2143,13 @@ MONITOR0(uint32_t dev) {
 }
 
 uint32_t
-MONITOR1(uint32_t dev, char *name) {
+MONITOR1(uint32_t dev, descriptor_t *name) {
   int lenFile, lenPart;
   int existed;
   char *path = NULL;
   if (dev >= DD_MAX)
-    {
-      sprintf(abendMessage, "Device number = %d >= %d", dev, DD_MAX);
-      abend("Output device number out of range");
-    }
+    abend("Output device number out of range: Device number = %d >= %d",
+          dev, DD_MAX);
   if (DD_OUTS[dev] != NULL)
     {
       fflush(DD_OUTS[dev]);
@@ -2189,74 +2157,55 @@ MONITOR1(uint32_t dev, char *name) {
       DD_OUTS[dev] = NULL;
     }
   if (DD_OUTS_FILENAMES[dev] == NULL)
-    {
-      sprintf(abendMessage, "Device number = %d", dev);
-      abend("Attempt to use unassigned PDS file for output");
-    }
+    abend("Attempt to use unassigned PDS file for output: Device number = %d", dev);
   lenFile = strlen(DD_OUTS_FILENAMES[dev]);
   if (mkdir(DD_OUTS_FILENAMES[dev], 0777) < 0)
-    {
-      sprintf(abendMessage, "Device number %d, PDS = '%s'",
-            dev, DD_OUTS_FILENAMES[dev]);
-      abend("Unable to create PDS; note that PDS is implemented as a folder");
-    }
-  lenPart = strlen(name);
+    abend("Unable to create PDS; note that PDS is implemented as a folder: "
+          "Device number %d, PDS = '%s'", dev, DD_OUTS_FILENAMES[dev]);
+  lenPart = name->numBytes;
   if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
-    {
-      sprintf(abendMessage, "Device number %d, PDS = '%s', part = '%s'",
-            dev, DD_OUTS_FILENAMES[dev], name);
-      abend("PDS partitions must have names from 1-8 characters long");
-    }
+    abend("PDS partitions must have names from 1-8 characters long: "
+          "Device number %d, PDS = '%s', part = '%s'",
+          dev, DD_OUTS_FILENAMES[dev], name->bytes);
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
     abend("Out of memory in MONITOR(1)");
-  sprintf(path, "%s/%s", DD_OUTS_FILENAMES[dev], name);
-  strcpy(DD_OUTS_PARTNAMES[dev], name);
+  sprintf(path, "%s/%s", DD_OUTS_FILENAMES[dev], name->bytes);
+  strcpy(DD_OUTS_PARTNAMES[dev], name->bytes);
   existed = DD_OUTS_EXISTED[dev];
   DD_OUTS_EXISTED[dev] = (access(path, F_OK) == 0); // Partition already exists?
   DD_OUTS[dev] = fopen(path, "wt");
   free(path);
   if (DD_OUTS[dev] == NULL)
-    {
-      sprintf(abendMessage, "Device number %d, PDS = '%s'",
-            dev, DD_OUTS_FILENAMES[dev]);
-      abend("Cannot open PDS partition for OUTPUT");
-    }
+    abend("Cannot open PDS partition for OUTPUT: Device number %d, PDS = '%s'",
+          dev, DD_OUTS_FILENAMES[dev]);
   return existed;
 }
 
 uint32_t
-MONITOR2(uint32_t dev, char *name) {
+MONITOR2(uint32_t dev, descriptor_t *name) {
   int lenFile, lenPart;
   char *path = NULL;
   if (dev >= DD_MAX)
-    {
-      sprintf(abendMessage, "Device number %d >= %d", dev, DD_MAX);
-      abend("Input device number out of range");
-    }
+    abend("Input device number out of range: Device number %d >= %d", dev, DD_MAX);
   if (DD_INS[dev] != NULL)
     {
       fclose(DD_INS[dev]);
       DD_INS[dev] = NULL;
     }
   if (DD_INS_FILENAMES[dev] == NULL)
-    {
-      sprintf(abendMessage, "Device number %d", dev);
-      abend("Attempt to use unassigned PDS file for input");
-    }
+    abend("Attempt to use unassigned PDS file for input: Device number %d", dev);
   lenFile = strlen(DD_INS_FILENAMES[dev]);
-  lenPart = strlen(name);
+  lenPart = name->numBytes;
   if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
-    {
-      sprintf(abendMessage, "Device number %d, PDS = '%s', part = '%s'",
-            dev, DD_INS_FILENAMES[dev], name);
-      abend("PDS partitions must have names from 1-8 characters long");
-    }
+    abend("PDS partitions must have names from 1-8 characters long: "
+          "Device number %d, PDS = '%s', part = '%s'",
+          dev, DD_INS_FILENAMES[dev], name->bytes);
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
     abend("Out of memory in MONITOR(2)");
-  sprintf(path, "%s/%s", DD_INS_FILENAMES[dev], name);
-  strcpy(DD_INS_PARTNAMES[dev], name);
+  sprintf(path, "%s/%s", DD_INS_FILENAMES[dev], name->bytes);
+  strcpy(DD_INS_PARTNAMES[dev], name->bytes);
   DD_INS[dev] = fopen(path, "rt");
   free(path);
   if (DD_INS[dev] == NULL)
@@ -2456,7 +2405,7 @@ MONITOR9(uint32_t op) {
 }
 
 uint32_t
-MONITOR10(char *name) {
+MONITOR10(descriptor_t *name) {
   abend("MONITOR(10) not yet implemented");
 }
 
@@ -2464,20 +2413,20 @@ void
 MONITOR11(void) {
 }
 
-char *
+descriptor_t *
 MONITOR12(uint32_t precision) {
   abend("MONITOR(12) not yet implemented");
 }
 
 optionsProcessor_t *USEROPT = NULL;
 uint32_t
-MONITOR13(char *namep) {
+MONITOR13(descriptor_t *namep) {
   // First get rid of trailing spaces in the `name`.
   char *s;
-  char name[128];
+  sbuf_t name;
   FILE *f;
 
-  strcpy(name, namep);
+  strncpy(name, namep->bytes, namep->numBytes);
   for (s = name; *s != 0 && !isspace(*s); s++);
   *s = 0;
   if (strlen(name) == 0)
@@ -2512,10 +2461,8 @@ MONITOR13(char *namep) {
       optionsProcessor = USEROPT;
     }
   else
-    {
-      sprintf(abendMessage, "Options processor '%s'", name);
-      abend("Unrecognized options processor for MONITOR(13)");
-    }
+    abend("Unrecognized options processor for MONITOR(13): "
+          "Options processor '%s'", name);
   parseParmField(0);
   // Save the parameters in a file.
   f = fopen("monitor13.parms", "w");
@@ -2541,7 +2488,7 @@ MONITOR16(uint32_t n) {
 }
 
 void
-MONITOR17(char *name) {
+MONITOR17(descriptor_t *name) {
   abend("MONITOR(17) not yet implemented");
 }
 
@@ -2579,7 +2526,7 @@ MONITOR22A(uint32_t n2) {
   abend("MONITOR(22,0) not yet implemented");
 }
 
-char *
+descriptor_t *
 MONITOR23(void) {
   return getCHARACTER(WHERE_MONITOR_23);
 }
@@ -2725,19 +2672,12 @@ uint32_t
 ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
   int address = rawADDR(bVar, bIndex, fVar, fIndex);
   if (address == -1)
-    {
-      sprintf(abendMessage, "bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
-              bVar, bIndex, fVar, fIndex);
-        abend("ADDR() not found");
-      abend("ADDR() not found for BASED");
-    }
+    abend("ADDR() not found for BASED: bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
+          bVar, bIndex, fVar, fIndex);
   if (address == -2)
-    {
-      sprintf(abendMessage, "bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
-              bVar, bIndex, fVar, fIndex);
-        abend("ADDR() not found");
-      abend("Could not find the specified BASED variable field");
-    }
+    abend("Could not find the specified BASED variable field: "
+          "bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
+          bVar, bIndex, fVar, fIndex);
   if (address == -3)
     {
       // This could have been a lookup of a LABEL, supporting an INLINE.  If so,
@@ -2749,9 +2689,8 @@ ADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
           //fprintf(stderr, "FYI: Lookup ADDR(%s)\n", fVar);
           return 0;
         }
-      sprintf(abendMessage, "bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
-              bVar, bIndex, fVar, fIndex);
-        abend("ADDR() not found");
+      abend("ADDR() not found: bVar=%s, bIndex=%d, fVar=%s, fIndex=%d",
+            bVar, bIndex, fVar, fIndex);
     }
   return address;
 }
@@ -3109,7 +3048,7 @@ writeCOMMON(FILE *fp) {
           if (!strcmp(datatype, "CHARACTER"))
             {
               fprintf(fp, "-\t%s\t%d\t%s\t", symbol, j, datatype);
-              fprintf(fp, "'%s'\n", getCHARACTER(address));
+              fprintf(fp, "'%s'\n", getCHARACTER(address)->bytes);
               address += dirWidth;
             }
           else if (!strcmp(datatype, "FIXED") || !strcmp(datatype, "BIT"))
@@ -3141,7 +3080,7 @@ writeCOMMON(FILE *fp) {
                           !strcmp(basedDatatype, "BIT"))
                         fprintf(fp, "%08X\n", getFIXED(address));
                       else if (!strcmp(basedDatatype, "CHARACTER"))
-                        fprintf(fp, "'%s'\n", getCHARACTER(address));
+                        fprintf(fp, "'%s'\n", getCHARACTER(address)->bytes);
                       else
                         fprintf(fp, "\n");
                     }
@@ -3157,8 +3096,8 @@ int
 readCOMMON(FILE *fp) {
   char line[1024];
   int index, ivalue, fieldIndex, allocated;
-  char svalue[sizeof(string_t) + 100];
-  string_t symbol, field;
+  char svalue[sizeof(sbuf_t) + 100];
+  sbuf_t symbol, field;
 
   // Read the COMMON file and process it line by line.
   while (NULL != fgets(line, sizeof(line), fp))
@@ -3169,7 +3108,8 @@ readCOMMON(FILE *fp) {
                       field, &fieldIndex, svalue))
         {
           svalue[strlen(svalue) - 1] = 0; // Get rid of trailing '
-          putCHARACTER(ADDR(NULL, 0, field, fieldIndex), svalue);
+          putCHARACTER(ADDR(NULL, 0, field, fieldIndex),
+                       cToDescriptor(NULL, svalue));
         }
       else if (3 == sscanf(line, "-\t%s\t%d\tFIXED\t%X",
                       field, &fieldIndex, &ivalue))
@@ -3190,7 +3130,8 @@ readCOMMON(FILE *fp) {
                       field, &fieldIndex, svalue))
         {
           svalue[strlen(svalue) - 1] = 0; // Get rid of trailing '
-          putCHARACTER(ADDR(symbol, index, field, fieldIndex), svalue);
+          putCHARACTER(ADDR(symbol, index, field, fieldIndex),
+                       cToDescriptor(NULL, svalue));
         }
       else if (3 == sscanf(line, ".\t%s\t%d\tFIXED\t%X",
                       field, &fieldIndex, &ivalue))
@@ -3202,7 +3143,8 @@ readCOMMON(FILE *fp) {
                       svalue))
         {
           svalue[strlen(svalue) - 1] = 0; // Get rid of trailing '
-          putCHARACTER(ADDR(symbol, index, NULL, 0), svalue);
+          putCHARACTER(ADDR(symbol, index, NULL, 0),
+                       cToDescriptor(NULL, svalue));
         }
       else if (1 == sscanf(line, ".\t\t0\tFIXED\t%X",
                       &ivalue))
@@ -3269,19 +3211,19 @@ FREEBASE(void) {
 
 void
 EXIT(void) {
-  OUTPUT(0, "");
+  OUTPUT(0, nextBuffer());
   exit(10);
 }
 
 void
 LINK(void) {
-  OUTPUT(0, "");
+  OUTPUT(0, nextBuffer());
   exit(0);
 }
 
-char *
+descriptor_t *
 PARM_FIELD(void) {
-  return parmField;
+  return cToDescriptor(NULL, parmField);
 }
 
 uint32_t
@@ -3304,7 +3246,7 @@ NDESCRIPT(void) {
 int outUTF8;
 FILE *DD_INS[DD_MAX];
 FILE *DD_OUTS[DD_MAX];
-typedef char string_t[MAX_XPL_STRING + 1];
+typedef char sbuf_t[MAX_XPL_STRING + 1];
 uint8_t memory[MEMORY_SIZE];
 
 int

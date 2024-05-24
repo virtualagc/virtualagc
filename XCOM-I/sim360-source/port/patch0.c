@@ -44,7 +44,8 @@ if (mapCP == NULL)
   }
 
 TABLE = getFIXED(mapTABLE->address);
-TEXT = getCHARACTER(mapTEXT->address);
+TEXT = getCHARACTER(mapTEXT->address)->bytes;
+
 if (*TEXT == 0)
   return fixedToBit(1, 0);
 if (TABLE == mapBLANKTABLE->address)
