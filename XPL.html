@@ -495,7 +495,8 @@ Suppose for example that we had an XPL program called <b>X</b> that was a compil
 an IBM 360).  But it's also true that if we use that native version of <b>X</b> to compile source-code in the X language, say for a program called <b>Y</b>, then the output of the compiler will still be an object file for the IBM 360.  So we still wouldn't be able to run <b>Y</b> on our native computer, and would still need an IBM 360 to run <b>Y</b>.<br></p>
 <p>Which means that even with <b>XCOM-I</b> in hand, it's still very useful to have an IBM 360 emulator in which to run not the programs <i>produced</i> by <b>XCOM-I</b>, but the programs produced by the compilers produced by <b>XCOM-I</b>.<br></p>
 <p>If you're already an IBM 360 expert or a wannabe IBM 360 user, then perhaps a full-scale IBM System/360 emulator such as <a moz-do-not-send="true" href="http://www.hercules-390.org/">Hercules</a>
- might work well for you.  As for myself, I'm neither a 360 expert nor 
+ might work well for you.  As for myself, having tried to figure out 
+Hercules, I have to concede that I'm neither a 360 expert nor 
 wannabe, and have no desire to confront that learning curve.  I'd much 
 prefer a <i>lightweight</i> IBM 360 emulator, with essentially no 
 learning curve at all.  (And a lightweight emulator is far more in line 
@@ -535,7 +536,7 @@ along-side your compiled XPL program on the emulator.&nbsp; Fortunately,
   <ul>
     <li><font size="-1">For McKeeman's <b>XCOM</b>, it's <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/XPL-TWS-1969-03/XMON.bal">XMON.bal</a>.</font></li>
     <li><font size="-1">For SUNY's <b>XCOM</b> 4.5, which we've not discussed yet but which we'll get to in the next section, it's the slightly-different <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/XPLSM4.5.bal">XPLSM.bal</a>.</font></li>
-    <li><font size="-1">And similarly for SUNY's <b>XCOM</b> 4.5w3, it's <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/xplsm.asm">xplsm.asm</a>.</font></li>
+    
     <li><font size="-1">For Intermetrics's unavailable <b>XCOM</b>, it's the collection of BAL source-code files known as <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/MONITOR.ASM">MONITOR.ASM</a>.&nbsp; You may wonder why that matters, given that the source code for the Intermetrics version of <b>XCOM</b> has not survided, and thus we couldn't run it anyway?&nbsp; (After all, the whole point of <b>XCOM-I</b> in the first place is to fill in for the missing Intermetrics <b>XCOM</b>, and <b>XCOM-I</b> needs no submonitor!)&nbsp; Well presumably, if we compile HAL/S source code (like PFS or BFS) using <b>HAL/S-FC</b>, we'd expect PFS or BFS to need the same submonitor as the Intermetrics <b>XCOM</b> would have.&nbsp; Probably.&nbsp; Or at least, maybe!<br>
       </font></li>
   </ul>
@@ -594,7 +595,7 @@ The command-line switches for <b>sim360</b> probably look mysterious, but they'r
 <h2><a name="compilingXCOM"></a>Insane Bootstrapping!</h2>
 For the still meatier example that I promised (threatened?) earlier, here it is with a vengeance!&nbsp; We're going try <i>bootstrapping</i>
  some XPL compilers.&nbsp; Although up to now I've only spoken of one 
-pure-XPL compiler, we happen to have XPL source code for three related 
+pure-XPL compiler, we happen to have XPL source code for two related 
 but different XPL compilers:<br>
 <ul>
   <li>McKeeman <i>et al.</i>'s XCOM, from the book <i>A Compiler Generator</i>, is what I've spoken of so often above.&nbsp; In our software repository, the source code consists of <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/Tests/XCOM.xpl">XCOM.xpl</a>, which contains the source code for XCOM proper, and the file <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/XPL.LIBRARY.xpl">XPL.LIBRARY.xpl</a>, which contains the source code for <a moz-do-not-send="true" href="#compactify">the <font color="#663300"><code>COMPACTIFY</code></font> procedure</a>.&nbsp;
@@ -602,16 +603,14 @@ but different XPL compilers:<br>
 implying that there were earlier major versions as well, to which we're 
 not privy.&nbsp; For clarity in this discussion, I'll start referring to it as <u><b>XCOM3</b></u>.</li>
   <li>SUNY's (State University of New York, Stonybrook) XCOM version 4.5 has been taken from <a moz-do-not-send="true" href="https://sourceforge.net/projects/suny-pascal/">Daniel Weaver's website</a>; in the Virtual AGC software repository, the source code consists of the files <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/xcom4.xpl">XCOM4.5.xpl</a> (for XCOM proper) and <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/XPLIB4.5.xpl">XPLIB4.5.xpl</a> (for <font color="#663300"><code>COMPACTIFY</code></font>).&nbsp; The materials we have
- are from 1976 and 1977.&nbsp; Interestingly, the distribution contains an 
-IBM 360 executable load file as well, which I call <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/XCOM4-1976.obj">XCOM45-19760719.obj</a>, that can be run in <b>sim360</b> (see the preceding section).&nbsp; For clarity, I'll refer to this this version of the compiler as <u><b>XCOM45</b></u> from now on.<br>
+ are from 1976 or 1977.&nbsp; Interestingly, the distribution contains an 
+IBM 360 executable load file as well, which I call <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/XCOM4-1976.obj">XCOM45-19760719.obj</a>, that can be run in <b>sim360</b> (see the preceding section).&nbsp; For clarity, I'll refer to this version of the compiler as <u><b>XCOM45</b></u>
+ from now on.&nbsp; (Don't be confused by a different XCOM version with 
+the source-code file xcom4.xpl on Dan's site; it's not a legacy program,
+ but one which has modern modifications to XCOM45 that are of no concern
+ to us here.)<br>
   </li>
-  <li>SUNY's (State University of New York, Stonybrook) XCOM version 
-4.5w3 has also been taken from Dan's website; in the Virtual AGC 
-software repository, the source code consists of the files <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/xcom4.xpl">xcom4.xpl</a> (for XCOM proper) and <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/xplib.xpl">xplib.xpl</a> (for <font color="#663300"><code>COMPACTIFY</code></font>).&nbsp; For clarity, I'll call this version of the compiler <u><b>XCOM45w3</b></u> from now on.&nbsp; (<b>Note:&nbsp;</b>
- XCOM45w3 is <i>not</i> an original file from the 1970's.&nbsp; Rather it's a 
-form of XCOM45 with modern editing.&nbsp; So if it 
-turns out that it can't be bootstrapped, it's hardly anything to worry about.)<br>
-  </li>
+  
 </ul>
 Also from now on, if I'm speaking generically about any of these old compilers, I'll simply refer to <b>XCOM<i>x</i></b>.<br>
 <br>
@@ -697,13 +696,13 @@ Object Files <br>
         </font></td>
       <td valign="middle" align="center"><font color="#009900"><b>XCOM-I.py</b><b><br>
           </b></font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#009900">No</font><font color="#009900"><br>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#009900">No</font><font color="#009900"><br>
         </font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#009900">Yes</font><font color="#009900"><br>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#009900">Yes</font><font color="#009900"><br>
         </font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#009900">XPL, ASCII coding</font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#009900">IBM 360 load file</font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#009900">EBCDIC</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#009900">XPL, ASCII coding</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#009900">IBM 360 load file</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#009900">EBCDIC</font></td>
     </tr>
     <tr>
       <td valign="middle" align="center"><font color="#009900"><b>XCOM45-native</b></font></td>
@@ -712,62 +711,45 @@ Object Files <br>
       <td valign="middle" align="center"><font color="#009900"><b>XCOM-I</b><b>.py<br>
           </b></font></td>
     </tr>
-    <tr>
-      <td valign="middle" align="center"><font color="#009900"><b>XCOM45w3-native</b></font></td>
-      <td valign="middle" align="center"><font color="#009900">xcom4.xpl, xplib.xpl</font></td>
-      <td valign="middle" align="center"><font color="#009900"><b>XCOM-I</b><b>.py<br>
-          </b></font></td>
-    </tr>
+    
     <tr>
       <td valign="middle" align="center"><font color="#cc9933"><b>XCOM3-360</b><b>.obj<br>
           </b></font></td>
       <td valign="middle" align="center"><font color="#cc9933">XCOM.xpl, XPL.LIBRARY.xpl</font></td>
       <td valign="middle" align="center"><font color="#cc9933"><b>XCOM3-native</b><b><br>
           </b></font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#cc9933">Yes</font><font color="#cc9933"><br>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#cc9933">Yes</font><font color="#cc9933"><br>
         </font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#cc9933">Only under <b>sim360</b> or similar</font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#cc9933">XPL, EBCDIC coding</font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#cc9933">IBM 360 load file</font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#cc9933">EBCDIC</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#cc9933">Only under <b>sim360</b> or similar</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#cc9933">XPL, EBCDIC coding</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#cc9933">IBM 360 load file</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#cc9933">EBCDIC</font></td>
     </tr>
     <tr>
       <td valign="middle" align="center"><font color="#cc9933"><b>XCOM45-360.obj</b></font></td>
       <td valign="middle" align="center"><font color="#cc9933">XCOM4.5.xpl, XPLIB4.5.xpl</font></td>
       <td valign="middle" align="center"><font color="#cc9933"><b>XCOM45-native</b></font></td>
     </tr>
-    <tr>
-      <td valign="middle" align="center"><font color="#cc9933"><b>XCOM45w3-360</b><b>.obj<br>
-          </b></font></td>
-      <td valign="middle" align="center"><font color="#cc9933">xcom4.xpl, xplib.xpl</font></td>
-      <td valign="middle" align="center"><font color="#cc9933"><b>XCOM45w3-native</b><b><br>
-          </b></font></td>
-    </tr>
+    
     <tr>
       <td valign="middle" align="center"><font color="#000099"><b>XCOM3-360A</b><b>.obj</b><br>
         </font></td>
       <td valign="middle" align="center"><font color="#000099">XCOM.xpl, XPL.LIBRARY.xpl</font></td>
       <td valign="middle" align="center"><font color="#000099"><b>XCOM3-360</b><b>.obj<br>
           </b></font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#000099">Yes<br>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#000099">Yes<br>
         </font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#000099">Only under <b>sim360</b> or similar</font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#000099">XPL, EBCDIC coding</font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#000099">IBM 360 load file</font></td>
-      <td rowspan="3" colspan="1" valign="middle" align="center"><font color="#000099">EBCDIC</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#000099">Only under <b>sim360</b> or similar</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#000099">XPL, EBCDIC coding</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#000099">IBM 360 load file</font></td>
+      <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#000099">EBCDIC</font></td>
     </tr>
     <tr>
       <td valign="middle" align="center"><font color="#000099"><b>XCOM45-360A.obj</b></font></td>
       <td valign="middle" align="center"><font color="#000099">XCOM4.5.xpl, XPLIB4.5.xpl</font></td>
       <td valign="middle" align="center"><font color="#000099"><b>XCOM45-360.obj</b></font></td>
     </tr>
-    <tr>
-      <td valign="middle" align="center"><font color="#000099"><b>XCOM45w3-360A</b><b>.obj<br>
-          </b></font></td>
-      <td valign="middle" align="center"><font color="#000099">xcom4.xpl, xplib.xpl</font></td>
-      <td valign="middle" align="center"><font color="#000099"><b>XCOM4w3-360.obj</b><b><br>
-          </b></font></td>
-    </tr>
+    
   </tbody>
 </table>
 <br>
@@ -793,15 +775,7 @@ For <b>XCOM45</b>:<br>
 make -C XCOM45-native
 </font></pre>
 
-</blockquote>
-
-For <b>XCOM45w3</b>:<br>
-
-
-<blockquote>
-  <pre><font color="#663300">XCOM-I.py --xpl --lib-file=sim360-source/port/xplib.xpl --output=XCOM45w3-native sim360-source/port/xcom4.xpl
-make -C XCOM45w3-native
-</font></pre>
+</blockquote><blockquote>
 
 </blockquote>
 
@@ -849,7 +823,7 @@ The Virtual AGC Project (2024)<br>
   </tbody>
 </table>
 <br>
-As for a similar check of <b>XCOM45-native</b> there is a possible way, and we'll get to in a minute.&nbsp; Of course, there's <i>no</i> way to perform any equivalent checks on the behavior of <b>XCOM4</b><b>5w3-native</b>, since it source code isn't from the 1970's anyway.<br>
+As for a similar check of <b>XCOM45-native</b> there is a possible way, and we'll get to in a minute.&nbsp; <br>
 
 
 <h3>Step 2:&nbsp; Compiling XCOM<i>x</i> source code with XCOM<i>x</i>-native to produce XCOM<i>x</i>-360</h3>
@@ -865,18 +839,7 @@ For <b>XCOM45</b>:<br>
 <blockquote>
   <pre><font color="#663300">XCOM45-native/XCOM45-native --ddi=0,sim360-source/port/XCOM4.5.xpl</font><font color="#663300"> --ddi=2,sim360-source/port/XPLIB4.5.xpl --raf=B,7200</font><font color="#663300"><font color="#663300">,1</font>,XCOM45-360.obj --raf=B,7200</font><font color="#663300"><font color="#663300">,2</font>,</font><font color="#663300">XCOM45-360</font><font color="#663300">.dat --raf=B,7200</font><font color="#663300"><font color="#663300">,3</font>,</font><font color="#663300"><font color="#663300">XCOM45-360</font>.str &gt;XCOM45-360.rpt</font></pre>
 
-</blockquote>
-
-
-
-For <b>XCOM45w3</b>:<br>
-
-
-<blockquote>
-  <pre><font color="#663300">XCOM45w3-native/XCOM45w3-native --ddi=0,sim360-source/port/xcom4.xpl</font><font color="#663300"> --ddi=2,sim360-source/port/xplib.xpl --raf=B,7200</font><font color="#663300"><font color="#663300">,1</font>,XCOM45w3-360.obj --raf=B,7200</font><font color="#663300"><font color="#663300">,2</font>,</font><font color="#663300">XCOM45w3-360</font><font color="#663300">.dat --raf=B,7200</font><font color="#663300"><font color="#663300">,3</font>,</font><font color="#663300"><font color="#663300">XCOM45w3-360</font>.str &gt;XCOM45w3-360.rpt</font></pre>
-
-</blockquote>
-As you can see, this involves a bit of command-line complexity that step
+</blockquote>As you can see, this involves a bit of command-line complexity that step
  1 did not.&nbsp; The command-line options are all there to compensate 
 for the lack of Job Control Language (JCL), and in particular to provide
  replacements for missing <font color="#663300"><code>DD</code></font> statements.&nbsp; For one thing, there's an extra file which 
@@ -889,7 +852,7 @@ those files.&nbsp; (Refer to <a moz-do-not-send="true" href="#file">the <font co
   <li><font color="#663300"><code>FILE(3)</code></font> — A scratch file for strings.</li>
 </ul>
 As far as the numbers 3600 or 7200 appearing in the command line, <b>XCOM<i>x</i></b> uses a hard-coded constant to determine the record sizes for
- these random-access files, which happens to have the default value of <font color="#663300"><code>DISKBYTES=3600</code></font> for <b>XCOM3</b>, but <font color="#663300"><code>DISKBYTES=7200</code></font> for <b>XCOM45</b> and <b>XCOM45w3</b>.<br>
+ these random-access files, which happens to have the default value of <font color="#663300"><code>DISKBYTES=3600</code></font> for <b>XCOM3</b>, but <font color="#663300"><code>DISKBYTES=7200</code></font> for <b>XCOM45</b>.<br>
 <blockquote>
   <font size="-1"><b>Aside:</b>&nbsp; Incidentally, McKeeman's <b>XCOM3</b>
  has plenty of quirks specific to it, quite aside from any quirks XPL 
@@ -932,8 +895,7 @@ explanation.&nbsp; <i>Perhaps</i> it's an <b>XCOM-I</b> bug, but perhaps it's ju
   <li>Bootstrapping <b>XCOM3</b> fails, because <b>XCOM3-360</b> fails to build <b>XCOM3-360A</b> at all.&nbsp; The solution or explanation is TBD.<br>
   </li>
   <li>Bootstrapping <b>XCOM45</b> succeeds!</li>
-  <li>Bootstrapping <b>XCOM45w3</b> fails: <b>XCOM3-360</b> builds <b>XCOM3-360A</b> without errors, but the two load files aren't identical.&nbsp; But ... so what?&nbsp; <b>XCOM45w3</b> isn't from the 1970's anyway, and there was no reason to expect that it could self-build in the first place.<br>
-  </li>
+  
 </ul>
 The long answer is as follows.&nbsp; First, as usual, the build instructions.<br>
 <br>
@@ -945,49 +907,36 @@ For <b>XCOM3</b>:
 </blockquote>For <b>XCOM45</b>:<br>
 <blockquote>
   <pre><font color="#663300">sim360 --size=7200</font><font color="#663300"><font color="#663300"> -o0ET stdout </font>-i0AT sim360-source/port/XCOM4.5.xpl -i2AT </font><font color="#663300"><font color="#663300">sim360-source/port/</font>XPLIB4.5.xpl -f1wb+ XCOM45-360A.obj -f2wb+ XCOM45-360A.dat -f3wb+ XCOM45-360A.str XCOM45-360.obj</font></pre>
-</blockquote>
-For <b>XCOM45w3</b>:<br>
-
-<blockquote>
-  <pre><font color="#663300">sim360 --size=7200</font><font color="#663300"><font color="#663300"> -o0ET stdout </font>-i0AT sim360-source/port/xcom4.xpl -i2AT </font><font color="#663300"><font color="#663300">sim360-source/port/</font>xplib.xpl -f1wb+ XCOM45w3-360A.obj -f2wb+ XCOM45w3-360A.dat -f3wb+ XCOM45w3-360A.str XCOM45w3-360.obj</font></pre>
-</blockquote>
-
-These command-line switches differ in detail from the ones we had to with <b>XCOM<i>x</i>-native</b>, but I think you can see that they're just the same old replacements for JCL <font color="#663300"><code>DD</code></font> commands in a different syntax.<br>
+</blockquote>These command-line switches differ in detail from the ones we had to with <b>XCOM<i>x</i>-native</b>, but I think you can see that they're just the same old replacements for JCL <font color="#663300"><code>DD</code></font> commands in a different syntax.<br>
 <br>
 For this denouement of the bootstrapping progress, what are the results?<br>
-<br>
-For <b>XCOM3</b>:&nbsp; Unfortunately, the build of XCOM3-360A 
-fails!&nbsp; No object file is produced, and hence we cannot perform a 
-comparison at all!<br>
-<br>
-For <b>XCOM45</b>:&nbsp; The build of XCOM45-360A.obj succeeds with no errors.&nbsp; If <b>XCOM45</b>
- has successfully built itself, we should find that XCOM45-360.obj and 
-XCOM45-360A.obj are byte-for-byte identical, except that the embedded 
-timestamps for the compile-time will differ.&nbsp; (And of course, if we
+<br>For <b>XCOM45</b>:&nbsp; The build of <b>XCOM45-360A.obj</b> succeeds with no errors.&nbsp; If <b>XCOM45</b>
+ has successfully built itself, we <i>should</i> find that <b>XCOM45-360.obj</b> and 
+<b>XCOM45-360A.obj</b> are byte-for-byte identical, except that the embedded 
+timestamps for the compile-times will differ.&nbsp; (And of course, if we
  built them on different days, then the embedded datestamp would differ 
 as well.)&nbsp; To perform this comparison, I made hexadecimal dumps of 
 the two object files, and then used a file-comparison utility to compare
- the hex dumps.&nbsp; Here's a screenshot of the <i>only</i> difference found between the two files, with XCOM45-360.obj on the left and XCOM45-360A.obj on the right:<br>
+ the hex dumps.&nbsp; Here's a screenshot of the <i>only</i> difference found between the two files, with <b>XCOM45-360.obj</b> on the left and <b>XCOM45-360A.obj</b> on the right:<br>
 <br>
 <img moz-do-not-send="true" src="XCOM45-360-meld.png" alt="" width="1580" height="89"><br>
 <br>
-What are the 3 bytes that are different?&nbsp; Well, XCOM45-360.obj was 
+What are the 3 bytes that are different?&nbsp; Well, <b>XCOM45-360.obj</b> was 
 built (according to the report it prints out) at time 19:53.37.27, while
- XCOM45-360A.obj was built at 17:5:6.24.&nbsp; Now, XCOM gets the 
+<b> XCOM45-360A.obj</b> was built at 17:5:6.24.&nbsp; Now, XCOM gets the 
 compile time using <a moz-do-not-send="true" href="#builtin">the built-in function <font color="#663300"><code>TIME_OF_GENERATION</code></font></a>,
  which returns the number of centiseconds since midnight.&nbsp; For 
-XCOM45-360.obj, that computes to 
+<b>XCOM45-360.obj</b>, that computes to 
 100*(19*3600+60*53+37.27)=7161727=0x6D477F.&nbsp; Similarly, for 
-XCOM45-360A.obj, 100*(17*3600+5*60+6.24)=6150624=0x5DD9E0, which 
+<b>XCOM45-360A.obj</b>, 100*(17*3600+5*60+6.24)=6150624=0x5DD9E0, which 
 (surprise!) matches the screenshot above.&nbsp; (Recall that these IBM 
-360 programs all store their integer data in <i>big-endian</i> form, so that the most-significant bytes come first in memory.)<br>
+360 programs all store their integer data in <i>big-endian</i> form, so that the most-significant bytes come first in memory.)&nbsp; In short, <b>XCOM45</b><b>-360.obj</b> can indeed accurately build itself, and bootstrapping <b>XCOM45</b> has been 100% successful!<br>
 <br>
-For <b>XCOM45w3</b>:&nbsp; The build of XCOM45w3-360A.obj also succeeds 
-with no errors.&nbsp; There is indeed a difference in the embedded 
-timestamp.&nbsp; But there are other differences too!&nbsp; The biggest 
-difference is what appears to be a large block of initialization data at
- the end of the file, a lot of which differs by having values that are 
-off by 1 or addresses that are off by 1.<br>
+For <b>XCOM3</b>:&nbsp; Unfortunately, the build of <b>XCOM3-360A.obj </b>
+fails!&nbsp; Due to compile-time errors no object file is produced, and hence we cannot perform a 
+comparison at all.&nbsp; This is a problem which, unfortunately, I'm still investigating.<br>
+
+<br>
 <blockquote>
 </blockquote>
 <h2><a name="halsfc"></a>Compiling and Running HAL/S-FC</h2>
@@ -2170,8 +2119,8 @@ many different programs under discussion, and all or most of them have
 their own sets of program options, or sometimes even their own unique 
 ways of specifying those options.  There's <b>XCOM-I</b>, whose program options you can discover with the command "<font color="#663300"><code>XCOM-I.py --help</code></font>".  Then too, when you use <b>XCOM-I</b> to compile an XPL or XPL/I program, <b>XCOM-I</b> endows the executables it produces with a uniform set of options; if (say) you had compiled an XPL program such as <i>MyProgram</i>.xpl, via a command like "<font color="#663300"><code>XCOM-I.py <i>MyProgram</i>.xpl</code></font>", you could find out what <i><b>MyProgram</b></i>'s uniform options were with the command "<i>MyProgram</i> --help".<br></p>
 <p>But that tells us only about options that are the same in all 
-programs of the XCOM-Iverse.  What about options that influence the XPL 
-or XPL/I program itself?  What options specific to <i>MyProgram</i>.xpl are there, and how can those options be selected?<br></p>
+programs of the XCOM-iverse.  What about options that influence the XPL 
+or XPL/I program itself in program-specific ways?  What options specific to <i>MyProgram</i>.xpl are there, and how can those options be selected?<br></p>
 <p>Originally, programs run on the IBM 360 would have been associated 
 with Job Control Language (JCL) cards that (among other things) would 
 have set the program options via what's called the "PARM field".  For 
@@ -2224,29 +2173,15 @@ default value is an empty string, meaning "don't override" the default
 company name, but in this case I've overridden it via a PARM field of <font color="#663300"><code>--parm='TITLE=T H E&nbsp;&nbsp; V I R T U A L&nbsp;&nbsp; A G C&nbsp;&nbsp; P R O J E C T'</code></font>.&nbsp;
  Notice that parameters whose values are strings are not enclosed in 
 quotes, which might mean that a string parameter such as this one cannot
- contain a comma.<br>
-<blockquote><font size="-1"><b>Aside:</b>&nbsp;  The default company name is the very solid-sounding <font color="#663300"><code>'T I T A N&nbsp; S Y S T E M S&nbsp; C O R P .'</code></font>.
- &nbsp;
- That, by the way, is a real company that really had something to do 
-with the Shuttle program. Or at least, the company name does appear 
-occasionally in documents.&nbsp; But never in any way that would lead me
- to believe that the company was somehow involved in development or use 
-of a HAL/S compiler.&nbsp; Possibly the copy of HAL/S-FC source code we 
-have is simply one that had been personalized in this way as a marketing
- tool for a sales effort targeted at Titan Systems Corp.&nbsp; I won't 
-lose sleep over it, but it would be mildly interesting to know why the 
-company name appears here.</font><br>
-</blockquote>
-
-
+ contain a comma.<br><br>
 In addition to Type 1 and Type 2, parameters are also categorized as <i>printable</i> or <i>unprintable</i>.&nbsp;
  The only distinction is that "printable" ones are printed out on the 
 first page of the output listing, and the "unprintable" ones are 
-not.&nbsp; It other words, there a lots of other parameters whose values <i>aren't</i> shown in the sample printout above.&nbsp; So there are actually 3 separate categories of parameters:&nbsp; Type 1 
+not.&nbsp; In other words, there a lots of other parameters whose values <i>aren't</i> shown in the sample printout above.&nbsp; So there are actually 3 separate categories of parameters:&nbsp; Type 1 
 printable, Type 1 unprintable, and Type 2 printable.&nbsp; (While in 
-principle there are Type 2 unprintable also, there are none presently 
+principle there are Type 2 unprintable parameters also, there are none presently 
 defined in any existing options processor.)<br>
-<blockquote><font size="-1"><b>Aside:</b> There are several exceptions too.  The parameter <font color="#009900"><code>LFXI</code></font> / <font color="#009900"><code>NOLFXI</code></font> is categorized as "non-printable" and yet special code is inserted into <b>HAL/S-FC</b> to make it print anyway; the comments in the code explicitly say so.  The same section of code, on the other hand, explicitly <i>prevents</i> printing of the parameters <font color="#009900"><code>QUASI</code></font> and <font color="#009900"><code>TRACE</code></font>, even though they're categorized as printable. </font><br>
+<blockquote><font size="-1"><b>Aside:</b> There are several exceptions too.  The parameter <font color="#009900"><code>LFXI</code></font> / <font color="#009900"><code>NOLFXI</code></font> is categorized as "non-printable" and yet special code was apparently inserted into <b>HAL/S-FC</b> to make it print anyway; the comments in the code explicitly say so.  The same section of code, on the other hand, explicitly <i>prevents</i> printing of the parameters <font color="#009900"><code>QUASI</code></font> and <font color="#009900"><code>TRACE</code></font>, even though they're categorized as printable. </font><br>
 </blockquote>
 I should note that not all of the parameters are documented ... though I
  suppose by now you probably shouldn't be very surprised by that.&nbsp; 
@@ -2263,7 +2198,8 @@ parsed contents to the XPL/I program.&nbsp; These options processors are
  specific to the XPL/I program you're compiling.&nbsp; The existing 
 options processors built into the runtime library go by the names<br>
 <ul>
-  <li>COMPOPT</li>
+  <li>COMPOPT (default)<br>
+</li>
   <li>LISTOPT</li>
   <li>MONOPT<br></li>
 </ul>
@@ -2906,28 +2842,61 @@ BFS<br>
   </tbody>
 </table>
 <br>
-<blockquote>
-  <font size="-1"><b>Aside:</b>&nbsp; In addition to these named parameters, <a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/Shuttle/19760020796.pdf#page=830">early documentation</a> indicates that <i>control toggles</i>
+<br>
+In addition to these named parameters, <a moz-do-not-send="true" href="https://www.ibiblio.org/apollo/Shuttle/19760020796.pdf#page=830">early documentation</a> indicates that <i>control toggles</i>
  can also appear in the PARM field.&nbsp; Control toggles are 
 two-character strings which normally would be embedded in program 
 comments.&nbsp; Generally speaking, program comments are ignored by 
 compilers.&nbsp; But when these particular two-character strings are 
 found within a program comment of an XPL program, they are used to 
 enable certain program features from the point they appear until a 
-countermanding control toggle is found.&nbsp; For example, McKeeman <b>XCOM</b>
- supports the control toggles "$T", "$U", and "$|".&nbsp; If control 
+countermanding control toggle is found.&nbsp; The control toggles I'm aware of that were supported by one or another version of <b>XCOM</b> are listed below.&nbsp; Not all of them are necessarily suitable for command-line usage; for example, the action of "<font color="#663300"><code>$|</code></font>" depends on its particular column.&nbsp; The list below has been merged from McKeeman (p. 148) and IR-182-1 (section 13.4):<br>
+<ul>
+  <li><font color="#663300"><code>$B</code></font> — Interlist code bytes in hexadecimal.</li>
+  <li><font color="#663300"><code>$D</code></font> — Print compilation statistics and symbol table at the end of compilation (initially enabled).</li>
+  <li><font color="#663300"><code>$E</code></font> — Interlist emitted code (assembly format) and data.</li>
+  <li><font color="#663300"><code>$I</code></font> — Print Impact 
+summary, indicating variables outside the scope of any procedure which 
+were referenced, plus procedures called.&nbsp; (Default = Off.)<br>
+  </li>
+  <li><font color="#663300"><code>$L</code></font> — List the compiled program (listing is initially enabled).</li>
+  <li><font color="#663300"><code>$M</code></font> — List program without auxiliary information (speeds compilation by minimizing string storage usage).</li>
+  <li><font color="#663300"><code>$N</code></font> — Produce a warning message if a procedure is called with fewer actual than formal parameters.</li>
+  <li><font color="#663300"><code>$R</code></font> — Collect cross-reference data for each symbol (based on statement numbers) and print with symbol table. (Default = On.)<br>
+  </li>
+  <li><font color="#663300"><code>$S</code></font> — Dump symbol table at the end of each procedure, if any local data is declared. (Default = Off.)<br>
+  </li>
+  <li><font color="#663300"><code>$T</code></font> — Begin tracing execution of XCOM at this point, during compilation.</li>
+  <li><font color="#663300"><code>$U</code></font> — Terminate tracing of XCOM.</li>
+  <li><font color="#663300"><code>$V</code></font> — Expand variable 
+cross reference to include names of procedures referencing data and 
+names of procedures calling other procedures.&nbsp; (Default = Off.)</li>
+  <li><font color="#663300"><code>$Z</code></font> — Allow the compiled program to execute in spite of severe errors.</li>
+  <li><font color="#663300"><code>$|</code></font> — Set margin.&nbsp; 
+The portion of succeeding cards starting from the column containing the |
+ will be ignored.&nbsp; Note that this can only be used to make the card
+ width <i>shorter</i> than 80 columns.<br>
+  </li>
+</ul>
+If control 
 toggles were able to appear in the PARM field (as well as inside of 
 program comments), then in effect they'd act like unnamed Type 1 
 parameters.&nbsp; Indeed, you can see examples of these in the sample 
-JCL cards I showed you at the top of this section.&nbsp; But if there 
-are any examples of control toggles in HAL/S-FC as it presently exists, 
-it has escaped my attention.&nbsp; In other words, I am unclear as to 
+JCL cards I showed you at the top of this section.&nbsp; But I am unclear as to 
 whether control toggles survived into the latest versions of XPL/I or 
-not, and hence it is TBD whether or not <b>XCOM-I</b> should support 
-them somehow.&nbsp; Currently, parameters with a leading '$' are 
-accepted (in the sense that there's no error message or abend), but 
-ignored. </font><br>
+not, and whether they're acceptable in PARM fields.&nbsp; Currently, parameters with a leading '<font color="#663300"><code>$</code></font>'
+ are 
+accepted (in the sense that there's no error message or abend) in PARM 
+fields, but 
+ignored.&nbsp; However, there is a command-line option that can be made 
+to serve the same purpose as control toggles in the PARM field:&nbsp; 
+The <font color="#663300"><code>--extra=<i>N</i>,'<i>STRING</i>'</code></font> option causes the <font color="#663300"><code><i>STRING</i></code></font> to be returned to the XPL program upon the first invocation of <font color="#663300"><code>INPUT(<i>N</i>)</code></font>; subsequent invocations of <font color="#663300"><code>INPUT(<i>N</i>)</code></font> get data from the file attached to input <font color="#663300"><code><i>N</i></code></font>.&nbsp; So for example, if you wanted to use the control toggle <font color="#663300"><code>$E</code></font>, but didn't want to modify your XPL source code to add it into a comment, you could use the command-line option <font color="#663300"><code>--extra=0,'/* $E */'</code></font>.<br>
+<blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; </font><font size="-1">Again, to be clear, <b>XCOM-I</b>
+ itself has no cognizance whatever of control toggles.&nbsp; Control 
+toggles, if available, are provided to and used by legacy versions of <b>XCOM</b> which <b>XCOM-I</b> may have compiled for you.</font><br>
 </blockquote>
+
+
 
 
 If you're writing <i>new</i> XPL or XPL/I programs, of course, then 
