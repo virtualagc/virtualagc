@@ -185,13 +185,14 @@ memory = bytearray([0] * (1 << 24));
 `memoryMap` is a dictionary whose keys are addresses in `memory` and whose
 values are themselves dictionaries with the keys:
     "mangled"           the mangled name of a variable
-    "datatype"          BASED, FIXED, BIT, CHARACTER, EBCDIC codes, BIT string
+    "datatype"          BASED, FIXED, BIT, CHARACTER, EBCDIC, BITSTRING
     "numElements"       Number of elements if variable subscripted, or else 0
     "record"            dict describing the RECORD if BASED RECORD
     "numFieldsInRecord" Number of fields in the RECORD, or 0
     "recordSize"        Sum of all dirWidths in the RECORD, or 0
     "dirWidth"          Number of bytes required in the variable index
     "bitWidth"          from BIT(bitWidth), or 0 if not BIT
+    "parentAddress"     For datatype EBCDIC or BITSTRING, address of descriptor.
 '''
 memoryMap = {}
 
@@ -405,17 +406,19 @@ def allocateVariables(scope, region):
             if len(initial) > 0:
                 memoryMap[variableAddress] = {
                     "mangled": mangled, 
-                    "datatype": "EBCDIC codes", 
+                    "datatype": "EBCDIC", 
                     "numElements": numElements,
                     "record": {},
                     "numFieldsInRecord": 0,
                     "recordSize": 0,
                     "dirWidth": 0,
-                    "bitWidth": 0
+                    "bitWidth": 0,
+                    "parentAddress": 0
                 }
                 if "BIT" in attributes:
-                    memoryMap[variableAddress]["datatype"] = "BIT string(s)"
+                    memoryMap[variableAddress]["datatype"] = "BITSTRING"
                 address = attributes["address"]
+                memoryMap[variableAddress]["parentAddress"] = address
                 firstAddress = address
                 for i in range(length):
                     # INITIALize (just CHARACTER and BIT(>32) variables).
@@ -491,7 +494,8 @@ def allocateVariables(scope, region):
                 "numFieldsInRecord": 0,
                 "recordSize": recordSize,
                 "dirWidth": 28,
-                "bitWidth": bitWidth
+                "bitWidth": bitWidth,
+                "parentAddress": 0
             }
             variableAddress += 28
             continue
@@ -507,7 +511,8 @@ def allocateVariables(scope, region):
             "numFieldsInRecord": 0,
             "recordSize": 0,
             "dirWidth": attributes["dirWidth"],
-            "bitWidth": bitWidth
+            "bitWidth": bitWidth,
+            "parentAddress": 0
         }
         attributes["address"] = variableAddress
         # INITIALize FIXED or BIT variables.
@@ -2132,6 +2137,26 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
         print(indent + "Unimplemented:", end="", file=debugSink)
         printDict(line)
 
+# Hex dump a range of memory.
+def printMemory(address, length):
+    allZeroes = True
+    for i in range(length):
+        if memory[address + i] != 0:
+            allZeroes = False
+            break
+    if allZeroes:
+        print("\t(0 repeats %d times)" % length)
+        return
+    for i in range(length):
+        d = "%02X" % memory[address + i]
+        if i == 0:
+            print("\t" + d, end = "")
+        elif i & 0xF == 0:
+            print("\n\t" + d, end = "")
+        else:
+            print(" " + d, end = "")
+    print()
+
 # `generateCodeForScope` is a function that's plugged into
 # `walkModel`.  It generates all of the code for a scope and its sub-scopes
 # *until* it reaches an embedded procedure definition.  It generates separate
@@ -2214,11 +2239,12 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         print()
         if functionName == "main":
             if verbose:
+                print("// clang-format off")
                 print("/*")
-                print("  Memory Map:")
-                print("%24s        %-16s %-8s" % \
+                print("            *** Memory Map ***")
+                print(" %14s   %-11s %-8s" % \
                       ("Address (Hex)", "Data Type", "Variable"))
-                print("%24s        %-16s %-8s" % \
+                print(" %14s   %-11s %-8s" % \
                       ("-------------", "---------", "--------"))
                 for address in sorted(memoryMap):
                     memoryMapEntry = memoryMap[address]
@@ -2229,14 +2255,29 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
                     if datatype == "BIT":
                         datatype = datatype + "(%d)" % bitWidth
                     if numElements == 0:
-                        print("       %8d (%06X)        %-16s %s" % \
+                        print("%6d (%06X)   %-11s %s" % \
                               (address, address, datatype, \
                                symbol))
                     else:
-                        print("       %8d (%06X)        %-16s %s(%d)" % \
+                        print("%6d (%06X)   %-11s %s(%d)" % \
                               (address, address, datatype, \
                                symbol, numElements-1))
+                    if displayInitializers:
+                        if numElements == 0:
+                            numElements = 1
+                        if datatype not in ["EBCDIC", "BITSTRING"]:
+                            printMemory(address, numElements * memoryMapEntry["dirWidth"])
+                        else:
+                            length = 0
+                            parentAddress = memoryMapEntry["parentAddress"]
+                            for i in range(numElements):
+                                d = getFIXED(parentAddress + 4 * i)
+                                if d == 0:
+                                    continue
+                                length += ((d >> 24) & 0xFF) + 1
+                            printMemory(address, length)
                 print("*/")
+                print("// clang-format on")
                 print()
             #print("uint32_t sizeOfCommon = %d;" % areaNormal)
             #print("uint32_t sizeOfNonCommon = %d;" % (variableAddress-areaNormal));
@@ -2461,7 +2502,10 @@ def generateC(globalScope):
                                           .replace("#", "p") \
                                           .replace("$", "d")
         print("#define %s %d" % (symbol, address), file=pf)
-        variable["superMangled"] = symbol
+        if noLabels:
+            variable["superMangled"] = "%d" % address
+        else:
+            variable["superMangled"] = symbol
     
     # Make another version of `memoryMap` that's sorted by symbol name rather
     # than address.
@@ -2588,16 +2632,17 @@ def generateC(globalScope):
             continue
         dirWidth = variable["dirWidth"]
         bitWidth = variable["bitWidth"]
+        parentAddress = variable["parentAddress"]
         if datatype == "BASED":
             basedFields = "based_" + symbol
         if i == numSymbols:
             comma = ''
         else:
             comma = ','
-        print('  { %s, "%s", "%s", %d, %d, %s, %d, %d, %d, %d }%s' % \
+        print('  { %s, "%s", "%s", %d, %d, %s, %d, %d, %d, %d, %d }%s' % \
               (memoryMap[address]["superMangled"], symbol, datatype, numElements, allocated, 
                basedFields, numFieldsInRecord, recordSize, dirWidth, bitWidth,
-               comma), file=f)
+               parentAddress, comma), file=f)
     print("};", file=f)
     print("\n// Memory map, sorted by symbol name -------------------------\n",\
           file=f)
@@ -2689,6 +2734,7 @@ def generateC(globalScope):
     print("  int recordSize;", file=f)
     print("  int dirWidth;", file=f)
     print("  int bitWidth;", file=f)
+    print("  int parentAddress;", file=f)
     print("} memoryMapEntry_t;", file=f)
     print("extern memoryMapEntry_t memoryMap[NUM_SYMBOLS]; // Sorted by address", 
           file=f)

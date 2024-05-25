@@ -48,24 +48,76 @@
 #		make CC=i686-w64-mingw32-gcc
 
 #	To include debugging info in the executable, so that it can be
-#	debugged with `gdb` (or whatever):
-#		make EXTRA="options"
-#	where the options are specific to the compiler.  The quotation
-#	marks need to be present if there are any spaces in the options.
-#	For `gcc` or its variants:
+#	debugged with `gdb` (or whatever), you can use this:
 #		make EXTRA=-ggdb
+
+#	Or more generally, EXTRA can be used for any other compiler switches 
+#	you like:
+#		make EXTRA='options'
+#	where the options are specific to the compiler.  The quotation
+#	marks need to be present if there are any spaces in the options.  In
+#	Linux at least, you can use either single-quotes (') or double-quotes("),
+#	with the distinction that environment variables (like, say, $n) will be
+#	expanded within double-quotes but not within single quotes; but that's
+#	a feature of the command shell, and not something done by us.  
+#	When compiling C code emitted by XCOM-I, clang produces large numbers
+#	of warnings that most likely are of no interest to you, so you might
+#	feel the need to disable those messages when using CC=clang:
+#	   EXTRA='-Wno-dangling-else -Wno-constant-conversion -Wno-pointer-sign'
+#	Or, if you trust XCOM-I to generate reasonable C source
+#	code, you can use EXTRA='-w' to just disable all warning messages.
+#	Conversely, if you're trying to figure out something XCOM-I and I 
+#	screwed up, you could use EXTRA='-Wall' to enable all warning messages.
 #
-#	EXTRA can also be used for any other compiler switches you like,
-# 	such as switched to turn off compiler warnings:
-#		make EXTRA="-ggdb -Wdangling-else"
+#	Some invocations of `make` (see below) run XCOM-I rather than merely
+#	compiling previously-generated C code.  You can add extra command-line
+#	switches for XCOM-I by using the XEXTRA variable.  For example,
+#		XEXTRA=--pp
+#	turns on "pretty printing" for the generated C code (assuming that the 
+#	program clang-format is installed and accessible).
 #
-#	Some targets (in particular, "make tests") also run XCOM-I, and
-#	PEXTRA allows adding extra command-line switches for XCOM-I.
-#	At the moment, this is only interesting for debugging XCOM-I
-#	itself, for adding engineering switches like --packing.
+# Bootstrapping
+# -------------
 #
-# Running Tests on the XCOM-I System
-# ----------------------------------
+# The "bootstrapping" targets,
+#	bootstrap3
+#	bootstrap45
+# are a little different, in that they perform an entire series of builds of
+# an XPL compiler, all the way down to native IBM 360 versions, and try to 
+# validate the entire chain of builds by verifying that the final version of 
+# the compiler works correctly.  A successful bootstrap is a test of both
+# XCOM-I and of sim360.
+#
+# The options TARGET, CC, EXTRA, and XEXTRA described above can be used as 
+# usual with the bootstrapping targets.
+#
+# Warning:  Building these targets requires programs and BASH (or a similar
+# command shell) not normally available on Windows, and maybe not in full on
+# stock Mac or Linux without additional setup.  I'm sure Windows *could* be
+# made to work, but I'm just not going to research it myself.
+#
+# For example, 
+#	make bootstrap45
+# would generate a lot of stuff if it works correctly:
+#	XCOM45-native/		Folder of C files, plus XCOM45-native, which is
+#				an XCOM 4.5 XPL compiler running natively.
+#	XCOM45-360.obj		An IBM 360 version (a "load file") of XCOM 4.5,
+#				as compiled by XCOM45-native.
+#	XCOM45-360.hex		A human-readable hexadecimal dump of the same.
+#	XCOM45-360.rpt		The compiler report.
+#	XCOM45-360.*		... and others ...
+#	XCOM45-360A.*		Same, but as compiled by XCOM45-360.obj, running
+#				in an IBM 360 simulator.
+# A "bootstrap" of XCOM 4.5 is successful if XCOM45-360.obj and XCOM45-360A.obj
+# are identical (other than an embedded datestamp/timestamp of the compilation
+# time).  This is tested via automated comparison of XCOM45-360.hex vs
+# XCOM45-360A.hex. 
+#
+# Regression Tests
+# ----------------
+#
+# Warning: The same warning about Windows vs Mac vs Linux apply as in the
+# preceding section.
 #
 # Included with the source code for the XCOM-I program itself is a folder
 # (Tests/) which contains various XPL and XPL/I sample programs.  A number of
@@ -83,10 +135,8 @@
 # of this Makefile will also be in that folder.  (But this Makefile may be in
 # other folders as well, so don't let that confuse you.)
 #
-# Second, use the command `make REGRESSION=yes`.  Note that the CC alternative 
-# described in the preceding section can be used to change the compiler name.
-# Note that this accepts the `EXTRA=...` syntax described earlier.  It also
-# accepts `XEXTRA=...` for adding optional command-line parameters to XCOM-I.py.
+# Second, use the command `make REGRESSION=yes`.  Note that the CC, EXTRA, and
+# XEXTRA variables can optionally be used as described above.
 #
 # This process should now have created various additional folders, with names
 # like bitsizeDemo/, bitsizeDemoCommon/, and so forth, which contain the 
@@ -100,6 +150,8 @@
 # Note on converting ANALYZER report output (say, out.txt) to PDF:  I used
 #	enscript -B -f Courier9 -o out.ps out.txt
 #	ps2pdf out.ps out.pdf
+
+SHELL = /bin/bash
 
 TARGET = $(notdir $(CURDIR))
 ifeq ($(strip $(CC)),)
@@ -118,12 +170,68 @@ ifndef REGRESSION
 all: $(TARGET)
 
 $(TARGET): $(SOURCES) $(HEADERS)
-	@$(CC) $(EXTRA) -o $@ $(SOURCES) -lm -rdynamic
+	$(CC) $(EXTRA) -o $@ $(SOURCES) -lm -rdynamic
 
 .PHONY: clean
 clean:
 	-rm $(TARGET)  # For Linux or Mac
 	-del $(TARGET) # For Windows
+
+#----------------------------------------------------------------------------
+# Bootstrap tests.
+
+.PHONY: bootstrap3
+bootstrap3:
+	$(MAKE) \
+		BASE=XCOM3 \
+		XPLFILE=Tests/XCOM.xpl \
+		LIBFILE=XPL.LIBRARY.xpl \
+		RECSIZE=3600 \
+		bootstrap
+
+.PHONY: bootstrap45
+bootstrap45:
+	$(MAKE) \
+		BASE=XCOM45 \
+		XPLFILE=sim360-source/port/XCOM4.5.xpl \
+		LIBFILE=sim360-source/port/XPLIB4.5.xpl \
+		RECSIZE=7200 \
+		bootstrap
+
+# Note that the condition for a successful bootstrap is that the XXX-360.obj
+# and XXX-360A.obj files differ by precisely 3 bytes.  That's because the 
+# embedded compile-time timestamp occupies 3 bytes.
+.PHONY: bootstrap
+bootstrap:
+	XCOM-I.py $(XEXTRA) --xpl \
+		--lib-file=$(LIBFILE) \
+		--output=$(BASE)-native \
+		$(XPLFILE)
+	make -C $(BASE)-native
+	$(BASE)-native/$(BASE)-native \
+		--ddi=0,$(XPLFILE) \
+		--ddi=2,$(LIBFILE) \
+		--raf=B,$(RECSIZE),1,$(BASE)-360.obj \
+		--raf=B,$(RECSIZE),2,$(BASE)-360.dat \
+		--raf=B,$(RECSIZE),3,$(BASE)-360.str \
+		>$(BASE)-360.rpt
+	sim360 --size=$(RECSIZE) \
+		-o0ET $(BASE)-360A.rpt \
+		-i0AT $(XPLFILE) \
+		-i2AT $(LIBFILE) \
+		-f1wb+ $(BASE)-360A.obj \
+		-f2wb+ $(BASE)-360A.dat \
+		-f3wb+ $(BASE)-360A.str \
+		$(BASE)-360.obj
+	@if [[ "`cmp -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l`" == 3 ]] ; \
+	then \
+		echo "Bootstrap of $(BASE) successful!" ; \
+	else \
+		hexdump -C $(BASE)-360.obj >$(BASE)-360.hex ; \
+		hexdump -C $(BASE)-360A.obj >$(BASE)-360A.hex ; \
+		echo "Bootstrap of $(BASE) failed!  For more info, try:" ; \
+		echo "	meld $(BASE)-360.hex $(BASE)-360A.hex" ; \
+	fi
 
 else # REGRESSION
 

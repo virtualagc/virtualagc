@@ -69,6 +69,8 @@ showBacktrace = False
 physicalTop = 1 << 24
 keepUnused = False
 prettyPrint = False
+noLabels = False
+displayInitializers = False
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -208,7 +210,17 @@ The available OPTIONS are:
                 normally.
 --pp            "Pretty print" the output C files.  The files runtimeC.c, 
                 memory.c, and *.h are exempted from the reformatting process.
-                This option requires installation of clang-format.
+                This option requires installation of clang-format.  Note that
+                depending on its version, clang pretty-printing may reformat
+                comment lines that extend past the 80-column limit.
+--nl            By default, generated C code uses C preprocessor macros (i.e.,
+                symbolic names) to represent the absolute memory addresses at
+                which XPL variables appear in the memory model.  With --nl
+                ("no labels"), the addresses appear as decimal numbers instead.
+                Note that --pp and --nl are independent of each other.
+--de            This duplicates the $E control toggle of the original XCOM,
+                but only to the extent of displaying the raw initial values of 
+                variables in the symbol table printed in main.c.
 '''
 
 for parm in sys.argv[1:]:
@@ -216,6 +228,10 @@ for parm in sys.argv[1:]:
         break
     elif parm == "--pp":
         prettyPrint = True
+    elif parm == "--nl":
+        noLabels = True
+    elif parm == "--de":
+        displayInitializers = True
     elif parm == "--keep-unused":
         keepUnused = True
     elif parm.startswith("--merge="):

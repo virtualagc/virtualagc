@@ -66,6 +66,138 @@ int linesPerPage = 59;
 memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
 int showBacktrace = 0;
 
+// The table below was adapted from the table of the same name in
+// the Virtual AGC source tree.  The table is indexed on the numeric
+// codes of the ASCII characters. It contains the EBCDIC numeric
+// code for each *printable* ASCII character, with non-printable
+// characters being translated to an EBCDIC space character.
+// There are two exceptions, however, in that the ASCII ` (EBCDIC
+// 0x79) and ASCII ~ (EBCDIC 0xA1) are assigned the EBCDIC codes
+// for the U.S. cent sign EBCDIC 0x4A) and the logical-NOT symbol
+// (EBCDIC 0x5F).  This reflects the fact that the latter two
+// characters are always replaced internally within XCOM-I by the
+// former two, because the latter two are not representable in
+// ASCII and would presumably require multi-byte UTF-8 replacements,
+// which is a potential complication I don't care to worry about.
+// There were also a couple of differences from the EBCDIC table
+// in the Wikipedia article of the same name, so I've changed those
+// to match Wikipedia.
+static uint8_t asciiToEbcdic[128] = {
+  0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f,
+  0x16, 0x05, 0x25, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+  0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26, /*              */
+  0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, /*              */
+  0x40, 0x5A, 0x7F, 0x7B, 0x5B, 0x6C, 0x50, 0x7D, /*  !"#$%&'     */
+  0x4D, 0x5D, 0x5C, 0x4E, 0x6B, 0x60, 0x4B, 0x61, /* ()*+,-./     */
+  0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, /* 01234567     */
+  0xF8, 0xF9, 0x7A, 0x5E, 0x4C, 0x7E, 0x6E, 0x6F, /* 89:;<=>?     */
+  0x7C, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, /* @ABCDEFG     */
+  0xC8, 0xC9, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, /* HIJKLMNO     */
+  0xD7, 0xD8, 0xD9, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, /* PQRSTUVW     */
+  0xE7, 0xE8, 0xE9, 0xBA, 0xE0, 0xBB, 0x5F, 0x6D, /* XYZ[\]^_     */
+  0x4A, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, /* `abcdefg     */
+  0x88, 0x89, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, /* hijklmno     */
+  0x97, 0x98, 0x99, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, /* pqrstuvw     */
+  0xA7, 0xA8, 0xA9, 0xC0, 0x4F, 0xD0, 0x5F, 0x07  /* xyz{|}~      */
+};
+
+descriptor_t *
+asciiToDescriptor(char *c) {
+  descriptor_t *descriptor = nextBuffer();
+  uint8_t *s = descriptor->bytes;
+  descriptor->numBytes = strlen(c);
+  while (*c)
+    *s++ = asciiToEbcdic[*c++];
+  *s = 0;
+  return descriptor;
+}
+
+// "Print" a C string to a new or existing descriptor_t.
+descriptor_t *
+cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
+  va_list args;
+  if (descriptor == NULL)
+    descriptor = nextBuffer();
+  va_start(args, fmt);
+  descriptor->numBytes =
+      vsnprintf(descriptor->bytes, sizeof(descriptor->bytes), fmt, args);
+  va_end(args);
+  for (char *s = descriptor->bytes; *s; s++) // ***BOUNDARY***
+    *s = asciiToEbcdic[*s];
+  descriptor->type = ddCHARACTER;
+  descriptor->bitWidth = 0;
+  return descriptor;
+}
+
+
+// The "inverse" (in spirit) of `asciiToEbcdic` above, in which the ASCII
+// equivalent character is given for each printable EBCDIC code.  It performs
+// the substitution of the U.S. cent character to ` and the logical-NOT
+// symbol to ~, a explained above.  It was generated from the table above
+// using the one-time-use program invertEbcdicTable.py.
+// Note: It would be nice if both `asciiToEbcdic` and `ebcdicToAscii` were
+// 256 bytes, and inverses of each other, even if half the entries in the
+// latter had to be invented, but that's impossible because of the way
+// ~,^ map to logical-NOT and ` maps to U.S. cent.  I.e., the mapping isn't
+// 1-to-1.  It's just too dodgy trying to make it work.
+static char ebcdicToAscii[256] = {
+  '\x00', '\x01', '\x02', '\x03', ' '   , '\x09', ' '   , '\x7F',
+  ' '   , ' '   , ' '   , '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
+  '\x10', '\x11', '\x12', '\x13', ' '   , ' '   , '\x08', ' '   ,
+  '\x18', '\x19', ' '   , ' '   , '\x1C', '\x1D', '\x1E', '\x1F',
+  ' '   , ' '   , ' '   , ' '   , ' '   , '\x0A', '\x17', '\x1B',
+  ' '   , ' '   , ' '   , ' '   , ' '   , '\x05', '\x06', '\x07',
+  ' '   , ' '   , '\x16', ' '   , ' '   , ' '   , ' '   , '\x04',
+  ' '   , ' '   , ' '   , ' '   , '\x14', '\x15', ' '   , '\x1A',
+  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , '`'   , '.'   , '<'   , '('   , '+'   , '|'   ,
+  '&'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , '!'   , '$'   , '*'   , ')'   , ';'   , '~'   ,
+  '-'   , '/'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , ' '   , ','   , '%'   , '_'   , '>'   , '?'   ,
+  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , ':'   , '#'   , '@'   , '\''  , '='   , '"'   ,
+  ' '   , 'a'   , 'b'   , 'c'   , 'd'   , 'e'   , 'f'   , 'g'   ,
+  'h'   , 'i'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , 'j'   , 'k'   , 'l'   , 'm'   , 'n'   , 'o'   , 'p'   ,
+  'q'   , 'r'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , 's'   , 't'   , 'u'   , 'v'   , 'w'   , 'x'   ,
+  'y'   , 'z'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  ' '   , ' '   , '['   , ']'   , ' '   , ' '   , ' '   , ' '   ,
+  '{'   , 'A'   , 'B'   , 'C'   , 'D'   , 'E'   , 'F'   , 'G'   ,
+  'H'   , 'I'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  '}'   , 'J'   , 'K'   , 'L'   , 'M'   , 'N'   , 'O'   , 'P'   ,
+  'Q'   , 'R'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  '\\'  , ' '   , 'S'   , 'T'   , 'U'   , 'V'   , 'W'   , 'X'   ,
+  'Y'   , 'Z'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
+  '0'   , '1'   , '2'   , '3'   , '4'   , '5'   , '6'   , '7'   ,
+  '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '
+};
+
+char *
+descriptorToAscii(descriptor_t *descriptor) {
+  descriptor_t *returnValue = nextBuffer();
+  uint8_t *c = returnValue->bytes, *s = descriptor->bytes;
+  if (descriptor->type == ddCHARACTER)
+    {
+      while (*s)
+        {
+          *c++ = ebcdicToAscii[*s++];
+          returnValue->numBytes++;
+        }
+      *c = 0;
+    }
+  else if (descriptor->numBytes > 32)
+    returnValue->numBytes = sprintf(returnValue->bytes, "(long bitstring)");
+  else
+    {
+      int32_t value = bitToFixed(descriptor);
+      returnValue->numBytes = sprintf(returnValue->bytes, "%d", value);
+    }
+  return returnValue->bytes;
+}
+
 optionsProcessor_t COMPOPT_PFS = {
   32 /* numParms1 */,
   13 /* numParms2 */,
@@ -575,7 +707,7 @@ printBacktrace(void)
   free(strings);
 }
 
-void
+__attribute__((noreturn)) void
 abend(const char *fmt, ...) {
   va_list args;
   sbuf_t buffer;
@@ -1071,21 +1203,6 @@ nextBuffer(void)
   return returnValue;
 }
 
-// "Print" a C string to a new or existing descriptor_t.
-descriptor_t *
-cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
-  va_list args;
-  if (descriptor == NULL)
-    descriptor = nextBuffer();
-  va_start(args, fmt);
-  descriptor->numBytes =
-      vsnprintf(descriptor->bytes, sizeof(descriptor->bytes), fmt, args);
-  va_end(args);
-  descriptor->type = ddCHARACTER;
-  descriptor->bitWidth = 0;
-  return descriptor;
-}
-
 descriptor_t *
 bitToCharacter(descriptor_t *bit) {
   if (bit->bitWidth > 32)
@@ -1286,86 +1403,6 @@ putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
     }
 }
 
-// The table below was adapted from the table of the same name in
-// the Virtual AGC source tree.  The table is indexed on the numeric
-// codes of the ASCII characters. It contains the EBCDIC numeric
-// code for each *printable* ASCII character, with non-printable
-// characters being translated to an EBCDIC space character.
-// There are two exceptions, however, in that the ASCII ` (EBCDIC
-// 0x79) and ASCII ~ (EBCDIC 0xA1) are assigned the EBCDIC codes
-// for the U.S. cent sign EBCDIC 0x4A) and the logical-NOT symbol
-// (EBCDIC 0x5F).  This reflects the fact that the latter two
-// characters are always replaced internally within XCOM-I by the
-// former two, because the latter two are not representable in
-// ASCII and would presumably require multi-byte UTF-8 replacements,
-// which is a potential complication I don't care to worry about.
-// There were also a couple of differences from the EBCDIC table
-// in the Wikipedia article of the same name, so I've changed those
-// to match Wikipedia.
-static uint8_t asciiToEbcdic[128] = {
-  0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f,
-  0x16, 0x05, 0x25, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-  0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26, /*              */
-  0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f, /*              */
-  0x40, 0x5A, 0x7F, 0x7B, 0x5B, 0x6C, 0x50, 0x7D, /*  !"#$%&'     */
-  0x4D, 0x5D, 0x5C, 0x4E, 0x6B, 0x60, 0x4B, 0x61, /* ()*+,-./     */
-  0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, /* 01234567     */
-  0xF8, 0xF9, 0x7A, 0x5E, 0x4C, 0x7E, 0x6E, 0x6F, /* 89:;<=>?     */
-  0x7C, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, /* @ABCDEFG     */
-  0xC8, 0xC9, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, /* HIJKLMNO     */
-  0xD7, 0xD8, 0xD9, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, /* PQRSTUVW     */
-  0xE7, 0xE8, 0xE9, 0xBA, 0xE0, 0xBB, 0x5F, 0x6D, /* XYZ[\]^_     */
-  0x4A, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, /* `abcdefg     */
-  0x88, 0x89, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, /* hijklmno     */
-  0x97, 0x98, 0x99, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, /* pqrstuvw     */
-  0xA7, 0xA8, 0xA9, 0xC0, 0x4F, 0xD0, 0x5F, 0x07  /* xyz{|}~      */
-};
-
-// The inverse of `asciiToEbcdic` above, in which the ASCII equivalent
-// character is given for each printable EBCDIC code.  It performs
-// the substitution of the U.S. cent character to ` and the logical-NOT
-// symbol to ~, a explained above.  It was generated from the table above
-// using the one-time-use program invertEbcdicTable.py.
-// Note: It would be nice if both `asciiToEbcdic` and `ebcdicToAscii` were
-// 256 bytes, and inverses of each other, even if half the entries in the
-// latter had to be invented, but that's impossible because of the way
-// ~,^ map to logical-NOT and ` maps to U.S. cent.  I.e., the mapping isn't
-// 1-to-1.  It's just too dodgy trying to make it work.
-static char ebcdicToAscii[256] = {
-  '\x00', '\x01', '\x02', '\x03', ' '   , '\x09', ' '   , '\x7F',
-  ' '   , ' '   , ' '   , '\x0B', '\x0C', '\x0D', '\x0E', '\x0F',
-  '\x10', '\x11', '\x12', '\x13', ' '   , ' '   , '\x08', ' '   ,
-  '\x18', '\x19', ' '   , ' '   , '\x1C', '\x1D', '\x1E', '\x1F',
-  ' '   , ' '   , ' '   , ' '   , ' '   , '\x0A', '\x17', '\x1B',
-  ' '   , ' '   , ' '   , ' '   , ' '   , '\x05', '\x06', '\x07',
-  ' '   , ' '   , '\x16', ' '   , ' '   , ' '   , ' '   , '\x04',
-  ' '   , ' '   , ' '   , ' '   , '\x14', '\x15', ' '   , '\x1A',
-  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , ' '   , '`'   , '.'   , '<'   , '('   , '+'   , '|'   ,
-  '&'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , ' '   , '!'   , '$'   , '*'   , ')'   , ';'   , '~'   ,
-  '-'   , '/'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , ' '   , ' '   , ','   , '%'   , '_'   , '>'   , '?'   ,
-  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , ' '   , ':'   , '#'   , '@'   , '\''  , '='   , '"'   ,
-  ' '   , 'a'   , 'b'   , 'c'   , 'd'   , 'e'   , 'f'   , 'g'   ,
-  'h'   , 'i'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , 'j'   , 'k'   , 'l'   , 'm'   , 'n'   , 'o'   , 'p'   ,
-  'q'   , 'r'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , ' '   , 's'   , 't'   , 'u'   , 'v'   , 'w'   , 'x'   ,
-  'y'   , 'z'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  ' '   , ' '   , '['   , ']'   , ' '   , ' '   , ' '   , ' '   ,
-  '{'   , 'A'   , 'B'   , 'C'   , 'D'   , 'E'   , 'F'   , 'G'   ,
-  'H'   , 'I'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  '}'   , 'J'   , 'K'   , 'L'   , 'M'   , 'N'   , 'O'   , 'P'   ,
-  'Q'   , 'R'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  '\\'  , ' '   , 'S'   , 'T'   , 'U'   , 'V'   , 'W'   , 'X'   ,
-  'Y'   , 'Z'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  '0'   , '1'   , '2'   , '3'   , '4'   , '5'   , '6'   , '7'   ,
-  '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '
-};
-
 uint32_t
 STRING_GT(descriptor_t *s1, descriptor_t *s2) {
   uint8_t blank = BYTE1literal(" ");
@@ -1405,7 +1442,10 @@ getCHARACTERd(uint32_t descriptor)
       returnValue->numBytes = numBytes;
       address = descriptor & 0xFFFFFF;
       for (i = 0; i < numBytes; i++)
-        returnValue->bytes[i] = ebcdicToAscii[memory[address + i]];
+        {
+          //returnValue->bytes[i] = ebcdicToAscii[memory[address + i]];
+          returnValue->bytes[i] = memory[address + i]; // ***BOUNDARY***
+        }
       // A NUL terminator isn't logically necessary, but will be lots more
       // convenient for consumers of string data.  The buffer is big enough
       // to hold it.
@@ -1458,8 +1498,10 @@ putCHARACTER(uint32_t address, descriptor_t *str)
       for (; length > 0; length--, s++, index++)
         {
           c = *s;
+          /* ***BOUNDARY***
           if (str->type == ddCHARACTER)
             c = asciiToEbcdic[c];
+          */
           memory[index] = c;
         }
     }
@@ -1727,7 +1769,7 @@ stringRelation(enum stringRelation_t relation,
                descriptor_t *d1,
                descriptor_t *d2) {
   int comparison = 0; // -1 for <, 0 for =, 1 for >.
-  char *s1 = d1->bytes, *s2 = d2->bytes;
+  uint8_t *s1 = d1->bytes, *s2 = d2->bytes;
   int l1 = d1->numBytes, l2 = d2->numBytes;
   if (l1 > l2)
     comparison = 1;
@@ -1736,11 +1778,13 @@ stringRelation(enum stringRelation_t relation,
   else
     for (; l1 > 0; l1--, s1++, s2++)
       {
-        int e1 = *s1, e2 = *s2;
+        uint8_t e1 = *s1, e2 = *s2;
+        /* ***BOUNDARY***
         if (d1->type == ddCHARACTER)
           e1 = asciiToEbcdic[e1];
         if (d2->type == ddCHARACTER)
           e2 = asciiToEbcdic[e2];
+        */
         if (e1 > e2) { comparison = 1; break; }
         else if (e1 < e2) { comparison = -1; break; }
       }
@@ -1812,7 +1856,7 @@ int pendingNewline = 0;
 void
 OUTPUT(uint32_t lun, descriptor_t *string) {
   char ansi = ' '; // ANSI carriage-control character.
-  char *s = string->bytes; // Printable character data.
+  char *s = descriptorToAscii(string); // Printable character data.
   FILE *fp;
   int i;
   if (lun < 0 || lun >= DD_MAX || DD_OUTS[lun] == NULL)
@@ -1824,7 +1868,7 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
     {
       if (lun == 1)
         {
-          ansi = string->bytes[0];
+          ansi = *s;
           s += 1;
         }
       if (ansi == '_')
@@ -1943,7 +1987,8 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
     }
   else
     {
-      fprintf(fp, "%s\n", string->bytes);
+      //fprintf(fp, "%s\n", string->bytes);
+      fprintf(fp, "%s\n", s); // ***BOUNDARY***
       pendingNewline = 0;
     }
 }
@@ -2008,6 +2053,8 @@ INPUT(uint32_t lun) {
         }
     }
   returnValue->numBytes = strlen(s);
+  for (s = returnValue->bytes; *s; s++) // ***BOUNDARY***
+    *s = asciiToEbcdic[*s];
   return returnValue;
 }
 
@@ -2067,7 +2114,10 @@ BYTE(descriptor_t *s, uint32_t index){
       return 0;
     }
   if (s->type == ddCHARACTER)
-    return asciiToEbcdic[s->bytes[index]];
+    {
+      //return asciiToEbcdic[s->bytes[index]];
+      return s->bytes[index]; // ***BOUNDARY***
+    }
   else // s->type == ddBIT
     return s->bytes[index];
 }
@@ -2081,7 +2131,8 @@ uint8_t
 BYTEliteral(char *s, uint32_t index) {
   if (index >= strlen(s))
     return 0;
-  return asciiToEbcdic[s[index]];
+  //return asciiToEbcdic[s[index]];
+  return s[index]; // ***BOUNDARY***
 }
 
 uint8_t
@@ -2098,7 +2149,8 @@ lBYTEc(uint32_t address, int32_t index, char c) {
   address = (descriptor & 0xFFFFFF) + index;
   if (address >= FREE_LIMIT)
     abend("BYTE address out of range of memory");
-  memory[address] = asciiToEbcdic[c];
+  ///memory[address] = asciiToEbcdic[c];
+  memory[address] = c; // ***BOUNDARY***
 }
 
 void
