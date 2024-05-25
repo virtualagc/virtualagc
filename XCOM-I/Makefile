@@ -198,6 +198,15 @@ bootstrap45:
 		RECSIZE=7200 \
 		bootstrap
 
+.PHONY: bootstrap45w3
+bootstrap45w3:
+	$(MAKE) \
+		BASE=XCOM45w3 \
+		XPLFILE=sim360-source/port/xcom4.xpl \
+		LIBFILE=sim360-source/port/xplib.xpl \
+		RECSIZE=7200 \
+		bootstrap
+
 # Note that the condition for a successful bootstrap is that the XXX-360.obj
 # and XXX-360A.obj files differ by precisely 3 bytes.  That's because the 
 # embedded compile-time timestamp occupies 3 bytes.
