@@ -598,7 +598,7 @@ For the still meatier example that I promised (threatened?) earlier, here it is 
 pure-XPL compiler, we happen to have XPL source code for two related 
 but different XPL compilers:<br>
 <ul>
-  <li>McKeeman <i>et al.</i>'s XCOM, from the book <i>A Compiler Generator</i>, is what I've spoken of so often above.&nbsp; In our software repository, the source code consists of <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/Tests/XCOM.xpl">XCOM.xpl</a>, which contains the source code for XCOM proper, and the file <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/XPL.LIBRARY.xpl">XPL.LIBRARY.xpl</a>, which contains the source code for <a moz-do-not-send="true" href="#compactify">the <font color="#663300"><code>COMPACTIFY</code></font> procedure</a>.&nbsp;
+  <li>McKeeman <i>et al.</i>'s XCOM, from the book <i>A Compiler Generator</i>, from 1969 or 1970, is what I've spoken of so often above.&nbsp; In our software repository, the source code consists of <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/Tests/XCOM.xpl">XCOM.xpl</a>, which contains the source code for XCOM proper, and the file <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/XPL.LIBRARY.xpl">XPL.LIBRARY.xpl</a>, which contains the source code for <a moz-do-not-send="true" href="#compactify">the <font color="#663300"><code>COMPACTIFY</code></font> procedure</a>.&nbsp;
  The program comments actually identify this program as "XCOM III", 
 implying that there were earlier major versions as well, to which we're 
 not privy.&nbsp; For clarity in this discussion, I'll start referring to it as <u><b>XCOM3</b></u>.</li>
@@ -622,7 +622,7 @@ itself.&nbsp; That process is called "bootstrapping", as in "hauling
 yourself up by your own bootstraps".&nbsp; We're now going to try doing 
 that with <b>XCOM<i>x</i></b>.<br>
 <br>
-To be clear, the use case for <b>XCOM-I</b> I'm personally interested in is building <b>HAL/S-FC</b> and then forgetting that <b>XCOM-I</b> even exists.&nbsp;&nbsp;<img moz-do-not-send="true" src="smiley.png" alt="" width="16" height="16">&nbsp; And we don't need <i>a single one</i> of these <b>XCOM<i>x</i></b> programs to do that.&nbsp; But still, it's going to go much more smoothly if <b>XCOM-I</b> is known to work properly in the first place.&nbsp; And if we can use <b>XCOM-I</b> for bootstrapping <b>XCOM<i>x</i></b>, that will give us a certain degree of confidence that <b>XCOM-I</b> does in fact work as intended.<br>
+To be clear, the use case for <b>XCOM-I</b> I'm personally interested in is building <b>HAL/S-FC</b> and then forgetting that <b>XCOM-I</b> even exists.&nbsp;&nbsp;<img moz-do-not-send="true" src="smiley.png" alt="" width="16" height="16">&nbsp; And we don't need <i>a single one</i> of these <b>XCOM<i>x</i></b> programs to do that.&nbsp; But still, it's going to go much more smoothly if <b>XCOM-I</b> is believed to work properly in the first place.&nbsp; And if we can use <b>XCOM-I</b> for bootstrapping <b>XCOM<i>x</i></b>, that will give us a certain degree of confidence that <b>XCOM-I</b> does in fact work as intended.<br>
 <br>
 Here's the bootstrapping game-plan as it applies to any/all of the <b>XCOM<i>x</i></b> compilers:<br>
 <ol>
@@ -636,8 +636,7 @@ Here's the bootstrapping game-plan as it applies to any/all of the <b>XCOM<i>x</
 reports they print out.That requires those dates and times to be 
 embedded within the executable load file.&nbsp; So a straightforward 
 automated test that load files are byte-for-byte identical will always 
-fail, since the embedded timestamps will always differ.&nbsp; We'll 
-worry about that later.<br>
+fail, since the embedded timestamps will always differ.&nbsp; Don't worry about that at the moment.<br>
   </font></blockquote>
 That's a <i>lot</i> of XPL compilers floating around to keep straight.&nbsp; Here's a synopsis of the <b>XCOM</b> variants relevant to the discussion:<br>
 <br>
@@ -658,7 +657,8 @@ Runs on IBM 360?<br>
       <th valign="bottom" align="center">Compiler<br>
 Runs on Linux/Mac/Windows<br>
       </th>
-      <th valign="bottom" align="center">Source Code Accepted<br>
+      <th valign="bottom" align="center">Source-Code Language<br>
+&nbsp;and Encoding Accepted<br>
 By Compiler<br>
       </th>
       <th valign="bottom" align="center">Object Files Directly <br>
@@ -754,8 +754,31 @@ Object Files <br>
 </table>
 <br>
 There are other possibilities, such as compiling one of the <b>XCOM<i>x</i></b> compiler's source code with another of the <b>XCOM<i>x</i></b> compiler's <b>-native</b> or <b>-360</b> executables.&nbsp; Those are left as an exercise for the reader.<br>
-<blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp; All of the instructions in the succeeding subsections assume that your current working directory is a local copy of <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I">the XCOM-I/ folder within the Virtual AGC source-code hierarchy</a>.</font><br>
+<blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp; All of the instructions in the succeeding subsections assume that your current working directory is a local copy of <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I">the XCOM-I/ folder within the Virtual AGC source-code hierarchy</a>.<br>
+</font></blockquote>In the next three subsections, I'm going to make a 
+detailed examination of the steps needed to actually carry out the 
+bootstrapping manipulations and to show that the bootstrapping was 
+successful.&nbsp; Or not!&nbsp; (But it was successful for me.)<br>
+<blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; 
+If you don't have the patience for that, the provided makefile will 
+perform the entire bootstrapping process for you, if you like.&nbsp; At 
+least if you're on Linux and have the right helper software 
+installed.&nbsp; And maybe in Mac OS.&nbsp; I'm sure it won't work in 
+Windows as-is, but that it could be made to work; but I'm not going to 
+personally research it, and you can personally look at the makefile to 
+see what has to be done.&nbsp; If you figure it out, drop me a line and 
+tell me about it.&nbsp; At any rate, the commands to bootstrap <b>XCOM3</b> and <b>XCOM4</b>
+ are as follows, and simply print a messages at the end that the process
+ either succeeded or failed, after which the various compilers listed in
+ the table above will be present:<br>
+  </font>
+  <blockquote>
+    <pre><font size="-1"><font color="#663300">make bootstrap3<br>make bootstrap45</font><br></font></pre>
+  </blockquote>
 </blockquote>
+<blockquote>
+</blockquote>
+
 
 
 
@@ -823,7 +846,7 @@ The Virtual AGC Project (2024)<br>
   </tbody>
 </table>
 <br>
-As for a similar check of <b>XCOM45-native</b> there is a possible way, and we'll get to in a minute.&nbsp; <br>
+As for a similar check of <b>XCOM45-native</b>, there is a possible way, and we'll get to in a minute.&nbsp; <br>
 
 
 <h3>Step 2:&nbsp; Compiling XCOM<i>x</i> source code with XCOM<i>x</i>-native to produce XCOM<i>x</i>-360</h3>
@@ -845,7 +868,7 @@ for the lack of Job Control Language (JCL), and in particular to provide
  replacements for missing <font color="#663300"><code>DD</code></font> statements.&nbsp; For one thing, there's an extra file which 
 needs to be attached as an input, because <b>XCOM</b> always needs to include the library file containing <a moz-do-not-send="true" href="#compactify"><font color="#663300"><code>COMPACTIFY</code></font></a>.&nbsp; Also, <b>XCOM</b> wants to use several "random-access
  files" for storing object code and what not, and we have to attach 
-those files.&nbsp; (Refer to <a moz-do-not-send="true" href="#file">the <font color="#663300"><code>FILE</code></font> entry in the section on XPL's built-in library functions</a>.)<br>
+those files.&nbsp; (Refer to <a moz-do-not-send="true" href="#file">the <font color="#663300"><code>FILE</code></font> entry in the section on XPL's built-in library functions</a>.)&nbsp; Those random-access files are as follows:<br>
 <ul>
   <li><font color="#663300"><code>FILE(1)</code></font> — The compiled object code.</li>
   <li><font color="#663300"><code>FILE(2)</code></font> — A scratch file (i.e., temporary working space) for data.</li>
@@ -883,21 +906,17 @@ day.&nbsp; Unfortunately, my hopes have been dashed, and it is <i>not</i>
  identical.&nbsp; Huge swaths of it are indeed the same, but there are 
 differences that to me seem indicative that a large chunk has simply 
 been displaced by 160 bytes, a fact for which I have no ready 
-explanation.&nbsp; <i>Perhaps</i> it's an <b>XCOM-I</b> bug, but perhaps it's just that the object file XCOM45-19760719.obj was really compiled by (say) <b>XCOM</b> 4.4 rather than by <b>XCOM</b> 4.5.&nbsp; After all, we know <i>when</i> XCOM45-19760719.obj was compiled — hint: it's July 19, 1976 at 9:05:40.16 p.m. — but not <i>which compiler</i> was used to compile it.&nbsp; In short, while it doesn't verify anything, it's not a problem either.<br>
+explanation.&nbsp; <i>Perhaps</i> it's an <b>XCOM-I</b> bug, but perhaps it's just that the object file XCOM45-19760719.obj was really compiled by (say) <b>XCOM</b> 4.4 rather than by <b>XCOM</b> 4.5.&nbsp; After all, we know <i>when</i> XCOM45-19760719.obj was compiled — hint: it's July 19, 1976 at 9:05:40.16 p.m. — but not <i>which compiler</i>
+ was used to compile it.&nbsp; In short, while it would have been great 
+if the files match, it doesn't really say much one way or the other if 
+there's a mismatch instead.<br>
 </p>
 <blockquote>
 </blockquote>
 
 
 
-<h3>Step 3:&nbsp; Compiling XCOM<i>x</i> source code with XCOM<i>x</i>-360 under sim360 to produce XCOM<i>x</i>-360A</h3>Executive summary:&nbsp; <br>
-<ul>
-  <li>Bootstrapping <b>XCOM3</b> fails, because <b>XCOM3-360</b> fails to build <b>XCOM3-360A</b> at all.&nbsp; The solution or explanation is TBD.<br>
-  </li>
-  <li>Bootstrapping <b>XCOM45</b> succeeds!</li>
-  
-</ul>
-The long answer is as follows.&nbsp; First, as usual, the build instructions.<br>
+<h3>Step 3:&nbsp; Compiling XCOM<i>x</i> source code with XCOM<i>x</i>-360 under sim360 to produce XCOM<i>x</i>-360A</h3>First, as usual, the build instructions.<br>
 <br>
 For <b>XCOM3</b>:
 
@@ -909,8 +928,8 @@ For <b>XCOM3</b>:
   <pre><font color="#663300">sim360 --size=7200</font><font color="#663300"><font color="#663300"> -o0ET stdout </font>-i0AT sim360-source/port/XCOM4.5.xpl -i2AT </font><font color="#663300"><font color="#663300">sim360-source/port/</font>XPLIB4.5.xpl -f1wb+ XCOM45-360A.obj -f2wb+ XCOM45-360A.dat -f3wb+ XCOM45-360A.str XCOM45-360.obj</font></pre>
 </blockquote>These command-line switches differ in detail from the ones we had to with <b>XCOM<i>x</i>-native</b>, but I think you can see that they're just the same old replacements for JCL <font color="#663300"><code>DD</code></font> commands in a different syntax.<br>
 <br>
-For this denouement of the bootstrapping progress, what are the results?<br>
-<br>For <b>XCOM45</b>:&nbsp; The build of <b>XCOM45-360A.obj</b> succeeds with no errors.&nbsp; If <b>XCOM45</b>
+For this denouement of the bootstrapping progress, what are the results?&nbsp; They're the same with both <b>XCOM3</b> and <b>XCOM45</b>, so I'll just explain what we see with <b>XCOM45</b>.<br>
+<br>Firstly, th build of <b>XCOM45-360A.obj</b> succeeds with no errors.&nbsp; If <b>XCOM45</b>
  has successfully built itself, we <i>should</i> find that <b>XCOM45-360.obj</b> and 
 <b>XCOM45-360A.obj</b> are byte-for-byte identical, except that the embedded 
 timestamps for the compile-times will differ.&nbsp; (And of course, if we
@@ -932,11 +951,7 @@ compile time using <a moz-do-not-send="true" href="#builtin">the built-in functi
 (surprise!) matches the screenshot above.&nbsp; (Recall that these IBM 
 360 programs all store their integer data in <i>big-endian</i> form, so that the most-significant bytes come first in memory.)&nbsp; In short, <b>XCOM45</b><b>-360.obj</b> can indeed accurately build itself, and bootstrapping <b>XCOM45</b> has been 100% successful!<br>
 <br>
-For <b>XCOM3</b>:&nbsp; Unfortunately, the build of <b>XCOM3-360A.obj </b>
-fails!&nbsp; Due to compile-time errors no object file is produced, and hence we cannot perform a 
-comparison at all.&nbsp; This is a problem which, unfortunately, I'm still investigating.<br>
-
-<br>
+Or in short, it works!&nbsp; <b>XCOMx</b> can be bootstrapped and accurately builds itself.<br>
 <blockquote>
 </blockquote>
 <h2><a name="halsfc"></a>Compiling and Running HAL/S-FC</h2>
@@ -2850,7 +2865,10 @@ comments.&nbsp; Generally speaking, program comments are ignored by
 compilers.&nbsp; But when these particular two-character strings are 
 found within a program comment of an XPL program, they are used to 
 enable certain program features from the point they appear until a 
-countermanding control toggle is found.&nbsp; The control toggles I'm aware of that were supported by one or another version of <b>XCOM</b> are listed below.&nbsp; Not all of them are necessarily suitable for command-line usage; for example, the action of "<font color="#663300"><code>$|</code></font>" depends on its particular column.&nbsp; The list below has been merged from McKeeman (p. 148) and IR-182-1 (section 13.4):<br>
+countermanding control toggle is found.&nbsp; The control toggles I'm aware of that were supported by one or another version of <b>XCOM</b> are listed below.&nbsp; Not all of them are necessarily suitable for command-line usage; for example, the action of "<font color="#663300"><code>$|</code></font>"
+ depends on its particular column.&nbsp; The list below has been merged 
+from McKeeman (p. 148), IR-182-1 (section 13.4), and SUNY XCOM 4.5 
+source code:<br>
 <ul>
   <li><font color="#663300"><code>$B</code></font> — Interlist code bytes in hexadecimal.</li>
   <li><font color="#663300"><code>$D</code></font> — Print compilation statistics and symbol table at the end of compilation (initially enabled).</li>
@@ -2862,6 +2880,8 @@ were referenced, plus procedures called.&nbsp; (Default = Off.)<br>
   <li><font color="#663300"><code>$L</code></font> — List the compiled program (listing is initially enabled).</li>
   <li><font color="#663300"><code>$M</code></font> — List program without auxiliary information (speeds compilation by minimizing string storage usage).</li>
   <li><font color="#663300"><code>$N</code></font> — Produce a warning message if a procedure is called with fewer actual than formal parameters.</li>
+  <li><font color="#663300"><code>$Q</code></font> — This toggle seems to have been available for a while and then discontinued.&nbsp; It <i>may</i> have caused compilation to terminate after processing the library file.<br>
+  </li>
   <li><font color="#663300"><code>$R</code></font> — Collect cross-reference data for each symbol (based on statement numbers) and print with symbol table. (Default = On.)<br>
   </li>
   <li><font color="#663300"><code>$S</code></font> — Dump symbol table at the end of each procedure, if any local data is declared. (Default = Off.)<br>
@@ -2871,6 +2891,10 @@ were referenced, plus procedures called.&nbsp; (Default = Off.)<br>
   <li><font color="#663300"><code>$V</code></font> — Expand variable 
 cross reference to include names of procedures referencing data and 
 names of procedures calling other procedures.&nbsp; (Default = Off.)</li>
+  <li><font color="#663300"><code>$X</code></font> — Do not abort compilation when ceiling on count of severe errors has been exceeded.<br>
+  </li>
+  <li><font color="#663300"><code>$Y</code></font> — Use <font color="#663300"><code>'|'</code></font> as margin marker rather than <font color="#663300"><code>'I'</code></font>.<br>
+  </li>
   <li><font color="#663300"><code>$Z</code></font> — Allow the compiled program to execute in spite of severe errors.</li>
   <li><font color="#663300"><code>$|</code></font> — Set margin.&nbsp; 
 The portion of succeeding cards starting from the column containing the |
