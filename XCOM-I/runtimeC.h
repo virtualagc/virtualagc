@@ -105,9 +105,15 @@ void abend(const char *fmt, ...);
 descriptor_t *
 nextBuffer(void);
 
+descriptor_t *
+asciiToDescriptor(char *c);
+
 // "Print" a C string to a new or existing descriptor_t.
 descriptor_t *
 cToDescriptor(descriptor_t *descriptor, const char *fmt, ...);
+
+char *
+descriptorToAscii(descriptor_t *descriptor);
 
 // "Convert" a BIT to a CHARACTER. For long bit-strings, this is just a
 // pass-through, but for short bit ones, it's a conversion from

@@ -203,18 +203,19 @@ bootstrap45:
 # embedded compile-time timestamp occupies 3 bytes.
 .PHONY: bootstrap
 bootstrap:
+	-rm $(BASE)-360*.*
 	XCOM-I.py $(XEXTRA) --xpl \
 		--lib-file=$(LIBFILE) \
 		--output=$(BASE)-native \
 		$(XPLFILE)
 	make -C $(BASE)-native
-	$(BASE)-native/$(BASE)-native \
+	$(BASE)-native/$(BASE)-native --extra=2,'/* $Y */' \
 		--ddi=0,$(XPLFILE) \
 		--ddi=2,$(LIBFILE) \
 		--raf=B,$(RECSIZE),1,$(BASE)-360.obj \
 		--raf=B,$(RECSIZE),2,$(BASE)-360.dat \
 		--raf=B,$(RECSIZE),3,$(BASE)-360.str \
-		>$(BASE)-360.rpt
+		&>$(BASE)-360.rpt
 	sim360 --size=$(RECSIZE) \
 		-o0ET $(BASE)-360A.rpt \
 		-i0AT $(XPLFILE) \
@@ -265,13 +266,6 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	cat xx00 xx01 | \
 	egrep --invert-match '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' > xxxx
 	
-	#cd bitsizeDemoCommonIn && \
-	#./bitsizeDemoCommonIn --commoni=../bitsizeDemoCommon/COMMON.out >out.txt && \
-	#csplit out.txt '%^Address Allocations .*%' >/dev/null && \
-	#cat xx00 | \
-	#egrep --invert-match '(^Address Allocations |^COMMON |^.PAGE [0-9]|^$$)' > xxxx
-	#diff -s -q bitsizeDemoCommon/xxxx bitsizeDemoCommonIn/xxxx
-	
 	@e=Example-6.18.3 && \
 	cd $$e && \
 	./$$e <../Tests/testdata.txt >out.txt && \
@@ -299,7 +293,9 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	Tests/ANALYZER-SKELETON.regression >ANALYZER/out.regression && \
 	diff -s -q ANALYZER/out.regression ANALYZER/out.txt
 	
-	@echo "\n*********** All tests passed! ***********\n"
+	@echo ""
+	@echo "*********** All tests passed! ***********"
+	@echo ""
 
 .PHONY: testclean
 testclean:

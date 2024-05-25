@@ -44,7 +44,7 @@ if (mapCP == NULL)
   }
 
 TABLE = getFIXED(mapTABLE->address);
-TEXT = getCHARACTER(mapTEXT->address)->bytes;
+TEXT = descriptorToAscii(getCHARACTER(mapTEXT->address));
 
 if (*TEXT == 0)
   return fixedToBit(1, 0);
