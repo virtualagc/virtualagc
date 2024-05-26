@@ -164,7 +164,7 @@ HEADERS = $(wildcard *.h)
 ifndef REGRESSION
 
 #----------------------------------------------------------------------------
-# For normal use building C-language files.
+# For normal use building C-language files from standard XPL source code.
 
 .PHONY: all
 all: $(TARGET)
@@ -178,8 +178,14 @@ clean:
 	-del $(TARGET) # For Windows
 
 #----------------------------------------------------------------------------
-# Bootstrap tests.
+# For building HAL/S-FC source code and running HAL/S-FC.
 
+
+
+#----------------------------------------------------------------------------
+# Bootstrap tests for legacy source code of standard-XPL compilers.
+
+# Should SUCCEED.  XCOM3 is the 
 .PHONY: bootstrap3
 bootstrap3:
 	$(MAKE) \
@@ -187,8 +193,10 @@ bootstrap3:
 		XPLFILE=Tests/XCOM.xpl \
 		LIBFILE=XPL.LIBRARY.xpl \
 		RECSIZE=3600 \
+		CONTEMPORARY=Tests/XCOM3-20010502.obj \
 		bootstrap
 
+# Should SUCCEED.
 .PHONY: bootstrap45
 bootstrap45:
 	$(MAKE) \
@@ -196,8 +204,13 @@ bootstrap45:
 		XPLFILE=sim360-source/port/XCOM4.5.xpl \
 		LIBFILE=sim360-source/port/XPLIB4.5.xpl \
 		RECSIZE=7200 \
+		CONTEMPORARY=sim360-source/XCOM45-19760719.obj \
 		bootstrap
 
+# Expected to FAIL.  However, XCOM45w3 is not legacy software, and has "modern"
+# mods (vs XCOM45) related to EBCDIC vs ASCII that I don't understand but which 
+# likely wouldn't be rational for legacy software, so its failure is likely not
+# indicative of any problem with XCOM-I.  At least, that's my rationale.
 .PHONY: bootstrap45w3
 bootstrap45w3:
 	$(MAKE) \
@@ -233,7 +246,31 @@ bootstrap:
 		-f2wb+ $(BASE)-360A.dat \
 		-f3wb+ $(BASE)-360A.str \
 		$(BASE)-360.obj
-	@if [[ "`cmp -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l`" == 3 ]] ; \
+ifdef CONTEMPORARY
+	sim360 --size=$(RECSIZE) \
+		-o0ET $(BASE)-360C.rpt \
+		-i0AT $(XPLFILE) \
+		-i2AT $(LIBFILE) \
+		-f1wb+ $(BASE)-360C.obj \
+		-f2wb+ $(BASE)-360C.dat \
+		-f3wb+ $(BASE)-360C.str \
+		$(CONTEMPORARY)
+	@if [ `cmp -l $(BASE)-360.obj $(CONTEMPORARY) | wc -l` -le 6 ] ; \
+	then \
+		echo "New compiler is identical to legacy compiler itself." ; \
+	else \
+		echo "New compiler not identical to legacy compiler itself." ; \
+	fi
+	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360C.obj | wc -l` -le 3 ] ; \
+	then \
+		echo "Cross-comparison to legacy compiler's output successful!" ; \
+	else \
+		echo "Cross-comparison to legacy compilers's output fails!" ; \
+	fi
+else
+	echo "No legacy compiler with which to compare."
+endif
+	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l` -le 3 ] ; \
 	then \
 		echo "Bootstrap of $(BASE) successful!" ; \
 	else \

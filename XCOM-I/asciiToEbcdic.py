@@ -98,6 +98,7 @@ if __name__ == "__main__":
     source = "ASCII"
     legal = ["EBCDIC", "ASCII", "UTF-8"]
     file = None
+    columns = None
     
     # Convert a single file.
     aborted = []
@@ -232,6 +233,12 @@ if __name__ == "__main__":
         elif target == "EBCDIC":
             for i in range(len(ba)):
                 ba[i] = asciiToEbcdic[ba[i]]
+        # Add newlines after every fixed number of columns.
+        if columns != None and target == "ASCII":
+            i = columns
+            while (i < len(ba)):
+                ba.insert(i, 0x0A)
+                i += columns + 1
         # Save it:
         if to != None:
             outf = open(to, "wb")
@@ -273,6 +280,8 @@ if __name__ == "__main__":
                 sys.exit(1)
         elif parm.startswith("--file="):
             file = parm[7:]
+        elif parm.startswith("--columns="):
+            columns = int(parm[10:])
         elif parm == "--help":
             print("Recursively convert ASCII, UTF-8, or EBCDIC files with")
             print("names of the form *.xpl, *.hal, or *.bal in the current")
@@ -308,6 +317,9 @@ if __name__ == "__main__":
             print("                 rather than an entire folder.  The output")
             print("                 is to a file of the same name, but")
             print("                 suffixed by \".converted\".")
+            print("    --columns=N  Inserts a newline after every Nth column.")
+            print("                 The default is to make no such insertions.")
+            print("                 Only for --target=ASCII.")
             sys.exit(0)
         else:
             print("Unrecognized command-line parameter.  Use --help for help.")

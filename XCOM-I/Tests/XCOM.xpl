@@ -2611,8 +2611,8 @@ PRINT_DATE_AND_TIME:
 INITIALIZATION:                                                                 
    PROCEDURE;                                                                   
       EJECT_PAGE;                                                               
-   CALL PRINT_DATE_AND_TIME ('X P L   COMPILATION -- THE VIRTUAL AGC PROJECT -- 
-XCOM III VERSION OF ', DATE_OF_GENERATION, TIME_OF_GENERATION);                 
+   CALL PRINT_DATE_AND_TIME ('X P L   COMPILATION -- "THIS INSTALLATION" -- XCOM
+ III VERSION OF ', DATE_OF_GENERATION, TIME_OF_GENERATION);                     
       DOUBLE_SPACE;                                                             
       CALL PRINT_DATE_AND_TIME ('TODAY IS ', DATE, TIME);                       
       DOUBLE_SPACE;                                                             
@@ -4199,5 +4199,6 @@ MAIN_PROCEDURE:
                                                                                 
 CALL MAIN_PROCEDURE;                                                            
 RETURN SEVERE_ERRORS;                                                           
-
-EOF EOF EOF
+                                                                                
+EOF EOF EOF                                                                     
+/*                                                                              
