@@ -403,7 +403,7 @@ uint32_t
 MONITOR9(uint32_t op);
 
 uint32_t
-MONITOR10(descriptor_t *name);
+MONITOR10(descriptor_t *fpstring);
 
 void
 MONITOR11(void);

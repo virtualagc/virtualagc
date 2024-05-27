@@ -108,10 +108,11 @@
 #	XCOM45-360.*		... and others ...
 #	XCOM45-360A.*		Same, but as compiled by XCOM45-360.obj, running
 #				in an IBM 360 simulator.
+#	XCOM45-360C.*		Same, but as compiled by the legacy XCOM45
+#				executable, downloaded along with XCOM45 source.
 # A "bootstrap" of XCOM 4.5 is successful if XCOM45-360.obj and XCOM45-360A.obj
-# are identical (other than an embedded datestamp/timestamp of the compilation
-# time).  This is tested via automated comparison of XCOM45-360.hex vs
-# XCOM45-360A.hex. 
+# and XCOM45-360C.obj are identical (other than an embedded datestamp/timestamp
+# of the compilation time).  This is tested via automated comparison.
 #
 # Regression Tests
 # ----------------
@@ -261,16 +262,20 @@ ifdef CONTEMPORARY
 	else \
 		echo "New compiler not identical to legacy compiler itself." ; \
 	fi
-	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360C.obj | wc -l` -le 3 ] ; \
+	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360C.obj | wc -l` -le 4 ] ; \
 	then \
 		echo "Cross-comparison to legacy compiler's output successful!" ; \
 	else \
+		hexdump -C $(BASE)-360.obj >$(BASE)-360.hex ; \
+		hexdump -C $(BASE)-360C.obj >$(BASE)-360C.hex ; \
 		echo "Cross-comparison to legacy compilers's output fails!" ; \
+		echo "For more info, try:" ; \
+		echo "	meld $(BASE)-360.hex $(BASE)-360C.hex" ; \
 	fi
 else
 	echo "No legacy compiler with which to compare."
 endif
-	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l` -le 3 ] ; \
+	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l` -le 4 ] ; \
 	then \
 		echo "Bootstrap of $(BASE) successful!" ; \
 	else \

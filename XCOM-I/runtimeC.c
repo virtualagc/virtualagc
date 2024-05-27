@@ -835,19 +835,20 @@ parseParmField(int print) {
   if (print)
     {
       for (i = 0; i < optionsProcessor->numParms1; i++)
-        printf("%s\n", type1Actual[i].bytes);
+        printf("%s\n", descriptorToAscii(&type1Actual[i]));
       for (i = 0; i < optionsProcessor->numParms2; i++)
         if (type2Actual[i].numBytes == 0)
           printf("%s = NULL\n", optionsProcessor->type2[i].name);
         else
-          printf("%s = %s\n", optionsProcessor->type2[i].name, type2Actual[i].bytes);
+          printf("%s = %s\n", optionsProcessor->type2[i].name,
+              descriptorToAscii(&type2Actual[i]));
     }
   // If we've gotten here, then the PARM field has been parsed, and the
   // arrays `type1Actual` and `type2Actual` have been updated with the new
   // settings, while `type2Names` contains the names of the Type 2 parameters.
   // We need to interpret the Type 1 settings as bit-flags in OPTIONS_CODE.
   for (i = 0; i < optionsProcessor->numParms1; i++)
-    if (strncmp(type1Actual[i].bytes, "NO", 2)) // Not NO?
+    if (strncmp(descriptorToAscii(&type1Actual[i]), "NO", 2)) // Not NO?
       OPTIONS_CODE |= optionsProcessor->type1[i].optionsCode;
 
   // Finally, we can update the XPL memory (for MONITOR(13)) which holds the
@@ -870,7 +871,7 @@ parseParmField(int print) {
           putCHARACTER(address + 4 * i, &type2Actual[i]);
       }
     else
-      putFIXED(address + 4 * i, atoi(type2Actual[i].bytes));
+      putFIXED(address + 4 * i, atoi(descriptorToAscii(&type2Actual[i])));
 }
 
 int
@@ -2284,12 +2285,12 @@ MONITOR4(uint32_t dev, uint32_t recsize) {
   randomAccessFiles[OUTPUT_RANDOM_ACCESS][dev].recordSize = recsize;
 }
 
-int32_t dwAccessAreaAddress = -1;
+int dwAddress = -1;
 void
 MONITOR5(int32_t address) {
   if (address < 0 || address >= MEMORY_SIZE - 14 * 4)
     abend("MONITOR(5) address overflows physical memory");
-  dwAccessAreaAddress = address;
+  dwAddress = address;
 }
 
 // In general, new memory is allocated at `FREEPOINT`, and `FREEPOINT` is then
@@ -2353,7 +2354,7 @@ uint32_t
 MONITOR7(uint32_t address, uint32_t n) {
   memoryMapEntry_t *found;
 
-  return 0;
+  abend("MONITOR7 implementation needs rework");
 
   found = lookupAddress(address);
   if (found == NULL)
@@ -2453,32 +2454,135 @@ fromFloatIBM(uint32_t msw, uint32_t lsw) {
 
 uint32_t
 MONITOR9(uint32_t op) {
-  abend("MONITOR(9) not yet implemented");
+  /*
+   * This is a bit confusing, so let me try to summarize my understanding of
+   * it.  There are no built-in floating-point operations in XPL nor
+   * (apparently) in the 360 CPU, so they're handled in a roundabout way via
+   * the MONITOR(5,...) and MONITOR(9,...) calls.  MONITOR(5) sets up a
+   * working array in which to hold floating-point operands and results.
+   * The values are stored in IBM DP floating-point format, each of which
+   * requires two 32-bit words, one for the most-significant part and one for
+   * the less-significant part.  The first two entries in the working area
+   * specified by MONITOR(5) comprise operand0 (and the result), while the
+   * second two entries comprise operand1 (if needed).
+   */
+  double operand0, operand1;
+  uint32_t msw, lsw;
+  if (dwAddress == -1)
+    abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
+  // Get operands from the defined working area, and convert them
+  // from IBM floating point to Python floats.
+  operand0 = fromFloatIBM(getFIXED(dwAddress), getFIXED(dwAddress + 4));
+  if (op < 6)
+    operand1 = fromFloatIBM(getFIXED(dwAddress + 8), getFIXED(dwAddress + 12));
+  // Perform the binary operations.
+  if (op == 1)
+    operand0 += operand1;
+  else if (op == 2)
+    operand0 -= operand1;
+  else if (op == 3)
+    operand0 *= operand1;
+  else if (op == 4)
+    {
+      if (operand1 == 0)
+        abend("Floating-point divide by zero");
+      operand0 /= operand1;
+    }
+  else if (op == 5)
+    {
+      if (operand0 == 0 && operand1 == 0)
+        abend("Zero to the power zero");
+      operand0 = pow(operand0, operand1);
+    }
+  /*
+   * Or perform the unary operations, which are all trig functions.
+   * Unfortunately, the documentation doesn't specify the angular
+   * units.  I assume they're radians.
+   */
+  else if (op == 6)
+    operand0 = sin(operand0);
+  else if (op == 7)
+    operand0 = cos(operand0);
+  else if (op == 8)
+    operand0 = tan(operand0);
+  else if (op == 9)
+    operand0 = exp(operand0);
+  else if (op == 10)
+    operand0 = log(operand0);
+  else if (op == 11)
+    operand0 = sqrt(operand0);
+  else
+    return 1;
+  // Convert the result back to IBM floats, and store in working area.
+  toFloatIBM(&msw, &lsw, operand0);
+  putFIXED(dwAddress, msw);
+  putFIXED(dwAddress + 4, lsw);
+  return 0;
 }
 
 uint32_t
-MONITOR10(descriptor_t *name) {
-  abend("MONITOR(10) not yet implemented");
+MONITOR10(descriptor_t *fpstring) {
+  char *s;
+  uint32_t msw, lsw;
+  if (dwAddress == -1)
+    abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
+  toFloatIBM(&msw, &lsw, atof(descriptorToAscii(fpstring)));
+  putFIXED(dwAddress, msw);
+  putFIXED(dwAddress + 4, lsw);
+  return 0;
 }
 
 void
 MONITOR11(void) {
+  // A No-op, supposedly.
 }
 
 descriptor_t *
 MONITOR12(uint32_t precision) {
-  abend("MONITOR(12) not yet implemented");
+  double value;
+  char *fpFormat;
+  sbuf_t s;
+  char *ss;
+  if (dwAddress == -1)
+    abend("CALL MONITOR(5) must precede CALL MONITOR(9)");
+  value = fromFloatIBM(getFIXED(dwAddress), getFIXED(dwAddress + 4));
+  /*
+   * The "standard" HAL format for floating-point numbers is described on
+   * p. 8-3 of "Programming in HAL/S", though unfortunately the number of
+   * significant digits provided for SP vs DP is not specified and is simply
+   * said to be implementation dependent.  To summarize the format:
+   *     0.0:        Printed as " 0.0" (notice the leading space)
+   *     Positive:   Printed as " d.ddd...E±ee"
+   *     Negative:   Printed as "-d.ddd...E±ee"
+   * Given that 2**24 = 16777216 (8 digits) and 2**56 = 72057594037927936
+   * (17 digits), it should be the case that SP and DP are *fully* accurate
+   * only to 7 digits and 16 digits respectively.  Moreover, there is always
+   * exactly 1 digit (non-zero) to the left of the decimal point.  Therefore,
+   * for SP and DP, it would be reasonable to have 6 and 15 digits to the
+   * right of the decimal point respectively.
+   */
+  if (value == 0.0)
+    return cToDescriptor(NULL, " 0.0");
+  if (precision == 0)
+    fpFormat = "%+2.6e";
+  else
+    fpFormat = "%+2.15e";
+  sprintf(s, fpFormat, value);
+  if (s[0] == '+')
+    s[0] = ' ';
+  ss = strstr(s, "e");
+  if (ss != NULL)
+    *ss = 'E';
+  return asciiToDescriptor(s);
 }
 
 optionsProcessor_t *USEROPT = NULL;
 uint32_t
 MONITOR13(descriptor_t *namep) {
   // First get rid of trailing spaces in the `name`.
-  char *s;
-  sbuf_t name;
+  char *s, *name = descriptorToAscii(namep);
   FILE *f;
 
-  strncpy(name, namep->bytes, namep->numBytes);
   for (s = name; *s != 0 && !isspace(*s); s++);
   *s = 0;
   if (strlen(name) == 0)
@@ -2565,6 +2669,7 @@ MONITOR20(uint32_t *addresses, uint32_t *sizes) {
 
 uint32_t
 MONITOR21(void) {
+  abend("MONITOR21 implementation needs rework");
   return freelimit - freepoint;
 }
 
