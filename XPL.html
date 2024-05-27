@@ -117,7 +117,7 @@ Intermetrics's own XPL/I compiler.&nbsp; In fact, there is reason to
 believe that it was intentionally destroyed.&nbsp; (Prove me wrong, 
 please!)&nbsp; If it had survived, however, it would presumably have 
 been written in standard XPL and itself compiled by McKeeman's XPL 
-compiler (which was called <b>XCOM</b>).</font><br>
+compiler (which was called <b>XCOM</b>) or some later variant thereof.</font><br>
 </blockquote>
 
 
@@ -338,7 +338,15 @@ make -C Example-6.18.6</code><br>
 
 </font></blockquote><font color="#663300">
 </font>This produces an executable program within the Example-6.18.6/ folder that's also called <b>Example-6.18.6</b>.<br>
-<br>
+<blockquote><font size="-1"><b>Important note</b>:&nbsp; <font color="#663300"><code> make</code></font>
+ will be fooled — badly, compiling multiple times with the wrong target 
+names! — if the path to your current working directory contains any 
+spaces.&nbsp; You can help </font><font size="-1"><font size="-1"><font color="#663300"><code>make</code></font></font> out in that case by explicitly specifying the target name:<br>
+  </font>
+  <blockquote>
+    <pre><font size="-1" color="#663300">make -C Example-6.18.6 Example-6.18.6</font><br></pre>
+  </blockquote>
+</blockquote>
 But the world being what it is, you most likely <i>don't</i> have a 
 setup like mine, so some alterations in the instructions above may be 
 needed in your situation.&nbsp; For one thing, your C compiler may not 
@@ -452,7 +460,7 @@ that since it's such a small program (~300 lines of XPL), it would be
 easy to experiment with.&nbsp; The SKELETON language itself is very 
 bare-bones, in that it only has assignment statements in it, and those 
 assignment statements have the form <code><font color="#663300">IDENTIFIER</font></code><font color="#663300"><code> = EXPRESSION;</code></font>.&nbsp;
- Identifiers follow the same rules as they in XPL, except that lower-case 
+ Identifiers follow the same rules as they do in XPL, except that lower-case 
 letters aren't supported.&nbsp; There are no declarations, no arrays, no
  strings, and "expressions" are basically whatever normal arithmetical 
 expressions you can form from just identifiers, literal decimal numbers,
@@ -495,7 +503,7 @@ Suppose for example that we had an XPL program called <b>X</b> that was a compil
 an IBM 360).  But it's also true that if we use that native version of <b>X</b> to compile source-code in the X language, say for a program called <b>Y</b>, then the output of the compiler will still be an object file for the IBM 360.  So we still wouldn't be able to run <b>Y</b> on our native computer, and would still need an IBM 360 to run <b>Y</b>.<br></p>
 <p>Which means that even with <b>XCOM-I</b> in hand, it's still very useful to have an IBM 360 emulator in which to run not the programs <i>produced</i> by <b>XCOM-I</b>, but the programs produced by the compilers produced by <b>XCOM-I</b>.<br></p>
 <p>If you're already an IBM 360 expert or a wannabe IBM 360 user, then perhaps a full-scale IBM System/360 emulator such as <a moz-do-not-send="true" href="http://www.hercules-390.org/">Hercules</a>
- might work well for you.  As for myself, having tried to figure out 
+ might work well for you.  As for myself, having tried to figure out&nbsp; without success how to use
 Hercules, I have to concede that I'm neither a 360 expert nor 
 wannabe, and have no desire to confront that learning curve.  I'd much 
 prefer a <i>lightweight</i> IBM 360 emulator, with essentially no 
@@ -505,9 +513,12 @@ into spaceflight simulation programs than a full-blown mainframe
 emulator would be.)<br></p>
 
 <p>As it happens, there is an available candidate for such lightweight IBM 360 emulator.  This emulator, called <b>sim360</b>,
- was written by Daniel Weaver, who I've mentioned earlier as also being 
-the author of an XPL-to-C translator for standard XPL.  You can find the
- source code for <b>sim360</b> archived as <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I/sim360">the XCOM-I/sim360-source/ folder</a> in the Virtual AGC software repository, but <a moz-do-not-send="true" href="https://sourceforge.net/projects/suny-pascal/">the official place to get the most up-to-date version is Dan's own site</a>.  It's disguised on Dan's site as a Pascal compiler, but don't be confused:  There's an IBM 360 emulator in there as well!<br>
+ was written by the same Daniel Weaver who I've also mentioned earlier 
+as the author of an XPL-to-C translator for standard XPL.  You can find 
+the
+ source code for <b>sim360</b> in <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I/sim360-source/simulate">the Virtual AGC software repository</a>, but <a moz-do-not-send="true" href="https://sourceforge.net/projects/suny-pascal/">the official place to get the most up-to-date version is Dan's own site</a>.
+ That hyperlink is disguised as a Pascal compiler, which is also there, 
+but don't be confused:  There's an IBM 360 emulator in there!<br>
 </p>
 <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; 
 There is a limit, of course, to how "lightweight" an IBM 360 emulator 
@@ -537,7 +548,7 @@ along-side your compiled XPL program on the emulator.&nbsp; Fortunately,
     <li><font size="-1">For McKeeman's <b>XCOM</b>, it's <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/yaShuttle/Source%20Code/XPL-TWS-1969-03/XMON.bal">XMON.bal</a>.</font></li>
     <li><font size="-1">For SUNY's <b>XCOM</b> 4.5, which we've not discussed yet but which we'll get to in the next section, it's the slightly-different <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/XPLSM4.5.bal">XPLSM.bal</a>.</font></li>
     
-    <li><font size="-1">For Intermetrics's unavailable <b>XCOM</b>, it's the collection of BAL source-code files known as <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/MONITOR.ASM">MONITOR.ASM</a>.&nbsp; You may wonder why that matters, given that the source code for the Intermetrics version of <b>XCOM</b> has not survided, and thus we couldn't run it anyway?&nbsp; (After all, the whole point of <b>XCOM-I</b> in the first place is to fill in for the missing Intermetrics <b>XCOM</b>, and <b>XCOM-I</b> needs no submonitor!)&nbsp; Well presumably, if we compile HAL/S source code (like PFS or BFS) using <b>HAL/S-FC</b>, we'd expect PFS or BFS to need the same submonitor as the Intermetrics <b>XCOM</b> would have.&nbsp; Probably.&nbsp; Or at least, maybe!<br>
+    <li><font size="-1">For Intermetrics's unavailable <b>XCOM</b>, it's the collection of BAL source-code files known as <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/yaShuttle/Source%20Code/PASS.REL32V0/MONITOR.ASM">MONITOR.ASM</a>.&nbsp; You may wonder why that matters, given that the source code for the Intermetrics version of <b>XCOM</b> has not survived, and thus we couldn't run it anyway?&nbsp; (After all, the whole point of <b>XCOM-I</b> in the first place is to fill in for the missing Intermetrics <b>XCOM</b>, and <b>XCOM-I</b> needs no submonitor!)&nbsp; Well presumably, if we compile HAL/S source code (like PFS or BFS) using <b>HAL/S-FC</b>, we'd expect PFS or BFS to need the same submonitor as the Intermetrics <b>XCOM</b> would have.&nbsp; Probably.&nbsp; Or at least, maybe!<br>
       </font></li>
   </ul>
   <p><font size="-1">What we <i>don't</i> have in this scenario is a BAL
@@ -593,51 +604,126 @@ The command-line switches for <b>sim360</b> probably look mysterious, but they'r
 <li><font color="#663300"><code>-o0ET stdout</code></font>:  Causes <font color="#663300"><code>OUTPUT(0)</code></font> to send data to <font color="#663300"><code>stdout</code></font> and automatically translate it from EBCDIC to ASCII.<br></li><li><code><font color="#663300">-i0AT stdin</font></code>:  Causes <font color="#663300"><code>INPUT(0)</code></font> to receive data from <font color="#663300"><code>stdin</code></font> and automatically translate it from ASCII to EBCDIC.<br></li>
 </ul>
 <h2><a name="compilingXCOM"></a>Insane Bootstrapping!</h2>
-For the still meatier example that I promised (threatened?) earlier, here it is with a vengeance!&nbsp; We're going try <i>bootstrapping</i>
- some XPL compilers.&nbsp; Although up to now I've only spoken of one 
-pure-XPL compiler, we happen to have XPL source code for two related 
-but different XPL compilers:<br>
-<ul>
-  <li>McKeeman <i>et al.</i>'s XCOM, from the book <i>A Compiler Generator</i>, from 1969 or 1970, is what I've spoken of so often above.&nbsp; In our software repository, the source code consists of <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/Tests/XCOM.xpl">XCOM.xpl</a>, which contains the source code for XCOM proper, and the file <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/XPL.LIBRARY.xpl">XPL.LIBRARY.xpl</a>, which contains the source code for <a moz-do-not-send="true" href="#compactify">the <font color="#663300"><code>COMPACTIFY</code></font> procedure</a>.&nbsp;
- The program comments actually identify this program as "XCOM III", 
-implying that there were earlier major versions as well, to which we're 
-not privy.&nbsp; For clarity in this discussion, I'll start referring to it as <u><b>XCOM3</b></u>.</li>
-  <li>SUNY's (State University of New York, Stonybrook) XCOM version 4.5 has been taken from <a moz-do-not-send="true" href="https://sourceforge.net/projects/suny-pascal/">Daniel Weaver's website</a>; in the Virtual AGC software repository, the source code consists of the files <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/xcom4.xpl">XCOM4.5.xpl</a> (for XCOM proper) and <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/XPLIB4.5.xpl">XPLIB4.5.xpl</a> (for <font color="#663300"><code>COMPACTIFY</code></font>).&nbsp; The materials we have
- are from 1976 or 1977.&nbsp; The original source code has a block of embedded IBM 360 assembly-language code, which <b>XCOM-I</b> cannot handle without assistance, so the additional C-language "patch" file <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/patch0.c">patch0.c</a> is needed as well; <a moz-do-not-send="true" href="#hooks"><b>XCOM-I</b>'s "patch" system is discussed later</a>, using this very example.&nbsp; Interestingly, the SUNY distribution contains an 
-IBM 360 executable load file as well, which I call <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/XCOM4-1976.obj">XCOM45-19760719.obj</a>, that can be run in <b>sim360</b> (see the preceding section).&nbsp; For clarity, I'll refer to this version of the compiler as <u><b>XCOM45</b></u>
- from now on.&nbsp; (Don't be confused by a different XCOM version with 
-the source-code file xcom4.xpl on Dan's site; it's not a legacy program,
- but one which has modern modifications to XCOM45 source code that we 
-needn't concern ourselves with.)<br>
-  </li>
-  
-</ul>
-Also from now on, if I'm speaking generically about any of these old compilers, I'll simply refer to <b>XCOM<i>x</i></b>.<br>
+And I do mean <i>insane</i>.<br>
+<br>
+Regarding the "still meatier example" that I promised (threatened?) earlier, here it is with a vengeance!&nbsp; We're going try <i>bootstrapping</i>
+ some legacy standard-XPL compilers.&nbsp; By a "legacy" compiler, I 
+mean an IBM 360 compiler from the good-old 1960's or 1970's, against 
+which we can hopefully accurately measure the authenticity of <b>XCOM-I</b>'s behavior, at least in so far as standard XPL is concerned.&nbsp; We happen to have XPL source code <i>and</i> IBM 360 builds of more than one such legacy compiler:<br>
+<br>
+<table cellspacing="2" cellpadding="2" border="1">
+  <tbody>
+    <tr>
+      <th valign="bottom" align="center">Designation<br>
+      </th>
+      <th valign="bottom" align="center">Notes<br>
+      </th>
+      <th valign="bottom" align="center">Where I Got it From<br>
+      </th>
+      <th valign="bottom" align="center">Legacy XPL Source Code for XCOM Proper<br>
+      </th>
+      <th valign="bottom" align="center">Legacy XPL Source Code for Library<br>
+      </th>
+      <th valign="bottom" align="center">Legacy IBM 360 Executable<br>
+      </th>
+      <th valign="bottom" align="center">"Modern" Patch(es) for use with XCOM-I<br>
+      </th>
+    </tr>
+    <tr>
+      <td valign="middle" align="center"><b>XCOM3</b><br>
+      </td>
+      <td valign="middle">This is the version of XCOM listed in the book <i>A Compiler Generator</i>.&nbsp; Printouts from it identify it as "XCOM III".<br>
+        <br>
+In reality, there's no way to know if it's identical to the book without
+ comparing it line by line, which I have not done.&nbsp;&nbsp; The notes
+ in the download file state that the files were recovered from a legacy 
+computer tape from the Stanford Computation Center, dated 1969-01-23. 
+&nbsp; The contemporary notes on the tape itself hint that it is the 
+source code from the book, but stop short of saying explicitly that it's
+ the precise version that appears in the book.&nbsp;&nbsp; The 
+contemporary notes further state that <br>
+        <blockquote><font size="-1">"THE BINARY IMAGE OF THE XCOM COMPILER ... [is] THE RESULT OF USING XCOM TO COMPILE ITSELF FROM THE SOURCE CARDS"</font><br>
+        </blockquote>
+However, if you run the binary executable, its printout says that it was
+ built on May 2, 2001, at 13:40:40.19.&nbsp; I'd suggest it's rare to 
+find files created in 2001 on tapes made in 1969.&nbsp; I'll give 
+pretty-convincing reasons later to believe that while this version of 
+the source code was compiled to get this executable, a different version
+ of the compiler itself was used to do so. Regardless, how this 2001 
+executable made its way onto the 1969 tape, or at 
+least into the download file, I cannot say.<br>
+      </td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://www.cs.toronto.edu/XPL/xpl.zip">University of Toronto XPL page</a><br>
+      </td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/Tests/XCOM.xpl">XCOM.xpl</a></td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/XPL.LIBRARY.xpl">XPL.LIBRARY.xpl</a></td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/Tests/XCOM3-20010502.obj">XCOM3-20010502.obj</a><br>
+      </td>
+      <td valign="middle" align="center">n/a<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="middle" align="center"><b>XCOM45</b><br>
+      </td>
+      <td valign="top">The accompanying notes indicate that this is from
+ a computer tape from the State University of New York, 
+Stonybrook.&nbsp; The notes from the tape itself date it 1977-05-22.<br>
+        <br>
+No information is given about how the binary executable of the compiler 
+was created.&nbsp; Its printout identifies itself as "XCOM 4.5", compiled on
+ July 19, 1976, at 21:05:40.16.&nbsp; Fortunately, unlike <b>XCOM3</b>, 
+that's consistent with the date of the tape itself.&nbsp; But for 
+reasons we'll come to later, I believe that while the provided 
+executable is indeed compatible with the version of the XPL source code 
+provided, it was nevertheless not used to compile itself.<br>
+      </td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://sourceforge.net/projects/suny-pascal/files/suny0005.tar.gz/download">Dan Weaver's XPL project</a><br>
+      </td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/xcom4.xpl">XCOM4.5.xpl</a></td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/XPLIB4.5.xpl">XPLIB4.5.xpl</a></td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/XCOM4-1976.obj">XCOM45-19760719.obj</a></td>
+      <td valign="middle" align="center"><a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/sim360-source/port/patch0.c">patch0.c</a></td>
+    </tr>
+  </tbody>
+</table>
+<br>
+
+To avoid confusion, from now on I'll refer to these specific compilers as <b>XCOM3</b> or <b>XCOM45</b>,
+ rather than via vague references like "McKeeman XCOM".&nbsp; Also from 
+now on, if I'm speaking generically about any of these old compilers, 
+I'll simply refer to <b>XCOM<i>x</i></b>.&nbsp; (For the legacy executables, I'll generically call those <b>XCOM</b><b><i>x-YYYYMMDD</i></b>.)&nbsp; As for the "patches" in the rightmost column, <a moz-do-not-send="true" href="#hooks">XCOM-I
+ has a framework for providing C-language patch files to replace the 
+functionality the original XPL source code implemented by inline IBM 360
+ machine code</a>.&nbsp; Fortunately, <b>XCOM3</b> has no such inlined code, and <b>XCOM45</b> has merely has a single block of 19 consecutive machine-code instructions.&nbsp; The patch file, of course, was <i>not</i> on the legacy computer tape; I wrote it myself.<br>
 <br>
 "Bootstrapping" is a process employed by folks who feel compelled to 
-write computer-language compilers that can "self-compile".&nbsp; For 
-example, you'll find that the source code for the C compiler <b>gcc</b> is itself written in C, and intended to be compiled by <b>gcc</b> as well.&nbsp; Which is fine nowadays, since <b>gcc</b> exists and is very capable.&nbsp; But how could it have possibly worked the very first time, when you had <b>gcc</b> source code but no <b>gcc</b> to compile it with?&nbsp; Well, obviously the initial versions of <b>gcc</b> must have been compiled with a C compiler other than <b>gcc</b>, and through successive iterations of this process <b>gcc</b>
- became more and more capable, until eventually it was able to compile 
+write computer-language compilers that can "self-compile"; in the case of XPL, that means that an <b>XCOM</b> executable can compile the XPL source code for <b>XCOM</b>, and get back an executable <i>identical</i>
+ to itself when it does so.&nbsp; How could it have possibly worked the 
+very first time back in the 1960's, when there was XPL source code but 
+no <b>XCOM</b> executable yet to compile it with?&nbsp; Well, obviously the initial versions of <b>XCOM</b> must have been very cut-rate; and they must have been compiled with something <i>other</i> than <b>XCOM</b>, something presumably with very-constrained functionality itself and not written in XPL itself.&nbsp; But over time, as <b>XCOM</b> became more and more capable, <b>XCOM</b> was eventually able to compile 
 itself.&nbsp; That process is called "bootstrapping", as in "hauling 
 yourself up by your own bootstraps".&nbsp; We're now going to try doing 
 that with <b>XCOM<i>x</i></b>.<br>
+<blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; To be clear, <b>XCOM-I</b> is not self-compiling.&nbsp; It's written in Python, not XPL.&nbsp; Rather, it's <b>XCOM3</b> and <b>XCOM45</b> that I expect to be self-compiling once they're bootstrapped.&nbsp; In the bootstrapping scenario, <b>XCOM-I</b> is that <i>other</i> compiler used to compile the initial version of <b>XCOMx</b> before an <b>XCOMx</b> executable exists.&nbsp; Except that unlike the normal bootstrapping scenario, <b>XCOM-I</b>, <b>XCOM3</b>, and <b>XCOM45</b> are full-blown compilers rather than being the initial weak-and-feeble versions thereof.</font><br>
+</blockquote>
+
+
+Also to be clear, the use case for <b>XCOM-I</b> I'm personally interested in is building <b>HAL/S-FC</b> and then forgetting that XPL and <b>XCOM-I</b> even exist.&nbsp;&nbsp;<img moz-do-not-send="true" src="smiley.png" alt="" width="16" height="16">&nbsp; And we don't need <i>a single one</i> of these <b>XCOM<i>x</i></b> programs to do that.&nbsp; But still, it's going to go much more smoothly if <b>XCOM-I</b> is believed to work properly in the first place.&nbsp; And if we can use <b>XCOM-I</b> for bootstrapping <b>XCOM<i>x</i></b>, that will give us a certain degree of confidence that <b>XCOM-I</b>
+ does in fact work as intended. And if in that process <b>XCOM-I</b> can be made useful for 
+somebody who (unlike myself) actually wants to play around with XPL, 
+then why not?<br>
 <br>
-To be clear, the use case for <b>XCOM-I</b> I'm personally interested in is building <b>HAL/S-FC</b> and then forgetting that <b>XCOM-I</b> even exists.&nbsp;&nbsp;<img moz-do-not-send="true" src="smiley.png" alt="" width="16" height="16">&nbsp; And we don't need <i>a single one</i> of these <b>XCOM<i>x</i></b> programs to do that.&nbsp; But still, it's going to go much more smoothly if <b>XCOM-I</b> is believed to work properly in the first place.&nbsp; And if we can use <b>XCOM-I</b> for bootstrapping <b>XCOM<i>x</i></b>, that will give us a certain degree of confidence that <b>XCOM-I</b> does in fact work as intended.<br>
-<br>
-Here's the bootstrapping game-plan as it applies to any/all of the <b>XCOM<i>x</i></b> compilers:<br>
+Here's the bootstrapping game-plan as it applies to any or all of the legacy <b>XCOM<i>x</i></b> compilers:<br>
 <ol>
   <li>We'll use <b>XCOM-I</b> to compile the XPL source code for <b>XCOM<i>x</i></b>.  That will give us an executable which I'll call <b><b>XCOM<i>x</i></b>-native</b> that runs natively on our Linux, Windows, or Mac computers. <br>
 </li>
   <li>We'll then use <b>XCOM<i>x</i></b><b>-native</b> to compile the XPL source code for <b>XCOM<i>x</i></b> <i>again</i>.  That will give us an executable which I'll call&nbsp;<b><b>XCOM<i>x</i></b>-360</b> that's native to the IBM 360. I.e., it only runs on an IBM 360 or a simulation thereof.<br></li>
-  <li>Finally, we'll run&nbsp;<b><b>XCOM<i>x</i></b>-360</b> under <b>sim360</b> to compile the source code for <b>XCOM<i>x</i></b> one last time.  That will give us an executable which I'll call&nbsp;<b><b>XCOM<i>x</i></b>-360A</b>.&nbsp; If everything worked perfectly, <b><b>XCOM<i>x</i></b>-360A</b> should be byte-for-byte identical to <b><b>XCOM<i>x</i></b>-360</b>.<br></li>
+  <li>Finally, we'll run&nbsp;<b><b>XCOM<i>x</i></b>-360</b> under <b>sim360</b> to compile the source code for <b>XCOM<i>x</i></b> one last time.  That will give us an executable which I'll call&nbsp;<b><b>XCOM<i>x</i></b>-360A</b>.&nbsp; If everything worked perfectly, <b><b>XCOM<i>x</i></b>-360A</b> should be byte-for-byte identical to <b><b>XCOM<i>x</i></b>-360</b>.</li>
+<li><i>Finally</i> finally, we'll run the legacy <b>XCOM<i>x</i></b><b>-<i>YYYYMMDD</i></b> executable under <b>sim360</b> to compile source code for <b>XCOM<i>x</i></b> one <i>really-truly</i> last time.&nbsp; That will give us an executable which I'll call <b>XCOM<i>x</i>-360C</b>.&nbsp; If everything worked perfectly, <b><b>XCOM<i>x</i></b>-360C</b> should be byte-for-byte identical to <b><b>XCOM<i>x</i></b>-360</b>.
+</li>
+
 </ol>
-<blockquote><font size="-1"><b>Aside:</b>&nbsp; The final statement above isn't precisely correct.&nbsp;  All of the <b>XCOM<i>x</i></b> executables, whether <b>-native</b>, <b>-360</b>, or <b>-360A</b>,
- like to include the date and time on which they were compiled in the 
-reports they print out.That requires those dates and times to be 
-embedded within the executable load file.&nbsp; So a straightforward 
-automated test that load files are byte-for-byte identical will always 
-fail, since the embedded timestamps will always differ.&nbsp; Don't worry about that at the moment.<br>
-  </font></blockquote>
+
 That's a <i>lot</i> of XPL compilers floating around to keep straight.&nbsp; Here's a synopsis of the <b>XCOM</b> variants relevant to the discussion:<br>
 <br>
 <table align="center" cellspacing="2" cellpadding="2" border="1">
@@ -748,32 +834,82 @@ Object Files <br>
       <td valign="middle" align="center"><font color="#000099"><b>XCOM45-360A.obj</b></font></td>
       <td valign="middle" align="center"><font color="#000099">XCOM4.5.xpl, XPLIB4.5.xpl</font></td>
       <td valign="middle" align="center"><font color="#000099"><b>XCOM45-360.obj</b></font></td>
-    </tr>
+    </tr><tr>
+  <td valign="middle" align="center"><b>XCOM3-20010502.obj</b><b><br>
+</b>
+
+  </td>
+  <td valign="middle" align="center">XCOM.xpl, XPL.LIBRARY.xpl</td>
+  <td valign="middle" align="center">n/a</td>
+  <td rowspan="2" colspan="1" valign="middle" align="center">Yes</td>
+  <td rowspan="2" colspan="1" valign="middle" align="center">Only under <b>sim360</b> or similar</td>
+  <td rowspan="2" colspan="1" valign="middle" align="center">XPL, EBCDIC coding</td>
+  <td rowspan="2" colspan="1" valign="middle" align="center">IBM 360 load file</td>
+  <td rowspan="2" colspan="1" valign="middle" align="center">EBCDIC<br>
+  </td>
+</tr>
+<tr>
+  <td valign="middle" align="center"><b>XCOM45-19760719.obj</b><b><br>
+</b>
+  </td>
+  <td valign="middle" align="center">XCOM4.5.xpl, XPLIB4.5.xpl</td>
+  <td valign="middle" align="center">n/a<br>
+  </td>
+</tr><tr>
+  <td valign="middle" align="center"><b><font color="#ff0000">XCOM3-360C.obj<br>
+  </font></b>
+  </td>
+  <td valign="middle" align="center"><font color="#ff0000">XCOM.xpl, XPL.LIBRARY.xpl</font></td>
+  <td valign="middle" align="center"><b><font color="#ff0000">XCOM3-20010502.obj</font></b></td>
+  <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#ff0000">Yes<br>
+</font>
+  </td>
+  <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#ff0000">Only under <b>sim360</b> or similar<br>
+</font>
+  </td>
+  <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#ff0000">XPL, EBCDIC coding<br>
+</font>
+  </td>
+  <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#ff0000">IBM 360 load file</font><br>
+  </td>
+  <td rowspan="2" colspan="1" valign="middle" align="center"><font color="#ff0000">EBCDIC</font><br>
+  </td>
+</tr>
+<tr>
+  <td valign="middle" align="center"><b><font color="#ff0000">XCOM45-360C.obj<br>
+  </font></b>
+  </td>
+  <td valign="middle" align="center"><font color="#ff0000">XCOM4.5.xpl, XPLIB4.5.xpl</font></td>
+  <td valign="middle" align="center"><b><font color="#ff0000">XCOM45-19760719.obj</font></b></td>
+</tr>
+
+
     
   </tbody>
 </table>
 <br>
-There are other possibilities, such as compiling one of the <b>XCOM<i>x</i></b> compiler's source code with another of the <b>XCOM<i>x</i></b> compiler's <b>-native</b> or <b>-360</b> executables.&nbsp; Those are left as an exercise for the reader.<br>
-<blockquote><b><font size="-1">Note:</font></b><font size="-1">&nbsp; All of the instructions in the succeeding subsections assume that your current working directory is a local copy of <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/tree/master/XCOM-I">the XCOM-I/ folder within the Virtual AGC source-code hierarchy</a>.<br>
-</font></blockquote>In the next three subsections, I'm going to make a 
+There are other possibilities that the table doesn't cover, for 
+compiling stuff with other stuff .&nbsp; Those are left as an exercise 
+for the reader, though I don't think they have any relevance <i>vis à vis</i> bootstrapping.<br><br>
+In the next four subsections, I'm going to make a 
 detailed examination of the steps needed to actually carry out the 
 bootstrapping manipulations and to show that the bootstrapping was 
 successful.&nbsp; Or not!&nbsp; (But it was successful for me.)<br>
 <blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; 
-If you don't have the patience for that, the provided makefile will 
-perform the entire bootstrapping process for you, if you like.&nbsp; At 
-least if you're on Linux and have the right helper software 
+If you don't have the patience for that, <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/Makefile">the provided makefile</a> will 
+perform all 4 steps of the bootstrapping roadmap for you, if you like, <a moz-do-not-send="true" href="#halsfc">before bypassing the discussion</a> about that roadmap.&nbsp; At 
+least, it will if you're on Linux and have the right helper software 
 installed.&nbsp; And maybe in Mac OS.&nbsp; I'm sure it won't work in 
 Windows as-is, but that it could be made to work; but I'm not going to 
-personally research it, and you can personally look at the makefile to 
+personally research it, and you can look at the makefile yourself to 
 see what has to be done.&nbsp; If you figure it out, drop me a line and 
-tell me about it.&nbsp; At any rate, the commands to bootstrap <b>XCOM3</b> and <b>XCOM4</b>
- are as follows, and simply print a messages at the end that the process
+tell me about it.&nbsp; At any rate, the commands to bootstrap <b>XCOM3</b> and <b>XCOM45</b>
+ using the makefile are as follows.&nbsp; It simply prints a messages at the end that the process
  either succeeded or failed, after which the various compilers listed in
  the table above will be present:<br>
   </font>
   <blockquote>
-    <pre><font size="-1"><font color="#663300">make bootstrap3<br>make bootstrap45</font><br></font></pre>
+    <pre><font size="-1"><font color="#663300">cd XCOM-I<br>make bootstrap3<br>make bootstrap45</font><br></font></pre>
   </blockquote>
 </blockquote>
 <blockquote>
@@ -786,7 +922,7 @@ tell me about it.&nbsp; At any rate, the commands to bootstrap <b>XCOM3</b> and 
 
 <blockquote>
   </blockquote>For <b>XCOM3</b>:<br>
-<blockquote><pre><font color="#663300">XCOM-I.py --xpl --output=XCOM3-native Tests/XCOM.xpl
+<blockquote><pre><font color="#663300">cd XCOM-I<br>XCOM-I.py --xpl --output=XCOM3-native Tests/XCOM.xpl
 make -C XCOM3-native
 </font></pre>
 
@@ -794,7 +930,7 @@ make -C XCOM3-native
 For <b>XCOM45</b>:<br>
 
 <blockquote>
-  <pre><font color="#663300">XCOM-I.py --xpl --lib-file=sim360-source/port/XPLIB4.5.xpl --output=XCOM45-native sim360-source/port/XCOM4.5.xpl
+  <pre><font color="#663300"><font color="#663300">cd XCOM-I<br></font>XCOM-I.py --xpl --lib-file=sim360-source/port/XPLIB4.5.xpl --output=XCOM45-native sim360-source/port/XCOM4.5.xpl
 make -C XCOM45-native
 </font></pre>
 
@@ -813,6 +949,7 @@ handling.&nbsp; The complete <b>XCOM</b><b>3</b>
  possible to compare the original reports from <b>XCOM3</b>, 
 including the interspersed IBM System/360 assembly language produced by 
 the compiler, versus the corresponding reports created now by <b>XCOM3-native</b>:<br>
+<br>
 <table align="center" cellspacing="2" cellpadding="2" border="1">
 
 
@@ -846,13 +983,13 @@ The Virtual AGC Project (2024)<br>
   </tbody>
 </table>
 <br>
-As for a similar check of <b>XCOM45-native</b>, there is a possible way, and we'll get to in a minute.&nbsp; <br>
+As for a similar check of <b>XCOM45-native</b>, I'm not aware of any legacy reports or other data known to have been produced by <b>XCOM45</b>.<br>
 
 
 <h3>Step 2:&nbsp; Compiling XCOM<i>x</i> source code with XCOM<i>x</i>-native to produce XCOM<i>x</i>-360</h3>
 For <b>XCOM3</b>:<br>
 <blockquote>
-  <pre><font color="#663300">XCOM3-native/XCOM3-native --ddi=0,Tests/XCOM.xpl</font><font color="#663300"> --ddi=2,XPL.LIBRARY.xpl --raf=B,3600</font><font color="#663300"><font color="#663300">,1</font>,XCOM3-360.obj --raf=B,3600</font><font color="#663300"><font color="#663300">,2</font>,</font><font color="#663300">XCOM3-360</font><font color="#663300">.dat --raf=B,3600</font><font color="#663300"><font color="#663300">,3</font>,</font><font color="#663300"><font color="#663300">XCOM3-360</font>.str &gt;XCOM3-360.rpt</font></pre>
+  <pre><font color="#663300"><font color="#663300">cd XCOM-I<br></font>XCOM3-native/XCOM3-native --ddi=0,Tests/XCOM.xpl</font><font color="#663300"> --ddi=2,XPL.LIBRARY.xpl --raf=B,3600</font><font color="#663300"><font color="#663300">,1</font>,XCOM3-360.obj --raf=B,3600</font><font color="#663300"><font color="#663300">,2</font>,</font><font color="#663300">XCOM3-360</font><font color="#663300">.dat --raf=B,3600</font><font color="#663300"><font color="#663300">,3</font>,</font><font color="#663300"><font color="#663300">XCOM3-360</font>.str &gt;XCOM3-360.rpt</font></pre>
 
 </blockquote>
 
@@ -860,13 +997,13 @@ For <b>XCOM3</b>:<br>
 For <b>XCOM45</b>:<br>
 
 <blockquote>
-  <pre><font color="#663300">XCOM45-native/XCOM45-native --ddi=0,sim360-source/port/XCOM4.5.xpl</font><font color="#663300"> --ddi=2,sim360-source/port/XPLIB4.5.xpl --raf=B,7200</font><font color="#663300"><font color="#663300">,1</font>,XCOM45-360.obj --raf=B,7200</font><font color="#663300"><font color="#663300">,2</font>,</font><font color="#663300">XCOM45-360</font><font color="#663300">.dat --raf=B,7200</font><font color="#663300"><font color="#663300">,3</font>,</font><font color="#663300"><font color="#663300">XCOM45-360</font>.str &gt;XCOM45-360.rpt</font></pre>
+  <pre><font color="#663300"><font color="#663300">cd XCOM-I<br></font>XCOM45-native/XCOM45-native --ddi=0,sim360-source/port/XCOM4.5.xpl</font><font color="#663300"> --ddi=2,sim360-source/port/XPLIB4.5.xpl --raf=B,7200</font><font color="#663300"><font color="#663300">,1</font>,XCOM45-360.obj --raf=B,7200</font><font color="#663300"><font color="#663300">,2</font>,</font><font color="#663300">XCOM45-360</font><font color="#663300">.dat --raf=B,7200</font><font color="#663300"><font color="#663300">,3</font>,</font><font color="#663300"><font color="#663300">XCOM45-360</font>.str &gt;XCOM45-360.rpt</font></pre>
 
 </blockquote>As you can see, this involves a bit of command-line complexity that step
  1 did not.&nbsp; The command-line options are all there to compensate 
 for the lack of Job Control Language (JCL), and in particular to provide
  replacements for missing <font color="#663300"><code>DD</code></font> statements.&nbsp; For one thing, there's an extra file which 
-needs to be attached as an input, because <b>XCOM</b> always needs to include the library file containing <a moz-do-not-send="true" href="#compactify"><font color="#663300"><code>COMPACTIFY</code></font></a>.&nbsp; Also, <b>XCOM</b> wants to use several "random-access
+needs to be attached as an input, because <b>XCOM</b><i><b>x</b></i> always needs to include the library file containing <a moz-do-not-send="true" href="#compactify"><font color="#663300"><code>COMPACTIFY</code></font></a>.&nbsp; Also, <b>XCOM</b><i><b>x</b></i> wants to use several "random-access
  files" for storing object code and what not, and we have to attach 
 those files.&nbsp; (Refer to <a moz-do-not-send="true" href="#file">the <font color="#663300"><code>FILE</code></font> entry in the section on XPL's built-in library functions</a>.)&nbsp; Those random-access files are as follows:<br>
 <ul>
@@ -897,19 +1034,9 @@ the files, addition of </font><font size="-1"><font size="-1"><font color="#6633
 if only to verify that somewhere in each of them is a line reading "NO 
 ERRORS WERE DETECTED".<br>
 </p>
-<p>Now, I promised in the succeeding section that there might be a way to check the functionality of <b>XCOM45-native</b>
- vs contemporary (1976) materials.&nbsp; The way I had in mind, but have
- delayed explaining until now, was this:&nbsp; The XCOM45-360.obj we've 
-just created might (knock wood!) be byte-for-byte identical to the 
-XCOM45-19760719.obj which has survived from 1976 to the present 
-day.&nbsp; Unfortunately, my hopes have been dashed, and it is <i>not</i>
- identical.&nbsp; Huge swaths of it are indeed the same, but there are 
-differences that to me seem indicative that a large chunk has simply 
-been displaced by 160 bytes, a fact for which I have no ready 
-explanation.&nbsp; <i>Perhaps</i> it's an <b>XCOM-I</b> bug, but perhaps it's just that the object file XCOM45-19760719.obj was really compiled by (say) <b>XCOM</b> 4.4 rather than by <b>XCOM</b> 4.5.&nbsp; After all, we know <i>when</i> XCOM45-19760719.obj was compiled — hint: it's July 19, 1976 at 9:05:40.16 p.m. — but not <i>which compiler</i>
- was used to compile it.&nbsp; In short, while it would have been great 
-if the files match, it doesn't really say much one way or the other if 
-there's a mismatch instead.<br>
+<p>I had <i>hoped</i> at this point to find that <b>XCOM<i>x</i>-360.obj</b> is byte-for-byte identical to the corresponding legacy executable <b>XCOM</b><b><i>x-YYYYMMDD</i>.obj</b>. &nbsp; Unfortunately, my hopes have been dashed:&nbsp; They are interestingly-similar but not identical.&nbsp; But as I mentioned earlier, I expect to give convincing evidence that <b>XCOM</b><b><i>x-YYYYMMDD</i>.obj</b> was <i>not</i> actually self-compiled, and instead was presumably compiled by a <i>different version</i> of <b>XCOM</b>.&nbsp; If so, it would fully explain the mismatch versus <b>XCOM<i>x</i>-360.obj</b>.&nbsp;
+ But until I show you that evidence, it would certainly be reasonable to
+ maintain the possibility that the mismatch is due to a bug in <b>XCOM-I</b>.<br>
 </p>
 <blockquote>
 </blockquote>
@@ -928,15 +1055,19 @@ For <b>XCOM3</b>:
   <pre><font color="#663300">sim360 --size=7200</font><font color="#663300"><font color="#663300"> -o0ET stdout </font>-i0AT sim360-source/port/XCOM4.5.xpl -i2AT </font><font color="#663300"><font color="#663300">sim360-source/port/</font>XPLIB4.5.xpl -f1wb+ XCOM45-360A.obj -f2wb+ XCOM45-360A.dat -f3wb+ XCOM45-360A.str XCOM45-360.obj</font></pre>
 </blockquote>These command-line switches differ in detail from the ones we had to with <b>XCOM<i>x</i>-native</b>, but I think you can see that they're just the same old replacements for JCL <font color="#663300"><code>DD</code></font> commands in a different syntax.<br>
 <br>
-For this denouement of the bootstrapping progress, what are the results?&nbsp; They're the same with both <b>XCOM3</b> and <b>XCOM45</b>, so I'll just explain what we see with <b>XCOM45</b>.<br>
-<br>Firstly, th build of <b>XCOM45-360A.obj</b> succeeds with no errors.&nbsp; If <b>XCOM45</b>
- has successfully built itself, we <i>should</i> find that <b>XCOM45-360.obj</b> and 
-<b>XCOM45-360A.obj</b> are byte-for-byte identical, except that the embedded 
-timestamps for the compile-times will differ.&nbsp; (And of course, if we
- built them on different days, then the embedded datestamp would differ 
-as well.)&nbsp; To perform this comparison, I made hexadecimal dumps of 
+For this denouement of the bootstrapping progress, what are the results?&nbsp; <b>XCOM3</b> and <b>XCOM45</b> are in the same boat in this regard, so I'll just explain what we see with <b>XCOM45</b>.&nbsp; You can check out <b>XCOM3</b> yourself if you like.<br>
+<br>Firstly, the build of <b>XCOM45-360A.obj</b> succeeds with no errors.&nbsp; If <b>XCOM45</b>
+ has successfully built itself, I claimed above that <b>XCOM45-360.obj</b> and 
+<b>XCOM45-360A.obj</b> will be byte-for-byte identical.&nbsp; That was actually an oversimplification.&nbsp; Anybody who runs <b>XCOM<i>x</i></b>
+ will immediately notice that the first thing reported by it is the date 
+and time at which the compiler itself was compiled.&nbsp; To be able to 
+do that, an <b>XCOM<i>x</i></b> executable must have such a timestamp embedded within it somewhere.&nbsp; Which further means that using identical <b>XCOM<i>x</i></b> executables to compile identical XPL source code for <b>XCOM<i>x</i></b>
+ will nevertheless produce output files that embed different timestamps,
+ and therefore will not be byte-for-byte identical.&nbsp; But there are 
+tricks you can use to work around that.&nbsp; Here's one of them:&nbsp; I
+ made hexadecimal dumps of 
 the two object files, and then used a file-comparison utility to compare
- the hex dumps.&nbsp; Here's a screenshot of the <i>only</i> difference found between the two files, with <b>XCOM45-360.obj</b> on the left and <b>XCOM45-360A.obj</b> on the right:<br>
+ the hex dumps side-by-side.&nbsp; Here's a screenshot of the <i>only</i> difference found between the two files, with <b>XCOM45-360.obj</b> on the left and <b>XCOM45-360A.obj</b> on the right:<br>
 <br>
 <img moz-do-not-send="true" src="XCOM45-360-meld.png" alt="" width="1580" height="89"><br>
 <br>
@@ -952,36 +1083,90 @@ compile time using <a moz-do-not-send="true" href="#builtin">the built-in functi
 360 programs all store their integer data in <i>big-endian</i> form, so that the most-significant bytes come first in memory.)&nbsp; In short, <b>XCOM45</b><b>-360.obj</b> can indeed accurately build itself, and bootstrapping <b>XCOM45</b> has been 100% successful!<br>
 <br>
 Or in short, it works!&nbsp; <b>XCOMx</b> can be bootstrapped and accurately builds itself.<br>
+<h3>Step 4:&nbsp; Bonus Cross-Comparison of Files Built by XCOMx-360.obj Versus Files Built by Legacy XCOMx Executables</h3>
+<p>In step 2 above, I noted that <b>XCOM<i>x</i>-360.obj</b>, disappointingly, 
+is not identical to the corresponding legacy IBM 360 executable load 
+file <b>XCOM</b><b><i>x-YYYYMMDD</i>.obj</b>.&nbsp; I speculated, but could not prove, that this was because 
+those legacy executables had themselves been built using different 
+versions of <b>XCOM</b><b><i>x</i></b>.&nbsp; For example, perhaps the legacy <b>XCOM45</b> was built by XCOM 4.4, or the legacy <b>XCOM3</b> was built by XCOM 3.2.&nbsp; Now comes the proof!<br>
+</p>
+<p>Suppose that my speculation is true.&nbsp; In that case, if we rebuild <b>XCOM</b><b><i>x</i></b> source code using <b>XCOM</b><b><i>x-YYYYMMDD</i>.obj</b>, then:</p>
+<ul>
+  <li>The executable load file we get by doing that <i>also</i> should <i>not</i> match <b>XCOM</b><b><i>x-YYYYMMDD</i>.obj</b> byte-for-byte, proving that <b>XCOM</b><b><i>x-YYYYMMDD</i>.obj</b> had not been self-built.<br>
+  </li>
+  <li>But it <i>should</i> match <b>XCOMx-360.obj</b> byte-for-byte, 
+giving us a tremendously warm, fuzzy feeling of independent confirmation
+ that the bootstrapping process was 100% successful.<br>
+</li>
+</ul>
+<p>So let's try that.&nbsp; As usual, here are the instructions for doing the compilations:</p>
+<p>For <b>XCOM3</b>:
+
+
+</p>
+<blockquote>
+  <pre><font color="#663300">sim360 --size=3600</font><font color="#663300"><font color="#663300"> -o0ET stdout </font>-i0AT Tests/XCOM.xpl -i2AT XPL.LIBRARY.xpl -f1wb+ XCOM3-360C.obj -f2wb+ XCOM3-360C.dat -f3wb+ XCOM3-360C.str XCOM3-20010502.obj</font><br></pre>
+</blockquote>
+For <b>XCOM45</b>:<br>
+
+<blockquote>
+  <pre><font color="#663300">sim360 --size=7200</font><font color="#663300"><font color="#663300"> -o0ET stdout </font>-i0AT sim360-source/port/XCOM4.5.xpl -i2AT </font><font color="#663300"><font color="#663300">sim360-source/port/</font>XPLIB4.5.xpl -f1wb+ XCOM45-360C.obj -f2wb+ XCOM45-360C.dat -f3wb+ XCOM45-360C.str XCOM45-19760719.obj<br></font></pre></blockquote>We could use the same technique as in the preceding section to check that <b>XCOMx-360.obj</b> is identical to <b>XCOM</b><b><i>x-YYYYMMDD</i>.obj</b>, taking into account the embedded timestamp.&nbsp; I'll let that as an exercise for the reader.<br>
+<br>
+I mentioned earlier that if you're on Linux (or possibly Mac), then <a moz-do-not-send="true" href="https://github.com/virtualagc/virtualagc/blob/master/XCOM-I/Makefile">the makefile </a>will
+ do the entire bootstrapping process for you, including this 
+byte-for-byte check.&nbsp; It actually uses a simplified check  (in the 
+makefile, see how the <font color="#663300"><code>cmp</code></font> 
+command is used), in which it just counts the number of mismatched 
+bytes, and concludes that if there were 3 or less mismatched bytes, then
+ there's an overall match.&nbsp; It doesn't bother to check that the 
+mismatched bytes are valid timestamps.<br>
+<br>
+QED.<br>
+<blockquote>
+</blockquote>
+
+
 <blockquote>
 </blockquote>
 <h2><a name="halsfc"></a>Compiling and Running HAL/S-FC</h2>
 <i>(Most of what's described in this section is not yet functional, but 
 I'm writing it while working it out so that my memory is fresh.)</i><br>
 <br>
-The examples in the preceding section are all very well and good, but the Holy Grail is compilation via <b>XCOM-I</b> of <b>HAL/S-FC</b> itself, and subsequently being able to successfully run <b>HAL/S-FC</b>.&nbsp; Just as there was a big leap in complexity from being able to compile <b>ANALYZER</b> (~1500 lines of XPL) to being able to compile <b>XCOM</b> (~4200 lines of XPL), there's a much larger leap to being able to compile <b>HAL/S-FC</b> (&gt;30,000 lines of XPL).&nbsp; The steps for doing so are also somewhat more complex.<br>
+The examples in the preceding section are all very well and good, but the Holy Grail is compilation via <b>XCOM-I</b> of <b>HAL/S-FC</b> itself, and subsequently being able to successfully run <b>HAL/S-FC</b>.&nbsp; Just as there was a big leap in complexity from being able to compile <b>ANALYZER</b> (~1500 lines of XPL) to being able to compile <b>XCOM<i>x</i></b> (~4200 lines of XPL), there's a much larger leap to being able to compile <b>HAL/S-FC</b> (&gt;30,000 lines of XPL, for some of <b>HAL/S-FC</b>'s passes).&nbsp; The steps for doing so are also somewhat more complex.<br>
 <br>
 To compile <b>HAL/S-FC</b>, I'd suggest switching over to the working directory where the <b>HAL/S-FC</b> source code actually is stored, and compiling it there, which looks like this:<br>
 <blockquote>
-  <pre><font color="#663300">cd .../virtualagc/yaShuttle/"Source Code"/PASS.REL32V0/PASS1.PROCS<br>make<br></font></pre>
+  <pre><font color="#663300">cd yaShuttle/"Source Code"/PASS.REL32V0<br>make<br></font></pre>
 </blockquote>
-The reason that looks so simple is that I took the trouble to hide the 
-complexity the additional complexity I mentioned above by creating a 
-Makefile in that folder. &nbsp; HAL/S-FC actually consists of 7 passes, 
+The reason that looks so simple is that I took the trouble to hide the additional complexity I mentioned above by creating a 
+Makefile in that folder. &nbsp; <b>HAL/S-FC</b> actually consists of 7 passes, 
 each with its own, standalone executable, and the instructions above (if
  they succeed), will thus create 7 new programs in that folder:&nbsp; 
-PASS1, FLO, OPT, AUX, PASS2, PASS3, and PASS4. You may or may not want 
+<b>PASS1</b>, <b>FLO</b>, <b>OPT</b>, <b>AUX</b>, <b>PASS2</b>, <b>PASS3</b>, and <b>PASS4</b>. You may or may not want 
 to move these into your PATH.&nbsp; The reason you might not want to 
-move them into your PATH is that a number of applications written in XPL
- use this kind of naming pattern, and have program names like PASS1, 
-PASS2, and PASS3.<br>
-<br>
-Actually running <b>HAL/S-FC</b> to compile some XPL/I source code is 
-also tricky, because the 7 passes are run in succession, with each pass 
+move them into your PATH is that a number of compilers written in XPL
+ use this kind of naming pattern, and have program names like <b>PASS1</b>, 
+<b>PASS2</b>, and <b>PASS3</b>.&nbsp; Also, the only thing HAL/S-FC is 
+good for is compiling HAL/S source code, and your unlikely to have that 
+in random folders.&nbsp; I.e., the passes of <b>HAL/S-FC</b> only need to be available conveniently from folders in which HAL/S source code resides.<br>
+<blockquote><b><font size="-1">Aside:</font></b><font size="-1">&nbsp; The <font color="#663300"><code>make</code></font> program doesn't actually guarantee the order in which different passes build.&nbsp; It's entirely possible that <b>PASS1</b> is the last one it builds.</font><br>
+</blockquote>
+
+
+Actually running <b>HAL/S-FC</b> to compile some HAL/S source code is tricky, because the 7 passes are run in succession, with each pass 
 passing data into the next pass either explicitly via files, or else via
  <font color="#663300"><code>COMMON</code></font> memory.&nbsp; It's 
 thus necessary not merely to run the passes in the correct order, but to
  use all of the command-line settings that attach files with the 
-expected names.<br>
+expected names.&nbsp; At first, though, let's just think about running <b>PASS1</b>.&nbsp;
+ It's obviously the most important — since where would the other passes 
+be without it?&nbsp; Nowheresville, baby, that's where! — and we also 
+have my previous manually-created port of it from XPL/I to Python with 
+which to compare.<br>
+<blockquote>
+  <pre><font color="#663300">cd PASS1.PROCS/<br>../PASS1 <i>TBD</i></font><br></pre>
+</blockquote>
+
 <br>
 TBD<br>
 <h1><a name="xpli"></a>A Primer for Standard XPL and Intermetrics XPL/I</h1>
@@ -4462,11 +4647,18 @@ Thus while we have lots of global and local variables and function parameters na
 
 
   <a name="hooks"></a>Patches for Basic Assembly Language Code<br>
-</h1>A serious difficulty in working with XPL/I code is that the Space Shuttle <b>PASS</b> programs were not 
+</h1>A serious difficulty in working with XPL or XPL/I code is that they are often not 
 written entirely in XPL/I, but also have insertions of inline IBM System/360 basic
- assembly-language (BAL) code at various junctures.&nbsp; However good 
+ assembly-language (BAL) code at various junctures.&nbsp; For example, <b>XCOM45</b> and <b>HAL/S-FC</b> source code both have such inlined code.&nbsp; However good 
 <b>XCOM-I</b> may (or may not) be at translating XPL or XPL/I to C, it is <i>not</i> capable of inferring the intent of arbitrary BAL code, nor of translating such code into C.<br>
-<br>
+<blockquote><font size="-1"><b>Aside:</b>&nbsp; In reality, such inlined code is numerical in nature, and consists of IBM 360 <i>machine code</i>
+ ... whereas the term "assembly language" implies that the insertions 
+are symbolic in nature rather than just numbers.&nbsp; I'll continue to 
+call the insertions BAL, because they undoubtedly began as BAL before 
+somebody assembled them to determine which numerical values to 
+use.&nbsp; But it is certainly technically incorrect to do so.</font><br>
+</blockquote>
+
 Moreover, there is a second problem associated with BAL code that has 
 been inlined into XPL/I code, which is that while I can imagine 
 replacing such BAL code by C-language code that provides the same 
@@ -4483,19 +4675,21 @@ you like to XPL source code you have on hand, as long as you don't
 insist that I follow your lead.<br>
 <br>
 Don't worry!&nbsp; <b>XCOM-I</b> lets us satisfy these criteria.&nbsp; But to understand <i>how</i>, you need to know a 
-little more about this BAL source code that's causing the problem.<br>
+little more about this BAL code that's causing the problem.<br>
 <br>
-Let's let a real-life example guide the discussion.&nbsp; The XPL source-code for SUNY's <b>XCOM4</b>
+Let's let a real-life example guide the discussion.&nbsp; The XPL source-code for SUNY's <b>XCOM45</b>
  program — which as you'll recall is an XPL compiler from the State 
 University of New York in the mid-1970's  — contains a single block of 
-19 consecutive <font color="#663300"><code>CALL INLINE</code></font> statements that we need to work around if we want to compile <i>and run</i> a version of <b>XCOM4</b> with <b>XCOM-I</b>:<br>
+19 consecutive <font color="#663300"><code>CALL INLINE</code></font> statements that we need to work around if we want to compile <i>and run</i> a version of <b>XCOM45</b> with <b>XCOM-I</b>:<br>
 <blockquote>
   <pre><font color="#663300">SCAN_FINDS_END_OF:<br>   PROCEDURE(TABLE) BIT(1);<br>      DECLARE TABLE FIXED;<br>      DECLARE TRT(1) FIXED INITIAL("DD003000", "10000000");<br><br>      /* THIS PROCEDURE ASSUMES CP = 0 WHEN IT IS CALLED */<br>      CALL INLINE("58", 3, 0, TEXT);     /* LOAD STRING DESCRIPTOR */<br>      CALL INLINE("1B", 2, 2);           /* CLEAR REG. 2 */<br>      CALL INLINE("19", 3, 2);           /* CHECK FOR TEXT = NULL STRING */<br>      CALL INLINE("07", 8, 12);          /* RETURN FALSE IF TEXT IS NULL */<br>      CALL INLINE("8D", 2, 0, 0, 8);     /* SHIFT LENGTH FIELD TO REG. 2 */<br>      CALL INLINE("88", 3, 0, 0, 8);     /* RESTORE STRING ADDRESS  */<br>      CALL INLINE("58", 1, 0, TABLE);    /* LOAD BASE ADDRESS OF TRANS_TABLE */<br>      CALL INLINE("41", 12, 0, TRT);     /* LOAD ADDRESS OF TRT INSTRUCTION */<br>      CALL INLINE("44", 2, 0, 12, 0);    /* EXECUTE TRT INSTRUCTION */<br>      CALL INLINE("05", 12, 0);          /* LOAD BRANCH REGISTER  */<br>      CALL INLINE("47", 7, 0, 12, 18);   /* BRANCH ON CC~=0  */<br>      CALL INLINE("18", 1, 2);           /* LOAD REG. 1 WITH LENGTH(\) - 1 */<br>      CALL INLINE("41", 0, 0, 0, 1);     /* LOAD REG. 0 WITH 1  */<br>      CALL INLINE("1A", 1, 0);           /* ADD TO OBTAIN IDENTIFIER LENGTH */<br>      CALL INLINE("1B", 3, 3);           /* PUT 0 INTO RETURN REGISTER */<br>      CALL INLINE("47", 15, 0, 12, 24);  /* BRANCH AROUND NEXT TWO INSTR*/<br>      CALL INLINE("1B", 1, 3);        /* SUBTRACT TO OBTAIN IDENTIFIER LENGTH */<br>      CALL INLINE("41", 3, 0, 0, 1);     /* LOAD 1 INTO RETURN REGISTER */<br>      CALL INLINE("50", 1, 0, CP);       /* STORE IDENTIFIER LENGTH */<br>   END SCAN_FINDS_END_OF;</font><br></pre>
 </blockquote>
-Actually, to be clear, <b>XCOM-I</b> will <i>compile</i> <b>XCOM4</b> 
+Actually, to be clear, <b>XCOM-I</b> will <i>compile</i> <b>XCOM45</b> 
 just fine, whether we work around this embedded assembly-language stuff 
-or not; the compiled program simply won't run correctly.&nbsp; As it 
-happens, though, part of the process of creating the workaround <i>depends</i> on us compiling <b>XCOM4</b> in advance, without any workarounds in place.&nbsp; So let's just do that.&nbsp; In the compilation process, the XPL procedure <font color="#663300"><code>SCAN_FINDS_END_OF</code></font> turns into a C file called SCANxSCAN_FINDS_END_OF.c that contains the following harmless but useless C representation of it:<br>
+or not; the compiled program simply won't run correctly, because vital 
+IBM 360 instructions will be missing in the midst of the program.&nbsp; 
+As it 
+happens, though, part of the process of creating the workaround <i>depends</i> on us compiling <b>XCOM45</b> in advance, without any workarounds in place.&nbsp; So let's just do that.&nbsp; In the compilation process, the XPL procedure <font color="#663300"><code>SCAN_FINDS_END_OF</code></font> turns into a C file called SCANxSCAN_FINDS_END_OF.c that contains the following harmless but useless C representation of it:<br>
 <blockquote>
   <pre><font color="#663300">/*<br>  File SCANxSCAN_FINDS_END_OF.c generated by XCOM-I, 2024-05-19 12:14:14.<br>*/<br><br>#include "runtimeC.h"<br>#include "procedures.h"<br><br>bit_t *<br>SCANxSCAN_FINDS_END_OF(void)<br>{<br>  ; // (0) CALL INLINE( 88, 3, 0, TEXT);<br>  ; // (1) CALL INLINE( 27, 2, 2);<br>  ; // (2) CALL INLINE( 25, 3, 2);<br>  ; // (3) CALL INLINE( 7, 8, 12);<br>  ; // (4) CALL INLINE( 141, 2, 0, 0, 8);<br>  ; // (5) CALL INLINE( 136, 3, 0, 0, 8);<br>  ; // (6) CALL INLINE( 88, 1, 0, TABLE);<br>  ; // (7) CALL INLINE( 65, 12, 0, TRT);<br>  ; // (8) CALL INLINE( 68, 2, 0, 12, 0);<br>  ; // (9) CALL INLINE( 5, 12, 0);<br>  ; // (10) CALL INLINE( 71, 7, 0, 12, 18);<br>  ; // (11) CALL INLINE( 24, 1, 2);<br>  ; // (12) CALL INLINE( 65, 0, 0, 0, 1);<br>  ; // (13) CALL INLINE( 26, 1, 0);<br>  ; // (14) CALL INLINE( 27, 3, 3);<br>  ; // (15) CALL INLINE( 71, 15, 0, 12, 24);<br>  ; // (16) CALL INLINE( 27, 1, 3);<br>  ; // (17) CALL INLINE( 65, 3, 0, 0, 1);<br>  ; // (18) CALL INLINE( 80, 1, 0, CP);<br>  return 0;<br>}</font><br></pre>
 </blockquote>
@@ -4505,9 +4699,9 @@ Basically, <b>XCOM-I</b> has simply commented out each <font color="#663300"><co
  statement, while replacing it with an empty statement.&nbsp; So why did
  we bother compiling it at all?&nbsp; The answer is that we want the 
 parenthesized numbers that have been added to the comments!&nbsp; The 
-parenthesized numbers will be the same every time we compile <b>XCOM4</b>, unless you take it upon yourself to mess us up by removing some of the <font color="#663300"><code>CALL INLINE</code></font> statements or adding new ones in the meantime.&nbsp; <b>Pro tip:</b>&nbsp; Don't do that!<br>
+parenthesized numbers will be the same every time we compile <b>XCOM45</b>, unless you take it upon yourself to mess us up by removing some of the <font color="#663300"><code>CALL INLINE</code></font> statements or adding new ones in the meantime.&nbsp; <b>Pro tip:</b>&nbsp; Don't do that!<br>
 <br>
-In this particular example, since <b>XCOM4</b> has a single block of <font color="#663300"><code>CALL INLINE</code></font> statements, we were guaranteed in advance that the block would start with number 0.&nbsp; In a more-complex example like <b>HAL/S-FC</b>, there would be a number of blocks of inlines, strewn throughout the source code, and lieu of <b>XCOM-I</b>
+In this particular example, since <b>XCOM45</b> has a single block of <font color="#663300"><code>CALL INLINE</code></font> statements, we were guaranteed in advance that the block would start with number 0.&nbsp; In a more-complex example like <b>HAL/S-FC</b>, there would be a number of blocks of inlines, strewn throughout the source code, and lieu of <b>XCOM-I</b>
  printing them all out for us the numbering would be 
 unpredictable.&nbsp; But because the numbers never change, we can use 
 them as unique, persistent identifiers for the <font color="#663300"><code>CALL INLINE</code></font> statements.&nbsp; <br>
@@ -4536,7 +4730,7 @@ find this process much easier.&nbsp; But regardless, the ease (or not)
 of developing the patch isn't at issue in this discussion.&nbsp; What's 
 at issue is how to deliver that patch code to <b>XCOM-I</b> for incorporation into the XPL program being compiled.</font><br>
 </blockquote>
-Now that we actually have a patch file, when <b>XCOM-I</b> again compiles <b>XCOM4</b>, the <font color="#663300"><code>SCAN_FINDS_END_OF</code></font> procedure is now translated to the following C code:<br>
+Now that we actually have a patch file, when <b>XCOM-I</b> again compiles <b>XCOM45</b>, the <font color="#663300"><code>SCAN_FINDS_END_OF</code></font> procedure is now translated to the following C code:<br>
 <blockquote>
   <pre><font color="#663300">/*<br>  File SCANxSCAN_FINDS_END_OF.c generated by XCOM-I, 2024-05-25 14:05:21.<br>*/<br><br>#include "runtimeC.h"<br><br>descriptor_t *<br>SCANxSCAN_FINDS_END_OF(void)<br>{<br><br>  { // (0) CALL INLINE ( 88, 3, 0,TEXT);<br>    /*<br>     * This is a C-language "patch" for CALL INLINE #0 in xcom4.xpl, as compiled<br>     * by XCOM-I.py.<br>     *<br>     * The patch spans the entirety of the `SCAN_FINDS` procedure embedded in<br>     * the `SCAN` procedure.  This comprises every `CALL INLINE` statement in<br>     * the entire xcom4 program.<br>     *<br>     * What the procedure does is this:  It's given the address of a "translation<br>     * table" of one of the following types:<br>     *      `BLANKTABLE`  (Blanks)<br>     *      `ALPHATABLE`  (Identifier)<br>     *      `STRINGTABLE` (Quoted string)<br>     *      `COMMENTABLE` (Comment)<br>     * Starting at position `CP=0` (already set up upon entry so that we know the<br>     * first character is of the asked-for type) in the string `TEXT`, searches<br>     * for the end of the pattern of the selected type, and updates `CP` to the<br>     * length of the found string.  It returns 0 on failure and 1 on success.  An<br>     * empty string counts as a failure.<br>     *<br>     * This was apparently coded in BAL because the IBM 360 has a translation-table<br>     * instruction, TRT, that does this efficiently.  But from my perspective,<br>     * considering that there's no other embedded BAL code in the entire program,<br>     * it seems as though it's a big price to pay, maintenance-wise and<br>     * portability-wise, for a pretty small gain in efficiency.  Yes, you can<br>     * always make assembly-language go faster than a high-level language; this is<br>     * news?<br>     */<br>    <br>    static memoryMapEntry_t *mapCP = NULL, *mapTEXT = NULL, *mapTABLE,<br>          *mapBLANKTABLE, *mapALPHATABLE, *mapSTRINGTABLE, *mapCOMMENTABLE;<br>    char *s, *TEXT;<br>    uint32_t TABLE;<br>    <br>    if (mapCP == NULL)<br>      {<br>        mapCP = lookupVariable("CP");<br>        mapTEXT = lookupVariable("TEXT");<br>        mapTABLE = lookupVariable("SCANxSCAN_FINDS_END_OFxTABLE");<br>        mapBLANKTABLE = lookupVariable("BLANKTABLE");<br>        mapALPHATABLE = lookupVariable("ALPHATABLE");<br>        mapSTRINGTABLE = lookupVariable("STRINGTABLE");<br>        mapCOMMENTABLE = lookupVariable("COMMENTABLE");<br>      }<br>    <br>    TABLE = getFIXED(mapTABLE-&gt;address);<br>    TEXT = descriptorToAscii(getCHARACTER(mapTEXT-&gt;address));<br>    <br>    if (*TEXT == 0)<br>      return fixedToBit(1, 0);<br>    if (TABLE == mapBLANKTABLE-&gt;address)<br>      {<br>        for (s = TEXT; *s == ' ' || *s == '\t'; s++);<br>      }<br>    else if (TABLE == mapALPHATABLE-&gt;address)<br>      {<br>        for (s = TEXT;<br>             isalnum(*s) || *s == '_' || *s == '@' || *s == '#' || *s == '$';<br>             s++);<br>      }<br>    else if (TABLE == mapSTRINGTABLE-&gt;address)<br>      {<br>        for (s = TEXT; *s &amp;&amp; *s != '\''; s++);<br>    <br>      }<br>    else if (TABLE == mapCOMMENTABLE-&gt;address)<br>      {<br>        for (s = TEXT; *s &amp;&amp; *s != '*' &amp;&amp; *s != '$'; s++);<br>      }<br>    else<br>      abend("Requested translation table for SCAN_FINDS_END_OF not found");<br>    if (*s == 0)<br>      {<br>        putFIXED(mapCP-&gt;address, s + 1 - TEXT);<br>        return fixedToBit(1, 0);<br>      }<br>    putFIXED(mapCP-&gt;address, s - TEXT);<br>    return fixedToBit(1, 1);<br>  }<br>  ; // (1) CALL INLINE ( 27, 2, 2);<br>  ; // (2) CALL INLINE ( 25, 3, 2);<br>  ; // (3) CALL INLINE ( 7, 8, 12);<br>  ; // (4) CALL INLINE ( 141, 2, 0,0,8);<br>  ; // (5) CALL INLINE ( 136, 3, 0,0,8);<br>  ; // (6) CALL INLINE ( 88, 1, 0,TABLE);<br>  ; // (7) CALL INLINE ( 65, 12, 0,TRT);<br>  ; // (8) CALL INLINE ( 68, 2, 0,12,0);<br>  ; // (9) CALL INLINE ( 5, 12, 0);<br>  ; // (10) CALL INLINE ( 71, 7, 0,12,18);<br>  ; // (11) CALL INLINE ( 24, 1, 2);<br>  ; // (12) CALL INLINE ( 65, 0, 0,0,1);<br>  ; // (13) CALL INLINE ( 26, 1, 0);<br>  ; // (14) CALL INLINE ( 27, 3, 3);<br>  ; // (15) CALL INLINE ( 71, 15, 0,12,24);<br>  ; // (16) CALL INLINE ( 27, 1, 3);<br>  ; // (17) CALL INLINE ( 65, 3, 0,0,1);<br>  ; // (18) CALL INLINE ( 80, 1, 0,CP);<br>  return 0;<br>}<br></font><br></pre>
 </blockquote>
@@ -4566,7 +4760,7 @@ technique, you might be able to do so just by altering the parameters of
         255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
           Creative Commons No Rights Reserved License</a> </span><br>
       <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2024-05-25<br>
+          2024-05-26<br>
           <br>
           <a href="https://www.ibiblio.org"> <img style="border: 0px
               solid ; width: 300px; height: 100px;" alt="Virtual AGC is
