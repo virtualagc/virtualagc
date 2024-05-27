@@ -14,15 +14,25 @@ Mods:       2024-03-27 RSB  Began experimenting with this concept.
 import sys
 import os
 import re
-import datetime
 
-def TIME(): # Equivalent to the XPL built-in.
+if False:
+    import datetime
     now = datetime.datetime.now()
-    return  now.hour * 360000 + \
-            now.minute * 6000 + \
-            now.second * 100 + \
-            now.microsecond // 10000
-TIME_OF_GENERATION = TIME()
+    def TIME(): # Equivalent to the XPL built-in.
+        return  now.hour * 360000 + \
+                now.minute * 6000 + \
+                now.second * 100 + \
+                now.microsecond // 10000
+    TIME_OF_GENERATION = TIME()
+else:
+    import time
+    epoch = time.time()
+    now = time.localtime(epoch)
+    TIME_OF_GENERATION = now.tm_hour * 360000 + \
+                         now.tm_min * 6000 + \
+                         now.tm_sec * 100
+    DATE_OF_GENERATION = (now.tm_year - 1900) * 1000 + \
+                         now.tm_yday
 
 '''
 # A nifty way to trap unwanted calls to `print`.

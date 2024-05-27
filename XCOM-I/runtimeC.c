@@ -2717,7 +2717,7 @@ uint32_t
 TIME(void) {
   struct timeval tv;
   gettimeofday(&tv, NULL);
-  struct tm *timeStruct = gmtime(&tv.tv_sec);
+  struct tm *timeStruct = localtime(&tv.tv_sec);
   return timeStruct->tm_hour * 360000 +
          timeStruct->tm_min  * 6000 +
          timeStruct->tm_sec  * 100 +
@@ -2730,44 +2730,63 @@ TIME(void) {
 uint32_t
 DATE(void) {
   time_t t = time(NULL);
-  struct tm *timeStruct = gmtime(&t);
+  struct tm *timeStruct = localtime(&t);
   return 1000 * timeStruct->tm_year + (timeStruct->tm_yday + 1);
 }
 
-// Because I'm lazy, `yisleap` and `get_yday` came directly from the web, as-is:
-// https://stackoverflow.com/questions/19377396/c-get-day-of-year-from-date.
-// Note that it considers January 1 to be day 1, whereas `gmtime` computes
-// it as 0.  McKeeman doesn't document it, but I notice that HAL/S-FC is one
-// day off if 0 is used, so I leave it at 1.
-int yisleap(int year)
-{
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-}
-int get_yday(int mon, int day, int year)
-{
-    static const int days[2][13] = {
-        {0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
-        {0, 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}
-    };
-    int leap = yisleap(year);
+#if 0
+  // Because I'm lazy, `yisleap` and `get_yday` came directly from the web, as-is:
+  // https://stackoverflow.com/questions/19377396/c-get-day-of-year-from-date.
+  // Note that it considers January 1 to be day 1, whereas `gmtime` computes
+  // it as 0.  McKeeman doesn't document it, but I notice that HAL/S-FC is one
+  // day off if 0 is used, so I leave it at 1.
+  int yisleap(int year)
+  {
+      return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+  }
+  int get_yday(int mon, int day, int year)
+  {
+      static const int days[2][13] = {
+          {0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
+          {0, 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}
+      };
+      int leap = yisleap(year);
 
-    return days[leap][mon] + day;
-}
+      return days[leap][mon] + day;
+  }
 
-static char *Mmms[13] = {"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
-                         "Aug", "Sep", "Oct", "Nov", "Dec"};
-uint32_t
-DATE_OF_GENERATION(void) {
-  char Mmm[4];
-  int mm, dd, yyyy, dayOfYear;
-  int n;
-  sscanf(__DATE__, "%s %d %d", Mmm, &dd, &yyyy);
-  for (mm = 1; mm < 13; mm++)
-    if (!strcmp(Mmm, Mmms[mm]))
-      break;
-  dayOfYear = get_yday(mm, dd, yyyy);
-  return 1000 * (yyyy - 1900) + dayOfYear;
-}
+  static char *Mmms[13] = {"", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                           "Aug", "Sep", "Oct", "Nov", "Dec"};
+  uint32_t
+  DATE_OF_GENERATION(void) {
+    char Mmm[4];
+    int mm, dd, yyyy, dayOfYear;
+    int n;
+    sscanf(__DATE__, "%s %d %d", Mmm, &dd, &yyyy);
+    for (mm = 1; mm < 13; mm++)
+      if (!strcmp(Mmm, Mmms[mm]))
+        break;
+    dayOfYear = get_yday(mm, dd, yyyy);
+    return 1000 * (yyyy - 1900) + dayOfYear;
+  }
+
+  uint32_t
+  TIME_OF_GENERATION(void) {
+    int h, m, s;
+    sscanf(__TIME__, "%d:%d:%d", &h, &m, &s);
+    return 360000 * h + 6000 * m + 100 * s;
+  }
+#else
+  uint32_t
+  DATE_OF_GENERATION(void) {
+    return XCOM_I_START_DATE;
+  }
+
+  uint32_t
+  TIME_OF_GENERATION(void) {
+    return XCOM_I_START_TIME;
+  }
+#endif
 
 uint32_t
 COREBYTE(uint32_t address) {
@@ -3337,13 +3356,6 @@ TRACE(void) {
 void
 UNTRACE(void) {
   // Intentionally empty.
-}
-
-uint32_t
-TIME_OF_GENERATION(void) {
-  int h, m, s;
-  sscanf(__TIME__, "%d:%d:%d", &h, &m, &s);
-  return 360000 * h + 6000 * m + 100 * s;
 }
 
 uint32_t

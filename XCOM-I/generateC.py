@@ -2687,6 +2687,7 @@ def generateC(globalScope):
     appName = fields[-1]
     print("#define APP_NAME \"%s\"" % appName, file=f)
     print("#define XCOM_I_START_TIME %d" % TIME_OF_GENERATION, file=f)
+    print("#define XCOM_I_START_DATE %d" % DATE_OF_GENERATION, file=f)
     if "P" in ifdefs:
         print("#define PFS", file=f)
     if "B" in ifdefs:

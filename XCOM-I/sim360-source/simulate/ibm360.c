@@ -5,6 +5,10 @@
 **
 **	Author: Daniel Weaver
 */
+/*
+ * Modifications to Dan Weaver's code:
+ * 2024-05-21 RSB   Removed several duplicated globals in favor of system.c.
+ */
 
 #include <stdio.h>
 #include <string.h>

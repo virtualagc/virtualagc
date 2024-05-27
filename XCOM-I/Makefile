@@ -184,7 +184,27 @@ clean:
 
 
 #----------------------------------------------------------------------------
-# Bootstrap tests for legacy source code of standard-XPL compilers.
+# Bootstrap tests for legacy source code of standard-XPL compilers.  To
+# bootstrap any particular version of XCOM, several variables are set and
+# then the `bootstrap` target is built.  The variables are:
+#	BASE		The base name upon which all files are built. 
+#			Conventionally, XCOM+version.  The C files are stored
+#			in BASE/, the executables built are BASE-native, 
+#			BASE-360.obj, BASE-360A.obj, and so on.
+#	XPLFILE		Path to the XCOM source-code file to build.
+#	LIBFILE		Path to the library file containing COMPACTIFY source.
+#	RECSIZE		3600 or 7200.  Must match the hardcoded value of
+#			`DISKBYTES` in the XPLFILE.
+#	LEGACY		Path to the legacy IBM 360 load file for this version
+#			of XCOM from the Good Old Days.  Omit this variable
+#			entirely if there's no legacy load file available.
+#	SELF		(For LEGACY.)  If the legacy load file had been
+#			used to build itself, assign SELF any value (such as
+#			YES).  If the legacy load file cannot build itself
+#			faithfully -- i.e., cannot be used to build the source
+#			code and create a load file that *matches* the legacy
+#			load file -- then omit this variable entirely.
+
 
 # Should SUCCEED.  XCOM3 is the 
 .PHONY: bootstrap3
@@ -194,7 +214,7 @@ bootstrap3:
 		XPLFILE=Tests/XCOM.xpl \
 		LIBFILE=XPL.LIBRARY.xpl \
 		RECSIZE=3600 \
-		CONTEMPORARY=Tests/XCOM3-20010502.obj \
+		LEGACY=Tests/XCOM3-20010502.obj \
 		bootstrap
 
 # Should SUCCEED.
@@ -205,7 +225,7 @@ bootstrap45:
 		XPLFILE=sim360-source/port/XCOM4.5.xpl \
 		LIBFILE=sim360-source/port/XPLIB4.5.xpl \
 		RECSIZE=7200 \
-		CONTEMPORARY=sim360-source/XCOM45-19760719.obj \
+		LEGACY=sim360-source/XCOM45-19760719.obj \
 		bootstrap
 
 # Expected to FAIL.  However, XCOM45w3 is not legacy software, and has "modern"
@@ -224,8 +244,10 @@ bootstrap45w3:
 # Note that the condition for a successful bootstrap is that the XXX-360.obj
 # and XXX-360A.obj files differ by precisely 3 bytes.  That's because the 
 # embedded compile-time timestamp occupies 3 bytes.
+ELSE = else
 .PHONY: bootstrap
 bootstrap:
+	@echo "Bootstrapping $(BASE) -----------------------------------------"
 	-rm $(BASE)-360*.*
 	XCOM-I.py $(XEXTRA) --xpl \
 		--lib-file=$(LIBFILE) \
@@ -247,7 +269,7 @@ bootstrap:
 		-f2wb+ $(BASE)-360A.dat \
 		-f3wb+ $(BASE)-360A.str \
 		$(BASE)-360.obj
-ifdef CONTEMPORARY
+ifdef LEGACY
 	sim360 --size=$(RECSIZE) \
 		-o0ET $(BASE)-360C.rpt \
 		-i0AT $(XPLFILE) \
@@ -255,13 +277,15 @@ ifdef CONTEMPORARY
 		-f1wb+ $(BASE)-360C.obj \
 		-f2wb+ $(BASE)-360C.dat \
 		-f3wb+ $(BASE)-360C.str \
-		$(CONTEMPORARY)
-	@if [ `cmp -l $(BASE)-360.obj $(CONTEMPORARY) | wc -l` -le 6 ] ; \
+		$(LEGACY)
+ifdef SELF
+	@if [ `cmp -l $(BASE)-360.obj $(LEGACY) | wc -l` -le 6 ] ; \
 	then \
-		echo "New compiler is identical to legacy compiler itself." ; \
+		echo "Comparison to legacy load file successful!" ; \
 	else \
-		echo "New compiler not identical to legacy compiler itself." ; \
+		echo "Comparison to legacy load file fails!" ; \
 	fi
+endif # SELF
 	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360C.obj | wc -l` -le 4 ] ; \
 	then \
 		echo "Cross-comparison to legacy compiler's output successful!" ; \
@@ -272,9 +296,7 @@ ifdef CONTEMPORARY
 		echo "For more info, try:" ; \
 		echo "	meld $(BASE)-360.hex $(BASE)-360C.hex" ; \
 	fi
-else
-	echo "No legacy compiler with which to compare."
-endif
+endif # LEGACY
 	@if [ `cmp -l $(BASE)-360.obj $(BASE)-360A.obj | wc -l` -le 4 ] ; \
 	then \
 		echo "Bootstrap of $(BASE) successful!" ; \
@@ -350,7 +372,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 
 .PHONY: testclean
 testclean:
-	-@rm $(XPL_APPS) $(XPLI_APPS) -rf
+	-@rm -rf $(XPL_APPS) $(XPLI_APPS)
 
 .PHONY: $(XPL_APPS)
 $(XPL_APPS): 

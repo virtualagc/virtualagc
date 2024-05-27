@@ -3,6 +3,10 @@
 **
 **	Author: Daniel E Weaver
 */
+/*
+ * Modifications to Dan Weaver's code:
+ * 2024-05-21 RSB   Changed some errant bitwise &'s to logical &&'s.
+ */
 
 #include <stdio.h>
 #include <unistd.h>

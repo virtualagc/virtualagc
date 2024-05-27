@@ -10,6 +10,10 @@
 **      XPL_LONG -> Should be defined as a 64-bit signed integer
 **      XPL_UNSIGNED_LONG -> Should be defined as a 64-bit unsigned integer
 */
+/*
+ * Modifications to Dan Weaver's code:
+ * 2024-05-21 RSB   Added some `extern`'s.
+ */
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 /* C99 standard */

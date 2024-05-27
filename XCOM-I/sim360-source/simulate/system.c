@@ -6,6 +6,10 @@
 **
 **	Author: Daniel Weaver
 */
+/*
+ * Modifications to Dan Weaver's code:
+ * 2024-05-27 RSB   Removed the "Sim360 normal exit" message.
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -897,7 +901,7 @@ start_simulation(void)
 		exit_code = simulator(0);
 	}
 	if (pp == returnlink) {
-		printf("Sim360 normal exit\n");
+		//printf("Sim360 normal exit\n");
 		return_code = reg[3];
 	} else {
 		return_code = 1;
