@@ -118,6 +118,8 @@ cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
   va_list args;
   if (descriptor == NULL)
     descriptor = nextBuffer();
+  if (fmt == NULL)
+    return descriptor;
   va_start(args, fmt);
   descriptor->numBytes =
       vsnprintf(descriptor->bytes, sizeof(descriptor->bytes), fmt, args);
@@ -710,11 +712,10 @@ printBacktrace(void)
 __attribute__((noreturn)) void
 abend(const char *fmt, ...) {
   va_list args;
-  sbuf_t buffer;
+  va_start(args, fmt);
   printf("\n");
   fflush(stdout);
-  va_start(args, fmt);
-  fprintf(stderr, fmt, args);
+  vfprintf(stderr, fmt, args);
   va_end(args);
   fprintf(stderr, "\n");
   if (showBacktrace)
@@ -2293,80 +2294,140 @@ MONITOR5(int32_t address) {
   dwAddress = address;
 }
 
-// In general, new memory is allocated at `FREEPOINT`, and `FREEPOINT` is then
-// incremented by `n`, leaving a hole if the based variable previously had
-// some memory allocated to it.  However, we can check to see if the BASED
-// variable was previously butted up against `FREEPOINT`, and can adjust the
-// size of the allocated block by moving `FREEPOINT` without creating a hole.
-// Note that new allocation is supposed to be cleared to 0.  I'm not sure what
-// is supposed to happen, though, if I'm just increasing the size of an
-// already-allocated block.  Note that `n` is expected to be an integral
-// multiple of the record size of the BASED variable, though the function will
-// not fail if not.
+// Memory management via MONITOR 6, 7, and 21 is so simple-minded that it's
+// practically brain-dead.  `allocations` is a list of dope vectors for
+// which allocations have been made.  They are arranged so that the allocated
+// blocks are in ascending order.  There are no gaps.  If a block needs
+// to be grown or shrunk, then all of the blocks above it are pushed up or
+// down.  Searches are linear.  Efficient?  No!  Will anyone ever notice?  No!
+// (I think.)
+
+allocation_t allocations[MAX_ALLOCATIONS] = { { 0 } };
+uint32_t numAllocations = 0;
+
+// A function for debugging.
+static void
+printAllocations(void) {
+  int i;
+  fprintf(stderr, "%d/%d blocks allocated.\n", numAllocations, MAX_ALLOCATIONS);
+  for (i = 0; i < numAllocations; i++)
+    fprintf(stderr, "\t%06X %06X %06X (%06X)\n", allocations[i].based,
+                           allocations[i].address,
+                           allocations[i].address + allocations[i].size - 1,
+                           allocations[i].size);
+}
+
 uint32_t
-MONITOR6(uint32_t address, uint32_t n) {
-  memoryMapEntry_t *found;
-  uint32_t start, end;
+MONITOR6a(uint32_t based, uint32_t n, int clear) {
+  allocation_t *f;
+  int found, i, remaining = MONITOR21(), used = sizeof(memory) - remaining;
+  int newAddress;
 
-  abend("MONITOR6 implementation needs rework");
+  fprintf(stderr, "MONITOR(6, 0x%06X, 0x%06X)\n", based, n); // ***DEBUG***
+  printAllocations();
 
-  found = lookupAddress(address);
-  if (found == NULL)
-    return 1;
-  if (strcmp(found->datatype, "BASED"))
-    return 1;
-  start = getFIXED(address);
-  end = start + found->allocated;
-  if (n <= found->allocated)
+  if (remaining < n)
     {
-      // To make an already-allocated block smaller, we can just mark it as
-      // being smaller.
-      found->allocated = n;
-      found->numElements = n / found->recordSize;
-      if (freepoint == end)
-        freepoint = start + n;
-      return 0;
+      abend("MONITOR(6, 0x%06X, 0x%06X) failed", based, n);
+      return 1;
     }
-  if (freepoint + n > freelimit)
-    COMPACTIFY();
-  if (freepoint + n > freelimit)
-    return 1;
-  start = getFIXED(address);
-  end = start + found->allocated;
-  if (end == freepoint)
+  for (found = 0; found < numAllocations; found++)
+    if (allocations[found].based == based)
+      break;
+
+  f = &allocations[found];
+  if (found == numAllocations)
     {
-      freepoint = start + n;
-      found->allocated = n;
-      found->numElements = n / found->recordSize;
-      for (; end < freepoint; end++)
-        memory[end] = 0;
-      return 0;
+      // We're going to need to allocate a new block.  Can we?
+      if (numAllocations >= MAX_ALLOCATIONS)
+        {
+          abend("MONITOR(6, 0x%06X, 0x%06X) failed", based, n);
+          return 1; // No!
+        }
+      f->based = based;
+      if (numAllocations == 0)
+        newAddress = 0;
+      else
+        newAddress = allocations[found - 1].address + allocations[found - 1].size;
+      f->address = newAddress;
+      f->size = n;
+      numAllocations++;
     }
-  putFIXED(address, freepoint);
-  for (end = freepoint + n; freepoint < end; freepoint++)
-    memory[freepoint] = 0;
-  found->allocated = n;
-  found->numElements = n / found->recordSize;
+  else
+    {
+      // We're going to be extending an existing block.
+      for (i = found + 1; i < numAllocations; i++)
+        allocations[i].address += n;
+      f->size += n;
+      newAddress = f->address + f->size;
+    }
+  // Make room for the new allocation and clear it.
+  if (newAddress < used)
+    memmove(&memory[newAddress + n], &memory[newAddress], n);
+  if (clear)
+    memset(&memory[newAddress], 0, n);
+  // Fix up the dope vector indicated by the function parameter.
+  putFIXED(based, f->address);
+  if (based >= memoryRegions[4].start && based <= memoryRegions[4].end)
+    putFIXED(based + 8, f->size / COREHALFWORD(based + 4)); // # recs allocated.
+
+  printAllocations(); // ***DEBUG***
   return 0;
 }
 
 uint32_t
-MONITOR7(uint32_t address, uint32_t n) {
-  memoryMapEntry_t *found;
+MONITOR6(uint32_t based, uint32_t n) {
+  return MONITOR6a(based, n, 1);
+}
 
-  abend("MONITOR7 implementation needs rework");
+uint32_t
+MONITOR7(uint32_t based, uint32_t n) {
+  int found, i;
 
-  found = lookupAddress(address);
-  if (found == NULL)
+  fprintf(stderr, "MONITOR(7, 0x%06X, 0x%06X)\n", based, n); // ***DEBUG***
+  printAllocations();
+
+  // Find the associated block.
+  for (i = 0, found = -1; i < numAllocations; i++)
+    if (allocations[i].based == based)
+      {
+        found = i;
+        break;
+      }
+  if (found == -1)
+    {
+      // None of the allocated blocks is associated with the given `based`.
+      // There's another possibility, though, given the way actual code uses
+      // `MONITOR(7)`, and that's that the address pointed to by `based` is
+      // within an allocated block.  Let's check out that possibility.
+      uint32_t address = getFIXED(based);
+      for (i = 0; i < numAllocations; i++)
+        {
+          allocation_t *f;
+          uint32_t end;
+          f = &allocations[i];
+          end = address + n;
+          if (address >= f->address && end <= f->address + f->size)
+            {
+              found = i;
+              break;
+            }
+        }
+      if (found == -1)
+        {
+          abend("MONITOR(7, 0x%06X, 0x%06X) failed", based, n);
+          return 1;
+        }
+    }
+  if (allocations[found].size < n)
     return 1;
-  if (strcmp(found->datatype, "BASED"))
-    return 1;
-  if (n > found->allocated)
-    n = found->allocated;
-  if (freepoint == getFIXED(address) + found->allocated)
-    freepoint -= n;
-  found->allocated -= n;
-  found->numElements -= n / found->recordSize;
+  i = allocations[found].address + allocations[found].size;
+  memmove(&memory[i - n], &memory[i], n);
+  allocations[found].size -= n;
+  for (i = found + 1; i < numAllocations; i++)
+    allocations[i].address -= n;
+
+  printAllocations(); // ***DEBUG***
   return 0;
 }
 
@@ -2669,8 +2730,14 @@ MONITOR20(uint32_t *addresses, uint32_t *sizes) {
 
 uint32_t
 MONITOR21(void) {
-  abend("MONITOR21 implementation needs rework");
-  return freelimit - freepoint;
+  allocation_t *last;
+  int used;
+  if (numAllocations == 0)
+    used = 0;
+  else
+    used = allocations[numAllocations - 1].address +
+           allocations[numAllocations - 1].size;
+  return sizeof(memory) - used;
 }
 
 uint32_t

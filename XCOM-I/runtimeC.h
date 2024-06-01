@@ -366,29 +366,26 @@ MONITOR4(uint32_t dev, uint32_t recsize);
 void
 MONITOR5(int32_t address);
 
-// Allocate `n` bytes in the free-memory area (i.e., between FREEPOINT and
-// FREELIMIT in `memory`), compacting if necessary, and storing the address
-// of the allocated memory at the memory address indicated by `address`, which
-// *should* only be the address of a BASED variable as obtained by ADDR(var).
-// The address and amount are preserved (with the help of `memoryMap`), and
-// thus the allocation can itself be moved later by `COMPACTIFY` if necessary.
-// Returns 0 on success, 1 otherwise.
-uint32_t
-MONITOR6(uint32_t address, uint32_t n);
+// Stuff for MONITOR6, 7, and 21.
+typedef struct
+{
+  int based;        // 24-bit address in `memory` of dope vector of associated
+                    // BASED variable, or -1 if none.
+  uint32_t address; // Starting address in `memory` of the allocation.
+  uint32_t size;    // Size in bytes of the allocation.
+} allocation_t;
+#define MAX_ALLOCATIONS 256
+extern allocation_t allocations[MAX_ALLOCATIONS];
+extern uint32_t numAllocations;
 
-// Frees memory allocated by `MONITOR6`, and the same comments mostly apply.
-// The value stored at `address`, however, is not changed by `MONITOR7`, and
-// in most cases should probably should be modified by the user afterward to
-// avoid confusion, conventionally to the value `UNALLOCATED`.  However,
-// `MONITOR7` does automatically fix `memoryMap` to say that 0 bytes have been
-// allocated, so even if the `address` isn't changed, it doesn't affect the
-// validity of a later `COMPACTIFY`.
-//
-// I'm not actually sure what it means to free `n` bytes if `n` wasn't the
-// amount originally allocated.  I'm assuming that it means to just remove `n`
-// bytes from the end of the allocation.
 uint32_t
-MONITOR7(uint32_t address, uint32_t n);
+MONITOR6a(uint32_t based, uint32_t n, int clear);
+
+uint32_t
+MONITOR6(uint32_t based, uint32_t n);
+
+uint32_t
+MONITOR7(uint32_t based, uint32_t n);
 
 void
 MONITOR8(uint32_t dev, uint32_t filenum);
@@ -435,9 +432,6 @@ MONITOR19(uint32_t *addresses, uint32_t *sizes);
 void
 MONITOR20(uint32_t *addresses, uint32_t *sizes);
 
-// There's a CALL to MONITOR(21) only in SPACELIB.  Since I'm not supporting
-// SPACELIB, I see no real reason to implement function 21 ... but it's so
-// darned easy, let's do it anyway.
 uint32_t
 MONITOR21(void);
 

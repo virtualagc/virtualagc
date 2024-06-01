@@ -29,6 +29,10 @@ debug = False # Standalone interactive test of expression generation.
 
 ppFiles = { "filenames": "" }
 
+# I'm not sure how close I can get to the top of memory (0x1000000) without
+# causing a problem.
+physicalMemoryLimit = 0x1000000 - 0x1000
+
 # Just for engineering
 errxitRef = 0
 def errxit(msg, action="abend"):
@@ -472,8 +476,14 @@ def allocateVariables(scope, region):
                     recordSize = 2
                 else:
                     recordSize = 4
+            ndescript = 0
+            if "CHARACTER" in attributes or \
+                    ("BIT" in attributes and attributes["BIT"] > 32):
+                ndescript = 1
+            elif "RECORD_CHAR" in attributes:
+                ndescript = len(attributes["RECORD_CHAR"])
             putHALFWORD(variableAddress + 4, recordSize)
-            putHALFWORD(variableAddress + 6, 0) # #descriptors
+            putHALFWORD(variableAddress + 6, ndescript) # #descriptors
             putFIXED(variableAddress + 8, 0) # allocated
             putFIXED(variableAddress + 12, 0) # used
             '''
@@ -2284,6 +2294,10 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             #print()
             print("int\nmain(int argc, char *argv[])\n{")
             print()
+            print("  // Setup for MONITOR(6), MONITOR(7), MONITOR(21).  Initially,")
+            print("  // entire physical memory is a single pre-allocated block.")
+            print("  MONITOR6a(USER_MEMORY, PHYSICAL_MEMORY_LIMIT, 0);")
+            print()
             print("  if (parseCommandLine(argc, argv)) exit(0);")
             print()
         else:
@@ -2480,16 +2494,17 @@ def generateC(globalScope):
     # Thus in XPL code translated to C, the code generator looks up addresses
     # of XPL variables, and generates C code that operates on absolute numerical
     # addresses rather than on symbolic addresses.
+    topUsableMemory = physicalMemoryLimit - 1024
     for region in range(1, 6):
         start = variableAddress
         walkModel(globalScope, allocateVariables, region)
         if region == 5: 
             freeBase = start
             freePoint = variableAddress
-            freeLimit = 0x1000000 - 512
+            freeLimit = topUsableMemory - 512
             variableAddress = freeLimit
         regions.append( [start, variableAddress] )
-    regions.append( [variableAddress, 0x1000000] )
+    regions.append( [variableAddress, physicalMemoryLimit] )
     nonCommonBase = regions[2][0]
     
     # Make #define's or all of these variables in procedures.h
@@ -2577,6 +2592,7 @@ def generateC(globalScope):
         recordSize = 0
         for key in record:
             attributes = record[key]
+            dirWidth = 4;
             size = 0
             if "top" in attributes:
                 size = 1 + attributes["top"]
@@ -2585,6 +2601,10 @@ def generateC(globalScope):
             if "BIT" in attributes:
                 subDatatype = "BIT"
                 bitWidth = attributes["BIT"]
+                if bitWidth <= 8:
+                    dirWidth = 1
+                elif bitWidth <= 16:
+                    dirWidth = 2
             elif "CHARACTER" in attributes:
                 subDatatype = "CHARACTER"
             else:
@@ -2595,7 +2615,7 @@ def generateC(globalScope):
                 offset = 0
             print(indentationQuantum + \
                   '{ "%s", "%s", %d, %d, %d, %d }' % (key, subDatatype, size,
-                                                  attributes["dirWidth"],
+                                                  dirWidth,
                                                   bitWidth, 
                                                   offset), \
                   end = "", file=f)
@@ -2614,10 +2634,13 @@ def generateC(globalScope):
           file=f)
     print("memoryMapEntry_t memoryMap[NUM_SYMBOLS] = {", file=f)
     i = 0
+    USER_MEMORY = None
     for address in memoryMap:
         i += 1
         variable = memoryMap[address]
         symbol = variable["mangled"]
+        if symbol == "userMemory":
+            USER_MEMORY = address;
         datatype = variable["datatype"]
         if datatype == "BASED":
             numFieldsInRecord = variable["numFieldsInRecord"]
@@ -2668,8 +2691,11 @@ def generateC(globalScope):
     if len(line) > 0:
         print(line, file=f)
     print("};", file=f)
-    print("\n// Memory regions --------------------------------------------\n",\
+    print("\n// Initial memory regions ------------------------------------",\
           file=f)
+    print("// Note that region 6 is often displaced downward by", file=f)
+    print("// by application code prior to allocation for any BASED", file=f)
+    print("// to leave a free region 7 at the top of memory.\n", file=f)
     print("memoryRegion_t memoryRegions[%d] = {" % len(regions), file=f)
     for i in range(len(regions)):
         if i > 0:
@@ -2692,14 +2718,14 @@ def generateC(globalScope):
         print("#define PFS", file=f)
     if "B" in ifdefs:
         print("#define BFS", file=f)
-    if standardXPL:
-        print("#define STANDARD_XPL", file=f)
+    print("#define STANDARD_XPL", file=f)
     print("#define COMMON_BASE 0x%06X" % commonBase, file=f)
     print("#define NON_COMMON_BASE 0x%06X" % nonCommonBase, file=f)
     print("#define FREE_BASE 0x%06X" % freeBase, file=f)
     print("#define FREE_POINT 0x%06X // Initial value for `freepoint`" % \
           freePoint, file=f)
-    print("#define FREE_LIMIT 0x%07X" % freeLimit, file=f)
+    print("#define PHYSICAL_MEMORY_LIMIT 0x%06X" % physicalMemoryLimit, file=f)
+    print("#define FREE_LIMIT 0x%06X" % freeLimit, file=f)
     print("#define NUM_SYMBOLS", numSymbols, file=f)
     print("#define MAX_SYMBOL_LENGTH", maxSymbolLength, file=f)
     print("#define MAX_DATATYPE_LENGTH %d" % len("CHARACTER"), file=f)
@@ -2712,6 +2738,7 @@ def generateC(globalScope):
     print("#define NUM_MANGLED %d" % len(mangledLabels), file=f)
     print("#define MAX_TYPE1 %d" % MAX_TYPES, file=f)
     print("#define MAX_TYPE2 %d" % MAX_TYPES, file=f)
+    print("#define USER_MEMORY %d" % USER_MEMORY, file=f)
     print("", file=f)
     print("extern char *mangledLabels[NUM_MANGLED];", file=f)
     print("typedef char symbol_t[MAX_SYMBOL_LENGTH + 1];", file=f)
