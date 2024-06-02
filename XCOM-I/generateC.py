@@ -2008,7 +2008,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 source = "fixedToBit(0)"
         else:
             toType, source = autoconvertFull(scope, line["RETURN"], toAttributes)
-        print(indent + "return " + source + ";")
+        print(indent + "{ reentryGuard = 0; return " + source + "; }")
     elif "ELSE" in line:
         print(indent + "else")
     elif "EMPTY" in line:
@@ -2330,11 +2330,15 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
             print("\n" + header + ";", file=pf)
             print(header + "\n{")
             print()
+        indent1 = indent + indentationQuantum
+        indent2 = indent1 + indentationQuantum
+        # Let's guard against reentry.
+        print(indent1 + "static int reentryGuard = 0;")
+        print(indent1 + 'reentryGuard = guardReentry(reentryGuard, "%s");' % \
+                                           functionName)
         # If there's a need to initialize buffers for calls to `setjmp`, we
         # have to do that right now.
         if "sortedSetjmpLabels" in scope:
-            indent1 = indent + indentationQuantum
-            indent2 = indent1 + indentationQuantum
             print(indent1 + "static int setjmpInitialize = 1;") 
             print(indent1 + "if (setjmpInitialize) { ")
             print(indent2 + "goto %s; " % scope["sortedSetjmpLabels"][0])
@@ -2379,7 +2383,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     # be reached, the C compiler may complain, but hopefully won't fail.
     if not lastReturned and scope["symbol"] != '' and \
             scope["symbol"][:1] != scopeDelimiter:
-        print(indent + "return 0;")
+        print(indent + "{ reentryGuard = 0; return 0; }")
     if "extraIndent" in scope: # End of the actual loop of a DO for-loop block.
         if "label" in scope and "blockType" in scope and \
                 scope["blockType"] == "DO for-loop block":
@@ -2401,7 +2405,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         print(indent + "if (LINE_COUNT)")
         print(indent + indentationQuantum + \
               "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")
-        print(indent + "return 0; // Just in case ...")
+        print(indent + "{ reentryGuard = 0; return 0; } // Just in case ...")
     if "label" in scope and "blockType" in scope and \
             scope["blockType"] in ["DO WHILE block", "DO UNTIL block",]:
         print(indent + "if (0) { r%s: continue; e%s: break; } // block labeled %s" % \

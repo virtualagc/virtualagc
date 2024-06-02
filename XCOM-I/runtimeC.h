@@ -47,6 +47,7 @@ typedef struct {
   uint16_t numBytes; // Number of bytes of stored data.
   uint16_t bitWidth; // Number of bits (0 for CHARACTER).
   uint8_t bytes[MAX_XPL_STRING+2]; // The data itself.
+  int32_t address; // Address from which was loaded, or -1 if none.
 } descriptor_t;
 typedef char sbuf_t[MAX_XPL_STRING + 1];
 #endif
@@ -576,5 +577,8 @@ NDESCRIPT(void);
 
 void
 debugInline(int inlineCounter);
+
+int
+guardReentry(int reentryGuard, char *functionName);
 
 #endif // RUNTIMEC_H

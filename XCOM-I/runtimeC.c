@@ -910,17 +910,17 @@ parseCommandLine(int argc, char **argv)
             }
           else
             {
+              int len = strlen(filename);
+              char *pfilename = malloc(len + 1);
+              strcpy(pfilename, filename);
+              DD_INS_FILENAMES[lun] = pfilename;
               if (argv[i][2] == 'd')
                 {
-                  int len = strlen(filename);
-                  char *pfilename = malloc(len + 1);
-                  strcpy(pfilename, filename);
                   if (!strcmp(&pfilename[len-2], ",U"))
                     {
                       DD_INS_UPPERCASE[lun] = 1;
                       pfilename[len-2] = 0;
                     }
-                  DD_INS_FILENAMES[lun] = pfilename;
                   PDS_INS[lun] = 0;
                   DD_INS[lun] = fopen(pfilename, "r");
                   if (DD_INS[lun] == NULL)
@@ -932,7 +932,6 @@ parseCommandLine(int argc, char **argv)
                 }
               else
                 {
-                  DD_INS_FILENAMES[lun] = &argv[i][7];
                   strcpy(DD_INS_PARTNAMES[lun], "");
                   PDS_INS[lun] = 1;
                 }
@@ -1202,6 +1201,7 @@ nextBuffer(void)
   returnValue->numBytes = 0;
   returnValue->bitWidth = 0;
   returnValue->bytes[0] = 0;
+  returnValue->address = -1;
   return returnValue;
 }
 
@@ -1347,6 +1347,7 @@ getBIT(uint32_t bitWidth, uint32_t address)
               "bitWidth=%d, numBytes=%d, descriptor=(%d,%06X)",
               bitWidth, numBytes, descriptor>>24, descriptor&0xFFFFFF);
       address = descriptor & 0xFFFFFF;
+      value->address = address;
     }
   value->type = ddBIT;
   value->bitWidth = bitWidth;
@@ -1443,6 +1444,7 @@ getCHARACTERd(uint32_t descriptor)
       numBytes = ((descriptor >> 24) & 0xFF) + 1;
       returnValue->numBytes = numBytes;
       address = descriptor & 0xFFFFFF;
+      returnValue->address = address;
       for (i = 0; i < numBytes; i++)
         {
           //returnValue->bytes[i] = ebcdicToAscii[memory[address + i]];
@@ -1466,6 +1468,10 @@ putCHARACTER(uint32_t address, descriptor_t *str)
 {
   size_t length;
   uint32_t index, descriptor, oldLength, newDescriptor;
+  static int reentryGuard = 0;
+  reentryGuard = guardReentry(reentryGuard, "putCHARACTER");
+  //fprintf(stderr, "%d %d/%d '%s'\n", address, FREEPOINT(), FREELIMIT(), \
+  //                descriptorToAscii(str));
   descriptor = (uint32_t) getFIXED(address);
   if (descriptor == 0)
     oldLength = 0;
@@ -1476,7 +1482,7 @@ putCHARACTER(uint32_t address, descriptor_t *str)
   if (length == 0)
     {
       putFIXED(address, 0);
-      return;
+      { reentryGuard = 0; return; }
     }
   if (length > 256) { // Shouldn't be possible.
     length = 256;
@@ -1507,6 +1513,7 @@ putCHARACTER(uint32_t address, descriptor_t *str)
           memory[index] = c;
         }
     }
+  { reentryGuard = 0; return; }
 }
 
 descriptor_t *
@@ -2200,7 +2207,7 @@ uint32_t
 MONITOR1(uint32_t dev, descriptor_t *name) {
   int lenFile, lenPart;
   int existed;
-  char *path = NULL;
+  char *path = NULL, *cname;
   if (dev >= DD_MAX)
     abend("Output device number out of range: Device number = %d >= %d",
           dev, DD_MAX);
@@ -2217,15 +2224,17 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
     abend("Unable to create PDS; note that PDS is implemented as a folder: "
           "Device number %d, PDS = '%s'", dev, DD_OUTS_FILENAMES[dev]);
   lenPart = name->numBytes;
+  cname = descriptorToAscii(name);
+  for (; lenPart > 0 && isspace(cname[lenPart - 1]); cname[--lenPart] = 0);
   if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
     abend("PDS partitions must have names from 1-8 characters long: "
           "Device number %d, PDS = '%s', part = '%s'",
-          dev, DD_OUTS_FILENAMES[dev], name->bytes);
+          dev, DD_OUTS_FILENAMES[dev], cname);
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
     abend("Out of memory in MONITOR(1)");
-  sprintf(path, "%s/%s", DD_OUTS_FILENAMES[dev], name->bytes);
-  strcpy(DD_OUTS_PARTNAMES[dev], name->bytes);
+  sprintf(path, "%s/%s", DD_OUTS_FILENAMES[dev], cname);
+  strcpy(DD_OUTS_PARTNAMES[dev], cname);
   existed = DD_OUTS_EXISTED[dev];
   DD_OUTS_EXISTED[dev] = (access(path, F_OK) == 0); // Partition already exists?
   DD_OUTS[dev] = fopen(path, "wt");
@@ -2238,8 +2247,8 @@ MONITOR1(uint32_t dev, descriptor_t *name) {
 
 uint32_t
 MONITOR2(uint32_t dev, descriptor_t *name) {
-  int lenFile, lenPart;
-  char *path = NULL;
+  int lenFile, lenPart, i;
+  char *path = NULL, *cname;
   if (dev >= DD_MAX)
     abend("Input device number out of range: Device number %d >= %d", dev, DD_MAX);
   if (DD_INS[dev] != NULL)
@@ -2251,15 +2260,17 @@ MONITOR2(uint32_t dev, descriptor_t *name) {
     abend("Attempt to use unassigned PDS file for input: Device number %d", dev);
   lenFile = strlen(DD_INS_FILENAMES[dev]);
   lenPart = name->numBytes;
+  cname = descriptorToAscii(name);
+  for (; lenPart > 0 && isspace(cname[lenPart - 1]); cname[--lenPart] = 0);
   if (lenPart < 1 || lenPart > PDS_PARTNAME_SIZE)
     abend("PDS partitions must have names from 1-8 characters long: "
           "Device number %d, PDS = '%s', part = '%s'",
-          dev, DD_INS_FILENAMES[dev], name->bytes);
+          dev, DD_INS_FILENAMES[dev], cname);
   path = malloc(lenFile + lenPart + 2);
   if (path == NULL)
     abend("Out of memory in MONITOR(2)");
-  sprintf(path, "%s/%s", DD_INS_FILENAMES[dev], name->bytes);
-  strcpy(DD_INS_PARTNAMES[dev], name->bytes);
+  sprintf(path, "%s/%s", DD_INS_FILENAMES[dev], cname);
+  strcpy(DD_INS_PARTNAMES[dev], cname);
   DD_INS[dev] = fopen(path, "rt");
   free(path);
   if (DD_INS[dev] == NULL)
@@ -2323,8 +2334,8 @@ MONITOR6a(uint32_t based, uint32_t n, int clear) {
   int found, i, remaining = MONITOR21(), used = sizeof(memory) - remaining;
   int newAddress;
 
-  fprintf(stderr, "MONITOR(6, 0x%06X, 0x%06X)\n", based, n); // ***DEBUG***
-  printAllocations();
+  //fprintf(stderr, "MONITOR(6, 0x%06X, 0x%06X)\n", based, n); // ***DEBUG***
+  //printAllocations();
 
   if (remaining < n)
     {
@@ -2371,7 +2382,7 @@ MONITOR6a(uint32_t based, uint32_t n, int clear) {
   if (based >= memoryRegions[4].start && based <= memoryRegions[4].end)
     putFIXED(based + 8, f->size / COREHALFWORD(based + 4)); // # recs allocated.
 
-  printAllocations(); // ***DEBUG***
+  //printAllocations(); // ***DEBUG***
   return 0;
 }
 
@@ -2384,8 +2395,8 @@ uint32_t
 MONITOR7(uint32_t based, uint32_t n) {
   int found, i;
 
-  fprintf(stderr, "MONITOR(7, 0x%06X, 0x%06X)\n", based, n); // ***DEBUG***
-  printAllocations();
+  //fprintf(stderr, "MONITOR(7, 0x%06X, 0x%06X)\n", based, n); // ***DEBUG***
+  //printAllocations();
 
   // Find the associated block.
   for (i = 0, found = -1; i < numAllocations; i++)
@@ -2427,7 +2438,7 @@ MONITOR7(uint32_t based, uint32_t n) {
   for (i = found + 1; i < numAllocations; i++)
     allocations[i].address -= n;
 
-  printAllocations(); // ***DEBUG***
+  //printAllocations(); // ***DEBUG***
   return 0;
 }
 
@@ -2706,6 +2717,7 @@ MONITOR16(uint32_t n) {
 
 void
 MONITOR17(descriptor_t *name) {
+  char *cname = descriptorToAscii(name);
   abend("MONITOR(17) not yet implemented");
 }
 
@@ -3480,6 +3492,32 @@ NDESCRIPT(void) {
 void
 debugInline(int inlineCounter) {
   fprintf(stderr, "Unpatched CALL INLINE %d\n", inlineCounter);
+}
+
+/*
+ * The `guardReentry` function detects (surprise!) reentry of a procedure,
+ * which is not allowed in XPL.  Use it like so:  Near the top of the procedure,
+ * put this:
+ *      static int reentryGuard = 0;
+ *      reentryGuard = guardReentry(reentryGuard, "...function name...");
+ * Wherever the procedure has a `return ...;`, replace it with
+ *      { reentryGuard = 0; return ...; }
+ * (Including at the ends of procedures with no explicit `return`.)
+ * This code is added automatically in the C code generated by XCOM-I, but
+ * needs to be added explicitly in patche files (always, for the `return`
+ * statements) and in runtime-library functions (for functions that might
+ * conceivably reenter).  The principal cause of worry was functions that
+ * use `putCHARACTER`, which might call `COMPACTIFY`, which might fail, which
+ * might try to use an error routine that uses `putCHARACTER`.  In fact, I
+ * don't think this actually can occur, but that was my motivating concern.
+ */
+int
+guardReentry(int reentryGuard, char *functionName) {
+  if (reentryGuard) {
+      fprintf(stderr, "\nIllegal reentry of function %s\n", functionName);
+      exit(1);
+  }
+  return 1;
 }
 
 // Some test code.

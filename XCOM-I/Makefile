@@ -209,7 +209,7 @@ clean:
 # Should SUCCEED.  XCOM3 is the 
 .PHONY: bootstrap3
 bootstrap3:
-	$(MAKE) \
+	@$(MAKE) -s \
 		BASE=XCOM3 \
 		XPLFILE=Tests/XCOM.xpl \
 		LIBFILE=XPL.LIBRARY.xpl \
@@ -220,7 +220,7 @@ bootstrap3:
 # Should SUCCEED.
 .PHONY: bootstrap45
 bootstrap45:
-	$(MAKE) \
+	@$(MAKE) -s \
 		BASE=XCOM45 \
 		XPLFILE=sim360-source/port/XCOM4.5.xpl \
 		LIBFILE=sim360-source/port/XPLIB4.5.xpl \
@@ -234,7 +234,7 @@ bootstrap45:
 # indicative of any problem with XCOM-I.  At least, that's my rationale.
 .PHONY: bootstrap45w3
 bootstrap45w3:
-	$(MAKE) \
+	@$(MAKE) -s \
 		BASE=XCOM45w3 \
 		XPLFILE=sim360-source/port/xcom4.xpl \
 		LIBFILE=sim360-source/port/xplib.xpl \
@@ -253,7 +253,7 @@ bootstrap:
 		--lib-file=$(LIBFILE) \
 		--output=$(BASE)-native \
 		$(XPLFILE)
-	make -C $(BASE)-native
+	make -s -C $(BASE)-native
 	$(BASE)-native/$(BASE)-native --extra=2,'/* $Y */' \
 		--ddi=0,$(XPLFILE) \
 		--ddi=2,$(LIBFILE) \

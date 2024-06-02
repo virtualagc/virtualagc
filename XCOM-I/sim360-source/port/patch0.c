@@ -1,5 +1,5 @@
 /*
- * This is a C-language "patch" for CALL INLINE #0 in xcom4.xpl, as compiled
+ * This is a C-language "patch" for CALL INLINEs #0-18 in xcom4.xpl, as compiled
  * by XCOM-I.py.
  *
  * The patch spans the entirety of the `SCAN_FINDS` procedure embedded in
@@ -47,7 +47,7 @@ TABLE = getFIXED(mapTABLE->address);
 TEXT = descriptorToAscii(getCHARACTER(mapTEXT->address));
 
 if (*TEXT == 0)
-  return fixedToBit(1, 0);
+  { reentryGuard = 0; return fixedToBit(1, 0); }
 if (TABLE == mapBLANKTABLE->address)
   {
     for (s = TEXT; *s == ' ' || *s == '\t'; s++);
@@ -72,7 +72,7 @@ else
 if (*s == 0)
   {
     putFIXED(mapCP->address, s + 1 - TEXT);
-    return fixedToBit(1, 0);
+    { reentryGuard = 0; return fixedToBit(1, 0); }
   }
 putFIXED(mapCP->address, s - TEXT);
-return fixedToBit(1, 1);
+{ reentryGuard = 0; return fixedToBit(1, 1); }
