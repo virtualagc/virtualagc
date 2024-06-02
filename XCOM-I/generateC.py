@@ -1425,8 +1425,10 @@ def getParmsFILE(scope, expression):
 lineCounter = 0  # For debugging purposes only.
 forLoopCounter = 0
 inlineCounter = 0
+lastCallInline = -2
 def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
     global forLoopCounter, lineCounter, inlineCounter, errxitRef
+    global lastCallInline
     '''
     The following line is a ridiculous trick.  Originally, the line wasn't
     there, and `indent` was simply the 2nd parameter of this
@@ -2018,7 +2020,9 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     "string" in line["parameters"][0]["token"]:
                 print(indent + line["parameters"][0]["token"]["string"])
             else:
-                patchFilename = baseSource + "/patch%d.c" % inlineCounter
+                patchFilename = "patch%d.c" % inlineCounter
+                if baseSource != "":
+                    patchFilename = baseSource + "/" + patchFilename
                 originalInline = scope["pseudoStatements"][indexInScope]
                 try:
                     indent2 = indent + indentationQuantum
@@ -2028,9 +2032,15 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         print(indent2 + patchLine.rstrip())
                     print(indent + "}")
                     patchFile.close()
-                except:    
-                    print(indent + "; // (%d) %s" % (inlineCounter, originalInline))
+                except:
+                    if debugInlines and lastCallInline != lineCounter - 1:
+                        print(indent + "debugInline(%d); // (%d) %s" % \
+                              (inlineCounter, inlineCounter, originalInline))
+                    else:
+                        print(indent + "; // (%d) %s" % (inlineCounter, \
+                                                         originalInline))
                 inlineCounter += 1
+                lastCallInline = lineCounter
         else:
             if procedure == "MONITOR":
                 '''

@@ -378,6 +378,9 @@ typedef struct
 extern allocation_t allocations[MAX_ALLOCATIONS];
 extern uint32_t numAllocations;
 
+void
+printAllocations(void);
+
 uint32_t
 MONITOR6a(uint32_t based, uint32_t n, int clear);
 
@@ -570,5 +573,8 @@ DESCRIPTOR2(uint32_t index, uint32_t descriptor);
 
 uint32_t
 NDESCRIPT(void);
+
+void
+debugInline(int inlineCounter);
 
 #endif // RUNTIMEC_H

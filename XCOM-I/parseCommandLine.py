@@ -81,6 +81,7 @@ keepUnused = False
 prettyPrint = False
 noLabels = False
 displayInitializers = False
+debugInlines = False
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -209,6 +210,13 @@ The available OPTIONS are:
                 the code output by XCOM-I.
 --debug=D       Print extra debugging messages to device D.  D is either stdout 
                 or stderr.
+--debug-inlines By default, XCOM-I comments out `CALL INLINE`s that embed IBM 360
+                which don't have an associated patch-file.  This option instead
+                inserts a call to a dummy function called `debugInline`, which
+                prints a message.  This allows detecting or trapping unpatched
+                `CALL INLINEs`.  `CALL INLINE`s which embed C code are not 
+                affected.  Only the first `CALL INLINE` in any adjacent sequence
+                is affected.
 --verbose       The --verbose switch (which is the default) embeds extra comments
 --concise       in the generated C source code, useful for debugging, or just for
                 improved human readability.  Whereas the --concise switch instead
@@ -236,6 +244,8 @@ The available OPTIONS are:
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm == "--debug-inlines":
+        debugInlines = True
     elif parm == "--pp":
         prettyPrint = True
     elif parm == "--nl":

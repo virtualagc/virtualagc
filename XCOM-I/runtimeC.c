@@ -2306,7 +2306,7 @@ allocation_t allocations[MAX_ALLOCATIONS] = { { 0 } };
 uint32_t numAllocations = 0;
 
 // A function for debugging.
-static void
+void
 printAllocations(void) {
   int i;
   fprintf(stderr, "%d/%d blocks allocated.\n", numAllocations, MAX_ALLOCATIONS);
@@ -3475,6 +3475,11 @@ DESCRIPTOR2(uint32_t index, uint32_t descriptor) {
 uint32_t
 NDESCRIPT(void) {
   return (memoryRegions[3].end - memoryRegions[3].start) / 4;
+}
+
+void
+debugInline(int inlineCounter) {
+  fprintf(stderr, "Unpatched CALL INLINE %d\n", inlineCounter);
 }
 
 // Some test code.

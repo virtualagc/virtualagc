@@ -22,7 +22,7 @@
      XCOM-I needs to make sure these variables (and `DX` later on) are 
      initialized properly in spite of there being no `INITIAL` clauses in the 
      declarations or any allocation of memory for `DX`. */
- DECLARE DX_SIZE FIXED, DESCRIPTOR_DESCRIPTOR(5) FIXED;
+ DECLARE DX_SIZE FIXED, DESCRIPTOR_DESCRIPTOR(7) FIXED;
  
 /**********************************************************************/        00000010
 /* MEMBER NAME:     SPACELIB                                          */        00000020
