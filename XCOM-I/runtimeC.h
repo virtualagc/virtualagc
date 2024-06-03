@@ -197,6 +197,8 @@ descriptor_t *
 getBIT(uint32_t bitWidth, uint32_t address);
 void
 putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value);
+void
+putBITp(uint32_t bitWidth, uint32_t address, descriptor_t *value);
 
 #if 0
 char *
@@ -213,6 +215,10 @@ descriptor_t *
 getCHARACTER(uint32_t address);
 void
 putCHARACTER(uint32_t address, descriptor_t *s);
+void
+putCHARACTERp(uint32_t address, descriptor_t *s);
+char *
+g(char *identifier); // For interactive debugging.
 
 // Convert a FIXED to a CHARACTER.
 descriptor_t *

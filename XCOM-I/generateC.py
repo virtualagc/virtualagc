@@ -379,6 +379,7 @@ def allocateVariables(scope, region):
         '''
             
         length = 1
+        initial = None
         # The following needs tweaking TBD.
         if "top" in attributes:
             length = attributes["top"] + 1
@@ -427,7 +428,7 @@ def allocateVariables(scope, region):
                 for i in range(length):
                     # INITIALize (just CHARACTER and BIT(>32) variables).
                     if datatype == "CHARACTER":
-                        if "INITIAL" in attributes and i < len(initial):
+                        if initial != None and i < len(initial):
                             initialValue = initial[i]
                             if isinstance(initialValue, str):
                                 if len(initialValue) > 256:
@@ -526,7 +527,7 @@ def allocateVariables(scope, region):
         }
         attributes["address"] = variableAddress
         # INITIALize FIXED or BIT variables.
-        if "INITIAL" in attributes and \
+        if initial != None and \
                 ("FIXED" in attributes or \
                  ("BIT" in attributes and attributes["BIT"] <= 32)):
             for initialValue in initial:
@@ -1161,7 +1162,9 @@ def generateExpression(scope, expression):
                                                            outerParameter, \
                                                            innerAttributes)
                             if toType == "BIT":
-                                function = "putBIT(%d, " % innerAttributes["BIT"]
+                                function = "putBITp(%d, " % innerAttributes["BIT"]
+                            elif toType == "CHARACTER":
+                                function = "putCHARACTERp("
                             else:
                                 function = "put" + toType + "("
                             source = source + function + \
@@ -2108,7 +2111,9 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                         innerAddress = memoryMap[innerAttributes["address"]]["superMangled"]
                         toType, parm = autoconvertFull(scope, outerParameter, innerAttributes)
                         if toType == "BIT":
-                            function = "putBIT(%d, " % innerAttributes["BIT"] 
+                            function = "putBITp(%d, " % innerAttributes["BIT"] 
+                        elif toType == "CHARACTER":
+                            function = "putCHARACTERp("
                         else:
                             function = "put" + toType + "("
                         print(indent2 + function + \

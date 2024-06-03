@@ -124,7 +124,7 @@ cToDescriptor(descriptor_t *descriptor, const char *fmt, ...) {
   descriptor->numBytes =
       vsnprintf(descriptor->bytes, sizeof(descriptor->bytes), fmt, args);
   va_end(args);
-  for (char *s = descriptor->bytes; *s; s++) // ***BOUNDARY***
+  for (char *s = descriptor->bytes; *s; s++)
     *s = asciiToEbcdic[*s];
   descriptor->type = ddCHARACTER;
   descriptor->bitWidth = 0;
@@ -1089,9 +1089,8 @@ parseCommandLine(int argc, char **argv)
           printf("              By default, 0 and 1 are attached to stdin.\n");
           printf("              N can range from 0 through 9. If the optional\n");
           printf("              \",U\" is present, it causes all input to be\n");
-          printf("              silently converted to upper case, and the UTF-8\n");
-          printf("              logical-NOT and U.S. cent to be translated as\n");
-          printf("              well.  The \"U\" is literal.\n");
+          printf("              silently converted to upper case.  The \"U\"\n");
+          printf("              is literal.\n");
           printf("--ddo=N,F     Attach filename F to the logical unit number\n");
           printf("              N, for use with the OUTPUT(N) XPL built-in.\n");
           printf("              By default, 0 and 1 are attached to stdout.\n");
@@ -1356,6 +1355,16 @@ getBIT(uint32_t bitWidth, uint32_t address)
   return value;
 }
 
+// Like `putBIT`, but for saving values of parameters.  See `putCHARACTERp`.
+void
+putBITp(uint32_t bitWidth, uint32_t address, descriptor_t *value)
+{
+  if (bitWidth > 32 && value->address > 0)
+    putCHARACTERp(address, value);
+  else
+    putBIT(bitWidth, address, value);
+}
+
 void
 putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
 {
@@ -1385,10 +1394,18 @@ putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
               "Implementation error: putBIT(%d,0x%06X), BIT width mismatch, getFIXED(0x%06X)==0x%08X.\n",
               bitWidth, address, address, descriptor);
         }
-      address = descriptor & 0xFFFFFF;
-      maskAddress = address;
+      destAddress = freepoint;
+      putFIXED(address, ((numBytes - 1) << 24) | destAddress);
+      freepoint += numBytes;
+      if (freepoint > freelimit)
+        {
+          COMPACTIFY(); // Will abort the program upon failure.
+          descriptor = getFIXED(address);
+          destAddress = descriptor & 0xFFFFFF;
+        }
     }
-  destAddress = address;
+  else
+    destAddress = address;
   maskWidth = bitWidth % 8;
   while (numBytes > value->numBytes)
     {
@@ -1448,7 +1465,7 @@ getCHARACTERd(uint32_t descriptor)
       for (i = 0; i < numBytes; i++)
         {
           //returnValue->bytes[i] = ebcdicToAscii[memory[address + i]];
-          returnValue->bytes[i] = memory[address + i]; // ***BOUNDARY***
+          returnValue->bytes[i] = memory[address + i];
         }
       // A NUL terminator isn't logically necessary, but will be lots more
       // convenient for consumers of string data.  The buffer is big enough
@@ -1463,20 +1480,58 @@ getCHARACTER(uint32_t address) {
   return getCHARACTERd(getFIXED(address));
 }
 
+// A function to simplify interactive debugging.  It prints out the value of
+// a variable in a human-friendly fashion.
+char *
+g(char *identifier) {
+  static sbuf_t msg;
+  memoryMapEntry_t *me = lookupVariable(identifier);
+  if (me == NULL)
+    sprintf(msg, "Variable %s not found", identifier);
+  else
+    {
+      uint32_t address = me->address, fixed = getFIXED(address);
+      char *datatype = me->datatype;
+      if (!strcmp(datatype, "FIXED"))
+        sprintf(msg, "@0x%X, %s = %d (0x%X)", address, identifier, fixed, fixed);
+      else if (!strcmp(datatype, "CHARACTER"))
+        sprintf(msg, "@0x%X, %s = '%s'", address, identifier,
+                descriptorToAscii(getCHARACTER(address)));
+      else if (!strcmp(datatype, "BIT") && me->bitWidth <= 32)
+        {
+          fixed = bitToFixed(getBIT(me->bitWidth, address));
+          sprintf(msg, "@0x%X, %s = %d (0x%X)", address, identifier, fixed, fixed);
+        }
+      else
+        sprintf(msg, "@0x%X, %s: Datatype %s not yet implemented", address,
+                identifier, datatype);
+    }
+  return msg;
+}
+
+// Like putCHARACTER(), except for saving procedure parameters.  the difference
+// is that if possible it overwrites just the in-memory descriptor, giving
+// the procedure the possibility of using the original string in-place.
+void
+putCHARACTERp(uint32_t address, descriptor_t *s) {
+  if (s->numBytes > 0 && s->address >= 0)
+    {
+      uint32_t descriptor;
+      descriptor = ((s->numBytes - 1) << 24) | (s->address & 0xFFFFFF);
+      putFIXED(address, descriptor);
+    }
+  else
+    putCHARACTER(address, s);
+}
+
 void
 putCHARACTER(uint32_t address, descriptor_t *str)
 {
   size_t length;
-  uint32_t index, descriptor, oldLength, newDescriptor;
+  uint32_t index, descriptor, newDescriptor;
   static int reentryGuard = 0;
   reentryGuard = guardReentry(reentryGuard, "putCHARACTER");
-  //fprintf(stderr, "%d %d/%d '%s'\n", address, FREEPOINT(), FREELIMIT(), \
-  //                descriptorToAscii(str));
   descriptor = (uint32_t) getFIXED(address);
-  if (descriptor == 0)
-    oldLength = 0;
-  else
-    oldLength = ((descriptor >> 24) & 0xFF) + 1;
   index = descriptor & 0xFFFFFF;
   length = str->numBytes;
   if (length == 0)
@@ -1488,28 +1543,29 @@ putCHARACTER(uint32_t address, descriptor_t *str)
     length = 256;
     str->numBytes = length;
   }
-  if (length > oldLength)
+  // Allocate space for the string.  My original code here only allocated
+  // space if the new string was longer than the old, simply saving the string
+  // in-place if it was short enough.  However, there's a problem with that:
+  // If the procedure internally manipulates one of its CHARACTER parameters,
+  // then we'd be overwriting the string that had been assigned to that
+  // parameter last, which we don't want.  None of my regression-test XPL files
+  // nor XCOM3 nor XCOM45 did that, so I never detected the problem; but
+  // HAL/S-FC does it.
+  index = freepoint;
+  putFIXED(address, ((length - 1) << 24) | index);
+  freepoint += length;
+  if (freepoint > freelimit)
     {
-      // The string we're saving is longer than the string we're overwriting.
-      // We need to move it higher in the free-memory area.
-      index = freepoint;
-      putFIXED(address, ((length - 1) << 24) | index);
-      freepoint += length;
-      if (freepoint > freelimit)
-        COMPACTIFY(); // Will abort the program upon failure.
+      COMPACTIFY(); // Will abort the program upon failure.
+      descriptor = getFIXED(address);
+      index = descriptor & 0xFFFFFF;
     }
-  descriptor = ((length - 1) << 24) | index;
-  putFIXED(address, (int32_t) descriptor);
   if (index + length <= MEMORY_SIZE)
     {
       char c, *s = str->bytes;
       for (; length > 0; length--, s++, index++)
         {
           c = *s;
-          /* ***BOUNDARY***
-          if (str->type == ddCHARACTER)
-            c = asciiToEbcdic[c];
-          */
           memory[index] = c;
         }
     }
@@ -1788,12 +1844,6 @@ stringRelation(enum stringRelation_t relation,
     for (; l1 > 0; l1--, s1++, s2++)
       {
         uint8_t e1 = *s1, e2 = *s2;
-        /* ***BOUNDARY***
-        if (d1->type == ddCHARACTER)
-          e1 = asciiToEbcdic[e1];
-        if (d2->type == ddCHARACTER)
-          e2 = asciiToEbcdic[e2];
-        */
         if (e1 > e2) { comparison = 1; break; }
         else if (e1 < e2) { comparison = -1; break; }
       }
@@ -1996,8 +2046,7 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
     }
   else
     {
-      //fprintf(fp, "%s\n", string->bytes);
-      fprintf(fp, "%s\n", s); // ***BOUNDARY***
+      fprintf(fp, "%s\n", s);
       pendingNewline = 0;
     }
 }
@@ -2044,25 +2093,21 @@ INPUT(uint32_t lun) {
     {
       // Convert to upper case.
       for (ss = s; *ss; ss++)
-        {
-          *ss = toupper(*ss);
-          if (*ss == '^')
-            *ss = '~';
-        }
-      // Fix U.S. cent and logical-NOT UTF-8.
-      while (NULL != (ss = strstr(s, "\xC2\xA2")))
-        {
-          *ss = '`';
-          memmove(ss+1, ss+2, strlen(ss+2));
-        }
-      while (NULL != (ss = strstr(s, "\xC2\xAC")))
-        {
-          *ss = '~';
-          memmove(ss+1, ss+2, strlen(ss+2));
-        }
+        *ss = toupper(*ss);
+    }
+  // Fix U.S. cent and logical-NOT UTF-8.
+  while (NULL != (ss = strstr(s, "\xC2\xA2")))
+    {
+      *ss = '`';
+      memmove(ss+1, ss+2, strlen(ss+2));
+    }
+  while (NULL != (ss = strstr(s, "\xC2\xAC")))
+    {
+      *ss = '~';
+      memmove(ss+1, ss+2, strlen(ss+2));
     }
   returnValue->numBytes = strlen(s);
-  for (s = returnValue->bytes; *s; s++) // ***BOUNDARY***
+  for (s = returnValue->bytes; *s; s++)
     *s = asciiToEbcdic[*s];
   return returnValue;
 }
@@ -2103,6 +2148,7 @@ SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
       if (length > len)
         length = len;
       strncpy(returnValue->bytes, &s->bytes[start], length);
+      returnValue->bytes[length] = 0;
       returnValue->numBytes = length;
     }
   return returnValue;
@@ -2124,8 +2170,7 @@ BYTE(descriptor_t *s, uint32_t index){
     }
   if (s->type == ddCHARACTER)
     {
-      //return asciiToEbcdic[s->bytes[index]];
-      return s->bytes[index]; // ***BOUNDARY***
+      return s->bytes[index];
     }
   else // s->type == ddBIT
     return s->bytes[index];
@@ -2140,8 +2185,7 @@ uint8_t
 BYTEliteral(char *s, uint32_t index) {
   if (index >= strlen(s))
     return 0;
-  //return asciiToEbcdic[s[index]];
-  return s[index]; // ***BOUNDARY***
+  return s[index];
 }
 
 uint8_t
@@ -2158,8 +2202,7 @@ lBYTEc(uint32_t address, int32_t index, char c) {
   address = (descriptor & 0xFFFFFF) + index;
   if (address >= FREE_LIMIT)
     abend("BYTE address out of range of memory");
-  ///memory[address] = asciiToEbcdic[c];
-  memory[address] = c; // ***BOUNDARY***
+  memory[address] = c;
 }
 
 void

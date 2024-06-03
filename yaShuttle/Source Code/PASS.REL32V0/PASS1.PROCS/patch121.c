@@ -3,6 +3,6 @@
  * used by XCOM-I in building PASS1 of HAL/S-FC.
  */
 
-// Note that `LIT_CHAR_AD` is aliased to `COMM(0)`.
+// Note that `LIT_CHAR_AD` is aliased to `COMM(0)`, which is also `COMM`.
 putFIXED(mCOMM, mLIT_NDX);
 putFIXED(mDW_AD, mFOR_DW);

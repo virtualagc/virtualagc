@@ -14,12 +14,12 @@
 SHELL := /bin/bash # To use bash rather than sh.
 
 defaultTargets = PASS1 FLO OPT AUX PASS2 PASS3 PASS4
-XCOM = ../../../../XCOM-I/XCOM-I.py
-XLIB = ../../../../XCOM-I/XPLI.LIBRARY.xpl
+XCOMI = ../../../../XCOM-I/XCOM-I.py
+XLIB = ../../../../XCOM-I/SPACELIB.xpl
 
-.PHONY: all
 all:	$(defaultTargets)
 
+.PHONY: $(defaultTargets)
 $(defaultTargets):
 	if [[ "$@" == "AUX" ]] ; \
 	then \
@@ -27,8 +27,8 @@ $(defaultTargets):
 	else \
 		cd $@.PROCS; \
 	fi && \
-	$(XCOM)	--cond=P --output=$@ \
+	$(XCOMI) $(XEXTRA) --cond=P --output=$@ \
 		--lib-file=$(XLIB) \
 		'##DRIVER.xpl' && \
-	make -C $@ && \
-	mv $@/$@ ..
+	make -C $@ $@ && \
+	cp $@/$@ ..
