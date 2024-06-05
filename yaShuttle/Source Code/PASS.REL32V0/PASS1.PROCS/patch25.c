@@ -23,7 +23,7 @@
           if (start + count > length)
             count = length - start;
           if (count > 0)
-            memset(&memory[start], 0x40, count); // EBCDIC space = 0x40.
+            memset(&memory[address + start], 0x40, count); // EBCDIC space = 0x40.
         }
     }
 }

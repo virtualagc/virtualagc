@@ -2049,6 +2049,8 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
       fprintf(fp, "%s\n", s);
       pendingNewline = 0;
     }
+  if (pendingNewline)
+    fflush(fp);
 }
 
 #define MAX_INPUTS 128
@@ -2117,36 +2119,34 @@ LENGTH(descriptor_t *s) {
   return s->numBytes;
 }
 
+void
+errorSUBSTR(descriptor_t *s, int32_t start, int32_t length)
+{
+  fflush(stdout);
+  fprintf(stderr, "\nSUBSTR('%s', %d, %d) error\n",
+          descriptorToAscii(s), start, length);
+  exit(1); //***DEBUG***
+}
+
 descriptor_t *
 SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
   descriptor_t *returnValue = nextBuffer();
   int len = s->numBytes - start;
+  if (len <= 0) // If past end of string, okay to return empty string.
+    return returnValue;
+  if (length <= 0 || start < 0 || length > len)
+    errorSUBSTR(s, start, length);
   if (start < 0)
     {
-      fflush(stdout);
-      fprintf(stderr, "SUBSTR start position is < 0.\n");
-      //exit(1); ***DEBUG***
       start = 0;
       len = s->numBytes - start;
     }
-  if (length < 0)
-    {
-      fflush(stdout);
-      fprintf(stderr, "SUBSTR length is < 0.\n");
-      //exit(1); ***DEBUG***
-      length = 0;
-    }
   if (len < 0)
+    len = 0;
+  if (length > len)
+    length = len;
+  if (length > 0)
     {
-      fflush(stdout);
-      fprintf(stderr, "SUBSTR start+length > string length\n");
-      //exit(1); ***DEBUG***
-      len = 0;
-    }
-  if (len > 0)
-    {
-      if (length > len)
-        length = len;
       strncpy(returnValue->bytes, &s->bytes[start], length);
       returnValue->bytes[length] = 0;
       returnValue->numBytes = length;
@@ -2758,10 +2758,11 @@ MONITOR16(uint32_t n) {
   abend("MONITOR(16) not yet implemented");
 }
 
+// I don't know what this is supposed to be used for yet.
+char *programNamePassedToMonitor = "";
 void
 MONITOR17(descriptor_t *name) {
-  char *cname = descriptorToAscii(name);
-  abend("MONITOR(17) not yet implemented");
+  programNamePassedToMonitor = descriptorToAscii(name);
 }
 
 uint32_t

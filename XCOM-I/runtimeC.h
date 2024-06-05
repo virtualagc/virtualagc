@@ -430,6 +430,7 @@ MONITOR15(void);
 void
 MONITOR16(uint32_t n);
 
+extern char *programNamePassedToMonitor;
 void
 MONITOR17(descriptor_t *name);
 

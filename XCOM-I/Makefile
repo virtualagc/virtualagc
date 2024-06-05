@@ -342,29 +342,29 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@e=Example-6.18.3 && \
 	cd $$e && \
 	./$$e <../Tests/testdata.txt >out.txt && \
-	diff -s -q ../Tests/$$e.regression out.txt
+	diff -s -q out.txt ../Tests/$$e.regression
 	
 	@e=Example-6.18.4 && \
 	cd $$e && \
 	./$$e <../Tests/testdata.txt >out.txt && \
-	diff -s -q ../Tests/$$e.regression out.txt
+	diff -s -q out.txt ../Tests/$$e.regression
 	
 	@Example-6.18.6/Example-6.18.6 | \
 	egrep '^[0-9]+' | \
 	Example-6.18.5/Example-6.18.5 >Example-6.18.5/out.txt && \
-	diff -s -q Tests/Example-6.18.5-and-6.regression Example-6.18.5/out.txt
+	diff -s -q Example-6.18.5/out.txt Tests/Example-6.18.5-and-6.regression
 	
 	@e=breakCharactersDemo && \
 	cd $$e && \
 	./$$e >out.txt && \
-	diff -s -q ../Tests/$$e.regression out.txt
+	diff -s -q out.txt ../Tests/$$e.regression
 	
 	@ANALYZER/ANALYZER <Tests/SKELETON.bnf | \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
 	>ANALYZER/out.txt && \
 	egrep --invert-match 'ANALYZER VERSION|^TODAY IS|^TIME USED|^TOTAL TIME' \
 	Tests/ANALYZER-SKELETON.regression >ANALYZER/out.regression && \
-	diff -s -q ANALYZER/out.regression ANALYZER/out.txt
+	diff -s -q ANALYZER/out.txt ANALYZER/out.regression
 	
 	@echo ""
 	@echo "*********** All tests passed! ***********"

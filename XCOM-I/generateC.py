@@ -1460,6 +1460,8 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 if parent["switchCounter"] > 0:
                     print(indent + "break;")
                 print(indent0 + "case %d:" % parent["switchCounter"])
+                if "TARGET" in line:
+                    parent["ifCounter"] += 1
                 parent["switchCounter"] += 1
                 if ps != None:
                     print(indent + "// " + \
@@ -1467,7 +1469,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                           + (" (%d)" % lineCounter))
             if parent["ifCounter"] > 0:
                 parent["ifCounter"] -= 1
-            if "IF" in line or "ELSE" in line:
+            if "IF" in line or "ELSE" in line or "TARGET" in line:
                 parent["ifCounter"] += 1
     if "ASSIGN" in line:
         print(indent + "{")
@@ -2639,9 +2641,9 @@ def generateC(globalScope):
                                                   offset), \
                   end = "", file=f)
             if size == 0:
-                recordSize += attributes["dirWidth"]
+                recordSize += dirWidth
             else:
-                recordSize += attributes["dirWidth"] * size
+                recordSize += dirWidth * size
             i += 1
             if i < len(record):
                 print(",", end="", file=f)
@@ -2682,7 +2684,8 @@ def generateC(globalScope):
         else:
             comma = ','
         print('  { %s, "%s", "%s", %d, %d, %s, %d, %d, %d, %d, %d }%s' % \
-              (memoryMap[address]["superMangled"], symbol, datatype, numElements, allocated, 
+              (memoryMap[address]["superMangled"], symbol, datatype, 
+               numElements, allocated, 
                basedFields, numFieldsInRecord, recordSize, dirWidth, bitWidth,
                parentAddress, comma), file=f)
     print("};", file=f)
