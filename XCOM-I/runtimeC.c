@@ -2814,9 +2814,8 @@ uint32_t
 MONITOR18(void) {
   struct timeval currentTime;
   gettimeofday(&currentTime, NULL);
-  uint32_t t;
-  return 1000000 * (currentTime.tv_sec - startTime.tv_sec) +
-                   (currentTime.tv_usec - startTime.tv_usec);
+  return (1000000 * (currentTime.tv_sec - startTime.tv_sec) +
+               currentTime.tv_usec - startTime.tv_usec) / 10000;
 }
 
 uint32_t
