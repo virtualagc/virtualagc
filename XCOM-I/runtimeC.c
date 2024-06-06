@@ -65,6 +65,7 @@ char parmField[1024] = "";
 int linesPerPage = 59;
 memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
 int showBacktrace = 0;
+int watchpoint = -1;
 
 // The table below was adapted from the table of the same name in
 // the Virtual AGC source tree.  The table is indexed on the numeric
@@ -94,7 +95,7 @@ static uint8_t asciiToEbcdic[128] = {
   0x7C, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, /* @ABCDEFG     */
   0xC8, 0xC9, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, /* HIJKLMNO     */
   0xD7, 0xD8, 0xD9, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, /* PQRSTUVW     */
-  0xE7, 0xE8, 0xE9, 0xBA, 0xE0, 0xBB, 0x5F, 0x6D, /* XYZ[\]^_     */
+  0xE7, 0xE8, 0xE9, 0xBA, 0xFE, 0xBB, 0x5F, 0x6D, /* XYZ[\]^_     */
   0x4A, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, /* `abcdefg     */
   0x88, 0x89, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, /* hijklmno     */
   0x97, 0x98, 0x99, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, /* pqrstuvw     */
@@ -171,10 +172,10 @@ static char ebcdicToAscii[256] = {
   'H'   , 'I'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
   '}'   , 'J'   , 'K'   , 'L'   , 'M'   , 'N'   , 'O'   , 'P'   ,
   'Q'   , 'R'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  '\\'  , ' '   , 'S'   , 'T'   , 'U'   , 'V'   , 'W'   , 'X'   ,
+  ' '   , ' '   , 'S'   , 'T'   , 'U'   , 'V'   , 'W'   , 'X'   ,
   'Y'   , 'Z'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
   '0'   , '1'   , '2'   , '3'   , '4'   , '5'   , '6'   , '7'   ,
-  '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '
+  '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , '\\'  , ' '
 };
 
 char *
@@ -202,6 +203,7 @@ descriptorToAscii(descriptor_t *descriptor) {
 
 optionsProcessor_t COMPOPT_PFS = {
   32 /* numParms1 */,
+  20 /* numPrintable */,
   13 /* numParms2 */,
   { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
@@ -256,6 +258,7 @@ optionsProcessor_t COMPOPT_PFS = {
 
 optionsProcessor_t COMPOPT_BFS = {
   32 /* numParms1 */,
+  21 /* numPrintable */,
   13 /* numParms2 */,
   { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
@@ -310,6 +313,7 @@ optionsProcessor_t COMPOPT_BFS = {
 
 optionsProcessor_t COMPOPT_360 = {
   32 /* numParms1 */,
+  17 /* numPrintable */,
   12 /* numParms2 */,
   { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
@@ -363,6 +367,7 @@ optionsProcessor_t COMPOPT_360 = {
 
 optionsProcessor_t LISTOPT = {
   25 /* numParms1 */,
+  4 /* numPrintable */,
   4 /* numParms2 */,
   { /* type1 */
     { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
@@ -401,6 +406,7 @@ optionsProcessor_t LISTOPT = {
 
 optionsProcessor_t MONOPT = {
   3 /* numParms1 */,
+  3 /* numPrintable */,
   5 /* numParms2 */,
   { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
@@ -451,7 +457,7 @@ printMemoryMap(char *msg, int start, int end) {
             {
               int k;
               int numFieldsInRecord = memoryMap[i].numFieldsInRecord;
-              basedField_t *basedField = memoryMap[i].basedFields;
+              const basedField_t *basedField = memoryMap[i].basedFields;
               for (k = 0; k < numFieldsInRecord; k++, basedField++)
                 {
                   int n, numElements = basedField->numElements, vector = 1;
@@ -462,7 +468,8 @@ printMemoryMap(char *msg, int start, int end) {
                     }
                   for (n = 0; n < numElements; n++, raddress += basedField->dirWidth)
                     {
-                      char *fieldName = basedField->symbol, *s;
+                      const char *fieldName = basedField->symbol;
+                      char *s;
                       printf("        %06X: BASED %s %s(%d)", raddress,
                              basedField->datatype, symbol, j);
                       if (strlen(fieldName) != 0)
@@ -853,11 +860,22 @@ parseParmField(int print) {
       OPTIONS_CODE |= optionsProcessor->type1[i].optionsCode;
 
   // Finally, we can update the XPL memory (for MONITOR(13)) which holds the
-  // `CON`, `TYPE2`, and `VALS` arrays.
+  // `CON`, `PRO`, `TYPE2`, `VALS`, and `NPVALS` arrays.
   putFIXED(WHERE_MONITOR_13, OPTIONS_CODE);
   address = getFIXED(WHERE_MONITOR_13 + 4); // Address of CON
-  for (i = 0; i < optionsProcessor->numParms1; i++)
+  for (i = 0; i < optionsProcessor->numPrintable; i++)
     putCHARACTER(address + 4 * i, &type1Actual[i]);
+  address = getFIXED(WHERE_MONITOR_13 + 8); // Address of PRO
+  for (i = 0; i < optionsProcessor->numPrintable; i++)
+    {
+      char *buf = descriptorToAscii(&type1Actual[i]);
+      sbuf_t buf2;
+      if (!strncmp(buf, "NO", 2))
+        strcpy(&buf2[0], buf + 2);
+      else
+        sprintf(&buf2[0], "NO%s", buf);
+      putCHARACTER(address + 4 * i, asciiToDescriptor(&buf2[0]));
+    }
   address = getFIXED(WHERE_MONITOR_13 + 12); // Address of TYPE2
   for (i = 0; i < optionsProcessor->numParms2; i++)
     putCHARACTER(address + 4 * i,
@@ -873,6 +891,9 @@ parseParmField(int print) {
       }
     else
       putFIXED(address + 4 * i, atoi(descriptorToAscii(&type2Actual[i])));
+  address = getFIXED(WHERE_MONITOR_13 + 20); // Address of NPVALS
+  for (i = optionsProcessor->numPrintable; i < optionsProcessor->numParms1; i++)
+    putCHARACTER(address + 4 * i, &type1Actual[i]);
 }
 
 int
@@ -889,6 +910,8 @@ parseCommandLine(int argc, char **argv)
       char c, filename[1024];
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
+      else if (1 == sscanf(argv[i], "--watch=%d", &j))
+        watchpoint = j;
       else if (2 == sscanf(argv[i], "--extra=%d,%c", &lun, &c))
         {
           if (lun < 0 || lun >= DD_MAX)
@@ -1134,6 +1157,8 @@ parseCommandLine(int argc, char **argv)
           printf("              main source-code file, skipping the library file.\n");
           printf("              Other (or no) toggles might be applicable for other\n");
           printf("              XPL compilers.\n");
+          printf("--watch=A     (Default none.)  Causes a message to be printed\n");
+          printf("              whenever the value of memory[A] changes.\n");
           printf("\n");
           returnValue = 1;
         }
@@ -2049,9 +2074,12 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
       fprintf(fp, "%s\n", s);
       pendingNewline = 0;
     }
+  if (pendingNewline)
+    fflush(fp);
 }
 
 #define MAX_INPUTS 128
+//sbuf_t lastInput0 = "";
 descriptor_t *
 INPUT(uint32_t lun) {
   descriptor_t *returnValue = nextBuffer();
@@ -2109,6 +2137,8 @@ INPUT(uint32_t lun) {
   returnValue->numBytes = strlen(s);
   for (s = returnValue->bytes; *s; s++)
     *s = asciiToEbcdic[*s];
+  //if (lun == 0)
+  //  strcpy(lastInput0, returnValue->bytes);
   return returnValue;
 }
 
@@ -2117,37 +2147,48 @@ LENGTH(descriptor_t *s) {
   return s->numBytes;
 }
 
+/*
+void
+errorSUBSTR(descriptor_t *s, int32_t start, int32_t length)
+{
+  fflush(stdout);
+  fprintf(stderr, "\nSUBSTR('%s', %d, %d) error\n",
+          descriptorToAscii(s), start, length);
+  exit(1); //***DEBUG***
+}
+*/
+
+// From the way SUBSTR() is used in the LITDUMP module, it's clear
+// that if ne2 is specified, then the function always returns exactly
+// ne2 characters, padded with blanks if past the end of the input
+// string.  I.e., ne2 is *not* the max number of characters to return.
+// However, from the behavior in TRUNCATE() of the SYTDUMP module, it
+// does appear that the string is shorter when ne < 0, though it's
+// unclear exactly what the behavior is supposed to be then.
 descriptor_t *
 SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
   descriptor_t *returnValue = nextBuffer();
-  int len = s->numBytes - start;
+  int len = s->numBytes - start, rawLength = length;
+  if (start < 0 || len <= 0 || length <= 0) // Return empty string.
+    return returnValue;
   if (start < 0)
     {
-      fflush(stdout);
-      fprintf(stderr, "SUBSTR start position is < 0.\n");
-      //exit(1); ***DEBUG***
       start = 0;
       len = s->numBytes - start;
     }
-  if (length < 0)
-    {
-      fflush(stdout);
-      fprintf(stderr, "SUBSTR length is < 0.\n");
-      //exit(1); ***DEBUG***
-      length = 0;
-    }
   if (len < 0)
+    len = 0;
+  if (length > len)
+    length = len;
+  if (length > 0)
     {
-      fflush(stdout);
-      fprintf(stderr, "SUBSTR start+length > string length\n");
-      //exit(1); ***DEBUG***
-      len = 0;
-    }
-  if (len > 0)
-    {
-      if (length > len)
-        length = len;
       strncpy(returnValue->bytes, &s->bytes[start], length);
+      returnValue->bytes[length] = 0;
+      returnValue->numBytes = length;
+    }
+  while (length < rawLength) // Pad to the desired length.
+    {
+      returnValue->bytes[length++] = 0x40; // EBCDIC space.
       returnValue->bytes[length] = 0;
       returnValue->numBytes = length;
     }
@@ -2417,7 +2458,7 @@ MONITOR6a(uint32_t based, uint32_t n, int clear) {
     }
   // Make room for the new allocation and clear it.
   if (newAddress < used)
-    memmove(&memory[newAddress + n], &memory[newAddress], n);
+    memmove(&memory[newAddress + n], &memory[newAddress], used - newAddress);
   if (clear)
     memset(&memory[newAddress], 0, n);
   // Fix up the dope vector indicated by the function parameter.
@@ -2436,7 +2477,7 @@ MONITOR6(uint32_t based, uint32_t n) {
 
 uint32_t
 MONITOR7(uint32_t based, uint32_t n) {
-  int found, i;
+  int found, i, remaining = MONITOR21(), used = sizeof(memory) - remaining;
 
   //fprintf(stderr, "MONITOR(7, 0x%06X, 0x%06X)\n", based, n); // ***DEBUG***
   //printAllocations();
@@ -2476,7 +2517,7 @@ MONITOR7(uint32_t based, uint32_t n) {
   if (allocations[found].size < n)
     return 1;
   i = allocations[found].address + allocations[found].size;
-  memmove(&memory[i - n], &memory[i], n);
+  memmove(&memory[i - n], &memory[i], used - i);
   allocations[found].size -= n;
   for (i = found + 1; i < numAllocations; i++)
     allocations[i].address -= n;
@@ -2582,14 +2623,15 @@ MONITOR9(uint32_t op) {
    * second two entries comprise operand1 (if needed).
    */
   double operand0, operand1;
-  uint32_t msw, lsw;
+  uint32_t msw, lsw, address;
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
+  address = getFIXED(dwAddress);
   // Get operands from the defined working area, and convert them
   // from IBM floating point to Python floats.
-  operand0 = fromFloatIBM(getFIXED(dwAddress), getFIXED(dwAddress + 4));
+  operand0 = fromFloatIBM(getFIXED(address), getFIXED(address + 4));
   if (op < 6)
-    operand1 = fromFloatIBM(getFIXED(dwAddress + 8), getFIXED(dwAddress + 12));
+    operand1 = fromFloatIBM(getFIXED(address + 8), getFIXED(address + 12));
   // Perform the binary operations.
   if (op == 1)
     operand0 += operand1;
@@ -2630,20 +2672,21 @@ MONITOR9(uint32_t op) {
     return 1;
   // Convert the result back to IBM floats, and store in working area.
   toFloatIBM(&msw, &lsw, operand0);
-  putFIXED(dwAddress, msw);
-  putFIXED(dwAddress + 4, lsw);
+  putFIXED(address, msw);
+  putFIXED(address + 4, lsw);
   return 0;
 }
 
 uint32_t
 MONITOR10(descriptor_t *fpstring) {
   char *s;
-  uint32_t msw, lsw;
+  uint32_t msw, lsw, address;
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
+  address = getFIXED(dwAddress);
   toFloatIBM(&msw, &lsw, atof(descriptorToAscii(fpstring)));
-  putFIXED(dwAddress, msw);
-  putFIXED(dwAddress + 4, lsw);
+  putFIXED(address, msw);
+  putFIXED(address + 4, lsw);
   return 0;
 }
 
@@ -2658,9 +2701,11 @@ MONITOR12(uint32_t precision) {
   char *fpFormat;
   sbuf_t s;
   char *ss;
+  uint32_t address;
   if (dwAddress == -1)
     abend("CALL MONITOR(5) must precede CALL MONITOR(9)");
-  value = fromFloatIBM(getFIXED(dwAddress), getFIXED(dwAddress + 4));
+  address = getFIXED(dwAddress);
+  value = fromFloatIBM(getFIXED(address), getFIXED(address + 4));
   /*
    * The "standard" HAL format for floating-point numbers is described on
    * p. 8-3 of "Programming in HAL/S", though unfortunately the number of
@@ -2758,10 +2803,11 @@ MONITOR16(uint32_t n) {
   abend("MONITOR(16) not yet implemented");
 }
 
+// I don't know what this is supposed to be used for yet.
+char *programNamePassedToMonitor = "";
 void
 MONITOR17(descriptor_t *name) {
-  char *cname = descriptorToAscii(name);
-  abend("MONITOR(17) not yet implemented");
+  programNamePassedToMonitor = descriptorToAscii(name);
 }
 
 uint32_t
@@ -2999,7 +3045,9 @@ int rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
     {
       int i, j;
       uint32_t address;
-      basedField_t *basedField;
+      const basedField_t *basedField;
+      //if (bVar != NULL && fVar != NULL && !strcmp(bVar, "MACRO_TEXTS"))
+      //  fprintf(stderr, "\n***DEBUG***\n");
       foundRawADDR = lookupVariable(bVar);
       if (foundRawADDR == NULL)
         return -1;
@@ -3070,17 +3118,17 @@ lFILE(uint32_t fileNumber, uint32_t recordNumber, uint32_t address)
   FILE *fp;
   int position, returnedValue, recordSize;
   if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
-    abend("Bad FILE number");
+    abend("Bad FILE number (%d)", fileNumber);
   fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
   recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
-    abend("FILE not open for writing");
+    abend("FILE %d not open for writing", fileNumber);
   if (fseek(fp, position, SEEK_SET) < 0)
-    abend("Cannot seek to specified offset in FILE");
+    abend("Cannot seek to specified offset in FILE %d", fileNumber);
   returnedValue = fwrite(&memory[address], recordSize, 1, fp);
   if (returnedValue != 1)
-    abend("Failed to write enough bytes to FILE");
+    abend("Failed to write enough bytes to FILE %d", fileNumber);
 }
 
 void
@@ -3089,17 +3137,17 @@ rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber)
   FILE *fp;
   int position, returnedValue, recordSize;
   if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
-    abend("Bad FILE number");
+    abend("Bad FILE number (%d)", fileNumber);
   fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
   recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
-    abend("FILE not open for reading");
+    abend("FILE %d not open for reading", fileNumber);
   if (fseek(fp, position, SEEK_SET) < 0)
-    abend("Cannot seek to specified offset in FILE");
+    abend("Cannot seek to specified offset in FILE %d", fileNumber);
   returnedValue = fread(&memory[address], recordSize, 1, fp);
   if (returnedValue != 1)
-    abend("Failed to read desired number of bytes from FILE");
+    abend("Failed to read desired number of bytes from FILE %d", fileNumber);
 }
 
 void
@@ -3109,9 +3157,9 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
   FILE *fpR, *fpL;
   int returnedValue, recsizeL, recsizeR, posL, posR, recsize;
   if (devL < 1 || devL >= MAX_RANDOM_ACCESS_FILES)
-    abend("Bad left-hand FILE number");
+    abend("Bad left-hand FILE number %d", devL);
   if (devR < 1 || devR >= MAX_RANDOM_ACCESS_FILES)
-    abend("Bad right-hand FILE number");
+    abend("Bad right-hand FILE number %d", devR);
   fpL = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devL].fp;
   fpR = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devR].fp;
   recsizeL = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devL].recordSize;
@@ -3119,13 +3167,13 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
   posL = recsizeL * recL;
   posR = recsizeR * recR;
   if (fpL == NULL)
-    abend("Left-hand FILE not open for writing");
+    abend("Left-hand FILE %d not open for writing", devL);
   if (fpR == NULL)
-    abend("Right-hand FILE not open for reading");
+    abend("Right-hand FILE %d not open for reading", devR);
   if (fseek(fpL, posL, SEEK_SET) < 0)
-    abend("Cannot seek to desired offset in left-hand FILE");
+    abend("Cannot seek to desired offset in left-hand FILE %d", devL);
   if (fseek(fpR, posR, SEEK_SET) < 0)
-    abend("Cannot seek to desired offset in right-hand FILE");
+    abend("Cannot seek to desired offset in right-hand FILE %d", devR);
   recsize = recsizeL;
   if (recsizeR > recsizeL)
     recsize = recsizeR;
@@ -3137,10 +3185,10 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
     }
   returnedValue = fread(buffer, recsizeR, 1, fpR);
   if (returnedValue != 1)
-    abend("Failed to read specified number of bytes from FILE");
+    abend("Failed to read specified number of bytes from FILE %d", devR);
   returnedValue = fwrite(buffer, recsizeL, 1, fpL);
   if (returnedValue != 1)
-    abend("Failed to write specified number of bytes to FILE");
+    abend("Failed to write specified number of bytes to FILE %d", devL);
 }
 
 /*
@@ -3358,12 +3406,12 @@ writeCOMMON(FILE *fp) {
           else if (!strcmp(datatype, "BASED"))
             {
               int numFieldsInRecord = memoryMap[i].numFieldsInRecord;
-              basedField_t *basedField = memoryMap[i].basedFields;
+              const basedField_t *basedField = memoryMap[i].basedFields;
               fprintf(fp, "+\t%s\t%d\t%s\t", symbol, j, datatype);
               fprintf(fp, "%d\n", allocated);
               for (k = 0; k < numFieldsInRecord; k++, basedField++)
                 {
-                  char *basedSymbol = basedField->symbol,
+                  const char *basedSymbol = basedField->symbol,
                       *basedDatatype = basedField->datatype;
                   int n, oBasedNumElements = basedField->numElements;
                   int fDirWidth = basedField->dirWidth;
@@ -3554,12 +3602,30 @@ debugInline(int inlineCounter) {
  * might try to use an error routine that uses `putCHARACTER`.  In fact, I
  * don't think this actually can occur, but that was my motivating concern.
  */
+sbuf_t lastWatchFunction = "(Initial)";
+int lastWatchValue = -1;
 int
 guardReentry(int reentryGuard, char *functionName) {
   if (reentryGuard) {
       fprintf(stderr, "\nIllegal reentry of function %s\n", functionName);
       exit(1);
   }
+  //if (memory[mNEXT_CHAR] == 0x4A && lastWatchValue != 0x4A)
+  //  fprintf(stderr,"\n%s: NEXT_CHAR = 0x4A\n", functionName);
+  //lastWatchValue = memory[mNEXT_CHAR];
+  //if (memoryRegions[0].end != lastWatchValue)
+  //  fprintf(stderr, "\n***DEBUG mem %s\n", functionName);
+  //lastWatchValue = memoryRegions[0].end;
+  if (watchpoint != -1)
+    {
+      uint8_t value = memory[watchpoint];
+      if (value != lastWatchValue)
+        fprintf(stderr, "\nWatchpoint (%d 0x%X) change: %d (%s) != %d (%s)\n",
+                  watchpoint, watchpoint,
+                  value, functionName, lastWatchValue, lastWatchFunction);
+      lastWatchValue = value;
+      strcpy(lastWatchFunction, functionName);
+    }
   return 1;
 }
 
