@@ -58,6 +58,8 @@ def HALMAT_BLAB(ANY_ATOM, I):
     # Local ICNT does appear to require persistence.
     l = lHALMAT_BLAB
     
+    ANY_ATOM = ANY_ATOM & 0xFFFFFFFF;
+    
     if ANY_ATOM & 1:
         # PIP ATOM
         C = HEX(SHR(ANY_ATOM, 1) & 0x7, 1);
