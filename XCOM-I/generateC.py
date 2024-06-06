@@ -1950,17 +1950,18 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             print(indent + "if (0) {")
             indent1 = indent + indentationQuantum
             indent2 = indent1 + indentationQuantum
+            indent3 = indent2 + indentationQuantum
             print(indent1 + line["TARGET"] + ":")
             parentProc = findParentProcedure(scope)
             label = parentProc["variables"][scope["sortedSetjmpLabels"][setjmpCounter]]["mangled"]
             print(indent1 + "if (setjmpInitialize) {")
-            print(indent2 + "setjmp(jb%s);" % label)
+            print(indent2 + "if (!setjmp(jb%s))" % label)
             setjmpCounter += 1
             if (setjmpCounter >= len(scope["sortedSetjmpLabels"])):
                 label = "setjmpInitialized"
             else:
                 label = scope["sortedSetjmpLabels"][setjmpCounter]
-            print(indent2 + "goto %s;" % label)
+            print(indent3 + "goto %s;" % label)
             print(indent1 + "}")
             print(indent + "}")
         else:
@@ -2488,20 +2489,20 @@ def generateC(globalScope):
     # all be filled in by the runtime library, but we need to make sure that the
     # space is properly allocated and templated.
     whereMonitor13 = variableAddress
-    # `MONITOR(13)` returns a pointer to a block of 6 `FIXED` values, 3 of which
-    # are pointers to arrays of FIXED.
+    # `MONITOR(13)` returns a pointer to a block of 6 `FIXED` values, 5 of which
+    # are pointers to arrays of CHAR.
     MAX_TYPES = 64
     SIZE_ARRAY = 4 * MAX_TYPES
     saddress = variableAddress + 24
     putFIXED(variableAddress, 0) # `OPTIONS_CODE`
     putFIXED(variableAddress + 4, saddress) # Pointer to `CON`.
-    putFIXED(variableAddress + 8, 0) # Pointer to unused BASED `PRO`.
-    putFIXED(variableAddress + 12, saddress + SIZE_ARRAY) # Pointer to `TYPE2`
-    putFIXED(variableAddress + 16, saddress + 2 * SIZE_ARRAY) # Pointer to `VALS`
-    putFIXED(variableAddress + 20, 0) # Pointer to unused BASED `NPVALS` or `MONVALS`
+    putFIXED(variableAddress + 8, saddress + SIZE_ARRAY) # Pointer to `PRO`.
+    putFIXED(variableAddress + 12, saddress + 2 * SIZE_ARRAY) # Pointer to `TYPE2`
+    putFIXED(variableAddress + 16, saddress + 3 * SIZE_ARRAY) # Pointer to `VALS`
+    putFIXED(variableAddress + 20, saddress + 4 * SIZE_ARRAY) # Pointer to `NPVALS` or `MONVALS`
     variableAddress = saddress;
-    # Arrays of `CON`, `TYPE2`, and `VALS`, respectively.
-    for i in range(3 * MAX_TYPES): 
+    # Arrays of `CON`, `PRO`, `TYPE2`, `VALS`, `NPVALS` respectively.
+    for i in range(5 * MAX_TYPES): 
         putFIXED(variableAddress, 0);
         variableAddress += 4;   
     regions.append( [0, variableAddress] )

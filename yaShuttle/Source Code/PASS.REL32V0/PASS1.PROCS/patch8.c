@@ -6,5 +6,6 @@
  * And no, `LEGNTH` is not a misprint; or at least, not a misprint by *me*.
  */
 
-memmove(&memory[mMOVExINTO], &memory[mMOVExFROM], getFIXED(mMOVExLEGNTH));
+memmove(&memory[getFIXED(mMOVExINTO)], &memory[getFIXED(mMOVExFROM)],
+    getFIXED(mMOVExLEGNTH));
 

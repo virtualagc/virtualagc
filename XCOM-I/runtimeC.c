@@ -65,6 +65,7 @@ char parmField[1024] = "";
 int linesPerPage = 59;
 memoryMapEntry_t *foundRawADDR = NULL; // Set only by `rawADDR`.
 int showBacktrace = 0;
+int watchpoint = -1;
 
 // The table below was adapted from the table of the same name in
 // the Virtual AGC source tree.  The table is indexed on the numeric
@@ -202,6 +203,7 @@ descriptorToAscii(descriptor_t *descriptor) {
 
 optionsProcessor_t COMPOPT_PFS = {
   32 /* numParms1 */,
+  20 /* numPrintable */,
   13 /* numParms2 */,
   { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
@@ -256,6 +258,7 @@ optionsProcessor_t COMPOPT_PFS = {
 
 optionsProcessor_t COMPOPT_BFS = {
   32 /* numParms1 */,
+  21 /* numPrintable */,
   13 /* numParms2 */,
   { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
@@ -310,6 +313,7 @@ optionsProcessor_t COMPOPT_BFS = {
 
 optionsProcessor_t COMPOPT_360 = {
   32 /* numParms1 */,
+  17 /* numPrintable */,
   12 /* numParms2 */,
   { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
@@ -363,6 +367,7 @@ optionsProcessor_t COMPOPT_360 = {
 
 optionsProcessor_t LISTOPT = {
   25 /* numParms1 */,
+  4 /* numPrintable */,
   4 /* numParms2 */,
   { /* type1 */
     { 0x00008000, "TABLST", "NOTABLST", "TL", "NOTABLST", "NTL" },
@@ -401,6 +406,7 @@ optionsProcessor_t LISTOPT = {
 
 optionsProcessor_t MONOPT = {
   3 /* numParms1 */,
+  3 /* numPrintable */,
   5 /* numParms2 */,
   { /* type1 */
     { 0x00000001, "DUMP", "NODUMP", "DP", "NODUMP", "NDP" },
@@ -853,11 +859,22 @@ parseParmField(int print) {
       OPTIONS_CODE |= optionsProcessor->type1[i].optionsCode;
 
   // Finally, we can update the XPL memory (for MONITOR(13)) which holds the
-  // `CON`, `TYPE2`, and `VALS` arrays.
+  // `CON`, `PRO`, `TYPE2`, `VALS`, and `NPVALS` arrays.
   putFIXED(WHERE_MONITOR_13, OPTIONS_CODE);
   address = getFIXED(WHERE_MONITOR_13 + 4); // Address of CON
-  for (i = 0; i < optionsProcessor->numParms1; i++)
+  for (i = 0; i < optionsProcessor->numPrintable; i++)
     putCHARACTER(address + 4 * i, &type1Actual[i]);
+  address = getFIXED(WHERE_MONITOR_13 + 8); // Address of PRO
+  for (i = 0; i < optionsProcessor->numPrintable; i++)
+    {
+      char *buf = descriptorToAscii(&type1Actual[i]);
+      sbuf_t buf2;
+      if (!strncmp(buf, "NO", 2))
+        strcpy(&buf2[0], buf + 2);
+      else
+        sprintf(&buf2[0], "NO%s", buf);
+      putCHARACTER(address + 4 * i, asciiToDescriptor(&buf2[0]));
+    }
   address = getFIXED(WHERE_MONITOR_13 + 12); // Address of TYPE2
   for (i = 0; i < optionsProcessor->numParms2; i++)
     putCHARACTER(address + 4 * i,
@@ -873,6 +890,9 @@ parseParmField(int print) {
       }
     else
       putFIXED(address + 4 * i, atoi(descriptorToAscii(&type2Actual[i])));
+  address = getFIXED(WHERE_MONITOR_13 + 20); // Address of NPVALS
+  for (i = optionsProcessor->numPrintable; i < optionsProcessor->numParms1; i++)
+    putCHARACTER(address + 4 * i, &type1Actual[i]);
 }
 
 int
@@ -889,6 +909,8 @@ parseCommandLine(int argc, char **argv)
       char c, filename[1024];
       if (!strcmp("--utf8", argv[i]))
         outUTF8 = 1;
+      else if (1 == sscanf(argv[i], "--watch=%d", &j))
+        watchpoint = j;
       else if (2 == sscanf(argv[i], "--extra=%d,%c", &lun, &c))
         {
           if (lun < 0 || lun >= DD_MAX)
@@ -1134,6 +1156,8 @@ parseCommandLine(int argc, char **argv)
           printf("              main source-code file, skipping the library file.\n");
           printf("              Other (or no) toggles might be applicable for other\n");
           printf("              XPL compilers.\n");
+          printf("--watch=A     (Default none.)  Causes a message to be printed\n");
+          printf("              whenever the value of memory[A] changes.\n");
           printf("\n");
           returnValue = 1;
         }
@@ -2054,6 +2078,7 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
 }
 
 #define MAX_INPUTS 128
+//sbuf_t lastInput0 = "";
 descriptor_t *
 INPUT(uint32_t lun) {
   descriptor_t *returnValue = nextBuffer();
@@ -2111,6 +2136,8 @@ INPUT(uint32_t lun) {
   returnValue->numBytes = strlen(s);
   for (s = returnValue->bytes; *s; s++)
     *s = asciiToEbcdic[*s];
+  //if (lun == 0)
+  //  strcpy(lastInput0, returnValue->bytes);
   return returnValue;
 }
 
@@ -2128,13 +2155,20 @@ errorSUBSTR(descriptor_t *s, int32_t start, int32_t length)
   exit(1); //***DEBUG***
 }
 
+// From the way SUBSTR() is used in the LITDUMP module, it's clear
+// that if ne2 is specified, then the function always returns exactly
+// ne2 characters, padded with blanks if past the end of the input
+// string.  I.e., ne2 is *not* the max number of characters to return.
+// However, from the behavior in TRUNCATE() of the SYTDUMP module, it
+// does appear that the string is shorter when ne < 0, though it's
+// unclear exactly what the behavior is supposed to be then.
 descriptor_t *
 SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
   descriptor_t *returnValue = nextBuffer();
-  int len = s->numBytes - start;
+  int len = s->numBytes - start, rawLength = length;
   if (len <= 0) // If past end of string, okay to return empty string.
     return returnValue;
-  if (length <= 0 || start < 0 || length > len)
+  if (length <= 0 || start < 0)
     errorSUBSTR(s, start, length);
   if (start < 0)
     {
@@ -2148,6 +2182,12 @@ SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
   if (length > 0)
     {
       strncpy(returnValue->bytes, &s->bytes[start], length);
+      returnValue->bytes[length] = 0;
+      returnValue->numBytes = length;
+    }
+  while (length < rawLength) // Pad to the desired length.
+    {
+      returnValue->bytes[length++] = 0x40; // EBCDIC space.
       returnValue->bytes[length] = 0;
       returnValue->numBytes = length;
     }
@@ -2582,14 +2622,15 @@ MONITOR9(uint32_t op) {
    * second two entries comprise operand1 (if needed).
    */
   double operand0, operand1;
-  uint32_t msw, lsw;
+  uint32_t msw, lsw, address;
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
+  address = getFIXED(dwAddress);
   // Get operands from the defined working area, and convert them
   // from IBM floating point to Python floats.
-  operand0 = fromFloatIBM(getFIXED(dwAddress), getFIXED(dwAddress + 4));
+  operand0 = fromFloatIBM(getFIXED(address), getFIXED(address + 4));
   if (op < 6)
-    operand1 = fromFloatIBM(getFIXED(dwAddress + 8), getFIXED(dwAddress + 12));
+    operand1 = fromFloatIBM(getFIXED(address + 8), getFIXED(address + 12));
   // Perform the binary operations.
   if (op == 1)
     operand0 += operand1;
@@ -2630,20 +2671,21 @@ MONITOR9(uint32_t op) {
     return 1;
   // Convert the result back to IBM floats, and store in working area.
   toFloatIBM(&msw, &lsw, operand0);
-  putFIXED(dwAddress, msw);
-  putFIXED(dwAddress + 4, lsw);
+  putFIXED(address, msw);
+  putFIXED(address + 4, lsw);
   return 0;
 }
 
 uint32_t
 MONITOR10(descriptor_t *fpstring) {
   char *s;
-  uint32_t msw, lsw;
+  uint32_t msw, lsw, address;
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
+  address = getFIXED(dwAddress);
   toFloatIBM(&msw, &lsw, atof(descriptorToAscii(fpstring)));
-  putFIXED(dwAddress, msw);
-  putFIXED(dwAddress + 4, lsw);
+  putFIXED(address, msw);
+  putFIXED(address + 4, lsw);
   return 0;
 }
 
@@ -2658,9 +2700,11 @@ MONITOR12(uint32_t precision) {
   char *fpFormat;
   sbuf_t s;
   char *ss;
+  uint32_t address;
   if (dwAddress == -1)
     abend("CALL MONITOR(5) must precede CALL MONITOR(9)");
-  value = fromFloatIBM(getFIXED(dwAddress), getFIXED(dwAddress + 4));
+  address = getFIXED(dwAddress);
+  value = fromFloatIBM(getFIXED(address), getFIXED(address + 4));
   /*
    * The "standard" HAL format for floating-point numbers is described on
    * p. 8-3 of "Programming in HAL/S", though unfortunately the number of
@@ -3001,6 +3045,8 @@ int rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
       int i, j;
       uint32_t address;
       basedField_t *basedField;
+      if (bVar != NULL && fVar != NULL && !strcmp(bVar, "MACRO_TEXTS"))
+        fprintf(stderr, "\n***DEBUG***\n");
       foundRawADDR = lookupVariable(bVar);
       if (foundRawADDR == NULL)
         return -1;
@@ -3555,12 +3601,27 @@ debugInline(int inlineCounter) {
  * might try to use an error routine that uses `putCHARACTER`.  In fact, I
  * don't think this actually can occur, but that was my motivating concern.
  */
+sbuf_t lastWatchFunction = "(Initial)";
+int lastWatchValue = -1;
 int
 guardReentry(int reentryGuard, char *functionName) {
   if (reentryGuard) {
       fprintf(stderr, "\nIllegal reentry of function %s\n", functionName);
       exit(1);
   }
+  //if (memory[mNEXT_CHAR] == 0x4A && lastWatchValue != 0x4A)
+  //  fprintf(stderr,"\n%s: NEXT_CHAR = 0x4A\n", functionName);
+  //lastWatchValue = memory[mNEXT_CHAR];
+  if (watchpoint != -1)
+    {
+      uint8_t value = memory[watchpoint];
+      if (value != lastWatchValue)
+        fprintf(stderr, "\nWatchpoint (%d 0x%X) change: %d (%s) != %d (%s)\n",
+                  watchpoint, watchpoint,
+                  value, functionName, lastWatchValue, lastWatchFunction);
+      lastWatchValue = value;
+      strcpy(lastWatchFunction, functionName);
+    }
   return 1;
 }
 

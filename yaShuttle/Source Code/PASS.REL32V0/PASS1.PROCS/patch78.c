@@ -4,11 +4,11 @@
  *
  * I believe that this moves 8 bytes from S to NODE_H(SRN_INX).
  */
-{
-  uint32_t srn_inx = COREHALFWORD(mSTAB_HDRxSRN_INX);
-  uint32_t node_h_address = getFIXED(mSTAB_HDRxNODE_H);
-  uint8_t *dest = &memory[node_h_address + srn_inx];
-  uint8_t *source = &memory[getFIXED(mS) & 0xFFFFFF];
 
-  memmove(dest, source, 8);
-}
+uint32_t srn_inx = COREHALFWORD(mSTAB_HDRxSRN_INX);
+uint32_t node_h_address = getFIXED(mSTAB_HDRxNODE_H);
+uint8_t *dest = &memory[node_h_address + srn_inx];
+uint8_t *source = &memory[getFIXED(mS) & 0xFFFFFF];
+
+memmove(dest, source, 8);
+

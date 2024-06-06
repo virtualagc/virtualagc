@@ -1,8 +1,8 @@
 /*
- * This is a C-language patch for CALL INLINEs #59-77 in PREPLITE.xpl, as
+ * This is a C-language patch for CALL INLINEs #59-75 in PREPLITE.xpl, as
  * used by XCOM-I in building PASS1 of HAL/S-FC.
  *
- * I'm porting this code over from the code I wrote when manually porting
+ * I'm porting this patch code over from the code I wrote when manually porting
  * PASS1 to Python.  Here are the comments I wrote in PREPLITE.py (but first
  * see the comments in patch57.c):
  *
@@ -12,13 +12,19 @@
  *      apparently branching to NOT_EXACT: (above) if there's an error
  *      detected.
  *
- *      Alas, beyond that, I haven't a clue as to what these INLINEs are trying to
- *      do to TABLE_ADDR.  My best guess is that these things are trying to use
- *      the value stored in DW[0],DW[1] and plce it in VALUE.
+ *      Alas, beyond that, I haven't a clue as to what these INLINEs are trying
+ *      to do to TABLE_ADDR.  My best guess is that these things are trying to
+ *      use the value stored in DW[0],DW[1] and place it in VALUE.
  */
 
-{
-  uint32_t addrDW = getFIXED(mFOR_DW);
-  putFIXED(addrDW + 0, 0xFF000000);
-  putFIXED(addrDW + 4, 0x00000000);
-}
+uint32_t addrDW = getFIXED(mFOR_DW);
+uint32_t msw = getFIXED(addrDW + 0), lsw = getFIXED(addrDW + 4);
+int32_t ivalue;
+double value = fromFloatIBM(msw, lsw);
+if (value > INT32_MAX)
+  ivalue = INT32_MAX;
+else if (value < INT32_MIN)
+  ivalue = INT32_MIN;
+else
+  ivalue = roundf(value);
+putFIXED(mVALUE, ivalue);

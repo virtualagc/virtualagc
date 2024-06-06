@@ -5,5 +5,5 @@
  * This block copies 256 bytes from address `FROM` to address `INTO`.
  */
 
-memmove(&memory[mMOVExINTO], &memory[mMOVExFROM], 256);
+memmove(&memory[getFIXED(mMOVExINTO)], &memory[getFIXED(mMOVExFROM)], 256);
 

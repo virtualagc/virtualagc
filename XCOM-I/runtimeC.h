@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <math.h>
 
 #define MAX_XPL_STRING 256
 #if 0
@@ -91,6 +92,7 @@ extern descriptor_t type1Actual[MAX_TYPE1];
 extern descriptor_t type2Actual[MAX_TYPE2];
 typedef struct {
   int numParms1;
+  int numPrintable;
   int numParms2;
   type1_t type1[MAX_TYPE1];
   type2_t type2[MAX_TYPE2];
