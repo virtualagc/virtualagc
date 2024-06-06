@@ -2609,7 +2609,7 @@ def generateC(globalScope):
         record = variable["record"]
         if len(record) == 1 and "" == list(record)[0]:
             print("// Note that BASED %s has no RECORD" % symbol, file=f)
-        print("basedField_t based_%s[%d] = {" % (symbol, len(record)), file=f)
+        print("const basedField_t based_%s[%d] = {" % (symbol, len(record)), file=f)
         i = 0
         recordSize = 0
         for key in record:
@@ -2780,7 +2780,7 @@ def generateC(globalScope):
     print("  datatype_t datatype;", file=f)
     print("  int numElements;", file=f)
     print("  int allocated;", file=f)
-    print("  basedField_t *basedFields;", file=f)
+    print("  const basedField_t *basedFields;", file=f)
     print("  int numFieldsInRecord;", file=f)
     print("  int recordSize;", file=f)
     print("  int dirWidth;", file=f)

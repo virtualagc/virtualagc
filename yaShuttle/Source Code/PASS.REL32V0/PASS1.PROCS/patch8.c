@@ -7,5 +7,5 @@
  */
 
 memmove(&memory[getFIXED(mMOVExINTO)], &memory[getFIXED(mMOVExFROM)],
-    getFIXED(mMOVExLEGNTH));
+    COREHALFWORD(mMOVExLEGNTH));
 

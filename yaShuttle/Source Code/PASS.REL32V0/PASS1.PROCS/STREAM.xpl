@@ -22,10 +22,7 @@
                                 else that I supposed were U.S. cent characters.
                                 Now that I have a sufficiently faithful PASS1,
                                 it barfs on those.  I'm semi-temporarily 
-                                replacing them (in INPUT_PAD) with capital-Z.
-                                I don't know that it actually matters what they
-                                are, but if I work out a coherent ASCII-EBCDIC
-                                representation for them, I'll change them later. 
+                                replacing them (in INPUT_PAD) with '\'.
     Note:       Inline comments beginning with "/*@" were created by the 
                 Virtual AGC Project. Inline comments beginning merely with 
                 "/*" are from the original Space Shuttle development.
@@ -376,7 +373,7 @@ STREAM:                                                                         
          THE FORMAT OF INPUT_PAD IS:                                            00442900
                    'M XY YX Z Z '' Z Z " Z Z'                                   00443000
          WHERE X IS A "/", Y IS A "*", AND Z IS THE EOF SYMBOL */               00443100
-         INPUT_PAD CHARACTER INITIAL('M /**/ Z Z '' Z Z " Z Z');                00443200
+         INPUT_PAD CHARACTER INITIAL('M /**/ \ \ '' \ \ " \ \');                00443200
       DECLARE (LAST_E_IND, LAST_S_IND, E_BLANKS, S_BLANKS, EP, SP) BIT(16),     00443300
          M_BLANKS BIT(16) INITIAL(-1),                                          00443400
          IND_LIM LITERALLY '127', IND_SHIFT LITERALLY '7',                      00443500

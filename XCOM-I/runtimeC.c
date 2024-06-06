@@ -95,7 +95,7 @@ static uint8_t asciiToEbcdic[128] = {
   0x7C, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, /* @ABCDEFG     */
   0xC8, 0xC9, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, /* HIJKLMNO     */
   0xD7, 0xD8, 0xD9, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, /* PQRSTUVW     */
-  0xE7, 0xE8, 0xE9, 0xBA, 0xE0, 0xBB, 0x5F, 0x6D, /* XYZ[\]^_     */
+  0xE7, 0xE8, 0xE9, 0xBA, 0xFE, 0xBB, 0x5F, 0x6D, /* XYZ[\]^_     */
   0x4A, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, /* `abcdefg     */
   0x88, 0x89, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, /* hijklmno     */
   0x97, 0x98, 0x99, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, /* pqrstuvw     */
@@ -172,10 +172,10 @@ static char ebcdicToAscii[256] = {
   'H'   , 'I'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
   '}'   , 'J'   , 'K'   , 'L'   , 'M'   , 'N'   , 'O'   , 'P'   ,
   'Q'   , 'R'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
-  '\\'  , ' '   , 'S'   , 'T'   , 'U'   , 'V'   , 'W'   , 'X'   ,
+  ' '   , ' '   , 'S'   , 'T'   , 'U'   , 'V'   , 'W'   , 'X'   ,
   'Y'   , 'Z'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '   ,
   '0'   , '1'   , '2'   , '3'   , '4'   , '5'   , '6'   , '7'   ,
-  '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , ' '   , ' '
+  '8'   , '9'   , ' '   , ' '   , ' '   , ' '   , '\\'  , ' '
 };
 
 char *
@@ -457,7 +457,7 @@ printMemoryMap(char *msg, int start, int end) {
             {
               int k;
               int numFieldsInRecord = memoryMap[i].numFieldsInRecord;
-              basedField_t *basedField = memoryMap[i].basedFields;
+              const basedField_t *basedField = memoryMap[i].basedFields;
               for (k = 0; k < numFieldsInRecord; k++, basedField++)
                 {
                   int n, numElements = basedField->numElements, vector = 1;
@@ -468,7 +468,8 @@ printMemoryMap(char *msg, int start, int end) {
                     }
                   for (n = 0; n < numElements; n++, raddress += basedField->dirWidth)
                     {
-                      char *fieldName = basedField->symbol, *s;
+                      const char *fieldName = basedField->symbol;
+                      char *s;
                       printf("        %06X: BASED %s %s(%d)", raddress,
                              basedField->datatype, symbol, j);
                       if (strlen(fieldName) != 0)
@@ -2146,6 +2147,7 @@ LENGTH(descriptor_t *s) {
   return s->numBytes;
 }
 
+/*
 void
 errorSUBSTR(descriptor_t *s, int32_t start, int32_t length)
 {
@@ -2154,6 +2156,7 @@ errorSUBSTR(descriptor_t *s, int32_t start, int32_t length)
           descriptorToAscii(s), start, length);
   exit(1); //***DEBUG***
 }
+*/
 
 // From the way SUBSTR() is used in the LITDUMP module, it's clear
 // that if ne2 is specified, then the function always returns exactly
@@ -2166,10 +2169,8 @@ descriptor_t *
 SUBSTR(descriptor_t *s, int32_t start, int32_t length) {
   descriptor_t *returnValue = nextBuffer();
   int len = s->numBytes - start, rawLength = length;
-  if (len <= 0) // If past end of string, okay to return empty string.
+  if (start < 0 || len <= 0 || length <= 0) // Return empty string.
     return returnValue;
-  if (length <= 0 || start < 0)
-    errorSUBSTR(s, start, length);
   if (start < 0)
     {
       start = 0;
@@ -2457,7 +2458,7 @@ MONITOR6a(uint32_t based, uint32_t n, int clear) {
     }
   // Make room for the new allocation and clear it.
   if (newAddress < used)
-    memmove(&memory[newAddress + n], &memory[newAddress], n);
+    memmove(&memory[newAddress + n], &memory[newAddress], used - newAddress);
   if (clear)
     memset(&memory[newAddress], 0, n);
   // Fix up the dope vector indicated by the function parameter.
@@ -2476,7 +2477,7 @@ MONITOR6(uint32_t based, uint32_t n) {
 
 uint32_t
 MONITOR7(uint32_t based, uint32_t n) {
-  int found, i;
+  int found, i, remaining = MONITOR21(), used = sizeof(memory) - remaining;
 
   //fprintf(stderr, "MONITOR(7, 0x%06X, 0x%06X)\n", based, n); // ***DEBUG***
   //printAllocations();
@@ -2516,7 +2517,7 @@ MONITOR7(uint32_t based, uint32_t n) {
   if (allocations[found].size < n)
     return 1;
   i = allocations[found].address + allocations[found].size;
-  memmove(&memory[i - n], &memory[i], n);
+  memmove(&memory[i - n], &memory[i], used - i);
   allocations[found].size -= n;
   for (i = found + 1; i < numAllocations; i++)
     allocations[i].address -= n;
@@ -3044,9 +3045,9 @@ int rawADDR(char *bVar, int32_t bIndex, char *fVar, int32_t fIndex) {
     {
       int i, j;
       uint32_t address;
-      basedField_t *basedField;
-      if (bVar != NULL && fVar != NULL && !strcmp(bVar, "MACRO_TEXTS"))
-        fprintf(stderr, "\n***DEBUG***\n");
+      const basedField_t *basedField;
+      //if (bVar != NULL && fVar != NULL && !strcmp(bVar, "MACRO_TEXTS"))
+      //  fprintf(stderr, "\n***DEBUG***\n");
       foundRawADDR = lookupVariable(bVar);
       if (foundRawADDR == NULL)
         return -1;
@@ -3117,17 +3118,17 @@ lFILE(uint32_t fileNumber, uint32_t recordNumber, uint32_t address)
   FILE *fp;
   int position, returnedValue, recordSize;
   if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
-    abend("Bad FILE number");
+    abend("Bad FILE number (%d)", fileNumber);
   fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
   recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
-    abend("FILE not open for writing");
+    abend("FILE %d not open for writing", fileNumber);
   if (fseek(fp, position, SEEK_SET) < 0)
-    abend("Cannot seek to specified offset in FILE");
+    abend("Cannot seek to specified offset in FILE %d", fileNumber);
   returnedValue = fwrite(&memory[address], recordSize, 1, fp);
   if (returnedValue != 1)
-    abend("Failed to write enough bytes to FILE");
+    abend("Failed to write enough bytes to FILE %d", fileNumber);
 }
 
 void
@@ -3136,17 +3137,17 @@ rFILE(uint32_t address, uint32_t fileNumber, uint32_t recordNumber)
   FILE *fp;
   int position, returnedValue, recordSize;
   if (fileNumber < 1 || fileNumber >= MAX_RANDOM_ACCESS_FILES)
-    abend("Bad FILE number");
+    abend("Bad FILE number (%d)", fileNumber);
   fp = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].fp;
   recordSize = randomAccessFiles[OUTPUT_RANDOM_ACCESS][fileNumber].recordSize;
   position = recordSize * recordNumber;
   if (fp == NULL)
-    abend("FILE not open for reading");
+    abend("FILE %d not open for reading", fileNumber);
   if (fseek(fp, position, SEEK_SET) < 0)
-    abend("Cannot seek to specified offset in FILE");
+    abend("Cannot seek to specified offset in FILE %d", fileNumber);
   returnedValue = fread(&memory[address], recordSize, 1, fp);
   if (returnedValue != 1)
-    abend("Failed to read desired number of bytes from FILE");
+    abend("Failed to read desired number of bytes from FILE %d", fileNumber);
 }
 
 void
@@ -3156,9 +3157,9 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
   FILE *fpR, *fpL;
   int returnedValue, recsizeL, recsizeR, posL, posR, recsize;
   if (devL < 1 || devL >= MAX_RANDOM_ACCESS_FILES)
-    abend("Bad left-hand FILE number");
+    abend("Bad left-hand FILE number %d", devL);
   if (devR < 1 || devR >= MAX_RANDOM_ACCESS_FILES)
-    abend("Bad right-hand FILE number");
+    abend("Bad right-hand FILE number %d", devR);
   fpL = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devL].fp;
   fpR = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devR].fp;
   recsizeL = randomAccessFiles[OUTPUT_RANDOM_ACCESS][devL].recordSize;
@@ -3166,13 +3167,13 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
   posL = recsizeL * recL;
   posR = recsizeR * recR;
   if (fpL == NULL)
-    abend("Left-hand FILE not open for writing");
+    abend("Left-hand FILE %d not open for writing", devL);
   if (fpR == NULL)
-    abend("Right-hand FILE not open for reading");
+    abend("Right-hand FILE %d not open for reading", devR);
   if (fseek(fpL, posL, SEEK_SET) < 0)
-    abend("Cannot seek to desired offset in left-hand FILE");
+    abend("Cannot seek to desired offset in left-hand FILE %d", devL);
   if (fseek(fpR, posR, SEEK_SET) < 0)
-    abend("Cannot seek to desired offset in right-hand FILE");
+    abend("Cannot seek to desired offset in right-hand FILE %d", devR);
   recsize = recsizeL;
   if (recsizeR > recsizeL)
     recsize = recsizeR;
@@ -3184,10 +3185,10 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
     }
   returnedValue = fread(buffer, recsizeR, 1, fpR);
   if (returnedValue != 1)
-    abend("Failed to read specified number of bytes from FILE");
+    abend("Failed to read specified number of bytes from FILE %d", devR);
   returnedValue = fwrite(buffer, recsizeL, 1, fpL);
   if (returnedValue != 1)
-    abend("Failed to write specified number of bytes to FILE");
+    abend("Failed to write specified number of bytes to FILE %d", devL);
 }
 
 /*
@@ -3405,12 +3406,12 @@ writeCOMMON(FILE *fp) {
           else if (!strcmp(datatype, "BASED"))
             {
               int numFieldsInRecord = memoryMap[i].numFieldsInRecord;
-              basedField_t *basedField = memoryMap[i].basedFields;
+              const basedField_t *basedField = memoryMap[i].basedFields;
               fprintf(fp, "+\t%s\t%d\t%s\t", symbol, j, datatype);
               fprintf(fp, "%d\n", allocated);
               for (k = 0; k < numFieldsInRecord; k++, basedField++)
                 {
-                  char *basedSymbol = basedField->symbol,
+                  const char *basedSymbol = basedField->symbol,
                       *basedDatatype = basedField->datatype;
                   int n, oBasedNumElements = basedField->numElements;
                   int fDirWidth = basedField->dirWidth;
@@ -3612,6 +3613,9 @@ guardReentry(int reentryGuard, char *functionName) {
   //if (memory[mNEXT_CHAR] == 0x4A && lastWatchValue != 0x4A)
   //  fprintf(stderr,"\n%s: NEXT_CHAR = 0x4A\n", functionName);
   //lastWatchValue = memory[mNEXT_CHAR];
+  //if (memoryRegions[0].end != lastWatchValue)
+  //  fprintf(stderr, "\n***DEBUG mem %s\n", functionName);
+  //lastWatchValue = memoryRegions[0].end;
   if (watchpoint != -1)
     {
       uint8_t value = memory[watchpoint];
