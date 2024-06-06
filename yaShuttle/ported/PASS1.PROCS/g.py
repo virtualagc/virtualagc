@@ -50,20 +50,39 @@ FREEPOINT = 0  # Must be somewhat smaller than FREELIMIT
 # compiler, some of which I may allow to be altered by command-line parameters.
 # The names correspond to the documentation, as prefixed by 'p'.
 pOPTIONS_CODE = 0
+'''
 pCON = ["NOADDRS", "NODECK", "NODUMP", "NOHALMAT", "NOHIGHOPT", "LFXI",
         "NOLIST", "NOLISTING2", "NOLSTALL", "MICROCODE", "NOPARSE",
         "NOREGOPT", "SCAL", "NOSDL", "NOSREF", "NOSRN", "NOTABDMP",
         "TABLES", "NOTABLST", "NOTEMPLATE", "NOVARSYM", "ZCON"]
-pPRO = [""] * len(pCON)
+'''
+# Note that pCONp is given for PFS.
+pCONp = ["NODUMP", "NOLISTING2", "NOLIST", "TRACE", "NOVARSYM", 
+        "NODECK", "TABLES", "NOTABLST", "NOADDRS", "NOSRN", "NOSDL", 
+        "NOTABDMP", "ZCON", "NOHALMAT", "NOREGOPT", "MICROCODE", 
+        "NOSREF", "NOQUASI", "NOTEMPLATE", "NOHIGHOPT", "NOPARSE",
+        "NOLSTALL", "LFXI", "NOX1", "NOX4", "NOX5", "NOXA", "NOX6",
+        "NOXB", "NOXC", "NOXE", "NOXF"]
+# Note that pCONb is given for BFS.
+pCONb = ["NODUMP", "NOLISTING2", "NOLIST", "TRACE", "NOVARSYM", 
+        "NODECK", "TABLES", "NOTABLST", "NOADDRS", "NOSRN", "NOSDL", 
+        "NOTABDMP", "ZCON", "NOHALMAT", "SCAL", "MICROCODE", 
+        "NOSREF", "NOQUASI", "NOREGOPT", "NOTEMPLATE", "NOHIGHOPT", "NOPARSE",
+        "NOLSTALL", "LFXI", "NOX1", "NOX4", "NOX5", "NOXA", "NOX6",
+        "NOXB", "NOXC", "NOXF"]
+pPROp = [""] * len(pCONp)
+pPROb = [""] * len(pCONb)
+pCON = pCONp
+pPRO = pPROp
 # (See the comments for TYPE2_TYPE in INITIALI.py.)  Since we have no 
 # operating system to communicate the names and values of type 2 options to
 # us from the JCL, pDESC and pVALS provide those for us.
-pDESC = ["TITLE", "LINECT", "PAGES", "SYMBOLS", "MACROSIZE", "LITSTRING",
+pDESC = ["TITLE", "LINECT", "PAGES", "SYMBOLS", "MACROSIZE", "LITSTRINGS",
          "COMPUNIT", "XREFSIZE", "CARDTYPE", "LABELSIZE", "DSR", "BLOCKSUM",
          "MFID"]
 bfsDESC = pDESC.index("MFID")
-pVALS = ["", "59", "2500", "200", "500", "2500", "0", "2000", "", "1200",
-         "1", "400", "0"]
+pVALS = ["", "59", "2500", "200", "500", "2000", "0", "2000", "", "1200",
+         "1", "400", ""]
 
 for parm in sys.argv[1:]:
     if parm.startswith("--hal="):
@@ -74,6 +93,8 @@ for parm in sys.argv[1:]:
         pass
     elif parm == '--bfs':
         pfs = False
+        pCON = pCONb
+        pPRO = pPROb
         index = pDESC.index("MFID")
         pDESC[bfsDESC] = "OLDTPL"
         pVALS[bfsDESC] = 0
@@ -238,7 +259,7 @@ parmFlags = {
     "STATISTICS": 0x01000000,
     "SDL": 0x00800000,
     "DECK": 0x00400000,
-    "LXFI": 0x00200000,
+    "LFXI": 0x00200000,
     "ADDRS": 0x00100000,
     "SRN": 0x00080000,
     "HALMAT": 0x00040000,
@@ -274,30 +295,36 @@ def fixParm(option):
     global pOPTIONS_CODE, pCON, PARM_FIELD
     if option not in parmFlags:
         return
-    if option in sys.argv[1:]:
+    NO = None
+    mask = parmFlags[option]
+    # Defaults
+    if option in pCON:
         NO = False
         parm = option[:]
-    elif ("NO" + option) in sys.argv[1:]:
+        index = pCON.index(parm)
+    elif ("NO" + option) in pCON:
         NO = True
         parm = "NO" + option
-    else:
+        index = pCON.index(parm)
+    # Overrides for defaults
+    inArgs = False
+    if option in sys.argv[1:]:
+        inArgs = True
+        NO = False
+        parm = option[:]
+        pCON[index] = parm
+    elif ("NO" + option) in sys.argv[1:]:
+        inArgs = True
+        NO = True
+        parm = "NO" + option
+        pCON[index] = parm
+    if inArgs:
+        if len(PARM_FIELD) == 0:
+            PARM_FIELD = parm
+        else:
+            PARM_FIELD = PARM_FIELD + "," + parm
+    if mask == None or NO == None:
         return
-    mask = parmFlags[option]
-    if mask == None:
-        return
-    if option in pCON:
-        index = pCON.index(option)
-        pOPTIONS_CODE |= mask
-    elif ("NO" + option) in pCON:
-        index = pCON.index("NO" + option)
-        pOPTIONS_CODE &= ~mask
-    else:
-        return
-    pCON[index] = parm
-    if len(PARM_FIELD) == 0:
-        PARM_FIELD = parm
-    else:
-        PARM_FIELD = PARM_FIELD + "," + parm
     if NO:
         pOPTIONS_CODE &= ~mask
     else:
