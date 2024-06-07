@@ -1,0 +1,196 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DPWRD     SD 0001 000000 000028
+#QDLOG    ER 0002
+#QDEXP    ER 0003
+#QDSQRT   ER 0004
+#LDPWRD   SD 0005 000028 000004
+
+         DPWRD -- EXPONENTIATION OF A SCALAR TO A SCALAR POWER                                                 PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 *                                                                       00000201
+                                  8 * REVISION HISTORY:                                                     00000301
+                                  9 *                                                                       00000401
+                                 10 *    DATE       NAME  DR/CR#     DESCRIPTION                            00000501
+                                 11 *    --------   ----  --------   ------------------------------------   00000601
+                                 12 *    12/16/89   JAC   DR103762   CHANGED QCED/QCEDR MACRO TO CED/CEDR   00000701
+                                 13 *                                INSTRUCTION                            00000801
+                                 14 *                                                                       00000901
+                                 15 *    01/14/93   RAH   CR11163    ADDED CODE TO COMPENSATE FOR BROKEN
+                                 16 *                                CED INSTRUCTION
+                                 17 *
+                                 18 * DPWRD: SCALAR TO SCALAR POWER(DOUBLE)                                 00001000
+                                 19 *                                                                       00001100
+                                 20 *        1. INPUTS: BASE IN F0, EXPONENT IN F2.                         00001200
+                                 21 *        2. OUTPUT IN F0.                                               00001300
+                                 22 *        3. X**Y = EXP(Y*LOG(X)).                                       00001400
+                                 23 *        3A. X**0.5 = SQRT(X)                                           00001500
+                                 24 *        4. ERRORS GIVEN WHEN BASE<0, OR BASE=0 AND EXPONENT<=0.        00001600
+                                 25 *                                                                       00001700
+                                 26          MACRO                                                          00001800
+                                 27          WORKAREA                                                       00001900
+                                 28 EXPON    DS    D                                                        00002000
+                                 29          MEND                                                           00002100
+                                 30 *                                                                       00002200
+                                 31 DPWRD    AMAIN ACALL=YES                                                00002300
+                                 32+***********************************************************************
+                                 33+*
+                                 34+*        PRIMARY ENTRY POINT
+                                 35+*
+                                 36+***********************************************************************
+00000                            37+DPWRD    CSECT                                                          01-AMAIN
+00000                            38+STACK    DSECT                                                          01-AMAIN
+                                 39+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            40+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            41+         DS    2F             R0,R1                                     01-AMAIN
+00006                            42+ARG2     DS    F              R2                                        01-AMAIN
+00008                            43+         DS    F              R3                                        01-AMAIN
+0000A                            44+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            45+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            46+ARG6     DS    F              R6                                        01-AMAIN
+00010                            47+ARG7     DS    F              R7                                        01-AMAIN
+                                 48+*        END OF STANDARD STACK AREA
+00012                            49+EXPON    DS    D                                                        02-00028
+00016                            50+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            51+DPWRD    CSECT                                                          01-AMAIN
+0000000                          52+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 E0FB 0016      0016        53+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN
+00002 B624 0000      0009 0000   54+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 56 * PERFORMS EXPONENTIATION OF DOUBLE PRECISION SCALAR TO DOUBLE          00002400
+                                 57 * PRECISION POWER                                                       00002500
+                                 58          INPUT F0,            SCALAR DP                                X00002600
+                                                   F2             SCALAR DP                                 00002700
+0000000                          59+F0       EQU   0                                                        01-INPUT
+0000002                          60+F2       EQU   2                                                        01-INPUT
+                                 62          OUTPUT F0            SCALAR DP                                 00002800
+                                 64          WORK  F1,F2,F3,F4,F5                                           00002900
+0000001                          65+F1       EQU   1                                                        01-WORK
+0000003                          66+F3       EQU   3                                                        01-WORK
+0000004                          67+F4       EQU   4                                                        01-WORK
+0000005                          68+F5       EQU   5                                                        01-WORK
+00004 5CEC                       70          SEDR  F4,F4          TEST BASE, AND                            00003000
+00005 54E8                       71          AEDR  F4,F0          GIVE ERROR IF                             00003100
+00006 DA64           0020 0019   72          BM    ERROR1         BASE<0.                                   00003200
+00007 DB18           000E 0006   73          BNZ   NOTZERO                                                  00003300
+                                 74 *                                                                       00003400
+00008 5CEC                       75          SEDR  F4,F4          TEST EXPONENT, AND                        00003500
+00009 54EA                       76          AEDR  F4,F2          EXIT IF BASE=0                            00003600
+0000A D944           001C 0011   77          BP    EXIT           AND EXPONENT<0.                           00003700
+                                 78 *                                                                       00003800
+                                 79          AERROR 4             ZERO RAISED TO POWER <= 0                 00003900
+                                 80+*********ISSUE SEND ERROR SVC******************************************
+         DPWRD -- EXPONENTIATION OF A SCALAR TO A SCALAR POWER                                                 PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0000B C9FB 0028      0028        81+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                 82+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0000D DF38           001C 000E   83          B     EXIT           FIXUP, RETURN ZERO                        00004000
+                                 84 *                                                                       00004100
+                                 85 *  MAIN COMPUTATION SECTION                                             00004200
+                                 86 *                                                                       00004300
+0000E 4AFF 0014      0024 0014   87 NOTZERO  CE    F2,DHALF       CHECK FIRST PART OF EXP     /* CR11163 */
+00010 DB0C           0014 0003   88          BNE   SKIPCED                                    /* CR11163 */
+00011 1AFF 0011      0024 0011   89          CED   F2,DHALF       IF EXPONENT=0.5,   /* DR103762,CR11163 */ 00004401
+00013 DC24           001D 0009   90          BE    DOSQRT         CALL DSQRT                                00004500
+                                 91 *                                                                       00004600
+00014 3AF8 0012      0012        92 SKIPCED  STED  F2,EXPON                                   /* CR11163 */ 00004700
+                                 93          ACALL DLOG                                                     00004800
+                                 94+         EXTRN #QDLOG                                                   01-ACALL
+00016 D0FF                       95+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00017 3800                       96+         DC  Y(#QDLOG+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+00018 30F8 0012      0012        97          MED   F0,EXPON                                                 00004900
+                                 98          ACALL DEXP                                                     00005000
+                                 99+         EXTRN #QDEXP                                                   01-ACALL
+0001A D0FF                      100+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+0001B 3800                      101+         DC  Y(#QDEXP+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+                                102 EXIT     AEXIT                                                          00005100
+                                103+*********RETURN TO CALLER**********************************************
+0001C                           104+EXIT     DS    0H                                                       01-AEXIT
+0001C 97E8                      105+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                106+***********************************************************************
+                                108 *                                                                       00005200
+                                109 DOSQRT   ACALL DSQRT                                                    00005300
+                                110+         EXTRN #QDSQRT                                                  01-ACALL
+0001D D0FF                      111+DOSQRT   DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+0001E 3800                      112+         DC  Y(#QDSQRT+X'3800')                                        X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+0001F DF12           001C 0004  113          B     EXIT                                                     00005400
+                                114 *                                                                       00005500
+                                115 ERROR1   AERROR 24            BASE<0 IN EXPONENTIATION                  00005600
+                                116+*********ISSUE SEND ERROR SVC******************************************
+00020 C9FB 002A      002A       117+ERROR1   SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                118+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00022 78E8                      119          LECR  F0,F0          FIXUP: GET |BASE| AND TRY AGAIN           00005700
+00023 DF5A           000E 0016  120          B     NOTZERO                                                  00005800
+                                121 *                                                                       00005900
+00024                           122          DS    0D                                                       00006000
+00024 4080000000000000          123 DHALF    DC    X'4080000000000000'                                      00006100
+                                124          ACLOSE                                                         00007000
+00028                           125+         LTORG                                                          02-ERRPA
+                                126+****************ERROR PARAMETER AREA***********************************
+00028                           127+#LDPWRD  CSECT                                                          02-ERRPA
+                                128+***  DPWRD SENDS THE FOLLOWING ERRORS                                   02-ERRPA
+                                130+***  ERROR NUMBER 4 IN GROUP 4                                          02-ERRPA
+00028 0014                      132+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00029 0404                      133+         DC    Y(4*256+4)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                135+***  ERROR NUMBER 24 IN GROUP 4                                         02-ERRPA
+0002A 0014                      137+AERROR2  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0002B 0418                      138+         DC    Y(4*256+24)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                139+****************END OF ERROR PARAMETER AREA****************************
+                                140+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000017
+  0001     0003     00     00001B
+  0001     0004     00     00001E
+  0001     0005     00     00000C
+  0001     0005     00     000021
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000028   132     81
+AERROR2      1   00002A   137    117
+ARG2         2   000006    42
+ARG4         2   00000A    44
+ARG5         2   00000C    45
+ARG6         2   00000E    46
+ARG7         2   000010    47
+DHALF        4   000024   123     87    89
+DOSQRT       1   00001D   111     90
+DPWRD        1 00000000    37     51
+ERROR1       2   000020   117     72
+EXIT         1   00001C   104     77    83   113
+EXPON        4   000012    49     92    97
+F0           1 00000000    59     71    97   119   119
+F1           1 00000001    65
+F2           1 00000002    60     76    87    89    92
+F3           1 00000003    66
+F4           1 00000004    67     70    70    71    75    75    76
+F5           1 00000005    68
+NOTZERO      2   00000E    87     73   120
+SKIPCED      2   000014    92     88
+STACK        1 00000000    38     52    53
+STACKEND     2   000016    50     53
+$RET1        1   00001C   105
+#LDPWRD      1 00000028   127
+#QDEXP       1 00000000    99    101
+#QDLOG       1 00000000    94     96
+#QDSQRT      1 00000000   110    112
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      72 CARDS FROM SYSIN     412 CARDS FROM SYSLIB
+     196 LINES OUTPUT          14 CARDS OUTPUT

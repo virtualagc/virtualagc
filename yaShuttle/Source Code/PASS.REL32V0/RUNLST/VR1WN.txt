@@ -1,0 +1,105 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VR1WN     SD 0001 000000 00000A
+
+         REMOTE TO REMOTE VECTOR MOVE, SP TO DP                                                                PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VR1WN    AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VR1WN    CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+VR1WN    CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * MOVE A PARTITION OF OR ALL OF V1 TO A PARTITION OF OR ALL OF V2, OR   00000400
+                                 33 *   A SUCCESSIVELY STORED PARTITION OR ALL OF M1 TO A SUCCESSIVELY      00000500
+                                 34 *   STORED PARTITION OR ALL OF M2, WHERE :                              00000600
+                                 35 *        V1 IS A SINGLE PRECISION VECTOR,                               00000700
+                                 36 *        V2 IS A DOUBLE PRECISION VECTOR,                               00000800
+                                 37 *        AT LEAST ONE OF THE ABOVE IS REMOTE,                           00000900
+                                 38 *        M1 IS A SINGLE PRECISION MATRIX,                               00001000
+                                 39 *        M2 IS A DOUBLE PRECISION MATRIX,                               00001100
+                                 40 *        AT LEAST ONE OF THE ABOVE IS REMOTE,                           00001200
+                                 41 *        AND WHERE THE SOURCE AND RECEIVERS ARE BOTH OF LENGTH N        00001300
+                                 42 *                                                                       00001400
+                                 43          INPUT R4,            ZCON(VECTOR(N)) SP                       X00001500
+                                                   R5             INTEGER(N)                                00001600
+0000004                          44+R4       EQU   4                                                        01-INPUT
+0000005                          45+R5       EQU   5                                                        01-INPUT
+                                 47          OUTPUT R2            ZCON(VECTOR(N)) DP                        00001700
+0000002                          48+R2       EQU   2                                                        01-OUTPU
+                                 50          WORK F0,F1                                                     00001800
+0000000                          51+F0       EQU   0                                                        01-WORK
+0000001                          52+F1       EQU   1                                                        01-WORK
+                                 54 *                                                                       00001900
+                                 55 * ALGORITHM:                                                            00002000
+                                 56 *   SEE ALGORITHM DESCRIPTION IN VR1DN                                  00002100
+                                 57 *                                                                       00002200
+00002 59E1                       58          SER   F1,F1                                                    00002300
+00003 C0E4                       59          NOPR  R4             NOP TO ALIGN THE LE AND STED ON           00002400
+                                 60 *                             EVEN BOUNDARIES TO SAVE ON LOOP TIME      00002500
+00004 78F4 B80A      000A        61 VR1WNX   LE@#  F0,ARG4(R5)                                              00002600
+00006 38FC B806      0006        62          STED@# F0,ARG2(R5)                                             00002700
+00008 DD17           0004 0005   63          BCTB  R5,VR1WNX                                                00002800
+                                 64          AEXIT                                                          00002900
+                                 65+*********RETURN TO CALLER**********************************************
+00009                            66+         DS    0H                                                       01-AEXIT
+00009 97E8                       67+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 68+***********************************************************************
+                                 70          ACLOSE                                                         00003000
+0000A                            71+         LTORG                                                          02-ERRPA
+                                 72+****************ERROR PARAMETER AREA***********************************
+                                 73+***  NO ERRORS SENT IN VR1WN                                            02-ERRPA
+                                 74+****************END OF ERROR PARAMETER AREA****************************
+                                 75+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    18     62
+ARG4         2   00000A    20     61
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+F0           1 00000000    51     61    62
+F1           1 00000001    52     58    58
+R2           1 00000002    48
+R4           1 00000004    44     59
+R5           1 00000005    45     61    62    63
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+VR1WN        1 00000000    13     27
+VR1WNX       2   000004    61     63
+$RET1        1   000009    67
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      35 CARDS FROM SYSIN     344 CARDS FROM SYSLIB
+     105 LINES OUTPUT           7 CARDS OUTPUT

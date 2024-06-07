@@ -1,0 +1,461 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+MM14DN    SD 0001 000000 000120
+#QMM15DN  ER 0002
+#LMM14DN  SD 0003 000120 000002
+
+         MM14DN MATRIX INVERSE,N X N,DOUBLE PREC                                                               PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 ROWL  DS    1H                                                          00000400
+                                 10          MEND                                                           00000500
+                                 11 MM14DN   AMAIN ACALL=YES,QDED=YES                                       00000600
+                                 12+***********************************************************************
+                                 13+*
+                                 14+*        PRIMARY ENTRY POINT
+                                 15+*
+                                 16+***********************************************************************
+00000                            17+MM14DN   CSECT                                                          01-AMAIN
+00000                            18+STACK    DSECT                                                          01-AMAIN
+                                 19+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            20+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            21+         DS    2F             R0,R1                                     01-AMAIN
+00006                            22+ARG2     DS    F              R2                                        01-AMAIN
+00008                            23+         DS    F              R3                                        01-AMAIN
+0000A                            24+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            25+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            26+ARG6     DS    F              R6                                        01-AMAIN
+00010                            27+ARG7     DS    F              R7                                        01-AMAIN
+                                 28+*        END OF STANDARD STACK AREA
+00012                            29+ROWL  DS    1H                                                          02-00009
+00013 C9FB
+00014                            30+QARGA    DS    D                                                        01-AMAIN
+00018                            31+QARGB    DS    D                                                        01-AMAIN
+0001C                            32+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            33+MM14DN   CSECT                                                          01-AMAIN
+0000000                          34+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 E0FB 001C      001C        35+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN
+00002 B624 0000      0009 0000   36+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 38 *                                                                       00000700
+                                 39 *   GENERATES THE INVERSE MATRIX :                                      00000800
+                                 40 *                                                                       00000900
+                                 41 *     M(N,N)= INVERSE ( M1(N,N) )                                       00001000
+                                 42 *                                                                       00001100
+                                 43 *   WHERE N NOT=3 & M , M1  ARE DP                                      00001200
+                                 44 *                                                                       00001300
+                                 45          INPUT R4,            MATRIX(N,N)  DP                          X00001400
+                                                   R5,            INTEGER(N)   DP                          X00001500
+                                                   R7             WORKAREA                                  00001600
+0000004                          46+R4       EQU   4                                                        01-INPUT
+0000005                          47+R5       EQU   5                                                        01-INPUT
+0000007                          48+R7       EQU   7                                                        01-INPUT
+                                 50          OUTPUT R2            MATRIX(N,N)  DP                           00001700
+0000002                          51+R2       EQU   2                                                        01-OUTPU
+                                 53          WORK  R1,R3,R6,F0,F1,F2,F3,F4,F5                               00001800
+0000001                          54+R1       EQU   1                                                        01-WORK
+0000003                          55+R3       EQU   3                                                        01-WORK
+0000006                          56+R6       EQU   6                                                        01-WORK
+0000000                          57+F0       EQU   0                                                        01-WORK
+0000001                          58+F1       EQU   1                                                        01-WORK
+0000002                          59+F2       EQU   2                                                        01-WORK
+0000003                          60+F3       EQU   3                                                        01-WORK
+0000004                          61+F4       EQU   4                                                        01-WORK
+0000005                          62+F5       EQU   5                                                        01-WORK
+                                 64 *                                                                       00001900
+                                 65 *  ALGORITHM:                                                           00002000
+                                 66 *                                                                       00002100
+                                 67 * FOR K=1,N                                                             00002200
+                                 68 *   FIND MAXIMAL ELEMENT IN ROWS K TO N,COL.S K TO N                    00002300
+                                 69 *   SAVE IT AS BIG,PIVOTAL ELEMENT                                      00002400
+                                 70 *     SAVE ITS ROW# AS ISW(K)                                           00002500
+                                 71 *     SAVE ITS COL# AS JSW(K)                                           00002600
+                                 72 *    SWITCH KTH ROW AND ROW OF PIVOTAL ELEMENT                          00002700
+                                 73 *   SWITCH KTH COLUMN AND COLUMN OF PIVOTAL ELEMENT                     00002800
+                                 74 *   DIVIDE KTH COLUMN ,EXCEPT FOR KTH ELEMENT BY -BIG                   00002900
+                                 75 *   REDUCE MATRIX                                                       00003000
+                                 76 *   DIVIDE KTH ROW,EXCEPT FOR KTH ELEMENT,BY BIG                        00003100
+                                 77 *   REPLACE PIVOT BY RECIPROCAL                                         00003200
+                                 78 *CONTINUE                                                               00003300
+         MM14DN MATRIX INVERSE,N X N,DOUBLE PREC                                                               PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                 79 *DO K=K-1,1                                                             00003400
+                                 80 *INTERCHANGE JSW(K) ROW AND KTH                                         00003500
+                                 81 *INTERCHANGE ISW(K) COLUMN AND KTH                                      00003600
+                                 82 *END                                                                    00003700
+                                 83 * IF DIM=2, THEN CALCULATES INVERSE DIRECTLY                            00003800
+                                 84 *                                                                       00003900
+00004 19E4                       85          LR    R1,R4          CHANGE BETWEEN R1&R4                      00004000
+00005 B5E5 0002           0002   86          CHI   R5,2                                                     00004100
+00007 DBCC           003B 0033   87          BNE   NLEN                                                     00004200
+00008 78F9 0004      0004        88          LED   F0,4(R1)                                                 00004300
+0000A 7AF9 0008      0008        89          LED   F2,8(R1)                                                 00004400
+0000C 30F9 0010      0010        90          MED   F0,16(R1)                                                00004500
+0000E 32F9 000C      000C        91          MED   F2,12(R1)                                                00004600
+00010 58EA                       92          SEDR  F0,F2                                                    00004700
+00011 C4F7 0104      0117 0104   93          BZ    AOUT                                                     00004800
+00013 5DE5                       94          SER   F5,F5                                                    00004900
+00014 8CE1                0001   95          LFLI  F4,1                                                     00005000
+                                 96         QDEDR  F4,F0                                                    00005100
+00015 3CF8 0014      0014        97+         STED  F4,QARGA                                                 01-QDEDR
+00017 38F8 0018      0018        98+         STED  F0,QARGB                                                 01-QDEDR
+00019 6CE0                       99+         DER   F4,F0                                                    01-QDEDR
+0001A 78E4                      100+         LER   F0,F4                                                    01-QDEDR
+0001B 79E5                      101+         LER   F0+1,F4+1                                                01-QDEDR
+0001C 30F8 0018      0018       102+         MED   F0,QARGB                                                 01-QDEDR
+0001E 58F8 0014      0014       103+         SED   F0,QARGA                                                 01-QDEDR
+00020 6830           0018       104+         DE    F0,QARGB                                                 01-QDEDR
+00021 5CE8                      105+         SEDR  F4,F0                                                    01-QDEDR
+00022 78F8 0018      0018       106+         LED   F0,QARGB                                                 01-QDEDR
+00024 7AF9 0010      0010       107          LED   F2,16(R1)                                                00005200
+00026 32EC                      108          MEDR  F2,F4                                                    00005300
+00027 3AFA 0004      0004       109          STED  F2,4(R2)                                                 00005400
+00029 7AF9 0008      0008       110          LED   F2,8(R1)                                                 00005500
+0002B 7AEA                      111          LECR  F2,F2                                                    00005600
+0002C 32EC                      112          MEDR  F2,F4                                                    00005700
+0002D 3AFA 0008      0008       113          STED  F2,8(R2)                                                 00005800
+0002F 7AF9 000C      000C       114          LED   F2,12(R1)                                                00005900
+00031 7AEA                      115          LECR  F2,F2                                                    00006000
+00032 32EC                      116          MEDR  F2,F4                                                    00006100
+00033 3AFA 000C      000C       117          STED  F2,12(R2)                                                00006200
+00035 7AF9 0004      0004       118          LED   F2,4(R1)                                                 00006300
+00037 32EC                      119          MEDR  F2,F4                                                    00006400
+00038 3AFA 0010      0010       120          STED  F2,16(R2)                                                00006500
+                                121          AEXIT                                                          00006600
+                                122+*********RETURN TO CALLER**********************************************
+0003A                           123+         DS    0H                                                       01-AEXIT
+0003A 97E8                      124+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                125+***********************************************************************
+0003B 1BE7                      127 NLEN     LR    R3,R7                                                    00006700
+0003C 1FE5                      128          LR    R7,R5                                                    00006800
+0003D 9FF8 000C      000C       129          MIH   R7,ARG5                                                  00006900
+0003F 78FD E000      0000       130 MVLOOP   LED   F0,0(R7,R1)                                              00007000
+00041 38FE E000      0000       131          STED   F0,0(R7,R2)                                             00007100
+00043 DF17           003F 0005  132          BCTB  R7,MVLOOP                                                00007200
+00044 F508                0002  133          SLL   R5,2                                                     00007300
+00045 BD48           0012       134          STH   R5,ROWL                                                  00007400
+00046 BDE3                0003  135          LFXI  R5,1                                                     00007500
+00047 5AEA                      136 ALOOP    SEDR   F2,F2                                                   00007600
+00048 78E2                      137          LER   F0,F2                                                    00007700
+00049 79E3                      138          LER   F1,F3                                                    00007800
+0004A 1EE5                      139          LR    R6,R5          I1=K                                      00007900
+0004B 1FE5                      140          LR    R7,R5          J1=K                                      00008000
+0004C 1CE5                      141          LR    R4,R5          I=K TO N                                  00008100
+0004D 19E5                      142 DLOOP    LR    R1,R5     J=K TO N                                       00008200
+0004E 7CFE 2000      0000       143 ELOOP    LED   F4,0(R1,R2)                                              00008300
+00050 DD04           0052 0001  144          BNM   NSKIP                                                    00008400
+00051 7CEC                      145          LECR  F4,F4                                                    00008500
+                                146 NSKIP   QCEDR  F0,F4                                                    00008600
+00052 48EC                      147+NSKIP    CER   F0,F4                                                    01-QCEDR
+00053 DD1C           005B 0007  148          BNL   GLOOP                                                    00008700
+00054 7AFE 2000      0000       149 CTSW     LED    F2,0(R1,R2)   NEW BIG                                   00008800
+00056 78E2                      150          LER   F0,F2                                                    00008900
+00057 DD04           0059 0001  151          BNM   POS                                                      00009000
+00058 78E8                      152          LECR  F0,F0                                                    00009100
+00059 1EE4                      153 POS      LR    R6,R4       I1=I                                         00009200
+0005A 1FE1                      154          LR    R7,R1       J1=J                                         00009300
+0005B E905           0001       155 GLOOP    LA    R1,1(R1)                                                 00009400
+0005C 9130           000C       156          CH    R1,ARG5                                                  00009500
+0005D DE42           004E 0010  157          BLE    ELOOP                                                   00009600
+0005E B0E4 0001           0001  158          AHI   R4,1                                                     00009700
+         MM14DN MATRIX INVERSE,N X N,DOUBLE PREC                                                               PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+00060 8248           0012       159          AH    R2,ROWL                                                  00009800
+00061 9430           000C       160          CH    R4,ARG5                                                  00009900
+00062 DE5A           004D 0016  161          BLE    DLOOP                                                   00010000
+00063 7AE2                      162          LER   F2,F2                                                    00010100
+00064 C4F7 00B1      0117 00B1  163          BZ    AOUT                                                     00010200
+00066 58E8                      164          SEDR  F0,F0                                                    00010300
+00067 88E1                0001  165          LFLI  F0,1                                                     00010400
+                                166         QDEDR  F0,F2                                                    00010500
+00068 38F8 0014      0014       167+         STED  F0,QARGA                                                 01-QDEDR
+0006A 3AF8 0018      0018       168+         STED  F2,QARGB                                                 01-QDEDR
+0006C 68E2                      169+         DER   F0,F2                                                    01-QDEDR
+0006D 7AE0                      170+         LER   F2,F0                                                    01-QDEDR
+0006E 7BE1                      171+         LER   F2+1,F0+1                                                01-QDEDR
+0006F 32F8 0018      0018       172+         MED   F2,QARGB                                                 01-QDEDR
+00071 5AF8 0014      0014       173+         SED   F2,QARGA                                                 01-QDEDR
+00073 6A30           0018       174+         DE    F2,QARGB                                                 01-QDEDR
+00074 58EA                      175+         SEDR  F0,F2                                                    01-QDEDR
+00075 7AF8 0018      0018       176+         LED   F2,QARGB                                                 01-QDEDR
+00077 BE03           0000       177          STH   R6,0(R3)       ISW(K)=I1                                 00010600
+00078 BF07           0001       178          STH   R7,1(R3)       JSW(K)=J1                                 00010700
+00079 9A18           0006       179          LH    R2,ARG2                                                  00010800
+0007A 19E2                      180          LR    R1,R2                                                    00010900
+0007B 8A48           0012       181          SH    R2,ROWL                                                  00011000
+0007C 1FE5                      182          LR    R7,R5                                                    00011100
+0007D 8248           0012       183 L2       AH    R2,ROWL                                                  00011200
+0007E DF0B           007D 0002  184          BCTB  R7,L2       KTH ROW                                      00011300
+0007F 15E6                      185          CR    R5,R6      K=I1?                                         00011400
+00080 DC3C           0090 000F  186          BE    MLOOP                                                    00011500
+                                187 *EXCHANGE ROWS                                                          00011600
+00081 8948           0012       188          SH    R1,ROWL                                                  00011700
+00082 8148           0012       189 L1       AH    R1,ROWL                                                  00011800
+00083 DE0B           0082 0002  190          BCTB  R6,L1     I1TH ROW                                       00011900
+00084 9F30           000C       191          LH    R7,ARG5                                                  00012000
+00085 7AFD E000      0000       192 L3       LED   F2,0(R7,R1)       A(I1,J)                                00012100
+00087 7CFE E000      0000       193          LED   F4,0(R7,R2)        A(K,J)                                00012200
+00089 DC04           008B 0001  194          BZ    FX1            WORKAROUND FOR LECR BUG.                  00012300
+0008A 7CEC                      195          LECR  F4,F4                                                    00012400
+0008B 3CFD E000      0000       196 FX1      STED  F4,0(R7,R1)                                              00012500
+0008D 3AFE E000      0000       197          STED  F2,0(R7,R2)                                              00012600
+0008F DF2F           0085 000B  198          BCTB  R7,L3                                                    00012700
+                                199 *EXCHANGE COLUMNS                                                       00012800
+00090 9C30           000C       200 MLOOP    LH    R4,ARG5                                                  00012900
+00091 9507           0001       201          CH    R5,1(R3)                                                 00013000
+00092 DC3C           00A2 000F  202          BE    ROWD                                                     00013100
+00093 9F07           0001       203          LH    R7,1(R3)     J1                                          00013200
+00094 9918           0006       204          LH    R1,ARG2                                                  00013300
+00095 8948           0012       205          SH    R1,ROWL                                                  00013400
+00096 8148           0012       206 M2LOOP   AH    R1,ROWL                                                  00013500
+00097 7AFD A000      0000       207          LED   F2,0(R5,R1)     A(I,K)                                   00013600
+00099 DC04           009B 0001  208          BZ    FX2            WORKAROUND FOR LECR BUG.                  00013700
+0009A 7AEA                      209          LECR  F2,F2                                                    00013800
+0009B 7CFD E000      0000       210 FX2      LED   F4,0(R7,R1)     A(I,J1)                                  00013900
+0009D 3AFD E000      0000       211          STED  F2,0(R7,R1)     A(I,J1)=TEMP1                            00014000
+0009F 3CFD A000      0000       212          STED  F4,0(R5,R1)    A(I,K)=TEMP2/-BIG                         00014100
+000A1 DC33           0096 000C  213          BCTB  R4,M2LOOP                                                00014200
+                                214 *DIVIDE KTH ROW BY -BIG                                                 00014300
+000A2 9918           0006       215 ROWD     LH    R1,ARG2                                                  00014400
+000A3 BCE3                0003  216          LFXI  R4,1                                                     00014500
+000A4 14E5                      217 DIVLOOP  CR    R4,R5                                                    00014600
+000A5 DC18           00AC 0006  218          BE    BABR                                                     00014700
+000A6 7AFD A000      0000       219          LED   F2,0(R5,R1)                                              00014800
+000A8 7AEA                      220          LECR  F2,F2                                                    00014900
+000A9 32E8                      221          MEDR  F2,F0                                                    00015000
+000AA 3AFD A000      0000       222          STED  F2,0(R5,R1)                                              00015100
+000AC 8148           0012       223 BABR     AH    R1,ROWL                                                  00015200
+000AD B0E4 0001           0001  224          AHI   R4,1                                                     00015300
+000AF 9430           000C       225          CH    R4,ARG5                                                  00015400
+000B0 DE36           00A4 000D  226          BLE   DIVLOOP                                                  00015500
+                                227 *BEGINNING OF REDUCTION                                                 00015600
+000B1 1FE5                      228          LR    R7,R5                                                    00015700
+000B2 9918           0006       229          LH    R1,ARG2                                                  00015800
+000B3 BCE3                0003  230 RABR     LFXI  R4,1               I-COUNTER                             00015900
+00000B4                         231 PLOOP    EQU   *                                                        00016000
+000B4 7AFD A000      0000       232          LED    F2,0(R5,R1)   A(I,K)=0?                                 00016100
+000B6 DC48           00C9 0012  233          BE    OSLOOP                                                   00016200
+000B7 14E5                      234          CR    R4,R5                                                    00016300
+000B8 DC40           00C9 0010  235          BE    OSLOOP                                                   00016400
+000B9 BEE3                0003  236          LFXI  R6,1    R6 IS J COUNTER                                  00016500
+000BA 16E5                      237 QLOOP    CR    R6,R5      J=K?                                          00016600
+000BB DC24           00C5 0009  238          BE    S1   IF YES,SKIP                                         00016700
+         MM14DN MATRIX INVERSE,N X N,DOUBLE PREC                                                               PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+000BC 7AFD A000      0000       239          LED   F2,0(R5,R1)     A(I,K)                                   00016800
+000BE 32FE C000      0000       240          MED    F2,0(R6,R2)     A(K,J)                                  00016900
+000C0 7CFD C000      0000       241          LED    F4,0(R6,R1)     A(I,J)                                  00017000
+000C2 54EA                      242          AEDR  F4,F2                                                    00017100
+000C3 3CFD C000      0000       243          STED   F4,0(R6,R1)                                             00017200
+000C5 B0E6 0001           0001  244 S1       AHI   R6,1    J=J+1                                            00017300
+000C7 9630           000C       245          CH    R6,ARG5    J=N?                                          00017400
+000C8 DE3E           00BA 000F  246          BNH   QLOOP                                                    00017500
+000C9 8148           0012       247 OSLOOP   AH    R1,ROWL   ROW I=I+1                                      00017600
+000CA B0E4 0001           0001  248          AHI   R4,1   R2 IS I-COUNTER                                   00017700
+000CC 9430           000C       249          CH    R4,ARG5   I=N?                                           00017800
+000CD DE6A           00B4 001A  250          BNH   PLOOP                                                    00017900
+                                251 *END OF REDUCTION                                                       00018000
+000CE 9F30           000C       252          LH    R7,ARG5                                                  00018100
+                                253 *ULOOP DIVIDES KTH ROW,EXCEPT FOR KTH MEMBER,BY PIVOT                   00018200
+000CF 17E5                      254 ULOOP    CR    R7,R5                                                    00018300
+000D0 DC1C           00D8 0007  255          BE    USKIP                                                    00018400
+000D1 7AFE E000      0000       256          LED   F2,0(R7,R2)     A(K,J)                                   00018500
+000D3 32E8                      257          MEDR  F2,F0                                                    00018600
+000D4 3AFE E000      0000       258          STED   F2,0(R7,R2)                                             00018700
+000D6 DF23           00CF 0008  259 KRIS     BCTB  R7,ULOOP                                                 00018800
+000D7 DF0C           00DB 0003  260          B     ARON                                                     00018900
+000D8 38FE E000      0000       261 USKIP    STED   F0,0(R7,R2)                                             00019000
+000DA DF16           00D6 0005  262          B     KRIS                                                     00019100
+000DB 1FE5                      263 ARON     LR    R7,R5                                                    00019200
+000DC B0E5 0001           0001  264          AHI   R5,1   K=K+1                                             00019300
+000DE EB0B           0002       265          LA    R3,2(R3)                                                 00019400
+000DF 8248           0012       266          AH    R2,ROWL                                                  00019500
+000E0 9530           000C       267          CH    R5,ARG5                                                  00019600
+000E1 C6F7 089C      0047 009C  268          BLE   ALOOP                                                    00019700
+000E3 8A48           0012       269          SH    R2,ROWL                                                  00019800
+000E4 8DF7 0038      011E 0038  270          SH    R5,=H'2'   FOR K=N-1 TO 1                                00019900
+000E6 8BF7 0036      011E 0036  271          SH    R3,=H'2'                                                 00020000
+                                272 *FINAL ROW AND COLUMN SWITCHS                                           00020100
+000E8 8BF7 0034      011E 0034  273 REVERS   SH    R3,=H'2'                                                 00020200
+000EA 9E07           0001       274          LH    R6,1(R3)      J1=ISW(K)                                  00020300
+000EB 16E5                      275          CR    R6,R5                                                    00020400
+000EC DC50           0101 0014  276          BE    JCOMP                                                    00020500
+000ED 9918           0006       277          LH    R1,ARG2                                                  00020600
+000EE 8948           0012       278          SH    R1,ROWL                                                  00020700
+000EF 1AE1                      279          LR    R2,R1                                                    00020800
+000F0 1CE5                      280          LR    R4,R5                                                    00020900
+000F1 8248           0012       281 WLOOP    AH    R2,ROWL     KTH ROW                                      00021000
+000F2 DC0B           00F1 0002  282          BCTB  R4,WLOOP                                                 00021100
+000F3 8148           0012       283 XLOOP    AH    R1,ROWL     I1TH ROW                                     00021200
+000F4 DE0B           00F3 0002  284          BCTB  R6,XLOOP                                                 00021300
+000F5 9F30           000C       285          LH   R7,ARG5                                                   00021400
+000F6 78FE E000      0000       286 X2LOOP   LED   F0,0(R7,R2)   A(K,J)                                     00021500
+000F8 7AFD E000      0000       287          LED   F2,0(R7,R1)     A(I1,J)                                  00021600
+000FA DC04           00FC 0001  288          BZ    FX3            WORKAROUND FOR LECR BUG.                  00021700
+000FB 7AEA                      289          LECR  F2,F2                                                    00021800
+000FC 3AFE E000      0000       290 FX3      STED  F2,0(R7,R2)   A(K,J)                                     00021900
+000FE 38FD E000      0000       291          STED  F0,0(R7,R1)   A(I1,J)                                    00022000
+00100 DF2F           00F6 000B  292          BCTB   R7,X2LOOP                                               00022100
+00101 9E03           0000       293 JCOMP    LH    R6,0(R3)                                                 00022200
+00102 16E5                      294          CR    R6,R5                                                    00022300
+00103 DC38           0112 000E  295          BE    INCR                                                     00022400
+00104 9A18           0006       296          LH    R2,ARG2                                                  00022500
+00105 9F30           000C       297          LH    R7,ARG5                                                  00022600
+00106 78FE C000      0000       298 Y2LOOP   LED   F0,0(R6,R2)   A(I,J1)                                    00022700
+00108 DC04           010A 0001  299          BZ    FX4            WORKAROUND FOR LECR BUG.                  00022800
+00109 78E8                      300          LECR  F0,F0                                                    00022900
+0010A 7AFE A000      0000       301 FX4      LED   F2,0(R5,R2)     A(I,K)                                   00023000
+0010C 3AFE C000      0000       302          STED  F2,0(R6,R2)                                              00023100
+0010E 38FE A000      0000       303          STED  F0,0(R5,R2)                                              00023200
+00110 8248           0012       304          AH    R2,ROWL                                                  00023300
+00111 DF33           0106 000C  305          BCTB  R7,Y2LOOP                                                00023400
+00112 8DF7 000B      011F 000B  306 INCR     SH    R5,=H'1'                                                 00023500
+00114 DC04           0116 0001  307          BZ    OUT                                                      00023600
+00115 DFBA           00E8 002E  308          B     REVERS                                                   00023700
+                                309 OUT      AEXIT                                                          00023800
+                                310+*********RETURN TO CALLER**********************************************
+00116                           311+OUT      DS    0H                                                       01-AEXIT
+00116 97E8                      312+$RET2    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                313+***********************************************************************
+                                315 AOUT     AERROR   27         ERROR:THIS IS A SINGULAR MATRIX            00023900
+                                316+*********ISSUE SEND ERROR SVC******************************************
+00117 C9FB 0120      0120       317+AOUT     SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                318+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+         MM14DN MATRIX INVERSE,N X N,DOUBLE PREC                                                               PAGE    6
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+00119 9D30           000C       319          LH    R5,ARG5                                                  00024000
+0011A 9918           0006       320          LH    R1,ARG2                                                  00024100
+                                321          ABAL MM15DN                                                    00024200
+                                322+         EXTRN #QMM15DN                                                 01-ABAL
+0011B E4F7                      323+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0011C 3800                      324+         DC  Y(#QMM15DN+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0011D DF22           0116 0008  325          B     OUT                                                      00024300
+                                326          ACLOSE                                                         00024400
+0011E                           327+         LTORG                                                          02-ERRPA
+0011E 0002                      328                =H'2'
+0011F 0001                      329                =H'1'
+                                330+****************ERROR PARAMETER AREA***********************************
+00120                           331+#LMM14DN CSECT                                                          02-ERRPA
+                                332+***  MM14DN SENDS THE FOLLOWING ERROR                                   02-ERRPA
+                                334+***  ERROR NUMBER 27 IN GROUP 4                                         02-ERRPA
+00120 0014                      336+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00121 041B                      337+         DC    Y(4*256+27)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                338+****************END OF ERROR PARAMETER AREA****************************
+                                339+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    7
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.38 07/22/05
+  0001     0002     00     00011C
+  0001     0003     00     000118
+
+                                             CROSS REFERENCE                                                   PAGE    8
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+AERROR1      1   000120   336    317
+ALOOP        1   000047   136    268
+AOUT         2   000117   317     93   163
+ARG2         2   000006    22    179   204   215   229   277   296   320
+ARG4         2   00000A    24
+ARG5         2   00000C    25    129   156   160   191   200   225   245   249   252   267   285   297   319
+ARG6         2   00000E    26
+ARG7         2   000010    27
+ARON         1   0000DB   263    260
+BABR         2   0000AC   223    218
+CTSW         2   000054   149
+DIVLOOP      1   0000A4   217    226
+DLOOP        1   00004D   142    161
+ELOOP        2   00004E   143    157
+F0           1 00000000    57     88    90    92    98    99   100   101   102   103   104   105   106   130   131   137
+                                 147   150   152   152   164   164   165   167   169   170   171   175   221   257   261
+                                 286   291   298   300   300   303
+F1           1 00000001    58    138
+F2           1 00000002    59     89    91    92   107   108   109   110   111   111   112   113   114   115   115   116
+                                 117   118   119   120   136   136   137   149   150   162   162   168   169   170   171
+                                 172   173   174   175   176   192   197   207   209   209   211   219   220   220   221
+                                 222   232   239   240   242   256   257   258   287   289   289   290   301   302
+F3           1 00000003    60    138
+F4           1 00000004    61     95    97    99   100   101   105   108   112   116   119   143   145   145   147   193
+                                 195   195   196   210   212   241   242   243
+F5           1 00000005    62     94    94
+FX1          2   00008B   196    194
+FX2          2   00009B   210    208
+FX3          2   0000FC   290    288
+FX4          2   00010A   301    299
+GLOOP        2   00005B   155    148
+INCR         2   000112   306    295
+JCOMP        2   000101   293    276
+KRIS         1   0000D6   259    262
+L1           2   000082   189    190
+L2           2   00007D   183    184
+L3           2   000085   192    198
+M2LOOP       2   000096   206    213
+MLOOP        2   000090   200    186
+MM14DN       1 00000000    17     33
+MVLOOP       2   00003F   130    132
+NLEN         1   00003B   127     87
+NSKIP        1   000052   147    144
+OSLOOP       2   0000C9   247    233   235
+OUT          1   000116   311    307   325
+PLOOP        1 000000B4   231    250
+POS          1   000059   153    151
+QARGA        4   000014    30     97   103   167   173
+QARGB        4   000018    31     98   102   104   106   168   172   174   176
+QLOOP        1   0000BA   237    246
+R1           1 00000001    54     85    88    88    89    89    90    90    91    91   107   107   110   110   114   114
+                                 118   118   130   142   143   143   149   149   154   155   155   155   156   180   188
+                                 189   192   196   204   205   206   207   210   211   212   215   219   222   223   229
+                                 232   239   241   243   247   277   278   279   283   287   291   320
+R2           1 00000002    51    109   109   113   113   117   117   120   120   131   143   149   159   179   180   181
+                                 183   193   197   240   256   258   261   266   269   279   281   286   290   296   298
+                                 301   302   303   304
+R3           1 00000003    55    127   177   177   178   178   201   201   203   203   265   265   265   271   273   274
+                                 274   293   293
+R4           1 00000004    46     85   141   153   158   160   200   213   216   217   224   225   230   234   248   249
+                                 280   282
+R5           1 00000005    47     86   128   133   134   135   139   140   141   142   182   185   201   207   207   212
+                                 212   217   219   219   222   222   228   232   232   234   237   239   239   254   263
+                                 264   267   270   275   280   294   301   301   303   303   306   319
+R6           1 00000006    56    139   153   177   185   190   236   237   240   240   241   241   243   243   244   245
+                                 274   275   284   293   294   298   298   302   302
+R7           1 00000007    48    127   128   129   130   130   131   131   132   140   154   178   182   184   191   192
+                                 192   193   193   196   196   197   197   198   203   210   210   211   211   228   252
+                                 254   256   256   258   258   259   261   261   263   285   286   286   287   287   290
+                                 290   291   291   292   297   305
+RABR         1   0000B3   230
+REVERS       2   0000E8   273    308
+ROWD         2   0000A2   215    202
+ROWL         1   000012    29    134   159   181   183   188   189   205   206   223   247   266   269   278   281   283
+                                 304
+S1           2   0000C5   244    238
+STACK        1 00000000    18     34    35
+STACKEND     2   00001C    32     35
+ULOOP        1   0000CF   254    259
+USKIP        2   0000D8   261    255
+                                             CROSS REFERENCE                                                   PAGE    9
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+WLOOP        2   0000F1   281    282
+X2LOOP       2   0000F6   286    292
+XLOOP        2   0000F3   283    284
+Y2LOOP       2   000106   298    305
+$RET1        1   00003A   124
+$RET2        1   000116   312
+#LMM14DN     1 00000120   331
+#QMM15DN     1 00000000   322    324
+=H'1'        1   00011F   329    306
+=H'2'        1   00011E   328    270   271   273
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE   10
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     249 CARDS FROM SYSIN     442 CARDS FROM SYSLIB
+     461 LINES OUTPUT          26 CARDS OUTPUT

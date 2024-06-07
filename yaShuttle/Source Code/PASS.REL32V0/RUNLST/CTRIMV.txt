@@ -1,0 +1,267 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CTRIMV    SD 0001 000000 00005E
+#QGTBYTE  ER 0002
+#QSTBYTE  ER 0003
+
+         CTRIMV--TRIMS LEADING AND TRAILING BLANKS                                                             PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 CTRIMV   AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+CTRIMV   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+CTRIMV   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * TRIM LEADING AND TRAILING BLANKS OFF A CHATACTER STRING, C1.          00000400
+                                 33 *                                                                       00000500
+                                 34          INPUT R4             CHARACTER(C1)                             00000600
+0000004                          35+R4       EQU   4                                                        01-INPUT
+                                 37          OUTPUT R2            CHARACTER(VAC)                            00000700
+0000002                          38+R2       EQU   2                                                        01-OUTPU
+                                 40          WORK  R1,R3,R5,R6,R7,F0                                        00000800
+0000001                          41+R1       EQU   1                                                        01-WORK
+0000003                          42+R3       EQU   3                                                        01-WORK
+0000005                          43+R5       EQU   5                                                        01-WORK
+0000006                          44+R6       EQU   6                                                        01-WORK
+0000007                          45+R7       EQU   7                                                        01-WORK
+0000000                          46+F0       EQU   0                                                        01-WORK
+                                 48 *                                                                       00000900
+                                 49 * ALGORITHM:                                                            00001000
+                                 50 *   CURR_LEN = CURRENT_LENGTH(C1);                                      00001100
+                                 51 *   IF CURR_LEN = 0 THEN                                                00001200
+                                 52 *     RETURN;                                                           00001300
+                                 53 *   IF ODD(CURR_LEN) THEN                                               00001400
+                                 54 *     DO;                                                               00001500
+                                 55 *       ODD_FLAG = ON;                                                  00001600
+                                 56 *       J = CURR_LEN - 1;                                               00001700
+                                 57 *     END;                                                              00001800
+                                 58 *   ELSE                                                                00001900
+                                 59 *     J = CURR_LEN;                                                     00002000
+                                 60 *   J = J/2;                                                            00002100
+                                 61 *   END_PTR = NAME(C1) + J;                                             00002200
+                                 62 *   IF ODD_FLAG THEN                                                    00002300
+                                 63 *     DO;                                                               00002400
+                                 64 *       CURR_LEN = CURR_LEN + 1;                                        00002500
+                                 65 *       IF C1$(#) = ' ' THEN                                            00002600
+                                 66 *         DO;                                                           00002700
+                                 67 *           CURR_LEN = CURR_LEN - 1;                                    00002800
+                                 68 *           ODD_FLAG = OFF;                                             00002900
+                                 69 *         END;                                                          00003000
+                                 70 *       ELSE                                                            00003100
+                                 71 *         IF CURR_LEN = 1 THEN                                          00003200
+                                 72 *           GO TO MOVE;                                                 00003300
+                                 73 *     END;                                                              00003400
+                                 74 *   DO WHILE TRUE;                                                      00003500
+                                 75 *     IF NAME(C1) = END_PTR THEN                                        00003600
+                                 76 *       RETURN '';                                                      00003700
+                                 77 *     IF C1$(2 AT 1) ^= '  ' THEN                                       00003800
+                                 78 *       EXIT;                                                           00003900
+                                 79 *     NAME(C1) = NAME(C1) + 1;                                          00004000
+                                 80 *     CURR_LEN = CURR_LEN + 1;                                          00004100
+                                 81 *   END;                                                                00004200
+         CTRIMV--TRIMS LEADING AND TRAILING BLANKS                                                             PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 82 *   IF C1$(1) = ' ' THEN                                                00004300
+                                 83 *     DO;                                                               00004400
+                                 84 *       CURR_LEN = CURR_LEN - 1;                                        00004500
+                                 85 *       RIGHT_BYTE FLAG = ON;  /* FOR GTBYTE AND STBYTE */              00004600
+                                 86 *     END;                                                              00004700
+                                 87 *   IF ^ODD_FLAG THEN                                                   00004800
+                                 88 *     DO;                                                               00004900
+                                 89 *       DO WHILE TRUE;                                                  00005000
+                                 90 *         IF C1$(2 AT END_PTR) ^= '  ' THEN                             00005100
+                                 91 *           EXIT;                                                       00005200
+                                 92 *         CURR_LEN = CURR_LEN - 2;                                      00005300
+                                 93 *         END_PTR = END_PTR - 1;                                        00005400
+                                 94 *       END;                                                            00005500
+                                 95 *       IF C1$(END_PTR + 1) = ' ' THEN                                  00005600
+                                 96 *         CURR_LEN = CURR_LEN - 1;                                      00005700
+                                 97 *     END;                                                              00005800
+                                 98 * MOVE:                                                                 00005900
+                                 99 *   DESCRIPTOR(VAC) = MAXIMUM_LENGTH(VAC) || CURR_LEN;                  00006000
+                                100 *   DO FOR I = 1 TO  CURR_LEN;                                          00006100
+                                101 *     VAC$(I) = C1$(I);                                                 00006200
+                                102 *   END;                                                                00006300
+                                103 *                                                                       00006400
+00002 19E2                      104          LR    R1,R2          PLACE VAC PTR IN R1                       00006500
+00003 1AE4                      105          LR    R2,R4          PLACE C1 PTR IN R2 FOR ADDRESSABILITY     00006600
+00004 0FE7                      106          SR    R7,R7          CLEAR R7 FOR USE AS ODD FLAG              00006700
+00005 9D02           0000       107          LH    R5,0(R2)       GET DESCRIPTOR OF C1                      00006800
+00006 B6E5 00FF           00FF  108          NHI   R5,X'00FF'     MASK OFF MAXIMUM LENGTH                   00006900
+00008 C4F7 004F      0059 004F  109          BZ    NULL           IF CURRENT_LENGTH(C1) = 0 THEN RETURN     00007000
+0000A B3E5 0001           0001  110          TRB   R5,X'0001'     CHECK TO SEE IF CURRENT_LENGTH(C1) IS ODD 00007100
+0000C DC0C           0010 0003  111          BZ    SKIP           IF ZERO THEN EVEN, SO SKIP                00007200
+0000D BFE3                0003  112          LFXI  R7,1           ELSE SET ODD FLAG                         00007300
+0000E 8DF7 004C      005C 004C  113          SH    R5,=H'1'       CURRENT_LENGTH(C1) =                      00007400
+                                114 *                             CURRENT_LENGTH(C1) - 1                    00007500
+00010 1BE5                      115 SKIP     LR    R3,R5          R3 <- CURRENT_LENGTH(C1)                  00007600
+00011 F306                0001  116          SRL   R3,1           GET LENGTH OF C1 IN HALFWORDS             00007700
+00012 03E2                      117          AR    R3,R2          SET R3 TO POINT TO HALFWORD CONTAINING    00007800
+                                118 *                             LAST CHARS                                00007900
+00013 1FE7                      119 ODD      LR    R7,R7          TEST ODD FLAG                             00008000
+00014 DC3C           0024 000F  120          BZ    LOOP           IF ZERO GO TO LOOP                        00008100
+                                121 *                             ELSE CHECK LAST CHARACTER                 00008200
+00015 B0E5 0001           0001  122          AHI   R5,1           GET BACK ORIGINAL CURRENT_LENGTH          00008300
+00017 B307 DF00      0001 DF00  123          TB    1(R3),X'DF00'  TEST IF LAST CHAR BLANK                   00008400
+00019 DB0C           001D 0003  124          BNZ   TEST           IF ^= 0 THEN NOT BLANK                    00008500
+0001A B307 2000      0001 2000  125          TB    1(R3),X'2000'  TEST AGAIN                                00008600
+0001C DB10           0021 0004  126          BNZ   NEXT           IF 1 THEN LAST CHAR IS BLANK              00008700
+                                127 *                                                                       00008800
+                                128 * IF GET HERE THEN LAST ODD CHAR WAS BLANK                              00008900
+                                129 *                                                                       00009000
+0001D 95F7 003D      005C 003D  130 TEST     CH    R5,=H'1'       ELSE COMPARE CURRENT_LENGTH(C1) WITH 1    00009100
+0001F DCB4           004D 002D  131          BE    MOVE           IF = THEN MOVE SINGLE CHAR AND DONE       00009200
+00020 DF0C           0024 0003  132          B     LOOP           ELSE CHECK FRONT OF C1                    00009300
+00021 0FE7                      133 NEXT     SR    R7,R7          CLEAR ODD FLAG                            00009400
+00022 8DF7 0038      005C 0038  134          SH    R5,=H'1'       CURRENT_LENGTH(C1) =                      00009500
+                                135 *                             CURRENT_LENGTH(C1) - 1                    00009600
+                                136 *                                                                       00009700
+                                137 * THIS LOOP CHECKS FRONT END OF C1                                      00009800
+                                138 *                                                                       00009900
+00024 13E2                      139 LOOP     CR    R3,R2          COMPARE END_PTR TO C1 PTR                 00010000
+00025 DCCC           0059 0033  140          BE    NULL           IF EQUAL THEN STRING IS ALL BLANK         00010100
+00026 B506 2020      0001 2020  141          CIST  1(R2),X'2020'  ELSE COMPARE WITH '  '                    00010200
+00028 DB10           002D 0004  142          BNE   FBYT1          IF ^= THEN EHECK IF FIRST BYTE IS BLANK   00010300
+00029 EA06           0001       143          LA    R2,1(R2)       ELSE UPDATE C1 PTR                        00010400
+0002A 8DF7 0031      005D 0031  144          SH    R5,=H'2'       AND UPDATE CURRENT_LENGTH(C2)             00010500
+                                145 *                             (DECUMULATES AS LENGTH OF RESULT)         00010600
+0002C DF26           0024 0009  146          B     LOOP           GO TO CHECK NEXT HALFWORD AT FRONT        00010700
+0002D B306 DF00      0001 DF00  147 FBYT1    TB    1(R2),X'DF00'  CHECK IF LEFT BYTE IS BLANK               00010800
+0002F DB1C           0037 0007  148          BNZ   BACBYT         IF NOT GO TO CHECK BACK OF STRING         00010900
+00030 B306 2000      0001 2000  149          TB    1(R2),X'2000'  TEST AGAIN                                00011000
+00032 DC10           0037 0004  150          BZ    BACBYT         IF ZERO THEN NOT BLANK SO CHECK BACK END  00011100
+00033 E2FB 8000      8000       151 NJUNK    IAL   R2,X'8000'     SET ODD SWITCH FOR GTBYTE AND STBYTE      00011200
+00035 8DF7 0025      005C 0025  152          SH    R5,=H'1'       DECUMULATE FOR LENGTH OF RESULT           00011300
+00037 1FE7                      153 BACBYT   LR    R7,R7          TEST ODD FLAG                             00011400
+00038 DB50           004D 0014  154          BNZ   MOVE           IF ^= 0 THEN DONE SO MOVE CHARS           00011500
+                                155 *                                                                       00011600
+                                156 * THIS LOOP CHECKS BACK END OF C1                                       00011700
+                                157 *                                                                       00011800
+00039 B503 2020      0000 2020  158 FBYTC    CIST  0(R3),X'2020'  ELSE COMPARE FROM BACK END                00011900
+0003B DB14           0041 0005  159          BNE   FBYT2          IF ^= '  ' THEN CHECK WITH BYTE IS BACK   00012000
+                                160 *                             BYTE IS BLANK                             00012100
+0003C 8BF7 001E      005C 001E  161          SH    R3,=H'1'       ELSE REDUCE BACK END PTR                  00012200
+         CTRIMV--TRIMS LEADING AND TRAILING BLANKS                                                             PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0003E 8DF7 001D      005D 001D  162          SH    R5,=H'2'       DECUMULATE FOR LENGTH OF RESULT           00012300
+00040 DF22           0039 0008  163          B     FBYTC          LOOP FOR ANOTHER CHECK                    00012400
+00041 9C03           0000       164 FBYT2    LH    R4,0(R3)       GET THE 2 CHARS ^= '  '                   00012500
+00042 B3E4 00DF           00DF  165          TRB   R4,X'00DF'     CHECK IF RIGHT BYTE BLANK                 00012600
+00044 DB0C           0048 0003  166          BNZ   J2             IF ^= 0 THEN NOT BLANK                    00012700
+00045 B3E4 0020           0020  167          TRB   R4,X'0020'     CHECK AGAIN                               00012800
+00047 D908           004A 0002  168          BO    N2             IF ONE THEN BLANK                         00012900
+00048 EB03           0000       169 J2       LA    R3,0(R3)       ELSE CLEAR RIGHT HALF OF R3 AND           00013000
+00049 DF0C           004D 0003  170          B     MOVE           MOVE                                      00013100
+0004A EB03           0000       171 N2       LA    R3,0(R3)       CLEAR RIGHT HALF OF R3                    00013200
+0004B 8DF7 000F      005C 000F  172          SH    R5,=H'1'       DECUMULATE FOR LENGTH OF RESULT           00013300
+0004D 9E01           0000       173 MOVE     LH    R6,0(R1)       GET VAC DESCRIPTOR                        00013400
+0004E B6E6 FF00           FF00  174          NHI   R6,X'FF00'     CLEAR CURRENT LENGTH FIELD                00013500
+00050 06E5                      175          AR    R6,R5          GET MAX_LENGTH || CURRENT_LENGTH(C1)      00013600
+00051 BE01           0000       176          STH   R6,0(R1)       STORE BACK DESCRIPTOR                     00013700
+00052 1EE5                      177          LR    R6,R5          SET LOOP COUNTER                          00013800
+                                178 NEXTB    ABAL  GTBYTE                                                   00013900
+                                179+         EXTRN #QGTBYTE                                                 01-ABAL
+00053 E4F7                      180+NEXTB    DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00054 3800                      181+         DC  Y(#QGTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+                                182          ABAL  STBYTE                                                   00014000
+                                183+         EXTRN #QSTBYTE                                                 01-ABAL
+00055 E4F7                      184+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00056 3800                      185+         DC  Y(#QSTBYTE+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00057 DE17           0053 0005  186          BCTB  R6,NEXTB                                                 00014100
+                                187 EXIT     AEXIT                                                          00014200
+                                188+*********RETURN TO CALLER**********************************************
+00058                           189+EXIT     DS    0H                                                       01-AEXIT
+00058 97E8                      190+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                191+***********************************************************************
+00059 B601 FF00      0000 FF00  193 NULL     NIST  0(R1),X'FF00'  SET L TO 0                                00014300
+0005B DF12           0058 0004  194          B     EXIT                                                     00014400
+                                195          ACLOSE                                                         00014500
+0005C                           196+         LTORG                                                          02-ERRPA
+0005C 0001                      197                =H'1'
+0005D 0002                      198                =H'2'
+                                199+****************ERROR PARAMETER AREA***********************************
+                                200+***  NO ERRORS SENT IN CTRIMV                                           02-ERRPA
+                                201+****************END OF ERROR PARAMETER AREA****************************
+                                202+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000054
+  0001     0003     00     000056
+
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+BACBYT       1   000037   153    148   150
+CTRIMV       1 00000000    13     27
+EXIT         1   000058   189    194
+F0           1 00000000    46
+FBYT1        2   00002D   147    142
+FBYT2        2   000041   164    159
+FBYTC        2   000039   158    163
+J2           2   000048   169    166
+LOOP         1   000024   139    120   132   146
+MOVE         2   00004D   173    131   154   170
+N2           2   00004A   171    168
+NEXT         1   000021   133    126
+NEXTB        1   000053   180    186
+NJUNK        2   000033   151
+NULL         2   000059   193    109   140
+ODD          1   000013   119
+R1           1 00000001    41    104   173   173   176   176   193
+R2           1 00000002    38    104   105   107   107   117   139   141   143   143   143   147   149   151
+R3           1 00000003    42    115   116   117   123   125   139   158   161   164   164   169   169   169   171   171
+                                 171
+R4           1 00000004    35    105   164   165   167
+R5           1 00000005    43    107   108   110   113   115   122   130   134   144   152   162   172   175   177
+R6           1 00000006    44    173   174   175   176   177   186
+R7           1 00000007    45    106   106   112   119   119   133   133   153   153
+SKIP         1   000010   115    111
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+TEST         2   00001D   130    124
+$RET1        1   000058   190
+#QGTBYTE     1 00000000   179    181
+#QSTBYTE     1 00000000   183    185
+=H'1'        1   00005C   197    113   130   134   152   161   172
+=H'2'        1   00005D   198    144   162
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     150 CARDS FROM SYSIN     402 CARDS FROM SYSLIB
+     267 LINES OUTPUT          14 CARDS OUTPUT

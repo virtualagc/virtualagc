@@ -1,0 +1,74 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VV0SNP    SD 0001 000000 000006
+
+         VV0SNP---SCALAR TO COLUMN VECTOR,SINGLE PREC                                                          PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV0SNP   AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV0SNP   CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *    FILLS A COL. OF SP MATRIX M(M,N)                                   00000400
+                                 17 *                                                                       00000500
+                                 18 *     WITH ZEROES                                                       00000600
+                                 19 *                                                                       00000700
+                                 20          INPUT F0,            SCLAR      SP                            X00000800
+                                                   R7,            INTEGER(N)  SP                           X00000900
+                                                   R5             INTEGER(M)  SP                            00001000
+0000000                          21+F0       EQU   0                                                        01-INPUT
+0000007                          22+R7       EQU   7                                                        01-INPUT
+0000005                          23+R5       EQU   5                                                        01-INPUT
+                                 25          OUTPUT R1            VECTOR(M)   SP                            00001100
+0000001                          26+R1       EQU   1                                                        01-OUTPU
+                                 28 *                                                                       00001200
+                                 29 *    ALGORITHM:                                                         00001300
+                                 30 *     DO FOR I=1 TO M;                                                  00001400
+                                 31 *      M(I,X)=0;                                                        00001500
+                                 32 *     END;                                                              00001600
+                                 33 *                                                                       00001700
+00000 3805           0002        34 LOOP     STE   F0,2(R1)       PLACE M ELE.                              00001800
+00001 01E7                       35          AR    R1,R7          BUMP RESULT PTR BY # COL.                 00001900
+00002 DD0F           0000 0003   36          BCTB  R5,LOOP        I=1 TO M COUNTER                          00002000
+                                 37          AEXIT                                                          00002100
+                                 38+*********RETURN TO CALLER**********************************************
+00003                            39+         DS    0H                                                       01-AEXIT
+00003 9914           0005        40+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00004 C7EC                       41+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 42+***********************************************************************
+                                 44          ACLOSE                                                         00002200
+00005 C9FB
+00006                            45+         LTORG                                                          02-ERRPA
+                                 46+****************ERROR PARAMETER AREA***********************************
+                                 47+***  NO ERRORS SENT IN VV0SNP                                           02-ERRPA
+                                 48+****************END OF ERROR PARAMETER AREA****************************
+                                 49+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    21     34
+LOOP         2   000000    34     36
+R1           1 00000001    26     34    34    35
+R5           1 00000005    23     36
+R7           1 00000007    22     35
+VV0SNP       1 00000000    13
+$RET1        1   000004    41
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      27 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+      74 LINES OUTPUT           4 CARDS OUTPUT

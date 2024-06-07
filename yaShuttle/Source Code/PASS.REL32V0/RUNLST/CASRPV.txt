@@ -1,0 +1,266 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CASRPV    SD 0001 000000 000056
+CASRP     LD      000007        0001
+#LCASRPV  SD 0002 000056 000002
+
+         CASRPV - CHARACTER ASSIGN,PARTITIONED INPUT,REMOTE                                                    PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 TARG2    DS    F                                                        00000400
+                                 10 TARG4    DS    F                                                        00000500
+                                 11          MEND                                                           00000600
+                                 12 CASRPV   AMAIN                                                          00000700
+                                 13+***********************************************************************
+                                 14+*
+                                 15+*        PRIMARY ENTRY POINT
+                                 16+*
+                                 17+***********************************************************************
+00000                            18+CASRPV   CSECT                                                          01-AMAIN
+00000                            19+STACK    DSECT                                                          01-AMAIN
+                                 20+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            21+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            22+         DS    2F             R0,R1                                     01-AMAIN
+00006                            23+ARG2     DS    F              R2                                        01-AMAIN
+00008                            24+         DS    F              R3                                        01-AMAIN
+0000A                            25+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            26+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            27+ARG6     DS    F              R6                                        01-AMAIN
+00010                            28+ARG7     DS    F              R7                                        01-AMAIN
+                                 29+*        END OF STANDARD STACK AREA
+00012                            30+TARG2    DS    F                                                        02-00009
+00014                            31+TARG4    DS    F                                                        02-00010
+00016                            32+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            33+CASRPV   CSECT                                                          01-AMAIN
+0000000                          34+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   35+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 37 *                                                                       00000800
+                                 38 * ASSIGN C1$(I TO J) TO C2 WHERE C1 IS A REMOTE CHARACTER STRING AND    00000900
+                                 39 *   C2 IS A TEMPORARY STRING AREA.                                      00001000
+                                 40 *                                                                       00001100
+                                 41          INPUT R4,            ZCON(CHARACTER STRING) C1                X00001200
+                                                   R5,            INTEGER(I) SP                            X00001300
+                                                   R6             INTEGER(J) SP                             00001400
+0000004                          42+R4       EQU   4                                                        01-INPUT
+0000005                          43+R5       EQU   5                                                        01-INPUT
+0000006                          44+R6       EQU   6                                                        01-INPUT
+                                 46          OUTPUT R2            ZCON(CHARACTER STRING) C2                 00001500
+0000002                          47+R2       EQU   2                                                        01-OUTPU
+                                 49          WORK  R1,R3,R7                                                 00001600
+0000001                          50+R1       EQU   1                                                        01-WORK
+0000003                          51+R3       EQU   3                                                        01-WORK
+0000007                          52+R7       EQU   7                                                        01-WORK
+                                 54 *                                                                       00001700
+                                 55 * ALGORITHM:                                                            00001800
+                                 56 *   DESCRIPTOR(C2) = 255 || 255;                                        00001900
+                                 57 *   GO TO CASRP                                                         00002000
+                                 58 *                                                                       00002100
+00002 3428           0014        59          ST    R4,TARG4       STORE INPUT ZCON IN TARG4                 00002200
+00003 74E4                       60          XR    R4,R4          CLEAR R4                                  00002300
+00004 A2F4 9806      0006        61          SHW@# ARG2(R4)       SET MAXLEN OF VAC TO 255                  00002400
+00006 DF10           000B 0004   62          B     MERG                                                     00002500
+                                 63 CASRP    AENTRY                                                         00002600
+                                 64+***********************************************************************
+                                 65+*
+                                 66+*        SECONDARY ENTRY POINT
+                                 67+*
+                                 68+***********************************************************************
+00007                            69+CASRP    DS    0H                                                       01-AENTR
+                                 70+         ENTRY CASRP                                                    01-AENTR
+00007 B624 0000      0009 0000   71+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 73 *                                                                       00002700
+                                 74 * ASSIGN C1$(I TO J) TO C2 WHERE C1 IS A REMOTE CHARACTER STRING AND    00002800
+                                 75 *   C2 IS A DECLARED CHARACTER STRING.                                  00002900
+                                 76 *                                                                       00003000
+                                 77          INPUT R4,            ZCON(CHARACTER STRING) C1                X00003100
+                                                   R5,            INTEGER(I) SP                            X00003200
+                                                   R6             INTEGER(J) SP                             00003300
+         CASRPV - CHARACTER ASSIGN,PARTITIONED INPUT,REMOTE                                                    PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 79          OUTPUT R2            ZCON(CHARACTER STRING) C2                 00003400
+                                 81          WORK  R1,R3,R7                                                 00003500
+                                 83 *                                                                       00003600
+                                 84 * ALGORITHM:                                                            00003700
+                                 85 *   IF I <= 0 THEN                                                      00003800
+                                 86 *     DO;                                                               00003900
+                                 87 *       I = 1;                                                          00004000
+                                 88 *       SEND ERROR$(4:17);                                              00004100
+                                 89 *     END;                                                              00004200
+                                 90 *   IF J > CURRENT_LENGTH(C1) THEN                                      00004300
+                                 91 *     DO;                                                               00004400
+                                 92 *       J = CURRENT_LENGTH(C1);                                         00004500
+                                 93 *       SEND ERROR$(4:17);                                              00004600
+                                 94 *     END;                                                              00004700
+                                 95 *   J = J - I + 1;                                                      00004800
+                                 96 *   IF J < 0 THEN                                                       00004900
+                                 97 *     DO;                                                               00005000
+                                 98 *       J = 0;                                                          00005100
+                                 99 *       IF C1 ^= '' THEN                                                00005200
+                                100 *         SEND ERROR$(4:17);                                            00005300
+                                101 *     END;                                                              00005400
+                                102 *   IF J > MAXIMUM_LENGTH(C2) THEN                                      00005500
+                                103 *     J = MAXIMUM_LENGTH(C2);                                           00005600
+                                104 *   DESCRIPTOR(C2) = MAXIMUM_LENGTH(C2) || J;                           00005700
+                                105 *   J = J + 1;                                                          00005800
+                                106 *   IF J = 1 THEN                                                       00005900
+                                107 *     RETURN;                                                           00006000
+                                108 *   J = SHR(J,1); /* J = # OF HALFWORDS TO BE MOVED */                  00006100
+                                109 *   IF ODD(I) THEN                                                      00006200
+                                110 *     DO;                                                               00006300
+                                111 *       I = SHR(I,1); /* NO ALIGNMENT PROBLEMS */                       00006400
+                                112 *       DO FOR L = 1 TO J;                                              00006500
+                                113 *         C2$(2 AT (2 * (L - 1)) + 1) = C1$(2 AT 2 * I + 1);            00006600
+                                114 *       END;                                                            00006700
+                                115 *     END;                                                              00006800
+                                116 *   ELSE                                                                00006900
+                                117 *     DO;                                                               00007000
+                                118 *       I = SHR(I,1);                                                   00007100
+                                119 *       ZCON(C1) = ZCON(C1) + I;                                        00007200
+                                120 *       DO FOR L = 1 TO J;                                              00007300
+                                121 *         C2$(2 AT (2 * (L - 1)) + 1) = C1$(2 AT 2 * I);                00007400
+                                122 *       END;                                                            00007500
+                                123 *     END;                                                              00007600
+                                124 *                                                                       00007700
+00009 3428           0014       125          ST    R4,TARG4       STORE INPUT ZCON IN TARG4                 00007800
+0000A 74E4                      126          XR    R4,R4          CLEAR R4 (TO BE USED AS INDEX)            00007900
+0000B 3224           0012       127 MERG     ST    R2,TARG2       SAVE ZCON OF OUTPUT IN TARG2              00008000
+0000C 1DE5                      128          LR    R5,R5          SET CONDITION CODE                        00008100
+0000D D910           0012 0004  129          BP    L1             IF > 0 THEN OK                            00008200
+0000E EDF3 0001      0001       130          LA    R5,1           ELSE FIXUP AND                            00008300
+                                131          AERROR 17            INTEGER(I) IS LESS THAN 0                 00008400
+                                132+*********ISSUE SEND ERROR SVC******************************************
+00010 C9FB 0056      0056       133+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                134+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00012 9BF4 9814      0014       135 L1       LH@#  R3,TARG4(R4)   GET C1 DESCRIPTOR                         00008500
+00014 B6E3 00FF           00FF  136          NHI   R3,X'00FF'     MASK OFF MAXLENGTH                        00008600
+00016 16E3                      137          CR    R6,R3          COMPARE J WITH CURR LENGTH OF C1          00008700
+00017 DE0C           001B 0003  138          BLE   L2             IF <= THEN OK                             00008800
+00018 1EE3                      139          LR    R6,R3          ELSE FIXUP AND                            00008900
+                                140          AERROR 17            INTEGER J IS GREATER THAN CURRLEN(C1)     00009000
+                                141+*********ISSUE SEND ERROR SVC******************************************
+00019 C9FB 0056      0056       142+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                143+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0001B 0EE5                      144 L2       SR    R6,R5          J - I + 1 =                               00009100
+0001C B0E6 0001           0001  145          AHI   R6,X'0001'     # OF CHARS TO STORE                       00009200
+0001E D914           0024 0005  146          BP    L3             IF > 0 THEN OK                            00009300
+0001F 0EE6                      147          SR    R6,R6          ELSE FIXUP                                00009400
+00020 1BE3                      148          LR    R3,R3          SET CONDITION CODE                        00009500
+00021 DC08           0024 0002  149          BZ    L3             IF = 0 THEN OK                            00009600
+                                150          AERROR 17            I TO J SPECIFIES NEG LEN PARTITION        00009700
+                                151+*********ISSUE SEND ERROR SVC******************************************
+00022 C9FB 0056      0056       152+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                153+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00024 9BF4 9812      0012       154 L3       LH@#  R3,TARG2(R4)   GET C2 DESCRIPTOR                         00009800
+00026 F322                0008  155          SRL   R3,8           PUT MAXLENGTH IN LOWER BYTE               00009900
+00027 B6E3 00FF           00FF  156          NHI   R3,X'00FF'     ISOLATE MAXIMUM LENGTH                    00010000
+00029 16E3                      157          CR    R6,R3          COMPARE I WITH MAXIMUM_LENGTH(C2)         00010100
+         CASRPV - CHARACTER ASSIGN,PARTITIONED INPUT,REMOTE                                                    PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0002A DE04           002C 0001  158          BLE   L4             IF <= THEN OK                             00010200
+0002B 1EE3                      159          LR    R6,R3          ELSE TRUNCATE (SET J = MAX_LENGTH)        00010300
+0002C F320                0008  160 L4       SLL   R3,8           RESTORE MAXLEN OF DESTINATION             00010400
+0002D 2BE6                      161          OR    R3,R6          WITH NEW CURRLEN                          00010500
+0002E BBF4 9812      0012       162          STH@# R3,TARG2(R4)   RESET C2 DESCRIPTOR                       00010600
+00030 B0E6 0001           0001  163          AHI   R6,X'0001'     ADD 1 TO J                                00010700
+00032 B5E6 0001           0001  164          CHI   R6,X'0001'     COMPARE J WITH 1                          00010800
+00034 DC80           0055 0020  165          BE    EXIT           IF = THEN RETURN                          00010900
+00035 F606                0001  166          SRL   R6,1           GET # OF HALFOWRDS TO BE MOVED            00011000
+00036 BFE3                0003  167          LFXI  R7,1           PUT A 1 INTO R7                           00011100
+00037 BBE1                0001  168          LFXI  R3,-1          PUT A -1 INTO R3                          00011200
+00038 B3E5 0001           0001  169          TRB   R5,X'0001'     MAKE ODD TEST                             00011300
+0003A F506                0001  170          SRL   R5,1           GET I / 2                                 00011400
+0003B D940           004C 0010  171          BO    L6             IF TESTED BIT WAS 1 THEN GO TO L6 LOOP    00011500
+                                172 *                                                                       00011600
+                                173 * THE FOLLOWING LOOP MOVES BY HALFWORDS WHICH ARE NOT ALIGNED           00011700
+                                174 *                                                                       00011800
+0003C 05F8 0014      0014       175          AST   R5,TARG4       INCREMENT INPUT ZCON                      00011900
+0003E 9DF4 9814      0014       176          LH@#  R5,TARG4(R4)   LOAD HALFWORD INTO R5 (INDEX = 0)         00012000
+00040 85FC F814      0014       177 L5       IHL@# R5,TARG4(R7)   GET NEXT HALFWORD IN LOW HALF OF REG.     00012100
+00042 F520                0008  178          SLL   R5,8           GET 2 CHARACTERS IN UPPER HALFWORD        00012200
+00043 BDF4 F812      0012       179          STH@# R5,TARG2(R7)   STORE IN C2                               00012300
+00045 07F8 0012      0012       180          AST   R7,TARG2       BUMP OUTPUT PTR TO NEXT 2 CHARS           00012400
+00047 07F8 0014      0014       181          AST   R7,TARG4       BUMP INPUT PTR TO NEXT 2 CHARS            00012500
+00049 F520                0008  182          SLL   R5,8           PUT NEXT CHAR IN LOWER BYTE OF R5         00012600
+0004A DE2F           0040 000B  183          BCTB  R6,L5                                                    00012700
+0004B DF24           0055 0009  184          B     EXIT                                                     00012800
+                                185 *                                                                       00012900
+                                186 * THE FOLLOWING LOOP MOVES BY HALFWORDS WHICH ARE ALIGNED               00013000
+                                187 *                                                                       00013100
+0004C 1AE5                      188 L6       LR    R2,R5          SET R2 TO I                               00013200
+0004D B9E3                0003  189          LFXI  R1,1          R1 <- 1                                    00013300
+0004E EA06           0001       190 L7       LA    R2,1(R2)       BUMP OUTPUT PTR TO NEXT 2 CHARS           00013400
+0004F 9DF4 5814      0014       191          LH@#  R5,TARG4(R2)   GET 2 CHARS FROM INPUT                    00013500
+00051 BDF4 3812      0012       192          STH@# R5,TARG2(R1)   STORE 2 CHARS IN OUTPUT                   00013600
+00053 E905           0001       193          LA    R1,1(R1)       BUMP OUTPUT PTR TO NEXT 2 CHARS           00013700
+00054 DE1F           004E 0007  194          BCTB  R6,L7                                                    00013800
+                                195 EXIT     AEXIT                                                          00013900
+                                196+*********RETURN TO CALLER**********************************************
+00055                           197+EXIT     DS    0H                                                       01-AEXIT
+00055 97E8                      198+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                199+***********************************************************************
+                                201          ACLOSE                                                         00014000
+00056                           202+         LTORG                                                          02-ERRPA
+                                203+****************ERROR PARAMETER AREA***********************************
+00056                           204+#LCASRPV CSECT                                                          02-ERRPA
+                                205+***  CASRPV SENDS THE FOLLOWING ERROR                                   02-ERRPA
+                                207+***  ERROR NUMBER 17 IN GROUP 4                                         02-ERRPA
+00056 0014                      209+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00057 0411                      210+         DC    Y(4*256+17)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                211+****************END OF ERROR PARAMETER AREA****************************
+                                212+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000011
+  0001     0002     00     00001A
+  0001     0002     00     000023
+
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000056   209    133   142   152
+ARG2         2   000006    23     61
+ARG4         2   00000A    25
+ARG5         2   00000C    26
+ARG6         2   00000E    27
+ARG7         2   000010    28
+CASRP        1   000007    69     70
+CASRPV       1 00000000    18     33
+EXIT         1   000055   197    165   184
+L1           2   000012   135    129
+L2           1   00001B   144    138
+L3           2   000024   154    146   149
+L4           1   00002C   160    158
+L5           2   000040   177    183
+L6           1   00004C   188    171
+L7           2   00004E   190    194
+MERG         2   00000B   127     62
+R1           1 00000001    50    189   192   193   193   193
+R2           1 00000002    47    127   188   190   190   190   191
+R3           1 00000003    51    135   136   137   139   148   148   154   155   156   157   159   160   161   162   168
+R4           1 00000004    42     59    60    60    61   125   126   126   135   154   162   176
+R5           1 00000005    43    128   128   130   144   169   170   175   176   177   178   179   182   188   191   192
+R6           1 00000006    44    137   139   144   145   147   147   157   159   161   163   164   166   183   194
+R7           1 00000007    52    167   177   179   180   181
+STACK        1 00000000    19     34
+STACKEND     2   000016    32
+TARG2        2   000012    30    127   154   162   179   180   192
+TARG4        2   000014    31     59   125   135   175   176   177   181   191
+$RET1        1   000055   198
+#LCASRPV     1 00000056   204
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     145 CARDS FROM SYSIN     426 CARDS FROM SYSLIB
+     266 LINES OUTPUT          14 CARDS OUTPUT

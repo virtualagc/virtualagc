@@ -1,0 +1,130 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+MR1TNP    SD 0001 000000 000018
+
+         MR1TNP--REMOTE PARTITIONED MATRIX MOVE, DP TO SP                                                      PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 TARG2    DS    F                                                        00000400
+                                 10 TARG4    DS    F                                                        00000500
+                                 11          MEND                                                           00000600
+                                 12 MR1TNP   AMAIN                                                          00000700
+                                 13+***********************************************************************
+                                 14+*
+                                 15+*        PRIMARY ENTRY POINT
+                                 16+*
+                                 17+***********************************************************************
+00000                            18+MR1TNP   CSECT                                                          01-AMAIN
+00000                            19+STACK    DSECT                                                          01-AMAIN
+                                 20+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            21+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            22+         DS    2F             R0,R1                                     01-AMAIN
+00006                            23+ARG2     DS    F              R2                                        01-AMAIN
+00008                            24+         DS    F              R3                                        01-AMAIN
+0000A                            25+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            26+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            27+ARG6     DS    F              R6                                        01-AMAIN
+00010                            28+ARG7     DS    F              R7                                        01-AMAIN
+                                 29+*        END OF STANDARD STACK AREA
+00012                            30+TARG2    DS    F                                                        02-00009
+00014                            31+TARG4    DS    F                                                        02-00010
+00016                            32+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            33+MR1TNP   CSECT                                                          01-AMAIN
+0000000                          34+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   35+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 37 *                                                                       00000800
+                                 38 * MOVE AN N X M PARTITION OF M1 TO ALL OR AN N X M PARTITION OF M2 OR   00000900
+                                 39 *   MOVE ALL OF M1 TO AN N X M PARTITION OF M2, WHERE M1 IS A DOUBLE    00001000
+                                 40 *   PRECISION MATRIX AND M2 IS A SINGLE PRECISION MATRIX, ONE OF WHICH  00001100
+                                 41 *   IS REMOTE.                                                          00001200
+                                 42 *                                                                       00001300
+                                 43          INPUT R4,            ZCON(MATRIX(N,M)) DP                     X00001400
+                                                   R5,            INTEGER(N) SP                            X00001500
+                                                   R6,            INTEGER(M) SP                            X00001600
+                                                   R7             INTEGER(INDEL || OUTDEL) SP               00001700
+0000004                          44+R4       EQU   4                                                        01-INPUT
+0000005                          45+R5       EQU   5                                                        01-INPUT
+0000006                          46+R6       EQU   6                                                        01-INPUT
+0000007                          47+R7       EQU   7                                                        01-INPUT
+                                 49          OUTPUT R2            ZCON(MATRIX(N,M)) SP                      00001800
+0000002                          50+R2       EQU   2                                                        01-OUTPU
+                                 52          WORK  R3,F0                                                    00001900
+0000003                          53+R3       EQU   3                                                        01-WORK
+0000000                          54+F0       EQU   0                                                        01-WORK
+                                 56 *                                                                       00002000
+                                 57 * ALGORITHM:                                                            00002100
+                                 58 *   SEE ALGORITHM DESCRIPTION IN MR1DNP                                 00002200
+                                 59 *                                                                       00002300
+00002 3224           0012        60          ST    R2,TARG2       STORE OUTPUT ZCON IN TARG2                00002400
+00003 3428           0014        61          ST    R4,TARG4       STORE INPUT ZCON IN TARG4                 00002500
+00004 0BE3                       62          SR    R3,R3          CLEAR R3                                  00002600
+00005 03EF                       63          XUL   R3,R7          PLACE OUTDEL IN R3                        00002700
+00006 1CE6                       64          LR    R4,R6          PLACE M IN R4                             00002800
+00007 F404                0001   65          SLL   R4,1           GET # OF HALFWORDS / ROW OF               00002900
+                                 66 *                             SP N X M PARTITION                        00003000
+00008 03E4                       67          AR    R3,R4          ADD SP ROWLENGTH TO OUTDEL                00003100
+                                 68 *                             (ACTUAL ROW LENGTH OF RECEIVER)           00003200
+00009 F404                0001   69          SLL   R4,1           GET # OF HALFWORDS / ROW OF               00003300
+                                 70 *                             DP N X M PARTITION                        00003400
+0000A 07E4                       71          AR    R7,R4          ADD DP ROWLENGTH TO INDEL                 00003500
+                                 72 *                             (ACTUAL ROW LENGTH OF SOURCE)             00003600
+0000B 1CE6                       73          LR    R4,R6          SAVE M IN R4                              00003700
+0000C 78FC D814      0014        74 MR1TNPX  LED@# F0,TARG4(R6)                                             00003800
+0000E 38F4 D812      0012        75          STE@# F0,TARG2(R6)                                             00003900
+00010 DE17           000C 0005   76          BCTB  R6,MR1TNPX                                               00004000
+00011 1EE4                       77          LR    R6,R4          RESET R6 TO M                             00004100
+00012 07F8 0014      0014        78          AST   R7,TARG4       BUMP INPUT PTR TO NEXT ROW                00004200
+         MR1TNP--REMOTE PARTITIONED MATRIX MOVE, DP TO SP                                                      PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+00014 03F8 0012      0012        79          AST   R3,TARG2       BUMP OUTPUT PTR TO NEXT ROW               00004300
+00016 DD2F           000C 000B   80          BCTB  R5,MR1TNPX                                               00004400
+                                 81          AEXIT                                                          00004500
+                                 82+*********RETURN TO CALLER**********************************************
+00017                            83+         DS    0H                                                       01-AEXIT
+00017 97E8                       84+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 85+***********************************************************************
+                                 87          ACLOSE                                                         00004600
+00018                            88+         LTORG                                                          02-ERRPA
+                                 89+****************ERROR PARAMETER AREA***********************************
+                                 90+***  NO ERRORS SENT IN MR1TNP                                           02-ERRPA
+                                 91+****************END OF ERROR PARAMETER AREA****************************
+                                 92+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    23
+ARG4         2   00000A    25
+ARG5         2   00000C    26
+ARG6         2   00000E    27
+ARG7         2   000010    28
+F0           1 00000000    54     74    75
+MR1TNP       1 00000000    18     33
+MR1TNPX      2   00000C    74     76    80
+R2           1 00000002    50     60
+R3           1 00000003    53     62    62    63    67    79
+R4           1 00000004    44     61    64    65    67    69    71    73    77
+R5           1 00000005    45     80
+R6           1 00000006    46     64    73    74    75    76    77
+R7           1 00000007    47     63    71    78
+STACK        1 00000000    19     34
+STACKEND     2   000016    32
+TARG2        2   000012    30     60    75    79
+TARG4        2   000014    31     61    74    78
+$RET1        1   000017    84
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      51 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+     130 LINES OUTPUT           7 CARDS OUTPUT

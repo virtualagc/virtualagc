@@ -1,0 +1,96 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+MM1WNP    SD 0001 000000 000012
+
+         MM1WNP--PARTITIONED MATRIX MOVE, LENGTH N, SP TO DP                                                   PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 MM1WNP   AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+MM1WNP   CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * MOVE AN N X M PARTITION OF M1 TO ALL OR AN N X M PARTITION OF M2 OR   00000400
+                                 17 *   MOVE ALL OF M1 TO AN N X M PARTITION OF M2, WHERE M1 IS A SINGLE    00000500
+                                 18 *   PRECISION MATRIX AND M2 IS A DOUBLE PRECISION MATRIX.               00000600
+                                 19 *                                                                       00000700
+                                 20          INPUT R2,            MATRIX(N,M) SP ( THIS IS M1 )            X00000800
+                                                   R5,            INTEGER(N) SP                            X00000900
+                                                   R6,            INTEGER(M) SP                            X00001000
+                                                   R7             INTEGER(INDEL || OUTDEL) SP               00001100
+0000002                          21+R2       EQU   2                                                        01-INPUT
+0000005                          22+R5       EQU   5                                                        01-INPUT
+0000006                          23+R6       EQU   6                                                        01-INPUT
+0000007                          24+R7       EQU   7                                                        01-INPUT
+                                 26          OUTPUT R1            MATRIX(N,M) DP (THIS IS M2 )              00001200
+0000001                          27+R1       EQU   1                                                        01-OUTPU
+                                 29          WORK  R3,F0,F1,F2                                              00001300
+0000003                          30+R3       EQU   3                                                        01-WORK
+0000000                          31+F0       EQU   0                                                        01-WORK
+0000001                          32+F1       EQU   1                                                        01-WORK
+0000002                          33+F2       EQU   2                                                        01-WORK
+                                 35 *                                                                       00001400
+                                 36 * ALGORITHM:                                                            00001500
+                                 37 *   SEE ALGORITHM DESCRIPTION IN MM1DNP                                 00001600
+                                 38 *                                                                       00001700
+00000 0BE3                       39          SR    R3,R3          CLEAR R3                                  00001800
+00001 2AEE                       40          LFLR  F2,R6          SAVE # OF COLUMNS                         00001900
+00002 03EF                       41          XUL   R3,R7          PLACE OUTDEL IN R3                        00002000
+00003 59E1                       42          SER   F1,F1          CLEAR F1 (FOR CONVERSION TO DP)           00002100
+00004 26EA                       43 OUTLOOP  LFXR  R6,F2          LOAD # OF COLUMNS                         00002200
+00005 7806           0002        44 INLOOP   LE    F0,2(R2)                                                 00002300
+00006 38F9 0004      0004        45          STED  F0,4(R1)                                                 00002400
+00008 EA0A           0002        46          LA    R2,2(R2)       BUMP INPUT POINTER BY A FULL WORD         00002500
+00009 E911           0004        47          LA    R1,4(R1)       BUMP OUTPUT POINTER BY A DOUBLE WORD      00002600
+0000A DE1B           0005 0006   48          BCTB  R6,INLOOP                                                00002700
+0000B 01E3                       49          AR    R1,R3          BUMP OUTPUT POINTER TO NEXT ROW           00002800
+0000C 02E7                       50          AR    R2,R7          BUMP INPUT POINTER TO NEXT ROW            00002900
+0000D DD2B           0004 000A   51          BCTB  R5,OUTLOOP                                               00003000
+                                 52          AEXIT                                                          00003100
+                                 53+*********RETURN TO CALLER**********************************************
+0000E                            54+         DS    0H                                                       01-AEXIT
+0000E 9B24           0009        55+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+0000F 9914           0005        56+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00010 C7EC                       57+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 58+***********************************************************************
+                                 60          ACLOSE                                                         00003200
+00011 C9FB
+00012                            61+         LTORG                                                          02-ERRPA
+                                 62+****************ERROR PARAMETER AREA***********************************
+                                 63+***  NO ERRORS SENT IN MM1WNP                                           02-ERRPA
+                                 64+****************END OF ERROR PARAMETER AREA****************************
+                                 65+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+F0           1 00000000    31     44    45
+F1           1 00000001    32     42    42
+F2           1 00000002    33     40    43
+INLOOP       2   000005    44     48
+MM1WNP       1 00000000    13
+OUTLOOP      1   000004    43     51
+R1           1 00000001    27     45    45    47    47    47    49
+R2           1 00000002    21     44    44    46    46    46    50
+R3           1 00000003    30     39    39    41    49
+R5           1 00000005    22     51
+R6           1 00000006    23     40    43    48
+R7           1 00000007    24     41    50
+$RET1        1   000010    57
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      37 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      96 LINES OUTPUT           5 CARDS OUTPUT

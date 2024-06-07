@@ -1,0 +1,301 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CPASR     SD 0001 000000 000084
+#LCPASR   SD 0002 000084 000002
+
+         CPASR - CHARACTER ASSIGN,PARTITIONED OUTPUT,REMOTE                                                    PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 TARG2    DS    F                                                        00000400
+                                 10 TARG4    DS    F                                                        00000500
+                                 11 PADBLANK DS    F                                                        00000600
+                                 12          MEND                                                           00000700
+                                 13 CPASR    AMAIN                                                          00000800
+                                 14+***********************************************************************
+                                 15+*
+                                 16+*        PRIMARY ENTRY POINT
+                                 17+*
+                                 18+***********************************************************************
+00000                            19+CPASR    CSECT                                                          01-AMAIN
+00000                            20+STACK    DSECT                                                          01-AMAIN
+                                 21+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            22+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            23+         DS    2F             R0,R1                                     01-AMAIN
+00006                            24+ARG2     DS    F              R2                                        01-AMAIN
+00008                            25+         DS    F              R3                                        01-AMAIN
+0000A                            26+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            27+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            28+ARG6     DS    F              R6                                        01-AMAIN
+00010                            29+ARG7     DS    F              R7                                        01-AMAIN
+                                 30+*        END OF STANDARD STACK AREA
+00012                            31+TARG2    DS    F                                                        02-00009
+00014                            32+TARG4    DS    F                                                        02-00010
+00016                            33+PADBLANK DS    F                                                        02-00011
+00018                            34+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            35+CPASR    CSECT                                                          01-AMAIN
+0000000                          36+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   37+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 39 *                                                                       00000900
+                                 40 * ASSIGN C2 TO C1$(I TO J) WHERE C1 AND C2 ARE CHARACTER STRINGS,       00001000
+                                 41 *   AT LEAST ONE OF WHICH IS REMOTE.                                    00001100
+                                 42 *                                                                       00001200
+                                 43          INPUT R4,            ZCON(CHARACTER) (C2)                     X00001300
+                                                   R5,            INTEGER(I) SP                            X00001400
+                                                   R6             INTEGER(J) SP                             00001500
+0000004                          44+R4       EQU   4                                                        01-INPUT
+0000005                          45+R5       EQU   5                                                        01-INPUT
+0000006                          46+R6       EQU   6                                                        01-INPUT
+                                 48          OUTPUT R2            ZCON(CHARACTER) (C1)                      00001600
+0000002                          49+R2       EQU   2                                                        01-OUTPU
+                                 51          WORK  R1,R3,R7,F0,F1                                           00001700
+0000001                          52+R1       EQU   1                                                        01-WORK
+0000003                          53+R3       EQU   3                                                        01-WORK
+0000007                          54+R7       EQU   7                                                        01-WORK
+0000000                          55+F0       EQU   0                                                        01-WORK
+0000001                          56+F1       EQU   1                                                        01-WORK
+                                 58 *                                                                       00001800
+                                 59 * ALGORITHM:                                                            00001900
+                                 60 *   IF I <= 0 THEN                                                      00002000
+                                 61 *     DO;                                                               00002100
+                                 62 *       I = 1; /* FIXUP */                                              00002200
+                                 63 *       SEND ERROR$(4:17);                                              00002300
+                                 64 *     END;                                                              00002400
+                                 65 *   IF MAXIMUM_LENGTH(C1) < J THEN                                      00002500
+                                 66 *     DO;                                                               00002600
+                                 67 *       J = MAXIMUM_LENGTH(C1); /* FIXUP */                             00002700
+                                 68 *       SEND ERROR$(4:17);                                              00002800
+                                 69 *     END;                                                              00002900
+                                 70 *   IF J > CURRENT_LENGTH(C1) THEN                                      00003000
+                                 71 *     DESCRIPTOR(C1) = MAXIMUM_LENGTH(C1) || J;                         00003100
+                                 72 *   PARTITION_LENGTH = J - I + 1;                                       00003200
+                                 73 *   IF PARTITION_LENGTH < 0 THEN                                        00003300
+                                 74 *     DO;                                                               00003400
+                                 75 *       SEND ERROR$(4:17);                                              00003500
+                                 76 *       RETURN;                                                         00003600
+                                 77 *     END;                                                              00003700
+                                 78 *   NUMBER_OF_BLANKS = I - CURRENT_LENGTH(C1) - 1;                      00003800
+                                 79 *   IF NUMBER_OF_BLANKS > 0 THEN                                        00003900
+         CPASR - CHARACTER ASSIGN,PARTITIONED OUTPUT,REMOTE                                                    PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 80 *     DO;                                                               00004000
+                                 81 *       TEMP = SHR(CURRENT_LENGTH(C1) + 3,2);                           00004100
+                                 82 *       DO FOR K = 1 TO NUMBER_OF_BLANKS;                               00004200
+                                 83 *         C1$(TEMP + K) = HEX'0020';                                    00004300
+                                 84 *       END;                                                            00004400
+                                 85 *     END;                                                              00004500
+                                 86 *   DO FOR L = 1 TO PARTITION_LENGTH;                                   00004600
+                                 87 *     C1$(TEMP + K - 1 + L) = C2$(L);                                   00004700
+                                 88 *   END;                                                                00004800
+                                 89 *                                                                       00004900
+00002 77E7                       90          XR    R7,R7          CLEAR R7                                  00005000
+00003 372C           0016        91          ST    R7,PADBLANK    CLEAR OUT PADBLANK                        00005100
+00004 3428           0014        92          ST    R4,TARG4       SAVE INPUT ZCON IN TARG4                  00005200
+00005 3224           0012        93          ST    R2,TARG2       SAVE OUTPUT ZCON IN TARG2                 00005300
+00006 88E1                0001   94          LFLI  F0,1           SET UP WHICH BYTE PTR FOR GTBYTER         00005400
+00007 79E0                       95          LER   F1,F0          SET UP WHICH BYTE PTR FOR STBYTER         00005500
+00008 1DE5                       96          LR    R5,R5          SET CONDITION CODE                        00005600
+00009 D90C           000D 0003   97          BP    L1             IF R5 = > 0 THEN OK                       00005700
+0000A BDE3                0003   98          LFXI  R5,1           ELSE FIXUP IS ONE                         00005800
+                                 99          AERROR 17            I <= 0                                    00005900
+                                100+*********ISSUE SEND ERROR SVC******************************************
+0000B C9FB 0084      0084       101+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                102+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0000D 9BF4 F812      0012       103 L1       LH@#  R3,TARG2(R7)   GET DESCRIPTOR OF DESTINATION             00006000
+0000F F322                0008  104          SRL   R3,8           PUT MAXIMUM_LENGTH(C1) IN LOWER PART OF   00006100
+                                105 *                             HALFWORD                                  00006200
+00010 16E3                      106          CR    R6,R3          COMPARE J WITH MAXIMUM_LENGTH(C1)         00006300
+00011 DE14           0017 0005  107          BLE   L5             IF <= THEN OK                             00006400
+00012 1EE3                      108          LR    R6,R3          ELSE FIXUP IS MAXLEN                      00006500
+00013 B6E6 00FF           00FF  109          NHI   R6,X'00FF'     CLEARS OUT THE BOTTOM HALF OF R6          00006600
+                                110          AERROR 17            J > MAXLENGTH(C1)                         00006700
+                                111+*********ISSUE SEND ERROR SVC******************************************
+00015 C9FB 0084      0084       112+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                113+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00017 F320                0008  114 L5       SLL   R3,8           GET BACK DESCRIPTOR OF C1                 00006800
+00018 B6E3 00FF           00FF  115          NHI   R3,X'00FF'     MASK OFF MAXIMUM_LENGTH                   00006900
+0001A 16E3                      116 L2       CR    R6,R3          COMPARE J WITH CURRENT(LENGTH(C1)         00007000
+0001B DE1C           0023 0007  117          BLE   L3             IF <= THEN GO TO L3                       00007100
+0001C 9CF4 F812      0012       118          LH@#  R4,TARG2(R7)   GET DESCRIPTOR(C1)                        00007200
+0001E B1E4 00FF           00FF  119          ZRB   R4,X'00FF'     ZERO OUT ORIG CURRLEN                     00007300
+00020 04E6                      120          AR    R4,R6          GET MAXLEN || J                           00007400
+00021 BCF4 F812      0012       121          STH@# R4,TARG2(R7)   STORE NEW C1 DESCRIPTOR                   00007500
+00023 0EE5                      122 L3       SR    R6,R5          J - I + 1 =                               00007600
+00024 B0E6 0001           0001  123          AHI   R6,1           LENGTH OF PARTITION                       00007700
+00026 DC3C           0036 000F  124          BZ    L6             IF ZERO THEN NO FURTHER PROCESSING        00007800
+00027 D910           002C 0004  125          BP    L4             IF  > 0 THEN OK ELSE ERROR                00007900
+                                126          AERROR    17         LENGTH OF PARTITION < 0                   00008000
+                                127+*********ISSUE SEND ERROR SVC******************************************
+00028 C9FB 0084      0084       128+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                129+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0002A C7F7 0037      0063 0037  130          B     EXIT           AND RETURN                                00008100
+                                131 *                                                                       00008200
+                                132 * NOTE: THE ABOVE RETURN LEAVES C1 IN AN INDETERMINATE STATE            00008300
+                                133 *                                                                       00008400
+0002C 9CF4 F814      0014       134 L4       LH@#  R4,TARG4(R7)   GET C2 DESCRIPTOR                         00008500
+0002E B6E4 00FF           00FF  135          NHI   R4,X'00FF'     GET CURRENT_LENGTH(C2)                    00008600
+00030 19E4                      136          LR    R1,R4          SAVE CURRENT_LENGTH(C2)                   00008700
+00031 0CE6                      137          SR    R4,R6          COMPUTE CURRLEN(C2) - PARTITION LENGTH    00008800
+00032 D90C           0036 0003  138          BP    L6             IF > 0 THEN BRANCH                        00008900
+00033 1EE1                      139          LR    R6,R1          ELSE SET R6 = CURRLEN(C2)                 00009000
+00034 ECEC                      140          LCR   R4,R4          COMPUTE # OF RIGHT PAD BLANKS             00009100
+00035 342C           0016       141          ST    R4,PADBLANK    SAVE IT AWAY                              00009200
+00036 1CE5                      142 L6       LR    R4,R5          PLACE I IN R4                             00009300
+00037 0CE3                      143          SR    R4,R3          I - CURRENT_LENGTH(C1) - 1 =              00009400
+00038 B0E4 FFFF          FFFFF  144          AHI   R4,-1          NUMBER OF INTERVENING BLANKS              00009500
+0003A BFE3                0003  145          LFXI  R7,1           SET INDEX REG FOR STBYTER AND GTBYTER     00009600
+0003B D92C           0047 000B  146          BP    LSTORE         IF R4 > 0 THEN STORE INTERVENING BLANKS   00009700
+0003C B0E5 FFFF          FFFFF  147          AHI   R5,-1          ELSE I - 1 / 2 =                          00009800
+0003E F506                0001  148          SRL   R5,1           ADDRESS TO HALFWORD CONTAINING I          00009900
+0003F 72E2                      149          XR    R2,R2          CLEAR OUT R2                              00010000
+00040 02ED                      150          XUL   R2,R5          GET POSSIBLE ODD INDICATOR IN R2          00010100
+00041 05F8 0012      0012       151          AST   R5,TARG2       INCREMENT OUTPUT ADDRESS                  00010200
+00043 1AE2                      152          LR    R2,R2          SET CONDITION CODE                        00010300
+00044 DD04           0046 0001  153          BNN   L7             IF >= 0 THEN BRANCH                       00010400
+00045 79E9                      154          LECR  F1,F1          ELSE SET RIGHT BYTE PTR                   00010500
+00046 DF38           0055 000E  155 L7       B     CSTORE         GO TO STORE CHARACTERS                    00010600
+00047 F306                0001  156 LSTORE   SRL   R3,1           ADDRESS TO START INTERVENING BLANKS       00010700
+00048 72E2                      157          XR    R2,R2          CLEAR OUT R2                              00010800
+00049 02EB                      158          XUL   R2,R3          PLACE ODD BIT IF ANY IN R2                00010900
+0004A 03F8 0012      0012       159          AST   R3,TARG2       INCREMENT OUTPUT PTR                      00011000
+         CPASR - CHARACTER ASSIGN,PARTITIONED OUTPUT,REMOTE                                                    PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0004C 1AE2                      160          LR    R2,R2          SET CONDITION CODE                        00011100
+0004D DD04           004F 0001  161          BNN   LST            IF >= 0 THEN BRANCH                       00011200
+0004E 79E9                      162          LECR  F1,F1          ELSE SET RIGHT BYTE PTR                   00011300
+0004F 19E4                      163 LST      LR    R1,R4          PLACE # OF BLANKS IN R1                   00011400
+00050 EDF3 0020      0020       164 LST1     LHI   R5,X'0020'     PLACE DEU BLANK IN R5                     00011500
+00052 E4F7 0010      0064 0010  165          BAL   R4,STBYTER     BRANCH TO STORE CHAR ROUTINE              00011600
+00054 D917           0050 0005  166          BCTB  R1,LST1                                                  00011700
+00055 1EE6                      167 CSTORE   LR    R6,R6          SET CONDITION CODE                        00011800
+00056 DC14           005C 0005  168          BZ    L8             IF ZERO THEN NO CHARS TO STORE            00011900
+00057 E4F7 001E      0077 001E  169 CST      BAL   R4,GTBYTER     GET A CHAR                                00012000
+00059 E4F7 0009      0064 0009  170          BAL   R4,STBYTER     STORE A CHAR                              00012100
+0005B DE17           0057 0005  171          BCTB  R6,CST                                                   00012200
+0005C 1E2C           0016       172 L8       L     R6,PADBLANK    GET NUMBER OF RIGHT PAD BLANKS            00012300
+0005D DC14           0063 0005  173          BZ    EXIT           IF ZERO THEN EXIT                         00012400
+0005E EDF3 0020      0020       174 RSTORE   LHI   R5,X'0020'                                               00012500
+00060 E4F7 0002      0064 0002  175          BAL   R4,STBYTER                                               00012600
+00062 DE17           005E 0005  176          BCTB  R6,RSTORE                                                00012700
+                                177 EXIT     AEXIT                                                          00012800
+                                178+*********RETURN TO CALLER**********************************************
+00063                           179+EXIT     DS    0H                                                       01-AEXIT
+00063 97E8                      180+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                181+***********************************************************************
+                                183 *                                                                       00012900
+                                184 * THIS CODE CORRESPONDS TO STBYTE FOR REMOTE DATA                       00013000
+                                185 *   F1 = WHICH BYTE INDICATOR (1 => LEFT, -1 => RIGHT)                  00013100
+                                186 *   TARG2 = OUTPUT PTR                                                  00013200
+                                187 *   R3 = WORK REGISTER                                                  00013300
+                                188 *   R5 = CHARACTER TO BE STORED                                         00013400
+                                189 *   R7 = 1                                                              00013500
+                                190 *                                                                       00013600
+00064 9BF4 F812      0012       191 STBYTER  LH@#  R3,TARG2(R7)                                             00013700
+00066 79E9                      192          LECR  F1,F1                                                    00013800
+00067 DA20           0070 0008  193          BM    LOWERS         IF NEGATIVE THEN STORE LEFT BYTE          00013900
+00068 B6E3 FF00           FF00  194          NHI   R3,X'FF00'     ELSE CLEAR OUT RIGHT BYTE                 00014000
+0006A 03E5                      195          AR    R3,R5          MERGE IN NEW CHAR                         00014100
+0006B BBF4 F812      0012       196          STH@# R3,TARG2(R7) STORE AWAY NEW COMBO                        00014200
+0006D 07F8 0012      0012       197          AST   R7,TARG2       SINCE RIGHT BYTE, INCREMENT OUTPUT        00014300
+0006F C7E4                      198          BR    R4                                                       00014400
+00070 F520                0008  199 LOWERS   SLL   R5,8           PLACE INPUT CHAR TO LEFT BYTE             00014500
+00071 B6E3 00FF           00FF  200          NHI   R3,X'00FF'     REMOVE OLD LEFT BYTE                      00014600
+00073 03E5                      201          AR    R3,R5          MERGE TWO CHARS                           00014700
+00074 BBF4 F812      0012       202          STH@# R3,TARG2(R7)   STORE NEW COMBO                           00014800
+00076 C7E4                      203          BR    R4             RETURN                                    00014900
+                                204 *                                                                       00015000
+                                205 * THIS CODE CORRESPONDS TO GTBYTE FOR REMOTE DATA                       00015100
+                                206 *   F0 = WHICH BYTE INDICATOR ( 1 => LEFT, -1 => RIGHT)                 00015200
+                                207 *   TARG4 = INPUT PTR                                                   00015300
+                                208 *   R5 = CHARACTER TO BE RETURNED                                       00015400
+                                209 *   R7 = 1                                                              00015500
+                                210 *                                                                       00015600
+00077 9DF4 F814      0014       211 GTBYTER  LH@#  R5,TARG4(R7)   GET HALFWORD WITH CHAR                    00015700
+00079 78E8                      212          LECR  F0,F0          SET CONDITION CODE                        00015800
+0007A DA14           0080 0005  213          BM    LOWERG         IF NEGATIVE THEN GET LEFT BYTE            00015900
+0007B B6E5 00FF           00FF  214          NHI   R5,X'00FF'     GET RID OF LEFT BYTE                      00016000
+0007D 07F8 0014      0014       215          AST   R7,TARG4       SINCE RIGTH BYTE INCREMENT INPUT PTR      00016100
+0007F C7E4                      216          BR    R4                                                       00016200
+00080 B6E5 FF00           FF00  217 LOWERG   NHI   R5,X'FF00'     MASK OFF RIGHT BYTE                       00016300
+00082 F522                0008  218          SRL   R5,8           PLACE IN RIGHTBYTE POSITION               00016400
+00083 C7E4                      219          BR    R4             RETURN                                    00016500
+                                220          ACLOSE                                                         00016600
+00084                           221+         LTORG                                                          02-ERRPA
+                                222+****************ERROR PARAMETER AREA***********************************
+00084                           223+#LCPASR  CSECT                                                          02-ERRPA
+                                224+***  CPASR SENDS THE FOLLOWING ERROR                                    02-ERRPA
+                                226+***  ERROR NUMBER 17 IN GROUP 4                                         02-ERRPA
+00084 0014                      228+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00085 0411                      229+         DC    Y(4*256+17)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                230+****************END OF ERROR PARAMETER AREA****************************
+                                231+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     00000C
+  0001     0002     00     000016
+  0001     0002     00     000029
+
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000084   228    101   112   128
+ARG2         2   000006    24
+ARG4         2   00000A    26
+ARG5         2   00000C    27
+ARG6         2   00000E    28
+ARG7         2   000010    29
+CPASR        1 00000000    19     35
+CST          2   000057   169    171
+CSTORE       1   000055   167    155
+EXIT         1   000063   179    130   173
+F0           1 00000000    55     94    95   212   212
+F1           1 00000001    56     95   154   154   162   162   192   192
+GTBYTER      2   000077   211    169
+L1           2   00000D   103     97
+L2           1   00001A   116
+L3           1   000023   122    117
+L4           2   00002C   134    125
+L5           1   000017   114    107
+L6           1   000036   142    124   138
+L7           2   000046   155    153
+L8           2   00005C   172    168
+LOWERG       2   000080   217    213
+LOWERS       1   000070   199    193
+LST          1   00004F   163    161
+LST1         2   000050   164    166
+LSTORE       1   000047   156    146
+PADBLANK     2   000016    33     91   141   172
+R1           1 00000001    52    136   139   163   166
+R2           1 00000002    49     93   149   149   150   152   152   157   157   158   160   160
+R3           1 00000003    53    103   104   106   108   114   115   116   143   156   158   159   191   194   195   196
+                                 200   201   202
+R4           1 00000004    44     92   118   119   120   121   134   135   136   137   140   140   141   142   143   144
+                                 163   165   169   170   175   198   203   216   219
+R5           1 00000005    45     96    96    98   122   142   147   148   150   151   164   174   195   199   201   211
+                                 214   217   218
+R6           1 00000006    46    106   108   109   116   120   122   123   137   139   167   167   171   172   176
+R7           1 00000007    54     90    90    91   103   118   121   134   145   191   196   197   202   211   215
+RSTORE       2   00005E   174    176
+STACK        1 00000000    20     36
+STACKEND     2   000018    34
+STBYTER      2   000064   191    165   170   175
+TARG2        2   000012    31     93   103   118   121   151   159   191   196   197   202
+TARG4        2   000014    32     92   134   211   215
+$RET1        1   000063   180
+#LCPASR      1 00000084   223
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     171 CARDS FROM SYSIN     360 CARDS FROM SYSLIB
+     301 LINES OUTPUT          16 CARDS OUTPUT

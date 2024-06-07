@@ -1,0 +1,161 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+TANH      SD 0001 000000 00003A
+#QEXP     ER 0002
+
+         TANH -- SINGLE PRECISION HYPERBOLIC TANGENT FUNCTION                                                  PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * TANH: HYPERBOLIC TANGENT(SINGLE)                                      00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUT AND OUTPUT VIA F0.                                    00000400
+                                 10 *        2. FOR |X|<16**(-3), RETURN TANH(X)=X.                         00000500
+                                 11 *        3. IF |X|<0.7, USE A RATIONAL FUNCTION APPROXIMATION.          00000600
+                                 12 *        4. IF |X|>9.011, RETURN +1 OR -1.                              00000700
+                                 13 *        5. FOR OTHER VALUES OF X, USE EXP:                             00000800
+                                 14 *           TANH(|X|) = 1 - 2 * (1 + EXP(2 * |X|)).                     00000900
+                                 15 *        6. TO GET THE SIGN, USE TANH(-X) = -TANH(X).                   00001000
+                                 16 *                                                                       00001100
+                                 17 *                                                                       00001200
+                                 18 TANH     AMAIN ACALL=YES                                                00001300
+                                 19+***********************************************************************
+                                 20+*
+                                 21+*        PRIMARY ENTRY POINT
+                                 22+*
+                                 23+***********************************************************************
+00000                            24+TANH     CSECT                                                          01-AMAIN
+00000                            25+STACK    DSECT                                                          01-AMAIN
+                                 26+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            27+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            28+         DS    2F             R0,R1                                     01-AMAIN
+00006                            29+ARG2     DS    F              R2                                        01-AMAIN
+00008                            30+         DS    F              R3                                        01-AMAIN
+0000A                            31+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            32+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            33+ARG6     DS    F              R6                                        01-AMAIN
+00010                            34+ARG7     DS    F              R7                                        01-AMAIN
+                                 35+*        END OF STANDARD STACK AREA
+                                 36+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            37+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            38+TANH     CSECT                                                          01-AMAIN
+0000000                          39+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   40+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 42 * COMPUTES HYPERBOLIC TANGENT IN SINGLE PRECISION                       00001400
+                                 43          INPUT F0             SCALAR SP                                 00001500
+0000000                          44+F0       EQU   0                                                        01-INPUT
+                                 46          OUTPUT F0            SCALAR SP                                 00001600
+                                 48          WORK  F2,F4,F5                                                 00001700
+0000002                          49+F2       EQU   2                                                        01-WORK
+0000004                          50+F4       EQU   4                                                        01-WORK
+0000005                          51+F5       EQU   5                                                        01-WORK
+00002 7DE0                       53          LER   F5,F0                                                    00001800
+00003 DD04           0005 0001   54          BNM   POSARG                                                   00001900
+00004 78E8                       55          LECR  F0,F0          GET |X|                                   00002000
+00005 48FF 0031      0038 0031   56 POSARG   CE    F0,MLIM                                                  00002100
+00007 DE54           001D 0015   57          BNH   SMALL                                                    00002200
+00008 48FF 002A      0034 002A   58          CE    F0,HILIM                                                 00002300
+0000A DD40           001B 0010   59          BNL   BIG                                                      00002400
+                                 60          ACALL EXP                                                      00002500
+                                 61+         EXTRN #QEXP                                                    01-ACALL
+0000B D0FF                       62+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+0000C 3800                       63+         DC  Y(#QEXP+X'3800') INDIRECTLY THRU QCON                      01-ACALL
+0000D 8CE1                0001   64          LFLI  F4,1                                                     00002600
+0000E 60E0                       65          MER   F0,F0                                                    00002700
+0000F 50E4                       66          AER   F0,F4                                                    00002800
+00010 7AE4                       67          LER   F2,F4                                                    00002900
+00011 52E2                       68          AER   F2,F2                                                    00003000
+00012 6AE0                       69          DER   F2,F0                                                    00003100
+00013 78E4                       70          LER   F0,F4                                                    00003200
+00014 58E2                       71          SER   F0,F2                                                    00003300
+                                 72 *                                                                       00003400
+00015 7DE5                       73 SIGN     LER   F5,F5                                                    00003500
+00016 DD0C           001A 0003   74          BNM   EXIT                                                     00003600
+00017 78E0                       75          LER   F0,F0          WORKAROUND FOR BUG                        00003700
+00018 DC04           001A 0001   76          BZ    EXIT           IN LECR INSTRUCTION.                      00003800
+00019 78E8                       77          LECR  F0,F0                                                    00003900
+                                 78 EXIT     AEXIT                                                          00004000
+                                 79+*********RETURN TO CALLER**********************************************
+0001A                            80+EXIT     DS    0H                                                       01-AEXIT
+0001A 97E8                       81+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+         TANH -- SINGLE PRECISION HYPERBOLIC TANGENT FUNCTION                                                  PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 82+***********************************************************************
+                                 84 *                                                                       00004100
+0001B 88E1                0001   85 BIG      LFLI  F0,1                                                     00004200
+0001C DF22           0015 0008   86          B     SIGN                                                     00004300
+                                 87 *                                                                       00004400
+0001D 48FF 0017      0036 0017   88 SMALL    CE    F0,LOLIM                                                 00004500
+0001F DE2E           0015 000B   89          BNH   SIGN           TANH(X)=X IF X IS SMALL                   00004600
+00020 60E0                       90          MER   F0,F0                                                    00004700
+00021 7CF7 000F      0032 000F   91          LE    F4,C                                                     00004800
+00023 54E0                       92          AER   F4,F0                                                    00004900
+00024 7AF7 000A      0030 000A   93          LE    F2,B                                                     00005000
+00026 6AE4                       94          DER   F2,F4                                                    00005100
+00027 52F7 0005      002E 0005   95          AE    F2,A                                                     00005200
+00029 60E2                       96          MER   F0,F2                                                    00005300
+0002A 60E5                       97          MER   F0,F5                                                    00005400
+0002B 50E5                       98          AER   F0,F5                                                    00005500
+0002C DF4E           001A 0013   99          B     EXIT                                                     00005600
+                                100 *                                                                       00005700
+0002D C9FB
+0002E                           101          DS    0E                                                       00005800
+0002E BEF7EA70                  102 A        DC    X'BEF7EA70'    -.003782895                               00005900
+00030 C0D08756                  103 B        DC    X'C0D08756'    -.81456511                                00006000
+00032 41278C49                  104 C        DC    X'41278C49'    2.4717498                                 00006100
+00034 41902D0E                  105 HILIM    DC    X'41902D0E'    9.011                                     00006200
+00036 3E100000                  106 LOLIM    DC    X'3E100000'    16**(-3)                                  00006300
+00038 40B33333                  107 MLIM     DC    X'40B33333'    0.7                                       00006400
+                                108          ACLOSE                                                         00006500
+0003A                           109+         LTORG                                                          02-ERRPA
+                                110+****************ERROR PARAMETER AREA***********************************
+                                111+***  NO ERRORS SENT IN TANH                                             02-ERRPA
+                                112+****************END OF ERROR PARAMETER AREA****************************
+                                113+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.39 07/22/05
+  0001     0002     00     00000C
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+A            2   00002E   102     95
+ARG2         2   000006    29
+ARG4         2   00000A    31
+ARG5         2   00000C    32
+ARG6         2   00000E    33
+ARG7         2   000010    34
+B            2   000030   103     93
+BIG          1   00001B    85     59
+C            2   000032   104     91
+EXIT         1   00001A    80     74    76    99
+F0           1 00000000    44     53    55    55    56    58    65    65    66    69    70    71    75    75    77    77
+                                  85    88    90    90    92    96    97    98
+F2           1 00000002    49     67    68    68    69    71    93    94    95    96
+F4           1 00000004    50     64    66    67    70    91    92    94
+F5           1 00000005    51     53    73    73    97    98
+HILIM        2   000034   105     58
+LOLIM        2   000036   106     88
+MLIM         2   000038   107     56
+POSARG       2   000005    56     54
+SIGN         1   000015    73     86    89
+SMALL        2   00001D    88     57
+STACK        1 00000000    25     39
+STACKEND     2   000012    37
+TANH         1 00000000    24     38
+$RET1        1   00001A    81
+#QEXP        1 00000000    61     63
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      70 CARDS FROM SYSIN     396 CARDS FROM SYSLIB
+     161 LINES OUTPUT          12 CARDS OUTPUT

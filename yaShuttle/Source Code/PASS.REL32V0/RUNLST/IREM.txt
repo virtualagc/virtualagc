@@ -1,0 +1,123 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+IREM      SD 0001 000000 000010
+HREM      LD      000000        0001
+#LIREM    SD 0002 000010 000002
+
+         IREM - REMAINDER FUNCTION,DBL PREC INTEGER                                                            PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 IREM     AMAIN INTSIC=YES                                               00000202
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+IREM     CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000302
+                                 16 *   CALCULATES THE REMAINDER :                                          00000402
+                                 17 *                                                                       00000502
+                                 18 *     REMAINDER( A,B)                                                   00000602
+                                 19 *                                                                       00000702
+                                 20 * WHERE A&B ARE INTEGERS AND AT LEAST ONE OF THEM IS DP                 00000802
+                                 21 *                                                                       00000902
+                                 22          INPUT R5,            INTEGER  DP (A)                          X00001002
+                                                   R6             INTEGER  DP (B)                           00001102
+0000005                          23+R5       EQU   5                                                        01-INPUT
+0000006                          24+R6       EQU   6                                                        01-INPUT
+                                 26          OUTPUT R5            INTEGER  DP                               00001202
+                                 28          WORK  R2,R7                                                    00001302
+0000002                          29+R2       EQU   2                                                        01-WORK
+0000007                          30+R7       EQU   7                                                        01-WORK
+                                 32 *                                                                       00001402
+                                 33 *                                                                       00001502
+                                 34 *                                                                       00001602
+                                 35 *                                                                       00001702
+                                 36 HREM     AENTRY                                                         00001802
+                                 37+***********************************************************************
+                                 38+*
+                                 39+*        SECONDARY ENTRY POINT
+                                 40+*
+                                 41+***********************************************************************
+00000                            42+HREM     DS    0H                                                       01-AENTR
+                                 43+         ENTRY HREM                                                     01-AENTR
+                                 45 *   CALCULATES THE REMAINDER :                                          00001902
+                                 46 *                                                                       00002002
+                                 47 *     REMAINDER( A,B)                                                   00002102
+                                 48 *                                                                       00002202
+                                 49 * WHERE A&B ARE INTEGER SP                                              00002302
+                                 50 *                                                                       00002402
+                                 51          INPUT R5,            INTEGER  SP                              X00002502
+                                                   R6             INTEGER  SP                               00002602
+                                 53          OUTPUT R5            INTEGER  SP                               00002702
+                                 55          WORK  R2,R7                                                    00002802
+                                 57 *                                                                       00002902
+                                 58 *                                                                       00003002
+                                 59 *                                                                       00003102
+00000 0FE7                       60          SR    R7,R7          CLEAR R7             /* DR103760 */       00003202
+00001 1AE5                       61          LR    R2,R5                                                    00003302
+00002 1DE6                       62          LR    R5,R6                                                    00003402
+00003 DC20           000C 0008   63          BZ     ERROR         IF DENOMINATOR=0, THEN ERROR              00003502
+00004 1EE2                       64          LR    R6,R2                                                    00003602
+00005 FE7D                001F   65          SRDA  R6,31          31 BECAUSE OF FRACTIONAL DIVIDE           00003702
+00006 4EE5                       66          DR    R6,R5          DIVIDE N/D                                00003802
+00007 46E5                       67          MR    R6,R5          MULTIPLY AGAIN                            00003902
+00008 FE05                0001   68          SRDA  R6,1           CHANGE FRACTION TO FULLWORD INTEGER       00004002
+00009 0AE7                       69          SR    R2,R7          N-(N/D)*D                                 00004102
+0000A 1DE2                       70 EXIT     LR    R5,R2          RESULT IN R5                              00004202
+                                 71          AEXIT                                                          00004302
+                                 72+*********RETURN TO CALLER**********************************************
+0000B                            73+         DS    0H                                                       01-AEXIT
+0000B C7EC                       74+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 75+***********************************************************************
+                                 77 ERROR    AERROR  16     ERROR:SECONDE ARGUMENT=0                        00004402
+                                 78+*********ISSUE SEND ERROR SVC******************************************
+0000C C9FB 0010      0010        79+ERROR    SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+         IREM - REMAINDER FUNCTION,DBL PREC INTEGER                                                            PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                 80+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0000E DF16           000A 0005   81          B     EXIT                                                     00004502
+                                 82          ACLOSE                                                         00004602
+0000F C9FB
+00010                            83+         LTORG                                                          02-ERRPA
+                                 84+****************ERROR PARAMETER AREA***********************************
+00010                            85+#LIREM   CSECT                                                          02-ERRPA
+                                 86+***  IREM SENDS THE FOLLOWING ERROR                                     02-ERRPA
+                                 88+***  ERROR NUMBER 16 IN GROUP 4                                         02-ERRPA
+00010 0014                       90+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00011 0410                       91+         DC    Y(4*256+16)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                 92+****************END OF ERROR PARAMETER AREA****************************
+                                 93+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.38 07/22/05
+  0001     0002     00     00000D
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+AERROR1      1   000010    90     79
+ERROR        2   00000C    79     63
+EXIT         1   00000A    70     81
+HREM         1   000000    42     43
+IREM         1 00000000    13
+R2           1 00000002    29     61    64    69    70
+R5           1 00000005    23     61    62    66    67    70
+R6           1 00000006    24     62    64    65    66    67    68
+R7           1 00000007    30     60    60    69
+$RET1        1   00000B    74
+#LIREM       1 00000010    85
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      51 CARDS FROM SYSIN     426 CARDS FROM SYSLIB
+     123 LINES OUTPUT           8 CARDS OUTPUT

@@ -1,0 +1,97 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VV5S3     SD 0001 000000 000012
+#LVV5S3   SD 0002 000012 000002
+
+         VV5S3--VECTOR DIVIDED BY SCALAR, LENGTH 3, SP                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV5S3    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV5S3    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * DIVIDE V1 BY A SINGLE PRECISION SCALAR WHERE V1 IS A SINGLE PRECISION 00000400
+                                 17 *   3 VECTOR.                                                           00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            VECTOR(3) SP                             X00000700
+                                                   F0             SCALAR                                    00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000000                          21+F0       EQU   0                                                        01-INPUT
+                                 23          OUTPUT R1            VECTOR(3) SP                              00000900
+0000001                          24+R1       EQU   1                                                        01-OUTPU
+                                 26          WORK  F2                                                       00001000
+0000002                          27+F2       EQU   2                                                        01-WORK
+                                 29 *                                                                       00001100
+                                 30 * ALGORITHM:                                                            00001200
+                                 31 *   SEE ALGORITHM DESCRIPTION IN VV5D3                                  00001300
+                                 32 *                                                                       00001400
+00000 78E0                       33          LER   F0,F0          SET CONDITION CODE                        00001500
+00001 DC2C           000D 000B   34          BZ    VV5SDZ         IF ZERO THEN SEND AN ERROR                00001600
+00002 7A06           0002        35 DIV      LE    F2,2(R2)       GET FIRST ELEMENT                         00001700
+00003 6AE0                       36          DER   F2,F0          DIVIDE BY THE SCALAR                      00001800
+00004 3A05           0002        37          STE   F2,2(R1)       STORE FIRST ELEMENT                       00001900
+00005 7A0A           0004        38          LE    F2,4(R2)       GET SECOND ELEMENT                        00002000
+00006 6AE0                       39          DER   F2,F0          DIVIDE BY THE SCALAR                      00002100
+00007 3A09           0004        40          STE   F2,4(R1)       STORE THE SECOND ELEMENT                  00002200
+00008 7A0E           0006        41          LE    F2,6(R2)       GET THIRD ELEMENT                         00002300
+00009 6AE0                       42          DER   F2,F0          DIVIDE BY THE SCALAR                      00002400
+0000A 3A0D           0006        43          STE   F2,6(R1)       STORE THIRD ELEMENT                       00002500
+                                 44          AEXIT                                                          00002600
+                                 45+*********RETURN TO CALLER**********************************************
+0000B                            46+         DS    0H                                                       01-AEXIT
+0000B 9914           0005        47+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0000C C7EC                       48+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 49+***********************************************************************
+                                 51 VV5SDZ   AERROR 25            ATTEMPT TO DIVIDE BY 0                    00002700
+                                 52+*********ISSUE SEND ERROR SVC******************************************
+0000D C9FB 0012      0012        53+VV5SDZ   SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                 54+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0000F 88E1                0001   55          LFLI  F0,1                                                     00002800
+00010 DF3E           0002 000F   56          B     DIV                                                      00002900
+                                 57          ACLOSE                                                         00003000
+00011 C9FB
+00012                            58+         LTORG                                                          02-ERRPA
+                                 59+****************ERROR PARAMETER AREA***********************************
+00012                            60+#LVV5S3  CSECT                                                          02-ERRPA
+                                 61+***  VV5S3 SENDS THE FOLLOWING ERROR                                    02-ERRPA
+                                 63+***  ERROR NUMBER 25 IN GROUP 4                                         02-ERRPA
+00012 0014                       65+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00013 0419                       66+         DC    Y(4*256+25)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                 67+****************END OF ERROR PARAMETER AREA****************************
+                                 68+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    3
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.40 07/22/05
+  0001     0002     00     00000E
+
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+AERROR1      1   000012    65     53
+DIV          2   000002    35     56
+F0           1 00000000    21     33    33    36    39    42    55
+F2           1 00000002    27     35    36    37    38    39    40    41    42    43
+R1           1 00000001    24     37    37    40    40    43    43
+R2           1 00000002    20     35    35    38    38    41    41
+VV5S3        1 00000000    13
+VV5SDZ       2   00000D    53     34
+$RET1        1   00000C    48
+#LVV5S3      1 00000012    60
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      35 CARDS FROM SYSIN     360 CARDS FROM SYSLIB
+      97 LINES OUTPUT           7 CARDS OUTPUT

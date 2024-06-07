@@ -1,0 +1,141 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+COUTP     SD 0001 000000 000014
+#QCASPV   ER 0002
+IOBUF     ER 0003
+IOCODE    ER 0004
+COUT      LD      000007        0001
+#QCASV    ER 0005
+#QOUTER1  ER 0006
+
+         COUTP, COUT- CHARACTER OUTPUT                                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 COUTP    AMAIN  ACALL=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+COUTP    CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+COUTP    CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *        CHARACTER PARTITIONED OUTPUT                                   00000300
+                                 32          INPUT R2,            CHARACTER STRING                         X00000400
+                                                   R5,            INTEGER SP FIRST CHARACTER               X00000500
+                                                   R6             INTEGER SP LAST CHARACTER                 00000600
+0000002                          33+R2       EQU   2                                                        01-INPUT
+0000005                          34+R5       EQU   5                                                        01-INPUT
+0000006                          35+R6       EQU   6                                                        01-INPUT
+                                 37          OUTPUT NONE                                                    00000700
+                                 39          WORK  R1,R2                                                    00000800
+0000001                          40+R1       EQU   1                                                        01-WORK
+                                 42 *                                                                       00000900
+00002 E9F3 0000      0000        43          LA    R1,IOBUF       TARGET STR FOR CASPV                      00001000
+                                 44 *        SOURCE STRING PARMS ARE ALREADY IN R2,R5,R6                    00001100
+                                 45          ABAL  CASPV      CASPV SETS MAXLEN TO 255                      00001200
+                                 46+         EXTRN #QCASPV                                                  01-ABAL
+00004 E4F7                       47+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00005 3800                       48+         DC  Y(#QCASPV+X'3800')                                        X01-ABAL
+                                   +                              THROUGH QCON
+00006 DF18           000D 0006   49          B     CALLOUT1       GO TELL HALUCP                            00001300
+                                 50          EXTRN IOBUF,IOCODE                                             00001400
+                                 51 COUT     AENTRY                                                         00001500
+                                 52+***********************************************************************
+                                 53+*
+                                 54+*        SECONDARY ENTRY POINT
+                                 55+*
+                                 56+***********************************************************************
+00007                            57+COUT     DS    0H                                                       01-AENTR
+                                 58+         ENTRY COUT                                                     01-AENTR
+00007 B624 0000      0009 0000   59+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 61 *        CHARACTER OUTPUT                                               00001600
+                                 62          INPUT R2             CHARACTER STRING                          00001700
+                                 64          OUTPUT NONE                                                    00001800
+00009 E9F3 0000      0000        66          LA    R1,IOBUF   R1-->DESTINATION STRING FOR CASV              00001900
+                                 67          ABAL  CASV                                                     00002000
+                                 68+         EXTRN #QCASV                                                   01-ABAL
+0000B E4F7                       69+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0000C 3800                       70+         DC  Y(#QCASV+X'3800')                                         X01-ABAL
+                                   +                              THROUGH QCON
+0000D EEF3 000D      000D        71 CALLOUT1 LHI   R6,13                                                    00002100
+0000F BEF3 0000      0000        72          STH   R6,IOCODE   SAVE I/O CODE                                00002200
+                                 73          ACALL OUTER1   OUTER1 BRANCHES TO OUTRAP                       00002300
+                                 74+         EXTRN #QOUTER1                                                 01-ACALL
+00011 D0FF                       75+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00012 3800                       76+         DC  Y(#QOUTER1+X'3800')                                       X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+         COUTP, COUT- CHARACTER OUTPUT                                                                         PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 77          AEXIT                                                          00002400
+                                 78+*********RETURN TO CALLER**********************************************
+00013                            79+         DS    0H                                                       01-AEXIT
+00013 97E8                       80+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 81+***********************************************************************
+                                 83          ACLOSE                                                         00002500
+00014                            84+         LTORG                                                          02-ERRPA
+                                 85+****************ERROR PARAMETER AREA***********************************
+                                 86+***  NO ERRORS SENT IN COUTP                                            02-ERRPA
+                                 87+****************END OF ERROR PARAMETER AREA****************************
+                                 88+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000005
+  0001     0003     00     000003
+  0001     0003     00     00000A
+  0001     0004     00     000010
+  0001     0005     00     00000C
+  0001     0006     00     000012
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+CALLOUT1     2   00000D    71     49
+COUT         1   000007    57     58
+COUTP        1 00000000    13     27
+IOBUF        1 00000000    50     43    66
+IOCODE       1 00000000    50     72
+R1           1 00000001    40     43    66
+R2           1 00000002    33
+R5           1 00000005    34
+R6           1 00000006    35     71    72
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   000013    80
+#QCASPV      1 00000000    46     48
+#QCASV       1 00000000    68     70
+#QOUTER1     1 00000000    74     76
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      30 CARDS FROM SYSIN     520 CARDS FROM SYSLIB
+     141 LINES OUTPUT          11 CARDS OUTPUT

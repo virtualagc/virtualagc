@@ -1,0 +1,105 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+BTOC      SD 0001 000000 00001C
+
+         BTOC -- BIT STRING TO CHARACTER CONVERSION                                                            PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 *                                                                       00000200
+                                  8 BTOC     AMAIN INTSIC=YES                                               00000300
+                                  9+***********************************************************************
+                                 10+*
+                                 11+*        PRIMARY ENTRY POINT
+                                 12+*
+                                 13+***********************************************************************
+00000                            14+BTOC     CSECT                                                          01-AMAIN
+                                 16 *                                                                       00000400
+                                 17 *  CONVERTS BIT DATA TO CHARACTER DATA                                  00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R5,            BIT STRING                               X00000700
+                                                   R6             INTEGER(LENG.)                            00000800
+0000005                          20+R5       EQU   5                                                        01-INPUT
+0000006                          21+R6       EQU   6                                                        01-INPUT
+                                 23          OUTPUT R2            CHARACTER                                 00000900
+0000002                          24+R2       EQU   2                                                        01-OUTPU
+                                 26          WORK  R3,R7,R1,R4                                              00001000
+0000003                          27+R3       EQU   3                                                        01-WORK
+0000007                          28+R7       EQU   7                                                        01-WORK
+0000001                          29+R1       EQU   1                                                        01-WORK
+0000004                          30+R4       EQU   4                                                        01-WORK
+                                 32 *                                                                       00001100
+                                 33 *                                                                       00001200
+                                 34 *                                                                       00001300
+00000 19E4                       35          LR    R1,R4          SAVE RETURN REGISTER                      00001400
+                                 36 *                                                                       00001500
+                                 37 *  STORE BYTE COUNT IN STRING                                           00001600
+                                 38 *                                                                       00001700
+00001 9B02           0000        39          LH    R3,0(R2)                                                 00001800
+00002 B6E3 FF00           FF00   40          NHI   R3,X'FF00'                                               00001900
+00004 03E6                       41          AR    R3,R6                                                    00002000
+00005 BB02           0000        42          STH   R3,0(R2)                                                 00002100
+                                 43 *                                                                       00002200
+                                 44 *  SET UP REGISTERS                                                     00002300
+                                 45 *                                                                       00002400
+00006 EFEE                       46          LACR  R7,R6                                                    00002500
+00007 B0E7 0020           0020   47          AHI   R7,32          SHIFT COUNT = 32 - LENGTH                 00002600
+00009 F5FC                003F   48          SLL   R5,63          SHIFT OFF UNWANTED BITS                   00002700
+0000A B0E6 0001           0001   49          AHI   R6,1                                                     00002800
+0000C F606                0001   50          SRL   R6,1           HALFWORD COUNT                            00002900
+                                 51 *                                                                       00003000
+                                 52 *  LOOP FOR CONVERSION                                                  00003100
+                                 53 *                                                                       00003200
+0000D 74E4                       54 LOOP     XR    R4,R4                                                    00003300
+0000E EA06           0001        55          LA    R2,1(R2)                                                 00003400
+0000F FC04                0001   56          SLDL  R4,1                                                     00003500
+00010 F41C                0007   57          SLL   R4,7                                                     00003600
+00011 FC04                0001   58          SLDL  R4,1                                                     00003700
+00012 F440                0010   59          SLL   R4,16                                                    00003800
+00013 B0E4 3030           3030   60          AHI   R4,X'3030'                                               00003900
+00015 BC02           0000        61          STH   R4,0(R2)                                                 00004000
+00016 DE2B           000D 000A   62          BCT   R6,LOOP                                                  00004100
+                                 63 *                                                                       00004200
+00017 1CE1                       64 EXIT     LR    R4,R1          RECOVER RETURN ADDRESS                    00004300
+                                 65          AEXIT                                                          00004400
+                                 66+*********RETURN TO CALLER**********************************************
+00018                            67+         DS    0H                                                       01-AEXIT
+00018 9B24           0009        68+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+00019 9914           0005        69+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0001A C7EC                       70+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 71+***********************************************************************
+                                 73          ACLOSE                                                         00004500
+0001B C9FB
+0001C                            74+         LTORG                                                          02-ERRPA
+                                 75+****************ERROR PARAMETER AREA***********************************
+                                 76+***  NO ERRORS SENT IN BTOC                                             02-ERRPA
+                                 77+****************END OF ERROR PARAMETER AREA****************************
+                                 78+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+BTOC         1 00000000    14
+EXIT         1   000017    64
+LOOP         1   00000D    54     62
+R1           1 00000001    29     35    64
+R2           1 00000002    24     39    39    42    42    55    55    55    61    61
+R3           1 00000003    27     39    40    41    42
+R4           1 00000004    30     35    54    54    56    57    58    59    60    61    64
+R5           1 00000005    20     48
+R6           1 00000006    21     41    46    49    50    62
+R7           1 00000007    28     46    47
+$RET1        1   00001A    70
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      50 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+     105 LINES OUTPUT           5 CARDS OUTPUT

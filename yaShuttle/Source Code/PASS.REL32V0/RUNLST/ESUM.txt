@@ -1,0 +1,68 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+ESUM      SD 0001 000000 000006
+
+         ESUM--SCALAR SUM FUNCTION,SP                                                                          PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 ESUM     AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+ESUM     CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * RETURNS THE SUM OF ALL THE ELEMENTS OF A LENGTH N ARRAY OF SINGLE     00000400
+                                 17 *   PRECISION SCALARS.                                                  00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            ARRAY(N) SCALAR SP                       X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT F0            SCALAR SP                                 00000900
+0000000                          24+F0       EQU   0                                                        01-OUTPU
+                                 26 *                                                                       00001000
+                                 27 * ALGORITHM:                                                            00001100
+                                 28 *   SEE ALGORITHM DESCRIPTION IN DSUM                                   00001200
+                                 29 *                                                                       00001300
+00000 58E0                       30          SER   F0,F0          CLEAR ACCUMULATOR                         00001400
+00001 5006           0002        31 LOOPE    AE    F0,2(R2)       F0 = ACCUMULATOR                          00001500
+00002 EA0A           0002        32          LA    R2,2(R2)       BUMP INPUT PTR TO NEXT ELEMENT            00001600
+00003 DD0F           0001 0003   33          BCT   R5,LOOPE                                                 00001700
+                                 34          AEXIT                                                          00001800
+                                 35+*********RETURN TO CALLER**********************************************
+00004                            36+         DS    0H                                                       01-AEXIT
+00004 C7EC                       37+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 38+***********************************************************************
+                                 40          ACLOSE                                                         00001900
+00005 C9FB
+00006                            41+         LTORG                                                          02-ERRPA
+                                 42+****************ERROR PARAMETER AREA***********************************
+                                 43+***  NO ERRORS SENT IN ESUM                                             02-ERRPA
+                                 44+****************END OF ERROR PARAMETER AREA****************************
+                                 45+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ESUM         1 00000000    13
+F0           1 00000000    24     30    30    31
+LOOPE        2   000001    31     33
+R2           1 00000002    20     31    31    32    32    32
+R5           1 00000005    21     33
+$RET1        1   000004    37
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      24 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+      68 LINES OUTPUT           4 CARDS OUTPUT

@@ -1,0 +1,89 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VV6DN     SD 0001 000000 00000C
+
+         VV6DN--VECTOR DOT PRODUCT,LENGTH N,DOUBLE PREC                                                        PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV6DN    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV6DN    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *   COMPUTES THE DOT PRODUCT:                                           00000400
+                                 17 *                                                                       00000500
+                                 18 *    S = V1 . V2                                                        00000600
+                                 19 *                                                                       00000700
+                                 20 *  WHERE LENGTH V1,V2 NOT=3  S,V1,V2 ARE DP                             00000800
+                                 21 *                                                                       00000900
+                                 22          INPUT R2,            VECTOR(N)   DP                           X00001000
+                                                   R3,            VECTOR(N)   DP                           X00001100
+                                                   R5             INTEGER(N)  SP                            00001200
+0000002                          23+R2       EQU   2                                                        01-INPUT
+0000003                          24+R3       EQU   3                                                        01-INPUT
+0000005                          25+R5       EQU   5                                                        01-INPUT
+                                 27          OUTPUT F0            SCALAR     DP                             00001300
+0000000                          28+F0       EQU   0                                                        01-OUTPU
+                                 30          WORK  F2,F3,R1                                                 00001400
+0000002                          31+F2       EQU   2                                                        01-WORK
+0000003                          32+F3       EQU   3                                                        01-WORK
+0000001                          33+R1       EQU   1                                                        01-WORK
+                                 35 *                                                                       00001500
+                                 36 *  ALGORITHM :                                                          00001600
+                                 37 *  DO FOR I=N TO 1;                                                     00001700
+                                 38 *   S=S+V1(I)*V2(I);                                                    00001800
+                                 39 *  END;                                                                 00001900
+                                 40 *                                                                       00002000
+00000 58E8                       41          SEDR  F0,F0                                                    00002100
+00001 19E3                       42 $TIM1    LR    R1,R3                                                    00002200
+00002 7AFD A000      0000        43 VV6DNL   LED   F2,0(R5,R1)    GET V1 ELE.                               00002300
+00004 32FE A000      0000        44          MED   F2,0(R5,R2)                                              00002400
+00006 50EA                       45          AEDR  F0,F2                                                    00002500
+00007 DD1B           0002 0006   46 $TIM2    BCTB  R5,VV6DNL     I=N TO 1 COUNTER                           00002600
+                                 47          AEXIT                                                          00002700
+                                 48+*********RETURN TO CALLER**********************************************
+00008                            49+         DS    0H                                                       01-AEXIT
+00008 9B24           0009        50+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+00009 9914           0005        51+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0000A C7EC                       52+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 53+***********************************************************************
+                                 55          ACLOSE                                                         00002800
+0000B C9FB
+0000C                            56+         LTORG                                                          02-ERRPA
+                                 57+****************ERROR PARAMETER AREA***********************************
+                                 58+***  NO ERRORS SENT IN VV6DN                                            02-ERRPA
+                                 59+****************END OF ERROR PARAMETER AREA****************************
+                                 60+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+F0           1 00000000    28     41    41    45
+F2           1 00000002    31     43    44    45
+F3           1 00000003    32
+R1           1 00000001    33     42    43
+R2           1 00000002    23     44
+R3           1 00000003    24     42
+R5           1 00000005    25     43    43    44    44    46
+VV6DN        1 00000000    13
+VV6DNL       2   000002    43     46
+$RET1        1   00000A    52
+$TIM1        1   000001    42
+$TIM2        1   000007    46
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      33 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      89 LINES OUTPUT           5 CARDS OUTPUT

@@ -1,0 +1,208 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+CSHAPQ    SD 0001 000000 000028
+#QCTOH    ER 0002
+#QCTOI    ER 0003
+#QCTOE    ER 0004
+#QCTOD    ER 0005
+#LCSHAPQ  SD 0006 000028 000004
+
+         CSHAPQ - ARRAYED CHARACTER TO INTEGER, SCALAR SHAPING FUNCTION                                        PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 CSHAPQ   AMAIN ACALL=YES                                                00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+CSHAPQ   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+CSHAPQ   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 * INTEGER AND SCALAR SHAPING FUNCTION, CONVERSION FROM CHARACTER ARRAY  00000300
+                                 32          INPUT R4,            CHARACTER ARRAY(N) POINTER (TO 1ST)      X00000400
+                                                   R5,            INTEGER(N) SP                            X00000500
+                                                   R6,            TYPE (0-H,1-I,2-E,3-D) OF CONVERSION     X00000600
+                                                   R7  WIDTH IN HALFWORDS BETWEEN CHARACTER ARRAY ITEMS     00000700
+0000004                          33+R4       EQU   4                                                        01-INPUT
+0000005                          34+R5       EQU   5                                                        01-INPUT
+0000006                          35+R6       EQU   6                                                        01-INPUT
+0000007                          36+R7       EQU   7                                                        01-INPUT
+                                 38          OUTPUT R2            PTR TO ARRAYED RESULT (H,I,E,OR D)        00000800
+0000002                          39+R2       EQU   2                                                        01-OUTPU
+                                 41          WORK  R1,R3,F0                                                 00000900
+0000001                          42+R1       EQU   1                                                        01-WORK
+0000003                          43+R3       EQU   3                                                        01-WORK
+0000000                          44+F0       EQU   0                                                        01-WORK
+                                 46          WORK  F1,F2,F3,F4,F5 DUE TO ACALLS                             00001000
+0000001                          47+F1       EQU   1                                                        01-WORK
+0000002                          48+F2       EQU   2                                                        01-WORK
+0000003                          49+F3       EQU   3                                                        01-WORK
+0000004                          50+F4       EQU   4                                                        01-WORK
+0000005                          51+F5       EQU   5                                                        01-WORK
+                                 53 *                                                                       00001100
+00002 E9F3 0028      0028        54          LA    R1,TABLE                                                 00001200
+0000028                          55          USING TABLE,R1                                                 00001300
+00004 9BF5 C000      0028        56          LH    R3,TABLE(R6)   GET ADDRESS OF SUBROUTINE                 00001400
+                                 57          DROP  R1                                                       00001500
+00006 19E2                       58          LR    R1,R2          SAVE PTR TO RESULT ARRAY                  00001600
+00007 1AE4                       59          LR    R2,R4          COPY PTR TO CHAR ARRAY FOR CTO? INPUT     00001700
+00008 1EE5                       60          LR    R6,R5          COPY COUNT TO SAFE REG                    00001800
+00009 C7E3                       61          BR    R3             GO TO SUBROUTINE                          00001900
+                                 62 *                                                                       00002000
+                                 63 CTOHX    ACALL CTOH           CONVERT TO HALFWORD INTEGER               00002100
+                                 64+         EXTRN #QCTOH                                                   01-ACALL
+0000A D0FF                       65+CTOHX    DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+0000B 3800                       66+         DC  Y(#QCTOH+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+0000C BD01           0000        67          STH   R5,0(R1)       SAVE ANSWER                               00002200
+0000D E905           0001        68          LA    R1,1(R1)       BUMP OUTPUT PTR                           00002300
+0000E 02E7                       69          AR    R2,R7          BUMP INPUT CHARACTER PTR                  00002400
+0000F D6E3                       70          BCTR  R6,R3          LOOP TILL DONE                            00002500
+                                 71          AEXIT                                                          00002600
+                                 72+*********RETURN TO CALLER**********************************************
+00010                            73+         DS    0H                                                       01-AEXIT
+00010 97E8                       74+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 75+***********************************************************************
+                                 77 *                                                                       00002700
+         CSHAPQ - ARRAYED CHARACTER TO INTEGER, SCALAR SHAPING FUNCTION                                        PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                 78 CTOIX    ACALL CTOI           CONVERT TO FULLWORD                       00002800
+                                 79+         EXTRN #QCTOI                                                   01-ACALL
+00011 D0FF                       80+CTOIX    DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00012 3800                       81+         DC  Y(#QCTOI+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+00013 3501           0000        82          ST    R5,0(R1)       SAVE ANSWER                               00002900
+00014 E909           0002        83          LA    R1,2(R1)       BUMP OUTPUT PTR                           00003000
+00015 02E7                       84          AR    R2,R7          BUMP INPUT CHARACTER ARRAY POINTER        00003100
+00016 D6E3                       85          BCTR  R6,R3          LOOP TILL DONE                            00003200
+                                 86          AEXIT                                                          00003300
+                                 87+*********RETURN TO CALLER**********************************************
+00017                            88+         DS    0H                                                       01-AEXIT
+00017 97E8                       89+$RET2    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 90+***********************************************************************
+                                 92 *                                                                       00003400
+                                 93 CTOEX    ACALL CTOE           CONVERT TO FULLWORD SCALAR                00003500
+                                 94+         EXTRN #QCTOE                                                   01-ACALL
+00018 D0FF                       95+CTOEX    DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00019 3800                       96+         DC  Y(#QCTOE+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+0001A 3801           0000        97          STE   F0,0(R1)       SAVE ANSWER                               00003600
+0001B E909           0002        98          LA    R1,2(R1)       BUMP OUTPUT PTR                           00003700
+0001C 02E7                       99          AR    R2,R7          BUMP INPUT CHARACTER ARRAY POINTER        00003800
+0001D D6E3                      100          BCTR  R6,R3          LOOP TILL DONE                            00003900
+                                101          AEXIT                                                          00004000
+                                102+*********RETURN TO CALLER**********************************************
+0001E                           103+         DS    0H                                                       01-AEXIT
+0001E 97E8                      104+$RET3    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                105+***********************************************************************
+                                107 *                                                                       00004100
+                                108 CTODX    ACALL CTOD           CONVERT TO DOUBLE SCALAR                  00004200
+                                109+         EXTRN #QCTOD                                                   01-ACALL
+0001F D0FF                      110+CTODX    DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00020 3800                      111+         DC  Y(#QCTOD+X'3800')                                         X01-ACALL
+                                   +                              INDIRECTLY THRU QCON
+00021 38F9 0000      0000       112          STED  F0,0(R1)       SAVE ANSWER                               00004300
+00023 E911           0004       113          LA    R1,4(R1)       BUMP OUTPUT PTR                           00004400
+00024 02E7                      114          AR    R2,R7          BUMP INPUT CHARACTER ARRAY POINTER        00004500
+00025 D6E3                      115          BCTR  R6,R3          LOOP TILL DONE                            00004600
+                                116          AEXIT                                                          00004700
+                                117+*********RETURN TO CALLER**********************************************
+00026                           118+         DS    0H                                                       01-AEXIT
+00026 97E8                      119+$RET4    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                120+***********************************************************************
+                                122 *                                                                       00004800
+                                123          ADATA                                                          00004900
+                                124+*********DATA CSECT****************************************************
+00027 C9FB
+00028                           125+         LTORG                                                          02-ERRPA
+                                126+****************ERROR PARAMETER AREA***********************************
+                                127+***  NO ERRORS SENT IN CSHAPQ                                           02-ERRPA
+                                128+****************END OF ERROR PARAMETER AREA****************************
+00028                           129+#LCSHAPQ CSECT                                                          01-ADATA
+00028 000A                      130 TABLE    DC    Y(CTOHX)                                                 00005000
+00029 0011                      131          DC    Y(CTOIX)                                                 00005100
+0002A 0018                      132          DC    Y(CTOEX)                                                 00005200
+0002B 001F                      133          DC    Y(CTODX)                                                 00005300
+                                134          ACLOSE                                                         00005400
+                                135+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     00000B
+  0001     0003     00     000012
+  0001     0004     00     000019
+  0001     0005     00     000020
+  0001     0006     00     000003
+  0006     0001     00     000028
+  0006     0001     00     000029
+  0006     0001     00     00002A
+  0006     0001     00     00002B
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+CSHAPQ       1 00000000    13     27
+CTODX        1   00001F   110    133
+CTOEX        1   000018    95    132
+CTOHX        1   00000A    65    130
+CTOIX        1   000011    80    131
+F0           1 00000000    44     97   112
+F1           1 00000001    47
+F2           1 00000002    48
+F3           1 00000003    49
+F4           1 00000004    50
+F5           1 00000005    51
+R1           1 00000001    42     54    55    57    58    67    67    68    68    68    82    82    83    83    83    97
+                                  97    98    98    98   112   112   113   113   113
+R2           1 00000002    39     58    59    69    84    99   114
+R3           1 00000003    43     56    61    70    85   100   115
+R4           1 00000004    33     59
+R5           1 00000005    34     60    67    82
+R6           1 00000006    35     56    60    70    85   100   115
+R7           1 00000007    36     69    84    99   114
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+TABLE        1   000028   130     54    55    56
+$RET1        1   000010    74
+$RET2        1   000017    89
+$RET3        1   00001E   104
+$RET4        1   000026   119
+#LCSHAPQ     1 00000028   129
+#QCTOD       1 00000000   109    111
+#QCTOE       1 00000000    94     96
+#QCTOH       1 00000000    64     66
+#QCTOI       1 00000000    79     81
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      59 CARDS FROM SYSIN     404 CARDS FROM SYSLIB
+     208 LINES OUTPUT          15 CARDS OUTPUT

@@ -1,0 +1,188 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DPWRI     SD 0001 000000 000036
+DPWRH     LD      000003        0001
+#LDPWRI   SD 0002 000036 000002
+
+         DPWRI -- EXPONENTIATION OF A SCALAR TO AN INTEGRAL POWER                                              PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * DPWRI: SCALAR TO AN INTEGRAL POWER(DOUBLE)                            00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUTS: BASE IN F0, EXPONENT IN R6.                         00000400
+                                 10 *        2. OUTPUT IN F0 SINGLE.                                        00000500
+                                 11 *        3. SUCCESSIVELY TAKE FIRST, SECOND, FOURTH, ETC.               00000600
+                                 12 *           POWERS OF BASE, SIMULTANEOUSLY SHIFTING EXPONENT RIGHT.     00000700
+                                 13 *        4. MULTIPLY POWER OF BASE INTO ANSWER WHEN '1' IS SHIFTED OUT. 00000800
+                                 14 *        5. ERROR GIVEN WHEN BASE=0 AND EXPONENT<=0.                    00000900
+                                 15 *                                                                       00001000
+                                 16 DPWRI    AMAIN QDED=YES                                                 00001100
+                                 17+***********************************************************************
+                                 18+*
+                                 19+*        PRIMARY ENTRY POINT
+                                 20+*
+                                 21+***********************************************************************
+00000                            22+DPWRI    CSECT                                                          01-AMAIN
+00000                            23+STACK    DSECT                                                          01-AMAIN
+                                 24+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            25+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            26+         DS    2F             R0,R1                                     01-AMAIN
+00006                            27+ARG2     DS    F              R2                                        01-AMAIN
+00008                            28+         DS    F              R3                                        01-AMAIN
+0000A                            29+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            30+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            31+ARG6     DS    F              R6                                        01-AMAIN
+00010                            32+ARG7     DS    F              R7                                        01-AMAIN
+                                 33+*        END OF STANDARD STACK AREA
+                                 34+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            35+QARGA    DS    D                                                        01-AMAIN
+00016                            36+QARGB    DS    D                                                        01-AMAIN
+0001A                            37+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            38+DPWRI    CSECT                                                          01-AMAIN
+0000000                          39+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   40+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 42 * EXPONENTIATION OF A DOUBLE PRECISION SCALAR                           00001200
+                                 43 * TO A FULLWORD INTEGER POWER                                           00001300
+                                 44          INPUT F0,            SCALAR DP                                X00001400
+                                                   R6             INTEGER DP                                00001500
+0000000                          45+F0       EQU   0                                                        01-INPUT
+0000006                          46+R6       EQU   6                                                        01-INPUT
+                                 48          OUTPUT F0            SCALAR DP                                 00001600
+                                 50          WORK  R5,R7,F1,F2,F3                                           00001700
+0000005                          51+R5       EQU   5                                                        01-WORK
+0000007                          52+R7       EQU   7                                                        01-WORK
+0000001                          53+F1       EQU   1                                                        01-WORK
+0000002                          54+F2       EQU   2                                                        01-WORK
+0000003                          55+F3       EQU   3                                                        01-WORK
+00002 DF0C           0006 0003   57          B     MERGE                                                    00001800
+                                 58 *                                                                       00001900
+                                 59 DPWRH    AENTRY                                                         00002000
+                                 60+***********************************************************************
+                                 61+*
+                                 62+*        SECONDARY ENTRY POINT
+                                 63+*
+                                 64+***********************************************************************
+00003                            65+DPWRH    DS    0H                                                       01-AENTR
+                                 66+         ENTRY DPWRH                                                    01-AENTR
+00003 B624 0000      0009 0000   67+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 69 * EXPONENTIATION OF A DOUBLE PRECISION SCALAR                           00002100
+                                 70 * TO A HALFWORD INTEGER POWER                                           00002200
+                                 71          INPUT F0,            SCALAR DP                                X00002300
+                                                   R6             INTEGER SP                                00002400
+                                 73          OUTPUT F0            SCALAR DP                                 00002500
+                                 75          WORK  R5,R7,F1,F2,F3                                           00002600
+00005 F641                0010   77          SRA   R6,16          GET FULLWORD EXPONENT                     00002700
+00006 7BE1                       78 MERGE    LER   F3,F1          GET BASE IN REGISTER PAIR                 00002800
+00007 7AE0                       79          LER   F2,F0          F2-F3 AND TEST SIGN                       00002900
+         DPWRI -- EXPONENTIATION OF A SCALAR TO AN INTEGRAL POWER                                              PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00008 DB14           000E 0005   80          BNZ   NOTZERO                                                  00003000
+00009 1DE6                       81          LR    R5,R6          RETURN 0 IF BASE=0                        00003100
+0000A D994           0030 0025   82          BP    EXIT           AND EXPONENT>0.                           00003200
+                                 83          AERROR 4             ERROR: BASE=0, EXPONENT<=0                00003300
+                                 84+*********ISSUE SEND ERROR SVC******************************************
+0000B C9FB 0036      0036        85+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                 86+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0000D DF88           0030 0022   87          B     EXIT           FIXUP: RETURN 0                           00003400
+                                 88 *                                                                       00003500
+0000E 78FF 0022      0032 0022   89 NOTZERO  LED   F0,ONE                                                   00003600
+00010 1DE6                       90          LR    R5,R6                                                    00003700
+00011 DD04           0013 0001   91          BNM   LOOP                                                     00003800
+00012 EEEE                       92          LACR  R6,R6          GET |EXPONENT|                            00003900
+                                 93 *                                                                       00004000
+00013 FE06                0001   94 LOOP     SRDL  R6,1                                                     00004100
+00014 1FE7                       95          LR    R7,R7                                                    00004200
+00015 DD04           0017 0001   96          BNM   NOMULT                                                   00004300
+00016 30EA                       97          MEDR  F0,F2          MULTIPLY IN IF 1 SHIFTED OUT              00004400
+00017 1EE6                       98 NOMULT   LR    R6,R6                                                    00004500
+00018 DC08           001B 0002   99          BZ    OUT                                                      00004600
+00019 32EA                      100          MEDR  F2,F2                                                    00004700
+0001A DF22           0013 0008  101          B     LOOP                                                     00004800
+                                102 *                                                                       00004900
+0001B 1DE5                      103 OUT      LR    R5,R5                                                    00005000
+0001C DD4C           0030 0013  104          BNM   EXIT                                                     00005100
+0001D 7AE0                      105          LER   F2,F0          GET RECIPROCAL OF                         00005200
+0001E 7BE1                      106          LER   F3,F1                                                    00005300
+0001F 78FF 0011      0032 0011  107          LED   F0,ONE                                                   00005400
+                                108         QDEDR  F0,F2          WAS NEGATIVE                              00005500
+00021 38F8 0012      0012       109+         STED  F0,QARGA                                                 01-QDEDR
+00023 3AF8 0016      0016       110+         STED  F2,QARGB                                                 01-QDEDR
+00025 68E2                      111+         DER   F0,F2                                                    01-QDEDR
+00026 7AE0                      112+         LER   F2,F0                                                    01-QDEDR
+00027 7BE1                      113+         LER   F2+1,F0+1                                                01-QDEDR
+00028 32F8 0016      0016       114+         MED   F2,QARGB                                                 01-QDEDR
+0002A 5AF8 0012      0012       115+         SED   F2,QARGA                                                 01-QDEDR
+0002C 6A2C           0016       116+         DE    F2,QARGB                                                 01-QDEDR
+0002D 58EA                      117+         SEDR  F0,F2                                                    01-QDEDR
+0002E 7AF8 0016      0016       118+         LED   F2,QARGB                                                 01-QDEDR
+                                119 *                                                                       00005600
+                                120 EXIT     AEXIT                                                          00005700
+                                121+*********RETURN TO CALLER**********************************************
+00030                           122+EXIT     DS    0H                                                       01-AEXIT
+00030 97E8                      123+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                124+***********************************************************************
+                                126 *                                                                       00005800
+00031 C9FB
+00032                           127          DS    0E                                                       00005900
+00032 4110000000000000          128 ONE      DC    X'4110000000000000'                                      00006000
+                                129 *                                                                       00006100
+                                130          ACLOSE                                                         00006200
+00036                           131+         LTORG                                                          02-ERRPA
+                                132+****************ERROR PARAMETER AREA***********************************
+00036                           133+#LDPWRI  CSECT                                                          02-ERRPA
+                                134+***  DPWRI SENDS THE FOLLOWING ERROR                                    02-ERRPA
+                                136+***  ERROR NUMBER 4 IN GROUP 4                                          02-ERRPA
+00036 0014                      138+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00037 0404                      139+         DC    Y(4*256+4)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                140+****************END OF ERROR PARAMETER AREA****************************
+                                141+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     00000C
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000036   138     85
+ARG2         2   000006    27
+ARG4         2   00000A    29
+ARG5         2   00000C    30
+ARG6         2   00000E    31
+ARG7         2   000010    32
+DPWRH        1   000003    65     66
+DPWRI        1 00000000    22     38
+EXIT         1   000030   122     82    87   104
+F0           1 00000000    45     79    89    97   105   107   109   111   112   113   117
+F1           1 00000001    53     78   106
+F2           1 00000002    54     79    97   100   100   105   110   111   112   113   114   115   116   117   118
+F3           1 00000003    55     78   106
+LOOP         1   000013    94     91   101
+MERGE        1   000006    78     57
+NOMULT       1   000017    98     96
+NOTZERO      2   00000E    89     80
+ONE          4   000032   128     89   107
+OUT          1   00001B   103     99
+QARGA        4   000012    35    109   115
+QARGB        4   000016    36    110   114   116   118
+R5           1 00000005    51     81    90   103   103
+R6           1 00000006    46     77    81    90    92    92    94    98    98
+R7           1 00000007    52     95    95
+STACK        1 00000000    23     39
+STACKEND     2   00001A    37
+$RET1        1   000030   123
+#LDPWRI      1 00000036   133
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      67 CARDS FROM SYSIN     452 CARDS FROM SYSLIB
+     188 LINES OUTPUT          12 CARDS OUTPUT

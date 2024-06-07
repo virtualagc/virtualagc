@@ -1,0 +1,174 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DSST      SD 0001 000000 000036
+#LDSST    SD 0002 000036 000002
+
+         DSST -- DOUBLE SCALAR SUBBIT STORE                                                                    PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 DSST     AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+DSST     CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+DSST     CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 *                                                                       00000400
+                                 33 *  STORES A BIT STRING INTO                                             00000500
+                                 34 *   SELECTED BITS OF DOUBLE SCALAR                                      00000600
+                                 35 *                                                                       00000700
+                                 36 *                                                                       00000800
+                                 37          INPUT R5,            INTEGER  SP                              X00000900
+                                                   R6,            INTEGER  SP                              X00001000
+                                                   R7             BIT STRING                                00001100
+0000005                          38+R5       EQU   5                                                        01-INPUT
+0000006                          39+R6       EQU   6                                                        01-INPUT
+0000007                          40+R7       EQU   7                                                        01-INPUT
+                                 42          OUTPUT R2            SCALAR  DP                                00001200
+0000002                          43+R2       EQU   2                                                        01-OUTPU
+                                 45          WORK  R1,R3,R4                                                 00001300
+0000001                          46+R1       EQU   1                                                        01-WORK
+0000003                          47+R3       EQU   3                                                        01-WORK
+0000004                          48+R4       EQU   4                                                        01-WORK
+                                 50 *                                                                       00001400
+                                 51 *                                                                       00001500
+00002 1DE5                       52          LR    R5,R5                                                    00001600
+00003 D910           0008 0004   53          BP    CONT                                                     00001700
+                                 54          AERROR 30           ERROR:FIRST BIT<0                          00001800
+                                 55+*********ISSUE SEND ERROR SVC******************************************
+00004 C9FB 0036      0036        56+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                 57+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00006 EDF3 0001      0001        58          LA    R5,1                                                     00001900
+                                 59 *                                                                       00002000
+00008 19E6                       60 CONT     LR    R1,R6                                                    00002100
+00009 0EE5                       61          SR    R6,R5                                                    00002200
+0000A B0E6 0001           0001   62          AHI   R6,1                                                     00002300
+0000C 74E4                       63          XR    R4,R4                                                    00002400
+0000D 1BE5                       64          LR    R3,R5                                                    00002500
+0000E 1DF7 0022      0032 0022   65          L     R5,ONE                                                   00002600
+00010 F5F8                003E   66          SLL   R5,0(R6)                                                 00002700
+00011 0DF7 001F      0032 001F   67          S     R5,ONE                                                   00002800
+00013 B0E1 FFC0           FFC0   68          AHI   R1,X'FFC0'                                               00002900
+00015 DE10           001A 0004   69          BNP   S1                                                       00003000
+                                 70          AERROR 30           ERROR LAST BIT>64                          00003100
+                                 71+*********ISSUE SEND ERROR SVC******************************************
+00016 C9FB 0036      0036        72+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                 73+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00018 FCE6                0039   74          SRDL  R4,0(R1)                                                 00003200
+00019 DF08           001C 0002   75          B     C1                                                       00003300
+                                 76 *                                                                       00003400
+0001A EEE9                       77 S1       LACR  R6,R1                                                    00003500
+0001B FCF8                003E   78          SLDL  R4,0(R6)       SHIFT LEFT 64-LAST BIT                    00003600
+                                 79 *                                                                       00003700
+         DSST -- DOUBLE SCALAR SUBBIT STORE                                                                    PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+0001C 74F7 0016      0034 0016   80 C1       X     R4,ALLF                                                  00003800
+0001E 75F7 0014      0034 0014   81          X     R5,ALLF        MASK READY                                00003900
+00020 1BE7                       82          LR    R3,R7          BIT STRING IN R3                          00004000
+00021 1E02           0000        83          L     R6,0(R2)                                                 00004100
+00022 1F06           0002        84          L     R7,2(R2)                                                 00004200
+00023 26E4                       85          NR    R6,R4          MASK OUT BITS TO                          00004300
+00024 27E5                       86          NR    R7,R5          BE STORED INTO                            00004400
+                                 87 *                                                                       00004500
+                                 88 *  SHIFT STRING TO PROPER BIT                                           00004600
+                                 89 *                                                                       00004700
+00025 72E2                       90          XR    R2,R2                                                    00004800
+00026 19E1                       91          LR    R1,R1                                                    00004900
+00027 DE08           002A 0002   92          BNP   S2                                                       00005000
+00028 FAE6                0039   93          SRDL  R2,0(R1)                                                 00005100
+00029 DF08           002C 0002   94          B     C2                                                       00005200
+                                 95 *                                                                       00005300
+0002A E9E9                       96 S2       LACR  R1,R1                                                    00005400
+0002B FAE4                0039   97          SLDL  R2,0(R1)                                                 00005500
+                                 98 *                                                                       00005600
+                                 99 *  INSERT BIT STRING                                                    00005700
+                                100 *                                                                       00005800
+0002C 2EE2                      101 C2       OR    R6,R2                                                    00005900
+0002D 2FE3                      102          OR    R7,R3                                                    00006000
+0002E 1A0C           0006       103          L     R2,ARG2                                                  00006100
+0002F 3602           0000       104          ST    R6,0(R2)                                                 00006200
+00030 3706           0002       105          ST    R7,2(R2)                                                 00006300
+                                106 EXIT     AEXIT                                                          00006400
+                                107+*********RETURN TO CALLER**********************************************
+00031                           108+EXIT     DS    0H                                                       01-AEXIT
+00031 97E8                      109+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                110+***********************************************************************
+                                112 *                                                                       00006500
+00032 00000001                  113 ONE      DC    F'1'                                                     00006600
+00034 FFFFFFFF                  114 ALLF     DC    X'FFFFFFFF'                                              00006700
+                                115          ACLOSE                                                         00006800
+00036                           116+         LTORG                                                          02-ERRPA
+                                117+****************ERROR PARAMETER AREA***********************************
+00036                           118+#LDSST   CSECT                                                          02-ERRPA
+                                119+***  DSST SENDS THE FOLLOWING ERROR                                     02-ERRPA
+                                121+***  ERROR NUMBER 30 IN GROUP 4                                         02-ERRPA
+00036 0014                      123+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00037 041E                      124+         DC    Y(4*256+30)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                125+****************END OF ERROR PARAMETER AREA****************************
+                                126+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000005
+  0001     0002     00     000017
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+AERROR1      1   000036   123     56    72
+ALLF         2   000034   114     80    81
+ARG2         2   000006    18    103
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+C1           2   00001C    80     75
+C2           1   00002C   101     94
+CONT         1   000008    60     53
+DSST         1 00000000    13     27
+EXIT         1   000031   108
+ONE          2   000032   113     65    67
+R1           1 00000001    46     60    68    74    77    91    91    93    96    96    97
+R2           1 00000002    43     83    83    84    84    90    90    93    97   101   103   104   104   105   105
+R3           1 00000003    47     64    82   102
+R4           1 00000004    48     63    63    74    78    80    85
+R5           1 00000005    38     52    52    58    61    64    65    66    67    81    86
+R6           1 00000006    39     60    61    62    66    77    78    83    85   101   104
+R7           1 00000007    40     82    84    86   102   105
+S1           1   00001A    77     69
+S2           1   00002A    96     92
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   000031   109
+#LDSST       1 00000036   118
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      73 CARDS FROM SYSIN     366 CARDS FROM SYSLIB
+     174 LINES OUTPUT          11 CARDS OUTPUT

@@ -1,0 +1,92 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VR0SN     SD 0001 000000 000006
+
+         VR0SN--SCALAR TO REMOTE VECTOR MOVE, SP                                                               PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VR0SN    AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VR0SN    CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+VR0SN    CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * FILLS A V OF LENGTH N, OR A SUCCESIVELY STORED PARTITION OF M OF      00000400
+                                 33 *   LENGTH N = R S, OR ALL OF M OF LENGTH N = R S, WITH A PARTICULAR    00000500
+                                 34 *   SINGLE PRECISION SCALAR, WHERE:                                     00000600
+                                 35 *     V IS A REMOTE SINGLE PRECISION VECTOR,                            00000700
+                                 36 *     M IS A REMOTE SINGLE PRECISION MATRIX,                            00000800
+                                 37 *     R AND S ARE THE DIMENSIONS OF M OR ITS PARTITION.                 00000900
+                                 38 *                                                                       00001000
+                                 39          INPUT R5,            INTEGER(N) SP                            X00001100
+                                                   F0             SCALAR SP                                 00001200
+0000005                          40+R5       EQU   5                                                        01-INPUT
+0000000                          41+F0       EQU   0                                                        01-INPUT
+                                 43          OUTPUT R2            ZCON(VECTOR(N)) SP                        00001300
+0000002                          44+R2       EQU   2                                                        01-OUTPU
+                                 46 *                                                                       00001400
+                                 47 * ALGORITHM:                                                            00001500
+                                 48 *   SEE ALGORITHM DESCRIPTION IN VR0DN                                  00001600
+                                 49 *                                                                       00001700
+00002 38F4 B806      0006        50 VR0SNX   STE@# F0,ARG2(R5)                                              00001800
+00004 DD0F           0002 0003   51          BCTB  R5,VR0SNX                                                00001900
+                                 52          AEXIT                                                          00002000
+                                 53+*********RETURN TO CALLER**********************************************
+00005                            54+         DS    0H                                                       01-AEXIT
+00005 97E8                       55+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 56+***********************************************************************
+                                 58          ACLOSE                                                         00002100
+00006                            59+         LTORG                                                          02-ERRPA
+                                 60+****************ERROR PARAMETER AREA***********************************
+                                 61+***  NO ERRORS SENT IN VR0SN                                            02-ERRPA
+                                 62+****************END OF ERROR PARAMETER AREA****************************
+                                 63+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    18     50
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+F0           1 00000000    41     50
+R2           1 00000002    44
+R5           1 00000005    40     50    51
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+VR0SN        1 00000000    13     27
+VR0SNX       2   000002    50     51
+$RET1        1   000005    55
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      26 CARDS FROM SYSIN     321 CARDS FROM SYSLIB
+      92 LINES OUTPUT           7 CARDS OUTPUT

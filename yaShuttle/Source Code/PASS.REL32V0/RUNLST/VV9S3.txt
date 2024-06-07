@@ -1,0 +1,104 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VV9S3     SD 0001 000000 00000E
+#QSQRT    ER 0002
+
+         VV9S3 -- UNIT VECTOR,LENGTH 3, SINGLE PREC                                                            PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV9S3    AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV9S3    CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+VV9S3    CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 * RETURNS THE MAGNITUDE OF V1, WHERE V1 IS A SINGLE PREC. 3 VECTOR      00000300
+                                 32          INPUT R2            VECTOR(3)  SP                              00000400
+0000002                          33+R2       EQU   2                                                        01-INPUT
+                                 35          OUTPUT F0           SCALAR  SP                                 00000500
+0000000                          36+F0       EQU   0                                                        01-OUTPU
+                                 38          WORK  R1,R6,F2                                                 00000600
+0000001                          39+R1       EQU   1                                                        01-WORK
+0000006                          40+R6       EQU   6                                                        01-WORK
+0000002                          41+F2       EQU   2                                                        01-WORK
+                                 43 * ALGORITHIM                                                            00000700
+                                 44 *  SEE VV9D3                                                            00000800
+00002 7806           0002        45          LE    F0,2(R2)                                                 00000900
+00003 60E0                       46          MER   F0,F0                                                    00001000
+00004 7A0A           0004        47          LE    F2,4(R2)                                                 00001100
+00005 62E2                       48          MER   F2,F2                                                    00001200
+00006 50E2                       49          AER   F0,F2                                                    00001300
+00007 7A0E           0006        50          LE    F2,6(R2)                                                 00001400
+00008 62E2                       51          MER   F2,F2                                                    00001500
+00009 50E2                       52          AER   F0,F2                                                    00001600
+                                 53          ABAL  SQRT                                                     00001700
+                                 54+         EXTRN #QSQRT                                                   01-ABAL
+0000A E4F7                       55+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0000B 3800                       56+         DC  Y(#QSQRT+X'3800')                                         X01-ABAL
+                                   +                              THROUGH QCON
+                                 57          AEXIT                                                          00001800
+                                 58+*********RETURN TO CALLER**********************************************
+0000C                            59+         DS    0H                                                       01-AEXIT
+0000C 97E8                       60+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 61+***********************************************************************
+                                 63          ACLOSE                                                         00001900
+0000D C9FB
+0000E                            64+         LTORG                                                          02-ERRPA
+                                 65+****************ERROR PARAMETER AREA***********************************
+                                 66+***  NO ERRORS SENT IN VV9S3                                            02-ERRPA
+                                 67+****************END OF ERROR PARAMETER AREA****************************
+                                 68+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    3
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.40 07/22/05
+  0001     0002     00     00000B
+
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+F0           1 00000000    36     45    46    46    49    52
+F2           1 00000002    41     47    48    48    49    50    51    51    52
+R1           1 00000001    39
+R2           1 00000002    33     45    45    47    47    50    50
+R6           1 00000006    40
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+VV9S3        1 00000000    13     27
+$RET1        1   00000C    60
+#QSQRT       1 00000000    54     56
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      24 CARDS FROM SYSIN     402 CARDS FROM SYSLIB
+     104 LINES OUTPUT           8 CARDS OUTPUT

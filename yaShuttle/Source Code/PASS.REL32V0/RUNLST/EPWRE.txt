@@ -1,0 +1,180 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+EPWRE     SD 0001 000000 000020
+#QLOG     ER 0002
+#QEXP     ER 0003
+#QSQRT    ER 0004
+#LEPWRE   SD 0005 000020 000004
+
+         EPWRE -- EXPONENTIATION OF A SCALAR TO A SCALAR POWER                                                 PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * EPWRE: SCALAR TO SCALAR POWER(SINGLE)                                 00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUTS: BASE IN F0, EXPONENT IN F2.                         00000400
+                                 10 *        2. OUTPUT IN F0.                                               00000500
+                                 11 *        3. X**Y = EXP(Y*LOG(X)).                                       00000600
+                                 12 *        3A. X**0.5 = SQRT(X)                                           00000700
+                                 13 *        4. ERRORS GIVEN WHEN BASE<0, OR BASE=0 AND EXPONENT<=0.        00000800
+                                 14 *                                                                       00000900
+                                 15          MACRO                                                          00001000
+                                 16          WORKAREA                                                       00001100
+                                 17 EXPON    DS    D                                                        00001200
+                                 18          MEND                                                           00001300
+                                 19 *                                                                       00001400
+                                 20 EPWRE    AMAIN ACALL=YES                                                00001500
+                                 21+***********************************************************************
+                                 22+*
+                                 23+*        PRIMARY ENTRY POINT
+                                 24+*
+                                 25+***********************************************************************
+00000                            26+EPWRE    CSECT                                                          01-AMAIN
+00000                            27+STACK    DSECT                                                          01-AMAIN
+                                 28+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            29+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            30+         DS    2F             R0,R1                                     01-AMAIN
+00006                            31+ARG2     DS    F              R2                                        01-AMAIN
+00008                            32+         DS    F              R3                                        01-AMAIN
+0000A                            33+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            34+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            35+ARG6     DS    F              R6                                        01-AMAIN
+00010                            36+ARG7     DS    F              R7                                        01-AMAIN
+                                 37+*        END OF STANDARD STACK AREA
+00012                            38+EXPON    DS    D                                                        02-00017
+00016                            39+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            40+EPWRE    CSECT                                                          01-AMAIN
+0000000                          41+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 E0FB 0016      0016        42+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN
+00002 B624 0000      0009 0000   43+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 45 * EXPONENTIATION OF A SINGLE PRECISION SCALAR                           00001600
+                                 46 * TO A SINGLE PRECISION SCALAR POWER                                    00001700
+                                 47          INPUT F0,            SCALAR SP                                X00001800
+                                                   F2             SCALAR SP                                 00001900
+0000000                          48+F0       EQU   0                                                        01-INPUT
+0000002                          49+F2       EQU   2                                                        01-INPUT
+                                 51          OUTPUT F0            SCALAR SP                                 00002000
+                                 53          WORK  R1,R5,R6,R7,F0,F1,F2,F3,F4                               00002100
+0000001                          54+R1       EQU   1                                                        01-WORK
+0000005                          55+R5       EQU   5                                                        01-WORK
+0000006                          56+R6       EQU   6                                                        01-WORK
+0000007                          57+R7       EQU   7                                                        01-WORK
+0000001                          58+F1       EQU   1                                                        01-WORK
+0000003                          59+F3       EQU   3                                                        01-WORK
+0000004                          60+F4       EQU   4                                                        01-WORK
+00004 78E0                       62          LER   F0,F0                                                    00002200
+00005 DA4C           0019 0013   63          BM    ERROR1                                                   00002300
+00006 DB14           000C 0005   64          BNZ   NOTZERO                                                  00002400
+00007 7AE2                       65          LER   F2,F2                                                    00002500
+00008 D930           0015 000C   66          BP    EXIT                                                     00002600
+                                 67          AERROR 4             ZERO RAISED TO POWER <= 0                 00002700
+                                 68+*********ISSUE SEND ERROR SVC******************************************
+00009 C9FB 0020      0020        69+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                 70+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0000B DF24           0015 0009   71          B     EXIT           FIXUP, RETURN ZERO                        00002800
+                                 72 *                                                                       00002900
+0000C 4AFF 0010      001E 0010   73 NOTZERO  CE    F2,=X'40800000' IS EXPONENT 0.5                          00003000
+0000E DC1C           0016 0007   74          BE    DOSQRT                                                   00003100
+0000F 3A24           0012        75          STE   F2,EXPON                                                 00003200
+                                 76          ACALL LOG                                                      00003300
+                                 77+         EXTRN #QLOG                                                    01-ACALL
+00010 D0FF                       78+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00011 3800                       79+         DC  Y(#QLOG+X'3800') INDIRECTLY THRU QCON                      01-ACALL
+00012 6024           0012        80          ME    F0,EXPON                                                 00003400
+         EPWRE -- EXPONENTIATION OF A SCALAR TO A SCALAR POWER                                                 PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                 81          ACALL EXP                                                      00003500
+                                 82+         EXTRN #QEXP                                                    01-ACALL
+00013 D0FF                       83+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00014 3800                       84+         DC  Y(#QEXP+X'3800') INDIRECTLY THRU QCON                      01-ACALL
+                                 85 EXIT     AEXIT                                                          00003600
+                                 86+*********RETURN TO CALLER**********************************************
+00015                            87+EXIT     DS    0H                                                       01-AEXIT
+00015 97E8                       88+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 89+***********************************************************************
+                                 91 *                                                                       00003700
+                                 92 DOSQRT   ABAL  SQRT                                                     00003800
+                                 93+         EXTRN #QSQRT                                                   01-ABAL
+00016 E4F7                       94+DOSQRT   DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00017 3800                       95+         DC  Y(#QSQRT+X'3800')                                         X01-ABAL
+                                   +                              THROUGH QCON
+00018 DF12           0015 0004   96          B     EXIT                                                     00003900
+                                 97 *                                                                       00004000
+                                 98 ERROR1   AERROR 24            BASE<0 IN EXPONENTIATION                  00004100
+                                 99+*********ISSUE SEND ERROR SVC******************************************
+00019 C9FB 0022      0022       100+ERROR1   SVC   AERROR2        ISSUE SEND ERROR SVC                      01-AERRO
+                                101+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0001B 78E8                      102          LECR  F0,F0          FIXUP: GET |BASE| AND TRY AGAIN           00004200
+0001C DF46           000C 0011  103          B     NOTZERO                                                  00004300
+                                104 *                                                                       00004400
+                                105          ACLOSE                                                         00004500
+0001D C9FB
+0001E                           106+         LTORG                                                          02-ERRPA
+0001E 40800000                  107                =X'40800000'
+                                108+****************ERROR PARAMETER AREA***********************************
+00020                           109+#LEPWRE  CSECT                                                          02-ERRPA
+                                110+***  EPWRE SENDS THE FOLLOWING ERRORS                                   02-ERRPA
+                                112+***  ERROR NUMBER 4 IN GROUP 4                                          02-ERRPA
+00020 0014                      114+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00021 0404                      115+         DC    Y(4*256+4)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                117+***  ERROR NUMBER 24 IN GROUP 4                                         02-ERRPA
+00022 0014                      119+AERROR2  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00023 0418                      120+         DC    Y(4*256+24)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                121+****************END OF ERROR PARAMETER AREA****************************
+                                122+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.38 07/22/05
+  0001     0002     00     000011
+  0001     0003     00     000014
+  0001     0004     00     000017
+  0001     0005     00     00000A
+  0001     0005     00     00001A
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+AERROR1      1   000020   114     69
+AERROR2      1   000022   119    100
+ARG2         2   000006    31
+ARG4         2   00000A    33
+ARG5         2   00000C    34
+ARG6         2   00000E    35
+ARG7         2   000010    36
+DOSQRT       1   000016    94     74
+EPWRE        1 00000000    26     40
+ERROR1       2   000019   100     63
+EXIT         1   000015    87     66    71    96
+EXPON        4   000012    38     75    80
+F0           1 00000000    48     62    62    80   102   102
+F1           1 00000001    58
+F2           1 00000002    49     65    65    73    75
+F3           1 00000003    59
+F4           1 00000004    60
+NOTZERO      2   00000C    73     64   103
+R1           1 00000001    54
+R5           1 00000005    55
+R6           1 00000006    56
+R7           1 00000007    57
+STACK        1 00000000    27     41    42
+STACKEND     2   000016    39     42
+$RET1        1   000015    88
+#LEPWRE      1 00000020   109
+#QEXP        1 00000000    82     84
+#QLOG        1 00000000    77     79
+#QSQRT       1 00000000    93     95
+=X'40800000'
+             2   00001E   107     73
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      50 CARDS FROM SYSIN     470 CARDS FROM SYSLIB
+     180 LINES OUTPUT          13 CARDS OUTPUT

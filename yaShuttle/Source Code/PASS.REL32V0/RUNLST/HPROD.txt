@@ -1,0 +1,74 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+HPROD     SD 0001 000000 00000B
+
+         HPROD--INTEGER PROD FUNCTION, SP                                                                      PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 HPROD    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+HPROD    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * RETURNS THE PRODUCT OF ALL THE ELEMENTS OF A LENGTH N ARRAY OF        00000400
+                                 17 *   SINGLE PRECISION INTEGERS.                                          00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            ARRAY(N) INTEGER SP                      X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT R5            INTEGER SP                                00000900
+                                 25          WORK  R6                                                       00001000
+0000006                          26+R6       EQU   6                                                        01-WORK
+                                 28 *                                                                       00001100
+                                 29 * ALGORITHM:                                                            00001200
+                                 30 *   SEE ALGORITHM DESCRIPTION IN DPROD                                  00001300
+                                 31 *                                                                       00001400
+00000 9EF7 0008      000A 0008   32          LH    R6,=H'1'       SET ACCUMULATOR TO 1                      00001500
+00002 9EFA 0001      0001        33 LOOPH    MIH   R6,1(R2)       MULT BY NEXT ELT.                         00001600
+00004 1EE6                       34          LR    R6,R6          SET CONDITION CODE                        00001700
+00005 DC08           0008 0002   35          BZ    SHIFT          PROD=0 SO RETURN                          00001800
+00006 EA06           0001        36          LA    R2,1(R2)       BUMP INPUT PTR TO NEXT ELEMENT            00001900
+00007 DD1B           0002 0006   37          BCT   R5,LOOPH                                                 00002000
+00008 1DE6                       38 SHIFT    LR    R5,R6          ANSWER EXPECTED IN R5                     00002100
+                                 39          AEXIT                                                          00002200
+                                 40+*********RETURN TO CALLER**********************************************
+00009                            41+         DS    0H                                                       01-AEXIT
+00009 C7EC                       42+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 43+***********************************************************************
+                                 45          ACLOSE                                                         00002300
+0000A                            46+         LTORG                                                          02-ERRPA
+0000A 0001                       47                =H'1'
+                                 48+****************ERROR PARAMETER AREA***********************************
+                                 49+***  NO ERRORS SENT IN HPROD                                            02-ERRPA
+                                 50+****************END OF ERROR PARAMETER AREA****************************
+                                 51+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+HPROD        1 00000000    13
+LOOPH        2   000002    33     37
+R2           1 00000002    20     33    33    36    36    36
+R5           1 00000005    21     37    38
+R6           1 00000006    26     32    33    34    34    38
+SHIFT        1   000008    38     35
+$RET1        1   000009    42
+=H'1'        1   00000A    47     32
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      28 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      74 LINES OUTPUT           5 CARDS OUTPUT

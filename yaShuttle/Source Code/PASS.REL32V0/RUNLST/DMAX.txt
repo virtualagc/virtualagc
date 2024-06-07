@@ -1,0 +1,86 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DMAX      SD 0001 000000 00000A
+
+         DMAX--SCALAR MAX FUNCTION, DP                                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 DMAX     AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+DMAX     CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * RETURNS THE MAX ELEMENT OF A LENGTH N ARRAY OF DOUBLE PRECISION       00000400
+                                 17 *   SCALARS.                                                            00000500
+                                 18 *                                                                       00000600
+                                 19 *   REVISION HISTORY:                                                   00000702
+                                 20 *                                                                       00000802
+                                 21 *     DATE       NAME  DR/SSCR#   DESCRIPTION                           00000902
+                                 22 *     --------   ----  --------   ------------------------------------  00001002
+                                 23 *     12/16/89   JAC   DR103762   REPLACED QCED/QCEDR MACRO WITH        00001102
+                                 24 *                                 CED/CEDR INSTRUCTION                  00001202
+                                 25 *                                                                       00001302
+                                 26          INPUT R2,            ARRAY(N) SCALAR DP                       X00001400
+                                                   R5             INTEGER(N) SP                             00001500
+0000002                          27+R2       EQU   2                                                        01-INPUT
+0000005                          28+R5       EQU   5                                                        01-INPUT
+                                 30          OUTPUT F0            SCALAR DP                                 00001600
+0000000                          31+F0       EQU   0                                                        01-OUTPU
+                                 33 *                                                                       00001700
+                                 34 * ALGORITHM:                                                            00001800
+                                 35 *   CURRMAX = ARRAY$(1);                                                00001900
+                                 36 *   DO FOR I = 2 TO N;                                                  00002000
+                                 37 *     IF ARRAY$(I) > CURRMAX THEN                                       00002100
+                                 38 *       CURRMAX = ARRAY$(I);                                            00002200
+                                 39 *   END;                                                                00002300
+                                 40 *                                                                       00002400
+00000 DF0C           0004 0003   41          B     START          GO TO SET CURRMAX                         00002500
+                                 42 *                                                                       00002601
+                                 43 *        DR103762 - REPLACED QCED WITH CED ON NEXT LINE                 00002701
+                                 44 *                                                                       00002801
+00001 18FA 0004      0004        45 DLOOP    CED   F0,4(R2)       COMPARE CURRMAX TO NEXT ELEMENT           00002900
+00003 DD08           0006 0002   46          BNL   HIGH           IF ^< THEN SKIP OVER SETTING OF CURRMAX   00003000
+00004 78FA 0004      0004        47 START    LED   F0,4(R2)       IF CURRMAX <= ARRAY$(I) THEN SET CURRMAX  00003100
+00006 EA12           0004        48 HIGH     LA    R2,4(R2)       UPDATE INPUT PTR                          00003200
+00007 DD1F           0001 0007   49          BCT   R5,DLOOP                                                 00003300
+                                 50          AEXIT                                                          00003400
+                                 51+*********RETURN TO CALLER**********************************************
+00008                            52+         DS    0H                                                       01-AEXIT
+00008 C7EC                       53+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 54+***********************************************************************
+                                 56          ACLOSE                                                         00004000
+00009 C9FB
+0000A                            57+         LTORG                                                          02-ERRPA
+                                 58+****************ERROR PARAMETER AREA***********************************
+                                 59+***  NO ERRORS SENT IN DMAX                                             02-ERRPA
+                                 60+****************END OF ERROR PARAMETER AREA****************************
+                                 61+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+DLOOP        2   000001    45     49
+DMAX         1 00000000    13
+F0           1 00000000    31     45    47
+HIGH         2   000006    48     46
+R2           1 00000002    27     45    45    47    47    48    48    48
+R5           1 00000005    28     49
+START        2   000004    47     41
+$RET1        1   000008    53
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      40 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+      86 LINES OUTPUT           5 CARDS OUTPUT

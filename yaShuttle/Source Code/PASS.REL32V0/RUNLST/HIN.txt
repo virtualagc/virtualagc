@@ -1,0 +1,240 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+HIN       SD 0001 000000 000046
+#QINTRAP  ER 0002
+IOBUF     ER 0003
+IOCODE    ER 0004
+IIN       LD      00000C        0001
+EIN       LD      000018        0001
+DIN       LD      000024        0001
+BIN       LD      000031        0001
+
+         HIN,IIN,EIN,DIN,BIN-INPUT ROUTINES                                                                    PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 HIN      AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+HIN      CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+HIN      CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *        INTEGER INPUT,SINGLE PRECISION (HALFWORD)                      00000300
+                                 32          INPUT R2             POINTER TO HALFWORD                       00000400
+0000002                          33+R2       EQU   2                                                        01-INPUT
+                                 35          OUTPUT NONE                                                    00000500
+                                 37          WORK  R5,R6                                                    00000600
+0000005                          38+R5       EQU   5                                                        01-WORK
+0000006                          39+R6       EQU   6                                                        01-WORK
+00002 EEF3 000A      000A        41          LHI   R6,10                                                    00000700
+00004 BEF3 0000      0000        42          STH   R6,IOCODE                                                00000800
+                                 43          ABAL  INTRAP                                                   00000900
+                                 44+         EXTRN #QINTRAP                                                 01-ABAL
+00006 E4F7                       45+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00007 3800                       46+         DC  Y(#QINTRAP+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00008 9DF3 0000      0000        47          LH    R5,IOBUF                                                 00001000
+0000A BD02           0000        48          STH   R5,0(R2)                                                 00001100
+                                 49          AEXIT                                                          00001200
+                                 50+*********RETURN TO CALLER**********************************************
+0000B                            51+         DS    0H                                                       01-AEXIT
+0000B 97E8                       52+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 53+***********************************************************************
+                                 55          EXTRN IOBUF,IOCODE                                             00001300
+                                 56 IIN      AENTRY                                                         00001400
+                                 57+***********************************************************************
+                                 58+*
+                                 59+*        SECONDARY ENTRY POINT
+                                 60+*
+                                 61+***********************************************************************
+0000C                            62+IIN      DS    0H                                                       01-AENTR
+                                 63+         ENTRY IIN                                                      01-AENTR
+0000C B624 0000      0009 0000   64+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 66 *        INTEGER INPUT,DOUBLE PRECISION (FULLWORD)                      00001500
+                                 67          INPUT R2             POINTER TO FULLWORD INTEGER               00001600
+                                 69          OUTPUT NONE                                                    00001700
+0000E EEF3 0009      0009        71          LHI   R6,9                                                     00001800
+00010 BEF3 0000      0000        72          STH   R6,IOCODE                                                00001900
+                                 73          ABAL  INTRAP                                                   00002000
+00012 E4F7                       74+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+00013 3800                       75+         DC  Y(#QINTRAP+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00014 1DF3 0000      0000        76          L    R5,IOBUF                                                  00002100
+00016 3502           0000        77          ST    R5,0(R2)                                                 00002200
+                                 78          AEXIT                                                          00002300
+                                 79+*********RETURN TO CALLER**********************************************
+         HIN,IIN,EIN,DIN,BIN-INPUT ROUTINES                                                                    PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+00017                            80+         DS    0H                                                       01-AEXIT
+00017 97E8                       81+$RET2    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 82+***********************************************************************
+                                 84 EIN      AENTRY                                                         00002400
+                                 85+***********************************************************************
+                                 86+*
+                                 87+*        SECONDARY ENTRY POINT
+                                 88+*
+                                 89+***********************************************************************
+00018                            90+EIN      DS    0H                                                       01-AENTR
+                                 91+         ENTRY EIN                                                      01-AENTR
+00018 B624 0000      0009 0000   92+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 94 *        SCALAR INPUT, SINGLE PRECISON (FULLWORD)                       00002500
+                                 95          INPUT R2             POINTER TO SCALAR FULLWORD                00002600
+                                 97          OUTPUT NONE                                                    00002700
+                                 99          WORK  F0                                                       00002800
+0000000                         100+F0       EQU   0                                                        01-WORK
+0001A EEF3 000B      000B       102          LHI   R6,11                                                    00002900
+0001C BEF3 0000      0000       103          STH   R6,IOCODE                                                00003000
+                                104          ABAL  INTRAP                                                   00003100
+0001E E4F7                      105+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0001F 3800                      106+         DC  Y(#QINTRAP+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+00020 78F3 0000      0000       107          LE    F0,IOBUF                                                 00003200
+00022 3802           0000       108          STE   F0,0(R2)                                                 00003300
+                                109          AEXIT                                                          00003400
+                                110+*********RETURN TO CALLER**********************************************
+00023                           111+         DS    0H                                                       01-AEXIT
+00023 97E8                      112+$RET3    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                113+***********************************************************************
+                                115 DIN      AENTRY                                                         00003500
+                                116+***********************************************************************
+                                117+*
+                                118+*        SECONDARY ENTRY POINT
+                                119+*
+                                120+***********************************************************************
+00024                           121+DIN      DS    0H                                                       01-AENTR
+                                122+         ENTRY DIN                                                      01-AENTR
+00024 B624 0000      0009 0000  123+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                125 *        SCALAR INPUT, DOUBLE PRECISION (DOUBLEWORD)                    00003600
+                                126          INPUT R2             POINTER TO SCALAR DOUBLE                  00003700
+                                128          OUTPUT NONE                                                    00003800
+00026 EEF3 000C      000C       130          LHI   R6,12                                                    00003900
+00028 BEF3 0000      0000       131          STH   R6,IOCODE                                                00004000
+                                132          ABAL  INTRAP                                                   00004100
+0002A E4F7                      133+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0002B 3800                      134+         DC  Y(#QINTRAP+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0002C 78FB 0000      0000       135          LED   F0,IOBUF                                                 00004200
+0002E 38FA 0000      0000       136          STED  F0,0(R2)                                                 00004300
+                                137          AEXIT                                                          00004400
+                                138+*********RETURN TO CALLER**********************************************
+00030                           139+         DS    0H                                                       01-AEXIT
+00030 97E8                      140+$RET4    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                141+***********************************************************************
+                                143 BIN      AENTRY                                                         00004500
+                                144+***********************************************************************
+                                145+*
+                                146+*        SECONDARY ENTRY POINT
+                                147+*
+                                148+***********************************************************************
+00031                           149+BIN      DS    0H                                                       01-AENTR
+                                150+         ENTRY BIN                                                      01-AENTR
+00031 B624 0000      0009 0000  151+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                153 *        BIT STRING INPUT                                               00004600
+                                154          INPUT R6             BIT STRING LENGTH                         00004700
+                                156          OUTPUT R6,           BIT STRING                               X00004800
+                                                   CC             CONDITION CODE (ALWAYS NE)                00004900
+         HIN,IIN,EIN,DIN,BIN-INPUT ROUTINES                                                                    PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+00033 BEF3 0000      0000       158          STH   R6,IOBUF                                                 00005000
+00035 EEF3 0008      0008       159          LHI   R6,8                                                     00005100
+00037 BEF3 0000      0000       160          STH   R6,IOCODE                                                00005200
+                                161          ABAL  INTRAP                                                   00005300
+00039 E4F7                      162+         DC  X'E4F7'          CALL INTRINSIC INDIRECTLY                 01-ABAL
+0003A 3800                      163+         DC  Y(#QINTRAP+X'3800')                                       X01-ABAL
+                                   +                              THROUGH QCON
+0003B 1EF3 0000      0000       164          L     R6,IOBUF                                                 00005400
+0003D B538 0010      000E 0010  165          CIST  ARG6,16                                                  00005500
+0003F DA04           0041 0001  166          BL    BINSTORE       WANT FULLWORD RETURNED                    00005600
+00040 F640                0010  167          SLL   R6,16          POISITION TO LEFTMOST POSITION            00005700
+00041 361C           000E       168 BINSTORE ST    R6,ARG6        SAVE FOR PROCESSING BY CALLER             00005800
+                                169          AEXIT CC=NE                                                    00005900
+                                170+*********RETURN TO CALLER**********************************************
+00042                           171+         DS    0H                                                       01-AEXIT
+00042 B204 C000      0001 C000  172+         SB    1(0),X'C000'   SET PSW CC TO 11 (LT (NE))                01-AEXIT
+00044 97E8                      173+$RET5    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                174+***********************************************************************
+                                176          ACLOSE                                                         00006000
+00045 C9FB
+00046                           177+         LTORG                                                          02-ERRPA
+                                178+****************ERROR PARAMETER AREA***********************************
+                                179+***  NO ERRORS SENT IN HIN                                              02-ERRPA
+                                180+****************END OF ERROR PARAMETER AREA****************************
+                                181+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.38 07/22/05
+  0001     0002     00     000007
+  0001     0002     00     000013
+  0001     0002     00     00001F
+  0001     0002     00     00002B
+  0001     0002     00     00003A
+  0001     0003     00     000009
+  0001     0003     00     000015
+  0001     0003     00     000021
+  0001     0003     00     00002D
+  0001     0003     00     000034
+  0001     0003     00     00003C
+  0001     0004     00     000005
+  0001     0004     00     000011
+  0001     0004     00     00001D
+  0001     0004     00     000029
+  0001     0004     00     000038
+
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ARG2         2   000006    18
+ARG4         2   00000A    20
+ARG5         2   00000C    21
+ARG6         2   00000E    22    165   168
+ARG7         2   000010    23
+BIN          1   000031   149    150
+BINSTORE     2   000041   168    166
+DIN          1   000024   121    122
+EIN          1   000018    90     91
+F0           1 00000000   100    107   108   135   136
+HIN          1 00000000    13     27
+IIN          1   00000C    62     63
+IOBUF        1 00000000    55     47    76   107   135   158   164
+IOCODE       1 00000000    55     42    72   103   131   160
+R2           1 00000002    33     48    48    77    77   108   108   136   136
+R5           1 00000005    38     47    48    76    77
+R6           1 00000006    39     41    42    71    72   102   103   130   131   158   159   160   164   167   168
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+$RET1        1   00000B    52
+$RET2        1   000017    81
+$RET3        1   000023   112
+$RET4        1   000030   140
+$RET5        1   000044   173
+#QINTRAP     1 00000000    44     46    75   106   134   163
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      65 CARDS FROM SYSIN     468 CARDS FROM SYSLIB
+     240 LINES OUTPUT          18 CARDS OUTPUT

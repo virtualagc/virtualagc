@@ -1,0 +1,124 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+MSTR      SD 0001 000000 00002A
+
+         MSTR- STRUCTURE MOVE,REMOTE                                                                           PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 MSTR     AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+MSTR     CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+MSTR     CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *        STRUCTURE MOVE, REMOTE                                         00000300
+                                 32          INPUT R4,            ZCON PTR TO SOURCE                       X00000500
+                                                   R5             INTEGER SP NUMBER OF HALFWORDS TO MOVE    00000600
+0000004                          33+R4       EQU   4                                                        01-INPUT
+0000005                          34+R5       EQU   5                                                        01-INPUT
+                                 36          OUTPUT R2            ZCON PTR TO DESTINATION                   00000700
+0000002                          37+R2       EQU   2                                                        01-OUTPU
+                                 39          WORK  R3,R6,R7                                                 00000800
+0000003                          40+R3       EQU   3                                                        01-WORK
+0000006                          41+R6       EQU   6                                                        01-WORK
+0000007                          42+R7       EQU   7                                                        01-WORK
+00002 1DE5                       44          LR    R5,R5          CHECK IF BAD COUNT                        00000900
+00003 DE7C           0023 001F   45          BNP   NOMOVE                                                   00001000
+00004 B32C 0400      000B 0400   46          TB    ARG4+1,X'0400'       IF SOURCE ZCON HAS IGNORE DSR BIT   00001100
+00006 DE10           000B 0004   47          BNO   SRCZCON                                                  00001200
+00007 84F8 0001      0001        48          IHL   R4,STACK+1           THEN GET DSR FROM PSW               00001300
+                                 49 *        DR103543: MASK OFF BITS 16-27 OF MVH SOURCE ADDRESS REGISTER.  00001401
+00009 24F7 0019      0024 0019   50          N     R4,=X'FFFF000F'      CLEAR RESRVED & IGNORED BITS 16-27  00001500
+0000B B31C 0400      0007 0400   51 SRCZCON  TB    ARG2+1,X'0400'       IF DEST ZCON HAS IGNORE DSR BIT     00001600
+0000D DE10           0012 0004   52          BNO   DESTZCON                                                 00001700
+0000E 82F8 000C      000C        53          IHL   R2,ARG5              R2 = A(DEST,COUNT)                  00001800
+00010 6AEC                       54          MVH   R2,R4                DIRECT MOVE                         00001900
+00011 DF44           0023 0011   55          B     NOMOVE                                                   00002000
+00012 1FE2                       56 DESTZCON LR    R7,R2                                                    00002100
+00013 27F7 0011      0026 0011   57          N     R7,=XL2'F'                                               00002200
+00015 82F8 000C      000C        58          IHL   R2,ARG5              R2 = A(DEST,COUNT)                  00002300
+00017 E3E0                       59          BALR  R3,0                                                     00002400
+00018 1EE3                       60 L1       LR    R6,R3                                                    00002500
+00019 26F7 000D      0028 000D   61          N     R6,=X'FFFFFFF0'                                          00002602
+0001B 2EE7                       62          OR    R6,R7                                                    00002700
+0001C B0E6 0007           0007   63          AHI   R6,L2-L1                                                 00002800
+0001E C7EE                       64          BCRE  7,R6                 PUT DEST DSR IN PSW                 00002900
+0001F 6AEC                       65 L2       MVH   R2,R4                                                    00003000
+00020 B0E3 000B           000B   66          AHI   R3,NOMOVE-L1                                             00003100
+00022 C7EB                       67          BCRE  7,R3                 RESTORE PSW                         00003200
+                                 68 NOMOVE   AEXIT                                                          00003300
+                                 69+*********RETURN TO CALLER**********************************************
+00023                            70+NOMOVE   DS    0H                                                       01-AEXIT
+00023 97E8                       71+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 72+***********************************************************************
+                                 74          ACLOSE                                                         00003400
+00024                            75+         LTORG                                                          02-ERRPA
+00024 FFFF000F                   76                =X'FFFF000F'
+00026 0000000F                   77                =XL2'F'
+00028 FFFFFFF0                   78                =X'FFFFFFF0'
+                                 79+****************ERROR PARAMETER AREA***********************************
+                                 80+***  NO ERRORS SENT IN MSTR                                             02-ERRPA
+         MSTR- STRUCTURE MOVE,REMOTE                                                                           PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 81+****************END OF ERROR PARAMETER AREA****************************
+                                 82+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    18     51
+ARG4         2   00000A    20     46
+ARG5         2   00000C    21     53    58
+ARG6         2   00000E    22
+ARG7         2   000010    23
+DESTZCON     1   000012    56     52
+L1           1   000018    60     63    66
+L2           1   00001F    65     63
+MSTR         1 00000000    13     27
+NOMOVE       1   000023    70     45    55    66
+R2           1 00000002    37     53    54    56    58    65
+R3           1 00000003    40     59    60    66    67
+R4           1 00000004    33     48    50    54    65
+R5           1 00000005    34     44    44
+R6           1 00000006    41     60    61    62    63    64
+R7           1 00000007    42     56    57    62
+SRCZCON      2   00000B    51     47
+STACK        1 00000000    14     28    48
+STACKEND     2   000012    26
+$RET1        1   000023    71
+=XL2'F'      2   000026    77     57
+=X'FFFF000F'
+             2   000024    76     50
+=X'FFFFFFF0'
+             2   000028    78     61
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      38 CARDS FROM SYSIN     344 CARDS FROM SYSLIB
+     124 LINES OUTPUT           9 CARDS OUTPUT

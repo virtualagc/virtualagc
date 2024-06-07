@@ -1,0 +1,390 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+#0ROUND   SD 0001 000000 000050
+ROUND     LD      000000        0001
+ETOI      LD      000000        0001
+TRUNC     LD      000003        0001
+FLOOR     LD      000006        0001
+CEIL      LD      000009        0001
+DTRUNC    LD      00000C        0001
+DFLOOR    LD      00000F        0001
+DCEIL     LD      000014        0001
+DROUND    LD      000019        0001
+DTOI      LD      000019        0001
+#LROUND   SD 0002 000050 000002
+
+         ROUND -- ROUND, DTOI, TRUNCATE, CEIL, AND FLOOR                                                       PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 *                                                                       00000200
+                                  8 *        CSECT NAME IS #0ROUND TO INSURE LOCATION IN SECTOR ZERO        00000300
+                                  9 *                                                                       00000400
+                                 10 *   REVISION HISTORY:                                                   00000502
+                                 11 *                                                                       00000602
+                                 12 *   DATE       NAME  DR/SSCR#    DESCRIPTION                            00000702
+                                 13 *   --------   ----  --------    ------------------------------------   00000802
+                                 14 *   12/16/89   JAC   DR103762    REPLACED QCED/QCEDR MACRO WITH         00000902
+                                 15 *                                CED/CEDR INSTRUCTION                   00001002
+                                 16 *                                                                       00001102
+                                 17 ROUND    AMAIN INTSIC=YES,SECTOR=0                                      00001200
+                                 18+***********************************************************************
+                                 19+*
+                                 20+*        PRIMARY ENTRY POINT
+                                 21+*
+                                 22+***********************************************************************
+00000                            23+#0ROUND  CSECT                                                          01-AMAIN
+00000                            24+ROUND    DS    0H             PRIMARY ENTRY POINT                       01-AMAIN
+                                 25+         ENTRY ROUND                                                    01-AMAIN
+                                 27 *                                                                       00001300
+                                 28 *                                                                       00001400
+                                 29 *  CONVERTS SINGLE  PRECISION SCALAR                                    00001500
+                                 30 *                                                                       00001600
+                                 31 *  TO FULLWORD INTEGER                                                  00001700
+                                 32 *                                                                       00001800
+                                 33          INPUT F0             SCALAR  SP                                00001900
+0000000                          34+F0       EQU   0                                                        01-INPUT
+                                 36          OUTPUT R5            INTEGER  DP                               00002000
+0000005                          37+R5       EQU   5                                                        01-OUTPU
+                                 39          WORK  F1,R4                                                    00002100
+0000001                          40+F1       EQU   1                                                        01-WORK
+0000004                          41+R4       EQU   4                                                        01-WORK
+                                 43 *                                                                       00002200
+                                 44 *                                                                       00002300
+                                 45 *                                                                       00002400
+                                 46 *                                                                       00002500
+                                 47 ETOI     AENTRY                                                         00002600
+                                 48+***********************************************************************
+                                 49+*
+                                 50+*        SECONDARY ENTRY POINT
+                                 51+*
+                                 52+***********************************************************************
+00000                            53+ETOI     DS    0H                                                       01-AENTR
+                                 54+         ENTRY ETOI                                                     01-AENTR
+                                 56 *                                                                       00002700
+                                 57 *  CONVERTS SCALAR SP TO INTEGER DP                                     00002800
+                                 58 *                                                                       00002900
+                                 59 *                                                                       00003000
+                                 60 *                                                                       00003100
+                                 61 *                                                                       00003200
+                                 62          INPUT F0             SCALAR  SP                                00003300
+                                 64          OUTPUT R5            INTEGER  DP                               00003400
+                                 66          WORK  F1,R4                                                    00003500
+                                 68 *                                                                       00003600
+                                 69 *                                                                       00003700
+                                 70 *                                                                       00003800
+00000 79F7 0038      003A 0038   71          LE    F1,SCALER1+2                                             00003900
+00002 DF58           0019 0016   72          B     DFLFX                                                    00004000
+                                 73 *                                                                       00004100
+                                 74 *  TRUNCATE: SINGLE PRECISION                                           00004200
+                                 75 *                                                                       00004300
+                                 76 TRUNC    AENTRY                                                         00004400
+                                 77+***********************************************************************
+                                 78+*
+                                 79+*        SECONDARY ENTRY POINT
+                                 80+*
+                                 81+***********************************************************************
+         ROUND -- ROUND, DTOI, TRUNCATE, CEIL, AND FLOOR                                                       PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+00003                            82+TRUNC    DS    0H                                                       01-AENTR
+                                 83+         ENTRY TRUNC                                                    01-AENTR
+                                 85 *                                                                       00004500
+                                 86 * RETURN THE LARGEST INTEGER THAT <= TO                                 00004600
+                                 87 *      THE ABSOLUTE VALUE OF THE ARGUMENT                               00004700
+                                 88 *                                                                       00004800
+                                 89          INPUT F0             SCALAR  SP                                00004900
+                                 91          OUTPUT R5            INTEGER  DP                               00005000
+                                 93          WORK  F1,R4                                                    00005100
+                                 95 *                                                                       00005200
+                                 96 *                                                                       00005300
+00003 79F7 0035      003A 0035   97          LE    F1,SCALER1+2   CLEAR LOW HALF F0                         00005400
+00005 DF18           000C 0006   98          B     TRUNCX         AND USE DOUBLE TRUNCATE.                  00005500
+                                 99 *                                                                       00005600
+                                100 *  FLOOR: SINGLE PRECISION                                              00005700
+                                101 *                                                                       00005800
+                                102 FLOOR    AENTRY                                                         00005900
+                                103+***********************************************************************
+                                104+*
+                                105+*        SECONDARY ENTRY POINT
+                                106+*
+                                107+***********************************************************************
+00006                           108+FLOOR    DS    0H                                                       01-AENTR
+                                109+         ENTRY FLOOR                                                    01-AENTR
+                                111 *   FLOOR(X) = |TRUNC(X) IF X>=0                                        00006000
+                                112 *              |TRUNC(X-(1-)) IF X<0                                    00006100
+                                113 *                                                                       00006200
+                                114 *                                                                       00006300
+                                115 *                                                                       00006400
+                                116          INPUT F0             SCALAR SP                                 00006500
+                                118          OUTPUT R5            INTEGER  DP                               00006600
+                                120          WORK  F1,R4                                                    00006700
+                                122 *                                                                       00006800
+                                123 *                                                                       00006900
+00006 79F7 0032      003A 0032  124          LE    F1,SCALER1+2   CLEAR LOW HALF F0                         00007000
+00008 DF18           000F 0006  125          B     FLOORX         AND USE DOUBLE FLOOR.                     00007100
+                                126 *                                                                       00007200
+                                127 * CEIL:  SINGLE PRECISION                                               00007300
+                                128 *                                                                       00007400
+                                129 CEIL     AENTRY                                                         00007500
+                                130+***********************************************************************
+                                131+*
+                                132+*        SECONDARY ENTRY POINT
+                                133+*
+                                134+***********************************************************************
+00009                           135+CEIL     DS    0H                                                       01-AENTR
+                                136+         ENTRY CEIL                                                     01-AENTR
+                                138 *  CEIL(X) = |TRUNC(X)  IF X<=0                                         00007600
+                                139 *            |TRUNC(X+(1-)) IF X>0                                      00007700
+                                140 *                                                                       00007800
+                                141 *                                                                       00007900
+                                142          INPUT F0             SCALAR SP                                 00008000
+                                144          OUTPUT R5            INTEGER DP                                00008100
+                                146          WORK  F1,R4                                                    00008200
+                                148 *                                                                       00008300
+                                149 *                                                                       00008400
+00009 79F7 002F      003A 002F  150          LE    F1,SCALER1+2   CLEAR LOW HALF F0                         00008500
+0000B DF20           0014 0008  151          B     CEILX          AND USE DOUBLE CEIL.                      00008600
+                                152 *                                                                       00008700
+                                153 *  TRUNCATE: DOUBLE PRECISION                                           00008800
+                                154 *                                                                       00008900
+                                155 DTRUNC   AENTRY                                                         00009000
+                                156+***********************************************************************
+                                157+*
+                                158+*        SECONDARY ENTRY POINT
+                                159+*
+                                160+***********************************************************************
+0000C                           161+DTRUNC   DS    0H                                                       01-AENTR
+         ROUND -- ROUND, DTOI, TRUNCATE, CEIL, AND FLOOR                                                       PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                162+         ENTRY DTRUNC                                                   01-AENTR
+                                164 *                                                                       00009100
+                                165 * RETURN THE LARGEST INTEGER THAT <= TO                                 00009200
+                                166 *      THE ABSOLUTE VALUE OF THE ARGUMENT                               00009300
+                                167 *                                                                       00009400
+                                168 *                                                                       00009500
+                                169          INPUT F0             SCALAR DP                                 00009600
+                                171          OUTPUT R5            INTEGER DP                                00009700
+                                173          WORK  F1,R4                                                    00009800
+                                175 *                                                                       00009900
+                                176 *                                                                       00010000
+0000C 78E0                      177 TRUNCX   LER   F0,F0          TEST SIGN OF X                            00010100
+0000D DD3C           001D 000F  178          BNM   POSCHK                                                   00010200
+0000E DF60           0027 0018  179          B     NEGCHK                                                   00010300
+                                180 *                                                                       00010400
+                                181 *  FLOOR: DOUBLE PRECISION                                              00010500
+                                182 *                                                                       00010600
+                                183 DFLOOR   AENTRY                                                         00010700
+                                184+***********************************************************************
+                                185+*
+                                186+*        SECONDARY ENTRY POINT
+                                187+*
+                                188+***********************************************************************
+0000F                           189+DFLOOR   DS    0H                                                       01-AENTR
+                                190+         ENTRY DFLOOR                                                   01-AENTR
+                                192 *   FLOOR(X) = |TRUNC(X) IF X>=0                                        00010800
+                                193 *              |TRUNC(X-(1-)) IF X<0                                    00010900
+                                194 *                                                                       00011000
+                                195 *                                                                       00011100
+                                196 *                                                                       00011200
+                                197          INPUT F0             SCALAR  DP                                00011300
+                                199          OUTPUT R5            INTEGER  DP                               00011400
+                                201          WORK  F1,R4                                                    00011500
+                                203 *                                                                       00011600
+                                204 *                                                                       00011700
+0000F 78E0                      205 FLOORX   LER   F0,F0                                                    00011800
+00010 DD30           001D 000C  206          BNM   POSCHK                                                   00011900
+00011 58FF 0029      003C 0029  207          SED   F0,ONEMINUS                                              00012000
+00013 DF4C           0027 0013  208          B     NEGCHK                                                   00012100
+                                209 *                                                                       00012200
+                                210 *  CEIL: DOUBLE PRECISION                                               00012300
+                                211 *                                                                       00012400
+                                212 DCEIL    AENTRY                                                         00012500
+                                213+***********************************************************************
+                                214+*
+                                215+*        SECONDARY ENTRY POINT
+                                216+*
+                                217+***********************************************************************
+00014                           218+DCEIL    DS    0H                                                       01-AENTR
+                                219+         ENTRY DCEIL                                                    01-AENTR
+                                221 *  CEIL(X) = |TRUNC(X)  IF X<=0                                         00012600
+                                222 *            |TRUNC(X+(1-)) IF X>0                                      00012700
+                                223 *                                                                       00012800
+                                224 *                                                                       00012900
+                                225          INPUT F0             SCALAR   DP                               00013000
+                                227          OUTPUT R5            INTEGER  DP                               00013100
+                                229          WORK  F1,R4                                                    00013200
+                                231 *                                                                       00013300
+                                232 *                                                                       00013400
+00014 78E0                      233 CEILX    LER   F0,F0                                                    00013500
+00015 DE44           0027 0011  234          BNP   NEGCHK                                                   00013600
+00016 50FF 0024      003C 0024  235          AED   F0,ONEMINUS                                              00013700
+00018 DF10           001D 0004  236          B     POSCHK                                                   00013800
+                                237 *                                                                       00013900
+                                238 *  ROUND: DOUBLE PRECISION                                              00014000
+                                239 *                                                                       00014100
+                                240 *  THIS IS THE MAIN SECTION                                             00014200
+                                241 *                                                                       00014300
+         ROUND -- ROUND, DTOI, TRUNCATE, CEIL, AND FLOOR                                                       PAGE    5
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                242 DROUND   AENTRY                                                         00014400
+                                243+***********************************************************************
+                                244+*
+                                245+*        SECONDARY ENTRY POINT
+                                246+*
+                                247+***********************************************************************
+00019                           248+DROUND   DS    0H                                                       01-AENTR
+                                249+         ENTRY DROUND                                                   01-AENTR
+                                251 *                                                                       00014500
+                                252 *  ROUNDS SCALAR DP TO FULLWORD INTEGER                                 00014600
+                                253 *                                                                       00014700
+                                254 *                                                                       00014800
+                                255 *                                                                       00014900
+                                256          INPUT F0             SCALAR  DP                                00015000
+                                258          OUTPUT R5            INTEGER  DP                               00015100
+                                260          WORK  F1,R4                                                    00015200
+                                262 *                                                                       00015300
+                                263 *                                                                       00015400
+                                264 *                                                                       00015500
+                                265 DTOI     AENTRY                                                         00015600
+                                266+***********************************************************************
+                                267+*
+                                268+*        SECONDARY ENTRY POINT
+                                269+*
+                                270+***********************************************************************
+00019                           271+DTOI     DS    0H                                                       01-AENTR
+                                272+         ENTRY DTOI                                                     01-AENTR
+                                274 *                                                                       00015700
+                                275 *  CONVERTS SCALAR DP TO INTEGER DP                                     00015800
+                                276 *                                                                       00015900
+                                277 *                                                                       00016000
+                                278 *                                                                       00016100
+                                279 *                                                                       00016200
+                                280          INPUT F0             SCALAR  DP                                00016300
+                                282          OUTPUT R5            INTEGER  DP                               00016400
+                                284          WORK  F1,R4                                                    00016500
+                                286 *                                                                       00016600
+                                287 *                                                                       00016700
+00019 78E0                      288 DFLFX    LER   F0,F0                                                    00016800
+0001A DA28           0025 000A  289          BM    NEGFX                                                    00016900
+0001B 50FF 0023      0040 0023  290          AED   F0,ROUNDER                                               00017000
+0001D 18FF 0029      0048 0029  291 POSCHK   CED   F0,MAXPOS                                /* DR103762 */  00017103
+0001F DE50           0034 0014  292          BNH   TRUNCP                                                   00017200
+                                293          AERROR 15            ERROR: POSITIVE ARGUMENT TOO LARGE        00017300
+                                294+*********ISSUE SEND ERROR SVC******************************************
+00020 C9FB 0050      0050       295+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                296+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00022 1DF7 002A      004E 002A  297          L     R5,POSMAX      FIXUP: LARGEST POSITIVE NUMBER            00017400
+00024 DF48           0037 0012  298          B     EXIT                                                     00017500
+                                299 *                                                                       00017600
+00025 58FF 0019      0040 0019  300 NEGFX    SED   F0,ROUNDER                                               00017700
+00027 18FF 001B      0044 001B  301 NEGCHK   CED   F0,MAXNEG                                /* DR103762 */  00017803
+00029 DD14           002F 0005  302          BNL   TRUNCM                                                   00017900
+                                303          AERROR 15            ERROR: NEGATIVE ARGUMENT TOO LARGE        00018000
+                                304+*********ISSUE SEND ERROR SVC******************************************
+0002A C9FB 0050      0050       305+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                306+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0002C 1DF7 001E      004C 001E  307          L     R5,NEGMAX      FIXUP: LARGEST NEGATIVE NUMBER            00018100
+0002E DF20           0037 0008  308          B     EXIT                                                     00018200
+                                309 *                                                                       00018300
+                                310 * CONVERT TO FIXED-POINT BY TRUNCATING. SLIGHTLY                        00018400
+                                311 *  DIFFERENT METHODS MUST BE USED FOR POSITIVE AND FOR                  00018500
+                                312 *   NEGATIVE ARGUMENTS, BUT IN EITHER CASE THE ANSWER                   00018600
+                                313 *   IS LEFT IN F1.                                                      00018700
+                                314 *                                                                       00018800
+                                315 *                            * (DR63479 FIX 8/86 HFG) *                 00018900
+0002F 58FF 0007      0038 0007  316 TRUNCM   SED   F0,SCALER1    * USE SED INSTEAD OF 'AED F0,SCALER2'      00019000
+00031 25E9                      317          LFXR  R5,F1         * |X| IN R5                                00019100
+00032 EDED                      318          LCR   R5,R5         * GET NEGATIVE X                           00019200
+                                319          AEXIT                                                          00019300
+                                320+*********RETURN TO CALLER**********************************************
+00033                           321+         DS    0H                                                       01-AEXIT
+         ROUND -- ROUND, DTOI, TRUNCATE, CEIL, AND FLOOR                                                       PAGE    6
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+00033 C7E4                      322+$RET1    BCR   7,4            RETURN TO CALLER                          01-AEXIT
+                                323+***********************************************************************
+                                325 *                                                                       00019400
+00034 50FF 0002      0038 0002  326 TRUNCP   AED   F0,SCALER1                                               00019500
+00036 25E9                      327          LFXR  R5,F1                                                    00019600
+                                328 EXIT     AEXIT                                                          00019700
+                                329+*********RETURN TO CALLER**********************************************
+00037                           330+EXIT     DS    0H                                                       01-AEXIT
+00037 C7E4                      331+$RET2    BCR   7,4            RETURN TO CALLER                          01-AEXIT
+                                332+***********************************************************************
+                                334 *                                                                       00019800
+00038                           335          DS    0F                                                       00019900
+00038 4E10000000000000          336 SCALER1  DC    X'4E10000000000000'                                      00020000
+0003C 40FFFFFFFFFFFFFF          337 ONEMINUS DC    X'40FFFFFFFFFFFFFF'                                      00020100
+00040 407FFFFFFFFFFFFF          338 ROUNDER  DC    X'407FFFFFFFFFFFFF'                                      00020200
+00044 C880000000FFFFFF          339 MAXNEG   DC    X'C880000000FFFFFF'                                      00020300
+00048 487FFFFFFFFFFFFF          340 MAXPOS   DC    X'487FFFFFFFFFFFFF'                                      00020400
+0004C 80000000                  341 NEGMAX   DC    X'80000000'                                              00020500
+0004E 7FFFFFFF                  342 POSMAX   DC    X'7FFFFFFF'                                              00021000
+                                343          ACLOSE                                                         00030000
+00050                           344+         LTORG                                                          02-ERRPA
+                                345+****************ERROR PARAMETER AREA***********************************
+00050                           346+#LROUND  CSECT                                                          02-ERRPA
+                                347+***  ROUND SENDS THE FOLLOWING ERROR                                    02-ERRPA
+                                349+***  ERROR NUMBER 15 IN GROUP 4                                         02-ERRPA
+00050 0014                      351+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00051 040F                      352+         DC    Y(4*256+15)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                353+****************END OF ERROR PARAMETER AREA****************************
+                                354+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    7
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.39 07/22/05
+  0001     0002     00     000021
+  0001     0002     00     00002B
+
+                                             CROSS REFERENCE                                                   PAGE    8
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+AERROR1      1   000050   351    295   305
+CEIL         1   000009   135    136
+CEILX        1   000014   233    151
+DCEIL        1   000014   218    219
+DFLFX        1   000019   288     72
+DFLOOR       1   00000F   189    190
+DROUND       1   000019   248    249
+DTOI         1   000019   271    272
+DTRUNC       1   00000C   161    162
+ETOI         1   000000    53     54
+EXIT         1   000037   330    298   308
+F0           1 00000000    34    177   177   205   205   207   233   233   235   288   288   290   291   300   301   316
+                                 326
+F1           1 00000001    40     71    97   124   150   317   327
+FLOOR        1   000006   108    109
+FLOORX       1   00000F   205    125
+MAXNEG       4   000044   339    301
+MAXPOS       4   000048   340    291
+NEGCHK       2   000027   301    179   208   234
+NEGFX        2   000025   300    289
+NEGMAX       2   00004C   341    307
+ONEMINUS     4   00003C   337    207   235
+POSCHK       2   00001D   291    178   206   236
+POSMAX       2   00004E   342    297
+R4           1 00000004    41
+R5           1 00000005    37    297   307   317   318   318   327
+ROUND        1   000000    24     25
+ROUNDER      4   000040   338    290   300
+SCALER1      4   000038   336     71    97   124   150   316   326
+TRUNC        1   000003    82     83
+TRUNCM       2   00002F   316    302
+TRUNCP       2   000034   326    292
+TRUNCX       1   00000C   177     98
+$RET1        1   000033   322
+$RET2        1   000037   331
+#0ROUND      1 00000000    23
+#LROUND      1 00000050   346
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    9
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     212 CARDS FROM SYSIN     426 CARDS FROM SYSLIB
+     390 LINES OUTPUT          20 CARDS OUTPUT

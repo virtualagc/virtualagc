@@ -1,0 +1,228 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+SINH      SD 0001 000000 000052
+COSH      LD      00001A        0001
+#QEXP     ER 0002
+#LSINH    SD 0003 000052 000002
+
+         SINH -- SINGLE PRECISION HYPERBOLIC SINE-COSINE FUNCTION                                              PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * SINH: HYPERBOLIC SINE-COSINE(SINGLE)                                  00000200
+                                  8 *                                                                       00000300
+                                  9 *        1. INPUT AND OUTPUT VIA F0.                                    00000400
+                                 10 *        2. IF  SINH ENTRY AND X<2.04E-4, GIVE SINH(X)=X.               00000500
+                                 11 *        3. IF SINH ENTRY AND 2.04<=X<1, COMPUTE SINH(X) DIRECTLY       00000600
+                                 12 *           WITH A POLYNOMIAL APPROXIMATION.                            00000700
+                                 13 *        4. OTHERWISE, COMPUTE USING EXP:                               00000800
+                                 14 *           SINH(X) = (1/2)(E**X-E**(-X));                              00000900
+                                 15 *           COSH(X) = (1/2)(E**X+E**(-X)).                              00001000
+                                 16 *        5. ERROR GIVEN IF X>175.366.                                   00001100
+                                 17 *                                                                       00001200
+                                 18 SINH     AMAIN ACALL=YES                                                00001300
+                                 19+***********************************************************************
+                                 20+*
+                                 21+*        PRIMARY ENTRY POINT
+                                 22+*
+                                 23+***********************************************************************
+00000                            24+SINH     CSECT                                                          01-AMAIN
+00000                            25+STACK    DSECT                                                          01-AMAIN
+                                 26+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            27+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            28+         DS    2F             R0,R1                                     01-AMAIN
+00006                            29+ARG2     DS    F              R2                                        01-AMAIN
+00008                            30+         DS    F              R3                                        01-AMAIN
+0000A                            31+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            32+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            33+ARG6     DS    F              R6                                        01-AMAIN
+00010                            34+ARG7     DS    F              R7                                        01-AMAIN
+                                 35+*        END OF STANDARD STACK AREA
+                                 36+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            37+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            38+SINH     CSECT                                                          01-AMAIN
+0000000                          39+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   40+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 42 * COMPUTES HYPERBOLIC SIN IN SINGLE PRECISION                           00001400
+                                 43          INPUT F0             SCALAR SP                                 00001500
+0000000                          44+F0       EQU   0                                                        01-INPUT
+                                 46          OUTPUT F0            SCALAR SP                                 00001600
+                                 48          WORK  R5,F2,F3,F4                                              00001700
+0000005                          49+R5       EQU   5                                                        01-WORK
+0000002                          50+F2       EQU   2                                                        01-WORK
+0000003                          51+F3       EQU   3                                                        01-WORK
+0000004                          52+F4       EQU   4                                                        01-WORK
+00002 0DE5                       54          SR    R5,R5          R5=0 FOR SINH, X>=0                       00001800
+00003 7CE0                       55          LER   F4,F0                                                    00001900
+00004 DD08           0007 0002   56          BNM   POS                                                      00002000
+00005 BDE1                0001   57          LFXI  R5,-1          R5<0 FOR SINH, X<0                        00002100
+00006 78E8                       58          LECR  F0,F0          GET |X|                                   00002200
+                                 59 *                                                                       00002300
+00007 48FF 0039      0042 0039   60 POS      CE    F0,LIMIT                                                 00002400
+00009 DD58           0020 0016   61          BNL   JOIN                                                     00002500
+0000A 48FF 0042      004E 0042   62          CE    F0,UNFLO       IF |X|<2.04E-4,                           00002600
+0000C DAA0           0035 0028   63          BL    SIGN           GIVE SINH(X)=X                            00002700
+                                 64 *                                                                       00002800
+                                 65 *  IF X IS SMALL, COMPUTE SINH(X) DIRECTLY WITH A POLYNOMIAL            00002900
+                                 66 *                                                                       00003000
+0000D 60E0                       67          MER   F0,F0          THE FORM OF THE POLYNOMIAL IS             00003100
+0000E 7AE0                       68          LER   F2,F0          X+C1X**3+C2X**5+C3X**7                    00003200
+0000F 60F7 003D      004E 003D   69          ME    F0,C3                                                    00003300
+00011 50F7 0039      004C 0039   70          AE    F0,C2                                                    00003400
+00013 60E2                       71          MER   F0,F2                                                    00003500
+00014 50F7 0034      004A 0034   72          AE    F0,C1                                                    00003600
+00016 60E2                       73          MER   F0,F2                                                    00003700
+00017 60E4                       74          MER   F0,F4                                                    00003800
+00018 50E4                       75          AER   F0,F4                                                    00003900
+00019 DF80           003A 0020   76          B     EXIT                                                     00004000
+                                 77 *                                                                       00004100
+                                 78 COSH     AENTRY                                                         00004200
+                                 79+***********************************************************************
+                                 80+*
+                                 81+*        SECONDARY ENTRY POINT
+         SINH -- SINGLE PRECISION HYPERBOLIC SINE-COSINE FUNCTION                                              PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 82+*
+                                 83+***********************************************************************
+0001A                            84+COSH     DS    0H                                                       01-AENTR
+                                 85+         ENTRY COSH                                                     01-AENTR
+0001A B624 0000      0009 0000   86+         NIST  9(0),0         CLEAR ERROR VECTOR POINTER                01-AENTR
+                                 88 * COMPUTES HYPERBOLIC COSINE IN SINGLE PRECISION                        00004300
+                                 89          INPUT F0             SCALAR SP                                 00004400
+                                 91          OUTPUT F0            SCALAR SP                                 00004500
+                                 93          WORK  R5,F2,F3                                                 00004600
+0001C BDE3                0003   95          LFXI  R5,1           R5>0 FOR COSH                             00004700
+0001D 78E0                       96          LER   F0,F0                                                    00004800
+0001E DD04           0020 0001   97          BNM   JOIN                                                     00004900
+0001F 78E8                       98          LECR  F0,F0          GET |X|                                   00005000
+                                 99 *                                                                       00005100
+00020 48FF 001E      0040 001E  100 JOIN     CE    F0,MAX         GIVE ERROR IF                             00005200
+00022 D960           003B 0018  101          BH    ERROR          |X|>175.366                               00005300
+                                102 *                                                                       00005400
+                                103 *  NOW,COMPUTE SINH OR COSH USING EXP. V IS INTRODUCED                  00005500
+                                104 *  TO CONTROL ROUNDING ERRORS, AND IS EQUAL TO 0.4995050                00005600
+                                105 *                                                                       00005700
+00023 50F7 0021      0046 0021  106          AE    F0,LNV                                                   00005800
+                                107          ACALL EXP                                                      00005900
+                                108+         EXTRN #QEXP                                                    01-ACALL
+00025 D0FF                      109+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00026 3800                      110+         DC  Y(#QEXP+X'3800') INDIRECTLY THRU QCON                      01-ACALL
+                                111 *                                                                       00006000
+                                112 *  F0 CONTAINS EXP(X+LN(V))                                             00006100
+                                113 *                                                                       00006200
+00027 7AF7 001B      0044 001B  114          LE    F2,VSQ                                                   00006300
+00029 6AE0                      115          DER   F2,F0                                                    00006400
+0002A 1DE5                      116          LR    R5,R5                                                    00006500
+0002B DE08           002E 0002  117          BNP   ESINH                                                    00006600
+0002C 50E2                      118          AER   F0,F2                                                    00006700
+0002D DF04           002F 0001  119          B     ROUND                                                    00006800
+0002E 58E2                      120 ESINH    SER   F0,F2                                                    00006900
+                                121 *                                                                       00007000
+                                122 *  F0 CONTAINS V(E**X+E**(-X)) FOR COSH, OR V(E**X-E**(-X)) FOR SINH    00007100
+                                123 *                                                                       00007200
+0002F 7BF7 0015      0046 0015  124 ROUND    LE    F3,LNV         ROUNDING OCCURS HERE.                     00007300
+00031 7AE0                      125          LER   F2,F0          THE NUMBER DELTA IS SUCH                  00007400
+00032 60F7 0014      0048 0014  126          ME    F0,DELTA       THAT 1+DELTA=1/(2V).                      00007500
+00034 50EA                      127          AEDR  F0,F2                                                    00007600
+                                128 *                                                                       00007700
+00035 1DE5                      129 SIGN     LR    R5,R5                                                    00007800
+00036 DD0C           003A 0003  130          BNM   EXIT                                                     00007900
+00037 78E0                      131          LER   F0,F0          WORKAROUND FOR BUG                        00008000
+00038 DC04           003A 0001  132          BZ    EXIT           IN LECR INSTRUCTION.                      00008100
+00039 78E8                      133          LECR  F0,F0                                                    00008200
+                                134 *                                                                       00008300
+                                135 EXIT     AEXIT                                                          00008400
+                                136+*********RETURN TO CALLER**********************************************
+0003A                           137+EXIT     DS    0H                                                       01-AEXIT
+0003A 97E8                      138+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                139+***********************************************************************
+                                141 *                                                                       00008500
+                                142 ERROR    AERROR 9             ARG > 175.366                             00008600
+                                143+*********ISSUE SEND ERROR SVC******************************************
+0003B C9FB 0052      0052       144+ERROR    SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                145+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+0003D 78F7 0011      0050 0011  146          LE    F0,INFINITY                                              00008700
+0003F DF1A           003A 0006  147          B     EXIT                                                     00008800
+                                148 *                                                                       00008900
+00040                           149          DS    0F                                                       00009000
+00040 42AF5DC0                  150 MAX      DC    X'42AF5DC0'    175.366                                   00009100
+00042 41100000                  151 LIMIT    DC    X'41100000'    1.0                                       00009200
+00044 403FDF95                  152 VSQ      DC    X'403FDF95'    V**2=0.2495053                            00009300
+00046 C0B1B300                  153 LNV      DC    X'C0B1B300'    LN(V)=-.6941376                           00009400
+00048 3E40F043                  154 DELTA    DC    X'3E40F043'    1/(2V)-1=.99088E-3                        00009500
+0004A 402AAAB8                  155 C1       DC    X'402AAAB8'    0.16666734                                00009600
+0004C 3F221E8C                  156 C2       DC    X'3F221E8C'    .008329912                                00009700
+000004E                         157 UNFLO    EQU   *                                                        00009800
+0004E 3DD5D8B3                  158 C3       DC    X'3DD5D8B3'    .2039399E-3                               00009900
+00050 7FFFFFFF                  159 INFINITY DC    X'7FFFFFFF'                                              00010000
+                                160          ACLOSE                                                         00010100
+00052                           161+         LTORG                                                          02-ERRPA
+         SINH -- SINGLE PRECISION HYPERBOLIC SINE-COSINE FUNCTION                                              PAGE    4
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                162+****************ERROR PARAMETER AREA***********************************
+00052                           163+#LSINH   CSECT                                                          02-ERRPA
+                                164+***  SINH SENDS THE FOLLOWING ERROR                                     02-ERRPA
+                                166+***  ERROR NUMBER 9 IN GROUP 4                                          02-ERRPA
+00052 0014                      168+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00053 0409                      169+         DC    Y(4*256+9)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                170+****************END OF ERROR PARAMETER AREA****************************
+                                171+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    5
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.39 07/22/05
+  0001     0002     00     000026
+  0001     0003     00     00003C
+
+                                             CROSS REFERENCE                                                   PAGE    6
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+AERROR1      1   000052   168    144
+ARG2         2   000006    29
+ARG4         2   00000A    31
+ARG5         2   00000C    32
+ARG6         2   00000E    33
+ARG7         2   000010    34
+C1           2   00004A   155     72
+C2           2   00004C   156     70
+C3           2   00004E   158     69
+COSH         1   00001A    84     85
+DELTA        2   000048   154    126
+ERROR        2   00003B   144    101
+ESINH        1   00002E   120    117
+EXIT         1   00003A   137     76   130   132   147
+F0           1 00000000    44     55    58    58    60    62    67    67    68    69    70    71    72    73    74    75
+                                  96    96    98    98   100   106   115   118   120   125   126   127   131   131   133
+                                 133   146
+F2           1 00000002    50     68    71    73   114   115   118   120   125   127
+F3           1 00000003    51    124
+F4           1 00000004    52     55    74    75
+INFINITY     2   000050   159    146
+JOIN         2   000020   100     61    97
+LIMIT        2   000042   151     60
+LNV          2   000046   153    106   124
+MAX          2   000040   150    100
+POS          2   000007    60     56
+R5           1 00000005    49     54    54    57    95   116   116   129   129
+ROUND        2   00002F   124    119
+SIGN         1   000035   129     63
+SINH         1 00000000    24     38
+STACK        1 00000000    25     39
+STACKEND     2   000012    37
+UNFLO        1 0000004E   157     62
+VSQ          2   000044   152    114
+$RET1        1   00003A   138
+#LSINH       1 00000052   163
+#QEXP        1 00000000   108    110
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    7
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+     106 CARDS FROM SYSIN     484 CARDS FROM SYSLIB
+     228 LINES OUTPUT          16 CARDS OUTPUT

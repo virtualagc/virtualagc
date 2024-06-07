@@ -1,0 +1,86 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VV7S3     SD 0001 000000 00000E
+
+         VV7S3--VECTOR NEGATE,LENGTH3,SINGLE PREC                                                              PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV7S3    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV7S3    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *  GENERATES NEGATIVE VECTOR :                                          00000400
+                                 17 *                                                                       00000500
+                                 18 *   V(3) = -V1(3)                                                       00000600
+                                 19 *                                                                       00000700
+                                 20 *   WHERE   V,V1  ARE SP                                                00000800
+                                 21 *                                                                       00000900
+                                 22          INPUT R2             VECTOR(3)  SP                             00001000
+0000002                          23+R2       EQU   2                                                        01-INPUT
+                                 25          OUTPUT R1            VECTOR(3)  SP                             00001100
+0000001                          26+R1       EQU   1                                                        01-OUTPU
+                                 28          WORK  F0,F2,F4                                                 00001200
+0000000                          29+F0       EQU   0                                                        01-WORK
+0000002                          30+F2       EQU   2                                                        01-WORK
+0000004                          31+F4       EQU   4                                                        01-WORK
+                                 33 *                                                                       00001300
+                                 34 *   ALGORITHM                                                           00001400
+                                 35 *                                                                       00001500
+                                 36 *   V = (-V1(1),-V1(2),-V1(3))                                          00001600
+                                 37 *                                                                       00001700
+00000 7806           0002        38          LE    F0,2(R2)      GET V1(1).                                 00001800
+00001 DC04           0003 0001   39          BZ    FX1            WORKAROUND FOR LECR BUG.                  00001900
+00002 78E8                       40          LECR  F0,F0          COMPLEMENT ELEMENT.                       00002000
+00003 7A0A           0004        41 FX1      LE    F2,4(R2)       GET V1(2).                                00002100
+00004 DC04           0006 0001   42          BZ    FX2            WORKAROUND FOR LECR BUG.                  00002200
+00005 7AEA                       43          LECR  F2,F2          COMPLEMENT ELEMENT.                       00002300
+00006 7C0E           0006        44 FX2      LE    F4,6(R2)       GET V1(3).                                00002400
+00007 DC04           0009 0001   45          BZ    FX3            WORKAROUND FOR LECR BUG.                  00002500
+00008 7CEC                       46          LECR  F4,F4          COMPLEMENT ELEMENT.                       00002600
+00009 3805           0002        47 FX3      STE   F0,2(R1)       STORE V2(1).                              00002700
+0000A 3A09           0004        48          STE   F2,4(R1)       STORE V2(2).                              00002800
+0000B 3C0D           0006        49          STE   F4,6(R1)       STORE V2(3).                              00002900
+                                 50          AEXIT                                                          00003000
+                                 51+*********RETURN TO CALLER**********************************************
+0000C                            52+         DS    0H                                                       01-AEXIT
+0000C 9914           0005        53+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0000D C7EC                       54+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 55+***********************************************************************
+                                 57          ACLOSE                                                         00003100
+0000E                            58+         LTORG                                                          02-ERRPA
+                                 59+****************ERROR PARAMETER AREA***********************************
+                                 60+***  NO ERRORS SENT IN VV7S3                                            02-ERRPA
+                                 61+****************END OF ERROR PARAMETER AREA****************************
+                                 62+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+F0           1 00000000    29     38    40    40    47
+F2           1 00000002    30     41    43    43    48
+F4           1 00000004    31     44    46    46    49
+FX1          2   000003    41     39
+FX2          2   000006    44     42
+FX3          2   000009    47     45
+R1           1 00000001    26     47    47    48    48    49    49
+R2           1 00000002    23     38    38    41    41    44    44
+VV7S3        1 00000000    13
+$RET1        1   00000D    54
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      36 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      86 LINES OUTPUT           5 CARDS OUTPUT

@@ -1,0 +1,95 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+#0ETOH    SD 0001 000000 00000E
+ETOH      LD      000000        0001
+DTOH      LD      000000        0001
+
+         ETOH - SNGL PREC SCALAR TO SNGL PREC INTEGER CONVERSION                                               PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 ETOH     AMAIN INTSIC=YES,SECTOR=0                                      00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+#0ETOH   CSECT                                                          01-AMAIN
+00000                            14+ETOH     DS    0H             PRIMARY ENTRY POINT                       01-AMAIN
+                                 15+         ENTRY ETOH                                                     01-AMAIN
+                                 17 *                                                                       00000300
+                                 18 *  CONVERTS SCALAR SP TO INTEGER SP                                     00000400
+                                 19 *                                                                       00000500
+                                 20          INPUT F0             SCALAR  SP                                00000600
+0000000                          21+F0       EQU   0                                                        01-INPUT
+                                 23          OUTPUT R5            INTEGER  SP                               00000700
+0000005                          24+R5       EQU   5                                                        01-OUTPU
+                                 26 *                                                                       00000800
+                                 27 *                                                                       00000900
+                                 28 *                                                                       00001000
+                                 29 DTOH     AENTRY                                                         00001100
+                                 30+***********************************************************************
+                                 31+*
+                                 32+*        SECONDARY ENTRY POINT
+                                 33+*
+                                 34+***********************************************************************
+00000                            35+DTOH     DS    0H                                                       01-AENTR
+                                 36+         ENTRY DTOH                                                     01-AENTR
+                                 38 *                                                                       00001200
+                                 39 *                                                                       00001300
+                                 40 *  CONVERTS SCALAR DP TO INTEGER SP                                     00001400
+                                 41 *                                                                       00001500
+                                 42          INPUT F0             SCALAR  DP                                00001600
+                                 44          OUTPUT R5            INTEGER  SP                               00001700
+                                 46 *                                                                       00001800
+                                 47 *                                                                       00001900
+                                 48 *                                                                       00002000
+00000 3DE0                       49 CONVERT  CVFX  R5,F0                                                    00002100
+00001 05F7 0007      000A 0007   50          A     R5,=X'00007FFF'                                          00002200
+00003 DD08           0006 0002   51          BC    5,POS                                                    00002300
+00004 05F7 0006      000C 0006   52          A     R5,=X'00000001'                                          00002400
+0000006                          53 POS      EQU   *                                                        00002500
+00006 B6E5 FFFF           FFFF   54          NHI   R5,X'FFFF'                                               00002600
+                                 55          AEXIT                                                          00002700
+                                 56+*********RETURN TO CALLER**********************************************
+00008                            57+         DS    0H                                                       01-AEXIT
+00008 C7E4                       58+$RET1    BCR   7,4            RETURN TO CALLER                          01-AEXIT
+                                 59+***********************************************************************
+                                 61          ACLOSE                                                         00002800
+00009 C9FB
+0000A                            62+         LTORG                                                          02-ERRPA
+0000A 00007FFF                   63                =X'00007FFF'
+0000C 00000001                   64                =X'00000001'
+                                 65+****************ERROR PARAMETER AREA***********************************
+                                 66+***  NO ERRORS SENT IN ETOH                                             02-ERRPA
+                                 67+****************END OF ERROR PARAMETER AREA****************************
+                                 68+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+CONVERT      1   000000    49
+DTOH         1   000000    35     36
+ETOH         1   000000    14     15
+F0           1 00000000    21     49
+POS          1 00000006    53     51
+R5           1 00000005    24     49    50    52    54
+$RET1        1   000008    58
+#0ETOH       1 00000000    13
+=X'00000001'
+             2   00000C    64     52
+=X'00007FFF'
+             2   00000A    63     50
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      33 CARDS FROM SYSIN     381 CARDS FROM SYSLIB
+      95 LINES OUTPUT           6 CARDS OUTPUT

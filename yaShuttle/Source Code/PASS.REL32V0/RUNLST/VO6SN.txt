@@ -1,0 +1,95 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VO6SN     SD 0001 000000 000014
+
+         VO6SN--VECTOR OUTER PRODUCT, LENGTH N, SP                                                             PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VO6SN    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VO6SN    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * TAKES THE OUTER PRODUCT OF V1(N) AND V2(M) WHERE V1 AND V2 ARE        00000400
+                                 17 *   SINGLE PRECISION VECTORS OF LENGTH N AND M RESPECTIVELY, AND        00000500
+                                 18 *   WHERE AT LEAST ONE OF N, M IS NOT EQUAL TO 3.                       00000600
+                                 19 *                                                                       00000700
+                                 20          INPUT R2,            VECTOR(N) SP                             X00000800
+                                                   R3,            VECTOR(M) SP                             X00000900
+                                                   R5,            INTEGER(N) SP                            X00001000
+                                                   R6             INTEGER(M) SP                             00001100
+0000002                          21+R2       EQU   2                                                        01-INPUT
+0000003                          22+R3       EQU   3                                                        01-INPUT
+0000005                          23+R5       EQU   5                                                        01-INPUT
+0000006                          24+R6       EQU   6                                                        01-INPUT
+                                 26          OUTPUT R1            MATRIX(N,M) SP                            00001200
+0000001                          27+R1       EQU   1                                                        01-OUTPU
+                                 29          WORK  R7,F0,F4                                                 00001300
+0000007                          30+R7       EQU   7                                                        01-WORK
+0000000                          31+F0       EQU   0                                                        01-WORK
+0000004                          32+F4       EQU   4                                                        01-WORK
+                                 34 *                                                                       00001400
+                                 35 * ALGORITHM:                                                            00001500
+                                 36 *   SEE ALGORITHM DESCRIPTION IN VO6DN                                  00001600
+                                 37 *                                                                       00001700
+00000 1FE6                       38          LR    R7,R6          PLACE M IN R7                             00001800
+00001 F704                0001   39          SLL   R7,1           GET # HALFWORDS IN V2                     00001900
+00002 2CEE                       40          LFLR  F4,R6          SAVE M IN F4                              00002000
+00003 72E3                       41          XR    R2,R3          SWITCH PTRS IN R3 AND R2                  00002100
+00004 73E2                       42          XR    R3,R2                                                    00002200
+00005 72E3                       43          XR    R2,R3                                                    00002300
+00006 C0E1                       44          NOPR  R1             NOP TO ALIGN ME AND STE ON EVEN           00002400
+                                 45 *                             BOUNDARIES                                00002500
+00007 7807           0002        46 LOOP1    LE    F0,2(R3)                                                 00002600
+00008 60F6 C000      0000        47          ME    F0,0(R6,R2)                                              00002700
+0000A 38F5 C000      0000        48          STE   F0,0(R6,R1)                                              00002800
+0000C DE1B           0007 0006   49          BCTB  R6,LOOP1                                                 00002900
+0000D EB0B           0002        50          LA    R3,2(R3)                                                 00003000
+0000E 26EC                       51          LFXR  R6,F4          RESET R6 TO M                             00003100
+0000F 01E7                       52          AR    R1,R7          BUMP OUTPUT PTR TO NEXT ROW               00003200
+00010 DD2B           0007 000A   53          BCTB  R5,LOOP1                                                 00003300
+                                 54          AEXIT                                                          00003400
+                                 55+*********RETURN TO CALLER**********************************************
+00011                            56+         DS    0H                                                       01-AEXIT
+00011 9B24           0009        57+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+00012 9914           0005        58+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00013 C7EC                       59+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 60+***********************************************************************
+                                 62          ACLOSE                                                         00003500
+00014                            63+         LTORG                                                          02-ERRPA
+                                 64+****************ERROR PARAMETER AREA***********************************
+                                 65+***  NO ERRORS SENT IN VO6SN                                            02-ERRPA
+                                 66+****************END OF ERROR PARAMETER AREA****************************
+                                 67+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    31     46    47    48
+F4           1 00000004    32     40    51
+LOOP1        2   000007    46     49    53
+R1           1 00000001    27     44    48    52
+R2           1 00000002    21     41    42    43    47
+R3           1 00000003    22     41    42    43    46    46    50    50    50
+R5           1 00000005    23     53
+R6           1 00000006    24     38    40    47    47    48    48    49    51
+R7           1 00000007    30     38    39    52
+VO6SN        1 00000000    13
+$RET1        1   000013    59
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      40 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      95 LINES OUTPUT           4 CARDS OUTPUT

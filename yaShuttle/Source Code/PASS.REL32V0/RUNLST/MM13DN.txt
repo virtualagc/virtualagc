@@ -1,0 +1,74 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+MM13DN    SD 0001 000000 00000A
+
+         MM13DN--TRACE OF N X N MATRIX, DP                                                                     PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 MM13DN   AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+MM13DN   CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * TAKES THE TRACE OF AN N X N DOUBLE PRECISION MATRIX WHERE N IS        00000400
+                                 17 *   NOT EQUAL TO 3.                                                     00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            MATRIX(N,N) DP                           X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT F0            SCALAR DP                                 00000900
+0000000                          24+F0       EQU   0                                                        01-OUTPU
+                                 26          WORK  R6                                                       00001000
+0000006                          27+R6       EQU   6                                                        01-WORK
+                                 29 *                                                                       00001100
+                                 30 * ALGORITHM:                                                            00001200
+                                 31 *   OBTAIN M$(1,1) AND INCREMENT THRU MATRIX BY N+1 ELEMENTS,           00001300
+                                 32 *     THEREBY CATCHING ALL THE DIAGONAL ELEMENTS OF THE MATRIX.         00001400
+                                 33 *                                                                       00001500
+00000 EEF7 A001      0001        34          LA    R6,1(R5,3)     PUT N + 1 IN R6                           00001600
+00002 F608                0002   35          SLL   R6,2           MULTIPLY N + 1 BY 4                       00001700
+00003 58E8                       36          SEDR  F0,F0          CLEAR F0                                  00001800
+00004 50FA 0004      0004        37 ADDLOOP  AED   F0,4(R2)                                                 00001900
+00006 02E6                       38          AR    R2,R6          BUMP INDEX INTO MATRIX BY N + 1           00002000
+00007 DD13           0004 0004   39          BCTB  R5,ADDLOOP                                               00002100
+                                 40          AEXIT                                                          00002200
+                                 41+*********RETURN TO CALLER**********************************************
+00008                            42+         DS    0H                                                       01-AEXIT
+00008 C7EC                       43+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 44+***********************************************************************
+                                 46          ACLOSE                                                         00002300
+00009 C9FB
+0000A                            47+         LTORG                                                          02-ERRPA
+                                 48+****************ERROR PARAMETER AREA***********************************
+                                 49+***  NO ERRORS SENT IN MM13DN                                           02-ERRPA
+                                 50+****************END OF ERROR PARAMETER AREA****************************
+                                 51+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ADDLOOP      2   000004    37     39
+F0           1 00000000    24     36    36    37
+MM13DN       1 00000000    13
+R2           1 00000002    20     37    37    38
+R5           1 00000005    21     34    34    39
+R6           1 00000006    27     34    35    38
+$RET1        1   000008    43
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      28 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+      74 LINES OUTPUT           4 CARDS OUTPUT

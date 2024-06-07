@@ -1,0 +1,70 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VV0SN     SD 0001 000000 000006
+
+         VV0SN -- SCALAR TO VECTOR MOVE,LENGTH N,SINGLE PREC                                                   PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV0SN    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV0SN    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 *     GENERATES A VECTOR(N)  SP                                         00000400
+                                 17 *                                                                       00000500
+                                 18 *    ALL OF WHOSE ELE. ARE THE SAME                                     00000600
+                                 19 *                                                                       00000700
+                                 20          INPUT F0,            SCALAR      SP                           X00000800
+                                                   R5             INTEGER(N)  SP                            00000900
+0000000                          21+F0       EQU   0                                                        01-INPUT
+0000005                          22+R5       EQU   5                                                        01-INPUT
+                                 24          OUTPUT R1            VECTOR(N)   SP                            00001000
+0000001                          25+R1       EQU   1                                                        01-OUTPU
+                                 27 *                                                                       00001100
+                                 28 *   ALGORITHM:                                                          00001200
+                                 29 *     DO FOR I=N TO 1;                                                  00001300
+                                 30 *      V(I)=S;                                                          00001400
+                                 31 *     END;                                                              00001500
+                                 32 *                                                                       00001600
+00000 38F5 A000      0000        33 LOOP     STE   F0,0(R5,R1)    PLACE V ELE.                              00001700
+00002 DD0F           0000 0003   34          BCTB  R5,LOOP        I=N TO 1 COUNTER                          00001800
+                                 35          AEXIT                                                          00001900
+                                 36+*********RETURN TO CALLER**********************************************
+00003                            37+         DS    0H                                                       01-AEXIT
+00003 9914           0005        38+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00004 C7EC                       39+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 40+***********************************************************************
+                                 42          ACLOSE                                                         00002000
+00005 C9FB
+00006                            43+         LTORG                                                          02-ERRPA
+                                 44+****************ERROR PARAMETER AREA***********************************
+                                 45+***  NO ERRORS SENT IN VV0SN                                            02-ERRPA
+                                 46+****************END OF ERROR PARAMETER AREA****************************
+                                 47+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    21     33
+LOOP         2   000000    33     34
+R1           1 00000001    25     33
+R5           1 00000005    22     33    33    34
+VV0SN        1 00000000    13
+$RET1        1   000004    39
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      25 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+      70 LINES OUTPUT           4 CARDS OUTPUT

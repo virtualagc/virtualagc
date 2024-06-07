@@ -1,0 +1,192 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DSQRT     SD 0001 000000 00003E
+#LDSQRT   SD 0002 00003E 000008
+
+         DSQRT -- DOUBLE PRECISION SQUARE ROOT FUNCTION                                                        PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 00000200
+                                  8 *  DOUBLE SQUARE ROOT _ 31 BITS ACCURACY                                00000300
+                                  9 *         USE QUADRATIC FUNCTION IN HALF WD FIXED, ONE NEWTON-RAPHSON   00000400
+                                 10 *         ITERATION(SP), THEN A N-R IN FORM X3=X2 + (X-X2(X2))/(X2+X2)  00000500
+                                 11 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 00000600
+                                 12 DSQRT    AMAIN                                                          00000700
+                                 13+***********************************************************************
+                                 14+*
+                                 15+*        PRIMARY ENTRY POINT
+                                 16+*
+                                 17+***********************************************************************
+00000                            18+DSQRT    CSECT                                                          01-AMAIN
+00000                            19+STACK    DSECT                                                          01-AMAIN
+                                 20+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            21+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            22+         DS    2F             R0,R1                                     01-AMAIN
+00006                            23+ARG2     DS    F              R2                                        01-AMAIN
+00008                            24+         DS    F              R3                                        01-AMAIN
+0000A                            25+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            26+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            27+ARG6     DS    F              R6                                        01-AMAIN
+00010                            28+ARG7     DS    F              R7                                        01-AMAIN
+                                 29+*        END OF STANDARD STACK AREA
+                                 30+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            31+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            32+DSQRT    CSECT                                                          01-AMAIN
+0000000                          33+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   34+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 36 * COMPUTES SQRT(X) IN DOUBLE PRECISION                                  00000800
+                                 37          INPUT F0             SCALAR DP                                 00000900
+0000000                          38+F0       EQU   0                                                        01-INPUT
+                                 40          OUTPUT F0            SCALAR DP                                 00001000
+                                 42          WORK  R2,R4,R5,R6,R7,F1,F2,F4,F5                               00001100
+0000002                          43+R2       EQU   2                                                        01-WORK
+0000004                          44+R4       EQU   4                                                        01-WORK
+0000005                          45+R5       EQU   5                                                        01-WORK
+0000006                          46+R6       EQU   6                                                        01-WORK
+0000007                          47+R7       EQU   7                                                        01-WORK
+0000001                          48+F1       EQU   1                                                        01-WORK
+0000002                          49+F2       EQU   2                                                        01-WORK
+0000004                          50+F4       EQU   4                                                        01-WORK
+0000005                          51+F5       EQU   5                                                        01-WORK
+00002 76E6                       53          XR    R6,R6         . ZERO REG                                 00001200
+00003 2CEE                       54          LFLR  F4,R6         . ZERO REG                                 00001300
+00004 54E0                       55          AER   F4,F0         . SET REG AND CC IN PSW                    00001400
+00005 DEB8           0034 002E   56          BNP   ERROR         . INPUT MUST BE GREATER THAN ZERO          00001500
+00006 27EC                       57 START    LFXR  R7,F4         . USE NORMALIZED INPUT                     00001600
+00007 B0E7 4100           4100   58          AHI   R7,X'4100'    . CHAR ADJUSTMENT                          00001700
+00009 FE1C                0007   59          SLDL  R6,7          . NEED 6 BITS AND SIGN OF MANTISSA         00001800
+0000A F618                0006   60          SLL   R6,6          . SET UP FOR LATER ADJUSTMENT              00001900
+0000B B4E7 8000           8000   61          XHI   R7,X'8000'    . COMPLEMENT FIRST BIT                     00002000
+0000D FE04                0001   62          SLDL  R6,1          . LAST BIT OF CHAR DETERMINES SHIFT        00002100
+0000E F644                0011   63          SLL   R6,17         . MOVE TO HIGH ORDER BITS                  00002200
+0000F B0E6 0005           0005   64          AHI   R6,5          . FINAL SHIFT ADJUSTMENT                   00002300
+00011 F706                0001   65          SRL   R7,1          . ADJUST MANTISSA FOR COMPUTATION          00002400
+00012 EAF3 0040      0040        66          LA    R2,CONST      . ADDRESS OF DATA AREA                     00002500
+0000040                          67          USING CONST,R2      . ESTABLISH BASE                           00002600
+00014 B5E7 2000           2000   68          CHI   R7,X'2000'    . COMPARE MANTISSA                         00002700
+00016 DA04           0018 0001   69          BC    2,LESS        . BRANCH ON LESS THAN                      00002800
+00017 EA06           0001        70          LA    R2,1(R2)      . BUMP TO CORRECT COEF.                    00002900
+00018 1DE7                       71 LESS     LR    R5,R7         . NEED VALUE LATER - X                     00003000
+00019 AD02           0040        72          MH    R5,A          . AX                                       00003100
+0001A 850A           0042        73          AH    R5,B          . AX+B                                     00003200
+0001B 45E7                       74          MR    R5,R7         . (AX+B)X                                  00003300
+0001C 8512           0044        75          AH    R5,C          . (AX+B)X + C - REG 5 HAS QUADRATIC        00003400
+                                 76          DROP  R2            . DO NOT NEED BASE REG                     00003500
+0001D F5FA                003E   77          SRL   R5,62         . SHIFT BY BITS IN R6 - TO ADJUST          00003600
+0001E B6E6 FF00           FF00   78          NHI   R6,X'FF00'    . ZERO SHIFT COUNT                         00003700
+00020 2EE5                       79          OR    R6,R5         . FLOAT  QUADRATIC-CHAR. PLUS MANTISSA     00003800
+00021 2AEE                       80          LFLR  F2,R6         . LOAD INTO FLOATING REGISTER - X1         00003900
+00022 6CE2                       81          DER   F4,F2         . FIRST PASS                               00004000
+         DSQRT -- DOUBLE PRECISION SQUARE ROOT FUNCTION                                                        PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+00023 54E2                       82          AER   F4,F2         .   THROUGH NEWTON-RAPHSON                 00004100
+00024 64F7 0014      003A 0014   83          ME    F4,HALF       .   RESULT=X2                              00004200
+00026 77E7                       84          XR    R7,R7         . ZERO REG.                                00004300
+00027 2DEF                       85          LFLR  F5,R7         . ZERO REG                                 00004400
+00028 7AE4                       86          LER   F2,F4         . SAME FIRST 32 BITS IN F2                 00004500
+00029 62E4                       87          MER   F2,F4         .  X2(X2)                                  00004600
+0002A 58EA                       88          SEDR  F0,F2         .  X - X2(X2)       X= INPUT VALUE         00004700
+0002B 7AE4                       89          LER   F2,F4         . RESTORE X2                               00004800
+0002C 52E2                       90          AER   F2,F2         .  X2 + X2                                 00004900
+0002D 68E2                       91          DER   F0,F2         .  (X - X2(X2)) / (X2+X2)                  00005000
+0002E 50EC                       92          AEDR  F0,F4         .  X2 + ( X - X2(X2)) / (X2 + X2)          00005100
+0002F 26E9                       93          LFXR  R6,F1         . NEED TO SAVE FIRST 10 BITS CLEAR REM.    00005200
+00030 26F7 000A      003C 000A   94          N     R6,MSK        .   MASK TO SAVE 10                        00005300
+00032 29EE                       95          LFLR  F1,R6         . RESTOR E F1                              00005400
+                                 96 EXIT     AEXIT                                                          00005500
+                                 97+*********RETURN TO CALLER**********************************************
+00033                            98+EXIT     DS    0H                                                       01-AEXIT
+00033 97E8                       99+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                100+***********************************************************************
+                                102 *                                                                       00005600
+00034 DC0A           0033 0002  103 ERROR    BZ    EXIT          . CANNOT BE ZERO                           00005700
+                                104          AERROR 5            . ARGUMENT LESS THAN ZERO                  00005800
+                                105+*********ISSUE SEND ERROR SVC******************************************
+00035 C9FB 003E      003E       106+         SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                107+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00037 78E8                      108          LECR  F0,F0         . COMPLEMENT                               00005900
+00038 7CEC                      109          LECR  F4,F4         . COMPLEMENT REG                           00006000
+00039 DFD2           0006 0034  110          B     START                                                    00006100
+                                111 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 00006200
+0003A                           112          DS    0F                                                       00006300
+0003A 40800000                  113 HALF     DC    X'40800000'   . 0.5                                      00006400
+0003C FFC00000                  114 MSK      DC    X'FFC00000'   .  MASK TO SAVE 10 BITS                    00006500
+                                115 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 00006600
+                                116 *                                                                       00006700
+                                117 * COEFFICIENTS FOR QUADRATIC                                            00006800
+                                118 *                                                                       00006900
+                                119          ADATA                                                          00007000
+                                120+*********DATA CSECT****************************************************
+0003E                           121+         LTORG                                                          02-ERRPA
+                                122+****************ERROR PARAMETER AREA***********************************
+0003E                           123+#LDSQRT  CSECT                                                          02-ERRPA
+                                124+***  DSQRT SENDS THE FOLLOWING ERROR                                    02-ERRPA
+                                126+***  ERROR NUMBER 5 IN GROUP 4                                          02-ERRPA
+0003E 0014                      128+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+0003F 0405                      129+         DC    Y(4*256+5)                       8 BIT GROUP AND NUMBER  02-ERRPA
+                                130+****************END OF ERROR PARAMETER AREA****************************
+00040                           131+#LDSQRT  CSECT                                                          01-ADATA
+00040                           132 CONST    DS    0H                                                       00007100
+00040 AF76                      133 A        DC    X'AF76'       .MANTISSA LT 0.25                          00007200
+00041 F5EF                      134          DC    X'F5EF'       .MANTISSA GE 0.25                          00007300
+00042 433E                      135 B        DC    X'433E'       .MANTISSA LT 0.25                          00007400
+00043 219F                      136          DC    X'219F'       .MANTISSA GE 0.25                          00007500
+00044 0427                      137 C        DC    X'0427'       .MANTISSA LT 0.25                          00007600
+00045 084D                      138          DC    X'084D'       .MANTISSA GE 0.25                          00007700
+                                139 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 00007800
+                                140          ACLOSE                                                         00007900
+                                141+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.37 07/22/05
+  0001     0002     00     000013
+  0001     0002     00     000036
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+A            1   000040   133     72
+AERROR1      1   00003E   128    106
+ARG2         2   000006    23
+ARG4         2   00000A    25
+ARG5         2   00000C    26
+ARG6         2   00000E    27
+ARG7         2   000010    28
+B            1   000042   135     73
+C            1   000044   137     75
+CONST        1   000040   132     66    67
+DSQRT        1 00000000    18     32
+ERROR        2   000034   103     56
+EXIT         1   000033    98    103
+F0           1 00000000    38     55    88    91    92   108   108
+F1           1 00000001    48     93    95
+F2           1 00000002    49     80    81    82    86    87    88    89    90    90    91
+F4           1 00000004    50     54    55    57    81    82    83    86    87    89    92   109   109
+F5           1 00000005    51     85
+HALF         2   00003A   113     83
+LESS         1   000018    71     69
+MSK          2   00003C   114     94
+R2           1 00000002    43     66    67    70    70    70    76
+R4           1 00000004    44
+R5           1 00000005    45     71    72    73    74    75    77    79
+R6           1 00000006    46     53    53    54    59    60    62    63    64    78    79    80    93    94    95
+R7           1 00000007    47     57    58    61    65    68    71    74    84    84    85
+STACK        1 00000000    19     33
+STACKEND     2   000012    31
+START        1   000006    57    110
+$RET1        1   000033    99
+#LDSQRT      1 0000003E   123    131
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      84 CARDS FROM SYSIN     374 CARDS FROM SYSLIB
+     192 LINES OUTPUT          14 CARDS OUTPUT

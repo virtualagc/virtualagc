@@ -1,0 +1,123 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+MM6D3     SD 0001 000000 000020
+
+         MM6D3--MATRIX(3,3) MATRIX(3,3) MULTIPLY, DP                                                           PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 MM6D3    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+MM6D3    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * COMPUTES THE MATRIX PRODUCT:                                          00000400
+                                 17 *                                                                       00000500
+                                 18 *          M(3,3) = M1(3,3) M2(3,3)                                     00000600
+                                 19 *                                                                       00000700
+                                 20          INPUT R2,            MATRIX(3,3) DP ( THIS IS M1 )            X00000800
+                                                   R3             MATRIX(3,3) DP ( THIS IS M2 )             00000900
+0000002                          21+R2       EQU   2                                                        01-INPUT
+0000003                          22+R3       EQU   3                                                        01-INPUT
+                                 24          OUTPUT R1            MATRIX(3,3) DP                            00001000
+0000001                          25+R1       EQU   1                                                        01-OUTPU
+                                 27          WORK  R5,R6,R7,F0,F1,F2,F3,F4,F5                               00001100
+0000005                          28+R5       EQU   5                                                        01-WORK
+0000006                          29+R6       EQU   6                                                        01-WORK
+0000007                          30+R7       EQU   7                                                        01-WORK
+0000000                          31+F0       EQU   0                                                        01-WORK
+0000001                          32+F1       EQU   1                                                        01-WORK
+0000002                          33+F2       EQU   2                                                        01-WORK
+0000003                          34+F3       EQU   3                                                        01-WORK
+0000004                          35+F4       EQU   4                                                        01-WORK
+0000005                          36+F5       EQU   5                                                        01-WORK
+                                 38 *                                                                       00001200
+                                 39 * ALGORITHM:                                                            00001300
+                                 40 *   DO FOR I = 1 TO 3;                                                  00001400
+                                 41 *     DO FOR J = 1 TO 3;                                                00001500
+                                 42 *       F0 = M2$(1,J);                                                  00001600
+                                 43 *       F0 = F0 M1$(I,1);                                               00001700
+                                 44 *       F2 = M2$(2,J);                                                  00001800
+                                 45 *       F2 = F2 M1$(I,2);                                               00001900
+                                 46 *       F4 = M2$(3,J);                                                  00002000
+                                 47 *       F4 = F4 M1$(I,3);                                               00002100
+                                 48 *       F0 = F0 + F2 + F4;                                              00002200
+                                 49 *       M$(I,J) = F0;                                                   00002300
+                                 50 *     END;                                                              00002400
+                                 51 *   END;                                                                00002500
+                                 52 *                                                                       00002600
+00000 EDF3 0003      0003        53          LA    R5,3           PLACE A 3 IN R5                           00002700
+00002 EEF3 000C      000C        54          LA    R6,12          PLACE A 12 IN R6                          00002800
+                                 55 *                             (# OF HALFWORDS / ROW)                    00002900
+00004 EFF3 0003      0003        56 LOOP3    LA    R7,3           SET R7 TO 3                               00003000
+00006 780B           0004        57 LOOP2    LE    F0,4(R3)       GET LEFT HALF OF M2$(1,J)                 00003100
+00007 790F           0006        58          LE    F1,6(R3)       GET RIGHT HALF OF M2$(1,J)                00003200
+00008 30FA 0004      0004        59          MED   F0,4(R2)       MULTIPLY BY M1$(I,1)                      00003300
+0000A 7A23           0010        60          LE    F2,16(R3)      GET LEFT HALF OF M2$(2,J)                 00003400
+0000B 7B27           0012        61          LE    F3,18(R3)      GET RIGHT HALF OF M2$(2,J)                00003500
+0000C 32FA 0008      0008        62          MED   F2,8(R2)       MULTIPLY BY M1$(I,2)                      00003600
+0000E 7C3B           001C        63          LE    F4,28(R3)      GET LEFT HALF OF M2$(3,J)                 00003700
+0000F 7D3F           001E        64          LE    F5,30(R3)      GET RIGHT HALF OF M2$(3,J)                00003800
+00010 34FA 000C      000C        65          MED   F4,12(R2)      MULTIPLY BY M1$(I,3);                     00003900
+00012 50EA                       66          AEDR  F0,F2          FORM SUM                                  00004000
+00013 50EC                       67          AEDR  F0,F4                                                    00004100
+00014 38F9 0004      0004        68          STED  F0,4(R1)       SAVE IN RESULT MATRIX                     00004200
+00016 E911           0004        69          LA    R1,4(R1)       BUMP OUTPUT PTR TO NEXT ELEMENT           00004300
+00017 EB13           0004        70          LA    R3,4(R3)       BUMP M2 PTR TO NEXT COLUMN                00004400
+00018 DF4F           0006 0013   71          BCTB  R7,LOOP2       (J = 1 TO 3 COUNTER)                      00004500
+00019 EA32           000C        72          LA    R2,12(R2)      BUMP M1 PTR TO NEXT ROW                   00004600
+0001A 0BE6                       73          SR    R3,R6          RESET R3 TO BEGINNING OF M2               00004700
+0001B DD63           0004 0018   74          BCTB  R5,LOOP3       (I = 1 TO 3 COUNTER)                      00004800
+                                 75          AEXIT                                                          00004900
+                                 76+*********RETURN TO CALLER**********************************************
+0001C                            77+         DS    0H                                                       01-AEXIT
+0001C 9B24           0009        78+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+0001D 9914           0005        79+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0001E C7EC                       80+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+         MM6D3--MATRIX(3,3) MATRIX(3,3) MULTIPLY, DP                                                           PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 81+***********************************************************************
+                                 83          ACLOSE                                                         00005000
+0001F C9FB
+00020                            84+         LTORG                                                          02-ERRPA
+                                 85+****************ERROR PARAMETER AREA***********************************
+                                 86+***  NO ERRORS SENT IN MM6D3                                            02-ERRPA
+                                 87+****************END OF ERROR PARAMETER AREA****************************
+                                 88+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+F0           1 00000000    31     57    59    66    67    68
+F1           1 00000001    32     58
+F2           1 00000002    33     60    62    66
+F3           1 00000003    34     61
+F4           1 00000004    35     63    65    67
+F5           1 00000005    36     64
+LOOP2        2   000006    57     71
+LOOP3        2   000004    56     74
+MM6D3        1 00000000    13
+R1           1 00000001    25     68    68    69    69    69
+R2           1 00000002    21     59    59    62    62    65    65    72    72    72
+R3           1 00000003    22     57    57    58    58    60    60    61    61    63    63    64    64    70    70    70
+                                  73
+R5           1 00000005    28     53    74
+R6           1 00000006    29     54    73
+R7           1 00000007    30     56    71
+$RET1        1   00001E    80
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      55 CARDS FROM SYSIN     338 CARDS FROM SYSLIB
+     123 LINES OUTPUT           6 CARDS OUTPUT

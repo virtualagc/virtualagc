@@ -1,0 +1,125 @@
+
+MMRDNP                                        EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.38 07/22/05
+MMRDNP    SD 0001 000000 000018
+#QDIN     ER 0002
+
+MMRDNP   DOUBLE PRECISION VECTOR/MATRIX INPUT INTERFACE                                                        PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7          MACRO                                                          00000200
+                                  8          WORKAREA                                                       00000300
+                                  9 HOLD1    DS    H                                                        00000400
+                                 10 HOLD7    DS    H                                                        00000500
+                                 11          MEND                                                           00000600
+                                 12 MMRDNP  AMAIN ACALL=YES                                                 00000700
+                                 13+***********************************************************************
+                                 14+*
+                                 15+*        PRIMARY ENTRY POINT
+                                 16+*
+                                 17+***********************************************************************
+00000                            18+MMRDNP   CSECT                                                          01-AMAIN
+00000                            19+STACK    DSECT                                                          01-AMAIN
+                                 20+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            21+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            22+         DS    2F             R0,R1                                     01-AMAIN
+00006                            23+ARG2     DS    F              R2                                        01-AMAIN
+00008                            24+         DS    F              R3                                        01-AMAIN
+0000A                            25+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            26+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            27+ARG6     DS    F              R6                                        01-AMAIN
+00010                            28+ARG7     DS    F              R7                                        01-AMAIN
+                                 29+*        END OF STANDARD STACK AREA
+00012                            30+HOLD1    DS    H                                                        02-00009
+00013                            31+HOLD7    DS    H                                                        02-00010
+00014                            32+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            33+MMRDNP   CSECT                                                          01-AMAIN
+0000000                          34+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 E0FB 0014      0014        35+         IAL   0,STACKEND-STACK SET STACK SIZE                          01-AMAIN
+00002 B624 0000      0009 0000   36+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 38 * READS AN M*N VECTOR/MATRIX IN DOUBLE PRECISION                        00000710
+                                 39          INPUT R5,            NO. OF ROWS(M)                           X00000720
+                                                   R6,            NO. OF COLLUMNS(N)                       X00000730
+                                                   R7             DELTA DIMENSION                           00000740
+0000005                          40+R5       EQU   5                                                        01-INPUT
+0000006                          41+R6       EQU   6                                                        01-INPUT
+0000007                          42+R7       EQU   7                                                        01-INPUT
+                                 44          OUTPUT R2            DESCRIPTOR FOR VECTOR/MATRIX              00000750
+0000002                          45+R2       EQU   2                                                        01-OUTPU
+                                 47          WORK  R1                                                       00000760
+0000001                          48+R1       EQU   1                                                        01-WORK
+00004 E9F3 0004      0004        50          LHI   R1,4                                                     00000800
+00006 1FE7                       51          LR    R7,R7                                                    00000900
+00007 DC10           000C 0004   52          BZ    OK                                                       00001000
+00008 B5E5 0001           0001   53          CHI   R5,1                                                     00001100
+0000A DB04           000C 0001   54          BNE   OK                                                       00001200
+0000B 19E7                       55          LR    R1,R7                                                    00001300
+0000C B948           0012        56 OK       STH   R1,HOLD1                                                 00001400
+0000D BF4C           0013        57          STH   R7,HOLD7                                                 00001500
+0000E 1FE5                       58          LR    R7,R5                                                    00001600
+0000F EA12           0004        59          LA    R2,4(R2)                                                 00001650
+0000010                          60 OLOOP    EQU   *                                                        00001700
+00010 1DE6                       61          LR    R5,R6                                                    00002000
+0000011                          62 LOOP     EQU   *                                                        00002100
+                                 63          ACALL DIN                                                      00002200
+                                 64+         EXTRN #QDIN                                                    01-ACALL
+00011 D0FF                       65+         DC  X'D0FF'          CALL PROCEDURE ROUTINE                    01-ACALL
+00012 3800                       66+         DC  Y(#QDIN+X'3800') INDIRECTLY THRU QCON                      01-ACALL
+00013 8248           0012        67          AH    R2,HOLD1                                                 00002300
+00014 DD13           0011 0004   68          BCT   R5,LOOP                                                  00002400
+00015 824C           0013        69          AH    R2,HOLD7                                                 00002500
+00016 DF1F           0010 0007   70          BCT   R7,OLOOP                                                 00002600
+                                 71          AEXIT                                                          00002700
+                                 72+*********RETURN TO CALLER**********************************************
+00017                            73+         DS    0H                                                       01-AEXIT
+00017 97E8                       74+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 75+***********************************************************************
+                                 77          ACLOSE                                                         00002800
+00018                            78+         LTORG                                                          02-ERRPA
+                                 79+****************ERROR PARAMETER AREA***********************************
+MMRDNP   DOUBLE PRECISION VECTOR/MATRIX INPUT INTERFACE                                                        PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.38 07/22/05
+                                 80+***  NO ERRORS SENT IN MMRDNP                                           02-ERRPA
+                                 81+****************END OF ERROR PARAMETER AREA****************************
+                                 82+         END                                                            01-ACLOS
+
+MMRDNP                                           RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.38 07/22/05
+  0001     0002     00     000012
+
+MMRDNP                                       CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.38 07/22/05
+ARG2         2   000006    23
+ARG4         2   00000A    25
+ARG5         2   00000C    26
+ARG6         2   00000E    27
+ARG7         2   000010    28
+HOLD1        1   000012    30     56    67
+HOLD7        1   000013    31     57    69
+LOOP         1 00000011    62     68
+MMRDNP       1 00000000    18     33
+OK           2   00000C    56     52    54
+OLOOP        1 00000010    60     70
+R1           1 00000001    48     50    55    56
+R2           1 00000002    45     59    59    59    67    69
+R5           1 00000005    40     53    58    61    68
+R6           1 00000006    41     61
+R7           1 00000007    42     51    51    55    57    58    70
+STACK        1 00000000    19     34    35
+STACKEND     2   000014    32     35
+$RET1        1   000017    74
+#QDIN        1 00000000    64     66
+
+MMRDNP                            DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.38 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      38 CARDS FROM SYSIN     390 CARDS FROM SYSLIB
+     125 LINES OUTPUT           8 CARDS OUTPUT

@@ -1,0 +1,118 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.39 07/22/05
+VR1WNP    SD 0001 000000 000016
+
+         VR1WNP--REMOTE COLUMN VECTOR MOVE, SP TO DP                                                           PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VR1WNP   AMAIN                                                          00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VR1WNP   CSECT                                                          01-AMAIN
+00000                            14+STACK    DSECT                                                          01-AMAIN
+                                 15+*        DS    18H            STANDARD STACK AREA DEFINITION
+00000                            16+         DS    F              PSW (LEFT HALF)                           01-AMAIN
+00002                            17+         DS    2F             R0,R1                                     01-AMAIN
+00006                            18+ARG2     DS    F              R2                                        01-AMAIN
+00008                            19+         DS    F              R3                                        01-AMAIN
+0000A                            20+ARG4     DS    F              R4                                        01-AMAIN
+0000C                            21+ARG5     DS    F              R5                                        01-AMAIN
+0000E                            22+ARG6     DS    F              R6                                        01-AMAIN
+00010                            23+ARG7     DS    F              R7                                        01-AMAIN
+                                 24+*        END OF STANDARD STACK AREA
+                                 25+*        NO ADDITIONAL STACK STORAGE REQUIRED FOR THIS ROUTINE
+00012                            26+STACKEND DS    0F             END OF COMBINED STACK AREA                01-AMAIN
+00000                            27+VR1WNP   CSECT                                                          01-AMAIN
+0000000                          28+         USING STACK,0        ADDRESS STACK AREA                        01-AMAIN
+00000 B624 0000      0009 0000   29+         NIST  9(0),0         CLEAR ON ERROR INFO (LCL DATA PTR)        01-AMAIN
+                                 31 *                                                                       00000300
+                                 32 * MOVES V1 TO V2 WHERE V1 IS A SINGLE PRECISION VECTOR AND V2 IS A      00000400
+                                 33 *   DOUBLE PRECISION VECTOR, AT LEAST ONE OF WHICH IS REMOTE, AT        00000500
+                                 34 *   LEAST ONE OF WHICH IS A COLUMN VECTOR WITHIN A MATRIX, AND BOTH     00000600
+                                 35 *   OF WHICH ARE LENGTH N.                                              00000700
+                                 36 *                                                                       00000800
+                                 37          INPUT R4,            ZCON(VECTOR(N)) SP                       X00000900
+                                                   R5,            INTEGER(N) SP                            X00001000
+                                                   R6,            INTEGER(INDEL) SP                        X00001100
+                                                   R7             INTEGER(OUTDEL) SP                        00001200
+0000004                          38+R4       EQU   4                                                        01-INPUT
+0000005                          39+R5       EQU   5                                                        01-INPUT
+0000006                          40+R6       EQU   6                                                        01-INPUT
+0000007                          41+R7       EQU   7                                                        01-INPUT
+                                 43          OUTPUT R2            ZCON(VECTOR(N)) DP                        00001300
+0000002                          44+R2       EQU   2                                                        01-OUTPU
+                                 46          WORK  F0,F1                                                    00001400
+0000000                          47+F0       EQU   0                                                        01-WORK
+0000001                          48+F1       EQU   1                                                        01-WORK
+                                 50 *                                                                       00001500
+                                 51 * ALGORITHM:                                                            00001600
+                                 52 *   SEE ALGORITHM DESCRIPTION IN VR1DNP                                 00001700
+                                 53 *                                                                       00001800
+00002 ECF3 0001      0001        54          LA    R4,1           SET INPUT INDEX TO 1                      00001900
+00004 F70A                0002   55          SRL   R7,2           GET NUMBER OF HALFWORDS IN OUTDEL         00002000
+00005 F606                0001   56          SRL   R6,1           GET NUMBER OF HALFWORDS IN INDEL          00002100
+00006 1AE4                       57          LR    R2,R4          SET OUTPUT INDEX TO 1                     00002200
+00007 59E1                       58          SER   F1,F1          CLEAR RIGHT HALF OF F0                    00002300
+00008 1FE7                       59          LR    R7,R7          SET CONDITION CODE                        00002400
+00009 DB04           000B 0001   60          BNZ   VR1            IF OUTDEL>0 THEN BRANCH                   00002500
+0000A 1FE2                       61          LR    R7,R2          ELEMENTS ARE IN A ROW,4 HALFWORDS APART   00002600
+0000B 1EE6                       62 VR1      LR    R6,R6          SET CONDITION CODE                        00002700
+0000C DB04           000E 0001   63          BNZ   VR2            BRANCH IF INDEL>0                         00002800
+0000D 1EE4                       64          LR    R6,R4          ELEMENTS ARE IN A ROW,2 HALFWORDS APART   00002900
+0000E 78F4 980A      000A        65 VR2      LE@#  F0,ARG4(R4)    LOAD NEXT ELEMENT                         00003000
+00010 38FC 5806      0006        66          STED@# F0,ARG2(R2)   STORE NEXT ELEMENT                        00003100
+00012 02E7                       67          AR    R2,R7          ADVANCE TO NEXT STORAGE ELEMENT           00003200
+00013 04E6                       68          AR    R4,R6          ADVANCE TO NEXT ELEMENT TO BE MOVED       00003300
+00014 DD1F           000E 0007   69          BCTB  R5,VR2                                                   00003400
+                                 70          AEXIT                                                          00003500
+                                 71+*********RETURN TO CALLER**********************************************
+00015                            72+         DS    0H                                                       01-AEXIT
+00015 97E8                       73+$RET1    SRET  7,0            RETURN TO CALLER                          01-AEXIT
+                                 74+***********************************************************************
+                                 76          ACLOSE                                                         00003600
+00016                            77+         LTORG                                                          02-ERRPA
+                                 78+****************ERROR PARAMETER AREA***********************************
+         VR1WNP--REMOTE COLUMN VECTOR MOVE, SP TO DP                                                           PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.39 07/22/05
+                                 79+***  NO ERRORS SENT IN VR1WNP                                           02-ERRPA
+                                 80+****************END OF ERROR PARAMETER AREA****************************
+                                 81+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.39 07/22/05
+ARG2         2   000006    18     66
+ARG4         2   00000A    20     65
+ARG5         2   00000C    21
+ARG6         2   00000E    22
+ARG7         2   000010    23
+F0           1 00000000    47     65    66
+F1           1 00000001    48     58    58
+R2           1 00000002    44     57    61    66    67
+R4           1 00000004    38     54    57    64    65    68
+R5           1 00000005    39     69
+R6           1 00000006    40     56    62    62    64    68
+R7           1 00000007    41     55    59    59    61    67
+STACK        1 00000000    14     28
+STACKEND     2   000012    26
+VR1          1   00000B    62     60
+VR1WNP       1 00000000    13     27
+VR2          2   00000E    65     63    69
+$RET1        1   000015    73
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.39 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      41 CARDS FROM SYSIN     344 CARDS FROM SYSLIB
+     118 LINES OUTPUT           7 CARDS OUTPUT

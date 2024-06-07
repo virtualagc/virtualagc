@@ -1,0 +1,161 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+XTOC      SD 0001 000000 000044
+OTOC      LD      00000C        0001
+
+         XTOC -- HEX AND OCTAL TO CHARACTER CONVERSION                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 *                                                                       00000200
+                                  8 XTOC     AMAIN INTSIC=YES                                               00000300
+                                  9+***********************************************************************
+                                 10+*
+                                 11+*        PRIMARY ENTRY POINT
+                                 12+*
+                                 13+***********************************************************************
+00000                            14+XTOC     CSECT                                                          01-AMAIN
+                                 16 *                                                                       00000400
+                                 17 *   CONVERT BIT STRING TO                                               00000500
+                                 18 *   A STRING OF HEXADECIMAL CHARACTER                                   00000600
+                                 19 *                                                                       00000700
+                                 20          INPUT R5,            BIT STRING                               X00000800
+                                                   R6             INTEGER(LENG.)                            00000900
+0000005                          21+R5       EQU   5                                                        01-INPUT
+0000006                          22+R6       EQU   6                                                        01-INPUT
+                                 24          OUTPUT R2            CHARACTER                                 00001000
+0000002                          25+R2       EQU   2                                                        01-OUTPU
+                                 27          WORK  R1,R3,R4,R7,F0                                           00001100
+0000001                          28+R1       EQU   1                                                        01-WORK
+0000003                          29+R3       EQU   3                                                        01-WORK
+0000004                          30+R4       EQU   4                                                        01-WORK
+0000007                          31+R7       EQU   7                                                        01-WORK
+0000000                          32+F0       EQU   0                                                        01-WORK
+                                 34 *                                                                       00001200
+                                 35 *                                                                       00001300
+                                 36 *                                                                       00001400
+00000 EBEE                       37          LACR  R3,R6                                                    00001500
+00001 B0E3 0034           0034   38          AHI   R3,52          52-LENGTH                                 00001600
+00003 B6E3 FFFC           FFFC   39          NHI   R3,X'FFFC'     SHIFT COUNT=MULTIPLE OF 4                 00001700
+00005 B0E6 0003           0003   40          AHI   R6,3                                                     00001800
+00007 F60A                0002   41          SRL   R6,2           CHAR COUNT=(LENGTH+3)/4                   00001900
+00008 19E6                       42          LR    R1,R6          SAVE CHAR COUNT IN R1                     00002000
+00009 EFF3 0004      0004        43          LHI   R7,4           HEX SHIFT COUNT                           00002100
+0000B DF30           0018 000C   44          B     COMMON                                                   00002200
+                                 45 *                                                                       00002300
+                                 46 OTOC     AENTRY                                                         00002400
+                                 47+***********************************************************************
+                                 48+*
+                                 49+*        SECONDARY ENTRY POINT
+                                 50+*
+                                 51+***********************************************************************
+0000C                            52+OTOC     DS    0H                                                       01-AENTR
+                                 53+         ENTRY OTOC                                                     01-AENTR
+                                 55 *                                                                       00002500
+                                 56 *  CONVERT BIT STRING TO OCL CHARACTER STRING                           00002600
+                                 57 *                                                                       00002700
+                                 58          INPUT R5,            BIT STRING                               X00002800
+                                                   R6             INTEGER(LENG.)                            00002900
+                                 60          OUTPUT R2            CHARACTER                                 00003000
+                                 62          WORK  R1,R3,R4,R7,F0                                           00003100
+                                 64 *                                                                       00003200
+                                 65 *                                                                       00003300
+0000C B0E6 0002           0002   66          AHI   R6,2                                                     00003400
+0000E F60A                0002   67          SRL   R6,2                                                     00003500
+0000F 4EF7 002F      0040 002F   68          D     R6,FX3         CHAR COUNT=(LENGTH+2)/3                   00003600
+00011 19E6                       69          LR    R1,R6          SAVE CHAR COUNT IN R1                     00003700
+00012 9EFF 002E      0042 002E   70          MIH   R6,FM3                                                   00003800
+00014 EBF7 C033      0033        71          LA    R3,51(R6,3)    SHIFT COUNT=51-3*(CHAR COUNT)             00003900
+00016 EFF3 0003      0003        72          LHI   R7,3           OCTAL SHIFT COUNT                         00004000
+                                 73 *                                                                       00004100
+                                 74 *  COMMON SECTION HERE                                                  00004200
+                                 75 *                                                                       00004300
+00018 EE05           0001        76 COMMON   LA    R6,1(R1)       CHAR COUNT+1                              00004400
+00019 F606                0001   77          SRL   R6,1           LOOP COUNT=(CHAR COUNT+1)/2               00004500
+0001A 28EC                       78          LFLR  F0,R4          SAVE RETURN ADDRESS                       00004600
+0001B 74E4                       79          XR    R4,R4          CLEAR R4 TO RECEIVE STRING                00004700
+         XTOC -- HEX AND OCTAL TO CHARACTER CONVERSION                                                         PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+0001C FCEC                003B   80          SLDL  R4,0(R3)       SHIFT TO FIRST DIGIT POSITION             00004800
+                                 81 *                                                                       00004900
+0001D 9B02           0000        82          LH    R3,0(R2)                                                 00005000
+0001E B6E3 FF00           FF00   83          NHI   R3,X'FF00'                                               00005100
+00020 03E1                       84          AR    R3,R1                                                    00005200
+00021 BB02           0000        85          STH   R3,0(R2)       STORE CHARACTER STRING LENGTH             00005300
+                                 86 *                                                                       00005400
+00022 EBF7 8000      0000        87 LOOP     LA    R3,0(R4,3)     DIGIT IN TOP HALF R3.                     00005500
+00024 B0E3 0030           0030   88          AHI   R3,X'0030'     IF 9 OR LESS,THEN                         00005600
+00026 B5E3 003A           003A   89          CHI   R3,X'003A'     CONVERT TO A NUMERAL.                     00005700
+00028 DA04           002A 0001   90          BL    SECOND         OTHERWISE, CONVERT A                      00005800
+00029 EB1F           0007        91          LA    R3,7(R3)       DIGIT TO A LETTER.                        00005900
+                                 92 *                                                                       00006000
+0002A B1E4 FFFF           FFFF   93 SECOND   ZRB   R4,X'FFFF'                                               00006100
+0002C FCFC                003F   94          SLDL  R4,0(R7)       SHIFT 3 FOR OCTAL, 4 FOR HEX              00006200
+0002D B0E4 0030           0030   95          AHI   R4,X'0030'                                               00006300
+0002F B5E4 003A           003A   96          CHI   R4,X'003A'                                               00006400
+00031 DA08           0034 0002   97          BL    STORE          CONVERT TO A LETTER                       00006500
+00032 B0E4 0007           0007   98          AHI   R4,7           IF GREATER THAN 9.                        00006600
+                                 99 *                                                                       00006700
+00034 F320                0008  100 STORE    SLL   R3,8           SHIFT TO RECEIVE SECOND DIGIT             00006800
+00035 03E4                      101          AR    R3,R4                                                    00006900
+00036 BB06           0001       102          STH   R3,1(R2)       STORE DIGITS IN STRING                    00007000
+00037 EA06           0001       103          LA    R2,1(R2)       INCREMENT POINTER                         00007100
+00038 B1E4 FFFF           FFFF  104          ZRB   R4,X'FFFF'     ZERO TOP HALF R4                          00007200
+0003A FCFC                003F  105          SLDL  R4,0(R7)       SHIFT 3 FOR OCTAL, 4 FOR HEX              00007300
+0003B DE6B           0022 001A  106          BCT   R6,LOOP                                                  00007400
+                                107 *                                                                       00007500
+0003C 24E8                      108 EXIT     LFXR  R4,F0          RESTORE RETURN ADDRESS                    00007600
+                                109          AEXIT                AND EXIT                                  00007700
+                                110+*********RETURN TO CALLER**********************************************
+0003D                           111+         DS    0H                                                       01-AEXIT
+0003D 9B24           0009       112+         LH    3,9(0)         RESTORE LOCAL DATA BASE                   01-AEXIT
+0003E 9914           0005       113+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+0003F C7EC                      114+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                115+***********************************************************************
+                                117 *                                                                       00007800
+00040                           118          DS    0F                                                       00007900
+00040 60000000                  119 FX3      DC    X'60000000'    0.75                                      00008000
+00042 FFFD                      120 FM3      DC    H'-3'                                                    00008100
+                                121          ACLOSE                                                         00008200
+00043 C9FB
+00044                           122+         LTORG                                                          02-ERRPA
+                                123+****************ERROR PARAMETER AREA***********************************
+                                124+***  NO ERRORS SENT IN XTOC                                             02-ERRPA
+                                125+****************END OF ERROR PARAMETER AREA****************************
+                                126+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    4
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+COMMON       2   000018    76     44
+EXIT         1   00003C   108
+F0           1 00000000    32     78   108
+FM3          1   000042   120     70
+FX3          2   000040   119     68
+LOOP         2   000022    87    106
+OTOC         1   00000C    52     53
+R1           1 00000001    28     42    69    76    76    84
+R2           1 00000002    25     82    82    85    85   102   102   103   103   103
+R3           1 00000003    29     37    38    39    71    80    82    83    84    85    87    88    89    91    91    91
+                                 100   101   102
+R4           1 00000004    30     78    79    79    80    87    87    93    94    95    96    98   101   104   105   108
+R5           1 00000005    21
+R6           1 00000006    22     37    40    41    42    66    67    68    69    70    71    71    76    77   106
+R7           1 00000007    31     43    72    94   105
+SECOND       2   00002A    93     90
+STORE        1   000034   100     97
+XTOC         1 00000000    14
+$RET1        1   00003F   114
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    5
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      87 CARDS FROM SYSIN     404 CARDS FROM SYSLIB
+     161 LINES OUTPUT           8 CARDS OUTPUT

@@ -1,0 +1,134 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.40 07/22/05
+VV5DN     SD 0001 000000 000018
+#LVV5DN   SD 0002 000018 000002
+
+         VV5DN--VECTOR DIVIDED BY SCALAR, LENGTH N, DP                                                         PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 VV5DN    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+VV5DN    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * DIVIDES V1 OR M1 BY A DOUBLE PRECISION SCALAR WHERE V1 IS A DOUBLE    00000400
+                                 17 *   PRECISION VECTOR OF LENGTH N AND M1 IS A DOUBLE PRECISION           00000500
+                                 18 *   MATRIX OF LENGTH N = R S WHERE R AND S ARE THE DIMENSIONS OF        00000600
+                                 19 *   THE MATRIX, WHERE N IS NOT EQUAL TO 3.                              00000700
+                                 20 *                                                                       00000800
+                                 21          INPUT R2,            VECTOR(N) DP                             X00000900
+                                                   R5,            INTEGER(N) SP                            X00001000
+                                                   F0,            SCALAR DP                                X00001100
+                                                   F1             SCALAR DP                                 00001200
+0000002                          22+R2       EQU   2                                                        01-INPUT
+0000005                          23+R5       EQU   5                                                        01-INPUT
+0000000                          24+F0       EQU   0                                                        01-INPUT
+0000001                          25+F1       EQU   1                                                        01-INPUT
+                                 27          OUTPUT R1            VECTOR(N) DP                              00001300
+0000001                          28+R1       EQU   1                                                        01-OUTPU
+                                 30          WORK  F2,F3,F4,F5,F6,F7                                        00001400
+0000002                          31+F2       EQU   2                                                        01-WORK
+0000003                          32+F3       EQU   3                                                        01-WORK
+0000004                          33+F4       EQU   4                                                        01-WORK
+0000005                          34+F5       EQU   5                                                        01-WORK
+                                 35+***** WARNING: F6 MUST BE PRESERVED ACROSS CALLS                        01-WORK
+0000006                          36+F6       EQU   6                                                        01-WORK
+0000007                          37+F7       EQU   7                                                        01-WORK
+                                 39 *                                                                       00001500
+                                 40 * ALGORITHM:                                                            00001600
+                                 41 *   IF F0 = 0 THEN                                                      00001700
+                                 42 *     SEND A DIVIDE BY 0 ERROR;                                         00001800
+                                 43 *   ELSE                                                                00001900
+                                 44 *     DO;                                                               00002000
+                                 45 *       F2 = 1 / F0;                                                    00002100
+                                 46 *       DO FOR I = N TO 1 BY -1;                                        00002200
+                                 47 *         V2$(I) = V1$(I) F2;                                           00002300
+                                 48 *       END;                                                            00002400
+                                 49 *     END;                                                              00002500
+                                 50 *                                                                       00002600
+00000 5AEA                       51 VV5DNL   SEDR  F2,F2          CLEAR F2                                  00002700
+                                 52         QCEDR  F2,F0          COMPARE INPUT AGAINST 0                   00002800
+00001 4AE8                       53+         CER   F2,F0                                                    01-QCEDR
+00002 8AE1                0001   54          LFLI  F2,1           LOAD UP A ONE                             00002900
+00003 DC44           0015 0011   55          BE    AOUT           IF OLD(F0) = 0 THEN SEND AN ERROR         00003000
+                                 56         IDEDR  F2,F0,F4,F6    TAKE 1 / F0                               00003100
+00004 7CE2                       57+         LER   F4,F2                                                    01-IDEDR
+00005 7DE3                       58+         LER   F4+1,F2+1                                                01-IDEDR
+00006 6AE0                       59+         DER   F2,F0                                                    01-IDEDR
+00007 7EE2                       60+         LER   F6,F2                                                    01-IDEDR
+00008 7FE3                       61+         LER   F6+1,F2+1                                                01-IDEDR
+00009 36E8                       62+         MEDR  F6,F0                                                    01-IDEDR
+0000A 5EEC                       63+         SEDR  F6,F4                                                    01-IDEDR
+0000B 6EE0                       64+         DER   F6,F0                                                    01-IDEDR
+0000C 5AEE                       65+         SEDR  F2,F6                                                    01-IDEDR
+0000D 78FE A000      0000        66 VV5DNX   LED   F0,0(R5,R2)    LOAD ELEMENT OF VECTOR                    00003200
+0000F 30EA                       67          MEDR  F0,F2          MULTIPLY BY 1 / OLD(F0)                   00003300
+00010 38FD A000      0000        68          STED  F0,0(R5,R1)    STORE AWAY IS RESULT AREA                 00003400
+00012 DD1B           000D 0006   69          BCTB  R5,VV5DNX                                                00003500
+                                 70 OUT      AEXIT                                                          00003600
+                                 71+*********RETURN TO CALLER**********************************************
+00013                            72+OUT      DS    0H                                                       01-AEXIT
+00013 9914           0005        73+         LH    1,5(0)         RESTORE PROGRAM DATA BASE                 01-AEXIT
+00014 C7EC                       74+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 75+***********************************************************************
+                                 77 AOUT     AERROR    25         ATTEMPT TO DIVIDE BY 0                    00003700
+                                 78+*********ISSUE SEND ERROR SVC******************************************
+         VV5DN--VECTOR DIVIDED BY SCALAR, LENGTH N, DP                                                         PAGE    3
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.40 07/22/05
+00015 C9FB 0018      0018        79+AOUT     SVC   AERROR1        ISSUE SEND ERROR SVC                      01-AERRO
+                                 80+*********SEND ERROR SVC RETURNS CONTROL FOR STANDARD FIXUP*************
+00017 DF2E           000D 000B   81          B     VV5DNX                                                   00003800
+                                 82          ACLOSE                                                         00003900
+00018                            83+         LTORG                                                          02-ERRPA
+                                 84+****************ERROR PARAMETER AREA***********************************
+00018                            85+#LVV5DN  CSECT                                                          02-ERRPA
+                                 86+***  VV5DN SENDS THE FOLLOWING ERROR                                    02-ERRPA
+                                 88+***  ERROR NUMBER 25 IN GROUP 4                                         02-ERRPA
+00018 0014                       90+AERROR1  DC    H'20'          SVC CODE FOR SEND ERROR                   02-ERRPA
+00019 0419                       91+         DC    Y(4*256+25)                      8 BIT GROUP AND NUMBER  02-ERRPA
+                                 92+****************END OF ERROR PARAMETER AREA****************************
+                                 93+         END                                                            01-ACLOS
+
+                                                 RELOCATION DICTIONARY                                         PAGE    4
+ POS.ID   REL.ID   FLAGS   ADDRESS                                                             AP101S 3.0 09.40 07/22/05
+  0001     0002     00     000016
+
+                                             CROSS REFERENCE                                                   PAGE    5
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.40 07/22/05
+AERROR1      1   000018    90     79
+AOUT         2   000015    79     55
+F0           1 00000000    24     53    59    62    64    66    67    68
+F1           1 00000001    25
+F2           1 00000002    31     51    51    53    54    57    58    59    60    61    65    67
+F3           1 00000003    32
+F4           1 00000004    33     57    58    63
+F5           1 00000005    34
+F6           1 00000006    36     60    61    62    63    64    65
+F7           1 00000007    37
+OUT          1   000013    72
+R1           1 00000001    28     68
+R2           1 00000002    22     66
+R5           1 00000005    23     66    66    68    68    69
+VV5DN        1 00000000    13
+VV5DNL       1   000000    51
+VV5DNX       2   00000D    66     69    81
+$RET1        1   000014    74
+#LVV5DN      1 00000018    85
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    6
+                                                                                               AP101S 3.0 09.40 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      44 CARDS FROM SYSIN     376 CARDS FROM SYSLIB
+     134 LINES OUTPUT           7 CARDS OUTPUT

@@ -1,0 +1,78 @@
+
+                                              EXTERNAL SYMBOL DICTIONARY                                       PAGE    1
+SYMBOL   TYPE  ID  ADDR  LENGTH  LD ID                                                         AP101S 3.0 09.37 07/22/05
+DPROD     SD 0001 000000 00000E
+
+         DPROD--SCALAR PROD FUNCTION, DP                                                                       PAGE    2
+  LOC  OBJECT CODE   ADR1 ADR2      SOURCE STATEMENT                                           AP101S 3.0 09.37 07/22/05
+                                  2 *
+                                  3 * WHEN DATA_REMOTE IS IN EFFECT, THE LDM INSTRUCTIONS ARE NOT NEEDED
+                                  4 * AROUND THE CALL TO THIS RTL ROUTINE BECAUSE R1/R3 IS NOT USED AS
+                                  5 * A BASE REGISTER. (CR12620)
+                                  6 *
+                                  7 DPROD    AMAIN INTSIC=YES                                               00000200
+                                  8+***********************************************************************
+                                  9+*
+                                 10+*        PRIMARY ENTRY POINT
+                                 11+*
+                                 12+***********************************************************************
+00000                            13+DPROD    CSECT                                                          01-AMAIN
+                                 15 *                                                                       00000300
+                                 16 * RETURNS THE PRODUCT OF ALL THE ELEMENTS OF A LENGTH N ARRAY OF        00000400
+                                 17 *   DOUBLE PRECISION SCALARS.                                           00000500
+                                 18 *                                                                       00000600
+                                 19          INPUT R2,            ARRAY(N) SCALAR DP                       X00000700
+                                                   R5             INTEGER(N) SP                             00000800
+0000002                          20+R2       EQU   2                                                        01-INPUT
+0000005                          21+R5       EQU   5                                                        01-INPUT
+                                 23          OUTPUT F0            SCALAR DP                                 00000900
+0000000                          24+F0       EQU   0                                                        01-OUTPU
+                                 26 *                                                                       00001000
+                                 27 * ALGORITHM:                                                            00001100
+                                 28 *   F0 = 1;                                                             00001200
+                                 29 *   DO FOR I = 1 TO N;                                                  00001300
+                                 30 *     F0 = F0 * ARRAY$(I);                                              00001400
+                                 31 *     IF F0 = 0 THEN                                                    00001500
+                                 32 *       EXIT;                                                           00001600
+                                 33 *   END;                                                                00001700
+                                 34 *                                                                       00001800
+00000 78FF 0008      000A 0008   35          LED   F0,=D'1'       INITIALIZE ACCUMULATOR                    00001900
+00002 30FA 0004      0004        36 LOOPD    MED   F0,4(R2)       MULTIPLY BY ELEMENT OF ARRAY              00002000
+00004 78E0                       37          LER   F0,F0          SET CONDITION CODE                        00002100
+00005 DC08           0008 0002   38          BZ    EXIT           IF ACCUMULATOR = 0 THEN EXIT              00002200
+00006 EA12           0004        39          LA    R2,4(R2)       BUMP INPUT PTR TO NEXT ELEMENT            00002300
+00007 DD1B           0002 0006   40          BCT   R5,LOOPD                                                 00002400
+                                 41 EXIT     AEXIT                                                          00002500
+                                 42+*********RETURN TO CALLER**********************************************
+00008                            43+EXIT     DS    0H                                                       01-AEXIT
+00008 C7EC                       44+$RET1    BCRE  7,4            RETURN TO CALLER                          01-AEXIT
+                                 45+***********************************************************************
+                                 47          ACLOSE                                                         00002600
+00009 C9FB
+0000A                            48+         LTORG                                                          02-ERRPA
+0000A 4110000000000000           49                =D'1'
+                                 50+****************ERROR PARAMETER AREA***********************************
+                                 51+***  NO ERRORS SENT IN DPROD                                            02-ERRPA
+                                 52+****************END OF ERROR PARAMETER AREA****************************
+                                 53+         END                                                            01-ACLOS
+
+                                             CROSS REFERENCE                                                   PAGE    3
+SYMBOL    LEN    VALUE   DEFN   REFERENCES                                                     AP101S 3.0 09.37 07/22/05
+DPROD        1 00000000    13
+EXIT         1   000008    43     38
+F0           1 00000000    24     35    36    37    37
+LOOPD        2   000002    36     40
+R2           1 00000002    20     36    36    39    39    39
+R5           1 00000005    21     40
+$RET1        1   000008    44
+=D'1'        4   00000A    49     35
+
+                                  DIAGNOSTIC CROSS REFERENCE AND ASSEMBLER SUMMARY                             PAGE    4
+                                                                                               AP101S 3.0 09.37 07/22/05
+     NO STATEMENTS FLAGGED IN THIS ASSEMBLY
+   OVERRIDING PARAMETERS-  ESD,RLD,SYSPARM=PASS
+   OPTIONS FOR THIS ASSEMBLY
+    NODECK,LOAD,LIST,XREF,NORENT,TEST,NOMULT,ALGN,ESD ,RLD ,NOSREF,LINECT= 80,MSGLEVEL=   0,SYSPARM= PASS
+   NO OVERRIDING DD NAMES
+      31 CARDS FROM SYSIN     315 CARDS FROM SYSLIB
+      78 LINES OUTPUT           5 CARDS OUTPUT
