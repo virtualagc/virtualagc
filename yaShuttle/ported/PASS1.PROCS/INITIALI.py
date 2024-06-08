@@ -131,7 +131,7 @@ def INITIALIZATION():
     # need persistent locals.
 
     SUBHEAD = 'STMT                                   ' + \
-              '              SOURCE                                                  CURRENT S' + \
+              '               SOURCE                                                  CURRENT S' + \
               'COPE'
     
     EQUALS = ' = '
@@ -195,7 +195,7 @@ def INITIALIZATION():
     
     g.C[0] = VALS[0]
     if LENGTH(g.C[0]) == 0:
-        g.C[0] = 'T H E  V I R T U A L  A G C  P R O J E C T'
+        g.C[0] = 'T I T A N  S Y S T E M S  C O R P .'
     g.J = LENGTH(g.C[0])
     g.J = ((61 - g.J) // 2) + g.J
     g.C[0] = LEFT_PAD(g.C[0], g.J)

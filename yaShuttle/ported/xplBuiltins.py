@@ -688,6 +688,7 @@ def OUTPUT(fileNumber, string):
                     LINE_COUNT += 1
             if i < len(queue) - 1:
                 print(queue[i])
+                LINE_COUNT += 1
             else:
                 print(queue[i], end='')
 
