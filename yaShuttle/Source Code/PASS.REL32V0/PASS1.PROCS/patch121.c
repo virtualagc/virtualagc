@@ -4,5 +4,5 @@
  */
 
 // Note that `LIT_CHAR_AD` is aliased to `COMM(0)`, which is also `COMM`.
-putFIXED(mCOMM, mLIT_NDX);
-putFIXED(mDW_AD, mFOR_DW);
+putFIXED(mCOMM, getFIXED(mLIT_NDX));
+putFIXED(mDW_AD, getFIXED(mFOR_DW));

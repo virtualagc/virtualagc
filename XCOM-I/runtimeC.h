@@ -118,10 +118,10 @@ cToDescriptor(descriptor_t *descriptor, const char *fmt, ...);
 char *
 descriptorToAscii(descriptor_t *descriptor);
 
-// "Convert" a BIT to a CHARACTER. For long bit-strings, this is just a
-// pass-through, but for short bit ones, it's a conversion from
-// a binary representation of an integer to a decimal representation
-// thereof.
+// "Convert" a BIT to a CHARACTER. For long bit-strings, this copies the
+// descriptor_t object and changes its type field; for bitWidth <= 32,
+// it's a conversion from a binary representation of an integer to a decimal
+// representation thereof.
 descriptor_t *
 bitToCharacter(descriptor_t *bit);
 

@@ -161,6 +161,7 @@ endif
 
 SOURCES = $(wildcard *.c)
 HEADERS = $(wildcard *.h)
+DIR_SIM360 = sim360-source/simulate
 
 ifndef REGRESSION
 
@@ -173,10 +174,24 @@ all: $(TARGET)
 $(TARGET): $(SOURCES) $(HEADERS)
 	$(CC) $(EXTRA) -o $@ $(SOURCES) -lm -rdynamic
 
+# The `clean` target is very iffy.  It must be used only in the XCOM-I folder
+# itself, or in folders created by XCOM-I.
 .PHONY: clean
 clean:
+ifeq ($(TARGET),XCOM-I)
+	-rm sim360
+	-make -C $(DIR_SIM360) clean
+else
 	-rm $(TARGET)  # For Linux or Mac
 	-del $(TARGET) # For Windows
+endif
+
+#----------------------------------------------------------------------------
+# For building sim360
+
+sim360: $(wildcard $(DIR_SIM360)/*.c) $(wildcard $(DIR_SIM360)/*.h)
+	make -C $(DIR_SIM360)
+	cp $(DIR_SIM360)/sim360 .
 
 #----------------------------------------------------------------------------
 # For building HAL/S-FC source code and running HAL/S-FC.
@@ -246,7 +261,7 @@ bootstrap45w3:
 # embedded compile-time timestamp occupies 3 bytes.
 ELSE = else
 .PHONY: bootstrap
-bootstrap:
+bootstrap: sim360
 	@echo "Bootstrapping $(BASE) -----------------------------------------"
 	-rm $(BASE)-360*.*
 	XCOM-I.py $(XEXTRA) --xpl \
@@ -367,7 +382,7 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	diff -s -q ANALYZER/out.txt ANALYZER/out.regression
 	
 	@echo ""
-	@echo "*********** All tests passed! ***********"
+	@echo "*********** All regression tests passed! ***********"
 	@echo ""
 
 .PHONY: testclean

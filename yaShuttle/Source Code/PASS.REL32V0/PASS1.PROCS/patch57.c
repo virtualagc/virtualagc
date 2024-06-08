@@ -28,7 +28,7 @@
  *      do below without any INLINEs, so perhaps that's not quite right.
  */
 
-uint32_t addrDW = getFIXED(mFOR_DW);
+uint32_t addrDW = getFIXED(mDW_AD);
 putFIXED(addrDW + 0, 0xFF000000);
 putFIXED(addrDW + 4, 0x00000000);
 

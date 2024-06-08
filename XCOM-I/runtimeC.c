@@ -1232,7 +1232,11 @@ nextBuffer(void)
 descriptor_t *
 bitToCharacter(descriptor_t *bit) {
   if (bit->bitWidth > 32)
-    return bit;
+    {
+      descriptor_t *returnValue = nextBuffer();
+      memmove(returnValue, bit, sizeof(descriptor_t));
+      return returnValue;
+    }
   return fixedToCharacter(bitToFixed(bit));
 }
 
@@ -2626,7 +2630,7 @@ MONITOR9(uint32_t op) {
   uint32_t msw, lsw, address;
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
-  address = getFIXED(dwAddress);
+  address = dwAddress;
   // Get operands from the defined working area, and convert them
   // from IBM floating point to Python floats.
   operand0 = fromFloatIBM(getFIXED(address), getFIXED(address + 4));
@@ -2683,7 +2687,7 @@ MONITOR10(descriptor_t *fpstring) {
   uint32_t msw, lsw, address;
   if (dwAddress == -1)
     abend("No CALL MONITOR(5) prior to CALL MONITOR(9)");
-  address = getFIXED(dwAddress);
+  address = dwAddress;
   toFloatIBM(&msw, &lsw, atof(descriptorToAscii(fpstring)));
   putFIXED(address, msw);
   putFIXED(address + 4, lsw);
@@ -2704,7 +2708,7 @@ MONITOR12(uint32_t precision) {
   uint32_t address;
   if (dwAddress == -1)
     abend("CALL MONITOR(5) must precede CALL MONITOR(9)");
-  address = getFIXED(dwAddress);
+  address = dwAddress;
   value = fromFloatIBM(getFIXED(address), getFIXED(address + 4));
   /*
    * The "standard" HAL format for floating-point numbers is described on
