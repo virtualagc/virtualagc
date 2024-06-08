@@ -167,9 +167,9 @@ def INITIALIZATION():
     
     STORAGE_INCREMENT = 0
     STORAGE_MASK = 0
-    LOGHEAD =                               'STMT                                      ' + \
-        '                          SOURCE                                              ' + \
-        '                   REVISION'
+    LOGHEAD =                                 'STMT                                      ' + \
+        '                            SOURCE                                              ' + \
+        '                    REVISION'
     TMP = 0
     if g.pfs:
         NUM1_OPT = 19
