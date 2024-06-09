@@ -462,7 +462,7 @@ def parseExpression(tokenized, start):
             if not isinstance(value, int):
                 return
             if operator == "~":
-                tree["token"] = {"number": 1 & ~value }
+                tree["token"] = {"number": ~value }
             elif operator == "+":
                 tree["token"] = {"number": value }
             elif operator == "-":
@@ -476,9 +476,9 @@ def parseExpression(tokenized, start):
             bothStrings = isinstance(value1, str) and isinstance(value2, str)
             bothSame = bothNumbers or bothStrings
             if operator == "|" and bothNumbers:
-                tree["token"] = {"number": 1 & (value1 | value2) }
+                tree["token"] = {"number": (value1 | value2) }
             elif operator == "&" and bothNumbers:
-                tree["token"] = {"number": 1 & (value1 & value2)}
+                tree["token"] = {"number": (value1 & value2)}
             elif operator == "=" and bothSame:
                 tree["token"] = {"number": int(value1 == value2) }
             elif operator == "<" and bothNumbers:
