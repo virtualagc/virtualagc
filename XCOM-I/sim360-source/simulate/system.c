@@ -15,15 +15,15 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#include <sys/resource.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <ctype.h>
 
 #ifndef _WIN32
-// Windows VS doesn't have sys/time.h.
+// Windows VS doesn't have sys/time.h or sys/resource.h.
 #include <sys/time.h> // For gettimeofday().
+#include <sys/resource.h> // For getrusage().
 #else
 struct timeval {
    time_t      tv_sec;     /* seconds */
@@ -155,6 +155,9 @@ dump_conversion_table(void)
 int
 get_ibm_time(void)
 {
+#ifdef _WIN32
+  return 0;
+#else
 	struct tm *now;
 	struct timeval tv;
 	time_t sec;
@@ -165,6 +168,7 @@ get_ibm_time(void)
 	sec = ((now->tm_hour * 60) + now->tm_min) * 60 + now->tm_sec;
 
 	return (tv.tv_usec / 10000) + sec * 100;	/* time */
+#endif
 }
 
 /*
