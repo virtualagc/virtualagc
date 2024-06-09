@@ -109,6 +109,8 @@ def PREP_LITERAL():
         if g.VALUE.is_integer() \
                 and g.VALUE < (1 << 31) and g.VALUE >= -(1 << 31):
             g.VALUE = int(g.VALUE)
+    g.DW[6] = g.DW[0]
+    g.DW[7] = g.DW[1]
     #g.SYT_INDEX = SAVE_LITERAL(1, h.TABLE_ADDR);
     g.SYT_INDEX = SAVE_LITERAL(1, g.DW_AD());
     return

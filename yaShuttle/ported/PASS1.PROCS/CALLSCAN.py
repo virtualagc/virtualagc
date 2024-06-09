@@ -77,11 +77,10 @@ def CALL_SCAN():
         else:
             OUTPUT(0, g.S);
             if g.extraTrace:
-                s = BYTE('', 0, g.NEXT_CHAR)
                 if g.CONTEXT >= 0:
                     s1 = "CONTEXT=" + contextNames[g.CONTEXT]
                 else:
                     s1 = "CONTEXT=TBD"
-                print("   { \"%s\" NEXT_CHAR=\'%s\' %s }" % \
-                      (g.VOCAB_INDEX[g.TOKEN], s, s1), end="")
+                print("   { \"%s\" NEXT_CHAR=%d %s }" % \
+                      (g.VOCAB_INDEX[g.TOKEN], g.NEXT_CHAR, s1), end="")
 

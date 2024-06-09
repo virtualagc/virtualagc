@@ -14,7 +14,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
-version = (2023, 11, 17, 13, 0, 0)
+version = (2024, 6, 8, 21, 14, 0)
 
 import sys
 

@@ -1164,9 +1164,9 @@ def STREAM():
     
     def MACRO_DIAGNOSTICS(WHERE):
         try:
-            OUTPUT(0, 'AT ' + str(WHERE) + '  NEXT_CHAR=\'' + 
-                   BYTE("", 0, g.NEXT_CHAR) + \
-                   '\'  MACRO_EXPAN_LEVEL=' + \
+            OUTPUT(0, 'AT ' + str(WHERE) + '  NEXT_CHAR=' + 
+                   str(g.NEXT_CHAR) + \
+                   '  MACRO_EXPAN_LEVEL=' + \
                     str(g.MACRO_EXPAN_LEVEL) + '  MACRO_TEXT(' + \
                     str(g.MACRO_POINT) + ')=' + \
                     str(g.MACRO_TEXT(g.MACRO_POINT)) + '  PARM_REPLACE_PTR(' + \
