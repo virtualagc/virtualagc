@@ -143,7 +143,7 @@ def PRINT_SUMMARY():
     PRINT_TIME('CPU TIME FOR PHASE 1 PROCESSING ', g.CLOCK[2] - g.CLOCK[1]);
     PRINT_TIME('CPU TIME FOR PHASE 1 CLEAN UP   ', g.CLOCK[3] - g.CLOCK[2]);
     if g.CLOCK[2] > g.CLOCK[1]:  # WATCH OUT FOR CLOCK BEING OFF
-        OUTPUT(0, 'PROCESSING RATE: ' + str(6000 * g.CARD_COUNT / (g.CLOCK[2] - g.CLOCK[1])) \
+        OUTPUT(0, 'PROCESSING RATE: ' + str(6000 * g.CARD_COUNT // (g.CLOCK[2] - g.CLOCK[1])) \
                     +' CARDS PER MINUTE.');
     g.DOUBLE_SPACE();
     if g.TPL_FLAG < 3: 
