@@ -98,7 +98,7 @@ sim360: $(wildcard $(DIR_SIM360)/*.c) $(wildcard $(DIR_SIM360)/*.h)
 # Should SUCCEED.  XCOM3 is the 
 .PHONY: bootstrap3
 bootstrap3:
-	@$(MAKE) -s \
+	@"$(MAKE)" -s \
 		BASE=XCOM3 \
 		XPLFILE=Tests/XCOM.xpl \
 		LIBFILE=XPL.LIBRARY.xpl \
@@ -109,7 +109,7 @@ bootstrap3:
 # Should SUCCEED.
 .PHONY: bootstrap45
 bootstrap45:
-	@$(MAKE) -s \
+	@"$(MAKE)" -s \
 		BASE=XCOM45 \
 		XPLFILE=sim360-source/port/XCOM4.5.xpl \
 		LIBFILE=sim360-source/port/XPLIB4.5.xpl \
@@ -124,7 +124,7 @@ bootstrap45:
 #that's my rationale.
 .PHONY: bootstrap45w3
 bootstrap45w3:
-	@$(MAKE) -s \
+	@"$(MAKE)" -s \
 		BASE=XCOM45w3 \
 		XPLFILE=sim360-source/port/xcom4.xpl \
 		LIBFILE=sim360-source/port/xplib.xpl \
