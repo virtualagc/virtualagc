@@ -1,0 +1,90 @@
+# Licensing:	Declared by the author (Ronald Burkey) to be Public Domain
+#		in the U.S., and can be freely distributed or modified in 
+#		any desired way whatsoever.
+# Filename:	Makefile.template -> Makefile
+# Purpose:	For building C-language source-code output from the XCOM-I.py
+#		XPL/I-to-C translator program.  
+# Reference:	https://www.ibiblio.org/apollo/Shuttle.html
+# Contact:	info@sandroid.org
+# Mod history:	2024-03-30 RSB	Wrote
+#		2024-06-09 RSB	Specialized from the general-purpose XCOM-I
+#				Makefile.
+#
+# Compiling C-language Source-Code Files Created by XCOM-I
+# --------------------------------------------------------
+#
+# If XCOM-I has translated an XPL or XPL/I program to C, it has moved all of
+# the C source-code files (and this Makefile) into a separate project folder
+# usually named after the original XPL source-code file it has translated.
+# This makefile is to be used *only* from such a project folder.  Its sole 
+# purpose is to compile the C files created by XCOM-I into an executable.
+#
+# From within the project folder created by XCOM-I, you can build the 
+# executable from the C source code simply with
+#	make
+# By default, the compiled program is given the same name as the folder that 
+# holds the source code, which is determined by the XCOM-I command-line switch
+# --output=FOLDER.  On Windows, you'd typically want the executable you produce
+# to have the filename extension ".exe", but this Makefile makes no effort to
+# automatically deal with detecting this condition.  
+# 
+# There are several alterations you can make by changing how `make` is invoked.
+# Any of these alterations can be used by itself, or in combination with the 
+# others:
+#
+#	To change the filename of the executable, without changing the 
+#	folder name:
+#		make TARGET=filename
+#	where filename is the desired filename.  For example,
+#		make TARGET=myfile.exe
+#
+#	The name of the C compiler is by default assumed to be given by
+#	the setting of the environment variable CC, though if there is
+#	no environment variable called CC, it falls back to `gcc` (the
+#	GNU C compiler).  To change it to something else, you use
+#		make CC=compilername
+#	Examples: 
+#		make CC=clang
+#		make CC=i686-w64-mingw32-gcc
+
+#	To include debugging info in the executable, so that it can be
+#	debugged with `gdb` (or whatever), you can use this:
+#		make EXTRA=-ggdb
+
+#	Or more generally, EXTRA can be used for any other compiler switches 
+#	you like:
+#		make EXTRA='options'
+#	where the options are specific to the compiler.  The quotation
+#	marks need to be present if there are any spaces in the options.  In
+#	Linux at least, you can use either single-quotes (') or double-quotes("),
+#	with the distinction that environment variables (like, say, $n) will be
+#	expanded within double-quotes but not within single quotes; but that's
+#	a feature of the command shell, and not something done by us.  
+#	When compiling C code emitted by XCOM-I, clang produces large numbers
+#	of warnings that most likely are of no interest to you, so you might
+#	feel the need to disable those messages when using CC=clang:
+#	   EXTRA='-Wno-dangling-else -Wno-constant-conversion -Wno-pointer-sign'
+#	Or, if you trust XCOM-I to generate reasonable C source
+#	code, you can use EXTRA='-w' to just disable all warning messages.
+#	Conversely, if you're trying to figure out something XCOM-I and I 
+#	screwed up, you could use EXTRA='-Wall' to enable all warning messages.
+
+TARGET = $(notdir $(CURDIR))
+ifeq ($(strip $(CC)),)
+	CC = gcc
+endif
+
+SOURCES = $(wildcard *.c)
+HEADERS = $(wildcard *.h)
+
+.PHONY: all
+all: $(TARGET)
+
+$(TARGET): $(SOURCES) $(HEADERS)
+	$(CC) $(EXTRA) -o $@ $(SOURCES) -lm -rdynamic
+
+.PHONY: clean
+clean:
+	-rm $(TARGET)  # For Linux or Mac
+	-del $(TARGET) # For Windows
+

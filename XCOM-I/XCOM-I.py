@@ -641,7 +641,7 @@ if targetLanguage == "C":
         os.mkdir(outputFolder)
         shutil.copy2(basePath + "runtimeC.c", outputFolder)
         shutil.copy2(basePath + "runtimeC.h", outputFolder)
-        shutil.copy2(basePath + "Makefile", outputFolder)
+        shutil.copy2(basePath + "Makefile.template", outputFolder + "/Makefile")
     except:
         error("Failed to create files runtimeC.c etc. in %s/" % outputFolder, \
               scope)
