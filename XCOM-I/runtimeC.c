@@ -27,13 +27,28 @@
 
 #include "runtimeC.h"
 #include <time.h>
-#include <sys/time.h> // For gettimeofday().
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <math.h>
 #include <ctype.h>
 #include <execinfo.h>
+
+#ifndef _WIN32
+// Windows VS doesn't have sys/time.h.
+#include <sys/time.h> // For gettimeofday().
+#else
+struct timeval {
+   time_t      tv_sec;     /* seconds */
+   suseconds_t tv_usec;    /* microseconds */
+};
+int gettimeofday(struct timeval *tv, void *tz) {
+  struct timespec ts;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  tv->tv_sec = ts.tv_sec;
+  tv->tv_usec = ts.tv_nsec / 1000;
+}
+#endif
 
 //---------------------------------------------------------------------------
 // Global variables.
