@@ -1164,7 +1164,7 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             g.TEMP = g.QUALIFICATION;
         elif didl == 1:
             # DO FOR
-            g.TEMP = g.QUALIFICATION;
+            g.TEMP = g.XEFOR;
         elif didl == 2:
             # DO CASE
             HALMAT_FIX_POPTAG(g.FIXV[g.MP], 1);
