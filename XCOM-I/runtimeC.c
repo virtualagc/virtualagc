@@ -1467,6 +1467,8 @@ putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
       else
         memory[address + numBytes - 1] &= ~((1 << maskWidth) - 1);
     }
+  if (maskAddress == address + 1)
+    memory[address] = 0;
 }
 
 uint32_t
