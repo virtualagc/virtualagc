@@ -197,6 +197,7 @@ values are themselves dictionaries with the keys:
     "dirWidth"          Number of bytes required in the variable index
     "bitWidth"          from BIT(bitWidth), or 0 if not BIT
     "parentAddress"     For datatype EBCDIC or BITSTRING, address of descriptor.
+    "common"            Present if variable is in COMMON
 '''
 memoryMap = {}
 
@@ -364,7 +365,6 @@ def allocateVariables(scope, region):
             datatype = "BASED"
         else:
             continue
-        
         mangled = attributes["mangled"]
         
         '''
@@ -420,6 +420,8 @@ def allocateVariables(scope, region):
                     "bitWidth": 0,
                     "parentAddress": 0
                 }
+                if "common" in attributes:
+                    memoryMap[variableAddress]["common"] = True
                 if "BIT" in attributes:
                     memoryMap[variableAddress]["datatype"] = "BITSTRING"
                 address = attributes["address"]
@@ -508,6 +510,8 @@ def allocateVariables(scope, region):
                 "bitWidth": bitWidth,
                 "parentAddress": 0
             }
+            if "common" in attributes:
+                memoryMap[variableAddress]["common"] = True
             variableAddress += 28
             continue
         record = {}
@@ -525,6 +529,8 @@ def allocateVariables(scope, region):
             "bitWidth": bitWidth,
             "parentAddress": 0
         }
+        if "common" in attributes:
+            memoryMap[variableAddress]["common"] = True
         attributes["address"] = variableAddress
         # INITIALize FIXED or BIT variables.
         if initial != None and \
@@ -2684,11 +2690,12 @@ def generateC(globalScope):
             comma = ''
         else:
             comma = ','
-        print('  { %s, "%s", "%s", %d, %d, %s, %d, %d, %d, %d, %d }%s' % \
+        common = "common" in variable
+        print('  { %s, "%s", "%s", %d, %d, %s, %d, %d, %d, %d, %d, %d }%s' % \
               (memoryMap[address]["superMangled"], symbol, datatype, 
                numElements, allocated, 
                basedFields, numFieldsInRecord, recordSize, dirWidth, bitWidth,
-               parentAddress, comma), file=f)
+               parentAddress, common, comma), file=f)
     print("};", file=f)
     print("\n// Memory map, sorted by symbol name -------------------------\n",\
           file=f)
@@ -2786,6 +2793,7 @@ def generateC(globalScope):
     print("  int dirWidth;", file=f)
     print("  int bitWidth;", file=f)
     print("  int parentAddress;", file=f)
+    print("  int common;", file=f)
     print("} memoryMapEntry_t;", file=f)
     print("extern memoryMapEntry_t memoryMap[NUM_SYMBOLS]; // Sorted by address", 
           file=f)
