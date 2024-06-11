@@ -142,10 +142,13 @@ for adhoc in adhocs:
 
 # Now let's turn the massaged lines[] array into one gigantic string
 # representing the entire source.
+sourceLibraryCutoff = 0 # Index in `source` of change from library to main.
 source = "".join(lines)
 sourcePos = 0
 sourceRefs = { }
 for i in range(len(lines)):
+    if sourceLibraryCutoff == 0 and i >= libraryCutoff:
+        sourceLibraryCutoff = sourcePos
     sourceRefs[sourcePos] = i
     sourcePos += len(lines[i])
 
@@ -165,6 +168,7 @@ conditionalTrue = False
 pseudoStatement = ''
 skipQuote = 0
 inRecord = False # Tracks whether continuation of "BASED RECORD:".
+psLibraryCutoff = 0 # Pseudo-statement index of change from library to main source.
     
 i = -1 # Position in the source.
 lineRef = None
@@ -356,6 +360,8 @@ while True:
         if not (c == ' ' and lastC == ' ') or inQuote:
             pseudoStatement = pseudoStatement + c
     if endOfStatement:
+        if psLibraryCutoff == 0 and i >= sourceLibraryCutoff:
+            psLibraryCutoff = len(pseudoStatements)
         pseudoStatements.append(pseudoStatement.lstrip())
         psRefs.append(lineRef)
         pseudoStatement = ''
@@ -439,12 +445,15 @@ while True:
             psRefs.insert(lineNumber, psRefs[lineNumber])
             pseudoStatement = pseudoStatement[i+1:].lstrip()
             pseudoStatements[lineNumber + 1] = pseudoStatement
+            if lineNumber <= psLibraryCutoff:
+                psLibraryCutoff += 1;
             ps = ''
             retry = True
             lineNumber -= 1
             break
     if retry:
         continue
+    library = lineNumber < psLibraryCutoff
     scope["pseudoStatements"][len(scope["code"])] = originalPseudoStatement
     scope["lineRefs"][len(scope["code"])] = psRefs[lineNumber]
     scope["lineExpandedText"] = pseudoStatement
@@ -477,7 +486,7 @@ while True:
     # I find that a bit to daunting to deal with if there's no real need
     # to do so.  Perhaps I'll rethink that later.
     if inRecord: # Declaration inside a BASED RECORD?
-        if DECLARE(pseudoStatement, scope, True):
+        if DECLARE(pseudoStatement, scope, library, True):
             error("Problem in DECLARE in BASED RECORD", scope)
         inRecord = False
     elif reserved0 == "EOF":
@@ -488,7 +497,7 @@ while True:
         # ending compilation would mess that up.
         pass
     elif reserved0 in ["DECLARE", "COMMON", "ARRAY", "BASED"]:
-        if DECLARE(pseudoStatement, scope, False):
+        if DECLARE(pseudoStatement, scope, library, False):
             error("Problem in DECLARE, COMMON, ARRAY, or BASED", scope)
         # Was the declaration a "BASED ... RECORD ...:" ?
         # If so, we'll use it (via inRecord) when processing

@@ -366,6 +366,10 @@ def allocateVariables(scope, region):
         else:
             continue
         mangled = attributes["mangled"]
+        if "library" in attributes:
+            library = attributes["library"]
+        else:
+            library = False
         
         '''
         if useString and datatype != "CHARACTER":
@@ -418,7 +422,8 @@ def allocateVariables(scope, region):
                     "recordSize": 0,
                     "dirWidth": 0,
                     "bitWidth": 0,
-                    "parentAddress": 0
+                    "parentAddress": 0,
+                    "library": library
                 }
                 if "common" in attributes:
                     memoryMap[variableAddress]["common"] = True
@@ -508,7 +513,8 @@ def allocateVariables(scope, region):
                 "recordSize": recordSize,
                 "dirWidth": 28,
                 "bitWidth": bitWidth,
-                "parentAddress": 0
+                "parentAddress": 0,
+                "library": library
             }
             if "common" in attributes:
                 memoryMap[variableAddress]["common"] = True
@@ -527,7 +533,8 @@ def allocateVariables(scope, region):
             "recordSize": 0,
             "dirWidth": attributes["dirWidth"],
             "bitWidth": bitWidth,
-            "parentAddress": 0
+            "parentAddress": 0,
+            "library": library
         }
         if "common" in attributes:
             memoryMap[variableAddress]["common"] = True
@@ -1988,10 +1995,12 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             if procScope == None:
                 expression = line["RETURN"]
                 if expression == None: 
-                    print(indent + "exit(0);")
+                    source = "0"
                 else:
                     tipe, source = generateExpression(scope, expression)
-                    print(indent + "exit(%s);" % source)
+                print(indent + 'if (LINE_COUNT) printf("\\n");')
+                print(indent + "writeCOMMON(COMMON_OUT);")
+                print(indent + "exit(%s);" % source)
                 return;
         procedureName = procScope["symbol"]
         procedureAttributes = getAttributes(procScope, procedureName)
@@ -2409,13 +2418,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         # End of main.c.
         print()
         if nonCommonBase > commonBase:
-            print(indent + "if (COMMON_OUT != NULL) {")
-            print(indent + indentationQuantum + "if (writeCOMMON(COMMON_OUT))")
-            print(indent + 2 * indentationQuantum + \
-                  'fprintf(stderr, "Error writing COMMON file.\\n");')
-            print(indent + indentationQuantum + "fclose(COMMON_OUT);")
-            print(indent + indentationQuantum + "COMMON_OUT = NULL;")
-            print(indent + "}")
+            print(indent + "writeCOMMON(COMMON_OUT);")
         print(indent + "if (LINE_COUNT)")
         print(indent + indentationQuantum + \
               "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")
@@ -2615,7 +2618,7 @@ def generateC(globalScope):
         record = variable["record"]
         if len(record) == 1 and "" == list(record)[0]:
             print("// Note that BASED %s has no RECORD" % symbol, file=f)
-        print("const basedField_t based_%s[%d] = {" % (symbol, len(record)), file=f)
+        print("basedField_t based_%s[%d] = {" % (symbol, len(record)), file=f)
         i = 0
         recordSize = 0
         for key in record:
@@ -2691,11 +2694,12 @@ def generateC(globalScope):
         else:
             comma = ','
         common = "common" in variable
-        print('  { %s, "%s", "%s", %d, %d, %s, %d, %d, %d, %d, %d, %d }%s' % \
+        library = variable["library"]
+        print('  { %s, "%s", "%s", %d, %d, %s, %d, %d, %d, %d, %d, %d, %d }%s' % \
               (memoryMap[address]["superMangled"], symbol, datatype, 
                numElements, allocated, 
                basedFields, numFieldsInRecord, recordSize, dirWidth, bitWidth,
-               parentAddress, common, comma), file=f)
+               parentAddress, common, library, comma), file=f)
     print("};", file=f)
     print("\n// Memory map, sorted by symbol name -------------------------\n",\
           file=f)
@@ -2748,7 +2752,8 @@ def generateC(globalScope):
         print("#define PFS", file=f)
     if "B" in ifdefs:
         print("#define BFS", file=f)
-    print("#define STANDARD_XPL", file=f)
+    if standardXPL:
+        print("#define STANDARD_XPL", file=f)
     print("#define COMMON_BASE 0x%06X" % commonBase, file=f)
     print("#define NON_COMMON_BASE 0x%06X" % nonCommonBase, file=f)
     print("#define FREE_BASE 0x%06X" % freeBase, file=f)
@@ -2787,13 +2792,14 @@ def generateC(globalScope):
     print("  datatype_t datatype;", file=f)
     print("  int numElements;", file=f)
     print("  int allocated;", file=f)
-    print("  const basedField_t *basedFields;", file=f)
+    print("  basedField_t *basedFields;", file=f)
     print("  int numFieldsInRecord;", file=f)
     print("  int recordSize;", file=f)
     print("  int dirWidth;", file=f)
     print("  int bitWidth;", file=f)
     print("  int parentAddress;", file=f)
     print("  int common;", file=f)
+    print("  int library;", file=f)
     print("} memoryMapEntry_t;", file=f)
     print("extern memoryMapEntry_t memoryMap[NUM_SYMBOLS]; // Sorted by address", 
           file=f)

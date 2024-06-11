@@ -60,16 +60,44 @@ XPL_APPS += ANALYZER SKELETON
 all: testclean $(XPL_APPS) $(XPLI_APPS)
 	@cd bitsizeDemo && \
 	./bitsizeDemo >out.txt
+	@cd bitsizeDemo && \
+	cat out.txt | \
+	csplit out.txt '%^Address Allocations .*%' \
+		       '/^Initial Values .*/' \
+		       '%^Assignments .*%' >/dev/null
+	-@cd bitsizeDemo && \
+	egrep --invert-match \
+	       '(^Assignments |^.PAGE [0-9]|^$$)' xx01 > xxxxA
 	@diff -s -q bitsizeDemo/out.txt Tests/bitsizeDemo.regression
 	
 	@cd bitsizeDemoCommon && \
 	./bitsizeDemoCommon >out.txt && \
 	csplit out.txt '%^Address Allocations .*%' \
 		       '/^Initial Values .*/' \
-		       '%^Assignments .*%' >/dev/null && \
+		       '%^Assignments .*%' >/dev/null
+	-@cd bitsizeDemoCommon && \
 	cat xx00 xx01 | \
-	egrep --invert-match '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' > xxxx
+	egrep --invert-match \
+	       '(^Address Allocations |^Assignments |^.PAGE [0-9]|^$$)' \
+	       > xxxx
+	-@cd bitsizeDemoCommon && \
+	egrep --invert-match \
+	       '(^Assignments |^.PAGE [0-9]|^$$)' xx01 > xxxxA
+	@diff -s -q bitsizeDemo/xxxxA bitsizeDemoCommon/xxxxA
 	
+	@cd bitsizeDemoCommonIn && \
+	./bitsizeDemoCommonIn --commoni=../bitsizeDemoCommon/COMMON.out >out.txt
+	@cd bitsizeDemoCommonIn && \
+	csplit out.txt '%^COMMON .*%' >/dev/null
+	-@cd bitsizeDemoCommonIn && \
+	cat xx00 | \
+	egrep --invert-match \
+	       '(^COMMON |^.PAGE [0-9]|^$$)' > xxxx
+	@diff -s -q bitsizeDemoCommon/xxxxA bitsizeDemoCommonIn/xxxx
+	@sed --in-place 's/^;.*//' bitsizeDemoCommon/COMMON.out
+	@sed --in-place 's/^;.*//' bitsizeDemoCommonIn/COMMON.out
+	@diff -s -q bitsizeDemoCommon/COMMON.out bitsizeDemoCommonIn/COMMON.out
+
 	@e=Example-6.18.3 && \
 	cd $$e && \
 	./$$e <../Tests/testdata.txt >out.txt && \

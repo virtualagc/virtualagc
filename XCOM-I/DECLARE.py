@@ -72,7 +72,7 @@ def integer(scope, s):
 #    scope               The dictionary for the scope in which
 #                        the `string` was found.
 offsetInRecord = 0
-def DECLARE(pseudoStatement, scope, inRecord = False):
+def DECLARE(pseudoStatement, scope, library, inRecord = False):
     global offsetInRecord
     returnValue = False
     
@@ -367,6 +367,7 @@ def DECLARE(pseudoStatement, scope, inRecord = False):
                                                         ' '.join(fields[n+1:]))
                         break
                     elif not inRecord:
+                        p["library"] = library
                         scope["variables"][symbol] = p
                     else:
                         variables = scope["variables"]

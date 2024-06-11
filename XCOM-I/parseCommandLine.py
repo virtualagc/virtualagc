@@ -82,6 +82,8 @@ prettyPrint = False
 noLabels = False
 displayInitializers = False
 debugInlines = False
+libraryCutoff = 0  # The line-number boundary between the library file and the
+                   # main source.
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -327,6 +329,7 @@ for parm in sys.argv[1:]:
                 dirHALINCL = includeFolder
             if libFile != None:
                 readFileIntoLines(libFile)
+                libraryCutoff = len(lines)
         firstFile = False
         readFileIntoLines(parm)
         if outputFolder == None:

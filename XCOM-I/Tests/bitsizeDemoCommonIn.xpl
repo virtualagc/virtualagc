@@ -101,6 +101,7 @@ COMMON BASED BR RECORD:
 OUTPUT = '';
 OUTPUT = 'BASED Allocations ---------------------------------------------';
 OUTPUT = '';
+/* Allocated by bitsizeDemoCommon via COMMON memory, and cannot be reallocated.
 RECORD_CONSTANT(BB1, 16, 1);
 RECORD_USED(BB1) = RECORD_ALLOC(BB1);
 RECORD_CONSTANT(BB8, 16, 1);
@@ -115,6 +116,7 @@ RECORD_CONSTANT(BC, 16, 1);
 RECORD_USED(BC) = RECORD_ALLOC(BC);
 RECORD_CONSTANT(BR, 16, 1);
 RECORD_USED(BR) = RECORD_ALLOC(BR);
+*/
 OUTPUT = 'BB1 @' || ADDR(BB1) || ', BB1(0) @' || ADDR(BB1(0));
 OUTPUT = 'BB8 @' || ADDR(BB8) || ', BB8(0) @' || ADDR(BB8(0));
 OUTPUT = 'BB16 @' || ADDR(BB16) || ', BB16(0) @' || ADDR(BB16(0));
