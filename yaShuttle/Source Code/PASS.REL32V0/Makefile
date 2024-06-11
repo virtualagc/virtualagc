@@ -20,6 +20,7 @@ XCOM_DIR = ../../../../XCOM-I
 XCOMI = $(XCOM_DIR)/XCOM-I.py
 XLIB = $(XCOM_DIR)/SPACELIB.xpl
 HAL_S_FC_DIR = ../../ported/PASS1.PROCS
+RTARGET = HELLO
 
 all:	$(TARGETS)
 
@@ -40,13 +41,13 @@ $(TARGETS):
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
 .PHONY: regression
-regression: PASS1 FLO
-	@echo Compiling HELLO.xpl with HAL_S_FC.py ...
-	@$(HAL_S_FC_DIR)/HAL_S_FC.py SRN --hal=$(HAL_S_FC_DIR)/HELLO >py.rpt
-	@echo Compiling HELLO.xpl with PASS1 ...
-	-@./PASS1 --pdsi=5,../../ERRORLIB --pdsi=6,../../ACCESS  \
+regression: 
+	@echo Processing $(RTARGET).xpl with HAL_S_FC.py ...
+	$(HAL_S_FC_DIR)/HAL_S_FC.py SRN --hal=$(HAL_S_FC_DIR)/$(RTARGET) >py.rpt
+	@echo Processing $(RTARGET).xpl with PASS1 ...
+	-./PASS1 --pdsi=5,../../ERRORLIB --pdsi=6,../../ACCESS  \
 		--commono=COMMON-PASS1.out \
-		--ddi=0,$(HAL_S_FC_DIR)/HELLO.hal --parm="SRN" \
+		--ddi=0,$(HAL_S_FC_DIR)/$(RTARGET).hal --parm="SRN" \
 		--raf=B,3360,6,vmem.bin --raf=B,7200,1,halmat.bin \
 		--raf=B,1560,2,litfile.bin >c.rpt
 	@echo Comparing ...
@@ -55,3 +56,11 @@ regression: PASS1 FLO
 	@diff -q -s -B c2.rpt py2.rpt
 	@diff -s ../../ported/FILE1.bin halmat.bin
 	
+	@echo Processing $(RTARGET).xpl with FLO ...
+	cp vmem.bin vmemf.bin
+	cp halmat.bin halmatf.bin
+	cp litfile.bin litfilef.bin
+	./FLO \
+		--commoni=COMMON-PASS1.out --commono=COMMON-FLO.out \
+		--raf=B,3360,6,vmemf.bin --raf=B,7200,1,halmatf.bin \
+		--raf=B,1560,2,litfilef.bin >f.rpt
