@@ -331,7 +331,8 @@ def SYT_DUMP():
         OUTPUT(1, '0         (CROSS REFERENCE FLAG KEY:  4 = ASSIGNMENT, ' + \
                   '2 = REFERENCE, 1 = SUBSCRIPT USE, 0 = DEFINITION)');
         l.S = ' DCL  NAME' + SUBSTR(g.X70, 0, J - 3) + \
-                '        TYPE ATTRIBUTES & CROSS REFERENCE';
+                "        TYPE                          " \
+                             "ATTRIBUTES & CROSS REFERENCE";
         OUTPUT(1, g.DOUBLE + l.S);
         OUTPUT(1, g.SUBHEADING + l.S);
         OUTPUT(0, g.X1);

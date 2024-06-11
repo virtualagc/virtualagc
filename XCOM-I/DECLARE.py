@@ -194,23 +194,38 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                 initialString = ''
                 initial = []
                 typeInitial = field
-            elif field == ")" and inInitial:
-                inInitial = False
+                paranCount = 0
+            elif field == "(" and inInitial:
                 attributes.append(field)
-                if initialString != '':
-                    tipe, value = evalString(scope, initialString)
-                    if tipe != None:
-                        initial.append(value)
-                    else:
-                        error("Cannot evaluate INITIAL(%s)" % str(initialString), scope)
-                    initialString = ''
-                properties[typeInitial] = initial
+                paranCount += 1
+            elif field == ")" and inInitial:
+                attributes.append(field)
+                paranCount -= 1
+                if paranCount == 0:
+                    inInitial = False
+                    if initialString != '':
+                        tipe, value = evalString(scope, initialString)
+                        if tipe != None:
+                            initial.append(value)
+                        else:
+                            error("Cannot evaluate INITIAL(%s)" % str(initialString), scope)
+                        initialString = ''
+                    properties[typeInitial] = initial
             elif field in [",", ";", ":"] and not inInitial:
                 properties = {  }
                 if isCommon:
                     properties["common"] = True
                 if isArray:
-                    properties["top"] = int(arrayTop)
+                    try:
+                        properties["top"] = int(arrayTop)
+                    except:
+                        # It turns out that there are cases in which an `ARRAY`
+                        # declaration is used with no defined subscript, and
+                        # the "ARRAY" variable is subsequently used only as a
+                        # scalar.  On cannot help but wonder why?  See the 
+                        # `DOFORCLBL` variable in PASS2.
+                        #error("Unassigned arrayTop", scope)
+                        properties["top"] = 0
                 # Convert the attributes of the new variable as a
                 # list of tokens into a dictionary of properties:
                 #    attributes -> properties
@@ -279,7 +294,11 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                         inBit = False
                         skip = 1
                     elif inInitial:
-                        if token in [",", ")"]:
+                        if token == "(":
+                            paranCount += 1
+                        if token == ")":
+                            paranCount -= 1
+                        if token == "," or (token == ")" and paranCount == 0):
                             if initialString != '':
                                 tipe, value = evalString(scope, initialString)
                                 if tipe != None:
@@ -314,6 +333,7 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                         initial = []
                         typeInitial = token
                         skip = 1
+                        paranCount = 1
                     elif token in ["CHARACTER", "FIXED", "LABEL", "ARRAY",
                                    "BASED", "DYNAMIC"]:
                         properties[token] = True
@@ -327,7 +347,8 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                         properties["RECORD_NONCHAR"] = {}
                         properties["RECORD"] = {}
                     else:
-                        error("Unrecognized token %s" % token, scope)
+                        error("Unrecognized token %s (%s)" % \
+                                                (str(token), str(attributes)), scope)
                         returnValue = True
                     inFirst = False
                 

@@ -3339,6 +3339,13 @@ writeEntryCOMMON(FILE *fp, memoryMapEntry_t *entry, int isField, char *parent) {
           COREHALFWORD(address + 26)
       );
       address = i;
+      if (numElements == 0)
+        {
+          fprintf(fp, "%c\t%s\t%d\t%s\t", prefix, symbol, 0, datatype);
+          fprintf(fp, "%s\n", dopeVector);
+          strcpy(dopeVector, "(blank)");
+          return;
+        }
     }
   else
     {
@@ -3442,11 +3449,12 @@ readCOMMON(FILE *fp) {
                             &address, &recordSize, &ndescriptors, &allocated,
                             &used, &link, &flags, &globalFactor, &groupFactor))
                 abend("Mismatched COMMON: %s", line);
-              // We have to allocate the space for the BASED, and update the
-              // dope vector in memory.
-              putFIXED(m_ALLOCATE_SPACExDOPE, dopeVectorAddress);
-              putFIXED(m_ALLOCATE_SPACExHIREC, allocated - 1);
-              _ALLOCATE_SPACE();
+              if (allocated > 0)
+                {
+                  putFIXED(m_ALLOCATE_SPACExDOPE, dopeVectorAddress);
+                  putFIXED(m_ALLOCATE_SPACExHIREC, allocated - 1);
+                  _ALLOCATE_SPACE();
+                }
               COREWORD2(dopeVectorAddress + 12, used);
               COREWORD2(dopeVectorAddress + 20, flags);
             }

@@ -6,22 +6,27 @@
 #		BASH shell or similar ... i.e., probably for *NIX, not Windows.
 #		Python 3
 #		gcc
+#		make
+#		Various *NIX utilities (diff, egrep)
 
-# This Makefile has several purposes related to the original source code for
-# the HAL/S-FC compiler for the HAL/S language.  By default, it builds 
-# HAL/S-FC itself, targeting the Primary Flight System's software.
+# This Makefile is used to build the components of HAL/S-FC.  It can also be
+# used to perform some regression tests, at least insofar as comparing
+# HAL/S-FC PASS1 to HAL_S_FC.py.
 
 SHELL := /bin/bash # To use bash rather than sh.
 
-defaultTargets = PASS1 FLO OPT AUX PASS2 PASS3 PASS4
-XCOMI = ../../../../XCOM-I/XCOM-I.py
-XLIB = ../../../../XCOM-I/SPACELIB.xpl
+TARGETS = PASS1 FLO OPT AUX PASS2 PASS3 PASS4
+XCOM_DIR = ../../../../XCOM-I
+XCOMI = $(XCOM_DIR)/XCOM-I.py
+XLIB = $(XCOM_DIR)/SPACELIB.xpl
+HAL_S_FC_DIR = ../../ported/PASS1.PROCS
 
-all:	$(defaultTargets)
+all:	$(TARGETS)
 
-.PHONY: $(defaultTargets)
-$(defaultTargets):
-	if [[ "$@" == "AUX" ]] ; \
+.PHONY: $(TARGETS)
+$(TARGETS):
+	@echo Building HAL/S-FC $@ ...
+	@if [[ "$@" == "AUX" ]] ; \
 	then \
 		cd AUX_PROCS; \
 	else \
@@ -32,3 +37,21 @@ $(defaultTargets):
 		'##DRIVER.xpl' && \
 	make -C $@ $@ && \
 	cp $@/$@ ..
+
+IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
+.PHONY: regression
+regression: PASS1 FLO
+	@echo Compiling HELLO.xpl with HAL_S_FC.py ...
+	@$(HAL_S_FC_DIR)/HAL_S_FC.py SRN --hal=$(HAL_S_FC_DIR)/HELLO >py.rpt
+	@echo Compiling HELLO.xpl with PASS1 ...
+	-@./PASS1 --pdsi=5,../../ERRORLIB --pdsi=6,../../ACCESS  \
+		--commono=COMMON-PASS1.out \
+		--ddi=0,$(HAL_S_FC_DIR)/HELLO.hal --parm="SRN" \
+		--raf=B,3360,6,vmem.bin --raf=B,7200,1,halmat.bin \
+		--raf=B,1560,2,litfile.bin >c.rpt
+	@echo Comparing ...
+	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >c2.rpt
+	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >py2.rpt
+	@diff -q -s -B c2.rpt py2.rpt
+	@diff -s ../../ported/FILE1.bin halmat.bin
+	

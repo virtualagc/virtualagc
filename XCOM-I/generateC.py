@@ -1031,6 +1031,13 @@ def autoconvertMonitor(scope, parameters):
     source = source + ")"
     return returnType, source
 
+def getIdentifier(token):
+    if "identifier" in token:
+        return token["identifier"]
+    if "builtin" in token:
+        return token["builtin"]
+    errxit("Token is neither an `identifier` nor a `builtin`: %s", str(token))
+
 # Recursively generate the source code for a C expression that evaluates a tree
 # (previously returned by the `parseExpression` function) created from an XPL 
 # expression.  Returns a pair:
@@ -1066,12 +1073,16 @@ def generateExpression(scope, expression):
             errxit("Wrong number of children for '.' operator")
         baseExpression = expression["children"][0]
         fieldExpression = expression["children"][1]
+        '''
         if "identifier" not in baseExpression["token"]:
             errxit("Base of '.' operator not an identifier")
         if "identifier" not in fieldExpression["token"]:
             errxit("Field of '.' operator not an identifier")
         baseName = baseExpression["token"]["identifier"]
         fieldName = fieldExpression["token"]["identifier"]
+        '''
+        baseName = getIdentifier(baseExpression["token"])
+        fieldName = getIdentifier(fieldExpression["token"])
         baseAttributes = getAttributes(scope, baseName)
         if baseAttributes == None:
             errxit("Base (%s) of '.' operator not found" % baseName)
@@ -1590,12 +1601,16 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     errxit("Wrong number of children for '.' operator")
                 baseExpression = expression["children"][0]
                 fieldExpression = expression["children"][1]
+                '''
                 if "identifier" not in baseExpression["token"]:
                     errxit("Base of '.' operator not an identifier")
                 if "identifier" not in fieldExpression["token"]:
                     errxit("Field of '.' operator not an identifier")
                 baseName = baseExpression["token"]["identifier"]
                 fieldName = fieldExpression["token"]["identifier"]
+                '''
+                baseName = getIdentifier(baseExpression["token"])
+                fieldName = getIdentifier(fieldExpression["token"])
                 baseAttributes = getAttributes(scope, baseName)
                 if baseAttributes == None:
                     errxit("Base (%s) of '.' operator not found" % baseName)
@@ -1998,9 +2013,13 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     source = "0"
                 else:
                     tipe, source = generateExpression(scope, expression)
-                print(indent + 'if (LINE_COUNT) printf("\\n");')
-                print(indent + "writeCOMMON(COMMON_OUT);")
-                print(indent + "exit(%s);" % source)
+                    tipe, source = autoconvert(tipe, ["FIXED"], source)
+                indent2 = indent + indentationQuantum
+                print(indent + "{")
+                print(indent2 + 'if (LINE_COUNT) printf("\\n");')
+                print(indent2 + "writeCOMMON(COMMON_OUT);")
+                print(indent2 + "exit(%s);" % source)
+                print(indent + "}")
                 return;
         procedureName = procScope["symbol"]
         procedureAttributes = getAttributes(procScope, procedureName)
@@ -2026,7 +2045,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             elif toType == "CHARACTER":
                 source = 'cToDescriptor(NULL, "")'
             elif toType == "BIT":
-                source = "fixedToBit(0)"
+                source = "fixedToBit(32, 0)"
         else:
             toType, source = autoconvertFull(scope, line["RETURN"], toAttributes)
         print(indent + "{ reentryGuard = 0; return " + source + "; }")
