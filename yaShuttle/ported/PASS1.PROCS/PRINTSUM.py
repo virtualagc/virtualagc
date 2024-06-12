@@ -134,6 +134,7 @@ def PRINT_SUMMARY():
         OUTPUT(0, 'NUMBER OF FILE 6 WRITES           = ' + VMEM_WRITE_CNT);
     '''
     g.DOUBLE_SPACE();
+    g.DOUBLE_SPACE();
     g.CLOCK[3] = MONITOR(18);
     for I in range(1, 3 + 1):  # WATCH OUT FOR MIDNIGHT
         if g.CLOCK[I] < g.CLOCK[I - 1]: 

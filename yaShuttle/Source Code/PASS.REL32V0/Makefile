@@ -53,7 +53,7 @@ regression:
 	@echo Comparing ...
 	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >c2.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >py2.rpt
-	@diff -q -s -B c2.rpt py2.rpt
+	@diff -q -s c2.rpt py2.rpt
 	@diff -s ../../ported/FILE1.bin halmat.bin
 	
 	@echo Processing $(RTARGET).xpl with FLO ...
