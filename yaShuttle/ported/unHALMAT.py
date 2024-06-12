@@ -8,7 +8,7 @@ Purpose:    To parse a binary HALMAT file output by HAL_S_FC.py.
 History:    2023-11-13 RSB  Began.
 
 It is unclear to the extent that the goal of this program can be 
-achieved.  Only 2 sources of documentation about the inner structure of
+achieved.  Only 3 sources of documentation about the inner structure of
 HALMAT are known at this writing:
     REF1: "HALMAT - An Intermediate Language of the First HAL Compiler",
         (1971).  Nominally complete, but is preliminary and contains

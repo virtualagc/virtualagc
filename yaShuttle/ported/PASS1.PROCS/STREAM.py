@@ -293,7 +293,7 @@ class cSTREAM:
         self.RETURNING_M = g.TRUE
         self.RETURNING_S = 0
         self.RETURNING_E = 0
-        self.PREV_CARD = 1
+        self.PREV_CARD = 0
         self.CHAR_TEMP = ''
         self.RETURN_CHAR = [0] * 3
         self.TYPE_CHAR = [0] * 3

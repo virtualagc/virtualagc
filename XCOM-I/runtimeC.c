@@ -2103,8 +2103,7 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
       fprintf(fp, "%s\n", s);
       pendingNewline = 0;
     }
-  if (pendingNewline)
-    fflush(fp);
+  fflush(fp);
 }
 
 #define MAX_INPUTS 128
@@ -3155,6 +3154,7 @@ lFILE(uint32_t fileNumber, uint32_t recordNumber, uint32_t address)
   if (fseek(fp, position, SEEK_SET) < 0)
     abend("Cannot seek to specified offset in FILE %d", fileNumber);
   returnedValue = fwrite(&memory[address], recordSize, 1, fp);
+  fflush(fp);
   if (returnedValue != 1)
     abend("Failed to write enough bytes to FILE %d", fileNumber);
 }
@@ -3215,6 +3215,7 @@ bFILE(uint32_t devL, uint32_t recL, uint32_t devR, uint32_t recR) {
   if (returnedValue != 1)
     abend("Failed to read specified number of bytes from FILE %d", devR);
   returnedValue = fwrite(buffer, recsizeL, 1, fpL);
+  fflush(fpL);
   if (returnedValue != 1)
     abend("Failed to write specified number of bytes to FILE %d", devL);
 }
