@@ -50,17 +50,6 @@ def PRINT2(LINE, SPACE):
         OUTPUT(2, \
             '1  H A L   C O M P I L A T I O N   --   P H A S E   1   --   U N F O R M A T T E D   S O U R C E   L I S T I N G             PAGE ' \
             +str(l.PAGE_NUM));
-        '''
-        I haven't ported the commented-out line below because it's pointless.
-        In the first place, LINE isn't used in the remainder of this function,
-        so why alter it?  If the original XPL was implemented as I *suspect* it
-        was (in contradiction to McKeeman et al section 6.14) it would change
-        LINE in the *calling* code ... but in all cases I've seen, the LINE
-        parameter is either a string literal or else a string expression, and
-        trying to change either of those would be not only pointless but bad.
-        Not that that's what would happen in the Python port of the line that
-        I'd use, namely LINE = BYTE(LINE, 0, BYTE('-')), but still ...
-        '''
-        # BYTE(LINE) = BYTE('-');
+        LINE = "-" + LINE[1:]
         g.LISTING2_COUNT = 4;
     OUTPUT(2, LINE);

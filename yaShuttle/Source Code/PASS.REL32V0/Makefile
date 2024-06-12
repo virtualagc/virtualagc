@@ -69,7 +69,6 @@ regression:
 	@diff -s $(PORTED)/FILE1.bin halmat.bin
 	@diff -q -s $(PORTED)/LISTING2.txt listing2.txt
 	
-	abort
 	@echo Processing $(RTARGET).xpl with FLO ...
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
