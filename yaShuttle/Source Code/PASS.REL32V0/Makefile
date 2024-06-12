@@ -45,7 +45,7 @@ regression:
 	@echo Processing $(RTARGET).xpl with HAL_S_FC.py ...
 	$(HAL_S_FC_DIR)/HAL_S_FC.py SRN --hal=$(HAL_S_FC_DIR)/$(RTARGET) >py.rpt
 	@echo Processing $(RTARGET).xpl with PASS1 ...
-	-./PASS1 --pdsi=5,../../ERRORLIB --pdsi=6,../../ACCESS  \
+	-./PASS1 --pdsi=5,ERRORLIB --pdsi=6,ACCESS  \
 		--commono=COMMON-PASS1.out \
 		--ddi=0,$(HAL_S_FC_DIR)/$(RTARGET).hal --parm="SRN" \
 		--raf=B,3360,6,vmem.bin --raf=B,7200,1,halmat.bin \

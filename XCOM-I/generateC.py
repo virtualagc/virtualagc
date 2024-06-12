@@ -814,8 +814,8 @@ operatorTypes = {
             "<": ("BIT", "xLT"),
             ">": ("BIT", "xGT"),
             "~=": ("BIT", "xNEQ"),
-            "~<": ("BIT", "xGT"),
-            "~>": ("BIT", "xLT"),
+            "~<": ("BIT", "xGE"),
+            "~>": ("BIT", "xLE"),
             "<=": ("BIT", "xLE"),
             ">=": ("BIT", "xGE")
             },
@@ -829,8 +829,8 @@ operatorTypes = {
             "<": ("BIT", "xsLT"),
             ">": ("BIT", "xsGT"),
             "~=": ("BIT", "xsNEQ"),
-            "~<": ("BIT", "xsGT"),
-            "~>": ("BIT", "xsLT"),
+            "~<": ("BIT", "xsGE"),
+            "~>": ("BIT", "xsLE"),
             "<=": ("BIT", "xsLE"),
             ">=": ("BIT", "xsGE")
         }
