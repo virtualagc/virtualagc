@@ -17,7 +17,7 @@ from auxiliary import walkModel
 # PROCEDURE), determines how many places it's called from, other than its own
 # embedded procedures.  In order to do this, it must walk the entire scope
 # hierarchy.  Having done that, it proceeds to eliminate all PROCEDUREs which
-# are not called from anywhere.
+# are not called from anywhere.  
 def callTree(globalScope):
     
     procedureNames = {}
@@ -99,3 +99,11 @@ def callTree(globalScope):
             for j in range(len(children)-1, -1, -1):
                 if children[j]["symbol"] in junkProcs:
                     del children[j]
+        
+        # We we need to iterate if any procedures were removed, because it
+        # may be that procedures were retained above only because they were
+        # called by procedures we've now eliminated, and thus it may not be
+        # possible to eliminate them also.
+        if len(junkProcs) > 0:
+            callTree(globalScope)
+            
