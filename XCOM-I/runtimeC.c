@@ -2721,6 +2721,7 @@ MONITOR10(descriptor_t *fpstring) {
 void
 MONITOR11(void) {
   // A No-op, supposedly.
+  abend("Unsupported MONITOR(11)");
 }
 
 descriptor_t *
@@ -2883,9 +2884,22 @@ MONITOR23(void) {
   return getCHARACTER(WHERE_MONITOR_23);
 }
 
+int32_t fileNumber31 = 2;
 void
-MONITOR31(int32_t n, uint32_t recnum) {
-  return;
+MONITOR31(int32_t n, int32_t recnum) {
+  if (recnum < 0)
+    {
+      if (n > 0)
+        fileNumber31 = n; // Set default file number.
+      else
+        return; // Wait for read operation to complete ... no need, it's complete!
+    }
+  else
+    {
+      if (n < 0) // Wait for read operation to complete ... no need, it's complete!
+        n &= 0x00FFFFFF;
+      rFILE(n, fileNumber31, recnum);
+    }
 }
 
 uint32_t

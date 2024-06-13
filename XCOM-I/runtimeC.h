@@ -459,8 +459,9 @@ MONITOR22A(uint32_t n2);
 descriptor_t *
 MONITOR23(void);
 
+extern int32_t fileNumber31;
 void
-MONITOR31(int32_t n, uint32_t recnum);
+MONITOR31(int32_t n, int32_t recnum);
 
 uint32_t
 MONITOR32(void);
