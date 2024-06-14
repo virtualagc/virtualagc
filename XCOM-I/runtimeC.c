@@ -3609,9 +3609,15 @@ FREELIMIT2(uint32_t address) {
   freelimit = address;
 }
 
-uint32_t
+int32_t freeBase = FREE_BASE;
+int32_t
 FREEBASE(void) {
-  return FREE_BASE;
+  return freeBase;
+}
+
+void
+FREEBASE2(int32_t value) {
+  freeBase = value;
 }
 
 void
@@ -3646,6 +3652,14 @@ DESCRIPTOR2(uint32_t index, uint32_t descriptor) {
 uint32_t
 NDESCRIPT(void) {
   return (memoryRegions[3].end - memoryRegions[3].start) / 4;
+}
+
+int32_t
+ABS(int32_t value) {
+  if (value == 0x80000000)
+    return 0x7FFFFFFF;
+  else
+    return -value;
 }
 
 void

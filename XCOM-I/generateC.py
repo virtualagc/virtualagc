@@ -738,6 +738,7 @@ def generateADDR(scope, parameter):
                 return 'ADDR("%s", 0x80000000, NULL, 0)' % bVar
             elif 1 == len(bSubs):
                 types, sources = generateExpression(scope, bSubs[0])
+                types, sources = autoconvert(types, ["FIXED"], sources)
                 return 'ADDR("%s", %s, NULL, 0)' % (bVar, sources)
             else:
                 errxit("Wrong subscripting in ADDR(%s(...))" % bVar)
@@ -1757,7 +1758,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             elif "builtin" in tokenLHS:
                 builtin = tokenLHS["builtin"]
                 children = LHS["children"]
-                if builtin in ["FREEPOINT", "FREELIMIT"]:
+                if builtin in ["FREEPOINT", "FREELIMIT", "FREEBASE"]:
                     print(indent + "%s2(numberRHS);" % builtin)
                 elif builtin in ["COREBYTE", "COREWORD", "COREHALFWORD",
                                  "DESCRIPTOR"]:

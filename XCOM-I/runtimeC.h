@@ -563,8 +563,12 @@ FREELIMIT(void);
 void
 FREELIMIT2(uint32_t address);
 
-uint32_t
+extern int32_t freeBase;
+int32_t
 FREEBASE(void);
+
+void
+FREEBASE2(int32_t);
 
 void
 EXIT(void);
@@ -584,6 +588,9 @@ DESCRIPTOR2(uint32_t index, uint32_t descriptor);
 
 uint32_t
 NDESCRIPT(void);
+
+int32_t
+ABS(int32_t value);
 
 void
 debugInline(int inlineCounter);

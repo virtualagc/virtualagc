@@ -533,6 +533,7 @@ while True:
     elif "identifier" in tokenized[0] or ("builtin" in tokenized[0] and \
         tokenized[0]["builtin"] in ["OUTPUT", "COREWORD", "COREBYTE", "FILE",
                                     "BYTE", "FREELIMIT", "FREEPOINT",
+                                    "FREEBASE",
                                     "COREHALFWORD", "DESCRIPTOR"]):
         # Other than a label (already processed above), the only thing
         # that begins with an identifier appears to be an assignment
