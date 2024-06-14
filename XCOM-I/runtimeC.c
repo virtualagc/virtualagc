@@ -3329,6 +3329,7 @@ writeEntryCOMMON(FILE *fp, memoryMapEntry_t *entry, int isField, char *parent) {
   if (symbol == NULL || *symbol == 0)
     symbol = "(blank)";
 
+#ifdef ORIGINAL_BASED_THINKING
   // A number of library variables are in COMMON, but I reject them.  Why?
   // The library is devoted to memory management, and its variables being in
   // COMMON is based on the false notion that the variables it is managing are
@@ -3338,6 +3339,10 @@ writeEntryCOMMON(FILE *fp, memoryMapEntry_t *entry, int isField, char *parent) {
   // the library couldn't have something other than memory management in it.
   if (!common || entry->library)
     return;
+#else
+  if (!common)
+    return;
+#endif
 
   if (!strcmp(datatype, "BASED"))
     {
@@ -3464,6 +3469,7 @@ readCOMMON(FILE *fp) {
                             &address, &recordSize, &ndescriptors, &allocated,
                             &used, &link, &flags, &globalFactor, &groupFactor))
                 abend("Mismatched COMMON: %s", line);
+#ifdef ORIGINAL_BASED_THINKING
               if (allocated > 0)
                 {
                   putFIXED(m_ALLOCATE_SPACExDOPE, dopeVectorAddress);
@@ -3472,6 +3478,17 @@ readCOMMON(FILE *fp) {
                 }
               COREWORD2(dopeVectorAddress + 12, used);
               COREWORD2(dopeVectorAddress + 20, flags);
+#else
+              COREWORD2(dopeVectorAddress + 0, address);
+              COREHALFWORD2(dopeVectorAddress + 4, recordSize);
+              COREHALFWORD2(dopeVectorAddress + 6, ndescriptors);
+              COREWORD2(dopeVectorAddress + 8, allocated);
+              COREWORD2(dopeVectorAddress + 12, used);
+              COREWORD2(dopeVectorAddress + 16, link);
+              COREWORD2(dopeVectorAddress + 20, flags);
+              COREHALFWORD2(dopeVectorAddress + 24, globalFactor);
+              COREHALFWORD2(dopeVectorAddress + 26, groupFactor);
+#endif
             }
           // Nothing else to do, since this line in the COMMON file is really
           // just a delimiter between the BASED's records.
