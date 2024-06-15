@@ -73,7 +73,7 @@ regression:
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
 	cp litfile.bin litfilef.bin
-	./FLO \
+	./FLO   --ddo=2,LISTING2f.txt \
 		--commoni=COMMON-PASS1.out --commono=COMMON-FLO.out \
 		--raf=B,3360,6,vmemf.bin --raf=B,7200,1,halmatf.bin \
 		--raf=B,1560,2,litfilef.bin >f.rpt

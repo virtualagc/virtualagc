@@ -27,9 +27,6 @@ def PROCEDURE(tokenized, scope, inRecord = False):
     # before reaching this point, and so will have been added to the list of
     # variables as a label.  Remove it.
     symbol = list(scope["variables"])[-1]
-    if symbol == "COMMENT_BRACKET": #***DEBUG***
-        #print("***", symbol, scope["blockType"], file=sys.stderr)
-        pass
     scope["labels"].remove(symbol)
     attributes = scope["variables"][symbol]
     attributes.pop("LABEL")

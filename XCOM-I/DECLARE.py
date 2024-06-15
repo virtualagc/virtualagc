@@ -176,7 +176,7 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                         inArray = 1
                     elif isBased:
                         inBased = 1
-                        attributes.append("BASED")
+                        #attributes.append("BASED")
                     group = [field]
                 seekingName = False
             elif field == ")" and inGroup:
@@ -352,12 +352,11 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                         returnValue = True
                     inFirst = False
                 
-                attributes = []
+                if isArray or isBased:
+                    attributes = attributes[:1]
+                else:
+                    attributes = []
                 for symbol in group:
-
-                    if symbol == "MOVECHAR": #***DEBUG***
-                        pass
-                        pass
                     if passCount == 1 and not inRecord:
                         if symbol in scope["variables"] or \
                                 symbol in scope["literals"]:
@@ -390,6 +389,9 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                     elif not inRecord:
                         p["library"] = library
                         scope["variables"][symbol] = p
+                        if symbol == "SYM_DATA_CELL_ADDR":
+                            print("***DEBUG***", p, pseudoStatement)
+
                     else:
                         variables = scope["variables"]
                         basedVar = variables[list(variables)[-1]]

@@ -524,6 +524,8 @@ def allocateVariables(scope, region):
         bitWidth = 0
         if "BIT" in attributes:
             bitWidth = attributes["BIT"]
+        if "dirWidth" not in attributes:
+            print("***DEBUG***", file=sys.stderr)
         memoryMap[variableAddress] = {
             "mangled": mangled, 
             "datatype": datatype, 
@@ -592,6 +594,8 @@ def mangle(scope, extra = None):
     for identifier in scope["variables"]:
         mangled = prefix + \
             identifier.replace("@", "a").replace("#", "p").replace("$","d")
+        #if identifier == "SYM_DATA_CELL_ADDR":
+        #    print("***DEBUG***", prefix, mangled, scope["blockType"], file=sys.stderr)
         scope["variables"][identifier]["mangled"] = mangled
         if "LABEL" in scope["variables"][identifier]:
             mangledLabels.append(mangled)

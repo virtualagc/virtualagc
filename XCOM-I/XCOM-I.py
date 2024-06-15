@@ -599,28 +599,43 @@ while True:
 # correctly right now, but easier (I think) than having done it above.
 # The same comment is true for LABELs within a PROCEDURE, except of course that
 # it actually *makes sense* for to be within DO...END blocks.
+ORIGINAL_PROMOTION = False
 def fixProcedureScopes(scope, extra=None):
     # If this scope is not itself a PROCEDURE, we
     # have to find the enclosing PROCEDURE, or failing that the global
     # procedure.
     nscope = scope
-    while "blockType" in nscope and nscope["blockType"] != "PROCEDURE":
+    while nscope["symbol"] == "" or nscope["symbol"][:1] == scopeDelimiter:
         if nscope["parent"] == None:
             break
         nscope = nscope["parent"]
     if nscope == scope:
         return
-    # Now promote all PROCEDURE definitions and LABELs from the current scope
-    # to the enclosing PROCEDURE's scope.
-    remove = []
-    for symbol in scope["variables"]:
-        attributes = scope["variables"][symbol]
-        if "PROCEDURE" not in attributes and "LABEL" not in attributes:
-            continue
-        remove.append(symbol)
-        nscope["variables"][symbol] = attributes
-    for symbol in remove:
-        scope["variables"].pop(symbol)
+    if ORIGINAL_PROMOTION:
+        # Now promote all PROCEDURE definitions and LABELs from the current scope
+        # to the enclosing PROCEDURE's scope.
+        remove = []
+        for symbol in scope["variables"]:
+            attributes = scope["variables"][symbol]
+            if "PROCEDURE" not in attributes and "LABEL" not in attributes:
+                continue
+            remove.append(symbol)
+            nscope["variables"][symbol] = attributes
+        for symbol in remove:
+            scope["variables"].pop(symbol)
+    else:
+        # It turns out that the same darned thing happens with variables as well. 
+        # Promote *all* identifiers from the current scope to the enclosing
+        # PROCEDURE's scope.  If duplicate definition, print a message, except
+        # for LABELs, since the duplicates would be expected forward declarations.
+        for symbol in scope["variables"]:
+            if symbol in nscope["variables"]:
+                if not ("LABEL" in scope["variables"][symbol] and \
+                        "LABEL" in nscope["variables"][symbol]):
+                    error("%s multiply-defined in %s" % (symbol, nscope["symbol"]),
+                          scope)
+            nscope["variables"][symbol] = scope["variables"][symbol]
+        scope["variables"] = {}
 walkModel(globalScope, fixProcedureScopes)
 
 if False: # Print out a hierarchical tree of procedures.
