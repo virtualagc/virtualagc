@@ -389,9 +389,6 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                     elif not inRecord:
                         p["library"] = library
                         scope["variables"][symbol] = p
-                        if symbol == "SYM_DATA_CELL_ADDR":
-                            print("***DEBUG***", p, pseudoStatement)
-
                     else:
                         variables = scope["variables"]
                         basedVar = variables[list(variables)[-1]]

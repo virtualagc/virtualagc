@@ -84,6 +84,7 @@ displayInitializers = False
 debugInlines = False
 libraryCutoff = 0  # The line-number boundary between the library file and the
                    # main source.
+reservedMemory = 0x1000
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -241,11 +242,17 @@ The available OPTIONS are:
 --de            This duplicates the $E control toggle of the original XCOM,
                 but only to the extent of displaying the raw initial values of 
                 variables in the symbol table printed in main.c.
+--reserved=N    (Default 4096.)  XCOM-I retains a certain amount of the 24-bit
+                XPL memory space for its own internal use.  If you get an 
+                out-of-reserved-memory error message from XCOM-I, you can use
+                this option to enlarge the amount of reserved memory.
 '''
 
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm.startswith("--reserved="):
+        reservedMemory = int(parm[11:])
     elif parm == "--debug-inlines":
         debugInlines = True
     elif parm == "--pp":

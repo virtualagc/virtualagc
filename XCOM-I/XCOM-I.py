@@ -36,7 +36,7 @@ from IF import IF
 from RETURN import RETURN
 from CALL import CALL
 from ESCAPEorREPEAT import ESCAPEorREPEAT
-from generateC import generateC, ppFiles
+from generateC import generateC, ppFiles, reservedMemory, physicalMemoryLimit
 
 logicalNot = '¬'
 usCent = '¢'
@@ -675,3 +675,9 @@ if targetLanguage == "C":
         #print("Pretty-printing " + ppFiles["filenames"], file=sys.stderr)
         os.system("cd " + outputFolder + " && clang-format --style=gnu -i " + \
                   ppFiles["filenames"])
+
+if reservedMemory["numReserved"] > 0:
+    print("Number of reserved literals: %d" % reservedMemory["numReserved"])
+    print("Space used for reserved literals: %d/%d" % \
+                                      (0x1000000 - reservedMemory["nextReserved"], 
+                                       0x1000000 - physicalMemoryLimit))

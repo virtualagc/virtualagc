@@ -29,9 +29,8 @@ debug = False # Standalone interactive test of expression generation.
 
 ppFiles = { "filenames": "" }
 
-# I'm not sure how close I can get to the top of memory (0x1000000) without
-# causing a problem.
-physicalMemoryLimit = 0x1000000 - 0x1000
+# Reserve the top of memory for some literal strings.
+physicalMemoryLimit = 0x1000000 - reservedMemory
 
 # Just for engineering
 errxitRef = 0
@@ -842,6 +841,41 @@ operatorTypes = {
     }
 }
 
+# This function is used by `autoconvert` to create a CHARACTER variable (both
+# descriptor and data) in the reserved area set aside at the top of physical
+# memory.  Returns the descriptor.  Amusingly -- or not! --, there's a need for
+# this precisely *once* in HAL/S-FC, in PASS4, where the code
+#    CALL MOVE(8, 'HALSDF  ', SDFNAM);
+# was used in place of
+#    SDFNAM = 'HALSDF  ';
+# (And yes, there was a reason for that; SDFNAM is a pointer to character data 
+# rather than a descriptor.)  Incidentally, this maneuver fooled not only me, 
+# but also fooled the contemporary embedded comments in the SDFPROCE module to 
+# say that SDFNAM was an "EXTERNAL VARIABLE REFERENCED" rather than an 
+# "EXTERNAL VARIABLE CHANGED".
+reservedMemory = {
+    "numReserved": 0,
+    "nextReserved": physicalMemoryLimit
+    }
+def reserveLiteral(string):
+    global reservedMemory
+    length = len(string)
+    if length == 0:
+        return 0
+    nextReserved = reservedMemory["nextReserved"]
+    if nextReserved + 4 + length > 0x1000000:
+        errxit("Please use --reserved=N with N>%d:  Literal '%s' overflowed reserved memory" % \
+               (reservedMemory, string))
+    descriptor = ((length - 1) << 24) | (nextReserved + 4)
+    putFIXED(nextReserved, descriptor)
+    nextReserved += 4
+    for i in range(length):
+        memory[nextReserved] = asciiToEbcdic[ord(string[i])]
+        nextReserved += 1
+    reservedMemory["numReserved"] += 1
+    reservedMemory["nextReserved"] = nextReserved
+    return descriptor
+
 # Get a list of possible autoconversions.  I'm frankly confused about
 # what conversions are allowed, and McKeeman seems to cover them
 # in a manner that (to me) seems obtuse.  On the other hand,
@@ -861,11 +895,16 @@ def autoconvert(current, allowed, source=None):
     if current == "CHARACTER":
         if "CHARACTER" in allowed:
             conversions.append(("CHARACTER", "%s"))
-        if "FIXED" in allowed and source != None and \
-                source.startswith("getCHARACTER("):
-            # In this case, we interpreted the FIXED as being the descriptor
-            # of the string. 
-            return "FIXED", "getFIXED" + source[12:]
+        if "FIXED" in allowed and source != None:
+            if source.startswith("getCHARACTER("):
+                # In this case, we interpret the FIXED as being the descriptor
+                # of the string. 
+                return "FIXED", "getFIXED" + source[12:]
+            elif source.startswith('cToDescriptor(NULL, "'): 
+                # In this case, we interpret the FIXED as being the descriptor
+                # of a literal string.
+                descriptor = reserveLiteral(source[21:-2])
+                return "FIXED", descriptor
         if "BIT" in allowed:
             convertions.append(("BIT", "%s"))
     elif current == "BIT":
@@ -2160,7 +2199,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                             function = "put" + toType + "("
                         print(indent2 + function + \
                                  innerAddress + ", " + \
-                                 parm + "); ")
+                                 str(parm) + "); ")
                     print(indent2 + mangled + "();")
                     print(indent + "}")
     elif "CASE" in line:
