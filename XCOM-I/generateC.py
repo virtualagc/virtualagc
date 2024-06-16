@@ -51,6 +51,9 @@ def errxit(msg, action="abend"):
     print("Unknown action (%s) requested", file = sys.stderr)
     sys.exit(2)
 
+def normalizedLabel(label):
+    return label.replace("@","a").replace("#","p").replace("$","d")
+
 '''
 Notes on the Translation of XPL or XPL/I Entities to C
 ------------------------------------------------------
@@ -508,6 +511,8 @@ def allocateVariables(scope, region):
                 reservedMemory["numReserved"] += 1
                 if nextReserved < physicalMemoryLimit:
                     physicalMemoryLimit = nextReserved
+                    errxit("Please use --reserved=N (N>=%d) for the entire XPL program chain" % \
+                           physicalMemoryLimit, scope)
                 address = nextReserved
                 allocated = size
                 used = size
@@ -2032,7 +2037,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             mangled = procScope["longjmpLabels"][label]["mangled"]
             print(indent + "longjmp(jb%s, 1);" % mangled)
         else:
-            print(indent + "goto " + label + ";")
+            print(indent + "goto " + normalizedLabel(label) + ";")
     elif "TARGET" in line:
         if "sortedSetjmpLabels" in scope and \
                 line["TARGET"] in scope["sortedSetjmpLabels"]:
@@ -2045,7 +2050,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             indent1 = indent + indentationQuantum
             indent2 = indent1 + indentationQuantum
             indent3 = indent2 + indentationQuantum
-            print(indent1 + line["TARGET"] + ":")
+            print(indent1 + normalizedLabel(line["TARGET"]) + ":")
             parentProc = findParentProcedure(scope)
             label = parentProc["variables"][scope["sortedSetjmpLabels"][setjmpCounter]]["mangled"]
             print(indent1 + "if (setjmpInitialize) {")
@@ -2055,11 +2060,11 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 label = "setjmpInitialized"
             else:
                 label = scope["sortedSetjmpLabels"][setjmpCounter]
-            print(indent3 + "goto %s;" % label)
+            print(indent3 + "goto %s;" % normalizedLabel(label))
             print(indent1 + "}")
             print(indent + "}")
         else:
-            print(indent + line["TARGET"] + ":", end="")
+            print(indent + normalizedLabel(line["TARGET"]) + ":", end="")
             if indexInScope >= len(scope["code"]) - 1:
                 print(";")
             else:
@@ -2210,7 +2215,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
         whereTo = line["ESCAPE"]
         if whereTo == None:
             if blockType in ["DO block"]:
-                print(indent + "goto e%s;" % scope["symbol"])
+                print(indent + "goto e%s;" % normalizedLabel(scope["symbol"]))
             else: # Looping blocks.
                 print(indent + "break;")
         else:
@@ -2219,13 +2224,13 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 bscope = bscope["parent"]
                 if bscope == None:
                     errxit("DO ... END block labeled %s not found" % whereTo)
-            print(indent + "goto e%s;" % bscope["symbol"])
+            print(indent + "goto e%s;" % normalizedLabel(bscope["symbol"]))
     elif "REPEAT" in line:
         blockType = scope["blockType"]
         whereTo = line["REPEAT"]
         if whereTo == None:
             if blockType in ["DO block", "DO CASE block"]:
-                print(indent + "goto r%s;" % scope["symbol"])
+                print(indent + "goto r%s;" % normalizedLabel(scope["symbol"]))
             else: # Looping blocks
                 print(indent + "continue;")
         else:
@@ -2234,7 +2239,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 bscope = bscope["parent"]
                 if bscope == None:
                     errxit("DO ... END block labeled %s not found" % whereTo)
-            print(indent + "goto r%s;" % bscope["symbol"])
+            print(indent + "goto r%s;" % normalizedLabel(bscope["symbol"]))
     else:
         print(indent + "Unimplemented:", end="", file=debugSink)
         printDict(line)
@@ -2423,7 +2428,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         if "sortedSetjmpLabels" in scope:
             print(indent1 + "static int setjmpInitialize = 1;") 
             print(indent1 + "if (setjmpInitialize) { ")
-            print(indent2 + "goto %s; " % scope["sortedSetjmpLabels"][0])
+            print(indent2 + "goto %s; " % normalizedLabel(scope["sortedSetjmpLabels"][0]))
             print(indent2 + "setjmpInitialized: setjmpInitialize = 0;")
             print(indent1 + "}")
         

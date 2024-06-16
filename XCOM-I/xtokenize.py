@@ -159,7 +159,7 @@ def xtokenize(scope, pseudoStatement):
             j = i
             while j < len(pseudoStatement) and \
                     (pseudoStatement[j].isalnum() or \
-                     pseudoStatement[j] in breakCharacters): # or pseudoStatement[j] == "."):
+                     pseudoStatement[j] in breakCharacters):
                 j += 1
             #if pseudoStatement[j - 1] == ".":
             #    j -= 1

@@ -78,7 +78,7 @@ displayInitializers = False
 debugInlines = False
 libraryCutoff = 0  # The line-number boundary between the library file and the
                    # main source.
-reservedMemory = 0x1000
+reservedMemory = 0x2000
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
