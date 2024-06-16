@@ -10,7 +10,7 @@ Reference:  http://www.ibibio.org/apollo/Shuttle.html
 Mods:       2024-05-02 RSB  Began.
 '''
 
-from parseCommandLine import keepUnused
+from parseCommandLine import keepUnused, quiet
 from auxiliary import walkModel
 
 # For each PROCEDURE defined at the global level (versus being an embedded
@@ -86,13 +86,15 @@ def callTree(globalScope):
                 if procedureNames[procedure]["anyCalls"] == 0:
                     junkProcs.append(procedure)
         if len(junkProcs) != 0:
-            print("No code is generated for the following PROCEDURE(s):")
+            if not quiet:
+                print("No code is generated for the following PROCEDURE(s):")
             for j in junkProcs:
-                if j in overrides:
-                    reason = "Overridden:  "
-                else:
-                    reason = "Not called:  "
-                print("\t" + reason + j)
+                if not quiet:
+                    if j in overrides:
+                        reason = "Overridden:  "
+                    else:
+                        reason = "Not called:  "
+                    print("\t" + reason + j)
                 if j in globalScope["variables"]:
                     globalScope["variables"].pop(j)
             children = globalScope["children"]

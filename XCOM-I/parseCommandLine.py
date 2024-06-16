@@ -79,6 +79,7 @@ debugInlines = False
 libraryCutoff = 0  # The line-number boundary between the library file and the
                    # main source.
 reservedMemory = 0x2000
+quiet = False
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -219,6 +220,9 @@ The available OPTIONS are:
 --concise       in the generated C source code, useful for debugging, or just for
                 improved human readability.  Whereas the --concise switch instead
                 eliminates those extra comments, producing smaller C file sizes.
+--quiet         Eliminates some informative messages by XCOM-I.  Note that this
+                is *not* the opposite of --verbose, which affects the generated
+                C code rather than XCOM-I's messages.
 --backtrace     Show Python backtrace for some XCOM-I errors.
 --keep-unused   By default, XPL procedures which are never called are discarded
                 without any generation of C code, and reduced analysis.  With
@@ -246,6 +250,8 @@ The available OPTIONS are:
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm == "--quiet":
+        quiet = True
     elif parm.startswith("--reserved="):
         reservedMemory = int(parm[11:])
     elif parm == "--debug-inlines":

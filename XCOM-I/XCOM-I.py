@@ -653,7 +653,7 @@ if targetLanguage == "C":
         os.system("cd " + outputFolder + " && clang-format --style=gnu -i " + \
                   ppFiles["filenames"])
 
-if reservedMemory["numReserved"] > 0:
+if not quiet and reservedMemory["numReserved"] > 0:
     print("Reserved count: %d" % reservedMemory["numReserved"])
     print("Reserved space: %d" % (0x1000000 - reservedMemory["nextReserved"]))
           
