@@ -319,7 +319,8 @@ def putCHARACTER(address, s):
 rootBASED = 0
 #lastBASED = 0
 def allocateVariables(scope, region):
-    global variableAddress, memory, memoryMap, rootBASED #, lastBASED
+    global variableAddress, memory, memoryMap, rootBASED, reservedMemory, \
+           physicalMemoryLimit
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
@@ -489,17 +490,40 @@ def allocateVariables(scope, region):
                 ndescript = 1
             elif "RECORD_CHAR" in attributes:
                 ndescript = len(attributes["RECORD_CHAR"])
+            address = 0
+            allocated = 0
+            used = 0
+            options = 0
+            if "top" in attributes:
+                # Although being implemented as a BASED RECORD, this object is
+                # really a DECLARE RECORD.  As such, it has a size known at
+                # compile time.  We're going to allocate that space in the
+                # memory that XCOM-I "reserves" between `physicalMemoryLimit`
+                # and 0x1000000.  This area grows downward, as tracked by the
+                # `reservedMemory` dictionary, pushing `physicalMemoryLimit`
+                # downward if necessary.
+                size = attributes["recordSize"] * length
+                nextReserved = reservedMemory["nextReserved"] - size
+                reservedMemory["nextReserved"] = nextReserved
+                reservedMemory["numReserved"] += 1
+                if nextReserved < physicalMemoryLimit:
+                    physicalMemoryLimit = nextReserved
+                address = nextReserved
+                allocated = size
+                used = size
+                options = 3 << 24 # constant and unmoveable
+            putFIXED(variableAddress + 0, address)
             putHALFWORD(variableAddress + 4, recordSize)
             putHALFWORD(variableAddress + 6, ndescript) # #descriptors
-            putFIXED(variableAddress + 8, 0) # allocated
-            putFIXED(variableAddress + 12, 0) # used
+            putFIXED(variableAddress + 8, allocated) # allocated
+            putFIXED(variableAddress + 12, used) # used
             '''
             if lastBASED > 0:
                 putFIXED(lastBASED + 16, variableAddress)
             lastBASED = variableAddress
             '''
             putFIXED(variableAddress + 16, 0) # next
-            putFIXED(variableAddress + 20, 0) # options
+            putFIXED(variableAddress + 20, options) # options
             putHALFWORD(variableAddress + 24, 0) # global factor
             putHALFWORD(variableAddress + 26, 0) # group factor
             attributes["address"] = variableAddress
@@ -855,23 +879,20 @@ operatorTypes = {
 # "EXTERNAL VARIABLE CHANGED".
 reservedMemory = {
     "numReserved": 0,
-    "nextReserved": physicalMemoryLimit
+    "nextReserved": 0x1000000
     }
 def reserveLiteral(string):
-    global reservedMemory
+    global reservedMemory, physicalMemoryLimit
     length = len(string)
     if length == 0:
         return 0
-    nextReserved = reservedMemory["nextReserved"]
-    if nextReserved + 4 + length > 0x1000000:
-        errxit("Please use --reserved=N with N>%d:  Literal '%s' overflowed reserved memory" % \
-               (reservedMemory, string))
+    nextReserved = reservedMemory["nextReserved"] - 4 - length
+    if nextReserved < physicalMemoryLimit:
+        physicalMemoryLimit = nextReserved;
     descriptor = ((length - 1) << 24) | (nextReserved + 4)
     putFIXED(nextReserved, descriptor)
-    nextReserved += 4
     for i in range(length):
-        memory[nextReserved] = asciiToEbcdic[ord(string[i])]
-        nextReserved += 1
+        memory[nextReserved + 4 + i] = asciiToEbcdic[ord(string[i])]
     reservedMemory["numReserved"] += 1
     reservedMemory["nextReserved"] = nextReserved
     return descriptor
@@ -1332,7 +1353,7 @@ def generateExpression(scope, expression):
                           "COREWORD", "FREEPOINT", "TIME_OF_GENERATION",
                           "FREELIMIT", "FREEBASE", "ABS", "NDESCRIPT",
                           "STRING_GT", "COREHALFWORD", "PARM_FIELD",
-                          "DESCRIPTOR"]:
+                          "DESCRIPTOR", "XPL_COMPILER_VERSION"]:
                 if symbol in ["INPUT", "SUBSTR", "PARM_FIELD"]:
                     builtinType = "CHARACTER"
                 else:
@@ -1340,7 +1361,8 @@ def generateExpression(scope, expression):
                 parameters = expression["children"]
                 source = symbol + "("
                 # Some special cases for omitted parameters.
-                if symbol == "INPUT" and len(parameters) == 0:
+                if symbol in ["INPUT", "XPL_COMPILER_VERSION"] and \
+                        len(parameters) == 0:
                     source = source + "0"
                     first = False
                 elif symbol == "SUBSTR" and len(parameters) == 2:
@@ -2127,32 +2149,6 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 lastCallInline = lineCounter
         else:
             if procedure == "MONITOR":
-                '''
-                parameters = line["parameters"]
-                if len(parameters) == 0:
-                    errxit("MONITOR function number missing")
-                tipe, parme = generateExpression(scope, parameters[0])
-                if not isinstance(parme, str) or not parme.isdigit():
-                    errxit("MONITOR function number not an integer")
-                pstart = 1
-                if parme == "22":
-                    if len(parameters) == 1:
-                        errxit("Second argument of MONITOR(22) missing")
-                    tipe, parme = generateExpression(scope, parameters[1])
-                    if parme == "0":
-                        pstart = 2
-                        print(indent + "MONITOR22A(", end="")
-                    else:
-                        print(indent + "MONITOR22(", end="")
-                else:
-                    print(indent + "MONITOR" + parme + "(", end="")
-                for i in range(pstart, len(parameters)):
-                    if i > pstart:
-                        print(", ", end = '')
-                    tipe, parme = generateExpression(scope, parameters[i])
-                    print(parme, end = '')
-                print(");")
-                '''
                 typem, sourcem = autoconvertMonitor(scope, line["parameters"])
                 print(indent + sourcem + ";")
             # Some builtins can be CALL'd
@@ -2811,6 +2807,8 @@ def generateC(globalScope):
     print("#define APP_NAME \"%s\"" % appName, file=f)
     print("#define XCOM_I_START_TIME %d" % TIME_OF_GENERATION, file=f)
     print("#define XCOM_I_START_DATE %d" % DATE_OF_GENERATION, file=f)
+    print("#define MAJOR_VERSION %d" % majorVersionXCOMI, file=f)
+    print("#define MINOR_VERSION %d" % minorVersionXCOMI, file=f)
     if "P" in ifdefs:
         print("#define PFS", file=f)
     if "B" in ifdefs:

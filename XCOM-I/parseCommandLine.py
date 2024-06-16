@@ -15,6 +15,10 @@ import sys
 import os
 import re
 
+# XCOM-I version.  Each is in the range 0-99.
+majorVersionXCOMI = 0
+minorVersionXCOMI = 9
+
 if False:
     import datetime
     now = datetime.datetime.now()
@@ -44,16 +48,6 @@ def my_print(*args, **kwargs):
         breakpoint()
 builtins.print = my_print
 '''
-
-# `newHex` affects the algorithm for replacing "..." by numbers.  If False, then
-# my original method is to replace numbers in non-decimal bases by tokens like
-# 0x..., 0q..., 0o..., and 0b....  However, I found that that broke the weird
-# `XSET` macro in HAL/S-FC source code, which can precede either decimal numbers
-# or double-quoted strings, but gets confused if preceding something like 0x....
-# The new algorithm simply replaces the double-quoted string by their decimal-
-# number equivalents immediately. I'll likely want to just eliminate the old
-# algorithm at some point.
-newHex = True # ***DEBUG***
 
 ifdefs = set()
 inputFilenames = []
@@ -117,6 +111,7 @@ def readFileIntoLines(filename):
             lineNumber += 1
             if "$%" in line:
                 pass
+            line = line.replace("'TITAN--XPL'", "'RSB-XCOM-I'") # Exactly 12 chars each.
             lines.append(line)
             lineRefs.append("%s:%d" % (filename, lineNumber))
             #sourceFiles.append(os.path.basename(filename))
@@ -271,8 +266,6 @@ for parm in sys.argv[1:]:
         noInclusionDirectives = True
     elif parm == "--no-overrides":
         noOverrides = True
-    elif parm == "--old-hex": # ***DEBUG***
-        newHex = False
     elif parm == "--help":
         print(helpMsg, file = sys.stderr)
         sys.exit(0)

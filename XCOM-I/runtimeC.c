@@ -3662,6 +3662,15 @@ ABS(int32_t value) {
     return -value;
 }
 
+uint32_t
+XPL_COMPILER_VERSION(uint32_t index){
+  if (index == 0)
+    return MAJOR_VERSION;
+  else if (index == 1)
+    return MINOR_VERSION;
+  abend("Bad index (%d) for XPL compiler version", index);
+}
+
 void
 debugInline(int inlineCounter) {
   fprintf(stderr, "Unpatched CALL INLINE %d\n", inlineCounter);

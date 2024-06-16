@@ -251,28 +251,25 @@ while True:
             continue
         if c == '"':
             inHex = False
-            if not newHex:
-                hexAccumulator = pseudoStatement[hexStart:]
             for ih in hexAccumulator:
                 if ih not in digits["x"]:
                     error("Non-digit (%s) in double-quoted string" % \
                           ih, None)
                     sys.exit(1)
-            if newHex:
-                # The leading space before the %d below relates to the fact
-                # that " cannot be a character in an identifier, but digits
-                # can be.  Thus if you have a construct like XSET"..." (which
-                # actually appears in HAL/S-FC source code), it's the difference
-                # between the number being appended to XSET vs being a separate
-                # token.  Neither choice is guaranteed to be safe, however, and
-                # the one I've made is the one that preserves the purpose of
-                # XSET.  Other XPL code might expect something different, and it
-                # *is* possible to process it such that both choices are ok.  My
-                # problem is that XCOM-I currently processes the hex strings 
-                # prior to processing the macros, whereas Intermetrics's XCOM
-                # must have done it in the reverse order; and I'm too far down  
-                # the development path to want to try fixing that.
-                pseudoStatement = pseudoStatement + " %d" % int(hexAccumulator, 16)
+            # The leading space before the %d below relates to the fact
+            # that " cannot be a character in an identifier, but digits
+            # can be.  Thus if you have a construct like XSET"..." (which
+            # actually appears in HAL/S-FC source code), it's the difference
+            # between the number being appended to XSET vs being a separate
+            # token.  Neither choice is guaranteed to be safe, however, and
+            # the one I've made is the one that preserves the purpose of
+            # XSET.  Other XPL code might expect something different, and it
+            # *is* possible to process it such that both choices are ok.  My
+            # problem is that XCOM-I currently processes the hex strings 
+            # prior to processing the macros, whereas Intermetrics's XCOM
+            # must have done it in the reverse order; and I'm too far down  
+            # the development path to want to try fixing that.
+            pseudoStatement = pseudoStatement + " %d" % int(hexAccumulator, 16)
             c = ''
     elif inBase:
         if c == ")":
@@ -291,9 +288,6 @@ while True:
             else:
                 error("%s-bit not supported in literals" % baseRadix, \
                       None)
-            if not newHex:
-                pseudoStatement = pseudoStatement[:baseStart] + cBase + \
-                    pseudoStatement[baseStart+1:]
             continue
         if cBase == '':
             baseRadix = baseRadix + c
@@ -302,17 +296,13 @@ while True:
             continue
         if c == '"':
             inBase = False
-            if newHex:
-                pseudoStatement = pseudoStatement + \
+            pseudoStatement = pseudoStatement + \
                                     " %d" % int(hexAccumulator, baseRadix)
             c = ''
     elif c == '"':
         inHex = True
         inStartedRef = lineRef
-        if newHex:
-            hexAccumulator = ''
-        else:
-            pseudoStatement = pseudoStatement + "0x"
+        hexAccumulator = ''
         hexStart = len(pseudoStatement)
         c = ''
     elif c == "'":
@@ -354,7 +344,7 @@ while True:
         endOfStatement = True
     elif c == "^" or c == logicalNot:
         c = '~'
-    if newHex and (inHex or inBase):
+    if inHex or inBase:
         hexAccumulator = hexAccumulator + c
     elif not inComment:
         if not (c == ' ' and lastC == ' ') or inQuote:
@@ -367,19 +357,6 @@ while True:
         pseudoStatement = ''
     lastLastC = lastC
     lastC = c
-
-if False: # ***DEBUG***
-    for i in range(len(pseudoStatements)):
-        print(pseudoStatements[i].strip()
-                                 .replace(replacementQuote, "''")
-                                 .replace(replacementSpace, " "))
-        j = psRefs[i]
-        print("%s: %s" % \
-              (lineRefs[j], 
-               lines[j].strip()
-                       .replace(replacementQuote, "''")
-                       .replace(replacementSpace, " ")))
-        print("--------------------------------------------------")
 
 setErrorRef(inStartedRef)
 if inQuote:
@@ -395,12 +372,6 @@ if inConditional:
 if inRecord:
     error("Unterminated BASED RECORD", None)
 
-if False: #***DEBUG***
-    # See what we have so far.
-    for i in range(len(pseudoStatements)):
-        print("%06d: %s" % (i, pseudoStatements[i]))
-    sys.exit(1)
-    
 # Tokenize and parse, on a pseudo-statement by pseudo-statement basis.
 # Note that because of macro expansion, the number of pseudo-statments
 # can increase during the loop.
@@ -417,8 +388,7 @@ while True:
     scope["lineNumber"] = lineNumber
     scope["lineText"] = pseudoStatement
     originalPseudoStatement = pseudoStatement
-    if "MACRO_EXPAN_LEVEL" in pseudoStatement: #***DEBUG***
-        pass
+    if "XVERSION" in pseudoStatement:
         pass
     pseudoStatement = expandAllMacrosInString(scope, \
                                               pseudoStatement)
@@ -465,8 +435,15 @@ while True:
     reserved1 = ""
     if "reserved" in tokenized[0]:
         reserved0 = tokenized[0]["reserved"]
-    if len(tokenized) > 1 and "reserved" in tokenized[1]:
-        reserved1 = tokenized[1]["reserved"]
+    if len(tokenized) > 1:
+        if "reserved" in tokenized[1]:
+            reserved1 = tokenized[1]["reserved"]
+        elif reserved0 == "RETURN" and "builtin" in tokenized[1] and \
+                tokenized[1]["builtin"] == "INLINE":
+            # Manipulate the extraordinarily-rare "RETURN INLINE(...)" so that
+            # it's internally treated as a "CALL INLINE(...)".
+            tokenized[0]["reserved"] = "CALL"
+            reserved0 = "CALL"
     if "go to" in pseudoStatement:
         pass
     if reserved0 == "GO" and reserved1 == "TO":
@@ -531,10 +508,10 @@ while True:
         #    scope["variables"].pop(label)
         scope = scope["parent"]
     elif "identifier" in tokenized[0] or ("builtin" in tokenized[0] and \
-        tokenized[0]["builtin"] in ["OUTPUT", "COREWORD", "COREBYTE", "FILE",
-                                    "BYTE", "FREELIMIT", "FREEPOINT",
-                                    "FREEBASE",
-                                    "COREHALFWORD", "DESCRIPTOR"]):
+            tokenized[0]["builtin"] in ["OUTPUT", "COREWORD", "COREBYTE", 
+                                        "FILE", "BYTE", "FREELIMIT", 
+                                        "FREEPOINT", "FREEBASE",
+                                        "COREHALFWORD", "DESCRIPTOR"]):
         # Other than a label (already processed above), the only thing
         # that begins with an identifier appears to be an assignment
         # statement.
@@ -677,7 +654,6 @@ if targetLanguage == "C":
                   ppFiles["filenames"])
 
 if reservedMemory["numReserved"] > 0:
-    print("Number of reserved literals: %d" % reservedMemory["numReserved"])
-    print("Space used for reserved literals: %d/%d" % \
-                                      (0x1000000 - reservedMemory["nextReserved"], 
-                                       0x1000000 - physicalMemoryLimit))
+    print("Reserved count: %d" % reservedMemory["numReserved"])
+    print("Reserved space: %d" % (0x1000000 - reservedMemory["nextReserved"]))
+          

@@ -592,6 +592,9 @@ NDESCRIPT(void);
 int32_t
 ABS(int32_t value);
 
+uint32_t
+XPL_COMPILER_VERSION(uint32_t index);
+
 void
 debugInline(int inlineCounter);
 

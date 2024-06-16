@@ -79,6 +79,7 @@ digits = {
     "x": "0123456789ABCDEFabcdef"
     }
 idChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_#@$"
+operatorPairs = {"~=", "~<", "~>", "<=", ">=", "||"}
 def mtokenize(string):
     tokens = []
     inside = 0 # 0 nothing, 1 quote, 2 identifier, 3 number
@@ -109,6 +110,11 @@ def mtokenize(string):
                 i -= 1
                 continue
         else: # inside = 0
+            pair = string[i-1:i+1]
+            if pair in operatorPairs:
+                tokens.append(pair)
+                i += 1
+                continue
             if c == "'":
                 inside = 1
             elif c.isdigit():
@@ -138,9 +144,6 @@ globiterals = set() # All identifiers used as names of literals.
 def expandOneMacroInString(scope, string):
     # We have to split the string into quoted portions and non-quoted
     # portions.
-    if "_CONDSPMANERR" in string: #***DEBUG***
-        pass
-        pass
     mtokens = mtokenize(string)
     # Do a quick check to see if there are any names of macros among the tokens.
     # We do a more time-consuming but accurate check only if there are some.
@@ -179,9 +182,6 @@ def expandOneMacroInString(scope, string):
             for symbol in scope["literals"]:
                 if symbol not in mtokens:
                     continue
-                if "_CONDSPMANERR" == symbol and "_CONDSPMANERR" in s:
-                    pass #***DEBUG***
-                    pass
                 attributes = scope["literals"][symbol]
                 # Found!  Let's determine the parameters:
                 found = mtokens.index(symbol)

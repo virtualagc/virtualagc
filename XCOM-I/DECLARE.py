@@ -140,6 +140,17 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                     attributes.append(field)
                     inBased = 2
                     continue
+            elif field == "RECORD":
+                # This is to cover the case of DECLARE ... RECORD.  It's going
+                # to screw up if variables both with and without RECORDs are
+                # declared in the same statement, I think.
+                attributes.append("BASED")
+                fields[0] = "BASED"
+                fields0 = fields[0]
+                attributes.append(field)
+                inBased = 2
+                isBased = True
+                continue
             if field == ":" and inBased == 2:
                 inBased = 0
             # *Cannot* be an `elif` below, because the 
@@ -164,9 +175,6 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                     # be terminated by a "variable" named "END" which 
                     # we should simply ignore.
                     continue
-                if field == "POINTER": #***DEBUG***
-                    pass
-                    pass
                 if field == "(":
                     inGroup = True
                     nextInGroup = ''
@@ -239,7 +247,7 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                 for token in attributes:
                     if skip > 0:
                         skip -= 1
-                    elif inFirst and token == "(":
+                    elif token == "(": # and inFirst:
                         inTop = True
                         topString = ''
                     elif inTop:
@@ -258,6 +266,15 @@ def DECLARE(pseudoStatement, scope, library, inRecord = False):
                         token = token[1:-1]\
                                 .replace(replacementSpace, " ")\
                                 .replace(replacementQuote, "'")
+                        # I've found macros in which the replacement string
+                        # contains a comment.  Since all comments *not* in 
+                        # quoted strings will have already been removed at this
+                        # point, such comments would cause a problem if the
+                        # macro expansion suddenly reintroduces them.
+                        # Note that the following simplistic fix will fail
+                        # in various pathological cases like quoted comments
+                        # or multiple comments within the replacement string.
+                        token = re.sub('/[*].*[*]/', ' ', token)
                         # There's one final ghastliness to account for, and
                         # that's the use of macros in which the replacement
                         # string contains somewhere within it something like:

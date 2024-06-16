@@ -72,7 +72,8 @@ builtIns = {
     "STRING",
     "STRING_GT",
     "ABS",
-    "COREHALFWORD"
+    "COREHALFWORD",
+    "XPL_COMPILER_VERSION"
     }
 if standardXPL:
     builtIns.remove("LINE_COUNT")
@@ -84,6 +85,7 @@ if standardXPL:
     builtIns.remove("ABS")
     builtIns.remove("COREHALFWORD")
     builtIns.remove("RECORD_WIDTH")
+    builtIns.remove("XPL_COMPILER_VERSION")
     reservedWords.remove("COMMON")
     reservedWords.remove("UNTIL")
     reservedWords.remove("ARRAY")
@@ -225,7 +227,4 @@ def xtokenize(scope, pseudoStatement):
                 tokens.append({"operator": c})
         else:
             tokens.append({"unrecognized": c})
-    #if "LIT_PG.LITERAL1" in pseudoStatement:
-    #    print("**A", pseudoStatement) #***DEBUG***
-    #    print("**B", tokens) #***DEBUG***
     return tokens
