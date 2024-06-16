@@ -319,6 +319,7 @@ def putCHARACTER(address, s):
 # to highest.  Refer to https://www.ibiblio.org/apollo/XPL.html#MemoryModel.
 # Not all regions (0 and 6) have anything in them that `allocateVariable`
 # can allocate at compile-time.
+baseRestriction = 0
 rootBASED = 0
 #lastBASED = 0
 def allocateVariables(scope, region):
@@ -327,18 +328,22 @@ def allocateVariables(scope, region):
     
     for identifier in scope["variables"]:
         attributes = scope["variables"][identifier]
+        if baseRestriction > 0 and "BASED" not in attributes:
+            continue
+        if baseRestriction < 0 and "BASED" in attributes:
+            continue
         if "PROCEDURE" in attributes:
             continue
         if "LABEL" in attributes:
             continue
         if "parameter" in attributes:
             continue
-        if "common" in attributes and region not in [1, 3, 4, 5]:
+        if "common" in attributes and region not in [1, 3, 5]:
             continue
         if "common" not in attributes and region == 1:
             continue
         if "BASED" in attributes:
-            if region != 4:
+            if region not in [1, 2]:
                 continue
         else:
             if "FIXED" in attributes and region not in [1, 2]:
@@ -2508,7 +2513,7 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
 
 def generateC(globalScope):
     global pf, nonCommonBase, freeBase, freePoint, freeLimit, \
-            variableAddress, regions
+            variableAddress, regions, baseRestriction
     
     pf = open(outputFolder + "/procedures.h", "w")
     print("/*", file=pf)
@@ -2592,7 +2597,14 @@ def generateC(globalScope):
     topUsableMemory = physicalMemoryLimit - 1024
     for region in range(1, 6):
         start = variableAddress
-        walkModel(globalScope, allocateVariables, region)
+        if region == 2:
+            baseRestriction = 1
+            walkModel(globalScope, allocateVariables, region)
+            baseRestriction = -1
+            walkModel(globalScope, allocateVariables, region)
+        else:
+            baseRestriction = 0  
+            walkModel(globalScope, allocateVariables, region)
         if region == 5: 
             freeBase = start
             freePoint = variableAddress
