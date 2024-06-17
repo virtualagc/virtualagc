@@ -79,10 +79,10 @@ def callTree(globalScope):
     walkModel(globalScope, checkScope)
     
     if not keepUnused:
-        junkProcs = []
         overrides = []
+        junkProcs = [] + overrides;
         for procedure in procedureNames:
-            if procedure != "COMPACTIFY":
+            if procedure not in ["COMPACTIFY", "RECORD_LINK"]:
                 if procedureNames[procedure]["anyCalls"] == 0:
                     junkProcs.append(procedure)
         if len(junkProcs) != 0:

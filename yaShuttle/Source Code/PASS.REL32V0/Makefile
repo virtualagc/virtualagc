@@ -23,7 +23,7 @@ PORTED := ../../ported
 HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
-PARM_STRING := SRN,LISTING2
+PARM_STRING := SRN,LISTING2,TABLST,HALMAT
 RTARGET := HELLO
 
 # `sPARM_STRING` is `PARM_STRING` with commas replaced by spaces.
@@ -53,7 +53,7 @@ $(TARGETS):
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
 .PHONY: regression
 regression: 
-	@echo Processing $(RTARGET).hal with HAL_S_FC.py ...
+	@echo Processing $(RTARGET) with HAL_S_FC.py ...
 	$(HAL_S_FC_DIR)/HAL_S_FC.py $(sPARM_STRING) --hal=$(HAL_S_FC_DIR)/$(RTARGET) >py.rpt
 	@echo Processing $(RTARGET).xpl with PASS1 ...
 	-./PASS1 --pdsi=5,ERRORLIB --pdsi=6,ACCESS  \

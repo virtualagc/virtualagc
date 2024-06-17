@@ -78,4 +78,6 @@ do i = 0 to #entries;
   output = table(i) || '                ' || count(i);
 end;
 
+output = '';
+
 eof

@@ -211,7 +211,7 @@ def INITIALIZATION():
     PRINT_DATE_AND_TIME ('TODAY IS ', DATE(), TIME())
     OUTPUT(0, g.X1)
     
-    g.C[0] = g.PARM_FIELD
+    g.C[0] = g.PARM_STRING # g.PARM_FIELD
     g.I = 0
     g.S = ' PARM FIELD: '
     g.K = LENGTH(g.C[0])

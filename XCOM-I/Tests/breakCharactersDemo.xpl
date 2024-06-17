@@ -94,3 +94,4 @@ END @A1;
 OUTPUT = @A1(2,3);
 CALL @A1(1,5);
 
+OUTPUT = '';

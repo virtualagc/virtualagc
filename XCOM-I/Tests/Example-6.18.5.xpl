@@ -34,4 +34,6 @@ DO WHILE LENGTH(BUFFER) > 0;
 
 END;
 
+OUTPUT = '';
+
 EOF

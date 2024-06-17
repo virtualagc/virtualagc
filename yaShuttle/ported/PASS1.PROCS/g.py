@@ -83,6 +83,7 @@ pDESC = ["TITLE", "LINECT", "PAGES", "SYMBOLS", "MACROSIZE", "LITSTRINGS",
 bfsDESC = pDESC.index("MFID")
 pVALS = ["", "59", "2500", "200", "500", "2000", "0", "2000", "", "1200",
          "1", "400", ""]
+PARM_STRING = ""
 
 for parm in sys.argv[1:]:
     if parm.startswith("--hal="):
@@ -119,6 +120,10 @@ for parm in sys.argv[1:]:
     elif parm in pCON or ("NO" + parm) in pCON or \
             (parm.startswith("NO") and parm[2:] in pCON):
         # Type 1 option:
+        if len(PARM_STRING) != 0:
+            PARM_STRING = PARM_STRING + "," + parm
+        else:
+            PARM_STRING = parm
         if parm in pCON:
             index = pCON.index(parm)
         elif parm.startswith("NO") and parm[2:] in pCON:
@@ -128,6 +133,10 @@ for parm in sys.argv[1:]:
         pCON[index] = parm
     elif "=" in parm and parm.split("=")[0] in (pDESC + ["MFID", "OLDTPL"]):
         # Type 2 option:
+        if len(PARM_STRING) != 0:
+            PARM_STRING = PARM_STRING + "," + parm
+        else:
+            PARM_STRING = parm
         fields = parm.split("=")
         if fields[0] in ["MFID", "OLDTPL"]:
             index = bfsDESC

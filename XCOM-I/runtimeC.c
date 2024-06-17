@@ -517,60 +517,31 @@ printMemoryMap(char *msg, int start, int end) {
           int dirWidth = memoryMap[i].dirWidth;
           if (numElements == 0)
             {
+              uint32_t saddress = getFIXED(address) & 0xFFFFFF;
               if (!strcmp(datatype, "CHARACTER"))
-                {
-                  uint32_t descriptor = getFIXED(address);
-                  uint32_t saddress = descriptor & 0xFFFFFF;
-                  if (descriptor == 0)
-                    {
-                      printf("%06X: CHARACTER %s = \"%s\"\n", address,
-                             symbol, getCHARACTER(address)->bytes);
-                    }
-                  else
-                    {
-                      printf("%06X: CHARACTER %s = \"%s\" @%06X\n",
-                             address, symbol, getCHARACTER(address)->bytes, saddress);
-                    }
-                }
+                printf("%06X: CHARACTER %s = \"%s\" @%06X\n",
+                       address, symbol, descriptorToAscii(getCHARACTER(address)),
+                       saddress);
               else if (!strcmp(datatype, "FIXED"))
-                {
-                  printf("%06X: FIXED     %s = %d\n", address, symbol,
-                      getFIXED(address));
-                }
+                printf("%06X: FIXED     %s = %d\n", address, symbol,
+                       getFIXED(address));
               else if (!strcmp(datatype, "BIT"))
-                {
-                  printf("%06X:       BIT %s = %u\n", address, symbol,
-                      getFIXED(address));
-                }
+                printf("%06X:       BIT %s = %u\n", address, symbol,
+                       getFIXED(address));
             }
           for (j = 0; j < numElements; j++)
             {
               int k = address + dirWidth * j;
+              uint32_t saddress = getFIXED(k) & 0xFFFFFF;
               if (!strcmp(datatype, "CHARACTER"))
-                {
-                  uint32_t descriptor = getFIXED(k);
-                  uint32_t saddress = descriptor & 0xFFFFFF;
-                  if (descriptor == 0)
-                    {
-                      printf("%06X: CHARACTER %s(%u) = \"%s\"\n", k, symbol,
-                          j, getCHARACTER(k)->bytes);
-                    }
-                  else
-                    {
-                      printf("%06X: CHARACTER %s(%u) = \"%s\" @%06X\n", k, symbol,
-                          j, getCHARACTER(k)->bytes, saddress);
-                    }
-                }
+                 printf("%06X: CHARACTER %s(%u) = \"%s\" @%06X\n", k, symbol,
+                          j, descriptorToAscii(getCHARACTER(k)), saddress);
               else if (!strcmp(datatype, "FIXED"))
-                {
-                  printf("%06X: FIXED     %s(%u) = %d\n", k, symbol,
+                printf("%06X: FIXED     %s(%u) = %d\n", k, symbol,
                       j, getFIXED(k));
-                }
               else if (!strcmp(datatype, "BIT"))
-                {
-                  printf("%06X:       BIT %s(%u) = %u\n", k, symbol,
+                printf("%06X:       BIT %s(%u) = %u\n", k, symbol,
                       j, getFIXED(k));
-                }
             }
         }
     }
@@ -1421,7 +1392,7 @@ void
 putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
 {
   uint32_t numBytes, destAddress;
-  uint32_t maskWidth, maskAddress = address;
+  //uint32_t maskWidth, maskAddress = address;
   if (bitWidth == 0)
     {
       memoryMapEntry_t *memoryMapEntry = lookupFloor(address);
@@ -1432,7 +1403,7 @@ putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
   numBytes = (bitWidth + 7) / 8;
   if (numBytes == 3) // BIT(17) through BIT(24) uses 4 bytes.
     {
-      maskAddress++;
+      //maskAddress++;
       numBytes = 4;
     }
   if (bitWidth > 32)
@@ -1458,14 +1429,15 @@ putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
     }
   else
     destAddress = address;
-  maskWidth = bitWidth % 8;
+  //maskWidth = bitWidth % 8;
   while (numBytes > value->numBytes)
     {
       memory[destAddress++] = 0;
       numBytes--;
-      maskWidth = 0;
+      //maskWidth = 0;
     }
   memmove(&memory[destAddress], &value->bytes[value->numBytes - numBytes], numBytes);
+  /*
   if (maskWidth)
     {
       if (bitWidth <= 32)
@@ -1475,6 +1447,7 @@ putBIT(uint32_t bitWidth, uint32_t address, descriptor_t *value)
     }
   if (maskAddress == address + 1)
     memory[address] = 0;
+  */
 }
 
 uint32_t
@@ -1534,33 +1507,40 @@ getCHARACTER(uint32_t address) {
   return getCHARACTERd(getFIXED(address));
 }
 
-// A function to simplify interactive debugging.  It prints out the value of
+// Functions to simplify interactive debugging.  They print out the value of
 // a variable in a human-friendly fashion.
 char *
-g(char *identifier) {
+g0(char *identifier, memoryMapEntry_t *me) {
   static sbuf_t msg;
+  uint32_t address = me->address, fixed = getFIXED(address);
+  char *datatype = me->datatype;
+  if (!strcmp(datatype, "FIXED"))
+    sprintf(msg, "@0x%X, %s = %d (0x%X)", address, identifier, fixed, fixed);
+  else if (!strcmp(datatype, "CHARACTER"))
+    sprintf(msg, "@0x%X, %s = '%s'", address, identifier,
+            descriptorToAscii(getCHARACTER(address)));
+  else if (!strcmp(datatype, "BIT") && me->bitWidth <= 32)
+    {
+      fixed = bitToFixed(getBIT(me->bitWidth, address));
+      sprintf(msg, "@0x%X, %s = %d (0x%X)", address, identifier, fixed, fixed);
+    }
+  else
+    sprintf(msg, "@0x%X, %s: Datatype %s not yet implemented", address,
+            identifier, datatype);
+  return msg;
+}
+
+char *
+g(char *identifier) {
   memoryMapEntry_t *me = lookupVariable(identifier);
   if (me == NULL)
-    sprintf(msg, "Variable %s not found", identifier);
-  else
     {
-      uint32_t address = me->address, fixed = getFIXED(address);
-      char *datatype = me->datatype;
-      if (!strcmp(datatype, "FIXED"))
-        sprintf(msg, "@0x%X, %s = %d (0x%X)", address, identifier, fixed, fixed);
-      else if (!strcmp(datatype, "CHARACTER"))
-        sprintf(msg, "@0x%X, %s = '%s'", address, identifier,
-                descriptorToAscii(getCHARACTER(address)));
-      else if (!strcmp(datatype, "BIT") && me->bitWidth <= 32)
-        {
-          fixed = bitToFixed(getBIT(me->bitWidth, address));
-          sprintf(msg, "@0x%X, %s = %d (0x%X)", address, identifier, fixed, fixed);
-        }
-      else
-        sprintf(msg, "@0x%X, %s: Datatype %s not yet implemented", address,
-                identifier, datatype);
+      static sbuf_t msg;
+      sprintf(msg, "Variable %s not found", identifier);
+      return msg;
     }
-  return msg;
+  else
+    return g0(identifier, me);
 }
 
 // Like putCHARACTER(), except for saving procedure parameters.  the difference
@@ -3488,6 +3468,8 @@ readCOMMON(FILE *fp) {
               COREWORD2(dopeVectorAddress + 20, flags);
               COREHALFWORD2(dopeVectorAddress + 24, globalFactor);
               COREHALFWORD2(dopeVectorAddress + 26, groupFactor);
+              if (freelimit > address - 512)
+                freelimit = address - 512;
 #endif
             }
           // Nothing else to do, since this line in the COMMON file is really
@@ -3628,9 +3610,11 @@ EXIT(void) {
 
 void
 LINK(void) {
-  OUTPUT(0, nextBuffer());
-  if (LINE_COUNT) printf("\n");
+#ifndef STANDARD_XPL
   writeCOMMON(COMMON_OUT);
+#endif
+  //OUTPUT(0, nextBuffer());
+  //if (LINE_COUNT) printf("\n");
   exit(0);
 }
 

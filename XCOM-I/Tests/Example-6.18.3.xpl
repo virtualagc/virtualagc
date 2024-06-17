@@ -33,4 +33,6 @@ do i = l to n;
    output = cards(i);
 end;
 
+output = '';
+
 eof

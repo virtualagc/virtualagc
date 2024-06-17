@@ -741,10 +741,11 @@ def sortJumps(scope, extra = None):
 def generateADDR(scope, parameter):
     token = parameter["token"]
     if "builtin" in token and token["builtin"] == "DESCRIPTOR":
-        # Used in SPACELIB as an an address below which is COMMON.  I'm not 
-        # clear why `DESCRIPTOR` is used for that purpose, but what I'm 
-        # returning here is the next address after COMMON memory region 1,
-        # and has nothing whatever to do with `DESCRIPTOR`
+        # SPACELIB uses the address of `DESCRIPTOR` to detect the upper
+        # boundary of `COMMON`.  Before I realized that, I chose to arrange
+        # memory somewhat differently, and to implement `DESCRIPTOR` as a 
+        # function rather than a variable.  The following is a workaround for
+        # that, in lieu of altering the design.
         return regions[1][1]
     elif "builtin" in token:
         # I allow this because there's some stuff in HAL/S-FC source code that
@@ -2092,9 +2093,12 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     tipe, source = autoconvert(tipe, ["FIXED"], source)
                 indent2 = indent + indentationQuantum
                 print(indent + "{")
-                print(indent2 + 'if (LINE_COUNT) printf("\\n");')
-                print(indent2 + "writeCOMMON(COMMON_OUT);")
-                print(indent2 + "exit(%s);" % source)
+                #print(indent2 + 'if (LINE_COUNT) printf("\\n");')
+                #print(indent2 + "writeCOMMON(COMMON_OUT);")
+                if standardXPL:
+                    print(indent2 + "exit(%s);" % source)
+                else:
+                    print(indent2 + "RECORD_LINK();")
                 print(indent + "}")
                 return;
         procedureName = procScope["symbol"]
@@ -2486,11 +2490,13 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     if parent == None:
         # End of main.c.
         print()
-        if nonCommonBase > commonBase:
-            print(indent + "writeCOMMON(COMMON_OUT);")
-        print(indent + "if (LINE_COUNT)")
-        print(indent + indentationQuantum + \
-              "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")
+        if not standardXPL:
+            if nonCommonBase > commonBase:
+                #print(indent + "writeCOMMON(COMMON_OUT);")
+                print(indent + "RECORD_LINK();")
+        #print(indent + "if (LINE_COUNT)")
+        #print(indent + indentationQuantum + \
+        #      "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")
         print(indent + "{ reentryGuard = 0; return 0; } // Just in case ...")
     if "label" in scope and "blockType" in scope and \
             scope["blockType"] in ["DO WHILE block", "DO UNTIL block",]:
