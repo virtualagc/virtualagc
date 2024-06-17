@@ -34,9 +34,6 @@ Alas, this change, though theoretically much better, didn't change the errors
 in my test compilations one iota.
 '''
 
-import sys
-noSyn = ("--no-syn" in sys.argv[1:])
-
 from xplBuiltins import *
 import g
 import HALINCL.COMMON as h
@@ -613,15 +610,38 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
             print("   { \"%s\" }" % PRODUCTION_NUMBERS[PRODUCTION_NUMBER], \
                   end="")
         
-    if noSyn:
-        # This is just to simplify debugging of SCAN. Bypass in production.
-        if PRODUCTION_NUMBER == 1: 
-            # <COMPILATION>::= <COMPILE LIST> _|_
-            if g.MP > 0:
-                ERROR(d.CLASS_P, 1);
-                STACK_DUMP();
-            g.COMPILING = 0x80;
-            g.STMT_PTR = g.STMT_PTR - 1;
+    if PRODUCTION_NUMBER == 1: 
+        # <COMPILATION>::= <COMPILE LIST> _|_
+        if g.MP > 0:
+            ERROR(d.CLASS_P, 1);
+            STACK_DUMP();
+        elif g.BLOCK_MODE[0] == 0:
+            ERROR(d.CLASS_PP, 4);
+        HALMAT_POP(g.XXREC, 0, 0, 1);
+        g.ATOMp_FAULT = -1;
+        HALMAT_OUT();
+        b = []
+        for nb in range(130):
+            f = h.LIT_PG[0].LITERAL1[nb]
+            b.append((f >> 24) & 0xff)
+            b.append((f >> 16) & 0xff)
+            b.append((f >> 8) & 0xff)
+            b.append((f >> 0) & 0xff)
+        for nb in range(130):
+            f = h.LIT_PG[0].LITERAL2[nb]
+            b.append((f >> 24) & 0xff)
+            b.append((f >> 16) & 0xff)
+            b.append((f >> 8) & 0xff)
+            b.append((f >> 0) & 0xff)
+        for nb in range(130):
+            f = h.LIT_PG[0].LITERAL3[nb]
+            b.append((f >> 24) & 0xff)
+            b.append((f >> 16) & 0xff)
+            b.append((f >> 8) & 0xff)
+            b.append((f >> 0) & 0xff)
+        FILE(g.LITFILE, g.CURLBLK, bytearray(b));
+        g.COMPILING = 0x80;
+        g.STMT_PTR = g.STMT_PTR - 1;
         return
     
     if SHR(g.pPRODUCE_NAME[PRODUCTION_NUMBER], 12) & 1:
@@ -3398,10 +3418,6 @@ def SYNTHESIZE(PRODUCTION_NUMBER):
                     g.MP = g.TERMP + 1;  # IT WAS DECREMENTED AT START OF LOOP
                     g.TERMP = 0;  # GET OUT OF LOOP
             g.TERMP = g.MP;
-            #print("\n!@", g.SCALAR_COUNT, 
-            #       g.FIXV[g.MP], g.FIXV[g.SP], g.MP, g.SP, 
-            #       g.PTR[g.MP], g.PTR[g.SP],
-            #       file=sys.stderr)
         
             if g.TERMP == g.SP: 
                 return;

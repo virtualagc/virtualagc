@@ -1763,16 +1763,8 @@ xNOT(descriptor_t *i1) {
   uint8_t *bytes = i1->bytes;
   result->bitWidth = bitWidth;
   result->numBytes = numBytes;
-  for (i = numBytes - 1; i >= 0; i--, bitWidth -= 8)
-    {
-      if (bitWidth <= 0)
-        mask = 0;
-      else if (bitWidth < 8)
-        mask = (1 << bitWidth) - 1;
-      else
-        mask = 0xFF;
-      result->bytes[i] = mask & ~(i1->bytes[i]);
-    }
+  for (i = numBytes - 1; i >= 0; i--)
+    result->bytes[i] = ~(i1->bytes[i]);
   return result;
 }
 
@@ -1833,24 +1825,15 @@ xAND(descriptor_t *i1, descriptor_t *i2){
   bytes2 += numBytes2 - 1;
   bytes += numBytes - 1;
   for (; numBytes > 0; numBytes--, numBytes1--, numBytes2--,
-                       bytes--, bytes1--, bytes2--,
-                       bitWidth1 -= 8, bitWidth2 -= 8)
+                       bytes--, bytes1--, bytes2--)
     {
       uint8_t b1, b2;
-      if (bitWidth1 > 0)
-        {
-          b1 = *bytes1;
-          if (bitWidth1 < 8)
-            b1 &= (1 << bitWidth1) - 1;
-        }
+      if (numBytes1 > 0)
+        b1 = *bytes1;
       else
         b1 = 0;
-      if (bitWidth2 > 0)
-        {
-          b2 = *bytes2;
-          if (bitWidth2 < 8)
-            b2 &= (1 << bitWidth2) - 1;
-        }
+      if (numBytes2 > 0)
+        b2 = *bytes2;
       else
         b2 = 0;
       *bytes = b1 & b2;

@@ -9,6 +9,7 @@ Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-28 RSB  Began porting process from XPL.
 '''
 
+import sys
 import g
 import HALINCL.COMMON as h
 import HALINCL.VMEM1 as v1
@@ -1094,7 +1095,7 @@ END _RECORD_COORDINATED;
 '''
 
 def RECORD_LINK():
-    return
+    sys.exit(0)
 
 '''
    /% DEBUG N@ S@  %/
