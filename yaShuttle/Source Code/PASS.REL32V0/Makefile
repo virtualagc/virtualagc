@@ -23,7 +23,7 @@ PORTED := ../../ported
 HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
-PARM_STRING := SRN,LISTING2,TABLST,HALMAT
+PARM_STRING := SRN,LISTING2,TABLST,HALMAT,X6
 RTARGET := HELLO
 
 # `sPARM_STRING` is `PARM_STRING` with commas replaced by spaces.
@@ -90,4 +90,15 @@ regression:
 		--raf=B,7200,4,optmato.bin \
 		>o.rpt
 	
+	@echo Processing $(RTARGET) with AUX ...
+	cp vmemo.bin vmema.bin
+	cp halmato.bin halmata.bin
+	cp litfileo.bin litfilea.bin
+	cp optmato.bin optmata.bin
+	./AUX   --ddo=2,LISTING2a.txt \
+		--commoni=COMMON-OPT.out --commono=COMMON-AUX.out \
+		--raf=B,3360,6,vmema.bin --raf=B,7200,1,auxmata.bin \
+		--raf=B,1560,2,litfilea.bin \
+		--raf=B,7200,4,optmata.bin \
+		>a.rpt
 	
