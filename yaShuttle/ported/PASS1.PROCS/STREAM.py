@@ -565,7 +565,8 @@ def STREAM():
                     if SUBSTR(ll.C[0], 0, 2) == 'H(':
                         g.SMRK_FLAG = CHAR_VALUE(ll.C[0]);
                     else:  # ADD NEW DEBUG TYPES HERE
-                        ll.C[0] = hd.D_TOKEN();
+                        pass;
+                    ll.C[0] = hd.D_TOKEN();
                 for ll.I in range(1, g.TEXT_LIMIT[0]):
                     # See section 2.2.7 (PDF p. 40) of "HAL/S-FC & HAL/S-360
                     # Compiler System Program Description".

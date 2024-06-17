@@ -55,7 +55,7 @@ IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME
 regression: 
 	@echo Processing $(RTARGET) with HAL_S_FC.py ...
 	$(HAL_S_FC_DIR)/HAL_S_FC.py $(sPARM_STRING) --hal=$(HAL_S_FC_DIR)/$(RTARGET) >py.rpt
-	@echo Processing $(RTARGET).xpl with PASS1 ...
+	@echo Processing $(RTARGET) with PASS1 ...
 	-./PASS1 --pdsi=5,ERRORLIB --pdsi=6,ACCESS  \
 		--commono=COMMON-PASS1.out \
 		--ddi=0,$(HAL_S_FC_DIR)/$(RTARGET).hal --parm="$(PARM_STRING)" \
@@ -69,7 +69,7 @@ regression:
 	@diff -s $(PORTED)/FILE1.bin halmat.bin
 	@diff -q -s $(PORTED)/LISTING2.txt listing2.txt
 	
-	@echo Processing $(RTARGET).xpl with FLO ...
+	@echo Processing $(RTARGET) with FLO ...
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
 	cp litfile.bin litfilef.bin
