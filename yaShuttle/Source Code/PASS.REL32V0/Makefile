@@ -55,6 +55,7 @@ IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME
 regression: 
 	@echo Processing $(RTARGET) with HAL_S_FC.py ...
 	$(HAL_S_FC_DIR)/HAL_S_FC.py $(sPARM_STRING) --hal=$(HAL_S_FC_DIR)/$(RTARGET) >py.rpt
+	
 	@echo Processing $(RTARGET) with PASS1 ...
 	-./PASS1 --pdsi=5,ERRORLIB --pdsi=6,ACCESS  \
 		--commono=COMMON-PASS1.out \
@@ -77,3 +78,16 @@ regression:
 		--commoni=COMMON-PASS1.out --commono=COMMON-FLO.out \
 		--raf=B,3360,6,vmemf.bin --raf=B,7200,1,halmatf.bin \
 		--raf=B,1560,2,litfilef.bin >f.rpt
+	
+	@echo Processing $(RTARGET) with OPT ...
+	cp vmemf.bin vmemo.bin
+	cp halmatf.bin halmato.bin
+	cp litfilef.bin litfileo.bin
+	./OPT   --ddo=2,LISTING2o.txt \
+		--commoni=COMMON-FLO.out --commono=COMMON-OPT.out \
+		--raf=B,3360,6,vmemo.bin --raf=B,7200,1,halmato.bin \
+		--raf=B,1560,2,litfileo.bin \
+		--raf=B,7200,4,optmato.bin \
+		>o.rpt
+	
+	
