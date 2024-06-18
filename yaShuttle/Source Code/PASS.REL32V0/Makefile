@@ -15,6 +15,8 @@
 
 SHELL := /bin/bash # To use bash rather than sh.
 
+COND := P	# P for PFS or B for BFS (or TBD?)
+
 TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4
 XCOM_DIR := ../../../../XCOM-I
 XCOMI := $(XCOM_DIR)/XCOM-I.py
@@ -24,6 +26,8 @@ HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
 PARM_STRING := SRN,LISTING2,TABLST,HALMAT,X6
+PARM4_STRING := 
+
 RTARGET := HELLO
 
 # `sPARM_STRING` is `PARM_STRING` with commas replaced by spaces.
@@ -31,7 +35,6 @@ comma := ,
 empty :=
 space := $(empty) $(empty)
 sPARM_STRING := $(subst $(comma),$(space),$(PARM_STRING))
-
 
 all:	$(TARGETS)
 
@@ -44,11 +47,28 @@ $(TARGETS):
 	else \
 		cd $@.PROCS; \
 	fi && \
-	$(XCOMI) $(XEXTRA) --cond=P --output=$@ \
+	$(XCOMI) $(XEXTRA) --cond=$(COND) --output=$@ \
 		--lib-file=$(XLIB) \
 		'##DRIVER.xpl' && \
 	make -C $@ $@ && \
 	cp $@/$@ ..
+
+# Note that `clean` doesn't clean everything that was built:  The executables
+# from TARGETS remain in place in the current folder, and the build-folders
+# for those (such as PASS1.PROCS/PASS1/) remain in place too.  What's cleaned is
+# the huge batch of intermediate files created by the builds.  Whereas
+# `cleanall` does clean everything.
+.PHONY: clean
+clean:
+	-rm COMMON-*.out listing2*.txt vmem*.bin halmat*.bin litfile*.bin \
+	    *.rpt optmat*.bin auxmat*.bin objfile*.obj cards*.txt \
+	    monitor13.parms
+
+.PHONY: cleanall
+cleanall: clean
+	-rm $(TARGETS) PASS1.PROCS/PASS1 FLO.PROCS/FLOW OPT.PROCS/OPT \
+            AUX_PROCS/AUX PASS2.PROCS/PASS2 PASS3.PROCS/PASS3 \
+            PASS4.PROCS/PASS4
 
 IGNORE_LINES = (HAL/S|FREE STRING AREA|NUMBER OF FILE 6|PROCESSING RATE|CPU TIME FOR|TODAY IS)
 .PHONY: regression
@@ -64,9 +84,9 @@ regression:
 		--raf=B,3360,6,vmem.bin --raf=B,7200,1,halmat.bin \
 		--raf=B,1560,2,litfile.bin >c.rpt
 	@echo Comparing ...
-	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >c2.rpt
-	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >py2.rpt
-	@diff -q -s c2.rpt py2.rpt
+	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >cA.rpt
+	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >pyA.rpt
+	@diff -q -s cA.rpt pyA.rpt
 	@diff -s $(PORTED)/FILE1.bin halmat.bin
 	@diff -q -s $(PORTED)/LISTING2.txt listing2.txt
 	
@@ -74,7 +94,7 @@ regression:
 	cp vmem.bin vmemf.bin
 	cp halmat.bin halmatf.bin
 	cp litfile.bin litfilef.bin
-	./FLO   --ddo=2,LISTING2f.txt \
+	./FLO   --ddo=2,listingf.txt \
 		--commoni=COMMON-PASS1.out --commono=COMMON-FLO.out \
 		--raf=B,3360,6,vmemf.bin --raf=B,7200,1,halmatf.bin \
 		--raf=B,1560,2,litfilef.bin >f.rpt
@@ -83,7 +103,7 @@ regression:
 	cp vmemf.bin vmemo.bin
 	cp halmatf.bin halmato.bin
 	cp litfilef.bin litfileo.bin
-	./OPT   --ddo=2,LISTING2o.txt \
+	./OPT   --ddo=2,listing2o.txt \
 		--commoni=COMMON-FLO.out --commono=COMMON-OPT.out \
 		--raf=B,3360,6,vmemo.bin --raf=B,7200,1,halmato.bin \
 		--raf=B,1560,2,litfileo.bin \
@@ -95,10 +115,24 @@ regression:
 	cp halmato.bin halmata.bin
 	cp litfileo.bin litfilea.bin
 	cp optmato.bin optmata.bin
-	./AUX   --ddo=2,LISTING2a.txt \
+	./AUX   --ddo=2,listinga.txt \
 		--commoni=COMMON-OPT.out --commono=COMMON-AUX.out \
 		--raf=B,3360,6,vmema.bin --raf=B,7200,1,auxmata.bin \
 		--raf=B,1560,2,litfilea.bin \
 		--raf=B,7200,4,optmata.bin \
 		>a.rpt
+	
+	@echo Processing $(RTARGET) with PASS2 ...
+	cp vmema.bin vmem2.bin
+	cp halmata.bin halmat2.bin
+	cp litfilea.bin litfile2.bin
+	cp optmata.bin optmat2.bin
+	./PASS2 --ddo=2,listing2.txt --ddo=3,cards2.txt \
+		--commoni=COMMON-AUX.out --commono=COMMON-PASS2.out \
+		--raf=B,3360,6,vmem2.bin --raf=B,7200,1,auxmat2.bin \
+		--raf=B,1560,2,litfile2.bin \
+		--raf=B,1600,3,objcode2.bin \
+		--raf=B,7200,4,optmat2.bin \
+		>c2.rpt
+	
 	

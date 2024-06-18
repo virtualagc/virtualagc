@@ -1,6 +1,11 @@
 /*
- * A C-language patch for CALL INLINE #5-8 in INT_TO_SCALAR procedure of
- * OPT pass of HAL/S-FC.
+ * License:     Public Domain, use or modify freely for any purpose.
+ * Filename:    OPT.PROCS/patch55.c
+ * Purpose:     A C-language patch for CALL INLINE #5-8 in INT_TO_SCALAR
+ *              procedure of the OPT pass of HAL/S-FC.
+ * History:     2024-06-17 RSB  Created.
+ *
+ * Here's my analysis of the IBM 360 machine code being replaced by C:
  *
  * My interpretation of the IBM 360 machine code:
  *
