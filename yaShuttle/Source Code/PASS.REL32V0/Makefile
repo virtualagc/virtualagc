@@ -50,7 +50,7 @@ $(TARGETS):
 	$(XCOMI) $(XEXTRA) --cond=$(COND) --output=$@ \
 		--lib-file=$(XLIB) \
 		'##DRIVER.xpl' && \
-	make -C $@ $@ && \
+	make EXTRA="-DIS_$@ $(EXTRA)" -C $@ $@ && \
 	cp $@/$@ ..
 
 # Note that `clean` doesn't clean everything that was built:  The executables

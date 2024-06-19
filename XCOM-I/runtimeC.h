@@ -137,6 +137,11 @@ g(char *identifier); // For interactive debugging.
 int
 guardReentry(int reentryGuard, char *functionName);
 
+#ifdef IS_PASS2
+void
+checkoutPASS2(void);
+#endif
+
 #endif // DEBUGGING_AID
 
 // Some functions that are perhaps useful for CALL INLINE or for running

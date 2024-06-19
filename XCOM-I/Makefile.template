@@ -69,13 +69,13 @@
 #	Conversely, if you're trying to figure out something XCOM-I and I 
 #	screwed up, you could use EXTRA='-Wall' to enable all warning messages.
 
-TARGET = $(notdir $(CURDIR))
+TARGET := $(notdir $(lastword $(CURDIR)))
 ifeq ($(strip $(CC)),)
 	CC = gcc
 endif
 
-SOURCES = $(wildcard *.c)
-HEADERS = $(wildcard *.h)
+SOURCES := $(wildcard *.c)
+HEADERS := $(wildcard *.h)
 
 .PHONY: all
 all: $(TARGET)

@@ -1357,70 +1357,58 @@ fixedToCharacter(int32_t i) {
 int32_t
 bitToFixed(descriptor_t *value)
 {
-  int32_t fixed, numBytes, bitWidth, dirWidth;
+  int32_t numBytes, bitWidth, dirWidth;
   uint8_t *bytes;
   bitWidth = value->bitWidth;
   numBytes = value->numBytes;
-  bytes = (uint8_t *) &(value->bytes);
-  if (bitWidth <= 8)
+  bytes = value->bytes;
+  if (numBytes == 1)
     return bytes[0];
-  if (bitWidth <= 15)
-    return (bytes[0] << 8) | bytes[1];
-  if (bitWidth == 16)
-    dirWidth = 2;
-  else
-    dirWidth = 4;
-  if (bitWidth <= 32)
+  if (numBytes == 2)
     {
-      int signBit = 0;
-      if (dirWidth == 4)
-        fixed = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
-      else
-        fixed = (bytes[0] << 8) | bytes[1];
-      signBit = fixed & (1 << (bitWidth - 1));
-      if (bitWidth <= 31 && signBit != 0 ) // sign extend.
-        {
-          int mask = (1 << bitWidth) - 1;
-          mask = ~mask;
-          fixed |= mask;
-        }
-      return fixed;
+      int16_t word = (bytes[0] << 8) | bytes[1];
+      if ((word & 0x8000) != 0)
+        word |= 0xFFFF0000;
+      return word;
     }
-  /*
-  numBytes = (bitWidth + 7) / 8;
-  fixed = (bytes[numBytes - 4] << 24) | (bytes[numBytes - 3] << 16) |
-          (bytes[numBytes - 2] << 8)  | bytes[numBytes - 1];
-  return fixed;
-  */
-  abend("Implementation error handling conversion of BIT to FIXED");
-  return 0; // Never gets to here.
+  if (numBytes == 4)
+    return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+  abend("Conversion of BIT(%d) to FIXED not implemented", bitWidth);
+  return 0; // Can't get to here.
 }
 
 descriptor_t *
 fixedToBit(int32_t bitWidth, int32_t value)
 {
   descriptor_t *buffer = nextBuffer();
-  int i, mask;
   uint32_t numBytes;
-  if (bitWidth > 32)
-    bitWidth = 32;
+  uint8_t *bytes = buffer->bytes;
   buffer->bitWidth = bitWidth;
   numBytes = (bitWidth + 7) / 8;
   if (numBytes == 3)
     numBytes = 4;
   buffer->numBytes = numBytes;
-  for (i = numBytes - 1; i > -1; i--, bitWidth -= 8)
+  if (numBytes == 1)
     {
-      if (bitWidth <= 0)
-        mask = 0;
-      else if (bitWidth < 8)
-        mask = (1 << bitWidth) - 1;
-      else
-        mask = 0xFF;
-      buffer->bytes[i] = value & mask;
-      value = value >> 8;
+      bytes[0] = value & 0xFF;
+      return buffer;
     }
-  return buffer;
+  if (numBytes == 2)
+    {
+      bytes[0] = (value >> 8) & 0xFF;
+      bytes[1] = value & 0xFF;
+      return buffer;
+    }
+  if (numBytes == 4)
+    {
+      bytes[0] = (value >> 24) & 0xFF;
+      bytes[1] = (value >> 16) & 0xFF;
+      bytes[2] = (value >> 8) & 0xFF;
+      bytes[3] = value & 0xFF;
+      return buffer;
+    }
+  abend("Conversion of FIXED to BIT(%d) not implemented", bitWidth);
+  return buffer; // Can't get to here.
 }
 
 int32_t

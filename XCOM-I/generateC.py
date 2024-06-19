@@ -279,7 +279,7 @@ def putBIT(address, value):
             errxit("putBIT(0x%06X) widths don't match (%d != %d bytes)" % \
                    (address, numBytes, lengthFromDescriptor))
         address = descriptor & 0xFFFFFF
-    bytes = value["bytes"] & ((1 << bitWidth) - 1)
+    bytes = value["bytes"] # & ((1 << bitWidth) - 1)
     if bitWidth > 32:
         shiftedBy = bitWidth % 8
         if shiftedBy != 0:

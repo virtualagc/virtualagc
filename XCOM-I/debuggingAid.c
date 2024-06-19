@@ -336,4 +336,41 @@ guardReentry(int reentryGuard, char *functionName) {
   return 1;
 }
 
+#ifdef IS_PASS2
+/*
+ * This is for trying to check out the objects `LIB_NAMES`, `LIB_NAME_INDEX`,
+ * `LIB_START`, etc., and associated functions.
+ */
+void
+checkoutPASS2(void) {
+  uint32_t HASHSIZE = 49;
+  uint32_t LIB_NUM = 282;
+  int32_t hashcode;
+  int16_t lib_start;
+  int32_t lib_name_index;
+  int16_t lib_link;
+  descriptor_t *name, *lib_name;
+  int i;
+
+  // First, print out all of the function names from the AP-101S runtime library.
+  fprintf(stderr, "\n\nLIB_NAMES\n");
+  for (i = 1; i <= LIB_NUM; i++)
+    {
+      name = getCHARACTER(mLIB_NAME_INDEX + 4 * i);
+      hashcode = ( putCHARACTER(mHASHxNAME, name), HASH() );
+      lib_start = COREHALFWORD(mLIB_START + 2 * hashcode);
+      lib_name = getCHARACTER(mLIB_NAME_INDEX + 4 * abs(lib_start));
+      lib_link = COREHALFWORD(mLIB_LINK + 2 * abs(lib_start));
+      fprintf(stderr, "\t%3d:  %-6s  %2d  %4d  %-6s  %3d  \n",
+              i,
+              descriptorToAscii(name),
+              hashcode,
+              lib_start,
+              descriptorToAscii(lib_name),
+              lib_link
+              );
+    }
+}
+#endif
+
 #endif // DEBUGGING_AID
