@@ -80,6 +80,8 @@ libraryCutoff = 0  # The line-number boundary between the library file and the
                    # main source.
 reservedMemory = 0x2000
 quiet = False
+debuggingAid = False
+reentryGuard = False
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -216,6 +218,11 @@ The available OPTIONS are:
                 `CALL INLINEs`.  `CALL INLINE`s which embed C code are not 
                 affected.  Only the first `CALL INLINE` in any adjacent sequence
                 is affected.
+--debugging-aid Include extra functions in the runtime library that may be 
+                useful for debugging XCOM-I itself.
+--reentry-guard Add extra runtime code which automatically detects illegal 
+                reentry into XPL functions.  (Automatically adds 
+                --debugging-aid.)
 --verbose       The --verbose switch (which is the default) embeds extra comments
 --concise       in the generated C source code, useful for debugging, or just for
                 improved human readability.  Whereas the --concise switch instead
@@ -250,6 +257,11 @@ The available OPTIONS are:
 for parm in sys.argv[1:]:
     if parm == "--":
         break
+    elif parm == "--debugging-aid":
+        debuggingAid = True
+    elif parm == "--reentry-guard":
+        reentryGuard = True
+        debuggingAid = True
     elif parm == "--quiet":
         quiet = True
     elif parm.startswith("--reserved="):

@@ -306,7 +306,7 @@ def putCHARACTER(address, s):
     putFIXED(address, descriptor)
     # Encode the string's character data as an EBCDIC Python byte array.
     for i in range(length):
-        try: ##***DEBUG***
+        try:
             memory[saddress + i] = asciiToEbcdic[ord(s[i])]
         except:
             errxit("Memory overflow (%06X,%d) or else illegal character in \"%s\"" %\
@@ -557,8 +557,6 @@ def allocateVariables(scope, region):
         bitWidth = 0
         if "BIT" in attributes:
             bitWidth = attributes["BIT"]
-        if "dirWidth" not in attributes:
-            print("***DEBUG***", file=sys.stderr)
         memoryMap[variableAddress] = {
             "mangled": mangled, 
             "datatype": datatype, 
@@ -627,8 +625,6 @@ def mangle(scope, extra = None):
     for identifier in scope["variables"]:
         mangled = prefix + \
             identifier.replace("@", "a").replace("#", "p").replace("$","d")
-        #if identifier == "SYM_DATA_CELL_ADDR":
-        #    print("***DEBUG***", prefix, mangled, scope["blockType"], file=sys.stderr)
         scope["variables"][identifier]["mangled"] = mangled
         if "LABEL" in scope["variables"][identifier]:
             mangledLabels.append(mangled)
@@ -674,9 +670,18 @@ def findParentProcedure(scope):
 #    dictionary of the target PROCEDURE as well.  The value of the entry 
 #    in both cases is the `attributes` of the target label in the target
 #    PROCEDURE.
+globalScope = None
 globalSetjmp = set()
 def mapJump(scope, extra = None):
-    global globalSetjmp
+    global globalSetjmp, globalScope
+    
+    # While `globalScope` is defined in XCOM-I.py, we can't import it from
+    # there since XCOM-I.py imports from us, and that would be a vicious circle.
+    # So lets's just deduce what it must be.
+    if globalScope == None:
+        globalScope = scope
+        while globalScope["parent"] != None:
+            globalScope = globalScope["parent"]
     
     # Look for all of the `GOTO` statements in the current scope.  
     procedureOfLongjmp = None
@@ -692,18 +697,20 @@ def mapJump(scope, extra = None):
             found = False
             inOurProc = True
             attributes = None
+            procedureOfSetjmp = globalScope
+            ourParentProcedure = findParentProcedure(scope)
             s = scope;
             while s != None:
                 if label in s["variables"] and "LABEL" in s["variables"][label]:
                     found = True
                     procedureOfSetjmp = findParentProcedure(s)
-                    attributes = procedureOfSetjmp["variables"][label]
                     break
-                if "blockType" not in s:
-                    inOurProc = False
                 s = s["parent"]
+            if ourParentProcedure != procedureOfSetjmp:
+                inOurProc = False
+            attributes = procedureOfSetjmp["variables"][label]
             # At this point:
-            #    `found` indicates whether the `label` was found in scopt at all.
+            #    `found` indicates whether the `label` was found in scope at all.
             #    If `found`:
             #        `s` is the scope in which `label` was found.
             #        `procedureOfSetjmp` is its enclosing PROCEDURE.
@@ -722,11 +729,6 @@ def mapJump(scope, extra = None):
                 procedureOfSetjmp["setjmpLabels"] = {}
             procedureOfSetjmp["setjmpLabels"][label] = attributes
             globalSetjmp.add(attributes["mangled"])
-            if False: # ***DEBUG***
-                print("Long jump %s:  '%s' -> '%s'" % (attributes["mangled"], 
-                                                   procedureOfLongjmp["symbol"],
-                                                   procedureOfSetjmp["symbol"]), \
-                      globalSetjmp, file=sys.stderr)
 
 def sortJumps(scope, extra = None):
     if "setjmpLabels" in scope:
@@ -1095,6 +1097,9 @@ def autoconvertMonitor(scope, parameters):
         if count > 0:
             source = source + ", "
         tipep, sourcep = generateExpression(scope, parameter)
+        if sourcef == "13" and tipep == "FIXED" and sourcep == "0":
+            tipep = "CHARACTER"
+            sourcep = 'asciiToDescriptor("")'
         if sourcef in monitorParameterTypes:
             mpt = monitorParameterTypes[sourcef]
             if count >= len(mpt):
@@ -1352,7 +1357,6 @@ def generateExpression(scope, expression):
                 if tipe == "FIXED":
                     return "FIXED", "getFIXED(" + source + ")"
                 if tipe == "CHARACTER":
-                    #print("**", tipe, source, file=sys.stderr) #***DEBUG***
                     return tipe, source
                 tipe, source = autoconvert(tipe, ["FIXED"], source)
                 if tipe != "FIXED":
@@ -1399,8 +1403,6 @@ def generateExpression(scope, expression):
                     # Datatype conversions for parameters:
                     autoconvertTo = tipe
                     if parmNum == 0:
-                        #if "1322" in p: #***DEBUG***
-                        #    print("**", tipe, p, file=sys.stderr)
                         if symbol in ["ABS", "COREBYTE", "COREWORD", "SHL",
                                       "SHR", "INPUT", "STRING", "COREHALFWORD",
                                       "DESCRIPTOR"]:
@@ -1496,7 +1498,6 @@ def generateExpression(scope, expression):
 # been clever, I would have been using this for assignments from day 1, but I've
 # introduced it belatedly only when working on `FILE`.  Returns type,source.
 def getExpressionADDR(scope, expression):
-    #print("***", expression, file=sys.stderr) # ***DEBUG***
     if "identifier" in expression["token"] and len(expression["children"]) == 0:
         expression["children"] = [ {
             "token": { "number": 0 }
@@ -1533,6 +1534,7 @@ lastCallInline = -2
 def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
     global forLoopCounter, lineCounter, inlineCounter, errxitRef
     global lastCallInline
+    parentProcedureScope = findParentProcedure(scope)
     '''
     The following line is a ridiculous trick.  Originally, the line wasn't
     there, and `indent` was simply the 2nd parameter of this
@@ -1596,7 +1598,6 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                     if not fileOnRight:
                         typeR, addrR = getExpressionADDR(scope, RHS)
                 else:
-                    #print("***", line, file=sys.stderr) # ***DEBUG***
                     typeL, addrL = getExpressionADDR(scope, LHS)
                 if fileOnLeft and not fileOnRight:
                     print(indent + "lFILE(%s, %s, %s);" % (devL, recL, addrR))
@@ -1773,7 +1774,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             elif "identifier" in tokenLHS:
                 identifier = tokenLHS["identifier"]
                 attributes = getAttributes(scope, identifier)
-                try: # ***DEBUG***
+                try:
                     address = attributes["address"]
                 except:
                     print(identifier, file=sys.stderr)
@@ -2045,9 +2046,10 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
         else:
             print(indent + "goto " + normalizedLabel(label) + ";")
     elif "TARGET" in line:
-        if "sortedSetjmpLabels" in scope and \
-                line["TARGET"] in scope["sortedSetjmpLabels"]:
-            setjmpCounter = scope["sortedSetjmpLabels"].index(line["TARGET"])
+        if "sortedSetjmpLabels" in parentProcedureScope and \
+                line["TARGET"] in parentProcedureScope["sortedSetjmpLabels"]:
+            sortedSetjmpLabels = parentProcedureScope["sortedSetjmpLabels"]
+            setjmpCounter = sortedSetjmpLabels.index(line["TARGET"])
             # If we're here, it's because there are targets of longjmp in the
             # enclosing procedure.  Therefore, we have to enhance the "label:"
             # we'd normally put here, with `setjmp` and means to initialize the
@@ -2058,14 +2060,14 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             indent3 = indent2 + indentationQuantum
             print(indent1 + normalizedLabel(line["TARGET"]) + ":")
             parentProc = findParentProcedure(scope)
-            label = parentProc["variables"][scope["sortedSetjmpLabels"][setjmpCounter]]["mangled"]
+            label = parentProc["variables"][sortedSetjmpLabels[setjmpCounter]]["mangled"]
             print(indent1 + "if (setjmpInitialize) {")
             print(indent2 + "if (!setjmp(jb%s))" % label)
             setjmpCounter += 1
-            if (setjmpCounter >= len(scope["sortedSetjmpLabels"])):
+            if (setjmpCounter >= len(sortedSetjmpLabels)):
                 label = "setjmpInitialized"
             else:
-                label = scope["sortedSetjmpLabels"][setjmpCounter]
+                label = sortedSetjmpLabels[setjmpCounter]
             print(indent3 + "goto %s;" % normalizedLabel(label))
             print(indent1 + "}")
             print(indent + "}")
@@ -2128,7 +2130,10 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 source = "fixedToBit(32, 0)"
         else:
             toType, source = autoconvertFull(scope, line["RETURN"], toAttributes)
-        print(indent + "{ reentryGuard = 0; return " + source + "; }")
+        if reentryGuard:
+            print(indent + "{ reentryGuard = 0; return " + source + "; }")
+        else:
+            print(indent + "return " + source + ";")
     elif "ELSE" in line:
         print(indent + "else")
     elif "EMPTY" in line:
@@ -2429,12 +2434,13 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         indent1 = indent + indentationQuantum
         indent2 = indent1 + indentationQuantum
         # Let's guard against reentry.
-        print(indent1 + "static int reentryGuard = 0;")
-        print(indent1 + 'reentryGuard = guardReentry(reentryGuard, "%s");' % \
-                                           functionName)
+        if reentryGuard:
+            print(indent1 + "static int reentryGuard = 0;")
+            print(indent1 + 'reentryGuard = guardReentry(reentryGuard, "%s");' % \
+                                               functionName)
         # If there's a need to initialize buffers for calls to `setjmp`, we
         # have to do that right now.
-        if "sortedSetjmpLabels" in scope:
+        if "sortedSetjmpLabels" in scope and len(scope["sortedSetjmpLabels"]) > 0:
             print(indent1 + "static int setjmpInitialize = 1;") 
             print(indent1 + "if (setjmpInitialize) { ")
             print(indent2 + "goto %s; " % normalizedLabel(scope["sortedSetjmpLabels"][0]))
@@ -2479,7 +2485,10 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
     # be reached, the C compiler may complain, but hopefully won't fail.
     if not lastReturned and scope["symbol"] != '' and \
             scope["symbol"][:1] != scopeDelimiter:
-        print(indent + "{ reentryGuard = 0; return 0; }")
+        if reentryGuard:
+            print(indent + "{ reentryGuard = 0; return 0; }")
+        else:
+            print(indent + "return 0;")
     if "extraIndent" in scope: # End of the actual loop of a DO for-loop block.
         if "label" in scope and "blockType" in scope and \
                 scope["blockType"] == "DO for-loop block":
@@ -2497,7 +2506,10 @@ def generateCodeForScope(scope, extra = { "of": None, "indent": "" }):
         #print(indent + "if (LINE_COUNT)")
         #print(indent + indentationQuantum + \
         #      "printf(\"\\n\"); // Flush buffer for OUTPUT(0) and OUTPUT(1).")
-        print(indent + "{ reentryGuard = 0; return 0; } // Just in case ...")
+        if reentryGuard:
+            print(indent + "{ reentryGuard = 0; return 0; } // Just in case ...")
+        else:
+            print(indent + "return 0; // Just in case ...")
     if "label" in scope and "blockType" in scope and \
             scope["blockType"] in ["DO WHILE block", "DO UNTIL block",]:
         print(indent + "if (0) { r%s: continue; e%s: break; } // block labeled %s" % \
@@ -2827,6 +2839,10 @@ def generateC(globalScope):
     print("// Configuration settings, inferred from the XPL/I source.", file=f)
     fields = outputFolder.split("/\\")
     appName = fields[-1]
+    if debuggingAid:
+        print("#define DEBUGGING_AID", file=f)
+    if reentryGuard:
+        print("#define REENTRY_GUARD", file=f)
     print("#define APP_NAME \"%s\"" % appName, file=f)
     print("#define XCOM_I_START_TIME %d" % TIME_OF_GENERATION, file=f)
     print("#define XCOM_I_START_DATE %d" % DATE_OF_GENERATION, file=f)

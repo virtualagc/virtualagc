@@ -56,6 +56,16 @@ typedef char sbuf_t[MAX_XPL_STRING + 1];
 #include "configuration.h"
 #include "procedures.h"
 
+// The macro `RETURN();` can be used in place of `return;`, while
+// `RETURN(something);` can be used in place of `return something;`.  The
+// advantage is that it takes `REENTRY_GUARD` into account.  This is really
+// useful just in C-language patches for CALL INLINE statements.
+#ifdef REENTRY_GUARD
+#define RETURN(...) return ((reentryGuard = 0), (__VA_ARGS__))
+#else
+#define RETURN(...) return (__VA_ARGS__)
+#endif
+
 // Command-line variables.
 #define DD_MAX 9
 #define PDS_PARTNAME_SIZE 8
@@ -99,6 +109,36 @@ typedef struct {
 } optionsProcessor_t;
 extern optionsProcessor_t *optionsProcessor, *USEROPT;
 
+#ifdef DEBUGGING_AID
+
+void
+printMemoryMap(char *msg, int start, int end);
+
+extern int bitBits;
+
+descriptor_t *
+bitToRadix(descriptor_t *b);
+
+descriptor_t *
+getXPL(char *identifier);
+
+void
+printXPL(char *identifier);
+
+descriptor_t *
+rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex);
+
+char *
+g0(char *identifier, memoryMapEntry_t *me);
+
+char *
+g(char *identifier); // For interactive debugging.
+
+int
+guardReentry(int reentryGuard, char *functionName);
+
+#endif // DEBUGGING_AID
+
 // Some functions that are perhaps useful for CALL INLINE or for running
 // the C code in a debugger.
 
@@ -133,17 +173,6 @@ lookupFloor(uint32_t address);
 
 memoryMapEntry_t *
 lookupVariable(char *symbol);
-
-void
-printMemoryMap(char *msg, int start, int end);
-
-extern int bitBits;
-descriptor_t *
-getXPL(char *identifier);
-void
-printXPL(char *identifier);
-descriptor_t *
-rawGetXPL(char *base, int baseIndex, char *field, int fieldIndex);
 
 // Returns -1 on failure, 0 on success, 1 to request an immediate termination.
 int
@@ -219,8 +248,6 @@ void
 putCHARACTER(uint32_t address, descriptor_t *s);
 void
 putCHARACTERp(uint32_t address, descriptor_t *s);
-char *
-g(char *identifier); // For interactive debugging.
 
 // Convert a FIXED to a CHARACTER.
 descriptor_t *
@@ -295,7 +322,9 @@ extern sbuf_t headingLine;
 extern sbuf_t subHeadingLine;
 extern int pageCount;
 extern int LINE_COUNT;
+extern memoryMapEntry_t *foundRawADDR;
 extern int linesPerPage;
+extern int watchpoint;
 void
 OUTPUT(uint32_t lun, descriptor_t *msg);
 
@@ -597,8 +626,5 @@ XPL_COMPILER_VERSION(uint32_t index);
 
 void
 debugInline(int inlineCounter);
-
-int
-guardReentry(int reentryGuard, char *functionName);
 
 #endif // RUNTIMEC_H

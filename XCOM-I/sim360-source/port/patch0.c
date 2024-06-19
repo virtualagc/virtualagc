@@ -27,6 +27,9 @@
  * news?
  */
 
+// Note the use of the `RETURN()` macro in place of `return`.  This is to
+// account for the possible use of XCOM-I's --reentry-guard switch.
+
 static memoryMapEntry_t *mapCP = NULL, *mapTEXT = NULL, *mapTABLE,
       *mapBLANKTABLE, *mapALPHATABLE, *mapSTRINGTABLE, *mapCOMMENTABLE;
 char *s, *TEXT;
@@ -47,7 +50,8 @@ TABLE = getFIXED(mapTABLE->address);
 TEXT = descriptorToAscii(getCHARACTER(mapTEXT->address));
 
 if (*TEXT == 0)
-  { reentryGuard = 0; return fixedToBit(1, 0); }
+  RETURN(fixedToBit(1, 0));
+
 if (TABLE == mapBLANKTABLE->address)
   {
     for (s = TEXT; *s == ' ' || *s == '\t'; s++);
@@ -72,7 +76,8 @@ else
 if (*s == 0)
   {
     putFIXED(mapCP->address, s + 1 - TEXT);
-    { reentryGuard = 0; return fixedToBit(1, 0); }
+    RETURN(fixedToBit(1, 0));
   }
 putFIXED(mapCP->address, s - TEXT);
-{ reentryGuard = 0; return fixedToBit(1, 1); }
+RETURN(fixedToBit(1, 1));
+
