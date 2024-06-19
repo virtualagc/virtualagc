@@ -62,7 +62,7 @@ $(TARGETS):
 clean:
 	-rm COMMON-*.out listing2*.txt vmem*.bin halmat*.bin litfile*.bin \
 	    *.rpt optmat*.bin auxmat*.bin objcode*.obj cards*.txt \
-	    monitor13.parms
+	    extra*.txt deck*.txt monitor13.parms
 
 .PHONY: cleanall
 cleanall: clean
@@ -149,6 +149,9 @@ regression:
 	./PASS2 \
 		--ddo=2,listing22.txt \
 		--ddo=3,cards2.txt \
+		--ddo=4,deck2.txt \
+		--pdsi=5,ERRORLIB \
+		--ddo=7,extra2.txt \
 		--commoni=COMMON-AUX.out \
 		--commono=COMMON-PASS2.out \
 		--raf=B,7200,1,auxmat2.bin \

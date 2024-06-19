@@ -109,6 +109,15 @@ typedef struct {
 } optionsProcessor_t;
 extern optionsProcessor_t *optionsProcessor, *USEROPT;
 
+// The following global variables represent IBM 360 registers.
+// They don't actually *do* anything, but sometimes CALL INLINEs may load values
+// into the registers and expect later blocks of CALL INLINEs to have access to
+// them.  Normal C patches to blocks of inlines use only variables local to the
+// block, so it's necessary to provide separate globals for them to use for
+// this purpose.
+extern uint32_t GR[16];
+extern double FR[16];
+
 #ifdef DEBUGGING_AID
 
 void
@@ -512,11 +521,11 @@ COREWORD(uint32_t address);
 void
 COREWORD2(uint32_t address, uint32_t value);
 
-uint32_t
+int16_t
 COREHALFWORD(uint32_t address);
 
 void
-COREHALFWORD2(uint32_t address, uint32_t value);
+COREHALFWORD2(uint32_t address, int32_t value);
 
 // Gets the address of any variable, subscripted or non-subscripted,
 // BASED or non-BASED, RECORD or non-RECORD, as follows:

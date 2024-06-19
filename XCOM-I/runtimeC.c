@@ -71,6 +71,11 @@ int DD_OUTS_EXISTED[DD_MAX] = { 0 };
 FILE *COMMON_OUT = NULL;
 randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES] = { { NULL } };
 
+// Model IBM 360 registers for communicating between C patches for blocks of
+// CALL INLINEs.
+uint32_t GR[16]; // General registers.
+double FR[16];   // Floating-point registers.
+
 // Starting time of the program run, more or less.
 struct timeval startTime;
 
@@ -2732,7 +2737,7 @@ COREWORD2(uint32_t address, uint32_t value) {
   abend("COREWORD write address overflows memory");
 }
 
-uint32_t
+int16_t
 COREHALFWORD(uint32_t address) {
   if (address + 2 <= MEMORY_SIZE)
     return (memory[address] << 8) | memory[address + 1];
@@ -2741,7 +2746,7 @@ COREHALFWORD(uint32_t address) {
 }
 
 void
-COREHALFWORD2(uint32_t address, uint32_t value) {
+COREHALFWORD2(uint32_t address, int32_t value) {
   if (address + 2 <= MEMORY_SIZE)
     {
       memory[address] = (value >> 8) & 0xFF;
@@ -3362,7 +3367,7 @@ ABS(int32_t value) {
   if (value == 0x80000000)
     return 0x7FFFFFFF;
   else
-    return -value;
+    return abs(value);
 }
 
 uint32_t
