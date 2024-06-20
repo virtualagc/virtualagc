@@ -900,13 +900,13 @@ parseCommandLine(int argc, char **argv)
           printf("              ordinarily be provided in program comments, since\n");
           printf("              it eliminates the need to modify the source code\n");
           printf("              being compiled.  For example,\n");
-          printf("                   --extra=2,'/* $E $S */'");
+          printf("                   --extra=2,'/* $E $S */'\n");
           printf("              would cause emitted IBM 360 codes to be\n");
           printf("              interlisted with XPL source code in the printout,\n");
           printf("              and symbol tables to be printed after each\n");
           printf("              PROCEDURE, for the XCOM of 'A Compiler Generator'.\n");
           printf("              Whereas\n");
-          printf("                   --extra=0,'/* $E $S */'");
+          printf("                   --extra=0,'/* $E $S */'\n");
           printf("              would do the same, but only beginning with the\n");
           printf("              main source-code file, skipping the library file.\n");
           printf("              Other (or no) toggles might be applicable for other\n");
