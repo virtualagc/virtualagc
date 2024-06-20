@@ -34,10 +34,8 @@
 #include <sys/types.h>
 #include <math.h>
 #include <ctype.h>
-#include <execinfo.h>
-
 #ifndef _WIN32
-// Windows VS doesn't have sys/time.h.
+#include <execinfo.h>
 #include <sys/time.h> // For gettimeofday().
 #else
 struct timeval {
@@ -453,10 +451,12 @@ optionsProcessor_t *optionsProcessor = NULL;
 
 #define BT_BUF_SIZE 100
 
-// The backtrace is available in Linux and (I've read) Mac OS.
+// The backtrace is available in Linux and (I've read) Mac OS.  It's not
+// available in Windows, at least not with the same execinfo.h mechanism.
 void
 printBacktrace(void)
 {
+#ifndef _WIN32
   int j, nptrs;
   void *buffer[BT_BUF_SIZE];
   char **strings;
@@ -469,6 +469,7 @@ printBacktrace(void)
         fprintf(stderr, "\t%s\n", strings[j]);
     }
   free(strings);
+#endif
 }
 
 __attribute__((noreturn)) void
