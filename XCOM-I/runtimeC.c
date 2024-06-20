@@ -889,6 +889,7 @@ parseCommandLine(int argc, char **argv)
           printf("--parm=S      Specifies a PARM FIELD such as would originally\n");
           printf("              have been provided in JCL.\n");
           printf("--backtrace   If available, print a backtrace upon abend.\n");
+          printf("              (Not presently functional in Windows.\n");
           printf("--extra=N,L   L represents a string and N represents a device\n");
           printf("              number for INPUT(N).  This option causes the\n");
           printf("              string L to be returned upon the *first* use of\n");
