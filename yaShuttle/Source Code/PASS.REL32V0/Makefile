@@ -16,7 +16,7 @@ SHELL := /bin/bash # To use bash rather than sh.
 
 COND := P	# P for PFS or B for BFS (or TBD?)
 
-TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4 regression
+TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4
 XCOM_DIR := ../../../../XCOM-I
 XCOMI := $(XCOM_DIR)/XCOM-I.py
 XLIB := $(XCOM_DIR)/SPACELIB.xpl
