@@ -11,6 +11,7 @@ History:    2023-08-24 RSB  Began importing global variables from ##DRIVER.xpl.
             2023-08-25 RSB  Finished initial port.
             2023-09-07 RSB  Split off xplBuiltins.py to contain just the 
                             functions.
+            2024-06-20 RSB  Stuff related to `D DOWNGRADE`
 '''
 
 # The version of the compiler port: (Y, M, D, H, M, S).
@@ -3428,6 +3429,7 @@ VALID_00_CHAR = BYTE('0')  # THE CHARACTER WHICH, WHEN
                              # GENERATES X'00' INTERNALLY
 
 STACK_DUMPED = 0
+DOWN_COUNT = 0
 SEVERITY = 0
 PARTIAL_PARSE = 0
 TEMPORARY_IMPLIED = 0
@@ -3646,6 +3648,8 @@ def DWN_CLS(n, value=None):
     fixup_DOWN_INFO(n)
     if value == None:
         return h.DOWN_INFO[n].DOWN_CLS[:]
+    elif isinstance(value, int):
+        h.DOWN_INFO[n].DOWN_CLS = "%d" % value
     else:
         h.DOWN_INFO[n].DOWN_CLS = value[:]
 

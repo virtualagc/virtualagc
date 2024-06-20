@@ -8,6 +8,7 @@ Purpose:    This is part of the port of the original XPL source code for
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-31 RSB  Created a stub.
             2023-09-04 RSB  Began porting.
+            2024-06-20 RSB  Stuff related to `D DOWNGRADE`
             
 Note that the original of this file was pretty spaghetti-like.  Refer to the
 notes concerning goto_XXXX in SCAN.xpl for an explanation of the workaround
@@ -17,8 +18,12 @@ technique.
 from xplBuiltins import *
 import g
 import HALINCL.CERRDECL as d
+import HALINCL.COMMON as h
+import HALINCL.SPACELIB as s
+import HALINCL.DWNTABLE as t
 from CHARINDE import CHAR_INDEX
 from ERROR    import ERROR
+from ERRORS   import ERRORS
 from NEXTRECO import NEXT_RECORD
 from ORDEROK  import ORDER_OK
 from OUTPUTGR import OUTPUT_GROUP
@@ -513,6 +518,17 @@ def STREAM():
             if not g.INCLUDING:
                 g.INCLUDE_STMT = -1;
 
+        def CHAR_VALUE(STR):
+            g.K = 0
+            g.J = 0;
+            g.VAL = 0;
+            while g.J < LENGTH(STR):
+                g.K = BYTE(STR, g.J);
+                if (g.K >= BYTE('0')) and (g.K <= BYTE('9')):
+                    g.VAL = g.VAL * 10 + (g.K - BYTE('0'));
+                g.J = g.J + 1;
+            return g.VAL;
+
         if BYTE(g.CURRENT_CARD) == BYTE('C'):
             PRINT_COMMENT(g.TRUE);
         elif BYTE(g.CURRENT_CARD) == BYTE('D'):
@@ -548,17 +564,6 @@ def STREAM():
                 return;
             PRINT_COMMENT(g.TRUE, ll.C[0]);
             if (ll.C[0] == 'EB') or (ll.C[0] == 'EBUG'):  # DEBUG DIRECTIVE
-                
-                def CHAR_VALUE(STR):
-                    g.K = 0
-                    g.J = 0;
-                    g.VAL = 0;
-                    while g.J < LENGTH(STR):
-                        g.K = BYTE(STR, g.J);
-                        if (g.K >= BYTE('0')) and (g.K <= BYTE('9')):
-                            g.VAL = g.VAL * 10 + (g.K - BYTE('0'));
-                        g.J = g.J + 1;
-                    return g.VAL;
                 
                 ll.C[0] = hd.D_TOKEN();
                 while LENGTH(ll.C[0]) != 0:
@@ -676,7 +681,7 @@ def STREAM():
                 ll.C[0] = hd.D_TOKEN();
                 if LENGTH(ll.C[0]) == 0:  # NO ERROR NUMBER TO DOWNGRADE 
                     ERRORS(d.CLASS_BI, 108);
-                elif g.DOWN_COUNT > DOWNGRADE_LIMIT:  # OBTAIN CLASS
+                elif g.DOWN_COUNT > h.DOWNGRADE_LIMIT:  # OBTAIN CLASS
                     '''
                     /* IN ORDER TO COMPLETELY REMOVE THE LIMIT ON THE NUMBER OF          */
                     /* ALLOWABLE DOWNGRADES JUST REMOVE THIS IF STATEMENT AND   */
@@ -686,7 +691,7 @@ def STREAM():
                     '''
                     ERRORS (d.CLASS_BI, 109);
                 else:
-                    NEXT_ELEMENT(h.DOWN_INFO);
+                    s.NEXT_ELEMENT(h.DOWN_INFO);
                     g.DOWN_COUNT = g.DOWN_COUNT + 1;
                     for ll.I in range(0, 2):
                        g.TEMP_CLS = SUBSTR(ll.C[0], 0, ll.I + 1);
@@ -694,7 +699,7 @@ def STREAM():
                        if g.ULT_TEMP_CLS >= '0' and g.ULT_TEMP_CLS <= '9':
                           g.CONTINUE = 1;
                        if g.CONTINUE == 0:  # GET CLASS
-                          g.ULT_TEMP_CLS = PAD('d.CLASS_' + g.TEMP_CLS, 8);
+                          g.ULT_TEMP_CLS = PAD('CLASS_' + g.TEMP_CLS, 8);
                           g.FIN_TMP_CLS = SUBSTR(g.X1 + g.ULT_TEMP_CLS, 1);
                        # END DETERMINE CLASS
                     # END OF ELSE FOR CLASS
@@ -713,17 +718,17 @@ def STREAM():
                             g.INCREMENT_DOWN_STMT = g.FALSE;
                     # ATTACH DOWNGRADE TO CORRECT STATEMENT
                     if g.INCREMENT_DOWN_STMT and TOKEN == SEMI_COLON:
-                        DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1 + g.STMT_NUM() + 1, 1));
+                        g.DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1 + str(g.STMT_NUM() + 1), 1));
                     else:
-                        DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1 + g.STMT_NUM(), 1));
+                        g.DWN_STMT(g.DOWN_COUNT, SUBSTR(g.X1 + str(g.STMT_NUM()), 1));
                     g.INCREMENT_DOWN_STMT = ll.TMP_INCREMENT;
                     g.TEMP_CLS = CHAR_VALUE(ll.C[0]);
-                    DWN_ERR(g.DOWN_COUNT, SUBSTR(g.X1 + g.TEMP_CLS, 1));
+                    g.DWN_ERR(g.DOWN_COUNT, SUBSTR(g.X1 + str(g.TEMP_CLS), 1));
                     g.CONTINUE = 1;
                     g.TEMP_COUNT = 0;
-                    while g.CONTINUE == 1 and g.TEMP_COUNT <= NUM_ERR:
-                        if g.FIN_TMP_CLS == ERROR_INDEX(g.TEMP_COUNT):
-                            DWN_CLS(g.DOWN_COUNT, ERR_VALUE(g.TEMP_COUNT));
+                    while g.CONTINUE == 1 and g.TEMP_COUNT <= t.NUM_ERR:
+                        if g.FIN_TMP_CLS == t.ERROR_INDEX[g.TEMP_COUNT]:
+                            g.DWN_CLS(g.DOWN_COUNT, t.ERR_VALUE[g.TEMP_COUNT]);
                             g.CONTINUE = 0;
                         else:
                             g.TEMP_COUNT = g.TEMP_COUNT + 1;
@@ -735,7 +740,7 @@ def STREAM():
                         /* IS NO INFORMATION TO PUT INFO 'DWN_CLS' SINCE THE ERROR CLASS DOES*/
                         /* NOT EXIST).                                                       */
                         '''
-                        DWN_UNKN(g.DOWN_COUNT, ll.C[0]);
+                        g.DWN_UNKN(g.DOWN_COUNT, ll.C[0]);
                         ERRORS (d.CLASS_BI, 107);
             # END OF DOWNGRADE
             elif ll.C[0] == 'PROGRAM':

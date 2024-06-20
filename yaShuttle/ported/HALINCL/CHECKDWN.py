@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python.  
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-09-26 RSB  Ported
+            2024-06-20 RSB  Stuff related to `D DOWNGRADE`
 '''
 
 from xplBuiltins import *
@@ -75,7 +76,7 @@ def CHECK_DOWN(ERRORCODE, SEVERITY):
         if l.TEMP_STMT == g.DWN_STMT(l.DOWN_COUNT):
             l.TFOUND = 0;
             l.COUNT = 0;
-            while l.TFOUND == 0 and l.COUNT < g.NUM_ERR:
+            while l.TFOUND == 0 and l.COUNT < t.NUM_ERR:
                 if g.DWN_CLS(l.DOWN_COUNT) == t.ERR_VALUE(l.COUNT): 
                     l.TMP_CLS = SUBSTR(t.ERROR_INDEX(l.COUNT), 6, 2);
                     l.TFOUND = 1;

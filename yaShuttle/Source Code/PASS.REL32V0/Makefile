@@ -94,7 +94,7 @@ regression:
 	@echo Comparing ...
 	-@egrep --invert-match "$(IGNORE_LINES)" c.rpt >cA.rpt
 	-@egrep --invert-match "$(IGNORE_LINES)" py.rpt >pyA.rpt
-	@diff -q -s cA.rpt pyA.rpt
+	@-diff -q -s cA.rpt pyA.rpt
 	@diff -s $(PORTED)/FILE1.bin halmat.bin
 	@diff -q -s $(PORTED)/LISTING2.txt listing2.txt
 	

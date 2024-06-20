@@ -42,7 +42,7 @@ ERROR_INDEX = ('CLASS_A ', 'CLASS_AA',
     'CLASS_VC', 'CLASS_VE', 'CLASS_VF', 'CLASS_X ', 'CLASS_XA', 'CLASS_XD', 'CLASS_XI',
     'CLASS_XM', 'CLASS_XQ', 'CLASS_XR', 'CLASS_XS', 'CLASS_XU', 'CLASS_XV', 'CLASS_Z ',
     'CLASS_ZB', 'CLASS_ZC', 'CLASS_ZI', 'CLASS_ZN', 'CLASS_ZO', 'CLASS_ZP', 'CLASS_ZR',
-    'CLASS_ZS');
+    'CLASS_ZS', '');
 
 ERR_VALUE = (
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,

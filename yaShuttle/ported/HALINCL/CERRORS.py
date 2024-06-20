@@ -7,6 +7,7 @@ Purpose:    This is part of the port of the original XPL source code for
             HAL/S-FC into Python.  
 Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
 History:    2023-08-29 RSB  Ported
+            2024-06-20 RSB  Stuff related to `D DOWNGRADE`
 '''
 
 from xplBuiltins import *
@@ -70,15 +71,15 @@ def COMMON_ERRORS(CLASS, NUM, TEXT, ERRORp, STMTp):
     l.SEVERITY = BYTE(l.S) - BYTE('0');
     #  DETERMINE IF THERE IS A DOWNGRADE FOR THIS STMT  
     while l.FOUND == 0  and l.DOWN_COUNT <= len(h.DOWN_INFO) - 1:
-        if l.NUMIT == DWN_ERR(l.DOWN_COUNT) and l.CLS_COMPARE == DWN_CLS(l.DOWN_COUNT):
-            if l.TEMP_STMT == DWN_STMT(l.DOWN_COUNT):
+        if l.NUMIT == g.DWN_ERR(l.DOWN_COUNT) and l.CLS_COMPARE == g.DWN_CLS(l.DOWN_COUNT):
+            if l.TEMP_STMT == g.DWN_STMT(l.DOWN_COUNT):
                 if l.SEVERITY == 1:
                     l.SEVERITY = 0;
                     OUTPUT(0, l.AST + ' THE FOLLOWING ERROR WAS DOWNGRADED FROM A ' + \
                              'SEVERITY ONE ERROR TO A SEVERITY ZERO ERROR ' + l.AST);
                     l.FOUND = 1;
                     # NOTE THAT THE ERROR WAS DOWNGRADED SUCCESSFULLY  
-                    DWN_VER(l.DOWN_COUNT, '1');
+                    g.DWN_VER(l.DOWN_COUNT, '1');
             else:
                 OUTPUT(0, l.AST + ' AN ATTEMPT WAS MADE TO DOWNGRADE AN ' + 
                            'ERROR OTHER THAN A SEVERITY ONE ERROR ' + 
