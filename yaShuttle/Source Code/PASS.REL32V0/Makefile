@@ -10,14 +10,13 @@
 #		Various *NIX utilities (diff, egrep)
 
 # This Makefile is used to build the components of HAL/S-FC.  It can also be
-# used to perform some regression tests, at least insofar as comparing
-# HAL/S-FC PASS1 to HAL_S_FC.py.
+# used to perform some regression tests.
 
 SHELL := /bin/bash # To use bash rather than sh.
 
 COND := P	# P for PFS or B for BFS (or TBD?)
 
-TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4
+TARGETS := PASS1 FLO OPT AUX PASS2 PASS3 PASS4 regression
 XCOM_DIR := ../../../../XCOM-I
 XCOMI := $(XCOM_DIR)/XCOM-I.py
 XLIB := $(XCOM_DIR)/SPACELIB.xpl

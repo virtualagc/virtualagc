@@ -94,9 +94,9 @@ all: testclean $(XPL_APPS) $(XPLI_APPS)
 	egrep --invert-match \
 	       '(^COMMON |^.PAGE [0-9]|^$$)' > xxxx
 	@diff -s -q bitsizeDemoCommon/xxxxA bitsizeDemoCommonIn/xxxx
-	@sed --in-place 's/^;.*//' bitsizeDemoCommon/COMMON.out
-	@sed --in-place 's/^;.*//' bitsizeDemoCommonIn/COMMON.out
-	@diff -s -q bitsizeDemoCommon/COMMON.out bitsizeDemoCommonIn/COMMON.out
+	@sed 's/^;.*//' bitsizeDemoCommon/COMMON.out >bitsizeDemoCommon/COMMONa.out
+	@sed 's/^;.*//' bitsizeDemoCommonIn/COMMON.out >bitsizeDemoCommonIn/COMMONa.out
+	@diff -s -q bitsizeDemoCommon/COMMONa.out bitsizeDemoCommonIn/COMMONa.out
 
 	@e=Example-6.18.3 && \
 	cd $$e && \
