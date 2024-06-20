@@ -34,10 +34,8 @@
 #include <sys/types.h>
 #include <math.h>
 #include <ctype.h>
-#ifndef _WIN32
-#include <execinfo.h>
-#include <sys/time.h> // For gettimeofday().
-#else
+
+#if defined(_WIN32) || defined(__CYGWIN__)
 struct timeval {
    time_t      tv_sec;     /* seconds */
    suseconds_t tv_usec;    /* microseconds */
@@ -48,6 +46,9 @@ int gettimeofday(struct timeval *tv, void *tz) {
   tv->tv_sec = ts.tv_sec;
   tv->tv_usec = ts.tv_nsec / 1000;
 }
+#else
+#include <execinfo.h> // For backtraces.
+#include <sys/time.h> // For gettimeofday().
 #endif
 
 //---------------------------------------------------------------------------
@@ -456,7 +457,7 @@ optionsProcessor_t *optionsProcessor = NULL;
 void
 printBacktrace(void)
 {
-#ifndef _WIN32
+#ifdef _EXECINFO_H
   int j, nptrs;
   void *buffer[BT_BUF_SIZE];
   char **strings;
