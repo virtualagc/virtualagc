@@ -33,9 +33,9 @@
 #include <sys/types.h>
 #include <math.h>
 #include <ctype.h>
-
-#if !defined(_WIN32)
 #include <unistd.h>
+
+#if !defined(_WIN32) || defined(__CYGWIN__)
 #include <sys/time.h> // For gettimeofday().
 #endif
 
@@ -54,21 +54,6 @@ int gettimeofday(struct timeval *tv, void *tz) {
   clock_gettime(CLOCK_REALTIME, &ts);
   tv->tv_sec = ts.tv_sec;
   tv->tv_usec = ts.tv_nsec / 1000;
-}
-#endif
-
-#ifndef _UNISTD_H
-// Presumably this is Windows.
-#include <fileapi.h>
-#define F_OK 0
-int
-access(const char *pathname, int mode) {
-  // We just need this to return 0 if the path already exists as a file or a
-  // directory.
-  long int fileAttributes = GetFileAttributes(pathname);
-  if (fileAttributes == -1)
-    return 1;
-  return 0;
 }
 #endif
 
