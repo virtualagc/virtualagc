@@ -1664,13 +1664,19 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
     abend("Output file has not been assigned: Device = %d", lun);
   fp = DD_OUTS[lun];
   sbuf_t queue[MAX_QUEUE]; // SYSPRINT line-queue for current page.
+  for (i = 0; i < strlen(s); i++)
+    if (s[i] == 0xF0)
+      fprintf(stderr, "***DEBUG*** Line '%s' has illegal 0xF0\n", s);
   int linesInQueue = 0;
   if (lun <= 1) // SYSPRINT
     {
       if (lun == 1)
         {
           ansi = *s;
-          s += 1;
+          if (*s == 0) // Account for a possible empty string.
+            ansi = ' ';
+          else
+            s += 1;
         }
       if (ansi == '_')
         {}

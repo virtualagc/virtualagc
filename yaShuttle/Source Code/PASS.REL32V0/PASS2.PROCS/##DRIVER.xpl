@@ -1,14 +1,72 @@
  /*@
     Access:     Public Domain, no restrictions believed to exist.
-    Filename:   ##DRIVER.xpl
+    Filename:   PASS2/##DRIVER.xpl
     Purpose:    This is a part of the HAL/S-FC compiler program.
     Reference:  "HAL/S Compiler Functional Specification", section 2.1.2.
     Language:   XPL.
     Contact:    The Virtual AGC Project (www.ibiblio.org/apollo).
     History:    2023-04-16 RSB  Suffixed the filename with ".xpl".
+    		2024-06-21 RSB	Added a modification to the source code to 
+    				work around the problem of "unverified"
+    				runtime-library routines.  Reluctantly.
+    				More explanation is below.
     Note:       Inline comments beginning with "/*@" were created by the
                 Virtual AGC Project. Inline comments beginning merely with
                 "/*" are from the original Space Shuttle development.
+    
+    Certification of Runtime-Library Routines
+    -----------------------------------------
+    
+    AP-101S runtime-library routines as developed by Intermetrics provided a 
+    lot of functionality, some of which was not needed for the flight software,
+    but which nevertheless might be useful for non-flight software.  To be used
+    for flight software, a runtime-library routine needed to undergo a 
+    "certification" process, and (I am told) because the certification process
+    would have had to be paid for, successors to Intermetrics (Loral, 
+    Lockheed Martin, USA) did not certify those routines not needed for flight
+    software.
+    
+    PASS2 contains not only a list of the runtime-library routines, but knows
+    which routines were certified -- PASS2 refers to them as "verified" -- and
+    which were not certified ("unverified").  If you write a HAL/S program that
+    indirectly results in an uncertified runtime-library routine being called,
+    PASS2 issues an XS3 error, "ATTEMPT TO INVOKE UNVERIFIED RUNTIME LIBRARY 
+    ROUTINE", of severity level 1. 
+    
+    Where I ran afoul of this was in HAL/S test code I wrote that contained
+    statements like "WRITE(6) '...message...';", which use the uncertified
+    functions IOINIT and COUT.  WRITE, after all, is perfectly legitimate
+    HAL/S, found for example throughout Ryer's book "Programming in HAL/S", and 
+    should *not* be generating fatal compile-time errors!
+    
+    There are several workarounds, such as downgrading XS3 errors to severity
+    0 with the compiler directive "D DOWNGRADE XS3", or editing the XS3 error
+    in the ERRLIB library to have severity 0.  However, even though downgraded
+    to severity 0, these will still be *errors* that show up in compiler reports
+    and possibly in other ways.
+    
+    In PASS2, the certification status of runtime-library routines is maintained
+    by the integer arrays LIB_START and LIB_LINK.  These arrays contain both
+    positive and negative numbers.  The positive numbers relate to the certified
+    functions, and the negative numbers relate to the uncertified functions.
+    Therefore, it is *possible* to mark all of the functions as certified by
+    making all of the numbers in these arrays positive.
+    
+    What I have done (search for "2024-06-21 RSB") is to introduce new 
+    compilation-conditionals,
+    
+    	/?V ... ?/
+    	/?W ... ?/
+    	
+    /?W is the default, and the original LIB_START/LIB_LINK declarations now are
+    enclosed by it.  /?V instead contains LIB_START/LIB_LINK declarations with 
+    all positive numbers.
+    
+    By default, when PASS2 is compiled with XCOM-I, /?W is applied, and the 
+    original PASS2 source code is compiled as-is.  But if PASS2 is compiled
+    with XCOM-I's command-line switch --cond=V, then the all-positive tables
+    are used instead, thus all runtime-library functions become "certified",
+    and all XS3 errors are eliminated.
  */
 
  /***************************************************************************/
@@ -1249,6 +1307,7 @@ V1T3PVV1WNVV1WNPVV1W3VV1W3PVV10DNVV10D3VV10SNVV10S3VV2DNVV2D3VV2SNVV2S3VV3DNVV3D
       83898885, 83900165, 83901445, 83902725, 83904005, 83905285, 83906565,     00397140
       83907845, 83909125, 83910405, 83911685, 83912965, 83914245, 83915525,     00397150
       83916805, 83918085, 67142149),                                            00397160
+/?W /*@ The source code exactly as it was.  See V conditional below. */
  /* DANNY STRAUSS ----------- CR11053 -------------------------------*/         00857500
  /* THE LIB_POINTERS (AS STORED IN LIB_START AND LIB_LINK) FOR EACH  */         00857500
  /* UNVERIFIED RTL ROUTINE ARE NOW NEGATIVE -- CHECKED IN EMIT_CALL. */         00857500
@@ -1283,6 +1342,34 @@ V1T3PVV1WNVV1WNPVV1W3VV1W3PVV10DNVV10D3VV10SNVV10S3VV2DNVV2D3VV2SNVV2S3VV3DNVV3D
       -185, 186,-220, 224,-155,-156, 240, 242, 235,-227, 207,-248, 239,-215,    00397360
       -177, 252, 225,-233, 204, 256,-213,-237, 162,-260,-243,-221, 231, 264,    00397370
       -246, 247, 238,-268,-241,-272, 253),                                      00397380
+?/
+/?V /*@ 2024-06-21 RSB:  Source code modified by Virtual AGC Project to 
+			 treat all runtime library functions as "verified", 
+			 to avoid XS3 errors. This was done by removing all
+			 of the minus signs in LIB_START and LIB_LINK.  */
+      LIB_START(HASHSIZE) BIT(16) INITIAL ( 194, 234, 257, 278, 195, 251, 261,  00397170
+      212, 104, 255, 265, 245, 105, 259, 269, 182, 226, 263, 273,144, 232,      00397180
+      267, 277, 130, 250, 271, 280, 146, 254, 275, 244, 196, 258, 279, 115,     00397190
+      123, 262, 281, 58, 230, 266, 276, 197, 249, 270, 9, 143, 282, 274, 0),    00397200
+      LIB_LINK(LIB_NUM) BIT(16) INITIAL ( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,   00397210
+       8, 0, 0, 0, 0, 0, 15, 0, 18, 0, 3, 0, 0, 0, 5, 6, 13, 14, 29, 0, 0, 24,  00397220
+      0, 32, 0, 0, 0, 12, 0, 0, 0, 0, 35, 31, 0, 0, 11, 38, 4, 34, 44, 48, 7,   00397230
+       21, 0, 2, 1, 57, 22, 50, 26, 27, 55, 20, 62, 63, 43, 42, 40, 0, 68, 61,  00397240
+      0, 0, 10, 70, 69, 56, 37, 73, 0, 39, 49, 74, 71, 0, 83, 33, 0, 28, 0, 0,  00397250
+       80, 51, 59, 84, 86, 53, 0, 30, 88, 45, 16, 91, 76, 60, 19, 72, 78, 47,   00397260
+       101, 77, 107, 0, 97, 85, 95, 110, 119, 109, 0, 41, 46, 117, 52, 36, 126, 00397270
+      0, 64, 121, 131, 116, 102, 81, 108, 100, 98, 128, 96, 87, 89, 0, 54,      00397280
+      135, 113, 140, 112, 75, 0, 66, 148, 118, 120, 92, 122, 99, 79, 65, 149,   00397290
+       25, 132, 114, 153, 93, 90, 136, 103, 142, 165, 151, 152, 17, 145, 137,   00397300
+      138, 154, 139, 171, 163, 169, 141, 160, 150, 179, 172, 178, 164, 82,      00397310
+       129, 158, 175, 174, 189, 134, 147, 125, 176, 67, 170, 181, 166, 94, 191, 00397320
+       159, 183, 184, 168, 201, 200, 111, 208, 124, 210, 188, 127, 203, 190,    00397330
+       161, 173, 214, 199, 222, 193, 202, 23, 206, 187, 209, 0, 211, 106, 157,  00397340
+      198, 205, 218, 219, 133, 180, 192, 167, 228, 229, 223, 216, 217, 236,     00397350
+       185, 186, 220, 224, 155, 156, 240, 242, 235, 227, 207, 248, 239, 215,    00397360
+       177, 252, 225, 233, 204, 256, 213, 237, 162, 260, 243, 221, 231, 264,    00397370
+       246, 247, 238, 268, 241, 272, 253),                                      00397380
+?/
  /* DANNY STRAUSS ---------------------------------------------------*/         00857500
 /*  CR13222- REPLACED LIB_INDEX & LIB_TABLE WITH LIB_REGS & LIB_CALLTYPE */
       LIB_REGS(LIB_NUM) BIT(16) INITIAL(0,

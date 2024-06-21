@@ -49,7 +49,7 @@ def my_print(*args, **kwargs):
 builtins.print = my_print
 '''
 
-ifdefs = set()
+ifdefs = { 'W' }
 inputFilenames = []
 targetLanguage = "C"
 outputFolder = None
@@ -169,7 +169,16 @@ The available OPTIONS are:
                     c=B    For the Backup Flight Software (PFS).
                     c=A    To produce debugging output for BASED management.
                     c=C    To produce debugging output for COMPACTIFY.
+                    c=V    Mark all runtime library functions "verified".
+                    c=W    Do not change the runtime-library verifications.
                 and one should use *either* --cond=P or --cond=B but not both.
+                The cases "--cond=V" and "--cond=W" are special, because 
+                using "--cond=W" (the default) *removes* "--cond=V", and vice-
+                versa.  These two cases target PASS2 of HAL/S-FC, which flags
+                some runtime-library functions because they never underwent
+                certification for use in the flight software.  The V switch
+                works around that, and allows all runtime-library functions to
+                be used without generating such errors.
 --identifer=S   (Default "REL32V0   ".)  Set the 10-character string returned 
                 by MONITOR(23).  Will be automatically truncated or padded as
                 needed.
@@ -295,6 +304,8 @@ for parm in sys.argv[1:]:
         if len(cond) != 1 or not cond.isupper():
             print("Illegal conditional %s" % parm, file=sys.stderr)
             sys.exit(1)
+        if cond in ["V", "W"]:
+            ifdef -= { "V", "W" }
         ifdefs.add(cond)
     elif parm.startswith("--identifier="):
         identifierString = "%-10s" % parm[13:23]

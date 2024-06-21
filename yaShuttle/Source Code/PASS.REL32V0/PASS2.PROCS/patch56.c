@@ -20,7 +20,13 @@
  *                                  (`COLUMN` is an 80-byte array.)
  */
 
-uint32_t sourceADDR = getFIXED(mOBJECT_GENERATORxS1) & 0xFFFFFF;
-memmove(&memory[3 + mOBJECT_GENERATORxCOLUMN], &memory[sourceADDR], 77);
+// CALL INLINE ("58",1,0,S1);       /* LOAD DESCRIPTOR */
+GR[1] = getFIXED(mOBJECT_GENERATORxS1);
+
+// CALL INLINE ("41",2,0,COLUMN);   /* ADDRESS OF RECEIVING FIELD */
+GR[2] = mOBJECT_GENERATORxCOLUMN;
+
+// CALL INLINE ("D2",0,3,2,76,1,0); /* MVC 76(4,2);,0(1); */
+memmove(&memory[GR[2] + 3], &memory[GR[1] & 0xFFFFFF], 77);
 
 #endif // PFS

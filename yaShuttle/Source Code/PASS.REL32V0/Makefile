@@ -24,7 +24,7 @@ PORTED := ../../ported
 HAL_S_FC_DIR = $(PORTED)/PASS1.PROCS
 
 # Uses commas (and no spaces) as delimiters between parameters in `PARM_STRING`.
-PARM_STRING := SRN,LISTING2,TABLST,HALMAT,X6,DECK,TRACE,LSTALL
+PARM_STRING := SRN,LISTING2,X6,LIST
 PARM4_STRING := 
 
 RTARGET := HELLO
@@ -46,7 +46,7 @@ $(TARGETS):
 	else \
 		cd $@.PROCS; \
 	fi && \
-	$(XCOMI) $(XEXTRA) --cond=$(COND) --output=$@ \
+	$(XCOMI) $(XEXTRA) --cond=$(COND) --cond=V --output=$@ \
 		--lib-file=$(XLIB) \
 		'##DRIVER.xpl' && \
 	make EXTRA="-DIS_$@ $(EXTRA)" -C $@ $@ && \
