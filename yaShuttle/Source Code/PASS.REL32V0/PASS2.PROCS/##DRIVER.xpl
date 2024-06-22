@@ -52,17 +52,17 @@
     Therefore, it is *possible* to mark all of the functions as certified by
     making all of the numbers in these arrays positive.
     
-    What I have done (search for "2024-06-21 RSB") is to introduce new 
+    What I have done (search for "2024-06-21 RSB" below) is to introduce new 
     compilation-conditionals,
     
     	/?V ... ?/
     	/?W ... ?/
     	
-    /?W is the default, and the original LIB_START/LIB_LINK declarations now are
-    enclosed by it.  /?V instead contains LIB_START/LIB_LINK declarations with 
+    W is the default, and the original LIB_START/LIB_LINK declarations now are
+    enclosed by it.  V instead contains LIB_START/LIB_LINK declarations with 
     all positive numbers.
     
-    By default, when PASS2 is compiled with XCOM-I, /?W is applied, and the 
+    By default, when PASS2 is compiled with XCOM-I, then W is applied, and the 
     original PASS2 source code is compiled as-is.  But if PASS2 is compiled
     with XCOM-I's command-line switch --cond=V, then the all-positive tables
     are used instead, thus all runtime-library functions become "certified",
@@ -1343,10 +1343,7 @@ V1T3PVV1WNVV1WNPVV1W3VV1W3PVV10DNVV10D3VV10SNVV10S3VV2DNVV2D3VV2SNVV2S3VV3DNVV3D
       -177, 252, 225,-233, 204, 256,-213,-237, 162,-260,-243,-221, 231, 264,    00397370
       -246, 247, 238,-268,-241,-272, 253),                                      00397380
 ?/
-/?V /*@ 2024-06-21 RSB:  Source code modified by Virtual AGC Project to 
-			 treat all runtime library functions as "verified", 
-			 to avoid XS3 errors. This was done by removing all
-			 of the minus signs in LIB_START and LIB_LINK.  */
+/?V /*@ 2024-06-21 RSB:  Source code modified by Virtual AGC Project */
       LIB_START(HASHSIZE) BIT(16) INITIAL ( 194, 234, 257, 278, 195, 251, 261,  00397170
       212, 104, 255, 265, 245, 105, 259, 269, 182, 226, 263, 273,144, 232,      00397180
       267, 277, 130, 250, 271, 280, 146, 254, 275, 244, 196, 258, 279, 115,     00397190

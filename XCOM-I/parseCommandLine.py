@@ -305,7 +305,7 @@ for parm in sys.argv[1:]:
             print("Illegal conditional %s" % parm, file=sys.stderr)
             sys.exit(1)
         if cond in ["V", "W"]:
-            ifdef -= { "V", "W" }
+            ifdefs -= { "V", "W" }
         ifdefs.add(cond)
     elif parm.startswith("--identifier="):
         identifierString = "%-10s" % parm[13:23]

@@ -57,6 +57,7 @@ uint8_t DD_INS_UPPERCASE[DD_MAX] = { 0 };
 char *DD_INS_EXTRA[DD_MAX] = { NULL };
 FILE *DD_OUTS[DD_MAX] = { NULL };
 char *DD_OUTS_FILENAMES[DD_MAX] = { NULL };
+uint8_t DD_OUTS_TRANSLATION[DD_MAX] = { 0 }; // 0=trans to ASCII, 1=don't.
 pdsPartname_t DD_OUTS_PARTNAMES[DD_MAX] = { "" };
 int PDS_OUTS[DD_MAX] = { 0 }; // 1 if a PDS, 0 if sequential.
 int DD_OUTS_EXISTED[DD_MAX] = { 0 };
@@ -649,7 +650,8 @@ parseParmField(int print) {
 int
 parseCommandLine(int argc, char **argv)
 {
-  int i, j, returnValue = 0;
+  int i, j, returnValue = 0, numArgs;
+  char translation;
   FILE *COMMON_IN = NULL;
   gettimeofday(&startTime, NULL);
   DD_INS[0] = DD_INS[1] = stdin;
@@ -710,7 +712,8 @@ parseCommandLine(int argc, char **argv)
                 }
             }
         }
-      else if (2 == sscanf(argv[i], "--ddo=%d,%s", &lun, filename) ||
+      else if (2 <= (numArgs = sscanf(argv[i], "--ddo=%d,%[^ ,],%c",
+                                      &lun, filename, &translation)) ||
                2 == sscanf(argv[i], "--pdso=%d,%s", &lun, filename))
         {
           if (lun < 0 || lun >= DD_MAX)
@@ -724,7 +727,17 @@ parseCommandLine(int argc, char **argv)
                 {
                   DD_OUTS_FILENAMES[lun] = &argv[i][6];
                   PDS_OUTS[lun] = 0;
-                  DD_OUTS[lun] = fopen(filename, "w");
+                  if (numArgs > 2)
+                    {
+                      //fprintf(stderr, "Note: OUTPUT(%d) is binary.\n", lun);
+                      DD_OUTS_TRANSLATION[lun] = 1;
+                      DD_OUTS[lun] = fopen(filename, "wb");
+                    }
+                  else
+                    {
+                      DD_OUTS_TRANSLATION[lun] = 0;
+                      DD_OUTS[lun] = fopen(filename, "w");
+                    }
                   if (DD_OUTS[lun] == NULL)
                     {
                       fprintf(stderr, "Cannot create file %s for writing on unit %d\n",
@@ -864,10 +877,13 @@ parseCommandLine(int argc, char **argv)
           printf("              \",U\" is present, it causes all input to be\n");
           printf("              silently converted to upper case.  The \"U\"\n");
           printf("              is literal.\n");
-          printf("--ddo=N,F     Attach filename F to the logical unit number\n");
+          printf("--ddo=N,F[,U] Attach filename F to the logical unit number\n");
           printf("              N, for use with the OUTPUT(N) XPL built-in.\n");
           printf("              By default, 0 and 1 are attached to stdout.\n");
-          printf("              N can range from 0 through 9.\n");
+          printf("              N can range from 0 through 9.  For N>1, the\n");
+          printf("              optional U can be present.  (It can actually be\n");
+          printf("              any character, not just U.)  If so, then the\n");
+          printf("              output is binary  rather than textual. \n");
           printf("--pdsi=N,F    Same as --ddi, but for a PDS file.\n");
           printf("--pdso=N,F    Same as --ddo, but for a PDS file.\n");
           printf("--raf=I,R,N,F Attach filename F to device number N, for use\n");
@@ -1794,7 +1810,10 @@ OUTPUT(uint32_t lun, descriptor_t *string) {
     }
   else
     {
-      fprintf(fp, "%s\n", s);
+      if (DD_OUTS_TRANSLATION[lun])
+        fwrite(string->bytes, string->numBytes, 1, fp);
+      else
+        fprintf(fp, "%s\n", s);
       pendingNewline = 0;
     }
   fflush(fp);

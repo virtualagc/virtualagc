@@ -147,8 +147,8 @@ regression:
 	cp auxmata.bin auxmat2.bin
 	./PASS2 \
 		--ddo=2,listing22.txt \
-		--ddo=3,cards2.txt \
-		--ddo=4,deck2.txt \
+		--ddo=3,cards2.bin,U \
+		--ddo=4,deck2.bin,U \
 		--pdsi=5,ERRORLIB \
 		--ddo=7,extra2.txt \
 		--commoni=COMMON-AUX.out \
