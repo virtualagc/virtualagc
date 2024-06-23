@@ -1523,6 +1523,234 @@ def getParmsFILE(scope, expression):
         errxit("Cannot compute record number for FILE(...)")
     return ne1Source, ne2Source
 
+inlineCounter = 1
+def generateINLINE(scope, indent, parameters, isReturn = False):
+    global inlineCounter
+    print(indent + "{ // (%d) %s" % (inlineCounter, lines[errxitRef]))
+    inlineCounter += 1
+    indent1 = indent + indentationQuantum
+    length = len(parameters)
+    if length == 0:
+        errxit("CALL INLINE with no opcode")
+    if "number" in parameters[0]["token"]:
+        opcode = parameters[0]["token"]["number"]
+    else:
+        errxit("CALL INLINE with no evaluable opcode")
+    if opcode < 0x40: # RR
+        try:
+            r1 = parameters[1]["token"]["number"]
+            r2 = parameters[2]["token"]["number"]
+        except:
+            errxit("Could not interpret parameters of INLINE for RR-type instruction")
+        #print("***DEBUG*** RR", r1, r2, "\t", lines[errxitRef], file=sys.stderr)
+        # The page numbers below are from the IBM Enterprise Systems
+        # Architecture/390 Principles of Operation (SA22-7201-08).
+        if opcode == 0x05: # BALR p. 7-14
+            pass # TBD
+        elif opcode == 0x06: # BCTR p. 7-18
+            print(indent1 + "GR[%d] = GR[%d] - 1;", r1, r1)
+            print(indent1 + "if (GR[%d] != 0) TBD;", r1)
+        elif opcode == 0x07: # BCR p. 7-17
+            pass
+        elif opcode == 0x18: # LR p. 7-77
+            print(indent1, "GR[%d] = GR[%d];" % (r1, r2))
+            # Note: No CC effect.
+        elif opcode == 0x1B: # SR p. 7-127
+            print(indent1 + "scratch = (int64_t) GR[%d] - (int64_t) GR[%d];" % (r1, r2))
+            print(indent1 + "setCC();")
+            print(indent1 + "GR[%d] = (int32_t) scratch;" % r1)
+        elif opcode == 0x20: # LPDR p. 18-17
+            print(indent1 + "scratchd = fabs(FR[%d]);" % r2)
+            print(indent1 + "setCCd();")
+            print(indent1 + "FR[%d] = scratchd;" % r1)
+        elif opcode == 0x28: # LDR p. 9-10
+            print(indent1 + "FR[%d] = FR[%d];" % (r1, r2))
+            # Note: No CC effect.
+        elif opcode == 0x29: # CDR p. 18-10
+            print(indent1 + "scratchd = FR[%d] - FR[%d];" % (r1, r2))
+            print(indent1 + "setCCd();")
+        elif opcode == 0x2A: # ADR p. 18-8
+            print(indent1 + "scratchd = FR[%d] + FR[%d];" % (r1, r2))
+            print(indent1 + "setCCd();")
+            print(indent1 + "FR[%d] = scratchd;" % r1)
+        elif opcode == 0x2B: # SDR p. 18-23
+            print(indent1 + "scratchd = FR[%d] - FR[%d];" % (r1, r2))
+            print(indent1 + "setCCd();")
+            print(indent1 + "FR[%d] = scratchd;" % r1)
+        else:
+            errxit('Unsupported opcode "%02X" of type RR' % opcode)
+    elif opcode < 0x80: # RX
+        try:
+            r1 = parameters[1]["token"]["number"]
+            x2 = parameters[2]["token"]["number"]
+            if "number" in parameters[3]["token"]:
+                b2 = parameters[3]["token"]["number"]
+                d2 = parameters[4]["token"]["number"]
+            else:
+                b2 = 0
+                identifier = parameters[3]["token"]["identifier"]
+                attributes = getAttributes(scope, identifier)
+                d2 = attributes["address"]  
+        except:
+            errxit("Could not interpret parameters for INLINE of RX-type instruction")
+        #print("***DEBUG*** RX", r1, x2, b2, d2, "\t", lines[errxitRef], file=sys.stderr)
+        address360B = "%d" % d2
+        if x2 != 0:
+            address360B = address360B + " + GR[%d]" % x2
+        if b2 != 0:
+            address360B = address360B + " + GR[%d]" % b2
+        print(indent1 + "address360B = %s;" % address360B)
+        if opcode == 0x41: # LA p. 7-78
+            print(indent1 + "GR[%d] = address360B;" % r1)
+            # No effect on condition codes.
+        elif opcode == 0x43: # IC p. 7-76
+            print(indent1 + \
+                  "GR[%d] = (memory[address360B] << 24) | (GR[%d] & 0xFFFFFF);" \
+                  % (r1, r1))
+            # No effect on condition codes.
+        elif opcode == 0x44: # EX p. 7-74
+            pass
+        elif opcode == 0x47: # BC p. 7-17
+            pass
+        elif opcode == 0x48: # LH p. 7-80
+            print(indent1 + "GR[%d] = COREHALFWORD(address360B);" % r1)
+            # No effect on condition codes.
+        elif opcode == 0x4A: # AH p. 7-12
+            print(indent1 + "scratch = GR[%d] + COREHALFWORD(address360B);" % r1)
+            print(indent1 + "setCC();")
+            print(indent1 + "GR[%d] = scratch;", r1)
+        elif opcode == 0x50: # ST p. 7-122
+            print(indent1 + "COREWORD2(address360B, GR[%d]);" % r1)
+            # No effect on condition codes.
+        elif opcode == 0x58: # L p. 7-77
+            print(indent1 + "GR[%d] = COREWORD(address360B);" % r1)
+            # No effect on condition codes.
+        elif opcode == 0x5A: # A p. 7-12
+            print(indent1 + "scratchd = GR[%d] + COREWORD[address360B];" % r1)
+            print(indent1 + "setCC();")
+            print(indent1 + "GR[%d] = scratch;" % r1)
+        elif opcode == 0x60: # STD p. 9-11
+            print(indent1 + "toFloatIBM(FR[%d], &msw360, &lsw360);" % r1)
+            print(indent1 + "COREWORD2(address360B, msw360);")
+            print(indent1 + "COREWORD2(address360B + 4, lsw360);")
+            # No effect on condition codes.
+        elif opcode == 0x68: # LD p. 9-10
+            print(indent1 + \
+                "FR[%d] = fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));"\
+                % r1)
+            # No effect on condition codes.
+        elif opcode == 0x69: # CD p. 18-10
+            print(indent1 + "scratchd = FR[%d];" % r1)
+            print(indent1 + \
+                  "scratchd -= fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));")
+            print(indent1 + "setCCd();")
+        elif opcode == 0x6A: # AD p. 18-8
+            print(indent1 + "scratchd = FR[%d];" % r1)
+            print(indent1 + \
+                  "scratchd += fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));")
+            print(indent1 + "setCCd();")
+            print(indent1 + "FR[%d] = scratchd;" % r1)
+        elif opcode == 0x6B: # SD p. 18-23
+            print(indent1 + "scratchd = FR[%d];" % r1)
+            print(indent1 + \
+                  "scratchd -= fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));")
+            print(indent1 + "setCCd();")
+            print(indent1 + "FR[%d] = scratchd;" % r1)
+        elif opcode == 0x6E: # AW p. 18-10
+            print(indent1 + "scratchd = FR[%d];" % r1)
+            print(indent1 + \
+                  "scratchd += fromFloatIBM(COREWORD(address360B), COREWORD(address360B + 4));")
+            print(indent1 + "setCCd();")
+            print(indent1 + "FR[%d] = scratchd;" % r1)
+        elif opcode == 0x70: # STE p. 9-11
+            print(indent1 + "toFloatIBM(FR[%d], &msw360, &lsw360);" % r1)
+            print(indent1 + "COREWORD2(address360B, msw360);")
+            # No effect on condition codes.
+        elif opcode == 0x78: # LE p. 9-10
+            print(indent1 + "FR[%d] = fromFloatIBM(COREWORD(address360), 0);" % r1)
+            # No effect on condition codes.
+        else:
+            errxit('Unsupported opcode "%02X" of type RX' % opcode)
+    elif opcode >= 0xD0: # SS
+        try:
+            msNibble = parameters[1]["token"]["number"]
+            lsNibble = parameters[2]["token"]["number"]
+            L = (msNibble << 4) + lsNibble
+            token = parameters[3]["token"]
+            if "number" in token:
+                B1 = token["number"]
+                D1 = parameters[4]["token"]["number"]
+                nextParameter = 5
+            else:
+                B1 = 0
+                identifier = token["identifier"]
+                attributes = getAttributes(scope, identifier)
+                D1 = attributes["address"]
+                nextParameter = 4
+            token = parameters[nextParameter]["token"]
+            if "number" in token:
+                B2 = token["number"]
+                D2 = parameters[nextParameter + 1]["token"]["number"]
+            else:
+                B2 = 0
+                identifier = token["identifier"]
+                attributes = getAttributes(scope, identifier)
+                D2 = attributes["address"]
+        except:
+            errxit("Could not interpret parameters of INLINE for SS-type instruction")
+        address360A = "%d" % D1
+        if B1 != 0:
+            address360A = address360A + " + GR[%d]" % B1
+        address360A = "COREWORD(%s) & 0xFFFFFF" % address360A
+        address360B = "%d" % D2
+        if B2 != 0:
+            address360B = address360B + " + GR[%d]" % B2
+        address360B = "COREWORD(%s) & 0xFFFFFF" % address360B
+        #print("***DEBUG*** SS", L, B1, D1, B2, D2, "\t", lines[errxitRef], file=sys.stderr)
+        print(indent1 + "address360A = %s;" % address360A)
+        print(indent1 + "address360B = %s;" % address360B)
+        if opcode == 0xD2: # MVC p. 7-83
+            print(indent1 + \
+                  "memmove(&memory[address360A], &memory[address360B], %d);" % (L + 1))
+        elif opcode == 0xDC: # TR p. 7-131
+            # I'm sure there's some standard C library function to do this, but
+            # I couldn't find it.
+            indent2 = indent1 + indentationQuantum
+            indent3 = indent2 + indentationQuantum
+            print(indent1 + "int i;")
+            print(indent1 + "for (i = 0; i < %d; i++)" % (L + 1))
+            print(indent2 + "memory[address360A + i] = memory[memory[address360B + i]];")
+        else:
+            errxit('Unsupported opcode "%02X" of type SS' % opcode)
+    else: # SI and others, but only SI actually supported.
+        try:
+            i2 = parameters[1]["token"]["number"]
+            token = parameters[2]["token"]
+            if "number" in token:
+                b1 = token["number"]
+                d1 = parameters[3]["token"]["number"]
+            else:
+                b1 = 0
+                identifier = token["identifier"]
+                attributes = getAttributes(scope, identifier)
+                d1 = attributes["address"]
+        except:
+            errxit("Could not interpret parameters for INLINE of SI-type instruction")
+        #print("***DEBUG*** SI", i2, b1, d1, "\t", lines[errxitRef], file=sys.stderr)
+        address360A = "%d" % d1
+        if b1 != 0:
+            address360A = address360A + " + GR[%d]" % b1
+        if opcode == 0x92: # MVI p. 7-83
+            print(indent1 + "COREWORD2(address360A, %d);" % i2)
+            # No effect on condition code.
+        elif opcode == 0x97: # XI p. 7-74
+            print(indent1 + "scratch = %d ^ COREWORD(address360A);" % i2)
+            print(indent1 + "CC = (scratch != 0);")
+            print(indent1 + "COREWORD2(address360A, (int32_t) scratch);")
+        else:
+            errxit('Unsupported opcode "%02X" of type SI' % opcode)
+    print(indent + "}")
+
 # The `generateSingleLine` function is used by `generateCodeForScope`.
 # As the name implies, it operates on the pseudo-code for a single 
 # pseudo-statement, generating the C source code for it, and printing that
@@ -2046,6 +2274,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
         else:
             print(indent + "goto " + normalizedLabel(label) + ";")
     elif "TARGET" in line:
+        nlabel = normalizedLabel(line["TARGET"])
         if "sortedSetjmpLabels" in parentProcedureScope and \
                 line["TARGET"] in parentProcedureScope["sortedSetjmpLabels"]:
             sortedSetjmpLabels = parentProcedureScope["sortedSetjmpLabels"]
@@ -2058,7 +2287,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             indent1 = indent + indentationQuantum
             indent2 = indent1 + indentationQuantum
             indent3 = indent2 + indentationQuantum
-            print(indent1 + normalizedLabel(line["TARGET"]) + ":")
+            print(indent1 + nlabel + ":")
             parentProc = findParentProcedure(scope)
             label = parentProc["variables"][sortedSetjmpLabels[setjmpCounter]]["mangled"]
             print(indent1 + "if (setjmpInitialize) {")
@@ -2072,7 +2301,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             print(indent1 + "}")
             print(indent + "}")
         else:
-            print(indent + normalizedLabel(line["TARGET"]) + ":", end="")
+            print(indent + nlabel + ":", end="")
             if indexInScope >= len(scope["code"]) - 1:
                 print(";")
             else:
@@ -2144,6 +2373,8 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
             if isinstance(line["parameters"][0], dict) and \
                     "string" in line["parameters"][0]["token"]:
                 print(indent + line["parameters"][0]["token"]["string"])
+            elif autoInline:
+                generateINLINE(scope, indent, line["parameters"])
             else:
                 patchFilename = "patch%d.c" % inlineCounter
                 if baseSource != "":

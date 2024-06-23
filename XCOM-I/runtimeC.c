@@ -64,10 +64,26 @@ int DD_OUTS_EXISTED[DD_MAX] = { 0 };
 FILE *COMMON_OUT = NULL;
 randomAccessFile_t randomAccessFiles[2][MAX_RANDOM_ACCESS_FILES] = { { NULL } };
 
-// Model IBM 360 registers for communicating between C patches for blocks of
-// CALL INLINEs.
+// Variables and functions to simplify IBM 360 CALL INLINEs.
 uint32_t GR[16]; // General registers.
 double FR[16];   // Floating-point registers.
+uint8_t CC;      // Condition codes.
+int64_t scratch; // Holds temporary results of IBM 360 operations.
+double scratchd;
+int32_t address360A, address360B, msw360, lsw360;
+void
+setCC(void) {
+  if (scratch > 0xFFFFFFFF || scratch < -0x100000000) CC = 3;
+  else if (scratch > 0) CC = 2;
+  else if (scratch < 0) CC = 1;
+  else CC = 0;
+}
+void
+setCCd(void) {
+  if (scratchd > 0) CC = 2;
+  else if (scratchd < 0) CC = 1;
+  else CC = 0;
+}
 
 // Starting time of the program run, more or less.
 struct timeval startTime;
