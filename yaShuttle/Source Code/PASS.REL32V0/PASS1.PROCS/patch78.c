@@ -1,4 +1,4 @@
-/*
+/* inlines=3
  * This is a C-language patch for CALL INLINEs #78-81 in STAB_HDR.xpl, as
  * used by XCOM-I in building PASS1 of HAL/S-FC.
  *

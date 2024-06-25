@@ -1,4 +1,4 @@
-/*
+/* inlines=13,0
  * License:     Public Domain, use or modify freely for any purpose.
  * Filename:    PASS2.PROCS/patch19.c
  * Purpose:     PFS only:  C-language patch for CALL INLINEs #19-31 in

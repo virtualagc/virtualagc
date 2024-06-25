@@ -1,4 +1,4 @@
-/*
+/* inlines=4
  * This is a C-language patch for CALL INLINEs #121-124 in INITIALI.xpl, as
  * used by XCOM-I in building PASS1 of HAL/S-FC.
  */

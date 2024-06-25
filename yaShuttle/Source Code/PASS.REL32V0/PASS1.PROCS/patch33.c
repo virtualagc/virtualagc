@@ -1,4 +1,4 @@
-/*
+/* inlines=13
  * This is a C patch for CALL INLINEs #33-45 in the `MAKE_FIXED_LIT` function
  * of PASS1 of HAL/S-FC.
  *

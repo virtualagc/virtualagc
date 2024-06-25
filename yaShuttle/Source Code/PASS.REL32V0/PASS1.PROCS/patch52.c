@@ -1,4 +1,4 @@
-/*
+/* inlines=5
  * This is a C-language patch for CALL INLINEs #52-56 in HALINCL/SAVELITE for
  * compiling with HAL/S-FC as translated by XCOM-I.
  *

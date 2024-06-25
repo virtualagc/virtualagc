@@ -109,14 +109,17 @@ typedef struct {
 } optionsProcessor_t;
 extern optionsProcessor_t *optionsProcessor, *USEROPT;
 
-// The following global variables represent IBM 360 registers.
-// They don't actually *do* anything, but sometimes CALL INLINEs may load values
-// into the registers and expect later blocks of CALL INLINEs to have access to
-// them.  Normal C patches to blocks of inlines use only variables local to the
-// block, so it's necessary to provide separate globals for them to use for
-// this purpose.
-extern uint32_t GR[16];
-extern double FR[16];
+// The following represents IBM 360 stuff.
+extern uint32_t GR[16]; // General registers.
+extern double FR[16];   // Floating-point registers.
+extern uint8_t CC;      // Condition codes.
+extern int64_t scratch; // Holds temporary results of IBM 360 operations.
+extern double scratchd;
+extern int32_t address360A, address360B, msw360, lsw360;
+void
+setCC(void);
+void
+setCCd(void);
 
 #ifdef DEBUGGING_AID
 

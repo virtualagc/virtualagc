@@ -137,21 +137,21 @@ bootstrap45w3:
 ELSE = else
 .PHONY: bootstrap
 bootstrap: sim360
-	@echo "Bootstrapping $(BASE) -----------------------------------------"
-	-rm $(BASE)-360*.*
-	XCOM-I.py $(XEXTRA) --xpl \
+	echo "Bootstrapping $(BASE) -----------------------------------------"
+	-@rm $(BASE)-360*.*
+	@XCOM-I.py $(XEXTRA) --xpl \
 		--lib-file=$(LIBFILE) \
 		--output=$(BASE)-native \
 		$(XPLFILE)
-	make -s -C $(BASE)-native
-	$(BASE)-native/$(BASE)-native --extra=2,'/* $Y */' \
+	@make -s -C $(BASE)-native
+	@$(BASE)-native/$(BASE)-native --extra=2,'/* $Y */' \
 		--ddi=0,$(XPLFILE) \
 		--ddi=2,$(LIBFILE) \
 		--raf=B,$(RECSIZE),1,$(BASE)-360.obj \
 		--raf=B,$(RECSIZE),2,$(BASE)-360.dat \
 		--raf=B,$(RECSIZE),3,$(BASE)-360.str \
 		&>$(BASE)-360.rpt
-	sim360 --size=$(RECSIZE) \
+	@sim360 --size=$(RECSIZE) \
 		-o0ET $(BASE)-360A.rpt \
 		-i0AT $(XPLFILE) \
 		-i2AT $(LIBFILE) \
@@ -160,7 +160,7 @@ bootstrap: sim360
 		-f3wb+ $(BASE)-360A.str \
 		$(BASE)-360.obj
 ifdef LEGACY
-	sim360 --size=$(RECSIZE) \
+	@sim360 --size=$(RECSIZE) \
 		-o0ET $(BASE)-360C.rpt \
 		-i0AT $(XPLFILE) \
 		-i2AT $(LIBFILE) \

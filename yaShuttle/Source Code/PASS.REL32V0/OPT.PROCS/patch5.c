@@ -1,4 +1,4 @@
-/*
+/* inlines=4
  * License:     Public Domain, use or modify freely for any purpose.
  * Filename:    OPT.PROCS/patch55.c
  * Purpose:     A C-language patch for CALL INLINE #5-8 in INT_TO_SCALAR

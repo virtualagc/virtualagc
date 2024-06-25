@@ -1,4 +1,4 @@
-/*
+/* inlines=17
  * This is a C-language patch for CALL INLINEs #59-75 in PREPLITE.xpl, as
  * used by XCOM-I in building PASS1 of HAL/S-FC. The IR-182-1 description
  * implies that the purpose of these INLINEs is to manufacture the value(s)

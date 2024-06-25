@@ -1,4 +1,4 @@
-/*
+/* inlines=8,4
  * License:     Public Domain, use or modify freely for any purpose.
  * Filename:    PASS2.PROCS/patch60.c
  * Purpose:     C-language patches for CALL INLINEs in OBJECT_GENERATOR

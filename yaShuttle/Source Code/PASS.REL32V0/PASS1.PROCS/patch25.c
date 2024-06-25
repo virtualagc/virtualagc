@@ -1,4 +1,4 @@
-/*
+/* inlines=7
  * This is a C-language patch for CALL INLINEs #25-31 in BLANK.xpl, as
  * used by XCOM-I in building PASS1 of HAL/S-FC.
  *

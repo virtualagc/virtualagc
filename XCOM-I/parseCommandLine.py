@@ -53,7 +53,7 @@ ifdefs = { 'W' }
 inputFilenames = []
 targetLanguage = "C"
 outputFolder = None
-indent = "  "
+indentationQuantum = "  "
 debugSink = None
 lines = [] # One line of source code per entry.
 lineRefs = [] # One reference (filename:number) for each line of source code.
@@ -82,7 +82,8 @@ reservedMemory = 0x2000
 quiet = False
 debuggingAid = False
 reentryGuard = False
-autoInline = False
+#autoInline = False
+guessInlines = False
 
 # The characters used internally to replace spaces and duplicated single-quotes
 # within quoted strings.  The exact values aren't important, except insofar as
@@ -210,9 +211,6 @@ The available OPTIONS are:
 --patch=P       Path to the inline-BAL patch files.  By default, this will
                 be the same folder that contains the first XPL source-code
                 file specified on the command line.
---auto-inline   Enables the experimental automated treatment of CALL INLINE
-                statements, and disables the existing system based upon 
-                patch files.
 --adhoc=S,R     This is a way of creating global XPL macros without change
                 to source-code files.  S is the name of the macro and R is
                 the replacement text.  This switch can be used multiple 
@@ -231,6 +229,9 @@ The available OPTIONS are:
                 `CALL INLINEs`.  `CALL INLINE`s which embed C code are not 
                 affected.  Only the first `CALL INLINE` in any adjacent sequence
                 is affected.
+--guess-inlines Disable loading of patch-files for `CALL INLINE` statements,
+                and instead produce guess-files with proposed translation of
+                `CALL INLINE` statemements.  Automatically sets --debug-inlines.
 --debugging-aid Include extra functions in the runtime library that may be 
                 useful for debugging XCOM-I itself.
 --reentry-guard Add extra runtime code which automatically detects illegal 
@@ -270,8 +271,11 @@ The available OPTIONS are:
 for parm in sys.argv[1:]:
     if parm == "--":
         break
-    elif parm == "--auto-inline":
-        autoInline = True
+    #elif parm == "--auto-inline":
+    #    autoInline = True
+    elif parm == "--guess-inlines":
+        guessInlines = True
+        debugInlines = True
     elif parm == "--debugging-aid":
         debuggingAid = True
     elif parm == "--reentry-guard":
@@ -348,7 +352,7 @@ for parm in sys.argv[1:]:
     elif parm.startswith("--output="):
         outputFolder = parm[9:]
     elif parm.startswith("--indent="):
-        indent = " " * int(parm[9:])
+        indentationQuantum = " " * int(parm[9:])
     elif parm == "--backtrace":
         showBacktrace = True
     elif parm.startswith("-"):

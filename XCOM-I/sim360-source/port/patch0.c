@@ -1,4 +1,4 @@
-/*
+/* inlines=19
  * This is a C-language "patch" for CALL INLINEs #0-18 in xcom4.xpl, as compiled
  * by XCOM-I.py.
  *
