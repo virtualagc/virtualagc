@@ -229,9 +229,14 @@ The available OPTIONS are:
                 `CALL INLINEs`.  `CALL INLINE`s which embed C code are not 
                 affected.  Only the first `CALL INLINE` in any adjacent sequence
                 is affected.
---guess-inlines Disable loading of patch-files for `CALL INLINE` statements,
-                and instead produce guess-files with proposed translation of
+--guess-inlines Disable loading of patch-files for `CALL INLINE` statements, and
+                instead produce approximate files with proposed translations of
                 `CALL INLINE` statemements.  Automatically sets --debug-inlines.
+                Since the files which are produced have names of the form
+                guessN.c, guessNp.c, and/or guessNb.c, where N is a positive
+                integer, it's advisable to preserve any such files to which
+                manual changes have been made and to delete the remainder from
+                the current working directory beforehand.
 --debugging-aid Include extra functions in the runtime library that may be 
                 useful for debugging XCOM-I itself.
 --reentry-guard Add extra runtime code which automatically detects illegal 

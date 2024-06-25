@@ -657,4 +657,8 @@ if targetLanguage == "C":
 if not quiet and reservedMemory["numReserved"] > 0:
     print("Reserved count: %d" % reservedMemory["numReserved"])
     print("Reserved space: %d" % (0x1000000 - reservedMemory["nextReserved"]))
-          
+
+if guessInlines:
+    # This is not really an error, but we want Makefiles that combine XCOM-I
+    # with compilation of the C code *not* to continue to the compilation step.
+    sys.exit(1)

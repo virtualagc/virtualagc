@@ -60,7 +60,15 @@ def error(msg, scope):
         print("Backtrace:", file=sys.stderr)
         traceback.print_stack(file=sys.stderr)
 
-
+# Return the scope of the innermost enclosing PROCEDURE of a scope.
+def findParentProcedure(scope):
+    while True:
+        if "blockType" not in scope:
+            return scope
+        if scope["parent"] == None:
+            return scope
+        scope = scope["parent"]
+    
 # This is a simplified tokenizer used only for macro replacement. Given `string`,
 # It returns a list of strings representing the tokens.  The possibilities for
 # tokens are:

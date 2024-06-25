@@ -649,15 +649,6 @@ def basedStats(scope, extra = None):
             if lenName > maxRecordFieldName:
                 maxRecordFieldName = lenName
 
-# Return the scope of the innermost enclosing PROCEDURE of a scope.
-def findParentProcedure(scope):
-    while True:
-        if "blockType" not in scope:
-            return scope
-        if scope["parent"] == None:
-            return scope
-        scope = scope["parent"]
-    
 # A function for figuring out `setjmp`/`longjmp` vs normal `goto`.  Basically,
 # it:
 #    Finds all of the `goto` statements.
@@ -2210,7 +2201,7 @@ def generateSingleLine(scope, indent2, line, indexInScope, ps = None):
                 if lastCallInline != lineCounter - 1:
                     guessFiles[inlineCounter] = []
                 guessINLINE(scope, functionName, line["parameters"], \
-                               inlineCounter, errxitRef)
+                               inlineCounter, errxitRef, indexInScope)
                 lastCallInline = lineCounter
             else: #elif inhibitInline == 0:
                 if not applyInlinePatch(scope, indent, originalInline):
@@ -2990,16 +2981,35 @@ def generateC(globalScope):
     
     pf.close()
     
-    if guessInlines: # ***DEBUG***
+    # Output the approximated patches.
+    if guessInlines:
+        fixmeFiles = []
         for n in guessFiles:
-            print("---------------------------------------------------------",\
-                  file=sys.stderr)
-            print("guess%d.c" % n, file=sys.stderr)
+            base = "guess%d" % n
+            if "P" in ifdefs:
+                filename = base + "p.c"
+            elif "B" in ifdefs:
+                filename = base + "b.c"
+            else:
+                filename = base + ".c"
+            fp = open(filename, "w")
             guessFile = guessFiles[n]
             for i in range(len(guessFile)):
                 guessLines = guessFile[i]
                 for guessLine in guessLines:
-                    print("  %s" % guessLine, file=sys.stderr)
+                    print(guessLine, file=fp)
+                    if "***FIXME***" in guessLine and filename not in fixmeFiles:
+                        fixmeFiles.append(filename)
+            fp.close()
+        print("%d approximate patch-files guess*.c were produced in %s" % \
+              (len(guessFiles), os.getcwd()), file=sys.stderr)
+        if len(fixmeFiles) == 0:
+            print("None of the files are known to require fixes")
+        else:
+            print("%d files(s) are known to require fixes:" % len(fixmeFiles))
+            for filename in fixmeFiles:
+                print("\t%s" % filename)
+            print('To fix them, search for the string "***FIXME***".')
     
 #-----------------------------------------------------------------------------
 # Interactive test mode for running this file in a stand-alone fashion rather

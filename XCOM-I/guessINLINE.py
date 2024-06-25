@@ -12,8 +12,9 @@ Mods:       2024-06-24 RSB  Began.
 '''
 
 import sys
-from parseCommandLine import indentationQuantum, lines
-from auxiliary import getAttributes
+import datetime
+from parseCommandLine import indentationQuantum, lines, ifdefs
+from auxiliary import getAttributes, findParentProcedure
 
 # The `guessFiles` dictionary has keys which are the starting patch numbers
 # for each block of consecutive CALL INLINEs found.  The values of these
@@ -114,22 +115,56 @@ makeInstruction("XI", 0x97, "SI", "7-74")
 makeInstruction("MVC", 0xD2, "SS", "7-83")
 makeInstruction("TR", 0xDC, "SS", "7-131")
 
+condition = "(CC == 0 && (mask360 & 8) != 0) || " + \
+           " (CC == 1 && (mask360 & 4) != 0) || " + \
+            "(CC == 2 && (mask360 & 2) != 0) || " + \
+            "(CC == 3 && (mask360 & 1) != 0)"
 pc = 0 # Program counter.  Reset to 0 at the start of each procedure.
+patchBase = ""
+offsetsInBlock = []
 # Return True on success, False on failure
-def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
-                   reset = False):
-    global pc
-    returnValue = True
+def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
+                indexInScope):
+    global pc, patchBase, offsetsInBlock
+    returnValue = False
     
-    if reset:
+    guessFile = guessFiles[list(guessFiles)[-1]]
+    if len(guessFile) == 0:
         pc = 0
+        patchBase = "p%d_" % inlineCounter
+        # To generate jump-tables for branch instructions to numerical addresses
+        # rather than to XPL labels, we have to know the byte offsets of each
+        # instruction in this block of inlines, and we have to know them all
+        # in advance.  So let's do some look-ahead here to find them.
+        offsetsInBlock = [0]
+        code = scope["code"]
+        for i in range(indexInScope, len(code)):
+            line = code[i]
+            if "CALL" in line and line["CALL"] == "INLINE":
+                p = line["parameters"]
+                token = p[0]["token"]
+                length = 0
+                if "number" in token:
+                    opcode = token["number"]
+                    if opcode in instructions360:
+                        instructionType = instructions360[opcode]["type"]
+                        if instructionType in instructionTypes:
+                            length = instructionTypes[instructionType]["length"]
+                if length > 0:
+                    offsetsInBlock.append(offsetsInBlock[-1] + length)
+    nextLabel = patchBase + "%d: ;" % pc
     
     # The parameter is the index of the *expected* B in the `parameters` 
     # array.  If `anyX` is true, B is immediately preceded in `parameters`
     # by the index register (X).  The return value is an ordered pair:
     #    The number of entries in `parameters` actually used.
     #    A string of C code that's an expression for X(B,D), or None on failure.
+    X = 0
+    B = 0
+    D = 0
+    identifierD = None
     def getXBD(iBD, anyX = False):
+        nonlocal X, B, D, identifierD
         address = ""
         count = 0
         if iBD >= len(parameters):
@@ -144,6 +179,9 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
             regX = tokenX["number"]
             if regX > 0:
                 address = "GR[%d] + " % regX
+            X = regX
+        else:
+            X = 0
         tokenB = parameters[iBD]["token"]
         if "number" in tokenB:
             count += 2
@@ -155,17 +193,21 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
             tokenD = parameters[iBD + 1]["token"]
             if "number" not in tokenD:
                 return count, None
-            address = address + ("%d" % tokenD["number"])
+            B = regB
+            D = tokenD["number"]
+            identifierD = None
         elif "identifier" in tokenB:
             count += 1
             identifier = tokenB["identifier"]
             attributes = getAttributes(scope, identifier)
             if attributes == None:
                 return count, None
-            else:
-                address = address + ("%d" % attributes["address"])
+            B = 0
+            D = attributes["address"]
+            identifierD = identifier
         else:
             return count, None
+        address = address + ("%d" % D)
         return count, address
     
     # Similar to getXBD(), but just for a single register.  Returns the register
@@ -179,55 +221,115 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
         if "number" not in token:
             return None
         return token["number"]
+
+    # Instead of `return True` or `return False`, use `return endOfInstruction()`.
+    def endOfInstruction(msg = None):
+        global pc
+        if msg != None:
+            thisLine.append(indent + msg)
+        thisLine.append("")
+        thisLine.append(nextLabel)
+        pc = nextPc
+        return returnValue
     
     # Generate a jump-table for a branch instruction.  The `address` parameter
-    # is a string with a negative address for the jump, typically something 
-    # like "GR[n]".
-    def generateJumpTable(indent, address):
-        parentProcedure = findParentProcedure(scope)
-        labels = parentProcedure["labels"]
-        if len(labels) < 2:
-            errxit("There are no labels in this PROCEDURE for INLINE branches")
+    # is a string for a C expression.  There are two cases:
+    #    1. Negative addresses, by convention, represent the XPL labels within
+    #       the procedure.
+    #    2. Positive addresses, again by convention, are the byte offset of an
+    #       instruction within the current block.
+    # Whe know which is which at compile-time because the former come only from
+    # RR-type instructions, and the other come from RX-type instructions.
+    # Returns False on success, True on error
+    def generateJumpTable(indent, address, negative=True):
         indent1 = indent + indentationQuantum
-        print(indent + "switch (%s): {" % address)
-        for i in range(1, len(labels)):
-            print(indent1 + "case -%d: goto %s;" % (i, labels[i]))
-        print(indent + "}")
+        if negative:
+            parentProcedure = findParentProcedure(scope)
+            labels = list(parentProcedure["labels"])
+            if len(labels) == 0:
+                thisLine.append(indent + "// " + str(labels))
+                thisLine.append(indent + ";" + FIXME + \
+                    "No labels in this procedure for jump-table generation")
+                return True # Error!
+            thisLine.append(indent + "switch (%s): {" % address)
+            for i in range(len(labels)):
+                thisLine.append(indent1 + "case -%d: goto %s;" % (i+1, labels[i]))
+            thisLine.append(indent1 + 'default: abend("Branch address must be a label in this procedure");')
+        else: # Positive addresses
+            thisLine.append(indent + "switch (%s): {" % address)
+            for i in range(len(offsetsInBlock)):
+                thisLine.append(indent1 + "case %d: goto %s%d;" % \
+                                (offsetsInBlock[i], patchBase, offsetsInBlock[i]))
+            thisLine.append(indent1 + \
+                'default: abend("Branch address must be an instruction offset within this block");')
+        thisLine.append(indent + "}")
+        return False
     
     indent = indentationQuantum
-    TBD = indent + "// ***FIXME***"
-    guessFile = guessFiles[list(guessFiles)[-1]]
+    FIXME = indent + "// ***FIXME*** "
     thisLine = []  # Add C lines to this list.
     if len(guessFile) == 0:
-        guessFile.append(["{"])
-        guessFile.append([indent + "// File:\tguess%d.c" % inlineCounter])
-        guessFile.append([indent + "// For:\t%s.c" % functionName])
-        guessFile.append([indent + "// Note:\tPage references are from IBM ESA/390 Principles of Operation"])
+        if "P" in ifdefs:
+            suffix = "p"
+        elif "B" in ifdefs:
+            suffix = "b"
+        else:
+            suffix = ""
+        guessFile.append([
+            "{",
+            indent + \
+            "// File:    guess%d%s.c" % (inlineCounter, suffix),
+            indent + \
+            "// For:     %s.c" % functionName,
+            indent + \
+            '// Notes:   1. Page references are from IBM "ESA/390 Principles of',
+            indent + \
+            '//             Operation", SA22-7201-08, Ninth Edition, June 2003.',
+            indent + \
+            '//          2. Labels are of the form p%d_%d, where the 1st number',
+            indent + \
+            '//             indicates the leading patch number of the block, and',
+            indent + \
+            '//             the 2nd is the byte offset of the instruction within',
+            indent + \
+            '//             within the block.',
+            indent + \
+            '//          3. Known-problematic translations are marked with the',
+            indent + \
+            '//             string  "* * * F I X M E * * *" (without spaces).',
+            indent + \
+            '// History: %s RSB  Auto-generated by XCOM-I --guess-inlines.' % \
+                    datetime.datetime.now().strftime("%Y-%m-%d"),
+            "",
+            nextLabel
+            ])
         guessFile.append(["}"])
     guessFile.insert(-1, thisLine)
     
-    thisLine.append("")
+    indent1 = indent + indentationQuantum
+    indent2 = indent1 + indentationQuantum
+    
     thisLine.append(indent + "// (%d) %s" % (inlineCounter, lines[errxitRef]))
     length = len(parameters)
     if length == 0:
-        thisLine.append(TBD)
-        return False
+        return endOfInstruction(FIXME + "INLINE with no parameters")
     if "number" in parameters[0]["token"]:
         opcode = parameters[0]["token"]["number"]
     else:
-        thisLIne.append(TBD)
-        return False
+        return endOfInstruction(FIXME + "Opcode not a number")
     if opcode not in instructions360:
-        thisLine.append(TBD)
-        return False
+        return endOfInstruction(FIXME + "Not a supported opcode")
     instruction = instructions360[opcode]
     mnemonic = instruction["mnemonic"]
     typeName = instruction["type"]
     typeData = instructionTypes[typeName]
     pageNumber = instruction["page"]
     instructionLength = typeData["length"]
-    thisLine.append(indent + "// Mnemonic " + mnemonic + ", type %s, " % typeName \
-                    + "p. %s" % pageNumber)
+    
+    # At the end of this instruction, use the following two items to update
+    # the program counter and to print the label for the next instruction.
+    nextPc = pc + instructionLength
+    nextLabel = patchBase + "%d: ;" % nextPc
     
     # Convert all of the parameters of CALL(...) inline to appropriate addresses,
     # either integers Rn (used as indices for GR[n] or FR[n]) or as assignments
@@ -236,19 +338,19 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
         R1 = getR(1)
         R2 = getR(2)
         if (R1 == None or R2 == None):
-            thisLine.append(TBD)
-            return False
+            return endOfInstruction(FIXME + "R1 or R2 in RR type not a number")
+        stringified = mnemonic + "\t" + "%d,%d" % (R1, R2)
     elif typeName == "RX":
         R1 = getR(1)
         if R1 == None:
-            thisLine.append(TBD)
-            return False
+            return endOfInstruction(FIXME + "R1 in RX type not a number")
         count, address360B = getXBD(3, True)
         if address360B != None:
             thisLine.append(indent + "address360B = %s;" % address360B)
-        if R1 == None or address360B == None:
-            thisLine.append(TBD)
-            return False
+        else:
+            return endOfInstruction(FIXME + "Cannot compute address in RX type")
+        stringified = mnemonic + "\t" + "%d,%d(%d,%d)" % \
+                                 (R1, D, X, B)
     elif typeName == "SS":
         msNibble = parameters[1]["token"]["number"]
         lsNibble = parameters[2]["token"]["number"]
@@ -256,36 +358,63 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
         count, address360A = getXBD(3, False)
         if address360A != None:
             thisLine.append(indent + "address360A = %s;" % address360A)
+        else:
+            return endOfInstruction(FIXME + "Cannot compute first address in SS type")
+        X1 = X
+        B1 = B
+        D1 = D
         count, address360B = getXBD(3 + count, False)
         if address360B != None:
             thisLine.append(indent + "address360B = %s;" % address360B)
-        if address360A == None or address360B == None:
-            thisLine.append(TBD)
-            return False
+        else:
+            return endOfInstruction(FIXME + "Cannot compute second address in SS type")
+        X2 = X
+        B2 = B
+        D2 = D
+        stringified = mnemonic + "\t" + "%d(%d,%d),%d(%d)" %\
+                                 (D1, L, B1, D2, B2)
     elif typeName == "RS":
         R1 = getR(1)
         R3 = getR(2)
         count, address360B = getXBD(3, False)
         if R1 == None or R3 == None or address360B == None:
-            thisLine.append(TBD)
-            return False
+            return endOfInstruction(FIXME + "Cannot get R1, R3, or address in RS type")
+        stringified = mnemonic + "\t" + "%d,%d,%d(%d)" % (R1, R3, D, B)
     elif typeName == "SI":
-        I2 = getR(1)
-        count, address360A = getXBD(2, False)
+        msNibble = parameters[1]["token"]["number"]
+        lsNibble = parameters[2]["token"]["number"]
+        I2 = (msNibble << 4) + lsNibble
+        count, address360A = getXBD(3, False)
         if address360A != None:
             thisLine.append(indent + "address360A = %s;" % address360A)
-        if I2 == None or address360A == None:
-            thisLine.append(TBD)
-            return False
+        else:
+            return endOfInstruction(FIXME + "Cannot compute address in SI type")
+        if I2 == None:
+            return endOfInstruction(FIXME + "Immediate value not a number in SI type")
+        stringified = mnemonic + "\t" + "%d(%d),%d" % (D, B, I2)
     else:
-        thisLine.append(TBD)
-        return False
+        return endOfInstruction(FIXME + "Unsupported instruction type %s" % typeName)
+    
+    thisLine.append(indent + "// Type %s, " % typeName \
+                    + "p. %s:\t\t%s" % (pageNumber, stringified))
     
     # Generated proposed code.
-    if opcode == 0x06: # BCTR p. 7-18
-        thisLine.append(TBD)
+    if opcode == 0x05: # BALR p. 7-14
+        thisLine.append(indent + "GR[%d] = %d;" % (R1, nextPc))
+        if R2 != 0:
+            generateJumpTable(indent, "GR[%d]" % R2)
+    elif opcode == 0x06: # BCTR p. 7-18
+        thisLine.append(indent + "GR[%d] = GR[%d] - 1;" % (R1, R1))
+        if R2 != 0:
+            thisLine.append(indent + "if (GR[%d] != 0)" % R1)
+            if generateJumpTable(indent1, "GR[%d]" % R2):
+                return endOfInstruction()
     elif opcode == 0x07: # BCR p. 7-17
-        thisLine.append(TBD)
+        thisLine.append(indent + "mask360 = %d;" % R1)
+        if R2 != 0:
+            thisLine.append(indent + "if (%s)" % condition)
+            if generateJumpTable(indent1, "GR[%d]" % R2):
+                return endOfInstruction()
     elif opcode == 0x18: # LR p. 7-77
         thisLine.append(indent + "GR[%d] = GR[%d];" % (R1, R2))
     elif opcode == 0x19: # CR p. 7-35
@@ -323,11 +452,20 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
               "GR[%d] = (memory[address360B] << 24) | (GR[%d] & 0xFFFFFF);" \
               % (R1, R1))
     elif opcode == 0x44: # EX p. 7-74
-        thisLine.append(TBD)
-        return False
+        return endOfInstruction(FIXME + "Unsupported opcode %s" % mnemonic)
     elif opcode == 0x47: # BC p. 7-17
-        thisLine.append(TBD)
-        return false
+        if B == 0 and X == 0:
+            thisLine.append(indent + "mask360 = %d;" % R1)
+            thisLine.append(indent + "if (%s)" % condition)
+            thisLine.append(indent1 + "goto %s;" % identifier)
+        elif X == 0:
+            thisLine.append(indent + "mask360 = %d;" % R1)
+            thisLine.append(indent + "if (%s)" % condition)
+            if generateJumpTable(indent1, "%s" % address360B, False):
+                return endOfInstruction()
+        else:
+            return endOfInstruction(FIXME + 
+                                    "BC not supported for this operand combination")
     elif opcode == 0x48: # LH p. 7-80
         thisLine.append(indent + "GR[%d] = COREHALFWORD(address360B);" % R1)
     elif opcode == 0x4A: # AH p. 7-12
@@ -380,7 +518,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
         thisLine.append(indent + "FR[%d] = fromFloatIBM(COREWORD(address360), 0);" % R1)
     elif opcode == 0xD2: # MVC p. 7-83
         thisLine.append(indent + \
-              "memmove(&memory[address360A], &memory[address360B], %d);" % \
+              "memmove(&memory[address360A & 0xFFFFFF], &memory[address360B & 0xFFFFFF], %d);" % \
               (L + 1))
     elif opcode == 0xDC: # TR p. 7-131
         # I'm sure there's some standard C library function to do this, but
@@ -406,7 +544,8 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef, \
         thisLine.append(indent + "CC = (scratch != 0);")
         thisLine.append(indent + "COREWORD2(address360A, (int32_t) scratch);")
     else:
-        thisLine.append(TBD)
-        return False
-    return True
+        return endOfInstruction(FIXME + "Implementation error %d,%s" % \
+                                (opcode, mnemonic))
+    returnValue = True
+    return endOfInstruction()
 

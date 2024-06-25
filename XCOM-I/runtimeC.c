@@ -70,7 +70,7 @@ double FR[16];   // Floating-point registers.
 uint8_t CC;      // Condition codes.
 int64_t scratch; // Holds temporary results of IBM 360 operations.
 double scratchd;
-int32_t address360A, address360B, msw360, lsw360;
+int32_t address360A, address360B, msw360, lsw360, mask360;
 void
 setCC(void) {
   if (scratch > 0xFFFFFFFF || scratch < -0x100000000) CC = 3;
