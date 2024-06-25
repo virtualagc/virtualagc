@@ -23,7 +23,7 @@ from auxiliary import getAttributes
 # at the very end of compilation.  I don't create the files as they're 
 # encountered, because while it's "easy" enough to start the files and 
 # populate them, it's tricky to figure out when to close the files.
-# There's so little patched material that it's just easier to accumulate it
+# There's so little patched material that it's just easier to accumulate it.
 guessFiles = { }
 
 # `instructionTypes` is a dictionary that gives characteristics of different
