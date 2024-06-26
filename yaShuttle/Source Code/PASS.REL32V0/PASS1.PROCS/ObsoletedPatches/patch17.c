@@ -6,4 +6,4 @@
  * memory at address `CORE_ADDR`.
  */
 
-memory[getFIXED(mZERO_CORExCORE_ADDR)] = 0;
+memory[getFIXED(mZERO_256xCORE_ADDR)] = 0;

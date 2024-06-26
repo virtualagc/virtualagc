@@ -115,7 +115,7 @@ extern double FR[16];   // Floating-point registers.
 extern uint8_t CC;      // Condition codes.
 extern int64_t scratch; // Holds temporary results of IBM 360 operations.
 extern double scratchd;
-extern int32_t address360A, address360B, msw360, lsw360;
+extern int32_t address360A, address360B, msw360, lsw360, mask360;
 void
 setCC(void);
 void
