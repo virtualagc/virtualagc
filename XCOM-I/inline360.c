@@ -103,9 +103,6 @@ std(int regnum, uint32_t address) {
 
 void
 trt(uint32_t source, uint32_t table, int lengthMinus1) {
-  // Note:  The example of TRT usage (p. A-32) contradicts the explanation
-  // given on p. 7-132 as to the effects on the GR1 and GR2 registers.
-  // The example makes much more sense to me, so I rely on it.
   source &= 0xFFFFFF;
   table &= 0xFFFFFF;
   for (i360 = 0; i360 <= lengthMinus1; i360++)

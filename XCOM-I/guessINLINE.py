@@ -462,7 +462,7 @@ def guessINLINE(scope, functionName, parameters, inlineCounter, errxitRef,
         thisLine.append(indent + "GR[%d] = address360B & 0xFFFFFF;" % R1)
     elif opcode == 0x43: # IC p. 7-76
         thisLine.append(indent + \
-              "GR[%d] = (memory[address360B] << 24) | (GR[%d] & 0xFFFFFF);" \
+              "GR[%d] = memory[address360B] | (GR[%d] & 0xFFFFFF00);" \
               % (R1, R1))
     elif opcode == 0x44: # EX p. 7-74
         return endOfInstruction(FIXME + "Unsupported opcode %s" % mnemonic)
